@@ -12,30 +12,30 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.rendertheme;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+import org.mapsforge.core.Tag;
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
+class SingleValueMatcher implements AttributeMatcher {
+	private final String mValue;
 
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
+	SingleValueMatcher(String value) {
+		mValue = value.intern();
 	}
 
 	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
+	public boolean isCoveredBy(AttributeMatcher attributeMatcher) {
+		Tag[] tags = { new Tag(null, mValue) };
+
+		return attributeMatcher == this || attributeMatcher.matches(tags);
 	}
 
 	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
+	public boolean matches(Tag[] tags) {
+		for (Tag tag : tags)
+			if (mValue == tag.value)
+				return true;
 
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
+		return false;
 	}
 }

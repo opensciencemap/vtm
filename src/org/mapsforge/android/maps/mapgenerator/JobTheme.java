@@ -12,30 +12,20 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.mapgenerator;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.Serializable;
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
-
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
-	}
-
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
+/**
+ * A JobTheme defines the render theme which is used for a {@link MapGeneratorJob}.
+ */
+public interface JobTheme extends Serializable {
+	/**
+	 * @return an InputStream to read the render theme data from.
+	 * @throws FileNotFoundException
+	 *             if the render theme file cannot be found.
+	 */
+	InputStream getRenderThemeAsStream() throws FileNotFoundException;
 }

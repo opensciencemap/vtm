@@ -19,7 +19,6 @@ import org.mapsforge.core.GeoPoint;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
-import de.sfb.tilemap.R;
 
 class MyLocationListener implements LocationListener {
 	private final TileMap advancedMapViewer;

@@ -12,30 +12,40 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.glrenderer;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+import java.util.LinkedList;
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
+class LayerPool {
+	static private LinkedList<PoolItem> pool;
+	static private int count;
 
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
+	static void init() {
+		pool = new LinkedList<PoolItem>();
+		count = 0;
 	}
 
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
+	static PoolItem get() {
+		if (count == 0)
+			return new PoolItem();
+
+		PoolItem it;
+		synchronized (pool) {
+			count--;
+			it = pool.pop();
+			it.used = 0;
+		}
+
+		return it;
 	}
 
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
+	static void add(LinkedList<PoolItem> items) {
+		int size = items.size();
+		synchronized (pool) {
+			while (count < 4096 && size-- > 0) {
+				count++;
+				pool.add(items.pop());
+			}
+		}
 	}
 }

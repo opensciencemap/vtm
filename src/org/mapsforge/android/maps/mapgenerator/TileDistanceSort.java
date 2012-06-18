@@ -12,30 +12,21 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.mapgenerator;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+import java.util.Comparator;
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
-
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
-	}
+/**
+ * 
+ *
+ */
+public class TileDistanceSort implements Comparator<MapTile> {
 
 	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
-	}
+	public int compare(MapTile tile1, MapTile tile2) {
+		if (tile1.distance == tile2.distance)
+			return 0;
 
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
+		return tile1.distance > tile2.distance ? 1 : -1;
 	}
 }

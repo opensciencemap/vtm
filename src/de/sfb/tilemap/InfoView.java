@@ -19,7 +19,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.WindowManager;
 import android.webkit.WebView;
-import de.sfb.tilemap.R;
 
 /**
  * Simple activity to display the info web page from the assets folder.

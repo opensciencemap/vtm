@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/mapsforge-map"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/mapsforge-map-reader"/>
 	<classpathentry exported="true" kind="lib" path="/mapsforge-map-reader/lib/postgresql-9.0-801.jdbc4.jar"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>

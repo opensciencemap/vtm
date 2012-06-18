@@ -12,30 +12,31 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.rendertheme;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+import java.io.InputStream;
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
+import org.mapsforge.android.maps.mapgenerator.JobTheme;
 
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
+/**
+ * Enumeration of all internal rendering themes.
+ */
+public enum InternalRenderTheme implements JobTheme {
+	/**
+	 * A rendering theme similar to the OpenStreetMap Osmarender style.
+	 * 
+	 * @see <a href="http://wiki.openstreetmap.org/wiki/Osmarender">Osmarender</a>
+	 */
+	OSMARENDER("/org/mapsforge/android/maps/rendertheme/osmarender/osmarender.xml");
+
+	private final String mPath;
+
+	private InternalRenderTheme(String path) {
+		mPath = path;
 	}
 
 	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
+	public InputStream getRenderThemeAsStream() {
+		return Thread.currentThread().getClass().getResourceAsStream(mPath);
 	}
 }

@@ -12,30 +12,23 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.swrenderer;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+class WayDataContainer implements ShapeContainer {
+	// position and length of float coordinates
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
+	int[] position;
+	int[] length;
 
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
+	int[] textPos;
+
+	WayDataContainer(int size) {
+		length = new int[size];
+		position = new int[size];
 	}
 
 	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
+	public ShapeType getShapeType() {
+		return ShapeType.WAY;
 	}
 }

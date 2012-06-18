@@ -12,30 +12,26 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.swrenderer;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
+import android.graphics.Paint;
 
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
-	}
+class WayTextContainer {
+	final WayDataContainer wayDataContainer;
+	final int first;
+	final int last;
+	final Paint paint;
+	final String text;
+	short x1, y1, x2, y2;
+	boolean match;
 
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
+	WayTextContainer(int first, int last, WayDataContainer wayDataContainer, String text, Paint paint) {
+		this.wayDataContainer = wayDataContainer;
+		this.first = first;
+		this.last = last;
+		this.text = text;
+		this.paint = paint;
+		this.match = false;
 	}
 }

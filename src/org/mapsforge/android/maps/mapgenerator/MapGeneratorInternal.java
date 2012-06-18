@@ -12,30 +12,19 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.mapgenerator;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+/**
+ * Enumeration of all internal MapGenerator implementations.
+ */
+public enum MapGeneratorInternal {
+	/**
+	 * texture renderer.
+	 */
+	SW_RENDERER,
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
-
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
-	}
-
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
+	/**
+	 * opengl renderer.
+	 */
+	GL_RENDERER
 }

@@ -12,30 +12,29 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.rendertheme;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+final class ClosedWayMatcher implements ClosedMatcher {
+	private static final ClosedWayMatcher INSTANCE = new ClosedWayMatcher();
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
-
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
+	static ClosedWayMatcher getInstance() {
+		return INSTANCE;
 	}
 
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
+	/**
+	 * Private constructor to prevent instantiation from other classes.
+	 */
+	private ClosedWayMatcher() {
 		// do nothing
 	}
 
 	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
+	public boolean isCoveredBy(ClosedMatcher closedMatcher) {
+		return closedMatcher.matches(Closed.YES);
+	}
+
+	@Override
+	public boolean matches(Closed closed) {
+		return closed == Closed.YES;
 	}
 }

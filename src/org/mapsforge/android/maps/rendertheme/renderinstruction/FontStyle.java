@@ -12,30 +12,27 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.sfb.tilemap;
+package org.mapsforge.android.maps.rendertheme.renderinstruction;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+enum FontStyle {
+	BOLD, BOLD_ITALIC, ITALIC, NORMAL;
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
+	/**
+	 * @return the constant int value of this FontStyle.
+	 * @see <a href="http://developer.android.com/reference/android/graphics/Typeface.html">Typeface</a>
+	 */
+	int toInt() {
+		switch (this) {
+			case BOLD:
+				return 1;
+			case BOLD_ITALIC:
+				return 3;
+			case ITALIC:
+				return 2;
+			case NORMAL:
+				return 0;
+		}
 
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
-	}
-
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
+		throw new IllegalArgumentException("unknown enum value: " + this);
 	}
 }
