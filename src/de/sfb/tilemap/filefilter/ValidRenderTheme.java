@@ -22,8 +22,8 @@ import java.io.InputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.mapsforge.android.maps.rendertheme.RenderThemeHandler;
-import org.mapsforge.map.FileOpenResult;
+import org.mapsforge.android.rendertheme.RenderThemeHandler;
+import org.mapsforge.mapdatabase.FileOpenResult;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;

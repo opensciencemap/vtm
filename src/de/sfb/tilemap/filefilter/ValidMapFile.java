@@ -16,9 +16,9 @@ package de.sfb.tilemap.filefilter;
 
 import java.io.File;
 
-import org.mapsforge.map.FileOpenResult;
-import org.mapsforge.map.IMapDatabase;
-import org.mapsforge.map.reader.MapDatabase;
+import org.mapsforge.mapdatabase.FileOpenResult;
+import org.mapsforge.mapdatabase.IMapDatabase;
+import org.mapsforge.mapdatabase.mapfile.MapDatabase;
 
 /**
  * Accepts all valid map files.

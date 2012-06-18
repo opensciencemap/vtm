@@ -16,7 +16,6 @@ package de.sfb.tilemap;
 
 import android.widget.SeekBar;
 import android.widget.TextView;
-import de.sfb.tilemap.R;
 
 class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
 	private final TextView textView;
