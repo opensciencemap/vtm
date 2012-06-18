@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<string-array name="preferences_map_generator_values">
+	  <item>Mapfile</item>
+		<item>PostGIS</item>
+	</string-array>
+
+	<string-array name="preferences_text_scale_values">
+		<item>hyvin pieni</item>
+		<item>pieni</item>
+		<item>normaali</item>
+		<item>suuri</item>
+		<item>hyvin suuri</item>
+	</string-array>
+                
+	<string name="application_name">VectorTileMap</string>
+	<string name="cancel">Peruuta</string>
+	<string name="error">Virhe</string>
+	<string name="error_last_location_unknown">Viimeinen sijainti ei ole tiedossa</string>
+	<string name="file_invalid">Valittu tiedosto ei ole kelvollinen karttatiedosto.</string>
+	<string name="file_select">Valitse karttatiedosto.</string>
+	<string name="file_size_byte">tavu</string>
+	<string name="file_size_bytes">tavua</string>
+	<string name="file_size_kb">kB</string>
+	<string name="file_size_mb">MB</string>
+	<string name="file_size_gb">GB</string>
+	<string name="go_to_position">Mene sijaintiin</string>
+	<string name="info_map_file_area">Alue</string>
+	<string name="info_map_file_comment">Kommentti</string>
+	<string name="info_map_file_date">Päivämäärä</string>
+	<string name="info_map_file_debug">Debuggaustietoja</string>
+	<string name="info_map_file_debug_no">ei sisälletty</string>
+	<string name="info_map_file_debug_yes">sisälletty</string>
+	<string name="info_map_file_language_preference">Suosittu kieli</string>
+	<string name="info_map_file_name">Tiedosto</string>
+	<string name="info_map_file_size">Tiedoston koko</string>
+	<string name="info_map_file_start">Aloitussijainti</string>
+	<string name="info_map_file_start_position">Aloitussijainti</string>
+	<string name="info_map_file_start_zoom_level">Aloituszoomaustaso</string>
+	<string name="info_map_file_version">Versio</string>
+	<string name="latitude">Leveyspiiri</string>
+	<string name="longitude">Pituuspiiri</string>
+	<string name="menu_info">Info</string>
+    <string name="menu_info_map_file">Karttatiedoston ominaisuudet</string>
+    <string name="menu_info_about">Tästä ohjelmasta</string>
+    <string name="menu_mapfile">Karttatiedosto</string>
+    <string name="menu_position">Sijainti</string>
+    <string name="menu_position_enter_coordinates">Anna koordinaatit</string>
+    <string name="menu_position_last_known">Viimeinen tunnettu sijainti</string>
+    <string name="menu_position_map_file_center">Karttatiedoston keskipiste</string>
+    <string name="menu_position_my_location_enable">Näytä sijaintini</string>
+    <string name="menu_position_my_location_disable">Poista sijaintini</string>
+    <string name="menu_preferences">Suositukset</string>
+    <string name="menu_render_theme">Render theme</string>
+	<string name="menu_render_theme_osmarender">Default Theme</string>
+	<string name="menu_render_theme_select_file">Valitse XML tiedosto …</string>
+	<string name="menu_screenshot">Screenshot</string>
+	<string name="menu_screenshot_jpeg">JPEG (häviöllinen)</string>
+	<string name="menu_screenshot_png">PNG (häviötön)</string>
+    <string name="no_location_provider_available">Sijaintilähde ei ole käytettävissä</string>
+    <string name="ok">OK</string>
+    <string name="preferences_debug">Debuggausasetukset</string>
+    <string name="preferences_general">Yleiset asetukset</string>
+    <string name="preferences_cache_persistence">Välimuistin pysyvyys</string>
+	<string name="preferences_cache_persistence_desc">Pitää välimuistin lopettaessa</string>
+    <string name="preferences_cache_size">Ulkopuolinen muisti</string>
+    <string name="preferences_cache_size_desc">Säädä välimuistin kokoa</string>
+    <string name="preferences_cache_size_value">%.1f MB</string>
+    <string name="preferences_fullscreen">Kokoruututila</string>
+    <string name="preferences_fullscreen_desc">Piilota tilapalkki</string>
+    <string name="preferences_map">Kartta-asetukset</string>
+    <string name="preferences_map_view_mode">Kartta-asetus</string>
+    <string name="preferences_map_view_mode_desc">Valitse toiminta-asetus</string>
+    <string name="preferences_move_speed">Liikkumisnopeus</string>
+    <string name="preferences_move_speed_desc">Säädä kartan liikkumisnopeutta</string>
+    <string name="preferences_move_speed_value">%d %% liikkumisnopeus</string>
+    <string name="preferences_show_fps_counter">Kehysnopeus</string>
+    <string name="preferences_show_fps_counter_desc">Salli kehyksen sekunttilaskin</string>
+    <string name="preferences_show_scale_bar">Kartan mittakaava</string>
+    <string name="preferences_show_scale_bar_desc">Näytä kartan mittakaava</string>
+    <string name="preferences_show_tile_coordinates">Laattakoordinaatit</string>
+	<string name="preferences_show_tile_coordinates_desc">Näytä koordinaatit laatalla</string>
+    <string name="preferences_show_tile_frames">Laattarajat</string>
+    <string name="preferences_show_tile_frames_desc">Piirrä laattarajat</string>
+    <string name="preferences_show_water_tiles">Vesilaatat</string>
+	<string name="preferences_show_water_tiles_desc">Korostaa vettä sisältävät laatat</string>
+	<string name="preferences_text_scale">Fonttikoko</string>
+	<string name="preferences_text_scale_desc">Valitse karttamerkintöjen tekstikoko</string>
+	<string name="preferences_wake_lock">Pysyy aktiivisena</string>
+	<string name="preferences_wake_lock_desc">Estää kuvaruudun himmenemisen</string>
+    <string name="snap_to_location_enabled">Kohdista sijainti on aktivoitu</string>
+	<string name="snap_to_location_disabled">Kohdista sijainti on deaktivoitu</string>
+    <string name="unit_symbol_kilometer">&#160;km</string>
+    <string name="unit_symbol_meter">&#160;m</string>
+	<string name="zoomLevel">Zoomaustaso</string>
+</resources>
