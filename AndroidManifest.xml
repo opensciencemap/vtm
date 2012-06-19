@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity android:name="de.sfb.tilemap.preferences.EditPreferences" />
-        <activity android:name="de.sfb.tilemap.filepicker.FilePicker" />
+        <activity android:name=".filepicker.FilePicker" />
     </application>
 
 </manifest>

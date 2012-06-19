@@ -16,7 +16,7 @@ package de.sfb.tilemap.filefilter;
 
 import java.io.FileFilter;
 
-import org.mapsforge.map.FileOpenResult;
+import org.mapsforge.mapdatabase.FileOpenResult;
 
 /**
  * An extension of the {@link FileFilter} interface.
