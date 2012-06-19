@@ -46,7 +46,8 @@ import android.util.Log;
 /**
  * 
  */
-public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatabaseCallback {
+public class DatabaseRenderer implements MapGenerator, RenderCallback,
+		IMapDatabaseCallback {
 	private static String TAG = DatabaseRenderer.class.getName();
 
 	private static final byte ZOOM_MAX = 22;
@@ -194,7 +195,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 	private boolean prevClosed;
 
 	@Override
-	public void renderWay(byte layer, Tag[] tags, float[] wayNodes, int[] wayLength, boolean changed) {
+	public void renderWay(byte layer, Tag[] tags, float[] wayNodes, int[] wayLength,
+			boolean changed) {
 
 		mProjected = false;
 		mDrawingLayer = getValidLayer(layer) * mLevels;
@@ -220,17 +222,20 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 		mWays = wayLength;
 
 		if (!firstMatch && prevClosed == closed && !changed) {
-			DatabaseRenderer.renderTheme.matchWay(this, tags, mCurrentTile.zoomLevel, closed, false);
+			DatabaseRenderer.renderTheme.matchWay(this, tags, mCurrentTile.zoomLevel,
+					closed, false);
 		} else {
 			prevClosed = closed;
-			DatabaseRenderer.renderTheme.matchWay(this, tags, mCurrentTile.zoomLevel, closed, true);
+			DatabaseRenderer.renderTheme.matchWay(this, tags, mCurrentTile.zoomLevel,
+					closed, true);
 		}
 
 		firstMatch = false;
 	}
 
 	@Override
-	public void renderAreaCaption(String caption, float verticalOffset, Paint paint, Paint stroke) {
+	public void renderAreaCaption(String caption, float verticalOffset, Paint paint,
+			Paint stroke) {
 		// TODO Auto-generated method stub
 
 	}
@@ -242,7 +247,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 	}
 
 	@Override
-	public void renderPointOfInterestCaption(String caption, float verticalOffset, Paint paint, Paint stroke) {
+	public void renderPointOfInterestCaption(String caption, float verticalOffset,
+			Paint paint, Paint stroke) {
 		// TODO Auto-generated method stub
 
 	}
@@ -265,7 +271,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 		projectToTile(false);
 
 		LineLayer outlineLayer = null;
-		LineLayer l = mLineLayers.getLayer(mDrawingLayer + line.level, line.color, false, line.fixed);
+		LineLayer l = mLineLayers.getLayer(mDrawingLayer + line.level, line.color, false,
+				line.fixed);
 
 		float w = line.strokeWidth;
 
@@ -275,7 +282,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 		if (line.outline != -1) {
 			Line outline = DatabaseRenderer.renderTheme.getOutline(line.outline);
 			if (outline != null) {
-				outlineLayer = mLineLayers.getLayer(mDrawingLayer + outline.level, outline.color, true, false);
+				outlineLayer = mLineLayers.getLayer(mDrawingLayer + outline.level,
+						outline.color, true, false);
 				outlineLayer.addOutline(l);
 			}
 		}
@@ -300,7 +308,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 		if (!projectToTile(false))
 			return;
 
-		PolygonLayer l = mPolyLayers.getLayer(mDrawingLayer + area.level, area.color, area.fade);
+		PolygonLayer l = mPolyLayers.getLayer(mDrawingLayer + area.level, area.color,
+				area.fade);
 
 		for (int i = 0, pos = 0, n = mWays.length; i < n; i++) {
 			int length = mWays[i];
@@ -381,8 +390,10 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 		// Log.d(TAG, "loaded " + mCurrentTile);
 
 		if (mapGeneratorJob.debugSettings.mDrawTileFrames) {
-			float[] coords = { 0, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 0, 0, 0 };
-			LineLayer ll = mLineLayers.getLayer(Integer.MAX_VALUE, Color.BLACK, false, true);
+			float[] coords = { 0, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE,
+					Tile.TILE_SIZE, 0, 0, 0 };
+			LineLayer ll = mLineLayers.getLayer(Integer.MAX_VALUE, Color.BLACK, false,
+					true);
 			ll.addLine(coords, 0, coords.length, 1.0f, false);
 		}
 
