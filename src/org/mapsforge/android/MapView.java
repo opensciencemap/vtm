@@ -17,9 +17,7 @@ package org.mapsforge.android;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import org.mapsforge.android.inputhandling.MapMover;
 import org.mapsforge.android.inputhandling.TouchHandler;
-import org.mapsforge.android.inputhandling.ZoomAnimator;
 import org.mapsforge.android.mapgenerator.JobParameters;
 import org.mapsforge.android.mapgenerator.JobQueue;
 import org.mapsforge.android.mapgenerator.JobTheme;
@@ -33,15 +31,14 @@ import org.mapsforge.android.rendertheme.InternalRenderTheme;
 import org.mapsforge.android.utils.GlConfigChooser;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.MapPosition;
-import org.mapsforge.mapdatabase.FileOpenResult;
-import org.mapsforge.mapdatabase.IMapDatabase;
-import org.mapsforge.mapdatabase.mapfile.MapDatabase;
+import org.mapsforge.database.FileOpenResult;
+import org.mapsforge.database.IMapDatabase;
+import org.mapsforge.database.mapfile.MapDatabase;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 /**
@@ -70,14 +67,15 @@ public class MapView extends GLSurfaceView {
 	private static final float DEFAULT_TEXT_SCALE = 1;
 
 	private final MapController mMapController;
-	private final MapMover mMapMover;
+	// private final MapMover mMapMover;
+	// private final ZoomAnimator mZoomAnimator;
+
 	private final MapScaleBar mMapScaleBar;
 	private final MapViewPosition mMapViewPosition;
 
 	private final MapZoomControls mMapZoomControls;
 	private final Projection mProjection;
 	private final TouchHandler mTouchEventHandler;
-	private final ZoomAnimator mZoomAnimator;
 
 	private IMapDatabase mMapDatabase;
 	private MapGenerator mMapGenerator;
@@ -151,10 +149,10 @@ public class MapView extends GLSurfaceView {
 		mJobQueue = new JobQueue(this);
 		mMapWorker = new MapWorker(this);
 		mMapWorker.start();
-		mMapMover = new MapMover(this);
-		mMapMover.start();
-		mZoomAnimator = new ZoomAnimator(this);
-		mZoomAnimator.start();
+		// mMapMover = new MapMover(this);
+		// mMapMover.start();
+		// mZoomAnimator = new ZoomAnimator(this);
+		// mZoomAnimator.start();
 
 		setMapGeneratorInternal(mapGenerator);
 
@@ -232,12 +230,12 @@ public class MapView extends GLSurfaceView {
 		return mMapGenerator;
 	}
 
-	/**
-	 * @return the MapMover which is used by this MapView.
-	 */
-	public MapMover getMapMover() {
-		return mMapMover;
-	}
+	// /**
+	// * @return the MapMover which is used by this MapView.
+	// */
+	// public MapMover getMapMover() {
+	// return mMapMover;
+	// }
 
 	/**
 	 * @return the current position and zoom level of this MapView.
@@ -267,32 +265,32 @@ public class MapView extends GLSurfaceView {
 		return mProjection;
 	}
 
-	/**
-	 * @return true if the ZoomAnimator is currently running, false otherwise.
-	 */
-	public boolean isZoomAnimatorRunning() {
-		return mZoomAnimator.isExecuting();
-	}
+	// /**
+	// * @return true if the ZoomAnimator is currently running, false otherwise.
+	// */
+	// public boolean isZoomAnimatorRunning() {
+	// return mZoomAnimator.isExecuting();
+	// }
 
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
-		return mMapMover.onKeyDown(keyCode, keyEvent);
-	}
-
-	@Override
-	public boolean onKeyUp(int keyCode, KeyEvent keyEvent) {
-		return mMapMover.onKeyUp(keyCode, keyEvent);
-	}
+	// @Override
+	// public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
+	// return mMapMover.onKeyDown(keyCode, keyEvent);
+	// }
+	//
+	// @Override
+	// public boolean onKeyUp(int keyCode, KeyEvent keyEvent) {
+	// return mMapMover.onKeyUp(keyCode, keyEvent);
+	// }
 
 	@Override
 	public boolean onTouchEvent(MotionEvent motionEvent) {
 		return mTouchEventHandler.handleMotionEvent(motionEvent);
 	}
 
-	@Override
-	public boolean onTrackballEvent(MotionEvent motionEvent) {
-		return mMapMover.onTrackballEvent(motionEvent);
-	}
+	// @Override
+	// public boolean onTrackballEvent(MotionEvent motionEvent) {
+	// return mMapMover.onTrackballEvent(motionEvent);
+	// }
 
 	/**
 	 * Calculates all necessary tiles and adds jobs accordingly.
@@ -365,17 +363,16 @@ public class MapView extends GLSurfaceView {
 			return false;
 		}
 
-		mZoomAnimator.pause();
+		// mZoomAnimator.pause();
+		// mMapMover.pause();
 		mMapWorker.pause();
-		mMapMover.pause();
-		mZoomAnimator.awaitPausing();
-		mMapMover.awaitPausing();
+		// mZoomAnimator.awaitPausing();
+		// mMapMover.awaitPausing();
 		mMapWorker.awaitPausing();
-		mMapMover.stopMove();
-
-		mZoomAnimator.proceed();
+		// mZoomAnimator.proceed();
+		// mMapMover.stopMove();
+		// mMapMover.proceed();
 		mMapWorker.proceed();
-		mMapMover.proceed();
 
 		mMapDatabase.closeFile();
 		FileOpenResult fileOpenResult = mMapDatabase.openFile(new File(mapFile));
@@ -588,9 +585,9 @@ public class MapView extends GLSurfaceView {
 	}
 
 	void destroy() {
-		mMapMover.interrupt();
+		// mMapMover.interrupt();
 		mMapWorker.interrupt();
-		mZoomAnimator.interrupt();
+		// mZoomAnimator.interrupt();
 
 		try {
 			mMapWorker.join();
@@ -617,10 +614,9 @@ public class MapView extends GLSurfaceView {
 	boolean hasValidCenter() {
 		if (!mMapViewPosition.isValid()) {
 			return false;
-		} else if (!mMapGenerator.requiresInternetConnection() &&
-				(!mMapDatabase.hasOpenFile() ||
-				!mMapDatabase.getMapFileInfo().boundingBox
-						.contains(getMapPosition().getMapCenter()))) {
+		} else if (!mMapGenerator.requiresInternetConnection()
+				&& (!mMapDatabase.hasOpenFile() || !mMapDatabase.getMapFileInfo().boundingBox.contains(getMapPosition()
+						.getMapCenter()))) {
 			return false;
 		}
 
@@ -635,16 +631,16 @@ public class MapView extends GLSurfaceView {
 	public void onPause() {
 		super.onPause();
 		mMapWorker.pause();
-		mMapMover.pause();
-		mZoomAnimator.pause();
+		// mMapMover.pause();
+		// mZoomAnimator.pause();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		mMapWorker.proceed();
-		mMapMover.proceed();
-		mZoomAnimator.proceed();
+		// mMapMover.proceed();
+		// mZoomAnimator.proceed();
 	}
 
 	/**

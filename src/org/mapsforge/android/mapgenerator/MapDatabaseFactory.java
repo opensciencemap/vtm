@@ -14,7 +14,7 @@
  */
 package org.mapsforge.android.mapgenerator;
 
-import org.mapsforge.mapdatabase.IMapDatabase;
+import org.mapsforge.database.IMapDatabase;
 
 import android.util.AttributeSet;
 
@@ -33,7 +33,7 @@ public final class MapDatabaseFactory {
 	public static IMapDatabase createMapDatabase(AttributeSet attributeSet) {
 		String mapDatabaseName = attributeSet.getAttributeValue(null, MAP_DATABASE_ATTRIBUTE_NAME);
 		if (mapDatabaseName == null) {
-			return new org.mapsforge.mapdatabase.mapfile.MapDatabase();
+			return new org.mapsforge.database.mapfile.MapDatabase();
 		}
 
 		MapDatabaseInternal mapDatabaseInternal = MapDatabaseInternal.valueOf(mapDatabaseName);
@@ -48,11 +48,11 @@ public final class MapDatabaseFactory {
 	public static IMapDatabase createMapDatabase(MapDatabaseInternal mapDatabaseInternal) {
 		switch (mapDatabaseInternal) {
 			case MAP_READER:
-				return new org.mapsforge.mapdatabase.mapfile.MapDatabase();
+				return new org.mapsforge.database.mapfile.MapDatabase();
 			case JSON_READER:
-				return new org.mapsforge.mapdatabase.json.MapDatabase();
+				return new org.mapsforge.database.json.MapDatabase();
 			case POSTGIS_READER:
-				return new org.mapsforge.mapdatabase.postgis.MapDatabase();
+				return new org.mapsforge.database.postgis.MapDatabase();
 
 		}
 

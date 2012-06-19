@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.sfb.tilemap"
+    package="org.mapsforge.tilemap"
     android:installLocation="auto"
     android:versionCode="10"
     android:versionName="0.1" >
@@ -17,15 +17,15 @@
     <application
         android:icon="@drawable/globe"
         android:label="@string/application_name" >
-        <activity android:name="de.sfb.tilemap.TileMap" >
+        <activity android:name="org.mapsforge.tilemap.TileMap" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="de.sfb.tilemap.preferences.EditPreferences" />
-        <activity android:name=".filepicker.FilePicker" />
+        <activity android:name="org.mapsforge.tilemap.preferences.EditPreferences" />
+        <activity android:name="org.mapsforge.tilemap.filepicker.FilePicker" />
     </application>
 
 </manifest>
