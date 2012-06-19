@@ -33,10 +33,10 @@ import org.mapsforge.android.rendertheme.renderinstruction.Line;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
-import org.mapsforge.mapdatabase.IMapDatabase;
-import org.mapsforge.mapdatabase.IMapDatabaseCallback;
-import org.mapsforge.mapdatabase.MapFileInfo;
-import org.mapsforge.mapdatabase.mapfile.MapDatabase;
+import org.mapsforge.database.IMapDatabase;
+import org.mapsforge.database.IMapDatabaseCallback;
+import org.mapsforge.database.MapFileInfo;
+import org.mapsforge.database.mapfile.MapDatabase;
 import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;

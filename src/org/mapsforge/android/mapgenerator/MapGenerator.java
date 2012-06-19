@@ -17,7 +17,7 @@ package org.mapsforge.android.mapgenerator;
 import org.mapsforge.android.MapRenderer;
 import org.mapsforge.android.MapView;
 import org.mapsforge.core.GeoPoint;
-import org.mapsforge.mapdatabase.IMapDatabase;
+import org.mapsforge.database.IMapDatabase;
 
 /**
  * A MapGenerator provides map tiles either by downloading or rendering them.

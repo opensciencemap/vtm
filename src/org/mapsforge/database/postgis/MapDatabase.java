@@ -1,0 +1,442 @@
+/*
+ * Copyright 2012 Hannes Janetzek
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.mapsforge.database.postgis;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Properties;
+
+import org.mapsforge.core.BoundingBox;
+import org.mapsforge.core.GeoPoint;
+import org.mapsforge.core.SphericalMercator;
+import org.mapsforge.core.Tag;
+import org.mapsforge.core.Tile;
+import org.mapsforge.database.FileOpenResult;
+import org.mapsforge.database.IMapDatabase;
+import org.mapsforge.database.IMapDatabaseCallback;
+import org.mapsforge.database.MapFileInfo;
+import org.postgresql.PGConnection;
+
+/**
+ * 
+ *
+ */
+public class MapDatabase implements IMapDatabase {
+	private static final String QUERY = "SELECT * FROM __get_tile(?,?,?)";
+
+	private final float mScale = 1; // 1000000.0f;
+
+	private int mCoordPos = 0;
+	private int mIndexPos = 0;
+	private float[] mCoords = new float[100000];
+	private int[] mIndex = new int[10000];
+
+	private Tag[] mTags;
+
+	private final MapFileInfo mMapInfo =
+			new MapFileInfo(new BoundingBox(-180, -85, 180, 85),
+					new Byte((byte) 14), new GeoPoint(53.11, 8.85), SphericalMercator.NAME,
+					0, 0, 0, "de", "yo!", "hannes");
+	// new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
+	// new Byte((byte) 0), null, "Mercator",
+	// 0, 0, 0, "de", "yo!", "by me");
+
+	private boolean mOpenFile = false;
+
+	private Connection connection = null;
+	private static HashMap<Entry<String, String>, Tag> tagHash = new HashMap<Entry<String, String>, Tag>(100);
+	private PreparedStatement prepQuery = null;
+
+	private boolean connect() {
+		Connection conn = null;
+		// &socketTimeout=15&tcpKeepAlive=true
+
+		String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/gis";
+		// String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/planet-2.0";
+		// String dburl = "jdbc:postgresql://127.0.0.1:5432/bremen";
+		// String dburl = "jdbc:postgresql://127.0.0.1:5431/planet-2.0";
+
+		Properties dbOpts = new Properties();
+		dbOpts.setProperty("user", "osm");
+		dbOpts.setProperty("password", "osm");
+		dbOpts.setProperty("socketTimeout", "15000");
+		dbOpts.setProperty("tcpKeepAlive", "true");
+
+		try {
+			DriverManager.setLoginTimeout(20);
+			System.out.println("Creating JDBC connection...");
+			Class.forName("org.postgresql.Driver");
+			conn = DriverManager.getConnection(dburl, dbOpts);
+			connection = conn;
+			prepQuery = conn.prepareStatement(QUERY);
+
+			PGConnection pgconn = (PGConnection) conn;
+
+			pgconn.addDataType("hstore", PGHStore.class);
+
+		} catch (Exception e) {
+			System.err.println("Aborted due to error:");
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public void executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
+		if (connection == null) {
+			if (!connect())
+				return;
+		}
+
+		ResultSet r;
+
+		try {
+			prepQuery.setLong(1, tile.pixelX);
+			prepQuery.setLong(2, tile.pixelY);
+			prepQuery.setInt(3, tile.zoomLevel);
+			prepQuery.execute();
+			r = prepQuery.getResultSet();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			connection = null;
+			return;
+		}
+
+		byte[] b = null;
+		PGHStore h = null;
+		// long id;
+
+		try {
+			while (r != null && r.next()) {
+				mIndexPos = 0;
+				mCoordPos = 0;
+
+				try {
+					// id = r.getLong(1);
+
+					Object obj = r.getObject(2);
+					h = null;
+
+					if (obj instanceof PGHStore)
+						h = (PGHStore) obj;
+					else
+						continue;
+
+					b = r.getBytes(3);
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+					continue;
+				}
+
+				if (b == null)
+					continue;
+
+				mTags = new Tag[h.size()];
+
+				int i = 0;
+				for (Entry<String, String> t : h.entrySet()) {
+					if (t.getKey() == null) {
+						System.out.println("no KEY !!! ");
+						break;
+					}
+					Tag tag = tagHash.get(t);
+					if (tag == null) {
+						tag = new Tag(t.getKey(), t.getValue());
+						tagHash.put(t, tag);
+
+					}
+					mTags[i++] = tag;
+				}
+				if (i < mTags.length)
+					continue;
+
+				parse(b);
+				if (mIndexPos == 0)
+					continue;
+
+				int[] idx = new int[mIndexPos];
+				System.arraycopy(mIndex, 0, idx, 0, mIndexPos);
+				mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, idx, true);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+
+			try {
+				connection.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			} finally {
+				connection = null;
+			}
+		}
+
+	}
+
+	@Override
+	public MapFileInfo getMapFileInfo() {
+		return mMapInfo;
+	}
+
+	@Override
+	public boolean hasOpenFile() {
+		return mOpenFile;
+	}
+
+	@Override
+	public FileOpenResult openFile(File mapFile) {
+		mOpenFile = true;
+		return new FileOpenResult();
+	}
+
+	@Override
+	public void closeFile() {
+		if (connection != null) {
+			try {
+				connection.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			} finally {
+				connection = null;
+			}
+		}
+		mOpenFile = false;
+	}
+
+	@Override
+	public String readString(int position) {
+		return null;
+	}
+
+	// taken from postgis-java
+
+	private static ValueGetter valueGetterForEndian(byte[] bytes) {
+		if (bytes[0] == ValueGetter.XDR.NUMBER) { // XDR
+			return new ValueGetter.XDR(bytes);
+		} else if (bytes[0] == ValueGetter.NDR.NUMBER) {
+			return new ValueGetter.NDR(bytes);
+		} else {
+			throw new IllegalArgumentException("Unknown Endian type:" + bytes[0]);
+		}
+	}
+
+	/**
+	 * Parse a binary encoded geometry. Is synchronized to protect offset counter. (Unfortunately, Java does not have
+	 * neither call by reference nor multiple return values.)
+	 * 
+	 * @param value
+	 *            ...
+	 */
+	private void parse(byte[] value) {
+		parseGeometry(valueGetterForEndian(value));
+	}
+
+	private void parseGeometry(ValueGetter data) {
+		byte endian = data.getByte(); // skip and test endian flag
+		if (endian != data.endian) {
+			throw new IllegalArgumentException("Endian inconsistency!");
+		}
+		int typeword = data.getInt();
+
+		int realtype = typeword & 0x1FFFFFFF; // cut off high flag bits
+
+		boolean haveZ = (typeword & 0x80000000) != 0;
+		boolean haveM = (typeword & 0x40000000) != 0;
+		boolean haveS = (typeword & 0x20000000) != 0;
+
+		// int srid = Geometry.UNKNOWN_SRID;
+
+		if (haveS) {
+			// srid = Geometry.parseSRID(data.getInt());
+			data.getInt();
+		}
+		switch (realtype) {
+			case Geometry.POINT:
+				parsePoint(data, haveZ, haveM);
+				break;
+			case Geometry.LINESTRING:
+				parseLineString(data, haveZ, haveM);
+				break;
+			case Geometry.POLYGON:
+				parsePolygon(data, haveZ, haveM);
+				break;
+			case Geometry.MULTIPOINT:
+				parseMultiPoint(data);
+				break;
+			case Geometry.MULTILINESTRING:
+				parseMultiLineString(data);
+				break;
+			case Geometry.MULTIPOLYGON:
+				parseMultiPolygon(data);
+				break;
+			case Geometry.GEOMETRYCOLLECTION:
+				parseCollection(data);
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown Geometry Type: " + realtype);
+		}
+		// if (srid != Geometry.UNKNOWN_SRID) {
+		// result.setSrid(srid);
+		// }
+	}
+
+	private static void parsePoint(ValueGetter data, boolean haveZ, boolean haveM) {
+		// double X = data.getDouble();
+		// double Y = data.getDouble();
+		data.getDouble();
+		data.getDouble();
+
+		if (haveZ)
+			data.getDouble();
+
+		if (haveM)
+			data.getDouble();
+
+	}
+
+	/**
+	 * Parse an Array of "full" Geometries
+	 * 
+	 * @param data
+	 *            ...
+	 * @param count
+	 *            ...
+	 */
+	private void parseGeometryArray(ValueGetter data, int count) {
+		for (int i = 0; i < count; i++) {
+			parseGeometry(data);
+		}
+	}
+
+	//
+	// private void parsePointArray(ValueGetter data, boolean haveZ, boolean haveM) {
+	// int count = data.getInt();
+	// for (int i = 0; i < count; i++) {
+	// parsePoint(data, haveZ, haveM);
+	// }
+	// }
+
+	private void parseMultiPoint(ValueGetter data) {
+		parseGeometryArray(data, data.getInt());
+	}
+
+	private void parseLineString(ValueGetter data, boolean haveZ, boolean haveM) {
+		int count = data.getInt();
+		for (int i = 0; i < count; i++) {
+			mCoords[mCoordPos++] = (float) (data.getDouble()) * mScale;
+			mCoords[mCoordPos++] = (float) (data.getDouble()) * mScale;
+			if (haveZ)
+				data.getDouble();
+			if (haveM)
+				data.getDouble();
+		}
+		mIndex[mIndexPos++] = count * 2;
+	}
+
+	private void parsePolygon(ValueGetter data, boolean haveZ, boolean haveM) {
+		int count = data.getInt();
+
+		for (int i = 0; i < count; i++) {
+			parseLineString(data, haveZ, haveM);
+		}
+	}
+
+	private void parseMultiLineString(ValueGetter data) {
+		int count = data.getInt();
+		parseGeometryArray(data, count);
+	}
+
+	private void parseMultiPolygon(ValueGetter data) {
+		int count = data.getInt();
+		parseGeometryArray(data, count);
+	}
+
+	private void parseCollection(ValueGetter data) {
+		int count = data.getInt();
+		parseGeometryArray(data, count);
+	}
+
+	// taken from mapsforge GeoUtils
+	// private static final double EQUATORIAL_RADIUS = 6378137.0;
+	// private static final double[] EPSILON_ZERO = new double[] { 0, 0 };
+	//
+	// static double latitudeDistance(int meters) {
+	// return (meters * 360) / (2 * Math.PI * EQUATORIAL_RADIUS);
+	// }
+	//
+	// static double longitudeDistance(int meters, double latitude) {
+	// return (meters * 360) / (2 * Math.PI * EQUATORIAL_RADIUS * Math.cos(Math.toRadians(latitude)));
+	// }
+	//
+	// private static double[] bufferInDegrees(long tileY, byte zoom, int enlargementInMeter) {
+	// if (enlargementInMeter == 0) {
+	// return EPSILON_ZERO;
+	// }
+	//
+	// double[] epsilons = new double[2];
+	// double lat = MercatorProjection.tileYToLatitude(tileY, zoom);
+	// epsilons[0] = latitudeDistance(enlargementInMeter);
+	// epsilons[1] = longitudeDistance(enlargementInMeter, lat);
+	//
+	// return epsilons;
+	// }
+	//
+	// static String tileToBOX3D(Tile tile, int pixel) {
+	// double minLat = MercatorProjection.pixelYToLatitude(tile.getPixelY() + Tile.TILE_SIZE + pixel, tile.zoomLevel);
+	// double maxLat = MercatorProjection.pixelYToLatitude(tile.getPixelY() - pixel, tile.zoomLevel);
+	//
+	// double minLon = MercatorProjection.pixelXToLongitude(tile.getPixelX() - pixel, tile.zoomLevel);
+	// double maxLon = MercatorProjection.pixelXToLongitude(tile.getPixelX() + Tile.TILE_SIZE + pixel, tile.zoomLevel);
+	//
+	// return "ST_SetSRID('BOX3D(" + minLon + " " + minLat + ", " + " " + maxLon + " " + maxLat + ")'::box3d ,4326)";
+	// }
+	//
+	// static String tileToBOX3D(Tile tile, int pixel, int projection) {
+	//
+	// double minLat = MercatorProjection.pixelYToLatitude(tile.getPixelY() + Tile.TILE_SIZE + pixel, tile.zoomLevel);
+	// double maxLat = MercatorProjection.pixelYToLatitude(tile.getPixelY() - pixel, tile.zoomLevel);
+	//
+	// double minLon = MercatorProjection.pixelXToLongitude(tile.getPixelX() - pixel, tile.zoomLevel);
+	// double maxLon = MercatorProjection.pixelXToLongitude(tile.getPixelX() + Tile.TILE_SIZE + pixel, tile.zoomLevel);
+	//
+	// return String
+	// .format("ST_Transform(ST_SetSRID('BOX3D(%f %f, %f %f)'::box3d , 4326), %d)",
+	// new Double(minLon), new Double(minLat), new Double(maxLon), new Double(maxLat), new Integer(
+	// projection));
+	// }
+	//
+	// static String tileToBOX3D(long tileX, long tileY, byte zoom, int enlargementInMeter) {
+	// double minLat = MercatorProjection.tileYToLatitude(tileY + 1, zoom);
+	// double maxLat = MercatorProjection.tileYToLatitude(tileY, zoom);
+	// double minLon = MercatorProjection.tileXToLongitude(tileX, zoom);
+	// double maxLon = MercatorProjection.tileXToLongitude(tileX + 1, zoom);
+	//
+	// double[] epsilons = bufferInDegrees(tileY, zoom, enlargementInMeter);
+	//
+	// minLon -= epsilons[1];
+	// minLat -= epsilons[0];
+	// maxLon += epsilons[1];
+	// maxLat += epsilons[0];
+	//
+	// return "ST_SetSRID('BOX3D(" + minLon + " " + minLat + ", " + " " + maxLon + " " + maxLat + ")'::box3d ,4326)";
+	// }
+}

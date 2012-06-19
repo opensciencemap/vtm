@@ -385,7 +385,7 @@
 								stroke-linecap="butt" />
 						</rule>
 						<rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16">
-							<line stroke="#c1bcb6" stroke-width="0.25" stroke-linecap="butt" />
+							<line stroke="#c1bcb6" stroke-width="0.2" stroke-linecap="butt" />
 						</rule>
 					</rule>
 
