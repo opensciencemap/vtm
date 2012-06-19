@@ -624,16 +624,16 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		boolean drawOutlines = false;
 		boolean drawFixed = false;
 
-		// stroke scale factor (0.85 to give some room for anti-aliasing)
-		float wdiv = 0.85f / FloatMath.sqrt(mDrawScale / z);
+		// stroke scale factor
+		float wdiv = 1.0f / FloatMath.sqrt(mDrawScale / z);
 		// linear scale for fixed lines
-		float fdiv = 0.85f / (mDrawScale / z);
+		float fdiv = 0.9f / (mDrawScale / z);
 
 		for (int i = 0, n = layers.length; i < n; i++) {
 			LineLayer l = layers[i];
 
 			// set line width and mode
-			if (i == 0 | l.isOutline != drawOutlines || l.isFixed != drawFixed) {
+			if ((i == 0) || (l.isOutline != drawOutlines) || (l.isFixed != drawFixed)) {
 				drawOutlines = l.isOutline;
 				drawFixed = l.isFixed;
 				if (drawFixed) {
@@ -644,7 +644,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 					GLES20.glUniform1f(gLineWidthHandle, wdiv);
 				} else {
 					GLES20.glUniform1i(gLineModeHandle, 0);
-					GLES20.glUniform1f(gLineWidthHandle, wdiv);
+					GLES20.glUniform1f(gLineWidthHandle, wdiv * 0.95f);
 				}
 			}
 
