@@ -338,9 +338,11 @@
 				<outline stroke="#c0c0c0" />
 			</rule>
 			<rule e="way" k="*" v="3">
-				<outline stroke="#404040" />
+				<outline stroke="#d69628" />
 			</rule>
-
+				<rule e="way" k="*" v="4">
+				<outline stroke="#d69628" />
+			</rule>
 		</rule>
 
 		<!-- highway -->
@@ -432,12 +434,12 @@
 					<rule e="way" k="*" v="*" zoom-min="11">
 
 						<rule e="way" k="*" v="tertiary|secondary_link">
-							<line stroke="#ffff9a" stroke-width="1.5" outline="1" />
+							<line stroke="#ffff9a" stroke-width="1.5" outline="3" />
 						</rule>
 
 						<rule e="way" k="*" v="trunk_link|motorway_link">
 							<line stroke="#fed6a3" stroke-width="1.6" stroke-linecap="butt"
-								outline="1" />
+								outline="4" />
 						</rule>
 
 						<rule e="way" k="*" v="secondary|primary_link">
@@ -448,23 +450,23 @@
 							</rule>
 
 							<rule e="way" k="bridge" v="~|no|false">
-								<line stroke="#fefe8a" stroke-width="1.6" outline="1" />
+								<line stroke="#fefe8a" stroke-width="1.6" outline="3" />
 							</rule>
 						</rule>
 
 						<rule e="way" k="*" v="primary">
 							<line stroke="#fefe8a" stroke-width="1.7" stroke-linecap="butt"
-								outline="1" />
+								outline="3" />
 						</rule>
 
 						<rule e="way" k="*" v="trunk">
 							<line stroke="#fed6a3" stroke-width="1.8" stroke-linecap="butt"
-								outline="1" />
+								outline="4" />
 						</rule>
 
 						<rule e="way" k="*" v="motorway">
 							<line stroke="#eec693" stroke-width="1.9" stroke-linecap="butt"
-								outline="1" />
+								outline="4" />
 						</rule>
 					</rule>
 				</rule>
