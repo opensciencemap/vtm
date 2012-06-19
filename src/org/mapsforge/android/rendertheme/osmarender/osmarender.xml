@@ -208,7 +208,7 @@
 		<rule e="way" k="waterway" v="*">
 
 			<rule e="way" k="waterway" v="ditch|drain" zoom-min="14">
-				<line stroke="#b4cbdc" stroke-width="1.0" stroke-linecap="butt"
+				<line stroke="#b4cbdc" stroke-width="0.5" stroke-linecap="butt"
 					fixed="true" />
 			</rule>
 
@@ -317,7 +317,7 @@
 			</rule>-->
 			
 			<rule e="way" k="*" v="*" zoom-min="15">
-				<line stroke="#c9c3c3" stroke-width="0.5" fixed="true"
+				<line stroke="#c9c3c3" stroke-width="0.6" fixed="true"
 					stroke-linecap="butt" />
 				<area fill="#e9e6e6" fade="15" />
 			</rule>
@@ -351,27 +351,27 @@
 				<rule e="way" k="*" v="*" zoom-min="5" zoom-max="10">
 
 					<rule e="way" k="*" v="secondary|primary_link" zoom-min="9">
-						<line stroke="#eeee4a" stroke-width="1.5" stroke-linecap="butt"
+						<line stroke="#eeee4a" stroke-width="1.3" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 
 					<rule e="way" k="*" v="trunk_link|motorway_link" zoom-min="8">
-						<line stroke="#fed6a3" stroke-width="1.6" stroke-linecap="butt"
+						<line stroke="#fed6a3" stroke-width="1.4" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 
 					<rule e="way" k="*" v="primary" zoom-min="8">
-						<line stroke="#eeee4a" stroke-width="1.6" stroke-linecap="butt"
+						<line stroke="#eeee4a" stroke-width="1.4" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 
 					<rule e="way" k="*" v="trunk" zoom-min="8">
-						<line stroke="#fed6a3" stroke-width="1.6" stroke-linecap="butt"
+						<line stroke="#fed6a3" stroke-width="1.4" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 
 					<rule e="way" k="*" v="motorway">
-						<line stroke="#eec693" stroke-width="1.7" stroke-linecap="butt"
+						<line stroke="#eec693" stroke-width="1.5" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 				</rule>
@@ -385,7 +385,7 @@
 								stroke-linecap="butt" />
 						</rule>
 						<rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16">
-							<line stroke="#c1bcb6" stroke-width="0.2" stroke-linecap="butt" />
+							<line stroke="#c1bcb6" stroke-width="0.35" stroke-linecap="butt" />
 						</rule>
 					</rule>
 
@@ -548,24 +548,24 @@
 
 				<!-- railway casings and cores -->
 				<rule e="way" k="railway" v="tram">
-					<line stroke="#8c8f8c" stroke-width="0.6" fixed="true" />
+					<line stroke="#8c8f8c" stroke-width="0.8" fixed="true" />
 				</rule>
 
 				<rule e="way" k="railway" v="light_rail|subway|narrow_gauge">
-					<line stroke="#a0a0a0" stroke-width="0.6" stroke-linecap="butt"
+					<line stroke="#a0a0a0" stroke-width="0.8" stroke-linecap="butt"
 						fixed="true" />
 
 				</rule>
 				<rule e="way" k="railway" v="rail" zoom-min="15">
-					<line stroke="#777799" stroke-width="0.5" stroke-linecap="butt"
+					<line stroke="#777799" stroke-width="0.6" stroke-linecap="butt"
 						fixed="true" />
 				</rule>
 				<rule e="way" k="railway" v="rail" zoom-max="14" zoom-min="13">
-					<line stroke="#8888aa" stroke-width="0.5" stroke-linecap="butt"
+					<line stroke="#8888aa" stroke-width="0.6" stroke-linecap="butt"
 						fixed="true" />
 				</rule>
 				<rule e="way" k="railway" v="rail" zoom-max="12" zoom-min="11">
-					<line stroke="#bbbbcc" stroke-width="0.5" stroke-linecap="butt"
+					<line stroke="#bbbbcc" stroke-width="0.6" stroke-linecap="butt"
 						fixed="true" />
 				</rule>
 			</rule>
