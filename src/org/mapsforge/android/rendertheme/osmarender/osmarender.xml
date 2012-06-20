@@ -547,15 +547,15 @@
 						fixed="true" />
 
 				</rule>
-				<rule e="way" k="railway" v="rail" zoom-min="15">
+				<rule e="way" k="railway" v="rail" zoom-min="14">
 					<line stroke="#777799" stroke-width="0.6" stroke-linecap="butt"
 						fixed="true" />
 				</rule>
-				<rule e="way" k="railway" v="rail" zoom-max="14" zoom-min="13">
+				<!-- <rule e="way" k="railway" v="rail" zoom-max="14" zoom-min="13">
 					<line stroke="#8888aa" stroke-width="0.6" stroke-linecap="butt"
 						fixed="true" />
-				</rule>
-				<rule e="way" k="railway" v="rail" zoom-max="12" zoom-min="11">
+				</rule> -->
+				<rule e="way" k="railway" v="rail" zoom-max="13" zoom-min="11">
 					<line stroke="#bbbbcc" stroke-width="0.6" stroke-linecap="butt"
 						fixed="true" />
 				</rule>
