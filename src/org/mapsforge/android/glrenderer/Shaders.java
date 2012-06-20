@@ -30,20 +30,29 @@ class Shaders {
 
 	final static String gLineFragmentShader = ""
 			+ "#extension GL_OES_standard_derivatives : enable\n"
+			+ "#pragma profilepragma blendoperation(gl_FragColor, GL_FUNC_ADD, GL_ONE, GL_ONE_MINUS_SRC_ALPHA)\n"
 			+ "precision mediump float;"
 			+ "uniform vec2 u_mode;"
 			+ "uniform vec4 u_color;"
 			+ "const float zero = 0.0;"
+			+ "const vec4 blank = vec4(0.0,0.0,0.0,0.0);"
 			+ "varying vec2 v_st;"
 			+ "void main() {"
 			+ "float width = u_mode[1];"
-			// + "      if (v_st.t == zero){ "
-			// + "         float fuzz = fwidth(v_st.s) * 1.5;"
-			// + "         gl_FragColor = u_color * smoothstep(-fuzz * u_mode[0], fuzz, width - abs(v_st.s));"
-			// + "      } else {"
+			+ "      if (v_st.t == zero){ "
+			+ "         float fuzz = fwidth(v_st.s) * 1.5;"
+			+ "         float min_fuzz = -fuzz * u_mode[0];"
+			+ "         float len = width - abs(v_st.s);"
+			// + "         if (len > fuzz)"
+			// + "          gl_FragColor = u_color;"
+			// + "         else if (len < min_fuzz)"
+			// + "          gl_FragColor = blank;"
+			// + "         else"
+			+ "         gl_FragColor = u_color * smoothstep(min_fuzz, fuzz, len);"
+			+ "      } else {"
 			+ "         float fuzz = max(fwidth(v_st.s), fwidth(v_st.t)) * 1.5;"
 			+ "         gl_FragColor = u_color * smoothstep(-fuzz * u_mode[0], fuzz, width - length(v_st));"
-			// + "      } "
+			+ "      } "
 			+ "}";
 
 	// final static String gLineFragmentShader = ""
@@ -88,11 +97,10 @@ class Shaders {
 	// + "         gl_FragColor = u_color * smoothstep(fuzz*0.5, -fuzz, abs(v_st.s) - width);"
 	// + "    }"
 	// + "}";
-
+	//
 	// final static String gLineFragmentShader = "" +
 	// "#extension GL_OES_standard_derivatives : enable\n" +
 	// "precision mediump float;" +
-	// "uniform float u_width;" +
 	// "uniform int u_mode;" +
 	// "uniform vec4 u_color;" +
 	// "varying vec2 v_st;" +
@@ -127,6 +135,7 @@ class Shaders {
 			+ "}";
 
 	final static String gPolygonFragmentShader = ""
+			+ "#pragma profilepragma blendoperation(gl_FragColor, GL_FUNC_ADD, GL_ONE, GL_ONE_MINUS_SRC_ALPHA)\n"
 			+ "precision mediump float;"
 			+ "uniform vec4 u_color;"
 			+ "void main() {"
