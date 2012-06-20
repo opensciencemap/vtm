@@ -254,11 +254,14 @@ public class MapDatabase implements IMapDatabase {
 		try {
 			prepareExecution();
 			QueryParameters queryParameters = new QueryParameters();
-			queryParameters.queryZoomLevel = mMapFileHeader.getQueryZoomLevel(tile.zoomLevel);
+			queryParameters.queryZoomLevel = mMapFileHeader
+					.getQueryZoomLevel(tile.zoomLevel);
 			// get and check the sub-file for the query zoom level
-			SubFileParameter subFileParameter = mMapFileHeader.getSubFileParameter(queryParameters.queryZoomLevel);
+			SubFileParameter subFileParameter = mMapFileHeader
+					.getSubFileParameter(queryParameters.queryZoomLevel);
 			if (subFileParameter == null) {
-				LOG.warning("no sub-file for zoom level: " + queryParameters.queryZoomLevel);
+				LOG.warning("no sub-file for zoom level: "
+						+ queryParameters.queryZoomLevel);
 				return;
 			}
 
@@ -320,7 +323,8 @@ public class MapDatabase implements IMapDatabase {
 			mReadBuffer = new ReadBuffer(mInputFile);
 
 			mMapFileHeader = new MapFileHeader();
-			FileOpenResult fileOpenResult = mMapFileHeader.readHeader(mReadBuffer, mFileSize);
+			FileOpenResult fileOpenResult = mMapFileHeader.readHeader(mReadBuffer,
+					mFileSize);
 			if (!fileOpenResult.isSuccess()) {
 				closeFile();
 				return fileOpenResult;
@@ -361,7 +365,8 @@ public class MapDatabase implements IMapDatabase {
 	 * @param mapDatabaseCallback
 	 *            the callback which handles the extracted map elements.
 	 */
-	private void processBlock(QueryParameters queryParameters, SubFileParameter subFileParameter,
+	private void processBlock(QueryParameters queryParameters,
+			SubFileParameter subFileParameter,
 			IMapDatabaseCallback mapDatabaseCallback) {
 		if (!processBlockSignature()) {
 			return;
@@ -416,7 +421,8 @@ public class MapDatabase implements IMapDatabase {
 
 	}
 
-	private void processBlocks(IMapDatabaseCallback mapDatabaseCallback, QueryParameters queryParameters,
+	private void processBlocks(IMapDatabaseCallback mapDatabaseCallback,
+			QueryParameters queryParameters,
 			SubFileParameter subFileParameter) throws IOException {
 		boolean queryIsWater = true;
 		// boolean queryReadWaterInfo = false;
@@ -429,7 +435,8 @@ public class MapDatabase implements IMapDatabase {
 				long blockNumber = row * subFileParameter.blocksWidth + column;
 
 				// get the current index entry
-				long currentBlockIndexEntry = mDatabaseIndexCache.getIndexEntry(subFileParameter, blockNumber);
+				long currentBlockIndexEntry = mDatabaseIndexCache.getIndexEntry(
+						subFileParameter, blockNumber);
 
 				// check if the current query would still return a water tile
 				if (queryIsWater) {
@@ -440,7 +447,8 @@ public class MapDatabase implements IMapDatabase {
 
 				// get and check the current block pointer
 				long currentBlockPointer = currentBlockIndexEntry & BITMASK_INDEX_OFFSET;
-				if (currentBlockPointer < 1 || currentBlockPointer > subFileParameter.subFileSize) {
+				if (currentBlockPointer < 1
+						|| currentBlockPointer > subFileParameter.subFileSize) {
 					LOG.warning("invalid current block pointer: " + currentBlockPointer);
 					LOG.warning("subFileSize: " + subFileParameter.subFileSize);
 					return;
@@ -453,9 +461,11 @@ public class MapDatabase implements IMapDatabase {
 					nextBlockPointer = subFileParameter.subFileSize;
 				} else {
 					// get and check the next block pointer
-					nextBlockPointer = mDatabaseIndexCache.getIndexEntry(subFileParameter, blockNumber + 1)
+					nextBlockPointer = mDatabaseIndexCache.getIndexEntry(
+							subFileParameter, blockNumber + 1)
 							& BITMASK_INDEX_OFFSET;
-					if (nextBlockPointer < 1 || nextBlockPointer > subFileParameter.subFileSize) {
+					if (nextBlockPointer < 1
+							|| nextBlockPointer > subFileParameter.subFileSize) {
 						LOG.warning("invalid next block pointer: " + nextBlockPointer);
 						LOG.warning("sub-file size: " + subFileParameter.subFileSize);
 						return;
@@ -465,7 +475,8 @@ public class MapDatabase implements IMapDatabase {
 				// calculate the size of the current block
 				int currentBlockSize = (int) (nextBlockPointer - currentBlockPointer);
 				if (currentBlockSize < 0) {
-					LOG.warning("current block size must not be negative: " + currentBlockSize);
+					LOG.warning("current block size must not be negative: "
+							+ currentBlockSize);
 					return;
 				} else if (currentBlockSize == 0) {
 					// the current block is empty, continue with the next block
@@ -475,7 +486,8 @@ public class MapDatabase implements IMapDatabase {
 					LOG.warning("current block size too large: " + currentBlockSize);
 					continue;
 				} else if (currentBlockPointer + currentBlockSize > mFileSize) {
-					LOG.warning("current block largher than file size: " + currentBlockSize);
+					LOG.warning("current block largher than file size: "
+							+ currentBlockSize);
 					return;
 				}
 
@@ -490,10 +502,12 @@ public class MapDatabase implements IMapDatabase {
 				}
 
 				// calculate the top-left coordinates of the underlying tile
-				double tileLatitudeDeg = MercatorProjection.tileYToLatitude(subFileParameter.boundaryTileTop + row,
+				double tileLatitudeDeg = MercatorProjection.tileYToLatitude(
+						subFileParameter.boundaryTileTop + row,
 						subFileParameter.baseZoomLevel);
-				double tileLongitudeDeg = MercatorProjection.tileXToLongitude(subFileParameter.boundaryTileLeft
-						+ column, subFileParameter.baseZoomLevel);
+				double tileLongitudeDeg = MercatorProjection.tileXToLongitude(
+						subFileParameter.boundaryTileLeft
+								+ column, subFileParameter.baseZoomLevel);
 				mTileLatitude = (int) (tileLatitudeDeg * 1000000);
 				mTileLongitude = (int) (tileLongitudeDeg * 1000000);
 
@@ -544,7 +558,6 @@ public class MapDatabase implements IMapDatabase {
 	 * @return true if the POIs could be processed successfully, false otherwise.
 	 */
 	private boolean processPOIs(IMapDatabaseCallback mapDatabaseCallback, int numberOfPois) {
-		// List<Tag> tags = new ArrayList<Tag>();
 		Tag[] poiTags = mMapFileHeader.getMapFileInfo().poiTags;
 		Tag[] tags = null;
 
@@ -586,22 +599,19 @@ public class MapDatabase implements IMapDatabase {
 			byte featureByte = mReadBuffer.readByte();
 
 			// bit 1-3 enable optional features
-			boolean featureName = (featureByte & POI_FEATURE_NAME) != 0;
-			boolean featureHouseNumber = (featureByte & POI_FEATURE_HOUSE_NUMBER) != 0;
-			boolean featureElevation = (featureByte & POI_FEATURE_ELEVATION) != 0;
 
 			// check if the POI has a name
-			if (featureName) {
+			if ((featureByte & POI_FEATURE_NAME) != 0) {
 				mReadBuffer.getPositionAndSkip();
 			}
 
 			// check if the POI has a house number
-			if (featureHouseNumber) {
+			if ((featureByte & POI_FEATURE_HOUSE_NUMBER) != 0) {
 				mReadBuffer.getPositionAndSkip();
 			}
 
 			// check if the POI has an elevation
-			if (featureElevation) {
+			if ((featureByte & POI_FEATURE_ELEVATION) != 0) {
 				mReadBuffer.readSignedInt();
 				// mReadBuffer.getPositionAndSkip();// tags.add(new Tag(Tag.TAG_KEY_ELE,
 				// Integer.toString(mReadBuffer.readSignedInt())));
@@ -686,7 +696,8 @@ public class MapDatabase implements IMapDatabase {
 			dLon = nLon - wayNodeLongitude;
 			wayNodeLongitude = nLon;
 
-			if (dLon > minLon || dLon < -minLon || dLat > minLat || dLat < -minLat || (pos == length - 2)) {
+			if (dLon > minLon || dLon < -minLon || dLat > minLat || dLat < -minLat
+					|| (pos == length - 2)) {
 				outBuffer[floatPos++] = nLon;
 				outBuffer[floatPos++] = nLat;
 				cnt += 2;
@@ -727,7 +738,8 @@ public class MapDatabase implements IMapDatabase {
 			dLon = nLon - wayNodeLongitude;
 			wayNodeLongitude = nLon;
 
-			if (dLon > minLon || dLon < -minLon || dLat > minLat || dLat < -minLat || (pos == length - 2)) {
+			if (dLon > minLon || dLon < -minLon || dLat > minLat || dLat < -minLat
+					|| (pos == length - 2)) {
 				outBuffer[floatPos++] = nLon;
 				outBuffer[floatPos++] = nLat;
 				cnt += 2;
@@ -760,7 +772,8 @@ public class MapDatabase implements IMapDatabase {
 	 *            how many ways should be processed.
 	 * @return true if the ways could be processed successfully, false otherwise.
 	 */
-	private boolean processWays(QueryParameters queryParameters, IMapDatabaseCallback mapDatabaseCallback,
+	private boolean processWays(QueryParameters queryParameters,
+			IMapDatabaseCallback mapDatabaseCallback,
 			int numberOfWays) {
 
 		Tag[] tags = null;
@@ -787,7 +800,8 @@ public class MapDatabase implements IMapDatabase {
 			}
 
 			if (queryParameters.useTileBitmask) {
-				elementCounter = mReadBuffer.skipWays(queryParameters.queryTileBitmask, elementCounter);
+				elementCounter = mReadBuffer.skipWays(queryParameters.queryTileBitmask,
+						elementCounter);
 
 				if (elementCounter == 0)
 					return true;
@@ -890,7 +904,8 @@ public class MapDatabase implements IMapDatabase {
 					return false;
 
 				// wayDataContainer.textPos = textPos;
-				mapDatabaseCallback.renderWay(layer, tags, mWayNodes, wayLengths, changed);
+				mapDatabaseCallback
+						.renderWay(layer, tags, mWayNodes, wayLengths, changed);
 			}
 		}
 
@@ -929,14 +944,18 @@ public class MapDatabase implements IMapDatabase {
 			cumulatedNumberOfPois += mReadBuffer.readUnsignedInt();
 			cumulatedNumberOfWays += mReadBuffer.readUnsignedInt();
 
-			if (cumulatedNumberOfPois < 0 || cumulatedNumberOfPois > MAXIMUM_ZOOM_TABLE_OBJECTS) {
-				LOG.warning("invalid cumulated number of POIs in row " + row + ' ' + cumulatedNumberOfPois);
+			if (cumulatedNumberOfPois < 0
+					|| cumulatedNumberOfPois > MAXIMUM_ZOOM_TABLE_OBJECTS) {
+				LOG.warning("invalid cumulated number of POIs in row " + row + ' '
+						+ cumulatedNumberOfPois);
 				if (mDebugFile) {
 					LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 				}
 				return null;
-			} else if (cumulatedNumberOfWays < 0 || cumulatedNumberOfWays > MAXIMUM_ZOOM_TABLE_OBJECTS) {
-				LOG.warning("invalid cumulated number of ways in row " + row + ' ' + cumulatedNumberOfWays);
+			} else if (cumulatedNumberOfWays < 0
+					|| cumulatedNumberOfWays > MAXIMUM_ZOOM_TABLE_OBJECTS) {
+				LOG.warning("invalid cumulated number of ways in row " + row + ' '
+						+ cumulatedNumberOfWays);
 				if (mMapFileHeader.getMapFileInfo().debugFile) {
 					LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 				}

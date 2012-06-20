@@ -17,6 +17,7 @@ package org.mapsforge.android.glrenderer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 
 import android.util.SparseArray;
 
@@ -56,7 +57,8 @@ class LineLayers {
 		}
 
 		if (buf == null || buf.capacity() < size) {
-			ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 4).order(ByteOrder.nativeOrder());
+			ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 4).order(
+					ByteOrder.nativeOrder());
 			fbuf = bbuf.asFloatBuffer();
 		} else {
 			fbuf.position(0);
@@ -87,8 +89,8 @@ class LineLayers {
 		return fbuf;
 	}
 
-	ByteBuffer compileLayerData(ByteBuffer buf) {
-		ByteBuffer sbuf = buf;
+	ShortBuffer compileLayerData(ShortBuffer buf) {
+		ShortBuffer sbuf = buf;
 
 		array = new LineLayer[layers.size()];
 
@@ -98,14 +100,16 @@ class LineLayers {
 			size += l.verticesCnt * NUM_VERTEX_FLOATS;
 		}
 
-		if (buf == null || buf.capacity() < size * 2) {
-			sbuf = ByteBuffer.allocateDirect(size * 2).order(ByteOrder.nativeOrder());
+		if (buf == null || buf.capacity() < size) {
+			ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 2).order(
+					ByteOrder.nativeOrder());
+			sbuf = bbuf.asShortBuffer();
 		} else {
 			sbuf.position(0);
 		}
 		int pos = 0;
 
-		byte[] data = new byte[PoolItem.SIZE * 2];
+		short[] data = new short[PoolItem.SIZE];
 
 		for (int i = 0, n = array.length; i < n; i++) {
 			LineLayer l = array[i];
@@ -115,7 +119,7 @@ class LineLayers {
 			for (int k = 0, m = l.pool.size(); k < m; k++) {
 				PoolItem item = l.pool.get(k);
 				PoolItem.toHalfFloat(item, data);
-				sbuf.put(data, 0, item.used * 2);
+				sbuf.put(data, 0, item.used);
 			}
 
 			l.offset = pos;

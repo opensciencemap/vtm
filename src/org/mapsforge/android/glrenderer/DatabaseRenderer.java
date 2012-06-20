@@ -222,11 +222,13 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 		mWays = wayLength;
 
 		if (!firstMatch && prevClosed == closed && !changed) {
-			DatabaseRenderer.renderTheme.matchWay(this, tags, mCurrentTile.zoomLevel,
+			DatabaseRenderer.renderTheme.matchWay(this, tags,
+					(byte) (mCurrentTile.zoomLevel + 0),
 					closed, false);
 		} else {
 			prevClosed = closed;
-			DatabaseRenderer.renderTheme.matchWay(this, tags, mCurrentTile.zoomLevel,
+			DatabaseRenderer.renderTheme.matchWay(this, tags,
+					(byte) (mCurrentTile.zoomLevel + 0),
 					closed, true);
 		}
 
@@ -268,6 +270,9 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 	@Override
 	public void renderWay(Line line) {
 
+		// if (prevClosed && !mProjected)
+		// return;
+
 		projectToTile(false);
 
 		LineLayer outlineLayer = null;
@@ -304,7 +309,7 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 		if (!mDebugDrawPolygons)
 			return;
 
-		// if (!projectToTile(mCurrentTile.zoomLevel < 13))
+		// if (!projectToTile(mCurrentTile.zoomLevel < 14))
 		if (!projectToTile(false))
 			return;
 

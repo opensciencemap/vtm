@@ -125,7 +125,8 @@ public class MapView extends GLSurfaceView {
 		super(context, attributeSet);
 
 		if (!(context instanceof MapActivity)) {
-			throw new IllegalArgumentException("context is not an instance of MapActivity");
+			throw new IllegalArgumentException(
+					"context is not an instance of MapActivity");
 		}
 		setWillNotDraw(true);
 		setWillNotCacheDrawing(true);
@@ -138,7 +139,8 @@ public class MapView extends GLSurfaceView {
 		mMapController = new MapController(this);
 
 		// mMapDatabase = MapDatabaseFactory.createMapDatabase(MapDatabaseInternal.POSTGIS_READER);
-		mMapDatabase = MapDatabaseFactory.createMapDatabase(MapDatabaseInternal.MAP_READER);
+		mMapDatabase = MapDatabaseFactory
+				.createMapDatabase(MapDatabaseInternal.MAP_READER);
 
 		mMapViewPosition = new MapViewPosition(this);
 		mMapScaleBar = new MapScaleBar(this);
@@ -327,7 +329,8 @@ public class MapView extends GLSurfaceView {
 	 *            the new center point of the map.
 	 */
 	public void setCenter(GeoPoint geoPoint) {
-		MapPosition mapPosition = new MapPosition(geoPoint, mMapViewPosition.getZoomLevel(), 1);
+		MapPosition mapPosition = new MapPosition(geoPoint,
+				mMapViewPosition.getZoomLevel(), 1);
 		setCenterAndZoom(mapPosition);
 	}
 
@@ -566,16 +569,22 @@ public class MapView extends GLSurfaceView {
 	protected final void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		// find out how big the zoom controls should be
 		mMapZoomControls.measure(
-				MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.AT_MOST),
-				MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.AT_MOST));
+				MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec),
+						MeasureSpec.AT_MOST),
+				MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec),
+						MeasureSpec.AT_MOST));
 
 		// make sure that MapView is big enough to display the zoom controls
-		setMeasuredDimension(Math.max(MeasureSpec.getSize(widthMeasureSpec), mMapZoomControls.getMeasuredWidth()),
-				Math.max(MeasureSpec.getSize(heightMeasureSpec), mMapZoomControls.getMeasuredHeight()));
+		setMeasuredDimension(
+				Math.max(MeasureSpec.getSize(widthMeasureSpec),
+						mMapZoomControls.getMeasuredWidth()),
+				Math.max(MeasureSpec.getSize(heightMeasureSpec),
+						mMapZoomControls.getMeasuredHeight()));
 	}
 
 	@Override
-	protected synchronized void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+	protected synchronized void onSizeChanged(int width, int height, int oldWidth,
+			int oldHeight) {
 		mMapWorker.pause();
 		mMapWorker.awaitPausing();
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
@@ -605,7 +614,8 @@ public class MapView extends GLSurfaceView {
 	 * @return the maximum possible zoom level.
 	 */
 	byte getMaximumPossibleZoomLevel() {
-		return (byte) Math.min(mMapZoomControls.getZoomLevelMax(), mMapGenerator.getZoomLevelMax());
+		return (byte) Math.min(mMapZoomControls.getZoomLevelMax(),
+				mMapGenerator.getZoomLevelMax());
 	}
 
 	/**
@@ -615,8 +625,9 @@ public class MapView extends GLSurfaceView {
 		if (!mMapViewPosition.isValid()) {
 			return false;
 		} else if (!mMapGenerator.requiresInternetConnection()
-				&& (!mMapDatabase.hasOpenFile() || !mMapDatabase.getMapFileInfo().boundingBox.contains(getMapPosition()
-						.getMapCenter()))) {
+				&& (!mMapDatabase.hasOpenFile() || !mMapDatabase.getMapFileInfo().boundingBox
+						.contains(getMapPosition()
+								.getMapCenter()))) {
 			return false;
 		}
 
@@ -624,7 +635,8 @@ public class MapView extends GLSurfaceView {
 	}
 
 	byte limitZoomLevel(byte zoom) {
-		return (byte) Math.max(Math.min(zoom, getMaximumPossibleZoomLevel()), mMapZoomControls.getZoomLevelMin());
+		return (byte) Math.max(Math.min(zoom, getMaximumPossibleZoomLevel()),
+				mMapZoomControls.getZoomLevelMin());
 	}
 
 	@Override
