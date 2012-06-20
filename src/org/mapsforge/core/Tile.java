@@ -14,7 +14,6 @@
  */
 package org.mapsforge.core;
 
-
 /**
  * A tile represents a rectangular part of the world map. All tiles can be identified by their X and Y number together
  * with their zoom level. The actual area that a tile covers on a map depends on the underlying map projection.
@@ -33,7 +32,8 @@ public class Tile {
 	/**
 	 * Size of a single uncompressed map tile bitmap in bytes.
 	 */
-	public static final int TILE_SIZE_IN_BYTES = TILE_SIZE * TILE_SIZE * TILE_BYTES_PER_PIXEL;
+	public static final int TILE_SIZE_IN_BYTES = TILE_SIZE * TILE_SIZE
+			* TILE_BYTES_PER_PIXEL;
 
 	/**
 	 * The X number of this tile.

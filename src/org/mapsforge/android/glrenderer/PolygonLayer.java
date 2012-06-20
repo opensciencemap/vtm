@@ -16,11 +16,14 @@ package org.mapsforge.android.glrenderer;
 
 import java.util.LinkedList;
 
+import org.mapsforge.core.Tile;
+
 class PolygonLayer extends Layer {
 	int fadeLevel;
-	private boolean first = true;
-	private float originX;
-	private float originY;
+
+	// private boolean first = true;
+	// private float originX;
+	// private float originY;
 
 	PolygonLayer(int layer, int color, int fade) {
 		super(layer, color);
@@ -34,11 +37,11 @@ class PolygonLayer extends Layer {
 
 		verticesCnt += length / 2 + 2;
 
-		if (first) {
-			first = false;
-			originX = points[pos];
-			originY = points[pos + 1];
-		}
+		// if (first) {
+		// first = false;
+		// originX = points[pos];
+		// originY = points[pos + 1];
+		// }
 
 		float[] curVertices = curItem.vertices;
 		int outPos = curItem.used;
@@ -48,8 +51,8 @@ class PolygonLayer extends Layer {
 			outPos = 0;
 		}
 
-		curVertices[outPos++] = originX;
-		curVertices[outPos++] = originY;
+		curVertices[outPos++] = Tile.TILE_SIZE >> 1;
+		curVertices[outPos++] = Tile.TILE_SIZE >> 1;
 
 		int remaining = length;
 		int inPos = pos;
@@ -74,7 +77,7 @@ class PolygonLayer extends Layer {
 			curVertices = getNextItem();
 			outPos = 0;
 		}
-
+		// Float.intBitsToFloat(bits)
 		curVertices[outPos++] = points[pos + 0];
 		curVertices[outPos++] = points[pos + 1];
 
