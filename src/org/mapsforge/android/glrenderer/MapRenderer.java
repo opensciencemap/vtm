@@ -50,7 +50,7 @@ import android.util.Log;
 public class MapRenderer implements org.mapsforge.android.MapRenderer {
 	private static final String TAG = "MapRenderer";
 
-	private static final int CACHE_TILES = 250;
+	private static int CACHE_TILES = 300;
 	private static final int LIMIT_BUFFERS = 32 * (1024 * 1024);
 
 	private static final int OES_HALF_FLOAT = 0x8D61;
@@ -481,7 +481,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 	private int[] mPolyColors;
 
 	private boolean drawPolygons(GLMapTile tile, int diff) {
-		float scale, x, y;
+		float scale, x, y, z = 1;
 
 		if (tile.polygonLayers == null || tile.polygonLayers.array == null)
 			return true;
@@ -500,12 +500,14 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 					POLYGON_VERTICES_DATA_POS_OFFSET);
 		}
 
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
 		if (diff == 0) {
 			scale = (float) (mDrawScale * 2.0 / mHeight);
 			x = (float) (mDrawX - tile.x);
 			y = (float) (tile.y - mDrawY);
 		} else {
-			float z = (diff > 0) ? (1 << diff) : 1.0f / (1 << -diff);
+			z = (diff > 0) ? (1 << diff) : 1.0f / (1 << -diff);
 			scale = (float) (mDrawScale * 2.0 / mHeight / z);
 			x = (float) (mDrawX * z - tile.x);
 			y = (float) (tile.y - mDrawY * z);
@@ -538,11 +540,11 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				else {
 					// clear stencilbuffer
 					GLES20.glStencilMask(0xFF);
-					// GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
+					GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
 
 					// clear stencilbuffer (tile region)
-					GLES20.glStencilOp(GLES20.GL_ZERO, GLES20.GL_ZERO, GLES20.GL_ZERO);
-					GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+					// GLES20.glStencilOp(GLES20.GL_ZERO, GLES20.GL_ZERO, GLES20.GL_ZERO);
+					// GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 				}
 
 				// stencil op for stencil method polygon drawing
@@ -560,7 +562,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 						continue;
 
 					// modify alpha channel
-					float s = (mDrawScale < 1.3f ? 1.3f : mDrawScale);
+					float s = ((mDrawScale / z) < 1.3f ? 1.3f : (mDrawScale / z));
 					colors[cnt] = (colors[cnt] & 0xffffff)
 							| (byte) ((s - 1) * 0xff) << 24;
 				}
@@ -612,6 +614,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 					false, 16,
 					LINE_VERTICES_DATA_TEX_OFFSET);
 		}
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
 		if (diff == 0) {
 			scale = (float) (mDrawScale * 2.0 / mHeight);
@@ -641,7 +644,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		// linear scale for fixed lines
 		float fdiv = 0.9f / (mDrawScale / z);
 
-		// int cnt = 0;
+		int cnt = 0;
 		for (int i = 0, n = layers.length; i < n; i++) {
 			LineLayer l = layers[i];
 
@@ -774,14 +777,15 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		}
 	}
 
-	private int uploadCnt;
+	// private int uploadCnt;
 
 	private boolean uploadTileData(GLMapTile tile) {
 		// not sure about this, but seems it fixes some flickering when
 		// multiple tiles are uploaded in one go. but if this is really
 		// the issue tiles should stay corrupted..
-		if (uploadCnt++ > 0)
-			GLES20.glFinish();
+
+		// if (uploadCnt++ > 0)
+		// GLES20.glFinish();
 
 		if (tile.lineVBO == null) {
 			// Upload line data to vertex buffer object
@@ -867,7 +871,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		GLES20.glStencilMask(0xFF);
 		GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_STENCIL_BUFFER_BIT);
-		GLES20.glFlush();
+
 		synchronized (this) {
 			mDrawX = mCurX;
 			mDrawY = mCurY;
@@ -899,11 +903,17 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 					vbo.size = 0;
 
 				}
+				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 			}
 			Log.d(TAG, " > " + mBufferMemoryUsage / (1024 * 1024) + "MB");
+
+			if (CACHE_TILES > 50)
+				CACHE_TILES -= 50;
+		} else if (CACHE_TILES < 300) {
+			CACHE_TILES += 50;
 		}
 
-		uploadCnt = 0;
+		// uploadCnt = 0;
 
 		// check visible tiles, set tile clip scissors, upload new vertex data
 		for (int i = 0; i < tileCnt; i++) {
@@ -983,8 +993,6 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 					drawProxyLines(tile);
 			}
 		}
-
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
 		if (timing) {
 			GLES20.glFinish();
