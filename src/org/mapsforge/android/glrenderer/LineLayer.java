@@ -43,9 +43,9 @@ class LineLayer extends Layer {
 
 		float a = (color >> 24 & 0xff) / 255.0f;
 
-		colors[0] = (color >> 16 & 0xff) / 255.0f * a;
-		colors[1] = (color >> 8 & 0xff) / 255.0f * a;
-		colors[2] = (color >> 0 & 0xff) / 255.0f * a;
+		colors[0] = (color >> 16 & 0xff) / 255.0f;
+		colors[1] = (color >> 8 & 0xff) / 255.0f;
+		colors[2] = (color >> 0 & 0xff) / 255.0f;
 		colors[3] = a;
 	}
 

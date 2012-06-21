@@ -463,9 +463,9 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			}
 
 			GLES20.glUniform4f(gPolygonColorHandle,
-					(color >> 16 & 0xff) / 255f * alpha,
-					(color >> 8 & 0xff) / 255f * alpha,
-					(color & 0xff) / 255f * alpha, alpha);
+					(color >> 16 & 0xff) / 255f,
+					(color >> 8 & 0xff) / 255f,
+					(color & 0xff) / 255f, alpha);
 
 			// set stencil buffer mask used to draw this layer
 			GLES20.glStencilFunc(GLES20.GL_EQUAL, 0xff, 1 << c);
@@ -540,11 +540,11 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				else {
 					// clear stencilbuffer
 					GLES20.glStencilMask(0xFF);
-					GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
+					// GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
 
 					// clear stencilbuffer (tile region)
-					// GLES20.glStencilOp(GLES20.GL_ZERO, GLES20.GL_ZERO, GLES20.GL_ZERO);
-					// GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+					GLES20.glStencilOp(GLES20.GL_ZERO, GLES20.GL_ZERO, GLES20.GL_ZERO);
+					GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 				}
 
 				// stencil op for stencil method polygon drawing
@@ -562,7 +562,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 						continue;
 
 					// modify alpha channel
-					float s = ((mDrawScale / z) < 1.3f ? 1.3f : (mDrawScale / z));
+					float s = (mDrawScale > 1.3f ? mDrawScale : 1.3f);
 					colors[cnt] = (colors[cnt] & 0xffffff)
 							| (byte) ((s - 1) * 0xff) << 24;
 				}
@@ -1094,10 +1094,10 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		GLES20.glEnableVertexAttribArray(gLineVertexPositionHandle);
 		GLES20.glEnableVertexAttribArray(gLineTexturePositionHandle);
 
-		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+		GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		GLES20.glDisable(GLES20.GL_DITHER);
-		GLES20.glClearColor(0.96f, 0.96f, 0.95f, 1.0f);
+		GLES20.glClearColor(0.98f, 0.98f, 0.975f, 1.0f);
 		GLES20.glClearStencil(0);
 	}
 
