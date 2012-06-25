@@ -4,7 +4,7 @@
 		<item>MAP_READER</item>
 		<item>POSTGIS_READER</item>
 	</string-array>
-	<string name="preferences_map_database_default">MAP_READER</string>
+	<string name="preferences_map_database_default">POSTGIS_READER</string>
 
 	<string-array name="preferences_scale_bar_unit_keys">
 		<item>imperial</item>
@@ -20,4 +20,11 @@
 		<item>1.6</item>
 	</string-array>
 	<string name="preferences_text_scale_default">1.0</string>
+	
+	<string-array name="view_sections">
+		<item>Map</item>
+		<item>Routes</item>
+		<item>Overlays</item>
+		<item>etc</item>
+	</string-array>
 </resources>

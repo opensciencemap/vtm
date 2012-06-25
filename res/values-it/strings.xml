@@ -13,7 +13,7 @@
 		<item>enorme</item>
 	</string-array>
 
-	<string name="application_name">VectorTileMap</string>
+	<string name="application_name">OpenScienceMap</string>
 	<string name="cancel">Annulla</string>
 	<string name="error">Errore</string>
 	<string name="error_last_location_unknown">L\'ultima posizione è sconosciuta</string>

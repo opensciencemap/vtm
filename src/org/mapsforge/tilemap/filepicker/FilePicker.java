@@ -19,6 +19,7 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.mapsforge.tilemap.R;
 import org.mapsforge.tilemap.filefilter.ValidFileFilter;
 
 import android.app.Activity;
@@ -28,12 +29,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import org.mapsforge.tilemap.R;
 
 /**
  * A FilePicker displays the contents of directories. The user can navigate within the file system and select a single
@@ -128,7 +126,8 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
 			this.currentDirectory = selectedFile;
 			browseToCurrentDirectory();
 		} else if (fileSelectFilter == null || fileSelectFilter.accept(selectedFile)) {
-			setResult(RESULT_OK, new Intent().putExtra(SELECTED_FILE, selectedFile.getAbsolutePath()));
+			setResult(RESULT_OK,
+					new Intent().putExtra(SELECTED_FILE, selectedFile.getAbsolutePath()));
 			finish();
 		} else {
 			showDialog(DIALOG_FILE_INVALID);
@@ -159,7 +158,8 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
 		if (this.currentDirectory.getParentFile() != null) {
 			this.filesWithParentFolder = new File[this.files.length + 1];
 			this.filesWithParentFolder[0] = this.currentDirectory.getParentFile();
-			System.arraycopy(this.files, 0, this.filesWithParentFolder, 1, this.files.length);
+			System.arraycopy(this.files, 0, this.filesWithParentFolder, 1,
+					this.files.length);
 			this.files = this.filesWithParentFolder;
 			this.filePickerIconAdapter.setFiles(this.files, true);
 		} else {
@@ -195,7 +195,8 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
 				StringBuilder stringBuilder = new StringBuilder();
 				stringBuilder.append(getString(R.string.file_invalid));
 				stringBuilder.append("\n\n");
-				stringBuilder.append(FilePicker.fileSelectFilter.getFileOpenResult().getErrorMessage());
+				stringBuilder.append(FilePicker.fileSelectFilter.getFileOpenResult()
+						.getErrorMessage());
 
 				builder.setMessage(stringBuilder.toString());
 				builder.setPositiveButton(R.string.ok, null);
@@ -225,18 +226,21 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
 	@Override
 	protected void onResume() {
 		super.onResume();
+		getActionBar().hide();
 		// check if the full screen mode should be activated
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fullscreen", false)) {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-		} else {
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-		}
+		// if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fullscreen", false)) {
+		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		// getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+		// } else {
+		// getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+		// }
 
 		// restore the current directory
-		SharedPreferences preferences = getSharedPreferences(PREFERENCES_FILE, MODE_PRIVATE);
-		this.currentDirectory = new File(preferences.getString(CURRENT_DIRECTORY, DEFAULT_DIRECTORY));
+		SharedPreferences preferences = getSharedPreferences(PREFERENCES_FILE,
+				MODE_PRIVATE);
+		this.currentDirectory = new File(preferences.getString(CURRENT_DIRECTORY,
+				DEFAULT_DIRECTORY));
 		if (!this.currentDirectory.exists() || !this.currentDirectory.canRead()) {
 			this.currentDirectory = new File(DEFAULT_DIRECTORY);
 		}

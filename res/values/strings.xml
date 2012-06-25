@@ -18,7 +18,7 @@
 		<item>huge</item>
 	</string-array>
 
-	<string name="application_name">VectorTileMap</string>
+	<string name="application_name">OpenScienceMap</string>
 	<string name="cancel">Cancel</string>
 	<string name="error">Error</string>
 	<string name="error_last_location_unknown">The last location is unknown</string>
@@ -100,4 +100,5 @@
 	<string name="unit_symbol_kilometer">&#160;km</string>
 	<string name="unit_symbol_meter">&#160;m</string>
 	<string name="zoomLevel">Zoom level</string>
+	<string name="menu_options">Options</string>
 </resources>
