@@ -21,7 +21,6 @@ import org.mapsforge.core.Tile;
 
 class LineLayer extends Layer {
 	ArrayList<LineLayer> outlines;
-	float[] colors;
 	boolean isOutline;
 	boolean isFixed;
 	float width;
@@ -38,15 +37,6 @@ class LineLayer extends Layer {
 			pool = new LinkedList<PoolItem>();
 			pool.add(curItem);
 		}
-
-		colors = new float[4];
-
-		float a = (color >> 24 & 0xff) / 255.0f;
-
-		colors[0] = (color >> 16 & 0xff) / 255.0f;
-		colors[1] = (color >> 8 & 0xff) / 255.0f;
-		colors[2] = (color >> 0 & 0xff) / 255.0f;
-		colors[3] = a;
 	}
 
 	void addOutline(LineLayer link) {

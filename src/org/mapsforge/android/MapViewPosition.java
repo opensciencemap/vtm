@@ -117,7 +117,8 @@ public class MapViewPosition {
 				mZoomLevel);
 		mLatitude = MercatorProjection.limitLatitude(mLatitude);
 
-		mLongitude = MercatorProjection.pixelXToLongitude(pixelX - moveHorizontal / mScale,
+		mLongitude = MercatorProjection.pixelXToLongitude(pixelX - moveHorizontal
+				/ mScale,
 				mZoomLevel);
 		mLongitude = MercatorProjection.limitLongitude(mLongitude);
 	}
@@ -163,10 +164,14 @@ public class MapViewPosition {
 		if (s >= MAX_SCALE) {
 
 			byte z = (byte) FloatMath.sqrt(s);
+			if (z != 0 && mZoomLevel == 20)
+				return;
 			mZoomLevel += z;
 			s *= 1.0f / (1 << z);
 		} else if (s < MIN_SCALE) {
 			byte z = (byte) FloatMath.sqrt(1 / s);
+			if (z != 0 && mZoomLevel == 1)
+				return;
 			mZoomLevel -= z;
 			s *= 1 << z;
 		}

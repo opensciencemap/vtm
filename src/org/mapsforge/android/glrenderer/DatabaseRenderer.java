@@ -54,7 +54,7 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 	private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 16);
 	private static final double PI180 = (Math.PI / 180) / 1000000.0;
 	private static final double PIx4 = Math.PI * 4;
-	private static final double STROKE_INCREASE = 1.5;
+	private static final double STROKE_INCREASE = Math.sqrt(2);
 	private static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 	private static final byte LAYERS = 11;
 
@@ -123,12 +123,12 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 		long dx = (x - (z >> 1));
 		long dy = (y - (z >> 1));
 
-		if (!useSphericalMercator) {
-			divx = 180000000.0 / (z >> 1);
-			divy = z / PIx4;
-		} else {
+		if (useSphericalMercator) {
 			divx = f900913 / (z >> 1);
 			divy = f900913 / (z >> 1);
+		} else {
+			divx = 180000000.0 / (z >> 1);
+			divy = z / PIx4;
 		}
 
 		for (int pos = 0, outPos = 0, i = 0, m = mWays.length; i < m; i++) {

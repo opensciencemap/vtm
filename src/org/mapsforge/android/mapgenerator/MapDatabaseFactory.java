@@ -31,12 +31,15 @@ public final class MapDatabaseFactory {
 	 * @return a new MapGenerator instance.
 	 */
 	public static IMapDatabase createMapDatabase(AttributeSet attributeSet) {
-		String mapDatabaseName = attributeSet.getAttributeValue(null, MAP_DATABASE_ATTRIBUTE_NAME);
+		String mapDatabaseName = attributeSet.getAttributeValue(null,
+				MAP_DATABASE_ATTRIBUTE_NAME);
 		if (mapDatabaseName == null) {
-			return new org.mapsforge.database.mapfile.MapDatabase();
+			return new org.mapsforge.database.postgis.MapDatabase();
 		}
 
-		MapDatabaseInternal mapDatabaseInternal = MapDatabaseInternal.valueOf(mapDatabaseName);
+		MapDatabaseInternal mapDatabaseInternal = MapDatabaseInternal
+				.valueOf(mapDatabaseName);
+
 		return MapDatabaseFactory.createMapDatabase(mapDatabaseInternal);
 	}
 

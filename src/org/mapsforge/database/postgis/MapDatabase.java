@@ -53,7 +53,8 @@ public class MapDatabase implements IMapDatabase {
 
 	private final MapFileInfo mMapInfo =
 			new MapFileInfo(new BoundingBox(-180, -85, 180, 85),
-					new Byte((byte) 14), new GeoPoint(53.11, 8.85), SphericalMercator.NAME,
+					new Byte((byte) 14), new GeoPoint(53.11, 8.85),
+					SphericalMercator.NAME,
 					0, 0, 0, "de", "yo!", "hannes");
 	// new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
 	// new Byte((byte) 0), null, "Mercator",
@@ -62,7 +63,8 @@ public class MapDatabase implements IMapDatabase {
 	private boolean mOpenFile = false;
 
 	private Connection connection = null;
-	private static HashMap<Entry<String, String>, Tag> tagHash = new HashMap<Entry<String, String>, Tag>(100);
+	private static HashMap<Entry<String, String>, Tag> tagHash = new HashMap<Entry<String, String>, Tag>(
+			100);
 	private PreparedStatement prepQuery = null;
 
 	private boolean connect() {
@@ -77,7 +79,7 @@ public class MapDatabase implements IMapDatabase {
 		Properties dbOpts = new Properties();
 		dbOpts.setProperty("user", "osm");
 		dbOpts.setProperty("password", "osm");
-		dbOpts.setProperty("socketTimeout", "15000");
+		dbOpts.setProperty("socketTimeout", "30");
 		dbOpts.setProperty("tcpKeepAlive", "true");
 
 		try {
@@ -113,6 +115,7 @@ public class MapDatabase implements IMapDatabase {
 			prepQuery.setLong(1, tile.pixelX);
 			prepQuery.setLong(2, tile.pixelY);
 			prepQuery.setInt(3, tile.zoomLevel);
+			System.out.println("" + prepQuery.toString());
 			prepQuery.execute();
 			r = prepQuery.getResultSet();
 		} catch (SQLException e) {
@@ -181,13 +184,13 @@ public class MapDatabase implements IMapDatabase {
 		} catch (SQLException e) {
 			e.printStackTrace();
 
-			try {
-				connection.close();
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			} finally {
-				connection = null;
-			}
+			// try {
+			// connection.close();
+			// } catch (SQLException e1) {
+			// e1.printStackTrace();
+			// } finally {
+			connection = null;
+			// }
 		}
 
 	}
