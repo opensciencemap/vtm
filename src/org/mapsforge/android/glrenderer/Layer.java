@@ -24,12 +24,19 @@ class Layer {
 	int offset;
 
 	final int layer;
-	final int color;
+	// final int color;
+	final float[] colors;
 
-	Layer(int l, int c) {
-		color = c;
+	Layer(int l, int color) {
 		layer = l;
 		verticesCnt = 0;
+
+		colors = new float[4];
+
+		colors[0] = (color >> 16 & 0xff) / 255.0f;
+		colors[1] = (color >> 8 & 0xff) / 255.0f;
+		colors[2] = (color >> 0 & 0xff) / 255.0f;
+		colors[3] = (color >> 24 & 0xff) / 255.0f;
 	}
 
 	float[] getNextItem() {

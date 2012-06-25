@@ -29,7 +29,7 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 				EGL10.EGL_GREEN_SIZE, 6,
 				EGL10.EGL_BLUE_SIZE, 5,
 				EGL10.EGL_ALPHA_SIZE, 0,
-				// EGL10.EGL_DEPTH_SIZE, 8,
+				EGL10.EGL_DEPTH_SIZE, 0,
 				// Requires that setEGLContextClientVersion(2) is called on the view.
 				EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
 				// EGL10.EGL_SAMPLE_BUFFERS, 1 /* true */,
@@ -50,7 +50,7 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 					EGL10.EGL_GREEN_SIZE, 6,
 					EGL10.EGL_BLUE_SIZE, 5,
 					EGL10.EGL_ALPHA_SIZE, 0,
-					// EGL10.EGL_DEPTH_SIZE, 8,
+					EGL10.EGL_DEPTH_SIZE, 0,
 					EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
 					EGL10.EGL_STENCIL_SIZE, 4,
 					EGL10.EGL_NONE };
@@ -78,18 +78,21 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		// configurations are considered to be "better" and returned first.
 		// You need to explicitly filter the data returned by eglChooseConfig!
 
-		// for (int i = 0; i < configs.length; ++i) {
-		// Log.i(TAG, printConfig(egl, display, configs[i]));
-		// }
-		//
+		for (int i = 0; i < configs.length; ++i) {
+			Log.i(TAG, printConfig(egl, display, configs[i]));
+		}
+
 		// int index = -1;
 		// for (int i = 0; i < configs.length; ++i) {
-		// if (findConfigAttrib(egl, display, configs[i], EGL10.EGL_RED_SIZE, 0) == 8 &&
-		// findConfigAttrib(egl, display, configs[i], EGL10.EGL_ALPHA_SIZE, 0) == 0) {
-		// index = i;
-		// break;
-		// }
-		// else if (findConfigAttrib(egl, display, configs[i], EGL10.EGL_RED_SIZE, 0) == 5 &&
+		// // if (findConfigAttrib(egl, display, configs[i], EGL10.EGL_RED_SIZE, 0) == 8
+		// // &&
+		// // findConfigAttrib(egl, display, configs[i], EGL10.EGL_ALPHA_SIZE, 0) == 0) {
+		// // index = i;
+		// // break;
+		// // }
+		// // else
+		// if (findConfigAttrib(egl, display, configs[i], EGL10.EGL_RED_SIZE, 0) == 5
+		// &&
 		// findConfigAttrib(egl, display, configs[i], EGL10.EGL_ALPHA_SIZE, 0) == 0) {
 		// index = i;
 		// break;
@@ -123,24 +126,26 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		int s = findConfigAttrib(egl, display, config, EGL10.EGL_STENCIL_SIZE, 0);
 
 		/*
-		 * EGL_CONFIG_CAVEAT value
-		 * #define EGL_NONE 0x3038
-		 * #define EGL_SLOW_CONFIG 0x3050
-		 * #define EGL_NON_CONFORMANT_CONFIG 0x3051
+		 * EGL_CONFIG_CAVEAT value #define EGL_NONE 0x3038 #define EGL_SLOW_CONFIG 0x3050 #define
+		 * EGL_NON_CONFORMANT_CONFIG 0x3051
 		 */
 
-		return String.format("EGLConfig rgba=%d%d%d%d depth=%d stencil=%d", new Integer(r), new Integer(g),
+		return String.format("EGLConfig rgba=%d%d%d%d depth=%d stencil=%d",
+				new Integer(r), new Integer(g),
 				new Integer(b), new Integer(a), new Integer(d), new Integer(s))
 				+ " native="
 				+ findConfigAttrib(egl, display, config, EGL10.EGL_NATIVE_RENDERABLE, 0)
 				+ " buffer="
 				+ findConfigAttrib(egl, display, config, EGL10.EGL_BUFFER_SIZE, 0)
-				+ String.format(" caveat=0x%04x",
-						new Integer(findConfigAttrib(egl, display, config, EGL10.EGL_CONFIG_CAVEAT, 0)));
+				+ String.format(
+						" caveat=0x%04x",
+						new Integer(findConfigAttrib(egl, display, config,
+								EGL10.EGL_CONFIG_CAVEAT, 0)));
 
 	}
 
-	private int findConfigAttrib(EGL10 egl, EGLDisplay display, EGLConfig config, int attribute, int defaultValue) {
+	private int findConfigAttrib(EGL10 egl, EGLDisplay display, EGLConfig config,
+			int attribute, int defaultValue) {
 		if (egl.eglGetConfigAttrib(display, config, attribute, mValue)) {
 			return mValue[0];
 		}

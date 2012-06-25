@@ -45,10 +45,10 @@ class PolygonLayers {
 	PolygonLayer getLayer(int layer, int color, int fade) {
 		PolygonLayer l = layers.get(layer);
 		if (l != null) {
-			if (color == l.color)
-				return l;
+			// if (color == l.color)
+			return l;
 
-			return getLayer(layer + 1, color, fade);
+			// return getLayer(layer + 1, color, fade);
 		}
 
 		l = new PolygonLayer(layer, color, fade);

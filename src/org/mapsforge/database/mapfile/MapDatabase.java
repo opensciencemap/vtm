@@ -302,7 +302,8 @@ public class MapDatabase implements IMapDatabase {
 	public FileOpenResult openFile(File mapFile) {
 		try {
 			if (mapFile == null) {
-				throw new IllegalArgumentException("mapFile must not be null");
+				// throw new IllegalArgumentException("mapFile must not be null");
+				return new FileOpenResult("no file!");
 			}
 
 			// make sure to close any previously opened file first

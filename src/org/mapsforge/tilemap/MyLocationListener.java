@@ -41,7 +41,7 @@ class MyLocationListener implements LocationListener {
 		// this.advancedMapViewer.itemizedOverlay.requestRedraw();
 		if (this.centerAtFirstFix || this.advancedMapViewer.isSnapToLocationEnabled()) {
 			this.centerAtFirstFix = false;
-			this.advancedMapViewer.mapController.setCenter(point);
+			this.advancedMapViewer.mMapController.setCenter(point);
 		}
 	}
 
