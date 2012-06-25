@@ -25,6 +25,7 @@ import org.mapsforge.android.mapgenerator.MapDatabaseFactory;
 import org.mapsforge.android.mapgenerator.MapDatabaseInternal;
 import org.mapsforge.android.mapgenerator.MapGenerator;
 import org.mapsforge.android.mapgenerator.MapGeneratorFactory;
+import org.mapsforge.android.mapgenerator.MapGeneratorInternal;
 import org.mapsforge.android.mapgenerator.MapWorker;
 import org.mapsforge.android.rendertheme.ExternalRenderTheme;
 import org.mapsforge.android.rendertheme.InternalRenderTheme;
@@ -93,7 +94,9 @@ public class MapView extends GLSurfaceView {
 	 *             if the context object is not an instance of {@link MapActivity} .
 	 */
 	public MapView(Context context) {
-		this(context, null, new org.mapsforge.android.glrenderer.DatabaseRenderer());
+		this(context, null,
+				MapGeneratorFactory.createMapGenerator(MapGeneratorInternal.GL_RENDERER),
+				MapDatabaseFactory.createMapDatabase(MapDatabaseInternal.MAP_READER));
 	}
 
 	/**
@@ -105,7 +108,9 @@ public class MapView extends GLSurfaceView {
 	 *             if the context object is not an instance of {@link MapActivity} .
 	 */
 	public MapView(Context context, AttributeSet attributeSet) {
-		this(context, attributeSet, MapGeneratorFactory.createMapGenerator(attributeSet));
+		this(context, attributeSet,
+				MapGeneratorFactory.createMapGenerator(attributeSet),
+				MapDatabaseFactory.createMapDatabase(attributeSet));
 	}
 
 	/**
@@ -117,10 +122,12 @@ public class MapView extends GLSurfaceView {
 	 *             if the context object is not an instance of {@link MapActivity} .
 	 */
 	public MapView(Context context, MapGenerator mapGenerator) {
-		this(context, null, mapGenerator);
+		this(context, null, mapGenerator, MapDatabaseFactory
+				.createMapDatabase(MapDatabaseInternal.MAP_READER));
 	}
 
-	private MapView(Context context, AttributeSet attributeSet, MapGenerator mapGenerator) {
+	private MapView(Context context, AttributeSet attributeSet,
+			MapGenerator mapGenerator, IMapDatabase mapDatabase) {
 
 		super(context, attributeSet);
 
@@ -128,6 +135,7 @@ public class MapView extends GLSurfaceView {
 			throw new IllegalArgumentException(
 					"context is not an instance of MapActivity");
 		}
+
 		setWillNotDraw(true);
 		setWillNotCacheDrawing(true);
 
@@ -139,8 +147,9 @@ public class MapView extends GLSurfaceView {
 		mMapController = new MapController(this);
 
 		// mMapDatabase = MapDatabaseFactory.createMapDatabase(MapDatabaseInternal.POSTGIS_READER);
-		mMapDatabase = MapDatabaseFactory
-				.createMapDatabase(MapDatabaseInternal.MAP_READER);
+		mMapDatabase = mapDatabase;
+		// MapDatabaseFactory
+		// .createMapDatabase(MapDatabaseInternal.MAP_READER);
 
 		mMapViewPosition = new MapViewPosition(this);
 		mMapScaleBar = new MapScaleBar(this);
@@ -354,14 +363,21 @@ public class MapView extends GLSurfaceView {
 	 *             if the current MapGenerator mode works with an Internet connection.
 	 */
 	public boolean setMapFile(String mapFile) {
+		FileOpenResult fileOpenResult = null;
+
 		if (mMapGenerator.requiresInternetConnection()) {
 			throw new UnsupportedOperationException();
 		}
 		Log.d(TAG, "set mapfile " + mapFile);
-		if (mapFile == null) {
-			// no map file specified
-			return false;
-		} else if (mapFile.equals(mMapFile)) {
+		// if (mapFile == null) {
+		// if (mMapDatabase instanceof org.mapsforge.database.postgis.MapDatabase) {
+		// fileOpenResult = mMapDatabase.openFile(null);
+		// } else {
+		// // no map file specified
+		// return false;
+		// }
+		// } else
+		if (mapFile != null && mapFile.equals(mMapFile)) {
 			// same map file as before
 			return false;
 		}
@@ -378,8 +394,13 @@ public class MapView extends GLSurfaceView {
 		mMapWorker.proceed();
 
 		mMapDatabase.closeFile();
-		FileOpenResult fileOpenResult = mMapDatabase.openFile(new File(mapFile));
-		if (fileOpenResult.isSuccess()) {
+
+		if (mapFile != null)
+			fileOpenResult = mMapDatabase.openFile(new File(mapFile));
+		else
+			fileOpenResult = mMapDatabase.openFile(null);
+
+		if (fileOpenResult != null && fileOpenResult.isSuccess()) {
 			mMapFile = mapFile;
 
 			GeoPoint startPoint = mMapGenerator.getStartPoint();
@@ -454,18 +475,23 @@ public class MapView extends GLSurfaceView {
 		if (mapDatabase == null) {
 			throw new IllegalArgumentException("MapDatabase must not be null");
 		}
-		// mMapWorker.pause();
-		// mMapWorker.awaitPausing();
 
+		if (!mMapWorker.isPausing()) {
+			mMapWorker.pause();
+			mMapWorker.awaitPausing();
+		}
+
+		mJobQueue.clear();
 		mMapDatabase = mapDatabase;
 		mMapGenerator.setMapDatabase(mMapDatabase);
 
 		Log.d(TAG, "setMapDatabaseInternal " + mapDatabase.getClass());
-		// mMapWorker.proceed();
 
 		String mapFile = mMapFile;
 		mMapFile = null;
 		setMapFile(mapFile);
+
+		mMapWorker.proceed();
 
 		// mMapWorker.setMapDatabase(mMapDatabase);
 
@@ -559,28 +585,28 @@ public class MapView extends GLSurfaceView {
 		return true;
 	}
 
-	@Override
-	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		super.onLayout(changed, left, top, right, bottom);
-		// mMapZoomControls.onLayout(changed, left, top, right, bottom);
-	}
+	// @Override
+	// protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+	// super.onLayout(changed, left, top, right, bottom);
+	// // mMapZoomControls.onLayout(changed, left, top, right, bottom);
+	// }
 
-	@Override
-	protected final void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		// find out how big the zoom controls should be
-		mMapZoomControls.measure(
-				MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec),
-						MeasureSpec.AT_MOST),
-				MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec),
-						MeasureSpec.AT_MOST));
-
-		// make sure that MapView is big enough to display the zoom controls
-		setMeasuredDimension(
-				Math.max(MeasureSpec.getSize(widthMeasureSpec),
-						mMapZoomControls.getMeasuredWidth()),
-				Math.max(MeasureSpec.getSize(heightMeasureSpec),
-						mMapZoomControls.getMeasuredHeight()));
-	}
+	// @Override
+	// protected final void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+	// // find out how big the zoom controls should be
+	// mMapZoomControls.measure(
+	// MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec),
+	// MeasureSpec.AT_MOST),
+	// MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec),
+	// MeasureSpec.AT_MOST));
+	//
+	// // make sure that MapView is big enough to display the zoom controls
+	// setMeasuredDimension(
+	// Math.max(MeasureSpec.getSize(widthMeasureSpec),
+	// mMapZoomControls.getMeasuredWidth()),
+	// Math.max(MeasureSpec.getSize(heightMeasureSpec),
+	// mMapZoomControls.getMeasuredHeight()));
+	// }
 
 	@Override
 	protected synchronized void onSizeChanged(int width, int height, int oldWidth,

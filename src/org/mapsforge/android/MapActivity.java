@@ -40,7 +40,8 @@ public abstract class MapActivity extends Activity {
 	private static final String PREFERENCES_FILE = "MapActivity";
 
 	private static boolean containsMapViewPosition(SharedPreferences sharedPreferences) {
-		return sharedPreferences.contains(KEY_LATITUDE) && sharedPreferences.contains(KEY_LONGITUDE)
+		return sharedPreferences.contains(KEY_LATITUDE)
+				&& sharedPreferences.contains(KEY_LONGITUDE)
 				&& sharedPreferences.contains(KEY_ZOOM_LEVEL);
 	}
 
@@ -59,10 +60,14 @@ public abstract class MapActivity extends Activity {
 	}
 
 	private void restoreMapView(MapView mapView) {
-		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE, MODE_PRIVATE);
+		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,
+				MODE_PRIVATE);
 		if (containsMapViewPosition(sharedPreferences)) {
+
 			MapGenerator mapGenerator = mapView.getMapGenerator();
-			if (!mapGenerator.requiresInternetConnection() && sharedPreferences.contains(KEY_MAP_FILE)) {
+
+			if (!mapGenerator.requiresInternetConnection()
+					&& sharedPreferences.contains(KEY_MAP_FILE)) {
 				// get and set the map file
 				mapView.setMapFile(sharedPreferences.getString(KEY_MAP_FILE, null));
 			}
@@ -101,7 +106,8 @@ public abstract class MapActivity extends Activity {
 			editor.putInt(KEY_ZOOM_LEVEL, mapPosition.zoomLevel);
 		}
 
-		if (!mMapView.getMapGenerator().requiresInternetConnection() && mMapView.getMapFile() != null) {
+		if (!mMapView.getMapGenerator().requiresInternetConnection()
+				&& mMapView.getMapFile() != null) {
 			// save the map file
 			editor.putString(KEY_MAP_FILE, mMapView.getMapFile());
 		}

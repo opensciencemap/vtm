@@ -10,64 +10,69 @@ package org.mapsforge.tilemap;
 public final class R {
     public static final class array {
         public static final int preferences_map_database_keys=0x7f050000;
-        public static final int preferences_map_generator_values=0x7f050003;
+        public static final int preferences_map_generator_values=0x7f050004;
         public static final int preferences_scale_bar_unit_keys=0x7f050001;
-        public static final int preferences_scale_bar_unit_values=0x7f050004;
+        public static final int preferences_scale_bar_unit_values=0x7f050005;
         public static final int preferences_text_scale_keys=0x7f050002;
-        public static final int preferences_text_scale_values=0x7f050005;
+        public static final int preferences_text_scale_values=0x7f050006;
+        public static final int view_sections=0x7f050003;
     }
     public static final class attr {
     }
     public static final class drawable {
-        public static final int btn_snap_normal=0x7f020000;
-        public static final int btn_snap_pressed=0x7f020001;
-        public static final int btn_snap_selected=0x7f020002;
-        public static final int file_picker_back=0x7f020003;
-        public static final int file_picker_file=0x7f020004;
-        public static final int file_picker_folder=0x7f020005;
-        public static final int globe=0x7f020006;
-        public static final int ic_menu_archive=0x7f020007;
-        public static final int ic_menu_camera=0x7f020008;
-        public static final int ic_menu_info_details=0x7f020009;
-        public static final int ic_menu_mapmode=0x7f02000a;
-        public static final int ic_menu_mylocation=0x7f02000b;
-        public static final int ic_menu_preferences=0x7f02000c;
-        public static final int my_location=0x7f02000d;
-        public static final int snap_to_position=0x7f02000e;
+        public static final int action_bar=0x7f020000;
+        public static final int bar_globe=0x7f020001;
+        public static final int bar_globe2=0x7f020002;
+        public static final int btn_snap_normal=0x7f020003;
+        public static final int btn_snap_pressed=0x7f020004;
+        public static final int btn_snap_selected=0x7f020005;
+        public static final int file_picker_back=0x7f020006;
+        public static final int file_picker_file=0x7f020007;
+        public static final int file_picker_folder=0x7f020008;
+        public static final int globe=0x7f020009;
+        public static final int globe2=0x7f02000a;
+        public static final int ic_menu_archive=0x7f02000b;
+        public static final int ic_menu_camera=0x7f02000c;
+        public static final int ic_menu_info_details=0x7f02000d;
+        public static final int ic_menu_mapmode=0x7f02000e;
+        public static final int ic_menu_mylocation=0x7f02000f;
+        public static final int ic_menu_options=0x7f020010;
+        public static final int ic_menu_preferences=0x7f020011;
+        public static final int my_location=0x7f020012;
+        public static final int snap_to_position=0x7f020013;
     }
     public static final class id {
-        public static final int filePickerView=0x7f080003;
-        public static final int infoMapFileViewArea=0x7f08000d;
-        public static final int infoMapFileViewComment=0x7f080011;
-        public static final int infoMapFileViewCreatedBy=0x7f080012;
-        public static final int infoMapFileViewDate=0x7f08000c;
-        public static final int infoMapFileViewDebug=0x7f08000b;
-        public static final int infoMapFileViewLanguagePreference=0x7f080010;
-        public static final int infoMapFileViewName=0x7f080008;
-        public static final int infoMapFileViewSize=0x7f080009;
-        public static final int infoMapFileViewStartPosition=0x7f08000e;
-        public static final int infoMapFileViewStartZoomLevel=0x7f08000f;
-        public static final int infoMapFileViewVersion=0x7f08000a;
-        public static final int latitude=0x7f080004;
-        public static final int longitude=0x7f080005;
-        public static final int mainView=0x7f080000;
-        public static final int mapView=0x7f080001;
-        public static final int menu_info=0x7f080013;
-        public static final int menu_info_map_file=0x7f080014;
-        public static final int menu_mapfile=0x7f08001f;
-        public static final int menu_position=0x7f080015;
-        public static final int menu_position_enter_coordinates=0x7f080019;
-        public static final int menu_position_last_known=0x7f080018;
-        public static final int menu_position_map_center=0x7f08001a;
-        public static final int menu_position_my_location_disable=0x7f080017;
-        public static final int menu_position_my_location_enable=0x7f080016;
-        public static final int menu_preferences=0x7f08001b;
-        public static final int menu_render_theme=0x7f08001c;
-        public static final int menu_render_theme_osmarender=0x7f08001d;
-        public static final int menu_render_theme_select_file=0x7f08001e;
-        public static final int snapToLocationView=0x7f080002;
-        public static final int zoomLevel=0x7f080006;
-        public static final int zoomlevelValue=0x7f080007;
+        public static final int filePickerView=0x7f090003;
+        public static final int infoMapFileViewArea=0x7f09000d;
+        public static final int infoMapFileViewComment=0x7f090011;
+        public static final int infoMapFileViewCreatedBy=0x7f090012;
+        public static final int infoMapFileViewDate=0x7f09000c;
+        public static final int infoMapFileViewDebug=0x7f09000b;
+        public static final int infoMapFileViewLanguagePreference=0x7f090010;
+        public static final int infoMapFileViewName=0x7f090008;
+        public static final int infoMapFileViewSize=0x7f090009;
+        public static final int infoMapFileViewStartPosition=0x7f09000e;
+        public static final int infoMapFileViewStartZoomLevel=0x7f09000f;
+        public static final int infoMapFileViewVersion=0x7f09000a;
+        public static final int latitude=0x7f090004;
+        public static final int longitude=0x7f090005;
+        public static final int mainView=0x7f090000;
+        public static final int mapView=0x7f090001;
+        public static final int menu_mapfile=0x7f09001e;
+        public static final int menu_options=0x7f090019;
+        public static final int menu_position=0x7f090013;
+        public static final int menu_position_enter_coordinates=0x7f090017;
+        public static final int menu_position_last_known=0x7f090016;
+        public static final int menu_position_map_center=0x7f090018;
+        public static final int menu_position_my_location_disable=0x7f090015;
+        public static final int menu_position_my_location_enable=0x7f090014;
+        public static final int menu_preferences=0x7f09001a;
+        public static final int menu_render_theme=0x7f09001b;
+        public static final int menu_render_theme_osmarender=0x7f09001c;
+        public static final int menu_render_theme_select_file=0x7f09001d;
+        public static final int snapToLocationView=0x7f090002;
+        public static final int zoomLevel=0x7f090006;
+        public static final int zoomlevelValue=0x7f090007;
     }
     public static final class layout {
         public static final int activity_advanced_map_viewer=0x7f030000;
@@ -76,7 +81,7 @@ public final class R {
         public static final int dialog_info_map_file=0x7f030003;
     }
     public static final class menu {
-        public static final int options_menu=0x7f070000;
+        public static final int options_menu=0x7f080000;
     }
     public static final class string {
         public static final int application_name=0x7f060003;
@@ -101,7 +106,7 @@ public final class R {
         public static final int info_map_file_language_preference=0x7f060016;
         public static final int info_map_file_name=0x7f060017;
         public static final int info_map_file_size=0x7f060018;
-        public static final int info_map_file_start=0x7f060055;
+        public static final int info_map_file_start=0x7f060056;
         public static final int info_map_file_start_position=0x7f060019;
         public static final int info_map_file_start_zoom_level=0x7f06001a;
         public static final int info_map_file_version=0x7f06001b;
@@ -111,6 +116,7 @@ public final class R {
         public static final int menu_info_about=0x7f060020;
         public static final int menu_info_map_file=0x7f06001f;
         public static final int menu_mapfile=0x7f060021;
+        public static final int menu_options=0x7f060055;
         public static final int menu_position=0x7f060022;
         public static final int menu_position_enter_coordinates=0x7f060023;
         public static final int menu_position_last_known=0x7f060024;
@@ -154,7 +160,7 @@ public final class R {
         public static final int preferences_show_tile_coordinates_desc=0x7f060047;
         public static final int preferences_show_tile_frames=0x7f060048;
         public static final int preferences_show_tile_frames_desc=0x7f060049;
-        public static final int preferences_show_water_tiles=0x7f060056;
+        public static final int preferences_show_water_tiles=0x7f060057;
         public static final int preferences_show_water_tiles_desc=0x7f06004b;
         public static final int preferences_text_scale=0x7f06004c;
         public static final int preferences_text_scale_default=0x7f060002;
@@ -166,6 +172,18 @@ public final class R {
         public static final int unit_symbol_kilometer=0x7f060052;
         public static final int unit_symbol_meter=0x7f060053;
         public static final int zoomLevel=0x7f060054;
+    }
+    public static final class style {
+        public static final int MyActionBar=0x7f070000;
+        /** 
+    <item name="android:dropDownListViewStyle">@style/MyDropDownListView</item>
+    <item name="android:actionBarTabStyle">@style/MyActionBarTabStyle</item>
+    <item name="android:actionDropDownStyle">@style/MyDropDownNav</item>
+    <item name="android:listChoiceIndicatorMultiple">@drawable/ad_btn_check_holo_light</item>
+    <item name="android:listChoiceIndicatorSingle">@drawable/ad_btn_radio_holo_light</item>
+        
+         */
+        public static final int Theme_TileMap=0x7f070001;
     }
     public static final class xml {
         public static final int preferences=0x7f040000;

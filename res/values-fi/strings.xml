@@ -13,7 +13,7 @@
 		<item>hyvin suuri</item>
 	</string-array>
                 
-	<string name="application_name">VectorTileMap</string>
+	<string name="application_name">OpenScienceMap</string>
 	<string name="cancel">Peruuta</string>
 	<string name="error">Virhe</string>
 	<string name="error_last_location_unknown">Viimeinen sijainti ei ole tiedossa</string>

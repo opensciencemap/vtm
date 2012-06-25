@@ -15,8 +15,10 @@
         android:targetSdkVersion="15" />
 
     <application
-        android:icon="@drawable/globe"
-        android:label="@string/application_name" >
+        android:icon="@drawable/globe2"
+        android:label="@string/application_name" 
+        android:theme="@style/Theme.TileMap" > 
+       
         <activity android:name="org.mapsforge.tilemap.TileMap" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

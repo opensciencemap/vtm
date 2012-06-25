@@ -14,11 +14,12 @@
  */
 package org.mapsforge.tilemap.preferences;
 
+import org.mapsforge.tilemap.R;
+
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.view.WindowManager;
-import org.mapsforge.tilemap.R;
 
 /**
  * Activity to edit the application preferences.
@@ -33,8 +34,11 @@ public class EditPreferences extends PreferenceActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		getActionBar().hide();
+
 		// check if the full screen mode should be activated
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fullscreen", false)) {
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fullscreen",
+				false)) {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		} else {
