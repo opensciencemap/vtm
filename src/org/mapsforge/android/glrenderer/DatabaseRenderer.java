@@ -205,13 +205,13 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 		boolean closed = (wayNodes[0] == wayNodes[len - 2] &&
 				wayNodes[1] == wayNodes[len - 1]);
 
-		mSimplify = 2.5f;
+		mSimplify = 0.5f;
 
 		if (closed) {
 			if (mCurrentTile.zoomLevel < 14)
-				mSimplify = 1.5f;
-			else
 				mSimplify = 0.5f;
+			else
+				mSimplify = 0.2f;
 
 			if (tags.length == 1 && "water".equals(tags[0].value))
 				mSimplify = 0;
