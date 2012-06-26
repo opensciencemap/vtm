@@ -188,7 +188,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				if (diff == -1) {
 					// load parent before current layer (kind of progressive transmission :)
 					dy *= mAspect;
-					t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
+					t.distance = 2 + ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
 				} else {
 					t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
 					// prefer lower zoom level, i.e. it covers a larger area
@@ -198,7 +198,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				dx = t.pixelX - x;
 				dy = t.pixelY - y;
 				dy *= mAspect;
-				t.distance = (1 + ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy))) * 2;
+				t.distance = (1 + ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)));// * 2;
 			}
 			// Log.d(TAG, t + " " + t.distance);
 		}
@@ -218,7 +218,8 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			// check if this tile is used as proxy for not yet drawn active tile
 			if (t.isDrawn || t.newData || t.isLoading) {
 				if (t.zoomLevel == z + 1) {
-					if (t.parent != null && t.parent.isActive && !t.parent.isDrawn) {
+					if (t.parent != null && t.parent.isActive
+							&& !(t.parent.isDrawn || t.parent.newData)) {
 						mTileList.add(t);
 						Log.d(TAG, "EEEK removing active proxy child");
 						continue;
@@ -711,7 +712,10 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				drawOutlines = l.isOutline;
 				drawFixed = l.isFixed;
 				if (drawFixed) {
-					GLES20.glUniform2f(gLineModeHandle, 0.4f, fdiv);
+					if (l.width < 1.0)
+						GLES20.glUniform2f(gLineModeHandle, 0.4f, fdiv);
+					else
+						GLES20.glUniform2f(gLineModeHandle, 0, fdiv);
 				} else if (drawOutlines) {
 					GLES20.glUniform2f(gLineModeHandle, 0, wdiv);
 				} else {
@@ -1212,8 +1216,8 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		GLES20.glDepthMask(false);
 		GLES20.glDisable(GLES20.GL_DITHER);
-
 		GLES20.glClearColor(0.98f, 0.98f, 0.97f, 1.0f);
 		GLES20.glClearStencil(0);
 	}
