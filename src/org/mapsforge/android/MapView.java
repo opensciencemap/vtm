@@ -420,7 +420,7 @@ public class MapView extends GLSurfaceView {
 			return true;
 		}
 		mMapFile = null;
-		clearAndRedrawMapView();
+		// clearAndRedrawMapView();
 		Log.d(TAG, "loading mapfile failed");
 		return false;
 	}

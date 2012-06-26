@@ -610,7 +610,7 @@ public class TileMap extends MapActivity implements ActionBar.OnNavigationListen
 			if (mMapView.getMapFile() == null)
 				startMapFilePicker();
 		} else {
-			mMapView.setMapFile(null);
+			mMapView.setMapFile(mMapView.getMapFile());
 		}
 	}
 
