@@ -32,15 +32,19 @@ public class RenderTheme {
 	private static final int MATCHING_CACHE_SIZE = 1024;
 	private static final int RENDER_THEME_VERSION = 1;
 
-	private static void validate(String elementName, Integer version, float baseStrokeWidth, float baseTextSize) {
+	private static void validate(String elementName, Integer version,
+			float baseStrokeWidth, float baseTextSize) {
 		if (version == null) {
-			throw new IllegalArgumentException("missing attribute version for element:" + elementName);
+			throw new IllegalArgumentException("missing attribute version for element:"
+					+ elementName);
 		} else if (version.intValue() != RENDER_THEME_VERSION) {
 			throw new IllegalArgumentException("invalid render theme version:" + version);
 		} else if (baseStrokeWidth < 0) {
-			throw new IllegalArgumentException("base-stroke-width must not be negative: " + baseStrokeWidth);
+			throw new IllegalArgumentException("base-stroke-width must not be negative: "
+					+ baseStrokeWidth);
 		} else if (baseTextSize < 0) {
-			throw new IllegalArgumentException("base-text-size must not be negative: " + baseTextSize);
+			throw new IllegalArgumentException("base-text-size must not be negative: "
+					+ baseTextSize);
 		}
 	}
 
@@ -93,9 +97,12 @@ public class RenderTheme {
 		mBaseTextSize = baseTextSize;
 		mRulesList = new ArrayList<Rule>();
 
-		mMatchingCacheNodes = new LRUCache<MatchingCacheKey, RenderInstruction[]>(MATCHING_CACHE_SIZE);
-		mMatchingCacheWay = new LRUCache<MatchingCacheKey, RenderInstruction[]>(MATCHING_CACHE_SIZE);
-		mMatchingCacheArea = new LRUCache<MatchingCacheKey, RenderInstruction[]>(MATCHING_CACHE_SIZE);
+		mMatchingCacheNodes = new LRUCache<MatchingCacheKey, RenderInstruction[]>(
+				MATCHING_CACHE_SIZE);
+		mMatchingCacheWay = new LRUCache<MatchingCacheKey, RenderInstruction[]>(
+				MATCHING_CACHE_SIZE);
+		mMatchingCacheArea = new LRUCache<MatchingCacheKey, RenderInstruction[]>(
+				MATCHING_CACHE_SIZE);
 	}
 
 	/**
@@ -207,7 +214,8 @@ public class RenderTheme {
 	 * @param changed
 	 *            ...
 	 */
-	public void matchWay(RenderCallback renderCallback, Tag[] tags, byte zoomLevel, boolean closed, boolean changed) {
+	public void matchWay(RenderCallback renderCallback, Tag[] tags, byte zoomLevel,
+			boolean closed, boolean changed) {
 		RenderInstruction[] renderInstructions = null;
 
 		LRUCache<MatchingCacheKey, RenderInstruction[]> matchingCache;
@@ -241,10 +249,11 @@ public class RenderTheme {
 			}
 		} else {
 			// cache miss
-			Closed c = (closed ? Closed.YES : Closed.NO);
+			int c = (closed ? Closed.YES : Closed.NO);
 			List<RenderInstruction> matchingList = new ArrayList<RenderInstruction>(4);
 			for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-				mRulesList.get(i).matchWay(renderCallback, tags, zoomLevel, c, matchingList);
+				mRulesList.get(i).matchWay(renderCallback, tags, zoomLevel, c,
+						matchingList);
 			}
 			int size = matchingList.size();
 			if (size > 0) {

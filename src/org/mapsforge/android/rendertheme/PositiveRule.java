@@ -20,9 +20,9 @@ class PositiveRule extends Rule {
 	final AttributeMatcher mKeyMatcher;
 	final AttributeMatcher mValueMatcher;
 
-	PositiveRule(ElementMatcher elementMatcher, ClosedMatcher closedMatcher, byte zoomMin, byte zoomMax,
+	PositiveRule(int element, int closed, byte zoomMin, byte zoomMax,
 			AttributeMatcher keyMatcher, AttributeMatcher valueMatcher) {
-		super(elementMatcher, closedMatcher, zoomMin, zoomMax);
+		super(element, closed, zoomMin, zoomMax);
 
 		if (keyMatcher instanceof AnyMatcher)
 			mKeyMatcher = null;
@@ -38,16 +38,16 @@ class PositiveRule extends Rule {
 	@Override
 	boolean matchesNode(Tag[] tags, byte zoomLevel) {
 		return mZoomMin <= zoomLevel && mZoomMax >= zoomLevel
-				&& (mElementMatcher == null || mElementMatcher.matches(Element.NODE))
+				&& (mElement == Element.NODE || mElement == Element.ANY)
 				&& (mKeyMatcher == null || mKeyMatcher.matches(tags))
 				&& (mValueMatcher == null || mValueMatcher.matches(tags));
 	}
 
 	@Override
-	boolean matchesWay(Tag[] tags, byte zoomLevel, Closed closed) {
+	boolean matchesWay(Tag[] tags, byte zoomLevel, int closed) {
 		return mZoomMin <= zoomLevel && mZoomMax >= zoomLevel
-				&& (mElementMatcher == null || mElementMatcher.matches(Element.WAY))
-				&& (mClosedMatcher == null || mClosedMatcher.matches(closed))
+				&& (mElement == Element.WAY || mElement == Element.ANY)
+				&& (mClosed == closed || mClosed == Closed.ANY)
 				&& (mKeyMatcher == null || mKeyMatcher.matches(tags))
 				&& (mValueMatcher == null || mValueMatcher.matches(tags));
 	}
