@@ -36,7 +36,7 @@ class Shaders {
 			+ "const float fuzzf = 1.8;"
 			+ "varying vec2 v_st;"
 			+ "void main() {"
-			+ "  gl_FragColor = u_color;"
+			+ "  lowp vec4 color = u_color;"
 			+ "  lowp float len;"
 			+ "  lowp float fuzz;"
 			+ "  lowp float width = u_mode[1];"
@@ -50,10 +50,11 @@ class Shaders {
 			// + "  if (len < min_fuzz)"
 			// + "    discard;"
 			// + "    alpha = zero;"
-			+ "  if (len < fuzz) {"
+			// + "  if (len < fuzz) {"
 			+ "     lowp float min_fuzz = -fuzz * u_mode[0];"
-			+ "     gl_FragColor.a = u_color.a * smoothstep(min_fuzz, fuzz, len);"
-			+ "  }"
+			+ "     color.a *= smoothstep(min_fuzz, fuzz, len);"
+			// + "  }"
+			+ "  gl_FragColor = color;"
 			+ "}";
 
 	// final static String gLineFragmentShader = ""
