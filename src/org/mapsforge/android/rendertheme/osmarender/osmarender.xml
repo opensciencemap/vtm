@@ -8,9 +8,17 @@
 	<rule e="way" k="*" v="*">
 
 		<!-- landuse -->
-		<rule e="way" k="landuse" v="*" zoom-min="10">
-			<rule e="way" k="landuse" v="residential|farmyard|retail|commercial">
-				<area fill="#ededec" fade="10" />
+		<rule e="way" k="landuse" v="*">
+		    <rule e="way" k="*"  zoom-min="12" v="farmland|farm">
+				<area fill="#fff8bf" fade="12" />
+			</rule>
+			
+			<rule e="way" k="landuse" v="grass">
+				<area fill="#deecb9" fade="12" />
+			</rule>
+			
+			<rule e="way" k="*"  zoom-min="10" v="residential|farmyard|retail|commercial">
+				<area fill="#efefeb" fade="10" />
 			</rule>
 
 			<!-- <rule e="way" k="landuse" v="industrial|brownfield|railway"> <area 
@@ -19,9 +27,7 @@
 				stroke="#e4e4e4" stroke-width="0.2" /> </rule> -->
 			<!-- <rule e="way" k="landuse" v="garages"> <area fill="#d6d6e4" /> </rule> -->
 
-			<rule e="way" k="landuse" v="grass">
-				<area fill="#deecb9" fade="12" />
-			</rule>
+			
 		</rule>
 
 		<rule e="way" k="outline" v="*">
@@ -103,9 +109,7 @@
 			<rule e="way" k="*" v="meadow|scrub">
 				<area fill="#deecb9" fade="12" />
 			</rule>
-			<rule e="way" k="*" v="farmland|farm">
-				<area fill="#fff8bf" fade="12" />
-			</rule>
+		
 	<!-- 		<rule e="way" k="*" v="village_green|recreation_ground">
 				<area fill="#daebaf" fade="12" />
 			</rule> -->
@@ -130,9 +134,14 @@
 		</rule>
 
 
-		<rule e="way" k="natural|landuse" v="forest|wood" zoom-min="10">
+		<rule e="way" k="natural|landuse" v="forest|wood" zoom-min="9">
 			<!-- <area fill="#BCCBB0" fade="10" /> -->
-			<area fill="#cde2bc" fade="10" />
+			<!-- 	<rule e="way" k="*" v="*" zoom-max="11"> -->
+			<area fill="#d3dec8" fade="9" />
+		<!-- 	</rule> -->
+	<!-- 		<rule e="way" k="*" v="*" zoom-min="12">
+			<area fill="#cde2bc" fade="12" />
+			</rule> -->
 			<!-- <area fill="#87a670" fade="10" /> -->
 		</rule>
 
@@ -169,8 +178,8 @@
 				<area fill="#fcfeab" />
 			</rule>
 			<!-- Heideland -->
-			<rule e="way" k="*" v="heath">
-				<area fill="#ffffc0" fade="10" />
+			<rule e="way" k="*" zoom-min="12" v="heath">
+				<area fill="#ffffc0" fade="12" />
 			</rule>
 			<rule e="way" k="*" v="marsh|wetland">
 				<area fill="#deecb9" fade="12" />
@@ -207,7 +216,8 @@
 		</rule>
 
 		<rule e="way" k="natural" v="water">
-			<area fill="#b4cbdc" />
+			<line stroke="#eea4bbcc" fixed="true" stroke-width="1.4" stroke-linecap="butt" /> 
+		  <area fill="#b4cbdc" />
 		</rule>
 
 		<!-- waterways -->
@@ -232,6 +242,7 @@
 					fixed="true" />
 			</rule>
 			<rule e="way" k="waterway" v="riverbank|dock">
+	   		<line stroke="#eea4bbcc" fixed="true" stroke-width="1.4" stroke-linecap="butt" /> 
 				<area fill="#b4cbdc" />
 			</rule>
 			<rule e="way" k="waterway" v="weir">
@@ -323,9 +334,8 @@
 			</rule>-->
 			
 			<rule e="way" k="*" v="*" zoom-min="15">
-				<line stroke="#c9c3c3" stroke-width="0.6" fixed="true"
-					stroke-linecap="butt" />
-				<area fill="#e9e6e6" fade="15" />
+				<line stroke="#c9c3c1" stroke-width="0.6" fixed="true" stroke-linecap="butt" />
+				<area fill="#e9e6e3" fade="15" />
 			</rule>
 			
 			<!--	<rule e="way" k="*" v="*" zoom-min="17">
@@ -359,31 +369,31 @@
 				<rule e="way" k="*" v="*" zoom-min="5" zoom-max="10">
 
 					<rule e="way" k="*" v="secondary|primary_link" zoom-min="9">
-				<!-- 		<line stroke="#eeee4a" stroke-width="1.3" stroke-linecap="butt"
+				<!-- 		<line stroke="#eeee4a" stroke-width="1.8" stroke-linecap="butt"
 							fixed="true" /> -->
-							<line stroke="#f2df6d" stroke-width="1.2" stroke-linecap="butt"
+							<line stroke="#f2df6d" stroke-width="1.7" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 
 					<rule e="way" k="*" v="trunk_link|motorway_link" zoom-min="8">
-						<line stroke="#fed6a3" stroke-width="1.4" stroke-linecap="butt"
+						<line stroke="#fed6a3" stroke-width="1.9" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 
-					<rule e="way" k="*" v="primary" zoom-min="8">
+					<rule e="way" k="*" v="primary" zoom-min="7">
 					<!-- 	<line stroke="#eeee4a" stroke-width="1.4" stroke-linecap="butt"
 							fixed="true" /> -->
-							<line stroke="#f2df6d" stroke-width="1.4" stroke-linecap="butt"
+							<line stroke="#f2df6d" stroke-width="1.9" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 
-					<rule e="way" k="*" v="trunk" zoom-min="8">
-						<line stroke="#fed6a3" stroke-width="1.4" stroke-linecap="butt"
+					<rule e="way" k="*" v="trunk" zoom-min="7">
+						<line stroke="#fed6a3" stroke-width="1.9" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 
 					<rule e="way" k="*" v="motorway">
-						<line stroke="#eec693" stroke-width="1.5" stroke-linecap="butt"
+						<line stroke="#eec693" stroke-width="2.0" stroke-linecap="butt"
 							fixed="true" />
 					</rule>
 				</rule>

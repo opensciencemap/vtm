@@ -47,7 +47,8 @@ public final class Line implements RenderInstruction {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading a resource.
 	 */
-	public static Line create(String elementName, Attributes attributes, int level) throws IOException {
+	public static Line create(String elementName, Attributes attributes, int level)
+			throws IOException {
 		String src = null;
 		int stroke = Color.BLACK;
 		float strokeWidth = 0;
@@ -83,12 +84,14 @@ public final class Line implements RenderInstruction {
 		}
 
 		validate(strokeWidth);
-		return new Line(src, stroke, strokeWidth, strokeDasharray, strokeLinecap, level, outline, fixed);
+		return new Line(src, stroke, strokeWidth, strokeDasharray, strokeLinecap, level,
+				outline, fixed);
 	}
 
 	private static void validate(float strokeWidth) {
 		if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: " + strokeWidth);
+			throw new IllegalArgumentException("stroke-width must not be negative: "
+					+ strokeWidth);
 		}
 	}
 
@@ -131,7 +134,8 @@ public final class Line implements RenderInstruction {
 	 */
 	public final boolean fixed;
 
-	private Line(String src, int stroke, float strokeWidth, float[] strokeDasharray, Cap strokeLinecap, int level,
+	private Line(String src, int stroke, float strokeWidth, float[] strokeDasharray,
+			Cap strokeLinecap, int level,
 			int outline, boolean fixed)
 			throws IOException {
 		super();
@@ -146,7 +150,7 @@ public final class Line implements RenderInstruction {
 			paint.setPathEffect(new DashPathEffect(strokeDasharray, 0));
 		}
 		paint.setStrokeCap(strokeLinecap);
-		round = strokeLinecap == Cap.ROUND;
+		round = (strokeLinecap == Cap.ROUND);
 		this.color = stroke;
 		this.strokeWidth = strokeWidth;
 		this.level = level;

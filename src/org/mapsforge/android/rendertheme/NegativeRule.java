@@ -19,9 +19,9 @@ import org.mapsforge.core.Tag;
 class NegativeRule extends Rule {
 	final AttributeMatcher mAttributeMatcher;
 
-	NegativeRule(ElementMatcher elementMatcher, ClosedMatcher closedMatcher, byte zoomMin, byte zoomMax,
+	NegativeRule(int element, int closed, byte zoomMin, byte zoomMax,
 			AttributeMatcher attributeMatcher) {
-		super(elementMatcher, closedMatcher, zoomMin, zoomMax);
+		super(element, closed, zoomMin, zoomMax);
 
 		mAttributeMatcher = attributeMatcher;
 	}
@@ -29,14 +29,15 @@ class NegativeRule extends Rule {
 	@Override
 	boolean matchesNode(Tag[] tags, byte zoomLevel) {
 		return mZoomMin <= zoomLevel && mZoomMax >= zoomLevel
-				&& (mElementMatcher == null || mElementMatcher.matches(Element.NODE))
+				&& (mElement == Element.NODE || mElement == Element.ANY)
 				&& mAttributeMatcher.matches(tags);
 	}
 
 	@Override
-	boolean matchesWay(Tag[] tags, byte zoomLevel, Closed closed) {
+	boolean matchesWay(Tag[] tags, byte zoomLevel, int closed) {
 		return mZoomMin <= zoomLevel && mZoomMax >= zoomLevel
-				&& (mElementMatcher == null || mElementMatcher.matches(Element.WAY))
-				&& (mClosedMatcher == null || mClosedMatcher.matches(closed)) && mAttributeMatcher.matches(tags);
+				&& (mElement == Element.WAY || mElement == Element.ANY)
+				&& (mClosed == closed || mClosed == Closed.ANY)
+				&& mAttributeMatcher.matches(tags);
 	}
 }

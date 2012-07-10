@@ -16,7 +16,7 @@ package org.mapsforge.android.rendertheme;
 
 import org.mapsforge.core.Tag;
 
-final class AnyMatcher implements ElementMatcher, AttributeMatcher, ClosedMatcher {
+final class AnyMatcher implements AttributeMatcher {
 	private static final AnyMatcher INSTANCE = new AnyMatcher();
 
 	static AnyMatcher getInstance() {
@@ -33,26 +33,6 @@ final class AnyMatcher implements ElementMatcher, AttributeMatcher, ClosedMatche
 	@Override
 	public boolean isCoveredBy(AttributeMatcher attributeMatcher) {
 		return attributeMatcher == this;
-	}
-
-	@Override
-	public boolean isCoveredBy(ClosedMatcher closedMatcher) {
-		return closedMatcher == this;
-	}
-
-	@Override
-	public boolean isCoveredBy(ElementMatcher elementMatcher) {
-		return elementMatcher == this;
-	}
-
-	@Override
-	public boolean matches(Closed closed) {
-		return true;
-	}
-
-	@Override
-	public boolean matches(Element element) {
-		return true;
 	}
 
 	@Override
