@@ -50,7 +50,8 @@ import android.util.Log;
 public class MapRenderer implements org.mapsforge.android.MapRenderer {
 	private static final String TAG = "MapRenderer";
 
-	private static int CACHE_TILES = 300;
+	private static int CACHE_TILES_MAX = 400;
+	private static int CACHE_TILES = CACHE_TILES_MAX;
 	private static final int LIMIT_BUFFERS = 32 * (1024 * 1024);
 
 	private static final int OES_HALF_FLOAT = 0x8D61;
@@ -658,20 +659,16 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 		if (useHalfFloat) {
 			GLES20.glVertexAttribPointer(gLineVertexPositionHandle, 2, OES_HALF_FLOAT,
-					false, 8,
-					LINE_VERTICES_DATA_POS_OFFSET);
+					false, 8, LINE_VERTICES_DATA_POS_OFFSET);
 
 			GLES20.glVertexAttribPointer(gLineTexturePositionHandle, 2, OES_HALF_FLOAT,
-					false, 8,
-					LINE_VERTICES_DATA_TEX_OFFSET >> 1);
+					false, 8, LINE_VERTICES_DATA_TEX_OFFSET >> 1);
 		} else {
 			GLES20.glVertexAttribPointer(gLineVertexPositionHandle, 2, GLES20.GL_FLOAT,
-					false, 16,
-					LINE_VERTICES_DATA_POS_OFFSET);
+					false, 16, LINE_VERTICES_DATA_POS_OFFSET);
 
 			GLES20.glVertexAttribPointer(gLineTexturePositionHandle, 2, GLES20.GL_FLOAT,
-					false, 16,
-					LINE_VERTICES_DATA_TEX_OFFSET);
+					false, 16, LINE_VERTICES_DATA_TEX_OFFSET);
 		}
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
@@ -711,18 +708,20 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			if ((i == 0) || (l.isOutline != drawOutlines) || (l.isFixed != drawFixed)) {
 				drawOutlines = l.isOutline;
 				drawFixed = l.isFixed;
-				if (drawFixed) {
-					if (l.width < 1.0)
-						GLES20.glUniform2f(gLineModeHandle, 0.4f, fdiv);
-					else
-						GLES20.glUniform2f(gLineModeHandle, 0, fdiv);
-				} else if (drawOutlines) {
+
+				if (drawOutlines) {
 					GLES20.glUniform2f(gLineModeHandle, 0, wdiv);
-				} else {
+				} else if (!drawFixed) {
 					GLES20.glUniform2f(gLineModeHandle, 0, wdiv * 0.98f);
 				}
 			}
 
+			if (drawFixed) {
+				if (l.width < 1.0)
+					GLES20.glUniform2f(gLineModeHandle, 0.4f, fdiv);
+				else
+					GLES20.glUniform2f(gLineModeHandle, 0, fdiv);
+			}
 			GLES20.glUniform4fv(gLineColorHandle, 1, l.colors, 0);
 
 			if (drawOutlines) {
@@ -1015,7 +1014,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 			if (CACHE_TILES > 50)
 				CACHE_TILES -= 50;
-		} else if (CACHE_TILES < 300) {
+		} else if (CACHE_TILES < CACHE_TILES_MAX) {
 			CACHE_TILES += 50;
 		}
 
@@ -1067,6 +1066,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 		GLES20.glUseProgram(gPolygonProgram);
 		GLES20.glEnableVertexAttribArray(gPolygonVertexPositionHandle);
+
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible) {
 				GLMapTile tile = tiles[i];
