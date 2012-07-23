@@ -69,17 +69,12 @@ public class MapDatabase implements IMapDatabase {
 
 	private boolean connect() {
 		Connection conn = null;
-		// &socketTimeout=15&tcpKeepAlive=true
-
 		String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/gis";
-		// String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/planet-2.0";
-		// String dburl = "jdbc:postgresql://127.0.0.1:5432/bremen";
-		// String dburl = "jdbc:postgresql://127.0.0.1:5431/planet-2.0";
 
 		Properties dbOpts = new Properties();
 		dbOpts.setProperty("user", "osm");
 		dbOpts.setProperty("password", "osm");
-		dbOpts.setProperty("socketTimeout", "30");
+		dbOpts.setProperty("socketTimeout", "50");
 		dbOpts.setProperty("tcpKeepAlive", "true");
 
 		try {
@@ -93,6 +88,8 @@ public class MapDatabase implements IMapDatabase {
 			PGConnection pgconn = (PGConnection) conn;
 
 			pgconn.addDataType("hstore", PGHStore.class);
+
+			conn.createStatement().execute("set statement_timeout to 60000");
 
 		} catch (Exception e) {
 			System.err.println("Aborted due to error:");
@@ -183,16 +180,8 @@ public class MapDatabase implements IMapDatabase {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-
-			// try {
-			// connection.close();
-			// } catch (SQLException e1) {
-			// e1.printStackTrace();
-			// } finally {
 			connection = null;
-			// }
 		}
-
 	}
 
 	@Override
@@ -327,6 +316,7 @@ public class MapDatabase implements IMapDatabase {
 	private void parseGeometryArray(ValueGetter data, int count) {
 		for (int i = 0; i < count; i++) {
 			parseGeometry(data);
+			mIndex[mIndexPos++] = 0;
 		}
 	}
 

@@ -147,9 +147,8 @@ public class MapView extends GLSurfaceView {
 		mMapController = new MapController(this);
 
 		// mMapDatabase = MapDatabaseFactory.createMapDatabase(MapDatabaseInternal.POSTGIS_READER);
+		// mMapDatabase = MapDatabaseFactory.createMapDatabase(MapDatabaseInternal.JSON_READER);
 		mMapDatabase = mapDatabase;
-		// MapDatabaseFactory
-		// .createMapDatabase(MapDatabaseInternal.MAP_READER);
 
 		mMapViewPosition = new MapViewPosition(this);
 		mMapScaleBar = new MapScaleBar(this);

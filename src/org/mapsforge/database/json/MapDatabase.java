@@ -56,23 +56,49 @@ public class MapDatabase implements IMapDatabase {
 		// float lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 100, tile.zoomLevel) * 1000000;
 		// float lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 100, tile.zoomLevel) * 1000000;
 
-		float lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 100, tile.zoomLevel);
-		float lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 100, tile.zoomLevel);
-		float lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 100, tile.zoomLevel);
-		float lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 100, tile.zoomLevel);
+		float lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 100,
+				tile.zoomLevel);
+		float lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 100,
+				tile.zoomLevel);
+		float lat1 = (float) MercatorProjection
+				.pixelYToLatitude(cy - 100, tile.zoomLevel);
+		float lat2 = (float) MercatorProjection
+				.pixelYToLatitude(cy + 100, tile.zoomLevel);
 
 		double lonRadians = (D2R * lon1);
 		double latRadians = (D2R * lat1);
 
 		// spherical mercator projection
-		lon1 = (float) (radius * lonRadians);
-		lat1 = (float) (radius * Math.log(Math.tan(Math.PI * 0.25 + latRadians * 0.5)));
+		// lon1 = (float) (radius * lonRadians);
+		// lat1 = (float) (radius * Math.log(Math.tan(Math.PI * 0.25 + latRadians * 0.5)));
+		//
+		// lonRadians = (D2R * lon2);
+		// latRadians = (D2R * lat2);
+		//
+		// lon2 = (float) (radius * lonRadians);
+		// lat2 = (float) (radius * Math.log(Math.tan(Math.PI * 0.25 + latRadians * 0.5)));
+		//
+		// mCoords[0] = lon1;
+		// mCoords[1] = lat1;
+		//
+		// mCoords[2] = lon2;
+		// mCoords[3] = lat1;
+		//
+		// mCoords[4] = lon2;
+		// mCoords[5] = lat2;
+		//
+		// mCoords[6] = lon1;
+		// mCoords[7] = lat2;
+		//
+		// mCoords[8] = lon1;
+		// mCoords[9] = lat1;
+		//
+		// mIndex[0] = 10;
 
-		lonRadians = (D2R * lon2);
-		latRadians = (D2R * lat2);
-
-		lon2 = (float) (radius * lonRadians);
-		lat2 = (float) (radius * Math.log(Math.tan(Math.PI * 0.25 + latRadians * 0.5)));
+		lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 80, tile.zoomLevel) * 1000000;
+		lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 80, tile.zoomLevel) * 1000000;
+		lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 80, tile.zoomLevel) * 1000000;
+		lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 80, tile.zoomLevel) * 1000000;
 
 		mCoords[0] = lon1;
 		mCoords[1] = lat1;
@@ -90,28 +116,6 @@ public class MapDatabase implements IMapDatabase {
 		mCoords[9] = lat1;
 
 		mIndex[0] = 10;
-
-		// lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 80, tile.zoomLevel) * 1000000;
-		// lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 80, tile.zoomLevel) * 1000000;
-		// lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 80, tile.zoomLevel) * 1000000;
-		// lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 80, tile.zoomLevel) * 1000000;
-		//
-		// mCoords[10] = lon1;
-		// mCoords[11] = lat1;
-		//
-		// mCoords[12] = lon2;
-		// mCoords[13] = lat1;
-		//
-		// mCoords[14] = lon2;
-		// mCoords[15] = lat2;
-		//
-		// mCoords[16] = lon1;
-		// mCoords[17] = lat2;
-		//
-		// mCoords[18] = lon1;
-		// mCoords[19] = lat1;
-		//
-		// mIndex[1] = 10;
 
 		mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, mIndex, true);
 	}

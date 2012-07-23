@@ -12,10 +12,32 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.android.rendertheme;
+package org.mapsforge.android.mapgenerator;
 
-final class Closed {
-	public static final int ANY = 0;
-	public static final int NO = 1;
-	public static final int YES = 2;
+import org.mapsforge.android.utils.PausableThread;
+
+public class MapDownloader extends PausableThread {
+	private static final String THREAD_NAME = "MapDownloader";
+
+	@Override
+	protected void doWork() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected boolean hasWork() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected String getThreadName() {
+		return THREAD_NAME;
+	}
+
+	@Override
+	protected int getThreadPriority() {
+		return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 2;
+	}
 }

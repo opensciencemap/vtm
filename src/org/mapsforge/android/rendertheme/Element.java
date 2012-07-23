@@ -14,7 +14,7 @@
  */
 package org.mapsforge.android.rendertheme;
 
-class Element {
+final class Element {
 	public static final int ANY = 0;
 	public static final int NODE = 1;
 	public static final int WAY = 2;
