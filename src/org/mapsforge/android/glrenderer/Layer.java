@@ -39,7 +39,7 @@ class Layer {
 		colors[3] = (color >> 24 & 0xff) / 255.0f;
 	}
 
-	float[] getNextItem() {
+	float[] getNextPoolItem() {
 		curItem.used = PoolItem.SIZE;
 		curItem = LayerPool.get();
 		pool.add(curItem);

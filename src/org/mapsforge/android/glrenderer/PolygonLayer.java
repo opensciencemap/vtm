@@ -16,14 +16,12 @@ package org.mapsforge.android.glrenderer;
 
 import java.util.LinkedList;
 
-import org.mapsforge.core.Tile;
-
 class PolygonLayer extends Layer {
 	int fadeLevel;
 
-	// private boolean first = true;
-	// private float originX;
-	// private float originY;
+	private boolean first = true;
+	private float originX;
+	private float originY;
 
 	PolygonLayer(int layer, int color, int fade) {
 		super(layer, color);
@@ -37,29 +35,29 @@ class PolygonLayer extends Layer {
 
 		verticesCnt += length / 2 + 2;
 
-		// if (first) {
-		// first = false;
-		// originX = points[pos];
-		// originY = points[pos + 1];
-		// }
+		if (first) {
+			first = false;
+			originX = points[pos];
+			originY = points[pos + 1];
+		}
 
 		float[] curVertices = curItem.vertices;
 		int outPos = curItem.used;
 
 		if (outPos == PoolItem.SIZE) {
-			curVertices = getNextItem();
+			curVertices = getNextPoolItem();
 			outPos = 0;
 		}
 
-		curVertices[outPos++] = Tile.TILE_SIZE >> 1;
-		curVertices[outPos++] = Tile.TILE_SIZE >> 1;
+		curVertices[outPos++] = originX; // Tile.TILE_SIZE >> 1;
+		curVertices[outPos++] = originY; // Tile.TILE_SIZE >> 1;
 
 		int remaining = length;
 		int inPos = pos;
 		while (remaining > 0) {
 
 			if (outPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				outPos = 0;
 			}
 
@@ -74,10 +72,10 @@ class PolygonLayer extends Layer {
 		}
 
 		if (outPos == PoolItem.SIZE) {
-			curVertices = getNextItem();
+			curVertices = getNextPoolItem();
 			outPos = 0;
 		}
-		// Float.intBitsToFloat(bits)
+
 		curVertices[outPos++] = points[pos + 0];
 		curVertices[outPos++] = points[pos + 1];
 

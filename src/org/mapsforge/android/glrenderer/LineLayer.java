@@ -44,10 +44,9 @@ class LineLayer extends Layer {
 			outlines.add(link);
 	}
 
-	// private void addVertex(float x, float y, byte tex, byte[] c){
-	// //
-	// }
-
+	/*
+	 * line extrusion is based on code from GLMap (https://github.com/olofsj/GLMap/) by olofsj
+	 */
 	void addLine(float[] pointArray, int pos, int length, float w, boolean capRound) {
 		float x, y, nextX, nextY, prevX, prevY, ux, uy, vx, vy, wx, wy;
 		double a;
@@ -64,7 +63,7 @@ class LineLayer extends Layer {
 		int vertexPos = curItem.used;
 
 		if (vertexPos == PoolItem.SIZE) {
-			curVertices = getNextItem();
+			curVertices = getNextPoolItem();
 			vertexPos = 0;
 		}
 
@@ -105,7 +104,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 1.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -115,7 +114,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 1.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -125,7 +124,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 1.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -136,7 +135,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 0.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -163,7 +162,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 0.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -173,7 +172,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 0.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -244,7 +243,7 @@ class LineLayer extends Layer {
 			uyw = uy * w;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -254,7 +253,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 0.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -304,7 +303,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 0.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -314,7 +313,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 0.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -325,7 +324,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -336,7 +335,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -360,7 +359,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 0.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
@@ -371,7 +370,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 0.0f;
 
 			if (vertexPos == PoolItem.SIZE) {
-				curVertices = getNextItem();
+				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
 
