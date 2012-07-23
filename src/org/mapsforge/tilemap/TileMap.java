@@ -34,6 +34,7 @@ import android.content.SharedPreferences;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -59,7 +60,7 @@ import android.widget.ToggleButton;
  * location. A simple file browser for selecting the map file is also included. Some preferences can be adjusted via the
  * {@link EditPreferences} activity.
  */
-public class TileMap extends MapActivity implements ActionBar.OnNavigationListener {
+public class TileMap extends MapActivity { // implements ActionBar.OnNavigationListener {
 	private static final String BUNDLE_CENTER_AT_FIRST_FIX = "centerAtFirstFix";
 	private static final String BUNDLE_SHOW_MY_LOCATION = "showMyLocation";
 	private static final String BUNDLE_SNAP_TO_LOCATION = "snapToLocation";
@@ -320,14 +321,16 @@ public class TileMap extends MapActivity implements ActionBar.OnNavigationListen
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mSpinnerAdapter = ArrayAdapter.createFromResource(this,
-				R.array.view_sections,
-				android.R.layout.simple_spinner_dropdown_item);
-		ActionBar actionBar = getActionBar();
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			mSpinnerAdapter = ArrayAdapter.createFromResource(this,
+					R.array.view_sections,
+					android.R.layout.simple_spinner_dropdown_item);
+			ActionBar actionBar = getActionBar();
+			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
-		actionBar.setListNavigationCallbacks(mSpinnerAdapter, this);
-		actionBar.setDisplayShowTitleEnabled(false);
+			// actionBar.setListNavigationCallbacks(mSpinnerAdapter, this);
+			actionBar.setDisplayShowTitleEnabled(false);
+		}
 
 		// getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 		// getActionBar().setBackgroundDrawable(
@@ -563,6 +566,7 @@ public class TileMap extends MapActivity implements ActionBar.OnNavigationListen
 				mapDatabaseInternalNew = MapDatabaseInternal.POSTGIS_READER;
 			}
 
+			// mapDatabaseInternalNew = MapDatabaseInternal.JSON_READER;
 			Log.d("VectorTileMap", "set map database " + mapDatabaseInternalNew);
 
 			if (mapDatabaseInternalNew != mMapDatabaseInternal) {
@@ -718,9 +722,9 @@ public class TileMap extends MapActivity implements ActionBar.OnNavigationListen
 		}
 	}
 
-	@Override
-	public boolean onNavigationItemSelected(int arg0, long arg1) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	// @Override
+	// public boolean onNavigationItemSelected(int arg0, long arg1) {
+	// // TODO Auto-generated method stub
+	// return false;
+	// }
 }
