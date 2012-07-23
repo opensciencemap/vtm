@@ -164,9 +164,10 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 	}
 
 	private void updateTileDistances() {
+		int h = (Tile.TILE_SIZE >> 1);
 		byte zoom = mMapPosition.zoomLevel;
-		long x = mTileX * (Tile.TILE_SIZE); // - (Tile.TILE_SIZE >> 1);
-		long y = mTileY * (Tile.TILE_SIZE); // - (Tile.TILE_SIZE >> 1);
+		long x = mTileX * (Tile.TILE_SIZE) + h;
+		long y = mTileY * (Tile.TILE_SIZE) + h;
 		int diff;
 		long dx, dy;
 
@@ -178,26 +179,26 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			if (diff != 0) {
 				if (diff > 0) {
 					// tile zoom level is child of current
-					dx = (t.pixelX >> diff) - x;
-					dy = (t.pixelY >> diff) - y;
+					dx = ((t.pixelX + h) >> diff) - x;
+					dy = ((t.pixelY + h) >> diff) - y;
 				} else {
 					// tile zoom level is parent of current
-					dx = (t.pixelX << -diff) - x;
-					dy = (t.pixelY << -diff) - y;
+					dx = ((t.pixelX + h) << -diff) - x;
+					dy = ((t.pixelY + h) << -diff) - y;
 				}
 
 				if (diff == -1) {
-					// load parent before current layer (kind of progressive transmission :)
 					dy *= mAspect;
 					t.distance = 2 + ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
 				} else {
+					// load parent before current layer (kind of progressive transmission :)
 					t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
 					// prefer lower zoom level, i.e. it covers a larger area
 					t.distance *= (1 + (diff > 0 ? diff * 4 : -diff * 2));
 				}
 			} else {
-				dx = t.pixelX - x;
-				dy = t.pixelY - y;
+				dx = (t.pixelX + h) - x;
+				dy = (t.pixelY + h) - y;
 				dy *= mAspect;
 				t.distance = (1 + ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)));// * 2;
 			}
@@ -307,10 +308,10 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		long pixelLeft = (long) x - offsetX;
 		long pixelTop = (long) y - offsetY;
 
-		long tileLeft = MercatorProjection.pixelXToTileX(pixelLeft, zoomLevel);
-		long tileTop = MercatorProjection.pixelYToTileY(pixelTop, zoomLevel);
-		long tileRight = MercatorProjection.pixelXToTileX(pixelRight, zoomLevel);
-		long tileBottom = MercatorProjection.pixelYToTileY(pixelBottom, zoomLevel);
+		long tileLeft = MercatorProjection.pixelXToTileX(pixelLeft, zoomLevel) - 1;
+		long tileTop = MercatorProjection.pixelYToTileY(pixelTop, zoomLevel) - 1;
+		long tileRight = MercatorProjection.pixelXToTileX(pixelRight, zoomLevel) + 1;
+		long tileBottom = MercatorProjection.pixelYToTileY(pixelBottom, zoomLevel) + 1;
 
 		mJobList.clear();
 		mJobParameter = mMapView.getJobParameters();
@@ -321,9 +322,19 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			return false;
 
 		int max = newTiles.tiles.length - 1;
+		long limit = (long) Math.pow(2, zoomLevel) - 1;
 
-		for (long tileY = tileTop - 1; tileY <= tileBottom + 1; tileY++) {
-			for (long tileX = tileLeft - 1; tileX <= tileRight + 1; tileX++) {
+		if (tileTop < 0)
+			tileTop = 0;
+		if (tileLeft < 0)
+			tileLeft = 0;
+		if (tileBottom >= limit)
+			tileBottom = limit;
+		if (tileRight >= limit)
+			tileRight = limit;
+
+		for (long tileY = tileTop; tileY <= tileBottom; tileY++) {
+			for (long tileX = tileLeft; tileX <= tileRight; tileX++) {
 				// FIXME
 				if (tiles == max)
 					break;
@@ -553,7 +564,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 	}
 
 	private boolean drawPolygons(GLMapTile tile, int diff) {
-		float scale, x, y, z = 1;
+		int cnt = 0;
 
 		if (tile.polygonLayers == null || tile.polygonLayers.array == null)
 			return true;
@@ -574,24 +585,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-		if (diff == 0) {
-			scale = (float) (mDrawScale * 2.0 / mHeight);
-			x = (float) (mDrawX - tile.x);
-			y = (float) (tile.y - mDrawY);
-		} else {
-			z = (diff > 0) ? (1 << diff) : 1.0f / (1 << -diff);
-			scale = (float) (mDrawScale * 2.0 / mHeight / z);
-			x = (float) (mDrawX * z - tile.x);
-			y = (float) (tile.y - mDrawY * z);
-		}
-
-		int cnt = 0;
-
-		mMVPMatrix[12] = -x * (scale * mAspect);
-		mMVPMatrix[13] = -y * (scale);
-		mMVPMatrix[0] = (scale * mAspect);
-		mMVPMatrix[5] = (scale);
-
+		setMatrix(tile, diff);
 		GLES20.glUniformMatrix4fv(gPolygonMatrixHandle, 1, false, mMVPMatrix, 0);
 
 		boolean firstPass = true;
@@ -611,11 +605,11 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				else {
 					// clear stencilbuffer
 					GLES20.glStencilMask(0xFF);
-					// GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
+					GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
 
 					// clear stencilbuffer (tile region)
-					GLES20.glStencilOp(GLES20.GL_ZERO, GLES20.GL_ZERO, GLES20.GL_ZERO);
-					GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+					// GLES20.glStencilOp(GLES20.GL_ZERO, GLES20.GL_ZERO, GLES20.GL_ZERO);
+					// GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 				}
 
 				// stencil op for stencil method polygon drawing
@@ -646,8 +640,45 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		return true;
 	}
 
+	private boolean drawTriangles(GLMapTile tile, int diff) {
+
+		if (tile.meshLayers == null || tile.meshLayers.array == null)
+			return true;
+
+		GLES20.glScissor(tile.sx, tile.sy, tile.sw, tile.sh);
+
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.id);
+
+		if (useHalfFloat) {
+			GLES20.glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
+					OES_HALF_FLOAT, false, 0,
+					POLYGON_VERTICES_DATA_POS_OFFSET);
+		} else {
+			GLES20.glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
+					GLES20.GL_FLOAT, false, 0,
+					POLYGON_VERTICES_DATA_POS_OFFSET);
+		}
+
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
+		setMatrix(tile, diff);
+		GLES20.glUniformMatrix4fv(gPolygonMatrixHandle, 1, false, mMVPMatrix, 0);
+
+		MeshLayer[] layers = tile.meshLayers.array;
+
+		for (int i = 0, n = layers.length; i < n; i++) {
+			MeshLayer l = layers[i];
+			GLES20.glUniform4fv(gPolygonColorHandle, 1, l.colors, 0);
+
+			// GLES20.glUniform4f(gPolygonColorHandle, 1, 0, 0, 1);
+
+			// System.out.println("draw: " + l.offset + " " + l.verticesCnt);
+			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, l.offset, l.verticesCnt);
+		}
+		return true;
+	}
+
 	private boolean drawLines(GLMapTile tile, int diff) {
-		float x, y, scale;
 		float z = 1;
 
 		if (tile.lineLayers == null || tile.lineLayers.array == null)
@@ -672,22 +703,10 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		}
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-		if (diff == 0) {
-			scale = (float) (mDrawScale * 2.0 / mHeight);
-			x = (float) (mDrawX - tile.x);
-			y = (float) (tile.y - mDrawY);
-		} else {
+		if (diff != 0)
 			z = (diff > 0) ? (1 << diff) : 1.0f / (1 << -diff);
-			scale = (float) (mDrawScale * 2.0 / mHeight / z);
-			x = (float) (mDrawX * z - tile.x);
-			y = (float) (tile.y - mDrawY * z);
-		}
 
-		mMVPMatrix[12] = -x * (scale * mAspect);
-		mMVPMatrix[13] = -y * (scale);
-		mMVPMatrix[0] = (scale * mAspect);
-		mMVPMatrix[5] = (scale);
-
+		setMatrix(tile, diff);
 		GLES20.glUniformMatrix4fv(gLineMatrixHandle, 1, false, mMVPMatrix, 0);
 
 		LineLayer[] layers = tile.lineLayers.array;
@@ -748,6 +767,27 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		// GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, cnt);
 
 		return true;
+	}
+
+	private void setMatrix(GLMapTile tile, int diff) {
+		float x, y, scale;
+		float z = 1;
+
+		if (diff == 0) {
+			scale = (float) (mDrawScale * 2.0 / mHeight);
+			x = (float) (mDrawX - tile.x);
+			y = (float) (tile.y - mDrawY);
+		} else {
+			z = (diff > 0) ? (1 << diff) : 1.0f / (1 << -diff);
+			scale = (float) (mDrawScale * 2.0 / mHeight / z);
+			x = (float) (mDrawX * z - tile.x);
+			y = (float) (tile.y - mDrawY * z);
+		}
+
+		mMVPMatrix[12] = -x * (scale * mAspect);
+		mMVPMatrix[13] = -y * (scale);
+		mMVPMatrix[0] = (scale * mAspect);
+		mMVPMatrix[5] = (scale);
 	}
 
 	private boolean setTileScissor(GLMapTile tile, float div) {
@@ -868,15 +908,49 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		}
 	}
 
-	// private int uploadCnt;
+	private void drawProxyTriangles(GLMapTile tile) {
+		if (tile.parent != null && tile.parent.isDrawn) {
+			tile.parent.sx = tile.sx;
+			tile.parent.sy = tile.sy;
+			tile.parent.sw = tile.sw;
+			tile.parent.sh = tile.sh;
+			drawTriangles(tile.parent, -1);
+		} else {
+			int drawn = 0;
+
+			for (int i = 0; i < 4; i++) {
+				GLMapTile c = tile.child[i];
+
+				if (c != null && c.isDrawn && setTileScissor(c, 2)) {
+					drawTriangles(c, 1);
+					drawn++;
+				}
+			}
+
+			if (drawn < 4 && tile.parent != null) {
+				GLMapTile p = tile.parent.parent;
+				if (p != null && p.isDrawn) {
+					p.sx = tile.sx;
+					p.sy = tile.sy;
+					p.sw = tile.sw;
+					p.sh = tile.sh;
+					drawTriangles(p, -2);
+				}
+			}
+		}
+	}
+
+	private boolean mTriangulate = false;
+
+	private int uploadCnt = 0;
 
 	private boolean uploadTileData(GLMapTile tile) {
 		// not sure about this, but seems it fixes some flickering when
 		// multiple tiles are uploaded in one go. but if this is really
 		// the issue tiles should stay corrupted..
 
-		// if (uploadCnt++ > 0)
-		// GLES20.glFinish();
+		if (uploadCnt++ > 0)
+			GLES20.glFinish();
 
 		if (tile.lineVBO == null) {
 			// Upload line data to vertex buffer object
@@ -915,33 +989,64 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			tile.lineLayers = null;
 		}
 
-		if (useHalfFloat)
-			shortBuffer = tile.polygonLayers.compileLayerData(shortBuffer);
-		else
-			floatBuffer = tile.polygonLayers.compileLayerData(floatBuffer);
+		if (!mTriangulate) {
+			if (useHalfFloat)
+				shortBuffer = tile.polygonLayers.compileLayerData(shortBuffer);
+			else
+				floatBuffer = tile.polygonLayers.compileLayerData(floatBuffer);
 
-		// Upload polygon data to vertex buffer object
-		if (tile.polygonLayers.size > 0) {
-			mBufferMemoryUsage -= tile.polygonVBO.size;
+			// Upload polygon data to vertex buffer object
+			if (tile.polygonLayers.size > 0) {
+				mBufferMemoryUsage -= tile.polygonVBO.size;
 
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.id);
-			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 0, null, GLES20.GL_STATIC_DRAW);
+				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.id);
+				GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 0, null,
+						GLES20.GL_STATIC_DRAW);
 
-			if (useHalfFloat) {
-				tile.polygonVBO.size = tile.polygonLayers.size * SHORT_BYTES;
-				GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.size,
-						shortBuffer, GLES20.GL_STATIC_DRAW);
+				if (useHalfFloat) {
+					tile.polygonVBO.size = tile.polygonLayers.size * SHORT_BYTES;
+					GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.size,
+							shortBuffer, GLES20.GL_STATIC_DRAW);
+				} else {
+					tile.polygonVBO.size = tile.polygonLayers.size * FLOAT_BYTES;
+					GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.size,
+							floatBuffer, GLES20.GL_STATIC_DRAW);
+				}
+				mBufferMemoryUsage += tile.polygonVBO.size;
+
 			} else {
-				tile.polygonVBO.size = tile.polygonLayers.size * FLOAT_BYTES;
-				GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.size,
-						floatBuffer, GLES20.GL_STATIC_DRAW);
+				tile.polygonLayers = null;
 			}
-			mBufferMemoryUsage += tile.polygonVBO.size;
-
-		} else {
-			tile.polygonLayers = null;
 		}
+		else {
+			if (useHalfFloat)
+				shortBuffer = tile.meshLayers.compileLayerData(shortBuffer);
+			else
+				floatBuffer = tile.meshLayers.compileLayerData(floatBuffer);
 
+			// Upload triangle data to vertex buffer object
+			if (tile.meshLayers.size > 0) {
+				mBufferMemoryUsage -= tile.polygonVBO.size;
+
+				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.id);
+				GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 0, null,
+						GLES20.GL_STATIC_DRAW);
+
+				if (useHalfFloat) {
+					tile.polygonVBO.size = tile.meshLayers.size * SHORT_BYTES;
+					GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.size,
+							shortBuffer, GLES20.GL_STATIC_DRAW);
+				} else {
+					tile.polygonVBO.size = tile.meshLayers.size * FLOAT_BYTES;
+					GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, tile.polygonVBO.size,
+							floatBuffer, GLES20.GL_STATIC_DRAW);
+				}
+				mBufferMemoryUsage += tile.polygonVBO.size;
+
+			} else {
+				tile.meshLayers = null;
+			}
+		}
 		tile.newData = false;
 		tile.isDrawn = true;
 		tile.isLoading = false;
@@ -964,7 +1069,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		GLES20.glStencilMask(0xFF);
 		GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_STENCIL_BUFFER_BIT);
-		GLES20.glFlush();
+		// GLES20.glFlush();
 
 		// long endTime = SystemClock.uptimeMillis();
 		// long dt = endTime - startTime;
@@ -1018,7 +1123,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			CACHE_TILES += 50;
 		}
 
-		// uploadCnt = 0;
+		uploadCnt = 0;
 
 		// check visible tiles, set tile clip scissors, upload new vertex data
 		for (int i = 0; i < tileCnt; i++) {
@@ -1054,46 +1159,64 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			}
 		}
 		// GLES20.glFinish();
+		GlUtils.checkGlError("upload");
 
 		if (timing)
 			clear_time = (SystemClock.uptimeMillis() - start);
 
 		GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
-		GLES20.glDisable(GLES20.GL_BLEND);
-
-		// Draw Polygons
-		GLES20.glEnable(GLES20.GL_STENCIL_TEST);
 
 		GLES20.glUseProgram(gPolygonProgram);
-		GLES20.glEnableVertexAttribArray(gPolygonVertexPositionHandle);
+		// GLES20.glEnableVertexAttribArray(gPolygonVertexPositionHandle);
 
-		for (int i = 0; i < tileCnt; i++) {
-			if (tiles[i].isVisible) {
-				GLMapTile tile = tiles[i];
+		if (!mTriangulate) {
+			GLES20.glDisable(GLES20.GL_BLEND);
+			// Draw Polygons
+			GLES20.glEnable(GLES20.GL_STENCIL_TEST);
 
-				if (tile.isDrawn)
-					drawPolygons(tile, 0);
-				else
-					drawProxyPolygons(tile);
+			// GLES20.glEnableVertexAttribArray(gPolygonVertexPositionHandle);
+
+			for (int i = 0; i < tileCnt; i++) {
+				if (tiles[i].isVisible) {
+					GLMapTile tile = tiles[i];
+
+					if (tile.isDrawn)
+						drawPolygons(tile, 0);
+					else
+						drawProxyPolygons(tile);
+				}
 			}
-		}
+			GlUtils.checkGlError("polygons");
+			GLES20.glDisable(GLES20.GL_STENCIL_TEST);
+		} else {
+			// Draw Triangles
+			for (int i = 0; i < tileCnt; i++) {
+				if (tiles[i].isVisible) {
+					GLMapTile tile = tiles[i];
 
-		GLES20.glDisable(GLES20.GL_STENCIL_TEST);
+					if (tile.isDrawn)
+						drawTriangles(tile, 0);
+					else
+						drawProxyTriangles(tile);
+				}
+			}
+			GlUtils.checkGlError("triangles");
+		}
 		// required on GalaxyII, Android 2.3.3
-		GLES20.glDisableVertexAttribArray(gPolygonVertexPositionHandle);
+		// GLES20.glDisableVertexAttribArray(gPolygonVertexPositionHandle);
 
 		if (timing) {
 			GLES20.glFinish();
 			poly_time = (SystemClock.uptimeMillis() - start);
 		}
-		// GLES20.glFlush();
+		GLES20.glFlush();
 
 		// Draw lines
 		GLES20.glEnable(GLES20.GL_BLEND);
 		GLES20.glUseProgram(gLineProgram);
 
-		GLES20.glEnableVertexAttribArray(gLineVertexPositionHandle);
-		GLES20.glEnableVertexAttribArray(gLineTexturePositionHandle);
+		// GLES20.glEnableVertexAttribArray(gLineVertexPositionHandle);
+		// GLES20.glEnableVertexAttribArray(gLineTexturePositionHandle);
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible) {
@@ -1111,9 +1234,10 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start) + " "
 					+ clear_time + " " + poly_time);
 		}
-		GLES20.glDisableVertexAttribArray(gLineVertexPositionHandle);
-		GLES20.glDisableVertexAttribArray(gLineTexturePositionHandle);
-
+		// GLES20.glDisableVertexAttribArray(gLineVertexPositionHandle);
+		// GLES20.glDisableVertexAttribArray(gLineTexturePositionHandle);
+		GlUtils.checkGlError("lines");
+		GLES20.glFinish();
 	}
 
 	private int[] mVboIds;
@@ -1220,6 +1344,8 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		GLES20.glDisable(GLES20.GL_DITHER);
 		GLES20.glClearColor(0.98f, 0.98f, 0.97f, 1.0f);
 		GLES20.glClearStencil(0);
+
+		// GLES20.glFrontFace(GLES20.GL_CCW);
 	}
 
 	@Override

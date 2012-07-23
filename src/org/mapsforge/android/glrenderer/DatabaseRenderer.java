@@ -75,6 +75,7 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 
 	private LineLayers mLineLayers;
 	private PolygonLayers mPolyLayers;
+	private MeshLayers mMeshLayers;
 
 	private int mDrawingLayer;
 	private int mLevels;
@@ -316,6 +317,9 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 		PolygonLayer l = mPolyLayers.getLayer(mDrawingLayer + area.level, area.color,
 				area.fade);
 
+		// MeshLayer l = mMeshLayers.getLayer(mDrawingLayer + area.level, area.color,
+		// area.fade);
+
 		for (int i = 0, pos = 0, n = mWays.length; i < n; i++) {
 			int length = mWays[i];
 			// need at least three points
@@ -324,6 +328,7 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 
 			pos += length;
 		}
+
 	}
 
 	@Override
@@ -386,8 +391,10 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 
 		mLineLayers = new LineLayers();
 		mPolyLayers = new PolygonLayers();
+		mMeshLayers = new MeshLayers();
 		mCurrentTile.lineLayers = mLineLayers;
 		mCurrentTile.polygonLayers = mPolyLayers;
+		mCurrentTile.meshLayers = mMeshLayers;
 
 		firstMatch = true;
 		mMapDatabase.executeQuery(mCurrentTile, this);
