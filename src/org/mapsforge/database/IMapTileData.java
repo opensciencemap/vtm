@@ -12,18 +12,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.tilemap.filefilter;
+package org.mapsforge.database;
 
-import java.io.FileFilter;
+public interface IMapTileData {
 
-import org.mapsforge.database.FileOpenResult;
-
-/**
- * An extension of the {@link FileFilter} interface.
- */
-public interface ValidFileFilter extends FileFilter {
-	/**
-	 * @return the result of the last {@link #accept} call (might be null).
-	 */
-	FileOpenResult getFileOpenResult();
 }

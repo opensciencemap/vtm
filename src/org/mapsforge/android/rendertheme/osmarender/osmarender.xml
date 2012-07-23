@@ -9,12 +9,12 @@
 
 		<!-- landuse -->
 		<rule e="way" k="landuse" v="*">
-		    <rule e="way" k="*"  zoom-min="12" v="farmland|farm">
-				<area fill="#fff8bf" fade="12" />
+		    <rule e="way" k="*"  zoom-min="10" v="farmland|farm">
+				<area fill="#fff8bf" fade="10" />
 			</rule>
 			
-			<rule e="way" k="landuse" v="grass">
-				<area fill="#deecb9" fade="12" />
+			<rule e="way" k="landuse" zoom-min="10" v="grass">
+				<area fill="#deecb9" fade="10" />
 			</rule>
 			
 			<rule e="way" k="*"  zoom-min="10" v="residential|farmyard|retail|commercial">
@@ -334,7 +334,7 @@
 			</rule>-->
 			
 			<rule e="way" k="*" v="*" zoom-min="15">
-				<line stroke="#c9c3c1" stroke-width="0.6" fixed="true" stroke-linecap="butt" />
+		  	<line stroke="#c9c3c1" stroke-width="0.6" fixed="true" stroke-linecap="butt" />
 				<area fill="#e9e6e3" fade="15" />
 			</rule>
 			

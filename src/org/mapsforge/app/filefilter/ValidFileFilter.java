@@ -12,30 +12,18 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.tilemap;
+package org.mapsforge.app.filefilter;
 
-import android.widget.SeekBar;
-import android.widget.TextView;
+import java.io.FileFilter;
 
-class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-	private final TextView textView;
+import org.mapsforge.database.FileOpenResult;
 
-	SeekBarChangeListener(TextView textView) {
-		this.textView = textView;
-	}
-
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		this.textView.setText(String.valueOf(progress));
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		// do nothing
-	}
+/**
+ * An extension of the {@link FileFilter} interface.
+ */
+public interface ValidFileFilter extends FileFilter {
+	/**
+	 * @return the result of the last {@link #accept} call (might be null).
+	 */
+	FileOpenResult getFileOpenResult();
 }

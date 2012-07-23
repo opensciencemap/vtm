@@ -14,7 +14,7 @@
  */
 package org.mapsforge.android.rendertheme.renderinstruction;
 
-import org.mapsforge.android.rendertheme.RenderCallback;
+import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.core.Tag;
 
 /**
@@ -32,7 +32,7 @@ public interface RenderInstruction {
 	 * @param tags
 	 *            the tags of the node.
 	 */
-	void renderNode(RenderCallback renderCallback, Tag[] tags);
+	void renderNode(IRenderCallback renderCallback, Tag[] tags);
 
 	/**
 	 * @param renderCallback
@@ -40,7 +40,7 @@ public interface RenderInstruction {
 	 * @param tags
 	 *            the tags of the way.
 	 */
-	void renderWay(RenderCallback renderCallback, Tag[] tags);
+	void renderWay(IRenderCallback renderCallback, Tag[] tags);
 
 	/**
 	 * Scales the stroke width of this RenderInstruction by the given factor.

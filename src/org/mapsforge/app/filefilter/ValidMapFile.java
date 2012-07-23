@@ -12,10 +12,30 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.android.rendertheme;
+package org.mapsforge.app.filefilter;
 
-final class Closed {
-	public static final int ANY = 0;
-	public static final int NO = 1;
-	public static final int YES = 2;
+import java.io.File;
+
+import org.mapsforge.database.FileOpenResult;
+import org.mapsforge.database.IMapDatabase;
+import org.mapsforge.database.mapfile.MapDatabase;
+
+/**
+ * Accepts all valid map files.
+ */
+public final class ValidMapFile implements ValidFileFilter {
+	private FileOpenResult fileOpenResult;
+
+	@Override
+	public boolean accept(File file) {
+		IMapDatabase mapDatabase = new MapDatabase();
+		this.fileOpenResult = mapDatabase.openFile(file);
+		mapDatabase.closeFile();
+		return this.fileOpenResult.isSuccess();
+	}
+
+	@Override
+	public FileOpenResult getFileOpenResult() {
+		return this.fileOpenResult;
+	}
 }

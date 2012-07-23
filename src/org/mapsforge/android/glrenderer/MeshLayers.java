@@ -34,7 +34,7 @@ public class MeshLayers {
 		size = 0;
 	}
 
-	MeshLayer getLayer(int layer, int color, int fade) {
+	MeshLayer getLayer(int layer, int color) {
 		MeshLayer l = layers.get(layer);
 		if (l != null) {
 			return l;

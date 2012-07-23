@@ -23,7 +23,7 @@ import android.graphics.Paint;
 /**
  * Callback methods for rendering areas, ways and points of interest (POIs).
  */
-public interface RenderCallback {
+public interface IRenderCallback {
 	/**
 	 * Renders an area with the given parameters.
 	 * 

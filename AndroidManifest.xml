@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.mapsforge.tilemap"
+    package="org.mapsforge.app"
     android:installLocation="auto"
     android:versionCode="10"
     android:versionName="0.1" >
@@ -19,15 +19,15 @@
         android:label="@string/application_name" 
         android:theme="@style/Theme.TileMap" > 
        
-        <activity android:name="org.mapsforge.tilemap.TileMap" >
+        <activity android:name="org.mapsforge.app.TileMap" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="org.mapsforge.tilemap.preferences.EditPreferences" />
-        <activity android:name="org.mapsforge.tilemap.filepicker.FilePicker" />
-    </application>
-
-</manifest>
+        <activity android:name=".preferences.EditPreferences" />
+        <activity android:name=".filepicker.FilePicker" />
+          
+     </application>
+     </manifest>

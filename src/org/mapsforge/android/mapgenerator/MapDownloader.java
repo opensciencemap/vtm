@@ -12,30 +12,32 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.tilemap.filefilter;
+package org.mapsforge.android.mapgenerator;
 
-import java.io.File;
+import org.mapsforge.android.utils.PausableThread;
 
-import org.mapsforge.database.FileOpenResult;
-import org.mapsforge.database.IMapDatabase;
-import org.mapsforge.database.mapfile.MapDatabase;
-
-/**
- * Accepts all valid map files.
- */
-public final class ValidMapFile implements ValidFileFilter {
-	private FileOpenResult fileOpenResult;
+public class MapDownloader extends PausableThread {
+	private static final String THREAD_NAME = "MapDownloader";
 
 	@Override
-	public boolean accept(File file) {
-		IMapDatabase mapDatabase = new MapDatabase();
-		this.fileOpenResult = mapDatabase.openFile(file);
-		mapDatabase.closeFile();
-		return this.fileOpenResult.isSuccess();
+	protected void doWork() {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
-	public FileOpenResult getFileOpenResult() {
-		return this.fileOpenResult;
+	protected boolean hasWork() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected String getThreadName() {
+		return THREAD_NAME;
+	}
+
+	@Override
+	protected int getThreadPriority() {
+		return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 2;
 	}
 }

@@ -14,7 +14,7 @@
  */
 package org.mapsforge.android.rendertheme.renderinstruction;
 
-import org.mapsforge.android.rendertheme.RenderCallback;
+import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderThemeHandler;
 import org.mapsforge.core.Tag;
 import org.xml.sax.Attributes;
@@ -123,7 +123,7 @@ public final class Circle implements RenderInstruction {
 	}
 
 	@Override
-	public void renderNode(RenderCallback renderCallback, Tag[] tags) {
+	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
 		if (mOutline != null) {
 			renderCallback.renderPointOfInterestCircle(mRenderRadius, mOutline, mLevel);
 		}
@@ -133,7 +133,7 @@ public final class Circle implements RenderInstruction {
 	}
 
 	@Override
-	public void renderWay(RenderCallback renderCallback, Tag[] tags) {
+	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
 		// do nothing
 	}
 

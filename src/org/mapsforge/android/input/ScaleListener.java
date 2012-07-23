@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.android.inputhandling;
+package org.mapsforge.android.input;
 
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.MapViewPosition;
@@ -21,10 +21,14 @@ import android.view.ScaleGestureDetector;
 
 class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 	private final MapView mMapView;
-	private float mFocusX;
-	private float mFocusY;
 	private MapViewPosition mMapPosition;
+	private float mCenterX;
+	private float mCenterY;
+	// private float mFocusX;
+	// private float mFocusY;
+	private float mScale;
 
+	// private boolean mScaling;
 	/**
 	 * Creates a new ScaleListener for the given MapView.
 	 * 
@@ -37,23 +41,46 @@ class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 
 	@Override
 	public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
-		float scaleFactor = scaleGestureDetector.getScaleFactor();
 
-		mMapPosition.scaleMap(scaleFactor, mFocusX, mFocusY);
+		float focusX = scaleGestureDetector.getFocusX();
+		float focusY = scaleGestureDetector.getFocusY();
+		mScale = scaleGestureDetector.getScaleFactor();
+
+		// mMapPosition.moveMap((focusX - mFocusX), (focusY - mFocusY));
+		// if (mScale > 1.001 || mScale < 0.999) {
+
+		mMapPosition.scaleMap(mScale,
+				focusX - mCenterX,
+				focusY - mCenterY);
 		mMapView.redrawTiles();
+		// mScale = 1;
+
+		// mFocusX = focusX;
+		// mFocusY = focusY;
+
+		// }
+		// else if (Math.abs(focusX - mFocusX) > 0.5 || Math.abs(focusY - mFocusY) > 0.5) {
+		// mMapPosition.moveMap((focusX - mFocusX), (focusY - mFocusY));
+		//
+		// mFocusX = focusX;
+		// mFocusY = focusY;
+		// mScale = 1;
+		// mMapView.redrawTiles();
+		// }
 
 		return true;
 	}
 
 	@Override
 	public boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
-		mFocusX = scaleGestureDetector.getFocusX();
-		mFocusY = scaleGestureDetector.getFocusY();
 
-		mFocusX -= ((mMapView.getWidth() >> 1));
-		mFocusY -= ((mMapView.getHeight() >> 1));
+		mCenterX = mMapView.getWidth() >> 1;
+		mCenterY = mMapView.getHeight() >> 1;
+		// mFocusX = scaleGestureDetector.getFocusX();
+		// mFocusY = scaleGestureDetector.getFocusY();
+		mScale = 1;
 		mMapPosition = mMapView.getMapPosition();
-
+		// mScaling = false;
 		return true;
 	}
 

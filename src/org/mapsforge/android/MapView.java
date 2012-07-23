@@ -17,13 +17,13 @@ package org.mapsforge.android;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import org.mapsforge.android.inputhandling.TouchHandler;
+import org.mapsforge.android.input.TouchHandler;
+import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.JobParameters;
 import org.mapsforge.android.mapgenerator.JobQueue;
 import org.mapsforge.android.mapgenerator.JobTheme;
 import org.mapsforge.android.mapgenerator.MapDatabaseFactory;
 import org.mapsforge.android.mapgenerator.MapDatabaseInternal;
-import org.mapsforge.android.mapgenerator.MapGenerator;
 import org.mapsforge.android.mapgenerator.MapGeneratorFactory;
 import org.mapsforge.android.mapgenerator.MapGeneratorInternal;
 import org.mapsforge.android.mapgenerator.MapWorker;
@@ -49,7 +49,8 @@ import android.view.MotionEvent;
  * <p>
  * This implementation supports offline map rendering as well as downloading map images (tiles) over an Internet
  * connection. The operation mode of a MapView can be set in the constructor and changed at runtime with the
- * {@link #setMapGeneratorInternal(MapGenerator)} method. Some MapView parameters depend on the selected operation mode.
+ * {@link #setMapGeneratorInternal(IMapGenerator)} method. Some MapView parameters depend on the selected operation
+ * mode.
  * <p>
  * In offline rendering mode a special database file is required which contains the map data. Map files can be stored in
  * any folder. The current map file is set by calling {@link #setMapFile(String)}. To retrieve the current
@@ -79,7 +80,7 @@ public class MapView extends GLSurfaceView {
 	private final TouchHandler mTouchEventHandler;
 
 	private IMapDatabase mMapDatabase;
-	private MapGenerator mMapGenerator;
+	private IMapGenerator mMapGenerator;
 	private MapRenderer mMapRenderer;
 	private JobQueue mJobQueue;
 	private MapWorker mMapWorker;
@@ -121,13 +122,13 @@ public class MapView extends GLSurfaceView {
 	 * @throws IllegalArgumentException
 	 *             if the context object is not an instance of {@link MapActivity} .
 	 */
-	public MapView(Context context, MapGenerator mapGenerator) {
+	public MapView(Context context, IMapGenerator mapGenerator) {
 		this(context, null, mapGenerator, MapDatabaseFactory
 				.createMapDatabase(MapDatabaseInternal.MAP_READER));
 	}
 
 	private MapView(Context context, AttributeSet attributeSet,
-			MapGenerator mapGenerator, IMapDatabase mapDatabase) {
+			IMapGenerator mapGenerator, IMapDatabase mapDatabase) {
 
 		super(context, attributeSet);
 
@@ -147,9 +148,8 @@ public class MapView extends GLSurfaceView {
 		mMapController = new MapController(this);
 
 		// mMapDatabase = MapDatabaseFactory.createMapDatabase(MapDatabaseInternal.POSTGIS_READER);
+		// mMapDatabase = MapDatabaseFactory.createMapDatabase(MapDatabaseInternal.JSON_READER);
 		mMapDatabase = mapDatabase;
-		// MapDatabaseFactory
-		// .createMapDatabase(MapDatabaseInternal.MAP_READER);
 
 		mMapViewPosition = new MapViewPosition(this);
 		mMapScaleBar = new MapScaleBar(this);
@@ -212,32 +212,22 @@ public class MapView extends GLSurfaceView {
 
 	/**
 	 * @return the map database which is used for reading map files.
-	 * @throws UnsupportedOperationException
-	 *             if the current MapGenerator works with an Internet connection.
 	 */
 	public IMapDatabase getMapDatabase() {
-		if (mMapGenerator.requiresInternetConnection()) {
-			throw new UnsupportedOperationException();
-		}
 		return mMapDatabase;
 	}
 
 	/**
 	 * @return the currently used map file.
-	 * @throws UnsupportedOperationException
-	 *             if the current MapGenerator mode works with an Internet connection.
 	 */
 	public String getMapFile() {
-		if (mMapGenerator.requiresInternetConnection()) {
-			throw new UnsupportedOperationException();
-		}
 		return mMapFile;
 	}
 
 	/**
 	 * @return the currently used MapGenerator (may be null).
 	 */
-	public MapGenerator getMapGenerator() {
+	public IMapGenerator getMapGenerator() {
 		return mMapGenerator;
 	}
 
@@ -359,24 +349,12 @@ public class MapView extends GLSurfaceView {
 	 * @param mapFile
 	 *            the path to the map file.
 	 * @return true if the map file was set correctly, false otherwise.
-	 * @throws UnsupportedOperationException
-	 *             if the current MapGenerator mode works with an Internet connection.
 	 */
 	public boolean setMapFile(String mapFile) {
 		FileOpenResult fileOpenResult = null;
 
-		if (mMapGenerator.requiresInternetConnection()) {
-			throw new UnsupportedOperationException();
-		}
 		Log.d(TAG, "set mapfile " + mapFile);
-		// if (mapFile == null) {
-		// if (mMapDatabase instanceof org.mapsforge.database.postgis.MapDatabase) {
-		// fileOpenResult = mMapDatabase.openFile(null);
-		// } else {
-		// // no map file specified
-		// return false;
-		// }
-		// } else
+
 		if (mapFile != null && mapFile.equals(mMapFile)) {
 			// same map file as before
 			return false;
@@ -419,9 +397,10 @@ public class MapView extends GLSurfaceView {
 			Log.d(TAG, "mapfile set");
 			return true;
 		}
+
 		mMapFile = null;
-		// clearAndRedrawMapView();
 		Log.d(TAG, "loading mapfile failed");
+
 		return false;
 	}
 
@@ -431,7 +410,7 @@ public class MapView extends GLSurfaceView {
 	 * @param mapGenerator
 	 *            the new MapGenerator.
 	 */
-	public void setMapGenerator(MapGenerator mapGenerator) {
+	public void setMapGenerator(IMapGenerator mapGenerator) {
 
 		if (mMapGenerator != mapGenerator) {
 			setMapGeneratorInternal(mapGenerator);
@@ -440,7 +419,7 @@ public class MapView extends GLSurfaceView {
 		}
 	}
 
-	private void setMapGeneratorInternal(MapGenerator mapGenerator) {
+	private void setMapGeneratorInternal(IMapGenerator mapGenerator) {
 		if (mapGenerator == null) {
 			throw new IllegalArgumentException("mapGenerator must not be null");
 		}
@@ -504,15 +483,12 @@ public class MapView extends GLSurfaceView {
 	 *            the internal rendering theme.
 	 * @throws IllegalArgumentException
 	 *             if the supplied internalRenderTheme is null.
-	 * @throws UnsupportedOperationException
-	 *             if the current MapGenerator does not support render themes.
 	 */
 	public void setRenderTheme(InternalRenderTheme internalRenderTheme) {
 		if (internalRenderTheme == null) {
 			throw new IllegalArgumentException("render theme must not be null");
-		} else if (mMapGenerator.requiresInternetConnection()) {
-			throw new UnsupportedOperationException();
 		}
+
 		Log.d(TAG, "set rendertheme " + internalRenderTheme);
 		mJobParameters = new JobParameters(internalRenderTheme, mJobParameters.textScale);
 
@@ -526,16 +502,12 @@ public class MapView extends GLSurfaceView {
 	 *            the path to the XML file which defines the rendering theme.
 	 * @throws IllegalArgumentException
 	 *             if the supplied internalRenderTheme is null.
-	 * @throws UnsupportedOperationException
-	 *             if the current MapGenerator does not support render themes.
 	 * @throws FileNotFoundException
 	 *             if the supplied file does not exist, is a directory or cannot be read.
 	 */
 	public void setRenderTheme(String renderThemePath) throws FileNotFoundException {
 		if (renderThemePath == null) {
 			throw new IllegalArgumentException("render theme path must not be null");
-		} else if (mMapGenerator.requiresInternetConnection()) {
-			throw new UnsupportedOperationException();
 		}
 
 		JobTheme jobTheme = new ExternalRenderTheme(renderThemePath);
@@ -650,10 +622,9 @@ public class MapView extends GLSurfaceView {
 	boolean hasValidCenter() {
 		if (!mMapViewPosition.isValid()) {
 			return false;
-		} else if (!mMapGenerator.requiresInternetConnection()
-				&& (!mMapDatabase.hasOpenFile() || !mMapDatabase.getMapFileInfo().boundingBox
-						.contains(getMapPosition()
-								.getMapCenter()))) {
+		} else if (!mMapDatabase.hasOpenFile()
+				|| !mMapDatabase.getMapFileInfo().boundingBox.contains(getMapPosition()
+						.getMapCenter())) {
 			return false;
 		}
 

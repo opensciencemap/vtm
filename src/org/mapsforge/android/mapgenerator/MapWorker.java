@@ -19,14 +19,14 @@ import org.mapsforge.android.MapView;
 import org.mapsforge.android.utils.PausableThread;
 
 /**
- * A MapWorker uses a {@link MapGenerator} to generate map tiles. It runs in a separate thread to avoid blocking the UI
+ * A MapWorker uses a {@link IMapGenerator} to generate map tiles. It runs in a separate thread to avoid blocking the UI
  * thread.
  */
 public class MapWorker extends PausableThread {
 	private static final String THREAD_NAME = "MapWorker";
 
 	private final JobQueue mJobQueue;
-	private MapGenerator mMapGenerator;
+	private IMapGenerator mMapGenerator;
 	private MapRenderer mMapRenderer;
 
 	/**
@@ -42,7 +42,7 @@ public class MapWorker extends PausableThread {
 	 * @param mapGenerator
 	 *            the MapGenerator which this MapWorker should use.
 	 */
-	public void setMapGenerator(MapGenerator mapGenerator) {
+	public void setMapGenerator(IMapGenerator mapGenerator) {
 		mMapGenerator = mapGenerator;
 	}
 

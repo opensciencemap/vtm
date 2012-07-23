@@ -14,13 +14,10 @@
  */
 package org.mapsforge.android.mapgenerator;
 
-import java.io.Serializable;
-
 /**
  * A JobParameters instance is a simple DTO to store the rendering parameters for a job.
  */
-public class JobParameters implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class JobParameters {
 
 	/**
 	 * The render theme which should be used.

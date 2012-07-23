@@ -189,7 +189,7 @@ abstract class Rule {
 
 	abstract boolean matchesWay(Tag[] tags, byte zoomLevel, int closed);
 
-	void matchNode(RenderCallback renderCallback, Tag[] tags, byte zoomLevel) {
+	void matchNode(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel) {
 		if (matchesNode(tags, zoomLevel)) {
 			for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
 				mRenderInstructionArray[i].renderNode(renderCallback, tags);
@@ -200,7 +200,7 @@ abstract class Rule {
 		}
 	}
 
-	void matchWay(RenderCallback renderCallback, Tag[] tags, byte zoomLevel,
+	void matchWay(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel,
 			int closed,
 			List<RenderInstruction> matchingList) {
 

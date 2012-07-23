@@ -14,7 +14,6 @@
  */
 package org.mapsforge.android;
 
-import org.mapsforge.android.mapgenerator.MapGenerator;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.MapPosition;
 
@@ -64,10 +63,7 @@ public abstract class MapActivity extends Activity {
 				MODE_PRIVATE);
 		if (containsMapViewPosition(sharedPreferences)) {
 
-			MapGenerator mapGenerator = mapView.getMapGenerator();
-
-			if (!mapGenerator.requiresInternetConnection()
-					&& sharedPreferences.contains(KEY_MAP_FILE)) {
+			if (sharedPreferences.contains(KEY_MAP_FILE)) {
 				// get and set the map file
 				mapView.setMapFile(sharedPreferences.getString(KEY_MAP_FILE, null));
 			}
@@ -106,8 +102,7 @@ public abstract class MapActivity extends Activity {
 			editor.putInt(KEY_ZOOM_LEVEL, mapPosition.zoomLevel);
 		}
 
-		if (!mMapView.getMapGenerator().requiresInternetConnection()
-				&& mMapView.getMapFile() != null) {
+		if (mMapView.getMapFile() != null) {
 			// save the map file
 			editor.putString(KEY_MAP_FILE, mMapView.getMapFile());
 		}

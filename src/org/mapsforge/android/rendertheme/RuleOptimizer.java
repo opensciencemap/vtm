@@ -15,10 +15,9 @@
 package org.mapsforge.android.rendertheme;
 
 import java.util.Stack;
-import java.util.logging.Logger;
 
 final class RuleOptimizer {
-	private static final Logger LOG = Logger.getLogger(RuleOptimizer.class.getName());
+	// private static final Logger LOG = Logger.getLogger(RuleOptimizer.class.getName());
 
 	private static AttributeMatcher optimizeKeyMatcher(AttributeMatcher attributeMatcher,
 			Stack<Rule> ruleStack) {
