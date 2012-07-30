@@ -61,14 +61,7 @@ public class MeshLayer extends Layer {
 				curVertices[outPos++] = (float) tri.points[i].getY();
 
 			}
-			// System.out.println("" +
-			// (float) tri.points[0].getX() + "/" + (float) tri.points[0].getY()
-			// + ", " +
-			// (float) tri.points[1].getX() + "/" + (float) tri.points[1].getY()
-			// + ", " +
-			// (float) tri.points[2].getX() + "/" + (float) tri.points[2].getY());
 		}
-		// System.out.println("---");
 		curItem.used = outPos;
 		verticesCnt += poly.getTriangles().size() * 3;
 	}

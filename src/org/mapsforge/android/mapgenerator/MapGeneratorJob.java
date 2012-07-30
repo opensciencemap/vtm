@@ -45,7 +45,7 @@ public class MapGeneratorJob implements Comparable<MapGeneratorJob>, Serializabl
 	public final MapTile tile;
 
 	private transient int mHashCodeValue;
-	private final MapGenerator mMapGenerator;
+	private final IMapGenerator mMapGenerator;
 	private transient double mPriority;
 
 	/**
@@ -97,7 +97,7 @@ public class MapGeneratorJob implements Comparable<MapGeneratorJob>, Serializabl
 	 * @param _debugSettings
 	 *            the debug settings for this job.
 	 */
-	public MapGeneratorJob(MapTile _tile, MapGenerator mapGenerator,
+	public MapGeneratorJob(MapTile _tile, IMapGenerator mapGenerator,
 			JobParameters _jobParameters, DebugSettings _debugSettings) {
 		tile = _tile;
 		mMapGenerator = mapGenerator;

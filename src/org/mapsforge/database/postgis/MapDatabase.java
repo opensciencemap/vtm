@@ -26,7 +26,7 @@ import java.util.Properties;
 
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
-import org.mapsforge.core.SphericalMercator;
+import org.mapsforge.core.WebMercator;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
 import org.mapsforge.database.FileOpenResult;
@@ -54,7 +54,7 @@ public class MapDatabase implements IMapDatabase {
 	private final MapFileInfo mMapInfo =
 			new MapFileInfo(new BoundingBox(-180, -85, 180, 85),
 					new Byte((byte) 14), new GeoPoint(53.11, 8.85),
-					SphericalMercator.NAME,
+					WebMercator.NAME,
 					0, 0, 0, "de", "yo!", "hannes");
 	// new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
 	// new Byte((byte) 0), null, "Mercator",

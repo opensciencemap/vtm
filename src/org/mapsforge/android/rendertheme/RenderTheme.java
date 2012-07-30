@@ -141,7 +141,7 @@ public class RenderTheme {
 	 * @param zoomLevel
 	 *            ...
 	 */
-	public void matchNode(RenderCallback renderCallback, Tag[] tags, byte zoomLevel) {
+	public void matchNode(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel) {
 		// List<RenderInstruction> matchingList = matchingListNode;
 		// MatchingCacheKey matchingCacheKey = matchingCacheKeyNode;
 		//
@@ -214,7 +214,7 @@ public class RenderTheme {
 	 * @param changed
 	 *            ...
 	 */
-	public void matchWay(RenderCallback renderCallback, Tag[] tags, byte zoomLevel,
+	public void matchWay(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel,
 			boolean closed, boolean changed) {
 		RenderInstruction[] renderInstructions = null;
 

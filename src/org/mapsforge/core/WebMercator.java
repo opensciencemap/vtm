@@ -18,7 +18,7 @@ package org.mapsforge.core;
 /**
  * 
  */
-public class SphericalMercator {
+public class WebMercator {
 	/**
 	 * 
 	 */

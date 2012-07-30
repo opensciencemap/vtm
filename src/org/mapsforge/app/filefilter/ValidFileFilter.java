@@ -12,30 +12,18 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.tilemap.filefilter;
+package org.mapsforge.app.filefilter;
 
-import java.io.File;
+import java.io.FileFilter;
 
 import org.mapsforge.database.FileOpenResult;
-import org.mapsforge.database.IMapDatabase;
-import org.mapsforge.database.mapfile.MapDatabase;
 
 /**
- * Accepts all valid map files.
+ * An extension of the {@link FileFilter} interface.
  */
-public final class ValidMapFile implements ValidFileFilter {
-	private FileOpenResult fileOpenResult;
-
-	@Override
-	public boolean accept(File file) {
-		IMapDatabase mapDatabase = new MapDatabase();
-		this.fileOpenResult = mapDatabase.openFile(file);
-		mapDatabase.closeFile();
-		return this.fileOpenResult.isSuccess();
-	}
-
-	@Override
-	public FileOpenResult getFileOpenResult() {
-		return this.fileOpenResult;
-	}
+public interface ValidFileFilter extends FileFilter {
+	/**
+	 * @return the result of the last {@link #accept} call (might be null).
+	 */
+	FileOpenResult getFileOpenResult();
 }

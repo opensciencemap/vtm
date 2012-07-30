@@ -22,10 +22,10 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.mapsforge.android.MapView;
+import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.JobTheme;
-import org.mapsforge.android.mapgenerator.MapGenerator;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
-import org.mapsforge.android.rendertheme.RenderCallback;
+import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.RenderThemeHandler;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
@@ -48,11 +48,13 @@ import android.util.Log;
 /**
  * A DatabaseRenderer renders map tiles by reading from a {@link MapDatabase}.
  */
-public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatabaseCallback {
+public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
+		IMapDatabaseCallback {
 	private static String TAG = DatabaseRenderer.class.getName();
 	private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 12);
 	private static final byte LAYERS = 11;
-	private static final Paint PAINT_WATER_TILE_HIGHTLIGHT = new Paint(Paint.ANTI_ALIAS_FLAG);
+	private static final Paint PAINT_WATER_TILE_HIGHTLIGHT = new Paint(
+			Paint.ANTI_ALIAS_FLAG);
 	private static final double STROKE_INCREASE = 1.5;
 	private static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 
@@ -151,7 +153,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 		PAINT_WATER_TILE_HIGHTLIGHT.setColor(Color.CYAN);
 		// mCoordinates = new float[1024];
 
-		mTileBitmap = Bitmap.createBitmap(Tile.TILE_SIZE * 2, Tile.TILE_SIZE * 2, Bitmap.Config.RGB_565);
+		mTileBitmap = Bitmap.createBitmap(Tile.TILE_SIZE * 2, Tile.TILE_SIZE * 2,
+				Bitmap.Config.RGB_565);
 
 	}
 
@@ -219,7 +222,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 		}
 		time_load = System.currentTimeMillis() - time_load;
 
-		mNodes = mLabelPlacement.placeLabels(mNodes, mPointSymbols, mAreaLabels, mCurrentTile);
+		mNodes = mLabelPlacement.placeLabels(mNodes, mPointSymbols, mAreaLabels,
+				mCurrentTile);
 
 		long time_draw = System.currentTimeMillis();
 
@@ -240,7 +244,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 		}
 
 		if (mapGeneratorJob.debugSettings.mDrawTileCoordinates) {
-			mCanvasRasterer.drawTileCoordinates(mCurrentTile, time_load, time_draw, _nodes, _nodesDropped);
+			mCanvasRasterer.drawTileCoordinates(mCurrentTile, time_load, time_draw,
+					_nodes, _nodesDropped);
 		}
 
 		clearLists();
@@ -282,7 +287,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 	}
 
 	@Override
-	public void renderAreaCaption(String textKey, float verticalOffset, Paint paint, Paint stroke) {
+	public void renderAreaCaption(String textKey, float verticalOffset, Paint paint,
+			Paint stroke) {
 		// mapDatabase.readTag(caption);
 		// if (caption.value != null) {
 		// float[] centerPosition = GeometryUtils
@@ -312,7 +318,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 	}
 
 	@Override
-	public void renderPointOfInterestCaption(String textKey, float verticalOffset, Paint paint, Paint stroke) {
+	public void renderPointOfInterestCaption(String textKey, float verticalOffset,
+			Paint paint, Paint stroke) {
 		// mapDatabase.readTag(caption);
 		// if (caption.value != null) {
 		// nodes.add(new PointTextContainer(caption.value, poiX, poiY + verticalOffset, paint, stroke));
@@ -327,8 +334,9 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 
 	@Override
 	public void renderPointOfInterestSymbol(Bitmap symbol) {
-		mPointSymbols.add(new SymbolContainer(symbol, mPoiX - (symbol.getWidth() >> 1), mPoiY
-				- (symbol.getHeight() >> 1)));
+		mPointSymbols.add(new SymbolContainer(symbol, mPoiX - (symbol.getWidth() >> 1),
+				mPoiY
+						- (symbol.getHeight() >> 1)));
 	}
 
 	@Override
@@ -359,7 +367,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 	// private byte mPrevLayer = 0;
 
 	@Override
-	public void renderWay(byte layer, Tag[] tags, float[] wayNodes, int[] wayLengths, boolean changed) {
+	public void renderWay(byte layer, Tag[] tags, float[] wayNodes, int[] wayLengths,
+			boolean changed) {
 		// if (mCoords == null)
 		// mCoords = mMapDatabase.getCoordinates();
 
@@ -475,7 +484,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 
 	@Override
 	public void renderWay(Line line) {
-		List<ShapeContainer> c = mDrawingLayer.add(line.level, mWayDataContainer, line.paint);
+		List<ShapeContainer> c = mDrawingLayer.add(line.level, mWayDataContainer,
+				line.paint);
 
 		if (mCurLevelContainer1 == null)
 			mCurLevelContainer1 = c;
@@ -486,13 +496,16 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 	@Override
 	public void renderArea(Area area) {
 		if (area.paintFill != null)
-			mCurLevelContainer1 = mDrawingLayer.add(area.level, mWayDataContainer, area.paintFill);
+			mCurLevelContainer1 = mDrawingLayer.add(area.level, mWayDataContainer,
+					area.paintFill);
 		if (area.paintOutline != null)
-			mCurLevelContainer1 = mDrawingLayer.add(area.level, mWayDataContainer, area.paintOutline);
+			mCurLevelContainer1 = mDrawingLayer.add(area.level, mWayDataContainer,
+					area.paintOutline);
 	}
 
 	@Override
-	public void renderWaySymbol(Bitmap symbolBitmap, boolean alignCenter, boolean repeatSymbol) {
+	public void renderWaySymbol(Bitmap symbolBitmap, boolean alignCenter,
+			boolean repeatSymbol) {
 		// WayDecorator.renderSymbol(symbolBitmap, alignCenter, repeatSymbol,
 		// coordinates,
 		// waySymbols);
@@ -506,11 +519,6 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 
 	String getWayName() {
 		return mMapDatabase.readString(mWayDataContainer.textPos[0]);
-	}
-
-	@Override
-	public boolean requiresInternetConnection() {
-		return false;
 	}
 
 	@Override
@@ -547,7 +555,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 	private static float scaleLatitude(float latitude) {
 		double sinLatitude = FloatMath.sin(latitude * PI180);
 
-		return (float) (0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / PIx4) * mCurrentTileZoom
+		return (float) (0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / PIx4)
+				* mCurrentTileZoom
 				- mCurrentTileY;
 	}
 
@@ -560,7 +569,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 	 */
 
 	private static float scaleLongitude(float longitude) {
-		return (float) ((longitude / 1000000.0 + 180) / 360 * mCurrentTileZoom) - mCurrentTileX;
+		return (float) ((longitude / 1000000.0 + 180) / 360 * mCurrentTileZoom)
+				- mCurrentTileX;
 	}
 
 	/**
@@ -571,7 +581,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback, IMapDatab
 	 */
 	private static void setScaleStrokeWidth(byte zoomLevel) {
 		int zoomLevelDiff = Math.max(zoomLevel - STROKE_MIN_ZOOM_LEVEL, 0);
-		DatabaseRenderer.renderTheme.scaleStrokeWidth((float) Math.pow(STROKE_INCREASE, zoomLevelDiff));
+		DatabaseRenderer.renderTheme.scaleStrokeWidth((float) Math.pow(STROKE_INCREASE,
+				zoomLevelDiff));
 	}
 
 	@Override

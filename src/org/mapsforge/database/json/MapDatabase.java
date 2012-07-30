@@ -41,8 +41,8 @@ public class MapDatabase implements IMapDatabase {
 
 	private boolean mOpenFile = false;
 
-	private static double radius = 6378137;
-	private static double D2R = Math.PI / 180;
+	// private static double radius = 6378137;
+	// private static double D2R = Math.PI / 180;
 
 	// private static double HALF_PI = Math.PI / 2;
 
@@ -65,8 +65,8 @@ public class MapDatabase implements IMapDatabase {
 		float lat2 = (float) MercatorProjection
 				.pixelYToLatitude(cy + 100, tile.zoomLevel);
 
-		double lonRadians = (D2R * lon1);
-		double latRadians = (D2R * lat1);
+		// double lonRadians = (D2R * lon1);
+		// double latRadians = (D2R * lat1);
 
 		// spherical mercator projection
 		// lon1 = (float) (radius * lonRadians);

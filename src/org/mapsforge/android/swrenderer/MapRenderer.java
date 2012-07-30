@@ -29,7 +29,7 @@ import javax.microedition.khronos.opengles.GL10;
 import org.mapsforge.android.DebugSettings;
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.JobParameters;
-import org.mapsforge.android.mapgenerator.MapGenerator;
+import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
 import org.mapsforge.android.mapgenerator.MapWorker;
 import org.mapsforge.android.mapgenerator.TileCacheKey;
@@ -184,7 +184,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 		mJobList.clear();
 
-		MapGenerator mapGenerator = mMapView.getMapGenerator();
+		IMapGenerator mapGenerator = mMapView.getMapGenerator();
 		int tiles = 0;
 		for (long tileY = tileTop - 1; tileY <= tileBottom + 1; tileY++) {
 			for (long tileX = tileLeft - 1; tileX <= tileRight + 1; tileX++) {

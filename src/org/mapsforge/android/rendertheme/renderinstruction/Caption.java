@@ -16,7 +16,7 @@ package org.mapsforge.android.rendertheme.renderinstruction;
 
 import java.util.Locale;
 
-import org.mapsforge.android.rendertheme.RenderCallback;
+import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderThemeHandler;
 import org.mapsforge.core.Tag;
 import org.xml.sax.Attributes;
@@ -121,12 +121,12 @@ public final class Caption implements RenderInstruction {
 	}
 
 	@Override
-	public void renderNode(RenderCallback renderCallback, Tag[] tags) {
+	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
 		renderCallback.renderPointOfInterestCaption(mTextKey, mDy, mPaint, mStroke);
 	}
 
 	@Override
-	public void renderWay(RenderCallback renderCallback, Tag[] tags) {
+	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
 		renderCallback.renderAreaCaption(mTextKey, mDy, mPaint, mStroke);
 	}
 

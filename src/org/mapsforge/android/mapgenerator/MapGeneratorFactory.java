@@ -27,7 +27,7 @@ public final class MapGeneratorFactory {
 	 *            A collection of attributes which includes the desired MapGenerator.
 	 * @return a new MapGenerator instance.
 	 */
-	public static MapGenerator createMapGenerator(AttributeSet attributeSet) {
+	public static IMapGenerator createMapGenerator(AttributeSet attributeSet) {
 		String mapGeneratorName = attributeSet.getAttributeValue(null, MAP_GENERATOR_ATTRIBUTE_NAME);
 		if (mapGeneratorName == null) {
 			return new org.mapsforge.android.glrenderer.DatabaseRenderer();
@@ -42,7 +42,7 @@ public final class MapGeneratorFactory {
 	 *            the internal MapGenerator implementation.
 	 * @return a new MapGenerator instance.
 	 */
-	public static MapGenerator createMapGenerator(MapGeneratorInternal mapGeneratorInternal) {
+	public static IMapGenerator createMapGenerator(MapGeneratorInternal mapGeneratorInternal) {
 		switch (mapGeneratorInternal) {
 			case SW_RENDERER:
 				return new org.mapsforge.android.swrenderer.DatabaseRenderer();

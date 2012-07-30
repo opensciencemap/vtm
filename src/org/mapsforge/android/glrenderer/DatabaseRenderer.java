@@ -21,16 +21,16 @@ import java.util.ArrayList;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.mapsforge.android.MapView;
+import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.JobTheme;
-import org.mapsforge.android.mapgenerator.MapGenerator;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
-import org.mapsforge.android.rendertheme.RenderCallback;
+import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.RenderThemeHandler;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
 import org.mapsforge.core.GeoPoint;
-import org.mapsforge.core.SphericalMercator;
+import org.mapsforge.core.WebMercator;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
 import org.mapsforge.database.IMapDatabase;
@@ -46,7 +46,7 @@ import android.util.Log;
 /**
  * 
  */
-public class DatabaseRenderer implements MapGenerator, RenderCallback,
+public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 		IMapDatabaseCallback {
 	private static String TAG = DatabaseRenderer.class.getName();
 
@@ -79,6 +79,8 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 
 	private int mDrawingLayer;
 	private int mLevels;
+
+	private boolean useSphericalMercator = false;
 
 	/**
 	 * 
@@ -420,7 +422,7 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 		if (mMapDatabase != null && mMapDatabase.hasOpenFile()) {
 			MapFileInfo mapFileInfo = mMapDatabase.getMapFileInfo();
 
-			if (SphericalMercator.NAME.equals(mapFileInfo.projectionName)) {
+			if (WebMercator.NAME.equals(mapFileInfo.projectionName)) {
 				Log.d(TAG, "using Spherical Mercator");
 
 				useSphericalMercator = true;
@@ -443,11 +445,6 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 	@Override
 	public byte getZoomLevelMax() {
 		return ZOOM_MAX;
-	}
-
-	@Override
-	public boolean requiresInternetConnection() {
-		return false;
 	}
 
 	private static boolean setRenderTheme(JobTheme jobTheme) {
@@ -488,8 +485,6 @@ public class DatabaseRenderer implements MapGenerator, RenderCallback,
 	public MapRenderer getMapRenderer(MapView mapView) {
 		return new MapRenderer(mapView);
 	}
-
-	private boolean useSphericalMercator = false;
 
 	@Override
 	public void setMapDatabase(IMapDatabase mapDatabase) {

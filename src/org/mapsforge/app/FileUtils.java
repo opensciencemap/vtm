@@ -12,12 +12,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.tilemap;
+package org.mapsforge.app;
 
 import java.text.DecimalFormat;
 
 import android.content.res.Resources;
-import org.mapsforge.tilemap.R;
 
 final class FileUtils {
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.00 ");
@@ -49,11 +48,14 @@ final class FileUtils {
 			return fileSize + " " + resources.getString(R.string.file_size_bytes);
 		} else {
 			if (fileSize < ONE_MEGABYTE) {
-				return DECIMAL_FORMAT.format(fileSize / ONE_KILOBYTE) + resources.getString(R.string.file_size_kb);
+				return DECIMAL_FORMAT.format(fileSize / ONE_KILOBYTE)
+						+ resources.getString(R.string.file_size_kb);
 			} else if (fileSize < ONE_GIGABYTE) {
-				return DECIMAL_FORMAT.format(fileSize / ONE_MEGABYTE) + resources.getString(R.string.file_size_mb);
+				return DECIMAL_FORMAT.format(fileSize / ONE_MEGABYTE)
+						+ resources.getString(R.string.file_size_mb);
 			}
-			return DECIMAL_FORMAT.format(fileSize / ONE_GIGABYTE) + resources.getString(R.string.file_size_gb);
+			return DECIMAL_FORMAT.format(fileSize / ONE_GIGABYTE)
+					+ resources.getString(R.string.file_size_gb);
 		}
 	}
 

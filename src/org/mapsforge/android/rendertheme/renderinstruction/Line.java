@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import org.mapsforge.android.rendertheme.RenderCallback;
+import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderThemeHandler;
 import org.mapsforge.core.Tag;
 import org.xml.sax.Attributes;
@@ -164,12 +164,12 @@ public final class Line implements RenderInstruction {
 	}
 
 	@Override
-	public void renderNode(RenderCallback renderCallback, Tag[] tags) {
+	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
 		// do nothing
 	}
 
 	@Override
-	public void renderWay(RenderCallback renderCallback, Tag[] tags) {
+	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
 		// renderCallback.renderWay(mPaint, mLevel, mColor, mStrokeWidth, mRound, mOutline);
 		renderCallback.renderWay(this);
 	}

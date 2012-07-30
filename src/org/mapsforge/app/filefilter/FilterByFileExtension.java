@@ -12,18 +12,36 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.tilemap.filefilter;
+package org.mapsforge.app.filefilter;
 
+import java.io.File;
 import java.io.FileFilter;
 
-import org.mapsforge.database.FileOpenResult;
-
 /**
- * An extension of the {@link FileFilter} interface.
+ * Accepts all readable directories and all readable files with a given extension.
  */
-public interface ValidFileFilter extends FileFilter {
+public class FilterByFileExtension implements FileFilter {
+	private final String extension;
+
 	/**
-	 * @return the result of the last {@link #accept} call (might be null).
+	 * @param extension
+	 *            the allowed file name extension.
 	 */
-	FileOpenResult getFileOpenResult();
+	public FilterByFileExtension(String extension) {
+		this.extension = extension;
+	}
+
+	@Override
+	public boolean accept(File file) {
+		// accept only readable files
+		if (file.canRead()) {
+			if (file.isDirectory()) {
+				// accept all directories
+				return true;
+			} else if (file.isFile() && file.getName().endsWith(this.extension)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

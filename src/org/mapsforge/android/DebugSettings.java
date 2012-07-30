@@ -14,13 +14,10 @@
  */
 package org.mapsforge.android;
 
-import java.io.Serializable;
-
 /**
  * A simple DTO to stores flags for debugging rendered map tiles.
  */
-public class DebugSettings implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class DebugSettings {
 
 	/**
 	 * True if drawing of tile coordinates is enabled, false otherwise.
@@ -47,7 +44,8 @@ public class DebugSettings implements Serializable {
 	 * @param disablePolygons
 	 *            if highlighting of water tiles is enabled.
 	 */
-	public DebugSettings(boolean drawTileCoordinates, boolean drawTileFrames, boolean disablePolygons) {
+	public DebugSettings(boolean drawTileCoordinates, boolean drawTileFrames,
+			boolean disablePolygons) {
 		mDrawTileCoordinates = drawTileCoordinates;
 		mDrawTileFrames = drawTileFrames;
 		mDisablePolygons = disablePolygons;

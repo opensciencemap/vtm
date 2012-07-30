@@ -1,4 +1,4 @@
-package org.mapsforge.tilemap;
+package org.mapsforge.app;
 
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
@@ -11,19 +11,19 @@ import org.mapsforge.android.MapController;
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.MapDatabaseFactory;
 import org.mapsforge.android.mapgenerator.MapDatabaseInternal;
-import org.mapsforge.android.mapgenerator.MapGenerator;
 import org.mapsforge.android.rendertheme.InternalRenderTheme;
 import org.mapsforge.android.utils.AndroidUtils;
+import org.mapsforge.app.filefilter.FilterByFileExtension;
+import org.mapsforge.app.filefilter.ValidMapFile;
+import org.mapsforge.app.filefilter.ValidRenderTheme;
+import org.mapsforge.app.filepicker.FilePicker;
+import org.mapsforge.app.preferences.EditPreferences;
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.MapFileInfo;
-import org.mapsforge.tilemap.filefilter.FilterByFileExtension;
-import org.mapsforge.tilemap.filefilter.ValidMapFile;
-import org.mapsforge.tilemap.filefilter.ValidRenderTheme;
-import org.mapsforge.tilemap.filepicker.FilePicker;
-import org.mapsforge.tilemap.preferences.EditPreferences;
 
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -175,13 +175,8 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		MapGenerator mapGenerator = mMapView.getMapGenerator();
 
-		// if (mapGenerator.requiresInternetConnection()) {
-		// menu.findItem(R.id.menu_info_map_file).setEnabled(false);
-		// } else {
 		// menu.findItem(R.id.menu_info_map_file).setEnabled(true);
-		// }
 
 		if (isShowMyLocationEnabled()) {
 			menu.findItem(R.id.menu_position_my_location_enable).setVisible(false);
@@ -195,23 +190,9 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 			menu.findItem(R.id.menu_position_my_location_disable).setEnabled(false);
 		}
 
-		if (mapGenerator.requiresInternetConnection()) {
-			menu.findItem(R.id.menu_position_map_center).setEnabled(false);
-		} else {
-			menu.findItem(R.id.menu_position_map_center).setEnabled(true);
-		}
-
-		if (mapGenerator.requiresInternetConnection()) {
-			menu.findItem(R.id.menu_render_theme).setEnabled(false);
-		} else {
-			menu.findItem(R.id.menu_render_theme).setEnabled(true);
-		}
-
-		if (mapGenerator.requiresInternetConnection()) {
-			menu.findItem(R.id.menu_mapfile).setEnabled(false);
-		} else {
-			menu.findItem(R.id.menu_mapfile).setEnabled(true);
-		}
+		menu.findItem(R.id.menu_position_map_center).setEnabled(true);
+		menu.findItem(R.id.menu_render_theme).setEnabled(true);
+		menu.findItem(R.id.menu_mapfile).setEnabled(true);
 
 		return true;
 	}
@@ -317,6 +298,7 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 		}
 	}
 
+	@TargetApi(11)
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -331,12 +313,6 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 			// actionBar.setListNavigationCallbacks(mSpinnerAdapter, this);
 			actionBar.setDisplayShowTitleEnabled(false);
 		}
-
-		// getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-		// getActionBar().setBackgroundDrawable(
-		// getResources().getDrawable(R.drawable.action_bar));
-		// // getActionBar().setDisplayShowTitleEnabled(false);
-		// getActionBar().setIcon(R.drawable.bar_globe2);
 
 		// set up the layout views
 		setContentView(R.layout.activity_advanced_map_viewer);
