@@ -58,7 +58,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 	private LineLayers mLineLayers;
 	private PolygonLayers mPolyLayers;
-	private MeshLayers mMeshLayers;
+	// private MeshLayers mMeshLayers;
 
 	private int mDrawingLayer;
 	private int mLevels;
@@ -365,10 +365,10 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 		mLineLayers = new LineLayers();
 		mPolyLayers = new PolygonLayers();
-		mMeshLayers = new MeshLayers();
+		// mMeshLayers = new MeshLayers();
 		mCurrentTile.lineLayers = mLineLayers;
 		mCurrentTile.polygonLayers = mPolyLayers;
-		mCurrentTile.meshLayers = mMeshLayers;
+		// mCurrentTile.meshLayers = mMeshLayers;
 
 		firstMatch = true;
 

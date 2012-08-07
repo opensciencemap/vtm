@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
-import org.mapsforge.android.mapgenerator.Theme;
 import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
@@ -44,8 +43,9 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	private static final byte LAYERS = 11;
 	private static final Paint PAINT_WATER_TILE_HIGHTLIGHT = new Paint(
 			Paint.ANTI_ALIAS_FLAG);
-	private static final double STROKE_INCREASE = 1.5;
-	private static final byte STROKE_MIN_ZOOM_LEVEL = 12;
+
+	// private static final double STROKE_INCREASE = 1.5;
+	// private static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 
 	private static byte getValidLayer(byte layer) {
 		if (layer < 0) {
@@ -65,9 +65,9 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	private List<PointTextContainer> mNodes;
 	private float mPoiX;
 	private float mPoiY;
-	private Theme mPreviousJobTheme;
-	private float mPreviousTextScale;
-	private byte mPreviousZoomLevel;
+	// private Theme mPreviousJobTheme;
+	// private float mPreviousTextScale;
+	// private byte mPreviousZoomLevel;
 	private static RenderTheme renderTheme;
 
 	private final List<WayTextContainer> mWayNames;
@@ -469,12 +469,12 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 		mWaySymbols.clear();
 	}
 
-	private void createWayLists() {
-		int levels = MapGenerator.renderTheme.getLevels();
-		for (byte i = LAYERS - 1; i >= 0; --i) {
-			mWays[i] = new LayerContainer(levels);
-		}
-	}
+	// private void createWayLists() {
+	// int levels = MapGenerator.renderTheme.getLevels();
+	// for (byte i = LAYERS - 1; i >= 0; --i) {
+	// mWays[i] = new LayerContainer(levels);
+	// }
+	// }
 
 	/**
 	 * Converts a latitude value into an Y coordinate on the current tile.
@@ -504,17 +504,17 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 				- mCurrentTileX;
 	}
 
-	/**
-	 * Sets the scale stroke factor for the given zoom level.
-	 * 
-	 * @param zoomLevel
-	 *            the zoom level for which the scale stroke factor should be set.
-	 */
-	private static void setScaleStrokeWidth(byte zoomLevel) {
-		int zoomLevelDiff = Math.max(zoomLevel - STROKE_MIN_ZOOM_LEVEL, 0);
-		MapGenerator.renderTheme.scaleStrokeWidth((float) Math.pow(STROKE_INCREASE,
-				zoomLevelDiff));
-	}
+	// /**
+	// * Sets the scale stroke factor for the given zoom level.
+	// *
+	// * @param zoomLevel
+	// * the zoom level for which the scale stroke factor should be set.
+	// */
+	// private static void setScaleStrokeWidth(byte zoomLevel) {
+	// int zoomLevelDiff = Math.max(zoomLevel - STROKE_MIN_ZOOM_LEVEL, 0);
+	// MapGenerator.renderTheme.scaleStrokeWidth((float) Math.pow(STROKE_INCREASE,
+	// zoomLevelDiff));
+	// }
 
 	@Override
 	public IMapDatabase getMapDatabase() {
