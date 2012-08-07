@@ -24,7 +24,7 @@ class GLMapTile extends MapTile {
 
 	LineLayers lineLayers;
 	PolygonLayers polygonLayers;
-	MeshLayers meshLayers;
+	// MeshLayers meshLayers;
 
 	boolean newData;
 	boolean loading;

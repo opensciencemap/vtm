@@ -30,7 +30,6 @@ import static android.opengl.GLES20.GL_SCISSOR_TEST;
 import static android.opengl.GLES20.GL_SRC_ALPHA;
 import static android.opengl.GLES20.GL_STENCIL_BUFFER_BIT;
 import static android.opengl.GLES20.GL_STENCIL_TEST;
-import static android.opengl.GLES20.GL_TRIANGLES;
 import static android.opengl.GLES20.GL_TRIANGLE_FAN;
 import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
 import static android.opengl.GLES20.GL_ZERO;
@@ -101,7 +100,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private static final String TAG = "MapRenderer";
 	private static final int MB = 1024 * 1024;
 
-	private boolean mTriangulate = false;
+	// private boolean mTriangulate = false;
 
 	private static int CACHE_TILES_MAX = 400;
 	private static int CACHE_TILES = CACHE_TILES_MAX;
@@ -693,46 +692,46 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	private int mLastBoundVBO;
 
-	private boolean drawTriangles(GLMapTile tile, int diff) {
-
-		if (tile.meshLayers == null || tile.meshLayers.array == null)
-			return true;
-
-		glScissor(tile.sx, tile.sy, tile.sw, tile.sh);
-
-		if (mLastBoundVBO != tile.polygonVBO.id) {
-			mLastBoundVBO = tile.polygonVBO.id;
-			glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
-
-			if (useHalfFloat) {
-				glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
-						OES_HALF_FLOAT, false, 0,
-						POLYGON_VERTICES_DATA_POS_OFFSET);
-			} else {
-				glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
-						GL_FLOAT, false, 0,
-						POLYGON_VERTICES_DATA_POS_OFFSET);
-			}
-
-			// glBindBuffer(GL_ARRAY_BUFFER, 0);
-		}
-		setMatrix(tile, diff);
-		glUniformMatrix4fv(gPolygonMatrixHandle, 1, false, mMVPMatrix, 0);
-
-		MeshLayer[] layers = tile.meshLayers.array;
-
-		for (int i = 0, n = layers.length; i < n; i++) {
-			MeshLayer l = layers[i];
-			glUniform4fv(gPolygonColorHandle, 1, l.colors, 0);
-
-			// glUniform4f(gPolygonColorHandle, 1, 0, 0, 1);
-
-			// System.out.println("draw: " + l.offset + " " + l.verticesCnt);
-			glDrawArrays(GL_TRIANGLES, l.offset, l.verticesCnt);
-		}
-
-		return true;
-	}
+	// private boolean drawTriangles(GLMapTile tile, int diff) {
+	//
+	// if (tile.meshLayers == null || tile.meshLayers.array == null)
+	// return true;
+	//
+	// glScissor(tile.sx, tile.sy, tile.sw, tile.sh);
+	//
+	// if (mLastBoundVBO != tile.polygonVBO.id) {
+	// mLastBoundVBO = tile.polygonVBO.id;
+	// glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
+	//
+	// if (useHalfFloat) {
+	// glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
+	// OES_HALF_FLOAT, false, 0,
+	// POLYGON_VERTICES_DATA_POS_OFFSET);
+	// } else {
+	// glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
+	// GL_FLOAT, false, 0,
+	// POLYGON_VERTICES_DATA_POS_OFFSET);
+	// }
+	//
+	// // glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// }
+	// setMatrix(tile, diff);
+	// glUniformMatrix4fv(gPolygonMatrixHandle, 1, false, mMVPMatrix, 0);
+	//
+	// MeshLayer[] layers = tile.meshLayers.array;
+	//
+	// for (int i = 0, n = layers.length; i < n; i++) {
+	// MeshLayer l = layers[i];
+	// glUniform4fv(gPolygonColorHandle, 1, l.colors, 0);
+	//
+	// // glUniform4f(gPolygonColorHandle, 1, 0, 0, 1);
+	//
+	// // System.out.println("draw: " + l.offset + " " + l.verticesCnt);
+	// glDrawArrays(GL_TRIANGLES, l.offset, l.verticesCnt);
+	// }
+	//
+	// return true;
+	// }
 
 	private boolean drawLines(GLMapTile tile, int diff) {
 		float z = 1;
@@ -961,37 +960,37 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 	}
 
-	private void drawProxyTriangles(GLMapTile tile) {
-		if (tile.parent != null && tile.parent.isDrawn) {
-			tile.parent.sx = tile.sx;
-			tile.parent.sy = tile.sy;
-			tile.parent.sw = tile.sw;
-			tile.parent.sh = tile.sh;
-			drawTriangles(tile.parent, -1);
-		} else {
-			int drawn = 0;
-
-			for (int i = 0; i < 4; i++) {
-				GLMapTile c = tile.child[i];
-
-				if (c != null && c.isDrawn && setTileScissor(c, 2)) {
-					drawTriangles(c, 1);
-					drawn++;
-				}
-			}
-
-			if (drawn < 4 && tile.parent != null) {
-				GLMapTile p = tile.parent.parent;
-				if (p != null && p.isDrawn) {
-					p.sx = tile.sx;
-					p.sy = tile.sy;
-					p.sw = tile.sw;
-					p.sh = tile.sh;
-					drawTriangles(p, -2);
-				}
-			}
-		}
-	}
+	// private void drawProxyTriangles(GLMapTile tile) {
+	// if (tile.parent != null && tile.parent.isDrawn) {
+	// tile.parent.sx = tile.sx;
+	// tile.parent.sy = tile.sy;
+	// tile.parent.sw = tile.sw;
+	// tile.parent.sh = tile.sh;
+	// drawTriangles(tile.parent, -1);
+	// } else {
+	// int drawn = 0;
+	//
+	// for (int i = 0; i < 4; i++) {
+	// GLMapTile c = tile.child[i];
+	//
+	// if (c != null && c.isDrawn && setTileScissor(c, 2)) {
+	// drawTriangles(c, 1);
+	// drawn++;
+	// }
+	// }
+	//
+	// if (drawn < 4 && tile.parent != null) {
+	// GLMapTile p = tile.parent.parent;
+	// if (p != null && p.isDrawn) {
+	// p.sx = tile.sx;
+	// p.sy = tile.sy;
+	// p.sw = tile.sw;
+	// p.sh = tile.sh;
+	// drawTriangles(p, -2);
+	// }
+	// }
+	// }
+	// }
 
 	private int uploadCnt = 0;
 
@@ -1048,68 +1047,68 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			tile.lineLayers = null;
 		}
 
-		if (!mTriangulate) {
-			if (useHalfFloat)
-				shortBuffer[uploadCnt * 2 + 1] = tile.polygonLayers
-						.compileLayerData(shortBuffer[uploadCnt * 2 + 1]);
-			else
-				floatBuffer[uploadCnt * 2 + 1] = tile.polygonLayers
-						.compileLayerData(floatBuffer[uploadCnt * 2 + 1]);
+		// if (!mTriangulate) {
+		if (useHalfFloat)
+			shortBuffer[uploadCnt * 2 + 1] = tile.polygonLayers
+					.compileLayerData(shortBuffer[uploadCnt * 2 + 1]);
+		else
+			floatBuffer[uploadCnt * 2 + 1] = tile.polygonLayers
+					.compileLayerData(floatBuffer[uploadCnt * 2 + 1]);
 
-			// Upload polygon data to vertex buffer object
-			if (tile.polygonLayers.size > 0) {
-				mBufferMemoryUsage -= tile.polygonVBO.size;
+		// Upload polygon data to vertex buffer object
+		if (tile.polygonLayers.size > 0) {
+			mBufferMemoryUsage -= tile.polygonVBO.size;
 
-				glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
-				// glBufferData(GL_ARRAY_BUFFER, 0, null,
-				// GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
+			// glBufferData(GL_ARRAY_BUFFER, 0, null,
+			// GL_DYNAMIC_DRAW);
 
-				if (useHalfFloat) {
-					tile.polygonVBO.size = tile.polygonLayers.size * SHORT_BYTES;
-					glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
-							shortBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
-				} else {
-					tile.polygonVBO.size = tile.polygonLayers.size * FLOAT_BYTES;
-					glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
-							floatBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
-				}
-				mBufferMemoryUsage += tile.polygonVBO.size;
-
+			if (useHalfFloat) {
+				tile.polygonVBO.size = tile.polygonLayers.size * SHORT_BYTES;
+				glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
+						shortBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
 			} else {
-				tile.polygonLayers = null;
+				tile.polygonVBO.size = tile.polygonLayers.size * FLOAT_BYTES;
+				glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
+						floatBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
 			}
+			mBufferMemoryUsage += tile.polygonVBO.size;
+
+		} else {
+			tile.polygonLayers = null;
 		}
-		else {
-			if (useHalfFloat)
-				shortBuffer[uploadCnt * 2 + 1] = tile.meshLayers
-						.compileLayerData(shortBuffer[uploadCnt * 2 + 1]);
-			else
-				floatBuffer[uploadCnt * 2 + 1] = tile.meshLayers
-						.compileLayerData(floatBuffer[uploadCnt * 2 + 1]);
-
-			// Upload triangle data to vertex buffer object
-			if (tile.meshLayers.size > 0) {
-				mBufferMemoryUsage -= tile.polygonVBO.size;
-
-				glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
-				// glBufferData(GL_ARRAY_BUFFER, 0, null,
-				// GL_DYNAMIC_DRAW);
-
-				if (useHalfFloat) {
-					tile.polygonVBO.size = tile.meshLayers.size * SHORT_BYTES;
-					glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
-							shortBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
-				} else {
-					tile.polygonVBO.size = tile.meshLayers.size * FLOAT_BYTES;
-					glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
-							floatBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
-				}
-				mBufferMemoryUsage += tile.polygonVBO.size;
-
-			} else {
-				tile.meshLayers = null;
-			}
-		}
+		// }
+		// else {
+		// if (useHalfFloat)
+		// shortBuffer[uploadCnt * 2 + 1] = tile.meshLayers
+		// .compileLayerData(shortBuffer[uploadCnt * 2 + 1]);
+		// else
+		// floatBuffer[uploadCnt * 2 + 1] = tile.meshLayers
+		// .compileLayerData(floatBuffer[uploadCnt * 2 + 1]);
+		//
+		// // Upload triangle data to vertex buffer object
+		// if (tile.meshLayers.size > 0) {
+		// mBufferMemoryUsage -= tile.polygonVBO.size;
+		//
+		// glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
+		// // glBufferData(GL_ARRAY_BUFFER, 0, null,
+		// // GL_DYNAMIC_DRAW);
+		//
+		// if (useHalfFloat) {
+		// tile.polygonVBO.size = tile.meshLayers.size * SHORT_BYTES;
+		// glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
+		// shortBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
+		// } else {
+		// tile.polygonVBO.size = tile.meshLayers.size * FLOAT_BYTES;
+		// glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
+		// floatBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
+		// }
+		// mBufferMemoryUsage += tile.polygonVBO.size;
+		//
+		// } else {
+		// tile.meshLayers = null;
+		// }
+		// }
 		tile.newData = false;
 		tile.isDrawn = true;
 		tile.isLoading = false;
@@ -1235,39 +1234,39 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		glUseProgram(gPolygonProgram);
 		glEnableVertexAttribArray(gPolygonVertexPositionHandle);
 
-		if (!mTriangulate) {
-			glDisable(GL_BLEND);
-			// Draw Polygons
-			glEnable(GL_STENCIL_TEST);
+		// if (!mTriangulate) {
+		glDisable(GL_BLEND);
+		// Draw Polygons
+		glEnable(GL_STENCIL_TEST);
 
-			// glEnableVertexAttribArray(gPolygonVertexPositionHandle);
+		// glEnableVertexAttribArray(gPolygonVertexPositionHandle);
 
-			for (int i = 0; i < tileCnt; i++) {
-				if (tiles[i].isVisible) {
-					GLMapTile tile = tiles[i];
+		for (int i = 0; i < tileCnt; i++) {
+			if (tiles[i].isVisible) {
+				GLMapTile tile = tiles[i];
 
-					if (tile.isDrawn)
-						drawPolygons(tile, 0);
-					else
-						drawProxyPolygons(tile);
-				}
+				if (tile.isDrawn)
+					drawPolygons(tile, 0);
+				else
+					drawProxyPolygons(tile);
 			}
-			// GlUtils.checkGlError("polygons");
-			glDisable(GL_STENCIL_TEST);
-		} else {
-			// Draw Triangles
-			for (int i = 0; i < tileCnt; i++) {
-				if (tiles[i].isVisible) {
-					GLMapTile tile = tiles[i];
-
-					if (tile.isDrawn)
-						drawTriangles(tile, 0);
-					else
-						drawProxyTriangles(tile);
-				}
-			}
-			// GlUtils.checkGlError("triangles");
 		}
+		// GlUtils.checkGlError("polygons");
+		glDisable(GL_STENCIL_TEST);
+		// } else {
+		// // Draw Triangles
+		// for (int i = 0; i < tileCnt; i++) {
+		// if (tiles[i].isVisible) {
+		// GLMapTile tile = tiles[i];
+		//
+		// if (tile.isDrawn)
+		// drawTriangles(tile, 0);
+		// else
+		// drawProxyTriangles(tile);
+		// }
+		// }
+		// // GlUtils.checkGlError("triangles");
+		// }
 		// required on GalaxyII, Android 2.3.3 (cant just VAA enable once...)
 		glDisableVertexAttribArray(gPolygonVertexPositionHandle);
 
