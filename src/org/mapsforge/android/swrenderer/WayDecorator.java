@@ -99,7 +99,7 @@ final class WayDecorator {
 		}
 	}
 
-	static void renderText(DatabaseRenderer databaseRenderer, Paint paint, Paint outline,
+	static void renderText(MapGenerator mapGenerator, Paint paint, Paint outline,
 			float[] coordinates, WayDataContainer wayDataContainer,
 			List<WayTextContainer> wayNames) {
 
@@ -185,7 +185,7 @@ final class WayDecorator {
 
 				if (wayNameWidth < 0) {
 					if (text == null) {
-						text = databaseRenderer.getWayName();
+						text = mapGenerator.getWayName();
 						if (text == null)
 							text = "blub";
 					}

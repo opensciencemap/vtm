@@ -31,13 +31,14 @@ import org.mapsforge.database.MapFileInfo;
  */
 public class MapDatabase implements IMapDatabase {
 
+	private final static String PROJECTION = "Mercator";
 	private float[] mCoords = new float[20];
-	private int[] mIndex = new int[1];
+	private int[] mIndex = new int[2];
 	// private Tag[] mTags = { new Tag("boundary", "administrative"), new Tag("admin_level", "2") };
-	private Tag[] mTags = { new Tag("building", "yes") };
+	private Tag[] mTags = { new Tag("natural", "water") };
 	private final MapFileInfo mMapInfo =
 			new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
-					new Byte((byte) 0), null, "Mercator", 0, 0, 0, "de", "yo!", "by me");
+					new Byte((byte) 0), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me");
 
 	private boolean mOpenFile = false;
 
@@ -95,10 +96,10 @@ public class MapDatabase implements IMapDatabase {
 		//
 		// mIndex[0] = 10;
 
-		lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 80, tile.zoomLevel) * 1000000;
-		lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 80, tile.zoomLevel) * 1000000;
-		lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 80, tile.zoomLevel) * 1000000;
-		lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 80, tile.zoomLevel) * 1000000;
+		lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 139, tile.zoomLevel) * 1000000;
+		lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 139, tile.zoomLevel) * 1000000;
+		lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 139, tile.zoomLevel) * 1000000;
+		lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 139, tile.zoomLevel) * 1000000;
 
 		mCoords[0] = lon1;
 		mCoords[1] = lat1;
@@ -117,7 +118,33 @@ public class MapDatabase implements IMapDatabase {
 
 		mIndex[0] = 10;
 
+		lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 119, tile.zoomLevel) * 1000000;
+		lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 119, tile.zoomLevel) * 1000000;
+		lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 119, tile.zoomLevel) * 1000000;
+		lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 119, tile.zoomLevel) * 1000000;
+
+		mCoords[10] = lon1;
+		mCoords[11] = lat1;
+
+		mCoords[12] = lon2;
+		mCoords[13] = lat1;
+
+		mCoords[14] = lon2;
+		mCoords[15] = lat2;
+
+		mCoords[16] = lon1;
+		mCoords[17] = lat2;
+
+		mCoords[18] = lon1;
+		mCoords[19] = lat1;
+
+		mIndex[1] = 10;
 		mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, mIndex, true);
+	}
+
+	@Override
+	public String getMapProjection() {
+		return PROJECTION;
 	}
 
 	@Override

@@ -21,12 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
-import org.mapsforge.android.mapgenerator.JobTheme;
+import org.mapsforge.android.mapgenerator.Theme;
 
 /**
  * An ExternalRenderTheme allows for customizing the rendering style of the map via an XML file.
  */
-public class ExternalRenderTheme implements JobTheme {
+public class ExternalRenderTheme implements Theme {
 	private static final long serialVersionUID = 1L;
 
 	private final long mFileModificationDate;

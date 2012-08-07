@@ -22,7 +22,7 @@ public class JobParameters {
 	/**
 	 * The render theme which should be used.
 	 */
-	public final JobTheme jobTheme;
+	public final Theme theme;
 
 	/**
 	 * The text scale factor which should applied to the render theme.
@@ -32,13 +32,13 @@ public class JobParameters {
 	private final int mHashCodeValue;
 
 	/**
-	 * @param jobTheme
+	 * @param theme
 	 *            render theme which should be used.
 	 * @param textScale
 	 *            the text scale factor which should applied to the render theme.
 	 */
-	public JobParameters(JobTheme jobTheme, float textScale) {
-		this.jobTheme = jobTheme;
+	public JobParameters(Theme theme, float textScale) {
+		this.theme = theme;
 		this.textScale = textScale;
 		mHashCodeValue = calculateHashCode();
 	}
@@ -52,11 +52,11 @@ public class JobParameters {
 			return false;
 		}
 		JobParameters other = (JobParameters) obj;
-		if (jobTheme == null) {
-			if (other.jobTheme != null) {
+		if (theme == null) {
+			if (other.theme != null) {
 				return false;
 			}
-		} else if (!jobTheme.equals(other.jobTheme)) {
+		} else if (!theme.equals(other.theme)) {
 			return false;
 		}
 		if (Float.floatToIntBits(textScale) != Float.floatToIntBits(other.textScale)) {
@@ -75,7 +75,7 @@ public class JobParameters {
 	 */
 	private int calculateHashCode() {
 		int result = 7;
-		result = 31 * result + ((jobTheme == null) ? 0 : jobTheme.hashCode());
+		result = 31 * result + ((theme == null) ? 0 : theme.hashCode());
 		result = 31 * result + Float.floatToIntBits(textScale);
 		return result;
 	}

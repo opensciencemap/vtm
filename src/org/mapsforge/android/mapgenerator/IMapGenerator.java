@@ -14,9 +14,7 @@
  */
 package org.mapsforge.android.mapgenerator;
 
-import org.mapsforge.android.MapRenderer;
-import org.mapsforge.android.MapView;
-import org.mapsforge.core.GeoPoint;
+import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.database.IMapDatabase;
 
 /**
@@ -38,30 +36,12 @@ public interface IMapGenerator {
 	boolean executeJob(MapGeneratorJob mapGeneratorJob);
 
 	/**
-	 * @return the start point of this MapGenerator (may be null).
-	 */
-	GeoPoint getStartPoint();
-
-	/**
-	 * @return the start zoom level of this MapGenerator (may be null).
-	 */
-	Byte getStartZoomLevel();
-
-	/**
-	 * @return the maximum zoom level that this MapGenerator supports.
-	 */
-	byte getZoomLevelMax();
-
-	/**
-	 * @param mapView
-	 *            the MapView
-	 * @return GLSurfaceView Renderer
-	 */
-	MapRenderer getMapRenderer(MapView mapView);
-
-	/**
 	 * @param mapDatabase
 	 *            the MapDatabase from which the map data will be read.
 	 */
 	void setMapDatabase(IMapDatabase mapDatabase);
+
+	IMapDatabase getMapDatabase();
+
+	void setRenderTheme(RenderTheme theme);
 }

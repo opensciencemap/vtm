@@ -26,6 +26,7 @@ import android.util.FloatMath;
 public class MapViewPosition {
 	private static float MAX_SCALE = 2.0f;
 	private static float MIN_SCALE = 1.0f;
+	private static int MAX_ZOOMLEVEL = 16;
 
 	private double mLatitude;
 	private double mLongitude;
@@ -162,12 +163,14 @@ public class MapViewPosition {
 		float s = mScale * scale;
 
 		if (s >= MAX_SCALE) {
-
-			byte z = (byte) FloatMath.sqrt(s);
-			if (z != 0 && mZoomLevel == 20)
+			if (s > 8)
 				return;
-			mZoomLevel += z;
-			s *= 1.0f / (1 << z);
+
+			if (mZoomLevel <= MAX_ZOOMLEVEL) {
+				byte z = (byte) FloatMath.sqrt(s);
+				mZoomLevel += z;
+				s *= 1.0f / (1 << z);
+			}
 		} else if (s < MIN_SCALE) {
 			byte z = (byte) FloatMath.sqrt(1 / s);
 			if (z != 0 && mZoomLevel == 1)

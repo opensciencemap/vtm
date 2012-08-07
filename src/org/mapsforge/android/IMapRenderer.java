@@ -14,6 +14,7 @@
  */
 package org.mapsforge.android;
 
+import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
 
 import android.opengl.GLSurfaceView;
@@ -21,7 +22,7 @@ import android.opengl.GLSurfaceView;
 /**
  *
  */
-public interface MapRenderer extends GLSurfaceView.Renderer {
+public interface IMapRenderer extends GLSurfaceView.Renderer {
 
 	/**
 	 * @param mapGeneratorJob
@@ -31,9 +32,8 @@ public interface MapRenderer extends GLSurfaceView.Renderer {
 	public boolean passTile(MapGeneratorJob mapGeneratorJob);
 
 	/**
-	 * @return true when tile passed to renderer is processed false otherwise.
-	 *         used to lock overwriting resources passed with the tile
-	 *         (e.g. lock until bitmap is loaded to texture)
+	 * @return true when tile passed to renderer is processed false otherwise. used to lock overwriting resources passed
+	 *         with the tile (e.g. lock until bitmap is loaded to texture)
 	 */
 	public boolean processedTile();
 
@@ -44,4 +44,6 @@ public interface MapRenderer extends GLSurfaceView.Renderer {
 	 *            ...
 	 */
 	public void redrawTiles(boolean clear);
+
+	public IMapGenerator createMapGenerator();
 }

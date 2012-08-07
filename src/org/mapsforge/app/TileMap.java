@@ -9,8 +9,7 @@ import org.mapsforge.android.DebugSettings;
 import org.mapsforge.android.MapActivity;
 import org.mapsforge.android.MapController;
 import org.mapsforge.android.MapView;
-import org.mapsforge.android.mapgenerator.MapDatabaseFactory;
-import org.mapsforge.android.mapgenerator.MapDatabaseInternal;
+import org.mapsforge.android.mapgenerator.MapDatabases;
 import org.mapsforge.android.rendertheme.InternalRenderTheme;
 import org.mapsforge.android.utils.AndroidUtils;
 import org.mapsforge.app.filefilter.FilterByFileExtension;
@@ -20,7 +19,6 @@ import org.mapsforge.app.filepicker.FilePicker;
 import org.mapsforge.app.preferences.EditPreferences;
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
-import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.MapFileInfo;
 
 import android.annotation.TargetApi;
@@ -74,7 +72,7 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 	private static final int SELECT_MAP_FILE = 0;
 	private static final int SELECT_RENDER_THEME_FILE = 1;
 	private LocationManager mLocationManager;
-	private MapDatabaseInternal mMapDatabaseInternal;
+	private MapDatabases mMapDatabase;
 	private MyLocationListener mMyLocationListener;
 	private boolean mShowMyLocation;
 	private boolean mSnapToLocation;
@@ -88,8 +86,11 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.options_menu, menu);
 
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			getMenuInflater().inflate(R.menu.options_menu, menu);
+		else
+			getMenuInflater().inflate(R.menu.options_menu_pre_honeycomb, menu);
 		mMenu = menu;
 		return true;
 	}
@@ -434,7 +435,7 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 			editText.setText(Double.toString(mapCenter.getLongitude()));
 
 			SeekBar zoomlevel = (SeekBar) dialog.findViewById(R.id.zoomLevel);
-			zoomlevel.setMax(mMapView.getMapGenerator().getZoomLevelMax());
+			zoomlevel.setMax(20); // FIXME mMapView.getMapGenerator().getZoomLevelMax());
 			zoomlevel.setProgress(mMapView.getMapPosition().getZoomLevel());
 
 			final TextView textView = (TextView) dialog.findViewById(R.id.zoomlevelValue);
@@ -532,25 +533,31 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 
 		if (preferences.contains("mapDatabase")) {
 			String name = preferences.getString("mapDatabase",
-					MapDatabaseInternal.POSTGIS_READER.name());
+					MapDatabases.POSTGIS_READER.name());
 
-			MapDatabaseInternal mapDatabaseInternalNew;
+			MapDatabases mapDatabaseNew;
 
 			try {
-				mapDatabaseInternalNew = MapDatabaseInternal.valueOf(name);
+				mapDatabaseNew = MapDatabases.valueOf(name);
 			} catch (IllegalArgumentException e) {
-				mapDatabaseInternalNew = MapDatabaseInternal.POSTGIS_READER;
+				mapDatabaseNew = MapDatabases.POSTGIS_READER;
 			}
 
-			// mapDatabaseInternalNew = MapDatabaseInternal.JSON_READER;
-			Log.d("VectorTileMap", "set map database " + mapDatabaseInternalNew);
+			// mapDatabaseInternalNew = MapDatabaseInternal.PBMAP_READER;
+			Log.d("VectorTileMap", "set map database " + mapDatabaseNew);
 
-			if (mapDatabaseInternalNew != mMapDatabaseInternal) {
-				IMapDatabase mapDatabase = MapDatabaseFactory
-						.createMapDatabase(mapDatabaseInternalNew);
-				mMapView.setMapDatabase(mapDatabase);
-				mMapDatabaseInternal = mapDatabaseInternalNew;
+			if (mapDatabaseNew != mMapDatabase) {
+				mMapView.setMapDatabase(mapDatabaseNew);
+				mMapDatabase = mapDatabaseNew;
 			}
+
+			// if (mapDatabaseNew != mMapDatabase) {
+			// IMapDatabase mapDatabase = MapDatabaseFactory
+			// .createMapDatabase(mapDatabaseNew);
+			//
+			// mMapView.setMapDatabase(mapDatabase);
+			// mMapDatabase = mapDatabaseNew;
+			// }
 		}
 
 		try {
@@ -586,7 +593,7 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 
 		mMapView.setDebugSettings(debugSettings);
 
-		if (mMapDatabaseInternal == MapDatabaseInternal.MAP_READER) {
+		if (mMapDatabase == MapDatabases.MAP_READER) {
 			if (mMapView.getMapFile() == null)
 				startMapFilePicker();
 		} else {

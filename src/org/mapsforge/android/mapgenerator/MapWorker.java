@@ -14,7 +14,7 @@
  */
 package org.mapsforge.android.mapgenerator;
 
-import org.mapsforge.android.MapRenderer;
+import org.mapsforge.android.IMapRenderer;
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.utils.PausableThread;
 
@@ -23,35 +23,33 @@ import org.mapsforge.android.utils.PausableThread;
  * thread.
  */
 public class MapWorker extends PausableThread {
-	private static final String THREAD_NAME = "MapWorker";
-
+	private final String THREAD_NAME;
 	private final JobQueue mJobQueue;
-	private IMapGenerator mMapGenerator;
-	private MapRenderer mMapRenderer;
+	private final IMapGenerator mMapGenerator;
+	private final IMapRenderer mMapRenderer;
 
 	/**
+	 * @param id
+	 *            thread id
 	 * @param mapView
 	 *            the MapView for which this MapWorker generates map tiles.
+	 * @param mapGenerator
+	 *            ...
+	 * @param mapRenderer
+	 *            ...
 	 */
-	public MapWorker(MapView mapView) {
+	public MapWorker(int id, MapView mapView, IMapGenerator mapGenerator,
+			IMapRenderer mapRenderer) {
 		super();
 		mJobQueue = mapView.getJobQueue();
-	}
-
-	/**
-	 * @param mapGenerator
-	 *            the MapGenerator which this MapWorker should use.
-	 */
-	public void setMapGenerator(IMapGenerator mapGenerator) {
 		mMapGenerator = mapGenerator;
+		mMapRenderer = mapRenderer;
+
+		THREAD_NAME = "MapWorker" + id;
 	}
 
-	/**
-	 * @param mapRenderer
-	 *            the MapRenderer
-	 */
-	public void setMapRenderer(MapRenderer mapRenderer) {
-		mMapRenderer = mapRenderer;
+	public IMapGenerator getMapGenerator() {
+		return mMapGenerator;
 	}
 
 	@Override
@@ -65,6 +63,7 @@ public class MapWorker extends PausableThread {
 
 		if (mMapGenerator == null || mapGeneratorJob == null)
 			return;
+		// Log.d(THREAD_NAME, "processing: " + mapGeneratorJob.tile);
 
 		boolean success = mMapGenerator.executeJob(mapGeneratorJob);
 
@@ -80,7 +79,8 @@ public class MapWorker extends PausableThread {
 
 	@Override
 	protected int getThreadPriority() {
-		return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 2;
+		// return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 2;
+		return Thread.MIN_PRIORITY;
 	}
 
 	@Override

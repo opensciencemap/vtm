@@ -37,29 +37,40 @@ public final class MapDatabaseFactory {
 			return new org.mapsforge.database.postgis.MapDatabase();
 		}
 
-		MapDatabaseInternal mapDatabaseInternal = MapDatabaseInternal
-				.valueOf(mapDatabaseName);
+		MapDatabases mapDatabaseInternal = MapDatabases.valueOf(mapDatabaseName);
 
 		return MapDatabaseFactory.createMapDatabase(mapDatabaseInternal);
 	}
 
+	public static MapDatabases getMapDatabase(AttributeSet attributeSet) {
+		String mapDatabaseName = attributeSet.getAttributeValue(null,
+				MAP_DATABASE_ATTRIBUTE_NAME);
+		if (mapDatabaseName == null) {
+			return MapDatabases.POSTGIS_READER;
+		}
+
+		return MapDatabases.valueOf(mapDatabaseName);
+	}
+
 	/**
-	 * @param mapDatabaseInternal
+	 * @param mapDatabase
 	 *            the internal MapDatabase implementation.
 	 * @return a new MapGenerator instance.
 	 */
-	public static IMapDatabase createMapDatabase(MapDatabaseInternal mapDatabaseInternal) {
-		switch (mapDatabaseInternal) {
+	public static IMapDatabase createMapDatabase(MapDatabases mapDatabase) {
+		switch (mapDatabase) {
 			case MAP_READER:
 				return new org.mapsforge.database.mapfile.MapDatabase();
 			case JSON_READER:
 				return new org.mapsforge.database.json.MapDatabase();
 			case POSTGIS_READER:
 				return new org.mapsforge.database.postgis.MapDatabase();
+			case PBMAP_READER:
+				return new org.mapsforge.database.pbmap.MapDatabase();
 
 		}
 
-		throw new IllegalArgumentException("unknown enum value: " + mapDatabaseInternal);
+		throw new IllegalArgumentException("unknown enum value: " + mapDatabase);
 	}
 
 	private MapDatabaseFactory() {

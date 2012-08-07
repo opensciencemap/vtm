@@ -37,6 +37,14 @@ public abstract class PausableThread extends Thread {
 		}
 	}
 
+	@Override
+	public void interrupt() {
+		// first acquire the monitor which is used to call wait()
+		synchronized (this) {
+			super.interrupt();
+		}
+	}
+
 	/**
 	 * @return true if this thread is currently pausing, false otherwise.
 	 */

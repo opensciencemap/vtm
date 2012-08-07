@@ -28,10 +28,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.mapsforge.android.DebugSettings;
 import org.mapsforge.android.MapView;
-import org.mapsforge.android.mapgenerator.JobParameters;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
+import org.mapsforge.android.mapgenerator.JobParameters;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
-import org.mapsforge.android.mapgenerator.MapWorker;
 import org.mapsforge.android.mapgenerator.TileCacheKey;
 import org.mapsforge.android.mapgenerator.TileDistanceSort;
 import org.mapsforge.android.utils.GlUtils;
@@ -46,7 +45,7 @@ import android.opengl.Matrix;
 /**
  * 
  */
-public class MapRenderer implements org.mapsforge.android.MapRenderer {
+public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	// private static String TAG = "MapRenderer";
 
 	private static final int FLOAT_SIZE_BYTES = 4;
@@ -72,7 +71,6 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 	private ArrayList<MapGeneratorJob> mJobList;
 
 	ArrayList<Integer> mTextures;
-	MapWorker mMapWorker;
 	MapView mMapView;
 
 	GLMapTile[] currentTiles;
@@ -97,7 +95,6 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 	 */
 	public MapRenderer(MapView mapView) {
 		mMapView = mapView;
-		mMapWorker = mapView.getMapWorker();
 		mDebugSettings = mapView.getDebugSettings();
 		mMapScale = 1;
 
@@ -133,7 +130,8 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			if (diff != 0)
 			{
 				float z = (diff > 0) ? (1 << diff) : 1.0f / (1 << -diff);
-				t.distance = (long) (Math.abs((t.tileX) * z - x) + Math.abs((t.tileY) * z - y));
+				t.distance = (long) (Math.abs((t.tileX) * z - x) + Math.abs((t.tileY) * z
+						- y));
 				t.distance *= 2 * diff * diff;
 			} else {
 				t.distance = (Math.abs(t.tileX - x) + Math.abs(t.tileY - y));
@@ -160,7 +158,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 			}
 			if (t.hasTexture()) {
 				synchronized (mTextures) {
-					mTextures.add(new Integer(t.getTexture()));
+					mTextures.add(Integer.valueOf(t.getTexture()));
 				}
 			}
 		}
@@ -184,7 +182,8 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 		mJobList.clear();
 
-		IMapGenerator mapGenerator = mMapView.getMapGenerator();
+		// IMapGenerator mapGenerator = mMapView.getMapGenerator();
+
 		int tiles = 0;
 		for (long tileY = tileTop - 1; tileY <= tileBottom + 1; tileY++) {
 			for (long tileX = tileLeft - 1; tileX <= tileRight + 1; tileX++) {
@@ -216,13 +215,14 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				if (!tile.isDrawn || (tile.getScale() != scale)) {
 					tile.isLoading = true;
 					// approximation for TileScheduler
-					if (tileY < tileTop || tileY > tileBottom || tileX < tileLeft || tileX > tileRight)
+					if (tileY < tileTop || tileY > tileBottom || tileX < tileLeft
+							|| tileX > tileRight)
 						tile.isVisible = false;
 					else
 						tile.isVisible = true;
 
-					MapGeneratorJob job = new MapGeneratorJob(tile, mapGenerator,
-							mJobParameter, mDebugSettings);
+					MapGeneratorJob job = new MapGeneratorJob(tile, mJobParameter,
+							mDebugSettings);
 					job.setScale(scale);
 					mJobList.add(job);
 				}
@@ -243,10 +243,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 		}
 
 		if (mJobList.size() > 0) {
-			mMapView.getJobQueue().setJobs(mJobList);
-			synchronized (mMapWorker) {
-				mMapWorker.notify();
-			}
+			mMapView.addJobs(mJobList);
 		}
 
 		return true;
@@ -262,10 +259,12 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 		mMapPosition = mMapView.getMapPosition().getMapPosition();
 
-		long x = (long) MercatorProjection.longitudeToPixelX(mMapPosition.geoPoint.getLongitude(),
+		long x = (long) MercatorProjection.longitudeToPixelX(
+				mMapPosition.geoPoint.getLongitude(),
 				mMapPosition.zoomLevel);
 		long y = (long) MercatorProjection
-				.latitudeToPixelY(mMapPosition.geoPoint.getLatitude(), mMapPosition.zoomLevel);
+				.latitudeToPixelY(mMapPosition.geoPoint.getLatitude(),
+						mMapPosition.zoomLevel);
 
 		long tileX = MercatorProjection.pixelXToTileX(x, mMapPosition.zoomLevel);
 		long tileY = MercatorProjection.pixelYToTileY(y, mMapPosition.zoomLevel);
@@ -345,7 +344,8 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				z = 1.0f / (1 << -diff);
 			}
 			drawX = MercatorProjection
-					.longitudeToPixelX(mMapPosition.geoPoint.getLongitude(), tile.zoomLevel);
+					.longitudeToPixelX(mMapPosition.geoPoint.getLongitude(),
+							tile.zoomLevel);
 			drawY = MercatorProjection
 					.latitudeToPixelY(mMapPosition.geoPoint.getLatitude(), tile.zoomLevel);
 
@@ -377,7 +377,8 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 		Matrix.setIdentityM(mMatrix, 0);
 		// map tile GL coordinates to screen coordinates
-		Matrix.scaleM(mMatrix, 0, 2.0f * (tileSize * z) / mWidth, 2.0f * (tileSize * z) / mHeight, 1);
+		Matrix.scaleM(mMatrix, 0, 2.0f * (tileSize * z) / mWidth, 2.0f * (tileSize * z)
+				/ mHeight, 1);
 
 		// scale tile
 		Matrix.scaleM(mMatrix, 0, mapScale / z, mapScale / z, 1);
@@ -396,7 +397,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
-		boolean loadedTexture = false;
+		// boolean loadedTexture = false;
 		GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
 		GLES20.glClearColor(0.95f, 0.95f, 0.94f, 1.0f);
 		// GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
@@ -437,14 +438,16 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				if (tile.getTexture() >= 0) {
 					// reuse tile texture
 					GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tile.getTexture());
-					GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mMapGeneratorJob.getBitmap());
+					GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0,
+							mMapGeneratorJob.getBitmap());
 				} else if (mTextures.size() > 0) {
 					// reuse texture from previous tiles
 					Integer texture;
 					texture = mTextures.remove(mTextures.size() - 1);
 
 					GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.intValue());
-					GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mMapGeneratorJob.getBitmap());
+					GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0,
+							mMapGeneratorJob.getBitmap());
 					tile.setTexture(texture.intValue());
 				} else {
 					// create texture
@@ -457,7 +460,7 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 
 				mMapGeneratorJob = null;
 				processedTile = true;
-				loadedTexture = true;
+				// loadedTexture = true;
 			}
 			int tileSize = (int) (Tile.TILE_SIZE * mMapScale);
 			int hWidth = mWidth >> 1;
@@ -491,11 +494,12 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 				}
 			}
 		}
-		if (loadedTexture) {
-			synchronized (mMapWorker) {
-				mMapWorker.notify();
-			}
-		}
+		// FIXME
+		// if (loadedTexture) {
+		// synchronized (mMapWorker) {
+		// mMapWorker.notify();
+		// }
+		// }
 	}
 
 	@Override
@@ -579,65 +583,9 @@ public class MapRenderer implements org.mapsforge.android.MapRenderer {
 	public boolean processedTile() {
 		return processedTile;
 	}
+
+	@Override
+	public IMapGenerator createMapGenerator() {
+		return new MapGenerator();
+	}
 }
-
-// private void limitCache(long top, long bottom, long left, long right, byte zoom, int remove) {
-// int cnt = 0;
-// TileCacheKey[] keys = new TileCacheKey[remove];
-//
-// for (Entry<TileCacheKey, GLMapTile> e : mTiles.entrySet()) {
-// GLMapTile t = e.getValue();
-// if (t.zoomLevel == zoom && t.tileX >= left && t.tileX <= right &&
-// t.tileY >= top && t.tileY <= bottom)
-// continue;
-//
-// if (t.zoomLevel + 1 == zoom) {
-// boolean found = false;
-// for (int i = 0; i < 4; i++) {
-// GLMapTile c = t.child[i];
-// if (c != null && !c.hasTexture() && c.tileX >= left && c.tileX <= right &&
-// c.tileY >= top && c.tileY <= bottom) {
-// found = true;
-// break;
-// }
-// }
-// if (found)
-// continue;
-// }
-// if (t.zoomLevel - 1 == zoom) {
-// GLMapTile p = t.parent;
-// if (p != null && !p.hasTexture() && p.tileX >= left && p.tileX <= right &&
-// p.tileY >= top && p.tileY <= bottom) {
-// continue;
-// }
-// }
-//
-// keys[cnt++] = e.getKey();
-//
-// if (cnt == remove)
-// break;
-// }
-//
-// for (TileCacheKey key : keys) {
-// GLMapTile t = mTiles.remove(key);
-// if (t == null)
-// continue;
-//
-// for (int i = 0; i < 4; i++) {
-// if (t.child[i] != null)
-// t.child[i].parent = null;
-// }
-// if (t.parent != null) {
-// for (int i = 0; i < 4; i++) {
-// if (t.parent.child[i] == t)
-// t.parent.child[i] = null;
-// }
-// }
-// if (t.hasTexture()) {
-// synchronized (mTextures) {
-// mTextures.add(new Integer(t.getTexture()));
-// }
-// }
-// }
-// }
-

@@ -14,29 +14,19 @@
  */
 package org.mapsforge.android.glrenderer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
-import org.mapsforge.android.mapgenerator.JobTheme;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
 import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
-import org.mapsforge.android.rendertheme.RenderThemeHandler;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
-import org.mapsforge.core.GeoPoint;
-import org.mapsforge.core.WebMercator;
+import org.mapsforge.android.rendertheme.renderinstruction.RenderInstruction;
+import org.mapsforge.core.MercatorProjection;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
+import org.mapsforge.core.WebMercator;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
-import org.mapsforge.database.MapFileInfo;
-import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -46,32 +36,25 @@ import android.util.Log;
 /**
  * 
  */
-public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
-		IMapDatabaseCallback {
-	private static String TAG = DatabaseRenderer.class.getName();
+public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabaseCallback {
 
-	private static final byte ZOOM_MAX = 22;
-	private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 16);
+	private static String TAG = MapGenerator.class.getName();
+
 	private static final double PI180 = (Math.PI / 180) / 1000000.0;
 	private static final double PIx4 = Math.PI * 4;
 	private static final double STROKE_INCREASE = Math.sqrt(2);
 	private static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 	private static final byte LAYERS = 11;
+	private static final double f900913 = 20037508.342789244;
 
 	private static RenderTheme renderTheme;
 
 	private IMapDatabase mMapDatabase;
 
-	private JobTheme mPreviousJobTheme;
-	// private float mPreviousTextScale;
-	private byte mPreviousZoomLevel;
-
 	private GLMapTile mCurrentTile;
 
 	private float[] mWayNodes;
 	private int[] mWays;
-
-	private ArrayList<float[]> mCurrentLines;
 
 	private LineLayers mLineLayers;
 	private PolygonLayers mPolyLayers;
@@ -81,14 +64,13 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 	private int mLevels;
 
 	private boolean useSphericalMercator = false;
+	private float mStrokeScale = 1.0f;
 
 	/**
 	 * 
 	 */
-	public DatabaseRenderer() {
+	public MapGenerator() {
 		Log.d(TAG, "init DatabaseRenderer");
-		mCurrentLines = new ArrayList<float[]>();
-
 		LayerPool.init();
 	}
 
@@ -107,7 +89,6 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 	private boolean mProjected;
 	private boolean mProjectedResult;
 	private float mSimplify;
-	private static final double f900913 = 20037508.342789244;
 
 	private boolean projectToTile(boolean area) {
 		if (mProjected)
@@ -136,6 +117,8 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 
 		for (int pos = 0, outPos = 0, i = 0, m = mWays.length; i < m; i++) {
 			int len = mWays[i];
+			if (len == 0)
+				continue;
 			int cnt = 0;
 			float lat, lon, prevLon = 0, prevLat = 0;
 
@@ -197,6 +180,8 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 	private boolean firstMatch;
 	private boolean prevClosed;
 
+	private RenderInstruction[] mRenderInstructions = null;
+
 	@Override
 	public void renderWay(byte layer, Tag[] tags, float[] wayNodes, int[] wayLength,
 			boolean changed) {
@@ -220,17 +205,20 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 				mSimplify = 0;
 		}
 
-		mCurrentLines.clear();
 		mWayNodes = wayNodes;
 		mWays = wayLength;
 
 		if (!firstMatch && prevClosed == closed && !changed) {
-			DatabaseRenderer.renderTheme.matchWay(this, tags,
-					(byte) (mCurrentTile.zoomLevel + 0),
-					closed, false);
+			if (mRenderInstructions != null) {
+				for (int i = 0, n = mRenderInstructions.length; i < n; i++)
+					mRenderInstructions[i].renderWay(this, tags);
+			}
+			// MapGenerator.renderTheme.matchWay(this, tags,
+			// (byte) (mCurrentTile.zoomLevel + 0),
+			// closed, false);
 		} else {
 			prevClosed = closed;
-			DatabaseRenderer.renderTheme.matchWay(this, tags,
+			mRenderInstructions = MapGenerator.renderTheme.matchWay(this, tags,
 					(byte) (mCurrentTile.zoomLevel + 0),
 					closed, true);
 		}
@@ -273,9 +261,6 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 	@Override
 	public void renderWay(Line line) {
 
-		// if (prevClosed && !mProjected)
-		// return;
-
 		projectToTile(false);
 
 		LineLayer outlineLayer = null;
@@ -284,11 +269,12 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 
 		float w = line.strokeWidth;
 
-		if (!line.fixed)
-			w *= mStrokeScale / 1.5f;
-
+		if (!line.fixed) {
+			w *= mStrokeScale;
+			w *= mProjectionScaleFactor;
+		}
 		if (line.outline != -1) {
-			Line outline = DatabaseRenderer.renderTheme.getOutline(line.outline);
+			Line outline = MapGenerator.renderTheme.getOutline(line.outline);
 			if (outline != null) {
 				outlineLayer = mLineLayers.getLayer(mDrawingLayer + outline.level,
 						outline.color, true, false);
@@ -363,33 +349,19 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 		if (mMapDatabase == null)
 			return false;
 
+		useSphericalMercator = WebMercator.NAME.equals(mMapDatabase.getMapProjection());
+
 		mCurrentTile = (GLMapTile) mapGeneratorJob.tile;
 		mDebugDrawPolygons = !mapGeneratorJob.debugSettings.mDisablePolygons;
 
-		// FIXME still chance of concurrency with maprenderer updateVisibleList ?
 		if (mCurrentTile.isLoading || mCurrentTile.isDrawn)
 			return false;
 
 		mCurrentTile.isLoading = true;
 
-		JobTheme jobTheme = mapGeneratorJob.jobParameters.jobTheme;
+		mLevels = MapGenerator.renderTheme.getLevels();
 
-		if (jobTheme != mPreviousJobTheme) {
-			if (!setRenderTheme(jobTheme)) {
-				mPreviousJobTheme = null;
-				return false;
-			}
-
-			mPreviousJobTheme = jobTheme;
-			mPreviousZoomLevel = Byte.MIN_VALUE;
-			mLevels = DatabaseRenderer.renderTheme.getLevels();
-		}
-
-		byte zoomLevel = mCurrentTile.zoomLevel;
-		if (zoomLevel != mPreviousZoomLevel) {
-			setScaleStrokeWidth(zoomLevel);
-			mPreviousZoomLevel = zoomLevel;
-		}
+		setScaleStrokeWidth(mCurrentTile.zoomLevel);
 
 		mLineLayers = new LineLayers();
 		mPolyLayers = new PolygonLayers();
@@ -399,81 +371,32 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 		mCurrentTile.meshLayers = mMeshLayers;
 
 		firstMatch = true;
-		mMapDatabase.executeQuery(mCurrentTile, this);
 
-		// Log.d(TAG, "loaded " + mCurrentTile);
+		mProjectionScaleFactor = (float) (1.0 / Math.cos(MercatorProjection
+				.pixelYToLatitude(mCurrentTile.pixelY, mCurrentTile.zoomLevel)
+				* (Math.PI / 180))) / 1.5f;
+		mMapDatabase.executeQuery(mCurrentTile, this);
 
 		if (mapGeneratorJob.debugSettings.mDrawTileFrames) {
 			float[] coords = { 0, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE,
 					Tile.TILE_SIZE, 0, 0, 0 };
 			LineLayer ll = mLineLayers.getLayer(Integer.MAX_VALUE, Color.BLACK, false,
 					true);
-			ll.addLine(coords, 0, coords.length, 1.0f, false);
+			ll.addLine(coords, 0, coords.length, 2.0f, false);
 		}
 
 		mCurrentTile.newData = true;
 		return true;
 	}
 
-	@Override
-	public GeoPoint getStartPoint() {
-		useSphericalMercator = false;
-
-		if (mMapDatabase != null && mMapDatabase.hasOpenFile()) {
-			MapFileInfo mapFileInfo = mMapDatabase.getMapFileInfo();
-
-			if (WebMercator.NAME.equals(mapFileInfo.projectionName)) {
-				Log.d(TAG, "using Spherical Mercator");
-
-				useSphericalMercator = true;
-			}
-			if (mapFileInfo.startPosition != null) {
-				return mapFileInfo.startPosition;
-			} else if (mapFileInfo.mapCenter != null) {
-				return mapFileInfo.mapCenter;
-			}
-
-		}
-		return null;
-	}
-
-	@Override
-	public Byte getStartZoomLevel() {
-		return DEFAULT_START_ZOOM_LEVEL;
-	}
-
-	@Override
-	public byte getZoomLevelMax() {
-		return ZOOM_MAX;
-	}
-
-	private static boolean setRenderTheme(JobTheme jobTheme) {
-		InputStream inputStream = null;
-		try {
-			inputStream = jobTheme.getRenderThemeAsStream();
-			DatabaseRenderer.renderTheme = RenderThemeHandler.getRenderTheme(inputStream);
-			return true;
-		} catch (ParserConfigurationException e) {
-			Log.e(TAG, e.getMessage());
-		} catch (SAXException e) {
-			Log.e(TAG, e.getMessage());
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
-		} finally {
-			try {
-				if (inputStream != null) {
-					inputStream.close();
-				}
-			} catch (IOException e) {
-				Log.e(TAG, e.getMessage());
-			}
-		}
-		return false;
-	}
+	private float mProjectionScaleFactor;
 
 	private static byte getValidLayer(byte layer) {
 		if (layer < 0) {
 			return 0;
+			/**
+			 * return instances of MapRenderer
+			 */
 		} else if (layer >= LAYERS) {
 			return LAYERS - 1;
 		} else {
@@ -481,9 +404,17 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 		}
 	}
 
-	@Override
-	public MapRenderer getMapRenderer(MapView mapView) {
-		return new MapRenderer(mapView);
+	/**
+	 * Sets the scale stroke factor for the given zoom level.
+	 * 
+	 * @param zoomLevel
+	 *            the zoom level for which the scale stroke factor should be set.
+	 */
+	private void setScaleStrokeWidth(byte zoomLevel) {
+		int zoomLevelDiff = Math.max(zoomLevel - STROKE_MIN_ZOOM_LEVEL, 0);
+		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevelDiff);
+		if (mStrokeScale < 1)
+			mStrokeScale = 1;
 	}
 
 	@Override
@@ -491,19 +422,13 @@ public class DatabaseRenderer implements IMapGenerator, IRenderCallback,
 		mMapDatabase = mapDatabase;
 	}
 
-	private static float mStrokeScale = 1.0f;
+	@Override
+	public IMapDatabase getMapDatabase() {
+		return mMapDatabase;
+	}
 
-	/**
-	 * Sets the scale stroke factor for the given zoom level.
-	 * 
-	 * @param zoomLevel
-	 *            the zoom level for which the scale stroke factor should be set.
-	 */
-	private static void setScaleStrokeWidth(byte zoomLevel) {
-		int zoomLevelDiff = Math.max(zoomLevel - STROKE_MIN_ZOOM_LEVEL, 0);
-		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevelDiff);
-		if (mStrokeScale < 1)
-			mStrokeScale = 1;
-		// DatabaseRenderer.renderTheme.scaleStrokeWidth(mStrokeScale);
+	@Override
+	public void setRenderTheme(RenderTheme theme) {
+		MapGenerator.renderTheme = theme;
 	}
 }

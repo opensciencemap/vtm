@@ -16,12 +16,12 @@ package org.mapsforge.android.rendertheme;
 
 import java.io.InputStream;
 
-import org.mapsforge.android.mapgenerator.JobTheme;
+import org.mapsforge.android.mapgenerator.Theme;
 
 /**
  * Enumeration of all internal rendering themes.
  */
-public enum InternalRenderTheme implements JobTheme {
+public enum InternalRenderTheme implements Theme {
 	/**
 	 * A rendering theme similar to the OpenStreetMap Osmarender style.
 	 * 
@@ -37,6 +37,9 @@ public enum InternalRenderTheme implements JobTheme {
 
 	@Override
 	public InputStream getRenderThemeAsStream() {
-		return Thread.currentThread().getClass().getResourceAsStream(mPath);
+		// getResourceAsStream(mPath);
+		return InternalRenderTheme.class.getResourceAsStream(mPath);
+		// return Thread.currentThread().getClass().getResourceAsStream(mPath);
+
 	}
 }

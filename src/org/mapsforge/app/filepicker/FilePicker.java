@@ -226,7 +226,8 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
 	@Override
 	protected void onResume() {
 		super.onResume();
-		getActionBar().hide();
+		// getActionBar().hide();
+
 		// check if the full screen mode should be activated
 		// if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fullscreen", false)) {
 		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
