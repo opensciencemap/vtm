@@ -153,7 +153,7 @@ public class MapDatabase implements IMapDatabase {
 		return null;
 	}
 
-	private static final int BUFFER_SIZE = 32768;
+	private static final int BUFFER_SIZE = 65536;
 	private final byte[] buffer = new byte[BUFFER_SIZE];
 	private int bufferPos;
 	private int bufferSize;
@@ -356,19 +356,78 @@ public class MapDatabase implements IMapDatabase {
 		int bytes = decodeVarint32();
 
 		int cnt = 0;
-		int end = bytesRead + bytes;
+		// int end = bytesRead + bytes;
 
-		while (bytesRead < end) {
-			int val = decodeZigZag32(decodeVarint32());
+		readBuffer(bytes);
+
+		int pos = bufferPos;
+		int end = pos + bytes;
+		float[] coords = tmpCoords;
+		byte[] buf = buffer;
+		int result;
+
+		while (pos < end) {
 			if (cnt >= MAX_WAY_COORDS) {
 				MAX_WAY_COORDS += 128;
 				Log.d(TAG, "increase coords array  " + MAX_WAY_COORDS);
 				float[] tmp = new float[MAX_WAY_COORDS];
-				System.arraycopy(tmpCoords, 0, tmp, 0, cnt);
-				tmpCoords = tmp;
+				System.arraycopy(coords, 0, tmp, 0, cnt);
+				tmpCoords = coords = tmp;
 			}
-			tmpCoords[cnt++] = val;
+
+			byte tmp = buf[pos++];
+			if (tmp >= 0) {
+				result = tmp;
+			} else {
+				result = tmp & 0x7f;
+				if ((tmp = buf[pos++]) >= 0) {
+					result |= tmp << 7;
+				} else {
+					result |= (tmp & 0x7f) << 7;
+					if ((tmp = buf[pos++]) >= 0) {
+						result |= tmp << 14;
+					} else {
+						result |= (tmp & 0x7f) << 14;
+						if ((tmp = buf[pos++]) >= 0) {
+							result |= tmp << 21;
+						} else {
+
+							result |= (tmp & 0x7f) << 21;
+							result |= (tmp = buf[pos++]) << 28;
+
+							if (tmp < 0) {
+								int i = 0;
+								// Discard upper 32 bits.
+								while (i++ < 5) {
+									if (buf[pos++] >= 0)
+										break;
+								}
+
+								if (i == 5)
+									// FIXME throw some poo
+									Log.d(TAG, "EEK malformedVarint");
+							}
+						}
+					}
+				}
+			}
+			coords[cnt++] = (result >>> 1) ^ -(result & 1);
 		}
+
+		bufferPos = pos;
+		bytesRead += bytes;
+
+		// while (bytesRead < end) {
+		// int val = decodeZigZag32(decodeVarint32());
+		// if (cnt >= MAX_WAY_COORDS) {
+		// MAX_WAY_COORDS += 128;
+		// Log.d(TAG, "increase coords array  " + MAX_WAY_COORDS);
+		// float[] tmp = new float[MAX_WAY_COORDS];
+		// System.arraycopy(tmpCoords, 0, tmp, 0, cnt);
+		// tmpCoords = tmp;
+		// }
+		// tmpCoords[cnt++] = val;
+		// }
 		return cnt;
 	}
 
