@@ -26,9 +26,9 @@ import java.util.Properties;
 
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
-import org.mapsforge.core.WebMercator;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
+import org.mapsforge.core.WebMercator;
 import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
@@ -40,7 +40,7 @@ import org.postgresql.PGConnection;
  *
  */
 public class MapDatabase implements IMapDatabase {
-	private static final String QUERY = "SELECT * FROM __get_tile(?,?,?)";
+	private static final String QUERY = "SELECT tags, geom FROM __get_tile(?,?,?)";
 
 	private final float mScale = 1; // 1000000.0f;
 
@@ -55,16 +55,13 @@ public class MapDatabase implements IMapDatabase {
 			new MapFileInfo(new BoundingBox(-180, -85, 180, 85),
 					new Byte((byte) 14), new GeoPoint(53.11, 8.85),
 					WebMercator.NAME,
-					0, 0, 0, "de", "yo!", "hannes");
-	// new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
-	// new Byte((byte) 0), null, "Mercator",
-	// 0, 0, 0, "de", "yo!", "by me");
+					0, 0, 0, "de", "comment", "author");
 
 	private boolean mOpenFile = false;
 
 	private Connection connection = null;
-	private static HashMap<Entry<String, String>, Tag> tagHash = new HashMap<Entry<String, String>, Tag>(
-			100);
+	private static volatile HashMap<Entry<String, String>, Tag> tagHash =
+			new HashMap<Entry<String, String>, Tag>(100);
 	private PreparedStatement prepQuery = null;
 
 	private boolean connect() {
@@ -123,7 +120,6 @@ public class MapDatabase implements IMapDatabase {
 
 		byte[] b = null;
 		PGHStore h = null;
-		// long id;
 
 		try {
 			while (r != null && r.next()) {
@@ -131,9 +127,7 @@ public class MapDatabase implements IMapDatabase {
 				mCoordPos = 0;
 
 				try {
-					// id = r.getLong(1);
-
-					Object obj = r.getObject(2);
+					Object obj = r.getObject(1);
 					h = null;
 
 					if (obj instanceof PGHStore)
@@ -141,7 +135,7 @@ public class MapDatabase implements IMapDatabase {
 					else
 						continue;
 
-					b = r.getBytes(3);
+					b = r.getBytes(2);
 
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -182,6 +176,11 @@ public class MapDatabase implements IMapDatabase {
 			e.printStackTrace();
 			connection = null;
 		}
+	}
+
+	@Override
+	public String getMapProjection() {
+		return WebMercator.NAME;
 	}
 
 	@Override

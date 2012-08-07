@@ -177,11 +177,13 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	private static final int WAY_NUMBER_OF_TAGS_BITMASK = 0x0f;
 
-	private IndexCache mDatabaseIndexCache;
+	private static IndexCache sDatabaseIndexCache;
+	private static MapFileHeader sMapFileHeader;
+	private static int instances = 0;
+
 	private long mFileSize;
 	private boolean mDebugFile;
 	private RandomAccessFile mInputFile;
-	private MapFileHeader mMapFileHeader;
 	private ReadBuffer mReadBuffer;
 	private String mSignatureBlock;
 	private String mSignaturePoi;
@@ -193,31 +195,6 @@ public class MapDatabase implements IMapDatabase {
 	private float[] mWayNodes = new float[100000];
 	private int mWayNodePosition;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.mapsforge.map.reader.IMapDatabase#closeFile()
-	 */
-	@Override
-	public void closeFile() {
-		try {
-			mMapFileHeader = null;
-
-			if (mDatabaseIndexCache != null) {
-				mDatabaseIndexCache.destroy();
-				mDatabaseIndexCache = null;
-			}
-
-			if (mInputFile != null) {
-				mInputFile.close();
-				mInputFile = null;
-			}
-
-			mReadBuffer = null;
-		} catch (IOException e) {
-			LOG.log(Level.SEVERE, null, e);
-		}
-	}
-
 	private int minLat, minLon;
 
 	/*
@@ -227,7 +204,7 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	@Override
 	public void executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
-		if (mMapFileHeader == null)
+		if (sMapFileHeader == null)
 			return;
 
 		if (mIntBuffer == null)
@@ -235,29 +212,13 @@ public class MapDatabase implements IMapDatabase {
 
 		mWayNodePosition = 0;
 
-		// if (tile.zoomLevel < 10) {
-		// // reduce small nodes with distance smaller min pixel
-		// int min = 1;
-		// long cx = tile.getPixelX() + (Tile.TILE_SIZE >> 1);
-		// long cy = tile.getPixelY() + (Tile.TILE_SIZE >> 1);
-		// double l1 = MercatorProjection.pixelXToLongitude(cx, tile.zoomLevel);
-		// double l2 = MercatorProjection.pixelXToLongitude(cx + min, tile.zoomLevel);
-		// minLon = (int) Math.abs((l1 * 1000000.0) - (l2 * 1000000.0));
-		// l1 = MercatorProjection.pixelYToLatitude(cy, tile.zoomLevel);
-		// l2 = MercatorProjection.pixelYToLatitude(cy + min, tile.zoomLevel);
-		// minLat = (int) Math.abs((l1 * 1000000.0) - (l2 * 1000000.0));
-		// } else {
-		minLat = 0;
-		minLon = 0;
-		// }
-
 		try {
-			prepareExecution();
+			// prepareExecution();
 			QueryParameters queryParameters = new QueryParameters();
-			queryParameters.queryZoomLevel = mMapFileHeader
+			queryParameters.queryZoomLevel = sMapFileHeader
 					.getQueryZoomLevel(tile.zoomLevel);
 			// get and check the sub-file for the query zoom level
-			SubFileParameter subFileParameter = mMapFileHeader
+			SubFileParameter subFileParameter = sMapFileHeader
 					.getSubFileParameter(queryParameters.queryZoomLevel);
 			if (subFileParameter == null) {
 				LOG.warning("no sub-file for zoom level: "
@@ -279,10 +240,15 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	@Override
 	public MapFileInfo getMapFileInfo() {
-		if (mMapFileHeader == null) {
+		if (sMapFileHeader == null) {
 			throw new IllegalStateException("no map file is currently opened");
 		}
-		return mMapFileHeader.getMapFileInfo();
+		return sMapFileHeader.getMapFileInfo();
+	}
+
+	@Override
+	public String getMapProjection() {
+		return getMapFileInfo().projectionName;
 	}
 
 	/*
@@ -300,6 +266,7 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	@Override
 	public FileOpenResult openFile(File mapFile) {
+
 		try {
 			if (mapFile == null) {
 				// throw new IllegalArgumentException("mapFile must not be null");
@@ -323,13 +290,22 @@ public class MapDatabase implements IMapDatabase {
 			mFileSize = mInputFile.length();
 			mReadBuffer = new ReadBuffer(mInputFile);
 
-			mMapFileHeader = new MapFileHeader();
-			FileOpenResult fileOpenResult = mMapFileHeader.readHeader(mReadBuffer,
+			if (instances > 0) {
+				instances++;
+				return FileOpenResult.SUCCESS;
+			}
+
+			sMapFileHeader = new MapFileHeader();
+			FileOpenResult fileOpenResult = sMapFileHeader.readHeader(mReadBuffer,
 					mFileSize);
 			if (!fileOpenResult.isSuccess()) {
 				closeFile();
 				return fileOpenResult;
 			}
+
+			prepareExecution();
+
+			instances++;
 
 			return FileOpenResult.SUCCESS;
 		} catch (IOException e) {
@@ -337,6 +313,37 @@ public class MapDatabase implements IMapDatabase {
 			// make sure that the file is closed
 			closeFile();
 			return new FileOpenResult(e.getMessage());
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.mapsforge.map.reader.IMapDatabase#closeFile()
+	 */
+	@Override
+	public void closeFile() {
+		instances--;
+		if (instances > 0) {
+			mReadBuffer = null;
+			return;
+		}
+
+		try {
+			sMapFileHeader = null;
+
+			if (sDatabaseIndexCache != null) {
+				sDatabaseIndexCache.destroy();
+				sDatabaseIndexCache = null;
+			}
+
+			if (mInputFile != null) {
+				mInputFile.close();
+				mInputFile = null;
+			}
+
+			mReadBuffer = null;
+		} catch (IOException e) {
+			LOG.log(Level.SEVERE, null, e);
 		}
 	}
 
@@ -351,8 +358,8 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private void prepareExecution() {
-		if (mDatabaseIndexCache == null) {
-			mDatabaseIndexCache = new IndexCache(mInputFile, INDEX_CACHE_SIZE);
+		if (sDatabaseIndexCache == null) {
+			sDatabaseIndexCache = new IndexCache(mInputFile, INDEX_CACHE_SIZE);
 		}
 	}
 
@@ -436,7 +443,7 @@ public class MapDatabase implements IMapDatabase {
 				long blockNumber = row * subFileParameter.blocksWidth + column;
 
 				// get the current index entry
-				long currentBlockIndexEntry = mDatabaseIndexCache.getIndexEntry(
+				long currentBlockIndexEntry = sDatabaseIndexCache.getIndexEntry(
 						subFileParameter, blockNumber);
 
 				// check if the current query would still return a water tile
@@ -462,7 +469,7 @@ public class MapDatabase implements IMapDatabase {
 					nextBlockPointer = subFileParameter.subFileSize;
 				} else {
 					// get and check the next block pointer
-					nextBlockPointer = mDatabaseIndexCache.getIndexEntry(
+					nextBlockPointer = sDatabaseIndexCache.getIndexEntry(
 							subFileParameter, blockNumber + 1)
 							& BITMASK_INDEX_OFFSET;
 					if (nextBlockPointer < 1
@@ -559,7 +566,7 @@ public class MapDatabase implements IMapDatabase {
 	 * @return true if the POIs could be processed successfully, false otherwise.
 	 */
 	private boolean processPOIs(IMapDatabaseCallback mapDatabaseCallback, int numberOfPois) {
-		Tag[] poiTags = mMapFileHeader.getMapFileInfo().poiTags;
+		Tag[] poiTags = sMapFileHeader.getMapFileInfo().poiTags;
 		Tag[] tags = null;
 
 		for (int elementCounter = numberOfPois; elementCounter != 0; --elementCounter) {
@@ -778,7 +785,7 @@ public class MapDatabase implements IMapDatabase {
 			int numberOfWays) {
 
 		Tag[] tags = null;
-		Tag[] wayTags = mMapFileHeader.getMapFileInfo().wayTags;
+		Tag[] wayTags = sMapFileHeader.getMapFileInfo().wayTags;
 		int[] textPos = new int[3];
 		// float[] labelPosition;
 		boolean skippedWays = false;
@@ -957,7 +964,7 @@ public class MapDatabase implements IMapDatabase {
 					|| cumulatedNumberOfWays > MAXIMUM_ZOOM_TABLE_OBJECTS) {
 				LOG.warning("invalid cumulated number of ways in row " + row + ' '
 						+ cumulatedNumberOfWays);
-				if (mMapFileHeader.getMapFileInfo().debugFile) {
+				if (sMapFileHeader.getMapFileInfo().debugFile) {
 					LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 				}
 				return null;

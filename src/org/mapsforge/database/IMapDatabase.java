@@ -62,6 +62,8 @@ public interface IMapDatabase {
 	 */
 	public abstract FileOpenResult openFile(File mapFile);
 
+	public abstract String getMapProjection();
+
 	/**
 	 * @param position
 	 *            ....

@@ -14,18 +14,27 @@
  */
 package org.mapsforge.android.mapgenerator;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.Serializable;
-
 /**
- * A JobTheme defines the render theme which is used for a {@link MapGeneratorJob}.
+ * MapDatabase Implementations
  */
-public interface JobTheme extends Serializable {
+public enum MapDatabases {
 	/**
-	 * @return an InputStream to read the render theme data from.
-	 * @throws FileNotFoundException
-	 *             if the render theme file cannot be found.
+	 * ...
 	 */
-	InputStream getRenderThemeAsStream() throws FileNotFoundException;
+	MAP_READER,
+
+	/**
+	 * ...
+	 */
+	JSON_READER,
+
+	/**
+	 * ...
+	 */
+	POSTGIS_READER,
+
+	/**
+	 * ...
+	 */
+	PBMAP_READER,
 }

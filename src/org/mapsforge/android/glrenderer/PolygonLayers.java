@@ -75,7 +75,7 @@ class PolygonLayers {
 			// Log.d("GLMap", "allocate buffer " + size);
 			fbuf = bbuf.asFloatBuffer();
 		} else {
-			fbuf.position(0);
+			fbuf.clear();
 		}
 
 		fbuf.put(mFillCoords, 0, 8);
@@ -95,7 +95,7 @@ class PolygonLayers {
 			l.pool = null;
 		}
 
-		fbuf.position(0);
+		fbuf.flip();
 
 		// not needed for drawing
 		layers = null;
@@ -121,7 +121,7 @@ class PolygonLayers {
 					ByteOrder.nativeOrder());
 			sbuf = bbuf.asShortBuffer();
 		} else {
-			sbuf.position(0);
+			sbuf.clear();
 		}
 
 		short[] data = new short[PoolItem.SIZE];
@@ -157,7 +157,7 @@ class PolygonLayers {
 			l.pool = null;
 		}
 
-		sbuf.position(0);
+		sbuf.flip();
 
 		// not needed for drawing
 		layers = null;

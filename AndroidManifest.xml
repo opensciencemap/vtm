@@ -12,14 +12,15 @@
 
     <uses-sdk
         android:minSdkVersion="10"
-        android:targetSdkVersion="15" />
+        android:targetSdkVersion="16" />
 
     <application
         android:icon="@drawable/globe2"
-        android:label="@string/application_name" 
-        android:theme="@style/Theme.TileMap" > 
-       
-        <activity android:name="org.mapsforge.app.TileMap" >
+        android:label="@string/application_name"
+        android:theme="@style/Theme.TileMap" >
+        <activity
+            android:name="org.mapsforge.app.TileMap"
+            android:configChanges="orientation|screenSize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,6 +29,6 @@
         </activity>
         <activity android:name=".preferences.EditPreferences" />
         <activity android:name=".filepicker.FilePicker" />
-          
-     </application>
-     </manifest>
+    </application>
+
+</manifest>

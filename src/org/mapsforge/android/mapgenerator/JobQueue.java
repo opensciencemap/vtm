@@ -103,7 +103,8 @@ public class JobQueue {
 	 * Schedules all jobs in this queue.
 	 */
 	private void schedule() {
-		PriorityQueue<MapGeneratorJob> tempJobQueue = new PriorityQueue<MapGeneratorJob>(INITIAL_CAPACITY);
+		PriorityQueue<MapGeneratorJob> tempJobQueue = new PriorityQueue<MapGeneratorJob>(
+				INITIAL_CAPACITY);
 
 		TileScheduler.time = SystemClock.uptimeMillis();
 		TileScheduler.mapPosition = mMapView.getMapPosition().getMapPosition();

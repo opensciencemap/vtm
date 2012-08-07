@@ -3,6 +3,7 @@
 	<string-array name="preferences_map_database_keys">
 		<item>MAP_READER</item>
 		<item>POSTGIS_READER</item>
+		<item>PBMAP_READER</item>
 	</string-array>
 	<string name="preferences_map_database_default">POSTGIS_READER</string>
 

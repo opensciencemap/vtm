@@ -61,7 +61,7 @@ class LineLayers {
 					ByteOrder.nativeOrder());
 			fbuf = bbuf.asFloatBuffer();
 		} else {
-			fbuf.position(0);
+			fbuf.clear();
 		}
 		int pos = 0;
 
@@ -81,7 +81,7 @@ class LineLayers {
 			l.pool = null;
 		}
 
-		fbuf.position(0);
+		fbuf.flip();
 
 		// not needed for drawing
 		layers = null;
@@ -105,7 +105,7 @@ class LineLayers {
 					ByteOrder.nativeOrder());
 			sbuf = bbuf.asShortBuffer();
 		} else {
-			sbuf.position(0);
+			sbuf.clear();
 		}
 		int pos = 0;
 
@@ -129,7 +129,7 @@ class LineLayers {
 			l.pool = null;
 		}
 
-		sbuf.position(0);
+		sbuf.flip();
 
 		// not needed for drawing
 		layers = null;

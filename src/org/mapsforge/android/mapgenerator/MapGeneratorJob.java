@@ -37,7 +37,7 @@ public class MapGeneratorJob implements Comparable<MapGeneratorJob>, Serializabl
 	/**
 	 * The rendering parameters for this job.
 	 */
-	public final JobParameters jobParameters;
+	// public final JobParameters jobParameters;
 
 	/**
 	 * The tile which should be generated.
@@ -45,7 +45,6 @@ public class MapGeneratorJob implements Comparable<MapGeneratorJob>, Serializabl
 	public final MapTile tile;
 
 	private transient int mHashCodeValue;
-	private final IMapGenerator mMapGenerator;
 	private transient double mPriority;
 
 	/**
@@ -90,18 +89,15 @@ public class MapGeneratorJob implements Comparable<MapGeneratorJob>, Serializabl
 	 * 
 	 * @param _tile
 	 *            the tile which should be generated.
-	 * @param mapGenerator
-	 *            the MapGenerator for this job.
 	 * @param _jobParameters
 	 *            the rendering parameters for this job.
 	 * @param _debugSettings
 	 *            the debug settings for this job.
 	 */
-	public MapGeneratorJob(MapTile _tile, IMapGenerator mapGenerator,
-			JobParameters _jobParameters, DebugSettings _debugSettings) {
+	public MapGeneratorJob(MapTile _tile, JobParameters _jobParameters,
+			DebugSettings _debugSettings) {
 		tile = _tile;
-		mMapGenerator = mapGenerator;
-		jobParameters = _jobParameters;
+		// jobParameters = _jobParameters;
 		debugSettings = _debugSettings;
 		calculateTransientValues();
 	}
@@ -133,16 +129,14 @@ public class MapGeneratorJob implements Comparable<MapGeneratorJob>, Serializabl
 		} else if (!debugSettings.equals(other.debugSettings)) {
 			return false;
 		}
-		if (jobParameters == null) {
-			if (other.jobParameters != null) {
-				return false;
-			}
-		} else if (!jobParameters.equals(other.jobParameters)) {
-			return false;
-		}
-		if (mMapGenerator != other.mMapGenerator) {
-			return false;
-		}
+		// if (jobParameters == null) {
+		// if (other.jobParameters != null) {
+		// return false;
+		// }
+		// } else if (!jobParameters.equals(other.jobParameters)) {
+		// return false;
+		// }
+
 		if (tile == null) {
 			if (other.tile != null) {
 				return false;
@@ -164,8 +158,7 @@ public class MapGeneratorJob implements Comparable<MapGeneratorJob>, Serializabl
 	private int calculateHashCode() {
 		int result = 1;
 		result = 31 * result + ((debugSettings == null) ? 0 : debugSettings.hashCode());
-		result = 31 * result + ((jobParameters == null) ? 0 : jobParameters.hashCode());
-		result = 31 * result + ((mMapGenerator == null) ? 0 : mMapGenerator.hashCode());
+		// result = 31 * result + ((jobParameters == null) ? 0 : jobParameters.hashCode());
 		result = 31 * result + ((tile == null) ? 0 : tile.hashCode());
 		return result;
 	}
@@ -177,7 +170,8 @@ public class MapGeneratorJob implements Comparable<MapGeneratorJob>, Serializabl
 		mHashCodeValue = calculateHashCode();
 	}
 
-	private void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
+	private void readObject(ObjectInputStream objectInputStream) throws IOException,
+			ClassNotFoundException {
 		objectInputStream.defaultReadObject();
 		calculateTransientValues();
 	}

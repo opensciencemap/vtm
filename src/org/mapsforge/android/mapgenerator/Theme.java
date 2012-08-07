@@ -14,17 +14,18 @@
  */
 package org.mapsforge.android.mapgenerator;
 
-/**
- * Enumeration of all internal MapGenerator implementations.
- */
-public enum MapGeneratorInternal {
-	/**
-	 * texture renderer.
-	 */
-	SW_RENDERER,
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.Serializable;
 
+/**
+ * A JobTheme defines the render theme which is used for a {@link MapGeneratorJob}.
+ */
+public interface Theme extends Serializable {
 	/**
-	 * opengl renderer.
+	 * @return an InputStream to read the render theme data from.
+	 * @throws FileNotFoundException
+	 *             if the render theme file cannot be found.
 	 */
-	GL_RENDERER
+	InputStream getRenderThemeAsStream() throws FileNotFoundException;
 }

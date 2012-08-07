@@ -15,22 +15,16 @@
 package org.mapsforge.android.mapgenerator;
 
 /**
- * MapDatabase Implementations
+ * Enumeration of all internal MapGenerator implementations.
  */
-public enum MapDatabaseInternal {
+public enum MapRenderers {
 	/**
-	 * ...
+	 * texture renderer.
 	 */
-	MAP_READER,
+	SW_RENDERER,
 
 	/**
-	 * ...
+	 * opengl renderer.
 	 */
-	JSON_READER,
-
-	/**
-	 * ...
-	 */
-	POSTGIS_READER,
-
+	GL_RENDERER
 }

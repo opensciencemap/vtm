@@ -87,10 +87,6 @@ public class RenderTheme {
 	private final LRUCache<MatchingCacheKey, RenderInstruction[]> mMatchingCacheWay;
 	private final LRUCache<MatchingCacheKey, RenderInstruction[]> mMatchingCacheArea;
 
-	// private List<RenderInstruction> mMatchingListWay;
-	// private List<RenderInstruction> mMatchingListArea;
-	// private List<RenderInstruction> mMatchingListNode;
-
 	RenderTheme(int mapBackground, float baseStrokeWidth, float baseTextSize) {
 		mMapBackground = mapBackground;
 		mBaseStrokeWidth = baseStrokeWidth;
@@ -198,7 +194,7 @@ public class RenderTheme {
 		}
 	}
 
-	private RenderInstruction[] mRenderInstructions = null;
+	// private RenderInstruction[] mRenderInstructions = null;
 
 	/**
 	 * Matches a way with the given parameters against this RenderTheme.
@@ -213,23 +209,26 @@ public class RenderTheme {
 	 *            way is Closed
 	 * @param changed
 	 *            ...
+	 * @return currently processed render instructions
 	 */
-	public void matchWay(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel,
+	public synchronized RenderInstruction[] matchWay(IRenderCallback renderCallback,
+			Tag[] tags,
+			byte zoomLevel,
 			boolean closed, boolean changed) {
 		RenderInstruction[] renderInstructions = null;
 
 		LRUCache<MatchingCacheKey, RenderInstruction[]> matchingCache;
 		MatchingCacheKey matchingCacheKey;
 
-		if (!changed) {
-			renderInstructions = mRenderInstructions;
-
-			if (renderInstructions != null) {
-				for (int i = 0, n = renderInstructions.length; i < n; i++)
-					renderInstructions[i].renderWay(renderCallback, tags);
-			}
-			return;
-		}
+		// if (!changed) {
+		// renderInstructions = mRenderInstructions;
+		//
+		// if (renderInstructions != null) {
+		// for (int i = 0, n = renderInstructions.length; i < n; i++)
+		// renderInstructions[i].renderWay(renderCallback, tags);
+		// }
+		// return;
+		// }
 
 		if (closed) {
 			matchingCache = mMatchingCacheArea;
@@ -267,90 +266,8 @@ public class RenderTheme {
 			matchingCache.put(matchingCacheKey, renderInstructions);
 		}
 
-		mRenderInstructions = renderInstructions;
-
-		// if (matchingList != null) {
-		// for (int i = 0, n = matchingList.size(); i < n; ++i) {
-		// matchingList.get(i).renderWay(renderCallback, tags);
-		// }
-		// }
-		// return renderInstructions;
-
-		// if (closed) {
-		// mMatchingListArea = matchingList;
-		// } else {
-		// mMatchingListWay = matchingList;
-		// }
-
-		// if (mCompareKey.set(tags, zoomLevel, closed)) {
-		// // Log.d("mapsforge", "SAME AS BAFORE!!!" + tags);
-		// for (int i = 0, n = mInstructionList.length; i < n; ++i) {
-		// mInstructionList[i].renderWay(renderCallback, tags);
-		// }
-		// return;
-		// }
-		//
-		// SparseArray<RenderInstruction[]> matchingList = mMatchingCache.get(mCompareKey);
-		//
-		// if (matchingList != null) {
-		// mInstructionList = matchingList.get(zoomLevel);
-		// if (mInstructionList != null) {
-		// // cache hit
-		// // Log.d("mapsforge", "CCACHE HIT !!!" + tags);
-		// for (int i = 0, n = mInstructionList.length; i < n; ++i) {
-		// mInstructionList[i].renderWay(renderCallback, tags);
-		// }
-		//
-		// return;
-		// }
-		// }
-		// // Log.d("mapsforge", "CACHE MISS !!!" + tags);
-		// // cache miss
-		// ArrayList<RenderInstruction> instructionList = new ArrayList<RenderInstruction>();
-		//
-		// for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-		// mRulesList.get(i).matchWay(renderCallback, mCompareKey.getTags(), zoomLevel, closed, instructionList);
-		// }
-		//
-		// boolean found = false;
-		// int size = instructionList.size();
-		//
-		// if (matchingList == null) {
-		// matchingList = new SparseArray<RenderInstruction[]>(25);
-		// MatchingCacheKey matchingCacheKey = new MatchingCacheKey(mCompareKey);
-		// mMatchingCache.put(matchingCacheKey, matchingList);
-		// } else {
-		// // check if another zoomLevel uses the same instructionList
-		// for (int i = 0, n = matchingList.size(); i < n; i++) {
-		// int key = matchingList.keyAt(i);
-		//
-		// RenderInstruction[] list2 = matchingList.get(key);
-		// if (list2.length != size)
-		// continue;
-		//
-		// int j = 0;
-		// while (j < size && (list2[j] == instructionList.get(j)))
-		// j++;
-		//
-		// if (j == size) {
-		// instructionList.clear();
-		// mInstructionList = list2;
-		// found = true;
-		// break;
-		// }
-		// }
-		// }
-		//
-		// if (!found) {
-		// mInstructionList = new RenderInstruction[size];
-		// for (int i = 0; i < size; i++)
-		// mInstructionList[i] = instructionList.get(i);
-		// }
-		//
-		// for (int i = 0, n = mInstructionList.length; i < n; ++i)
-		// mInstructionList[i].renderWay(renderCallback, tags);
-		//
-		// matchingList.put(zoomLevel, mInstructionList);
+		// mRenderInstructions = renderInstructions;
+		return renderInstructions;
 	}
 
 	void addRule(Rule rule) {

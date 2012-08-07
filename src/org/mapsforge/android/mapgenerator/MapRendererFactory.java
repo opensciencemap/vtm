@@ -14,46 +14,66 @@
  */
 package org.mapsforge.android.mapgenerator;
 
+import org.mapsforge.android.IMapRenderer;
+import org.mapsforge.android.MapView;
+
 import android.util.AttributeSet;
 
 /**
  * A factory for the internal MapGenerator implementations.
  */
-public final class MapGeneratorFactory {
+public final class MapRendererFactory {
 	private static final String MAP_GENERATOR_ATTRIBUTE_NAME = "mapGenerator";
 
 	/**
+	 * @param mapView
+	 *            ...
 	 * @param attributeSet
 	 *            A collection of attributes which includes the desired MapGenerator.
 	 * @return a new MapGenerator instance.
 	 */
-	public static IMapGenerator createMapGenerator(AttributeSet attributeSet) {
-		String mapGeneratorName = attributeSet.getAttributeValue(null, MAP_GENERATOR_ATTRIBUTE_NAME);
+	public static IMapRenderer createMapRenderer(MapView mapView,
+			AttributeSet attributeSet) {
+		String mapGeneratorName = attributeSet.getAttributeValue(null,
+				MAP_GENERATOR_ATTRIBUTE_NAME);
 		if (mapGeneratorName == null) {
-			return new org.mapsforge.android.glrenderer.DatabaseRenderer();
+			return new org.mapsforge.android.glrenderer.MapRenderer(mapView);
 		}
 
-		MapGeneratorInternal mapGeneratorInternal = MapGeneratorInternal.valueOf(mapGeneratorName);
-		return MapGeneratorFactory.createMapGenerator(mapGeneratorInternal);
+		MapRenderers mapGeneratorInternal = MapRenderers.valueOf(mapGeneratorName);
+		return MapRendererFactory.createMapRenderer(mapView, mapGeneratorInternal);
+	}
+
+	public static MapRenderers getMapGenerator(AttributeSet attributeSet) {
+		String mapGeneratorName = attributeSet.getAttributeValue(null,
+				MAP_GENERATOR_ATTRIBUTE_NAME);
+		if (mapGeneratorName == null) {
+			return MapRenderers.GL_RENDERER;
+		}
+
+		return MapRenderers.valueOf(mapGeneratorName);
 	}
 
 	/**
+	 * @param mapView
+	 *            ...
 	 * @param mapGeneratorInternal
 	 *            the internal MapGenerator implementation.
 	 * @return a new MapGenerator instance.
 	 */
-	public static IMapGenerator createMapGenerator(MapGeneratorInternal mapGeneratorInternal) {
+	public static IMapRenderer createMapRenderer(MapView mapView,
+			MapRenderers mapGeneratorInternal) {
 		switch (mapGeneratorInternal) {
 			case SW_RENDERER:
-				return new org.mapsforge.android.swrenderer.DatabaseRenderer();
+				return new org.mapsforge.android.swrenderer.MapRenderer(mapView);
 			case GL_RENDERER:
-				return new org.mapsforge.android.glrenderer.DatabaseRenderer();
+				return new org.mapsforge.android.glrenderer.MapRenderer(mapView);
 		}
 
 		throw new IllegalArgumentException("unknown enum value: " + mapGeneratorInternal);
 	}
 
-	private MapGeneratorFactory() {
+	private MapRendererFactory() {
 		throw new IllegalStateException();
 	}
 }
