@@ -154,9 +154,11 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private static final int BUFFER_SIZE = 65536;
+
 	private final byte[] buffer = new byte[BUFFER_SIZE];
 	private int bufferPos;
 	private int bufferSize;
+	private int bytesRead;
 	private InputStream inputStream;
 
 	private static final int TAG_TILE_TAGS = 1;
@@ -165,23 +167,20 @@ public class MapDatabase implements IMapDatabase {
 	private static final int TAG_WAY_TAGS = 1;
 	private static final int TAG_WAY_INDEX = 2;
 	private static final int TAG_WAY_COORDS = 3;
+	private static final int TAG_WAY_LAYER = 4;
+
 	// private static final int TAG_NODE_TAGS = 1;
 	// private static final int TAG_NODE_COORDS = 2;
-
-	private int bytesRead;
 
 	private boolean decode(InputStream is) throws IOException {
 		inputStream = is;
 		bytesRead = 0;
 		bufferSize = 0;
 		bufferPos = 0;
-		while (true) {
+		int val;
+
+		while ((val = decodeVarint32()) > 0) {
 			// read tag and wire type
-			int val = decodeVarint32();
-			if (val == 0) {
-				// Log.d(TAG, "EOF, all good");
-				return true;
-			}
 			int tag = (val >> 3);
 			// int wireType = (val & 7);
 			// Log.d(TAG, "tile " + tag + " " + wireType);
@@ -204,6 +203,7 @@ public class MapDatabase implements IMapDatabase {
 					return false;
 			}
 		}
+		return true;
 	}
 
 	private boolean decodeTileTags() throws IOException {
@@ -227,6 +227,8 @@ public class MapDatabase implements IMapDatabase {
 		int indexCnt = 0;
 		int tagCnt = 0;
 		int coordCnt = 0;
+		int layer = 0;
+
 		while (bytesRead < end) {
 			// read tag and wire type
 
@@ -250,6 +252,10 @@ public class MapDatabase implements IMapDatabase {
 
 				case TAG_WAY_COORDS:
 					coordCnt = decodeWayCoordinates();
+					break;
+
+				case TAG_WAY_LAYER:
+					layer = decodeVarint32();
 					break;
 
 				default:
@@ -292,7 +298,7 @@ public class MapDatabase implements IMapDatabase {
 
 		}
 
-		mMapGenerator.renderWay((byte) 0, tags, coords, index, true);
+		mMapGenerator.renderWay((byte) layer, tags, coords, index, true);
 		return true;
 	}
 
@@ -368,8 +374,8 @@ public class MapDatabase implements IMapDatabase {
 
 		while (pos < end) {
 			if (cnt >= MAX_WAY_COORDS) {
+				// Log.d(TAG, "increase coords array  " + MAX_WAY_COORDS);
 				MAX_WAY_COORDS += 128;
-				Log.d(TAG, "increase coords array  " + MAX_WAY_COORDS);
 				float[] tmp = new float[MAX_WAY_COORDS];
 				System.arraycopy(coords, 0, tmp, 0, cnt);
 				tmpCoords = coords = tmp;
@@ -391,7 +397,6 @@ public class MapDatabase implements IMapDatabase {
 						if ((tmp = buf[pos++]) >= 0) {
 							result |= tmp << 21;
 						} else {
-
 							result |= (tmp & 0x7f) << 21;
 							result |= (tmp = buf[pos++]) << 28;
 
