@@ -453,6 +453,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (removes > 0)
 			Collections.sort(mTileList, mTileDistanceSort);
 
+		// pass new tile list to glThread
 		synchronized (this) {
 			for (int i = 0; i < nextTiles.cnt; i++)
 				nextTiles.tiles[i].isActive = false;
@@ -501,7 +502,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	 * 
 	 */
 	@Override
-	public synchronized void redrawTiles(boolean clear) {
+	public void redrawTiles(boolean clear) {
 		boolean changedPos = false;
 		boolean changedZoom = false;
 		mMapPosition = mMapView.getMapPosition().getMapPosition();
@@ -513,11 +514,18 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		if (clear) {
 			mInitial = true;
-
-			for (GLMapTile t : mTileList) {
-				t.isDrawn = false;
-				t.isLoading = false;
-				t.newData = false;
+			synchronized (this) {
+				for (GLMapTile t : mTileList) {
+					if (t.lineVBO != null) {
+						mVBOs.add(t.lineVBO);
+					}
+					if (t.polygonVBO != null)
+						mVBOs.add(t.polygonVBO);
+				}
+				mTileList.clear();
+				mTiles.clear();
+				nextTiles.cnt = 0;
+				mBufferMemoryUsage = 0;
 			}
 		}
 
@@ -546,6 +554,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (changedZoom)
 			updateVisibleList(x, y);
 
+		// pass new position to glThread
 		synchronized (this) {
 			// do not change position while drawing
 			mCurX = x;
@@ -862,12 +871,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			dy = tile.pixelY - mDrawY * div;
 			scale = mDrawScale / div;
 		}
-
+		int size = Tile.TILE_SIZE;
 		int sx = (int) (dx * scale);
 		int sy = (int) (dy * scale);
 
-		int sw = (int) ((dx + Tile.TILE_SIZE) * scale) - sx;
-		int sh = (int) ((dy + Tile.TILE_SIZE) * scale) - sy;
+		int sw = (int) ((dx + size) * scale) - sx;
+		int sh = (int) ((dy + size) * scale) - sy;
 
 		sx = (mWidth >> 1) + sx;
 		sy = (mHeight >> 1) - (sy + sh);
@@ -903,101 +912,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		return true;
 	}
-
-	private void drawProxyLines(GLMapTile tile) {
-		if (tile.parent != null && tile.parent.isDrawn) {
-			tile.parent.sx = tile.sx;
-			tile.parent.sy = tile.sy;
-			tile.parent.sw = tile.sw;
-			tile.parent.sh = tile.sh;
-			drawLines(tile.parent, -1);
-		} else {
-			int drawn = 0;
-			// scissor coordinates already set for polygons
-			for (int i = 0; i < 4; i++) {
-				GLMapTile c = tile.child[i];
-				if (c != null && c.isDrawn && c.isVisible) {
-					drawLines(c, 1);
-					drawn++;
-				}
-
-			}
-			if (drawn < 4 && tile.parent != null) {
-				GLMapTile p = tile.parent.parent;
-				if (p != null && p.isDrawn) {
-					p.sx = tile.sx;
-					p.sy = tile.sy;
-					p.sw = tile.sw;
-					p.sh = tile.sh;
-					drawLines(p, -2);
-				}
-			}
-		}
-	}
-
-	private void drawProxyPolygons(GLMapTile tile) {
-		if (tile.parent != null && tile.parent.isDrawn) {
-			tile.parent.sx = tile.sx;
-			tile.parent.sy = tile.sy;
-			tile.parent.sw = tile.sw;
-			tile.parent.sh = tile.sh;
-			drawPolygons(tile.parent, -1);
-		} else {
-			int drawn = 0;
-
-			for (int i = 0; i < 4; i++) {
-				GLMapTile c = tile.child[i];
-
-				if (c != null && c.isDrawn && setTileScissor(c, 2)) {
-					drawPolygons(c, 1);
-					drawn++;
-				}
-			}
-
-			if (drawn < 4 && tile.parent != null) {
-				GLMapTile p = tile.parent.parent;
-				if (p != null && p.isDrawn) {
-					p.sx = tile.sx;
-					p.sy = tile.sy;
-					p.sw = tile.sw;
-					p.sh = tile.sh;
-					drawPolygons(p, -2);
-				}
-			}
-		}
-	}
-
-	// private void drawProxyTriangles(GLMapTile tile) {
-	// if (tile.parent != null && tile.parent.isDrawn) {
-	// tile.parent.sx = tile.sx;
-	// tile.parent.sy = tile.sy;
-	// tile.parent.sw = tile.sw;
-	// tile.parent.sh = tile.sh;
-	// drawTriangles(tile.parent, -1);
-	// } else {
-	// int drawn = 0;
-	//
-	// for (int i = 0; i < 4; i++) {
-	// GLMapTile c = tile.child[i];
-	//
-	// if (c != null && c.isDrawn && setTileScissor(c, 2)) {
-	// drawTriangles(c, 1);
-	// drawn++;
-	// }
-	// }
-	//
-	// if (drawn < 4 && tile.parent != null) {
-	// GLMapTile p = tile.parent.parent;
-	// if (p != null && p.isDrawn) {
-	// p.sx = tile.sx;
-	// p.sy = tile.sy;
-	// p.sw = tile.sw;
-	// p.sh = tile.sh;
-	// drawTriangles(p, -2);
-	// }
-	// }
-	// }
-	// }
 
 	private int uploadCnt = 0;
 
@@ -1419,6 +1333,101 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		glClearColor(0.98f, 0.98f, 0.97f, 1.0f);
 		glClearStencil(0);
 	}
+
+	private void drawProxyLines(GLMapTile tile) {
+		if (tile.parent != null && tile.parent.isDrawn) {
+			tile.parent.sx = tile.sx;
+			tile.parent.sy = tile.sy;
+			tile.parent.sw = tile.sw;
+			tile.parent.sh = tile.sh;
+			drawLines(tile.parent, -1);
+		} else {
+			int drawn = 0;
+			// scissor coordinates already set for polygons
+			for (int i = 0; i < 4; i++) {
+				GLMapTile c = tile.child[i];
+				if (c != null && c.isDrawn && c.isVisible) {
+					drawLines(c, 1);
+					drawn++;
+				}
+
+			}
+			if (drawn < 4 && tile.parent != null) {
+				GLMapTile p = tile.parent.parent;
+				if (p != null && p.isDrawn) {
+					p.sx = tile.sx;
+					p.sy = tile.sy;
+					p.sw = tile.sw;
+					p.sh = tile.sh;
+					drawLines(p, -2);
+				}
+			}
+		}
+	}
+
+	private void drawProxyPolygons(GLMapTile tile) {
+		if (tile.parent != null && tile.parent.isDrawn) {
+			tile.parent.sx = tile.sx;
+			tile.parent.sy = tile.sy;
+			tile.parent.sw = tile.sw;
+			tile.parent.sh = tile.sh;
+			drawPolygons(tile.parent, -1);
+		} else {
+			int drawn = 0;
+
+			for (int i = 0; i < 4; i++) {
+				GLMapTile c = tile.child[i];
+
+				if (c != null && c.isDrawn && setTileScissor(c, 2)) {
+					drawPolygons(c, 1);
+					drawn++;
+				}
+			}
+
+			if (drawn < 4 && tile.parent != null) {
+				GLMapTile p = tile.parent.parent;
+				if (p != null && p.isDrawn) {
+					p.sx = tile.sx;
+					p.sy = tile.sy;
+					p.sw = tile.sw;
+					p.sh = tile.sh;
+					drawPolygons(p, -2);
+				}
+			}
+		}
+	}
+
+	// private void drawProxyTriangles(GLMapTile tile) {
+	// if (tile.parent != null && tile.parent.isDrawn) {
+	// tile.parent.sx = tile.sx;
+	// tile.parent.sy = tile.sy;
+	// tile.parent.sw = tile.sw;
+	// tile.parent.sh = tile.sh;
+	// drawTriangles(tile.parent, -1);
+	// } else {
+	// int drawn = 0;
+	//
+	// for (int i = 0; i < 4; i++) {
+	// GLMapTile c = tile.child[i];
+	//
+	// if (c != null && c.isDrawn && setTileScissor(c, 2)) {
+	// drawTriangles(c, 1);
+	// drawn++;
+	// }
+	// }
+	//
+	// if (drawn < 4 && tile.parent != null) {
+	// GLMapTile p = tile.parent.parent;
+	// if (p != null && p.isDrawn) {
+	// p.sx = tile.sx;
+	// p.sy = tile.sy;
+	// p.sw = tile.sw;
+	// p.sh = tile.sh;
+	// drawTriangles(p, -2);
+	// }
+	// }
+	// }
+	// }
 
 	@Override
 	public boolean processedTile() {
