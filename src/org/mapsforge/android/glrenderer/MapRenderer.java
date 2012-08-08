@@ -441,6 +441,13 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		updateTileDistances();
 
+		// scramble tile draw order, might help to make draw calls independent... just a guess :)
+		for (int i = 1; i < tiles / 2; i += 2) {
+			GLMapTile tmp = newTiles.tiles[i];
+			newTiles.tiles[i] = newTiles.tiles[tiles - i];
+			newTiles.tiles[tiles - i] = tmp;
+		}
+
 		int removes = mTiles.size() - CACHE_TILES;
 
 		if (removes > 0)
