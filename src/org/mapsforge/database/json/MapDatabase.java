@@ -173,4 +173,10 @@ public class MapDatabase implements IMapDatabase {
 		return null;
 	}
 
+	@Override
+	public void cancel() {
+		// TODO Auto-generated method stub
+
+	}
+
 }

@@ -28,6 +28,8 @@ public class MapWorker extends PausableThread {
 	private final IMapGenerator mMapGenerator;
 	private final IMapRenderer mMapRenderer;
 
+	// private final int mPrio;
+
 	/**
 	 * @param id
 	 *            thread id
@@ -46,6 +48,7 @@ public class MapWorker extends PausableThread {
 		mMapRenderer = mapRenderer;
 
 		THREAD_NAME = "MapWorker" + id;
+		// mPrio = Math.max(Thread.MIN_PRIORITY + id, Thread.NORM_PRIORITY - 1);
 	}
 
 	public IMapGenerator getMapGenerator() {
@@ -63,7 +66,6 @@ public class MapWorker extends PausableThread {
 
 		if (mMapGenerator == null || mapGeneratorJob == null)
 			return;
-		// Log.d(THREAD_NAME, "processing: " + mapGeneratorJob.tile);
 
 		boolean success = mMapGenerator.executeJob(mapGeneratorJob);
 
@@ -78,9 +80,14 @@ public class MapWorker extends PausableThread {
 	}
 
 	@Override
+	protected void takeabreak() {
+		mMapGenerator.getMapDatabase().cancel();
+	}
+
+	@Override
 	protected int getThreadPriority() {
-		// return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 2;
-		return Thread.MIN_PRIORITY;
+		return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 2;
+		// return mPrio;
 	}
 
 	@Override

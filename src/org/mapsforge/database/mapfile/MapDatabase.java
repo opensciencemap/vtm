@@ -976,4 +976,10 @@ public class MapDatabase implements IMapDatabase {
 
 		return zoomTable;
 	}
+
+	@Override
+	public void cancel() {
+		// TODO Auto-generated method stub
+
+	}
 }
