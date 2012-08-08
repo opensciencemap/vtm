@@ -382,7 +382,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 					Tile.TILE_SIZE, 0, 0, 0 };
 			LineLayer ll = mLineLayers.getLayer(Integer.MAX_VALUE, Color.BLACK, false,
 					true);
-			ll.addLine(coords, 0, coords.length, 2.0f, false);
+			ll.addLine(coords, 0, coords.length, 1.5f, false);
 		}
 
 		mCurrentTile.newData = true;
