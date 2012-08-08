@@ -93,7 +93,7 @@ public class MapView extends GLSurfaceView {
 	private IMapRenderer mMapRenderer;
 	private JobQueue mJobQueue;
 	private MapWorker mMapWorkers[];
-	private int mNumMapWorkers = 6;
+	private int mNumMapWorkers = 4;
 	private JobParameters mJobParameters;
 	private DebugSettings mDebugSettings;
 	private String mMapFile;
@@ -301,15 +301,15 @@ public class MapView extends GLSurfaceView {
 	/**
 	 * Calculates all necessary tiles and adds jobs accordingly.
 	 */
-	public synchronized void redrawTiles() {
-		if (getWidth() <= 0 || getHeight() <= 0)
+	public void redrawTiles() {
+		if (getWidth() > 0 && getHeight() > 0)
 			return;
 
 		mMapRenderer.redrawTiles(false);
 	}
 
 	void clearAndRedrawMapView() {
-		if (getWidth() <= 0 || getHeight() <= 0)
+		if (getWidth() > 0 && getHeight() > 0)
 			return;
 
 		mMapRenderer.redrawTiles(true);
@@ -525,7 +525,6 @@ public class MapView extends GLSurfaceView {
 		} catch (IOException e) {
 			Log.e(TAG, e.getMessage());
 		} finally {
-			mapWorkersProceed();
 			try {
 				if (inputStream != null) {
 					inputStream.close();
@@ -533,7 +532,9 @@ public class MapView extends GLSurfaceView {
 			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 			}
+			mapWorkersProceed();
 		}
+
 		return false;
 	}
 
@@ -604,13 +605,13 @@ public class MapView extends GLSurfaceView {
 	@Override
 	protected synchronized void onSizeChanged(int width, int height, int oldWidth,
 			int oldHeight) {
-		for (MapWorker mapWorker : mMapWorkers) {
-			mapWorker.pause();
-			mapWorker.awaitPausing();
-			super.onSizeChanged(width, height, oldWidth, oldHeight);
-			mapWorker.proceed();
-		}
-		// redrawTiles();
+		mJobQueue.clear();
+
+		mapWorkersPause();
+
+		super.onSizeChanged(width, height, oldWidth, oldHeight);
+
+		mapWorkersProceed();
 	}
 
 	void destroy() {
@@ -618,6 +619,7 @@ public class MapView extends GLSurfaceView {
 		// mZoomAnimator.interrupt();
 
 		for (MapWorker mapWorker : mMapWorkers) {
+			mapWorker.pause();
 			mapWorker.interrupt();
 
 			try {
@@ -754,10 +756,12 @@ public class MapView extends GLSurfaceView {
 
 	private void mapWorkersPause() {
 		for (MapWorker mapWorker : mMapWorkers) {
-			if (!mapWorker.isPausing()) {
+			if (!mapWorker.isPausing())
 				mapWorker.pause();
+		}
+		for (MapWorker mapWorker : mMapWorkers) {
+			if (!mapWorker.isPausing())
 				mapWorker.awaitPausing();
-			}
 		}
 	}
 

@@ -366,4 +366,10 @@ public class MapDatabase implements IMapDatabase {
 		int count = data.getInt();
 		parseGeometryArray(data, count);
 	}
+
+	@Override
+	public void cancel() {
+		// TODO Auto-generated method stub
+
+	}
 }

@@ -17,6 +17,8 @@ package org.mapsforge.database.pbmap;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.zip.GZIPInputStream;
 
@@ -24,8 +26,17 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.Tag;
@@ -36,7 +47,6 @@ import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
 import org.mapsforge.database.MapFileInfo;
 
-import android.net.http.AndroidHttpClient;
 import android.util.Log;
 
 /**
@@ -63,12 +73,17 @@ public class MapDatabase implements IMapDatabase {
 	private Tag[] curTags = new Tag[1000];
 	private int mCurTagCnt;
 
-	private AndroidHttpClient mClient;
+	// private AndroidHttpClient mClient;
+	private HttpClient mClient;
 	private IMapDatabaseCallback mMapGenerator;
 	private float mScaleFactor;
 
 	@Override
 	public void executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
+		mCanceled = false;
+
+		if (mClient == null)
+			createClient();
 
 		String url = String.format(URL, Integer.valueOf(tile.zoomLevel),
 				Long.valueOf(tile.tileX), Long.valueOf(tile.tileY));
@@ -100,6 +115,7 @@ public class MapDatabase implements IMapDatabase {
 			InputStream is = null;
 			GZIPInputStream zis = null;
 			try {
+				// is = AndroidHttpClient.getUngzippedContent(entity);
 
 				is = entity.getContent();
 				zis = new GZIPInputStream(is);
@@ -113,6 +129,10 @@ public class MapDatabase implements IMapDatabase {
 					is.close();
 				entity.consumeContent();
 			}
+		} catch (SocketException ex) {
+			Log.d(TAG, "Socket exception: " + ex.getMessage());
+		} catch (SocketTimeoutException ex) {
+			Log.d(TAG, "Socket exception: " + ex.getMessage());
 		} catch (Exception ex) {
 			getRequest.abort();
 			ex.printStackTrace();
@@ -134,10 +154,27 @@ public class MapDatabase implements IMapDatabase {
 		return mOpenFile;
 	}
 
+	private void createClient() {
+		// mClient = AndroidHttpClient.newInstance("Android");
+
+		mOpenFile = true;
+		HttpParams params = new BasicHttpParams();
+		HttpConnectionParams.setStaleCheckingEnabled(params, false);
+
+		HttpConnectionParams.setConnectionTimeout(params, 10 * 1000);
+		HttpConnectionParams.setSoTimeout(params, 60 * 1000);
+		HttpConnectionParams.setSocketBufferSize(params, 8192);
+		mClient = new DefaultHttpClient(params);
+		HttpClientParams.setRedirecting(params, false);
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("http",
+				PlainSocketFactory.getSocketFactory(), 80));
+	}
+
 	@Override
 	public FileOpenResult openFile(File mapFile) {
-		mOpenFile = true;
-		mClient = AndroidHttpClient.newInstance("Android");
+		createClient();
+
 		return new FileOpenResult();
 	}
 
@@ -145,7 +182,7 @@ public class MapDatabase implements IMapDatabase {
 	public void closeFile() {
 		mOpenFile = false;
 		if (mClient != null)
-			mClient.close();
+			mClient.getConnectionManager().shutdown();
 	}
 
 	@Override
@@ -361,20 +398,18 @@ public class MapDatabase implements IMapDatabase {
 	private int decodeWayCoordinates() throws IOException {
 		int bytes = decodeVarint32();
 
-		int cnt = 0;
-		// int end = bytesRead + bytes;
-
 		readBuffer(bytes);
 
 		int pos = bufferPos;
 		int end = pos + bytes;
 		float[] coords = tmpCoords;
 		byte[] buf = buffer;
+		int cnt = 0;
 		int result;
 
+		// read repeated sint32
 		while (pos < end) {
 			if (cnt >= MAX_WAY_COORDS) {
-				// Log.d(TAG, "increase coords array  " + MAX_WAY_COORDS);
 				MAX_WAY_COORDS += 128;
 				float[] tmp = new float[MAX_WAY_COORDS];
 				System.arraycopy(coords, 0, tmp, 0, cnt);
@@ -457,10 +492,10 @@ public class MapDatabase implements IMapDatabase {
 			return;
 
 		if (size > BUFFER_SIZE) {
-			Log.d(TAG, "EEEK too large");
-			// FIXME throw exception, but frankly better sanitize tile data on compilation
-			// this only happen with Strings larger than 32kb
-			return;
+			// FIXME throw exception for now, but frankly better
+			// sanitize tile data on compilation.
+			// this only happen with strings or coordinates larger than 64kb
+			throw new IOException("EEEK requested size too large");
 		}
 
 		if ((size - bufferSize) + bufferPos > BUFFER_SIZE) {
@@ -572,6 +607,15 @@ public class MapDatabase implements IMapDatabase {
 
 	public static int decodeZigZag32(final int n) {
 		return (n >>> 1) ^ -(n & 1);
+	}
+
+	private boolean mCanceled;
+
+	@Override
+	public void cancel() {
+		mCanceled = true;
+		mClient.getConnectionManager().shutdown();
+		mClient = null;
 	}
 
 }

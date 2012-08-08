@@ -71,4 +71,6 @@ public interface IMapDatabase {
 	 */
 	public abstract String readString(int position);
 
+	public abstract void cancel();
+
 }
