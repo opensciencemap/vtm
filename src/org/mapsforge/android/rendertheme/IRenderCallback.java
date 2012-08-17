@@ -15,6 +15,7 @@
 package org.mapsforge.android.rendertheme;
 
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
+import org.mapsforge.android.rendertheme.renderinstruction.Caption;
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
 
 import android.graphics.Bitmap;
@@ -37,14 +38,8 @@ public interface IRenderCallback {
 	 * 
 	 * @param caption
 	 *            the text to be rendered.
-	 * @param verticalOffset
-	 *            the vertical offset of the caption.
-	 * @param paint
-	 *            the paint to be used for rendering the text.
-	 * @param stroke
-	 *            an optional paint for the text casing (may be null).
 	 */
-	void renderAreaCaption(String caption, float verticalOffset, Paint paint, Paint stroke);
+	void renderAreaCaption(Caption caption);
 
 	/**
 	 * Renders an area symbol with the given bitmap.
@@ -59,14 +54,8 @@ public interface IRenderCallback {
 	 * 
 	 * @param caption
 	 *            the text to be rendered.
-	 * @param verticalOffset
-	 *            the vertical offset of the caption.
-	 * @param paint
-	 *            the paint to be used for rendering the text.
-	 * @param stroke
-	 *            an optional paint for the text casing (may be null).
 	 */
-	void renderPointOfInterestCaption(String caption, float verticalOffset, Paint paint, Paint stroke);
+	void renderPointOfInterestCaption(Caption caption);
 
 	/**
 	 * Renders a point of interest circle with the given parameters.

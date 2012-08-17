@@ -14,21 +14,21 @@
  */
 package org.mapsforge.android.glrenderer;
 
-import java.util.LinkedList;
+import org.mapsforge.android.rendertheme.renderinstruction.Area;
 
 class PolygonLayer extends Layer {
-	int fadeLevel;
+	PolygonLayer next;
+	Area area;
 
 	private boolean first = true;
 	private float originX;
 	private float originY;
 
-	PolygonLayer(int layer, int color, int fade) {
-		super(layer, color);
-		fadeLevel = fade;
-		curItem = LayerPool.get();
-		pool = new LinkedList<PoolItem>();
-		pool.add(curItem);
+	PolygonLayer(int layer, Area area) {
+		super(layer);
+		this.area = area;
+		curItem = VertexPool.get();
+		pool = curItem;
 	}
 
 	void addPolygon(float[] points, int pos, int length) {

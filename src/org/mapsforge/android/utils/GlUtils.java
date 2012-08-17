@@ -101,6 +101,7 @@ public class GlUtils {
 
 		int program = GLES20.glCreateProgram();
 		if (program != 0) {
+			checkGlError("glCreateProgram");
 			GLES20.glAttachShader(program, vertexShader);
 			checkGlError("glAttachShader");
 			GLES20.glAttachShader(program, pixelShader);

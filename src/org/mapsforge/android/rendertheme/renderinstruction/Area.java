@@ -42,7 +42,8 @@ public final class Area implements RenderInstruction {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading a resource.
 	 */
-	public static Area create(String elementName, Attributes attributes, int level) throws IOException {
+	public static Area create(String elementName, Attributes attributes, int level)
+			throws IOException {
 		String src = null;
 		int fill = Color.BLACK;
 		int stroke = Color.TRANSPARENT;
@@ -73,7 +74,8 @@ public final class Area implements RenderInstruction {
 
 	private static void validate(float strokeWidth) {
 		if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: " + strokeWidth);
+			throw new IllegalArgumentException("stroke-width must not be negative: "
+					+ strokeWidth);
 		}
 	}
 
@@ -96,22 +98,24 @@ public final class Area implements RenderInstruction {
 	/**
 	 * 
 	 */
-	public final int color;
+	public final float color[];
 	/**
 	 * 
 	 */
 	public final int fade;
 
-	private Area(String src, int fill, int stroke, float strokeWidth, int fade, int level) throws IOException {
+	private Area(String src, int fill, int stroke, float strokeWidth, int fade, int level)
+			throws IOException {
 		super();
-
-		Shader shader = BitmapUtils.createBitmapShader(src);
 
 		if (fill == Color.TRANSPARENT) {
 			paintFill = null;
 		} else {
 			paintFill = new Paint(Paint.ANTI_ALIAS_FLAG);
-			paintFill.setShader(shader);
+			if (src != null) {
+				Shader shader = BitmapUtils.createBitmapShader(src);
+				paintFill.setShader(shader);
+			}
 			paintFill.setStyle(Style.FILL);
 			paintFill.setColor(fill);
 			paintFill.setStrokeCap(Cap.ROUND);
@@ -125,7 +129,12 @@ public final class Area implements RenderInstruction {
 			paintOutline.setColor(stroke);
 			paintOutline.setStrokeCap(Cap.ROUND);
 		}
-		color = fill;
+		color = new float[4];
+		color[0] = (fill >> 16 & 0xff) / 255.0f;
+		color[1] = (fill >> 8 & 0xff) / 255.0f;
+		color[2] = (fill >> 0 & 0xff) / 255.0f;
+		color[3] = (fill >> 24 & 0xff) / 255.0f;
+
 		this.strokeWidth = strokeWidth;
 		this.fade = fade;
 		this.level = level;

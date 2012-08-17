@@ -23,6 +23,8 @@ class Shaders {
 			+ "attribute vec2 a_st;"
 			+ "varying vec2 v_st;"
 			+ "void main() {"
+			// + "  gl_Position = u_center * vec4(a_position.x, a_position.y, 0.0, 1.0);"
+			// + "  v_st = a_position.zw;"
 			+ "  gl_Position = u_center * a_position;"
 			+ "  v_st = a_st;"
 			+ "}";

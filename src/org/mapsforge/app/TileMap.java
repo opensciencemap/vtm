@@ -587,9 +587,11 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 				preferences.getBoolean("drawTileCoordinates", false);
 		boolean disablePolygons =
 				preferences.getBoolean("disablePolygons", false);
+		boolean drawUnmatchedWays =
+				preferences.getBoolean("drawUnmatchedWays", false);
 
 		DebugSettings debugSettings = new DebugSettings(drawTileCoordinates,
-				drawTileFrames, disablePolygons);
+				drawTileFrames, disablePolygons, drawUnmatchedWays);
 
 		mMapView.setDebugSettings(debugSettings);
 

@@ -5,29 +5,36 @@
              version="1" map-background="#f0f0f0">
 
   <!-- ways -->
-  <rule e="way" k="*" v="*">
+  <rule e="way" k="*" v="*" >
 
-    <!-- landuse -->
+    <rule e="way" k="natural"  v="grassland|scrub" zoom-min="9">
+      <area fill="#ebf2d2" fade="10" />
+    </rule>
+      
+    <!-- landuse base -->      
     <rule e="way" k="landuse" v="*">
-      <rule e="way" k="*"  v="farmland|farm">
+        <rule e="way" k="*" v="military">
+            <area fill="#dddddd"/>
+            <line stroke="#666666" stroke-width="1.5" fixed="true"/>
+        </rule>
+      <rule e="way" k="*"  v="farmland|farm|orchard|vine_yard|greenhouse_horticulture|plant_nursery">
         <area fill="#fff8bf" fade="10" />
       </rule>
-      
-      <rule e="way" k="landuse"  v="grass">
-        <area fill="#deecb9" fade="10" />
+      <!-- Steinbruch, Schotter-, Kies-, Sand- und Tongrube -->
+      <rule e="way" k="*"  v="quarry">
+        <area fill="#ddddcc" fade="10" />
       </rule>
-      
+       
       <rule e="way" k="*"   v="residential|farmyard|retail|commercial">
         <area fill="#efefeb" fade="10" />
       </rule>
 
-      <!-- <rule e="way" k="landuse" v="industrial|brownfield|railway"> <area 
-           fill="#bcaacd" stroke="#e4e4e4" stroke-width="0.2" /> -->
+       <rule e="way" k="*" v="industrial|railway"> <area 
+           fill="#e8e3e4" stroke="#e4e4e4" stroke-width="0.2"  fade="10" /> 
+       </rule>
       <!--<rule e="way" k="landuse" v="construction|greenfield"> <area fill="#a47c41" 
           stroke="#e4e4e4" stroke-width="0.2" /> </rule> -->
       <!-- <rule e="way" k="landuse" v="garages"> <area fill="#d6d6e4" /> </rule> -->
-
-      
     </rule>
 
     <rule e="way" k="outline" v="*">
@@ -99,15 +106,16 @@
         </rule>
       </rule>
     </rule>
+    
     <!-- landuse -->
-    <rule e="way" k="landuse" v="*" >
+    <rule e="way" k="landuse" v="*"  zoom-min="10">
       <!-- <rule e="way" k="*" v="landfill|quarry"> <area fill="#e9dd72" stroke="#556b2f" 
            stroke-width="0.2" /> </rule> -->
       <rule e="way" k="*" v="cemetery">
         <area fill="#d7e6b0"  />
       </rule>
-      <rule e="way" k="*" v="meadow|scrub">
-        <area fill="#deecb9" />
+      <rule e="way" k="*" v="meadow">
+        <area fill="#ebf2d2"  fade="10"/>
       </rule>
       
       <!--              <rule e="way" k="*" v="village_green|recreation_ground">
@@ -122,7 +130,12 @@
     </rule>
 
 
-    <rule e="way" k="leisure|landuse" v="allotments|village_green|recreation_ground|garden|golf_course|dog_park" zoom-min="12">
+    <!-- garden -->
+    <rule e="way" k="leisure" v="golf_course|dog_park" zoom-min="12">
+      <area fill="#e7f7c1" fade="12" />
+    </rule>
+   
+    <rule e="way" k="landuse" v="allotments|village_green|recreation_ground" zoom-min="12">
       <area fill="#e7f7c1" fade="12" />
     </rule>
     
@@ -132,19 +145,35 @@
         <area fill="#d7e6b0" fade="12" />
       </rule>
     </rule>
-
-
-    <rule e="way" k="natural|landuse" v="forest|wood" zoom-min="9">
-      <!-- <area fill="#BCCBB0" fade="10" /> -->
-      <!--      <rule e="way" k="*" v="*" zoom-max="11"> -->
-      <area fill="#d3dec8" fade="9" />
-      <!--      </rule> -->
-      <!--              <rule e="way" k="*" v="*" zoom-min="12">
-           <area fill="#cde2bc" fade="12" />
-           </rule> -->
-      <!-- <area fill="#87a670" fade="10" /> -->
+      
+    
+    <rule e="way" k="natural|" v="*">
+      <rule e="way" k="*" v="wood"> 
+        <rule e="way" k="*" v="*" zoom-max="12">
+          <area fill="#ebefe5" fade="7" />
+        </rule>
+        <rule e="way" k="*" v="*" zoom-min="11">
+          <area fill="#d3dec8" fade="12" />
+        </rule>
+      </rule>  
     </rule>
-
+    
+    <rule e="way" k="landuse" v="*">
+      <rule e="way" k="*" v="forest"> 
+        <rule e="way" k="*" v="*" zoom-max="12">
+          <area fill="#ebefe5" fade="7" />
+        </rule>
+        <rule e="way" k="*" v="*" zoom-min="11">
+          <area fill="#d3dec8" fade="12" />
+        </rule>
+      </rule>  
+    </rule>
+    
+		<!-- keep grass above forest:wood and leisure:park! --> 
+		<rule e="way" k="landuse"  v="grass">
+        <area fill="#ebf2d2" fade="10" />
+    </rule>
+     
 
     <!-- amenity -->
     <rule e="way" k="amenity" v="*">
@@ -181,7 +210,7 @@
       <rule e="way" k="*" zoom-min="12" v="heath">
         <area fill="#ffffc0" fade="12" />
       </rule>
-      <rule e="way" k="*" v="marsh|wetland">
+      <rule e="way" k="*" v="marsh|wetland|mud">
         <area fill="#deecb9" fade="12" />
       </rule>
     </rule>
@@ -190,14 +219,23 @@
     <!-- leisure -->
     <rule e="way" k="leisure" v="*" zoom-min="13">
 
-      <!--  playground| -->
+     
+      <rule e="way" k="*" v="stadium" zoom-min="14">>
+        <line stroke="#c9c3c1" stroke-width="0.6" fixed="true" stroke-linecap="butt" />
+        <area fill="#e9e6e3" fade="15" />
+      </rule>
       
       <!-- sollte unter playing field sein -->
-      <rule e="way" k="*" zoom_min="14" v="sports_centre|water_park">
+      <rule e="way" k="*" zoom-min="14" v="sports_centre|water_park">
         <area fill="#daefdb" fade="12" />
       </rule>
       
-      <rule e="way" k="*" v="*" zoom-min="15">
+      <rule e="way" k="*" v="*" zoom-min="14">
+          <rule e="way" k="*" v="playground|miniature_golf">
+          <area fill="#f4f4de" />
+          <line stroke="#fbdbc8" stroke-width="0.6" fixed="true"
+                stroke-linecap="butt" />
+        </rule>
         <rule e="way" k="*" v="playing_fields|pitch">
           <area fill="#f4f4de" />
           <line stroke="#dbdbc8" stroke-width="0.6" fixed="true"
@@ -235,10 +273,10 @@
         <line stroke="#b4cbdc" stroke-width="0.275" stroke-linecap="butt" />
       </rule>
       <rule e="way" k="waterway" v="river" zoom-min="12">
-        <line stroke="#b4cbdc" stroke-width="1.0" stroke-linecap="butt" />
+        <line stroke="#b4cbdc" stroke-width="1.3" stroke-linecap="butt" />
       </rule>
       <rule e="way" k="waterway" v="river" zoom-max="11">
-        <line stroke="#b4cbdc" stroke-width="1.0" stroke-linecap="butt"
+        <line stroke="#b4cbdc" stroke-width="1.3" stroke-linecap="butt"
               fixed="true" />
       </rule>
       <rule e="way" k="waterway" v="riverbank|dock">
@@ -346,6 +384,8 @@
           </rule> -->
     </rule>
 
+    
+      
     <rule e="way" k="outline" v="*">
       <rule e="way" k="*" v="1">
         <outline stroke="#909090" />
@@ -371,30 +411,30 @@
           <rule e="way" k="*" v="secondary|primary_link" zoom-min="9">
             <!--                <line stroke="#eeee4a" stroke-width="1.8" stroke-linecap="butt"
                  fixed="true" /> -->
-            <line stroke="#f2df6d" stroke-width="1.9" stroke-linecap="butt"
-                  fixed="true" />
+            <line stroke="#f2df6d" stroke-width="1.8" stroke-linecap="butt"
+                  fixed="true" fade="9"/>
           </rule>
 
           <rule e="way" k="*" v="trunk_link|motorway_link" zoom-min="8">
-            <line stroke="#fed6a3" stroke-width="2.0" stroke-linecap="butt"
-                  fixed="true" />
+            <line stroke="#fed6a3" stroke-width="1.8" stroke-linecap="butt"
+                  fixed="true"  fade="8"/>
           </rule>
 
-          <rule e="way" k="*" v="primary" zoom-min="6">
+          <rule e="way" k="*" v="primary" zoom-min="5">
             <!--        <line stroke="#eeee4a" stroke-width="1.4" stroke-linecap="butt"
                  fixed="true" /> -->
-            <line stroke="#f2df6d" stroke-width="2.0" stroke-linecap="butt"
-                  fixed="true" />
+            <line stroke="#f2df6d" stroke-width="1.8" stroke-linecap="butt"
+                  fixed="true"  fade="5"/>
           </rule>
 
-          <rule e="way" k="*" v="trunk" zoom-min="7">
+          <rule e="way" k="*" v="trunk" zoom-min="5">
             <line stroke="#fed6a3" stroke-width="2.0" stroke-linecap="butt"
-                  fixed="true" />
+                  fixed="true"  fade="5"/>
           </rule>
 
           <rule e="way" k="*" v="motorway">
-            <line stroke="#eec693" stroke-width="2.4" stroke-linecap="butt"
-                  fixed="true" />
+            <line stroke="#eec693" stroke-width="2.2" stroke-linecap="butt"
+                  fixed="true"  fade="4"/>
           </rule>
         </rule>
 
@@ -403,11 +443,11 @@
           <rule e="way" k="*" v="*" zoom-min="15">
 
             <rule e="way" k="*" v="steps">
-              <line stroke="#f1f0f4" stroke-width="0.35" outline="2"
+              <line stroke="#f1f0f4" stroke-width="0.25" outline="2"
                     stroke-linecap="butt" />
             </rule>
             <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16">
-              <line stroke="#c1bcb6" stroke-width="0.30" stroke-linecap="butt" />
+              <line stroke="#c1bcb6" stroke-width="0.20" stroke-linecap="butt" />
             </rule>
           </rule>
 
@@ -426,7 +466,7 @@
             </rule>
 
             <rule e="way" k="*" v="construction">
-              <line stroke="#d0d0d0" stroke-width="1.3" outline="1" />
+              <line stroke="#d0d0d0" stroke-width="1.2" outline="1" />
             </rule>
           </rule>
 
@@ -434,10 +474,10 @@
 
             <rule e="way" k="*" v="residential|road|unclassified|living_street">
               <rule e="way" k="bridge" v="yes|true">
-                <line stroke="#ffffff" stroke-width="1.3" outline="2" stroke-linecap="butt" />
+                <line stroke="#ffffff" stroke-width="1.2" outline="2" stroke-linecap="butt" />
               </rule>
               <rule e="way" k="bridge" v="~|no|false">
-                <line stroke="#ffffff" stroke-width="1.3" outline="1" />
+                <line stroke="#ffffff" stroke-width="1.2" outline="1" />
               </rule>
             </rule>
 
@@ -558,11 +598,11 @@
         </rule>
 
         <!-- railway casings and cores -->
-        <rule e="way" k="railway" v="tram">
+        <rule e="way" k="railway" v="tram" zoom-min="14">
           <line stroke="#8c8f8c" stroke-width="0.8" fixed="true" />
         </rule>
 
-        <rule e="way" k="railway" v="light_rail|subway|narrow_gauge">
+        <rule e="way" k="railway" v="light_rail|subway|narrow_gauge" zoom-min="14">
           <line stroke="#a0a0a0" stroke-width="0.8" stroke-linecap="butt"
                 fixed="true" />
 
@@ -577,6 +617,12 @@
              </rule> -->
         <rule e="way" k="railway" v="rail" zoom-max="13" zoom-min="11">
           <line stroke="#bbbbcc" stroke-width="0.6" stroke-linecap="butt"
+                fixed="true" />
+        </rule>
+        
+        <!-- whatever railway:spur means ...  -->
+ 				<rule e="way" k="railway" v="disused|spur|abandoned|preserved" >
+          <line stroke="#cccccc" stroke-width="0.6" stroke-linecap="butt"
                 fixed="true" />
         </rule>
       </rule>
@@ -634,6 +680,15 @@
       <caption k="name" font-style="bold" font-size="10" fill="#000000"
                stroke="#ffffff" stroke-width="2.0" />
     </rule>
+    <rule e="way" k="debug" v="area">
+         <line stroke="#ff0000" stroke-width="1.2" fixed="true" stroke-linecap="butt" />
+        <area fill="#880000ff"/>
+        <caption k="name" font-size="15" fill="#ffffff" stroke="#000000" stroke-width="2.0"/>
+    </rule>
+     <rule e="way" k="debug" v="way">
+         <line stroke="#00ffff" stroke-width="1.5" fixed="true" stroke-linecap="butt" />
+        <caption k="name" font-size="15" fill="#ffffff" stroke="#000000" stroke-width="2.0"/>
+    </rule>
   </rule>
 
   <rule e="node" k="*" v="*">
@@ -642,6 +697,10 @@
       <circle r="1.5" fill="#909090" />
     </rule>
 
+     <rule e="node" k="debug" v="*" >
+        <caption k="name" font-size="12" fill="#0000ff" />
+      </rule>
+      
 
     <!-- highway -->
     <!-- <rule e="node" k="highway" v="*"> <rule e="node" k="highway" v="turning_circle"> 
@@ -671,12 +730,12 @@
         <caption k="name" font-style="bold" font-size="20" fill="#000000"
                  stroke="#ffffff" stroke-width="2.0" />
       </rule>
-      <rule e="node" k="*" v="city" zoom-max="14">
-        <caption k="name" font-style="bold" font-size="25" fill="#000000"
+      <rule e="node" k="*" v="city">
+        <caption k="name" font-style="bold" font-size="20" fill="#000000"
                  stroke="#ffffff" stroke-width="2.0" />
       </rule>
-      <rule e="node" k="*" v="country" zoom-max="6">
-        <caption k="name" font-style="bold" font-size="25" fill="#000000"
+      <rule e="node" k="*" v="country" zoom-max="7">
+        <caption k="name" font-size="20" fill="#000000"
                  stroke="#ffffff" stroke-width="2.0" />
       </rule>
     </rule>

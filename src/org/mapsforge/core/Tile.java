@@ -27,7 +27,7 @@ public class Tile {
 	/**
 	 * Width and height of a map tile in pixel.
 	 */
-	public static final int TILE_SIZE = 256;
+	public static int TILE_SIZE = 256;
 
 	/**
 	 * Size of a single uncompressed map tile bitmap in bytes.

@@ -33,7 +33,7 @@ public interface IMapDatabaseCallback {
 	 * @param tags
 	 *            the tags of the node.
 	 */
-	void renderPointOfInterest(byte layer, int latitude, int longitude, Tag[] tags);
+	void renderPointOfInterest(byte layer, float latitude, float longitude, Tag[] tags);
 
 	/**
 	 * Renders water background for the current tile.
@@ -54,5 +54,9 @@ public interface IMapDatabaseCallback {
 	 * @param changed
 	 *            tags have changed since last call (just an optional hint)
 	 */
-	void renderWay(byte layer, Tag[] tags, float[] wayNodes, int[] wayLength, boolean changed);
+	void renderWay(byte layer, Tag[] tags, float[] wayNodes, short[] wayLength,
+			boolean changed);
+
+	boolean checkWay(Tag[] tags, boolean closed);
+
 }

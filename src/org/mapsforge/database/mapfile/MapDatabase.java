@@ -26,6 +26,7 @@ import org.mapsforge.core.Tile;
 import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
+import org.mapsforge.database.QueryResult;
 import org.mapsforge.database.mapfile.header.MapFileHeader;
 import org.mapsforge.database.mapfile.header.MapFileInfo;
 import org.mapsforge.database.mapfile.header.SubFileParameter;
@@ -203,9 +204,9 @@ public class MapDatabase implements IMapDatabase {
 	 * org.mapsforge.map.reader.MapDatabaseCallback)
 	 */
 	@Override
-	public void executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		if (sMapFileHeader == null)
-			return;
+			return QueryResult.FAILED;
 
 		if (mIntBuffer == null)
 			mIntBuffer = new int[MAXIMUM_WAY_NODES_SEQUENCE_LENGTH * 2];
@@ -223,7 +224,7 @@ public class MapDatabase implements IMapDatabase {
 			if (subFileParameter == null) {
 				LOG.warning("no sub-file for zoom level: "
 						+ queryParameters.queryZoomLevel);
-				return;
+				return QueryResult.FAILED;
 			}
 
 			QueryCalculations.calculateBaseTiles(queryParameters, tile, subFileParameter);
@@ -231,7 +232,9 @@ public class MapDatabase implements IMapDatabase {
 			processBlocks(mapDatabaseCallback, queryParameters, subFileParameter);
 		} catch (IOException e) {
 			LOG.log(Level.SEVERE, null, e);
+			return QueryResult.FAILED;
 		}
+		return QueryResult.SUCCESS;
 	}
 
 	/*
@@ -580,6 +583,8 @@ public class MapDatabase implements IMapDatabase {
 				}
 			}
 
+			// Log.d("MapDatabase", "read POI");
+
 			// get the POI latitude offset (VBE-S)
 			int latitude = mTileLatitude + mReadBuffer.readSignedInt();
 
@@ -610,12 +615,19 @@ public class MapDatabase implements IMapDatabase {
 
 			// check if the POI has a name
 			if ((featureByte & POI_FEATURE_NAME) != 0) {
-				mReadBuffer.getPositionAndSkip();
+				// int pos = mReadBuffer.getPositionAndSkip();
+				String str = mReadBuffer.readUTF8EncodedString();
+
+				Tag[] tmp = tags;
+				tags = new Tag[tmp.length + 1];
+				System.arraycopy(tmp, 0, tags, 0, tmp.length);
+				tags[tags.length - 1] = new Tag("name", str, false);
 			}
 
 			// check if the POI has a house number
 			if ((featureByte & POI_FEATURE_HOUSE_NUMBER) != 0) {
-				mReadBuffer.getPositionAndSkip();
+				// mReadBuffer.getPositionAndSkip();
+				String str = mReadBuffer.readUTF8EncodedString();
 			}
 
 			// check if the POI has an elevation
@@ -632,7 +644,7 @@ public class MapDatabase implements IMapDatabase {
 		return true;
 	}
 
-	private int[] processWayDataBlock(boolean doubleDeltaEncoding) {
+	private short[] processWayDataBlock(boolean doubleDeltaEncoding) {
 		// get and check the number of way coordinate blocks (VBE-U)
 		int numBlocks = mReadBuffer.readUnsignedInt();
 		if (numBlocks < 1 || numBlocks > Short.MAX_VALUE) {
@@ -640,7 +652,7 @@ public class MapDatabase implements IMapDatabase {
 			return null;
 		}
 
-		int[] wayLengths = new int[numBlocks];
+		short[] wayLengths = new short[numBlocks];
 
 		mWayNodePosition = 0;
 
@@ -663,7 +675,7 @@ public class MapDatabase implements IMapDatabase {
 			} else {
 				len = decodeWayNodesSingleDelta(len);
 			}
-			wayLengths[coordinateBlock] = len;
+			wayLengths[coordinateBlock] = (short) len;
 		}
 
 		return wayLengths;
@@ -907,7 +919,7 @@ public class MapDatabase implements IMapDatabase {
 			}
 
 			for (int wayDataBlock = 0; wayDataBlock < wayDataBlocks; ++wayDataBlock) {
-				int[] wayLengths = processWayDataBlock(featureWayDoubleDeltaEncoding);
+				short[] wayLengths = processWayDataBlock(featureWayDoubleDeltaEncoding);
 				if (wayLengths == null)
 					return false;
 

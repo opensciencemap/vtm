@@ -140,7 +140,7 @@ public class RenderTheme {
 	public void matchNode(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel) {
 		// List<RenderInstruction> matchingList = matchingListNode;
 		// MatchingCacheKey matchingCacheKey = matchingCacheKeyNode;
-		//
+
 		// if (!changed) {
 		// if (matchingList != null) {
 		// for (int i = 0, n = matchingList.size(); i < n; ++i) {
@@ -158,11 +158,13 @@ public class RenderTheme {
 		// matchingList.get(i).renderNode(renderCallback, tags);
 		// }
 		// } else {
-		// // cache miss
+
+		// cache miss
 		// matchingList = new ArrayList<RenderInstruction>();
-		// for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-		// mRulesList.get(i).matchNode(renderCallback, tags, zoomLevel, matchingList);
-		// }
+		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
+			mRulesList.get(i).matchNode(renderCallback, tags, zoomLevel);
+			// , matchingList
+		}
 		// matchingCacheNodes.put(matchingCacheKey, matchingList);
 		// }
 		//
@@ -214,7 +216,7 @@ public class RenderTheme {
 	public synchronized RenderInstruction[] matchWay(IRenderCallback renderCallback,
 			Tag[] tags,
 			byte zoomLevel,
-			boolean closed, boolean changed) {
+			boolean closed, boolean render) {
 		RenderInstruction[] renderInstructions = null;
 
 		LRUCache<MatchingCacheKey, RenderInstruction[]> matchingCache;
@@ -240,12 +242,6 @@ public class RenderTheme {
 		boolean found = matchingCache.containsKey(matchingCacheKey);
 		if (found) {
 			renderInstructions = matchingCache.get(matchingCacheKey);
-
-			if (renderInstructions != null) {
-				for (int i = 0, n = renderInstructions.length; i < n; i++)
-					renderInstructions[i].renderWay(renderCallback, tags);
-
-			}
 		} else {
 			// cache miss
 			int c = (closed ? Closed.YES : Closed.NO);
@@ -259,13 +255,17 @@ public class RenderTheme {
 				renderInstructions = new RenderInstruction[matchingList.size()];
 				for (int i = 0, n = matchingList.size(); i < n; ++i) {
 					RenderInstruction renderInstruction = matchingList.get(i);
-					renderInstruction.renderWay(renderCallback, tags);
+
 					renderInstructions[i] = renderInstruction;
 				}
 			}
 			matchingCache.put(matchingCacheKey, renderInstructions);
 		}
 
+		if (render && renderInstructions != null) {
+			for (int i = 0, n = renderInstructions.length; i < n; i++)
+				renderInstructions[i].renderWay(renderCallback, tags);
+		}
 		// mRenderInstructions = renderInstructions;
 		return renderInstructions;
 	}

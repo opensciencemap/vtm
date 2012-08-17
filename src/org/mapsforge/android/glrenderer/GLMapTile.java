@@ -14,6 +14,8 @@
  */
 package org.mapsforge.android.glrenderer;
 
+import java.util.ArrayList;
+
 import org.mapsforge.android.mapgenerator.MapTile;
 import org.mapsforge.core.Tile;
 
@@ -21,10 +23,12 @@ class GLMapTile extends MapTile {
 
 	VertexBufferObject lineVBO;
 	VertexBufferObject polygonVBO;
+	TextTexture texture;
 
-	LineLayers lineLayers;
-	PolygonLayers polygonLayers;
-	// MeshLayers meshLayers;
+	LineLayer lineLayers;
+	PolygonLayer polygonLayers;
+
+	ArrayList<TextItem> labels;
 
 	boolean newData;
 	boolean loading;

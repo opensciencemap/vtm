@@ -25,6 +25,7 @@ import static android.opengl.GLES20.GL_EXTENSIONS;
 import static android.opengl.GLES20.GL_FLOAT;
 import static android.opengl.GLES20.GL_INVERT;
 import static android.opengl.GLES20.GL_NEVER;
+import static android.opengl.GLES20.GL_ONE;
 import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
 import static android.opengl.GLES20.GL_SCISSOR_TEST;
 import static android.opengl.GLES20.GL_SRC_ALPHA;
@@ -80,6 +81,7 @@ import org.mapsforge.android.mapgenerator.JobParameters;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
 import org.mapsforge.android.mapgenerator.TileCacheKey;
 import org.mapsforge.android.mapgenerator.TileDistanceSort;
+import org.mapsforge.android.rendertheme.renderinstruction.Line;
 import org.mapsforge.android.utils.GlConfigChooser;
 import org.mapsforge.android.utils.GlUtils;
 import org.mapsforge.core.MapPosition;
@@ -102,7 +104,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	// private boolean mTriangulate = false;
 
-	private static int CACHE_TILES_MAX = 400;
+	private static int CACHE_TILES_MAX = 250;
 	private static int CACHE_TILES = CACHE_TILES_MAX;
 	private static int LIMIT_BUFFERS = 20 * MB;
 
@@ -127,28 +129,29 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private JobParameters mJobParameter;
 	private MapPosition mMapPosition, mPrevMapPosition;
 
-	private int mWidth, mHeight;
-	private float mAspect;
+	private static int mWidth, mHeight;
+	private static float mAspect;
 
 	// draw position is updated from current position in onDrawFrame
 	// keeping the position consistent while drawing
-	private double mDrawX, mDrawY, mDrawZ, mCurX, mCurY, mCurZ;
-	private float mDrawScale, mCurScale;
+	private static double mDrawX, mDrawY, mDrawZ, mCurX, mCurY, mCurZ;
+	private static float mDrawScale, mCurScale;
 
 	// current center tile
-	private long mTileX, mTileY;
+	private static long mTileX, mTileY;
 
-	private FloatBuffer floatBuffer[];
-	private ShortBuffer shortBuffer[];
+	private static int rotateBuffers = 2;
+	private static FloatBuffer floatBuffer[];
+	private static ShortBuffer shortBuffer[];
 
-	boolean useHalfFloat = false;
+	static boolean useHalfFloat = false;
 
 	// bytes currently loaded in VBOs
-	private int mBufferMemoryUsage;
+	private static int mBufferMemoryUsage;
 
 	// flag set by updateVisibleList when current visible tiles changed.
 	// used in onDrawFrame to nextTiles to curTiles
-	private boolean mUpdateTiles;
+	private static boolean mUpdateTiles;
 
 	class TilesData {
 		int cnt = 0;
@@ -159,30 +162,30 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 	}
 
-	private float[] mMVPMatrix = new float[16];
+	private static float[] mMVPMatrix = new float[16];
 	// private float[] mMMatrix = new float[16];
 	// private float[] mRMatrix = new float[16];
 
 	// newTiles is set in updateVisibleList and synchronized swapped
 	// with nextTiles on main thread.
 	// nextTiles is swapped with curTiles in onDrawFrame in GL thread.
-	private TilesData newTiles, nextTiles, curTiles;
+	private static TilesData newTiles, nextTiles, curTiles;
 
 	private boolean mInitial;
 
 	// shader handles
-	private int gLineProgram;
-	private int gLineVertexPositionHandle;
-	private int gLineTexturePositionHandle;
-	private int gLineColorHandle;
-	private int gLineMatrixHandle;
-	private int gLineModeHandle;
-	private int gLineWidthHandle;
+	private static int lineProgram;
+	private static int hLineVertexPosition;
+	private static int hLineTexturePosition;
+	private static int hLineColor;
+	private static int hLineMatrix;
+	private static int hLineMode;
+	private static int hLineWidth;
 
-	private int gPolygonProgram;
-	private int gPolygonVertexPositionHandle;
-	private int gPolygonMatrixHandle;
-	private int gPolygonColorHandle;
+	private static int polygonProgram;
+	private static int hPolygonVertexPosition;
+	private static int hPolygonMatrix;
+	private static int hPolygonColor;
 
 	/**
 	 * 
@@ -261,7 +264,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 			GLMapTile t = mTileList.remove(j);
 			if (t.isActive) {
-				// Log.d(TAG, "EEEK removing active tile");
+				Log.d(TAG, "EEEK removing active tile");
 				mTileList.add(t);
 				continue;
 			}
@@ -441,17 +444,13 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		updateTileDistances();
 
-		// scramble tile draw order, might help to make draw calls independent... just a guess :)
+		// scramble tile draw order: might help to make gl
+		// pipelines more independent... just a guess :)
 		for (int i = 1; i < tiles / 2; i += 2) {
 			GLMapTile tmp = newTiles.tiles[i];
 			newTiles.tiles[i] = newTiles.tiles[tiles - i];
 			newTiles.tiles[tiles - i] = tmp;
 		}
-
-		int removes = mTiles.size() - CACHE_TILES;
-
-		if (removes > 0)
-			Collections.sort(mTileList, mTileDistanceSort);
 
 		// pass new tile list to glThread
 		synchronized (this) {
@@ -472,7 +471,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			mUpdateTiles = true;
 		}
 
-		limitCache(removes);
+		int removes = mTiles.size() - CACHE_TILES;
+
+		if (removes > 0) {
+			Collections.sort(mTileList, mTileDistanceSort);
+			limitCache(removes);
+		}
 
 		if (mJobList.size() > 0)
 			mMapView.addJobs(mJobList);
@@ -593,7 +597,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 			float alpha = 1.0f;
 
-			if (l.fadeLevel >= mDrawZ) {
+			if (l.area.fade >= mDrawZ) {
 
 				alpha = (mDrawScale > 1.3f ? mDrawScale : 1.3f) - alpha;
 				if (alpha > 1.0f)
@@ -608,8 +612,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				blend = false;
 			}
 
-			glUniform4f(gPolygonColorHandle,
-					l.colors[0], l.colors[1], l.colors[2], alpha);
+			glUniform4f(hPolygonColor,
+					l.area.color[0], l.area.color[1], l.area.color[2], alpha);
 
 			// set stencil buffer mask used to draw this layer
 			glStencilFunc(GL_EQUAL, 0xff, 1 << c);
@@ -625,7 +629,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private boolean drawPolygons(GLMapTile tile, int diff) {
 		int cnt = 0;
 
-		if (tile.polygonLayers == null || tile.polygonLayers.array == null)
+		if (tile.polygonLayers == null)
 			return true;
 
 		glScissor(tile.sx, tile.sy, tile.sw, tile.sh);
@@ -635,27 +639,23 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
 
 			if (useHalfFloat) {
-				glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
+				glVertexAttribPointer(hPolygonVertexPosition, 2,
 						OES_HALF_FLOAT, false, 0,
 						POLYGON_VERTICES_DATA_POS_OFFSET);
 			} else {
-				glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
+				glVertexAttribPointer(hPolygonVertexPosition, 2,
 						GL_FLOAT, false, 0,
 						POLYGON_VERTICES_DATA_POS_OFFSET);
 			}
-
-			// glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		setMatrix(tile, diff);
-		glUniformMatrix4fv(gPolygonMatrixHandle, 1, false, mMVPMatrix, 0);
+		glUniformMatrix4fv(hPolygonMatrix, 1, false, mMVPMatrix, 0);
 
 		boolean firstPass = true;
 
-		for (int i = 0, n = tile.polygonLayers.array.length; i < n; i++) {
-			PolygonLayer l = tile.polygonLayers.array[i];
-
+		for (PolygonLayer l = tile.polygonLayers; l != null; l = l.next) {
 			// fade out polygon layers (set in RederTheme)
-			if (l.fadeLevel > 0 && l.fadeLevel > mDrawZ)
+			if (l.area.fade > 0 && l.area.fade > mDrawZ)
 				continue;
 
 			if (cnt == 0) {
@@ -668,8 +668,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				if (firstPass)
 					firstPass = false;
 				else {
-					// eeek, nexus! - cant do old-school polygons
-					// glFinish();
+					GLES20.glFlush();
 
 					// clear stencilbuffer
 					glStencilMask(0xFF);
@@ -703,56 +702,16 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			// eeek, nexus! - cant do old-school polygons
 			// glFinish();
 		}
+		GLES20.glFlush();
 		return true;
 	}
 
-	private int mLastBoundVBO;
-
-	// private boolean drawTriangles(GLMapTile tile, int diff) {
-	//
-	// if (tile.meshLayers == null || tile.meshLayers.array == null)
-	// return true;
-	//
-	// glScissor(tile.sx, tile.sy, tile.sw, tile.sh);
-	//
-	// if (mLastBoundVBO != tile.polygonVBO.id) {
-	// mLastBoundVBO = tile.polygonVBO.id;
-	// glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
-	//
-	// if (useHalfFloat) {
-	// glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
-	// OES_HALF_FLOAT, false, 0,
-	// POLYGON_VERTICES_DATA_POS_OFFSET);
-	// } else {
-	// glVertexAttribPointer(gPolygonVertexPositionHandle, 2,
-	// GL_FLOAT, false, 0,
-	// POLYGON_VERTICES_DATA_POS_OFFSET);
-	// }
-	//
-	// // glBindBuffer(GL_ARRAY_BUFFER, 0);
-	// }
-	// setMatrix(tile, diff);
-	// glUniformMatrix4fv(gPolygonMatrixHandle, 1, false, mMVPMatrix, 0);
-	//
-	// MeshLayer[] layers = tile.meshLayers.array;
-	//
-	// for (int i = 0, n = layers.length; i < n; i++) {
-	// MeshLayer l = layers[i];
-	// glUniform4fv(gPolygonColorHandle, 1, l.colors, 0);
-	//
-	// // glUniform4f(gPolygonColorHandle, 1, 0, 0, 1);
-	//
-	// // System.out.println("draw: " + l.offset + " " + l.verticesCnt);
-	// glDrawArrays(GL_TRIANGLES, l.offset, l.verticesCnt);
-	// }
-	//
-	// return true;
-	// }
+	private static int mLastBoundVBO;
 
 	private boolean drawLines(GLMapTile tile, int diff) {
 		float z = 1;
 
-		if (tile.lineLayers == null || tile.lineLayers.array == null)
+		if (tile.lineLayers == null)
 			return false;
 
 		glScissor(tile.sx, tile.sy, tile.sw, tile.sh);
@@ -762,27 +721,24 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			glBindBuffer(GL_ARRAY_BUFFER, tile.lineVBO.id);
 
 			if (useHalfFloat) {
-				glVertexAttribPointer(gLineVertexPositionHandle, 2, OES_HALF_FLOAT,
+				glVertexAttribPointer(hLineVertexPosition, 2, OES_HALF_FLOAT,
 						false, 8, LINE_VERTICES_DATA_POS_OFFSET);
 
-				glVertexAttribPointer(gLineTexturePositionHandle, 2, OES_HALF_FLOAT,
+				glVertexAttribPointer(hLineTexturePosition, 2, OES_HALF_FLOAT,
 						false, 8, LINE_VERTICES_DATA_TEX_OFFSET >> 1);
 			} else {
-				glVertexAttribPointer(gLineVertexPositionHandle, 2, GL_FLOAT,
+				glVertexAttribPointer(hLineVertexPosition, 2, GL_FLOAT,
 						false, 16, LINE_VERTICES_DATA_POS_OFFSET);
 
-				glVertexAttribPointer(gLineTexturePositionHandle, 2, GL_FLOAT,
+				glVertexAttribPointer(hLineTexturePosition, 2, GL_FLOAT,
 						false, 16, LINE_VERTICES_DATA_TEX_OFFSET);
 			}
-			// glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		if (diff != 0)
 			z = (diff > 0) ? (1 << diff) : 1.0f / (1 << -diff);
 
 		setMatrix(tile, diff);
-		glUniformMatrix4fv(gLineMatrixHandle, 1, false, mMVPMatrix, 0);
-
-		LineLayer[] layers = tile.lineLayers.array;
+		glUniformMatrix4fv(hLineMatrix, 1, false, mMVPMatrix, 0);
 
 		boolean drawOutlines = false;
 		boolean drawFixed = false;
@@ -792,52 +748,67 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		// linear scale for fixed lines
 		float fdiv = 0.9f / (mDrawScale / z);
 
-		// int cnt = 0;
-		for (int i = 0, n = layers.length; i < n; i++) {
-			LineLayer l = layers[i];
+		boolean first = true;
+
+		for (LineLayer l = tile.lineLayers; l != null; l = l.next) {
+			Line line = l.line;
+			if (line.fade > 0 && line.fade > mDrawZ)
+				continue;
 
 			// set line width and mode
-			if ((i == 0) || (l.isOutline != drawOutlines) || (l.isFixed != drawFixed)) {
+			if (first || (l.isOutline != drawOutlines)
+					|| (line.fixed != drawFixed)) {
+				first = false;
 				drawOutlines = l.isOutline;
-				drawFixed = l.isFixed;
+				drawFixed = line.fixed;
 
 				if (drawOutlines) {
-					glUniform2f(gLineModeHandle, 0, wdiv);
+					glUniform2f(hLineMode, 0, wdiv);
 				} else if (!drawFixed) {
-					glUniform2f(gLineModeHandle, 0, wdiv * 0.98f);
+					glUniform2f(hLineMode, 0, wdiv * 0.98f);
 				}
 			}
 
 			if (drawFixed) {
 				if (l.width < 1.0)
-					glUniform2f(gLineModeHandle, 0.4f, fdiv);
+					glUniform2f(hLineMode, 0.4f, fdiv);
 				else
-					glUniform2f(gLineModeHandle, 0, fdiv);
+					glUniform2f(hLineMode, 0, fdiv);
 			}
-			glUniform4fv(gLineColorHandle, 1, l.colors, 0);
+
+			if (line.fade >= mDrawZ) {
+				float alpha = 1.0f;
+
+				alpha = (mDrawScale > 1.3f ? mDrawScale : 1.3f) - alpha;
+				if (alpha > 1.0f)
+					alpha = 1.0f;
+				glUniform4f(hLineColor,
+						line.color[0], line.color[1], line.color[2], alpha);
+			} else {
+				glUniform4fv(hLineColor, 1, line.color, 0);
+			}
 
 			if (drawOutlines) {
-				for (int j = 0, m = l.outlines.size(); j < m; j++) {
-					LineLayer o = l.outlines.get(j);
+				for (LineLayer o = l.outlines; o != null; o = o.outlines) {
 
 					if (mSimpleLines)
-						glUniform1f(gLineWidthHandle, o.width);
+						glUniform1f(hLineWidth, o.width);
 
 					glDrawArrays(GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
 				}
 			}
 			else {
 				if (mSimpleLines)
-					glUniform1f(gLineWidthHandle, l.width);
+					glUniform1f(hLineWidth, l.width);
 
 				glDrawArrays(GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
 			}
 		}
-
+		GLES20.glFlush();
 		return true;
 	}
 
-	private void setMatrix(GLMapTile tile, int diff) {
+	private static void setMatrix(GLMapTile tile, int diff) {
 		float x, y, scale;
 		float z = 1;
 
@@ -858,7 +829,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mMVPMatrix[5] = (scale);
 	}
 
-	private boolean setTileScissor(GLMapTile tile, float div) {
+	private static boolean setTileScissor(GLMapTile tile, float div) {
 
 		double dx, dy, scale;
 
@@ -916,12 +887,14 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private int uploadCnt = 0;
 
 	private boolean uploadTileData(GLMapTile tile) {
+		ShortBuffer sbuf = null;
+		FloatBuffer fbuf = null;
 
 		// double start = SystemClock.uptimeMillis();
 
-		// use multiple buffers to avoid overwriting buffer while current data is uploaded
-		// (or rather the blocking which is required to avoid this)
-		if (uploadCnt >= 10) {
+		// use multiple buffers to avoid overwriting buffer while current
+		// data is uploaded (or rather the blocking which is required to avoid this)
+		if (uploadCnt >= rotateBuffers) {
 			// mMapView.requestRender();
 			// return false;
 			uploadCnt = 0;
@@ -939,27 +912,34 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				tile.polygonVBO = mVBOs.remove(mVBOs.size() - 1);
 			}
 		}
-		if (useHalfFloat)
-			shortBuffer[uploadCnt * 2] = tile.lineLayers
-					.compileLayerData(shortBuffer[uploadCnt * 2]);
-		else
-			floatBuffer[uploadCnt * 2] = tile.lineLayers
-					.compileLayerData(floatBuffer[uploadCnt * 2]);
+		int size = 0;
 
-		if (tile.lineLayers.size > 0) {
+		if (useHalfFloat) {
+			sbuf = LineLayers.compileLayerData(tile.lineLayers,
+					shortBuffer[uploadCnt * 2]);
+			size = sbuf.remaining();
+			shortBuffer[uploadCnt * 2] = sbuf;
+		} else {
+			fbuf = LineLayers.compileLayerData(tile.lineLayers,
+					floatBuffer[uploadCnt * 2]);
+			size = fbuf.remaining();
+			floatBuffer[uploadCnt * 2] = fbuf;
+		}
+
+		if (size > 0) {
 			mBufferMemoryUsage -= tile.lineVBO.size;
 
 			glBindBuffer(GL_ARRAY_BUFFER, tile.lineVBO.id);
 			// glBufferData(GL_ARRAY_BUFFER, 0, null, GL_DYNAMIC_DRAW);
 
 			if (useHalfFloat) {
-				tile.lineVBO.size = tile.lineLayers.size * SHORT_BYTES;
+				tile.lineVBO.size = size * SHORT_BYTES;
 				glBufferData(GL_ARRAY_BUFFER, tile.lineVBO.size,
-						shortBuffer[uploadCnt * 2], GL_DYNAMIC_DRAW);
+						sbuf, GL_DYNAMIC_DRAW);
 			} else {
-				tile.lineVBO.size = tile.lineLayers.size * FLOAT_BYTES;
+				tile.lineVBO.size = size * FLOAT_BYTES;
 				glBufferData(GL_ARRAY_BUFFER, tile.lineVBO.size,
-						floatBuffer[uploadCnt * 2], GL_DYNAMIC_DRAW);
+						fbuf, GL_DYNAMIC_DRAW);
 			}
 
 			mBufferMemoryUsage += tile.lineVBO.size;
@@ -968,16 +948,19 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			tile.lineLayers = null;
 		}
 
-		// if (!mTriangulate) {
-		if (useHalfFloat)
-			shortBuffer[uploadCnt * 2 + 1] = tile.polygonLayers
-					.compileLayerData(shortBuffer[uploadCnt * 2 + 1]);
-		else
-			floatBuffer[uploadCnt * 2 + 1] = tile.polygonLayers
-					.compileLayerData(floatBuffer[uploadCnt * 2 + 1]);
-
+		if (useHalfFloat) {
+			sbuf = PolygonLayers.compileLayerData(tile.polygonLayers,
+					shortBuffer[uploadCnt * 2 + 1]);
+			size = sbuf.remaining();
+			shortBuffer[uploadCnt * 2 + 1] = sbuf;
+		} else {
+			fbuf = PolygonLayers.compileLayerData(tile.polygonLayers,
+					floatBuffer[uploadCnt * 2 + 1]);
+			size = fbuf.remaining();
+			floatBuffer[uploadCnt * 2 + 1] = fbuf;
+		}
 		// Upload polygon data to vertex buffer object
-		if (tile.polygonLayers.size > 0) {
+		if (size > 0) {
 			mBufferMemoryUsage -= tile.polygonVBO.size;
 
 			glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
@@ -985,54 +968,24 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			// GL_DYNAMIC_DRAW);
 
 			if (useHalfFloat) {
-				tile.polygonVBO.size = tile.polygonLayers.size * SHORT_BYTES;
+				tile.polygonVBO.size = size * SHORT_BYTES;
 				glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
-						shortBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
+						sbuf, GL_DYNAMIC_DRAW);
 			} else {
-				tile.polygonVBO.size = tile.polygonLayers.size * FLOAT_BYTES;
+				tile.polygonVBO.size = size * FLOAT_BYTES;
 				glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
-						floatBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
+						fbuf, GL_DYNAMIC_DRAW);
 			}
 			mBufferMemoryUsage += tile.polygonVBO.size;
 
 		} else {
 			tile.polygonLayers = null;
 		}
-		// }
-		// else {
-		// if (useHalfFloat)
-		// shortBuffer[uploadCnt * 2 + 1] = tile.meshLayers
-		// .compileLayerData(shortBuffer[uploadCnt * 2 + 1]);
-		// else
-		// floatBuffer[uploadCnt * 2 + 1] = tile.meshLayers
-		// .compileLayerData(floatBuffer[uploadCnt * 2 + 1]);
-		//
-		// // Upload triangle data to vertex buffer object
-		// if (tile.meshLayers.size > 0) {
-		// mBufferMemoryUsage -= tile.polygonVBO.size;
-		//
-		// glBindBuffer(GL_ARRAY_BUFFER, tile.polygonVBO.id);
-		// // glBufferData(GL_ARRAY_BUFFER, 0, null,
-		// // GL_DYNAMIC_DRAW);
-		//
-		// if (useHalfFloat) {
-		// tile.polygonVBO.size = tile.meshLayers.size * SHORT_BYTES;
-		// glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
-		// shortBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
-		// } else {
-		// tile.polygonVBO.size = tile.meshLayers.size * FLOAT_BYTES;
-		// glBufferData(GL_ARRAY_BUFFER, tile.polygonVBO.size,
-		// floatBuffer[uploadCnt * 2 + 1], GL_DYNAMIC_DRAW);
-		// }
-		// mBufferMemoryUsage += tile.polygonVBO.size;
-		//
-		// } else {
-		// tile.meshLayers = null;
-		// }
-		// }
+
 		tile.newData = false;
 		tile.isDrawn = true;
 		tile.isLoading = false;
+
 		// double compile = SystemClock.uptimeMillis();
 		// glFinish();
 		// double now = SystemClock.uptimeMillis();
@@ -1043,8 +996,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		return true;
 	}
-
-	// private long startTime = SystemClock.uptimeMillis();
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
@@ -1057,19 +1008,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			start = SystemClock.uptimeMillis();
 
 		glStencilMask(0xFF);
-		glDisable(GL_SCISSOR_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		// long endTime = SystemClock.uptimeMillis();
-		// long dt = endTime - startTime;
-		// if (dt < 33)
-		// try {
-		// Thread.sleep(33 - dt);
-		// } catch (InterruptedException e) {
-		// Log.d(TAG, "interrupt");
-		// return;
-		// }
-		// startTime = SystemClock.uptimeMillis();
 
 		synchronized (this) {
 			mDrawX = mCurX;
@@ -1114,12 +1053,19 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		uploadCnt = 0;
 		mLastBoundVBO = -1;
 
+		int updateTextures = 0;
+
 		// check visible tiles, set tile clip scissors, upload new vertex data
+
 		for (int i = 0; i < tileCnt; i++) {
 			GLMapTile tile = tiles[i];
 
 			if (!setTileScissor(tile, 1))
 				continue;
+
+			if (tile.texture == null && tile.labels != null &&
+					mTextRenderer.drawToTexture(tile))
+				updateTextures++;
 
 			if (tile.newData) {
 				uploadTileData(tile);
@@ -1143,24 +1089,24 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			}
 		}
 
-		if (GlUtils.checkGlOutOfMemory("upload: " + mBufferMemoryUsage)
-				&& LIMIT_BUFFERS > MB)
-			LIMIT_BUFFERS -= MB;
+		if (updateTextures > 0)
+			mTextRenderer.compileTextures();
+
+		// if (GlUtils.checkGlOutOfMemory("upload: " + mBufferMemoryUsage)
+		// && LIMIT_BUFFERS > MB)
+		// LIMIT_BUFFERS -= MB;
 
 		if (timing)
 			clear_time = (SystemClock.uptimeMillis() - start);
 
 		glEnable(GL_SCISSOR_TEST);
 
-		glUseProgram(gPolygonProgram);
-		glEnableVertexAttribArray(gPolygonVertexPositionHandle);
+		glUseProgram(polygonProgram);
+		glEnableVertexAttribArray(hPolygonVertexPosition);
 
-		// if (!mTriangulate) {
 		glDisable(GL_BLEND);
 		// Draw Polygons
 		glEnable(GL_STENCIL_TEST);
-
-		// glEnableVertexAttribArray(gPolygonVertexPositionHandle);
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible) {
@@ -1172,24 +1118,11 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 					drawProxyPolygons(tile);
 			}
 		}
-		// GlUtils.checkGlError("polygons");
+
 		glDisable(GL_STENCIL_TEST);
-		// } else {
-		// // Draw Triangles
-		// for (int i = 0; i < tileCnt; i++) {
-		// if (tiles[i].isVisible) {
-		// GLMapTile tile = tiles[i];
-		//
-		// if (tile.isDrawn)
-		// drawTriangles(tile, 0);
-		// else
-		// drawProxyTriangles(tile);
-		// }
-		// }
-		// // GlUtils.checkGlError("triangles");
-		// }
+
 		// required on GalaxyII, Android 2.3.3 (cant just VAA enable once...)
-		glDisableVertexAttribArray(gPolygonVertexPositionHandle);
+		glDisableVertexAttribArray(hPolygonVertexPosition);
 
 		if (timing) {
 			glFinish();
@@ -1198,10 +1131,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		// Draw lines
 		glEnable(GL_BLEND);
-		glUseProgram(gLineProgram);
+		glUseProgram(lineProgram);
 
-		glEnableVertexAttribArray(gLineVertexPositionHandle);
-		glEnableVertexAttribArray(gLineTexturePositionHandle);
+		glEnableVertexAttribArray(hLineVertexPosition);
+		glEnableVertexAttribArray(hLineTexturePosition);
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible) {
@@ -1214,20 +1147,37 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			}
 		}
 
+		glDisableVertexAttribArray(hLineVertexPosition);
+		glDisableVertexAttribArray(hLineTexturePosition);
+
+		glDisable(GL_SCISSOR_TEST);
+
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		mTextRenderer.beginDraw();
+		for (int i = 0; i < tileCnt; i++) {
+			if (!tiles[i].isVisible || tiles[i].texture == null)
+				continue;
+
+			setMatrix(tiles[i], 0);
+
+			mTextRenderer.drawTile(tiles[i], mMVPMatrix);
+		}
+		mTextRenderer.endDraw();
+
 		if (timing) {
 			glFinish();
 			Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start) + " "
 					+ clear_time + " " + poly_time);
 		}
-		glDisableVertexAttribArray(gLineVertexPositionHandle);
-		glDisableVertexAttribArray(gLineTexturePositionHandle);
-		// GlUtils.checkGlError("lines");
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	private int[] mVboIds;
+	private static TextRenderer mTextRenderer;
 
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
+		GlUtils.checkGlError("onSurfaceChanged");
+
 		mVBOs.clear();
 		mTiles.clear();
 		mTileList.clear();
@@ -1246,19 +1196,26 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mAspect = (float) height / width;
 
 		glViewport(0, 0, width, height);
+		GlUtils.checkGlError("glViewport");
 
-		int tiles = (mWidth / Tile.TILE_SIZE + 4) * (mHeight / Tile.TILE_SIZE + 4);
-		curTiles = new TilesData(tiles);
-		newTiles = new TilesData(tiles);
-		nextTiles = new TilesData(tiles);
+		int numTiles = (mWidth / (Tile.TILE_SIZE / 2) + 2)
+				* (mHeight / (Tile.TILE_SIZE / 2) + 2);
+
+		curTiles = new TilesData(numTiles);
+		newTiles = new TilesData(numTiles);
+		nextTiles = new TilesData(numTiles);
 
 		// Set up vertex buffer objects
-		int numVBO = (CACHE_TILES + tiles) * 2;
-		mVboIds = new int[numVBO];
+		int numVBO = (CACHE_TILES + numTiles) * 2;
+		int[] mVboIds = new int[numVBO];
 		glGenBuffers(numVBO, mVboIds, 0);
+		GlUtils.checkGlError("glGenBuffers");
 
 		for (int i = 0; i < numVBO; i++)
 			mVBOs.add(new VertexBufferObject(mVboIds[i]));
+
+		// Set up textures
+		mTextRenderer = new TextRenderer(numTiles * 2);
 
 		mDebugSettings = mMapView.getDebugSettings();
 		mJobParameter = mMapView.getJobParameters();
@@ -1273,14 +1230,14 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Set up the program for rendering lines
 
-		gLineProgram = GlUtils.createProgram(Shaders.gLineVertexShader,
+		lineProgram = GlUtils.createProgram(Shaders.gLineVertexShader,
 				Shaders.gLineFragmentShader);
-		if (gLineProgram == 0) {
+		if (lineProgram == 0) {
 			mSimpleLines = true;
 			Log.e(TAG, "trying simple line program.");
-			gLineProgram = GlUtils.createProgram(Shaders.gLineVertexShader,
+			lineProgram = GlUtils.createProgram(Shaders.gLineVertexShader,
 					Shaders.gLineFragmentShaderSimple);
-			if (gLineProgram == 0) {
+			if (lineProgram == 0) {
 				Log.e(TAG, "Could not create line program.");
 				return;
 			}
@@ -1290,48 +1247,51 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		if (ext.indexOf("GL_OES_vertex_half_float") >= 0) {
 			useHalfFloat = true;
-			shortBuffer = new ShortBuffer[20];
+			shortBuffer = new ShortBuffer[rotateBuffers * 2];
 		}
 		else {
-			floatBuffer = new FloatBuffer[20];
+			floatBuffer = new FloatBuffer[rotateBuffers * 2];
 		}
 		Log.d(TAG, "Extensions: " + ext);
 
-		gLineMatrixHandle = glGetUniformLocation(gLineProgram, "u_center");
-		gLineModeHandle = glGetUniformLocation(gLineProgram, "u_mode");
-		gLineColorHandle = glGetUniformLocation(gLineProgram, "u_color");
-		gLineVertexPositionHandle = GLES20
-				.glGetAttribLocation(gLineProgram, "a_position");
-		gLineTexturePositionHandle = glGetAttribLocation(gLineProgram, "a_st");
+		hLineMatrix = glGetUniformLocation(lineProgram, "u_center");
+		hLineMode = glGetUniformLocation(lineProgram, "u_mode");
+		hLineColor = glGetUniformLocation(lineProgram, "u_color");
+		hLineVertexPosition = GLES20.glGetAttribLocation(lineProgram, "a_position");
+		hLineTexturePosition = glGetAttribLocation(lineProgram, "a_st");
 		if (mSimpleLines)
-			gLineWidthHandle = glGetUniformLocation(gLineProgram, "u_width");
+			hLineWidth = glGetUniformLocation(lineProgram, "u_width");
 
 		// Set up the program for rendering polygons
-		gPolygonProgram = GlUtils.createProgram(Shaders.gPolygonVertexShader,
+		polygonProgram = GlUtils.createProgram(Shaders.gPolygonVertexShader,
 				Shaders.gPolygonFragmentShader);
-		if (gPolygonProgram == 0) {
+		if (polygonProgram == 0) {
 			Log.e(TAG, "Could not create polygon program.");
 			return;
 		}
-		gPolygonMatrixHandle = glGetUniformLocation(gPolygonProgram, "u_center");
-		gPolygonVertexPositionHandle = glGetAttribLocation(gPolygonProgram,
-				"a_position");
-		gPolygonColorHandle = glGetUniformLocation(gPolygonProgram, "u_color");
+		hPolygonMatrix = glGetUniformLocation(polygonProgram, "u_center");
+		hPolygonVertexPosition = glGetAttribLocation(polygonProgram, "a_position");
+		hPolygonColor = glGetUniformLocation(polygonProgram, "u_color");
 
-		// glUseProgram(gPolygonProgram);
-		// glEnableVertexAttribArray(gPolygonVertexPositionHandle);
+		// glUseProgram(polygonProgram);
+		// glEnableVertexAttribArray(hPolygonVertexPosition);
 		//
-		// glUseProgram(gLineProgram);
-		// glEnableVertexAttribArray(gLineVertexPositionHandle);
-		// glEnableVertexAttribArray(gLineTexturePositionHandle);
+		// glUseProgram(lineProgram);
+		// glEnableVertexAttribArray(hLineVertexPosition);
+		// glEnableVertexAttribArray(hLineTexturePosition);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		// glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(false);
 		glDisable(GL_DITHER);
 		glClearColor(0.98f, 0.98f, 0.97f, 1.0f);
 		glClearStencil(0);
+
+		GlUtils.checkGlError("onSurfaceCreated");
+
 	}
 
 	private void drawProxyLines(GLMapTile tile) {
@@ -1396,38 +1356,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			}
 		}
 	}
-
-	// private void drawProxyTriangles(GLMapTile tile) {
-	// if (tile.parent != null && tile.parent.isDrawn) {
-	// tile.parent.sx = tile.sx;
-	// tile.parent.sy = tile.sy;
-	// tile.parent.sw = tile.sw;
-	// tile.parent.sh = tile.sh;
-	// drawTriangles(tile.parent, -1);
-	// } else {
-	// int drawn = 0;
-	//
-	// for (int i = 0; i < 4; i++) {
-	// GLMapTile c = tile.child[i];
-	//
-	// if (c != null && c.isDrawn && setTileScissor(c, 2)) {
-	// drawTriangles(c, 1);
-	// drawn++;
-	// }
-	// }
-	//
-	// if (drawn < 4 && tile.parent != null) {
-	// GLMapTile p = tile.parent.parent;
-	// if (p != null && p.isDrawn) {
-	// p.sx = tile.sx;
-	// p.sy = tile.sy;
-	// p.sw = tile.sw;
-	// p.sh = tile.sh;
-	// drawTriangles(p, -2);
-	// }
-	// }
-	// }
-	// }
 
 	@Override
 	public boolean processedTile() {

@@ -55,7 +55,7 @@ public final class Line implements RenderInstruction {
 		float[] strokeDasharray = null;
 		Cap strokeLinecap = Cap.ROUND;
 		int outline = -1;
-		// int fade = -1;
+		int fade = -1;
 		boolean fixed = false;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
@@ -75,7 +75,7 @@ public final class Line implements RenderInstruction {
 			} else if ("outline".equals(name)) {
 				outline = Integer.parseInt(value);
 			} else if ("fade".equals(name)) {
-				// fade = Integer.parseInt(value);
+				fade = Integer.parseInt(value);
 			} else if ("fixed".equals(name)) {
 				fixed = Boolean.parseBoolean(value);
 			} else {
@@ -85,7 +85,7 @@ public final class Line implements RenderInstruction {
 
 		validate(strokeWidth);
 		return new Line(src, stroke, strokeWidth, strokeDasharray, strokeLinecap, level,
-				outline, fixed);
+				outline, fixed, fade);
 	}
 
 	private static void validate(float strokeWidth) {
@@ -123,7 +123,7 @@ public final class Line implements RenderInstruction {
 	/**
 	 * 
 	 */
-	public final int color;
+	public final float color[];
 	/**
 	 * 
 	 */
@@ -134,9 +134,11 @@ public final class Line implements RenderInstruction {
 	 */
 	public final boolean fixed;
 
+	public final int fade;
+
 	private Line(String src, int stroke, float strokeWidth, float[] strokeDasharray,
 			Cap strokeLinecap, int level,
-			int outline, boolean fixed)
+			int outline, boolean fixed, int fade)
 			throws IOException {
 		super();
 
@@ -151,11 +153,18 @@ public final class Line implements RenderInstruction {
 		}
 		paint.setStrokeCap(strokeLinecap);
 		round = (strokeLinecap == Cap.ROUND);
-		this.color = stroke;
+
+		color = new float[4];
+		color[0] = (stroke >> 16 & 0xff) / 255.0f;
+		color[1] = (stroke >> 8 & 0xff) / 255.0f;
+		color[2] = (stroke >> 0 & 0xff) / 255.0f;
+		color[3] = (stroke >> 24 & 0xff) / 255.0f;
+
 		this.strokeWidth = strokeWidth;
 		this.level = level;
 		this.outline = outline;
 		this.fixed = fixed;
+		this.fade = fade;
 	}
 
 	@Override

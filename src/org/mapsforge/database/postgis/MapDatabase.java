@@ -33,13 +33,18 @@ import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
 import org.mapsforge.database.MapFileInfo;
+import org.mapsforge.database.QueryResult;
 import org.postgresql.PGConnection;
+
+import android.util.Log;
 
 /**
  * 
  *
  */
 public class MapDatabase implements IMapDatabase {
+	private final static String TAG = "MapDatabase";
+
 	private static final String QUERY = "SELECT tags, geom FROM __get_tile(?,?,?)";
 
 	private final float mScale = 1; // 1000000.0f;
@@ -47,7 +52,7 @@ public class MapDatabase implements IMapDatabase {
 	private int mCoordPos = 0;
 	private int mIndexPos = 0;
 	private float[] mCoords = new float[100000];
-	private int[] mIndex = new int[10000];
+	private short[] mIndex = new short[10000];
 
 	private Tag[] mTags;
 
@@ -66,7 +71,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private boolean connect() {
 		Connection conn = null;
-		String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/gis";
+		String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/gis-2.0";
 
 		Properties dbOpts = new Properties();
 		dbOpts.setProperty("user", "osm");
@@ -97,44 +102,45 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	@Override
-	public void executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		if (connection == null) {
 			if (!connect())
-				return;
+				return QueryResult.FAILED;
 		}
 
 		ResultSet r;
 
 		try {
-			prepQuery.setLong(1, tile.pixelX);
-			prepQuery.setLong(2, tile.pixelY);
+			prepQuery.setLong(1, tile.tileX * 256);
+			prepQuery.setLong(2, tile.tileY * 256);
 			prepQuery.setInt(3, tile.zoomLevel);
-			System.out.println("" + prepQuery.toString());
+			Log.d(TAG, "" + prepQuery.toString());
 			prepQuery.execute();
 			r = prepQuery.getResultSet();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			connection = null;
-			return;
+			return QueryResult.FAILED;
 		}
 
 		byte[] b = null;
 		PGHStore h = null;
-
+		int cnt = 0;
 		try {
 			while (r != null && r.next()) {
 				mIndexPos = 0;
 				mCoordPos = 0;
-
+				cnt++;
 				try {
 					Object obj = r.getObject(1);
 					h = null;
 
 					if (obj instanceof PGHStore)
 						h = (PGHStore) obj;
-					else
+					else {
+						Log.d(TAG, "no tags: skip way");
 						continue;
-
+					}
 					b = r.getBytes(2);
 
 				} catch (SQLException e) {
@@ -142,15 +148,16 @@ public class MapDatabase implements IMapDatabase {
 					continue;
 				}
 
-				if (b == null)
+				if (b == null) {
+					// Log.d(TAG, "no geometry: skip way");
 					continue;
-
+				}
 				mTags = new Tag[h.size()];
 
 				int i = 0;
 				for (Entry<String, String> t : h.entrySet()) {
 					if (t.getKey() == null) {
-						System.out.println("no KEY !!! ");
+						Log.d(TAG, "no KEY !!! ");
 						break;
 					}
 					Tag tag = tagHash.get(t);
@@ -164,18 +171,27 @@ public class MapDatabase implements IMapDatabase {
 				if (i < mTags.length)
 					continue;
 
-				parse(b);
-				if (mIndexPos == 0)
+				boolean polygon = parse(b);
+				if (mIndexPos == 0) {
+					Log.d(TAG, "no index: skip way");
 					continue;
+				} else if (mIndexPos == 1) {
+					mapDatabaseCallback.renderPointOfInterest((byte) 0, mCoords[1],
+							mCoords[0], mTags);
+				} else {
 
-				int[] idx = new int[mIndexPos];
-				System.arraycopy(mIndex, 0, idx, 0, mIndexPos);
-				mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, idx, true);
+					short[] idx = new short[mIndexPos];
+					System.arraycopy(mIndex, 0, idx, 0, mIndexPos);
+					mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, idx, polygon);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			connection = null;
+			return QueryResult.FAILED;
 		}
+		// Log.d(TAG, "rows: " + cnt);
+		return QueryResult.SUCCESS;
 	}
 
 	@Override
@@ -237,11 +253,11 @@ public class MapDatabase implements IMapDatabase {
 	 * @param value
 	 *            ...
 	 */
-	private void parse(byte[] value) {
-		parseGeometry(valueGetterForEndian(value));
+	private boolean parse(byte[] value) {
+		return parseGeometry(valueGetterForEndian(value));
 	}
 
-	private void parseGeometry(ValueGetter data) {
+	private boolean parseGeometry(ValueGetter data) {
 		byte endian = data.getByte(); // skip and test endian flag
 		if (endian != data.endian) {
 			throw new IllegalArgumentException("Endian inconsistency!");
@@ -255,7 +271,7 @@ public class MapDatabase implements IMapDatabase {
 		boolean haveS = (typeword & 0x20000000) != 0;
 
 		// int srid = Geometry.UNKNOWN_SRID;
-
+		boolean polygon = false;
 		if (haveS) {
 			// srid = Geometry.parseSRID(data.getInt());
 			data.getInt();
@@ -269,6 +285,7 @@ public class MapDatabase implements IMapDatabase {
 				break;
 			case Geometry.POLYGON:
 				parsePolygon(data, haveZ, haveM);
+				polygon = true;
 				break;
 			case Geometry.MULTIPOINT:
 				parseMultiPoint(data);
@@ -278,6 +295,7 @@ public class MapDatabase implements IMapDatabase {
 				break;
 			case Geometry.MULTIPOLYGON:
 				parseMultiPolygon(data);
+				polygon = true;
 				break;
 			case Geometry.GEOMETRYCOLLECTION:
 				parseCollection(data);
@@ -288,14 +306,16 @@ public class MapDatabase implements IMapDatabase {
 		// if (srid != Geometry.UNKNOWN_SRID) {
 		// result.setSrid(srid);
 		// }
+		return polygon;
 	}
 
-	private static void parsePoint(ValueGetter data, boolean haveZ, boolean haveM) {
+	private void parsePoint(ValueGetter data, boolean haveZ, boolean haveM) {
 		// double X = data.getDouble();
 		// double Y = data.getDouble();
-		data.getDouble();
-		data.getDouble();
-
+		mCoords[0] = (float) (data.getDouble() * mScale);
+		mCoords[1] = (float) (data.getDouble() * mScale);
+		mIndex[0] = 2;
+		mIndexPos = 1;
 		if (haveZ)
 			data.getDouble();
 
@@ -341,7 +361,7 @@ public class MapDatabase implements IMapDatabase {
 			if (haveM)
 				data.getDouble();
 		}
-		mIndex[mIndexPos++] = count * 2;
+		mIndex[mIndexPos++] = (short) (count * 2);
 	}
 
 	private void parsePolygon(ValueGetter data, boolean haveZ, boolean haveM) {

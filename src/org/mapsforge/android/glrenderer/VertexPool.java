@@ -15,40 +15,62 @@
 
 package org.mapsforge.android.glrenderer;
 
-import java.util.LinkedList;
+import android.annotation.SuppressLint;
 
-class LayerPool {
-	static private LinkedList<PoolItem> pool = null;
-	static private int count;
+class VertexPool {
+	private static final int POOL_LIMIT = 8192;
+
+	@SuppressLint("UseValueOf")
+	private static final Boolean lock = new Boolean(true);
+
+	static private PoolItem pool = null;
+	static private int count = 0;
 
 	static void init() {
-		if (pool == null) {
-			pool = new LinkedList<PoolItem>();
-			count = 0;
-		}
 	}
 
 	static PoolItem get() {
-		synchronized (pool) {
+		synchronized (lock) {
 
 			if (count == 0)
 				return new PoolItem();
 
 			count--;
-			PoolItem it = pool.pop();
+
+			PoolItem it = pool;
+			pool = pool.next;
 			it.used = 0;
+			it.next = null;
 			return it;
 		}
 	}
 
-	static void add(LinkedList<PoolItem> items) {
-		synchronized (pool) {
-			int size = items.size();
+	static void add(PoolItem items) {
+		if (items == null)
+			return;
 
-			while (count < 4096 && size-- > 0) {
+		synchronized (lock) {
+			PoolItem last = items;
+
+			// limit pool items
+			while (count < POOL_LIMIT) {
+				if (last.next == null) {
+					break;
+				}
+				last = last.next;
 				count++;
-				pool.add(items.pop());
 			}
+
+			// clear references
+			PoolItem tmp2, tmp = last.next;
+			while (tmp != null) {
+				tmp2 = tmp;
+				tmp = tmp.next;
+				tmp2.next = null;
+			}
+
+			last.next = pool;
+			pool = items;
 		}
 	}
 }

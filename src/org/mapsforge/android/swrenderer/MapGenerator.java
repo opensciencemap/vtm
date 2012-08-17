@@ -22,6 +22,7 @@ import org.mapsforge.android.mapgenerator.MapGeneratorJob;
 import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
+import org.mapsforge.android.rendertheme.renderinstruction.Caption;
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
@@ -218,8 +219,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	}
 
 	@Override
-	public void renderAreaCaption(String textKey, float verticalOffset, Paint paint,
-			Paint stroke) {
+	public void renderAreaCaption(Caption caption) {
 		// mapDatabase.readTag(caption);
 		// if (caption.value != null) {
 		// float[] centerPosition = GeometryUtils
@@ -241,7 +241,8 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	}
 
 	@Override
-	public void renderPointOfInterest(byte layer, int latitude, int longitude, Tag[] tags) {
+	public void renderPointOfInterest(byte layer, float latitude, float longitude,
+			Tag[] tags) {
 		mDrawingLayer = mWays[getValidLayer(layer)];
 		mPoiX = scaleLongitude(longitude);
 		mPoiY = scaleLatitude(latitude);
@@ -249,8 +250,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	}
 
 	@Override
-	public void renderPointOfInterestCaption(String textKey, float verticalOffset,
-			Paint paint, Paint stroke) {
+	public void renderPointOfInterestCaption(Caption caption) {
 		// mapDatabase.readTag(caption);
 		// if (caption.value != null) {
 		// nodes.add(new PointTextContainer(caption.value, poiX, poiY + verticalOffset, paint, stroke));
@@ -298,7 +298,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	// private byte mPrevLayer = 0;
 
 	@Override
-	public void renderWay(byte layer, Tag[] tags, float[] wayNodes, int[] wayLengths,
+	public void renderWay(byte layer, Tag[] tags, float[] wayNodes, short[] wayLengths,
 			boolean changed) {
 		// if (mCoords == null)
 		// mCoords = mMapDatabase.getCoordinates();
@@ -525,5 +525,11 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	public void setRenderTheme(RenderTheme theme) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public boolean checkWay(Tag[] tags, boolean closed) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

@@ -19,42 +19,17 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-import android.util.SparseArray;
-
 class LineLayers {
 	private static int NUM_VERTEX_FLOATS = 4;
 
-	private SparseArray<LineLayer> layers;
-
-	LineLayer[] array = null;
-	int size = 0;
-
-	LineLayers() {
-		layers = new SparseArray<LineLayer>(10);
-	}
-
-	LineLayer getLayer(int layer, int color, boolean outline, boolean fixed) {
-		LineLayer l = layers.get(layer);
-		if (l != null) {
-			return l;
-		}
-
-		l = new LineLayer(layer, color, outline, fixed);
-		layers.put(layer, l);
-
-		return l;
-	}
-
-	FloatBuffer compileLayerData(FloatBuffer buf) {
+	static FloatBuffer compileLayerData(LineLayer layers, FloatBuffer buf) {
 		FloatBuffer fbuf = buf;
+		int size = 0;
 
-		array = new LineLayer[layers.size()];
+		for (LineLayer l = layers; l != null; l = l.next)
+			size += l.verticesCnt;
 
-		for (int i = 0, n = layers.size(); i < n; i++) {
-			LineLayer l = layers.valueAt(i);
-			array[i] = l;
-			size += l.verticesCnt * NUM_VERTEX_FLOATS;
-		}
+		size *= NUM_VERTEX_FLOATS;
 
 		if (buf == null || buf.capacity() < size) {
 			ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 4).order(
@@ -65,40 +40,42 @@ class LineLayers {
 		}
 		int pos = 0;
 
-		for (int i = 0, n = array.length; i < n; i++) {
-			LineLayer l = array[i];
+		PoolItem last = null, items = null;
+
+		for (LineLayer l = layers; l != null; l = l.next) {
 			if (l.isOutline)
 				continue;
 
-			for (PoolItem item : l.pool) {
+			for (PoolItem item = l.pool; item != null; item = item.next) {
 				fbuf.put(item.vertices, 0, item.used);
+				last = item;
 			}
-
 			l.offset = pos;
 			pos += l.verticesCnt;
 
-			LayerPool.add(l.pool);
+			if (last != null) {
+				last.next = items;
+				items = l.pool;
+			}
+
 			l.pool = null;
 		}
 
-		fbuf.flip();
+		VertexPool.add(items);
 
-		// not needed for drawing
-		layers = null;
+		fbuf.flip();
 
 		return fbuf;
 	}
 
-	ShortBuffer compileLayerData(ShortBuffer buf) {
+	static ShortBuffer compileLayerData(LineLayer layers, ShortBuffer buf) {
+		int size = 0;
 		ShortBuffer sbuf = buf;
 
-		array = new LineLayer[layers.size()];
+		for (LineLayer l = layers; l != null; l = l.next)
+			size += l.verticesCnt;
 
-		for (int i = 0, n = layers.size(); i < n; i++) {
-			LineLayer l = layers.valueAt(i);
-			array[i] = l;
-			size += l.verticesCnt * NUM_VERTEX_FLOATS;
-		}
+		size *= NUM_VERTEX_FLOATS;
 
 		if (buf == null || buf.capacity() < size) {
 			ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 2).order(
@@ -111,29 +88,40 @@ class LineLayers {
 
 		short[] data = new short[PoolItem.SIZE];
 
-		for (int i = 0, n = array.length; i < n; i++) {
-			LineLayer l = array[i];
+		PoolItem last = null, items = null;
+
+		for (LineLayer l = layers; l != null; l = l.next) {
 			if (l.isOutline)
 				continue;
 
-			for (int k = 0, m = l.pool.size(); k < m; k++) {
-				PoolItem item = l.pool.get(k);
+			for (PoolItem item = l.pool; item != null; item = item.next) {
 				PoolItem.toHalfFloat(item, data);
 				sbuf.put(data, 0, item.used);
+				last = item;
 			}
 
 			l.offset = pos;
 			pos += l.verticesCnt;
 
-			LayerPool.add(l.pool);
+			if (last != null) {
+				last.next = items;
+				items = l.pool;
+			}
+
 			l.pool = null;
 		}
 
+		VertexPool.add(items);
+
 		sbuf.flip();
 
-		// not needed for drawing
-		layers = null;
-
 		return sbuf;
+	}
+
+	static void clear(LineLayer layer) {
+		for (LineLayer l = layer; l != null; l = l.next) {
+			if (l.pool != null)
+				VertexPool.add(l.pool);
+		}
 	}
 }

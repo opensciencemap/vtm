@@ -22,50 +22,20 @@ import java.nio.ShortBuffer;
 import org.mapsforge.android.utils.FastMath;
 import org.mapsforge.core.Tile;
 
-import android.util.SparseArray;
-
 class PolygonLayers {
 	private static final int NUM_VERTEX_FLOATS = 2;
-	private static final float[] mFillCoords = { -2, Tile.TILE_SIZE + 1,
+	static final float[] mFillCoords = { -2, Tile.TILE_SIZE + 1,
 			Tile.TILE_SIZE + 1, Tile.TILE_SIZE + 1, -2,
 			-2, Tile.TILE_SIZE + 1, -2 };
 
 	private static short[] mByteFillCoords = null;
 
-	private SparseArray<PolygonLayer> layers;
-
-	PolygonLayer[] array = null;
-	int size;
-
-	PolygonLayers() {
-		layers = new SparseArray<PolygonLayer>(10);
-		size = 4;
-	}
-
-	PolygonLayer getLayer(int layer, int color, int fade) {
-		PolygonLayer l = layers.get(layer);
-		if (l != null) {
-			// if (color == l.color)
-			return l;
-
-			// return getLayer(layer + 1, color, fade);
-		}
-
-		l = new PolygonLayer(layer, color, fade);
-		layers.put(layer, l);
-		return l;
-	}
-
-	FloatBuffer compileLayerData(FloatBuffer buf) {
+	static FloatBuffer compileLayerData(PolygonLayer layers, FloatBuffer buf) {
 		FloatBuffer fbuf = buf;
+		int size = 4;
 
-		array = new PolygonLayer[layers.size()];
-
-		for (int i = 0, n = layers.size(); i < n; i++) {
-			PolygonLayer l = layers.valueAt(i);
-			array[i] = l;
+		for (PolygonLayer l = layers; l != null; l = l.next)
 			size += l.verticesCnt;
-		}
 
 		size *= NUM_VERTEX_FLOATS;
 
@@ -81,38 +51,40 @@ class PolygonLayers {
 		fbuf.put(mFillCoords, 0, 8);
 		int pos = 4;
 
-		for (int i = 0, n = array.length; i < n; i++) {
-			PolygonLayer l = array[i];
+		PoolItem last = null, items = null;
 
-			for (PoolItem item : l.pool) {
+		for (PolygonLayer l = layers; l != null; l = l.next) {
+
+			for (PoolItem item = l.pool; item != null; item = item.next) {
 				fbuf.put(item.vertices, 0, item.used);
+				last = item;
 			}
-
 			l.offset = pos;
 			pos += l.verticesCnt;
 
-			LayerPool.add(l.pool);
+			if (last != null) {
+				last.next = items;
+				items = l.pool;
+			}
+
 			l.pool = null;
 		}
 
-		fbuf.flip();
+		VertexPool.add(items);
 
-		// not needed for drawing
-		layers = null;
+		fbuf.flip();
 
 		return fbuf;
 	}
 
-	ShortBuffer compileLayerData(ShortBuffer buf) {
+	static final short[] tmpItem = new short[PoolItem.SIZE];
+
+	static ShortBuffer compileLayerData(PolygonLayer layers, ShortBuffer buf) {
 		ShortBuffer sbuf = buf;
+		int size = 4;
 
-		array = new PolygonLayer[layers.size()];
-
-		for (int i = 0, n = layers.size(); i < n; i++) {
-			PolygonLayer l = layers.valueAt(i);
-			array[i] = l;
+		for (PolygonLayer l = layers; l != null; l = l.next)
 			size += l.verticesCnt;
-		}
 
 		size *= NUM_VERTEX_FLOATS;
 
@@ -124,7 +96,7 @@ class PolygonLayers {
 			sbuf.clear();
 		}
 
-		short[] data = new short[PoolItem.SIZE];
+		short[] data = tmpItem;
 
 		if (mByteFillCoords == null) {
 			mByteFillCoords = new short[8];
@@ -141,27 +113,38 @@ class PolygonLayers {
 		sbuf.put(mByteFillCoords, 0, 8);
 		int pos = 4;
 
-		for (int i = 0, n = array.length; i < n; i++) {
-			PolygonLayer l = array[i];
+		PoolItem last = null, items = null;
 
-			for (int k = 0, m = l.pool.size(); k < m; k++) {
-				PoolItem item = l.pool.get(k);
+		for (PolygonLayer l = layers; l != null; l = l.next) {
+
+			for (PoolItem item = l.pool; item != null; item = item.next) {
 				PoolItem.toHalfFloat(item, data);
 				sbuf.put(data, 0, item.used);
+				last = item;
 			}
 
 			l.offset = pos;
 			pos += l.verticesCnt;
 
-			LayerPool.add(l.pool);
+			if (last != null) {
+				last.next = items;
+				items = l.pool;
+			}
+
 			l.pool = null;
 		}
 
+		VertexPool.add(items);
+
 		sbuf.flip();
 
-		// not needed for drawing
-		layers = null;
-
 		return sbuf;
+	}
+
+	static void clear(PolygonLayer layers) {
+		for (PolygonLayer l = layers; l != null; l = l.next) {
+			if (l.pool != null)
+				VertexPool.add(l.pool);
+		}
 	}
 }
