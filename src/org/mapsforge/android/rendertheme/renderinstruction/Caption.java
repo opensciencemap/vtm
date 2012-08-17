@@ -24,8 +24,10 @@ import org.xml.sax.Attributes;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
+import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Typeface;
+import android.util.FloatMath;
 
 /**
  * Represents a text label on the map.
@@ -78,41 +80,54 @@ public final class Caption implements RenderInstruction {
 		return new Caption(textKey, dy, typeface, fontSize, fill, stroke, strokeWidth);
 	}
 
-	private static void validate(String elementName, String textKey, float fontSize, float strokeWidth) {
+	private static void validate(String elementName, String textKey, float fontSize,
+			float strokeWidth) {
 		if (textKey == null) {
-			throw new IllegalArgumentException("missing attribute k for element: " + elementName);
+			throw new IllegalArgumentException("missing attribute k for element: "
+					+ elementName);
 		} else if (fontSize < 0) {
-			throw new IllegalArgumentException("font-size must not be negative: " + fontSize);
+			throw new IllegalArgumentException("font-size must not be negative: "
+					+ fontSize);
 		} else if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: " + strokeWidth);
+			throw new IllegalArgumentException("stroke-width must not be negative: "
+					+ strokeWidth);
 		}
 	}
 
-	private final float mDy;
-	private final float mFontSize;
-	private final Paint mPaint;
-	private final Paint mStroke;
-	private final String mTextKey;
+	public final float dy;
+	public float fontSize;
+	public final Paint paint;
+	public final Paint stroke;
+	public final String textKey;
+	public final float fontHeight;
+	public final float fontDescent;
 
-	private Caption(String textKey, float dy, Typeface typeface, float fontSize, int fill, int stroke, float strokeWidth) {
+	private Caption(String textKey, float dy, Typeface typeface, float fontSize,
+			int fillColor, int strokeColor, float strokeWidth) {
 		super();
 
-		mTextKey = textKey;
-		mDy = dy;
+		this.textKey = textKey.intern();
+		this.dy = dy;
+		this.fontSize = fontSize;
 
-		mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mPaint.setTextAlign(Align.LEFT);
-		mPaint.setTypeface(typeface);
-		mPaint.setColor(fill);
+		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		paint.setTextAlign(Align.CENTER);
+		paint.setTypeface(typeface);
+		paint.setColor(fillColor);
 
-		mStroke = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mStroke.setStyle(Style.STROKE);
-		mStroke.setTextAlign(Align.LEFT);
-		mStroke.setTypeface(typeface);
-		mStroke.setColor(stroke);
-		mStroke.setStrokeWidth(strokeWidth);
+		stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+		stroke.setStyle(Style.STROKE);
+		stroke.setTextAlign(Align.CENTER);
+		stroke.setTypeface(typeface);
+		stroke.setColor(strokeColor);
+		stroke.setStrokeWidth(strokeWidth);
 
-		mFontSize = fontSize;
+		paint.setTextSize(fontSize);
+		stroke.setTextSize(fontSize);
+
+		FontMetrics fm = paint.getFontMetrics();
+		fontHeight = FloatMath.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
+		fontDescent = FloatMath.ceil(Math.abs(fm.descent));
 	}
 
 	@Override
@@ -122,12 +137,12 @@ public final class Caption implements RenderInstruction {
 
 	@Override
 	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
-		renderCallback.renderPointOfInterestCaption(mTextKey, mDy, mPaint, mStroke);
+		renderCallback.renderPointOfInterestCaption(this);
 	}
 
 	@Override
 	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
-		renderCallback.renderAreaCaption(mTextKey, mDy, mPaint, mStroke);
+		renderCallback.renderAreaCaption(this);
 	}
 
 	@Override
@@ -137,7 +152,7 @@ public final class Caption implements RenderInstruction {
 
 	@Override
 	public void scaleTextSize(float scaleFactor) {
-		mPaint.setTextSize(mFontSize * scaleFactor);
-		mStroke.setTextSize(mFontSize * scaleFactor);
+		paint.setTextSize(fontSize * scaleFactor);
+		stroke.setTextSize(fontSize * scaleFactor);
 	}
 }

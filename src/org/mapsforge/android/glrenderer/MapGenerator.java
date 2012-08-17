@@ -14,11 +14,14 @@
  */
 package org.mapsforge.android.glrenderer;
 
+import java.util.ArrayList;
+
 import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
 import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
+import org.mapsforge.android.rendertheme.renderinstruction.Caption;
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
 import org.mapsforge.android.rendertheme.renderinstruction.RenderInstruction;
 import org.mapsforge.core.MercatorProjection;
@@ -27,9 +30,9 @@ import org.mapsforge.core.Tile;
 import org.mapsforge.core.WebMercator;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
+import org.mapsforge.database.QueryResult;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
 
@@ -54,11 +57,14 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 	private GLMapTile mCurrentTile;
 
 	private float[] mWayNodes;
-	private int[] mWays;
+	private short[] mWays;
 
-	private LineLayers mLineLayers;
-	private PolygonLayers mPolyLayers;
-	// private MeshLayers mMeshLayers;
+	private LineLayer mLineLayers;
+	private PolygonLayer mPolyLayers;
+	private LineLayer mCurLineLayer;
+	private PolygonLayer mCurPolyLayer;
+
+	private ArrayList<TextItem> mLabels;
 
 	private int mDrawingLayer;
 	private int mLevels;
@@ -71,13 +77,60 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 	 */
 	public MapGenerator() {
 		Log.d(TAG, "init DatabaseRenderer");
-		LayerPool.init();
+		VertexPool.init();
+	}
+
+	private float mPoiX = 256;
+	private float mPoiY = 256;
+
+	private Tag mTagEmptyName = new Tag("name", "");
+	private Tag mTagName;
+
+	private void filterTags(Tag[] tags) {
+		for (int i = 0; i < tags.length; i++) {
+			// Log.d(TAG, "check tag: " + tags[i]);
+			if (tags[i].key == mTagEmptyName.key && tags[i].value != null) {
+				mTagName = tags[i];
+				tags[i] = mTagEmptyName;
+			}
+		}
 	}
 
 	@Override
-	public void renderPointOfInterest(byte layer, int latitude, int longitude, Tag[] tags) {
-		// TODO Auto-generated method stub
+	public void renderPointOfInterest(byte layer, float latitude, float longitude,
+			Tag[] tags) {
 
+		mTagName = null;
+
+		long x = mCurrentTile.x;
+		long y = mCurrentTile.y;
+		long z = Tile.TILE_SIZE << mCurrentTile.zoomLevel;
+
+		double divx, divy;
+		long dx = (x - (z >> 1));
+		long dy = (y - (z >> 1));
+
+		if (useSphericalMercator) {
+			divx = f900913 / (z >> 1);
+			divy = f900913 / (z >> 1);
+			mPoiX = (float) (longitude / divx - dx);
+			mPoiY = (float) (latitude / divy + dy);
+		} else {
+			divx = 180000000.0 / (z >> 1);
+			divy = z / PIx4;
+			mPoiX = (float) (longitude / divx - dx);
+			double sinLat = Math.sin(latitude * PI180);
+			mPoiY = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
+			if (mPoiX < -10 || mPoiX > Tile.TILE_SIZE + 10 || mPoiY < -10
+					|| mPoiY > Tile.TILE_SIZE + 10)
+				return;
+		}
+
+		// remove tags that should not be cached in Rendertheme
+		filterTags(tags);
+		// Log.d(TAG, "renderPointOfInterest: " + mTagName);
+
+		MapGenerator.renderTheme.matchNode(this, tags, mCurrentTile.zoomLevel);
 	}
 
 	@Override
@@ -94,7 +147,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 		if (mProjected)
 			return mProjectedResult;
 
-		float minx = Float.MAX_VALUE, miny = Float.MAX_VALUE, maxx = Float.MIN_VALUE, maxy = Float.MIN_VALUE;
+		// float minx = Float.MAX_VALUE, miny = Float.MAX_VALUE, maxx = Float.MIN_VALUE, maxy = Float.MIN_VALUE;
 
 		float[] coords = mWayNodes;
 
@@ -133,16 +186,16 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 					lat = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
 				}
 
-				if (area && i == 0) {
-					if (lon < minx)
-						minx = lon;
-					if (lon > maxx)
-						maxx = lon;
-					if (lat < miny)
-						miny = lat;
-					if (lat > maxy)
-						maxy = lat;
-				}
+				// if (area && i == 0) {
+				// if (lon < minx)
+				// minx = lon;
+				// if (lon > maxx)
+				// maxx = lon;
+				// if (lat < miny)
+				// miny = lat;
+				// if (lat > maxy)
+				// maxy = lat;
+				// }
 
 				if (cnt != 0) {
 					// drop small distance intermediate nodes
@@ -161,38 +214,44 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 				cnt += 2;
 			}
 
-			if (area) {
-				// Log.d(TAG, "area:" + (maxx - minx) * (maxy - miny));
-				if ((maxx - minx) * (maxy - miny) < 2000 / mCurrentTile.zoomLevel) {
-					mProjected = true;
-					mProjectedResult = false;
-					return false;
-				}
-			}
+			// if (area) {
+			// // Log.d(TAG, "area:" + (maxx - minx) * (maxy - miny));
+			// if ((maxx - minx) * (maxy - miny) < 2000 / mCurrentTile.zoomLevel) {
+			// mProjected = true;
+			// mProjectedResult = false;
+			// return false;
+			// }
+			// }
 
-			mWays[i] = cnt;
+			mWays[i] = (short) cnt;
 		}
 		mProjected = true;
 		mProjectedResult = true;
 		return true;
 	}
 
-	private boolean firstMatch;
-	private boolean prevClosed;
+	// private boolean firstMatch;
+	// private boolean prevClosed;
 
 	private RenderInstruction[] mRenderInstructions = null;
 
+	private final String TAG_WATER = "water".intern();
+
 	@Override
-	public void renderWay(byte layer, Tag[] tags, float[] wayNodes, int[] wayLength,
+	public void renderWay(byte layer, Tag[] tags, float[] wayNodes, short[] wayLength,
 			boolean changed) {
+
+		// Log.d(TAG, "render way: " + layer);
+		mTagName = null;
 
 		mProjected = false;
 		mDrawingLayer = getValidLayer(layer) * mLevels;
 
-		int len = wayLength[0];
-		boolean closed = (wayNodes[0] == wayNodes[len - 2] &&
-				wayNodes[1] == wayNodes[len - 1]);
+		// int len = wayLength[0];
+		// boolean closed = (wayNodes[0] == wayNodes[len - 2] &&
+		// wayNodes[1] == wayNodes[len - 1]);
 
+		boolean closed = changed;
 		mSimplify = 0.5f;
 
 		if (closed) {
@@ -201,47 +260,80 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 			else
 				mSimplify = 0.2f;
 
-			if (tags.length == 1 && "water".equals(tags[0].value))
+			if (tags.length == 1 && TAG_WATER == (tags[0].value))
 				mSimplify = 0;
 		}
 
 		mWayNodes = wayNodes;
 		mWays = wayLength;
 
-		if (!firstMatch && prevClosed == closed && !changed) {
-			if (mRenderInstructions != null) {
-				for (int i = 0, n = mRenderInstructions.length; i < n; i++)
-					mRenderInstructions[i].renderWay(this, tags);
-			}
-			// MapGenerator.renderTheme.matchWay(this, tags,
-			// (byte) (mCurrentTile.zoomLevel + 0),
-			// closed, false);
+		// if (mRenderInstructions != null) {
+		// for (int i = 0, n = mRenderInstructions.length; i < n; i++)
+		// mRenderInstructions[i].renderWay(this, tags);
+		// }
+
+		// prevClosed = closed;
+		mRenderInstructions = MapGenerator.renderTheme.matchWay(this, tags,
+				(byte) (mCurrentTile.zoomLevel + 0),
+				closed, true);
+
+		if (mRenderInstructions == null && mDebugDrawUnmatched)
+			debugUnmatched(closed, tags);
+
+		// firstMatch = false;
+	}
+
+	private void debugUnmatched(boolean closed, Tag[] tags) {
+
+		Log.d(TAG, "way not matched: " + tags[0] + " "
+				+ (tags.length > 1 ? tags[1] : "") + " " + closed);
+
+		mTagName = new Tag("name", tags[0].key + ":" + tags[0].value, false);
+
+		if (closed) {
+			mRenderInstructions = MapGenerator.renderTheme.matchWay(this, debugTagArea,
+					(byte) 0, true, true);
 		} else {
-			prevClosed = closed;
-			mRenderInstructions = MapGenerator.renderTheme.matchWay(this, tags,
-					(byte) (mCurrentTile.zoomLevel + 0),
-					closed, true);
+			mRenderInstructions = MapGenerator.renderTheme.matchWay(this, debugTagWay,
+					(byte) 0, true, true);
 		}
 
-		firstMatch = false;
 	}
 
 	@Override
-	public void renderAreaCaption(String caption, float verticalOffset, Paint paint,
-			Paint stroke) {
-		// TODO Auto-generated method stub
+	public void renderAreaCaption(Caption caption) {
+		// Log.d(TAG, "renderAreaCaption: " + mTagName);
 
+		if (mTagName == null)
+			return;
+
+		if (caption.textKey == mTagEmptyName.key) {
+			if (mLabels == null)
+				mLabels = new ArrayList<TextItem>();
+			mLabels.add(new TextItem(mWayNodes[0], mWayNodes[1], mTagName.value, caption));
+		}
+
+		// if (caption.textKey == mTagEmptyName.key)
+		// mLabels.add(new TextItem(mPoiX, mPoiY, mTagName.value, caption));
+	}
+
+	@Override
+	public void renderPointOfInterestCaption(Caption caption) {
+		// Log.d(TAG, "renderPointOfInterestCaption: " + mPoiX + " " + mPoiY + " "
+		// + mTagName);
+
+		if (mTagName == null)
+			return;
+
+		if (caption.textKey == mTagEmptyName.key) {
+			if (mLabels == null)
+				mLabels = new ArrayList<TextItem>();
+			mLabels.add(new TextItem(mPoiX, mPoiY, mTagName.value, caption));
+		}
 	}
 
 	@Override
 	public void renderAreaSymbol(Bitmap symbol) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void renderPointOfInterestCaption(String caption, float verticalOffset,
-			Paint paint, Paint stroke) {
 		// TODO Auto-generated method stub
 
 	}
@@ -260,12 +352,60 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 	@Override
 	public void renderWay(Line line) {
-
 		projectToTile(false);
 
 		LineLayer outlineLayer = null;
-		LineLayer l = mLineLayers.getLayer(mDrawingLayer + line.level, line.color, false,
-				line.fixed);
+		LineLayer lineLayer = null;
+
+		int numLayer = mDrawingLayer + line.level;
+
+		// LineLayer l = mLineLayers;
+		//
+		// for (; l != null; l = l.next)
+		// if (l.next == null || l.next.layer > numLayer)
+		// break;
+		//
+		// if (l == null || l == mLineLayers) {
+		// // insert at start
+		// lineLayer = new LineLayer(numLayer, line, false);
+		// lineLayer.next = mLineLayers;
+		// mLineLayers = lineLayer;
+		// } else if (l.layer == numLayer) {
+		// lineLayer = l;
+		// } else {
+		// // insert between current and next layer
+		// lineLayer = new LineLayer(numLayer, line, false);
+		// lineLayer.next = l.next;
+		// l.next = lineLayer;
+		// }
+
+		// FIXME simplify this...
+		if (mCurLineLayer != null && mCurLineLayer.layer == numLayer) {
+			lineLayer = mCurLineLayer;
+		} else if (mLineLayers == null || mLineLayers.layer > numLayer) {
+			// insert new layer at start
+			lineLayer = new LineLayer(numLayer, line, false);
+			lineLayer.next = mLineLayers;
+			mLineLayers = lineLayer;
+		} else {
+			for (LineLayer l = mLineLayers; l != null; l = l.next) {
+				if (l.layer == numLayer) {
+					lineLayer = l;
+					break;
+				}
+				if (l.next == null || l.next.layer > numLayer) {
+					lineLayer = new LineLayer(numLayer, line, false);
+					// insert new layer between current and next layer
+					lineLayer.next = l.next;
+					l.next = lineLayer;
+				}
+			}
+		}
+
+		if (lineLayer == null)
+			return;
+
+		mCurLineLayer = lineLayer;
 
 		float w = line.strokeWidth;
 
@@ -273,13 +413,8 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 			w *= mStrokeScale;
 			w *= mProjectionScaleFactor;
 		}
-		if (line.outline != -1) {
-			Line outline = MapGenerator.renderTheme.getOutline(line.outline);
-			if (outline != null) {
-				outlineLayer = mLineLayers.getLayer(mDrawingLayer + outline.level,
-						outline.color, true, false);
-				outlineLayer.addOutline(l);
-			}
+		else {
+			w *= 1.2; // TODO make this dependent on dpi
 		}
 
 		for (int i = 0, pos = 0, n = mWays.length; i < n; i++) {
@@ -287,10 +422,44 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 			// need at least two points
 			if (length >= 4)
-				l.addLine(mWayNodes, pos, length, w, line.round);
+				lineLayer.addLine(mWayNodes, pos, length, w, line.round);
 
 			pos += length;
 		}
+
+		if (line.outline < 0)
+			return;
+
+		Line outline = MapGenerator.renderTheme.getOutline(line.outline);
+
+		if (outline == null)
+			return;
+
+		numLayer = mDrawingLayer + outline.level;
+
+		if (mLineLayers == null || mLineLayers.layer > numLayer) {
+			// insert new layer at start
+			outlineLayer = new LineLayer(numLayer, outline, true);
+			outlineLayer.next = mLineLayers;
+			mLineLayers = outlineLayer;
+		} else {
+			for (LineLayer l = mLineLayers; l != null; l = l.next) {
+				if (l.layer == numLayer) {
+					outlineLayer = l;
+					break;
+				}
+				if (l.next == null || l.next.layer > numLayer) {
+					outlineLayer = new LineLayer(numLayer, outline, true);
+					// insert new layer between current and next layer
+					outlineLayer.next = l.next;
+					l.next = outlineLayer;
+				}
+			}
+		}
+
+		if (outlineLayer != null)
+			outlineLayer.addOutline(lineLayer);
+
 	}
 
 	@Override
@@ -302,17 +471,41 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 		if (!projectToTile(false))
 			return;
 
-		PolygonLayer l = mPolyLayers.getLayer(mDrawingLayer + area.level, area.color,
-				area.fade);
+		int numLayer = mDrawingLayer + area.level;
+		PolygonLayer layer = null;
 
-		// MeshLayer l = mMeshLayers.getLayer(mDrawingLayer + area.level, area.color,
-		// area.fade);
+		if (mCurPolyLayer != null && mCurPolyLayer.layer == numLayer) {
+			layer = mCurPolyLayer;
+		} else if (mPolyLayers == null || mPolyLayers.layer > numLayer) {
+			// insert new layer at start
+			layer = new PolygonLayer(numLayer, area);
+			layer.next = mPolyLayers;
+			mPolyLayers = layer;
+		} else {
+			for (PolygonLayer l = mPolyLayers; l != null; l = l.next) {
+				if (l.layer >= numLayer) {
+					layer = l;
+					break;
+				}
+
+				if (l.next == null || l.next.layer > numLayer) {
+					layer = new PolygonLayer(numLayer, area);
+					// insert new layer between current and next layer
+					layer.next = l.next;
+					l.next = layer;
+				}
+			}
+		}
+		if (layer == null)
+			return;
+
+		mCurPolyLayer = layer;
 
 		for (int i = 0, pos = 0, n = mWays.length; i < n; i++) {
 			int length = mWays[i];
 			// need at least three points
 			if (length >= 6)
-				l.addPolygon(mWayNodes, pos, length);
+				layer.addPolygon(mWayNodes, pos, length);
 
 			pos += length;
 		}
@@ -338,10 +531,10 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 	}
 
 	private boolean mDebugDrawPolygons;
+	boolean mDebugDrawUnmatched;
 
 	@Override
 	public boolean executeJob(MapGeneratorJob mapGeneratorJob) {
-		// Log.d(TAG, "load " + mCurrentTile);
 
 		if (!(mapGeneratorJob.tile instanceof GLMapTile))
 			return false;
@@ -353,7 +546,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 		mCurrentTile = (GLMapTile) mapGeneratorJob.tile;
 		mDebugDrawPolygons = !mapGeneratorJob.debugSettings.mDisablePolygons;
-
+		mDebugDrawUnmatched = mapGeneratorJob.debugSettings.mDrawUnmatchted;
 		if (mCurrentTile.isLoading || mCurrentTile.isDrawn)
 			return false;
 
@@ -363,31 +556,48 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 		setScaleStrokeWidth(mCurrentTile.zoomLevel);
 
-		mLineLayers = new LineLayers();
-		mPolyLayers = new PolygonLayers();
-		// mMeshLayers = new MeshLayers();
-		mCurrentTile.lineLayers = mLineLayers;
-		mCurrentTile.polygonLayers = mPolyLayers;
-		// mCurrentTile.meshLayers = mMeshLayers;
+		mLineLayers = null;
+		mPolyLayers = null;
+		mLabels = null;
 
-		firstMatch = true;
+		// firstMatch = true;
 
 		mProjectionScaleFactor = (float) (1.0 / Math.cos(MercatorProjection
 				.pixelYToLatitude(mCurrentTile.pixelY, mCurrentTile.zoomLevel)
-				* (Math.PI / 180))) / 1.5f;
-		mMapDatabase.executeQuery(mCurrentTile, this);
+				* (Math.PI / 180))); // / 1.5f;
+
+		if (mMapDatabase.executeQuery(mCurrentTile, this) != QueryResult.SUCCESS) {
+			LineLayers.clear(mLineLayers);
+			PolygonLayers.clear(mPolyLayers);
+			mLineLayers = null;
+			mPolyLayers = null;
+			mCurrentTile.isLoading = false;
+			return false;
+		}
 
 		if (mapGeneratorJob.debugSettings.mDrawTileFrames) {
-			float[] coords = { 0, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE,
-					Tile.TILE_SIZE, 0, 0, 0 };
-			LineLayer ll = mLineLayers.getLayer(Integer.MAX_VALUE, Color.BLACK, false,
-					true);
-			ll.addLine(coords, 0, coords.length, 1.5f, false);
+			mTagName = new Tag("name", mCurrentTile.toString(), false);
+			mPoiX = 10;
+			mPoiY = 10;
+			MapGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
+			// float[] coords = { 0, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE,
+			// Tile.TILE_SIZE, 0, 0, 0 };
+			// LineLayer ll = mLineLayers.getLayer(Integer.MAX_VALUE, Color.BLACK, false,
+			// true, -1);
+			// ll.addLine(coords, 0, coords.length, 1.5f, false);
 		}
+		mCurrentTile.lineLayers = mLineLayers;
+		mCurrentTile.polygonLayers = mPolyLayers;
+		mCurrentTile.labels = mLabels;
+		mCurPolyLayer = null;
+		mCurLineLayer = null;
 
 		mCurrentTile.newData = true;
 		return true;
 	}
+
+	private Tag[] debugTagWay = { new Tag("debug", "way") };
+	private Tag[] debugTagArea = { new Tag("debug", "area") };
 
 	private float mProjectionScaleFactor;
 
@@ -430,5 +640,14 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 	@Override
 	public void setRenderTheme(RenderTheme theme) {
 		MapGenerator.renderTheme = theme;
+	}
+
+	@Override
+	public boolean checkWay(Tag[] tags, boolean closed) {
+
+		mRenderInstructions = MapGenerator.renderTheme.matchWay(this, tags,
+				(byte) (mCurrentTile.zoomLevel + 0), closed, false);
+
+		return mRenderInstructions != null;
 	}
 }

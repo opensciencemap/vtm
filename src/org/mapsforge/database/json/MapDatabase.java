@@ -24,6 +24,7 @@ import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
 import org.mapsforge.database.MapFileInfo;
+import org.mapsforge.database.QueryResult;
 
 /**
  * 
@@ -33,9 +34,11 @@ public class MapDatabase implements IMapDatabase {
 
 	private final static String PROJECTION = "Mercator";
 	private float[] mCoords = new float[20];
-	private int[] mIndex = new int[2];
+	private short[] mIndex = new short[2];
 	// private Tag[] mTags = { new Tag("boundary", "administrative"), new Tag("admin_level", "2") };
 	private Tag[] mTags = { new Tag("natural", "water") };
+	private Tag[] mNameTags;
+
 	private final MapFileInfo mMapInfo =
 			new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
 					new Byte((byte) 0), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me");
@@ -48,7 +51,7 @@ public class MapDatabase implements IMapDatabase {
 	// private static double HALF_PI = Math.PI / 2;
 
 	@Override
-	public void executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
 
 		long cx = tile.pixelX + (Tile.TILE_SIZE >> 1);
 		long cy = tile.pixelY + (Tile.TILE_SIZE >> 1);
@@ -140,6 +143,17 @@ public class MapDatabase implements IMapDatabase {
 
 		mIndex[1] = 10;
 		mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, mIndex, true);
+
+		lon1 = (float) MercatorProjection.pixelXToLongitude(cx, tile.zoomLevel) * 1000000;
+		lat1 = (float) MercatorProjection.pixelXToLongitude(cx, tile.zoomLevel) * 1000000;
+
+		mNameTags = new Tag[2];
+		mNameTags[0] = new Tag("place", "city");
+		mNameTags[1] = new Tag("name", "check one check two, YO!");
+		mapDatabaseCallback.renderPointOfInterest((byte) 0, (int) lat1, (int) lon1,
+				mNameTags);
+
+		return QueryResult.SUCCESS;
 	}
 
 	@Override

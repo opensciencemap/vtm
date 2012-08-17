@@ -14,34 +14,39 @@
  */
 package org.mapsforge.android.glrenderer;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
+import org.mapsforge.android.rendertheme.renderinstruction.Line;
 import org.mapsforge.core.Tile;
 
+import android.util.FloatMath;
+
 class LineLayer extends Layer {
-	ArrayList<LineLayer> outlines;
-	boolean isOutline;
-	boolean isFixed;
+	Line line;
+
+	LineLayer next;
+	LineLayer outlines;
+
 	float width;
+	boolean isOutline;
 
-	LineLayer(int layer, int color, boolean outline, boolean fixed) {
-		super(layer, color);
-		isOutline = outline;
-		isFixed = fixed;
-		if (outline) {
-			outlines = new ArrayList<LineLayer>();
-		} else {
-			curItem = LayerPool.get();
+	LineLayer(int layer, Line line, boolean outline) {
+		super(layer);
 
-			pool = new LinkedList<PoolItem>();
-			pool.add(curItem);
+		this.line = line;
+		this.isOutline = outline;
+
+		if (!outline) {
+			curItem = VertexPool.get();
+			pool = curItem;
 		}
 	}
 
 	void addOutline(LineLayer link) {
-		if (!outlines.contains(link))
-			outlines.add(link);
+		for (LineLayer l = outlines; l != null; l = l.outlines)
+			if (link == l)
+				return;
+
+		link.outlines = outlines;
+		outlines = link;
 	}
 
 	/*
@@ -49,7 +54,7 @@ class LineLayer extends Layer {
 	 */
 	void addLine(float[] pointArray, int pos, int length, float w, boolean capRound) {
 		float x, y, nextX, nextY, prevX, prevY, ux, uy, vx, vy, wx, wy;
-		double a;
+		float a;
 		int pointPos = pos;
 		boolean rounded = capRound;
 		width = w;
@@ -59,10 +64,12 @@ class LineLayer extends Layer {
 		// amount of vertices used
 		verticesCnt += length + (rounded ? 6 : 2);
 
+		int MAX = PoolItem.SIZE;
+
 		float[] curVertices = curItem.vertices;
 		int vertexPos = curItem.used;
 
-		if (vertexPos == PoolItem.SIZE) {
+		if (vertexPos == MAX) {
 			curVertices = getNextPoolItem();
 			vertexPos = 0;
 		}
@@ -77,7 +84,7 @@ class LineLayer extends Layer {
 		vx = nextX - x;
 		vy = nextY - y;
 
-		a = Math.sqrt(vx * vx + vy * vy);
+		a = FloatMath.sqrt(vx * vx + vy * vy);
 
 		vx = (float) (vx / a);
 		vy = (float) (vy / a);
@@ -103,7 +110,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 			curVertices[vertexPos++] = 1.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -113,7 +120,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 			curVertices[vertexPos++] = 1.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -123,7 +130,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 1.0f;
 			curVertices[vertexPos++] = 1.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -134,7 +141,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 			curVertices[vertexPos++] = 0.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -161,7 +168,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 			curVertices[vertexPos++] = 0.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -171,7 +178,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 			curVertices[vertexPos++] = 0.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -195,14 +202,14 @@ class LineLayer extends Layer {
 			// Unit vector pointing back to previous node
 			vx = prevX - x;
 			vy = prevY - y;
-			a = Math.sqrt(vx * vx + vy * vy);
+			a = FloatMath.sqrt(vx * vx + vy * vy);
 			vx = (float) (vx / a);
 			vy = (float) (vy / a);
 
 			// Unit vector pointing forward to next node
 			wx = nextX - x;
 			wy = nextY - y;
-			a = Math.sqrt(wx * wx + wy * wy);
+			a = FloatMath.sqrt(wx * wx + wy * wy);
 			wx = (float) (wx / a);
 			wy = (float) (wy / a);
 
@@ -242,7 +249,7 @@ class LineLayer extends Layer {
 			uxw = ux * w;
 			uyw = uy * w;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -252,7 +259,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 			curVertices[vertexPos++] = 0.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -271,7 +278,7 @@ class LineLayer extends Layer {
 		vx = prevX - x;
 		vy = prevY - y;
 
-		a = Math.sqrt(vx * vx + vy * vy);
+		a = FloatMath.sqrt(vx * vx + vy * vy);
 
 		vx = (float) (vx / a);
 		vy = (float) (vy / a);
@@ -288,11 +295,16 @@ class LineLayer extends Layer {
 		outside = (x <= 0 || x >= Tile.TILE_SIZE || y <= 0 || y >= Tile.TILE_SIZE)
 				&& (x - vxw <= 0 || x - vxw >= Tile.TILE_SIZE || y - vyw <= 0 || y - vyw >= Tile.TILE_SIZE);
 
-		if (vertexPos == PoolItem.SIZE) {
-			curItem.used = vertexPos;
-			curItem = LayerPool.get();
-			pool.add(curItem);
-			curVertices = curItem.vertices;
+		// if (vertexPos == MAX) {
+		// curItem.used = vertexPos;
+		// curItem = LayerPool.get();
+		// pool.add(curItem);
+		// curVertices = curItem.vertices;
+		// vertexPos = 0;
+		// }
+
+		if (vertexPos == MAX) {
+			curVertices = getNextPoolItem();
 			vertexPos = 0;
 		}
 
@@ -302,7 +314,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 			curVertices[vertexPos++] = 0.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -312,7 +324,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 1.0f;
 			curVertices[vertexPos++] = 0.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -323,7 +335,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 			curVertices[vertexPos++] = -1.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -334,7 +346,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 1.0f;
 			curVertices[vertexPos++] = -1.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -358,7 +370,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = -1.0f;
 			curVertices[vertexPos++] = 0.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}
@@ -369,7 +381,7 @@ class LineLayer extends Layer {
 			curVertices[vertexPos++] = 1.0f;
 			curVertices[vertexPos++] = 0.0f;
 
-			if (vertexPos == PoolItem.SIZE) {
+			if (vertexPos == MAX) {
 				curVertices = getNextPoolItem();
 				vertexPos = 0;
 			}

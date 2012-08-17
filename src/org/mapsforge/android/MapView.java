@@ -40,6 +40,7 @@ import org.mapsforge.android.rendertheme.RenderThemeHandler;
 import org.mapsforge.android.utils.GlConfigChooser;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.MapPosition;
+import org.mapsforge.core.Tile;
 import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.MapFileInfo;
@@ -93,9 +94,9 @@ public class MapView extends GLSurfaceView {
 	private IMapRenderer mMapRenderer;
 	private JobQueue mJobQueue;
 	private MapWorker mMapWorkers[];
-	private int mNumMapWorkers = 4;
+	private int mNumMapWorkers = 6;
 	private JobParameters mJobParameters;
-	private DebugSettings mDebugSettings;
+	public DebugSettings debugSettings;
 	private String mMapFile;
 
 	/**
@@ -122,6 +123,8 @@ public class MapView extends GLSurfaceView {
 				MapDatabaseFactory.getMapDatabase(attributeSet));
 	}
 
+	private boolean mDebugDatabase = false;
+
 	private MapView(Context context, AttributeSet attributeSet,
 			MapRenderers mapGeneratorType, MapDatabases mapDatabaseType) {
 
@@ -131,13 +134,17 @@ public class MapView extends GLSurfaceView {
 			throw new IllegalArgumentException(
 					"context is not an instance of MapActivity");
 		}
+		Log.d(TAG, "create MapView: " + mapDatabaseType.name());
 
-		setWillNotDraw(true);
-		setWillNotCacheDrawing(true);
+		// TODO make this dpi dependent
+		Tile.TILE_SIZE = 400;
+
+		// setWillNotDraw(true);
+		// setWillNotCacheDrawing(true);
 
 		MapActivity mapActivity = (MapActivity) context;
 
-		mDebugSettings = new DebugSettings(false, false, false);
+		debugSettings = new DebugSettings(false, false, false, false);
 
 		mJobParameters = new JobParameters(DEFAULT_RENDER_THEME, DEFAULT_TEXT_SCALE);
 		mMapController = new MapController(this);
@@ -161,8 +168,14 @@ public class MapView extends GLSurfaceView {
 		mMapWorkers = new MapWorker[mNumMapWorkers];
 
 		for (int i = 0; i < mNumMapWorkers; i++) {
-			IMapDatabase mapDatabase = MapDatabaseFactory
-					.createMapDatabase(mapDatabaseType);
+			IMapDatabase mapDatabase;
+			if (mDebugDatabase) {
+				mapDatabase = MapDatabaseFactory
+						.createMapDatabase(MapDatabases.JSON_READER);
+
+			} else {
+				mapDatabase = MapDatabaseFactory.createMapDatabase(mapDatabaseType);
+			}
 
 			IMapGenerator mapGenerator = mMapRenderer.createMapGenerator();
 			mapGenerator.setMapDatabase(mapDatabase);
@@ -170,8 +183,6 @@ public class MapView extends GLSurfaceView {
 			if (i == 0) {
 				mMapDatabase = mapDatabase;
 				initMapStartPosition();
-
-				// mapGenerator.setRendertheme(DEFAULT_RENDER_THEME);
 			}
 			mMapWorkers[i] = new MapWorker(i, this, mapGenerator, mMapRenderer);
 			mMapWorkers[i].start();
@@ -179,13 +190,13 @@ public class MapView extends GLSurfaceView {
 
 		setRenderTheme(InternalRenderTheme.OSMARENDER);
 
-		mapActivity.registerMapView(this);
-
 		setEGLConfigChooser(new GlConfigChooser());
 		setEGLContextClientVersion(2);
 
 		setRenderer(mMapRenderer);
 		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+		mapActivity.registerMapView(this);
 	}
 
 	private void initMapStartPosition() {
@@ -212,7 +223,7 @@ public class MapView extends GLSurfaceView {
 	 * @return the debug settings which are used in this MapView.
 	 */
 	public DebugSettings getDebugSettings() {
-		return mDebugSettings;
+		return debugSettings;
 	}
 
 	/**
@@ -302,14 +313,14 @@ public class MapView extends GLSurfaceView {
 	 * Calculates all necessary tiles and adds jobs accordingly.
 	 */
 	public void redrawTiles() {
-		if (getWidth() > 0 && getHeight() > 0)
+		if (getWidth() <= 0 || getHeight() <= 0)
 			return;
 
 		mMapRenderer.redrawTiles(false);
 	}
 
-	void clearAndRedrawMapView() {
-		if (getWidth() > 0 && getHeight() > 0)
+	private void clearAndRedrawMapView() {
+		if (getWidth() <= 0 || getHeight() <= 0)
 			return;
 
 		mMapRenderer.redrawTiles(true);
@@ -343,7 +354,7 @@ public class MapView extends GLSurfaceView {
 	 *            the new DebugSettings for this MapView.
 	 */
 	public void setDebugSettings(DebugSettings debugSettings) {
-		mDebugSettings = debugSettings;
+		this.debugSettings = debugSettings;
 
 		clearAndRedrawMapView();
 	}
@@ -377,7 +388,7 @@ public class MapView extends GLSurfaceView {
 
 		mJobQueue.clear();
 
-		mapWorkersPause();
+		mapWorkersPause(true);
 
 		for (MapWorker mapWorker : mMapWorkers) {
 
@@ -445,6 +456,9 @@ public class MapView extends GLSurfaceView {
 	 */
 
 	public void setMapDatabase(MapDatabases mapDatabaseType) {
+		if (mDebugDatabase)
+			return;
+
 		IMapGenerator mapGenerator;
 
 		Log.d(TAG, "setMapDatabase " + mapDatabaseType.name());
@@ -452,7 +466,9 @@ public class MapView extends GLSurfaceView {
 		if (mMapDatabaseType == mapDatabaseType)
 			return;
 
-		mapWorkersPause();
+		mMapDatabaseType = mapDatabaseType;
+
+		mapWorkersPause(true);
 
 		for (MapWorker mapWorker : mMapWorkers) {
 			mapGenerator = mapWorker.getMapGenerator();
@@ -468,6 +484,8 @@ public class MapView extends GLSurfaceView {
 		setMapFile(mapFile);
 
 		mapWorkersProceed();
+
+		Log.d(TAG, ">>>");
 	}
 
 	/**
@@ -510,7 +528,7 @@ public class MapView extends GLSurfaceView {
 
 	private boolean setRenderTheme(Theme theme) {
 
-		mapWorkersPause();
+		mapWorkersPause(true);
 
 		InputStream inputStream = null;
 		try {
@@ -607,7 +625,7 @@ public class MapView extends GLSurfaceView {
 			int oldHeight) {
 		mJobQueue.clear();
 
-		mapWorkersPause();
+		mapWorkersPause(true);
 
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
 
@@ -668,8 +686,7 @@ public class MapView extends GLSurfaceView {
 	@Override
 	public void onPause() {
 		super.onPause();
-		for (MapWorker mapWorker : mMapWorkers)
-			mapWorker.pause();
+		mapWorkersPause(false);
 
 		// mMapMover.pause();
 		// mZoomAnimator.pause();
@@ -678,8 +695,7 @@ public class MapView extends GLSurfaceView {
 	@Override
 	public void onResume() {
 		super.onResume();
-		for (MapWorker mapWorker : mMapWorkers)
-			mapWorker.proceed();
+		mapWorkersProceed();
 
 		// mMapMover.proceed();
 		// mZoomAnimator.proceed();
@@ -747,21 +763,24 @@ public class MapView extends GLSurfaceView {
 	public void addJobs(ArrayList<MapGeneratorJob> jobs) {
 		mJobQueue.setJobs(jobs);
 
-		for (MapWorker m : mMapWorkers) {
+		for (int i = 0; i < mNumMapWorkers; i++) {
+			MapWorker m = mMapWorkers[i];
 			synchronized (m) {
 				m.notify();
 			}
 		}
 	}
 
-	private void mapWorkersPause() {
+	private void mapWorkersPause(boolean wait) {
 		for (MapWorker mapWorker : mMapWorkers) {
 			if (!mapWorker.isPausing())
 				mapWorker.pause();
 		}
-		for (MapWorker mapWorker : mMapWorkers) {
-			if (!mapWorker.isPausing())
-				mapWorker.awaitPausing();
+		if (wait) {
+			for (MapWorker mapWorker : mMapWorkers) {
+				if (!mapWorker.isPausing())
+					mapWorker.awaitPausing();
+			}
 		}
 	}
 

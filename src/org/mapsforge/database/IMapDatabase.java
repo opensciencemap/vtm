@@ -36,8 +36,10 @@ public interface IMapDatabase {
 	 *            the tile to read.
 	 * @param mapDatabaseCallback
 	 *            the callback which handles the extracted map elements.
+	 * @return true if successful
 	 */
-	public abstract void executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback);
+	public abstract QueryResult executeQuery(Tile tile,
+			IMapDatabaseCallback mapDatabaseCallback);
 
 	/**
 	 * @return the metadata for the current map file.

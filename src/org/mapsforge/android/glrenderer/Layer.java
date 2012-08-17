@@ -14,35 +14,27 @@
  */
 package org.mapsforge.android.glrenderer;
 
-import java.util.LinkedList;
-
 class Layer {
-	LinkedList<PoolItem> pool;
+	PoolItem pool;
+
 	protected PoolItem curItem;
 
 	int verticesCnt;
 	int offset;
 
 	final int layer;
-	// final int color;
-	final float[] colors;
 
-	Layer(int l, int color) {
+	Layer(int l) {
 		layer = l;
 		verticesCnt = 0;
-
-		colors = new float[4];
-
-		colors[0] = (color >> 16 & 0xff) / 255.0f;
-		colors[1] = (color >> 8 & 0xff) / 255.0f;
-		colors[2] = (color >> 0 & 0xff) / 255.0f;
-		colors[3] = (color >> 24 & 0xff) / 255.0f;
 	}
 
 	float[] getNextPoolItem() {
 		curItem.used = PoolItem.SIZE;
-		curItem = LayerPool.get();
-		pool.add(curItem);
+
+		curItem.next = VertexPool.get();
+		curItem = curItem.next;
+
 		return curItem.vertices;
 	}
 }

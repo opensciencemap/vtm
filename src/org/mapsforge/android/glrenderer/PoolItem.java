@@ -24,13 +24,14 @@ import java.nio.IntBuffer;
 class PoolItem {
 	final float[] vertices;
 	int used;
+	PoolItem next;
 
 	PoolItem() {
 		vertices = new float[SIZE];
 		used = 0;
 	}
 
-	static int SIZE = 256;
+	static int SIZE = 128;
 
 	private static final float FLOAT_HALF_PREC = 5.96046E-8f;
 	private static final float FLOAT_HALF_MAX = 65504f;

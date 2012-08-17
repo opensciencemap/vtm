@@ -58,8 +58,25 @@ public class Tag {
 
 	public Tag(String tag) {
 		int splitPosition = tag.indexOf(KEY_VALUE_SEPARATOR);
+		if (splitPosition < 0) {
+			System.out.println("TAG:" + tag);
+		}
 		this.key = tag.substring(0, splitPosition).intern();
 		this.value = tag.substring(splitPosition + 1).intern();
+		this.hashCodeValue = calculateHashCode();
+	}
+
+	public Tag(String tag, boolean hashValue) {
+		int splitPosition = tag.indexOf(KEY_VALUE_SEPARATOR);
+		if (splitPosition < 0) {
+			System.out.println("TAG:" + tag);
+		}
+		this.key = tag.substring(0, splitPosition).intern();
+		if (!hashValue)
+			this.value = tag.substring(splitPosition + 1);
+		else
+			this.value = tag.substring(splitPosition + 1).intern();
+
 		this.hashCodeValue = calculateHashCode();
 	}
 
@@ -72,6 +89,12 @@ public class Tag {
 	public Tag(String key, String value) {
 		this.key = (key == null ? null : key.intern());
 		this.value = (value == null ? null : value.intern());
+		this.hashCodeValue = calculateHashCode();
+	}
+
+	public Tag(String key, String value, boolean intern) {
+		this.key = (key == null ? null : key);
+		this.value = (value == null ? null : value);
 		this.hashCodeValue = calculateHashCode();
 	}
 

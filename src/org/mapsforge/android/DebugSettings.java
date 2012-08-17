@@ -29,12 +29,12 @@ public class DebugSettings {
 	 */
 	public final boolean mDrawTileFrames;
 
+	public final boolean mDrawUnmatchted;
+
 	/**
 	 * True if highlighting of water tiles is enabled, false otherwise.
 	 */
 	public final boolean mDisablePolygons;
-
-	private final int mHashCodeValue;
 
 	/**
 	 * @param drawTileCoordinates
@@ -43,49 +43,14 @@ public class DebugSettings {
 	 *            if drawing of tile frames is enabled.
 	 * @param disablePolygons
 	 *            if highlighting of water tiles is enabled.
+	 * @param drawUnmatched
+	 *            ...
 	 */
 	public DebugSettings(boolean drawTileCoordinates, boolean drawTileFrames,
-			boolean disablePolygons) {
+			boolean disablePolygons, boolean drawUnmatched) {
 		mDrawTileCoordinates = drawTileCoordinates;
 		mDrawTileFrames = drawTileFrames;
+		mDrawUnmatchted = drawUnmatched;
 		mDisablePolygons = disablePolygons;
-		mHashCodeValue = calculateHashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof DebugSettings)) {
-			return false;
-		}
-		DebugSettings other = (DebugSettings) obj;
-		if (mDrawTileCoordinates != other.mDrawTileCoordinates) {
-			return false;
-		}
-		if (mDrawTileFrames != other.mDrawTileFrames) {
-			return false;
-		}
-		if (mDisablePolygons != other.mDisablePolygons) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		return mHashCodeValue;
-	}
-
-	/**
-	 * @return the hash code of this object.
-	 */
-	private int calculateHashCode() {
-		int result = 1;
-		result = 31 * result + (mDrawTileCoordinates ? 1231 : 1237);
-		result = 31 * result + (mDrawTileFrames ? 1231 : 1237);
-		result = 31 * result + (mDisablePolygons ? 1231 : 1237);
-		return result;
 	}
 }

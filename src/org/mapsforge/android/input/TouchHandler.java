@@ -19,6 +19,7 @@ import org.mapsforge.core.Tile;
 
 import android.content.Context;
 import android.os.CountDownTimer;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -59,7 +60,8 @@ public class TouchHandler {
 		mMapView = mapView;
 		mMapMoveDelta = viewConfiguration.getScaledTouchSlop();
 		mActivePointerId = INVALID_POINTER_ID;
-		mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener(mMapView));
+		mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener(
+				mMapView));
 		mGestureDetector = new GestureDetector(new MapGestureDetector(mMapView));
 	}
 
@@ -90,7 +92,8 @@ public class TouchHandler {
 		boolean scaling = mScaleGestureDetector.isInProgress();
 		if (!scaling && !mMoveThresholdReached) {
 
-			if (Math.abs(moveX) > 3 * mMapMoveDelta || Math.abs(moveY) > 3 * mMapMoveDelta) {
+			if (Math.abs(moveX) > 3 * mMapMoveDelta
+					|| Math.abs(moveY) > 3 * mMapMoveDelta) {
 				// the map movement threshold has been reached
 				// longPressDetector.pressStop();
 				mMoveThresholdReached = true;
@@ -179,15 +182,19 @@ public class TouchHandler {
 		return true;
 	}
 
+	private long lastRun = 0;
+
 	/**
 	 * @param motionEvent
 	 *            ...
 	 * @return ...
 	 */
 	public boolean handleMotionEvent(MotionEvent motionEvent) {
+
 		// workaround for a bug in the ScaleGestureDetector, see Android issue
 		// #12976
-		if (motionEvent.getAction() != MotionEvent.ACTION_MOVE || motionEvent.getPointerCount() > 1) {
+		if (motionEvent.getAction() != MotionEvent.ACTION_MOVE
+				|| motionEvent.getPointerCount() > 1) {
 			mScaleGestureDetector.onTouchEvent(motionEvent);
 		}
 
@@ -197,23 +204,44 @@ public class TouchHandler {
 		// // return true;
 		// }
 		int action = getAction(motionEvent);
-
+		boolean ret = false;
 		if (action == MotionEvent.ACTION_DOWN) {
-			return onActionDown(motionEvent);
+			ret = onActionDown(motionEvent);
 		} else if (action == MotionEvent.ACTION_MOVE) {
-			return onActionMove(motionEvent);
+			ret = onActionMove(motionEvent);
 		} else if (action == MotionEvent.ACTION_UP) {
-			return onActionUp(motionEvent);
+			ret = onActionUp(motionEvent);
 		} else if (action == MotionEvent.ACTION_CANCEL) {
-			return onActionCancel();
+			ret = onActionCancel();
 			// } else if (action == MotionEvent.ACTION_POINTER_DOWN) {
 			// return onActionPointerDown(motionEvent);
 		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-			return onActionPointerUp(motionEvent);
+			ret = onActionPointerUp(motionEvent);
 		}
 
+		// if (ret) {
+		// Log.d("", "" + );
+		//
+		// // try {
+		// //
+		// // Thread.sleep(10);
+		// // } catch (InterruptedException e) {
+		// // // TODO Auto-generated catch block
+		// // // e.printStackTrace();
+		// // }
+		//
+		// }
+		if (ret) {
+			// throttle input
+			long diff = SystemClock.uptimeMillis() - lastRun;
+			if (diff < 16) {
+				// Log.d("", "" + diff);
+				SystemClock.sleep(16 - diff);
+			}
+			lastRun = SystemClock.uptimeMillis();
+		}
 		// the event was not handled
-		return false;
+		return ret;
 	}
 
 	class MapGestureDetector extends SimpleOnGestureListener {
@@ -254,7 +282,8 @@ public class TouchHandler {
 		}
 
 		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
 			int w = Tile.TILE_SIZE * 20;
 			int h = Tile.TILE_SIZE * 20;
 			mPrevX = 0;
@@ -265,7 +294,8 @@ public class TouchHandler {
 				mTimer = null;
 			}
 
-			mScroller.fling(0, 0, Math.round(velocityX) / 2, Math.round(velocityY) / 2, -w, w, -h, h);
+			mScroller.fling(0, 0, Math.round(velocityX) / 2, Math.round(velocityY) / 2,
+					-w, w, -h, h);
 			// animate for two seconds
 			mTimer = new CountDownTimer(2000, 20) {
 				@Override

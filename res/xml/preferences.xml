@@ -32,8 +32,8 @@
 			android:key="showFpsCounter" /> -->
 		<CheckBoxPreference android:title="@string/preferences_show_tile_frames" android:summary="@string/preferences_show_tile_frames_desc"
 			android:key="drawTileFrames" />
-	<!-- 	<CheckBoxPreference android:title="@string/preferences_show_tile_coordinates" android:summary="@string/preferences_show_tile_coordinates_desc"
-			android:key="drawTileCoordinates" /> -->
+		<CheckBoxPreference android:title="@string/preferences_show_unmatched_ways" android:summary="@string/preferences_show_unmatched_ways"
+			android:key="drawUnmatchedWays" /> 
 		<CheckBoxPreference android:title="@string/preferences_disable_polygons" android:summary="@string/preferences_disable_polygons"
 			android:key="disablePolygons" />
 	</PreferenceCategory>
