@@ -212,7 +212,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 				newTiles[tiles++] = tile;
 
-				if (!tile.isDrawn || (tile.getScale() != scale)) {
+				if (!tile.isReady || (tile.getScale() != scale)) {
 					tile.isLoading = true;
 					// approximation for TileScheduler
 					if (tileY < tileTop || tileY > tileBottom || tileX < tileLeft
@@ -455,7 +455,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				}
 
 				tile.setScale(mMapGeneratorJob.getScale());
-				tile.isDrawn = true;
+				tile.isReady = true;
 				tile.isLoading = false;
 
 				mMapGeneratorJob = null;

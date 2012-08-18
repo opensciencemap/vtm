@@ -86,12 +86,16 @@
 		<xs:attribute name="src" type="tns:src" use="optional" />
 		<xs:attribute name="fill" type="tns:color" use="optional"
 			default="#000000" />
-		<xs:attribute name="stroke" type="tns:color" use="optional"
+		<xs:attribute name="stroke" type="tns:color" u se="optional"
 			default="#00000000" />
 		<xs:attribute name="stroke-width" type="tns:nonNegativeFloat"
 			use="optional" default="0" />
 		<xs:attribute name="fade" type="xs:integer" use="optional"
 			default="-1" />
+			<xs:attribute name="blend" type="xs:integer" use="optional"
+			default="-1" />
+		<xs:attribute name="blend-fill" type="tns:color" use="optional"
+			default="#000000" />
 	</xs:complexType>
 
 	<xs:complexType name="caption">

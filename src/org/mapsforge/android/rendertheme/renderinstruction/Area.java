@@ -49,6 +49,9 @@ public final class Area implements RenderInstruction {
 		int stroke = Color.TRANSPARENT;
 		float strokeWidth = 0;
 		int fade = -1;
+		int blend = -1;
+		int blendFill = Color.BLACK;
+
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
@@ -63,13 +66,17 @@ public final class Area implements RenderInstruction {
 				strokeWidth = Float.parseFloat(value);
 			} else if ("fade".equals(name)) {
 				fade = Integer.parseInt(value);
+			} else if ("blend".equals(name)) {
+				blend = Integer.parseInt(value);
+			} else if ("blend-fill".equals(name)) {
+				blendFill = Color.parseColor(value);
 			} else {
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
 
 		validate(strokeWidth);
-		return new Area(src, fill, stroke, strokeWidth, fade, level);
+		return new Area(src, fill, stroke, strokeWidth, fade, level, blend, blendFill);
 	}
 
 	private static void validate(float strokeWidth) {
@@ -79,32 +86,8 @@ public final class Area implements RenderInstruction {
 		}
 	}
 
-	/**
-	 * 
-	 */
-	public final int level;
-	/**
-	 * 
-	 */
-	public final Paint paintFill;
-	/**
-	 * 
-	 */
-	public final Paint paintOutline;
-	/**
-	 * 
-	 */
-	public final float strokeWidth;
-	/**
-	 * 
-	 */
-	public final float color[];
-	/**
-	 * 
-	 */
-	public final int fade;
-
-	private Area(String src, int fill, int stroke, float strokeWidth, int fade, int level)
+	private Area(String src, int fill, int stroke, float strokeWidth, int fade,
+			int level, int blend, int blendFill)
 			throws IOException {
 		super();
 
@@ -129,12 +112,24 @@ public final class Area implements RenderInstruction {
 			paintOutline.setColor(stroke);
 			paintOutline.setStrokeCap(Cap.ROUND);
 		}
+
 		color = new float[4];
 		color[0] = (fill >> 16 & 0xff) / 255.0f;
 		color[1] = (fill >> 8 & 0xff) / 255.0f;
 		color[2] = (fill >> 0 & 0xff) / 255.0f;
 		color[3] = (fill >> 24 & 0xff) / 255.0f;
 
+		if (blend > 0) {
+			blendColor = new float[4];
+			blendColor[0] = (blendFill >> 16 & 0xff) / 255.0f;
+			blendColor[1] = (blendFill >> 8 & 0xff) / 255.0f;
+			blendColor[2] = (blendFill >> 0 & 0xff) / 255.0f;
+			blendColor[3] = (blendFill >> 24 & 0xff) / 255.0f;
+		} else {
+			blendColor = null;
+		}
+
+		this.blend = blend;
 		this.strokeWidth = strokeWidth;
 		this.fade = fade;
 		this.level = level;
@@ -168,4 +163,33 @@ public final class Area implements RenderInstruction {
 	public void scaleTextSize(float scaleFactor) {
 		// do nothing
 	}
+
+	/**
+	 * 
+	 */
+	public final int level;
+	/**
+	 * 
+	 */
+	public final Paint paintFill;
+	/**
+	 * 
+	 */
+	public final Paint paintOutline;
+	/**
+	 * 
+	 */
+	public final float strokeWidth;
+	/**
+	 * 
+	 */
+	public final float color[];
+	/**
+	 * 
+	 */
+	public final int fade;
+
+	public final float blendColor[];
+
+	public final int blend;
 }

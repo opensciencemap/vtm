@@ -59,7 +59,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private static final MapFileInfo mMapInfo =
 			new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
-					new Byte((byte) 14), new GeoPoint(53.11, 8.85),
+					new Byte((byte) 4), new GeoPoint(53.11, 8.85),
 					WebMercator.NAME, 0, 0, 0, "de", "comment", "author");
 
 	private boolean mOpenFile = false;
@@ -343,7 +343,8 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		if (fail || index == null || tags == null || indexCnt == 0 || tagCnt == 0) {
-			Log.d(TAG, "..." + index + " " + tags + " " + indexCnt + " " + coordCnt + " "
+			Log.d(TAG, "..." + index + " " + (tags != null ? tags[0] : "...") + " "
+					+ indexCnt + " " + coordCnt + " "
 					+ tagCnt);
 			return false;
 		}

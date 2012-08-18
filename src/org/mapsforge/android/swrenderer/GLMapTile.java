@@ -39,7 +39,6 @@ public class GLMapTile extends MapTile {
 	public GLMapTile(long tileX, long tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
 		mScale = 1;
-		isDrawn = false;
 		mTextureID = -1;
 	}
 

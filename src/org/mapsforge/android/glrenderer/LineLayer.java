@@ -15,11 +15,13 @@
 package org.mapsforge.android.glrenderer;
 
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
-import org.mapsforge.core.Tile;
 
 import android.util.FloatMath;
 
-class LineLayer extends Layer {
+class LineLayer {
+
+	private static final float SCALE_FACTOR = 16;
+
 	Line line;
 
 	LineLayer next;
@@ -28,14 +30,21 @@ class LineLayer extends Layer {
 	float width;
 	boolean isOutline;
 
+	ShortItem pool;
+	protected ShortItem curItem;
+	int verticesCnt;
+	int offset;
+
+	final int layer;
+
 	LineLayer(int layer, Line line, boolean outline) {
-		super(layer);
+		this.layer = layer;
 
 		this.line = line;
 		this.isOutline = outline;
 
 		if (!outline) {
-			curItem = VertexPool.get();
+			curItem = ShortPool.get();
 			pool = curItem;
 		}
 	}
@@ -49,6 +58,15 @@ class LineLayer extends Layer {
 		outlines = link;
 	}
 
+	short[] getNextItem() {
+		curItem.used = ShortItem.SIZE;
+
+		curItem.next = ShortPool.get();
+		curItem = curItem.next;
+
+		return curItem.vertices;
+	}
+
 	/*
 	 * line extrusion is based on code from GLMap (https://github.com/olofsj/GLMap/) by olofsj
 	 */
@@ -57,7 +75,7 @@ class LineLayer extends Layer {
 		float a;
 		int pointPos = pos;
 		boolean rounded = capRound;
-		width = w;
+		width = w;// * SCALE_FACTOR;
 		if (w < 0.5)
 			rounded = false;
 
@@ -66,19 +84,19 @@ class LineLayer extends Layer {
 
 		int MAX = PoolItem.SIZE;
 
-		float[] curVertices = curItem.vertices;
+		short[] curVertices = curItem.vertices;
 		int vertexPos = curItem.used;
 
 		if (vertexPos == MAX) {
-			curVertices = getNextPoolItem();
+			curVertices = getNextItem();
 			vertexPos = 0;
 		}
 
-		x = pointArray[pointPos++];
-		y = pointArray[pointPos++];
+		x = pointArray[pointPos++];// * SCALE_FACTOR;
+		y = pointArray[pointPos++];// * SCALE_FACTOR;
 
-		nextX = pointArray[pointPos++];
-		nextY = pointArray[pointPos++];
+		nextX = pointArray[pointPos++];// * SCALE_FACTOR;
+		nextY = pointArray[pointPos++];// * SCALE_FACTOR;
 
 		// Calculate triangle corners for the given width
 		vx = nextX - x;
@@ -86,8 +104,8 @@ class LineLayer extends Layer {
 
 		a = FloatMath.sqrt(vx * vx + vy * vy);
 
-		vx = (float) (vx / a);
-		vy = (float) (vy / a);
+		vx = (vx / a);
+		vy = (vy / a);
 
 		ux = -vy;
 		uy = vx;
@@ -98,58 +116,59 @@ class LineLayer extends Layer {
 		float vxw = vx * w;
 		float vyw = vy * w;
 
-		boolean outside = (x <= 0 || x >= Tile.TILE_SIZE || y <= 0 || y >= Tile.TILE_SIZE)
-				&& (x - vxw <= 0 || x - vxw >= Tile.TILE_SIZE || y - vyw <= 0 || y - vyw >= Tile.TILE_SIZE);
+		// boolean outside = (x <= 0 || x >= Tile.TILE_SIZE || y <= 0 || y >= Tile.TILE_SIZE)
+		// && (x - vxw <= 0 || x - vxw >= Tile.TILE_SIZE || y - vyw <= 0 || y - vyw >= Tile.TILE_SIZE);
 
+		boolean outside = false;
 		if (rounded && !outside) {
 
 			// Add the first point twice to be able to draw with GL_TRIANGLE_STRIP
 
-			curVertices[vertexPos++] = x + uxw - vxw;
-			curVertices[vertexPos++] = y + uyw - vyw;
-			curVertices[vertexPos++] = -1.0f;
-			curVertices[vertexPos++] = 1.0f;
+			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = -1;
+			curVertices[vertexPos++] = 1;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x + uxw - vxw;
-			curVertices[vertexPos++] = y + uyw - vyw;
-			curVertices[vertexPos++] = -1.0f;
-			curVertices[vertexPos++] = 1.0f;
+			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = -1;
+			curVertices[vertexPos++] = 1;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x - uxw - vxw;
-			curVertices[vertexPos++] = y - uyw - vyw;
-			curVertices[vertexPos++] = 1.0f;
-			curVertices[vertexPos++] = 1.0f;
+			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = 1;
+			curVertices[vertexPos++] = 1;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
 			// Start of line
-			curVertices[vertexPos++] = x + uxw;
-			curVertices[vertexPos++] = y + uyw;
-			curVertices[vertexPos++] = -1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x + uxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y + uyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = -1;
+			curVertices[vertexPos++] = 0;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x - uxw;
-			curVertices[vertexPos++] = y - uyw;
-			curVertices[vertexPos++] = 1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x - uxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y - uyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = 1;
+			curVertices[vertexPos++] = 0;
 
 		} else {
 			// outside means line is probably clipped
@@ -163,30 +182,30 @@ class LineLayer extends Layer {
 				verticesCnt -= 2;
 			}
 			// Add the first point twice to be able to draw with GL_TRIANGLE_STRIP
-			curVertices[vertexPos++] = x + uxw - vxw;
-			curVertices[vertexPos++] = y + uyw - vyw;
-			curVertices[vertexPos++] = -1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = -1;
+			curVertices[vertexPos++] = 0;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x + uxw - vxw;
-			curVertices[vertexPos++] = y + uyw - vyw;
-			curVertices[vertexPos++] = -1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = -1;
+			curVertices[vertexPos++] = 0;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x - uxw - vxw;
-			curVertices[vertexPos++] = y - uyw - vyw;
-			curVertices[vertexPos++] = 1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = 1;
+			curVertices[vertexPos++] = 0;
 		}
 
 		prevX = x;
@@ -203,15 +222,15 @@ class LineLayer extends Layer {
 			vx = prevX - x;
 			vy = prevY - y;
 			a = FloatMath.sqrt(vx * vx + vy * vy);
-			vx = (float) (vx / a);
-			vy = (float) (vy / a);
+			vx = (vx / a);
+			vy = (vy / a);
 
 			// Unit vector pointing forward to next node
 			wx = nextX - x;
 			wy = nextY - y;
 			a = FloatMath.sqrt(wx * wx + wy * wy);
-			wx = (float) (wx / a);
-			wy = (float) (wy / a);
+			wx = (wx / a);
+			wy = (wy / a);
 
 			// Sum of these two vectors points
 			ux = vx + wx;
@@ -223,8 +242,8 @@ class LineLayer extends Layer {
 				ux = -wy;
 				uy = wx;
 			} else {
-				ux = (float) (ux / a);
-				uy = (float) (uy / a);
+				ux = (ux / a);
+				uy = (uy / a);
 
 				if (ux > 2 || uy > 2 || ux < -2 || uy < -2) {
 					ux = -wy;
@@ -250,24 +269,24 @@ class LineLayer extends Layer {
 			uyw = uy * w;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x + uxw;
-			curVertices[vertexPos++] = y + uyw;
-			curVertices[vertexPos++] = -1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x + uxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y + uyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = -1;
+			curVertices[vertexPos++] = 0;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x - uxw;
-			curVertices[vertexPos++] = y - uyw;
-			curVertices[vertexPos++] = 1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x - uxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y - uyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = 1;
+			curVertices[vertexPos++] = 0;
 
 			prevX = x;
 			prevY = y;
@@ -280,8 +299,8 @@ class LineLayer extends Layer {
 
 		a = FloatMath.sqrt(vx * vx + vy * vy);
 
-		vx = (float) (vx / a);
-		vy = (float) (vy / a);
+		vx = (vx / a);
+		vy = (vy / a);
 
 		ux = vy;
 		uy = -vx;
@@ -292,69 +311,61 @@ class LineLayer extends Layer {
 		vxw = vx * w;
 		vyw = vy * w;
 
-		outside = (x <= 0 || x >= Tile.TILE_SIZE || y <= 0 || y >= Tile.TILE_SIZE)
-				&& (x - vxw <= 0 || x - vxw >= Tile.TILE_SIZE || y - vyw <= 0 || y - vyw >= Tile.TILE_SIZE);
-
-		// if (vertexPos == MAX) {
-		// curItem.used = vertexPos;
-		// curItem = LayerPool.get();
-		// pool.add(curItem);
-		// curVertices = curItem.vertices;
-		// vertexPos = 0;
-		// }
+		// outside = (x <= 0 || x >= Tile.TILE_SIZE || y <= 0 || y >= Tile.TILE_SIZE)
+		// && (x - vxw <= 0 || x - vxw >= Tile.TILE_SIZE || y - vyw <= 0 || y - vyw >= Tile.TILE_SIZE);
 
 		if (vertexPos == MAX) {
-			curVertices = getNextPoolItem();
+			curVertices = getNextItem();
 			vertexPos = 0;
 		}
 
 		if (rounded && !outside) {
-			curVertices[vertexPos++] = x + uxw;
-			curVertices[vertexPos++] = y + uyw;
-			curVertices[vertexPos++] = -1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x + uxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y + uyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = -1;
+			curVertices[vertexPos++] = 0;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x - uxw;
-			curVertices[vertexPos++] = y - uyw;
-			curVertices[vertexPos++] = 1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x - uxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y - uyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = 1;
+			curVertices[vertexPos++] = 0;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
 			// For rounded line edges
-			curVertices[vertexPos++] = x + uxw - vxw;
-			curVertices[vertexPos++] = y + uyw - vyw;
-			curVertices[vertexPos++] = -1.0f;
-			curVertices[vertexPos++] = -1.0f;
+			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = -1;
+			curVertices[vertexPos++] = -1;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
 			// Add the last vertex twice to be able to draw with GL_TRIANGLE_STRIP
-			curVertices[vertexPos++] = x - uxw - vxw;
-			curVertices[vertexPos++] = y - uyw - vyw;
-			curVertices[vertexPos++] = 1.0f;
-			curVertices[vertexPos++] = -1.0f;
+			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = 1;
+			curVertices[vertexPos++] = -1;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x - uxw - vxw;
-			curVertices[vertexPos++] = y - uyw - vyw;
-			curVertices[vertexPos++] = 1.0f;
-			curVertices[vertexPos++] = -1.0f;
+			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = 1;
+			curVertices[vertexPos++] = -1;
 
 		} else {
 			if (!outside) {
@@ -365,31 +376,31 @@ class LineLayer extends Layer {
 				verticesCnt -= 2;
 			}
 
-			curVertices[vertexPos++] = x + uxw;
-			curVertices[vertexPos++] = y + uyw;
-			curVertices[vertexPos++] = -1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x + uxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y + uyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = -1;
+			curVertices[vertexPos++] = 0;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
 			// Add the last vertex twice to be able to draw with GL_TRIANGLE_STRIP
-			curVertices[vertexPos++] = x - uxw - vxw;
-			curVertices[vertexPos++] = y - uyw - vyw;
-			curVertices[vertexPos++] = 1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = 1;
+			curVertices[vertexPos++] = 0;
 
 			if (vertexPos == MAX) {
-				curVertices = getNextPoolItem();
+				curVertices = getNextItem();
 				vertexPos = 0;
 			}
 
-			curVertices[vertexPos++] = x - uxw - vxw;
-			curVertices[vertexPos++] = y - uyw - vyw;
-			curVertices[vertexPos++] = 1.0f;
-			curVertices[vertexPos++] = 0.0f;
+			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
+			curVertices[vertexPos++] = 1;
+			curVertices[vertexPos++] = 0;
 
 		}
 

@@ -37,4 +37,5 @@ class Layer {
 
 		return curItem.vertices;
 	}
+
 }

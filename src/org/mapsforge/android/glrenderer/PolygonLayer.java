@@ -16,19 +16,35 @@ package org.mapsforge.android.glrenderer;
 
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
 
-class PolygonLayer extends Layer {
+class PolygonLayer {
 	PolygonLayer next;
 	Area area;
-
+	private static final float SCALE_FACTOR = 16.0f;
 	private boolean first = true;
 	private float originX;
 	private float originY;
 
+	ShortItem pool;
+	protected ShortItem curItem;
+	int verticesCnt;
+	int offset;
+
+	final int layer;
+
 	PolygonLayer(int layer, Area area) {
-		super(layer);
+		this.layer = layer;
 		this.area = area;
-		curItem = VertexPool.get();
+		curItem = ShortPool.get();
 		pool = curItem;
+	}
+
+	short[] getNextItem() {
+		curItem.used = ShortItem.SIZE;
+
+		curItem.next = ShortPool.get();
+		curItem = curItem.next;
+
+		return curItem.vertices;
 	}
 
 	void addPolygon(float[] points, int pos, int length) {
@@ -41,43 +57,48 @@ class PolygonLayer extends Layer {
 			originY = points[pos + 1];
 		}
 
-		float[] curVertices = curItem.vertices;
+		short[] curVertices = curItem.vertices;
 		int outPos = curItem.used;
 
-		if (outPos == PoolItem.SIZE) {
-			curVertices = getNextPoolItem();
+		if (outPos == ShortItem.SIZE) {
+			curVertices = getNextItem();
 			outPos = 0;
 		}
 
-		curVertices[outPos++] = originX; // Tile.TILE_SIZE >> 1;
-		curVertices[outPos++] = originY; // Tile.TILE_SIZE >> 1;
+		curVertices[outPos++] = (short) (originX * SCALE_FACTOR);
+		curVertices[outPos++] = (short) (originY * SCALE_FACTOR);
 
 		int remaining = length;
 		int inPos = pos;
 		while (remaining > 0) {
 
-			if (outPos == PoolItem.SIZE) {
-				curVertices = getNextPoolItem();
+			if (outPos == ShortItem.SIZE) {
+				curVertices = getNextItem();
 				outPos = 0;
 			}
 
 			int len = remaining;
-			if (len > (PoolItem.SIZE) - outPos)
-				len = (PoolItem.SIZE) - outPos;
+			if (len > (ShortItem.SIZE) - outPos)
+				len = (ShortItem.SIZE) - outPos;
 
-			System.arraycopy(points, inPos, curVertices, outPos, len);
-			outPos += len;
-			inPos += len;
+			for (int i = 0; i < len; i++)
+				curVertices[outPos++] = (short) (points[inPos++] * SCALE_FACTOR);
+
+			// System.arraycopy(points, inPos, curVertices, outPos, len);
+
+			// outPos += len;
+			// inPos += len;
+
 			remaining -= len;
 		}
 
 		if (outPos == PoolItem.SIZE) {
-			curVertices = getNextPoolItem();
+			curVertices = getNextItem();
 			outPos = 0;
 		}
 
-		curVertices[outPos++] = points[pos + 0];
-		curVertices[outPos++] = points[pos + 1];
+		curVertices[outPos++] = (short) (points[pos + 0] * SCALE_FACTOR);
+		curVertices[outPos++] = (short) (points[pos + 1] * SCALE_FACTOR);
 
 		curItem.used = outPos;
 	}

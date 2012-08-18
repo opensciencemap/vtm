@@ -16,57 +16,113 @@ package org.mapsforge.android.glrenderer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 class LineLayers {
 	private static int NUM_VERTEX_FLOATS = 4;
 
-	static FloatBuffer compileLayerData(LineLayer layers, FloatBuffer buf) {
-		FloatBuffer fbuf = buf;
-		int size = 0;
-
-		for (LineLayer l = layers; l != null; l = l.next)
-			size += l.verticesCnt;
-
-		size *= NUM_VERTEX_FLOATS;
-
-		if (buf == null || buf.capacity() < size) {
-			ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 4).order(
-					ByteOrder.nativeOrder());
-			fbuf = bbuf.asFloatBuffer();
-		} else {
-			fbuf.clear();
-		}
-		int pos = 0;
-
-		PoolItem last = null, items = null;
-
-		for (LineLayer l = layers; l != null; l = l.next) {
-			if (l.isOutline)
-				continue;
-
-			for (PoolItem item = l.pool; item != null; item = item.next) {
-				fbuf.put(item.vertices, 0, item.used);
-				last = item;
-			}
-			l.offset = pos;
-			pos += l.verticesCnt;
-
-			if (last != null) {
-				last.next = items;
-				items = l.pool;
-			}
-
-			l.pool = null;
-		}
-
-		VertexPool.add(items);
-
-		fbuf.flip();
-
-		return fbuf;
-	}
+	// static FloatBuffer compileLayerData(LineLayer layers, FloatBuffer buf) {
+	// FloatBuffer fbuf = buf;
+	// int size = 0;
+	//
+	// for (LineLayer l = layers; l != null; l = l.next)
+	// size += l.verticesCnt;
+	//
+	// size *= NUM_VERTEX_FLOATS;
+	//
+	// if (buf == null || buf.capacity() < size) {
+	// ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 4).order(
+	// ByteOrder.nativeOrder());
+	// fbuf = bbuf.asFloatBuffer();
+	// } else {
+	// fbuf.clear();
+	// }
+	// int pos = 0;
+	//
+	// PoolItem last = null, items = null;
+	//
+	// for (LineLayer l = layers; l != null; l = l.next) {
+	// if (l.isOutline)
+	// continue;
+	//
+	// for (PoolItem item = l.pool; item != null; item = item.next) {
+	// fbuf.put(item.vertices, 0, item.used);
+	// last = item;
+	// }
+	// l.offset = pos;
+	// pos += l.verticesCnt;
+	//
+	// if (last != null) {
+	// last.next = items;
+	// items = l.pool;
+	// }
+	//
+	// l.pool = null;
+	// }
+	//
+	// VertexPool.add(items);
+	//
+	// fbuf.flip();
+	//
+	// return fbuf;
+	// }
+	//
+	// static ShortBuffer compileLayerData(LineLayer layers, ShortBuffer buf) {
+	// int size = 0;
+	// ShortBuffer sbuf = buf;
+	//
+	// for (LineLayer l = layers; l != null; l = l.next)
+	// size += l.verticesCnt;
+	//
+	// size *= NUM_VERTEX_FLOATS;
+	//
+	// if (buf == null || buf.capacity() < size) {
+	// ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 2).order(
+	// ByteOrder.nativeOrder());
+	// sbuf = bbuf.asShortBuffer();
+	// } else {
+	// sbuf.clear();
+	// }
+	// int pos = 0;
+	//
+	// short[] data = new short[PoolItem.SIZE];
+	//
+	// PoolItem last = null, items = null;
+	//
+	// for (LineLayer l = layers; l != null; l = l.next) {
+	// if (l.isOutline)
+	// continue;
+	//
+	// for (PoolItem item = l.pool; item != null; item = item.next) {
+	// PoolItem.toHalfFloat(item, data);
+	// sbuf.put(data, 0, item.used);
+	// last = item;
+	// }
+	//
+	// l.offset = pos;
+	// pos += l.verticesCnt;
+	//
+	// if (last != null) {
+	// last.next = items;
+	// items = l.pool;
+	// }
+	//
+	// l.pool = null;
+	// }
+	//
+	// VertexPool.add(items);
+	//
+	// sbuf.flip();
+	//
+	// return sbuf;
+	// }
+	//
+	// static void clear(LineLayer layer) {
+	// for (LineLayer l = layer; l != null; l = l.next) {
+	// if (l.pool != null)
+	// VertexPool.add(l.pool);
+	// }
+	// }
 
 	static ShortBuffer compileLayerData(LineLayer layers, ShortBuffer buf) {
 		int size = 0;
@@ -86,17 +142,18 @@ class LineLayers {
 		}
 		int pos = 0;
 
-		short[] data = new short[PoolItem.SIZE];
+		// short[] data = new short[PoolItem.SIZE];
 
-		PoolItem last = null, items = null;
+		ShortItem last = null, items = null;
 
 		for (LineLayer l = layers; l != null; l = l.next) {
 			if (l.isOutline)
 				continue;
 
-			for (PoolItem item = l.pool; item != null; item = item.next) {
-				PoolItem.toHalfFloat(item, data);
-				sbuf.put(data, 0, item.used);
+			for (ShortItem item = l.pool; item != null; item = item.next) {
+				// PoolItem.toHalfFloat(item, data);
+				// sbuf.put(data, 0, item.used);
+				sbuf.put(item.vertices, 0, item.used);
 				last = item;
 			}
 
@@ -111,7 +168,7 @@ class LineLayers {
 			l.pool = null;
 		}
 
-		VertexPool.add(items);
+		ShortPool.add(items);
 
 		sbuf.flip();
 
@@ -121,7 +178,7 @@ class LineLayers {
 	static void clear(LineLayer layer) {
 		for (LineLayer l = layer; l != null; l = l.next) {
 			if (l.pool != null)
-				VertexPool.add(l.pool);
+				ShortPool.add(l.pool);
 		}
 	}
 }
