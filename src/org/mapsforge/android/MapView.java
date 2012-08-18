@@ -188,7 +188,10 @@ public class MapView extends GLSurfaceView {
 			mMapWorkers[i].start();
 		}
 
-		setRenderTheme(InternalRenderTheme.OSMARENDER);
+		if (!setRenderTheme(InternalRenderTheme.OSMARENDER)) {
+			Log.d(TAG, "EEEK could parse theme");
+			// FIXME show init error dialog
+		}
 
 		setEGLConfigChooser(new GlConfigChooser());
 		setEGLContextClientVersion(2);
@@ -496,14 +499,15 @@ public class MapView extends GLSurfaceView {
 	 * @throws IllegalArgumentException
 	 *             if the supplied internalRenderTheme is null.
 	 */
-	public void setRenderTheme(InternalRenderTheme internalRenderTheme) {
+	public boolean setRenderTheme(InternalRenderTheme internalRenderTheme) {
 		if (internalRenderTheme == null) {
 			throw new IllegalArgumentException("render theme must not be null");
 		}
 
-		setRenderTheme((Theme) internalRenderTheme);
+		boolean ret = setRenderTheme((Theme) internalRenderTheme);
 
 		clearAndRedrawMapView();
+		return ret;
 	}
 
 	/**

@@ -14,21 +14,15 @@
  */
 package org.mapsforge.android.glrenderer;
 
-public class TextTexture {
-
+public class ShortItem {
 	final short[] vertices;
-	final int id;
-	int length;
-	int offset;
-	GLMapTile tile;
+	int used;
+	ShortItem next;
 
-	String[] text;
-
-	TextTexture(int textureID) {
-		vertices = new short[TextRenderer.MAX_LABELS *
-				TextRenderer.VERTICES_PER_SPRITE *
-				TextRenderer.SHORTS_PER_VERTICE];
-		id = textureID;
+	ShortItem() {
+		vertices = new short[SIZE];
+		used = 0;
 	}
 
+	static int SIZE = 128;
 }

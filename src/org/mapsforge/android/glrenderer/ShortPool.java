@@ -1,43 +1,39 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2010, 2011, 2012 mapsforge.org
  *
  * This program is free software: you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General License as published by the Free Software
+ * terms of the GNU Lesser General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU Lesser General License for more details.
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General License along with
+ * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.mapsforge.android.glrenderer;
 
 import android.annotation.SuppressLint;
 
-class VertexPool {
+public class ShortPool {
 	private static final int POOL_LIMIT = 8192;
 
 	@SuppressLint("UseValueOf")
 	private static final Boolean lock = new Boolean(true);
 
-	static private PoolItem pool = null;
+	static private ShortItem pool = null;
 	static private int count = 0;
 
-	static void init() {
-	}
-
-	static PoolItem get() {
+	static ShortItem get() {
 		synchronized (lock) {
 
 			if (count == 0)
-				return new PoolItem();
+				return new ShortItem();
 
 			count--;
 
-			PoolItem it = pool;
+			ShortItem it = pool;
 			pool = pool.next;
 			it.used = 0;
 			it.next = null;
@@ -45,12 +41,12 @@ class VertexPool {
 		}
 	}
 
-	static void add(PoolItem items) {
+	static void add(ShortItem items) {
 		if (items == null)
 			return;
 
 		synchronized (lock) {
-			PoolItem last = items;
+			ShortItem last = items;
 
 			// limit pool items
 			while (count < POOL_LIMIT) {
@@ -62,7 +58,7 @@ class VertexPool {
 			}
 
 			// clear references
-			PoolItem tmp2, tmp = last.next;
+			ShortItem tmp2, tmp = last.next;
 			while (tmp != null) {
 				tmp2 = tmp;
 				tmp = tmp.next;

@@ -21,9 +21,9 @@ import org.mapsforge.core.Tile;
  */
 public class MapTile extends Tile {
 	/**
-	 * tile is loaded and ready for drawing. (set and used by render thread).
+	 * tile is loaded and ready for drawing. (set and used by render thread after uploading data to gl).
 	 */
-	public boolean isDrawn;
+	public boolean isReady;
 
 	/**
 	 * tile is removed from JobQueue and loading in DatabaseRenderer. set by MapWorker.

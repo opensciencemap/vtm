@@ -16,7 +16,6 @@ package org.mapsforge.android.glrenderer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.mapsforge.android.utils.GlUtils;
@@ -42,7 +41,7 @@ public class TextRenderer {
 	private int mBitmapFormat;
 	private int mBitmapType;
 	private ByteBuffer mByteBuffer;
-	private FloatBuffer mFloatBuffer;
+	private ShortBuffer mShortBuffer;
 	private TextTexture[] mTextures;
 
 	private int mIndicesVBO;
@@ -50,30 +49,31 @@ public class TextRenderer {
 
 	final static int INDICES_PER_SPRITE = 6; // Indices Per Sprite
 	final static int VERTICES_PER_SPRITE = 4; // Vertices Per Sprite
-	final static int FLOATS_PER_VERTICE = 4;
+	final static int SHORTS_PER_VERTICE = 6;
 
 	private static int mTextProgram;
-	static int mTextUVPMatrixLocation;
-	static int mTextVertexLocation;
-	static int mTextTextureCoordLocation;
-	static int mTextUColorLocation;
+	static int hTextUVPMatrix;
+	static int hTextVertex;
+	static int hTextScale;
+	static int hTextTextureCoord;
+	static int hTextUColor;
 
 	static Paint mPaint = new Paint(Color.BLACK);
 
 	boolean debug = false;
-	float[] debugVertices = {
+	short[] debugVertices = {
 
 			0, 0,
-			0, 1,
+			0, TEXTURE_HEIGHT,
 
 			0, TEXTURE_HEIGHT - 1,
 			0, 0,
 
 			TEXTURE_WIDTH - 1, 0,
-			1, 1,
+			TEXTURE_WIDTH, TEXTURE_HEIGHT,
 
 			TEXTURE_WIDTH - 1, TEXTURE_HEIGHT - 1,
-			1, 0,
+			TEXTURE_WIDTH, 0,
 
 	};
 
@@ -87,20 +87,21 @@ public class TextRenderer {
 
 		mTextProgram = GlUtils.createProgram(textVertexShader, textFragmentShader);
 
-		mTextUVPMatrixLocation = GLES20.glGetUniformLocation(mTextProgram, "mvp");
-		mTextUColorLocation = GLES20.glGetUniformLocation(mTextProgram, "col");
-		mTextVertexLocation = GLES20.glGetAttribLocation(mTextProgram, "vertex");
-		mTextTextureCoordLocation = GLES20.glGetAttribLocation(mTextProgram, "tex_coord");
+		hTextUVPMatrix = GLES20.glGetUniformLocation(mTextProgram, "mvp");
+		hTextUColor = GLES20.glGetUniformLocation(mTextProgram, "col");
+		hTextVertex = GLES20.glGetAttribLocation(mTextProgram, "vertex");
+		hTextScale = GLES20.glGetUniformLocation(mTextProgram, "scale");
+		hTextTextureCoord = GLES20.glGetAttribLocation(mTextProgram, "tex_coord");
 
 		// mVertexBuffer = new float[];
 		int bufferSize = numTextures
 				* MAX_LABELS * VERTICES_PER_SPRITE
-				* FLOATS_PER_VERTICE * (Float.SIZE / 8);
+				* SHORTS_PER_VERTICE * (Short.SIZE / 8);
 
 		mByteBuffer = ByteBuffer.allocateDirect(bufferSize)
 				.order(ByteOrder.nativeOrder());
 
-		mFloatBuffer = mByteBuffer.asFloatBuffer();
+		mShortBuffer = mByteBuffer.asShortBuffer();
 
 		int[] textureIds = new int[numTextures];
 		TextTexture[] textures = new TextTexture[numTextures];
@@ -184,20 +185,14 @@ public class TextRenderer {
 		if (tex.tile != null)
 			tex.tile.texture = null;
 
-		// if (debug)
-		// mBitmap.eraseColor(0xaa0000aa);
-		// else
 		mBitmap.eraseColor(Color.TRANSPARENT);
 
 		int pos = 0;
-		float[] buf = tex.vertices;
-
-		float xx = mFontPadX;
-		float yy = 0;
-		float width, height;
+		short[] buf = tex.vertices;
 
 		float y = 0;
-		float x = 0;
+		float x = mFontPadX;
+		float width, height;
 
 		int max = tile.labels.size();
 		if (max > MAX_LABELS)
@@ -214,8 +209,9 @@ public class TextRenderer {
 			mCanvas.drawLine(debugVertices[12], debugVertices[13], debugVertices[8],
 					debugVertices[9], mPaint);
 		}
+
 		int advanceY = 0;
-		// int advanceX = 0;
+
 		for (int i = 0; i < max; i++) {
 			TextItem t = tile.labels.get(i);
 
@@ -225,18 +221,23 @@ public class TextRenderer {
 			if (height > advanceY)
 				advanceY = (int) height;
 
-			if (xx + width > TEXTURE_WIDTH) {
-				xx = mFontPadX;
+			if (x + width > TEXTURE_WIDTH) {
+				x = mFontPadX;
 				y += advanceY;
 				advanceY = (int) height;
 			}
 
-			yy = y + (height - 1) - t.caption.fontDescent - mFontPadY;
+			float yy = y + (height - 1) - t.caption.fontDescent - mFontPadY;
+
+			if (yy > TEXTURE_HEIGHT) {
+				Log.d(TAG, "reached max labels");
+				continue;
+			}
 
 			if (t.caption.stroke != null)
-				mCanvas.drawText(t.text, xx + t.width / 2, yy, t.caption.stroke);
+				mCanvas.drawText(t.text, x + t.width / 2, yy, t.caption.stroke);
 
-			mCanvas.drawText(t.text, xx + t.width / 2, yy, t.caption.paint);
+			mCanvas.drawText(t.text, x + t.width / 2, yy, t.caption.paint);
 
 			// Log.d(TAG, "draw: " + t.text + " at:" + (xx + t.width / 2) + " " + yy + " w:"
 			// + t.width + " " + cellHeight);
@@ -246,44 +247,57 @@ public class TextRenderer {
 
 			float halfWidth = width / 2.0f;
 			float halfHeight = height / 2.0f;
-			float x1 = t.x - halfWidth;
-			float y1 = t.y - halfHeight;
-			float x2 = t.x + halfWidth;
-			float y2 = t.y + halfHeight;
 
-			float u1 = xx / TEXTURE_WIDTH;
-			float v1 = y / TEXTURE_HEIGHT;
-			float u2 = u1 + (width / TEXTURE_WIDTH);
-			float v2 = v1 + (height / TEXTURE_HEIGHT);
+			// short x1 = (short) (2.0f * (t.x - halfWidth));
+			// short y1 = (short) (2.0f * (t.y - halfHeight));
+			// short x2 = (short) (2.0f * (t.x + halfWidth));
+			// short y2 = (short) (2.0f * (t.y + halfHeight));
 
+			short x1 = (short) (2.0f * (-halfWidth));
+			short y1 = (short) (2.0f * (-halfHeight));
+			short x2 = (short) (2.0f * (halfWidth));
+			short y2 = (short) (2.0f * (halfHeight));
+
+			short u1 = (short) (2.0f * x);
+			short v1 = (short) (2.0f * y);
+			short u2 = (short) (2.0f * (x + width));
+			short v2 = (short) (2.0f * (y + height));
+
+			short tx = (short) (2.0f * t.x);
+			short ty = (short) (2.0f * t.y);
+
+			buf[pos++] = tx;
+			buf[pos++] = ty;
 			buf[pos++] = x1;
 			buf[pos++] = y1;
 			buf[pos++] = u1;
 			buf[pos++] = v2;
 
+			buf[pos++] = tx;
+			buf[pos++] = ty;
 			buf[pos++] = x2;
 			buf[pos++] = y1;
 			buf[pos++] = u2;
 			buf[pos++] = v2;
 
+			buf[pos++] = tx;
+			buf[pos++] = ty;
 			buf[pos++] = x2;
 			buf[pos++] = y2;
 			buf[pos++] = u2;
 			buf[pos++] = v1;
 
+			buf[pos++] = tx;
+			buf[pos++] = ty;
 			buf[pos++] = x1;
 			buf[pos++] = y2;
 			buf[pos++] = u1;
 			buf[pos++] = v1;
 
-			// yy += cellHeight;
-			// x += width;
+			x += width;
 
-			xx += width;
-
-			// y += cellHeight;
 			if (y > TEXTURE_HEIGHT) {
-				Log.d(TAG, "reached max labels");
+				Log.d(TAG, "reached max labels: texture is full");
 				break;
 			}
 		}
@@ -309,42 +323,42 @@ public class TextRenderer {
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVerticesVBO);
 
-		mFloatBuffer.clear();
+		mShortBuffer.clear();
 
 		for (int i = 0; i < mTextures.length; i++) {
 			tex = mTextures[i];
 			if (tex.tile == null || !tex.tile.isActive)
 				continue;
 
-			mFloatBuffer.put(tex.vertices, 0, tex.length);
+			mShortBuffer.put(tex.vertices, 0, tex.length);
 			tex.offset = offset;
 			offset += tex.length;
 		}
 
-		mFloatBuffer.flip();
+		mShortBuffer.flip();
 		// Log.d(TAG, "compileTextures" + mFloatBuffer.remaining() + " " + offset);
 
 		// TODO use sub-bufferdata function
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, offset * (Float.SIZE / 8),
-				mFloatBuffer, GLES20.GL_DYNAMIC_DRAW);
+		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, offset * (Short.SIZE / 8),
+				mShortBuffer, GLES20.GL_DYNAMIC_DRAW);
 	}
 
-	void beginDraw() {
+	void beginDraw(float scale) {
 		GLES20.glUseProgram(mTextProgram);
 
-		GLES20.glEnableVertexAttribArray(mTextTextureCoordLocation);
-		GLES20.glEnableVertexAttribArray(mTextVertexLocation);
-
+		GLES20.glEnableVertexAttribArray(hTextTextureCoord);
+		GLES20.glEnableVertexAttribArray(hTextVertex);
+		GLES20.glUniform1f(hTextScale, scale);
 		if (debug) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-			mFloatBuffer.clear();
-			mFloatBuffer.put(debugVertices, 0, 16);
-			mFloatBuffer.flip();
-			GLES20.glVertexAttribPointer(mTextVertexLocation, 2,
-					GLES20.GL_FLOAT, false, 16, mFloatBuffer);
-			mFloatBuffer.position(2);
-			GLES20.glVertexAttribPointer(mTextTextureCoordLocation, 2,
-					GLES20.GL_FLOAT, false, 16, mFloatBuffer);
+			mShortBuffer.clear();
+			mShortBuffer.put(debugVertices, 0, 16);
+			mShortBuffer.flip();
+			GLES20.glVertexAttribPointer(hTextVertex, 2,
+					GLES20.GL_SHORT, false, 8, mShortBuffer);
+			mShortBuffer.position(2);
+			GLES20.glVertexAttribPointer(hTextTextureCoord, 2,
+					GLES20.GL_SHORT, false, 8, mShortBuffer);
 		} else {
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesVBO);
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVerticesVBO);
@@ -353,31 +367,32 @@ public class TextRenderer {
 
 	void endDraw() {
 
-		GLES20.glDisableVertexAttribArray(mTextTextureCoordLocation);
-		GLES20.glDisableVertexAttribArray(mTextVertexLocation);
+		GLES20.glDisableVertexAttribArray(hTextTextureCoord);
+		GLES20.glDisableVertexAttribArray(hTextVertex);
 	}
 
 	void drawTile(GLMapTile tile, float[] matrix) {
 
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tile.texture.id);
-		GlUtils.checkGlError("bind");
 
-		GLES20.glUniformMatrix4fv(mTextUVPMatrixLocation, 1, false, matrix, 0);
-		GlUtils.checkGlError("matrix");
+		GLES20.glUniformMatrix4fv(hTextUVPMatrix, 1, false, matrix, 0);
 
 		if (debug) {
 			GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 		} else {
 
-			GLES20.glVertexAttribPointer(mTextVertexLocation, 2,
-					GLES20.GL_FLOAT, false, 16, tile.texture.offset * 4);
+			GLES20.glVertexAttribPointer(hTextVertex, 4,
+					GLES20.GL_SHORT, false, 12, tile.texture.offset * (Short.SIZE / 8));
 
-			GLES20.glVertexAttribPointer(mTextTextureCoordLocation, 2,
-					GLES20.GL_FLOAT, false, 16, tile.texture.offset * 4 + 8);
+			// GLES20.glVertexAttribPointer(hTextVertexOffset, 2,
+			// GLES20.GL_SHORT, false, 8, tile.texture.offset * (Short.SIZE / 8) + 4);
+			//
+			GLES20.glVertexAttribPointer(hTextTextureCoord, 2,
+					GLES20.GL_SHORT, false, 12, tile.texture.offset * (Short.SIZE / 8)
+							+ 8);
 
-			GLES20.glDrawElements(GLES20.GL_TRIANGLES, (tile.texture.length / 16) *
+			GLES20.glDrawElements(GLES20.GL_TRIANGLES, (tile.texture.length / 24) *
 					INDICES_PER_SPRITE, GLES20.GL_UNSIGNED_SHORT, 0);
-
 		}
 
 	}
@@ -385,12 +400,18 @@ public class TextRenderer {
 	private static String textVertexShader = ""
 			+ "precision highp float; "
 			+ "attribute vec4 vertex;"
+			// + "attribute vec4 offset;"
 			+ "attribute vec2 tex_coord;"
 			+ "uniform mat4 mvp;"
+			+ "uniform float scale;"
 			+ "varying vec2 tex_c;"
+			+ "const vec2 div = vec2(1.0/1024.0,1.0/512.0);"
+			+ "const vec4 dp = vec4(0.5,0.5,0.5,0.5);"
 			+ "void main() {"
-			+ "   gl_Position = mvp * vertex;"
-			+ "   tex_c = tex_coord;"
+			+ "   vec4  s = dp * vertex;"
+			+ "   gl_Position = mvp * vec4(s.x + (s.z / scale), s.y + (s.w / scale), 0.0, 1.0);"
+			// + "   gl_Position = vec4(pos.x + s.z, pos.y + s.w, 0.0, 1.0);"
+			+ "   tex_c = tex_coord * div;"
 			+ "}";
 
 	private static String textFragmentShader = ""
@@ -399,7 +420,7 @@ public class TextRenderer {
 			+ "uniform vec4 col;"
 			+ "varying vec2 tex_c;"
 			+ "void main() {"
-			+ "   gl_FragColor = texture2D(tex, tex_c);"
+			+ "   gl_FragColor = texture2D(tex, tex_c.xy);"
 			+ "}";
 
 }

@@ -22,10 +22,12 @@ class Shaders {
 			+ "attribute vec4 a_position;"
 			+ "attribute vec2 a_st;"
 			+ "varying vec2 v_st;"
+			+ "const vec4 scale = vec4(1.0/16.0, 1.0/16.0, 0.0, 1.0);"
 			+ "void main() {"
 			// + "  gl_Position = u_center * vec4(a_position.x, a_position.y, 0.0, 1.0);"
 			// + "  v_st = a_position.zw;"
-			+ "  gl_Position = u_center * a_position;"
+			+ "  gl_Position = u_center * (scale * a_position);"
+			// + "  gl_Position = u_center * a_position;"
 			+ "  v_st = a_st;"
 			+ "}";
 
@@ -165,8 +167,9 @@ class Shaders {
 			+ "precision mediump float; \n"
 			+ "uniform mat4 u_center;\n"
 			+ "attribute vec4 a_position;"
+			+ "const vec4 scale = vec4(1.0/16.0, 1.0/16.0, 0.0, 1.0);"
 			+ "void main() {"
-			+ "  gl_Position = u_center * a_position;"
+			+ "  gl_Position = u_center * (scale * a_position);"
 			+ "}";
 
 	final static String gPolygonFragmentShader = ""
