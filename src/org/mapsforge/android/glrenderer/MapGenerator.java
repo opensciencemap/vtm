@@ -538,9 +538,6 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 		mCurPolyLayer = null;
 		mCurLineLayer = null;
 
-		tile.newData = true;
-		tile.isLoading = false;
-
 		return true;
 	}
 
