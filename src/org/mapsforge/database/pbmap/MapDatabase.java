@@ -85,9 +85,9 @@ public class MapDatabase implements IMapDatabase {
 				}
 			});
 
-	private final static int MAX_TILE_TAGS = 100;
 	private final static float REF_TILE_SIZE = 4096.0f;
 
+	private int MAX_TILE_TAGS = 100;
 	private Tag[] curTags = new Tag[MAX_TILE_TAGS];
 	private int mCurTagCnt;
 
@@ -300,7 +300,8 @@ public class MapDatabase implements IMapDatabase {
 
 		// FIXME ...
 		if (mCurTagCnt >= MAX_TILE_TAGS) {
-			Tag[] tmp = new Tag[mCurTagCnt + 10];
+			MAX_TILE_TAGS = mCurTagCnt + 10;
+			Tag[] tmp = new Tag[MAX_TILE_TAGS];
 			System.arraycopy(curTags, 0, tmp, 0, mCurTagCnt);
 			curTags = tmp;
 		}
