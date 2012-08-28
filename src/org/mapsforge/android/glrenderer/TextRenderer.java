@@ -189,6 +189,16 @@ public class TextRenderer {
 		}
 
 		if (tex == null) {
+			for (int i = 0; i < mTextures.length; i++) {
+				tex = mTextures[i];
+				if (!tex.tile.isVisible)
+					break;
+
+				tex = null;
+			}
+		}
+
+		if (tex == null) {
 			Log.d(TAG, "no textures left");
 			return false;
 		}

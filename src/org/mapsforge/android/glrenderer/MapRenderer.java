@@ -345,8 +345,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		// Log.d(TAG, "--------------------------------<<");
 	}
 
-	private Object lock = new Object();
-
 	private boolean updateVisibleList(double x, double y, int zdir) {
 		byte zoomLevel = mLastZoom;
 		float scale = mLastScale;
@@ -1144,7 +1142,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			mVBOs.add(new VertexBufferObject(mVboIds[i]));
 
 		// Set up textures
-		TextRenderer.init(numTiles * 2);
+		TextRenderer.init(numTiles);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GLES20.GL_DEPTH_TEST);
