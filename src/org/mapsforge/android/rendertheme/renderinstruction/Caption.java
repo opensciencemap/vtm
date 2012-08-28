@@ -32,7 +32,7 @@ import android.util.FloatMath;
 /**
  * Represents a text label on the map.
  */
-public final class Caption implements RenderInstruction {
+public final class Caption extends RenderInstruction {
 	/**
 	 * @param elementName
 	 *            the name of the XML element.
@@ -131,11 +131,6 @@ public final class Caption implements RenderInstruction {
 	}
 
 	@Override
-	public void destroy() {
-		// do nothing
-	}
-
-	@Override
 	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
 		renderCallback.renderPointOfInterestCaption(this);
 	}
@@ -143,11 +138,6 @@ public final class Caption implements RenderInstruction {
 	@Override
 	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
 		renderCallback.renderAreaCaption(this);
-	}
-
-	@Override
-	public void scaleStrokeWidth(float scaleFactor) {
-		// do nothing
 	}
 
 	@Override

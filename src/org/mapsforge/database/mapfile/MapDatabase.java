@@ -251,7 +251,7 @@ public class MapDatabase implements IMapDatabase {
 
 	@Override
 	public String getMapProjection() {
-		return getMapFileInfo().projectionName;
+		return "WSG84"; // getMapFileInfo().projectionName;
 	}
 
 	/*
@@ -883,14 +883,25 @@ public class MapDatabase implements IMapDatabase {
 			boolean featureWayDoubleDeltaEncoding = (featureByte & WAY_FEATURE_DOUBLE_DELTA_ENCODING) != 0;
 
 			// check if the way has a name
-			if ((featureByte & WAY_FEATURE_NAME) != 0)
+			if ((featureByte & WAY_FEATURE_NAME) != 0) {
 				textPos[0] = mReadBuffer.readUnsignedInt();
+				String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset
+						+ textPos[0]);
+				if (changed) {
+					Tag[] tmp = tags;
+					tags = new Tag[tmp.length + 1];
+					System.arraycopy(tmp, 0, tags, 0, tmp.length);
+				}
+				tags[tags.length - 1] = new Tag("name", str, false);
+			}
 			else
 				textPos[0] = -1;
 
 			// check if the way has a house number
-			if ((featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0)
+			if ((featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0) {
 				textPos[1] = mReadBuffer.readUnsignedInt();
+
+			}
 			else
 				textPos[1] = -1;
 

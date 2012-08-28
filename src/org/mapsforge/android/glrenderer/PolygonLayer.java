@@ -15,11 +15,14 @@
 package org.mapsforge.android.glrenderer;
 
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
+import org.mapsforge.core.Tile;
 
 class PolygonLayer {
+	private static final float S = MapRenderer.COORD_MULTIPLIER;
+
 	PolygonLayer next;
 	Area area;
-	private static final float SCALE_FACTOR = 16.0f;
+	// private static final float MapRenderer.COORD_MULTIPLIER = 8.0f;
 	private boolean first = true;
 	private float originX;
 	private float originY;
@@ -53,8 +56,8 @@ class PolygonLayer {
 
 		if (first) {
 			first = false;
-			originX = points[pos];
-			originY = points[pos + 1];
+			originX = Tile.TILE_SIZE >> 1; // points[pos];
+			originY = Tile.TILE_SIZE >> 1; // points[pos + 1];
 		}
 
 		short[] curVertices = curItem.vertices;
@@ -65,24 +68,25 @@ class PolygonLayer {
 			outPos = 0;
 		}
 
-		curVertices[outPos++] = (short) (originX * SCALE_FACTOR);
-		curVertices[outPos++] = (short) (originY * SCALE_FACTOR);
+		curVertices[outPos++] = (short) (originX * S);
+		curVertices[outPos++] = (short) (originY * S);
 
+		int MAX = ShortItem.SIZE;
 		int remaining = length;
 		int inPos = pos;
 		while (remaining > 0) {
 
-			if (outPos == ShortItem.SIZE) {
+			if (outPos == MAX) {
 				curVertices = getNextItem();
 				outPos = 0;
 			}
 
 			int len = remaining;
-			if (len > (ShortItem.SIZE) - outPos)
-				len = (ShortItem.SIZE) - outPos;
+			if (len > MAX - outPos)
+				len = MAX - outPos;
 
 			for (int i = 0; i < len; i++)
-				curVertices[outPos++] = (short) (points[inPos++] * SCALE_FACTOR);
+				curVertices[outPos++] = (short) (points[inPos++] * S);
 
 			// System.arraycopy(points, inPos, curVertices, outPos, len);
 
@@ -92,13 +96,13 @@ class PolygonLayer {
 			remaining -= len;
 		}
 
-		if (outPos == PoolItem.SIZE) {
+		if (outPos == MAX) {
 			curVertices = getNextItem();
 			outPos = 0;
 		}
 
-		curVertices[outPos++] = (short) (points[pos + 0] * SCALE_FACTOR);
-		curVertices[outPos++] = (short) (points[pos + 1] * SCALE_FACTOR);
+		curVertices[outPos++] = (short) (points[pos + 0] * S);
+		curVertices[outPos++] = (short) (points[pos + 1] * S);
 
 		curItem.used = outPos;
 	}

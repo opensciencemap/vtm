@@ -26,7 +26,7 @@ import android.graphics.Paint.Style;
 /**
  * Represents a round area on the map.
  */
-public final class Circle implements RenderInstruction {
+public final class Circle extends RenderInstruction {
 	/**
 	 * @param elementName
 	 *            the name of the XML element.
@@ -68,11 +68,13 @@ public final class Circle implements RenderInstruction {
 
 	private static void validate(String elementName, Float radius, float strokeWidth) {
 		if (radius == null) {
-			throw new IllegalArgumentException("missing attribute r for element: " + elementName);
+			throw new IllegalArgumentException("missing attribute r for element: "
+					+ elementName);
 		} else if (radius.floatValue() < 0) {
 			throw new IllegalArgumentException("radius must not be negative: " + radius);
 		} else if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: " + strokeWidth);
+			throw new IllegalArgumentException("stroke-width must not be negative: "
+					+ strokeWidth);
 		}
 	}
 
@@ -84,7 +86,8 @@ public final class Circle implements RenderInstruction {
 	private final boolean mScaleRadius;
 	private final float mStrokeWidth;
 
-	private Circle(Float radius, boolean scaleRadius, int fill, int stroke, float strokeWidth, int level) {
+	private Circle(Float radius, boolean scaleRadius, int fill, int stroke,
+			float strokeWidth, int level) {
 		super();
 
 		mRadius = radius.floatValue();
@@ -118,11 +121,6 @@ public final class Circle implements RenderInstruction {
 	}
 
 	@Override
-	public void destroy() {
-		// do nothing
-	}
-
-	@Override
 	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
 		if (mOutline != null) {
 			renderCallback.renderPointOfInterestCircle(mRenderRadius, mOutline, mLevel);
@@ -133,11 +131,6 @@ public final class Circle implements RenderInstruction {
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
-		// do nothing
-	}
-
-	@Override
 	public void scaleStrokeWidth(float scaleFactor) {
 		if (mScaleRadius) {
 			mRenderRadius = mRadius * scaleFactor;
@@ -145,10 +138,5 @@ public final class Circle implements RenderInstruction {
 				mOutline.setStrokeWidth(mStrokeWidth * scaleFactor);
 			}
 		}
-	}
-
-	@Override
-	public void scaleTextSize(float scaleFactor) {
-		// do nothing
 	}
 }

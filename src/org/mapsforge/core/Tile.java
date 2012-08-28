@@ -60,6 +60,8 @@ public class Tile {
 	 */
 	public final long pixelY;
 
+	public volatile boolean isCanceled;
+
 	/**
 	 * @param tileX
 	 *            the X number of the tile.

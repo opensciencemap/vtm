@@ -92,9 +92,23 @@ public class Tag {
 		this.hashCodeValue = calculateHashCode();
 	}
 
+	/**
+	 * @param key
+	 *            the key of the tag.
+	 * @param value
+	 *            the value of the tag.
+	 * @param intern
+	 *            true when string should be intern()alized.
+	 */
 	public Tag(String key, String value, boolean intern) {
-		this.key = (key == null ? null : key);
-		this.value = (value == null ? null : value);
+		if (intern) {
+			this.key = (key == null ? null : key.intern());
+			this.value = (value == null ? null : value.intern());
+		}
+		else {
+			this.key = (key == null ? null : key);
+			this.value = (value == null ? null : value);
+		}
 		this.hashCodeValue = calculateHashCode();
 	}
 

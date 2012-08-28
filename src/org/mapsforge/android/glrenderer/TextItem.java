@@ -15,6 +15,7 @@
 package org.mapsforge.android.glrenderer;
 
 import org.mapsforge.android.rendertheme.renderinstruction.Caption;
+import org.mapsforge.android.rendertheme.renderinstruction.PathText;
 
 public class TextItem {
 	TextItem next;
@@ -22,7 +23,10 @@ public class TextItem {
 	final float x, y;
 	final String text;
 	final Caption caption;
+	final PathText path;
 	final float width;
+
+	short x1, y1, x2, y2;
 
 	public TextItem(float x, float y, String text, Caption caption) {
 		this.x = x;
@@ -30,6 +34,16 @@ public class TextItem {
 		this.text = text;
 		this.caption = caption;
 		this.width = caption.paint.measureText(text);
+		this.path = null;
+	}
+
+	public TextItem(float x, float y, String text, PathText pathText, float width) {
+		this.x = x;
+		this.y = y;
+		this.text = text;
+		this.path = pathText;
+		this.caption = null;
+		this.width = width;
 	}
 
 }

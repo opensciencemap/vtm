@@ -32,6 +32,7 @@ abstract class Rule {
 	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_VALUE = new HashMap<List<String>, AttributeMatcher>();
 	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\|");
 	private static final String STRING_NEGATION = "~";
+	private static final String STRING_EXCLUSIVE = "-";
 	private static final String STRING_WILDCARD = "*";
 
 	private static Rule createRule(Stack<Rule> ruleStack, int element, String keys,
@@ -44,11 +45,18 @@ abstract class Rule {
 				.split(values)));
 
 		if (valueList.remove(STRING_NEGATION)) {
-			AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList);
+			AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList,
+					false);
 			return new NegativeRule(element, closed, zoomMin, zoomMax,
 					attributeMatcher);
 		}
 
+		if (valueList.remove(STRING_EXCLUSIVE)) {
+			AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList,
+					true);
+			return new NegativeRule(element, closed, zoomMin, zoomMax,
+					attributeMatcher);
+		}
 		AttributeMatcher keyMatcher = getKeyMatcher(keyList);
 		AttributeMatcher valueMatcher = getValueMatcher(valueList);
 
@@ -189,13 +197,14 @@ abstract class Rule {
 
 	abstract boolean matchesWay(Tag[] tags, byte zoomLevel, int closed);
 
-	void matchNode(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel) {
+	void matchNode(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel,
+			List<RenderInstruction> matchingList) {
 		if (matchesNode(tags, zoomLevel)) {
 			for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
-				mRenderInstructionArray[i].renderNode(renderCallback, tags);
+				matchingList.add(mRenderInstructionArray[i]);
 
 			for (int i = 0, n = mSubRuleArray.length; i < n; i++)
-				mSubRuleArray[i].matchNode(renderCallback, tags, zoomLevel);
+				mSubRuleArray[i].matchNode(renderCallback, tags, zoomLevel, matchingList);
 
 		}
 	}
@@ -220,14 +229,15 @@ abstract class Rule {
 		MATCHERS_CACHE_VALUE.clear();
 
 		mRenderInstructionArray = new RenderInstruction[mRenderInstructions.size()];
-
-		for (int i = 0, n = mRenderInstructions.size(); i < n; i++)
-			mRenderInstructionArray[i] = mRenderInstructions.get(i);
+		mRenderInstructions.toArray(mRenderInstructionArray);
+		// for (int i = 0, n = mRenderInstructions.size(); i < n; i++)
+		// mRenderInstructionArray[i] = mRenderInstructions.get(i);
 
 		mSubRuleArray = new Rule[mSubRules.size()];
+		mSubRules.toArray(mSubRuleArray);
 
-		for (int i = 0, n = mSubRules.size(); i < n; i++)
-			mSubRuleArray[i] = mSubRules.get(i);
+		// for (int i = 0, n = mSubRules.size(); i < n; i++)
+		// mSubRuleArray[i] = mSubRules.get(i);
 
 		mRenderInstructions.clear();
 		mRenderInstructions = null;

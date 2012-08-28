@@ -12,17 +12,22 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.android.glrenderer;
+package org.mapsforge.android.rendertheme.renderinstruction;
 
-import java.util.ArrayList;
+import org.mapsforge.android.rendertheme.IRenderCallback;
+import org.mapsforge.core.Tag;
 
-import org.mapsforge.android.rendertheme.renderinstruction.Caption;
+public class AreaLevel extends RenderInstruction {
+	private final Area area;
+	private final int level;
 
-public class TextLayer {
-	public ArrayList<TextItem> labels;
-
-	void addLabel(float x, float y, String text, Caption caption) {
-
+	public AreaLevel(Area area, int level) {
+		this.area = area;
+		this.level = level;
 	}
 
+	@Override
+	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
+		renderCallback.renderArea(this.area, level);
+	}
 }

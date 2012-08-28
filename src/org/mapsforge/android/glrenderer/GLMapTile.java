@@ -14,21 +14,23 @@
  */
 package org.mapsforge.android.glrenderer;
 
-import java.util.ArrayList;
-
 import org.mapsforge.android.mapgenerator.MapTile;
 import org.mapsforge.core.Tile;
 
 class GLMapTile extends MapTile {
+	long lastDraw = 0;
 
-	VertexBufferObject lineVBO;
-	VertexBufferObject polygonVBO;
+	VertexBufferObject vbo;
+
+	// polygonOffset is always 8
+	int lineOffset;
+
 	TextTexture texture;
 
 	LineLayer lineLayers;
 	PolygonLayer polygonLayers;
 
-	ArrayList<TextItem> labels;
+	TextItem labels;
 
 	boolean newData;
 	boolean loading;
@@ -36,9 +38,6 @@ class GLMapTile extends MapTile {
 	// pixel coordinates (y-flipped)
 	final long x;
 	final long y;
-
-	// scissor coordinates
-	int sx, sy, sw, sh;
 
 	final GLMapTile[] child = { null, null, null, null };
 	GLMapTile parent;

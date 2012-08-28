@@ -19,10 +19,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.util.HashMap;
-import java.util.zip.GZIPInputStream;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -33,7 +33,6 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -41,7 +40,6 @@ import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
-import org.mapsforge.core.WebMercator;
 import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
@@ -60,45 +58,62 @@ public class MapDatabase implements IMapDatabase {
 	private static final MapFileInfo mMapInfo =
 			new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
 					new Byte((byte) 4), new GeoPoint(53.11, 8.85),
-					WebMercator.NAME, 0, 0, 0, "de", "comment", "author");
+					null, 0, 0, 0, "de", "comment", "author");
 
 	private boolean mOpenFile = false;
 
 	// private static final String URL = "http://city.informatik.uni-bremen.de:8020/test/%d/%d/%d.osmtile";
 	private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/test/%d/%d/%d.osmtile";
 	// private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/gis2/%d/%d/%d.osmtile";
-	private static final Header encodingHeader =
-			new BasicHeader("Accept-Encoding", "gzip");
+	// private static final Header encodingHeader =
+	// new BasicHeader("Accept-Encoding", "gzip");
 
-	private static volatile HashMap<String, Tag> tagHash = new HashMap<String, Tag>(100);
+	private static final int MAX_TAGS_CACHE = 100;
+	private static Map<String, Tag> tagHash = Collections
+			.synchronizedMap(new LinkedHashMap<String, Tag>(
+					MAX_TAGS_CACHE, 0.75f, true) {
 
-	private Tag[] curTags = new Tag[250];
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected boolean removeEldestEntry(Entry<String, Tag> e) {
+					if (size() < MAX_TAGS_CACHE)
+						return false;
+
+					// Log.d(TAG, "cache: drop " + e.getValue());
+					return true;
+				}
+			});
+
+	private final static int MAX_TILE_TAGS = 100;
+	private final static float REF_TILE_SIZE = 4096.0f;
+
+	private Tag[] curTags = new Tag[MAX_TILE_TAGS];
 	private int mCurTagCnt;
 
 	private HttpClient mClient;
 	private IMapDatabaseCallback mMapGenerator;
 	private float mScaleFactor;
 	private HttpGet mRequest = null;
+	private Tile mTile;
 
 	@Override
 	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		mCanceled = false;
+		// just used for debugging ....
+		mTile = tile;
 		// Log.d(TAG, "get tile >> : " + tile);
 
 		String url = String.format(URL, Integer.valueOf(tile.zoomLevel),
 				Long.valueOf(tile.tileX), Long.valueOf(tile.tileY));
 
 		HttpGet getRequest = new HttpGet(url);
-		getRequest.addHeader(encodingHeader);
 
 		mRequest = getRequest;
 		mMapGenerator = mapDatabaseCallback;
 		mCurTagCnt = 0;
 
-		// using variable coordinate scalefactor to take advantage of varint
-		mScaleFactor = 1 / 100f;
-		if (tile.zoomLevel < 12)
-			mScaleFactor = (float) Math.pow(2, (12 - tile.zoomLevel)) / 100f;
+		mScaleFactor = REF_TILE_SIZE / Tile.TILE_SIZE;
 
 		try {
 			HttpResponse response = mClient.execute(getRequest);
@@ -110,17 +125,24 @@ public class MapDatabase implements IMapDatabase {
 				entity.consumeContent();
 				return QueryResult.FAILED;
 			}
+
+			if (mTile.isCanceled) {
+				Log.d(TAG, "1 loading canceled " + mTile);
+				entity.consumeContent();
+				return QueryResult.FAILED;
+			}
+
 			InputStream is = null;
-			GZIPInputStream zis = null;
+			// GZIPInputStream zis = null;
 			try {
 				is = entity.getContent();
-				zis = new GZIPInputStream(is);
+				// zis = new GZIPInputStream(is);
 
-				decode(zis);
+				decode(is);
 
 			} finally {
-				if (zis != null)
-					zis.close();
+				// if (zis != null)
+				// zis.close();
 				if (is != null)
 					is.close();
 				entity.consumeContent();
@@ -137,6 +159,12 @@ public class MapDatabase implements IMapDatabase {
 			return QueryResult.FAILED;
 		}
 		mRequest = null;
+
+		if (mTile.isCanceled) {
+			Log.d(TAG, "2 loading canceled " + mTile);
+			return QueryResult.FAILED;
+		}
+
 		// Log.d(TAG, "get tile << : " + tile);
 
 		return QueryResult.SUCCESS;
@@ -144,7 +172,7 @@ public class MapDatabase implements IMapDatabase {
 
 	@Override
 	public String getMapProjection() {
-		return WebMercator.NAME;
+		return null;
 	}
 
 	@Override
@@ -158,8 +186,6 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private void createClient() {
-		// mClient = AndroidHttpClient.newInstance("Android");
-
 		mOpenFile = true;
 		HttpParams params = new BasicHttpParams();
 		HttpConnectionParams.setStaleCheckingEnabled(params, false);
@@ -193,7 +219,8 @@ public class MapDatabase implements IMapDatabase {
 		return null;
 	}
 
-	private static final int BUFFER_SIZE = 65536 * 2;
+	// // // hand sewed tile protocol buffers decoder // // //
+	private static final int BUFFER_SIZE = 65536;
 
 	private final byte[] buffer = new byte[BUFFER_SIZE];
 	private int bufferPos;
@@ -261,20 +288,24 @@ public class MapDatabase implements IMapDatabase {
 		String tagString = decodeString();
 
 		Tag tag = tagHash.get(tagString);
+
 		if (tag == null) {
-			// Log.d(TAG, "tag:" + tagString);
-			if (tagString.equals("name="))
-				tag = new Tag(tagString, false);
+			if (tagString.startsWith(Tag.TAG_KEY_NAME))
+				tag = new Tag(Tag.TAG_KEY_NAME, tagString.substring(5), false);
 			else
 				tag = new Tag(tagString);
 
 			tagHash.put(tagString, tag);
 		}
-		// FIXME ...
-		if (mCurTagCnt < 250)
-			curTags[mCurTagCnt++] = tag;
 
-		//
+		// FIXME ...
+		if (mCurTagCnt >= MAX_TILE_TAGS) {
+			Tag[] tmp = new Tag[mCurTagCnt + 10];
+			System.arraycopy(curTags, 0, tmp, 0, mCurTagCnt);
+			curTags = tmp;
+		}
+		curTags[mCurTagCnt++] = tag;
+
 		return true;
 	}
 
@@ -285,7 +316,7 @@ public class MapDatabase implements IMapDatabase {
 		int indexCnt = 0;
 		int tagCnt = 0;
 		int coordCnt = 0;
-		int layer = 0;
+		int layer = 5;
 		Tag[] tags = null;
 		short[] index = null;
 
@@ -294,7 +325,6 @@ public class MapDatabase implements IMapDatabase {
 
 		while (bytesRead < end) {
 			// read tag and wire type
-
 			int val = decodeVarint32();
 			if (val == 0)
 				break;
@@ -350,18 +380,10 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		float[] coords = tmpCoords;
-		int pos = 0;
 
-		float z = mScaleFactor;
-		for (int j = 0, m = indexCnt; j < m; j++) {
-			float lastX = 0;
-			float lastY = 0;
-
-			for (int n = index[j] + pos; pos < n; pos += 2) {
-				lastX = coords[pos] = (coords[pos] * z) + lastX;
-				lastY = coords[pos + 1] = (coords[pos + 1] * z) + lastY;
-			}
-		}
+		// FIXME !!!!!
+		if (layer == 0)
+			layer = 5;
 
 		mMapGenerator.renderWay((byte) layer, tags, coords, index, polygon);
 		return true;
@@ -429,12 +451,20 @@ public class MapDatabase implements IMapDatabase {
 		readBuffer(bytes);
 		int cnt = 0;
 		int end = bufferPos + bytes;
-
+		float scale = mScaleFactor;
 		// read repeated sint32
+		int lastX = 0;
+		int lastY = 0;
 		while (bufferPos < end && cnt < numNodes) {
-			float lon = decodeZigZag32(decodeVarint32()) * mScaleFactor;
-			float lat = decodeZigZag32(decodeVarint32()) * mScaleFactor;
-			mMapGenerator.renderPointOfInterest(layer, lat, lon, tags);
+			int lon = decodeZigZag32(decodeVarint32()); // * mScaleFactor;
+			int lat = decodeZigZag32(decodeVarint32()); // * mScaleFactor;
+			lastX = lon + lastX;
+			lastY = lat + lastY;
+
+			mMapGenerator.renderPointOfInterest(layer,
+					lastY / scale,
+					lastX / scale,
+					tags);
 			cnt += 2;
 		}
 		return cnt;
@@ -443,13 +473,6 @@ public class MapDatabase implements IMapDatabase {
 	private int MAX_WAY_COORDS = 32768;
 	private float[] tmpCoords = new float[MAX_WAY_COORDS];
 
-	// private boolean ensureBufferSize(int size) throws IOException {
-	// if (size > (bufferSize - bufferPos))
-	// readBuffer(size - (bufferSize - bufferPos));
-	//
-	// return true;
-	// }
-
 	private Tag[] decodeWayTags(int tagCnt) throws IOException {
 		int bytes = decodeVarint32();
 
@@ -457,33 +480,45 @@ public class MapDatabase implements IMapDatabase {
 
 		int cnt = 0;
 		int end = bytesRead + bytes;
-		int max = curTags.length;
+		int max = mCurTagCnt;
 
 		while (bytesRead < end) {
 			int tagNum = decodeVarint32();
 
-			if (tagNum < 0 || cnt == tagCnt)
-				continue;
-
+			if (tagNum < 0 || cnt == tagCnt) {
+				Log.d(TAG, "NULL TAG: " + mTile + " invalid tag:" + tagNum + " "
+						+ tagCnt + "/" + cnt);
+				break;
+			}
 			if (tagNum < Tags.MAX)
 				tags[cnt++] = Tags.tags[tagNum];
 			else {
 				tagNum -= Tags.LIMIT;
+
 				if (tagNum >= 0 && tagNum < max) {
 					// Log.d(TAG, "variable tag: " + curTags[tagNum]);
 					tags[cnt++] = curTags[tagNum];
+				} else {
+					Log.d(TAG, "NULL TAG: " + mTile + " could find tag:" + tagNum + " "
+							+ tagCnt + "/" + cnt);
 				}
 			}
-			// else DEBUG...
 		}
+		if (tagCnt != cnt)
+			Log.d(TAG, "NULL TAG: " + mTile + " ...");
 
 		return tags;
 	}
 
+	private short[] mIndices = new short[10];
+
 	private short[] decodeWayIndices(int indexCnt) throws IOException {
 		int bytes = decodeVarint32();
 
-		short[] index = new short[indexCnt];
+		short[] index = mIndices;
+		if (index.length < indexCnt + 1) {
+			index = mIndices = new short[indexCnt + 1];
+		}
 
 		int cnt = 0;
 		int end = bytesRead + bytes;
@@ -495,6 +530,9 @@ public class MapDatabase implements IMapDatabase {
 			// else DEBUG...
 
 		}
+
+		index[indexCnt] = -1;
+
 		return index;
 	}
 
@@ -514,67 +552,78 @@ public class MapDatabase implements IMapDatabase {
 		int cnt = 0;
 		int result;
 
+		int x, lastX = 0;
+		int y, lastY = 0;
+		boolean even = true;
+
+		float scale = mScaleFactor;
+
 		// read repeated sint32
 		while (pos < end) {
 			if (cnt >= MAX_WAY_COORDS) {
+				Log.d(TAG, "increase way coord buffer " + mTile);
+
 				MAX_WAY_COORDS += 128;
 				float[] tmp = new float[MAX_WAY_COORDS];
 				System.arraycopy(coords, 0, tmp, 0, cnt);
 				tmpCoords = coords = tmp;
 			}
 
-			byte tmp = buf[pos++];
-			if (tmp >= 0) {
-				result = tmp;
+			if (buf[pos] >= 0) {
+				result = buf[pos++];
+			} else if (buf[pos + 1] >= 0) {
+				result = buf[pos] & 0x7f
+						| buf[pos + 1] << 7;
+				pos += 2;
+			} else if (buf[pos + 2] >= 0) {
+				result = buf[pos] & 0x7f
+						| buf[pos + 1] << 7
+						| buf[pos + 2] << 14;
+				pos += 3;
+			} else if (buf[pos + 3] >= 0) {
+				result = buf[pos] & 0x7f
+						| buf[pos + 1] << 7
+						| buf[pos + 2] << 14
+						| buf[pos + 3] << 21;
+				pos += 4;
+				Log.d(TAG, "4 Stuffs too large " + mTile);
 			} else {
-				result = tmp & 0x7f;
-				if ((tmp = buf[pos++]) >= 0) {
-					result |= tmp << 7;
-				} else {
-					result |= (tmp & 0x7f) << 7;
-					if ((tmp = buf[pos++]) >= 0) {
-						result |= tmp << 14;
-					} else {
-						result |= (tmp & 0x7f) << 14;
-						if ((tmp = buf[pos++]) >= 0) {
-							result |= tmp << 21;
-						} else {
-							result |= (tmp & 0x7f) << 21;
-							result |= (tmp = buf[pos++]) << 28;
+				result = buf[pos] & 0x7f
+						| buf[pos + 1] << 7
+						| buf[pos + 2] << 14
+						| buf[pos + 3] << 21
+						| buf[pos + 4] << 28;
+				pos += 5;
 
-							if (tmp < 0) {
-								int i = 0;
-								// Discard upper 32 bits.
-								while (i++ < 5) {
-									if (buf[pos++] >= 0)
-										break;
-								}
+				Log.d(TAG, "5 Stuffs too large " + mTile);
 
-								if (i == 5)
-									// FIXME throw some poo
-									Log.d(TAG, "EEK malformedVarint");
-							}
-						}
+				if (buf[pos + 4] < 0) {
+					Log.d(TAG, "Stuffs too large ...");
+					int i = 0;
+					while (i++ < 5) {
+						if (buf[pos++] >= 0)
+							break;
 					}
+					if (i == 5)
+						throw new IOException("EEEK malformed varInt");
 				}
 			}
-			coords[cnt++] = (result >>> 1) ^ -(result & 1);
+			if (even) {
+				x = ((result >>> 1) ^ -(result & 1));
+				lastX = lastX + x;
+				coords[cnt++] = lastX / scale;
+				even = false;
+			} else {
+				y = ((result >>> 1) ^ -(result & 1));
+				lastY = lastY + y;
+				coords[cnt++] = lastY / scale;
+				even = true;
+			}
 		}
 
 		bufferPos = pos;
 		bytesRead += bytes;
 
-		// while (bytesRead < end) {
-		// int val = decodeZigZag32(decodeVarint32());
-		// if (cnt >= MAX_WAY_COORDS) {
-		// MAX_WAY_COORDS += 128;
-		// Log.d(TAG, "increase coords array  " + MAX_WAY_COORDS);
-		// float[] tmp = new float[MAX_WAY_COORDS];
-		// System.arraycopy(tmpCoords, 0, tmp, 0, cnt);
-		// tmpCoords = tmp;
-		// }
-		// tmpCoords[cnt++] = val;
-		// }
 		return cnt;
 	}
 
@@ -589,9 +638,6 @@ public class MapDatabase implements IMapDatabase {
 		}
 		bufferSize = len;
 		bufferPos = 0;
-
-		// Log.d(TAG, "pos " + bufferPos + ", size " + bufferSize + ", read "
-		// + bytesRead);
 	}
 
 	private void readBuffer(int size) throws IOException {
@@ -612,6 +658,10 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		while ((bufferSize - bufferPos) < size) {
+			if (mTile.isCanceled) {
+				throw new IOException("canceled " + mTile);
+			}
+
 			// read until requested size is available in buffer
 			int len = inputStream.read(buffer, bufferSize, BUFFER_SIZE - bufferSize);
 			if (len < 0) {
@@ -621,13 +671,6 @@ public class MapDatabase implements IMapDatabase {
 
 			bufferSize += len;
 
-			// if (len == 0)
-			// try {
-			// wait(50);
-			// } catch (InterruptedException e) {
-			// // just waiting for data
-			// }
-
 			if (mCanceled)
 				throw new IOException("... canceld?");
 		}
@@ -635,6 +678,17 @@ public class MapDatabase implements IMapDatabase {
 		// Log.d(TAG, "needed " + size + " pos " + bufferPos + ", size "
 		// + bufferSize
 		// + ", read " + bytesRead);
+	}
+
+	private boolean mCanceled;
+
+	@Override
+	public void cancel() {
+		mCanceled = true;
+		if (mRequest != null) {
+			mRequest.abort();
+			mRequest = null;
+		}
 	}
 
 	/* All code below is taken from or based on Google's Protocol Buffers implementation: */
@@ -725,19 +779,6 @@ public class MapDatabase implements IMapDatabase {
 
 	public static int decodeZigZag32(final int n) {
 		return (n >>> 1) ^ -(n & 1);
-	}
-
-	private boolean mCanceled;
-
-	@Override
-	public void cancel() {
-		mCanceled = true;
-		if (mRequest != null) {
-			mRequest.abort();
-			mRequest = null;
-		}
-		// mClient.getConnectionManager().shutdown();
-		// mClient = null;
 	}
 
 }

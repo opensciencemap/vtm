@@ -46,14 +46,14 @@ public class JobQueue {
 	 * @param mapGeneratorJob
 	 *            the job to be added to this queue.
 	 */
-	public synchronized void addJob(MapGeneratorJob mapGeneratorJob) {
-		if (!mPriorityQueue.contains(mapGeneratorJob))
-		// priorityQueue.remove(mapGeneratorJob);
-		{
-			mapGeneratorJob.tile.isLoading = true;
-			mPriorityQueue.offer(mapGeneratorJob);
-		}
-	}
+	// public synchronized void addJob(MapGeneratorJob mapGeneratorJob) {
+	// if (!mPriorityQueue.contains(mapGeneratorJob))
+	// // priorityQueue.remove(mapGeneratorJob);
+	// {
+	// //mapGeneratorJob.tile.isLoading = true;
+	// mPriorityQueue.offer(mapGeneratorJob);
+	// }
+	// }
 
 	/**
 	 * @param jobs

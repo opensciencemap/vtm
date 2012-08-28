@@ -24,6 +24,7 @@ import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
 import org.mapsforge.android.rendertheme.renderinstruction.Caption;
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
+import org.mapsforge.android.rendertheme.renderinstruction.PathText;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
 import org.mapsforge.database.IMapDatabase;
@@ -414,24 +415,24 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	private List<ShapeContainer> mCurLevelContainer2;
 
 	@Override
-	public void renderWay(Line line) {
-		List<ShapeContainer> c = mDrawingLayer.add(line.level, mWayDataContainer,
-				line.paint);
-
-		if (mCurLevelContainer1 == null)
-			mCurLevelContainer1 = c;
-		else if (mCurLevelContainer2 == null)
-			mCurLevelContainer2 = c;
+	public void renderWay(Line line, int level) {
+		// List<ShapeContainer> c = mDrawingLayer.add(level, mWayDataContainer,
+		// line.paint);
+		//
+		// if (mCurLevelContainer1 == null)
+		// mCurLevelContainer1 = c;
+		// else if (mCurLevelContainer2 == null)
+		// mCurLevelContainer2 = c;
 	}
 
 	@Override
-	public void renderArea(Area area) {
-		if (area.paintFill != null)
-			mCurLevelContainer1 = mDrawingLayer.add(area.level, mWayDataContainer,
-					area.paintFill);
-		if (area.paintOutline != null)
-			mCurLevelContainer1 = mDrawingLayer.add(area.level, mWayDataContainer,
-					area.paintOutline);
+	public void renderArea(Area area, int level) {
+		// if (area.paintFill != null)
+		// mCurLevelContainer1 = mDrawingLayer.add(level, mWayDataContainer,
+		// area.paintFill);
+		// if (area.paintOutline != null)
+		// mCurLevelContainer1 = mDrawingLayer.add(level, mWayDataContainer,
+		// area.paintOutline);
 	}
 
 	@Override
@@ -443,7 +444,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	}
 
 	@Override
-	public void renderWayText(String textKey, Paint paint, Paint outline) {
+	public void renderWayText(PathText pathText) {
 		// if (mWayDataContainer.textPos[0] >= 0)
 		// WayDecorator.renderText(this, paint, outline, mCoords, mWayDataContainer, mWayNames);
 	}

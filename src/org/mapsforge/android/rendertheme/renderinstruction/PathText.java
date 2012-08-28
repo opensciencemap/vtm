@@ -24,13 +24,15 @@ import org.xml.sax.Attributes;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
+import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Typeface;
+import android.util.FloatMath;
 
 /**
  * Represents a text along a polyline on the map.
  */
-public final class PathText implements RenderInstruction {
+public final class PathText extends RenderInstruction {
 	/**
 	 * @param elementName
 	 *            the name of the XML element.
@@ -46,12 +48,14 @@ public final class PathText implements RenderInstruction {
 		int fill = Color.BLACK;
 		int stroke = Color.BLACK;
 		float strokeWidth = 0;
+		String style = null;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
-
-			if ("k".equals(name)) {
+			if ("name".equals(name))
+				style = value;
+			else if ("k".equals(name)) {
 				textKey = TextKey.getInstance(value);
 			} else if ("font-family".equals(name)) {
 				fontFamily = FontFamily.valueOf(value.toUpperCase(Locale.ENGLISH));
@@ -72,67 +76,69 @@ public final class PathText implements RenderInstruction {
 
 		validate(elementName, textKey, fontSize, strokeWidth);
 		Typeface typeface = Typeface.create(fontFamily.toTypeface(), fontStyle.toInt());
-		return new PathText(textKey, typeface, fontSize, fill, stroke, strokeWidth);
+		return new PathText(style, textKey, typeface, fontSize, fill, stroke, strokeWidth);
 	}
 
-	private static void validate(String elementName, String textKey, float fontSize, float strokeWidth) {
+	private static void validate(String elementName, String textKey, float fontSize,
+			float strokeWidth) {
 		if (textKey == null) {
-			throw new IllegalArgumentException("missing attribute k for element: " + elementName);
+			throw new IllegalArgumentException("missing attribute k for element: "
+					+ elementName);
 		} else if (fontSize < 0) {
-			throw new IllegalArgumentException("font-size must not be negative: " + fontSize);
+			throw new IllegalArgumentException("font-size must not be negative: "
+					+ fontSize);
 		} else if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: " + strokeWidth);
+			throw new IllegalArgumentException("stroke-width must not be negative: "
+					+ strokeWidth);
 		}
 	}
 
-	private final float mFontSize;
-	private final Paint mPaint;
-	private final Paint mStroke;
-	private final String mTextKey;
+	public final float fontSize;
+	public final Paint paint;
+	public Paint stroke;
+	public String textKey;
+	public final float fontHeight;
+	public final float fontDescent;
+	public String style;
 
-	private PathText(String textKey, Typeface typeface, float fontSize, int fill, int stroke, float strokeWidth) {
+	private PathText(String style, String textKey, Typeface typeface, float fontSize,
+			int fill, int outline, float strokeWidth) {
 		super();
 
-		mTextKey = textKey;
+		this.style = style;
 
-		mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mPaint.setTextAlign(Align.CENTER);
-		mPaint.setTypeface(typeface);
-		mPaint.setColor(fill);
+		this.textKey = textKey;
 
-		mStroke = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mStroke.setStyle(Style.STROKE);
-		mStroke.setTextAlign(Align.CENTER);
-		mStroke.setTypeface(typeface);
-		mStroke.setColor(stroke);
-		mStroke.setStrokeWidth(strokeWidth);
+		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		paint.setTextAlign(Align.CENTER);
+		paint.setTypeface(typeface);
+		paint.setColor(fill);
 
-		mFontSize = fontSize;
-	}
+		stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+		stroke.setStyle(Style.STROKE);
+		stroke.setTextAlign(Align.CENTER);
+		stroke.setTypeface(typeface);
+		stroke.setColor(outline);
+		stroke.setStrokeWidth(strokeWidth);
 
-	@Override
-	public void destroy() {
-		// do nothing
-	}
+		this.fontSize = fontSize;
 
-	@Override
-	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
-		// do nothing
+		paint.setTextSize(fontSize);
+		stroke.setTextSize(fontSize);
+
+		FontMetrics fm = paint.getFontMetrics();
+		fontHeight = FloatMath.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
+		fontDescent = FloatMath.ceil(Math.abs(fm.descent));
 	}
 
 	@Override
 	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
-		renderCallback.renderWayText(mTextKey, mPaint, mStroke);
-	}
-
-	@Override
-	public void scaleStrokeWidth(float scaleFactor) {
-		// do nothing
+		renderCallback.renderWayText(this);
 	}
 
 	@Override
 	public void scaleTextSize(float scaleFactor) {
-		mPaint.setTextSize(mFontSize * scaleFactor);
-		mStroke.setTextSize(mFontSize * scaleFactor);
+		paint.setTextSize(fontSize * scaleFactor);
+		stroke.setTextSize(fontSize * scaleFactor);
 	}
 }

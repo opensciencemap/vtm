@@ -45,14 +45,14 @@ import android.util.Log;
 public class MapDatabase implements IMapDatabase {
 	private final static String TAG = "MapDatabase";
 
-	private static final String QUERY = "SELECT tags, geom FROM __get_tile(?,?,?)";
+	private static final String QUERY = "SELECT tags, geom FROM __get_tile(?,?,?,false)";
 
-	private final float mScale = 1; // 1000000.0f;
+	private final float mScale = 1;
 
 	private int mCoordPos = 0;
 	private int mIndexPos = 0;
-	private float[] mCoords = new float[100000];
-	private short[] mIndex = new short[10000];
+	private float[] mCoords;
+	private short[] mIndex;
 
 	private Tag[] mTags;
 
@@ -71,7 +71,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private boolean connect() {
 		Connection conn = null;
-		String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/gis-2.0";
+		String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/gis";
 
 		Properties dbOpts = new Properties();
 		dbOpts.setProperty("user", "osm");
@@ -212,6 +212,10 @@ public class MapDatabase implements IMapDatabase {
 	@Override
 	public FileOpenResult openFile(File mapFile) {
 		mOpenFile = true;
+		if (mCoords == null) {
+			mCoords = new float[100000];
+			mIndex = new short[100000];
+		}
 		return new FileOpenResult();
 	}
 
@@ -226,6 +230,8 @@ public class MapDatabase implements IMapDatabase {
 				connection = null;
 			}
 		}
+		mCoords = null;
+		mIndex = null;
 		mOpenFile = false;
 	}
 

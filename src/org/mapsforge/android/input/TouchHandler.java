@@ -19,14 +19,12 @@ import org.mapsforge.core.Tile;
 
 import android.content.Context;
 import android.os.CountDownTimer;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ViewConfiguration;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
 
 /**
@@ -220,27 +218,15 @@ public class TouchHandler {
 		}
 
 		// if (ret) {
-		// Log.d("", "" + );
-		//
-		// // try {
-		// //
-		// // Thread.sleep(10);
-		// // } catch (InterruptedException e) {
-		// // // TODO Auto-generated catch block
-		// // // e.printStackTrace();
-		// // }
-		//
+		// // throttle input
+		// long diff = SystemClock.uptimeMillis() - lastRun;
+		// if (diff < 16 && diff > 5) {
+		// // Log.d("", "" + diff);
+		// SystemClock.sleep(16 - diff);
 		// }
-		if (ret) {
-			// throttle input
-			long diff = SystemClock.uptimeMillis() - lastRun;
-			if (diff < 16) {
-				// Log.d("", "" + diff);
-				SystemClock.sleep(16 - diff);
-			}
-			lastRun = SystemClock.uptimeMillis();
-		}
-		// the event was not handled
+		// lastRun = SystemClock.uptimeMillis();
+		// }
+
 		return ret;
 	}
 
@@ -250,7 +236,8 @@ public class TouchHandler {
 		private CountDownTimer mTimer = null;
 
 		public MapGestureDetector(MapView mapView) {
-			mScroller = new Scroller(mapView.getContext(), new DecelerateInterpolator());
+			mScroller = new Scroller(mapView.getContext(),
+					new android.view.animation.LinearInterpolator());
 		}
 
 		@Override
@@ -284,8 +271,8 @@ public class TouchHandler {
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 				float velocityY) {
-			int w = Tile.TILE_SIZE * 20;
-			int h = Tile.TILE_SIZE * 20;
+			int w = Tile.TILE_SIZE * 10;
+			int h = Tile.TILE_SIZE * 10;
 			mPrevX = 0;
 			mPrevY = 0;
 
@@ -297,7 +284,7 @@ public class TouchHandler {
 			mScroller.fling(0, 0, Math.round(velocityX) / 2, Math.round(velocityY) / 2,
 					-w, w, -h, h);
 			// animate for two seconds
-			mTimer = new CountDownTimer(2000, 20) {
+			mTimer = new CountDownTimer(2000, 40) {
 				@Override
 				public void onTick(long tick) {
 					if (!scroll())

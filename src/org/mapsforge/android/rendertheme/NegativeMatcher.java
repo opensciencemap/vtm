@@ -21,8 +21,9 @@ import org.mapsforge.core.Tag;
 class NegativeMatcher implements AttributeMatcher {
 	private final String[] mKeyList;
 	private final String[] mValueList;
+	private final boolean mExclusive;
 
-	NegativeMatcher(List<String> keyList, List<String> valueList) {
+	NegativeMatcher(List<String> keyList, List<String> valueList, boolean exclusive) {
 		mKeyList = new String[keyList.size()];
 		for (int i = 0; i < mKeyList.length; i++)
 			mKeyList[i] = keyList.get(i).intern();
@@ -30,6 +31,8 @@ class NegativeMatcher implements AttributeMatcher {
 		mValueList = new String[valueList.size()];
 		for (int i = 0; i < mValueList.length; i++)
 			mValueList[i] = valueList.get(i).intern();
+
+		mExclusive = exclusive;
 	}
 
 	@Override
@@ -46,9 +49,9 @@ class NegativeMatcher implements AttributeMatcher {
 		for (Tag tag : tags) {
 			for (String value : mValueList)
 				if (value == tag.value)
-					return true;
+					return !mExclusive;
 		}
-		return false;
+		return mExclusive;
 	}
 
 	private boolean keyListDoesNotContainKeys(Tag[] tags) {

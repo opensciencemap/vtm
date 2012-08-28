@@ -15,38 +15,35 @@
 package org.mapsforge.android.glrenderer;
 
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
+import org.mapsforge.core.Tile;
 
+import android.graphics.Paint.Cap;
 import android.util.FloatMath;
 
 class LineLayer {
 
-	private static final float SCALE_FACTOR = 16;
-
-	Line line;
+	private static final float S = MapRenderer.COORD_MULTIPLIER;
+	private static final float S1000 = 1000;
 
 	LineLayer next;
 	LineLayer outlines;
 
+	Line line;
 	float width;
 	boolean isOutline;
+	int layer;
 
 	ShortItem pool;
 	protected ShortItem curItem;
 	int verticesCnt;
 	int offset;
+	short[] mVertex;
 
-	final int layer;
-
-	LineLayer(int layer, Line line, boolean outline) {
+	LineLayer(int layer, Line line, float width, boolean outline) {
 		this.layer = layer;
-
+		this.width = width;
 		this.line = line;
 		this.isOutline = outline;
-
-		if (!outline) {
-			curItem = ShortPool.get();
-			pool = curItem;
-		}
 	}
 
 	void addOutline(LineLayer link) {
@@ -58,45 +55,82 @@ class LineLayer {
 		outlines = link;
 	}
 
-	short[] getNextItem() {
-		curItem.used = ShortItem.SIZE;
+	private static ShortItem addTwoVertex(short[] vertex, ShortItem item) {
+		ShortItem it = item;
 
-		curItem.next = ShortPool.get();
-		curItem = curItem.next;
+		if (it.used + 6 >= ShortItem.SIZE) {
 
-		return curItem.vertices;
+			if (it.used == ShortItem.SIZE) {
+				it.next = ShortPool.get();
+				it = it.next;
+
+			} else {
+				System.arraycopy(vertex, 0, it.vertices, it.used, 6);
+				it.used += 6;
+
+				it.next = ShortPool.get();
+				it = it.next;
+
+				System.arraycopy(vertex, 6, it.vertices, it.used, 6);
+				it.used += 6;
+
+				return it;
+			}
+		}
+
+		System.arraycopy(vertex, 0, it.vertices, it.used, 12);
+		it.used += 12;
+
+		return it;
+	}
+
+	private static ShortItem addVertex(short[] vertex, ShortItem item) {
+		ShortItem it = item;
+
+		if (it.used == ShortItem.SIZE) {
+			it.next = ShortPool.get();
+			it = it.next;
+		}
+
+		System.arraycopy(vertex, 0, it.vertices, it.used, 6);
+		it.used += 6;
+
+		return it;
 	}
 
 	/*
-	 * line extrusion is based on code from GLMap (https://github.com/olofsj/GLMap/) by olofsj
+	 * line extrusion is based on code from GLMap (https://github.com/olofsj/GLMap/) by olofsj -- need some way to know
+	 * how the road connects to set the ending angles
 	 */
-	void addLine(float[] pointArray, int pos, int length, float w, boolean capRound) {
+	void addLine(float[] pointArray, int pos, int length) {
 		float x, y, nextX, nextY, prevX, prevY, ux, uy, vx, vy, wx, wy;
 		float a;
 		int pointPos = pos;
-		boolean rounded = capRound;
-		width = w;// * SCALE_FACTOR;
-		if (w < 0.5)
-			rounded = false;
+		boolean rounded = false;
+		boolean squared = false;
+
+		if (line.cap == Cap.ROUND)
+			rounded = true;
+		else if (line.cap == Cap.SQUARE)
+			squared = true;
+
+		if (pool == null) {
+			curItem = ShortPool.get();
+			pool = curItem;
+
+			mVertex = new short[12];
+		}
 
 		// amount of vertices used
 		verticesCnt += length + (rounded ? 6 : 2);
 
-		int MAX = PoolItem.SIZE;
+		ShortItem si = curItem;
 
-		short[] curVertices = curItem.vertices;
-		int vertexPos = curItem.used;
+		x = pointArray[pointPos++];
+		y = pointArray[pointPos++];
 
-		if (vertexPos == MAX) {
-			curVertices = getNextItem();
-			vertexPos = 0;
-		}
-
-		x = pointArray[pointPos++];// * SCALE_FACTOR;
-		y = pointArray[pointPos++];// * SCALE_FACTOR;
-
-		nextX = pointArray[pointPos++];// * SCALE_FACTOR;
-		nextY = pointArray[pointPos++];// * SCALE_FACTOR;
+		nextX = pointArray[pointPos++];
+		nextY = pointArray[pointPos++];
 
 		// Calculate triangle corners for the given width
 		vx = nextX - x;
@@ -110,109 +144,83 @@ class LineLayer {
 		ux = -vy;
 		uy = vx;
 
-		float uxw = ux * w;
-		float uyw = uy * w;
+		float uxw = ux;
+		float uyw = uy;
 
-		float vxw = vx * w;
-		float vyw = vy * w;
+		float vxw = vx;
+		float vyw = vy;
+		int tsize = Tile.TILE_SIZE;
 
-		// boolean outside = (x <= 0 || x >= Tile.TILE_SIZE || y <= 0 || y >= Tile.TILE_SIZE)
-		// && (x - vxw <= 0 || x - vxw >= Tile.TILE_SIZE || y - vyw <= 0 || y - vyw >= Tile.TILE_SIZE);
+		short v[] = mVertex;
 
-		boolean outside = false;
+		v[0] = (short) (x * S);
+		v[1] = (short) (y * S);
+
+		boolean outside = (x <= 0 || x >= tsize || y <= 0 || y >= tsize)
+				&& (x - vxw <= 0 || x - vxw >= tsize || y - vyw <= 0 || y - vyw >= tsize);
+
 		if (rounded && !outside) {
+			v[2] = (short) ((uxw - vxw) * S1000);
+			v[3] = (short) ((uyw - vyw) * S1000);
+			v[4] = -1;
+			v[5] = 1;
+			si = addVertex(v, si);
+			si = addVertex(v, si);
 
-			// Add the first point twice to be able to draw with GL_TRIANGLE_STRIP
-
-			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = -1;
-			curVertices[vertexPos++] = 1;
-
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = -1;
-			curVertices[vertexPos++] = 1;
-
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = 1;
-			curVertices[vertexPos++] = 1;
-
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
+			v[2] = (short) (-(uxw + vxw) * S1000);
+			v[3] = (short) (-(uyw + vyw) * S1000);
+			v[4] = 1;
+			v[5] = 1;
+			si = addVertex(v, si);
 
 			// Start of line
-			curVertices[vertexPos++] = (short) ((x + uxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y + uyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = -1;
-			curVertices[vertexPos++] = 0;
+			v[2] = (short) ((uxw) * S1000);
+			v[3] = (short) ((uyw) * S1000);
+			v[4] = -1;
+			v[5] = 0;
+			si = addVertex(v, si);
 
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			curVertices[vertexPos++] = (short) ((x - uxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y - uyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = 1;
-			curVertices[vertexPos++] = 0;
+			v[2] = (short) ((-uxw) * S1000);
+			v[3] = (short) ((-uyw) * S1000);
+			v[4] = 1;
+			v[5] = 0;
+			si = addVertex(v, si);
 
 		} else {
 			// outside means line is probably clipped
 			// TODO should align ending with tile boundary
 			// for now, just extend the line a little
-			if (!outside) {
+
+			if (squared) {
+				vxw = 0;
+				vyw = 0;
+			} else if (!outside) {
 				vxw *= 0.5;
 				vyw *= 0.5;
 			}
-			if (rounded) {
+
+			if (rounded)
 				verticesCnt -= 2;
-			}
+
 			// Add the first point twice to be able to draw with GL_TRIANGLE_STRIP
-			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = -1;
-			curVertices[vertexPos++] = 0;
+			v[2] = (short) ((uxw - vxw) * S1000);
+			v[3] = (short) ((uyw - vyw) * S1000);
+			v[4] = -1;
+			v[5] = 0;
+			si = addVertex(v, si);
+			si = addVertex(v, si);
 
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = -1;
-			curVertices[vertexPos++] = 0;
-
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = 1;
-			curVertices[vertexPos++] = 0;
+			v[2] = (short) (-(uxw + vxw) * S1000);
+			v[3] = (short) (-(uyw + vyw) * S1000);
+			v[4] = 1;
+			v[5] = 0;
+			si = addVertex(v, si);
 		}
 
 		prevX = x;
 		prevY = y;
 		x = nextX;
 		y = nextY;
-		// boolean flipped = false;
 
 		for (; pointPos < pos + length;) {
 			nextX = pointArray[pointPos++];
@@ -235,58 +243,40 @@ class LineLayer {
 			// Sum of these two vectors points
 			ux = vx + wx;
 			uy = vy + wy;
+
 			a = -wy * ux + wx * uy;
 
-			if ((a < 0.1 && a > -0.1)) {
-				// Almost straight, use normal vector
+			// boolean split = false;
+			if (a < 0.1f && a > -0.1f) {
+				// Almost straight or miter goes to infinity, use normal vector
 				ux = -wy;
 				uy = wx;
 			} else {
 				ux = (ux / a);
 				uy = (uy / a);
 
-				if (ux > 2 || uy > 2 || ux < -2 || uy < -2) {
+				if (ux > 2.0f || ux < -2.0f || uy > 2.0f || uy < -2.0f) {
 					ux = -wy;
 					uy = wx;
-
-					// ux = vx + wx;
-					// uy = vy + wy;
-					// // Normalize u, and project normal vector onto this
-					// double c = Math.sqrt(ux * ux + uy * uy);
-					// if (a < 0) {
-					// ux = (float) -(ux / c);
-					// uy = (float) -(uy / c);
-					// }
-					// else {
-					// ux = (float) (ux / c);
-					// uy = (float) (uy / c);
-					// }
-					// flipped = flipped ? false : true;
 				}
 			}
 
-			uxw = ux * w;
-			uyw = uy * w;
+			uxw = ux * S1000;
+			uyw = uy * S1000;
 
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
+			v[6] = v[0] = (short) (x * S);
+			v[7] = v[1] = (short) (y * S);
 
-			curVertices[vertexPos++] = (short) ((x + uxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y + uyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = -1;
-			curVertices[vertexPos++] = 0;
+			v[2] = (short) uxw;
+			v[3] = (short) uyw;
+			v[4] = -1;
+			v[5] = 0;
 
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			curVertices[vertexPos++] = (short) ((x - uxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y - uyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = 1;
-			curVertices[vertexPos++] = 0;
+			v[8] = (short) -uxw;
+			v[9] = (short) -uyw;
+			v[10] = 1;
+			v[11] = 0;
+			si = addTwoVertex(v, si);
 
 			prevX = x;
 			prevY = y;
@@ -305,105 +295,71 @@ class LineLayer {
 		ux = vy;
 		uy = -vx;
 
-		uxw = ux * w;
-		uyw = uy * w;
+		uxw = ux;
+		uyw = uy;
 
-		vxw = vx * w;
-		vyw = vy * w;
+		vxw = vx;
+		vyw = vy;
 
-		// outside = (x <= 0 || x >= Tile.TILE_SIZE || y <= 0 || y >= Tile.TILE_SIZE)
-		// && (x - vxw <= 0 || x - vxw >= Tile.TILE_SIZE || y - vyw <= 0 || y - vyw >= Tile.TILE_SIZE);
+		outside = (x <= 0 || x >= tsize || y <= 0 || y >= tsize)
+				&& (x - vxw <= 0 || x - vxw >= tsize || y - vyw <= 0 || y - vyw >= tsize);
 
-		if (vertexPos == MAX) {
-			curVertices = getNextItem();
-			vertexPos = 0;
-		}
+		v[0] = (short) (x * S);
+		v[1] = (short) (y * S);
 
 		if (rounded && !outside) {
-			curVertices[vertexPos++] = (short) ((x + uxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y + uyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = -1;
-			curVertices[vertexPos++] = 0;
+			v[2] = (short) ((uxw) * S1000);
+			v[3] = (short) ((uyw) * S1000);
+			v[4] = -1;
+			v[5] = 0;
+			si = addVertex(v, si);
 
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			curVertices[vertexPos++] = (short) ((x - uxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y - uyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = 1;
-			curVertices[vertexPos++] = 0;
-
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
+			v[2] = (short) ((-uxw) * S1000);
+			v[3] = (short) ((-uyw) * S1000);
+			v[4] = 1;
+			v[5] = 0;
+			si = addVertex(v, si);
 
 			// For rounded line edges
-			curVertices[vertexPos++] = (short) ((x + uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y + uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = -1;
-			curVertices[vertexPos++] = -1;
+			v[2] = (short) ((uxw - vxw) * S1000);
+			v[3] = (short) ((uyw - vyw) * S1000);
+			v[4] = -1;
+			v[5] = -1;
+			si = addVertex(v, si);
 
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			// Add the last vertex twice to be able to draw with GL_TRIANGLE_STRIP
-			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = 1;
-			curVertices[vertexPos++] = -1;
-
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = 1;
-			curVertices[vertexPos++] = -1;
+			v[2] = (short) (-(uxw + vxw) * S1000);
+			v[3] = (short) (-(uyw + vyw) * S1000);
+			v[4] = 1;
+			v[5] = -1;
+			si = addVertex(v, si);
+			si = addVertex(v, si);
 
 		} else {
-			if (!outside) {
+			if (squared) {
+				vxw = 0;
+				vyw = 0;
+			} else if (!outside) {
 				vxw *= 0.5;
 				vyw *= 0.5;
 			}
-			if (rounded) {
+
+			if (rounded)
 				verticesCnt -= 2;
-			}
 
-			curVertices[vertexPos++] = (short) ((x + uxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y + uyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = -1;
-			curVertices[vertexPos++] = 0;
+			v[2] = (short) ((uxw) * S1000);
+			v[3] = (short) ((uyw) * S1000);
+			v[4] = -1;
+			v[5] = 0;
+			si = addVertex(v, si);
 
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			// Add the last vertex twice to be able to draw with GL_TRIANGLE_STRIP
-			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = 1;
-			curVertices[vertexPos++] = 0;
-
-			if (vertexPos == MAX) {
-				curVertices = getNextItem();
-				vertexPos = 0;
-			}
-
-			curVertices[vertexPos++] = (short) ((x - uxw - vxw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = (short) ((y - uyw - vyw) * SCALE_FACTOR);
-			curVertices[vertexPos++] = 1;
-			curVertices[vertexPos++] = 0;
-
+			v[2] = (short) (-(uxw + vxw) * S1000);
+			v[3] = (short) (-(uyw + vyw) * S1000);
+			v[4] = 1;
+			v[5] = 0;
+			si = addVertex(v, si);
+			si = addVertex(v, si);
 		}
 
-		curItem.used = vertexPos;
+		curItem = si;
 	}
 }
