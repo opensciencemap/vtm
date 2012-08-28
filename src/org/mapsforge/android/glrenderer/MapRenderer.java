@@ -208,7 +208,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			if (diff == 0) {
 				dx = (t.pixelX + h) - x;
 				dy = (t.pixelY + h) - y;
-				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.5f;
+				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
 				// t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
 			} else if (diff > 0) {
 				// tile zoom level is child of current
@@ -225,7 +225,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				dy = ((t.pixelY + h) << -diff) - y;
 
 				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy))
-						* (-diff * 0.25f);
+						* (-diff * 0.5f);
 				// t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
 			}
 
@@ -493,11 +493,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			mUpdateTiles = true;
 		}
 
-		int active = 0;
 		// see FIXME in passTile
-		synchronized (mTiles) {
-			active = updateTileDistances();
-		}
+		// synchronized (mTiles) {
+		updateTileDistances();
+		// }
 
 		if (mJobList.size() > 0)
 			mMapView.addJobs(mJobList);
@@ -505,9 +504,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		int removes = mTiles.size() - CACHE_TILES;
 
 		if (removes > 20) {
-
-			Log.d(TAG, "---- remove " + removes + " on " + zoomLevel + " active:"
-					+ active + "------");
+			// Log.d(TAG, "---- remove " + removes + " on " + zoomLevel + " active:"
+			// + active + "------");
 			Collections.sort(mTileList, mTileDistanceSort);
 			limitCache(removes);
 		}
@@ -611,8 +609,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mTileY = tileY;
 		mLastZoom = zoomLevel;
 
-		if (zdir > 0)
-			Log.d(TAG, "prefetch parent");
+		// if (zdir > 0)
+		// Log.d(TAG, "prefetch parent");
 
 		if (changedZoom) {
 			// need to update visible list first when zoom level changes
@@ -651,9 +649,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			return true;
 		}
 
-		if (!timing && tile.isVisible)
-			mMapView.requestRender();
-
 		int size = mTilesLoaded.size();
 		if (size > MAX_TILES_IN_QUEUE) {
 			// remove uploaded tiles
@@ -670,33 +665,37 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 			if (size > MAX_TILES_IN_QUEUE) {
 				// FIXME pass tile via queue back to mainloop instead...
-				synchronized (mTiles) {
-					Collections.sort(mTilesLoaded, mTileDistanceSort);
-				}
+				// synchronized (mTiles) {
+				// Collections.sort(mTilesLoaded, mTileDistanceSort);
+				// }
 				// clear loaded but not used tiles
 				while (size-- > MAX_TILES_IN_QUEUE) {
 					GLMapTile t = mTilesLoaded.get(size);
 					// FIXME race condition: tile could be uploaded as proxy
 					// therefore sync with upload tile data
-					synchronized (t) {
-
-						// dont remove tile if currently used or is direct parent
-						// or child of currently active tile
-						if (t.isActive || childIsActive(t))
-						// (t.parent != null && t.parent.isActive))
-						{
-							// Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
-							continue;
-						}
-						mTilesLoaded.remove(size);
-						// Log.d(TAG, "remove unused tile data: " + t);
-						clearTile(t);
-						// TODO could also remove from mTileHash/List ?
+					// synchronized (t) {
+					// dont remove tile if currently used or is direct parent
+					// or child of currently active tile
+					if (t.isActive || childIsActive(t) ||
+							(tile.parent != null && tile.parent.isActive)) {
+						// Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
+						continue;
 					}
+					mTilesLoaded.remove(size);
+					// Log.d(TAG, "remove unused tile data: " + t);
+					clearTile(t);
+					// TODO could also remove from mTileHash/List ?
+					// }
 				}
 			}
 		}
+		tile.newData = true;
+		tile.isLoading = false;
+
 		mTilesLoaded.add(0, tile);
+
+		if (!timing)
+			mMapView.requestRender();
 
 		return true;
 	}
@@ -767,13 +766,13 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			}
 		}
 
-		synchronized (tile) {
-			if (!tile.newData)
-				return false;
+		// synchronized (tile) {
+		if (!tile.newData)
+			return false;
 
-			tile.isReady = true;
-			tile.newData = false;
-		}
+		tile.isReady = true;
+		tile.newData = false;
+		// }
 
 		int lineSize = LineLayers.sizeOf(tile.lineLayers);
 		int polySize = PolygonLayers.sizeOf(tile.polygonLayers);
