@@ -496,6 +496,7 @@ public class MapView extends GLSurfaceView {
 	 * 
 	 * @param internalRenderTheme
 	 *            the internal rendering theme.
+	 * @return ...
 	 * @throws IllegalArgumentException
 	 *             if the supplied internalRenderTheme is null.
 	 */
@@ -538,6 +539,7 @@ public class MapView extends GLSurfaceView {
 		try {
 			inputStream = theme.getRenderThemeAsStream();
 			RenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
+			mMapRenderer.setRenderTheme(t);
 			mMapWorkers[0].getMapGenerator().setRenderTheme(t);
 			return true;
 		} catch (ParserConfigurationException e) {

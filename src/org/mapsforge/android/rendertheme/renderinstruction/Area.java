@@ -14,23 +14,17 @@
  */
 package org.mapsforge.android.rendertheme.renderinstruction;
 
-import java.io.IOException;
-
 import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderThemeHandler;
 import org.mapsforge.core.Tag;
 import org.xml.sax.Attributes;
 
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Cap;
-import android.graphics.Paint.Style;
-import android.graphics.Shader;
 
 /**
  * Represents a closed polygon on the map.
  */
-public final class Area implements RenderInstruction {
+public final class Area extends RenderInstruction {
 	/**
 	 * @param elementName
 	 *            the name of the XML element.
@@ -39,11 +33,8 @@ public final class Area implements RenderInstruction {
 	 * @param level
 	 *            the drawing level of this instruction.
 	 * @return a new Area with the given rendering attributes.
-	 * @throws IOException
-	 *             if an I/O error occurs while reading a resource.
 	 */
-	public static Area create(String elementName, Attributes attributes, int level)
-			throws IOException {
+	public static Area create(String elementName, Attributes attributes, int level) {
 		String src = null;
 		int fill = Color.BLACK;
 		int stroke = Color.TRANSPARENT;
@@ -51,12 +42,14 @@ public final class Area implements RenderInstruction {
 		int fade = -1;
 		int blend = -1;
 		int blendFill = Color.BLACK;
+		String style = null;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
-
-			if ("src".equals(name)) {
+			if ("name".equals(name))
+				style = value;
+			else if ("src".equals(name)) {
 				src = value;
 			} else if ("fill".equals(name)) {
 				fill = Color.parseColor(value);
@@ -76,7 +69,8 @@ public final class Area implements RenderInstruction {
 		}
 
 		validate(strokeWidth);
-		return new Area(src, fill, stroke, strokeWidth, fade, level, blend, blendFill);
+		return new Area(style, src, fill, stroke, strokeWidth, fade, level, blend,
+				blendFill);
 	}
 
 	private static void validate(float strokeWidth) {
@@ -86,32 +80,38 @@ public final class Area implements RenderInstruction {
 		}
 	}
 
-	private Area(String src, int fill, int stroke, float strokeWidth, int fade,
-			int level, int blend, int blendFill)
-			throws IOException {
+	private Area(String style, String src, int fill, int stroke, float strokeWidth,
+			int fade, int level, int blend, int blendFill) {
 		super();
+		this.style = style;
 
-		if (fill == Color.TRANSPARENT) {
-			paintFill = null;
-		} else {
-			paintFill = new Paint(Paint.ANTI_ALIAS_FLAG);
-			if (src != null) {
-				Shader shader = BitmapUtils.createBitmapShader(src);
-				paintFill.setShader(shader);
-			}
-			paintFill.setStyle(Style.FILL);
-			paintFill.setColor(fill);
-			paintFill.setStrokeCap(Cap.ROUND);
-		}
+		// if (fill == Color.TRANSPARENT) {
+		// paintFill = null;
+		// } else {
+		// paintFill = new Paint(Paint.ANTI_ALIAS_FLAG);
+		// if (src != null) {
+		// Shader shader = BitmapUtils.createBitmapShader(src);
+		// paintFill.setShader(shader);
+		// }
+		// paintFill.setStyle(Style.FILL);
+		// paintFill.setColor(fill);
+		// paintFill.setStrokeCap(Cap.ROUND);
+		// }
+		//
+		// if (stroke == Color.TRANSPARENT) {
+		// paintOutline = null;
+		// } else {
+		// paintOutline = new Paint(Paint.ANTI_ALIAS_FLAG);
+		// paintOutline.setStyle(Style.STROKE);
+		// paintOutline.setColor(stroke);
+		// paintOutline.setStrokeCap(Cap.ROUND);
+		// }
 
-		if (stroke == Color.TRANSPARENT) {
-			paintOutline = null;
-		} else {
-			paintOutline = new Paint(Paint.ANTI_ALIAS_FLAG);
-			paintOutline.setStyle(Style.STROKE);
-			paintOutline.setColor(stroke);
-			paintOutline.setStrokeCap(Cap.ROUND);
-		}
+		// if (stroke == Color.TRANSPARENT) {
+		// stroke = null;
+		// } else{
+		// stroke = new Line()
+		// }
 
 		color = new float[4];
 		color[0] = (fill >> 16 & 0xff) / 255.0f;
@@ -136,46 +136,30 @@ public final class Area implements RenderInstruction {
 	}
 
 	@Override
-	public void destroy() {
-		// do nothing
-	}
-
-	@Override
-	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
-		// do nothing
-	}
-
-	@Override
 	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
-		if (paintFill != null) {
-			renderCallback.renderArea(this);
-		}
+		renderCallback.renderArea(this, this.level);
 	}
 
-	@Override
-	public void scaleStrokeWidth(float scaleFactor) {
-		if (paintOutline != null) {
-			paintOutline.setStrokeWidth(strokeWidth * scaleFactor);
-		}
-	}
+	// @Override
+	// public void scaleStrokeWidth(float scaleFactor) {
+	// // if (paintOutline != null) {
+	// // paintOutline.setStrokeWidth(strokeWidth * scaleFactor);
+	// // }
+	// }
 
-	@Override
-	public void scaleTextSize(float scaleFactor) {
-		// do nothing
-	}
-
+	public String style;
 	/**
 	 * 
 	 */
-	public final int level;
+	private final int level;
 	/**
 	 * 
 	 */
-	public final Paint paintFill;
+	// public final Paint paintFill;
 	/**
 	 * 
 	 */
-	public final Paint paintOutline;
+	// public final Paint paintOutline;
 	/**
 	 * 
 	 */

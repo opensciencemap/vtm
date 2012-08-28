@@ -26,7 +26,7 @@ import android.graphics.Bitmap;
 /**
  * Represents an icon on the map.
  */
-public final class Symbol implements RenderInstruction {
+public final class Symbol extends RenderInstruction {
 	/**
 	 * @param elementName
 	 *            the name of the XML element.
@@ -36,7 +36,8 @@ public final class Symbol implements RenderInstruction {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading a resource.
 	 */
-	public static Symbol create(String elementName, Attributes attributes) throws IOException {
+	public static Symbol create(String elementName, Attributes attributes)
+			throws IOException {
 		String src = null;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
@@ -56,7 +57,8 @@ public final class Symbol implements RenderInstruction {
 
 	private static void validate(String elementName, String src) {
 		if (src == null) {
-			throw new IllegalArgumentException("missing attribute src for element: " + elementName);
+			throw new IllegalArgumentException("missing attribute src for element: "
+					+ elementName);
 		}
 	}
 
@@ -81,15 +83,5 @@ public final class Symbol implements RenderInstruction {
 	@Override
 	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
 		renderCallback.renderAreaSymbol(mBitmap);
-	}
-
-	@Override
-	public void scaleStrokeWidth(float scaleFactor) {
-		// do nothing
-	}
-
-	@Override
-	public void scaleTextSize(float scaleFactor) {
-		// do nothing
 	}
 }

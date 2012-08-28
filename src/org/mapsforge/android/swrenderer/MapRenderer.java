@@ -33,6 +33,7 @@ import org.mapsforge.android.mapgenerator.JobParameters;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
 import org.mapsforge.android.mapgenerator.TileCacheKey;
 import org.mapsforge.android.mapgenerator.TileDistanceSort;
+import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.utils.GlUtils;
 import org.mapsforge.core.MapPosition;
 import org.mapsforge.core.MercatorProjection;
@@ -213,7 +214,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				newTiles[tiles++] = tile;
 
 				if (!tile.isReady || (tile.getScale() != scale)) {
-					tile.isLoading = true;
+					// tile.isLoading = true;
 					// approximation for TileScheduler
 					if (tileY < tileTop || tileY > tileBottom || tileX < tileLeft
 							|| tileX > tileRight)
@@ -494,12 +495,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				}
 			}
 		}
-		// FIXME
-		// if (loadedTexture) {
-		// synchronized (mMapWorker) {
-		// mMapWorker.notify();
-		// }
-		// }
 	}
 
 	@Override
@@ -587,5 +582,11 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	@Override
 	public IMapGenerator createMapGenerator() {
 		return new MapGenerator();
+	}
+
+	@Override
+	public void setRenderTheme(RenderTheme t) {
+		// TODO Auto-generated method stub
+
 	}
 }

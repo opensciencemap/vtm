@@ -132,11 +132,11 @@
 		<xs:attribute name="src" type="tns:src" use="optional" />
 		<xs:attribute name="stroke" type="tns:color" use="optional"
 			default="#000000" />
-		<xs:attribute name="stroke-width" type="tns:nonNegativeFloat"
+		<xs:attribute name="width" type="tns:nonNegativeFloat"
 			use="optional" default="0" />
 		<xs:attribute name="stroke-dasharray" type="tns:strokeDasharray"
 			use="optional" />
-		<xs:attribute name="stroke-linecap" type="tns:cap" use="optional"
+		<xs:attribute name="cap" type="tns:cap" use="optional"
 			default="round" />
 		<xs:attribute name="outline" type="xs:integer" use="optional"
 			default="0" />
@@ -163,6 +163,7 @@
 	</xs:complexType>
 
 	<xs:complexType name="pathText">
+		<xs:attribute name="style" type="xs:string" use="optional" default="0"/>
 		<xs:attribute name="k" type="tns:textKey" use="required" />
 		<xs:attribute name="dy" type="xs:float" use="optional"
 			default="0" />
@@ -190,7 +191,7 @@
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<!-- recursion to allow for nested rules -->
 			<xs:element name="rule" type="tns:rule" />
-
+			
 			<xs:element name="area" type="tns:area" />
 			<xs:element name="caption" type="tns:caption" />
 			<xs:element name="circle" type="tns:circle" />
@@ -198,6 +199,7 @@
 			<xs:element name="outline" type="tns:outline" />
 			<xs:element name="lineSymbol" type="tns:lineSymbol" />
 			<xs:element name="pathText" type="tns:pathText" />
+			<xs:element name="stylePathText type="xs:string" />
 			<xs:element name="symbol" type="tns:symbol" />
 		</xs:choice>
 		<xs:attribute name="e" type="tns:elementList" use="required" />
@@ -214,6 +216,12 @@
 
 	<!-- rendertheme element -->
 	<xs:complexType name="rendertheme">
+	  <xs:sequence minOccurs="0" maxOccurds="256">
+	  <xs:choice minOccurs="0" maxOccurs="unbounded">
+	  	<xs:element name="style-pathtext" type="tns:pathText" />
+	  	<xs:element name="style-area" type="tns:area" />
+	  </xs:choice>
+	  </xs:sequence)
 		<xs:sequence minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="rule" type="tns:rule" />
 		</xs:sequence>

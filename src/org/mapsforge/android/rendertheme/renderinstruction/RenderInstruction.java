@@ -20,11 +20,12 @@ import org.mapsforge.core.Tag;
 /**
  * A RenderInstruction is a basic graphical primitive to draw a map.
  */
-public interface RenderInstruction {
+public abstract class RenderInstruction {
 	/**
 	 * Destroys this RenderInstruction and cleans up all its internal resources.
 	 */
-	void destroy();
+	public void destroy() {
+	}
 
 	/**
 	 * @param renderCallback
@@ -32,7 +33,8 @@ public interface RenderInstruction {
 	 * @param tags
 	 *            the tags of the node.
 	 */
-	void renderNode(IRenderCallback renderCallback, Tag[] tags);
+	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
+	}
 
 	/**
 	 * @param renderCallback
@@ -40,7 +42,8 @@ public interface RenderInstruction {
 	 * @param tags
 	 *            the tags of the way.
 	 */
-	void renderWay(IRenderCallback renderCallback, Tag[] tags);
+	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
+	}
 
 	/**
 	 * Scales the stroke width of this RenderInstruction by the given factor.
@@ -48,7 +51,8 @@ public interface RenderInstruction {
 	 * @param scaleFactor
 	 *            the factor by which the stroke width should be scaled.
 	 */
-	void scaleStrokeWidth(float scaleFactor);
+	public void scaleStrokeWidth(float scaleFactor) {
+	}
 
 	/**
 	 * Scales the text size of this RenderInstruction by the given factor.
@@ -56,5 +60,6 @@ public interface RenderInstruction {
 	 * @param scaleFactor
 	 *            the factor by which the text size should be scaled.
 	 */
-	void scaleTextSize(float scaleFactor);
+	public void scaleTextSize(float scaleFactor) {
+	}
 }

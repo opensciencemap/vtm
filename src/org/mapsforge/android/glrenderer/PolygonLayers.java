@@ -14,172 +14,269 @@
  */
 package org.mapsforge.android.glrenderer;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import static android.opengl.GLES20.GL_BLEND;
+import static android.opengl.GLES20.GL_EQUAL;
+import static android.opengl.GLES20.GL_INVERT;
+import static android.opengl.GLES20.GL_KEEP;
+import static android.opengl.GLES20.GL_NEVER;
+import static android.opengl.GLES20.GL_STENCIL_TEST;
+import static android.opengl.GLES20.GL_TRIANGLE_FAN;
+import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
+import static android.opengl.GLES20.GL_ZERO;
+import static android.opengl.GLES20.glColorMask;
+import static android.opengl.GLES20.glDisable;
+import static android.opengl.GLES20.glDrawArrays;
+import static android.opengl.GLES20.glEnable;
+import static android.opengl.GLES20.glEnableVertexAttribArray;
+import static android.opengl.GLES20.glGetAttribLocation;
+import static android.opengl.GLES20.glGetUniformLocation;
+import static android.opengl.GLES20.glStencilFunc;
+import static android.opengl.GLES20.glStencilMask;
+import static android.opengl.GLES20.glStencilOp;
+import static android.opengl.GLES20.glUniform4f;
+import static android.opengl.GLES20.glUniform4fv;
+import static android.opengl.GLES20.glUniformMatrix4fv;
+import static android.opengl.GLES20.glUseProgram;
+import static android.opengl.GLES20.glVertexAttribPointer;
+
 import java.nio.ShortBuffer;
 
-import org.mapsforge.core.Tile;
+import org.mapsforge.android.utils.GlUtils;
+
+import android.opengl.GLES20;
 
 class PolygonLayers {
-	private static final int NUM_VERTEX_FLOATS = 2;
-	// static final float[] mFillCoords = { -2, Tile.TILE_SIZE + 1,
-	// Tile.TILE_SIZE + 1, Tile.TILE_SIZE + 1, -2,
-	// -2, Tile.TILE_SIZE + 1, -2 };
+	private static final int NUM_VERTEX_SHORTS = 2;
+	private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
+	private static int STENCIL_BITS = 8;
 
-	// private static short[] mByteFillCoords = null;
+	private static PolygonLayer[] mFillPolys;
 
-	// static FloatBuffer compileLayerData(PolygonLayer layers, FloatBuffer buf) {
-	// FloatBuffer fbuf = buf;
-	// int size = 4;
-	//
-	// for (PolygonLayer l = layers; l != null; l = l.next)
-	// size += l.verticesCnt;
-	//
-	// size *= NUM_VERTEX_FLOATS;
-	//
-	// if (buf == null || buf.capacity() < size) {
-	// ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 4).order(
-	// ByteOrder.nativeOrder());
-	// // Log.d("GLMap", "allocate buffer " + size);
-	// fbuf = bbuf.asFloatBuffer();
-	// } else {
-	// fbuf.clear();
-	// }
-	//
-	// fbuf.put(mFillCoords, 0, 8);
-	// int pos = 4;
-	//
-	// PoolItem last = null, items = null;
-	//
-	// for (PolygonLayer l = layers; l != null; l = l.next) {
-	//
-	// for (PoolItem item = l.pool; item != null; item = item.next) {
-	// fbuf.put(item.vertices, 0, item.used);
-	// last = item;
-	// }
-	// l.offset = pos;
-	// pos += l.verticesCnt;
-	//
-	// if (last != null) {
-	// last.next = items;
-	// items = l.pool;
-	// }
-	//
-	// l.pool = null;
-	// }
-	//
-	// VertexPool.add(items);
-	//
-	// fbuf.flip();
-	//
-	// return fbuf;
-	// }
-	//
-	// static final short[] tmpItem = new short[PoolItem.SIZE];
+	private static int polygonProgram;
+	private static int hPolygonVertexPosition;
+	private static int hPolygonMatrix;
+	private static int hPolygonColor;
 
-	// static ShortBuffer compileLayerData(PolygonLayer layers, ShortBuffer buf) {
-	// ShortBuffer sbuf = buf;
-	// int size = 4;
+	static boolean init() {
+
+		// Set up the program for rendering polygons
+		polygonProgram = GlUtils.createProgram(Shaders.polygonVertexShader,
+				Shaders.polygonFragmentShader);
+		if (polygonProgram == 0) {
+			// Log.e(TAG, "Could not create polygon program.");
+			return false;
+		}
+		hPolygonMatrix = glGetUniformLocation(polygonProgram, "mvp");
+		hPolygonVertexPosition = glGetAttribLocation(polygonProgram, "a_position");
+		hPolygonColor = glGetUniformLocation(polygonProgram, "u_color");
+
+		mFillPolys = new PolygonLayer[STENCIL_BITS];
+
+		return true;
+	}
+
+	private static void fillPolygons(int count, double zoom, float scale) {
+		boolean blend = false;
+
+		// draw to framebuffer
+		glColorMask(true, true, true, true);
+
+		// do not modify stencil buffer
+		glStencilMask(0);
+
+		for (int c = 0; c < count; c++) {
+			PolygonLayer l = mFillPolys[c];
+
+			float alpha = 1.0f;
+
+			if (l.area.fade >= zoom || l.area.color[3] != 1.0) {
+
+				if (l.area.fade >= zoom) {
+					alpha = (scale > 1.3f ? scale : 1.3f) - alpha;
+					if (alpha > 1.0f)
+						alpha = 1.0f;
+				}
+
+				alpha *= l.area.color[3];
+
+				if (!blend) {
+					glEnable(GL_BLEND);
+					blend = true;
+				}
+				glUniform4f(hPolygonColor,
+						l.area.color[0], l.area.color[1], l.area.color[2], alpha);
+
+			} else if (l.area.blend == zoom) {
+				alpha = scale - 1.0f;
+				if (alpha > 1.0f)
+					alpha = 1.0f;
+				else if (alpha < 0)
+					alpha = 0;
+
+				glUniform4f(hPolygonColor,
+						l.area.color[0] * (1 - alpha) + l.area.blendColor[0] * alpha,
+						l.area.color[1] * (1 - alpha) + l.area.blendColor[1] * alpha,
+						l.area.color[2] * (1 - alpha) + l.area.blendColor[2] * alpha, 1);
+			} else {
+				if (blend) {
+					glDisable(GL_BLEND);
+					blend = false;
+				}
+				if (l.area.blend <= zoom && l.area.blend > 0)
+					glUniform4fv(hPolygonColor, 1, l.area.blendColor, 0);
+				else
+					glUniform4fv(hPolygonColor, 1, l.area.color, 0);
+			}
+
+			// set stencil buffer mask used to draw this layer
+			glStencilFunc(GL_EQUAL, 0xff, 1 << c);
+
+			// draw tile fill coordinates
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		}
+
+		if (blend)
+			glDisable(GL_BLEND);
+	}
+
+	static PolygonLayer drawPolygons(PolygonLayer layer, int next,
+			float[] matrix, double zoom, float scale, short drawCount, boolean clip) {
+		int cnt = 0;
+
+		glUseProgram(polygonProgram);
+		glEnableVertexAttribArray(hPolygonVertexPosition);
+
+		glVertexAttribPointer(hPolygonVertexPosition, 2,
+				GLES20.GL_SHORT, false, 0,
+				POLYGON_VERTICES_DATA_POS_OFFSET);
+
+		glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
+
+		glEnable(GL_STENCIL_TEST);
+
+		PolygonLayer l = layer;
+
+		for (; l != null && l.layer < next; l = l.next) {
+			// fade out polygon layers (set in RederTheme)
+			if (l.area.fade > 0 && l.area.fade > zoom)
+				continue;
+
+			if (cnt == 0) {
+				// disable drawing to framebuffer
+				glColorMask(false, false, false, false);
+
+				// never pass the test, i.e. always apply first stencil op (sfail)
+				glStencilFunc(GL_NEVER, 0, 0xff);
+
+				// clear stencilbuffer
+				glStencilMask(0xFF);
+				// glClear(GL_STENCIL_BUFFER_BIT);
+
+				// clear stencilbuffer (tile region)
+				glStencilOp(GL_ZERO, GL_KEEP, GL_KEEP);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+				// stencil op for stencil method polygon drawing
+				glStencilOp(GL_INVERT, GL_KEEP, GL_KEEP);
+			}
+
+			mFillPolys[cnt] = l;
+
+			// set stencil mask to draw to
+			glStencilMask(1 << cnt++);
+
+			glDrawArrays(GL_TRIANGLE_FAN, l.offset, l.verticesCnt);
+
+			// draw up to 8 layers into stencil buffer
+			if (cnt == STENCIL_BITS) {
+				fillPolygons(cnt, zoom, scale);
+				cnt = 0;
+			}
+		}
+
+		if (cnt > 0)
+			fillPolygons(cnt, zoom, scale);
+
+		glDisable(GL_STENCIL_TEST);
+
+		if (clip) {
+			drawDepthClip(drawCount);
+		}
+
+		// required on GalaxyII, Android 2.3.3 (cant just VAA enable once...)
+		GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);
+
+		return l;
+	}
+
+	// static void drawStencilClip(byte drawCount) {
+	// // set stencil mask for line drawing... HACK!!!
+	// glColorMask(false, false, false, false);
 	//
-	// for (PolygonLayer l = layers; l != null; l = l.next)
-	// size += l.verticesCnt;
+	// int c = drawCount % 16;
+	// // never pass the test, i.e. always apply first stencil op (sfail)
+	// // glStencilFunc(GLES20.GL_NEVER, drawCount, 0);
+	// glStencilFunc(GLES20.GL_NEVER, flipdabit[c], 0);
 	//
-	// size *= NUM_VERTEX_FLOATS;
+	// // replace stencilbuffer
+	// glStencilMask(0xff);
 	//
-	// if (buf == null || buf.capacity() < size) {
-	// ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 2).order(
-	// ByteOrder.nativeOrder());
-	// sbuf = bbuf.asShortBuffer();
-	// } else {
-	// sbuf.clear();
-	// }
+	// // set stencilbuffer for (tile region)
+	// glStencilOp(GLES20.GL_REPLACE, GLES20.GL_KEEP, GLES20.GL_KEEP);
+	// glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	//
-	// short[] data = tmpItem;
+	// glStencilFunc(GL_EQUAL, flipdabit[c], 0xff);
+	// // do not modify stencil buffer
+	// glStencilMask(0);
 	//
-	// if (mByteFillCoords == null) {
-	// mByteFillCoords = new short[8];
-	// FastMath.convertFloatToHalf(mFillCoords[0], mByteFillCoords, 0);
-	// FastMath.convertFloatToHalf(mFillCoords[1], mByteFillCoords, 1);
-	// FastMath.convertFloatToHalf(mFillCoords[2], mByteFillCoords, 2);
-	// FastMath.convertFloatToHalf(mFillCoords[3], mByteFillCoords, 3);
-	// FastMath.convertFloatToHalf(mFillCoords[4], mByteFillCoords, 4);
-	// FastMath.convertFloatToHalf(mFillCoords[5], mByteFillCoords, 5);
-	// FastMath.convertFloatToHalf(mFillCoords[6], mByteFillCoords, 6);
-	// FastMath.convertFloatToHalf(mFillCoords[7], mByteFillCoords, 7);
-	// }
-	//
-	// sbuf.put(mByteFillCoords, 0, 8);
-	// int pos = 4;
-	//
-	// PoolItem last = null, items = null;
-	//
-	// for (PolygonLayer l = layers; l != null; l = l.next) {
-	//
-	// for (PoolItem item = l.pool; item != null; item = item.next) {
-	// PoolItem.toHalfFloat(item, data);
-	// sbuf.put(data, 0, item.used);
-	// last = item;
-	// }
-	//
-	// l.offset = pos;
-	// pos += l.verticesCnt;
-	//
-	// if (last != null) {
-	// last.next = items;
-	// items = l.pool;
-	// }
-	//
-	// l.pool = null;
-	// }
-	//
-	// VertexPool.add(items);
-	//
-	// sbuf.flip();
-	//
-	// return sbuf;
-	// }
-	//
-	// static void clear(PolygonLayer layers) {
-	// for (PolygonLayer l = layers; l != null; l = l.next) {
-	// if (l.pool != null)
-	// VertexPool.add(l.pool);
-	// }
+	// glColorMask(true, true, true, true);
 	// }
 
-	private static short[] mFillCoords;
+	// this only increases the chance for the stencil buffer clip to work
+	// should check for clipping with depth buffer or sth
+	// private static short[] flipdabit = {
+	// 255, 254, 253, 251,
+	// 247, 239, 223, 191,
+	// 127, 63, 252, 250,
+	// 249, 243, 231, 207 };
 
-	static ShortBuffer compileLayerData(PolygonLayer layers, ShortBuffer buf) {
-		ShortBuffer sbuf = buf;
-		int size = 4;
+	static void drawDepthClip(short drawCount) {
+
+		glColorMask(false, false, false, false);
+		glEnable(GLES20.GL_DEPTH_TEST);
+		glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+		// GLES20.GL_PO
+		GLES20.glPolygonOffset(0, drawCount);
+
+		// int i[] = new int[1];
+		// GLES20.glGetIntegerv(GLES20.GL_POLYGON_OFFSET_UNITS, i, 0);
+		// Log.d("...", "UNITS " + i[0]);
+		//
+		// System.out.println("set offset: " + drawCount);
+		GLES20.glDepthMask(true);
+
+		GLES20.glDepthFunc(GLES20.GL_ALWAYS);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		GLES20.glDepthMask(false);
+		glColorMask(true, true, true, true);
+
+		GLES20.glDepthFunc(GLES20.GL_EQUAL);
+	}
+
+	static int sizeOf(PolygonLayer layers) {
+		int size = 0;
 
 		for (PolygonLayer l = layers; l != null; l = l.next)
 			size += l.verticesCnt;
 
-		size *= NUM_VERTEX_FLOATS;
+		size *= NUM_VERTEX_SHORTS;
 
-		if (buf == null || buf.capacity() < size) {
-			ByteBuffer bbuf = ByteBuffer.allocateDirect(size * 2).order(
-					ByteOrder.nativeOrder());
-			sbuf = bbuf.asShortBuffer();
-		} else {
-			sbuf.clear();
-		}
+		return size;
+	}
 
-		if (mFillCoords == null) {
-			short min = (-2) << 4;
-			short max = (short) ((Tile.TILE_SIZE + 1) << 4);
-			mFillCoords = new short[8];
-			mFillCoords[0] = min;
-			mFillCoords[1] = max;
-			mFillCoords[2] = max;
-			mFillCoords[3] = max;
-			mFillCoords[4] = min;
-			mFillCoords[5] = min;
-			mFillCoords[6] = max;
-			mFillCoords[7] = min;
-		}
-
-		sbuf.put(mFillCoords, 0, 8);
+	static void compileLayerData(PolygonLayer layers, ShortBuffer sbuf) {
 		int pos = 4;
 
 		ShortItem last = null, items = null;
@@ -203,10 +300,6 @@ class PolygonLayers {
 		}
 
 		ShortPool.add(items);
-
-		sbuf.flip();
-
-		return sbuf;
 	}
 
 	static void clear(PolygonLayer layers) {

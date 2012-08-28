@@ -26,7 +26,7 @@ import android.graphics.Bitmap;
 /**
  * Represents an icon along a polyline on the map.
  */
-public final class LineSymbol implements RenderInstruction {
+public final class LineSymbol extends RenderInstruction {
 	/**
 	 * @param elementName
 	 *            the name of the XML element.
@@ -36,7 +36,8 @@ public final class LineSymbol implements RenderInstruction {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading a resource.
 	 */
-	public static LineSymbol create(String elementName, Attributes attributes) throws IOException {
+	public static LineSymbol create(String elementName, Attributes attributes)
+			throws IOException {
 		String src = null;
 		boolean alignCenter = false;
 		boolean repeat = false;
@@ -62,7 +63,8 @@ public final class LineSymbol implements RenderInstruction {
 
 	private static void validate(String elementName, String src) {
 		if (src == null) {
-			throw new IllegalArgumentException("missing attribute src for element: " + elementName);
+			throw new IllegalArgumentException("missing attribute src for element: "
+					+ elementName);
 		}
 	}
 
@@ -70,7 +72,8 @@ public final class LineSymbol implements RenderInstruction {
 	private final Bitmap mBitmap;
 	private final boolean mRepeat;
 
-	private LineSymbol(String src, boolean alignCenter, boolean repeat) throws IOException {
+	private LineSymbol(String src, boolean alignCenter, boolean repeat)
+			throws IOException {
 		super();
 
 		mBitmap = BitmapUtils.createBitmap(src);
@@ -84,22 +87,7 @@ public final class LineSymbol implements RenderInstruction {
 	}
 
 	@Override
-	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
-		// do nothing
-	}
-
-	@Override
 	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
 		renderCallback.renderWaySymbol(mBitmap, mAlignCenter, mRepeat);
-	}
-
-	@Override
-	public void scaleStrokeWidth(float scaleFactor) {
-		// do nothing
-	}
-
-	@Override
-	public void scaleTextSize(float scaleFactor) {
-		// do nothing
 	}
 }

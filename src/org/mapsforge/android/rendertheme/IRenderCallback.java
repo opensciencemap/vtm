@@ -17,6 +17,7 @@ package org.mapsforge.android.rendertheme;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
 import org.mapsforge.android.rendertheme.renderinstruction.Caption;
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
+import org.mapsforge.android.rendertheme.renderinstruction.PathText;
 
 import android.graphics.Bitmap;
 import android.graphics.Paint;
@@ -31,7 +32,7 @@ public interface IRenderCallback {
 	 * @param area
 	 *            ...
 	 */
-	void renderArea(Area area);
+	void renderArea(Area area, int level);
 
 	/**
 	 * Renders an area caption with the given text.
@@ -83,7 +84,7 @@ public interface IRenderCallback {
 	 * @param line
 	 *            ...
 	 */
-	void renderWay(Line line);
+	void renderWay(Line line, int level);
 
 	/**
 	 * Renders a way with the given symbol along the way path.
@@ -100,12 +101,8 @@ public interface IRenderCallback {
 	/**
 	 * Renders a way with the given text along the way path.
 	 * 
-	 * @param text
-	 *            the text to be rendered.
-	 * @param paint
-	 *            the paint to be used for rendering the text.
-	 * @param stroke
-	 *            an optional paint for the text casing (may be null).
+	 * @param pathText
+	 *            ...
 	 */
-	void renderWayText(String text, Paint paint, Paint stroke);
+	void renderWayText(PathText pathText);
 }

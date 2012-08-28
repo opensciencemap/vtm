@@ -29,7 +29,7 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 				EGL10.EGL_GREEN_SIZE, 6,
 				EGL10.EGL_BLUE_SIZE, 5,
 				EGL10.EGL_ALPHA_SIZE, 0,
-				EGL10.EGL_DEPTH_SIZE, 0,
+				EGL10.EGL_DEPTH_SIZE, 16,
 				// Requires that setEGLContextClientVersion(2) is called on the view.
 				EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
 				// EGL10.EGL_SAMPLE_BUFFERS, 1 /* true */,
@@ -50,7 +50,7 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 					EGL10.EGL_GREEN_SIZE, 6,
 					EGL10.EGL_BLUE_SIZE, 5,
 					EGL10.EGL_ALPHA_SIZE, 0,
-					EGL10.EGL_DEPTH_SIZE, 0,
+					EGL10.EGL_DEPTH_SIZE, 16,
 					EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
 					EGL10.EGL_STENCIL_SIZE, 4,
 					EGL10.EGL_NONE };
@@ -93,7 +93,10 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		// // else
 		// if (findConfigAttrib(egl, display, configs[i], EGL10.EGL_RED_SIZE, 0) == 5
 		// &&
-		// findConfigAttrib(egl, display, configs[i], EGL10.EGL_ALPHA_SIZE, 0) == 0) {
+		// findConfigAttrib(egl, display, configs[i], EGL10.EGL_ALPHA_SIZE, 0) == 0
+		// // &&
+		// // findConfigAttrib(egl, display, configs[i], EGL10.EGL_DEPTH_SIZE, 0) == 16
+		// ) {
 		// index = i;
 		// break;
 		// }

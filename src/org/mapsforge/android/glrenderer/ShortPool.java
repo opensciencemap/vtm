@@ -14,59 +14,80 @@
  */
 package org.mapsforge.android.glrenderer;
 
-import android.annotation.SuppressLint;
+import android.util.Log;
 
 public class ShortPool {
-	private static final int POOL_LIMIT = 8192;
-
-	@SuppressLint("UseValueOf")
-	private static final Boolean lock = new Boolean(true);
+	private static final int POOL_LIMIT = 6000;
 
 	static private ShortItem pool = null;
 	static private int count = 0;
+	static private int countAll = 0;
 
-	static ShortItem get() {
-		synchronized (lock) {
-
-			if (count == 0)
-				return new ShortItem();
-
-			count--;
-
-			ShortItem it = pool;
-			pool = pool.next;
-			it.used = 0;
-			it.next = null;
-			return it;
-		}
+	static synchronized void finish() {
+		count = 0;
+		countAll = 0;
+		pool = null;
 	}
 
-	static void add(ShortItem items) {
+	static synchronized ShortItem get() {
+
+		if (pool == null) {
+			countAll++;
+			return new ShortItem();
+		}
+
+		count--;
+
+		if (count < 0) {
+			int c = 0;
+
+			for (ShortItem tmp = pool; tmp != null; tmp = tmp.next)
+				c++;
+
+			Log.d("ShortPool", "eek wrong count: " + count + " left" + c);
+			return new ShortItem();
+		}
+
+		ShortItem it = pool;
+		pool = pool.next;
+		it.used = 0;
+		it.next = null;
+		return it;
+	}
+
+	static synchronized void add(ShortItem items) {
 		if (items == null)
 			return;
 
-		synchronized (lock) {
+		// limit pool items
+		if (countAll < POOL_LIMIT) {
+
 			ShortItem last = items;
 
-			// limit pool items
-			while (count < POOL_LIMIT) {
-				if (last.next == null) {
-					break;
-				}
-				last = last.next;
+			while (true) {
 				count++;
-			}
 
-			// clear references
-			ShortItem tmp2, tmp = last.next;
-			while (tmp != null) {
-				tmp2 = tmp;
-				tmp = tmp.next;
-				tmp2.next = null;
+				if (last.next == null)
+					break;
+
+				last = last.next;
 			}
 
 			last.next = pool;
 			pool = items;
+
+		} else {
+			// int cleared = 0;
+			ShortItem prev, tmp = items;
+			while (tmp != null) {
+				prev = tmp;
+				tmp = tmp.next;
+
+				countAll--;
+
+				prev.next = null;
+
+			}
 		}
 	}
 }

@@ -38,7 +38,8 @@ final class WayDecorator {
 	 */
 	private static final int SEGMENT_SAFETY_DISTANCE = 30;
 
-	static void renderSymbol(Bitmap symbolBitmap, boolean alignCenter, boolean repeatSymbol, float[][] coordinates,
+	static void renderSymbol(Bitmap symbolBitmap, boolean alignCenter,
+			boolean repeatSymbol, float[][] coordinates,
 			List<SymbolContainer> waySymbols) {
 		int skipPixels = SEGMENT_SAFETY_DISTANCE;
 
@@ -68,9 +69,11 @@ final class WayDecorator {
 				// move the previous point forward towards the current point
 				previousX += diffX * segmentSkipPercentage;
 				previousY += diffY * segmentSkipPercentage;
-				symbolAngle = (float) Math.toDegrees(Math.atan2(currentY - previousY, currentX - previousX));
+				symbolAngle = (float) Math.toDegrees(Math.atan2(currentY - previousY,
+						currentX - previousX));
 
-				waySymbols.add(new SymbolContainer(symbolBitmap, previousX, previousY, alignCenter, symbolAngle));
+				waySymbols.add(new SymbolContainer(symbolBitmap, previousX, previousY,
+						alignCenter, symbolAngle));
 
 				// check if the symbol should only be rendered once
 				if (!repeatSymbol) {
@@ -145,7 +148,8 @@ final class WayDecorator {
 				} else if ((currentY - nextY) == 0)
 					break;
 
-				float diff = ((float) (diffX) / (diffY) - (float) (currentX - nextX) / (currentY - nextY));
+				float diff = ((float) (diffX) / (diffY) - (float) (currentX - nextX)
+						/ (currentY - nextY));
 
 				// skip segments with corners
 				if (diff >= 0.2 || diff <= -0.2)
@@ -210,7 +214,7 @@ final class WayDecorator {
 						y2 = previousY;
 					}
 
-					// estimate position of test on path
+					// estimate position of text on path
 					width = (x2 - x1) / 2;
 					x2 = x2 - (int) (width - s * width);
 					x1 = x1 + (int) (width - s * width);
@@ -234,7 +238,8 @@ final class WayDecorator {
 							break;
 
 						// check crossings
-						if (GeometryUtils.lineIntersect(x1, y1, x2, y2, wtc2.x1, wtc2.y1, wtc2.x2, wtc2.y2)) {
+						if (GeometryUtils.lineIntersect(x1, y1, x2, y2, wtc2.x1, wtc2.y1,
+								wtc2.x2, wtc2.y2)) {
 							intersects = true;
 							break;
 						}
@@ -244,7 +249,8 @@ final class WayDecorator {
 						short top2 = (wtc2.y1 < wtc2.y2 ? wtc2.y1 : wtc2.y2);
 						short bot2 = (wtc2.y1 < wtc2.y2 ? wtc2.y2 : wtc2.y1);
 
-						if (x1 - 10 < wtc2.x2 && wtc2.x1 - 10 < x2 && top - 10 < bot2 && top2 - 10 < bot) {
+						if (x1 - 10 < wtc2.x2 && wtc2.x1 - 10 < x2 && top - 10 < bot2
+								&& top2 - 10 < bot) {
 
 							if (wtc2.text.equals(text)) {
 								intersects = true;
@@ -260,7 +266,8 @@ final class WayDecorator {
 					}
 
 					Log.d("mapsforge", "add " + text + " " + first + " " + last);
-					WayTextContainer wtc = new WayTextContainer(first, last, wayDataContainer, text,
+					WayTextContainer wtc = new WayTextContainer(first, last,
+							wayDataContainer, text,
 							paint);
 					wtc.x1 = (short) x1;
 					wtc.y1 = (short) y1;
@@ -272,7 +279,8 @@ final class WayDecorator {
 					containerSize++;
 
 					if (outline != null) {
-						wayNames.add(new WayTextContainer(first, last, wayDataContainer, text, outline));
+						wayNames.add(new WayTextContainer(first, last, wayDataContainer,
+								text, outline));
 						containerSize++;
 					}
 					// 500 ??? how big is a tile?!

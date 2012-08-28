@@ -17,7 +17,6 @@ package org.mapsforge.android.rendertheme;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mapsforge.android.rendertheme.renderinstruction.Line;
 import org.mapsforge.android.rendertheme.renderinstruction.RenderInstruction;
 import org.mapsforge.core.LRUCache;
 import org.mapsforge.core.Tag;
@@ -136,40 +135,112 @@ public class RenderTheme {
 	 *            ...
 	 * @param zoomLevel
 	 *            ...
+	 * @return ...
 	 */
-	public void matchNode(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel) {
-		// List<RenderInstruction> matchingList = matchingListNode;
-		// MatchingCacheKey matchingCacheKey = matchingCacheKeyNode;
+	public synchronized RenderInstruction[] matchNode(IRenderCallback renderCallback,
+			Tag[] tags,
+			byte zoomLevel) {
 
-		// if (!changed) {
-		// if (matchingList != null) {
-		// for (int i = 0, n = matchingList.size(); i < n; ++i) {
-		// matchingList.get(i).renderNode(renderCallback, tags);
-		// }
-		// }
-		// return;
-		// }
-		// matchingCacheKey = new MatchingCacheKey(tags, zoomLevel);
-		// matchingList = matchingCacheNodes.get(matchingCacheKey);
-		//
-		// if (matchingList != null) {
-		// // cache hit
-		// for (int i = 0, n = matchingList.size(); i < n; ++i) {
-		// matchingList.get(i).renderNode(renderCallback, tags);
-		// }
-		// } else {
+		RenderInstruction[] renderInstructions = null;
 
-		// cache miss
-		// matchingList = new ArrayList<RenderInstruction>();
-		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-			mRulesList.get(i).matchNode(renderCallback, tags, zoomLevel);
-			// , matchingList
+		MatchingCacheKey matchingCacheKey;
+
+		matchingCacheKey = new MatchingCacheKey(tags, zoomLevel);
+		boolean found = mMatchingCacheNodes.containsKey(matchingCacheKey);
+		if (found) {
+			renderInstructions = mMatchingCacheNodes.get(matchingCacheKey);
+		} else {
+			// cache miss
+			List<RenderInstruction> matchingList = new ArrayList<RenderInstruction>(4);
+			for (int i = 0, n = mRulesList.size(); i < n; ++i)
+				mRulesList.get(i)
+						.matchNode(renderCallback, tags, zoomLevel, matchingList);
+
+			int size = matchingList.size();
+			if (size > 0) {
+				renderInstructions = new RenderInstruction[size];
+				matchingList.toArray(renderInstructions);
+			}
+			mMatchingCacheNodes.put(matchingCacheKey, renderInstructions);
 		}
-		// matchingCacheNodes.put(matchingCacheKey, matchingList);
-		// }
-		//
-		// matchingListNode = matchingList;
-		// matchingCacheKeyNode = matchingCacheKey;
+
+		if (renderInstructions != null) {
+			for (int i = 0, n = renderInstructions.length; i < n; i++)
+				renderInstructions[i].renderNode(renderCallback, tags);
+		}
+
+		return renderInstructions;
+
+	}
+
+	/**
+	 * Matches a way with the given parameters against this RenderTheme.
+	 * 
+	 * @param renderCallback
+	 *            the callback implementation which will be executed on each match.
+	 * @param tags
+	 *            the tags of the way.
+	 * @param zoomLevel
+	 *            the zoom level at which the way should be matched.
+	 * @param closed
+	 *            way is Closed
+	 * @param render
+	 *            ...
+	 * @return currently processed render instructions
+	 */
+	public synchronized RenderInstruction[] matchWay(IRenderCallback renderCallback,
+			Tag[] tags,
+			byte zoomLevel,
+			boolean closed, boolean render) {
+		RenderInstruction[] renderInstructions = null;
+
+		LRUCache<MatchingCacheKey, RenderInstruction[]> matchingCache;
+		MatchingCacheKey matchingCacheKey;
+
+		if (closed) {
+			matchingCache = mMatchingCacheArea;
+		} else {
+			matchingCache = mMatchingCacheWay;
+		}
+
+		matchingCacheKey = new MatchingCacheKey(tags, zoomLevel);
+		boolean found = matchingCache.containsKey(matchingCacheKey);
+		if (found) {
+			renderInstructions = matchingCache.get(matchingCacheKey);
+		} else {
+			// cache miss
+			int c = (closed ? Closed.YES : Closed.NO);
+			List<RenderInstruction> matchingList = new ArrayList<RenderInstruction>(4);
+			for (int i = 0, n = mRulesList.size(); i < n; ++i) {
+				mRulesList.get(i).matchWay(renderCallback, tags, zoomLevel, c,
+						matchingList);
+			}
+			int size = matchingList.size();
+			if (size > 0) {
+				renderInstructions = new RenderInstruction[size];
+				matchingList.toArray(renderInstructions);
+			}
+			matchingCache.put(matchingCacheKey, renderInstructions);
+		}
+
+		if (render && renderInstructions != null) {
+			for (int i = 0, n = renderInstructions.length; i < n; i++)
+				renderInstructions[i].renderWay(renderCallback, tags);
+		}
+
+		return renderInstructions;
+	}
+
+	void addRule(Rule rule) {
+		mRulesList.add(rule);
+	}
+
+	void complete() {
+		mRulesList.trimToSize();
+		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
+			mRulesList.get(i).onComplete();
+		}
+
 	}
 
 	/**
@@ -194,107 +265,6 @@ public class RenderTheme {
 		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
 			mRulesList.get(i).scaleTextSize(scaleFactor * mBaseTextSize);
 		}
-	}
-
-	// private RenderInstruction[] mRenderInstructions = null;
-
-	/**
-	 * Matches a way with the given parameters against this RenderTheme.
-	 * 
-	 * @param renderCallback
-	 *            the callback implementation which will be executed on each match.
-	 * @param tags
-	 *            the tags of the way.
-	 * @param zoomLevel
-	 *            the zoom level at which the way should be matched.
-	 * @param closed
-	 *            way is Closed
-	 * @param changed
-	 *            ...
-	 * @return currently processed render instructions
-	 */
-	public synchronized RenderInstruction[] matchWay(IRenderCallback renderCallback,
-			Tag[] tags,
-			byte zoomLevel,
-			boolean closed, boolean render) {
-		RenderInstruction[] renderInstructions = null;
-
-		LRUCache<MatchingCacheKey, RenderInstruction[]> matchingCache;
-		MatchingCacheKey matchingCacheKey;
-
-		// if (!changed) {
-		// renderInstructions = mRenderInstructions;
-		//
-		// if (renderInstructions != null) {
-		// for (int i = 0, n = renderInstructions.length; i < n; i++)
-		// renderInstructions[i].renderWay(renderCallback, tags);
-		// }
-		// return;
-		// }
-
-		if (closed) {
-			matchingCache = mMatchingCacheArea;
-		} else {
-			matchingCache = mMatchingCacheWay;
-		}
-
-		matchingCacheKey = new MatchingCacheKey(tags, zoomLevel);
-		boolean found = matchingCache.containsKey(matchingCacheKey);
-		if (found) {
-			renderInstructions = matchingCache.get(matchingCacheKey);
-		} else {
-			// cache miss
-			int c = (closed ? Closed.YES : Closed.NO);
-			List<RenderInstruction> matchingList = new ArrayList<RenderInstruction>(4);
-			for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-				mRulesList.get(i).matchWay(renderCallback, tags, zoomLevel, c,
-						matchingList);
-			}
-			int size = matchingList.size();
-			if (size > 0) {
-				renderInstructions = new RenderInstruction[matchingList.size()];
-				for (int i = 0, n = matchingList.size(); i < n; ++i) {
-					RenderInstruction renderInstruction = matchingList.get(i);
-
-					renderInstructions[i] = renderInstruction;
-				}
-			}
-			matchingCache.put(matchingCacheKey, renderInstructions);
-		}
-
-		if (render && renderInstructions != null) {
-			for (int i = 0, n = renderInstructions.length; i < n; i++)
-				renderInstructions[i].renderWay(renderCallback, tags);
-		}
-		// mRenderInstructions = renderInstructions;
-		return renderInstructions;
-	}
-
-	void addRule(Rule rule) {
-		mRulesList.add(rule);
-	}
-
-	void complete() {
-		mRulesList.trimToSize();
-		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-			mRulesList.get(i).onComplete();
-		}
-
-	}
-
-	private final ArrayList<Line> outlineLayers = new ArrayList<Line>();
-
-	void addOutlineLayer(Line line) {
-		outlineLayers.add(line);
-	}
-
-	/**
-	 * @param layer
-	 *            ...
-	 * @return Line (paint and level) used for outline
-	 */
-	public Line getOutline(int layer) {
-		return outlineLayers.get(layer);
 	}
 
 	void setLevels(int levels) {

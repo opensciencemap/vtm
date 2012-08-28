@@ -16,6 +16,7 @@ package org.mapsforge.android.rendertheme;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,9 +27,11 @@ import javax.xml.parsers.SAXParserFactory;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
 import org.mapsforge.android.rendertheme.renderinstruction.Caption;
 import org.mapsforge.android.rendertheme.renderinstruction.Circle;
+import org.mapsforge.android.rendertheme.renderinstruction.AreaLevel;
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
 import org.mapsforge.android.rendertheme.renderinstruction.LineSymbol;
 import org.mapsforge.android.rendertheme.renderinstruction.PathText;
+import org.mapsforge.android.rendertheme.renderinstruction.RenderInstruction;
 import org.mapsforge.android.rendertheme.renderinstruction.Symbol;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -41,14 +44,23 @@ import org.xml.sax.helpers.DefaultHandler;
  * SAX2 handler to parse XML render theme files.
  */
 public class RenderThemeHandler extends DefaultHandler {
-	private static final Logger LOG = Logger.getLogger(RenderThemeHandler.class.getName());
+	private static final Logger LOG = Logger
+			.getLogger(RenderThemeHandler.class.getName());
 
 	private static enum Element {
-		RENDER_THEME, RENDERING_INSTRUCTION, RULE;
+		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE;
 	}
 
 	private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
 	private static final String ELEMENT_NAME_RULE = "rule";
+	private static final String ELEMENT_NAME_STYPE_PATH_TEXT = "style-pathtext";
+	private static final String ELEMENT_NAME_STYLE_AREA = "style-area";
+	private static final String ELEMENT_NAME_STYLE_LINE = "style-line";
+	private static final String ELEMENT_NAME_STYLE_OUTLINE = "style-outline";
+	private static final String ELEMENT_NAME_USE_STYLE_PATH_TEXT = "use-text";
+	private static final String ELEMENT_NAME_USE_STYLE_AREA = "use-area";
+	private static final String ELEMENT_NAME_USE_STYLE_LINE = "use-line";
+	private static final String ELEMENT_NAME_USE_STYLE_OUTLINE = "use-outline";
 	private static final String UNEXPECTED_ELEMENT = "unexpected element: ";
 
 	/**
@@ -62,10 +74,12 @@ public class RenderThemeHandler extends DefaultHandler {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading from the input stream.
 	 */
-	public static RenderTheme getRenderTheme(InputStream inputStream) throws SAXException,
+	public static RenderTheme getRenderTheme(InputStream inputStream)
+			throws SAXException,
 			ParserConfigurationException, IOException {
 		RenderThemeHandler renderThemeHandler = new RenderThemeHandler();
-		XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
+		XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser()
+				.getXMLReader();
 		xmlReader.setContentHandler(renderThemeHandler);
 		xmlReader.parse(new InputSource(inputStream));
 		return renderThemeHandler.mRenderTheme;
@@ -83,7 +97,8 @@ public class RenderThemeHandler extends DefaultHandler {
 	 * @param attributeIndex
 	 *            the XML attribute index position.
 	 */
-	public static void logUnknownAttribute(String element, String name, String value, int attributeIndex) {
+	public static void logUnknownAttribute(String element, String name, String value,
+			int attributeIndex) {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("unknown attribute in element ");
 		stringBuilder.append(element);
@@ -110,6 +125,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 		mRenderTheme.setLevels(mLevel);
 		mRenderTheme.complete();
+		tmpStyleHash.clear();
 	}
 
 	@Override
@@ -131,8 +147,12 @@ public class RenderThemeHandler extends DefaultHandler {
 		LOG.log(Level.SEVERE, null, exception);
 	}
 
+	private static HashMap<String, RenderInstruction> tmpStyleHash = new HashMap<String, RenderInstruction>(
+			10);
+
 	@Override
-	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+	public void startElement(String uri, String localName, String qName,
+			Attributes attributes) throws SAXException {
 		try {
 			if (ELEMENT_NAME_RENDER_THEME.equals(localName)) {
 				checkState(localName, Element.RENDER_THEME);
@@ -149,10 +169,53 @@ public class RenderThemeHandler extends DefaultHandler {
 				mRuleStack.push(mCurrentRule);
 			}
 
+			else if (ELEMENT_NAME_STYPE_PATH_TEXT.equals(localName)) {
+				checkState(localName, Element.STYLE);
+				PathText pathText = PathText.create(localName, attributes);
+				tmpStyleHash.put("t" + pathText.style, pathText);
+				// System.out.println("add style: " + pathText.style);
+			}
+
+			else if (ELEMENT_NAME_STYLE_AREA.equals(localName)) {
+				checkState(localName, Element.STYLE);
+				Area area = Area.create(localName, attributes, 0);
+				tmpStyleHash.put("a" + area.style, area);
+				// System.out.println("add style: " + area.style);
+			}
+
+			else if (ELEMENT_NAME_STYLE_LINE.equals(localName)) {
+				checkState(localName, Element.STYLE);
+				String style = null;
+				if ((style = attributes.getValue("from")) != null) {
+					RenderInstruction ri = tmpStyleHash.get("l" + style);
+					if (ri instanceof Line) {
+						Line line = Line.create((Line) ri, localName, attributes, 0,
+								false);
+						tmpStyleHash.put("l" + line.style, line);
+						// System.out.println("add style: " + line.style + " from " + style);
+					}
+					else {
+						// System.out.println("couldnt check the style yo! " + style);
+					}
+				} else {
+					Line line = Line.create(null, localName, attributes, 0, false);
+					tmpStyleHash.put("l" + line.style, line);
+					// System.out.println("add style: " + line.style);
+				}
+			}
+
+			else if (ELEMENT_NAME_STYLE_OUTLINE.equals(localName)) {
+				checkState(localName, Element.RENDERING_INSTRUCTION);
+				Line line = Line.create(null, localName, attributes, mLevel++, true);
+				tmpStyleHash.put("o" + line.style, line);
+				// outlineLayers.add(line);
+			}
+
 			else if ("area".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				Area area = Area.create(localName, attributes, mLevel++);
-				mRuleStack.peek().addRenderingInstruction(area);
+				// mRuleStack.peek().addRenderingInstruction(area);
+				mCurrentRule.addRenderingInstruction(area);
 			}
 
 			else if ("caption".equals(localName)) {
@@ -169,15 +232,8 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			else if ("line".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Line line = Line.create(localName, attributes, mLevel++);
+				Line line = Line.create(null, localName, attributes, mLevel++, false);
 				mCurrentRule.addRenderingInstruction(line);
-			}
-
-			else if ("outline".equals(localName)) {
-				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Line line = Line.create(localName, attributes, mLevel++);
-				mRenderTheme.addOutlineLayer(line);
-				// mCurrentRule.addRenderingInstruction(line);
 			}
 
 			else if ("lineSymbol".equals(localName)) {
@@ -198,7 +254,45 @@ public class RenderThemeHandler extends DefaultHandler {
 				mCurrentRule.addRenderingInstruction(symbol);
 			}
 
-			else {
+			else if (ELEMENT_NAME_USE_STYLE_LINE.equals(localName)) {
+				checkState(localName, Element.RENDERING_INSTRUCTION);
+				String style = attributes.getValue("name");
+				if (style != null) {
+					Line line = (Line) tmpStyleHash.get("l" + style);
+					if (line != null) {
+						// System.out.println("found style line : " + line.style);
+						Line newLine = Line.create(line, localName, attributes,
+								mLevel++, false);
+
+						mCurrentRule.addRenderingInstruction(newLine);
+					}
+				}
+			} else if (ELEMENT_NAME_USE_STYLE_OUTLINE.equals(localName)) {
+				checkState(localName, Element.RENDERING_INSTRUCTION);
+				String style = attributes.getValue("name");
+				if (style != null) {
+					Line line = (Line) tmpStyleHash.get("o" + style);
+					if (line != null && line.outline)
+						mCurrentRule.addRenderingInstruction(line);
+				}
+			} else if (ELEMENT_NAME_USE_STYLE_AREA.equals(localName)) {
+				checkState(localName, Element.RENDERING_INSTRUCTION);
+				String style = attributes.getValue("name");
+				if (style != null) {
+					Area area = (Area) tmpStyleHash.get("a" + style);
+					if (area != null)
+						mCurrentRule.addRenderingInstruction(new AreaLevel(area,
+								mLevel++));
+				}
+			} else if (ELEMENT_NAME_USE_STYLE_PATH_TEXT.equals(localName)) {
+				checkState(localName, Element.RENDERING_INSTRUCTION);
+				String style = attributes.getValue("name");
+				if (style != null) {
+					PathText pt = (PathText) tmpStyleHash.get("t" + style);
+					if (pt != null)
+						mCurrentRule.addRenderingInstruction(pt);
+				}
+			} else {
 				throw new SAXException("unknown element: " + localName);
 			}
 		} catch (IllegalArgumentException e) {
@@ -214,6 +308,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	}
 
 	private void checkElement(String elementName, Element element) throws SAXException {
+		Element parentElement;
 		switch (element) {
 			case RENDER_THEME:
 				if (!mElementStack.empty()) {
@@ -222,8 +317,16 @@ public class RenderThemeHandler extends DefaultHandler {
 				return;
 
 			case RULE:
-				Element parentElement = mElementStack.peek();
-				if (parentElement != Element.RENDER_THEME && parentElement != Element.RULE) {
+				parentElement = mElementStack.peek();
+				if (parentElement != Element.RENDER_THEME
+						&& parentElement != Element.RULE) {
+					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+				}
+				return;
+
+			case STYLE:
+				parentElement = mElementStack.peek();
+				if (parentElement != Element.RENDER_THEME) {
 					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
 				}
 				return;

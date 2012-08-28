@@ -43,7 +43,7 @@ public class MapTile extends Tile {
 	/**
 	 * distance from center, used in TileScheduler set by updateVisibleList.
 	 */
-	public long distance;
+	public float distance;
 
 	/**
 	 * @param tileX

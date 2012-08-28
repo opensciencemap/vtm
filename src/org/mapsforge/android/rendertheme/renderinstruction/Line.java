@@ -14,7 +14,6 @@
  */
 package org.mapsforge.android.rendertheme.renderinstruction;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -24,73 +23,94 @@ import org.mapsforge.core.Tag;
 import org.xml.sax.Attributes;
 
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
-import android.graphics.Paint;
 import android.graphics.Paint.Cap;
-import android.graphics.Paint.Style;
-import android.graphics.Shader;
 
 /**
  * Represents a polyline on the map.
  */
-public final class Line implements RenderInstruction {
+public final class Line extends RenderInstruction {
 	private static final Pattern SPLIT_PATTERN = Pattern.compile(",");
 
 	/**
+	 * @param line
+	 *            ...
 	 * @param elementName
 	 *            the name of the XML element.
 	 * @param attributes
 	 *            the attributes of the XML element.
 	 * @param level
 	 *            the drawing level of this instruction.
+	 * @param isOutline
+	 *            ...
 	 * @return a new Line with the given rendering attributes.
-	 * @throws IOException
-	 *             if an I/O error occurs while reading a resource.
 	 */
-	public static Line create(String elementName, Attributes attributes, int level)
-			throws IOException {
+	public static Line create(Line line, String elementName, Attributes attributes,
+			int level, boolean isOutline) {
 		String src = null;
 		int stroke = Color.BLACK;
 		float strokeWidth = 0;
 		float[] strokeDasharray = null;
 		Cap strokeLinecap = Cap.ROUND;
-		int outline = -1;
 		int fade = -1;
 		boolean fixed = false;
+		String style = null;
+		float blur = 0;
+
+		if (line != null) {
+			fixed = line.fixed;
+			fade = line.fade;
+			strokeLinecap = line.cap;
+			blur = line.blur;
+		}
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
-			if ("src".equals(name)) {
+			if ("name".equals(name))
+				style = value;
+			else if ("src".equals(name)) {
 				src = value;
 			} else if ("stroke".equals(name)) {
 				stroke = Color.parseColor(value);
-			} else if ("stroke-width".equals(name)) {
+			} else if ("width".equals(name)) {
 				strokeWidth = Float.parseFloat(value);
 			} else if ("stroke-dasharray".equals(name)) {
 				strokeDasharray = parseFloatArray(value);
-			} else if ("stroke-linecap".equals(name)) {
+			} else if ("cap".equals(name)) {
 				strokeLinecap = Cap.valueOf(value.toUpperCase(Locale.ENGLISH));
-			} else if ("outline".equals(name)) {
-				outline = Integer.parseInt(value);
 			} else if ("fade".equals(name)) {
 				fade = Integer.parseInt(value);
 			} else if ("fixed".equals(name)) {
 				fixed = Boolean.parseBoolean(value);
+			} else if ("blur".equals(name)) {
+				blur = Float.parseFloat(value);
+			} else if ("from".equals(name)) {
 			} else {
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
 
-		validate(strokeWidth);
-		return new Line(src, stroke, strokeWidth, strokeDasharray, strokeLinecap, level,
-				outline, fixed, fade);
+		if (line != null) {
+
+			strokeWidth = line.width + strokeWidth;
+			if (strokeWidth <= 0)
+				strokeWidth = 1;
+
+			return new Line(line, style, src, stroke, strokeWidth, strokeDasharray,
+					strokeLinecap, level, fixed, fade, blur, isOutline);
+		}
+
+		if (!isOutline)
+			validate(strokeWidth);
+
+		return new Line(style, src, stroke, strokeWidth, strokeDasharray, strokeLinecap,
+				level, fixed, fade, blur, isOutline);
 	}
 
 	private static void validate(float strokeWidth) {
 		if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: "
+			throw new IllegalArgumentException("width must not be negative: "
 					+ strokeWidth);
 		}
 	}
@@ -107,15 +127,15 @@ public final class Line implements RenderInstruction {
 	/**
 	 * 
 	 */
-	public final int level;
+	private final int level;
 	/**
 	 * 
 	 */
-	public final Paint paint;
+	// public final Paint paint;
 	/**
 	 * 
 	 */
-	public final float strokeWidth;
+	public final float width;
 	/**
 	 * 
 	 */
@@ -127,7 +147,7 @@ public final class Line implements RenderInstruction {
 	/**
 	 * 
 	 */
-	public final int outline;
+	public final boolean outline;
 
 	/**
 	 * 
@@ -136,23 +156,36 @@ public final class Line implements RenderInstruction {
 
 	public final int fade;
 
-	private Line(String src, int stroke, float strokeWidth, float[] strokeDasharray,
-			Cap strokeLinecap, int level,
-			int outline, boolean fixed, int fade)
-			throws IOException {
+	public final String style;
+
+	public final Cap cap;
+
+	public final float blur;
+
+	private Line(String style, String src, int stroke, float strokeWidth,
+			float[] strokeDasharray, Cap strokeLinecap, int level, boolean fixed,
+			int fade, float blur, boolean isOutline) {
 		super();
 
-		Shader shader = BitmapUtils.createBitmapShader(src);
+		this.style = style;
 
-		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		paint.setShader(shader);
-		paint.setStyle(Style.STROKE);
-		paint.setColor(stroke);
-		if (strokeDasharray != null) {
-			paint.setPathEffect(new DashPathEffect(strokeDasharray, 0));
-		}
-		paint.setStrokeCap(strokeLinecap);
+		// paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		//
+		// if (src != null) {
+		// Shader shader = BitmapUtils.createBitmapShader(src);
+		// paint.setShader(shader);
+		// }
+		//
+		// paint.setStyle(Style.STROKE);
+		// paint.setColor(stroke);
+		// if (strokeDasharray != null) {
+		// paint.setPathEffect(new DashPathEffect(strokeDasharray, 0));
+		// }
+		// paint.setStrokeCap(strokeLinecap);
+
 		round = (strokeLinecap == Cap.ROUND);
+
+		this.cap = strokeLinecap;
 
 		color = new float[4];
 		color[0] = (stroke >> 16 & 0xff) / 255.0f;
@@ -160,36 +193,46 @@ public final class Line implements RenderInstruction {
 		color[2] = (stroke >> 0 & 0xff) / 255.0f;
 		color[3] = (stroke >> 24 & 0xff) / 255.0f;
 
-		this.strokeWidth = strokeWidth;
+		this.width = strokeWidth;
 		this.level = level;
-		this.outline = outline;
+		this.outline = isOutline;
 		this.fixed = fixed;
+		this.blur = blur;
 		this.fade = fade;
 	}
 
-	@Override
-	public void destroy() {
-		// do nothing
-	}
+	private Line(Line line, String style, String src, int stroke, float strokeWidth,
+			float[] strokeDasharray, Cap strokeLinecap, int level, boolean fixed,
+			int fade, float blur, boolean isOutline) {
+		super();
 
-	@Override
-	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
-		// do nothing
+		this.style = style;
+
+		round = (strokeLinecap == Cap.ROUND);
+
+		color = line.color;
+
+		this.width = strokeWidth;
+		this.level = level;
+		this.outline = isOutline;
+		this.fixed = fixed;
+		this.fade = fade;
+		this.cap = strokeLinecap;
+		this.blur = blur;
 	}
 
 	@Override
 	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
 		// renderCallback.renderWay(mPaint, mLevel, mColor, mStrokeWidth, mRound, mOutline);
-		renderCallback.renderWay(this);
+		renderCallback.renderWay(this, level);
 	}
 
-	@Override
-	public void scaleStrokeWidth(float scaleFactor) {
-		paint.setStrokeWidth(strokeWidth * scaleFactor);
-	}
+	// @Override
+	// public void scaleStrokeWidth(float scaleFactor) {
+	// paint.setStrokeWidth(strokeWidth * scaleFactor);
+	// }
 
-	@Override
-	public void scaleTextSize(float scaleFactor) {
-		// do nothing
+	public int getLevel() {
+		return this.level;
 	}
 }

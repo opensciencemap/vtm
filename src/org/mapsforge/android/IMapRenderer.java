@@ -16,6 +16,7 @@ package org.mapsforge.android;
 
 import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.MapGeneratorJob;
+import org.mapsforge.android.rendertheme.RenderTheme;
 
 import android.opengl.GLSurfaceView;
 
@@ -46,4 +47,6 @@ public interface IMapRenderer extends GLSurfaceView.Renderer {
 	public void redrawTiles(boolean clear);
 
 	public IMapGenerator createMapGenerator();
+
+	public void setRenderTheme(RenderTheme t);
 }
