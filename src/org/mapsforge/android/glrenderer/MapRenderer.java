@@ -278,14 +278,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			synchronized (t) {
 				// dont remove tile used by renderthread or mapgenerator
 				// FIXME set tile loading state in main thread
-				// if (t.isLoading) {
-				// Log.d(TAG, "cancel loading " + t + " " + (t.zoomLevel - mCurZ)
-				// + " " + (t.zoomLevel - mDrawZ) + " " + t.distance);
-				// t.isCanceled = true;
-				// }
-				// else
-				if (t.isActive || t.isLoading) {
-					Log.d(TAG, "EEEK removing active " + t + " " + (t.zoomLevel - mCurZ)
+				if (t.isLoading) {
+					Log.d(TAG, "cancel loading " + t + " " + (t.zoomLevel - mCurZ)
+							+ " " + (t.zoomLevel - mDrawZ) + " " + t.distance);
+					t.isCanceled = true;
+				} else if (t.isActive || t.isLoading) {
+					Log.d(TAG, "X removing active " + t + " " + (t.zoomLevel - mCurZ)
 							+ " " + (t.zoomLevel - mDrawZ) + " " + t.distance);
 					mTileList.add(t);
 					continue;
