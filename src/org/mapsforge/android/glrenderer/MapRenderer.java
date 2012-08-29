@@ -625,11 +625,11 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 					synchronized (t) {
 						if (tileInUse(t)) {
-							Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
+							// Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
 							continue;
 						}
 						mTilesLoaded.remove(size);
-						Log.d(TAG, "remove unused tile data: " + t);
+						// Log.d(TAG, "remove unused tile data: " + t);
 
 						clearTile(t);
 					}
@@ -748,7 +748,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				return false;
 			}
 
-			Log.d(TAG, "uploadTileData, " + tile);
+			// Log.d(TAG, "uploadTileData, " + tile);
 
 			glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
 
@@ -889,11 +889,9 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			}
 		}
 
-		if (updateTextures > 0) {
+		if (updateTextures > 0)
 			TextRenderer.compileTextures();
-			// if (updateTextures == 4)
-			// mMapView.requestRender();
-		}
+
 		// if (GlUtils.checkGlOutOfMemory("upload: " + mBufferMemoryUsage)
 		// && LIMIT_BUFFERS > MB)
 		// LIMIT_BUFFERS -= MB;
