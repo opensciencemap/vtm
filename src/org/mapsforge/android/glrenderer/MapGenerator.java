@@ -511,6 +511,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 			PolygonLayers.clear(mPolyLayers);
 			mLineLayers = null;
 			mPolyLayers = null;
+			mLabels = null;
 			tile.isLoading = false;
 			return false;
 		}

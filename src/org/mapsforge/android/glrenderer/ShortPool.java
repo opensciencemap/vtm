@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -17,7 +17,7 @@ package org.mapsforge.android.glrenderer;
 import android.util.Log;
 
 public class ShortPool {
-	private static final int POOL_LIMIT = 6000;
+	private static final int POOL_LIMIT = 2500;
 
 	static private ShortItem pool = null;
 	static private int count = 0;
@@ -31,6 +31,9 @@ public class ShortPool {
 
 	static synchronized ShortItem get() {
 
+		if (pool == null && count > 0) {
+			Log.d("ShortPool", "XXX wrong count: " + count);
+		}
 		if (pool == null) {
 			countAll++;
 			return new ShortItem();
@@ -44,7 +47,7 @@ public class ShortPool {
 			for (ShortItem tmp = pool; tmp != null; tmp = tmp.next)
 				c++;
 
-			Log.d("ShortPool", "eek wrong count: " + count + " left" + c);
+			Log.d("ShortPool", "XXX wrong count: " + count + " left" + c);
 			return new ShortItem();
 		}
 
@@ -55,9 +58,15 @@ public class ShortPool {
 		return it;
 	}
 
+	// private static float load = 1.0f;
+	// private static int loadCount = 0;
+
 	static synchronized void add(ShortItem items) {
 		if (items == null)
 			return;
+
+		// int pall = countAll;
+		// int pcnt = count;
 
 		// limit pool items
 		if (countAll < POOL_LIMIT) {
@@ -66,6 +75,8 @@ public class ShortPool {
 
 			while (true) {
 				count++;
+				// load += (float) last.used / ShortItem.SIZE;
+				// loadCount++;
 
 				if (last.next == null)
 					break;
@@ -75,6 +86,8 @@ public class ShortPool {
 
 			last.next = pool;
 			pool = items;
+			// Log.d("Pool", "added: " + (count - pcnt) + " " + count + " " + countAll
+			// + " load: " + (load / loadCount));
 
 		} else {
 			// int cleared = 0;
@@ -85,9 +98,14 @@ public class ShortPool {
 
 				countAll--;
 
+				// load += (float) prev.used / ShortItem.SIZE;
+				// loadCount++;
+
 				prev.next = null;
 
 			}
+			// Log.d("Pool", "dropped: " + (pall - countAll) + " " + count + " "
+			// + countAll + " load: " + (load / loadCount));
 		}
 	}
 }

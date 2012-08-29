@@ -35,9 +35,11 @@ class LineLayer {
 
 	ShortItem pool;
 	protected ShortItem curItem;
+
+	// number of vertices this layer holds
 	int verticesCnt;
+	// vertices offset of this layer in VBO
 	int offset;
-	short[] mVertex;
 
 	LineLayer(int layer, Line line, float width, boolean outline) {
 		this.layer = layer;
@@ -55,57 +57,14 @@ class LineLayer {
 		outlines = link;
 	}
 
-	private static ShortItem addTwoVertex(short[] vertex, ShortItem item) {
-		ShortItem it = item;
-
-		if (it.used + 6 >= ShortItem.SIZE) {
-
-			if (it.used == ShortItem.SIZE) {
-				it.next = ShortPool.get();
-				it = it.next;
-
-			} else {
-				System.arraycopy(vertex, 0, it.vertices, it.used, 6);
-				it.used += 6;
-
-				it.next = ShortPool.get();
-				it = it.next;
-
-				System.arraycopy(vertex, 6, it.vertices, it.used, 6);
-				it.used += 6;
-
-				return it;
-			}
-		}
-
-		System.arraycopy(vertex, 0, it.vertices, it.used, 12);
-		it.used += 12;
-
-		return it;
-	}
-
-	private static ShortItem addVertex(short[] vertex, ShortItem item) {
-		ShortItem it = item;
-
-		if (it.used == ShortItem.SIZE) {
-			it.next = ShortPool.get();
-			it = it.next;
-		}
-
-		System.arraycopy(vertex, 0, it.vertices, it.used, 6);
-		it.used += 6;
-
-		return it;
-	}
-
 	/*
 	 * line extrusion is based on code from GLMap (https://github.com/olofsj/GLMap/) by olofsj -- need some way to know
 	 * how the road connects to set the ending angles
 	 */
-	void addLine(float[] pointArray, int pos, int length) {
+	void addLine(float[] points, int pos, int length) {
 		float x, y, nextX, nextY, prevX, prevY, ux, uy, vx, vy, wx, wy;
 		float a;
-		int pointPos = pos;
+		int ipos = pos;
 		boolean rounded = false;
 		boolean squared = false;
 
@@ -114,23 +73,14 @@ class LineLayer {
 		else if (line.cap == Cap.SQUARE)
 			squared = true;
 
-		if (pool == null) {
-			curItem = ShortPool.get();
-			pool = curItem;
-
-			mVertex = new short[12];
-		}
-
 		// amount of vertices used
 		verticesCnt += length + (rounded ? 6 : 2);
 
-		ShortItem si = curItem;
+		x = points[ipos++];
+		y = points[ipos++];
 
-		x = pointArray[pointPos++];
-		y = pointArray[pointPos++];
-
-		nextX = pointArray[pointPos++];
-		nextY = pointArray[pointPos++];
+		nextX = points[ipos++];
+		nextY = points[ipos++];
 
 		// Calculate triangle corners for the given width
 		vx = nextX - x;
@@ -144,47 +94,116 @@ class LineLayer {
 		ux = -vy;
 		uy = vx;
 
-		float uxw = ux;
-		float uyw = uy;
-
-		float vxw = vx;
-		float vyw = vy;
 		int tsize = Tile.TILE_SIZE;
 
-		short v[] = mVertex;
+		if (pool == null) {
+			pool = curItem = ShortPool.get();
+		}
 
-		v[0] = (short) (x * S);
-		v[1] = (short) (y * S);
+		ShortItem si = curItem;
+		short v[] = si.vertices;
+		int opos = si.used;
+
+		if (opos == ShortItem.SIZE) {
+			si.used = ShortItem.SIZE;
+			si.next = ShortPool.get();
+			si = si.next;
+			opos = 0;
+			v = si.vertices;
+		}
 
 		boolean outside = (x <= 0 || x >= tsize || y <= 0 || y >= tsize)
-				&& (x - vxw <= 0 || x - vxw >= tsize || y - vyw <= 0 || y - vyw >= tsize);
+				&& (x - vx <= 0 || x - vx >= tsize || y - vy <= 0 || y - vy >= tsize);
+
+		short ox, oy, dx, dy;
+
+		ox = (short) (x * S);
+		oy = (short) (y * S);
 
 		if (rounded && !outside) {
-			v[2] = (short) ((uxw - vxw) * S1000);
-			v[3] = (short) ((uyw - vyw) * S1000);
-			v[4] = -1;
-			v[5] = 1;
-			si = addVertex(v, si);
-			si = addVertex(v, si);
 
-			v[2] = (short) (-(uxw + vxw) * S1000);
-			v[3] = (short) (-(uyw + vyw) * S1000);
-			v[4] = 1;
-			v[5] = 1;
-			si = addVertex(v, si);
+			// For rounded line edges
+			dx = (short) ((ux - vx) * S1000);
+			dy = (short) ((uy - vy) * S1000);
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = -1;
+			v[opos + 5] = 1;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = -1;
+			v[opos + 5] = 1;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			dx = (short) (-(ux + vx) * S1000);
+			dy = (short) (-(uy + vy) * S1000);
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = 1;
+			v[opos + 5] = 1;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
 
 			// Start of line
-			v[2] = (short) ((uxw) * S1000);
-			v[3] = (short) ((uyw) * S1000);
-			v[4] = -1;
-			v[5] = 0;
-			si = addVertex(v, si);
+			dx = (short) (ux * S1000);
+			dy = (short) (uy * S1000);
 
-			v[2] = (short) ((-uxw) * S1000);
-			v[3] = (short) ((-uyw) * S1000);
-			v[4] = 1;
-			v[5] = 0;
-			si = addVertex(v, si);
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = -1;
+			v[opos + 5] = 0;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = (short) (-dx);
+			v[opos + 3] = (short) (-dy);
+			v[opos + 4] = 1;
+			v[opos + 5] = 0;
+			opos += 6;
 
 		} else {
 			// outside means line is probably clipped
@@ -192,29 +211,61 @@ class LineLayer {
 			// for now, just extend the line a little
 
 			if (squared) {
-				vxw = 0;
-				vyw = 0;
+				vx = 0;
+				vy = 0;
 			} else if (!outside) {
-				vxw *= 0.5;
-				vyw *= 0.5;
+				vx *= 0.5;
+				vy *= 0.5;
 			}
 
 			if (rounded)
 				verticesCnt -= 2;
 
-			// Add the first point twice to be able to draw with GL_TRIANGLE_STRIP
-			v[2] = (short) ((uxw - vxw) * S1000);
-			v[3] = (short) ((uyw - vyw) * S1000);
-			v[4] = -1;
-			v[5] = 0;
-			si = addVertex(v, si);
-			si = addVertex(v, si);
+			dx = (short) ((ux - vx) * S1000);
+			dy = (short) ((uy - vy) * S1000);
 
-			v[2] = (short) (-(uxw + vxw) * S1000);
-			v[3] = (short) (-(uyw + vyw) * S1000);
-			v[4] = 1;
-			v[5] = 0;
-			si = addVertex(v, si);
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = -1;
+			v[opos + 5] = 0;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = -1;
+			v[opos + 5] = 0;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			dx = (short) (-(ux + vx) * S1000);
+			dy = (short) (-(uy + vy) * S1000);
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = 1;
+			v[opos + 5] = 0;
+			opos += 6;
 		}
 
 		prevX = x;
@@ -222,9 +273,9 @@ class LineLayer {
 		x = nextX;
 		y = nextY;
 
-		for (; pointPos < pos + length;) {
-			nextX = pointArray[pointPos++];
-			nextY = pointArray[pointPos++];
+		for (; ipos < pos + length;) {
+			nextX = points[ipos++];
+			nextY = points[ipos++];
 
 			// Unit vector pointing back to previous node
 			vx = prevX - x;
@@ -261,22 +312,43 @@ class LineLayer {
 				}
 			}
 
-			uxw = ux * S1000;
-			uyw = uy * S1000;
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
 
-			v[6] = v[0] = (short) (x * S);
-			v[7] = v[1] = (short) (y * S);
+			ox = (short) (x * S);
+			oy = (short) (y * S);
 
-			v[2] = (short) uxw;
-			v[3] = (short) uyw;
-			v[4] = -1;
-			v[5] = 0;
+			dx = (short) (ux * S1000);
+			dy = (short) (uy * S1000);
 
-			v[8] = (short) -uxw;
-			v[9] = (short) -uyw;
-			v[10] = 1;
-			v[11] = 0;
-			si = addTwoVertex(v, si);
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = -1;
+			v[opos + 5] = 0;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = (short) -dx;
+			v[opos + 3] = (short) -dy;
+			v[opos + 4] = 1;
+			v[opos + 5] = 0;
+			opos += 6;
 
 			prevX = x;
 			prevY = y;
@@ -295,71 +367,164 @@ class LineLayer {
 		ux = vy;
 		uy = -vx;
 
-		uxw = ux;
-		uyw = uy;
-
-		vxw = vx;
-		vyw = vy;
-
 		outside = (x <= 0 || x >= tsize || y <= 0 || y >= tsize)
-				&& (x - vxw <= 0 || x - vxw >= tsize || y - vyw <= 0 || y - vyw >= tsize);
+				&& (x - vx <= 0 || x - vx >= tsize || y - vy <= 0 || y - vy >= tsize);
 
-		v[0] = (short) (x * S);
-		v[1] = (short) (y * S);
+		if (opos == ShortItem.SIZE) {
+			si.used = ShortItem.SIZE;
+			si.next = ShortPool.get();
+			si = si.next;
+			opos = 0;
+			v = si.vertices;
+		}
+
+		ox = (short) (x * S);
+		oy = (short) (y * S);
 
 		if (rounded && !outside) {
-			v[2] = (short) ((uxw) * S1000);
-			v[3] = (short) ((uyw) * S1000);
-			v[4] = -1;
-			v[5] = 0;
-			si = addVertex(v, si);
 
-			v[2] = (short) ((-uxw) * S1000);
-			v[3] = (short) ((-uyw) * S1000);
-			v[4] = 1;
-			v[5] = 0;
-			si = addVertex(v, si);
+			dx = (short) (ux * S1000);
+			dy = (short) (uy * S1000);
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = -1;
+			v[opos + 5] = 0;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = (short) -dx;
+			v[opos + 3] = (short) -dy;
+			v[opos + 4] = 1;
+			v[opos + 5] = 0;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
 
 			// For rounded line edges
-			v[2] = (short) ((uxw - vxw) * S1000);
-			v[3] = (short) ((uyw - vyw) * S1000);
-			v[4] = -1;
-			v[5] = -1;
-			si = addVertex(v, si);
+			dx = (short) ((ux - vx) * S1000);
+			dy = (short) ((uy - vy) * S1000);
 
-			v[2] = (short) (-(uxw + vxw) * S1000);
-			v[3] = (short) (-(uyw + vyw) * S1000);
-			v[4] = 1;
-			v[5] = -1;
-			si = addVertex(v, si);
-			si = addVertex(v, si);
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = -1;
+			v[opos + 5] = -1;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			dx = (short) (-(ux + vx) * S1000);
+			dy = (short) (-(uy + vy) * S1000);
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = 1;
+			v[opos + 5] = -1;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = 1;
+			v[opos + 5] = -1;
+			opos += 6;
 
 		} else {
 			if (squared) {
-				vxw = 0;
-				vyw = 0;
+				vx = 0;
+				vy = 0;
 			} else if (!outside) {
-				vxw *= 0.5;
-				vyw *= 0.5;
+				vx *= 0.5;
+				vy *= 0.5;
 			}
 
 			if (rounded)
 				verticesCnt -= 2;
 
-			v[2] = (short) ((uxw) * S1000);
-			v[3] = (short) ((uyw) * S1000);
-			v[4] = -1;
-			v[5] = 0;
-			si = addVertex(v, si);
+			dx = (short) ((ux - vx) * S1000);
+			dy = (short) ((uy - vy) * S1000);
 
-			v[2] = (short) (-(uxw + vxw) * S1000);
-			v[3] = (short) (-(uyw + vyw) * S1000);
-			v[4] = 1;
-			v[5] = 0;
-			si = addVertex(v, si);
-			si = addVertex(v, si);
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = -1;
+			v[opos + 5] = 0;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			dx = (short) (-(ux + vx) * S1000);
+			dy = (short) (-(uy + vy) * S1000);
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = 1;
+			v[opos + 5] = 0;
+			opos += 6;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			v[opos + 0] = ox;
+			v[opos + 1] = oy;
+			v[opos + 2] = dx;
+			v[opos + 3] = dy;
+			v[opos + 4] = 1;
+			v[opos + 5] = 0;
+			opos += 6;
 		}
 
+		si.used = opos;
 		curItem = si;
 	}
 }
