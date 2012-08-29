@@ -64,7 +64,7 @@
   
   <style-line name="steps"               stroke="#f1f0f4" width="0.25" cap="butt" />
   
-  <style-line name="water:outline"       stroke="#a4bbcc" width="1.0" cap="butt" /> 
+  <style-line name="water:outline"       stroke="#a4bbcc" width="1.0" fixed="true" cap="butt" /> 
 	<style-line name="water"               stroke="#b4cbdc" width="1.0" cap="butt" /> 
   <style-area name="water"               fill="#b4cbdc" />
   <!-- no-go area boundary -->
@@ -175,8 +175,10 @@
 	            
 	    <!-- amenity -->
 	    <rule e="way" k="amenity" v="*">
-	     <rule e="way" k="*" v="kindergarten|school|college|university" zoom-min="14"> 
-	        <area fill="#cdabde" stroke="#b094bf" stroke-width="0.2" /> </rule>
+	      <rule e="way" k="*" v="kindergarten|school|college|university" zoom-min="14"> 
+	        <area fill="#cdabde" />
+	        <line  stroke="#9aabae" width="1.0" fixed="true" cap="butt"/> 
+	      </rule>
 	           
 	      <rule e="way" k="*" v="parking" zoom-min="14">
 	        <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
@@ -259,10 +261,10 @@
 	    </rule>
 	     
 	      
-	    <rule e="way" k="natural" v="water">
-	    	<use-line name="water:outline" width="1.5" fixed="true"/>
+	   <rule e="way" k="natural" v="water">
 	      <use-area name="water"/>
-	    </rule>
+	    	<use-line name="water:outline"/>
+	     </rule>
     </rule>
  
     <!-- waterways -->
@@ -290,8 +292,8 @@
       </rule>
       
       <rule e="way" k="waterway" v="riverbank|dock">
-        <use-line name="water" width="0.4" fixed="true"/>
         <use-area name="water"/>
+        <use-line name="water:outline"/>
       </rule>
       
       <rule e="way" k="waterway" v="weir">
@@ -483,7 +485,7 @@
     </rule>
 
     <!-- outline 1 - 4 -->
-     <style-outline name="1" stroke="#a0a0a0" width="0.01"/>  
+     <style-outline name="1" stroke="#404040" width="0.025"/>  
  <!--    <style-outline name="1" stroke="#404030"/>  -->
     <style-outline name="2" stroke="#c0c0c0" />
     <style-outline name="primary"  stroke="#7f7700" width="0.025"/>
