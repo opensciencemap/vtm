@@ -85,6 +85,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private final MapView mMapView;
 	private static ArrayList<MapGeneratorJob> mJobList;
 	private static ArrayList<VertexBufferObject> mVBOs;
+
 	private static TileCacheKey mTileCacheKey;
 	private static HashMap<TileCacheKey, GLMapTile> mTiles;
 
@@ -152,6 +153,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	@Override
 	public void setRenderTheme(RenderTheme t) {
 		int bg = t.getMapBackground();
+		Log.d(TAG, "BG" + bg);
 		float[] c = new float[4];
 		c[0] = (bg >> 16 & 0xff) / 255.0f;
 		c[1] = (bg >> 8 & 0xff) / 255.0f;
@@ -246,103 +248,78 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		return false;
 	}
 
-	private static void limitCache(int remove) {
+	private static boolean tileInUse(GLMapTile t) {
 		byte z = mLastZoom;
-		// Log.d(TAG, "--------------------------------");
+
+		if (t.zoomLevel == z + 1) {
+			if (t.parent != null
+					&& t.parent.isActive
+					&& !(t.parent.isReady || t.parent.newData))
+				return true;
+		} else if (t.zoomLevel == z - 1) {
+			if (childIsActive(t))
+				return true;
+
+		} else if (t.zoomLevel == z - 2) {
+			for (int i = 0; i < 4; i++) {
+				if (t.child[i] != null && childIsActive(t.child[i]))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	private static void limitCache(int remove) {
+
 		for (int j = mTileList.size() - 1, cnt = 0; cnt < remove && j > 0; j--) {
 
 			GLMapTile t = mTileList.remove(j);
-			// dont remove tile used by renderthread or mapgenerator
-			// FIXME set tile loading state in main thread
-			if (t.isLoading) {
 
-				Log.d(TAG, "cancel loading " + t + " " + (t.zoomLevel - mCurZ)
-						+ " " + (t.zoomLevel - mDrawZ) + " " + t.distance);
-				t.isCanceled = true;
-			}
-			else if (t.isActive) {
-				Log.d(TAG, "EEEK removing active " + t + " " + (t.zoomLevel - mCurZ)
-						+ " " + (t.zoomLevel - mDrawZ) + " " + t.distance);
-				mTileList.add(t);
-				continue;
-			}
-			// check if this tile is used as proxy for not yet drawn active tile
-			// TODO to be simplified...
-			else if (t.isReady || t.newData) {
-				if (t.zoomLevel == z + 1) {
-					if (t.parent != null && t.parent.isActive
-							&& !(t.parent.isReady || t.parent.newData)) {
-						mTileList.add(t);
-						Log.d(TAG, "EEEK removing active proxy child");
-						continue;
-					}
-				} else if (t.zoomLevel == z - 1) {
-					GLMapTile c = null;
-					for (int i = 0; i < 4; i++) {
-						c = t.child[i];
-						if (c != null && c.isActive && !(c.isReady || c.newData))
-							break;
-						c = null;
-					}
+			synchronized (t) {
+				// dont remove tile used by renderthread or mapgenerator
+				// FIXME set tile loading state in main thread
+				// if (t.isLoading) {
+				// Log.d(TAG, "cancel loading " + t + " " + (t.zoomLevel - mCurZ)
+				// + " " + (t.zoomLevel - mDrawZ) + " " + t.distance);
+				// t.isCanceled = true;
+				// }
+				// else
+				if (t.isActive || t.isLoading) {
+					Log.d(TAG, "EEEK removing active " + t + " " + (t.zoomLevel - mCurZ)
+							+ " " + (t.zoomLevel - mDrawZ) + " " + t.distance);
+					mTileList.add(t);
+					continue;
+				} else if (t.isReady || t.newData) {
+					// check if this tile is used as proxy for not yet drawn active tile
 
-					if (c != null) {
-						Log.d(TAG, "EEEK removing active proxy parent");
-						mTileList.add(t);
-						continue;
-					}
-				} else if (t.zoomLevel == z - 2) {
-					GLMapTile c = null, c2 = null;
-					for (int i = 0; i < 4; i++) {
-						c = t.child[i];
-						if (c != null) {
-							for (int k = 0; k < 4; k++) {
-								c2 = c.child[k];
-								if (c2 != null && c2.isActive
-										&& !(c2.isReady || c2.newData))
-									break;
-
-								c2 = null;
-							}
-							if (c2 != null)
-								break;
-						}
-						c = null;
-					}
-
-					if (c != null) {
-						// Log.d(TAG, "EEEK removing active second level proxy parent");
+					if (tileInUse(t)) {
+						Log.d(TAG, "X removing proxy: " + t);
 						mTileList.add(t);
 						continue;
 					}
 				}
-			}
-			// Log.d(TAG, ">>> remove " + t + " " + (t.zoomLevel - mCurZ)
-			// + " " + t.distance);
 
-			cnt++;
-			mTileCacheKey.set(t.tileX, t.tileY, t.zoomLevel);
-			mTiles.remove(mTileCacheKey);
+				cnt++;
+				mTileCacheKey.set(t.tileX, t.tileY, t.zoomLevel);
+				mTiles.remove(mTileCacheKey);
 
-			// clear references to this tile
-			for (int i = 0; i < 4; i++) {
-				if (t.child[i] != null)
-					t.child[i].parent = null;
-			}
-
-			if (t.parent != null) {
+				// clear references to this tile
 				for (int i = 0; i < 4; i++) {
-					if (t.parent.child[i] == t) {
-						t.parent.child[i] = null;
-						break;
+					if (t.child[i] != null)
+						t.child[i].parent = null;
+				}
+
+				if (t.parent != null) {
+					for (int i = 0; i < 4; i++) {
+						if (t.parent.child[i] == t) {
+							t.parent.child[i] = null;
+							break;
+						}
 					}
 				}
-			}
-
-			synchronized (mVBOs) {
 				clearTile(t);
 			}
 		}
-		// Log.d(TAG, "--------------------------------<<");
 	}
 
 	private boolean updateVisibleList(double x, double y, int zdir) {
@@ -370,27 +347,29 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			return false;
 
 		int max = newTiles.tiles.length - 1;
-		long limit = (long) Math.pow(2, zoomLevel) - 1;
+		long limit = (long) Math.pow(2, zoomLevel);
 
 		if (tileTop < 0)
 			tileTop = 0;
 		if (tileLeft < 0)
 			tileLeft = 0;
 		if (tileBottom >= limit)
-			tileBottom = limit;
+			tileBottom = limit - 1;
 		if (tileRight >= limit)
-			tileRight = limit;
+			tileRight = limit - 1;
 
-		for (long tileY = tileTop; tileY <= tileBottom; tileY++) {
-			for (long tileX = tileLeft; tileX <= tileRight; tileX++) {
+		for (long yy = tileTop; yy <= tileBottom; yy++) {
+			for (long xx = tileLeft; xx <= tileRight; xx++) {
 				// FIXME
 				if (tiles == max)
 					break;
 
-				GLMapTile tile = mTiles.get(mTileCacheKey.set(tileX, tileY, zoomLevel));
+				long tx = xx;// % limit;
+
+				GLMapTile tile = mTiles.get(mTileCacheKey.set(tx, yy, zoomLevel));
 
 				if (tile == null) {
-					tile = new GLMapTile(tileX, tileY, zoomLevel);
+					tile = new GLMapTile(tx, yy, zoomLevel);
 					TileCacheKey key = new TileCacheKey(mTileCacheKey);
 
 					// FIXME use sparse matrix or sth.
@@ -399,15 +378,15 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 						Log.d(TAG, "eeek collision");
 					mTileList.add(tile);
 
-					mTileCacheKey.set((tileX >> 1), (tileY >> 1), (byte) (zoomLevel - 1));
+					mTileCacheKey.set((tx >> 1), (yy >> 1), (byte) (zoomLevel - 1));
 					tile.parent = mTiles.get(mTileCacheKey);
-					int idx = (int) ((tileX & 0x01) + 2 * (tileY & 0x01));
+					int idx = (int) ((tx & 0x01) + 2 * (yy & 0x01));
 
 					// set this tile to be child of its parent
 					if (tile.parent != null) {
 						tile.parent.child[idx] = tile;
 					} else if (zdir > 0 && zoomLevel > 0) {
-						tile.parent = new GLMapTile(tileX >> 1, tileY >> 1,
+						tile.parent = new GLMapTile(tx >> 1, yy >> 1,
 								(byte) (zoomLevel - 1));
 						key = new TileCacheKey(mTileCacheKey);
 						if (mTiles.put(key, tile.parent) != null)
@@ -436,6 +415,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 						MapGeneratorJob job = new MapGeneratorJob(tile.parent,
 								mJobParameter,
 								mDebugSettings);
+
 						if (!mJobList.contains(job))
 							mJobList.add(job);
 					}
@@ -443,19 +423,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			}
 		}
 
-		// scramble tile draw order: might help to make gl
-		// pipelines more independent... just a guess :)
-		// for (int i = 1; i < tiles / 2; i += 2) {
-		// GLMapTile tmp = newTiles.tiles[i];
-		// newTiles.tiles[i] = newTiles.tiles[tiles - i];
-		// newTiles.tiles[tiles - i] = tmp;
-		// }
-
 		newTiles.cnt = tiles;
 
 		// pass new tile list to glThread
 		synchronized (this) {
-
 			for (int i = 0; i < curTiles.cnt; i++) {
 				boolean found = false;
 
@@ -467,18 +438,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 					if (curTiles.tiles[i] == newTiles.tiles[j])
 						found = true;
 
-				if (!found) {
+				if (!found)
 					curTiles.tiles[i].isActive = false;
-					// activeList.remove(newTiles.tiles[i]);
-				}
 			}
 
-			for (int i = 0; i < tiles; i++) {
-				if (!newTiles.tiles[i].isActive) {
-					newTiles.tiles[i].isActive = true;
-					// activeList.add(newTiles.tiles[i]);
-				}
-			}
+			for (int i = 0; i < tiles; i++)
+				newTiles.tiles[i].isActive = true;
 
 			TilesData tmp = curTiles;
 			curTiles = newTiles;
@@ -493,19 +458,14 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			mUpdateTiles = true;
 		}
 
-		// see FIXME in passTile
-		// synchronized (mTiles) {
 		updateTileDistances();
-		// }
 
 		if (mJobList.size() > 0)
 			mMapView.addJobs(mJobList);
 
 		int removes = mTiles.size() - CACHE_TILES;
 
-		if (removes > 20) {
-			// Log.d(TAG, "---- remove " + removes + " on " + zoomLevel + " active:"
-			// + active + "------");
+		if (removes > 10) {
 			Collections.sort(mTileList, mTileDistanceSort);
 			limitCache(removes);
 		}
@@ -534,18 +494,23 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	}
 
 	private static void clearTile(GLMapTile t) {
+		t.newData = false;
+		t.isLoading = false;
+		t.isReady = false;
+
 		LineLayers.clear(t.lineLayers);
 		PolygonLayers.clear(t.polygonLayers);
-
-		if (t.vbo != null)
-			mVBOs.add(t.vbo);
 
 		t.labels = null;
 		t.lineLayers = null;
 		t.polygonLayers = null;
-		t.newData = false;
-		t.isLoading = false;
-		t.isReady = false;
+
+		if (t.vbo != null) {
+			synchronized (mVBOs) {
+				mVBOs.add(t.vbo);
+			}
+		}
+		t.vbo = null;
 	}
 
 	/**
@@ -624,6 +589,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				mCurY = y;
 				mCurZ = zoomLevel;
 				mCurScale = scale;
+				// Log.d(TAG, "draw at:" + tileX + " " + tileY + " " + mCurX + " " + mCurY
+				// + " " + mCurZ);
 			}
 		}
 
@@ -632,25 +599,13 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		if (changedPos)
 			updateVisibleList(x, y, zdir);
-	}
-
-	private static final int MAX_TILES_IN_QUEUE = 40;
-
-	/**
-	 * called by MapWorkers when tile is loaded
-	 */
-	@Override
-	public synchronized boolean passTile(MapGeneratorJob mapGeneratorJob) {
-		GLMapTile tile = (GLMapTile) mapGeneratorJob.tile;
-
-		if (tile.isCanceled) {
-			Log.d(TAG, "passTile: canceld " + tile);
-			clearTile(tile);
-			return true;
-		}
 
 		int size = mTilesLoaded.size();
-		if (size > MAX_TILES_IN_QUEUE) {
+		if (size < MAX_TILES_IN_QUEUE)
+			return;
+
+		synchronized (mTilesLoaded) {
+
 			// remove uploaded tiles
 			for (int i = 0; i < size;) {
 				GLMapTile t = mTilesLoaded.get(i);
@@ -663,39 +618,52 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				i++;
 			}
 
+			// clear loaded but not used tiles
 			if (size > MAX_TILES_IN_QUEUE) {
-				// FIXME pass tile via queue back to mainloop instead...
-				// synchronized (mTiles) {
-				// Collections.sort(mTilesLoaded, mTileDistanceSort);
-				// }
-				// clear loaded but not used tiles
-				while (size-- > MAX_TILES_IN_QUEUE) {
+				while (size-- > MAX_TILES_IN_QUEUE - 20) {
 					GLMapTile t = mTilesLoaded.get(size);
-					// FIXME race condition: tile could be uploaded as proxy
-					// therefore sync with upload tile data
-					// synchronized (t) {
-					// dont remove tile if currently used or is direct parent
-					// or child of currently active tile
-					if (t.isActive || childIsActive(t) ||
-							(tile.parent != null && tile.parent.isActive)) {
-						// Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
-						continue;
+
+					synchronized (t) {
+						if (tileInUse(t)) {
+							Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
+							continue;
+						}
+						mTilesLoaded.remove(size);
+						Log.d(TAG, "remove unused tile data: " + t);
+
+						clearTile(t);
 					}
-					mTilesLoaded.remove(size);
-					// Log.d(TAG, "remove unused tile data: " + t);
-					clearTile(t);
-					// TODO could also remove from mTileHash/List ?
-					// }
 				}
 			}
 		}
+	}
+
+	private static final int MAX_TILES_IN_QUEUE = 40;
+
+	/**
+	 * called by MapWorkers when tile is loaded
+	 */
+	@Override
+	public synchronized boolean passTile(MapGeneratorJob mapGeneratorJob) {
+		GLMapTile tile = (GLMapTile) mapGeneratorJob.tile;
+
+		// if (tile.isCanceled) {
+		// // no one should be able to use this tile now, mapgenerator passed it,
+		// // glthread does nothing until newdata is set.
+		// Log.d(TAG, "passTile: canceled " + tile);
+		// clearTile(tile);
+		// return true;
+		// }
+
 		tile.newData = true;
 		tile.isLoading = false;
 
-		mTilesLoaded.add(0, tile);
-
 		if (!timing)
 			mMapView.requestRender();
+
+		synchronized (mTilesLoaded) {
+			mTilesLoaded.add(0, tile);
+		}
 
 		return true;
 	}
@@ -754,96 +722,90 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 
 		// Upload line data to vertex buffer object
+		synchronized (tile) {
+			if (!tile.newData)
+				return false;
 
-		// FIXME do this in main thread:
-		if (tile.vbo == null) {
 			synchronized (mVBOs) {
-				if (mVBOs.size() < 1) {
-					Log.d(TAG, "uploadTileData, no VBOs left");
-					return false;
+				if (tile.vbo == null) {
+					if (mVBOs.size() < 1) {
+						Log.d(TAG, "uploadTileData, no VBOs left");
+						return false;
+					}
+					tile.vbo = mVBOs.remove(mVBOs.size() - 1);
 				}
-				tile.vbo = mVBOs.remove(mVBOs.size() - 1);
 			}
+
+			int lineSize = LineLayers.sizeOf(tile.lineLayers);
+			int polySize = PolygonLayers.sizeOf(tile.polygonLayers);
+			int newSize = lineSize + polySize;
+
+			if (newSize == 0) {
+				LineLayers.clear(tile.lineLayers);
+				PolygonLayers.clear(tile.polygonLayers);
+				tile.lineLayers = null;
+				tile.polygonLayers = null;
+				return false;
+			}
+
+			Log.d(TAG, "uploadTileData, " + tile);
+
+			glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
+
+			sbuf = shortBuffer[uploadCnt];
+
+			// add fill coordinates
+			newSize += 8;
+
+			// FIXME probably not a good idea to do this in gl thread...
+			if (sbuf == null || sbuf.capacity() < newSize) {
+				ByteBuffer bbuf = ByteBuffer.allocateDirect(newSize * SHORT_BYTES).order(
+						ByteOrder.nativeOrder());
+				sbuf = bbuf.asShortBuffer();
+				shortBuffer[uploadCnt] = sbuf;
+				sbuf.put(mFillCoords, 0, 8);
+			}
+
+			sbuf.clear();
+			sbuf.position(8);
+
+			PolygonLayers.compileLayerData(tile.polygonLayers, sbuf);
+			LineLayers.compileLayerData(tile.lineLayers, sbuf);
+			sbuf.flip();
+
+			newSize *= SHORT_BYTES;
+
+			if (tile.vbo.size > newSize && tile.vbo.size < newSize * 4) {
+				GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, newSize, sbuf);
+			} else {
+				mBufferMemoryUsage -= tile.vbo.size;
+				tile.vbo.size = newSize;
+				glBufferData(GL_ARRAY_BUFFER, tile.vbo.size, sbuf, GL_DYNAMIC_DRAW);
+				mBufferMemoryUsage += tile.vbo.size;
+			}
+			tile.lineOffset = (8 + polySize) * SHORT_BYTES;
+
+			// tile.isLoading = false;
+
+			uploadCnt++;
+
+			tile.isReady = true;
+			tile.newData = false;
 		}
-
-		// synchronized (tile) {
-		if (!tile.newData)
-			return false;
-
-		tile.isReady = true;
-		tile.newData = false;
-		// }
-
-		int lineSize = LineLayers.sizeOf(tile.lineLayers);
-		int polySize = PolygonLayers.sizeOf(tile.polygonLayers);
-		int newSize = lineSize + polySize;
-
-		if (newSize == 0) {
-			LineLayers.clear(tile.lineLayers);
-			PolygonLayers.clear(tile.polygonLayers);
-			tile.lineLayers = null;
-			tile.polygonLayers = null;
-			return false;
-		}
-
-		// Log.d(TAG, "uploadTileData, " + tile);
-
-		glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
-
-		sbuf = shortBuffer[uploadCnt];
-
-		// add fill coordinates
-		newSize += 8;
-
-		// FIXME probably not a good idea to do this in gl thread...
-		if (sbuf == null || sbuf.capacity() < newSize) {
-			ByteBuffer bbuf = ByteBuffer.allocateDirect(newSize * SHORT_BYTES).order(
-					ByteOrder.nativeOrder());
-			sbuf = bbuf.asShortBuffer();
-			shortBuffer[uploadCnt] = sbuf;
-			sbuf.put(mFillCoords, 0, 8);
-		}
-
-		sbuf.clear();
-		sbuf.position(8);
-
-		PolygonLayers.compileLayerData(tile.polygonLayers, sbuf);
-		LineLayers.compileLayerData(tile.lineLayers, sbuf);
-		sbuf.flip();
-
-		newSize *= SHORT_BYTES;
-
-		if (tile.vbo.size > newSize && tile.vbo.size < newSize * 4) {
-			GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, newSize, sbuf);
-		} else {
-			mBufferMemoryUsage -= tile.vbo.size;
-			tile.vbo.size = newSize;
-			glBufferData(GL_ARRAY_BUFFER, tile.vbo.size, sbuf, GL_DYNAMIC_DRAW);
-			mBufferMemoryUsage += tile.vbo.size;
-		}
-		tile.lineOffset = (8 + polySize) * SHORT_BYTES;
-
-		// tile.isLoading = false;
-
-		uploadCnt++;
-
 		return true;
 	}
 
-	private float[] mClearColor;
+	private float[] mClearColor = null;
 	private static long mRedrawCnt = 0;
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		long start = 0, poly_time = 0, clear_time = 0;
 
-		if (mClearColor != null) {
-			glClearColor(mClearColor[0], mClearColor[1], mClearColor[2],
-					mClearColor[3]);
-			mClearColor = null;
-		}
-
-		glClear(GLES20.GL_COLOR_BUFFER_BIT);// | GLES20.GL_DEPTH_BUFFER_BIT);
+		glClear(GLES20.GL_COLOR_BUFFER_BIT
+				| GLES20.GL_DEPTH_BUFFER_BIT
+		// | GLES20.GL_STENCIL_BUFFER_BIT
+		);
 
 		if (mInitial)
 			return;
@@ -903,8 +865,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			if (!setTileScissor(tile, 1))
 				continue;
 
-			if (updateTextures < 4 && tile.texture == null
-					&& TextRenderer.drawToTexture(tile))
+			if (tile.texture == null && TextRenderer.drawToTexture(tile))
 				updateTextures++;
 
 			if (tile.newData) {
@@ -930,8 +891,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		if (updateTextures > 0) {
 			TextRenderer.compileTextures();
-			if (updateTextures == 4)
-				mMapView.requestRender();
+			// if (updateTextures == 4)
+			// mMapView.requestRender();
 		}
 		// if (GlUtils.checkGlOutOfMemory("upload: " + mBufferMemoryUsage)
 		// && LIMIT_BUFFERS > MB)
@@ -941,18 +902,25 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			clear_time = (SystemClock.uptimeMillis() - start);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		for (int i = 0; i < tileCnt; i++) {
-			if (tiles[i].isVisible && !tiles[i].isReady) {
-				drawProxyTile(tiles[i]);
-			}
-		}
+		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible && tiles[i].isReady) {
 				drawTile(tiles[i], 1);
 			}
 		}
+
+		// proxies are clipped to the region where nothing was drawn to depth buffer
+		for (int i = 0; i < tileCnt; i++) {
+			if (tiles[i].isVisible && !tiles[i].isReady) {
+				drawProxyTile(tiles[i]);
+			}
+		}
+
+		glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
+		glDisable(GLES20.GL_DEPTH_TEST);
+
 		mDrawCount = 0;
 
 		glEnable(GL_BLEND);
@@ -1006,6 +974,9 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		boolean clipped = false;
 
+		// GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+
 		for (; pl != null || ll != null;) {
 			int lnext = Integer.MAX_VALUE;
 			int pnext = Integer.MAX_VALUE;
@@ -1024,27 +995,30 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 				if (!clipped) {
 					clipped = true;
-					glDisable(GLES20.GL_DEPTH_TEST);
+					// glDisable(GLES20.GL_DEPTH_TEST);
 				}
 			} else {
 				// nastay
 				if (!clipped)
 					PolygonLayers.drawPolygons(null, 0, mMVPMatrix, mDrawZ,
 							mDrawScale, mDrawCount, true);
-				else {
-					GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-					glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
-					GLES20.glPolygonOffset(0, mDrawCount);
-				}
+				// else {
+				// GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+				// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+				// GLES20.glPolygonOffset(0, mDrawCount);
+				// }
 				glEnable(GL_BLEND);
 
 				ll = LineLayers.drawLines(tile, ll, pnext, mMVPMatrix, div,
 						mDrawZ, mDrawScale);
 
-				glDisable(GLES20.GL_DEPTH_TEST);
-				glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
+				// glDisable(GLES20.GL_DEPTH_TEST);
+				// glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 			}
 		}
+
+		// glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
+		// glDisable(GLES20.GL_DEPTH_TEST);
 
 		mDrawCount++;
 	}
@@ -1059,7 +1033,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 					continue;
 				}
 
-				if (c.isReady && c.isVisible) {
+				if (c.isReady) {
 					drawTile(c, 2);
 					drawn++;
 				}
@@ -1069,29 +1043,29 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	}
 
 	private static void drawProxyTile(GLMapTile tile) {
-		if (mDrawScale < 1.5f) {
-			if (!drawProxyChild(tile)) {
-				if (tile.parent != null) {
-					if (tile.parent.isReady) {
-						drawTile(tile.parent, 0.5f);
-					} else {
-						GLMapTile p = tile.parent.parent;
-						if (p != null && p.isReady)
-							drawTile(p, 0.25f);
-					}
-				}
-			}
-		} else {
-			if (tile.parent != null && tile.parent.isReady) {
-				drawTile(tile.parent, 0.5f);
-			} else if (!drawProxyChild(tile)) {
-				if (tile.parent != null) {
-					GLMapTile p = tile.parent.parent;
-					if (p != null && p.isReady)
-						drawTile(p, 0.25f);
-				}
+		// if (mDrawScale < 1.5f) {
+		// if (!drawProxyChild(tile)) {
+		// if (tile.parent != null) {
+		// if (tile.parent.isReady) {
+		// drawTile(tile.parent, 0.5f);
+		// } else {
+		// GLMapTile p = tile.parent.parent;
+		// if (p != null && p.isReady)
+		// drawTile(p, 0.25f);
+		// }
+		// }
+		// }
+		// } else {
+		if (tile.parent != null && tile.parent.isReady) {
+			drawTile(tile.parent, 0.5f);
+		} else if (!drawProxyChild(tile)) {
+			if (tile.parent != null) {
+				GLMapTile p = tile.parent.parent;
+				if (p != null && p.isReady)
+					drawTile(p, 0.25f);
 			}
 		}
+		// }
 	}
 
 	@Override
@@ -1147,7 +1121,14 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		glDisable(GLES20.GL_DEPTH_TEST);
 		glDepthMask(false);
 		glDisable(GL_DITHER);
-		glClearColor(0.98f, 0.98f, 0.97f, 1.0f);
+
+		if (mClearColor != null) {
+
+			glClearColor(mClearColor[0], mClearColor[1], mClearColor[2],
+					mClearColor[3]);
+		} else {
+			glClearColor(0.98f, 0.98f, 0.97f, 1.0f);
+		}
 		glClearStencil(0);
 		glClear(GL_STENCIL_BUFFER_BIT);
 

@@ -94,7 +94,7 @@ public class MapView extends GLSurfaceView {
 	private IMapRenderer mMapRenderer;
 	private JobQueue mJobQueue;
 	private MapWorker mMapWorkers[];
-	private int mNumMapWorkers = 6;
+	private int mNumMapWorkers = 4;
 	private JobParameters mJobParameters;
 	public DebugSettings debugSettings;
 	private String mMapFile;

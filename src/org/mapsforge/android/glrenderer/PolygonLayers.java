@@ -17,8 +17,6 @@ package org.mapsforge.android.glrenderer;
 import static android.opengl.GLES20.GL_BLEND;
 import static android.opengl.GLES20.GL_EQUAL;
 import static android.opengl.GLES20.GL_INVERT;
-import static android.opengl.GLES20.GL_KEEP;
-import static android.opengl.GLES20.GL_NEVER;
 import static android.opengl.GLES20.GL_STENCIL_TEST;
 import static android.opengl.GLES20.GL_TRIANGLE_FAN;
 import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
@@ -84,6 +82,10 @@ class PolygonLayers {
 		// do not modify stencil buffer
 		glStencilMask(0);
 
+		// clip with depth mask
+		// GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+
 		for (int c = 0; c < count; c++) {
 			PolygonLayer l = mFillPolys[c];
 
@@ -137,6 +139,9 @@ class PolygonLayers {
 
 		if (blend)
 			glDisable(GL_BLEND);
+
+		// glDisable(GLES20.GL_DEPTH_TEST);
+		// glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 	}
 
 	static PolygonLayer drawPolygons(PolygonLayer layer, int next,
@@ -156,6 +161,8 @@ class PolygonLayers {
 
 		PolygonLayer l = layer;
 
+		boolean first = clip;
+
 		for (; l != null && l.layer < next; l = l.next) {
 			// fade out polygon layers (set in RederTheme)
 			if (l.area.fade > 0 && l.area.fade > zoom)
@@ -166,18 +173,34 @@ class PolygonLayers {
 				glColorMask(false, false, false, false);
 
 				// never pass the test, i.e. always apply first stencil op (sfail)
-				glStencilFunc(GL_NEVER, 0, 0xff);
+				glStencilFunc(GLES20.GL_ALWAYS, 0, 0xff);
 
 				// clear stencilbuffer
 				glStencilMask(0xFF);
 				// glClear(GL_STENCIL_BUFFER_BIT);
 
 				// clear stencilbuffer (tile region)
-				glStencilOp(GL_ZERO, GL_KEEP, GL_KEEP);
+				glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+
+				if (first) {
+					// glEnable(GLES20.GL_DEPTH_TEST);
+					// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+					GLES20.glPolygonOffset(0, drawCount);
+					GLES20.glDepthMask(true);
+					GLES20.glDepthFunc(GLES20.GL_LESS);
+				}
+
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+				if (first) {
+					first = false;
+					GLES20.glDepthMask(false);
+					GLES20.glDepthFunc(GLES20.GL_EQUAL);
+					// glDisable(GLES20.GL_DEPTH_TEST);
+				}
+
 				// stencil op for stencil method polygon drawing
-				glStencilOp(GL_INVERT, GL_KEEP, GL_KEEP);
+				glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
 			}
 
 			mFillPolys[cnt] = l;
@@ -199,9 +222,8 @@ class PolygonLayers {
 
 		glDisable(GL_STENCIL_TEST);
 
-		if (clip) {
+		if (clip && first)
 			drawDepthClip(drawCount);
-		}
 
 		// required on GalaxyII, Android 2.3.3 (cant just VAA enable once...)
 		GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);
@@ -243,19 +265,13 @@ class PolygonLayers {
 	static void drawDepthClip(short drawCount) {
 
 		glColorMask(false, false, false, false);
-		glEnable(GLES20.GL_DEPTH_TEST);
-		glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
-		// GLES20.GL_PO
+		// glEnable(GLES20.GL_DEPTH_TEST);
+		// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 		GLES20.glPolygonOffset(0, drawCount);
 
-		// int i[] = new int[1];
-		// GLES20.glGetIntegerv(GLES20.GL_POLYGON_OFFSET_UNITS, i, 0);
-		// Log.d("...", "UNITS " + i[0]);
-		//
-		// System.out.println("set offset: " + drawCount);
 		GLES20.glDepthMask(true);
 
-		GLES20.glDepthFunc(GLES20.GL_ALWAYS);
+		GLES20.glDepthFunc(GLES20.GL_LESS);
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
