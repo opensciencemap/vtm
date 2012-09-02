@@ -31,6 +31,8 @@ public interface IRenderCallback {
 	 * 
 	 * @param area
 	 *            ...
+	 * @param level
+	 *            ...
 	 */
 	void renderArea(Area area, int level);
 
@@ -82,6 +84,8 @@ public interface IRenderCallback {
 	 * Renders a way with the given parameters.
 	 * 
 	 * @param line
+	 *            ...
+	 * @param level
 	 *            ...
 	 */
 	void renderWay(Line line, int level);

@@ -3,7 +3,6 @@
 
     <style name="MyActionBar" parent="android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">@drawable/action_bar</item>
-        <item name="android:windowActionBarOverlay">true</item>
     </style>
 
     <style name="Theme.TileMap" parent="android:style/Theme.Holo">

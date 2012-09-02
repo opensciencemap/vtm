@@ -67,6 +67,8 @@ class LineLayers {
 		return true;
 	}
 
+	static final boolean mFast = true;
+
 	static LineLayer drawLines(GLMapTile tile, LineLayer layer, int next, float[] matrix,
 			float div, double zoom, float scale) {
 
@@ -88,18 +90,17 @@ class LineLayers {
 
 		glUniformMatrix4fv(hLineMatrix, 1, false, matrix, 0);
 
-		// if (diff != 0)
-		// // diff < 0 means tile is parent
-		// z = (diff > 0) ? 1.0f / (1 << diff) : (1 << -diff);
-
 		// scale factor to map one pixel on tile to one pixel on screen:
-		// float pixel = 2.0f / (scale * z);
-		// GLES20.glUniform1f(hLineScale, pixel);
+		float pixel = 2.0f / (scale * z);
+
+		if (mFast)
+			GLES20.glUniform1f(hLineScale, pixel);
+		else
+			GLES20.glUniform1f(hLineScale, 0);
 
 		// line scale factor (for non fixed lines)
 		float s = FloatMath.sqrt(scale * z);
 		boolean blur = false;
-		GLES20.glUniform1f(hLineScale, 0);
 
 		LineLayer l = layer;
 		for (; l != null && l.layer < next; l = l.next) {
@@ -120,11 +121,16 @@ class LineLayers {
 			}
 
 			if (blur) {
-				GLES20.glUniform1f(hLineScale, 0);
+				if (mFast)
+					GLES20.glUniform1f(hLineScale, pixel);
+				else
+					GLES20.glUniform1f(hLineScale, 0);
 				blur = false;
 			}
+
 			if (l.isOutline) {
 				for (LineLayer o = l.outlines; o != null; o = o.outlines) {
+
 					if (line.blur != 0) {
 						GLES20.glUniform1f(hLineScale, (l.width + o.width) / (scale * z)
 								- (line.blur / (scale * z)));

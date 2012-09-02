@@ -15,38 +15,33 @@
 package org.mapsforge.android.glrenderer;
 
 import org.mapsforge.android.mapgenerator.MapTile;
-import org.mapsforge.core.Tile;
 
 class GLMapTile extends MapTile {
 	long lastDraw = 0;
 
+	// VBO layout:
+	// 16 bytes fill coordinates
+	// n bytes polygon vertices
+	// m bytes lines vertices
 	VertexBufferObject vbo;
 
-	// polygonOffset is always 8
+	// polygonOffset in vbo is always 16 bytes,
 	int lineOffset;
 
 	TextTexture texture;
 
+	// Tile data set by MapGenerator:
 	LineLayer lineLayers;
 	PolygonLayer polygonLayers;
-
 	TextItem labels;
 
 	boolean newData;
-	boolean loading;
 
-	// pixel coordinates (y-flipped)
-	final long x;
-	final long y;
+	// pointer in TileTree
+	TreeTile rel;
 
-	final GLMapTile[] child = { null, null, null, null };
-	GLMapTile parent;
-
-	GLMapTile(long tileX, long tileY, byte zoomLevel) {
+	GLMapTile(int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
-
-		x = pixelX;
-		y = pixelY + Tile.TILE_SIZE;
 	}
 
 }

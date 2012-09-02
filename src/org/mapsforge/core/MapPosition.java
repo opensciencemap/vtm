@@ -14,20 +14,17 @@
  */
 package org.mapsforge.core;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-
 /**
  * A MapPosition represents an immutable pair of {@link GeoPoint} and zoom level.
  */
-public class MapPosition implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class MapPosition {
 
 	/**
 	 * The map position.
 	 */
-	public final GeoPoint geoPoint;
+	// public final GeoPoint geoPoint;
+	public final double lon;
+	public final double lat;
 
 	/**
 	 * The zoom level.
@@ -38,10 +35,11 @@ public class MapPosition implements Serializable {
 	 * 1.0 - 2.0 scale of current zoomlevel
 	 */
 	public final float scale;
-	/**
-	 * The hash code of this object.
-	 */
-	private transient int hashCodeValue;
+
+	public final float angle;
+
+	public final double x;
+	public final double y;
 
 	/**
 	 * @param geoPoint
@@ -51,62 +49,40 @@ public class MapPosition implements Serializable {
 	 * @param scale
 	 *            ...
 	 */
+
 	public MapPosition(GeoPoint geoPoint, byte zoomLevel, float scale) {
-		this.geoPoint = geoPoint;
+		// this.geoPoint = geoPoint;
 		this.zoomLevel = zoomLevel;
 		this.scale = scale;
-		this.hashCodeValue = calculateHashCode();
+		this.lat = geoPoint.getLatitude();
+		this.lon = geoPoint.getLongitude();
+		this.angle = 0;
+		this.x = MercatorProjection.longitudeToPixelX(this.lon, zoomLevel);
+		this.y = MercatorProjection.latitudeToPixelY(this.lat, zoomLevel);
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		} else if (!(obj instanceof MapPosition)) {
-			return false;
-		}
-		MapPosition other = (MapPosition) obj;
-		if (this.geoPoint == null) {
-			if (other.geoPoint != null) {
-				return false;
-			}
-		} else if (!this.geoPoint.equals(other.geoPoint)) {
-			return false;
-		}
-		if (this.zoomLevel != other.zoomLevel) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		return this.hashCodeValue;
+	public MapPosition(double latitude, double longitude, byte zoomLevel, float scale,
+			float angle) {
+		this.zoomLevel = zoomLevel;
+		this.scale = scale;
+		this.lat = latitude;
+		this.lon = longitude;
+		this.angle = angle;
+		this.x = MercatorProjection.longitudeToPixelX(longitude, zoomLevel);
+		this.y = MercatorProjection.latitudeToPixelY(latitude, zoomLevel);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("MapPosition [geoPoint=");
-		builder.append(this.geoPoint);
+		builder.append("lat");
+		builder.append(this.lat);
+		builder.append("lon");
+		builder.append(this.lon);
 		builder.append(", zoomLevel=");
 		builder.append(this.zoomLevel);
 		builder.append("]");
 		return builder.toString();
-	}
-
-	/**
-	 * @return the hash code of this object.
-	 */
-	private int calculateHashCode() {
-		int result = 7;
-		result = 31 * result + ((this.geoPoint == null) ? 0 : this.geoPoint.hashCode());
-		result = 31 * result + this.zoomLevel;
-		return result;
-	}
-
-	private void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
-		objectInputStream.defaultReadObject();
-		this.hashCodeValue = calculateHashCode();
 	}
 }

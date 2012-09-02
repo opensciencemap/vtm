@@ -138,8 +138,7 @@ public class RenderTheme {
 	 * @return ...
 	 */
 	public synchronized RenderInstruction[] matchNode(IRenderCallback renderCallback,
-			Tag[] tags,
-			byte zoomLevel) {
+			Tag[] tags, byte zoomLevel) {
 
 		RenderInstruction[] renderInstructions = null;
 
@@ -189,9 +188,8 @@ public class RenderTheme {
 	 * @return currently processed render instructions
 	 */
 	public synchronized RenderInstruction[] matchWay(IRenderCallback renderCallback,
-			Tag[] tags,
-			byte zoomLevel,
-			boolean closed, boolean render) {
+			Tag[] tags, byte zoomLevel, boolean closed, boolean render) {
+
 		RenderInstruction[] renderInstructions = null;
 
 		LRUCache<MatchingCacheKey, RenderInstruction[]> matchingCache;
@@ -205,6 +203,7 @@ public class RenderTheme {
 
 		matchingCacheKey = new MatchingCacheKey(tags, zoomLevel);
 		boolean found = matchingCache.containsKey(matchingCacheKey);
+
 		if (found) {
 			renderInstructions = matchingCache.get(matchingCacheKey);
 		} else {

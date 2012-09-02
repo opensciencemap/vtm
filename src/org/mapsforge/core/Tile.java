@@ -19,10 +19,6 @@ package org.mapsforge.core;
  * with their zoom level. The actual area that a tile covers on a map depends on the underlying map projection.
  */
 public class Tile {
-	/**
-	 * Bytes per pixel required in a map tile bitmap.
-	 */
-	public static final byte TILE_BYTES_PER_PIXEL = 2;
 
 	/**
 	 * Width and height of a map tile in pixel.
@@ -30,27 +26,20 @@ public class Tile {
 	public static int TILE_SIZE = 256;
 
 	/**
-	 * Size of a single uncompressed map tile bitmap in bytes.
-	 */
-	public static final int TILE_SIZE_IN_BYTES = TILE_SIZE * TILE_SIZE
-			* TILE_BYTES_PER_PIXEL;
-
-	/**
 	 * The X number of this tile.
 	 */
-	public final long tileX;
+	public final int tileX;
 
 	/**
 	 * The Y number of this tile.
 	 */
-	public final long tileY;
+	public final int tileY;
 
 	/**
 	 * The Zoom level of this tile.
 	 */
 	public final byte zoomLevel;
 
-	private transient int hashCodeValue;
 	/**
 	 * the pixel X coordinate of the upper left corner of this tile.
 	 */
@@ -70,51 +59,12 @@ public class Tile {
 	 * @param zoomLevel
 	 *            the zoom level of the tile.
 	 */
-	public Tile(long tileX, long tileY, byte zoomLevel) {
+	public Tile(int tileX, int tileY, byte zoomLevel) {
 		this.tileX = tileX;
 		this.tileY = tileY;
 		this.pixelX = this.tileX * TILE_SIZE;
 		this.pixelY = this.tileY * TILE_SIZE;
 		this.zoomLevel = zoomLevel;
-		this.hashCodeValue = calculateHashCode();
-
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		} else if (!(obj instanceof Tile)) {
-			return false;
-		}
-		Tile other = (Tile) obj;
-		if (this.tileX != other.tileX) {
-			return false;
-		} else if (this.tileY != other.tileY) {
-			return false;
-		} else if (this.zoomLevel != other.zoomLevel) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * @return the pixel X coordinate of the upper left corner of this tile.
-	 */
-	// public long getPixelX() {
-	// return this.pixelX;
-	// }
-
-	/**
-	 * @return the pixel Y coordinate of the upper left corner of this tile.
-	 */
-	// public long getPixelY() {
-	// return this.pixelY;
-	// }
-
-	@Override
-	public int hashCode() {
-		return this.hashCodeValue;
 	}
 
 	@Override
@@ -130,14 +80,34 @@ public class Tile {
 		return stringBuilder.toString();
 	}
 
-	/**
-	 * @return the hash code of this object.
-	 */
-	private int calculateHashCode() {
-		int result = 7;
-		result = 31 * result + (int) (this.tileX ^ (this.tileX >>> 32));
-		result = 31 * result + (int) (this.tileY ^ (this.tileY >>> 32));
-		result = 31 * result + this.zoomLevel;
-		return result;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+
+		if (!(obj instanceof Tile))
+			return false;
+
+		Tile o = (Tile) obj;
+
+		if (o.tileX == this.tileX && o.tileY == this.tileY
+				&& o.zoomLevel == this.zoomLevel)
+			return true;
+
+		return false;
+	}
+
+	private int mHash = 0;
+
+	@Override
+	public int hashCode() {
+		if (mHash == 0) {
+			int result = 7;
+			result = 31 * result + this.tileX;
+			result = 31 * result + this.tileY;
+			result = 31 * result + this.zoomLevel;
+			mHash = result;
+		}
+		return mHash;
 	}
 }

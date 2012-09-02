@@ -72,7 +72,8 @@ public class MapZoomControls {
 	/**
 	 * Default {@link Gravity} of the zoom controls.
 	 */
-	private static final int DEFAULT_ZOOM_CONTROLS_GRAVITY = Gravity.BOTTOM | Gravity.RIGHT;
+	private static final int DEFAULT_ZOOM_CONTROLS_GRAVITY = Gravity.BOTTOM
+			| Gravity.RIGHT;
 
 	/**
 	 * Default maximum zoom level.
@@ -97,7 +98,8 @@ public class MapZoomControls {
 	/**
 	 * Delay in milliseconds after which the zoom controls disappear.
 	 */
-	private static final long ZOOM_CONTROLS_TIMEOUT = ViewConfiguration.getZoomControlsTimeout();
+	private static final long ZOOM_CONTROLS_TIMEOUT = ViewConfiguration
+			.getZoomControlsTimeout();
 
 	private boolean mGravityChanged;
 	private boolean mShowMapZoomControls;
@@ -220,7 +222,8 @@ public class MapZoomControls {
 				return (right - left - zoomControlsWidth) / 2;
 
 			case Gravity.RIGHT:
-				return right - left - zoomControlsWidth - ZOOM_CONTROLS_HORIZONTAL_PADDING;
+				return right - left - zoomControlsWidth
+						- ZOOM_CONTROLS_HORIZONTAL_PADDING;
 		}
 
 		throw new IllegalArgumentException("unknown horizontal gravity: " + gravity);
@@ -251,7 +254,8 @@ public class MapZoomControls {
 
 	private void showZoomControlsWithTimeout() {
 		showZoomControls();
-		mZoomControlsHideHandler.sendEmptyMessageDelayed(MSG_ZOOM_CONTROLS_HIDE, ZOOM_CONTROLS_TIMEOUT);
+		mZoomControlsHideHandler.sendEmptyMessageDelayed(MSG_ZOOM_CONTROLS_HIDE,
+				ZOOM_CONTROLS_TIMEOUT);
 	}
 
 	int getMeasuredHeight() {

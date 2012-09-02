@@ -48,6 +48,9 @@
        <!--   <item
                 android:id="@+id/menu_info_map_file"
                 android:title="@string/menu_info_map_file"/> -->
+          <item
+            android:id="@+id/menu_info_about"
+            android:title="@string/menu_info_about"/>
     </menu>
 
     </item>
@@ -61,6 +64,9 @@
                 <item
                     android:id="@+id/menu_render_theme_osmarender"
                     android:title="@string/menu_render_theme_osmarender"/>
+                 <item
+                    android:id="@+id/menu_render_theme_tronrender"
+                    android:title="@string/menu_render_theme_tronrender"/>
                 <item
                     android:id="@+id/menu_render_theme_select_file"
                     android:title="@string/menu_render_theme_select_file"/>

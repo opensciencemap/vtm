@@ -27,7 +27,9 @@ public enum InternalRenderTheme implements Theme {
 	 * 
 	 * @see <a href="http://wiki.openstreetmap.org/wiki/Osmarender">Osmarender</a>
 	 */
-	OSMARENDER("/org/mapsforge/android/rendertheme/osmarender/osmarender.xml");
+	OSMARENDER("/org/mapsforge/android/rendertheme/osmarender/osmarender.xml"),
+
+	TRONRENDER("/org/mapsforge/android/rendertheme/osmarender/tronrender.xml");
 
 	private final String mPath;
 

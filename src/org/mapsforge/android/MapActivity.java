@@ -96,7 +96,7 @@ public abstract class MapActivity extends Activity {
 		// save the map position and zoom level
 		MapPosition mapPosition = mMapView.getMapPosition().getMapPosition();
 		if (mapPosition != null) {
-			GeoPoint geoPoint = mapPosition.geoPoint;
+			GeoPoint geoPoint = new GeoPoint(mapPosition.lat, mapPosition.lon);
 			editor.putInt(KEY_LATITUDE, geoPoint.latitudeE6);
 			editor.putInt(KEY_LONGITUDE, geoPoint.longitudeE6);
 			editor.putInt(KEY_ZOOM_LEVEL, mapPosition.zoomLevel);

@@ -22,12 +22,14 @@ import java.util.Comparator;
 import org.mapsforge.app.R;
 import org.mapsforge.app.filefilter.ValidFileFilter;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -223,13 +225,16 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
 		editor.commit();
 	}
 
+	@TargetApi(11)
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// getActionBar().hide();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			getActionBar().hide();
 
 		// check if the full screen mode should be activated
-		// if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fullscreen", false)) {
+		// if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fullscreen",
+		// false)) {
 		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		// getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		// } else {

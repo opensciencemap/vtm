@@ -25,9 +25,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
+import org.mapsforge.android.rendertheme.renderinstruction.AreaLevel;
 import org.mapsforge.android.rendertheme.renderinstruction.Caption;
 import org.mapsforge.android.rendertheme.renderinstruction.Circle;
-import org.mapsforge.android.rendertheme.renderinstruction.AreaLevel;
 import org.mapsforge.android.rendertheme.renderinstruction.Line;
 import org.mapsforge.android.rendertheme.renderinstruction.LineSymbol;
 import org.mapsforge.android.rendertheme.renderinstruction.PathText;
@@ -39,6 +39,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
+
+import android.util.Log;
 
 /**
  * SAX2 handler to parse XML render theme files.
@@ -195,7 +197,7 @@ public class RenderThemeHandler extends DefaultHandler {
 						// System.out.println("add style: " + line.style + " from " + style);
 					}
 					else {
-						// System.out.println("couldnt check the style yo! " + style);
+						Log.d("...", "this aint no style! " + style);
 					}
 				} else {
 					Line line = Line.create(null, localName, attributes, 0, false);
@@ -266,6 +268,8 @@ public class RenderThemeHandler extends DefaultHandler {
 
 						mCurrentRule.addRenderingInstruction(newLine);
 					}
+					else
+						Log.d("...", "styles not a line! " + style);
 				}
 			} else if (ELEMENT_NAME_USE_STYLE_OUTLINE.equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -274,6 +278,8 @@ public class RenderThemeHandler extends DefaultHandler {
 					Line line = (Line) tmpStyleHash.get("o" + style);
 					if (line != null && line.outline)
 						mCurrentRule.addRenderingInstruction(line);
+					else
+						Log.d("...", "styles not bad, but this aint no outline! " + style);
 				}
 			} else if (ELEMENT_NAME_USE_STYLE_AREA.equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -283,6 +289,8 @@ public class RenderThemeHandler extends DefaultHandler {
 					if (area != null)
 						mCurrentRule.addRenderingInstruction(new AreaLevel(area,
 								mLevel++));
+					else
+						Log.d("...", "this aint no style inna di area! " + style);
 				}
 			} else if (ELEMENT_NAME_USE_STYLE_PATH_TEXT.equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -291,6 +299,8 @@ public class RenderThemeHandler extends DefaultHandler {
 					PathText pt = (PathText) tmpStyleHash.get("t" + style);
 					if (pt != null)
 						mCurrentRule.addRenderingInstruction(pt);
+					else
+						Log.d("...", "this aint no path text style! " + style);
 				}
 			} else {
 				throw new SAXException("unknown element: " + localName);

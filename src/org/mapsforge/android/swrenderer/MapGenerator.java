@@ -17,8 +17,10 @@ package org.mapsforge.android.swrenderer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mapsforge.android.DebugSettings;
+import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
-import org.mapsforge.android.mapgenerator.MapGeneratorJob;
+import org.mapsforge.android.mapgenerator.MapTile;
 import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
@@ -98,11 +100,16 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 
 	// private long _renderTime;
 	private int _nodes, _nodesDropped;
+	private MapView mMapView;
 
 	/**
 	 * Constructs a new DatabaseRenderer.
+	 * 
+	 * @param mapView
+	 *            the MapView
 	 */
-	public MapGenerator() {
+	public MapGenerator(MapView mapView) {
+		mMapView = mapView;
 		mCanvasRasterer = new CanvasRasterer();
 		mLabelPlacement = new LabelPlacement();
 
@@ -131,13 +138,13 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	}
 
 	@Override
-	public boolean executeJob(MapGeneratorJob mapGeneratorJob) {
+	public boolean executeJob(MapTile mapTile) {
 		long time_load = System.currentTimeMillis();
 		_nodes = 0;
 		_nodesDropped = 0;
 		// _renderTime = 0;
 
-		mCurrentTile = mapGeneratorJob.tile;
+		mCurrentTile = mapTile;
 		mCurrentTileZoom = ((long) Tile.TILE_SIZE << mCurrentTile.zoomLevel);
 		mCurrentTileX = mCurrentTile.pixelX;
 		mCurrentTileY = mCurrentTile.pixelY;
@@ -151,7 +158,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 		//
 		// mTileWidth = mLon2 - mLon1;
 		// mTileHeight = mLat1 - mLat2;
-		mScale = mapGeneratorJob.getScale();
+		// mScale = mapGeneratorJob.getScale();
 
 		// Theme theme = mapGeneratorJob.jobParameters.theme;
 		// if (!theme.equals(mPreviousJobTheme)) {
@@ -203,18 +210,20 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 		mCanvasRasterer.drawNodes(mAreaLabels);
 		time_draw = System.currentTimeMillis() - time_draw;
 
-		if (mapGeneratorJob.debugSettings.mDrawTileFrames) {
+		DebugSettings debugSettings = mMapView.getDebugSettings();
+
+		if (debugSettings.mDrawTileFrames) {
 			mCanvasRasterer.drawTileFrame();
 		}
 
-		if (mapGeneratorJob.debugSettings.mDrawTileCoordinates) {
+		if (debugSettings.mDrawTileCoordinates) {
 			mCanvasRasterer.drawTileCoordinates(mCurrentTile, time_load, time_draw,
 					_nodes, _nodesDropped);
 		}
 
 		clearLists();
 
-		mapGeneratorJob.setBitmap(mTileBitmap);
+		// mapGeneratorJob.setBitmap(mTileBitmap);
 
 		return true;
 	}
@@ -411,8 +420,8 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 		// mPrevLayer = layer;
 	}
 
-	private List<ShapeContainer> mCurLevelContainer1;
-	private List<ShapeContainer> mCurLevelContainer2;
+	// private List<ShapeContainer> mCurLevelContainer1;
+	// private List<ShapeContainer> mCurLevelContainer2;
 
 	@Override
 	public void renderWay(Line line, int level) {

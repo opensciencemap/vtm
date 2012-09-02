@@ -25,10 +25,10 @@ final class WayDecorator {
 	// */
 	// private static final int DISTANCE_BETWEEN_SYMBOLS = 200;
 
-	/**
-	 * Minimum distance in pixels before the way name is repeated.
-	 */
-	private static final int DISTANCE_BETWEEN_WAY_NAMES = 500;
+	// /**
+	// * Minimum distance in pixels before the way name is repeated.
+	// */
+	// private static final int DISTANCE_BETWEEN_WAY_NAMES = 500;
 
 	// /**
 	// * Distance in pixels to skip from both ends of a segment.

@@ -46,7 +46,7 @@ public final class MapDatabaseFactory {
 		String mapDatabaseName = attributeSet.getAttributeValue(null,
 				MAP_DATABASE_ATTRIBUTE_NAME);
 		if (mapDatabaseName == null) {
-			return MapDatabases.POSTGIS_READER;
+			return MapDatabases.PBMAP_READER;
 		}
 
 		return MapDatabases.valueOf(mapDatabaseName);

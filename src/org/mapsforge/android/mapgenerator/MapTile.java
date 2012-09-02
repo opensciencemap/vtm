@@ -19,7 +19,7 @@ import org.mapsforge.core.Tile;
 /**
  * 
  */
-public class MapTile extends Tile {
+public class MapTile extends Tile implements Comparable<MapTile> {
 	/**
 	 * tile is loaded and ready for drawing. (set and used by render thread after uploading data to gl).
 	 */
@@ -53,7 +53,17 @@ public class MapTile extends Tile {
 	 * @param zoomLevel
 	 *            ..
 	 */
-	public MapTile(long tileX, long tileY, byte zoomLevel) {
+	public MapTile(int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
+	}
+
+	@Override
+	public int compareTo(MapTile o) {
+		if (this.distance < o.distance) {
+			return -1;
+		} else if (this.distance > o.distance) {
+			return 1;
+		}
+		return 0;
 	}
 }

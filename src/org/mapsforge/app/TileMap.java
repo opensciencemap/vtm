@@ -23,6 +23,7 @@ import org.mapsforge.database.MapFileInfo;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -43,7 +44,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -51,14 +51,14 @@ import android.widget.SeekBar;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 /**
  * A map application which uses the features from the mapsforge map library. The map can be centered to the current
  * location. A simple file browser for selecting the map file is also included. Some preferences can be adjusted via the
  * {@link EditPreferences} activity.
  */
-public class TileMap extends MapActivity { // implements ActionBar.OnNavigationListener {
+public class TileMap extends MapActivity {
+	// implements ActionBar.OnNavigationListener {
 	private static final String BUNDLE_CENTER_AT_FIRST_FIX = "centerAtFirstFix";
 	private static final String BUNDLE_SHOW_MY_LOCATION = "showMyLocation";
 	private static final String BUNDLE_SNAP_TO_LOCATION = "snapToLocation";
@@ -76,7 +76,7 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 	private MyLocationListener mMyLocationListener;
 	private boolean mShowMyLocation;
 	private boolean mSnapToLocation;
-	private ToggleButton mSnapToLocationView;
+	// private ToggleButton mSnapToLocationView;
 	private WakeLock mWakeLock;
 	MapController mMapController;
 	MapView mMapView;
@@ -86,12 +86,12 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 			getMenuInflater().inflate(R.menu.options_menu, menu);
 		else
 			getMenuInflater().inflate(R.menu.options_menu_pre_honeycomb, menu);
 		mMenu = menu;
+
 		return true;
 	}
 
@@ -99,9 +99,9 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 
-		// case R.id.menu_info_map_file:
-		// showDialog(DIALOG_INFO_MAP_FILE);
-		// return true;
+			case R.id.menu_info_about:
+				startActivity(new Intent(this, InfoView.class));
+				return true;
 
 			case R.id.menu_position:
 				return true;
@@ -161,6 +161,10 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 				mMapView.setRenderTheme(InternalRenderTheme.OSMARENDER);
 				return true;
 
+			case R.id.menu_render_theme_tronrender:
+				mMapView.setRenderTheme(InternalRenderTheme.TRONRENDER);
+				return true;
+
 			case R.id.menu_render_theme_select_file:
 				startRenderThemePicker();
 				return true;
@@ -176,6 +180,10 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
+		menu.clear();
+		onCreateOptionsMenu(menu);
+
+		Log.d("TileMap", "prepare options...");
 
 		// menu.findItem(R.id.menu_info_map_file).setEnabled(true);
 
@@ -193,9 +201,15 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 
 		menu.findItem(R.id.menu_position_map_center).setEnabled(true);
 		menu.findItem(R.id.menu_render_theme).setEnabled(true);
-		menu.findItem(R.id.menu_mapfile).setEnabled(true);
+		// menu.findItem(R.id.menu_mapfile).setEnabled(true);
 
-		return true;
+		if (mMapDatabase == MapDatabases.MAP_READER)
+			menu.findItem(R.id.menu_mapfile).setVisible(true);
+		else
+			menu.findItem(R.id.menu_mapfile).setVisible(false);
+
+		return super.onPrepareOptionsMenu(menu);
+		// return true;
 	}
 
 	@Override
@@ -227,7 +241,7 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 			mMyLocationListener.setCenterAtFirstFix(centerAtFirstFix);
 			mLocationManager.requestLocationUpdates(bestProvider, 1000, 0,
 					mMyLocationListener);
-			mSnapToLocationView.setVisibility(View.VISIBLE);
+			// mSnapToLocationView.setVisibility(View.VISIBLE);
 			return true;
 		}
 		return false;
@@ -323,17 +337,18 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 		mMapView = (MapView) findViewById(R.id.mapView);
 		configureMapView();
 
-		mSnapToLocationView = (ToggleButton) findViewById(R.id.snapToLocationView);
-		mSnapToLocationView.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (isSnapToLocationEnabled()) {
-					disableSnapToLocation(true);
-				} else {
-					enableSnapToLocation(true);
-				}
-			}
-		});
+		// mSnapToLocationView = (ToggleButton) findViewById(R.id.snapToLocationView);
+		//
+		// mSnapToLocationView.setOnClickListener(new OnClickListener() {
+		// @Override
+		// public void onClick(View view) {
+		// if (isSnapToLocationEnabled()) {
+		// disableSnapToLocation(true);
+		// } else {
+		// enableSnapToLocation(true);
+		// }
+		// }
+		// });
 
 		// get the pointers to different system services
 		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -404,7 +419,7 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 			builder.setPositiveButton(R.string.ok, null);
 			return builder.create();
 		} else {
-			// do dialog will be created
+			// no dialog will be created
 			return null;
 		}
 	}
@@ -533,40 +548,31 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 
 		if (preferences.contains("mapDatabase")) {
 			String name = preferences.getString("mapDatabase",
-					MapDatabases.POSTGIS_READER.name());
+					MapDatabases.PBMAP_READER.name());
 
 			MapDatabases mapDatabaseNew;
 
 			try {
 				mapDatabaseNew = MapDatabases.valueOf(name);
 			} catch (IllegalArgumentException e) {
-				mapDatabaseNew = MapDatabases.POSTGIS_READER;
+				mapDatabaseNew = MapDatabases.PBMAP_READER;
 			}
 
-			// mapDatabaseInternalNew = MapDatabaseInternal.PBMAP_READER;
 			Log.d("VectorTileMap", "set map database " + mapDatabaseNew);
 
 			if (mapDatabaseNew != mMapDatabase) {
 				mMapView.setMapDatabase(mapDatabaseNew);
 				mMapDatabase = mapDatabaseNew;
 			}
-
-			// if (mapDatabaseNew != mMapDatabase) {
-			// IMapDatabase mapDatabase = MapDatabaseFactory
-			// .createMapDatabase(mapDatabaseNew);
-			//
-			// mMapView.setMapDatabase(mapDatabase);
-			// mMapDatabase = mapDatabaseNew;
-			// }
 		}
 
-		try {
-			String textScaleDefault = getString(R.string.preferences_text_scale_default);
-			mMapView.setTextScale(Float.parseFloat(preferences.getString("textScale",
-					textScaleDefault)));
-		} catch (NumberFormatException e) {
-			mMapView.setTextScale(1);
-		}
+		// try {
+		// String textScaleDefault = getString(R.string.preferences_text_scale_default);
+		// mMapView.setTextScale(Float.parseFloat(preferences.getString("textScale",
+		// textScaleDefault)));
+		// } catch (NumberFormatException e) {
+		// mMapView.setTextScale(1);
+		// }
 
 		if (preferences.getBoolean("fullscreen", false)) {
 			Log.i("mapviewer", "FULLSCREEN");
@@ -601,6 +607,18 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 		} else {
 			mMapView.setMapFile(mMapView.getMapFile());
 		}
+
+		if (Build.VERSION.SDK_INT >= 11) {
+			VersionHelper.refreshActionBarMenu(this);
+		}
+
+	}
+
+	static class VersionHelper {
+		@TargetApi(11)
+		static void refreshActionBarMenu(Activity activity) {
+			activity.invalidateOptionsMenu();
+		}
 	}
 
 	@Override
@@ -628,7 +646,7 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 			// circleOverlay = null;
 			// itemizedOverlay = null;
 			// }
-			mSnapToLocationView.setVisibility(View.GONE);
+			// mSnapToLocationView.setVisibility(View.GONE);
 			return true;
 		}
 		return false;
@@ -643,7 +661,7 @@ public class TileMap extends MapActivity { // implements ActionBar.OnNavigationL
 	void disableSnapToLocation(boolean showToast) {
 		if (mSnapToLocation) {
 			mSnapToLocation = false;
-			mSnapToLocationView.setChecked(false);
+			// mSnapToLocationView.setChecked(false);
 			mMapView.setClickable(true);
 			if (showToast) {
 				showToastOnUiThread(getString(R.string.snap_to_location_disabled));
