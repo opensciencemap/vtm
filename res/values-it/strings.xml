@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-	<string-array name="preferences_map_generator_values">
+	<!-- <string-array name="preferences_map_generator_values">
 	  <item>Mapfile</item>
 		<item>PostGIS</item>
 			<item>OpenScienceMap</item>
-	</string-array>
+	</string-array> -->
 
 	<string-array name="preferences_text_scale_values">
 		<item>minuscola</item>

@@ -62,15 +62,15 @@ public class MapWorker extends PausableThread {
 
 	@Override
 	protected void doWork() {
-		MapGeneratorJob mapGeneratorJob = mJobQueue.poll();
+		MapTile tile = mJobQueue.poll();
 
-		if (mMapGenerator == null || mapGeneratorJob == null)
+		if (mMapGenerator == null || tile == null)
 			return;
 
-		boolean success = mMapGenerator.executeJob(mapGeneratorJob);
+		boolean success = mMapGenerator.executeJob(tile);
 
 		if (!isInterrupted() && success) {
-			mMapRenderer.passTile(mapGeneratorJob);
+			mMapRenderer.passTile(tile);
 		}
 	}
 

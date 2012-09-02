@@ -14,8 +14,10 @@
  */
 package org.mapsforge.android.glrenderer;
 
+import org.mapsforge.android.DebugSettings;
+import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
-import org.mapsforge.android.mapgenerator.MapGeneratorJob;
+import org.mapsforge.android.mapgenerator.MapTile;
 import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
@@ -81,12 +83,24 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 	private RenderInstruction[] mRenderInstructions = null;
 
 	private final String TAG_WATER = "water".intern();
+	private final MapView mMapView;
+
+	private final Tag[] debugTagBox = { new Tag("debug", "box") };
+	private final Tag[] debugTagWay = { new Tag("debug", "way") };
+	private final Tag[] debugTagArea = { new Tag("debug", "area") };
+	private final float[] debugBoxCoords = { 0, 0, 0, Tile.TILE_SIZE,
+			Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 0, 0, 0 };
+	private final short[] debugBoxIndex = { 10 };
+
+	private float mProjectionScaleFactor;
 
 	/**
-	 * 
+	 * @param mapView
+	 *            the MapView
 	 */
-	public MapGenerator() {
+	public MapGenerator(MapView mapView) {
 		Log.d(TAG, "init DatabaseRenderer");
+		mMapView = mapView;
 	}
 
 	private float mPoiX = 256;
@@ -115,8 +129,8 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 		if (mMapProjection != null)
 		{
-			long x = mCurrentTile.x;
-			long y = mCurrentTile.y;
+			long x = mCurrentTile.pixelX;
+			long y = mCurrentTile.pixelY + Tile.TILE_SIZE;
 			long z = Tile.TILE_SIZE << mCurrentTile.zoomLevel;
 
 			double divx, divy;
@@ -163,6 +177,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 		mTagName = null;
 		mProjected = false;
+		mCurLineLayer = null;
 
 		mDrawingLayer = getValidLayer(layer) * mLevels;
 		mSimplify = 0.5f;
@@ -325,9 +340,10 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 			}
 		}
 
-		if (lineLayer == null)
+		if (lineLayer == null) {
+			mCurLineLayer = null;
 			return;
-
+		}
 		if (line.outline) {
 			lineLayer.addOutline(mCurLineLayer);
 			return;
@@ -355,45 +371,6 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 			}
 			pos += length;
 		}
-
-		// if (line.outline < 0)
-		// return;
-		//
-		// Line outline = MapGenerator.renderTheme.getOutline(line.outline);
-		//
-		// if (outline == null)
-		// return;
-		//
-		// numLayer = mDrawingLayer + outline.getLevel();
-		//
-		// l = mLineLayers;
-		//
-		// if (l == null || l.layer > numLayer) {
-		// // insert new layer at start
-		// outlineLayer = new LineLayer(numLayer, outline, w, true);
-		// // outlineLayer = LineLayers.get(numLayer, outline, w, true);
-		// outlineLayer.next = l;
-		// mLineLayers = outlineLayer;
-		// } else {
-		// while (l != null) {
-		// if (l.layer == numLayer) {
-		// outlineLayer = l;
-		// break;
-		// }
-		// // insert new layer between current and next layer
-		// if (l.next == null || l.next.layer > numLayer) {
-		// outlineLayer = new LineLayer(numLayer, outline, w, true);
-		// // outlineLayer = LineLayers.get(numLayer, outline, w, true);
-		// outlineLayer.next = l.next;
-		// l.next = outlineLayer;
-		// }
-		// l = l.next;
-		// }
-		// }
-		//
-		// if (outlineLayer != null)
-		// outlineLayer.addOutline(lineLayer);
-
 	}
 
 	@Override
@@ -469,20 +446,27 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 	boolean mDebugDrawUnmatched;
 
 	@Override
-	public boolean executeJob(MapGeneratorJob mapGeneratorJob) {
+	public boolean executeJob(MapTile mapTile) {
 		GLMapTile tile;
 
 		if (mMapDatabase == null)
 			return false;
 
-		tile = mCurrentTile = (GLMapTile) mapGeneratorJob.tile;
-		mDebugDrawPolygons = !mapGeneratorJob.debugSettings.mDisablePolygons;
-		mDebugDrawUnmatched = mapGeneratorJob.debugSettings.mDrawUnmatchted;
+		tile = mCurrentTile = (GLMapTile) mapTile;
+		DebugSettings debugSettings = mMapView.getDebugSettings();
 
-		if (tile.isLoading || tile.isReady || tile.isCanceled)
+		mDebugDrawPolygons = !debugSettings.mDisablePolygons;
+		mDebugDrawUnmatched = debugSettings.mDrawUnmatchted;
+
+		// fixed now....
+		if (tile.newData || tile.isReady || tile.isCanceled) {
+			Log.d(TAG, "XXX tile already loaded "
+					+ tile + " "
+					+ tile.newData + " "
+					+ tile.isReady + " "
+					+ tile.isCanceled);
 			return false;
-
-		tile.isLoading = true;
+		}
 
 		mLevels = MapGenerator.renderTheme.getLevels();
 
@@ -491,10 +475,6 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 			setScaleStrokeWidth(tile.zoomLevel);
 		else
 			setScaleStrokeWidth(STROKE_MAX_ZOOM_LEVEL);
-
-		mLineLayers = null;
-		mPolyLayers = null;
-		mLabels = null;
 
 		// firstMatch = true;
 		countLines = 0;
@@ -516,12 +496,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 			return false;
 		}
 
-		if (mapGeneratorJob.debugSettings.mDrawTileFrames) {
-
-			final float[] debugBoxCoords = { 0, 0, 0, Tile.TILE_SIZE,
-					Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 0, 0, 0 };
-			final short[] debugBoxIndex = { 10 };
-
+		if (debugSettings.mDrawTileFrames) {
 			mTagName = new Tag("name", countLines + " " + countNodes + " "
 					+ tile.toString(), false);
 			mPoiX = Tile.TILE_SIZE >> 1;
@@ -533,20 +508,19 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 			mDrawingLayer = 10 * mLevels;
 			MapGenerator.renderTheme.matchWay(this, debugTagBox, (byte) 0, false, true);
 		}
+
 		tile.lineLayers = mLineLayers;
 		tile.polygonLayers = mPolyLayers;
 		tile.labels = mLabels;
+
 		mCurPolyLayer = null;
 		mCurLineLayer = null;
+		mLineLayers = null;
+		mPolyLayers = null;
+		mLabels = null;
 
 		return true;
 	}
-
-	private final Tag[] debugTagBox = { new Tag("debug", "box") };
-	private final Tag[] debugTagWay = { new Tag("debug", "way") };
-	private final Tag[] debugTagArea = { new Tag("debug", "area") };
-
-	private float mProjectionScaleFactor;
 
 	private static byte getValidLayer(byte layer) {
 		if (layer < 0) {
@@ -612,8 +586,8 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 		float[] coords = mWayNodes;
 
-		long x = mCurrentTile.x;
-		long y = mCurrentTile.y;
+		long x = mCurrentTile.pixelX;
+		long y = mCurrentTile.pixelY + Tile.TILE_SIZE;
 		long z = Tile.TILE_SIZE << mCurrentTile.zoomLevel;
 		float min = mSimplify;
 

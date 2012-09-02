@@ -23,7 +23,7 @@ public class ShortPool {
 	static private int count = 0;
 	static private int countAll = 0;
 
-	static synchronized void finish() {
+	static synchronized void init() {
 		count = 0;
 		countAll = 0;
 		pool = null;

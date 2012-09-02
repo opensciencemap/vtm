@@ -17,18 +17,19 @@ package org.mapsforge.android.input;
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.MapViewPosition;
 
+import android.os.CountDownTimer;
+import android.os.SystemClock;
 import android.view.ScaleGestureDetector;
+import android.view.animation.DecelerateInterpolator;
 
 class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 	private final MapView mMapView;
 	private MapViewPosition mMapPosition;
 	private float mCenterX;
 	private float mCenterY;
-	// private float mFocusX;
-	// private float mFocusY;
 	private float mScale;
+	private boolean mBeginScale;
 
-	// private boolean mScaling;
 	/**
 	 * Creates a new ScaleListener for the given MapView.
 	 * 
@@ -40,52 +41,104 @@ class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 	}
 
 	@Override
-	public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
+	public boolean onScale(ScaleGestureDetector gd) {
 
-		float focusX = scaleGestureDetector.getFocusX();
-		float focusY = scaleGestureDetector.getFocusY();
-		mScale = scaleGestureDetector.getScaleFactor();
+		float focusX = gd.getFocusX();
+		float focusY = gd.getFocusY();
+		mScale = gd.getScaleFactor();
 
-		// mMapPosition.moveMap((focusX - mFocusX), (focusY - mFocusY));
-		// if (mScale > 1.001 || mScale < 0.999) {
+		mSumScale *= mScale;
 
-		mMapPosition.scaleMap(mScale,
-				focusX - mCenterX,
-				focusY - mCenterY);
+		mTimeEnd = SystemClock.elapsedRealtime();
+
+		if (!mBeginScale) {
+			if (mTimeEnd - mTimeStart > 100) {
+				mBeginScale = true;
+				mScale = mSumScale;
+			}
+			else
+				return true;
+		}
+
+		mMapPosition.scaleMap(mScale, focusX - mCenterX, focusY - mCenterY);
 		mMapView.redrawTiles();
-		// mScale = 1;
-
-		// mFocusX = focusX;
-		// mFocusY = focusY;
-
-		// }
-		// else if (Math.abs(focusX - mFocusX) > 0.5 || Math.abs(focusY - mFocusY) > 0.5) {
-		// mMapPosition.moveMap((focusX - mFocusX), (focusY - mFocusY));
-		//
-		// mFocusX = focusX;
-		// mFocusY = focusY;
-		// mScale = 1;
-		// mMapView.redrawTiles();
-		// }
 
 		return true;
 	}
 
-	@Override
-	public boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
+	private long mTimeStart;
+	private long mTimeEnd;
+	private float mSumScale;
 
+	@Override
+	public boolean onScaleBegin(ScaleGestureDetector gd) {
+		mTimeEnd = mTimeStart = SystemClock.elapsedRealtime();
+		mSumScale = 1;
+		mBeginScale = false;
 		mCenterX = mMapView.getWidth() >> 1;
 		mCenterY = mMapView.getHeight() >> 1;
-		// mFocusX = scaleGestureDetector.getFocusX();
-		// mFocusY = scaleGestureDetector.getFocusY();
 		mScale = 1;
 		mMapPosition = mMapView.getMapPosition();
-		// mScaling = false;
 		return true;
 	}
 
 	@Override
-	public void onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
-		// do nothing
+	public void onScaleEnd(ScaleGestureDetector gd) {
+		// Log.d("ScaleListener", "Sum " + mSumScale + " " + (mTimeEnd - mTimeStart));
+		if (mTimer == null && mTimeEnd - mTimeStart < 150
+				&& (mSumScale < 0.99 || mSumScale > 1.01)) {
+
+			mPrevScale = 0;
+
+			mZooutOut = mSumScale < 0.99;
+
+			mTimer = new CountDownTimer((int) mScaleDuration, 30) {
+				@Override
+				public void onTick(long tick) {
+					scale(tick);
+				}
+
+				@Override
+				public void onFinish() {
+					scale(0);
+
+				}
+			}.start();
+		}
+
+	}
+
+	private DecelerateInterpolator mBounce = new DecelerateInterpolator();
+	private float mPrevScale;
+	private CountDownTimer mTimer;
+	boolean mZooutOut;
+	private final float mScaleDuration = 350;
+
+	boolean scale(long tick) {
+
+		if (mPrevScale >= 1) {
+			mTimer = null;
+			return false;
+		}
+
+		float adv = (mScaleDuration - tick) / mScaleDuration;
+		adv = mBounce.getInterpolation(adv);
+
+		float scale = adv - mPrevScale;
+		mPrevScale += scale;
+
+		if (mZooutOut) {
+			scale = 1 - scale;
+		} else {
+			scale = 1 + scale;
+		}
+
+		mMapPosition.scaleMap(scale, 0, 0);
+		mMapView.redrawTiles();
+
+		if (tick == 0)
+			mTimer = null;
+
+		return true;
 	}
 }

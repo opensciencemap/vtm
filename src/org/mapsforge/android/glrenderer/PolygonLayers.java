@@ -82,9 +82,7 @@ class PolygonLayers {
 		// do not modify stencil buffer
 		glStencilMask(0);
 
-		// clip with depth mask
-		// GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+		GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 
 		for (int c = 0; c < count; c++) {
 			PolygonLayer l = mFillPolys[c];
@@ -139,13 +137,10 @@ class PolygonLayers {
 
 		if (blend)
 			glDisable(GL_BLEND);
-
-		// glDisable(GLES20.GL_DEPTH_TEST);
-		// glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 	}
 
 	static PolygonLayer drawPolygons(PolygonLayer layer, int next,
-			float[] matrix, double zoom, float scale, short drawCount, boolean clip) {
+			float[] matrix, double zoom, float scale, boolean clip) {
 		int cnt = 0;
 
 		glUseProgram(polygonProgram);
@@ -182,10 +177,8 @@ class PolygonLayers {
 				// clear stencilbuffer (tile region)
 				glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 
+				// draw depth clipper
 				if (first) {
-					// glEnable(GLES20.GL_DEPTH_TEST);
-					// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
-					GLES20.glPolygonOffset(0, drawCount);
 					GLES20.glDepthMask(true);
 					GLES20.glDepthFunc(GLES20.GL_LESS);
 				}
@@ -196,12 +189,15 @@ class PolygonLayers {
 					first = false;
 					GLES20.glDepthMask(false);
 					GLES20.glDepthFunc(GLES20.GL_EQUAL);
-					// glDisable(GLES20.GL_DEPTH_TEST);
 				}
 
 				// stencil op for stencil method polygon drawing
 				glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
+
+				GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 			}
+
+			//
 
 			mFillPolys[cnt] = l;
 
@@ -223,7 +219,7 @@ class PolygonLayers {
 		glDisable(GL_STENCIL_TEST);
 
 		if (clip && first)
-			drawDepthClip(drawCount);
+			drawDepthClip();
 
 		// required on GalaxyII, Android 2.3.3 (cant just VAA enable once...)
 		GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);
@@ -231,53 +227,16 @@ class PolygonLayers {
 		return l;
 	}
 
-	// static void drawStencilClip(byte drawCount) {
-	// // set stencil mask for line drawing... HACK!!!
-	// glColorMask(false, false, false, false);
-	//
-	// int c = drawCount % 16;
-	// // never pass the test, i.e. always apply first stencil op (sfail)
-	// // glStencilFunc(GLES20.GL_NEVER, drawCount, 0);
-	// glStencilFunc(GLES20.GL_NEVER, flipdabit[c], 0);
-	//
-	// // replace stencilbuffer
-	// glStencilMask(0xff);
-	//
-	// // set stencilbuffer for (tile region)
-	// glStencilOp(GLES20.GL_REPLACE, GLES20.GL_KEEP, GLES20.GL_KEEP);
-	// glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	//
-	// glStencilFunc(GL_EQUAL, flipdabit[c], 0xff);
-	// // do not modify stencil buffer
-	// glStencilMask(0);
-	//
-	// glColorMask(true, true, true, true);
-	// }
-
-	// this only increases the chance for the stencil buffer clip to work
-	// should check for clipping with depth buffer or sth
-	// private static short[] flipdabit = {
-	// 255, 254, 253, 251,
-	// 247, 239, 223, 191,
-	// 127, 63, 252, 250,
-	// 249, 243, 231, 207 };
-
-	static void drawDepthClip(short drawCount) {
+	static void drawDepthClip() {
 
 		glColorMask(false, false, false, false);
-		// glEnable(GLES20.GL_DEPTH_TEST);
-		// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
-		GLES20.glPolygonOffset(0, drawCount);
-
 		GLES20.glDepthMask(true);
-
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		GLES20.glDepthMask(false);
 		glColorMask(true, true, true, true);
-
 		GLES20.glDepthFunc(GLES20.GL_EQUAL);
 	}
 

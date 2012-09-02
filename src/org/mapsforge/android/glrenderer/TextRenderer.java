@@ -45,7 +45,6 @@ public class TextRenderer {
 	private static int mFontPadY = 1;
 	private static int mBitmapFormat;
 	private static int mBitmapType;
-	private static ByteBuffer mByteBuffer;
 	private static ShortBuffer mShortBuffer;
 	private static TextTexture[] mTextures;
 
@@ -57,9 +56,8 @@ public class TextRenderer {
 	private static int hTextVertex;
 	private static int hTextScale;
 	private static int hTextTextureCoord;
-	// private static int hTextUColor;
 
-	static Paint mPaint = new Paint(Color.BLACK);
+	private static Paint mPaint = new Paint(Color.BLACK);
 
 	private static boolean debug = false;
 	private static short[] debugVertices = {
@@ -79,12 +77,23 @@ public class TextRenderer {
 	};
 
 	static boolean init(int numTextures) {
-		mBitmap = Bitmap
-				.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT, Bitmap.Config.ARGB_8888);
+		int bufferSize = numTextures
+				* MAX_LABELS * VERTICES_PER_SPRITE
+				* SHORTS_PER_VERTICE * (Short.SIZE / 8);
+
+		// if (mBitmap == null) {
+		mBitmap = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
+				Bitmap.Config.ARGB_8888);
 		mCanvas = new Canvas(mBitmap);
 
 		mBitmapFormat = GLUtils.getInternalFormat(mBitmap);
 		mBitmapType = GLUtils.getType(mBitmap);
+
+		ByteBuffer buf = ByteBuffer.allocateDirect(bufferSize)
+				.order(ByteOrder.nativeOrder());
+
+		mShortBuffer = buf.asShortBuffer();
+		// }
 
 		mTextProgram = GlUtils.createProgram(Shaders.textVertexShader,
 				Shaders.textFragmentShader);
@@ -93,15 +102,6 @@ public class TextRenderer {
 		hTextVertex = GLES20.glGetAttribLocation(mTextProgram, "vertex");
 		hTextScale = GLES20.glGetUniformLocation(mTextProgram, "scale");
 		hTextTextureCoord = GLES20.glGetAttribLocation(mTextProgram, "tex_coord");
-
-		int bufferSize = numTextures
-				* MAX_LABELS * VERTICES_PER_SPRITE
-				* SHORTS_PER_VERTICE * (Short.SIZE / 8);
-
-		mByteBuffer = ByteBuffer.allocateDirect(bufferSize)
-				.order(ByteOrder.nativeOrder());
-
-		mShortBuffer = mByteBuffer.asShortBuffer();
 
 		int[] textureIds = new int[numTextures];
 		TextTexture[] textures = new TextTexture[numTextures];
@@ -136,24 +136,23 @@ public class TextRenderer {
 		int len = indices.length;
 		short j = 0;
 		for (int i = 0; i < len; i += INDICES_PER_SPRITE, j += VERTICES_PER_SPRITE) {
-			// indices[i + 0] = (short) (j + 0);
-			// indices[i + 1] = (short) (j + 1);
-			// indices[i + 2] = (short) (j + 2);
-			// indices[i + 3] = (short) (j + 2);
-			// indices[i + 4] = (short) (j + 3);
-			// indices[i + 5] = (short) (j + 0);
 			indices[i + 0] = (short) (j + 0);
-			indices[i + 1] = (short) (j + 0);
-			indices[i + 2] = (short) (j + 1);
-			indices[i + 3] = (short) (j + 3);
-			indices[i + 4] = (short) (j + 2);
-			indices[i + 5] = (short) (j + 2);
+			indices[i + 1] = (short) (j + 1);
+			indices[i + 2] = (short) (j + 2);
+			indices[i + 3] = (short) (j + 2);
+			indices[i + 4] = (short) (j + 3);
+			indices[i + 5] = (short) (j + 0);
+			// indices[i + 0] = (short) (j + 0);
+			// indices[i + 1] = (short) (j + 0);
+			// indices[i + 2] = (short) (j + 1);
+			// indices[i + 3] = (short) (j + 3);
+			// indices[i + 4] = (short) (j + 2);
+			// indices[i + 5] = (short) (j + 2);
 		}
 
-		ShortBuffer tmpIndices = mByteBuffer.asShortBuffer();
-
-		tmpIndices.put(indices, 0, len);
-		tmpIndices.flip();
+		mShortBuffer.clear();
+		mShortBuffer.put(indices, 0, len);
+		mShortBuffer.flip();
 
 		int[] mVboIds = new int[2];
 		GLES20.glGenBuffers(2, mVboIds, 0);
@@ -162,13 +161,15 @@ public class TextRenderer {
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesVBO);
 		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, len * (Short.SIZE / 8),
-				tmpIndices, GLES20.GL_STATIC_DRAW);
+				mShortBuffer, GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
+		mShortBuffer.clear();
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVerticesVBO);
 		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, bufferSize,
 				mShortBuffer, GLES20.GL_DYNAMIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
 		return true;
 	}
 
@@ -360,9 +361,12 @@ public class TextRenderer {
 		tex.length = pos;
 		tile.texture = tex;
 		tex.tile = tile;
+
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tex.id);
 		GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mBitmap,
 				mBitmapFormat, mBitmapType);
+
+		GLES20.glFlush();
 
 		return true;
 	}
@@ -388,9 +392,7 @@ public class TextRenderer {
 		}
 
 		mShortBuffer.flip();
-		// Log.d(TAG, "compileTextures" + mFloatBuffer.remaining() + " " + offset);
 
-		// TODO use sub-bufferdata function
 		GLES20.glBufferSubData(GLES20.GL_ARRAY_BUFFER, 0, offset * (Short.SIZE / 8),
 				mShortBuffer);
 	}
@@ -442,7 +444,7 @@ public class TextRenderer {
 					GLES20.GL_SHORT, false, 12, tile.texture.offset * (Short.SIZE / 8)
 							+ 8);
 
-			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, (tile.texture.length / 24) *
+			GLES20.glDrawElements(GLES20.GL_TRIANGLES, (tile.texture.length / 24) *
 					INDICES_PER_SPRITE, GLES20.GL_UNSIGNED_SHORT, 0);
 		}
 	}

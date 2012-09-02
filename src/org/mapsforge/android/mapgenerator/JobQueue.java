@@ -17,54 +17,29 @@ package org.mapsforge.android.mapgenerator;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
-import org.mapsforge.android.MapView;
-
-import android.os.SystemClock;
-
 /**
  * A JobQueue keeps the list of pending jobs for a MapView and prioritizes them.
  */
 public class JobQueue {
-	private static final int INITIAL_CAPACITY = 128;
+	private static final int INITIAL_CAPACITY = 64;
 
-	private final MapView mMapView;
-	private PriorityQueue<MapGeneratorJob> mPriorityQueue;
-	private boolean mScheduleNeeded;
+	private PriorityQueue<MapTile> mPriorityQueue;
 
 	/**
-	 * @param mapView
-	 *            the MapView whose jobs should be organized.
 	 */
-	public JobQueue(MapView mapView) {
-		mMapView = mapView;
-		mPriorityQueue = new PriorityQueue<MapGeneratorJob>(INITIAL_CAPACITY);
+	public JobQueue() {
+		mPriorityQueue = new PriorityQueue<MapTile>(INITIAL_CAPACITY);
 	}
 
 	/**
-	 * Adds the given job to this queue. Does nothing if the given job is already in this queue.
-	 * 
-	 * @param mapGeneratorJob
+	 * @param tiles
 	 *            the job to be added to this queue.
 	 */
-	// public synchronized void addJob(MapGeneratorJob mapGeneratorJob) {
-	// if (!mPriorityQueue.contains(mapGeneratorJob))
-	// // priorityQueue.remove(mapGeneratorJob);
-	// {
-	// //mapGeneratorJob.tile.isLoading = true;
-	// mPriorityQueue.offer(mapGeneratorJob);
-	// }
-	// }
-
-	/**
-	 * @param jobs
-	 *            the job to be added to this queue.
-	 */
-	public synchronized void setJobs(ArrayList<MapGeneratorJob> jobs) {
+	public synchronized void setJobs(ArrayList<MapTile> tiles) {
 		mPriorityQueue.clear();
-		for (MapGeneratorJob job : jobs)
-			mPriorityQueue.offer(job);
-		// priorityQueue.addAll(jobs);
-		mScheduleNeeded = true;
+		mPriorityQueue.addAll(tiles);
+		// for (int i = 0, n = tiles.size(); i < n; i++)
+		// mPriorityQueue.offer(tiles.get(i));
 	}
 
 	/**
@@ -84,39 +59,11 @@ public class JobQueue {
 	/**
 	 * @return the most important job from this queue or null, if empty.
 	 */
-	public synchronized MapGeneratorJob poll() {
-		if (mScheduleNeeded) {
-			mScheduleNeeded = false;
-			schedule();
-		}
-		return mPriorityQueue.poll();
+	public synchronized MapTile poll() {
+		MapTile tile = mPriorityQueue.poll();
+		if (tile != null)
+			tile.isLoading = true;
+
+		return tile;
 	}
-
-	/**
-	 * Request a scheduling of all jobs that are currently in this queue.
-	 */
-	public synchronized void requestSchedule() {
-		mScheduleNeeded = true;
-	}
-
-	/**
-	 * Schedules all jobs in this queue.
-	 */
-	private void schedule() {
-		PriorityQueue<MapGeneratorJob> tempJobQueue = new PriorityQueue<MapGeneratorJob>(
-				INITIAL_CAPACITY);
-
-		TileScheduler.time = SystemClock.uptimeMillis();
-		TileScheduler.mapPosition = mMapView.getMapPosition().getMapPosition();
-
-		while (!mPriorityQueue.isEmpty()) {
-			MapGeneratorJob mapGeneratorJob = mPriorityQueue.poll();
-			double priority = TileScheduler.getPriority(mapGeneratorJob, mMapView);
-			mapGeneratorJob.setPriority(priority);
-			tempJobQueue.offer(mapGeneratorJob);
-		}
-
-		mPriorityQueue = tempJobQueue;
-	}
-
 }

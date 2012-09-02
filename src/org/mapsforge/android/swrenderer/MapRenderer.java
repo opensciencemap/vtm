@@ -21,17 +21,13 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.mapsforge.android.DebugSettings;
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
-import org.mapsforge.android.mapgenerator.JobParameters;
-import org.mapsforge.android.mapgenerator.MapGeneratorJob;
-import org.mapsforge.android.mapgenerator.TileCacheKey;
+import org.mapsforge.android.mapgenerator.MapTile;
 import org.mapsforge.android.mapgenerator.TileDistanceSort;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.utils.GlUtils;
@@ -40,7 +36,6 @@ import org.mapsforge.core.MercatorProjection;
 import org.mapsforge.core.Tile;
 
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
 /**
@@ -65,11 +60,11 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private double mDrawX, mDrawY;
 	private long mTileX, mTileY;
 	private float mMapScale;
-	private DebugSettings mDebugSettings;
-	private JobParameters mJobParameter;
+	// private DebugSettings mDebugSettings;
+	// private JobParameters mJobParameter;
 	private MapPosition mMapPosition, mPrevMapPosition;
 
-	private ArrayList<MapGeneratorJob> mJobList;
+	private ArrayList<MapTile> mJobList;
 
 	ArrayList<Integer> mTextures;
 	MapView mMapView;
@@ -78,8 +73,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	GLMapTile[] newTiles;
 	int currentTileCnt = 0;
 
-	private TileCacheKey mTileCacheKey;
-	private LinkedHashMap<TileCacheKey, GLMapTile> mTiles;
+	// private TileCacheKey mTileCacheKey;
+	// private LinkedHashMap<TileCacheKey, GLMapTile> mTiles;
 	private ArrayList<GLMapTile> mTileList;
 
 	private boolean processedTile = true;
@@ -96,7 +91,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	 */
 	public MapRenderer(MapView mapView) {
 		mMapView = mapView;
-		mDebugSettings = mapView.getDebugSettings();
+		// mDebugSettings = mapView.getDebugSettings();
 		mMapScale = 1;
 
 		float[] vertices = {
@@ -110,12 +105,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mVertices.put(vertices);
 
 		mTextures = new ArrayList<Integer>();
-		mJobList = new ArrayList<MapGeneratorJob>();
+		mJobList = new ArrayList<MapTile>();
 
-		mTiles = new LinkedHashMap<TileCacheKey, GLMapTile>(100);
+		// mTiles = new LinkedHashMap<TileCacheKey, GLMapTile>(100);
 		mTileList = new ArrayList<GLMapTile>();
 
-		mTileCacheKey = new TileCacheKey();
+		// mTileCacheKey = new TileCacheKey();
 		mInitial = true;
 	}
 
@@ -144,8 +139,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		for (int j = mTileList.size() - 1, cnt = 0; cnt < remove; j--, cnt++) {
 			GLMapTile t = mTileList.remove(j);
 
-			mTileCacheKey.set(t.tileX, t.tileY, t.zoomLevel);
-			mTiles.remove(mTileCacheKey);
+			// mTileCacheKey.set(t.tileX, t.tileY, t.zoomLevel);
+			// mTiles.remove(mTileCacheKey);
 
 			for (int i = 0; i < 4; i++) {
 				if (t.child[i] != null)
@@ -176,63 +171,63 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		long pixelLeft = x - offsetX;
 		long pixelTop = y - offsetY;
 
-		long tileLeft = MercatorProjection.pixelXToTileX(pixelLeft, zoomLevel);
-		long tileTop = MercatorProjection.pixelYToTileY(pixelTop, zoomLevel);
-		long tileRight = MercatorProjection.pixelXToTileX(pixelRight, zoomLevel);
-		long tileBottom = MercatorProjection.pixelYToTileY(pixelBottom, zoomLevel);
+		int tileLeft = MercatorProjection.pixelXToTileX(pixelLeft, zoomLevel);
+		int tileTop = MercatorProjection.pixelYToTileY(pixelTop, zoomLevel);
+		int tileRight = MercatorProjection.pixelXToTileX(pixelRight, zoomLevel);
+		int tileBottom = MercatorProjection.pixelYToTileY(pixelBottom, zoomLevel);
 
 		mJobList.clear();
 
 		// IMapGenerator mapGenerator = mMapView.getMapGenerator();
 
 		int tiles = 0;
-		for (long tileY = tileTop - 1; tileY <= tileBottom + 1; tileY++) {
-			for (long tileX = tileLeft - 1; tileX <= tileRight + 1; tileX++) {
+		for (int tileY = tileTop - 1; tileY <= tileBottom + 1; tileY++) {
+			for (int tileX = tileLeft - 1; tileX <= tileRight + 1; tileX++) {
 
-				GLMapTile tile = mTiles.get(mTileCacheKey.set(tileX, tileY, zoomLevel));
+				// GLMapTile tile = mTiles.get(mTileCacheKey.set(tileX, tileY, zoomLevel));
+				//
+				// if (tile == null) {
+				// tile = new GLMapTile(tileX, tileY, zoomLevel);
+				// TileCacheKey key = new TileCacheKey(mTileCacheKey);
+				// mTiles.put(key, tile);
+				//
+				// mTileCacheKey.set((tileX >> 1), (tileY >> 1), (byte) (zoomLevel - 1));
+				// tile.parent = mTiles.get(mTileCacheKey);
+				//
+				// long xx = tileX << 1;
+				// long yy = tileY << 1;
+				// byte z = (byte) (zoomLevel + 1);
+				//
+				// tile.child[0] = mTiles.get(mTileCacheKey.set(xx, yy, z));
+				// tile.child[1] = mTiles.get(mTileCacheKey.set(xx + 1, yy, z));
+				// tile.child[2] = mTiles.get(mTileCacheKey.set(xx, yy + 1, z));
+				// tile.child[3] = mTiles.get(mTileCacheKey.set(xx + 1, yy + 1, z));
+				//
+				// mTileList.add(tile);
+				// }
 
-				if (tile == null) {
-					tile = new GLMapTile(tileX, tileY, zoomLevel);
-					TileCacheKey key = new TileCacheKey(mTileCacheKey);
-					mTiles.put(key, tile);
-
-					mTileCacheKey.set((tileX >> 1), (tileY >> 1), (byte) (zoomLevel - 1));
-					tile.parent = mTiles.get(mTileCacheKey);
-
-					long xx = tileX << 1;
-					long yy = tileY << 1;
-					byte z = (byte) (zoomLevel + 1);
-
-					tile.child[0] = mTiles.get(mTileCacheKey.set(xx, yy, z));
-					tile.child[1] = mTiles.get(mTileCacheKey.set(xx + 1, yy, z));
-					tile.child[2] = mTiles.get(mTileCacheKey.set(xx, yy + 1, z));
-					tile.child[3] = mTiles.get(mTileCacheKey.set(xx + 1, yy + 1, z));
-
-					mTileList.add(tile);
-				}
-
-				newTiles[tiles++] = tile;
-
-				if (!tile.isReady || (tile.getScale() != scale)) {
-					// tile.isLoading = true;
-					// approximation for TileScheduler
-					if (tileY < tileTop || tileY > tileBottom || tileX < tileLeft
-							|| tileX > tileRight)
-						tile.isVisible = false;
-					else
-						tile.isVisible = true;
-
-					MapGeneratorJob job = new MapGeneratorJob(tile, mJobParameter,
-							mDebugSettings);
-					job.setScale(scale);
-					mJobList.add(job);
-				}
+				// newTiles[tiles++] = tile;
+				//
+				// if (!tile.isReady || (tile.getScale() != scale)) {
+				// // tile.isLoading = true;
+				// // approximation for TileScheduler
+				// if (tileY < tileTop || tileY > tileBottom || tileX < tileLeft
+				// || tileX > tileRight)
+				// tile.isVisible = false;
+				// else
+				// tile.isVisible = true;
+				//
+				// MapGeneratorJob job = new MapGeneratorJob(tile, mJobParameter,
+				// mDebugSettings);
+				// job.setScale(scale);
+				// mJobList.add(job);
+				// }
 			}
 		}
 
 		synchronized (this) {
 
-			limitCache(zoomLevel, (mTiles.size() - 200));
+			limitCache(zoomLevel, (mTileList.size() - 200));
 
 			for (int i = 0; i < tiles; i++)
 				currentTiles[i] = newTiles[i];
@@ -243,9 +238,9 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			mMapScale = scale;
 		}
 
-		if (mJobList.size() > 0) {
-			mMapView.addJobs(mJobList);
-		}
+		// if (mJobList.size() > 0) {
+		// mMapView.addJobs(mJobList);
+		// }
 
 		return true;
 	}
@@ -260,12 +255,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		mMapPosition = mMapView.getMapPosition().getMapPosition();
 
-		long x = (long) MercatorProjection.longitudeToPixelX(
-				mMapPosition.geoPoint.getLongitude(),
-				mMapPosition.zoomLevel);
-		long y = (long) MercatorProjection
-				.latitudeToPixelY(mMapPosition.geoPoint.getLatitude(),
-						mMapPosition.zoomLevel);
+		long x = (long) MercatorProjection.longitudeToPixelX(mMapPosition);
+		long y = (long) MercatorProjection.latitudeToPixelY(mMapPosition);
 
 		long tileX = MercatorProjection.pixelXToTileX(x, mMapPosition.zoomLevel);
 		long tileY = MercatorProjection.pixelYToTileY(y, mMapPosition.zoomLevel);
@@ -304,12 +295,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mMapView.requestRender();
 	}
 
-	private MapGeneratorJob mMapGeneratorJob = null;
+	// private MapGeneratorJob mMapGeneratorJob = null;
 
 	@Override
-	public boolean passTile(MapGeneratorJob mapGeneratorJob) {
+	public boolean passTile(MapTile mapTile) {
 
-		mMapGeneratorJob = mapGeneratorJob;
+		// mMapGeneratorJob = mapGeneratorJob;
 		processedTile = false;
 		mMapView.requestRender();
 
@@ -344,11 +335,11 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			} else {
 				z = 1.0f / (1 << -diff);
 			}
-			drawX = MercatorProjection
-					.longitudeToPixelX(mMapPosition.geoPoint.getLongitude(),
-							tile.zoomLevel);
-			drawY = MercatorProjection
-					.latitudeToPixelY(mMapPosition.geoPoint.getLatitude(), tile.zoomLevel);
+			// drawX = MercatorProjection
+			// .longitudeToPixelX(mMapPosition.geoPoint.getLongitude(),
+			// tile.zoomLevel);
+			// drawY = MercatorProjection
+			// .latitudeToPixelY(mMapPosition.geoPoint.getLatitude(), tile.zoomLevel);
 
 		}
 
@@ -430,71 +421,71 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
 
 		// lock position and currentTiles while drawing
-		synchronized (this) {
-			if (mMapGeneratorJob != null) {
-
-				tile = (GLMapTile) mMapGeneratorJob.tile;
-				// TODO tile bitmaps texture to smaller parts avoiding uploading full
-				// bitmap when not necessary
-				if (tile.getTexture() >= 0) {
-					// reuse tile texture
-					GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tile.getTexture());
-					GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0,
-							mMapGeneratorJob.getBitmap());
-				} else if (mTextures.size() > 0) {
-					// reuse texture from previous tiles
-					Integer texture;
-					texture = mTextures.remove(mTextures.size() - 1);
-
-					GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.intValue());
-					GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0,
-							mMapGeneratorJob.getBitmap());
-					tile.setTexture(texture.intValue());
-				} else {
-					// create texture
-					tile.setTexture(GlUtils.loadTextures(mMapGeneratorJob.getBitmap()));
-				}
-
-				tile.setScale(mMapGeneratorJob.getScale());
-				tile.isReady = true;
-				tile.isLoading = false;
-
-				mMapGeneratorJob = null;
-				processedTile = true;
-				// loadedTexture = true;
-			}
-			int tileSize = (int) (Tile.TILE_SIZE * mMapScale);
-			int hWidth = mWidth >> 1;
-			int hHeight = mHeight >> 1;
-			for (int i = 0, n = currentTileCnt; i < n; i++) {
-				tile = currentTiles[i];
-
-				float x = (float) (tile.pixelX - mDrawX);
-				float y = (float) (tile.pixelY - mDrawY);
-
-				// clip rendering to tile boundaries
-				GLES20.glScissor(
-						hWidth + (int) (x * mMapScale) - 2,
-						hHeight - (int) (y * mMapScale) - tileSize - 2,
-						tileSize + 4, tileSize + 4);
-
-				if (drawTile(tile, 0, 0.0f))
-					continue;
-
-				// or two zoom level above
-				for (int k = 0; k < 4; k++) {
-					if (((child = tile.child[k]) != null)) {
-
-						if (drawTile(child, 2, 0.1f))
-							continue;
-
-						for (int j = 0; j < 4; j++)
-							if ((child2 = child.child[j]) != null)
-								drawTile(child2, 2, 0.1f);
-					}
-				}
-			}
-		}
+		// synchronized (this) {
+		// if (mMapGeneratorJob != null) {
+		//
+		// tile = (GLMapTile) mMapGeneratorJob.tile;
+		// // TODO tile bitmaps texture to smaller parts avoiding uploading full
+		// // bitmap when not necessary
+		// if (tile.getTexture() >= 0) {
+		// // reuse tile texture
+		// GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tile.getTexture());
+		// GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0,
+		// mMapGeneratorJob.getBitmap());
+		// } else if (mTextures.size() > 0) {
+		// // reuse texture from previous tiles
+		// Integer texture;
+		// texture = mTextures.remove(mTextures.size() - 1);
+		//
+		// GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.intValue());
+		// GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0,
+		// mMapGeneratorJob.getBitmap());
+		// tile.setTexture(texture.intValue());
+		// } else {
+		// // create texture
+		// tile.setTexture(GlUtils.loadTextures(mMapGeneratorJob.getBitmap()));
+		// }
+		//
+		// tile.setScale(mMapGeneratorJob.getScale());
+		// tile.isReady = true;
+		// tile.isLoading = false;
+		//
+		// mMapGeneratorJob = null;
+		// processedTile = true;
+		// // loadedTexture = true;
+		// }
+		// int tileSize = (int) (Tile.TILE_SIZE * mMapScale);
+		// int hWidth = mWidth >> 1;
+		// int hHeight = mHeight >> 1;
+		// for (int i = 0, n = currentTileCnt; i < n; i++) {
+		// tile = currentTiles[i];
+		//
+		// float x = (float) (tile.pixelX - mDrawX);
+		// float y = (float) (tile.pixelY - mDrawY);
+		//
+		// // clip rendering to tile boundaries
+		// GLES20.glScissor(
+		// hWidth + (int) (x * mMapScale) - 2,
+		// hHeight - (int) (y * mMapScale) - tileSize - 2,
+		// tileSize + 4, tileSize + 4);
+		//
+		// if (drawTile(tile, 0, 0.0f))
+		// continue;
+		//
+		// // or two zoom level above
+		// for (int k = 0; k < 4; k++) {
+		// if (((child = tile.child[k]) != null)) {
+		//
+		// if (drawTile(child, 2, 0.1f))
+		// continue;
+		//
+		// for (int j = 0; j < 4; j++)
+		// if ((child2 = child.child[j]) != null)
+		// drawTile(child2, 2, 0.1f);
+		// }
+		// }
+		// }
+		// }
 	}
 
 	@Override
@@ -508,10 +499,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		GLES20.glViewport(0, 0, width, height);
 
-		mDebugSettings = mMapView.getDebugSettings();
-		mJobParameter = mMapView.getJobParameters();
+		// mDebugSettings = mMapView.getDebugSettings();
+		// mJobParameter = mMapView.getJobParameters();
 
-		mTiles.clear();
+		// mTiles.clear();
 		mTileList.clear();
 		mTextures.clear();
 		mInitial = true;
@@ -581,7 +572,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	@Override
 	public IMapGenerator createMapGenerator() {
-		return new MapGenerator();
+		return new MapGenerator(mMapView);
 	}
 
 	@Override

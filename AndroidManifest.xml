@@ -29,6 +29,7 @@
         </activity>
         <activity android:name=".preferences.EditPreferences" />
         <activity android:name=".filepicker.FilePicker" />
+        <activity android:name=".InfoView" android:theme="@android:style/Theme.NoTitleBar" />
     </application>
 
 </manifest>

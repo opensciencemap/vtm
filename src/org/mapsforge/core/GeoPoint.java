@@ -14,20 +14,15 @@
  */
 package org.mapsforge.core;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 
 /**
  * A GeoPoint represents an immutable pair of latitude and longitude coordinates.
  */
-public class GeoPoint implements Comparable<GeoPoint>, Serializable {
+public class GeoPoint implements Comparable<GeoPoint> {
 	/**
 	 * Conversion factor from degrees to microdegrees.
 	 */
 	private static final double CONVERSION_FACTOR = 1000000d;
-
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The latitude value of this GeoPoint in microdegrees (degrees * 10^6).
@@ -42,7 +37,7 @@ public class GeoPoint implements Comparable<GeoPoint>, Serializable {
 	/**
 	 * The hash code of this object.
 	 */
-	private transient int hashCodeValue;
+	private int hashCodeValue = 0;
 
 	/**
 	 * @param latitude
@@ -57,7 +52,6 @@ public class GeoPoint implements Comparable<GeoPoint>, Serializable {
 		double limitLongitude = MercatorProjection.limitLongitude(longitude);
 		this.longitudeE6 = (int) (limitLongitude * CONVERSION_FACTOR);
 
-		this.hashCodeValue = calculateHashCode();
 	}
 
 	/**
@@ -116,6 +110,9 @@ public class GeoPoint implements Comparable<GeoPoint>, Serializable {
 
 	@Override
 	public int hashCode() {
+		if (this.hashCodeValue == 0)
+			this.hashCodeValue = calculateHashCode();
+
 		return this.hashCodeValue;
 	}
 
@@ -138,10 +135,5 @@ public class GeoPoint implements Comparable<GeoPoint>, Serializable {
 		result = 31 * result + this.latitudeE6;
 		result = 31 * result + this.longitudeE6;
 		return result;
-	}
-
-	private void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
-		objectInputStream.defaultReadObject();
-		this.hashCodeValue = calculateHashCode();
 	}
 }

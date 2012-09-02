@@ -29,11 +29,11 @@ public interface IMapGenerator {
 	/**
 	 * Called when a job needs to be executed.
 	 * 
-	 * @param mapGeneratorJob
+	 * @param tile
 	 *            the job that should be executed.
 	 * @return true if the job was executed successfully, false otherwise.
 	 */
-	boolean executeJob(MapGeneratorJob mapGeneratorJob);
+	boolean executeJob(MapTile tile);
 
 	/**
 	 * @param mapDatabase

@@ -19,6 +19,7 @@ import org.mapsforge.core.MapPosition;
 import org.mapsforge.core.MercatorProjection;
 
 import android.util.FloatMath;
+import android.util.Log;
 
 /**
  * A MapPosition stores the latitude and longitude coordinate of a MapView together with its zoom level.
@@ -33,8 +34,7 @@ public class MapViewPosition {
 	private final MapView mMapView;
 	private byte mZoomLevel;
 	private float mScale;
-
-	// private float mRotation;
+	private float mRotation;
 
 	MapViewPosition(MapView mapView) {
 		mMapView = mapView;
@@ -43,7 +43,7 @@ public class MapViewPosition {
 		mLongitude = Double.NaN;
 		mZoomLevel = -1;
 		mScale = 1;
-		// mRotation = 0.0f;
+		mRotation = 0.0f;
 	}
 
 	/**
@@ -61,8 +61,7 @@ public class MapViewPosition {
 		if (!isValid()) {
 			return null;
 		}
-		GeoPoint geoPoint = new GeoPoint(mLatitude, mLongitude);
-		return new MapPosition(geoPoint, mZoomLevel, mScale);
+		return new MapPosition(mLatitude, mLongitude, mZoomLevel, mScale, mRotation);
 	}
 
 	/**
@@ -105,28 +104,50 @@ public class MapViewPosition {
 	/**
 	 * Moves this MapViewPosition by the given amount of pixels.
 	 * 
-	 * @param moveHorizontal
+	 * @param mx
 	 *            the amount of pixels to move the map horizontally.
-	 * @param moveVertical
+	 * @param my
 	 *            the amount of pixels to move the map vertically.
 	 */
-	public synchronized void moveMap(float moveHorizontal, float moveVertical) {
+	public synchronized void moveMap(float mx, float my) {
 		double pixelX = MercatorProjection.longitudeToPixelX(mLongitude, mZoomLevel);
 		double pixelY = MercatorProjection.latitudeToPixelY(mLatitude, mZoomLevel);
 
-		mLatitude = MercatorProjection.pixelYToLatitude(pixelY - moveVertical / mScale,
-				mZoomLevel);
+		// float rad = (float) Math.toRadians(mRotation);
+		// mx /= mScale;
+		// my /= mScale;
+		//
+		// double x = mx * FloatMath.cos(rad) + my * -FloatMath.sin(rad);
+		// double y = mx * FloatMath.sin(rad) + my * FloatMath.cos(rad);
+		//
+		// double dx = pixelX - x;
+		// double dy = pixelY - y;
+
+		double dx = pixelX - mx / mScale;
+		double dy = pixelY - my / mScale;
+
+		mLatitude = MercatorProjection.pixelYToLatitude(dy, mZoomLevel);
 		mLatitude = MercatorProjection.limitLatitude(mLatitude);
 
-		mLongitude = MercatorProjection.pixelXToLongitude(pixelX - moveHorizontal
-				/ mScale,
-				mZoomLevel);
-		mLongitude = MercatorProjection.limitLongitude(mLongitude);
+		mLongitude = MercatorProjection.pixelXToLongitude(dx, mZoomLevel);
+
+		//
+		// mLatitude = MercatorProjection.pixelYToLatitude(pixelY - moveVertical / mScale,
+		// mZoomLevel);
+		// mLatitude = MercatorProjection.limitLatitude(mLatitude);
+		//
+		// mLongitude = MercatorProjection.pixelXToLongitude(pixelX - moveHorizontal
+		// / mScale, mZoomLevel);
+
+		mLongitude = MercatorProjection.wrapLongitude(mLongitude);
+		// mLongitude = MercatorProjection.limitLongitude(mLongitude);
 	}
 
-	// public synchronized void rotateMap(float angle) {
-	// mRotation = angle;
-	// }
+	public synchronized void rotateMap(float angle) {
+		mRotation -= angle;
+		Log.d("...", "angle:" + mRotation);
+		// mRotation %= 360;
+	}
 
 	synchronized void setMapCenter(GeoPoint geoPoint) {
 		mLatitude = MercatorProjection.limitLatitude(geoPoint.getLatitude());
@@ -134,9 +155,8 @@ public class MapViewPosition {
 	}
 
 	synchronized void setMapCenterAndZoomLevel(MapPosition mapPosition) {
-		GeoPoint geoPoint = mapPosition.geoPoint;
-		mLatitude = MercatorProjection.limitLatitude(geoPoint.getLatitude());
-		mLongitude = MercatorProjection.limitLongitude(geoPoint.getLongitude());
+		mLatitude = MercatorProjection.limitLatitude(mapPosition.lat);
+		mLongitude = MercatorProjection.limitLongitude(mapPosition.lon);
 		mZoomLevel = mMapView.limitZoomLevel(mapPosition.zoomLevel);
 	}
 
@@ -157,8 +177,9 @@ public class MapViewPosition {
 	 *            ...
 	 */
 	public synchronized void scaleMap(float scale, float pivotX, float pivotY) {
-		moveMap(pivotX * (1.0f - scale),
-				pivotY * (1.0f - scale));
+		if (pivotY != 0 || pivotY != 0)
+			moveMap(pivotX * (1.0f - scale),
+					pivotY * (1.0f - scale));
 
 		float s = mScale * scale;
 

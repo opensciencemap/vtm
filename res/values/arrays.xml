@@ -1,31 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-	<string-array name="preferences_map_database_keys">
-		<item>MAP_READER</item>
-		<item>POSTGIS_READER</item>
-		<item>PBMAP_READER</item>
-	</string-array>
-	<string name="preferences_map_database_default">POSTGIS_READER</string>
 
-	<string-array name="preferences_scale_bar_unit_keys">
-		<item>imperial</item>
-		<item>metric</item>
-	</string-array>
-	<string name="preferences_scale_bar_unit_default">metric</string>
+    <string-array name="preferences_map_database_keys">
 
-	<string-array name="preferences_text_scale_keys">
-		<item>0.7</item>
-		<item>0.85</item>
-		<item>1.0</item>
-		<item>1.3</item>
-		<item>1.6</item>
-	</string-array>
-	<string name="preferences_text_scale_default">1.0</string>
-	
-	<string-array name="view_sections">
-		<item>Map</item>
-		<item>Routes</item>
-		<item>Overlays</item>
-		<item>etc</item>
-	</string-array>
+        <!-- <item>MAP_READER</item> -->
+        <item>POSTGIS_READER</item> 
+        <item>PBMAP_READER</item>
+    </string-array>
+
+    <string name="preferences_map_database_default">PBMAP_READER</string>
+
+    <string-array name="preferences_scale_bar_unit_keys">
+        <item>imperial</item>
+        <item>metric</item>
+    </string-array>
+
+    <string name="preferences_scale_bar_unit_default">metric</string>
+
+    <string-array name="preferences_text_scale_keys">
+        <item>0.7</item>
+        <item>0.85</item>
+        <item>1.0</item>
+        <item>1.3</item>
+        <item>1.6</item>
+    </string-array>
+
+    <string name="preferences_text_scale_default">1.0</string>
+
+    <string-array name="view_sections">
+        <item>Map</item>
+        <item>Routes</item>
+        <item>Overlays</item>
+        <item>etc</item>
+    </string-array>
+
 </resources>
