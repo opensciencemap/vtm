@@ -18,7 +18,6 @@ import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_BLEND;
 import static android.opengl.GLES20.GL_DITHER;
 import static android.opengl.GLES20.GL_DYNAMIC_DRAW;
-import static android.opengl.GLES20.GL_ONE;
 import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
 import static android.opengl.GLES20.GL_SCISSOR_TEST;
 import static android.opengl.GLES20.GL_SRC_ALPHA;
@@ -29,7 +28,6 @@ import static android.opengl.GLES20.glBufferData;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
 import static android.opengl.GLES20.glClearStencil;
-import static android.opengl.GLES20.glDepthMask;
 import static android.opengl.GLES20.glDisable;
 import static android.opengl.GLES20.glEnable;
 import static android.opengl.GLES20.glFinish;
@@ -602,7 +600,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		return true;
 	}
 
-	private static void setMatrix(GLMapTile tile, float div) {
+	private static void setMatrix(GLMapTile tile, float div, int offset) {
 		float x, y, scale;
 
 		scale = (float) (2.0 * mDrawPosition.scale / (mHeight * div));
@@ -611,6 +609,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		mMVPMatrix[12] = x * scale * mAspect;
 		mMVPMatrix[13] = -(y + Tile.TILE_SIZE) * scale;
+		mMVPMatrix[14] = offset * 0.01f;
 		mMVPMatrix[0] = scale * mAspect / COORD_MULTIPLIER;
 		mMVPMatrix[5] = scale / COORD_MULTIPLIER;
 
@@ -801,6 +800,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			mUpdateColor = false;
 		}
 
+		GLES20.glDepthMask(true);
 		glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		if (mInitial)
@@ -864,7 +864,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+		// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible && tiles[i].isReady) {
@@ -879,14 +879,15 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				drawProxyTile(tiles[i]);
 			}
 		}
+		// GlUtils.checkGlError("end draw");
 
-		glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
+		// glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 		glDisable(GLES20.GL_DEPTH_TEST);
 
 		mDrawCount = 0;
 
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendFunc(GLES20.GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		int z = mDrawPosition.zoomLevel;
 		float s = mDrawPosition.scale;
@@ -906,7 +907,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			if (!tiles[i].isVisible || tiles[i].texture == null)
 				continue;
 
-			setMatrix(tiles[i], 1);
+			setMatrix(tiles[i], 1, 0);
 			TextRenderer.drawTile(tiles[i], mMVPMatrix);
 		}
 		TextRenderer.endDraw();
@@ -929,10 +930,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		tile.lastDraw = mRedrawCnt;
 
-		setMatrix(tile, div);
+		setMatrix(tile, div, mDrawCount++);
 
 		glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
-		GLES20.glPolygonOffset(0, mDrawCount);
+		// GLES20.glPolygonOffset(0, mDrawCount);
 
 		LineLayer ll = tile.lineLayers;
 		PolygonLayer pl = tile.polygonLayers;
@@ -968,8 +969,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				ll = LineLayers.drawLines(tile, ll, pnext, mMVPMatrix, div, z, s);
 			}
 		}
-
-		mDrawCount++;
 	}
 
 	private static boolean drawProxyChild(GLMapTile tile) {
@@ -1054,7 +1053,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mHeight = height;
 		mAspect = (float) height / width;
 
-		Matrix.orthoM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f, 0.5f, -1, 1);
+		// Matrix.orthoM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f, 0.5f, -1, 1);
 
 		glViewport(0, 0, width, height);
 
@@ -1084,10 +1083,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glDisable(GLES20.GL_DEPTH_TEST);
-		glDepthMask(false);
-		// GLES20.glDepthRangef(0, 1);
-		// GLES20.glClearDepthf(1);
+		// glDisable(GLES20.GL_DEPTH_TEST);
+		// glDepthMask(false);
+		// GLES20.glDepthRangef(1, 0);
+		// GLES20.glClearDepthf(0);
 
 		glDisable(GL_DITHER);
 
@@ -1109,8 +1108,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-		// String ext = GLES20.glGetString(GLES20.GL_EXTENSIONS);
-		// Log.d(TAG, "Extensions: " + ext);
+		String ext = GLES20.glGetString(GLES20.GL_EXTENSIONS);
+		Log.d(TAG, "Extensions: " + ext);
 
 		shortBuffer = new ShortBuffer[rotateBuffers];
 
@@ -1128,6 +1127,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mFillCoords[6] = max;
 		mFillCoords[7] = min;
 
+		int i[] = new int[1];
+
+		// GLES20.glGetIntegerv(GLES20.GL_, i, 0);
+		Log.d(TAG, " >>>> " + i[0]);
 		LineLayers.init();
 		PolygonLayers.init();
 	}

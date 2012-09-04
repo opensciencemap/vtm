@@ -24,7 +24,6 @@ class Shaders {
 			+ "attribute vec2 a_st;"
 			+ "varying vec2 v_st;"
 			+ "uniform float u_width;"
-			+ "uniform float u_offset;"
 			+ "const float dscale = 8.0/1000.0;"
 			+ "void main() {"
 			+ "  vec2 dir = dscale * u_width * a_position.zw;"
@@ -76,7 +75,6 @@ class Shaders {
 			+ "precision mediump float;"
 			+ "uniform mat4 mvp;"
 			+ "attribute vec4 a_position;"
-			+ "uniform float u_offset;"
 			+ "void main() {"
 			+ "  gl_Position = mvp * a_position;"
 			+ "}";

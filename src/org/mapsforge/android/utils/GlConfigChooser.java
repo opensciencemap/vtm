@@ -25,11 +25,11 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
 		// Try to find a normal multisample configuration first.
 		int[] configSpec = {
-				EGL10.EGL_RED_SIZE, 5,
-				EGL10.EGL_GREEN_SIZE, 6,
-				EGL10.EGL_BLUE_SIZE, 5,
+				EGL10.EGL_RED_SIZE, 8,
+				EGL10.EGL_GREEN_SIZE, 8,
+				EGL10.EGL_BLUE_SIZE, 8,
 				EGL10.EGL_ALPHA_SIZE, 0,
-				EGL10.EGL_DEPTH_SIZE, 16,
+				EGL10.EGL_DEPTH_SIZE, 24,
 				// Requires that setEGLContextClientVersion(2) is called on the view.
 				EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
 				// EGL10.EGL_SAMPLE_BUFFERS, 1 /* true */,
@@ -50,9 +50,9 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 					EGL10.EGL_GREEN_SIZE, 6,
 					EGL10.EGL_BLUE_SIZE, 5,
 					EGL10.EGL_ALPHA_SIZE, 0,
-					EGL10.EGL_DEPTH_SIZE, 16,
+					EGL10.EGL_DEPTH_SIZE, 24,
 					EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
-					EGL10.EGL_STENCIL_SIZE, 4,
+					EGL10.EGL_STENCIL_SIZE, 8,
 					EGL10.EGL_NONE };
 
 			if (!egl.eglChooseConfig(display, configSpec, null, 0, mValue)) {
@@ -91,17 +91,15 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		// // break;
 		// // }
 		// // else
-		// if (findConfigAttrib(egl, display, configs[i], EGL10.EGL_RED_SIZE, 0) == 5
+		// if (findConfigAttrib(egl, display, configs[i], EGL10.EGL_RED_SIZE, 0) == 8
 		// &&
 		// findConfigAttrib(egl, display, configs[i], EGL10.EGL_ALPHA_SIZE, 0) == 0
-		// // &&
-		// // findConfigAttrib(egl, display, configs[i], EGL10.EGL_DEPTH_SIZE, 0) == 16
-		// ) {
+		// &&
+		// findConfigAttrib(egl, display, configs[i], EGL10.EGL_DEPTH_SIZE, 0) == 24) {
 		// index = i;
 		// break;
 		// }
 		// }
-		//
 		// if (index == -1) {
 		// Log.w(TAG, "Did not find sane config, using first");
 		// index = 0;
