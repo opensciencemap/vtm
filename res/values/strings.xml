@@ -2,7 +2,7 @@
 <resources>
 	<string-array name="preferences_map_generator_values">
 	<!--   <item>Mapfile</item> -->
-	 <item>PostGIS</item> 
+	<!-- <item>PostGIS</item>--> 
 		<item>OpenScienceMap</item>
 	</string-array>
 
