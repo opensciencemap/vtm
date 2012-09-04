@@ -101,9 +101,10 @@ public class MapDatabase implements IMapDatabase {
 	private int mCurTagCnt;
 
 	private HttpClient mClient;
+	private HttpGet mRequest = null;
+
 	private IMapDatabaseCallback mMapGenerator;
 	private float mScaleFactor;
-	private HttpGet mRequest = null;
 	private Tile mTile;
 
 	private FileOutputStream mCacheFile;
@@ -157,7 +158,7 @@ public class MapDatabase implements IMapDatabase {
 		try {
 
 			// HttpURLConnection urlConn = (HttpURLConnection) new URL(url).openConnection();
-			// urlConn.setUseCaches(false);
+			// // urlConn.setUseCaches(false);
 			//
 			// InputStream in = urlConn.getInputStream();
 			// try {
@@ -206,8 +207,6 @@ public class MapDatabase implements IMapDatabase {
 				if (is != null)
 					is.close();
 				entity.consumeContent();
-
-				// urlConnection.disconnect();
 			}
 		} catch (SocketException ex) {
 			Log.d(TAG, "Socket exception: " + ex.getMessage());
@@ -271,7 +270,7 @@ public class MapDatabase implements IMapDatabase {
 
 		HttpConnectionParams.setConnectionTimeout(params, 20 * 1000);
 		HttpConnectionParams.setSoTimeout(params, 60 * 1000);
-		HttpConnectionParams.setSocketBufferSize(params, 16384);
+		HttpConnectionParams.setSocketBufferSize(params, 32768);
 		HttpClientParams.setRedirecting(params, false);
 		// HttpClientParams.setCookiePolicy(params, CookiePolicy.ACCEPT_NONE);
 
@@ -284,6 +283,7 @@ public class MapDatabase implements IMapDatabase {
 
 	@Override
 	public FileOpenResult openFile(File mapFile) {
+
 		createClient();
 
 		if (USE_CACHE) {
@@ -335,8 +335,13 @@ public class MapDatabase implements IMapDatabase {
 	private static final int BUFFER_SIZE = 65536;
 
 	private final byte[] buffer = new byte[BUFFER_SIZE];
+	// position in read buffer
 	private int bufferPos;
+	// bytes available in read buffer
 	private int bufferSize;
+	// (bytesRead - bufferPos) + bufferSize
+	// private int bufferLimit;
+	// bytes processed
 	private int bytesRead;
 	private InputStream inputStream;
 
@@ -368,8 +373,6 @@ public class MapDatabase implements IMapDatabase {
 		while ((val = decodeVarint32()) > 0) {
 			// read tag and wire type
 			int tag = (val >> 3);
-			// int wireType = (val & 7);
-			// Log.d(TAG, "tile " + tag + " " + wireType);
 
 			switch (tag) {
 				case TAG_TILE_TAGS:
@@ -398,7 +401,13 @@ public class MapDatabase implements IMapDatabase {
 
 	private boolean decodeTileTags() throws IOException {
 		String tagString = decodeString();
+		// Log.d(TAG, "tag>" + tagString + "<");
 
+		if (tagString == null || tagString.length() == 0) {
+
+			curTags[mCurTagCnt++] = new Tag(Tag.TAG_KEY_NAME, "...");
+			return false;
+		}
 		Tag tag = tagHash.get(tagString);
 
 		if (tag == null) {
@@ -455,7 +464,7 @@ public class MapDatabase implements IMapDatabase {
 				case TAG_WAY_COORDS:
 					int cnt = decodeWayCoordinates(skip);
 					if (cnt != coordCnt) {
-						Log.d(TAG, "EEEK wrong number of coordintes");
+						Log.d(TAG, "X wrong number of coordintes");
 						fail = true;
 					}
 					break;
@@ -477,14 +486,14 @@ public class MapDatabase implements IMapDatabase {
 					break;
 
 				default:
-					Log.d(TAG, "invalid type for way: " + tag);
+					Log.d(TAG, "X invalid type for way: " + tag);
 			}
 		}
 
 		if (fail || index == null || tags == null || indexCnt == 0 || tagCnt == 0) {
-			Log.d(TAG, "..." + index + " " + (tags != null ? tags[0] : "...") + " "
-					+ indexCnt + " " + coordCnt + " "
-					+ tagCnt);
+			Log.d(TAG, "failed reading way: bytes:" + bytes + " index:" + index + " tag:"
+					+ (tags != null ? tags[0] : "...") + " "
+					+ indexCnt + " " + coordCnt + " " + tagCnt);
 			return false;
 		}
 
@@ -523,7 +532,7 @@ public class MapDatabase implements IMapDatabase {
 				case TAG_NODE_COORDS:
 					int cnt = decodeNodeCoordinates(coordCnt, layer, tags);
 					if (cnt != coordCnt) {
-						Log.d(TAG, "EEEK wrong number of coordintes");
+						Log.d(TAG, "X wrong number of coordintes");
 						return false;
 					}
 					break;
@@ -541,7 +550,7 @@ public class MapDatabase implements IMapDatabase {
 					break;
 
 				default:
-					Log.d(TAG, "invalid type for node: " + tag);
+					Log.d(TAG, "X invalid type for node: " + tag);
 			}
 		}
 
@@ -674,39 +683,38 @@ public class MapDatabase implements IMapDatabase {
 			if (buf[pos] >= 0) {
 				result = buf[pos++];
 			} else if (buf[pos + 1] >= 0) {
-				result = buf[pos] & 0x7f
+				result = (buf[pos] & 0x7f)
 						| buf[pos + 1] << 7;
 				pos += 2;
 			} else if (buf[pos + 2] >= 0) {
-				result = buf[pos] & 0x7f
-						| buf[pos + 1] << 7
-						| buf[pos + 2] << 14;
+				result = (buf[pos] & 0x7f)
+						| (buf[pos + 1] & 0x7f) << 7
+						| (buf[pos + 2]) << 14;
 				pos += 3;
 			} else if (buf[pos + 3] >= 0) {
-				result = buf[pos] & 0x7f
-						| buf[pos + 1] << 7
-						| buf[pos + 2] << 14
-						| buf[pos + 3] << 21;
+				result = (buf[pos] & 0x7f)
+						| (buf[pos + 1] & 0x7f) << 7
+						| (buf[pos + 2] & 0x7f) << 14
+						| (buf[pos + 3]) << 21;
 				pos += 4;
 			} else {
-				result = buf[pos] & 0x7f
-						| buf[pos + 1] << 7
-						| buf[pos + 2] << 14
-						| buf[pos + 3] << 21
-						| buf[pos + 4] << 28;
+				result = (buf[pos] & 0x7f)
+						| (buf[pos + 1] & 0x7f) << 7
+						| (buf[pos + 2] & 0x7f) << 14
+						| (buf[pos + 3] & 0x7f) << 21
+						| (buf[pos + 4]) << 28;
 
 				Log.d(TAG, "Stuffs too large " + mTile);
-				pos += 5;
 
-				if (buf[pos - 1] < 0) {
-					int i = 0;
-					while (i++ < 5) {
-						if (buf[pos++] >= 0)
-							break;
-					}
-					if (i == 5)
-						throw new IOException("EEEK malformed varInt");
-				}
+				pos += 4;
+				int i = 0;
+
+				while (buf[pos++] < 0 && i < 10)
+					i++;
+
+				if (i == 10)
+					throw new IOException("X malformed VarInt32");
+
 			}
 			if (even) {
 				x = ((result >>> 1) ^ -(result & 1));
@@ -727,25 +735,27 @@ public class MapDatabase implements IMapDatabase {
 		return cnt;
 	}
 
-	private void readBuffer(int size) throws IOException {
-		if (size < (bufferSize - bufferPos))
-			return;
+	private int readBuffer(int size) throws IOException {
+		int read = 0;
+
+		if (bufferPos + size < bufferSize)
+			return 0;
 
 		if (size > BUFFER_SIZE) {
 			// FIXME throw exception for now, but frankly better
 			// sanitize tile data on compilation.
 			// this only happen with strings or coordinates larger than 64kb
-			throw new IOException("EEEK requested size too large");
+			throw new IOException("X requested size too large");
 		}
 
 		if (bufferSize == bufferPos) {
 			bufferPos = 0;
 			bufferSize = 0;
-		}
-
-		if ((size - bufferSize) + bufferPos > BUFFER_SIZE) {
-			// copy bytes left to read from buffer to the beginning of buffer
-			System.arraycopy(buffer, bufferPos, buffer, 0, bufferSize - bufferPos);
+		} else if (bufferPos + (size - bufferSize) > BUFFER_SIZE) {
+			Log.d(TAG, "wrap buffer" + (size - bufferSize) + " " + bufferPos);
+			// copy bytes left to read to the beginning of buffer
+			bufferSize -= bufferPos;
+			System.arraycopy(buffer, bufferPos, buffer, 0, bufferSize);
 			bufferPos = 0;
 		}
 
@@ -755,15 +765,19 @@ public class MapDatabase implements IMapDatabase {
 			int len = inputStream.read(buffer, bufferSize, BUFFER_SIZE - bufferSize);
 
 			if (len < 0) {
+				// finished reading, mark end
 				buffer[bufferSize] = 0;
 				break;
 			}
+
+			read += len;
 
 			if (mCacheFile != null)
 				mCacheFile.write(buffer, bufferSize, len);
 
 			bufferSize += len;
 		}
+		return read;
 	}
 
 	@Override
@@ -772,6 +786,67 @@ public class MapDatabase implements IMapDatabase {
 			mRequest.abort();
 			mRequest = null;
 		}
+	}
+
+	private int decodeVarint32() throws IOException {
+		int pos = bufferPos;
+
+		if (pos + 10 > bufferSize) {
+			readBuffer(8192);
+			pos = bufferPos;
+		}
+
+		byte[] buf = buffer;
+
+		if (buf[pos] >= 0) {
+			bufferPos += 1;
+			bytesRead += 1;
+			return buf[pos];
+		} else if (buf[pos + 1] >= 0) {
+			bufferPos += 2;
+			bytesRead += 2;
+			return (buf[pos] & 0x7f)
+					| (buf[pos + 1]) << 7;
+
+		} else if (buf[pos + 2] >= 0) {
+			bufferPos += 3;
+			bytesRead += 3;
+			return (buf[pos] & 0x7f)
+					| (buf[pos + 1] & 0x7f) << 7
+					| (buf[pos + 2]) << 14;
+		} else if (buf[pos + 3] >= 0) {
+			bufferPos += 4;
+			bytesRead += 4;
+			return (buf[pos] & 0x7f)
+					| (buf[pos + 1] & 0x7f) << 7
+					| (buf[pos + 2] & 0x7f) << 14
+					| (buf[pos + 3]) << 21;
+		}
+
+		int result = (buf[pos] & 0x7f)
+				| (buf[pos + 1] & 0x7f) << 7
+				| (buf[pos + 2] & 0x7f) << 14
+				| (buf[pos + 3] & 0x7f) << 21
+				| (buf[pos + 4]) << 28;
+
+		Log.d(TAG, "got a big number, eh?");
+
+		int read = 5;
+		pos += 4;
+
+		// 'Discard upper 32 bits' - the original comment.
+		// havent found this in any document but the code provided by google.
+		// no idea what this is for, just seems fsckin stupid...
+		while (buf[pos++] < 0 && read < 10)
+			read++;
+
+		if (read == 10)
+			throw new IOException("X malformed VarInt32");
+
+		bufferPos += read;
+		bytesRead += read;
+
+		return result;
 	}
 
 	/* All code below is taken from or based on Google's Protocol Buffers implementation: */
@@ -806,114 +881,21 @@ public class MapDatabase implements IMapDatabase {
 	// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 	// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-	// private byte readRawByte() throws IOException {
-	// if (bufferPos == bufferSize) {
-	// readBuffer(8192);
-	// }
-	//
-	// bytesRead++;
-	// return buffer[bufferPos++];
-	// }
-
-	private int decodeVarint32() throws IOException {
-		if (bytesRead + 10 > bufferSize)
-			readBuffer(10);
-
-		int pos = bufferPos;
-		byte[] buf = buffer;
-		int result;
-		int read = 0;
-
-		if (buf[pos] >= 0) {
-			result = buf[pos++];
-			read = 1;
-		} else if (buf[pos + 1] >= 0) {
-			result = buf[pos] & 0x7f
-					| buf[pos + 1] << 7;
-			read = 2;
-		} else if (buf[pos + 2] >= 0) {
-			result = buf[pos] & 0x7f
-					| buf[pos + 1] << 7
-					| buf[pos + 2] << 14;
-			read = 3;
-		} else if (buf[pos + 3] >= 0) {
-			result = buf[pos] & 0x7f
-					| buf[pos + 1] << 7
-					| buf[pos + 2] << 14
-					| buf[pos + 3] << 21;
-			read = 4;
-		} else {
-			result = buf[pos] & 0x7f
-					| buf[pos + 1] << 7
-					| buf[pos + 2] << 14
-					| buf[pos + 3] << 21
-					| buf[pos + 4] << 28;
-			read = 5;
-
-			pos += 4;
-			if (buf[pos++] < 0) {
-				while (read++ < 10) {
-					if (buf[pos++] >= 0)
-						break;
-				}
-
-				if (read == 10)
-					throw new IOException("X malformed VarInt32");
-			}
-		}
-
-		bufferPos += read;
-		bytesRead += read;
-		return result;
-	}
-
-	// private int _decodeVarint32() throws IOException {
-	// byte tmp = readRawByte();
-	// if (tmp >= 0) {
-	// return tmp;
-	// }
-	// int result = tmp & 0x7f;
-	// if ((tmp = readRawByte()) >= 0) {
-	// return result | tmp << 7;
-	// }
-	// result |= (tmp & 0x7f) << 7;
-	// if ((tmp = readRawByte()) >= 0) {
-	// return result | tmp << 14;
-	// }
-	// result |= (tmp & 0x7f) << 14;
-	// if ((tmp = readRawByte()) >= 0) {
-	// return result | tmp << 21;
-	// }
-	// result |= (tmp & 0x7f) << 21;
-	// result |= (tmp = readRawByte()) << 28;
-	//
-	// if (tmp < 0) {
-	// // Discard upper 32 bits.
-	// for (int i = 0; i < 5; i++) {
-	// if (readRawByte() >= 0) {
-	// return result;
-	// }
-	// }
-	// Log.d(TAG, "EEK malformedVarint");
-	// // FIXME throw some poo
-	// }
-	//
-	// return result;
-	// }
-
 	private String decodeString() throws IOException {
 		final int size = decodeVarint32();
 
 		readBuffer(size);
 
 		final String result = new String(buffer, bufferPos, size, "UTF-8");
+		// Log.d(TAG, "read string " + read + " " + size + " " + bufferPos + " " + result);
+
 		bufferPos += size;
 		bytesRead += size;
 		return result;
 
 	}
 
-	public static int decodeZigZag32(final int n) {
+	private static int decodeZigZag32(final int n) {
 		return (n >>> 1) ^ -(n & 1);
 	}
 
