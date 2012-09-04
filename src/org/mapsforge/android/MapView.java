@@ -94,8 +94,6 @@ public class MapView extends GLSurfaceView {
 	private DebugSettings debugSettings;
 	private String mMapFile;
 
-	private File cacheDir;
-
 	/**
 	 * @param context
 	 *            the enclosing MapActivity instance.
@@ -138,8 +136,6 @@ public class MapView extends GLSurfaceView {
 
 		MapActivity mapActivity = (MapActivity) context;
 
-		cacheDir = context.getFilesDir();
-
 		debugSettings = new DebugSettings(false, false, false, false);
 
 		mMapController = new MapController(this);
@@ -181,10 +177,12 @@ public class MapView extends GLSurfaceView {
 		setMapFile("default");
 		initMapStartPosition();
 
-		if (!setRenderTheme(DEFAULT_RENDER_THEME)) {
-			Log.d(TAG, "X could not parse theme");
-			// FIXME show init error dialog
-		}
+		mapActivity.registerMapView(this);
+
+		// if (!setRenderTheme(DEFAULT_RENDER_THEME)) {
+		// Log.d(TAG, "X could not parse theme");
+		// // FIXME show init error dialog
+		// }
 
 		setEGLConfigChooser(new GlConfigChooser());
 		setEGLContextClientVersion(2);
@@ -193,8 +191,6 @@ public class MapView extends GLSurfaceView {
 
 		if (!debugFrameTime)
 			setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
-		mapActivity.registerMapView(this);
 	}
 
 	public final static boolean debugFrameTime = false;
@@ -348,7 +344,7 @@ public class MapView extends GLSurfaceView {
 			if (mapFile != null)
 				fileOpenResult = mapDatabase.openFile(new File(mapFile));
 			else
-				fileOpenResult = mapDatabase.openFile(cacheDir);
+				fileOpenResult = mapDatabase.openFile(null);
 
 			if (fileOpenResult != null && fileOpenResult.isSuccess()) {
 				mMapFile = mapFile;
@@ -436,6 +432,12 @@ public class MapView extends GLSurfaceView {
 		mapWorkersProceed();
 	}
 
+	private String mRenderTheme;
+
+	public String getRenderTheme() {
+		return mRenderTheme;
+	}
+
 	/**
 	 * Sets the internal theme which is used for rendering the map.
 	 * 
@@ -451,6 +453,9 @@ public class MapView extends GLSurfaceView {
 		}
 
 		boolean ret = setRenderTheme((Theme) internalRenderTheme);
+		if (ret) {
+			mRenderTheme = internalRenderTheme.name();
+		}
 
 		clearAndRedrawMapView();
 		return ret;
@@ -471,7 +476,10 @@ public class MapView extends GLSurfaceView {
 			throw new IllegalArgumentException("render theme path must not be null");
 		}
 
-		setRenderTheme(new ExternalRenderTheme(renderThemePath));
+		boolean ret = setRenderTheme(new ExternalRenderTheme(renderThemePath));
+		if (ret) {
+			mRenderTheme = renderThemePath;
+		}
 
 		clearAndRedrawMapView();
 	}

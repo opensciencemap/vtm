@@ -14,6 +14,9 @@
  */
 package org.mapsforge.android;
 
+import java.io.FileNotFoundException;
+
+import org.mapsforge.android.rendertheme.InternalRenderTheme;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.MapPosition;
 
@@ -37,6 +40,7 @@ public abstract class MapActivity extends Activity {
 	private static final String KEY_MAP_FILE = "mapFile";
 	private static final String KEY_ZOOM_LEVEL = "zoomLevel";
 	private static final String PREFERENCES_FILE = "MapActivity";
+	private static final String KEY_THEME = "Theme";
 
 	private static boolean containsMapViewPosition(SharedPreferences sharedPreferences) {
 		return sharedPreferences.contains(KEY_LATITUDE)
@@ -45,22 +49,14 @@ public abstract class MapActivity extends Activity {
 	}
 
 	/**
-	 * Counter to store the last ID given to a MapView.
-	 */
-	private int lastMapViewId;
-
-	/**
 	 * Internal list which contains references to all running MapView objects.
 	 */
 	private MapView mMapView;
 
-	private void destroyMapViews() {
-		mMapView.destroy();
-	}
-
 	private void restoreMapView(MapView mapView) {
 		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,
 				MODE_PRIVATE);
+
 		if (containsMapViewPosition(sharedPreferences)) {
 
 			if (sharedPreferences.contains(KEY_MAP_FILE)) {
@@ -77,12 +73,25 @@ public abstract class MapActivity extends Activity {
 			MapPosition mapPosition = new MapPosition(geoPoint, (byte) zoomLevel, 1);
 			mapView.setCenterAndZoom(mapPosition);
 		}
+
+		String theme = sharedPreferences.getString(KEY_THEME,
+				InternalRenderTheme.OSMARENDER.name());
+
+		if (theme.startsWith("/")) {
+			try {
+				mapView.setRenderTheme(theme);
+			} catch (FileNotFoundException e) {
+				mapView.setRenderTheme(InternalRenderTheme.OSMARENDER);
+			}
+		} else {
+			mapView.setRenderTheme(InternalRenderTheme.valueOf(theme));
+		}
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		destroyMapViews();
+		mMapView.destroy();
 	}
 
 	@Override
@@ -107,6 +116,8 @@ public abstract class MapActivity extends Activity {
 			editor.putString(KEY_MAP_FILE, mMapView.getMapFile());
 		}
 
+		editor.putString(KEY_THEME, mMapView.getRenderTheme());
+
 		editor.commit();
 	}
 
@@ -114,13 +125,6 @@ public abstract class MapActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		mMapView.onResume();
-	}
-
-	/**
-	 * @return a unique MapView ID on each call.
-	 */
-	final int getMapViewId() {
-		return ++lastMapViewId;
 	}
 
 	/**
