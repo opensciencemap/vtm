@@ -27,6 +27,8 @@ class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 	private MapViewPosition mMapPosition;
 	private float mCenterX;
 	private float mCenterY;
+	private float mFocusX;
+	private float mFocusY;
 	private float mScale;
 	private boolean mBeginScale;
 
@@ -43,9 +45,9 @@ class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 	@Override
 	public boolean onScale(ScaleGestureDetector gd) {
 
-		float focusX = gd.getFocusX();
-		float focusY = gd.getFocusY();
 		mScale = gd.getScaleFactor();
+		mFocusX = gd.getFocusX() - mCenterX;
+		mFocusY = gd.getFocusY() - mCenterY;
 
 		mSumScale *= mScale;
 
@@ -60,7 +62,7 @@ class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 				return true;
 		}
 
-		mMapPosition.scaleMap(mScale, focusX - mCenterX, focusY - mCenterY);
+		mMapPosition.scaleMap(mScale, mFocusX, mFocusY);
 		mMapView.redrawTiles();
 
 		return true;
@@ -85,6 +87,7 @@ class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 	@Override
 	public void onScaleEnd(ScaleGestureDetector gd) {
 		// Log.d("ScaleListener", "Sum " + mSumScale + " " + (mTimeEnd - mTimeStart));
+
 		if (mTimer == null && mTimeEnd - mTimeStart < 150
 				&& (mSumScale < 0.99 || mSumScale > 1.01)) {
 
@@ -128,12 +131,11 @@ class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 		mPrevScale += scale;
 
 		if (mZooutOut) {
-			scale = 1 - scale;
+			mMapPosition.scaleMap(1 - scale, 0, 0);
 		} else {
-			scale = 1 + scale;
+			mMapPosition.scaleMap(1 + scale, mFocusX, mFocusY);
 		}
 
-		mMapPosition.scaleMap(scale, 0, 0);
 		mMapView.redrawTiles();
 
 		if (tick == 0)
