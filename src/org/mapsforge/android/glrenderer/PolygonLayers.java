@@ -82,7 +82,7 @@ class PolygonLayers {
 		// do not modify stencil buffer
 		glStencilMask(0);
 
-		GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+		// GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 
 		for (int c = 0; c < count; c++) {
 			PolygonLayer l = mFillPolys[c];
@@ -193,12 +193,7 @@ class PolygonLayers {
 
 				// stencil op for stencil method polygon drawing
 				glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
-
-				GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 			}
-
-			//
-
 			mFillPolys[cnt] = l;
 
 			// set stencil mask to draw to
@@ -228,7 +223,6 @@ class PolygonLayers {
 	}
 
 	static void drawDepthClip() {
-
 		glColorMask(false, false, false, false);
 		GLES20.glDepthMask(true);
 		GLES20.glDepthFunc(GLES20.GL_LESS);
