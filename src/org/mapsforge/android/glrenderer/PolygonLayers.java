@@ -25,7 +25,6 @@ import static android.opengl.GLES20.glColorMask;
 import static android.opengl.GLES20.glDisable;
 import static android.opengl.GLES20.glDrawArrays;
 import static android.opengl.GLES20.glEnable;
-import static android.opengl.GLES20.glEnableVertexAttribArray;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glStencilFunc;
@@ -82,7 +81,7 @@ class PolygonLayers {
 		// do not modify stencil buffer
 		glStencilMask(0);
 
-		// GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+		glEnable(GLES20.GL_DEPTH_TEST);
 
 		for (int c = 0; c < count; c++) {
 			PolygonLayer l = mFillPolys[c];
@@ -90,7 +89,7 @@ class PolygonLayers {
 			float alpha = 1.0f;
 
 			if (l.area.fade >= zoom || l.area.color[3] != 1.0) {
-
+				// draw alpha blending, fade in/out
 				if (l.area.fade >= zoom) {
 					alpha = (scale > 1.3f ? scale : 1.3f) - alpha;
 					if (alpha > 1.0f)
@@ -104,9 +103,13 @@ class PolygonLayers {
 					blend = true;
 				}
 				glUniform4f(hPolygonColor,
-						l.area.color[0], l.area.color[1], l.area.color[2], alpha);
+						l.area.color[0] * alpha,
+						l.area.color[1] * alpha,
+						l.area.color[2] * alpha,
+						alpha);
 
 			} else if (l.area.blend == zoom) {
+				// fade in/out
 				alpha = scale - 1.0f;
 				if (alpha > 1.0f)
 					alpha = 1.0f;
@@ -118,6 +121,7 @@ class PolygonLayers {
 						l.area.color[1] * (1 - alpha) + l.area.blendColor[1] * alpha,
 						l.area.color[2] * (1 - alpha) + l.area.blendColor[2] * alpha, 1);
 			} else {
+				// draw solid
 				if (blend) {
 					glDisable(GL_BLEND);
 					blend = false;
@@ -144,7 +148,7 @@ class PolygonLayers {
 		int cnt = 0;
 
 		glUseProgram(polygonProgram);
-		glEnableVertexAttribArray(hPolygonVertexPosition);
+		GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);
 
 		glVertexAttribPointer(hPolygonVertexPosition, 2,
 				GLES20.GL_SHORT, false, 0,
@@ -177,9 +181,12 @@ class PolygonLayers {
 				// clear stencilbuffer (tile region)
 				glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 
-				// draw depth clipper
 				if (first) {
+					// draw clip-region into depth buffer
 					GLES20.glDepthMask(true);
+					// to prevent overdraw gl_less restricts
+					// the clip to the area where no other
+					// tile was drawn
 					GLES20.glDepthFunc(GLES20.GL_LESS);
 				}
 
@@ -193,6 +200,7 @@ class PolygonLayers {
 
 				// stencil op for stencil method polygon drawing
 				glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
+				glDisable(GLES20.GL_DEPTH_TEST);
 			}
 			mFillPolys[cnt] = l;
 
@@ -218,7 +226,6 @@ class PolygonLayers {
 
 		// required on GalaxyII, Android 2.3.3 (cant just VAA enable once...)
 		GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);
-
 		return l;
 	}
 

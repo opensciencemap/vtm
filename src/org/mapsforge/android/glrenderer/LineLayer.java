@@ -22,10 +22,16 @@ import android.util.FloatMath;
 
 class LineLayer {
 
-	private static final float S = MapRenderer.COORD_MULTIPLIER;
-	private static final float S1000 = 1000;
+	private static final float COORD_SCALE = MapRenderer.COORD_MULTIPLIER;
+	// scale factor mapping direction vector to short values
+	private static final float DIR_SCALE = 2048;
+	// mask for packing last two bits of direction vector with texture coordinates
+	private static final int DIR_MASK = 0xFFFFFFFC;
 
+	// next layer
 	LineLayer next;
+
+	// lines referenced by this outline layer
 	LineLayer outlines;
 
 	Line line;
@@ -58,12 +64,12 @@ class LineLayer {
 	}
 
 	/*
-	 * line extrusion is based on code from GLMap (https://github.com/olofsj/GLMap/) by olofsj -- need some way to know
-	 * how the road connects to set the ending angles
+	 * line extrusion is based on code from GLMap (https://github.com/olofsj/GLMap/) by olofsj
 	 */
 	void addLine(float[] points, int pos, int length) {
-		float x, y, nextX, nextY, prevX, prevY, ux, uy, vx, vy, wx, wy;
-		float a;
+		float x, y, nextX, nextY, prevX, prevY;
+		float a, ux, uy, vx, vy, wx, wy;
+
 		int ipos = pos;
 		boolean rounded = false;
 		boolean squared = false;
@@ -94,7 +100,8 @@ class LineLayer {
 		ux = -vy;
 		uy = vx;
 
-		int tsize = Tile.TILE_SIZE;
+		int tmax = Tile.TILE_SIZE + 10;
+		int tmin = -10;
 
 		if (pool == null) {
 			pool = curItem = ShortPool.get();
@@ -112,27 +119,25 @@ class LineLayer {
 			v = si.vertices;
 		}
 
-		boolean outside = (x <= 0 || x >= tsize || y <= 0 || y >= tsize)
-				&& (x - vx <= 0 || x - vx >= tsize || y - vy <= 0 || y - vy >= tsize);
-
 		short ox, oy, dx, dy;
+		int ddx, ddy;
 
-		ox = (short) (x * S);
-		oy = (short) (y * S);
+		ox = (short) (x * COORD_SCALE);
+		oy = (short) (y * COORD_SCALE);
+
+		boolean outside = (x < tmin || x > tmax || y < tmin || y > tmax);
 
 		if (rounded && !outside) {
+			// add first vertex twice
+			ddx = (int) ((ux - vx) * DIR_SCALE);
+			ddy = (int) ((uy - vy) * DIR_SCALE);
+			dx = (short) (0 | ddx & DIR_MASK);
+			dy = (short) (2 | ddy & DIR_MASK);
 
-			// For rounded line edges
-			dx = (short) ((ux - vx) * S1000);
-			dy = (short) ((uy - vy) * S1000);
-
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = -1;
-			v[opos + 5] = 1;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = dx;
+			v[opos++] = dy;
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -142,13 +147,10 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = -1;
-			v[opos + 5] = 1;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = dx;
+			v[opos++] = dy;
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -158,16 +160,13 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			dx = (short) (-(ux + vx) * S1000);
-			dy = (short) (-(uy + vy) * S1000);
+			ddx = (int) (-(ux + vx) * DIR_SCALE);
+			ddy = (int) (-(uy + vy) * DIR_SCALE);
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = 1;
-			v[opos + 5] = 1;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = (short) (2 | ddx & DIR_MASK);
+			v[opos++] = (short) (2 | ddy & DIR_MASK);
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -178,16 +177,13 @@ class LineLayer {
 			}
 
 			// Start of line
-			dx = (short) (ux * S1000);
-			dy = (short) (uy * S1000);
+			ddx = (int) (ux * DIR_SCALE);
+			ddy = (int) (uy * DIR_SCALE);
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = -1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = (short) (0 | ddx & DIR_MASK);
+			v[opos++] = (short) (1 | ddy & DIR_MASK);
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -197,13 +193,10 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = (short) (-dx);
-			v[opos + 3] = (short) (-dy);
-			v[opos + 4] = 1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = (short) (2 | -ddx & DIR_MASK);
+			v[opos++] = (short) (1 | -ddy & DIR_MASK);
 
 		} else {
 			// outside means line is probably clipped
@@ -221,32 +214,16 @@ class LineLayer {
 			if (rounded)
 				verticesCnt -= 2;
 
-			dx = (short) ((ux - vx) * S1000);
-			dy = (short) ((uy - vy) * S1000);
+			// add first vertex twice
+			ddx = (int) ((ux - vx) * DIR_SCALE);
+			ddy = (int) ((uy - vy) * DIR_SCALE);
+			dx = (short) (0 | ddx & DIR_MASK);
+			dy = (short) (1 | ddy & DIR_MASK);
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = -1;
-			v[opos + 5] = 0;
-			opos += 6;
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = -1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = dx;
+			v[opos++] = dy;
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -256,16 +233,27 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			dx = (short) (-(ux + vx) * S1000);
-			dy = (short) (-(uy + vy) * S1000);
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = dx;
+			v[opos++] = dy;
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = 1;
-			v[opos + 5] = 0;
-			opos += 6;
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			ddx = (int) (-(ux + vx) * DIR_SCALE);
+			ddy = (int) (-(uy + vy) * DIR_SCALE);
+
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = (short) (2 | ddx & DIR_MASK);
+			v[opos++] = (short) (1 | ddy & DIR_MASK);
+
 		}
 
 		prevX = x;
@@ -298,14 +286,16 @@ class LineLayer {
 			a = -wy * ux + wx * uy;
 
 			// boolean split = false;
-			if (a < 0.1f && a > -0.1f) {
-				// Almost straight or miter goes to infinity, use normal vector
+			if (a < 0.01f && a > -0.01f) {
+				// Almost straight
 				ux = -wy;
 				uy = wx;
 			} else {
 				ux = (ux / a);
 				uy = (uy / a);
 
+				// hack to avoid miter going to infinity
+				// note to myself: find my mathbook and do this properly!
 				if (ux > 2.0f || ux < -2.0f || uy > 2.0f || uy < -2.0f) {
 					ux = -wy;
 					uy = wx;
@@ -320,19 +310,16 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			ox = (short) (x * S);
-			oy = (short) (y * S);
+			ox = (short) (x * COORD_SCALE);
+			oy = (short) (y * COORD_SCALE);
 
-			dx = (short) (ux * S1000);
-			dy = (short) (uy * S1000);
+			ddx = (int) (ux * DIR_SCALE);
+			ddy = (int) (uy * DIR_SCALE);
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = -1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = (short) (0 | ddx & DIR_MASK);
+			v[opos++] = (short) (1 | ddy & DIR_MASK);
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -342,13 +329,10 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = (short) -dx;
-			v[opos + 3] = (short) -dy;
-			v[opos + 4] = 1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = (short) (2 | -ddx & DIR_MASK);
+			v[opos++] = (short) (1 | -ddy & DIR_MASK);
 
 			prevX = x;
 			prevY = y;
@@ -367,8 +351,7 @@ class LineLayer {
 		ux = vy;
 		uy = -vx;
 
-		outside = (x <= 0 || x >= tsize || y <= 0 || y >= tsize)
-				&& (x - vx <= 0 || x - vx >= tsize || y - vy <= 0 || y - vy >= tsize);
+		outside = (x < tmin || x > tmax || y < tmin || y > tmax);
 
 		if (opos == ShortItem.SIZE) {
 			si.used = ShortItem.SIZE;
@@ -378,21 +361,17 @@ class LineLayer {
 			v = si.vertices;
 		}
 
-		ox = (short) (x * S);
-		oy = (short) (y * S);
+		ox = (short) (x * COORD_SCALE);
+		oy = (short) (y * COORD_SCALE);
 
 		if (rounded && !outside) {
+			ddx = (int) (ux * DIR_SCALE);
+			ddy = (int) (uy * DIR_SCALE);
 
-			dx = (short) (ux * S1000);
-			dy = (short) (uy * S1000);
-
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = -1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = (short) (0 | ddx & DIR_MASK);
+			v[opos++] = (short) (1 | ddy & DIR_MASK);
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -402,13 +381,10 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = (short) -dx;
-			v[opos + 3] = (short) -dy;
-			v[opos + 4] = 1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = (short) (2 | -ddx & DIR_MASK);
+			v[opos++] = (short) (1 | -ddy & DIR_MASK);
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -419,35 +395,15 @@ class LineLayer {
 			}
 
 			// For rounded line edges
-			dx = (short) ((ux - vx) * S1000);
-			dy = (short) ((uy - vy) * S1000);
+			ddx = (int) ((ux - vx) * DIR_SCALE);
+			ddy = (int) ((uy - vy) * DIR_SCALE);
+			dx = (short) (0 | ddx & DIR_MASK);
+			dy = (short) (0 | ddy & DIR_MASK);
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = -1;
-			v[opos + 5] = -1;
-			opos += 6;
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			dx = (short) (-(ux + vx) * S1000);
-			dy = (short) (-(uy + vy) * S1000);
-
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = 1;
-			v[opos + 5] = -1;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = dx;
+			v[opos++] = dy;
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -457,13 +413,29 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = 1;
-			v[opos + 5] = -1;
-			opos += 6;
+			// add last vertex twice
+			ddx = (int) (-(ux + vx) * DIR_SCALE);
+			ddy = (int) (-(uy + vy) * DIR_SCALE);
+			dx = (short) (2 | ddx & DIR_MASK);
+			dy = (short) (0 | ddy & DIR_MASK);
+
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = dx;
+			v[opos++] = dy;
+
+			if (opos == ShortItem.SIZE) {
+				si.used = ShortItem.SIZE;
+				si.next = ShortPool.get();
+				si = si.next;
+				opos = 0;
+				v = si.vertices;
+			}
+
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = dx;
+			v[opos++] = dy;
 
 		} else {
 			if (squared) {
@@ -477,16 +449,13 @@ class LineLayer {
 			if (rounded)
 				verticesCnt -= 2;
 
-			dx = (short) ((ux - vx) * S1000);
-			dy = (short) ((uy - vy) * S1000);
+			ddx = (int) ((ux - vx) * DIR_SCALE);
+			ddy = (int) ((uy - vy) * DIR_SCALE);
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = -1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = (short) (0 | ddx & DIR_MASK);
+			v[opos++] = (short) (1 | ddy & DIR_MASK);
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -496,16 +465,16 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			dx = (short) (-(ux + vx) * S1000);
-			dy = (short) (-(uy + vy) * S1000);
+			// add last vertex twice
+			ddx = (int) (-(ux + vx) * DIR_SCALE);
+			ddy = (int) (-(uy + vy) * DIR_SCALE);
+			dx = (short) (2 | ddx & DIR_MASK);
+			dy = (short) (1 | ddy & DIR_MASK);
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = 1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = dx;
+			v[opos++] = dy;
 
 			if (opos == ShortItem.SIZE) {
 				si.used = ShortItem.SIZE;
@@ -515,13 +484,10 @@ class LineLayer {
 				v = si.vertices;
 			}
 
-			v[opos + 0] = ox;
-			v[opos + 1] = oy;
-			v[opos + 2] = dx;
-			v[opos + 3] = dy;
-			v[opos + 4] = 1;
-			v[opos + 5] = 0;
-			opos += 6;
+			v[opos++] = ox;
+			v[opos++] = oy;
+			v[opos++] = dx;
+			v[opos++] = dy;
 		}
 
 		si.used = opos;

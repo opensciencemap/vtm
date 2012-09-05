@@ -16,11 +16,9 @@ package org.mapsforge.android.glrenderer;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_BLEND;
-import static android.opengl.GLES20.GL_DITHER;
 import static android.opengl.GLES20.GL_DYNAMIC_DRAW;
 import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
 import static android.opengl.GLES20.GL_SCISSOR_TEST;
-import static android.opengl.GLES20.GL_SRC_ALPHA;
 import static android.opengl.GLES20.GL_STENCIL_BUFFER_BIT;
 import static android.opengl.GLES20.glBindBuffer;
 import static android.opengl.GLES20.glBlendFunc;
@@ -30,7 +28,6 @@ import static android.opengl.GLES20.glClearColor;
 import static android.opengl.GLES20.glClearStencil;
 import static android.opengl.GLES20.glDisable;
 import static android.opengl.GLES20.glEnable;
-import static android.opengl.GLES20.glFinish;
 import static android.opengl.GLES20.glGenBuffers;
 import static android.opengl.GLES20.glScissor;
 import static android.opengl.GLES20.glViewport;
@@ -68,7 +65,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	private static final int MAX_TILES_IN_QUEUE = 40;
 	private static final int CACHE_TILES_MAX = 250;
-	private static final int LIMIT_BUFFERS = 16 * MB;
+	private static final int LIMIT_BUFFERS = 12 * MB;
 
 	private static int CACHE_TILES = CACHE_TILES_MAX;
 
@@ -109,7 +106,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	private static float[] mMVPMatrix = new float[16];
 	// private static float[] mRotateMatrix = new float[16];
-	private static float[] mProjMatrix = new float[16];
+	// private static float[] mProjMatrix = new float[16];
 
 	// newTiles is set in updateVisibleList and swapped
 	// with curTiles on main thread. curTiles is swapped
@@ -600,6 +597,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		return true;
 	}
 
+	// depthRange: -1 to 1, bits: 2^24 => 2/2^24 one step
+	// maybe one could avoid clearing the depth buffer for a few
+	// iterations when modifying glDepthRange before clipper
+	// gl_less test so that it does not fail
+	// private static final float depthStep = 0.00000011920928955078125f;
+
 	private static void setMatrix(GLMapTile tile, float div, int offset) {
 		float x, y, scale;
 
@@ -609,7 +612,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		mMVPMatrix[12] = x * scale * mAspect;
 		mMVPMatrix[13] = -(y + Tile.TILE_SIZE) * scale;
-		mMVPMatrix[14] = offset * 0.01f;
+		// increase the 'distance' with each tile drawn.
+		mMVPMatrix[14] = -1 + offset * 0.01f; // depthStep; // 0.01f;
 		mMVPMatrix[0] = scale * mAspect / COORD_MULTIPLIER;
 		mMVPMatrix[5] = scale / COORD_MULTIPLIER;
 
@@ -763,6 +767,9 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (mBufferMemoryUsage > LIMIT_BUFFERS) {
 			Log.d(TAG, "buffer object usage: " + mBufferMemoryUsage / MB + "MB");
 
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			int buf[] = new int[1];
+
 			synchronized (mVBOs) {
 				for (VertexBufferObject vbo : mVBOs) {
 
@@ -770,8 +777,19 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 						continue;
 
 					mBufferMemoryUsage -= vbo.size;
-					glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
-					glBufferData(GL_ARRAY_BUFFER, 0, null, GL_DYNAMIC_DRAW);
+					GlUtils.checkGlError("before");
+					// this should free allocated memory but it does not. at least on HTC.
+					// glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
+					// glBufferData(GL_ARRAY_BUFFER, 0, null, GLES20.GL_STATIC_DRAW);
+
+					// recreate vbo
+					buf[0] = vbo.id;
+					GLES20.glDeleteBuffers(1, buf, 0);
+					GLES20.glGenBuffers(1, buf, 0);
+					vbo.id = buf[0];
+
+					GlUtils.checkGlError("after");
+
 					vbo.size = 0;
 				}
 			}
@@ -801,7 +819,14 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 
 		GLES20.glDepthMask(true);
-		glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+		// Note: i have the impression it is faster to also clear the
+		// stencil buffer even when not needed. probaly otherwise it
+		// is masked out from the depth buffer as they share the same
+		// memory region afaik
+		glClear(GLES20.GL_COLOR_BUFFER_BIT
+				| GLES20.GL_DEPTH_BUFFER_BIT
+				| GLES20.GL_STENCIL_BUFFER_BIT);
 
 		if (mInitial)
 			return;
@@ -862,7 +887,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (updateTextures > 0)
 			TextRenderer.compileTextures();
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 		// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 
@@ -883,17 +907,15 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		// glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 		glDisable(GLES20.GL_DEPTH_TEST);
+		//
 
 		mDrawCount = 0;
 
 		glEnable(GL_BLEND);
-		glBlendFunc(GLES20.GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
 		int z = mDrawPosition.zoomLevel;
 		float s = mDrawPosition.scale;
 
-		int zoomLevelDiff = Math
-				.max(z - MapGenerator.STROKE_MAX_ZOOM_LEVEL, 0);
+		int zoomLevelDiff = Math.max(z - MapGenerator.STROKE_MAX_ZOOM_LEVEL, 0);
 		float scale = (float) Math.pow(1.4, zoomLevelDiff);
 		if (scale < 1)
 			scale = 1;
@@ -913,7 +935,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		TextRenderer.endDraw();
 
 		if (MapView.debugFrameTime) {
-			glFinish();
+			GLES20.glFinish();
 			Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start));
 		}
 
@@ -921,19 +943,20 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	}
 
 	private static void drawTile(GLMapTile tile, float div) {
-
+		// draw parents only once
 		if (tile.lastDraw == mRedrawCnt)
 			return;
+
+		tile.lastDraw = mRedrawCnt;
 
 		int z = mDrawPosition.zoomLevel;
 		float s = mDrawPosition.scale;
 
-		tile.lastDraw = mRedrawCnt;
-
+		// mDrawCount is used to calculation z offset.
+		// (used for depth clipping)
 		setMatrix(tile, div, mDrawCount++);
 
 		glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
-		// GLES20.glPolygonOffset(0, mDrawCount);
 
 		LineLayer ll = tile.lineLayers;
 		PolygonLayer pl = tile.polygonLayers;
@@ -955,15 +978,15 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 				pl = PolygonLayers.drawPolygons(pl, lnext, mMVPMatrix, z, s, !clipped);
 
-				if (!clipped) {
-					clipped = true;
-				}
+				clipped = true;
+
 			} else {
-				// XXX nastay
+				// XXX nasty
 				if (!clipped) {
 					PolygonLayers.drawPolygons(null, 0, mMVPMatrix, z, s, true);
 					clipped = true;
 				}
+
 				glEnable(GL_BLEND);
 
 				ll = LineLayers.drawLines(tile, ll, pnext, mMVPMatrix, div, z, s);
@@ -1081,14 +1104,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		// Set up textures
 		TextRenderer.init(numTiles);
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		// glDisable(GLES20.GL_DEPTH_TEST);
-		// glDepthMask(false);
-		// GLES20.glDepthRangef(1, 0);
-		// GLES20.glClearDepthf(0);
-
-		glDisable(GL_DITHER);
+		// glDisable(GL_DITHER);
 
 		if (mClearColor != null) {
 			glClearColor(mClearColor[0], mClearColor[1],
@@ -1096,11 +1112,16 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		} else {
 			glClearColor(0.98f, 0.98f, 0.97f, 1.0f);
 		}
+
 		glClearStencil(0);
 		glClear(GL_STENCIL_BUFFER_BIT);
 
 		glEnable(GL_SCISSOR_TEST);
 		glScissor(0, 0, mWidth, mHeight);
+
+		glBlendFunc(GLES20.GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+		GlUtils.checkGlError("onSurfaceChanged");
 
 		mMapView.redrawTiles();
 	}
@@ -1127,10 +1148,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mFillCoords[6] = max;
 		mFillCoords[7] = min;
 
-		int i[] = new int[1];
-
+		// int i[] = new int[1];
 		// GLES20.glGetIntegerv(GLES20.GL_, i, 0);
-		Log.d(TAG, " >>>> " + i[0]);
+		// Log.d(TAG, " >>>> " + i[0]);
+
 		LineLayers.init();
 		PolygonLayers.init();
 	}

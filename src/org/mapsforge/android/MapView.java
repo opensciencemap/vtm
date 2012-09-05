@@ -78,6 +78,8 @@ public class MapView extends GLSurfaceView {
 	private static final float DEFAULT_TEXT_SCALE = 1;
 	private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 16);
 
+	public final static boolean debugFrameTime = false;
+
 	private final MapController mMapController;
 	private final MapViewPosition mMapViewPosition;
 
@@ -186,14 +188,13 @@ public class MapView extends GLSurfaceView {
 
 		setEGLConfigChooser(new GlConfigChooser());
 		setEGLContextClientVersion(2);
+		// setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
 
 		setRenderer(mMapRenderer);
 
 		if (!debugFrameTime)
 			setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 	}
-
-	public final static boolean debugFrameTime = false;
 
 	private void initMapStartPosition() {
 		GeoPoint startPoint = getStartPoint();

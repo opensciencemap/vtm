@@ -25,9 +25,9 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
 		// Try to find a normal multisample configuration first.
 		int[] configSpec = {
-				EGL10.EGL_RED_SIZE, 8,
-				EGL10.EGL_GREEN_SIZE, 8,
-				EGL10.EGL_BLUE_SIZE, 8,
+				EGL10.EGL_RED_SIZE, 5,
+				EGL10.EGL_GREEN_SIZE, 6,
+				EGL10.EGL_BLUE_SIZE, 5,
 				EGL10.EGL_ALPHA_SIZE, 0,
 				EGL10.EGL_DEPTH_SIZE, 24,
 				// Requires that setEGLContextClientVersion(2) is called on the view.
@@ -132,15 +132,16 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		 */
 
 		return String.format("EGLConfig rgba=%d%d%d%d depth=%d stencil=%d",
-				new Integer(r), new Integer(g),
-				new Integer(b), new Integer(a), new Integer(d), new Integer(s))
+				Integer.valueOf(r), Integer.valueOf(g),
+				Integer.valueOf(b), Integer.valueOf(a), Integer.valueOf(d),
+				Integer.valueOf(s))
 				+ " native="
 				+ findConfigAttrib(egl, display, config, EGL10.EGL_NATIVE_RENDERABLE, 0)
 				+ " buffer="
 				+ findConfigAttrib(egl, display, config, EGL10.EGL_BUFFER_SIZE, 0)
 				+ String.format(
 						" caveat=0x%04x",
-						new Integer(findConfigAttrib(egl, display, config,
+						Integer.valueOf(findConfigAttrib(egl, display, config,
 								EGL10.EGL_CONFIG_CAVEAT, 0)));
 
 	}

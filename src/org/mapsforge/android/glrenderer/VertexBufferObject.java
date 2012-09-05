@@ -16,7 +16,7 @@
 package org.mapsforge.android.glrenderer;
 
 class VertexBufferObject {
-	final int id;
+	int id;
 	int size;
 
 	VertexBufferObject(int id) {

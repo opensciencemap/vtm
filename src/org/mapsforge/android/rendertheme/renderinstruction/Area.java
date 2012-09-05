@@ -114,17 +114,17 @@ public final class Area extends RenderInstruction {
 		// }
 
 		color = new float[4];
-		color[0] = (fill >> 16 & 0xff) / 255.0f;
-		color[1] = (fill >> 8 & 0xff) / 255.0f;
-		color[2] = (fill >> 0 & 0xff) / 255.0f;
 		color[3] = (fill >> 24 & 0xff) / 255.0f;
+		color[0] = (fill >> 16 & 0xff) / 255.0f * color[3];
+		color[1] = (fill >> 8 & 0xff) / 255.0f * color[3];
+		color[2] = (fill >> 0 & 0xff) / 255.0f * color[3];
 
 		if (blend > 0) {
 			blendColor = new float[4];
-			blendColor[0] = (blendFill >> 16 & 0xff) / 255.0f;
-			blendColor[1] = (blendFill >> 8 & 0xff) / 255.0f;
-			blendColor[2] = (blendFill >> 0 & 0xff) / 255.0f;
 			blendColor[3] = (blendFill >> 24 & 0xff) / 255.0f;
+			blendColor[0] = (blendFill >> 16 & 0xff) / 255.0f * blendColor[3];
+			blendColor[1] = (blendFill >> 8 & 0xff) / 255.0f * blendColor[3];
+			blendColor[2] = (blendFill >> 0 & 0xff) / 255.0f * blendColor[3];
 		} else {
 			blendColor = null;
 		}
