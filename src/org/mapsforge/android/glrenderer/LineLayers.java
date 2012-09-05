@@ -35,10 +35,10 @@ import android.opengl.GLES20;
 import android.util.FloatMath;
 
 class LineLayers {
-	private static int NUM_VERTEX_SHORTS = 6;
+	private static int NUM_VERTEX_SHORTS = 4;
 
 	private static final int LINE_VERTICES_DATA_POS_OFFSET = 0;
-	private static final int LINE_VERTICES_DATA_TEX_OFFSET = 8;
+	private static final int LINE_VERTICES_DATA_TEX_OFFSET = 4;
 
 	// shader handles
 	private static int lineProgram;
@@ -82,11 +82,11 @@ class LineLayers {
 		glEnableVertexAttribArray(hLineVertexPosition);
 		glEnableVertexAttribArray(hLineTexturePosition);
 
-		glVertexAttribPointer(hLineVertexPosition, 4, GLES20.GL_SHORT,
-				false, 12, tile.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
+		glVertexAttribPointer(hLineVertexPosition, 2, GLES20.GL_SHORT,
+				false, 8, tile.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
 
 		glVertexAttribPointer(hLineTexturePosition, 2, GLES20.GL_SHORT,
-				false, 12, tile.lineOffset + LINE_VERTICES_DATA_TEX_OFFSET);
+				false, 8, tile.lineOffset + LINE_VERTICES_DATA_TEX_OFFSET);
 
 		glUniformMatrix4fv(hLineMatrix, 1, false, matrix, 0);
 
@@ -115,7 +115,10 @@ class LineLayers {
 				if (alpha > 1.0f)
 					alpha = 1.0f;
 				glUniform4f(hLineColor,
-						line.color[0], line.color[1], line.color[2], alpha);
+						line.color[0] * alpha,
+						line.color[1] * alpha,
+						line.color[2] * alpha,
+						alpha);
 			} else {
 				glUniform4fv(hLineColor, 1, line.color, 0);
 			}

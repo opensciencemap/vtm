@@ -188,10 +188,10 @@ public final class Line extends RenderInstruction {
 		this.cap = strokeLinecap;
 
 		color = new float[4];
-		color[0] = (stroke >> 16 & 0xff) / 255.0f;
-		color[1] = (stroke >> 8 & 0xff) / 255.0f;
-		color[2] = (stroke >> 0 & 0xff) / 255.0f;
 		color[3] = (stroke >> 24 & 0xff) / 255.0f;
+		color[0] = (stroke >> 16 & 0xff) / 255.0f * color[3];
+		color[1] = (stroke >> 8 & 0xff) / 255.0f * color[3];
+		color[2] = (stroke >> 0 & 0xff) / 255.0f * color[3];
 
 		this.width = strokeWidth;
 		this.level = level;

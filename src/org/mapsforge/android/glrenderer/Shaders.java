@@ -20,16 +20,34 @@ class Shaders {
 	final static String lineVertexShader = ""
 			+ "precision mediump float;"
 			+ "uniform mat4 mvp;"
-			+ "attribute vec4 a_position;"
+			+ "attribute vec2 a_position;"
 			+ "attribute vec2 a_st;"
 			+ "varying vec2 v_st;"
 			+ "uniform float u_width;"
-			+ "const float dscale = 8.0/1000.0;"
+			+ "const float dscale = 8.0/2048.0;"
 			+ "void main() {"
-			+ "  vec2 dir = dscale * u_width * a_position.zw;"
-			+ "  gl_Position = mvp * vec4(a_position.xy + dir, 0.0,1.0);"
-			+ "  v_st = u_width * a_st;"
+			// scale extrusion to line u_width pixel
+			// just ignore the two most insignificant bits of a_st :)
+			+ "  vec2 dir = dscale * u_width * a_st;"
+			+ "  gl_Position = mvp * vec4(a_position + dir, 0.0,1.0);"
+			// last two bits of a_st hold the texture coordinates
+			// TODO use bit operations when available!
+			+ "  v_st = u_width * (abs(mod(a_st,4.0)) - 1.0);"
 			+ "}";
+
+	// final static String lineVertexShader = ""
+	// + "precision mediump float;"
+	// + "uniform mat4 mvp;"
+	// + "attribute vec4 a_position;"
+	// + "attribute vec2 a_st;"
+	// + "varying vec2 v_st;"
+	// + "uniform float u_width;"
+	// + "const float dscale = 8.0/1000.0;"
+	// + "void main() {"
+	// + "  vec2 dir = dscale * u_width * a_position.zw;"
+	// + "  gl_Position = mvp * vec4(a_position.xy + dir, 0.0,1.0);"
+	// + "  v_st = u_width * a_st;"
+	// + "}";
 
 	final static String lineFragmentShader = ""
 			+ "precision mediump float;"
@@ -45,7 +63,12 @@ class Shaders {
 			+ "    len = abs(v_st.s);"
 			+ "  else "
 			+ "    len = length(v_st);"
-			+ "  color.a *= smoothstep(zero, u_wscale, u_width - len);"
+			// fade to alpha. u_wscale is the width in pixel which should be faded,
+			// u_width - len the position of this fragment on the perpendicular to the line
+			+ "color *= smoothstep(zero, u_wscale, u_width - len);"
+			+ "if (color.a < 0.02)"
+			+ "  discard;"
+			+ " else"
 			+ "  gl_FragColor = color;"
 			+ "}";
 
