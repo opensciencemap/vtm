@@ -22,10 +22,6 @@ class PolygonLayer {
 
 	PolygonLayer next;
 	Area area;
-	// private static final float MapRenderer.COORD_MULTIPLIER = 8.0f;
-	private boolean first = true;
-	private short originX;
-	private short originY;
 
 	ShortItem pool;
 	protected ShortItem curItem;
@@ -40,66 +36,6 @@ class PolygonLayer {
 		curItem = ShortPool.get();
 		pool = curItem;
 	}
-
-	// short[] getNextItem() {
-	// curItem.used = ShortItem.SIZE;
-	// curItem.next = ShortPool.get();
-	// curItem = curItem.next;
-	//
-	// return curItem.vertices;
-	// }
-	//
-	// void addPolygon(float[] points, int pos, int length) {
-	//
-	// verticesCnt += length / 2 + 2;
-	//
-	// if (first) {
-	// first = false;
-	// originX = (short) ((Tile.TILE_SIZE >> 1) * S);
-	// originY = (short) ((Tile.TILE_SIZE >> 1) * S);
-	// }
-	//
-	// short[] curVertices = curItem.vertices;
-	// int outPos = curItem.used;
-	//
-	// if (outPos == ShortItem.SIZE) {
-	// curVertices = getNextItem();
-	// outPos = 0;
-	// }
-	//
-	// curVertices[outPos++] = originX;
-	// curVertices[outPos++] = originY;
-	//
-	// int MAX = ShortItem.SIZE;
-	// int remaining = length;
-	// int inPos = pos;
-	// while (remaining > 0) {
-	//
-	// if (outPos == MAX) {
-	// curVertices = getNextItem();
-	// outPos = 0;
-	// }
-	//
-	// int len = remaining;
-	// if (len > MAX - outPos)
-	// len = MAX - outPos;
-	//
-	// for (int i = 0; i < len; i++)
-	// curVertices[outPos++] = (short) (points[inPos++] * S);
-	//
-	// remaining -= len;
-	// }
-	//
-	// if (outPos == MAX) {
-	// curVertices = getNextItem();
-	// outPos = 0;
-	// }
-	//
-	// curVertices[outPos++] = (short) (points[pos + 0] * S);
-	// curVertices[outPos++] = (short) (points[pos + 1] * S);
-	//
-	// curItem.used = outPos;
-	// }
 
 	void addPolygon(float[] points, short[] index) {
 		short center = (short) ((Tile.TILE_SIZE >> 1) * S);
