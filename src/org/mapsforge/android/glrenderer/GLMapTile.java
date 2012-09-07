@@ -17,7 +17,7 @@ package org.mapsforge.android.glrenderer;
 import org.mapsforge.android.mapgenerator.MapTile;
 
 class GLMapTile extends MapTile {
-	long lastDraw = 0;
+	byte lastDraw = 0;
 
 	// VBO layout:
 	// 16 bytes fill coordinates

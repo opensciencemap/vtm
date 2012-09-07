@@ -114,7 +114,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private static TilesData newTiles, curTiles, drawTiles;
 
 	// draw position is updated from current position in onDrawFrame
-	// keeping the position consistent while drawing
+	// keeping the position and active tiles consistent while drawing
 	private static MapPosition mCurPosition, mDrawPosition;
 
 	// flag set by updateVisibleList when current visible tiles
@@ -122,10 +122,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private static boolean mUpdateTiles;
 
 	private static boolean mInitial;
-	private static short mDrawCount = 0;
 
 	private float[] mClearColor = null;
-	private static long mRedrawCnt = 0;
+
+	// number of tiles drawn in one frame
+	private static short mDrawCount = 0;
+
 	private static boolean mUpdateColor = false;
 
 	/**
@@ -218,8 +220,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		return false;
 	}
 
-	// FIXME still the chance that one jumped two zoomlevels between cur and draw...
-	// and this is all a bit heavy in the first place
+	// FIXME still the chance that one jumped two zoomlevels between
+	// cur and draw. should use reference counter instead
 	private static boolean tileInUse(GLMapTile t) {
 		byte z = mPrevZoom;
 
@@ -267,35 +269,115 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		return false;
 	}
 
-	private static void limitCache(int remove) {
-		boolean printAll = false;
+	private static void limitCache(MapPosition mapPosition, int remove) {
+		int removes = remove;
 
-		for (int j = mTiles.size() - 1, cnt = 0; cnt < remove && j > 0; j--, cnt++) {
-			GLMapTile t = mTiles.remove(j);
+		int size = mTiles.size();
+
+		// remove orphaned tiles
+		for (int i = 0; i < size;) {
+			GLMapTile cur = mTiles.get(i);
+			// make sure tile cannot be used by GL or MapWorker Thread
+			if ((!cur.isActive) && (!cur.isLoading) && (!cur.newData)
+					&& (!cur.isReady) && (!tileInUse(cur))) {
+
+				clearTile(cur);
+				mTiles.remove(i);
+				removes--;
+				size--;
+				// Log.d(TAG, "remove empty tile" + cur);
+				continue;
+			}
+			i++;
+		}
+
+		if (removes <= 0)
+			return;
+
+		updateTileDistances(mTiles, mapPosition);
+
+		Log.d(TAG, "remove tiles: " + removes);
+
+		// boolean printAll = false;
+
+		for (int i = 1; i <= removes; i++) {
+
+			GLMapTile t = mTiles.get(0);
+			int pos = 0;
+
+			for (int j = 1; j < size; j++) {
+				GLMapTile t2 = mTiles.get(j);
+				if (t2.distance > t.distance) {
+					t = t2;
+					pos = j;
+				}
+			}
 
 			synchronized (t) {
-
 				if (t.isActive) {
 					// dont remove tile used by renderthread or mapgenerator
 					Log.d(TAG, "X not removing active " + t + " " + t.distance);
-					mTiles.add(t);
 
-					if (printAll) {
-						printAll = false;
-						for (GLMapTile tt : mTiles)
-							Log.d(TAG, ">>>" + tt + " " + tt.distance);
-					}
+					// if (printAll) {
+					// printAll = false;
+					// for (GLMapTile tt : mTiles)
+					// Log.d(TAG, ">>>" + tt + " " + tt.distance);
+					// }
 				} else if ((t.isReady || t.newData) && tileInUse(t)) {
 					// check if this tile could be used as proxy
 					// for not yet drawn active tile
 					Log.d(TAG, "X not removing proxy: " + t + " " + t.distance);
-					mTiles.add(t);
 				} else {
 					if (t.isLoading) {
 						Log.d(TAG, ">>> cancel loading " + t + " " + t.distance);
 						t.isCanceled = true;
 					}
+					mTiles.remove(pos);
+					clearTile(t);
+					size--;
+				}
+			}
+		}
+	}
 
+	private static void limitLoadQueue(int remove) {
+		int size = remove;
+
+		synchronized (mTilesLoaded) {
+
+			// remove uploaded tiles
+			for (int i = 0; i < size;) {
+				GLMapTile t = mTilesLoaded.get(i);
+				// rel == null means tile is already removed by limitCache
+				if (!t.newData || t.rel == null) {
+					mTilesLoaded.remove(i);
+					size--;
+					continue;
+				}
+				i++;
+			}
+
+			// clear loaded but not used tiles
+			if (size < MAX_TILES_IN_QUEUE)
+				return;
+
+			while (size-- > MAX_TILES_IN_QUEUE - 20) {
+				GLMapTile t = mTilesLoaded.get(size);
+
+				synchronized (t) {
+					if (t.rel == null) {
+						mTilesLoaded.remove(size);
+						continue;
+					}
+
+					if (tileInUse(t)) {
+						// Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
+						continue;
+					}
+
+					mTilesLoaded.remove(size);
+					mTiles.remove(t);
+					// Log.d(TAG, "remove unused tile data: " + t);
 					clearTile(t);
 				}
 			}
@@ -409,51 +491,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			mMapView.addJobs(mJobList);
 		}
 
-		int removes = mTiles.size() - CACHE_TILES;
-
-		if (removes > 10) {
-			// int size = mTiles.size();
-			// for (int i = 0; i < size;) {
-			// GLMapTile cur = mTiles.get(i);
-			// if (!cur.isActive && !cur.isLoading && !cur.newData && !cur.isReady) {
-			// // Log.d(TAG, "remove empty tile" + cur);
-			// mTiles.remove(i);
-			// TreeTile.remove(cur);
-			// removes--;
-			// size--;
-			// continue;
-			// }
-			// i++;
-			// }
-
-			int size = mTiles.size();
-
-			updateTileDistances(mTiles, mapPosition);
-			// Log.d(TAG, "remove tiles: " + removes);
-
-			// find 'removes' tiles with longest distance and
-			// move them at the end
-			for (int i = 1; i <= removes; i++) {
-				int pos = 0;
-				GLMapTile t = mTiles.get(0);
-
-				for (int j = 1; j <= size - i; j++) {
-					GLMapTile t2 = mTiles.get(j);
-					if (t2.distance > t.distance) {
-						t = t2;
-						pos = j;
-					}
-				}
-				// Log.d(TAG, "mark for removal" + cur);
-
-				mTiles.add(size - i, mTiles.remove(pos));
-			}
-			// Collections.sort(mTiles);
-
-			limitCache(removes);
-
-		}
-
 		return true;
 	}
 
@@ -560,47 +597,16 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (changedPos)
 			updateVisibleList(mapPosition, zdir);
 
-		synchronized (mTilesLoaded) {
-			int size = mTilesLoaded.size();
-			if (size < MAX_TILES_IN_QUEUE)
-				return;
-
-			// remove uploaded tiles
-			for (int i = 0; i < size;) {
-				GLMapTile t = mTilesLoaded.get(i);
-				// rel == null means tile is already removed by limitCache
-				if (!t.newData || t.rel == null) {
-					mTilesLoaded.remove(i);
-					size--;
-					continue;
-				}
-				i++;
-			}
-
-			// clear loaded but not used tiles
-			if (size > MAX_TILES_IN_QUEUE) {
-				while (size-- > MAX_TILES_IN_QUEUE - 20) {
-					GLMapTile t = mTilesLoaded.get(size);
-
-					synchronized (t) {
-						if (t.rel == null) {
-							mTilesLoaded.remove(size);
-							continue;
-						}
-
-						if (tileInUse(t)) {
-							// Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
-							continue;
-						}
-
-						mTilesLoaded.remove(size);
-						mTiles.remove(t);
-						// Log.d(TAG, "remove unused tile data: " + t);
-						clearTile(t);
-					}
-				}
-			}
+		if (changedPos || changedZoom) {
+			int remove = mTiles.size() - CACHE_TILES;
+			if (remove > 10)
+				limitCache(mapPosition, remove);
 		}
+
+		int size = mTilesLoaded.size();
+		if (size > MAX_TILES_IN_QUEUE)
+			limitLoadQueue(size);
+
 	}
 
 	/**
@@ -646,9 +652,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	}
 
 	// depthRange: -1 to 1, bits: 2^24 => 2/2^24 one step
-	// maybe one could avoid clearing the depth buffer for a few
-	// iterations when modifying glDepthRange before clipper
-	// gl_less test so that it does not fail
+	// ... asus has just 16 bit?!
 	// private static final float depthStep = 0.00000011920928955078125f;
 
 	private static void setMatrix(GLMapTile tile, float div, int offset) {
@@ -811,7 +815,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	}
 
 	private static void checkBufferUsage() {
-		// not really tested, try to clear some vbo when exceding limit
+		// try to clear some unused vbo when exceding limit
 		if (mBufferMemoryUsage > LIMIT_BUFFERS) {
 			Log.d(TAG, "buffer object usage: " + mBufferMemoryUsage / MB + "MB");
 
@@ -825,18 +829,18 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 						continue;
 
 					mBufferMemoryUsage -= vbo.size;
-					GlUtils.checkGlError("before");
-					// this should free allocated memory but it does not. at least on HTC.
+
+					// this should free allocated memory but it does not.
+					// on HTC it causes oom exception?!
+
 					// glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
 					// glBufferData(GL_ARRAY_BUFFER, 0, null, GLES20.GL_STATIC_DRAW);
 
-					// recreate vbo
+					// recreate vbo instead
 					buf[0] = vbo.id;
 					GLES20.glDeleteBuffers(1, buf, 0);
 					GLES20.glGenBuffers(1, buf, 0);
 					vbo.id = buf[0];
-
-					GlUtils.checkGlError("after");
 
 					vbo.size = 0;
 				}
@@ -861,8 +865,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			start = SystemClock.uptimeMillis();
 
 		if (mUpdateColor && mClearColor != null) {
-			glClearColor(mClearColor[0], mClearColor[1],
-					mClearColor[2], mClearColor[3]);
+			glClearColor(mClearColor[0], mClearColor[1], mClearColor[2], mClearColor[3]);
 			mUpdateColor = false;
 		}
 
@@ -937,7 +940,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			TextRenderer.compileTextures();
 
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		// glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible && tiles[i].isReady) {
@@ -954,11 +956,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 		// GlUtils.checkGlError("end draw");
 
-		// glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 		glDisable(GLES20.GL_DEPTH_TEST);
-		//
 
 		mDrawCount = 0;
+		mDrawSerial++;
 
 		glEnable(GL_BLEND);
 		int z = mDrawPosition.zoomLevel;
@@ -987,16 +988,17 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			GLES20.glFinish();
 			Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start));
 		}
-
-		mRedrawCnt++;
 	}
+
+	// used to not draw a tile twice per frame...
+	private static byte mDrawSerial = 0;
 
 	private static void drawTile(GLMapTile tile, float div) {
 		// draw parents only once
-		if (tile.lastDraw == mRedrawCnt)
+		if (tile.lastDraw == mDrawSerial)
 			return;
 
-		tile.lastDraw = mRedrawCnt;
+		tile.lastDraw = mDrawSerial;
 
 		int z = mDrawPosition.zoomLevel;
 		float s = mDrawPosition.scale;
