@@ -24,8 +24,8 @@ class PolygonLayer {
 	Area area;
 	// private static final float MapRenderer.COORD_MULTIPLIER = 8.0f;
 	private boolean first = true;
-	private float originX;
-	private float originY;
+	private short originX;
+	private short originY;
 
 	ShortItem pool;
 	protected ShortItem curItem;
@@ -41,69 +41,121 @@ class PolygonLayer {
 		pool = curItem;
 	}
 
-	short[] getNextItem() {
-		curItem.used = ShortItem.SIZE;
+	// short[] getNextItem() {
+	// curItem.used = ShortItem.SIZE;
+	// curItem.next = ShortPool.get();
+	// curItem = curItem.next;
+	//
+	// return curItem.vertices;
+	// }
+	//
+	// void addPolygon(float[] points, int pos, int length) {
+	//
+	// verticesCnt += length / 2 + 2;
+	//
+	// if (first) {
+	// first = false;
+	// originX = (short) ((Tile.TILE_SIZE >> 1) * S);
+	// originY = (short) ((Tile.TILE_SIZE >> 1) * S);
+	// }
+	//
+	// short[] curVertices = curItem.vertices;
+	// int outPos = curItem.used;
+	//
+	// if (outPos == ShortItem.SIZE) {
+	// curVertices = getNextItem();
+	// outPos = 0;
+	// }
+	//
+	// curVertices[outPos++] = originX;
+	// curVertices[outPos++] = originY;
+	//
+	// int MAX = ShortItem.SIZE;
+	// int remaining = length;
+	// int inPos = pos;
+	// while (remaining > 0) {
+	//
+	// if (outPos == MAX) {
+	// curVertices = getNextItem();
+	// outPos = 0;
+	// }
+	//
+	// int len = remaining;
+	// if (len > MAX - outPos)
+	// len = MAX - outPos;
+	//
+	// for (int i = 0; i < len; i++)
+	// curVertices[outPos++] = (short) (points[inPos++] * S);
+	//
+	// remaining -= len;
+	// }
+	//
+	// if (outPos == MAX) {
+	// curVertices = getNextItem();
+	// outPos = 0;
+	// }
+	//
+	// curVertices[outPos++] = (short) (points[pos + 0] * S);
+	// curVertices[outPos++] = (short) (points[pos + 1] * S);
+	//
+	// curItem.used = outPos;
+	// }
 
-		curItem.next = ShortPool.get();
-		curItem = curItem.next;
+	void addPolygon(float[] points, short[] index) {
+		short center = (short) ((Tile.TILE_SIZE >> 1) * S);
 
-		return curItem.vertices;
-	}
+		ShortItem si = curItem;
+		short[] v = si.vertices;
+		int outPos = si.used;
 
-	void addPolygon(float[] points, int pos, int length) {
+		for (int i = 0, pos = 0, n = index.length; i < n; i++) {
+			int length = index[i];
+			if (length < 0)
+				break;
 
-		verticesCnt += length / 2 + 2;
+			// need at least three points
+			if (length < 6) {
+				pos += length;
+				continue;
+			}
 
-		if (first) {
-			first = false;
-			originX = Tile.TILE_SIZE >> 1; // points[pos];
-			originY = Tile.TILE_SIZE >> 1; // points[pos + 1];
-		}
+			verticesCnt += length / 2 + 2;
 
-		short[] curVertices = curItem.vertices;
-		int outPos = curItem.used;
+			int inPos = pos;
 
-		if (outPos == ShortItem.SIZE) {
-			curVertices = getNextItem();
-			outPos = 0;
-		}
-
-		curVertices[outPos++] = (short) (originX * S);
-		curVertices[outPos++] = (short) (originY * S);
-
-		int MAX = ShortItem.SIZE;
-		int remaining = length;
-		int inPos = pos;
-		while (remaining > 0) {
-
-			if (outPos == MAX) {
-				curVertices = getNextItem();
+			if (outPos == ShortItem.SIZE) {
+				si = si.next = ShortPool.get();
+				v = si.vertices;
 				outPos = 0;
 			}
 
-			int len = remaining;
-			if (len > MAX - outPos)
-				len = MAX - outPos;
+			v[outPos++] = center;
+			v[outPos++] = center;
 
-			for (int i = 0; i < len; i++)
-				curVertices[outPos++] = (short) (points[inPos++] * S);
+			for (int j = 0; j < length; j += 2) {
+				if (outPos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					outPos = 0;
+				}
+				v[outPos++] = (short) (points[inPos++] * S);
+				v[outPos++] = (short) (points[inPos++] * S);
+			}
 
-			// System.arraycopy(points, inPos, curVertices, outPos, len);
+			if (outPos == ShortItem.SIZE) {
+				si = si.next = ShortPool.get();
+				v = si.vertices;
+				outPos = 0;
+			}
 
-			// outPos += len;
-			// inPos += len;
+			v[outPos++] = (short) (points[pos + 0] * S);
+			v[outPos++] = (short) (points[pos + 1] * S);
 
-			remaining -= len;
+			pos += length;
 		}
 
-		if (outPos == MAX) {
-			curVertices = getNextItem();
-			outPos = 0;
-		}
-
-		curVertices[outPos++] = (short) (points[pos + 0] * S);
-		curVertices[outPos++] = (short) (points[pos + 1] * S);
-
-		curItem.used = outPos;
+		si.used = outPos;
+		curItem = si;
 	}
+
 }

@@ -37,7 +37,7 @@ class GLMapTile extends MapTile {
 
 	boolean newData;
 
-	// pointer in TileTree
+	// pointer to access relatives in TileTree
 	TreeTile rel;
 
 	GLMapTile(int tileX, int tileY, byte zoomLevel) {
