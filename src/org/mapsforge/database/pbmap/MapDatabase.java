@@ -95,22 +95,6 @@ public class MapDatabase implements IMapDatabase {
 	// private static final String URL = "http://city.informatik.uni-bremen.de/tiles/tiles.py///test/%d/%d/%d.osmtile";
 	// private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/gis2/%d/%d/%d.osmtile";
 
-	private static final int MAX_TAGS_CACHE = 100;
-
-	private static Map<String, Tag> tagHash = Collections
-			.synchronizedMap(new LinkedHashMap<String, Tag>(
-					MAX_TAGS_CACHE, 0.75f, true) {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				protected boolean removeEldestEntry(Entry<String, Tag> e) {
-					if (size() < MAX_TAGS_CACHE)
-						return false;
-					return true;
-				}
-			});
-
 	private final static float REF_TILE_SIZE = 4096.0f;
 
 	private int MAX_TILE_TAGS = 100;
@@ -128,16 +112,35 @@ public class MapDatabase implements IMapDatabase {
 	private long mContentLenth;
 	private InputStream mInputStream;
 
+	private static final int MAX_TAGS_CACHE = 100;
+
+	private static Map<String, Tag> tagHash = Collections
+			.synchronizedMap(new LinkedHashMap<String, Tag>(
+					MAX_TAGS_CACHE, 0.75f, true) {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected boolean removeEldestEntry(Entry<String, Tag> e) {
+					if (size() < MAX_TAGS_CACHE)
+						return false;
+					return true;
+				}
+			});
+
 	@Override
 	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
-
 		QueryResult result = QueryResult.SUCCESS;
 		mCacheFile = null;
+
 		mTile = tile;
 
 		mMapGenerator = mapDatabaseCallback;
 		mCurTagCnt = 0;
+
+		// scale coordinates to tile size
 		mScaleFactor = REF_TILE_SIZE / Tile.TILE_SIZE;
+
 		File f = null;
 
 		mBufferSize = 0;
@@ -150,28 +153,8 @@ public class MapDatabase implements IMapDatabase {
 					Integer.valueOf(tile.tileX),
 					Integer.valueOf(tile.tileY)));
 
-			if (f.exists() && f.length() > 0) {
-				FileInputStream in;
-				Log.d(TAG, "using cache: " + tile);
-
-				try {
-					in = new FileInputStream(f);
-
-					mContentLenth = f.length();
-					mInputStream = in;
-
-					decode();
-					in.close();
-					return QueryResult.SUCCESS;
-
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-
-			f.delete();
+			if (cacheRead(tile, f))
+				return QueryResult.SUCCESS;
 		}
 
 		String url = null;
@@ -236,9 +219,8 @@ public class MapDatabase implements IMapDatabase {
 					entity.consumeContent();
 				}
 			} else {
-
-				HttpURLConnection urlConn = (HttpURLConnection) new URL(url)
-						.openConnection();
+				HttpURLConnection urlConn =
+						(HttpURLConnection) new URL(url).openConnection();
 
 				InputStream in = urlConn.getInputStream();
 				try {
@@ -272,7 +254,7 @@ public class MapDatabase implements IMapDatabase {
 			result = QueryResult.FAILED;
 		}
 
-		cacheFinish(result == QueryResult.SUCCESS, f);
+		cacheFinish(result == QueryResult.SUCCESS, f, tile);
 
 		return result;
 	}
@@ -458,6 +440,7 @@ public class MapDatabase implements IMapDatabase {
 			curTags[mCurTagCnt++] = new Tag(Tag.TAG_KEY_NAME, "...");
 			return false;
 		}
+
 		Tag tag = tagHash.get(tagString);
 
 		if (tag == null) {
@@ -970,7 +953,8 @@ public class MapDatabase implements IMapDatabase {
 
 	private int mMaxReq = 0;
 	private Socket mSocket;
-	private OutputStream mCmdBuffer;
+	private OutputStream mCommandStream;
+	private InputStream mResponseStream;
 	private long mLastRequest = 0;
 	private SocketAddress mSockAddr;
 
@@ -992,7 +976,7 @@ public class MapDatabase implements IMapDatabase {
 	// "Connection: Keep-Alive\n\n";
 
 	int lwHttpReadHeader() throws IOException {
-		InputStream is = mInputStream;
+		InputStream is = mResponseStream;
 
 		byte[] buf = mReadBuffer;
 
@@ -1067,6 +1051,8 @@ public class MapDatabase implements IMapDatabase {
 		// buffer fill
 		mBufferSize = read;
 
+		mInputStream = mResponseStream;
+
 		return resp_len;
 	}
 
@@ -1095,10 +1081,12 @@ public class MapDatabase implements IMapDatabase {
 			// Log.d(TAG, "create connection");
 		} else {
 			// should not be needed
-			int avail = mInputStream.available();
+
+			int avail = mResponseStream.available();
+
 			if (avail > 0) {
 				Log.d(TAG, "Consume left-over bytes: " + avail);
-				mInputStream.read(mReadBuffer, 0, avail);
+				mResponseStream.read(mReadBuffer, 0, avail);
 			}
 		}
 
@@ -1130,8 +1118,8 @@ public class MapDatabase implements IMapDatabase {
 		// Integer.valueOf(tile.tileX), Integer.valueOf(tile.tileY)).getBytes();
 
 		try {
-			mCmdBuffer.write(request, 0, len);
-			mCmdBuffer.flush();
+			mCommandStream.write(request, 0, len);
+			mCommandStream.flush();
 			return true;
 		} catch (IOException e) {
 			Log.d(TAG, "retry - recreate connection");
@@ -1139,8 +1127,8 @@ public class MapDatabase implements IMapDatabase {
 
 		lwHttpConnect();
 
-		mCmdBuffer.write(request, 0, len);
-		mCmdBuffer.flush();
+		mCommandStream.write(request, 0, len);
+		mCommandStream.flush();
 
 		return true;
 	}
@@ -1157,16 +1145,40 @@ public class MapDatabase implements IMapDatabase {
 		mSocket.connect(mSockAddr, 30000);
 		mSocket.setTcpNoDelay(true);
 		// mCmdBuffer = new PrintStream(mSocket.getOutputStream());
-		mCmdBuffer = new BufferedOutputStream(mSocket.getOutputStream());
-		mInputStream = mSocket.getInputStream();
-
+		mCommandStream = new BufferedOutputStream(mSocket.getOutputStream());
+		mResponseStream = mSocket.getInputStream();
 		return true;
 	}
 
 	// //////////////////////////// Tile cache ////////////////////////////////////
 
-	private boolean cacheRead() {
-		return true;
+	private boolean cacheRead(Tile tile, File f) {
+		if (f.exists() && f.length() > 0) {
+			FileInputStream in;
+
+			try {
+				in = new FileInputStream(f);
+
+				mContentLenth = f.length();
+				Log.d(TAG, tile + " using cache: " + mContentLenth);
+				mInputStream = in;
+
+				decode();
+				in.close();
+
+				return true;
+
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+
+			f.delete();
+			return false;
+		}
+
+		return false;
 	}
 
 	private boolean cacheBegin(Tile tile, File f) {
@@ -1179,6 +1191,7 @@ public class MapDatabase implements IMapDatabase {
 					try {
 						mCacheFile.write(mReadBuffer, mBufferPos,
 								mBufferSize - mBufferPos);
+
 					} catch (IOException e) {
 						e.printStackTrace();
 						mCacheFile = null;
@@ -1194,12 +1207,13 @@ public class MapDatabase implements IMapDatabase {
 		return true;
 	}
 
-	private void cacheFinish(boolean success, File file) {
+	private void cacheFinish(boolean success, File file, Tile tile) {
 		if (USE_CACHE) {
 			if (success) {
 				try {
 					mCacheFile.flush();
 					mCacheFile.close();
+					Log.d(TAG, tile + " cache written " + file.length());
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
