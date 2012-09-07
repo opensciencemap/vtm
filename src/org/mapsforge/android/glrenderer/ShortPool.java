@@ -17,7 +17,7 @@ package org.mapsforge.android.glrenderer;
 import android.util.Log;
 
 public class ShortPool {
-	private static final int POOL_LIMIT = 2500;
+	private static final int POOL_LIMIT = 6000;
 
 	static private ShortItem pool = null;
 	static private int count = 0;
