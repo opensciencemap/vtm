@@ -172,6 +172,10 @@ public class RenderTheme {
 
 	}
 
+	private int missCnt = 0;
+	private int hitCnt = 0;
+	private MatchingCacheKey mCacheKey = new MatchingCacheKey();
+
 	/**
 	 * Matches a way with the given parameters against this RenderTheme.
 	 * 
@@ -201,13 +205,17 @@ public class RenderTheme {
 			matchingCache = mMatchingCacheWay;
 		}
 
-		matchingCacheKey = new MatchingCacheKey(tags, zoomLevel);
-		boolean found = matchingCache.containsKey(matchingCacheKey);
+		mCacheKey.set(tags, zoomLevel);
+		renderInstructions = matchingCache.get(mCacheKey);
 
-		if (found) {
-			renderInstructions = matchingCache.get(matchingCacheKey);
-		} else {
+		if (renderInstructions != null) {
+			// Log.d("RenderTheme", hitCnt++ + "Cache Hit");
+		} else if (!matchingCache.containsKey(mCacheKey)) {
+			matchingCacheKey = new MatchingCacheKey(mCacheKey);
+
 			// cache miss
+			// Log.d("RenderTheme", missCnt++ + " Cache Miss");
+
 			int c = (closed ? Closed.YES : Closed.NO);
 			List<RenderInstruction> matchingList = new ArrayList<RenderInstruction>(4);
 			for (int i = 0, n = mRulesList.size(); i < n; ++i) {

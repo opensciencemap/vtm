@@ -17,9 +17,12 @@ package org.mapsforge.android.rendertheme;
 import org.mapsforge.core.Tag;
 
 class MatchingCacheKey {
-	private final int mHashCodeValue;
-	final Tag[] mTags;
-	final byte mZoomLevel;
+	int mHashCodeValue;
+	Tag[] mTags;
+	byte mZoomLevel;
+
+	MatchingCacheKey() {
+	}
 
 	MatchingCacheKey(Tag[] tags, byte zoomLevel) {
 		mTags = tags;
@@ -27,13 +30,37 @@ class MatchingCacheKey {
 		mHashCodeValue = calculateHashCode();
 	}
 
+	MatchingCacheKey(MatchingCacheKey key) {
+		mTags = key.mTags;
+		mZoomLevel = key.mZoomLevel;
+		mHashCodeValue = key.mHashCodeValue;
+	}
+
+	void set(Tag[] tags, byte zoomLevel) {
+		mTags = tags;
+		mZoomLevel = zoomLevel;
+
+		int result = 7;
+
+		for (int i = 0, n = mTags.length; i < n; i++) {
+			if (mTags[i] == null)
+				break;
+			result = 31 * result + mTags[i].hashCode();
+		}
+		result = 31 * result + mZoomLevel;
+
+		mHashCodeValue = result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		} else if (!(obj instanceof MatchingCacheKey)) {
-			return false;
 		}
+		// else if (!(obj instanceof MatchingCacheKey)) {
+		// return false;
+		// }
+
 		MatchingCacheKey other = (MatchingCacheKey) obj;
 
 		if (mZoomLevel != other.mZoomLevel)
