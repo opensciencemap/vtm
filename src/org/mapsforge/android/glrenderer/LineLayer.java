@@ -23,9 +23,9 @@ import android.util.FloatMath;
 class LineLayer {
 
 	private static final float COORD_SCALE = MapRenderer.COORD_MULTIPLIER;
-	// scale factor mapping direction vector to short values
+	// scale factor mapping extrusion vector to short values
 	private static final float DIR_SCALE = 2048;
-	// mask for packing last two bits of direction vector with texture coordinates
+	// mask for packing last two bits of extrusion vector with texture coordinates
 	private static final int DIR_MASK = 0xFFFFFFFC;
 
 	// next layer
@@ -66,11 +66,14 @@ class LineLayer {
 	/*
 	 * line extrusion is based on code from GLMap (https://github.com/olofsj/GLMap/) by olofsj
 	 */
-	void addLine(float[] points, int pos, int length) {
+
+	void addLine(float[] points, short[] index) {
 		float x, y, nextX, nextY, prevX, prevY;
 		float a, ux, uy, vx, vy, wx, wy;
 
-		int ipos = pos;
+		int tmax = Tile.TILE_SIZE + 10;
+		int tmin = -10;
+
 		boolean rounded = false;
 		boolean squared = false;
 
@@ -78,30 +81,6 @@ class LineLayer {
 			rounded = true;
 		else if (line.cap == Cap.SQUARE)
 			squared = true;
-
-		// amount of vertices used
-		verticesCnt += length + (rounded ? 6 : 2);
-
-		x = points[ipos++];
-		y = points[ipos++];
-
-		nextX = points[ipos++];
-		nextY = points[ipos++];
-
-		// Calculate triangle corners for the given width
-		vx = nextX - x;
-		vy = nextY - y;
-
-		a = FloatMath.sqrt(vx * vx + vy * vy);
-
-		vx = (vx / a);
-		vy = (vy / a);
-
-		ux = -vy;
-		uy = vx;
-
-		int tmax = Tile.TILE_SIZE + 10;
-		int tmin = -10;
 
 		if (pool == null) {
 			pool = curItem = ShortPool.get();
@@ -111,199 +90,273 @@ class LineLayer {
 		short v[] = si.vertices;
 		int opos = si.used;
 
-		if (opos == ShortItem.SIZE) {
-			si.used = ShortItem.SIZE;
-			si.next = ShortPool.get();
-			si = si.next;
-			opos = 0;
-			v = si.vertices;
-		}
+		for (int i = 0, pos = 0, n = index.length; i < n; i++) {
+			int length = index[i];
+			if (length < 0)
+				break;
 
-		short ox, oy, dx, dy;
-		int ddx, ddy;
+			// save some vertices
+			if (rounded && i > 200)
+				rounded = false;
 
-		ox = (short) (x * COORD_SCALE);
-		oy = (short) (y * COORD_SCALE);
+			int ipos = pos;
 
-		boolean outside = (x < tmin || x > tmax || y < tmin || y > tmax);
-
-		if (rounded && !outside) {
-			// add first vertex twice
-			ddx = (int) ((ux - vx) * DIR_SCALE);
-			ddy = (int) ((uy - vy) * DIR_SCALE);
-			dx = (short) (0 | ddx & DIR_MASK);
-			dy = (short) (2 | ddy & DIR_MASK);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = dx;
-			v[opos++] = dy;
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
+			// need at least two points
+			if (length < 4) {
+				pos += length;
+				continue;
 			}
+			// amount of vertices used
+			verticesCnt += length + (rounded ? 6 : 2);
 
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = dx;
-			v[opos++] = dy;
+			x = points[ipos++];
+			y = points[ipos++];
 
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			ddx = (int) (-(ux + vx) * DIR_SCALE);
-			ddy = (int) (-(uy + vy) * DIR_SCALE);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = (short) (2 | ddx & DIR_MASK);
-			v[opos++] = (short) (2 | ddy & DIR_MASK);
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			// Start of line
-			ddx = (int) (ux * DIR_SCALE);
-			ddy = (int) (uy * DIR_SCALE);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = (short) (0 | ddx & DIR_MASK);
-			v[opos++] = (short) (1 | ddy & DIR_MASK);
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = (short) (2 | -ddx & DIR_MASK);
-			v[opos++] = (short) (1 | -ddy & DIR_MASK);
-
-		} else {
-			// outside means line is probably clipped
-			// TODO should align ending with tile boundary
-			// for now, just extend the line a little
-
-			if (squared) {
-				vx = 0;
-				vy = 0;
-			} else if (!outside) {
-				vx *= 0.5;
-				vy *= 0.5;
-			}
-
-			if (rounded)
-				verticesCnt -= 2;
-
-			// add first vertex twice
-			ddx = (int) ((ux - vx) * DIR_SCALE);
-			ddy = (int) ((uy - vy) * DIR_SCALE);
-			dx = (short) (0 | ddx & DIR_MASK);
-			dy = (short) (1 | ddy & DIR_MASK);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = dx;
-			v[opos++] = dy;
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = dx;
-			v[opos++] = dy;
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			ddx = (int) (-(ux + vx) * DIR_SCALE);
-			ddy = (int) (-(uy + vy) * DIR_SCALE);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = (short) (2 | ddx & DIR_MASK);
-			v[opos++] = (short) (1 | ddy & DIR_MASK);
-
-		}
-
-		prevX = x;
-		prevY = y;
-		x = nextX;
-		y = nextY;
-
-		for (; ipos < pos + length;) {
 			nextX = points[ipos++];
 			nextY = points[ipos++];
 
-			// Unit vector pointing back to previous node
-			vx = prevX - x;
-			vy = prevY - y;
+			// Calculate triangle corners for the given width
+			vx = nextX - x;
+			vy = nextY - y;
+
 			a = FloatMath.sqrt(vx * vx + vy * vy);
+
 			vx = (vx / a);
 			vy = (vy / a);
 
-			// Unit vector pointing forward to next node
-			wx = nextX - x;
-			wy = nextY - y;
-			a = FloatMath.sqrt(wx * wx + wy * wy);
-			wx = (wx / a);
-			wy = (wy / a);
-
-			// Sum of these two vectors points
-			ux = vx + wx;
-			uy = vy + wy;
-
-			a = -wy * ux + wx * uy;
-
-			// boolean split = false;
-			if (a < 0.01f && a > -0.01f) {
-				// Almost straight
-				ux = -wy;
-				uy = wx;
-			} else {
-				ux = (ux / a);
-				uy = (uy / a);
-
-				// hack to avoid miter going to infinity
-				// note to myself: find my mathbook and do this properly!
-				if (ux > 2.0f || ux < -2.0f || uy > 2.0f || uy < -2.0f) {
-					ux = -wy;
-					uy = wx;
-				}
-			}
+			ux = -vy;
+			uy = vx;
 
 			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
+				si = si.next = ShortPool.get();
+				v = si.vertices;
+				opos = 0;
+			}
+
+			short ox, oy, dx, dy;
+			int ddx, ddy;
+
+			ox = (short) (x * COORD_SCALE);
+			oy = (short) (y * COORD_SCALE);
+
+			boolean outside = (x < tmin || x > tmax || y < tmin || y > tmax);
+
+			if (opos == ShortItem.SIZE) {
+				si = si.next = ShortPool.get();
+				v = si.vertices;
+				opos = 0;
+			}
+
+			if (rounded && !outside) {
+				// add first vertex twice
+				ddx = (int) ((ux - vx) * DIR_SCALE);
+				ddy = (int) ((uy - vy) * DIR_SCALE);
+				dx = (short) (0 | ddx & DIR_MASK);
+				dy = (short) (2 | ddy & DIR_MASK);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = dx;
+				v[opos++] = dy;
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = dx;
+				v[opos++] = dy;
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				ddx = (int) (-(ux + vx) * DIR_SCALE);
+				ddy = (int) (-(uy + vy) * DIR_SCALE);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = (short) (2 | ddx & DIR_MASK);
+				v[opos++] = (short) (2 | ddy & DIR_MASK);
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				// Start of line
+				ddx = (int) (ux * DIR_SCALE);
+				ddy = (int) (uy * DIR_SCALE);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = (short) (0 | ddx & DIR_MASK);
+				v[opos++] = (short) (1 | ddy & DIR_MASK);
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = (short) (2 | -ddx & DIR_MASK);
+				v[opos++] = (short) (1 | -ddy & DIR_MASK);
+
+			} else {
+				// outside means line is probably clipped
+				// TODO should align ending with tile boundary
+				// for now, just extend the line a little
+
+				if (squared) {
+					vx = 0;
+					vy = 0;
+				} else if (!outside) {
+					vx *= 0.5;
+					vy *= 0.5;
+				}
+
+				if (rounded)
+					verticesCnt -= 2;
+
+				// add first vertex twice
+				ddx = (int) ((ux - vx) * DIR_SCALE);
+				ddy = (int) ((uy - vy) * DIR_SCALE);
+				dx = (short) (0 | ddx & DIR_MASK);
+				dy = (short) (1 | ddy & DIR_MASK);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = dx;
+				v[opos++] = dy;
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = dx;
+				v[opos++] = dy;
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				ddx = (int) (-(ux + vx) * DIR_SCALE);
+				ddy = (int) (-(uy + vy) * DIR_SCALE);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = (short) (2 | ddx & DIR_MASK);
+				v[opos++] = (short) (1 | ddy & DIR_MASK);
+
+			}
+
+			prevX = x;
+			prevY = y;
+			x = nextX;
+			y = nextY;
+
+			for (; ipos < pos + length;) {
+				nextX = points[ipos++];
+				nextY = points[ipos++];
+
+				// Unit vector pointing back to previous node
+				vx = prevX - x;
+				vy = prevY - y;
+				a = FloatMath.sqrt(vx * vx + vy * vy);
+				vx = (vx / a);
+				vy = (vy / a);
+
+				// Unit vector pointing forward to next node
+				wx = nextX - x;
+				wy = nextY - y;
+				a = FloatMath.sqrt(wx * wx + wy * wy);
+				wx = (wx / a);
+				wy = (wy / a);
+
+				// Sum of these two vectors points
+				ux = vx + wx;
+				uy = vy + wy;
+
+				a = -wy * ux + wx * uy;
+
+				// boolean split = false;
+				if (a < 0.01f && a > -0.01f) {
+					// Almost straight
+					ux = -wy;
+					uy = wx;
+				} else {
+					ux = (ux / a);
+					uy = (uy / a);
+
+					// hack to avoid miter going to infinity
+					if (ux > 2.0f || ux < -2.0f || uy > 2.0f || uy < -2.0f) {
+						ux = -wy;
+						uy = wx;
+					}
+				}
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				ox = (short) (x * COORD_SCALE);
+				oy = (short) (y * COORD_SCALE);
+
+				ddx = (int) (ux * DIR_SCALE);
+				ddy = (int) (uy * DIR_SCALE);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = (short) (0 | ddx & DIR_MASK);
+				v[opos++] = (short) (1 | ddy & DIR_MASK);
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = (short) (2 | -ddx & DIR_MASK);
+				v[opos++] = (short) (1 | -ddy & DIR_MASK);
+
+				prevX = x;
+				prevY = y;
+				x = nextX;
+				y = nextY;
+			}
+
+			vx = prevX - x;
+			vy = prevY - y;
+
+			a = FloatMath.sqrt(vx * vx + vy * vy);
+
+			vx = (vx / a);
+			vy = (vy / a);
+
+			ux = vy;
+			uy = -vx;
+
+			outside = (x < tmin || x > tmax || y < tmin || y > tmax);
+
+			if (opos == ShortItem.SIZE) {
 				si.next = ShortPool.get();
 				si = si.next;
 				opos = 0;
@@ -313,181 +366,120 @@ class LineLayer {
 			ox = (short) (x * COORD_SCALE);
 			oy = (short) (y * COORD_SCALE);
 
-			ddx = (int) (ux * DIR_SCALE);
-			ddy = (int) (uy * DIR_SCALE);
+			if (rounded && !outside) {
+				ddx = (int) (ux * DIR_SCALE);
+				ddy = (int) (uy * DIR_SCALE);
 
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = (short) (0 | ddx & DIR_MASK);
-			v[opos++] = (short) (1 | ddy & DIR_MASK);
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = (short) (0 | ddx & DIR_MASK);
+				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = (short) (2 | -ddx & DIR_MASK);
+				v[opos++] = (short) (1 | -ddy & DIR_MASK);
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				// For rounded line edges
+				ddx = (int) ((ux - vx) * DIR_SCALE);
+				ddy = (int) ((uy - vy) * DIR_SCALE);
+				dx = (short) (0 | ddx & DIR_MASK);
+				dy = (short) (0 | ddy & DIR_MASK);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = dx;
+				v[opos++] = dy;
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				// add last vertex twice
+				ddx = (int) (-(ux + vx) * DIR_SCALE);
+				ddy = (int) (-(uy + vy) * DIR_SCALE);
+				dx = (short) (2 | ddx & DIR_MASK);
+				dy = (short) (0 | ddy & DIR_MASK);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = dx;
+				v[opos++] = dy;
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = dx;
+				v[opos++] = dy;
+
+			} else {
+				if (squared) {
+					vx = 0;
+					vy = 0;
+				} else if (!outside) {
+					vx *= 0.5;
+					vy *= 0.5;
+				}
+
+				if (rounded)
+					verticesCnt -= 2;
+
+				ddx = (int) ((ux - vx) * DIR_SCALE);
+				ddy = (int) ((uy - vy) * DIR_SCALE);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = (short) (0 | ddx & DIR_MASK);
+				v[opos++] = (short) (1 | ddy & DIR_MASK);
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				// add last vertex twice
+				ddx = (int) (-(ux + vx) * DIR_SCALE);
+				ddy = (int) (-(uy + vy) * DIR_SCALE);
+				dx = (short) (2 | ddx & DIR_MASK);
+				dy = (short) (1 | ddy & DIR_MASK);
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = dx;
+				v[opos++] = dy;
+
+				if (opos == ShortItem.SIZE) {
+					si = si.next = ShortPool.get();
+					v = si.vertices;
+					opos = 0;
+				}
+
+				v[opos++] = ox;
+				v[opos++] = oy;
+				v[opos++] = dx;
+				v[opos++] = dy;
 			}
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = (short) (2 | -ddx & DIR_MASK);
-			v[opos++] = (short) (1 | -ddy & DIR_MASK);
-
-			prevX = x;
-			prevY = y;
-			x = nextX;
-			y = nextY;
-		}
-
-		vx = prevX - x;
-		vy = prevY - y;
-
-		a = FloatMath.sqrt(vx * vx + vy * vy);
-
-		vx = (vx / a);
-		vy = (vy / a);
-
-		ux = vy;
-		uy = -vx;
-
-		outside = (x < tmin || x > tmax || y < tmin || y > tmax);
-
-		if (opos == ShortItem.SIZE) {
-			si.used = ShortItem.SIZE;
-			si.next = ShortPool.get();
-			si = si.next;
-			opos = 0;
-			v = si.vertices;
-		}
-
-		ox = (short) (x * COORD_SCALE);
-		oy = (short) (y * COORD_SCALE);
-
-		if (rounded && !outside) {
-			ddx = (int) (ux * DIR_SCALE);
-			ddy = (int) (uy * DIR_SCALE);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = (short) (0 | ddx & DIR_MASK);
-			v[opos++] = (short) (1 | ddy & DIR_MASK);
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = (short) (2 | -ddx & DIR_MASK);
-			v[opos++] = (short) (1 | -ddy & DIR_MASK);
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			// For rounded line edges
-			ddx = (int) ((ux - vx) * DIR_SCALE);
-			ddy = (int) ((uy - vy) * DIR_SCALE);
-			dx = (short) (0 | ddx & DIR_MASK);
-			dy = (short) (0 | ddy & DIR_MASK);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = dx;
-			v[opos++] = dy;
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			// add last vertex twice
-			ddx = (int) (-(ux + vx) * DIR_SCALE);
-			ddy = (int) (-(uy + vy) * DIR_SCALE);
-			dx = (short) (2 | ddx & DIR_MASK);
-			dy = (short) (0 | ddy & DIR_MASK);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = dx;
-			v[opos++] = dy;
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = dx;
-			v[opos++] = dy;
-
-		} else {
-			if (squared) {
-				vx = 0;
-				vy = 0;
-			} else if (!outside) {
-				vx *= 0.5;
-				vy *= 0.5;
-			}
-
-			if (rounded)
-				verticesCnt -= 2;
-
-			ddx = (int) ((ux - vx) * DIR_SCALE);
-			ddy = (int) ((uy - vy) * DIR_SCALE);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = (short) (0 | ddx & DIR_MASK);
-			v[opos++] = (short) (1 | ddy & DIR_MASK);
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			// add last vertex twice
-			ddx = (int) (-(ux + vx) * DIR_SCALE);
-			ddy = (int) (-(uy + vy) * DIR_SCALE);
-			dx = (short) (2 | ddx & DIR_MASK);
-			dy = (short) (1 | ddy & DIR_MASK);
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = dx;
-			v[opos++] = dy;
-
-			if (opos == ShortItem.SIZE) {
-				si.used = ShortItem.SIZE;
-				si.next = ShortPool.get();
-				si = si.next;
-				opos = 0;
-				v = si.vertices;
-			}
-
-			v[opos++] = ox;
-			v[opos++] = oy;
-			v[opos++] = dx;
-			v[opos++] = dy;
+			pos += length;
 		}
 
 		si.used = opos;

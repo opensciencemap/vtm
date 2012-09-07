@@ -260,7 +260,14 @@ class PolygonLayers {
 		for (PolygonLayer l = layers; l != null; l = l.next) {
 
 			for (ShortItem item = l.pool; item != null; item = item.next) {
-				sbuf.put(item.vertices, 0, item.used);
+
+				if (item.next == null) {
+					sbuf.put(item.vertices, 0, item.used);
+				} else {
+					// item.used = ShortItem.SIZE;
+					sbuf.put(item.vertices);
+				}
+
 				last = item;
 			}
 

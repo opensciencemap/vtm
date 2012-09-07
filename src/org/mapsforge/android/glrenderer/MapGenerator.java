@@ -351,26 +351,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 		mCurLineLayer = lineLayer;
 
-		boolean round = line.round;
-
-		for (int i = 0, pos = 0, n = mWays.length; i < n; i++) {
-			int length = mWays[i];
-			if (length < 0)
-				break;
-
-			// save some vertices
-			if (round && i > 200) {
-				// Log.d(TAG, "WAY TOO MANY LINES!!!");
-				round = false;
-			}
-			// need at least two points
-			if (length >= 4) {
-				lineLayer.addLine(mWayNodes, pos, length);
-				countLines++;
-				countNodes += length;
-			}
-			pos += length;
-		}
+		lineLayer.addLine(mWayNodes, mWays);
 	}
 
 	@Override
@@ -415,19 +396,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 		mCurPolyLayer = layer;
 
-		for (int i = 0, pos = 0, n = mWays.length; i < n; i++) {
-			int length = mWays[i];
-			if (length < 0)
-				break;
-
-			// need at least three points
-			if (length >= 6)
-				layer.addPolygon(mWayNodes, pos, length);
-
-			pos += length;
-		}
-
-		// if (area.line != null)
+		layer.addPolygon(mWayNodes, mWays);
 	}
 
 	@Override
