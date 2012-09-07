@@ -14,14 +14,21 @@
  */
 package org.mapsforge.database.pbmap;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -33,6 +40,10 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.protocol.RequestAddCookies;
+import org.apache.http.client.protocol.RequestProxyAuthentication;
+import org.apache.http.client.protocol.RequestTargetAuthentication;
+import org.apache.http.client.protocol.ResponseProcessCookies;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -40,6 +51,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.RequestExpectContinue;
+import org.apache.http.protocol.RequestUserAgent;
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.Tag;
@@ -51,6 +64,7 @@ import org.mapsforge.database.MapFileInfo;
 import org.mapsforge.database.QueryResult;
 
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 
 /**
@@ -69,14 +83,17 @@ public class MapDatabase implements IMapDatabase {
 
 	private static final boolean USE_CACHE = false;
 
+	private static final boolean USE_APACHE_HTTP = false;
+	private static final boolean USE_LW_HTTP = true;
+
 	private static final String CACHE_DIRECTORY = "/Android/data/org.mapsforge.app/cache/";
 	private static final String CACHE_FILE = "%d-%d-%d.tile";
 
+	private static final String SERVER_ADDR = "city.informatik.uni-bremen.de";
 	// private static final String URL = "http://city.informatik.uni-bremen.de:8020/test/%d/%d/%d.osmtile";
 	private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/test/%d/%d/%d.osmtile";
+	// private static final String URL = "http://city.informatik.uni-bremen.de/tiles/tiles.py///test/%d/%d/%d.osmtile";
 	// private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/gis2/%d/%d/%d.osmtile";
-	// private static final Header encodingHeader =
-	// new BasicHeader("Accept-Encoding", "gzip");
 
 	private static final int MAX_TAGS_CACHE = 100;
 
@@ -106,144 +123,158 @@ public class MapDatabase implements IMapDatabase {
 	private IMapDatabaseCallback mMapGenerator;
 	private float mScaleFactor;
 	private Tile mTile;
-
 	private FileOutputStream mCacheFile;
+
+	private long mContentLenth;
+	private InputStream mInputStream;
 
 	@Override
 	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
-		// mCanceled = false;
+
+		QueryResult result = QueryResult.SUCCESS;
 		mCacheFile = null;
-
-		// just used for debugging ....
 		mTile = tile;
-
-		// Log.d(TAG, "get tile >> : " + tile);
 
 		mMapGenerator = mapDatabaseCallback;
 		mCurTagCnt = 0;
 		mScaleFactor = REF_TILE_SIZE / Tile.TILE_SIZE;
-		File f;
+		File f = null;
+
+		mBufferSize = 0;
+		mBufferPos = 0;
+		mReadPos = 0;
 
 		if (USE_CACHE) {
 			f = new File(cacheDir, String.format(CACHE_FILE,
 					Integer.valueOf(tile.zoomLevel),
-					Long.valueOf(tile.tileX),
-					Long.valueOf(tile.tileY)));
+					Integer.valueOf(tile.tileX),
+					Integer.valueOf(tile.tileY)));
 
-			if (f.exists()) {
+			if (f.exists() && f.length() > 0) {
 				FileInputStream in;
 				Log.d(TAG, "using cache: " + tile);
 
 				try {
 					in = new FileInputStream(f);
-					decode(in);
+
+					mContentLenth = f.length();
+					mInputStream = in;
+
+					decode();
 					in.close();
 					return QueryResult.SUCCESS;
+
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
+
+			f.delete();
 		}
 
-		String url = String.format(URL,
-				Integer.valueOf(tile.zoomLevel),
-				Long.valueOf(tile.tileX),
-				Long.valueOf(tile.tileY));
+		String url = null;
+		HttpGet getRequest;
 
-		HttpGet getRequest = new HttpGet(url);
-		mRequest = getRequest;
+		if (!USE_LW_HTTP) {
+			url = String.format(URL,
+					Integer.valueOf(tile.zoomLevel),
+					Integer.valueOf(tile.tileX),
+					Integer.valueOf(tile.tileY));
+		}
+
+		if (USE_APACHE_HTTP) {
+			getRequest = new HttpGet(url);
+			mRequest = getRequest;
+		}
 
 		try {
+			if (USE_LW_HTTP) {
+				if (lwHttpSendRequest(tile)) {
+					if (lwHttpReadHeader() > 0) {
 
-			// HttpURLConnection urlConn = (HttpURLConnection) new URL(url).openConnection();
-			// // urlConn.setUseCaches(false);
-			//
-			// InputStream in = urlConn.getInputStream();
-			// try {
-			// decode(in);
-			// } finally {
-			// urlConn.disconnect();
-			// }
-
-			HttpResponse response = mClient.execute(getRequest);
-			final int statusCode = response.getStatusLine().getStatusCode();
-			final HttpEntity entity = response.getEntity();
-
-			if (statusCode != HttpStatus.SC_OK) {
-				Log.d(TAG, "Http response " + statusCode);
-				entity.consumeContent();
-				return QueryResult.FAILED;
-			}
-			if (mTile.isCanceled) {
-				Log.d(TAG, "1 loading canceled " + mTile);
-				entity.consumeContent();
-
-				return QueryResult.FAILED;
-			}
-
-			InputStream is = null;
-			// GZIPInputStream zis = null;
-			try {
-				is = entity.getContent();
-
-				if (USE_CACHE) {
-					try {
-						Log.d(TAG, "writing cache: " + tile);
-						mCacheFile = new FileOutputStream(f);
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
+						cacheBegin(tile, f);
+						decode();
 					}
+				} else {
+					result = QueryResult.FAILED;
 				}
 
-				// zis = new GZIPInputStream(is);
+			} else if (USE_APACHE_HTTP) {
+				HttpResponse response = mClient.execute(getRequest);
+				final int statusCode = response.getStatusLine().getStatusCode();
+				final HttpEntity entity = response.getEntity();
 
-				decode(is);
+				if (statusCode != HttpStatus.SC_OK) {
+					Log.d(TAG, "Http response " + statusCode);
+					entity.consumeContent();
+					return QueryResult.FAILED;
+				}
+				if (mTile.isCanceled) {
+					Log.d(TAG, "1 loading canceled " + mTile);
+					entity.consumeContent();
 
-			} finally {
-				// if (zis != null)
-				// zis.close();
-				if (is != null)
-					is.close();
-				entity.consumeContent();
+					return QueryResult.FAILED;
+				}
+
+				InputStream is = null;
+				// GZIPInputStream zis = null;
+				try {
+					is = entity.getContent();
+
+					mContentLenth = entity.getContentLength();
+					mInputStream = is;
+					cacheBegin(tile, f);
+					// zis = new GZIPInputStream(is);
+					decode();
+				} finally {
+					// if (zis != null)
+					// zis.close();
+					if (is != null)
+						is.close();
+					entity.consumeContent();
+				}
+			} else {
+
+				HttpURLConnection urlConn = (HttpURLConnection) new URL(url)
+						.openConnection();
+
+				InputStream in = urlConn.getInputStream();
+				try {
+					decode();
+				} finally {
+					urlConn.disconnect();
+				}
 			}
 		} catch (SocketException ex) {
 			Log.d(TAG, "Socket exception: " + ex.getMessage());
-			// f.delete();
-			return QueryResult.FAILED;
+			result = QueryResult.FAILED;
 		} catch (SocketTimeoutException ex) {
 			Log.d(TAG, "Socket Timeout exception: " + ex.getMessage());
-			// f.delete();
-			return QueryResult.FAILED;
+			result = QueryResult.FAILED;
 		} catch (UnknownHostException ex) {
 			Log.d(TAG, "no network");
-			// f.delete();
-			return QueryResult.FAILED;
+			result = QueryResult.FAILED;
 		} catch (Exception ex) {
-			// f.delete();
 			ex.printStackTrace();
-			return QueryResult.FAILED;
+			result = QueryResult.FAILED;
 		}
 
-		mRequest = null;
+		mLastRequest = SystemClock.elapsedRealtime();
 
+		if (USE_APACHE_HTTP)
+			mRequest = null;
+
+		// FIXME remove this stuff
 		if (mTile.isCanceled) {
-			Log.d(TAG, "2 loading canceled " + mTile);
-			return QueryResult.FAILED;
+			Log.d(TAG, "loading canceled " + mTile);
+			result = QueryResult.FAILED;
 		}
 
-		if (USE_CACHE) {
-			try {
-				mCacheFile.flush();
-				mCacheFile.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			mCacheFile = null;
-		}
+		cacheFinish(result == QueryResult.SUCCESS, f);
 
-		return QueryResult.SUCCESS;
+		return result;
 	}
 
 	private static File cacheDir;
@@ -267,14 +298,21 @@ public class MapDatabase implements IMapDatabase {
 		mOpenFile = true;
 		HttpParams params = new BasicHttpParams();
 		HttpConnectionParams.setStaleCheckingEnabled(params, false);
-
+		HttpConnectionParams.setTcpNoDelay(params, true);
 		HttpConnectionParams.setConnectionTimeout(params, 20 * 1000);
 		HttpConnectionParams.setSoTimeout(params, 60 * 1000);
 		HttpConnectionParams.setSocketBufferSize(params, 32768);
 		HttpClientParams.setRedirecting(params, false);
-		// HttpClientParams.setCookiePolicy(params, CookiePolicy.ACCEPT_NONE);
 
-		mClient = new DefaultHttpClient(params);
+		DefaultHttpClient client = new DefaultHttpClient(params);
+		client.removeRequestInterceptorByClass(RequestAddCookies.class);
+		client.removeResponseInterceptorByClass(ResponseProcessCookies.class);
+		client.removeRequestInterceptorByClass(RequestUserAgent.class);
+		client.removeRequestInterceptorByClass(RequestExpectContinue.class);
+		client.removeRequestInterceptorByClass(RequestTargetAuthentication.class);
+		client.removeRequestInterceptorByClass(RequestProxyAuthentication.class);
+
+		mClient = client;
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http",
@@ -284,7 +322,8 @@ public class MapDatabase implements IMapDatabase {
 	@Override
 	public FileOpenResult openFile(File mapFile) {
 
-		createClient();
+		if (USE_APACHE_HTTP)
+			createClient();
 
 		if (USE_CACHE) {
 			if (cacheDir == null) {
@@ -296,7 +335,7 @@ public class MapDatabase implements IMapDatabase {
 				String cacheDirectoryPath = externalStorageDirectory + CACHE_DIRECTORY;
 				cacheDir = createDirectory(cacheDirectoryPath);
 
-				Log.d(TAG, "cache dir: " + cacheDir);
+				Log.d(TAG, "----------- cache dir: " + cacheDir);
 			}
 		}
 
@@ -306,9 +345,25 @@ public class MapDatabase implements IMapDatabase {
 	@Override
 	public void closeFile() {
 		mOpenFile = false;
-		if (mClient != null) {
-			mClient.getConnectionManager().shutdown();
-			mClient = null;
+		if (USE_APACHE_HTTP) {
+			if (mClient != null) {
+				mClient.getConnectionManager().shutdown();
+				mClient = null;
+			}
+		}
+
+		if (USE_LW_HTTP) {
+			if (mSocket != null) {
+				try {
+					mSocket.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				mSocket = null;
+			}
+		}
+		if (USE_CACHE) {
+			cacheDir = null;
 		}
 	}
 
@@ -331,19 +386,17 @@ public class MapDatabase implements IMapDatabase {
 		return file;
 	}
 
-	// // // hand sewed tile protocol buffers decoder // // //
+	// /////////////// hand sewed tile protocol buffers decoder ///////////////////
 	private static final int BUFFER_SIZE = 65536;
 
-	private final byte[] buffer = new byte[BUFFER_SIZE];
+	private final byte[] mReadBuffer = new byte[BUFFER_SIZE];
+
 	// position in read buffer
-	private int bufferPos;
+	private int mBufferPos;
 	// bytes available in read buffer
-	private int bufferSize;
-	// (bytesRead - bufferPos) + bufferSize
-	// private int bufferLimit;
-	// bytes processed
-	private int bytesRead;
-	private InputStream inputStream;
+	private int mBufferSize;
+	// overall bytes of content processed
+	private int mBytesProcessed;
 
 	private static final int TAG_TILE_TAGS = 1;
 	private static final int TAG_TILE_WAYS = 2;
@@ -363,14 +416,11 @@ public class MapDatabase implements IMapDatabase {
 	private static final int TAG_NODE_NUM_TAGS = 1;
 	private static final int TAG_NODE_NUM_COORDS = 2;
 
-	private boolean decode(InputStream is) throws IOException {
-		inputStream = is;
-		bytesRead = 0;
-		bufferSize = 0;
-		bufferPos = 0;
+	private boolean decode() throws IOException {
+		mBytesProcessed = 0;
 		int val;
 
-		while ((val = decodeVarint32()) > 0) {
+		while (mBytesProcessed < mContentLenth && (val = decodeVarint32()) > 0) {
 			// read tag and wire type
 			int tag = (val >> 3);
 
@@ -433,7 +483,7 @@ public class MapDatabase implements IMapDatabase {
 	private boolean decodeTileWays(boolean polygon) throws IOException {
 		int bytes = decodeVarint32();
 
-		int end = bytesRead + bytes;
+		int end = mBytesProcessed + bytes;
 		int indexCnt = 0;
 		int tagCnt = 0;
 		int coordCnt = 0;
@@ -444,7 +494,7 @@ public class MapDatabase implements IMapDatabase {
 		boolean skip = false;
 		boolean fail = false;
 
-		while (bytesRead < end) {
+		while (mBytesProcessed < end) {
 			// read tag and wire type
 			int val = decodeVarint32();
 			if (val == 0)
@@ -462,7 +512,11 @@ public class MapDatabase implements IMapDatabase {
 					break;
 
 				case TAG_WAY_COORDS:
-					int cnt = decodeWayCoordinates(skip);
+					if (coordCnt == 0)
+						skip = true;
+
+					int cnt = decodeWayCoordinates(skip, coordCnt);
+
 					if (cnt != coordCnt) {
 						Log.d(TAG, "X wrong number of coordintes");
 						fail = true;
@@ -510,13 +564,13 @@ public class MapDatabase implements IMapDatabase {
 	private boolean decodeTileNodes() throws IOException {
 		int bytes = decodeVarint32();
 
-		int end = bytesRead + bytes;
+		int end = mBytesProcessed + bytes;
 		int tagCnt = 0;
 		int coordCnt = 0;
 		byte layer = 0;
 		Tag[] tags = null;
 
-		while (bytesRead < end) {
+		while (mBytesProcessed < end) {
 			// read tag and wire type
 			int val = decodeVarint32();
 			if (val == 0)
@@ -563,12 +617,12 @@ public class MapDatabase implements IMapDatabase {
 
 		readBuffer(bytes);
 		int cnt = 0;
-		int end = bufferPos + bytes;
+		int end = mBytesProcessed + bytes;
 		float scale = mScaleFactor;
 		// read repeated sint32
 		int lastX = 0;
 		int lastY = 0;
-		while (bufferPos < end && cnt < numNodes) {
+		while (mBytesProcessed < end && cnt < numNodes) {
 			int lon = decodeZigZag32(decodeVarint32());
 			int lat = decodeZigZag32(decodeVarint32());
 			lastX = lon + lastX;
@@ -582,6 +636,7 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private int MAX_WAY_COORDS = 32768;
+
 	private float[] tmpCoords = new float[MAX_WAY_COORDS];
 
 	private Tag[] decodeWayTags(int tagCnt) throws IOException {
@@ -590,31 +645,32 @@ public class MapDatabase implements IMapDatabase {
 		Tag[] tags = new Tag[tagCnt];
 
 		int cnt = 0;
-		int end = bytesRead + bytes;
+		int end = mBytesProcessed + bytes;
 		int max = mCurTagCnt;
 
-		while (bytesRead < end) {
+		while (mBytesProcessed < end) {
 			int tagNum = decodeVarint32();
 
 			if (tagNum < 0 || cnt == tagCnt) {
 				Log.d(TAG, "NULL TAG: " + mTile + " invalid tag:" + tagNum + " "
 						+ tagCnt + "/" + cnt);
-				break;
-			}
-			if (tagNum < Tags.MAX)
-				tags[cnt++] = Tags.tags[tagNum];
-			else {
-				tagNum -= Tags.LIMIT;
+			} else {
+				if (tagNum < Tags.MAX)
+					tags[cnt++] = Tags.tags[tagNum];
+				else {
+					tagNum -= Tags.LIMIT;
 
-				if (tagNum >= 0 && tagNum < max) {
-					// Log.d(TAG, "variable tag: " + curTags[tagNum]);
-					tags[cnt++] = curTags[tagNum];
-				} else {
-					Log.d(TAG, "NULL TAG: " + mTile + " could find tag:"
-							+ tagNum + " " + tagCnt + "/" + cnt);
+					if (tagNum >= 0 && tagNum < max) {
+						// Log.d(TAG, "variable tag: " + curTags[tagNum]);
+						tags[cnt++] = curTags[tagNum];
+					} else {
+						Log.d(TAG, "NULL TAG: " + mTile + " could find tag:"
+								+ tagNum + " " + tagCnt + "/" + cnt);
+					}
 				}
 			}
 		}
+
 		if (tagCnt != cnt)
 			Log.d(TAG, "NULL TAG: " + mTile + " ...");
 
@@ -631,54 +687,18 @@ public class MapDatabase implements IMapDatabase {
 			index = mIndices = new short[indexCnt + 1];
 		}
 
-		int cnt = 0;
-		int end = bytesRead + bytes;
-
-		while (bytesRead < end) {
-			int val = decodeVarint32();
-			if (cnt < indexCnt)
-				index[cnt++] = (short) (val * 2);
-			// else DEBUG...
-
-		}
-
-		index[indexCnt] = -1;
-
-		return index;
-	}
-
-	private int decodeWayCoordinates(boolean skip) throws IOException {
-		int bytes = decodeVarint32();
-
 		readBuffer(bytes);
-		if (skip) {
-			bufferPos += bytes;
-			return 0;
-		}
 
-		int pos = bufferPos;
-		int end = pos + bytes;
-		float[] coords = tmpCoords;
-		byte[] buf = buffer;
 		int cnt = 0;
+		// int end = bytesRead + bytes;
+
+		int pos = mBufferPos;
+		int end = pos + bytes;
+		byte[] buf = mReadBuffer;
 		int result;
 
-		int x, lastX = 0;
-		int y, lastY = 0;
-		boolean even = true;
-
-		float scale = mScaleFactor;
-
-		// read repeated sint32
 		while (pos < end) {
-			if (cnt >= MAX_WAY_COORDS) {
-				Log.d(TAG, "increase way coord buffer " + mTile);
-
-				MAX_WAY_COORDS += 128;
-				float[] tmp = new float[MAX_WAY_COORDS];
-				System.arraycopy(coords, 0, tmp, 0, cnt);
-				tmpCoords = coords = tmp;
-			}
+			// int val = decodeVarint32();
 
 			if (buf[pos] >= 0) {
 				result = buf[pos++];
@@ -704,7 +724,88 @@ public class MapDatabase implements IMapDatabase {
 						| (buf[pos + 3] & 0x7f) << 21
 						| (buf[pos + 4]) << 28;
 
-				Log.d(TAG, "Stuffs too large " + mTile);
+				pos += 4;
+				int i = 0;
+
+				while (buf[pos++] < 0 && i < 10)
+					i++;
+
+				if (i == 10)
+					throw new IOException("X malformed VarInt32");
+
+			}
+
+			index[cnt++] = (short) (result * 2);
+
+			// if (cnt < indexCnt)
+			// index[cnt++] = (short) (val * 2);
+			// else DEBUG...
+
+		}
+
+		mBufferPos = pos;
+		mBytesProcessed += bytes;
+
+		index[indexCnt] = -1;
+
+		return index;
+	}
+
+	private int decodeWayCoordinates(boolean skip, int nodes) throws IOException {
+		int bytes = decodeVarint32();
+
+		readBuffer(bytes);
+
+		if (skip) {
+			mBufferPos += bytes;
+			return nodes;
+		}
+
+		int pos = mBufferPos;
+		int end = pos + bytes;
+		float[] coords = tmpCoords;
+		byte[] buf = mReadBuffer;
+		int cnt = 0;
+		int result;
+
+		int x, lastX = 0;
+		int y, lastY = 0;
+		boolean even = true;
+
+		float scale = mScaleFactor;
+
+		if (nodes * 2 >= coords.length) {
+			Log.d(TAG, "increase way coord buffer " + mTile + " to " + (nodes * 2));
+			float[] tmp = new float[nodes * 2];
+			tmpCoords = coords = tmp;
+		}
+
+		// read repeated sint32
+		while (pos < end) {
+
+			if (buf[pos] >= 0) {
+				result = buf[pos++];
+			} else if (buf[pos + 1] >= 0) {
+				result = (buf[pos] & 0x7f)
+						| buf[pos + 1] << 7;
+				pos += 2;
+			} else if (buf[pos + 2] >= 0) {
+				result = (buf[pos] & 0x7f)
+						| (buf[pos + 1] & 0x7f) << 7
+						| (buf[pos + 2]) << 14;
+				pos += 3;
+			} else if (buf[pos + 3] >= 0) {
+				result = (buf[pos] & 0x7f)
+						| (buf[pos + 1] & 0x7f) << 7
+						| (buf[pos + 2] & 0x7f) << 14
+						| (buf[pos + 3]) << 21;
+				pos += 4;
+			} else {
+				result = (buf[pos] & 0x7f)
+						| (buf[pos + 1] & 0x7f) << 7
+						| (buf[pos + 2] & 0x7f) << 14
+						| (buf[pos + 3] & 0x7f) << 21
+						| (buf[pos + 4]) << 28;
 
 				pos += 4;
 				int i = 0;
@@ -729,53 +830,71 @@ public class MapDatabase implements IMapDatabase {
 			}
 		}
 
-		bufferPos = pos;
-		bytesRead += bytes;
+		mBufferPos = pos;
+		mBytesProcessed += bytes;
 
 		return cnt;
 	}
 
+	int mReadPos;
+
 	private int readBuffer(int size) throws IOException {
 		int read = 0;
 
-		if (bufferPos + size < bufferSize)
-			return 0;
+		if (mBufferPos + size < mBufferSize)
+			return mBufferSize - mBufferPos;
+
+		if (mReadPos == mContentLenth)
+			return mBufferSize - mBufferPos;
 
 		if (size > BUFFER_SIZE) {
 			// FIXME throw exception for now, but frankly better
-			// sanitize tile data on compilation.
-			// this only happen with strings or coordinates larger than 64kb
-			throw new IOException("X requested size too large");
+			// sanitize tile data on compilation. this should only
+			// happen with strings or one ways coordinates are
+			// larger than 64kb
+			throw new IOException("X requested size too large " + mTile);
 		}
 
-		if (bufferSize == bufferPos) {
-			bufferPos = 0;
-			bufferSize = 0;
-		} else if (bufferPos + (size - bufferSize) > BUFFER_SIZE) {
-			Log.d(TAG, "wrap buffer" + (size - bufferSize) + " " + bufferPos);
+		if (mBufferSize == mBufferPos) {
+			mBufferPos = 0;
+			mBufferSize = 0;
+		} else if (mBufferPos + (size - mBufferSize) > BUFFER_SIZE) {
+			Log.d(TAG, "wrap buffer" + (size - mBufferSize) + " " + mBufferPos);
 			// copy bytes left to read to the beginning of buffer
-			bufferSize -= bufferPos;
-			System.arraycopy(buffer, bufferPos, buffer, 0, bufferSize);
-			bufferPos = 0;
+			mBufferSize -= mBufferPos;
+			System.arraycopy(mReadBuffer, mBufferPos, mReadBuffer, 0, mBufferSize);
+			mBufferPos = 0;
 		}
 
-		while ((bufferSize - bufferPos) < size) {
+		int max = BUFFER_SIZE - mBufferSize;
+
+		while ((mBufferSize - mBufferPos) < size && max > 0) {
+
+			max = BUFFER_SIZE - mBufferSize;
+			if (max > mContentLenth - mReadPos)
+				max = (int) (mContentLenth - mReadPos);
 
 			// read until requested size is available in buffer
-			int len = inputStream.read(buffer, bufferSize, BUFFER_SIZE - bufferSize);
+			int len = mInputStream.read(mReadBuffer, mBufferSize, max);
 
 			if (len < 0) {
 				// finished reading, mark end
-				buffer[bufferSize] = 0;
+				mReadBuffer[mBufferSize] = 0;
 				break;
 			}
 
 			read += len;
+			mReadPos += len;
 
 			if (mCacheFile != null)
-				mCacheFile.write(buffer, bufferSize, len);
+				mCacheFile.write(mReadBuffer, mBufferSize, len);
 
-			bufferSize += len;
+			if (USE_LW_HTTP) {
+				if (mReadPos == mContentLenth)
+					break;
+			}
+
+			mBufferSize += len;
 		}
 		return read;
 	}
@@ -789,34 +908,34 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private int decodeVarint32() throws IOException {
-		int pos = bufferPos;
+		int pos = mBufferPos;
 
-		if (pos + 10 > bufferSize) {
-			readBuffer(8192);
-			pos = bufferPos;
+		if (pos + 10 > mBufferSize) {
+			readBuffer(4096);
+			pos = mBufferPos;
 		}
 
-		byte[] buf = buffer;
+		byte[] buf = mReadBuffer;
 
 		if (buf[pos] >= 0) {
-			bufferPos += 1;
-			bytesRead += 1;
+			mBufferPos += 1;
+			mBytesProcessed += 1;
 			return buf[pos];
 		} else if (buf[pos + 1] >= 0) {
-			bufferPos += 2;
-			bytesRead += 2;
+			mBufferPos += 2;
+			mBytesProcessed += 2;
 			return (buf[pos] & 0x7f)
 					| (buf[pos + 1]) << 7;
 
 		} else if (buf[pos + 2] >= 0) {
-			bufferPos += 3;
-			bytesRead += 3;
+			mBufferPos += 3;
+			mBytesProcessed += 3;
 			return (buf[pos] & 0x7f)
 					| (buf[pos + 1] & 0x7f) << 7
 					| (buf[pos + 2]) << 14;
 		} else if (buf[pos + 3] >= 0) {
-			bufferPos += 4;
-			bytesRead += 4;
+			mBufferPos += 4;
+			mBytesProcessed += 4;
 			return (buf[pos] & 0x7f)
 					| (buf[pos + 1] & 0x7f) << 7
 					| (buf[pos + 2] & 0x7f) << 14
@@ -829,24 +948,266 @@ public class MapDatabase implements IMapDatabase {
 				| (buf[pos + 3] & 0x7f) << 21
 				| (buf[pos + 4]) << 28;
 
-		Log.d(TAG, "got a big number, eh?");
-
 		int read = 5;
 		pos += 4;
 
 		// 'Discard upper 32 bits' - the original comment.
 		// havent found this in any document but the code provided by google.
-		// no idea what this is for, just seems fsckin stupid...
 		while (buf[pos++] < 0 && read < 10)
 			read++;
 
 		if (read == 10)
 			throw new IOException("X malformed VarInt32");
 
-		bufferPos += read;
-		bytesRead += read;
+		mBufferPos += read;
+		mBytesProcessed += read;
 
 		return result;
+	}
+
+	// ///////////////////////// LW HttpClient ///////////////////////////////////////
+	// would have written simple tcp server/client for this...
+
+	private int mMaxReq = 0;
+	private Socket mSocket;
+	private OutputStream mCmdBuffer;
+	private long mLastRequest = 0;
+	private SocketAddress mSockAddr;
+
+	private final static byte[] RESPONSE_HTTP_OK = "HTTP/1.1 200 OK".getBytes();
+	private final static byte[] RESPONSE_CONTENT_LEN = "Content-Length: ".getBytes();
+	private final static int RESPONSE_EXPECTED_LIVES = 100;
+
+	private final static byte[] REQUEST_GET_START = "GET /osmstache/test/".getBytes();
+	private final static byte[] REQUEST_GET_END = (".osmtile HTTP/1.1\n" +
+			"Host: " + SERVER_ADDR + "\n" +
+			"Connection: Keep-Alive\n\n").getBytes();
+
+	private byte[] mRequestBuffer;
+
+	// private final static String REQUEST =
+	// // "GET /tiles/tiles.py//test/%d/%d/%d.osmtile HTTP/1.1\n" +
+	// "GET /osmstache/test/%d/%d/%d.osmtile HTTP/1.1\n" +
+	// "Host: city.informatik.uni-bremen.de\n" +
+	// "Connection: Keep-Alive\n\n";
+
+	int lwHttpReadHeader() throws IOException {
+		InputStream is = mInputStream;
+
+		byte[] buf = mReadBuffer;
+
+		int read = 0;
+		int pos = 0;
+		int end = 0;
+		// int max_req = 0;
+		int resp_len = 0;
+		boolean first = true;
+
+		for (int len = 0; pos < read
+				|| (len = is.read(buf, read, BUFFER_SIZE - read)) >= 0; len = 0) {
+			read += len;
+
+			while (end < read && (buf[end] != '\n'))
+				end++;
+
+			if (buf[end] == '\n') {
+
+				if (first) {
+					// check for OK
+					for (int i = 0; i < 15 && pos + i < end; i++)
+						if (buf[pos + i] != RESPONSE_HTTP_OK[i])
+							return -1;
+					first = false;
+				} else if (end - pos == 1) {
+					// check empty line (header end)
+					end += 1;
+					break;
+				}
+				else {
+					// parse Content-Length, TODO just encode this with message
+					for (int i = 0; pos + i < end - 1; i++) {
+						if (i < 16) {
+							if (buf[pos + i] == RESPONSE_CONTENT_LEN[i])
+								continue;
+
+							break;
+						}
+
+						// read int value
+						resp_len = resp_len * 10 + (buf[pos + i]) - 48;
+					}
+				}
+
+				// String line = new String(buf, pos, end - pos - 1);
+				// Log.d(TAG, ">" + line + "< " + resp_len);
+				//
+				// if (first) {
+				// first = false;
+				// }
+				// else if (line.startsWith("Content-Length:")) {
+				// resp_len = Integer.parseInt(line.substring(16));
+				// }
+				// we know our server max=100, timeout=15
+				// if (line.startsWith("Keep-Alive:"))
+				// max_req = Integer.parseInt(line.substring(line.indexOf("max=") + 4));
+
+				pos += (end - pos) + 1;
+				end = pos;
+			}
+		}
+
+		mContentLenth = resp_len;
+
+		// start of content
+		mBufferPos = end;
+
+		// bytes of content already read into buffer
+		mReadPos = read - end;
+
+		// buffer fill
+		mBufferSize = read;
+
+		return resp_len;
+	}
+
+	private boolean lwHttpSendRequest(Tile tile) throws IOException {
+		if (mSockAddr == null) {
+			mSockAddr = new InetSocketAddress(SERVER_ADDR, 80);
+		}
+
+		if (mSocket != null && ((mMaxReq-- <= 0)
+				|| (SystemClock.elapsedRealtime() - mLastRequest > 10000))) {
+
+			try {
+				mSocket.close();
+			} catch (IOException e) {
+
+			}
+
+			// Log.d(TAG, "not alive  - recreate connection " + mMaxReq);
+			mSocket = null;
+		}
+
+		if (mSocket == null) {
+			lwHttpConnect();
+			// we know our server
+			mMaxReq = RESPONSE_EXPECTED_LIVES;
+			// Log.d(TAG, "create connection");
+		} else {
+			// should not be needed
+			int avail = mInputStream.available();
+			if (avail > 0) {
+				Log.d(TAG, "Consume left-over bytes: " + avail);
+				mInputStream.read(mReadBuffer, 0, avail);
+			}
+		}
+
+		byte[] request = mRequestBuffer;
+		int pos = REQUEST_GET_START.length;
+
+		byte[] val = Integer.valueOf(tile.zoomLevel).toString().getBytes();
+		int len = val.length;
+		System.arraycopy(val, 0, request, pos, len);
+		pos += len;
+		request[pos++] = '/';
+
+		val = Integer.valueOf(tile.tileX).toString().getBytes();
+		len = val.length;
+		System.arraycopy(val, 0, request, pos, len);
+		pos += len;
+		request[pos++] = '/';
+
+		val = Integer.valueOf(tile.tileY).toString().getBytes();
+		len = val.length;
+		System.arraycopy(val, 0, request, pos, len);
+		pos += len;
+		len = REQUEST_GET_END.length;
+		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
+
+		len += pos;
+
+		// byte[] request = String.format(REQUEST, Integer.valueOf(tile.zoomLevel),
+		// Integer.valueOf(tile.tileX), Integer.valueOf(tile.tileY)).getBytes();
+
+		try {
+			mCmdBuffer.write(request, 0, len);
+			mCmdBuffer.flush();
+			return true;
+		} catch (IOException e) {
+			Log.d(TAG, "retry - recreate connection");
+		}
+
+		lwHttpConnect();
+
+		mCmdBuffer.write(request, 0, len);
+		mCmdBuffer.flush();
+
+		return true;
+	}
+
+	private boolean lwHttpConnect() throws IOException {
+		if (mRequestBuffer == null) {
+			mRequestBuffer = new byte[1024];
+			System.arraycopy(REQUEST_GET_START,
+					0, mRequestBuffer, 0,
+					REQUEST_GET_START.length);
+		}
+
+		mSocket = new Socket();
+		mSocket.connect(mSockAddr, 30000);
+		mSocket.setTcpNoDelay(true);
+		// mCmdBuffer = new PrintStream(mSocket.getOutputStream());
+		mCmdBuffer = new BufferedOutputStream(mSocket.getOutputStream());
+		mInputStream = mSocket.getInputStream();
+
+		return true;
+	}
+
+	// //////////////////////////// Tile cache ////////////////////////////////////
+
+	private boolean cacheRead() {
+		return true;
+	}
+
+	private boolean cacheBegin(Tile tile, File f) {
+		if (USE_CACHE) {
+			try {
+				Log.d(TAG, "writing cache: " + tile);
+				mCacheFile = new FileOutputStream(f);
+
+				if (mReadPos > 0) {
+					try {
+						mCacheFile.write(mReadBuffer, mBufferPos,
+								mBufferSize - mBufferPos);
+					} catch (IOException e) {
+						e.printStackTrace();
+						mCacheFile = null;
+						return false;
+					}
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				mCacheFile = null;
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private void cacheFinish(boolean success, File file) {
+		if (USE_CACHE) {
+			if (success) {
+				try {
+					mCacheFile.flush();
+					mCacheFile.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				file.delete();
+			}
+		}
+		mCacheFile = null;
 	}
 
 	/* All code below is taken from or based on Google's Protocol Buffers implementation: */
@@ -886,11 +1247,10 @@ public class MapDatabase implements IMapDatabase {
 
 		readBuffer(size);
 
-		final String result = new String(buffer, bufferPos, size, "UTF-8");
-		// Log.d(TAG, "read string " + read + " " + size + " " + bufferPos + " " + result);
+		final String result = new String(mReadBuffer, mBufferPos, size, "UTF-8");
 
-		bufferPos += size;
-		bytesRead += size;
+		mBufferPos += size;
+		mBytesProcessed += size;
 		return result;
 
 	}
