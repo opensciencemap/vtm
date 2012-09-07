@@ -28,12 +28,10 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 				EGL10.EGL_RED_SIZE, 5,
 				EGL10.EGL_GREEN_SIZE, 6,
 				EGL10.EGL_BLUE_SIZE, 5,
-				EGL10.EGL_ALPHA_SIZE, 0,
-				EGL10.EGL_DEPTH_SIZE, 24,
+				EGL10.EGL_ALPHA_SIZE, 8,
+				EGL10.EGL_DEPTH_SIZE, 16,
 				// Requires that setEGLContextClientVersion(2) is called on the view.
 				EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
-				// EGL10.EGL_SAMPLE_BUFFERS, 1 /* true */,
-				// EGL10.EGL_SAMPLES, 2,
 				EGL10.EGL_STENCIL_SIZE, 8,
 				EGL10.EGL_NONE };
 
@@ -46,17 +44,18 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 			stencilSize = 4;
 
 			configSpec = new int[] {
-					EGL10.EGL_RED_SIZE, 5,
-					EGL10.EGL_GREEN_SIZE, 6,
-					EGL10.EGL_BLUE_SIZE, 5,
-					EGL10.EGL_ALPHA_SIZE, 0,
-					EGL10.EGL_DEPTH_SIZE, 24,
+					// EGL10.EGL_RENDERABLE_TYPE, 4, EGL10.EGL_NONE };
+					EGL10.EGL_RED_SIZE, 8,
+					EGL10.EGL_GREEN_SIZE, 8,
+					EGL10.EGL_BLUE_SIZE, 8,
+					EGL10.EGL_ALPHA_SIZE, 8,
+					EGL10.EGL_DEPTH_SIZE, 16,
 					EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
 					EGL10.EGL_STENCIL_SIZE, 8,
 					EGL10.EGL_NONE };
 
 			if (!egl.eglChooseConfig(display, configSpec, null, 0, mValue)) {
-				throw new IllegalArgumentException("3rd eglChooseConfig failed");
+				throw new IllegalArgumentException("eglChooseConfig failed");
 			}
 			numConfigs = mValue[0];
 
