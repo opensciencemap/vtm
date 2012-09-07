@@ -24,6 +24,6 @@ public class ShortItem {
 		used = 0;
 	}
 
-	// must be multiple of 6 and 4 (expected in LineLayer/PolygonLayer)
-	static final int SIZE = 480;
+	// must be multiple of 4 (expected in LineLayer/PolygonLayer)
+	static final int SIZE = 256;
 }
