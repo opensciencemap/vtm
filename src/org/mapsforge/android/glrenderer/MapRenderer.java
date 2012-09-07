@@ -65,7 +65,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	private static final int MAX_TILES_IN_QUEUE = 40;
 	private static final int CACHE_TILES_MAX = 250;
-	private static final int LIMIT_BUFFERS = 12 * MB;
+	private static final int LIMIT_BUFFERS = 16 * MB;
 
 	private static int CACHE_TILES = CACHE_TILES_MAX;
 
@@ -156,14 +156,16 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			MapPosition mapPosition) {
 		int h = (Tile.TILE_SIZE >> 1);
 		byte zoom = mapPosition.zoomLevel;
-		long x = mTileX + h;
-		long y = mTileY + h;
+		long x = (long) mapPosition.x;
+		long y = (long) mapPosition.y;
+
 		int diff;
 		long dx, dy;
 		int cnt = 0;
 
-		// TODO this could need some fixing..
-		// and be optimized to consider move/zoom direction
+		// TODO this could need some fixing, and optimization
+		// to consider move/zoom direction
+
 		for (int i = 0, n = tiles.size(); i < n; i++) {
 			MapTile t = (MapTile) tiles.get(i);
 			diff = (t.zoomLevel - zoom);
@@ -173,28 +175,30 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			if (diff == 0) {
 				dx = (t.pixelX + h) - x;
 				dy = (t.pixelY + h) - y;
-				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
-				// t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
+				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
+				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
 			} else if (diff > 0) {
 				// tile zoom level is child of current
-				dx = ((t.pixelX + h) >> diff) - x;
-				dy = ((t.pixelY + h) >> diff) - y;
 
-				// dy *= mAspect;
-				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * diff;
-				// t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * diff;
+				if (diff < 3) {
+					dx = ((t.pixelX + h) >> diff) - x;
+					dy = ((t.pixelY + h) >> diff) - y;
+				}
+				else {
+					dx = ((t.pixelX + h) >> (diff >> 1)) - x;
+					dy = ((t.pixelY + h) >> (diff >> 1)) - y;
+				}
+				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
+				t.distance = FloatMath.sqrt((dx * dx + dy * dy));
 
 			} else {
 				// tile zoom level is parent of current
 				dx = ((t.pixelX + h) << -diff) - x;
 				dy = ((t.pixelY + h) << -diff) - y;
 
-				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy))
-						* (-diff * 0.5f);
-				// t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
+				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * (-diff * 0.5f);
+				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
 			}
-
-			// Log.d(TAG, diff + " " + (float) t.distance / Tile.TILE_SIZE + " " + t);
 		}
 		return cnt;
 	}
@@ -215,45 +219,47 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	}
 
 	// FIXME still the chance that one jumped two zoomlevels between cur and draw...
-	// and this is a bit heavy in the first place
+	// and this is all a bit heavy in the first place
 	private static boolean tileInUse(GLMapTile t) {
 		byte z = mPrevZoom;
 
 		if (t.isActive) {
 			return true;
+
 		} else if (t.zoomLevel == z + 1) {
 			GLMapTile p = t.rel.parent.tile;
 
 			if (p != null && p.isActive && !(p.isReady || p.newData))
 				return true;
+
 		} else if (t.zoomLevel == z + 2) {
 			GLMapTile p = t.rel.parent.parent.tile;
 
 			if (p != null && p.isActive && !(p.isReady || p.newData))
 				return true;
+
 		} else if (t.zoomLevel == z - 1) {
 			if (childIsActive(t))
 				return true;
+
 		} else if (t.zoomLevel == z - 2) {
-			for (int i = 0; i < 4; i++) {
-				if (t.rel.child[i] == null)
+			for (TreeTile c : t.rel.child) {
+				if (c == null)
 					continue;
 
-				GLMapTile child = t.rel.child[i].tile;
-				if (child != null && childIsActive(child))
+				if (c.tile != null && childIsActive(c.tile))
 					return true;
 			}
 		} else if (t.zoomLevel == z - 3) {
-			for (int i = 0; i < 4; i++) {
-				if (t.rel.child[i] == null)
+			for (TreeTile c : t.rel.child) {
+				if (c == null)
 					continue;
-				TreeTile c = t.rel.child[i];
 
-				for (int j = 0; j < 4; j++) {
-					if (c.child[j] == null)
+				for (TreeTile c2 : c.child) {
+					if (c2 == null)
 						continue;
-					GLMapTile child = c.child[j].tile;
-					if (child != null && childIsActive(child))
+
+					if (c2.tile != null && childIsActive(c2.tile))
 						return true;
 				}
 			}
@@ -262,9 +268,9 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	}
 
 	private static void limitCache(int remove) {
+		boolean printAll = false;
 
-		for (int j = mTiles.size() - 1, cnt = 0; cnt < remove && j > 0; j--) {
-
+		for (int j = mTiles.size() - 1, cnt = 0; cnt < remove && j > 0; j--, cnt++) {
 			GLMapTile t = mTiles.remove(j);
 
 			synchronized (t) {
@@ -273,10 +279,16 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 					// dont remove tile used by renderthread or mapgenerator
 					Log.d(TAG, "X not removing active " + t + " " + t.distance);
 					mTiles.add(t);
+
+					if (printAll) {
+						printAll = false;
+						for (GLMapTile tt : mTiles)
+							Log.d(TAG, ">>>" + tt + " " + tt.distance);
+					}
 				} else if ((t.isReady || t.newData) && tileInUse(t)) {
 					// check if this tile could be used as proxy
 					// for not yet drawn active tile
-					Log.d(TAG, "X not removing proxy: " + t);
+					Log.d(TAG, "X not removing proxy: " + t + " " + t.distance);
 					mTiles.add(t);
 				} else {
 					if (t.isLoading) {
@@ -285,7 +297,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 					}
 
 					clearTile(t);
-					cnt++;
 				}
 			}
 		}
@@ -401,9 +412,46 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		int removes = mTiles.size() - CACHE_TILES;
 
 		if (removes > 10) {
+			// int size = mTiles.size();
+			// for (int i = 0; i < size;) {
+			// GLMapTile cur = mTiles.get(i);
+			// if (!cur.isActive && !cur.isLoading && !cur.newData && !cur.isReady) {
+			// // Log.d(TAG, "remove empty tile" + cur);
+			// mTiles.remove(i);
+			// TreeTile.remove(cur);
+			// removes--;
+			// size--;
+			// continue;
+			// }
+			// i++;
+			// }
+
+			int size = mTiles.size();
+
 			updateTileDistances(mTiles, mapPosition);
-			Collections.sort(mTiles);
+			// Log.d(TAG, "remove tiles: " + removes);
+
+			// find 'removes' tiles with longest distance and
+			// move them at the end
+			for (int i = 1; i <= removes; i++) {
+				int pos = 0;
+				GLMapTile t = mTiles.get(0);
+
+				for (int j = 1; j <= size - i; j++) {
+					GLMapTile t2 = mTiles.get(j);
+					if (t2.distance > t.distance) {
+						t = t2;
+						pos = j;
+					}
+				}
+				// Log.d(TAG, "mark for removal" + cur);
+
+				mTiles.add(size - i, mTiles.remove(pos));
+			}
+			// Collections.sort(mTiles);
+
 			limitCache(removes);
+
 		}
 
 		return true;
@@ -843,8 +891,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			}
 		}
 
-		checkBufferUsage();
-
 		int tileCnt = drawTiles.cnt;
 		GLMapTile[] tiles = drawTiles.tiles;
 
@@ -883,6 +929,9 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				}
 			}
 		}
+
+		if (uploadCnt > 0)
+			checkBufferUsage();
 
 		if (updateTextures > 0)
 			TextRenderer.compileTextures();
