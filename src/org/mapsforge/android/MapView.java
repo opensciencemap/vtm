@@ -22,7 +22,6 @@ import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.mapsforge.android.input.TouchHandler;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.JobQueue;
 import org.mapsforge.android.mapgenerator.MapDatabaseFactory;
@@ -75,7 +74,7 @@ public class MapView extends GLSurfaceView {
 	 */
 	public static final InternalRenderTheme DEFAULT_RENDER_THEME = InternalRenderTheme.OSMARENDER;
 
-	private static final float DEFAULT_TEXT_SCALE = 1;
+	// private static final float DEFAULT_TEXT_SCALE = 1;
 	private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 16);
 
 	public final static boolean debugFrameTime = false;
