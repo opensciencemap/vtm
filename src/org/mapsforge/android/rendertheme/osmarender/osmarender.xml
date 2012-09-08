@@ -2,7 +2,7 @@
 <rendertheme xmlns="http://mapsforge.org/renderTheme"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://mapsforge.org/renderTheme ../renderTheme.xsd"
-             version="1" map-background="#f8f8f6">
+             version="1" map-background="#fcfcfa">
 
   <style-pathtext name="road" k="name"    font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
   <style-pathtext name="major-road" k="name"   font-style="bold" font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
