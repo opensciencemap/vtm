@@ -20,10 +20,10 @@ import java.util.Comparator;
  * 
  *
  */
-public class TileDistanceSort implements Comparator<MapTile> {
+public class TileDistanceSort implements Comparator<JobTile> {
 
 	@Override
-	public int compare(MapTile tile1, MapTile tile2) {
+	public int compare(JobTile tile1, JobTile tile2) {
 		if (tile1.distance == tile2.distance)
 			return 0;
 

@@ -27,7 +27,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
-import org.mapsforge.android.mapgenerator.MapTile;
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.android.mapgenerator.TileDistanceSort;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.utils.GlUtils;
@@ -64,18 +64,18 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	// private JobParameters mJobParameter;
 	private MapPosition mMapPosition, mPrevMapPosition;
 
-	private ArrayList<MapTile> mJobList;
+	private ArrayList<JobTile> mJobList;
 
 	ArrayList<Integer> mTextures;
 	MapView mMapView;
 
-	GLMapTile[] currentTiles;
-	GLMapTile[] newTiles;
+	MapTile[] currentTiles;
+	MapTile[] newTiles;
 	int currentTileCnt = 0;
 
 	// private TileCacheKey mTileCacheKey;
 	// private LinkedHashMap<TileCacheKey, GLMapTile> mTiles;
-	private ArrayList<GLMapTile> mTileList;
+	private ArrayList<MapTile> mTileList;
 
 	private boolean processedTile = true;
 
@@ -105,10 +105,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mVertices.put(vertices);
 
 		mTextures = new ArrayList<Integer>();
-		mJobList = new ArrayList<MapTile>();
+		mJobList = new ArrayList<JobTile>();
 
 		// mTiles = new LinkedHashMap<TileCacheKey, GLMapTile>(100);
-		mTileList = new ArrayList<GLMapTile>();
+		mTileList = new ArrayList<MapTile>();
 
 		// mTileCacheKey = new TileCacheKey();
 		mInitial = true;
@@ -119,7 +119,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		long y = mTileY;
 		int diff;
 
-		for (GLMapTile t : mTileList) {
+		for (MapTile t : mTileList) {
 
 			diff = (t.zoomLevel - zoom);
 
@@ -137,7 +137,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		Collections.sort(mTileList, tileDistanceSort);
 
 		for (int j = mTileList.size() - 1, cnt = 0; cnt < remove; j--, cnt++) {
-			GLMapTile t = mTileList.remove(j);
+			MapTile t = mTileList.remove(j);
 
 			// mTileCacheKey.set(t.tileX, t.tileY, t.zoomLevel);
 			// mTiles.remove(mTileCacheKey);
@@ -298,7 +298,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	// private MapGeneratorJob mMapGeneratorJob = null;
 
 	@Override
-	public boolean passTile(MapTile mapTile) {
+	public boolean passTile(JobTile jobTile) {
 
 		// mMapGeneratorJob = mapGeneratorJob;
 		processedTile = false;
@@ -307,7 +307,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		return true;
 	}
 
-	private boolean drawTile(GLMapTile tile, int level, float height) {
+	private boolean drawTile(MapTile tile, int level, float height) {
 
 		// do not recurse more than two parents
 		if (level > 2)
@@ -416,7 +416,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-		GLMapTile tile, child, child2;
+		MapTile tile, child, child2;
 
 		GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
 
@@ -494,8 +494,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mHeight = height;
 
 		int tiles = (mWidth / Tile.TILE_SIZE + 4) * (mHeight / Tile.TILE_SIZE + 4);
-		currentTiles = new GLMapTile[tiles];
-		newTiles = new GLMapTile[tiles];
+		currentTiles = new MapTile[tiles];
+		newTiles = new MapTile[tiles];
 
 		GLES20.glViewport(0, 0, width, height);
 

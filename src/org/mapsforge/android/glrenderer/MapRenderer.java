@@ -43,7 +43,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
-import org.mapsforge.android.mapgenerator.MapTile;
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.utils.GlUtils;
 import org.mapsforge.core.MapPosition;
@@ -70,14 +70,14 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private static int CACHE_TILES = CACHE_TILES_MAX;
 
 	private final MapView mMapView;
-	private static ArrayList<MapTile> mJobList;
+	private static ArrayList<JobTile> mJobList;
 	private static ArrayList<VertexBufferObject> mVBOs;
 
 	// all tiles currently referenced
-	private static ArrayList<GLMapTile> mTiles;
+	private static ArrayList<MapTile> mTiles;
 
 	// tiles that have new data to upload, see passTile()
-	private static ArrayList<GLMapTile> mTilesLoaded;
+	private static ArrayList<MapTile> mTilesLoaded;
 
 	private static int mWidth, mHeight;
 	private static float mAspect;
@@ -97,10 +97,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	class TilesData {
 		int cnt = 0;
-		final GLMapTile[] tiles;
+		final MapTile[] tiles;
 
 		TilesData(int numTiles) {
-			tiles = new GLMapTile[numTiles];
+			tiles = new MapTile[numTiles];
 		}
 	}
 
@@ -142,16 +142,16 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (mInitial)
 			return;
 
-		mJobList = new ArrayList<MapTile>();
-		mTiles = new ArrayList<GLMapTile>();
-		mTilesLoaded = new ArrayList<GLMapTile>(30);
+		mJobList = new ArrayList<JobTile>();
+		mTiles = new ArrayList<MapTile>();
+		mTilesLoaded = new ArrayList<MapTile>(30);
 
 		Matrix.setIdentityM(mMVPMatrix, 0);
 
 		mInitial = true;
 		mUpdateTiles = false;
 
-		TreeTile.init();
+		QuadTree.init();
 	}
 
 	private static int updateTileDistances(ArrayList<?> tiles,
@@ -169,7 +169,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		// to consider move/zoom direction
 
 		for (int i = 0, n = tiles.size(); i < n; i++) {
-			MapTile t = (MapTile) tiles.get(i);
+			JobTile t = (JobTile) tiles.get(i);
 			diff = (t.zoomLevel - zoom);
 			if (t.isActive)
 				cnt++;
@@ -205,8 +205,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		return cnt;
 	}
 
-	private static boolean childIsActive(GLMapTile t) {
-		GLMapTile c = null;
+	private static boolean childIsActive(MapTile t) {
+		MapTile c = null;
 
 		for (int i = 0; i < 4; i++) {
 			if (t.rel.child[i] == null)
@@ -222,20 +222,20 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	// FIXME still the chance that one jumped two zoomlevels between
 	// cur and draw. should use reference counter instead
-	private static boolean tileInUse(GLMapTile t) {
+	private static boolean tileInUse(MapTile t) {
 		byte z = mPrevZoom;
 
 		if (t.isActive) {
 			return true;
 
 		} else if (t.zoomLevel == z + 1) {
-			GLMapTile p = t.rel.parent.tile;
+			MapTile p = t.rel.parent.tile;
 
 			if (p != null && p.isActive && !(p.isReady || p.newData))
 				return true;
 
 		} else if (t.zoomLevel == z + 2) {
-			GLMapTile p = t.rel.parent.parent.tile;
+			MapTile p = t.rel.parent.parent.tile;
 
 			if (p != null && p.isActive && !(p.isReady || p.newData))
 				return true;
@@ -245,7 +245,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				return true;
 
 		} else if (t.zoomLevel == z - 2) {
-			for (TreeTile c : t.rel.child) {
+			for (QuadTree c : t.rel.child) {
 				if (c == null)
 					continue;
 
@@ -253,11 +253,11 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 					return true;
 			}
 		} else if (t.zoomLevel == z - 3) {
-			for (TreeTile c : t.rel.child) {
+			for (QuadTree c : t.rel.child) {
 				if (c == null)
 					continue;
 
-				for (TreeTile c2 : c.child) {
+				for (QuadTree c2 : c.child) {
 					if (c2 == null)
 						continue;
 
@@ -276,7 +276,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		// remove orphaned tiles
 		for (int i = 0; i < size;) {
-			GLMapTile cur = mTiles.get(i);
+			MapTile cur = mTiles.get(i);
 			// make sure tile cannot be used by GL or MapWorker Thread
 			if ((!cur.isActive) && (!cur.isLoading) && (!cur.newData)
 					&& (!cur.isReady) && (!tileInUse(cur))) {
@@ -302,11 +302,11 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		for (int i = 1; i <= removes; i++) {
 
-			GLMapTile t = mTiles.get(0);
+			MapTile t = mTiles.get(0);
 			int pos = 0;
 
 			for (int j = 1; j < size; j++) {
-				GLMapTile t2 = mTiles.get(j);
+				MapTile t2 = mTiles.get(j);
 				if (t2.distance > t.distance) {
 					t = t2;
 					pos = j;
@@ -347,7 +347,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 			// remove uploaded tiles
 			for (int i = 0; i < size;) {
-				GLMapTile t = mTilesLoaded.get(i);
+				MapTile t = mTilesLoaded.get(i);
 				// rel == null means tile is already removed by limitCache
 				if (!t.newData || t.rel == null) {
 					mTilesLoaded.remove(i);
@@ -362,7 +362,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				return;
 
 			while (size-- > MAX_TILES_IN_QUEUE - 20) {
-				GLMapTile t = mTilesLoaded.get(size);
+				MapTile t = mTilesLoaded.get(size);
 
 				synchronized (t) {
 					if (t.rel == null) {
@@ -419,12 +419,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				if (tiles == max)
 					break;
 
-				GLMapTile tile = TreeTile.getTile(xx, yy, zoomLevel);
+				MapTile tile = QuadTree.getTile(xx, yy, zoomLevel);
 
 				if (tile == null) {
-					tile = new GLMapTile(xx, yy, zoomLevel);
+					tile = new MapTile(xx, yy, zoomLevel);
 
-					TreeTile.add(tile);
+					QuadTree.add(tile);
 					mTiles.add(tile);
 				}
 
@@ -436,12 +436,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 				if (zdir > 0 && zoomLevel > 0) {
 					// prefetch parent
-					GLMapTile parent = tile.rel.parent.tile;
+					MapTile parent = tile.rel.parent.tile;
 
 					if (parent == null) {
-						parent = new GLMapTile(xx >> 1, yy >> 1, (byte) (zoomLevel - 1));
+						parent = new MapTile(xx >> 1, yy >> 1, (byte) (zoomLevel - 1));
 
-						TreeTile.add(parent);
+						QuadTree.add(parent);
 						mTiles.add(parent);
 					}
 
@@ -494,7 +494,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		return true;
 	}
 
-	private static void clearTile(GLMapTile t) {
+	private static void clearTile(MapTile t) {
 		t.newData = false;
 		t.isLoading = false;
 		t.isReady = false;
@@ -513,7 +513,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			t.vbo = null;
 		}
 
-		TreeTile.remove(t);
+		QuadTree.remove(t);
 	}
 
 	/**
@@ -534,12 +534,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			mInitial = true;
 			synchronized (this) {
 
-				for (GLMapTile t : mTiles)
+				for (MapTile t : mTiles)
 					clearTile(t);
 
 				mTiles.clear();
 				mTilesLoaded.clear();
-				TreeTile.init();
+				QuadTree.init();
 				curTiles.cnt = 0;
 				mBufferMemoryUsage = 0;
 			}
@@ -613,8 +613,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	 * called by MapWorkers when tile is loaded
 	 */
 	@Override
-	public synchronized boolean passTile(MapTile mapTile) {
-		GLMapTile tile = (GLMapTile) mapTile;
+	public synchronized boolean passTile(JobTile jobTile) {
+		MapTile tile = (MapTile) jobTile;
 
 		if (tile.isCanceled) {
 			// no one should be able to use this tile now, mapgenerator passed it,
@@ -655,7 +655,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	// ... asus has just 16 bit?!
 	// private static final float depthStep = 0.00000011920928955078125f;
 
-	private static void setMatrix(GLMapTile tile, float div, int offset) {
+	private static void setMatrix(MapTile tile, float div, int offset) {
 		float x, y, scale;
 
 		scale = (float) (2.0 * mDrawPosition.scale / (mHeight * div));
@@ -685,7 +685,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	}
 
-	private static boolean setTileScissor(GLMapTile tile, float div) {
+	private static boolean setTileScissor(MapTile tile, float div) {
 		double dx, dy, scale;
 
 		if (div == 0) {
@@ -715,7 +715,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	private int uploadCnt = 0;
 
-	private boolean uploadTileData(GLMapTile tile) {
+	private boolean uploadTileData(MapTile tile) {
 		ShortBuffer sbuf = null;
 
 		// use multiple buffers to avoid overwriting buffer while current
@@ -895,14 +895,14 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 
 		int tileCnt = drawTiles.cnt;
-		GLMapTile[] tiles = drawTiles.tiles;
+		MapTile[] tiles = drawTiles.tiles;
 
 		uploadCnt = 0;
 		int updateTextures = 0;
 
 		// check visible tiles, upload new vertex data
 		for (int i = 0; i < tileCnt; i++) {
-			GLMapTile tile = tiles[i];
+			MapTile tile = tiles[i];
 
 			if (!setTileScissor(tile, 1))
 				continue;
@@ -917,7 +917,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 			if (!tile.isReady) {
 				// check near relatives if they can serve as proxy
-				GLMapTile rel = tile.rel.parent.tile;
+				MapTile rel = tile.rel.parent.tile;
 				if (rel != null && rel.newData) {
 					uploadTileData(rel);
 				} else {
@@ -993,7 +993,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	// used to not draw a tile twice per frame...
 	private static byte mDrawSerial = 0;
 
-	private static void drawTile(GLMapTile tile, float div) {
+	private static void drawTile(MapTile tile, float div) {
 		// draw parents only once
 		if (tile.lastDraw == mDrawSerial)
 			return;
@@ -1045,13 +1045,13 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 	}
 
-	private static boolean drawProxyChild(GLMapTile tile) {
+	private static boolean drawProxyChild(MapTile tile) {
 		int drawn = 0;
 		for (int i = 0; i < 4; i++) {
 			if (tile.rel.child[i] == null)
 				continue;
 
-			GLMapTile c = tile.rel.child[i].tile;
+			MapTile c = tile.rel.child[i].tile;
 			if (c == null)
 				continue;
 
@@ -1068,17 +1068,17 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		return drawn == 4;
 	}
 
-	private static void drawProxyTile(GLMapTile tile) {
+	private static void drawProxyTile(MapTile tile) {
 
 		if (mDrawPosition.scale > 1.5f) {
 			// prefer drawing children
 			if (!drawProxyChild(tile)) {
-				GLMapTile t = tile.rel.parent.tile;
+				MapTile t = tile.rel.parent.tile;
 				if (t != null) {
 					if (t.isReady) {
 						drawTile(t, 0.5f);
 					} else {
-						GLMapTile p = t.rel.parent.tile;
+						MapTile p = t.rel.parent.tile;
 						if (p != null && p.isReady)
 							drawTile(p, 0.25f);
 					}
@@ -1086,7 +1086,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			}
 		} else {
 			// prefer drawing parent
-			GLMapTile t = tile.rel.parent.tile;
+			MapTile t = tile.rel.parent.tile;
 
 			if (t != null && t.isReady) {
 				drawTile(t, 0.5f);
@@ -1111,7 +1111,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mTiles.clear();
 
 		ShortPool.init();
-		TreeTile.init();
+		QuadTree.init();
 		// LineLayers.finish();
 
 		drawTiles = newTiles = curTiles = null;

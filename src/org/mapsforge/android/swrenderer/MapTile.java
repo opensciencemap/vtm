@@ -14,16 +14,16 @@
  */
 package org.mapsforge.android.swrenderer;
 
-import org.mapsforge.android.mapgenerator.MapTile;
+import org.mapsforge.android.mapgenerator.JobTile;
 
 /**
  * 
  */
-public class GLMapTile extends MapTile {
+public class MapTile extends JobTile {
 	private float mScale;
 
-	final GLMapTile[] child = { null, null, null, null };
-	GLMapTile parent;
+	final MapTile[] child = { null, null, null, null };
+	MapTile parent;
 
 	// private long mLoadTime;
 	private int mTextureID;
@@ -36,7 +36,7 @@ public class GLMapTile extends MapTile {
 	 * @param zoomLevel
 	 *            ..
 	 */
-	public GLMapTile(int tileX, int tileY, byte zoomLevel) {
+	public MapTile(int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
 		mScale = 1;
 		mTextureID = -1;

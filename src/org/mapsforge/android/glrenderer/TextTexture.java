@@ -20,7 +20,7 @@ public class TextTexture {
 	final int id;
 	int length;
 	int offset;
-	GLMapTile tile;
+	MapTile tile;
 
 	String[] text;
 

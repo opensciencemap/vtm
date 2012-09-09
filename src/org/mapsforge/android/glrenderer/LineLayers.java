@@ -69,7 +69,7 @@ class LineLayers {
 
 	static final boolean mFast = true;
 
-	static LineLayer drawLines(GLMapTile tile, LineLayer layer, int next, float[] matrix,
+	static LineLayer drawLines(MapTile tile, LineLayer layer, int next, float[] matrix,
 			float div, double zoom, float scale) {
 
 		float z = 1 / div;

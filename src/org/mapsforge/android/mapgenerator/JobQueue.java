@@ -23,29 +23,36 @@ import java.util.PriorityQueue;
 public class JobQueue {
 	private static final int INITIAL_CAPACITY = 64;
 
-	private PriorityQueue<MapTile> mPriorityQueue;
+	private PriorityQueue<JobTile> mPriorityQueue;
 
 	/**
 	 */
 	public JobQueue() {
-		mPriorityQueue = new PriorityQueue<MapTile>(INITIAL_CAPACITY);
+		mPriorityQueue = new PriorityQueue<JobTile>(INITIAL_CAPACITY);
 	}
 
 	/**
 	 * @param tiles
 	 *            the job to be added to this queue.
 	 */
-	public synchronized void setJobs(ArrayList<MapTile> tiles) {
+	public synchronized void setJobs(ArrayList<JobTile> tiles) {
 		mPriorityQueue.clear();
-		mPriorityQueue.addAll(tiles);
-		// for (int i = 0, n = tiles.size(); i < n; i++)
-		// mPriorityQueue.offer(tiles.get(i));
+		// mPriorityQueue.addAll(tiles);
+		for (int i = 0, n = tiles.size(); i < n; i++) {
+			JobTile tile = tiles.get(i);
+			tile.isLoading = true;
+			mPriorityQueue.offer(tile);
+		}
 	}
 
 	/**
 	 * Removes all jobs from this queue.
 	 */
 	public synchronized void clear() {
+		for (int i = 0, n = mPriorityQueue.size(); i < n; i++) {
+			JobTile tile = mPriorityQueue.poll();
+			tile.isLoading = false;
+		}
 		mPriorityQueue.clear();
 	}
 
@@ -59,10 +66,8 @@ public class JobQueue {
 	/**
 	 * @return the most important job from this queue or null, if empty.
 	 */
-	public synchronized MapTile poll() {
-		MapTile tile = mPriorityQueue.poll();
-		if (tile != null)
-			tile.isLoading = true;
+	public synchronized JobTile poll() {
+		JobTile tile = mPriorityQueue.poll();
 
 		return tile;
 	}

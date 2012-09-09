@@ -28,7 +28,7 @@ import org.mapsforge.android.mapgenerator.MapDatabaseFactory;
 import org.mapsforge.android.mapgenerator.MapDatabases;
 import org.mapsforge.android.mapgenerator.MapRendererFactory;
 import org.mapsforge.android.mapgenerator.MapRenderers;
-import org.mapsforge.android.mapgenerator.MapTile;
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.android.mapgenerator.MapWorker;
 import org.mapsforge.android.mapgenerator.Theme;
 import org.mapsforge.android.rendertheme.ExternalRenderTheme;
@@ -651,7 +651,7 @@ public class MapView extends GLSurfaceView {
 	 * @param jobs
 	 *            tile jobs
 	 */
-	public void addJobs(ArrayList<MapTile> jobs) {
+	public void addJobs(ArrayList<JobTile> jobs) {
 		if (jobs == null) {
 			mJobQueue.clear();
 			return;
