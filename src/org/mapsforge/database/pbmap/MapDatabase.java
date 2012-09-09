@@ -254,7 +254,7 @@ public class MapDatabase implements IMapDatabase {
 			result = QueryResult.FAILED;
 		}
 
-		cacheFinish(result == QueryResult.SUCCESS, f, tile);
+		cacheFinish(tile, f, result == QueryResult.SUCCESS);
 
 		return result;
 	}
@@ -757,7 +757,7 @@ public class MapDatabase implements IMapDatabase {
 
 		float scale = mScaleFactor;
 
-		if (nodes * 2 >= coords.length) {
+		if (nodes * 2 > coords.length) {
 			Log.d(TAG, "increase way coord buffer " + mTile + " to " + (nodes * 2));
 			float[] tmp = new float[nodes * 2];
 			tmpCoords = coords = tmp;
@@ -948,7 +948,7 @@ public class MapDatabase implements IMapDatabase {
 		return result;
 	}
 
-	// ///////////////////////// LW HttpClient ///////////////////////////////////////
+	// ///////////////////////// Lightweight HttpClient ///////////////////////////////////////
 	// would have written simple tcp server/client for this...
 
 	private int mMaxReq = 0;
@@ -961,6 +961,7 @@ public class MapDatabase implements IMapDatabase {
 	private final static byte[] RESPONSE_HTTP_OK = "HTTP/1.1 200 OK".getBytes();
 	private final static byte[] RESPONSE_CONTENT_LEN = "Content-Length: ".getBytes();
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
+	private final static int RESPONSE_EXPECTED_TIMEOUT = 10000;
 
 	private final static byte[] REQUEST_GET_START = "GET /osmstache/test/".getBytes();
 	private final static byte[] REQUEST_GET_END = (".osmtile HTTP/1.1\n" +
@@ -968,12 +969,6 @@ public class MapDatabase implements IMapDatabase {
 			"Connection: Keep-Alive\n\n").getBytes();
 
 	private byte[] mRequestBuffer;
-
-	// private final static String REQUEST =
-	// // "GET /tiles/tiles.py//test/%d/%d/%d.osmtile HTTP/1.1\n" +
-	// "GET /osmstache/test/%d/%d/%d.osmtile HTTP/1.1\n" +
-	// "Host: city.informatik.uni-bremen.de\n" +
-	// "Connection: Keep-Alive\n\n";
 
 	int lwHttpReadHeader() throws IOException {
 		InputStream is = mResponseStream;
@@ -1018,22 +1013,12 @@ public class MapDatabase implements IMapDatabase {
 						}
 
 						// read int value
-						resp_len = resp_len * 10 + (buf[pos + i]) - 48;
+						resp_len = resp_len * 10 + (buf[pos + i]) - '0';
 					}
 				}
 
 				// String line = new String(buf, pos, end - pos - 1);
 				// Log.d(TAG, ">" + line + "< " + resp_len);
-				//
-				// if (first) {
-				// first = false;
-				// }
-				// else if (line.startsWith("Content-Length:")) {
-				// resp_len = Integer.parseInt(line.substring(16));
-				// }
-				// we know our server max=100, timeout=15
-				// if (line.startsWith("Keep-Alive:"))
-				// max_req = Integer.parseInt(line.substring(line.indexOf("max=") + 4));
 
 				pos += (end - pos) + 1;
 				end = pos;
@@ -1062,7 +1047,8 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		if (mSocket != null && ((mMaxReq-- <= 0)
-				|| (SystemClock.elapsedRealtime() - mLastRequest > 10000))) {
+				|| (SystemClock.elapsedRealtime() - mLastRequest
+				> RESPONSE_EXPECTED_TIMEOUT))) {
 
 			try {
 				mSocket.close();
@@ -1081,9 +1067,7 @@ public class MapDatabase implements IMapDatabase {
 			// Log.d(TAG, "create connection");
 		} else {
 			// should not be needed
-
 			int avail = mResponseStream.available();
-
 			if (avail > 0) {
 				Log.d(TAG, "Consume left-over bytes: " + avail);
 				mResponseStream.read(mReadBuffer, 0, avail);
@@ -1093,27 +1077,17 @@ public class MapDatabase implements IMapDatabase {
 		byte[] request = mRequestBuffer;
 		int pos = REQUEST_GET_START.length;
 
-		byte[] val = Integer.valueOf(tile.zoomLevel).toString().getBytes();
-		int len = val.length;
-		System.arraycopy(val, 0, request, pos, len);
-		pos += len;
+		pos = writeInt(tile.zoomLevel, pos, request);
 		request[pos++] = '/';
-
-		val = Integer.valueOf(tile.tileX).toString().getBytes();
-		len = val.length;
-		System.arraycopy(val, 0, request, pos, len);
-		pos += len;
+		pos = writeInt(tile.tileX, pos, request);
 		request[pos++] = '/';
+		pos = writeInt(tile.tileY, pos, request);
 
-		val = Integer.valueOf(tile.tileY).toString().getBytes();
-		len = val.length;
-		System.arraycopy(val, 0, request, pos, len);
-		pos += len;
-		len = REQUEST_GET_END.length;
+		int len = REQUEST_GET_END.length;
 		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
-
 		len += pos;
 
+		// this does the same but with a few more allocations:
 		// byte[] request = String.format(REQUEST, Integer.valueOf(tile.zoomLevel),
 		// Integer.valueOf(tile.tileX), Integer.valueOf(tile.tileY)).getBytes();
 
@@ -1148,6 +1122,28 @@ public class MapDatabase implements IMapDatabase {
 		mCommandStream = new BufferedOutputStream(mSocket.getOutputStream());
 		mResponseStream = mSocket.getInputStream();
 		return true;
+	}
+
+	// write (positive) integer as char sequence to buffer
+	private static int writeInt(int val, int pos, byte[] buf) {
+		if (val == 0) {
+			buf[pos] = '0';
+			return pos + 1;
+		}
+
+		int i = 0;
+		for (int n = val; n > 0; n = n / 10, i++)
+			buf[pos + i] = (byte) ('0' + n % 10);
+
+		// reverse bytes
+		for (int j = pos, end = pos + i - 1, mid = pos + i / 2; j < mid; j++, end--) {
+			byte tmp = buf[j];
+			buf[j] = buf[end];
+			buf[end] = tmp;
+		}
+
+		return pos + i;
+
 	}
 
 	// //////////////////////////// Tile cache ////////////////////////////////////
@@ -1207,7 +1203,7 @@ public class MapDatabase implements IMapDatabase {
 		return true;
 	}
 
-	private void cacheFinish(boolean success, File file, Tile tile) {
+	private void cacheFinish(Tile tile, File file, boolean success) {
 		if (USE_CACHE) {
 			if (success) {
 				try {
