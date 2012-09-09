@@ -33,7 +33,7 @@ public interface IMapGenerator {
 	 *            the job that should be executed.
 	 * @return true if the job was executed successfully, false otherwise.
 	 */
-	boolean executeJob(MapTile tile);
+	boolean executeJob(JobTile tile);
 
 	/**
 	 * @param mapDatabase

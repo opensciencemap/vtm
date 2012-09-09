@@ -62,7 +62,7 @@ public class MapWorker extends PausableThread {
 
 	@Override
 	protected void doWork() {
-		MapTile tile = mJobQueue.poll();
+		JobTile tile = mJobQueue.poll();
 
 		if (mMapGenerator == null || tile == null)
 			return;

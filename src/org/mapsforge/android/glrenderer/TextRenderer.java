@@ -173,7 +173,7 @@ public class TextRenderer {
 		return true;
 	}
 
-	static boolean drawToTexture(GLMapTile tile) {
+	static boolean drawToTexture(MapTile tile) {
 		TextTexture tex = null;
 
 		if (tile.labels == null)
@@ -427,7 +427,7 @@ public class TextRenderer {
 		GLES20.glDisableVertexAttribArray(hTextVertex);
 	}
 
-	static void drawTile(GLMapTile tile, float[] matrix) {
+	static void drawTile(MapTile tile, float[] matrix) {
 
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tile.texture.id);
 

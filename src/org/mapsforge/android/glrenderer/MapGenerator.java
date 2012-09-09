@@ -17,7 +17,7 @@ package org.mapsforge.android.glrenderer;
 import org.mapsforge.android.DebugSettings;
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
-import org.mapsforge.android.mapgenerator.MapTile;
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
@@ -57,7 +57,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 
 	private IMapDatabase mMapDatabase;
 
-	private GLMapTile mCurrentTile;
+	private MapTile mCurrentTile;
 
 	private float[] mWayNodes;
 	private short[] mWays;
@@ -415,13 +415,13 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 	boolean mDebugDrawUnmatched;
 
 	@Override
-	public boolean executeJob(MapTile mapTile) {
-		GLMapTile tile;
+	public boolean executeJob(JobTile jobTile) {
+		MapTile tile;
 
 		if (mMapDatabase == null)
 			return false;
 
-		tile = mCurrentTile = (GLMapTile) mapTile;
+		tile = mCurrentTile = (MapTile) jobTile;
 		DebugSettings debugSettings = mMapView.getDebugSettings();
 
 		mDebugDrawPolygons = !debugSettings.mDisablePolygons;

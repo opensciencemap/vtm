@@ -14,9 +14,9 @@
  */
 package org.mapsforge.android.glrenderer;
 
-import org.mapsforge.android.mapgenerator.MapTile;
+import org.mapsforge.android.mapgenerator.JobTile;
 
-class GLMapTile extends MapTile {
+class MapTile extends JobTile {
 	byte lastDraw = 0;
 
 	// VBO layout:
@@ -38,9 +38,9 @@ class GLMapTile extends MapTile {
 	boolean newData;
 
 	// pointer to access relatives in TileTree
-	TreeTile rel;
+	QuadTree rel;
 
-	GLMapTile(int tileX, int tileY, byte zoomLevel) {
+	MapTile(int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
 	}
 

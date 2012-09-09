@@ -15,7 +15,7 @@
 package org.mapsforge.android;
 
 import org.mapsforge.android.mapgenerator.IMapGenerator;
-import org.mapsforge.android.mapgenerator.MapTile;
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.android.rendertheme.RenderTheme;
 
 import android.opengl.GLSurfaceView;
@@ -30,7 +30,7 @@ public interface IMapRenderer extends GLSurfaceView.Renderer {
 	 *            the mapGeneratorJob holding Tile data
 	 * @return true if the tile was processed
 	 */
-	public boolean passTile(MapTile tile);
+	public boolean passTile(JobTile tile);
 
 	/**
 	 * @return true when tile passed to renderer is processed false otherwise. used to lock overwriting resources passed

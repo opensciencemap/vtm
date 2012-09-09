@@ -20,7 +20,7 @@ import java.util.List;
 import org.mapsforge.android.DebugSettings;
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.IMapGenerator;
-import org.mapsforge.android.mapgenerator.MapTile;
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.android.rendertheme.IRenderCallback;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.rendertheme.renderinstruction.Area;
@@ -138,13 +138,13 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	}
 
 	@Override
-	public boolean executeJob(MapTile mapTile) {
+	public boolean executeJob(JobTile jobTile) {
 		long time_load = System.currentTimeMillis();
 		_nodes = 0;
 		_nodesDropped = 0;
 		// _renderTime = 0;
 
-		mCurrentTile = mapTile;
+		mCurrentTile = jobTile;
 		mCurrentTileZoom = ((long) Tile.TILE_SIZE << mCurrentTile.zoomLevel);
 		mCurrentTileX = mCurrentTile.pixelX;
 		mCurrentTileY = mCurrentTile.pixelY;

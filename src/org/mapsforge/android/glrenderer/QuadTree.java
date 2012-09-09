@@ -16,43 +16,43 @@ package org.mapsforge.android.glrenderer;
 
 import android.util.Log;
 
-class TreeTile {
-	private static String TAG = "TreeTile";
+class QuadTree {
+	private static String TAG = "QuadTree";
 
-	private static TreeTile root;
+	private static QuadTree root;
 
 	// parent pointer is used to link pool items
-	private static TreeTile pool;
+	private static QuadTree pool;
 
 	// TreeTile members
-	TreeTile parent;
-	final TreeTile[] child = new TreeTile[4];
+	QuadTree parent;
+	final QuadTree[] child = new QuadTree[4];
 	int refs = 0;
 	byte id;
-	GLMapTile tile;
+	MapTile tile;
 
 	static void init() {
 
 		pool = null;
-		root = new TreeTile();
+		root = new QuadTree();
 		root.parent = root;
 
-		TreeTile t;
+		QuadTree t;
 		for (int i = 0; i < 200; i++) {
-			t = new TreeTile();
+			t = new QuadTree();
 			t.parent = pool;
 			pool = t;
 		}
 	}
 
-	static boolean remove(GLMapTile t) {
+	static boolean remove(MapTile t) {
 		if (t.rel == null) {
 			Log.d(TAG, "already removed " + t);
 			return true;
 		}
 
-		TreeTile cur = t.rel;
-		TreeTile next;
+		QuadTree cur = t.rel;
+		QuadTree next;
 
 		for (; cur != root;) {
 			// keep pointer to parent
@@ -79,13 +79,13 @@ class TreeTile {
 		return true;
 	}
 
-	static TreeTile add(GLMapTile tile) {
+	static QuadTree add(MapTile tile) {
 
 		int x = tile.tileX;
 		int y = tile.tileY;
 		int z = tile.zoomLevel;
 
-		TreeTile cur;
+		QuadTree cur;
 
 		// if (x < 0 || x >= 1 << z) {
 		// Log.d(TAG, "invalid position");
@@ -96,7 +96,7 @@ class TreeTile {
 		// return null;
 		// }
 
-		TreeTile leaf = root;
+		QuadTree leaf = root;
 
 		for (int level = z - 1; level >= 0; level--) {
 
@@ -115,7 +115,7 @@ class TreeTile {
 				cur = pool;
 				pool = pool.parent;
 			} else {
-				cur = new TreeTile();
+				cur = new QuadTree();
 			}
 
 			cur.refs = 0;
@@ -133,8 +133,8 @@ class TreeTile {
 		return leaf;
 	}
 
-	static GLMapTile getTile(int x, int y, int z) {
-		TreeTile leaf = root;
+	static MapTile getTile(int x, int y, int z) {
+		QuadTree leaf = root;
 
 		for (int level = z - 1; level >= 0; level--) {
 
