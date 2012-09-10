@@ -12,10 +12,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.mapsforge.database.json;
+package org.mapsforge.database.test;
 
 import java.io.File;
 
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.MercatorProjection;
 import org.mapsforge.core.Tag;
@@ -51,7 +52,7 @@ public class MapDatabase implements IMapDatabase {
 	// private static double HALF_PI = Math.PI / 2;
 
 	@Override
-	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 
 		long cx = tile.pixelX + (Tile.TILE_SIZE >> 1);
 		long cy = tile.pixelY + (Tile.TILE_SIZE >> 1);

@@ -2,7 +2,7 @@
 <resources>
 	<string-array name="preferences_map_generator_values">
 	<!--   <item>Mapfile</item> -->
-	<!-- <item>PostGIS</item>--> 
+	<!--  <item>PostGIS</item>-->
 		<item>OpenScienceMap</item>
 	</string-array>
 
@@ -51,6 +51,7 @@
 	<string name="menu_info_about">About this software</string>
 	<string name="menu_mapfile">Map file</string>
 	<string name="menu_position">Position</string>
+	<string name="menu_rotation_enable">Enable rotation</string>
 	<string name="menu_position_enter_coordinates">Enter coordinates</string>
 	<string name="menu_position_last_known">Last known location</string>
 	<string name="menu_position_map_file_center">Map file center</string>

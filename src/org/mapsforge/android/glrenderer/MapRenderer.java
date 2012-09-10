@@ -36,7 +36,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -47,7 +46,6 @@ import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.android.rendertheme.RenderTheme;
 import org.mapsforge.android.utils.GlUtils;
 import org.mapsforge.core.MapPosition;
-import org.mapsforge.core.MercatorProjection;
 import org.mapsforge.core.Tile;
 
 import android.opengl.GLES20;
@@ -57,45 +55,11 @@ import android.util.FloatMath;
 import android.util.Log;
 
 public class MapRenderer implements org.mapsforge.android.IMapRenderer {
-	private static final String TAG = "MapRenderer";
 
-	private static final int MB = 1024 * 1024;
-	private static final int SHORT_BYTES = 2;
-	static final float COORD_MULTIPLIER = 8.0f;
-
-	private static final int MAX_TILES_IN_QUEUE = 40;
-	private static final int CACHE_TILES_MAX = 250;
-	private static final int LIMIT_BUFFERS = 16 * MB;
-
-	private static int CACHE_TILES = CACHE_TILES_MAX;
-
-	private final MapView mMapView;
-	private static ArrayList<JobTile> mJobList;
-	private static ArrayList<VertexBufferObject> mVBOs;
-
-	// all tiles currently referenced
-	private static ArrayList<MapTile> mTiles;
-
-	// tiles that have new data to upload, see passTile()
-	private static ArrayList<MapTile> mTilesLoaded;
-
-	private static int mWidth, mHeight;
-	private static float mAspect;
-
-	// current center tile, values used to check if position has
-	// changed for updating current tile list
-	private static long mTileX, mTileY;
-	private static float mPrevScale;
-	private static byte mPrevZoom;
-
-	private static int rotateBuffers = 2;
-	private static ShortBuffer shortBuffer[];
-	private static short[] mFillCoords;
-
-	// bytes currently loaded in VBOs
-	private static int mBufferMemoryUsage;
-
-	class TilesData {
+	/**
+	 * used for passing tiles to be rendered from TileLoader(Main) to GLThread
+	 */
+	static class TilesData {
 		int cnt = 0;
 		final MapTile[] tiles;
 
@@ -104,14 +68,39 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 	}
 
+	private static final String TAG = "MapRenderer";
+
+	private static final int MB = 1024 * 1024;
+	private static final int SHORT_BYTES = 2;
+	static final float COORD_MULTIPLIER = 8.0f;
+
+	private static final int CACHE_TILES_MAX = 200;
+	private static final int LIMIT_BUFFERS = 16 * MB;
+
+	private static int CACHE_TILES = CACHE_TILES_MAX;
+
+	private final MapView mMapView;
+	private static ArrayList<VertexBufferObject> mVBOs;
+
+	private static int mWidth, mHeight;
+	private static float mAspect;
+
+	private static int rotateBuffers = 2;
+	private static ShortBuffer shortBuffer[];
+	private static short[] mFillCoords;
+
+	// bytes currently loaded in VBOs
+	private static int mBufferMemoryUsage;
+
 	private static float[] mMVPMatrix = new float[16];
-	// private static float[] mRotateMatrix = new float[16];
-	// private static float[] mProjMatrix = new float[16];
+	private static float[] mRotateMatrix = new float[16];
+	private static float[] mProjMatrix = new float[16];
+	private static float[] mRotTMatrix = new float[16];
 
 	// newTiles is set in updateVisibleList and swapped
 	// with curTiles on main thread. curTiles is swapped
 	// with drawTiles in onDrawFrame in GL thread.
-	private static TilesData newTiles, curTiles, drawTiles;
+	private static TilesData curTiles, drawTiles;
 
 	// draw position is updated from current position in onDrawFrame
 	// keeping the position and active tiles consistent while drawing
@@ -121,14 +110,14 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	// changed. used in onDrawFrame to flip curTiles/drawTiles
 	private static boolean mUpdateTiles;
 
-	private static boolean mInitial;
-
 	private float[] mClearColor = null;
 
 	// number of tiles drawn in one frame
 	private static short mDrawCount = 0;
 
 	private static boolean mUpdateColor = false;
+
+	static Object lock = new Object();
 
 	/**
 	 * @param mapView
@@ -138,475 +127,52 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		Log.d(TAG, "init MapRenderer");
 
 		mMapView = mapView;
-
-		if (mInitial)
-			return;
-
-		mJobList = new ArrayList<JobTile>();
-		mTiles = new ArrayList<MapTile>();
-		mTilesLoaded = new ArrayList<MapTile>(30);
-
 		Matrix.setIdentityM(mMVPMatrix, 0);
 
-		mInitial = true;
 		mUpdateTiles = false;
-
-		QuadTree.init();
-	}
-
-	private static int updateTileDistances(ArrayList<?> tiles,
-			MapPosition mapPosition) {
-		int h = (Tile.TILE_SIZE >> 1);
-		byte zoom = mapPosition.zoomLevel;
-		long x = (long) mapPosition.x;
-		long y = (long) mapPosition.y;
-
-		int diff;
-		long dx, dy;
-		int cnt = 0;
-
-		// TODO this could need some fixing, and optimization
-		// to consider move/zoom direction
-
-		for (int i = 0, n = tiles.size(); i < n; i++) {
-			JobTile t = (JobTile) tiles.get(i);
-			diff = (t.zoomLevel - zoom);
-			if (t.isActive)
-				cnt++;
-
-			if (diff == 0) {
-				dx = (t.pixelX + h) - x;
-				dy = (t.pixelY + h) - y;
-				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
-				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
-			} else if (diff > 0) {
-				// tile zoom level is child of current
-
-				if (diff < 3) {
-					dx = ((t.pixelX + h) >> diff) - x;
-					dy = ((t.pixelY + h) >> diff) - y;
-				}
-				else {
-					dx = ((t.pixelX + h) >> (diff >> 1)) - x;
-					dy = ((t.pixelY + h) >> (diff >> 1)) - y;
-				}
-				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
-				t.distance = FloatMath.sqrt((dx * dx + dy * dy));
-
-			} else {
-				// tile zoom level is parent of current
-				dx = ((t.pixelX + h) << -diff) - x;
-				dy = ((t.pixelY + h) << -diff) - y;
-
-				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * (-diff * 0.5f);
-				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
-			}
-		}
-		return cnt;
-	}
-
-	private static boolean childIsActive(MapTile t) {
-		MapTile c = null;
-
-		for (int i = 0; i < 4; i++) {
-			if (t.rel.child[i] == null)
-				continue;
-
-			c = t.rel.child[i].tile;
-			if (c != null && c.isActive && !(c.isReady || c.newData))
-				return true;
-		}
-
-		return false;
-	}
-
-	// FIXME still the chance that one jumped two zoomlevels between
-	// cur and draw. should use reference counter instead
-	private static boolean tileInUse(MapTile t) {
-		byte z = mPrevZoom;
-
-		if (t.isActive) {
-			return true;
-
-		} else if (t.zoomLevel == z + 1) {
-			MapTile p = t.rel.parent.tile;
-
-			if (p != null && p.isActive && !(p.isReady || p.newData))
-				return true;
-
-		} else if (t.zoomLevel == z + 2) {
-			MapTile p = t.rel.parent.parent.tile;
-
-			if (p != null && p.isActive && !(p.isReady || p.newData))
-				return true;
-
-		} else if (t.zoomLevel == z - 1) {
-			if (childIsActive(t))
-				return true;
-
-		} else if (t.zoomLevel == z - 2) {
-			for (QuadTree c : t.rel.child) {
-				if (c == null)
-					continue;
-
-				if (c.tile != null && childIsActive(c.tile))
-					return true;
-			}
-		} else if (t.zoomLevel == z - 3) {
-			for (QuadTree c : t.rel.child) {
-				if (c == null)
-					continue;
-
-				for (QuadTree c2 : c.child) {
-					if (c2 == null)
-						continue;
-
-					if (c2.tile != null && childIsActive(c2.tile))
-						return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private static void limitCache(MapPosition mapPosition, int remove) {
-		int removes = remove;
-
-		int size = mTiles.size();
-
-		// remove orphaned tiles
-		for (int i = 0; i < size;) {
-			MapTile cur = mTiles.get(i);
-			// make sure tile cannot be used by GL or MapWorker Thread
-			if ((!cur.isActive) && (!cur.isLoading) && (!cur.newData)
-					&& (!cur.isReady) && (!tileInUse(cur))) {
-
-				clearTile(cur);
-				mTiles.remove(i);
-				removes--;
-				size--;
-				// Log.d(TAG, "remove empty tile" + cur);
-				continue;
-			}
-			i++;
-		}
-
-		if (removes <= 0)
-			return;
-
-		updateTileDistances(mTiles, mapPosition);
-
-		Log.d(TAG, "remove tiles: " + removes);
-
-		// boolean printAll = false;
-
-		for (int i = 1; i <= removes; i++) {
-
-			MapTile t = mTiles.get(0);
-			int pos = 0;
-
-			for (int j = 1; j < size; j++) {
-				MapTile t2 = mTiles.get(j);
-				if (t2.distance > t.distance) {
-					t = t2;
-					pos = j;
-				}
-			}
-
-			synchronized (t) {
-				if (t.isActive) {
-					// dont remove tile used by renderthread or mapgenerator
-					Log.d(TAG, "X not removing active " + t + " " + t.distance);
-
-					// if (printAll) {
-					// printAll = false;
-					// for (GLMapTile tt : mTiles)
-					// Log.d(TAG, ">>>" + tt + " " + tt.distance);
-					// }
-				} else if ((t.isReady || t.newData) && tileInUse(t)) {
-					// check if this tile could be used as proxy
-					// for not yet drawn active tile
-					Log.d(TAG, "X not removing proxy: " + t + " " + t.distance);
-				} else {
-					if (t.isLoading) {
-						Log.d(TAG, ">>> cancel loading " + t + " " + t.distance);
-						t.isCanceled = true;
-					}
-					mTiles.remove(pos);
-					clearTile(t);
-					size--;
-				}
-			}
-		}
-	}
-
-	private static void limitLoadQueue(int remove) {
-		int size = remove;
-
-		synchronized (mTilesLoaded) {
-
-			// remove uploaded tiles
-			for (int i = 0; i < size;) {
-				MapTile t = mTilesLoaded.get(i);
-				// rel == null means tile is already removed by limitCache
-				if (!t.newData || t.rel == null) {
-					mTilesLoaded.remove(i);
-					size--;
-					continue;
-				}
-				i++;
-			}
-
-			// clear loaded but not used tiles
-			if (size < MAX_TILES_IN_QUEUE)
-				return;
-
-			while (size-- > MAX_TILES_IN_QUEUE - 20) {
-				MapTile t = mTilesLoaded.get(size);
-
-				synchronized (t) {
-					if (t.rel == null) {
-						mTilesLoaded.remove(size);
-						continue;
-					}
-
-					if (tileInUse(t)) {
-						// Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
-						continue;
-					}
-
-					mTilesLoaded.remove(size);
-					mTiles.remove(t);
-					// Log.d(TAG, "remove unused tile data: " + t);
-					clearTile(t);
-				}
-			}
-		}
-	}
-
-	private boolean updateVisibleList(MapPosition mapPosition, int zdir) {
-		double x = mapPosition.x;
-		double y = mapPosition.y;
-		byte zoomLevel = mapPosition.zoomLevel;
-		float scale = mapPosition.scale;
-
-		double add = 1.0f / scale;
-		int offsetX = (int) ((mWidth >> 1) * add) + Tile.TILE_SIZE;
-		int offsetY = (int) ((mHeight >> 1) * add) + Tile.TILE_SIZE;
-
-		long pixelRight = (long) x + offsetX;
-		long pixelBottom = (long) y + offsetY;
-		long pixelLeft = (long) x - offsetX;
-		long pixelTop = (long) y - offsetY;
-
-		int tileLeft = MercatorProjection.pixelXToTileX(pixelLeft, zoomLevel);
-		int tileTop = MercatorProjection.pixelYToTileY(pixelTop, zoomLevel);
-		int tileRight = MercatorProjection.pixelXToTileX(pixelRight, zoomLevel);
-		int tileBottom = MercatorProjection.pixelYToTileY(pixelBottom, zoomLevel);
-
-		mJobList.clear();
-		mMapView.addJobs(null);
-
-		int tiles = 0;
-		if (newTiles == null)
-			return false;
-
-		int max = newTiles.tiles.length - 1;
-
-		for (int yy = tileTop; yy <= tileBottom; yy++) {
-			for (int xx = tileLeft; xx <= tileRight; xx++) {
-
-				if (tiles == max)
-					break;
-
-				MapTile tile = QuadTree.getTile(xx, yy, zoomLevel);
-
-				if (tile == null) {
-					tile = new MapTile(xx, yy, zoomLevel);
-
-					QuadTree.add(tile);
-					mTiles.add(tile);
-				}
-
-				newTiles.tiles[tiles++] = tile;
-
-				if (!(tile.isLoading || tile.newData || tile.isReady)) {
-					mJobList.add(tile);
-				}
-
-				if (zdir > 0 && zoomLevel > 0) {
-					// prefetch parent
-					MapTile parent = tile.rel.parent.tile;
-
-					if (parent == null) {
-						parent = new MapTile(xx >> 1, yy >> 1, (byte) (zoomLevel - 1));
-
-						QuadTree.add(parent);
-						mTiles.add(parent);
-					}
-
-					if (!(parent.isLoading || parent.isReady || parent.newData)) {
-						if (!mJobList.contains(parent))
-							mJobList.add(parent);
-					}
-				}
-			}
-		}
-
-		newTiles.cnt = tiles;
-
-		// pass new tile list to glThread
-		synchronized (this) {
-			for (int i = 0; i < curTiles.cnt; i++) {
-				boolean found = false;
-
-				for (int j = 0; j < drawTiles.cnt && !found; j++)
-					if (curTiles.tiles[i] == drawTiles.tiles[j])
-						found = true;
-
-				for (int j = 0; j < newTiles.cnt && !found; j++)
-					if (curTiles.tiles[i] == newTiles.tiles[j])
-						found = true;
-
-				if (!found)
-					curTiles.tiles[i].isActive = false;
-			}
-
-			for (int i = 0; i < tiles; i++)
-				newTiles.tiles[i].isActive = true;
-
-			TilesData tmp = curTiles;
-			curTiles = newTiles;
-			curTiles.cnt = tiles;
-			newTiles = tmp;
-
-			mCurPosition = mapPosition;
-
-			mUpdateTiles = true;
-		}
-
-		if (mJobList.size() > 0) {
-			updateTileDistances(mJobList, mapPosition);
-			Collections.sort(mJobList);
-			mMapView.addJobs(mJobList);
-		}
-
-		return true;
-	}
-
-	private static void clearTile(MapTile t) {
-		t.newData = false;
-		t.isLoading = false;
-		t.isReady = false;
-
-		LineLayers.clear(t.lineLayers);
-		PolygonLayers.clear(t.polygonLayers);
-
-		t.labels = null;
-		t.lineLayers = null;
-		t.polygonLayers = null;
-
-		if (t.vbo != null) {
-			synchronized (mVBOs) {
-				mVBOs.add(t.vbo);
-			}
-			t.vbo = null;
-		}
-
-		QuadTree.remove(t);
 	}
 
 	/**
 	 * called by MapView when position or map settings changes
 	 */
 	@Override
-	public synchronized void redrawTiles(boolean clear) {
-		boolean changedPos = false;
-		boolean changedZoom = false;
-		MapPosition mapPosition = mMapView.getMapPosition().getMapPosition();
+	public void redrawTiles(boolean clear) {
+		TileLoader.redrawTiles(clear);
+	}
 
-		if (mapPosition == null) {
-			Log.d(TAG, ">>> no map position");
-			return;
-		}
+	static void updatePosition(MapPosition mapPosition) {
+		// synchronized (MapRenderer.lock) {
+		mCurPosition = mapPosition;
+		// }
+	}
 
-		if (clear) {
-			mInitial = true;
-			synchronized (this) {
+	static TilesData updateTiles(MapPosition mapPosition, TilesData tiles) {
+		synchronized (MapRenderer.lock) {
 
-				for (MapTile t : mTiles)
-					clearTile(t);
-
-				mTiles.clear();
-				mTilesLoaded.clear();
-				QuadTree.init();
-				curTiles.cnt = 0;
-				mBufferMemoryUsage = 0;
-			}
-		}
-
-		byte zoomLevel = mapPosition.zoomLevel;
-		float scale = mapPosition.scale;
-
-		long tileX = MercatorProjection.pixelXToTileX(mapPosition.x, zoomLevel)
-				* Tile.TILE_SIZE;
-		long tileY = MercatorProjection.pixelYToTileY(mapPosition.y, zoomLevel)
-				* Tile.TILE_SIZE;
-
-		int zdir = 0;
-		if (mInitial || mPrevZoom != zoomLevel) {
-			changedZoom = true;
-			mPrevScale = scale;
-		}
-		else if (tileX != mTileX || tileY != mTileY) {
-			if (mPrevScale - scale > 0 && scale > 1.2)
-				zdir = 1;
-			mPrevScale = scale;
-			changedPos = true;
-		}
-		else if (mPrevScale - scale > 0.2 || mPrevScale - scale < -0.2) {
-			if (mPrevScale - scale > 0 && scale > 1.2)
-				zdir = 1;
-			mPrevScale = scale;
-			changedPos = true;
-		}
-
-		if (mInitial) {
 			mCurPosition = mapPosition;
-			mInitial = false;
+
+			for (int i = 0; i < curTiles.cnt; i++)
+				curTiles.tiles[i].isActive = false;
+
+			TilesData tmp = curTiles;
+			curTiles = tiles;
+
+			for (int i = 0; i < curTiles.cnt; i++)
+				curTiles.tiles[i].isActive = true;
+
+			for (int j = 0; j < drawTiles.cnt; j++)
+				drawTiles.tiles[j].isActive = true;
+
+			mUpdateTiles = true;
+
+			return tmp;
 		}
-		mTileX = tileX;
-		mTileY = tileY;
-		mPrevZoom = zoomLevel;
+	}
 
-		if (changedZoom) {
-			// need to update visible list first when zoom level changes
-			// as scaling is relative to the tiles of current zoom-level
-			updateVisibleList(mapPosition, 0);
-		} else {
-			// pass new position to glThread
-			synchronized (this) {
-				// do not change position while drawing
-				mCurPosition = mapPosition;
-			}
+	static void addVBO(VertexBufferObject vbo) {
+		synchronized (mVBOs) {
+			mVBOs.add(vbo);
 		}
-
-		if (!MapView.debugFrameTime)
-			mMapView.requestRender();
-
-		if (changedPos)
-			updateVisibleList(mapPosition, zdir);
-
-		if (changedPos || changedZoom) {
-			int remove = mTiles.size() - CACHE_TILES;
-			if (remove > 10)
-				limitCache(mapPosition, remove);
-		}
-
-		int size = mTilesLoaded.size();
-		if (size > MAX_TILES_IN_QUEUE)
-			limitLoadQueue(size);
-
 	}
 
 	/**
@@ -616,11 +182,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	public synchronized boolean passTile(JobTile jobTile) {
 		MapTile tile = (MapTile) jobTile;
 
-		if (tile.isCanceled) {
+		if (!tile.isLoading) {
 			// no one should be able to use this tile now, mapgenerator passed it,
 			// glthread does nothing until newdata is set.
 			Log.d(TAG, "passTile: canceled " + tile);
-			tile.isLoading = false;
 			return true;
 		}
 
@@ -644,9 +209,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (!MapView.debugFrameTime)
 			mMapView.requestRender();
 
-		synchronized (mTilesLoaded) {
-			mTilesLoaded.add(0, tile);
-		}
+		TileLoader.addTileLoaded(tile);
 
 		return true;
 	}
@@ -655,37 +218,46 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	// ... asus has just 16 bit?!
 	// private static final float depthStep = 0.00000011920928955078125f;
 
+	private static boolean mRotate = false;
+
 	private static void setMatrix(MapTile tile, float div, int offset) {
 		float x, y, scale;
 
-		scale = (float) (2.0 * mDrawPosition.scale / (mHeight * div));
-		x = (float) (tile.pixelX - mDrawPosition.x * div);
-		y = (float) (tile.pixelY - mDrawPosition.y * div);
+		if (mRotate) {
+			scale = (float) (1.0 * mDrawPosition.scale / (mHeight * div));
+			x = (float) (tile.pixelX - mDrawPosition.x * div);
+			y = (float) (tile.pixelY - mDrawPosition.y * div);
 
-		mMVPMatrix[12] = x * scale * mAspect;
-		mMVPMatrix[13] = -(y + Tile.TILE_SIZE) * scale;
-		// increase the 'distance' with each tile drawn.
-		mMVPMatrix[14] = -1 + offset * 0.01f; // depthStep; // 0.01f;
-		mMVPMatrix[0] = scale * mAspect / COORD_MULTIPLIER;
-		mMVPMatrix[5] = scale / COORD_MULTIPLIER;
+			Matrix.setIdentityM(mMVPMatrix, 0);
 
-		// Matrix.setIdentityM(mMVPMatrix, 0);
-		//
-		// Matrix.scaleM(mMVPMatrix, 0, scale / COORD_MULTIPLIER,
-		// scale / COORD_MULTIPLIER, 1);
-		//
-		// Matrix.translateM(mMVPMatrix, 0, x * COORD_MULTIPLIER, -(y + Tile.TILE_SIZE)
-		// * COORD_MULTIPLIER, 0);
-		//
-		// Matrix.setRotateM(mRotateMatrix, 0, mDrawPosition.angle, 0, 0, 1);
-		//
-		// Matrix.multiplyMM(mMVPMatrix, 0, mRotateMatrix, 0, mMVPMatrix, 0);
-		//
-		// Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVPMatrix, 0);
+			Matrix.scaleM(mMVPMatrix, 0, scale / COORD_MULTIPLIER,
+					scale / COORD_MULTIPLIER, 1);
+
+			Matrix.translateM(mMVPMatrix, 0,
+					x * COORD_MULTIPLIER,
+					-(y + Tile.TILE_SIZE) * COORD_MULTIPLIER,
+					-1 + offset * 0.01f);
+
+			Matrix.multiplyMM(mMVPMatrix, 0, mRotateMatrix, 0, mMVPMatrix, 0);
+
+			Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVPMatrix, 0);
+		}
+		else {
+			scale = (float) (2.0 * mDrawPosition.scale / (mHeight * div));
+			x = (float) (tile.pixelX - mDrawPosition.x * div);
+			y = (float) (tile.pixelY - mDrawPosition.y * div);
+
+			mMVPMatrix[12] = x * scale * mAspect;
+			mMVPMatrix[13] = -(y + Tile.TILE_SIZE) * scale;
+			// increase the 'distance' with each tile drawn.
+			mMVPMatrix[14] = -1 + offset * 0.01f; // depthStep; // 0.01f;
+			mMVPMatrix[0] = scale * mAspect / COORD_MULTIPLIER;
+			mMVPMatrix[5] = scale / COORD_MULTIPLIER;
+		}
 
 	}
 
-	private static boolean setTileScissor(MapTile tile, float div) {
+	private static boolean isVisible(MapTile tile, float div) {
 		double dx, dy, scale;
 
 		if (div == 0) {
@@ -773,8 +345,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 						+ sbuf.limit() + " "
 						+ sbuf.remaining() + " "
 						+ PolygonLayers.sizeOf(tile.polygonLayers) + " "
-						+ tile.isCanceled + " "
-						+ tile.isLoading + " "
 						+ tile.rel);
 
 			tile.lineOffset *= SHORT_BYTES;
@@ -790,7 +360,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 						+ sbuf.limit() + " "
 						+ sbuf.remaining() + " "
 						+ LineLayers.sizeOf(tile.lineLayers)
-						+ tile.isCanceled + " "
 						+ tile.isLoading + " "
 						+ tile.rel);
 
@@ -864,6 +433,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (MapView.debugFrameTime)
 			start = SystemClock.uptimeMillis();
 
+		mRotate = mMapView.enableRotation;
+
 		if (mUpdateColor && mClearColor != null) {
 			glClearColor(mClearColor[0], mClearColor[1], mClearColor[2], mClearColor[3]);
 			mUpdateColor = false;
@@ -871,7 +442,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		GLES20.glDepthMask(true);
 
-		// Note: i have the impression it is faster to also clear the
+		// Note: having the impression it is faster to also clear the
 		// stencil buffer even when not needed. probaly otherwise it
 		// is masked out from the depth buffer as they share the same
 		// memory region afaik
@@ -879,11 +450,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 				| GLES20.GL_DEPTH_BUFFER_BIT
 				| GLES20.GL_STENCIL_BUFFER_BIT);
 
-		if (mInitial)
-			return;
-
 		// get position and current tiles to draw
-		synchronized (this) {
+		synchronized (MapRenderer.lock) {
 			mDrawPosition = mCurPosition;
 
 			if (mUpdateTiles) {
@@ -904,7 +472,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile tile = tiles[i];
 
-			if (!setTileScissor(tile, 1))
+			if (!isVisible(tile, 1))
 				continue;
 
 			if (tile.texture == null && TextRenderer.drawToTexture(tile))
@@ -939,6 +507,11 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (updateTextures > 0)
 			TextRenderer.compileTextures();
 
+		if (mRotate) {
+			Matrix.setRotateM(mRotateMatrix, 0, mDrawPosition.angle, 0, 0, 1);
+			Matrix.transposeM(mRotTMatrix, 0, mRotateMatrix, 0);
+		}
+
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
 		for (int i = 0; i < tileCnt; i++) {
@@ -970,10 +543,13 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (scale < 1)
 			scale = 1;
 
+		// scale = (1.0f * mDrawPosition.scale / mHeight);
+		// TextRenderer.beginDraw(scale);
+
 		if (z >= MapGenerator.STROKE_MAX_ZOOM_LEVEL)
-			TextRenderer.beginDraw(FloatMath.sqrt(s) / scale);
+			TextRenderer.beginDraw(FloatMath.sqrt(s) / scale, mRotTMatrix);
 		else
-			TextRenderer.beginDraw(s);
+			TextRenderer.beginDraw(s, mRotTMatrix);
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (!tiles[i].isVisible || tiles[i].texture == null)
@@ -1055,7 +631,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			if (c == null)
 				continue;
 
-			if (!setTileScissor(c, 2)) {
+			if (!isVisible(c, 2)) {
 				drawn++;
 				continue;
 			}
@@ -1107,16 +683,13 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		Log.d(TAG, "SurfaceChanged:" + width + " " + height);
-		mTilesLoaded.clear();
-		mTiles.clear();
-
-		ShortPool.init();
-		QuadTree.init();
+		// mTilesLoaded.clear();
+		// mTiles.clear();
 		// LineLayers.finish();
 
-		drawTiles = newTiles = curTiles = null;
+		drawTiles = curTiles = null;
 		mBufferMemoryUsage = 0;
-		mInitial = true;
+		// mInitial = true;
 
 		if (width <= 0 || height <= 0)
 			return;
@@ -1127,22 +700,20 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mHeight = height;
 		mAspect = (float) height / width;
 
-		// Matrix.orthoM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f, 0.5f, -1, 1);
+		Matrix.orthoM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f, 0.5f, -1, 1);
 
 		glViewport(0, 0, width, height);
 
 		int numTiles = (mWidth / (Tile.TILE_SIZE / 2) + 2)
 				* (mHeight / (Tile.TILE_SIZE / 2) + 2);
 
+		TileLoader.init(mMapView, width, height, numTiles);
+
 		drawTiles = new TilesData(numTiles);
-		newTiles = new TilesData(numTiles);
 		curTiles = new TilesData(numTiles);
 
-		// Log.d(TAG, "using: " + numTiles + " + cache: " + CACHE_TILES);
-		GlUtils.checkGlError("pre glGenBuffers");
-
 		// Set up vertex buffer objects
-		int numVBO = (CACHE_TILES + numTiles);
+		int numVBO = (CACHE_TILES + (numTiles * 2));
 		int[] mVboIds = new int[numVBO];
 		glGenBuffers(numVBO, mVboIds, 0);
 		GlUtils.checkGlError("glGenBuffers");
@@ -1154,8 +725,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		// Set up textures
 		TextRenderer.init(numTiles);
-
-		// glDisable(GL_DITHER);
 
 		if (mClearColor != null) {
 			glClearColor(mClearColor[0], mClearColor[1],
@@ -1198,10 +767,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mFillCoords[5] = min;
 		mFillCoords[6] = max;
 		mFillCoords[7] = min;
-
-		// int i[] = new int[1];
-		// GLES20.glGetIntegerv(GLES20.GL_, i, 0);
-		// Log.d(TAG, " >>>> " + i[0]);
 
 		LineLayers.init();
 		PolygonLayers.init();

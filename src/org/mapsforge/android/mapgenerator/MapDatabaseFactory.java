@@ -61,8 +61,8 @@ public final class MapDatabaseFactory {
 		switch (mapDatabase) {
 			case MAP_READER:
 				return new org.mapsforge.database.mapfile.MapDatabase();
-			case JSON_READER:
-				return new org.mapsforge.database.json.MapDatabase();
+			case TEST_READER:
+				return new org.mapsforge.database.test.MapDatabase();
 			case POSTGIS_READER:
 				return new org.mapsforge.database.postgis.MapDatabase();
 			case PBMAP_READER:

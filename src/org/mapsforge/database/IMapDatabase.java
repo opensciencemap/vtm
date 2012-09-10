@@ -16,7 +16,7 @@ package org.mapsforge.database;
 
 import java.io.File;
 
-import org.mapsforge.core.Tile;
+import org.mapsforge.android.mapgenerator.JobTile;
 
 /**
  *
@@ -38,7 +38,7 @@ public interface IMapDatabase {
 	 *            the callback which handles the extracted map elements.
 	 * @return true if successful
 	 */
-	public abstract QueryResult executeQuery(Tile tile,
+	public abstract QueryResult executeQuery(JobTile tile,
 			IMapDatabaseCallback mapDatabaseCallback);
 
 	/**

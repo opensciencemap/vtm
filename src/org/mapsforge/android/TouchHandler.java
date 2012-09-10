@@ -112,16 +112,33 @@ public class TouchHandler {
 			return true;
 		}
 
-		// if (multi > 0) {
-		// double dx = event.getX(0) - event.getX(1);
-		// double dy = event.getY(0) - event.getY(1);
-		// double rad = Math.atan2(dy, dx);
-		// float angle = (float) Math.toDegrees(rad);
-		// mMapPosition.rotateMap(angle - mAngle);
-		// mAngle = angle;
-		// mMapView.redrawTiles();
-		// }
+		if (mMapView.enableRotation) {
+			if (multi > 0) {
+				double x1 = event.getX(0);
+				double x2 = event.getX(1);
+				double y1 = event.getY(0);
+				double y2 = event.getY(1);
 
+				double dx = x1 - x2;
+				double dy = y1 - y2;
+
+				double rad = Math.atan2(dy, dx);
+				float angle = (float) Math.toDegrees(rad);
+
+				// focus point relative to center
+				double cx = (mMapView.getWidth() >> 1) - (x1 + x2) / 2;
+				double cy = (mMapView.getHeight() >> 1) - (y1 + y2) / 2;
+				double r = Math.toRadians(angle - mAngle);
+
+				double x = cx * Math.cos(r) + cy * -Math.sin(r) - cx;
+				double y = cx * Math.sin(r) + cy * Math.cos(r) - cy;
+				// Log.d("...", "move " + x + " " + y + " " + cx + " " + cy);
+
+				mMapPosition.rotateMap(angle - mAngle, (float) x, (float) y);
+				mAngle = angle;
+				mMapView.redrawTiles();
+			}
+		}
 		// save the position of the event
 		mPosX = event.getX(pointerIndex);
 		mPosY = event.getY(pointerIndex);
@@ -182,7 +199,7 @@ public class TouchHandler {
 	private boolean onActionUp(MotionEvent motionEvent) {
 		mActivePointerId = INVALID_POINTER_ID;
 		mScaling = false;
-
+		multi = 0;
 		return true;
 	}
 
@@ -400,7 +417,11 @@ public class TouchHandler {
 			mCenterX = mMapView.getWidth() >> 1;
 			mCenterY = mMapView.getHeight() >> 1;
 			mScale = 1;
-			// mMapPosition = mMapView.getMapPosition();
+
+			if (mTimer != null) {
+				mTimer.cancel();
+				mTimer = null;
+			}
 			return true;
 		}
 

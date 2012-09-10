@@ -22,6 +22,10 @@
             <item
                 android:id="@+id/menu_position_map_center"
                 android:title="@string/menu_position_map_file_center"/>
+            
+            <item
+                android:id="@+id/menu_rotation_enable"
+                android:title="@string/menu_rotation_enable"/>
         </menu>
     </item>
     <item

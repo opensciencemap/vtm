@@ -20,28 +20,20 @@ import org.mapsforge.core.Tile;
  * 
  */
 public class JobTile extends Tile implements Comparable<JobTile> {
-	/**
-	 * tile is loaded and ready for drawing. (set and used by render thread after uploading data to gl).
-	 */
-	public boolean isReady;
+	// public final static int LOADING = 1;
+	// public final static int NEWDATA = 1 << 1;
+	// public final static int READY = 1 << 2;
+	// public final static int AVAILABLE = 1 << 1 | 1 << 2;
+	// public final static int CANCELED = 1 << 3;
+	// public int state;
 
 	/**
-	 * tile is removed from JobQueue and loading in DatabaseRenderer. set by MapWorker.
+	 * tile is in JobQueue
 	 */
 	public boolean isLoading;
 
 	/**
-	 * tile is in view region. (set and used by render thread)
-	 */
-	public boolean isVisible;
-
-	/**
-	 * tile is used by render thread. set by updateVisibleList (main thread).
-	 */
-	public boolean isActive;
-
-	/**
-	 * distance from center, used in TileScheduler set by updateVisibleList.
+	 * distance from map center.
 	 */
 	public float distance;
 
@@ -61,7 +53,8 @@ public class JobTile extends Tile implements Comparable<JobTile> {
 	public int compareTo(JobTile o) {
 		if (this.distance < o.distance) {
 			return -1;
-		} else if (this.distance > o.distance) {
+		}
+		if (this.distance > o.distance) {
 			return 1;
 		}
 		return 0;
