@@ -428,12 +428,11 @@ public class MapGenerator implements IMapGenerator, IRenderCallback, IMapDatabas
 		mDebugDrawUnmatched = debugSettings.mDrawUnmatchted;
 
 		// fixed now....
-		if (tile.newData || tile.isReady || tile.isCanceled) {
+		if (tile.newData || tile.isReady) {
 			Log.d(TAG, "XXX tile already loaded "
 					+ tile + " "
 					+ tile.newData + " "
-					+ tile.isReady + " "
-					+ tile.isCanceled);
+					+ tile.isReady + " ");
 			return false;
 		}
 

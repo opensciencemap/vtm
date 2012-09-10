@@ -24,11 +24,11 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.mapsforge.android.mapgenerator.IMapGenerator;
 import org.mapsforge.android.mapgenerator.JobQueue;
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.android.mapgenerator.MapDatabaseFactory;
 import org.mapsforge.android.mapgenerator.MapDatabases;
 import org.mapsforge.android.mapgenerator.MapRendererFactory;
 import org.mapsforge.android.mapgenerator.MapRenderers;
-import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.android.mapgenerator.MapWorker;
 import org.mapsforge.android.mapgenerator.Theme;
 import org.mapsforge.android.rendertheme.ExternalRenderTheme;
@@ -78,6 +78,7 @@ public class MapView extends GLSurfaceView {
 	private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 16);
 
 	public final static boolean debugFrameTime = false;
+	public boolean enableRotation = false;
 
 	private final MapController mMapController;
 	private final MapViewPosition mMapViewPosition;
@@ -160,7 +161,7 @@ public class MapView extends GLSurfaceView {
 			IMapDatabase mapDatabase;
 			if (mDebugDatabase) {
 				mapDatabase = MapDatabaseFactory
-						.createMapDatabase(MapDatabases.JSON_READER);
+						.createMapDatabase(MapDatabases.TEST_READER);
 			} else {
 				mapDatabase = MapDatabaseFactory.createMapDatabase(mapDatabaseType);
 			}
@@ -682,6 +683,10 @@ public class MapView extends GLSurfaceView {
 	private void mapWorkersProceed() {
 		for (MapWorker mapWorker : mMapWorkers)
 			mapWorker.proceed();
+	}
+
+	public void enableRotation(boolean enable) {
+		enableRotation = enable;
 	}
 
 	// public final int

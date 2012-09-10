@@ -26,7 +26,7 @@ public enum MapDatabases {
 	/**
 	 * ...
 	 */
-	JSON_READER,
+	TEST_READER,
 
 	/**
 	 * ...

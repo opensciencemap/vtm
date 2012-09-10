@@ -91,7 +91,7 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 	private static float PI180 = (float) (Math.PI / 180) / 1000000.0f;
 	private static float PIx4 = (float) Math.PI * 4;
 
-	private Tile mCurrentTile;
+	private JobTile mCurrentTile;
 	private static long mCurrentTileY;
 	private static long mCurrentTileX;
 	private static long mCurrentTileZoom;

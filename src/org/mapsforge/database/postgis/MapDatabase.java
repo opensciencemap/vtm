@@ -24,10 +24,10 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.Tag;
-import org.mapsforge.core.Tile;
 import org.mapsforge.core.WebMercator;
 import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
@@ -45,7 +45,7 @@ import android.util.Log;
 public class MapDatabase implements IMapDatabase {
 	private final static String TAG = "MapDatabase";
 
-	private static final String QUERY = "SELECT tags, geom FROM __get_tile(?,?,?,false)";
+	private static final String QUERY = "SELECT tags, geom FROM __get_tile(?,?,?)";
 
 	private final float mScale = 1;
 
@@ -71,7 +71,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private boolean connect() {
 		Connection conn = null;
-		String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/gis";
+		String dburl = "jdbc:postgresql://city.informatik.uni-bremen.de:5432/gis-2.0";
 
 		Properties dbOpts = new Properties();
 		dbOpts.setProperty("user", "osm");
@@ -102,7 +102,7 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	@Override
-	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		if (connection == null) {
 			if (!connect())
 				return QueryResult.FAILED;

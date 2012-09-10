@@ -53,6 +53,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestUserAgent;
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.Tag;
@@ -106,7 +107,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private IMapDatabaseCallback mMapGenerator;
 	private float mScaleFactor;
-	private Tile mTile;
+	private JobTile mTile;
 	private FileOutputStream mCacheFile;
 
 	private long mContentLenth;
@@ -129,7 +130,7 @@ public class MapDatabase implements IMapDatabase {
 			});
 
 	@Override
-	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		QueryResult result = QueryResult.SUCCESS;
 		mCacheFile = null;
 
@@ -194,7 +195,7 @@ public class MapDatabase implements IMapDatabase {
 					entity.consumeContent();
 					return QueryResult.FAILED;
 				}
-				if (mTile.isCanceled) {
+				if (!mTile.isLoading) {
 					Log.d(TAG, "1 loading canceled " + mTile);
 					entity.consumeContent();
 
@@ -249,7 +250,7 @@ public class MapDatabase implements IMapDatabase {
 			mRequest = null;
 
 		// FIXME remove this stuff
-		if (mTile.isCanceled) {
+		if (!mTile.isLoading) {
 			Log.d(TAG, "loading canceled " + mTile);
 			result = QueryResult.FAILED;
 		}

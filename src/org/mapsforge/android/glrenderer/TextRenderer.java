@@ -32,7 +32,9 @@ import android.util.Log;
 public class TextRenderer {
 	private final static int TEXTURE_WIDTH = 512;
 	private final static int TEXTURE_HEIGHT = 256;
-	private final static float SCALE_FACTOR = 8.0f;
+	private final static float SCALE = 8.0f;
+	private final static int LBIT_MASK = 0xfffffffe;
+	private final static int L2BIT_MASK = 0xfffffffc;
 
 	final static int INDICES_PER_SPRITE = 6;
 	final static int VERTICES_PER_SPRITE = 4;
@@ -53,6 +55,7 @@ public class TextRenderer {
 
 	private static int mTextProgram;
 	private static int hTextUVPMatrix;
+	private static int hTextRotationMatrix;
 	private static int hTextVertex;
 	private static int hTextScale;
 	private static int hTextTextureCoord;
@@ -99,6 +102,8 @@ public class TextRenderer {
 				Shaders.textFragmentShader);
 
 		hTextUVPMatrix = GLES20.glGetUniformLocation(mTextProgram, "mvp");
+		hTextRotationMatrix = GLES20.glGetUniformLocation(mTextProgram, "rotation");
+
 		hTextVertex = GLES20.glGetAttribLocation(mTextProgram, "vertex");
 		hTextScale = GLES20.glGetUniformLocation(mTextProgram, "scale");
 		hTextTextureCoord = GLES20.glGetAttribLocation(mTextProgram, "tex_coord");
@@ -283,10 +288,10 @@ public class TextRenderer {
 			float hh = height / 2.0f;
 
 			if (t.caption != null) {
-				x1 = x3 = (short) (SCALE_FACTOR * (-hw));
-				y1 = y3 = (short) (SCALE_FACTOR * (-hh));
-				x2 = x4 = (short) (SCALE_FACTOR * (hw));
-				y2 = y4 = (short) (SCALE_FACTOR * (hh));
+				x1 = x3 = (short) (SCALE * (-hw));
+				y1 = y3 = (short) (SCALE * (-hh));
+				x2 = x4 = (short) (SCALE * (hw));
+				y2 = y4 = (short) (SCALE * (hh));
 			}
 			else {
 				float vx = t.x1 - t.x2;
@@ -298,26 +303,45 @@ public class TextRenderer {
 				float ux = -vy;
 				float uy = vx;
 
-				x1 = (short) (SCALE_FACTOR * (vx * hw + ux * hh));
-				y1 = (short) (SCALE_FACTOR * (vy * hw + uy * hh));
+				// int dx = (int) (vx * SCALE) & L2BIT_MASK;
+				// int dy = (int) (vy * SCALE) & L2BIT_MASK;
+				//
+				// x1 = (short) dx;
+				// y1 = (short) dy;
+				//
+				// x2 = (short) (dx | 1);
+				// y3 = (short) (dy | 1);
+				//
+				// x4 = (short) (dx | 3);
+				// y4 = (short) (dy | 3);
+				//
+				// x3 = (short) (dx | 2);
+				// y2 = (short) (dy | 2);
 
-				x2 = (short) (SCALE_FACTOR * (-vx * hw + ux * hh));
-				y3 = (short) (SCALE_FACTOR * (-vy * hw + uy * hh));
-
-				x4 = (short) (SCALE_FACTOR * (-vx * hw - ux * hh));
-				y4 = (short) (SCALE_FACTOR * (-vy * hw - uy * hh));
-
-				x3 = (short) (SCALE_FACTOR * (vx * hw - ux * hh));
-				y2 = (short) (SCALE_FACTOR * (vy * hw - uy * hh));
+				x1 = (short) (SCALE * (vx * hw + ux * hh));
+				y1 = (short) (SCALE * (vy * hw + uy * hh));
+				x2 = (short) (SCALE * (-vx * hw + ux * hh));
+				y3 = (short) (SCALE * (-vy * hw + uy * hh));
+				x4 = (short) (SCALE * (-vx * hw - ux * hh));
+				y4 = (short) (SCALE * (-vy * hw - uy * hh));
+				x3 = (short) (SCALE * (vx * hw - ux * hh));
+				y2 = (short) (SCALE * (vy * hw - uy * hh));
 
 			}
-			short u1 = (short) (SCALE_FACTOR * x);
-			short v1 = (short) (SCALE_FACTOR * y);
-			short u2 = (short) (SCALE_FACTOR * (x + width));
-			short v2 = (short) (SCALE_FACTOR * (y + height));
+			short u1 = (short) (SCALE * x);
+			short v1 = (short) (SCALE * y);
+			short u2 = (short) (SCALE * (x + width));
+			short v2 = (short) (SCALE * (y + height));
 
-			short tx = (short) (SCALE_FACTOR * t.x);
-			short ty = (short) (SCALE_FACTOR * t.y);
+			// pack caption/way-text info in lowest bit
+			short tx;
+			if (t.caption == null)
+				tx = (short) ((int) (SCALE * t.x) & LBIT_MASK | 0);
+			else
+				tx = (short) ((int) (SCALE * t.x) & LBIT_MASK | 1);
+
+			short ty = (short) (SCALE * t.y);
+
 			// top-left
 			buf[pos++] = tx;
 			buf[pos++] = ty;
@@ -366,7 +390,7 @@ public class TextRenderer {
 		GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mBitmap,
 				mBitmapFormat, mBitmapType);
 
-		GLES20.glFlush();
+		// GLES20.glFlush();
 
 		return true;
 	}
@@ -397,13 +421,14 @@ public class TextRenderer {
 				mShortBuffer);
 	}
 
-	static void beginDraw(float scale) {
+	static void beginDraw(float scale, float[] rotation) {
 		GLES20.glUseProgram(mTextProgram);
 
 		GLES20.glEnableVertexAttribArray(hTextTextureCoord);
 		GLES20.glEnableVertexAttribArray(hTextVertex);
 
 		GLES20.glUniform1f(hTextScale, scale);
+		GLES20.glUniformMatrix4fv(hTextRotationMatrix, 1, false, rotation, 0);
 
 		if (debug) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);

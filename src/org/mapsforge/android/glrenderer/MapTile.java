@@ -19,25 +19,51 @@ import org.mapsforge.android.mapgenerator.JobTile;
 class MapTile extends JobTile {
 	byte lastDraw = 0;
 
-	// VBO layout:
-	// 16 bytes fill coordinates
-	// n bytes polygon vertices
-	// m bytes lines vertices
+	/**
+	 *  VBO layout:
+	 * - 16 bytes fill coordinates
+	 * - n bytes polygon vertices
+	 * - m bytes lines vertices
+	 */
 	VertexBufferObject vbo;
 
-	// polygonOffset in vbo is always 16 bytes,
+	/**
+	 *  polygonOffset in vbo is always 16 bytes,
+	 */
 	int lineOffset;
 
 	TextTexture texture;
 
-	// Tile data set by MapGenerator:
+	/**
+	 *  Tile data set by MapGenerator:
+	 */
 	LineLayer lineLayers;
 	PolygonLayer polygonLayers;
 	TextItem labels;
 
+	/**
+	 * tile has new data to upload to gl
+	 */
 	boolean newData;
 
-	// pointer to access relatives in TileTree
+	/**
+	 * tile is loaded and ready for drawing.
+	 */
+	boolean isReady;
+
+	/**
+	 * tile is in view region.
+	 */
+	boolean isVisible;
+
+	/**
+	 * tile is used by render thread. set by updateVisibleList (main thread).
+	 */
+	boolean isActive;
+
+	/**
+	 *  pointer to access relatives in TileTree
+	 */
 	QuadTree rel;
 
 	MapTile(int tileX, int tileY, byte zoomLevel) {

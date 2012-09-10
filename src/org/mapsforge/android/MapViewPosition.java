@@ -19,7 +19,6 @@ import org.mapsforge.core.MapPosition;
 import org.mapsforge.core.MercatorProjection;
 
 import android.util.FloatMath;
-import android.util.Log;
 
 /**
  * A MapPosition stores the latitude and longitude coordinate of a MapView together with its zoom level.
@@ -112,41 +111,35 @@ public class MapViewPosition {
 	public synchronized void moveMap(float mx, float my) {
 		double pixelX = MercatorProjection.longitudeToPixelX(mLongitude, mZoomLevel);
 		double pixelY = MercatorProjection.latitudeToPixelY(mLatitude, mZoomLevel);
+		double dx, dy;
 
-		// float rad = (float) Math.toRadians(mRotation);
-		// mx /= mScale;
-		// my /= mScale;
-		//
-		// double x = mx * FloatMath.cos(rad) + my * -FloatMath.sin(rad);
-		// double y = mx * FloatMath.sin(rad) + my * FloatMath.cos(rad);
-		//
-		// double dx = pixelX - x;
-		// double dy = pixelY - y;
+		if (mMapView.enableRotation) {
+			float rad = (float) Math.toRadians(mRotation);
+			dx = mx / mScale;
+			dy = my / mScale;
 
-		double dx = pixelX - mx / mScale;
-		double dy = pixelY - my / mScale;
+			double x = dx * FloatMath.cos(rad) + dy * -FloatMath.sin(rad);
+			double y = dx * FloatMath.sin(rad) + dy * FloatMath.cos(rad);
 
+			dx = pixelX - x;
+			dy = pixelY - y;
+		}
+		else {
+			dx = pixelX - mx / mScale;
+			dy = pixelY - my / mScale;
+		}
 		mLatitude = MercatorProjection.pixelYToLatitude(dy, mZoomLevel);
 		mLatitude = MercatorProjection.limitLatitude(mLatitude);
 
 		mLongitude = MercatorProjection.pixelXToLongitude(dx, mZoomLevel);
 
-		//
-		// mLatitude = MercatorProjection.pixelYToLatitude(pixelY - moveVertical / mScale,
-		// mZoomLevel);
-		// mLatitude = MercatorProjection.limitLatitude(mLatitude);
-		//
-		// mLongitude = MercatorProjection.pixelXToLongitude(pixelX - moveHorizontal
-		// / mScale, mZoomLevel);
-
 		mLongitude = MercatorProjection.wrapLongitude(mLongitude);
 		// mLongitude = MercatorProjection.limitLongitude(mLongitude);
 	}
 
-	public synchronized void rotateMap(float angle) {
+	public synchronized void rotateMap(float angle, float cx, float cy) {
+		moveMap(cx, cy);
 		mRotation -= angle;
-		Log.d("...", "angle:" + mRotation);
-		// mRotation %= 360;
 	}
 
 	synchronized void setMapCenter(GeoPoint geoPoint) {

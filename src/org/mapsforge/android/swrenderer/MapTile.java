@@ -28,6 +28,8 @@ public class MapTile extends JobTile {
 	// private long mLoadTime;
 	private int mTextureID;
 
+	boolean isVisible;
+
 	/**
 	 * @param tileX
 	 *            ...

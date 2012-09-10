@@ -20,9 +20,9 @@ import java.io.RandomAccessFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.core.MercatorProjection;
 import org.mapsforge.core.Tag;
-import org.mapsforge.core.Tile;
 import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
@@ -204,7 +204,7 @@ public class MapDatabase implements IMapDatabase {
 	 * org.mapsforge.map.reader.MapDatabaseCallback)
 	 */
 	@Override
-	public QueryResult executeQuery(Tile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		if (sMapFileHeader == null)
 			return QueryResult.FAILED;
 
