@@ -269,14 +269,14 @@ public class MapView extends GLSurfaceView {
 		if (getWidth() <= 0 || getHeight() <= 0)
 			return;
 
-		mMapRenderer.redrawTiles(false);
+		mMapRenderer.updateMap(false);
 	}
 
 	private void clearAndRedrawMapView() {
 		if (getWidth() <= 0 || getHeight() <= 0)
 			return;
 
-		mMapRenderer.redrawTiles(true);
+		mMapRenderer.updateMap(true);
 	}
 
 	/**

@@ -18,7 +18,6 @@ import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_BLEND;
 import static android.opengl.GLES20.GL_DYNAMIC_DRAW;
 import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
-import static android.opengl.GLES20.GL_SCISSOR_TEST;
 import static android.opengl.GLES20.GL_STENCIL_BUFFER_BIT;
 import static android.opengl.GLES20.glBindBuffer;
 import static android.opengl.GLES20.glBlendFunc;
@@ -29,7 +28,6 @@ import static android.opengl.GLES20.glClearStencil;
 import static android.opengl.GLES20.glDisable;
 import static android.opengl.GLES20.glEnable;
 import static android.opengl.GLES20.glGenBuffers;
-import static android.opengl.GLES20.glScissor;
 import static android.opengl.GLES20.glViewport;
 
 import java.nio.ByteBuffer;
@@ -56,18 +54,6 @@ import android.util.Log;
 
 public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
-	/**
-	 * used for passing tiles to be rendered from TileLoader(Main) to GLThread
-	 */
-	static class TilesData {
-		int cnt = 0;
-		final MapTile[] tiles;
-
-		TilesData(int numTiles) {
-			tiles = new MapTile[numTiles];
-		}
-	}
-
 	private static final String TAG = "MapRenderer";
 
 	private static final int MB = 1024 * 1024;
@@ -77,7 +63,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private static final int CACHE_TILES_MAX = 200;
 	private static final int LIMIT_BUFFERS = 16 * MB;
 
-	private static int CACHE_TILES = CACHE_TILES_MAX;
+	static int CACHE_TILES = CACHE_TILES_MAX;
 
 	private final MapView mMapView;
 	private static ArrayList<VertexBufferObject> mVBOs;
@@ -97,18 +83,15 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	private static float[] mProjMatrix = new float[16];
 	private static float[] mRotTMatrix = new float[16];
 
-	// newTiles is set in updateVisibleList and swapped
-	// with curTiles on main thread. curTiles is swapped
-	// with drawTiles in onDrawFrame in GL thread.
+	// curTiles is set by TileLoader and swapped with
+	// drawTiles in onDrawFrame in GL thread.
 	private static TilesData curTiles, drawTiles;
-
-	// draw position is updated from current position in onDrawFrame
-	// keeping the position and active tiles consistent while drawing
-	private static MapPosition mCurPosition, mDrawPosition;
 
 	// flag set by updateVisibleList when current visible tiles
 	// changed. used in onDrawFrame to flip curTiles/drawTiles
 	private static boolean mUpdateTiles;
+
+	private static MapPosition mCurPosition;
 
 	private float[] mClearColor = null;
 
@@ -117,7 +100,18 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	private static boolean mUpdateColor = false;
 
+	// lock to synchronize Main- and GL-Thread
 	static Object lock = new Object();
+
+	// used for passing tiles to be rendered from TileLoader(Main-Thread) to GLThread
+	static class TilesData {
+		int cnt = 0;
+		final MapTile[] tiles;
+
+		TilesData(int numTiles) {
+			tiles = new MapTile[numTiles];
+		}
+	}
 
 	/**
 	 * @param mapView
@@ -136,16 +130,29 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	 * called by MapView when position or map settings changes
 	 */
 	@Override
-	public void redrawTiles(boolean clear) {
-		TileLoader.redrawTiles(clear);
+	public void updateMap(boolean clear) {
+		TileLoader.updateMap(clear);
 	}
 
+	/**
+	 * called by TileLoader when only position changed
+	 * 
+	 * @param mapPosition
+	 *            current MapPosition
+	 */
 	static void updatePosition(MapPosition mapPosition) {
-		// synchronized (MapRenderer.lock) {
 		mCurPosition = mapPosition;
-		// }
 	}
 
+	/**
+	 * called by TileLoader when list of active tiles changed
+	 * 
+	 * @param mapPosition
+	 *            current MapPosition
+	 * @param tiles
+	 *            active tiles
+	 * @return curTiles (the previously active tiles)
+	 */
 	static TilesData updateTiles(MapPosition mapPosition, TilesData tiles) {
 		synchronized (MapRenderer.lock) {
 
@@ -169,6 +176,12 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 	}
 
+	/**
+	 * called by TileLoader. when tile is removed from cache, reuse its vbo.
+	 * 
+	 * @param vbo
+	 *            the VBO
+	 */
 	static void addVBO(VertexBufferObject vbo) {
 		synchronized (mVBOs) {
 			mVBOs.add(vbo);
@@ -176,7 +189,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	}
 
 	/**
-	 * called by MapWorkers when tile is loaded
+	 * called from MapWorker Thread when tile is loaded by MapGenerator
 	 */
 	@Override
 	public synchronized boolean passTile(JobTile jobTile) {
@@ -186,6 +199,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			// no one should be able to use this tile now, mapgenerator passed it,
 			// glthread does nothing until newdata is set.
 			Log.d(TAG, "passTile: canceled " + tile);
+			TileLoader.addTileLoaded(tile);
 			return true;
 		}
 
@@ -220,13 +234,14 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	private static boolean mRotate = false;
 
-	private static void setMatrix(MapTile tile, float div, int offset) {
+	private static void setMatrix(MapPosition mapPosition, MapTile tile, float div,
+			int offset) {
 		float x, y, scale;
 
 		if (mRotate) {
-			scale = (float) (1.0 * mDrawPosition.scale / (mHeight * div));
-			x = (float) (tile.pixelX - mDrawPosition.x * div);
-			y = (float) (tile.pixelY - mDrawPosition.y * div);
+			scale = (float) (1.0 * mapPosition.scale / (mHeight * div));
+			x = (float) (tile.pixelX - mapPosition.x * div);
+			y = (float) (tile.pixelY - mapPosition.y * div);
 
 			Matrix.setIdentityM(mMVPMatrix, 0);
 
@@ -243,9 +258,9 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVPMatrix, 0);
 		}
 		else {
-			scale = (float) (2.0 * mDrawPosition.scale / (mHeight * div));
-			x = (float) (tile.pixelX - mDrawPosition.x * div);
-			y = (float) (tile.pixelY - mDrawPosition.y * div);
+			scale = (float) (2.0 * mapPosition.scale / (mHeight * div));
+			x = (float) (tile.pixelX - mapPosition.x * div);
+			y = (float) (tile.pixelY - mapPosition.y * div);
 
 			mMVPMatrix[12] = x * scale * mAspect;
 			mMVPMatrix[13] = -(y + Tile.TILE_SIZE) * scale;
@@ -257,29 +272,41 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 	}
 
-	private static boolean isVisible(MapTile tile, float div) {
+	private static boolean isVisible(MapPosition mapPosition, MapTile tile, float div) {
 		double dx, dy, scale;
 
 		if (div == 0) {
-			dx = tile.pixelX - mDrawPosition.x;
-			dy = tile.pixelY - mDrawPosition.y;
-			scale = mDrawPosition.scale;
+			dx = tile.pixelX - mapPosition.x;
+			dy = tile.pixelY - mapPosition.y;
+			scale = mapPosition.scale;
 		} else {
-			dx = tile.pixelX - mDrawPosition.x * div;
-			dy = tile.pixelY - mDrawPosition.y * div;
-			scale = mDrawPosition.scale / div;
+			dx = tile.pixelX - mapPosition.x * div;
+			dy = tile.pixelY - mapPosition.y * div;
+			scale = mapPosition.scale / div;
 		}
 		int size = Tile.TILE_SIZE;
 		int sx = (int) (dx * scale);
 		int sy = (int) (dy * scale);
 
-		if (sy > mHeight / 2 || sx > mWidth / 2
-				|| sx + size * scale < -mWidth / 2
-				|| sy + size * scale < -mHeight / 2) {
-			tile.isVisible = false;
-			return false;
-		}
+		// FIXME little hack, need to do scanline check or sth
+		// this kindof works for typical screen aspect
+		if (mRotate) {
+			int ssize = mWidth > mHeight ? mWidth : mHeight;
 
+			if (sy > ssize / 2 || sx > ssize / 2
+					|| sx + size * scale < -ssize / 2
+					|| sy + size * scale < -ssize / 2) {
+				tile.isVisible = false;
+				return false;
+			}
+		} else {
+			if (sy > mHeight / 2 || sx > mWidth / 2
+					|| sx + size * scale < -mWidth / 2
+					|| sy + size * scale < -mHeight / 2) {
+				tile.isVisible = false;
+				return false;
+			}
+		}
 		tile.isVisible = true;
 
 		return true;
@@ -429,6 +456,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		long start = 0;
+		MapPosition mapPosition;
 
 		if (MapView.debugFrameTime)
 			start = SystemClock.uptimeMillis();
@@ -452,7 +480,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		// get position and current tiles to draw
 		synchronized (MapRenderer.lock) {
-			mDrawPosition = mCurPosition;
+			mapPosition = mCurPosition;
 
 			if (mUpdateTiles) {
 				TilesData tmp = drawTiles;
@@ -472,7 +500,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile tile = tiles[i];
 
-			if (!isVisible(tile, 1))
+			if (!isVisible(mapPosition, tile, 1))
 				continue;
 
 			if (tile.texture == null && TextRenderer.drawToTexture(tile))
@@ -508,15 +536,17 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			TextRenderer.compileTextures();
 
 		if (mRotate) {
-			Matrix.setRotateM(mRotateMatrix, 0, mDrawPosition.angle, 0, 0, 1);
+			Matrix.setRotateM(mRotateMatrix, 0, mapPosition.angle, 0, 0, 1);
 			Matrix.transposeM(mRotTMatrix, 0, mRotateMatrix, 0);
+		} else {
+			Matrix.setIdentityM(mRotTMatrix, 0);
 		}
 
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible && tiles[i].isReady) {
-				drawTile(tiles[i], 1);
+				drawTile(mapPosition, tiles[i], 1);
 			}
 		}
 
@@ -524,7 +554,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		// TODO draw all parent before grandparent
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible && !tiles[i].isReady) {
-				drawProxyTile(tiles[i]);
+				drawProxyTile(mapPosition, tiles[i]);
 			}
 		}
 		// GlUtils.checkGlError("end draw");
@@ -535,16 +565,13 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		mDrawSerial++;
 
 		glEnable(GL_BLEND);
-		int z = mDrawPosition.zoomLevel;
-		float s = mDrawPosition.scale;
+		int z = mapPosition.zoomLevel;
+		float s = mapPosition.scale;
 
 		int zoomLevelDiff = Math.max(z - MapGenerator.STROKE_MAX_ZOOM_LEVEL, 0);
 		float scale = (float) Math.pow(1.4, zoomLevelDiff);
 		if (scale < 1)
 			scale = 1;
-
-		// scale = (1.0f * mDrawPosition.scale / mHeight);
-		// TextRenderer.beginDraw(scale);
 
 		if (z >= MapGenerator.STROKE_MAX_ZOOM_LEVEL)
 			TextRenderer.beginDraw(FloatMath.sqrt(s) / scale, mRotTMatrix);
@@ -555,7 +582,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			if (!tiles[i].isVisible || tiles[i].texture == null)
 				continue;
 
-			setMatrix(tiles[i], 1, 0);
+			setMatrix(mapPosition, tiles[i], 1, 0);
 			TextRenderer.drawTile(tiles[i], mMVPMatrix);
 		}
 		TextRenderer.endDraw();
@@ -569,19 +596,19 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	// used to not draw a tile twice per frame...
 	private static byte mDrawSerial = 0;
 
-	private static void drawTile(MapTile tile, float div) {
+	private static void drawTile(MapPosition mapPosition, MapTile tile, float div) {
 		// draw parents only once
 		if (tile.lastDraw == mDrawSerial)
 			return;
 
 		tile.lastDraw = mDrawSerial;
 
-		int z = mDrawPosition.zoomLevel;
-		float s = mDrawPosition.scale;
+		int z = mapPosition.zoomLevel;
+		float s = mapPosition.scale;
 
 		// mDrawCount is used to calculation z offset.
 		// (used for depth clipping)
-		setMatrix(tile, div, mDrawCount++);
+		setMatrix(mapPosition, tile, div, mDrawCount++);
 
 		glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
 
@@ -621,7 +648,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		}
 	}
 
-	private static boolean drawProxyChild(MapTile tile) {
+	private static boolean drawProxyChild(MapPosition mapPosition, MapTile tile) {
 		int drawn = 0;
 		for (int i = 0; i < 4; i++) {
 			if (tile.rel.child[i] == null)
@@ -631,32 +658,32 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			if (c == null)
 				continue;
 
-			if (!isVisible(c, 2)) {
+			if (!isVisible(mapPosition, c, 2)) {
 				drawn++;
 				continue;
 			}
 
 			if (c.isReady) {
-				drawTile(c, 2);
+				drawTile(mapPosition, c, 2);
 				drawn++;
 			}
 		}
 		return drawn == 4;
 	}
 
-	private static void drawProxyTile(MapTile tile) {
+	private static void drawProxyTile(MapPosition mapPosition, MapTile tile) {
 
-		if (mDrawPosition.scale > 1.5f) {
+		if (mapPosition.scale > 1.5f) {
 			// prefer drawing children
-			if (!drawProxyChild(tile)) {
+			if (!drawProxyChild(mapPosition, tile)) {
 				MapTile t = tile.rel.parent.tile;
 				if (t != null) {
 					if (t.isReady) {
-						drawTile(t, 0.5f);
+						drawTile(mapPosition, t, 0.5f);
 					} else {
 						MapTile p = t.rel.parent.tile;
 						if (p != null && p.isReady)
-							drawTile(p, 0.25f);
+							drawTile(mapPosition, p, 0.25f);
 					}
 				}
 			}
@@ -665,16 +692,16 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			MapTile t = tile.rel.parent.tile;
 
 			if (t != null && t.isReady) {
-				drawTile(t, 0.5f);
+				drawTile(mapPosition, t, 0.5f);
 
-			} else if (!drawProxyChild(tile)) {
+			} else if (!drawProxyChild(mapPosition, tile)) {
 
 				// need to check rel.parent here, t could alread be root
 				if (t != null) {
 					t = t.rel.parent.tile;
 
 					if (t != null && t.isReady)
-						drawTile(t, 0.25f);
+						drawTile(mapPosition, t, 0.25f);
 				}
 			}
 		}
@@ -683,24 +710,21 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		Log.d(TAG, "SurfaceChanged:" + width + " " + height);
-		// mTilesLoaded.clear();
-		// mTiles.clear();
-		// LineLayers.finish();
 
 		drawTiles = curTiles = null;
 		mBufferMemoryUsage = 0;
-		// mInitial = true;
 
 		if (width <= 0 || height <= 0)
 			return;
-
-		// STENCIL_BITS = GlConfigChooser.stencilSize;
 
 		mWidth = width;
 		mHeight = height;
 		mAspect = (float) height / width;
 
 		Matrix.orthoM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f, 0.5f, -1, 1);
+
+		// Matrix.frustumM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f, 0.7f,
+		// 1, 100);
 
 		glViewport(0, 0, width, height);
 
@@ -736,8 +760,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		glClearStencil(0);
 		glClear(GL_STENCIL_BUFFER_BIT);
 
-		glEnable(GL_SCISSOR_TEST);
-		glScissor(0, 0, mWidth, mHeight);
+		// glEnable(GL_SCISSOR_TEST);
+		// glScissor(0, 0, mWidth, mHeight);
+
+		glDisable(GLES20.GL_CULL_FACE);
 
 		glBlendFunc(GLES20.GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -770,11 +796,6 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 
 		LineLayers.init();
 		PolygonLayers.init();
-	}
-
-	@Override
-	public boolean processedTile() {
-		return true;
 	}
 
 	@Override

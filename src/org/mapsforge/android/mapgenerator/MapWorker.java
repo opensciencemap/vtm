@@ -92,6 +92,6 @@ public class MapWorker extends PausableThread {
 
 	@Override
 	protected boolean hasWork() {
-		return !mJobQueue.isEmpty() && mMapRenderer.processedTile();
+		return !mJobQueue.isEmpty();
 	}
 }

@@ -18,7 +18,6 @@ package org.mapsforge.android.glrenderer;
 class Shaders {
 
 	final static String lineVertexShader = ""
-			// + "#version 130\n"
 			+ "precision mediump float;"
 			+ "uniform mat4 mvp;"
 			+ "attribute vec2 a_position;"
@@ -27,13 +26,13 @@ class Shaders {
 			+ "uniform float u_width;"
 			+ "const float dscale = 8.0/2048.0;"
 			+ "void main() {"
-			// scale extrusion to line u_width pixel
+			// scale extrusion to u_width pixel
 			// just ignore the two most insignificant bits of a_st :)
 			+ "  vec2 dir = dscale * u_width * a_st;"
 			+ "  gl_Position = mvp * vec4(a_position + dir, 0.0,1.0);"
 			// last two bits of a_st hold the texture coordinates
-			// TODO use bit operations when available!
 			+ "  v_st = u_width * (abs(mod(a_st,4.0)) - 1.0);"
+			// TODO use bit operations when available (gles 1.3)
 			// + "  v_st = u_width * vec2(ivec2(a_st) & 3 - 1);"
 			+ "}";
 
@@ -60,12 +59,13 @@ class Shaders {
 			+ "const float zero = 0.0;"
 			+ "void main() {"
 			+ "  float len;"
-			// + "  if (v_st.t == zero)"
-			// + "    len = abs(v_st.s);"
-			// + "  else "
+			+ "  if (v_st.t == zero)"
+			+ "    len = abs(v_st.s);"
+			+ "  else "
 			+ "    len = length(v_st);"
 			// fade to alpha. u_wscale is the width in pixel which should be faded,
-			// u_width - len the position of this fragment on the perpendicular to the line
+			// u_width - len the position of this fragment on the perpendicular to
+			// this line segment
 			+ "  gl_FragColor = smoothstep(zero, u_wscale, u_width - len) * u_color;"
 			+ "}";
 

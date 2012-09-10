@@ -27,26 +27,28 @@ public interface IMapRenderer extends GLSurfaceView.Renderer {
 
 	/**
 	 * @param tile
-	 *            the mapGeneratorJob holding Tile data
-	 * @return true if the tile was processed
+	 *            Tile data ready for rendering
+	 * @return true
 	 */
 	public boolean passTile(JobTile tile);
-
-	/**
-	 * @return true when tile passed to renderer is processed false otherwise. used to lock overwriting resources passed
-	 *         with the tile (e.g. lock until bitmap is loaded to texture)
-	 */
-	public boolean processedTile();
 
 	/**
 	 * called by MapView on position and map changes
 	 * 
 	 * @param clear
-	 *            ...
+	 *            recreate all tiles (i.e. on theme change)
 	 */
-	public void redrawTiles(boolean clear);
+	public void updateMap(boolean clear);
 
+	/**
+	 * @return new MapGenerator Instance for this Renderer
+	 */
 	public IMapGenerator createMapGenerator();
 
+	/**
+	 * @param t
+	 *            the theme
+	 */
 	public void setRenderTheme(RenderTheme t);
+
 }

@@ -37,7 +37,8 @@ public class TouchHandler {
 	/* package */final MapViewPosition mMapPosition;
 
 	private final float mMapMoveDelta;
-	private boolean mMoveThresholdReached;
+	private boolean mMoveStart;
+	private boolean mRotationStart;
 	private float mPosX;
 	private float mPosY;
 	private float mAngle;
@@ -76,7 +77,8 @@ public class TouchHandler {
 	private boolean onActionDown(MotionEvent event) {
 		mPosX = event.getX();
 		mPosY = event.getY();
-		mMoveThresholdReached = false;
+		mMoveStart = false;
+		mRotationStart = false;
 		// save the ID of the pointer
 		mActivePointerId = event.getPointerId(0);
 		// Log.d("...", "set active pointer" + mActivePointerId);
@@ -97,13 +99,13 @@ public class TouchHandler {
 		if (!mScaling) {
 			mScaling = scaling;
 		}
-		if (!scaling && !mMoveThresholdReached) {
+		if (!scaling && !mMoveStart) {
 
 			if (Math.abs(moveX) > 3 * mMapMoveDelta
 					|| Math.abs(moveY) > 3 * mMapMoveDelta) {
 				// the map movement threshold has been reached
 				// longPressDetector.pressStop();
-				mMoveThresholdReached = true;
+				mMoveStart = true;
 
 				// save the position of the event
 				mPosX = event.getX(pointerIndex);
@@ -134,9 +136,15 @@ public class TouchHandler {
 				double y = cx * Math.sin(r) + cy * Math.cos(r) - cy;
 				// Log.d("...", "move " + x + " " + y + " " + cx + " " + cy);
 
-				mMapPosition.rotateMap(angle - mAngle, (float) x, (float) y);
-				mAngle = angle;
-				mMapView.redrawTiles();
+				if (!mRotationStart) {
+					if (Math.abs(angle - mAngle) > 3.0)
+						mRotationStart = true;
+				}
+				else {
+					mMapPosition.rotateMap(angle - mAngle, (float) x, (float) y);
+					mAngle = angle;
+					mMapView.redrawTiles();
+				}
 			}
 		}
 		// save the position of the event

@@ -104,10 +104,10 @@ public class TileMap extends MapActivity {
 				return true;
 
 			case R.id.menu_position:
-				mMapView.enableRotation(true);
 				return true;
 
 			case R.id.menu_rotation_enable:
+				mMapView.enableRotation(true);
 				return true;
 
 			case R.id.menu_position_my_location_enable:

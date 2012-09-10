@@ -34,20 +34,15 @@ import android.util.Log;
  * JobQueue (mapView.addJobs) for loading by MapGenerator class
  */
 
-public class TileLoader {
+class TileLoader {
 	private static final String TAG = "TileLoader";
 
 	private static final int MAX_TILES_IN_QUEUE = 40;
-	private static final int CACHE_TILES_MAX = 200;
-	// private static final int MB = 1024 * 1024;
-	// private static final int LIMIT_BUFFERS = 16 * MB;
-
-	private static int CACHE_TILES = CACHE_TILES_MAX;
 
 	private static MapView mMapView;
 
+	// new jobs for the MapWorkers
 	private static ArrayList<JobTile> mJobList;
-	// private static ArrayList<VertexBufferObject> mVBOs;
 
 	// all tiles currently referenced
 	private static ArrayList<MapTile> mTiles;
@@ -65,7 +60,7 @@ public class TileLoader {
 	// private static MapPosition mCurPosition, mDrawPosition;
 	private static int mWidth, mHeight;
 
-	private static TilesData newTiles; // , curTiles, drawTiles;
+	private static TilesData newTiles;
 
 	static void init(MapView mapView, int w, int h, int numTiles) {
 		mMapView = mapView;
@@ -84,7 +79,7 @@ public class TileLoader {
 		newTiles = new TilesData(numTiles);
 	}
 
-	static void redrawTiles(boolean clear) {
+	static void updateMap(boolean clear) {
 
 		boolean changedPos = false;
 		boolean changedZoom = false;
@@ -151,13 +146,7 @@ public class TileLoader {
 			updateVisibleList(mapPosition, 0);
 		} else {
 			// pass new position to glThread
-
 			MapRenderer.updatePosition(mapPosition);
-
-			// synchronized () {
-			// // do not change position while drawing
-			// mCurPosition = mapPosition;
-			// }
 		}
 
 		if (!MapView.debugFrameTime)
@@ -167,7 +156,7 @@ public class TileLoader {
 			updateVisibleList(mapPosition, zdir);
 
 		if (changedPos || changedZoom) {
-			int remove = mTiles.size() - CACHE_TILES;
+			int remove = mTiles.size() - MapRenderer.CACHE_TILES;
 			if (remove > 50)
 				limitCache(mapPosition, remove);
 		}
@@ -176,6 +165,18 @@ public class TileLoader {
 		if (size > MAX_TILES_IN_QUEUE)
 			limitLoadQueue(size);
 
+	}
+
+	/**
+	 * Manage tiles that have data to be uploaded to gl
+	 * 
+	 * @param tile
+	 *            tile processed by MapGenerator
+	 */
+	static void addTileLoaded(MapTile tile) {
+		synchronized (mTilesLoaded) {
+			mTilesLoaded.add(tile);
+		}
 	}
 
 	private static boolean updateVisibleList(MapPosition mapPosition, int zdir) {
@@ -252,28 +253,6 @@ public class TileLoader {
 		// pass new tile list to glThread
 		newTiles.cnt = tiles;
 		newTiles = MapRenderer.updateTiles(mapPosition, newTiles);
-
-		// pass new tile list to glThread
-		// synchronized (MapRenderer.lock) {
-		//
-		// for (int i = 0; i < curTiles.cnt; i++)
-		// curTiles.tiles[i].isActive = false;
-		//
-		// for (int j = 0; j < drawTiles.cnt; j++)
-		// drawTiles.tiles[j].isActive = true;
-		//
-		// for (int i = 0; i < tiles; i++)
-		// newTiles.tiles[i].isActive = true;
-		//
-		// TilesData tmp = curTiles;
-		// curTiles = newTiles;
-		// curTiles.cnt = tiles;
-		// newTiles = tmp;
-		//
-		// mCurPosition = mapPosition;
-		//
-		// mUpdateTiles = true;
-		// }
 
 		if (mJobList.size() > 0) {
 			updateTileDistances(mJobList, mapPosition);
@@ -467,11 +446,15 @@ public class TileLoader {
 					// check if this tile could be used as proxy
 					Log.d(TAG, "X not removing proxy: " + t + " " + t.distance);
 					mTiles.add(t);
+				} else if (t.isLoading) {
+					// FIXME !!! if we add tile back on next limit cache
+					// this will be removed. clearTile could interfere with
+					// MapGenerator... clear in passTile().
+					Log.d(TAG, "X cancel loading " + t + " " + t.distance);
+					t.isLoading = false;
+					// mTiles.add(t);
+
 				} else {
-					if (t.isLoading) {
-						Log.d(TAG, "X cancel loading " + t + " " + t.distance);
-						t.isLoading = false;
-					}
 					clearTile(t);
 				}
 			}
@@ -499,12 +482,12 @@ public class TileLoader {
 			if (size < MAX_TILES_IN_QUEUE)
 				return;
 
-			while (size-- > MAX_TILES_IN_QUEUE - 20) {
-				MapTile t = mTilesLoaded.get(size);
+			for (int i = 0, n = size - MAX_TILES_IN_QUEUE + 20; i < n; i++) {
+				MapTile t = mTilesLoaded.get(i);
 
 				synchronized (t) {
 					if (t.rel == null) {
-						mTilesLoaded.remove(size);
+						mTilesLoaded.remove(i);
 						continue;
 					}
 
@@ -513,18 +496,12 @@ public class TileLoader {
 						continue;
 					}
 
-					mTilesLoaded.remove(size);
+					mTilesLoaded.remove(i);
 					mTiles.remove(t);
 					// Log.d(TAG, "remove unused tile data: " + t);
 					clearTile(t);
 				}
 			}
-		}
-	}
-
-	static void addTileLoaded(MapTile tile) {
-		synchronized (mTilesLoaded) {
-			mTilesLoaded.add(0, tile);
 		}
 	}
 }
