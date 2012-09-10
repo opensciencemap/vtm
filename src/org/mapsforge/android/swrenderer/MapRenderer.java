@@ -249,7 +249,7 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	 * 
 	 */
 	@Override
-	public synchronized void redrawTiles(boolean clear) {
+	public synchronized void updateMap(boolean clear) {
 
 		boolean update = false;
 
@@ -565,10 +565,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 			"  gl_FragColor = texture2D(sTexture, vTextureCoord); \n" +
 			"}\n";
 
-	@Override
-	public boolean processedTile() {
-		return processedTile;
-	}
+	// @Override
+	// public boolean processedTile() {
+	// return processedTile;
+	// }
 
 	@Override
 	public IMapGenerator createMapGenerator() {

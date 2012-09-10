@@ -128,9 +128,6 @@
 	        <use-area name="park"/>
 	      </rule>
 	           
-	      <rule e="way" k="*" v="reservoir|basin">
-	        <use-area name="water" />
-	      </rule>
 	    </rule>
 	
 	    <rule e="way" k="landuse" v="village_green|recreation_ground" >
@@ -159,6 +156,7 @@
 	        <!--  <line stroke="#abcfab" width="1.5" fixed="true" cap="butt"/> -->
 	    </rule>
 	    
+	      
 			<!-- keep grass above forest:wood and leisure:park! --> 
 			<rule e="way" k="landuse"  v="grass|meadow">
 			   <use-area name="greens"/>
@@ -266,7 +264,11 @@
 	    	<use-line name="water:outline"/>
 	     </rule>
     </rule>
- 
+     
+     <rule e="way" k="landuse" v="reservoir|basin">
+	        <use-area name="water" />
+	   </rule>
+	      
     <!-- waterways -->
     <rule e="way" k="waterway" v="*">
 

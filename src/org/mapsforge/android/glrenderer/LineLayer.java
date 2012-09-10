@@ -151,6 +151,7 @@ class LineLayer {
 				// add first vertex twice
 				ddx = (int) ((ux - vx) * DIR_SCALE);
 				ddy = (int) ((uy - vy) * DIR_SCALE);
+				// last two bit encode texture coord (-1)
 				dx = (short) (0 | ddx & DIR_MASK);
 				dy = (short) (2 | ddy & DIR_MASK);
 
