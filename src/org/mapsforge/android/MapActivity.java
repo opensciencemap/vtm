@@ -48,45 +48,7 @@ public abstract class MapActivity extends Activity {
 				&& sharedPreferences.contains(KEY_ZOOM_LEVEL);
 	}
 
-	/**
-	 * Internal list which contains references to all running MapView objects.
-	 */
 	private MapView mMapView;
-
-	private void restoreMapView(MapView mapView) {
-		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,
-				MODE_PRIVATE);
-
-		if (containsMapViewPosition(sharedPreferences)) {
-
-			if (sharedPreferences.contains(KEY_MAP_FILE)) {
-				// get and set the map file
-				mapView.setMapFile(sharedPreferences.getString(KEY_MAP_FILE, null));
-			}
-
-			// get and set the map position and zoom level
-			int latitudeE6 = sharedPreferences.getInt(KEY_LATITUDE, 0);
-			int longitudeE6 = sharedPreferences.getInt(KEY_LONGITUDE, 0);
-			int zoomLevel = sharedPreferences.getInt(KEY_ZOOM_LEVEL, -1);
-
-			GeoPoint geoPoint = new GeoPoint(latitudeE6, longitudeE6);
-			MapPosition mapPosition = new MapPosition(geoPoint, (byte) zoomLevel, 1);
-			mapView.setCenterAndZoom(mapPosition);
-		}
-
-		String theme = sharedPreferences.getString(KEY_THEME,
-				InternalRenderTheme.OSMARENDER.name());
-
-		if (theme.startsWith("/")) {
-			try {
-				mapView.setRenderTheme(theme);
-			} catch (FileNotFoundException e) {
-				mapView.setRenderTheme(InternalRenderTheme.OSMARENDER);
-			}
-		} else {
-			mapView.setRenderTheme(InternalRenderTheme.valueOf(theme));
-		}
-	}
 
 	@Override
 	protected void onDestroy() {
@@ -111,10 +73,10 @@ public abstract class MapActivity extends Activity {
 			editor.putInt(KEY_ZOOM_LEVEL, mapPosition.zoomLevel);
 		}
 
-		if (mMapView.getMapFile() != null) {
-			// save the map file
-			editor.putString(KEY_MAP_FILE, mMapView.getMapFile());
-		}
+		// if (mMapView.getMapFile() != null) {
+		// // save the map file
+		// editor.putString(KEY_MAP_FILE, mMapView.getMapFile());
+		// }
 
 		editor.putString(KEY_THEME, mMapView.getRenderTheme());
 
@@ -134,10 +96,40 @@ public abstract class MapActivity extends Activity {
 	 *            the calling MapView.
 	 */
 	final void registerMapView(MapView mapView) {
-		if (mMapView != null)
-			return;
-
 		mMapView = mapView;
-		restoreMapView(mapView);
+
+		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,
+				MODE_PRIVATE);
+
+		if (containsMapViewPosition(sharedPreferences)) {
+			//
+			// if (sharedPreferences.contains(KEY_MAP_FILE)) {
+			// // get and set the map file
+			// mapView.setMapFile(sharedPreferences.getString(KEY_MAP_FILE, null));
+			// }
+
+			// get and set the map position and zoom level
+			int latitudeE6 = sharedPreferences.getInt(KEY_LATITUDE, 0);
+			int longitudeE6 = sharedPreferences.getInt(KEY_LONGITUDE, 0);
+			int zoomLevel = sharedPreferences.getInt(KEY_ZOOM_LEVEL, -1);
+
+			GeoPoint geoPoint = new GeoPoint(latitudeE6, longitudeE6);
+			MapPosition mapPosition = new MapPosition(geoPoint, (byte) zoomLevel, 1);
+
+			mapView.setMapCenter(mapPosition);
+		}
+
+		String theme = sharedPreferences.getString(KEY_THEME,
+				InternalRenderTheme.OSMARENDER.name());
+
+		if (theme.startsWith("/")) {
+			try {
+				mapView.setRenderTheme(theme);
+			} catch (FileNotFoundException e) {
+				mapView.setRenderTheme(InternalRenderTheme.OSMARENDER);
+			}
+		} else {
+			mapView.setRenderTheme(InternalRenderTheme.valueOf(theme));
+		}
 	}
 }

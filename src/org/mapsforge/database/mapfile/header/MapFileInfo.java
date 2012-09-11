@@ -20,9 +20,9 @@ import org.mapsforge.database.mapfile.MapDatabase;
 /**
  * Contains the immutable metadata of a map file.
  * 
- * @see MapDatabase#getMapFileInfo()
+ * @see MapDatabase#getMapInfo()
  */
-public class MapFileInfo extends org.mapsforge.database.MapFileInfo {
+public class MapFileInfo extends org.mapsforge.database.MapInfo {
 
 	/**
 	 * True if the map file includes debug information, false otherwise.

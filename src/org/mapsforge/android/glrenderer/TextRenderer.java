@@ -34,7 +34,7 @@ public class TextRenderer {
 	private final static int TEXTURE_HEIGHT = 256;
 	private final static float SCALE = 8.0f;
 	private final static int LBIT_MASK = 0xfffffffe;
-	private final static int L2BIT_MASK = 0xfffffffc;
+	// private final static int L2BIT_MASK = 0xfffffffc;
 
 	final static int INDICES_PER_SPRITE = 6;
 	final static int VERTICES_PER_SPRITE = 4;

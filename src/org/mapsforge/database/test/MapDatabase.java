@@ -14,17 +14,17 @@
  */
 package org.mapsforge.database.test;
 
-import java.io.File;
+import java.util.Map;
 
 import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.MercatorProjection;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
-import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
-import org.mapsforge.database.MapFileInfo;
+import org.mapsforge.database.MapInfo;
+import org.mapsforge.database.OpenResult;
 import org.mapsforge.database.QueryResult;
 
 /**
@@ -40,8 +40,8 @@ public class MapDatabase implements IMapDatabase {
 	private Tag[] mTags = { new Tag("natural", "water") };
 	private Tag[] mNameTags;
 
-	private final MapFileInfo mMapInfo =
-			new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
+	private final MapInfo mMapInfo =
+			new MapInfo(new BoundingBox(-180, -90, 180, 90),
 					new Byte((byte) 0), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me");
 
 	private boolean mOpenFile = false;
@@ -163,29 +163,24 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	@Override
-	public MapFileInfo getMapFileInfo() {
+	public MapInfo getMapInfo() {
 		return mMapInfo;
 	}
 
 	@Override
-	public boolean hasOpenFile() {
+	public boolean isOpen() {
 		return mOpenFile;
 	}
 
 	@Override
-	public FileOpenResult openFile(File mapFile) {
+	public OpenResult open(Map<String, String> options) {
 		mOpenFile = true;
-		return new FileOpenResult();
+		return new OpenResult();
 	}
 
 	@Override
-	public void closeFile() {
+	public void close() {
 		mOpenFile = false;
-	}
-
-	@Override
-	public String readString(int position) {
-		return null;
 	}
 
 	@Override

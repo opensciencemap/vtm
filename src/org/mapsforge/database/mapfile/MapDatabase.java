@@ -17,15 +17,16 @@ package org.mapsforge.database.mapfile;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mapsforge.android.mapgenerator.JobTile;
 import org.mapsforge.core.MercatorProjection;
 import org.mapsforge.core.Tag;
-import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
+import org.mapsforge.database.OpenResult;
 import org.mapsforge.database.QueryResult;
 import org.mapsforge.database.mapfile.header.MapFileHeader;
 import org.mapsforge.database.mapfile.header.MapFileInfo;
@@ -242,7 +243,7 @@ public class MapDatabase implements IMapDatabase {
 	 * @see org.mapsforge.map.reader.IMapDatabase#getMapFileInfo()
 	 */
 	@Override
-	public MapFileInfo getMapFileInfo() {
+	public MapFileInfo getMapInfo() {
 		if (sMapFileHeader == null) {
 			throw new IllegalStateException("no map file is currently opened");
 		}
@@ -259,7 +260,7 @@ public class MapDatabase implements IMapDatabase {
 	 * @see org.mapsforge.map.reader.IMapDatabase#hasOpenFile()
 	 */
 	@Override
-	public boolean hasOpenFile() {
+	public boolean isOpen() {
 		return mInputFile != null;
 	}
 
@@ -268,54 +269,56 @@ public class MapDatabase implements IMapDatabase {
 	 * @see org.mapsforge.map.reader.IMapDatabase#openFile(java.io.File)
 	 */
 	@Override
-	public FileOpenResult openFile(File mapFile) {
+	public OpenResult open(Map<String, String> options) {
 
 		try {
-			if (mapFile == null) {
+			if (options == null || options.get("mapfile") == null) {
 				// throw new IllegalArgumentException("mapFile must not be null");
-				return new FileOpenResult("no file!");
+				return new OpenResult("no file!");
 			}
 
 			// make sure to close any previously opened file first
-			closeFile();
+			close();
+
+			File file = new File(options.get("mapfile"));
 
 			// check if the file exists and is readable
-			if (!mapFile.exists()) {
-				return new FileOpenResult("file does not exist: " + mapFile);
-			} else if (!mapFile.isFile()) {
-				return new FileOpenResult("not a file: " + mapFile);
-			} else if (!mapFile.canRead()) {
-				return new FileOpenResult("cannot read file: " + mapFile);
+			if (!file.exists()) {
+				return new OpenResult("file does not exist: " + file);
+			} else if (!file.isFile()) {
+				return new OpenResult("not a file: " + file);
+			} else if (!file.canRead()) {
+				return new OpenResult("cannot read file: " + file);
 			}
 
 			// open the file in read only mode
-			mInputFile = new RandomAccessFile(mapFile, READ_ONLY_MODE);
+			mInputFile = new RandomAccessFile(file, READ_ONLY_MODE);
 			mFileSize = mInputFile.length();
 			mReadBuffer = new ReadBuffer(mInputFile);
 
 			if (instances > 0) {
 				instances++;
-				return FileOpenResult.SUCCESS;
+				return OpenResult.SUCCESS;
 			}
 
 			sMapFileHeader = new MapFileHeader();
-			FileOpenResult fileOpenResult = sMapFileHeader.readHeader(mReadBuffer,
+			OpenResult openResult = sMapFileHeader.readHeader(mReadBuffer,
 					mFileSize);
-			if (!fileOpenResult.isSuccess()) {
-				closeFile();
-				return fileOpenResult;
+			if (!openResult.isSuccess()) {
+				close();
+				return openResult;
 			}
 
 			prepareExecution();
 
 			instances++;
 
-			return FileOpenResult.SUCCESS;
+			return OpenResult.SUCCESS;
 		} catch (IOException e) {
 			LOG.log(Level.SEVERE, null, e);
 			// make sure that the file is closed
-			closeFile();
-			return new FileOpenResult(e.getMessage());
+			close();
+			return new OpenResult(e.getMessage());
 		}
 	}
 
@@ -324,7 +327,7 @@ public class MapDatabase implements IMapDatabase {
 	 * @see org.mapsforge.map.reader.IMapDatabase#closeFile()
 	 */
 	@Override
-	public void closeFile() {
+	public void close() {
 		instances--;
 		if (instances > 0) {
 			mReadBuffer = null;
@@ -627,7 +630,8 @@ public class MapDatabase implements IMapDatabase {
 			// check if the POI has a house number
 			if ((featureByte & POI_FEATURE_HOUSE_NUMBER) != 0) {
 				// mReadBuffer.getPositionAndSkip();
-				String str = mReadBuffer.readUTF8EncodedString();
+				// String str =
+				mReadBuffer.readUTF8EncodedString();
 			}
 
 			// check if the POI has an elevation
@@ -771,15 +775,6 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private int stringOffset = -1;
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.mapsforge.map.reader.IMapDatabase#readString(int)
-	 */
-	@Override
-	public String readString(int position) {
-		return mReadBuffer.readUTF8EncodedStringAt(stringOffset + position);
-	}
 
 	/**
 	 * Processes the given number of ways.

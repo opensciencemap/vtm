@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -21,12 +21,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 public class Compass {
+
 	private final SensorEventListener mListener = new SensorEventListener() {
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			// if (true) Log.d(TAG,
-			// "sensorChanged (" + event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ")");
-			// mValues = event.values;
 			if (Math.abs(event.values[0] - mAngle) > 0.25) {
 				mAngle = event.values[0];
 
@@ -48,12 +46,11 @@ public class Compass {
 	private SensorManager mSensorManager;
 	private Sensor mSensor;
 
-	// private float[] mValues;
-
 	public Compass(MapActivity mapActivity, MapView mapView) {
 		mMapView = mapView;
 		mSensorManager = (SensorManager) mapActivity
 				.getSystemService(Context.SENSOR_SERVICE);
+
 		mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 	}
 

@@ -18,7 +18,7 @@ import java.io.IOException;
 
 import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.Tag;
-import org.mapsforge.database.FileOpenResult;
+import org.mapsforge.database.OpenResult;
 import org.mapsforge.database.mapfile.ReadBuffer;
 
 final class RequiredFields {
@@ -72,93 +72,93 @@ final class RequiredFields {
 	 */
 	static final int LONGITUDE_MIN = -180000000;
 
-	static FileOpenResult readBoundingBox(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readBoundingBox(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the minimum latitude (4 bytes)
 		int minLatitude = readBuffer.readInt();
 		if (minLatitude < LATITUDE_MIN || minLatitude > LATITUDE_MAX) {
-			return new FileOpenResult("invalid minimum latitude: " + minLatitude);
+			return new OpenResult("invalid minimum latitude: " + minLatitude);
 		}
 
 		// get and check the minimum longitude (4 bytes)
 		int minLongitude = readBuffer.readInt();
 		if (minLongitude < LONGITUDE_MIN || minLongitude > LONGITUDE_MAX) {
-			return new FileOpenResult("invalid minimum longitude: " + minLongitude);
+			return new OpenResult("invalid minimum longitude: " + minLongitude);
 		}
 
 		// get and check the maximum latitude (4 bytes)
 		int maxLatitude = readBuffer.readInt();
 		if (maxLatitude < LATITUDE_MIN || maxLatitude > LATITUDE_MAX) {
-			return new FileOpenResult("invalid maximum latitude: " + maxLatitude);
+			return new OpenResult("invalid maximum latitude: " + maxLatitude);
 		}
 
 		// get and check the maximum longitude (4 bytes)
 		int maxLongitude = readBuffer.readInt();
 		if (maxLongitude < LONGITUDE_MIN || maxLongitude > LONGITUDE_MAX) {
-			return new FileOpenResult("invalid maximum longitude: " + maxLongitude);
+			return new OpenResult("invalid maximum longitude: " + maxLongitude);
 		}
 
 		// check latitude and longitude range
 		if (minLatitude > maxLatitude) {
-			return new FileOpenResult("invalid latitude range: " + minLatitude + SPACE + maxLatitude);
+			return new OpenResult("invalid latitude range: " + minLatitude + SPACE + maxLatitude);
 		} else if (minLongitude > maxLongitude) {
-			return new FileOpenResult("invalid longitude range: " + minLongitude + SPACE + maxLongitude);
+			return new OpenResult("invalid longitude range: " + minLongitude + SPACE + maxLongitude);
 		}
 
 		mapFileInfoBuilder.boundingBox = new BoundingBox(minLatitude, minLongitude, maxLatitude, maxLongitude);
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
-	static FileOpenResult readFileSize(ReadBuffer readBuffer, long fileSize, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readFileSize(ReadBuffer readBuffer, long fileSize, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the file size (8 bytes)
 		long headerFileSize = readBuffer.readLong();
 		if (headerFileSize != fileSize) {
-			return new FileOpenResult("invalid file size: " + headerFileSize);
+			return new OpenResult("invalid file size: " + headerFileSize);
 		}
 		mapFileInfoBuilder.fileSize = fileSize;
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
-	static FileOpenResult readFileVersion(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readFileVersion(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the file version (4 bytes)
 		int fileVersion = readBuffer.readInt();
 		if (fileVersion != SUPPORTED_FILE_VERSION) {
-			return new FileOpenResult("unsupported file version: " + fileVersion);
+			return new OpenResult("unsupported file version: " + fileVersion);
 		}
 		mapFileInfoBuilder.fileVersion = fileVersion;
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
-	static FileOpenResult readMagicByte(ReadBuffer readBuffer) throws IOException {
+	static OpenResult readMagicByte(ReadBuffer readBuffer) throws IOException {
 		// read the the magic byte and the file header size into the buffer
 		int magicByteLength = BINARY_OSM_MAGIC_BYTE.length();
 		if (!readBuffer.readFromFile(magicByteLength + 4)) {
-			return new FileOpenResult("reading magic byte has failed");
+			return new OpenResult("reading magic byte has failed");
 		}
 
 		// get and check the magic byte
 		String magicByte = readBuffer.readUTF8EncodedString(magicByteLength);
 		if (!BINARY_OSM_MAGIC_BYTE.equals(magicByte)) {
-			return new FileOpenResult("invalid magic byte: " + magicByte);
+			return new OpenResult("invalid magic byte: " + magicByte);
 		}
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
-	static FileOpenResult readMapDate(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readMapDate(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the the map date (8 bytes)
 		long mapDate = readBuffer.readLong();
 		// is the map date before 2010-01-10 ?
 		if (mapDate < 1200000000000L) {
-			return new FileOpenResult("invalid map date: " + mapDate);
+			return new OpenResult("invalid map date: " + mapDate);
 		}
 		mapFileInfoBuilder.mapDate = mapDate;
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
-	static FileOpenResult readPoiTags(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readPoiTags(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the number of POI tags (2 bytes)
 		int numberOfPoiTags = readBuffer.readShort();
 		if (numberOfPoiTags < 0) {
-			return new FileOpenResult("invalid number of POI tags: " + numberOfPoiTags);
+			return new OpenResult("invalid number of POI tags: " + numberOfPoiTags);
 		}
 
 		Tag[] poiTags = new Tag[numberOfPoiTags];
@@ -166,53 +166,53 @@ final class RequiredFields {
 			// get and check the POI tag
 			String tag = readBuffer.readUTF8EncodedString();
 			if (tag == null) {
-				return new FileOpenResult("POI tag must not be null: " + currentTagId);
+				return new OpenResult("POI tag must not be null: " + currentTagId);
 			}
 			poiTags[currentTagId] = new Tag(tag);
 		}
 		mapFileInfoBuilder.poiTags = poiTags;
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
-	static FileOpenResult readProjectionName(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readProjectionName(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the projection name
 		String projectionName = readBuffer.readUTF8EncodedString();
 		if (!MERCATOR.equals(projectionName)) {
-			return new FileOpenResult("unsupported projection: " + projectionName);
+			return new OpenResult("unsupported projection: " + projectionName);
 		}
 		mapFileInfoBuilder.projectionName = projectionName;
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
-	static FileOpenResult readRemainingHeader(ReadBuffer readBuffer) throws IOException {
+	static OpenResult readRemainingHeader(ReadBuffer readBuffer) throws IOException {
 		// get and check the size of the remaining file header (4 bytes)
 		int remainingHeaderSize = readBuffer.readInt();
 		if (remainingHeaderSize < HEADER_SIZE_MIN || remainingHeaderSize > HEADER_SIZE_MAX) {
-			return new FileOpenResult("invalid remaining header size: " + remainingHeaderSize);
+			return new OpenResult("invalid remaining header size: " + remainingHeaderSize);
 		}
 
 		// read the header data into the buffer
 		if (!readBuffer.readFromFile(remainingHeaderSize)) {
-			return new FileOpenResult("reading header data has failed: " + remainingHeaderSize);
+			return new OpenResult("reading header data has failed: " + remainingHeaderSize);
 		}
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
-	static FileOpenResult readTilePixelSize(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readTilePixelSize(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the tile pixel size (2 bytes)
 		int tilePixelSize = readBuffer.readShort();
 		// if (tilePixelSize != Tile.TILE_SIZE) {
 		// return new FileOpenResult("unsupported tile pixel size: " + tilePixelSize);
 		// }
 		mapFileInfoBuilder.tilePixelSize = tilePixelSize;
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
-	static FileOpenResult readWayTags(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readWayTags(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the number of way tags (2 bytes)
 		int numberOfWayTags = readBuffer.readShort();
 		if (numberOfWayTags < 0) {
-			return new FileOpenResult("invalid number of way tags: " + numberOfWayTags);
+			return new OpenResult("invalid number of way tags: " + numberOfWayTags);
 		}
 
 		Tag[] wayTags = new Tag[numberOfWayTags];
@@ -221,12 +221,12 @@ final class RequiredFields {
 			// get and check the way tag
 			String tag = readBuffer.readUTF8EncodedString();
 			if (tag == null) {
-				return new FileOpenResult("way tag must not be null: " + currentTagId);
+				return new OpenResult("way tag must not be null: " + currentTagId);
 			}
 			wayTags[currentTagId] = new Tag(tag);
 		}
 		mapFileInfoBuilder.wayTags = wayTags;
-		return FileOpenResult.SUCCESS;
+		return OpenResult.SUCCESS;
 	}
 
 	private RequiredFields() {

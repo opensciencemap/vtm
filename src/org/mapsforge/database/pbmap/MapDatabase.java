@@ -58,10 +58,10 @@ import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.Tile;
-import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
-import org.mapsforge.database.MapFileInfo;
+import org.mapsforge.database.MapInfo;
+import org.mapsforge.database.OpenResult;
 import org.mapsforge.database.QueryResult;
 
 import android.os.Environment;
@@ -75,8 +75,8 @@ import android.util.Log;
 public class MapDatabase implements IMapDatabase {
 	private static final String TAG = "MapDatabase";
 
-	private static final MapFileInfo mMapInfo =
-			new MapFileInfo(new BoundingBox(-180, -90, 180, 90),
+	private static final MapInfo mMapInfo =
+			new MapInfo(new BoundingBox(-180, -90, 180, 90),
 					new Byte((byte) 4), new GeoPoint(53.11, 8.85),
 					null, 0, 0, 0, "de", "comment", "author");
 
@@ -268,12 +268,12 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	@Override
-	public MapFileInfo getMapFileInfo() {
+	public MapInfo getMapInfo() {
 		return mMapInfo;
 	}
 
 	@Override
-	public boolean hasOpenFile() {
+	public boolean isOpen() {
 		return mOpenFile;
 	}
 
@@ -303,7 +303,7 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	@Override
-	public FileOpenResult openFile(File mapFile) {
+	public OpenResult open(Map<String, String> options) {
 
 		if (USE_APACHE_HTTP)
 			createClient();
@@ -322,11 +322,11 @@ public class MapDatabase implements IMapDatabase {
 			}
 		}
 
-		return new FileOpenResult();
+		return new OpenResult();
 	}
 
 	@Override
-	public void closeFile() {
+	public void close() {
 		mOpenFile = false;
 		if (USE_APACHE_HTTP) {
 			if (mClient != null) {
@@ -348,11 +348,6 @@ public class MapDatabase implements IMapDatabase {
 		if (USE_CACHE) {
 			cacheDir = null;
 		}
-	}
-
-	@Override
-	public String readString(int position) {
-		return null;
 	}
 
 	private static File createDirectory(String pathName) {

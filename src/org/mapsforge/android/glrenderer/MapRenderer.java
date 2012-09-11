@@ -131,6 +131,9 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	 */
 	@Override
 	public void updateMap(boolean clear) {
+		if (mWidth <= 0 || mHeight <= 0)
+			return;
+
 		TileLoader.updateMap(clear);
 	}
 

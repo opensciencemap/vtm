@@ -458,10 +458,6 @@ public class MapGenerator implements IMapGenerator, IRenderCallback,
 		// WayDecorator.renderText(this, paint, outline, mCoords, mWayDataContainer, mWayNames);
 	}
 
-	String getWayName() {
-		return mMapDatabase.readString(mWayDataContainer.textPos[0]);
-	}
-
 	@Override
 	public void setMapDatabase(IMapDatabase mapDatabase) {
 		mMapDatabase = mapDatabase;

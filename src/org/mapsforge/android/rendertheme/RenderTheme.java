@@ -172,8 +172,8 @@ public class RenderTheme {
 
 	}
 
-	private int missCnt = 0;
-	private int hitCnt = 0;
+	// private int missCnt = 0;
+	// private int hitCnt = 0;
 	private MatchingCacheKey mCacheKey = new MatchingCacheKey();
 
 	/**
