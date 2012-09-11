@@ -79,10 +79,14 @@ class TileLoader {
 		newTiles = new TilesData(numTiles);
 	}
 
-	static void updateMap(boolean clear) {
+	static synchronized void updateMap(boolean clear) {
 
 		boolean changedPos = false;
 		boolean changedZoom = false;
+
+		if (mMapView == null || mMapView.getMapPosition() == null)
+			return;
+
 		MapPosition mapPosition = mMapView.getMapPosition().getMapPosition();
 
 		if (mapPosition == null) {
@@ -100,8 +104,6 @@ class TileLoader {
 				mTiles.clear();
 				mTilesLoaded.clear();
 				QuadTree.init();
-				// curTiles.cnt = 0;
-				// mBufferMemoryUsage = 0;
 			}
 		}
 
@@ -161,22 +163,8 @@ class TileLoader {
 				limitCache(mapPosition, remove);
 		}
 
-		int size = mTilesLoaded.size();
-		if (size > MAX_TILES_IN_QUEUE)
-			limitLoadQueue(size);
+		limitLoadQueue();
 
-	}
-
-	/**
-	 * Manage tiles that have data to be uploaded to gl
-	 * 
-	 * @param tile
-	 *            tile processed by MapGenerator
-	 */
-	static void addTileLoaded(MapTile tile) {
-		synchronized (mTilesLoaded) {
-			mTilesLoaded.add(tile);
-		}
 	}
 
 	private static boolean updateVisibleList(MapPosition mapPosition, int zdir) {
@@ -398,7 +386,7 @@ class TileLoader {
 		int removes = remove;
 
 		int size = mTiles.size();
-		int tmp = size;
+		// int tmp = size;
 
 		// remove orphaned tiles
 		for (int i = 0; i < size;) {
@@ -417,7 +405,7 @@ class TileLoader {
 			i++;
 		}
 
-		Log.d(TAG, "remove tiles: " + removes + " " + size + " " + tmp);
+		// Log.d(TAG, "remove tiles: " + removes + " " + size + " " + tmp);
 
 		if (removes <= 0)
 			return;
@@ -461,8 +449,11 @@ class TileLoader {
 		}
 	}
 
-	private static void limitLoadQueue(int remove) {
-		int size = remove;
+	private static void limitLoadQueue() {
+		int size = mTilesLoaded.size();
+
+		if (size < MAX_TILES_IN_QUEUE)
+			return;
 
 		synchronized (mTilesLoaded) {
 
@@ -481,8 +472,11 @@ class TileLoader {
 			// clear loaded but not used tiles
 			if (size < MAX_TILES_IN_QUEUE)
 				return;
+			// Log.d(TAG, "queue: " + mTilesLoaded.size() + " " + size + " "
+			// + (size - MAX_TILES_IN_QUEUE / 2));
 
-			for (int i = 0, n = size - MAX_TILES_IN_QUEUE + 20; i < n; i++) {
+			for (int i = 0, n = size - MAX_TILES_IN_QUEUE / 2; i < n; n--) {
+
 				MapTile t = mTilesLoaded.get(i);
 
 				synchronized (t) {
@@ -493,15 +487,28 @@ class TileLoader {
 
 					if (tileInUse(t)) {
 						// Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
+						i++;
 						continue;
 					}
 
+					// Log.d(TAG, "remove unused tile data: " + t);
 					mTilesLoaded.remove(i);
 					mTiles.remove(t);
-					// Log.d(TAG, "remove unused tile data: " + t);
 					clearTile(t);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Manage tiles that have data to be uploaded to gl
+	 * 
+	 * @param tile
+	 *            tile processed by MapGenerator
+	 */
+	static void addTileLoaded(MapTile tile) {
+		synchronized (mTilesLoaded) {
+			mTilesLoaded.add(tile);
 		}
 	}
 }

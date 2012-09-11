@@ -60,6 +60,7 @@ public class MapViewPosition {
 		if (!isValid()) {
 			return null;
 		}
+		// Log.d("MapViewPosition", "lat: " + mLatitude + " lon: " + mLongitude);
 		return new MapPosition(mLatitude, mLongitude, mZoomLevel, mScale, mRotation);
 	}
 
@@ -113,7 +114,7 @@ public class MapViewPosition {
 		double pixelY = MercatorProjection.latitudeToPixelY(mLatitude, mZoomLevel);
 		double dx, dy;
 
-		if (mMapView.enableRotation) {
+		if (mMapView.enableRotation || mMapView.enableCompass) {
 			float rad = (float) Math.toRadians(mRotation);
 			dx = mx / mScale;
 			dy = my / mScale;
@@ -140,6 +141,10 @@ public class MapViewPosition {
 	public synchronized void rotateMap(float angle, float cx, float cy) {
 		moveMap(cx, cy);
 		mRotation -= angle;
+	}
+
+	public void setRotation(float f) {
+		mRotation = f;
 	}
 
 	synchronized void setMapCenter(GeoPoint geoPoint) {

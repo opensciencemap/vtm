@@ -7,7 +7,6 @@ import java.util.Date;
 
 import org.mapsforge.android.DebugSettings;
 import org.mapsforge.android.MapActivity;
-import org.mapsforge.android.MapController;
 import org.mapsforge.android.MapView;
 import org.mapsforge.android.mapgenerator.MapDatabases;
 import org.mapsforge.android.rendertheme.InternalRenderTheme;
@@ -30,9 +29,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
+import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -71,14 +68,12 @@ public class TileMap extends MapActivity {
 			new FilterByFileExtension(".xml");
 	private static final int SELECT_MAP_FILE = 0;
 	private static final int SELECT_RENDER_THEME_FILE = 1;
-	private LocationManager mLocationManager;
+
+	LocationHandler mLocation;
+
 	private MapDatabases mMapDatabase;
-	private MyLocationListener mMyLocationListener;
-	private boolean mShowMyLocation;
-	private boolean mSnapToLocation;
-	// private ToggleButton mSnapToLocationView;
+
 	private WakeLock mWakeLock;
-	MapController mMapController;
 	MapView mMapView;
 	private Menu mMenu = null;
 
@@ -108,36 +103,48 @@ public class TileMap extends MapActivity {
 
 			case R.id.menu_rotation_enable:
 				mMapView.enableRotation(true);
+				toggleMenuRotation(mMenu,
+						mMapView.enableRotation,
+						mMapView.enableCompass);
+				return true;
+
+			case R.id.menu_rotation_disable:
+				mMapView.enableRotation(false);
+				toggleMenuRotation(mMenu,
+						mMapView.enableRotation,
+						mMapView.enableCompass);
+				return true;
+
+			case R.id.menu_compass_enable:
+				mMapView.enableCompass(true);
+				toggleMenuRotation(mMenu,
+						mMapView.enableRotation,
+						mMapView.enableCompass);
+				return true;
+
+			case R.id.menu_compass_disable:
+				mMapView.enableCompass(false);
+				toggleMenuRotation(mMenu,
+						mMapView.enableRotation,
+						mMapView.enableCompass);
 				return true;
 
 			case R.id.menu_position_my_location_enable:
-				if (enableShowMyLocation(true)) {
-					mMenu.findItem(R.id.menu_position_my_location_enable)
-							.setVisible(false);
-					mMenu.findItem(R.id.menu_position_my_location_enable)
-							.setEnabled(false);
-					mMenu.findItem(R.id.menu_position_my_location_disable)
-							.setVisible(true);
-					mMenu.findItem(R.id.menu_position_my_location_disable)
-							.setEnabled(true);
-				}
+				toggleMenuItem(mMenu,
+						R.id.menu_position_my_location_enable,
+						R.id.menu_position_my_location_disable,
+						!mLocation.enableShowMyLocation(true));
 				return true;
 
 			case R.id.menu_position_my_location_disable:
-				if (disableShowMyLocation()) {
-					mMenu.findItem(R.id.menu_position_my_location_enable)
-							.setVisible(true);
-					mMenu.findItem(R.id.menu_position_my_location_enable)
-							.setEnabled(true);
-					mMenu.findItem(R.id.menu_position_my_location_disable)
-							.setVisible(false);
-					mMenu.findItem(R.id.menu_position_my_location_disable)
-							.setEnabled(false);
-				}
+				toggleMenuItem(mMenu,
+						R.id.menu_position_my_location_enable,
+						R.id.menu_position_my_location_disable,
+						mLocation.disableShowMyLocation());
 				return true;
 
 			case R.id.menu_position_last_known:
-				gotoLastKnownPosition();
+				mLocation.gotoLastKnownPosition();
 				return true;
 
 			case R.id.menu_position_enter_coordinates:
@@ -146,8 +153,9 @@ public class TileMap extends MapActivity {
 
 			case R.id.menu_position_map_center:
 				// disable GPS follow mode if it is enabled
-				disableSnapToLocation(true);
-				mMapController.setCenter(mMapView.getMapDatabase()
+				mLocation.disableSnapToLocation(true);
+
+				mMapView.setCenter(mMapView.getMapDatabase()
 						.getMapFileInfo().mapCenter);
 				return true;
 
@@ -182,38 +190,68 @@ public class TileMap extends MapActivity {
 		}
 	}
 
+	private static void toggleMenuRotation(Menu menu, boolean rotate, boolean compass) {
+		toggleMenuItem(menu,
+				R.id.menu_rotation_enable,
+				R.id.menu_rotation_disable,
+				!rotate);
+
+		toggleMenuItem(menu,
+				R.id.menu_compass_enable,
+				R.id.menu_compass_disable,
+				!compass);
+	}
+
+	private static void toggleMenuItem(Menu menu, int id, int id2, boolean enable) {
+		menu.findItem(id).setVisible(enable);
+		menu.findItem(id).setEnabled(enable);
+		menu.findItem(id2).setVisible(!enable);
+		menu.findItem(id2).setEnabled(!enable);
+	}
+
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		menu.clear();
 		onCreateOptionsMenu(menu);
 
-		Log.d("TileMap", "prepare options...");
+		toggleMenuItem(menu,
+				R.id.menu_position_my_location_enable,
+				R.id.menu_position_my_location_disable,
+				!mLocation.isShowMyLocationEnabled());
 
-		// menu.findItem(R.id.menu_info_map_file).setEnabled(true);
+		// if (mLocation.isShowMyLocationEnabled()) {
+		// menu.findItem(R.id.menu_position_my_location_enable).setVisible(false);
+		// menu.findItem(R.id.menu_position_my_location_enable).setEnabled(false);
+		// menu.findItem(R.id.menu_position_my_location_disable).setVisible(true);
+		// menu.findItem(R.id.menu_position_my_location_disable).setEnabled(true);
+		// } else {
+		// menu.findItem(R.id.menu_position_my_location_enable).setVisible(true);
+		// menu.findItem(R.id.menu_position_my_location_enable).setEnabled(true);
+		// menu.findItem(R.id.menu_position_my_location_disable).setVisible(false);
+		// menu.findItem(R.id.menu_position_my_location_disable).setEnabled(false);
+		// }
 
-		if (isShowMyLocationEnabled()) {
-			menu.findItem(R.id.menu_position_my_location_enable).setVisible(false);
-			menu.findItem(R.id.menu_position_my_location_enable).setEnabled(false);
-			menu.findItem(R.id.menu_position_my_location_disable).setVisible(true);
-			menu.findItem(R.id.menu_position_my_location_disable).setEnabled(true);
+		menu.findItem(R.id.menu_render_theme).setEnabled(true);
+
+		if (mMapDatabase == MapDatabases.MAP_READER) {
+			menu.findItem(R.id.menu_mapfile).setVisible(true);
+			menu.findItem(R.id.menu_position_map_center).setVisible(true);
 		} else {
-			menu.findItem(R.id.menu_position_my_location_enable).setVisible(true);
-			menu.findItem(R.id.menu_position_my_location_enable).setEnabled(true);
-			menu.findItem(R.id.menu_position_my_location_disable).setVisible(false);
-			menu.findItem(R.id.menu_position_my_location_disable).setEnabled(false);
+			menu.findItem(R.id.menu_mapfile).setVisible(false);
+			menu.findItem(R.id.menu_position_map_center).setVisible(false);
 		}
 
-		menu.findItem(R.id.menu_position_map_center).setEnabled(true);
-		menu.findItem(R.id.menu_render_theme).setEnabled(true);
-		// menu.findItem(R.id.menu_mapfile).setEnabled(true);
+		toggleMenuItem(menu,
+				R.id.menu_compass_enable,
+				R.id.menu_compass_disable,
+				!mMapView.enableCompass);
 
-		if (mMapDatabase == MapDatabases.MAP_READER)
-			menu.findItem(R.id.menu_mapfile).setVisible(true);
-		else
-			menu.findItem(R.id.menu_mapfile).setVisible(false);
+		toggleMenuItem(mMenu,
+				R.id.menu_rotation_enable,
+				R.id.menu_rotation_disable,
+				!mMapView.enableRotation);
 
 		return super.onPrepareOptionsMenu(menu);
-		// return true;
 	}
 
 	@Override
@@ -225,52 +263,8 @@ public class TileMap extends MapActivity {
 	private void configureMapView() {
 		// configure the MapView and activate the zoomLevel buttons
 		mMapView.setClickable(true);
-		mMapView.setBuiltInZoomControls(true);
+		// mMapView.setBuiltInZoomControls(true);
 		mMapView.setFocusable(true);
-
-		mMapController = mMapView.getController();
-	}
-
-	private boolean enableShowMyLocation(boolean centerAtFirstFix) {
-		if (!mShowMyLocation) {
-			Criteria criteria = new Criteria();
-			criteria.setAccuracy(Criteria.ACCURACY_FINE);
-			String bestProvider = mLocationManager.getBestProvider(criteria, true);
-			if (bestProvider == null) {
-				showDialog(DIALOG_LOCATION_PROVIDER_DISABLED);
-				return false;
-			}
-
-			mShowMyLocation = true;
-			mMyLocationListener.setCenterAtFirstFix(centerAtFirstFix);
-			mLocationManager.requestLocationUpdates(bestProvider, 1000, 0,
-					mMyLocationListener);
-			// mSnapToLocationView.setVisibility(View.VISIBLE);
-			return true;
-		}
-		return false;
-	}
-
-	private void gotoLastKnownPosition() {
-		Location currentLocation;
-		Location bestLocation = null;
-		for (String provider : mLocationManager.getProviders(true)) {
-			currentLocation = mLocationManager.getLastKnownLocation(provider);
-			if (currentLocation == null)
-				continue;
-			if (bestLocation == null
-					|| currentLocation.getAccuracy() < bestLocation.getAccuracy()) {
-				bestLocation = currentLocation;
-			}
-		}
-
-		if (bestLocation != null) {
-			GeoPoint point = new GeoPoint(bestLocation.getLatitude(),
-					bestLocation.getLongitude());
-			mMapController.setCenter(point);
-		} else {
-			showToastOnUiThread(getString(R.string.error_last_location_unknown));
-		}
 	}
 
 	private void startMapFilePicker() {
@@ -291,7 +285,7 @@ public class TileMap extends MapActivity {
 		if (requestCode == SELECT_MAP_FILE) {
 			if (resultCode == RESULT_OK) {
 
-				disableSnapToLocation(true);
+				mLocation.disableSnapToLocation(true);
 
 				if (intent != null) {
 					if (intent.getStringExtra(FilePicker.SELECTED_FILE) != null) {
@@ -301,9 +295,6 @@ public class TileMap extends MapActivity {
 				}
 			} else if (resultCode == RESULT_CANCELED) {
 				startActivity(new Intent(this, EditPreferences.class));
-				// && !mapView.getMapGenerator().requiresInternetConnection()
-				// && mapView.getMapFile() == null) {
-				// finish();
 			}
 		} else if (requestCode == SELECT_RENDER_THEME_FILE && resultCode == RESULT_OK
 				&& intent != null
@@ -334,41 +325,30 @@ public class TileMap extends MapActivity {
 		}
 
 		// set up the layout views
-		setContentView(R.layout.activity_advanced_map_viewer);
+		setContentView(R.layout.activity_tilemap);
 
 		// getActionBar().setDisplayOptions(ActionBar.NAVIGATION_MODE_TABS);
 
 		mMapView = (MapView) findViewById(R.id.mapView);
+
 		configureMapView();
 
-		// mSnapToLocationView = (ToggleButton) findViewById(R.id.snapToLocationView);
-		//
-		// mSnapToLocationView.setOnClickListener(new OnClickListener() {
-		// @Override
-		// public void onClick(View view) {
-		// if (isSnapToLocationEnabled()) {
-		// disableSnapToLocation(true);
-		// } else {
-		// enableSnapToLocation(true);
-		// }
-		// }
-		// });
+		mLocation = new LocationHandler(this);
 
 		// get the pointers to different system services
-		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		mMyLocationListener = new MyLocationListener(this);
 		PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
 		mWakeLock = powerManager
 				.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "AMV");
 
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getBoolean(BUNDLE_SHOW_MY_LOCATION)) {
 
-				enableShowMyLocation(savedInstanceState
-						.getBoolean(BUNDLE_CENTER_AT_FIRST_FIX));
+				// enableShowMyLocation(savedInstanceState
+				// .getBoolean(BUNDLE_CENTER_AT_FIRST_FIX));
 
 				if (savedInstanceState.getBoolean(BUNDLE_SNAP_TO_LOCATION)) {
-					enableSnapToLocation(false);
+					mLocation.enableSnapToLocation(false);
 				}
 			}
 		}
@@ -383,12 +363,13 @@ public class TileMap extends MapActivity {
 			LayoutInflater factory = LayoutInflater.from(this);
 			final View view = factory.inflate(R.layout.dialog_enter_coordinates, null);
 			builder.setView(view);
+
 			builder.setPositiveButton(R.string.go_to_position,
 					new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							// disable GPS follow mode if it is enabled
-							disableSnapToLocation(true);
+							mLocation.disableSnapToLocation(true);
 
 							// set the map center and zoom level
 							EditText latitudeView = (EditText) view
@@ -400,11 +381,13 @@ public class TileMap extends MapActivity {
 							double longitude = Double.parseDouble(longitudeView.getText()
 									.toString());
 							GeoPoint geoPoint = new GeoPoint(latitude, longitude);
-							TileMap.this.mMapController.setCenter(geoPoint);
+							TileMap.this.mMapView.setCenter(geoPoint);
 							SeekBar zoomLevelView = (SeekBar) view
 									.findViewById(R.id.zoomLevel);
-							TileMap.this.mMapController.setZoom(zoomLevelView
-									.getProgress());
+
+							TileMap.this.mMapView.zoom((byte) (zoomLevelView
+									.getProgress() - mMapView.getMapPosition()
+									.getZoomLevel()));
 						}
 					});
 			builder.setNegativeButton(R.string.cancel, null);
@@ -431,7 +414,7 @@ public class TileMap extends MapActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		disableShowMyLocation();
+		mLocation.disableShowMyLocation();
 	}
 
 	@Override
@@ -587,6 +570,13 @@ public class TileMap extends MapActivity {
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		}
+		if (preferences.getBoolean("fixOrientation", true)) {
+			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			// this all returns the orientation which is not currently active?!
+			// getWindow().getWindowManager().getDefaultDisplay().getRotation());
+			// getWindow().getWindowManager().getDefaultDisplay().getOrientation());
+		}
+
 		if (preferences.getBoolean("wakeLock", false) && !mWakeLock.isHeld()) {
 			mWakeLock.acquire();
 		}
@@ -628,83 +618,11 @@ public class TileMap extends MapActivity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putBoolean(BUNDLE_SHOW_MY_LOCATION, isShowMyLocationEnabled());
-		outState.putBoolean(BUNDLE_CENTER_AT_FIRST_FIX,
-				mMyLocationListener.isCenterAtFirstFix());
-		outState.putBoolean(BUNDLE_SNAP_TO_LOCATION, mSnapToLocation);
-	}
+		outState.putBoolean(BUNDLE_SHOW_MY_LOCATION, mLocation.isShowMyLocationEnabled());
+		// outState.putBoolean(BUNDLE_CENTER_AT_FIRST_FIX,
+		// mMyLocationListener.isCenterAtFirstFix());
 
-	/**
-	 * Disables the "show my location" mode.
-	 * 
-	 * @return ...
-	 */
-	private boolean disableShowMyLocation() {
-		if (mShowMyLocation) {
-			mShowMyLocation = false;
-			disableSnapToLocation(false);
-			mLocationManager.removeUpdates(mMyLocationListener);
-			// if (circleOverlay != null) {
-			// mapView.getOverlays().remove(circleOverlay);
-			// mapView.getOverlays().remove(itemizedOverlay);
-			// circleOverlay = null;
-			// itemizedOverlay = null;
-			// }
-			// mSnapToLocationView.setVisibility(View.GONE);
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Disables the "snap to location" mode.
-	 * 
-	 * @param showToast
-	 *            defines whether a toast message is displayed or not.
-	 */
-	void disableSnapToLocation(boolean showToast) {
-		if (mSnapToLocation) {
-			mSnapToLocation = false;
-			// mSnapToLocationView.setChecked(false);
-			mMapView.setClickable(true);
-			if (showToast) {
-				showToastOnUiThread(getString(R.string.snap_to_location_disabled));
-			}
-		}
-	}
-
-	/**
-	 * Enables the "snap to location" mode.
-	 * 
-	 * @param showToast
-	 *            defines whether a toast message is displayed or not.
-	 */
-	void enableSnapToLocation(boolean showToast) {
-		if (!mSnapToLocation) {
-			mSnapToLocation = true;
-			mMapView.setClickable(false);
-			if (showToast) {
-				showToastOnUiThread(getString(R.string.snap_to_location_enabled));
-			}
-		}
-	}
-
-	/**
-	 * Returns the status of the "show my location" mode.
-	 * 
-	 * @return true if the "show my location" mode is enabled, false otherwise.
-	 */
-	boolean isShowMyLocationEnabled() {
-		return mShowMyLocation;
-	}
-
-	/**
-	 * Returns the status of the "snap to location" mode.
-	 * 
-	 * @return true if the "snap to location" mode is enabled, false otherwise.
-	 */
-	boolean isSnapToLocationEnabled() {
-		return mSnapToLocation;
+		// outState.putBoolean(BUNDLE_SNAP_TO_LOCATION, mSnapToLocation);
 	}
 
 	/**
@@ -734,4 +652,28 @@ public class TileMap extends MapActivity {
 	// // TODO Auto-generated method stub
 	// return false;
 	// }
+
+	class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
+		private final TextView textView;
+
+		SeekBarChangeListener(TextView textView) {
+			this.textView = textView;
+		}
+
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+			this.textView.setText(String.valueOf(progress));
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+			// do nothing
+		}
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			// do nothing
+		}
+	}
+
 }

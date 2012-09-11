@@ -160,7 +160,7 @@ public class MapZoomControls {
 	 *            true if the zoom controls should be visible, false otherwise.
 	 */
 	public void setShowMapZoomControls(boolean showMapZoomControls) {
-		mShowMapZoomControls = false; // showMapZoomControls;
+		mShowMapZoomControls = false;
 	}
 
 	/**
