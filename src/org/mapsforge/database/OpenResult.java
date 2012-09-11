@@ -18,11 +18,11 @@ package org.mapsforge.database;
 /**
  * A FileOpenResult is a simple DTO which is returned by IMapDatabase#openFile(File).
  */
-public class FileOpenResult {
+public class OpenResult {
 	/**
 	 * Singleton for a FileOpenResult instance with {@code success=true}.
 	 */
-	public static final FileOpenResult SUCCESS = new FileOpenResult();
+	public static final OpenResult SUCCESS = new OpenResult();
 
 	private final String errorMessage;
 	private final boolean success;
@@ -31,7 +31,7 @@ public class FileOpenResult {
 	 * @param errorMessage
 	 *            a textual message describing the error, must not be null.
 	 */
-	public FileOpenResult(String errorMessage) {
+	public OpenResult(String errorMessage) {
 		if (errorMessage == null) {
 			throw new IllegalArgumentException("error message must not be null");
 		}
@@ -43,7 +43,7 @@ public class FileOpenResult {
 	/**
 	 * 
 	 */
-	public FileOpenResult() {
+	public OpenResult() {
 		this.success = true;
 		this.errorMessage = null;
 	}

@@ -2,8 +2,6 @@ package org.mapsforge.app;
 
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
-import java.text.DateFormat;
-import java.util.Date;
 
 import org.mapsforge.android.DebugSettings;
 import org.mapsforge.android.MapActivity;
@@ -16,9 +14,8 @@ import org.mapsforge.app.filefilter.ValidMapFile;
 import org.mapsforge.app.filefilter.ValidRenderTheme;
 import org.mapsforge.app.filepicker.FilePicker;
 import org.mapsforge.app.preferences.EditPreferences;
-import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
-import org.mapsforge.database.MapFileInfo;
+import org.mapsforge.core.MapPosition;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
@@ -56,7 +53,7 @@ import android.widget.Toast;
  */
 public class TileMap extends MapActivity {
 	// implements ActionBar.OnNavigationListener {
-	private static final String BUNDLE_CENTER_AT_FIRST_FIX = "centerAtFirstFix";
+	// private static final String BUNDLE_CENTER_AT_FIRST_FIX = "centerAtFirstFix";
 	private static final String BUNDLE_SHOW_MY_LOCATION = "showMyLocation";
 	private static final String BUNDLE_SNAP_TO_LOCATION = "snapToLocation";
 	private static final int DIALOG_ENTER_COORDINATES = 0;
@@ -156,7 +153,7 @@ public class TileMap extends MapActivity {
 				mLocation.disableSnapToLocation(true);
 
 				mMapView.setCenter(mMapView.getMapDatabase()
-						.getMapFileInfo().mapCenter);
+						.getMapInfo().mapCenter);
 				return true;
 
 			case R.id.menu_preferences:
@@ -282,21 +279,22 @@ public class TileMap extends MapActivity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		if (requestCode == SELECT_MAP_FILE) {
-			if (resultCode == RESULT_OK) {
-
-				mLocation.disableSnapToLocation(true);
-
-				if (intent != null) {
-					if (intent.getStringExtra(FilePicker.SELECTED_FILE) != null) {
-						mMapView.setMapFile(intent
-								.getStringExtra(FilePicker.SELECTED_FILE));
-					}
-				}
-			} else if (resultCode == RESULT_CANCELED) {
-				startActivity(new Intent(this, EditPreferences.class));
-			}
-		} else if (requestCode == SELECT_RENDER_THEME_FILE && resultCode == RESULT_OK
+		// if (requestCode == SELECT_MAP_FILE) {
+		// if (resultCode == RESULT_OK) {
+		//
+		// mLocation.disableSnapToLocation(true);
+		//
+		// if (intent != null) {
+		// if (intent.getStringExtra(FilePicker.SELECTED_FILE) != null) {
+		// mMapView.setMapFile(intent
+		// .getStringExtra(FilePicker.SELECTED_FILE));
+		// }
+		// }
+		// } else if (resultCode == RESULT_CANCELED) {
+		// startActivity(new Intent(this, EditPreferences.class));
+		// }
+		// } else
+		if (requestCode == SELECT_RENDER_THEME_FILE && resultCode == RESULT_OK
 				&& intent != null
 				&& intent.getStringExtra(FilePicker.SELECTED_FILE) != null) {
 			try {
@@ -380,14 +378,16 @@ public class TileMap extends MapActivity {
 									.toString());
 							double longitude = Double.parseDouble(longitudeView.getText()
 									.toString());
-							GeoPoint geoPoint = new GeoPoint(latitude, longitude);
-							TileMap.this.mMapView.setCenter(geoPoint);
+
 							SeekBar zoomLevelView = (SeekBar) view
 									.findViewById(R.id.zoomLevel);
 
-							TileMap.this.mMapView.zoom((byte) (zoomLevelView
-									.getProgress() - mMapView.getMapPosition()
-									.getZoomLevel()));
+							byte zoom = (byte) (zoomLevelView.getProgress());
+
+							MapPosition mapPosition = new MapPosition(latitude,
+									longitude, zoom, 1, 0);
+
+							TileMap.this.mMapView.setMapCenter(mapPosition);
 						}
 					});
 			builder.setNegativeButton(R.string.cancel, null);
@@ -443,62 +443,62 @@ public class TileMap extends MapActivity {
 			final TextView textView = (TextView) dialog.findViewById(R.id.zoomlevelValue);
 			textView.setText(String.valueOf(zoomlevel.getProgress()));
 			zoomlevel.setOnSeekBarChangeListener(new SeekBarChangeListener(textView));
-		} else if (id == DIALOG_INFO_MAP_FILE) {
-			MapFileInfo mapFileInfo = mMapView.getMapDatabase().getMapFileInfo();
-
-			TextView textView = (TextView) dialog.findViewById(R.id.infoMapFileViewName);
-			textView.setText(mMapView.getMapFile());
-
-			textView = (TextView) dialog.findViewById(R.id.infoMapFileViewSize);
-			textView.setText(FileUtils.formatFileSize(mapFileInfo.fileSize,
-					getResources()));
-
-			textView = (TextView) dialog.findViewById(R.id.infoMapFileViewVersion);
-			textView.setText(String.valueOf(mapFileInfo.fileVersion));
-
-			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewDebug);
-			// if (mapFileInfo.debugFile) {
-			// textView.setText(R.string.info_map_file_debug_yes);
+			// } else if (id == DIALOG_INFO_MAP_FILE) {
+			// MapInfo mapInfo = mMapView.getMapDatabase().getMapInfo();
+			//
+			// TextView textView = (TextView) dialog.findViewById(R.id.infoMapFileViewName);
+			// textView.setText(mMapView.getMapFile());
+			//
+			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewSize);
+			// textView.setText(FileUtils.formatFileSize(mapInfo.fileSize,
+			// getResources()));
+			//
+			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewVersion);
+			// textView.setText(String.valueOf(mapInfo.fileVersion));
+			//
+			// // textView = (TextView) dialog.findViewById(R.id.infoMapFileViewDebug);
+			// // if (mapFileInfo.debugFile) {
+			// // textView.setText(R.string.info_map_file_debug_yes);
+			// // } else {
+			// // textView.setText(R.string.info_map_file_debug_no);
+			// // }
+			//
+			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewDate);
+			// Date date = new Date(mapInfo.mapDate);
+			// textView.setText(DateFormat.getDateTimeInstance().format(date));
+			//
+			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewArea);
+			// BoundingBox boundingBox = mapInfo.boundingBox;
+			// textView.setText(boundingBox.getMinLatitude() + ", "
+			// + boundingBox.getMinLongitude() + " - \n"
+			// + boundingBox.getMaxLatitude() + ", " + boundingBox.getMaxLongitude());
+			//
+			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewStartPosition);
+			// GeoPoint startPosition = mapInfo.startPosition;
+			// if (startPosition == null) {
+			// textView.setText(null);
 			// } else {
-			// textView.setText(R.string.info_map_file_debug_no);
+			// textView.setText(startPosition.getLatitude() + ", "
+			// + startPosition.getLongitude());
 			// }
-
-			textView = (TextView) dialog.findViewById(R.id.infoMapFileViewDate);
-			Date date = new Date(mapFileInfo.mapDate);
-			textView.setText(DateFormat.getDateTimeInstance().format(date));
-
-			textView = (TextView) dialog.findViewById(R.id.infoMapFileViewArea);
-			BoundingBox boundingBox = mapFileInfo.boundingBox;
-			textView.setText(boundingBox.getMinLatitude() + ", "
-					+ boundingBox.getMinLongitude() + " - \n"
-					+ boundingBox.getMaxLatitude() + ", " + boundingBox.getMaxLongitude());
-
-			textView = (TextView) dialog.findViewById(R.id.infoMapFileViewStartPosition);
-			GeoPoint startPosition = mapFileInfo.startPosition;
-			if (startPosition == null) {
-				textView.setText(null);
-			} else {
-				textView.setText(startPosition.getLatitude() + ", "
-						+ startPosition.getLongitude());
-			}
-
-			textView = (TextView) dialog.findViewById(R.id.infoMapFileViewStartZoomLevel);
-			Byte startZoomLevel = mapFileInfo.startZoomLevel;
-			if (startZoomLevel == null) {
-				textView.setText(null);
-			} else {
-				textView.setText(startZoomLevel.toString());
-			}
-
-			textView = (TextView) dialog
-					.findViewById(R.id.infoMapFileViewLanguagePreference);
-			textView.setText(mapFileInfo.languagePreference);
-
-			textView = (TextView) dialog.findViewById(R.id.infoMapFileViewComment);
-			textView.setText(mapFileInfo.comment);
-
-			textView = (TextView) dialog.findViewById(R.id.infoMapFileViewCreatedBy);
-			textView.setText(mapFileInfo.createdBy);
+			//
+			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewStartZoomLevel);
+			// Byte startZoomLevel = mapInfo.startZoomLevel;
+			// if (startZoomLevel == null) {
+			// textView.setText(null);
+			// } else {
+			// textView.setText(startZoomLevel.toString());
+			// }
+			//
+			// textView = (TextView) dialog
+			// .findViewById(R.id.infoMapFileViewLanguagePreference);
+			// textView.setText(mapInfo.languagePreference);
+			//
+			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewComment);
+			// textView.setText(mapInfo.comment);
+			//
+			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewCreatedBy);
+			// textView.setText(mapInfo.createdBy);
 		} else {
 			super.onPrepareDialog(id, dialog);
 		}
@@ -595,12 +595,12 @@ public class TileMap extends MapActivity {
 
 		mMapView.setDebugSettings(debugSettings);
 
-		if (mMapDatabase == MapDatabases.MAP_READER) {
-			if (mMapView.getMapFile() == null)
-				startMapFilePicker();
-		} else {
-			mMapView.setMapFile(mMapView.getMapFile());
-		}
+		// if (mMapDatabase == MapDatabases.MAP_READER) {
+		// if (mMapView.getMapFile() == null)
+		// startMapFilePicker();
+		// } else {
+		// mMapView.setMapFile(mMapView.getMapFile());
+		// }
 
 		if (Build.VERSION.SDK_INT >= 11) {
 			VersionHelper.refreshActionBarMenu(this);

@@ -3,8 +3,8 @@
 
     <string-array name="preferences_map_database_keys">
 
-        <!-- <item>MAP_READER</item> -->
-        <!-- <item>POSTGIS_READER</item>--> 
+        <!-- <item>MAP_READER</item> --> 
+        <!--  <item>POSTGIS_READER</item> -->
         <item>PBMAP_READER</item>
     </string-array>
 

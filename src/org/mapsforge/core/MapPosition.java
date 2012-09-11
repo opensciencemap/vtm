@@ -41,6 +41,16 @@ public class MapPosition {
 	public final double x;
 	public final double y;
 
+	public MapPosition() {
+		this.zoomLevel = (byte) 1;
+		this.scale = 1;
+		this.lat = 0;
+		this.lon = 0;
+		this.angle = 0;
+		this.x = MercatorProjection.longitudeToPixelX(this.lon, zoomLevel);
+		this.y = MercatorProjection.latitudeToPixelY(this.lat, zoomLevel);
+	}
+
 	/**
 	 * @param geoPoint
 	 *            the map position.
@@ -49,7 +59,6 @@ public class MapPosition {
 	 * @param scale
 	 *            ...
 	 */
-
 	public MapPosition(GeoPoint geoPoint, byte zoomLevel, float scale) {
 		// this.geoPoint = geoPoint;
 		this.zoomLevel = zoomLevel;

@@ -14,13 +14,13 @@
  */
 package org.mapsforge.database.postgis;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -29,10 +29,10 @@ import org.mapsforge.core.BoundingBox;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.Tag;
 import org.mapsforge.core.WebMercator;
-import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
 import org.mapsforge.database.IMapDatabaseCallback;
-import org.mapsforge.database.MapFileInfo;
+import org.mapsforge.database.MapInfo;
+import org.mapsforge.database.OpenResult;
 import org.mapsforge.database.QueryResult;
 import org.postgresql.PGConnection;
 
@@ -56,8 +56,8 @@ public class MapDatabase implements IMapDatabase {
 
 	private Tag[] mTags;
 
-	private final MapFileInfo mMapInfo =
-			new MapFileInfo(new BoundingBox(-180, -85, 180, 85),
+	private final MapInfo mMapInfo =
+			new MapInfo(new BoundingBox(-180, -85, 180, 85),
 					new Byte((byte) 14), new GeoPoint(53.11, 8.85),
 					WebMercator.NAME,
 					0, 0, 0, "de", "comment", "author");
@@ -125,12 +125,12 @@ public class MapDatabase implements IMapDatabase {
 
 		byte[] b = null;
 		PGHStore h = null;
-		int cnt = 0;
+		// int cnt = 0;
 		try {
 			while (r != null && r.next()) {
 				mIndexPos = 0;
 				mCoordPos = 0;
-				cnt++;
+				// cnt++;
 				try {
 					Object obj = r.getObject(1);
 					h = null;
@@ -200,27 +200,27 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	@Override
-	public MapFileInfo getMapFileInfo() {
+	public MapInfo getMapInfo() {
 		return mMapInfo;
 	}
 
 	@Override
-	public boolean hasOpenFile() {
+	public boolean isOpen() {
 		return mOpenFile;
 	}
 
 	@Override
-	public FileOpenResult openFile(File mapFile) {
+	public OpenResult open(Map<String, String> options) {
 		mOpenFile = true;
 		if (mCoords == null) {
 			mCoords = new float[100000];
 			mIndex = new short[100000];
 		}
-		return new FileOpenResult();
+		return new OpenResult();
 	}
 
 	@Override
-	public void closeFile() {
+	public void close() {
 		if (connection != null) {
 			try {
 				connection.close();
@@ -233,11 +233,6 @@ public class MapDatabase implements IMapDatabase {
 		mCoords = null;
 		mIndex = null;
 		mOpenFile = false;
-	}
-
-	@Override
-	public String readString(int position) {
-		return null;
 	}
 
 	// taken from postgis-java
@@ -258,6 +253,7 @@ public class MapDatabase implements IMapDatabase {
 	 * 
 	 * @param value
 	 *            ...
+	 * @return ...
 	 */
 	private boolean parse(byte[] value) {
 		return parseGeometry(valueGetterForEndian(value));

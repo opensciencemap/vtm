@@ -189,9 +189,9 @@ final class WayDecorator {
 
 				if (wayNameWidth < 0) {
 					if (text == null) {
-						text = mapGenerator.getWayName();
-						if (text == null)
-							text = "blub";
+						// text = mapGenerator.getWayName();
+						// if (text == null)
+						text = "blub";
 					}
 
 					wayNameWidth = (paint.measureText(text) + 10);

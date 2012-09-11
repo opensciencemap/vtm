@@ -14,6 +14,8 @@
  */
 package org.mapsforge.android.mapgenerator;
 
+//import static org.mapsforge.android.mapgenerator.JobTile.LOADING;
+
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
@@ -40,6 +42,7 @@ public class JobQueue {
 		// mPriorityQueue.addAll(tiles);
 		for (int i = 0, n = tiles.size(); i < n; i++) {
 			JobTile tile = tiles.get(i);
+			// tile.state = LOADING;
 			tile.isLoading = true;
 			mPriorityQueue.offer(tile);
 		}
@@ -51,6 +54,7 @@ public class JobQueue {
 	public synchronized void clear() {
 		for (int i = 0, n = mPriorityQueue.size(); i < n; i++) {
 			JobTile tile = mPriorityQueue.poll();
+			// tile.state = 0;
 			tile.isLoading = false;
 		}
 		mPriorityQueue.clear();

@@ -19,6 +19,7 @@ import org.mapsforge.core.Tile;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
@@ -41,7 +42,7 @@ public class TouchHandler {
 	private boolean mRotationStart;
 	private float mPosX;
 	private float mPosY;
-	private float mAngle;
+	private double mAngle;
 
 	private int mActivePointerId;
 
@@ -125,24 +126,27 @@ public class TouchHandler {
 				double dy = y1 - y2;
 
 				double rad = Math.atan2(dy, dx);
-				float angle = (float) Math.toDegrees(rad);
 
 				// focus point relative to center
 				double cx = (mMapView.getWidth() >> 1) - (x1 + x2) / 2;
 				double cy = (mMapView.getHeight() >> 1) - (y1 + y2) / 2;
-				double r = Math.toRadians(angle - mAngle);
+				double r = rad - mAngle;
 
-				double x = cx * Math.cos(r) + cy * -Math.sin(r) - cx;
-				double y = cx * Math.sin(r) + cy * Math.cos(r) - cy;
+				double rsin = Math.sin(r);
+				double rcos = Math.cos(r);
+
+				float x = (float) (cx * rcos + cy * -rsin - cx);
+				float y = (float) (cx * rsin + cy * rcos - cy);
+
 				// Log.d("...", "move " + x + " " + y + " " + cx + " " + cy);
 
 				if (!mRotationStart) {
-					if (Math.abs(angle - mAngle) > 3.0)
+					if (Math.abs(rad - mAngle) > 0.001)
 						mRotationStart = true;
 				}
 				else {
-					mMapPosition.rotateMap(angle - mAngle, (float) x, (float) y);
-					mAngle = angle;
+					mMapPosition.rotateMap((float) Math.toDegrees(rad - mAngle), x, y);
+					mAngle = rad;
 					mMapView.redrawTiles();
 				}
 			}
@@ -170,10 +174,8 @@ public class TouchHandler {
 		if (multi == 1) {
 			double dx = event.getX(0) - event.getX(1);
 			double dy = event.getY(0) - event.getY(1);
-			double rad = Math.atan2(dy, dx);
-			mAngle = (float) Math.toDegrees(rad);
+			mAngle = Math.atan2(dy, dx);
 		}
-
 		return true;
 	}
 
@@ -326,10 +328,57 @@ public class TouchHandler {
 
 		private DecelerateInterpolator mBounce = new DecelerateInterpolator();
 
+		private boolean mZooutOut = true;
+
 		@Override
 		public void onLongPress(MotionEvent e) {
-			// mMapView.zoom((byte) 1);
-			// Log.d("mapsforge", "long press");
+			Log.d("mapsforge", "long press");
+
+			// mMapView.zoom((byte) -1);
+
+			mPrevScale = 0;
+
+			mTimer = new CountDownTimer((int) mScaleDuration, 30) {
+				@Override
+				public void onTick(long tick) {
+					scale2(tick);
+				}
+
+				@Override
+				public void onFinish() {
+					scale2(0);
+
+				}
+			}.start();
+
+		}
+
+		boolean scale2(long tick) {
+
+			if (mPrevScale >= 1) {
+				mTimer = null;
+				return false;
+			}
+
+			float adv = (mScaleDuration - tick) / mScaleDuration;
+			adv = mBounce.getInterpolation(adv);
+
+			float scale = adv - mPrevScale;
+			mPrevScale += scale;
+
+			if (mZooutOut) {
+				mMapPosition.scaleMap(1 - scale, 0, 0);
+			}
+			// } else {
+			// mMapPosition.scaleMap(1 + scale, mFocusX, mFocusY);
+			// }
+
+			mMapView.redrawTiles();
+
+			if (tick == 0)
+				mTimer = null;
+
+			return true;
 		}
 
 		private final float mScaleDuration = 300;

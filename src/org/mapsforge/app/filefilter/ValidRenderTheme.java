@@ -23,7 +23,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.mapsforge.android.rendertheme.RenderThemeHandler;
-import org.mapsforge.database.FileOpenResult;
+import org.mapsforge.database.OpenResult;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -32,7 +32,7 @@ import org.xml.sax.XMLReader;
  * Accepts all valid render theme XML files.
  */
 public final class ValidRenderTheme implements ValidFileFilter {
-	private FileOpenResult fileOpenResult;
+	private OpenResult openResult;
 
 	@Override
 	public boolean accept(File file) {
@@ -44,28 +44,28 @@ public final class ValidRenderTheme implements ValidFileFilter {
 			XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 			xmlReader.setContentHandler(renderThemeHandler);
 			xmlReader.parse(new InputSource(inputStream));
-			this.fileOpenResult = FileOpenResult.SUCCESS;
+			this.openResult = OpenResult.SUCCESS;
 		} catch (ParserConfigurationException e) {
-			this.fileOpenResult = new FileOpenResult(e.getMessage());
+			this.openResult = new OpenResult(e.getMessage());
 		} catch (SAXException e) {
-			this.fileOpenResult = new FileOpenResult(e.getMessage());
+			this.openResult = new OpenResult(e.getMessage());
 		} catch (IOException e) {
-			this.fileOpenResult = new FileOpenResult(e.getMessage());
+			this.openResult = new OpenResult(e.getMessage());
 		} finally {
 			try {
 				if (inputStream != null) {
 					inputStream.close();
 				}
 			} catch (IOException e) {
-				this.fileOpenResult = new FileOpenResult(e.getMessage());
+				this.openResult = new OpenResult(e.getMessage());
 			}
 		}
 
-		return this.fileOpenResult.isSuccess();
+		return this.openResult.isSuccess();
 	}
 
 	@Override
-	public FileOpenResult getFileOpenResult() {
-		return this.fileOpenResult;
+	public OpenResult getFileOpenResult() {
+		return this.openResult;
 	}
 }

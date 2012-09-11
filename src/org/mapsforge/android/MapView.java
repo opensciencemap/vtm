@@ -14,11 +14,11 @@
  */
 package org.mapsforge.android;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -39,10 +39,9 @@ import org.mapsforge.android.utils.GlConfigChooser;
 import org.mapsforge.core.GeoPoint;
 import org.mapsforge.core.MapPosition;
 import org.mapsforge.core.Tile;
-import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
-import org.mapsforge.database.MapFileInfo;
-import org.mapsforge.database.mapfile.MapDatabase;
+import org.mapsforge.database.MapInfo;
+import org.mapsforge.database.OpenResult;
 import org.xml.sax.SAXException;
 
 import android.content.Context;
@@ -53,16 +52,7 @@ import android.view.MotionEvent;
 
 /**
  * A MapView shows a map on the display of the device. It handles all user input and touch gestures to move and zoom the
- * map. This MapView also includes a scale bar and zoom controls.
- * <p>
- * This implementation supports offline map rendering as well as downloading map images (tiles) over an Internet
- * connection. The operation mode of a MapView can be set in the constructor and changed at runtime with the
- * {@link #setMapDatabase(MapDatabases)} method. Some MapView parameters depend on the selected operation mode.
- * <p>
- * In offline rendering mode a special database file is required which contains the map data. Map files can be stored in
- * any folder. The current map file is set by calling {@link #setMapFile(String)}. To retrieve the current
- * {@link MapDatabase}, use the {@link #getMapDatabase()} method.
- * <p>
+ * map.
  */
 public class MapView extends GLSurfaceView {
 
@@ -74,7 +64,7 @@ public class MapView extends GLSurfaceView {
 	public static final InternalRenderTheme DEFAULT_RENDER_THEME = InternalRenderTheme.OSMARENDER;
 
 	// private static final float DEFAULT_TEXT_SCALE = 1;
-	private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 16);
+	// private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 16);
 
 	public final static boolean debugFrameTime = false;
 
@@ -95,7 +85,7 @@ public class MapView extends GLSurfaceView {
 	private MapWorker mMapWorkers[];
 	private int mNumMapWorkers = 4;
 	private DebugSettings debugSettings;
-	private String mMapFile;
+	private String mRenderTheme;
 
 	/**
 	 * @param context
@@ -178,47 +168,26 @@ public class MapView extends GLSurfaceView {
 			mMapWorkers[i].start();
 		}
 
-		setMapFile("default");
-
-		initMapStartPosition();
-
 		mapActivity.registerMapView(this);
 
-		// if (!setRenderTheme(DEFAULT_RENDER_THEME)) {
-		// Log.d(TAG, "X could not parse theme");
-		// // FIXME show init error dialog
-		// }
+		if (!mMapDatabase.isOpen()) {
+			Log.d(TAG, "open database with defaults");
+			setMapOptions(null);
+		}
+		if (!mMapViewPosition.isValid()) {
+			Log.d(TAG, "set default start position");
+			setMapCenter(getStartPosition());
+		}
 
 		setEGLConfigChooser(new GlConfigChooser());
 		setEGLContextClientVersion(2);
+
 		// setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
 
 		setRenderer(mMapRenderer);
 
 		if (!debugFrameTime)
 			setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
-		// mCompass.enable();
-	}
-
-	private void initMapStartPosition() {
-		GeoPoint startPoint = getStartPoint();
-		if (startPoint != null) {
-			mMapViewPosition.setMapCenter(startPoint);
-			Log.d(TAG, "got start");
-
-			Byte startZoomLevel = getStartZoomLevel();
-			if (startZoomLevel != null) {
-				mMapViewPosition.setZoomLevel(startZoomLevel.byteValue());
-				Log.d(TAG, "got zoom");
-			} else
-				mMapViewPosition.setZoomLevel((byte) 2);
-		}
-		else {
-			startPoint = new GeoPoint(0, 0);
-			mMapViewPosition.setMapCenter(startPoint);
-			mMapViewPosition.setZoomLevel((byte) 4);
-		}
 	}
 
 	/**
@@ -240,13 +209,6 @@ public class MapView extends GLSurfaceView {
 	 */
 	public IMapDatabase getMapDatabase() {
 		return mMapDatabase;
-	}
-
-	/**
-	 * @return the currently used map file.
-	 */
-	public String getMapFile() {
-		return mMapFile;
 	}
 
 	/**
@@ -275,30 +237,7 @@ public class MapView extends GLSurfaceView {
 	 * Calculates all necessary tiles and adds jobs accordingly.
 	 */
 	public void redrawTiles() {
-		if (getWidth() <= 0 || getHeight() <= 0)
-			return;
-
 		mMapRenderer.updateMap(false);
-	}
-
-	private void clearAndRedrawMapView() {
-		if (getWidth() <= 0 || getHeight() <= 0)
-			return;
-
-		mMapRenderer.updateMap(true);
-	}
-
-	/**
-	 * Sets the center of the MapView and triggers a redraw.
-	 * 
-	 * @param geoPoint
-	 *            the new center point of the map.
-	 */
-	public void setCenter(GeoPoint geoPoint) {
-		MapPosition mapPosition = new MapPosition(geoPoint,
-				mMapViewPosition.getZoomLevel(), 1);
-
-		setCenterAndZoom(mapPosition);
 	}
 
 	/**
@@ -307,31 +246,28 @@ public class MapView extends GLSurfaceView {
 	 */
 	public void setDebugSettings(DebugSettings debugSettings) {
 		this.debugSettings = debugSettings;
+		mMapRenderer.updateMap(true);
+	}
 
-		clearAndRedrawMapView();
+	private Map<String, String> mMapOptions;
+
+	public Map<String, String> getMapOptions() {
+		return mMapOptions;
 	}
 
 	/**
 	 * Sets the map file for this MapView.
 	 * 
-	 * @param mapFile
-	 *            the path to the map file.
+	 * @param mapOptions
+	 *            ...
 	 * @return true if the map file was set correctly, false otherwise.
 	 */
-	public boolean setMapFile(String mapFile) {
-		FileOpenResult fileOpenResult = null;
-
-		Log.i(TAG, "set mapfile " + mapFile);
-
-		if (mapFile != null && mapFile.equals(mMapFile)) {
-			// same map file as before
-			return false;
-		}
+	public boolean setMapOptions(Map<String, String> mapOptions) {
+		OpenResult openResult = null;
 
 		boolean initialized = false;
 
 		mJobQueue.clear();
-
 		mapWorkersPause(true);
 
 		for (MapWorker mapWorker : mMapWorkers) {
@@ -339,59 +275,49 @@ public class MapView extends GLSurfaceView {
 			IMapGenerator mapGenerator = mapWorker.getMapGenerator();
 			IMapDatabase mapDatabase = mapGenerator.getMapDatabase();
 
-			mapDatabase.closeFile();
+			mapDatabase.close();
+			openResult = mapDatabase.open(null);
 
-			if (mapFile != null)
-				fileOpenResult = mapDatabase.openFile(new File(mapFile));
-			else
-				fileOpenResult = mapDatabase.openFile(null);
-
-			if (fileOpenResult != null && fileOpenResult.isSuccess()) {
-				mMapFile = mapFile;
-
-				if (!initialized)
-					initialized = true;
+			if (openResult != null && openResult.isSuccess()) {
+				mMapOptions = mapOptions;
+				initialized = true;
 			}
 		}
 
 		mapWorkersProceed();
 
 		if (initialized) {
-			clearAndRedrawMapView();
-			Log.i(TAG, "mapfile set");
+			mMapRenderer.updateMap(true);
+			Log.i(TAG, "MapDatabase ready");
 			return true;
 		}
 
-		mMapFile = null;
-		Log.i(TAG, "loading mapfile failed");
+		mMapOptions = null;
+		Log.i(TAG, "Opening MapDatabase failed");
 
 		return false;
 	}
 
-	private GeoPoint getStartPoint() {
-		if (mMapDatabase != null && mMapDatabase.hasOpenFile()) {
-			MapFileInfo mapFileInfo = mMapDatabase.getMapFileInfo();
+	private MapPosition getStartPosition() {
+		if (mMapDatabase == null)
+			return new MapPosition();
 
-			if (mapFileInfo.startPosition != null) {
-				return mapFileInfo.startPosition;
-			} else if (mapFileInfo.mapCenter != null) {
-				return mapFileInfo.mapCenter;
-			}
-		}
+		MapInfo mapInfo = mMapDatabase.getMapInfo();
+		if (mapInfo == null)
+			return new MapPosition();
 
-		return null;
-	}
+		GeoPoint startPos = mapInfo.startPosition;
 
-	private Byte getStartZoomLevel() {
-		if (mMapDatabase != null && mMapDatabase.hasOpenFile()) {
-			MapFileInfo mapFileInfo = mMapDatabase.getMapFileInfo();
+		if (startPos == null)
+			startPos = mapInfo.mapCenter;
 
-			if (mapFileInfo.startZoomLevel != null) {
-				return mapFileInfo.startZoomLevel;
-			}
-		}
+		if (startPos == null)
+			startPos = new GeoPoint(0, 0);
 
-		return DEFAULT_START_ZOOM_LEVEL;
+		if (mapInfo.startZoomLevel != null)
+			return new MapPosition(startPos, (mapInfo.startZoomLevel).byteValue(), 1);
+
+		return new MapPosition(startPos, (byte) 1, 1);
 	}
 
 	/**
@@ -425,14 +351,12 @@ public class MapView extends GLSurfaceView {
 
 		mJobQueue.clear();
 
-		String mapFile = mMapFile;
-		mMapFile = null;
-		setMapFile(mapFile);
+		// String mapFile = mMapFile;
+		// mMapFile = null;
+		setMapOptions(null);
 
 		mapWorkersProceed();
 	}
-
-	private String mRenderTheme;
 
 	public String getRenderTheme() {
 		return mRenderTheme;
@@ -456,8 +380,7 @@ public class MapView extends GLSurfaceView {
 		if (ret) {
 			mRenderTheme = internalRenderTheme.name();
 		}
-
-		clearAndRedrawMapView();
+		mMapRenderer.updateMap(true);
 		return ret;
 	}
 
@@ -480,8 +403,7 @@ public class MapView extends GLSurfaceView {
 		if (ret) {
 			mRenderTheme = renderThemePath;
 		}
-
-		clearAndRedrawMapView();
+		mMapRenderer.updateMap(true);
 	}
 
 	private boolean setRenderTheme(Theme theme) {
@@ -515,16 +437,51 @@ public class MapView extends GLSurfaceView {
 		return false;
 	}
 
-	/**
-	 * Sets the text scale for the map rendering. Has no effect in downloading mode.
-	 * 
-	 * @param textScale
-	 *            the new text scale for the map rendering.
-	 */
-	// public void setTextScale(float textScale) {
-	// mJobParameters = new JobParameters(mJobParameters.theme, textScale);
-	// clearAndRedrawMapView();
-	// }
+	@Override
+	protected synchronized void onSizeChanged(int width, int height,
+			int oldWidth, int oldHeight) {
+
+		mJobQueue.clear();
+		mapWorkersPause(true);
+
+		super.onSizeChanged(width, height, oldWidth, oldHeight);
+
+		mapWorkersProceed();
+	}
+
+	void destroy() {
+		for (MapWorker mapWorker : mMapWorkers) {
+			mapWorker.pause();
+			mapWorker.interrupt();
+
+			try {
+				mapWorker.join();
+			} catch (InterruptedException e) {
+				// restore the interrupted status
+				Thread.currentThread().interrupt();
+			}
+			IMapDatabase mapDatabase = mapWorker.getMapGenerator().getMapDatabase();
+			mapDatabase.close();
+		}
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		mapWorkersPause(false);
+
+		if (this.enableCompass)
+			mCompass.disable();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		mapWorkersProceed();
+
+		if (this.enableCompass)
+			mCompass.enable();
+	}
 
 	/**
 	 * Zooms in or out by the given amount of zoom levels.
@@ -550,40 +507,9 @@ public class MapView extends GLSurfaceView {
 		}
 
 		mMapViewPosition.setZoomLevel((byte) z);
-
 		redrawTiles();
 
 		return true;
-	}
-
-	@Override
-	protected synchronized void onSizeChanged(int width, int height, int oldWidth,
-			int oldHeight) {
-
-		mJobQueue.clear();
-		mCompass.disable();
-		mapWorkersPause(true);
-
-		super.onSizeChanged(width, height, oldWidth, oldHeight);
-
-		mapWorkersProceed();
-		mCompass.enable();
-	}
-
-	void destroy() {
-		for (MapWorker mapWorker : mMapWorkers) {
-			mapWorker.pause();
-			mapWorker.interrupt();
-
-			try {
-				mapWorker.join();
-			} catch (InterruptedException e) {
-				// restore the interrupted status
-				Thread.currentThread().interrupt();
-			}
-			IMapDatabase mapDatabase = mapWorker.getMapGenerator().getMapDatabase();
-			mapDatabase.closeFile();
-		}
 	}
 
 	/**
@@ -599,13 +525,16 @@ public class MapView extends GLSurfaceView {
 	 * @return true if the current center position of this MapView is valid, false otherwise.
 	 */
 	boolean hasValidCenter() {
-		if (!mMapViewPosition.isValid()) {
+		MapInfo mapInfo;
+
+		if (!mMapViewPosition.isValid())
 			return false;
-		} else if (!mMapDatabase.hasOpenFile()
-				|| !mMapDatabase.getMapFileInfo().boundingBox.contains(getMapPosition()
-						.getMapCenter())) {
+
+		if ((mapInfo = mMapDatabase.getMapInfo()) == null)
 			return false;
-		}
+
+		if (!mapInfo.boundingBox.contains(getMapPosition().getMapCenter()))
+			return false;
 
 		return true;
 	}
@@ -615,36 +544,31 @@ public class MapView extends GLSurfaceView {
 				mMapZoomControls.getZoomLevelMin());
 	}
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		mapWorkersPause(false);
-
-		if (this.enableCompass)
-			mCompass.disable();
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		mapWorkersProceed();
-
-		if (this.enableCompass)
-			mCompass.enable();
-	}
-
 	/**
 	 * Sets the center and zoom level of this MapView and triggers a redraw.
 	 * 
 	 * @param mapPosition
 	 *            the new map position of this MapView.
 	 */
-	void setCenterAndZoom(MapPosition mapPosition) {
-		Log.d(TAG, "setCenterAndZoom "
+	public void setMapCenter(MapPosition mapPosition) {
+		Log.d(TAG, "setMapCenter "
 				+ " lat: " + mapPosition.lat
 				+ " lon: " + mapPosition.lon);
-		mMapViewPosition.setMapCenterAndZoomLevel(mapPosition);
+		mMapViewPosition.setMapCenter(mapPosition);
 		redrawTiles();
+	}
+
+	/**
+	 * Sets the center of the MapView and triggers a redraw.
+	 * 
+	 * @param geoPoint
+	 *            the new center point of the map.
+	 */
+	public void setCenter(GeoPoint geoPoint) {
+		MapPosition mapPosition = new MapPosition(geoPoint,
+				mMapViewPosition.getZoomLevel(), 1);
+
+		setMapCenter(mapPosition);
 	}
 
 	/**
@@ -696,9 +620,8 @@ public class MapView extends GLSurfaceView {
 	public void enableRotation(boolean enable) {
 		enableRotation = enable;
 
-		if (enable && this.enableCompass) {
-			this.enableCompass = false;
-			mCompass.disable();
+		if (enable) {
+			enableCompass(false);
 		}
 	}
 
@@ -709,7 +632,7 @@ public class MapView extends GLSurfaceView {
 		this.enableCompass = enable;
 
 		if (enable)
-			this.enableRotation = false;
+			enableRotation(false);
 
 		if (enable)
 			mCompass.enable();
@@ -727,6 +650,17 @@ public class MapView extends GLSurfaceView {
 	// public void setBuiltInZoomControls(boolean showZoomControls) {
 	// mMapZoomControls.setShowMapZoomControls(showZoomControls);
 	//
+	// }
+
+	// /**
+	// * Sets the text scale for the map rendering. Has no effect in downloading mode.
+	// *
+	// * @param textScale
+	// * the new text scale for the map rendering.
+	// */
+	// public void setTextScale(float textScale) {
+	// mJobParameters = new JobParameters(mJobParameters.theme, textScale);
+	// clearAndRedrawMapView();
 	// }
 
 	// public final int

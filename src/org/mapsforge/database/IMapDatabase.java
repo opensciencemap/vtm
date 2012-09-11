@@ -14,7 +14,7 @@
  */
 package org.mapsforge.database;
 
-import java.io.File;
+import java.util.Map;
 
 import org.mapsforge.android.mapgenerator.JobTile;
 
@@ -23,11 +23,6 @@ import org.mapsforge.android.mapgenerator.JobTile;
  *
  */
 public interface IMapDatabase {
-
-	/**
-	 * Closes the map file and destroys all internal caches. Has no effect if no map file is currently opened.
-	 */
-	public abstract void closeFile();
 
 	/**
 	 * Starts a database query with the given parameters.
@@ -46,33 +41,32 @@ public interface IMapDatabase {
 	 * @throws IllegalStateException
 	 *             if no map is currently opened.
 	 */
-	public abstract MapFileInfo getMapFileInfo();
+	public abstract MapInfo getMapInfo();
 
 	/**
-	 * @return true if a map file is currently opened, false otherwise.
+	 * @return true if a map database is currently opened, false otherwise.
 	 */
-	public abstract boolean hasOpenFile();
+	public abstract boolean isOpen();
 
 	/**
-	 * Opens the given map file, reads its header data and validates them.
+	 * Opens MapDatabase
 	 * 
-	 * @param mapFile
-	 *            the map file.
-	 * @return a FileOpenResult containing an error message in case of a failure.
-	 * @throws IllegalArgumentException
-	 *             if the given map file is null.
+	 * @param options
+	 *            the options.
+	 * @return a OpenResult containing an error message in case of a failure.
 	 */
-	public abstract FileOpenResult openFile(File mapFile);
+	public abstract OpenResult open(Map<String, String> options);
+
+	/**
+	 * Closes the map file and destroys all internal caches. Has no effect if no map file is currently opened.
+	 */
+	public abstract void close();
 
 	public abstract String getMapProjection();
 
 	/**
-	 * @param position
-	 *            ....
-	 * @return ...
+	 * Cancel loading
 	 */
-	public abstract String readString(int position);
-
 	public abstract void cancel();
 
 }

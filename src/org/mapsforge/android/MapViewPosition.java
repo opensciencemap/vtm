@@ -19,6 +19,7 @@ import org.mapsforge.core.MapPosition;
 import org.mapsforge.core.MercatorProjection;
 
 import android.util.FloatMath;
+import android.util.Log;
 
 /**
  * A MapPosition stores the latitude and longitude coordinate of a MapView together with its zoom level.
@@ -140,6 +141,7 @@ public class MapViewPosition {
 
 	public synchronized void rotateMap(float angle, float cx, float cy) {
 		moveMap(cx, cy);
+		Log.d("MapViewPosition", "rotate:" + angle + " " + (mRotation - angle));
 		mRotation -= angle;
 	}
 
@@ -152,7 +154,7 @@ public class MapViewPosition {
 		mLongitude = MercatorProjection.limitLongitude(geoPoint.getLongitude());
 	}
 
-	synchronized void setMapCenterAndZoomLevel(MapPosition mapPosition) {
+	synchronized void setMapCenter(MapPosition mapPosition) {
 		mLatitude = MercatorProjection.limitLatitude(mapPosition.lat);
 		mLongitude = MercatorProjection.limitLongitude(mapPosition.lon);
 		mZoomLevel = mMapView.limitZoomLevel(mapPosition.zoomLevel);

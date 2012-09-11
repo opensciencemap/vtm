@@ -21,9 +21,9 @@ import org.mapsforge.database.mapfile.MapDatabase;
 /**
  * Contains the immutable metadata of a map file.
  * 
- * @see MapDatabase#getMapFileInfo()
+ * @see MapDatabase#getMapInfo()
  */
-public class MapFileInfo {
+public class MapInfo {
 	/**
 	 * The bounding box of the map file.
 	 */
@@ -101,7 +101,7 @@ public class MapFileInfo {
 	 * @param createdBy
 	 *            ...
 	 */
-	public MapFileInfo(BoundingBox bbox, Byte zoom, GeoPoint start, String projection,
+	public MapInfo(BoundingBox bbox, Byte zoom, GeoPoint start, String projection,
 			long date, long size, int version, String language, String comment, String createdBy) {
 
 		this.startZoomLevel = zoom;

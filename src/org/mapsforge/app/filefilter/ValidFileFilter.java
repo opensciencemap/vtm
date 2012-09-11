@@ -16,7 +16,7 @@ package org.mapsforge.app.filefilter;
 
 import java.io.FileFilter;
 
-import org.mapsforge.database.FileOpenResult;
+import org.mapsforge.database.OpenResult;
 
 /**
  * An extension of the {@link FileFilter} interface.
@@ -25,5 +25,5 @@ public interface ValidFileFilter extends FileFilter {
 	/**
 	 * @return the result of the last {@link #accept} call (might be null).
 	 */
-	FileOpenResult getFileOpenResult();
+	OpenResult getFileOpenResult();
 }

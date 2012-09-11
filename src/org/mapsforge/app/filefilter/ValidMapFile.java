@@ -15,27 +15,32 @@
 package org.mapsforge.app.filefilter;
 
 import java.io.File;
+import java.util.HashMap;
 
-import org.mapsforge.database.FileOpenResult;
 import org.mapsforge.database.IMapDatabase;
+import org.mapsforge.database.OpenResult;
 import org.mapsforge.database.mapfile.MapDatabase;
 
 /**
  * Accepts all valid map files.
  */
 public final class ValidMapFile implements ValidFileFilter {
-	private FileOpenResult fileOpenResult;
+	private OpenResult openResult;
 
 	@Override
 	public boolean accept(File file) {
 		IMapDatabase mapDatabase = new MapDatabase();
-		this.fileOpenResult = mapDatabase.openFile(file);
-		mapDatabase.closeFile();
-		return this.fileOpenResult.isSuccess();
+		HashMap<String, String> options = new HashMap<String, String>();
+		options.put("mapfile", file.getAbsolutePath());
+
+		this.openResult = mapDatabase.open(options);
+
+		mapDatabase.close();
+		return this.openResult.isSuccess();
 	}
 
 	@Override
-	public FileOpenResult getFileOpenResult() {
-		return this.fileOpenResult;
+	public OpenResult getFileOpenResult() {
+		return this.openResult;
 	}
 }
