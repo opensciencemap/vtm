@@ -1,6 +1,6 @@
-package org.mapsforge.database.pbmap;
+package org.oscim.database.pbmap;
 
-option java_package = "org.mapsforge.database.pbmap";
+option java_package = "org.oscim.database.pbmap";
 option optimize_for = LITE_RUNTIME;
 
 message Data {

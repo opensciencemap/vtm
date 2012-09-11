@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.mapsforge.app"
+    package="org.oscim.app"
     android:installLocation="auto"
     android:versionCode="10"
     android:versionName="0.1" >
@@ -19,7 +19,7 @@
         android:label="@string/application_name"
         android:theme="@style/Theme.TileMap" >
         <activity
-            android:name="org.mapsforge.app.TileMap"
+            android:name="org.oscim.app.TileMap"
             android:configChanges="orientation|screenSize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,7 +29,7 @@
         </activity>
         <activity android:name=".preferences.EditPreferences" />
         <activity android:name=".filepicker.FilePicker" />
-        <activity android:name=".InfoView" android:theme="@android:style/Theme.NoTitleBar" />
+        <activity android:name=".InfoView" />
     </application>
 
 </manifest>
