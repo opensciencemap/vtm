@@ -15,6 +15,7 @@
 package org.oscim.app;
 
 import org.oscim.core.GeoPoint;
+import org.oscim.core.MapPosition;
 
 import android.content.Context;
 import android.location.Criteria;
@@ -43,7 +44,7 @@ public class LocationHandler {
 		mTileMap = tileMap;
 		mLocationManager = (LocationManager) tileMap
 				.getSystemService(Context.LOCATION_SERVICE);
-		mLocationListener = new MyLocationListener(tileMap);
+		mLocationListener = new MyLocationListener();
 
 		mSnapToLocationView = (ToggleButton) tileMap
 				.findViewById(R.id.snapToLocationView);
@@ -63,6 +64,8 @@ public class LocationHandler {
 	boolean enableShowMyLocation(boolean centerAtFirstFix) {
 		Log.d("TileMap", "enableShowMyLocation " + mShowMyLocation);
 
+		gotoLastKnownPosition();
+
 		if (!mShowMyLocation) {
 			Criteria criteria = new Criteria();
 			criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -77,7 +80,7 @@ public class LocationHandler {
 
 			Log.d("TileMap", "enableShowMyLocation " + mShowMyLocation);
 
-			mLocationListener.setCenterAtFirstFix(centerAtFirstFix);
+			mLocationListener.setFirstCenter(centerAtFirstFix);
 
 			mLocationManager.requestLocationUpdates(bestProvider, 1000, 0,
 					mLocationListener);
@@ -92,6 +95,7 @@ public class LocationHandler {
 	void gotoLastKnownPosition() {
 		Location currentLocation;
 		Location bestLocation = null;
+
 		for (String provider : mLocationManager.getProviders(true)) {
 			currentLocation = mLocationManager.getLastKnownLocation(provider);
 			if (currentLocation == null)
@@ -103,10 +107,14 @@ public class LocationHandler {
 		}
 
 		if (bestLocation != null) {
-			GeoPoint point = new GeoPoint(bestLocation.getLatitude(),
-					bestLocation.getLongitude());
+			byte zoom = mTileMap.mMapView.getMapPosition().getZoomLevel();
+			if (zoom < 12)
+				zoom = (byte) 12;
 
-			mTileMap.mMapView.setCenter(point);
+			MapPosition mapPosition = new MapPosition(bestLocation.getLatitude(),
+					bestLocation.getLongitude(), zoom, 1, 0);
+
+			mTileMap.mMapView.setMapCenter(mapPosition);
 
 		} else {
 			mTileMap.showToastOnUiThread(mTileMap
@@ -197,12 +205,8 @@ public class LocationHandler {
 	}
 
 	class MyLocationListener implements LocationListener {
-		private final TileMap tileMap;
-		private boolean centerAtFirstFix;
 
-		MyLocationListener(TileMap tileMap) {
-			this.tileMap = tileMap;
-		}
+		private boolean mSetCenter;
 
 		@Override
 		public void onLocationChanged(Location location) {
@@ -222,9 +226,9 @@ public class LocationHandler {
 			// this.advancedMapViewer.circleOverlay.requestRedraw();
 			// this.advancedMapViewer.itemizedOverlay.requestRedraw();
 
-			if (this.centerAtFirstFix || isSnapToLocationEnabled()) {
-				this.centerAtFirstFix = false;
-				this.tileMap.mMapView.setCenter(point);
+			if (mSetCenter || isSnapToLocationEnabled()) {
+				mSetCenter = false;
+				mTileMap.mMapView.setCenter(point);
 			}
 		}
 
@@ -243,12 +247,12 @@ public class LocationHandler {
 			// do nothing
 		}
 
-		boolean isCenterAtFirstFix() {
-			return this.centerAtFirstFix;
+		boolean isFirstCenter() {
+			return mSetCenter;
 		}
 
-		void setCenterAtFirstFix(boolean centerAtFirstFix) {
-			this.centerAtFirstFix = centerAtFirstFix;
+		void setFirstCenter(boolean center) {
+			mSetCenter = center;
 		}
 	}
 }

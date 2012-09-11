@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.oscim.android.mapgenerator.JobTile;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.database.IMapDatabase;
@@ -31,6 +30,7 @@ import org.oscim.database.QueryResult;
 import org.oscim.database.mapfile.header.MapFileHeader;
 import org.oscim.database.mapfile.header.MapFileInfo;
 import org.oscim.database.mapfile.header.SubFileParameter;
+import org.oscim.view.mapgenerator.JobTile;
 
 /**
  * A class for reading binary map files.

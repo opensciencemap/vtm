@@ -3,12 +3,6 @@ package org.oscim.app;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 
-import org.oscim.android.DebugSettings;
-import org.oscim.android.MapActivity;
-import org.oscim.android.MapView;
-import org.oscim.android.mapgenerator.MapDatabases;
-import org.oscim.android.rendertheme.InternalRenderTheme;
-import org.oscim.android.utils.AndroidUtils;
 import org.oscim.app.filefilter.FilterByFileExtension;
 import org.oscim.app.filefilter.ValidMapFile;
 import org.oscim.app.filefilter.ValidRenderTheme;
@@ -16,6 +10,12 @@ import org.oscim.app.filepicker.FilePicker;
 import org.oscim.app.preferences.EditPreferences;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
+import org.oscim.database.MapDatabases;
+import org.oscim.theme.InternalRenderTheme;
+import org.oscim.view.DebugSettings;
+import org.oscim.view.MapActivity;
+import org.oscim.view.MapView;
+import org.oscim.view.utils.AndroidUtils;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
@@ -140,9 +140,9 @@ public class TileMap extends MapActivity {
 						mLocation.disableShowMyLocation());
 				return true;
 
-			case R.id.menu_position_last_known:
-				mLocation.gotoLastKnownPosition();
-				return true;
+				// case R.id.menu_position_last_known:
+				// mLocation.gotoLastKnownPosition();
+				// return true;
 
 			case R.id.menu_position_enter_coordinates:
 				showDialog(DIALOG_ENTER_COORDINATES);

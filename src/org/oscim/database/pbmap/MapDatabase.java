@@ -53,7 +53,6 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestUserAgent;
-import org.oscim.android.mapgenerator.JobTile;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.Tag;
@@ -63,6 +62,7 @@ import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
+import org.oscim.view.mapgenerator.JobTile;
 
 import android.os.Environment;
 import android.os.SystemClock;

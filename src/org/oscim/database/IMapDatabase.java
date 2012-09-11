@@ -16,7 +16,7 @@ package org.oscim.database;
 
 import java.util.Map;
 
-import org.oscim.android.mapgenerator.JobTile;
+import org.oscim.view.mapgenerator.JobTile;
 
 /**
  *

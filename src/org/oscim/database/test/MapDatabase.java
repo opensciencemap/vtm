@@ -16,7 +16,6 @@ package org.oscim.database.test;
 
 import java.util.Map;
 
-import org.oscim.android.mapgenerator.JobTile;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
@@ -26,6 +25,7 @@ import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
+import org.oscim.view.mapgenerator.JobTile;
 
 /**
  * 

@@ -13,9 +13,9 @@
             <item
                 android:id="@+id/menu_position_my_location_disable"
                 android:title="@string/menu_position_my_location_disable"/>
-            <item
+           <!--  <item
                 android:id="@+id/menu_position_last_known"
-                android:title="@string/menu_position_last_known"/>
+                android:title="@string/menu_position_last_known"/> -->
             <item
                 android:id="@+id/menu_position_enter_coordinates"
                 android:title="@string/menu_position_enter_coordinates"/>
