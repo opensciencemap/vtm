@@ -179,6 +179,7 @@ public class MapView extends GLSurfaceView {
 		}
 
 		setMapFile("default");
+
 		initMapStartPosition();
 
 		mapActivity.registerMapView(this);
@@ -204,11 +205,19 @@ public class MapView extends GLSurfaceView {
 		GeoPoint startPoint = getStartPoint();
 		if (startPoint != null) {
 			mMapViewPosition.setMapCenter(startPoint);
-		}
+			Log.d(TAG, "got start");
 
-		Byte startZoomLevel = getStartZoomLevel();
-		if (startZoomLevel != null) {
-			mMapViewPosition.setZoomLevel(startZoomLevel.byteValue());
+			Byte startZoomLevel = getStartZoomLevel();
+			if (startZoomLevel != null) {
+				mMapViewPosition.setZoomLevel(startZoomLevel.byteValue());
+				Log.d(TAG, "got zoom");
+			} else
+				mMapViewPosition.setZoomLevel((byte) 2);
+		}
+		else {
+			startPoint = new GeoPoint(0, 0);
+			mMapViewPosition.setMapCenter(startPoint);
+			mMapViewPosition.setZoomLevel((byte) 4);
 		}
 	}
 

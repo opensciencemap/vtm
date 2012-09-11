@@ -77,9 +77,9 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		// configurations are considered to be "better" and returned first.
 		// You need to explicitly filter the data returned by eglChooseConfig!
 
-		for (int i = 0; i < configs.length; ++i) {
-			Log.i(TAG, printConfig(egl, display, configs[i]));
-		}
+		// for (int i = 0; i < configs.length; ++i) {
+		// Log.i(TAG, printConfig(egl, display, configs[i]));
+		// }
 
 		// int index = -1;
 		// for (int i = 0; i < configs.length; ++i) {

@@ -777,8 +777,8 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-		String ext = GLES20.glGetString(GLES20.GL_EXTENSIONS);
-		Log.d(TAG, "Extensions: " + ext);
+		// String ext = GLES20.glGetString(GLES20.GL_EXTENSIONS);
+		// Log.d(TAG, "Extensions: " + ext);
 
 		shortBuffer = new ShortBuffer[rotateBuffers];
 
