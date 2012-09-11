@@ -461,8 +461,10 @@ public class MapRenderer implements org.mapsforge.android.IMapRenderer {
 		if (MapView.debugFrameTime)
 			start = SystemClock.uptimeMillis();
 
-		mRotate = mMapView.enableRotation;
-
+		if (mRotate != (mMapView.enableRotation || mMapView.enableCompass)) {
+			Matrix.setIdentityM(mMVPMatrix, 0);
+			mRotate = mMapView.enableRotation || mMapView.enableCompass;
+		}
 		if (mUpdateColor && mClearColor != null) {
 			glClearColor(mClearColor[0], mClearColor[1], mClearColor[2], mClearColor[3]);
 			mUpdateColor = false;

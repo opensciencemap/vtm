@@ -53,8 +53,7 @@ import android.view.MotionEvent;
 
 /**
  * A MapView shows a map on the display of the device. It handles all user input and touch gestures to move and zoom the
- * map. This MapView also includes a scale bar and zoom controls. The {@link #getController()} method returns a
- * {@link MapController} to programmatically modify the position and zoom level of the map.
+ * map. This MapView also includes a scale bar and zoom controls.
  * <p>
  * This implementation supports offline map rendering as well as downloading map images (tiles) over an Internet
  * connection. The operation mode of a MapView can be set in the constructor and changed at runtime with the
@@ -78,14 +77,16 @@ public class MapView extends GLSurfaceView {
 	private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 16);
 
 	public final static boolean debugFrameTime = false;
-	public boolean enableRotation = false;
 
-	private final MapController mMapController;
+	public boolean enableRotation = false;
+	public boolean enableCompass = false;
+
 	private final MapViewPosition mMapViewPosition;
 
 	private final MapZoomControls mMapZoomControls;
 	private final Projection mProjection;
 	private final TouchHandler mTouchEventHandler;
+	private final Compass mCompass;
 
 	private IMapDatabase mMapDatabase;
 	private MapDatabases mMapDatabaseType;
@@ -131,6 +132,7 @@ public class MapView extends GLSurfaceView {
 			throw new IllegalArgumentException(
 					"context is not an instance of MapActivity");
 		}
+
 		Log.d(TAG, "create MapView: " + mapDatabaseType.name());
 
 		// TODO make this dpi dependent
@@ -139,8 +141,6 @@ public class MapView extends GLSurfaceView {
 		MapActivity mapActivity = (MapActivity) context;
 
 		debugSettings = new DebugSettings(false, false, false, false);
-
-		mMapController = new MapController(this);
 
 		mMapDatabaseType = mapDatabaseType;
 
@@ -151,6 +151,8 @@ public class MapView extends GLSurfaceView {
 		mProjection = new MapViewProjection(this);
 
 		mTouchEventHandler = new TouchHandler(mapActivity, this);
+
+		mCompass = new Compass(mapActivity, this);
 
 		mJobQueue = new JobQueue();
 
@@ -194,6 +196,8 @@ public class MapView extends GLSurfaceView {
 
 		if (!debugFrameTime)
 			setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+		// mCompass.enable();
 	}
 
 	private void initMapStartPosition() {
@@ -206,13 +210,6 @@ public class MapView extends GLSurfaceView {
 		if (startZoomLevel != null) {
 			mMapViewPosition.setZoomLevel(startZoomLevel.byteValue());
 		}
-	}
-
-	/**
-	 * @return the MapController for this MapView.
-	 */
-	public MapController getController() {
-		return mMapController;
 	}
 
 	/**
@@ -259,7 +256,10 @@ public class MapView extends GLSurfaceView {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent motionEvent) {
-		return mTouchEventHandler.handleMotionEvent(motionEvent);
+		if (this.isClickable())
+			return mTouchEventHandler.handleMotionEvent(motionEvent);
+
+		return false;
 	}
 
 	/**
@@ -280,17 +280,6 @@ public class MapView extends GLSurfaceView {
 	}
 
 	/**
-	 * Sets the visibility of the zoom controls.
-	 * 
-	 * @param showZoomControls
-	 *            true if the zoom controls should be visible, false otherwise.
-	 */
-	public void setBuiltInZoomControls(boolean showZoomControls) {
-		mMapZoomControls.setShowMapZoomControls(showZoomControls);
-
-	}
-
-	/**
 	 * Sets the center of the MapView and triggers a redraw.
 	 * 
 	 * @param geoPoint
@@ -299,6 +288,7 @@ public class MapView extends GLSurfaceView {
 	public void setCenter(GeoPoint geoPoint) {
 		MapPosition mapPosition = new MapPosition(geoPoint,
 				mMapViewPosition.getZoomLevel(), 1);
+
 		setCenterAndZoom(mapPosition);
 	}
 
@@ -562,12 +552,13 @@ public class MapView extends GLSurfaceView {
 			int oldHeight) {
 
 		mJobQueue.clear();
-
+		mCompass.disable();
 		mapWorkersPause(true);
 
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
 
 		mapWorkersProceed();
+		mCompass.enable();
 	}
 
 	void destroy() {
@@ -619,12 +610,18 @@ public class MapView extends GLSurfaceView {
 	public void onPause() {
 		super.onPause();
 		mapWorkersPause(false);
+
+		if (this.enableCompass)
+			mCompass.disable();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		mapWorkersProceed();
+
+		if (this.enableCompass)
+			mCompass.enable();
 	}
 
 	/**
@@ -634,7 +631,9 @@ public class MapView extends GLSurfaceView {
 	 *            the new map position of this MapView.
 	 */
 	void setCenterAndZoom(MapPosition mapPosition) {
-
+		Log.d(TAG, "setCenterAndZoom "
+				+ " lat: " + mapPosition.lat
+				+ " lon: " + mapPosition.lon);
 		mMapViewPosition.setMapCenterAndZoomLevel(mapPosition);
 		redrawTiles();
 	}
@@ -687,7 +686,39 @@ public class MapView extends GLSurfaceView {
 
 	public void enableRotation(boolean enable) {
 		enableRotation = enable;
+
+		if (enable && this.enableCompass) {
+			this.enableCompass = false;
+			mCompass.disable();
+		}
 	}
+
+	public void enableCompass(boolean enable) {
+		if (enable == this.enableCompass)
+			return;
+
+		this.enableCompass = enable;
+
+		if (enable)
+			this.enableRotation = false;
+
+		if (enable)
+			mCompass.enable();
+		else
+			mCompass.disable();
+
+	}
+
+	// /**
+	// * Sets the visibility of the zoom controls.
+	// *
+	// * @param showZoomControls
+	// * true if the zoom controls should be visible, false otherwise.
+	// */
+	// public void setBuiltInZoomControls(boolean showZoomControls) {
+	// mMapZoomControls.setShowMapZoomControls(showZoomControls);
+	//
+	// }
 
 	// public final int
 	// public Handler messageHandler = new Handler() {

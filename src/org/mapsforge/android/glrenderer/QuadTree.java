@@ -19,13 +19,18 @@ import android.util.Log;
 class QuadTree {
 	private static String TAG = "QuadTree";
 
+	// pointer to tile 0/0/0
 	private static QuadTree root;
 
 	// parent pointer is used to link pool items
 	private static QuadTree pool;
 
-	// TreeTile members
 	QuadTree parent;
+	// .... x y
+	// 0 => 0 0
+	// 1 => 1 0
+	// 2 => 0 1
+	// 3 => 1 1
 	final QuadTree[] child = new QuadTree[4];
 	int refs = 0;
 	byte id;
