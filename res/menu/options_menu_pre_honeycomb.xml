@@ -13,19 +13,27 @@
             <item
                 android:id="@+id/menu_position_my_location_disable"
                 android:title="@string/menu_position_my_location_disable"/>
-            <item
+           <!--  <item
                 android:id="@+id/menu_position_last_known"
-                android:title="@string/menu_position_last_known"/>
+                android:title="@string/menu_position_last_known"/> -->
             <item
                 android:id="@+id/menu_position_enter_coordinates"
                 android:title="@string/menu_position_enter_coordinates"/>
             <item
                 android:id="@+id/menu_position_map_center"
                 android:title="@string/menu_position_map_file_center"/>
-            
-            <item
+           <item
                 android:id="@+id/menu_rotation_enable"
                 android:title="@string/menu_rotation_enable"/>
+            <item
+                android:id="@+id/menu_rotation_disable"
+                android:title="@string/menu_rotation_disable"/>
+             <item
+                android:id="@+id/menu_compass_enable"
+                android:title="@string/menu_compass_enable"/>
+             <item
+                android:id="@+id/menu_compass_disable"
+                android:title="@string/menu_compass_disable"/>
         </menu>
     </item>
     <item
