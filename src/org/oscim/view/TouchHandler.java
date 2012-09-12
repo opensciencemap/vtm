@@ -334,22 +334,24 @@ public class TouchHandler {
 		public void onLongPress(MotionEvent e) {
 			Log.d("mapsforge", "long press");
 
+			mMapView.mRegionLookup.updateRegion();
+
 			// mMapView.zoom((byte) -1);
 
-			mPrevScale = 0;
+			// mPrevScale = 0;
 
-			mTimer = new CountDownTimer((int) mScaleDuration, 30) {
-				@Override
-				public void onTick(long tick) {
-					scale2(tick);
-				}
-
-				@Override
-				public void onFinish() {
-					scale2(0);
-
-				}
-			}.start();
+			// mTimer = new CountDownTimer((int) mScaleDuration, 30) {
+			// @Override
+			// public void onTick(long tick) {
+			// scale2(tick);
+			// }
+			//
+			// @Override
+			// public void onFinish() {
+			// scale2(0);
+			//
+			// }
+			// }.start();
 
 		}
 

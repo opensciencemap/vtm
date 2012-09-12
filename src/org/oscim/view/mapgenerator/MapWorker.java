@@ -15,8 +15,6 @@
 package org.oscim.view.mapgenerator;
 
 import org.oscim.view.IMapRenderer;
-import org.oscim.view.MapView;
-import org.oscim.view.utils.PausableThread;
 
 /**
  * A MapWorker uses a {@link IMapGenerator} to generate map tiles. It runs in a separate thread to avoid blocking the UI
@@ -33,17 +31,15 @@ public class MapWorker extends PausableThread {
 	/**
 	 * @param id
 	 *            thread id
-	 * @param mapView
-	 *            the MapView for which this MapWorker generates map tiles.
 	 * @param mapGenerator
 	 *            ...
 	 * @param mapRenderer
 	 *            ...
 	 */
-	public MapWorker(int id, MapView mapView, IMapGenerator mapGenerator,
+	public MapWorker(int id, JobQueue jobQueue, IMapGenerator mapGenerator,
 			IMapRenderer mapRenderer) {
 		super();
-		mJobQueue = mapView.getJobQueue();
+		mJobQueue = jobQueue;
 		mMapGenerator = mapGenerator;
 		mMapRenderer = mapRenderer;
 

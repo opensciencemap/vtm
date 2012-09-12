@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view.utils;
+package org.oscim.view.mapgenerator;
 
 /**
  * An abstract base class for threads which support pausing and resuming.
