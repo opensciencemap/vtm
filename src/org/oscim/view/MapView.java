@@ -30,6 +30,7 @@ import org.oscim.database.MapDatabaseFactory;
 import org.oscim.database.MapDatabases;
 import org.oscim.database.MapInfo;
 import org.oscim.database.OpenResult;
+import org.oscim.stuff.RegionLookup;
 import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.RenderTheme;
@@ -84,6 +85,7 @@ public class MapView extends GLSurfaceView {
 	private int mNumMapWorkers = 4;
 	private DebugSettings debugSettings;
 	private String mRenderTheme;
+	private Map<String, String> mMapOptions;
 
 	/**
 	 * @param context
@@ -145,6 +147,7 @@ public class MapView extends GLSurfaceView {
 		mJobQueue = new JobQueue();
 
 		mMapRenderer = MapRendererFactory.createMapRenderer(this, mapGeneratorType);
+
 		mMapWorkers = new MapWorker[mNumMapWorkers];
 
 		for (int i = 0; i < mNumMapWorkers; i++) {
@@ -162,7 +165,7 @@ public class MapView extends GLSurfaceView {
 			if (i == 0)
 				mMapDatabase = mapDatabase;
 
-			mMapWorkers[i] = new MapWorker(i, this, mapGenerator, mMapRenderer);
+			mMapWorkers[i] = new MapWorker(i, mJobQueue, mapGenerator, mMapRenderer);
 			mMapWorkers[i].start();
 		}
 
@@ -186,21 +189,12 @@ public class MapView extends GLSurfaceView {
 
 		if (!debugFrameTime)
 			setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+		mRegionLookup = new RegionLookup(this);
+
 	}
 
-	/**
-	 * @return the debug settings which are used in this MapView.
-	 */
-	public DebugSettings getDebugSettings() {
-		return debugSettings;
-	}
-
-	/**
-	 * @return the job queue which is used in this MapView.
-	 */
-	public JobQueue getJobQueue() {
-		return mJobQueue;
-	}
+	RegionLookup mRegionLookup;
 
 	/**
 	 * @return the map database which is used for reading map files.
@@ -214,13 +208,6 @@ public class MapView extends GLSurfaceView {
 	 */
 	public MapViewPosition getMapPosition() {
 		return mMapViewPosition;
-	}
-
-	/**
-	 * @return the currently used projection of the map. Do not keep this object for a longer time.
-	 */
-	public Projection getProjection() {
-		return mProjection;
 	}
 
 	@Override
@@ -247,7 +234,12 @@ public class MapView extends GLSurfaceView {
 		mMapRenderer.updateMap(true);
 	}
 
-	private Map<String, String> mMapOptions;
+	/**
+	 * @return the debug settings which are used in this MapView.
+	 */
+	public DebugSettings getDebugSettings() {
+		return debugSettings;
+	}
 
 	public Map<String, String> getMapOptions() {
 		return mMapOptions;
