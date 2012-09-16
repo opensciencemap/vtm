@@ -14,7 +14,7 @@
  */
 package org.oscim.view;
 
-import org.oscim.view.mapgenerator.IMapGenerator;
+import org.oscim.view.renderer.MapGenerator;
 
 import android.content.Context;
 import android.os.Handler;
@@ -23,6 +23,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ZoomControls;
 
 /**
@@ -44,28 +45,35 @@ public class MapZoomControls {
 	}
 
 	private static class ZoomInClickListener implements View.OnClickListener {
-		private final MapView mMapView;
+		private final MapZoomControls mMapZoomControls;
 
-		ZoomInClickListener(MapView mapView) {
-			mMapView = mapView;
+		ZoomInClickListener(MapZoomControls mapZoomControls) {
+			mMapZoomControls = mapZoomControls;
 		}
 
 		@Override
 		public void onClick(View view) {
-			mMapView.zoom((byte) 1);
+			// if (MapView.testRegionZoom)
+			// mMapView.mRegionLookup.updateRegion(1, null);
+			// else
+			// MapZoomControls.this.zoom((byte) 1);
+			mMapZoomControls.zoom((byte) 1);
 		}
 	}
 
 	private static class ZoomOutClickListener implements View.OnClickListener {
-		private final MapView mMapView;
+		private final MapZoomControls mMapZoomControls;
 
-		ZoomOutClickListener(MapView mapView) {
-			mMapView = mapView;
+		ZoomOutClickListener(MapZoomControls mapZoomControls) {
+			mMapZoomControls = mapZoomControls;
 		}
 
 		@Override
 		public void onClick(View view) {
-			mMapView.zoom((byte) -1);
+			// if (MapView.testRegionZoom)
+			// mMapView.mRegionLookup.updateRegion(-1, null);
+			// else
+			mMapZoomControls.zoom((byte) -1);
 		}
 	}
 
@@ -78,12 +86,12 @@ public class MapZoomControls {
 	/**
 	 * Default maximum zoom level.
 	 */
-	private static final byte DEFAULT_ZOOM_LEVEL_MAX = 22;
+	private static final byte DEFAULT_ZOOM_LEVEL_MAX = 18;
 
 	/**
 	 * Default minimum zoom level.
 	 */
-	private static final byte DEFAULT_ZOOM_LEVEL_MIN = 0;
+	private static final byte DEFAULT_ZOOM_LEVEL_MIN = 1;
 
 	/**
 	 * Message code for the handler to hide the zoom controls.
@@ -108,22 +116,53 @@ public class MapZoomControls {
 	private final Handler mZoomControlsHideHandler;
 	private byte mZoomLevelMax;
 	private byte mZoomLevelMin;
+	private MapView mMapView;
 
 	MapZoomControls(Context context, final MapView mapView) {
 		mZoomControls = new ZoomControls(context);
 		mShowMapZoomControls = true;
 		mZoomLevelMax = DEFAULT_ZOOM_LEVEL_MAX;
 		mZoomLevelMin = DEFAULT_ZOOM_LEVEL_MIN;
-		mZoomControls.setVisibility(View.GONE);
+		if (!MapView.testRegionZoom)
+			mZoomControls.setVisibility(View.GONE);
 		mZoomControlsGravity = DEFAULT_ZOOM_CONTROLS_GRAVITY;
 
-		mZoomControls.setOnZoomInClickListener(new ZoomInClickListener(mapView));
-		mZoomControls.setOnZoomOutClickListener(new ZoomOutClickListener(mapView));
+		mZoomControls.setOnZoomInClickListener(new ZoomInClickListener(this));
+		mZoomControls.setOnZoomOutClickListener(new ZoomOutClickListener(this));
 		mZoomControlsHideHandler = new ZoomControlsHideHandler(mZoomControls);
 
-		// int wrapContent = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-		// LayoutParams layoutParams = new LayoutParams(wrapContent, wrapContent);
-		// mapView.addView(zoomControls, layoutParams);
+		int wrapContent = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+		LayoutParams layoutParams = new LayoutParams(wrapContent, wrapContent);
+		mapView.addView(mZoomControls, layoutParams);
+	}
+
+	/**
+	 * Zooms in or out by the given amount of zoom levels.
+	 * 
+	 * @param zoomLevelDiff
+	 *            the difference to the current zoom level.
+	 * @return true if the zoom level was changed, false otherwise.
+	 */
+	boolean zoom(byte zoomLevelDiff) {
+		MapViewPosition mapViewPosition = mMapView.getMapViewPosition();
+		int z = mapViewPosition.getZoomLevel() + zoomLevelDiff;
+		if (zoomLevelDiff > 0) {
+			// check if zoom in is possible
+			if (z > mZoomLevelMax) {
+				return false;
+			}
+
+		} else if (zoomLevelDiff < 0) {
+			// check if zoom out is possible
+			if (z < getZoomLevelMin()) {
+				return false;
+			}
+		}
+
+		mapViewPosition.setZoomLevel((byte) z);
+		mMapView.redrawMap();
+
+		return true;
 	}
 
 	/**
@@ -156,11 +195,11 @@ public class MapZoomControls {
 	}
 
 	/**
-	 * @param showMapZoomControls
+	 * @param show
 	 *            true if the zoom controls should be visible, false otherwise.
 	 */
-	public void setShowMapZoomControls(boolean showMapZoomControls) {
-		mShowMapZoomControls = false;
+	public void setShowMapZoomControls(boolean show) {
+		mShowMapZoomControls = show;
 	}
 
 	/**
@@ -181,7 +220,7 @@ public class MapZoomControls {
 	/**
 	 * Sets the maximum zoom level of the map.
 	 * <p>
-	 * The maximum possible zoom level of the MapView depends also on the current {@link IMapGenerator}. For example,
+	 * The maximum possible zoom level of the MapView depends also on the current {@link MapGenerator}. For example,
 	 * downloading map tiles may only be possible up to a certain zoom level. Setting a higher maximum zoom level has no
 	 * effect in this case.
 	 * 

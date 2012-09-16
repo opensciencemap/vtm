@@ -14,7 +14,6 @@
  */
 package org.oscim.core;
 
-
 /**
  * A GeoPoint represents an immutable pair of latitude and longitude coordinates.
  */
@@ -119,10 +118,10 @@ public class GeoPoint implements Comparable<GeoPoint> {
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("GeoPoint [latitudeE6=");
-		stringBuilder.append(this.latitudeE6);
-		stringBuilder.append(", longitudeE6=");
-		stringBuilder.append(this.longitudeE6);
+		stringBuilder.append("GeoPoint [lat=");
+		stringBuilder.append(this.getLatitude());
+		stringBuilder.append(", lon=");
+		stringBuilder.append(this.getLongitude());
 		stringBuilder.append("]");
 		return stringBuilder.toString();
 	}

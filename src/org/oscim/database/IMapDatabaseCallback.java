@@ -26,14 +26,14 @@ public interface IMapDatabaseCallback {
 	 * 
 	 * @param layer
 	 *            the layer of the node.
+	 * @param tags
+	 *            the tags of the node.
 	 * @param latitude
 	 *            the latitude of the node.
 	 * @param longitude
 	 *            the longitude of the node.
-	 * @param tags
-	 *            the tags of the node.
 	 */
-	void renderPointOfInterest(byte layer, float latitude, float longitude, Tag[] tags);
+	void renderPointOfInterest(byte layer, Tag[] tags, float latitude, float longitude);
 
 	/**
 	 * Renders water background for the current tile.
@@ -51,12 +51,21 @@ public interface IMapDatabaseCallback {
 	 *            the geographical coordinates of the way nodes in the order longitude/latitude.
 	 * @param wayLength
 	 *            length of way data in wayNodes
-	 * @param changed
-	 *            tags have changed since last call (just an optional hint)
+	 * @param closed
+	 *            way is closed (means need to add endpoint == startpoint)
 	 */
 	void renderWay(byte layer, Tag[] tags, float[] wayNodes, short[] wayLength,
-			boolean changed);
+			boolean closed);
 
+	/**
+	 * TBD: check if way will be rendered before decoding
+	 * 
+	 * @param tags
+	 *            ...
+	 * @param closed
+	 *            ...
+	 * @return true if the way will be rendered (i.e. found match in RenderTheme)
+	 */
 	boolean checkWay(Tag[] tags, boolean closed);
 
 }

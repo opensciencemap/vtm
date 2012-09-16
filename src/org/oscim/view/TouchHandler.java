@@ -29,19 +29,22 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
 
 /**
- * Implementation for multi-touch capable devices.
+ * Implementation for multi-touch capable devices. TODO write a AnimationTimer instead of using CountDownTimer
  */
 public class TouchHandler {
 	private static final int INVALID_POINTER_ID = -1;
 
 	/* package */final MapView mMapView;
 	/* package */final MapViewPosition mMapPosition;
+	/* package */final DecelerateInterpolator mInterpolator = new DecelerateInterpolator();
+	/* package */boolean mBeginScale;
+	/* package */float mSumScale;
 
 	private final float mMapMoveDelta;
 	private boolean mMoveStart;
-	private boolean mRotationStart;
-	private float mPosX;
-	private float mPosY;
+	private boolean mBeginRotate;
+	/* package */float mPosX;
+	/* package */float mPosY;
 	private double mAngle;
 
 	private int mActivePointerId;
@@ -78,8 +81,9 @@ public class TouchHandler {
 	private boolean onActionDown(MotionEvent event) {
 		mPosX = event.getX();
 		mPosY = event.getY();
+
 		mMoveStart = false;
-		mRotationStart = false;
+		mBeginRotate = false;
 		// save the ID of the pointer
 		mActivePointerId = event.getPointerId(0);
 		// Log.d("...", "set active pointer" + mActivePointerId);
@@ -126,28 +130,27 @@ public class TouchHandler {
 				double dy = y1 - y2;
 
 				double rad = Math.atan2(dy, dx);
-
-				// focus point relative to center
-				double cx = (mMapView.getWidth() >> 1) - (x1 + x2) / 2;
-				double cy = (mMapView.getHeight() >> 1) - (y1 + y2) / 2;
 				double r = rad - mAngle;
-
-				double rsin = Math.sin(r);
-				double rcos = Math.cos(r);
-
-				float x = (float) (cx * rcos + cy * -rsin - cx);
-				float y = (float) (cx * rsin + cy * rcos - cy);
 
 				// Log.d("...", "move " + x + " " + y + " " + cx + " " + cy);
 
-				if (!mRotationStart) {
-					if (Math.abs(rad - mAngle) > 0.001)
-						mRotationStart = true;
-				}
-				else {
+				if (!mBeginRotate && !mBeginScale) {
+					if (r > 0.02 || r < -0.02)
+						mBeginRotate = true;
+				} else if (mBeginRotate) {
+					double rsin = Math.sin(r);
+					double rcos = Math.cos(r);
+
+					// focus point relative to center
+					double cx = (mMapView.getWidth() >> 1) - (x1 + x2) / 2;
+					double cy = (mMapView.getHeight() >> 1) - (y1 + y2) / 2;
+
+					float x = (float) (cx * rcos + cy * -rsin - cx);
+					float y = (float) (cx * rsin + cy * rcos - cy);
+
 					mMapPosition.rotateMap((float) Math.toDegrees(rad - mAngle), x, y);
 					mAngle = rad;
-					mMapView.redrawTiles();
+					mMapView.redrawMap();
 				}
 			}
 		}
@@ -160,7 +163,7 @@ public class TouchHandler {
 		}
 
 		mMapPosition.moveMap(moveX, moveY);
-		mMapView.redrawTiles();
+		mMapView.redrawMap();
 
 		return true;
 	}
@@ -182,7 +185,8 @@ public class TouchHandler {
 	private boolean onActionPointerUp(MotionEvent motionEvent) {
 
 		// extract the index of the pointer that left the touch sensor
-		int pointerIndex = (motionEvent.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+		int masked = (motionEvent.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK);
+		int pointerIndex = masked >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
 
 		if (motionEvent.getPointerId(pointerIndex) == mActivePointerId) {
 			// the active pointer has gone up, choose a new one
@@ -251,7 +255,7 @@ public class TouchHandler {
 
 	class MapGestureDetector extends SimpleOnGestureListener {
 		private Scroller mScroller;
-		private float mPrevX, mPrevY, mPrevScale;
+		private float mScrollX, mScrollY, mPrevScale;
 		private CountDownTimer mTimer = null;
 		private boolean fling = false;
 
@@ -282,14 +286,14 @@ public class TouchHandler {
 			}
 			mScroller.computeScrollOffset();
 
-			float moveX = mScroller.getCurrX() - mPrevX;
-			float moveY = mScroller.getCurrY() - mPrevY;
+			float moveX = mScroller.getCurrX() - mScrollX;
+			float moveY = mScroller.getCurrY() - mScrollY;
 
 			if (moveX >= 1 || moveY >= 1 || moveX <= -1 || moveY <= -1) {
 				mMapPosition.moveMap(moveX, moveY);
-				mMapView.redrawTiles();
-				mPrevX = mScroller.getCurrX();
-				mPrevY = mScroller.getCurrY();
+				mMapView.redrawMap();
+				mScrollX = mScroller.getCurrX();
+				mScrollY = mScroller.getCurrY();
 			}
 			return true;
 		}
@@ -299,8 +303,8 @@ public class TouchHandler {
 				float velocityY) {
 			int w = Tile.TILE_SIZE * 20;
 			int h = Tile.TILE_SIZE * 20;
-			mPrevX = 0;
-			mPrevY = 0;
+			mScrollX = 0;
+			mScrollY = 0;
 
 			if (mTimer != null) {
 				mTimer.cancel();
@@ -326,61 +330,12 @@ public class TouchHandler {
 			return true;
 		}
 
-		private DecelerateInterpolator mBounce = new DecelerateInterpolator();
-
-		private boolean mZooutOut = true;
-
 		@Override
 		public void onLongPress(MotionEvent e) {
-			Log.d("mapsforge", "long press");
-
-			mMapView.mRegionLookup.updateRegion();
-
-			// mMapView.zoom((byte) -1);
-
-			// mPrevScale = 0;
-
-			// mTimer = new CountDownTimer((int) mScaleDuration, 30) {
-			// @Override
-			// public void onTick(long tick) {
-			// scale2(tick);
-			// }
-			//
-			// @Override
-			// public void onFinish() {
-			// scale2(0);
-			//
-			// }
-			// }.start();
-
-		}
-
-		boolean scale2(long tick) {
-
-			if (mPrevScale >= 1) {
-				mTimer = null;
-				return false;
+			if (MapView.testRegionZoom) {
+				Log.d("mapsforge", "long press");
+				mMapView.mRegionLookup.updateRegion(-1, null);
 			}
-
-			float adv = (mScaleDuration - tick) / mScaleDuration;
-			adv = mBounce.getInterpolation(adv);
-
-			float scale = adv - mPrevScale;
-			mPrevScale += scale;
-
-			if (mZooutOut) {
-				mMapPosition.scaleMap(1 - scale, 0, 0);
-			}
-			// } else {
-			// mMapPosition.scaleMap(1 + scale, mFocusX, mFocusY);
-			// }
-
-			mMapView.redrawTiles();
-
-			if (tick == 0)
-				mTimer = null;
-
-			return true;
 		}
 
 		private final float mScaleDuration = 300;
@@ -391,7 +346,7 @@ public class TouchHandler {
 			if (mPrevScale >= 1)
 				return false;
 			float adv = (mScaleDuration - tick) / mScaleDuration;
-			adv = mBounce.getInterpolation(adv);
+			adv = mInterpolator.getInterpolation(adv);
 
 			float scale = adv - mPrevScale;
 			mPrevScale += scale;
@@ -399,8 +354,8 @@ public class TouchHandler {
 			adv += 1;
 
 			if (scale > 1) {
-				mMapPosition.scaleMap(scale, mPrevX / adv, mPrevY / adv);
-				mMapView.redrawTiles();
+				mMapPosition.scaleMap(scale, mScrollX / adv, mScrollY / adv);
+				mMapView.redrawMap();
 			}
 
 			return true;
@@ -408,24 +363,28 @@ public class TouchHandler {
 
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
-			// Log.d("mapsforge", "double tap");
+			if (MapView.testRegionZoom) {
+				Log.d("mapsforge", "double tap");
 
-			mPrevX = (e.getX(0) - (mMapView.getWidth() >> 1)) * 2f;
-			mPrevY = (e.getY(0) - (mMapView.getHeight() >> 1)) * 2f;
-			mPrevScale = 0;
+				mMapView.mRegionLookup.updateRegion(1,
+						mMapPosition.getOffsetPoint(mPosX, mPosY));
+			} else {
+				mScrollX = (e.getX(0) - (mMapView.getWidth() >> 1)) * 2f;
+				mScrollY = (e.getY(0) - (mMapView.getHeight() >> 1)) * 2f;
+				mPrevScale = 0;
 
-			mTimer = new CountDownTimer((int) mScaleDuration, 30) {
-				@Override
-				public void onTick(long tick) {
-					scale(tick);
-				}
+				mTimer = new CountDownTimer((int) mScaleDuration, 30) {
+					@Override
+					public void onTick(long tick) {
+						scale(tick);
+					}
 
-				@Override
-				public void onFinish() {
-					scale(0);
-				}
-			}.start();
-
+					@Override
+					public void onFinish() {
+						scale(0);
+					}
+				}.start();
+			}
 			return true;
 		}
 	}
@@ -435,38 +394,34 @@ public class TouchHandler {
 		private float mCenterY;
 		private float mFocusX;
 		private float mFocusY;
-		private float mScale;
-		private boolean mBeginScale;
+		private long mTimeStart;
+		private long mTimeEnd;
 
 		@Override
 		public boolean onScale(ScaleGestureDetector gd) {
 
-			mScale = gd.getScaleFactor();
+			float scale = gd.getScaleFactor();
 			mFocusX = gd.getFocusX() - mCenterX;
 			mFocusY = gd.getFocusY() - mCenterY;
 
-			mSumScale *= mScale;
+			mSumScale *= scale;
 
 			mTimeEnd = SystemClock.elapsedRealtime();
 
 			if (!mBeginScale) {
-				if (mTimeEnd - mTimeStart > 100) {
+				if (mTimeEnd - mTimeStart > 150 || mSumScale > 1.1 || mSumScale < 0.9) {
 					mBeginScale = true;
-					mScale = mSumScale;
+					scale = mSumScale;
 				}
 				else
 					return true;
 			}
 
-			mMapPosition.scaleMap(mScale, mFocusX, mFocusY);
-			mMapView.redrawTiles();
+			mMapPosition.scaleMap(scale, mFocusX, mFocusY);
+			mMapView.redrawMap();
 
 			return true;
 		}
-
-		private long mTimeStart;
-		private long mTimeEnd;
-		private float mSumScale;
 
 		@Override
 		public boolean onScaleBegin(ScaleGestureDetector gd) {
@@ -475,7 +430,6 @@ public class TouchHandler {
 			mBeginScale = false;
 			mCenterX = mMapView.getWidth() >> 1;
 			mCenterY = mMapView.getHeight() >> 1;
-			mScale = 1;
 
 			if (mTimer != null) {
 				mTimer.cancel();
@@ -508,9 +462,9 @@ public class TouchHandler {
 					}
 				}.start();
 			}
+			mBeginScale = false;
 		}
 
-		private DecelerateInterpolator mBounce = new DecelerateInterpolator();
 		private float mPrevScale;
 		private CountDownTimer mTimer;
 		boolean mZooutOut;
@@ -524,7 +478,7 @@ public class TouchHandler {
 			}
 
 			float adv = (mScaleDuration - tick) / mScaleDuration;
-			adv = mBounce.getInterpolation(adv);
+			adv = mInterpolator.getInterpolation(adv);
 
 			float scale = adv - mPrevScale;
 			mPrevScale += scale;
@@ -535,7 +489,7 @@ public class TouchHandler {
 				mMapPosition.scaleMap(1 + scale, mFocusX, mFocusY);
 			}
 
-			mMapView.redrawTiles();
+			mMapView.redrawMap();
 
 			if (tick == 0)
 				mTimer = null;

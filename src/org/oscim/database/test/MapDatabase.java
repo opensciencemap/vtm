@@ -17,7 +17,6 @@ package org.oscim.database.test;
 import java.util.Map;
 
 import org.oscim.core.BoundingBox;
-import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
@@ -25,7 +24,7 @@ import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
-import org.oscim.view.mapgenerator.JobTile;
+import org.oscim.view.generator.JobTile;
 
 /**
  * 
@@ -35,7 +34,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private final static String PROJECTION = "Mercator";
 	private float[] mCoords = new float[20];
-	private short[] mIndex = new short[2];
+	private short[] mIndex = new short[4];
 	// private Tag[] mTags = { new Tag("boundary", "administrative"), new Tag("admin_level", "2") };
 	private Tag[] mTags = { new Tag("natural", "water") };
 	private Tag[] mNameTags;
@@ -46,64 +45,13 @@ public class MapDatabase implements IMapDatabase {
 
 	private boolean mOpenFile = false;
 
-	// private static double radius = 6378137;
-	// private static double D2R = Math.PI / 180;
-
-	// private static double HALF_PI = Math.PI / 2;
-
 	@Override
 	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 
-		long cx = tile.pixelX + (Tile.TILE_SIZE >> 1);
-		long cy = tile.pixelY + (Tile.TILE_SIZE >> 1);
-		// float lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 100, tile.zoomLevel) * 1000000;
-		// float lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 100, tile.zoomLevel) * 1000000;
-		// float lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 100, tile.zoomLevel) * 1000000;
-		// float lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 100, tile.zoomLevel) * 1000000;
-
-		float lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 100,
-				tile.zoomLevel);
-		float lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 100,
-				tile.zoomLevel);
-		float lat1 = (float) MercatorProjection
-				.pixelYToLatitude(cy - 100, tile.zoomLevel);
-		float lat2 = (float) MercatorProjection
-				.pixelYToLatitude(cy + 100, tile.zoomLevel);
-
-		// double lonRadians = (D2R * lon1);
-		// double latRadians = (D2R * lat1);
-
-		// spherical mercator projection
-		// lon1 = (float) (radius * lonRadians);
-		// lat1 = (float) (radius * Math.log(Math.tan(Math.PI * 0.25 + latRadians * 0.5)));
-		//
-		// lonRadians = (D2R * lon2);
-		// latRadians = (D2R * lat2);
-		//
-		// lon2 = (float) (radius * lonRadians);
-		// lat2 = (float) (radius * Math.log(Math.tan(Math.PI * 0.25 + latRadians * 0.5)));
-		//
-		// mCoords[0] = lon1;
-		// mCoords[1] = lat1;
-		//
-		// mCoords[2] = lon2;
-		// mCoords[3] = lat1;
-		//
-		// mCoords[4] = lon2;
-		// mCoords[5] = lat2;
-		//
-		// mCoords[6] = lon1;
-		// mCoords[7] = lat2;
-		//
-		// mCoords[8] = lon1;
-		// mCoords[9] = lat1;
-		//
-		// mIndex[0] = 10;
-
-		lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 139, tile.zoomLevel) * 1000000;
-		lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 139, tile.zoomLevel) * 1000000;
-		lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 139, tile.zoomLevel) * 1000000;
-		lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 139, tile.zoomLevel) * 1000000;
+		float lat1 = -0.5f;
+		float lon1 = -0.5f;
+		float lat2 = Tile.TILE_SIZE - 0.5f;
+		float lon2 = Tile.TILE_SIZE - 0.5f;
 
 		mCoords[0] = lon1;
 		mCoords[1] = lat1;
@@ -120,12 +68,13 @@ public class MapDatabase implements IMapDatabase {
 		mCoords[8] = lon1;
 		mCoords[9] = lat1;
 
-		mIndex[0] = 10;
+		mIndex[0] = 8;
+		mIndex[1] = 2;
 
-		lon1 = (float) MercatorProjection.pixelXToLongitude(cx - 119, tile.zoomLevel) * 1000000;
-		lon2 = (float) MercatorProjection.pixelXToLongitude(cx + 119, tile.zoomLevel) * 1000000;
-		lat1 = (float) MercatorProjection.pixelYToLatitude(cy - 119, tile.zoomLevel) * 1000000;
-		lat2 = (float) MercatorProjection.pixelYToLatitude(cy + 119, tile.zoomLevel) * 1000000;
+		lon1 = 40;
+		lon2 = Tile.TILE_SIZE - 40;
+		lat1 = 40;
+		lat2 = Tile.TILE_SIZE - 40;
 
 		mCoords[10] = lon1;
 		mCoords[11] = lat1;
@@ -142,24 +91,26 @@ public class MapDatabase implements IMapDatabase {
 		mCoords[18] = lon1;
 		mCoords[19] = lat1;
 
-		mIndex[1] = 10;
+		mIndex[2] = 8;
+		mIndex[3] = 2;
+
 		mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, mIndex, true);
 
-		lon1 = (float) MercatorProjection.pixelXToLongitude(cx, tile.zoomLevel) * 1000000;
-		lat1 = (float) MercatorProjection.pixelXToLongitude(cx, tile.zoomLevel) * 1000000;
+		lon1 = Tile.TILE_SIZE / 2;
+		lat1 = Tile.TILE_SIZE / 2;
 
 		mNameTags = new Tag[2];
 		mNameTags[0] = new Tag("place", "city");
-		mNameTags[1] = new Tag("name", "check one check two, YO!");
-		mapDatabaseCallback.renderPointOfInterest((byte) 0, (int) lat1, (int) lon1,
-				mNameTags);
+		mNameTags[1] = new Tag("name", tile.toString());
+		mapDatabaseCallback.renderPointOfInterest((byte) 0, mNameTags, (int) lat1,
+				(int) lon1);
 
 		return QueryResult.SUCCESS;
 	}
 
 	@Override
 	public String getMapProjection() {
-		return PROJECTION;
+		return null; // PROJECTION;
 	}
 
 	@Override
@@ -185,8 +136,6 @@ public class MapDatabase implements IMapDatabase {
 
 	@Override
 	public void cancel() {
-		// TODO Auto-generated method stub
-
 	}
 
 }

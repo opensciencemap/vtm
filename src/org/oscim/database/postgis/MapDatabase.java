@@ -33,7 +33,7 @@ import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
-import org.oscim.view.mapgenerator.JobTile;
+import org.oscim.view.generator.JobTile;
 import org.postgresql.PGConnection;
 
 import android.util.Log;
@@ -176,8 +176,8 @@ public class MapDatabase implements IMapDatabase {
 					Log.d(TAG, "no index: skip way");
 					continue;
 				} else if (mIndexPos == 1) {
-					mapDatabaseCallback.renderPointOfInterest((byte) 0, mCoords[1],
-							mCoords[0], mTags);
+					mapDatabaseCallback.renderPointOfInterest((byte) 0, mTags,
+							mCoords[1], mCoords[0]);
 				} else {
 
 					short[] idx = new short[mIndexPos];

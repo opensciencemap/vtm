@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,33 +12,18 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.database;
+package org.oscim.view.renderer;
 
-/**
- * MapDatabase Implementations
- */
-public enum MapDatabases {
-	/**
-	 * ...
-	 */
-	MAP_READER,
+public class ShortItem {
+	final short[] vertices;
+	int used;
+	ShortItem next;
 
-	/**
-	 * ...
-	 */
-	TEST_READER,
+	ShortItem() {
+		vertices = new short[SIZE];
+		used = 0;
+	}
 
-	/**
-	 * ...
-	 */
-	POSTGIS_READER,
-
-	/**
-	 * ...
-	 */
-	PBMAP_READER,
-	/**
-	 * ...
-	 */
-	OSCIMAP_READER,
+	// must be multiple of 4 (expected in LineLayer/PolygonLayer)
+	static final int SIZE = 256;
 }

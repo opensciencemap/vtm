@@ -30,30 +30,29 @@ import org.oscim.database.MapDatabaseFactory;
 import org.oscim.database.MapDatabases;
 import org.oscim.database.MapInfo;
 import org.oscim.database.OpenResult;
-import org.oscim.stuff.RegionLookup;
 import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.RenderTheme;
 import org.oscim.theme.RenderThemeHandler;
 import org.oscim.theme.Theme;
-import org.oscim.view.mapgenerator.IMapGenerator;
-import org.oscim.view.mapgenerator.JobQueue;
-import org.oscim.view.mapgenerator.JobTile;
-import org.oscim.view.mapgenerator.MapWorker;
-import org.oscim.view.utils.GlConfigChooser;
+import org.oscim.view.generator.JobQueue;
+import org.oscim.view.generator.JobTile;
+import org.oscim.view.generator.MapWorker;
+import org.oscim.view.renderer.MapGenerator;
+import org.oscim.view.renderer.MapRenderer;
 import org.xml.sax.SAXException;
 
 import android.content.Context;
-import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.FrameLayout;
 
 /**
  * A MapView shows a map on the display of the device. It handles all user input and touch gestures to move and zoom the
  * map.
  */
-public class MapView extends GLSurfaceView {
+public class MapView extends FrameLayout {
 
 	final static String TAG = "MapView";
 
@@ -67,19 +66,23 @@ public class MapView extends GLSurfaceView {
 
 	public final static boolean debugFrameTime = false;
 
+	public final static boolean testRegionZoom = false;
+	RegionLookup mRegionLookup;
+
 	public boolean enableRotation = false;
 	public boolean enableCompass = false;
 
 	private final MapViewPosition mMapViewPosition;
 
 	private final MapZoomControls mMapZoomControls;
-	private final Projection mProjection;
+
 	private final TouchHandler mTouchEventHandler;
 	private final Compass mCompass;
 
 	private IMapDatabase mMapDatabase;
 	private MapDatabases mMapDatabaseType;
-	private IMapRenderer mMapRenderer;
+
+	private MapRenderer mMapRenderer;
 	private JobQueue mJobQueue;
 	private MapWorker mMapWorkers[];
 	private int mNumMapWorkers = 4;
@@ -94,7 +97,7 @@ public class MapView extends GLSurfaceView {
 	 *             if the context object is not an instance of {@link MapActivity} .
 	 */
 	public MapView(Context context) {
-		this(context, null, MapRenderers.GL_RENDERER, MapDatabases.MAP_READER);
+		this(context, null, MapDatabases.MAP_READER);
 	}
 
 	/**
@@ -106,15 +109,13 @@ public class MapView extends GLSurfaceView {
 	 *             if the context object is not an instance of {@link MapActivity} .
 	 */
 	public MapView(Context context, AttributeSet attributeSet) {
-		this(context, attributeSet,
-				MapRendererFactory.getMapRenderer(attributeSet),
-				MapDatabaseFactory.getMapDatabase(attributeSet));
+		this(context, attributeSet, MapDatabaseFactory.getMapDatabase(attributeSet));
 	}
 
 	private boolean mDebugDatabase = false;
 
 	private MapView(Context context, AttributeSet attributeSet,
-			MapRenderers mapGeneratorType, MapDatabases mapDatabaseType) {
+			MapDatabases mapDatabaseType) {
 
 		super(context, attributeSet);
 
@@ -136,17 +137,13 @@ public class MapView extends GLSurfaceView {
 
 		mMapViewPosition = new MapViewPosition(this);
 
-		mMapZoomControls = new MapZoomControls(mapActivity, this);
-
-		mProjection = new MapViewProjection(this);
-
 		mTouchEventHandler = new TouchHandler(mapActivity, this);
 
 		mCompass = new Compass(mapActivity, this);
 
 		mJobQueue = new JobQueue();
 
-		mMapRenderer = MapRendererFactory.createMapRenderer(this, mapGeneratorType);
+		mMapRenderer = new MapRenderer(context, this);
 
 		mMapWorkers = new MapWorker[mNumMapWorkers];
 
@@ -159,7 +156,7 @@ public class MapView extends GLSurfaceView {
 				mapDatabase = MapDatabaseFactory.createMapDatabase(mapDatabaseType);
 			}
 
-			IMapGenerator mapGenerator = mMapRenderer.createMapGenerator();
+			MapGenerator mapGenerator = new MapGenerator(this);
 			mapGenerator.setMapDatabase(mapDatabase);
 
 			if (i == 0)
@@ -180,21 +177,18 @@ public class MapView extends GLSurfaceView {
 			setMapCenter(getStartPosition());
 		}
 
-		setEGLConfigChooser(new GlConfigChooser());
-		setEGLContextClientVersion(2);
+		LayoutParams params = new LayoutParams(
+				android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+				android.view.ViewGroup.LayoutParams.MATCH_PARENT);
 
-		// setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
+		addView(mMapRenderer, params);
 
-		setRenderer(mMapRenderer);
+		if (testRegionZoom)
+			mRegionLookup = new RegionLookup(this);
 
-		if (!debugFrameTime)
-			setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
-		mRegionLookup = new RegionLookup(this);
-
+		mMapZoomControls = new MapZoomControls(mapActivity, this);
+		mMapZoomControls.setShowMapZoomControls(true);
 	}
-
-	RegionLookup mRegionLookup;
 
 	/**
 	 * @return the map database which is used for reading map files.
@@ -212,6 +206,9 @@ public class MapView extends GLSurfaceView {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent motionEvent) {
+		// mMapZoomControls.onMapViewTouchEvent(motionEvent.getAction()
+		// & MotionEvent.ACTION_MASK);
+
 		if (this.isClickable())
 			return mTouchEventHandler.handleMotionEvent(motionEvent);
 
@@ -221,8 +218,12 @@ public class MapView extends GLSurfaceView {
 	/**
 	 * Calculates all necessary tiles and adds jobs accordingly.
 	 */
-	public void redrawTiles() {
+	public void redrawMap() {
 		mMapRenderer.updateMap(false);
+	}
+
+	public void clearAndRedrawMap() {
+		mMapRenderer.updateMap(true);
 	}
 
 	/**
@@ -231,7 +232,7 @@ public class MapView extends GLSurfaceView {
 	 */
 	public void setDebugSettings(DebugSettings debugSettings) {
 		this.debugSettings = debugSettings;
-		mMapRenderer.updateMap(true);
+		clearAndRedrawMap();
 	}
 
 	/**
@@ -262,7 +263,7 @@ public class MapView extends GLSurfaceView {
 
 		for (MapWorker mapWorker : mMapWorkers) {
 
-			IMapGenerator mapGenerator = mapWorker.getMapGenerator();
+			MapGenerator mapGenerator = mapWorker.getMapGenerator();
 			IMapDatabase mapDatabase = mapGenerator.getMapDatabase();
 
 			mapDatabase.close();
@@ -276,7 +277,8 @@ public class MapView extends GLSurfaceView {
 
 		if (initialized) {
 			mMapOptions = mapOptions;
-			mMapRenderer.updateMap(true);
+			clearAndRedrawMap();
+
 			Log.i(TAG, "MapDatabase ready");
 			return true;
 		}
@@ -320,7 +322,7 @@ public class MapView extends GLSurfaceView {
 		if (mDebugDatabase)
 			return;
 
-		IMapGenerator mapGenerator;
+		MapGenerator mapGenerator;
 
 		Log.i(TAG, "setMapDatabase " + mapDatabaseType.name());
 
@@ -340,8 +342,6 @@ public class MapView extends GLSurfaceView {
 
 		mJobQueue.clear();
 
-		// String mapFile = mMapFile;
-		// mMapFile = null;
 		setMapOptions(null);
 
 		mapWorkersProceed();
@@ -369,7 +369,7 @@ public class MapView extends GLSurfaceView {
 		if (ret) {
 			mRenderTheme = internalRenderTheme.name();
 		}
-		mMapRenderer.updateMap(true);
+		clearAndRedrawMap();
 		return ret;
 	}
 
@@ -392,7 +392,7 @@ public class MapView extends GLSurfaceView {
 		if (ret) {
 			mRenderTheme = renderThemePath;
 		}
-		mMapRenderer.updateMap(true);
+		clearAndRedrawMap();
 	}
 
 	private boolean setRenderTheme(Theme theme) {
@@ -432,10 +432,16 @@ public class MapView extends GLSurfaceView {
 
 		mJobQueue.clear();
 		mapWorkersPause(true);
-
+		Log.d(TAG, "onSizeChanged" + width + " " + height);
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
 
 		mapWorkersProceed();
+	}
+
+	@Override
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		super.onLayout(changed, left, top, right, bottom);
+		mMapZoomControls.onLayout(changed, left, top, right, bottom);
 	}
 
 	void destroy() {
@@ -454,18 +460,14 @@ public class MapView extends GLSurfaceView {
 		}
 	}
 
-	@Override
-	public void onPause() {
-		super.onPause();
+	void onPause() {
 		mapWorkersPause(false);
 
 		if (this.enableCompass)
 			mCompass.disable();
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
+	void onResume() {
 		mapWorkersProceed();
 
 		if (this.enableCompass)
@@ -473,40 +475,11 @@ public class MapView extends GLSurfaceView {
 	}
 
 	/**
-	 * Zooms in or out by the given amount of zoom levels.
-	 * 
-	 * @param zoomLevelDiff
-	 *            the difference to the current zoom level.
-	 * @return true if the zoom level was changed, false otherwise.
-	 */
-	public boolean zoom(byte zoomLevelDiff) {
-
-		int z = mMapViewPosition.getZoomLevel() + zoomLevelDiff;
-		if (zoomLevelDiff > 0) {
-			// check if zoom in is possible
-			if (z > getMaximumPossibleZoomLevel()) {
-				return false;
-			}
-
-		} else if (zoomLevelDiff < 0) {
-			// check if zoom out is possible
-			if (z < mMapZoomControls.getZoomLevelMin()) {
-				return false;
-			}
-		}
-
-		mMapViewPosition.setZoomLevel((byte) z);
-		redrawTiles();
-
-		return true;
-	}
-
-	/**
 	 * @return the maximum possible zoom level.
 	 */
 	byte getMaximumPossibleZoomLevel() {
-		return (byte) 20;
-		// FIXME Math.min(mMapZoomControls.getZoomLevelMax(),
+		return (byte) MapViewPosition.MAX_ZOOMLEVEL;
+		// Math.min(mMapZoomControls.getZoomLevelMax(),
 		// mMapGenerator.getZoomLevelMax());
 	}
 
@@ -529,6 +502,9 @@ public class MapView extends GLSurfaceView {
 	}
 
 	byte limitZoomLevel(byte zoom) {
+		if (mMapZoomControls == null)
+			return zoom;
+
 		return (byte) Math.max(Math.min(zoom, getMaximumPossibleZoomLevel()),
 				mMapZoomControls.getZoomLevelMin());
 	}
@@ -544,7 +520,7 @@ public class MapView extends GLSurfaceView {
 				+ " lat: " + mapPosition.lat
 				+ " lon: " + mapPosition.lon);
 		mMapViewPosition.setMapCenter(mapPosition);
-		redrawTiles();
+		redrawMap();
 	}
 
 	/**

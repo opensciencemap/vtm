@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,33 +12,23 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.database;
+package org.oscim.view.renderer;
 
-/**
- * MapDatabase Implementations
- */
-public enum MapDatabases {
-	/**
-	 * ...
-	 */
-	MAP_READER,
+public class TextTexture {
 
-	/**
-	 * ...
-	 */
-	TEST_READER,
+	final short[] vertices;
+	final int id;
+	int length;
+	int offset;
+	MapTile tile;
 
-	/**
-	 * ...
-	 */
-	POSTGIS_READER,
+	String[] text;
 
-	/**
-	 * ...
-	 */
-	PBMAP_READER,
-	/**
-	 * ...
-	 */
-	OSCIMAP_READER,
+	TextTexture(int textureID) {
+		vertices = new short[TextRenderer.MAX_LABELS *
+				TextRenderer.VERTICES_PER_SPRITE *
+				TextRenderer.SHORTS_PER_VERTICE];
+		id = textureID;
+	}
+
 }

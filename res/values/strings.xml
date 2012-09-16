@@ -6,7 +6,9 @@
         <!-- <item>Mapfile</item> -->
         <!-- <item>PostGIS</item> -->
         <item>OpenScienceMap</item>
-    </string-array>
+     <!--    <item>OpenScienceMap2</item> -->
+        <item>Test</item>
+        </string-array>
     <string-array name="preferences_scale_bar_unit_values">
         <item>Imperial</item>
         <item>Metric</item>

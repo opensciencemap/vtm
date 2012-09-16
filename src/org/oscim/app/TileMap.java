@@ -12,10 +12,10 @@ import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.database.MapDatabases;
 import org.oscim.theme.InternalRenderTheme;
+import org.oscim.utils.AndroidUtils;
 import org.oscim.view.DebugSettings;
 import org.oscim.view.MapActivity;
 import org.oscim.view.MapView;
-import org.oscim.view.utils.AndroidUtils;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
@@ -82,6 +82,7 @@ public class TileMap extends MapActivity {
 			getMenuInflater().inflate(R.menu.options_menu, menu);
 		else
 			getMenuInflater().inflate(R.menu.options_menu_pre_honeycomb, menu);
+
 		mMenu = menu;
 
 		return true;
@@ -100,30 +101,22 @@ public class TileMap extends MapActivity {
 
 			case R.id.menu_rotation_enable:
 				mMapView.enableRotation(true);
-				toggleMenuRotation(mMenu,
-						mMapView.enableRotation,
-						mMapView.enableCompass);
+				toggleMenuRotation();
 				return true;
 
 			case R.id.menu_rotation_disable:
 				mMapView.enableRotation(false);
-				toggleMenuRotation(mMenu,
-						mMapView.enableRotation,
-						mMapView.enableCompass);
+				toggleMenuRotation();
 				return true;
 
 			case R.id.menu_compass_enable:
 				mMapView.enableCompass(true);
-				toggleMenuRotation(mMenu,
-						mMapView.enableRotation,
-						mMapView.enableCompass);
+				toggleMenuRotation();
 				return true;
 
 			case R.id.menu_compass_disable:
 				mMapView.enableCompass(false);
-				toggleMenuRotation(mMenu,
-						mMapView.enableRotation,
-						mMapView.enableCompass);
+				toggleMenuRotation();
 				return true;
 
 			case R.id.menu_position_my_location_enable:
@@ -187,16 +180,17 @@ public class TileMap extends MapActivity {
 		}
 	}
 
-	private static void toggleMenuRotation(Menu menu, boolean rotate, boolean compass) {
-		toggleMenuItem(menu,
+	private void toggleMenuRotation() {
+
+		toggleMenuItem(mMenu,
 				R.id.menu_rotation_enable,
 				R.id.menu_rotation_disable,
-				!rotate);
+				!mMapView.enableRotation);
 
-		toggleMenuItem(menu,
+		toggleMenuItem(mMenu,
 				R.id.menu_compass_enable,
 				R.id.menu_compass_disable,
-				!compass);
+				!mMapView.enableCompass);
 	}
 
 	private static void toggleMenuItem(Menu menu, int id, int id2, boolean enable) {
@@ -208,27 +202,16 @@ public class TileMap extends MapActivity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		menu.clear();
-		onCreateOptionsMenu(menu);
+
+		if (!isPreHoneyComb()) {
+			menu.clear();
+			onCreateOptionsMenu(menu);
+		}
 
 		toggleMenuItem(menu,
 				R.id.menu_position_my_location_enable,
 				R.id.menu_position_my_location_disable,
 				!mLocation.isShowMyLocationEnabled());
-
-		// if (mLocation.isShowMyLocationEnabled()) {
-		// menu.findItem(R.id.menu_position_my_location_enable).setVisible(false);
-		// menu.findItem(R.id.menu_position_my_location_enable).setEnabled(false);
-		// menu.findItem(R.id.menu_position_my_location_disable).setVisible(true);
-		// menu.findItem(R.id.menu_position_my_location_disable).setEnabled(true);
-		// } else {
-		// menu.findItem(R.id.menu_position_my_location_enable).setVisible(true);
-		// menu.findItem(R.id.menu_position_my_location_enable).setEnabled(true);
-		// menu.findItem(R.id.menu_position_my_location_disable).setVisible(false);
-		// menu.findItem(R.id.menu_position_my_location_disable).setEnabled(false);
-		// }
-
-		menu.findItem(R.id.menu_render_theme).setEnabled(true);
 
 		if (mMapDatabase == MapDatabases.MAP_READER) {
 			menu.findItem(R.id.menu_mapfile).setVisible(true);
@@ -238,15 +221,7 @@ public class TileMap extends MapActivity {
 			menu.findItem(R.id.menu_position_map_center).setVisible(false);
 		}
 
-		toggleMenuItem(menu,
-				R.id.menu_compass_enable,
-				R.id.menu_compass_disable,
-				!mMapView.enableCompass);
-
-		toggleMenuItem(mMenu,
-				R.id.menu_rotation_enable,
-				R.id.menu_rotation_disable,
-				!mMapView.enableRotation);
+		toggleMenuRotation();
 
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -255,13 +230,6 @@ public class TileMap extends MapActivity {
 	public boolean onTrackballEvent(MotionEvent event) {
 		// forward the event to the MapView
 		return mMapView.onTrackballEvent(event);
-	}
-
-	private void configureMapView() {
-		// configure the MapView and activate the zoomLevel buttons
-		mMapView.setClickable(true);
-		// mMapView.setBuiltInZoomControls(true);
-		mMapView.setFocusable(true);
 	}
 
 	private void startMapFilePicker() {
@@ -306,12 +274,16 @@ public class TileMap extends MapActivity {
 		}
 	}
 
+	static boolean isPreHoneyComb() {
+		return Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB;
+	}
+
 	@TargetApi(11)
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		if (!isPreHoneyComb()) {
 			mSpinnerAdapter = ArrayAdapter.createFromResource(this,
 					R.array.view_sections,
 					android.R.layout.simple_spinner_dropdown_item);
@@ -325,11 +297,12 @@ public class TileMap extends MapActivity {
 		// set up the layout views
 		setContentView(R.layout.activity_tilemap);
 
-		// getActionBar().setDisplayOptions(ActionBar.NAVIGATION_MODE_TABS);
-
 		mMapView = (MapView) findViewById(R.id.mapView);
 
-		configureMapView();
+		// configure the MapView and activate the zoomLevel buttons
+		mMapView.setClickable(true);
+		// mMapView.setBuiltInZoomControls(true);
+		mMapView.setFocusable(true);
 
 		mLocation = new LocationHandler(this);
 
@@ -605,7 +578,6 @@ public class TileMap extends MapActivity {
 		if (Build.VERSION.SDK_INT >= 11) {
 			VersionHelper.refreshActionBarMenu(this);
 		}
-
 	}
 
 	static class VersionHelper {

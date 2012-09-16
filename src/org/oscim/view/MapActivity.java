@@ -37,7 +37,7 @@ import android.content.SharedPreferences.Editor;
 public abstract class MapActivity extends Activity {
 	private static final String KEY_LATITUDE = "latitude";
 	private static final String KEY_LONGITUDE = "longitude";
-	private static final String KEY_MAP_FILE = "mapFile";
+	// private static final String KEY_MAP_FILE = "mapFile";
 	private static final String KEY_ZOOM_LEVEL = "zoomLevel";
 	private static final String PREFERENCES_FILE = "MapActivity";
 	private static final String KEY_THEME = "Theme";
