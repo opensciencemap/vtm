@@ -7,7 +7,7 @@
   <style-pathtext name="road" k="name"    font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
   <style-pathtext name="major-road" k="name"   font-style="bold" font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
   
-  <style-area name="residential"         fill="#f0f0ec" fade="10"/>
+  <style-area name="residential"         fill="#f0eee8" fade="10"/>
   
   <style-area name="railway|industrial"  fill="#f2eeef" fade="10"/>
   <!-- "#f0fae7" mint green  -->
@@ -66,7 +66,7 @@
   
   <style-line name="water:outline"       stroke="#a4bbcc" width="1.0" fixed="true" cap="butt" /> 
 	<style-line name="water"               stroke="#b4cbdc" width="1.0" cap="butt" /> 
-  <style-area name="water"               fill="#b4cbdc" />
+  <style-area name="water"               fill="#a3c9f3" />
   <!-- no-go area boundary -->
   <style-line name="fence"               stroke="#444444" width="1.2" fixed="true" cap="butt"/>
  	

@@ -17,9 +17,9 @@ package org.oscim.theme;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.oscim.core.LRUCache;
 import org.oscim.core.Tag;
 import org.oscim.theme.renderinstruction.RenderInstruction;
+import org.oscim.utils.LRUCache;
 import org.xml.sax.Attributes;
 
 import android.graphics.Color;

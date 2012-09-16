@@ -30,7 +30,7 @@ import org.oscim.database.QueryResult;
 import org.oscim.database.mapfile.header.MapFileHeader;
 import org.oscim.database.mapfile.header.MapFileInfo;
 import org.oscim.database.mapfile.header.SubFileParameter;
-import org.oscim.view.mapgenerator.JobTile;
+import org.oscim.view.generator.JobTile;
 
 /**
  * A class for reading binary map files.
@@ -641,7 +641,7 @@ public class MapDatabase implements IMapDatabase {
 				// Integer.toString(mReadBuffer.readSignedInt())));
 			}
 
-			mapDatabaseCallback.renderPointOfInterest(layer, latitude, longitude, tags);
+			mapDatabaseCallback.renderPointOfInterest(layer, tags, latitude, longitude);
 
 		}
 

@@ -22,22 +22,22 @@ public class Tag {
 	/**
 	 * The key of the house number OpenStreetMap tag.
 	 */
-	public static final String TAG_KEY_HOUSE_NUMBER = "addr:housenumber";
+	public static final String TAG_KEY_HOUSE_NUMBER = "addr:housenumber".intern();
 
 	/**
 	 * The key of the name OpenStreetMap tag.
 	 */
-	public static final String TAG_KEY_NAME = "name";
+	public static final String TAG_KEY_NAME = "name".intern();
 
 	/**
 	 * The key of the reference OpenStreetMap tag.
 	 */
-	public static final String TAG_KEY_REF = "ref";
+	public static final String TAG_KEY_REF = "ref".intern();
 
 	/**
 	 * The key of the elevation OpenStreetMap tag.
 	 */
-	public static final String TAG_KEY_ELE = "ele";
+	public static final String TAG_KEY_ELE = "ele".intern();
 
 	/**
 	 * The key of this tag.
@@ -102,8 +102,8 @@ public class Tag {
 			this.value = (value == null ? null : value.intern());
 		}
 		else {
-			this.key = (key == null ? null : key);
-			this.value = (value == null ? null : value);
+			this.key = key;
+			this.value = value;
 		}
 	}
 

@@ -30,7 +30,7 @@ public class Compass {
 
 				if (mMapView != null) {
 					mMapView.getMapPosition().setRotation(mAngle);
-					mMapView.redrawTiles();
+					mMapView.redrawMap();
 				}
 			}
 		}
@@ -56,7 +56,7 @@ public class Compass {
 
 	void enable() {
 		mSensorManager.registerListener(mListener, mSensor,
-				SensorManager.SENSOR_DELAY_GAME);
+				SensorManager.SENSOR_DELAY_UI);
 	}
 
 	void disable() {

@@ -12,33 +12,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.database;
+package org.oscim.view.renderer;
 
-/**
- * MapDatabase Implementations
- */
-public enum MapDatabases {
-	/**
-	 * ...
-	 */
-	MAP_READER,
+public class SymbolLayer {
 
-	/**
-	 * ...
-	 */
-	TEST_READER,
-
-	/**
-	 * ...
-	 */
-	POSTGIS_READER,
-
-	/**
-	 * ...
-	 */
-	PBMAP_READER,
-	/**
-	 * ...
-	 */
-	OSCIMAP_READER,
 }

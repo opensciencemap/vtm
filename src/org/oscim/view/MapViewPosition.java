@@ -19,7 +19,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 
 import android.util.FloatMath;
-import android.util.Log;
 
 /**
  * A MapPosition stores the latitude and longitude coordinate of a MapView together with its zoom level.
@@ -27,7 +26,7 @@ import android.util.Log;
 public class MapViewPosition {
 	private static float MAX_SCALE = 2.0f;
 	private static float MIN_SCALE = 1.0f;
-	private static int MAX_ZOOMLEVEL = 16;
+	public static int MAX_ZOOMLEVEL = 16;
 
 	private double mLatitude;
 	private double mLongitude;
@@ -103,6 +102,43 @@ public class MapViewPosition {
 	}
 
 	/**
+	 * Get GeoPoint for a pixel on screen
+	 * 
+	 * @param x
+	 *            ...
+	 * @param y
+	 *            ...
+	 * @return the GeoPoint
+	 */
+	public GeoPoint getOffsetPoint(float x, float y) {
+		double pixelX = MercatorProjection.longitudeToPixelX(mLongitude, mZoomLevel);
+		double pixelY = MercatorProjection.latitudeToPixelY(mLatitude, mZoomLevel);
+
+		double dx = ((mMapView.getWidth() >> 1) - x) / mScale;
+		double dy = ((mMapView.getHeight() >> 1) - y) / mScale;
+
+		if (mMapView.enableRotation || mMapView.enableCompass) {
+			double rad = Math.toRadians(mRotation);
+			double xx = dx * Math.cos(rad) + dy * -Math.sin(rad);
+			double yy = dx * Math.sin(rad) + dy * Math.cos(rad);
+
+			dx = pixelX - xx;
+			dy = pixelY - yy;
+		} else {
+			dx = pixelX - dx;
+			dy = pixelY - dy;
+		}
+
+		double latitude = MercatorProjection.pixelYToLatitude(dy, mZoomLevel);
+		latitude = MercatorProjection.limitLatitude(latitude);
+
+		double longitude = MercatorProjection.pixelXToLongitude(dx, mZoomLevel);
+		longitude = MercatorProjection.limitLongitude(longitude);
+
+		return new GeoPoint(latitude, longitude);
+	}
+
+	/**
 	 * Moves this MapViewPosition by the given amount of pixels.
 	 * 
 	 * @param mx
@@ -113,22 +149,21 @@ public class MapViewPosition {
 	public synchronized void moveMap(float mx, float my) {
 		double pixelX = MercatorProjection.longitudeToPixelX(mLongitude, mZoomLevel);
 		double pixelY = MercatorProjection.latitudeToPixelY(mLatitude, mZoomLevel);
-		double dx, dy;
+
+		double dx = mx / mScale;
+		double dy = my / mScale;
 
 		if (mMapView.enableRotation || mMapView.enableCompass) {
-			float rad = (float) Math.toRadians(mRotation);
-			dx = mx / mScale;
-			dy = my / mScale;
-
-			double x = dx * FloatMath.cos(rad) + dy * -FloatMath.sin(rad);
-			double y = dx * FloatMath.sin(rad) + dy * FloatMath.cos(rad);
+			double rad = Math.toRadians(mRotation);
+			double x = dx * Math.cos(rad) + dy * -Math.sin(rad);
+			double y = dx * Math.sin(rad) + dy * Math.cos(rad);
 
 			dx = pixelX - x;
 			dy = pixelY - y;
 		}
 		else {
-			dx = pixelX - mx / mScale;
-			dy = pixelY - my / mScale;
+			dx = pixelX - dx;
+			dy = pixelY - dy;
 		}
 		mLatitude = MercatorProjection.pixelYToLatitude(dy, mZoomLevel);
 		mLatitude = MercatorProjection.limitLatitude(mLatitude);
@@ -141,7 +176,7 @@ public class MapViewPosition {
 
 	public synchronized void rotateMap(float angle, float cx, float cy) {
 		moveMap(cx, cy);
-		Log.d("MapViewPosition", "rotate:" + angle + " " + (mRotation - angle));
+		// Log.d("MapViewPosition", "rotate:" + angle + " " + (mRotation - angle));
 		mRotation -= angle;
 	}
 
@@ -167,6 +202,10 @@ public class MapViewPosition {
 	synchronized void setScale(float scale) {
 		mScale = scale;
 	}
+
+	// synchronized void zoomBoundingBox(GeoPoint p1, GeoPoint p2) {
+	//
+	// }
 
 	/**
 	 * @param scale

@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.oscim.core.LRUCache;
 import org.oscim.database.mapfile.header.SubFileParameter;
+import org.oscim.utils.LRUCache;
 
 /**
  * A cache for database index blocks with a fixed size and LRU policy.

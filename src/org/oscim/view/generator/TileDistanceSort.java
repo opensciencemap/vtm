@@ -12,33 +12,21 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.database;
+package org.oscim.view.generator;
+
+import java.util.Comparator;
 
 /**
- * MapDatabase Implementations
+ * 
+ *
  */
-public enum MapDatabases {
-	/**
-	 * ...
-	 */
-	MAP_READER,
+public class TileDistanceSort implements Comparator<JobTile> {
 
-	/**
-	 * ...
-	 */
-	TEST_READER,
+	@Override
+	public int compare(JobTile tile1, JobTile tile2) {
+		if (tile1.distance == tile2.distance)
+			return 0;
 
-	/**
-	 * ...
-	 */
-	POSTGIS_READER,
-
-	/**
-	 * ...
-	 */
-	PBMAP_READER,
-	/**
-	 * ...
-	 */
-	OSCIMAP_READER,
+		return tile1.distance > tile2.distance ? 1 : -1;
+	}
 }

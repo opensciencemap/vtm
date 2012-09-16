@@ -14,7 +14,6 @@
  */
 package org.oscim.database;
 
-
 import android.util.AttributeSet;
 
 /**
@@ -66,6 +65,8 @@ public final class MapDatabaseFactory {
 				return new org.oscim.database.postgis.MapDatabase();
 			case PBMAP_READER:
 				return new org.oscim.database.pbmap.MapDatabase();
+			case OSCIMAP_READER:
+				return new org.oscim.database.oscimap.MapDatabase();
 
 		}
 
