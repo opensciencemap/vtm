@@ -12,12 +12,14 @@
 
     <uses-sdk
         android:minSdkVersion="10"
-        android:targetSdkVersion="16" />
+        android:targetSdkVersion="10" />
 
     <application
         android:icon="@drawable/globe2"
         android:label="@string/application_name"
-        android:theme="@style/Theme.TileMap" >
+       	android:theme="@android:style/Theme.NoTitleBar"
+        >
+       <!--  android:theme="@style/Theme.TileMap"  -->
         <activity
             android:name="org.oscim.app.TileMap"
             android:configChanges="orientation|screenSize" >
