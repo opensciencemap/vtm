@@ -38,7 +38,7 @@ import org.oscim.theme.Theme;
 import org.oscim.view.generator.JobQueue;
 import org.oscim.view.generator.JobTile;
 import org.oscim.view.generator.MapWorker;
-import org.oscim.view.renderer.MapGenerator;
+import org.oscim.view.renderer.TileGenerator;
 import org.oscim.view.renderer.MapRenderer;
 import org.xml.sax.SAXException;
 
@@ -156,13 +156,13 @@ public class MapView extends FrameLayout {
 				mapDatabase = MapDatabaseFactory.createMapDatabase(mapDatabaseType);
 			}
 
-			MapGenerator mapGenerator = new MapGenerator(this);
-			mapGenerator.setMapDatabase(mapDatabase);
+			TileGenerator tileGenerator = new TileGenerator(this);
+			tileGenerator.setMapDatabase(mapDatabase);
 
 			if (i == 0)
 				mMapDatabase = mapDatabase;
 
-			mMapWorkers[i] = new MapWorker(i, mJobQueue, mapGenerator, mMapRenderer);
+			mMapWorkers[i] = new MapWorker(i, mJobQueue, tileGenerator, mMapRenderer);
 			mMapWorkers[i].start();
 		}
 
@@ -188,6 +188,8 @@ public class MapView extends FrameLayout {
 
 		mMapZoomControls = new MapZoomControls(mapActivity, this);
 		mMapZoomControls.setShowMapZoomControls(true);
+
+		enableRotation = true;
 	}
 
 	/**
@@ -263,8 +265,8 @@ public class MapView extends FrameLayout {
 
 		for (MapWorker mapWorker : mMapWorkers) {
 
-			MapGenerator mapGenerator = mapWorker.getMapGenerator();
-			IMapDatabase mapDatabase = mapGenerator.getMapDatabase();
+			TileGenerator tileGenerator = mapWorker.getMapGenerator();
+			IMapDatabase mapDatabase = tileGenerator.getMapDatabase();
 
 			mapDatabase.close();
 			openResult = mapDatabase.open(null);
@@ -322,7 +324,7 @@ public class MapView extends FrameLayout {
 		if (mDebugDatabase)
 			return;
 
-		MapGenerator mapGenerator;
+		TileGenerator tileGenerator;
 
 		Log.i(TAG, "setMapDatabase " + mapDatabaseType.name());
 
@@ -334,9 +336,9 @@ public class MapView extends FrameLayout {
 		mapWorkersPause(true);
 
 		for (MapWorker mapWorker : mMapWorkers) {
-			mapGenerator = mapWorker.getMapGenerator();
+			tileGenerator = mapWorker.getMapGenerator();
 
-			mapGenerator.setMapDatabase(MapDatabaseFactory
+			tileGenerator.setMapDatabase(MapDatabaseFactory
 					.createMapDatabase(mapDatabaseType));
 		}
 

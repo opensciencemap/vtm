@@ -25,8 +25,8 @@ public final class MapDatabaseFactory {
 
 	/**
 	 * @param attributeSet
-	 *            A collection of attributes which includes the desired MapGenerator.
-	 * @return a new MapGenerator instance.
+	 *            A collection of attributes which includes the desired MapDatabase.
+	 * @return a new MapDatabase instance.
 	 */
 	public static IMapDatabase createMapDatabase(AttributeSet attributeSet) {
 		String mapDatabaseName = attributeSet.getAttributeValue(null,
@@ -53,7 +53,7 @@ public final class MapDatabaseFactory {
 	/**
 	 * @param mapDatabase
 	 *            the internal MapDatabase implementation.
-	 * @return a new MapGenerator instance.
+	 * @return a new MapDatabase instance.
 	 */
 	public static IMapDatabase createMapDatabase(MapDatabases mapDatabase) {
 		switch (mapDatabase) {
