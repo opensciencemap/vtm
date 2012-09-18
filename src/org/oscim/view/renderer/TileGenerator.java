@@ -246,7 +246,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	@Override
 	public void renderPointOfInterestCaption(Caption caption) {
-		// Log.d(TAG, "renderPointOfInterestCaption: " + mPoiX + " " + mPoiY + " "
+		// Log.d(TAG, "renderPointOfInterestCaption: " + mPoiX + " " + mPoiY +
+		// " "
 		// + mTagName);
 
 		if (mTagName == null)
@@ -266,7 +267,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (mTagName == null)
 			return;
 
-		if (pathText.textKey == mTagEmptyName.key) {
+		if (pathText.textKey == mTagEmptyName.key && mTagName.value != null) {
 
 			mLabels = WayDecorator.renderText(mCoords, mTagName.value, pathText, 0,
 					mIndices[0], mLabels);
@@ -509,7 +510,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 * Sets the scale stroke factor for the given zoom level.
 	 * 
 	 * @param zoomLevel
-	 *            the zoom level for which the scale stroke factor should be set.
+	 *            the zoom level for which the scale stroke factor should be
+	 *            set.
 	 */
 	private void setScaleStrokeWidth(byte zoomLevel) {
 		int zoomLevelDiff = Math.max(zoomLevel - STROKE_MIN_ZOOM_LEVEL, 0);

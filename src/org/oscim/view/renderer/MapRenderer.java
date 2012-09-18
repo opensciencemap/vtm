@@ -20,6 +20,7 @@ import java.util.Collections;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
+import org.oscim.database.MapInfo;
 import org.oscim.theme.RenderTheme;
 import org.oscim.utils.GlConfigChooser;
 import org.oscim.view.MapView;
@@ -58,7 +59,11 @@ public class MapRenderer extends GLSurfaceView {
 	// private static MapPosition mCurPosition, mDrawPosition;
 	private static int mWidth = 0, mHeight = 0;
 
-	private static TilesData newTiles;
+	private static TilesData mCurrentTiles;
+
+	// map zoom-level to available zoom-levels in MapDatabase
+	// e.g. 16->16, 15->16, 14->13, 13->13, 12->13,....
+	private static int[] mZoomLevels;
 
 	public MapRenderer(Context context, MapView mapView) {
 		super(context);
@@ -90,8 +95,9 @@ public class MapRenderer extends GLSurfaceView {
 	 * called by MapView when position or map settings changes
 	 */
 	/**
-	 * Update list of visible tiles and passes them to MapRenderer, when not available tiles are created and added to
-	 * JobQueue (mapView.addJobs) for loading by MapGenerator class
+	 * Update list of visible tiles and passes them to MapRenderer, when not
+	 * available tiles are created and added to JobQueue (mapView.addJobs) for
+	 * loading by MapGenerator class
 	 * 
 	 * @param clear
 	 *            ...
@@ -108,16 +114,14 @@ public class MapRenderer extends GLSurfaceView {
 		MapPosition mapPosition = mMapView.getMapPosition().getMapPosition();
 
 		if (mapPosition == null) {
-			Log.d(TAG, ">>> no map position");
+			Log.d(TAG, "X no map position");
 			return;
 		}
 
 		if (clear) {
+			// remove all tiles references
 			Log.d(TAG, "CLEAR");
-
-			mInitial = true;
 			synchronized (GLRenderer.lock) {
-
 				for (MapTile t : mTiles)
 					clearTile(t);
 
@@ -125,15 +129,20 @@ public class MapRenderer extends GLSurfaceView {
 				mTilesLoaded.clear();
 				QuadTree.init();
 			}
+			mInitial = true;
 		}
 
 		if (mInitial) {
-			mRenderer.clearTiles();
-
+			// set up TileData arrays that are passed to gl-thread
 			int numTiles = (mWidth / (Tile.TILE_SIZE / 2) + 2)
 					* (mHeight / (Tile.TILE_SIZE / 2) + 2);
-			Log.d(TAG, "newTiles: " + numTiles);
-			newTiles = new TilesData(numTiles);
+
+			mRenderer.clearTiles(numTiles);
+			mCurrentTiles = new TilesData(numTiles);
+
+			MapInfo mapInfo = mMapView.getMapDatabase().getMapInfo();
+			if (mapInfo != null)
+				mZoomLevels = mapInfo.zoomLevel;
 		}
 
 		byte zoomLevel = mapPosition.zoomLevel;
@@ -196,7 +205,16 @@ public class MapRenderer extends GLSurfaceView {
 
 	}
 
-	private static boolean updateVisibleList(MapPosition mapPosition, int zdir) {
+	/**
+	 * set mCurrentTiles for the visible tiles and pass it to GLRenderer, add
+	 * jobs for not yet loaded tiles
+	 * 
+	 * @param mapPosition
+	 *            the current MapPosition
+	 * @param zdir
+	 *            zoom direction
+	 */
+	private static void updateVisibleList(MapPosition mapPosition, int zdir) {
 		double x = mapPosition.x;
 		double y = mapPosition.y;
 		byte zoomLevel = mapPosition.zoomLevel;
@@ -222,12 +240,28 @@ public class MapRenderer extends GLSurfaceView {
 		mMapView.addJobs(null);
 
 		int tiles = 0;
-		if (newTiles == null)
-			return false;
+		int max = mCurrentTiles.tiles.length - 1;
 
-		int max = newTiles.tiles.length - 1;
+		boolean fetchChildren = false;
+		boolean fetchParent = false;
+		boolean fetchProxy = false;
+		if (mZoomLevels != null) {
+			// check MapDatabase zoom-level-mapping
+			if (mZoomLevels[zoomLevel] == 0) {
+				mCurrentTiles.cnt = 0;
+				mCurrentTiles = GLRenderer.updateTiles(mapPosition, mCurrentTiles);
+				return;
+			}
 
-		boolean prefetchChildren = true;
+			if (mZoomLevels[zoomLevel] > zoomLevel) {
+				fetchChildren = true;
+				fetchProxy = true;
+			}
+			else if (mZoomLevels[zoomLevel] < zoomLevel) {
+				fetchParent = true;
+				fetchProxy = true;
+			}
+		}
 
 		for (int yy = tileTop; yy <= tileBottom; yy++) {
 			for (int xx = tileLeft; xx <= tileRight; xx++) {
@@ -244,17 +278,34 @@ public class MapRenderer extends GLSurfaceView {
 					mTiles.add(tile);
 				}
 
-				newTiles.tiles[tiles++] = tile;
+				mCurrentTiles.tiles[tiles++] = tile;
 
-				if (prefetchChildren) {
-
-				}
-
-				if (!(tile.isLoading || tile.newData || tile.isReady)) {
+				if (!fetchProxy && !(tile.isLoading || tile.newData || tile.isReady)) {
 					mJobList.add(tile);
 				}
 
-				if (zdir > 0 && zoomLevel > 0) {
+				if (fetchChildren) {
+					byte z = (byte) (zoomLevel + 1);
+					for (int i = 0; i < 4; i++) {
+						int cx = (xx << 1) + (i % 2);
+						int cy = (yy << 1) + (i >> 1);
+
+						MapTile c = QuadTree.getTile(cx, cy, z);
+
+						if (c == null) {
+							c = new MapTile(cx, cy, z);
+
+							QuadTree.add(c);
+							mTiles.add(c);
+						}
+
+						if (!(c.isLoading || c.newData || c.isReady)) {
+							mJobList.add(c);
+						}
+					}
+				}
+
+				if (fetchParent || (!fetchProxy && zdir > 0 && zoomLevel > 0)) {
 					// prefetch parent
 					MapTile parent = tile.rel.parent.tile;
 
@@ -274,8 +325,8 @@ public class MapRenderer extends GLSurfaceView {
 		}
 
 		// pass new tile list to glThread
-		newTiles.cnt = tiles;
-		newTiles = GLRenderer.updateTiles(mapPosition, newTiles);
+		mCurrentTiles.cnt = tiles;
+		mCurrentTiles = GLRenderer.updateTiles(mapPosition, mCurrentTiles);
 
 		// note: this sets isLoading == true for all job tiles
 		if (mJobList.size() > 0) {
@@ -283,8 +334,6 @@ public class MapRenderer extends GLSurfaceView {
 			Collections.sort(mJobList);
 			mMapView.addJobs(mJobList);
 		}
-
-		return true;
 	}
 
 	private static void clearTile(MapTile t) {
@@ -310,10 +359,6 @@ public class MapRenderer extends GLSurfaceView {
 		QuadTree.remove(t);
 	}
 
-	// private static boolean tileInUse(MapTile t) {
-	// return (t.isActive || t.refs != 0);
-	// }
-
 	private static void updateTileDistances(ArrayList<?> tiles,
 			MapPosition mapPosition) {
 		int h = (Tile.TILE_SIZE >> 1);
@@ -334,7 +379,8 @@ public class MapRenderer extends GLSurfaceView {
 			if (diff == 0) {
 				dx = (t.pixelX + h) - x;
 				dy = (t.pixelY + h) - y;
-				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
+				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) *
+				// 0.25f;
 				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
 			} else if (diff > 0) {
 				// tile zoom level is child of current
@@ -355,7 +401,8 @@ public class MapRenderer extends GLSurfaceView {
 				dx = ((t.pixelX + h) << -diff) - x;
 				dy = ((t.pixelY + h) << -diff) - y;
 
-				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * (-diff * 0.5f);
+				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) *
+				// (-diff * 0.5f);
 				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
 			}
 		}
@@ -454,7 +501,8 @@ public class MapRenderer extends GLSurfaceView {
 					}
 
 					if (t.isLocked()) {
-						// Log.d(TAG, "keep unused tile data: " + t + " " + t.isActive);
+						// Log.d(TAG, "keep unused tile data: " + t + " " +
+						// t.isActive);
 						i++;
 						continue;
 					}
@@ -479,7 +527,8 @@ public class MapRenderer extends GLSurfaceView {
 		MapTile tile = (MapTile) jobTile;
 
 		if (!tile.isLoading) {
-			// no one should be able to use this tile now, mapgenerator passed it,
+			// no one should be able to use this tile now, mapgenerator passed
+			// it,
 			// glthread does nothing until newdata is set.
 			Log.d(TAG, "passTile: canceled " + tile);
 			synchronized (mTilesLoaded) {
