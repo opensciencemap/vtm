@@ -32,12 +32,15 @@ import org.oscim.database.mapfile.header.MapFileInfo;
 import org.oscim.database.mapfile.header.SubFileParameter;
 import org.oscim.view.generator.JobTile;
 
+import android.os.Environment;
+
 /**
  * A class for reading binary map files.
  * <p>
  * This class is not thread-safe. Each thread should use its own instance.
  * 
- * @see <a href="http://code.google.com/p/mapsforge/wiki/SpecificationBinaryMapFile">Specification</a>
+ * @see <a
+ *      href="http://code.google.com/p/mapsforge/wiki/SpecificationBinaryMapFile">Specification</a>
  */
 public class MapDatabase implements IMapDatabase {
 	/**
@@ -83,7 +86,8 @@ public class MapDatabase implements IMapDatabase {
 	private static final int MAXIMUM_WAY_NODES_SEQUENCE_LENGTH = 8192;
 
 	/**
-	 * Maximum number of map objects in the zoom table which is considered as valid.
+	 * Maximum number of map objects in the zoom table which is considered as
+	 * valid.
 	 */
 	private static final int MAXIMUM_ZOOM_TABLE_OBJECTS = 65536;
 
@@ -270,17 +274,28 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	@Override
 	public OpenResult open(Map<String, String> options) {
-
+		// if (options == null) {
+		// options = new HashMap<String, String>(1);
+		// options.put("mapfile", "/sdcard/bremen.map");
+		// }
 		try {
-			if (options == null || options.get("mapfile") == null) {
-				// throw new IllegalArgumentException("mapFile must not be null");
-				return new OpenResult("no file!");
-			}
+			// if (options == null || options.get("mapfile") == null) {
+			// // throw new
+			// // IllegalArgumentException("mapFile must not be null");
+			// return new OpenResult("no file!");
+			// }
 
 			// make sure to close any previously opened file first
 			close();
 
-			File file = new File(options.get("mapfile"));
+			File file = new File(Environment.getExternalStorageDirectory().getPath()
+					+ "/bremen.map");
+
+			System.out.println("load " + file + " "
+					+ (Environment.getExternalStorageDirectory().getPath()
+					+ "/bremen.map"));
+
+			// File file = new File(options.get("mapfile"));
 
 			// check if the file exists and is readable
 			if (!file.exists()) {
@@ -370,7 +385,8 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	/**
-	 * Processes a single block and executes the callback functions on all map elements.
+	 * Processes a single block and executes the callback functions on all map
+	 * elements.
 	 * 
 	 * @param queryParameters
 	 *            the parameters of the current query.
@@ -445,7 +461,8 @@ public class MapDatabase implements IMapDatabase {
 		for (long row = queryParameters.fromBlockY; row <= queryParameters.toBlockY; ++row) {
 			for (long column = queryParameters.fromBlockX; column <= queryParameters.toBlockX; ++column) {
 
-				// calculate the actual block number of the needed block in the file
+				// calculate the actual block number of the needed block in the
+				// file
 				long blockNumber = row * subFileParameter.blocksWidth + column;
 
 				// get the current index entry
@@ -454,7 +471,8 @@ public class MapDatabase implements IMapDatabase {
 
 				// check if the current query would still return a water tile
 				if (queryIsWater) {
-					// check the water flag of the current block in its index entry
+					// check the water flag of the current block in its index
+					// entry
 					queryIsWater &= (currentBlockIndexEntry & BITMASK_INDEX_WATER) != 0;
 					// queryReadWaterInfo = true;
 				}
@@ -496,7 +514,8 @@ public class MapDatabase implements IMapDatabase {
 					// the current block is empty, continue with the next block
 					continue;
 				} else if (currentBlockSize > ReadBuffer.MAXIMUM_BUFFER_SIZE) {
-					// the current block is too large, continue with the next block
+					// the current block is too large, continue with the next
+					// block
 					LOG.warning("current block size too large: " + currentBlockSize);
 					continue;
 				} else if (currentBlockPointer + currentBlockSize > mFileSize) {
@@ -538,7 +557,8 @@ public class MapDatabase implements IMapDatabase {
 		// Tag[] tags = new Tag[1];
 		// tags[0] = TAG_NATURAL_WATER;
 		//
-		// System.arraycopy(WATER_TILE_COORDINATES, 0, mWayNodes, mWayNodePosition, 8);
+		// System.arraycopy(WATER_TILE_COORDINATES, 0, mWayNodes,
+		// mWayNodePosition, 8);
 		// mWayNodePosition += 8;
 		// mapDatabaseCallback.renderWaterBackground(tags, wayDataContainer);
 		// }
@@ -548,7 +568,8 @@ public class MapDatabase implements IMapDatabase {
 	/**
 	 * Processes the block signature, if present.
 	 * 
-	 * @return true if the block signature could be processed successfully, false otherwise.
+	 * @return true if the block signature could be processed successfully,
+	 *         false otherwise.
 	 */
 	private boolean processBlockSignature() {
 		if (mDebugFile) {
@@ -569,7 +590,8 @@ public class MapDatabase implements IMapDatabase {
 	 *            the callback which handles the extracted POIs.
 	 * @param numberOfPois
 	 *            how many POIs should be processed.
-	 * @return true if the POIs could be processed successfully, false otherwise.
+	 * @return true if the POIs could be processed successfully, false
+	 *         otherwise.
 	 */
 	private boolean processPOIs(IMapDatabaseCallback mapDatabaseCallback, int numberOfPois) {
 		Tag[] poiTags = sMapFileHeader.getMapFileInfo().poiTags;
@@ -637,7 +659,8 @@ public class MapDatabase implements IMapDatabase {
 			// check if the POI has an elevation
 			if ((featureByte & POI_FEATURE_ELEVATION) != 0) {
 				mReadBuffer.readSignedInt();
-				// mReadBuffer.getPositionAndSkip();// tags.add(new Tag(Tag.TAG_KEY_ELE,
+				// mReadBuffer.getPositionAndSkip();// tags.add(new
+				// Tag(Tag.TAG_KEY_ELE,
 				// Integer.toString(mReadBuffer.readSignedInt())));
 			}
 
@@ -785,7 +808,8 @@ public class MapDatabase implements IMapDatabase {
 	 *            the callback which handles the extracted ways.
 	 * @param numberOfWays
 	 *            how many ways should be processed.
-	 * @return true if the ways could be processed successfully, false otherwise.
+	 * @return true if the ways could be processed successfully, false
+	 *         otherwise.
 	 */
 	private boolean processWays(QueryParameters queryParameters,
 			IMapDatabaseCallback mapDatabaseCallback,
@@ -882,12 +906,13 @@ public class MapDatabase implements IMapDatabase {
 				textPos[0] = mReadBuffer.readUnsignedInt();
 				String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset
 						+ textPos[0]);
-				if (changed) {
-					Tag[] tmp = tags;
-					tags = new Tag[tmp.length + 1];
-					System.arraycopy(tmp, 0, tags, 0, tmp.length);
-				}
-				tags[tags.length - 1] = new Tag("name", str, false);
+				// if (changed) {
+				// Tag[] tmp = tags;
+				// tags = new Tag[tmp.length + 1];
+				// System.arraycopy(tmp, 0, tags, 0, tmp.length);
+				// }
+				// tags[tags.length - 1] = new Tag(Tag.TAG_KEY_NAME, str,
+				// false);
 			}
 			else
 				textPos[0] = -1;
@@ -930,8 +955,13 @@ public class MapDatabase implements IMapDatabase {
 					return false;
 
 				// wayDataContainer.textPos = textPos;
+				int l = wayLengths[0];
+
+				boolean closed = mWayNodes[0] == mWayNodes[l - 2]
+						&& mWayNodes[1] == mWayNodes[l - 1];
+
 				mapDatabaseCallback
-						.renderWay(layer, tags, mWayNodes, wayLengths, changed);
+						.renderWay(layer, tags, mWayNodes, wayLengths, closed);
 			}
 		}
 
@@ -950,7 +980,8 @@ public class MapDatabase implements IMapDatabase {
 		return labelPosition;
 	}
 
-	// private int readOptionalWayDataBlocksByte(boolean featureWayDataBlocksByte) {
+	// private int readOptionalWayDataBlocksByte(boolean
+	// featureWayDataBlocksByte) {
 	// if (featureWayDataBlocksByte) {
 	// // get and check the number of way data blocks (VBE-U)
 	// return mReadBuffer.readUnsignedInt();

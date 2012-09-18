@@ -28,6 +28,7 @@ class MapFileInfoBuilder {
 	String projectionName;
 	int tilePixelSize;
 	Tag[] wayTags;
+	int[] zoomLevel;
 
 	MapFileInfo build() {
 		return new MapFileInfo(this);

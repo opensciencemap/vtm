@@ -49,24 +49,17 @@ import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
 /**
- * A MapView shows a map on the display of the device. It handles all user input and touch gestures to move and zoom the
- * map.
+ * A MapView shows a map on the display of the device. It handles all user input
+ * and touch gestures to move and zoom the map.
  */
 public class MapView extends FrameLayout {
 
 	final static String TAG = "MapView";
 
-	/**
-	 * Default render theme of the MapView.
-	 */
-	public static final InternalRenderTheme DEFAULT_RENDER_THEME = InternalRenderTheme.OSMARENDER;
-
-	// private static final float DEFAULT_TEXT_SCALE = 1;
-	// private static final Byte DEFAULT_START_ZOOM_LEVEL = Byte.valueOf((byte) 16);
-
 	public final static boolean debugFrameTime = false;
-
 	public final static boolean testRegionZoom = false;
+	private final boolean mDebugDatabase = false;
+
 	RegionLookup mRegionLookup;
 
 	public boolean enableRotation = false;
@@ -94,7 +87,8 @@ public class MapView extends FrameLayout {
 	 * @param context
 	 *            the enclosing MapActivity instance.
 	 * @throws IllegalArgumentException
-	 *             if the context object is not an instance of {@link MapActivity} .
+	 *             if the context object is not an instance of
+	 *             {@link MapActivity} .
 	 */
 	public MapView(Context context) {
 		this(context, null, MapDatabases.MAP_READER);
@@ -106,13 +100,12 @@ public class MapView extends FrameLayout {
 	 * @param attributeSet
 	 *            a set of attributes.
 	 * @throws IllegalArgumentException
-	 *             if the context object is not an instance of {@link MapActivity} .
+	 *             if the context object is not an instance of
+	 *             {@link MapActivity} .
 	 */
 	public MapView(Context context, AttributeSet attributeSet) {
 		this(context, attributeSet, MapDatabaseFactory.getMapDatabase(attributeSet));
 	}
-
-	private boolean mDebugDatabase = false;
 
 	private MapView(Context context, AttributeSet attributeSet,
 			MapDatabases mapDatabaseType) {
@@ -150,8 +143,11 @@ public class MapView extends FrameLayout {
 		for (int i = 0; i < mNumMapWorkers; i++) {
 			IMapDatabase mapDatabase;
 			if (mDebugDatabase) {
+				// mapDatabase = MapDatabaseFactory
+				// .createMapDatabase(MapDatabases.TEST_READER);
 				mapDatabase = MapDatabaseFactory
-						.createMapDatabase(MapDatabases.TEST_READER);
+						.createMapDatabase(MapDatabases.MAP_READER);
+				mNumMapWorkers = 1;
 			} else {
 				mapDatabase = MapDatabaseFactory.createMapDatabase(mapDatabaseType);
 			}
@@ -392,7 +388,8 @@ public class MapView extends FrameLayout {
 	 * @throws IllegalArgumentException
 	 *             if the supplied internalRenderTheme is null.
 	 * @throws FileNotFoundException
-	 *             if the supplied file does not exist, is a directory or cannot be read.
+	 *             if the supplied file does not exist, is a directory or cannot
+	 *             be read.
 	 */
 	public void setRenderTheme(String renderThemePath) throws FileNotFoundException {
 		if (renderThemePath == null) {
@@ -505,7 +502,8 @@ public class MapView extends FrameLayout {
 	}
 
 	/**
-	 * @return true if the current center position of this MapView is valid, false otherwise.
+	 * @return true if the current center position of this MapView is valid,
+	 *         false otherwise.
 	 */
 	boolean hasValidCenter() {
 		MapInfo mapInfo;
@@ -639,7 +637,8 @@ public class MapView extends FrameLayout {
 	// }
 
 	// /**
-	// * Sets the text scale for the map rendering. Has no effect in downloading mode.
+	// * Sets the text scale for the map rendering. Has no effect in downloading
+	// mode.
 	// *
 	// * @param textScale
 	// * the new text scale for the map rendering.

@@ -85,7 +85,8 @@ public class MapFileHeader {
 	 *            the ReadBuffer for the file data.
 	 * @param fileSize
 	 *            the size of the map file in bytes.
-	 * @return a FileOpenResult containing an error message in case of a failure.
+	 * @return a FileOpenResult containing an error message in case of a
+	 *         failure.
 	 * @throws IOException
 	 *             if an error occurs while reading the file.
 	 */
@@ -107,7 +108,8 @@ public class MapFileHeader {
 			return openResult;
 		}
 
-		openResult = RequiredFields.readFileSize(readBuffer, fileSize, mapFileInfoBuilder);
+		openResult = RequiredFields
+				.readFileSize(readBuffer, fileSize, mapFileInfoBuilder);
 		if (!openResult.isSuccess()) {
 			return openResult;
 		}
@@ -151,8 +153,24 @@ public class MapFileHeader {
 		if (!openResult.isSuccess()) {
 			return openResult;
 		}
+		int[] level = new int[20];
+		level[17] = 16;
+		level[16] = 16;
+		level[15] = 16;
+		level[14] = 13;
+		level[13] = 13;
+		level[12] = 13;
+		level[11] = 10;
+		level[10] = 10;
+		level[9] = 10;
+		level[8] = 7;
+		level[7] = 7;
+		level[6] = 7;
+
+		mapFileInfoBuilder.zoomLevel = level;
 
 		this.mapFileInfo = mapFileInfoBuilder.build();
+
 		return OpenResult.SUCCESS;
 	}
 
@@ -196,7 +214,8 @@ public class MapFileHeader {
 
 			// check for valid zoom level range
 			if (zoomLevelMin > zoomLevelMax) {
-				return new OpenResult("invalid zoom level range: " + zoomLevelMin + SPACE + zoomLevelMax);
+				return new OpenResult("invalid zoom level range: " + zoomLevelMin + SPACE
+						+ zoomLevelMax);
 			}
 
 			// get and check the start address of the sub-file (8 bytes)
