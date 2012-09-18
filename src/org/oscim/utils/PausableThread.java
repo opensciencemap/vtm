@@ -18,7 +18,7 @@ package org.oscim.utils;
  * An abstract base class for threads which support pausing and resuming.
  */
 public abstract class PausableThread extends Thread {
-	private boolean mPausing;
+	private boolean mPausing = true;
 	private boolean mShouldPause;
 
 	/**

@@ -573,9 +573,9 @@ public class TileMap extends MapActivity {
 		// mMapView.setMapFile(mMapView.getMapFile());
 		// }
 
-		if (Build.VERSION.SDK_INT >= 11) {
-			VersionHelper.refreshActionBarMenu(this);
-		}
+		// if (Build.VERSION.SDK_INT >= 11) {
+		// VersionHelper.refreshActionBarMenu(this);
+		// }
 	}
 
 	static class VersionHelper {

@@ -33,32 +33,7 @@ import android.util.Log;
 
 public class MapRenderer extends GLSurfaceView {
 	private final static String TAG = "MapRenderer";
-
-	public MapRenderer(Context context, MapView mapView) {
-		super(context);
-
-		mMapView = mapView;
-
-		Log.d(TAG, "init GLSurfaceLayer");
-		setEGLConfigChooser(new GlConfigChooser());
-		setEGLContextClientVersion(2);
-
-		// setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
-		mRenderer = new GLRenderer(mMapView);
-		setRenderer(mRenderer);
-		//
-		// if (!debugFrameTime)
-		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
-		mJobList = new ArrayList<JobTile>();
-		mTiles = new ArrayList<MapTile>();
-		mTilesLoaded = new ArrayList<MapTile>(30);
-
-		ShortPool.init();
-		QuadTree.init();
-
-		mInitial = true;
-	}
+	private GLRenderer mRenderer;
 
 	private static final int MAX_TILES_IN_QUEUE = 40;
 
@@ -85,6 +60,32 @@ public class MapRenderer extends GLSurfaceView {
 
 	private static TilesData newTiles;
 
+	public MapRenderer(Context context, MapView mapView) {
+		super(context);
+
+		mMapView = mapView;
+
+		Log.d(TAG, "init GLSurfaceLayer");
+		setEGLConfigChooser(new GlConfigChooser());
+		setEGLContextClientVersion(2);
+
+		// setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
+		mRenderer = new GLRenderer(mMapView);
+		setRenderer(mRenderer);
+
+		// if (!debugFrameTime)
+		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+		mJobList = new ArrayList<JobTile>();
+		mTiles = new ArrayList<MapTile>();
+		mTilesLoaded = new ArrayList<MapTile>(30);
+
+		ShortPool.init();
+		QuadTree.init();
+
+		mInitial = true;
+	}
+
 	/**
 	 * called by MapView when position or map settings changes
 	 */
@@ -97,9 +98,6 @@ public class MapRenderer extends GLSurfaceView {
 	 */
 
 	public synchronized void updateMap(boolean clear) {
-
-		if (mWidth == 0 || mHeight == 0)
-			return;
 
 		boolean changedPos = false;
 		boolean changedZoom = false;
@@ -230,6 +228,8 @@ public class MapRenderer extends GLSurfaceView {
 
 		int max = newTiles.tiles.length - 1;
 
+		boolean prefetchChildren = true;
+
 		for (int yy = tileTop; yy <= tileBottom; yy++) {
 			for (int xx = tileLeft; xx <= tileRight; xx++) {
 
@@ -246,6 +246,10 @@ public class MapRenderer extends GLSurfaceView {
 				}
 
 				newTiles.tiles[tiles++] = tile;
+
+				if (prefetchChildren) {
+
+				}
 
 				if (!(tile.isLoading || tile.newData || tile.isReady)) {
 					mJobList.add(tile);
@@ -399,13 +403,13 @@ public class MapRenderer extends GLSurfaceView {
 
 					mTiles.add(t);
 
-				} else if (t.isLoading) {
-					// FIXME if we add tile back on next limit cache
-					// this will be removed. clearTile could interfere with
-					// TileGenerator... clear in passTile().
-					Log.d(TAG, "X cancel loading " + t + " " + t.distance);
-					t.isLoading = false;
-					// mTiles.add(t);
+					// } else if (t.isLoading) {
+					// // FIXME if we add tile back on next limit cache
+					// // this will be removed. clearTile could interfere with
+					// // MapGenerator... clear in passTile().
+					// Log.d(TAG, "X cancel loading " + t + " " + t.distance);
+					// t.isLoading = false;
+					// // mTiles.add(t);
 				} else {
 					clearTile(t);
 				}
@@ -510,13 +514,6 @@ public class MapRenderer extends GLSurfaceView {
 		if (mRenderer != null)
 			mRenderer.setRenderTheme(t);
 
-	}
-
-	private GLRenderer mRenderer;
-
-	@Override
-	public void onPause() {
-		super.onPause();
 	}
 
 	@Override

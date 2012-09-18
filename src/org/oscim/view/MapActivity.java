@@ -116,7 +116,8 @@ public abstract class MapActivity extends Activity {
 			GeoPoint geoPoint = new GeoPoint(latitudeE6, longitudeE6);
 			MapPosition mapPosition = new MapPosition(geoPoint, (byte) zoomLevel, 1);
 
-			mapView.setMapCenter(mapPosition);
+			mMapView.getMapViewPosition().setMapCenter(mapPosition);
+			// mapView.setMapCenter(mapPosition);
 		}
 
 		String theme = sharedPreferences.getString(KEY_THEME,

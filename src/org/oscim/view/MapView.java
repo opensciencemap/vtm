@@ -38,8 +38,8 @@ import org.oscim.theme.Theme;
 import org.oscim.view.generator.JobQueue;
 import org.oscim.view.generator.JobTile;
 import org.oscim.view.generator.MapWorker;
-import org.oscim.view.renderer.TileGenerator;
 import org.oscim.view.renderer.MapRenderer;
+import org.oscim.view.renderer.TileGenerator;
 import org.xml.sax.SAXException;
 
 import android.content.Context;
@@ -163,7 +163,6 @@ public class MapView extends FrameLayout {
 				mMapDatabase = mapDatabase;
 
 			mMapWorkers[i] = new MapWorker(i, mJobQueue, tileGenerator, mMapRenderer);
-			mMapWorkers[i].start();
 		}
 
 		mapActivity.registerMapView(this);
@@ -190,6 +189,10 @@ public class MapView extends FrameLayout {
 		mMapZoomControls.setShowMapZoomControls(true);
 
 		enableRotation = true;
+
+		for (MapWorker worker : mMapWorkers)
+			worker.start();
+
 	}
 
 	/**
@@ -221,10 +224,16 @@ public class MapView extends FrameLayout {
 	 * Calculates all necessary tiles and adds jobs accordingly.
 	 */
 	public void redrawMap() {
+		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
+			return;
+
 		mMapRenderer.updateMap(false);
 	}
 
 	public void clearAndRedrawMap() {
+		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
+			return;
+
 		mMapRenderer.updateMap(true);
 	}
 
@@ -462,18 +471,28 @@ public class MapView extends FrameLayout {
 		}
 	}
 
+	private boolean mPausing = false;
+
 	void onPause() {
-		mapWorkersPause(false);
+		mPausing = true;
+
+		Log.d(TAG, "onPause");
+		mJobQueue.clear();
+		mapWorkersPause(true);
 
 		if (this.enableCompass)
 			mCompass.disable();
+
 	}
 
 	void onResume() {
+		Log.d(TAG, "onResume");
 		mapWorkersProceed();
 
 		if (this.enableCompass)
 			mCompass.enable();
+
+		mPausing = false;
 	}
 
 	/**

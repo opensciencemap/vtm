@@ -98,7 +98,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 *            the MapView
 	 */
 	public TileGenerator(MapView mapView) {
-		Log.d(TAG, "init DatabaseRenderer");
+		Log.d(TAG, "init TileGenerator");
 		mMapView = mapView;
 	}
 

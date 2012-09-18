@@ -80,6 +80,11 @@ public class MapInfo {
 	public final Byte startZoomLevel;
 
 	/**
+	 * Zoomlevels provided by this Database, if null then any zoomlevel can be queried.
+	 */
+	public final int[] zoomLevel;
+
+	/**
 	 * @param bbox
 	 *            ...
 	 * @param zoom
@@ -100,11 +105,15 @@ public class MapInfo {
 	 *            ...
 	 * @param createdBy
 	 *            ...
+	 * @param zoomLevel
+	 *            TODO
 	 */
 	public MapInfo(BoundingBox bbox, Byte zoom, GeoPoint start, String projection,
-			long date, long size, int version, String language, String comment, String createdBy) {
+			long date, long size, int version, String language, String comment,
+			String createdBy, int[] zoomLevel) {
 
 		this.startZoomLevel = zoom;
+		this.zoomLevel = zoomLevel;
 		this.startPosition = start;
 		this.projectionName = projection;
 		this.mapDate = date;
@@ -116,5 +125,6 @@ public class MapInfo {
 
 		this.comment = comment;
 		this.createdBy = createdBy;
+
 	}
 }
