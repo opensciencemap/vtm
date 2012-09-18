@@ -78,7 +78,7 @@ public class MapDatabase implements IMapDatabase {
 	private static final MapInfo mMapInfo =
 			new MapInfo(new BoundingBox(-180, -90, 180, 90),
 					new Byte((byte) 4), new GeoPoint(53.11, 8.85),
-					null, 0, 0, 0, "de", "comment", "author");
+					null, 0, 0, 0, "de", "comment", "author", null);
 
 	private boolean mOpenFile = false;
 

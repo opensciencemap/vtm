@@ -35,13 +35,15 @@ public class MapDatabase implements IMapDatabase {
 	private final static String PROJECTION = "Mercator";
 	private float[] mCoords = new float[20];
 	private short[] mIndex = new short[4];
-	// private Tag[] mTags = { new Tag("boundary", "administrative"), new Tag("admin_level", "2") };
+	// private Tag[] mTags = { new Tag("boundary", "administrative"), new
+	// Tag("admin_level", "2") };
 	private Tag[] mTags = { new Tag("natural", "water") };
 	private Tag[] mNameTags;
 
 	private final MapInfo mMapInfo =
 			new MapInfo(new BoundingBox(-180, -90, 180, 90),
-					new Byte((byte) 0), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me");
+					new Byte((byte) 0), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me",
+					null);
 
 	private boolean mOpenFile = false;
 
@@ -50,8 +52,8 @@ public class MapDatabase implements IMapDatabase {
 
 		float lat1 = -0.5f;
 		float lon1 = -0.5f;
-		float lat2 = Tile.TILE_SIZE - 0.5f;
-		float lon2 = Tile.TILE_SIZE - 0.5f;
+		float lat2 = Tile.TILE_SIZE + 0.5f;
+		float lon2 = Tile.TILE_SIZE + 0.5f;
 
 		mCoords[0] = lon1;
 		mCoords[1] = lat1;
