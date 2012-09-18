@@ -102,7 +102,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// lock to synchronize Main- and GL-Thread
 	static ReentrantLock tilelock = new ReentrantLock();
 
-	// used for passing tiles to be rendered from TileLoader(Main-Thread) to GLThread
+	// used for passing tiles to be rendered from TileLoader(Main-Thread) to
+	// GLThread
 	static class TilesData {
 		int cnt = 0;
 		final MapTile[] tiles;
@@ -337,7 +338,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		ShortBuffer sbuf = null;
 
 		// use multiple buffers to avoid overwriting buffer while current
-		// data is uploaded (or rather the blocking which is probably done to avoid this)
+		// data is uploaded (or rather the blocking which is probably done to
+		// avoid this)
 		if (uploadCnt >= rotateBuffers) {
 			uploadCnt = 0;
 			GLES20.glFlush();
@@ -453,7 +455,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					// on HTC it causes oom exception?!
 
 					// glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
-					// glBufferData(GL_ARRAY_BUFFER, 0, null, GLES20.GL_STATIC_DRAW);
+					// glBufferData(GL_ARRAY_BUFFER, 0, null,
+					// GLES20.GL_STATIC_DRAW);
 
 					// recreate vbo instead
 					buf[0] = vbo.id;
@@ -581,7 +584,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			}
 		}
 
-		// proxies are clipped to the region where nothing was drawn to depth buffer
+		// proxies are clipped to the region where nothing was drawn to depth
+		// buffer
 		// TODO draw all parent before grandparent
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible && !tiles[i].isReady) {
@@ -819,12 +823,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mMapView.redrawMap();
 	}
 
-	void clearTiles() {
-		int numTiles = (mWidth / (Tile.TILE_SIZE / 2) + 2)
-				* (mHeight / (Tile.TILE_SIZE / 2) + 2);
-
-		Log.d(TAG, "clearTiles " + numTiles);
-
+	void clearTiles(int numTiles) {
 		drawTiles = new TilesData(numTiles);
 		curTiles = new TilesData(numTiles);
 	}
