@@ -99,9 +99,6 @@ public class MapRenderer extends GLSurfaceView {
 
 	public synchronized void updateMap(boolean clear) {
 
-		if (mWidth == 0 || mHeight == 0)
-			return;
-
 		boolean changedPos = false;
 		boolean changedZoom = false;
 
@@ -230,6 +227,8 @@ public class MapRenderer extends GLSurfaceView {
 
 		int max = newTiles.tiles.length - 1;
 
+		boolean prefetchChildren = true;
+
 		for (int yy = tileTop; yy <= tileBottom; yy++) {
 			for (int xx = tileLeft; xx <= tileRight; xx++) {
 
@@ -246,6 +245,10 @@ public class MapRenderer extends GLSurfaceView {
 				}
 
 				newTiles.tiles[tiles++] = tile;
+
+				if (prefetchChildren) {
+
+				}
 
 				if (!(tile.isLoading || tile.newData || tile.isReady)) {
 					mJobList.add(tile);
@@ -399,13 +402,13 @@ public class MapRenderer extends GLSurfaceView {
 
 					mTiles.add(t);
 
-				} else if (t.isLoading) {
-					// FIXME if we add tile back on next limit cache
-					// this will be removed. clearTile could interfere with
-					// MapGenerator... clear in passTile().
-					Log.d(TAG, "X cancel loading " + t + " " + t.distance);
-					t.isLoading = false;
-					// mTiles.add(t);
+					// } else if (t.isLoading) {
+					// // FIXME if we add tile back on next limit cache
+					// // this will be removed. clearTile could interfere with
+					// // MapGenerator... clear in passTile().
+					// Log.d(TAG, "X cancel loading " + t + " " + t.distance);
+					// t.isLoading = false;
+					// // mTiles.add(t);
 				} else {
 					clearTile(t);
 				}
