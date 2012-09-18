@@ -33,32 +33,7 @@ import android.util.Log;
 
 public class MapRenderer extends GLSurfaceView {
 	private final static String TAG = "MapRenderer";
-
-	public MapRenderer(Context context, MapView mapView) {
-		super(context);
-
-		mMapView = mapView;
-
-		Log.d(TAG, "init GLSurfaceLayer");
-		setEGLConfigChooser(new GlConfigChooser());
-		setEGLContextClientVersion(2);
-
-		// setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
-		mRenderer = new GLRenderer(mMapView);
-		setRenderer(mRenderer);
-		//
-		// if (!debugFrameTime)
-		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
-		mJobList = new ArrayList<JobTile>();
-		mTiles = new ArrayList<MapTile>();
-		mTilesLoaded = new ArrayList<MapTile>(30);
-
-		ShortPool.init();
-		QuadTree.init();
-
-		mInitial = true;
-	}
+	private GLRenderer mRenderer;
 
 	private static final int MAX_TILES_IN_QUEUE = 40;
 
@@ -84,6 +59,32 @@ public class MapRenderer extends GLSurfaceView {
 	private static int mWidth = 0, mHeight = 0;
 
 	private static TilesData newTiles;
+
+	public MapRenderer(Context context, MapView mapView) {
+		super(context);
+
+		mMapView = mapView;
+
+		Log.d(TAG, "init GLSurfaceLayer");
+		setEGLConfigChooser(new GlConfigChooser());
+		setEGLContextClientVersion(2);
+
+		// setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
+		mRenderer = new GLRenderer(mMapView);
+		setRenderer(mRenderer);
+
+		// if (!debugFrameTime)
+		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+		mJobList = new ArrayList<JobTile>();
+		mTiles = new ArrayList<MapTile>();
+		mTilesLoaded = new ArrayList<MapTile>(30);
+
+		ShortPool.init();
+		QuadTree.init();
+
+		mInitial = true;
+	}
 
 	/**
 	 * called by MapView when position or map settings changes
@@ -509,13 +510,6 @@ public class MapRenderer extends GLSurfaceView {
 		if (mRenderer != null)
 			mRenderer.setRenderTheme(t);
 
-	}
-
-	private GLRenderer mRenderer;
-
-	@Override
-	public void onPause() {
-		super.onPause();
 	}
 
 	@Override
