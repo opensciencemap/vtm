@@ -14,16 +14,6 @@
  */
 package org.oscim.view.renderer;
 
-import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
-import static android.opengl.GLES20.glDisableVertexAttribArray;
-import static android.opengl.GLES20.glDrawArrays;
-import static android.opengl.GLES20.glEnableVertexAttribArray;
-import static android.opengl.GLES20.glGetAttribLocation;
-import static android.opengl.GLES20.glGetUniformLocation;
-import static android.opengl.GLES20.glUniformMatrix4fv;
-import static android.opengl.GLES20.glUseProgram;
-import static android.opengl.GLES20.glVertexAttribPointer;
-
 import java.nio.ShortBuffer;
 
 import org.oscim.theme.renderinstruction.Line;
@@ -46,6 +36,7 @@ class LineRenderer {
 	private static int hLineMatrix;
 	private static int hLineScale;
 	private static int hLineWidth;
+	private static int hLineOffset;
 
 	static boolean init() {
 		lineProgram = GlUtils.createProgram(Shaders.lineVertexShader,
@@ -55,38 +46,41 @@ class LineRenderer {
 			return false;
 		}
 
-		hLineMatrix = glGetUniformLocation(lineProgram, "mvp");
-		hLineScale = glGetUniformLocation(lineProgram, "u_wscale");
-		hLineWidth = glGetUniformLocation(lineProgram, "u_width");
-		hLineColor = glGetUniformLocation(lineProgram, "u_color");
+		hLineMatrix = GLES20.glGetUniformLocation(lineProgram, "u_mvp");
+		hLineScale = GLES20.glGetUniformLocation(lineProgram, "u_wscale");
+		hLineWidth = GLES20.glGetUniformLocation(lineProgram, "u_width");
+		hLineColor = GLES20.glGetUniformLocation(lineProgram, "u_color");
+		hLineOffset = GLES20.glGetUniformLocation(lineProgram, "u_offset");
+
 		hLineVertexPosition = GLES20.glGetAttribLocation(lineProgram, "a_position");
-		hLineTexturePosition = glGetAttribLocation(lineProgram, "a_st");
+		hLineTexturePosition = GLES20.glGetAttribLocation(lineProgram, "a_st");
 
 		return true;
 	}
 
-	static final boolean mFast = true;
+	static final boolean mFast = false;
 
 	static LineLayer drawLines(MapTile tile, LineLayer layer, int next, float[] matrix,
-			float div, double zoom, float scale) {
+			float offset, float div, double zoom, float scale) {
 
 		float z = 1 / div;
 
 		if (layer == null)
 			return null;
 
-		glUseProgram(lineProgram);
+		GLES20.glUseProgram(lineProgram);
 
-		glEnableVertexAttribArray(hLineVertexPosition);
-		glEnableVertexAttribArray(hLineTexturePosition);
+		GLES20.glEnableVertexAttribArray(hLineVertexPosition);
+		GLES20.glEnableVertexAttribArray(hLineTexturePosition);
 
-		glVertexAttribPointer(hLineVertexPosition, 2, GLES20.GL_SHORT,
+		GLES20.glVertexAttribPointer(hLineVertexPosition, 2, GLES20.GL_SHORT,
 				false, 8, tile.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
 
-		glVertexAttribPointer(hLineTexturePosition, 2, GLES20.GL_SHORT,
+		GLES20.glVertexAttribPointer(hLineTexturePosition, 2, GLES20.GL_SHORT,
 				false, 8, tile.lineOffset + LINE_VERTICES_DATA_TEX_OFFSET);
 
-		glUniformMatrix4fv(hLineMatrix, 1, false, matrix, 0);
+		GLES20.glUniformMatrix4fv(hLineMatrix, 1, false, matrix, 0);
+		GLES20.glUniform1f(hLineOffset, offset);
 
 		// scale factor to map one pixel on tile to one pixel on screen:
 		float pixel = 2.0f / (scale * z);
@@ -130,14 +124,14 @@ class LineRenderer {
 						blur = true;
 					}
 
-					if (zoom > MapGenerator.STROKE_MAX_ZOOM_LEVEL)
+					if (zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL)
 						GLES20.glUniform1f(hLineWidth,
 								(l.width + o.width) / (scale * z));
 					else
 						GLES20.glUniform1f(hLineWidth, l.width / (scale * z)
 								+ o.width / s);
 
-					glDrawArrays(GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
+					GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
 				}
 			}
 			else {
@@ -146,19 +140,19 @@ class LineRenderer {
 					blur = true;
 				}
 
-				if (line.fixed || zoom > MapGenerator.STROKE_MAX_ZOOM_LEVEL) {
+				if (line.fixed || zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL) {
 					// invert scaling of extrusion vectors so that line width stays the same
 					GLES20.glUniform1f(hLineWidth, (l.width / (scale * z)));
 				} else {
 					GLES20.glUniform1f(hLineWidth, (l.width / s));
 				}
 
-				glDrawArrays(GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
+				GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
 			}
 		}
 
-		glDisableVertexAttribArray(hLineVertexPosition);
-		glDisableVertexAttribArray(hLineTexturePosition);
+		GLES20.glDisableVertexAttribArray(hLineVertexPosition);
+		GLES20.glDisableVertexAttribArray(hLineTexturePosition);
 
 		return l;
 	}

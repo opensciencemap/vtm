@@ -79,7 +79,20 @@ public class TextRenderer {
 
 	};
 
-	static boolean init(int numTextures) {
+	static void init() {
+		mTextProgram = GlUtils.createProgram(Shaders.textVertexShader,
+				Shaders.textFragmentShader);
+
+		hTextUVPMatrix = GLES20.glGetUniformLocation(mTextProgram, "mvp");
+		hTextRotationMatrix = GLES20.glGetUniformLocation(mTextProgram, "rotation");
+
+		hTextVertex = GLES20.glGetAttribLocation(mTextProgram, "vertex");
+		hTextScale = GLES20.glGetUniformLocation(mTextProgram, "scale");
+		hTextTextureCoord = GLES20.glGetAttribLocation(mTextProgram, "tex_coord");
+
+	}
+
+	static boolean setup(int numTextures) {
 		int bufferSize = numTextures
 				* MAX_LABELS * VERTICES_PER_SPRITE
 				* SHORTS_PER_VERTICE * (Short.SIZE / 8);
@@ -97,16 +110,6 @@ public class TextRenderer {
 
 		mShortBuffer = buf.asShortBuffer();
 		// }
-
-		mTextProgram = GlUtils.createProgram(Shaders.textVertexShader,
-				Shaders.textFragmentShader);
-
-		hTextUVPMatrix = GLES20.glGetUniformLocation(mTextProgram, "mvp");
-		hTextRotationMatrix = GLES20.glGetUniformLocation(mTextProgram, "rotation");
-
-		hTextVertex = GLES20.glGetAttribLocation(mTextProgram, "vertex");
-		hTextScale = GLES20.glGetUniformLocation(mTextProgram, "scale");
-		hTextTextureCoord = GLES20.glGetAttribLocation(mTextProgram, "tex_coord");
 
 		int[] textureIds = new int[numTextures];
 		TextTexture[] textures = new TextTexture[numTextures];

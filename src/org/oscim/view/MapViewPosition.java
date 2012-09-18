@@ -34,6 +34,7 @@ public class MapViewPosition {
 	private byte mZoomLevel;
 	private float mScale;
 	private float mRotation;
+	private float mTilt;
 
 	MapViewPosition(MapView mapView) {
 		mMapView = mapView;
@@ -43,6 +44,7 @@ public class MapViewPosition {
 		mZoomLevel = -1;
 		mScale = 1;
 		mRotation = 0.0f;
+		mTilt = 0;
 	}
 
 	/**
@@ -182,6 +184,10 @@ public class MapViewPosition {
 
 	public void setRotation(float f) {
 		mRotation = f;
+	}
+
+	public void setTile(float f) {
+		mTilt = f;
 	}
 
 	synchronized void setMapCenter(GeoPoint geoPoint) {
