@@ -91,7 +91,7 @@ public class MapRenderer extends GLSurfaceView {
 	 */
 	/**
 	 * Update list of visible tiles and passes them to MapRenderer, when not available tiles are created and added to
-	 * JobQueue (mapView.addJobs) for loading by MapGenerator class
+	 * JobQueue (mapView.addJobs) for loading by TileGenerator class
 	 * 
 	 * @param clear
 	 *            ...
@@ -116,15 +116,16 @@ public class MapRenderer extends GLSurfaceView {
 			Log.d(TAG, "CLEAR");
 
 			mInitial = true;
-			synchronized (GLRenderer.lock) {
+			// FIXME still needed?
+			GLRenderer.tilelock.lock();
 
-				for (MapTile t : mTiles)
-					clearTile(t);
+			for (MapTile t : mTiles)
+				clearTile(t);
 
-				mTiles.clear();
-				mTilesLoaded.clear();
-				QuadTree.init();
-			}
+			mTiles.clear();
+			mTilesLoaded.clear();
+			QuadTree.init();
+			GLRenderer.tilelock.unlock();
 		}
 
 		if (mInitial) {
@@ -469,7 +470,7 @@ public class MapRenderer extends GLSurfaceView {
 	}
 
 	/**
-	 * called from MapWorker Thread when tile is loaded by MapGenerator
+	 * called from MapWorker Thread when tile is loaded by TileGenerator
 	 * 
 	 * @param jobTile
 	 *            ...

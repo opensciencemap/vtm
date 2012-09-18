@@ -51,6 +51,7 @@ class PolygonRenderer {
 	private static int polygonProgram;
 	private static int hPolygonVertexPosition;
 	private static int hPolygonMatrix;
+	private static int hPolygonOffset;
 	private static int hPolygonColor;
 
 	static boolean init() {
@@ -62,9 +63,10 @@ class PolygonRenderer {
 			// Log.e(TAG, "Could not create polygon program.");
 			return false;
 		}
-		hPolygonMatrix = glGetUniformLocation(polygonProgram, "mvp");
-		hPolygonVertexPosition = glGetAttribLocation(polygonProgram, "a_position");
+		hPolygonMatrix = glGetUniformLocation(polygonProgram, "u_mvp");
 		hPolygonColor = glGetUniformLocation(polygonProgram, "u_color");
+		hPolygonOffset = glGetUniformLocation(polygonProgram, "u_offset");
+		hPolygonVertexPosition = glGetAttribLocation(polygonProgram, "a_position");
 
 		mFillPolys = new PolygonLayer[STENCIL_BITS];
 
@@ -80,7 +82,7 @@ class PolygonRenderer {
 		// do not modify stencil buffer
 		glStencilMask(0);
 
-		glEnable(GLES20.GL_DEPTH_TEST);
+		// glEnable(GLES20.GL_DEPTH_TEST);
 
 		for (int c = 0; c < count; c++) {
 			PolygonLayer l = mFillPolys[c];
@@ -149,7 +151,7 @@ class PolygonRenderer {
 	}
 
 	static PolygonLayer drawPolygons(PolygonLayer layer, int next,
-			float[] matrix, double zoom, float scale, boolean clip) {
+			float[] matrix, float offset, double zoom, float scale, boolean clip) {
 		int cnt = 0;
 
 		glUseProgram(polygonProgram);
@@ -160,7 +162,7 @@ class PolygonRenderer {
 				POLYGON_VERTICES_DATA_POS_OFFSET);
 
 		glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
-
+		GLES20.glUniform1f(hPolygonOffset, offset);
 		glEnable(GL_STENCIL_TEST);
 
 		PolygonLayer l = layer;
@@ -206,7 +208,7 @@ class PolygonRenderer {
 				// stencil op for stencil method polygon drawing
 				glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
 
-				glDisable(GLES20.GL_DEPTH_TEST);
+				// glDisable(GLES20.GL_DEPTH_TEST);
 			}
 			mFillPolys[cnt] = l;
 
