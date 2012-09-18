@@ -130,7 +130,7 @@ class LineRenderer {
 						blur = true;
 					}
 
-					if (zoom > MapGenerator.STROKE_MAX_ZOOM_LEVEL)
+					if (zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL)
 						GLES20.glUniform1f(hLineWidth,
 								(l.width + o.width) / (scale * z));
 					else
@@ -146,7 +146,7 @@ class LineRenderer {
 					blur = true;
 				}
 
-				if (line.fixed || zoom > MapGenerator.STROKE_MAX_ZOOM_LEVEL) {
+				if (line.fixed || zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL) {
 					// invert scaling of extrusion vectors so that line width stays the same
 					GLES20.glUniform1f(hLineWidth, (l.width / (scale * z)));
 				} else {
