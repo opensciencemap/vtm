@@ -14,7 +14,7 @@
  */
 package org.oscim.view;
 
-import org.oscim.view.renderer.MapGenerator;
+import org.oscim.view.renderer.TileGenerator;
 
 import android.content.Context;
 import android.os.Handler;
@@ -220,7 +220,7 @@ public class MapZoomControls {
 	/**
 	 * Sets the maximum zoom level of the map.
 	 * <p>
-	 * The maximum possible zoom level of the MapView depends also on the current {@link MapGenerator}. For example,
+	 * The maximum possible zoom level of the MapView depends also on the current {@link TileGenerator}. For example,
 	 * downloading map tiles may only be possible up to a certain zoom level. Setting a higher maximum zoom level has no
 	 * effect in this case.
 	 * 

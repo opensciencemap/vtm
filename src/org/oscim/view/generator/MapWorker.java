@@ -15,7 +15,7 @@
 package org.oscim.view.generator;
 
 import org.oscim.utils.PausableThread;
-import org.oscim.view.renderer.MapGenerator;
+import org.oscim.view.renderer.TileGenerator;
 import org.oscim.view.renderer.MapRenderer;
 
 /**
@@ -25,7 +25,7 @@ import org.oscim.view.renderer.MapRenderer;
 public class MapWorker extends PausableThread {
 	private final String THREAD_NAME;
 	private final JobQueue mJobQueue;
-	private final MapGenerator mMapGenerator;
+	private final TileGenerator mMapGenerator;
 	private final MapRenderer mMapRenderer;
 
 	// private final int mPrio;
@@ -33,23 +33,23 @@ public class MapWorker extends PausableThread {
 	/**
 	 * @param id
 	 *            thread id
-	 * @param mapGenerator
+	 * @param tileGenerator
 	 *            ...
 	 * @param mapRenderer
 	 *            ...
 	 */
-	public MapWorker(int id, JobQueue jobQueue, MapGenerator mapGenerator,
+	public MapWorker(int id, JobQueue jobQueue, TileGenerator tileGenerator,
 			MapRenderer mapRenderer) {
 		super();
 		mJobQueue = jobQueue;
-		mMapGenerator = mapGenerator;
+		mMapGenerator = tileGenerator;
 		mMapRenderer = mapRenderer;
 
 		THREAD_NAME = "MapWorker" + id;
 		// mPrio = Math.max(Thread.MIN_PRIORITY + id, Thread.NORM_PRIORITY - 1);
 	}
 
-	public MapGenerator getMapGenerator() {
+	public TileGenerator getMapGenerator() {
 		return mMapGenerator;
 	}
 

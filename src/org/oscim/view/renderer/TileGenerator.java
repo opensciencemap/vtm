@@ -39,9 +39,9 @@ import android.util.Log;
 /**
  * 
  */
-public class MapGenerator implements IRenderCallback, IMapDatabaseCallback {
+public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
-	private static String TAG = MapGenerator.class.getName();
+	private static String TAG = TileGenerator.class.getName();
 
 	private static final double PI180 = (Math.PI / 180) / 1000000.0;
 	private static final double PIx4 = Math.PI * 4;
@@ -88,8 +88,8 @@ public class MapGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private final Tag[] debugTagWay = { new Tag("debug", "way") };
 	private final Tag[] debugTagArea = { new Tag("debug", "area") };
 	private final float[] debugBoxCoords = { 0, 0, 0, Tile.TILE_SIZE,
-			Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 0 };
-	private final short[] debugBoxIndex = { 8 };
+			Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 0, 0, 0 };
+	private final short[] debugBoxIndex = { 10 };
 
 	private float mProjectionScaleFactor;
 
@@ -97,7 +97,7 @@ public class MapGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 * @param mapView
 	 *            the MapView
 	 */
-	public MapGenerator(MapView mapView) {
+	public TileGenerator(MapView mapView) {
 		Log.d(TAG, "init DatabaseRenderer");
 		mMapView = mapView;
 	}
@@ -161,7 +161,7 @@ public class MapGenerator implements IRenderCallback, IMapDatabaseCallback {
 		// Log.d(TAG, "renderPointOfInterest: " + mTagName);
 
 		// mNodeRenderInstructions =
-		MapGenerator.renderTheme.matchNode(this, tags, mCurrentTile.zoomLevel);
+		TileGenerator.renderTheme.matchNode(this, tags, mCurrentTile.zoomLevel);
 	}
 
 	@Override
@@ -205,7 +205,7 @@ public class MapGenerator implements IRenderCallback, IMapDatabaseCallback {
 		// mRenderInstructions[i].renderWay(this, tags);
 		// }
 
-		mRenderInstructions = MapGenerator.renderTheme.matchWay(this, tags,
+		mRenderInstructions = TileGenerator.renderTheme.matchWay(this, tags,
 				(byte) (mCurrentTile.zoomLevel + 0),
 				closed, true);
 
@@ -221,10 +221,10 @@ public class MapGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mTagName = new Tag("name", tags[0].key + ":" + tags[0].value, false);
 
 		if (closed) {
-			mRenderInstructions = MapGenerator.renderTheme.matchWay(this, debugTagArea,
+			mRenderInstructions = TileGenerator.renderTheme.matchWay(this, debugTagArea,
 					(byte) 0, true, true);
 		} else {
-			mRenderInstructions = MapGenerator.renderTheme.matchWay(this, debugTagWay,
+			mRenderInstructions = TileGenerator.renderTheme.matchWay(this, debugTagWay,
 					(byte) 0, true, true);
 		}
 	}
@@ -438,7 +438,7 @@ public class MapGenerator implements IRenderCallback, IMapDatabaseCallback {
 			return false;
 		}
 
-		mLevels = MapGenerator.renderTheme.getLevels();
+		mLevels = TileGenerator.renderTheme.getLevels();
 
 		// limit stroke scale at z=17
 		if (tile.zoomLevel < STROKE_MAX_ZOOM_LEVEL)
@@ -471,12 +471,12 @@ public class MapGenerator implements IRenderCallback, IMapDatabaseCallback {
 					+ tile.toString(), false);
 			mPoiX = Tile.TILE_SIZE >> 1;
 			mPoiY = 10;
-			MapGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
+			TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
 
 			mIndices = debugBoxIndex;
 			mCoords = debugBoxCoords;
 			mDrawingLayer = 10 * mLevels;
-			MapGenerator.renderTheme.matchWay(this, debugTagBox, (byte) 0, false, true);
+			TileGenerator.renderTheme.matchWay(this, debugTagBox, (byte) 0, false, true);
 		}
 
 		tile.lineLayers = mLineLayers;
@@ -530,13 +530,13 @@ public class MapGenerator implements IRenderCallback, IMapDatabaseCallback {
 	}
 
 	public void setRenderTheme(RenderTheme theme) {
-		MapGenerator.renderTheme = theme;
+		TileGenerator.renderTheme = theme;
 	}
 
 	@Override
 	public boolean checkWay(Tag[] tags, boolean closed) {
 
-		mRenderInstructions = MapGenerator.renderTheme.matchWay(this, tags,
+		mRenderInstructions = TileGenerator.renderTheme.matchWay(this, tags,
 				(byte) (mCurrentTile.zoomLevel + 0), closed, false);
 
 		return mRenderInstructions != null;

@@ -31,7 +31,7 @@ class MapTile extends JobTile {
 	TextTexture texture;
 
 	/**
-	 * Tile data set by MapGenerator:
+	 * Tile data set by TileGenerator:
 	 */
 	LineLayer lineLayers;
 	PolygonLayer polygonLayers;
