@@ -580,12 +580,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		int z = mapPosition.zoomLevel;
 		float s = mapPosition.scale;
 
-		int zoomLevelDiff = Math.max(z - MapGenerator.STROKE_MAX_ZOOM_LEVEL, 0);
+		int zoomLevelDiff = Math.max(z - TileGenerator.STROKE_MAX_ZOOM_LEVEL, 0);
 		float scale = (float) Math.pow(1.4, zoomLevelDiff);
 		if (scale < 1)
 			scale = 1;
 
-		if (z >= MapGenerator.STROKE_MAX_ZOOM_LEVEL)
+		if (z >= TileGenerator.STROKE_MAX_ZOOM_LEVEL)
 			TextRenderer.beginDraw(FloatMath.sqrt(s) / scale, mRotTMatrix);
 		else
 			TextRenderer.beginDraw(s, mRotTMatrix);
