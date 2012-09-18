@@ -18,7 +18,6 @@ import org.oscim.view.MapActivity;
 import org.oscim.view.MapView;
 
 import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -39,7 +38,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.SpinnerAdapter;
@@ -78,10 +76,10 @@ public class TileMap extends MapActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-			getMenuInflater().inflate(R.menu.options_menu, menu);
-		else
-			getMenuInflater().inflate(R.menu.options_menu_pre_honeycomb, menu);
+		// if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+		// getMenuInflater().inflate(R.menu.options_menu, menu);
+		// else
+		getMenuInflater().inflate(R.menu.options_menu_pre_honeycomb, menu);
 
 		mMenu = menu;
 
@@ -141,14 +139,6 @@ public class TileMap extends MapActivity {
 				showDialog(DIALOG_ENTER_COORDINATES);
 				return true;
 
-			case R.id.menu_position_map_center:
-				// disable GPS follow mode if it is enabled
-				mLocation.disableSnapToLocation(true);
-
-				mMapView.setCenter(mMapView.getMapDatabase()
-						.getMapInfo().mapCenter);
-				return true;
-
 			case R.id.menu_preferences:
 				startActivity(new Intent(this, EditPreferences.class));
 				return true;
@@ -171,9 +161,16 @@ public class TileMap extends MapActivity {
 				startRenderThemePicker();
 				return true;
 
-			case R.id.menu_mapfile:
-				startMapFilePicker();
-				return true;
+				// case R.id.menu_position_map_center:
+				// // disable GPS follow mode if it is enabled
+				// mLocation.disableSnapToLocation(true);
+				//
+				// mMapView.setCenter(mMapView.getMapDatabase()
+				// .getMapInfo().mapCenter);
+				// return true;
+				// case R.id.menu_mapfile:
+				// startMapFilePicker();
+				// return true;
 
 			default:
 				return false;
@@ -216,10 +213,11 @@ public class TileMap extends MapActivity {
 		if (mMapDatabase == MapDatabases.MAP_READER) {
 			menu.findItem(R.id.menu_mapfile).setVisible(true);
 			menu.findItem(R.id.menu_position_map_center).setVisible(true);
-		} else {
-			menu.findItem(R.id.menu_mapfile).setVisible(false);
-			menu.findItem(R.id.menu_position_map_center).setVisible(false);
 		}
+		// else {
+		// menu.findItem(R.id.menu_mapfile).setVisible(false);
+		// menu.findItem(R.id.menu_position_map_center).setVisible(false);
+		// }
 
 		toggleMenuRotation();
 
@@ -278,21 +276,21 @@ public class TileMap extends MapActivity {
 		return Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB;
 	}
 
-	@TargetApi(11)
+	// @TargetApi(11)
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (!isPreHoneyComb()) {
-			mSpinnerAdapter = ArrayAdapter.createFromResource(this,
-					R.array.view_sections,
-					android.R.layout.simple_spinner_dropdown_item);
-			ActionBar actionBar = getActionBar();
-			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-
-			// actionBar.setListNavigationCallbacks(mSpinnerAdapter, this);
-			actionBar.setDisplayShowTitleEnabled(false);
-		}
+		// if (!isPreHoneyComb()) {
+		// mSpinnerAdapter = ArrayAdapter.createFromResource(this,
+		// R.array.view_sections,
+		// android.R.layout.simple_spinner_dropdown_item);
+		// ActionBar actionBar = getActionBar();
+		// actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		//
+		// // actionBar.setListNavigationCallbacks(mSpinnerAdapter, this);
+		// actionBar.setDisplayShowTitleEnabled(false);
+		// }
 
 		// set up the layout views
 		setContentView(R.layout.activity_tilemap);
@@ -500,7 +498,7 @@ public class TileMap extends MapActivity {
 		// }
 		//
 		// if (mapGeneratorInternalNew != mapGeneratorInternal) {
-		// MapGenerator mapGenerator = MapGeneratorFactory.createMapGenerator(mapGeneratorInternalNew);
+		// TileGenerator mapGenerator = MapGeneratorFactory.createMapGenerator(mapGeneratorInternalNew);
 		// mapView.setMapGenerator(mapGenerator);
 		// mapGeneratorInternal = mapGeneratorInternalNew;
 		// }
@@ -575,9 +573,9 @@ public class TileMap extends MapActivity {
 		// mMapView.setMapFile(mMapView.getMapFile());
 		// }
 
-		if (Build.VERSION.SDK_INT >= 11) {
-			VersionHelper.refreshActionBarMenu(this);
-		}
+		// if (Build.VERSION.SDK_INT >= 11) {
+		// VersionHelper.refreshActionBarMenu(this);
+		// }
 	}
 
 	static class VersionHelper {

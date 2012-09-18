@@ -50,7 +50,7 @@
     <string name="longitude">Longitude</string>
     <string name="menu_info">Info</string>
     <string name="menu_info_map_file">Map file properties</string>
-    <string name="menu_info_about">About this software</string>
+    <string name="menu_info_about">About</string>
     <string name="menu_mapfile">Map file</string>
     <string name="menu_position">Position</string>
     <string name="menu_rotation_enable">Enable rotation</string>
@@ -63,7 +63,7 @@
     <string name="menu_position_my_location_enable">Show my location</string>
     <string name="menu_position_my_location_disable">Remove my location</string>
     <string name="menu_preferences">Preferences</string>
-    <string name="menu_render_theme">Render theme</string>
+    <string name="menu_render_theme">Theme</string>
     <string name="menu_render_theme_osmarender">Default Theme</string>
     <string name="menu_render_theme_tronrender">Tube Theme</string>
     <string name="menu_render_theme_select_file">Select XML file …</string>
