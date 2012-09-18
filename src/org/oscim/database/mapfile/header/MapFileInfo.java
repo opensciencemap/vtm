@@ -59,7 +59,7 @@ public class MapFileInfo extends org.oscim.database.MapInfo {
 				mapFileInfoBuilder.fileVersion,
 				mapFileInfoBuilder.optionalFields.languagePreference,
 				mapFileInfoBuilder.optionalFields.comment,
-				mapFileInfoBuilder.optionalFields.createdBy);
+				mapFileInfoBuilder.optionalFields.createdBy, null);
 
 		debugFile = mapFileInfoBuilder.optionalFields.isDebugFile;
 

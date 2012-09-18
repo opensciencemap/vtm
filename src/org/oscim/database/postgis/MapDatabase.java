@@ -60,7 +60,7 @@ public class MapDatabase implements IMapDatabase {
 			new MapInfo(new BoundingBox(-180, -85, 180, 85),
 					new Byte((byte) 14), new GeoPoint(53.11, 8.85),
 					WebMercator.NAME,
-					0, 0, 0, "de", "comment", "author");
+					0, 0, 0, "de", "comment", "author", null);
 
 	private boolean mOpenFile = false;
 

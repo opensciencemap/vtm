@@ -41,7 +41,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private final MapInfo mMapInfo =
 			new MapInfo(new BoundingBox(-180, -90, 180, 90),
-					new Byte((byte) 0), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me");
+					new Byte((byte) 0), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me", null);
 
 	private boolean mOpenFile = false;
 
