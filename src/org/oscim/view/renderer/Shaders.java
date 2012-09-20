@@ -22,7 +22,6 @@ class Shaders {
 			// + "invariant gl_Position;"
 			+ "uniform mat4 u_mvp;"
 			+ "uniform float u_width;"
-			+ "uniform float u_offset;"
 			+ "attribute vec2 a_position;"
 			+ "attribute vec2 a_st;"
 			+ "varying vec2 v_st;"
@@ -31,11 +30,7 @@ class Shaders {
 			// scale extrusion to u_width pixel
 			// just ignore the two most insignificant bits of a_st :)
 			+ "  vec2 dir = dscale * u_width * a_st;"
-			+ "  vec4 pos = u_mvp * vec4(a_position + dir, 0.0,1.0);"
-			+ "  pos.z = 0.0;"
-			// + "  gl_Position = vec4(pos.xy, u_offset, 1.0);"
-			+ "  gl_Position = pos;"
-			// + "  gl_Position = mvp * vec4(a_position + dir, 0.0,1.0);"
+			+ "  gl_Position = u_mvp * vec4(a_position + dir, 0.0,1.0);"
 			// last two bits of a_st hold the texture coordinates
 			+ "  v_st = u_width * (abs(mod(a_st,4.0)) - 1.0);"
 			// TODO use bit operations when available (gles 1.3)
@@ -100,15 +95,10 @@ class Shaders {
 
 	final static String polygonVertexShader = ""
 			+ "precision mediump float;"
-			// + "invariant gl_Position;"
 			+ "uniform mat4 u_mvp;"
-			+ "uniform float u_offset;"
 			+ "attribute vec4 a_position;"
 			+ "void main() {"
-			+ "  vec4 pos =  u_mvp * a_position;"
-			+ "  pos.z = 0.0;"
-			+ "  gl_Position = pos;"
-			// + "  gl_Position = mvp * a_position;"
+			+ "  gl_Position = u_mvp * a_position;"
 			+ "}";
 
 	final static String polygonFragmentShader = ""
@@ -127,15 +117,16 @@ class Shaders {
 			+ "uniform float scale;"
 			+ "varying vec2 tex_c;"
 			+ "const vec2 div = vec2(1.0/4096.0,1.0/2048.0);"
+			+ "const float coord_scale = 0.125;"
 			+ "void main() {"
 			+ "  vec4 pos;"
 			+ " if (mod(vertex.x, 2.0) == 0.0){"
-			+ "       pos = rotation * (mvp * vec4(vertex.xy + vertex.zw, 0.0, 1.0));"
+			+ "       pos = rotation * (mvp * vec4(vertex.xy + vertex.zw * (1.0 / scale), 0.0, 1.0));"
 			+ "  } else {"
+			// place as billboard
 			+ "    vec4 dir = mvp * vec4(vertex.xy, 0.0, 1.0);"
-			+ "    pos = rotation * (dir + vec4(vertex.zw * scale, 0.0, 0.0));"
+			+ "    pos = rotation * (dir + vec4(vertex.zw * coord_scale, 0.0, 0.0));"
 			+ "  }"
-			+ "  pos.z = 0.0;"
 			+ "  gl_Position = pos;"
 			+ "  tex_c = tex_coord * div;"
 			+ "}";
@@ -173,7 +164,8 @@ class Shaders {
 	// + "const vec2 div = vec2(1.0/4096.0,1.0/2048.0);"
 	// + "void main() {"
 	// + " if (mod(vertex.x, 2.0) == 0.0){"
-	// + "       gl_Position = mvp * vec4(vertex.xy + vertex.zw / scale, 0.0, 1.0);"
+	// +
+	// "       gl_Position = mvp * vec4(vertex.xy + vertex.zw / scale, 0.0, 1.0);"
 	// + "  } else {"
 	// + "    vec4 dir = rotation * vec4(vertex.zw / scale, 0.0, 1.0);"
 	// + "    gl_Position = mvp * vec4(vertex.xy + dir.xy, 0.0, 1.0);"

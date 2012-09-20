@@ -50,7 +50,6 @@ class LineRenderer {
 		hLineScale = GLES20.glGetUniformLocation(lineProgram, "u_wscale");
 		hLineWidth = GLES20.glGetUniformLocation(lineProgram, "u_width");
 		hLineColor = GLES20.glGetUniformLocation(lineProgram, "u_color");
-		hLineOffset = GLES20.glGetUniformLocation(lineProgram, "u_offset");
 
 		hLineVertexPosition = GLES20.glGetAttribLocation(lineProgram, "a_position");
 		hLineTexturePosition = GLES20.glGetAttribLocation(lineProgram, "a_st");
@@ -61,7 +60,7 @@ class LineRenderer {
 	static final boolean mFast = false;
 
 	static LineLayer drawLines(MapTile tile, LineLayer layer, int next, float[] matrix,
-			float offset, float div, double zoom, float scale) {
+			float div, double zoom, float scale) {
 
 		float z = 1 / div;
 
@@ -80,7 +79,6 @@ class LineRenderer {
 				false, 8, tile.lineOffset + LINE_VERTICES_DATA_TEX_OFFSET);
 
 		GLES20.glUniformMatrix4fv(hLineMatrix, 1, false, matrix, 0);
-		GLES20.glUniform1f(hLineOffset, offset);
 
 		// scale factor to map one pixel on tile to one pixel on screen:
 		float pixel = 2.0f / (scale * z);
@@ -141,7 +139,8 @@ class LineRenderer {
 				}
 
 				if (line.fixed || zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL) {
-					// invert scaling of extrusion vectors so that line width stays the same
+					// invert scaling of extrusion vectors so that line width
+					// stays the same
 					GLES20.glUniform1f(hLineWidth, (l.width / (scale * z)));
 				} else {
 					GLES20.glUniform1f(hLineWidth, (l.width / s));
@@ -217,7 +216,8 @@ class LineRenderer {
 	// }
 	// }
 	//
-	// static LineLayer get(int layer, Line line, float width, boolean outline) {
+	// static LineLayer get(int layer, Line line, float width, boolean outline)
+	// {
 	// synchronized (lock) {
 	//
 	// if (count == 0 && pool == null) {
