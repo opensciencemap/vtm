@@ -51,7 +51,6 @@ class PolygonRenderer {
 	private static int polygonProgram;
 	private static int hPolygonVertexPosition;
 	private static int hPolygonMatrix;
-	private static int hPolygonOffset;
 	private static int hPolygonColor;
 
 	static boolean init() {
@@ -65,7 +64,6 @@ class PolygonRenderer {
 		}
 		hPolygonMatrix = glGetUniformLocation(polygonProgram, "u_mvp");
 		hPolygonColor = glGetUniformLocation(polygonProgram, "u_color");
-		hPolygonOffset = glGetUniformLocation(polygonProgram, "u_offset");
 		hPolygonVertexPosition = glGetAttribLocation(polygonProgram, "a_position");
 
 		mFillPolys = new PolygonLayer[STENCIL_BITS];
@@ -76,49 +74,50 @@ class PolygonRenderer {
 	private static void fillPolygons(int count, double zoom, float scale) {
 		boolean blend = false;
 
-		// draw to framebuffer
+		/* draw to framebuffer */
 		glColorMask(true, true, true, true);
 
-		// do not modify stencil buffer
+		/* do not modify stencil buffer */
 		glStencilMask(0);
 
-		// glEnable(GLES20.GL_DEPTH_TEST);
+		/* only draw where nothing was drawn yet */
+		glEnable(GLES20.GL_DEPTH_TEST);
 
 		for (int c = 0; c < count; c++) {
 			PolygonLayer l = mFillPolys[c];
 
-			float alpha = 1.0f;
+			float f = 1.0f;
 
 			if (l.area.fade >= zoom || l.area.color[3] != 1.0) {
-				// draw alpha blending, fade in/out
+				/* fade in/out || draw alpha color */
 				if (l.area.fade >= zoom) {
-					alpha = (scale > 1.3f ? scale : 1.3f) - alpha;
-					if (alpha > 1.0f)
-						alpha = 1.0f;
+					f = (scale > 1.3f ? scale : 1.3f) - f;
+					if (f > 1.0f)
+						f = 1.0f;
 				}
 
-				alpha *= l.area.color[3];
+				f *= l.area.color[3];
 
 				if (!blend) {
 					glEnable(GL_BLEND);
 					blend = true;
 				}
 
-				GlUtils.setColor(hPolygonColor, l.area.color, alpha);
+				GlUtils.setColor(hPolygonColor, l.area.color, f);
 
 			} else if (l.area.blend == zoom) {
-				// fade in/out
-				alpha = scale - 1.0f;
-				if (alpha > 1.0f)
-					alpha = 1.0f;
-				else if (alpha < 0)
-					alpha = 0;
+				/* blend colors */
+				f = scale - 1.0f;
+				if (f > 1.0f)
+					f = 1.0f;
+				else if (f < 0)
+					f = 0;
 
 				GlUtils.setBlendColors(hPolygonColor,
-						l.area.color, l.area.blendColor, alpha);
+						l.area.color, l.area.blendColor, f);
 
 			} else {
-				// draw solid
+				/* draw solid */
 				if (blend) {
 					glDisable(GL_BLEND);
 					blend = false;
@@ -139,10 +138,10 @@ class PolygonRenderer {
 			// blend = false;
 			// }
 
-			// set stencil buffer mask used to draw this layer
+			/* set stencil buffer mask used to draw this layer */
 			glStencilFunc(GL_EQUAL, 0xff, 1 << c);
 
-			// draw tile fill coordinates
+			/* draw tile fill coordinates */
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		}
 
@@ -151,23 +150,22 @@ class PolygonRenderer {
 	}
 
 	static PolygonLayer drawPolygons(PolygonLayer layer, int next,
-			float[] matrix, float offset, double zoom, float scale, boolean clip) {
-		int cnt = 0;
+			float[] matrix, double zoom, float scale, boolean clip) {
 
 		glUseProgram(polygonProgram);
 		GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);
 
-		glVertexAttribPointer(hPolygonVertexPosition, 2,
-				GLES20.GL_SHORT, false, 0,
-				POLYGON_VERTICES_DATA_POS_OFFSET);
+		glVertexAttribPointer(hPolygonVertexPosition, 2, GLES20.GL_SHORT,
+				false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
 
 		glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
-		GLES20.glUniform1f(hPolygonOffset, offset);
+
 		glEnable(GL_STENCIL_TEST);
 
 		PolygonLayer l = layer;
 
 		boolean first = clip;
+		int cnt = 0;
 
 		for (; l != null && l.layer < next; l = l.next) {
 			// fade out polygon layers (set in RederTheme)
@@ -178,10 +176,8 @@ class PolygonRenderer {
 				// disable drawing to framebuffer
 				glColorMask(false, false, false, false);
 
-				// never pass the test, i.e. always apply first stencil op (sfail)
-				glStencilFunc(GLES20.GL_ALWAYS, 0, 0xff);
-
-				// clear stencilbuffer
+				// never pass the test: always apply fail op
+				glStencilFunc(GLES20.GL_ALWAYS, 0, 0xFF);
 				glStencilMask(0xFF);
 				// glClear(GL_STENCIL_BUFFER_BIT);
 
@@ -202,13 +198,15 @@ class PolygonRenderer {
 				if (first) {
 					first = false;
 					GLES20.glDepthMask(false);
+					// only draw to this tile
 					GLES20.glDepthFunc(GLES20.GL_EQUAL);
 				}
 
 				// stencil op for stencil method polygon drawing
 				glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
 
-				// glDisable(GLES20.GL_DEPTH_TEST);
+				// no need for depth test while drawing stencil
+				glDisable(GLES20.GL_DEPTH_TEST);
 			}
 			mFillPolys[cnt] = l;
 
@@ -232,8 +230,8 @@ class PolygonRenderer {
 		if (clip && first)
 			drawDepthClip();
 
-		// required on GalaxyII, Android 2.3.3 (cant just VAA enable once...)
 		GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);
+
 		return l;
 	}
 

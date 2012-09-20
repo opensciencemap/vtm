@@ -49,6 +49,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.FloatMath;
 import android.util.Log;
 
 public class GLRenderer implements GLSurfaceView.Renderer {
@@ -79,8 +80,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private static float[] mMVPMatrix = new float[16];
 	private static float[] mRotateMatrix = new float[16];
+	private static float[] mTmpMatrix = new float[16];
+	private static float[] mTmp2Matrix = new float[16];
+
 	private static float[] mProjMatrix = new float[16];
-	private static float[] mRotTMatrix = new float[16];
+	private static float[] mProjMatrixI = new float[16];
 
 	// curTiles is set by TileLoader and swapped with
 	// drawTiles in onDrawFrame in GL thread.
@@ -230,66 +234,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		c[2] = (bg >> 0 & 0xff) / 255.0f;
 		mClearColor = c;
 		mUpdateColor = true;
-	}
-
-	// depthRange: -1 to 1, bits: 2^24 => 2/2^24 one step
-	// ... asus has just 16 bit?!
-	// private static final float depthStep = 0.00000011920928955078125f;
-
-	private static boolean mRotate = false;
-
-	private static void setMatrix(float[] matrix, MapPosition mapPosition, MapTile tile,
-			float div, int offset, boolean project) {
-		float x, y, scale;
-
-		if (mRotate) {
-			scale = (float) (1.0 * mapPosition.scale / (mHeight * div));
-			x = (float) (tile.pixelX - mapPosition.x * div);
-			y = (float) (tile.pixelY - mapPosition.y * div);
-
-			Matrix.setIdentityM(matrix, 0);
-
-			// scale to tile coordinates
-			Matrix.scaleM(matrix, 0, scale / COORD_MULTIPLIER,
-					scale / COORD_MULTIPLIER, 1);
-
-			// translate to center
-			Matrix.translateM(matrix, 0,
-					x * COORD_MULTIPLIER,
-					-(y + Tile.TILE_SIZE) * COORD_MULTIPLIER,
-					// -0.99f + offset * 0.01f,
-					-1.000f
-					);
-
-			// Matrix.setRotateM(mRotTMatrix, 0, -35, 1, 0, 0);
-			// Matrix.multiplyMM(matrix, 0, mRotTMatrix, 0, matrix, 0);
-			// Matrix.translateM(matrix, 0, 0, 5000.2f, 0);
-
-			Matrix.multiplyMM(matrix, 0, mRotateMatrix, 0, matrix, 0);
-
-			float angle = 25;
-			Matrix.setRotateM(mRotTMatrix, 0, -angle, 1, 0, 0);
-			Matrix.translateM(mRotTMatrix, 0, 0, (float) Math.tan(Math.toRadians(angle)),
-					0);
-			Matrix.multiplyMM(matrix, 0, mRotTMatrix, 0, matrix, 0);
-
-			if (project)
-				Matrix.multiplyMM(matrix, 0, mProjMatrix, 0, matrix, 0);
-
-		}
-		else {
-			scale = (float) (2.0 * mapPosition.scale / (mHeight * div));
-			x = (float) (tile.pixelX - mapPosition.x * div);
-			y = (float) (tile.pixelY - mapPosition.y * div);
-
-			matrix[12] = x * scale * mAspect;
-			matrix[13] = -(y + Tile.TILE_SIZE) * scale;
-			// increase the 'distance' with each tile drawn.
-			matrix[14] = -0.99f + offset * 0.01f;
-			matrix[0] = scale * mAspect / COORD_MULTIPLIER;
-			matrix[5] = scale / COORD_MULTIPLIER;
-		}
-
 	}
 
 	private static boolean isVisible(MapPosition mapPosition, MapTile tile, float div) {
@@ -479,6 +423,72 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 
+	private static boolean mRotate = false;
+
+	private static void setMatrix(float[] matrix, MapPosition mapPosition, MapTile tile,
+			float div, boolean project) {
+		float x, y, scale;
+
+		// if (mRotate) {
+		scale = mapPosition.scale / (div * COORD_MULTIPLIER);
+		x = (float) (tile.pixelX - mapPosition.x * div);
+		y = (float) (tile.pixelY - mapPosition.y * div);
+
+		Matrix.setIdentityM(matrix, 0);
+
+		// scale to tile coordinates
+		Matrix.scaleM(matrix, 0, scale, scale, 1);
+
+		// translate relative to center
+		Matrix.translateM(matrix, 0,
+				x * COORD_MULTIPLIER,
+				-(y + Tile.TILE_SIZE) * COORD_MULTIPLIER,
+				-1); // put on near plane
+
+		if (mRotate)
+			Matrix.multiplyMM(matrix, 0, mRotateMatrix, 0, matrix, 0);
+
+		if (project)
+			Matrix.multiplyMM(matrix, 0, mProjMatrix, 0, matrix, 0);
+
+		// } else {
+		// scale = (float) (2.0 * mapPosition.scale / (mHeight * div));
+		// x = (float) (tile.pixelX - mapPosition.x * div);
+		// y = (float) (tile.pixelY - mapPosition.y * div);
+		//
+		// matrix[12] = x * scale * mAspect;
+		// matrix[13] = -(y + Tile.TILE_SIZE) * scale;
+		// // increase the 'distance' with each tile drawn.
+		// matrix[14] = -0.99f + offset * 0.01f;
+		// matrix[0] = scale * mAspect / COORD_MULTIPLIER;
+		// matrix[5] = scale / COORD_MULTIPLIER;
+		// }
+	}
+
+	private float[] mv = new float[4];
+	private float[] mu = { 1, 1, -1, 1 };
+
+	private float[] mUnprojMatrix = new float[16];
+
+	private void unproject(MapPosition pos, float x, float y) {
+		mu[0] = x;
+		mu[1] = y;
+		mu[2] = -1;
+
+		// add tilt
+		Matrix.multiplyMV(mv, 0, mTmpMatrix, 0, mu, 0);
+		// Log.d(TAG, ">> " + mv[0] + " " + mv[1] + " " + mv[2]);
+
+		Matrix.multiplyMV(mv, 0, mUnprojMatrix, 0, mv, 0);
+		float size = Tile.TILE_SIZE * pos.scale;
+		if (mv[3] != 0) {
+			float w = 1 / mv[3];
+			float xx = Math.round(((mv[0] * w) / size) * 100) / 100f;
+			float yy = Math.round(((mv[1] * w) / size) * 100) / 100f;
+			Log.d(TAG, " " + xx + " " + yy);
+		}
+	}
+
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		long start = 0;
@@ -514,17 +524,51 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (drawTiles == null)
 			return;
 
-		if (mRotate != (mMapView.enableRotation || mMapView.enableCompass)) {
-			Matrix.setIdentityM(mMVPMatrix, 0);
-			mRotate = mMapView.enableRotation || mMapView.enableCompass;
-		}
-		if (mRotate) {
-			// Matrix.setRotateM(mRotTMatrix, 0, -10, 1, 0, 0);
-			Matrix.setRotateM(mRotateMatrix, 0, mapPosition.angle, 0, 0, 1);
-			// Matrix.multiplyMM(mRotateMatrix, 0, mRotateMatrix, 0,
-			// mRotTMatrix, 0);
+		// if (mRotate != (mMapView.enableRotation || mMapView.enableCompass)) {
+		// Matrix.setIdentityM(mMVPMatrix, 0);
+		// mRotate = mMapView.enableRotation || mMapView.enableCompass;
+		// }
 
-			Matrix.transposeM(mRotTMatrix, 0, mRotateMatrix, 0);
+		mRotate = mMapView.enableRotation || mMapView.enableCompass;
+
+		if (mRotate) {
+			// rotate map
+			Matrix.setRotateM(mRotateMatrix, 0, mapPosition.angle, 0, 0, 1);
+
+			// tilt map
+			float angle = 15f / (mHeight / 2);
+			Matrix.setRotateM(mTmpMatrix, 0, -angle, 1, 0, 0);
+
+			// move camera center back to map center
+			Matrix.translateM(mTmpMatrix, 0,
+					0, (float) Math.tan(Math.toRadians(angle)), 0);
+
+			// apply first rotation, then tilt
+			Matrix.multiplyMM(mRotateMatrix, 0, mTmpMatrix, 0, mRotateMatrix, 0);
+
+			// // get unproject matrix
+			// Matrix.setIdentityM(mTmp2Matrix, 0);
+			// float s = mapPosition.scale;
+			// Matrix.translateM(mTmp2Matrix, 0,
+			// (float) (mapPosition.x * s),
+			// (float) (mapPosition.y * s), 0);
+			//
+			// Matrix.multiplyMM(mTmp2Matrix, 0, mRotateMatrix, 0, mTmp2Matrix,
+			// 0);
+			//
+			// // Matrix.invertM(mTmpMatrix, 0, mTmp2Matrix, 0);
+			// // (AB)^-1 = B^-1*A^-1
+			// Matrix.multiplyMM(mUnprojMatrix, 0, mTmp2Matrix, 0, mProjMatrixI,
+			// 0);
+			//
+			// // set tilt of screen coords
+			// Matrix.setRotateM(mTmpMatrix, 0, -15, 1, 0, 0);
+			//
+			// // unproject(mapPosition, 0, 0);
+			// unproject(mapPosition, -1, -1); // top-left
+			// unproject(mapPosition, 1, -1); // top-right
+			// unproject(mapPosition, -1, 1); // bottom-left
+			// unproject(mapPosition, 1, 1); // bottom-right
 		}
 
 		if (mUpdateColor && mClearColor != null) {
@@ -579,6 +623,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 		GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible && tiles[i].isReady) {
 				drawTile(mapPosition, tiles[i], 1);
@@ -610,19 +655,19 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (scale < 1)
 			scale = 1;
 
-		// if (z >= TileGenerator.STROKE_MAX_ZOOM_LEVEL)
-		// TextRenderer.beginDraw(FloatMath.sqrt(s) / scale, mRotTMatrix);
-		// else
-		// TextRenderer.beginDraw(s, mRotTMatrix);
-		s = (float) (1.0 / mHeight) / COORD_MULTIPLIER;
+		if (z >= TileGenerator.STROKE_MAX_ZOOM_LEVEL)
+			TextRenderer.beginDraw(FloatMath.sqrt(s) / scale, mProjMatrix);
+		else
+			TextRenderer.beginDraw(s, mProjMatrix);
 
-		TextRenderer.beginDraw(s, mProjMatrix);
+		// s = (float) 1.0 / COORD_MULTIPLIER;
+		// TextRenderer.beginDraw(s, mProjMatrix);
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (!tiles[i].isVisible || tiles[i].texture == null)
 				continue;
 
-			setMatrix(mMVPMatrix, mapPosition, tiles[i], 1, 0, false);
+			setMatrix(mMVPMatrix, mapPosition, tiles[i], 1, false);
 			TextRenderer.drawTile(tiles[i], mMVPMatrix);
 		}
 		TextRenderer.endDraw();
@@ -647,13 +692,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		int z = mapPosition.zoomLevel;
 		float s = mapPosition.scale;
-		// mDrawCount is used to calculation z offset.
-		// (used for depth clipping)
-		setMatrix(mMVPMatrix, mapPosition, tile, div, mDrawCount++, true);
+		float[] mvp = mMVPMatrix;
 
-		GLES20.glPolygonOffset(0, mDrawCount);
+		setMatrix(mvp, mapPosition, tile, div, true);
 
-		float offset = 0.0f;
+		GLES20.glPolygonOffset(0, mDrawCount++);
 
 		glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
 
@@ -675,7 +718,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			if (pl != null && pnext < lnext) {
 				glDisable(GL_BLEND);
 
-				pl = PolygonRenderer.drawPolygons(pl, lnext, mMVPMatrix, offset, z, s,
+				pl = PolygonRenderer.drawPolygons(pl, lnext, mvp, z, s,
 						!clipped);
 
 				clipped = true;
@@ -683,14 +726,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			} else {
 				// XXX nasty
 				if (!clipped) {
-					PolygonRenderer.drawPolygons(null, 0, mMVPMatrix, offset, z, s, true);
+					PolygonRenderer.drawPolygons(null, 0, mvp, z, s, true);
 					clipped = true;
 				}
 
 				glEnable(GL_BLEND);
-
-				ll = LineRenderer.drawLines(tile, ll, pnext, mMVPMatrix, offset, div, z,
-						s);
+				ll = LineRenderer.drawLines(tile, ll, pnext, mvp, div, z, s);
 			}
 		}
 	}
@@ -775,14 +816,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// Matrix.orthoM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f,
 		// 0.5f, -1, 1);
 
-		Matrix.frustumM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f,
-				0.5f, 1, 4);
+		Matrix.frustumM(mProjMatrix, 0,
+				-0.5f * width,
+				0.5f * width,
+				-0.5f * height,
+				0.5f * height, 1, 2);
 
-		// float angle = 35;
-		// Matrix.setRotateM(mRotTMatrix, 0, -angle, 1, 0, 0);
-		// Matrix.multiplyMM(mProjMatrix, 0, mProjMatrix, 0, mRotTMatrix, 0);
-		// Matrix.translateM(mProjMatrix, 0, 0, (float)
-		// Math.tan(Math.toRadians(angle)), 0);
+		Matrix.invertM(mProjMatrixI, 0, mProjMatrix, 0);
+
+		// set to zero: we modify the z value with polygon-offset for clipping
+		mProjMatrix[10] = 0;
+		mProjMatrix[14] = 0;
+
 		glViewport(0, 0, width, height);
 
 		if (!changed && !mNewSurface) {
