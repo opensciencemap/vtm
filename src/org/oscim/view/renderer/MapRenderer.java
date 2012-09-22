@@ -92,12 +92,9 @@ public class MapRenderer extends GLSurfaceView {
 	}
 
 	/**
-	 * called by MapView when position or map settings changes
-	 */
-	/**
 	 * Update list of visible tiles and passes them to MapRenderer, when not
 	 * available tiles are created and added to JobQueue (mapView.addJobs) for
-	 * loading by MapGenerator class
+	 * loading by TileGenerator class
 	 * 
 	 * @param clear
 	 *            ...
@@ -108,7 +105,7 @@ public class MapRenderer extends GLSurfaceView {
 		boolean changedPos = false;
 		boolean changedZoom = false;
 
-		if (mMapView == null || mMapView.getMapPosition() == null)
+		if (mMapView == null)
 			return;
 
 		MapPosition mapPosition = mMapView.getMapPosition().getMapPosition();
@@ -121,14 +118,17 @@ public class MapRenderer extends GLSurfaceView {
 		if (clear) {
 			// remove all tiles references
 			Log.d(TAG, "CLEAR");
-			synchronized (GLRenderer.lock) {
-				for (MapTile t : mTiles)
-					clearTile(t);
 
-				mTiles.clear();
-				mTilesLoaded.clear();
-				QuadTree.init();
-			}
+			GLRenderer.tilelock.lock();
+
+			for (MapTile t : mTiles)
+				clearTile(t);
+
+			mTiles.clear();
+			mTilesLoaded.clear();
+			QuadTree.init();
+			GLRenderer.tilelock.unlock();
+
 			mInitial = true;
 		}
 
@@ -180,20 +180,28 @@ public class MapRenderer extends GLSurfaceView {
 		mTileY = tileY;
 		mPrevZoom = zoomLevel;
 
-		if (changedZoom) {
-			// need to update visible list first when zoom level changes
-			// as scaling is relative to the tiles of current zoom-level
-			updateVisibleList(mapPosition, 0);
-		} else {
-			// pass new position to glThread
-			GLRenderer.updatePosition(mapPosition);
-		}
-
+		GLRenderer.updatePosition(mapPosition);
 		if (!MapView.debugFrameTime)
 			requestRender();
 
-		if (changedPos)
+		if (changedZoom || changedPos) {
+			// need to update visible list first when zoom level changes
+			// as scaling is relative to the tiles of current zoom-level
 			updateVisibleList(mapPosition, zdir);
+
+			if (!MapView.debugFrameTime)
+				requestRender();
+		}
+		// else {
+		// // pass new position to glThread
+		// GLRenderer.updatePosition(mapPosition);
+		// }
+
+		// if (!MapView.debugFrameTime)
+		// requestRender();
+
+		// if (changedPos)
+		// updateVisibleList(mapPosition, zdir);
 
 		if (changedPos || changedZoom) {
 			int remove = mTiles.size() - GLRenderer.CACHE_TILES;
@@ -202,7 +210,6 @@ public class MapRenderer extends GLSurfaceView {
 		}
 
 		limitLoadQueue();
-
 	}
 
 	/**

@@ -25,7 +25,8 @@ class LineLayer {
 	private static final float COORD_SCALE = GLRenderer.COORD_MULTIPLIER;
 	// scale factor mapping extrusion vector to short values
 	private static final float DIR_SCALE = 2048;
-	// mask for packing last two bits of extrusion vector with texture coordinates
+	// mask for packing last two bits of extrusion vector with texture
+	// coordinates
 	private static final int DIR_MASK = 0xFFFFFFFC;
 
 	// next layer
@@ -64,7 +65,8 @@ class LineLayer {
 	}
 
 	/*
-	 * line extrusion is based on code from GLMap (https://github.com/olofsj/GLMap/) by olofsj
+	 * line extrusion is based on code from GLMap
+	 * (https://github.com/olofsj/GLMap/) by olofsj
 	 */
 
 	void addLine(float[] points, short[] index, boolean closed) {

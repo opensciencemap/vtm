@@ -62,11 +62,10 @@ class LineRenderer {
 	static LineLayer drawLines(MapTile tile, LineLayer layer, int next, float[] matrix,
 			float div, double zoom, float scale) {
 
-		float z = 1 / div;
-
 		if (layer == null)
 			return null;
 
+		// TODO should use fast line program when view is not tilted
 		GLES20.glUseProgram(lineProgram);
 
 		GLES20.glEnableVertexAttribArray(hLineVertexPosition);
@@ -81,7 +80,9 @@ class LineRenderer {
 		GLES20.glUniformMatrix4fv(hLineMatrix, 1, false, matrix, 0);
 
 		// scale factor to map one pixel on tile to one pixel on screen:
-		float pixel = 2.0f / (scale * z);
+		// only works with orthographic projection
+		float s = scale / div;
+		float pixel = 2.0f / s;
 
 		if (mFast)
 			GLES20.glUniform1f(hLineScale, pixel);
@@ -89,7 +90,7 @@ class LineRenderer {
 			GLES20.glUniform1f(hLineScale, 0);
 
 		// line scale factor (for non fixed lines)
-		float s = FloatMath.sqrt(scale * z);
+		float lineScale = FloatMath.sqrt(s);
 		boolean blur = false;
 
 		LineLayer l = layer;
@@ -117,33 +118,31 @@ class LineRenderer {
 				for (LineLayer o = l.outlines; o != null; o = o.outlines) {
 
 					if (line.blur != 0) {
-						GLES20.glUniform1f(hLineScale, (l.width + o.width) / (scale * z)
-								- (line.blur / (scale * z)));
+						GLES20.glUniform1f(hLineScale, (l.width + o.width) / s
+								- (line.blur / s));
 						blur = true;
 					}
 
 					if (zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL)
-						GLES20.glUniform1f(hLineWidth,
-								(l.width + o.width) / (scale * z));
+						GLES20.glUniform1f(hLineWidth, (l.width + o.width) / s);
 					else
-						GLES20.glUniform1f(hLineWidth, l.width / (scale * z)
-								+ o.width / s);
+						GLES20.glUniform1f(hLineWidth, l.width / s + o.width / lineScale);
 
 					GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
 				}
 			}
 			else {
 				if (line.blur != 0) {
-					GLES20.glUniform1f(hLineScale, (l.width / s) * line.blur);
+					GLES20.glUniform1f(hLineScale, (l.width / lineScale) * line.blur);
 					blur = true;
 				}
 
 				if (line.fixed || zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL) {
 					// invert scaling of extrusion vectors so that line width
-					// stays the same
-					GLES20.glUniform1f(hLineWidth, (l.width / (scale * z)));
+					// stays the same.
+					GLES20.glUniform1f(hLineWidth, l.width / s);
 				} else {
-					GLES20.glUniform1f(hLineWidth, (l.width / s));
+					GLES20.glUniform1f(hLineWidth, l.width / lineScale);
 				}
 
 				GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);

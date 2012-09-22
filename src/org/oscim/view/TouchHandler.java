@@ -29,7 +29,8 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
 
 /**
- * Implementation for multi-touch capable devices. TODO write a AnimationTimer instead of using CountDownTimer
+ * Implementation for multi-touch capable devices. TODO write a AnimationTimer
+ * instead of using CountDownTimer
  */
 public class TouchHandler {
 	private static final int INVALID_POINTER_ID = -1;
@@ -440,7 +441,8 @@ public class TouchHandler {
 
 		@Override
 		public void onScaleEnd(ScaleGestureDetector gd) {
-			// Log.d("ScaleListener", "Sum " + mSumScale + " " + (mTimeEnd - mTimeStart));
+			// Log.d("ScaleListener", "Sum " + mSumScale + " " + (mTimeEnd -
+			// mTimeStart));
 
 			if (mTimer == null && mTimeEnd - mTimeStart < 150
 					&& (mSumScale < 0.99 || mSumScale > 1.01)) {
@@ -449,7 +451,7 @@ public class TouchHandler {
 
 				mZooutOut = mSumScale < 0.99;
 
-				mTimer = new CountDownTimer((int) mScaleDuration, 30) {
+				mTimer = new CountDownTimer((int) mScaleDuration, 15) {
 					@Override
 					public void onTick(long tick) {
 						scale(tick);
@@ -468,7 +470,7 @@ public class TouchHandler {
 		private float mPrevScale;
 		private CountDownTimer mTimer;
 		boolean mZooutOut;
-		private final float mScaleDuration = 350;
+		private final float mScaleDuration = 450;
 
 		boolean scale(long tick) {
 

@@ -42,6 +42,8 @@ import org.oscim.utils.GlUtils;
 import android.opengl.GLES20;
 
 class PolygonRenderer {
+	private static final String TAG = "PolygonRenderer";
+
 	private static final int NUM_VERTEX_SHORTS = 2;
 	private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
 	private static int STENCIL_BITS = 8;
@@ -71,7 +73,7 @@ class PolygonRenderer {
 		return true;
 	}
 
-	private static void fillPolygons(int count, double zoom, float scale) {
+	private static void fillPolygons(double zoom, float scale) {
 		boolean blend = false;
 
 		/* draw to framebuffer */
@@ -83,7 +85,7 @@ class PolygonRenderer {
 		/* only draw where nothing was drawn yet */
 		glEnable(GLES20.GL_DEPTH_TEST);
 
-		for (int c = 0; c < count; c++) {
+		for (int c = mStart; c < mCount; c++) {
 			PolygonLayer l = mFillPolys[c];
 
 			float f = 1.0f;
@@ -149,8 +151,13 @@ class PolygonRenderer {
 			glDisable(GL_BLEND);
 	}
 
-	static PolygonLayer drawPolygons(PolygonLayer layer, int next,
-			float[] matrix, double zoom, float scale, boolean clip) {
+	// layers to fill
+	private static int mCount;
+	// stencil buffer index to start fill
+	private static int mStart;
+
+	static PolygonLayer drawPolygons(final PolygonLayer layer, final int next,
+			final float[] matrix, final double zoom, final float scale, boolean first) {
 
 		glUseProgram(polygonProgram);
 		GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);
@@ -160,33 +167,42 @@ class PolygonRenderer {
 
 		glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
 
+		// use stencilbuffer method for polygon drawing
 		glEnable(GL_STENCIL_TEST);
 
 		PolygonLayer l = layer;
 
-		boolean first = clip;
-		int cnt = 0;
+		if (first) {
+			mCount = 0;
+			mStart = 0;
+		} else {
+			mStart = mCount;
+		}
 
 		for (; l != null && l.layer < next; l = l.next) {
 			// fade out polygon layers (set in RederTheme)
 			if (l.area.fade > 0 && l.area.fade > zoom)
 				continue;
 
-			if (cnt == 0) {
+			if (mCount == 0) {
+				// clear stencilbuffer (tile region)
+
 				// disable drawing to framebuffer
 				glColorMask(false, false, false, false);
 
 				// never pass the test: always apply fail op
 				glStencilFunc(GLES20.GL_ALWAYS, 0, 0xFF);
 				glStencilMask(0xFF);
-				// glClear(GL_STENCIL_BUFFER_BIT);
 
-				// clear stencilbuffer (tile region)
 				glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 
 				if (first) {
-					// draw clip-region into depth buffer
+					// draw clip-region into depth buffer:
+					// this is used for lines and polygons
+
+					// write to depth buffer
 					GLES20.glDepthMask(true);
+
 					// to prevent overdraw gl_less restricts
 					// the clip to the area where no other
 					// tile was drawn
@@ -197,6 +213,7 @@ class PolygonRenderer {
 
 				if (first) {
 					first = false;
+					// dont modify depth buffer
 					GLES20.glDepthMask(false);
 					// only draw to this tile
 					GLES20.glDepthFunc(GLES20.GL_EQUAL);
@@ -207,27 +224,48 @@ class PolygonRenderer {
 
 				// no need for depth test while drawing stencil
 				glDisable(GLES20.GL_DEPTH_TEST);
+
+			} else if (mCount == mStart) {
+				// disable drawing to framebuffer
+				glColorMask(false, false, false, false);
+
+				// never pass the test: always apply fail op
+				glStencilFunc(GLES20.GL_ALWAYS, 0, 0xFF);
+
+				// stencil op for stencil method polygon drawing
+				glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
+
+				// no need for depth test while drawing stencil
+				glDisable(GLES20.GL_DEPTH_TEST);
 			}
-			mFillPolys[cnt] = l;
+
+			mFillPolys[mCount] = l;
 
 			// set stencil mask to draw to
-			glStencilMask(1 << cnt++);
+			glStencilMask(1 << mCount++);
 
 			glDrawArrays(GL_TRIANGLE_FAN, l.offset, l.verticesCnt);
 
 			// draw up to 8 layers into stencil buffer
-			if (cnt == STENCIL_BITS) {
-				fillPolygons(cnt, zoom, scale);
-				cnt = 0;
+			if (mCount == STENCIL_BITS) {
+				fillPolygons(zoom, scale);
+				mCount = 0;
+				mStart = 0;
 			}
 		}
 
-		if (cnt > 0)
-			fillPolygons(cnt, zoom, scale);
+		if (mCount > 0)
+			fillPolygons(zoom, scale);
+
+		//
+		// if (mCount > 5){
+		// mCount = 0;
+		// mStart = 0;
+		// }
 
 		glDisable(GL_STENCIL_TEST);
 
-		if (clip && first)
+		if (first)
 			drawDepthClip();
 
 		GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);

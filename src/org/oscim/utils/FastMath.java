@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Hannes Janetzek
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,24 +12,39 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view.overlay;
+package org.oscim.utils;
 
-public class Overlay {
+public class FastMath {
+	/**
+	 * from http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
+	 * 
+	 * @param v
+	 *            ...
+	 * @return ...
+	 */
+	public static int log2(int v) {
 
-	synchronized void move() {
+		int r = 0; // result of log2(v) will go here
 
-	}
-
-	synchronized void addBitmap() {
-
-	}
-
-	synchronized boolean onTouch() {
-
-		return true;
-	}
-
-	synchronized void draw() {
-
+		if ((v & 0xFFFF0000) != 0) {
+			v >>= 16;
+			r |= 16;
+		}
+		if ((v & 0xFF00) != 0) {
+			v >>= 8;
+			r |= 8;
+		}
+		if ((v & 0xF0) != 0) {
+			v >>= 4;
+			r |= 4;
+		}
+		if ((v & 0xC) != 0) {
+			v >>= 2;
+			r |= 2;
+		}
+		if ((v & 0x2) != 0) {
+			r |= 1;
+		}
+		return r;
 	}
 }

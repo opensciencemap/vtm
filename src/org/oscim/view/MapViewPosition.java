@@ -17,24 +17,34 @@ package org.oscim.view;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
-
-import android.util.FloatMath;
+import org.oscim.utils.FastMath;
 
 /**
- * A MapPosition stores the latitude and longitude coordinate of a MapView together with its zoom level.
+ * A MapPosition stores the latitude and longitude coordinate of a MapView
+ * together with its zoom level.
  */
 public class MapViewPosition {
-	private static float MAX_SCALE = 2.0f;
-	private static float MIN_SCALE = 1.0f;
-	public static int MAX_ZOOMLEVEL = 16;
+	private static final String TAG = "MapViewPosition";
+
+	public final static int MAX_ZOOMLEVEL = 16;
+
+	private final static float MAX_SCALE = 2.0f;
+	private final static float MIN_SCALE = 1.0f;
+
+	private final MapView mMapView;
 
 	private double mLatitude;
 	private double mLongitude;
-	private final MapView mMapView;
 	private byte mZoomLevel;
 	private float mScale;
 	private float mRotation;
 	private float mTilt;
+
+	// 2^mZoomLevel * mScale;
+	private float mMapScale;
+
+	// private final static float MAP_SIZE = 1000000;
+	// private final static float MAP_SIZE2 = 1000000 >> 1;
 
 	MapViewPosition(MapView mapView) {
 		mMapView = mapView;
@@ -45,7 +55,23 @@ public class MapViewPosition {
 		mScale = 1;
 		mRotation = 0.0f;
 		mTilt = 0;
+		mMapScale = 1;
 	}
+
+	// private static double latitudeToMapView(double latitude) {
+	// double sinLatitude = Math.sin(latitude * (Math.PI / 180));
+	// return (0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 *
+	// Math.PI))
+	// * MAP_SIZE;
+	// }
+	//
+	// public static double longitudeToMapView(double longitude) {
+	// return (longitude + 180) / 360 * MAP_SIZE;
+	// }
+	//
+	// private static double pixelXToLongitude(double pixelX, byte zoomLevel) {
+	// return 360 * ((pixelX / ((long) Tile.TILE_SIZE << zoomLevel)) - 0.5);
+	// }
 
 	/**
 	 * @return the current center point of the MapView.
@@ -55,14 +81,16 @@ public class MapViewPosition {
 	}
 
 	/**
-	 * @return an immutable MapPosition or null, if this map position is not valid.
+	 * @return an immutable MapPosition or null, if this map position is not
+	 *         valid.
 	 * @see #isValid()
 	 */
 	public synchronized MapPosition getMapPosition() {
 		if (!isValid()) {
 			return null;
 		}
-		// Log.d("MapViewPosition", "lat: " + mLatitude + " lon: " + mLongitude);
+		// Log.d("MapViewPosition", "lat: " + mLatitude + " lon: " +
+		// mLongitude);
 		return new MapPosition(mLatitude, mLongitude, mZoomLevel, mScale, mRotation);
 	}
 
@@ -178,7 +206,8 @@ public class MapViewPosition {
 
 	public synchronized void rotateMap(float angle, float cx, float cy) {
 		moveMap(cx, cy);
-		// Log.d("MapViewPosition", "rotate:" + angle + " " + (mRotation - angle));
+		// Log.d("MapViewPosition", "rotate:" + angle + " " + (mRotation -
+		// angle));
 		mRotation -= angle;
 	}
 
@@ -186,7 +215,7 @@ public class MapViewPosition {
 		mRotation = f;
 	}
 
-	public void setTile(float f) {
+	public void setTilt(float f) {
 		mTilt = f;
 	}
 
@@ -199,10 +228,12 @@ public class MapViewPosition {
 		mLatitude = MercatorProjection.limitLatitude(mapPosition.lat);
 		mLongitude = MercatorProjection.limitLongitude(mapPosition.lon);
 		mZoomLevel = mMapView.limitZoomLevel(mapPosition.zoomLevel);
+		mMapScale = 1 << mZoomLevel;
 	}
 
 	synchronized void setZoomLevel(byte zoomLevel) {
 		mZoomLevel = mMapView.limitZoomLevel(zoomLevel);
+		mMapScale = 1 << mZoomLevel;
 	}
 
 	synchronized void setScale(float scale) {
@@ -226,79 +257,25 @@ public class MapViewPosition {
 			moveMap(pivotX * (1.0f - scale),
 					pivotY * (1.0f - scale));
 
-		float s = mScale * scale;
+		float newScale = mMapScale * scale;
 
-		if (s >= MAX_SCALE) {
-			if (s > 8)
+		int z = FastMath.log2((int) newScale);
+
+		if (z <= 0 || (z >= MAX_ZOOMLEVEL && mScale >= 8))
+			return;
+
+		if (z > MAX_ZOOMLEVEL) {
+			// z16 shows everything, just increase scaling
+			if (mScale * scale > 8)
 				return;
 
-			if (mZoomLevel <= MAX_ZOOMLEVEL) {
-				byte z = (byte) FloatMath.sqrt(s);
-				mZoomLevel += z;
-				s *= 1.0f / (1 << z);
-			}
-		} else if (s < MIN_SCALE) {
-			byte z = (byte) FloatMath.sqrt(1 / s);
-			if (z != 0 && mZoomLevel == 1)
-				return;
-			mZoomLevel -= z;
-			s *= 1 << z;
+			mScale *= scale;
+			mMapScale = newScale;
+			return;
 		}
 
-		mScale = s;
+		mZoomLevel = (byte) z;
+		mScale = newScale / (1 << z);
+		mMapScale = newScale;
 	}
-
-	/**
-	 * Zooms in or out by the given amount of zoom levels.
-	 * 
-	 * @param zoomLevelDiff
-	 *            the difference to the current zoom level.
-	 * @param s
-	 *            scale between min/max zoom
-	 * @return true if the zoom level was changed, false otherwise.
-	 */
-	// public boolean zoom(byte zoomLevelDiff, float s) {
-	// float scale = s;
-	//
-	// if (zoomLevelDiff > 0) {
-	// // check if zoom in is possible
-	// if (mMapViewPosition.getZoomLevel() + zoomLevelDiff > getMaximumPossibleZoomLevel()) {
-	// return false;
-	// }
-	//
-	// scale *= 1.0f / (1 << zoomLevelDiff);
-	// } else if (zoomLevelDiff < 0) {
-	// // check if zoom out is possible
-	// if (mMapViewPosition.getZoomLevel() + zoomLevelDiff < mMapZoomControls.getZoomLevelMin()) {
-	// return false;
-	// }
-	//
-	// scale *= 1 << -zoomLevelDiff;
-	// }
-	//
-	// if (scale == 0)
-	// scale = 1;
-	// // else
-	// // scale = Math.round(256.0f * scale) / 256.0f;
-	//
-	// mMapViewPosition.setZoomLevel((byte) (mMapViewPosition.getZoomLevel() + zoomLevelDiff));
-	//
-	// // mapZoomControls.onZoomLevelChange(mapViewPosition.getZoomLevel());
-	//
-	// // zoomAnimator.setParameters(zoomStart, matrixScaleFactor,
-	// // getWidth() >> 1, getHeight() >> 1);
-	// // zoomAnimator.startAnimation();
-	//
-	// // if (scale > MAX_ZOOM) {
-	// // scale = MAX_ZOOM;
-	// // }
-	//
-	// if (zoomLevelDiff != 0 || mZoomFactor != scale) {
-	// mZoomFactor = scale;
-	// redrawTiles();
-	// }
-	//
-	// return true;
-	// }
-
 }
