@@ -83,6 +83,8 @@ public class MapView extends FrameLayout {
 	private String mRenderTheme;
 	private Map<String, String> mMapOptions;
 
+	// private final Handler mHandler;
+
 	/**
 	 * @param context
 	 *            the enclosing MapActivity instance.
@@ -123,6 +125,8 @@ public class MapView extends FrameLayout {
 		Tile.TILE_SIZE = 400;
 
 		MapActivity mapActivity = (MapActivity) context;
+
+		// mHandler = new DelayedTaskHandler();
 
 		debugSettings = new DebugSettings(false, false, false, false);
 
@@ -203,6 +207,29 @@ public class MapView extends FrameLayout {
 	 */
 	public MapViewPosition getMapPosition() {
 		return mMapViewPosition;
+	}
+
+	public void enableRotation(boolean enable) {
+		enableRotation = enable;
+
+		if (enable) {
+			enableCompass(false);
+		}
+	}
+
+	public void enableCompass(boolean enable) {
+		if (enable == this.enableCompass)
+			return;
+
+		this.enableCompass = enable;
+
+		if (enable)
+			enableRotation(false);
+
+		if (enable)
+			mCompass.enable();
+		else
+			mCompass.disable();
 	}
 
 	@Override
@@ -601,30 +628,6 @@ public class MapView extends FrameLayout {
 			mapWorker.proceed();
 	}
 
-	public void enableRotation(boolean enable) {
-		enableRotation = enable;
-
-		if (enable) {
-			enableCompass(false);
-		}
-	}
-
-	public void enableCompass(boolean enable) {
-		if (enable == this.enableCompass)
-			return;
-
-		this.enableCompass = enable;
-
-		if (enable)
-			enableRotation(false);
-
-		if (enable)
-			mCompass.enable();
-		else
-			mCompass.disable();
-
-	}
-
 	// /**
 	// * Sets the visibility of the zoom controls.
 	// *
@@ -647,18 +650,4 @@ public class MapView extends FrameLayout {
 	// mJobParameters = new JobParameters(mJobParameters.theme, textScale);
 	// clearAndRedrawMapView();
 	// }
-
-	// public final int
-	// public Handler messageHandler = new Handler() {
-	//
-	// @Override
-	// public void handleMessage(Message msg) {
-	// switch (msg.what) {
-	// // handle update
-	// // .....
-	// }
-	// }
-	//
-	// };
-
 }

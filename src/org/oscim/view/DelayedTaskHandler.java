@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Hannes Janetzek
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,24 +12,21 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view.overlay;
+package org.oscim.view;
 
-public class Overlay {
+import android.os.Handler;
+import android.os.Message;
 
-	synchronized void move() {
+public class DelayedTaskHandler extends Handler {
+	public final int MESSAGE_UPDATE_POSITION = 1;
 
-	}
+	@Override
+	public void handleMessage(Message msg) {
+		switch (msg.what) {
+			case MESSAGE_UPDATE_POSITION:
 
-	synchronized void addBitmap() {
+				break;
 
-	}
-
-	synchronized boolean onTouch() {
-
-		return true;
-	}
-
-	synchronized void draw() {
-
+		}
 	}
 }

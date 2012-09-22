@@ -19,7 +19,8 @@ import org.oscim.view.generator.JobTile;
 class MapTile extends JobTile {
 
 	/**
-	 * VBO layout: - 16 bytes fill coordinates, n bytes polygon vertices, m bytes lines vertices
+	 * VBO layout: - 16 bytes fill coordinates, n bytes polygon vertices, m
+	 * bytes lines vertices
 	 */
 	VertexBufferObject vbo;
 
@@ -65,8 +66,8 @@ class MapTile extends JobTile {
 	byte lastDraw = 0;
 
 	// keep track which tiles are locked as proxy for this tile
-	// 16: parent
-	// 32: grandparent
+	final static int PROXY_PARENT = 16;
+	final static int PROXY_GRAMPA = 32;
 	// 1-8: children
 	byte proxies;
 
@@ -99,12 +100,12 @@ class MapTile extends JobTile {
 		MapTile p = rel.parent.tile;
 
 		if (p != null && (p.isReady || p.newData || p.isLoading)) {
-			proxies |= (1 << 4);
+			proxies |= PROXY_PARENT;
 			p.refs++;
 		} else {
 			p = rel.parent.parent.tile;
 			if (p != null && (p.isReady || p.newData || p.isLoading)) {
-				proxies |= (1 << 5);
+				proxies |= PROXY_GRAMPA;
 				p.refs++;
 			}
 		}
