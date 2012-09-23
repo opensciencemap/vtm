@@ -51,25 +51,24 @@ class Shaders {
 	// + "  v_st = u_width * a_st;"
 	// + "}";
 
-	// final static String lineFragmentShader = ""
-	// + "precision mediump float;"
-	// + "uniform float u_wscale;"
-	// + "uniform float u_width;"
-	// + "uniform vec4 u_color;"
-	// + "varying vec2 v_st;"
-	// + "const float zero = 0.0;"
-	// + "void main() {"
-	// + "  float len;"
-	// + "  if (v_st.t == zero)"
-	// + "    len = abs(v_st.s);"
-	// + "  else "
-	// + "    len = length(v_st);"
-	// // fade to alpha. u_wscale is the width in pixel which should be faded,
-	// // u_width - len the position of this fragment on the perpendicular to
-	// // this line segment
-	// + "  gl_FragColor = smoothstep(zero, u_wscale, u_width - len) * u_color;"
-	// // + " gl_FragColor = u_color;"
-	// + "}";
+	final static String lineSimpleFragmentShader = ""
+			+ "precision mediump float;"
+			+ "uniform float u_wscale;"
+			+ "uniform float u_width;"
+			+ "uniform vec4 u_color;"
+			+ "varying vec2 v_st;"
+			+ "const float zero = 0.0;"
+			+ "void main() {"
+			+ "  float len;"
+			+ "  if (v_st.t == zero)"
+			+ "    len = abs(v_st.s);"
+			+ "  else "
+			+ "    len = length(v_st);"
+			// fade to alpha. u_wscale is the width in pixel which should be
+			// faded, u_width - len the position of this fragment on the
+			// perpendicular to this line segment
+			+ "  gl_FragColor = smoothstep(zero, u_wscale, u_width - len) * u_color;"
+			+ "}";
 
 	final static String lineFragmentShader = ""
 			+ "#extension GL_OES_standard_derivatives : enable\n"

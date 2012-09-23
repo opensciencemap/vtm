@@ -78,18 +78,6 @@ class MapTile extends JobTile {
 		return isActive || refs > 0;
 	}
 
-	// void unref() {
-	// if (refs == 0) {
-	// Log.d("MapTile", "XXX already unrefd " + this);
-	// return;
-	// }
-	// refs--;
-	// }
-	//
-	// void ref() {
-	// refs++;
-	// }
-
 	void lock() {
 
 		isActive = true;
@@ -102,13 +90,14 @@ class MapTile extends JobTile {
 		if (p != null && (p.isReady || p.newData || p.isLoading)) {
 			proxies |= PROXY_PARENT;
 			p.refs++;
-		} else {
-			p = rel.parent.parent.tile;
-			if (p != null && (p.isReady || p.newData || p.isLoading)) {
-				proxies |= PROXY_GRAMPA;
-				p.refs++;
-			}
 		}
+
+		p = rel.parent.parent.tile;
+		if (p != null && (p.isReady || p.newData || p.isLoading)) {
+			proxies |= PROXY_GRAMPA;
+			p.refs++;
+		}
+
 		for (int j = 0; j < 4; j++) {
 			if (rel.child[j] != null) {
 				p = rel.child[j].tile;
@@ -129,7 +118,8 @@ class MapTile extends JobTile {
 		if ((proxies & (1 << 4)) != 0) {
 			MapTile p = rel.parent.tile;
 			p.refs--;
-		} else if ((proxies & (1 << 5)) != 0) {
+		}
+		if ((proxies & (1 << 5)) != 0) {
 			MapTile p = rel.parent.parent.tile;
 			p.refs--;
 		}

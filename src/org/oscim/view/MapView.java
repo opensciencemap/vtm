@@ -188,7 +188,7 @@ public class MapView extends FrameLayout {
 		mMapZoomControls = new MapZoomControls(mapActivity, this);
 		mMapZoomControls.setShowMapZoomControls(true);
 
-		enableRotation = true;
+		// enableRotation = true;
 
 		for (MapWorker worker : mMapWorkers)
 			worker.start();
