@@ -38,7 +38,7 @@ public class MapViewPosition {
 	private byte mZoomLevel;
 	private float mScale;
 	private float mRotation;
-	private float mTilt;
+	public float mTilt;
 
 	// 2^mZoomLevel * mScale;
 	private float mMapScale;
@@ -277,5 +277,18 @@ public class MapViewPosition {
 		mZoomLevel = (byte) z;
 		mScale = newScale / (1 << z);
 		mMapScale = newScale;
+	}
+
+	public boolean tilt(float moveX) {
+		float tilt = mTilt + moveX;
+		if (tilt > 25)
+			tilt = 25;
+		else if (tilt < 0)
+			tilt = 0;
+		if (mTilt == tilt)
+			return false;
+
+		mTilt = tilt;
+		return true;
 	}
 }

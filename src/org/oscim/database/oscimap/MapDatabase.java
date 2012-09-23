@@ -65,7 +65,8 @@ public class MapDatabase implements IMapDatabase {
 	private static final String CACHE_FILE = "%d-%d-%d.tile";
 
 	private static final String SERVER_ADDR = "city.informatik.uni-bremen.de";
-	private static final String URL = "/osci/map-live/";
+	// private static final String URL = "/osci/map-live/";
+	private static final String URL = "/osci/oscim/";
 
 	private final static float REF_TILE_SIZE = 4096.0f;
 
@@ -82,21 +83,6 @@ public class MapDatabase implements IMapDatabase {
 	private InputStream mInputStream;
 
 	private final boolean debug = false;
-
-	// private static final int MAX_TAGS_CACHE = 100;
-	// private static Map<String, Tag> tagHash = Collections
-	// .synchronizedMap(new LinkedHashMap<String, Tag>(
-	// MAX_TAGS_CACHE, 0.75f, true) {
-	//
-	// private static final long serialVersionUID = 1L;
-	//
-	// @Override
-	// protected boolean removeEldestEntry(Entry<String, Tag> e) {
-	// if (size() < MAX_TAGS_CACHE)
-	// return false;
-	// return true;
-	// }
-	// });
 
 	@Override
 	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
@@ -234,7 +220,7 @@ public class MapDatabase implements IMapDatabase {
 		return file;
 	}
 
-	// /////////////// hand sewed tile protocol buffers decoder ///////////////////
+	// /////////////// hand sewed tile protocol buffers decoder ///////////////
 	// TODO write an own serialization format for structs and packed strings..
 
 	private static final int BUFFER_SIZE = 65536;
@@ -763,7 +749,7 @@ public class MapDatabase implements IMapDatabase {
 				| (buffer[offset + 3] & 0xff);
 	}
 
-	// ///////////////////////// Lightweight HttpClient ///////////////////////////////////////
+	// ///////////////////////// Lightweight HttpClient ///////////////////////
 	// should have written simple tcp server/client for this...
 
 	private int mMaxReq = 0;
@@ -788,9 +774,7 @@ public class MapDatabase implements IMapDatabase {
 		InputStream is = mResponseStream;
 
 		byte[] buf = mReadBuffer;
-
 		boolean first = true;
-
 		int read = 0;
 		int pos = 0;
 		int end = 0;
@@ -806,8 +790,9 @@ public class MapDatabase implements IMapDatabase {
 				if (first) {
 					// check only for OK
 					first = false;
+					int i = 0;
 
-					for (int i = 0; i < 15 && pos + i < end; i++)
+					for (; i < 15 && pos + i < end; i++)
 						if (buf[pos + i] != RESPONSE_HTTP_OK[i])
 							return -1;
 
@@ -854,7 +839,6 @@ public class MapDatabase implements IMapDatabase {
 		if (mSocket != null && ((mMaxReq-- <= 0)
 				|| (SystemClock.elapsedRealtime() - mLastRequest
 				> RESPONSE_EXPECTED_TIMEOUT))) {
-
 			try {
 				mSocket.close();
 			} catch (IOException e) {
@@ -893,7 +877,8 @@ public class MapDatabase implements IMapDatabase {
 		len += pos;
 
 		// this does the same but with a few more allocations:
-		// byte[] request = String.format(REQUEST, Integer.valueOf(tile.zoomLevel),
+		// byte[] request = String.format(REQUEST,
+		// Integer.valueOf(tile.zoomLevel),
 		// Integer.valueOf(tile.tileX), Integer.valueOf(tile.tileY)).getBytes();
 
 		try {
@@ -950,7 +935,8 @@ public class MapDatabase implements IMapDatabase {
 		return pos + i;
 	}
 
-	// //////////////////////////// Tile cache ////////////////////////////////////
+	// //////////////////////////// Tile cache
+	// ////////////////////////////////////
 
 	private boolean cacheRead(Tile tile, File f) {
 		if (f.exists() && f.length() > 0) {

@@ -523,7 +523,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			Matrix.setRotateM(mRotateMatrix, 0, mapPosition.angle, 0, 0, 1);
 
 			// tilt map
-			float angle = 15f / (mHeight / 2);
+			// mMapView.getMapViewPosition().mTilt;
+
+			float angle = mMapView.getMapViewPosition().mTilt / (mHeight / 2);
 			Matrix.setRotateM(mTmpMatrix, 0, -angle, 1, 0, 0);
 
 			// move camera center back to map center
@@ -698,6 +700,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		PolygonLayer pl = tile.polygonLayers;
 
 		boolean clipped = false;
+		int simpleShader = mRotate ? 0 : 1;
 
 		for (; pl != null || ll != null;) {
 			int lnext = Integer.MAX_VALUE;
@@ -724,7 +727,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				}
 
 				GLES20.glEnable(GL_BLEND);
-				ll = LineRenderer.drawLines(tile, ll, pnext, mvp, div, z, s);
+				ll = LineRenderer.drawLines(tile, ll, pnext, mvp, div, z, s,
+						simpleShader);
 			}
 		}
 	}
@@ -755,8 +759,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	// TODO could use tile.proxies here
 	private static void drawProxyTile(MapPosition mapPosition, MapTile tile) {
+		int diff = mapPosition.zoomLevel - tile.zoomLevel;
+
 		boolean drawn = false;
-		if (mapPosition.scale > 1.5f) {
+		if (mapPosition.scale > 1.5f || diff < 0) {
 			// prefer drawing children
 			if (!drawProxyChild(mapPosition, tile)) {
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {

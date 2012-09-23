@@ -95,16 +95,21 @@ public class TouchHandler {
 	private boolean mScaling = false;
 
 	private boolean onActionMove(MotionEvent event) {
-		int pointerIndex = event.findPointerIndex(mActivePointerId);
+		int id = event.findPointerIndex(mActivePointerId);
 
 		// calculate the distance between previous and current position
-		float moveX = event.getX(pointerIndex) - mPosX;
-		float moveY = event.getY(pointerIndex) - mPosY;
+		float moveX = event.getX(id) - mPosX;
+		float moveY = event.getY(id) - mPosY;
+		// save the position of the event
+
+		// Log.d("...", "mx " + moveX + " my " + moveY);
 
 		boolean scaling = mScaleGestureDetector.isInProgress();
+
 		if (!mScaling) {
 			mScaling = scaling;
 		}
+
 		if (!scaling && !mMoveStart) {
 
 			if (Math.abs(moveX) > 3 * mMapMoveDelta
@@ -112,11 +117,17 @@ public class TouchHandler {
 				// the map movement threshold has been reached
 				// longPressDetector.pressStop();
 				mMoveStart = true;
-
-				// save the position of the event
-				mPosX = event.getX(pointerIndex);
-				mPosY = event.getY(pointerIndex);
 			}
+
+			return true;
+		}
+
+		mPosX = event.getX(id);
+		mPosY = event.getY(id);
+
+		if (!scaling) {
+			mMapPosition.moveMap(moveX, moveY);
+			mMapView.redrawMap();
 			return true;
 		}
 
@@ -133,7 +144,12 @@ public class TouchHandler {
 				double rad = Math.atan2(dy, dx);
 				double r = rad - mAngle;
 
-				// Log.d("...", "move " + x + " " + y + " " + cx + " " + cy);
+				if (!mBeginRotate && Math.abs(dy) < 80) {
+					if (mMapPosition.tilt(moveY / 4)) {
+						mMapView.redrawMap();
+						return true;
+					}
+				}
 
 				if (!mBeginRotate && !mBeginScale) {
 					if (r > 0.02 || r < -0.02)
@@ -153,18 +169,9 @@ public class TouchHandler {
 					mAngle = rad;
 					mMapView.redrawMap();
 				}
+
 			}
 		}
-		// save the position of the event
-		mPosX = event.getX(pointerIndex);
-		mPosY = event.getY(pointerIndex);
-
-		if (scaling) {
-			return true;
-		}
-
-		mMapPosition.moveMap(moveX, moveY);
-		mMapView.redrawMap();
 
 		return true;
 	}
