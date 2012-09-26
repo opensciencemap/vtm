@@ -13,7 +13,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ported from Polymaps: Layer.js */
+/* ported from Polymaps: Layer.js Copyright (c) 2010, SimpleGeo and Stamen Design */
 
 package org.oscim.view.renderer;
 
