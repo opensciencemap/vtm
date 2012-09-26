@@ -110,7 +110,7 @@ public class MapRenderer extends GLSurfaceView {
 	 * @param clear
 	 *            whether to clear and reload all tiles
 	 */
-	public synchronized void updateMap(boolean clear) {
+	public void updateMap(boolean clear) {
 		boolean changedPos = false;
 
 		if (mMapView == null)
@@ -124,20 +124,19 @@ public class MapRenderer extends GLSurfaceView {
 		}
 
 		if (clear) {
+			// make sure onDrawFrame is not running
+			GLRenderer.lock.lock();
 			// remove all tiles references
 			Log.d(TAG, "CLEAR");
-
-			GLRenderer.tilelock.lock();
-
 			for (MapTile t : mTiles)
 				clearTile(t);
 
 			mTiles.clear();
 			mTilesLoaded.clear();
 			QuadTree.init();
-			GLRenderer.tilelock.unlock();
-
 			mInitial = true;
+
+			GLRenderer.lock.unlock();
 		}
 
 		if (mInitial) {
