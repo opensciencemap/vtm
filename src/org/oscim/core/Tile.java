@@ -15,8 +15,9 @@
 package org.oscim.core;
 
 /**
- * A tile represents a rectangular part of the world map. All tiles can be identified by their X and Y number together
- * with their zoom level. The actual area that a tile covers on a map depends on the underlying map projection.
+ * A tile represents a rectangular part of the world map. All tiles can be
+ * identified by their X and Y number together with their zoom level. The actual
+ * area that a tile covers on a map depends on the underlying map projection.
  */
 public class Tile {
 
@@ -68,11 +69,11 @@ public class Tile {
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("Tile [tileX=");
+		stringBuilder.append("[X:");
 		stringBuilder.append(this.tileX);
-		stringBuilder.append(", tileY=");
+		stringBuilder.append(", Y:");
 		stringBuilder.append(this.tileY);
-		stringBuilder.append(", zoomLevel=");
+		stringBuilder.append(", Z:");
 		stringBuilder.append(this.zoomLevel);
 		stringBuilder.append("]");
 		return stringBuilder.toString();
