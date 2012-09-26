@@ -17,6 +17,9 @@ package org.oscim.core;
 /**
  * A tag represents an immutable key-value pair.
  */
+
+// TODO: use own stringshare method instead of internalized strings
+
 public class Tag {
 	private static final char KEY_VALUE_SEPARATOR = '=';
 	/**

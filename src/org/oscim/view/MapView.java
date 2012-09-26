@@ -23,7 +23,6 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.oscim.core.GeoPoint;
-import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.MapDatabaseFactory;
@@ -56,9 +55,9 @@ public class MapView extends FrameLayout {
 
 	final static String TAG = "MapView";
 
-	public final static boolean debugFrameTime = false;
-	public final static boolean testRegionZoom = false;
-	private final boolean mDebugDatabase = false;
+	public static final boolean debugFrameTime = false;
+	public static final boolean testRegionZoom = false;
+	private static final boolean debugDatabase = false;
 
 	RegionLookup mRegionLookup;
 
@@ -146,7 +145,7 @@ public class MapView extends FrameLayout {
 
 		for (int i = 0; i < mNumMapWorkers; i++) {
 			IMapDatabase mapDatabase;
-			if (mDebugDatabase) {
+			if (debugDatabase) {
 				// mapDatabase = MapDatabaseFactory
 				// .createMapDatabase(MapDatabases.TEST_READER);
 				mapDatabase = MapDatabaseFactory
@@ -188,7 +187,7 @@ public class MapView extends FrameLayout {
 		mMapZoomControls = new MapZoomControls(mapActivity, this);
 		mMapZoomControls.setShowMapZoomControls(true);
 
-		// enableRotation = true;
+		enableRotation = true;
 
 		for (MapWorker worker : mMapWorkers)
 			worker.start();
@@ -353,7 +352,7 @@ public class MapView extends FrameLayout {
 	 */
 
 	public void setMapDatabase(MapDatabases mapDatabaseType) {
-		if (mDebugDatabase)
+		if (debugDatabase)
 			return;
 
 		TileGenerator tileGenerator;
@@ -469,6 +468,9 @@ public class MapView extends FrameLayout {
 		mapWorkersPause(true);
 		Log.d(TAG, "onSizeChanged" + width + " " + height);
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
+
+		if (width != 0 && height != 0)
+			mMapViewPosition.setViewport(width, height);
 
 		mapWorkersProceed();
 	}

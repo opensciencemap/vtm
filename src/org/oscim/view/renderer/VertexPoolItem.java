@@ -14,12 +14,12 @@
  */
 package org.oscim.view.renderer;
 
-public class ShortItem {
+public class VertexPoolItem {
 	final short[] vertices;
 	int used;
-	ShortItem next;
+	VertexPoolItem next;
 
-	ShortItem() {
+	VertexPoolItem() {
 		vertices = new short[SIZE];
 		used = 0;
 	}

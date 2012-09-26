@@ -9,12 +9,12 @@ import org.oscim.app.filefilter.ValidRenderTheme;
 import org.oscim.app.filepicker.FilePicker;
 import org.oscim.app.preferences.EditPreferences;
 import org.oscim.core.GeoPoint;
-import org.oscim.core.MapPosition;
 import org.oscim.database.MapDatabases;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.utils.AndroidUtils;
 import org.oscim.view.DebugSettings;
 import org.oscim.view.MapActivity;
+import org.oscim.view.MapPosition;
 import org.oscim.view.MapView;
 
 import android.annotation.TargetApi;

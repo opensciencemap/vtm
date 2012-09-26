@@ -16,10 +16,10 @@ package org.oscim.view.renderer;
 
 import android.util.Log;
 
-public class ShortPool {
+public class VertexPool {
 	private static final int POOL_LIMIT = 6000;
 
-	static private ShortItem pool = null;
+	static private VertexPoolItem pool = null;
 	static private int count = 0;
 	static private int countAll = 0;
 
@@ -29,14 +29,14 @@ public class ShortPool {
 		pool = null;
 	}
 
-	static synchronized ShortItem get() {
+	static synchronized VertexPoolItem get() {
 
 		if (pool == null && count > 0) {
-			Log.d("ShortPool", "XXX wrong count: " + count);
+			Log.d("VertexPool", "XXX wrong count: " + count);
 		}
 		if (pool == null) {
 			countAll++;
-			return new ShortItem();
+			return new VertexPoolItem();
 		}
 
 		count--;
@@ -44,14 +44,14 @@ public class ShortPool {
 		if (count < 0) {
 			int c = 0;
 
-			for (ShortItem tmp = pool; tmp != null; tmp = tmp.next)
+			for (VertexPoolItem tmp = pool; tmp != null; tmp = tmp.next)
 				c++;
 
-			Log.d("ShortPool", "XXX wrong count: " + count + " left" + c);
-			return new ShortItem();
+			Log.d("VertexPool", "XXX wrong count: " + count + " left" + c);
+			return new VertexPoolItem();
 		}
 
-		ShortItem it = pool;
+		VertexPoolItem it = pool;
 		pool = pool.next;
 		it.used = 0;
 		it.next = null;
@@ -61,7 +61,7 @@ public class ShortPool {
 	// private static float load = 1.0f;
 	// private static int loadCount = 0;
 
-	static synchronized void add(ShortItem items) {
+	static synchronized void add(VertexPoolItem items) {
 		if (items == null)
 			return;
 
@@ -71,11 +71,11 @@ public class ShortPool {
 		// limit pool items
 		if (countAll < POOL_LIMIT) {
 
-			ShortItem last = items;
+			VertexPoolItem last = items;
 
 			while (true) {
 				count++;
-				// load += (float) last.used / ShortItem.SIZE;
+				// load += (float) last.used / VertexPoolItem.SIZE;
 				// loadCount++;
 
 				if (last.next == null)
@@ -91,14 +91,14 @@ public class ShortPool {
 
 		} else {
 			// int cleared = 0;
-			ShortItem prev, tmp = items;
+			VertexPoolItem prev, tmp = items;
 			while (tmp != null) {
 				prev = tmp;
 				tmp = tmp.next;
 
 				countAll--;
 
-				// load += (float) prev.used / ShortItem.SIZE;
+				// load += (float) prev.used / VertexPoolItem.SIZE;
 				// loadCount++;
 
 				prev.next = null;

@@ -192,7 +192,7 @@ public class TextRenderer {
 			if (tex.tile == null)
 				break;
 
-			if (!tex.tile.isActive)
+			if (!tex.tile.isLocked)
 				break;
 
 			tex = null;
@@ -412,7 +412,7 @@ public class TextRenderer {
 
 		for (int i = 0; i < mTextures.length; i++) {
 			tex = mTextures[i];
-			if (tex.tile == null || !tex.tile.isActive)
+			if (tex.tile == null || !tex.tile.isLocked)
 				continue;
 
 			mShortBuffer.put(tex.vertices, 0, tex.length);

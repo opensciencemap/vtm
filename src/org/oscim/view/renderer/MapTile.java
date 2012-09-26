@@ -41,7 +41,7 @@ class MapTile extends JobTile {
 	/**
 	 * tile is used by render thread. set by updateVisibleList (main thread).
 	 */
-	boolean isActive;
+	boolean isLocked;
 
 	/**
 	 * tile has new data to upload to gl
@@ -74,13 +74,16 @@ class MapTile extends JobTile {
 	// counting the tiles that use this tile as proxy
 	byte refs;
 
+	boolean isActive() {
+		return isLoading || newData || isReady;
+	}
+
 	boolean isLocked() {
-		return isActive || refs > 0;
+		return isLocked || refs > 0;
 	}
 
 	void lock() {
-
-		isActive = true;
+		isLocked = true;
 
 		if (isReady || newData)
 			return;
@@ -110,7 +113,7 @@ class MapTile extends JobTile {
 	}
 
 	void unlock() {
-		isActive = false;
+		isLocked = false;
 
 		if (proxies == 0)
 			return;

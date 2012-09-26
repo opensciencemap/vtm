@@ -15,7 +15,7 @@
 package org.oscim.app;
 
 import org.oscim.core.GeoPoint;
-import org.oscim.core.MapPosition;
+import org.oscim.view.MapPosition;
 
 import android.content.Context;
 import android.location.Criteria;

@@ -123,8 +123,8 @@ public class MapZoomControls {
 		mShowMapZoomControls = true;
 		mZoomLevelMax = DEFAULT_ZOOM_LEVEL_MAX;
 		mZoomLevelMin = DEFAULT_ZOOM_LEVEL_MIN;
-		if (!MapView.testRegionZoom)
-			mZoomControls.setVisibility(View.GONE);
+		// if (!MapView.testRegionZoom)
+		mZoomControls.setVisibility(View.GONE);
 		mZoomControlsGravity = DEFAULT_ZOOM_CONTROLS_GRAVITY;
 
 		mZoomControls.setOnZoomInClickListener(new ZoomInClickListener(this));
@@ -203,12 +203,14 @@ public class MapZoomControls {
 	}
 
 	/**
-	 * Sets the gravity for the placing of the zoom controls. Supported values are {@link Gravity#TOP},
-	 * {@link Gravity#CENTER_VERTICAL}, {@link Gravity#BOTTOM}, {@link Gravity#LEFT}, {@link Gravity#CENTER_HORIZONTAL}
-	 * and {@link Gravity#RIGHT}.
+	 * Sets the gravity for the placing of the zoom controls. Supported values
+	 * are {@link Gravity#TOP}, {@link Gravity#CENTER_VERTICAL},
+	 * {@link Gravity#BOTTOM}, {@link Gravity#LEFT},
+	 * {@link Gravity#CENTER_HORIZONTAL} and {@link Gravity#RIGHT}.
 	 * 
 	 * @param zoomControlsGravity
-	 *            a combination of {@link Gravity} constants describing the desired placement.
+	 *            a combination of {@link Gravity} constants describing the
+	 *            desired placement.
 	 */
 	public void setZoomControlsGravity(int zoomControlsGravity) {
 		if (mZoomControlsGravity != zoomControlsGravity) {
@@ -220,14 +222,16 @@ public class MapZoomControls {
 	/**
 	 * Sets the maximum zoom level of the map.
 	 * <p>
-	 * The maximum possible zoom level of the MapView depends also on the current {@link TileGenerator}. For example,
-	 * downloading map tiles may only be possible up to a certain zoom level. Setting a higher maximum zoom level has no
-	 * effect in this case.
+	 * The maximum possible zoom level of the MapView depends also on the
+	 * current {@link TileGenerator}. For example, downloading map tiles may
+	 * only be possible up to a certain zoom level. Setting a higher maximum
+	 * zoom level has no effect in this case.
 	 * 
 	 * @param zoomLevelMax
 	 *            the maximum zoom level.
 	 * @throws IllegalArgumentException
-	 *             if the maximum zoom level is smaller than the current minimum zoom level.
+	 *             if the maximum zoom level is smaller than the current minimum
+	 *             zoom level.
 	 */
 	public void setZoomLevelMax(byte zoomLevelMax) {
 		if (zoomLevelMax < mZoomLevelMin) {
@@ -242,7 +246,8 @@ public class MapZoomControls {
 	 * @param zoomLevelMin
 	 *            the minimum zoom level.
 	 * @throws IllegalArgumentException
-	 *             if the minimum zoom level is larger than the current maximum zoom level.
+	 *             if the minimum zoom level is larger than the current maximum
+	 *             zoom level.
 	 */
 	public void setZoomLevelMin(byte zoomLevelMin) {
 		if (zoomLevelMin > mZoomLevelMax) {

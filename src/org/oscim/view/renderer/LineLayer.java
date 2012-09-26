@@ -40,8 +40,8 @@ class LineLayer {
 	boolean isOutline;
 	int layer;
 
-	ShortItem pool;
-	protected ShortItem curItem;
+	VertexPoolItem pool;
+	protected VertexPoolItem curItem;
 
 	// number of vertices this layer holds
 	int verticesCnt;
@@ -85,10 +85,10 @@ class LineLayer {
 			squared = true;
 
 		if (pool == null) {
-			pool = curItem = ShortPool.get();
+			pool = curItem = VertexPool.get();
 		}
 
-		ShortItem si = curItem;
+		VertexPoolItem si = curItem;
 		short v[] = si.vertices;
 		int opos = si.used;
 
@@ -137,8 +137,8 @@ class LineLayer {
 			ux = -vy;
 			uy = vx;
 
-			if (opos == ShortItem.SIZE) {
-				si = si.next = ShortPool.get();
+			if (opos == VertexPoolItem.SIZE) {
+				si = si.next = VertexPool.get();
 				v = si.vertices;
 				opos = 0;
 			}
@@ -151,8 +151,8 @@ class LineLayer {
 
 			boolean outside = (x < tmin || x > tmax || y < tmin || y > tmax);
 
-			if (opos == ShortItem.SIZE) {
-				si = si.next = ShortPool.get();
+			if (opos == VertexPoolItem.SIZE) {
+				si = si.next = VertexPool.get();
 				v = si.vertices;
 				opos = 0;
 			}
@@ -170,8 +170,8 @@ class LineLayer {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -181,8 +181,8 @@ class LineLayer {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -195,8 +195,8 @@ class LineLayer {
 				v[opos++] = (short) (2 | ddx & DIR_MASK);
 				v[opos++] = (short) (2 | ddy & DIR_MASK);
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -210,8 +210,8 @@ class LineLayer {
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -248,8 +248,8 @@ class LineLayer {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -259,8 +259,8 @@ class LineLayer {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -334,8 +334,8 @@ class LineLayer {
 				ddx = (int) (ux * DIR_SCALE);
 				ddy = (int) (uy * DIR_SCALE);
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -345,8 +345,8 @@ class LineLayer {
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -375,8 +375,8 @@ class LineLayer {
 
 			outside = (x < tmin || x > tmax || y < tmin || y > tmax);
 
-			if (opos == ShortItem.SIZE) {
-				si.next = ShortPool.get();
+			if (opos == VertexPoolItem.SIZE) {
+				si.next = VertexPool.get();
 				si = si.next;
 				opos = 0;
 				v = si.vertices;
@@ -394,8 +394,8 @@ class LineLayer {
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -405,8 +405,8 @@ class LineLayer {
 				v[opos++] = (short) (2 | -ddx & DIR_MASK);
 				v[opos++] = (short) (1 | -ddy & DIR_MASK);
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -422,8 +422,8 @@ class LineLayer {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -439,8 +439,8 @@ class LineLayer {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -470,8 +470,8 @@ class LineLayer {
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
@@ -487,8 +487,8 @@ class LineLayer {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (opos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					opos = 0;
 				}
