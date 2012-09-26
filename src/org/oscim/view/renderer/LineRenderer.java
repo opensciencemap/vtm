@@ -109,10 +109,15 @@ class LineRenderer {
 
 		// line scale factor (for non fixed lines)
 		float lineScale = FloatMath.sqrt(s);
+		float blurScale = pixel;
 		boolean blur = false;
+		// dont increase scale when max is reached
+		boolean strokeMaxZoom = zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL;
+		float width = 1;
 
 		LineLayer l = layer;
 		for (; l != null && l.layer < next; l = l.next) {
+
 			Line line = l.line;
 			if (line.fade != -1 && line.fade > zoom)
 				continue;
@@ -124,7 +129,7 @@ class LineRenderer {
 
 			GlUtils.setColor(hLineColor[mode], line.color, alpha);
 
-			if (blur) {
+			if (blur && line.blur == 0) {
 				GLES20.glUniform1f(hLineScale[mode], pixel);
 				blur = false;
 			}
@@ -132,38 +137,43 @@ class LineRenderer {
 			if (l.isOutline) {
 				for (LineLayer o = l.outlines; o != null; o = o.outlines) {
 
+					if (o.line.fixed || strokeMaxZoom) {
+						width = (l.width + o.width) / s;
+					} else {
+						width = l.width / s + o.width / lineScale;
+					}
+
+					GLES20.glUniform1f(hLineWidth[mode], width);
+
 					if (line.blur != 0) {
-						GLES20.glUniform1f(hLineScale[mode], (l.width + o.width) / s
-								- (line.blur / s));
+						blurScale = (l.width + o.width) / s - (line.blur / s);
+						GLES20.glUniform1f(hLineScale[mode], blurScale);
 						blur = true;
 					}
 
-					if (zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL)
-						GLES20.glUniform1f(hLineWidth[mode], (l.width + o.width) / s);
-					else
-						GLES20.glUniform1f(hLineWidth[mode], l.width / s + o.width
-								/ lineScale);
-
 					GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
 				}
-			}
-			else {
-				if (line.blur != 0) {
-					GLES20.glUniform1f(hLineScale[mode], (l.width / lineScale)
-							* line.blur);
-					blur = true;
-				}
+			} else {
 
-				if (line.fixed || zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL) {
+				if (line.fixed || strokeMaxZoom) {
 					// invert scaling of extrusion vectors so that line width
 					// stays the same.
-					GLES20.glUniform1f(hLineWidth[mode], l.width / s);
+					width = l.width / s;
 				} else {
-					GLES20.glUniform1f(hLineWidth[mode], l.width / lineScale);
+					width = l.width / lineScale;
+				}
+
+				GLES20.glUniform1f(hLineWidth[mode], width);
+
+				if (line.blur != 0) {
+					blurScale = (l.width / lineScale) * line.blur;
+					GLES20.glUniform1f(hLineScale[mode], blurScale);
+					blur = true;
 				}
 
 				GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
 			}
+
 		}
 
 		GLES20.glDisableVertexAttribArray(hLineVertexPosition[mode]);
