@@ -790,11 +790,11 @@ public class MapDatabase implements IMapDatabase {
 				if (first) {
 					// check only for OK
 					first = false;
-					int i = 0;
+					if (!compareBytes(buf, pos, end, RESPONSE_HTTP_OK, 15))
+						return -1;
 
-					for (; i < 15 && pos + i < end; i++)
-						if (buf[pos + i] != RESPONSE_HTTP_OK[i])
-							return -1;
+					// for (int i = 0; i < 15 && pos + i < end; i++)
+					// if (buf[pos + i] != RESPONSE_HTTP_OK[i])
 
 				} else if (end - pos == 1) {
 					// check empty line (header end)
@@ -935,8 +935,20 @@ public class MapDatabase implements IMapDatabase {
 		return pos + i;
 	}
 
-	// //////////////////////////// Tile cache
-	// ////////////////////////////////////
+	private static boolean compareBytes(byte[] buffer, int position, int available,
+			byte[] string, int length) {
+
+		if (available - position < length)
+			return false;
+
+		for (int i = 0; i < length; i++)
+			if (buffer[position + i] != string[i])
+				return false;
+
+		return true;
+	}
+
+	// ///////////////////////// Tile cache /////////////////////////////////
 
 	private boolean cacheRead(Tile tile, File f) {
 		if (f.exists() && f.length() > 0) {
@@ -946,7 +958,7 @@ public class MapDatabase implements IMapDatabase {
 				in = new FileInputStream(f);
 
 				mContentLenth = f.length();
-				Log.d(TAG, tile + " using cache: " + mContentLenth);
+				Log.d(TAG, tile + " - using cache: " + mContentLenth);
 				mInputStream = in;
 
 				decode();
@@ -970,7 +982,7 @@ public class MapDatabase implements IMapDatabase {
 	private boolean cacheBegin(Tile tile, File f) {
 		if (USE_CACHE) {
 			try {
-				Log.d(TAG, "writing cache: " + tile);
+				Log.d(TAG, tile + " - writing cache");
 				mCacheFile = new FileOutputStream(f);
 
 				if (mReadPos > 0) {
@@ -999,7 +1011,7 @@ public class MapDatabase implements IMapDatabase {
 				try {
 					mCacheFile.flush();
 					mCacheFile.close();
-					Log.d(TAG, tile + " cache written " + file.length());
+					Log.d(TAG, tile + " - cache written " + file.length());
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
