@@ -61,7 +61,7 @@ public class ScanBox {
 	static Edge bc = new Edge();
 	static Edge ca = new Edge();
 
-	static void scanSpans(Edge e0, Edge e1, float ymin, float ymax) {
+	static void scanSpans(Edge e0, Edge e1) {
 
 		// sort edge by x-coordinate
 		if (e0.x0 == e1.x0 && e0.y0 == e1.y0) {
@@ -86,8 +86,8 @@ public class ScanBox {
 
 		float x0, x1;
 
-		int y = (int) Math.max(ymin, FloatMath.floor(e1.y0));
-		int bottom = (int) Math.min(ymax, FloatMath.ceil(e1.y1));
+		int y = (int) Math.max(0, FloatMath.floor(e1.y0));
+		int bottom = (int) Math.min(mMax, FloatMath.ceil(e1.y1));
 
 		for (; y < bottom; y++) {
 			// float x0 = (m0 * Math.min(e0.dy, y + d0 - e0.y0) + e0.x0);
@@ -97,7 +97,7 @@ public class ScanBox {
 			if (e0.dy < x0)
 				x0 = e0.dy;
 
-			x0 = m0 * x0 + e0.x0;
+			x0 = e0.x0 + m0 * x0;
 
 			if (x0 < 0)
 				x0 = 0;
@@ -108,7 +108,7 @@ public class ScanBox {
 			if (e1.dy < x1)
 				x1 = e1.dy;
 
-			x1 = m1 * x1 + e1.x0;
+			x1 = e1.x0 + m1 * x1;
 
 			if (x1 < 0)
 				x1 = 0;
@@ -121,7 +121,7 @@ public class ScanBox {
 		}
 	}
 
-	static void scanTriangle(float ymin, float ymax) {
+	static void scanTriangle() {
 
 		if (ab.dy > bc.dy) {
 			Edge t = ab;
@@ -140,25 +140,28 @@ public class ScanBox {
 		}
 
 		if (ab.dy != 0)
-			scanSpans(ca, ab, ymin, ymax);
+			scanSpans(ca, ab);
+
 		if (bc.dy != 0)
-			scanSpans(ca, bc, ymin, ymax);
+			scanSpans(ca, bc);
 	}
+
+	private static int mMax;
 
 	public static void scan(float[] coords, TilesData tiles, int max) {
 		sTiles = tiles;
 		cntDoubles = 0;
+		mMax = max;
+
 		ab.set(coords[0], coords[1], coords[2], coords[3]);
 		bc.set(coords[2], coords[3], coords[4], coords[5]);
 		ca.set(coords[4], coords[5], coords[0], coords[1]);
+		scanTriangle();
 
-		scanTriangle(0, max);
-		// Log.d("..", ">doubles " + cntDoubles);
 		ab.set(coords[4], coords[5], coords[6], coords[7]);
 		bc.set(coords[6], coords[7], coords[0], coords[1]);
 		ca.set(coords[0], coords[1], coords[4], coords[5]);
-
-		scanTriangle(0, max);
+		scanTriangle();
 
 		// Log.d("..", "<doubles " + cntDoubles);
 	}

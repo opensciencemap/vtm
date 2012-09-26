@@ -98,6 +98,7 @@ public class MapViewPosition {
 		mapPosition.angle = mRotation;
 		mapPosition.zoomLevel = mZoomLevel;
 		mapPosition.scale = mScale;
+
 		byte z = mZoomLevel;
 		mapPosition.x = MercatorProjection.longitudeToPixelX(mLongitude, z);
 		mapPosition.y = MercatorProjection.latitudeToPixelY(mLatitude, z);
@@ -114,7 +115,7 @@ public class MapViewPosition {
 		// updateMatrix();
 
 		// not so sure about this, but works...
-		float tilt = FloatMath.sin((float) Math.toRadians(mTilt)) * 4;
+		float tilt = (float) Math.sin(Math.toRadians(mTilt)) * 4;
 
 		unproject(-1, 1, tilt, coords, 0); // top-left
 		unproject(1, 1, tilt, coords, 2); // top-right
@@ -365,6 +366,21 @@ public class MapViewPosition {
 		updateMatrix();
 	}
 
+	public boolean tilt(float move) {
+		float tilt = mTilt + move;
+		if (tilt > MAX_ANGLE)
+			tilt = MAX_ANGLE;
+		else if (tilt < 0)
+			tilt = 0;
+
+		if (mTilt == tilt)
+			return false;
+
+		mTilt = tilt;
+		updateMatrix();
+		return true;
+	}
+
 	public void setTilt(float f) {
 		mTilt = f;
 		updateMatrix();
@@ -433,16 +449,4 @@ public class MapViewPosition {
 		return true;
 	}
 
-	public boolean tilt(float moveX) {
-		float tilt = mTilt + moveX;
-		if (tilt > MAX_ANGLE)
-			tilt = MAX_ANGLE;
-		else if (tilt < 0)
-			tilt = 0;
-		if (mTilt == tilt)
-			return false;
-
-		mTilt = tilt;
-		return true;
-	}
 }
