@@ -417,8 +417,7 @@ public class TouchHandler
 			if (mTimeEnd - mTimeStart > 150 || mSumScale > 1.1 || mSumScale < 0.9) {
 				mBeginScale = true;
 				scale = mSumScale;
-			}
-			else
+			} else
 				return true;
 		}
 

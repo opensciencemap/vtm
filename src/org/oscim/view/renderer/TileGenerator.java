@@ -247,8 +247,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	@Override
 	public void renderPointOfInterestCaption(Caption caption) {
 		// Log.d(TAG, "renderPointOfInterestCaption: " + mPoiX + " " + mPoiY +
-		// " "
-		// + mTagName);
+		// " " + mTagName);
 
 		if (mTagName == null)
 			return;
@@ -430,8 +429,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mDebugDrawPolygons = !debugSettings.mDisablePolygons;
 		mDebugDrawUnmatched = debugSettings.mDrawUnmatchted;
 
-		// fixed now....
 		if (tile.newData || tile.isReady) {
+			// fixed now....
 			Log.d(TAG, "XXX tile already loaded "
 					+ tile + " "
 					+ tile.newData + " "
@@ -468,8 +467,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		}
 
 		if (debugSettings.mDrawTileFrames) {
-			mTagName = new Tag("name", countLines + " " + countNodes + " "
-					+ tile.toString(), false);
+			mTagName = new Tag("name", tile.toString(), false);
 			mPoiX = Tile.TILE_SIZE >> 1;
 			mPoiY = 10;
 			TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
