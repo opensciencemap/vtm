@@ -97,6 +97,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	// lock to synchronize Main- and GL-Thread
 	static ReentrantLock tilelock = new ReentrantLock();
+	static ReentrantLock lock = new ReentrantLock();
 
 	/**
 	 * @param mapView
@@ -113,6 +114,29 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		Matrix.setIdentityM(mMVPMatrix, 0);
 
+		// add half pixel to tile clip/fill coordinates to avoid rounding issues
+		short min = -4;
+		short max = (short) ((Tile.TILE_SIZE << 3) + 4);
+		mFillCoords = new short[8];
+		mFillCoords[0] = min;
+		mFillCoords[1] = max;
+		mFillCoords[2] = max;
+		mFillCoords[3] = max;
+		mFillCoords[4] = min;
+		mFillCoords[5] = min;
+		mFillCoords[6] = max;
+		mFillCoords[7] = min;
+
+		shortBuffer = new ShortBuffer[rotateBuffers];
+
+		for (int i = 0; i < rotateBuffers; i++) {
+			ByteBuffer bbuf = ByteBuffer.allocateDirect(MB >> 2)
+					.order(ByteOrder.nativeOrder());
+
+			shortBuffer[i] = bbuf.asShortBuffer();
+			shortBuffer[i].put(mFillCoords, 0, 8);
+		}
+
 		mUpdateTiles = false;
 	}
 
@@ -125,8 +149,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	 */
 	static TilesData updateTiles(TilesData tiles) {
 		GLRenderer.tilelock.lock();
-
-		// mCurPosition = mapPosition;
 
 		// unlock previously active tiles
 		for (int i = 0; i < mNextTiles.cnt; i++) {
@@ -179,7 +201,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	/**
-	 * called by TileLoader. when tile is removed from cache, reuse its vbo.
+	 * called by TileLoader. when tile is removed from cache reuse its vbo.
 	 * 
 	 * @param vbo
 	 *            the VBO
@@ -214,105 +236,100 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private int uploadCnt = 0;
 
 	private boolean uploadTileData(MapTile tile) {
-		ShortBuffer sbuf = null;
+		// Upload line data to vertex buffer object
+		// Log.d(TAG, "uploadTileData, " + tile);
+
+		int lineSize = LineRenderer.sizeOf(tile.lineLayers);
+		int polySize = PolygonRenderer.sizeOf(tile.polygonLayers);
+		int newSize = lineSize + polySize;
+
+		if (newSize == 0) {
+			LineRenderer.clear(tile.lineLayers);
+			PolygonRenderer.clear(tile.polygonLayers);
+			tile.lineLayers = null;
+			tile.polygonLayers = null;
+			tile.newData = false;
+			return false;
+		}
+
+		GLES20.glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
 
 		// use multiple buffers to avoid overwriting buffer while current
 		// data is uploaded (or rather the blocking which is probably done to
-		// avoid this)
+		// avoid overwriting)
 		if (uploadCnt >= rotateBuffers) {
 			uploadCnt = 0;
-			GLES20.glFlush();
+			// GLES20.glFlush();
 		}
 
-		// Upload line data to vertex buffer object
-		synchronized (tile) {
-			if (!tile.newData)
-				return false;
+		ShortBuffer sbuf = shortBuffer[uploadCnt];
 
-			int lineSize = LineRenderer.sizeOf(tile.lineLayers);
-			int polySize = PolygonRenderer.sizeOf(tile.polygonLayers);
-			int newSize = lineSize + polySize;
+		// add fill coordinates
+		newSize += 8;
 
-			if (newSize == 0) {
-				LineRenderer.clear(tile.lineLayers);
-				PolygonRenderer.clear(tile.polygonLayers);
-				tile.lineLayers = null;
-				tile.polygonLayers = null;
-				tile.newData = false;
-				return false;
-			}
+		// FIXME probably not a good idea to do this in gl thread...
+		if (sbuf.capacity() < newSize) {
+			ByteBuffer bbuf = ByteBuffer.allocateDirect(newSize * SHORT_BYTES)
+					.order(ByteOrder.nativeOrder());
+			sbuf = bbuf.asShortBuffer();
+			shortBuffer[uploadCnt] = sbuf;
+			sbuf.put(mFillCoords, 0, 8);
+		}
 
-			// Log.d(TAG, "uploadTileData, " + tile);
-			GLES20.glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
+		sbuf.clear();
+		sbuf.position(8);
 
-			sbuf = shortBuffer[uploadCnt];
+		PolygonRenderer.compileLayerData(tile.polygonLayers, sbuf);
 
-			// add fill coordinates
-			newSize += 8;
+		tile.lineOffset = (8 + polySize);
+		if (tile.lineOffset != sbuf.position())
+			Log.d(TAG, "tiles lineoffset is wrong: " + tile + " "
+					+ tile.lineOffset + " "
+					+ sbuf.position() + " "
+					+ sbuf.limit() + " "
+					+ sbuf.remaining() + " "
+					+ PolygonRenderer.sizeOf(tile.polygonLayers) + " "
+					+ tile.rel);
 
-			// FIXME probably not a good idea to do this in gl thread...
-			if (sbuf == null || sbuf.capacity() < newSize) {
-				ByteBuffer bbuf = ByteBuffer.allocateDirect(newSize * SHORT_BYTES)
-						.order(ByteOrder.nativeOrder());
-				sbuf = bbuf.asShortBuffer();
-				shortBuffer[uploadCnt] = sbuf;
-				sbuf.put(mFillCoords, 0, 8);
-			}
+		tile.lineOffset *= SHORT_BYTES;
 
-			sbuf.clear();
-			sbuf.position(8);
+		LineRenderer.compileLayerData(tile.lineLayers, sbuf);
 
-			PolygonRenderer.compileLayerData(tile.polygonLayers, sbuf);
+		sbuf.flip();
 
-			tile.lineOffset = (8 + polySize);
-			if (tile.lineOffset != sbuf.position())
-				Log.d(TAG, "tiles lineoffset is wrong: " + tile + " "
-						+ tile.lineOffset + " "
-						+ sbuf.position() + " "
-						+ sbuf.limit() + " "
-						+ sbuf.remaining() + " "
-						+ PolygonRenderer.sizeOf(tile.polygonLayers) + " "
-						+ tile.rel);
+		if (newSize != sbuf.remaining()) {
+			Log.d(TAG, "tiles wrong: " + tile + " "
+					+ newSize + " "
+					+ sbuf.position() + " "
+					+ sbuf.limit() + " "
+					+ sbuf.remaining() + " "
+					+ LineRenderer.sizeOf(tile.lineLayers)
+					+ tile.isLoading + " "
+					+ tile.rel);
 
-			tile.lineOffset *= SHORT_BYTES;
-
-			LineRenderer.compileLayerData(tile.lineLayers, sbuf);
-
-			sbuf.flip();
-
-			if (newSize != sbuf.remaining()) {
-				Log.d(TAG, "tiles wrong: " + tile + " "
-						+ newSize + " "
-						+ sbuf.position() + " "
-						+ sbuf.limit() + " "
-						+ sbuf.remaining() + " "
-						+ LineRenderer.sizeOf(tile.lineLayers)
-						+ tile.isLoading + " "
-						+ tile.rel);
-
-				tile.newData = false;
-				return false;
-			}
-			newSize *= SHORT_BYTES;
-
-			// reuse memory allocated for vbo when possible and allocated
-			// memory is less then four times the new data
-			if (tile.vbo.size > newSize && tile.vbo.size < newSize * 4
-					&& mBufferMemoryUsage < LIMIT_BUFFERS) {
-				GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, newSize, sbuf);
-				// Log.d(TAG, "reuse buffer " + tile.vbo.size + " " + newSize);
-			} else {
-				mBufferMemoryUsage -= tile.vbo.size;
-				tile.vbo.size = newSize;
-				GLES20.glBufferData(GL_ARRAY_BUFFER, tile.vbo.size, sbuf, GL_DYNAMIC_DRAW);
-				mBufferMemoryUsage += tile.vbo.size;
-			}
-
-			uploadCnt++;
-
-			tile.isReady = true;
 			tile.newData = false;
+			return false;
 		}
+		newSize *= SHORT_BYTES;
+
+		// reuse memory allocated for vbo when possible and allocated
+		// memory is less then four times the new data
+		if (tile.vbo.size > newSize && tile.vbo.size < newSize * 4
+				&& mBufferMemoryUsage < LIMIT_BUFFERS) {
+			GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, newSize, sbuf);
+			// Log.d(TAG, "reuse buffer " + tile.vbo.size + " " + newSize);
+		} else {
+			mBufferMemoryUsage -= tile.vbo.size;
+			tile.vbo.size = newSize;
+			GLES20.glBufferData(GL_ARRAY_BUFFER, tile.vbo.size, sbuf, GL_DYNAMIC_DRAW);
+			mBufferMemoryUsage += tile.vbo.size;
+		}
+
+		uploadCnt++;
+
+		tile.isReady = true;
+		tile.newData = false;
+
 		return true;
 	}
 
@@ -451,6 +468,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		long start = 0;
+		// prevent main thread recreating all tiles (updateMap)
+		// while rendering is going. not have seen this happen
+		// yet though
+		GLRenderer.lock.lock();
 
 		if (MapView.debugFrameTime)
 			start = SystemClock.uptimeMillis();
@@ -464,9 +485,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				| GLES20.GL_DEPTH_BUFFER_BIT
 				| GLES20.GL_STENCIL_BUFFER_BIT);
 
-		// get position and current tiles to draw
-		// mapPosition = mCurPosition;
-
+		// get current tiles to draw
 		if (mUpdateTiles) {
 			GLRenderer.tilelock.lock();
 			TilesData tmp = mDrawTiles;
@@ -476,12 +495,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			GLRenderer.tilelock.unlock();
 		}
 
-		if (mDrawTiles == null || mDrawTiles.cnt == 0)
+		if (mDrawTiles == null || mDrawTiles.cnt == 0) {
+			GLRenderer.lock.unlock();
 			return;
+		}
 
-		// MapPosition mapPosition =
-		// mMapView.getMapViewPosition().getMapPosition();
-
+		// get current MapPosition, set mTileCoords (mapping of screen to model
+		// coordinates)
 		MapPosition mapPosition = mMapPosition;
 		boolean changed = mMapViewPosition.getMapPosition(mapPosition, mTileCoords);
 
@@ -489,10 +509,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		MapTile[] tiles = mDrawTiles.tiles;
 
 		if (changed) {
+			// get visible tiles
 			for (int i = 0; i < tileCnt; i++)
 				tiles[i].isVisible = false;
 
-			// get relative zoom-level, tiles could not have been updated after
+			// relative zoom-level, 'tiles' could not have been updated after
 			// zoom-level changed.
 			float div = scaleDiv(tiles[0]);
 
@@ -517,8 +538,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 
 		if (mUpdateColor && mClearColor != null) {
-			GLES20.glClearColor(mClearColor[0], mClearColor[1], mClearColor[2],
-					mClearColor[3]);
+			GLES20.glClearColor(mClearColor[0], mClearColor[1], mClearColor[2], mClearColor[3]);
 			mUpdateColor = false;
 		}
 
@@ -633,6 +653,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			GLES20.glFinish();
 			Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start));
 		}
+		GLRenderer.lock.unlock();
 	}
 
 	// used to not draw a tile twice per frame...
@@ -644,12 +665,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			return;
 
 		float div = scaleDiv(tile);
-		// float div = 1;
-		// int diff = mapPosition.zoomLevel - tile.zoomLevel;
-		// if (diff < 0)
-		// div = (1 << -diff);
-		// else if (diff > 0)
-		// div = (1.0f / (1 << diff));
 
 		tile.lastDraw = mDrawSerial;
 
@@ -681,21 +696,16 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 			if (pl != null && pnext < lnext) {
 				GLES20.glDisable(GL_BLEND);
-
 				pl = PolygonRenderer.drawPolygons(pl, lnext, mvp, z, s, !clipped);
-
 				clipped = true;
-
 			} else {
-				// XXX nasty
+				// FIXME
 				if (!clipped) {
 					PolygonRenderer.drawPolygons(null, 0, mvp, z, s, true);
 					clipped = true;
 				}
-
 				GLES20.glEnable(GL_BLEND);
-				ll = LineRenderer.drawLines(tile, ll, pnext, mvp, div, z, s,
-						simpleShader);
+				ll = LineRenderer.drawLines(tile, ll, pnext, mvp, div, z, s, simpleShader);
 			}
 		}
 	}
@@ -724,7 +734,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		return drawn == 4;
 	}
 
-	// TODO could use tile.proxies here
 	private static void drawProxyTile(MapTile tile) {
 		int diff = mMapPosition.zoomLevel - tile.zoomLevel;
 
@@ -779,20 +788,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mWidth = width;
 		mHeight = height;
 
-		// Matrix.orthoM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f,
-		// 0.5f, -1, 1);
 		float s = 0.5f;
+		// use this to scale only the view to see which tiles are rendered
+		// s = 1.0f;
 		Matrix.frustumM(mProjMatrix, 0, -s * width, s * width,
 				-s * height, s * height, 1, 2);
 		Matrix.translateM(mProjMatrix, 0, 0, 0, -1);
-
-		// Matrix.invertM(mProjMatrixI, 0, mProjMatrix, 0);
-
-		// use this to scale only the view to see which tiles are rendered
-		// s = 1.0f;
-		// Matrix.frustumM(mProjMatrix, 0, -s * width, s * width,
-		// -s * height, s * height, 1, 2);
-		// Matrix.translateM(mProjMatrix, 0, 0, 0, -1);
 
 		// set to zero: we modify the z value with polygon-offset for clipping
 		mProjMatrix[10] = 0;
@@ -851,21 +852,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		String ext = GLES20.glGetString(GLES20.GL_EXTENSIONS);
 		Log.d(TAG, "Extensions: " + ext);
-
-		shortBuffer = new ShortBuffer[rotateBuffers];
-
-		// add half pixel to tile clip/fill coordinates to avoid rounding issues
-		short min = -4;
-		short max = (short) ((Tile.TILE_SIZE << 3) + 4);
-		mFillCoords = new short[8];
-		mFillCoords[0] = min;
-		mFillCoords[1] = max;
-		mFillCoords[2] = max;
-		mFillCoords[3] = max;
-		mFillCoords[4] = min;
-		mFillCoords[5] = min;
-		mFillCoords[6] = max;
-		mFillCoords[7] = min;
 
 		LineRenderer.init();
 		PolygonRenderer.init();
