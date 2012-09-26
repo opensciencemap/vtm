@@ -17,7 +17,6 @@ package org.oscim.view;
 import java.io.FileNotFoundException;
 
 import org.oscim.core.GeoPoint;
-import org.oscim.core.MapPosition;
 import org.oscim.theme.InternalRenderTheme;
 
 import android.app.Activity;

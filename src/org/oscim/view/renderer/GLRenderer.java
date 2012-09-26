@@ -32,11 +32,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.theme.RenderTheme;
 import org.oscim.utils.GlUtils;
+import org.oscim.view.MapPosition;
 import org.oscim.view.MapView;
+import org.oscim.view.MapViewPosition;
+import org.oscim.view.renderer.MapRenderer.TilesData;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -59,6 +61,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	static int CACHE_TILES = CACHE_TILES_MAX;
 
 	private final MapView mMapView;
+	private final MapViewPosition mMapViewPosition;
+
+	private static final MapPosition mMapPosition = new MapPosition();
+
 	private static ArrayList<VertexBufferObject> mVBOs;
 
 	private static int mWidth, mHeight;
@@ -71,12 +77,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static int mBufferMemoryUsage;
 
 	private static float[] mMVPMatrix = new float[16];
-	private static float[] mRotateMatrix = new float[16];
-	private static float[] mTmpMatrix = new float[16];
-	private static float[] mTmp2Matrix = new float[16];
-
 	private static float[] mProjMatrix = new float[16];
-	private static float[] mProjMatrixI = new float[16];
+	private static float[] mTileCoords = new float[8];
 
 	// mNextTiles is set by TileLoader and swapped with
 	// mDrawTiles in onDrawFrame in GL thread.
@@ -85,8 +87,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// flag set by updateVisibleList when current visible tiles
 	// changed. used in onDrawFrame to flip mNextTiles/mDrawTiles
 	private static boolean mUpdateTiles;
-
-	private static MapPosition mCurPosition;
 
 	private float[] mClearColor = null;
 
@@ -98,17 +98,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// lock to synchronize Main- and GL-Thread
 	static ReentrantLock tilelock = new ReentrantLock();
 
-	// used for passing tiles to be rendered from TileLoader(Main-Thread) to
-	// GLThread
-	static class TilesData {
-		int cnt = 0;
-		final MapTile[] tiles;
-
-		TilesData(int numTiles) {
-			tiles = new MapTile[numTiles];
-		}
-	}
-
 	/**
 	 * @param mapView
 	 *            the MapView
@@ -117,34 +106,27 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		Log.d(TAG, "init MapRenderer");
 
 		mMapView = mapView;
+		mMapViewPosition = mapView.getMapViewPosition();
+		// mMapPosition = new MapPosition();
+
+		mMapPosition.init();
+
 		Matrix.setIdentityM(mMVPMatrix, 0);
 
 		mUpdateTiles = false;
 	}
 
 	/**
-	 * called by TileLoader when only position changed
-	 * 
-	 * @param mapPosition
-	 *            current MapPosition
-	 */
-	static void updatePosition(MapPosition mapPosition) {
-		mCurPosition = mapPosition;
-	}
-
-	/**
 	 * called by TileLoader when list of active tiles changed
 	 * 
-	 * @param mapPosition
-	 *            current MapPosition
 	 * @param tiles
 	 *            active tiles
 	 * @return mNextTiles (the previously active tiles)
 	 */
-	static TilesData updateTiles(MapPosition mapPosition, TilesData tiles) {
+	static TilesData updateTiles(TilesData tiles) {
 		GLRenderer.tilelock.lock();
 
-		mCurPosition = mapPosition;
+		// mCurPosition = mapPosition;
 
 		// unlock previously active tiles
 		for (int i = 0; i < mNextTiles.cnt; i++) {
@@ -178,13 +160,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// lock tiles (and their proxies) to not be removed from cache
 		for (int i = 0; i < mNextTiles.cnt; i++) {
 			MapTile t = mNextTiles.tiles[i];
-			if (!t.isActive)
+			if (!t.isLocked)
 				t.lock();
 		}
 
 		for (int j = 0; j < mDrawTiles.cnt; j++) {
 			MapTile t = mDrawTiles.tiles[j];
-			if (!t.isActive)
+			if (!t.isLocked)
 				t.lock();
 		}
 
@@ -386,8 +368,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			CACHE_TILES -= 50;
 	}
 
-	private static boolean isVisible(MapPosition mapPosition, MapTile tile) {
+	private static boolean isVisible(MapTile tile) {
 		float dx, dy, scale, div = 1;
+		MapPosition mapPosition = mMapPosition;
 		int diff = mapPosition.zoomLevel - tile.zoomLevel;
 
 		if (diff < 0)
@@ -407,7 +390,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// this kindof works for typical screen aspect
 		if (mRotate) {
 			int ssize = mWidth > mHeight ? mWidth : mHeight;
-
+			ssize += Tile.TILE_SIZE;
 			if (sy > ssize / 2 || sx > ssize / 2
 					|| sx + size * scale < -ssize / 2
 					|| sy + size * scale < -ssize / 2) {
@@ -429,9 +412,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private static boolean mRotate = false;
 
-	private static void setMatrix(float[] matrix, MapPosition mapPosition, MapTile tile,
+	private static void setMatrix(float[] matrix, MapTile tile,
 			float div, boolean project) {
 		float x, y, scale;
+
+		MapPosition mapPosition = mMapPosition;
 
 		scale = mapPosition.scale / (div * COORD_MULTIPLIER);
 		x = (float) (tile.pixelX - mapPosition.x * div);
@@ -443,47 +428,29 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		Matrix.scaleM(matrix, 0, scale, scale, 1);
 
 		// translate relative to map center
-		Matrix.translateM(matrix, 0,
-				x * COORD_MULTIPLIER,
-				-(y + Tile.TILE_SIZE) * COORD_MULTIPLIER,
-				-1); // put on near plane
+		Matrix.translateM(matrix, 0, x * COORD_MULTIPLIER,
+				-(y + Tile.TILE_SIZE) * COORD_MULTIPLIER, 0);
 
 		if (mRotate)
-			Matrix.multiplyMM(matrix, 0, mRotateMatrix, 0, matrix, 0);
+			Matrix.multiplyMM(matrix, 0, mapPosition.rotation, 0, matrix, 0);
 
 		if (project)
 			Matrix.multiplyMM(matrix, 0, mProjMatrix, 0, matrix, 0);
 	}
 
-	// private float[] mv = new float[4];
-	// private float[] mu = { 1, 1, -1, 1 };
-	//
-	// private float[] mUnprojMatrix = new float[16];
-	//
-	// private void unproject(MapPosition pos, float x, float y) {
-	// mu[0] = x;
-	// mu[1] = y;
-	// mu[2] = -1;
-	//
-	// // add tilt
-	// Matrix.multiplyMV(mv, 0, mTmpMatrix, 0, mu, 0);
-	// // Log.d(TAG, ">> " + mv[0] + " " + mv[1] + " " + mv[2]);
-	//
-	// Matrix.multiplyMV(mv, 0, mUnprojMatrix, 0, mv, 0);
-	// float size = Tile.TILE_SIZE * pos.scale;
-	// if (mv[3] != 0) {
-	// float w = 1 / mv[3];
-	// float xx = Math.round(((mv[0] * w) / size) * 100) / 100f;
-	// float yy = Math.round(((mv[1] * w) / size) * 100) / 100f;
-	// Log.d(TAG, " " + xx + " " + yy);
-	// }
-	// }
+	private static float scaleDiv(MapTile t) {
+		float div = 1;
+		int diff = mMapPosition.zoomLevel - t.zoomLevel;
+		if (diff < 0)
+			div = (1 << -diff);
+		else if (diff > 0)
+			div = (1.0f / (1 << diff));
+		return div;
+	}
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		long start = 0;
-
-		MapPosition mapPosition;
 
 		if (MapView.debugFrameTime)
 			start = SystemClock.uptimeMillis();
@@ -498,66 +465,55 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				| GLES20.GL_STENCIL_BUFFER_BIT);
 
 		// get position and current tiles to draw
-		GLRenderer.tilelock.lock();
-		mapPosition = mCurPosition;
+		// mapPosition = mCurPosition;
+
 		if (mUpdateTiles) {
+			GLRenderer.tilelock.lock();
 			TilesData tmp = mDrawTiles;
 			mDrawTiles = mNextTiles;
 			mNextTiles = tmp;
 			mUpdateTiles = false;
+			GLRenderer.tilelock.unlock();
 		}
-		GLRenderer.tilelock.unlock();
 
-		if (mDrawTiles == null)
+		if (mDrawTiles == null || mDrawTiles.cnt == 0)
 			return;
 
-		// if (mRotate != (mMapView.enableRotation || mMapView.enableCompass)) {
-		// Matrix.setIdentityM(mMVPMatrix, 0);
-		// mRotate = mMapView.enableRotation || mMapView.enableCompass;
-		// }
+		// MapPosition mapPosition =
+		// mMapView.getMapViewPosition().getMapPosition();
 
-		mRotate = mMapView.enableRotation || mMapView.enableCompass;
+		MapPosition mapPosition = mMapPosition;
+		boolean changed = mMapViewPosition.getMapPosition(mapPosition, mTileCoords);
 
-		if (mRotate) {
-			// rotate map
-			Matrix.setRotateM(mRotateMatrix, 0, mapPosition.angle, 0, 0, 1);
+		int tileCnt = mDrawTiles.cnt;
+		MapTile[] tiles = mDrawTiles.tiles;
 
-			// tilt map
-			// mMapView.getMapViewPosition().mTilt;
+		if (changed) {
+			for (int i = 0; i < tileCnt; i++)
+				tiles[i].isVisible = false;
 
-			float angle = mMapView.getMapViewPosition().mTilt / (mHeight / 2);
-			Matrix.setRotateM(mTmpMatrix, 0, -angle, 1, 0, 0);
+			// get relative zoom-level, tiles could not have been updated after
+			// zoom-level changed.
+			float div = scaleDiv(tiles[0]);
 
-			// move camera center back to map center
-			Matrix.translateM(mTmpMatrix, 0,
-					0, (float) Math.tan(Math.toRadians(angle)), 0);
+			mRotate = mMapView.enableRotation || mMapView.enableCompass;
 
-			// apply first rotation, then tilt
-			Matrix.multiplyMM(mRotateMatrix, 0, mTmpMatrix, 0, mRotateMatrix, 0);
+			float s = Tile.TILE_SIZE;
+			float scale = mapPosition.scale / div;
+			float px = (float) (mapPosition.x * div);
+			float py = (float) (mapPosition.y * div);
 
-			// // get unproject matrix
-			// Matrix.setIdentityM(mTmp2Matrix, 0);
-			// float s = mapPosition.scale;
-			// Matrix.translateM(mTmp2Matrix, 0,
-			// (float) (mapPosition.x * s),
-			// (float) (mapPosition.y * s), 0);
-			//
-			// Matrix.multiplyMM(mTmp2Matrix, 0, mRotateMatrix, 0, mTmp2Matrix,
-			// 0);
-			//
-			// // Matrix.invertM(mTmpMatrix, 0, mTmp2Matrix, 0);
-			// // (AB)^-1 = B^-1*A^-1
-			// Matrix.multiplyMM(mUnprojMatrix, 0, mTmp2Matrix, 0, mProjMatrixI,
-			// 0);
-			//
-			// // set tilt of screen coords
-			// Matrix.setRotateM(mTmpMatrix, 0, -15, 1, 0, 0);
-			//
-			// // unproject(mapPosition, 0, 0);
-			// unproject(mapPosition, -1, -1); // top-left
-			// unproject(mapPosition, 1, -1); // top-right
-			// unproject(mapPosition, -1, 1); // bottom-left
-			// unproject(mapPosition, 1, 1); // bottom-right
+			mTileCoords[0] = (px + mTileCoords[0] / scale) / s;
+			mTileCoords[1] = (py - mTileCoords[1] / scale) / s;
+			mTileCoords[2] = (px + mTileCoords[2] / scale) / s;
+			mTileCoords[3] = (py - mTileCoords[3] / scale) / s;
+			mTileCoords[4] = (px + mTileCoords[4] / scale) / s;
+			mTileCoords[5] = (py - mTileCoords[5] / scale) / s;
+			mTileCoords[6] = (px + mTileCoords[6] / scale) / s;
+			mTileCoords[7] = (py - mTileCoords[7] / scale) / s;
+
+			byte z = tiles[0].zoomLevel;
+			ScanBox.scan(mTileCoords, mDrawTiles, 1 << z);
 		}
 
 		if (mUpdateColor && mClearColor != null) {
@@ -566,9 +522,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			mUpdateColor = false;
 		}
 
-		int tileCnt = mDrawTiles.cnt;
-		MapTile[] tiles = mDrawTiles.tiles;
-
 		uploadCnt = 0;
 		int updateTextures = 0;
 
@@ -576,7 +529,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile tile = tiles[i];
 
-			if (!isVisible(mapPosition, tile))
+			// if (!isVisible(mapPosition, tile))
+			// continue;
+			if (!tile.isVisible)
 				continue;
 
 			if (tile.texture == null && TextRenderer.drawToTexture(tile))
@@ -616,14 +571,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible && tiles[i].isReady)
-				drawTile(mapPosition, tiles[i]);
+				drawTile(tiles[i]);
 		}
 
 		// proxies are clipped to the region where nothing was drawn to depth
 		// buffer. TODO draw all parent before grandparent
 		for (int i = 0; i < tileCnt; i++) {
 			if (tiles[i].isVisible && !tiles[i].isReady)
-				drawProxyTile(mapPosition, tiles[i]);
+				drawProxyTile(tiles[i]);
 		}
 		// GlUtils.checkGlError("end draw");
 
@@ -647,19 +602,32 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		else
 			TextRenderer.beginDraw(s, mProjMatrix);
 
-		// s = (float) 1.0 / COORD_MULTIPLIER;
-		// TextRenderer.beginDraw(s, mProjMatrix);
-
 		for (int i = 0; i < tileCnt; i++) {
 			if (!tiles[i].isVisible || tiles[i].texture == null)
 				continue;
 
-			setMatrix(mMVPMatrix, mapPosition, tiles[i], 1, false);
+			setMatrix(mMVPMatrix, tiles[i], 1, false);
 			TextRenderer.drawTile(tiles[i], mMVPMatrix);
 		}
 		TextRenderer.endDraw();
 
-		// TODO call overlay renderer
+		// TODO call overlay renderer here
+
+		// s = 0.5f;
+		// mTileCoords[0] = -s;
+		// mTileCoords[1] = s;
+		// mTileCoords[2] = s;
+		// mTileCoords[3] = s;
+		// mTileCoords[4] = -s;
+		// mTileCoords[5] = -s;
+		// mTileCoords[6] = s;
+		// mTileCoords[7] = -s;
+		//
+		// Matrix.setIdentityM(mMVPMatrix, 0);
+		// // Matrix.scaleM(mMVPMatrix, 0, 0.99f, 0.99f, 1);
+		// // Matrix.multiplyMM(mMVPMatrix, 0, mRotateMatrix, 0, mMVPMatrix, 0);
+		// // Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVPMatrix, 0);
+		// PolygonRenderer.debugDraw(mMVPMatrix, mTileCoords);
 
 		if (MapView.debugFrameTime) {
 			GLES20.glFinish();
@@ -670,27 +638,26 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// used to not draw a tile twice per frame...
 	private static byte mDrawSerial = 0;
 
-	private static void drawTile(MapPosition mapPosition, MapTile tile) {
+	private static void drawTile(MapTile tile) {
 		// draw parents only once
 		if (tile.lastDraw == mDrawSerial)
 			return;
 
-		float div = 1;
-
-		int diff = mapPosition.zoomLevel - tile.zoomLevel;
-
-		if (diff < 0)
-			div = (1 << -diff);
-		else if (diff > 0)
-			div = (1.0f / (1 << diff));
+		float div = scaleDiv(tile);
+		// float div = 1;
+		// int diff = mapPosition.zoomLevel - tile.zoomLevel;
+		// if (diff < 0)
+		// div = (1 << -diff);
+		// else if (diff > 0)
+		// div = (1.0f / (1 << diff));
 
 		tile.lastDraw = mDrawSerial;
 
-		int z = mapPosition.zoomLevel;
-		float s = mapPosition.scale;
+		int z = mMapPosition.zoomLevel;
+		float s = mMapPosition.scale;
 		float[] mvp = mMVPMatrix;
 
-		setMatrix(mvp, mapPosition, tile, div, true);
+		setMatrix(mvp, tile, div, true);
 
 		GLES20.glPolygonOffset(0, mDrawCount++);
 
@@ -734,7 +701,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	// TODO could use tile.proxies here
-	private static boolean drawProxyChild(MapPosition mapPosition, MapTile tile) {
+	private static boolean drawProxyChild(MapTile tile) {
 		int drawn = 0;
 		for (int i = 0; i < 4; i++) {
 			if (tile.rel.child[i] == null)
@@ -744,13 +711,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			if (c == null)
 				continue;
 
-			if (!isVisible(mapPosition, c)) {
+			if (!isVisible(c)) {
 				drawn++;
 				continue;
 			}
 
 			if (c.isReady) {
-				drawTile(mapPosition, c);
+				drawTile(c);
 				drawn++;
 			}
 		}
@@ -758,17 +725,17 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	// TODO could use tile.proxies here
-	private static void drawProxyTile(MapPosition mapPosition, MapTile tile) {
-		int diff = mapPosition.zoomLevel - tile.zoomLevel;
+	private static void drawProxyTile(MapTile tile) {
+		int diff = mMapPosition.zoomLevel - tile.zoomLevel;
 
 		boolean drawn = false;
-		if (mapPosition.scale > 1.5f || diff < 0) {
+		if (mMapPosition.scale > 1.5f || diff < 0) {
 			// prefer drawing children
-			if (!drawProxyChild(mapPosition, tile)) {
+			if (!drawProxyChild(tile)) {
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					MapTile t = tile.rel.parent.tile;
 					if (t.isReady) {
-						drawTile(mapPosition, t);
+						drawTile(t);
 						drawn = true;
 					}
 				}
@@ -776,7 +743,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				if (!drawn && (tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
 					MapTile t = tile.rel.parent.parent.tile;
 					if (t.isReady)
-						drawTile(mapPosition, t);
+						drawTile(t);
 
 				}
 			}
@@ -785,14 +752,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			MapTile t = tile.rel.parent.tile;
 
 			if (t != null && t.isReady) {
-				drawTile(mapPosition, t);
+				drawTile(t);
 
-			} else if (!drawProxyChild(mapPosition, tile)) {
+			} else if (!drawProxyChild(tile)) {
 
 				if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
 					t = tile.rel.parent.parent.tile;
 					if (t.isReady)
-						drawTile(mapPosition, t);
+						drawTile(t);
 				}
 			}
 		}
@@ -814,14 +781,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		// Matrix.orthoM(mProjMatrix, 0, -0.5f / mAspect, 0.5f / mAspect, -0.5f,
 		// 0.5f, -1, 1);
+		float s = 0.5f;
+		Matrix.frustumM(mProjMatrix, 0, -s * width, s * width,
+				-s * height, s * height, 1, 2);
+		Matrix.translateM(mProjMatrix, 0, 0, 0, -1);
 
-		Matrix.frustumM(mProjMatrix, 0,
-				-0.5f * width,
-				0.5f * width,
-				-0.5f * height,
-				0.5f * height, 1, 2);
+		// Matrix.invertM(mProjMatrixI, 0, mProjMatrix, 0);
 
-		Matrix.invertM(mProjMatrixI, 0, mProjMatrix, 0);
+		// use this to scale only the view to see which tiles are rendered
+		// s = 1.0f;
+		// Matrix.frustumM(mProjMatrix, 0, -s * width, s * width,
+		// -s * height, s * height, 1, 2);
+		// Matrix.translateM(mProjMatrix, 0, 0, 0, -1);
 
 		// set to zero: we modify the z value with polygon-offset for clipping
 		mProjMatrix[10] = 0;
@@ -869,6 +840,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mMapView.redrawMap();
 	}
 
+	// FIXME this is a bit too spaghetti
 	void clearTiles(int numTiles) {
 		mDrawTiles = new TilesData(numTiles);
 		mNextTiles = new TilesData(numTiles);

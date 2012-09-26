@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import org.oscim.core.GeoPoint;
-import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 
 import android.os.AsyncTask;

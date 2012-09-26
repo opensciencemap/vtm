@@ -15,12 +15,12 @@
 package org.oscim.view.generator;
 
 import org.oscim.utils.PausableThread;
-import org.oscim.view.renderer.TileGenerator;
 import org.oscim.view.renderer.MapRenderer;
+import org.oscim.view.renderer.TileGenerator;
 
 /**
- * A MapWorker uses a {@link IMapGenerator} to generate map tiles. It runs in a separate thread to avoid blocking the UI
- * thread.
+ * A MapWorker uses a {@link TileGenerator} to generate map tiles. It runs in a
+ * separate thread to avoid blocking the UI thread.
  */
 public class MapWorker extends PausableThread {
 	private final String THREAD_NAME;
@@ -28,11 +28,11 @@ public class MapWorker extends PausableThread {
 	private final TileGenerator mMapGenerator;
 	private final MapRenderer mMapRenderer;
 
-	// private final int mPrio;
-
 	/**
 	 * @param id
 	 *            thread id
+	 * @param jobQueue
+	 *            ...
 	 * @param tileGenerator
 	 *            ...
 	 * @param mapRenderer
@@ -46,7 +46,6 @@ public class MapWorker extends PausableThread {
 		mMapRenderer = mapRenderer;
 
 		THREAD_NAME = "MapWorker" + id;
-		// mPrio = Math.max(Thread.MIN_PRIORITY + id, Thread.NORM_PRIORITY - 1);
 	}
 
 	public TileGenerator getMapGenerator() {
@@ -85,7 +84,6 @@ public class MapWorker extends PausableThread {
 	@Override
 	protected int getThreadPriority() {
 		return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 3;
-		// return mPrio;
 	}
 
 	@Override

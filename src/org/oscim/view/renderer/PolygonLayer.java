@@ -23,8 +23,8 @@ class PolygonLayer {
 	PolygonLayer next;
 	Area area;
 
-	ShortItem pool;
-	protected ShortItem curItem;
+	VertexPoolItem pool;
+	protected VertexPoolItem curItem;
 	int verticesCnt;
 	int offset;
 
@@ -33,14 +33,14 @@ class PolygonLayer {
 	PolygonLayer(int layer, Area area) {
 		this.layer = layer;
 		this.area = area;
-		curItem = ShortPool.get();
+		curItem = VertexPool.get();
 		pool = curItem;
 	}
 
 	void addPolygon(float[] points, short[] index) {
 		short center = (short) ((Tile.TILE_SIZE >> 1) * S);
 
-		ShortItem si = curItem;
+		VertexPoolItem si = curItem;
 		short[] v = si.vertices;
 		int outPos = si.used;
 
@@ -59,8 +59,8 @@ class PolygonLayer {
 
 			int inPos = pos;
 
-			if (outPos == ShortItem.SIZE) {
-				si = si.next = ShortPool.get();
+			if (outPos == VertexPoolItem.SIZE) {
+				si = si.next = VertexPool.get();
 				v = si.vertices;
 				outPos = 0;
 			}
@@ -69,8 +69,8 @@ class PolygonLayer {
 			v[outPos++] = center;
 
 			for (int j = 0; j < length; j += 2) {
-				if (outPos == ShortItem.SIZE) {
-					si = si.next = ShortPool.get();
+				if (outPos == VertexPoolItem.SIZE) {
+					si = si.next = VertexPool.get();
 					v = si.vertices;
 					outPos = 0;
 				}
@@ -78,8 +78,8 @@ class PolygonLayer {
 				v[outPos++] = (short) (points[inPos++] * S);
 			}
 
-			if (outPos == ShortItem.SIZE) {
-				si = si.next = ShortPool.get();
+			if (outPos == VertexPoolItem.SIZE) {
+				si = si.next = VertexPool.get();
 				v = si.vertices;
 				outPos = 0;
 			}

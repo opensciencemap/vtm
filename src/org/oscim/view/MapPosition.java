@@ -12,34 +12,29 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.core;
+package org.oscim.view;
+
+import org.oscim.core.GeoPoint;
+import org.oscim.core.MercatorProjection;
+
+import android.opengl.Matrix;
 
 /**
- * A MapPosition represents an immutable pair of {@link GeoPoint} and zoom level.
+ * A MapPosition Container.
  */
 public class MapPosition {
 
-	/**
-	 * The map position.
-	 */
-	// public final GeoPoint geoPoint;
-	public final double lon;
-	public final double lat;
+	public double lon;
+	public double lat;
 
-	/**
-	 * The zoom level.
-	 */
-	public final byte zoomLevel;
+	public byte zoomLevel;
+	public float scale;
+	public float angle;
 
-	/**
-	 * 1.0 - 2.0 scale of current zoomlevel
-	 */
-	public final float scale;
+	public double x;
+	public double y;
 
-	public final float angle;
-
-	public final double x;
-	public final double y;
+	public float[] rotation;
 
 	public MapPosition() {
 		this.zoomLevel = (byte) 1;
@@ -49,6 +44,11 @@ public class MapPosition {
 		this.angle = 0;
 		this.x = MercatorProjection.longitudeToPixelX(this.lon, zoomLevel);
 		this.y = MercatorProjection.latitudeToPixelY(this.lat, zoomLevel);
+	}
+
+	public void init() {
+		rotation = new float[16];
+		Matrix.setIdentityM(rotation, 0);
 	}
 
 	/**

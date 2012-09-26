@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2010, 2011, 2012 mapsforge.org, 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -15,36 +15,36 @@
 package org.oscim.view;
 
 import org.oscim.core.GeoPoint;
-import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.utils.FastMath;
+
+import android.opengl.Matrix;
+import android.util.FloatMath;
+import android.util.Log;
 
 /**
  * A MapPosition stores the latitude and longitude coordinate of a MapView
  * together with its zoom level.
  */
 public class MapViewPosition {
-	private static final String TAG = "MapViewPosition";
+	// private static final String TAG = "MapViewPosition";
 
-	public final static int MAX_ZOOMLEVEL = 16;
+	public final static int MAX_ZOOMLEVEL = 17;
 
-	private final static float MAX_SCALE = 2.0f;
-	private final static float MIN_SCALE = 1.0f;
+	private final static float MAX_ANGLE = 20;
 
 	private final MapView mMapView;
 
 	private double mLatitude;
 	private double mLongitude;
 	private byte mZoomLevel;
+	// 1.0 - 2.0 scale per level
 	private float mScale;
-	private float mRotation;
-	public float mTilt;
-
 	// 2^mZoomLevel * mScale;
 	private float mMapScale;
 
-	// private final static float MAP_SIZE = 1000000;
-	// private final static float MAP_SIZE2 = 1000000 >> 1;
+	private float mRotation;
+	public float mTilt;
 
 	MapViewPosition(MapView mapView) {
 		mMapView = mapView;
@@ -58,20 +58,158 @@ public class MapViewPosition {
 		mMapScale = 1;
 	}
 
-	// private static double latitudeToMapView(double latitude) {
-	// double sinLatitude = Math.sin(latitude * (Math.PI / 180));
-	// return (0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 *
-	// Math.PI))
-	// * MAP_SIZE;
-	// }
-	//
-	// public static double longitudeToMapView(double longitude) {
-	// return (longitude + 180) / 360 * MAP_SIZE;
-	// }
-	//
-	// private static double pixelXToLongitude(double pixelX, byte zoomLevel) {
-	// return 360 * ((pixelX / ((long) Tile.TILE_SIZE << zoomLevel)) - 0.5);
-	// }
+	private float[] mProjMatrix = new float[16];
+	private float[] mProjMatrixI = new float[16];
+	private float[] mUnprojMatrix = new float[16];
+	private float[] mRotateMatrix = new float[16];
+	private float[] mTmpMatrix = new float[16];
+
+	private int mHeight, mWidth;
+
+	void setViewport(int width, int height) {
+		Matrix.frustumM(mProjMatrix, 0, -0.5f * width, 0.5f * width,
+				-0.5f * height, 0.5f * height, 1, 2);
+
+		Matrix.translateM(mProjMatrix, 0, 0, 0, -1);
+
+		Matrix.invertM(mProjMatrixI, 0, mProjMatrix, 0);
+		Matrix.invertM(mUnprojMatrix, 0, mProjMatrix, 0);
+
+		Matrix.setIdentityM(mRotateMatrix, 0);
+
+		mHeight = height;
+		mWidth = width;
+	}
+
+	public synchronized boolean getMapPosition(final MapPosition mapPosition,
+			final float[] coords) {
+		// if (!isValid())
+		// return false;
+
+		// if (mapPosition.lat == mLatitude
+		// && mapPosition.lon == mLongitude
+		// && mapPosition.zoomLevel == mZoomLevel
+		// && mapPosition.scale == mScale
+		// && mapPosition.angle == mRotation)
+		// return false;
+
+		mapPosition.lat = mLatitude;
+		mapPosition.lon = mLongitude;
+		mapPosition.angle = mRotation;
+		mapPosition.zoomLevel = mZoomLevel;
+		mapPosition.scale = mScale;
+		byte z = mZoomLevel;
+		mapPosition.x = MercatorProjection.longitudeToPixelX(mLongitude, z);
+		mapPosition.y = MercatorProjection.latitudeToPixelY(mLatitude, z);
+
+		if (mapPosition.rotation != null) {
+			// updateMatrix();
+			System.arraycopy(mRotateMatrix, 0, mapPosition.rotation, 0, 16);
+		}
+
+		if (coords == null)
+			return true;
+
+		// if (mapPosition.rotation == null)
+		// updateMatrix();
+
+		// not so sure about this, but works...
+		float tilt = FloatMath.sin((float) Math.toRadians(mTilt)) * 4;
+
+		unproject(-1, 1, tilt, coords, 0); // top-left
+		unproject(1, 1, tilt, coords, 2); // top-right
+		unproject(1, -1, -tilt, coords, 4); // bottom-right
+		unproject(-1, -1, -tilt, coords, 6); // bottom-left
+
+		return true;
+	}
+
+	private float[] mv = { 0, 0, 0, 1 };
+	private float[] mBBoxCoords = new float[8];
+
+	private void unproject(float x, float y, float z, float[] coords, int position) {
+		mv[0] = x;
+		mv[1] = y;
+		mv[2] = z - 1;
+		mv[3] = 1;
+
+		Matrix.multiplyMV(mv, 0, mUnprojMatrix, 0, mv, 0);
+
+		if (mv[3] != 0) {
+			float w = 1 / mv[3];
+			float xx = mv[0] * w;
+			float yy = mv[1] * w;
+
+			coords[position] = xx;
+			coords[position + 1] = yy;
+		}
+		// else what?
+	}
+
+	private void updateMatrix() {
+		Matrix.setRotateM(mRotateMatrix, 0, mRotation, 0, 0, 1);
+
+		// tilt map
+		float tilt = mTilt;
+		Matrix.setRotateM(mTmpMatrix, 0, -tilt / (mHeight / 2), 1, 0, 0);
+
+		// apply first rotation, then tilt
+		Matrix.multiplyMM(mRotateMatrix, 0, mTmpMatrix, 0, mRotateMatrix, 0);
+
+		// get unproject matrix:
+		// (transpose of rotation is its inverse)
+		Matrix.transposeM(mTmpMatrix, 0, mRotateMatrix, 0);
+		// (AB)^-1 = B^-1*A^-1
+		Matrix.multiplyMM(mUnprojMatrix, 0, mTmpMatrix, 0, mProjMatrixI, 0);
+
+	}
+
+	/**
+	 * sets viewBox to visible bounding box, (left,top,right,bottom)
+	 * 
+	 * @param viewBox
+	 *            ...
+	 */
+	public synchronized void getViewBox(final float[] viewBox) {
+
+		updateMatrix();
+
+		float tilt = FloatMath.sin((float) Math.toRadians(mTilt)) * 4;
+
+		unproject(-1, 1, tilt, mBBoxCoords, 0); // top-left
+		unproject(1, 1, tilt, mBBoxCoords, 2); // top-right
+		unproject(1, -1, -tilt, mBBoxCoords, 4); // bottom-right
+		unproject(-1, -1, -tilt, mBBoxCoords, 6); // bottom-left
+
+		byte z = mZoomLevel;
+		double pixelX = MercatorProjection.longitudeToPixelX(mLongitude, z);
+		double pixelY = MercatorProjection.latitudeToPixelY(mLatitude, z);
+
+		double dx = pixelX - mBBoxCoords[0] / mScale;
+		double dy = pixelY - mBBoxCoords[1] / mScale;
+		double lon = MercatorProjection.pixelXToLongitude(dx, z);
+		double lat = MercatorProjection.pixelYToLatitude(dy, z);
+		Log.d(">>>", "bl:" + lon + " " + lat);
+
+		dx = pixelX - mBBoxCoords[2] / mScale;
+		dy = pixelY - mBBoxCoords[3] / mScale;
+		lon = MercatorProjection.pixelXToLongitude(dx, z);
+		lat = MercatorProjection.pixelYToLatitude(dy, z);
+		Log.d("...", "br:" + lon + " " + lat);
+
+		dx = pixelX - mBBoxCoords[4] / mScale;
+		dy = pixelY - mBBoxCoords[5] / mScale;
+		lon = MercatorProjection.pixelXToLongitude(dx, z);
+		lat = MercatorProjection.pixelYToLatitude(dy, z);
+		Log.d("...", "tl:" + lon + " " + lat);
+
+		dx = pixelX - mBBoxCoords[6] / mScale;
+		dy = pixelY - mBBoxCoords[7] / mScale;
+		lon = MercatorProjection.pixelXToLongitude(dx, z);
+		lat = MercatorProjection.pixelYToLatitude(dy, z);
+		Log.d("...", "tr:" + lon + " " + lat);
+
+	}
 
 	/**
 	 * @return the current center point of the MapView.
@@ -168,6 +306,15 @@ public class MapViewPosition {
 		return new GeoPoint(latitude, longitude);
 	}
 
+	// public static double pixelXToLongitude(double pixelX, byte zoomLevel) {
+	// return 360 * ((pixelX / ((long) Tile.TILE_SIZE << zoomLevel)) - 0.5);
+	// }
+	//
+	// public static double pixelYToLatitude(double pixelY, byte zoomLevel) {
+	// double y = 0.5 - (pixelY / ((long) Tile.TILE_SIZE << zoomLevel));
+	// return 90 - 360 * Math.atan(Math.exp(-y * (2 * Math.PI))) / Math.PI;
+	// }
+
 	/**
 	 * Moves this MapViewPosition by the given amount of pixels.
 	 * 
@@ -187,14 +334,13 @@ public class MapViewPosition {
 			double rad = Math.toRadians(mRotation);
 			double x = dx * Math.cos(rad) + dy * -Math.sin(rad);
 			double y = dx * Math.sin(rad) + dy * Math.cos(rad);
+			dx = x;
+			dy = y;
+		}
 
-			dx = pixelX - x;
-			dy = pixelY - y;
-		}
-		else {
-			dx = pixelX - dx;
-			dy = pixelY - dy;
-		}
+		dx = pixelX - dx;
+		dy = pixelY - dy;
+
 		mLatitude = MercatorProjection.pixelYToLatitude(dy, mZoomLevel);
 		mLatitude = MercatorProjection.limitLatitude(mLatitude);
 
@@ -202,6 +348,8 @@ public class MapViewPosition {
 
 		mLongitude = MercatorProjection.wrapLongitude(mLongitude);
 		// mLongitude = MercatorProjection.limitLongitude(mLongitude);
+
+		// getViewBox(null);
 	}
 
 	public synchronized void rotateMap(float angle, float cx, float cy) {
@@ -209,14 +357,17 @@ public class MapViewPosition {
 		// Log.d("MapViewPosition", "rotate:" + angle + " " + (mRotation -
 		// angle));
 		mRotation -= angle;
+		updateMatrix();
 	}
 
 	public void setRotation(float f) {
 		mRotation = f;
+		updateMatrix();
 	}
 
 	public void setTilt(float f) {
 		mTilt = f;
+		updateMatrix();
 	}
 
 	synchronized void setMapCenter(GeoPoint geoPoint) {
@@ -251,38 +402,41 @@ public class MapViewPosition {
 	 *            ...
 	 * @param pivotY
 	 *            ...
+	 * @return true if scale was changed
 	 */
-	public synchronized void scaleMap(float scale, float pivotX, float pivotY) {
-		if (pivotY != 0 || pivotY != 0)
-			moveMap(pivotX * (1.0f - scale),
-					pivotY * (1.0f - scale));
+	public synchronized boolean scaleMap(float scale, float pivotX, float pivotY) {
 
 		float newScale = mMapScale * scale;
 
 		int z = FastMath.log2((int) newScale);
 
 		if (z <= 0 || (z >= MAX_ZOOMLEVEL && mScale >= 8))
-			return;
+			return false;
 
 		if (z > MAX_ZOOMLEVEL) {
 			// z16 shows everything, just increase scaling
 			if (mScale * scale > 8)
-				return;
+				return false;
 
 			mScale *= scale;
 			mMapScale = newScale;
-			return;
+		} else {
+			mZoomLevel = (byte) z;
+			mScale = newScale / (1 << z);
+			mMapScale = newScale;
 		}
 
-		mZoomLevel = (byte) z;
-		mScale = newScale / (1 << z);
-		mMapScale = newScale;
+		if (pivotY != 0 || pivotY != 0)
+			moveMap(pivotX * (1.0f - scale),
+					pivotY * (1.0f - scale));
+
+		return true;
 	}
 
 	public boolean tilt(float moveX) {
 		float tilt = mTilt + moveX;
-		if (tilt > 25)
-			tilt = 25;
+		if (tilt > MAX_ANGLE)
+			tilt = MAX_ANGLE;
 		else if (tilt < 0)
 			tilt = 0;
 		if (mTilt == tilt)

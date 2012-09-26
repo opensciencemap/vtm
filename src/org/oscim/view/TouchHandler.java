@@ -32,20 +32,24 @@ import android.widget.Scroller;
  * Implementation for multi-touch capable devices. TODO write a AnimationTimer
  * instead of using CountDownTimer
  */
-public class TouchHandler {
+public class TouchHandler
+		extends SimpleOnGestureListener
+		implements ScaleGestureDetector.OnScaleGestureListener {
+
+	private static final float SCALE_DURATION = 450;
 	private static final int INVALID_POINTER_ID = -1;
 
-	/* package */final MapView mMapView;
-	/* package */final MapViewPosition mMapPosition;
-	/* package */final DecelerateInterpolator mInterpolator = new DecelerateInterpolator();
-	/* package */boolean mBeginScale;
-	/* package */float mSumScale;
+	private final MapView mMapView;
+	private final MapViewPosition mMapPosition;
+	private final DecelerateInterpolator mInterpolator = new DecelerateInterpolator();
+	private boolean mBeginScale;
+	private float mSumScale;
 
 	private final float mMapMoveDelta;
 	private boolean mMoveStart;
 	private boolean mBeginRotate;
-	/* package */float mPosX;
-	/* package */float mPosY;
+	private float mPosX;
+	private float mPosY;
 	private double mAngle;
 
 	private int mActivePointerId;
@@ -65,9 +69,47 @@ public class TouchHandler {
 		mMapPosition = mapView.getMapPosition();
 		mMapMoveDelta = viewConfiguration.getScaledTouchSlop();
 		mActivePointerId = INVALID_POINTER_ID;
-		mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
-		mGestureDetector = new GestureDetector(context, new MapGestureDetector());
+		mScaleGestureDetector = new ScaleGestureDetector(context, this);
+		mGestureDetector = new GestureDetector(context, this);
 
+		mScroller = new Scroller(mMapView.getContext(),
+				new android.view.animation.LinearInterpolator());
+	}
+
+	/**
+	 * @param event
+	 *            ...
+	 * @return ...
+	 */
+	public boolean handleMotionEvent(MotionEvent event) {
+
+		// workaround for a bug in the ScaleGestureDetector, see Android issue
+		// #12976
+		// if (event.getAction() != MotionEvent.ACTION_MOVE
+		// || event.getPointerCount() > 1) {
+		mScaleGestureDetector.onTouchEvent(event);
+		// }
+
+		if (!mScaling)
+			mGestureDetector.onTouchEvent(event);
+
+		int action = getAction(event);
+		boolean ret = false;
+		if (action == MotionEvent.ACTION_DOWN) {
+			ret = onActionDown(event);
+		} else if (action == MotionEvent.ACTION_MOVE) {
+			ret = onActionMove(event);
+		} else if (action == MotionEvent.ACTION_UP) {
+			ret = onActionUp(event);
+		} else if (action == MotionEvent.ACTION_CANCEL) {
+			ret = onActionCancel();
+		} else if (action == MotionEvent.ACTION_POINTER_DOWN) {
+			return onActionPointerDown(event);
+		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+			ret = onActionPointerUp(event);
+		}
+
+		return ret;
 	}
 
 	private static int getAction(MotionEvent motionEvent) {
@@ -131,46 +173,44 @@ public class TouchHandler {
 			return true;
 		}
 
-		if (mMapView.enableRotation) {
-			if (multi > 0) {
-				double x1 = event.getX(0);
-				double x2 = event.getX(1);
-				double y1 = event.getY(0);
-				double y2 = event.getY(1);
+		if (!mMapView.enableRotation || multi < 1)
+			return true;
 
-				double dx = x1 - x2;
-				double dy = y1 - y2;
+		double x1 = event.getX(0);
+		double x2 = event.getX(1);
+		double y1 = event.getY(0);
+		double y2 = event.getY(1);
 
-				double rad = Math.atan2(dy, dx);
-				double r = rad - mAngle;
+		double dx = x1 - x2;
+		double dy = y1 - y2;
 
-				if (!mBeginRotate && Math.abs(dy) < 80) {
-					if (mMapPosition.tilt(moveY / 4)) {
-						mMapView.redrawMap();
-						return true;
-					}
-				}
+		double rad = Math.atan2(dy, dx);
+		double r = rad - mAngle;
 
-				if (!mBeginRotate && !mBeginScale) {
-					if (r > 0.02 || r < -0.02)
-						mBeginRotate = true;
-				} else if (mBeginRotate) {
-					double rsin = Math.sin(r);
-					double rcos = Math.cos(r);
-
-					// focus point relative to center
-					double cx = (mMapView.getWidth() >> 1) - (x1 + x2) / 2;
-					double cy = (mMapView.getHeight() >> 1) - (y1 + y2) / 2;
-
-					float x = (float) (cx * rcos + cy * -rsin - cx);
-					float y = (float) (cx * rsin + cy * rcos - cy);
-
-					mMapPosition.rotateMap((float) Math.toDegrees(rad - mAngle), x, y);
-					mAngle = rad;
-					mMapView.redrawMap();
-				}
-
+		if (!mBeginRotate && Math.abs(dy) < 80) {
+			if (mMapPosition.tilt(moveY / 4)) {
+				mMapView.redrawMap();
+				return true;
 			}
+		}
+
+		if (!mBeginRotate && !mBeginScale) {
+			if (r > 0.02 || r < -0.02)
+				mBeginRotate = true;
+		} else if (mBeginRotate) {
+			double rsin = Math.sin(r);
+			double rcos = Math.cos(r);
+
+			// focus point relative to center
+			double cx = (mMapView.getWidth() >> 1) - (x1 + x2) / 2;
+			double cy = (mMapView.getHeight() >> 1) - (y1 + y2) / 2;
+
+			float x = (float) (cx * rcos + cy * -rsin - cx);
+			float y = (float) (cx * rsin + cy * rcos - cy);
+
+			mMapPosition.rotateMap((float) Math.toDegrees(rad - mAngle), x, y);
+			mAngle = rad;
+			mMapView.redrawMap();
 		}
 
 		return true;
@@ -225,285 +265,240 @@ public class TouchHandler {
 		return true;
 	}
 
-	/**
-	 * @param event
-	 *            ...
-	 * @return ...
-	 */
-	public boolean handleMotionEvent(MotionEvent event) {
+	/******************* SimpleOnGestureListener *******************/
 
-		// workaround for a bug in the ScaleGestureDetector, see Android issue
-		// #12976
-		// if (event.getAction() != MotionEvent.ACTION_MOVE
-		// || event.getPointerCount() > 1) {
-		mScaleGestureDetector.onTouchEvent(event);
-		// }
+	private Scroller mScroller;
+	private float mScrollX, mScrollY;
+	private boolean fling = false;
 
-		if (!mScaling)
-			mGestureDetector.onTouchEvent(event);
-
-		int action = getAction(event);
-		boolean ret = false;
-		if (action == MotionEvent.ACTION_DOWN) {
-			ret = onActionDown(event);
-		} else if (action == MotionEvent.ACTION_MOVE) {
-			ret = onActionMove(event);
-		} else if (action == MotionEvent.ACTION_UP) {
-			ret = onActionUp(event);
-		} else if (action == MotionEvent.ACTION_CANCEL) {
-			ret = onActionCancel();
-		} else if (action == MotionEvent.ACTION_POINTER_DOWN) {
-			return onActionPointerDown(event);
-		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-			ret = onActionPointerUp(event);
-		}
-
-		return ret;
-	}
-
-	class MapGestureDetector extends SimpleOnGestureListener {
-		private Scroller mScroller;
-		private float mScrollX, mScrollY, mPrevScale;
-		private CountDownTimer mTimer = null;
-		private boolean fling = false;
-
-		public MapGestureDetector() {
-			mScroller = new Scroller(mMapView.getContext(),
-					new android.view.animation.LinearInterpolator());
-		}
-
-		@Override
-		public boolean onDown(MotionEvent e) {
-			if (fling) {
-				mScroller.forceFinished(true);
-
-				if (mTimer != null) {
-					mTimer.cancel();
-					mTimer = null;
-				}
-				fling = false;
-			}
-			// Log.d("mapsforge", "onDown");
-
-			return true;
-		}
-
-		boolean scroll() {
-			if (mScroller.isFinished()) {
-				return false;
-			}
-			mScroller.computeScrollOffset();
-
-			float moveX = mScroller.getCurrX() - mScrollX;
-			float moveY = mScroller.getCurrY() - mScrollY;
-
-			if (moveX >= 1 || moveY >= 1 || moveX <= -1 || moveY <= -1) {
-				mMapPosition.moveMap(moveX, moveY);
-				mMapView.redrawMap();
-				mScrollX = mScroller.getCurrX();
-				mScrollY = mScroller.getCurrY();
-			}
-			return true;
-		}
-
-		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-				float velocityY) {
-			int w = Tile.TILE_SIZE * 20;
-			int h = Tile.TILE_SIZE * 20;
-			mScrollX = 0;
-			mScrollY = 0;
+	@Override
+	public boolean onDown(MotionEvent e) {
+		if (fling) {
+			mScroller.forceFinished(true);
 
 			if (mTimer != null) {
 				mTimer.cancel();
 				mTimer = null;
 			}
+			fling = false;
+		}
+		// Log.d("mapsforge", "onDown");
 
-			mScroller.fling(0, 0, Math.round(velocityX) / 2, Math.round(velocityY) / 2,
-					-w, w, -h, h);
+		return true;
+	}
 
-			// animate for two seconds
-			mTimer = new CountDownTimer(1500, 50) {
+	boolean scroll() {
+		if (mScroller.isFinished()) {
+			return false;
+		}
+		mScroller.computeScrollOffset();
+
+		float moveX = mScroller.getCurrX() - mScrollX;
+		float moveY = mScroller.getCurrY() - mScrollY;
+
+		if (moveX >= 1 || moveY >= 1 || moveX <= -1 || moveY <= -1) {
+			mMapPosition.moveMap(moveX, moveY);
+			mMapView.redrawMap();
+			mScrollX = mScroller.getCurrX();
+			mScrollY = mScroller.getCurrY();
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+			float velocityY) {
+		int w = Tile.TILE_SIZE * 20;
+		int h = Tile.TILE_SIZE * 20;
+		mScrollX = 0;
+		mScrollY = 0;
+
+		if (mTimer != null) {
+			mTimer.cancel();
+			mTimer = null;
+		}
+
+		mScroller.fling(0, 0, Math.round(velocityX) / 2, Math.round(velocityY) / 2,
+				-w, w, -h, h);
+
+		// animate for two seconds
+		mTimer = new CountDownTimer(1500, 50) {
+			@Override
+			public void onTick(long tick) {
+				scroll();
+			}
+
+			@Override
+			public void onFinish() {
+				// do nothing
+			}
+		}.start();
+		fling = true;
+		return true;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent e) {
+		if (MapView.testRegionZoom) {
+			Log.d("mapsforge", "long press");
+			mMapView.mRegionLookup.updateRegion(-1, null);
+		}
+	}
+
+	boolean scale2(long tick) {
+
+		fling = true;
+		if (mPrevScale >= 1)
+			return false;
+		float adv = (SCALE_DURATION - tick) / SCALE_DURATION;
+		adv = mInterpolator.getInterpolation(adv);
+
+		float scale = adv - mPrevScale;
+		mPrevScale += scale;
+		scale += 1;
+		adv += 1;
+
+		if (scale > 1) {
+			mMapPosition.scaleMap(scale, mScrollX / adv, mScrollY / adv);
+			mMapView.redrawMap();
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean onDoubleTap(MotionEvent e) {
+		if (MapView.testRegionZoom) {
+			Log.d("mapsforge", "double tap");
+
+			mMapView.mRegionLookup.updateRegion(1,
+					mMapPosition.getOffsetPoint(mPosX, mPosY));
+		} else {
+			mScrollX = (e.getX(0) - (mMapView.getWidth() >> 1)) * 2f;
+			mScrollY = (e.getY(0) - (mMapView.getHeight() >> 1)) * 2f;
+			mPrevScale = 0;
+
+			mTimer = new CountDownTimer((int) SCALE_DURATION, 30) {
 				@Override
 				public void onTick(long tick) {
-					scroll();
+					scale2(tick);
 				}
 
 				@Override
 				public void onFinish() {
-					// do nothing
+					scale(0);
 				}
 			}.start();
-			fling = true;
-			return true;
 		}
-
-		@Override
-		public void onLongPress(MotionEvent e) {
-			if (MapView.testRegionZoom) {
-				Log.d("mapsforge", "long press");
-				mMapView.mRegionLookup.updateRegion(-1, null);
-			}
-		}
-
-		private final float mScaleDuration = 300;
-
-		boolean scale(long tick) {
-
-			fling = true;
-			if (mPrevScale >= 1)
-				return false;
-			float adv = (mScaleDuration - tick) / mScaleDuration;
-			adv = mInterpolator.getInterpolation(adv);
-
-			float scale = adv - mPrevScale;
-			mPrevScale += scale;
-			scale += 1;
-			adv += 1;
-
-			if (scale > 1) {
-				mMapPosition.scaleMap(scale, mScrollX / adv, mScrollY / adv);
-				mMapView.redrawMap();
-			}
-
-			return true;
-		}
-
-		@Override
-		public boolean onDoubleTap(MotionEvent e) {
-			if (MapView.testRegionZoom) {
-				Log.d("mapsforge", "double tap");
-
-				mMapView.mRegionLookup.updateRegion(1,
-						mMapPosition.getOffsetPoint(mPosX, mPosY));
-			} else {
-				mScrollX = (e.getX(0) - (mMapView.getWidth() >> 1)) * 2f;
-				mScrollY = (e.getY(0) - (mMapView.getHeight() >> 1)) * 2f;
-				mPrevScale = 0;
-
-				mTimer = new CountDownTimer((int) mScaleDuration, 30) {
-					@Override
-					public void onTick(long tick) {
-						scale(tick);
-					}
-
-					@Override
-					public void onFinish() {
-						scale(0);
-					}
-				}.start();
-			}
-			return true;
-		}
+		return true;
 	}
 
-	class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
-		private float mCenterX;
-		private float mCenterY;
-		private float mFocusX;
-		private float mFocusY;
-		private long mTimeStart;
-		private long mTimeEnd;
+	/******************* ScaleListener *******************/
 
-		@Override
-		public boolean onScale(ScaleGestureDetector gd) {
+	private float mCenterX;
+	private float mCenterY;
+	private float mFocusX;
+	private float mFocusY;
+	private long mTimeStart;
+	private long mTimeEnd;
 
-			float scale = gd.getScaleFactor();
-			mFocusX = gd.getFocusX() - mCenterX;
-			mFocusY = gd.getFocusY() - mCenterY;
+	@Override
+	public boolean onScale(ScaleGestureDetector gd) {
 
-			mSumScale *= scale;
+		float scale = gd.getScaleFactor();
+		mFocusX = gd.getFocusX() - mCenterX;
+		mFocusY = gd.getFocusY() - mCenterY;
 
-			mTimeEnd = SystemClock.elapsedRealtime();
+		mSumScale *= scale;
 
-			if (!mBeginScale) {
-				if (mTimeEnd - mTimeStart > 150 || mSumScale > 1.1 || mSumScale < 0.9) {
-					mBeginScale = true;
-					scale = mSumScale;
+		mTimeEnd = SystemClock.elapsedRealtime();
+
+		if (!mBeginScale) {
+			if (mTimeEnd - mTimeStart > 150 || mSumScale > 1.1 || mSumScale < 0.9) {
+				mBeginScale = true;
+				scale = mSumScale;
+			}
+			else
+				return true;
+		}
+
+		if (mMapPosition.scaleMap(scale, mFocusX, mFocusY))
+			mMapView.redrawMap();
+
+		return true;
+	}
+
+	@Override
+	public boolean onScaleBegin(ScaleGestureDetector gd) {
+		mTimeEnd = mTimeStart = SystemClock.elapsedRealtime();
+		mSumScale = 1;
+		mBeginScale = false;
+		mCenterX = mMapView.getWidth() >> 1;
+		mCenterY = mMapView.getHeight() >> 1;
+
+		if (mTimer != null) {
+			mTimer.cancel();
+			mTimer = null;
+		}
+		return true;
+	}
+
+	@Override
+	public void onScaleEnd(ScaleGestureDetector gd) {
+		// Log.d("ScaleListener", "Sum " + mSumScale + " " + (mTimeEnd -
+		// mTimeStart));
+
+		if (mTimer == null && mTimeEnd - mTimeStart < 150
+				&& (mSumScale < 0.99 || mSumScale > 1.01)) {
+
+			mPrevScale = 0;
+
+			mZooutOut = mSumScale < 0.99;
+
+			mTimer = new CountDownTimer((int) SCALE_DURATION, 15) {
+				@Override
+				public void onTick(long tick) {
+					scale(tick);
 				}
-				else
-					return true;
-			}
 
-			mMapPosition.scaleMap(scale, mFocusX, mFocusY);
-			mMapView.redrawMap();
+				@Override
+				public void onFinish() {
+					scale(0);
 
-			return true;
+				}
+			}.start();
+		}
+		mBeginScale = false;
+	}
+
+	private float mPrevScale;
+	private CountDownTimer mTimer;
+	boolean mZooutOut;
+
+	boolean scale(long tick) {
+
+		if (mPrevScale >= 1) {
+			mTimer = null;
+			return false;
 		}
 
-		@Override
-		public boolean onScaleBegin(ScaleGestureDetector gd) {
-			mTimeEnd = mTimeStart = SystemClock.elapsedRealtime();
-			mSumScale = 1;
-			mBeginScale = false;
-			mCenterX = mMapView.getWidth() >> 1;
-			mCenterY = mMapView.getHeight() >> 1;
+		float adv = (SCALE_DURATION - tick) / SCALE_DURATION;
+		adv = mInterpolator.getInterpolation(adv);
 
-			if (mTimer != null) {
-				mTimer.cancel();
-				mTimer = null;
-			}
-			return true;
+		float scale = adv - mPrevScale;
+		mPrevScale += scale;
+
+		if (mZooutOut) {
+			mMapPosition.scaleMap(1 - scale, 0, 0);
+		} else {
+			mMapPosition.scaleMap(1 + scale, mFocusX, mFocusY);
 		}
 
-		@Override
-		public void onScaleEnd(ScaleGestureDetector gd) {
-			// Log.d("ScaleListener", "Sum " + mSumScale + " " + (mTimeEnd -
-			// mTimeStart));
+		mMapView.redrawMap();
 
-			if (mTimer == null && mTimeEnd - mTimeStart < 150
-					&& (mSumScale < 0.99 || mSumScale > 1.01)) {
+		if (tick == 0)
+			mTimer = null;
 
-				mPrevScale = 0;
-
-				mZooutOut = mSumScale < 0.99;
-
-				mTimer = new CountDownTimer((int) mScaleDuration, 15) {
-					@Override
-					public void onTick(long tick) {
-						scale(tick);
-					}
-
-					@Override
-					public void onFinish() {
-						scale(0);
-
-					}
-				}.start();
-			}
-			mBeginScale = false;
-		}
-
-		private float mPrevScale;
-		private CountDownTimer mTimer;
-		boolean mZooutOut;
-		private final float mScaleDuration = 450;
-
-		boolean scale(long tick) {
-
-			if (mPrevScale >= 1) {
-				mTimer = null;
-				return false;
-			}
-
-			float adv = (mScaleDuration - tick) / mScaleDuration;
-			adv = mInterpolator.getInterpolation(adv);
-
-			float scale = adv - mPrevScale;
-			mPrevScale += scale;
-
-			if (mZooutOut) {
-				mMapPosition.scaleMap(1 - scale, 0, 0);
-			} else {
-				mMapPosition.scaleMap(1 + scale, mFocusX, mFocusY);
-			}
-
-			mMapView.redrawMap();
-
-			if (tick == 0)
-				mTimer = null;
-
-			return true;
-		}
+		return true;
 	}
 }

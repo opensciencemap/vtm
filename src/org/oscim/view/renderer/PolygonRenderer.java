@@ -35,6 +35,9 @@ import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glUseProgram;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.utils.GlUtils;
@@ -257,7 +260,7 @@ class PolygonRenderer {
 		if (mCount > 0)
 			fillPolygons(zoom, scale);
 
-		//
+		// maybe reset start when only few layers left in stencil buffer
 		// if (mCount > 5){
 		// mCount = 0;
 		// mStart = 0;
@@ -271,6 +274,35 @@ class PolygonRenderer {
 		GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);
 
 		return l;
+	}
+
+	private static float[] debugFillColor = { 0.3f, 0.0f, 0.0f, 0.3f };
+
+	private static ByteBuffer mDebugFill;
+
+	static void debugDraw(float[] matrix, float[] coords) {
+
+		mDebugFill = ByteBuffer.allocateDirect(32).order(ByteOrder.nativeOrder());
+		FloatBuffer buf = mDebugFill.asFloatBuffer();
+		buf.put(coords);
+
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
+		mDebugFill.position(0);
+		glUseProgram(polygonProgram);
+		GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);
+
+		glVertexAttribPointer(hPolygonVertexPosition, 2, GLES20.GL_FLOAT,
+				false, 0, mDebugFill);
+
+		glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
+
+		glUniform4fv(hPolygonColor, 1, debugFillColor, 0);
+
+		glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+
+		GlUtils.checkGlError("draw debug");
+		GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);
 	}
 
 	static void drawDepthClip() {
@@ -299,16 +331,16 @@ class PolygonRenderer {
 	static void compileLayerData(PolygonLayer layers, ShortBuffer sbuf) {
 		int pos = 4;
 
-		ShortItem last = null, items = null;
+		VertexPoolItem last = null, items = null;
 
 		for (PolygonLayer l = layers; l != null; l = l.next) {
 
-			for (ShortItem item = l.pool; item != null; item = item.next) {
+			for (VertexPoolItem item = l.pool; item != null; item = item.next) {
 
 				if (item.next == null) {
 					sbuf.put(item.vertices, 0, item.used);
 				} else {
-					// item.used = ShortItem.SIZE;
+					// item.used = VertexPoolItem.SIZE;
 					sbuf.put(item.vertices);
 				}
 
@@ -326,13 +358,13 @@ class PolygonRenderer {
 			l.pool = null;
 		}
 
-		ShortPool.add(items);
+		VertexPool.add(items);
 	}
 
 	static void clear(PolygonLayer layers) {
 		for (PolygonLayer l = layers; l != null; l = l.next) {
 			if (l.pool != null)
-				ShortPool.add(l.pool);
+				VertexPool.add(l.pool);
 		}
 	}
 }

@@ -183,18 +183,18 @@ class LineRenderer {
 
 	static void compileLayerData(LineLayer layers, ShortBuffer sbuf) {
 		int pos = 0;
-		ShortItem last = null, items = null;
+		VertexPoolItem last = null, items = null;
 
 		for (LineLayer l = layers; l != null; l = l.next) {
 			if (l.isOutline)
 				continue;
 
-			for (ShortItem item = l.pool; item != null; item = item.next) {
+			for (VertexPoolItem item = l.pool; item != null; item = item.next) {
 
 				if (item.next == null) {
 					sbuf.put(item.vertices, 0, item.used);
 				} else {
-					// item.used = ShortItem.SIZE;
+					// item.used = VertexPoolItem.SIZE;
 					sbuf.put(item.vertices);
 				}
 
@@ -213,7 +213,7 @@ class LineRenderer {
 			l.curItem = null;
 		}
 
-		ShortPool.add(items);
+		VertexPool.add(items);
 	}
 
 	// @SuppressLint("UseValueOf")
@@ -310,7 +310,7 @@ class LineRenderer {
 	static void clear(LineLayer layer) {
 		for (LineLayer l = layer; l != null; l = l.next) {
 			if (l.pool != null) {
-				ShortPool.add(l.pool);
+				VertexPool.add(l.pool);
 				l.pool = null;
 				l.curItem = null;
 			}
