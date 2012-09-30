@@ -136,8 +136,8 @@ final class WayDecorator {
 				} else if ((currentY - nextY) == 0)
 					break;
 
-				float diff = ((diffX) / (diffY) - (float) (currentX - nextX)
-						/ (currentY - nextY));
+				float diff = diffX / diffY -
+						(float) (currentX - nextX) / (currentY - nextY);
 
 				// skip segments with corners
 				if (diff >= 0.1f || diff <= -0.1f)
@@ -221,8 +221,8 @@ final class WayDecorator {
 
 						// check overlapping labels of road with more than one
 						// way
-						short top2 = (t2.y1 < t2.y2 ? t2.y1 : t2.y2);
-						short bot2 = (t2.y1 < t2.y2 ? t2.y2 : t2.y1);
+						short top2 = t2.y1 < t2.y2 ? t2.y1 : t2.y2;
+						short bot2 = t2.y1 < t2.y2 ? t2.y2 : t2.y1;
 
 						if (x1 - 10 < t2.x2 && t2.x1 - 10 < x2 && top - 10 < bot2
 								&& top2 - 10 < bot) {
@@ -240,7 +240,8 @@ final class WayDecorator {
 						continue;
 					}
 
-					// Log.d("mapsforge", "add " + text + " " + first + " " + last);
+					// Log.d("mapsforge", "add " + text + " " + first + " " +
+					// last);
 
 					if (previousX < currentX) {
 						x1 = previousX;

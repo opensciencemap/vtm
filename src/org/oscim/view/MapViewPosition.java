@@ -27,9 +27,10 @@ import android.util.Log;
  * together with its zoom level.
  */
 public class MapViewPosition {
-	// private static final String TAG = "MapViewPosition";
+	private static final String TAG = "MapViewPosition";
 
 	public final static int MAX_ZOOMLEVEL = 17;
+	public final static int MIN_ZOOMLEVEL = 2;
 
 	private final static float MAX_ANGLE = 20;
 
@@ -68,7 +69,7 @@ public class MapViewPosition {
 
 	void setViewport(int width, int height) {
 		Matrix.frustumM(mProjMatrix, 0, -0.5f * width, 0.5f * width,
-				-0.5f * height, 0.5f * height, 1, 2);
+				0.5f * height, -0.5f * height, 1, 2);
 
 		Matrix.translateM(mProjMatrix, 0, 0, 0, -1);
 
@@ -92,14 +93,14 @@ public class MapViewPosition {
 		// && mapPosition.scale == mScale
 		// && mapPosition.angle == mRotation)
 		// return false;
+		byte z = mZoomLevel;
 
 		mapPosition.lat = mLatitude;
 		mapPosition.lon = mLongitude;
 		mapPosition.angle = mRotation;
-		mapPosition.zoomLevel = mZoomLevel;
 		mapPosition.scale = mScale;
+		mapPosition.zoomLevel = z;
 
-		byte z = mZoomLevel;
 		mapPosition.x = MercatorProjection.longitudeToPixelX(mLongitude, z);
 		mapPosition.y = MercatorProjection.latitudeToPixelY(mLatitude, z);
 
@@ -138,13 +139,12 @@ public class MapViewPosition {
 
 		if (mv[3] != 0) {
 			float w = 1 / mv[3];
-			float xx = mv[0] * w;
-			float yy = mv[1] * w;
-
-			coords[position] = xx;
-			coords[position + 1] = yy;
+			coords[position] = mv[0] * w;
+			coords[position + 1] = mv[1] * w;
+		} else {
+			// else what?
+			Log.d(TAG, "... what?");
 		}
-		// else what?
 	}
 
 	private void updateMatrix() {
@@ -152,7 +152,7 @@ public class MapViewPosition {
 
 		// tilt map
 		float tilt = mTilt;
-		Matrix.setRotateM(mTmpMatrix, 0, -tilt / (mHeight / 2), 1, 0, 0);
+		Matrix.setRotateM(mTmpMatrix, 0, tilt / (mHeight / 2), 1, 0, 0);
 
 		// apply first rotation, then tilt
 		Matrix.multiplyMM(mRotateMatrix, 0, mTmpMatrix, 0, mRotateMatrix, 0);
@@ -177,10 +177,10 @@ public class MapViewPosition {
 
 		float tilt = FloatMath.sin((float) Math.toRadians(mTilt)) * 4;
 
-		unproject(-1, 1, tilt, mBBoxCoords, 0); // top-left
-		unproject(1, 1, tilt, mBBoxCoords, 2); // top-right
-		unproject(1, -1, -tilt, mBBoxCoords, 4); // bottom-right
-		unproject(-1, -1, -tilt, mBBoxCoords, 6); // bottom-left
+		unproject(-1, 1, -tilt, mBBoxCoords, 0); // top-left
+		unproject(1, 1, -tilt, mBBoxCoords, 2); // top-right
+		unproject(1, -1, tilt, mBBoxCoords, 4); // bottom-right
+		unproject(-1, -1, tilt, mBBoxCoords, 6); // bottom-left
 
 		byte z = mZoomLevel;
 		double pixelX = MercatorProjection.longitudeToPixelX(mLongitude, z);
@@ -333,8 +333,8 @@ public class MapViewPosition {
 
 		if (mMapView.enableRotation || mMapView.enableCompass) {
 			double rad = Math.toRadians(mRotation);
-			double x = dx * Math.cos(rad) + dy * -Math.sin(rad);
-			double y = dx * Math.sin(rad) + dy * Math.cos(rad);
+			double x = dx * Math.cos(rad) + dy * Math.sin(rad);
+			double y = dx * -Math.sin(rad) + dy * Math.cos(rad);
 			dx = x;
 			dy = y;
 		}
@@ -357,7 +357,7 @@ public class MapViewPosition {
 		moveMap(cx, cy);
 		// Log.d("MapViewPosition", "rotate:" + angle + " " + (mRotation -
 		// angle));
-		mRotation -= angle;
+		mRotation += angle;
 		updateMatrix();
 	}
 
@@ -426,12 +426,13 @@ public class MapViewPosition {
 
 		int z = FastMath.log2((int) newScale);
 
-		if (z <= 0 || (z >= MAX_ZOOMLEVEL && mScale >= 8))
+		if (z < MIN_ZOOMLEVEL || (z >= MAX_ZOOMLEVEL && mScale >= 8))
 			return false;
 
 		if (z > MAX_ZOOMLEVEL) {
-			// z16 shows everything, just increase scaling
-			if (mScale * scale > 8)
+			// z17 shows everything, just increase scaling
+			// need to fix this for ScanBox
+			if (mScale * scale > 2) // 8)
 				return false;
 
 			mScale *= scale;

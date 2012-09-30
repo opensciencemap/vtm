@@ -29,7 +29,7 @@ public class Compass {
 				mAngle = event.values[0];
 
 				if (mMapView != null) {
-					mMapView.getMapPosition().setRotation(mAngle);
+					mMapView.getMapPosition().setRotation(-mAngle);
 					mMapView.redrawMap();
 				}
 			}

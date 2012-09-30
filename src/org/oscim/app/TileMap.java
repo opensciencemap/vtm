@@ -45,13 +45,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * A map application which uses the features from the mapsforge map library. The map can be centered to the current
- * location. A simple file browser for selecting the map file is also included. Some preferences can be adjusted via the
- * {@link EditPreferences} activity.
+ * A map application which uses the features from the mapsforge map library. The
+ * map can be centered to the current location. A simple file browser for
+ * selecting the map file is also included. Some preferences can be adjusted via
+ * the {@link EditPreferences} activity.
  */
 public class TileMap extends MapActivity {
 	// implements ActionBar.OnNavigationListener {
-	// private static final String BUNDLE_CENTER_AT_FIRST_FIX = "centerAtFirstFix";
+	// private static final String BUNDLE_CENTER_AT_FIRST_FIX =
+	// "centerAtFirstFix";
 	private static final String BUNDLE_SHOW_MY_LOCATION = "showMyLocation";
 	private static final String BUNDLE_SNAP_TO_LOCATION = "snapToLocation";
 	private static final int DIALOG_ENTER_COORDINATES = 0;
@@ -408,7 +410,8 @@ public class TileMap extends MapActivity {
 			editText.setText(Double.toString(mapCenter.getLongitude()));
 
 			SeekBar zoomlevel = (SeekBar) dialog.findViewById(R.id.zoomLevel);
-			zoomlevel.setMax(20); // FIXME mMapView.getMapGenerator().getZoomLevelMax());
+			zoomlevel.setMax(20); // FIXME
+									// mMapView.getMapGenerator().getZoomLevelMax());
 			zoomlevel.setProgress(mMapView.getMapPosition().getZoomLevel());
 
 			final TextView textView = (TextView) dialog.findViewById(R.id.zoomlevelValue);
@@ -417,34 +420,42 @@ public class TileMap extends MapActivity {
 			// } else if (id == DIALOG_INFO_MAP_FILE) {
 			// MapInfo mapInfo = mMapView.getMapDatabase().getMapInfo();
 			//
-			// TextView textView = (TextView) dialog.findViewById(R.id.infoMapFileViewName);
+			// TextView textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewName);
 			// textView.setText(mMapView.getMapFile());
 			//
-			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewSize);
+			// textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewSize);
 			// textView.setText(FileUtils.formatFileSize(mapInfo.fileSize,
 			// getResources()));
 			//
-			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewVersion);
+			// textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewVersion);
 			// textView.setText(String.valueOf(mapInfo.fileVersion));
 			//
-			// // textView = (TextView) dialog.findViewById(R.id.infoMapFileViewDebug);
+			// // textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewDebug);
 			// // if (mapFileInfo.debugFile) {
 			// // textView.setText(R.string.info_map_file_debug_yes);
 			// // } else {
 			// // textView.setText(R.string.info_map_file_debug_no);
 			// // }
 			//
-			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewDate);
+			// textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewDate);
 			// Date date = new Date(mapInfo.mapDate);
 			// textView.setText(DateFormat.getDateTimeInstance().format(date));
 			//
-			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewArea);
+			// textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewArea);
 			// BoundingBox boundingBox = mapInfo.boundingBox;
 			// textView.setText(boundingBox.getMinLatitude() + ", "
 			// + boundingBox.getMinLongitude() + " - \n"
-			// + boundingBox.getMaxLatitude() + ", " + boundingBox.getMaxLongitude());
+			// + boundingBox.getMaxLatitude() + ", " +
+			// boundingBox.getMaxLongitude());
 			//
-			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewStartPosition);
+			// textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewStartPosition);
 			// GeoPoint startPosition = mapInfo.startPosition;
 			// if (startPosition == null) {
 			// textView.setText(null);
@@ -453,7 +464,8 @@ public class TileMap extends MapActivity {
 			// + startPosition.getLongitude());
 			// }
 			//
-			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewStartZoomLevel);
+			// textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewStartZoomLevel);
 			// Byte startZoomLevel = mapInfo.startZoomLevel;
 			// if (startZoomLevel == null) {
 			// textView.setText(null);
@@ -465,10 +477,12 @@ public class TileMap extends MapActivity {
 			// .findViewById(R.id.infoMapFileViewLanguagePreference);
 			// textView.setText(mapInfo.languagePreference);
 			//
-			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewComment);
+			// textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewComment);
 			// textView.setText(mapInfo.comment);
 			//
-			// textView = (TextView) dialog.findViewById(R.id.infoMapFileViewCreatedBy);
+			// textView = (TextView)
+			// dialog.findViewById(R.id.infoMapFileViewCreatedBy);
 			// textView.setText(mapInfo.createdBy);
 		} else {
 			super.onPrepareDialog(id, dialog);
@@ -483,13 +497,17 @@ public class TileMap extends MapActivity {
 				.getDefaultSharedPreferences(this);
 
 		// MapScaleBar mapScaleBar = mapView.getMapScaleBar();
-		// mapScaleBar.setShowMapScaleBar(preferences.getBoolean("showScaleBar", false));
-		// String scaleBarUnitDefault = getString(R.string.preferences_scale_bar_unit_default);
-		// String scaleBarUnit = preferences.getString("scaleBarUnit", scaleBarUnitDefault);
+		// mapScaleBar.setShowMapScaleBar(preferences.getBoolean("showScaleBar",
+		// false));
+		// String scaleBarUnitDefault =
+		// getString(R.string.preferences_scale_bar_unit_default);
+		// String scaleBarUnit = preferences.getString("scaleBarUnit",
+		// scaleBarUnitDefault);
 		// mapScaleBar.setImperialUnits(scaleBarUnit.equals("imperial"));
 
 		// if (preferences.contains("mapGenerator")) {
-		// String name = preferences.getString("mapGenerator", MapGeneratorInternal.SW_RENDERER.name());
+		// String name = preferences.getString("mapGenerator",
+		// MapGeneratorInternal.SW_RENDERER.name());
 		// MapGeneratorInternal mapGeneratorInternalNew;
 		// try {
 		// mapGeneratorInternalNew = MapGeneratorInternal.valueOf(name);
@@ -498,7 +516,8 @@ public class TileMap extends MapActivity {
 		// }
 		//
 		// if (mapGeneratorInternalNew != mapGeneratorInternal) {
-		// TileGenerator mapGenerator = MapGeneratorFactory.createMapGenerator(mapGeneratorInternalNew);
+		// TileGenerator mapGenerator =
+		// MapGeneratorFactory.createMapGenerator(mapGeneratorInternalNew);
 		// mapView.setMapGenerator(mapGenerator);
 		// mapGeneratorInternal = mapGeneratorInternalNew;
 		// }
@@ -525,7 +544,8 @@ public class TileMap extends MapActivity {
 		}
 
 		// try {
-		// String textScaleDefault = getString(R.string.preferences_text_scale_default);
+		// String textScaleDefault =
+		// getString(R.string.preferences_text_scale_default);
 		// mMapView.setTextScale(Float.parseFloat(preferences.getString("textScale",
 		// textScaleDefault)));
 		// } catch (NumberFormatException e) {
@@ -596,7 +616,8 @@ public class TileMap extends MapActivity {
 	}
 
 	/**
-	 * Uses the UI thread to display the given text message as toast notification.
+	 * Uses the UI thread to display the given text message as toast
+	 * notification.
 	 * 
 	 * @param text
 	 *            the text message to display

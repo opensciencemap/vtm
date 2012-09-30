@@ -57,6 +57,8 @@ public class MapView extends FrameLayout {
 
 	public static final boolean debugFrameTime = false;
 	public static final boolean testRegionZoom = false;
+	public static final boolean staticLabeling = true;
+
 	private static final boolean debugDatabase = false;
 
 	RegionLookup mRegionLookup;
@@ -81,8 +83,6 @@ public class MapView extends FrameLayout {
 	private DebugSettings debugSettings;
 	private String mRenderTheme;
 	private Map<String, String> mMapOptions;
-
-	// private final Handler mHandler;
 
 	/**
 	 * @param context

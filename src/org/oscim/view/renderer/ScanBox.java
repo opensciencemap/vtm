@@ -17,23 +17,10 @@
 
 package org.oscim.view.renderer;
 
-import org.oscim.view.renderer.MapRenderer.TilesData;
-
 import android.util.FloatMath;
+import android.util.Log;
 
-public class ScanBox {
-
-	interface Callback {
-		void call(MapTile tile);
-	}
-
-	class SetVisible implements Callback {
-
-		@Override
-		public void call(MapTile tile) {
-			tile.isVisible = true;
-		}
-	}
+public abstract class ScanBox {
 
 	static class Edge {
 		float x0, y0, x1, y1, dx, dy;
@@ -44,84 +31,50 @@ public class ScanBox {
 				this.y0 = y0;
 				this.x1 = x1;
 				this.y1 = y1;
-				this.dx = x1 - x0;
-				this.dy = y1 - y0;
+				dx = x1 - x0;
+				dy = y1 - y0;
 			} else {
 				this.x0 = x1;
 				this.y0 = y1;
 				this.x1 = x0;
 				this.y1 = y0;
-				this.dx = x0 - x1;
-				this.dy = y0 - y1;
+				dx = x0 - x1;
+				dy = y0 - y1;
 			}
 		}
 	}
 
-	static Edge ab = new Edge();
-	static Edge bc = new Edge();
-	static Edge ca = new Edge();
+	private Edge ab = new Edge();
+	private Edge bc = new Edge();
+	private Edge ca = new Edge();
+	protected byte mZoom;
 
-	static void scanSpans(Edge e0, Edge e1) {
+	void scan(float[] coords, byte zoom) {
+		mZoom = zoom;
 
-		// sort edge by x-coordinate
-		if (e0.x0 == e1.x0 && e0.y0 == e1.y0) {
-			if (e0.x0 + e1.dy / e0.dy * e0.dx < e1.x1) {
-				Edge t = e0;
-				e0 = e1;
-				e1 = t;
-			}
-		} else {
-			if (e0.x1 - e1.dy / e0.dy * e0.dx < e1.x0) {
-				Edge t = e0;
-				e0 = e1;
-				e1 = t;
-			}
-		}
+		ab.set(coords[0], coords[1], coords[2], coords[3]);
+		bc.set(coords[2], coords[3], coords[4], coords[5]);
+		ca.set(coords[4], coords[5], coords[0], coords[1]);
+		scanTriangle();
 
-		float m0 = e0.dx / e0.dy;
-		float m1 = e1.dx / e1.dy;
-
-		int d0 = e0.dx > 0 ? 1 : 0;// use y + 1 to compute x0
-		int d1 = e1.dx < 0 ? 1 : 0; // use y + 1 to compute x1
-
-		float x0, x1;
-
-		int y = (int) Math.max(0, FloatMath.floor(e1.y0));
-		int bottom = (int) Math.min(mMax, FloatMath.ceil(e1.y1));
-
-		for (; y < bottom; y++) {
-			// float x0 = (m0 * Math.min(e0.dy, y + d0 - e0.y0) + e0.x0);
-			// float x1 = (m1 * Math.min(e1.dy, y + d1 - e1.y0) + e1.x0);
-
-			x0 = y + d0 - e0.y0;
-			if (e0.dy < x0)
-				x0 = e0.dy;
-
-			x0 = e0.x0 + m0 * x0;
-
-			if (x0 < 0)
-				x0 = 0;
-			else
-				x0 = FloatMath.ceil(x0);
-
-			x1 = y + d1 - e1.y0;
-			if (e1.dy < x1)
-				x1 = e1.dy;
-
-			x1 = e1.x0 + m1 * x1;
-
-			if (x1 < 0)
-				x1 = 0;
-			else
-				x1 = FloatMath.floor(x1);
-
-			setVisible(y, (int) x1, (int) x0);
-
-			// setVisible(y, (int) (x1 - 0.5f), (int) (x0 + 0.5f));
-		}
+		ab.set(coords[4], coords[5], coords[6], coords[7]);
+		bc.set(coords[6], coords[7], coords[0], coords[1]);
+		ca.set(coords[0], coords[1], coords[4], coords[5]);
+		scanTriangle();
 	}
 
-	static void scanTriangle() {
+	/**
+	 * @param y
+	 *            ...
+	 * @param x1
+	 *            ...
+	 * @param x2
+	 *            ...
+	 */
+	void setVisible(int y, int x1, int x2) {
+	}
+
+	private void scanTriangle() {
 
 		if (ab.dy > bc.dy) {
 			Edge t = ab;
@@ -138,6 +91,10 @@ public class ScanBox {
 			bc = ca;
 			ca = t;
 		}
+		// ca.dy > bc.dy > ab.dy
+
+		if (ca.dy == 0)
+			return;
 
 		if (ab.dy != 0)
 			scanSpans(ca, ab);
@@ -146,42 +103,68 @@ public class ScanBox {
 			scanSpans(ca, bc);
 	}
 
-	private static int mMax;
+	private static final int MAX_SLOPE = 4;
 
-	public static void scan(float[] coords, TilesData tiles, int max) {
-		sTiles = tiles;
-		cntDoubles = 0;
-		mMax = max;
+	private void scanSpans(Edge e0, Edge e1) {
 
-		ab.set(coords[0], coords[1], coords[2], coords[3]);
-		bc.set(coords[2], coords[3], coords[4], coords[5]);
-		ca.set(coords[4], coords[5], coords[0], coords[1]);
-		scanTriangle();
+		int y0 = (int) Math.max(0, FloatMath.floor(e1.y0));
+		int y1 = (int) Math.min((1 << mZoom), FloatMath.ceil(e1.y1));
 
-		ab.set(coords[4], coords[5], coords[6], coords[7]);
-		bc.set(coords[6], coords[7], coords[0], coords[1]);
-		ca.set(coords[0], coords[1], coords[4], coords[5]);
-		scanTriangle();
-
-		// Log.d("..", "<doubles " + cntDoubles);
-	}
-
-	private static TilesData sTiles;
-	private static int cntDoubles;
-
-	private static void setVisible(int y, int x1, int x2) {
-
-		MapTile[] tiles = sTiles.tiles;
-		for (int i = 0, n = sTiles.cnt; i < n; i++) {
-			if (tiles[i].tileY == y) {
-				if (tiles[i].tileX >= x1 && tiles[i].tileX < x2) {
-					// if (tiles[i].isVisible) {
-					// Log.d("..", ">>>" + y + " " + tiles[i].tileX);
-					// cntDoubles++;
-					// }
-					tiles[i].isVisible = true;
-				}
+		// sort edge by x-coordinate
+		if (e0.x0 == e1.x0 && e0.y0 == e1.y0) {
+			// bottom-flat
+			if (e0.x0 + e1.dy / e0.dy * e0.dx < e1.x1) {
+				Edge t = e0;
+				e0 = e1;
+				e1 = t;
 			}
+		} else {
+			// top-flat
+			if (e0.x1 - e1.dy / e0.dy * e0.dx < e1.x0) {
+				Edge t = e0;
+				e0 = e1;
+				e1 = t;
+			}
+		}
+
+		float m0 = e0.dx / e0.dy;
+		float m1 = e1.dx / e1.dy;
+
+		// still needed?
+		if (m0 > MAX_SLOPE)
+			m0 = MAX_SLOPE;
+		else if (m0 < -MAX_SLOPE)
+			m0 = -MAX_SLOPE;
+
+		if (m1 > MAX_SLOPE)
+			m1 = MAX_SLOPE;
+		else if (m1 < -MAX_SLOPE)
+			m1 = -MAX_SLOPE;
+
+		int d0 = e0.dx > 0 ? 1 : 0; // use y + 1 to compute x0
+		int d1 = e1.dx < 0 ? 1 : 0; // use y + 1 to compute x1
+
+		float x0, x1, dy;
+
+		for (int y = y0; y < y1; y++) {
+			dy = y + d0 - e0.y0;
+			if (e0.dy < dy)
+				dy = e0.dy;
+
+			x0 = e0.x0 + m0 * dy;
+			x0 = FloatMath.ceil(x0);
+
+			dy = y + d1 - e1.y0;
+			if (e1.dy < dy)
+				dy = e1.dy;
+
+			x1 = e1.x0 + m1 * dy;
+			x1 = FloatMath.floor(x1);
+
+			if (x1 > x0)
+				Log.d("...", "X set visible" + y + " " + x1 + "/" + x0);
+
+			setVisible(y, (int) x1, (int) x0);
 		}
 	}
 }
