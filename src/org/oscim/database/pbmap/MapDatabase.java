@@ -91,10 +91,13 @@ public class MapDatabase implements IMapDatabase {
 	private static final String CACHE_FILE = "%d-%d-%d.tile";
 
 	private static final String SERVER_ADDR = "city.informatik.uni-bremen.de";
-	// private static final String URL = "http://city.informatik.uni-bremen.de:8020/test/%d/%d/%d.osmtile";
+	// private static final String URL =
+	// "http://city.informatik.uni-bremen.de:8020/test/%d/%d/%d.osmtile";
 	private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/test/%d/%d/%d.osmtile";
-	// private static final String URL = "http://city.informatik.uni-bremen.de/tiles/tiles.py///test/%d/%d/%d.osmtile";
-	// private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/gis2/%d/%d/%d.osmtile";
+	// private static final String URL =
+	// "http://city.informatik.uni-bremen.de/tiles/tiles.py///test/%d/%d/%d.osmtile";
+	// private static final String URL =
+	// "http://city.informatik.uni-bremen.de/osmstache/gis2/%d/%d/%d.osmtile";
 
 	private final static float REF_TILE_SIZE = 4096.0f;
 
@@ -360,7 +363,7 @@ public class MapDatabase implements IMapDatabase {
 		return file;
 	}
 
-	// /////////////// hand sewed tile protocol buffers decoder ///////////////////
+	// /////////////// hand sewed tile protocol buffers decoder ////////////////
 	private static final int BUFFER_SIZE = 65536;
 
 	private final byte[] mReadBuffer = new byte[BUFFER_SIZE];
@@ -604,7 +607,7 @@ public class MapDatabase implements IMapDatabase {
 			lastY = lat + lastY;
 
 			mMapGenerator.renderPointOfInterest(layer,
-					tags, lastY / scale, lastX / scale);
+					tags, Tile.TILE_SIZE - lastY / scale, lastX / scale);
 			cnt += 2;
 		}
 		return cnt;
@@ -800,7 +803,7 @@ public class MapDatabase implements IMapDatabase {
 			} else {
 				y = ((result >>> 1) ^ -(result & 1));
 				lastY = lastY + y;
-				coords[cnt++] = lastY / scale;
+				coords[cnt++] = Tile.TILE_SIZE - lastY / scale;
 				even = true;
 			}
 		}
@@ -940,7 +943,8 @@ public class MapDatabase implements IMapDatabase {
 		return result;
 	}
 
-	// ///////////////////////// Lightweight HttpClient ///////////////////////////////////////
+	// ///////////////////////// Lightweight HttpClient
+	// ///////////////////////////////////////
 	// would have written simple tcp server/client for this...
 
 	private int mMaxReq = 0;
@@ -1080,7 +1084,8 @@ public class MapDatabase implements IMapDatabase {
 		len += pos;
 
 		// this does the same but with a few more allocations:
-		// byte[] request = String.format(REQUEST, Integer.valueOf(tile.zoomLevel),
+		// byte[] request = String.format(REQUEST,
+		// Integer.valueOf(tile.zoomLevel),
 		// Integer.valueOf(tile.tileX), Integer.valueOf(tile.tileY)).getBytes();
 
 		try {
@@ -1138,7 +1143,7 @@ public class MapDatabase implements IMapDatabase {
 
 	}
 
-	// //////////////////////////// Tile cache ////////////////////////////////////
+	// //////////////////////////// Tile cache ///////////////////////////////
 
 	private boolean cacheRead(Tile tile, File f) {
 		if (f.exists() && f.length() > 0) {
@@ -1212,7 +1217,10 @@ public class MapDatabase implements IMapDatabase {
 		mCacheFile = null;
 	}
 
-	/* All code below is taken from or based on Google's Protocol Buffers implementation: */
+	/*
+	 * All code below is taken from or based on Google's Protocol Buffers
+	 * implementation:
+	 */
 
 	// Protocol Buffers - Google's data interchange format
 	// Copyright 2008 Google Inc. All rights reserved.

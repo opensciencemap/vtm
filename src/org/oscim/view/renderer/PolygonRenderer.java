@@ -41,15 +41,18 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.utils.GlUtils;
+import org.oscim.view.MapPosition;
 
 import android.opengl.GLES20;
 
 class PolygonRenderer {
-	private static final String TAG = "PolygonRenderer";
+	// private static final String TAG = "PolygonRenderer";
 
 	private static final int NUM_VERTEX_SHORTS = 2;
 	private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
-	private static int STENCIL_BITS = 8;
+	private static final int STENCIL_BITS = 8;
+
+	private static final float FADE_START = 1.3f;
 
 	private static PolygonLayer[] mFillPolys;
 
@@ -76,7 +79,7 @@ class PolygonRenderer {
 		return true;
 	}
 
-	private static void fillPolygons(double zoom, float scale) {
+	private static void fillPolygons(int zoom, float scale) {
 		boolean blend = false;
 
 		/* draw to framebuffer */
@@ -96,7 +99,7 @@ class PolygonRenderer {
 			if (l.area.fade >= zoom || l.area.color[3] != 1.0) {
 				/* fade in/out || draw alpha color */
 				if (l.area.fade >= zoom) {
-					f = (scale > 1.3f ? scale : 1.3f) - f;
+					f = (scale > FADE_START ? scale : FADE_START) - f;
 					if (f > 1.0f)
 						f = 1.0f;
 				}
@@ -159,8 +162,11 @@ class PolygonRenderer {
 	// stencil buffer index to start fill
 	private static int mStart;
 
-	static PolygonLayer drawPolygons(final PolygonLayer layer, final int next,
-			final float[] matrix, final double zoom, final float scale, boolean first) {
+	static PolygonLayer drawPolygons(MapPosition pos, PolygonLayer layer, int next,
+			float[] matrix, boolean first) {
+
+		int zoom = pos.zoomLevel;
+		float scale = pos.scale;
 
 		glUseProgram(polygonProgram);
 		GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);

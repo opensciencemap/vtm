@@ -41,7 +41,7 @@ class MapTile extends JobTile {
 	/**
 	 * tile is used by render thread. set by updateVisibleList (main thread).
 	 */
-	boolean isLocked;
+	// boolean isLocked;
 
 	/**
 	 * tile has new data to upload to gl
@@ -63,29 +63,38 @@ class MapTile extends JobTile {
 	 */
 	QuadTree rel;
 
-	byte lastDraw = 0;
+	int lastDraw = 0;
 
 	// keep track which tiles are locked as proxy for this tile
 	final static int PROXY_PARENT = 16;
 	final static int PROXY_GRAMPA = 32;
+	final static int PROXY_HOLDER = 64;
 	// 1-8: children
 	byte proxies;
 
 	// counting the tiles that use this tile as proxy
 	byte refs;
 
+	byte locked;
+
+	// this tile sits in fo another tile. e.g. x:-1,y:0,z:1 for x:1,y:0
+	MapTile holder;
+
 	boolean isActive() {
 		return isLoading || newData || isReady;
 	}
 
 	boolean isLocked() {
-		return isLocked || refs > 0;
+		return locked > 0 || refs > 0;
 	}
 
 	void lock() {
-		isLocked = true;
+		if (holder != null)
+			return;
 
-		if (isReady || newData)
+		locked++;
+
+		if (locked > 1 || isReady || newData)
 			return;
 
 		MapTile p = rel.parent.tile;
@@ -113,9 +122,12 @@ class MapTile extends JobTile {
 	}
 
 	void unlock() {
-		isLocked = false;
+		if (holder != null)
+			return;
 
-		if (proxies == 0)
+		locked--;
+
+		if (locked > 0 || proxies == 0)
 			return;
 
 		if ((proxies & (1 << 4)) != 0) {

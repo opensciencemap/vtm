@@ -38,6 +38,8 @@ public class MapDatabase implements IMapDatabase {
 	// private Tag[] mTags = { new Tag("boundary", "administrative"), new
 	// Tag("admin_level", "2") };
 	private Tag[] mTags = { new Tag("natural", "water") };
+	private Tag[] mTagsWay = { new Tag("highway", "primary"), new Tag("name", "Highway Rd") };
+
 	private Tag[] mNameTags;
 
 	private final MapInfo mMapInfo =
@@ -50,10 +52,12 @@ public class MapDatabase implements IMapDatabase {
 	@Override
 	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 
-		float lat1 = -0.5f;
-		float lon1 = -0.5f;
-		float lat2 = Tile.TILE_SIZE + 0.5f;
-		float lon2 = Tile.TILE_SIZE + 0.5f;
+		int size = Tile.TILE_SIZE;
+
+		float lat1 = -1;
+		float lon1 = -1;
+		float lat2 = size + 1;
+		float lon2 = size + 1;
 
 		mCoords[0] = lon1;
 		mCoords[1] = lat1;
@@ -70,13 +74,13 @@ public class MapDatabase implements IMapDatabase {
 		mCoords[8] = lon1;
 		mCoords[9] = lat1;
 
-		mIndex[0] = 8;
-		mIndex[1] = 2;
+		mIndex[0] = 10;
+		mIndex[1] = 0;
 
 		lon1 = 40;
-		lon2 = Tile.TILE_SIZE - 40;
+		lon2 = size - 40;
 		lat1 = 40;
-		lat2 = Tile.TILE_SIZE - 40;
+		lat2 = size - 40;
 
 		mCoords[10] = lon1;
 		mCoords[11] = lat1;
@@ -93,19 +97,84 @@ public class MapDatabase implements IMapDatabase {
 		mCoords[18] = lon1;
 		mCoords[19] = lat1;
 
-		mIndex[2] = 8;
-		mIndex[3] = 2;
+		mIndex[2] = 10;
+		mIndex[3] = 0;
 
 		mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, mIndex, true);
 
-		lon1 = Tile.TILE_SIZE / 2;
-		lat1 = Tile.TILE_SIZE / 2;
+		mIndex[0] = 4;
+		mIndex[1] = -1;
 
-		mNameTags = new Tag[2];
-		mNameTags[0] = new Tag("place", "city");
-		mNameTags[1] = new Tag("name", tile.toString());
-		mapDatabaseCallback.renderPointOfInterest((byte) 0, mNameTags, (int) lat1,
-				(int) lon1);
+		// middle horizontal
+		mCoords[0] = 0;
+		mCoords[1] = size / 2;
+		mCoords[2] = size;
+		mCoords[3] = size / 2;
+		Tag[] tags = new Tag[2];
+		tags[0] = mTagsWay[0];
+		tags[1] = mTagsWay[1];
+		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex, false);
+
+		// center up
+		mCoords[0] = size / 2;
+		mCoords[1] = -size / 2;
+		mCoords[2] = size / 2;
+		mCoords[3] = size / 2;
+		tags = new Tag[2];
+		tags[0] = mTagsWay[0];
+		tags[1] = mTagsWay[1];
+		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex,
+				false);
+
+		// center down
+		mCoords[0] = size / 2;
+		mCoords[1] = size / 2;
+		mCoords[2] = size / 2;
+		mCoords[3] = size / 2 + size;
+		tags = new Tag[2];
+		tags[0] = mTagsWay[0];
+		tags[1] = mTagsWay[1];
+		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex, false);
+
+		// left-top to center
+		mCoords[0] = size / 2;
+		mCoords[1] = size / 2;
+		mCoords[2] = 10;
+		mCoords[3] = 10;
+		tags = new Tag[2];
+		tags[0] = mTagsWay[0];
+		tags[1] = mTagsWay[1];
+		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false);
+
+		// middle horizontal
+		mCoords[0] = 0;
+		mCoords[1] = 10;
+		mCoords[2] = size;
+		mCoords[3] = 10;
+		tags = new Tag[2];
+		tags[0] = mTagsWay[0];
+		tags[1] = mTagsWay[1];
+		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false);
+
+		// middle horizontal
+		mCoords[0] = 10;
+		mCoords[1] = 0;
+		mCoords[2] = 10;
+		mCoords[3] = size;
+		tags = new Tag[2];
+		tags[0] = mTagsWay[0];
+		tags[1] = mTagsWay[1];
+		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false);
+
+		// lon1 = size / 2;
+		// lat1 = size / 2;
+
+		// mNameTags = new Tag[2];
+		// mNameTags[0] = new Tag("place", "city");
+		// mNameTags[1] = new Tag("name", tile.toString());
+		// mapDatabaseCallback.renderPointOfInterest((byte) 0, mNameTags, (int)
+		// lat1,
+		// (int) lon1);
 
 		return QueryResult.SUCCESS;
 	}

@@ -54,8 +54,8 @@ public class TextRenderer {
 	private static int mVerticesVBO;
 
 	private static int mTextProgram;
-	private static int hTextUVPMatrix;
-	private static int hTextRotationMatrix;
+	private static int hTextMVMatrix;
+	private static int hTextProjectionMatrix;
 	private static int hTextVertex;
 	private static int hTextScale;
 	private static int hTextTextureCoord;
@@ -83,11 +83,10 @@ public class TextRenderer {
 		mTextProgram = GlUtils.createProgram(Shaders.textVertexShader,
 				Shaders.textFragmentShader);
 
-		hTextUVPMatrix = GLES20.glGetUniformLocation(mTextProgram, "mvp");
-		hTextRotationMatrix = GLES20.glGetUniformLocation(mTextProgram, "rotation");
-
+		hTextMVMatrix = GLES20.glGetUniformLocation(mTextProgram, "u_mv");
+		hTextProjectionMatrix = GLES20.glGetUniformLocation(mTextProgram, "u_proj");
+		hTextScale = GLES20.glGetUniformLocation(mTextProgram, "u_scale");
 		hTextVertex = GLES20.glGetAttribLocation(mTextProgram, "vertex");
-		hTextScale = GLES20.glGetUniformLocation(mTextProgram, "scale");
 		hTextTextureCoord = GLES20.glGetAttribLocation(mTextProgram, "tex_coord");
 
 	}
@@ -150,12 +149,6 @@ public class TextRenderer {
 			indices[i + 3] = (short) (j + 2);
 			indices[i + 4] = (short) (j + 3);
 			indices[i + 5] = (short) (j + 0);
-			// indices[i + 0] = (short) (j + 0);
-			// indices[i + 1] = (short) (j + 0);
-			// indices[i + 2] = (short) (j + 1);
-			// indices[i + 3] = (short) (j + 3);
-			// indices[i + 4] = (short) (j + 2);
-			// indices[i + 5] = (short) (j + 2);
 		}
 
 		mShortBuffer.clear();
@@ -192,7 +185,7 @@ public class TextRenderer {
 			if (tex.tile == null)
 				break;
 
-			if (!tex.tile.isLocked)
+			if (!tex.tile.isLocked())
 				break;
 
 			tex = null;
@@ -293,11 +286,10 @@ public class TextRenderer {
 
 			if (t.caption != null) {
 				x1 = x3 = (short) (SCALE * (-hw));
-				y1 = y3 = (short) (SCALE * (-hh));
+				y1 = y3 = (short) (SCALE * (hh));
 				x2 = x4 = (short) (SCALE * (hw));
-				y2 = y4 = (short) (SCALE * (hh));
-			}
-			else {
+				y2 = y4 = (short) (SCALE * (-hh));
+			} else {
 				float vx = t.x1 - t.x2;
 				float vy = t.y1 - t.y2;
 				float a = FloatMath.sqrt(vx * vx + vy * vy);
@@ -322,14 +314,14 @@ public class TextRenderer {
 				// x3 = (short) (dx | 2);
 				// y2 = (short) (dy | 2);
 
-				x1 = (short) (SCALE * (vx * hw + ux * hh));
-				y1 = (short) (SCALE * (vy * hw + uy * hh));
-				x2 = (short) (SCALE * (-vx * hw + ux * hh));
-				y3 = (short) (SCALE * (-vy * hw + uy * hh));
-				x4 = (short) (SCALE * (-vx * hw - ux * hh));
-				y4 = (short) (SCALE * (-vy * hw - uy * hh));
-				x3 = (short) (SCALE * (vx * hw - ux * hh));
-				y2 = (short) (SCALE * (vy * hw - uy * hh));
+				x1 = (short) (SCALE * (vx * hw - ux * hh));
+				y1 = (short) (SCALE * (vy * hw - uy * hh));
+				x2 = (short) (SCALE * (-vx * hw - ux * hh));
+				y3 = (short) (SCALE * (-vy * hw - uy * hh));
+				x4 = (short) (SCALE * (-vx * hw + ux * hh));
+				y4 = (short) (SCALE * (-vy * hw + uy * hh));
+				x3 = (short) (SCALE * (vx * hw + ux * hh));
+				y2 = (short) (SCALE * (vy * hw + uy * hh));
 
 			}
 			short u1 = (short) (SCALE * x);
@@ -394,7 +386,8 @@ public class TextRenderer {
 		GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mBitmap,
 				mBitmapFormat, mBitmapType);
 
-		// FIXME shouldnt be needed here, still looking for sometimes corrupted labels..
+		// FIXME shouldnt be needed here, still looking for sometimes corrupted
+		// labels..
 		GLES20.glFlush();
 
 		return true;
@@ -412,7 +405,7 @@ public class TextRenderer {
 
 		for (int i = 0; i < mTextures.length; i++) {
 			tex = mTextures[i];
-			if (tex.tile == null || !tex.tile.isLocked)
+			if (tex.tile == null) // || !tex.tile.isLocked)
 				continue;
 
 			mShortBuffer.put(tex.vertices, 0, tex.length);
@@ -426,14 +419,14 @@ public class TextRenderer {
 				mShortBuffer);
 	}
 
-	static void beginDraw(float scale, float[] rotation) {
+	static void beginDraw(float scale, float[] projection) {
 		GLES20.glUseProgram(mTextProgram);
 
 		GLES20.glEnableVertexAttribArray(hTextTextureCoord);
 		GLES20.glEnableVertexAttribArray(hTextVertex);
 
 		GLES20.glUniform1f(hTextScale, scale);
-		GLES20.glUniformMatrix4fv(hTextRotationMatrix, 1, false, rotation, 0);
+		GLES20.glUniformMatrix4fv(hTextProjectionMatrix, 1, false, projection, 0);
 
 		if (debug) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
@@ -461,7 +454,7 @@ public class TextRenderer {
 
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tile.texture.id);
 
-		GLES20.glUniformMatrix4fv(hTextUVPMatrix, 1, false, matrix, 0);
+		GLES20.glUniformMatrix4fv(hTextMVMatrix, 1, false, matrix, 0);
 
 		if (debug) {
 			GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);

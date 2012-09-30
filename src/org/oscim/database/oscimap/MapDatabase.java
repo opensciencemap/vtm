@@ -65,8 +65,8 @@ public class MapDatabase implements IMapDatabase {
 	private static final String CACHE_FILE = "%d-%d-%d.tile";
 
 	private static final String SERVER_ADDR = "city.informatik.uni-bremen.de";
-	private static final String URL = "/osci/map-live/";
-	// private static final String URL = "/osci/oscim/";
+	// private static final String URL = "/osci/map-live/";
+	private static final String URL = "/osci/oscim/";
 
 	private final static float REF_TILE_SIZE = 4096.0f;
 

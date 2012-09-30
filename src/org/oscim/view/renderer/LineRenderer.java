@@ -18,6 +18,7 @@ import java.nio.ShortBuffer;
 
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.GlUtils;
+import org.oscim.view.MapPosition;
 
 import android.opengl.GLES20;
 import android.util.FloatMath;
@@ -74,26 +75,25 @@ class LineRenderer {
 		return true;
 	}
 
-	// static int mSimple = 1;
+	static LineLayer drawLines(MapPosition pos, LineLayer layer, int next,
+			float[] matrix, float div, int mode, int bufferOffset) {
 
-	static LineLayer drawLines(MapTile tile, LineLayer layer, int next, float[] matrix,
-			float div, double zoom, float scale, int mode) {
-		// int mode = mSimple;
+		int zoom = pos.zoomLevel;
+		float scale = pos.scale;
 
 		if (layer == null)
 			return null;
 
-		// TODO should use fast line program when view is not tilted
 		GLES20.glUseProgram(lineProgram[mode]);
 
 		GLES20.glEnableVertexAttribArray(hLineVertexPosition[mode]);
 		GLES20.glEnableVertexAttribArray(hLineTexturePosition[mode]);
 
 		GLES20.glVertexAttribPointer(hLineVertexPosition[mode], 2, GLES20.GL_SHORT,
-				false, 8, tile.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
+				false, 8, bufferOffset + LINE_VERTICES_DATA_POS_OFFSET);
 
 		GLES20.glVertexAttribPointer(hLineTexturePosition[mode], 2, GLES20.GL_SHORT,
-				false, 8, tile.lineOffset + LINE_VERTICES_DATA_TEX_OFFSET);
+				false, 8, bufferOffset + LINE_VERTICES_DATA_TEX_OFFSET);
 
 		GLES20.glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 
