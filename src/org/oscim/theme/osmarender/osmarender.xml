@@ -144,7 +144,7 @@
 	          
 	       <!-- Heideland, keep below forest -->
 	    <rule e="way" k="*" zoom-min="11" v="heath|sand">
-	      <area fill="#ffffc0" fade="11" />
+	      <area fill="#fffad1" fade="11" />
 	    </rule>
 	      
 	    <rule e="way" k="landuse" v="forest">

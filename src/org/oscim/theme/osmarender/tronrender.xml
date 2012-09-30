@@ -72,7 +72,7 @@
  	
   <style-line name="aeroway:runway"      stroke="#008888" width="1.8" cap="butt" blur="0.7" />
   
-  <style-line name="building"            stroke="#dd999999" width="1.8" fixed="true" cap="butt"/> 
+  <style-line name="building"            stroke="#dd888888" width="1.5" fixed="true" cap="butt"/> 
   <style-area name="building"            fill="#ee202020" fade="15"/>
   
   <!-- ways -->
