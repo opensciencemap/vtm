@@ -29,10 +29,14 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
 
 /**
- * Implementation for multi-touch capable devices. TODO write a AnimationTimer
- * instead of using CountDownTimer
+ * Implementation for multi-touch capable devices.
  */
-public class TouchHandler
+
+// TODO:
+// - write a AnimationTimer instead of using CountDownTimers
+// - fix recognition of tilt/rotate/scale state...
+
+final class TouchHandler
 		extends SimpleOnGestureListener
 		implements ScaleGestureDetector.OnScaleGestureListener {
 
@@ -48,6 +52,7 @@ public class TouchHandler
 	private final float mMapMoveDelta;
 	private boolean mMoveStart;
 	private boolean mBeginRotate;
+	private boolean mBeginTilt;
 	private float mPosX;
 	private float mPosY;
 	private double mAngle;
@@ -87,6 +92,7 @@ public class TouchHandler
 		// #12976
 		// if (event.getAction() != MotionEvent.ACTION_MOVE
 		// || event.getPointerCount() > 1) {
+
 		mScaleGestureDetector.onTouchEvent(event);
 		// }
 
@@ -127,6 +133,7 @@ public class TouchHandler
 
 		mMoveStart = false;
 		mBeginRotate = false;
+		mBeginTilt = false;
 		// save the ID of the pointer
 		mActivePointerId = event.getPointerId(0);
 		// Log.d("...", "set active pointer" + mActivePointerId);
@@ -187,15 +194,18 @@ public class TouchHandler
 		double rad = Math.atan2(dy, dx);
 		double r = rad - mAngle;
 
-		if (!mBeginRotate && Math.abs(dy) < 80) {
+		if (!mBeginRotate && Math.abs(rad) < 0.25 || Math.abs(rad) > Math.PI - 0.25) {
+			// if (Math.abs(moveX) > 3 * mMapMoveDelta) {
+			mBeginTilt = true;
 			if (mMapPosition.tilt(moveY / 4)) {
 				mMapView.redrawMap();
-				return true;
 			}
+			// }
+			return true;
 		}
 
-		if (!mBeginRotate && !mBeginScale) {
-			if (r > 0.02 || r < -0.02)
+		if (!mBeginRotate && !mBeginScale && !mBeginTilt) {
+			if (Math.abs(r) > 0.03)
 				mBeginRotate = true;
 		} else if (mBeginRotate) {
 			double rsin = Math.sin(r);
@@ -405,6 +415,9 @@ public class TouchHandler
 	@Override
 	public boolean onScale(ScaleGestureDetector gd) {
 
+		if (mBeginTilt)
+			return true;
+
 		float scale = gd.getScaleFactor();
 		mFocusX = gd.getFocusX() - mCenterX;
 		mFocusY = gd.getFocusY() - mCenterY;
@@ -414,7 +427,7 @@ public class TouchHandler
 		mTimeEnd = SystemClock.elapsedRealtime();
 
 		if (!mBeginScale) {
-			if (mTimeEnd - mTimeStart > 150 || mSumScale > 1.1 || mSumScale < 0.9) {
+			if (mTimeEnd - mTimeStart > 200 || mSumScale > 1.1 || mSumScale < 0.9) {
 				mBeginScale = true;
 				scale = mSumScale;
 			} else
