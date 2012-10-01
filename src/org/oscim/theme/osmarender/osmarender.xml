@@ -66,7 +66,7 @@
   
   <style-line name="water:outline"       stroke="#a4bbcc" width="1.0" fixed="true" cap="butt" /> 
 	<style-line name="water"               stroke="#b4cbdc" width="1.0" cap="butt" /> 
-  <style-area name="water"               fill="#a3c9f3" />
+  <style-area name="water"               fill="#afcbf3" />
   <!-- no-go area boundary -->
   <style-line name="fence"               stroke="#444444" width="1.2" fixed="true" cap="butt"/>
  	
