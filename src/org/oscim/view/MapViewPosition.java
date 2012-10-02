@@ -66,12 +66,17 @@ public class MapViewPosition {
 	private float[] mTmpMatrix = new float[16];
 
 	private int mHeight, mWidth;
+	public final static float VIEW_SCALE = 1f / 2;
+	public final static float VIEW_DISTANCE = 1;
 
 	void setViewport(int width, int height) {
-		Matrix.frustumM(mProjMatrix, 0, -0.5f * width, 0.5f * width,
-				0.5f * height, -0.5f * height, 1, 2);
+		float sw = VIEW_SCALE;
+		float sh = VIEW_SCALE;
 
-		Matrix.translateM(mProjMatrix, 0, 0, 0, -1);
+		Matrix.frustumM(mProjMatrix, 0, -sw * width, sw * width,
+				sh * height, -sh * height, 1, 2);
+
+		Matrix.translateM(mProjMatrix, 0, 0, 0, -VIEW_DISTANCE);
 
 		Matrix.invertM(mProjMatrixI, 0, mProjMatrix, 0);
 		Matrix.invertM(mUnprojMatrix, 0, mProjMatrix, 0);
@@ -132,7 +137,7 @@ public class MapViewPosition {
 	private void unproject(float x, float y, float z, float[] coords, int position) {
 		mv[0] = x;
 		mv[1] = y;
-		mv[2] = z - 1;
+		mv[2] = z - VIEW_DISTANCE;
 		mv[3] = 1;
 
 		Matrix.multiplyMV(mv, 0, mUnprojMatrix, 0, mv, 0);
@@ -160,6 +165,8 @@ public class MapViewPosition {
 		// get unproject matrix:
 		// (transpose of rotation is its inverse)
 		Matrix.transposeM(mTmpMatrix, 0, mRotateMatrix, 0);
+		// Matrix.invertM(mTmpMatrix, 0, mRotateMatrix, 0);
+
 		// (AB)^-1 = B^-1*A^-1
 		Matrix.multiplyMM(mUnprojMatrix, 0, mTmpMatrix, 0, mProjMatrixI, 0);
 

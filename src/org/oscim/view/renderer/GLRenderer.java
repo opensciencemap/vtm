@@ -453,6 +453,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		if (project)
 			Matrix.multiplyMM(matrix, 0, mProjMatrix, 0, matrix, 0);
+
 	}
 
 	private static float scaleDiv(MapTile t) {
@@ -528,17 +529,33 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 			float s = Tile.TILE_SIZE;
 			float scale = mapPosition.scale / div;
-			double px = mapPosition.x * div;
-			double py = mapPosition.y * div;
+			float px = (float) mapPosition.x * div;
+			float py = (float) mapPosition.y * div;
 
 			for (int i = 0; i < 8; i += 2) {
-				coords[i + 0] = (float) ((px + coords[i + 0] / scale) / s);
-				coords[i + 1] = (float) ((py + coords[i + 1] / scale) / s);
+				coords[i + 0] = (px + coords[i + 0] / scale) / s;
+				coords[i + 1] = (py + coords[i + 1] / scale) / s;
 			}
 
 			mHolderCount = 0;
 			mScanBox.scan(coords, tiles[0].zoomLevel);
 			tileCnt += mHolderCount;
+
+			// // TODO get the right function: trying to accomodate for the
+			// y-stretching introduced by the perspective transformation...
+			// float sw, sh;
+			// sw = MapViewPosition.VIEW_SCALE;
+			// sh = MapViewPosition.VIEW_SCALE;
+			// sh += (mMapViewPosition.mTilt / 150);
+			//
+			// Matrix.frustumM(mProjMatrix, 0, -sw * mWidth, sw * mWidth,
+			// sh * mHeight, -sh * mHeight, 1, 2);
+			//
+			// Matrix.translateM(mProjMatrix, 0, 0, 0,
+			// -MapViewPosition.VIEW_DISTANCE);
+			//
+			// mProjMatrix[10] = 0;
+			// mProjMatrix[14] = 0;
 		}
 
 		uploadCnt = 0;
@@ -795,13 +812,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mWidth = width;
 		mHeight = height;
 
-		float s = 0.5f;
 		// use this to scale only the view to see better which tiles are
 		// rendered
-		// s = 1.0f;
+		float s = MapViewPosition.VIEW_SCALE;
 		Matrix.frustumM(mProjMatrix, 0, -s * width, s * width,
 				s * height, -s * height, 1, 2);
-		Matrix.translateM(mProjMatrix, 0, 0, 0, -1);
+
+		Matrix.translateM(mProjMatrix, 0, 0, 0, -MapViewPosition.VIEW_DISTANCE);
 
 		// set to zero: we modify the z value with polygon-offset for clipping
 		mProjMatrix[10] = 0;
