@@ -208,14 +208,14 @@ public class MapRenderer extends GLSurfaceView {
 		float s = Tile.TILE_SIZE;
 		// load some additional tiles more than currently visible
 		float scale = mapPosition.scale * 0.75f;
-		double px = mapPosition.x;
-		double py = mapPosition.y;
+		float px = (float) mapPosition.x;
+		float py = (float) mapPosition.y;
 		float[] coords = mTileCoords;
 		int zdir = 0;
 
 		for (int i = 0; i < 8; i += 2) {
-			coords[i + 0] = (float) ((px + coords[i + 0] / scale) / s);
-			coords[i + 1] = (float) ((py + coords[i + 1] / scale) / s);
+			coords[i + 0] = (px + coords[i + 0] / scale) / s;
+			coords[i + 1] = (py + coords[i + 1] / scale) / s;
 		}
 
 		for (int i = 0; i < 8; i++)
