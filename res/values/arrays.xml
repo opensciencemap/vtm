@@ -6,7 +6,7 @@
         <!-- <item>MAP_READER</item> --> 
         <!--  <item>POSTGIS_READER</item> -->
         <item>PBMAP_READER</item>
-       <!--  <item>OSCIMAP_READER</item> -->
+      	<item>OSCIMAP_READER</item>
 	      <item>TEST_READER</item>
         </string-array>
 

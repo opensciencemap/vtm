@@ -2,11 +2,10 @@
 <resources>
 
     <string-array name="preferences_map_generator_values">
-
         <!-- <item>Mapfile</item> -->
         <!-- <item>PostGIS</item> -->
         <item>OpenScienceMap</item>
-     <!--    <item>OpenScienceMap2</item> -->
+        <item>OpenScienceMap2</item> 
         <item>Test</item>
         </string-array>
     <string-array name="preferences_scale_bar_unit_values">
