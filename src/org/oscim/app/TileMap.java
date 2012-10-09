@@ -4,21 +4,18 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 
 import org.oscim.app.filefilter.FilterByFileExtension;
-import org.oscim.app.filefilter.ValidMapFile;
 import org.oscim.app.filefilter.ValidRenderTheme;
 import org.oscim.app.filepicker.FilePicker;
 import org.oscim.app.preferences.EditPreferences;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.MapPosition;
 import org.oscim.database.MapDatabases;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.utils.AndroidUtils;
 import org.oscim.view.DebugSettings;
 import org.oscim.view.MapActivity;
-import org.oscim.view.MapPosition;
 import org.oscim.view.MapView;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -59,11 +56,11 @@ public class TileMap extends MapActivity {
 	private static final int DIALOG_ENTER_COORDINATES = 0;
 	private static final int DIALOG_INFO_MAP_FILE = 1;
 	private static final int DIALOG_LOCATION_PROVIDER_DISABLED = 2;
-	private static final FileFilter FILE_FILTER_EXTENSION_MAP =
-			new FilterByFileExtension(".map");
+	// private static final FileFilter FILE_FILTER_EXTENSION_MAP =
+	// new FilterByFileExtension(".map");
 	private static final FileFilter FILE_FILTER_EXTENSION_XML =
 			new FilterByFileExtension(".xml");
-	private static final int SELECT_MAP_FILE = 0;
+	// private static final int SELECT_MAP_FILE = 0;
 	private static final int SELECT_RENDER_THEME_FILE = 1;
 
 	LocationHandler mLocation;
@@ -232,11 +229,12 @@ public class TileMap extends MapActivity {
 		return mMapView.onTrackballEvent(event);
 	}
 
-	private void startMapFilePicker() {
-		FilePicker.setFileDisplayFilter(FILE_FILTER_EXTENSION_MAP);
-		FilePicker.setFileSelectFilter(new ValidMapFile());
-		startActivityForResult(new Intent(this, FilePicker.class), SELECT_MAP_FILE);
-	}
+	// private void startMapFilePicker() {
+	// FilePicker.setFileDisplayFilter(FILE_FILTER_EXTENSION_MAP);
+	// FilePicker.setFileSelectFilter(new ValidMapFile());
+	// startActivityForResult(new Intent(this, FilePicker.class),
+	// SELECT_MAP_FILE);
+	// }
 
 	private void startRenderThemePicker() {
 		FilePicker.setFileDisplayFilter(FILE_FILTER_EXTENSION_XML);
@@ -598,12 +596,12 @@ public class TileMap extends MapActivity {
 		// }
 	}
 
-	static class VersionHelper {
-		@TargetApi(11)
-		static void refreshActionBarMenu(Activity activity) {
-			activity.invalidateOptionsMenu();
-		}
-	}
+	// static class VersionHelper {
+	// @TargetApi(11)
+	// static void refreshActionBarMenu(Activity activity) {
+	// activity.invalidateOptionsMenu();
+	// }
+	// }
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {

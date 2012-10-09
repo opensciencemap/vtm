@@ -162,7 +162,7 @@
 			default="false" />
 	</xs:complexType>
 
-	<xs:complexType name="pathText">
+	<xs:complexType name="text">
 		<xs:attribute name="style" type="xs:string" use="optional" default="0"/>
 		<xs:attribute name="k" type="tns:textKey" use="required" />
 		<xs:attribute name="dy" type="xs:float" use="optional"
@@ -179,6 +179,8 @@
 			default="#000000" />
 		<xs:attribute name="stroke-width" type="tns:nonNegativeFloat"
 			use="optional" default="0" />
+		<xs:attribute name="caption" type="xs:boolean" use="optional"
+			default="false" />
 	</xs:complexType>
 
 	<xs:complexType name="symbol">
@@ -198,8 +200,8 @@
 			<xs:element name="line" type="tns:line" />
 			<xs:element name="outline" type="tns:outline" />
 			<xs:element name="lineSymbol" type="tns:lineSymbol" />
-			<xs:element name="pathText" type="tns:pathText" />
-			<xs:element name="stylePathText type="xs:string" />
+			<xs:element name="text" type="tns:text" />
+			<xs:element name="styletext type="xs:string" />
 			<xs:element name="symbol" type="tns:symbol" />
 		</xs:choice>
 		<xs:attribute name="e" type="tns:elementList" use="required" />
@@ -218,7 +220,7 @@
 	<xs:complexType name="rendertheme">
 	  <xs:sequence minOccurs="0" maxOccurds="256">
 	  <xs:choice minOccurs="0" maxOccurs="unbounded">
-	  	<xs:element name="style-pathtext" type="tns:pathText" />
+	  	<xs:element name="style-text" type="tns:text" />
 	  	<xs:element name="style-area" type="tns:area" />
 	  </xs:choice>
 	  </xs:sequence)

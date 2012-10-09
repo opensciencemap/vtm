@@ -17,6 +17,7 @@ package org.oscim.view;
 import java.io.FileNotFoundException;
 
 import org.oscim.core.GeoPoint;
+import org.oscim.core.MapPosition;
 import org.oscim.theme.InternalRenderTheme;
 
 import android.app.Activity;
@@ -24,14 +25,17 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
 /**
- * MapActivity is the abstract base class which must be extended in order to use a {@link MapView}. There are no
- * abstract methods in this implementation which subclasses need to override and no API key or registration is required.
+ * MapActivity is the abstract base class which must be extended in order to use
+ * a {@link MapView}. There are no abstract methods in this implementation which
+ * subclasses need to override and no API key or registration is required.
  * <p>
- * A subclass may create a MapView either via one of the MapView constructors or by inflating an XML layout file. It is
- * possible to use more than one MapView at the same time.
+ * A subclass may create a MapView either via one of the MapView constructors or
+ * by inflating an XML layout file. It is possible to use more than one MapView
+ * at the same time.
  * <p>
- * When the MapActivity is shut down, the current center position, zoom level and map file of the MapView are saved in a
- * preferences file and restored in the next startup process.
+ * When the MapActivity is shut down, the current center position, zoom level
+ * and map file of the MapView are saved in a preferences file and restored in
+ * the next startup process.
  */
 public abstract class MapActivity extends Activity {
 	private static final String KEY_LATITUDE = "latitude";
@@ -88,6 +92,12 @@ public abstract class MapActivity extends Activity {
 		mMapView.onResume();
 	}
 
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mMapView.onStop();
+	}
+
 	/**
 	 * This method is called once by each MapView during its setup process.
 	 * 
@@ -104,7 +114,8 @@ public abstract class MapActivity extends Activity {
 			//
 			// if (sharedPreferences.contains(KEY_MAP_FILE)) {
 			// // get and set the map file
-			// mapView.setMapFile(sharedPreferences.getString(KEY_MAP_FILE, null));
+			// mapView.setMapFile(sharedPreferences.getString(KEY_MAP_FILE,
+			// null));
 			// }
 
 			// get and set the map position and zoom level

@@ -14,7 +14,7 @@
  */
 package org.oscim.view;
 
-import org.oscim.view.renderer.TileGenerator;
+import org.oscim.renderer.TileGenerator;
 
 import android.content.Context;
 import android.os.Handler;

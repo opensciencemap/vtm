@@ -24,7 +24,8 @@ public class WebMercator {
 	 */
 	public static final String NAME = "SphericalMercator";
 
-	private static final double f900913 = 20037508.342789244;
+	// earth radius * pi, roughly
+	public static final double f900913 = 20037508.342789244;
 	private static final double f900913_2 = 20037508.342789244 * 2;
 
 	/**

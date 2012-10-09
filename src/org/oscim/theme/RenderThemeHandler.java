@@ -26,13 +26,12 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.AreaLevel;
-import org.oscim.theme.renderinstruction.Caption;
 import org.oscim.theme.renderinstruction.Circle;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.LineSymbol;
-import org.oscim.theme.renderinstruction.PathText;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.renderinstruction.Symbol;
+import org.oscim.theme.renderinstruction.Text;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -55,7 +54,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
 	private static final String ELEMENT_NAME_RULE = "rule";
-	private static final String ELEMENT_NAME_STYPE_PATH_TEXT = "style-pathtext";
+	private static final String ELEMENT_NAME_STYLE_TEXT = "style-text";
 	private static final String ELEMENT_NAME_STYLE_AREA = "style-area";
 	private static final String ELEMENT_NAME_STYLE_LINE = "style-line";
 	private static final String ELEMENT_NAME_STYLE_OUTLINE = "style-outline";
@@ -68,7 +67,8 @@ public class RenderThemeHandler extends DefaultHandler {
 	/**
 	 * @param inputStream
 	 *            an input stream containing valid render theme XML data.
-	 * @return a new RenderTheme which is created by parsing the XML data from the input stream.
+	 * @return a new RenderTheme which is created by parsing the XML data from
+	 *         the input stream.
 	 * @throws SAXException
 	 *             if an error occurs while parsing the render theme XML.
 	 * @throws ParserConfigurationException
@@ -171,11 +171,11 @@ public class RenderThemeHandler extends DefaultHandler {
 				mRuleStack.push(mCurrentRule);
 			}
 
-			else if (ELEMENT_NAME_STYPE_PATH_TEXT.equals(localName)) {
+			else if (ELEMENT_NAME_STYLE_TEXT.equals(localName)) {
 				checkState(localName, Element.STYLE);
-				PathText pathText = PathText.create(localName, attributes);
-				tmpStyleHash.put("t" + pathText.style, pathText);
-				// System.out.println("add style: " + pathText.style);
+				Text text = Text.create(localName, attributes, false);
+				tmpStyleHash.put("t" + text.style, text);
+				// System.out.println("add style: " + text.style);
 			}
 
 			else if (ELEMENT_NAME_STYLE_AREA.equals(localName)) {
@@ -194,7 +194,8 @@ public class RenderThemeHandler extends DefaultHandler {
 						Line line = Line.create((Line) ri, localName, attributes, 0,
 								false);
 						tmpStyleHash.put("l" + line.style, line);
-						// System.out.println("add style: " + line.style + " from " + style);
+						// System.out.println("add style: " + line.style +
+						// " from " + style);
 					}
 					else {
 						Log.d("...", "this aint no style! " + style);
@@ -222,8 +223,11 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			else if ("caption".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Caption caption = Caption.create(localName, attributes);
-				mCurrentRule.addRenderingInstruction(caption);
+				Text text = Text.create(localName, attributes, true);
+				mCurrentRule.addRenderingInstruction(text);
+
+				// Caption caption = Caption.create(localName, attributes);
+				// mCurrentRule.addRenderingInstruction(caption);
 			}
 
 			else if ("circle".equals(localName)) {
@@ -244,10 +248,10 @@ public class RenderThemeHandler extends DefaultHandler {
 				mCurrentRule.addRenderingInstruction(lineSymbol);
 			}
 
-			else if ("pathText".equals(localName)) {
+			else if ("text".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				PathText pathText = PathText.create(localName, attributes);
-				mCurrentRule.addRenderingInstruction(pathText);
+				Text text = Text.create(localName, attributes, false);
+				mCurrentRule.addRenderingInstruction(text);
 			}
 
 			else if ("symbol".equals(localName)) {
@@ -262,7 +266,8 @@ public class RenderThemeHandler extends DefaultHandler {
 				if (style != null) {
 					Line line = (Line) tmpStyleHash.get("l" + style);
 					if (line != null) {
-						// System.out.println("found style line : " + line.style);
+						// System.out.println("found style line : " +
+						// line.style);
 						Line newLine = Line.create(line, localName, attributes,
 								mLevel++, false);
 
@@ -290,13 +295,13 @@ public class RenderThemeHandler extends DefaultHandler {
 						mCurrentRule.addRenderingInstruction(new AreaLevel(area,
 								mLevel++));
 					else
-						Log.d("...", "this aint no style inna di area! " + style);
+						Log.d("...", "this aint no style inna d'area! " + style);
 				}
 			} else if (ELEMENT_NAME_USE_STYLE_PATH_TEXT.equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				String style = attributes.getValue("name");
 				if (style != null) {
-					PathText pt = (PathText) tmpStyleHash.get("t" + style);
+					Text pt = (Text) tmpStyleHash.get("t" + style);
 					if (pt != null)
 						mCurrentRule.addRenderingInstruction(pt);
 					else

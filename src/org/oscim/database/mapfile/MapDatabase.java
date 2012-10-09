@@ -30,7 +30,7 @@ import org.oscim.database.QueryResult;
 import org.oscim.database.mapfile.header.MapFileHeader;
 import org.oscim.database.mapfile.header.MapFileInfo;
 import org.oscim.database.mapfile.header.SubFileParameter;
-import org.oscim.view.generator.JobTile;
+import org.oscim.generator.JobTile;
 
 import android.os.Environment;
 
@@ -819,7 +819,7 @@ public class MapDatabase implements IMapDatabase {
 		Tag[] wayTags = sMapFileHeader.getMapFileInfo().wayTags;
 		int[] textPos = new int[3];
 		// float[] labelPosition;
-		boolean skippedWays = false;
+		// boolean skippedWays = false;
 		int wayDataBlocks;
 
 		// skip string block
@@ -858,7 +858,7 @@ public class MapDatabase implements IMapDatabase {
 					if (tags == null)
 						return false;
 
-					skippedWays = true;
+					// skippedWays = true;
 
 					mReadBuffer.setBufferPosition(pos);
 				}
@@ -885,12 +885,12 @@ public class MapDatabase implements IMapDatabase {
 			// bit 5-8 represent the number of tag IDs
 			byte numberOfTags = (byte) (specialByte & WAY_NUMBER_OF_TAGS_BITMASK);
 
-			boolean changed = skippedWays;
-			skippedWays = false;
+			// boolean changed = skippedWays;
+			// skippedWays = false;
 
 			if (numberOfTags != 0) {
 				tags = mReadBuffer.readTags(wayTags, numberOfTags);
-				changed = true;
+				// changed = true;
 			}
 			if (tags == null)
 				return false;
@@ -904,8 +904,8 @@ public class MapDatabase implements IMapDatabase {
 			// check if the way has a name
 			if ((featureByte & WAY_FEATURE_NAME) != 0) {
 				textPos[0] = mReadBuffer.readUnsignedInt();
-				String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset
-						+ textPos[0]);
+				// String str =
+				mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos[0]);
 				// if (changed) {
 				// Tag[] tmp = tags;
 				// tags = new Tag[tmp.length + 1];

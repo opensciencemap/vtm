@@ -62,26 +62,26 @@ public final class Symbol extends RenderInstruction {
 		}
 	}
 
-	private final Bitmap mBitmap;
+	public final Bitmap bitmap;
 
-	private Symbol(String src) throws IOException {
+	public Symbol(String src) throws IOException {
 		super();
 
-		mBitmap = BitmapUtils.createBitmap(src);
+		bitmap = BitmapUtils.createBitmap(src);
 	}
 
 	@Override
 	public void destroy() {
-		mBitmap.recycle();
+		bitmap.recycle();
 	}
 
 	@Override
 	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
-		renderCallback.renderPointOfInterestSymbol(mBitmap);
+		renderCallback.renderPointOfInterestSymbol(bitmap);
 	}
 
 	@Override
 	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
-		renderCallback.renderAreaSymbol(mBitmap);
+		renderCallback.renderAreaSymbol(bitmap);
 	}
 }

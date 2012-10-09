@@ -62,7 +62,7 @@ import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
-import org.oscim.view.generator.JobTile;
+import org.oscim.generator.JobTile;
 
 import android.os.Environment;
 import android.os.SystemClock;

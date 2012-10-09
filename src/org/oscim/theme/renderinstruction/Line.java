@@ -49,7 +49,7 @@ public final class Line extends RenderInstruction {
 		String src = null;
 		int stroke = Color.BLACK;
 		float strokeWidth = 0;
-		float[] strokeDasharray = null;
+		int stipple = 0;
 		Cap strokeLinecap = Cap.ROUND;
 		int fade = -1;
 		boolean fixed = false;
@@ -75,8 +75,8 @@ public final class Line extends RenderInstruction {
 				stroke = Color.parseColor(value);
 			} else if ("width".equals(name)) {
 				strokeWidth = Float.parseFloat(value);
-			} else if ("stroke-dasharray".equals(name)) {
-				strokeDasharray = parseFloatArray(value);
+			} else if ("stipple".equals(name)) {
+				stipple = Integer.parseInt(value);
 			} else if ("cap".equals(name)) {
 				strokeLinecap = Cap.valueOf(value.toUpperCase(Locale.ENGLISH));
 			} else if ("fade".equals(name)) {
@@ -91,21 +91,41 @@ public final class Line extends RenderInstruction {
 			}
 		}
 
+		if (stipple != 0)
+			strokeLinecap = Cap.BUTT;
+
 		if (line != null) {
 
 			strokeWidth = line.width + strokeWidth;
 			if (strokeWidth <= 0)
 				strokeWidth = 1;
 
-			return new Line(line, style, src, stroke, strokeWidth, strokeDasharray,
+			return new Line(line, style, src, stroke, strokeWidth, stipple,
 					strokeLinecap, level, fixed, fade, blur, isOutline);
 		}
 
 		if (!isOutline)
 			validate(strokeWidth);
 
-		return new Line(style, src, stroke, strokeWidth, strokeDasharray, strokeLinecap,
+		return new Line(style, src, stroke, strokeWidth, stipple, strokeLinecap,
 				level, fixed, fade, blur, isOutline);
+	}
+
+	public Line(int stroke, float width, Cap cap) {
+		this.level = 0;
+		this.blur = 0;
+		this.cap = cap;
+		this.outline = false;
+		this.style = "";
+		this.width = width;
+		this.fixed = true;
+		this.fade = -1;
+		this.stipple = 2;
+		color = new float[4];
+		color[3] = (stroke >> 24 & 0xff) / 255.0f;
+		color[0] = (stroke >> 16 & 0xff) / 255.0f * color[3];
+		color[1] = (stroke >> 8 & 0xff) / 255.0f * color[3];
+		color[2] = (stroke >> 0 & 0xff) / 255.0f * color[3];
 	}
 
 	private static void validate(float strokeWidth) {
@@ -124,34 +144,16 @@ public final class Line extends RenderInstruction {
 		return dashIntervals;
 	}
 
-	/**
-	 * 
-	 */
 	private final int level;
-	/**
-	 * 
-	 */
-	// public final Paint paint;
-	/**
-	 * 
-	 */
+
 	public final float width;
-	/**
-	 * 
-	 */
-	public final boolean round;
-	/**
-	 * 
-	 */
+
+	// public final boolean round;
+
 	public final float color[];
-	/**
-	 * 
-	 */
+
 	public final boolean outline;
 
-	/**
-	 * 
-	 */
 	public final boolean fixed;
 
 	public final int fade;
@@ -162,8 +164,34 @@ public final class Line extends RenderInstruction {
 
 	public final float blur;
 
+	public final int stipple;
+
+	/**
+	 * @param style
+	 *            ...
+	 * @param src
+	 *            ...
+	 * @param stroke
+	 *            ...
+	 * @param strokeWidth
+	 *            ...
+	 * @param stipple
+	 *            ...
+	 * @param strokeLinecap
+	 *            ...
+	 * @param level
+	 *            ...
+	 * @param fixed
+	 *            ...
+	 * @param fade
+	 *            ...
+	 * @param blur
+	 *            ...
+	 * @param isOutline
+	 *            ...
+	 */
 	private Line(String style, String src, int stroke, float strokeWidth,
-			float[] strokeDasharray, Cap strokeLinecap, int level, boolean fixed,
+			int stipple, Cap strokeLinecap, int level, boolean fixed,
 			int fade, float blur, boolean isOutline) {
 		super();
 
@@ -183,7 +211,7 @@ public final class Line extends RenderInstruction {
 		// }
 		// paint.setStrokeCap(strokeLinecap);
 
-		round = (strokeLinecap == Cap.ROUND);
+		// round = (strokeLinecap == Cap.ROUND);
 
 		this.cap = strokeLinecap;
 
@@ -199,16 +227,43 @@ public final class Line extends RenderInstruction {
 		this.fixed = fixed;
 		this.blur = blur;
 		this.fade = fade;
+		this.stipple = stipple;
 	}
 
+	/**
+	 * @param line
+	 *            ...
+	 * @param style
+	 *            ...
+	 * @param src
+	 *            ...
+	 * @param stroke
+	 *            ...
+	 * @param strokeWidth
+	 *            ...
+	 * @param stipple
+	 *            ...
+	 * @param strokeLinecap
+	 *            ...
+	 * @param level
+	 *            ...
+	 * @param fixed
+	 *            ...
+	 * @param fade
+	 *            ...
+	 * @param blur
+	 *            ...
+	 * @param isOutline
+	 *            ...
+	 */
 	private Line(Line line, String style, String src, int stroke, float strokeWidth,
-			float[] strokeDasharray, Cap strokeLinecap, int level, boolean fixed,
+			int stipple, Cap strokeLinecap, int level, boolean fixed,
 			int fade, float blur, boolean isOutline) {
 		super();
 
 		this.style = style;
 
-		round = (strokeLinecap == Cap.ROUND);
+		// round = (strokeLinecap == Cap.ROUND);
 
 		color = line.color;
 
@@ -219,11 +274,13 @@ public final class Line extends RenderInstruction {
 		this.fade = fade;
 		this.cap = strokeLinecap;
 		this.blur = blur;
+		this.stipple = stipple;
 	}
 
 	@Override
 	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
-		// renderCallback.renderWay(mPaint, mLevel, mColor, mStrokeWidth, mRound, mOutline);
+		// renderCallback.renderWay(mPaint, mLevel, mColor, mStrokeWidth,
+		// mRound, mOutline);
 		renderCallback.renderWay(this, level);
 	}
 

@@ -156,7 +156,7 @@ public class GlUtils {
 		if (alpha >= 1)
 			GLES20.glUniform4fv(handle, 1, c, 0);
 		else
-			glUniform4f(handle, c[0] * alpha, c[1] * alpha, c[2] * alpha, alpha);
+			glUniform4f(handle, c[0] * alpha, c[1] * alpha, c[2] * alpha, c[3] * alpha);
 
 	}
 }

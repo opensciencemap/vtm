@@ -17,6 +17,7 @@ package org.oscim.view;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 
 import android.graphics.Bitmap;

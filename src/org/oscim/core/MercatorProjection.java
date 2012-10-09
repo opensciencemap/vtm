@@ -14,7 +14,6 @@
  */
 package org.oscim.core;
 
-import org.oscim.view.MapPosition;
 
 /**
  * An implementation of the spherical Mercator projection.

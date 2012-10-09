@@ -80,6 +80,41 @@ public final class Area extends RenderInstruction {
 		}
 	}
 
+	public Area(int fill) {
+		this.level = 0;
+		this.style = "";
+		this.fade = -1;
+		blendColor = null;
+		blend = -1;
+		strokeWidth = 0;
+
+		color = new float[4];
+		color[3] = (fill >> 24 & 0xff) / 255.0f;
+		color[0] = (fill >> 16 & 0xff) / 255.0f * color[3];
+		color[1] = (fill >> 8 & 0xff) / 255.0f * color[3];
+		color[2] = (fill >> 0 & 0xff) / 255.0f * color[3];
+	}
+
+	/**
+	 * @param style
+	 *            ...
+	 * @param src
+	 *            ...
+	 * @param fill
+	 *            ...
+	 * @param stroke
+	 *            ...
+	 * @param strokeWidth
+	 *            ...
+	 * @param fade
+	 *            ...
+	 * @param level
+	 *            ...
+	 * @param blend
+	 *            ...
+	 * @param blendFill
+	 *            ...
+	 */
 	private Area(String style, String src, int fill, int stroke, float strokeWidth,
 			int fade, int level, int blend, int blendFill) {
 		super();
