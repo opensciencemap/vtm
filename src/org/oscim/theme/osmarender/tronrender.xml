@@ -4,8 +4,8 @@
              xsi:schemaLocation="http://mapsforge.org/renderTheme ../renderTheme.xsd"
              version="1" map-background="#050508">
 
-  <style-pathtext name="road" k="name"    font-style="bold"  font-size="18" stroke="#606050" fill="#eeffee" stroke-width="2.5" />
-  <style-pathtext name="major-road" k="name" font-style="bold" font-size="19" fill="#e2cf5d" stroke="#101010" stroke-width="2.5" />
+  <style-text name="road" k="name"    font-style="bold"  font-size="18" stroke="#606050" fill="#eeffee" stroke-width="2.5" />
+  <style-text name="major-road" k="name" font-style="bold" font-size="19" fill="#e2cf5d" stroke="#101010" stroke-width="2.5" />
   
   <style-area name="residential"         fill="#ff0000" fade="10"/>
   
@@ -807,7 +807,7 @@
          src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/cable_car.png" 
          /> </rule> <rule e="way" k="aerialway" v="chair_lift"> <lineSymbol src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/chair_lift_2.png" 
          /> </rule> <rule e="way" k="aerialway" v="gondola"> <lineSymbol src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/gondola.png" 
-         /> </rule> <rule e="way" k="*" v="*" zoom-min="14"> <pathText k="name" font-style="bold" 
+         /> </rule> <rule e="way" k="*" v="*" zoom-min="14"> <text k="name" font-style="bold" 
          font-size="10" fill="#606060" stroke="#ffffff" width="2.0" /> </rule> 
          </rule> -->
 

@@ -23,22 +23,23 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.oscim.core.GeoPoint;
+import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.MapDatabaseFactory;
 import org.oscim.database.MapDatabases;
 import org.oscim.database.MapInfo;
 import org.oscim.database.OpenResult;
+import org.oscim.generator.JobQueue;
+import org.oscim.generator.JobTile;
+import org.oscim.generator.MapWorker;
+import org.oscim.renderer.MapRenderer;
+import org.oscim.renderer.TileGenerator;
 import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.RenderTheme;
 import org.oscim.theme.RenderThemeHandler;
 import org.oscim.theme.Theme;
-import org.oscim.view.generator.JobQueue;
-import org.oscim.view.generator.JobTile;
-import org.oscim.view.generator.MapWorker;
-import org.oscim.view.renderer.MapRenderer;
-import org.oscim.view.renderer.TileGenerator;
 import org.xml.sax.SAXException;
 
 import android.content.Context;
@@ -139,7 +140,7 @@ public class MapView extends FrameLayout {
 
 		mJobQueue = new JobQueue();
 
-		mMapRenderer = new MapRenderer(context, this);
+		mMapRenderer = MapRenderer.create(context, this);
 
 		mMapWorkers = new MapWorker[mNumMapWorkers];
 
@@ -519,6 +520,11 @@ public class MapView extends FrameLayout {
 			mCompass.enable();
 
 		mPausing = false;
+	}
+
+	public void onStop() {
+		Log.d(TAG, "onStop");
+		mMapRenderer.destroy();
 	}
 
 	/**

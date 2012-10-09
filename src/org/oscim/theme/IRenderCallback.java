@@ -15,9 +15,8 @@
 package org.oscim.theme;
 
 import org.oscim.theme.renderinstruction.Area;
-import org.oscim.theme.renderinstruction.Caption;
 import org.oscim.theme.renderinstruction.Line;
-import org.oscim.theme.renderinstruction.PathText;
+import org.oscim.theme.renderinstruction.Text;
 
 import android.graphics.Bitmap;
 import android.graphics.Paint;
@@ -37,28 +36,12 @@ public interface IRenderCallback {
 	void renderArea(Area area, int level);
 
 	/**
-	 * Renders an area caption with the given text.
-	 * 
-	 * @param caption
-	 *            the text to be rendered.
-	 */
-	void renderAreaCaption(Caption caption);
-
-	/**
 	 * Renders an area symbol with the given bitmap.
 	 * 
 	 * @param symbol
 	 *            the symbol to be rendered.
 	 */
 	void renderAreaSymbol(Bitmap symbol);
-
-	/**
-	 * Renders a point of interest caption with the given text.
-	 * 
-	 * @param caption
-	 *            the text to be rendered.
-	 */
-	void renderPointOfInterestCaption(Caption caption);
 
 	/**
 	 * Renders a point of interest circle with the given parameters.
@@ -105,8 +88,25 @@ public interface IRenderCallback {
 	/**
 	 * Renders a way with the given text along the way path.
 	 * 
-	 * @param pathText
+	 * @param text
 	 *            ...
 	 */
-	void renderWayText(PathText pathText);
+	void renderWayText(Text text);
+
+	/**
+	 * Renders an area caption with the given text.
+	 * 
+	 * @param text
+	 *            the text to be rendered.
+	 */
+	void renderAreaCaption(Text text);
+
+	/**
+	 * Renders a point of interest caption with the given text.
+	 * 
+	 * @param text
+	 *            the text to be rendered.
+	 */
+	void renderPointOfInterestCaption(Text text);
+
 }

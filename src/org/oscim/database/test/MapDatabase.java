@@ -24,7 +24,7 @@ import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
-import org.oscim.view.generator.JobTile;
+import org.oscim.generator.JobTile;
 
 /**
  * 
@@ -40,7 +40,7 @@ public class MapDatabase implements IMapDatabase {
 	private Tag[] mTags = { new Tag("natural", "water") };
 	private Tag[] mTagsWay = { new Tag("highway", "primary"), new Tag("name", "Highway Rd") };
 
-	private Tag[] mNameTags;
+	// private Tag[] mNameTags;
 
 	private final MapInfo mMapInfo =
 			new MapInfo(new BoundingBox(-180, -90, 180, 90),

@@ -4,8 +4,8 @@
              xsi:schemaLocation="http://mapsforge.org/renderTheme ../renderTheme.xsd"
              version="1" map-background="#fcfcfa">
 
-  <style-pathtext name="road" k="name"    font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
-  <style-pathtext name="major-road" k="name"   font-style="bold" font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
+  <style-text name="road" k="name"    font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
+  <style-text name="major-road" k="name"   font-style="bold" font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
   
   <style-area name="residential"         fill="#f0eee8" fade="10"/>
   
@@ -65,14 +65,14 @@
   <style-line name="steps"               stroke="#f1f0f4" width="0.25" cap="butt" />
   
   <style-line name="water:outline"       stroke="#a4bbcc" width="1.0" fixed="true" cap="butt" /> 
-	<style-line name="water"               stroke="#b4cbdc" width="1.0" cap="butt" /> 
+	<style-line name="water"               stroke="#afcbf3" width="1.0" cap="butt" /> 
   <style-area name="water"               fill="#afcbf3" />
   <!-- no-go area boundary -->
   <style-line name="fence"               stroke="#444444" width="1.2" fixed="true" cap="butt"/>
  	
   <style-line name="aeroway:runway"      stroke="#c8ccbe" width="1.8" cap="butt" />
   
-  <style-line name="building"            stroke="#c9c3c1" width="1.2" fixed="true" cap="butt" fade="15"/> 
+  <style-line name="building"            stroke="#c9c3c1" width="1.0" fixed="true" cap="butt" fade="15"/> 
   <style-area name="building"            fill="#e9e6e3" fade="15"/>
   
   <!-- ways -->
@@ -487,11 +487,11 @@
     </rule>
 
     <!-- outline 1 - 4 -->
-     <style-outline name="1" stroke="#ee605020" width="0.02"/>  
+     <style-outline name="1" stroke="#aa807040" width="0.1"/>  
  <!--    <style-outline name="1" stroke="#404030"/>  -->
     <style-outline name="2" stroke="#c0c0c0" />
-    <style-outline name="primary"  stroke="#7f7700" width="0.025"/>
-    <style-outline name="motorway" stroke="#805f2e" width="0.025"/>
+    <style-outline name="primary"  stroke="#aa7f7700" width="0.1"/>
+    <style-outline name="motorway" stroke="#aa805f2e" width="0.1"/>
 
     
     <!-- highway -->
@@ -499,23 +499,23 @@
       <rule e="way" k="*" v="*" zoom-min="5" zoom-max="10">
  			  <rule e="way" k="area" v="~|no|false">
           <rule e="way" k="*" v="secondary|primary_link" zoom-min="9">
-            <line stroke="#f2df6d" width="1.8" cap="butt" fixed="true" fade="9"/>
+            <line stroke="#f2df6d" width="1.3" cap="butt" fixed="true" fade="9"/>
           </rule>
 
           <rule e="way" k="*" v="trunk_link|motorway_link" zoom-min="8">
-            <line stroke="#fed6a3" width="1.8" cap="butt" fixed="true" fade="8"/>
+            <line stroke="#fed6a3" width="1.4" cap="butt" fixed="true" fade="8"/>
           </rule>
 
           <rule e="way" k="*" v="primary" zoom-min="5">
-            <line stroke="#f2df6d" width="1.8" cap="butt" fixed="true" fade="5"/>
+            <line stroke="#f2df6d" width="1.4" cap="butt" fixed="true" fade="5"/>
           </rule>
 
           <rule e="way" k="*" v="trunk" zoom-min="5">
-            <line stroke="#fed6a3" width="2.0" cap="butt" fixed="true" fade="5"/>
+            <line stroke="#fed6a3" width="1.4" cap="butt" fixed="true" fade="5"/>
           </rule>
 
           <rule e="way" k="*" v="motorway">
-            <line stroke="#eec693" width="2.2" cap="butt" fixed="true" fade="5"/>
+            <line stroke="#eec693" width="1.5" cap="butt" fixed="true" fade="5"/>
           </rule>
         </rule>
       </rule>
@@ -790,7 +790,7 @@
          src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/cable_car.png" 
          /> </rule> <rule e="way" k="aerialway" v="chair_lift"> <lineSymbol src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/chair_lift_2.png" 
          /> </rule> <rule e="way" k="aerialway" v="gondola"> <lineSymbol src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/gondola.png" 
-         /> </rule> <rule e="way" k="*" v="*" zoom-min="14"> <pathText k="name" font-style="bold" 
+         /> </rule> <rule e="way" k="*" v="*" zoom-min="14"> <text k="name" font-style="bold" 
          font-size="10" fill="#606060" stroke="#ffffff" width="2.0" /> </rule> 
          </rule> -->
 
@@ -831,7 +831,7 @@
 
         </rule>
         <rule e="way" k="railway" v="rail|turntable" >
-          <line stroke="#887766" width="0.8" cap="butt" fixed="true" fade="12"/>
+          <line stroke="#ccaa9988" width="1.0" cap="butt" fixed="true" fade="12"/>
         </rule>
         <!-- <rule e="way" k="railway" v="rail" zoom-max="14" zoom-min="13">
              <line stroke="#8888aa" width="0.6" cap="butt"
@@ -969,6 +969,165 @@
              stroke="#ffffff" stroke-width="2.0" /> -->
       </rule>
     </rule>
+    
+    <!-- aeroway -->
+		<rule e="node" k="aeroway" v="*">
+			<rule e="node" k="aeroway" v="helipad" zoom-min="17">
+				<symbol src="jar:symbols/helipad.png" />
+			</rule>
+			<rule e="node" k="aeroway" v="aerodrome|airport" zoom-max="13">
+				<symbol src="jar:symbols/airport.png" />
+			</rule>
+		</rule>
+
+
+		<!-- amenity -->
+		<rule e="node" k="amenity" v="*">
+			<rule e="node" k="amenity" v="atm" zoom-min="17">
+				<symbol src="jar:symbols/atm.png" />
+			</rule>
+			<rule e="node" k="amenity" v="bank" zoom-min="17">
+				<symbol src="jar:symbols/bank.png" />
+			</rule>
+			<rule e="node" k="amenity" v="bench" zoom-min="17">
+				<symbol src="jar:symbols/bench.png" />
+			</rule>
+			<rule e="node" k="amenity" v="bicycle_rental" zoom-min="17">
+				<symbol src="jar:symbols/bicycle_rental.png" />
+			</rule>
+			<rule e="node" k="amenity" v="bus_station" zoom-min="17">
+				<symbol src="jar:symbols/bus_sta.png" />
+			</rule>
+			<rule e="node" k="amenity" v="cafe" zoom-min="17">
+				<symbol src="jar:symbols/cafe.png" />
+			</rule>
+			<rule e="node" k="amenity" v="cinema" zoom-min="17">
+				<symbol src="jar:symbols/cinema.png" />
+			</rule>
+			<rule e="node" k="amenity" v="drinking_water" zoom-min="17">
+				<symbol src="jar:symbols/drinking_water.png" />
+			</rule>
+			<rule e="node" k="amenity" v="fast_food" zoom-min="17">
+				<symbol src="jar:symbols/fastfood.png" />
+			</rule>
+			<rule e="node" k="amenity" v="fire_station" zoom-min="17">
+				<symbol src="jar:symbols/firebrigade.png" />
+			</rule>
+			<rule e="node" k="amenity" v="fountain" zoom-min="17">
+				<symbol src="jar:symbols/fountain.png" />
+			</rule>
+			<rule e="node" k="amenity" v="fuel" zoom-min="17">
+				<symbol src="jar:symbols/petrolStation.png" />
+			</rule>
+			<rule e="node" k="amenity" v="hospital" zoom-min="15">
+				<symbol src="jar:symbols/hospital.png" />
+			</rule>
+			<!-- <rule e="node" k="amenity" v="kindergarten" zoom-min="17">
+				<symbol src="jar:symbols/kindergarten.png" />
+			</rule>-->
+			<rule e="node" k="amenity" v="library" zoom-min="17">
+				<symbol src="jar:symbols/library.png" />
+			</rule>
+			<rule e="node" k="amenity" v="parking" zoom-min="17">
+				<symbol src="jar:symbols/parking.png" />
+			</rule>
+			<rule e="node" k="amenity" v="pharmacy" zoom-min="17">
+				<symbol src="jar:symbols/pharmacy.png" />
+			</rule>
+			<rule e="node" k="amenity" v="place_of_worship" zoom-min="17">
+				<rule e="node" k="denomination|religion" v="jewish">
+					<symbol src="jar:symbols/synagogue.png" />
+				</rule>
+				<rule e="node" k="denomination|religion" v="muslim|moslem">
+					<symbol src="jar:symbols/mosque.png" />
+				</rule>
+				<rule e="node" k="denomination|religion" v="christian">
+					<symbol src="jar:symbols/church.png" />
+				</rule>
+			</rule>
+			<rule e="node" k="amenity" v="post_box" zoom-min="17">
+				<symbol src="jar:symbols/postbox.png" />
+			</rule>
+			<rule e="node" k="amenity" v="post_office" zoom-min="17">
+				<symbol src="jar:symbols/postoffice.png" />
+			</rule>
+			<rule e="node" k="amenity" v="pub|bar" zoom-min="17">
+				<symbol src="jar:symbols/pub.png" />
+			</rule>
+			<!-- <rule e="node" k="amenity" v="recycling" zoom-min="17">
+				<symbol src="jar:symbols/recycling.png" />
+			</rule> -->
+			<rule e="node" k="amenity" v="restaurant" zoom-min="17">
+				<symbol src="jar:symbols/restaurant.png" />
+			</rule>
+			<rule e="node" k="amenity" v="school" zoom-min="17">
+				<symbol src="jar:symbols/school.png" />
+			</rule>
+			<rule e="node" k="amenity" v="shelter" zoom-min="17">
+				<symbol src="jar:symbols/shelter.png" />
+			</rule>
+			<!-- <rule e="node" k="amenity" v="telephone" zoom-min="17">
+				<symbol src="jar:symbols/telephone.png" />
+			</rule> -->
+			<rule e="node" k="amenity" v="theatre" zoom-min="17">
+				<symbol src="jar:symbols/theatre.png" />
+			</rule>
+			<rule e="node" k="amenity" v="toilets" zoom-min="17">
+				<symbol src="jar:symbols/toilets.png" />
+			</rule>
+			<rule e="node" k="amenity" v="university|college" zoom-min="17">
+				<symbol src="jar:symbols/university.png" />
+			</rule>
+
+		<!-- 	<rule e="node" k="*" v="*" zoom-min="17">
+				<caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
+			</rule>-->
+		</rule>
+    
+    <!-- shop -->
+		<rule e="node" k="shop" v="*">
+			<rule e="node" k="shop" v="bakery" zoom-min="17">
+				<symbol src="jar:symbols/bakery.png" />
+			</rule>
+			<rule e="node" k="shop" v="florist" zoom-min="17">
+				<symbol src="jar:symbols/florist.png" />
+			</rule>
+			<rule e="node" k="shop" v="supermarket|organic" zoom-min="17">
+				<symbol src="jar:symbols/supermarket.png" />
+			</rule>
+
+			<rule e="node" k="*" v="*" zoom-min="17">
+				<caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
+			</rule>
+		</rule>
+
+
+		<!-- tourism -->
+		<rule e="node" k="tourism" v="*">
+			<rule e="node" k="tourism" v="alpine_hut" zoom-min="16">
+				<symbol src="jar:symbols/alpine_hut.png" />
+			</rule>
+			<rule e="node" k="tourism" v="camp_site" zoom-min="17">
+				<symbol src="jar:symbols/campSite.png" />
+			</rule>
+			<rule e="node" k="tourism" v="hostel" zoom-min="17">
+				<symbol src="jar:symbols/hostel.png" />
+			</rule>
+			<rule e="node" k="tourism" v="hotel" zoom-min="17">
+				<symbol src="jar:symbols/hotel.png" />
+			</rule>
+			<rule e="node" k="tourism" v="information" zoom-min="17">
+				<symbol src="jar:symbols/information.png" />
+			</rule>
+			<rule e="node" k="tourism" v="viewpoint" zoom-min="15">
+				<symbol src="jar:symbols/viewpoint.png" />
+			</rule>
+
+			<rule e="node" k="*" v="*" zoom-min="17">
+				<caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
+			</rule>
+		</rule>
+    
   </rule>
 
 </rendertheme>

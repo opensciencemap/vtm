@@ -25,16 +25,18 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Shader.TileMode;
 
-final class BitmapUtils {
+public final class BitmapUtils {
 	private static final String PREFIX_FILE = "file:";
 	private static final String PREFIX_JAR = "jar:";
 
 	private static InputStream createInputStream(String src) throws FileNotFoundException {
 		if (src.startsWith(PREFIX_JAR)) {
-			String name = src.substring(PREFIX_JAR.length());
-			InputStream inputStream = Thread.currentThread().getClass().getResourceAsStream(name);
+			String name = "/org/oscim/theme/osmarender/" + src.substring(PREFIX_JAR.length());
+
+			InputStream inputStream = BitmapUtils.class
+					.getResourceAsStream(name);
 			if (inputStream == null) {
-				throw new FileNotFoundException("resource not found: " + src);
+				throw new FileNotFoundException("resource not found: " + src + " " + name);
 			}
 			return inputStream;
 		} else if (src.startsWith(PREFIX_FILE)) {
@@ -51,7 +53,7 @@ final class BitmapUtils {
 		throw new IllegalArgumentException("invalid bitmap source: " + src);
 	}
 
-	static Bitmap createBitmap(String src) throws IOException {
+	public static Bitmap createBitmap(String src) throws IOException {
 		if (src == null || src.length() == 0) {
 			// no image source defined
 			return null;
