@@ -14,12 +14,13 @@
  */
 package org.oscim.renderer;
 
+import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.renderinstruction.Text;
 import org.oscim.utils.GeometryUtils;
 
 import android.util.FloatMath;
 
-final class WayDecorator {
+public final class WayDecorator {
 	// /**
 	// * Minimum distance in pixels before the symbol is repeated.
 	// */
@@ -99,7 +100,7 @@ final class WayDecorator {
 	// }
 	// }
 
-	static TextItem renderText(float[] coordinates, String string, Text text,
+	public static TextItem renderText(float[] coordinates, String string, Text text,
 			int pos, int len, TextItem textItems) {
 		TextItem items = textItems;
 		TextItem t = null;
@@ -256,9 +257,16 @@ final class WayDecorator {
 					}
 
 					// if (t == null)
-					t = new TextItem(x1 + (x2 - x1) / 2, y1 + (y2 - y1) / 2, string,
-							text, wayNameWidth);
+					t = TextItem.get();
+					// t = new TextItem(x1 + (x2 - x1) / 2, y1 + (y2 - y1) / 2,
+					// string,
+					// text, wayNameWidth);
 
+					t.x = x1 + (x2 - x1) / 2f;
+					t.y = y1 + (y2 - y1) / 2f;
+					t.string = string;
+					t.text = text;
+					t.width = wayNameWidth;
 					t.x1 = (short) x1;
 					t.y1 = (short) y1;
 					t.x2 = (short) x2;

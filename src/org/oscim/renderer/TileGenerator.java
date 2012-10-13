@@ -28,6 +28,7 @@ import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.layer.PolygonLayer;
 import org.oscim.renderer.layer.SymbolItem;
 import org.oscim.renderer.layer.SymbolLayer;
+import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderTheme;
 import org.oscim.theme.renderinstruction.Area;
@@ -39,6 +40,7 @@ import org.oscim.view.MapView;
 
 import android.graphics.Bitmap;
 import android.graphics.Paint;
+import android.util.FloatMath;
 import android.util.Log;
 
 /**
@@ -96,6 +98,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private final short[] debugBoxIndex = { 10 };
 
 	private float mProjectionScaleFactor;
+
+	public static void setRenderTheme(RenderTheme theme) {
+		renderTheme = theme;
+	}
 
 	/**
 	 * @param mapView
@@ -243,7 +249,9 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		if (text.textKey == mTagEmptyName.key) {
 
-			TextItem t = new TextItem(mCoords[0], mCoords[1], mTagName.value, text);
+			// TextItem t = new TextItem(mCoords[0], mCoords[1], mTagName.value,
+			// text);
+			TextItem t = TextItem.get().set(mCoords[0], mCoords[1], mTagName.value, text);
 			t.next = mLabels;
 			mLabels = t;
 		}
@@ -258,7 +266,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			return;
 
 		if (text.textKey == mTagEmptyName.key) {
-			TextItem t = new TextItem(mPoiX, mPoiY, mTagName.value, text);
+			TextItem t = TextItem.get().set(mPoiX, mPoiY, mTagName.value, text);
+			// TextItem t = new TextItem(mPoiX, mPoiY, mTagName.value, text);
 			t.next = mLabels;
 			mLabels = t;
 		}
@@ -294,10 +303,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	public void renderPointOfInterestSymbol(Bitmap bitmap) {
 		// Log.d(TAG, "add symbol");
 
-		if (mLayers.symbolLayers == null)
-			mLayers.symbolLayers = new SymbolLayer();
+		if (mLayers.textureLayers == null)
+			mLayers.textureLayers = new SymbolLayer();
 
-		SymbolLayer sl = (SymbolLayer) mLayers.symbolLayers;
+		SymbolLayer sl = (SymbolLayer) mLayers.textureLayers;
 
 		SymbolItem it = new SymbolItem();
 		it.x = mPoiX;
@@ -388,12 +397,13 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mDebugDrawPolygons = !debugSettings.mDisablePolygons;
 		mDebugDrawUnmatched = debugSettings.mDrawUnmatchted;
 
-		if (tile.newData || tile.isReady) {
+		if (tile.newData || tile.isReady || tile.layers != null) {
 			// should be fixed now.
 			Log.d(TAG, "XXX tile already loaded "
 					+ tile + " "
 					+ tile.newData + " "
-					+ tile.isReady + " ");
+					+ tile.isReady + " "
+					+ tile.isLoading);
 			return false;
 		}
 
@@ -406,9 +416,9 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			setScaleStrokeWidth(STROKE_MAX_ZOOM_LEVEL);
 
 		// acount for area changes with latitude
-		mProjectionScaleFactor = 0.5f + (float) (0.5 / Math.cos(MercatorProjection
-				.pixelYToLatitude(tile.pixelY, tile.zoomLevel)
-				* (Math.PI / 180)));
+		mProjectionScaleFactor = 0.5f + 0.5f * (
+				FloatMath.sin((float) (Math.abs(MercatorProjection
+						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180))));
 
 		mLayers = new Layers();
 
@@ -480,10 +490,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	public IMapDatabase getMapDatabase() {
 		return mMapDatabase;
-	}
-
-	public void setRenderTheme(RenderTheme theme) {
-		TileGenerator.renderTheme = theme;
 	}
 
 	@Override

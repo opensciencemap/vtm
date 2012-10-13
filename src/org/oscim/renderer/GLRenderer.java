@@ -37,6 +37,7 @@ import org.oscim.renderer.MapRenderer.TilesData;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.theme.RenderTheme;
+import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
@@ -44,7 +45,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.FloatMath;
 import android.util.Log;
 
 public class GLRenderer implements GLSurfaceView.Renderer {
@@ -61,13 +61,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	static int CACHE_TILES = CACHE_TILES_MAX;
 
 	private final MapView mMapView;
-	private final MapViewPosition mMapViewPosition;
-
-	private static MapPosition mMapPosition;
-
-	// private static ArrayList<BufferObject> mVBOs;
-
 	static int mWidth, mHeight;
+
+	private static MapViewPosition mMapViewPosition;
+	private static MapPosition mMapPosition;
 
 	private static int rotateBuffers = 2;
 	private static ShortBuffer shortBuffer[];
@@ -82,16 +79,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static float[] mTileCoords = new float[8];
 	private static float[] mDebugCoords = new float[8];
 
-	// mNextTiles is set by TileLoader and swapped with
-	// mDrawTiles in onDrawFrame in GL thread.
-	private static TilesData mNextTiles;
-	/* package */static TilesData mDrawTiles;
-
-	// flag set by updateVisibleList when current visible tiles
-	// changed. used in onDrawFrame to flip mNextTiles/mDrawTiles
-	private static boolean mUpdateTiles;
-
-	private float[] mClearColor = null;
+	private static float[] mClearColor = null;
 
 	// number of tiles drawn in one frame
 	private static short mDrawCount = 0;
@@ -99,7 +87,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static boolean mUpdateColor = false;
 
 	// drawlock to synchronize Main- and GL-Thread
-	static ReentrantLock tilelock = new ReentrantLock();
+	// static ReentrantLock tilelock = new ReentrantLock();
 	static ReentrantLock drawlock = new ReentrantLock();
 
 	// Add additional tiles that serve as placeholer when flipping
@@ -108,7 +96,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// the other option would be to run scanbox each time for upload,
 	// drawing, proxies and text layer. needing to add placeholder only
 	// happens rarely, unless you live on Fidschi
+
 	/* package */static int mHolderCount;
+	/* package */static TilesData mDrawTiles;
 
 	static boolean[] vertexArray = { false, false };
 
@@ -222,58 +212,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			shortBuffer[i].put(mFillCoords, 0, 8);
 		}
 
-		mUpdateTiles = false;
+		mOverlays = new ArrayList<Overlay>();
+
+		// mOverlays.add(new OverlayGrid(mapView));
+		// mOverlays.add(new OverlayTest(mapView));
+		mOverlays.add(new OverlayText(mapView));
+
 	}
 
 	private static ArrayList<Overlay> mOverlays;
 
-	/**
-	 * Called by TileLoader when list of active tiles changed. the list is
-	 * copied to mNextTiles to be used in next call to onDrawFrame
-	 * 
-	 * @param tiles
-	 *            active tiles
-	 * @param overlays
-	 *            ...
-	 */
-	static void updateTiles(TilesData tiles, ArrayList<Overlay> overlays) {
-
-		MapTile[] newTiles = tiles.tiles;
-
-		// lock tiles (and their proxies) to not be removed from cache
-		for (int i = 0, n = tiles.cnt; i < n; i++)
-			newTiles[i].lock();
-
-		mOverlays = overlays;
-
-		// dont flip next/drawTiles while copying
-		GLRenderer.tilelock.lock();
-
-		MapTile[] nextTiles = mNextTiles.tiles;
-
-		// unlock previously active tiles
-		for (int i = 0, n = mNextTiles.cnt; i < n; i++)
-			nextTiles[i].unlock();
-
-		// copy newTiles to nextTiles
-		System.arraycopy(newTiles, 0, nextTiles, 0, tiles.cnt);
-
-		mNextTiles.cnt = tiles.cnt;
-
-		// flip next/drawTiles in next onDrawFrame
-		mUpdateTiles = true;
-
-		GLRenderer.tilelock.unlock();
-	}
-
-	void setRenderTheme(RenderTheme t) {
-		int bg = t.getMapBackground();
-		float[] c = new float[4];
-		c[3] = (bg >> 24 & 0xff) / 255.0f;
-		c[0] = (bg >> 16 & 0xff) / 255.0f;
-		c[1] = (bg >> 8 & 0xff) / 255.0f;
-		c[2] = (bg >> 0 & 0xff) / 255.0f;
-		mClearColor = c;
+	public static void setRenderTheme(RenderTheme t) {
+		mClearColor = GlUtils.colorToFloat(t.getMapBackground());
 		mUpdateColor = true;
 	}
 
@@ -282,19 +232,20 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static boolean uploadLayers(Layers layers, BufferObject vbo, boolean addFill) {
 
 		int newSize = layers.getSize();
-		if (newSize == 0)
-			return false;
+		if (newSize == 0) {
+			Log.d(TAG, "empty");
+			return true;
+		}
 
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
 
 		// use multiple buffers to avoid overwriting buffer while current
 		// data is uploaded (or rather the blocking which is probably done to
 		// avoid overwriting)
-		if (uploadCnt >= rotateBuffers) {
-			uploadCnt = 0;
-		}
+		int curBuffer = uploadCnt % rotateBuffers;
+		uploadCnt++;
 
-		ShortBuffer sbuf = shortBuffer[uploadCnt];
+		ShortBuffer sbuf = shortBuffer[curBuffer];
 
 		// add fill coordinates
 		if (addFill)
@@ -307,7 +258,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					.order(ByteOrder.nativeOrder())
 					.asShortBuffer();
 
-			shortBuffer[uploadCnt] = sbuf;
+			shortBuffer[curBuffer] = sbuf;
 			if (addFill)
 				sbuf.put(mFillCoords, 0, 8);
 		} else {
@@ -345,18 +296,21 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			mBufferMemoryUsage += vbo.size;
 		}
 
-		uploadCnt++;
-
 		return true;
 	}
 
 	private static boolean uploadTileData(MapTile tile) {
-
-		if (uploadLayers(tile.layers, tile.vbo, true))
-			tile.isReady = true;
+		// synchronized (tile) {
+		tile.isReady = uploadLayers(tile.layers, tile.vbo, true);
+		if (!tile.isReady) {
+			tile.layers.clear();
+			tile.layers = null;
+		}
 
 		tile.newData = false;
+		// Log.d(TAG, "uploaded " + tile.isReady + " " + tile);
 
+		// }
 		return tile.isReady;
 	}
 
@@ -427,11 +381,19 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
-		long start = 0;
+
 		// prevent main thread recreating all tiles (updateMap)
-		// while rendering is going. not have seen this happen
-		// yet though
-		GLRenderer.drawlock.lock();
+		// while rendering is going.
+		drawlock.lock();
+		try {
+			draw();
+		} finally {
+			drawlock.unlock();
+		}
+	}
+
+	static void draw() {
+		long start = 0;
 
 		if (MapView.debugFrameTime)
 			start = SystemClock.uptimeMillis();
@@ -451,23 +413,21 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				| GLES20.GL_DEPTH_BUFFER_BIT
 				| GLES20.GL_STENCIL_BUFFER_BIT);
 
-		if (mUpdateTiles) {
-			// get current tiles to draw
-			GLRenderer.tilelock.lock();
-			mUpdateTiles = false;
+		int serial = 0;
+		if (mDrawTiles != null)
+			serial = mDrawTiles.serial;
 
-			TilesData tmp = mDrawTiles;
-			mDrawTiles = mNextTiles;
-			mNextTiles = tmp;
-			GLRenderer.tilelock.unlock();
-
-			// force update of mapPosition
-			mMapPosition.zoomLevel = -1;
-		}
+		// get current tiles to draw
+		mDrawTiles = MapRenderer.getActiveTiles(mDrawTiles);
 
 		if (mDrawTiles == null || mDrawTiles.cnt == 0) {
-			GLRenderer.drawlock.unlock();
 			return;
+		}
+		boolean tilesChanged = false;
+		// check if the tiles have changed...
+		if (serial != mDrawTiles.serial) {
+			mMapPosition.zoomLevel = -1;
+			tilesChanged = true;
 		}
 
 		// get current MapPosition, set mTileCoords (mapping of screen to model
@@ -475,10 +435,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		MapPosition mapPosition = mMapPosition;
 		float[] coords = mTileCoords;
 		boolean changed = mMapViewPosition.getMapPosition(mapPosition, coords);
-
-		for (Overlay overlay : mOverlays) {
-			overlay.update(mMapView);
-		}
 
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
@@ -492,6 +448,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			// zoom-level changed.
 			float div = scaleDiv(tiles[0]);
 
+			// transform screen coordinates to tile coordinates
 			float s = Tile.TILE_SIZE;
 			float scale = mapPosition.scale / div;
 			float px = (float) mapPosition.x * div;
@@ -511,9 +468,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// Log.d(TAG, "visible: " + tileCnt);
 
 		uploadCnt = 0;
-		int updateTextures = 0;
+		// int updateTextures = 0;
 
-		// check visible tiles, upload new vertex data
+		// compile data and upload to VBOsi
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile tile = tiles[i];
 
@@ -522,10 +479,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			if (!tile.isVisible)
 				continue;
 
-			if (MapView.staticLabeling) {
-				if (tile.texture == null && TextRenderer.drawToTexture(tile))
-					updateTextures++;
-			}
+			// if (MapView.staticLabeling) {
+			// if (tile.texture == null && TextRenderer.drawToTexture(tile))
+			// updateTextures++;
+			// }
 
 			if (tile.newData) {
 				uploadTileData(tile);
@@ -562,10 +519,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (uploadCnt > 0)
 			checkBufferUsage();
 
-		if (MapView.staticLabeling) {
-			if (updateTextures > 0)
-				TextRenderer.compileTextures();
+		tilesChanged |= (uploadCnt > 0);
+
+		// if (changed || tilesChanged) {
+		for (Overlay overlay : mOverlays) {
+			overlay.update(changed, tilesChanged);
 		}
+		// }
+
+		// if (MapView.staticLabeling) {
+		// if (updateTextures > 0)
+		// TextRenderer.compileTextures();
+		// }
 
 		GLES20.glEnable(GL_DEPTH_TEST);
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
@@ -593,41 +558,41 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mDrawCount = 0;
 		mDrawSerial++;
 
-		if (MapView.staticLabeling) {
-			GLES20.glEnable(GL_BLEND);
-			int z = mapPosition.zoomLevel;
-			float s = mapPosition.scale;
+		GLES20.glEnable(GL_BLEND);
 
-			int zoomLevelDiff = Math.max(z - TileGenerator.STROKE_MAX_ZOOM_LEVEL,
-					0);
-			float scale = (float) Math.pow(1.4, zoomLevelDiff);
-			if (scale < 1)
-				scale = 1;
-
-			if (z >= TileGenerator.STROKE_MAX_ZOOM_LEVEL)
-				TextRenderer.beginDraw(scale / FloatMath.sqrt(s), mProjMatrix);
-			else
-				TextRenderer.beginDraw(1f / s, mProjMatrix);
-
-			for (int i = 0; i < tileCnt; i++) {
-				MapTile t = tiles[i];
-				if (!t.isVisible)
-					continue;
-
-				if (t.holder == null) {
-					if (t.texture != null) {
-						setMatrix(mMVPMatrix, t, 1, false);
-						TextRenderer.drawTile(t, mMVPMatrix);
-					}
-				} else {
-					if (t.holder.texture != null) {
-						setMatrix(mMVPMatrix, t, 1, false);
-						TextRenderer.drawTile(t.holder, mMVPMatrix);
-					}
-				}
-			}
-			TextRenderer.endDraw();
-		}
+		// if (MapView.staticLabeling) {
+		// int z = mapPosition.zoomLevel;
+		// float s = mapPosition.scale;
+		// int zoomLevelDiff = Math.max(z - TileGenerator.STROKE_MAX_ZOOM_LEVEL,
+		// 0);
+		// float scale = (float) Math.pow(1.4, zoomLevelDiff);
+		// if (scale < 1)
+		// scale = 1;
+		//
+		// if (z >= TileGenerator.STROKE_MAX_ZOOM_LEVEL)
+		// TextRenderer.beginDraw(scale / FloatMath.sqrt(s), mProjMatrix);
+		// else
+		// TextRenderer.beginDraw(1f / s, mProjMatrix);
+		//
+		// for (int i = 0; i < tileCnt; i++) {
+		// MapTile t = tiles[i];
+		// if (!t.isVisible)
+		// continue;
+		//
+		// if (t.holder == null) {
+		// if (t.texture != null) {
+		// setMatrix(mMVPMatrix, t, 1, false);
+		// TextRenderer.drawTile(t, mMVPMatrix);
+		// }
+		// } else {
+		// if (t.holder.texture != null) {
+		// setMatrix(mMVPMatrix, t, 1, false);
+		// TextRenderer.drawTile(t.holder, mMVPMatrix);
+		// }
+		// }
+		// }
+		// TextRenderer.endDraw();
+		// }
 
 		// call overlay renderer
 		for (Overlay overlay : mOverlays) {
@@ -675,8 +640,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					mapPosition.viewMatrix, 0);
 			PolygonRenderer.debugDraw(mMVPMatrix, mDebugCoords, 1);
 		}
-
-		GLRenderer.drawlock.unlock();
 	}
 
 	// used to not draw a tile twice per frame.
@@ -728,12 +691,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			}
 		}
 
-		if (tile.layers.symbolLayers != null) {
+		if (tile.layers.textureLayers != null) {
 			setMatrix(mvp, tile, div, false);
 
-			for (Layer l = tile.layers.symbolLayers; l != null;) {
+			for (Layer l = tile.layers.textureLayers; l != null;) {
 				l = TextureRenderer.draw(l, 1, mProjMatrix, mvp,
-						tile.layers.symbolOffset);
+						tile.layers.texOffset);
 			}
 		}
 	}
@@ -798,6 +761,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		Log.d(TAG, "SurfaceChanged:" + width + " " + height);
 
+		mDrawTiles = null;
+
 		if (width <= 0 || height <= 0)
 			return;
 
@@ -849,7 +814,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		BufferObject.init(numVBO);
 
 		// Set up textures
-		TextRenderer.setup(numTiles);
+		// TextRenderer.setup(numTiles);
 
 		if (mClearColor != null)
 			mUpdateColor = true;
@@ -861,13 +826,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mMapView.redrawMap();
 	}
 
-	// FIXME this is a bit too spaghetti
-	void clearTiles(int numTiles) {
-		mDrawTiles = new TilesData(numTiles);
-		mNextTiles = new TilesData(numTiles);
-		mMapPosition.zoomLevel = -1;
-	}
-
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// String ext = GLES20.glGetString(GLES20.GL_EXTENSIONS);
@@ -875,7 +833,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		LineRenderer.init();
 		PolygonRenderer.init();
-		TextRenderer.init();
+		// TextRenderer.init();
 		TextureRenderer.init();
 		TextureObject.init(10);
 
@@ -884,7 +842,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClearStencil(0);
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
 		mNewSurface = true;
 	}
 

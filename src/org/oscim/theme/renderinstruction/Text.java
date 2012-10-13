@@ -53,6 +53,7 @@ public final class Text extends RenderInstruction {
 		String style = null;
 		// boolean caption = false;
 		float dy = 0;
+
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
@@ -82,9 +83,26 @@ public final class Text extends RenderInstruction {
 		}
 
 		validate(elementName, textKey, fontSize, strokeWidth);
-		Typeface typeface = Typeface.create(fontFamily.toTypeface(), fontStyle.toInt());
+
+		Typeface typeface = null;
+		if (fontFamily == FontFamily.DEFAULT) {
+			if (fontStyle == FontStyle.NORMAL)
+				typeface = typefaceNormal;
+			else if (fontStyle == FontStyle.BOLD)
+				typeface = typefaceBold;
+		}
+
+		if (typeface == null)
+			typeface = Typeface.create(fontFamily.toTypeface(), fontStyle.toInt());
+
 		return new Text(style, textKey, typeface, fontSize, fill, stroke, strokeWidth, dy, caption);
 	}
+
+	private static Typeface typefaceNormal = Typeface.create(FontFamily.DEFAULT.toTypeface(),
+			FontStyle.NORMAL.toInt());
+
+	private static Typeface typefaceBold = Typeface.create(FontFamily.DEFAULT.toTypeface(),
+			FontStyle.BOLD.toInt());
 
 	private static void validate(String elementName, String textKey, float fontSize,
 			float strokeWidth) {
@@ -110,9 +128,15 @@ public final class Text extends RenderInstruction {
 	public final boolean caption;
 	public final float dy;
 
+	public static Text createText(float fontSize, float strokeWidth, int fill, int outline,
+			boolean billboard) {
+
+		return new Text("", "", typefaceNormal, fontSize, fill, outline, strokeWidth, 0, billboard);
+	}
+
 	private Text(String style, String textKey, Typeface typeface, float fontSize,
 			int fill, int outline, float strokeWidth, float dy, boolean caption) {
-		super();
+		// super();
 
 		this.style = style;
 		this.textKey = textKey;
@@ -123,18 +147,20 @@ public final class Text extends RenderInstruction {
 		paint.setTextAlign(Align.CENTER);
 		paint.setTypeface(typeface);
 		paint.setColor(fill);
+		paint.setTextSize(fontSize);
 
-		stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
-		stroke.setStyle(Style.STROKE);
-		stroke.setTextAlign(Align.CENTER);
-		stroke.setTypeface(typeface);
-		stroke.setColor(outline);
-		stroke.setStrokeWidth(strokeWidth);
+		if (strokeWidth > 0) {
+			stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+			stroke.setStyle(Style.STROKE);
+			stroke.setTextAlign(Align.CENTER);
+			stroke.setTypeface(typeface);
+			stroke.setColor(outline);
+			stroke.setStrokeWidth(strokeWidth);
+			stroke.setTextSize(fontSize);
+		} else
+			stroke = null;
 
 		this.fontSize = fontSize;
-
-		paint.setTextSize(fontSize);
-		stroke.setTextSize(fontSize);
 
 		FontMetrics fm = paint.getFontMetrics();
 		fontHeight = FloatMath.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));

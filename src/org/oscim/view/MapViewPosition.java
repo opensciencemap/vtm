@@ -523,7 +523,7 @@ public class MapViewPosition {
 			mMapScale = newScale;
 		}
 
-		if (pivotY != 0 || pivotY != 0)
+		if (pivotX != 0 || pivotY != 0)
 			moveMap(pivotX * (1.0f - scale),
 					pivotY * (1.0f - scale));
 

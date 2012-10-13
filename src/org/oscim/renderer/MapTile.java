@@ -16,6 +16,7 @@ package org.oscim.renderer;
 
 import org.oscim.generator.JobTile;
 import org.oscim.renderer.layer.Layers;
+import org.oscim.renderer.layer.TextItem;
 
 class MapTile extends JobTile {
 
@@ -25,7 +26,7 @@ class MapTile extends JobTile {
 	 */
 	BufferObject vbo;
 
-	TextTexture texture;
+	// TextTexture texture;
 
 	/**
 	 * Tile data set by TileGenerator:
@@ -56,10 +57,14 @@ class MapTile extends JobTile {
 	int lastDraw = 0;
 
 	// keep track which tiles are locked as proxy for this tile
-	final static int PROXY_PARENT = 16;
-	final static int PROXY_GRAMPA = 32;
-	final static int PROXY_HOLDER = 64;
-	// 1-8: children
+	final static int PROXY_CHILD1 = 1 << 0;
+	final static int PROXY_CHILD2 = 1 << 1;
+	final static int PROXY_CHILD3 = 1 << 2;
+	final static int PROXY_CHILD4 = 1 << 3;
+	final static int PROXY_PARENT = 1 << 4;
+	final static int PROXY_GRAMPA = 1 << 5;
+	final static int PROXY_HOLDER = 1 << 6;
+
 	byte proxies;
 
 	// counting the tiles that use this tile as proxy
@@ -83,8 +88,6 @@ class MapTile extends JobTile {
 	}
 
 	void lock() {
-		if (holder != null)
-			return;
 
 		locked++;
 
@@ -116,27 +119,21 @@ class MapTile extends JobTile {
 	}
 
 	void unlock() {
-		if (holder != null)
-			return;
 
 		locked--;
 
 		if (locked > 0 || proxies == 0)
 			return;
 
-		if ((proxies & (1 << 4)) != 0) {
-			MapTile p = rel.parent.tile;
-			p.refs--;
-		}
-		if ((proxies & (1 << 5)) != 0) {
-			MapTile p = rel.parent.parent.tile;
-			p.refs--;
-		}
+		if ((proxies & PROXY_PARENT) != 0)
+			rel.parent.tile.refs--;
+
+		if ((proxies & PROXY_GRAMPA) != 0)
+			rel.parent.parent.tile.refs--;
 
 		for (int i = 0; i < 4; i++) {
-			if ((proxies & (1 << i)) != 0) {
+			if ((proxies & (1 << i)) != 0)
 				rel.child[i].tile.refs--;
-			}
 		}
 		proxies = 0;
 	}

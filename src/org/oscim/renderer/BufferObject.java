@@ -19,15 +19,15 @@ import android.opengl.GLES20;
 
 class BufferObject {
 	private static BufferObject pool;
+	static int counter;
 
 	static synchronized BufferObject get() {
-		BufferObject bo;
 
-		if (pool == null) {
+		if (pool == null)
 			return null;
-		}
+		counter--;
 
-		bo = pool;
+		BufferObject bo = pool;
 		pool = pool.next;
 		bo.next = null;
 		return bo;
@@ -64,6 +64,7 @@ class BufferObject {
 	static synchronized void release(BufferObject bo) {
 		bo.next = pool;
 		pool = bo;
+		counter++;
 	}
 
 	// Note: only call from GL-Thread
@@ -106,6 +107,7 @@ class BufferObject {
 			bo.next = pool;
 			pool = bo;
 		}
+		counter = num;
 	}
 
 	int id;

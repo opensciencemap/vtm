@@ -61,8 +61,10 @@ public class MapWorker extends PausableThread {
 	protected void doWork() {
 		JobTile tile = mJobQueue.poll();
 
-		if (mMapGenerator == null || tile == null)
+		if (tile == null)
 			return;
+
+		// Log.d("...", "load: " + tile);
 
 		boolean success = mMapGenerator.executeJob(tile);
 

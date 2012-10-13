@@ -157,6 +157,24 @@ public class GlUtils {
 			GLES20.glUniform4fv(handle, 1, c, 0);
 		else
 			glUniform4f(handle, c[0] * alpha, c[1] * alpha, c[2] * alpha, c[3] * alpha);
+	}
 
+	public static float[] colorToFloat(int color) {
+		float[] c = new float[4];
+		c[3] = (color >> 24 & 0xff) / 255.0f;
+		c[0] = (color >> 16 & 0xff) / 255.0f;
+		c[1] = (color >> 8 & 0xff) / 255.0f;
+		c[2] = (color >> 0 & 0xff) / 255.0f;
+		return c;
+	}
+
+	// premultiply alpha
+	public static float[] colorToFloatP(int color) {
+		float[] c = new float[4];
+		c[3] = (color >> 24 & 0xff) / 255.0f;
+		c[0] = (color >> 16 & 0xff) / 255.0f * c[3];
+		c[1] = (color >> 8 & 0xff) / 255.0f * c[3];
+		c[2] = (color >> 0 & 0xff) / 255.0f * c[3];
+		return c;
 	}
 }

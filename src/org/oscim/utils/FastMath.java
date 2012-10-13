@@ -47,4 +47,11 @@ public class FastMath {
 		}
 		return r;
 	}
+
+	public static float pow(int pow) {
+		if (pow == 0)
+			return 1;
+
+		return (pow > 0 ? (1 << pow) : (1.0f / (1 << -pow)));
+	}
 }

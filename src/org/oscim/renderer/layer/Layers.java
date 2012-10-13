@@ -16,8 +16,6 @@ package org.oscim.renderer.layer;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.renderer.TextureObject;
-
 import android.util.Log;
 
 public class Layers {
@@ -25,8 +23,8 @@ public class Layers {
 	public Layer layers;
 	public int lineOffset;
 
-	public Layer symbolLayers;
-	public int symbolOffset;
+	public Layer textureLayers;
+	public int texOffset;
 
 	private Layer mCurLayer;
 
@@ -57,10 +55,13 @@ public class Layers {
 		if (ret == null) {
 			if (type == Layer.LINE)
 				ret = new LineLayer(level);
-			else
+			else if (type == Layer.POLYGON)
 				ret = new PolygonLayer(level);
+			else
+				return null;
 
 			if (l == null) {
+				// insert at start
 				ret.next = layers;
 				layers = ret;
 			} else {
@@ -81,7 +82,9 @@ public class Layers {
 	private static int TEXTURE_VERTEX_SHORTS = 6;
 
 	public int getSize() {
+
 		int size = 0;
+
 		for (Layer l = layers; l != null; l = l.next) {
 			if (l.type == Layer.LINE)
 				size += l.verticesCnt * LINE_VERTEX_SHORTS;
@@ -90,7 +93,7 @@ public class Layers {
 
 		}
 
-		for (Layer l = symbolLayers; l != null; l = l.next) {
+		for (Layer l = textureLayers; l != null; l = l.next) {
 			size += l.verticesCnt * TEXTURE_VERTEX_SHORTS;
 		}
 
@@ -109,10 +112,10 @@ public class Layers {
 		lineOffset = sbuf.position() * 2; // * short-bytes
 		addLayerItems(sbuf, layers, Layer.LINE, 0);
 
-		symbolOffset = sbuf.position() * 2; // * short-bytes
+		texOffset = sbuf.position() * 2; // * short-bytes
 
-		for (Layer l = symbolLayers; l != null; l = l.next) {
-			SymbolLayer sl = (SymbolLayer) l;
+		for (Layer l = textureLayers; l != null; l = l.next) {
+			TextureLayer sl = (TextureLayer) l;
 			sl.compile(sbuf);
 		}
 	}
@@ -148,19 +151,25 @@ public class Layers {
 	}
 
 	public void clear() {
-		// FIXME collect pool and add as a whole
-		for (Layer l = layers; l != null; l = l.next) {
+
+		while (layers != null) {
+			Layer l = layers;
 			if (l.pool != null) {
 				VertexPool.release(l.pool);
 				l.pool = null;
 				l.curItem = null;
 			}
+			layers = layers.next;
 		}
 
-		for (Layer l = symbolLayers; l != null; l = l.next) {
-			SymbolLayer sl = (SymbolLayer) l;
-			if (sl.textures != null)
-				TextureObject.release(sl.textures);
+		while (textureLayers != null) {
+			textureLayers.clear();
+
+			// TextureLayer sl = (TextureLayer) textureLayers;
+			// if (sl.textures != null)
+			// TextureObject.release(sl.textures);
+
+			textureLayers = textureLayers.next;
 		}
 	}
 }

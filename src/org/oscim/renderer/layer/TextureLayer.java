@@ -14,9 +14,18 @@
  */
 package org.oscim.renderer.layer;
 
+import java.nio.ShortBuffer;
+
 import org.oscim.renderer.TextureObject;
 
 public abstract class TextureLayer extends Layer {
 	public TextureObject textures;
+
+	/**
+	 * @param sbuf
+	 *            buffer to add vertices
+	 */
+	void compile(ShortBuffer sbuf) {
+	}
 
 }

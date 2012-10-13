@@ -17,6 +17,7 @@ package org.oscim.theme.renderinstruction;
 import org.oscim.core.Tag;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
+import org.oscim.utils.GlUtils;
 import org.xml.sax.Attributes;
 
 import android.graphics.Color;
@@ -88,11 +89,7 @@ public final class Area extends RenderInstruction {
 		blend = -1;
 		strokeWidth = 0;
 
-		color = new float[4];
-		color[3] = (fill >> 24 & 0xff) / 255.0f;
-		color[0] = (fill >> 16 & 0xff) / 255.0f * color[3];
-		color[1] = (fill >> 8 & 0xff) / 255.0f * color[3];
-		color[2] = (fill >> 0 & 0xff) / 255.0f * color[3];
+		color = GlUtils.colorToFloatP(fill);
 	}
 
 	/**
@@ -128,41 +125,13 @@ public final class Area extends RenderInstruction {
 		// Shader shader = BitmapUtils.createBitmapShader(src);
 		// paintFill.setShader(shader);
 		// }
-		// paintFill.setStyle(Style.FILL);
-		// paintFill.setColor(fill);
-		// paintFill.setStrokeCap(Cap.ROUND);
-		// }
-		//
-		// if (stroke == Color.TRANSPARENT) {
-		// paintOutline = null;
-		// } else {
-		// paintOutline = new Paint(Paint.ANTI_ALIAS_FLAG);
-		// paintOutline.setStyle(Style.STROKE);
-		// paintOutline.setColor(stroke);
-		// paintOutline.setStrokeCap(Cap.ROUND);
-		// }
 
-		// if (stroke == Color.TRANSPARENT) {
-		// stroke = null;
-		// } else{
-		// stroke = new Line()
-		// }
+		color = GlUtils.colorToFloatP(fill);
 
-		color = new float[4];
-		color[3] = (fill >> 24 & 0xff) / 255.0f;
-		color[0] = (fill >> 16 & 0xff) / 255.0f * color[3];
-		color[1] = (fill >> 8 & 0xff) / 255.0f * color[3];
-		color[2] = (fill >> 0 & 0xff) / 255.0f * color[3];
-
-		if (blend > 0) {
-			blendColor = new float[4];
-			blendColor[3] = (blendFill >> 24 & 0xff) / 255.0f;
-			blendColor[0] = (blendFill >> 16 & 0xff) / 255.0f * blendColor[3];
-			blendColor[1] = (blendFill >> 8 & 0xff) / 255.0f * blendColor[3];
-			blendColor[2] = (blendFill >> 0 & 0xff) / 255.0f * blendColor[3];
-		} else {
+		if (blend > 0)
+			blendColor = GlUtils.colorToFloatP(blendFill);
+		else
 			blendColor = null;
-		}
 
 		this.blend = blend;
 		this.strokeWidth = strokeWidth;
@@ -183,32 +152,10 @@ public final class Area extends RenderInstruction {
 	// }
 
 	public String style;
-	/**
-	 * 
-	 */
 	private final int level;
-	/**
-	 * 
-	 */
-	// public final Paint paintFill;
-	/**
-	 * 
-	 */
-	// public final Paint paintOutline;
-	/**
-	 * 
-	 */
 	public final float strokeWidth;
-	/**
-	 * 
-	 */
 	public final float color[];
-	/**
-	 * 
-	 */
 	public final int fade;
-
 	public final float blendColor[];
-
 	public final int blend;
 }

@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -33,6 +34,7 @@ import org.oscim.database.OpenResult;
 import org.oscim.generator.JobQueue;
 import org.oscim.generator.JobTile;
 import org.oscim.generator.MapWorker;
+import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.TileGenerator;
 import org.oscim.theme.ExternalRenderTheme;
@@ -58,7 +60,7 @@ public class MapView extends FrameLayout {
 
 	public static final boolean debugFrameTime = false;
 	public static final boolean testRegionZoom = false;
-	public static final boolean staticLabeling = true;
+	// public static final boolean staticLabeling = false;
 
 	private static final boolean debugDatabase = false;
 
@@ -438,8 +440,9 @@ public class MapView extends FrameLayout {
 		try {
 			inputStream = theme.getRenderThemeAsStream();
 			RenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
-			mMapRenderer.setRenderTheme(t);
-			mMapWorkers[0].getMapGenerator().setRenderTheme(t);
+			// FIXME somehow...
+			GLRenderer.setRenderTheme(t);
+			TileGenerator.setRenderTheme(t);
 			return true;
 		} catch (ParserConfigurationException e) {
 			Log.e(TAG, e.getMessage());

@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import org.oscim.core.Tag;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
+import org.oscim.utils.GlUtils;
 import org.xml.sax.Attributes;
 
 import android.graphics.Color;
@@ -121,11 +122,7 @@ public final class Line extends RenderInstruction {
 		this.fixed = true;
 		this.fade = -1;
 		this.stipple = 2;
-		color = new float[4];
-		color[3] = (stroke >> 24 & 0xff) / 255.0f;
-		color[0] = (stroke >> 16 & 0xff) / 255.0f * color[3];
-		color[1] = (stroke >> 8 & 0xff) / 255.0f * color[3];
-		color[2] = (stroke >> 0 & 0xff) / 255.0f * color[3];
+		color = GlUtils.colorToFloatP(stroke);
 	}
 
 	private static void validate(float strokeWidth) {
@@ -215,11 +212,7 @@ public final class Line extends RenderInstruction {
 
 		this.cap = strokeLinecap;
 
-		color = new float[4];
-		color[3] = (stroke >> 24 & 0xff) / 255.0f;
-		color[0] = (stroke >> 16 & 0xff) / 255.0f * color[3];
-		color[1] = (stroke >> 8 & 0xff) / 255.0f * color[3];
-		color[2] = (stroke >> 0 & 0xff) / 255.0f * color[3];
+		color = GlUtils.colorToFloatP(stroke);
 
 		this.width = strokeWidth;
 		this.level = level;

@@ -12,34 +12,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.view;
 
-import org.oscim.theme.renderinstruction.Text;
-
-public class TextItem {
-	TextItem next;
-
-	final float x, y;
-	final String string;
-	final Text text;
-	final float width;
-
-	short x1, y1, x2, y2;
-
-	public TextItem(float x, float y, String string, Text text) {
-		this.x = x;
-		this.y = y;
-		this.string = string;
-		this.text = text;
-		this.width = text.paint.measureText(string);
-	}
-
-	public TextItem(float x, float y, String string, Text text, float width) {
-		this.x = x;
-		this.y = y;
-		this.string = string;
-		this.text = text;
-		this.width = width;
-	}
+public class OverlayManager {
 
 }

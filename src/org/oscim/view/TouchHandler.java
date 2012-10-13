@@ -18,6 +18,8 @@ import org.oscim.core.Tile;
 
 import android.content.Context;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -53,6 +55,9 @@ final class TouchHandler
 	private boolean mMoveStart;
 	private boolean mBeginRotate;
 	private boolean mBeginTilt;
+	private boolean mLongPress;
+	private long mLongPressTime;
+
 	private float mPosX;
 	private float mPosY;
 	private double mAngle;
@@ -124,6 +129,7 @@ final class TouchHandler
 
 	private boolean onActionCancel() {
 		mActivePointerId = INVALID_POINTER_ID;
+		mLongPress = true;
 		return true;
 	}
 
@@ -174,6 +180,12 @@ final class TouchHandler
 		mPosX = event.getX(id);
 		mPosY = event.getY(id);
 
+		if (mLongPress) {
+			mMapPosition.scaleMap(1 - moveY / 100, 0, 0);
+			mMapView.redrawMap();
+			return true;
+		}
+
 		if (!scaling) {
 			mMapPosition.moveMap(moveX, moveY);
 			mMapView.redrawMap();
@@ -207,7 +219,16 @@ final class TouchHandler
 		if (!mBeginRotate && !mBeginScale && !mBeginTilt) {
 			if (Math.abs(r) > 0.03)
 				mBeginRotate = true;
-		} else if (mBeginRotate) {
+		}
+
+		// quick way to prevent flipping...
+		// Log.d("", "rotation " + rad + " " + r);
+		if (Math.abs(r) > 0.1) {
+			rad = mAngle;
+			r = 0;
+		}
+
+		if (mBeginRotate) {
 			double rsin = Math.sin(r);
 			double rcos = Math.cos(r);
 
@@ -260,6 +281,8 @@ final class TouchHandler
 		}
 		multi--;
 
+		mLongPress = false;
+
 		return true;
 	}
 
@@ -272,6 +295,28 @@ final class TouchHandler
 		mActivePointerId = INVALID_POINTER_ID;
 		mScaling = false;
 		multi = 0;
+
+		// if (mLongPress && SystemClock.uptimeMillis() - mLongPressTime < 150)
+		// {
+		// mScrollX = (mPosX - (mMapView.getWidth() >> 1)) * 2f;
+		// mScrollY = (mPosY - (mMapView.getHeight() >> 1)) * 2f;
+		// mPrevScale = 0;
+		//
+		// mTimer = new CountDownTimer((int) SCALE_DURATION, 30) {
+		// @Override
+		// public void onTick(long tick) {
+		// scale2(tick);
+		// }
+		//
+		// @Override
+		// public void onFinish() {
+		// scale2(0);
+		// }
+		// }.start();
+		// }
+
+		mLongPress = false;
+
 		return true;
 	}
 
@@ -292,7 +337,6 @@ final class TouchHandler
 			}
 			fling = false;
 		}
-		// Log.d("mapsforge", "onDown");
 
 		return true;
 	}
@@ -353,6 +397,7 @@ final class TouchHandler
 			Log.d("mapsforge", "long press");
 			mMapView.mRegionLookup.updateRegion(-1, null);
 		}
+		mLongPress = true;
 	}
 
 	boolean scale2(long tick) {
@@ -360,11 +405,12 @@ final class TouchHandler
 		fling = true;
 		if (mPrevScale >= 1)
 			return false;
+
 		float adv = (SCALE_DURATION - tick) / SCALE_DURATION;
 		adv = mInterpolator.getInterpolation(adv);
-
 		float scale = adv - mPrevScale;
 		mPrevScale += scale;
+		scale *= 0.75;
 		scale += 1;
 		adv += 1;
 
@@ -379,26 +425,26 @@ final class TouchHandler
 	@Override
 	public boolean onDoubleTap(MotionEvent e) {
 		if (MapView.testRegionZoom) {
-			Log.d("mapsforge", "double tap");
-
 			mMapView.mRegionLookup.updateRegion(1,
 					mMapPosition.getOffsetPoint(mPosX, mPosY));
 		} else {
-			mScrollX = (e.getX(0) - (mMapView.getWidth() >> 1)) * 2f;
-			mScrollY = (e.getY(0) - (mMapView.getHeight() >> 1)) * 2f;
-			mPrevScale = 0;
-
-			mTimer = new CountDownTimer((int) SCALE_DURATION, 30) {
-				@Override
-				public void onTick(long tick) {
-					scale2(tick);
-				}
-
-				@Override
-				public void onFinish() {
-					scale(0);
-				}
-			}.start();
+			mLongPress = true;
+			mLongPressTime = SystemClock.uptimeMillis();
+			// mScrollX = (e.getX(0) - (mMapView.getWidth() >> 1)) * 2f;
+			// mScrollY = (e.getY(0) - (mMapView.getHeight() >> 1)) * 2f;
+			// mPrevScale = 0;
+			//
+			// mTimer = new CountDownTimer((int) SCALE_DURATION, 30) {
+			// @Override
+			// public void onTick(long tick) {
+			// scale2(tick);
+			// }
+			//
+			// @Override
+			// public void onFinish() {
+			// scale(0);
+			// }
+			// }.start();
 		}
 		return true;
 	}
@@ -512,5 +558,121 @@ final class TouchHandler
 			mTimer = null;
 
 		return true;
+	}
+
+	/*
+	 * from CountDownTimer.java: Copyright (C) 2008 The Android Open Source
+	 * Project Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License. You may
+	 * obtain a copy of the License at
+	 * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable
+	 * law or agreed to in writing, software distributed under the License is
+	 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	 * KIND, either express or implied. See the License for the specific
+	 * language governing permissions and limitations under the License.
+	 */
+
+	final static class Timer {
+
+		/**
+		 * Millis since epoch when alarm should stop.
+		 */
+		private final long mMillisInFuture;
+
+		/**
+		 * The interval in millis that the user receives callbacks
+		 */
+		final long mCountdownInterval;
+
+		long mStopTimeInFuture;
+
+		/**
+		 * @param millisInFuture
+		 *            The number of millis in the future from the call to
+		 *            {@link #start()} until the countdown is done and
+		 *            {@link #onFinish()} is called.
+		 * @param countDownInterval
+		 *            The interval along the way to receive
+		 *            {@link #onTick(long)} callbacks.
+		 */
+		public Timer(long millisInFuture, long countDownInterval) {
+			mMillisInFuture = millisInFuture;
+			mCountdownInterval = countDownInterval;
+		}
+
+		/**
+		 * Cancel the countdown.
+		 */
+		public final void cancel() {
+			mHandler.removeMessages(MSG);
+		}
+
+		/**
+		 * Start the countdown.
+		 * 
+		 * @return ...
+		 */
+		public synchronized final Timer start() {
+			if (mMillisInFuture <= 0) {
+				onFinish();
+				return this;
+			}
+			mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture;
+			mHandler.sendMessage(mHandler.obtainMessage(MSG));
+			return this;
+		}
+
+		/**
+		 * Callback fired on regular interval.
+		 * 
+		 * @param millisUntilFinished
+		 *            The amount of time until finished.
+		 */
+		public void onTick(long millisUntilFinished) {
+		}
+
+		/**
+		 * Callback fired when the time is up.
+		 */
+		public void onFinish() {
+		}
+
+		private static final int MSG = 1;
+
+		// handles counting down
+		private Handler mHandler = new Handler() {
+
+			@Override
+			public void handleMessage(Message msg) {
+
+				synchronized (Timer.this) {
+					final long millisLeft = mStopTimeInFuture
+							- SystemClock.elapsedRealtime();
+
+					if (millisLeft <= 0) {
+						onFinish();
+					} else if (millisLeft < mCountdownInterval) {
+						// no tick, just delay until done
+						sendMessageDelayed(obtainMessage(MSG), millisLeft);
+					} else {
+						long lastTickStart = SystemClock.elapsedRealtime();
+						onTick(millisLeft);
+
+						// take into account user's onTick taking time to
+						// execute
+						long delay = lastTickStart + mCountdownInterval
+								- SystemClock.elapsedRealtime();
+
+						// special case: user's onTick took more than interval
+						// to
+						// complete, skip to next interval
+						while (delay < 0)
+							delay += mCountdownInterval;
+
+						sendMessageDelayed(obtainMessage(MSG), delay);
+					}
+				}
+			}
+		};
 	}
 }

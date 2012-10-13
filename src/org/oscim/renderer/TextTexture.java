@@ -14,20 +14,20 @@
  */
 package org.oscim.renderer;
 
-public class TextTexture {
-
-	final short[] vertices;
-	final int id;
-	int length;
-	int offset;
-	MapTile tile;
-
-	TextTexture(int textureID) {
-		vertices = new short[TextRenderer.MAX_LABELS *
-				TextRenderer.VERTICES_PER_SPRITE *
-				TextRenderer.SHORTS_PER_VERTICE];
-
-		id = textureID;
-	}
-
-}
+//public class TextTexture {
+//
+//	final short[] vertices;
+//	final int id;
+//	int length;
+//	int offset;
+//	MapTile tile;
+//
+//	TextTexture(int textureID) {
+//		vertices = new short[TextRenderer.MAX_LABELS *
+//				TextRenderer.VERTICES_PER_SPRITE *
+//				TextRenderer.SHORTS_PER_VERTICE];
+//
+//		id = textureID;
+//	}
+//
+// }

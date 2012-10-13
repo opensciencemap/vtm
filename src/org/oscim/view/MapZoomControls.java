@@ -116,9 +116,10 @@ public class MapZoomControls {
 	private final Handler mZoomControlsHideHandler;
 	private byte mZoomLevelMax;
 	private byte mZoomLevelMin;
-	private MapView mMapView;
+	private final MapView mMapView;
 
 	MapZoomControls(Context context, final MapView mapView) {
+		mMapView = mapView;
 		mZoomControls = new ZoomControls(context);
 		mShowMapZoomControls = true;
 		mZoomLevelMax = DEFAULT_ZOOM_LEVEL_MAX;

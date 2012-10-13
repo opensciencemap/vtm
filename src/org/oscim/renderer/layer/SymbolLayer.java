@@ -17,12 +17,9 @@ package org.oscim.renderer.layer;
 import java.nio.ShortBuffer;
 
 import org.oscim.renderer.TextureObject;
+import org.oscim.renderer.TextureRenderer;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.RectF;
-import android.opengl.GLUtils;
 import android.util.Log;
 
 // TODO share one static texture for all poi map symabols
@@ -30,28 +27,17 @@ import android.util.Log;
 public final class SymbolLayer extends TextureLayer {
 	private static String TAG = SymbolLayer.class.getSimpleName();
 
-	private final static int TEXTURE_WIDTH = 256;
-	private final static int TEXTURE_HEIGHT = 256;
+	private final static int TEXTURE_WIDTH = TextureObject.TEXTURE_WIDTH;
+	private final static int TEXTURE_HEIGHT = TextureObject.TEXTURE_HEIGHT;
 	private final static float SCALE = 8.0f;
 
 	private static short[] mVertices;
-	private static Bitmap mBitmap;
-	private static Canvas mCanvas;
-	private static int mBitmapFormat;
-	private static int mBitmapType;
 
 	SymbolItem symbols;
 
 	public SymbolLayer() {
-		if (mBitmap == null) {
-			mBitmap = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
-					Bitmap.Config.ARGB_8888);
-			mCanvas = new Canvas(mBitmap);
-			mBitmapFormat = GLUtils.getInternalFormat(mBitmap);
-			mBitmapType = GLUtils.getType(mBitmap);
-			//
-			mVertices = new short[40 * 24];
-		}
+		if (mVertices == null)
+			mVertices = new short[TextureRenderer.MAX_ITEMS * 24];
 	}
 
 	public void addSymbol(SymbolItem item) {
@@ -73,19 +59,23 @@ public final class SymbolLayer extends TextureLayer {
 	}
 
 	private final static int LBIT_MASK = 0xfffffffe;
-	private final RectF mRect = new RectF();
 
 	// TODO ... reuse texture when only symbol position changed
+	@Override
 	public void compile(ShortBuffer sbuf) {
+
+		short numIndices = 0;
+		short offsetIndices = 0;
 
 		int pos = 0;
 		short buf[] = mVertices;
+		int bufLen = buf.length;
 
 		int advanceY = 0;
 		float x = 0;
 		float y = 0;
 
-		mBitmap.eraseColor(Color.TRANSPARENT);
+		Canvas canvas = TextureObject.getCanvas();
 
 		for (SymbolItem it = symbols; it != null;) {
 
@@ -103,35 +93,31 @@ public final class SymbolLayer extends TextureLayer {
 
 				if (y + height > TEXTURE_HEIGHT) {
 					Log.d(TAG, "reached max symbols");
-					// need to sync bitmap upload somehow???
-					TextureObject to = TextureObject.get();
-					TextureObject.uploadTexture(to, mBitmap,
-							mBitmapFormat, mBitmapType,
-							TEXTURE_WIDTH, TEXTURE_HEIGHT);
+
+					TextureObject to = TextureObject.uploadCanvas(offsetIndices, numIndices);
+					offsetIndices = numIndices;
+
 					to.next = textures;
 					textures = to;
 
 					sbuf.put(buf, 0, pos);
 					pos = 0;
+
+					x = 0;
+					y = 0;
+					advanceY = (int) height;
 				}
 			}
-			mRect.left = x;
-			mRect.top = y;
-			mRect.right = x + width;
-			mRect.bottom = y + height;
-			// Log.d("...", "draw " + x + " " + y + " " + width + " " + height);
 
-			mCanvas.drawBitmap(it.bitmap, null, mRect, null);
-			// mCanvas.drawBitmap(it.bitmap, x, y, null);
+			canvas.drawBitmap(it.bitmap, x, y, null);
 
 			float hw = width / 2.0f;
 			float hh = height / 2.0f;
-			short x1, x2, x3, x4, y1, y2, y3, y4;
-			x1 = x3 = (short) (SCALE * (-hw));
-			x2 = x4 = (short) (SCALE * (hw));
 
-			y1 = y3 = (short) (SCALE * (hh));
-			y2 = y4 = (short) (SCALE * (-hh));
+			short x1 = (short) (SCALE * (-hw));
+			short x2 = (short) (SCALE * (hw));
+			short y1 = (short) (SCALE * (hh));
+			short y2 = (short) (SCALE * (-hh));
 
 			short u1 = (short) (SCALE * x);
 			short v1 = (short) (SCALE * y);
@@ -157,40 +143,43 @@ public final class SymbolLayer extends TextureLayer {
 				buf[pos++] = y1;
 				buf[pos++] = u1;
 				buf[pos++] = v2;
-
 				// top-right
 				buf[pos++] = tx;
 				buf[pos++] = ty;
 				buf[pos++] = x2;
-				buf[pos++] = y3;
+				buf[pos++] = y1;
 				buf[pos++] = u2;
 				buf[pos++] = v2;
-
 				// bot-right
 				buf[pos++] = tx;
 				buf[pos++] = ty;
-				buf[pos++] = x4;
-				buf[pos++] = y4;
+				buf[pos++] = x2;
+				buf[pos++] = y2;
 				buf[pos++] = u2;
 				buf[pos++] = v1;
-
 				// bot-left
 				buf[pos++] = tx;
 				buf[pos++] = ty;
-				buf[pos++] = x3;
+				buf[pos++] = x1;
 				buf[pos++] = y2;
 				buf[pos++] = u1;
 				buf[pos++] = v1;
 
-				x += width + 1;
+				// six elements used to draw the four vertices
+				numIndices += 6;
+
+				// FIXME this does not work, need to draw bitmap on next
+				// texture...
+				if (pos == bufLen) {
+					sbuf.put(buf, 0, pos);
+					pos = 0;
+				}
+
+				x += width;
 			}
 		}
 
-		TextureObject to = TextureObject.get();
-
-		TextureObject.uploadTexture(to, mBitmap,
-				mBitmapFormat, mBitmapType,
-				TEXTURE_WIDTH, TEXTURE_HEIGHT);
+		TextureObject to = TextureObject.uploadCanvas(offsetIndices, numIndices);
 
 		to.next = textures;
 		textures = to;
