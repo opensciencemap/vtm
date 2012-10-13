@@ -523,8 +523,9 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		if (fail || index == null || tags == null || indexCnt == 0 || tagCnt == 0) {
-			Log.d(TAG, "failed reading way: bytes:" + bytes + " index:" + index + " tag:"
-					+ (tags != null ? tags[0] : "...") + " "
+			Log.d(TAG, "failed reading way: bytes:" + bytes + " index:"
+					+ (index == null ? "null" : index.toString()) + " tag:"
+					+ (tags != null ? tags.toString() : "...") + " "
 					+ indexCnt + " " + coordCnt + " " + tagCnt);
 			return false;
 		}
@@ -943,8 +944,7 @@ public class MapDatabase implements IMapDatabase {
 		return result;
 	}
 
-	// ///////////////////////// Lightweight HttpClient
-	// ///////////////////////////////////////
+	// ///////////////////////// Lightweight HttpClient //////////////////////
 	// would have written simple tcp server/client for this...
 
 	private int mMaxReq = 0;

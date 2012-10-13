@@ -22,10 +22,10 @@ final class QueryCalculations {
 		if (tile.tileX % 2 == 0 && tile.tileY % 2 == 0) {
 			// upper left quadrant
 			return 0xcc00;
-		} else if (tile.tileX % 2 == 1 && tile.tileY % 2 == 0) {
+		} else if ((tile.tileX & 1) == 1 && tile.tileY % 2 == 0) {
 			// upper right quadrant
 			return 0x3300;
-		} else if (tile.tileX % 2 == 0 && tile.tileY % 2 == 1) {
+		} else if (tile.tileX % 2 == 0 && (tile.tileY & 1) == 1) {
 			// lower left quadrant
 			return 0xcc;
 		} else {
@@ -98,14 +98,18 @@ final class QueryCalculations {
 		}
 	}
 
-	static void calculateBaseTiles(QueryParameters queryParameters, Tile tile, SubFileParameter subFileParameter) {
+	static void calculateBaseTiles(QueryParameters queryParameters, Tile tile,
+			SubFileParameter subFileParameter) {
 		if (tile.zoomLevel < subFileParameter.baseZoomLevel) {
-			// calculate the XY numbers of the upper left and lower right sub-tiles
+			// calculate the XY numbers of the upper left and lower right
+			// sub-tiles
 			int zoomLevelDifference = subFileParameter.baseZoomLevel - tile.zoomLevel;
 			queryParameters.fromBaseTileX = tile.tileX << zoomLevelDifference;
 			queryParameters.fromBaseTileY = tile.tileY << zoomLevelDifference;
-			queryParameters.toBaseTileX = queryParameters.fromBaseTileX + (1 << zoomLevelDifference) - 1;
-			queryParameters.toBaseTileY = queryParameters.fromBaseTileY + (1 << zoomLevelDifference) - 1;
+			queryParameters.toBaseTileX = queryParameters.fromBaseTileX
+					+ (1 << zoomLevelDifference) - 1;
+			queryParameters.toBaseTileY = queryParameters.fromBaseTileY
+					+ (1 << zoomLevelDifference) - 1;
 			queryParameters.useTileBitmask = false;
 		} else if (tile.zoomLevel > subFileParameter.baseZoomLevel) {
 			// calculate the XY numbers of the parent base tile
@@ -128,11 +132,15 @@ final class QueryCalculations {
 
 	static void calculateBlocks(QueryParameters queryParameters, SubFileParameter subFileParameter) {
 		// calculate the blocks in the file which need to be read
-		queryParameters.fromBlockX = Math.max(queryParameters.fromBaseTileX - subFileParameter.boundaryTileLeft, 0);
-		queryParameters.fromBlockY = Math.max(queryParameters.fromBaseTileY - subFileParameter.boundaryTileTop, 0);
-		queryParameters.toBlockX = Math.min(queryParameters.toBaseTileX - subFileParameter.boundaryTileLeft,
+		queryParameters.fromBlockX = Math.max(queryParameters.fromBaseTileX
+				- subFileParameter.boundaryTileLeft, 0);
+		queryParameters.fromBlockY = Math.max(queryParameters.fromBaseTileY
+				- subFileParameter.boundaryTileTop, 0);
+		queryParameters.toBlockX = Math.min(queryParameters.toBaseTileX
+				- subFileParameter.boundaryTileLeft,
 				subFileParameter.blocksWidth - 1);
-		queryParameters.toBlockY = Math.min(queryParameters.toBaseTileY - subFileParameter.boundaryTileTop,
+		queryParameters.toBlockY = Math.min(queryParameters.toBaseTileY
+				- subFileParameter.boundaryTileTop,
 				subFileParameter.blocksHeight - 1);
 	}
 
