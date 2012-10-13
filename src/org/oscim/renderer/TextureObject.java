@@ -15,6 +15,8 @@
 package org.oscim.renderer;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
@@ -22,11 +24,22 @@ import android.util.Log;
 public class TextureObject {
 	private static TextureObject pool;
 
+	// shared bitmap and canvas for default texture size
+	public final static int TEXTURE_WIDTH = 256;
+	public final static int TEXTURE_HEIGHT = 256;
+	private static Bitmap mBitmap;
+	private static Canvas mCanvas;
+	private static int mBitmapFormat;
+	private static int mBitmapType;
+	private static int objectCount = 10;
+
 	public static synchronized TextureObject get() {
 		TextureObject to;
 
 		if (pool == null) {
 			init(10);
+			objectCount += 10;
+			Log.d("...", "textures: " + objectCount);
 		}
 
 		to = pool;
@@ -36,8 +49,15 @@ public class TextureObject {
 	}
 
 	public static synchronized void release(TextureObject to) {
-		to.next = pool;
-		pool = to;
+
+		while (to != null) {
+			TextureObject next = to.next;
+
+			to.next = pool;
+			pool = to;
+
+			to = next;
+		}
 	}
 
 	public static void uploadTexture(TextureObject to, Bitmap bitmap,
@@ -79,6 +99,30 @@ public class TextureObject {
 			to.next = pool;
 			pool = to;
 		}
+
+		mBitmap = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
+				Bitmap.Config.ARGB_8888);
+		mCanvas = new Canvas(mBitmap);
+		mBitmapFormat = GLUtils.getInternalFormat(mBitmap);
+		mBitmapType = GLUtils.getType(mBitmap);
+	}
+
+	public static Canvas getCanvas() {
+		mBitmap.eraseColor(Color.TRANSPARENT);
+
+		return mCanvas;
+	}
+
+	public static TextureObject uploadCanvas(short offset, short indices) {
+		TextureObject to = get();
+		uploadTexture(to, mBitmap,
+				mBitmapFormat, mBitmapType,
+				TEXTURE_WIDTH, TEXTURE_HEIGHT);
+
+		to.offset = offset;
+		to.vertices = (short) (indices - offset);
+
+		return to;
 	}
 
 	public TextureObject next;
@@ -89,7 +133,8 @@ public class TextureObject {
 
 	// vertex offset from which this texture is referenced
 	// or store texture id with vertex?
-	int offset;
+	short offset;
+	short vertices;
 
 	TextureObject(int id) {
 		this.id = id;

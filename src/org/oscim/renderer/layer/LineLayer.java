@@ -35,19 +35,10 @@ public final class LineLayer extends Layer {
 	public Line line;
 	public float width;
 
-	// boolean isOutline;
-
 	LineLayer(int layer) {
 		this.layer = layer;
 		this.type = Layer.LINE;
 	}
-
-	// LineLayer(int layer, Line line, float width, boolean outline) {
-	// this.layer = layer;
-	// this.width = width;
-	// this.line = line;
-	// // this.isOutline = outline;
-	// }
 
 	public void addOutline(LineLayer link) {
 		for (LineLayer l = outlines; l != null; l = l.outlines)
@@ -272,6 +263,7 @@ public final class LineLayer extends Layer {
 			prevY = y;
 			x = nextX;
 			y = nextY;
+			boolean flip = false;
 
 			for (;;) {
 				if (ipos < pos + length) {
@@ -314,10 +306,15 @@ public final class LineLayer extends Layer {
 					ux = (ux / a);
 					uy = (uy / a);
 
-					// hack to avoid miter going to infinity
-					if (ux > 2.0f || ux < -2.0f || uy > 2.0f || uy < -2.0f) {
-						ux = -wy;
-						uy = wx;
+					// avoid miter going to infinity...
+					if (ux > 4.0f || ux < -4.0f || uy > 4.0f || uy < -4.0f) {
+						ux = vx - wx;
+						uy = vy - wy;
+
+						a = -wy * ux + wx * uy;
+						ux = (ux / a);
+						uy = (uy / a);
+						flip = !flip;
 					}
 				}
 
@@ -327,6 +324,10 @@ public final class LineLayer extends Layer {
 				ddx = (int) (ux * DIR_SCALE);
 				ddy = (int) (uy * DIR_SCALE);
 
+				if (flip) {
+					ddx *= -1;
+					ddy *= -1;
+				}
 				if (opos == VertexPoolItem.SIZE) {
 					si = si.next = VertexPool.get();
 					v = si.vertices;
@@ -382,6 +383,11 @@ public final class LineLayer extends Layer {
 				ddx = (int) (ux * DIR_SCALE);
 				ddy = (int) (uy * DIR_SCALE);
 
+				if (flip) {
+					ddx *= -1;
+					ddy *= -1;
+				}
+
 				v[opos++] = ox;
 				v[opos++] = oy;
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
@@ -410,6 +416,11 @@ public final class LineLayer extends Layer {
 				dx = (short) (0 | ddx & DIR_MASK);
 				dy = (short) (0 | ddy & DIR_MASK);
 
+				if (flip) {
+					ddx *= -1;
+					ddy *= -1;
+				}
+
 				v[opos++] = ox;
 				v[opos++] = oy;
 				v[opos++] = dx;
@@ -426,6 +437,11 @@ public final class LineLayer extends Layer {
 				ddy = (int) (-(uy + vy) * DIR_SCALE);
 				dx = (short) (2 | ddx & DIR_MASK);
 				dy = (short) (0 | ddy & DIR_MASK);
+
+				if (flip) {
+					ddx *= -1;
+					ddy *= -1;
+				}
 
 				v[opos++] = ox;
 				v[opos++] = oy;
@@ -457,7 +473,10 @@ public final class LineLayer extends Layer {
 
 				ddx = (int) ((ux - vx) * DIR_SCALE);
 				ddy = (int) ((uy - vy) * DIR_SCALE);
-
+				if (flip) {
+					ddx *= -1;
+					ddy *= -1;
+				}
 				v[opos++] = ox;
 				v[opos++] = oy;
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
@@ -472,6 +491,10 @@ public final class LineLayer extends Layer {
 				// add last vertex twice
 				ddx = (int) (-(ux + vx) * DIR_SCALE);
 				ddy = (int) (-(uy + vy) * DIR_SCALE);
+				if (flip) {
+					ddx *= -1;
+					ddy *= -1;
+				}
 				dx = (short) (2 | ddx & DIR_MASK);
 				dy = (short) (1 | ddy & DIR_MASK);
 

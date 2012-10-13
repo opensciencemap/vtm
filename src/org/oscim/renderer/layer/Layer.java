@@ -14,7 +14,7 @@
  */
 package org.oscim.renderer.layer;
 
-public class Layer {
+public abstract class Layer {
 	public final static byte LINE = 0;
 	public final static byte POLYGON = 1;
 	public final static byte WAYTEXT = 2;
@@ -34,4 +34,7 @@ public class Layer {
 
 	VertexPoolItem pool;
 	protected VertexPoolItem curItem;
+
+	protected void clear() {
+	}
 }

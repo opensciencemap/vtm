@@ -39,7 +39,7 @@ public class TextureRenderer {
 	final static int VERTICES_PER_SPRITE = 4;
 	final static int SHORTS_PER_VERTICE = 6;
 	// per texture
-	public final static int MAX_ITEMS = 40;
+	public final static int MAX_ITEMS = 50;
 
 	static void init() {
 		mTextureProgram = GlUtils.createProgram(Shaders.textVertexShader,
@@ -89,6 +89,7 @@ public class TextureRenderer {
 
 	static Layer draw(Layer layer, float scale, float[] projection,
 			float matrix[], int offset) {
+
 		GLES20.glUseProgram(mTextureProgram);
 		GlUtils.checkGlError("draw texture1");
 
@@ -116,20 +117,25 @@ public class TextureRenderer {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesVBO);
 		GlUtils.checkGlError("draw texture3");
 
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tl.textures.id);
-		GlUtils.checkGlError("draw texture4");
+		for (TextureObject to = tl.textures; to != null; to = to.next) {
 
-		GlUtils.checkGlError("draw texture5");
-		GLES20.glVertexAttribPointer(hTextureVertex, 4,
-				GLES20.GL_SHORT, false, 12, offset);
-		GlUtils.checkGlError("draw texture..");
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
+			GlUtils.checkGlError("draw texture4");
 
-		GLES20.glVertexAttribPointer(hTextureTexCoord, 2,
-				GLES20.GL_SHORT, false, 12, offset + 8);
-		GlUtils.checkGlError("draw texture...");
+			GlUtils.checkGlError("draw texture5");
 
-		GLES20.glDrawElements(GLES20.GL_TRIANGLES, (tl.verticesCnt / 4)
-				* INDICES_PER_SPRITE, GLES20.GL_UNSIGNED_SHORT, 0);
+			// to.offset * 24(shorts) * 2(short-bytes) / 6(indices)
+			GLES20.glVertexAttribPointer(hTextureVertex, 4,
+					GLES20.GL_SHORT, false, 12, to.offset * 8 + offset);
+			GlUtils.checkGlError("draw texture..");
+
+			GLES20.glVertexAttribPointer(hTextureTexCoord, 2,
+					GLES20.GL_SHORT, false, 12, to.offset * 8 + offset + 8);
+			GlUtils.checkGlError("draw texture...");
+
+			GLES20.glDrawElements(GLES20.GL_TRIANGLES, to.vertices,
+					GLES20.GL_UNSIGNED_SHORT, 0);
+		}
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 		GlUtils.checkGlError("draw texture");
