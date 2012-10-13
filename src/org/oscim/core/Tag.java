@@ -52,7 +52,8 @@ public class Tag {
 	 */
 	public String value;
 
-	private transient int hashCodeValue = 0;
+	private int hashCodeValue = 0;
+	private final boolean intern;
 
 	/**
 	 * @param tag
@@ -66,18 +67,7 @@ public class Tag {
 		}
 		this.key = tag.substring(0, splitPosition).intern();
 		this.value = tag.substring(splitPosition + 1).intern();
-	}
-
-	public Tag(String tag, boolean hashValue) {
-		int splitPosition = tag.indexOf(KEY_VALUE_SEPARATOR);
-		if (splitPosition < 0) {
-			System.out.println("TAG:" + tag);
-		}
-		this.key = tag.substring(0, splitPosition).intern();
-		if (!hashValue)
-			this.value = tag.substring(splitPosition + 1);
-		else
-			this.value = tag.substring(splitPosition + 1).intern();
+		this.intern = true;
 	}
 
 	/**
@@ -89,6 +79,7 @@ public class Tag {
 	public Tag(String key, String value) {
 		this.key = (key == null ? null : key.intern());
 		this.value = (value == null ? null : value.intern());
+		this.intern = true;
 	}
 
 	/**
@@ -108,6 +99,7 @@ public class Tag {
 			this.key = key;
 			this.value = value;
 		}
+		this.intern = intern;
 	}
 
 	@Override
@@ -119,9 +111,13 @@ public class Tag {
 		}
 		Tag other = (Tag) obj;
 
-		if ((this.key == other.key) && (this.value == other.value))
-			return true;
-
+		if (this.intern && other.intern) {
+			if ((this.key == other.key) && (this.value == other.value))
+				return true;
+		} else {
+			if ((this.key.equals(other.key)) && (this.value.equals(other.value)))
+				return true;
+		}
 		return false;
 	}
 
