@@ -594,6 +594,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// TextRenderer.endDraw();
 		// }
 
+		// start drawing, overlays migh be busy for a bit uploading textures
+		GLES20.glFlush();
+
 		// call overlay renderer
 		for (Overlay overlay : mOverlays) {
 			if (overlay.newData) {

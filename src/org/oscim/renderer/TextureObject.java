@@ -27,8 +27,8 @@ public class TextureObject {
 	// shared bitmap and canvas for default texture size
 	public final static int TEXTURE_WIDTH = 256;
 	public final static int TEXTURE_HEIGHT = 256;
-	private static Bitmap mBitmap;
-	private static Canvas mCanvas;
+	private static Bitmap[] mBitmap;
+	private static Canvas[] mCanvas;
 	private static int mBitmapFormat;
 	private static int mBitmapType;
 	private static int objectCount = 10;
@@ -64,7 +64,7 @@ public class TextureObject {
 			int format, int type, int w, int h) {
 
 		if (to == null) {
-			Log.d("...", "no fckn texture!");
+			Log.d("...", "no texture!");
 			return;
 		}
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
@@ -100,22 +100,31 @@ public class TextureObject {
 			pool = to;
 		}
 
-		mBitmap = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
-				Bitmap.Config.ARGB_8888);
-		mCanvas = new Canvas(mBitmap);
-		mBitmapFormat = GLUtils.getInternalFormat(mBitmap);
-		mBitmapType = GLUtils.getType(mBitmap);
+		mBitmap = new Bitmap[4];
+		mCanvas = new Canvas[4];
+
+		for (int i = 0; i < 4; i++) {
+			mBitmap[i] = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
+					Bitmap.Config.ARGB_8888);
+			mCanvas[i] = new Canvas(mBitmap[i]);
+		}
+		mBitmapFormat = GLUtils.getInternalFormat(mBitmap[0]);
+		mBitmapType = GLUtils.getType(mBitmap[0]);
 	}
 
-	public static Canvas getCanvas() {
-		mBitmap.eraseColor(Color.TRANSPARENT);
+	private static int curCanvas = 0;
 
-		return mCanvas;
+	public static Canvas getCanvas() {
+		curCanvas = ++curCanvas % 4;
+
+		mBitmap[curCanvas].eraseColor(Color.TRANSPARENT);
+
+		return mCanvas[curCanvas];
 	}
 
 	public static TextureObject uploadCanvas(short offset, short indices) {
 		TextureObject to = get();
-		uploadTexture(to, mBitmap,
+		uploadTexture(to, mBitmap[curCanvas],
 				mBitmapFormat, mBitmapType,
 				TEXTURE_WIDTH, TEXTURE_HEIGHT);
 

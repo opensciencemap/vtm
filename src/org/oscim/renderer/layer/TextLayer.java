@@ -21,10 +21,11 @@ import org.oscim.renderer.TextureRenderer;
 
 import android.graphics.Canvas;
 import android.util.FloatMath;
+import android.util.Log;
 
 public final class TextLayer extends TextureLayer {
 
-	private static String TAG = SymbolLayer.class.getSimpleName();
+	private static String TAG = TextureLayer.class.getSimpleName();
 
 	private final static int TEXTURE_WIDTH = TextureObject.TEXTURE_WIDTH;
 	private final static int TEXTURE_HEIGHT = TextureObject.TEXTURE_HEIGHT;
@@ -64,8 +65,8 @@ public final class TextLayer extends TextureLayer {
 
 	@Override
 	public void compile(ShortBuffer sbuf) {
-		// int numLabel = 0;
-
+		int numLabel = 0;
+		int numTextures = 0;
 		short numIndices = 0;
 		short offsetIndices = 0;
 
@@ -80,7 +81,7 @@ public final class TextLayer extends TextureLayer {
 
 		Canvas canvas = TextureObject.getCanvas();
 		for (TextItem it = labels; it != null; it = it.next) {
-			// numLabel++;
+			numLabel++;
 
 			float width = it.width + 2 * mFontPadX;
 			float height = (int) (it.text.fontHeight) + 2 * mFontPadY + 0.5f;
@@ -94,7 +95,9 @@ public final class TextLayer extends TextureLayer {
 				advanceY = (int) (height + 0.5f);
 
 				if (y + height > TEXTURE_HEIGHT) {
-					// Log.d(TAG, "reached max labels " + numLabel);
+					// Log.d(TAG, "reached max labels " + numTextures + " " +
+					// numLabel + " "
+					// + ((numIndices - offsetIndices) / 6));
 
 					// need to sync bitmap upload somehow???
 					TextureObject to = TextureObject.uploadCanvas(offsetIndices, numIndices);
@@ -113,6 +116,7 @@ public final class TextLayer extends TextureLayer {
 					// clear bitmap, TODO rotate two canvas to reduce the chance
 					// of having upload lock draing to the canvas?
 					canvas = TextureObject.getCanvas();
+					numTextures++;
 				}
 			}
 
@@ -206,11 +210,12 @@ public final class TextLayer extends TextureLayer {
 			// FIXME this does not work, need to draw bitmap on next
 			// texture...
 			if (pos == bufLen) {
+				Log.d(TAG, "--- reached max label per texture " + numLabel);
 				sbuf.put(buf, 0, pos);
 				pos = 0;
 			}
 
-			x += width + 1;
+			x += width;
 		}
 
 		TextureObject to = TextureObject.uploadCanvas(offsetIndices, numIndices);
@@ -220,7 +225,7 @@ public final class TextLayer extends TextureLayer {
 
 		sbuf.put(buf, 0, pos);
 
-		// Log.d(TAG, "added labels " + numLabel);
+		Log.d(TAG, "added labels " + numTextures + " " + numLabel);
 	}
 
 	@Override

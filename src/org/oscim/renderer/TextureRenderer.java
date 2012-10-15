@@ -89,7 +89,7 @@ public class TextureRenderer {
 
 	static Layer draw(Layer layer, float scale, float[] projection,
 			float matrix[], int offset) {
-
+		GlUtils.checkGlError("draw texture0");
 		GLES20.glUseProgram(mTextureProgram);
 		GlUtils.checkGlError("draw texture1");
 
