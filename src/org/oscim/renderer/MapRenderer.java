@@ -662,8 +662,6 @@ public class MapRenderer extends GLSurfaceView {
 	public synchronized boolean passTile(JobTile jobTile) {
 		MapTile tile = (MapTile) jobTile;
 
-		// XXX this is concurrent with updateVisiblelist which set loading false
-		// temporarily
 		// if (!tile.isLoading) {
 		// // no one should be able to use this tile now, TileGenerator passed
 		// // it, GL-Thread does nothing until newdata is set.
