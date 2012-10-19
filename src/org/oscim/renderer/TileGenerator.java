@@ -457,9 +457,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private static byte getValidLayer(byte layer) {
 		if (layer < 0) {
 			return 0;
-			/**
-			 * return instances of MapRenderer
-			 */
 		} else if (layer >= LAYERS) {
 			return LAYERS - 1;
 		} else {

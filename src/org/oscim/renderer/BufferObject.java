@@ -17,7 +17,7 @@ package org.oscim.renderer;
 
 import android.opengl.GLES20;
 
-class BufferObject {
+public final class BufferObject {
 	private static BufferObject pool;
 	static int counter;
 
@@ -110,7 +110,7 @@ class BufferObject {
 		counter = num;
 	}
 
-	int id;
+	public int id;
 	int size;
 	BufferObject next;
 

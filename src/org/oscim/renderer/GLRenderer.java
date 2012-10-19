@@ -33,9 +33,10 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.MapRenderer.TilesData;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
+import org.oscim.renderer.overlays.Overlay;
+import org.oscim.renderer.overlays.OverlayText;
 import org.oscim.theme.RenderTheme;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
@@ -98,7 +99,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// happens rarely, unless you live on Fidschi
 
 	/* package */static int mHolderCount;
-	/* package */static TilesData mDrawTiles;
+	/* package */static Tiles mDrawTiles;
 
 	static boolean[] vertexArray = { false, false };
 
@@ -418,7 +419,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			serial = mDrawTiles.serial;
 
 		// get current tiles to draw
-		mDrawTiles = MapRenderer.getActiveTiles(mDrawTiles);
+		mDrawTiles = TileManager.getActiveTiles(mDrawTiles);
 
 		if (mDrawTiles == null || mDrawTiles.cnt == 0) {
 			return;

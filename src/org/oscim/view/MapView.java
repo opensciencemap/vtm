@@ -35,8 +35,9 @@ import org.oscim.generator.JobQueue;
 import org.oscim.generator.JobTile;
 import org.oscim.generator.MapWorker;
 import org.oscim.renderer.GLRenderer;
-import org.oscim.renderer.MapRenderer;
+import org.oscim.renderer.GLView;
 import org.oscim.renderer.TileGenerator;
+import org.oscim.renderer.TileManager;
 import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.RenderTheme;
@@ -79,7 +80,8 @@ public class MapView extends FrameLayout {
 	private IMapDatabase mMapDatabase;
 	private MapDatabases mMapDatabaseType;
 
-	private MapRenderer mMapRenderer;
+	private TileManager mTileManager;
+	private GLView mGLView;
 	private JobQueue mJobQueue;
 	private MapWorker mMapWorkers[];
 	private int mNumMapWorkers = 4;
@@ -142,7 +144,8 @@ public class MapView extends FrameLayout {
 
 		mJobQueue = new JobQueue();
 
-		mMapRenderer = MapRenderer.create(context, this);
+		mTileManager = TileManager.create(this);
+		mGLView = new GLView(context, this);
 
 		mMapWorkers = new MapWorker[mNumMapWorkers];
 
@@ -164,7 +167,7 @@ public class MapView extends FrameLayout {
 			if (i == 0)
 				mMapDatabase = mapDatabase;
 
-			mMapWorkers[i] = new MapWorker(i, mJobQueue, tileGenerator, mMapRenderer);
+			mMapWorkers[i] = new MapWorker(i, mJobQueue, tileGenerator, mTileManager);
 		}
 
 		mapActivity.registerMapView(this);
@@ -182,7 +185,7 @@ public class MapView extends FrameLayout {
 				android.view.ViewGroup.LayoutParams.MATCH_PARENT,
 				android.view.ViewGroup.LayoutParams.MATCH_PARENT);
 
-		addView(mMapRenderer, params);
+		addView(mGLView, params);
 
 		if (testRegionZoom)
 			mRegionLookup = new RegionLookup(this);
@@ -194,7 +197,11 @@ public class MapView extends FrameLayout {
 
 		for (MapWorker worker : mMapWorkers)
 			worker.start();
+	}
 
+	public void render() {
+		if (!MapView.debugFrameTime)
+			mGLView.requestRender();
 	}
 
 	/**
@@ -252,14 +259,14 @@ public class MapView extends FrameLayout {
 		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
 			return;
 
-		mMapRenderer.updateMap(false);
+		mTileManager.updateMap(false);
 	}
 
 	public void clearAndRedrawMap() {
 		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
 			return;
 
-		mMapRenderer.updateMap(true);
+		mTileManager.updateMap(true);
 	}
 
 	/**
@@ -476,6 +483,8 @@ public class MapView extends FrameLayout {
 		if (width != 0 && height != 0)
 			mMapViewPosition.setViewport(width, height);
 
+		TileManager.onSizeChanged(width, height);
+
 		mapWorkersProceed();
 	}
 
@@ -527,7 +536,7 @@ public class MapView extends FrameLayout {
 
 	public void onStop() {
 		Log.d(TAG, "onStop");
-		mMapRenderer.destroy();
+		mTileManager.destroy();
 	}
 
 	/**

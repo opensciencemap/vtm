@@ -46,7 +46,7 @@ import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
 
-class PolygonRenderer {
+public final class PolygonRenderer {
 	// private static final String TAG = "PolygonRenderer";
 
 	// private static final int NUM_VERTEX_SHORTS = 2;
@@ -160,7 +160,7 @@ class PolygonRenderer {
 	// stencil buffer index to start fill
 	private static int mStart;
 
-	static Layer draw(MapPosition pos, Layer layer,
+	public static Layer draw(MapPosition pos, Layer layer,
 			float[] matrix, boolean first, boolean clip) {
 
 		int zoom = pos.zoomLevel;

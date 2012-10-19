@@ -25,7 +25,7 @@ import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
 
-public class TextureRenderer {
+public final class TextureRenderer {
 	private static int mTextureProgram;
 	private static int hTextureMVMatrix;
 	private static int hTextureProjMatrix;
@@ -87,7 +87,7 @@ public class TextureRenderer {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	static Layer draw(Layer layer, float scale, float[] projection,
+	public static Layer draw(Layer layer, float scale, float[] projection,
 			float matrix[], int offset) {
 		GlUtils.checkGlError("draw texture0");
 		GLES20.glUseProgram(mTextureProgram);

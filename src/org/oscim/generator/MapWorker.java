@@ -14,7 +14,7 @@
  */
 package org.oscim.generator;
 
-import org.oscim.renderer.MapRenderer;
+import org.oscim.renderer.TileManager;
 import org.oscim.renderer.TileGenerator;
 import org.oscim.utils.PausableThread;
 
@@ -26,7 +26,7 @@ public class MapWorker extends PausableThread {
 	private final String THREAD_NAME;
 	private final JobQueue mJobQueue;
 	private final TileGenerator mMapGenerator;
-	private final MapRenderer mMapRenderer;
+	private final TileManager mTileManager;
 
 	/**
 	 * @param id
@@ -35,15 +35,15 @@ public class MapWorker extends PausableThread {
 	 *            ...
 	 * @param tileGenerator
 	 *            ...
-	 * @param mapRenderer
+	 * @param tileManager
 	 *            ...
 	 */
 	public MapWorker(int id, JobQueue jobQueue, TileGenerator tileGenerator,
-			MapRenderer mapRenderer) {
+			TileManager tileManager) {
 		super();
 		mJobQueue = jobQueue;
 		mMapGenerator = tileGenerator;
-		mMapRenderer = mapRenderer;
+		mTileManager = tileManager;
 
 		THREAD_NAME = "MapWorker" + id;
 	}
@@ -69,7 +69,7 @@ public class MapWorker extends PausableThread {
 		boolean success = mMapGenerator.executeJob(tile);
 
 		if (!isInterrupted() && success) {
-			mMapRenderer.passTile(tile);
+			mTileManager.passTile(tile);
 		}
 	}
 

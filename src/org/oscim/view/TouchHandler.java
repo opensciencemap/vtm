@@ -43,6 +43,8 @@ final class TouchHandler
 		implements ScaleGestureDetector.OnScaleGestureListener {
 
 	private static final float SCALE_DURATION = 450;
+	private static final float ROTATION_DELAY = 200; // ms
+
 	private static final int INVALID_POINTER_ID = -1;
 
 	private final MapView mMapView;
@@ -56,7 +58,7 @@ final class TouchHandler
 	private boolean mBeginRotate;
 	private boolean mBeginTilt;
 	private boolean mLongPress;
-	private long mLongPressTime;
+	// private long mLongPressTime;
 
 	private float mPosX;
 	private float mPosY;
@@ -161,14 +163,12 @@ final class TouchHandler
 
 		boolean scaling = mScaleGestureDetector.isInProgress();
 
-		if (!mScaling) {
+		if (!mScaling)
 			mScaling = scaling;
-		}
 
 		if (!scaling && !mMoveStart) {
 
-			if (Math.abs(moveX) > 3 * mMapMoveDelta
-					|| Math.abs(moveY) > 3 * mMapMoveDelta) {
+			if (Math.abs(moveX) > mMapMoveDelta || Math.abs(moveY) > mMapMoveDelta) {
 				// the map movement threshold has been reached
 				// longPressDetector.pressStop();
 				mMoveStart = true;
@@ -186,13 +186,13 @@ final class TouchHandler
 			return true;
 		}
 
-		if (!scaling) {
+		if (multi == 0) {
 			mMapPosition.moveMap(moveX, moveY);
 			mMapView.redrawMap();
 			return true;
 		}
 
-		if (!mMapView.enableRotation || multi < 1)
+		if (event.getEventTime() - mMultiTouchDownTime < ROTATION_DELAY)
 			return true;
 
 		double x1 = event.getX(0);
@@ -206,26 +206,21 @@ final class TouchHandler
 		double rad = Math.atan2(dy, dx);
 		double r = rad - mAngle;
 
-		if (!mBeginRotate && Math.abs(rad) < 0.25 || Math.abs(rad) > Math.PI - 0.25) {
-			// if (Math.abs(moveX) > 3 * mMapMoveDelta) {
-			mBeginTilt = true;
-			if (mMapPosition.tilt(moveY / 4)) {
-				mMapView.redrawMap();
+		if (!mBeginRotate) {
+			if (Math.abs(rad) < 0.25 || Math.abs(rad) > Math.PI - 0.25) {
+				mBeginTilt = true;
+				if (mMapPosition.tilt(moveY / 4)) {
+					mMapView.redrawMap();
+				}
+				return true;
 			}
-			// }
-			return true;
-		}
 
-		if (!mBeginRotate && !mBeginScale && !mBeginTilt) {
-			if (Math.abs(r) > 0.03)
-				mBeginRotate = true;
-		}
-
-		// quick way to prevent flipping...
-		// Log.d("", "rotation " + rad + " " + r);
-		if (Math.abs(r) > 0.1) {
-			rad = mAngle;
-			r = 0;
+			if (!mBeginScale && !mBeginTilt) {
+				if (Math.abs(r) > 0.05) {
+					Log.d("...", "begin rotate");
+					mBeginRotate = true;
+				}
+			}
 		}
 
 		if (mBeginRotate) {
@@ -248,16 +243,20 @@ final class TouchHandler
 	}
 
 	private int multi = 0;
+	private long mMultiTouchDownTime;
 
 	private boolean onActionPointerDown(MotionEvent event) {
 		// longPressDetector.pressStop();
-		// multiTouchDownTime = motionEvent.getEventTime();
+		mMultiTouchDownTime = event.getEventTime();
+
 		multi++;
+
 		if (multi == 1) {
 			double dx = event.getX(0) - event.getX(1);
 			double dy = event.getY(0) - event.getY(1);
 			mAngle = Math.atan2(dy, dx);
 		}
+		Log.d("...", "multi down " + multi);
 		return true;
 	}
 
@@ -282,6 +281,7 @@ final class TouchHandler
 		multi--;
 
 		mLongPress = false;
+		Log.d("...", "multi up " + multi);
 
 		return true;
 	}
@@ -429,7 +429,8 @@ final class TouchHandler
 					mMapPosition.getOffsetPoint(mPosX, mPosY));
 		} else {
 			mLongPress = true;
-			mLongPressTime = SystemClock.uptimeMillis();
+
+			// mLongPressTime = SystemClock.uptimeMillis();
 			// mScrollX = (e.getX(0) - (mMapView.getWidth() >> 1)) * 2f;
 			// mScrollY = (e.getY(0) - (mMapView.getHeight() >> 1)) * 2f;
 			// mPrevScale = 0;
@@ -473,14 +474,14 @@ final class TouchHandler
 		mTimeEnd = SystemClock.elapsedRealtime();
 
 		if (!mBeginScale) {
-			if (mTimeEnd - mTimeStart > 200 || mSumScale > 1.1 || mSumScale < 0.9) {
+			if (mSumScale > 1.1 || mSumScale < 0.9) {
+				Log.d("...", "begin scale " + mSumScale);
 				mBeginScale = true;
-				scale = mSumScale;
-			} else
-				return true;
+				// scale = mSumScale;
+			}
 		}
 
-		if (mMapPosition.scaleMap(scale, mFocusX, mFocusY))
+		if (mBeginScale && mMapPosition.scaleMap(scale, mFocusX, mFocusY))
 			mMapView.redrawMap();
 
 		return true;

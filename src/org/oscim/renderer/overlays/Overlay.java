@@ -12,10 +12,15 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.renderer.BufferObject;
+import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.LineRenderer;
+import org.oscim.renderer.PolygonRenderer;
+import org.oscim.renderer.TextureRenderer;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.utils.FastMath;
@@ -29,17 +34,17 @@ public abstract class Overlay {
 
 	protected final MapView mMapView;
 	protected MapPosition mMapPosition;
-	protected final Layers layers;
+	public final Layers layers;
 
 	// flag to set when data is ready for (re)compilation.
-	protected boolean newData;
+	public boolean newData;
 
 	// flag set by GLRenderer when data is compiled
-	protected boolean isReady;
+	public boolean isReady;
 
-	protected BufferObject vbo;
+	public BufferObject vbo;
 
-	Overlay(MapView mapView) {
+	public Overlay(MapView mapView) {
 		mMapView = mapView;
 		mMapPosition = new MapPosition();
 		layers = new Layers();
@@ -68,7 +73,7 @@ public abstract class Overlay {
 	 * @param tilesChanged
 	 *            true when loaded tiles changed
 	 */
-	synchronized void update(boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(boolean positionChanged, boolean tilesChanged) {
 		// // keep position constant (or update layer relative to new position)
 		// mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
 		//
@@ -85,7 +90,7 @@ public abstract class Overlay {
 
 	float[] mvp = new float[16];
 
-	synchronized void render(MapPosition pos, float[] mv, float[] proj) {
+	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
 		float div = setMatrix(pos, mv);
 
 		Matrix.multiplyMM(mvp, 0, proj, 0, mv, 0);

@@ -18,7 +18,7 @@ import org.oscim.generator.JobTile;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.TextItem;
 
-class MapTile extends JobTile {
+public final class MapTile extends JobTile {
 
 	/**
 	 * VBO layout: - 16 bytes fill coordinates, n bytes polygon vertices, m
@@ -31,7 +31,7 @@ class MapTile extends JobTile {
 	/**
 	 * Tile data set by TileGenerator:
 	 */
-	TextItem labels;
+	public TextItem labels;
 	Layers layers;
 
 	/**
@@ -47,7 +47,7 @@ class MapTile extends JobTile {
 	/**
 	 * tile is in view region.
 	 */
-	boolean isVisible;
+	public boolean isVisible;
 
 	/**
 	 * pointer to access relatives in QuadTree

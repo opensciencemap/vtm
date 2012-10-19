@@ -66,7 +66,7 @@ public final class TextLayer extends TextureLayer {
 	@Override
 	public void compile(ShortBuffer sbuf) {
 		int numLabel = 0;
-		int numTextures = 0;
+		// int numTextures = 0;
 		short numIndices = 0;
 		short offsetIndices = 0;
 
@@ -116,7 +116,7 @@ public final class TextLayer extends TextureLayer {
 					// clear bitmap, TODO rotate two canvas to reduce the chance
 					// of having upload lock draing to the canvas?
 					canvas = TextureObject.getCanvas();
-					numTextures++;
+					// numTextures++;
 				}
 			}
 
@@ -225,7 +225,7 @@ public final class TextLayer extends TextureLayer {
 
 		sbuf.put(buf, 0, pos);
 
-		Log.d(TAG, "added labels " + numTextures + " " + numLabel);
+		// Log.d(TAG, "added labels " + numTextures + " " + numLabel);
 	}
 
 	@Override
