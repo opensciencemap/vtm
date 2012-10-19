@@ -469,21 +469,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// Log.d(TAG, "visible: " + tileCnt);
 
 		uploadCnt = 0;
-		// int updateTextures = 0;
 
 		// compile data and upload to VBOsi
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile tile = tiles[i];
 
-			// if (!isVisible(mapPosition, tile))
-			// continue;
 			if (!tile.isVisible)
 				continue;
-
-			// if (MapView.staticLabeling) {
-			// if (tile.texture == null && TextRenderer.drawToTexture(tile))
-			// updateTextures++;
-			// }
 
 			if (tile.newData) {
 				uploadTileData(tile);
@@ -528,11 +520,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 		// }
 
-		// if (MapView.staticLabeling) {
-		// if (updateTextures > 0)
-		// TextRenderer.compileTextures();
-		// }
-
 		GLES20.glEnable(GL_DEPTH_TEST);
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
 
@@ -560,40 +547,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mDrawSerial++;
 
 		GLES20.glEnable(GL_BLEND);
-
-		// if (MapView.staticLabeling) {
-		// int z = mapPosition.zoomLevel;
-		// float s = mapPosition.scale;
-		// int zoomLevelDiff = Math.max(z - TileGenerator.STROKE_MAX_ZOOM_LEVEL,
-		// 0);
-		// float scale = (float) Math.pow(1.4, zoomLevelDiff);
-		// if (scale < 1)
-		// scale = 1;
-		//
-		// if (z >= TileGenerator.STROKE_MAX_ZOOM_LEVEL)
-		// TextRenderer.beginDraw(scale / FloatMath.sqrt(s), mProjMatrix);
-		// else
-		// TextRenderer.beginDraw(1f / s, mProjMatrix);
-		//
-		// for (int i = 0; i < tileCnt; i++) {
-		// MapTile t = tiles[i];
-		// if (!t.isVisible)
-		// continue;
-		//
-		// if (t.holder == null) {
-		// if (t.texture != null) {
-		// setMatrix(mMVPMatrix, t, 1, false);
-		// TextRenderer.drawTile(t, mMVPMatrix);
-		// }
-		// } else {
-		// if (t.holder.texture != null) {
-		// setMatrix(mMVPMatrix, t, 1, false);
-		// TextRenderer.drawTile(t.holder, mMVPMatrix);
-		// }
-		// }
-		// }
-		// TextRenderer.endDraw();
-		// }
 
 		// start drawing, overlays migh be busy for a bit uploading textures
 		GLES20.glFlush();
