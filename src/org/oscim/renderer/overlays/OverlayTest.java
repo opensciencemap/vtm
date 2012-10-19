@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.renderer.overlays;
 
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
@@ -92,7 +92,7 @@ public class OverlayTest extends Overlay {
 	}
 
 	@Override
-	synchronized void update(boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(boolean positionChanged, boolean tilesChanged) {
 		// keep position constant (or update layer relative to new position)
 		mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
 

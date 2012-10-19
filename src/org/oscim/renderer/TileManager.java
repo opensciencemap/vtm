@@ -23,19 +23,16 @@ import org.oscim.core.Tile;
 import org.oscim.generator.JobTile;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.VertexPool;
-import org.oscim.utils.GlConfigChooser;
+import org.oscim.renderer.overlays.Overlay;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
-import android.content.Context;
-import android.opengl.GLSurfaceView;
 import android.util.FloatMath;
 import android.util.Log;
 
-// FIXME to many 'Renderer', this one needs a better name.. TileLoader?
-public class MapRenderer extends GLSurfaceView {
-	private final static String TAG = "MapRenderer";
-	private GLRenderer mRenderer;
+// FIXME move GLSurfaceView in separate class
+public class TileManager { // extends GLSurfaceView {
+	private final static String TAG = "TileManager";
 
 	private static final int MAX_TILES_IN_QUEUE = 40;
 	private static final int CACHE_THRESHOLD = 10;
@@ -72,25 +69,10 @@ public class MapRenderer extends GLSurfaceView {
 
 	// private static int[] mBoundaryTiles = new int[8];
 
-	// used for passing tiles to be rendered from TileLoader(Main-Thread) to
-	// GLThread
-	static final class TilesData {
-		int cnt = 0;
-		int serial;
-		MapTile[] tiles;
-
-		TilesData() {
-		}
-
-		TilesData(int numTiles) {
-			tiles = new MapTile[numTiles];
-		}
-	}
-
 	static int mUpdateCnt;
 	static ReentrantLock tilelock = new ReentrantLock();
-	static TilesData mCurrentTiles;
-	/* package */static TilesData mNewTiles;
+	static Tiles mCurrentTiles;
+	/* package */static Tiles mNewTiles;
 
 	static int tileCounter;
 
@@ -145,13 +127,13 @@ public class MapRenderer extends GLSurfaceView {
 	// but should do the same for GLRenderer.
 	// findbugs found that volatile thingy, though this class
 	// is created before any other thread starts
-	private static volatile MapRenderer SINGLETON;
+	private static volatile TileManager SINGLETON;
 
-	public static MapRenderer create(Context context, MapView mapView) {
+	public static TileManager create(MapView mapView) {
 		if (SINGLETON != null)
 			throw new IllegalStateException();
 
-		return SINGLETON = new MapRenderer(context, mapView);
+		return SINGLETON = new TileManager(mapView);
 	}
 
 	public void destroy() {
@@ -164,22 +146,22 @@ public class MapRenderer extends GLSurfaceView {
 		// ... free pools
 	}
 
-	private MapRenderer(Context context, MapView mapView) {
-		super(context);
+	private TileManager(MapView mapView) {
+		// super(context);
 
 		mMapView = mapView;
 		mMapViewPosition = mapView.getMapViewPosition();
 
-		Log.d(TAG, "init GLSurfaceLayer");
-		setEGLConfigChooser(new GlConfigChooser());
-		setEGLContextClientVersion(2);
-
-		// setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
-		mRenderer = new GLRenderer(mMapView);
-		setRenderer(mRenderer);
-
-		// if (!debugFrameTime)
-		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+		// Log.d(TAG, "init GLSurfaceLayer");
+		// setEGLConfigChooser(new GlConfigChooser());
+		// setEGLContextClientVersion(2);
+		//
+		// // setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
+		// mRenderer = new GLRenderer(mMapView);
+		// setRenderer(mRenderer);
+		//
+		// // if (!debugFrameTime)
+		// setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
 		mJobList = new ArrayList<JobTile>();
 		mTiles = new ArrayList<MapTile>();
@@ -196,7 +178,7 @@ public class MapRenderer extends GLSurfaceView {
 	}
 
 	/**
-	 * Update list of visible tiles and passes them to MapRenderer, when not
+	 * Update list of visible tiles and passes them to TileManager, when not
 	 * available tiles are created and added to JobQueue (mapView.addJobs) for
 	 * loading by TileGenerator class
 	 * 
@@ -241,8 +223,8 @@ public class MapRenderer extends GLSurfaceView {
 			int numTiles = (num * num) / (size * size) * 4;
 
 			// mRenderer.clearTiles(numTiles);
-			mNewTiles = new TilesData(numTiles);
-			mCurrentTiles = new TilesData(numTiles);
+			mNewTiles = new Tiles(numTiles);
+			mCurrentTiles = new Tiles(numTiles);
 			// MapInfo mapInfo = mMapView.getMapDatabase().getMapInfo();
 			// if (mapInfo != null)
 			// mZoomLevels = mapInfo.zoomLevel;
@@ -259,7 +241,7 @@ public class MapRenderer extends GLSurfaceView {
 		changedPos = mMapViewPosition.getMapPosition(mapPosition, coords);
 
 		if (!changedPos) {
-			requestRender();
+			mMapView.render();
 			return;
 		}
 
@@ -281,8 +263,7 @@ public class MapRenderer extends GLSurfaceView {
 
 		boolean changed = updateVisibleList(mapPosition, zdir);
 
-		if (!MapView.debugFrameTime)
-			requestRender();
+		mMapView.render();
 
 		if (changed) {
 			int remove = mTiles.size() - GLRenderer.CACHE_TILES;
@@ -294,13 +275,13 @@ public class MapRenderer extends GLSurfaceView {
 		}
 	}
 
-	public static TilesData getActiveTiles(TilesData td) {
+	public static Tiles getActiveTiles(Tiles td) {
 
 		if (td != null && td.serial == mUpdateCnt)
 			return td;
 
 		// dont flip new/currentTiles while copying
-		MapRenderer.tilelock.lock();
+		TileManager.tilelock.lock();
 		try {
 			MapTile[] newTiles = mCurrentTiles.tiles;
 			int cnt = mCurrentTiles.cnt;
@@ -312,7 +293,7 @@ public class MapRenderer extends GLSurfaceView {
 			MapTile[] nextTiles;
 
 			if (td == null)
-				td = new TilesData(newTiles.length);
+				td = new Tiles(newTiles.length);
 
 			nextTiles = td.tiles;
 
@@ -326,13 +307,13 @@ public class MapRenderer extends GLSurfaceView {
 			td.serial = mUpdateCnt;
 			td.cnt = cnt;
 		} finally {
-			MapRenderer.tilelock.unlock();
+			TileManager.tilelock.unlock();
 		}
 
 		return td;
 	}
 
-	// public void releaseTiles(TilesData tiles) {
+	// public void releaseTiles(Tiles tiles) {
 	//
 	// }
 
@@ -378,7 +359,7 @@ public class MapRenderer extends GLSurfaceView {
 		}
 
 		if (changed) {
-			MapRenderer.tilelock.lock();
+			TileManager.tilelock.lock();
 			try {
 				for (int i = 0, n = mNewTiles.cnt; i < n; i++)
 					newTiles[i].lock();
@@ -386,13 +367,13 @@ public class MapRenderer extends GLSurfaceView {
 				for (int i = 0, n = mCurrentTiles.cnt; i < n; i++)
 					curTiles[i].unlock();
 
-				TilesData tmp = mCurrentTiles;
+				Tiles tmp = mCurrentTiles;
 				mCurrentTiles = mNewTiles;
 				mNewTiles = tmp;
 
 				mUpdateCnt++;
 			} finally {
-				MapRenderer.tilelock.unlock();
+				TileManager.tilelock.unlock();
 			}
 
 			// Log.d(TAG, "tiles: " + tileCounter + " " + BufferObject.counter
@@ -685,8 +666,7 @@ public class MapRenderer extends GLSurfaceView {
 		tile.isLoading = false;
 		// }
 
-		if (!MapView.debugFrameTime)
-			requestRender();
+		mMapView.render();
 
 		synchronized (mTilesLoaded) {
 			if (!mTilesLoaded.contains(tile))
@@ -696,22 +676,32 @@ public class MapRenderer extends GLSurfaceView {
 		return true;
 	}
 
+	public static void onSizeChanged(int w, int h) {
+		Log.d(TAG, "onSizeChanged" + w + " " + h);
+
+		mWidth = w;
+		mHeight = h;
+
+		if (mWidth > 0 && mHeight > 0)
+			mInitial = true;
+	}
+
 	// public void setRenderTheme(RenderTheme t) {
 	// if (mRenderer != null)
 	// mRenderer.setRenderTheme(t);
 	//
 	// }
 
-	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-
-		Log.d(TAG, "onSizeChanged" + w + " " + h);
-		mWidth = w;
-		mHeight = h;
-
-		if (mWidth > 0 && mHeight > 0)
-			mInitial = true;
-
-		super.onSizeChanged(w, h, oldw, oldh);
-	}
+	// @Override
+	// protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+	//
+	// Log.d(TAG, "onSizeChanged" + w + " " + h);
+	// mWidth = w;
+	// mHeight = h;
+	//
+	// if (mWidth > 0 && mHeight > 0)
+	// mInitial = true;
+	//
+	// super.onSizeChanged(w, h, oldw, oldh);
+	// }
 }

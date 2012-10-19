@@ -25,7 +25,7 @@ import android.opengl.GLES20;
 import android.util.FloatMath;
 import android.util.Log;
 
-class LineRenderer {
+public final class LineRenderer {
 	private final static String TAG = "LineRenderer";
 
 	// private static int NUM_VERTEX_SHORTS = 4;
@@ -79,7 +79,7 @@ class LineRenderer {
 		return true;
 	}
 
-	static Layer draw(MapPosition pos, Layer layer, float[] matrix, float div,
+	public static Layer draw(MapPosition pos, Layer layer, float[] matrix, float div,
 			int mode, int bufferOffset) {
 
 		int zoom = pos.zoomLevel;

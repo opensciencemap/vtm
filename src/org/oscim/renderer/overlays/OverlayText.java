@@ -13,11 +13,13 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.oscim.renderer;
+package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.MapRenderer.TilesData;
+import org.oscim.renderer.TileManager;
+import org.oscim.renderer.MapTile;
+import org.oscim.renderer.Tiles;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.TextLayer;
 import org.oscim.utils.FastMath;
@@ -29,7 +31,7 @@ import android.util.FloatMath;
 
 public class OverlayText extends Overlay {
 
-	private TilesData tiles;
+	private Tiles tiles;
 	private LabelThread mThread;
 	/* package */boolean mRun;
 	/* package */boolean mRerun;
@@ -57,7 +59,7 @@ public class OverlayText extends Overlay {
 		}
 	}
 
-	OverlayText(MapView mapView) {
+	public OverlayText(MapView mapView) {
 		super(mapView);
 
 		mWorkPos = new MapPosition();
@@ -66,7 +68,7 @@ public class OverlayText extends Overlay {
 	}
 
 	void updateLabels() {
-		tiles = MapRenderer.getActiveTiles(tiles);
+		tiles = TileManager.getActiveTiles(tiles);
 
 		if (tiles.cnt == 0)
 			return;
@@ -134,7 +136,7 @@ public class OverlayText extends Overlay {
 	}
 
 	@Override
-	synchronized void update(boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(boolean positionChanged, boolean tilesChanged) {
 		// Log.d("...", "update " + tilesChanged + " " + positionChanged);
 
 		if (mWorkLayer != null) {
