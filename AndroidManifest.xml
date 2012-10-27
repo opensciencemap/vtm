@@ -15,10 +15,11 @@
         android:targetSdkVersion="10" />
 
     <application
+        android:name="org.oscim.app.App"
         android:icon="@drawable/globe2"
         android:label="@string/application_name"
        	android:theme="@android:style/Theme.NoTitleBar"
-        >
+        android:hardwareAccelerated="false">
        <!--  android:theme="@style/Theme.TileMap"  -->
         <activity
             android:name="TileMap"
@@ -32,6 +33,13 @@
         <activity android:name=".preferences.EditPreferences" />
         <activity android:name=".filepicker.FilePicker" />
         <activity android:name=".InfoView" />
+        <activity
+            android:name=".POIActivity"
+            android:label="@string/application_name" 
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" 
+            android:windowSoftInputMode="stateHidden"
+            android:launchMode="singleTop"
+            />
     </application>
 
 </manifest>
