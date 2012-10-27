@@ -20,12 +20,13 @@ import org.oscim.renderer.TextureObject;
 
 public abstract class TextureLayer extends Layer {
 	public TextureObject textures;
+	public boolean fixed;
 
 	/**
 	 * @param sbuf
 	 *            buffer to add vertices
 	 */
-	void compile(ShortBuffer sbuf) {
-	}
+	abstract void compile(ShortBuffer sbuf);
 
+	abstract public boolean prepare();
 }

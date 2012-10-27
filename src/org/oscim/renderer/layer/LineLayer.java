@@ -49,11 +49,18 @@ public final class LineLayer extends Layer {
 		outlines = link;
 	}
 
-	/*
+	/**
 	 * line extrusion is based on code from GLMap
 	 * (https://github.com/olofsj/GLMap/) by olofsj
+	 * 
+	 * @param points
+	 *            array of points as float x_n = i, y_n = i+1
+	 * @param index
+	 *            array of line indices holding the length of the individual
+	 *            lines
+	 * @param closed
+	 *            whether to connect start- and end-point
 	 */
-
 	public void addLine(float[] points, short[] index, boolean closed) {
 		float x, y, nextX, nextY, prevX, prevY;
 		float a, ux, uy, vx, vy, wx, wy;
@@ -83,7 +90,7 @@ public final class LineLayer extends Layer {
 			if (length < 0)
 				break;
 
-			// save some vertices
+			// Note: just a hack to save some vertices
 			if (rounded && i > 200)
 				rounded = false;
 
@@ -519,5 +526,9 @@ public final class LineLayer extends Layer {
 
 		si.used = opos;
 		curItem = si;
+	}
+
+	@Override
+	protected void clear() {
 	}
 }

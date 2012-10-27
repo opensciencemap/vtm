@@ -15,15 +15,12 @@
 package org.oscim.renderer.layer;
 
 public class VertexPoolItem {
-	final short[] vertices;
+	final short[] vertices = new short[SIZE];
+
 	int used;
 	VertexPoolItem next;
 
-	VertexPoolItem() {
-		vertices = new short[SIZE];
-		used = 0;
-	}
-
 	// must be multiple of 4 (expected in LineLayer/PolygonLayer)
-	static final int SIZE = 256;
+	// and 24 (Texture Layer)
+	static final int SIZE = 360;
 }

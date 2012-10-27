@@ -27,7 +27,9 @@ public class TextItem {
 
 			TextItem ti = pool;
 			pool = pool.next;
+
 			ti.next = null;
+
 			return ti;
 		}
 	}
@@ -73,5 +75,6 @@ public class TextItem {
 	public Text text;
 	public float width;
 	public short x1, y1, x2, y2;
+
 	// public byte placement
 }

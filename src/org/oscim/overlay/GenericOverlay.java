@@ -12,8 +12,20 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view;
+package org.oscim.overlay;
 
-public class OverlayManager {
+import org.oscim.renderer.overlays.RenderOverlay;
+import org.oscim.view.MapView;
 
+public class GenericOverlay extends Overlay {
+	/**
+	 * @param mapView
+	 *            ...
+	 * @param renderer
+	 *            ...
+	 */
+	public GenericOverlay(MapView mapView, RenderOverlay renderer) {
+		super();
+		mLayer = renderer;
+	}
 }

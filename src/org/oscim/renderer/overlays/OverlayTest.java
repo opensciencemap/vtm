@@ -14,16 +14,16 @@
  */
 package org.oscim.renderer.overlays;
 
-import org.oscim.renderer.layer.Layer;
-import org.oscim.renderer.layer.LineLayer;
+import java.io.IOException;
+
+import org.oscim.core.MapPosition;
+import org.oscim.renderer.layer.SymbolItem;
+import org.oscim.renderer.layer.SymbolLayer;
 import org.oscim.renderer.layer.TextItem;
-import org.oscim.theme.renderinstruction.Line;
+import org.oscim.theme.renderinstruction.BitmapUtils;
 import org.oscim.view.MapView;
 
-import android.graphics.Color;
-import android.graphics.Paint.Cap;
-
-public class OverlayTest extends Overlay {
+public class OverlayTest extends RenderOverlay {
 
 	TextItem labels;
 
@@ -31,15 +31,16 @@ public class OverlayTest extends Overlay {
 
 	private boolean first = true;
 
-	OverlayTest(MapView mapView) {
+	public OverlayTest(MapView mapView) {
 		super(mapView);
 
-		LineLayer ll = (LineLayer) layers.getLayer(1, Layer.LINE);
-		ll.line = new Line(Color.BLUE, 1.0f, Cap.BUTT);
-		ll.width = 2;
-		float[] points = { -100, -100, 100, -100, 100, 100, -100, 100, -100, -100 };
-		short[] index = { (short) points.length };
-		ll.addLine(points, index, false);
+		//		LineLayer ll = (LineLayer) layers.getLayer(1, Layer.LINE);
+		//		ll.line = new Line(Color.BLUE, 1.0f, Cap.BUTT);
+		//		ll.width = 2;
+		//		float[] points = { -100, -100, 100, -100, 100, 100, -100, 100, -100, -100 };
+		//		short[] index = { (short) points.length };
+		//		ll.addLine(points, index, false);
+
 		//
 		// PolygonLayer pl = (PolygonLayer) layers.getLayer(0, Layer.POLYGON);
 		// pl.area = new Area(Color.argb(128, 255, 0, 0));
@@ -53,30 +54,33 @@ public class OverlayTest extends Overlay {
 		// short[] pindex = { (short) ppoints.length };
 		// pl.addPolygon(ppoints, pindex);
 
-		// SymbolLayer sl = new SymbolLayer();
-		// SymbolItem it = new SymbolItem();
-		//
-		// it.x = 0;
-		// it.y = 0;
-		// // billboard always faces camera
-		// it.billboard = true;
-		//
-		// try {
-		// it.bitmap = BitmapUtils.createBitmap("file:/sdcard/cheshire.png");
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// sl.addSymbol(it);
-		//
-		// SymbolItem it2 = new SymbolItem();
-		// it2.bitmap = it.bitmap;
-		// it2.x = 0;
-		// it2.y = 0;
-		// // billboard always faces camera
-		// it2.billboard = false;
-		//
-		// sl.addSymbol(it2);
+		SymbolLayer sl = new SymbolLayer();
+		SymbolItem it = new SymbolItem();
+
+		it.x = 0;
+		it.y = 0;
+		// billboard always faces camera
+		it.billboard = true;
+
+		try {
+			it.bitmap = BitmapUtils.createBitmap("file:/sdcard/cheshire.png");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		sl.addSymbol(it);
+
+		SymbolItem it2 = new SymbolItem();
+		it2.bitmap = it.bitmap;
+		it2.x = 0;
+		it2.y = 0;
+		// billboard always faces camera
+		it2.billboard = false;
+
+		sl.addSymbol(it2);
+		sl.fixed = false;
+
+		layers.textureLayers = sl;
 
 		// TextLayer tl = new TextLayer();
 		// Text t = Text.createText(20, 2, Color.WHITE, Color.BLACK, false);
@@ -92,14 +96,16 @@ public class OverlayTest extends Overlay {
 	}
 
 	@Override
-	public synchronized void update(boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
 		// keep position constant (or update layer relative to new position)
-		mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
+		//mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
 
 		if (first) {
 			// fix at initial position
-			// mapView.getMapViewPosition().getMapPosition(mMapPosition, null);
+			updateMapPosition();
+
 			first = false;
+			((SymbolLayer) (layers.textureLayers)).prepare();
 
 			// pass layers to be uploaded and drawn to GL Thread
 			// afterwards never modify 'layers' outside of this function!

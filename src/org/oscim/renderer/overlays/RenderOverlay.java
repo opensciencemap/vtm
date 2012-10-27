@@ -28,12 +28,14 @@ import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.util.Log;
 
-public abstract class Overlay {
+public abstract class RenderOverlay {
 
 	protected final MapView mMapView;
+	// keep the Position for which the Overlay is rendered
 	protected MapPosition mMapPosition;
+
+	// current Layers to draw
 	public final Layers layers;
 
 	// flag to set when data is ready for (re)compilation.
@@ -44,19 +46,14 @@ public abstract class Overlay {
 
 	public BufferObject vbo;
 
-	public Overlay(MapView mapView) {
+	public RenderOverlay(MapView mapView) {
 		mMapView = mapView;
 		mMapPosition = new MapPosition();
 		layers = new Layers();
 	}
 
-	synchronized boolean onTouch(boolean down) {
-		Log.d("...", "Overlay handle onTouch " + down);
-		return true;
-	}
-
 	/**
-	 * update mMapPosition
+	 * Utility: update mMapPosition
 	 * 
 	 * @return true if position has changed
 	 */
@@ -68,12 +65,13 @@ public abstract class Overlay {
 	// use synchronized (this){} when updating 'layers' from another thread
 
 	/**
+	 * @param curPos TODO
 	 * @param positionChanged
 	 *            true when MapPosition has changed
 	 * @param tilesChanged
 	 *            true when loaded tiles changed
 	 */
-	public synchronized void update(boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
 		// // keep position constant (or update layer relative to new position)
 		// mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
 		//
@@ -110,23 +108,20 @@ public abstract class Overlay {
 		// float scale = curPos.scale / div;
 
 		for (Layer l = layers.textureLayers; l != null;) {
+
 			l = TextureRenderer.draw(l, (mMapPosition.scale / pos.scale) * div, proj, mv,
 					layers.texOffset);
 		}
 	}
 
 	private float setMatrix(MapPosition curPos, float[] matrix) {
+		// TODO if oPos == curPos this could be simplified
 
 		MapPosition oPos = mMapPosition;
 
 		byte z = oPos.zoomLevel;
-		// int diff = curPos.zoomLevel - z;
-		float div = FastMath.pow(z - curPos.zoomLevel);
-		// if (diff < 0)
-		// div = (1 << -diff);
-		// else if (diff > 0)
-		// div = (1.0f / (1 << diff));
 
+		float div = FastMath.pow(z - curPos.zoomLevel);
 		float x = (float) (oPos.x - curPos.x * div);
 		float y = (float) (oPos.y - curPos.y * div);
 
@@ -145,8 +140,8 @@ public abstract class Overlay {
 		matrix[12] = x * scale;
 		matrix[13] = y * scale;
 
+		// scale to current tile world coordinates
 		scale = (curPos.scale / oPos.scale) / div;
-		// scale to tile to world coordinates
 		scale /= GLRenderer.COORD_MULTIPLIER;
 		matrix[0] = scale;
 		matrix[5] = scale;

@@ -87,4 +87,7 @@ public final class PolygonLayer extends Layer {
 		curItem = si;
 	}
 
+	@Override
+	protected void clear() {
+	}
 }

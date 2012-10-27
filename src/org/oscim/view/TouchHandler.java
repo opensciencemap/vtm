@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,55 +13,52 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.oscim.view;
 
 import org.oscim.core.Tile;
+import org.oscim.overlay.OverlayManager;
 
 import android.content.Context;
 import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.GestureDetector.OnDoubleTapListener;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.ViewConfiguration;
+import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
-
-/**
- * Implementation for multi-touch capable devices.
- */
 
 // TODO:
 // - write a AnimationTimer instead of using CountDownTimers
 // - fix recognition of tilt/rotate/scale state...
 
-final class TouchHandler
-		extends SimpleOnGestureListener
-		implements ScaleGestureDetector.OnScaleGestureListener {
+final class TouchHandler implements OnGestureListener, OnScaleGestureListener, OnDoubleTapListener {
 
-	private static final float SCALE_DURATION = 450;
+	private static final String TAG = TouchHandler.class.getSimpleName();
+
+	private static final float SCALE_DURATION = 500;
 	private static final float ROTATION_DELAY = 200; // ms
 
 	private static final int INVALID_POINTER_ID = -1;
 
 	private final MapView mMapView;
 	private final MapViewPosition mMapPosition;
-	private final DecelerateInterpolator mInterpolator = new DecelerateInterpolator();
+	private final OverlayManager mOverlayManager;
+
+	private final DecelerateInterpolator mInterpolator;
+	private final DecelerateInterpolator mLinearInterpolator;
 	private boolean mBeginScale;
 	private float mSumScale;
 
-	private final float mMapMoveDelta;
-	private boolean mMoveStart;
 	private boolean mBeginRotate;
 	private boolean mBeginTilt;
 	private boolean mLongPress;
-	// private long mLongPressTime;
 
-	private float mPosX;
+	//	private float mPosX;
 	private float mPosY;
 	private double mAngle;
 
@@ -76,16 +74,20 @@ final class TouchHandler
 	 *            the MapView
 	 */
 	public TouchHandler(Context context, MapView mapView) {
-		ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
 		mMapView = mapView;
 		mMapPosition = mapView.getMapPosition();
-		mMapMoveDelta = viewConfiguration.getScaledTouchSlop();
+		mOverlayManager = mapView.getOverlayManager();
+		// ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
+		// mMapMoveDelta = viewConfiguration.getScaledTouchSlop();
 		mActivePointerId = INVALID_POINTER_ID;
 		mScaleGestureDetector = new ScaleGestureDetector(context, this);
 		mGestureDetector = new GestureDetector(context, this);
+		mGestureDetector.setOnDoubleTapListener(this);
 
-		mScroller = new Scroller(mMapView.getContext(),
-				new android.view.animation.LinearInterpolator());
+		mInterpolator = new DecelerateInterpolator(1.5f);
+
+		mScroller = new Scroller(mMapView.getContext(), mInterpolator);
+		mLinearInterpolator = new DecelerateInterpolator(0.8f);//new android.view.animation.LinearInterpolator();
 	}
 
 	/**
@@ -95,16 +97,8 @@ final class TouchHandler
 	 */
 	public boolean handleMotionEvent(MotionEvent event) {
 
-		// workaround for a bug in the ScaleGestureDetector, see Android issue
-		// #12976
-		// if (event.getAction() != MotionEvent.ACTION_MOVE
-		// || event.getPointerCount() > 1) {
-
+		mGestureDetector.onTouchEvent(event);
 		mScaleGestureDetector.onTouchEvent(event);
-		// }
-
-		if (!mScaling)
-			mGestureDetector.onTouchEvent(event);
 
 		int action = getAction(event);
 		boolean ret = false;
@@ -136,10 +130,10 @@ final class TouchHandler
 	}
 
 	private boolean onActionDown(MotionEvent event) {
-		mPosX = event.getX();
+		//	mPosX = event.getX();
 		mPosY = event.getY();
 
-		mMoveStart = false;
+		// mMoveStart = false;
 		mBeginRotate = false;
 		mBeginTilt = false;
 		// save the ID of the pointer
@@ -154,43 +148,19 @@ final class TouchHandler
 	private boolean onActionMove(MotionEvent event) {
 		int id = event.findPointerIndex(mActivePointerId);
 
-		// calculate the distance between previous and current position
-		float moveX = event.getX(id) - mPosX;
-		float moveY = event.getY(id) - mPosY;
-		// save the position of the event
+		float py = event.getY(id);
+		float moveY = py - mPosY;
+		mPosY = py;
 
-		// Log.d("...", "mx " + moveX + " my " + moveY);
-
-		boolean scaling = mScaleGestureDetector.isInProgress();
-
-		if (!mScaling)
-			mScaling = scaling;
-
-		if (!scaling && !mMoveStart) {
-
-			if (Math.abs(moveX) > mMapMoveDelta || Math.abs(moveY) > mMapMoveDelta) {
-				// the map movement threshold has been reached
-				// longPressDetector.pressStop();
-				mMoveStart = true;
-			}
-
-			return true;
-		}
-
-		mPosX = event.getX(id);
-		mPosY = event.getY(id);
-
+		// double-tap + hold
 		if (mLongPress) {
 			mMapPosition.scaleMap(1 - moveY / 100, 0, 0);
 			mMapView.redrawMap();
 			return true;
 		}
 
-		if (multi == 0) {
-			mMapPosition.moveMap(moveX, moveY);
-			mMapView.redrawMap();
+		if (multi == 0)
 			return true;
-		}
 
 		if (event.getEventTime() - mMultiTouchDownTime < ROTATION_DELAY)
 			return true;
@@ -206,18 +176,22 @@ final class TouchHandler
 		double rad = Math.atan2(dy, dx);
 		double r = rad - mAngle;
 
-		if (!mBeginRotate) {
+		if (!mBeginRotate && !mBeginScale) {
+			/* our naive gesture detector for rotation and tilt.. */
+
 			if (Math.abs(rad) < 0.25 || Math.abs(rad) > Math.PI - 0.25) {
 				mBeginTilt = true;
 				if (mMapPosition.tilt(moveY / 4)) {
 					mMapView.redrawMap();
 				}
+
 				return true;
 			}
 
-			if (!mBeginScale && !mBeginTilt) {
+			if (!mBeginTilt) {
 				if (Math.abs(r) > 0.05) {
-					Log.d("...", "begin rotate");
+					// Log.d(TAG, "begin rotate");
+					mAngle = rad;
 					mBeginRotate = true;
 				}
 			}
@@ -246,7 +220,7 @@ final class TouchHandler
 	private long mMultiTouchDownTime;
 
 	private boolean onActionPointerDown(MotionEvent event) {
-		// longPressDetector.pressStop();
+
 		mMultiTouchDownTime = event.getEventTime();
 
 		multi++;
@@ -256,7 +230,7 @@ final class TouchHandler
 			double dy = event.getY(0) - event.getY(1);
 			mAngle = Math.atan2(dy, dx);
 		}
-		Log.d("...", "multi down " + multi);
+		// Log.d("...", "multi down " + multi);
 		return true;
 	}
 
@@ -274,14 +248,14 @@ final class TouchHandler
 				pointerIndex = 0;
 			}
 			// save the position of the event
-			mPosX = motionEvent.getX(pointerIndex);
+			//	mPosX = motionEvent.getX(pointerIndex);
 			mPosY = motionEvent.getY(pointerIndex);
 			mActivePointerId = motionEvent.getPointerId(pointerIndex);
 		}
 		multi--;
 
 		mLongPress = false;
-		Log.d("...", "multi up " + multi);
+		// Log.d("...", "multi up " + multi);
 
 		return true;
 	}
@@ -294,37 +268,31 @@ final class TouchHandler
 	private boolean onActionUp(MotionEvent motionEvent) {
 		mActivePointerId = INVALID_POINTER_ID;
 		mScaling = false;
-		multi = 0;
-
-		// if (mLongPress && SystemClock.uptimeMillis() - mLongPressTime < 150)
-		// {
-		// mScrollX = (mPosX - (mMapView.getWidth() >> 1)) * 2f;
-		// mScrollY = (mPosY - (mMapView.getHeight() >> 1)) * 2f;
-		// mPrevScale = 0;
-		//
-		// mTimer = new CountDownTimer((int) SCALE_DURATION, 30) {
-		// @Override
-		// public void onTick(long tick) {
-		// scale2(tick);
-		// }
-		//
-		// @Override
-		// public void onFinish() {
-		// scale2(0);
-		// }
-		// }.start();
-		// }
-
 		mLongPress = false;
+
+		multi = 0;
 
 		return true;
 	}
 
-	/******************* SimpleOnGestureListener *******************/
+	/******************* GestureListener *******************/
 
 	private Scroller mScroller;
 	private float mScrollX, mScrollY;
 	private boolean fling = false;
+
+	@Override
+	public void onShowPress(MotionEvent e) {
+		Log.d(TAG, "show press");
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent e) {
+		Log.d(TAG, "single tap up");
+		return mOverlayManager.onSingleTapUp(e, mMapView);
+	}
 
 	@Override
 	public boolean onDown(MotionEvent e) {
@@ -337,6 +305,8 @@ final class TouchHandler
 			}
 			fling = false;
 		}
+
+		//	Log.d(TAG, "tap");
 
 		return true;
 	}
@@ -360,8 +330,31 @@ final class TouchHandler
 	}
 
 	@Override
+	public boolean onScroll(final MotionEvent e1, final MotionEvent e2, final float distanceX,
+			final float distanceY) {
+
+		if (mOverlayManager.onScroll(e1, e2, distanceX, distanceY, mMapView)) {
+			return true;
+		}
+
+		if (mScaling)
+			return true;
+
+		if (multi == 0) {
+			mMapPosition.moveMap(-distanceX, -distanceY);
+			mMapView.redrawMap();
+		}
+
+		return true;
+	}
+
+	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
+
+		if (mScaling)
+			return true;
+
 		int w = Tile.TILE_SIZE * 20;
 		int h = Tile.TILE_SIZE * 20;
 		mScrollX = 0;
@@ -376,7 +369,7 @@ final class TouchHandler
 				-w, w, -h, h);
 
 		// animate for two seconds
-		mTimer = new CountDownTimer(1500, 50) {
+		mTimer = new CountDownTimer(1500, 16) {
 			@Override
 			public void onTick(long tick) {
 				scroll();
@@ -384,20 +377,26 @@ final class TouchHandler
 
 			@Override
 			public void onFinish() {
-				// do nothing
 			}
 		}.start();
 		fling = true;
+
 		return true;
 	}
 
 	@Override
 	public void onLongPress(MotionEvent e) {
-		if (MapView.testRegionZoom) {
-			Log.d("mapsforge", "long press");
-			mMapView.mRegionLookup.updateRegion(-1, null);
+		if (mLongPress)
+			return;
+
+		if (mOverlayManager.onLongPress(e, mMapView)) {
+			return;
 		}
-		mLongPress = true;
+
+		//	if (MapView.testRegionZoom) {
+		//		Log.d("mapsforge", "long press");
+		//		mMapView.mRegionLookup.updateRegion(-1, null);
+		//	}
 	}
 
 	boolean scale2(long tick) {
@@ -422,36 +421,30 @@ final class TouchHandler
 		return true;
 	}
 
+	/******************* DoubleTapListener ****************/
+	@Override
+	public boolean onSingleTapConfirmed(MotionEvent e) {
+		//		Log.d(TAG, "single tap confirmed");
+		return mOverlayManager.onSingleTapConfirmed(e, mMapView);
+	}
+
 	@Override
 	public boolean onDoubleTap(MotionEvent e) {
-		if (MapView.testRegionZoom) {
-			mMapView.mRegionLookup.updateRegion(1,
-					mMapPosition.getOffsetPoint(mPosX, mPosY));
-		} else {
-			mLongPress = true;
+		Log.d(TAG, "double tap");
 
-			// mLongPressTime = SystemClock.uptimeMillis();
-			// mScrollX = (e.getX(0) - (mMapView.getWidth() >> 1)) * 2f;
-			// mScrollY = (e.getY(0) - (mMapView.getHeight() >> 1)) * 2f;
-			// mPrevScale = 0;
-			//
-			// mTimer = new CountDownTimer((int) SCALE_DURATION, 30) {
-			// @Override
-			// public void onTick(long tick) {
-			// scale2(tick);
-			// }
-			//
-			// @Override
-			// public void onFinish() {
-			// scale(0);
-			// }
-			// }.start();
-		}
-		return true;
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean onDoubleTapEvent(MotionEvent e) {
+		mLongPress = true;
+		Log.d(TAG, "double tap event");
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	/******************* ScaleListener *******************/
-
 	private float mCenterX;
 	private float mCenterY;
 	private float mFocusX;
@@ -475,7 +468,7 @@ final class TouchHandler
 
 		if (!mBeginScale) {
 			if (mSumScale > 1.1 || mSumScale < 0.9) {
-				Log.d("...", "begin scale " + mSumScale);
+				// Log.d("...", "begin scale " + mSumScale);
 				mBeginScale = true;
 				// scale = mSumScale;
 			}
@@ -489,9 +482,11 @@ final class TouchHandler
 
 	@Override
 	public boolean onScaleBegin(ScaleGestureDetector gd) {
+		mScaling = true;
+		mBeginScale = false;
+
 		mTimeEnd = mTimeStart = SystemClock.elapsedRealtime();
 		mSumScale = 1;
-		mBeginScale = false;
 		mCenterX = mMapView.getWidth() >> 1;
 		mCenterY = mMapView.getHeight() >> 1;
 
@@ -514,19 +509,21 @@ final class TouchHandler
 
 			mZooutOut = mSumScale < 0.99;
 
-			mTimer = new CountDownTimer((int) SCALE_DURATION, 15) {
+			mTimer = new CountDownTimer((int) SCALE_DURATION, 32) {
 				@Override
 				public void onTick(long tick) {
-					scale(tick);
+					scaleAnim(tick);
 				}
 
 				@Override
 				public void onFinish() {
-					scale(0);
-
+					scaleAnim(0);
 				}
 			}.start();
+		} else {
+			mScaling = false;
 		}
+
 		mBeginScale = false;
 	}
 
@@ -534,7 +531,7 @@ final class TouchHandler
 	private CountDownTimer mTimer;
 	boolean mZooutOut;
 
-	boolean scale(long tick) {
+	boolean scaleAnim(long tick) {
 
 		if (mPrevScale >= 1) {
 			mTimer = null;
@@ -542,7 +539,8 @@ final class TouchHandler
 		}
 
 		float adv = (SCALE_DURATION - tick) / SCALE_DURATION;
-		adv = mInterpolator.getInterpolation(adv);
+		//		adv = mInterpolator.getInterpolation(adv);
+		adv = mLinearInterpolator.getInterpolation(adv);
 
 		float scale = adv - mPrevScale;
 		mPrevScale += scale;
@@ -559,121 +557,5 @@ final class TouchHandler
 			mTimer = null;
 
 		return true;
-	}
-
-	/*
-	 * from CountDownTimer.java: Copyright (C) 2008 The Android Open Source
-	 * Project Licensed under the Apache License, Version 2.0 (the "License");
-	 * you may not use this file except in compliance with the License. You may
-	 * obtain a copy of the License at
-	 * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable
-	 * law or agreed to in writing, software distributed under the License is
-	 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-	 * KIND, either express or implied. See the License for the specific
-	 * language governing permissions and limitations under the License.
-	 */
-
-	final static class Timer {
-
-		/**
-		 * Millis since epoch when alarm should stop.
-		 */
-		private final long mMillisInFuture;
-
-		/**
-		 * The interval in millis that the user receives callbacks
-		 */
-		final long mCountdownInterval;
-
-		long mStopTimeInFuture;
-
-		/**
-		 * @param millisInFuture
-		 *            The number of millis in the future from the call to
-		 *            {@link #start()} until the countdown is done and
-		 *            {@link #onFinish()} is called.
-		 * @param countDownInterval
-		 *            The interval along the way to receive
-		 *            {@link #onTick(long)} callbacks.
-		 */
-		public Timer(long millisInFuture, long countDownInterval) {
-			mMillisInFuture = millisInFuture;
-			mCountdownInterval = countDownInterval;
-		}
-
-		/**
-		 * Cancel the countdown.
-		 */
-		public final void cancel() {
-			mHandler.removeMessages(MSG);
-		}
-
-		/**
-		 * Start the countdown.
-		 * 
-		 * @return ...
-		 */
-		public synchronized final Timer start() {
-			if (mMillisInFuture <= 0) {
-				onFinish();
-				return this;
-			}
-			mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture;
-			mHandler.sendMessage(mHandler.obtainMessage(MSG));
-			return this;
-		}
-
-		/**
-		 * Callback fired on regular interval.
-		 * 
-		 * @param millisUntilFinished
-		 *            The amount of time until finished.
-		 */
-		public void onTick(long millisUntilFinished) {
-		}
-
-		/**
-		 * Callback fired when the time is up.
-		 */
-		public void onFinish() {
-		}
-
-		private static final int MSG = 1;
-
-		// handles counting down
-		private Handler mHandler = new Handler() {
-
-			@Override
-			public void handleMessage(Message msg) {
-
-				synchronized (Timer.this) {
-					final long millisLeft = mStopTimeInFuture
-							- SystemClock.elapsedRealtime();
-
-					if (millisLeft <= 0) {
-						onFinish();
-					} else if (millisLeft < mCountdownInterval) {
-						// no tick, just delay until done
-						sendMessageDelayed(obtainMessage(MSG), millisLeft);
-					} else {
-						long lastTickStart = SystemClock.elapsedRealtime();
-						onTick(millisLeft);
-
-						// take into account user's onTick taking time to
-						// execute
-						long delay = lastTickStart + mCountdownInterval
-								- SystemClock.elapsedRealtime();
-
-						// special case: user's onTick took more than interval
-						// to
-						// complete, skip to next interval
-						while (delay < 0)
-							delay += mCountdownInterval;
-
-						sendMessageDelayed(obtainMessage(MSG), delay);
-					}
-				}
-			}
-		};
 	}
 }

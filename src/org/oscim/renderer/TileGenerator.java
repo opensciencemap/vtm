@@ -308,7 +308,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		SymbolLayer sl = (SymbolLayer) mLayers.textureLayers;
 
-		SymbolItem it = new SymbolItem();
+		SymbolItem it = SymbolItem.get();
 		it.x = mPoiX;
 		it.y = mPoiY;
 		it.bitmap = bitmap;

@@ -23,16 +23,13 @@ import org.oscim.core.Tile;
 import org.oscim.generator.JobTile;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.VertexPool;
-import org.oscim.renderer.overlays.Overlay;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
-import android.util.FloatMath;
 import android.util.Log;
 
-// FIXME move GLSurfaceView in separate class
-public class TileManager { // extends GLSurfaceView {
-	private final static String TAG = "TileManager";
+public class TileManager {
+	static final String TAG = TileManager.class.getSimpleName();
 
 	private static final int MAX_TILES_IN_QUEUE = 40;
 	private static final int CACHE_THRESHOLD = 10;
@@ -45,16 +42,11 @@ public class TileManager { // extends GLSurfaceView {
 	// new jobs for the MapWorkers
 	private static ArrayList<JobTile> mJobList;
 
-	// all tiles currently referenced
+	// all tiles
 	private static ArrayList<MapTile> mTiles;
 
 	// tiles that have new data to upload, see passTile()
 	private static ArrayList<MapTile> mTilesLoaded;
-
-	private static ArrayList<Overlay> mOverlays;
-
-	// TODO current boundary tiles, values used to check if position has
-	// changed for updating current tile list
 
 	private static boolean mInitial;
 
@@ -66,8 +58,6 @@ public class TileManager { // extends GLSurfaceView {
 	// private static int[] mZoomLevels;
 
 	private static float[] mTileCoords = new float[8];
-
-	// private static int[] mBoundaryTiles = new int[8];
 
 	static int mUpdateCnt;
 	static ReentrantLock tilelock = new ReentrantLock();
@@ -123,10 +113,6 @@ public class TileManager { // extends GLSurfaceView {
 		}
 	};
 
-	// why not try a pattern every now and then?
-	// but should do the same for GLRenderer.
-	// findbugs found that volatile thingy, though this class
-	// is created before any other thread starts
 	private static volatile TileManager SINGLETON;
 
 	public static TileManager create(MapView mapView) {
@@ -147,27 +133,15 @@ public class TileManager { // extends GLSurfaceView {
 	}
 
 	private TileManager(MapView mapView) {
-		// super(context);
 
 		mMapView = mapView;
 		mMapViewPosition = mapView.getMapViewPosition();
 
-		// Log.d(TAG, "init GLSurfaceLayer");
-		// setEGLConfigChooser(new GlConfigChooser());
-		// setEGLContextClientVersion(2);
-		//
-		// // setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
-		// mRenderer = new GLRenderer(mMapView);
-		// setRenderer(mRenderer);
-		//
-		// // if (!debugFrameTime)
-		// setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
 		mJobList = new ArrayList<JobTile>();
 		mTiles = new ArrayList<MapTile>();
 		mTilesLoaded = new ArrayList<MapTile>(30);
-		mOverlays = new ArrayList<Overlay>(5);
 
+		// this is probably a good place to init these
 		VertexPool.init();
 		QuadTree.init();
 
@@ -191,6 +165,7 @@ public class TileManager { // extends GLSurfaceView {
 		if (mMapView == null)
 			return;
 
+		// FIXME too messy!
 		if (clear || mInitial) {
 			// make sure onDrawFrame is not running
 			GLRenderer.drawlock.lock();
@@ -208,10 +183,6 @@ public class TileManager { // extends GLSurfaceView {
 			mTilesLoaded.clear();
 
 			QuadTree.init();
-
-			// TODO clear overlay items data
-			mOverlays.clear();
-			// mOverlays.add(new Overlay());
 
 			// set up TileData arrays that are passed to gl-thread
 			int num = mWidth;
@@ -246,20 +217,19 @@ public class TileManager { // extends GLSurfaceView {
 		}
 
 		float s = Tile.TILE_SIZE;
-		// load some additional tiles more than currently visible
+		// load some tiles more than currently visible
+		// TODO limit how many more...
 		float scale = mapPosition.scale * 0.75f;
 		float px = (float) mapPosition.x;
 		float py = (float) mapPosition.y;
 
+		// TODO hint whether to prefetch parent / children
 		int zdir = 0;
 
 		for (int i = 0; i < 8; i += 2) {
 			coords[i + 0] = (px + coords[i + 0] / scale) / s;
 			coords[i + 1] = (py + coords[i + 1] / scale) / s;
 		}
-
-		// TODO all following should probably be done in an idler instead
-		// to drain queued events. need to check how android handles things.
 
 		boolean changed = updateVisibleList(mapPosition, zdir);
 
@@ -276,6 +246,8 @@ public class TileManager { // extends GLSurfaceView {
 	}
 
 	public static Tiles getActiveTiles(Tiles td) {
+		if (mCurrentTiles == null)
+			return td;
 
 		if (td != null && td.serial == mUpdateCnt)
 			return td;
@@ -409,58 +381,65 @@ public class TileManager { // extends GLSurfaceView {
 
 		tile = QuadTree.getTile(x, y, zoomLevel);
 
-		if (tile == null) {
-			tile = new MapTile(x, y, zoomLevel);
-			QuadTree.add(tile);
+		if (tile != null) {
+			if (!tile.isActive())
+				mJobList.add(tile);
 
-			mTiles.add(tile);
-			mJobList.add(tile);
-			tileCounter++;
-		} else if (!tile.isActive()) {
-			mJobList.add(tile);
+			return tile;
 		}
-		// mNewTiles.tiles[tiles++] = tile;
 
-		// if (fetchChildren) {
-		// byte z = (byte) (zoomLevel + 1);
-		// for (int i = 0; i < 4; i++) {
-		// int cx = (xx << 1) + (i % 2);
-		// int cy = (yy << 1) + (i >> 1);
-		//
-		// MapTile c = QuadTree.getTile(cx, cy, z);
-		//
-		// if (c == null) {
-		// c = new MapTile(cx, cy, z);
-		//
-		// QuadTree.add(c);
-		// mTiles.add(c);
-		// }
-		//
-		// if (!c.isActive()) {
-		// mJobList.add(c);
-		// }
-		// }
-		// }
+		tile = new MapTile(x, y, zoomLevel);
+		QuadTree.add(tile);
 
-		// if (fetchParent || (!fetchProxy && zdir > 0 && zoomLevel > 0)) {
+		mTiles.add(tile);
+		mJobList.add(tile);
+		tileCounter++;
 
-		// if (zdir > 0 && zoomLevel > 0) {
-		// // prefetch parent
-		// MapTile p = tile.rel.parent.tile;
-		//
-		// if (p == null) {
-		// p = new MapTile(x >> 1, y >> 1, (byte) (zoomLevel - 1));
-		//
-		// QuadTree.add(p);
-		// mTiles.add(p);
-		// mJobList.add(p);
-		//
-		// } else if (!p.isActive()) {
-		// if (!mJobList.contains(p))
-		// mJobList.add(p);
-		// }
-		// }
 		return tile;
+
+		//      mNewTiles.tiles[tiles++] = tile;
+		//		boolean fetchParent = false;
+		//		boolean fetchProxy = false;
+		//		boolean fetchChildren = false;
+		//		if (fetchChildren) {
+		//			byte z = (byte) (zoomLevel + 1);
+		//			for (int i = 0; i < 4; i++) {
+		//				int cx = (x << 1) + (i % 2);
+		//				int cy = (y << 1) + (i >> 1);
+		//
+		//				MapTile c = QuadTree.getTile(cx, cy, z);
+		//
+		//				if (c == null) {
+		//					c = new MapTile(cx, cy, z);
+		//
+		//					QuadTree.add(c);
+		//					mTiles.add(c);
+		//				}
+		//
+		//				if (!c.isActive()) {
+		//					mJobList.add(c);
+		//				}
+		//			}
+		//		}
+		//
+		//		if (fetchParent || (!fetchProxy && zdir > 0 && zoomLevel > 0)) {
+		//			if (zdir > 0 && zoomLevel > 0) {
+		//				// prefetch parent
+		//				MapTile p = tile.rel.parent.tile;
+		//
+		//				if (p == null) {
+		//					p = new MapTile(x >> 1, y >> 1, (byte) (zoomLevel - 1));
+		//
+		//					QuadTree.add(p);
+		//					mTiles.add(p);
+		//					mJobList.add(p);
+		//
+		//				} else if (!p.isActive()) {
+		//					if (!mJobList.contains(p))
+		//						mJobList.add(p);
+		//				}
+		//			}
+		//		}
 	}
 
 	private static void clearTile(MapTile t) {
@@ -492,7 +471,7 @@ public class TileManager { // extends GLSurfaceView {
 		byte zoom = mapPosition.zoomLevel;
 		long x = (long) mapPosition.x;
 		long y = (long) mapPosition.y;
-		// long center = Tile.TILE_SIZE << (zoom - 1);
+		long center = Tile.TILE_SIZE << (zoom - 1);
 		int diff;
 		long dx, dy;
 
@@ -506,11 +485,10 @@ public class TileManager { // extends GLSurfaceView {
 			if (diff == 0) {
 				dx = (t.pixelX + h) - x;
 				dy = (t.pixelY + h) - y;
-				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) *
-				// 0.25f;
-				// dx %= center;
-				// dy %= center;
-				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
+				dx %= center;
+				dy %= center;
+				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
+				// t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
 			} else if (diff > 0) {
 				// tile zoom level is child of current
 
@@ -522,20 +500,19 @@ public class TileManager { // extends GLSurfaceView {
 					dx = ((t.pixelX + h) >> (diff >> 1)) - x;
 					dy = ((t.pixelY + h) >> (diff >> 1)) - y;
 				}
-				// dx %= center;
-				// dy %= center;
-				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
-				t.distance = FloatMath.sqrt((dx * dx + dy * dy));
+				dx %= center;
+				dy %= center;
+				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
+				// t.distance = FloatMath.sqrt((dx * dx + dy * dy));
 
 			} else {
 				// tile zoom level is parent of current
 				dx = ((t.pixelX + h) << -diff) - x;
 				dy = ((t.pixelY + h) << -diff) - y;
-				// dx %= center;
-				// dy %= center;
-				// t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) *
-				// (-diff * 0.5f);
-				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
+				dx %= center;
+				dy %= center;
+				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * (-diff * 0.5f);
+				// t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
 			}
 		}
 	}
@@ -565,10 +542,9 @@ public class TileManager { // extends GLSurfaceView {
 
 		for (int i = 1; i < remove; i++) {
 			MapTile t = mTiles.remove(size - i);
-			// synchronized (t) {
 
 			if (t.isLocked()) {
-				// dont remove tile used by GLRenderer
+				// dont remove tile used by GLRenderer, or somewhere else
 				Log.d(TAG, "X not removing " + t + " " + t.distance);
 				mTiles.add(t);
 			} else if (t.isLoading) {
@@ -585,7 +561,6 @@ public class TileManager { // extends GLSurfaceView {
 			} else {
 				clearTile(t);
 			}
-			// }
 		}
 	}
 
@@ -616,7 +591,7 @@ public class TileManager { // extends GLSurfaceView {
 			for (int i = 0, n = size - MAX_TILES_IN_QUEUE / 2; i < n; n--) {
 
 				MapTile t = mTilesLoaded.get(i);
-				// synchronized (t) {
+
 				if (t.isLocked()) {
 					// Log.d(TAG, "keep unused tile data: " + t + " " +
 					// t.isActive);
@@ -629,7 +604,6 @@ public class TileManager { // extends GLSurfaceView {
 				mTiles.remove(t);
 				clearTile(t);
 			}
-			// }
 		}
 	}
 
@@ -650,21 +624,22 @@ public class TileManager { // extends GLSurfaceView {
 		// return true;
 		// }
 
-		// synchronized (tile) {
-		if (tile.vbo == null) {
-			tile.vbo = BufferObject.get();
-
-			if (tile.vbo == null) {
-				Log.d(TAG, "no VBOs left for " + tile);
-				tile.isLoading = false;
-				return false;
-			}
-		} else
+		if (tile.vbo != null) {
+			// BAD Things(tm) happend... 
 			Log.d(TAG, "tile loaded before " + tile);
+			return true;
+		}
+
+		tile.vbo = BufferObject.get();
+
+		if (tile.vbo == null) {
+			Log.d(TAG, "no VBOs left for " + tile);
+			tile.isLoading = false;
+			return true;
+		}
 
 		tile.newData = true;
 		tile.isLoading = false;
-		// }
 
 		mMapView.render();
 
@@ -685,23 +660,4 @@ public class TileManager { // extends GLSurfaceView {
 		if (mWidth > 0 && mHeight > 0)
 			mInitial = true;
 	}
-
-	// public void setRenderTheme(RenderTheme t) {
-	// if (mRenderer != null)
-	// mRenderer.setRenderTheme(t);
-	//
-	// }
-
-	// @Override
-	// protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-	//
-	// Log.d(TAG, "onSizeChanged" + w + " " + h);
-	// mWidth = w;
-	// mHeight = h;
-	//
-	// if (mWidth > 0 && mHeight > 0)
-	// mInitial = true;
-	//
-	// super.onSizeChanged(w, h, oldw, oldh);
-	// }
 }

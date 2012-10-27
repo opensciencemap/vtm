@@ -107,14 +107,14 @@ public class LocationHandler {
 		}
 
 		if (bestLocation != null) {
-			byte zoom = mTileMap.mMapView.getMapPosition().getZoomLevel();
+			byte zoom = mTileMap.map.getMapPosition().getZoomLevel();
 			if (zoom < 12)
 				zoom = (byte) 12;
 
 			MapPosition mapPosition = new MapPosition(bestLocation.getLatitude(),
 					bestLocation.getLongitude(), zoom, 1, 0);
 
-			mTileMap.mMapView.setMapCenter(mapPosition);
+			mTileMap.map.setMapCenter(mapPosition);
 
 		} else {
 			mTileMap.showToastOnUiThread(mTileMap
@@ -167,7 +167,7 @@ public class LocationHandler {
 			mSnapToLocation = false;
 			mSnapToLocationView.setChecked(false);
 
-			mTileMap.mMapView.setClickable(true);
+			mTileMap.map.setClickable(true);
 
 			if (showToast) {
 				mTileMap.showToastOnUiThread(mTileMap
@@ -186,7 +186,7 @@ public class LocationHandler {
 		if (!mSnapToLocation) {
 			mSnapToLocation = true;
 
-			mTileMap.mMapView.setClickable(false);
+			mTileMap.map.setClickable(false);
 
 			if (showToast) {
 				mTileMap.showToastOnUiThread(mTileMap
@@ -228,7 +228,7 @@ public class LocationHandler {
 
 			if (mSetCenter || isSnapToLocationEnabled()) {
 				mSetCenter = false;
-				mTileMap.mMapView.setCenter(point);
+				mTileMap.map.setCenter(point);
 			}
 		}
 

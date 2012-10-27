@@ -14,8 +14,9 @@
  */
 package org.oscim.renderer;
 
+import java.util.ArrayList;
+
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
@@ -24,11 +25,12 @@ import android.util.Log;
 public class TextureObject {
 	private static TextureObject pool;
 
+	private static ArrayList<Bitmap> mBitmaps;
+
 	// shared bitmap and canvas for default texture size
 	public final static int TEXTURE_WIDTH = 256;
 	public final static int TEXTURE_HEIGHT = 256;
-	private static Bitmap[] mBitmap;
-	private static Canvas[] mCanvas;
+
 	private static int mBitmapFormat;
 	private static int mBitmapType;
 	private static int objectCount = 10;
@@ -37,27 +39,63 @@ public class TextureObject {
 		TextureObject to;
 
 		if (pool == null) {
-			init(10);
-			objectCount += 10;
-			Log.d("...", "textures: " + objectCount);
+			objectCount += 1;
+			if (TextureRenderer.debug)
+				Log.d("...", "textures: " + objectCount);
+			pool = new TextureObject(-1);
 		}
 
 		to = pool;
 		pool = pool.next;
+
 		to.next = null;
+
+		to.bitmap = getBitmap();
+		to.bitmap.eraseColor(Color.TRANSPARENT);
+
+		if (TextureRenderer.debug)
+			Log.d("...", "get texture " + to.id + " " + to.bitmap);
+
 		return to;
 	}
 
 	public static synchronized void release(TextureObject to) {
-
 		while (to != null) {
+			if (TextureRenderer.debug)
+				Log.d("...", "release texture " + to.id);
+
 			TextureObject next = to.next;
+
+			if (to.bitmap != null) {
+				mBitmaps.add(to.bitmap);
+				to.bitmap = null;
+			}
 
 			to.next = pool;
 			pool = to;
 
 			to = next;
 		}
+	}
+
+	public static synchronized void uploadTexture(TextureObject to) {
+		if (TextureRenderer.debug)
+			Log.d("...", "upload texture " + to.id);
+
+		if (to.id < 0) {
+			int[] textureIds = new int[1];
+			GLES20.glGenTextures(1, textureIds, 0);
+			to.id = textureIds[0];
+			initTexture(to.id);
+			if (TextureRenderer.debug)
+				Log.d("...", "new texture " + to.id);
+		}
+
+		uploadTexture(to, to.bitmap, mBitmapFormat, mBitmapType,
+				TEXTURE_WIDTH, TEXTURE_HEIGHT);
+
+		mBitmaps.add(to.bitmap);
+		to.bitmap = null;
 	}
 
 	public static void uploadTexture(TextureObject to, Bitmap bitmap,
@@ -77,64 +115,65 @@ public class TextureObject {
 		}
 	}
 
+	static void initTexture(int id) {
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, id);
+
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
+				GLES20.GL_LINEAR);
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
+				GLES20.GL_LINEAR);
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
+				GLES20.GL_CLAMP_TO_EDGE); // Set U Wrapping
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
+				GLES20.GL_CLAMP_TO_EDGE); // Set V Wrapping
+	}
+
 	static void init(int num) {
+		pool = null;
+
 		TextureObject to;
 
 		int[] textureIds = new int[num];
 		GLES20.glGenTextures(num, textureIds, 0);
 
 		for (int i = 1; i < num; i++) {
-			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[i]);
-
-			GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
-					GLES20.GL_LINEAR);
-			GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
-					GLES20.GL_LINEAR);
-			GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
-					GLES20.GL_CLAMP_TO_EDGE); // Set U Wrapping
-			GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
-					GLES20.GL_CLAMP_TO_EDGE); // Set V Wrapping
-
+			initTexture(textureIds[i]);
 			to = new TextureObject(textureIds[i]);
+
 			to.next = pool;
 			pool = to;
 		}
 
-		mBitmap = new Bitmap[4];
-		mCanvas = new Canvas[4];
+		mBitmaps = new ArrayList<Bitmap>(10);
 
 		for (int i = 0; i < 4; i++) {
-			mBitmap[i] = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
+			Bitmap bitmap = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
 					Bitmap.Config.ARGB_8888);
-			mCanvas[i] = new Canvas(mBitmap[i]);
+
+			mBitmaps.add(bitmap);
 		}
-		mBitmapFormat = GLUtils.getInternalFormat(mBitmap[0]);
-		mBitmapType = GLUtils.getType(mBitmap[0]);
+
+		mBitmapFormat = GLUtils.getInternalFormat(mBitmaps.get(0));
+		mBitmapType = GLUtils.getType(mBitmaps.get(0));
 	}
 
-	private static int curCanvas = 0;
+	private static Bitmap getBitmap() {
+		int size = mBitmaps.size();
+		if (size == 0) {
+			for (int i = 0; i < 4; i++) {
+				Bitmap bitmap = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
+						Bitmap.Config.ARGB_8888);
 
-	public static Canvas getCanvas() {
-		curCanvas = ++curCanvas % 4;
-
-		mBitmap[curCanvas].eraseColor(Color.TRANSPARENT);
-
-		return mCanvas[curCanvas];
-	}
-
-	public static TextureObject uploadCanvas(short offset, short indices) {
-		TextureObject to = get();
-		uploadTexture(to, mBitmap[curCanvas],
-				mBitmapFormat, mBitmapType,
-				TEXTURE_WIDTH, TEXTURE_HEIGHT);
-
-		to.offset = offset;
-		to.vertices = (short) (indices - offset);
-
-		return to;
+				mBitmaps.add(bitmap);
+			}
+			size = 4;
+		}
+		return mBitmaps.remove(size - 1);
 	}
 
 	public TextureObject next;
+
+	public Bitmap bitmap;
 
 	int id;
 	int width;
@@ -142,8 +181,8 @@ public class TextureObject {
 
 	// vertex offset from which this texture is referenced
 	// or store texture id with vertex?
-	short offset;
-	short vertices;
+	public short offset;
+	public short vertices;
 
 	TextureObject(int id) {
 		this.id = id;

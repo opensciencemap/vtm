@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -16,9 +17,7 @@ package org.oscim.core;
 
 import android.opengl.Matrix;
 
-/**
- * A MapPosition Container.
- */
+/** A MapPosition Container. */
 public class MapPosition {
 
 	public double lon;
@@ -33,7 +32,9 @@ public class MapPosition {
 	public double y;
 
 	public float[] viewMatrix;
-	public float[] rotateMatrix;
+
+	//	// DO NOT MODIFY! shared with MapViewPosition
+	//	public float[] projMatrix;
 
 	public MapPosition() {
 		this.zoomLevel = (byte) 1;
@@ -49,19 +50,32 @@ public class MapPosition {
 	public void init() {
 		viewMatrix = new float[16];
 		Matrix.setIdentityM(viewMatrix, 0);
-
-		rotateMatrix = new float[16];
-		Matrix.setIdentityM(rotateMatrix, 0);
+		//
+		//		rotateMatrix = new float[16];
+		//		Matrix.setIdentityM(rotateMatrix, 0);
 	}
 
-	/**
-	 * @param geoPoint
+	//	public Point geopointToMap(GeoPoint in, Point reuse) {
+	//		Point out = reuse == null ? new Point() : reuse;
+	//		out.x = (int) (MercatorProjection.longitudeToPixelX(in.getLongitude(), zoomLevel) - x);
+	//		out.y = (int) (MercatorProjection.latitudeToPixelY(in.getLatitude(), zoomLevel) - y);
+	//
+	//		return out;
+	//	}
+
+	//	public void geopointToMap(GeoPoint in, float[] out, int pos) {
+	//		out[pos * 2 + 0] =
+	//				(float) (MercatorProjection.longitudeToPixelX(in.getLongitude(), zoomLevel) - x);
+	//		out[pos * 2 + 1] =
+	//				(float) (MercatorProjection.latitudeToPixelY(in.getLatitude(), zoomLevel) - y);
+	//	}
+
+	/** @param geoPoint
 	 *            the map position.
 	 * @param zoomLevel
 	 *            the zoom level.
 	 * @param scale
-	 *            ...
-	 */
+	 *            ... */
 	public MapPosition(GeoPoint geoPoint, byte zoomLevel, float scale) {
 		this.zoomLevel = zoomLevel;
 		this.scale = scale;

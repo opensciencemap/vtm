@@ -12,21 +12,22 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view;
+package org.oscim.overlay;
 
-import android.os.Handler;
-import android.os.Message;
+import org.oscim.renderer.overlays.OverlayText;
+import org.oscim.view.MapView;
 
-public class DelayedTaskHandler extends Handler {
-	public final int MESSAGE_UPDATE_POSITION = 1;
+public class LabelingOverlay extends Overlay {
 
-	@Override
-	public void handleMessage(Message msg) {
-		switch (msg.what) {
-			case MESSAGE_UPDATE_POSITION:
+	//	private OverlayText mLayer;
 
-				break;
+	//	@Override
+	//	public org.oscim.renderer.overlays.RenderOverlay getLayer() {
+	//		return mLayer;
+	//	}
 
-		}
+	public LabelingOverlay(MapView mapView) {
+		super();
+		mLayer = new OverlayText(mapView);
 	}
 }
