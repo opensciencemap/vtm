@@ -44,6 +44,7 @@ class QuadTree {
 
 	static boolean remove(MapTile t) {
 		if (t.rel == null) {
+			// Bad Things(tm) happened
 			Log.d(TAG, "already removed " + t);
 			return true;
 		}

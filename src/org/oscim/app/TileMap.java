@@ -1,3 +1,19 @@
+/* Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
+ * Copyright 2012 osmdroidbonuspack: M.Kergall
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.oscim.app;
 
 import java.io.FileFilter;
@@ -7,8 +23,6 @@ import org.oscim.app.filefilter.FilterByFileExtension;
 import org.oscim.app.filefilter.ValidRenderTheme;
 import org.oscim.app.filepicker.FilePicker;
 import org.oscim.app.preferences.EditPreferences;
-import org.oscim.core.GeoPoint;
-import org.oscim.core.MapPosition;
 import org.oscim.database.MapDatabases;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.utils.AndroidUtils;
@@ -19,7 +33,6 @@ import org.oscim.view.MapView;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -29,57 +42,96 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.SpinnerAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * A map application which uses the features from the mapsforge map library. The
- * map can be centered to the current location. A simple file browser for
- * selecting the map file is also included. Some preferences can be adjusted via
- * the {@link EditPreferences} activity.
- */
 public class TileMap extends MapActivity {
-	// implements ActionBar.OnNavigationListener {
+	static final String TAG = TileMap.class.getSimpleName();
+
+	MapView map;
+
 	// private static final String BUNDLE_CENTER_AT_FIRST_FIX =
 	// "centerAtFirstFix";
+
 	private static final String BUNDLE_SHOW_MY_LOCATION = "showMyLocation";
 	private static final String BUNDLE_SNAP_TO_LOCATION = "snapToLocation";
 	private static final int DIALOG_ENTER_COORDINATES = 0;
-	private static final int DIALOG_INFO_MAP_FILE = 1;
+	//	private static final int DIALOG_INFO_MAP_FILE = 1;
 	private static final int DIALOG_LOCATION_PROVIDER_DISABLED = 2;
+
 	// private static final FileFilter FILE_FILTER_EXTENSION_MAP =
 	// new FilterByFileExtension(".map");
 	private static final FileFilter FILE_FILTER_EXTENSION_XML =
 			new FilterByFileExtension(".xml");
 	// private static final int SELECT_MAP_FILE = 0;
+
+	// Intents
 	private static final int SELECT_RENDER_THEME_FILE = 1;
+	protected static final int POIS_REQUEST = 2;
 
 	LocationHandler mLocation;
 
 	private MapDatabases mMapDatabase;
 
 	private WakeLock mWakeLock;
-	MapView mMapView;
 	private Menu mMenu = null;
 
-	SpinnerAdapter mSpinnerAdapter;
+	POISearch mPoiSearch;
+	RouteSearch mRouteSearch;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		// set up the layout views
+		setContentView(R.layout.activity_tilemap);
+
+		map = (MapView) findViewById(R.id.mapView);
+
+		App.map = map;
+
+		// configure the MapView and activate the zoomLevel buttons
+		map.setClickable(true);
+		// map.setBuiltInZoomControls(true);
+		map.setFocusable(true);
+
+		mLocation = new LocationHandler(this);
+
+		// get the pointers to different system services
+		PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+		mWakeLock = powerManager
+				.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "AMV");
+
+		if (savedInstanceState != null) {
+			if (savedInstanceState.getBoolean(BUNDLE_SHOW_MY_LOCATION)) {
+
+				// enableShowMyLocation(savedInstanceState
+				// .getBoolean(BUNDLE_CENTER_AT_FIRST_FIX));
+
+				if (savedInstanceState.getBoolean(BUNDLE_SNAP_TO_LOCATION)) {
+					mLocation.enableSnapToLocation(false);
+				}
+			}
+		}
+
+		App.poiSearch = mPoiSearch = new POISearch(this);
+
+		registerForContextMenu(map);
+		mRouteSearch = new RouteSearch(this);
+
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-		// getMenuInflater().inflate(R.menu.options_menu, menu);
-		// else
-		getMenuInflater().inflate(R.menu.options_menu_pre_honeycomb, menu);
-
+		getMenuInflater().inflate(R.menu.options_menu, menu);
 		mMenu = menu;
 
 		return true;
@@ -97,22 +149,22 @@ public class TileMap extends MapActivity {
 				return true;
 
 			case R.id.menu_rotation_enable:
-				mMapView.enableRotation(true);
+				map.enableRotation(true);
 				toggleMenuRotation();
 				return true;
 
 			case R.id.menu_rotation_disable:
-				mMapView.enableRotation(false);
+				map.enableRotation(false);
 				toggleMenuRotation();
 				return true;
 
 			case R.id.menu_compass_enable:
-				mMapView.enableCompass(true);
+				map.enableCompass(true);
 				toggleMenuRotation();
 				return true;
 
 			case R.id.menu_compass_disable:
-				mMapView.enableCompass(false);
+				map.enableCompass(false);
 				toggleMenuRotation();
 				return true;
 
@@ -130,10 +182,6 @@ public class TileMap extends MapActivity {
 						mLocation.disableShowMyLocation());
 				return true;
 
-				// case R.id.menu_position_last_known:
-				// mLocation.gotoLastKnownPosition();
-				// return true;
-
 			case R.id.menu_position_enter_coordinates:
 				showDialog(DIALOG_ENTER_COORDINATES);
 				return true;
@@ -145,15 +193,12 @@ public class TileMap extends MapActivity {
 			case R.id.menu_render_theme:
 				return true;
 
-			case R.id.menu_options:
-				return true;
-
 			case R.id.menu_render_theme_osmarender:
-				mMapView.setRenderTheme(InternalRenderTheme.OSMARENDER);
+				map.setRenderTheme(InternalRenderTheme.OSMARENDER);
 				return true;
 
 			case R.id.menu_render_theme_tronrender:
-				mMapView.setRenderTheme(InternalRenderTheme.TRONRENDER);
+				map.setRenderTheme(InternalRenderTheme.TRONRENDER);
 				return true;
 
 			case R.id.menu_render_theme_select_file:
@@ -162,15 +207,29 @@ public class TileMap extends MapActivity {
 
 				// case R.id.menu_position_map_center:
 				// // disable GPS follow mode if it is enabled
-				// mLocation.disableSnapToLocation(true);
+				// location.disableSnapToLocation(true);
 				//
-				// mMapView.setCenter(mMapView.getMapDatabase()
+				// map.setCenter(map.getMapDatabase()
 				// .getMapInfo().mapCenter);
 				// return true;
 				// case R.id.menu_mapfile:
 				// startMapFilePicker();
 				// return true;
 
+			case R.id.menu_pois:
+				mPoiSearch.getPOIAsync("bar");
+				//				Intent myIntent = new Intent(this, POIActivity.class);
+				//				myIntent.putParcelableArrayListExtra("POI", mPOIs);
+				//				//				myIntent.putExtra("ID", poiMarkers.getBubbledItemId());
+				//				startActivityForResult(myIntent, POIS_REQUEST);
+				return true;
+
+			case R.id.menu_poi_list:
+				Intent myIntent = new Intent(this, POIActivity.class);
+				myIntent.putParcelableArrayListExtra("POI", mPoiSearch.mPOIs);
+				myIntent.putExtra("ID", mPoiSearch.poiMarkers.getBubbledItemId());
+				startActivityForResult(myIntent, POIS_REQUEST);
+				return true;
 			default:
 				return false;
 		}
@@ -181,12 +240,12 @@ public class TileMap extends MapActivity {
 		toggleMenuItem(mMenu,
 				R.id.menu_rotation_enable,
 				R.id.menu_rotation_disable,
-				!mMapView.enableRotation);
+				!map.enableRotation);
 
 		toggleMenuItem(mMenu,
 				R.id.menu_compass_enable,
 				R.id.menu_compass_disable,
-				!mMapView.enableCompass);
+				!map.enableCompass);
 	}
 
 	private static void toggleMenuItem(Menu menu, int id, int id2, boolean enable) {
@@ -210,7 +269,7 @@ public class TileMap extends MapActivity {
 				!mLocation.isShowMyLocationEnabled());
 
 		if (mMapDatabase == MapDatabases.MAP_READER) {
-			menu.findItem(R.id.menu_mapfile).setVisible(true);
+			//menu.findItem(R.id.menu_mapfile).setVisible(true);
 			menu.findItem(R.id.menu_position_map_center).setVisible(true);
 		}
 		// else {
@@ -226,7 +285,7 @@ public class TileMap extends MapActivity {
 	@Override
 	public boolean onTrackballEvent(MotionEvent event) {
 		// forward the event to the MapView
-		return mMapView.onTrackballEvent(event);
+		return map.onTrackballEvent(event);
 	}
 
 	// private void startMapFilePicker() {
@@ -245,14 +304,40 @@ public class TileMap extends MapActivity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		switch (requestCode) {
+			case POIS_REQUEST:
+				Log.d(TAG, "result: POIS_REQUEST");
+				if (resultCode == RESULT_OK) {
+					int id = intent.getIntExtra("ID", 0);
+					Log.d(TAG, "result: POIS_REQUEST: " + id);
+					//	map.getController().setCenter(mPOIs.get(id).mLocation);
+					mPoiSearch.poiMarkers.showBubbleOnItem(id, map);
+					map.getMapViewPosition().animateTo(mPoiSearch.mPOIs.get(id).location);
+				}
+				break;
+			case SELECT_RENDER_THEME_FILE:
+				if (resultCode == RESULT_OK && intent != null
+						&& intent.getStringExtra(FilePicker.SELECTED_FILE) != null) {
+					try {
+						map.setRenderTheme(intent
+								.getStringExtra(FilePicker.SELECTED_FILE));
+					} catch (FileNotFoundException e) {
+						showToastOnUiThread(e.getLocalizedMessage());
+					}
+				}
+				break;
+			default:
+				break;
+		}
+
 		// if (requestCode == SELECT_MAP_FILE) {
 		// if (resultCode == RESULT_OK) {
 		//
-		// mLocation.disableSnapToLocation(true);
+		// location.disableSnapToLocation(true);
 		//
 		// if (intent != null) {
 		// if (intent.getStringExtra(FilePicker.SELECTED_FILE) != null) {
-		// mMapView.setMapFile(intent
+		// map.setMapFile(intent
 		// .getStringExtra(FilePicker.SELECTED_FILE));
 		// }
 		// }
@@ -260,120 +345,35 @@ public class TileMap extends MapActivity {
 		// startActivity(new Intent(this, EditPreferences.class));
 		// }
 		// } else
-		if (requestCode == SELECT_RENDER_THEME_FILE && resultCode == RESULT_OK
-				&& intent != null
-				&& intent.getStringExtra(FilePicker.SELECTED_FILE) != null) {
-			try {
-				mMapView.setRenderTheme(intent
-						.getStringExtra(FilePicker.SELECTED_FILE));
-			} catch (FileNotFoundException e) {
-				showToastOnUiThread(e.getLocalizedMessage());
-			}
-		}
+		//		if (requestCode == SELECT_RENDER_THEME_FILE && resultCode == RESULT_OK
+		//				&& intent != null
+		//				&& intent.getStringExtra(FilePicker.SELECTED_FILE) != null) {
+		//			try {
+		//				map.setRenderTheme(intent
+		//						.getStringExtra(FilePicker.SELECTED_FILE));
+		//			} catch (FileNotFoundException e) {
+		//				showToastOnUiThread(e.getLocalizedMessage());
+		//			}
+		//		}
 	}
 
 	static boolean isPreHoneyComb() {
 		return Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB;
 	}
 
-	// @TargetApi(11)
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		// if (!isPreHoneyComb()) {
-		// mSpinnerAdapter = ArrayAdapter.createFromResource(this,
-		// R.array.view_sections,
-		// android.R.layout.simple_spinner_dropdown_item);
-		// ActionBar actionBar = getActionBar();
-		// actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		//
-		// // actionBar.setListNavigationCallbacks(mSpinnerAdapter, this);
-		// actionBar.setDisplayShowTitleEnabled(false);
-		// }
-
-		// set up the layout views
-		setContentView(R.layout.activity_tilemap);
-
-		mMapView = (MapView) findViewById(R.id.mapView);
-
-		// configure the MapView and activate the zoomLevel buttons
-		mMapView.setClickable(true);
-		// mMapView.setBuiltInZoomControls(true);
-		mMapView.setFocusable(true);
-
-		mLocation = new LocationHandler(this);
-
-		// get the pointers to different system services
-		PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-
-		mWakeLock = powerManager
-				.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "AMV");
-
-		if (savedInstanceState != null) {
-			if (savedInstanceState.getBoolean(BUNDLE_SHOW_MY_LOCATION)) {
-
-				// enableShowMyLocation(savedInstanceState
-				// .getBoolean(BUNDLE_CENTER_AT_FIRST_FIX));
-
-				if (savedInstanceState.getBoolean(BUNDLE_SNAP_TO_LOCATION)) {
-					mLocation.enableSnapToLocation(false);
-				}
-			}
-		}
-	}
-
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		if (id == DIALOG_ENTER_COORDINATES) {
-			builder.setIcon(android.R.drawable.ic_menu_mylocation);
-			builder.setTitle(R.string.menu_position_enter_coordinates);
-			LayoutInflater factory = LayoutInflater.from(this);
-			final View view = factory.inflate(R.layout.dialog_enter_coordinates, null);
-			builder.setView(view);
+			if (mLocationDialog == null)
+				mLocationDialog = new LocationDialog();
 
-			builder.setPositiveButton(R.string.go_to_position,
-					new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// disable GPS follow mode if it is enabled
-							mLocation.disableSnapToLocation(true);
+			return mLocationDialog.createDialog(this);
 
-							// set the map center and zoom level
-							EditText latitudeView = (EditText) view
-									.findViewById(R.id.latitude);
-							EditText longitudeView = (EditText) view
-									.findViewById(R.id.longitude);
-							double latitude = Double.parseDouble(latitudeView.getText()
-									.toString());
-							double longitude = Double.parseDouble(longitudeView.getText()
-									.toString());
-
-							SeekBar zoomLevelView = (SeekBar) view
-									.findViewById(R.id.zoomLevel);
-
-							byte zoom = (byte) (zoomLevelView.getProgress());
-
-							MapPosition mapPosition = new MapPosition(latitude,
-									longitude, zoom, 1, 0);
-
-							TileMap.this.mMapView.setMapCenter(mapPosition);
-						}
-					});
-			builder.setNegativeButton(R.string.cancel, null);
-			return builder.create();
 		} else if (id == DIALOG_LOCATION_PROVIDER_DISABLED) {
 			builder.setIcon(android.R.drawable.ic_menu_info_details);
 			builder.setTitle(R.string.error);
 			builder.setMessage(R.string.no_location_provider_available);
-			builder.setPositiveButton(R.string.ok, null);
-			return builder.create();
-		} else if (id == DIALOG_INFO_MAP_FILE) {
-			builder.setIcon(android.R.drawable.ic_menu_info_details);
-			builder.setTitle(R.string.menu_info_map_file);
-			LayoutInflater factory = LayoutInflater.from(this);
-			builder.setView(factory.inflate(R.layout.dialog_info_map_file, null));
 			builder.setPositiveButton(R.string.ok, null);
 			return builder.create();
 		} else {
@@ -390,6 +390,7 @@ public class TileMap extends MapActivity {
 
 	@Override
 	protected void onPause() {
+		Log.d(TAG, "onPause");
 		super.onPause();
 		// release the wake lock if necessary
 		if (mWakeLock.isHeld()) {
@@ -397,91 +398,14 @@ public class TileMap extends MapActivity {
 		}
 	}
 
+	LocationDialog mLocationDialog;
+
 	@Override
 	protected void onPrepareDialog(int id, final Dialog dialog) {
 		if (id == DIALOG_ENTER_COORDINATES) {
-			EditText editText = (EditText) dialog.findViewById(R.id.latitude);
-			GeoPoint mapCenter = mMapView.getMapPosition().getMapCenter();
-			editText.setText(Double.toString(mapCenter.getLatitude()));
 
-			editText = (EditText) dialog.findViewById(R.id.longitude);
-			editText.setText(Double.toString(mapCenter.getLongitude()));
+			mLocationDialog.prepareDialog(map, dialog);
 
-			SeekBar zoomlevel = (SeekBar) dialog.findViewById(R.id.zoomLevel);
-			zoomlevel.setMax(20); // FIXME
-									// mMapView.getMapGenerator().getZoomLevelMax());
-			zoomlevel.setProgress(mMapView.getMapPosition().getZoomLevel());
-
-			final TextView textView = (TextView) dialog.findViewById(R.id.zoomlevelValue);
-			textView.setText(String.valueOf(zoomlevel.getProgress()));
-			zoomlevel.setOnSeekBarChangeListener(new SeekBarChangeListener(textView));
-			// } else if (id == DIALOG_INFO_MAP_FILE) {
-			// MapInfo mapInfo = mMapView.getMapDatabase().getMapInfo();
-			//
-			// TextView textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewName);
-			// textView.setText(mMapView.getMapFile());
-			//
-			// textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewSize);
-			// textView.setText(FileUtils.formatFileSize(mapInfo.fileSize,
-			// getResources()));
-			//
-			// textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewVersion);
-			// textView.setText(String.valueOf(mapInfo.fileVersion));
-			//
-			// // textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewDebug);
-			// // if (mapFileInfo.debugFile) {
-			// // textView.setText(R.string.info_map_file_debug_yes);
-			// // } else {
-			// // textView.setText(R.string.info_map_file_debug_no);
-			// // }
-			//
-			// textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewDate);
-			// Date date = new Date(mapInfo.mapDate);
-			// textView.setText(DateFormat.getDateTimeInstance().format(date));
-			//
-			// textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewArea);
-			// BoundingBox boundingBox = mapInfo.boundingBox;
-			// textView.setText(boundingBox.getMinLatitude() + ", "
-			// + boundingBox.getMinLongitude() + " - \n"
-			// + boundingBox.getMaxLatitude() + ", " +
-			// boundingBox.getMaxLongitude());
-			//
-			// textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewStartPosition);
-			// GeoPoint startPosition = mapInfo.startPosition;
-			// if (startPosition == null) {
-			// textView.setText(null);
-			// } else {
-			// textView.setText(startPosition.getLatitude() + ", "
-			// + startPosition.getLongitude());
-			// }
-			//
-			// textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewStartZoomLevel);
-			// Byte startZoomLevel = mapInfo.startZoomLevel;
-			// if (startZoomLevel == null) {
-			// textView.setText(null);
-			// } else {
-			// textView.setText(startZoomLevel.toString());
-			// }
-			//
-			// textView = (TextView) dialog
-			// .findViewById(R.id.infoMapFileViewLanguagePreference);
-			// textView.setText(mapInfo.languagePreference);
-			//
-			// textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewComment);
-			// textView.setText(mapInfo.comment);
-			//
-			// textView = (TextView)
-			// dialog.findViewById(R.id.infoMapFileViewCreatedBy);
-			// textView.setText(mapInfo.createdBy);
 		} else {
 			super.onPrepareDialog(id, dialog);
 		}
@@ -503,24 +427,6 @@ public class TileMap extends MapActivity {
 		// scaleBarUnitDefault);
 		// mapScaleBar.setImperialUnits(scaleBarUnit.equals("imperial"));
 
-		// if (preferences.contains("mapGenerator")) {
-		// String name = preferences.getString("mapGenerator",
-		// MapGeneratorInternal.SW_RENDERER.name());
-		// MapGeneratorInternal mapGeneratorInternalNew;
-		// try {
-		// mapGeneratorInternalNew = MapGeneratorInternal.valueOf(name);
-		// } catch (IllegalArgumentException e) {
-		// mapGeneratorInternalNew = MapGeneratorInternal.SW_RENDERER;
-		// }
-		//
-		// if (mapGeneratorInternalNew != mapGeneratorInternal) {
-		// TileGenerator mapGenerator =
-		// MapGeneratorFactory.createMapGenerator(mapGeneratorInternalNew);
-		// mapView.setMapGenerator(mapGenerator);
-		// mapGeneratorInternal = mapGeneratorInternalNew;
-		// }
-		// }
-
 		if (preferences.contains("mapDatabase")) {
 			String name = preferences.getString("mapDatabase",
 					MapDatabases.PBMAP_READER.name());
@@ -533,10 +439,10 @@ public class TileMap extends MapActivity {
 				mapDatabaseNew = MapDatabases.PBMAP_READER;
 			}
 
-			Log.d("VectorTileMap", "set map database " + mapDatabaseNew);
-
 			if (mapDatabaseNew != mMapDatabase) {
-				mMapView.setMapDatabase(mapDatabaseNew);
+				Log.d(TAG, "set map database " + mapDatabaseNew);
+
+				map.setMapDatabase(mapDatabaseNew);
 				mMapDatabase = mapDatabaseNew;
 			}
 		}
@@ -544,10 +450,10 @@ public class TileMap extends MapActivity {
 		// try {
 		// String textScaleDefault =
 		// getString(R.string.preferences_text_scale_default);
-		// mMapView.setTextScale(Float.parseFloat(preferences.getString("textScale",
+		// map.setTextScale(Float.parseFloat(preferences.getString("textScale",
 		// textScaleDefault)));
 		// } catch (NumberFormatException e) {
-		// mMapView.setTextScale(1);
+		// map.setTextScale(1);
 		// }
 
 		if (preferences.getBoolean("fullscreen", false)) {
@@ -579,29 +485,28 @@ public class TileMap extends MapActivity {
 		boolean drawUnmatchedWays =
 				preferences.getBoolean("drawUnmatchedWays", false);
 
-		DebugSettings debugSettings = new DebugSettings(drawTileCoordinates,
-				drawTileFrames, disablePolygons, drawUnmatchedWays);
+		DebugSettings cur = map.getDebugSettings();
+		if (cur.mDisablePolygons != disablePolygons
+				|| cur.mDrawTileCoordinates != drawTileCoordinates
+				|| cur.mDrawTileFrames != drawTileFrames
+				|| cur.mDrawUnmatchted != drawUnmatchedWays) {
+			Log.d(TAG, "set map debug settings");
 
-		mMapView.setDebugSettings(debugSettings);
+			DebugSettings debugSettings = new DebugSettings(drawTileCoordinates,
+					drawTileFrames, disablePolygons, drawUnmatchedWays);
+
+			map.setDebugSettings(debugSettings);
+		}
 
 		// if (mMapDatabase == MapDatabases.MAP_READER) {
-		// if (mMapView.getMapFile() == null)
+		// if (map.getMapFile() == null)
 		// startMapFilePicker();
 		// } else {
-		// mMapView.setMapFile(mMapView.getMapFile());
+		// map.setMapFile(map.getMapFile());
 		// }
 
-		// if (Build.VERSION.SDK_INT >= 11) {
-		// VersionHelper.refreshActionBarMenu(this);
-		// }
+		map.redrawMap();
 	}
-
-	// static class VersionHelper {
-	// @TargetApi(11)
-	// static void refreshActionBarMenu(Activity activity) {
-	// activity.invalidateOptionsMenu();
-	// }
-	// }
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
@@ -616,7 +521,6 @@ public class TileMap extends MapActivity {
 	/**
 	 * Uses the UI thread to display the given text message as toast
 	 * notification.
-	 * 
 	 * @param text
 	 *            the text message to display
 	 */
@@ -636,33 +540,25 @@ public class TileMap extends MapActivity {
 		}
 	}
 
-	// @Override
-	// public boolean onNavigationItemSelected(int arg0, long arg1) {
-	// // TODO Auto-generated method stub
-	// return false;
-	// }
+	//----------- Context Menu when clicking on the map
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		Log.d(TAG, "create context menu");
 
-	class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-		private final TextView textView;
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.map_menu, menu);
+	}
 
-		SeekBarChangeListener(TextView textView) {
-			this.textView = textView;
-		}
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		Log.d(TAG, "context menu item selected " + item.getItemId());
 
-		@Override
-		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-			this.textView.setText(String.valueOf(progress));
-		}
+		if (mRouteSearch.onContextItemSelected(item))
+			return true;
 
-		@Override
-		public void onStartTrackingTouch(SeekBar seekBar) {
-			// do nothing
-		}
-
-		@Override
-		public void onStopTrackingTouch(SeekBar seekBar) {
-			// do nothing
-		}
+		return super.onContextItemSelected(item);
 	}
 
 }

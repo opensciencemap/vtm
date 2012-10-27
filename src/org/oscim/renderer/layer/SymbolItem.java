@@ -15,15 +15,55 @@
 package org.oscim.renderer.layer;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 
 public class SymbolItem {
+	private static Object lock = new Object();
+	private static SymbolItem pool;
+
+	public static SymbolItem get() {
+		synchronized (lock) {
+			if (pool == null)
+				return new SymbolItem();
+
+			SymbolItem ti = pool;
+			pool = pool.next;
+
+			ti.next = null;
+
+			return ti;
+		}
+	}
+
+	public static void release(SymbolItem ti) {
+		if (ti == null)
+			return;
+
+		synchronized (lock) {
+			while (ti != null) {
+				SymbolItem next = ti.next;
+
+				ti.drawable = null;
+				ti.bitmap = null;
+
+				ti.next = pool;
+				pool = ti;
+
+				ti = next;
+			}
+		}
+	}
+
 	SymbolItem next;
 
 	public Bitmap bitmap;
+	public Drawable drawable;
 	public float x;
 	public float y;
 	public boolean billboard;
+	public int state;
 
 	// center, top, bottom, left, right, top-left...
-	byte placement;
+	//	byte placement;
+
 }

@@ -38,7 +38,6 @@ public class JobQueue {
 	 *            the job to be added to this queue.
 	 */
 	public synchronized void setJobs(ArrayList<JobTile> tiles) {
-		// mPriorityQueue.clear();
 
 		for (int i = 0, n = tiles.size(); i < n; i++) {
 			JobTile tile = tiles.get(i);
@@ -51,9 +50,10 @@ public class JobQueue {
 	 * Removes all jobs from this queue.
 	 */
 	public synchronized void clear() {
-		for (JobTile tile : mPriorityQueue) {
-			tile.isLoading = false;
-		}
+
+		JobTile t;
+		while ((t = mPriorityQueue.poll()) != null)
+			t.isLoading = false;
 
 		mPriorityQueue.clear();
 	}

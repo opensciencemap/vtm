@@ -2,12 +2,13 @@
 <resources>
 
     <string-array name="preferences_map_generator_values">
+
         <!-- <item>Mapfile</item> -->
         <!-- <item>PostGIS</item> -->
         <item>OpenScienceMap</item>
-        <item>OpenScienceMap2</item> 
+        <item>OpenScienceMap2</item>
         <item>Test</item>
-        </string-array>
+    </string-array>
     <string-array name="preferences_scale_bar_unit_values">
         <item>Imperial</item>
         <item>Metric</item>
@@ -111,5 +112,9 @@
     <string name="unit_symbol_meter">&#160;m</string>
     <string name="zoomLevel">Zoom level</string>
     <string name="menu_options">Options</string>
-
+    <string name="menu_pois">Bars nearby</string>
+     <string name="menu_poi_list">List POIs</string>
+    <string name="departure">Departure</string>
+    <string name="destination">Destination</string>
+    <string name="viapoint">Via-Point</string>
 </resources>

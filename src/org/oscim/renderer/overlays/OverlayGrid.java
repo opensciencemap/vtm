@@ -14,6 +14,7 @@
  */
 package org.oscim.renderer.overlays;
 
+import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
@@ -27,13 +28,13 @@ import android.graphics.Color;
 import android.graphics.Paint.Cap;
 import android.util.Log;
 
-public class OverlayGrid extends Overlay {
+public class OverlayGrid extends RenderOverlay {
 
 	private float[] mPoints;
 	private short[] mIndex;
 	private Text mText;
 
-	OverlayGrid(MapView mapView) {
+	public OverlayGrid(MapView mapView) {
 		super(mapView);
 
 		int size = Tile.TILE_SIZE;
@@ -91,6 +92,8 @@ public class OverlayGrid extends Overlay {
 				tl.addText(ti);
 			}
 		}
+		tl.prepare();
+
 		layers.textureLayers = tl;
 	}
 
@@ -107,7 +110,7 @@ public class OverlayGrid extends Overlay {
 	}
 
 	@Override
-	public synchronized void update(boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
 
 		updateMapPosition();
 
@@ -133,6 +136,8 @@ public class OverlayGrid extends Overlay {
 			ll.line = new Line(Color.BLUE, 1.0f, Cap.BUTT);
 			ll.width = 1.5f;
 			ll.addLine(mPoints, mIndex, false);
+
+			Log.d("...", "update labels");
 
 			addLabels(x, y, mCurZ);
 

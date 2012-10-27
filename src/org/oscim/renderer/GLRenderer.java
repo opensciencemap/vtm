@@ -25,7 +25,7 @@ import static android.opengl.GLES20.GL_POLYGON_OFFSET_FILL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -35,8 +35,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
-import org.oscim.renderer.overlays.Overlay;
-import org.oscim.renderer.overlays.OverlayText;
+import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.theme.RenderTheme;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
@@ -61,7 +60,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	static int CACHE_TILES = CACHE_TILES_MAX;
 
-	private final MapView mMapView;
+	private static MapView mMapView;
 	static int mWidth, mHeight;
 
 	private static MapViewPosition mMapViewPosition;
@@ -177,10 +176,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 	};
 
-	/**
-	 * @param mapView
-	 *            the MapView
-	 */
+	/** @param mapView
+	 *            the MapView */
 	public GLRenderer(MapView mapView) {
 
 		mMapView = mapView;
@@ -213,15 +210,15 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			shortBuffer[i].put(mFillCoords, 0, 8);
 		}
 
-		mOverlays = new ArrayList<Overlay>();
+		//		overlays = new ArrayList<RenderOverlay>();
 
 		// mOverlays.add(new OverlayGrid(mapView));
 		// mOverlays.add(new OverlayTest(mapView));
-		mOverlays.add(new OverlayText(mapView));
+		//		overlays.add(new OverlayText(mapView));
 
 	}
 
-	private static ArrayList<Overlay> mOverlays;
+	//	private static ArrayList<RenderOverlay> overlays;
 
 	public static void setRenderTheme(RenderTheme t) {
 		mClearColor = GlUtils.colorToFloat(t.getMapBackground());
@@ -234,7 +231,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		int newSize = layers.getSize();
 		if (newSize == 0) {
-			Log.d(TAG, "empty");
+			// FIXME why are there so many tiles empty?
+			// Log.d(TAG, "empty");
 			return true;
 		}
 
@@ -315,14 +313,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		return tile.isReady;
 	}
 
-	private static boolean uploadOverlayData(Overlay overlay) {
+	private static boolean uploadOverlayData(RenderOverlay renderOverlay) {
 
-		if (uploadLayers(overlay.layers, overlay.vbo, true))
-			overlay.isReady = true;
+		if (uploadLayers(renderOverlay.layers, renderOverlay.vbo, true))
+			renderOverlay.isReady = true;
 
-		overlay.newData = false;
+		renderOverlay.newData = false;
 
-		return overlay.isReady;
+		return renderOverlay.isReady;
 	}
 
 	private static void checkBufferUsage() {
@@ -384,7 +382,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	public void onDrawFrame(GL10 glUnused) {
 
 		// prevent main thread recreating all tiles (updateMap)
-		// while rendering is going.
+		// while rendering is going on.
 		drawlock.lock();
 		try {
 			draw();
@@ -421,9 +419,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// get current tiles to draw
 		mDrawTiles = TileManager.getActiveTiles(mDrawTiles);
 
+		// FIXME what if only drawing overlays?
 		if (mDrawTiles == null || mDrawTiles.cnt == 0) {
 			return;
 		}
+
 		boolean tilesChanged = false;
 		// check if the tiles have changed...
 		if (serial != mDrawTiles.serial) {
@@ -450,14 +450,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			float div = scaleDiv(tiles[0]);
 
 			// transform screen coordinates to tile coordinates
-			float s = Tile.TILE_SIZE;
 			float scale = mapPosition.scale / div;
 			float px = (float) mapPosition.x * div;
 			float py = (float) mapPosition.y * div;
 
 			for (int i = 0; i < 8; i += 2) {
-				coords[i + 0] = (px + coords[i + 0] / scale) / s;
-				coords[i + 1] = (py + coords[i + 1] / scale) / s;
+				coords[i + 0] = (px + coords[i + 0] / scale) / Tile.TILE_SIZE;
+				coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
 			}
 
 			mHolderCount = 0;
@@ -514,11 +513,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		tilesChanged |= (uploadCnt > 0);
 
-		// if (changed || tilesChanged) {
-		for (Overlay overlay : mOverlays) {
-			overlay.update(changed, tilesChanged);
-		}
-		// }
+		// update overlays
+		List<RenderOverlay> overlays = mMapView.getOverlayManager().getRenderLayers();
+
+		for (int i = 0, n = overlays.size(); i < n; i++)
+			overlays.get(i).update(mMapPosition, changed, tilesChanged);
 
 		GLES20.glEnable(GL_DEPTH_TEST);
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
@@ -538,7 +537,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			if (t.isVisible && !t.isReady && (t.holder == null))
 				drawProxyTile(t);
 		}
-		// GlUtils.checkGlError("end draw");
 
 		GLES20.glDisable(GL_POLYGON_OFFSET_FILL);
 		GLES20.glDisable(GL_DEPTH_TEST);
@@ -552,22 +550,25 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glFlush();
 
 		// call overlay renderer
-		for (Overlay overlay : mOverlays) {
-			if (overlay.newData) {
-				if (overlay.vbo == null)
-					overlay.vbo = BufferObject.get();
+		for (int i = 0, n = overlays.size(); i < n; i++) {
+			RenderOverlay renderOverlay = overlays.get(i);
 
-				if (overlay.vbo == null)
-					continue;
+			if (renderOverlay.newData) {
+				if (renderOverlay.vbo == null) {
+					renderOverlay.vbo = BufferObject.get();
 
-				if (uploadOverlayData(overlay))
-					overlay.isReady = true;
+					if (renderOverlay.vbo == null)
+						continue;
+				}
+
+				if (uploadOverlayData(renderOverlay))
+					renderOverlay.isReady = true;
 			}
-			if (!overlay.isReady)
-				continue;
 
-			// setMatrix(mMVPMatrix, overlay);
-			overlay.render(mMapPosition, mMVPMatrix, mProjMatrix);
+			if (renderOverlay.isReady) {
+				// setMatrix(mMVPMatrix, overlay);
+				renderOverlay.render(mMapPosition, mMVPMatrix, mProjMatrix);
+			}
 		}
 
 		if (MapView.debugFrameTime) {
@@ -597,6 +598,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					mapPosition.viewMatrix, 0);
 			PolygonRenderer.debugDraw(mMVPMatrix, mDebugCoords, 1);
 		}
+
+		//		mMapView.getOverlayManager().onUpdate(mMapPosition);
+
 	}
 
 	// used to not draw a tile twice per frame.

@@ -19,10 +19,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -34,6 +36,9 @@ import org.oscim.database.OpenResult;
 import org.oscim.generator.JobQueue;
 import org.oscim.generator.JobTile;
 import org.oscim.generator.MapWorker;
+import org.oscim.overlay.LabelingOverlay;
+import org.oscim.overlay.Overlay;
+import org.oscim.overlay.OverlayManager;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLView;
 import org.oscim.renderer.TileGenerator;
@@ -43,29 +48,28 @@ import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.RenderTheme;
 import org.oscim.theme.RenderThemeHandler;
 import org.oscim.theme.Theme;
+import org.oscim.utils.AndroidUtils;
 import org.xml.sax.SAXException;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 /**
  * A MapView shows a map on the display of the device. It handles all user input
  * and touch gestures to move and zoom the map.
  */
-public class MapView extends FrameLayout {
+public class MapView extends RelativeLayout {
 
 	final static String TAG = "MapView";
 
 	public static final boolean debugFrameTime = false;
 	public static final boolean testRegionZoom = false;
-	// public static final boolean staticLabeling = false;
-
 	private static final boolean debugDatabase = false;
 
-	RegionLookup mRegionLookup;
+	//	RegionLookup mRegionLookup;
 
 	public boolean enableRotation = false;
 	public boolean enableCompass = false;
@@ -81,10 +85,15 @@ public class MapView extends FrameLayout {
 	private MapDatabases mMapDatabaseType;
 
 	private TileManager mTileManager;
-	private GLView mGLView;
-	private JobQueue mJobQueue;
-	private MapWorker mMapWorkers[];
-	private int mNumMapWorkers = 4;
+	private final OverlayManager mOverlayManager;
+
+	private final GLView mGLView;
+	private final JobQueue mJobQueue;
+
+	// TODO use 1 download and 1 generator thread instead
+	private final MapWorker mMapWorkers[];
+	private final int mNumMapWorkers = 4;
+
 	private DebugSettings debugSettings;
 	private String mRenderTheme;
 	private Map<String, String> mMapOptions;
@@ -124,8 +133,10 @@ public class MapView extends FrameLayout {
 		}
 
 		Log.d(TAG, "create MapView: " + mapDatabaseType.name());
+		//		this.setDrawingCacheEnabled(true);
+		this.setWillNotDraw(true);
 
-		// TODO make this dpi dependent
+		// TODO set tilesize, make this dpi dependent
 		Tile.TILE_SIZE = 400;
 
 		MapActivity mapActivity = (MapActivity) context;
@@ -138,6 +149,8 @@ public class MapView extends FrameLayout {
 
 		mMapViewPosition = new MapViewPosition(this);
 
+		mOverlayManager = new OverlayManager();
+
 		mTouchEventHandler = new TouchHandler(mapActivity, this);
 
 		mCompass = new Compass(mapActivity, this);
@@ -145,6 +158,7 @@ public class MapView extends FrameLayout {
 		mJobQueue = new JobQueue();
 
 		mTileManager = TileManager.create(this);
+
 		mGLView = new GLView(context, this);
 
 		mMapWorkers = new MapWorker[mNumMapWorkers];
@@ -156,7 +170,7 @@ public class MapView extends FrameLayout {
 				// .createMapDatabase(MapDatabases.TEST_READER);
 				mapDatabase = MapDatabaseFactory
 						.createMapDatabase(MapDatabases.MAP_READER);
-				mNumMapWorkers = 1;
+				// mNumMapWorkers = 1;
 			} else {
 				mapDatabase = MapDatabaseFactory.createMapDatabase(mapDatabaseType);
 			}
@@ -187,8 +201,8 @@ public class MapView extends FrameLayout {
 
 		addView(mGLView, params);
 
-		if (testRegionZoom)
-			mRegionLookup = new RegionLookup(this);
+		//		if (testRegionZoom)
+		//			mRegionLookup = new RegionLookup(this);
 
 		mMapZoomControls = new MapZoomControls(mapActivity, this);
 		mMapZoomControls.setShowMapZoomControls(true);
@@ -197,6 +211,35 @@ public class MapView extends FrameLayout {
 
 		for (MapWorker worker : mMapWorkers)
 			worker.start();
+
+		mOverlayManager.add(new LabelingOverlay(this));
+		//		mOverlayManager.add(new GenericOverlay(this, new OverlayGrid(this)));
+		//		mOverlayManager.add(new GenericOverlay(this, new OverlayTest(this)));
+
+		//		ArrayList<OverlayItem> pList = new ArrayList<OverlayItem>();
+		//		pList.add(new OverlayItem("title", "description", new GeoPoint(53.067221, 8.78767)));
+		//		Overlay overlay = new ItemizedIconOverlay<OverlayItem>(this, context, pList, null);
+		//		mOverlayManager.add(overlay);
+
+		//		ArrayList<OverlayItem> pList = new ArrayList<OverlayItem>();
+		//		pList.add(new ExtendedOverlayItem("Bremen", "description",
+		//				new GeoPoint(53.047221, 8.78767), context));
+		//		pList.add(new ExtendedOverlayItem("New York", "description",
+		//				new GeoPoint(40.4251, -74.021), context));
+		//		pList.add(new ExtendedOverlayItem("Tokyo", "description",
+		//				new GeoPoint(35.4122, 139.4130), context));
+		//		Overlay overlay = new ItemizedOverlayWithBubble<OverlayItem>(this, context, pList, null);
+		//		mOverlayManager.add(overlay);
+
+		//		PathOverlay pathOverlay = new PathOverlay(this, Color.BLUE, context);
+		//		pathOverlay.addGreatCircle(
+		//				new GeoPoint(53.047221, 8.78767),
+		//				new GeoPoint(40.4251, -74.021));
+		//		//		pathOverlay.addPoint(new GeoPoint(53.047221, 8.78767));
+		//		//		pathOverlay.addPoint(new GeoPoint(53.067221, 8.78767));
+		//		mOverlayManager.add(pathOverlay);
+
+		mMapViewPosition.animateTo(new GeoPoint(53.067221, 8.78767));
 	}
 
 	public void render() {
@@ -259,6 +302,9 @@ public class MapView extends FrameLayout {
 		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
 			return;
 
+		if (AndroidUtils.currentThreadIsUiThread())
+			mOverlayManager.onUpdate(mMapViewPosition.getMapPosition());
+
 		mTileManager.updateMap(false);
 	}
 
@@ -266,7 +312,8 @@ public class MapView extends FrameLayout {
 		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
 			return;
 
-		mTileManager.updateMap(true);
+		if (AndroidUtils.currentThreadIsUiThread())
+			mTileManager.updateMap(true);
 	}
 
 	/**
@@ -291,7 +338,6 @@ public class MapView extends FrameLayout {
 
 	/**
 	 * Sets the map file for this MapView.
-	 * 
 	 * @param mapOptions
 	 *            ...
 	 * @return true if the map file was set correctly, false otherwise.
@@ -356,7 +402,6 @@ public class MapView extends FrameLayout {
 
 	/**
 	 * Sets the MapDatabase for this MapView.
-	 * 
 	 * @param mapDatabaseType
 	 *            the new MapDatabase.
 	 */
@@ -396,7 +441,6 @@ public class MapView extends FrameLayout {
 
 	/**
 	 * Sets the internal theme which is used for rendering the map.
-	 * 
 	 * @param internalRenderTheme
 	 *            the internal rendering theme.
 	 * @return ...
@@ -418,7 +462,6 @@ public class MapView extends FrameLayout {
 
 	/**
 	 * Sets the theme file which is used for rendering the map.
-	 * 
 	 * @param renderThemePath
 	 *            the path to the XML file which defines the rendering theme.
 	 * @throws IllegalArgumentException
@@ -488,11 +531,11 @@ public class MapView extends FrameLayout {
 		mapWorkersProceed();
 	}
 
-	@Override
-	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		super.onLayout(changed, left, top, right, bottom);
-		mMapZoomControls.onLayout(changed, left, top, right, bottom);
-	}
+	//	@Override
+	//	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+	//		//		super.onLayout(changed, left, top, right, bottom);
+	//		mMapZoomControls.onLayout(changed, left, top, right, bottom);
+	//	}
 
 	void destroy() {
 		for (MapWorker mapWorker : mMapWorkers) {
@@ -577,7 +620,6 @@ public class MapView extends FrameLayout {
 
 	/**
 	 * Sets the center and zoom level of this MapView and triggers a redraw.
-	 * 
 	 * @param mapPosition
 	 *            the new map position of this MapView.
 	 */
@@ -591,7 +633,6 @@ public class MapView extends FrameLayout {
 
 	/**
 	 * Sets the center of the MapView and triggers a redraw.
-	 * 
 	 * @param geoPoint
 	 *            the new center point of the map.
 	 */
@@ -611,7 +652,6 @@ public class MapView extends FrameLayout {
 
 	/**
 	 * add jobs and remember MapWorkers that stuff needs to be done
-	 * 
 	 * @param jobs
 	 *            tile jobs
 	 */
@@ -648,6 +688,35 @@ public class MapView extends FrameLayout {
 			mapWorker.proceed();
 	}
 
+	/**
+	 * You can add/remove/reorder your Overlays using the List of
+	 * {@link Overlay}. The first (index 0) Overlay gets drawn first, the one
+	 * with the highest as the last one.
+	 * @return ...
+	 */
+	public List<Overlay> getOverlays() {
+		return this.getOverlayManager();
+	}
+
+	public OverlayManager getOverlayManager() {
+		return mOverlayManager;
+	}
+
+	public BoundingBox getBoundingBox() {
+		return mMapViewPosition.getViewBox();
+	}
+
+	//	@Override
+	//	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
+	//	
+	//	@Override
+	//	protected void onMeasure()) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 	// /**
 	// * Sets the visibility of the zoom controls.
 	// *

@@ -25,26 +25,28 @@ import android.util.Log;
 
 public final class TextLayer extends TextureLayer {
 
-	private static String TAG = TextureLayer.class.getSimpleName();
+	// private static String TAG = TextureLayer.class.getSimpleName();
 
 	private final static int TEXTURE_WIDTH = TextureObject.TEXTURE_WIDTH;
 	private final static int TEXTURE_HEIGHT = TextureObject.TEXTURE_HEIGHT;
 	private final static float SCALE = 8.0f;
 	private final static int LBIT_MASK = 0xfffffffe;
 
-	private static short[] mVertices;
 	private static int mFontPadX = 1;
 	private static int mFontPadY = 1;
 
 	TextItem labels;
+
+	private Canvas mCanvas;
 
 	public TextItem getLabels() {
 		return labels;
 	}
 
 	public TextLayer() {
-		if (mVertices == null)
-			mVertices = new short[TextureRenderer.MAX_ITEMS * 24];
+		type = Layer.SYMBOL;
+		mCanvas = new Canvas();
+		fixed = true;
 	}
 
 	public void addText(TextItem item) {
@@ -53,8 +55,10 @@ public final class TextLayer extends TextureLayer {
 
 		for (; it != null; it = it.next) {
 			if (it.text == item.text) {
+				// insert after text of same type
 				item.next = it.next;
 				it.next = item;
+
 				return;
 			}
 		}
@@ -64,24 +68,44 @@ public final class TextLayer extends TextureLayer {
 	}
 
 	@Override
-	public void compile(ShortBuffer sbuf) {
-		int numLabel = 0;
+	void compile(ShortBuffer sbuf) {
+		if (TextureRenderer.debug)
+			Log.d("...", "compile");
+
+		for (TextureObject to = textures; to != null; to = to.next)
+			TextureObject.uploadTexture(to);
+	}
+
+	@Override
+	public boolean prepare() {
+		if (TextureRenderer.debug)
+			Log.d("...", "prepare");
+
+		// int numLabel = 0;
 		// int numTextures = 0;
+
 		short numIndices = 0;
 		short offsetIndices = 0;
 
-		int pos = 0;
-		short buf[] = mVertices;
-		int bufLen = buf.length;
+		curItem = VertexPool.get();
+		pool = curItem;
+
+		VertexPoolItem si = curItem;
+
+		int pos = si.used;
+		short buf[] = si.vertices;
 
 		int advanceY = 0;
 		float x = 0;
 		float y = 0;
 		float yy;
 
-		Canvas canvas = TextureObject.getCanvas();
+		TextureObject to = TextureObject.get();
+		textures = to;
+		mCanvas.setBitmap(to.bitmap);
+
 		for (TextItem it = labels; it != null; it = it.next) {
-			numLabel++;
+			// numLabel++;
 
 			float width = it.width + 2 * mFontPadX;
 			float height = (int) (it.text.fontHeight) + 2 * mFontPadY + 0.5f;
@@ -99,33 +123,27 @@ public final class TextLayer extends TextureLayer {
 					// numLabel + " "
 					// + ((numIndices - offsetIndices) / 6));
 
-					// need to sync bitmap upload somehow???
-					TextureObject to = TextureObject.uploadCanvas(offsetIndices, numIndices);
+					to.offset = offsetIndices;
+					to.vertices = (short) (numIndices - offsetIndices);
 					offsetIndices = numIndices;
 
-					to.next = textures;
-					textures = to;
+					to.next = TextureObject.get();
+					to = to.next;
 
-					sbuf.put(buf, 0, pos);
-					pos = 0;
+					mCanvas.setBitmap(to.bitmap);
 
 					x = 0;
 					y = 0;
 					advanceY = (int) height;
-
-					// clear bitmap, TODO rotate two canvas to reduce the chance
-					// of having upload lock draing to the canvas?
-					canvas = TextureObject.getCanvas();
-					// numTextures++;
 				}
 			}
 
 			yy = y + (height - 1) - it.text.fontDescent - mFontPadY;
 
 			if (it.text.stroke != null)
-				canvas.drawText(it.string, x + it.width / 2, yy, it.text.stroke);
+				mCanvas.drawText(it.string, x + it.width / 2, yy, it.text.stroke);
 
-			canvas.drawText(it.string, x + it.width / 2, yy, it.text.paint);
+			mCanvas.drawText(it.string, x + it.width / 2, yy, it.text.paint);
 
 			// FIXME !!!
 			if (width > TEXTURE_WIDTH)
@@ -207,30 +225,41 @@ public final class TextLayer extends TextureLayer {
 			// six indices to draw the four vertices
 			numIndices += 6;
 
-			// FIXME this does not work, need to draw bitmap on next
-			// texture...
-			if (pos == bufLen) {
-				Log.d(TAG, "--- reached max label per texture " + numLabel);
-				sbuf.put(buf, 0, pos);
+			if (pos == VertexPoolItem.SIZE) {
+				si.used = VertexPoolItem.SIZE;
+				si = si.next = VertexPool.get();
+				buf = si.vertices;
 				pos = 0;
 			}
+
+			// FIXME this does not work, need to draw bitmap on next
+			// texture...
+			// if (numLabel == TextureRenderer.MAX_ITEMS) {
+			// Log.d(TAG, "--- reached max label per texture " + numLabel);
+			// sbuf.put(buf, 0, pos);
+			// pos = 0;
+			// }
 
 			x += width;
 		}
 
-		TextureObject to = TextureObject.uploadCanvas(offsetIndices, numIndices);
+		to.offset = offsetIndices;
+		to.vertices = (short) (numIndices - offsetIndices);
 
-		to.next = textures;
-		textures = to;
-
-		sbuf.put(buf, 0, pos);
+		si.used = pos;
+		curItem = si;
 
 		// Log.d(TAG, "added labels " + numTextures + " " + numLabel);
+
+		return true;
 	}
 
 	@Override
 	protected void clear() {
 		TextureObject.release(textures);
 		TextItem.release(labels);
+		textures = null;
+		labels = null;
+		verticesCnt = 0;
 	}
 }

@@ -24,8 +24,11 @@ import org.oscim.renderer.layer.TextureLayer;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
+import android.util.Log;
 
 public final class TextureRenderer {
+	public final static boolean debug = false;
+
 	private static int mTextureProgram;
 	private static int hTextureMVMatrix;
 	private static int hTextureProjMatrix;
@@ -35,7 +38,7 @@ public final class TextureRenderer {
 	private static int hTextureTexCoord;
 	private static int mIndicesVBO;
 
-	final static int INDICES_PER_SPRITE = 6;
+	public final static int INDICES_PER_SPRITE = 6;
 	final static int VERTICES_PER_SPRITE = 4;
 	final static int SHORTS_PER_VERTICE = 6;
 	// per texture
@@ -89,9 +92,9 @@ public final class TextureRenderer {
 
 	public static Layer draw(Layer layer, float scale, float[] projection,
 			float matrix[], int offset) {
-		GlUtils.checkGlError("draw texture0");
+
+		// GlUtils.checkGlError("draw texture >");
 		GLES20.glUseProgram(mTextureProgram);
-		GlUtils.checkGlError("draw texture1");
 
 		int va = hTextureTexCoord;
 		if (!GLRenderer.vertexArray[va]) {
@@ -106,39 +109,48 @@ public final class TextureRenderer {
 		}
 
 		TextureLayer tl = (TextureLayer) layer;
-		GlUtils.checkGlError("draw texture2.");
-		GLES20.glUniform1f(hTextureScale, scale);
+
+		if (tl.fixed)
+			GLES20.glUniform1f(hTextureScale, scale);
+		else
+			GLES20.glUniform1f(hTextureScale, 1);
+
 		GLES20.glUniform1f(hTextureScreenScale, 1f / GLRenderer.mWidth);
 
 		GLES20.glUniformMatrix4fv(hTextureProjMatrix, 1, false, projection, 0);
 		GLES20.glUniformMatrix4fv(hTextureMVMatrix, 1, false, matrix, 0);
-		GlUtils.checkGlError("draw texture2");
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesVBO);
-		GlUtils.checkGlError("draw texture3");
 
 		for (TextureObject to = tl.textures; to != null; to = to.next) {
+			if (TextureRenderer.debug)
+				Log.d("...", "draw texture: " + to.id + " " + to.offset + " " + to.vertices);
 
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
-			GlUtils.checkGlError("draw texture4");
+			int maxVertices = MAX_ITEMS * INDICES_PER_SPRITE;
 
-			GlUtils.checkGlError("draw texture5");
+			for (int i = 0; i < to.vertices; i += maxVertices) {
+				// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
+				int off = (to.offset + i) * 8 + offset;
 
-			// to.offset * 24(shorts) * 2(short-bytes) / 6(indices)
-			GLES20.glVertexAttribPointer(hTextureVertex, 4,
-					GLES20.GL_SHORT, false, 12, to.offset * 8 + offset);
-			GlUtils.checkGlError("draw texture..");
+				GLES20.glVertexAttribPointer(hTextureVertex, 4,
+						GLES20.GL_SHORT, false, 12, off);
 
-			GLES20.glVertexAttribPointer(hTextureTexCoord, 2,
-					GLES20.GL_SHORT, false, 12, to.offset * 8 + offset + 8);
-			GlUtils.checkGlError("draw texture...");
+				GLES20.glVertexAttribPointer(hTextureTexCoord, 2,
+						GLES20.GL_SHORT, false, 12, off + 8);
 
-			GLES20.glDrawElements(GLES20.GL_TRIANGLES, to.vertices,
-					GLES20.GL_UNSIGNED_SHORT, 0);
+				int numVertices = to.vertices - i;
+				if (numVertices > maxVertices)
+					numVertices = maxVertices;
+
+				GLES20.glDrawElements(GLES20.GL_TRIANGLES, numVertices,
+						GLES20.GL_UNSIGNED_SHORT, 0);
+			}
 		}
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-		GlUtils.checkGlError("draw texture");
+
+		// GlUtils.checkGlError("< draw texture");
 
 		return layer.next;
 	}

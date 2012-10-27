@@ -118,6 +118,10 @@ public class Layers {
 			TextureLayer sl = (TextureLayer) l;
 			sl.compile(sbuf);
 		}
+
+		// FIXME
+		addLayerItems(sbuf, textureLayers, Layer.SYMBOL, 0);
+
 	}
 
 	private static void addLayerItems(ShortBuffer sbuf, Layer l, byte type, int pos) {
@@ -162,14 +166,22 @@ public class Layers {
 			layers = layers.next;
 		}
 
-		while (textureLayers != null) {
-			textureLayers.clear();
+		Layer l = textureLayers;
+		while (l != null) {
 
-			// TextureLayer sl = (TextureLayer) textureLayers;
-			// if (sl.textures != null)
-			// TextureObject.release(sl.textures);
+			l.clear();
 
-			textureLayers = textureLayers.next;
+			if (l.pool != null) {
+				VertexPool.release(l.pool);
+				l.pool = null;
+				l.curItem = null;
+			}
+
+			// if (l instanceof TextLayer)
+			// ((TextLayer) l).clear();
+
+			l = l.next;
 		}
+		textureLayers = null;
 	}
 }

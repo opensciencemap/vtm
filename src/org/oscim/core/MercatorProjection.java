@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,6 +15,7 @@
  */
 package org.oscim.core;
 
+import android.graphics.Point;
 
 /**
  * An implementation of the spherical Mercator projection.
@@ -245,5 +247,14 @@ public final class MercatorProjection {
 
 	private MercatorProjection() {
 		throw new IllegalStateException();
+	}
+
+	public static Point projectPoint(GeoPoint geopoint, byte z, Point reuse) {
+		Point out = reuse == null ? new Point() : reuse;
+
+		out.x = (int) MercatorProjection.longitudeToPixelX(geopoint.getLongitude(), z);
+		out.y = (int) MercatorProjection.latitudeToPixelY(geopoint.getLatitude(), z);
+
+		return out;
 	}
 }

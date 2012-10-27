@@ -35,6 +35,5 @@ public abstract class Layer {
 	VertexPoolItem pool;
 	protected VertexPoolItem curItem;
 
-	protected void clear() {
-	}
+	abstract protected void clear();
 }

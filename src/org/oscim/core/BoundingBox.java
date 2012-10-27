@@ -16,40 +16,46 @@ package org.oscim.core;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
+import java.util.ArrayList;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
- * A BoundingBox represents an immutable set of two latitude and two longitude coordinates.
+ * A BoundingBox represents an immutable set of two latitude and two longitude
+ * coordinates.
  */
-public class BoundingBox implements Serializable {
+public class BoundingBox implements Parcelable {
 	/**
 	 * Conversion factor from degrees to microdegrees.
 	 */
 	private static final double CONVERSION_FACTOR = 1000000d;
-
-	private static final long serialVersionUID = 1L;
 
 	private static boolean isBetween(int number, int min, int max) {
 		return min <= number && number <= max;
 	}
 
 	/**
-	 * The maximum latitude value of this BoundingBox in microdegrees (degrees * 10^6).
+	 * The maximum latitude value of this BoundingBox in microdegrees (degrees *
+	 * 10^6).
 	 */
 	public final int maxLatitudeE6;
 
 	/**
-	 * The maximum longitude value of this BoundingBox in microdegrees (degrees * 10^6).
+	 * The maximum longitude value of this BoundingBox in microdegrees (degrees
+	 * * 10^6).
 	 */
 	public final int maxLongitudeE6;
 
 	/**
-	 * The minimum latitude value of this BoundingBox in microdegrees (degrees * 10^6).
+	 * The minimum latitude value of this BoundingBox in microdegrees (degrees *
+	 * 10^6).
 	 */
 	public final int minLatitudeE6;
 
 	/**
-	 * The minimum longitude value of this BoundingBox in microdegrees (degrees * 10^6).
+	 * The minimum longitude value of this BoundingBox in microdegrees (degrees
+	 * * 10^6).
 	 */
 	public final int minLongitudeE6;
 
@@ -76,10 +82,20 @@ public class BoundingBox implements Serializable {
 		this.hashCodeValue = calculateHashCode();
 	}
 
+	public BoundingBox(double minLatitude, double minLongitude, double maxLatitude,
+			double maxLongitude) {
+		this.minLatitudeE6 = (int) (minLatitude * 1E6);
+		this.minLongitudeE6 = (int) (minLongitude * 1E6);
+		this.maxLatitudeE6 = (int) (maxLatitude * 1E6);
+		this.maxLongitudeE6 = (int) (maxLongitude * 1E6);
+		this.hashCodeValue = calculateHashCode();
+	}
+
 	/**
 	 * @param geoPoint
 	 *            the point whose coordinates should be checked.
-	 * @return true if this BoundingBox contains the given GeoPoint, false otherwise.
+	 * @return true if this BoundingBox contains the given GeoPoint, false
+	 *         otherwise.
 	 */
 	public boolean contains(GeoPoint geoPoint) {
 		return isBetween(geoPoint.latitudeE6, this.minLatitudeE6, this.maxLatitudeE6)
@@ -107,12 +123,14 @@ public class BoundingBox implements Serializable {
 	}
 
 	/**
-	 * @return the GeoPoint at the horizontal and vertical center of this BoundingBox.
+	 * @return the GeoPoint at the horizontal and vertical center of this
+	 *         BoundingBox.
 	 */
 	public GeoPoint getCenterPoint() {
 		int latitudeOffset = (this.maxLatitudeE6 - this.minLatitudeE6) / 2;
 		int longitudeOffset = (this.maxLongitudeE6 - this.minLongitudeE6) / 2;
-		return new GeoPoint(this.minLatitudeE6 + latitudeOffset, this.minLongitudeE6 + longitudeOffset);
+		return new GeoPoint(this.minLatitudeE6 + latitudeOffset, this.minLongitudeE6
+				+ longitudeOffset);
 	}
 
 	/**
@@ -175,8 +193,78 @@ public class BoundingBox implements Serializable {
 		return result;
 	}
 
-	private void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
+	private void readObject(ObjectInputStream objectInputStream) throws IOException,
+			ClassNotFoundException {
 		objectInputStream.defaultReadObject();
 		this.hashCodeValue = calculateHashCode();
 	}
+
+	/* code below is from osdmroid, @author Nicolas Gramlich */
+
+	public static BoundingBox fromGeoPoints(final ArrayList<? extends GeoPoint> partialPolyLine) {
+		int minLat = Integer.MAX_VALUE;
+		int minLon = Integer.MAX_VALUE;
+		int maxLat = Integer.MIN_VALUE;
+		int maxLon = Integer.MIN_VALUE;
+		for (final GeoPoint gp : partialPolyLine) {
+
+			minLat = Math.min(minLat, gp.latitudeE6);
+			minLon = Math.min(minLon, gp.longitudeE6);
+			maxLat = Math.max(maxLat, gp.latitudeE6);
+			maxLon = Math.max(maxLon, gp.longitudeE6);
+		}
+
+		return new BoundingBox(minLat, minLon, maxLat, maxLon);
+	}
+
+	public static final Parcelable.Creator<BoundingBox> CREATOR = new Parcelable.Creator<BoundingBox>() {
+		@Override
+		public BoundingBox createFromParcel(final Parcel in) {
+			return new BoundingBox(in.readInt(), in.readInt(), in.readInt(), in.readInt());
+		}
+
+		@Override
+		public BoundingBox[] newArray(final int size) {
+			return new BoundingBox[size];
+		}
+	};
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(minLatitudeE6);
+		dest.writeInt(minLongitudeE6);
+		dest.writeInt(maxLatitudeE6);
+		dest.writeInt(maxLongitudeE6);
+	}
+
+	//	public BoundingBox(final double north, final double east, final double south,
+	//			final double west) {
+	//		this((int) (north * 1E6), (int) (east * 1E6), (int) (south * 1E6), (int) (west * 1E6));
+	//		// this.mLatNorthE6 = (int) (north * 1E6);
+	//		// this.mLonEastE6 = (int) (east * 1E6);
+	//		// this.mLatSouthE6 = (int) (south * 1E6);
+	//		// this.mLonWestE6 = (int) (west * 1E6);
+	//	}
+
+	//	public int getLatNorthE6() {
+	//		return this.maxLatitudeE6;
+	//	}
+	//
+	//	public int getLatSouthE6() {
+	//		return this.minLatitudeE6;
+	//	}
+	//
+	//	public int getLonEastE6() {
+	//		return this.maxLongitudeE6;
+	//	}
+	//
+	//	public int getLonWestE6() {
+	//		return this.minLongitudeE6;
+	//	}
+
 }

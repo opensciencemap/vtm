@@ -17,8 +17,8 @@ package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.TileManager;
 import org.oscim.renderer.MapTile;
+import org.oscim.renderer.TileManager;
 import org.oscim.renderer.Tiles;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.TextLayer;
@@ -29,20 +29,23 @@ import org.oscim.view.MapView;
 import android.os.SystemClock;
 import android.util.FloatMath;
 
-public class OverlayText extends Overlay {
+public class OverlayText extends RenderOverlay {
 
 	private Tiles tiles;
 	private LabelThread mThread;
-	/* package */boolean mRun;
-	/* package */boolean mRerun;
+
 	private MapPosition mWorkPos;
 	private TextLayer mWorkLayer;
+	private TextLayer mNewLayer;
+
+	/* package */boolean mRun;
+	/* package */boolean mRerun;
 
 	class LabelThread extends PausableThread {
 
 		@Override
 		protected void doWork() {
-			SystemClock.sleep(250);
+			SystemClock.sleep(300);
 			mRun = false;
 			updateLabels();
 			mMapView.redrawMap();
@@ -70,14 +73,29 @@ public class OverlayText extends Overlay {
 	void updateLabels() {
 		tiles = TileManager.getActiveTiles(tiles);
 
+		// Log.d("...", "relabel " + mRerun + " " + x + " " + y);
 		if (tiles.cnt == 0)
 			return;
 
 		mMapView.getMapViewPosition().getMapPosition(mWorkPos, null);
 
-		// TODO tiles might be from another zoomlevel than the current:
+		TextLayer tl = mWorkLayer;
+
+		if (tl == null)
+			tl = new TextLayer();
+
+		// tiles might be from another zoomlevel than the current:
 		// this scales MapPosition to the zoomlevel of tiles...
+		// TODO create a helper function in MapPosition
 		int diff = tiles.tiles[0].zoomLevel - mWorkPos.zoomLevel;
+
+		if (diff > 1 || diff < -2) {
+			synchronized (this) {
+				mNewLayer = tl;
+			}
+			return;
+		}
+
 		float div = FastMath.pow(diff);
 
 		// fix map position to tile coordinates
@@ -89,14 +107,11 @@ public class OverlayText extends Overlay {
 		mWorkPos.zoomLevel += diff;
 		mWorkPos.scale = div;
 
-		// Log.d("...", "relabel " + mRerun + " " + x + " " + y);
-
-		TextLayer tl = new TextLayer();
-
 		float angle = (float) Math.toRadians(mWorkPos.angle);
 		float cos = FloatMath.cos(angle);
 		float sin = FloatMath.sin(angle);
 
+		// TODO more sophisticated placement :)
 		for (int i = 0, n = tiles.cnt; i < n; i++) {
 			MapTile t = tiles.tiles[i];
 			if (!t.isVisible)
@@ -104,7 +119,6 @@ public class OverlayText extends Overlay {
 
 			int dx = (t.tileX - x) * Tile.TILE_SIZE;
 			int dy = (t.tileY - y) * Tile.TILE_SIZE;
-			// Log.d("...", "update tiles " + dx + " " + dy);
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 
@@ -129,20 +143,27 @@ public class OverlayText extends Overlay {
 			}
 		}
 
+		// draw text to bitmaps and create vertices
+		tl.prepare();
+
 		// everything synchronized?
 		synchronized (this) {
-			mWorkLayer = tl;
+			mNewLayer = tl;
 		}
 	}
 
 	@Override
-	public synchronized void update(boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
 		// Log.d("...", "update " + tilesChanged + " " + positionChanged);
 
-		if (mWorkLayer != null) {
+		if (mNewLayer != null) {
+
+			// keep text layer, not recrating its canvas each time...
+			mWorkLayer = (TextLayer) layers.textureLayers;
 			layers.clear();
-			layers.textureLayers = mWorkLayer;
-			mWorkLayer = null;
+
+			layers.textureLayers = mNewLayer;
+			mNewLayer = null;
 
 			// make the 'labeled' MapPosition current
 			MapPosition tmp = mMapPosition;
@@ -154,7 +175,6 @@ public class OverlayText extends Overlay {
 		}
 
 		if (tilesChanged || positionChanged) {
-
 			if (!mRun) {
 				mRun = true;
 				synchronized (mThread) {

@@ -13,9 +13,11 @@
             <item
                 android:id="@+id/menu_position_my_location_disable"
                 android:title="@string/menu_position_my_location_disable"/>
-           <!--  <item
+            <!--
+                 <item
                 android:id="@+id/menu_position_last_known"
-                android:title="@string/menu_position_last_known"/> -->
+                android:title="@string/menu_position_last_known"/>
+            -->
             <item
                 android:id="@+id/menu_position_enter_coordinates"
                 android:title="@string/menu_position_enter_coordinates"/>
@@ -28,57 +30,73 @@
             <item
                 android:id="@+id/menu_rotation_disable"
                 android:title="@string/menu_rotation_disable"/>
-             <item
+            <item
                 android:id="@+id/menu_compass_enable"
                 android:title="@string/menu_compass_enable"/>
-             <item
+            <item
                 android:id="@+id/menu_compass_disable"
                 android:title="@string/menu_compass_disable"/>
         </menu>
     </item>
-    <item
+    <!--
+         <item
         android:id="@+id/menu_options"
         android:icon="@drawable/ic_menu_options"
         android:showAsAction="always"
         android:title="@string/menu_options">
+        <menu>
+    -->
+    <!-- android:icon="@drawable/ic_menu_preferences" -->
+    <item
+        android:id="@+id/menu_preferences"
+        android:showAsAction="never"
+        android:icon="@drawable/ic_menu_options"
+        android:title="@string/menu_preferences"/>
 
-    <menu>
-          <!--  android:icon="@drawable/ic_menu_preferences" -->
-        <item
-            android:id="@+id/menu_preferences"
-       
-            android:showAsAction="never"
-            android:title="@string/menu_preferences"/>
-         <!-- android:icon="@drawable/ic_menu_mapmode" -->
-        <item
-            android:id="@+id/menu_render_theme"
-           
-            android:showAsAction="never"
-            android:title="@string/menu_render_theme">
-            <menu>
-                <item
-                    android:id="@+id/menu_render_theme_osmarender"
-                    android:title="@string/menu_render_theme_osmarender"/>
-                   <item
-                    android:id="@+id/menu_render_theme_tronrender"
-                    android:title="@string/menu_render_theme_tronrender"/>
-                <item
-                    android:id="@+id/menu_render_theme_select_file"
-                    android:title="@string/menu_render_theme_select_file"/>
-            </menu>
-        </item>
-        <!--   android:icon="@drawable/ic_menu_archive" -->
-        <item
-            android:id="@+id/menu_mapfile"
-          
-            android:showAsAction="never"
-            android:title="@string/menu_mapfile"/>
-          <item
-            android:id="@+id/menu_info_about"
-            android:title="@string/menu_info_about"/>
+    <!-- android:icon="@drawable/ic_menu_mapmode" -->
+    <!-- android:icon="@drawable/ic_menu_archive" -->
+    <!--
+                 <item
+                android:id="@+id/menu_mapfile"
+                android:showAsAction="never"
+                android:title="@string/menu_mapfile"/>
+    -->
+    <!--
+              <item
+                android:id="@+id/menu_info_map_file"
+                android:title="@string/menu_info_map_file"/>
+    -->
+    <!--
     </menu>
-
     </item>
-   
+    -->
 
+    <item
+        android:id="@+id/menu_render_theme"
+        android:showAsAction="never"
+        android:title="@string/menu_render_theme">
+        <menu>
+            <item
+                android:id="@+id/menu_render_theme_osmarender"
+                android:title="@string/menu_render_theme_osmarender"/>
+            <item
+                android:id="@+id/menu_render_theme_tronrender"
+                android:title="@string/menu_render_theme_tronrender"/>
+            <item
+                android:id="@+id/menu_render_theme_select_file"
+                android:title="@string/menu_render_theme_select_file"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/menu_info_about"
+        android:title="@string/menu_info_about"/>
+
+     <item
+        android:id="@+id/menu_pois"
+        android:title="@string/menu_pois"/>
+     
+      <item
+        android:id="@+id/menu_poi_list"
+        android:title="@string/menu_poi_list"/>
+    
 </menu>

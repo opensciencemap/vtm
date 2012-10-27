@@ -33,8 +33,7 @@ public final class BitmapUtils {
 		if (src.startsWith(PREFIX_JAR)) {
 			String name = "/org/oscim/theme/osmarender/" + src.substring(PREFIX_JAR.length());
 
-			InputStream inputStream = BitmapUtils.class
-					.getResourceAsStream(name);
+			InputStream inputStream = BitmapUtils.class.getResourceAsStream(name);
 			if (inputStream == null) {
 				throw new FileNotFoundException("resource not found: " + src + " " + name);
 			}
