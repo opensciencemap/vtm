@@ -176,8 +176,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 	};
 
-	/** @param mapView
-	 *            the MapView */
+	/**
+	 * @param mapView
+	 *            the MapView
+	 */
 	public GLRenderer(MapView mapView) {
 
 		mMapView = mapView;
@@ -522,6 +524,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glEnable(GL_DEPTH_TEST);
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
 
+		mDrawCount = 0;
+
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && t.isReady)
@@ -541,7 +545,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glDisable(GL_POLYGON_OFFSET_FILL);
 		GLES20.glDisable(GL_DEPTH_TEST);
 
-		mDrawCount = 0;
+		//		Log.d(TAG, "tiles: " + mDrawCount);
+
 		mDrawSerial++;
 
 		GLES20.glEnable(GL_BLEND);
@@ -620,6 +625,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			tile = tile.holder;
 
 		GLES20.glPolygonOffset(0, mDrawCount++);
+
+		// seems there are not infinite offset units possible
+		// this should suffice for at least two rows, i.e.
+		// having not two neighbours with the same depth
+		if (mDrawCount == 20)
+			mDrawCount = 0;
 
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
 
@@ -789,6 +800,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// String ext = GLES20.glGetString(GLES20.GL_EXTENSIONS);
 		// Log.d(TAG, "Extensions: " + ext);
 
+		//		GLES20.GL_POLYGON_OFFSET_UNITS
 		LineRenderer.init();
 		PolygonRenderer.init();
 		// TextRenderer.init();
