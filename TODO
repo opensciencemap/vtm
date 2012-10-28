@@ -1,0 +1,10 @@
+- labeling
+	- use separate datasource?
+  	this would allow for reuse in multiple zoomlevels and 
+  	reducing the problem of tile clipped ways
+  - text renderer for paths
+  - interface for different placement algorithms
+  - support icon+text items
+- zoom to bounding box animator
+- compositing of overlay item bubble
+- extract app into separate project
