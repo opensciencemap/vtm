@@ -45,6 +45,7 @@ public class PathOverlay extends Overlay {
 	class RenderPath extends RenderOverlay {
 
 		private static final byte MAX_ZOOM = 20;
+		private static final int MIN_DIST = 4;
 
 		// pre-projected points to zoomlovel 20
 		private int[] mPreprojected;
@@ -143,7 +144,7 @@ public class PathOverlay extends Overlay {
 				// skip too near points
 				int dx = x - px;
 				int dy = y - py;
-				if ((i == 0) || dx > 2 || dx < -2 || dy > 2 || dy < -2) {
+				if ((i == 0) || dx > MIN_DIST || dx < -MIN_DIST || dy > MIN_DIST || dy < -MIN_DIST) {
 					projected[i + 0] = px = x;
 					projected[i + 1] = py = y;
 					i += 2;
@@ -189,11 +190,13 @@ public class PathOverlay extends Overlay {
 		mPaint = pPaint;
 	}
 
-	/** Draw a great circle. Calculate a point for every 100km along the path.
+	/**
+	 * Draw a great circle. Calculate a point for every 100km along the path.
 	 * @param startPoint
 	 *            start point of the great circle
 	 * @param endPoint
-	 *            end point of the great circle */
+	 *            end point of the great circle
+	 */
 	public void addGreatCircle(final GeoPoint startPoint, final GeoPoint endPoint) {
 		synchronized (mPoints) {
 
@@ -207,13 +210,15 @@ public class PathOverlay extends Overlay {
 		}
 	}
 
-	/** Draw a great circle.
+	/**
+	 * Draw a great circle.
 	 * @param startPoint
 	 *            start point of the great circle
 	 * @param endPoint
 	 *            end point of the great circle
 	 * @param numberOfPoints
-	 *            number of points to calculate along the path */
+	 *            number of points to calculate along the path
+	 */
 	public void addGreatCircle(final GeoPoint startPoint, final GeoPoint endPoint,
 			final int numberOfPoints) {
 		// adapted from page
