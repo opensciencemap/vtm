@@ -26,32 +26,36 @@ public class OverlayManager extends AbstractList<Overlay> {
 		// final TilesOverlay tilesOverlay) {
 		// setTilesOverlay(tilesOverlay);
 		mOverlayList = new CopyOnWriteArrayList<Overlay>();
+
 	}
 
 	@Override
-	public Overlay get(final int pIndex) {
+	public synchronized Overlay get(final int pIndex) {
 		return mOverlayList.get(pIndex);
 	}
 
 	@Override
-	public int size() {
+	public synchronized int size() {
 		return mOverlayList.size();
 	}
 
 	@Override
-	public void add(final int pIndex, final Overlay pElement) {
+	public synchronized void add(final int pIndex, final Overlay pElement) {
 		mOverlayList.add(pIndex, pElement);
+		mUpdateDrawLayers = true;
 		mUpdateLayers = true;
 	}
 
 	@Override
-	public Overlay remove(final int pIndex) {
+	public synchronized Overlay remove(final int pIndex) {
+		mUpdateDrawLayers = true;
 		mUpdateLayers = true;
 		return mOverlayList.remove(pIndex);
 	}
 
 	@Override
-	public Overlay set(final int pIndex, final Overlay pElement) {
+	public synchronized Overlay set(final int pIndex, final Overlay pElement) {
+		mUpdateDrawLayers = true;
 		mUpdateLayers = true;
 		return mOverlayList.set(pIndex, pElement);
 	}
@@ -106,13 +110,14 @@ public class OverlayManager extends AbstractList<Overlay> {
 	}
 
 	private boolean mUpdateLayers;
+	private boolean mUpdateDrawLayers;
 	private List<RenderOverlay> mDrawLayers = new ArrayList<RenderOverlay>();
 
 	public List<RenderOverlay> getRenderLayers() {
-		if (mUpdateLayers) {
+		if (mUpdateDrawLayers) {
 			synchronized (this) {
 
-				mUpdateLayers = false;
+				mUpdateDrawLayers = false;
 				mDrawLayers.clear();
 
 				for (Overlay o : mOverlayList) {
@@ -158,12 +163,21 @@ public class OverlayManager extends AbstractList<Overlay> {
 		}
 	}
 
+	Overlay[] mOverlays;
+
+	private synchronized void updateOverlays() {
+		mOverlays = new Overlay[mOverlayList.size()];
+		mOverlays = mOverlayList.toArray(mOverlays);
+		mUpdateLayers = false;
+	}
+
 	public boolean onKeyDown(final int keyCode, final KeyEvent event, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onKeyDown(keyCode, event, pMapView)) {
+		if (mUpdateLayers)
+			updateOverlays();
+
+		for (int i = mOverlays.length - 1; i >= 0; i--)
+			if (mOverlays[i].onKeyDown(keyCode, event, pMapView))
 				return true;
-			}
-		}
 
 		return false;
 	}
@@ -294,19 +308,32 @@ public class OverlayManager extends AbstractList<Overlay> {
 	}
 
 	public boolean onSingleTapUp(final MotionEvent pEvent, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onSingleTapUp(pEvent, pMapView)) {
+		if (mUpdateLayers)
+			updateOverlays();
+
+		for (int i = mOverlays.length - 1; i >= 0; i--)
+			if (mOverlays[i].onSingleTapUp(pEvent, pMapView))
 				return true;
-			}
-		}
+
+		//		for (final Overlay overlay : this.overlaysReversed()) {
+		//			if (overlay.onSingleTapUp(pEvent, pMapView)) {
+		//				return true;
+		//			}
+		//		}
 
 		return false;
 	}
 
-	public void onUpdate(MapPosition mapPosition) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			overlay.onUpdate(mapPosition);
-		}
+	public void onUpdate(MapPosition mapPosition, boolean changed) {
+		if (mUpdateLayers)
+			updateOverlays();
+
+		for (int i = mOverlays.length - 1; i >= 0; i--)
+			mOverlays[i].onUpdate(mapPosition, changed);
+
+		//		for (final Overlay overlay : this.overlaysReversed()) {
+		//			overlay.onUpdate(mapPosition);
+		//		}
 	}
 
 	// ** Options Menu **//
