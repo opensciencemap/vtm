@@ -20,7 +20,6 @@ import android.view.MotionEvent;
  * {@link android.view.GestureDetector.SimpleOnGestureListener} and
  * GestureDetector.OnGestureListener. The difference is there is an additional
  * argument for the item.
- * 
  * @author Nicolas Gramlich
  */
 public abstract class Overlay implements OverlayConstants {
@@ -79,7 +78,6 @@ public abstract class Overlay implements OverlayConstants {
 	/**
 	 * Sets whether the Overlay is marked to be enabled. This setting does
 	 * nothing by default, but should be checked before calling draw().
-	 * 
 	 * @param pEnabled
 	 *            ...
 	 */
@@ -90,7 +88,6 @@ public abstract class Overlay implements OverlayConstants {
 	/**
 	 * Specifies if the Overlay is marked to be enabled. This should be checked
 	 * before calling draw().
-	 * 
 	 * @return true if the Overlay is marked enabled, false otherwise
 	 */
 	public boolean isEnabled() {
@@ -102,7 +99,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * IDs cannot be fixed at compile time. Overlays should use this method to
 	 * obtain and store a menu id for each menu item at construction time. This
 	 * will ensure that two overlays don't use the same id.
-	 * 
 	 * @return an integer suitable to be used as a menu identifier
 	 */
 	protected final static int getSafeMenuId() {
@@ -113,7 +109,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Similar to <see cref="getSafeMenuId" />, except this reserves a sequence
 	 * of IDs of length <param name="count" />. The returned number is the
 	 * starting index of that sequential list.
-	 * 
 	 * @param count
 	 *            ....
 	 * @return an integer suitable to be used as a menu identifier
@@ -148,7 +143,6 @@ public abstract class Overlay implements OverlayConstants {
 	/**
 	 * Override to perform clean up of resources before shutdown. By default
 	 * does nothing.
-	 * 
 	 * @param mapView
 	 *            ...
 	 */
@@ -160,7 +154,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param keyCode
 	 *            ...
 	 * @param event
@@ -178,7 +171,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param keyCode
 	 *            ...
 	 * @param event
@@ -197,7 +189,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param e
 	 *            ...
 	 * @param mapView
@@ -213,7 +204,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param e
 	 *            ...
 	 * @param mapView
@@ -231,7 +221,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param e
 	 *            ...
 	 * @param mapView
@@ -247,7 +236,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param e
 	 *            ...
 	 * @param mapView
@@ -263,7 +251,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param e
 	 *            ...
 	 * @param mapView
@@ -281,7 +268,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param e
 	 *            ...
 	 * @param mapView
@@ -297,7 +283,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param pEvent1
 	 *            ...
 	 * @param pEvent2
@@ -320,7 +305,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param e
 	 *            ...
 	 * @param mapView
@@ -336,7 +320,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param pEvent1
 	 *            ...
 	 * @param pEvent2
@@ -369,7 +352,6 @@ public abstract class Overlay implements OverlayConstants {
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
-	 * 
 	 * @param e
 	 *            ...
 	 * @param mapView
@@ -383,8 +365,9 @@ public abstract class Overlay implements OverlayConstants {
 	/**
 	 * @param mapPosition
 	 *            current MapPosition
+	 * @param changed ...
 	 */
-	public void onUpdate(MapPosition mapPosition) {
+	public void onUpdate(MapPosition mapPosition, boolean changed) {
 
 	}
 
@@ -429,7 +412,6 @@ public abstract class Overlay implements OverlayConstants {
 		/**
 		 * Checks to see if the given x and y are close enough to an item
 		 * resulting in snapping the current action (e.g. zoom) to the item.
-		 * 
 		 * @param x
 		 *            The x in screen coordinates.
 		 * @param y

@@ -26,6 +26,7 @@ import org.oscim.renderer.layer.VertexPool;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
+import android.util.FloatMath;
 import android.util.Log;
 
 public class TileManager {
@@ -155,7 +156,6 @@ public class TileManager {
 	 * Update list of visible tiles and passes them to TileManager, when not
 	 * available tiles are created and added to JobQueue (mapView.addJobs) for
 	 * loading by TileGenerator class
-	 * 
 	 * @param clear
 	 *            whether to clear and reload all tiles
 	 */
@@ -292,7 +292,6 @@ public class TileManager {
 	/**
 	 * set mNewTiles for the visible tiles and pass it to GLRenderer, add jobs
 	 * for not yet loaded tiles
-	 * 
 	 * @param mapPosition
 	 *            the current MapPosition
 	 * @param zdir
@@ -487,8 +486,8 @@ public class TileManager {
 				dy = (t.pixelY + h) - y;
 				dx %= center;
 				dy %= center;
-				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
-				// t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
+				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
+				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
 			} else if (diff > 0) {
 				// tile zoom level is child of current
 
@@ -502,8 +501,8 @@ public class TileManager {
 				}
 				dx %= center;
 				dy %= center;
-				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
-				// t.distance = FloatMath.sqrt((dx * dx + dy * dy));
+				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
+				t.distance = FloatMath.sqrt((dx * dx + dy * dy));
 
 			} else {
 				// tile zoom level is parent of current
@@ -511,8 +510,8 @@ public class TileManager {
 				dy = ((t.pixelY + h) << -diff) - y;
 				dx %= center;
 				dy %= center;
-				t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * (-diff * 0.5f);
-				// t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
+				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * (-diff * 0.5f);
+				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
 			}
 		}
 	}
@@ -609,7 +608,6 @@ public class TileManager {
 
 	/**
 	 * called from MapWorker Thread when tile is loaded by TileGenerator
-	 * 
 	 * @param jobTile
 	 *            ...
 	 * @return ...

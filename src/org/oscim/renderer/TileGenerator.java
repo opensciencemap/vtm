@@ -410,10 +410,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mLevels = TileGenerator.renderTheme.getLevels();
 
 		// limit stroke scale at z=17
-		if (tile.zoomLevel < STROKE_MAX_ZOOM_LEVEL)
-			setScaleStrokeWidth(tile.zoomLevel);
-		else
-			setScaleStrokeWidth(STROKE_MAX_ZOOM_LEVEL);
+		// if (tile.zoomLevel < STROKE_MAX_ZOOM_LEVEL)
+		setScaleStrokeWidth(tile.zoomLevel);
+		// else
+		// setScaleStrokeWidth(STROKE_MAX_ZOOM_LEVEL);
 
 		// acount for area changes with latitude
 		mProjectionScaleFactor = 0.5f + 0.5f * (
@@ -466,7 +466,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	/**
 	 * Sets the scale stroke factor for the given zoom level.
-	 * 
 	 * @param zoomLevel
 	 *            the zoom level for which the scale stroke factor should be
 	 *            set.

@@ -75,6 +75,7 @@ public class MapView extends RelativeLayout {
 	public boolean enableCompass = false;
 
 	private final MapViewPosition mMapViewPosition;
+	private final MapPosition mMapPosition;
 
 	private final MapZoomControls mMapZoomControls;
 
@@ -148,6 +149,7 @@ public class MapView extends RelativeLayout {
 		mMapDatabaseType = mapDatabaseType;
 
 		mMapViewPosition = new MapViewPosition(this);
+		mMapPosition = new MapPosition();
 
 		mOverlayManager = new OverlayManager();
 
@@ -239,7 +241,7 @@ public class MapView extends RelativeLayout {
 		//		//		pathOverlay.addPoint(new GeoPoint(53.067221, 8.78767));
 		//		mOverlayManager.add(pathOverlay);
 
-		mMapViewPosition.animateTo(new GeoPoint(53.067221, 8.78767));
+		//		mMapViewPosition.animateTo(new GeoPoint(53.067221, 8.78767));
 	}
 
 	public void render() {
@@ -302,9 +304,11 @@ public class MapView extends RelativeLayout {
 		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
 			return;
 
-		if (AndroidUtils.currentThreadIsUiThread())
-			mOverlayManager.onUpdate(mMapViewPosition.getMapPosition());
+		if (AndroidUtils.currentThreadIsUiThread()) {
+			boolean changed = mMapViewPosition.getMapPosition(mMapPosition, null);
 
+			mOverlayManager.onUpdate(mMapPosition, changed);
+		}
 		mTileManager.updateMap(false);
 	}
 
