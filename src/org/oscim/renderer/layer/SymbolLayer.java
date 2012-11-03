@@ -119,7 +119,7 @@ public final class SymbolLayer extends TextureLayer {
 		textures = to;
 		mCanvas.setBitmap(to.bitmap);
 
-		int maxIndices = TextureRenderer.MAX_ITEMS * TextureRenderer.INDICES_PER_SPRITE;
+		//		int maxIndices = TextureRenderer.MAX_ITEMS * TextureRenderer.INDICES_PER_SPRITE;
 
 		for (SymbolItem it = symbols; it != null;) {
 			float width, height;
@@ -143,7 +143,7 @@ public final class SymbolLayer extends TextureLayer {
 
 			}
 
-			if (y + height > TEXTURE_HEIGHT || curIndices == maxIndices) {
+			if (y + height > TEXTURE_HEIGHT) { // || curIndices == maxIndices) {
 				Log.d(TAG, "reached max symbols: " + numIndices);
 
 				to.offset = offsetIndices;
@@ -248,13 +248,6 @@ public final class SymbolLayer extends TextureLayer {
 					buf = si.vertices;
 					pos = 0;
 				}
-
-				// FIXME this does not work, need to draw bitmap on next
-				// texture...
-				//	if (pos == bufLen) {
-				//	sbuf.put(buf, 0, pos);
-				//	pos = 0;
-				//	}
 
 				x += width;
 			}

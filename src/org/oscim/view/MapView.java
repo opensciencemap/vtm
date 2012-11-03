@@ -215,7 +215,8 @@ public class MapView extends RelativeLayout {
 			worker.start();
 
 		mOverlayManager.add(new LabelingOverlay(this));
-		//		mOverlayManager.add(new GenericOverlay(this, new OverlayGrid(this)));
+		//mOverlayManager.add(new GenericOverlay(this, new OverlayGrid(this)));
+
 		//		mOverlayManager.add(new GenericOverlay(this, new OverlayTest(this)));
 
 		//		ArrayList<OverlayItem> pList = new ArrayList<OverlayItem>();
@@ -708,6 +709,10 @@ public class MapView extends RelativeLayout {
 
 	public BoundingBox getBoundingBox() {
 		return mMapViewPosition.getViewBox();
+	}
+
+	public GeoPoint getCenter() {
+		return new GeoPoint(mMapPosition.lat, mMapPosition.lon);
 	}
 
 	//	@Override

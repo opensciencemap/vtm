@@ -1,4 +1,9 @@
+- cache: 
+	- collect tiles from 4 zoomlevels into one cache-tile (GEM-File?)
+
 - labeling
+  - use relevance tag, sort labels by relevance for faster dynamic placement 
+  - throw out overlapping labels with less relevance!
 	- use separate datasource?
   	this would allow for reuse in multiple zoomlevels and 
   	reducing the problem of tile clipped ways

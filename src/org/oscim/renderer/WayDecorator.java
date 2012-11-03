@@ -179,7 +179,7 @@ public final class WayDecorator {
 					wayNameWidth = text.paint.measureText(string);
 				}
 
-				if (segmentLengthInPixel > wayNameWidth + 25) {
+				if (segmentLengthInPixel > wayNameWidth * 0.80) {
 
 					float s = (wayNameWidth + 25) / segmentLengthInPixel;
 					int width, height;
@@ -244,17 +244,17 @@ public final class WayDecorator {
 					// Log.d("mapsforge", "add " + text + " " + first + " " +
 					// last);
 
-					if (previousX < currentX) {
-						x1 = previousX;
-						y1 = previousY;
-						x2 = currentX;
-						y2 = currentY;
-					} else {
-						x1 = currentX;
-						y1 = currentY;
-						x2 = previousX;
-						y2 = previousY;
-					}
+					//					if (previousX < currentX) {
+					//						x1 = previousX;
+					//						y1 = previousY;
+					//						x2 = currentX;
+					//						y2 = currentY;
+					//					} else {
+					//						x1 = currentX;
+					//						y1 = currentY;
+					//						x2 = previousX;
+					//						y2 = previousY;
+					//					}
 
 					// if (t == null)
 					t = TextItem.get();

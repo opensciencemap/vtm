@@ -35,9 +35,9 @@ public final class TextLayer extends TextureLayer {
 	private static int mFontPadX = 1;
 	private static int mFontPadY = 1;
 
-	TextItem labels;
-
+	public TextItem labels;
 	private Canvas mCanvas;
+	private float mScale;
 
 	public TextItem getLabels() {
 		return labels;
@@ -47,6 +47,31 @@ public final class TextLayer extends TextureLayer {
 		type = Layer.SYMBOL;
 		mCanvas = new Canvas();
 		fixed = true;
+		mScale = 1;
+	}
+
+	public void setScale(float scale) {
+		mScale = scale;
+	}
+
+	public boolean removeText(TextItem item) {
+		TextItem prev = null;
+
+		for (TextItem it = labels; it != null; it = it.next) {
+			if (it == item) {
+				if (prev == null)
+					labels = it.next;
+				else
+					prev.next = it.next;
+
+				verticesCnt -= 4;
+				return true;
+			}
+
+			prev = it;
+		}
+
+		return false;
 	}
 
 	public void addText(TextItem item) {
@@ -170,8 +195,14 @@ public final class TextLayer extends TextureLayer {
 
 				float ux = -vy;
 				float uy = vx;
+
+				hw /= mScale;
 				float hh2 = hh + it.text.fontDescent / 2;
 				hh -= it.text.fontDescent / 2;
+
+				hh /= mScale;
+				hh2 /= mScale;
+
 				x1 = (short) (SCALE * (vx * hw - ux * hh));
 				y1 = (short) (SCALE * (vy * hw - uy * hh));
 				x2 = (short) (SCALE * (-vx * hw - ux * hh));

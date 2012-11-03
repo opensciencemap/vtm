@@ -17,15 +17,18 @@ package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.MapTile;
 import org.oscim.renderer.TileManager;
 import org.oscim.renderer.Tiles;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.TextLayer;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.GeometryUtils;
 import org.oscim.utils.PausableThread;
 import org.oscim.view.MapView;
 
+import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.util.FloatMath;
 
@@ -45,7 +48,7 @@ public class OverlayText extends RenderOverlay {
 
 		@Override
 		protected void doWork() {
-			SystemClock.sleep(300);
+			SystemClock.sleep(500);
 			mRun = false;
 			updateLabels();
 			mMapView.redrawMap();
@@ -96,20 +99,12 @@ public class OverlayText extends RenderOverlay {
 			return;
 		}
 
-		float div = FastMath.pow(diff);
-
-		// fix map position to tile coordinates
-		float size = Tile.TILE_SIZE;
-		int x = (int) (mWorkPos.x / div / size);
-		int y = (int) (mWorkPos.y / div / size);
-		mWorkPos.x = x * size;
-		mWorkPos.y = y * size;
-		mWorkPos.zoomLevel += diff;
-		mWorkPos.scale = div;
-
+		float scale = mWorkPos.scale;
 		float angle = (float) Math.toRadians(mWorkPos.angle);
 		float cos = FloatMath.cos(angle);
 		float sin = FloatMath.sin(angle);
+
+		TextItem ti2 = null;
 
 		// TODO more sophisticated placement :)
 		for (int i = 0, n = tiles.cnt; i < n; i++) {
@@ -117,33 +112,118 @@ public class OverlayText extends RenderOverlay {
 			if (!t.isVisible)
 				continue;
 
-			int dx = (t.tileX - x) * Tile.TILE_SIZE;
-			int dy = (t.tileY - y) * Tile.TILE_SIZE;
+			float dx = (float) ((t.pixelX - mWorkPos.x) * scale);
+			float dy = (float) ((t.pixelY - mWorkPos.y) * scale);
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 
-				TextItem ti2 = TextItem.get().move(ti, dx, dy);
+				if (ti2 == null)
+					ti2 = TextItem.get();
 
-				if (!ti.text.caption) {
+				ti2.move(ti, dx, dy, scale);
+
+				boolean overlaps = false;
+
+				if (ti.text.caption) {
+					int tx = (int) (ti2.x);
+					int ty = (int) (ti2.y);
+					int tw = (int) (ti2.width / 2);
+					int th = (int) (ti2.text.fontHeight / 2);
+
+					for (TextItem lp = tl.labels; lp != null; lp = lp.next) {
+						int px = (int) (lp.x);
+						int py = (int) (lp.y);
+						int ph = (int) (lp.text.fontHeight / 2);
+						int pw = (int) (lp.width / 2);
+
+						if ((tx - tw) < (px + pw)
+								&& (px - pw) < (tx + tw)
+								&& (ty - th) < (py + ph)
+								&& (py - ph) < (ty + th)) {
+							overlaps = true;
+							break;
+						}
+					}
+				} else {
+
 					if (cos * (ti.x2 - ti.x1) - sin * (ti.y2 - ti.y1) < 0) {
 						// flip label upside-down
-						ti2.x1 = ti.x2;
-						ti2.y1 = ti.y2;
-						ti2.x2 = ti.x1;
-						ti2.y2 = ti.y1;
+						ti2.x1 = (short) ((ti.x2 * scale + dx));
+						ti2.y1 = (short) ((ti.y2 * scale + dy));
+						ti2.x2 = (short) ((ti.x1 * scale + dx));
+						ti2.y2 = (short) ((ti.y1 * scale + dy));
 					} else {
-						ti2.x1 = ti.x1;
-						ti2.y1 = ti.y1;
-						ti2.x2 = ti.x2;
-						ti2.y2 = ti.y2;
+						ti2.x1 = (short) ((ti.x1 * scale + dx));
+						ti2.y1 = (short) ((ti.y1 * scale + dy));
+						ti2.x2 = (short) ((ti.x2 * scale + dx));
+						ti2.y2 = (short) ((ti.y2 * scale + dy));
+					}
+
+					//float normalLength = (float) Math.hypot(ti2.x2 - ti2.x1, ti2.y2 - ti2.y1);
+
+					for (TextItem lp = tl.labels; lp != null;) {
+						if (lp.text.caption) {
+							lp = lp.next;
+							continue;
+						}
+
+						if (GeometryUtils.lineIntersect(ti2.x1, ti2.y1, ti2.x2, ti2.y2,
+								lp.x1, lp.y1, lp.x2, lp.y2)) {
+							// just to make it more deterministic
+							if (lp.width < ti2.width) {
+								TextItem tmp = lp;
+								lp = lp.next;
+
+								tl.removeText(tmp);
+								tmp.next = null;
+								TextItem.release(tmp);
+								continue;
+							}
+							overlaps = true;
+							break;
+						}
+
+						if ((ti2.x1) < (lp.x2)
+								&& (lp.x1) < (ti2.x2)
+								&& (ti2.y1) < (lp.y2)
+								&& (lp.y1) < (ti2.y2)) {
+
+							// just to make it more deterministic
+							if (lp.width < ti2.width) {
+								TextItem tmp = lp;
+								lp = lp.next;
+
+								tl.removeText(tmp);
+								tmp.next = null;
+								TextItem.release(tmp);
+								continue;
+							}
+							overlaps = true;
+							break;
+						}
+
+						lp = lp.next;
 					}
 				}
 
-				tl.addText(ti2);
+				if (!overlaps) {
+					tl.addText(ti2);
+					ti2 = null;
+				}
 			}
 		}
 
+		if (ti2 != null)
+			TextItem.release(ti2);
+
+		// scale back to fixed zoom-level. could be done in setMatrix..
+		for (TextItem lp = tl.labels; lp != null; lp = lp.next) {
+			lp.x /= scale;
+			lp.y /= scale;
+		}
+
 		// draw text to bitmaps and create vertices
+		tl.setScale(scale);
 		tl.prepare();
 
 		// everything synchronized?
@@ -153,7 +233,8 @@ public class OverlayText extends RenderOverlay {
 	}
 
 	@Override
-	public synchronized void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(MapPosition curPos, boolean positionChanged,
+			boolean tilesChanged) {
 		// Log.d("...", "update " + tilesChanged + " " + positionChanged);
 
 		if (mNewLayer != null) {
@@ -182,5 +263,44 @@ public class OverlayText extends RenderOverlay {
 				}
 			}
 		}
+	}
+
+	@Override
+	protected float setMatrix(MapPosition curPos, float[] matrix) {
+		// TODO if oPos == curPos this could be simplified
+
+		MapPosition oPos = mMapPosition;
+
+		byte z = oPos.zoomLevel;
+
+		float div = FastMath.pow(z - curPos.zoomLevel);
+
+		float x = (float) (oPos.x - curPos.x * div);
+		float y = (float) (oPos.y - curPos.y * div);
+
+		// flip around date-line
+		float max = (Tile.TILE_SIZE << z);
+		if (x < -max / 2)
+			x = max + x;
+		else if (x > max / 2)
+			x = x - max;
+
+		float scale = curPos.scale / div;
+
+		Matrix.setIdentityM(matrix, 0);
+
+		// translate relative to map center
+		matrix[12] = x * scale;
+		matrix[13] = y * scale;
+
+		// scale to current tile world coordinates
+		scale = curPos.scale / div; // oPos.scale / div;
+		scale /= GLRenderer.COORD_MULTIPLIER;
+		matrix[0] = scale;
+		matrix[5] = scale;
+
+		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
+
+		return div;
 	}
 }
