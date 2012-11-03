@@ -14,6 +14,8 @@
  */
 package org.oscim.utils;
 
+import android.graphics.Point;
+
 /**
  * 
  *
@@ -22,7 +24,6 @@ public final class GeometryUtils {
 	/**
 	 * Calculates the center of the minimum bounding rectangle for the given
 	 * coordinates.
-	 * 
 	 * @param coordinates
 	 *            the coordinates for which calculation should be done.
 	 * @return the center coordinates of the minimum bounding rectangle.
@@ -165,12 +166,12 @@ public final class GeometryUtils {
 	 */
 	public static boolean lineIntersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4,
 			int y4) {
-		double denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+		float denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
 		if (denom == 0.0) { // Lines are parallel.
 			return false;
 		}
-		double ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
-		double ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
+		float ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+		float ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
 		if (ua >= 0.0f && ua <= 1.0f && ub >= 0.0f && ub <= 1.0f) {
 			// Get the intersection point.
 			return true;
@@ -178,4 +179,11 @@ public final class GeometryUtils {
 
 		return false;
 	}
+
+	// http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+	public static double pointToLineDistance(Point A, Point B, Point P) {
+		double normalLength = Math.hypot(B.x - A.x, B.y - A.y);
+		return Math.abs((P.x - A.x) * (B.y - A.y) - (P.y - A.y) * (B.x - A.x)) / normalLength;
+	}
+
 }

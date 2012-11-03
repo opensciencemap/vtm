@@ -68,6 +68,15 @@ public class TextItem {
 		return this;
 	}
 
+	public TextItem move(TextItem ti, float dx, float dy, float scale) {
+		this.x = dx + (ti.x * scale);
+		this.y = dy + (ti.y * scale);
+		this.string = ti.string;
+		this.text = ti.text;
+		this.width = ti.width;
+		return this;
+	}
+
 	public TextItem next;
 
 	public float x, y;

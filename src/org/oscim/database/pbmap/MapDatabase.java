@@ -94,6 +94,8 @@ public class MapDatabase implements IMapDatabase {
 	// private static final String URL =
 	// "http://city.informatik.uni-bremen.de:8020/test/%d/%d/%d.osmtile";
 	private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/test/%d/%d/%d.osmtile";
+	//private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/gis-live/%d/%d/%d.osmtile";
+
 	// private static final String URL =
 	// "http://city.informatik.uni-bremen.de/tiles/tiles.py///test/%d/%d/%d.osmtile";
 	// private static final String URL =
@@ -1217,10 +1219,8 @@ public class MapDatabase implements IMapDatabase {
 		mCacheFile = null;
 	}
 
-	/*
-	 * All code below is taken from or based on Google's Protocol Buffers
-	 * implementation:
-	 */
+	/* All code below is taken from or based on Google's Protocol Buffers
+	 * implementation: */
 
 	// Protocol Buffers - Google's data interchange format
 	// Copyright 2008 Google Inc. All rights reserved.

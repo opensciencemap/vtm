@@ -24,6 +24,7 @@ import org.oscim.renderer.layer.TextureLayer;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
+import android.util.FloatMath;
 import android.util.Log;
 
 public final class TextureRenderer {
@@ -42,7 +43,7 @@ public final class TextureRenderer {
 	final static int VERTICES_PER_SPRITE = 4;
 	final static int SHORTS_PER_VERTICE = 6;
 	// per texture
-	public final static int MAX_ITEMS = 50;
+	private final static int MAX_ITEMS = 50;
 
 	static void init() {
 		mTextureProgram = GlUtils.createProgram(Shaders.textVertexShader,
@@ -111,7 +112,8 @@ public final class TextureRenderer {
 		TextureLayer tl = (TextureLayer) layer;
 
 		if (tl.fixed)
-			GLES20.glUniform1f(hTextureScale, scale);
+
+			GLES20.glUniform1f(hTextureScale, FloatMath.sqrt(scale));
 		else
 			GLES20.glUniform1f(hTextureScale, 1);
 
@@ -129,6 +131,7 @@ public final class TextureRenderer {
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
 			int maxVertices = MAX_ITEMS * INDICES_PER_SPRITE;
 
+			// can only draw MAX_ITEMS in each iteration
 			for (int i = 0; i < to.vertices; i += maxVertices) {
 				// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
 				int off = (to.offset + i) * 8 + offset;

@@ -160,10 +160,8 @@ public abstract class ScanBox {
 		}
 	}
 
-	/*
-	 * ported from Polymaps: Layer.js Copyright (c) 2010, SimpleGeo and Stamen
-	 * Design
-	 */
+	/* ported from Polymaps: Layer.js Copyright (c) 2010, SimpleGeo and Stamen
+	 * Design */
 
 	//	// scan-line conversion
 	//	function edge(a, b) {

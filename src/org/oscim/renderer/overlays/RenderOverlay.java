@@ -54,7 +54,6 @@ public abstract class RenderOverlay {
 
 	/**
 	 * Utility: update mMapPosition
-	 * 
 	 * @return true if position has changed
 	 */
 	protected boolean updateMapPosition() {
@@ -71,7 +70,8 @@ public abstract class RenderOverlay {
 	 * @param tilesChanged
 	 *            true when loaded tiles changed
 	 */
-	public synchronized void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(MapPosition curPos, boolean positionChanged,
+			boolean tilesChanged) {
 		// // keep position constant (or update layer relative to new position)
 		// mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
 		//
@@ -114,7 +114,8 @@ public abstract class RenderOverlay {
 		}
 	}
 
-	private float setMatrix(MapPosition curPos, float[] matrix) {
+	// set matrix to scale relative to zoomlevel
+	protected float setMatrix(MapPosition curPos, float[] matrix) {
 		// TODO if oPos == curPos this could be simplified
 
 		MapPosition oPos = mMapPosition;

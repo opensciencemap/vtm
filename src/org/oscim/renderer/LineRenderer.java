@@ -170,7 +170,7 @@ public final class LineRenderer {
 						blur = true;
 					}
 
-					if (line.cap == Cap.ROUND) {
+					if (o.line.cap == Cap.ROUND) {
 						if (lineMode != 1) {
 							lineMode = 1;
 							GLES20.glUniform1i(hLineMode[mode], lineMode);
