@@ -457,6 +457,9 @@ public class MapView extends RelativeLayout {
 			throw new IllegalArgumentException("render theme must not be null");
 		}
 
+		if (internalRenderTheme.name() == mRenderTheme)
+			return true;
+
 		boolean ret = setRenderTheme((Theme) internalRenderTheme);
 		if (ret) {
 			mRenderTheme = internalRenderTheme.name();
