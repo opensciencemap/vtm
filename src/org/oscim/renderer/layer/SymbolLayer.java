@@ -119,8 +119,6 @@ public final class SymbolLayer extends TextureLayer {
 		textures = to;
 		mCanvas.setBitmap(to.bitmap);
 
-		//		int maxIndices = TextureRenderer.MAX_ITEMS * TextureRenderer.INDICES_PER_SPRITE;
-
 		for (SymbolItem it = symbols; it != null;) {
 			float width, height;
 
@@ -143,7 +141,7 @@ public final class SymbolLayer extends TextureLayer {
 
 			}
 
-			if (y + height > TEXTURE_HEIGHT) { // || curIndices == maxIndices) {
+			if (y + height > TEXTURE_HEIGHT) {
 				Log.d(TAG, "reached max symbols: " + numIndices);
 
 				to.offset = offsetIndices;
@@ -199,7 +197,6 @@ public final class SymbolLayer extends TextureLayer {
 			for (SymbolItem it2 = it;; it2 = it2.next) {
 
 				if (it2 == null
-						//	|| (curIndices == maxIndices)
 						|| (it.drawable != null && it2.drawable != it.drawable)
 						|| (it.bitmap != null && it2.bitmap != it.bitmap)) {
 					it = it2;
