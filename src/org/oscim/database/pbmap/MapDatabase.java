@@ -180,12 +180,9 @@ public class MapDatabase implements IMapDatabase {
 
 		try {
 			if (USE_LW_HTTP) {
-				if (lwHttpSendRequest(tile)) {
-					if (lwHttpReadHeader() > 0) {
-
-						cacheBegin(tile, f);
-						decode();
-					}
+				if (lwHttpSendRequest(tile) && lwHttpReadHeader() > 0) {
+					cacheBegin(tile, f);
+					decode();
 				} else {
 					result = QueryResult.FAILED;
 				}
@@ -253,12 +250,6 @@ public class MapDatabase implements IMapDatabase {
 
 		if (USE_APACHE_HTTP)
 			mRequest = null;
-
-		// FIXME remove this stuff
-		if (!mTile.isLoading) {
-			Log.d(TAG, "loading canceled " + mTile);
-			result = QueryResult.FAILED;
-		}
 
 		cacheFinish(tile, f, result == QueryResult.SUCCESS);
 
@@ -877,6 +868,7 @@ public class MapDatabase implements IMapDatabase {
 
 			mBufferSize += len;
 		}
+
 		return read;
 	}
 

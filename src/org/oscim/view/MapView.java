@@ -99,6 +99,8 @@ public class MapView extends RelativeLayout {
 	private String mRenderTheme;
 	private Map<String, String> mMapOptions;
 
+	private boolean mClearTiles;
+
 	/**
 	 * @param context
 	 *            the enclosing MapActivity instance.
@@ -310,15 +312,16 @@ public class MapView extends RelativeLayout {
 
 			mOverlayManager.onUpdate(mMapPosition, changed);
 		}
-		mTileManager.updateMap(false);
+		mTileManager.updateMap(mClearTiles);
+		mClearTiles = false;
 	}
 
 	public void clearAndRedrawMap() {
 		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
 			return;
 
-		if (AndroidUtils.currentThreadIsUiThread())
-			mTileManager.updateMap(true);
+		//if (AndroidUtils.currentThreadIsUiThread())
+		mTileManager.updateMap(true);
 	}
 
 	/**
@@ -415,28 +418,25 @@ public class MapView extends RelativeLayout {
 		if (debugDatabase)
 			return;
 
-		TileGenerator tileGenerator;
-
 		Log.i(TAG, "setMapDatabase " + mapDatabaseType.name());
 
 		if (mMapDatabaseType == mapDatabaseType)
 			return;
 
 		mMapDatabaseType = mapDatabaseType;
-
 		mapWorkersPause(true);
 
 		for (MapWorker mapWorker : mMapWorkers) {
-			tileGenerator = mapWorker.getMapGenerator();
+			TileGenerator tileGenerator = mapWorker.getMapGenerator();
 
 			tileGenerator.setMapDatabase(MapDatabaseFactory
 					.createMapDatabase(mapDatabaseType));
 		}
 
 		mJobQueue.clear();
+		mClearTiles = true;
 
 		setMapOptions(null);
-
 		mapWorkersProceed();
 	}
 

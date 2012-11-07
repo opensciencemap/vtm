@@ -140,12 +140,6 @@ public class MapDatabase implements IMapDatabase {
 
 		mLastRequest = SystemClock.elapsedRealtime();
 
-		// FIXME remove this stuff
-		if (!mTile.isLoading) {
-			Log.d(TAG, "loading canceled " + mTile);
-			result = QueryResult.FAILED;
-		}
-
 		cacheFinish(tile, f, result == QueryResult.SUCCESS);
 
 		return result;

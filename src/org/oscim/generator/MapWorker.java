@@ -14,8 +14,8 @@
  */
 package org.oscim.generator;
 
-import org.oscim.renderer.TileManager;
 import org.oscim.renderer.TileGenerator;
+import org.oscim.renderer.TileManager;
 import org.oscim.utils.PausableThread;
 
 /**
@@ -66,9 +66,9 @@ public class MapWorker extends PausableThread {
 
 		// Log.d("...", "load: " + tile);
 
-		boolean success = mMapGenerator.executeJob(tile);
+		mMapGenerator.executeJob(tile);
 
-		if (!isInterrupted() && success) {
+		if (!isInterrupted()) {
 			mTileManager.passTile(tile);
 		}
 	}
