@@ -423,7 +423,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mLayers = new Layers();
 
 		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
-			Log.d(TAG, "Failed loading: " + tile);
+			//Log.d(TAG, "Failed loading: " + tile);
 			mLayers.clear();
 			mLayers = null;
 			mLabels = null;

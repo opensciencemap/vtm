@@ -301,17 +301,16 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	private static boolean uploadTileData(MapTile tile) {
-		// synchronized (tile) {
-		tile.isReady = uploadLayers(tile.layers, tile.vbo, true);
-		if (!tile.isReady) {
-			tile.layers.clear();
-			tile.layers = null;
+		if (tile.layers != null) {
+			tile.isReady = uploadLayers(tile.layers, tile.vbo, true);
+			if (!tile.isReady) {
+				tile.layers.clear();
+				tile.layers = null;
+			}
 		}
-
 		tile.newData = false;
 		// Log.d(TAG, "uploaded " + tile.isReady + " " + tile);
 
-		// }
 		return tile.isReady;
 	}
 
@@ -728,16 +727,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
-		Log.d(TAG, "SurfaceChanged:" + width + " " + height);
-
-		mDrawTiles = null;
+		Log.d(TAG, "SurfaceChanged:" + mNewSurface + " " + width + " " + height);
 
 		if (width <= 0 || height <= 0)
 			return;
 
-		boolean changed = true;
-		if (mWidth == width || mHeight == height)
-			changed = false;
+		//		boolean changed = true;
+		//		if (mWidth == width || mHeight == height)
+		//			changed = false;
 
 		mWidth = width;
 		mHeight = height;
@@ -767,13 +764,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		GLES20.glViewport(0, 0, width, height);
 
-		if (!changed && !mNewSurface) {
+		if (!mNewSurface) {
 			mMapView.redrawMap();
 			return;
 		}
 
 		mNewSurface = false;
 		mBufferMemoryUsage = 0;
+		mDrawTiles = null;
 
 		int numTiles = (mWidth / (Tile.TILE_SIZE / 2) + 2)
 				* (mHeight / (Tile.TILE_SIZE / 2) + 2);
@@ -791,7 +789,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		vertexArray[0] = false;
 		vertexArray[1] = false;
 
-		// FIXME this should be synchronized
 		mMapView.redrawMap();
 	}
 
@@ -800,10 +797,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// String ext = GLES20.glGetString(GLES20.GL_EXTENSIONS);
 		// Log.d(TAG, "Extensions: " + ext);
 
-		//		GLES20.GL_POLYGON_OFFSET_UNITS
 		LineRenderer.init();
 		PolygonRenderer.init();
-		// TextRenderer.init();
 		TextureRenderer.init();
 		TextureObject.init(10);
 
@@ -818,4 +813,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private boolean mNewSurface;
 
 	private static final boolean debugView = false;
+
+	void clearBuffer() {
+		mNewSurface = true;
+	}
 }

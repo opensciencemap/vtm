@@ -16,7 +16,6 @@ package org.oscim.renderer;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -61,7 +60,7 @@ public class TileManager {
 	private static float[] mTileCoords = new float[8];
 
 	static int mUpdateCnt;
-	static ReentrantLock tilelock = new ReentrantLock();
+	static Object tilelock = new Object();
 	static Tiles mCurrentTiles;
 	/* package */static Tiles mNewTiles;
 
@@ -134,12 +133,12 @@ public class TileManager {
 	}
 
 	private TileManager(MapView mapView) {
-
+		Log.d(TAG, "init TileManager");
 		mMapView = mapView;
 		mMapViewPosition = mapView.getMapViewPosition();
 
 		mJobList = new ArrayList<JobTile>();
-		mTiles = new ArrayList<MapTile>();
+		mTiles = new ArrayList<MapTile>(200);
 		mTilesLoaded = new ArrayList<MapTile>(30);
 
 		// this is probably a good place to init these
@@ -165,45 +164,40 @@ public class TileManager {
 		if (mMapView == null)
 			return;
 
-		// FIXME too messy!
 		if (clear || mInitial) {
-			// make sure onDrawFrame is not running
+			// make sure onDrawFrame is not running, and labeling thread?
 			GLRenderer.drawlock.lock();
-			// remove all tiles references
+
+			// clear all tiles references
 			Log.d(TAG, "CLEAR " + mInitial);
 
+			mUpdateCnt = 0;
+
 			if (clear) {
+				// pass VBOs and VertexItems back to pools
 				for (MapTile t : mTiles)
 					clearTile(t);
 			} else {
 				VertexPool.init();
 			}
 
+			//VertexPool.init();
+			QuadTree.init();
+
 			mTiles.clear();
 			mTilesLoaded.clear();
 
-			QuadTree.init();
-
 			// set up TileData arrays that are passed to gl-thread
-			int num = mWidth;
-			if (mWidth < mHeight)
-				num = mHeight;
-
+			int num = Math.max(mWidth, mHeight);
 			int size = Tile.TILE_SIZE >> 1;
-
 			int numTiles = (num * num) / (size * size) * 4;
-
-			// mRenderer.clearTiles(numTiles);
 			mNewTiles = new Tiles(numTiles);
 			mCurrentTiles = new Tiles(numTiles);
-			// MapInfo mapInfo = mMapView.getMapDatabase().getMapInfo();
-			// if (mapInfo != null)
-			// mZoomLevels = mapInfo.zoomLevel;
+
 			GLRenderer.drawlock.unlock();
 
 			// .. make sure mMapPosition will be updated
 			mMapPosition.zoomLevel = -1;
-
 			mInitial = false;
 		}
 
@@ -253,8 +247,7 @@ public class TileManager {
 			return td;
 
 		// dont flip new/currentTiles while copying
-		TileManager.tilelock.lock();
-		try {
+		synchronized (TileManager.tilelock) {
 			MapTile[] newTiles = mCurrentTiles.tiles;
 			int cnt = mCurrentTiles.cnt;
 
@@ -264,9 +257,13 @@ public class TileManager {
 
 			MapTile[] nextTiles;
 
-			if (td == null)
+			if (td == null) {
 				td = new Tiles(newTiles.length);
-
+			} else if (td.serial > mUpdateCnt) {
+				Log.d(TAG, "ignore previous tile data " + td.cnt);
+				// tile data was cleared, ignore tiles
+				td.cnt = 0;
+			}
 			nextTiles = td.tiles;
 
 			// unlock previously active tiles
@@ -278,8 +275,6 @@ public class TileManager {
 
 			td.serial = mUpdateCnt;
 			td.cnt = cnt;
-		} finally {
-			TileManager.tilelock.unlock();
 		}
 
 		return td;
@@ -313,7 +308,7 @@ public class TileManager {
 		MapTile[] newTiles = mNewTiles.tiles;
 		MapTile[] curTiles = mCurrentTiles.tiles;
 
-		boolean changed = false;
+		boolean changed = (mNewTiles.cnt != mCurrentTiles.cnt);
 
 		for (int i = 0, n = mNewTiles.cnt; i < n && !changed; i++) {
 			MapTile t = newTiles[i];
@@ -330,8 +325,7 @@ public class TileManager {
 		}
 
 		if (changed) {
-			TileManager.tilelock.lock();
-			try {
+			synchronized (TileManager.tilelock) {
 				for (int i = 0, n = mNewTiles.cnt; i < n; i++)
 					newTiles[i].lock();
 
@@ -343,8 +337,6 @@ public class TileManager {
 				mNewTiles = tmp;
 
 				mUpdateCnt++;
-			} finally {
-				TileManager.tilelock.unlock();
 			}
 
 			// Log.d(TAG, "tiles: " + tileCounter + " " + BufferObject.counter
@@ -615,12 +607,12 @@ public class TileManager {
 	public synchronized boolean passTile(JobTile jobTile) {
 		MapTile tile = (MapTile) jobTile;
 
-		// if (!tile.isLoading) {
-		// // no one should be able to use this tile now, TileGenerator passed
-		// // it, GL-Thread does nothing until newdata is set.
-		// Log.d(TAG, "passTile: canceled " + tile);
-		// return true;
-		// }
+		if (!tile.isLoading) {
+			// no one should be able to use this tile now, TileGenerator passed
+			// it, GL-Thread does nothing until newdata is set.
+			//Log.d(TAG, "passTile: failed loading " + tile);
+			return true;
+		}
 
 		if (tile.vbo != null) {
 			// BAD Things(tm) happend... 
