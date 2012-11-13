@@ -2,9 +2,7 @@ package org.oscim.overlay;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.oscim.core.MapPosition;
@@ -18,15 +16,10 @@ import android.view.MotionEvent;
 
 public class OverlayManager extends AbstractList<Overlay> {
 
-	// private TilesOverlay mTilesOverlay;
-
-	/* package */final CopyOnWriteArrayList<Overlay> mOverlayList;
+	private final CopyOnWriteArrayList<Overlay> mOverlayList;
 
 	public OverlayManager() {
-		// final TilesOverlay tilesOverlay) {
-		// setTilesOverlay(tilesOverlay);
 		mOverlayList = new CopyOnWriteArrayList<Overlay>();
-
 	}
 
 	@Override
@@ -42,22 +35,226 @@ public class OverlayManager extends AbstractList<Overlay> {
 	@Override
 	public synchronized void add(final int pIndex, final Overlay pElement) {
 		mOverlayList.add(pIndex, pElement);
-		mUpdateDrawLayers = true;
-		mUpdateLayers = true;
+		mDirtyOverlays = true;
 	}
 
 	@Override
 	public synchronized Overlay remove(final int pIndex) {
-		mUpdateDrawLayers = true;
-		mUpdateLayers = true;
+		mDirtyOverlays = true;
 		return mOverlayList.remove(pIndex);
 	}
 
 	@Override
 	public synchronized Overlay set(final int pIndex, final Overlay pElement) {
-		mUpdateDrawLayers = true;
-		mUpdateLayers = true;
+		mDirtyOverlays = true;
 		return mOverlayList.set(pIndex, pElement);
+	}
+
+	private boolean mDirtyOverlays;
+	private List<RenderOverlay> mDrawLayers = new ArrayList<RenderOverlay>();
+
+	public List<RenderOverlay> getRenderLayers() {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		return mDrawLayers;
+	}
+
+	public void onDetach(final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			o.onDetach(pMapView);
+	}
+
+	Overlay[] mOverlays;
+
+	private synchronized void updateOverlays() {
+		if (!mDirtyOverlays)
+			return;
+
+		mOverlays = new Overlay[mOverlayList.size()];
+
+		mDrawLayers.clear();
+		for (int i = 0, n = mOverlayList.size(); i < n; i++) {
+			Overlay o = mOverlayList.get(i);
+			RenderOverlay l = o.getLayer();
+			if (l != null)
+				mDrawLayers.add(l);
+
+			mOverlays[n - i - 1] = o;
+		}
+
+		mDirtyOverlays = false;
+	}
+
+	public boolean onKeyDown(final int keyCode, final KeyEvent event, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onKeyDown(keyCode, event, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public boolean onKeyUp(final int keyCode, final KeyEvent event, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onKeyUp(keyCode, event, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public boolean onTouchEvent(final MotionEvent event, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onTouchEvent(event, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public boolean onTrackballEvent(final MotionEvent event, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onTrackballEvent(event, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public boolean onSnapToItem(final int x, final int y, final Point snapPoint,
+			final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o instanceof Snappable)
+				if (((Snappable) o).onSnapToItem(x, y, snapPoint, pMapView))
+					return true;
+
+		return false;
+	}
+
+	/* GestureDetector.OnDoubleTapListener */
+
+	public boolean onDoubleTap(final MotionEvent e, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onDoubleTap(e, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public boolean onDoubleTapEvent(final MotionEvent e, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onDoubleTapEvent(e, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public boolean onSingleTapConfirmed(final MotionEvent e, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onSingleTapConfirmed(e, pMapView))
+				return true;
+
+		return false;
+	}
+
+	/* OnGestureListener */
+
+	public boolean onDown(final MotionEvent pEvent, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onDown(pEvent, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
+			final float pVelocityX, final float pVelocityY, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public boolean onLongPress(final MotionEvent pEvent, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onLongPress(pEvent, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public boolean onScroll(final MotionEvent pEvent1, final MotionEvent pEvent2,
+			final float pDistanceX, final float pDistanceY, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onScroll(pEvent1, pEvent2, pDistanceX, pDistanceY, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public void onShowPress(final MotionEvent pEvent, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			o.onShowPress(pEvent, pMapView);
+
+	}
+
+	public boolean onSingleTapUp(final MotionEvent pEvent, final MapView pMapView) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onSingleTapUp(pEvent, pMapView))
+				return true;
+
+		return false;
+	}
+
+	public void onUpdate(MapPosition mapPosition, boolean changed) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			o.onUpdate(mapPosition, changed);
 	}
 
 	// /**
@@ -83,53 +280,6 @@ public class OverlayManager extends AbstractList<Overlay> {
 	// mTilesOverlay = tilesOverlay;
 	// }
 
-	public Iterable<Overlay> overlaysReversed() {
-		return new Iterable<Overlay>() {
-			@Override
-			public Iterator<Overlay> iterator() {
-				final ListIterator<Overlay> i = mOverlayList.listIterator(mOverlayList.size());
-
-				return new Iterator<Overlay>() {
-					@Override
-					public boolean hasNext() {
-						return i.hasPrevious();
-					}
-
-					@Override
-					public Overlay next() {
-						return i.previous();
-					}
-
-					@Override
-					public void remove() {
-						i.remove();
-					}
-				};
-			}
-		};
-	}
-
-	private boolean mUpdateLayers;
-	private boolean mUpdateDrawLayers;
-	private List<RenderOverlay> mDrawLayers = new ArrayList<RenderOverlay>();
-
-	public List<RenderOverlay> getRenderLayers() {
-		if (mUpdateDrawLayers) {
-			synchronized (this) {
-
-				mUpdateDrawLayers = false;
-				mDrawLayers.clear();
-
-				for (Overlay o : mOverlayList) {
-					RenderOverlay l = o.getLayer();
-					if (l != null)
-						mDrawLayers.add(l);
-				}
-			}
-		}
-		return mDrawLayers;
-	}
-
 	//	public void onDraw(final Canvas c, final MapView pMapView) {
 	//		// if ((mTilesOverlay != null) && mTilesOverlay.isEnabled()) {
 	//		// mTilesOverlay.draw(c, pMapView, true);
@@ -152,189 +302,6 @@ public class OverlayManager extends AbstractList<Overlay> {
 	//		}
 	//
 	//	}
-
-	public void onDetach(final MapView pMapView) {
-		// if (mTilesOverlay != null) {
-		// mTilesOverlay.onDetach(pMapView);
-		// }
-
-		for (final Overlay overlay : this.overlaysReversed()) {
-			overlay.onDetach(pMapView);
-		}
-	}
-
-	Overlay[] mOverlays;
-
-	private synchronized void updateOverlays() {
-		mOverlays = new Overlay[mOverlayList.size()];
-		mOverlays = mOverlayList.toArray(mOverlays);
-		mUpdateLayers = false;
-	}
-
-	public boolean onKeyDown(final int keyCode, final KeyEvent event, final MapView pMapView) {
-		if (mUpdateLayers)
-			updateOverlays();
-
-		for (int i = mOverlays.length - 1; i >= 0; i--)
-			if (mOverlays[i].onKeyDown(keyCode, event, pMapView))
-				return true;
-
-		return false;
-	}
-
-	public boolean onKeyUp(final int keyCode, final KeyEvent event, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onKeyUp(keyCode, event, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean onTouchEvent(final MotionEvent event, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onTouchEvent(event, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean onTrackballEvent(final MotionEvent event, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onTrackballEvent(event, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean onSnapToItem(final int x, final int y, final Point snapPoint,
-			final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay instanceof Snappable) {
-				if (((Snappable) overlay).onSnapToItem(x, y, snapPoint, pMapView)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/* GestureDetector.OnDoubleTapListener */
-
-	public boolean onDoubleTap(final MotionEvent e, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onDoubleTap(e, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean onDoubleTapEvent(final MotionEvent e, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onDoubleTapEvent(e, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean onSingleTapConfirmed(final MotionEvent e, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onSingleTapConfirmed(e, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/* OnGestureListener */
-
-	public boolean onDown(final MotionEvent pEvent, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onDown(pEvent, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pVelocityX, final float pVelocityY, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean onLongPress(final MotionEvent pEvent, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onLongPress(pEvent, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean onScroll(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pDistanceX, final float pDistanceY, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			if (overlay.onScroll(pEvent1, pEvent2, pDistanceX, pDistanceY, pMapView)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public void onShowPress(final MotionEvent pEvent, final MapView pMapView) {
-		for (final Overlay overlay : this.overlaysReversed()) {
-			overlay.onShowPress(pEvent, pMapView);
-		}
-	}
-
-	public boolean onSingleTapUp(final MotionEvent pEvent, final MapView pMapView) {
-		if (mUpdateLayers)
-			updateOverlays();
-
-		for (int i = mOverlays.length - 1; i >= 0; i--)
-			if (mOverlays[i].onSingleTapUp(pEvent, pMapView))
-				return true;
-
-		//		for (final Overlay overlay : this.overlaysReversed()) {
-		//			if (overlay.onSingleTapUp(pEvent, pMapView)) {
-		//				return true;
-		//			}
-		//		}
-
-		return false;
-	}
-
-	public void onUpdate(MapPosition mapPosition, boolean changed) {
-		if (mUpdateLayers)
-			updateOverlays();
-
-		for (int i = mOverlays.length - 1; i >= 0; i--)
-			mOverlays[i].onUpdate(mapPosition, changed);
-
-		//		for (final Overlay overlay : this.overlaysReversed()) {
-		//			overlay.onUpdate(mapPosition);
-		//		}
-	}
 
 	// ** Options Menu **//
 

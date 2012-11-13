@@ -97,6 +97,9 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 	 */
 	public boolean handleMotionEvent(MotionEvent event) {
 
+		if (mOverlayManager.onTouchEvent(event, mMapView))
+			return true;
+
 		mGestureDetector.onTouchEvent(event);
 		mScaleGestureDetector.onTouchEvent(event);
 
