@@ -22,7 +22,6 @@ import org.oscim.overlay.OverlayManager;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
@@ -104,22 +103,25 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		mScaleGestureDetector.onTouchEvent(event);
 
 		int action = getAction(event);
-		boolean ret = false;
+
 		if (action == MotionEvent.ACTION_DOWN) {
-			ret = onActionDown(event);
+			if (mOverlayManager.onDown(event, mMapView))
+				return true;
+
+			return onActionDown(event);
 		} else if (action == MotionEvent.ACTION_MOVE) {
-			ret = onActionMove(event);
+			return onActionMove(event);
 		} else if (action == MotionEvent.ACTION_UP) {
-			ret = onActionUp(event);
+			return onActionUp(event);
 		} else if (action == MotionEvent.ACTION_CANCEL) {
-			ret = onActionCancel();
+			return onActionCancel();
 		} else if (action == MotionEvent.ACTION_POINTER_DOWN) {
 			return onActionPointerDown(event);
 		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-			ret = onActionPointerUp(event);
+			return onActionPointerUp(event);
 		}
 
-		return ret;
+		return false;
 	}
 
 	private static int getAction(MotionEvent motionEvent) {
@@ -286,14 +288,11 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 
 	@Override
 	public void onShowPress(MotionEvent e) {
-		Log.d(TAG, "show press");
-		// TODO Auto-generated method stub
-
+		mOverlayManager.onShowPress(e, mMapView);
 	}
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
-		Log.d(TAG, "single tap up");
 		return mOverlayManager.onSingleTapUp(e, mMapView);
 	}
 
@@ -308,8 +307,6 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 			}
 			fling = false;
 		}
-
-		//	Log.d(TAG, "tap");
 
 		return true;
 	}
@@ -427,23 +424,21 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 	/******************* DoubleTapListener ****************/
 	@Override
 	public boolean onSingleTapConfirmed(MotionEvent e) {
-		//		Log.d(TAG, "single tap confirmed");
 		return mOverlayManager.onSingleTapConfirmed(e, mMapView);
 	}
 
 	@Override
 	public boolean onDoubleTap(MotionEvent e) {
-		Log.d(TAG, "double tap");
+		if (mOverlayManager.onDoubleTap(e, mMapView))
+			return true;
 
-		// TODO Auto-generated method stub
-		return false;
+		mLongPress = true;
+
+		return true;
 	}
 
 	@Override
 	public boolean onDoubleTapEvent(MotionEvent e) {
-		mLongPress = true;
-		Log.d(TAG, "double tap event");
-		// TODO Auto-generated method stub
 		return false;
 	}
 
