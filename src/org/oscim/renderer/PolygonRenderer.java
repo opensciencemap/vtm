@@ -169,15 +169,15 @@ public final class PolygonRenderer {
 		glUseProgram(polygonProgram);
 
 		int va = hPolygonVertexPosition;
-		if (!GLRenderer.vertexArray[va]) {
-			GLES20.glEnableVertexAttribArray(va);
-			GLRenderer.vertexArray[va] = true;
-		}
-		va = va == 0 ? 1 : 0;
-		if (GLRenderer.vertexArray[va]) {
-			GLES20.glDisableVertexAttribArray(va);
-			GLRenderer.vertexArray[va] = false;
-		}
+		//if (!GLRenderer.vertexArray[va]) {
+		GLES20.glEnableVertexAttribArray(va);
+		//	GLRenderer.vertexArray[va] = true;
+		//}
+		//va = va == 0 ? 1 : 0;
+		//if (GLRenderer.vertexArray[va]) {
+		//	GLES20.glDisableVertexAttribArray(va);
+		//	GLRenderer.vertexArray[va] = false;
+		//}
 		// GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);
 
 		glVertexAttribPointer(hPolygonVertexPosition, 2, GLES20.GL_SHORT,
@@ -299,7 +299,7 @@ public final class PolygonRenderer {
 		if (clip && first)
 			drawDepthClip();
 
-		// GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);
+		GLES20.glDisableVertexAttribArray(hPolygonVertexPosition);
 
 		return l;
 	}

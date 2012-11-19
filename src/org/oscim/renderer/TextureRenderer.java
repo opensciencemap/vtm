@@ -98,16 +98,16 @@ public final class TextureRenderer {
 		GLES20.glUseProgram(mTextureProgram);
 
 		int va = hTextureTexCoord;
-		if (!GLRenderer.vertexArray[va]) {
-			GLES20.glEnableVertexAttribArray(va);
-			GLRenderer.vertexArray[va] = true;
-		}
+		//if (!GLRenderer.vertexArray[va]) {
+		GLES20.glEnableVertexAttribArray(va);
+		//	GLRenderer.vertexArray[va] = true;
+		//}
 
 		va = hTextureVertex;
-		if (!GLRenderer.vertexArray[va]) {
-			GLES20.glEnableVertexAttribArray(va);
-			GLRenderer.vertexArray[va] = true;
-		}
+		//if (!GLRenderer.vertexArray[va]) {
+		GLES20.glEnableVertexAttribArray(va);
+		//	GLRenderer.vertexArray[va] = true;
+		//}
 
 		TextureLayer tl = (TextureLayer) layer;
 
@@ -154,6 +154,9 @@ public final class TextureRenderer {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		// GlUtils.checkGlError("< draw texture");
+
+		GLES20.glDisableVertexAttribArray(hTextureVertex);
+		GLES20.glDisableVertexAttribArray(hTextureTexCoord);
 
 		return layer.next;
 	}

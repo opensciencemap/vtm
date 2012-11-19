@@ -91,16 +91,16 @@ public final class LineRenderer {
 		GLES20.glUseProgram(lineProgram[mode]);
 
 		int va = hLineVertexPosition[mode];
-		if (!GLRenderer.vertexArray[va]) {
-			GLES20.glEnableVertexAttribArray(va);
-			GLRenderer.vertexArray[va] = true;
-		}
+		//if (!GLRenderer.vertexArray[va]) {
+		GLES20.glEnableVertexAttribArray(va);
+		//		GLRenderer.vertexArray[va] = true;
+		//}
 
 		va = hLineTexturePosition[mode];
-		if (!GLRenderer.vertexArray[va]) {
-			GLES20.glEnableVertexAttribArray(va);
-			GLRenderer.vertexArray[va] = true;
-		}
+		//if (!GLRenderer.vertexArray[va]) {
+		GLES20.glEnableVertexAttribArray(va);
+		//	GLRenderer.vertexArray[va] = true;
+		//}
 
 		// GLES20.glEnableVertexAttribArray(hLineVertexPosition[mode]);
 		// GLES20.glEnableVertexAttribArray(hLineTexturePosition[mode]);
@@ -215,8 +215,8 @@ public final class LineRenderer {
 
 		}
 
-		// GLES20.glDisableVertexAttribArray(hLineVertexPosition[mode]);
-		// GLES20.glDisableVertexAttribArray(hLineTexturePosition[mode]);
+		GLES20.glDisableVertexAttribArray(hLineVertexPosition[mode]);
+		GLES20.glDisableVertexAttribArray(hLineTexturePosition[mode]);
 
 		return l;
 	}
