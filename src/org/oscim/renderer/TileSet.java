@@ -15,20 +15,20 @@
 package org.oscim.renderer;
 
 /**
- * use with TileManager.getActiveTiles(Tiles) to get the current tiles. tiles
+ * use with TileManager.getActiveTiles(TileSet) to get the current tiles. tiles
  * are locked to not be modifed until getActiveTiles passes them back on a
- * second invocation or TODO: implement TileManager.releaseTiles(Tiles).
+ * second invocation or TODO: implement TileManager.releaseTiles(TileSet).
  */
-public final class Tiles {
+public final class TileSet {
 	public int cnt = 0;
 	public MapTile[] tiles;
 
 	int serial;
 
-	Tiles() {
+	TileSet() {
 	}
 
-	Tiles(int numTiles) {
+	TileSet(int numTiles) {
 		tiles = new MapTile[numTiles];
 	}
 }

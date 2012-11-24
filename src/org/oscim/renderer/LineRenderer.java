@@ -90,20 +90,20 @@ public final class LineRenderer {
 
 		GLES20.glUseProgram(lineProgram[mode]);
 
-		int va = hLineVertexPosition[mode];
-		//if (!GLRenderer.vertexArray[va]) {
-		GLES20.glEnableVertexAttribArray(va);
-		//		GLRenderer.vertexArray[va] = true;
-		//}
+		// int va = hLineVertexPosition[mode];
+		// if (!GLRenderer.vertexArray[va]) {
+		// GLES20.glEnableVertexAttribArray(va);
+		// GLRenderer.vertexArray[va] = true;
+		// }
 
-		va = hLineTexturePosition[mode];
-		//if (!GLRenderer.vertexArray[va]) {
-		GLES20.glEnableVertexAttribArray(va);
-		//	GLRenderer.vertexArray[va] = true;
-		//}
+		// va = hLineTexturePosition[mode];
+		// if (!GLRenderer.vertexArray[va]) {
+		// GLES20.glEnableVertexAttribArray(va);
+		// GLRenderer.vertexArray[va] = true;
+		// }
 
-		// GLES20.glEnableVertexAttribArray(hLineVertexPosition[mode]);
-		// GLES20.glEnableVertexAttribArray(hLineTexturePosition[mode]);
+		GLES20.glEnableVertexAttribArray(hLineVertexPosition[mode]);
+		GLES20.glEnableVertexAttribArray(hLineTexturePosition[mode]);
 
 		GLES20.glVertexAttribPointer(hLineVertexPosition[mode], 2, GLES20.GL_SHORT,
 				false, 8, bufferOffset + LINE_VERTICES_DATA_POS_OFFSET);

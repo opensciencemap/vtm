@@ -61,8 +61,8 @@ public class TileManager {
 
 	static int mUpdateCnt;
 	static Object tilelock = new Object();
-	static Tiles mCurrentTiles;
-	/* package */static Tiles mNewTiles;
+	static TileSet mCurrentTiles;
+	/* package */static TileSet mNewTiles;
 
 	static int tileCounter;
 
@@ -191,8 +191,8 @@ public class TileManager {
 			int num = Math.max(mWidth, mHeight);
 			int size = Tile.TILE_SIZE >> 1;
 			int numTiles = (num * num) / (size * size) * 4;
-			mNewTiles = new Tiles(numTiles);
-			mCurrentTiles = new Tiles(numTiles);
+			mNewTiles = new TileSet(numTiles);
+			mCurrentTiles = new TileSet(numTiles);
 
 			GLRenderer.drawlock.unlock();
 
@@ -239,7 +239,7 @@ public class TileManager {
 		}
 	}
 
-	public static Tiles getActiveTiles(Tiles td) {
+	public static TileSet getActiveTiles(TileSet td) {
 		if (mCurrentTiles == null)
 			return td;
 
@@ -258,7 +258,7 @@ public class TileManager {
 			MapTile[] nextTiles;
 
 			if (td == null) {
-				td = new Tiles(newTiles.length);
+				td = new TileSet(newTiles.length);
 			} else if (td.serial > mUpdateCnt) {
 				Log.d(TAG, "ignore previous tile data " + td.cnt);
 				// tile data was cleared, ignore tiles
@@ -280,7 +280,7 @@ public class TileManager {
 		return td;
 	}
 
-	// public void releaseTiles(Tiles tiles) {
+	// public void releaseTiles(TileSet tiles) {
 	//
 	// }
 
@@ -332,7 +332,7 @@ public class TileManager {
 				for (int i = 0, n = mCurrentTiles.cnt; i < n; i++)
 					curTiles[i].unlock();
 
-				Tiles tmp = mCurrentTiles;
+				TileSet tmp = mCurrentTiles;
 				mCurrentTiles = mNewTiles;
 				mNewTiles = tmp;
 

@@ -28,6 +28,7 @@ public class Layers {
 
 	private Layer mCurLayer;
 
+	// get or add the line- or polygon-layer for a level.
 	public Layer getLayer(int level, byte type) {
 		Layer l = layers;
 		Layer ret = null;
@@ -176,9 +177,6 @@ public class Layers {
 				l.pool = null;
 				l.curItem = null;
 			}
-
-			// if (l instanceof TextLayer)
-			// ((TextLayer) l).clear();
 
 			l = l.next;
 		}

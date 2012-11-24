@@ -20,7 +20,7 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.MapTile;
 import org.oscim.renderer.TileManager;
-import org.oscim.renderer.Tiles;
+import org.oscim.renderer.TileSet;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.TextLayer;
 import org.oscim.utils.FastMath;
@@ -34,7 +34,7 @@ import android.util.FloatMath;
 
 public class OverlayText extends RenderOverlay {
 
-	private Tiles tiles;
+	private TileSet tiles;
 	private LabelThread mThread;
 
 	private MapPosition mWorkPos;

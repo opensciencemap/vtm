@@ -102,15 +102,16 @@ public final class PolygonRenderer {
 						f = 1.0f;
 				}
 
-				f *= l.area.color[3];
-
 				if (!blend) {
 					glEnable(GL_BLEND);
 					blend = true;
 				}
-
-				GlUtils.setColor(hPolygonColor, l.area.color, f);
-
+				if (f != 1) {
+					f *= l.area.color[3];
+					GlUtils.setColor(hPolygonColor, l.area.color, f);
+				} else {
+					glUniform4fv(hPolygonColor, 1, l.area.color, 0);
+				}
 			} else if (l.area.blend == zoom) {
 				/* blend colors */
 				f = scale - 1.0f;
@@ -168,17 +169,18 @@ public final class PolygonRenderer {
 
 		glUseProgram(polygonProgram);
 
-		int va = hPolygonVertexPosition;
-		//if (!GLRenderer.vertexArray[va]) {
-		GLES20.glEnableVertexAttribArray(va);
-		//	GLRenderer.vertexArray[va] = true;
-		//}
-		//va = va == 0 ? 1 : 0;
-		//if (GLRenderer.vertexArray[va]) {
-		//	GLES20.glDisableVertexAttribArray(va);
-		//	GLRenderer.vertexArray[va] = false;
-		//}
-		// GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);
+		// int va = hPolygonVertexPosition;
+		// if (!GLRenderer.vertexArray[va]) {
+		// GLES20.glEnableVertexAttribArray(va);
+		// GLRenderer.vertexArray[va] = true;
+		// }
+		// va = va == 0 ? 1 : 0;
+		// if (GLRenderer.vertexArray[va]) {
+		// GLES20.glDisableVertexAttribArray(va);
+		// GLRenderer.vertexArray[va] = false;
+		// }
+
+		GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);
 
 		glVertexAttribPointer(hPolygonVertexPosition, 2, GLES20.GL_SHORT,
 				false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
