@@ -46,6 +46,8 @@ public abstract class RenderOverlay {
 
 	public BufferObject vbo;
 
+	protected float[] mvp = new float[16];
+
 	public RenderOverlay(MapView mapView) {
 		mMapView = mapView;
 		mMapPosition = new MapPosition();
@@ -68,7 +70,7 @@ public abstract class RenderOverlay {
 	 * @param positionChanged
 	 *            true when MapPosition has changed
 	 * @param tilesChanged
-	 *            true when loaded tiles changed
+	 *            true when current tiles changed
 	 */
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged) {
@@ -86,8 +88,15 @@ public abstract class RenderOverlay {
 		// }
 	}
 
-	float[] mvp = new float[16];
-
+	/**
+	 * Default overlay render function
+	 * @param pos
+	 *            current MapPosition
+	 * @param mv
+	 *            current model-view matrix
+	 * @param proj
+	 *            current projection matrix
+	 */
 	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
 		float div = setMatrix(pos, mv);
 
@@ -104,8 +113,6 @@ public abstract class RenderOverlay {
 				l = LineRenderer.draw(pos, l, mvp, 1 / div, 0, layers.lineOffset);
 			}
 		}
-
-		// float scale = curPos.scale / div;
 
 		for (Layer l = layers.textureLayers; l != null;) {
 

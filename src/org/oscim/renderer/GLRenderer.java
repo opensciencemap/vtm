@@ -98,7 +98,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// happens rarely, unless you live on Fidschi
 
 	/* package */static int mHolderCount;
-	/* package */static Tiles mDrawTiles;
+	/* package */static TileSet mDrawTiles;
 
 	static boolean[] vertexArray = { false, false };
 
@@ -142,20 +142,17 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				else
 					xx = x - xmax;
 
-				if (xx < 0 || xx >= xmax) {
-					// Log.d(TAG, "out of bounds " + y + " " + x + "/" + xx);
+				if (xx < 0 || xx >= xmax)
 					continue;
-				}
+
 				for (int i = cnt; i < cnt + mHolderCount; i++)
 					if (tiles[i].tileX == x && tiles[i].tileY == y) {
 						found = true;
 						break;
 					}
 
-				if (found) {
-					// Log.d(TAG, "already added " + y + " " + x + "/" + xx);
+				if (found)
 					continue;
-				}
 
 				for (int i = 0; i < cnt; i++)
 					if (tiles[i].tileX == xx && tiles[i].tileY == y) {
@@ -163,10 +160,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 						break;
 					}
 
-				if (tile == null) {
-					// Log.d(TAG, "not found " + y + " " + x + "/" + xx);
+				if (tile == null)
 					continue;
-				}
 
 				holder = new MapTile(x, y, mZoom);
 				holder.isVisible = true;
@@ -211,16 +206,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			shortBuffer[i] = bbuf.asShortBuffer();
 			shortBuffer[i].put(mFillCoords, 0, 8);
 		}
-
-		//		overlays = new ArrayList<RenderOverlay>();
-
-		// mOverlays.add(new OverlayGrid(mapView));
-		// mOverlays.add(new OverlayTest(mapView));
-		//		overlays.add(new OverlayText(mapView));
-
 	}
-
-	//	private static ArrayList<RenderOverlay> overlays;
 
 	public static void setRenderTheme(RenderTheme t) {
 		mClearColor = GlUtils.colorToFloat(t.getMapBackground());
@@ -233,7 +219,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		int newSize = layers.getSize();
 		if (newSize == 0) {
-			// FIXME why are there so many tiles empty?
 			// Log.d(TAG, "empty");
 			return true;
 		}
@@ -252,7 +237,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (addFill)
 			newSize += 8;
 
-		// probably not a good idea to do this in gl thread...
 		if (sbuf.capacity() < newSize) {
 			sbuf = ByteBuffer
 					.allocateDirect(newSize * SHORT_BYTES)
@@ -260,15 +244,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					.asShortBuffer();
 
 			shortBuffer[curBuffer] = sbuf;
-			if (addFill)
-				sbuf.put(mFillCoords, 0, 8);
 		} else {
 			sbuf.clear();
-			if (addFill)
-				sbuf.put(mFillCoords, 0, 8);
 			// if (addFill)
 			// sbuf.position(8);
 		}
+
+		if (addFill)
+			sbuf.put(mFillCoords, 0, 8);
 
 		layers.compile(sbuf, addFill);
 		sbuf.flip();
@@ -279,8 +262,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					+ sbuf.position() + " "
 					+ sbuf.limit() + " "
 					+ sbuf.remaining());
-
-			// tile.newData = false;
 			return false;
 		}
 		newSize *= SHORT_BYTES;
@@ -291,10 +272,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				&& mBufferMemoryUsage < LIMIT_BUFFERS) {
 			GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, newSize, sbuf);
 		} else {
-			mBufferMemoryUsage -= vbo.size;
+			mBufferMemoryUsage += newSize - vbo.size;
 			vbo.size = newSize;
 			GLES20.glBufferData(GL_ARRAY_BUFFER, vbo.size, sbuf, GL_DYNAMIC_DRAW);
-			mBufferMemoryUsage += vbo.size;
+			//mBufferMemoryUsage += vbo.size;
 		}
 
 		return true;
@@ -303,7 +284,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static boolean uploadTileData(MapTile tile) {
 		if (tile.layers != null) {
 			tile.isReady = uploadLayers(tile.layers, tile.vbo, true);
+
 			if (!tile.isReady) {
+				Log.d(TAG, "uploadTileData " + tile + " is empty!");
 				tile.layers.clear();
 				tile.layers = null;
 			}
@@ -466,11 +449,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		tileCnt += mHolderCount;
 
-		// Log.d(TAG, "visible: " + tileCnt);
-
+		/* compile layer data and upload to VBOs */
 		uploadCnt = 0;
-
-		// compile data and upload to VBOsi
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile tile = tiles[i];
 
@@ -514,15 +494,15 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		tilesChanged |= (uploadCnt > 0);
 
-		// update overlays
+		/* update overlays */
 		List<RenderOverlay> overlays = mMapView.getOverlayManager().getRenderLayers();
 
 		for (int i = 0, n = overlays.size(); i < n; i++)
 			overlays.get(i).update(mMapPosition, changed, tilesChanged);
 
+		/* draw base layer */
 		GLES20.glEnable(GL_DEPTH_TEST);
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
-
 		mDrawCount = 0;
 
 		for (int i = 0; i < tileCnt; i++) {
@@ -543,11 +523,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		GLES20.glDisable(GL_POLYGON_OFFSET_FILL);
 		GLES20.glDisable(GL_DEPTH_TEST);
-
-		//		Log.d(TAG, "tiles: " + mDrawCount);
-
 		mDrawSerial++;
 
+		/* draw overlays */
 		GLES20.glEnable(GL_BLEND);
 
 		// call overlay renderer
@@ -599,9 +577,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					mapPosition.viewMatrix, 0);
 			PolygonRenderer.debugDraw(mMVPMatrix, mDebugCoords, 1);
 		}
-
-		//		mMapView.getOverlayManager().onUpdate(mMapPosition);
-
 	}
 
 	// used to not draw a tile twice per frame.
@@ -732,12 +707,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (width <= 0 || height <= 0)
 			return;
 
-		//		boolean changed = true;
-		//		if (mWidth == width || mHeight == height)
-		//			changed = false;
-
 		mWidth = width;
 		mHeight = height;
+
+		GLES20.glScissor(0, 0, mWidth, mHeight);
 
 		float s = MapViewPosition.VIEW_SCALE;
 		float aspect = mHeight / (float) mWidth;
@@ -802,8 +775,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		TextureRenderer.init();
 		TextureObject.init(10);
 
-		// glEnable(GL_SCISSOR_TEST);
-		// glScissor(0, 0, mWidth, mHeight);
+		GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
 		GLES20.glClearStencil(0);
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
