@@ -114,16 +114,16 @@ public class MapDatabase implements IMapDatabase {
 
 		try {
 
-			if (lwHttpSendRequest(tile)) {
-				if (lwHttpReadHeader() >= 0) {
-
-					cacheBegin(tile, f);
-					decode();
-				}
+			if (lwHttpSendRequest(tile) && lwHttpReadHeader() >= 0) {
+				cacheBegin(tile, f);
+				decode();
 			} else {
+				Log.d(TAG, "Network Error: " + tile);
 				result = QueryResult.FAILED;
+				// clear connection, TODO cleanup properly
+				mSocket.close();
+				mSocket = null;
 			}
-
 		} catch (SocketException ex) {
 			Log.d(TAG, "Socket exception: " + ex.getMessage());
 			result = QueryResult.FAILED;
@@ -215,8 +215,6 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	// /////////////// hand sewed tile protocol buffers decoder ///////////////
-	// TODO write an own serialization format for structs and packed strings..
-
 	private static final int BUFFER_SIZE = 65536;
 
 	private final byte[] mReadBuffer = new byte[BUFFER_SIZE];
@@ -745,7 +743,6 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	// ///////////////////////// Lightweight HttpClient ///////////////////////
-	// should have written simple tcp server/client for this...
 
 	private int mMaxReq = 0;
 	private Socket mSocket;
@@ -787,9 +784,6 @@ public class MapDatabase implements IMapDatabase {
 					first = false;
 					if (!compareBytes(buf, pos, end, RESPONSE_HTTP_OK, 15))
 						return -1;
-
-					// for (int i = 0; i < 15 && pos + i < end; i++)
-					// if (buf[pos + i] != RESPONSE_HTTP_OK[i])
 
 				} else if (end - pos == 1) {
 					// check empty line (header end)
