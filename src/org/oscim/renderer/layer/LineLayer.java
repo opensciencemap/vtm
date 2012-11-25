@@ -52,7 +52,6 @@ public final class LineLayer extends Layer {
 	/**
 	 * line extrusion is based on code from GLMap
 	 * (https://github.com/olofsj/GLMap/) by olofsj
-	 * 
 	 * @param points
 	 *            array of points as float x_n = i, y_n = i+1
 	 * @param index
@@ -87,6 +86,8 @@ public final class LineLayer extends Layer {
 		for (int i = 0, pos = 0, n = index.length; i < n; i++) {
 
 			int length = index[i];
+
+			// check end-marker in indices
 			if (length < 0)
 				break;
 
@@ -100,6 +101,7 @@ public final class LineLayer extends Layer {
 				continue;
 			}
 
+			// FIXME: remove this when switching to oscimap MapDatabase
 			closed = false;
 
 			// amount of vertices used
@@ -313,7 +315,8 @@ public final class LineLayer extends Layer {
 					ux = (ux / a);
 					uy = (uy / a);
 
-					// avoid miter going to infinity...
+					// avoid miter going to infinity.
+					// TODO add option for round joints
 					if (ux > 4.0f || ux < -4.0f || uy > 4.0f || uy < -4.0f) {
 						ux = vx - wx;
 						uy = vy - wy;
