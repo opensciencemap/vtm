@@ -171,8 +171,6 @@ public class TileManager {
 			// clear all tiles references
 			Log.d(TAG, "CLEAR " + mInitial);
 
-			mUpdateCnt = 0;
-
 			if (clear) {
 				// pass VBOs and VertexItems back to pools
 				for (MapTile t : mTiles)
@@ -187,6 +185,10 @@ public class TileManager {
 			mTiles.clear();
 			mTilesLoaded.clear();
 
+			//mUpdateCnt = 0;
+			for (TileSet td : mTileSets)
+				td.cnt = 0;
+
 			// set up TileData arrays that are passed to gl-thread
 			int num = Math.max(mWidth, mHeight);
 			int size = Tile.TILE_SIZE >> 1;
@@ -196,7 +198,7 @@ public class TileManager {
 
 			GLRenderer.drawlock.unlock();
 
-			// .. make sure mMapPosition will be updated
+			// make sure mMapPosition will be updated
 			mMapPosition.zoomLevel = -1;
 			mInitial = false;
 		}
@@ -239,6 +241,9 @@ public class TileManager {
 		}
 	}
 
+	/// EEEK, need to keep track of TileSets to clear on reset...
+	private static ArrayList<TileSet> mTileSets = new ArrayList<TileSet>(2);
+
 	public static TileSet getActiveTiles(TileSet td) {
 		if (mCurrentTiles == null)
 			return td;
@@ -259,11 +264,13 @@ public class TileManager {
 
 			if (td == null) {
 				td = new TileSet(newTiles.length);
-			} else if (td.serial > mUpdateCnt) {
-				Log.d(TAG, "ignore previous tile data " + td.cnt);
-				// tile data was cleared, ignore tiles
-				td.cnt = 0;
+				mTileSets.add(td);
 			}
+			// else if (td.serial > mUpdateCnt) {
+			// Log.d(TAG, "ignore previous tile data " + td.cnt);
+			// // tile data was cleared, ignore tiles
+			// td.cnt = 0;
+			// }
 			nextTiles = td.tiles;
 
 			// unlock previously active tiles
