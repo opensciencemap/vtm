@@ -10,7 +10,6 @@ import org.oscim.view.MapViewPosition;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -174,7 +173,6 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 * When a content sensitive action is performed the content item needs to be
 	 * identified. This method does that and then performs the assigned task on
 	 * that item.
-	 * 
 	 * @param event
 	 *            ...
 	 * @param mapView
@@ -202,7 +200,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 		mapViewPosition.getScreenPointOnMap(eventX, eventY, mTouchScreenPoint);
 
 		int nearest = -1;
-		float dist = Float.MAX_VALUE;
+		double dist = Double.MAX_VALUE;
 
 		// TODO use intermediate projection and bounding box test
 
@@ -221,7 +219,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 
 			float dx = mItemPoint.x - mTouchScreenPoint.x;
 			float dy = mItemPoint.y - mTouchScreenPoint.y;
-			float d = FloatMath.sqrt(dx * dx + dy * dy);
+			double d = Math.sqrt(dx * dx + dy * dy);
 
 			if (d < 50) {
 				//	Log.d("...", "HIT! " + (x - mTouchScreenPoint.x) + "  " + (y - mTouchScreenPoint.y));
@@ -262,7 +260,6 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 * When the item is touched one of these methods may be invoked depending on
 	 * the type of touch. Each of them returns true if the event was completely
 	 * handled.
-	 * 
 	 * @param <T>
 	 *            ....
 	 */
