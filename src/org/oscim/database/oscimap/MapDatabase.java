@@ -23,12 +23,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Map;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
@@ -37,6 +38,7 @@ import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
+import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
 import org.oscim.generator.JobTile;
@@ -60,15 +62,17 @@ public class MapDatabase implements IMapDatabase {
 	private boolean mOpenFile = false;
 
 	private static final boolean USE_CACHE = false;
-
 	private static final String CACHE_DIRECTORY = "/Android/data/org.oscim.app/cache/";
 	private static final String CACHE_FILE = "%d-%d-%d.tile";
 
-	private static final String SERVER_ADDR = "city.informatik.uni-bremen.de";
+	//private static String SERVER_ADDR = "city.informatik.uni-bremen.de";
+	//private static int PORT = 80;
 	//private static final String URL = "/osci/map-live/";
-	private static final String URL = "/osci/oscim/";
+	//private static String TILE_URL = "/osci/oscim/";
 
 	private final static float REF_TILE_SIZE = 4096.0f;
+
+	private static File cacheDir;
 
 	private int MAX_TILE_TAGS = 100;
 	private Tag[] curTags = new Tag[MAX_TILE_TAGS];
@@ -79,6 +83,8 @@ public class MapDatabase implements IMapDatabase {
 	private JobTile mTile;
 	private FileOutputStream mCacheFile;
 
+	private String mHost;
+	private int mPort;
 	private long mContentLenth;
 	private InputStream mInputStream;
 
@@ -120,9 +126,6 @@ public class MapDatabase implements IMapDatabase {
 			} else {
 				Log.d(TAG, "Network Error: " + tile);
 				result = QueryResult.FAILED;
-				// clear connection, TODO cleanup properly
-				mSocket.close();
-				mSocket = null;
 			}
 		} catch (SocketException ex) {
 			Log.d(TAG, "Socket exception: " + ex.getMessage());
@@ -140,12 +143,23 @@ public class MapDatabase implements IMapDatabase {
 
 		mLastRequest = SystemClock.elapsedRealtime();
 
-		cacheFinish(tile, f, result == QueryResult.SUCCESS);
+		if (result == QueryResult.SUCCESS) {
 
+			cacheFinish(tile, f, true);
+		} else {
+			cacheFinish(tile, f, false);
+			if (mSocket != null) {
+				// clear connection, TODO cleanup properly
+				try {
+					mSocket.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				mSocket = null;
+			}
+		}
 		return result;
 	}
-
-	private static File cacheDir;
 
 	@Override
 	public String getMapProjection() {
@@ -163,7 +177,42 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	@Override
-	public OpenResult open(Map<String, String> options) {
+	public OpenResult open(MapOptions options) {
+		if (mOpenFile)
+			return OpenResult.SUCCESS;
+
+		if (options == null || !options.containsKey("url"))
+			return new OpenResult("options missing");
+
+		URL url;
+		try {
+			url = new URL(options.get("url"));
+		} catch (MalformedURLException e) {
+
+			e.printStackTrace();
+			return new OpenResult("invalid url: " + options.get("url"));
+		}
+
+		int port = url.getPort();
+		if (port < 0)
+			port = 80;
+
+		String host = url.getHost();
+		String path = url.getPath();
+		Log.d(TAG, "open oscim database: " + host + " " + port + " " + path);
+
+		REQUEST_GET_START = ("GET " + path).getBytes();
+		REQUEST_GET_END = (".osmtile HTTP/1.1\n" +
+				"Host: " + host + "\n" +
+				"Connection: Keep-Alive\n\n").getBytes();
+
+		mHost = host;
+		mPort = port;
+		//mSockAddr = new InetSocketAddress(host, port);
+
+		mRequestBuffer = new byte[1024];
+		System.arraycopy(REQUEST_GET_START, 0,
+				mRequestBuffer, 0, REQUEST_GET_START.length);
 
 		if (USE_CACHE) {
 			if (cacheDir == null) {
@@ -174,6 +223,8 @@ public class MapDatabase implements IMapDatabase {
 				cacheDir = createDirectory(cacheDirectoryPath);
 			}
 		}
+
+		mOpenFile = true;
 
 		return OpenResult.SUCCESS;
 	}
@@ -187,8 +238,9 @@ public class MapDatabase implements IMapDatabase {
 				mSocket.close();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+				mSocket = null;
 			}
-			mSocket = null;
 		}
 
 		if (USE_CACHE) {
@@ -755,10 +807,8 @@ public class MapDatabase implements IMapDatabase {
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
 	private final static int RESPONSE_EXPECTED_TIMEOUT = 10000;
 
-	private final static byte[] REQUEST_GET_START = ("GET " + URL).getBytes();
-	private final static byte[] REQUEST_GET_END = (".osmtile HTTP/1.1\n" +
-			"Host: " + SERVER_ADDR + "\n" +
-			"Connection: Keep-Alive\n\n").getBytes();
+	private byte[] REQUEST_GET_START;
+	private byte[] REQUEST_GET_END;
 
 	private byte[] mRequestBuffer;
 
@@ -821,9 +871,6 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private boolean lwHttpSendRequest(Tile tile) throws IOException {
-		if (mSockAddr == null) {
-			mSockAddr = new InetSocketAddress(SERVER_ADDR, 80);
-		}
 
 		if (mSocket != null && ((mMaxReq-- <= 0)
 				|| (SystemClock.elapsedRealtime() - mLastRequest
@@ -887,11 +934,8 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private boolean lwHttpConnect() throws IOException {
-		if (mRequestBuffer == null) {
-			mRequestBuffer = new byte[1024];
-			System.arraycopy(REQUEST_GET_START, 0,
-					mRequestBuffer, 0, REQUEST_GET_START.length);
-		}
+		if (mSockAddr == null)
+			mSockAddr = new InetSocketAddress(mHost, mPort);
 
 		mSocket = new Socket();
 		mSocket.connect(mSockAddr, 30000);

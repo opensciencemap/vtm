@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -31,6 +30,7 @@ import org.oscim.core.WebMercator;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
+import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
 import org.oscim.generator.JobTile;
@@ -210,7 +210,7 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	@Override
-	public OpenResult open(Map<String, String> options) {
+	public OpenResult open(MapOptions options) {
 		mOpenFile = true;
 		if (mCoords == null) {
 			mCoords = new float[100000];

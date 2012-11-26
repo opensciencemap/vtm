@@ -22,8 +22,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -34,25 +34,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.protocol.RequestAddCookies;
-import org.apache.http.client.protocol.RequestProxyAuthentication;
-import org.apache.http.client.protocol.RequestTargetAuthentication;
-import org.apache.http.client.protocol.ResponseProcessCookies;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.RequestExpectContinue;
-import org.apache.http.protocol.RequestUserAgent;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.Tag;
@@ -60,6 +41,7 @@ import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
+import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
 import org.oscim.generator.JobTile;
@@ -84,16 +66,16 @@ public class MapDatabase implements IMapDatabase {
 
 	private static final boolean USE_CACHE = false;
 
-	private static final boolean USE_APACHE_HTTP = false;
-	private static final boolean USE_LW_HTTP = true;
+	//	private static final boolean USE_APACHE_HTTP = false;
+	//	private static final boolean USE_LW_HTTP = true;
 
 	private static final String CACHE_DIRECTORY = "/Android/data/org.oscim.app/cache/";
 	private static final String CACHE_FILE = "%d-%d-%d.tile";
 
-	private static final String SERVER_ADDR = "city.informatik.uni-bremen.de";
+	//	private static final String SERVER_ADDR = "city.informatik.uni-bremen.de";
 	// private static final String URL =
 	// "http://city.informatik.uni-bremen.de:8020/test/%d/%d/%d.osmtile";
-	private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/test/%d/%d/%d.osmtile";
+	//private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/test/%d/%d/%d.osmtile";
 	//private static final String URL = "http://city.informatik.uni-bremen.de/osmstache/gis-live/%d/%d/%d.osmtile";
 
 	// private static final String URL =
@@ -107,14 +89,16 @@ public class MapDatabase implements IMapDatabase {
 	private Tag[] curTags = new Tag[MAX_TILE_TAGS];
 	private int mCurTagCnt;
 
-	private HttpClient mClient;
-	private HttpGet mRequest = null;
+	//	private HttpClient mClient;
+	//	private HttpGet mRequest = null;
 
 	private IMapDatabaseCallback mMapGenerator;
 	private float mScaleFactor;
 	private JobTile mTile;
 	private FileOutputStream mCacheFile;
 
+	private String mHost;
+	private int mPort;
 	private long mContentLenth;
 	private InputStream mInputStream;
 
@@ -163,75 +147,76 @@ public class MapDatabase implements IMapDatabase {
 				return QueryResult.SUCCESS;
 		}
 
-		String url = null;
-		HttpGet getRequest;
+		//		String url = null;
+		//		HttpGet getRequest;
 
-		if (!USE_LW_HTTP) {
-			url = String.format(URL,
-					Integer.valueOf(tile.zoomLevel),
-					Integer.valueOf(tile.tileX),
-					Integer.valueOf(tile.tileY));
-		}
+		//		if (!USE_LW_HTTP) {
+		//			url = String.format(URL,
+		//					Integer.valueOf(tile.zoomLevel),
+		//					Integer.valueOf(tile.tileX),
+		//					Integer.valueOf(tile.tileY));
+		//		}
 
-		if (USE_APACHE_HTTP) {
-			getRequest = new HttpGet(url);
-			mRequest = getRequest;
-		}
+		//		if (USE_APACHE_HTTP) {
+		//			getRequest = new HttpGet(url);
+		//			mRequest = getRequest;
+		//		}
 
 		try {
-			if (USE_LW_HTTP) {
-				if (lwHttpSendRequest(tile) && lwHttpReadHeader() > 0) {
-					cacheBegin(tile, f);
-					decode();
-				} else {
-					result = QueryResult.FAILED;
-				}
-
-			} else if (USE_APACHE_HTTP) {
-				HttpResponse response = mClient.execute(getRequest);
-				final int statusCode = response.getStatusLine().getStatusCode();
-				final HttpEntity entity = response.getEntity();
-
-				if (statusCode != HttpStatus.SC_OK) {
-					Log.d(TAG, "Http response " + statusCode);
-					entity.consumeContent();
-					return QueryResult.FAILED;
-				}
-				if (!mTile.isLoading) {
-					Log.d(TAG, "1 loading canceled " + mTile);
-					entity.consumeContent();
-
-					return QueryResult.FAILED;
-				}
-
-				InputStream is = null;
-				// GZIPInputStream zis = null;
-				try {
-					is = entity.getContent();
-
-					mContentLenth = entity.getContentLength();
-					mInputStream = is;
-					cacheBegin(tile, f);
-					// zis = new GZIPInputStream(is);
-					decode();
-				} finally {
-					// if (zis != null)
-					// zis.close();
-					if (is != null)
-						is.close();
-					entity.consumeContent();
-				}
+			//			if (USE_LW_HTTP) {
+			if (lwHttpSendRequest(tile) && lwHttpReadHeader() > 0) {
+				cacheBegin(tile, f);
+				decode();
 			} else {
-				HttpURLConnection urlConn =
-						(HttpURLConnection) new URL(url).openConnection();
-
-				InputStream in = urlConn.getInputStream();
-				try {
-					decode();
-				} finally {
-					urlConn.disconnect();
-				}
+				result = QueryResult.FAILED;
 			}
+
+			//			}
+			//			else if (USE_APACHE_HTTP) {
+			//				HttpResponse response = mClient.execute(getRequest);
+			//				final int statusCode = response.getStatusLine().getStatusCode();
+			//				final HttpEntity entity = response.getEntity();
+			//
+			//				if (statusCode != HttpStatus.SC_OK) {
+			//					Log.d(TAG, "Http response " + statusCode);
+			//					entity.consumeContent();
+			//					return QueryResult.FAILED;
+			//				}
+			//				if (!mTile.isLoading) {
+			//					Log.d(TAG, "1 loading canceled " + mTile);
+			//					entity.consumeContent();
+			//
+			//					return QueryResult.FAILED;
+			//				}
+			//
+			//				InputStream is = null;
+			//				// GZIPInputStream zis = null;
+			//				try {
+			//					is = entity.getContent();
+			//
+			//					mContentLenth = entity.getContentLength();
+			//					mInputStream = is;
+			//					cacheBegin(tile, f);
+			//					// zis = new GZIPInputStream(is);
+			//					decode();
+			//				} finally {
+			//					// if (zis != null)
+			//					// zis.close();
+			//					if (is != null)
+			//						is.close();
+			//					entity.consumeContent();
+			//				}
+			//			} else {
+			//				HttpURLConnection urlConn =
+			//						(HttpURLConnection) new URL(url).openConnection();
+			//
+			//				InputStream in = urlConn.getInputStream();
+			//				try {
+			//					decode();
+			//				} finally {
+			//					urlConn.disconnect();
+			//				}
+			//			}
 		} catch (SocketException ex) {
 			Log.d(TAG, "Socket exception: " + ex.getMessage());
 			result = QueryResult.FAILED;
@@ -248,8 +233,8 @@ public class MapDatabase implements IMapDatabase {
 
 		mLastRequest = SystemClock.elapsedRealtime();
 
-		if (USE_APACHE_HTTP)
-			mRequest = null;
+		//		if (USE_APACHE_HTTP)
+		//			mRequest = null;
 
 		cacheFinish(tile, f, result == QueryResult.SUCCESS);
 
@@ -273,36 +258,73 @@ public class MapDatabase implements IMapDatabase {
 		return mOpenFile;
 	}
 
-	private void createClient() {
-		mOpenFile = true;
-		HttpParams params = new BasicHttpParams();
-		HttpConnectionParams.setStaleCheckingEnabled(params, false);
-		HttpConnectionParams.setTcpNoDelay(params, true);
-		HttpConnectionParams.setConnectionTimeout(params, 20 * 1000);
-		HttpConnectionParams.setSoTimeout(params, 60 * 1000);
-		HttpConnectionParams.setSocketBufferSize(params, 32768);
-		HttpClientParams.setRedirecting(params, false);
-
-		DefaultHttpClient client = new DefaultHttpClient(params);
-		client.removeRequestInterceptorByClass(RequestAddCookies.class);
-		client.removeResponseInterceptorByClass(ResponseProcessCookies.class);
-		client.removeRequestInterceptorByClass(RequestUserAgent.class);
-		client.removeRequestInterceptorByClass(RequestExpectContinue.class);
-		client.removeRequestInterceptorByClass(RequestTargetAuthentication.class);
-		client.removeRequestInterceptorByClass(RequestProxyAuthentication.class);
-
-		mClient = client;
-
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http",
-				PlainSocketFactory.getSocketFactory(), 80));
-	}
+	//	private void createClient() {
+	//		mOpenFile = true;
+	//		HttpParams params = new BasicHttpParams();
+	//		HttpConnectionParams.setStaleCheckingEnabled(params, false);
+	//		HttpConnectionParams.setTcpNoDelay(params, true);
+	//		HttpConnectionParams.setConnectionTimeout(params, 20 * 1000);
+	//		HttpConnectionParams.setSoTimeout(params, 60 * 1000);
+	//		HttpConnectionParams.setSocketBufferSize(params, 32768);
+	//		HttpClientParams.setRedirecting(params, false);
+	//
+	//		DefaultHttpClient client = new DefaultHttpClient(params);
+	//		client.removeRequestInterceptorByClass(RequestAddCookies.class);
+	//		client.removeResponseInterceptorByClass(ResponseProcessCookies.class);
+	//		client.removeRequestInterceptorByClass(RequestUserAgent.class);
+	//		client.removeRequestInterceptorByClass(RequestExpectContinue.class);
+	//		client.removeRequestInterceptorByClass(RequestTargetAuthentication.class);
+	//		client.removeRequestInterceptorByClass(RequestProxyAuthentication.class);
+	//
+	//		mClient = client;
+	//
+	//		SchemeRegistry schemeRegistry = new SchemeRegistry();
+	//		schemeRegistry.register(new Scheme("http",
+	//				PlainSocketFactory.getSocketFactory(), 80));
+	//	}
 
 	@Override
-	public OpenResult open(Map<String, String> options) {
+	public OpenResult open(MapOptions options) {
 
-		if (USE_APACHE_HTTP)
-			createClient();
+		//if (USE_APACHE_HTTP)
+		//	createClient();
+
+		if (mOpenFile)
+			return OpenResult.SUCCESS;
+
+		if (options == null || !options.containsKey("url"))
+			return new OpenResult("options missing");
+
+		URL url;
+		try {
+			url = new URL(options.get("url"));
+		} catch (MalformedURLException e) {
+
+			e.printStackTrace();
+			return new OpenResult("invalid url: " + options.get("url"));
+		}
+
+		int port = url.getPort();
+		if (port < 0)
+			port = 80;
+
+		String host = url.getHost();
+		String path = url.getPath();
+		Log.d(TAG, "open oscim database: " + host + " " + port + " " + path);
+
+		REQUEST_GET_START = ("GET " + path).getBytes();
+		REQUEST_GET_END = (".osmtile HTTP/1.1\n" +
+				"Host: " + host + "\n" +
+				"Connection: Keep-Alive\n\n").getBytes();
+
+		mHost = host;
+		mPort = port;
+
+		//mSockAddr = new InetSocketAddress(host, port);
+
+		mRequestBuffer = new byte[1024];
+		System.arraycopy(REQUEST_GET_START, 0,
+				mRequestBuffer, 0, REQUEST_GET_START.length);
 
 		if (USE_CACHE) {
 			if (cacheDir == null) {
@@ -314,29 +336,34 @@ public class MapDatabase implements IMapDatabase {
 			}
 		}
 
+		mOpenFile = true;
+
 		return OpenResult.SUCCESS;
 	}
 
 	@Override
 	public void close() {
 		mOpenFile = false;
-		if (USE_APACHE_HTTP) {
-			if (mClient != null) {
-				mClient.getConnectionManager().shutdown();
-				mClient = null;
-			}
-		}
+		//		if (USE_APACHE_HTTP) {
+		//			if (mClient != null) {
+		//				mClient.getConnectionManager().shutdown();
+		//				mClient = null;
+		//			}
+		//		}
 
-		if (USE_LW_HTTP) {
-			if (mSocket != null) {
-				try {
-					mSocket.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				mSocket = null;
+		//		if (USE_LW_HTTP) {
+
+		mSockAddr = null;
+
+		if (mSocket != null) {
+			try {
+				mSocket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
+			mSocket = null;
 		}
+		//		}
 		if (USE_CACHE) {
 			cacheDir = null;
 		}
@@ -861,10 +888,10 @@ public class MapDatabase implements IMapDatabase {
 			if (mCacheFile != null)
 				mCacheFile.write(mReadBuffer, mBufferSize, len);
 
-			if (USE_LW_HTTP) {
-				if (mReadPos == mContentLenth)
-					break;
-			}
+			//			if (USE_LW_HTTP) {
+			if (mReadPos == mContentLenth)
+				break;
+			//			}
 
 			mBufferSize += len;
 		}
@@ -874,10 +901,10 @@ public class MapDatabase implements IMapDatabase {
 
 	@Override
 	public void cancel() {
-		if (mRequest != null) {
-			mRequest.abort();
-			mRequest = null;
-		}
+		//		if (mRequest != null) {
+		//			mRequest.abort();
+		//			mRequest = null;
+		//		}
 	}
 
 	private int decodeVarint32() throws IOException {
@@ -953,10 +980,11 @@ public class MapDatabase implements IMapDatabase {
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
 	private final static int RESPONSE_EXPECTED_TIMEOUT = 10000;
 
-	private final static byte[] REQUEST_GET_START = "GET /osmstache/test/".getBytes();
-	private final static byte[] REQUEST_GET_END = (".osmtile HTTP/1.1\n" +
-			"Host: " + SERVER_ADDR + "\n" +
-			"Connection: Keep-Alive\n\n").getBytes();
+	private byte[] REQUEST_GET_START;// = "GET /osmstache/test/".getBytes();
+	private byte[] REQUEST_GET_END;
+	// = (".osmtile HTTP/1.1\n" +
+	//"Host: " + SERVER_ADDR + "\n" +
+	//"Connection: Keep-Alive\n\n").getBytes();
 
 	private byte[] mRequestBuffer;
 
@@ -1033,7 +1061,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private boolean lwHttpSendRequest(Tile tile) throws IOException {
 		if (mSockAddr == null) {
-			mSockAddr = new InetSocketAddress(SERVER_ADDR, 80);
+			mSockAddr = new InetSocketAddress(mHost, mPort);
 		}
 
 		if (mSocket != null && ((mMaxReq-- <= 0)
@@ -1099,12 +1127,12 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private boolean lwHttpConnect() throws IOException {
-		if (mRequestBuffer == null) {
-			mRequestBuffer = new byte[1024];
-			System.arraycopy(REQUEST_GET_START,
-					0, mRequestBuffer, 0,
-					REQUEST_GET_START.length);
-		}
+		//		if (mRequestBuffer == null) {
+		//			mRequestBuffer = new byte[1024];
+		//			System.arraycopy(REQUEST_GET_START,
+		//					0, mRequestBuffer, 0,
+		//					REQUEST_GET_START.length);
+		//		}
 
 		mSocket = new Socket();
 		mSocket.connect(mSockAddr, 30000);

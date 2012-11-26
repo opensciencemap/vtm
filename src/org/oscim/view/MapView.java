@@ -30,8 +30,8 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.MapDatabaseFactory;
-import org.oscim.database.MapDatabases;
 import org.oscim.database.MapInfo;
+import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
 import org.oscim.generator.JobQueue;
 import org.oscim.generator.JobTile;
@@ -69,8 +69,6 @@ public class MapView extends RelativeLayout {
 	public static final boolean testRegionZoom = false;
 	private static final boolean debugDatabase = false;
 
-	//	RegionLookup mRegionLookup;
-
 	public boolean enableRotation = false;
 	public boolean enableCompass = false;
 
@@ -82,8 +80,7 @@ public class MapView extends RelativeLayout {
 	private final TouchHandler mTouchEventHandler;
 	private final Compass mCompass;
 
-	private IMapDatabase mMapDatabase;
-	private MapDatabases mMapDatabaseType;
+	//private MapDatabases mMapDatabaseType;
 
 	private TileManager mTileManager;
 	private final OverlayManager mOverlayManager;
@@ -95,9 +92,11 @@ public class MapView extends RelativeLayout {
 	private final MapWorker mMapWorkers[];
 	private final int mNumMapWorkers = 4;
 
+	private MapOptions mMapOptions;
+	private IMapDatabase mMapDatabase;
+
 	private DebugSettings debugSettings;
 	private String mRenderTheme;
-	private Map<String, String> mMapOptions;
 
 	private boolean mClearTiles;
 
@@ -109,7 +108,7 @@ public class MapView extends RelativeLayout {
 	 *             {@link MapActivity} .
 	 */
 	public MapView(Context context) {
-		this(context, null, MapDatabases.MAP_READER);
+		this(context, null);
 	}
 
 	/**
@@ -121,13 +120,8 @@ public class MapView extends RelativeLayout {
 	 *             if the context object is not an instance of
 	 *             {@link MapActivity} .
 	 */
+
 	public MapView(Context context, AttributeSet attributeSet) {
-		this(context, attributeSet, MapDatabaseFactory.getMapDatabase(attributeSet));
-	}
-
-	private MapView(Context context, AttributeSet attributeSet,
-			MapDatabases mapDatabaseType) {
-
 		super(context, attributeSet);
 
 		if (!(context instanceof MapActivity)) {
@@ -135,8 +129,6 @@ public class MapView extends RelativeLayout {
 					"context is not an instance of MapActivity");
 		}
 
-		Log.d(TAG, "create MapView: " + mapDatabaseType.name());
-		//		this.setDrawingCacheEnabled(true);
 		this.setWillNotDraw(true);
 
 		// TODO set tilesize, make this dpi dependent
@@ -144,11 +136,7 @@ public class MapView extends RelativeLayout {
 
 		MapActivity mapActivity = (MapActivity) context;
 
-		// mHandler = new DelayedTaskHandler();
-
 		debugSettings = new DebugSettings(false, false, false, false);
-
-		mMapDatabaseType = mapDatabaseType;
 
 		mMapViewPosition = new MapViewPosition(this);
 		mMapPosition = new MapPosition();
@@ -168,32 +156,13 @@ public class MapView extends RelativeLayout {
 		mMapWorkers = new MapWorker[mNumMapWorkers];
 
 		for (int i = 0; i < mNumMapWorkers; i++) {
-			IMapDatabase mapDatabase;
-			if (debugDatabase) {
-				// mapDatabase = MapDatabaseFactory
-				// .createMapDatabase(MapDatabases.TEST_READER);
-				mapDatabase = MapDatabaseFactory
-						.createMapDatabase(MapDatabases.MAP_READER);
-				// mNumMapWorkers = 1;
-			} else {
-				mapDatabase = MapDatabaseFactory.createMapDatabase(mapDatabaseType);
-			}
-
 			TileGenerator tileGenerator = new TileGenerator(this);
-			tileGenerator.setMapDatabase(mapDatabase);
-
-			if (i == 0)
-				mMapDatabase = mapDatabase;
-
 			mMapWorkers[i] = new MapWorker(i, mJobQueue, tileGenerator, mTileManager);
+			mMapWorkers[i].start();
 		}
 
 		mapActivity.registerMapView(this);
 
-		if (!mMapDatabase.isOpen()) {
-			Log.d(TAG, "open database with defaults");
-			setMapOptions(null);
-		}
 		if (!mMapViewPosition.isValid()) {
 			Log.d(TAG, "set default start position");
 			setMapCenter(getStartPosition());
@@ -205,16 +174,9 @@ public class MapView extends RelativeLayout {
 
 		addView(mGLView, params);
 
-		//		if (testRegionZoom)
-		//			mRegionLookup = new RegionLookup(this);
-
 		mMapZoomControls = new MapZoomControls(mapActivity, this);
 		mMapZoomControls.setShowMapZoomControls(true);
-
 		enableRotation = true;
-
-		for (MapWorker worker : mMapWorkers)
-			worker.start();
 
 		mOverlayManager.add(new LabelingOverlay(this));
 		//mOverlayManager.add(new GenericOverlay(this, new OverlayGrid(this)));
@@ -245,6 +207,10 @@ public class MapView extends RelativeLayout {
 		//		mOverlayManager.add(pathOverlay);
 
 		//		mMapViewPosition.animateTo(new GeoPoint(53.067221, 8.78767));
+
+		//		if (testRegionZoom)
+		//			mRegionLookup = new RegionLookup(this);
+
 	}
 
 	public void render() {
@@ -252,12 +218,12 @@ public class MapView extends RelativeLayout {
 			mGLView.requestRender();
 	}
 
-	/**
-	 * @return the map database which is used for reading map files.
-	 */
-	public IMapDatabase getMapDatabase() {
-		return mMapDatabase;
-	}
+	//	/**
+	//	 * @return the map database which is used for reading map files.
+	//	 */
+	//	public IMapDatabase getMapDatabase() {
+	//		return mMapDatabase;
+	//	}
 
 	/**
 	 * @return the current position and zoom level of this MapView.
@@ -344,48 +310,6 @@ public class MapView extends RelativeLayout {
 		return mMapOptions;
 	}
 
-	/**
-	 * Sets the map file for this MapView.
-	 * @param mapOptions
-	 *            ...
-	 * @return true if the map file was set correctly, false otherwise.
-	 */
-	public boolean setMapOptions(Map<String, String> mapOptions) {
-		OpenResult openResult = null;
-
-		boolean initialized = false;
-
-		mJobQueue.clear();
-		mapWorkersPause(true);
-
-		for (MapWorker mapWorker : mMapWorkers) {
-
-			TileGenerator tileGenerator = mapWorker.getMapGenerator();
-			IMapDatabase mapDatabase = tileGenerator.getMapDatabase();
-
-			mapDatabase.close();
-			openResult = mapDatabase.open(null);
-
-			if (openResult.isSuccess())
-				initialized = true;
-		}
-
-		mapWorkersProceed();
-
-		if (initialized) {
-			mMapOptions = mapOptions;
-			clearAndRedrawMap();
-
-			Log.i(TAG, "MapDatabase ready");
-			return true;
-		}
-
-		mMapOptions = null;
-		Log.i(TAG, "Opening MapDatabase failed");
-
-		return false;
-	}
-
 	private MapPosition getStartPosition() {
 		if (mMapDatabase == null)
 			return new MapPosition();
@@ -410,34 +334,44 @@ public class MapView extends RelativeLayout {
 
 	/**
 	 * Sets the MapDatabase for this MapView.
-	 * @param mapDatabaseType
-	 *            the new MapDatabase.
+	 * @param options
+	 *            the new MapDatabase options.
+	 * @return ...
 	 */
-
-	public void setMapDatabase(MapDatabases mapDatabaseType) {
+	public boolean setMapDatabase(MapOptions options) {
 		if (debugDatabase)
-			return;
+			return false;
 
-		Log.i(TAG, "setMapDatabase " + mapDatabaseType.name());
+		Log.i(TAG, "setMapDatabase " + options.db.name());
 
-		if (mMapDatabaseType == mapDatabaseType)
-			return;
+		if (mMapOptions != null && mMapOptions.equals(options))
+			return true;
 
-		mMapDatabaseType = mapDatabaseType;
 		mapWorkersPause(true);
-
-		for (MapWorker mapWorker : mMapWorkers) {
-			TileGenerator tileGenerator = mapWorker.getMapGenerator();
-
-			tileGenerator.setMapDatabase(MapDatabaseFactory
-					.createMapDatabase(mapDatabaseType));
-		}
 
 		mJobQueue.clear();
 		mClearTiles = true;
+		mMapOptions = options;
 
-		setMapOptions(null);
+		for (int i = 0; i < mNumMapWorkers; i++) {
+			MapWorker mapWorker = mMapWorkers[i];
+
+			IMapDatabase mapDatabase = MapDatabaseFactory
+					.createMapDatabase(options.db);
+
+			OpenResult result = mapDatabase.open(options);
+
+			if (result != OpenResult.SUCCESS) {
+				Log.d(TAG, "failed open db: " + result.getErrorMessage());
+			}
+
+			TileGenerator tileGenerator = mapWorker.getTileGenerator();
+			tileGenerator.setMapDatabase(mapDatabase);
+		}
+
 		mapWorkersProceed();
+
+		return true;
 	}
 
 	public String getRenderTheme() {
@@ -556,8 +490,8 @@ public class MapView extends RelativeLayout {
 				// restore the interrupted status
 				Thread.currentThread().interrupt();
 			}
-			IMapDatabase mapDatabase = mapWorker.getMapGenerator().getMapDatabase();
-			mapDatabase.close();
+			TileGenerator tileGenerator = mapWorker.getTileGenerator();
+			tileGenerator.getMapDatabase().close();
 		}
 	}
 

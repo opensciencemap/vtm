@@ -478,6 +478,9 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private String mMapProjection;
 
 	public void setMapDatabase(IMapDatabase mapDatabase) {
+		if (mMapDatabase != null)
+			mMapDatabase.close();
+
 		mMapDatabase = mapDatabase;
 		mMapProjection = mMapDatabase.getMapProjection();
 	}

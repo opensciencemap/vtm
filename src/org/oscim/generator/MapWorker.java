@@ -48,7 +48,7 @@ public class MapWorker extends PausableThread {
 		THREAD_NAME = "MapWorker" + id;
 	}
 
-	public TileGenerator getMapGenerator() {
+	public TileGenerator getTileGenerator() {
 		return mMapGenerator;
 	}
 

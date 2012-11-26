@@ -17,7 +17,6 @@ package org.oscim.database.mapfile;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +24,7 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
+import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
 import org.oscim.database.mapfile.header.MapFileHeader;
@@ -273,7 +273,7 @@ public class MapDatabase implements IMapDatabase {
 	 * @see org.oscim.map.reader.IMapDatabase#openFile(java.io.File)
 	 */
 	@Override
-	public OpenResult open(Map<String, String> options) {
+	public OpenResult open(MapOptions options) {
 		// if (options == null) {
 		// options = new HashMap<String, String>(1);
 		// options.put("mapfile", "/sdcard/bremen.map");
