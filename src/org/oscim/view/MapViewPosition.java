@@ -537,15 +537,25 @@ public class MapViewPosition {
 	}
 
 	synchronized void setMapCenter(MapPosition mapPosition) {
-		mZoomLevel = mMapView.limitZoomLevel(mapPosition.zoomLevel);
+		//mZoomLevel = mMapView.limitZoomLevel(mapPosition.zoomLevel);
+		setZoomLevelLimit(mapPosition.zoomLevel);
 		mMapScale = 1 << mZoomLevel;
 		setMapCenter(mapPosition.lat, mapPosition.lon);
 	}
 
 	synchronized void setZoomLevel(byte zoomLevel) {
-		mZoomLevel = mMapView.limitZoomLevel(zoomLevel);
+		//mZoomLevel = mMapView.limitZoomLevel(zoomLevel);
+		setZoomLevelLimit(zoomLevel);
 		mMapScale = 1 << mZoomLevel;
 		updatePosition();
+	}
+
+	private void setZoomLevelLimit(byte zoomLevel) {
+		mZoomLevel = zoomLevel;
+		if (mZoomLevel > MAX_ZOOMLEVEL)
+			mZoomLevel = MAX_ZOOMLEVEL;
+		else if (mZoomLevel < MIN_ZOOMLEVEL)
+			mZoomLevel = MIN_ZOOMLEVEL;
 	}
 
 	synchronized void setScale(float scale) {
