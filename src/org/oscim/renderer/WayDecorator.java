@@ -18,8 +18,6 @@ import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.renderinstruction.Text;
 import org.oscim.utils.GeometryUtils;
 
-import android.util.FloatMath;
-
 public final class WayDecorator {
 	// /**
 	// * Minimum distance in pixels before the symbol is repeated.
@@ -168,7 +166,7 @@ public final class WayDecorator {
 				continue;
 			}
 
-			float segmentLengthInPixel = FloatMath.sqrt(diffX * diffX + diffY * diffY);
+			double segmentLengthInPixel = Math.sqrt(diffX * diffX + diffY * diffY);
 
 			if (skipPixels > 0) {
 				skipPixels -= segmentLengthInPixel;
@@ -181,7 +179,7 @@ public final class WayDecorator {
 
 				if (segmentLengthInPixel > wayNameWidth * 0.80) {
 
-					float s = (wayNameWidth + 25) / segmentLengthInPixel;
+					float s = (wayNameWidth + 25) / (float) segmentLengthInPixel;
 					int width, height;
 					int x1, y1, x2, y2;
 
@@ -240,21 +238,6 @@ public final class WayDecorator {
 						previousY = (int) coordinates[pos + i + 1];
 						continue;
 					}
-
-					// Log.d("mapsforge", "add " + text + " " + first + " " +
-					// last);
-
-					//					if (previousX < currentX) {
-					//						x1 = previousX;
-					//						y1 = previousY;
-					//						x2 = currentX;
-					//						y2 = currentY;
-					//					} else {
-					//						x1 = currentX;
-					//						y1 = currentY;
-					//						x2 = previousX;
-					//						y2 = previousY;
-					//					}
 
 					// if (t == null)
 					t = TextItem.get();
