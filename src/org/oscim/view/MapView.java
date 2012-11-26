@@ -552,13 +552,13 @@ public class MapView extends RelativeLayout {
 		return true;
 	}
 
-	byte limitZoomLevel(byte zoom) {
-		if (mMapZoomControls == null)
-			return zoom;
-
-		return (byte) Math.max(Math.min(zoom, getMaximumPossibleZoomLevel()),
-				mMapZoomControls.getZoomLevelMin());
-	}
+	//	byte limitZoomLevel(byte zoom) {
+	//		if (mMapZoomControls == null)
+	//			return zoom;
+	//
+	//		return (byte) Math.max(Math.min(zoom, getMaximumPossibleZoomLevel()),
+	//				mMapZoomControls.getZoomLevelMin());
+	//	}
 
 	/**
 	 * Sets the center and zoom level of this MapView and triggers a redraw.
