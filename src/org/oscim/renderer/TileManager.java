@@ -543,7 +543,7 @@ public class TileManager {
 
 			if (t.isLocked()) {
 				// dont remove tile used by GLRenderer, or somewhere else
-				Log.d(TAG, "X not removing " + t + " " + t.distance);
+				Log.d(TAG, "limitCache: tile still locked " + t + " " + t.distance);
 				mTiles.add(t);
 			} else if (t.isLoading) {
 				// NOTE: if we add tile back and set loading=false, on next
@@ -555,7 +555,7 @@ public class TileManager {
 				// processed in TileGenerator => need tile.cancel flag.
 				// t.isLoading = false;
 				mTiles.add(t);
-				Log.d(TAG, "X cancel loading " + t + " " + t.distance);
+				Log.d(TAG, "limitCache: cancel loading " + t + " " + t.distance);
 			} else {
 				clearTile(t);
 			}
