@@ -14,7 +14,6 @@
  */
 package org.oscim.utils;
 
-import static android.opengl.GLES20.glUniform4f;
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
@@ -144,19 +143,29 @@ public class GlUtils {
 		return oom;
 	}
 
-	public static void setBlendColors(int handle, float[] c1, float[] c2, float alpha) {
+	// this is save as it can only be called from glThread
+	private static float[] tmpColor = new float[4];
 
-		glUniform4f(handle,
-				c1[0] * (1 - alpha) + c2[0] * alpha,
-				c1[1] * (1 - alpha) + c2[1] * alpha,
-				c1[2] * (1 - alpha) + c2[2] * alpha, 1);
+	public static void setBlendColors(int handle, float[] c1, float[] c2, float alpha) {
+		tmpColor[0] = c1[0] * (1 - alpha) + c2[0] * alpha;
+		tmpColor[1] = c1[1] * (1 - alpha) + c2[1] * alpha;
+		tmpColor[2] = c1[2] * (1 - alpha) + c2[2] * alpha;
+		tmpColor[3] = c1[3] * (1 - alpha) + c2[3] * alpha;
+
+		GLES20.glUniform4fv(handle, 1, tmpColor, 0);
 	}
 
 	public static void setColor(int handle, float[] c, float alpha) {
 		if (alpha >= 1)
 			GLES20.glUniform4fv(handle, 1, c, 0);
-		else
-			glUniform4f(handle, c[0] * alpha, c[1] * alpha, c[2] * alpha, c[3] * alpha);
+		else {
+			tmpColor[0] = c[0] * alpha;
+			tmpColor[1] = c[1] * alpha;
+			tmpColor[2] = c[2] * alpha;
+			tmpColor[3] = c[3] * alpha;
+
+			GLES20.glUniform4fv(handle, 1, tmpColor, 0);
+		}
 	}
 
 	public static float[] colorToFloat(int color) {
