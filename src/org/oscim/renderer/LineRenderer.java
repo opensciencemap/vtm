@@ -22,8 +22,9 @@ import org.oscim.utils.GlUtils;
 
 import android.graphics.Paint.Cap;
 import android.opengl.GLES20;
-import android.util.FloatMath;
 import android.util.Log;
+
+// FIXME make sure coordinates are in valid range for short
 
 public final class LineRenderer {
 	private final static String TAG = "LineRenderer";
@@ -90,6 +91,11 @@ public final class LineRenderer {
 
 		GLES20.glUseProgram(lineProgram[mode]);
 
+		int uLineScale = hLineScale[mode];
+		int uLineMode = hLineMode[mode];
+		int uLineColor = hLineColor[mode];
+		int uLineWidth = hLineWidth[mode];
+
 		// int va = hLineVertexPosition[mode];
 		// if (!GLRenderer.vertexArray[va]) {
 		// GLES20.glEnableVertexAttribArray(va);
@@ -121,12 +127,12 @@ public final class LineRenderer {
 		if (mode == 1)
 			pixel = 1.5f / s;
 
-		GLES20.glUniform1f(hLineScale[mode], pixel);
+		GLES20.glUniform1f(uLineScale, pixel);
 		int lineMode = 0;
-		GLES20.glUniform1i(hLineMode[mode], lineMode);
+		GLES20.glUniform1i(uLineMode, lineMode);
 
 		// line scale factor (for non fixed lines)
-		float lineScale = FloatMath.sqrt(s);
+		float lineScale = (float) Math.sqrt(s);
 		float blurScale = pixel;
 		boolean blur = false;
 		// dont increase scale when max is reached
@@ -146,10 +152,10 @@ public final class LineRenderer {
 			if (line.fade >= zoom)
 				alpha = (scale > 1.2f ? scale : 1.2f) - alpha;
 
-			GlUtils.setColor(hLineColor[mode], line.color, alpha);
+			GlUtils.setColor(uLineColor, line.color, alpha);
 
 			if (blur && line.blur == 0) {
-				GLES20.glUniform1f(hLineScale[mode], pixel);
+				GLES20.glUniform1f(uLineScale, pixel);
 				blur = false;
 			}
 
@@ -162,22 +168,22 @@ public final class LineRenderer {
 						width = ll.width / s + o.width / lineScale;
 					}
 
-					GLES20.glUniform1f(hLineWidth[mode], width);
+					GLES20.glUniform1f(uLineWidth, width);
 
 					if (line.blur != 0) {
 						blurScale = (ll.width + o.width) / s - (line.blur / s);
-						GLES20.glUniform1f(hLineScale[mode], blurScale);
+						GLES20.glUniform1f(uLineScale, blurScale);
 						blur = true;
 					}
 
 					if (o.line.cap == Cap.ROUND) {
 						if (lineMode != 1) {
 							lineMode = 1;
-							GLES20.glUniform1i(hLineMode[mode], lineMode);
+							GLES20.glUniform1i(uLineMode, lineMode);
 						}
 					} else if (lineMode != 0) {
 						lineMode = 0;
-						GLES20.glUniform1i(hLineMode[mode], lineMode);
+						GLES20.glUniform1i(uLineMode, lineMode);
 					}
 
 					GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
@@ -192,22 +198,22 @@ public final class LineRenderer {
 					width = ll.width / lineScale;
 				}
 
-				GLES20.glUniform1f(hLineWidth[mode], width);
+				GLES20.glUniform1f(uLineWidth, width);
 
 				if (line.blur != 0) {
 					blurScale = (ll.width / lineScale) * line.blur;
-					GLES20.glUniform1f(hLineScale[mode], blurScale);
+					GLES20.glUniform1f(uLineScale, blurScale);
 					blur = true;
 				}
 
 				if (line.cap == Cap.ROUND) {
 					if (lineMode != 1) {
 						lineMode = 1;
-						GLES20.glUniform1i(hLineMode[mode], lineMode);
+						GLES20.glUniform1i(uLineMode, lineMode);
 					}
 				} else if (lineMode != 0) {
 					lineMode = 0;
-					GLES20.glUniform1i(hLineMode[mode], lineMode);
+					GLES20.glUniform1i(uLineMode, lineMode);
 				}
 
 				GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
