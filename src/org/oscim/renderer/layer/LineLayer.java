@@ -17,6 +17,7 @@ package org.oscim.renderer.layer;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.theme.renderinstruction.Line;
+import org.oscim.view.MapView;
 
 import android.graphics.Paint.Cap;
 
@@ -82,6 +83,10 @@ public final class LineLayer extends Layer {
 		short v[] = si.vertices;
 		int opos = si.used;
 
+		// FIXME: remove this when switching to oscimap MapDatabase
+		if (!MapView.enableClosePolygons)
+			closed = false;
+
 		for (int i = 0, pos = 0, n = index.length; i < n; i++) {
 
 			int length = index[i];
@@ -99,9 +104,6 @@ public final class LineLayer extends Layer {
 				pos += length;
 				continue;
 			}
-
-			// FIXME: remove this when switching to oscimap MapDatabase
-			closed = false;
 
 			// amount of vertices used
 			// + 2 for drawing triangle-strip

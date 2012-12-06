@@ -30,6 +30,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.MapDatabaseFactory;
+import org.oscim.database.MapDatabases;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
@@ -99,6 +100,9 @@ public class MapView extends RelativeLayout {
 	private String mRenderTheme;
 
 	private boolean mClearTiles;
+
+	// FIXME: keep until old pbmap reader is removed
+	public static boolean enableClosePolygons = false;
 
 	/**
 	 * @param context
@@ -368,6 +372,11 @@ public class MapView extends RelativeLayout {
 			TileGenerator tileGenerator = mapWorker.getTileGenerator();
 			tileGenerator.setMapDatabase(mapDatabase);
 		}
+
+		if (options.db == MapDatabases.OSCIMAP_READER)
+			MapView.enableClosePolygons = true;
+		else
+			MapView.enableClosePolygons = false;
 
 		mapWorkersProceed();
 
