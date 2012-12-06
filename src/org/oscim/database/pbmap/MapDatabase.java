@@ -857,8 +857,8 @@ public class MapDatabase implements IMapDatabase {
 		if (mBufferSize == mBufferPos) {
 			mBufferPos = 0;
 			mBufferSize = 0;
-		} else if (mBufferPos + (size - mBufferSize) > BUFFER_SIZE) {
-			Log.d(TAG, "wrap buffer" + (size - mBufferSize) + " " + mBufferPos);
+		} else if (mBufferPos + size > BUFFER_SIZE) {
+			//Log.d(TAG, "wrap buffer" + (size - mBufferSize) + " " + mBufferPos);
 			// copy bytes left to read to the beginning of buffer
 			mBufferSize -= mBufferPos;
 			System.arraycopy(mReadBuffer, mBufferPos, mReadBuffer, 0, mBufferSize);
