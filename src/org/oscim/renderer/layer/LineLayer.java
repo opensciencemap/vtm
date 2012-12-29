@@ -424,13 +424,9 @@ public final class LineLayer extends Layer {
 				// For rounded line edges
 				ddx = (int) ((ux - vx) * DIR_SCALE);
 				ddy = (int) ((uy - vy) * DIR_SCALE);
-				dx = (short) (0 | ddx & DIR_MASK);
-				dy = (short) (0 | ddy & DIR_MASK);
 
-				if (flip) {
-					ddx *= -1;
-					ddy *= -1;
-				}
+				dx = (short) (0 | (flip ? -ddx : ddx) & DIR_MASK);
+				dy = (short) (0 | (flip ? -ddy : ddy) & DIR_MASK);
 
 				v[opos++] = ox;
 				v[opos++] = oy;
@@ -446,13 +442,8 @@ public final class LineLayer extends Layer {
 				// add last vertex twice
 				ddx = (int) (-(ux + vx) * DIR_SCALE);
 				ddy = (int) (-(uy + vy) * DIR_SCALE);
-				dx = (short) (2 | ddx & DIR_MASK);
-				dy = (short) (0 | ddy & DIR_MASK);
-
-				if (flip) {
-					ddx *= -1;
-					ddy *= -1;
-				}
+				dx = (short) (2 | (flip ? -ddx : ddx) & DIR_MASK);
+				dy = (short) (0 | (flip ? -ddy : ddy) & DIR_MASK);
 
 				v[opos++] = ox;
 				v[opos++] = oy;
@@ -484,14 +475,11 @@ public final class LineLayer extends Layer {
 
 				ddx = (int) ((ux - vx) * DIR_SCALE);
 				ddy = (int) ((uy - vy) * DIR_SCALE);
-				if (flip) {
-					ddx *= -1;
-					ddy *= -1;
-				}
+
 				v[opos++] = ox;
 				v[opos++] = oy;
-				v[opos++] = (short) (0 | ddx & DIR_MASK);
-				v[opos++] = (short) (1 | ddy & DIR_MASK);
+				v[opos++] = (short) (0 | (flip ? -ddx : ddx) & DIR_MASK);
+				v[opos++] = (short) (1 | (flip ? -ddy : ddy) & DIR_MASK);
 
 				if (opos == VertexPoolItem.SIZE) {
 					si = si.next = VertexPool.get();
@@ -502,12 +490,8 @@ public final class LineLayer extends Layer {
 				// add last vertex twice
 				ddx = (int) (-(ux + vx) * DIR_SCALE);
 				ddy = (int) (-(uy + vy) * DIR_SCALE);
-				if (flip) {
-					ddx *= -1;
-					ddy *= -1;
-				}
-				dx = (short) (2 | ddx & DIR_MASK);
-				dy = (short) (1 | ddy & DIR_MASK);
+				dx = (short) (2 | (flip ? -ddx : ddx) & DIR_MASK);
+				dy = (short) (1 | (flip ? -ddy : ddy) & DIR_MASK);
 
 				v[opos++] = ox;
 				v[opos++] = oy;

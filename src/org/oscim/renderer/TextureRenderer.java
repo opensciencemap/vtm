@@ -24,7 +24,6 @@ import org.oscim.renderer.layer.TextureLayer;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
-import android.util.FloatMath;
 import android.util.Log;
 
 public final class TextureRenderer {
@@ -97,23 +96,13 @@ public final class TextureRenderer {
 		// GlUtils.checkGlError("draw texture >");
 		GLES20.glUseProgram(mTextureProgram);
 
-		int va = hTextureTexCoord;
-		//if (!GLRenderer.vertexArray[va]) {
-		GLES20.glEnableVertexAttribArray(va);
-		//	GLRenderer.vertexArray[va] = true;
-		//}
-
-		va = hTextureVertex;
-		//if (!GLRenderer.vertexArray[va]) {
-		GLES20.glEnableVertexAttribArray(va);
-		//	GLRenderer.vertexArray[va] = true;
-		//}
+		GLRenderer.enableVertexArrays(hTextureTexCoord, hTextureVertex);
 
 		TextureLayer tl = (TextureLayer) layer;
 
 		if (tl.fixed)
 
-			GLES20.glUniform1f(hTextureScale, FloatMath.sqrt(scale));
+			GLES20.glUniform1f(hTextureScale, (float) Math.sqrt(scale));
 		else
 			GLES20.glUniform1f(hTextureScale, 1);
 
@@ -154,9 +143,6 @@ public final class TextureRenderer {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		// GlUtils.checkGlError("< draw texture");
-
-		GLES20.glDisableVertexAttribArray(hTextureVertex);
-		GLES20.glDisableVertexAttribArray(hTextureTexCoord);
 
 		return layer.next;
 	}
