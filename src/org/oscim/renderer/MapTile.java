@@ -37,12 +37,12 @@ public final class MapTile extends JobTile {
 	/**
 	 * tile has new data to upload to gl
 	 */
-	boolean newData;
+	//boolean newData;
 
 	/**
 	 * tile is loaded and ready for drawing.
 	 */
-	boolean isReady;
+	//boolean isReady;
 
 	/**
 	 * tile is in view region.
@@ -80,7 +80,7 @@ public final class MapTile extends JobTile {
 	}
 
 	boolean isActive() {
-		return isLoading || newData || isReady;
+		return state != 0;
 	}
 
 	boolean isLocked() {
@@ -91,18 +91,22 @@ public final class MapTile extends JobTile {
 
 		locked++;
 
-		if (locked > 1 || isReady || newData)
+		if (locked > 1)
 			return;
+
+		//if (isReady || newData)
+		// return;
 
 		MapTile p = rel.parent.tile;
 
-		if (p != null && (p.isReady || p.newData || p.isLoading)) {
+		if (p != null && (p.state != 0)) {
 			proxies |= PROXY_PARENT;
 			p.refs++;
 		}
 
+		// FIXME handle root-tile case?
 		p = rel.parent.parent.tile;
-		if (p != null && (p.isReady || p.newData || p.isLoading)) {
+		if (p != null && (p.state != 0)) {
 			proxies |= PROXY_GRAMPA;
 			p.refs++;
 		}
@@ -110,7 +114,7 @@ public final class MapTile extends JobTile {
 		for (int j = 0; j < 4; j++) {
 			if (rel.child[j] != null) {
 				p = rel.child[j].tile;
-				if (p != null && (p.isReady || p.newData || p.isLoading)) {
+				if (p != null && (p.state != 0)) {
 					proxies |= (1 << j);
 					p.refs++;
 				}

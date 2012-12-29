@@ -21,6 +21,8 @@ import static android.opengl.GLES20.GL_DYNAMIC_DRAW;
 import static android.opengl.GLES20.GL_ONE;
 import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
 import static android.opengl.GLES20.GL_POLYGON_OFFSET_FILL;
+import static org.oscim.generator.JobTile.STATE_NEW_DATA;
+import static org.oscim.generator.JobTile.STATE_READY;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -166,6 +168,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				holder = new MapTile(x, y, mZoom);
 				holder.isVisible = true;
 				holder.holder = tile;
+				tile.isVisible = true;
 				tiles[cnt + mHolderCount++] = holder;
 			}
 		}
@@ -281,20 +284,19 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		return true;
 	}
 
-	private static boolean uploadTileData(MapTile tile) {
-		if (tile.layers != null) {
-			tile.isReady = uploadLayers(tile.layers, tile.vbo, true);
-
-			if (!tile.isReady) {
-				Log.d(TAG, "uploadTileData " + tile + " is empty!");
-				tile.layers.clear();
-				tile.layers = null;
-			}
+	private static void uploadTileData(MapTile tile) {
+		if (tile.layers == null) {
+			BufferObject.release(tile.vbo);
+			tile.vbo = null;
+		} else if (!uploadLayers(tile.layers, tile.vbo, true)) {
+			Log.d(TAG, "uploadTileData " + tile + " failed!");
+			tile.layers.clear();
+			tile.layers = null;
+			BufferObject.release(tile.vbo);
+			tile.vbo = null;
 		}
-		tile.newData = false;
-		// Log.d(TAG, "uploaded " + tile.isReady + " " + tile);
 
-		return tile.isReady;
+		tile.state = STATE_READY;
 	}
 
 	private static boolean uploadOverlayData(RenderOverlay renderOverlay) {
@@ -307,10 +309,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		return renderOverlay.isReady;
 	}
 
-	private static void checkBufferUsage() {
+	private static void checkBufferUsage(boolean force) {
 		// try to clear some unused vbo when exceding limit
 
-		if (mBufferMemoryUsage < LIMIT_BUFFERS) {
+		if (!force && mBufferMemoryUsage < LIMIT_BUFFERS) {
 			if (CACHE_TILES < CACHE_TILES_MAX)
 				CACHE_TILES += 50;
 			return;
@@ -457,23 +459,23 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			if (!tile.isVisible)
 				continue;
 
-			if (tile.newData) {
+			if (tile.state == STATE_NEW_DATA) {
 				uploadTileData(tile);
 				continue;
 			}
 
 			if (tile.holder != null) {
 				// load tile that is referenced by this holder
-				if (tile.holder.newData)
+				if (tile.holder.state == STATE_NEW_DATA)
 					uploadTileData(tile.holder);
 
-				tile.isReady = tile.holder.isReady;
+				tile.state = tile.holder.state;
 
-			} else if (!tile.isReady) {
+			} else if (tile.state != STATE_READY) {
 				// check near relatives than can serve as proxy
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					MapTile rel = tile.rel.parent.tile;
-					if (rel.newData)
+					if (rel.state == STATE_NEW_DATA)
 						uploadTileData(rel);
 
 					continue;
@@ -483,14 +485,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 						continue;
 
 					MapTile rel = tile.rel.child[c].tile;
-					if (rel != null && rel.newData)
+					if (rel != null && rel.state == STATE_NEW_DATA)
 						uploadTileData(rel);
 				}
 			}
 		}
 
 		if (uploadCnt > 0)
-			checkBufferUsage();
+			checkBufferUsage(false);
 
 		tilesChanged |= (uploadCnt > 0);
 
@@ -507,7 +509,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
-			if (t.isVisible && t.isReady)
+			if (t.isVisible && t.state == STATE_READY)
 				drawTile(t);
 		}
 
@@ -517,7 +519,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// TODO draw proxies for placeholder...
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
-			if (t.isVisible && !t.isReady && (t.holder == null))
+			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null))
 				drawProxyTile(t);
 		}
 
@@ -579,6 +581,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					mapPosition.viewMatrix, 0);
 			PolygonRenderer.debugDraw(mMVPMatrix, mDebugCoords, 1);
 		}
+
+		if (GlUtils.checkGlOutOfMemory("finish")) {
+			checkBufferUsage(true);
+			// TODO also throw out some textures etc
+		}
 	}
 
 	// used to not draw a tile twice per frame.
@@ -599,6 +606,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		if (tile.holder != null)
 			tile = tile.holder;
+
+		if (tile.layers == null)
+			return;
 
 		GLES20.glPolygonOffset(0, mDrawCount++);
 
@@ -654,7 +664,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 			MapTile c = tile.rel.child[i].tile;
 
-			if (c.isReady) {
+			if (c.state == STATE_READY) {
 				drawTile(c);
 				drawn++;
 			}
@@ -671,7 +681,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			if (!drawProxyChild(tile)) {
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					MapTile t = tile.rel.parent.tile;
-					if (t.isReady) {
+					if (t.state == STATE_READY) {
 						drawTile(t);
 						drawn = true;
 					}
@@ -679,7 +689,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 				if (!drawn && (tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
 					MapTile t = tile.rel.parent.parent.tile;
-					if (t.isReady)
+					if (t.state == STATE_READY)
 						drawTile(t);
 
 				}
@@ -688,14 +698,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			// prefer drawing parent
 			MapTile t = tile.rel.parent.tile;
 
-			if (t != null && t.isReady) {
+			if (t != null && t.state == STATE_READY) {
 				drawTile(t);
 
 			} else if (!drawProxyChild(tile)) {
 
 				if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
 					t = tile.rel.parent.parent.tile;
-					if (t.isReady)
+					if (t.state == STATE_READY)
 						drawTile(t);
 				}
 			}
@@ -790,5 +800,34 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	void clearBuffer() {
 		mNewSurface = true;
+	}
+
+	public static void enableVertexArrays(int va1, int va2) {
+		if (va1 > 1 || va2 > 1)
+			Log.d(TAG, "FIXME: enableVertexArrays...");
+
+		if ((va1 == 0 || va2 == 0)) {
+			if (!vertexArray[0]) {
+				GLES20.glEnableVertexAttribArray(0);
+				vertexArray[0] = true;
+			}
+		} else {
+			if (vertexArray[0]) {
+				GLES20.glDisableVertexAttribArray(0);
+				vertexArray[0] = false;
+			}
+		}
+
+		if ((va1 == 1 || va2 == 1)) {
+			if (!vertexArray[1]) {
+				GLES20.glEnableVertexAttribArray(1);
+				vertexArray[1] = true;
+			}
+		} else {
+			if (vertexArray[1]) {
+				GLES20.glDisableVertexAttribArray(1);
+				vertexArray[1] = false;
+			}
+		}
 	}
 }

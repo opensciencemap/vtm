@@ -41,7 +41,8 @@ public class JobQueue {
 
 		for (int i = 0, n = tiles.size(); i < n; i++) {
 			JobTile tile = tiles.get(i);
-			tile.isLoading = true;
+			//tile.isLoading = true;
+			tile.state = JobTile.STATE_LOADING;
 			mPriorityQueue.offer(tile);
 		}
 	}
@@ -50,10 +51,10 @@ public class JobQueue {
 	 * Removes all jobs from this queue.
 	 */
 	public synchronized void clear() {
-
 		JobTile t;
 		while ((t = mPriorityQueue.poll()) != null)
-			t.isLoading = false;
+			t.state = JobTile.STATE_NONE;
+		//t.isLoading = false;
 
 		mPriorityQueue.clear();
 	}

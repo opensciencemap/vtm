@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,7 +12,13 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.oscim.renderer;
+
+import static org.oscim.generator.JobTile.STATE_LOADING;
+import static org.oscim.generator.JobTile.STATE_NEW_DATA;
+import static org.oscim.generator.JobTile.STATE_NONE;
+import static org.oscim.generator.JobTile.STATE_READY;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,9 +31,11 @@ import org.oscim.renderer.layer.VertexPool;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
-import android.util.FloatMath;
 import android.util.Log;
 
+/**
+ * @author Hannes Janetzek
+ */
 public class TileManager {
 	static final String TAG = TileManager.class.getSimpleName();
 
@@ -266,11 +274,7 @@ public class TileManager {
 				td = new TileSet(newTiles.length);
 				mTileSets.add(td);
 			}
-			// else if (td.serial > mUpdateCnt) {
-			// Log.d(TAG, "ignore previous tile data " + td.cnt);
-			// // tile data was cleared, ignore tiles
-			// td.cnt = 0;
-			// }
+
 			nextTiles = td.tiles;
 
 			// unlock previously active tiles
@@ -442,9 +446,7 @@ public class TileManager {
 
 	private static void clearTile(MapTile t) {
 
-		t.newData = false;
-		t.isLoading = false;
-		t.isReady = false;
+		t.state = STATE_NONE;
 
 		if (t.layers != null) {
 			t.layers.clear();
@@ -486,7 +488,7 @@ public class TileManager {
 				dx %= center;
 				dy %= center;
 				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
-				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * 0.25f;
+				t.distance = (float) Math.sqrt((dx * dx + dy * dy)) * 0.25f;
 			} else if (diff > 0) {
 				// tile zoom level is child of current
 
@@ -501,7 +503,7 @@ public class TileManager {
 				dx %= center;
 				dy %= center;
 				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
-				t.distance = FloatMath.sqrt((dx * dx + dy * dy));
+				t.distance = (float) Math.sqrt((dx * dx + dy * dy));
 
 			} else {
 				// tile zoom level is parent of current
@@ -510,7 +512,7 @@ public class TileManager {
 				dx %= center;
 				dy %= center;
 				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * (-diff * 0.5f);
-				t.distance = FloatMath.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
+				t.distance = (float) Math.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
 			}
 		}
 	}
@@ -545,7 +547,7 @@ public class TileManager {
 				// dont remove tile used by GLRenderer, or somewhere else
 				Log.d(TAG, "limitCache: tile still locked " + t + " " + t.distance);
 				mTiles.add(t);
-			} else if (t.isLoading) {
+			} else if (t.state == STATE_LOADING) {
 				// NOTE: if we add tile back and set loading=false, on next
 				// limitCache the tile will be removed. clearTile could
 				// interfere with TileGenerator. so clear in passTile()
@@ -573,8 +575,8 @@ public class TileManager {
 			// remove tiles already uploaded to vbo
 			for (int i = 0; i < size;) {
 				MapTile t = mTilesLoaded.get(i);
-				// t.rel == null means tile was removed in limitCache
-				if (!t.newData || t.rel == null) {
+				// t.rel == null means tile was removed in limitCache -- but then newdata is false anyway?
+				if (t.state == STATE_READY || t.state == STATE_NONE) {// || t.rel == null) {
 					mTilesLoaded.remove(i);
 					size--;
 					continue;
@@ -614,7 +616,7 @@ public class TileManager {
 	public synchronized boolean passTile(JobTile jobTile) {
 		MapTile tile = (MapTile) jobTile;
 
-		if (!tile.isLoading) {
+		if (tile.state != STATE_LOADING) {
 			// no one should be able to use this tile now, TileGenerator passed
 			// it, GL-Thread does nothing until newdata is set.
 			//Log.d(TAG, "passTile: failed loading " + tile);
@@ -631,12 +633,15 @@ public class TileManager {
 
 		if (tile.vbo == null) {
 			Log.d(TAG, "no VBOs left for " + tile);
-			tile.isLoading = false;
+			//tile.isLoading = false;
+			clearTile(tile);
 			return true;
 		}
 
-		tile.newData = true;
-		tile.isLoading = false;
+		tile.state = STATE_NEW_DATA;
+
+		//tile.newData = true;
+		//tile.isLoading = false;
 
 		mMapView.render();
 
