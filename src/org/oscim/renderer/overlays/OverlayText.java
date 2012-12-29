@@ -30,7 +30,6 @@ import org.oscim.view.MapView;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.FloatMath;
 
 public class OverlayText extends RenderOverlay {
 
@@ -100,11 +99,13 @@ public class OverlayText extends RenderOverlay {
 		}
 
 		float scale = mWorkPos.scale;
-		float angle = (float) Math.toRadians(mWorkPos.angle);
-		float cos = FloatMath.cos(angle);
-		float sin = FloatMath.sin(angle);
+		double angle = Math.toRadians(mWorkPos.angle);
+		float cos = (float) Math.cos(angle);
+		float sin = (float) Math.sin(angle);
 
 		TextItem ti2 = null;
+
+		int maxx = Tile.TILE_SIZE << (mWorkPos.zoomLevel - 1);
 
 		// TODO more sophisticated placement :)
 		for (int i = 0, n = tiles.cnt; i < n; i++) {
@@ -114,6 +115,13 @@ public class OverlayText extends RenderOverlay {
 
 			float dx = (float) ((t.pixelX - mWorkPos.x) * scale);
 			float dy = (float) ((t.pixelY - mWorkPos.y) * scale);
+
+			// flip around date-line
+			if (dx > maxx) {
+				dx = dx - maxx * 2;
+			} else if (dx < -maxx) {
+				dx = dx + maxx * 2;
+			}
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 
@@ -277,13 +285,6 @@ public class OverlayText extends RenderOverlay {
 
 		float x = (float) (oPos.x - curPos.x * div);
 		float y = (float) (oPos.y - curPos.y * div);
-
-		// flip around date-line
-		float max = (Tile.TILE_SIZE << z);
-		if (x < -max / 2)
-			x = max + x;
-		else if (x > max / 2)
-			x = x - max;
 
 		float scale = curPos.scale / div;
 
