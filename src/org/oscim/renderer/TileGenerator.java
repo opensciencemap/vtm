@@ -14,6 +14,8 @@
  */
 package org.oscim.renderer;
 
+import static org.oscim.generator.JobTile.STATE_NONE;
+
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -38,7 +40,6 @@ import org.oscim.view.MapView;
 
 import android.graphics.Bitmap;
 import android.graphics.Paint;
-import android.util.FloatMath;
 import android.util.Log;
 
 /**
@@ -395,13 +396,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mDebugDrawPolygons = !debugSettings.mDisablePolygons;
 		mDebugDrawUnmatched = debugSettings.mDrawUnmatchted;
 
-		if (tile.newData || tile.isReady || tile.layers != null) {
+		if (tile.layers != null) {
 			// should be fixed now.
 			Log.d(TAG, "XXX tile already loaded "
-					+ tile + " "
-					+ tile.newData + " "
-					+ tile.isReady + " "
-					+ tile.isLoading);
+					+ tile + " " + tile.state);
 			return false;
 		}
 
@@ -415,8 +413,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		// acount for area changes with latitude
 		mProjectionScaleFactor = 0.5f + 0.5f * (
-				FloatMath.sin((float) (Math.abs(MercatorProjection
-						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180))));
+				(float) Math.sin(Math.abs(MercatorProjection
+						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180)));
 
 		mLayers = new Layers();
 
@@ -426,7 +424,9 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			mLayers = null;
 			mLabels = null;
 			mCurLineLayer = null;
-			tile.isLoading = false;
+
+			// FIXME add STATE_FAILED?
+			tile.state = STATE_NONE;
 			return false;
 		}
 
