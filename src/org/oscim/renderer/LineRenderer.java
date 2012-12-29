@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General License as published by the Free Software
@@ -14,6 +14,17 @@
  */
 package org.oscim.renderer;
 
+import static android.opengl.GLES20.GL_SHORT;
+import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
+import static android.opengl.GLES20.glDrawArrays;
+import static android.opengl.GLES20.glGetAttribLocation;
+import static android.opengl.GLES20.glGetUniformLocation;
+import static android.opengl.GLES20.glUniform1f;
+import static android.opengl.GLES20.glUniform1i;
+import static android.opengl.GLES20.glUniformMatrix4fv;
+import static android.opengl.GLES20.glUseProgram;
+import static android.opengl.GLES20.glVertexAttribPointer;
+
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
@@ -21,15 +32,14 @@ import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.GlUtils;
 
 import android.graphics.Paint.Cap;
-import android.opengl.GLES20;
 import android.util.Log;
 
-// FIXME make sure coordinates are in valid range for short
+/**
+ * @author Hannes Janetzek
+ */
 
 public final class LineRenderer {
 	private final static String TAG = "LineRenderer";
-
-	// private static int NUM_VERTEX_SHORTS = 4;
 
 	private static final int LINE_VERTICES_DATA_POS_OFFSET = 0;
 	private static final int LINE_VERTICES_DATA_TEX_OFFSET = 4;
@@ -52,15 +62,6 @@ public final class LineRenderer {
 			return false;
 		}
 
-		hLineMatrix[0] = GLES20.glGetUniformLocation(lineProgram[0], "u_mvp");
-		hLineScale[0] = GLES20.glGetUniformLocation(lineProgram[0], "u_wscale");
-		hLineWidth[0] = GLES20.glGetUniformLocation(lineProgram[0], "u_width");
-		hLineColor[0] = GLES20.glGetUniformLocation(lineProgram[0], "u_color");
-		hLineMode[0] = GLES20.glGetUniformLocation(lineProgram[0], "u_mode");
-
-		hLineVertexPosition[0] = GLES20.glGetAttribLocation(lineProgram[0], "a_position");
-		hLineTexturePosition[0] = GLES20.glGetAttribLocation(lineProgram[0], "a_st");
-
 		lineProgram[1] = GlUtils.createProgram(Shaders.lineVertexShader,
 				Shaders.lineSimpleFragmentShader);
 		if (lineProgram[1] == 0) {
@@ -68,15 +69,15 @@ public final class LineRenderer {
 			return false;
 		}
 
-		hLineMatrix[1] = GLES20.glGetUniformLocation(lineProgram[1], "u_mvp");
-		hLineScale[1] = GLES20.glGetUniformLocation(lineProgram[1], "u_wscale");
-		hLineWidth[1] = GLES20.glGetUniformLocation(lineProgram[1], "u_width");
-		hLineColor[1] = GLES20.glGetUniformLocation(lineProgram[1], "u_color");
-		hLineMode[1] = GLES20.glGetUniformLocation(lineProgram[1], "u_mode");
-
-		hLineVertexPosition[1] = GLES20.glGetAttribLocation(lineProgram[1], "a_position");
-		hLineTexturePosition[1] = GLES20.glGetAttribLocation(lineProgram[1], "a_st");
-
+		for (int i = 0; i < 2; i++) {
+			hLineMatrix[i] = glGetUniformLocation(lineProgram[i], "u_mvp");
+			hLineScale[i] = glGetUniformLocation(lineProgram[i], "u_wscale");
+			hLineWidth[i] = glGetUniformLocation(lineProgram[i], "u_width");
+			hLineColor[i] = glGetUniformLocation(lineProgram[i], "u_color");
+			hLineMode[i] = glGetUniformLocation(lineProgram[i], "u_mode");
+			hLineVertexPosition[i] = glGetAttribLocation(lineProgram[i], "a_position");
+			hLineTexturePosition[i] = glGetAttribLocation(lineProgram[i], "a_st");
+		}
 		return true;
 	}
 
@@ -89,35 +90,22 @@ public final class LineRenderer {
 		if (layer == null)
 			return null;
 
-		GLES20.glUseProgram(lineProgram[mode]);
+		glUseProgram(lineProgram[mode]);
 
 		int uLineScale = hLineScale[mode];
 		int uLineMode = hLineMode[mode];
 		int uLineColor = hLineColor[mode];
 		int uLineWidth = hLineWidth[mode];
 
-		// int va = hLineVertexPosition[mode];
-		// if (!GLRenderer.vertexArray[va]) {
-		// GLES20.glEnableVertexAttribArray(va);
-		// GLRenderer.vertexArray[va] = true;
-		// }
+		GLRenderer.enableVertexArrays(hLineVertexPosition[mode], hLineTexturePosition[mode]);
 
-		// va = hLineTexturePosition[mode];
-		// if (!GLRenderer.vertexArray[va]) {
-		// GLES20.glEnableVertexAttribArray(va);
-		// GLRenderer.vertexArray[va] = true;
-		// }
-
-		GLES20.glEnableVertexAttribArray(hLineVertexPosition[mode]);
-		GLES20.glEnableVertexAttribArray(hLineTexturePosition[mode]);
-
-		GLES20.glVertexAttribPointer(hLineVertexPosition[mode], 2, GLES20.GL_SHORT,
+		glVertexAttribPointer(hLineVertexPosition[mode], 2, GL_SHORT,
 				false, 8, bufferOffset + LINE_VERTICES_DATA_POS_OFFSET);
 
-		GLES20.glVertexAttribPointer(hLineTexturePosition[mode], 2, GLES20.GL_SHORT,
+		glVertexAttribPointer(hLineTexturePosition[mode], 2, GL_SHORT,
 				false, 8, bufferOffset + LINE_VERTICES_DATA_TEX_OFFSET);
 
-		GLES20.glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
+		glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 
 		// scale factor to map one pixel on tile to one pixel on screen:
 		// only works with orthographic projection
@@ -127,9 +115,9 @@ public final class LineRenderer {
 		if (mode == 1)
 			pixel = 1.5f / s;
 
-		GLES20.glUniform1f(uLineScale, pixel);
+		glUniform1f(uLineScale, pixel);
 		int lineMode = 0;
-		GLES20.glUniform1i(uLineMode, lineMode);
+		glUniform1i(uLineMode, lineMode);
 
 		// line scale factor (for non fixed lines)
 		float lineScale = (float) Math.sqrt(s);
@@ -155,11 +143,12 @@ public final class LineRenderer {
 			GlUtils.setColor(uLineColor, line.color, alpha);
 
 			if (blur && line.blur == 0) {
-				GLES20.glUniform1f(uLineScale, pixel);
+				glUniform1f(uLineScale, pixel);
 				blur = false;
 			}
 
 			if (line.outline) {
+				// draw outline for linelayers references by this outline
 				for (LineLayer o = ll.outlines; o != null; o = o.outlines) {
 
 					if (o.line.fixed || strokeMaxZoom) {
@@ -168,25 +157,25 @@ public final class LineRenderer {
 						width = ll.width / s + o.width / lineScale;
 					}
 
-					GLES20.glUniform1f(uLineWidth, width);
+					glUniform1f(uLineWidth, width);
 
 					if (line.blur != 0) {
 						blurScale = (ll.width + o.width) / s - (line.blur / s);
-						GLES20.glUniform1f(uLineScale, blurScale);
+						glUniform1f(uLineScale, blurScale);
 						blur = true;
 					}
 
 					if (o.line.cap == Cap.ROUND) {
 						if (lineMode != 1) {
 							lineMode = 1;
-							GLES20.glUniform1i(uLineMode, lineMode);
+							glUniform1i(uLineMode, lineMode);
 						}
 					} else if (lineMode != 0) {
 						lineMode = 0;
-						GLES20.glUniform1i(uLineMode, lineMode);
+						glUniform1i(uLineMode, lineMode);
 					}
 
-					GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
+					glDrawArrays(GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
 				}
 			} else {
 
@@ -198,31 +187,27 @@ public final class LineRenderer {
 					width = ll.width / lineScale;
 				}
 
-				GLES20.glUniform1f(uLineWidth, width);
+				glUniform1f(uLineWidth, width);
 
 				if (line.blur != 0) {
 					blurScale = (ll.width / lineScale) * line.blur;
-					GLES20.glUniform1f(uLineScale, blurScale);
+					glUniform1f(uLineScale, blurScale);
 					blur = true;
 				}
 
 				if (line.cap == Cap.ROUND) {
 					if (lineMode != 1) {
 						lineMode = 1;
-						GLES20.glUniform1i(uLineMode, lineMode);
+						glUniform1i(uLineMode, lineMode);
 					}
 				} else if (lineMode != 0) {
 					lineMode = 0;
-					GLES20.glUniform1i(uLineMode, lineMode);
+					glUniform1i(uLineMode, lineMode);
 				}
 
-				GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
+				glDrawArrays(GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
 			}
-
 		}
-
-		GLES20.glDisableVertexAttribArray(hLineVertexPosition[mode]);
-		GLES20.glDisableVertexAttribArray(hLineTexturePosition[mode]);
 
 		return l;
 	}
