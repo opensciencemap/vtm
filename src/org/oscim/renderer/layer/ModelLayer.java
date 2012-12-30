@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,7 +14,14 @@
  */
 package org.oscim.renderer.layer;
 
+/**
+ * @author Hannes Janetzek
+ */
 public class ModelLayer extends Layer {
+
+	public void addObject(float[] points, short[] index, float height) {
+
+	}
 
 	@Override
 	protected void clear() {

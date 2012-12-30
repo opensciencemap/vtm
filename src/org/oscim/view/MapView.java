@@ -37,6 +37,7 @@ import org.oscim.database.OpenResult;
 import org.oscim.generator.JobQueue;
 import org.oscim.generator.JobTile;
 import org.oscim.generator.MapWorker;
+import org.oscim.overlay.GenericOverlay;
 import org.oscim.overlay.LabelingOverlay;
 import org.oscim.overlay.Overlay;
 import org.oscim.overlay.OverlayManager;
@@ -44,6 +45,7 @@ import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLView;
 import org.oscim.renderer.TileGenerator;
 import org.oscim.renderer.TileManager;
+import org.oscim.renderer.overlays.ModelOverlay;
 import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.RenderTheme;
@@ -183,9 +185,10 @@ public class MapView extends RelativeLayout {
 		enableRotation = true;
 
 		mOverlayManager.add(new LabelingOverlay(this));
-		//mOverlayManager.add(new GenericOverlay(this, new OverlayGrid(this)));
+		//mOverlayManager.add(new GenericOverlay(this, new GridOverlay(this)));
+		mOverlayManager.add(new GenericOverlay(this, new ModelOverlay(this)));
 
-		//		mOverlayManager.add(new GenericOverlay(this, new OverlayTest(this)));
+		//		mOverlayManager.add(new GenericOverlay(this, new TestOverlay(this)));
 
 		//		ArrayList<OverlayItem> pList = new ArrayList<OverlayItem>();
 		//		pList.add(new OverlayItem("title", "description", new GeoPoint(53.067221, 8.78767)));
@@ -494,7 +497,9 @@ public class MapView extends RelativeLayout {
 			mapWorker.interrupt();
 
 			try {
-				mapWorker.join();
+				// FIXME this hangs badly sometimes,
+				// just let it crash...
+				mapWorker.join(10000);
 			} catch (InterruptedException e) {
 				// restore the interrupted status
 				Thread.currentThread().interrupt();

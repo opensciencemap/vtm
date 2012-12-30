@@ -31,36 +31,36 @@ import android.util.Log;
 /**
  * @author Hannes Janetzek
  */
-public class OverlayModel extends RenderOverlay {
+public class ModelOverlay extends RenderOverlay {
 
-	public OverlayModel(MapView mapView) {
+	public ModelOverlay(MapView mapView) {
 		super(mapView);
 	}
 
 	private final float[] box = {
 			// north
-			-80f, -80f, 0, 0.9f,
-			80f, -80f, 0, 0.9f,
-			-80f, -80f, 0.15f, 0.9f,
-			80f, -80f, 0.15f, 0.9f,
+			-200f, -200f, 0, 0.9f,
+			200f, -200f, 0, 0.9f,
+			-200f, -200f, 0.15f, 0.9f,
+			200f, -200f, 0.15f, 0.9f,
 
 			// west
-			-80f, -80f, 0, 0.8f,
-			-80f, 80f, 0, 0.8f,
-			-80f, -80f, 0.15f, 0.8f,
-			-80f, 80f, 0.15f, 0.8f,
+			-200f, -200f, 0, 0.8f,
+			-200f, 200f, 0, 0.8f,
+			-200f, -200f, 0.15f, 0.8f,
+			-200f, 200f, 0.15f, 0.8f,
 
 			// south
-			80f, 80f, 0, 0.7f,
-			-80f, 80f, 0, 0.7f,
-			80f, 80f, 0.15f, 0.7f,
-			-80f, 80f, 0.15f, 0.7f,
+			200f, 200f, 0, 0.7f,
+			-200f, 200f, 0, 0.7f,
+			200f, 200f, 0.15f, 0.7f,
+			-200f, 200f, 0.15f, 0.7f,
 
 			// east
-			80f, -80f, 0, 1.0f,
-			80f, 80f, 0, 1.0f,
-			80f, -80f, 0.15f, 1.0f,
-			80f, 80f, 0.15f, 1.0f,
+			200f, -200f, 0, 1.0f,
+			200f, 200f, 0, 1.0f,
+			200f, -200f, 0.15f, 1.0f,
+			200f, 200f, 0.15f, 1.0f,
 	};
 
 	private final short[] indices = {

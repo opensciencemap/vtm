@@ -31,7 +31,7 @@ import org.oscim.view.MapView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
-public class OverlayText extends RenderOverlay {
+public class TextOverlay extends RenderOverlay {
 
 	private TileSet tiles;
 	private LabelThread mThread;
@@ -64,7 +64,7 @@ public class OverlayText extends RenderOverlay {
 		}
 	}
 
-	public OverlayText(MapView mapView) {
+	public TextOverlay(MapView mapView) {
 		super(mapView);
 
 		mWorkPos = new MapPosition();
