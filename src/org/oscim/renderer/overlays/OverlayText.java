@@ -274,7 +274,7 @@ public class OverlayText extends RenderOverlay {
 	}
 
 	@Override
-	protected float setMatrix(MapPosition curPos, float[] matrix) {
+	protected void setMatrix(MapPosition curPos, float[] matrix) {
 		// TODO if oPos == curPos this could be simplified
 
 		MapPosition oPos = mMapPosition;
@@ -301,7 +301,5 @@ public class OverlayText extends RenderOverlay {
 		matrix[5] = scale;
 
 		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
-
-		return div;
 	}
 }
