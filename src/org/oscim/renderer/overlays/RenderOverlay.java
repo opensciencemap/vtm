@@ -98,7 +98,8 @@ public abstract class RenderOverlay {
 	 *            current projection matrix
 	 */
 	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
-		float div = setMatrix(pos, mv);
+		setMatrix(pos, mv);
+		float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
 
 		Matrix.multiplyMM(mvp, 0, proj, 0, mv, 0);
 
@@ -121,8 +122,12 @@ public abstract class RenderOverlay {
 		}
 	}
 
-	// set matrix to scale relative to zoomlevel
-	protected float setMatrix(MapPosition curPos, float[] matrix) {
+	/**
+	 * Utility: set matrix to scale relative to zoomlevel
+	 * @param curPos ...
+	 * @param matrix ...
+	 */
+	protected void setMatrix(MapPosition curPos, float[] matrix) {
 		// TODO if oPos == curPos this could be simplified
 
 		MapPosition oPos = mMapPosition;
@@ -155,7 +160,5 @@ public abstract class RenderOverlay {
 		matrix[5] = scale;
 
 		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
-
-		return div;
 	}
 }

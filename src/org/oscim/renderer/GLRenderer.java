@@ -77,6 +77,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private static float[] mMVPMatrix = new float[16];
 	private static float[] mProjMatrix = new float[16];
+	// 'flat' projection used for clipping by depth buffer
+	private static float[] mfProjMatrix = new float[16];
 	private static float[] mTmpMatrix = new float[16];
 	private static float[] mTileCoords = new float[8];
 	private static float[] mDebugCoords = new float[8];
@@ -351,7 +353,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		Matrix.multiplyMM(matrix, 0, mapPosition.viewMatrix, 0, matrix, 0);
 
 		if (project)
-			Matrix.multiplyMM(matrix, 0, mProjMatrix, 0, matrix, 0);
+			Matrix.multiplyMM(matrix, 0, mfProjMatrix, 0, matrix, 0);
 	}
 
 	private static float scaleDiv(MapTile t) {
@@ -579,6 +581,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			mMapViewPosition.getMapPosition(mapPosition, mDebugCoords);
 			Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0,
 					mapPosition.viewMatrix, 0);
+
 			PolygonRenderer.debugDraw(mMVPMatrix, mDebugCoords, 1);
 		}
 
@@ -646,14 +649,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			}
 		}
 
-		if (tile.layers.textureLayers != null) {
-			setMatrix(mvp, tile, div, false);
-
-			for (Layer l = tile.layers.textureLayers; l != null;) {
-				l = TextureRenderer.draw(l, 1, mProjMatrix, mvp,
-						tile.layers.texOffset);
-			}
-		}
+		//		if (tile.layers.textureLayers != null) {
+		//			setMatrix(mvp, tile, div, false);
+		//
+		//			for (Layer l = tile.layers.textureLayers; l != null;) {
+		//				l = TextureRenderer.draw(l, 1, mProjMatrix, mvp,
+		//						tile.layers.texOffset);
+		//			}
+		//		}
 	}
 
 	private static boolean drawProxyChild(MapTile tile) {
@@ -732,7 +735,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				MapViewPosition.VIEW_FAR);
 
 		Matrix.setIdentityM(mTmpMatrix, 0);
-		Matrix.translateM(mTmpMatrix, 0, 0, 0, -MapViewPosition.VIEW_DISTANCE);
+		Matrix.translateM(mTmpMatrix, 0, 0, 0, -MapViewPosition.VIEW_DISTANCE * 2);
 		Matrix.multiplyMM(mProjMatrix, 0, mProjMatrix, 0, mTmpMatrix, 0);
 
 		if (debugView) {
@@ -743,9 +746,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			Matrix.multiplyMM(mProjMatrix, 0, mMVPMatrix, 0, mProjMatrix, 0);
 		}
 
+		System.arraycopy(mProjMatrix, 0, mfProjMatrix, 0, 16);
 		// set to zero: we modify the z value with polygon-offset for clipping
-		mProjMatrix[10] = 0;
-		mProjMatrix[14] = 0;
+		mfProjMatrix[10] = 0;
+		mfProjMatrix[14] = 0;
 
 		GLES20.glViewport(0, 0, width, height);
 

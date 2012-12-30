@@ -15,6 +15,9 @@
  */
 package org.oscim.view;
 
+// TODO:
+// - fix ray intersection for unproject, see getZ()
+
 import java.lang.ref.WeakReference;
 
 import org.oscim.core.BoundingBox;
@@ -28,7 +31,6 @@ import android.opengl.Matrix;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.FloatMath;
 import android.util.Log;
 
 /**
@@ -84,10 +86,10 @@ public class MapViewPosition {
 	private float[] mTmpMatrix = new float[16];
 
 	private static int mHeight, mWidth;
-	public final static float VIEW_SCALE = 1f / 2;
-	public final static float VIEW_DISTANCE = 2;
+	public final static float VIEW_SCALE = 1f / 4;
+	public final static float VIEW_DISTANCE = 1;
 	public final static float VIEW_NEAR = VIEW_DISTANCE;
-	public final static float VIEW_FAR = VIEW_DISTANCE * 2;
+	public final static float VIEW_FAR = VIEW_DISTANCE * 4;
 
 	void setViewport(int width, int height) {
 		float sw = VIEW_SCALE;
@@ -98,7 +100,7 @@ public class MapViewPosition {
 				aspect * sh, -aspect * sh, VIEW_NEAR, VIEW_FAR);
 
 		Matrix.setIdentityM(mTmpMatrix, 0);
-		Matrix.translateM(mTmpMatrix, 0, 0, 0, -VIEW_DISTANCE);
+		Matrix.translateM(mTmpMatrix, 0, 0, 0, -VIEW_DISTANCE * 2);
 		Matrix.multiplyMM(mProjMatrix, 0, mProjMatrix, 0, mTmpMatrix, 0);
 
 		Matrix.invertM(mProjMatrixI, 0, mProjMatrix, 0);
@@ -229,10 +231,11 @@ public class MapViewPosition {
 	 * needed to un-project a point on screen to the position on the map. not
 	 * so sure about this, but at least somehow works. */
 	private float getZ(float y) {
-		return FloatMath.sin((float) Math.toRadians(mTilt))
-				// * 2.2f // for dist = 1
-				* 1.3f // for dist = 2
-				// * 0.8f // for dist = 4
+		return (float) Math.sin(Math.toRadians(mTilt))
+				//* 2.2f // for dist = 1
+				//* 1.3f // for dist = 2
+				//* 0.8f // for dist = 4
+				* 0.5f
 				* ((float) mHeight / mWidth) * y;
 	}
 
@@ -335,7 +338,8 @@ public class MapViewPosition {
 	private void unproject(float x, float y, float z, float[] coords, int position) {
 		mv[0] = x;
 		mv[1] = y;
-		mv[2] = z - 1f;
+		// -1f when near plane is 1 and map is on near plane..
+		mv[2] = z + 0.4f;
 		mv[3] = 1;
 
 		Matrix.multiplyMV(mv, 0, mUnprojMatrix, 0, mv, 0);
