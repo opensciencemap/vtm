@@ -169,13 +169,13 @@ public class BoundingBox implements Parcelable {
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("BoundingBox [minLatitudeE6=");
+		stringBuilder.append("BoundingBox [minLat=");
 		stringBuilder.append(this.minLatitudeE6);
-		stringBuilder.append(", minLongitudeE6=");
+		stringBuilder.append(", minLon=");
 		stringBuilder.append(this.minLongitudeE6);
-		stringBuilder.append(", maxLatitudeE6=");
+		stringBuilder.append(", maxLat=");
 		stringBuilder.append(this.maxLatitudeE6);
-		stringBuilder.append(", maxLongitudeE6=");
+		stringBuilder.append(", maxLon=");
 		stringBuilder.append(this.maxLongitudeE6);
 		stringBuilder.append("]");
 		return stringBuilder.toString();
