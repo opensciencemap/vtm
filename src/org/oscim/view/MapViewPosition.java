@@ -24,6 +24,7 @@ import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
 
 import android.graphics.Point;
@@ -551,6 +552,7 @@ public class MapViewPosition {
 		//mZoomLevel = mMapView.limitZoomLevel(zoomLevel);
 		setZoomLevelLimit(zoomLevel);
 		mMapScale = 1 << mZoomLevel;
+		mScale = 1;
 		updatePosition();
 	}
 
@@ -576,10 +578,49 @@ public class MapViewPosition {
 	private double mEndX;
 	private double mEndY;
 	private float mDuration = 500;
-	private Point mTmpPoint;
+
+	public synchronized void animateTo(BoundingBox bbox) {
+		double dx = MercatorProjection.longitudeToX(bbox.getMaxLongitude())
+				- MercatorProjection.longitudeToX(bbox.getMinLongitude());
+		double dy = MercatorProjection.latitudeToY(bbox.getMinLatitude())
+				- MercatorProjection.latitudeToY(bbox.getMaxLatitude());
+
+		double log4 = Math.log(4);
+
+		double zx = -log4 * Math.log(dx) + (mWidth / Tile.TILE_SIZE);
+		double zy = -log4 * Math.log(dy) + (mHeight / Tile.TILE_SIZE);
+
+		double z = Math.min(zx, zy);
+
+		if (z > MAX_ZOOMLEVEL)
+			z = MAX_ZOOMLEVEL;
+		else if (z < MIN_ZOOMLEVEL)
+			z = MIN_ZOOMLEVEL;
+
+		mZoomLevel = (byte) Math.floor(z);
+		mScale = (float) (1 + (z - mZoomLevel));
+		// global scale
+		mMapScale = (1 << mZoomLevel) * mScale;
+		//Log.d(TAG, "zoom: " + bbox + " " + zx + " " + zy + " / " + mScale + " " + mZoomLevel);
+		updatePosition();
+
+		// reset rotation/tilt
+		mTilt = 0;
+		mRotation = 0;
+		updateMatrix();
+
+		GeoPoint geoPoint = bbox.getCenterPoint();
+		mEndX = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(), mZoomLevel);
+		mEndY = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(), mZoomLevel);
+		mStartX = mPosX;
+		mStartY = mPosY;
+
+		mDuration = 300;
+		mHandler.start((int) mDuration);
+	}
 
 	public synchronized void animateTo(GeoPoint geoPoint) {
-		MercatorProjection.projectPoint(geoPoint, mZoomLevel, mTmpPoint);
+		//MercatorProjection.projectPoint(geoPoint, mZoomLevel, mTmpPoint);
 
 		mEndX = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(), mZoomLevel);
 		mEndY = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(), mZoomLevel);
