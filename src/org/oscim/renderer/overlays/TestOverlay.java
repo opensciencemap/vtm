@@ -23,7 +23,7 @@ import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.renderinstruction.BitmapUtils;
 import org.oscim.view.MapView;
 
-public class OverlayTest extends RenderOverlay {
+public class TestOverlay extends RenderOverlay {
 
 	TextItem labels;
 
@@ -31,7 +31,7 @@ public class OverlayTest extends RenderOverlay {
 
 	private boolean first = true;
 
-	public OverlayTest(MapView mapView) {
+	public TestOverlay(MapView mapView) {
 		super(mapView);
 
 		//		LineLayer ll = (LineLayer) layers.getLayer(1, Layer.LINE);

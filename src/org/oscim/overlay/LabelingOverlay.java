@@ -14,12 +14,12 @@
  */
 package org.oscim.overlay;
 
-import org.oscim.renderer.overlays.OverlayText;
+import org.oscim.renderer.overlays.TextOverlay;
 import org.oscim.view.MapView;
 
 public class LabelingOverlay extends Overlay {
 
-	//	private OverlayText mLayer;
+	//	private TextOverlay mLayer;
 
 	//	@Override
 	//	public org.oscim.renderer.overlays.RenderOverlay getLayer() {
@@ -28,6 +28,6 @@ public class LabelingOverlay extends Overlay {
 
 	public LabelingOverlay(MapView mapView) {
 		super();
-		mLayer = new OverlayText(mapView);
+		mLayer = new TextOverlay(mapView);
 	}
 }

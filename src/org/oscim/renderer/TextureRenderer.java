@@ -24,7 +24,6 @@ import org.oscim.renderer.layer.TextureLayer;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
-import android.util.Log;
 
 public final class TextureRenderer {
 	public final static boolean debug = false;
@@ -101,7 +100,6 @@ public final class TextureRenderer {
 		TextureLayer tl = (TextureLayer) layer;
 
 		if (tl.fixed)
-
 			GLES20.glUniform1f(hTextureScale, (float) Math.sqrt(scale));
 		else
 			GLES20.glUniform1f(hTextureScale, 1);
@@ -114,8 +112,8 @@ public final class TextureRenderer {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesVBO);
 
 		for (TextureObject to = tl.textures; to != null; to = to.next) {
-			if (TextureRenderer.debug)
-				Log.d("...", "draw texture: " + to.id + " " + to.offset + " " + to.vertices);
+			//if (TextureRenderer.debug)
+			//	Log.d("...", "draw texture: " + to.id + " " + to.offset + " " + to.vertices);
 
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
 			int maxVertices = MAX_ITEMS * INDICES_PER_SPRITE;

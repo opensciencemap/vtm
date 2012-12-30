@@ -28,13 +28,13 @@ import android.graphics.Color;
 import android.graphics.Paint.Cap;
 import android.util.Log;
 
-public class OverlayGrid extends RenderOverlay {
+public class GridOverlay extends RenderOverlay {
 
 	private float[] mPoints;
 	private short[] mIndex;
 	private Text mText;
 
-	public OverlayGrid(MapView mapView) {
+	public GridOverlay(MapView mapView) {
 		super(mapView);
 
 		int size = Tile.TILE_SIZE;
