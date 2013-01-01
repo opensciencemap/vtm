@@ -29,7 +29,7 @@ public class VertexPool {
 		pool = null;
 	}
 
-	static synchronized VertexPoolItem get() {
+	public static synchronized VertexPoolItem get() {
 
 		if (pool == null && count > 0) {
 			Log.d("VertexPool", "XXX wrong count: " + count);
@@ -61,7 +61,7 @@ public class VertexPool {
 	// private static float load = 1.0f;
 	// private static int loadCount = 0;
 
-	static synchronized void release(VertexPoolItem items) {
+	public static synchronized void release(VertexPoolItem items) {
 		if (items == null)
 			return;
 

@@ -20,7 +20,9 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 
@@ -207,6 +209,42 @@ public class ModelOverlay extends RenderOverlay {
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 		GlUtils.checkGlError("...");
+	}
+
+	@Override
+	protected void setMatrix(MapPosition curPos, float[] matrix) {
+		// TODO if oPos == curPos this could be simplified
+
+		MapPosition oPos = mMapPosition;
+
+		byte z = oPos.zoomLevel;
+
+		float div = FastMath.pow(z - curPos.zoomLevel);
+		float x = (float) (oPos.x - curPos.x * div);
+		float y = (float) (oPos.y - curPos.y * div);
+
+		// flip around date-line
+		float max = (Tile.TILE_SIZE << z);
+		if (x < -max / 2)
+			x = max + x;
+		else if (x > max / 2)
+			x = x - max;
+
+		float scale = curPos.scale / div;
+
+		Matrix.setIdentityM(matrix, 0);
+
+		// translate relative to map center
+		matrix[12] = x * scale;
+		matrix[13] = y * scale;
+		// scale to current tile world coordinates
+		scale = (curPos.scale / oPos.scale) / div;
+		scale /= GLRenderer.COORD_MULTIPLIER;
+		matrix[0] = scale;
+		matrix[5] = scale;
+		matrix[10] = scale; // 1000f;
+
+		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
 	}
 
 }
