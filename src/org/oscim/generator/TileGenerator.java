@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,7 +19,6 @@ import static org.oscim.generator.JobTile.STATE_NONE;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
-import org.oscim.core.WebMercator;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.QueryResult;
@@ -44,14 +43,19 @@ import android.graphics.Paint;
 import android.util.Log;
 
 /**
- * 
+ * @author Hannes Janetzek
+ * @note
+ *       1. MapWorker calls TileGenerator.execute to load a tile.
+ *       2. The tile data will be loaded from current MapDatabase
+ *       3. MapDatabase calls the IMapDatabaseCallback functions
+ *       implemented by TileGenerator for WAY and POI items.
+ *       4. these callbacks then call RenderTheme to get the matching style.
+ *       5. RenderTheme calls IRenderCallback functions with style information
+ *       6. Styled items become added to MapTile.layers... roughly
  */
 public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private static String TAG = TileGenerator.class.getName();
-
-	private static final double PI180 = (Math.PI / 180) / 1000000.0;
-	private static final double PIx4 = Math.PI * 4;
 
 	private static final double STROKE_INCREASE = Math.sqrt(2);
 	private static final byte LAYERS = 11;
@@ -82,12 +86,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private float mStrokeScale = 1.0f;
 
-	private boolean mProjected;
-	private float mSimplify;
-
 	private RenderInstruction[] mRenderInstructions = null;
 
-	private final String TAG_WATER = "water".intern();
+	//private final String TAG_WATER = "water".intern();
+	private final String TAG_BUILDING = "building".intern();
+
 	private final MapView mMapView;
 
 	private final Tag[] debugTagBox = { new Tag("debug", "box") };
@@ -99,6 +102,14 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private float mProjectionScaleFactor;
 
+	private float mPoiX, mPoiY;
+
+	private Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
+	private Tag mTagName;
+
+	private boolean mDebugDrawPolygons;
+	boolean mDebugDrawUnmatched;
+
 	public static void setRenderTheme(RenderTheme theme) {
 		renderTheme = theme;
 	}
@@ -108,64 +119,166 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 *            the MapView
 	 */
 	public TileGenerator(MapView mapView) {
-		Log.d(TAG, "init TileGenerator");
+		//Log.d(TAG, "init TileGenerator");
 		mMapView = mapView;
 	}
 
-	private float mPoiX = 256;
-	private float mPoiY = 256;
+	public void cleanup() {
+	}
 
-	private Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
-	private Tag mTagName;
+	public boolean executeJob(JobTile jobTile) {
+		MapTile tile;
 
-	private void filterTags(Tag[] tags) {
-		for (int i = 0; i < tags.length; i++) {
-			// Log.d(TAG, "check tag: " + tags[i]);
-			if (tags[i].key == Tag.TAG_KEY_NAME) {
-				mTagName = tags[i];
-				tags[i] = mTagEmptyName;
-			}
+		if (mMapDatabase == null)
+			return false;
+
+		tile = mCurrentTile = (MapTile) jobTile;
+		DebugSettings debugSettings = mMapView.getDebugSettings();
+
+		mDebugDrawPolygons = !debugSettings.mDisablePolygons;
+		mDebugDrawUnmatched = debugSettings.mDrawUnmatchted;
+
+		if (tile.layers != null) {
+			// should be fixed now.
+			Log.d(TAG, "XXX tile already loaded " + tile + " " + tile.state);
+			return false;
+		}
+
+		mLevels = TileGenerator.renderTheme.getLevels();
+
+		// limit stroke scale at z=17
+		// if (tile.zoomLevel < STROKE_MAX_ZOOM_LEVEL)
+		setScaleStrokeWidth(tile.zoomLevel);
+		// else
+		// setScaleStrokeWidth(STROKE_MAX_ZOOM_LEVEL);
+
+		// acount for area changes with latitude
+		mProjectionScaleFactor = 0.5f + 0.5f * (
+				(float) Math.sin(Math.abs(MercatorProjection
+						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180)));
+
+		mLayers = new Layers();
+
+		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
+			//Log.d(TAG, "Failed loading: " + tile);
+			mLayers.clear();
+			mLayers = null;
+			TextItem.release(mLabels);
+			mLabels = null;
+
+			// FIXME add STATE_FAILED?
+			tile.state = STATE_NONE;
+			return false;
+		}
+
+		if (debugSettings.mDrawTileFrames) {
+			mTagName = new Tag("name", tile.toString(), false);
+			mPoiX = Tile.TILE_SIZE >> 1;
+			mPoiY = 10;
+			TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
+
+			mIndices = debugBoxIndex;
+			mCoords = debugBoxCoords;
+			mDrawingLayer = 10 * mLevels;
+			TileGenerator.renderTheme.matchWay(this, debugTagBox, (byte) 0, false, true);
+		}
+
+		tile.layers = mLayers;
+		tile.labels = mLabels;
+		mLayers = null;
+		mLabels = null;
+
+		return true;
+	}
+
+	private static byte getValidLayer(byte layer) {
+		if (layer < 0) {
+			return 0;
+		} else if (layer >= LAYERS) {
+			return LAYERS - 1;
+		} else {
+			return layer;
 		}
 	}
 
-	// private RenderInstruction[] mNodeRenderInstructions;
+	/**
+	 * Sets the scale stroke factor for the given zoom level.
+	 * @param zoomLevel
+	 *            the zoom level for which the scale stroke factor should be
+	 *            set.
+	 */
+	private void setScaleStrokeWidth(byte zoomLevel) {
+		int zoomLevelDiff = Math.max(zoomLevel - STROKE_MIN_ZOOM_LEVEL, 0);
+		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevelDiff);
+		if (mStrokeScale < 1)
+			mStrokeScale = 1;
+	}
 
+	public void setMapDatabase(IMapDatabase mapDatabase) {
+		if (mMapDatabase != null)
+			mMapDatabase.close();
+
+		mMapDatabase = mapDatabase;
+		//mMapProjection = mMapDatabase.getMapProjection();
+	}
+
+	public IMapDatabase getMapDatabase() {
+		return mMapDatabase;
+	}
+
+	private boolean filterTags(Tag[] tags) {
+		for (int i = 0; i < tags.length; i++) {
+			String key = tags[i].key;
+			if (key == Tag.TAG_KEY_NAME) {
+				mTagName = tags[i];
+				tags[i] = mTagEmptyName;
+			} else if (mCurrentTile.zoomLevel >= 17 &&
+					key == TAG_BUILDING) {
+
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// ---------------- MapDatabaseCallback -----------------
 	@Override
 	public void renderPointOfInterest(byte layer, Tag[] tags, float latitude,
 			float longitude) {
 
+		// reset state
 		mTagName = null;
 
-		if (mMapProjection != null) {
-			long x = mCurrentTile.pixelX;
-			long y = mCurrentTile.pixelY + Tile.TILE_SIZE;
-			long z = Tile.TILE_SIZE << mCurrentTile.zoomLevel;
-
-			double divx, divy;
-			long dx = (x - (z >> 1));
-			long dy = (y - (z >> 1));
-
-			if (mMapProjection == WebMercator.NAME) {
-				double div = WebMercator.f900913 / (z >> 1);
-				// divy = f900913 / (z >> 1);
-				mPoiX = (float) (longitude / div - dx);
-				mPoiY = (float) (latitude / div + dy);
-			} else {
-				divx = 180000000.0 / (z >> 1);
-				divy = z / PIx4;
-				mPoiX = (float) (longitude / divx - dx);
-				double sinLat = Math.sin(latitude * PI180);
-				mPoiY = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
-
-				// TODO remove this, only used for mapsforge maps
-				if (mPoiX < -10 || mPoiX > Tile.TILE_SIZE + 10 || mPoiY < -10
-						|| mPoiY > Tile.TILE_SIZE + 10)
-					return;
-			}
-		} else {
-			mPoiX = longitude;
-			mPoiY = latitude;
-		}
+		//if (mMapProjection != null) {
+		//	long x = mCurrentTile.pixelX;
+		//	long y = mCurrentTile.pixelY + Tile.TILE_SIZE;
+		//	long z = Tile.TILE_SIZE << mCurrentTile.zoomLevel;
+		//
+		//	double divx, divy;
+		//	long dx = (x - (z >> 1));
+		//	long dy = (y - (z >> 1));
+		//
+		//	if (mMapProjection == WebMercator.NAME) {
+		//		double div = WebMercator.f900913 / (z >> 1);
+		//		// divy = f900913 / (z >> 1);
+		//		mPoiX = (float) (longitude / div - dx);
+		//		mPoiY = (float) (latitude / div + dy);
+		//	} else {
+		//		divx = 180000000.0 / (z >> 1);
+		//		divy = z / PIx4;
+		//		mPoiX = (float) (longitude / divx - dx);
+		//		double sinLat = Math.sin(latitude * PI180);
+		//		mPoiY = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
+		//
+		//		// TODO remove this, only used for mapsforge maps
+		//		if (mPoiX < -10 || mPoiX > Tile.TILE_SIZE + 10 || mPoiY < -10
+		//				|| mPoiY > Tile.TILE_SIZE + 10)
+		//			return;
+		//	}
+		//} else {
+		mPoiX = longitude;
+		mPoiY = latitude;
+		//}
 
 		// remove tags that should not be cached in Rendertheme
 		filterTags(tags);
@@ -175,53 +288,45 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		TileGenerator.renderTheme.matchNode(this, tags, mCurrentTile.zoomLevel);
 	}
 
-	@Override
-	public void renderWaterBackground() {
-		// TODO Auto-generated method stub
-
-	}
-
 	private boolean mClosed;
 
 	@Override
 	public void renderWay(byte layer, Tag[] tags, float[] coords, short[] indices,
 			boolean closed) {
 
+		// reset state
 		mTagName = null;
-		mProjected = false;
 		mCurLineLayer = null;
+
 		mClosed = closed;
 
+		// replace tags that should not be cached in Rendertheme (e.g. name)
+		if (!filterTags(tags))
+			return;
+
 		mDrawingLayer = getValidLayer(layer) * mLevels;
-		mSimplify = 0.5f;
 
-		if (closed) {
-			if (mCurrentTile.zoomLevel < 14)
-				mSimplify = 0.5f;
-			else
-				mSimplify = 0.2f;
-
-			if (tags.length == 1 && TAG_WATER == (tags[0].value))
-				mSimplify = 0;
-		}
+		//	mProjected = false;
+		//	mSimplify = 0.5f;
+		//	if (closed) {
+		//		if (mCurrentTile.zoomLevel < 14)
+		//			mSimplify = 0.5f;
+		//		else
+		//			mSimplify = 0.2f;
+		//		if (tags.length == 1 && TAG_WATER == (tags[0].value))
+		//			mSimplify = 0;
+		//	}
 
 		mCoords = coords;
 		mIndices = indices;
 
-		// remove tags that should not be cached in Rendertheme
-		filterTags(tags);
-
-		// if (mRenderInstructions != null) {
-		// for (int i = 0, n = mRenderInstructions.length; i < n; i++)
-		// mRenderInstructions[i].renderWay(this, tags);
-		// }
-
 		mRenderInstructions = TileGenerator.renderTheme.matchWay(this, tags,
-				(byte) (mCurrentTile.zoomLevel + 0),
-				closed, true);
+				(byte) (mCurrentTile.zoomLevel + 0), closed, true);
 
 		if (mRenderInstructions == null && mDebugDrawUnmatched)
 			debugUnmatched(closed, tags);
+
+		mCurLineLayer = null;
 	}
 
 	private void debugUnmatched(boolean closed, Tag[] tags) {
@@ -232,12 +337,79 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mTagName = new Tag("name", tags[0].key + ":" + tags[0].value, false);
 
 		if (closed) {
-			mRenderInstructions = TileGenerator.renderTheme.matchWay(this, debugTagArea,
-					(byte) 0, true, true);
+			TileGenerator.renderTheme.matchWay(this, debugTagArea, (byte) 0, true, true);
 		} else {
-			mRenderInstructions = TileGenerator.renderTheme.matchWay(this, debugTagWay,
-					(byte) 0, true, true);
+			TileGenerator.renderTheme.matchWay(this, debugTagWay, (byte) 0, true, true);
 		}
+	}
+
+	@Override
+	public void renderWaterBackground() {
+	}
+
+	@Override
+	public boolean checkWay(Tag[] tags, boolean closed) {
+
+		mRenderInstructions = TileGenerator.renderTheme.matchWay(this, tags,
+				(byte) (mCurrentTile.zoomLevel + 0), closed, false);
+
+		return mRenderInstructions != null;
+	}
+
+	// ----------------- RenderThemeCallback -----------------
+	@Override
+	public void renderWay(Line line, int level) {
+		// projectToTile();
+
+		if (line.outline && mCurLineLayer == null) {
+			// TODO fix this in RenderTheme
+			Log.e(TAG, "theme issue, cannot add outline: line must come before outline!");
+			return;
+		}
+		int numLayer = (mDrawingLayer * 2) + level;
+
+		LineLayer lineLayer = (LineLayer) mLayers.getLayer(numLayer, Layer.LINE);
+		if (lineLayer == null)
+			return;
+
+		if (lineLayer.line == null) {
+			lineLayer.line = line;
+
+			float w = line.width;
+			if (!line.fixed) {
+				w *= mStrokeScale;
+				w *= mProjectionScaleFactor;
+			}
+			lineLayer.width = w;
+		}
+
+		if (line.outline) {
+			lineLayer.addOutline(mCurLineLayer);
+			return;
+		}
+
+		lineLayer.addLine(mCoords, mIndices, mClosed);
+		mCurLineLayer = lineLayer;
+	}
+
+	@Override
+	public void renderArea(Area area, int level) {
+		if (!mDebugDrawPolygons)
+			return;
+
+		//	if (!mProjected && !projectToTile())
+		//		return;
+
+		int numLayer = mDrawingLayer + level;
+
+		PolygonLayer layer = (PolygonLayer) mLayers.getLayer(numLayer, Layer.POLYGON);
+		if (layer == null)
+			return;
+
+		if (layer.area == null)
+			layer.area = area;
+
+		layer.addPolygon(mCoords, mIndices);
 	}
 
 	@Override
@@ -288,15 +460,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	}
 
 	@Override
-	public void renderAreaSymbol(Bitmap symbol) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void renderPointOfInterestCircle(float radius, Paint fill, int level) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -318,256 +482,90 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	}
 
 	@Override
-	public void renderWay(Line line, int level) {
-		projectToTile();
-
-		if (line.outline && mCurLineLayer == null)
-			return;
-
-		int numLayer = (mDrawingLayer * 2) + level;
-
-		LineLayer lineLayer = (LineLayer) mLayers.getLayer(numLayer, Layer.LINE);
-		if (lineLayer == null)
-			return;
-
-		if (lineLayer.line == null) {
-			lineLayer.line = line;
-
-			float w = line.width;
-			if (!line.fixed) {
-				w *= mStrokeScale;
-				w *= mProjectionScaleFactor;
-			}
-			lineLayer.width = w;
-		}
-
-		if (line.outline) {
-			lineLayer.addOutline(mCurLineLayer);
-			return;
-		}
-
-		mCurLineLayer = lineLayer;
-
-		lineLayer.addLine(mCoords, mIndices, mClosed);
-	}
-
-	@Override
-	public void renderArea(Area area, int level) {
-		if (!mDebugDrawPolygons)
-			return;
-
-		if (!mProjected && !projectToTile())
-			return;
-
-		int numLayer = mDrawingLayer + level;
-
-		PolygonLayer layer = (PolygonLayer) mLayers.getLayer(numLayer, Layer.POLYGON);
-		if (layer == null)
-			return;
-
-		if (layer.area == null)
-			layer.area = area;
-
-		layer.addPolygon(mCoords, mIndices);
+	public void renderAreaSymbol(Bitmap symbol) {
 	}
 
 	@Override
 	public void renderWaySymbol(Bitmap symbol, boolean alignCenter, boolean repeat) {
-		// TODO Auto-generated method stub
 
 	}
 
-	public void cleanup() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private boolean mDebugDrawPolygons;
-	boolean mDebugDrawUnmatched;
-
-	public boolean executeJob(JobTile jobTile) {
-		MapTile tile;
-
-		if (mMapDatabase == null)
-			return false;
-
-		tile = mCurrentTile = (MapTile) jobTile;
-		DebugSettings debugSettings = mMapView.getDebugSettings();
-
-		mDebugDrawPolygons = !debugSettings.mDisablePolygons;
-		mDebugDrawUnmatched = debugSettings.mDrawUnmatchted;
-
-		if (tile.layers != null) {
-			// should be fixed now.
-			Log.d(TAG, "XXX tile already loaded "
-					+ tile + " " + tile.state);
-			return false;
-		}
-
-		mLevels = TileGenerator.renderTheme.getLevels();
-
-		// limit stroke scale at z=17
-		// if (tile.zoomLevel < STROKE_MAX_ZOOM_LEVEL)
-		setScaleStrokeWidth(tile.zoomLevel);
-		// else
-		// setScaleStrokeWidth(STROKE_MAX_ZOOM_LEVEL);
-
-		// acount for area changes with latitude
-		mProjectionScaleFactor = 0.5f + 0.5f * (
-				(float) Math.sin(Math.abs(MercatorProjection
-						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180)));
-
-		mLayers = new Layers();
-
-		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
-			//Log.d(TAG, "Failed loading: " + tile);
-			mLayers.clear();
-			mLayers = null;
-			mLabels = null;
-			mCurLineLayer = null;
-
-			// FIXME add STATE_FAILED?
-			tile.state = STATE_NONE;
-			return false;
-		}
-
-		if (debugSettings.mDrawTileFrames) {
-			mTagName = new Tag("name", tile.toString(), false);
-			mPoiX = Tile.TILE_SIZE >> 1;
-			mPoiY = 10;
-			TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
-
-			mIndices = debugBoxIndex;
-			mCoords = debugBoxCoords;
-			mDrawingLayer = 10 * mLevels;
-			TileGenerator.renderTheme.matchWay(this, debugTagBox, (byte) 0, false, true);
-		}
-
-		tile.layers = mLayers;
-		tile.labels = mLabels;
-
-		mLayers = null;
-		mLabels = null;
-		mCurLineLayer = null;
-
-		return true;
-	}
-
-	private static byte getValidLayer(byte layer) {
-		if (layer < 0) {
-			return 0;
-		} else if (layer >= LAYERS) {
-			return LAYERS - 1;
-		} else {
-			return layer;
-		}
-	}
-
-	/**
-	 * Sets the scale stroke factor for the given zoom level.
-	 * @param zoomLevel
-	 *            the zoom level for which the scale stroke factor should be
-	 *            set.
-	 */
-	private void setScaleStrokeWidth(byte zoomLevel) {
-		int zoomLevelDiff = Math.max(zoomLevel - STROKE_MIN_ZOOM_LEVEL, 0);
-		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevelDiff);
-		if (mStrokeScale < 1)
-			mStrokeScale = 1;
-	}
-
-	private String mMapProjection;
-
-	public void setMapDatabase(IMapDatabase mapDatabase) {
-		if (mMapDatabase != null)
-			mMapDatabase.close();
-
-		mMapDatabase = mapDatabase;
-		mMapProjection = mMapDatabase.getMapProjection();
-	}
-
-	public IMapDatabase getMapDatabase() {
-		return mMapDatabase;
-	}
-
-	@Override
-	public boolean checkWay(Tag[] tags, boolean closed) {
-
-		mRenderInstructions = TileGenerator.renderTheme.matchWay(this, tags,
-				(byte) (mCurrentTile.zoomLevel + 0), closed, false);
-
-		return mRenderInstructions != null;
-	}
-
-	// TODO move this to Projection classes
-	private boolean projectToTile() {
-		if (mProjected || mMapProjection == null)
-			return true;
-
-		boolean useWebMercator = false;
-
-		if (mMapProjection == WebMercator.NAME)
-			useWebMercator = true;
-
-		float[] coords = mCoords;
-
-		long x = mCurrentTile.pixelX;
-		long y = mCurrentTile.pixelY + Tile.TILE_SIZE;
-		long z = Tile.TILE_SIZE << mCurrentTile.zoomLevel;
-		float min = mSimplify;
-
-		double divx, divy = 0;
-		long dx = (x - (z >> 1));
-		long dy = (y - (z >> 1));
-
-		if (useWebMercator) {
-			divx = WebMercator.f900913 / (z >> 1);
-		} else {
-			divx = 180000000.0 / (z >> 1);
-			divy = z / PIx4;
-		}
-
-		for (int pos = 0, outPos = 0, i = 0, m = mIndices.length; i < m; i++) {
-			int len = mIndices[i];
-			if (len == 0)
-				continue;
-			if (len < 0)
-				break;
-
-			int cnt = 0;
-			float lat, lon, prevLon = 0, prevLat = 0;
-
-			for (int end = pos + len; pos < end; pos += 2) {
-
-				if (useWebMercator) {
-					lon = (float) (coords[pos] / divx - dx);
-					lat = (float) (coords[pos + 1] / divx + dy);
-				} else {
-					lon = (float) ((coords[pos]) / divx - dx);
-					double sinLat = Math.sin(coords[pos + 1] * PI180);
-					lat = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
-				}
-
-				if (cnt != 0) {
-					// drop small distance intermediate nodes
-					if (lat == prevLat && lon == prevLon)
-						continue;
-
-					if ((pos != end - 2) &&
-							!((lat > prevLat + min || lat < prevLat - min) ||
-							(lon > prevLon + min || lon < prevLon - min)))
-						continue;
-				}
-				coords[outPos++] = prevLon = lon;
-				coords[outPos++] = prevLat = lat;
-
-				cnt += 2;
-			}
-
-			mIndices[i] = (short) cnt;
-		}
-		mProjected = true;
-		// mProjectedResult = true;
-		return true;
-	}
+	//	// TODO move this to Projection classes
+	//
+	//  private String mMapProjection;
+	//  private static final double PI180 = (Math.PI / 180) / 1000000.0;
+	//  private static final double PIx4 = Math.PI * 4;
+	//	private boolean mProjected;
+	//	private float mSimplify;
+	//
+	//	private boolean projectToTile() {
+	//		if (mProjected || mMapProjection == null)
+	//			return true;
+	//
+	//		boolean useWebMercator = false;
+	//
+	//		if (mMapProjection == WebMercator.NAME)
+	//			useWebMercator = true;
+	//
+	//		float[] coords = mCoords;
+	//
+	//		long x = mCurrentTile.pixelX;
+	//		long y = mCurrentTile.pixelY + Tile.TILE_SIZE;
+	//		long z = Tile.TILE_SIZE << mCurrentTile.zoomLevel;
+	//		float min = mSimplify;
+	//
+	//		double divx, divy = 0;
+	//		long dx = (x - (z >> 1));
+	//		long dy = (y - (z >> 1));
+	//
+	//		if (useWebMercator) {
+	//			divx = WebMercator.f900913 / (z >> 1);
+	//		} else {
+	//			divx = 180000000.0 / (z >> 1);
+	//			divy = z / PIx4;
+	//		}
+	//
+	//		for (int pos = 0, outPos = 0, i = 0, m = mIndices.length; i < m; i++) {
+	//			int len = mIndices[i];
+	//			if (len == 0)
+	//				continue;
+	//			if (len < 0)
+	//				break;
+	//
+	//			int cnt = 0;
+	//			float lat, lon, prevLon = 0, prevLat = 0;
+	//
+	//			for (int end = pos + len; pos < end; pos += 2) {
+	//
+	//				if (useWebMercator) {
+	//					lon = (float) (coords[pos] / divx - dx);
+	//					lat = (float) (coords[pos + 1] / divx + dy);
+	//				} else {
+	//					lon = (float) ((coords[pos]) / divx - dx);
+	//					double sinLat = Math.sin(coords[pos + 1] * PI180);
+	//					lat = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
+	//				}
+	//
+	//				if (cnt != 0) {
+	//					// drop small distance intermediate nodes
+	//					if (lat == prevLat && lon == prevLon)
+	//						continue;
+	//
+	//					if ((pos != end - 2) &&
+	//							!((lat > prevLat + min || lat < prevLat - min) ||
+	//							(lon > prevLon + min || lon < prevLon - min)))
+	//						continue;
+	//				}
+	//				coords[outPos++] = prevLon = lon;
+	//				coords[outPos++] = prevLat = lat;
+	//
+	//				cnt += 2;
+	//			}
+	//
+	//			mIndices[i] = (short) cnt;
+	//		}
+	//		mProjected = true;
+	//		// mProjectedResult = true;
+	//		return true;
+	//	}
 }
