@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.generator;
 
 import static org.oscim.generator.JobTile.STATE_NONE;
 
@@ -23,7 +23,8 @@ import org.oscim.core.WebMercator;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.QueryResult;
-import org.oscim.generator.JobTile;
+import org.oscim.renderer.MapTile;
+import org.oscim.renderer.WayDecorator;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
@@ -55,8 +56,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private static final double STROKE_INCREASE = Math.sqrt(2);
 	private static final byte LAYERS = 11;
 
-	static final byte STROKE_MIN_ZOOM_LEVEL = 12;
-	static final byte STROKE_MAX_ZOOM_LEVEL = 17;
+	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
+	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
 
 	private static RenderTheme renderTheme;
 

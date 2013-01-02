@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,21 +19,16 @@ import org.oscim.core.Tile;
 import android.util.Log;
 
 /**
- * 
+ * @author Hannes Janetzek
  */
 public class JobTile extends Tile implements Comparable<JobTile> {
 	private final static String TAG = JobTile.class.getName();
-	// public final static int LOADING = 1;
-	// public final static int NEWDATA = 1 << 1;
-	// public final static int READY = 1 << 2;
-	// public final static int AVAILABLE = 1 << 1 | 1 << 2;
-	// public final static int CANCELED = 1 << 3;
-	// public int state;
 
 	public final static int STATE_NONE = 0;
 	public final static int STATE_LOADING = 1 << 0;
 	public final static int STATE_NEW_DATA = 1 << 1;
 	public final static int STATE_READY = 1 << 2;
+	public final static int STATE_ERROR = 1 << 3;
 
 	public void clearState() {
 		state = STATE_NONE;
@@ -46,14 +41,10 @@ public class JobTile extends Tile implements Comparable<JobTile> {
 		state = STATE_LOADING;
 	}
 
-	/**
-	 * tile is in JobQueue
-	 */
-	//public boolean isLoading;
 	public byte state;
 
 	/**
-	 * distance from map center.
+	 * distance from map center
 	 */
 	public float distance;
 

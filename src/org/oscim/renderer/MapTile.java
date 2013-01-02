@@ -32,7 +32,7 @@ public final class MapTile extends JobTile {
 	 * Tile data set by TileGenerator:
 	 */
 	public TextItem labels;
-	Layers layers;
+	public Layers layers;
 
 	/**
 	 * tile has new data to upload to gl

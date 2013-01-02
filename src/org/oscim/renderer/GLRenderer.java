@@ -233,8 +233,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// use multiple buffers to avoid overwriting buffer while current
 		// data is uploaded (or rather the blocking which is probably done to
 		// avoid overwriting)
-		int curBuffer = uploadCnt % rotateBuffers;
-		uploadCnt++;
+		int curBuffer = uploadCnt++ % rotateBuffers;
+		//uploadCnt++;
 
 		ShortBuffer sbuf = shortBuffer[curBuffer];
 

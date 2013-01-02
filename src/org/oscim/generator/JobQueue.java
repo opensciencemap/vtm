@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012, 2013 OpenScienceMap 
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,7 +15,8 @@
  */
 package org.oscim.generator;
 
-//import static org.oscim.view.mapgenerator.JobTile.LOADING;
+import static org.oscim.generator.JobTile.STATE_LOADING;
+import static org.oscim.generator.JobTile.STATE_NONE;
 
 import java.util.ArrayList;
 import java.util.PriorityQueue;
@@ -41,8 +43,7 @@ public class JobQueue {
 
 		for (int i = 0, n = tiles.size(); i < n; i++) {
 			JobTile tile = tiles.get(i);
-			//tile.isLoading = true;
-			tile.state = JobTile.STATE_LOADING;
+			tile.state = STATE_LOADING;
 			mPriorityQueue.offer(tile);
 		}
 	}
@@ -53,8 +54,7 @@ public class JobQueue {
 	public synchronized void clear() {
 		JobTile t;
 		while ((t = mPriorityQueue.poll()) != null)
-			t.state = JobTile.STATE_NONE;
-		//t.isLoading = false;
+			t.state = STATE_NONE;
 
 		mPriorityQueue.clear();
 	}

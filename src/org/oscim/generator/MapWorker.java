@@ -14,7 +14,6 @@
  */
 package org.oscim.generator;
 
-import org.oscim.renderer.TileGenerator;
 import org.oscim.renderer.TileManager;
 import org.oscim.utils.PausableThread;
 
