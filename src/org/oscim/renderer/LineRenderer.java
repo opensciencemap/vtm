@@ -26,6 +26,7 @@ import static android.opengl.GLES20.glUseProgram;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.generator.TileGenerator;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.theme.renderinstruction.Line;
