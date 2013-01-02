@@ -1,6 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -31,13 +31,16 @@ import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
 
-// TODO:
-// - write a AnimationTimer instead of using CountDownTimers
-// - fix recognition of tilt/rotate/scale state...
+/**
+ * @author Hannes Janetzek
+ * @TODO:
+ *        - use one AnimationTimer instead of CountDownTimers
+ *        - fix recognition of tilt/rotate/scale state...
+ */
 
 final class TouchHandler implements OnGestureListener, OnScaleGestureListener, OnDoubleTapListener {
 
-	private static final String TAG = TouchHandler.class.getSimpleName();
+	//private static final String TAG = TouchHandler.class.getSimpleName();
 
 	private static final float SCALE_DURATION = 500;
 	private static final float ROTATION_DELAY = 200; // ms
