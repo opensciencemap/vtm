@@ -179,6 +179,10 @@
 	        <line  stroke="#9aabae" width="1.0" fixed="true" cap="butt"/> 
 	      </rule>
 	           
+	      <rule e="way" k="*" v="hospital" zoom-min="14">
+	        <area fill="#f0f0d8" />
+	      </rule>
+	      
 	      <rule e="way" k="*" v="parking" zoom-min="14">
 	        <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
 	      </rule>
@@ -472,7 +476,7 @@
     <!-- building -->
     <rule e="way" k="building" v="*">
 
-      <rule e="way" k="*" v="*" zoom-min="15">
+      <rule e="way" k="*" v="*" zoom-min="15" zoom-max="16">
         <use-area name="building" fade="15"/>
         <use-line name="building" fade="15"/>
       <!--   <line stroke="#c9c3c1" width="1.0" fixed="true" cap="butt" fade="15"/> 
@@ -925,6 +929,11 @@
     </rule>
      <rule e="way" k="debug" v="box">
          <line stroke="#000000" width="1.5" fixed="true" cap="butt" />
+    </rule>
+    
+    <!-- HACK!!! render building models last -->
+     <rule e="way" k="building" v="*" zoom-min="17">
+        <use-area name="building" fade="15"/>
     </rule>
   </rule>
 

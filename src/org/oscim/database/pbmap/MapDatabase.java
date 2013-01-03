@@ -556,7 +556,7 @@ public class MapDatabase implements IMapDatabase {
 		if (layer == 0)
 			layer = 5;
 
-		mMapGenerator.renderWay((byte) layer, tags, coords, index, polygon);
+		mMapGenerator.renderWay((byte) layer, tags, coords, index, polygon, 0);
 		return true;
 	}
 

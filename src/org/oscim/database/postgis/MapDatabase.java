@@ -182,7 +182,7 @@ public class MapDatabase implements IMapDatabase {
 
 					short[] idx = new short[mIndexPos];
 					System.arraycopy(mIndex, 0, idx, 0, mIndexPos);
-					mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, idx, polygon);
+					mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, idx, polygon, 0);
 				}
 			}
 		} catch (SQLException e) {

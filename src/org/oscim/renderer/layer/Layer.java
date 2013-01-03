@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap 
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,6 +14,9 @@
  */
 package org.oscim.renderer.layer;
 
+/**
+ * @authorHannes Janetzek
+ */
 public abstract class Layer {
 	public final static byte LINE = 0;
 	public final static byte POLYGON = 1;
@@ -21,15 +24,21 @@ public abstract class Layer {
 	public final static byte POITEXT = 3;
 	public final static byte SYMBOL = 4;
 	public final static byte BITMAP = 5;
+	public final static byte TEXLINE = 6;
+	public final static byte EXTRUSION = 7;
 
-	public byte type;
+	public byte type = -1;
 
 	public Layer next;
 
 	int layer;
-	// number of vertices this layer holds
+	// number of vertices for this layer
 	public int verticesCnt;
-	// vertices offset of this layer in VBO
+
+	// in case of line and polygon layer:
+	// - number of VERTICES offset for this layertype in VBO
+	// otherwise: 
+	// - offset in byte in VBO
 	public int offset;
 
 	VertexPoolItem pool;

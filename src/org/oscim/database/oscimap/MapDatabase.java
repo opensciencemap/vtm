@@ -298,7 +298,7 @@ public class MapDatabase implements IMapDatabase {
 	private static final int TAG_ELEM_INDEX = 12;
 	private static final int TAG_ELEM_COORDS = 13;
 	private static final int TAG_ELEM_LAYER = 21;
-	// private static final int TAG_ELEM_PRIORITY = 31;
+	private static final int TAG_ELEM_PRIORITY = 31;
 
 	private short[] mTmpKeys = new short[100];
 	private short[] mIndices = new short[10];
@@ -376,6 +376,8 @@ public class MapDatabase implements IMapDatabase {
 		int indexCnt = 1;
 		int coordCnt = 0;
 		int layer = 5;
+		int prio = 0;
+
 		Tag[] tags = null;
 		short[] index = null;
 
@@ -441,6 +443,10 @@ public class MapDatabase implements IMapDatabase {
 					layer = decodeVarint32();
 					break;
 
+				case TAG_ELEM_PRIORITY:
+					prio = decodeVarint32();
+					break;
+
 				default:
 					Log.d(TAG, "X invalid type for way: " + tag);
 			}
@@ -457,9 +463,9 @@ public class MapDatabase implements IMapDatabase {
 		float[] coords = mTmpCoords;
 
 		if (type == TAG_TILE_LINE)
-			mMapGenerator.renderWay((byte) layer, tags, coords, index, false);
+			mMapGenerator.renderWay((byte) layer, tags, coords, index, false, prio);
 		else if (type == TAG_TILE_POLY)
-			mMapGenerator.renderWay((byte) layer, tags, coords, index, true);
+			mMapGenerator.renderWay((byte) layer, tags, coords, index, true, prio);
 		else {
 			if (debug)
 				Log.d(TAG, "add poi " + coords[1] + " " + coords[0] + " " + tags[0]);

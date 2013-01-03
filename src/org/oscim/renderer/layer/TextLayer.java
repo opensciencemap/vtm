@@ -14,13 +14,10 @@
  */
 package org.oscim.renderer.layer;
 
-import java.nio.ShortBuffer;
-
 import org.oscim.renderer.TextureObject;
 import org.oscim.renderer.TextureRenderer;
 
 import android.graphics.Canvas;
-import android.util.FloatMath;
 import android.util.Log;
 
 public final class TextLayer extends TextureLayer {
@@ -90,15 +87,6 @@ public final class TextLayer extends TextureLayer {
 
 		item.next = labels;
 		labels = item;
-	}
-
-	@Override
-	void compile(ShortBuffer sbuf) {
-		if (TextureRenderer.debug)
-			Log.d("...", "compile");
-
-		for (TextureObject to = textures; to != null; to = to.next)
-			TextureObject.uploadTexture(to);
 	}
 
 	@Override
@@ -189,7 +177,7 @@ public final class TextLayer extends TextureLayer {
 			} else {
 				float vx = it.x1 - it.x2;
 				float vy = it.y1 - it.y2;
-				float a = FloatMath.sqrt(vx * vx + vy * vy);
+				float a = (float) Math.sqrt(vx * vx + vy * vy);
 				vx = vx / a;
 				vy = vy / a;
 
