@@ -35,6 +35,9 @@ import android.util.Log;
 
 /**
  * @author Hannes Janetzek
+ * @TODO
+ *       - this class should probably not be in 'renderer' -> tilemap?
+ *       - make it general for reuse in tile-overlays
  */
 public class TileManager {
 	static final String TAG = TileManager.class.getSimpleName();

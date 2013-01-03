@@ -17,6 +17,9 @@ package org.oscim.renderer.layer;
 import java.nio.ShortBuffer;
 
 import org.oscim.renderer.TextureObject;
+import org.oscim.renderer.TextureRenderer;
+
+import android.util.Log;
 
 public abstract class TextureLayer extends Layer {
 	public TextureObject textures;
@@ -26,7 +29,15 @@ public abstract class TextureLayer extends Layer {
 	 * @param sbuf
 	 *            buffer to add vertices
 	 */
-	abstract void compile(ShortBuffer sbuf);
+	void compile(ShortBuffer sbuf) {
+		if (TextureRenderer.debug)
+			Log.d("...", "compile");
+
+		for (TextureObject to = textures; to != null; to = to.next)
+			TextureObject.uploadTexture(to);
+
+		Layers.addPoolItems(this, sbuf);
+	}
 
 	abstract public boolean prepare();
 }

@@ -53,9 +53,10 @@ public interface IMapDatabaseCallback {
 	 *            length of way data in wayNodes
 	 * @param closed
 	 *            way is closed (means need to add endpoint == startpoint)
+	 * @param prio TODO
 	 */
 	void renderWay(byte layer, Tag[] tags, float[] wayNodes, short[] wayLength,
-			boolean closed);
+			boolean closed, int prio);
 
 	/**
 	 * TBD: check if way will be rendered before decoding

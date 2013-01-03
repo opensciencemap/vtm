@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -18,13 +18,22 @@ import java.nio.ShortBuffer;
 
 import android.util.Log;
 
+/**
+ * @author Hannes Janetzek
+ */
 public class Layers {
 
+	// mixed Polygon and Line layers
 	public Layer layers;
-	public int lineOffset;
 
 	public Layer textureLayers;
-	public int texOffset;
+	public Layer extrusionLayers;
+
+	// To not need to switch VertexAttribPointer positions all the time:
+	// 1. polygons are packed in VBO at offset 0
+	// 2. lines afterwards at lineOffset
+	// 3. other layers keep their byte offset in Layer.offset
+	public int lineOffset;
 
 	private Layer mCurLayer;
 
@@ -78,9 +87,77 @@ public class Layers {
 		return ret;
 	}
 
+	//	public boolean uploadLayers(BufferObject vbo, boolean addFill, boolean limit) {
+	//
+	//		int newSize = getSize();
+	//		if (newSize == 0) {
+	//			// Log.d(TAG, "empty");
+	//			return true;
+	//		}
+	//
+	//		GLES20.glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
+	//
+	//		// use multiple buffers to avoid overwriting buffer while current
+	//		// data is uploaded (or rather the blocking which is probably done to
+	//		// avoid overwriting)
+	//		int curBuffer = uploadCnt++ % rotateBuffers;
+	//
+	//		ShortBuffer sbuf = shortBuffer[curBuffer];
+	//
+	//		// add fill coordinates
+	//		if (addFill)
+	//			newSize += 8;
+	//
+	//		if (sbuf.capacity() < newSize) {
+	//			sbuf = ByteBuffer
+	//					.allocateDirect(newSize * SHORT_BYTES)
+	//					.order(ByteOrder.nativeOrder())
+	//					.asShortBuffer();
+	//
+	//			shortBuffer[curBuffer] = sbuf;
+	//		} else {
+	//			sbuf.clear();
+	//			// if (addFill)
+	//			// sbuf.position(8);
+	//		}
+	//
+	//		if (addFill)
+	//			sbuf.put(mFillCoords, 0, 8);
+	//
+	//		compile(sbuf, addFill);
+	//		
+	//		sbuf.flip();
+	//
+	//		if (newSize != sbuf.remaining()) {
+	//			Log.d(TAG, "wrong size: "
+	//					+ newSize + " "
+	//					+ sbuf.position() + " "
+	//					+ sbuf.limit() + " "
+	//					+ sbuf.remaining());
+	//			return false;
+	//		}
+	//		newSize *= SHORT_BYTES;
+	//
+	//		// reuse memory allocated for vbo when possible and allocated
+	//		// memory is less then four times the new data
+	//		if (vbo.size > newSize && vbo.size < newSize * 4
+	//				&& !limit) {
+	//			GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, newSize, sbuf);
+	//		} else {
+	//			//mBufferMemoryUsage += newSize - vbo.size;
+	//			vbo.size = newSize;
+	//			GLES20.glBufferData(GL_ARRAY_BUFFER, vbo.size, sbuf, GL_DYNAMIC_DRAW);
+	//			//mBufferMemoryUsage += vbo.size;
+	//		}
+	//
+	//		return true;
+	//	}
+
 	private static int LINE_VERTEX_SHORTS = 4;
 	private static int POLY_VERTEX_SHORTS = 2;
 	private static int TEXTURE_VERTEX_SHORTS = 6;
+
+	//private static int EXTRUSION_VERTEX_SHORTS = 4;
 
 	public int getSize() {
 
@@ -91,12 +168,13 @@ public class Layers {
 				size += l.verticesCnt * LINE_VERTEX_SHORTS;
 			else
 				size += l.verticesCnt * POLY_VERTEX_SHORTS;
-
 		}
 
-		for (Layer l = textureLayers; l != null; l = l.next) {
+		for (Layer l = textureLayers; l != null; l = l.next)
 			size += l.verticesCnt * TEXTURE_VERTEX_SHORTS;
-		}
+
+		//for (Layer l = extrusionLayers; l != null; l = l.next)
+		//	size += l.verticesCnt * EXTRUSION_VERTEX_SHORTS;
 
 		return size;
 	}
@@ -113,18 +191,18 @@ public class Layers {
 		lineOffset = sbuf.position() * 2; // * short-bytes
 		addLayerItems(sbuf, layers, Layer.LINE, 0);
 
-		texOffset = sbuf.position() * 2; // * short-bytes
-
 		for (Layer l = textureLayers; l != null; l = l.next) {
-			TextureLayer sl = (TextureLayer) l;
-			sl.compile(sbuf);
+			TextureLayer tl = (TextureLayer) l;
+			tl.compile(sbuf);
 		}
 
-		// FIXME
-		addLayerItems(sbuf, textureLayers, Layer.SYMBOL, 0);
-
+		//		for (Layer l = extrusionLayers; l != null; l = l.next) {
+		//			ExtrusionLayer tl = (ExtrusionLayer) l;
+		//			tl.compile(sbuf);
+		//		}
 	}
 
+	// optimization for lines and polygon: collect all pool items and add back in one go
 	private static void addLayerItems(ShortBuffer sbuf, Layer l, byte type, int pos) {
 		VertexPoolItem last = null, items = null;
 
@@ -136,7 +214,8 @@ public class Layers {
 				if (it.next == null)
 					sbuf.put(it.vertices, 0, it.used);
 				else
-					sbuf.put(it.vertices);
+					sbuf.put(it.vertices, 0, VertexPoolItem.SIZE);
+
 				last = it;
 			}
 			if (last == null)
@@ -155,8 +234,22 @@ public class Layers {
 		VertexPool.release(items);
 	}
 
-	public void clear() {
+	static void addPoolItems(Layer l, ShortBuffer sbuf) {
+		l.offset = sbuf.position() * 2; // (* short-bytes)
 
+		for (VertexPoolItem it = l.pool; it != null; it = it.next) {
+			if (it.next == null)
+				sbuf.put(it.vertices, 0, it.used);
+			else
+				sbuf.put(it.vertices, 0, VertexPoolItem.SIZE);
+		}
+
+		VertexPool.release(l.pool);
+		l.pool = null;
+	}
+
+	// cleanup only when layers are not used by tile or overlay anymore!
+	public void clear() {
 		while (layers != null) {
 			Layer l = layers;
 			if (l.pool != null) {
@@ -181,5 +274,20 @@ public class Layers {
 			l = l.next;
 		}
 		textureLayers = null;
+
+		l = extrusionLayers;
+		while (l != null) {
+
+			l.clear();
+
+			if (l.pool != null) {
+				VertexPool.release(l.pool);
+				l.pool = null;
+				l.curItem = null;
+			}
+
+			l = l.next;
+		}
+		extrusionLayers = null;
 	}
 }

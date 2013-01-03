@@ -40,9 +40,6 @@ public class BuildingOverlay extends RenderOverlay {
 		super(mapView);
 	}
 
-	private int mNumIndices = 0;
-	private int mNumVertices = 0;
-
 	private static int buildingProgram;
 	private static int hBuildingVertexPosition;
 	private static int hBuildingLightPosition;
@@ -55,8 +52,9 @@ public class BuildingOverlay extends RenderOverlay {
 	private int mIndicesBufferID;
 	private int mVertexBufferID;
 
+	private int mNumIndices = 0;
+	private int mNumVertices = 0;
 	private VertexPoolItem mVertices, mCurVertices;
-
 	private VertexPoolItem mIndices[], mCurIndices[];
 
 	private int mIndiceCnt[] = { 0, 0, 0 };

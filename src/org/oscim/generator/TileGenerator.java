@@ -24,6 +24,7 @@ import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.QueryResult;
 import org.oscim.renderer.MapTile;
 import org.oscim.renderer.WayDecorator;
+import org.oscim.renderer.layer.ExtrusionLayer;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
@@ -103,6 +104,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private float mProjectionScaleFactor;
 
 	private float mPoiX, mPoiY;
+	private int mPriority;
 
 	private Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
 	private Tag mTagName;
@@ -159,6 +161,12 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		mLayers = new Layers();
 
+		//if (tile.tileX == 68758 && tile.tileY == 42708 && tile.zoomLevel == 17)
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 68743 && tile.tileY == 42651))
+
+		// if ((tile.zoomLevel != 17)
+		// || (tile.tileX >= 68738 && tile.tileY >= 42653
+		//&& tile.tileX <= 68739 && tile.tileY <= 42654))
 		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
 			//Log.d(TAG, "Failed loading: " + tile);
 			mLayers.clear();
@@ -187,6 +195,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		tile.labels = mLabels;
 		mLayers = null;
 		mLabels = null;
+
+		if (tile.layers.extrusionLayers != null)
+			((ExtrusionLayer) tile.layers.extrusionLayers).ready = true;
+		//Log.d(TAG, "Finished loading: " + tile);
 
 		return true;
 	}
@@ -226,16 +238,19 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		return mMapDatabase;
 	}
 
+	private boolean mRenderBuildingModel;
+
 	private boolean filterTags(Tag[] tags) {
+		mRenderBuildingModel = false;
+
 		for (int i = 0; i < tags.length; i++) {
 			String key = tags[i].key;
-			if (key == Tag.TAG_KEY_NAME) {
+			if (tags[i].key == Tag.TAG_KEY_NAME) {
 				mTagName = tags[i];
 				tags[i] = mTagEmptyName;
 			} else if (mCurrentTile.zoomLevel >= 17 &&
 					key == TAG_BUILDING) {
-
-				return false;
+				mRenderBuildingModel = true;
 			}
 		}
 		return true;
@@ -292,19 +307,18 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	@Override
 	public void renderWay(byte layer, Tag[] tags, float[] coords, short[] indices,
-			boolean closed) {
+			boolean closed, int prio) {
 
 		// reset state
 		mTagName = null;
 		mCurLineLayer = null;
 
+		mPriority = prio;
 		mClosed = closed;
 
 		// replace tags that should not be cached in Rendertheme (e.g. name)
 		if (!filterTags(tags))
 			return;
-
-		mDrawingLayer = getValidLayer(layer) * mLevels;
 
 		//	mProjected = false;
 		//	mSimplify = 0.5f;
@@ -317,6 +331,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		//			mSimplify = 0;
 		//	}
 
+		mDrawingLayer = getValidLayer(layer) * mLevels;
 		mCoords = coords;
 		mIndices = indices;
 
@@ -394,13 +409,23 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	@Override
 	public void renderArea(Area area, int level) {
+		int numLayer = mDrawingLayer + level;
+
+		if (mRenderBuildingModel) {
+			//Log.d(TAG, "add buildings: " + mCurrentTile + " " + mPriority);
+			if (mLayers.extrusionLayers == null)
+				mLayers.extrusionLayers = new ExtrusionLayer(0);
+
+			((ExtrusionLayer) mLayers.extrusionLayers).addBuildings(mCoords, mIndices, mPriority);
+
+			return;
+		}
+
 		if (!mDebugDrawPolygons)
 			return;
 
 		//	if (!mProjected && !projectToTile())
 		//		return;
-
-		int numLayer = mDrawingLayer + level;
 
 		PolygonLayer layer = (PolygonLayer) mLayers.getLayer(numLayer, Layer.POLYGON);
 		if (layer == null)

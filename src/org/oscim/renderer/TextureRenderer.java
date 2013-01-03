@@ -89,8 +89,7 @@ public final class TextureRenderer {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	public static Layer draw(Layer layer, float scale, float[] projection,
-			float matrix[], int offset) {
+	public static Layer draw(Layer layer, float scale, float[] projection, float matrix[]) {
 
 		// GlUtils.checkGlError("draw texture >");
 		GLES20.glUseProgram(mTextureProgram);
@@ -121,7 +120,7 @@ public final class TextureRenderer {
 			// can only draw MAX_ITEMS in each iteration
 			for (int i = 0; i < to.vertices; i += maxVertices) {
 				// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
-				int off = (to.offset + i) * 8 + offset;
+				int off = (to.offset + i) * 8 + tl.offset;
 
 				GLES20.glVertexAttribPointer(hTextureVertex, 4,
 						GLES20.GL_SHORT, false, 12, off);

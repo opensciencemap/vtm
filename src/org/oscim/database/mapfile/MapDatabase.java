@@ -961,7 +961,7 @@ public class MapDatabase implements IMapDatabase {
 						&& mWayNodes[1] == mWayNodes[l - 1];
 
 				mapDatabaseCallback
-						.renderWay(layer, tags, mWayNodes, wayLengths, closed);
+						.renderWay(layer, tags, mWayNodes, wayLengths, closed, 0);
 			}
 		}
 

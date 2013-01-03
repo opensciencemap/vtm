@@ -14,8 +14,6 @@
  */
 package org.oscim.renderer.layer;
 
-import java.nio.ShortBuffer;
-
 import org.oscim.renderer.TextureObject;
 import org.oscim.renderer.TextureRenderer;
 
@@ -85,14 +83,16 @@ public final class SymbolLayer extends TextureLayer {
 		symbols = item;
 	}
 
-	@Override
-	void compile(ShortBuffer sbuf) {
-		if (TextureRenderer.debug)
-			Log.d("...", "compile");
-
-		for (TextureObject to = textures; to != null; to = to.next)
-			TextureObject.uploadTexture(to);
-	}
+	//	@Override
+	//	void compile(ShortBuffer sbuf) {
+	//		if (TextureRenderer.debug)
+	//			Log.d("...", "compile");
+	//
+	//		for (TextureObject to = textures; to != null; to = to.next)
+	//			TextureObject.uploadTexture(to);
+	//
+	//		Layers.addPoolItems(this, sbuf);
+	//	}
 
 	private final static int LBIT_MASK = 0xfffffffe;
 

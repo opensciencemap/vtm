@@ -116,9 +116,7 @@ public abstract class RenderOverlay {
 		}
 
 		for (Layer l = layers.textureLayers; l != null;) {
-
-			l = TextureRenderer.draw(l, (mMapPosition.scale / pos.scale) * div, proj, mv,
-					layers.texOffset);
+			l = TextureRenderer.draw(l, (mMapPosition.scale / pos.scale) * div, proj, mv);
 		}
 	}
 

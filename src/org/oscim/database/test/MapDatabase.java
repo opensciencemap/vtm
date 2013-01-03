@@ -100,7 +100,7 @@ public class MapDatabase implements IMapDatabase {
 		mIndex[2] = 10;
 		mIndex[3] = 0;
 
-		mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, mIndex, true);
+		mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, mIndex, true, 0);
 
 		mIndex[0] = 4;
 		mIndex[1] = -1;
@@ -113,7 +113,7 @@ public class MapDatabase implements IMapDatabase {
 		Tag[] tags = new Tag[2];
 		tags[0] = mTagsWay[0];
 		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex, false);
+		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex, false, 0);
 
 		// center up
 		mCoords[0] = size / 2;
@@ -124,7 +124,7 @@ public class MapDatabase implements IMapDatabase {
 		tags[0] = mTagsWay[0];
 		tags[1] = mTagsWay[1];
 		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex,
-				false);
+				false, 0);
 
 		// center down
 		mCoords[0] = size / 2;
@@ -134,7 +134,7 @@ public class MapDatabase implements IMapDatabase {
 		tags = new Tag[2];
 		tags[0] = mTagsWay[0];
 		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex, false);
+		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex, false, 0);
 
 		// left-top to center
 		mCoords[0] = size / 2;
@@ -144,7 +144,7 @@ public class MapDatabase implements IMapDatabase {
 		tags = new Tag[2];
 		tags[0] = mTagsWay[0];
 		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false);
+		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false, 0);
 
 		// middle horizontal
 		mCoords[0] = 0;
@@ -154,7 +154,7 @@ public class MapDatabase implements IMapDatabase {
 		tags = new Tag[2];
 		tags[0] = mTagsWay[0];
 		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false);
+		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false, 0);
 
 		// middle horizontal
 		mCoords[0] = 10;
@@ -164,7 +164,7 @@ public class MapDatabase implements IMapDatabase {
 		tags = new Tag[2];
 		tags[0] = mTagsWay[0];
 		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false);
+		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false, 0);
 
 		// lon1 = size / 2;
 		// lat1 = size / 2;
