@@ -111,7 +111,7 @@ public class BuildingOverlay2 extends RenderOverlay {
 	// sligthly differ adjacent faces to imrpove contrast
 	float mColor[] = { 0.71872549f, 0.701960784f, 0.690196078f, 0.7f };
 	float mColor2[] = { 0.71372549f, 0.701960784f, 0.695196078f, 0.7f };
-	float mRoofColor[] = { 0.81f, 0.80f, 0.79f, 0.7f };
+	float mRoofColor[] = { 0.895f, 0.89f, 0.88f, 0.9f };
 	boolean debug = false;
 
 	@Override
@@ -156,7 +156,7 @@ public class BuildingOverlay2 extends RenderOverlay {
 			return;
 		}
 
-		int drawCount = 20;
+		int drawCount = 0;
 		// draw to depth buffer
 		MapTile[] tiles = mTileSet.tiles;
 		for (int i = 0; i < mTileSet.cnt; i++) {
@@ -169,27 +169,27 @@ public class BuildingOverlay2 extends RenderOverlay {
 				continue;
 
 			if (first) {
+				GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+
 				GLES20.glUseProgram(buildingProgram);
 				GLRenderer.enableVertexArrays(hBuildingVertexPosition, -1);
 
-				GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
-				GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 				GLES20.glEnable(GLES20.GL_CULL_FACE);
 				GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
-				//GLES20.glCullFace(GLES20.GL_CW);
-				GLES20.glDepthMask(true);
+				GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 				GLES20.glDepthFunc(GLES20.GL_LESS);
-				GLES20.glUniform1i(hBuildingMode, 0);
+				GLES20.glDepthMask(true);
 				GLES20.glColorMask(false, false, false, false);
+				GLES20.glUniform1i(hBuildingMode, 0);
 				first = false;
 			}
 
-			GLES20.glPolygonOffset(0, drawCount--);
+			GLES20.glPolygonOffset(0, drawCount += 10);
 			// seems there are not infinite offset units possible
 			// this should suffice for at least two rows, i.e.
 			// having not two neighbours with the same depth
-			if (drawCount == 0)
-				drawCount = 20;
+			if (drawCount == 100)
+				drawCount = 0;
 
 			setMatrix(pos, mv, proj, tiles[i], 1);
 			GLES20.glUniformMatrix4fv(hBuildingMatrix, 1, false, mv, 0);
@@ -209,10 +209,13 @@ public class BuildingOverlay2 extends RenderOverlay {
 		// enable color buffer, use depth mask
 		GLRenderer.enableVertexArrays(hBuildingVertexPosition, hBuildingLightPosition);
 		GLES20.glColorMask(true, true, true, true);
-		GLES20.glDepthMask(false);
+		//GLES20.glDepthMask(false);
 		GLES20.glDepthFunc(GLES20.GL_EQUAL);
+		//GLES20.glDepthFunc(GLES20.GL_EQUAL);
 
-		drawCount = 20;
+		drawCount = 0;
+		//GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+		//GLES20.glPolygonOffset(0, -2);
 
 		for (int i = 0; i < mTileSet.cnt; i++) {
 			if (!tiles[i].isVisible || tiles[i].layers == null
@@ -223,9 +226,9 @@ public class BuildingOverlay2 extends RenderOverlay {
 			if (!el.compiled)
 				continue;
 
-			GLES20.glPolygonOffset(0, drawCount--);
-			if (drawCount == 0)
-				drawCount = 20;
+			GLES20.glPolygonOffset(0, drawCount += 10);
+			if (drawCount == 100)
+				drawCount = 0;
 
 			setMatrix(pos, mv, proj, tiles[i], 1);
 			GLES20.glUniformMatrix4fv(hBuildingMatrix, 1, false, mv, 0);
@@ -233,6 +236,7 @@ public class BuildingOverlay2 extends RenderOverlay {
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
 
+			//GLRenderer.enableVertexArrays(hBuildingVertexPosition, hBuildingLightPosition);
 			GLES20.glVertexAttribPointer(hBuildingVertexPosition, 3,
 					GLES20.GL_SHORT, false, 8, 0);
 
@@ -262,7 +266,18 @@ public class BuildingOverlay2 extends RenderOverlay {
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[1],
 					GLES20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
-			GlUtils.checkGlError("...");
+			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+			GlUtils.checkGlError(".1.");
+
+			//			GLRenderer.enableVertexArrays(hBuildingVertexPosition, -1);
+			//			GLES20.glVertexAttribPointer(hBuildingVertexPosition, 3,
+			//					GLES20.GL_SHORT, false, 16, 8);
+			//
+			//			GLES20.glUniform1i(hBuildingMode, 0);
+			//			GLES20.glUniform4f(hBuildingColor, 1.0f, 0.5f, 0.5f, 0.9f);
+			//			GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, 10);
+			//
+			//			GlUtils.checkGlError(".2.");
 		}
 
 		if (!first) {
