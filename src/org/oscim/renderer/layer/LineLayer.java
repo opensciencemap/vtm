@@ -61,7 +61,7 @@ public final class LineLayer extends Layer {
 	 *            whether to connect start- and end-point
 	 */
 	public void addLine(float[] points, short[] index, boolean closed) {
-		float x, y, nextX, nextY, prevX, prevY;
+		float x, y, nextX, nextY;
 		float a, ux, uy, vx, vy, wx, wy;
 
 		int tmax = Tile.TILE_SIZE + 10;
@@ -219,21 +219,23 @@ public final class LineLayer extends Layer {
 				// outside means line is probably clipped
 				// TODO should align ending with tile boundary
 				// for now, just extend the line a little
+				float tx = vx;
+				float ty = vy;
 
 				if (squared) {
-					vx = 0;
-					vy = 0;
+					tx = 0;
+					ty = 0;
 				} else if (!outside) {
-					vx *= 0.5;
-					vy *= 0.5;
+					tx *= 0.5;
+					ty *= 0.5;
 				}
 
 				if (rounded)
 					verticesCnt -= 2;
 
 				// add first vertex twice
-				ddx = (int) ((ux - vx) * DIR_SCALE);
-				ddy = (int) ((uy - vy) * DIR_SCALE);
+				ddx = (int) ((ux - tx) * DIR_SCALE);
+				ddy = (int) ((uy - ty) * DIR_SCALE);
 				dx = (short) (0 | ddx & DIR_MASK);
 				dy = (short) (1 | ddy & DIR_MASK);
 
@@ -259,8 +261,8 @@ public final class LineLayer extends Layer {
 					opos = 0;
 				}
 
-				ddx = (int) (-(ux + vx) * DIR_SCALE);
-				ddy = (int) (-(uy + vy) * DIR_SCALE);
+				ddx = (int) (-(ux + tx) * DIR_SCALE);
+				ddy = (int) (-(uy + ty) * DIR_SCALE);
 
 				v[opos++] = ox;
 				v[opos++] = oy;
@@ -269,11 +271,12 @@ public final class LineLayer extends Layer {
 
 			}
 
-			prevX = x;
-			prevY = y;
 			x = nextX;
 			y = nextY;
 			boolean flip = false;
+			// Unit vector pointing back to previous node
+			vx *= -1;
+			vy *= -1;
 
 			for (;;) {
 				if (ipos < pos + length) {
@@ -286,13 +289,6 @@ public final class LineLayer extends Layer {
 					ipos += 2;
 				} else
 					break;
-
-				// Unit vector pointing back to previous node
-				vx = prevX - x;
-				vy = prevY - y;
-				a = (float) Math.sqrt(vx * vx + vy * vy);
-				vx = (vx / a);
-				vy = (vy / a);
 
 				// Unit vector pointing forward to next node
 				wx = nextX - x;
@@ -361,19 +357,12 @@ public final class LineLayer extends Layer {
 				v[opos++] = (short) (2 | -ddx & DIR_MASK);
 				v[opos++] = (short) (1 | -ddy & DIR_MASK);
 
-				prevX = x;
-				prevY = y;
 				x = nextX;
 				y = nextY;
+
+				vx = -1 * wx;
+				vy = -1 * wy;
 			}
-
-			vx = prevX - x;
-			vy = prevY - y;
-
-			a = (float) Math.sqrt(vx * vx + vy * vy);
-
-			vx = (vx / a);
-			vy = (vy / a);
 
 			ux = vy;
 			uy = -vx;
