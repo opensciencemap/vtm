@@ -39,6 +39,8 @@ public class ExtrusionLayer extends Layer {
 	private VertexPoolItem mIndices[], mCurIndices[];
 	private LineClipper mClipper;
 
+	// indices for:
+	// 0. even sides, 1. odd sides, 2. roof, 3. roof outline
 	public int mIndiceCnt[] = { 0, 0, 0, 0 };
 	public int mIndicesBufferID;
 	public int mVertexBufferID;
@@ -54,11 +56,7 @@ public class ExtrusionLayer extends Layer {
 		this.layer = level;
 
 		mVertices = mCurVertices = VertexPool.get();
-		// indices for
-		// 0. even sides
-		// 1. odd sides
-		// 2. roof
-		// 3. roof outline
+
 		mIndices = new VertexPoolItem[4];
 		mCurIndices = new VertexPoolItem[4];
 		for (int i = 0; i < 4; i++)
@@ -271,7 +269,6 @@ public class ExtrusionLayer extends Layer {
 			if (convex) {
 				// TODO simple polys with only one concave arc
 				// could be handled without special triangulation
-
 				if ((ux < 0 ? 1 : -1) != (vx < 0 ? 1 : -1))
 					changeX++;
 				if ((uy < 0 ? 1 : -1) != (vy < 0 ? 1 : -1))
@@ -291,6 +288,7 @@ public class ExtrusionLayer extends Layer {
 			short[] indices = mCurIndices[even].vertices;
 			// index id relative to mCurIndices item
 			int ind = mCurIndices[even].used;
+			// indices for current face
 			short vert = (short) (vOffset + (i - 2));
 			short s0 = vert++;
 			short s1 = vert++;
@@ -322,7 +320,7 @@ public class ExtrusionLayer extends Layer {
 			mCurIndices[even].used += 6;
 			even = (even + 1) % 2;
 
-			// add outline indices
+			// add roof outline indices
 			VertexPoolItem it = mCurIndices[IND_OUTLINE];
 			if (it.used == VertexPoolItem.SIZE) {
 				it.next = VertexPool.get();
@@ -382,6 +380,8 @@ public class ExtrusionLayer extends Layer {
 			VertexPool.release(i);
 
 		VertexPool.release(mVertices);
+
+		mClipper = null;
 
 		compiled = true;
 	}
