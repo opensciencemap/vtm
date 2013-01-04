@@ -192,7 +192,7 @@ public class BuildingOverlay2 extends RenderOverlay {
 				GLES20.glUniform1i(hBuildingMode, 0);
 				first = false;
 			}
-			GLES20.glPolygonOffset(1, 10);
+			GLES20.glPolygonOffset(1, 40);
 
 			//			GLES20.glPolygonOffset(0, drawCount += 10);
 			//			// seems there are not infinite offset units possible
@@ -220,12 +220,12 @@ public class BuildingOverlay2 extends RenderOverlay {
 		// enable color buffer, use depth mask
 		GLRenderer.enableVertexArrays(hBuildingVertexPosition, hBuildingLightPosition);
 		GLES20.glColorMask(true, true, true, true);
-		GLES20.glDepthMask(false);
+		//GLES20.glDepthMask(false);
 		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 		//GLES20.glDepthFunc(GLES20.GL_EQUAL);
 
-		//drawCount = 0;
-		GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
+		int drawCount = 40;
+		//GLES20.glEnbable(GLES20.GL_POLYGON_);
 		//GLES20.glPolygonOffset(0, -2);
 
 		for (int i = 0; i < mTileSet.cnt; i++) {
@@ -236,10 +236,10 @@ public class BuildingOverlay2 extends RenderOverlay {
 			ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
 			if (!el.compiled)
 				continue;
-
-			//			GLES20.glPolygonOffset(0, drawCount += 10);
-			//			if (drawCount == 100)
-			//				drawCount = 0;
+			GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+			GLES20.glPolygonOffset(1, drawCount--);
+			if (drawCount == 20)
+				drawCount = 40;
 
 			setMatrix(pos, mv, proj, tiles[i], 1);
 			GLES20.glUniformMatrix4fv(hBuildingMatrix, 1, false, mv, 0);
@@ -278,8 +278,8 @@ public class BuildingOverlay2 extends RenderOverlay {
 					GLES20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
 			GLES20.glUniform1i(hBuildingMode, 0);
-			GLES20.glUniform4f(hBuildingColor, 0.7f, 0.7f, 0.72f, 1.0f);
-
+			GLES20.glUniform4f(hBuildingColor, 0.75f, 0.75f, 0.75f, 1.0f);
+			GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
 					GLES20.GL_UNSIGNED_SHORT,
 					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
