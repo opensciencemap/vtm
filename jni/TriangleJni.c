@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "triangle.h"
 
 static void mylog(const char *msg)
@@ -29,7 +30,7 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   int i, j;
 
   memset(&in, 0, sizeof(TriangleIO));
-  
+
   int num_points = (indices[0])>>1;
   in.numberofpoints = num_points;
   in.pointlist = (float *) points;
@@ -44,15 +45,15 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   in.segmentlist = (int *) malloc(num_segments * 2 * sizeof(int));
   in.numberofsegments = num_segments;
   in.numberofholes = num_rings - 1;
-  int *rings = NULL;  
+  int *rings = NULL;
   if (in.numberofholes > 0)
 	{
 	  in.holelist = (float *) malloc(in.numberofholes * 2 * sizeof(float));
 	  rings = (int*) malloc(num_rings * sizeof(int));
 	}
-  
-  int n = 0;
-  int h = 0;
+
+  int seg = 0;
+  int hole = 0;
 
   int ring;
   int point;
@@ -64,33 +65,51 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 
 	  if (rings)
 		rings[ring] = num_points;
-	 
-	  // add holes, fixme: works only for convex
-	  // if ring is clockwise one could take the center of
-	  // the first 'triangle' of a convex arc?
+
+	  // add holes: we need a point inside the hole...
+	  // this is just a heuristic, assuming that two
+	  // 'parallel' lines have a distance of at least
+	  // 1 unit.
 	  if (ring > 0)
 		{
-		  int k;
-		  float cx = 0;
-		  float cy = 0;
-	  
-		  for (k = point, len = k + num_points; k < len; k++)
-			{
-			  cx += in.pointlist[k*2];
-			  cy += in.pointlist[k*2+1];			  
-			}
+		  int k = point * 2;
 
-		  in.holelist[h++] = cx / num_points;
-		  in.holelist[h++] = cy / num_points;
+		  float cx = in.pointlist[k+0];
+		  float cy = in.pointlist[k+1];
+
+		  float nx = in.pointlist[k+2];
+		  float ny = in.pointlist[k+3];
+
+		  float vx = nx - cx;
+		  float vy = ny - cy;
+
+		  float a = sqrt(vx*vx + vy*vy);
+
+		  // fixme: need to check a == 0?
+		  //if (a > 0.00001 || a < -0.0001)
+
+		  float ux = -vy / a;
+		  float uy = vx / a;
+
+		  float centerx = cx + vx / 2 - ux;
+		  float centery = cy + vy / 2 - uy;
+
+		  snprintf(buf, 128, "a: %f in:(%.2f %.2f) "
+				   "cur:(%.2f %.2f), next:(%.2f %.2f)\n",
+				   a, centerx, centery, cx, cy, nx,ny);
+		  mylog(buf);
+
+		  in.holelist[hole++] = centerx;
+		  in.holelist[hole++] = centery;
 		}
-	  
-	  in.segmentlist[n++] = point + (num_points - 1);
-	  in.segmentlist[n++] = point;
-	  
+
+	  in.segmentlist[seg++] = point + (num_points - 1);
+	  in.segmentlist[seg++] = point;
+
 	  for (len = point + num_points - 1; point < len; point++)
 		{
-		  in.segmentlist[n++] = point;
-		  in.segmentlist[n++] = point + 1;
+		  in.segmentlist[seg++] = point;
+		  in.segmentlist[seg++] = point + 1;
 		}
 	}
 #ifdef TESTING
@@ -108,10 +127,10 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   	  mylog(buf);
   	}
 #endif
-  
+
   memset(&out, 0, sizeof(TriangleIO));
   out.trianglelist = (INDICE*) indices;
-  
+
   triangulate("pzPNBQ", &in, &out, (TriangleIO *) NULL);
 
   //if (offset || stride)
@@ -119,7 +138,7 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   //  if (stride <= 0)
   //	stride = 1;
 
-#ifdef TESTING  
+#ifdef TESTING
   snprintf(buf, 128, "triangles: %d\n", out.numberoftriangles);
   mylog(buf);
 
@@ -132,9 +151,10 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	}
 #endif
 
-  // ----------- fix addresses to vertex buffer indices -------------
+  // ----------- fix offset to vertex buffer indices -------------
   // scale to stride
   short stride = 2;
+  int n, m;
 
   for (i = 0, n = out.numberoftriangles * 3; i < n; i++)
 	out.trianglelist[i] *= stride;
@@ -150,19 +170,18 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   short off = offset;
   int add = 0;
   int start = 0;
-  int m;
-  
+
   for (j = 0, m = in.numberofholes; j < m; j++)
 	{
 	  start += rings[j] * stride;
 	  if (rings[j] % 2 == 0)
 		continue;
-	  
+
 #ifdef TESTING
 	  snprintf(buf, 128, "add offset: %d\n", start);
 	  mylog(buf);
 #endif
-	  
+
 	  for (i = 0, n = out.numberoftriangles * 3; i < n; i++)
 		if (out.trianglelist[i] >= start)
 		  out.trianglelist[i] += stride;
@@ -180,7 +199,7 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 #endif
 	}
 
-  // flip direction and add offset 
+  // flip direction and add offset
   for (i = 0, n = out.numberoftriangles * 3; i < n; i += 3)
 	{
 	  out.trianglelist[i+0] = out.trianglelist[i+0] + offset;
