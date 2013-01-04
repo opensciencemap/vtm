@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -16,31 +16,37 @@ package org.oscim.utils;
 
 import android.graphics.Point;
 
-// from http://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
+/**
+ * @author Hannes Janetzek
+ *         taken from http://en.wikipedia.org/wiki/Cohen%E2%80%93
+ *         Sutherland_algorithm
+ */
 
 public class LineClipper {
 
-	private static final int INSIDE = 0; // 0000
-	private static int LEFT = 1; // 0001
-	private static int RIGHT = 2; // 0010
-	private static int BOTTOM = 4; // 0100
-	private static int TOP = 8; // 1000
+	public static final int INSIDE = 0; // 0000
+	public static final int LEFT = 1; // 0001
+	public static final int RIGHT = 2; // 0010
+	public static final int BOTTOM = 4; // 0100
+	public static final int TOP = 8; // 1000
 
 	// Compute the bit code for a point (x, y) using the clip rectangle
 	// bounded diagonally by (xmin, ymin), and (xmax, ymax)
 
 	private int xmin, xmax, ymin, ymax;
 
-	public boolean clip(Point p1, Point p2, int minx, int miny, int maxx, int maxy) {
+	public LineClipper(int minx, int miny, int maxx, int maxy) {
 		this.xmin = minx;
 		this.ymin = miny;
 		this.xmax = maxx;
 		this.ymax = maxy;
-
-		return cohenSutherlandLineClip(p1.x, p1.y, p2.x, p2.y);
 	}
 
-	private int outCode(int x, int y) {
+	public boolean clip(Point p1, Point p2) {
+		return clip(p1.x, p1.y, p2.x, p2.y);
+	}
+
+	public int outCode(int x, int y) {
 		int code;
 
 		code = INSIDE; // initialised as being inside of clip window
@@ -60,7 +66,7 @@ public class LineClipper {
 	// CohenSutherland clipping algorithm clips a line from
 	// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with 
 	// diagonal from (xmin, ymin) to (xmax, ymax).
-	private boolean cohenSutherlandLineClip(int x0, int y0, int x1, int y1) {
+	public boolean clip(int x0, int y0, int x1, int y1) {
 		// compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
 		int outcode0 = outCode(x0, y0);
 		int outcode1 = outCode(x1, y1);
