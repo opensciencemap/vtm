@@ -17,8 +17,8 @@
   <style-area name="forest|wood"         fill="#ebefe5" fade="7" blend="11" blend-fill="#d3dec8"/>
  
   <!-- grass|meadow|garden|grassland|scrub -->
- 	<style-area name="greens"              fill="#ebf2d2" fade="10" />
- 	
+ 	<style-area name="greens"              fill="#e6edcc" fade="10" />
+ 	 	<!-- <style-area name="greens"              fill="#d2e5ce" fade="10" />-->
  	<!-- marsh|wetland|nature_reserve -->
  	<style-area name="greens2"             fill="#deecb9" fade="12" />
  	  
@@ -174,16 +174,17 @@
 	            
 	    <!-- amenity -->
 	    <rule e="way" k="amenity" v="*">
-	      <rule e="way" k="*" v="kindergarten|school|college|university" zoom-min="14"> 
-	        <area fill="#cdabde" />
-	        <line  stroke="#9aabae" width="1.0" fixed="true" cap="butt"/> 
+	      <rule e="way" k="*" v="kindergarten|school|college|university" zoom-min="15"> 
+	       <!--  <area fill="#cdabde" />-->
+	       <area fill="#cdbbca" fade="15"/>
+	       <line  stroke="#9aabae" width="1.0" fixed="true" cap="butt" fade="15"/> 
 	      </rule>
 	           
 	      <rule e="way" k="*" v="hospital" zoom-min="14">
-	        <area fill="#f0f0d8" />
+	        <area fill="#e6e4c5" />
 	      </rule>
 	      
-	      <rule e="way" k="*" v="parking" zoom-min="14">
+	      <rule e="way" k="*" v="parking" zoom-min="15">
 	        <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
 	      </rule>
 	      
@@ -230,12 +231,12 @@
 	      
 	      <rule e="way" k="*" zoom-min="15" v="playground|miniature_golf">
 	        <area fill="#f4f4de" />
-	        <line stroke="#fbdbc8" width="0.6" fixed="true" cap="butt" />
+	        <line stroke="#d9d9a3" width="1.0" fixed="true" cap="butt" />
 	      </rule>
 	      
 	      <rule e="way" k="*" v="playing_fields|pitch">
 	        <area fill="#f4f4de" />
-	        <line stroke="#dbdbc8" width="0.6" fixed="true" cap="butt" />
+	        <line stroke="#d9d9a3" width="1.0" fixed="true" cap="butt" />
 	      </rule>
 	
 	      <rule e="way" k="*" v="swimming_pool">
