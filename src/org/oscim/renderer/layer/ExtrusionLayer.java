@@ -145,8 +145,8 @@ public class ExtrusionLayer extends Layer {
 				i = 0;
 			}
 			indices[i++] = first;
-			indices[i++] = (short) (first + k + 4);
 			indices[i++] = (short) (first + k + 2);
+			indices[i++] = (short) (first + k + 4);
 		}
 		mCurIndices[IND_ROOF].used = i;
 	}
@@ -316,12 +316,12 @@ public class ExtrusionLayer extends Layer {
 			}
 
 			indices[ind + 0] = s0;
-			indices[ind + 1] = s1;
-			indices[ind + 2] = s2;
+			indices[ind + 1] = s2;
+			indices[ind + 2] = s1;
 
 			indices[ind + 3] = s1;
-			indices[ind + 4] = s3;
-			indices[ind + 5] = s2;
+			indices[ind + 4] = s2;
+			indices[ind + 5] = s3;
 
 			mCurIndices[even].used += 6;
 			even = (even + 1) % 2;
