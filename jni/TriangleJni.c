@@ -41,7 +41,7 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   	mylog(buf);
   }
 #endif
-  int num_segments = num_points;
+  int num_segments = num_points; // - (closed ? (num_rings - 1) : 0);
   in.segmentlist = (int *) malloc(num_segments * 2 * sizeof(int));
   in.numberofsegments = num_segments;
   in.numberofholes = num_rings - 1;
@@ -52,8 +52,8 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	  rings = (int*) malloc(num_rings * sizeof(int));
 	}
 
-  int seg = 0;
-  int hole = 0;
+  int   *seg = in.segmentlist;
+  float *hole = in.holelist;
 
   int ring;
   int point;
@@ -69,7 +69,8 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	  // add holes: we need a point inside the hole...
 	  // this is just a heuristic, assuming that two
 	  // 'parallel' lines have a distance of at least
-	  // 1 unit.
+	  // 1 unit. you'll notice when things went wrong
+	  // when the hole is rendered instead of the poly
 	  if (ring > 0)
 		{
 		  int k = point * 2;
@@ -94,22 +95,24 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 		  float centerx = cx + vx / 2 - ux;
 		  float centery = cy + vy / 2 - uy;
 
-		  snprintf(buf, 128, "a: %f in:(%.2f %.2f) "
-				   "cur:(%.2f %.2f), next:(%.2f %.2f)\n",
-				   a, centerx, centery, cx, cy, nx,ny);
-		  mylog(buf);
+		  /* snprintf(buf, 128, "a: %f in:(%.2f %.2f) " */
+		  /* 		   "cur:(%.2f %.2f), next:(%.2f %.2f)\n", */
+		  /* 		   a, centerx, centery, cx, cy, nx,ny); */
+		  /* mylog(buf); */
 
-		  in.holelist[hole++] = centerx;
-		  in.holelist[hole++] = centery;
+		  *hole++ = centerx;
+		  *hole++ = centery;
 		}
 
-	  in.segmentlist[seg++] = point + (num_points - 1);
-	  in.segmentlist[seg++] = point;
-
+	  //if (!closed){
+	  *seg++ = point + (num_points - 1);
+	  *seg++ = point;
+	  //}
+	  
 	  for (len = point + num_points - 1; point < len; point++)
 		{
-		  in.segmentlist[seg++] = point;
-		  in.segmentlist[seg++] = point + 1;
+		  *seg++ = point;
+		  *seg++ = point + 1;
 		}
 	}
 #ifdef TESTING
@@ -152,24 +155,27 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 #endif
 
   // ----------- fix offset to vertex buffer indices -------------
-  // scale to stride
+
+  // scale to stride and add offset
   short stride = 2;
   int n, m;
-
-  for (i = 0, n = out.numberoftriangles * 3; i < n; i++)
-	out.trianglelist[i] *= stride;
-
-  // correct offsetting is tricky (and probably not a general case):
-  // when a ring has an odd number of points one (or rather two)
-  // additional vertices will be added. so the following rings
-  // needs extra offset...
 
   if (offset < 0)
 	offset = 0;
 
-  short off = offset;
-  int add = 0;
-  int start = 0;
+  INDICE *tri = out.trianglelist;
+  n = out.numberoftriangles * 3;
+
+  while (n-- > 0)
+	*tri++ = *tri * stride + offset;
+
+  // correct offsetting is tricky (but this is probably not a
+  // general case):
+  // when a ring has an odd number of points one (or rather two)
+  // additional vertices will be added. so the following rings
+  // needs extra offset...
+
+  int start = offset;
 
   for (j = 0, m = in.numberofholes; j < m; j++)
 	{
@@ -177,35 +183,14 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	  if (rings[j] % 2 == 0)
 		continue;
 
-#ifdef TESTING
-	  snprintf(buf, 128, "add offset: %d\n", start);
-	  mylog(buf);
-#endif
+	  tri = out.trianglelist;
+	  n = out.numberoftriangles * 3;
 
-	  for (i = 0, n = out.numberoftriangles * 3; i < n; i++)
-		if (out.trianglelist[i] >= start)
-		  out.trianglelist[i] += stride;
+	  for (;n-- > 0; tri++)
+		if (*tri >= start)
+		  *tri += stride;
 
 	  start += stride;
-
-#ifdef TESTING
-	  for (i = 0; i < out.numberoftriangles; i++)
-		{
-		  snprintf(buf, 128, "> %d, %d, %d\n",out.trianglelist[i*3],
-				   out.trianglelist[i*3+1],
-				   out.trianglelist[i*3+2]);
-		  mylog(buf);
-		}
-#endif
-	}
-
-  // flip direction and add offset
-  for (i = 0, n = out.numberoftriangles * 3; i < n; i += 3)
-	{
-	  out.trianglelist[i+0] = out.trianglelist[i+0] + offset;
-	  unsigned short tmp = out.trianglelist[i+1];
-	  out.trianglelist[i+1] = out.trianglelist[i+2]  + offset;
-	  out.trianglelist[i+2] = tmp + offset;
 	}
 
   free(in.segmentlist);

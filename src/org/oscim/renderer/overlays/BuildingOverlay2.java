@@ -184,6 +184,7 @@ public class BuildingOverlay2 extends RenderOverlay {
 				GLRenderer.enableVertexArrays(hBuildingVertexPosition, -1);
 
 				GLES20.glEnable(GLES20.GL_CULL_FACE);
+				GLES20.glCullFace(GLES20.GL_FRONT);
 				GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 				GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 				GLES20.glDepthFunc(GLES20.GL_LESS);
