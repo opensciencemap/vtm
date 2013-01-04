@@ -95,9 +95,19 @@ public class ExtrusionLayer extends Layer {
 
 			// we dont need to add duplicate end/start point
 			int len = length;
-			if (!MapView.enableClosePolygons)
-				len -= 2;
 
+			boolean circle = false;
+			// safety check
+			if (points[ppos] == points[ppos + len - 2]
+					&& points[ppos + 1] == points[ppos + len - 1]) {
+				circle = true;
+				len = -2;
+			}
+
+			if (!MapView.enableClosePolygons) {
+				circle = true;
+				len -= 2;
+			}
 			// need at least three points
 			if (len < 6) {
 				ppos += length;
@@ -111,7 +121,7 @@ public class ExtrusionLayer extends Layer {
 			boolean convex = addOutline(points, ppos, len, height, simple);
 			if (simple && (convex || len <= 8))
 				addRoofSimple(startVertex, len);
-			else if (ipos == outer) // only add roof once
+			else if (!circle && ipos == outer) // only add roof once
 				//addRoof(startVertex, pos, len, points);
 				addRoof(startVertex, index, ipos, points, ppos);
 
@@ -173,9 +183,6 @@ public class ExtrusionLayer extends Layer {
 
 		// add two vertices for last face to make zigzag indices work
 		boolean addFace = (len % 4 != 0);
-
-		// Log.d(TAG, "add: " + addFace + " " + len + "  (" + pos + ")");
-
 		int vertexCnt = len + (addFace ? 2 : 0);
 
 		short h = (short) height;
@@ -199,7 +206,6 @@ public class ExtrusionLayer extends Layer {
 		short color2 = 0;
 
 		int even = 0;
-
 		int changeX = 0;
 		int changeY = 0;
 
@@ -210,13 +216,13 @@ public class ExtrusionLayer extends Layer {
 		int v = mCurVertices.used;
 
 		for (int i = 2, n = vertexCnt + 2; i < n; i += 2, v += 8) {
-			/* add bottom and top vertex for each point */
 			cx = nx;
 			cy = ny;
 
 			ux = vx;
 			uy = vy;
 
+			/* add bottom and top vertex for each point */
 			if (v == VertexPoolItem.SIZE) {
 				mCurVertices.used = VertexPoolItem.SIZE;
 				mCurVertices.next = VertexPool.get();
