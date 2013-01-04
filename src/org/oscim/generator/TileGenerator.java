@@ -161,12 +161,14 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		mLayers = new Layers();
 
-		//if (tile.tileX == 68758 && tile.tileY == 42708 && tile.zoomLevel == 17)
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 68743 && tile.tileY == 42651))
+		//Log.d(TAG, "loading: " + tile);
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 68752 && tile.tileY == 42640))
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 68743 && tile.tileY == 42681))
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 68736 && tile.tileY == 42653))
+		// TODO: building with non simple holes (Berlin): 
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 70428 && tile.tileY == 43009)),
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 70463 && tile.tileY == 42990))
 
-		// if ((tile.zoomLevel != 17)
-		// || (tile.tileX >= 68738 && tile.tileY >= 42653
-		//&& tile.tileX <= 68739 && tile.tileY <= 42654))
 		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
 			//Log.d(TAG, "Failed loading: " + tile);
 			mLayers.clear();
@@ -198,7 +200,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		if (tile.layers.extrusionLayers != null)
 			((ExtrusionLayer) tile.layers.extrusionLayers).ready = true;
-		//Log.d(TAG, "Finished loading: " + tile);
 
 		return true;
 	}
