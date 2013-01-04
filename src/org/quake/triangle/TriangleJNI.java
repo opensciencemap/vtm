@@ -49,7 +49,19 @@ public class TriangleJNI {
 	//		return numTris * 3;
 	//	}
 
-	public static native int triangulate(FloatBuffer points, int length, ShortBuffer result,
+	/**
+	 * !!! NOT for general use!!! - this is specifically for ExtrusionLayer
+	 * .
+	 * @param points points to use: array of x,y coordinates
+	 * @param numRings number of rings in polygon == outer(1) + inner rings
+	 * @param io input: 1. number of all points, 2.. number of points in rings -
+	 *            times 2!
+	 *            output: indices of triangles, 3 per triangle :) (indices use
+	 *            stride=2, i.e. 0,2,4...)
+	 * @param ioffset offset used to add offset to indices
+	 * @return number of triangles in io buffer
+	 */
+	public static native int triangulate(FloatBuffer points, int numRings, ShortBuffer io,
 			int ioffset);
 
 	static {
