@@ -150,13 +150,22 @@ public class BuildingOverlay2 extends RenderOverlay {
 				GLES20.glVertexAttribPointer(hBuildingLightPosition, 2,
 						GLES20.GL_UNSIGNED_BYTE, false, 8, 6);
 
-				GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mNumIndices,
+				GLES20.glUniform4f(hBuildingColor, 0.6f, 0.6f, 0.6f, 0.8f);
+				GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+						(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
 						GLES20.GL_UNSIGNED_SHORT, 0);
+
+				GLES20.glUniform1i(hBuildingMode, 0);
+				GLES20.glUniform4f(hBuildingColor, 1.0f, 0.5f, 0.5f, 0.9f);
+
+				GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
+						GLES20.GL_UNSIGNED_SHORT,
+						(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
 			}
 			return;
 		}
 
-		int drawCount = 0;
+		//int drawCount = 2;
 		// draw to depth buffer
 		MapTile[] tiles = mTileSet.tiles;
 		for (int i = 0; i < mTileSet.cnt; i++) {
@@ -183,13 +192,14 @@ public class BuildingOverlay2 extends RenderOverlay {
 				GLES20.glUniform1i(hBuildingMode, 0);
 				first = false;
 			}
+			GLES20.glPolygonOffset(1, 10);
 
-			GLES20.glPolygonOffset(0, drawCount += 10);
-			// seems there are not infinite offset units possible
-			// this should suffice for at least two rows, i.e.
-			// having not two neighbours with the same depth
-			if (drawCount == 100)
-				drawCount = 0;
+			//			GLES20.glPolygonOffset(0, drawCount += 10);
+			//			// seems there are not infinite offset units possible
+			//			// this should suffice for at least two rows, i.e.
+			//			// having not two neighbours with the same depth
+			//			if (drawCount == 100)
+			//				drawCount = 0;
 
 			setMatrix(pos, mv, proj, tiles[i], 1);
 			GLES20.glUniformMatrix4fv(hBuildingMatrix, 1, false, mv, 0);
@@ -200,7 +210,8 @@ public class BuildingOverlay2 extends RenderOverlay {
 			GLES20.glVertexAttribPointer(hBuildingVertexPosition, 3,
 					GLES20.GL_SHORT, false, 8, 0);
 
-			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mNumIndices,
+			GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
 					GLES20.GL_UNSIGNED_SHORT, 0);
 		}
 
@@ -209,12 +220,12 @@ public class BuildingOverlay2 extends RenderOverlay {
 		// enable color buffer, use depth mask
 		GLRenderer.enableVertexArrays(hBuildingVertexPosition, hBuildingLightPosition);
 		GLES20.glColorMask(true, true, true, true);
-		//GLES20.glDepthMask(false);
-		GLES20.glDepthFunc(GLES20.GL_EQUAL);
+		GLES20.glDepthMask(false);
+		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 		//GLES20.glDepthFunc(GLES20.GL_EQUAL);
 
-		drawCount = 0;
-		//GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+		//drawCount = 0;
+		GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 		//GLES20.glPolygonOffset(0, -2);
 
 		for (int i = 0; i < mTileSet.cnt; i++) {
@@ -226,9 +237,9 @@ public class BuildingOverlay2 extends RenderOverlay {
 			if (!el.compiled)
 				continue;
 
-			GLES20.glPolygonOffset(0, drawCount += 10);
-			if (drawCount == 100)
-				drawCount = 0;
+			//			GLES20.glPolygonOffset(0, drawCount += 10);
+			//			if (drawCount == 100)
+			//				drawCount = 0;
 
 			setMatrix(pos, mv, proj, tiles[i], 1);
 			GLES20.glUniformMatrix4fv(hBuildingMatrix, 1, false, mv, 0);
@@ -266,17 +277,13 @@ public class BuildingOverlay2 extends RenderOverlay {
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[1],
 					GLES20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-			GlUtils.checkGlError(".1.");
+			GLES20.glUniform1i(hBuildingMode, 0);
+			GLES20.glUniform4f(hBuildingColor, 0.7f, 0.7f, 0.72f, 1.0f);
 
-			//			GLRenderer.enableVertexArrays(hBuildingVertexPosition, -1);
-			//			GLES20.glVertexAttribPointer(hBuildingVertexPosition, 3,
-			//					GLES20.GL_SHORT, false, 16, 8);
-			//
-			//			GLES20.glUniform1i(hBuildingMode, 0);
-			//			GLES20.glUniform4f(hBuildingColor, 1.0f, 0.5f, 0.5f, 0.9f);
-			//			GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, 10);
-			//
+			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
+					GLES20.GL_UNSIGNED_SHORT,
+					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
+
 			//			GlUtils.checkGlError(".2.");
 		}
 

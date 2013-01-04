@@ -39,13 +39,13 @@ public class ExtrusionLayer extends Layer {
 	private VertexPoolItem mIndices[], mCurIndices[];
 	private LineClipper mClipper;
 
-	public int mIndiceCnt[] = { 0, 0, 0 };
+	public int mIndiceCnt[] = { 0, 0, 0, 0 };
 	public int mIndicesBufferID;
 	public int mVertexBufferID;
 	public int mNumIndices = 0;
 
-	private final static int IND_EVEN_SIDE = 0;
-	private final static int IND_ODD_SIDE = 1;
+	//private final static int IND_EVEN_SIDE = 0;
+	//private final static int IND_ODD_SIDE = 1;
 	private final static int IND_ROOF = 2;
 	private final static int IND_OUTLINE = 3;
 
@@ -187,30 +187,37 @@ public class ExtrusionLayer extends Layer {
 		float nx = points[pos + 0];
 		float ny = points[pos + 1];
 
+		// vector to next point
 		float vx = nx - cx;
 		float vy = ny - cy;
-		float ca = (float) Math.sqrt(vx * vx + vy * vy);
-		float ux = vx;
-		float uy = vy;
+		// vector from previous point
+		float ux, uy;
 
+		float ca = (float) Math.sqrt(vx * vx + vy * vy);
 		float vlight = vx > 0 ? (vx / ca) : -(vx / ca) - 0.1f;
 
 		short color1 = (short) (200 + (50 * vlight));
 		short fcolor = color1;
 		short color2 = 0;
 
-		boolean even = true;
+		int even = 0;
 
 		int changeX = 0;
 		int changeY = 0;
 
+		// vertex offset for all vertices in layer
+		int vOffset = mNumVertices;
+
 		short[] vertices = mCurVertices.vertices;
 		int v = mCurVertices.used;
 
-		for (int i = 2; i < len + 2; i += 2, v += 8) {
+		for (int i = 2, n = vertexCnt + 2; i < n; i += 2, v += 8) {
 			/* add bottom and top vertex for each point */
 			cx = nx;
 			cy = ny;
+
+			ux = vx;
+			uy = vy;
 
 			if (v == VertexPoolItem.SIZE) {
 				mCurVertices.used = VertexPoolItem.SIZE;
@@ -232,28 +239,35 @@ public class ExtrusionLayer extends Layer {
 			if (i < len) {
 				nx = points[pos + i + 0];
 				ny = points[pos + i + 1];
-			} else {
+			} else if (i == len) {
 				nx = points[pos + 0];
 				ny = points[pos + 1];
-				//color2 = fcolor;
+			} else { // if (addFace)
+				short c = (short) (color1 | fcolor << 8);
+				vertices[v + 3] = vertices[v + 7] = c;
+				v += 8;
+				break;
 			}
 
+			// vector to next point
 			vx = nx - cx;
 			vy = ny - cy;
-			ca = (float) Math.sqrt(vx * vx + vy * vy);
 
+			ca = (float) Math.sqrt(vx * vx + vy * vy);
 			vlight = vx > 0 ? (vx / ca) : -(vx / ca) - 0.1f;
 			color2 = (short) (200 + (50 * vlight));
 
 			short c;
-			if (even)
+			if (even == 0)
 				c = (short) (color1 | color2 << 8);
 			else
 				c = (short) (color2 | color1 << 8);
 
 			// set lighting (direction)
 			vertices[v + 3] = vertices[v + 7] = c;
+			color1 = color2;
 
+			// check if polygon is convex
 			if (convex) {
 				// TODO simple polys with only one concave arc
 				// could be handled without special triangulation
@@ -267,112 +281,58 @@ public class ExtrusionLayer extends Layer {
 					convex = false;
 			}
 
-			ux = vx;
-			uy = vy;
-			color1 = color2;
-			even = !even;
-		}
-
-		if (addFace) {
-			if (v == VertexPoolItem.SIZE) {
-				mCurVertices.used = VertexPoolItem.SIZE;
-				mCurVertices.next = VertexPool.get();
-				mCurVertices = mCurVertices.next;
-				vertices = mCurVertices.vertices;
-				v = 0;
+			// check if face is within tile
+			if (!mClipper.clip((int) cx, (int) cy, (int) nx, (int) ny)) {
+				even = (even + 1) % 2;
+				continue;
 			}
 
-			cx = points[pos + 0];
-			cy = points[pos + 1];
+			// add ZigZagQuadIndices(tm) for sides
+			short[] indices = mCurIndices[even].vertices;
+			// index id relative to mCurIndices item
+			int ind = mCurIndices[even].used;
+			short vert = (short) (vOffset + (i - 2));
+			short s0 = vert++;
+			short s1 = vert++;
+			short s2 = vert++;
+			short s3 = vert++;
 
-			vertices[v + 0] = vertices[v + 4] = (short) (cx * S);
-			vertices[v + 1] = vertices[v + 5] = (short) (cy * S);
+			if (ind == VertexPoolItem.SIZE) {
+				//mCurIndices[even].used = VertexPoolItem.SIZE;
+				mCurIndices[even].next = VertexPool.get();
+				mCurIndices[even] = mCurIndices[even].next;
+				indices = mCurIndices[even].vertices;
+				ind = 0;
+			}
 
-			vertices[v + 2] = 0;
-			vertices[v + 6] = h;
+			// connect last to first (when number of faces is even)
+			if (!addFace && i == len) {
+				s2 -= len;
+				s3 -= len;
+			}
 
-			short c = (short) (color1 | fcolor << 8);
-			vertices[v + 3] = vertices[v + 7] = c;
+			indices[ind + 0] = s0;
+			indices[ind + 1] = s1;
+			indices[ind + 2] = s2;
 
-			v += 8;
+			indices[ind + 3] = s1;
+			indices[ind + 4] = s3;
+			indices[ind + 5] = s2;
+
+			mCurIndices[even].used += 6;
+			even = (even + 1) % 2;
+
+			// add outline indices
+			VertexPoolItem it = mCurIndices[IND_OUTLINE];
+			if (it.used == VertexPoolItem.SIZE) {
+				it.next = VertexPool.get();
+				it = mCurIndices[IND_OUTLINE] = it.next;
+			}
+			it.vertices[it.used++] = s1;
+			it.vertices[it.used++] = s3;
 		}
 
 		mCurVertices.used = v;
-
-		// fill ZigZagQuadIndices(tm) and outline indices
-		for (int j = 0; j < 2; j++) {
-			short[] indices = mCurIndices[j].vertices;
-
-			// index id relative to mCurIndices
-			int i = mCurIndices[j].used;
-
-			// vertex id
-			v = mNumVertices + (j * 2);
-			int ppos = pos + (j * 2);
-
-			for (int k = j * 2; k < len; k += 4, ppos += 4) {
-				boolean accept;
-				if (k + 2 < len) {
-					accept = mClipper.clip(
-							(int) points[ppos],
-							(int) points[ppos + 1],
-							(int) points[ppos + 2],
-							(int) points[ppos + 3]);
-				} else {
-					accept = mClipper.clip(
-							(int) points[ppos],
-							(int) points[ppos + 1],
-							(int) points[pos + 0],
-							(int) points[pos + 1]);
-				}
-
-				if (!accept) {
-					//	Log.d(TAG, "omit line: "
-					//			+ points[ppos] + ":" + points[ppos + 1] + " "
-					//			+ points[ppos + 2] + ":" + points[ppos + 3]);
-					v += 4;
-					continue;
-				}
-
-				short s0 = (short) (v++);
-				short s1 = (short) (v++);
-				short s2 = (short) (v++);
-				short s3 = (short) (v++);
-
-				if (i == VertexPoolItem.SIZE) {
-					mCurIndices[j].used = VertexPoolItem.SIZE;
-					mCurIndices[j].next = VertexPool.get();
-					mCurIndices[j] = mCurIndices[j].next;
-					indices = mCurIndices[j].vertices;
-					i = 0;
-				}
-
-				if (k + 2 == len) {
-					// connect last to first (when number of faces is even)
-					if (!addFace) {
-						//Log.d(TAG, "connect last  " + vertexCnt + " " + len);
-						s2 -= len;
-						s3 -= len;
-					}
-				}
-
-				indices[i++] = s0;
-				indices[i++] = s1;
-				indices[i++] = s2;
-
-				indices[i++] = s1;
-				indices[i++] = s3;
-				indices[i++] = s2;
-				//System.out.println(" i:" + (mNumIndices + (k * 6))
-				//	+ "\t(" + s0 + "," + s1 + "," + s2
-				//	+ ")\t(" + s1 + "," + s3 + "," + s2 + ")");
-
-				//	outline[cOut++] = s1;
-				//	outline[cOut++] = s3;
-
-			}
-			mCurIndices[j].used = i;
-		}
 
 		mNumVertices += vertexCnt;
 		return convex;
@@ -391,33 +351,24 @@ public class ExtrusionLayer extends Layer {
 		// upload indices
 
 		sbuf.clear();
-		for (int i = 0; i < 3; i++) {
+		mNumIndices = 0;
+		for (int i = 0; i < 4; i++) {
 			for (VertexPoolItem vi = mIndices[i]; vi != null; vi = vi.next) {
-				//System.out.println("put indices: " + vi.used + " " + mNumIndices);
 				sbuf.put(vi.vertices, 0, vi.used);
 				mIndiceCnt[i] += vi.used;
 			}
+			mNumIndices += mIndiceCnt[i];
 		}
 
-		//		Log.d(TAG,"put indices: " + mNumIndices + "=="
-		//				+ (mIndiceCnt[0] + mIndiceCnt[1] + mIndiceCnt[2])
-		//				+ " " + mIndiceCnt[0] + " " + mIndiceCnt[1] + " " + mIndiceCnt[2]);
-
-		mNumIndices = mIndiceCnt[0] + mIndiceCnt[1] + mIndiceCnt[2];
-
 		sbuf.flip();
-
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferID);
 		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
 				mNumIndices * 2, sbuf, GLES20.GL_DYNAMIC_DRAW);
 
-		sbuf.clear();
-
 		// upload vertices
-		for (VertexPoolItem vi = mVertices; vi != null; vi = vi.next) {
-			//System.out.println("put vertices: " + vi.used + " " + mNumVertices);
+		sbuf.clear();
+		for (VertexPoolItem vi = mVertices; vi != null; vi = vi.next)
 			sbuf.put(vi.vertices, 0, vi.used);
-		}
 
 		sbuf.flip();
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferID);
