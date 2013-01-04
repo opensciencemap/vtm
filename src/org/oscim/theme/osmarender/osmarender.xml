@@ -174,16 +174,17 @@
 	            
 	    <!-- amenity -->
 	    <rule e="way" k="amenity" v="*">
-	      <rule e="way" k="*" v="kindergarten|school|college|university" zoom-min="14"> 
-	        <area fill="#cdabde" />
-	        <line  stroke="#9aabae" width="1.0" fixed="true" cap="butt"/> 
+	      <rule e="way" k="*" v="kindergarten|school|college|university" zoom-min="15"> 
+	       <!--  <area fill="#cdabde" />-->
+	       <area fill="#cdbbca" fade="15"/>
+	       <line  stroke="#9aabae" width="1.0" fixed="true" cap="butt" fade="15"/> 
 	      </rule>
 	           
 	      <rule e="way" k="*" v="hospital" zoom-min="14">
 	        <area fill="#f0f0d8" />
 	      </rule>
 	      
-	      <rule e="way" k="*" v="parking" zoom-min="14">
+	      <rule e="way" k="*" v="parking" zoom-min="15">
 	        <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
 	      </rule>
 	      
