@@ -423,13 +423,33 @@ public class MapViewPosition {
 		return true;
 	}
 
+	// JAVA...
+	class Point2D {
+		double x;
+		double y;
+	}
+
+	// only use in synchronized functions!
+	Point2D mMovePoint = new Point2D();
+
 	/**
 	 * Moves this MapViewPosition by the given amount of pixels.
 	 * @param mx the amount of pixels to move the map horizontally.
 	 * @param my the amount of pixels to move the map vertically.
 	 */
 	public synchronized void moveMap(float mx, float my) {
+		getMove(mx, my);
 
+		mLatitude = MercatorProjection.pixelYToLatitude(mPosY - mMovePoint.y, mZoomLevel);
+		mLatitude = MercatorProjection.limitLatitude(mLatitude);
+
+		mLongitude = MercatorProjection.pixelXToLongitude(mPosX - mMovePoint.x, mZoomLevel);
+		mLongitude = MercatorProjection.wrapLongitude(mLongitude);
+
+		updatePosition();
+	}
+
+	private void getMove(float mx, float my) {
 		double dx = mx / mScale;
 		double dy = my / mScale;
 
@@ -443,16 +463,8 @@ public class MapViewPosition {
 			dy = y;
 		}
 
-		dx = mPosX - dx;
-		dy = mPosY - dy;
-
-		mLatitude = MercatorProjection.pixelYToLatitude(dy, mZoomLevel);
-		mLatitude = MercatorProjection.limitLatitude(mLatitude);
-
-		mLongitude = MercatorProjection.pixelXToLongitude(dx, mZoomLevel);
-		mLongitude = MercatorProjection.wrapLongitude(mLongitude);
-
-		updatePosition();
+		mMovePoint.x = dx;
+		mMovePoint.y = dy;
 	}
 
 	/**
@@ -628,6 +640,19 @@ public class MapViewPosition {
 		mStartY = mPosY;
 
 		mDuration = 300;
+		mHandler.start((int) mDuration);
+	}
+
+	public synchronized void animateTo(float dx, float dy, float duration) {
+		getMove(dx, dy);
+
+		mEndX = mPosX - mMovePoint.x;
+		mEndY = mPosY - mMovePoint.y;
+
+		mStartX = mPosX;
+		mStartY = mPosY;
+
+		mDuration = duration;
 		mHandler.start((int) mDuration);
 	}
 
