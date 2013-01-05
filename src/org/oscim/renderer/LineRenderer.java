@@ -98,7 +98,7 @@ public final class LineRenderer {
 		int uLineColor = hLineColor[mode];
 		int uLineWidth = hLineWidth[mode];
 
-		GLRenderer.enableVertexArrays(hLineVertexPosition[mode], hLineTexturePosition[mode]);
+		GLState.enableVertexArrays(hLineVertexPosition[mode], hLineTexturePosition[mode]);
 
 		glVertexAttribPointer(hLineVertexPosition[mode], 2, GL_SHORT,
 				false, 8, bufferOffset + LINE_VERTICES_DATA_POS_OFFSET);

@@ -94,7 +94,7 @@ public final class TextureRenderer {
 		// GlUtils.checkGlError("draw texture >");
 		GLES20.glUseProgram(mTextureProgram);
 
-		GLRenderer.enableVertexArrays(hTextureTexCoord, hTextureVertex);
+		GLState.enableVertexArrays(hTextureTexCoord, hTextureVertex);
 
 		TextureLayer tl = (TextureLayer) layer;
 
