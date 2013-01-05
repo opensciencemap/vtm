@@ -144,10 +144,6 @@ public class ExtrusionOverlay extends RenderOverlay {
 		return null;
 	}
 
-	// sligthly differ adjacent faces to improve contrast
-	float mColor[] = { 0.76872549f, 0.751960784f, 0.740196078f, 0.8f };
-	float mColor2[] = { 0.76372549f, 0.751960784f, 0.745196078f, 0.8f };
-	float mRoofColor[] = { 0.895f, 0.89f, 0.88f, 0.9f };
 	boolean debug = false;
 
 	@Override
@@ -235,7 +231,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLState.enableVertexArrays(hExtrusionVertexPosition, hExtrusionLightPosition);
 		GLES20.glColorMask(true, true, true, true);
 		GLES20.glDepthMask(false);
-		GLES20.glDepthFunc(GLES20.GL_EQUAL);
+		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 
 		for (int i = 0; i < mTileCnt; i++) {
 			ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
@@ -273,13 +269,13 @@ public class ExtrusionOverlay extends RenderOverlay {
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[1],
 					GLES20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
-			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-			GLES20.glUniform1i(hExtrusionMode, 0);
+			//GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+			GLES20.glUniform1i(hExtrusionMode, 3);
 			GLES20.glUniform4f(hExtrusionColor, 0.7f, 0.7f, 0.7f, 1.0f);
 			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
 					GLES20.GL_UNSIGNED_SHORT,
 					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
-			GLES20.glDepthFunc(GLES20.GL_EQUAL);
+			//GLES20.glDepthFunc(GLES20.GL_EQUAL);
 
 			// just a temporary reference!
 			tiles[i] = null;
@@ -314,6 +310,15 @@ public class ExtrusionOverlay extends RenderOverlay {
 		Matrix.multiplyMM(matrix, 0, proj, 0, matrix, 0);
 	}
 
+	// sligthly differ adjacent faces to improve contrast
+	//float mColor[] = { 0.76872549f, 0.751960784f, 0.740196078f, 0.8f };
+	//float mColor2[] = { 0.76372549f, 0.751960784f, 0.745196078f, 0.8f };
+
+	float mColor[] = { 201 / 255f, 200 / 255f, 198 / 255f, 0.8f };
+	float mColor2[] = { 201 / 255f, 200 / 255f, 199 / 255f, 0.8f };
+
+	float mRoofColor[] = { 0.895f, 0.89f, 0.88f, 0.9f };
+
 	final static String extrusionVertexShader = ""
 			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
@@ -328,13 +333,19 @@ public class ExtrusionOverlay extends RenderOverlay {
 			+ "  if (u_mode == 0)"
 			//     roof / depth pass
 			+ "    color = u_color;"
-			+ "  else if (u_mode == 1)"
+			+ "  else {"
+			//    decrease contrast with distance
+			+ "   float alpha = 0.95 + gl_Position.z * 0.05;"
+			+ "    if (u_mode == 1)"
 			//     sides 1 - use 0xff00
-			+ "    color = vec4(u_color.rgb * (a_light.y / ff), 0.85);"
+			+ "    color = vec4(u_color.rgb * (a_light.y / ff * alpha), 1.0) * (0.8 * alpha);"
+			+ "  else if (u_mode == 2)"
+			//     sides 2 - use 0x00ff
+			+ "    color = vec4(u_color.rgb * (a_light.x / ff * alpha), 1.0) * (0.8 * alpha);"
 			+ "  else"
 			//     sides 2 - use 0x00ff
-			+ "    color = vec4(u_color.rgb * (a_light.x / ff), 0.85);"
-			+ "}";
+			+ "    color = u_color * alpha;"
+			+ "}}";
 
 	//	final static String extrusionVertexAnimShader = ""
 	//			+ "precision mediump float;"
@@ -360,7 +371,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	//			+ "}";
 
 	final static String extrusionFragmentShader = ""
-			+ "precision lowp float;"
+			+ "precision mediump float;"
 			+ "varying vec4 color;"
 			+ "void main() {"
 			+ "  gl_FragColor = color;"
