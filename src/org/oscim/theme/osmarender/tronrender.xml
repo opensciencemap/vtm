@@ -179,7 +179,7 @@
 	        <area fill="#cdabde" stroke="#b094bf" stroke-width="0.2" /> </rule>
 	           
 	      <rule e="way" k="*" v="parking" zoom-min="14">
-	        <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
+	        <area fill="#444434" stroke="#d4d4d4" stroke-width="0.2" />
 	      </rule>
 	      
 	      <rule e="way" k="*" v="fountain" closed="yes">
