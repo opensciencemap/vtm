@@ -247,7 +247,6 @@ public final class PolygonRenderer {
 
 				if (drawClipped) {
 					first = false;
-					drawClipped = false;
 					// do not modify depth buffer anymore
 					glDepthMask(false);
 					// only draw to this tile
