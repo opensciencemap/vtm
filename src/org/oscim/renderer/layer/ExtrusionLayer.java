@@ -163,8 +163,9 @@ public class ExtrusionLayer extends Layer {
 			len = index[ipos] - 2;
 		}
 
-		// triangulate up to 200 points (limited only by prepared buffers)
-		if (len > 400) {
+		// triangulate up to 600 points (limited only by prepared buffers)
+		// some buildings in paris have even more...
+		if (len > 1200) {
 			Log.d(TAG, ">>> skip building : " + len + " <<<");
 			return;
 		}
@@ -415,10 +416,10 @@ public class ExtrusionLayer extends Layer {
 
 		if (!initialized) {
 			// FIXME also cleanup on shutdown!
-			fBuf = ByteBuffer.allocateDirect(360 * 4).order(ByteOrder.nativeOrder())
+			fBuf = ByteBuffer.allocateDirect(1200 * 4).order(ByteOrder.nativeOrder())
 					.asFloatBuffer();
 
-			sBuf = ByteBuffer.allocateDirect(720 * 2).order(ByteOrder.nativeOrder())
+			sBuf = ByteBuffer.allocateDirect(1800 * 2).order(ByteOrder.nativeOrder())
 					.asShortBuffer();
 
 			initialized = true;
