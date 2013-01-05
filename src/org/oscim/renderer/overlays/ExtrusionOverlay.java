@@ -256,21 +256,17 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 			// draw roof
 			GLES20.glUniform1i(hExtrusionMode, 0);
-			//GLES20.glUniform4f(hExtrusionColor, 0.81f, 0.8f, 0.8f, 0.9f);
 			GLES20.glUniform4fv(hExtrusionColor, 1, mRoofColor, 0);
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[2],
 					GLES20.GL_UNSIGNED_SHORT, (el.mIndiceCnt[0] + el.mIndiceCnt[1]) * 2);
 
 			// draw sides 1
-			//GLES20.glUniform4f(hExtrusionColor, 0.8f, 0.8f, 0.8f, 1.0f);
-			//GLES20.glUniform4f(hExtrusionColor, 0.9f, 0.905f, 0.9f, 1.0f);
 			GLES20.glUniform4fv(hExtrusionColor, 1, mColor, 0);
 			GLES20.glUniform1i(hExtrusionMode, 1);
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[0],
 					GLES20.GL_UNSIGNED_SHORT, 0);
 
 			// draw sides 2
-			//GLES20.glUniform4f(hExtrusionColor, 0.9f, 0.9f, 0.905f, 1.0f);
 			GLES20.glUniform4fv(hExtrusionColor, 1, mColor2, 0);
 			GLES20.glUniform1i(hExtrusionMode, 2);
 
@@ -279,7 +275,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 			GLES20.glUniform1i(hExtrusionMode, 0);
-			GLES20.glUniform4f(hExtrusionColor, 0.65f, 0.65f, 0.65f, 0.98f);
+			GLES20.glUniform4f(hExtrusionColor, 0.7f, 0.7f, 0.7f, 1.0f);
 			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
 					GLES20.GL_UNSIGNED_SHORT,
 					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
@@ -334,10 +330,10 @@ public class ExtrusionOverlay extends RenderOverlay {
 			+ "    color = u_color;"
 			+ "  else if (u_mode == 1)"
 			//     sides 1 - use 0xff00
-			+ "    color = vec4(u_color.rgb * (a_light.y / ff), 0.8);"
+			+ "    color = vec4(u_color.rgb * (a_light.y / ff), 0.85);"
 			+ "  else"
 			//     sides 2 - use 0x00ff
-			+ "    color = vec4(u_color.rgb * (a_light.x / ff), 0.8);"
+			+ "    color = vec4(u_color.rgb * (a_light.x / ff), 0.85);"
 			+ "}";
 
 	//	final static String extrusionVertexAnimShader = ""
