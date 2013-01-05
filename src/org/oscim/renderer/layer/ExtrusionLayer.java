@@ -203,8 +203,9 @@ public class ExtrusionLayer extends Layer {
 
 		float ca = (float) Math.sqrt(vx * vx + vy * vy);
 		float vlight = vx > 0 ? (vx / ca) : -(vx / ca) - 0.1f;
+		//float vlight = vx / ca;
 
-		short color1 = (short) (200 + (50 * vlight));
+		short color1 = (short) (230 + (25 * vlight));
 		short fcolor = color1;
 		short color2 = 0;
 
@@ -262,7 +263,8 @@ public class ExtrusionLayer extends Layer {
 
 			ca = (float) Math.sqrt(vx * vx + vy * vy);
 			vlight = vx > 0 ? (vx / ca) : -(vx / ca) - 0.1f;
-			color2 = (short) (200 + (50 * vlight));
+			//vlight = vx / ca;
+			color2 = (short) (230 + (25 * vlight));
 
 			short c;
 			if (even == 0)
