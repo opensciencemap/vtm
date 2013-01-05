@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -17,14 +17,10 @@ package org.oscim.overlay;
 import org.oscim.renderer.overlays.TextOverlay;
 import org.oscim.view.MapView;
 
+/**
+ * @author Hannes Janetzek
+ */
 public class LabelingOverlay extends Overlay {
-
-	//	private TextOverlay mLayer;
-
-	//	@Override
-	//	public org.oscim.renderer.overlays.RenderOverlay getLayer() {
-	//		return mLayer;
-	//	}
 
 	public LabelingOverlay(MapView mapView) {
 		super();
