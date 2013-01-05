@@ -200,13 +200,12 @@ public class ExtrusionOverlay extends RenderOverlay {
 		}
 		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
 
+		GLState.test(true, false);
 		GLES20.glUseProgram(extrusionProgram);
 		GLState.enableVertexArrays(hExtrusionVertexPosition, -1);
-
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glCullFace(GLES20.GL_FRONT);
 		GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
-		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 		GLES20.glDepthMask(true);
 		GLES20.glColorMask(false, false, false, false);
@@ -291,7 +290,6 @@ public class ExtrusionOverlay extends RenderOverlay {
 		}
 
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
-		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 

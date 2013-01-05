@@ -16,7 +16,6 @@ package org.oscim.renderer;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_BLEND;
-import static android.opengl.GLES20.GL_DEPTH_TEST;
 import static android.opengl.GLES20.GL_POLYGON_OFFSET_FILL;
 import static org.oscim.generator.JobTile.STATE_READY;
 
@@ -51,9 +50,7 @@ public class BaseLayer {
 		Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, pos.viewMatrix, 0);
 
 		/* draw base layer */
-		GLES20.glEnable(GL_DEPTH_TEST);
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
-		//	mDrawCount = 0;
 
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
@@ -72,7 +69,7 @@ public class BaseLayer {
 		}
 
 		GLES20.glDisable(GL_POLYGON_OFFSET_FILL);
-		GLES20.glDisable(GL_DEPTH_TEST);
+
 		mDrawSerial++;
 	}
 
@@ -116,7 +113,8 @@ public class BaseLayer {
 						PolygonRenderer.draw(pos, null, mvp, true, true);
 						clipped = true;
 					}
-
+					// clip lines to quad in depth buffer
+					GLState.test(true, false);
 					GLES20.glEnable(GL_BLEND);
 					l = LineRenderer.draw(pos, l, mvp, div, simpleShader,
 							tile.layers.lineOffset);

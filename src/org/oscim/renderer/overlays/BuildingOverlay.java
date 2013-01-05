@@ -373,10 +373,8 @@ public class BuildingOverlay extends RenderOverlay {
 		GLES20.glUniform1i(hBuildingMode, 0);
 		GLES20.glColorMask(false, false, false, false);
 		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
-		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-
+		GLState.test(true, false);
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
-		//GLES20.glCullFace(GLES20.GL_CW);
 
 		GLES20.glDepthMask(true);
 		GLES20.glDepthFunc(GLES20.GL_LESS);

@@ -90,7 +90,7 @@ public final class TextureRenderer {
 	}
 
 	public static Layer draw(Layer layer, float scale, float[] projection, float matrix[]) {
-
+		GLState.test(false, false);
 		// GlUtils.checkGlError("draw texture >");
 		GLES20.glUseProgram(mTextureProgram);
 
