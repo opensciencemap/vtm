@@ -21,6 +21,7 @@ import java.nio.ShortBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.layer.VertexPool;
 import org.oscim.renderer.layer.VertexPoolItem;
 import org.oscim.utils.FastMath;
@@ -354,7 +355,7 @@ public class BuildingOverlay extends RenderOverlay {
 		GLES20.glUniformMatrix4fv(hBuildingMatrix, 1, false, mv, 0);
 		GLES20.glUniform4f(hBuildingColor, 0.5f, 0.5f, 0.5f, 0.7f);
 
-		GLRenderer.enableVertexArrays(hBuildingVertexPosition, hBuildingLightPosition);
+		GLState.enableVertexArrays(hBuildingVertexPosition, hBuildingLightPosition);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferID);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferID);

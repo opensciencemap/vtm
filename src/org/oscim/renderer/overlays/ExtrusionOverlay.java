@@ -20,6 +20,7 @@ import java.nio.ShortBuffer;
 
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapTile;
 import org.oscim.renderer.TileManager;
 import org.oscim.renderer.TileSet;
@@ -144,8 +145,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 	}
 
 	// sligthly differ adjacent faces to improve contrast
-	float mColor[] = { 0.71872549f, 0.701960784f, 0.690196078f, 0.7f };
-	float mColor2[] = { 0.71372549f, 0.701960784f, 0.695196078f, 0.7f };
+	float mColor[] = { 0.76872549f, 0.751960784f, 0.740196078f, 0.8f };
+	float mColor2[] = { 0.76372549f, 0.751960784f, 0.745196078f, 0.8f };
 	float mRoofColor[] = { 0.895f, 0.89f, 0.88f, 0.9f };
 	boolean debug = false;
 
@@ -161,8 +162,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		if (debug) {
 			GLES20.glUseProgram(extrusionProgram);
 
-			GLRenderer
-					.enableVertexArrays(hExtrusionVertexPosition, hExtrusionLightPosition);
+			GLState.enableVertexArrays(hExtrusionVertexPosition, hExtrusionLightPosition);
 			GLES20.glUniform1i(hExtrusionMode, 0);
 			GLES20.glUniform4f(hExtrusionColor, 0.6f, 0.6f, 0.6f, 0.8f);
 
@@ -201,7 +201,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
 
 		GLES20.glUseProgram(extrusionProgram);
-		GLRenderer.enableVertexArrays(hExtrusionVertexPosition, -1);
+		GLState.enableVertexArrays(hExtrusionVertexPosition, -1);
 
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glCullFace(GLES20.GL_FRONT);
@@ -233,7 +233,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		}
 
 		// enable color buffer, use depth mask
-		GLRenderer.enableVertexArrays(hExtrusionVertexPosition, hExtrusionLightPosition);
+		GLState.enableVertexArrays(hExtrusionVertexPosition, hExtrusionLightPosition);
 		GLES20.glColorMask(true, true, true, true);
 		GLES20.glDepthMask(false);
 		GLES20.glDepthFunc(GLES20.GL_EQUAL);

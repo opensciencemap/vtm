@@ -175,7 +175,7 @@ public final class PolygonRenderer {
 
 		glUseProgram(polygonProgram);
 
-		GLRenderer.enableVertexArrays(hPolygonVertexPosition, -1);
+		GLState.enableVertexArrays(hPolygonVertexPosition, -1);
 
 		glVertexAttribPointer(hPolygonVertexPosition, 2, GL_SHORT,
 				false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
@@ -184,6 +184,7 @@ public final class PolygonRenderer {
 
 		// use stencilbuffer method for polygon drawing
 		glEnable(GL_STENCIL_TEST);
+		//GLState.stencilTest(true);
 
 		if (first) {
 			mCount = 0;

@@ -22,6 +22,7 @@ import java.nio.ShortBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLState;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
@@ -173,7 +174,7 @@ public class ModelOverlay extends RenderOverlay {
 
 		GLES20.glUseProgram(polygonProgram);
 
-		GLRenderer.enableVertexArrays(hPolygonVertexPosition, hPolygonLightPosition);
+		GLState.enableVertexArrays(hPolygonVertexPosition, hPolygonLightPosition);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferID);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferID);
