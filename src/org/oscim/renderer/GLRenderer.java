@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General License as published by the Free Software
@@ -39,6 +39,7 @@ import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.theme.RenderTheme;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
@@ -49,9 +50,12 @@ import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.util.Log;
 
+/**
+ * @author Hannes Janetzek
+ */
 public class GLRenderer implements GLSurfaceView.Renderer {
 
-	private static final String TAG = "SurfaceRenderer";
+	private static final String TAG = GLRenderer.class.getName();
 
 	private static final int MB = 1024 * 1024;
 	private static final int SHORT_BYTES = 2;
@@ -86,7 +90,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static float[] mClearColor = null;
 
 	// number of tiles drawn in one frame
-	private static short mDrawCount = 0;
+	//private static short mDrawCount = 0;
 
 	private static boolean mUpdateColor = false;
 
@@ -356,16 +360,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			Matrix.multiplyMM(matrix, 0, mfProjMatrix, 0, matrix, 0);
 	}
 
-	private static float scaleDiv(MapTile t) {
-		float div = 1;
-		int diff = mMapPosition.zoomLevel - t.zoomLevel;
-		if (diff < 0)
-			div = (1 << -diff);
-		else if (diff > 0)
-			div = (1.0f / (1 << diff));
-		return div;
-	}
-
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 
@@ -435,7 +429,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 			// relative zoom-level, 'tiles' could not have been updated after
 			// zoom-level changed.
-			float div = scaleDiv(tiles[0]);
+			byte z = tiles[0].zoomLevel;
+			float div = FastMath.pow(z - mapPosition.zoomLevel);
 
 			// transform screen coordinates to tile coordinates
 			float scale = mapPosition.scale / div;
@@ -448,7 +443,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			}
 
 			mHolderCount = 0;
-			mScanBox.scan(coords, tiles[0].zoomLevel);
+			mScanBox.scan(coords, z);
 		}
 
 		tileCnt += mHolderCount;
@@ -507,7 +502,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		/* draw base layer */
 		GLES20.glEnable(GL_DEPTH_TEST);
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
-		mDrawCount = 0;
+		//	mDrawCount = 0;
 
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
@@ -589,6 +584,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 
+	public static int depthOffset(MapTile t) {
+		return ((t.tileX % 4) + (t.tileY % 4 * 4) * 2) * 20;
+	}
+
 	// used to not draw a tile twice per frame.
 	private static int mDrawSerial = 0;
 
@@ -597,9 +596,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (tile.lastDraw == mDrawSerial)
 			return;
 
-		float div = scaleDiv(tile);
 		float[] mvp = mMVPMatrix;
 		MapPosition pos = mMapPosition;
+
+		float div = FastMath.pow(tile.zoomLevel - pos.zoomLevel);
 
 		tile.lastDraw = mDrawSerial;
 
@@ -611,13 +611,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (tile.layers == null)
 			return;
 
-		GLES20.glPolygonOffset(0, mDrawCount++);
-
-		// seems there are not infinite offset units possible
-		// this should suffice for at least two rows, i.e.
-		// having not two neighbours with the same depth
-		if (mDrawCount == 20)
-			mDrawCount = 0;
+		GLES20.glPolygonOffset(0, depthOffset(tile));
 
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
 

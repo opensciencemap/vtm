@@ -52,7 +52,7 @@ public final class MapTile extends JobTile {
 	/**
 	 * pointer to access relatives in QuadTree
 	 */
-	QuadTree rel;
+	public QuadTree rel;
 
 	int lastDraw = 0;
 
@@ -65,7 +65,7 @@ public final class MapTile extends JobTile {
 	final static int PROXY_GRAMPA = 1 << 5;
 	final static int PROXY_HOLDER = 1 << 6;
 
-	byte proxies;
+	public byte proxies;
 
 	// counting the tiles that use this tile as proxy
 	byte refs;
@@ -93,9 +93,6 @@ public final class MapTile extends JobTile {
 
 		if (locked > 1)
 			return;
-
-		//if (isReady || newData)
-		// return;
 
 		MapTile p = rel.parent.tile;
 

@@ -16,7 +16,7 @@ package org.oscim.renderer;
 
 import android.util.Log;
 
-class QuadTree {
+public class QuadTree {
 	private static String TAG = "QuadTree";
 
 	// pointer to tile 0/0/0
@@ -25,16 +25,16 @@ class QuadTree {
 	// parent pointer is used to link pool items
 	private static QuadTree pool;
 
-	QuadTree parent;
+	public QuadTree parent;
 	// .... x y
 	// 0 => 0 0
 	// 1 => 1 0
 	// 2 => 0 1
 	// 3 => 1 1
-	final QuadTree[] child = new QuadTree[4];
+	public final QuadTree[] child = new QuadTree[4];
 	int refs = 0;
 	byte id;
-	MapTile tile;
+	public MapTile tile;
 
 	static void init() {
 		pool = null;

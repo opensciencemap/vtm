@@ -45,7 +45,7 @@ import org.oscim.overlay.OverlayManager;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLView;
 import org.oscim.renderer.TileManager;
-import org.oscim.renderer.overlays.BuildingOverlay2;
+import org.oscim.renderer.overlays.ExtrusionOverlay;
 import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.RenderTheme;
@@ -185,7 +185,7 @@ public class MapView extends RelativeLayout {
 		enableRotation = true;
 
 		//mOverlayManager.add(new GenericOverlay(this, new GridOverlay(this)));
-		mOverlayManager.add(new GenericOverlay(this, new BuildingOverlay2(this)));
+		mOverlayManager.add(new GenericOverlay(this, new ExtrusionOverlay(this)));
 		mOverlayManager.add(new LabelingOverlay(this));
 
 		//		mOverlayManager.add(new GenericOverlay(this, new TestOverlay(this)));
