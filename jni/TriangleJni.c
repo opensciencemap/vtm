@@ -75,19 +75,28 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 		{
 		  int k = point * 2;
 
-		  float cx = in.pointlist[k+0];
-		  float cy = in.pointlist[k+1];
+		  float nx = in.pointlist[k++];
+		  float ny = in.pointlist[k++];
 
-		  float nx = in.pointlist[k+2];
-		  float ny = in.pointlist[k+3];
+		  float cx, cy, vx, vy;
 
-		  float vx = nx - cx;
-		  float vy = ny - cy;
+		  // try to find a large enough segment
+		  for (len = (point + num_points) * 2; k < len;)
+			{
+			  cx = nx;
+			  cy = ny;
+
+			  nx = in.pointlist[k++];
+			  ny = in.pointlist[k++];
+
+			  vx = nx - cx;
+			  vy = ny - cy;
+
+			  if (vx > 4 || vx < -4 || vy > 4 || vy < -4)
+				break;
+			}
 
 		  float a = sqrt(vx*vx + vy*vy);
-
-		  // fixme: need to check a == 0?
-		  //if (a > 0.00001 || a < -0.0001)
 
 		  float ux = -vy / a;
 		  float uy = vx / a;
@@ -108,7 +117,7 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	  *seg++ = point + (num_points - 1);
 	  *seg++ = point;
 	  //}
-	  
+
 	  for (len = point + num_points - 1; point < len; point++)
 		{
 		  *seg++ = point;
@@ -135,11 +144,6 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   out.trianglelist = (INDICE*) indices;
 
   triangulate("pzPNBQ", &in, &out, (TriangleIO *) NULL);
-
-  //if (offset || stride)
-  //{
-  //  if (stride <= 0)
-  //	stride = 1;
 
 #ifdef TESTING
   snprintf(buf, 128, "triangles: %d\n", out.numberoftriangles);
@@ -169,8 +173,6 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   while (n-- > 0)
 	*tri++ = *tri * stride + offset;
 
-  // correct offsetting is tricky (but this is probably not a
-  // general case):
   // when a ring has an odd number of points one (or rather two)
   // additional vertices will be added. so the following rings
   // needs extra offset...
@@ -180,7 +182,8 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   for (j = 0, m = in.numberofholes; j < m; j++)
 	{
 	  start += rings[j] * stride;
-	  if (rings[j] % 2 == 0)
+	  // even number of points?
+	  if (!(rings[j] & 1))
 		continue;
 
 	  tri = out.trianglelist;
