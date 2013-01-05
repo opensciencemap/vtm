@@ -41,7 +41,7 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   	mylog(buf);
   }
 #endif
-  int num_segments = num_points;
+  int num_segments = num_points; // - (closed ? (num_rings - 1) : 0);
   in.segmentlist = (int *) malloc(num_segments * 2 * sizeof(int));
   in.numberofsegments = num_segments;
   in.numberofholes = num_rings - 1;
@@ -69,7 +69,8 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	  // add holes: we need a point inside the hole...
 	  // this is just a heuristic, assuming that two
 	  // 'parallel' lines have a distance of at least
-	  // 1 unit.
+	  // 1 unit. you'll notice when things went wrong
+	  // when the hole is rendered instead of the poly
 	  if (ring > 0)
 		{
 		  int k = point * 2;
@@ -94,18 +95,20 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 		  float centerx = cx + vx / 2 - ux;
 		  float centery = cy + vy / 2 - uy;
 
-		  snprintf(buf, 128, "a: %f in:(%.2f %.2f) "
-				   "cur:(%.2f %.2f), next:(%.2f %.2f)\n",
-				   a, centerx, centery, cx, cy, nx,ny);
-		  mylog(buf);
+		  /* snprintf(buf, 128, "a: %f in:(%.2f %.2f) " */
+		  /* 		   "cur:(%.2f %.2f), next:(%.2f %.2f)\n", */
+		  /* 		   a, centerx, centery, cx, cy, nx,ny); */
+		  /* mylog(buf); */
 
 		  *hole++ = centerx;
 		  *hole++ = centery;
 		}
 
+	  //if (!closed){
 	  *seg++ = point + (num_points - 1);
 	  *seg++ = point;
-
+	  //}
+	  
 	  for (len = point + num_points - 1; point < len; point++)
 		{
 		  *seg++ = point;
