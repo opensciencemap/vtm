@@ -273,7 +273,7 @@ public class ExtrusionLayer extends Layer {
 			vertices[v + 3] = vertices[v + 7] = c;
 			color1 = color2;
 
-			// check if polygon is convex
+			/* check if polygon is convex */
 			if (convex) {
 				// TODO simple polys with only one concave arc
 				// could be handled without special triangulation
@@ -286,35 +286,34 @@ public class ExtrusionLayer extends Layer {
 					convex = false;
 			}
 
-			// check if face is within tile
+			/* check if face is within tile */
 			if (!mClipper.clip((int) cx, (int) cy, (int) nx, (int) ny)) {
 				even = (even + 1) % 2;
 				continue;
 			}
 
-			// add ZigZagQuadIndices(tm) for sides
-			short[] indices = mCurIndices[even].vertices;
-			// index id relative to mCurIndices item
-			int ind = mCurIndices[even].used;
-			// indices for current face
+			/* add ZigZagQuadIndices(tm) for sides */
 			short vert = (short) (vOffset + (i - 2));
 			short s0 = vert++;
 			short s1 = vert++;
 			short s2 = vert++;
 			short s3 = vert++;
 
-			if (ind == VertexPoolItem.SIZE) {
-				//mCurIndices[even].used = VertexPoolItem.SIZE;
-				mCurIndices[even].next = VertexPool.get();
-				mCurIndices[even] = mCurIndices[even].next;
-				indices = mCurIndices[even].vertices;
-				ind = 0;
-			}
-
 			// connect last to first (when number of faces is even)
 			if (!addFace && i == len) {
 				s2 -= len;
 				s3 -= len;
+			}
+
+			short[] indices = mCurIndices[even].vertices;
+			// index id relative to mCurIndices item
+			int ind = mCurIndices[even].used;
+
+			if (ind == VertexPoolItem.SIZE) {
+				mCurIndices[even].next = VertexPool.get();
+				mCurIndices[even] = mCurIndices[even].next;
+				indices = mCurIndices[even].vertices;
+				ind = 0;
 			}
 
 			indices[ind + 0] = s0;
@@ -326,9 +325,9 @@ public class ExtrusionLayer extends Layer {
 			indices[ind + 5] = s3;
 
 			mCurIndices[even].used += 6;
-			even = (even + 1) % 2;
+			even = (even == 0 ? 1 : 0);
 
-			// add roof outline indices
+			/* add roof outline indices */
 			VertexPoolItem it = mCurIndices[IND_OUTLINE];
 			if (it.used == VertexPoolItem.SIZE) {
 				it.next = VertexPool.get();
@@ -405,10 +404,6 @@ public class ExtrusionLayer extends Layer {
 		if (compiled) {
 			GLES20.glDeleteBuffers(2, mVboIds, 0);
 		}
-	}
-
-	public void render() {
-
 	}
 
 	private static boolean initialized = false;
