@@ -49,7 +49,6 @@ public class BaseLayer {
 
 		Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, pos.viewMatrix, 0);
 
-		/* draw base layer */
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
 
 		for (int i = 0; i < tileCnt; i++) {
