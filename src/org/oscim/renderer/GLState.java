@@ -34,39 +34,42 @@ public class GLState {
 		blend = false;
 		depth = false;
 		stencil = false;
+
+		GLES20.glDisable(GLES20.GL_STENCIL_TEST);
+		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 	}
 
-	//	public static void blend(boolean enable) {
-	//		if (blend == enable)
-	//			return;
-	//
-	//		if (blend)
-	//			GLES20.glEnable(GLES20.GL_BLEND);
-	//		else
-	//			GLES20.glDisable(GLES20.GL_BLEND);
-	//	}
-	//
-	//	public static void test(boolean depthTest, boolean stencilTest) {
-	//		if (depth != depthTest) {
-	//
-	//			if (depthTest)
-	//				GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-	//			else
-	//				GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-	//
-	//			depth = depthTest;
-	//		}
-	//
-	//		if (stencil != stencilTest) {
-	//
-	//			if (stencilTest)
-	//				GLES20.glEnable(GLES20.GL_STENCIL_TEST);
-	//			else
-	//				GLES20.glDisable(GLES20.GL_STENCIL_TEST);
-	//
-	//			stencil = stencilTest;
-	//		}
-	//	}
+	public static void blend(boolean enable) {
+		if (blend == enable)
+			return;
+
+		if (blend)
+			GLES20.glEnable(GLES20.GL_BLEND);
+		else
+			GLES20.glDisable(GLES20.GL_BLEND);
+	}
+
+	public static void test(boolean depthTest, boolean stencilTest) {
+		if (depth != depthTest) {
+
+			if (depthTest)
+				GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+			else
+				GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+
+			depth = depthTest;
+		}
+
+		if (stencil != stencilTest) {
+
+			if (stencilTest)
+				GLES20.glEnable(GLES20.GL_STENCIL_TEST);
+			else
+				GLES20.glDisable(GLES20.GL_STENCIL_TEST);
+
+			stencil = stencilTest;
+		}
+	}
 
 	public static void enableVertexArrays(int va1, int va2) {
 		if (va1 > 1 || va2 > 1)

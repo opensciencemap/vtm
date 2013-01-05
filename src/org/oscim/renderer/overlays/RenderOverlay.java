@@ -18,6 +18,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.LineRenderer;
 import org.oscim.renderer.PolygonRenderer;
 import org.oscim.renderer.TextureRenderer;
@@ -104,6 +105,7 @@ public abstract class RenderOverlay {
 		Matrix.multiplyMM(mvp, 0, proj, 0, mv, 0);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo.id);
+		GLState.test(false, false);
 
 		for (Layer l = layers.layers; l != null;) {
 			if (l.type == Layer.POLYGON) {
