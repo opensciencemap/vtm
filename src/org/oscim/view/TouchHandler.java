@@ -22,6 +22,7 @@ import org.oscim.overlay.OverlayManager;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
@@ -40,7 +41,7 @@ import android.widget.Scroller;
 
 final class TouchHandler implements OnGestureListener, OnScaleGestureListener, OnDoubleTapListener {
 
-	//private static final String TAG = TouchHandler.class.getSimpleName();
+	private static final String TAG = TouchHandler.class.getName();
 
 	private static final float SCALE_DURATION = 500;
 	private static final float ROTATION_DELAY = 200; // ms
@@ -108,6 +109,8 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		int action = getAction(event);
 
 		if (action == MotionEvent.ACTION_DOWN) {
+			mMulti = 0;
+			mWasMulti = false;
 			if (mOverlayManager.onDown(event, mMapView))
 				return true;
 
@@ -167,7 +170,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 			return true;
 		}
 
-		if (multi == 0)
+		if (mMulti == 0)
 			return true;
 
 		if (event.getEventTime() - mMultiTouchDownTime < ROTATION_DELAY)
@@ -224,21 +227,23 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		return true;
 	}
 
-	private int multi = 0;
+	private int mMulti = 0;
+	private boolean mWasMulti;
 	private long mMultiTouchDownTime;
 
 	private boolean onActionPointerDown(MotionEvent event) {
 
 		mMultiTouchDownTime = event.getEventTime();
 
-		multi++;
+		mMulti++;
+		mWasMulti = true;
 
-		if (multi == 1) {
+		if (mMulti == 1) {
 			double dx = event.getX(0) - event.getX(1);
 			double dy = event.getY(0) - event.getY(1);
 			mAngle = Math.atan2(dy, dx);
 		}
-		// Log.d("...", "multi down " + multi);
+		// Log.d("...", "mMulti down " + mMulti);
 		return true;
 	}
 
@@ -260,10 +265,10 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 			mPosY = motionEvent.getY(pointerIndex);
 			mActivePointerId = motionEvent.getPointerId(pointerIndex);
 		}
-		multi--;
+		mMulti--;
 
 		mLongPress = false;
-		// Log.d("...", "multi up " + multi);
+		// Log.d("...", "mMulti up " + mMulti);
 
 		return true;
 	}
@@ -278,7 +283,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		mScaling = false;
 		mLongPress = false;
 
-		multi = 0;
+		mMulti = 0;
 
 		return true;
 	}
@@ -343,7 +348,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		if (mScaling)
 			return true;
 
-		if (multi == 0) {
+		if (mMulti == 0) {
 			mMapPosition.moveMap(-distanceX, -distanceY);
 			mMapView.redrawMap();
 		}
@@ -355,7 +360,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
 
-		if (mScaling)
+		if (mScaling || mWasMulti)
 			return true;
 
 		int w = Tile.TILE_SIZE * 20;
@@ -368,22 +373,34 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 			mTimer = null;
 		}
 
-		mScroller.fling(0, 0, Math.round(velocityX) / 2, Math.round(velocityY) / 2,
-				-w, w, -h, h);
+		if (mMapView.enablePagedFling) {
+			double a = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
 
-		// animate for two seconds
-		mTimer = new CountDownTimer(1500, 16) {
-			@Override
-			public void onTick(long tick) {
-				scroll();
-			}
+			float vx = (float) (velocityX / a);
+			float vy = (float) (velocityY / a);
 
-			@Override
-			public void onFinish() {
-			}
-		}.start();
-		fling = true;
+			Log.d(TAG, "velocity: " + a + " " + velocityX + " " + velocityY + " - " + vx + " " + vy);
 
+			if (a < 500)
+				return true;
+
+			mMapPosition.animateTo(vx * Tile.TILE_SIZE * 2, vy * Tile.TILE_SIZE * 2, 250);
+		} else {
+			mScroller.fling(0, 0, Math.round(velocityX) / 2, Math.round(velocityY) / 2,
+					-w, w, -h, h);
+
+			mTimer = new CountDownTimer(1000, 16) {
+				@Override
+				public void onTick(long tick) {
+					scroll();
+				}
+
+				@Override
+				public void onFinish() {
+				}
+			}.start();
+			fling = true;
+		}
 		return true;
 	}
 

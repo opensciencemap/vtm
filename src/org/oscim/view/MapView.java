@@ -73,6 +73,7 @@ public class MapView extends RelativeLayout {
 
 	public boolean enableRotation = false;
 	public boolean enableCompass = false;
+	public boolean enablePagedFling = false;
 
 	private final MapViewPosition mMapViewPosition;
 	private final MapPosition mMapPosition;
