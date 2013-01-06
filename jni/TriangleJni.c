@@ -11,6 +11,21 @@ static void mylog(const char *msg)
   __android_log_write(ANDROID_LOG_INFO,"triangle", msg);
 }
 
+// from www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+#if 0
+int pnpoly(int nvert, float *vert, float testx, float testy)
+{
+  int i, j, c = 0;
+  for (i = 0, j = (nvert-1)*2; i < nvert * 2; j = i++) {
+    if ( ((vert[i*2+1] > testy) != (vert[j*j+1] > testy)) &&
+	 (testx < (vert[j*2]-vert[i*2])
+	  * (testy - vert[i*2+1])
+	  / (vert[j*2+1]-vert[i*2+1]) + vert[i*2]) )
+       c = !c;
+  }
+  return c;
+}
+#endif
 
 //#define TESTING
 
@@ -143,7 +158,26 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   memset(&out, 0, sizeof(TriangleIO));
   out.trianglelist = (INDICE*) indices;
 
+  // p - use polygon input, for CDT
+  // z - zero offset array offsets...
+  // P - no poly output
+  // N - no node output
+  // B - no bound output
+  // Q - be quiet!
   triangulate("pzPNBQ", &in, &out, (TriangleIO *) NULL);
+
+  if (in.numberofpoints < out.numberofpoints)
+	{
+	  snprintf(buf, 128, "polygon input is bad! points in:%d out%d\n",
+				in.numberofpoints, out.numberofpoints);
+	  mylog(buf);
+
+	  free(in.segmentlist);
+	  free(in.holelist);
+	  free(rings);
+	  return 0;
+	}
+
 
 #ifdef TESTING
   snprintf(buf, 128, "triangles: %d\n", out.numberoftriangles);
