@@ -19,6 +19,7 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.generator.JobTile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapTile;
@@ -105,7 +106,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 				if (el == null)
 					continue;
 
-				if (el.ready && !el.compiled) {
+				if (!el.compiled) {
 					el.compile(mShortBuffer);
 					GlUtils.checkGlError("...");
 				}
@@ -139,7 +140,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 	}
 
 	private static ExtrusionLayer getLayer(MapTile t) {
-		if (t.layers != null && t.layers.extrusionLayers != null)
+		if (t.layers != null && t.layers.extrusionLayers != null
+				&& t.state == JobTile.STATE_READY)
 			return (ExtrusionLayer) t.layers.extrusionLayers;
 		return null;
 	}
@@ -162,6 +164,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 			GLES20.glUniform1i(hExtrusionMode, 0);
 			GLES20.glUniform4f(hExtrusionColor, 0.6f, 0.6f, 0.6f, 0.8f);
 
+			GLState.test(false, false);
+
 			for (int i = 0; i < mTileCnt; i++) {
 				ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
 
@@ -182,7 +186,6 @@ public class ExtrusionOverlay extends RenderOverlay {
 						(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
 						GLES20.GL_UNSIGNED_SHORT, 0);
 
-				GLES20.glUniform1i(hExtrusionMode, 0);
 				GLES20.glUniform4f(hExtrusionColor, 1.0f, 0.5f, 0.5f, 0.9f);
 
 				GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
@@ -317,7 +320,9 @@ public class ExtrusionOverlay extends RenderOverlay {
 	float mColor[] = { 201 / 255f, 200 / 255f, 198 / 255f, 0.8f };
 	float mColor2[] = { 201 / 255f, 200 / 255f, 199 / 255f, 0.8f };
 
-	float mRoofColor[] = { 0.895f, 0.89f, 0.88f, 0.9f };
+	//float mRoofColor[] = { 0.895f, 0.89f, 0.88f, 0.9f };
+	float _a = 0.8f;
+	float mRoofColor[] = { 236 / 255f * _a, 235 / 255f * _a, 234 / 255f * _a, _a };
 
 	final static String extrusionVertexShader = ""
 			+ "precision mediump float;"
