@@ -1,5 +1,4 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2012, 2013 OpenScienceMap 
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -18,58 +17,71 @@ package org.oscim.generator;
 import static org.oscim.generator.JobTile.STATE_LOADING;
 import static org.oscim.generator.JobTile.STATE_NONE;
 
-import java.util.ArrayList;
-import java.util.PriorityQueue;
+import java.util.Arrays;
 
 /**
  * A JobQueue keeps the list of pending jobs for a MapView and prioritizes them.
  */
 public class JobQueue {
-	private static final int INITIAL_CAPACITY = 64;
 
-	private PriorityQueue<JobTile> mPriorityQueue;
-
-	/**
-	 */
-	public JobQueue() {
-		mPriorityQueue = new PriorityQueue<JobTile>(INITIAL_CAPACITY);
-	}
+	private int mCurrentJob = 0;
+	private JobTile[] mJobs;
 
 	/**
 	 * @param tiles
 	 *            the job to be added to this queue.
 	 */
-	public synchronized void setJobs(ArrayList<JobTile> tiles) {
+	public synchronized void setJobs(JobTile[] tiles) {
+		for (JobTile t : tiles)
+			t.state = STATE_LOADING;
 
-		for (int i = 0, n = tiles.size(); i < n; i++) {
-			JobTile tile = tiles.get(i);
-			tile.state = STATE_LOADING;
-			mPriorityQueue.offer(tile);
-		}
+		mJobs = tiles;
+		mCurrentJob = 0;
 	}
 
 	/**
 	 * Removes all jobs from this queue.
 	 */
 	public synchronized void clear() {
-		JobTile t;
-		while ((t = mPriorityQueue.poll()) != null)
-			t.state = STATE_NONE;
+		if (mJobs == null) {
+			mCurrentJob = 0;
+			return;
+		}
+		JobTile[] tiles = mJobs;
 
-		mPriorityQueue.clear();
+		for (int i = mCurrentJob, n = mJobs.length; i < n; i++) {
+			tiles[i].state = STATE_NONE;
+			tiles[i] = null;
+		}
+		mCurrentJob = 0;
+		mJobs = null;
 	}
 
 	/**
 	 * @return true if this queue contains no jobs, false otherwise.
 	 */
 	public synchronized boolean isEmpty() {
-		return mPriorityQueue.isEmpty();
+		return (mJobs == null);
 	}
 
 	/**
 	 * @return the most important job from this queue or null, if empty.
 	 */
 	public synchronized JobTile poll() {
-		return mPriorityQueue.poll();
+		if (mJobs == null)
+			return null;
+
+		if (mCurrentJob == 0)
+			Arrays.sort(mJobs);
+
+		//return mPriorityQueue.poll();
+		JobTile t = mJobs[mCurrentJob];
+		mJobs[mCurrentJob] = null;
+
+		if (++mCurrentJob == mJobs.length)
+			mJobs = null;
+
+		return t;
+
 	}
 }

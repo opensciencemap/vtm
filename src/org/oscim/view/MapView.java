@@ -18,7 +18,6 @@ package org.oscim.view;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -611,7 +610,7 @@ public class MapView extends RelativeLayout {
 	 * @param jobs
 	 *            tile jobs
 	 */
-	public void addJobs(ArrayList<JobTile> jobs) {
+	public void addJobs(JobTile[] jobs) {
 		if (jobs == null) {
 			mJobQueue.clear();
 			return;
