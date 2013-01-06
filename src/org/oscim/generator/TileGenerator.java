@@ -168,6 +168,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		// TODO: building with non simple holes (Berlin): 
 		//if ((tile.zoomLevel != 17) || (tile.tileX == 70428 && tile.tileY == 43009)),
 		//if ((tile.zoomLevel != 17) || (tile.tileX == 70463 && tile.tileY == 42990))
+		// FIXME 180 degree angle in building
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 68728 && tile.tileY == 42634))
 
 		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
 			//Log.d(TAG, "Failed loading: " + tile);
@@ -197,9 +199,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		tile.labels = mLabels;
 		mLayers = null;
 		mLabels = null;
-
-		if (tile.layers.extrusionLayers != null)
-			((ExtrusionLayer) tile.layers.extrusionLayers).ready = true;
 
 		return true;
 	}

@@ -30,6 +30,8 @@ import android.util.Log;
 
 /**
  * @author Hannes Janetzek
+ *         FIXME check if polygon has self intersections or 0/180 degree
+ *         angles!!!
  */
 public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
@@ -50,6 +52,9 @@ public class ExtrusionLayer extends Layer {
 	//private final static int IND_ODD_SIDE = 1;
 	private final static int IND_ROOF = 2;
 	private final static int IND_OUTLINE = 3;
+
+	public boolean compiled = false;
+	private int[] mVboIds;
 
 	public ExtrusionLayer(int level) {
 		this.type = Layer.EXTRUSION;
@@ -182,8 +187,7 @@ public class ExtrusionLayer extends Layer {
 		}
 	}
 
-	private static short getColor(float vx, float vy) {
-		float a = (float) Math.sqrt(vx * vx + vy * vy);
+	private static short getColor(float vx, float a) {
 		float vlight = vx > 0 ? (vx / a) : -(vx / a);
 		return (short) (220 + (35 * vlight));
 	}
@@ -207,7 +211,8 @@ public class ExtrusionLayer extends Layer {
 		// vector from previous point
 		float ux, uy;
 
-		short color1 = getColor(vx, vy);
+		float a = (float) Math.sqrt(vx * vx + vy * vy);
+		short color1 = getColor(vx, a);
 		short fcolor = color1;
 		short color2 = 0;
 
@@ -245,7 +250,7 @@ public class ExtrusionLayer extends Layer {
 			vertices[v + 2] = 0;
 			vertices[v + 6] = h;
 
-			// calculate direction to next point
+			// get direction to next point
 			if (i < len) {
 				nx = points[pos + i + 0];
 				ny = points[pos + i + 1];
@@ -259,11 +264,12 @@ public class ExtrusionLayer extends Layer {
 				break;
 			}
 
-			// vector to next point
 			vx = nx - cx;
 			vy = ny - cy;
 
-			color2 = getColor(vx, vy);
+			// set lighting (by direction)
+			a = (float) Math.sqrt(vx * vx + vy * vy);
+			color2 = getColor(vx, a);
 
 			short c;
 			if (even == 0)
@@ -271,7 +277,6 @@ public class ExtrusionLayer extends Layer {
 			else
 				c = (short) (color2 | color1 << 8);
 
-			// set lighting (direction)
 			vertices[v + 3] = vertices[v + 7] = c;
 			color1 = color2;
 
@@ -394,12 +399,6 @@ public class ExtrusionLayer extends Layer {
 
 		compiled = true;
 	}
-
-	public boolean compiled = false;
-
-	int[] mVboIds;
-
-	public boolean ready;
 
 	@Override
 	protected void clear() {
