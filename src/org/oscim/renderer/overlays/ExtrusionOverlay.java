@@ -146,10 +146,14 @@ public class ExtrusionOverlay extends RenderOverlay {
 		return null;
 	}
 
-	boolean debug = false;
+	private boolean debug = false;
+	private final float[] mVPMatrix = new float[16];
 
 	@Override
 	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
+
+		Matrix.multiplyMM(mVPMatrix, 0, proj, 0, pos.viewMatrix, 0);
+		proj = mVPMatrix;
 
 		MapTile[] tiles = mTiles;
 
@@ -162,7 +166,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 			GLState.enableVertexArrays(hExtrusionVertexPosition, hExtrusionLightPosition);
 			GLES20.glUniform1i(hExtrusionMode, 0);
-			GLES20.glUniform4f(hExtrusionColor, 0.6f, 0.6f, 0.6f, 0.8f);
+			GLES20.glUniform4fv(hExtrusionColor, 4, mColor, 0);
 
 			GLState.test(false, false);
 
@@ -209,6 +213,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLES20.glDepthMask(true);
 		GLES20.glColorMask(false, false, false, false);
 		GLES20.glUniform1i(hExtrusionMode, 0);
+		GLES20.glUniform4fv(hExtrusionColor, 4, mColor, 0);
 
 		// draw to depth buffer
 		for (int i = 0; i < mTileCnt; i++) {
@@ -255,30 +260,23 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 			// draw roof
 			GLES20.glUniform1i(hExtrusionMode, 0);
-			GLES20.glUniform4fv(hExtrusionColor, 1, mRoofColor, 0);
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[2],
 					GLES20.GL_UNSIGNED_SHORT, (el.mIndiceCnt[0] + el.mIndiceCnt[1]) * 2);
 
 			// draw sides 1
-			GLES20.glUniform4fv(hExtrusionColor, 1, mColor, 0);
 			GLES20.glUniform1i(hExtrusionMode, 1);
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[0],
 					GLES20.GL_UNSIGNED_SHORT, 0);
 
 			// draw sides 2
-			GLES20.glUniform4fv(hExtrusionColor, 1, mColor2, 0);
 			GLES20.glUniform1i(hExtrusionMode, 2);
-
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[1],
 					GLES20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
-			//GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 			GLES20.glUniform1i(hExtrusionMode, 3);
-			GLES20.glUniform4f(hExtrusionColor, 0.7f, 0.7f, 0.7f, 1.0f);
 			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
 					GLES20.GL_UNSIGNED_SHORT,
 					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
-			//GLES20.glDepthFunc(GLES20.GL_EQUAL);
 
 			// just a temporary reference!
 			tiles[i] = null;
@@ -309,48 +307,46 @@ public class ExtrusionOverlay extends RenderOverlay {
 		matrix[5] = scale;
 		matrix[10] = scale / 1000f;
 
-		Matrix.multiplyMM(matrix, 0, mapPosition.viewMatrix, 0, matrix, 0);
 		Matrix.multiplyMM(matrix, 0, proj, 0, matrix, 0);
 	}
 
-	// sligthly differ adjacent faces to improve contrast
-	//float mColor[] = { 0.76872549f, 0.751960784f, 0.740196078f, 0.8f };
-	//float mColor2[] = { 0.76372549f, 0.751960784f, 0.745196078f, 0.8f };
+	private final float _a = 0.8f;
 
-	float mColor[] = { 201 / 255f, 200 / 255f, 198 / 255f, 0.8f };
-	float mColor2[] = { 201 / 255f, 200 / 255f, 199 / 255f, 0.8f };
-
-	//float mRoofColor[] = { 0.895f, 0.89f, 0.88f, 0.9f };
-	float _a = 0.8f;
-	float mRoofColor[] = { 236 / 255f * _a, 235 / 255f * _a, 234 / 255f * _a, _a };
+	private final float[] mColor = {
+			// roof color
+			236 / 255f * _a, 235 / 255f * _a, 234 / 255f * _a, _a,
+			// sligthly differ adjacent side faces to improve contrast
+			201 / 255f, 200 / 255f, 198 / 255f, _a,
+			200 / 255f, 200 / 255f, 196 / 255f, _a,
+			// roof outline
+			0.75f, 0.75f, 0.75f, 1.0f
+	};
 
 	final static String extrusionVertexShader = ""
 			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
-			+ "uniform vec4 u_color;"
+			+ "uniform vec4 u_color[4];"
 			+ "uniform int u_mode;"
 			+ "attribute vec4 a_position;"
 			+ "attribute vec2 a_light;"
 			+ "varying vec4 color;"
 			+ "const float ff = 255.0;"
+			+ "const float a = 0.8;"
 			+ "void main() {"
 			+ "  gl_Position = u_mvp * a_position;"
 			+ "  if (u_mode == 0)"
 			//     roof / depth pass
-			+ "    color = u_color;"
-			+ "  else {"
-			//    decrease contrast with distance
-			+ "   float alpha = 0.95 + gl_Position.z * 0.05;"
-			+ "    if (u_mode == 1)"
+			+ "    color = u_color[0];"
+			+ "  else if (u_mode == 1)"
 			//     sides 1 - use 0xff00
-			+ "    color = vec4(u_color.rgb * (a_light.y / ff * alpha), 1.0) * (0.8 * alpha);"
+			+ "    color = vec4(u_color[1].rgb * ((0.90 + (0.5 - (a_light.y / ff)) * 0.2) * a), a);"
 			+ "  else if (u_mode == 2)"
 			//     sides 2 - use 0x00ff
-			+ "    color = vec4(u_color.rgb * (a_light.x / ff * alpha), 1.0) * (0.8 * alpha);"
+			+ "    color = vec4(u_color[2].rgb * ((0.90 + (0.5 - (a_light.x / ff)) * 0.2) * a), a);"
 			+ "  else"
-			//     sides 2 - use 0x00ff
-			+ "    color = u_color * alpha;"
-			+ "}}";
+			//     outline - decrease contrast with distance
+			+ "    color = u_color[3] * (0.98 + gl_Position.z * 0.02);"
+			+ "}";
 
 	//	final static String extrusionVertexAnimShader = ""
 	//			+ "precision mediump float;"
