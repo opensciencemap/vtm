@@ -188,11 +188,6 @@ public class ExtrusionLayer extends Layer {
 		}
 	}
 
-	private static short getColor(float vx, float a) {
-		float vlight = vx > 0 ? (vx / a) : -(vx / a);
-		return (short) (220 + (35 * vlight));
-	}
-
 	private boolean addOutline(float[] points, int pos, int len, float height, boolean convex) {
 
 		// add two vertices for last face to make zigzag indices work
@@ -213,7 +208,6 @@ public class ExtrusionLayer extends Layer {
 		float ux, uy;
 
 		float a = (float) Math.sqrt(vx * vx + vy * vy);
-		//float vlight = vx > 0 ? (vx / a) : -(vx / a);
 		short color1 = (short) ((1 + vx / a) * 127);
 		short fcolor = color1;
 		short color2 = 0;
@@ -273,7 +267,7 @@ public class ExtrusionLayer extends Layer {
 
 			// set lighting (by direction)
 			a = (float) Math.sqrt(vx * vx + vy * vy);
-			color2 = (short) ((1 + vx / a) * 127); //getColor(vx, a);
+			color2 = (short) ((1 + vx / a) * 127);
 
 			short c;
 			if (even == 0)
