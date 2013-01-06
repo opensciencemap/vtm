@@ -139,6 +139,7 @@ public class TileManager {
 
 	public void destroy() {
 		SINGLETON = null;
+		// there might be some leaks in here
 		// mRenderer = null;
 		// mTiles = null;
 		// mTilesLoaded = null;
@@ -156,10 +157,7 @@ public class TileManager {
 		mTiles = new MapTile[GLRenderer.CACHE_TILES];
 		mTilesLoaded = new ArrayList<MapTile>(30);
 
-		// this is probably a good place to init these
-		//VertexPool.init();
-		//QuadTree.init();
-
+		mTilesSize = 0;
 		mUpdateCnt = 0;
 		mInitial = true;
 	}
