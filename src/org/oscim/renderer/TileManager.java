@@ -21,7 +21,7 @@ import static org.oscim.generator.JobTile.STATE_NONE;
 import static org.oscim.generator.JobTile.STATE_READY;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -43,18 +43,24 @@ public class TileManager {
 	static final String TAG = TileManager.class.getSimpleName();
 
 	private static final int MAX_TILES_IN_QUEUE = 40;
-	private static final int CACHE_THRESHOLD = 10;
+	private static final int CACHE_THRESHOLD = 30;
 
 	private static MapView mMapView;
 
 	private static final MapPosition mMapPosition = new MapPosition();
 	private final MapViewPosition mMapViewPosition;
 
-	// new jobs for the MapWorkers
-	private static ArrayList<JobTile> mJobList;
-
 	// all tiles
-	private static ArrayList<MapTile> mTiles;
+	private static MapTile[] mTiles;
+	// actual number of tiles in mTiles
+	private static int mTilesCount;
+	// current end position in mTiles
+	private static int mTilesSize;
+	// first free slot in mTiles
+	//private static int mTilesFirst;
+
+	// new jobs for MapWorkers
+	private static ArrayList<JobTile> mJobs;
 
 	// tiles that have new data to upload, see passTile()
 	private static ArrayList<MapTile> mTilesLoaded;
@@ -74,8 +80,6 @@ public class TileManager {
 	static Object tilelock = new Object();
 	static TileSet mCurrentTiles;
 	/* package */static TileSet mNewTiles;
-
-	static int tileCounter;
 
 	private static ScanBox mScanBox = new ScanBox() {
 
@@ -138,7 +142,7 @@ public class TileManager {
 		// mRenderer = null;
 		// mTiles = null;
 		// mTilesLoaded = null;
-		// mJobList = null;
+		// mJobs = null;
 		// mOverlays = null;
 		// ... free pools
 	}
@@ -148,18 +152,16 @@ public class TileManager {
 		mMapView = mapView;
 		mMapViewPosition = mapView.getMapViewPosition();
 
-		mJobList = new ArrayList<JobTile>();
-		mTiles = new ArrayList<MapTile>(200);
+		mJobs = new ArrayList<JobTile>();
+		mTiles = new MapTile[GLRenderer.CACHE_TILES];
 		mTilesLoaded = new ArrayList<MapTile>(30);
 
 		// this is probably a good place to init these
-		VertexPool.init();
-		QuadTree.init();
+		//VertexPool.init();
+		//QuadTree.init();
 
 		mUpdateCnt = 0;
 		mInitial = true;
-
-		tileCounter = 0;
 	}
 
 	/**
@@ -176,7 +178,8 @@ public class TileManager {
 			return;
 
 		if (clear || mInitial) {
-			// make sure onDrawFrame is not running, and labeling thread?
+			// make sure onDrawFrame is not running
+			// - and labeling thread?
 			GLRenderer.drawlock.lock();
 
 			// clear all tiles references
@@ -184,21 +187,26 @@ public class TileManager {
 
 			if (clear) {
 				// pass VBOs and VertexItems back to pools
-				for (MapTile t : mTiles)
-					clearTile(t);
+				for (int i = 0; i < mTilesSize; i++)
+					clearTile(mTiles[i]);
 			} else {
+				// mInitial is set when surface changed 
+				// and VBOs might be lost
 				VertexPool.init();
 			}
 
-			//VertexPool.init();
 			QuadTree.init();
 
-			mTiles.clear();
+			Arrays.fill(mTiles, null);
+			mTilesSize = 0;
+			mTilesCount = 0;
+
 			mTilesLoaded.clear();
 
-			//mUpdateCnt = 0;
-			for (TileSet td : mTileSets)
+			for (TileSet td : mTileSets) {
+				Arrays.fill(td.tiles, null);
 				td.cnt = 0;
+			}
 
 			// set up TileData arrays that are passed to gl-thread
 			int num = Math.max(mWidth, mHeight);
@@ -207,11 +215,11 @@ public class TileManager {
 			mNewTiles = new TileSet(numTiles);
 			mCurrentTiles = new TileSet(numTiles);
 
-			GLRenderer.drawlock.unlock();
-
 			// make sure mMapPosition will be updated
 			mMapPosition.zoomLevel = -1;
 			mInitial = false;
+
+			GLRenderer.drawlock.unlock();
 		}
 
 		MapPosition mapPosition = mMapPosition;
@@ -243,8 +251,7 @@ public class TileManager {
 		mMapView.render();
 
 		if (changed) {
-			int remove = mTiles.size() - GLRenderer.CACHE_TILES;
-
+			int remove = mTilesCount - GLRenderer.CACHE_TILES;
 			if (remove > CACHE_THRESHOLD)
 				limitCache(mapPosition, remove);
 
@@ -252,7 +259,7 @@ public class TileManager {
 		}
 	}
 
-	/// EEEK, need to keep track of TileSets to clear on reset...
+	// need to keep track of TileSets to clear on reset...
 	private static ArrayList<TileSet> mTileSets = new ArrayList<TileSet>(2);
 
 	public static TileSet getActiveTiles(TileSet td) {
@@ -308,12 +315,6 @@ public class TileManager {
 	 * @return true if new tiles were loaded
 	 */
 	private static boolean updateVisibleList(MapPosition mapPosition, int zdir) {
-
-		// TODO keep mJobList and JobQueue in sync, no need to clear
-		mJobList.clear();
-
-		// sets non processed tiles to isLoading = false
-		// and clear job queue
 		mMapView.addJobs(null);
 
 		mNewTiles.cnt = 0;
@@ -353,17 +354,19 @@ public class TileManager {
 				mUpdateCnt++;
 			}
 
-			// Log.d(TAG, "tiles: " + tileCounter + " " + BufferObject.counter
-			// + " sum:" + (tileCounter + BufferObject.counter));
+			// Log.d(TAG, "tiles: " + mTilesCount + " " + BufferObject.counter
+			// + " sum:" + (mTilesCount + BufferObject.counter));
 		}
 
-		if (mJobList.size() > 0) {
-			updateTileDistances(mJobList, mapPosition);
-			Collections.sort(mJobList);
+		if (mJobs.size() > 0) {
+
+			JobTile[] jobs = new JobTile[mJobs.size()];
+			jobs = mJobs.toArray(jobs);
+			updateTileDistances(jobs, jobs.length, mapPosition);
 
 			// sets tiles to isLoading = true
-			mMapView.addJobs(mJobList);
-
+			mMapView.addJobs(jobs);
+			mJobs.clear();
 			return true;
 		}
 		return false;
@@ -388,7 +391,7 @@ public class TileManager {
 
 		if (tile != null) {
 			if (!tile.isActive())
-				mJobList.add(tile);
+				mJobs.add(tile);
 
 			return tile;
 		}
@@ -396,9 +399,16 @@ public class TileManager {
 		tile = new MapTile(x, y, zoomLevel);
 		QuadTree.add(tile);
 
-		mTiles.add(tile);
-		mJobList.add(tile);
-		tileCounter++;
+		if (mTilesSize == mTiles.length) {
+			MapTile[] tmp = new MapTile[mTiles.length + 20];
+			System.arraycopy(mTiles, 0, tmp, 0, mTilesSize);
+			mTiles = tmp;
+			Log.d(TAG, "increase tiles: " + mTiles.length);
+		}
+		mTiles[mTilesSize++] = tile;
+
+		mJobs.add(tile);
+		mTilesCount++;
 
 		return tile;
 
@@ -422,7 +432,7 @@ public class TileManager {
 		//				}
 		//
 		//				if (!c.isActive()) {
-		//					mJobList.add(c);
+		//					mJobs.add(c);
 		//				}
 		//			}
 		//		}
@@ -437,19 +447,19 @@ public class TileManager {
 		//
 		//					QuadTree.add(p);
 		//					mTiles.add(p);
-		//					mJobList.add(p);
+		//					mJobs.add(p);
 		//
 		//				} else if (!p.isActive()) {
-		//					if (!mJobList.contains(p))
-		//						mJobList.add(p);
+		//					if (!mJobs.contains(p))
+		//						mJobs.add(p);
 		//				}
 		//			}
 		//		}
 	}
 
 	private static void clearTile(MapTile t) {
-
-		t.state = STATE_NONE;
+		if (t == null)
+			return;
 
 		if (t.layers != null) {
 			t.layers.clear();
@@ -462,14 +472,14 @@ public class TileManager {
 			BufferObject.release(t.vbo);
 			t.vbo = null;
 		}
-		// if (t.texture != null)
-		// t.texture.tile = null;
 
-		tileCounter--;
+		mTilesCount--;
 		QuadTree.remove(t);
+
+		t.state = STATE_NONE;
 	}
 
-	private static void updateTileDistances(ArrayList<?> tiles, MapPosition mapPosition) {
+	private static void updateTileDistances(Object[] tiles, int size, MapPosition mapPosition) {
 		int h = (Tile.TILE_SIZE >> 1);
 		byte zoom = mapPosition.zoomLevel;
 		long x = (long) mapPosition.x;
@@ -481,8 +491,11 @@ public class TileManager {
 		// TODO this could need some fixing, and optimization
 		// to consider move/zoom direction
 
-		for (int i = 0, n = tiles.size(); i < n; i++) {
-			JobTile t = (JobTile) tiles.get(i);
+		for (int i = 0; i < size; i++) {
+			JobTile t = (JobTile) tiles[i];
+			if (t == null)
+				continue;
+
 			diff = (t.zoomLevel - zoom);
 
 			if (diff == 0) {
@@ -490,8 +503,9 @@ public class TileManager {
 				dy = (t.pixelY + h) - y;
 				dx %= center;
 				dy %= center;
+				t.distance = (dx * dx + dy * dy) * 0.5f;
 				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
-				t.distance = (float) Math.sqrt((dx * dx + dy * dy)) * 0.25f;
+				//t.distance = (float) Math.sqrt((dx * dx + dy * dy)) * 0.25f;
 			} else if (diff > 0) {
 				// tile zoom level is child of current
 
@@ -505,8 +519,9 @@ public class TileManager {
 				}
 				dx %= center;
 				dy %= center;
+				t.distance = (dx * dx + dy * dy);
 				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
-				t.distance = (float) Math.sqrt((dx * dx + dy * dy));
+				//t.distance = (float) Math.sqrt((dx * dx + dy * dy));
 
 			} else {
 				// tile zoom level is parent of current
@@ -514,55 +529,89 @@ public class TileManager {
 				dy = ((t.pixelY + h) << -diff) - y;
 				dx %= center;
 				dy %= center;
+				t.distance = (dx * dx + dy * dy) * (-diff * 0.7f);
 				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * (-diff * 0.5f);
-				t.distance = (float) Math.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
+				//t.distance = (float) Math.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
 			}
 		}
 	}
 
 	private static void limitCache(MapPosition mapPosition, int remove) {
-		int size = mTiles.size();
+		MapTile[] tiles = mTiles;
 
 		// remove tiles that were never loaded
-		for (int i = 0; i < size;) {
-			MapTile t = mTiles.get(i);
+		for (int i = 0, size = mTilesSize; i < size; i++) {
+			MapTile t = tiles[i];
+			if (t == null)
+				continue;
+
 			// make sure tile cannot be used by GL or MapWorker Thread
 			if (t.isLocked() || t.isActive()) {
-				i++;
-			} else {
-				clearTile(t);
-				mTiles.remove(i);
-				remove--;
-				size--;
+				continue;
 			}
+			clearTile(t);
+			tiles[i] = null;
+			remove--;
+			size--;
 		}
 
-		if (remove <= 0)
-			return;
+		if (remove > 5) {
+			int size = mTilesSize;
 
-		updateTileDistances(mTiles, mapPosition);
-		Collections.sort(mTiles);
+			if (size > mTilesCount) {
+				Log.d(TAG, "repack: " + size + " " + mTilesCount);
 
-		for (int i = 1; i < remove; i++) {
-			MapTile t = mTiles.remove(size - i);
+				int start = 0;
+				// get first position to shift
+				while (start < size && tiles[start] != null)
+					start++;
+				int space = start + 1;
+				for (int end = 0; end < size;) {
+					// get the number of slots to shift
+					while (space < size && tiles[space] == null)
+						space++;
+					// get the position of next free slots 
+					end = space;
+					while (end < size && tiles[end] != null)
+						end++;
+					// number of items to shift
+					int len = end - space;
 
-			if (t.isLocked()) {
-				// dont remove tile used by GLRenderer, or somewhere else
-				Log.d(TAG, "limitCache: tile still locked " + t + " " + t.distance);
-				mTiles.add(t);
-			} else if (t.state == STATE_LOADING) {
-				// NOTE: if we add tile back and set loading=false, on next
-				// limitCache the tile will be removed. clearTile could
-				// interfere with TileGenerator. so clear in passTile()
-				// instead.
-				// ... no, this does not work either: when set loading to
-				// false tile could be added to load queue while still
-				// processed in TileGenerator => need tile.cancel flag.
-				// t.isLoading = false;
-				mTiles.add(t);
-				Log.d(TAG, "limitCache: cancel loading " + t + " " + t.distance);
-			} else {
-				clearTile(t);
+					if (len > 0) {
+						System.arraycopy(tiles, space, tiles, start, len);
+						start = start + len;
+						space = end;
+					}
+				}
+				Log.d(TAG, "repacked tiles to: " + start);
+				Arrays.fill(mTiles, start, mTilesSize, null);
+				mTilesSize = size = start;
+			}
+
+			updateTileDistances(mTiles, size, mapPosition);
+			Arrays.sort(mTiles, 0, size);
+
+			for (int i = 1; i < remove; i++) {
+				MapTile t = tiles[size - i];
+				if (t.isLocked()) {
+					// dont remove tile used by GLRenderer, or somewhere else
+					Log.d(TAG, "limitCache: tile still locked " + t + " " + t.distance);
+					//mTiles.add(t);
+				} else if (t.state == STATE_LOADING) {
+					// NOTE: if we add tile back and set loading=false, on next
+					// limitCache the tile will be removed. clearTile could
+					// interfere with TileGenerator. so clear in passTile()
+					// instead.
+					// ... no, this does not work either: when set loading to
+					// false tile could be added to load queue while still
+					// processed in TileGenerator => need tile.cancel flag.
+					// t.isLoading = false;
+					//mTiles.add(t);
+					Log.d(TAG, "limitCache: cancel loading " + t + " " + t.distance);
+				} else {
+					clearTile(t);
+					tiles[size - i] = null;
+				}
 			}
 		}
 	}
@@ -574,12 +623,10 @@ public class TileManager {
 			return;
 
 		synchronized (mTilesLoaded) {
-
 			// remove tiles already uploaded to vbo
 			for (int i = 0; i < size;) {
 				MapTile t = mTilesLoaded.get(i);
-				// t.rel == null means tile was removed in limitCache -- but then newdata is false anyway?
-				if (t.state == STATE_READY || t.state == STATE_NONE) {// || t.rel == null) {
+				if (t.state == STATE_READY || t.state == STATE_NONE) {
 					mTilesLoaded.remove(i);
 					size--;
 					continue;
@@ -592,19 +639,24 @@ public class TileManager {
 
 			// clear loaded but not used tiles
 			for (int i = 0, n = size - MAX_TILES_IN_QUEUE / 2; i < n; n--) {
-
 				MapTile t = mTilesLoaded.get(i);
 
 				if (t.isLocked()) {
-					// Log.d(TAG, "keep unused tile data: " + t + " " +
-					// t.isActive);
 					i++;
 					continue;
 				}
 
-				// Log.d(TAG, "remove unused tile data: " + t);
 				mTilesLoaded.remove(i);
-				mTiles.remove(t);
+
+				// remove reference from mTiles
+				MapTile[] tiles = mTiles;
+				for (int j = 0, m = mTilesSize; j < m; j++) {
+					if (t == tiles[j]) {
+						mTiles[j] = null;
+						break;
+					}
+				}
+
 				clearTile(t);
 			}
 		}
@@ -636,15 +688,11 @@ public class TileManager {
 
 		if (tile.vbo == null) {
 			Log.d(TAG, "no VBOs left for " + tile);
-			//tile.isLoading = false;
 			clearTile(tile);
 			return true;
 		}
 
 		tile.state = STATE_NEW_DATA;
-
-		//tile.newData = true;
-		//tile.isLoading = false;
 
 		mMapView.render();
 
