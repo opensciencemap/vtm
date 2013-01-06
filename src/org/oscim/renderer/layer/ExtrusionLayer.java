@@ -78,10 +78,11 @@ public class ExtrusionLayer extends Layer {
 		boolean simple = true;
 		int startVertex = mNumVertices;
 
+		// just a guess to make it look ok
 		if (height == 0)
-			height = 400;
+			height = 320;
 		else
-			height *= 40;
+			height *= 30;
 
 		int length = 0;
 		for (int ipos = 0, ppos = 0, n = index.length; ipos < n; ipos++, ppos += length) {
@@ -212,7 +213,8 @@ public class ExtrusionLayer extends Layer {
 		float ux, uy;
 
 		float a = (float) Math.sqrt(vx * vx + vy * vy);
-		short color1 = getColor(vx, a);
+		//float vlight = vx > 0 ? (vx / a) : -(vx / a);
+		short color1 = (short) ((1 + vx / a) * 127);
 		short fcolor = color1;
 		short color2 = 0;
 
@@ -225,6 +227,8 @@ public class ExtrusionLayer extends Layer {
 
 		short[] vertices = mCurVertices.vertices;
 		int v = mCurVertices.used;
+
+		mClipper.clipStart((int) nx, (int) ny);
 
 		for (int i = 2, n = vertexCnt + 2; i < n; i += 2, v += 8) {
 			cx = nx;
@@ -269,7 +273,7 @@ public class ExtrusionLayer extends Layer {
 
 			// set lighting (by direction)
 			a = (float) Math.sqrt(vx * vx + vy * vy);
-			color2 = getColor(vx, a);
+			color2 = (short) ((1 + vx / a) * 127); //getColor(vx, a);
 
 			short c;
 			if (even == 0)
@@ -294,7 +298,7 @@ public class ExtrusionLayer extends Layer {
 			}
 
 			/* check if face is within tile */
-			if (!mClipper.clip((int) cx, (int) cy, (int) nx, (int) ny)) {
+			if (!mClipper.clipNext((int) nx, (int) ny)) {
 				even = (even + 1) % 2;
 				continue;
 			}
