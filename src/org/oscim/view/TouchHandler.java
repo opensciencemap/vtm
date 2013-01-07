@@ -381,10 +381,11 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 
 			Log.d(TAG, "velocity: " + a + " " + velocityX + " " + velocityY + " - " + vx + " " + vy);
 
-			if (a < 500)
+			if (a < 400)
 				return true;
 
-			mMapPosition.animateTo(vx * Tile.TILE_SIZE * 2, vy * Tile.TILE_SIZE * 2, 250);
+			float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
+			mMapPosition.animateTo(vx * move, vy * move, 250);
 		} else {
 			mScroller.fling(0, 0, Math.round(velocityX) / 2, Math.round(velocityY) / 2,
 					-w, w, -h, h);
