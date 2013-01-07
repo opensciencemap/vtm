@@ -138,7 +138,9 @@ public class BaseLayer {
 		float y = (float) (tile.pixelY - pos.y * div);
 		float scale = pos.scale / div;
 
-		Matrix.setIdentityM(matrix, 0);
+		//Matrix.setIdentityM(matrix, 0);
+		for (int i = 0; i < 16; i++)
+			matrix[i] = 0;
 
 		// translate relative to map center
 		matrix[12] = x * scale;
@@ -148,6 +150,8 @@ public class BaseLayer {
 		scale /= GLRenderer.COORD_MULTIPLIER;
 		matrix[0] = scale;
 		matrix[5] = scale;
+		matrix[10] = 1;
+		matrix[15] = 1;
 
 		//	Matrix.multiplyMM(matrix, 0, pos.viewMatrix, 0, matrix, 0);
 		//	Matrix.multiplyMM(matrix, 0, mfProjMatrix, 0, matrix, 0);
