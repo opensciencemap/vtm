@@ -206,8 +206,6 @@ public class ModelOverlay extends RenderOverlay {
 		GLES20.glUniform4f(hPolygonColor, 0.7f, 0.5f, 0.5f, 0.7f);
 		GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_SHORT, 24 * 2);
 
-		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 		GlUtils.checkGlError("...");
 	}
