@@ -21,7 +21,7 @@ import android.util.Log;
 /**
  * @author Hannes Janetzek
  */
-public class JobTile extends Tile implements Comparable<JobTile> {
+public class JobTile extends Tile {
 	private final static String TAG = JobTile.class.getName();
 
 	public final static int STATE_NONE = 0;
@@ -58,16 +58,5 @@ public class JobTile extends Tile implements Comparable<JobTile> {
 	 */
 	public JobTile(int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
-	}
-
-	@Override
-	public int compareTo(JobTile o) {
-		if (this.distance < o.distance) {
-			return -1;
-		}
-		if (this.distance > o.distance) {
-			return 1;
-		}
-		return 0;
 	}
 }

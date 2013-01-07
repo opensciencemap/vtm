@@ -26,6 +26,7 @@ import java.util.Arrays;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.generator.JobTile;
+import org.oscim.generator.TileDistanceSort;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.VertexPool;
 import org.oscim.view.MapView;
@@ -471,10 +472,10 @@ public class TileManager {
 			t.vbo = null;
 		}
 
-		mTilesCount--;
 		QuadTree.remove(t);
-
 		t.state = STATE_NONE;
+
+		mTilesCount--;
 	}
 
 	private static void updateTileDistances(Object[] tiles, int size, MapPosition mapPosition) {
@@ -536,58 +537,38 @@ public class TileManager {
 
 	private static void limitCache(MapPosition mapPosition, int remove) {
 		MapTile[] tiles = mTiles;
+		int size = mTilesSize;
 
 		// remove tiles that were never loaded
-		for (int i = 0, size = mTilesSize; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			MapTile t = tiles[i];
 			if (t == null)
 				continue;
 
 			// make sure tile cannot be used by GL or MapWorker Thread
-			if (t.isLocked() || t.isActive()) {
+			if ((t.state != 0) || t.isLocked()) {
 				continue;
 			}
 			clearTile(t);
 			tiles[i] = null;
 			remove--;
-			size--;
 		}
 
-		if (remove > 5) {
-			int size = mTilesSize;
+		if (remove > 10) {
+			updateTileDistances(tiles, size, mapPosition);
 
-			if (size > mTilesCount) {
-				Log.d(TAG, "repack: " + size + " " + mTilesCount);
+			// double start, end;
+			// start = SystemClock.uptimeMillis();
 
-				int start = 0;
-				// get first position to shift
-				while (start < size && tiles[start] != null)
-					start++;
-				int space = start + 1;
-				for (int end = 0; end < size;) {
-					// get the number of slots to shift
-					while (space < size && tiles[space] == null)
-						space++;
-					// get the position of next free slots 
-					end = space;
-					while (end < size && tiles[end] != null)
-						end++;
-					// number of items to shift
-					int len = end - space;
+			TileDistanceSort.sort(tiles, 0, size);
 
-					if (len > 0) {
-						System.arraycopy(tiles, space, tiles, start, len);
-						start = start + len;
-						space = end;
-					}
-				}
-				Log.d(TAG, "repacked tiles to: " + start);
-				Arrays.fill(mTiles, start, mTilesSize, null);
-				mTilesSize = size = start;
-			}
+			//end = SystemClock.uptimeMillis();
+			//Log.d(TAG, "sort took " + (end - start) +
+			//	"limitCache: repacked: " + mTilesSize + " to: " + mTilesCount);
 
-			updateTileDistances(mTiles, size, mapPosition);
-			Arrays.sort(mTiles, 0, size);
+			// sorting also repacks the 'sparse' filled array
+			// so end of mTiles is at mTilesCount now
+			mTilesSize = size = mTilesCount;
 
 			for (int i = 1; i < remove; i++) {
 				MapTile t = tiles[size - i];

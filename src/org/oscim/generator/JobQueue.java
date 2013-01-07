@@ -17,8 +17,6 @@ package org.oscim.generator;
 import static org.oscim.generator.JobTile.STATE_LOADING;
 import static org.oscim.generator.JobTile.STATE_NONE;
 
-import java.util.Arrays;
-
 /**
  * A JobQueue keeps the list of pending jobs for a MapView and prioritizes them.
  */
@@ -71,8 +69,12 @@ public class JobQueue {
 		if (mJobs == null)
 			return null;
 
-		if (mCurrentJob == 0)
-			Arrays.sort(mJobs);
+		if (mCurrentJob == 0) {
+			//Arrays.sort(mJobs);
+			int len = mJobs.length;
+			if (len > 1)
+				TileDistanceSort.sort(mJobs, 0, len);
+		}
 
 		//return mPriorityQueue.poll();
 		JobTile t = mJobs[mCurrentJob];
