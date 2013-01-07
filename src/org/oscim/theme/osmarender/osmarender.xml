@@ -14,7 +14,8 @@
   <style-area name="farmland"            fill="#fff8bf" fade="11" />
   
   <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
-  <style-area name="forest|wood"         fill="#ebefe5" fade="7" blend="11" blend-fill="#d3dec8"/>
+  <!-- <style-area name="forest|wood"         fill="#ebefe5" fade="7" blend="11" blend-fill="#cee0bc"/>   d3dec8-->
+  <style-area name="forest|wood"         fill="#ebefe5" fade="7" blend="11" blend-fill="#c6dbb2"/> 
  
   <!-- grass|meadow|garden|grassland|scrub -->
  	<style-area name="greens"              fill="#e6edcc" fade="10" />
@@ -56,7 +57,7 @@
     
   <!-- track|footway|path|cycleway -->
   <style-line name="footway"             stroke="#c1bcb6" width="1.2" cap="butt" fixed="true"/>
-  <style-line name="footway:z16"         from="footway" width="-1.0" fixed="false" fade="-1"/>
+  <!-- <style-line name="footway:z16"         from="footway" width="-0.95" fixed="false" fade="-1"/>-->
   <style-line name="footway:z17"         stroke="#faf8f5" width="0.3"/>
   
   <!-- de: ein Weg der für Reiter vorgeshen ist.. -->
@@ -73,9 +74,10 @@
   <style-line name="aeroway:runway"      stroke="#c8ccbe" width="1.8" cap="butt" />
   
   <!-- <style-line name="building"            stroke="#c9c3c1" width="1.0" fixed="true" cap="butt" fade="15"/>  -->
-  <style-line name="building"            stroke="#d0cec8" width="1.0" fixed="true" cap="butt" fade="15"/> 
-  <style-area name="building"            fill="#e9e6e3" fade="15"/>
-  
+  <!-- <style-line name="building"            stroke="#d0cec8" width="1.0" fixed="true" cap="butt" fade="15"/> 
+  <style-area name="building"            fill="#e9e6e3" fade="15"/>-->
+   <style-line name="building"            stroke="#c4c3c2" width="1.0" fixed="true" cap="butt" fade="15"/> 
+  <style-area name="building"            fill="#eae8e6" fade="15"/>
   <!-- ways -->
   <rule e="way" k="*" v="*" >
 
@@ -349,13 +351,13 @@
              <use-line name="steps"/>
              <use-outline name="0"/>
            </rule>
-           <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16">
+           <!-- <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16">
              <use-line name="footway:z16"/>
-           </rule>
+           </rule>-->
          </rule>
 
          <rule e="way" k="*" v="*" zoom-min="14">
-           <rule e="way" k="*" v="track|footway|path|cycleway" zoom-max="15">
+           <rule e="way" k="*" v="track|footway|path|cycleway" zoom-max="16">
             <use-line name="footway"/>
            </rule>
 
@@ -572,9 +574,9 @@
 	              <use-line name="steps"/>
 	              <use-outline name="2"/>
 	            </rule>
-	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16" zoom-max="16">
+	            <!-- <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16" zoom-max="16">
 	              <use-line name="footway:z16"/>
-	            </rule>
+	            </rule>-->
 	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="17">
 	              <use-line name="footway:z17"/>
 	              <use-outline name="1"/>
@@ -582,7 +584,7 @@
 	          </rule>
 	
 	          <rule e="way" k="*" v="*" zoom-min="14">
-	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-max="15">
+	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-max="16">
 	              <use-line name="footway"/>
 	            </rule>
 	
@@ -671,11 +673,11 @@
 	              <use-line name="steps"/>
 	              <use-outline name="bridge"/>
 	            </rule>
-	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16" zoom-max="16">
+	            <!-- <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16" zoom-max="16">
 	              <use-line name="footway:z16"/>
-	            </rule>
+	            </rule>-->
 	            
-	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="17">
+	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16">
 	              <use-line name="footway:z17" cap="butt"/>
 	              <use-outline name="bridge"/>
 	            </rule>
