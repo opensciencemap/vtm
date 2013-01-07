@@ -406,7 +406,6 @@ public class BuildingOverlay extends RenderOverlay {
 		GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndiceCnt[1],
 				GLES20.GL_UNSIGNED_SHORT, mIndiceCnt[0] * 2);
 
-		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
