@@ -78,11 +78,10 @@ public class ExtrusionLayer extends Layer {
 		boolean simple = true;
 		int startVertex = mNumVertices;
 
-		// just a guess to make it look ok
+		// just a guessing to make it look ok
 		if (height == 0)
-			height = 320;
-		else
-			height *= 30;
+			height = 10;
+		height = (int) (height * -Math.log(height / 100000f)) * 4;
 
 		int length = 0;
 		for (int ipos = 0, ppos = 0, n = index.length; ipos < n; ipos++, ppos += length) {
