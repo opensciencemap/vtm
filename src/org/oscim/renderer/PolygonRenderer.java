@@ -210,6 +210,8 @@ public final class PolygonRenderer {
 			mStart = mCount;
 		}
 
+		GLState.test(drawClipped, true);
+
 		Layer l = layer;
 
 		for (; l != null && l.type == Layer.POLYGON; l = l.next) {
@@ -230,8 +232,8 @@ public final class PolygonRenderer {
 				glStencilMask(0xFF);
 				glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 
-				if (drawClipped) {
-					GLState.test(true, true);
+				if (first && drawClipped) {
+					//GLState.test(true, true);
 					// draw clip-region into depth buffer:
 					// this is used for lines and polygons
 
@@ -245,7 +247,7 @@ public final class PolygonRenderer {
 
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-				if (drawClipped) {
+				if (first && drawClipped) {
 					first = false;
 					// do not modify depth buffer anymore
 					glDepthMask(false);
@@ -258,7 +260,7 @@ public final class PolygonRenderer {
 			}
 
 			// no need for depth test while drawing stencil
-			GLState.test(false, true);
+			//GLState.test(false, true);
 
 			mFillPolys[mCount] = pl;
 
@@ -270,8 +272,8 @@ public final class PolygonRenderer {
 			// draw up to 8 layers into stencil buffer
 			if (mCount == STENCIL_BITS) {
 				/* only draw where nothing was drawn yet */
-				if (drawClipped)
-					GLState.test(true, true);
+				//if (drawClipped)
+				//	GLState.test(true, true);
 
 				fillPolygons(zoom, scale);
 				mCount = 0;
@@ -281,8 +283,8 @@ public final class PolygonRenderer {
 
 		if (mCount > 0) {
 			/* only draw where nothing was drawn yet */
-			if (drawClipped)
-				GLState.test(true, true);
+			//if (drawClipped)
+			//	GLState.test(true, true);
 
 			fillPolygons(zoom, scale);
 		}
