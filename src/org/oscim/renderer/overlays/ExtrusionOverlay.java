@@ -98,7 +98,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		mTileSet = TileManager.getActiveTiles(mTileSet);
 		MapTile[] tiles = mTileSet.tiles;
 		// FIXME just release tiles in this case
-		if (mAlpha == 0) {
+		if (mAlpha == 0 || curPos.zoomLevel < 16) {
 			isReady = false;
 			return;
 		}
@@ -170,8 +170,6 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 		float div = FastMath.pow(tiles[0].zoomLevel - pos.zoomLevel);
 
-		int depthScale = 1;
-
 		int shaderMode = 1;
 		int uExtAlpha = hExtrusionAlpha[shaderMode];
 		int uExtColor = hExtrusionColor[shaderMode];
@@ -220,16 +218,17 @@ public class ExtrusionOverlay extends RenderOverlay {
 			}
 			return;
 		}
+		GLES20.glDepthMask(true);
 		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
 
 		GLState.test(true, false);
+
 		GLES20.glUseProgram(extrusionProgram[shaderMode]);
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glCullFace(GLES20.GL_FRONT);
 		GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 		GLES20.glDepthFunc(GLES20.GL_LESS);
-		GLES20.glDepthMask(true);
 		GLES20.glColorMask(false, false, false, false);
 		GLES20.glUniform1i(uExtMode, 0);
 		GLES20.glUniform4fv(uExtColor, 4, mColor, 0);
@@ -239,7 +238,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		for (int i = 0; i < mTileCnt; i++) {
 			ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
 
-			GLES20.glPolygonOffset(depthScale, GLRenderer.depthOffset(tiles[i]));
+			GLES20.glPolygonOffset(1, GLRenderer.depthOffset(tiles[i]));
 
 			setMatrix(pos, mv, proj, tiles[i], div);
 			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
@@ -264,7 +263,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		for (int i = 0; i < mTileCnt; i++) {
 			ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
 
-			GLES20.glPolygonOffset(depthScale, GLRenderer.depthOffset(tiles[i]));
+			GLES20.glPolygonOffset(1, GLRenderer.depthOffset(tiles[i]));
 
 			setMatrix(pos, mv, proj, tiles[i], div);
 			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
@@ -305,7 +304,6 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
 	}
 
 	private static void setMatrix(MapPosition mapPosition, float[] matrix, float[] proj,
@@ -336,7 +334,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	private final float _r = 0xea;
 	private final float _g = 0xe8;
 	private final float _b = 0xe6;
-	private final float _o = 50;
+	private final float _o = 55;
 	private final float _s = 16;
 	private final float _l = 8;
 	private float mAlpha = 1;
