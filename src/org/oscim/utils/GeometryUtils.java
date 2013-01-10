@@ -185,4 +185,43 @@ public final class GeometryUtils {
 		return Math.abs((P.x - A.x) * (B.y - A.y) - (P.y - A.y) * (B.x - A.x)) / normalLength;
 	}
 
+	public static final class Point2D {
+		public double x;
+		public double y;
+	}
+
+	// from libosmscout-render
+	public static byte calcLinesIntersect(
+			double ax1, double ay1,
+			double ax2, double ay2,
+			double bx1, double by1,
+			double bx2, double by2,
+			GeometryUtils.Point2D point)
+	{
+		double ua_numr = (bx2 - bx1) * (ay1 - by1) - (by2 - by1) * (ax1 - bx1);
+		double ub_numr = (ax2 - ax1) * (ay1 - by1) - (ay2 - ay1) * (ax1 - bx1);
+		double denr = (by2 - by1) * (ax2 - ax1) - (bx2 - bx1) * (ay2 - ay1);
+
+		if (denr == 0.0)
+		{
+			// lines are coincident
+			if (ua_numr == 0.0 && ub_numr == 0.0)
+				return 2; //XSEC_COINCIDENT;
+
+			// lines are parallel
+			return 3; //XSEC_PARALLEL;   
+		}
+
+		double ua = ua_numr / denr;
+		double ub = ub_numr / denr;
+
+		//if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
+		{
+			point.x = ax1 + ua * (ax2 - ax1);
+			point.y = ay1 + ua * (ay2 - ay1);
+			return 0; //XSEC_TRUE;
+		}
+
+		//return 1; //XSEC_FALSE;
+	}
 }
