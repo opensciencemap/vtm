@@ -68,7 +68,8 @@ public class BaseLayer {
 		}
 
 		GLES20.glDisable(GL_POLYGON_OFFSET_FILL);
-
+		//GLES20.glFinish()
+		//Log.d(TAG, "building took " + (end - start));
 		mDrawSerial++;
 	}
 
@@ -90,18 +91,18 @@ public class BaseLayer {
 		if (tile.layers == null)
 			return;
 
-		GLES20.glPolygonOffset(0, GLRenderer.depthOffset(tile));
+		// set depth offset (used for clipping to tile boundaries)
+		GLES20.glPolygonOffset(-1, -GLRenderer.depthOffset(tile));
 
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
 
 		boolean clipped = false;
-		int simpleShader = 0; // mRotate ? 0 : 1;
+		int simpleShader = (pos.tilt == 0 ? 1 : 0);
 
 		for (Layer l = tile.layers.layers; l != null;) {
 
 			switch (l.type) {
 				case Layer.POLYGON:
-
 					GLES20.glDisable(GL_BLEND);
 					l = PolygonRenderer.draw(pos, l, mvp, !clipped, true);
 					clipped = true;
@@ -114,6 +115,7 @@ public class BaseLayer {
 					}
 					// clip lines to quad in depth buffer
 					GLState.test(true, false);
+
 					GLES20.glEnable(GL_BLEND);
 					l = LineRenderer.draw(pos, l, mvp, div, simpleShader,
 							tile.layers.lineOffset);
@@ -138,7 +140,6 @@ public class BaseLayer {
 		float y = (float) (tile.pixelY - pos.y * div);
 		float scale = pos.scale / div;
 
-		//Matrix.setIdentityM(matrix, 0);
 		for (int i = 0; i < 16; i++)
 			matrix[i] = 0;
 
@@ -153,8 +154,6 @@ public class BaseLayer {
 		matrix[10] = 1;
 		matrix[15] = 1;
 
-		//	Matrix.multiplyMM(matrix, 0, pos.viewMatrix, 0, matrix, 0);
-		//	Matrix.multiplyMM(matrix, 0, mfProjMatrix, 0, matrix, 0);
 		Matrix.multiplyMM(matrix, 0, mVPMatrix, 0, matrix, 0);
 	}
 

@@ -494,7 +494,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 
 		if (debugView) {
-			float mm = 0.5f;
+			GLState.test(false, false);
+
+			float mm = 0.25f; // * mHeight;
 			float min = -mm;
 			float max = mm;
 			float ymax = mm * mHeight / mWidth;
@@ -511,10 +513,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 			pos.zoomLevel = -1;
 			mMapViewPosition.getMapPosition(pos, mDebugCoords);
+
 			Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0,
 					pos.viewMatrix, 0);
 
 			PolygonRenderer.debugDraw(mMVPMatrix, mDebugCoords, 1);
+
 		}
 
 		if (GlUtils.checkGlOutOfMemory("finish")) {
@@ -524,7 +528,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	public static int depthOffset(MapTile t) {
-		return ((t.tileX % 4) + (t.tileY % 4 * 4) * 2) * 20;
+		return ((t.tileX % 4) + (t.tileY % 4 * 4) + 1);
 	}
 
 	@Override
@@ -547,16 +551,16 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				MapViewPosition.VIEW_FAR);
 
 		Matrix.setIdentityM(mTmpMatrix, 0);
-		Matrix.translateM(mTmpMatrix, 0, 0, 0, -MapViewPosition.VIEW_DISTANCE * 2);
+		Matrix.translateM(mTmpMatrix, 0, 0, 0, -MapViewPosition.VIEW_DISTANCE);
 		Matrix.multiplyMM(mProjMatrix, 0, mProjMatrix, 0, mTmpMatrix, 0);
 
-		if (debugView) {
-			// modify this to scale only the view, to see better which tiles are
-			// rendered
-			Matrix.setIdentityM(mMVPMatrix, 0);
-			Matrix.scaleM(mMVPMatrix, 0, 0.5f, 0.5f, 1);
-			Matrix.multiplyMM(mProjMatrix, 0, mMVPMatrix, 0, mProjMatrix, 0);
-		}
+		//		if (debugView) {
+		//			// modify this to scale only the view, to see better which tiles are
+		//			// rendered
+		//			Matrix.setIdentityM(mMVPMatrix, 0);
+		//			Matrix.scaleM(mMVPMatrix, 0, 0.75f, 0.75f, 1);
+		//			Matrix.multiplyMM(mProjMatrix, 0, mMVPMatrix, 0, mProjMatrix, 0);
+		//		}
 
 		BaseLayer.setProjection(mProjMatrix);
 
@@ -578,16 +582,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		int numVBO = (CACHE_TILES + (numTiles * 2));
 		BufferObject.init(numVBO);
 
-		// Set up textures
-		// TextRenderer.setup(numTiles);
-
 		if (mClearColor != null)
 			mUpdateColor = true;
 
 		GLState.init();
-
-		//vertexArray[0] = false;
-		//vertexArray[1] = false;
 
 		mMapView.redrawMap();
 	}
