@@ -33,7 +33,7 @@ import android.os.SystemClock;
 
 public class TextOverlay extends RenderOverlay {
 
-	private TileSet tiles;
+	private TileSet mTiles;
 	private LabelThread mThread;
 
 	private MapPosition mWorkPos;
@@ -47,7 +47,10 @@ public class TextOverlay extends RenderOverlay {
 
 		@Override
 		protected void doWork() {
-			SystemClock.sleep(500);
+			SystemClock.sleep(250);
+			if (!mRun)
+				return;
+
 			mRun = false;
 			updateLabels();
 			mMapView.redrawMap();
@@ -73,10 +76,10 @@ public class TextOverlay extends RenderOverlay {
 	}
 
 	void updateLabels() {
-		tiles = TileManager.getActiveTiles(tiles);
+		mTiles = TileManager.getActiveTiles(mTiles);
 
 		// Log.d("...", "relabel " + mRerun + " " + x + " " + y);
-		if (tiles.cnt == 0)
+		if (mTiles.cnt == 0)
 			return;
 
 		mMapView.getMapViewPosition().getMapPosition(mWorkPos, null);
@@ -86,11 +89,12 @@ public class TextOverlay extends RenderOverlay {
 		if (tl == null)
 			tl = new TextLayer();
 
-		// tiles might be from another zoomlevel than the current:
-		// this scales MapPosition to the zoomlevel of tiles...
+		// mTiles might be from another zoomlevel than the current:
+		// this scales MapPosition to the zoomlevel of mTiles...
 		// TODO create a helper function in MapPosition
-		int diff = tiles.tiles[0].zoomLevel - mWorkPos.zoomLevel;
+		int diff = mTiles.tiles[0].zoomLevel - mWorkPos.zoomLevel;
 
+		// only relabel when tiles belong to the current zoomlevel or its parent
 		if (diff > 1 || diff < -2) {
 			synchronized (this) {
 				mNewLayer = tl;
@@ -107,14 +111,20 @@ public class TextOverlay extends RenderOverlay {
 
 		int maxx = Tile.TILE_SIZE << (mWorkPos.zoomLevel - 1);
 
+		MapTile[] tiles = mTiles.tiles;
+
+		// order tiles by x/y coordinate to make placement more consistent 
+		// while map position changes
+		//Arrays.sort(tiles, 0, mTiles.cnt, TileSet.coordComparator);
+
 		// TODO more sophisticated placement :)
-		for (int i = 0, n = tiles.cnt; i < n; i++) {
-			MapTile t = tiles.tiles[i];
+		for (int i = 0, n = mTiles.cnt; i < n; i++) {
+			MapTile t = tiles[i];
 			if (!t.isVisible)
 				continue;
 
-			float dx = (float) ((t.pixelX - mWorkPos.x) * scale);
-			float dy = (float) ((t.pixelY - mWorkPos.y) * scale);
+			float dx = (float) (t.pixelX - mWorkPos.x);
+			float dy = (float) (t.pixelY - mWorkPos.y);
 
 			// flip around date-line
 			if (dx > maxx) {
@@ -122,6 +132,8 @@ public class TextOverlay extends RenderOverlay {
 			} else if (dx < -maxx) {
 				dx = dx + maxx * 2;
 			}
+			dx *= scale;
+			dy *= scale;
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 
@@ -138,7 +150,7 @@ public class TextOverlay extends RenderOverlay {
 					int tw = (int) (ti2.width / 2);
 					int th = (int) (ti2.text.fontHeight / 2);
 
-					for (TextItem lp = tl.labels; lp != null; lp = lp.next) {
+					for (TextItem lp = tl.labels; lp != null;) {
 						int px = (int) (lp.x);
 						int py = (int) (lp.y);
 						int ph = (int) (lp.text.fontHeight / 2);
@@ -148,9 +160,11 @@ public class TextOverlay extends RenderOverlay {
 								&& (px - pw) < (tx + tw)
 								&& (ty - th) < (py + ph)
 								&& (py - ph) < (ty + th)) {
+
 							overlaps = true;
 							break;
 						}
+						lp = lp.next;
 					}
 				} else {
 
@@ -178,7 +192,7 @@ public class TextOverlay extends RenderOverlay {
 						if (GeometryUtils.lineIntersect(ti2.x1, ti2.y1, ti2.x2, ti2.y2,
 								lp.x1, lp.y1, lp.x2, lp.y2)) {
 							// just to make it more deterministic
-							if (lp.width < ti2.width) {
+							if (lp.width > ti2.width) {
 								TextItem tmp = lp;
 								lp = lp.next;
 
@@ -197,7 +211,7 @@ public class TextOverlay extends RenderOverlay {
 								&& (lp.y1) < (ti2.y2)) {
 
 							// just to make it more deterministic
-							if (lp.width < ti2.width) {
+							if (lp.width > ti2.width) {
 								TextItem tmp = lp;
 								lp = lp.next;
 
@@ -244,6 +258,8 @@ public class TextOverlay extends RenderOverlay {
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged) {
 		// Log.d("...", "update " + tilesChanged + " " + positionChanged);
+		if (mHolding)
+			return;
 
 		if (mNewLayer != null) {
 
@@ -301,5 +317,19 @@ public class TextOverlay extends RenderOverlay {
 		matrix[5] = scale;
 
 		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
+	}
+
+	private boolean mHolding;
+
+	public synchronized void hold(boolean enable) {
+		//		mHolding = enable;
+		//		if (!enable && !mRun) {
+		//			mRun = true;
+		//			synchronized (mThread) {
+		//				mThread.notify();
+		//			}
+		//		} else {
+		//			mRun = false;
+		//		}
 	}
 }
