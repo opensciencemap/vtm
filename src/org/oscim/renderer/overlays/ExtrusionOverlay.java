@@ -70,12 +70,12 @@ public class ExtrusionOverlay extends RenderOverlay {
 		if (!initialized) {
 			initialized = true;
 
-			for (int i = 0; i < 2; i++) {
+			for (int i = 1; i < 2; i++) {
 				// Set up the program for rendering extrusions
 				extrusionProgram[i] = GlUtils.createProgram(extrusionVertexShader[i],
 						extrusionFragmentShader);
 				if (extrusionProgram[i] == 0) {
-					Log.e(TAG, "Could not create extrusion shader program.");
+					Log.e(TAG, "Could not create extrusion shader program. " + i);
 					return;
 				}
 				hExtrusionMatrix[i] = GLES20.glGetUniformLocation(extrusionProgram[i], "u_mvp");
@@ -238,7 +238,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 		for (int i = 0; i < mTileCnt; i++) {
 			ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
 
-			GLES20.glPolygonOffset(1, GLRenderer.depthOffset(tiles[i]));
+			GLES20.glPolygonOffset(2, GLRenderer.depthOffset(tiles[i]) * 4);
+			//GLES20.glPolygonOffset(2, i * 4 + 10);
 
 			setMatrix(pos, mv, proj, tiles[i], div);
 			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
@@ -258,12 +259,13 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
 		GLES20.glColorMask(true, true, true, true);
 		GLES20.glDepthMask(false);
-		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 
 		for (int i = 0; i < mTileCnt; i++) {
 			ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
+			GLES20.glDepthFunc(GLES20.GL_EQUAL);
 
-			GLES20.glPolygonOffset(1, GLRenderer.depthOffset(tiles[i]));
+			GLES20.glPolygonOffset(2, GLRenderer.depthOffset(tiles[i]) * 4);
+			//GLES20.glPolygonOffset(2, i * 4 + 10);
 
 			setMatrix(pos, mv, proj, tiles[i], div);
 			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
@@ -291,6 +293,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 			GLES20.glUniform1i(uExtMode, 2);
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[1],
 					GLES20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
+
+			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 
 			GLES20.glUniform1i(uExtMode, 3);
 			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
@@ -331,12 +335,12 @@ public class ExtrusionOverlay extends RenderOverlay {
 	}
 
 	private final float _a = 0.8f;
-	private final float _r = 0xea;
+	private final float _r = 0xe9;
 	private final float _g = 0xe8;
 	private final float _b = 0xe6;
 	private final float _o = 55;
-	private final float _s = 16;
-	private final float _l = 8;
+	private final float _s = -10;
+	private final float _l = 16;
 	private float mAlpha = 1;
 	private final float[] mColor = {
 			// roof color
@@ -414,6 +418,42 @@ public class ExtrusionOverlay extends RenderOverlay {
 					+ "    color = u_color[0];"
 					+ "  else {"
 					//    decrease contrast with distance
+					+ "   float z = (0.8 + gl_Position.z * 0.2);"
+					+ "   if (u_mode == 1){"
+					//     sides 1 - use 0xff00
+					//     scale direction to -0.5<>0.5 
+					+ "    float dir = abs(a_light.y / ff - 0.5);"
+					+ "    color = u_color[1] * z;"
+					+ "    color.rgb *= (0.7 + dir * 0.4) * z;"
+					+ "  } else if (u_mode == 2){"
+					//     sides 2 - use 0x00ff
+					+ "    float dir = abs(a_light.x / ff - 0.5);"
+					+ "    color = u_color[2] * z;"
+					+ "    color.rgb *= (0.7 + dir * 0.4) * z;"
+					+ "  } else"
+					//     outline
+					+ "    color = u_color[3] * z;"
+					+ "}}",
+			"precision mediump float;"
+					+ "uniform mat4 u_mvp;"
+					+ "uniform vec4 u_color[4];"
+					+ "uniform int u_mode;"
+					+ "uniform float u_alpha;"
+					+ "attribute vec4 a_pos;"
+					+ "attribute vec2 a_light;"
+					+ "varying vec4 color;"
+					+ "varying float z;"
+					+ "const float ff = 255.0;"
+					+ "float c_alpha = 0.8;"
+					+ "void main() {"
+					//   change height by u_alpha
+					+ "  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);"
+					+ "  z = gl_Position.z;"
+					+ "  if (u_mode == 0)"
+					//     roof / depth pass
+					+ "    color = u_color[0];"
+					+ "  else {"
+					//    decrease contrast with distance
 					+ "   float z = (0.96 + gl_Position.z * 0.04);"
 					+ "   if (u_mode == 1){"
 					//     sides 1 - use 0xff00
@@ -438,6 +478,17 @@ public class ExtrusionOverlay extends RenderOverlay {
 			+ "void main() {"
 			+ "  gl_FragColor = color;"
 			+ "}";
+
+	//	final static String extrusionFragmentShader = ""
+	//			+ "precision highp float;"
+	//			+ "uniform vec4 u_color;"
+	//			+ "varying float z;"
+	//			+ "void main() {"
+	//			+ "if (z < 0.0)"
+	//			+ "  gl_FragColor = vec4(z * -1.0, 0.0, 0.0, 1.0)*0.8;"
+	//			+ "else"
+	//			+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0)*0.8;"
+	//			+ "}";
 
 	public void setAlpha(float a) {
 		mAlpha = a;
