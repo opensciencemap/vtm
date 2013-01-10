@@ -17,13 +17,40 @@ package org.oscim.overlay;
 import org.oscim.renderer.overlays.TextOverlay;
 import org.oscim.view.MapView;
 
+import android.util.Log;
+import android.view.MotionEvent;
+
 /**
  * @author Hannes Janetzek
  */
 public class LabelingOverlay extends Overlay {
+	private final static String TAG = LabelingOverlay.class.getName();
+	final TextOverlay mTextLayer;
 
 	public LabelingOverlay(MapView mapView) {
 		super();
-		mLayer = new TextOverlay(mapView);
+		mTextLayer = new TextOverlay(mapView);
+		mLayer = mTextLayer;
+	}
+
+	private int multi;
+
+	@Override
+	public boolean onTouchEvent(MotionEvent e, MapView mapView) {
+		int action = e.getAction() & MotionEvent.ACTION_MASK;
+		if (action == MotionEvent.ACTION_POINTER_DOWN) {
+			multi++;
+			mTextLayer.hold(true);
+		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+			multi--;
+			if (multi == 0)
+				mTextLayer.hold(false);
+		} else if (action == MotionEvent.ACTION_CANCEL) {
+			multi = 0;
+			Log.d(TAG, "cancel " + multi);
+			mTextLayer.hold(false);
+		}
+
+		return false;
 	}
 }
