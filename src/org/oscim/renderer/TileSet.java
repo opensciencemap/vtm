@@ -14,6 +14,8 @@
  */
 package org.oscim.renderer;
 
+import java.util.Comparator;
+
 /**
  * use with TileManager.getActiveTiles(TileSet) to get the current tiles. tiles
  * are locked to not be modifed until getActiveTiles passes them back on a
@@ -30,5 +32,27 @@ public final class TileSet {
 
 	TileSet(int numTiles) {
 		tiles = new MapTile[numTiles];
+	}
+
+	public static Comparator<MapTile> coordComparator = new CoordComparator();
+
+	public static class CoordComparator implements Comparator<MapTile> {
+
+		@Override
+		public int compare(MapTile lhs, MapTile rhs) {
+			if (lhs.tileX == rhs.tileX) {
+				if (lhs.tileY == rhs.tileY)
+					return 0;
+
+				if (lhs.tileY < rhs.tileY)
+					return 1;
+
+				return -1;
+			}
+			if (lhs.tileX < rhs.tileX)
+				return 1;
+
+			return -1;
+		}
 	}
 }

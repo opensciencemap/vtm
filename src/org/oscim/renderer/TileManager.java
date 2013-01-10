@@ -324,18 +324,15 @@ public class TileManager {
 
 		boolean changed = (mNewTiles.cnt != mCurrentTiles.cnt);
 
-		for (int i = 0, n = mNewTiles.cnt; i < n && !changed; i++) {
-			MapTile t = newTiles[i];
-			boolean found = false;
+		Arrays.sort(mNewTiles.tiles, 0, mNewTiles.cnt, TileSet.coordComparator);
 
-			for (int j = 0, m = mCurrentTiles.cnt; j < m; j++) {
-				if (t == curTiles[j]) {
-					found = true;
+		if (!changed) {
+			for (int i = 0, n = mNewTiles.cnt; i < n; i++) {
+				if (newTiles[i] != curTiles[i]) {
+					changed = true;
 					break;
 				}
 			}
-			if (!found)
-				changed = true;
 		}
 
 		if (changed) {
