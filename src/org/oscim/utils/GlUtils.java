@@ -230,4 +230,15 @@ public class GlUtils {
 		matrix[5] = sy;
 		matrix[10] = sz;
 	}
+
+	public static void addOffsetM(float[] matrix, int delta) {
+		// from http://www.mathfor3dgameprogramming.com/code/Listing9.1.cpp
+		//		float n = MapViewPosition.VIEW_NEAR;
+		//		float f = MapViewPosition.VIEW_FAR;
+		//		float pz = 1;
+		//		float epsilon = -2.0f * f * n * delta / ((f + n) * pz * (pz + delta));
+		float epsilon = 1.0f / (1 << 11);
+
+		matrix[10] *= 1.0f + epsilon * delta;
+	}
 }

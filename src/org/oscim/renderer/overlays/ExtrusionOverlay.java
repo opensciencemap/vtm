@@ -161,6 +161,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 	@Override
 	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
+		// TODO one could render in one pass to texture and then draw the texture
+		// with alpha... might be faster.
 
 		Matrix.multiplyMM(mVPMatrix, 0, proj, 0, pos.viewMatrix, 0);
 		proj = mVPMatrix;
@@ -189,7 +191,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			for (int i = 0; i < mTileCnt; i++) {
 				ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
 
-				setMatrix(pos, mv, proj, tiles[i], div);
+				setMatrix(pos, mv, proj, tiles[i], div, 0);
 				GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
 
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
@@ -226,7 +228,6 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glCullFace(GLES20.GL_FRONT);
-		GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 		GLES20.glColorMask(false, false, false, false);
 		GLES20.glUniform1i(uExtMode, 0);
@@ -237,11 +238,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
 			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
-			int add = GLRenderer.depthOffset(t);
-			GLES20.glPolygonOffset(2, add);
-			//GLES20.glPolygonOffset(1, i * 4 + 10);
-
-			setMatrix(pos, mv, proj, t, div);
+			int d = GLRenderer.depthOffset(t) * 10;
+			setMatrix(pos, mv, proj, t, div, d);
 			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
 
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
@@ -263,12 +261,10 @@ public class ExtrusionOverlay extends RenderOverlay {
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
 			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
-			GLES20.glDepthFunc(GLES20.GL_EQUAL);
-			int add = GLRenderer.depthOffset(t);
-			GLES20.glPolygonOffset(2, add);
-			//GLES20.glPolygonOffset(1, i * 4 + 10);
 
-			setMatrix(pos, mv, proj, t, div);
+			GLES20.glDepthFunc(GLES20.GL_EQUAL);
+			int d = GLRenderer.depthOffset(t) * 10;
+			setMatrix(pos, mv, proj, t, div, d);
 			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
 
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
@@ -295,7 +291,11 @@ public class ExtrusionOverlay extends RenderOverlay {
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[1],
 					GLES20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
+			// drawing gl_lines with the same coordinates does not result in 
+			// same depth values as polygons, so add offset and draw gl_lequal:
 			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+			GlUtils.addOffsetM(mv, 1000);
+			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
 
 			GLES20.glUniform1i(uExtMode, 3);
 			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
@@ -307,12 +307,11 @@ public class ExtrusionOverlay extends RenderOverlay {
 		}
 
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
-		GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
 	private static void setMatrix(MapPosition mapPosition, float[] matrix, float[] proj,
-			MapTile tile, float div) {
+			MapTile tile, float div, int delta) {
 
 		float x = (float) (tile.pixelX - mapPosition.x * div);
 		float y = (float) (tile.pixelY - mapPosition.y * div);
@@ -323,6 +322,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 		matrix[10] = scale / (1000f * GLRenderer.COORD_MULTIPLIER);
 
 		Matrix.multiplyMM(matrix, 0, proj, 0, matrix, 0);
+
+		GlUtils.addOffsetM(matrix, delta);
 	}
 
 	private final float _a = 0.8f;
@@ -353,6 +354,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			(_r - _o) / 255,
 			(_g - _o) / 255,
 			(_b - _o) / 255,
+			//			1, 0, 0,
 			1.0f,
 	};
 
@@ -441,9 +443,9 @@ public class ExtrusionOverlay extends RenderOverlay {
 	//			+ "varying float z;"
 	//			+ "void main() {"
 	//			+ "if (z < 0.0)"
-	//			+ "  gl_FragColor = vec4(z * -1.0, 0.0, 0.0, 1.0)*0.8;"
+	//			+ "  gl_FragColor = vec4(z * -1.0, 0.0, 0.0, 1.0);"
 	//			+ "else"
-	//			+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0)*0.8;"
+	//			+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0);"
 	//			+ "}";
 
 	public void setAlpha(float a) {
