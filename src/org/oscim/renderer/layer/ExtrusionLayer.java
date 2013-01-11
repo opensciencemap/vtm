@@ -401,6 +401,10 @@ public class ExtrusionLayer extends Layer {
 	protected void clear() {
 		if (compiled) {
 			GLES20.glDeleteBuffers(2, mVboIds, 0);
+		} else {
+			VertexPool.release(mVertices);
+			for (VertexPoolItem i : mIndices)
+				VertexPool.release(i);
 		}
 	}
 
