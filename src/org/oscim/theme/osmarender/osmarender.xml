@@ -2,14 +2,14 @@
 <rendertheme xmlns="http://mapsforge.org/renderTheme"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://mapsforge.org/renderTheme ../renderTheme.xsd"
-             version="1" map-background="#fcfcfa">
+             version="1" map-background="#fdfdfc">
 
   <style-text name="road" k="name"    font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
   <style-text name="major-road" k="name"   font-style="bold" font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
   
   <style-area name="residential"         fill="#f0eee8" fade="10"/>
   
-  <style-area name="railway|industrial"  fill="#f2eeef" fade="10"/>
+  <style-area name="railway|industrial"  fill="#e6e1e4" fade="10"/>
   <!-- "#f0fae7" mint green  -->
   <style-area name="farmland"            fill="#fff8bf" fade="11" />
   
@@ -77,17 +77,28 @@
   <!-- <style-line name="building"            stroke="#d0cec8" width="1.0" fixed="true" cap="butt" fade="15"/> 
   <style-area name="building"            fill="#e9e6e3" fade="15"/>-->
    <style-line name="building"            stroke="#c4c3c2" width="1.0" fixed="true" cap="butt" fade="15"/> 
-  <style-area name="building"            fill="#eae8e6" fade="15"/>
-  <!-- ways -->
+  <!-- <style-area name="building"            fill="#eae8e6" fade="15"/>-->
+     <style-area name="building"            fill="#f2f0ed" fade="15"/>
+   <!-- ways -->
   <rule e="way" k="*" v="*" >
 
-    <rule e="way" k="natural"  v="grassland|scrub" zoom-min="10">
-      <use-area name="greens"/>
-    </rule>
+  
       
     <!-- landuse base -->      
     <rule e="way" k="landuse" v="*">
-     
+     <rule e="way" k="*" v="urban">
+        <area fill="#f4f4f2" />
+      </rule>
+      <rule e="way" k="*" v="residential">
+        <use-area name="residential" />
+      </rule>
+     </rule>
+    
+    <rule e="way" k="natural"  v="grassland|scrub" zoom-min="10">
+      <use-area name="greens"/>
+    </rule>
+    
+     <rule e="way" k="landuse" v="*">
       <rule e="way" k="*"  zoom-min="10" v="farmland|farm|orchard|vineyard|greenhouse_horticulture|plant_nursery">
         <use-area name="farmland"/>
       </rule>
@@ -96,10 +107,12 @@
         <use-area name="quarry"/>
       </rule>
        
-      <rule e="way" k="*" v="residential|farmyard|retail|commercial|industrial;retail">
-        <use-area name="residential" />
-      </rule>
+     
 
+      <!-- <rule e="way" k="*" v="farmyard|retail|commercial|industrial;retail">
+        <use-area name="residential" />
+      </rule>-->
+      
       <rule e="way" k="*" v="industrial|railway"> 
          <use-area name ="railway|industrial"/>
       </rule>
