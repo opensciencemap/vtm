@@ -29,14 +29,14 @@ public class VertexPool {
 		pool = null;
 	}
 
-	//	public static VertexPoolItem get(VertexPoolItem prev) {
-	//		VertexPoolItem it = get();
-	//		if (prev != null) {
-	//			prev.next = it;
-	//			prev.used = VertexPoolItem.SIZE;
-	//		}
-	//		return it;
-	//	}
+	public static VertexPoolItem getNext(VertexPoolItem prev) {
+		VertexPoolItem it = get();
+		if (prev != null) {
+			prev.next = it;
+			prev.used = VertexPoolItem.SIZE;
+		}
+		return it;
+	}
 
 	public static synchronized VertexPoolItem get() {
 
