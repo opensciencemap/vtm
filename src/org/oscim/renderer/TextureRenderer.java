@@ -44,8 +44,8 @@ public final class TextureRenderer {
 	private final static int MAX_ITEMS = 50;
 
 	static void init() {
-		mTextureProgram = GlUtils.createProgram(Shaders.textVertexShader,
-				Shaders.textFragmentShader);
+		mTextureProgram = GlUtils.createProgram(textVertexShader,
+				textFragmentShader);
 
 		hTextureMVMatrix = GLES20.glGetUniformLocation(mTextureProgram, "u_mv");
 		hTextureProjMatrix = GLES20.glGetUniformLocation(mTextureProgram, "u_proj");
@@ -144,4 +144,36 @@ public final class TextureRenderer {
 
 		return layer.next;
 	}
+
+	private final static String textVertexShader = ""
+			+ "precision highp float; "
+			+ "attribute vec4 vertex;"
+			+ "attribute vec2 tex_coord;"
+			+ "uniform mat4 u_mv;"
+			+ "uniform mat4 u_proj;"
+			+ "uniform float u_scale;"
+			+ "uniform float u_swidth;"
+			+ "varying vec2 tex_c;"
+			+ "const vec2 div = vec2(1.0/2048.0,1.0/2048.0);"
+			+ "const float coord_scale = 0.125;"
+			+ "void main() {"
+			+ "  vec4 pos;"
+			+ " if (mod(vertex.x, 2.0) == 0.0){"
+			+ "       pos = u_proj * (u_mv * vec4(vertex.xy + vertex.zw * u_scale, 0.02, 1.0));"
+			+ "  } else {"
+			// // place as billboard
+			+ "    vec4 dir = u_mv * vec4(vertex.xy, 0.0, 1.0);"
+			+ "    pos = u_proj * (dir + vec4(vertex.zw * (coord_scale * u_swidth), 0.02, 0.0));"
+			+ "  }"
+			+ "  gl_Position = pos;"
+			+ "  tex_c = tex_coord * div;"
+			+ "}";
+
+	private final static String textFragmentShader = ""
+			+ "precision highp float;"
+			+ "uniform sampler2D tex;"
+			+ "varying vec2 tex_c;"
+			+ "void main() {"
+			+ "   gl_FragColor = texture2D(tex, tex_c.xy);"
+			+ "}";
 }
