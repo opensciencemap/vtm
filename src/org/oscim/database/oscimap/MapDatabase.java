@@ -267,9 +267,9 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	// /////////////// hand sewed tile protocol buffers decoder ///////////////
-	private static final int BUFFER_SIZE = 65536;
+	private int BUFFER_SIZE = 65536;
 
-	private final byte[] mReadBuffer = new byte[BUFFER_SIZE];
+	private byte[] mReadBuffer = new byte[BUFFER_SIZE];
 
 	// position in buffer
 	private int mBufferPos;
@@ -603,23 +603,31 @@ public class MapDatabase implements IMapDatabase {
 		return cnt;
 	}
 
-	private int readBuffer(int size) throws IOException {
-		int read = 0;
+	private void readBuffer(int size) throws IOException {
+		//int read = 0;
 
 		// check if buffer already contains the request bytes
 		if (mBufferPos + size < mBufferSize)
-			return mBufferSize - mBufferPos;
+			return;// mBufferSize - mBufferPos;
 
 		// check if inputstream is read to the end
 		if (mReadPos == mContentLenth)
-			return mBufferSize - mBufferPos;
+			return; // mBufferSize - mBufferPos;
 
 		if (size > BUFFER_SIZE) {
 			// FIXME throw exception for now, but frankly better
 			// sanitize tile data on compilation. this should only
 			// happen with strings or one ways coordinates are
 			// larger than 64kb
-			throw new IOException("X requested size too large " + mTile);
+			//throw new IOException("X requested size too large " + mTile);
+			BUFFER_SIZE = size;
+			byte[] tmp = new byte[BUFFER_SIZE];
+
+			mBufferSize -= mBufferPos;
+			System.arraycopy(mReadBuffer, mBufferPos, tmp, 0, mBufferSize);
+			mBufferPos = 0;
+			mReadBuffer = tmp;
+			Log.d(TAG, mTile + "increase read buffer to " + size + " bytes");
 		}
 
 		if (mBufferSize == mBufferPos) {
@@ -653,7 +661,7 @@ public class MapDatabase implements IMapDatabase {
 				break;
 			}
 
-			read += len;
+			//read += len;
 			mReadPos += len;
 
 			if (mCacheFile != null)
@@ -664,7 +672,7 @@ public class MapDatabase implements IMapDatabase {
 
 			mBufferSize += len;
 		}
-		return read;
+		return; // read;
 	}
 
 	private short[] decodeShortArray(int num, short[] array) throws IOException {
