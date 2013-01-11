@@ -496,7 +496,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (debugView) {
 			GLState.test(false, false);
 
-			float mm = 0.25f; // * mHeight;
+			float mm = 0.5f;
 			float min = -mm;
 			float max = mm;
 			float ymax = mm * mHeight / mWidth;
@@ -546,7 +546,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		float s = MapViewPosition.VIEW_SCALE;
 		float aspect = mHeight / (float) mWidth;
 
-		Matrix.frustumM(mProjMatrix, 0, -1 * s, 1 * s,
+		Matrix.frustumM(mProjMatrix, 0, -s, s,
 				aspect * s, -aspect * s, MapViewPosition.VIEW_NEAR,
 				MapViewPosition.VIEW_FAR);
 
@@ -554,13 +554,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		Matrix.translateM(mTmpMatrix, 0, 0, 0, -MapViewPosition.VIEW_DISTANCE);
 		Matrix.multiplyMM(mProjMatrix, 0, mProjMatrix, 0, mTmpMatrix, 0);
 
-		//		if (debugView) {
-		//			// modify this to scale only the view, to see better which tiles are
-		//			// rendered
-		//			Matrix.setIdentityM(mMVPMatrix, 0);
-		//			Matrix.scaleM(mMVPMatrix, 0, 0.75f, 0.75f, 1);
-		//			Matrix.multiplyMM(mProjMatrix, 0, mMVPMatrix, 0, mProjMatrix, 0);
-		//		}
+		if (debugView) {
+			// modify this to scale only the view, to see better which tiles are
+			// rendered
+			Matrix.setIdentityM(mMVPMatrix, 0);
+			Matrix.scaleM(mMVPMatrix, 0, 0.5f, 0.5f, 1);
+			Matrix.multiplyMM(mProjMatrix, 0, mMVPMatrix, 0, mProjMatrix, 0);
+		}
 
 		BaseLayer.setProjection(mProjMatrix);
 
