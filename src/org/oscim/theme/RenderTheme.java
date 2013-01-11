@@ -1,6 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
- *
+ * Copyright 2013 OpenScienceMap
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later version.
@@ -101,7 +101,8 @@ public class RenderTheme {
 	}
 
 	/**
-	 * Must be called when this RenderTheme gets destroyed to clean up and free resources.
+	 * Must be called when this RenderTheme gets destroyed to clean up and free
+	 * resources.
 	 */
 	public void destroy() {
 		mMatchingCacheNodes.clear();
@@ -114,7 +115,8 @@ public class RenderTheme {
 	}
 
 	/**
-	 * @return the number of distinct drawing levels required by this RenderTheme.
+	 * @return the number of distinct drawing levels required by this
+	 *         RenderTheme.
 	 */
 	public int getLevels() {
 		return mLevels;
@@ -178,9 +180,9 @@ public class RenderTheme {
 
 	/**
 	 * Matches a way with the given parameters against this RenderTheme.
-	 * 
 	 * @param renderCallback
-	 *            the callback implementation which will be executed on each match.
+	 *            the callback implementation which will be executed on each
+	 *            match.
 	 * @param tags
 	 *            the tags of the way.
 	 * @param zoomLevel
@@ -252,7 +254,6 @@ public class RenderTheme {
 
 	/**
 	 * Scales the stroke width of this RenderTheme by the given factor.
-	 * 
 	 * @param scaleFactor
 	 *            the factor by which the stroke width should be scaled.
 	 */
@@ -264,7 +265,6 @@ public class RenderTheme {
 
 	/**
 	 * Scales the text size of this RenderTheme by the given factor.
-	 * 
 	 * @param scaleFactor
 	 *            the factor by which the text size should be scaled.
 	 */
