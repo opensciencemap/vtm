@@ -25,6 +25,7 @@ import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.TextLayer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GeometryUtils;
+import org.oscim.utils.GlUtils;
 import org.oscim.utils.PausableThread;
 import org.oscim.view.MapView;
 
@@ -291,30 +292,16 @@ public class TextOverlay extends RenderOverlay {
 
 	@Override
 	protected void setMatrix(MapPosition curPos, float[] matrix) {
-		// TODO if oPos == curPos this could be simplified
-
 		MapPosition oPos = mMapPosition;
 
-		byte z = oPos.zoomLevel;
-
-		float div = FastMath.pow(z - curPos.zoomLevel);
-
+		float div = FastMath.pow(oPos.zoomLevel - curPos.zoomLevel);
 		float x = (float) (oPos.x - curPos.x * div);
 		float y = (float) (oPos.y - curPos.y * div);
 
 		float scale = curPos.scale / div;
 
-		Matrix.setIdentityM(matrix, 0);
-
-		// translate relative to map center
-		matrix[12] = x * scale;
-		matrix[13] = y * scale;
-
-		// scale to current tile world coordinates
-		scale = curPos.scale / div; // oPos.scale / div;
-		scale /= GLRenderer.COORD_MULTIPLIER;
-		matrix[0] = scale;
-		matrix[5] = scale;
+		GlUtils.setMatrix(matrix, x * scale, y * scale,
+				scale / GLRenderer.COORD_MULTIPLIER);
 
 		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
 	}

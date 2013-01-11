@@ -25,6 +25,7 @@ import org.oscim.renderer.TextureRenderer;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
@@ -128,36 +129,30 @@ public abstract class RenderOverlay {
 	 * @param matrix ...
 	 */
 	protected void setMatrix(MapPosition curPos, float[] matrix) {
-		// TODO if oPos == curPos this could be simplified
-
 		MapPosition oPos = mMapPosition;
 
-		byte z = oPos.zoomLevel;
+		float div = FastMath.pow(oPos.zoomLevel - curPos.zoomLevel);
 
-		float div = FastMath.pow(z - curPos.zoomLevel);
+		// translate relative to map center
 		float x = (float) (oPos.x - curPos.x * div);
 		float y = (float) (oPos.y - curPos.y * div);
 
 		// flip around date-line
-		float max = (Tile.TILE_SIZE << z);
+		// FIXME not sure if this is correct!
+		float max = (Tile.TILE_SIZE << oPos.zoomLevel);
 		if (x < -max / 2)
 			x = max + x;
 		else if (x > max / 2)
 			x = x - max;
 
+		// scale to current tile world coordinates
 		float scale = curPos.scale / div;
 
-		Matrix.setIdentityM(matrix, 0);
+		// set scale to be relative to current scale
+		float s = (curPos.scale / oPos.scale) / div;
 
-		// translate relative to map center
-		matrix[12] = x * scale;
-		matrix[13] = y * scale;
-
-		// scale to current tile world coordinates
-		scale = (curPos.scale / oPos.scale) / div;
-		scale /= GLRenderer.COORD_MULTIPLIER;
-		matrix[0] = scale;
-		matrix[5] = scale;
+		GlUtils.setMatrix(matrix, x * scale, y * scale,
+				s / GLRenderer.COORD_MULTIPLIER);
 
 		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
 	}
