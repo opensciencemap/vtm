@@ -15,6 +15,7 @@
 package org.oscim.generator;
 
 /**
+ * Sort Tiles by 'distance' value.
  * based on ComparableTimSort:
  * everything below is Copyright OpenJDK, Oracle
  */
@@ -32,12 +33,12 @@ public class TileDistanceSort {
 	}
 
 	static int compareTo(JobTile a, JobTile b) {
-		if (a == null && b == null)
-			return 0;
+		if (a == null) {
+			if (b == null)
+				return 0;
 
-		if (a == null)
 			return 1;
-
+		}
 		if (b == null)
 			return -1;
 
@@ -65,7 +66,6 @@ public class TileDistanceSort {
 
 			while (left < right) {
 				int mid = left + right >>> 1;
-				//if (pivot.compareTo(a[mid]) < 0)
 				if (compareTo(pivot, a[mid]) < 0)
 					right = mid;
 				else
@@ -75,17 +75,25 @@ public class TileDistanceSort {
 
 			int n = start - left;
 
-			switch (n)
-			{
-				case 2:
-					a[(left + 2)] = a[(left + 1)];
-					//$FALL-THROUGH$
-				case 1:
-					a[(left + 1)] = a[left];
-					break;
-				default:
-					System.arraycopy(a, left, a, left + 1, n);
+			if (n < 16) {
+				int end = left + n;
+				while (end-- > left)
+					a[end + 1] = a[end];
+			} else {
+				System.arraycopy(a, left, a, left + 1, n);
 			}
+
+			//	switch (n)
+			//	{
+			//	case 2:
+			//	a[(left + 2)] = a[(left + 1)];
+			//	//$FALL-THROUGH$
+			//	case 1:
+			//	a[(left + 1)] = a[left];
+			//	break;
+			//	default:
+			//	System.arraycopy(a, left, a, left + 1, n);
+			//	}
 			a[left] = pivot;
 		}
 	}
