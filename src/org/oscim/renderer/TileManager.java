@@ -66,7 +66,7 @@ public class TileManager {
 	// tiles that have new data to upload, see passTile()
 	private static ArrayList<MapTile> mTilesLoaded;
 
-	private static boolean mInitial;
+	private static boolean mInitialized;
 
 	// private static MapPosition mCurPosition, mDrawPosition;
 	private static int mWidth = 0, mHeight = 0;
@@ -160,7 +160,7 @@ public class TileManager {
 
 		mTilesSize = 0;
 		mUpdateCnt = 0;
-		mInitial = true;
+		mInitialized = false;
 	}
 
 	/**
@@ -176,20 +176,20 @@ public class TileManager {
 		if (mMapView == null)
 			return;
 
-		if (clear || mInitial) {
+		if (clear || !mInitialized) {
 			// make sure onDrawFrame is not running
 			// - and labeling thread?
 			GLRenderer.drawlock.lock();
 
 			// clear all tiles references
-			Log.d(TAG, "CLEAR " + mInitial);
+			Log.d(TAG, "CLEAR " + mInitialized);
 
 			if (clear) {
 				// pass VBOs and VertexItems back to pools
 				for (int i = 0; i < mTilesSize; i++)
 					clearTile(mTiles[i]);
 			} else {
-				// mInitial is set when surface changed 
+				// mInitialized is set when surface changed 
 				// and VBOs might be lost
 				VertexPool.init();
 			}
@@ -216,7 +216,7 @@ public class TileManager {
 
 			// make sure mMapPosition will be updated
 			mMapPosition.zoomLevel = -1;
-			mInitial = false;
+			mInitialized = true;
 
 			GLRenderer.drawlock.unlock();
 		}
@@ -686,7 +686,9 @@ public class TileManager {
 		mWidth = w;
 		mHeight = h;
 
-		if (mWidth > 0 && mHeight > 0)
-			mInitial = true;
+		// size changed does not mean gl surface was recreated 
+		// FIXME iirc this was the case before honeycomb
+		//if (mWidth > 0 && mHeight > 0)
+		//	mInitialized = true;
 	}
 }
