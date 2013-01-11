@@ -81,7 +81,7 @@ public class ExtrusionLayer extends Layer {
 		// just a guessing to make it look ok
 		if (height == 0)
 			height = 10;
-		height = (int) (height * -Math.log(height / 100000f)) * 4;
+		height = (int) (height * -Math.log(height / 100000f) * 3.6f);
 
 		int length = 0;
 		for (int ipos = 0, ppos = 0, n = index.length; ipos < n; ipos++, ppos += length) {
