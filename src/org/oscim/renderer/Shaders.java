@@ -79,7 +79,7 @@ public final class Shaders {
 			+ "}";
 
 	final static String polygonVertexShader = ""
-			+ "precision mediump float;"
+			+ "precision highp float;"
 			+ "uniform mat4 u_mvp;"
 			+ "attribute vec4 a_position;"
 			+ "void main() {"
@@ -87,10 +87,32 @@ public final class Shaders {
 			+ "}";
 
 	final static String polygonFragmentShader = ""
-			+ "precision mediump float;"
+			+ "precision highp float;"
 			+ "uniform vec4 u_color;"
 			+ "void main() {"
 			+ "  gl_FragColor = u_color;"
+			+ "}";
+
+	final static String polygonVertexShaderZ = ""
+			+ "precision highp float;"
+			+ "uniform mat4 u_mvp;"
+			+ "attribute vec4 a_position;"
+			+ "varying float z;"
+			+ "void main() {"
+			+ "  gl_Position = u_mvp * a_position;"
+			+ "  z = gl_Position.z;"
+			+ "}";
+	final static String polygonFragmentShaderZ = ""
+			+ "precision highp float;"
+			+ "uniform vec4 u_color;"
+			+ "varying float z;"
+			+ "void main() {"
+			+ "if (z < 0.0)"
+			+ "  gl_FragColor = vec4(z * -1.0, 0.0, 0.0, 1.0)*0.8;"
+			+ "else if (z < 1.0)"
+			+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0)*0.8;"
+			+ "else"
+			+ "  gl_FragColor = vec4(0.0, z - 1.0, 0.0, 1.0)*0.8;"
 			+ "}";
 
 	final static String textVertexShader = ""
@@ -107,11 +129,11 @@ public final class Shaders {
 			+ "void main() {"
 			+ "  vec4 pos;"
 			+ " if (mod(vertex.x, 2.0) == 0.0){"
-			+ "       pos = u_proj * (u_mv * vec4(vertex.xy + vertex.zw * u_scale, 0.0, 1.0));"
+			+ "       pos = u_proj * (u_mv * vec4(vertex.xy + vertex.zw * u_scale, 0.02, 1.0));"
 			+ "  } else {"
 			// // place as billboard
 			+ "    vec4 dir = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-			+ "    pos = u_proj * (dir + vec4(vertex.zw * (coord_scale * u_swidth), 0.0, 0.0));"
+			+ "    pos = u_proj * (dir + vec4(vertex.zw * (coord_scale * u_swidth), 0.02, 0.0));"
 			+ "  }"
 			+ "  gl_Position = pos;"
 			+ "  tex_c = tex_coord * div;"
@@ -170,4 +192,29 @@ public final class Shaders {
 	// + "void main() {"
 	// + "  gl_FragColor = u_color * 0.5;"
 	// + "}";
+
+	//	final static String buildingVertexShader = ""
+	//			+ "precision mediump float;"
+	//			+ "uniform mat4 u_mvp;"
+	//			+ "uniform vec4 u_color;"
+	//			+ "uniform int u_mode;"
+	//			+ "uniform float u_scale;"
+	//			+ "attribute vec4 a_position;"
+	//			+ "attribute float a_light;"
+	//			+ "varying vec4 color;"
+	//			+ "const float ff = 256.0;"
+	//			+ "const float ffff = 65536.0;"
+	//			+ "void main() {"
+	//			+ "  gl_Position = u_mvp * vec4(a_position.xy, a_position.z/u_scale, 1.0);"
+	//			+ "  if (u_mode == 0)"
+	//			//     roof / depth pass
+	//			+ "    color = u_color;"
+	//			+ "  else if (u_mode == 1)"
+	//			//     sides 1 - use 0xff00
+	//			+ "    color = vec4(u_color.rgb * (a_light / ffff), 0.9);"
+	//			+ "  else"
+	//			//     sides 2 - use 0x00ff
+	//			+ "    color = vec4(u_color.rgb * fract(a_light/ff), 0.9);"
+	//			+ "}";
+
 }

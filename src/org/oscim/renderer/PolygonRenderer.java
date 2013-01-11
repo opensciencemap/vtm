@@ -69,8 +69,11 @@ public final class PolygonRenderer {
 	static boolean init() {
 
 		// Set up the program for rendering polygons
+		//		polygonProgram = GlUtils.createProgram(Shaders.polygonVertexShaderZ,
+		//				Shaders.polygonFragmentShaderZ);
 		polygonProgram = GlUtils.createProgram(Shaders.polygonVertexShader,
 				Shaders.polygonFragmentShader);
+
 		if (polygonProgram == 0) {
 			// Log.e(TAG, "Could not create polygon program.");
 			return false;
@@ -201,7 +204,7 @@ public final class PolygonRenderer {
 		//	if (mCount > 5) {
 		//	mCount = 0;
 		//	mStart = 0;
-		//	}
+		//	} 
 
 		if (first) {
 			mCount = 0;
@@ -232,11 +235,9 @@ public final class PolygonRenderer {
 				glStencilMask(0xFF);
 				glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 
+				// draw clip-region into depth buffer:
+				// this is used for lines and polygons
 				if (first && drawClipped) {
-					//GLState.test(true, true);
-					// draw clip-region into depth buffer:
-					// this is used for lines and polygons
-
 					// write to depth buffer
 					glDepthMask(true);
 
@@ -260,7 +261,7 @@ public final class PolygonRenderer {
 			}
 
 			// no need for depth test while drawing stencil
-			//GLState.test(false, true);
+			GLState.test(false, true);
 
 			mFillPolys[mCount] = pl;
 
@@ -272,8 +273,8 @@ public final class PolygonRenderer {
 			// draw up to 8 layers into stencil buffer
 			if (mCount == STENCIL_BITS) {
 				/* only draw where nothing was drawn yet */
-				//if (drawClipped)
-				//	GLState.test(true, true);
+				if (drawClipped)
+					GLState.test(true, true);
 
 				fillPolygons(zoom, scale);
 				mCount = 0;
@@ -283,8 +284,8 @@ public final class PolygonRenderer {
 
 		if (mCount > 0) {
 			/* only draw where nothing was drawn yet */
-			//if (drawClipped)
-			//	GLState.test(true, true);
+			if (drawClipped)
+				GLState.test(true, true);
 
 			fillPolygons(zoom, scale);
 		}
@@ -305,7 +306,7 @@ public final class PolygonRenderer {
 	}
 
 	private static float[] debugFillColor = { 0.3f, 0.0f, 0.0f, 0.3f };
-	private static float[] debugFillColor2 = { 0.0f, 0.3f, 0.0f, 0.3f };
+	private static float[] debugFillColor2 = { .8f, .8f, .8f, .8f };
 	private static FloatBuffer mDebugFill;
 
 	static void debugDraw(float[] matrix, float[] coords, int color) {
