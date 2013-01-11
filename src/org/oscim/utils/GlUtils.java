@@ -14,6 +14,8 @@
  */
 package org.oscim.utils;
 
+import org.oscim.renderer.GLRenderer;
+
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
@@ -185,5 +187,26 @@ public class GlUtils {
 		c[1] = (color >> 8 & 0xff) / 255.0f * c[3];
 		c[2] = (color >> 0 & 0xff) / 255.0f * c[3];
 		return c;
+	}
+
+	public static void setTileMatrix(float[] matrix, float tx, float ty, float s) {
+		// scale tile relative to map scale
+		matrix[0] = matrix[5] = s / GLRenderer.COORD_MULTIPLIER;
+		matrix[1] = 0;
+		matrix[2] = 0;
+		matrix[3] = 0;
+		matrix[4] = 0;
+
+		matrix[6] = 0;
+		matrix[7] = 0;
+		matrix[8] = 0;
+		matrix[9] = 0;
+		matrix[10] = 1;
+		matrix[11] = 0;
+		// translate relative to map center
+		matrix[12] = tx * s;
+		matrix[13] = ty * s;
+		matrix[14] = 0;
+		matrix[15] = 1;
 	}
 }
