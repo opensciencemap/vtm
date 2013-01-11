@@ -189,24 +189,45 @@ public class GlUtils {
 		return c;
 	}
 
+	private final static float[] mIdentity = {
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1 };
+
 	public static void setTileMatrix(float[] matrix, float tx, float ty, float s) {
+		System.arraycopy(mIdentity, 0, matrix, 0, 16);
 		// scale tile relative to map scale
 		matrix[0] = matrix[5] = s / GLRenderer.COORD_MULTIPLIER;
-		matrix[1] = 0;
-		matrix[2] = 0;
-		matrix[3] = 0;
-		matrix[4] = 0;
-
-		matrix[6] = 0;
-		matrix[7] = 0;
-		matrix[8] = 0;
-		matrix[9] = 0;
-		matrix[10] = 1;
-		matrix[11] = 0;
 		// translate relative to map center
 		matrix[12] = tx * s;
 		matrix[13] = ty * s;
-		matrix[14] = 0;
-		matrix[15] = 1;
+	}
+
+	public static void setTranslation(float[] matrix, float x, float y, float z) {
+		System.arraycopy(mIdentity, 0, matrix, 0, 16);
+		matrix[12] = x;
+		matrix[13] = y;
+		matrix[14] = z;
+	}
+
+	public static void setMatrix(float[] matrix, float tx, float ty, float scale) {
+		System.arraycopy(mIdentity, 0, matrix, 0, 16);
+		matrix[12] = tx;
+		matrix[13] = ty;
+		matrix[0] = scale;
+		matrix[5] = scale;
+		//matrix[10] = scale;
+	}
+
+	public static void setIdentity(float[] matrix) {
+		System.arraycopy(mIdentity, 0, matrix, 0, 16);
+	}
+
+	public static void setScaleM(float[] matrix, float sx, float sy, float sz) {
+		System.arraycopy(mIdentity, 0, matrix, 0, 16);
+		matrix[0] = sx;
+		matrix[5] = sy;
+		matrix[10] = sz;
 	}
 }

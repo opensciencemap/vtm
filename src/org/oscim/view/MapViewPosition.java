@@ -26,7 +26,9 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.GeometryUtils;
 import org.oscim.utils.GeometryUtils.Point2D;
+import org.oscim.utils.GlUtils;
 
 import android.graphics.Point;
 import android.opengl.Matrix;
@@ -47,7 +49,7 @@ public class MapViewPosition {
 	public final static int MAX_ZOOMLEVEL = 17;
 	public final static int MIN_ZOOMLEVEL = 2;
 
-	private final static float MAX_ANGLE = 42;
+	private final static float MAX_ANGLE = 50;
 
 	private final MapView mMapView;
 
@@ -87,55 +89,31 @@ public class MapViewPosition {
 	private float[] mRotMatrix = new float[16];
 	private float[] mTmpMatrix = new float[16];
 
-	// only use in synchronized functions!
-	Point2D mMovePoint = new Point2D();
+	// temporary vars: only use in synchronized functions!
+	private Point2D mMovePoint = new Point2D();
+	private float[] mv = { 0, 0, 0, 1 };
+	private float[] mu = { 0, 0, 0, 1 };
+	private float[] mBBoxCoords = new float[8];
 
-	private static float mHeight, mWidth;
+	private float mHeight, mWidth;
 
-	//	public final static float VIEW_SCALE = 1 / 4f;
-	//	public final static float VIEW_DISTANCE = 2f;
-	//	public final static float VIEW_NEAR = 1;
-	//	public final static float VIEW_FAR = 4;
-
-	//	public final static float VIEW_SCALE = 1 / 3f;
-	//	public final static float VIEW_DISTANCE = 2.7f;
-	//	public final static float VIEW_NEAR = 2;
-	//	public final static float VIEW_FAR = 4;
-
-	public final static float VIEW_SCALE = 1 / 4f;
 	public final static float VIEW_DISTANCE = 3.0f;
 	public final static float VIEW_NEAR = 2;
-	public final static float VIEW_FAR = 8;
+	public final static float VIEW_FAR = 7;
+	// scale map plane at VIEW_DISTANCE to near plane
+	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
 	void setViewport(int width, int height) {
-		float sw = VIEW_SCALE;
-		float sh = VIEW_SCALE;
+		float s = VIEW_SCALE;
 		float aspect = height / (float) width;
 
-		Matrix.frustumM(mProjMatrix, 0, -1 * sw, 1 * sw,
-				aspect * sh, -aspect * sh, VIEW_NEAR, VIEW_FAR);
+		Matrix.frustumM(mProjMatrix, 0, -s, s,
+				aspect * s, -aspect * s, VIEW_NEAR, VIEW_FAR);
 
-		Matrix.setIdentityM(mTmpMatrix, 0);
-		Matrix.translateM(mTmpMatrix, 0, 0, 0, -VIEW_DISTANCE);
-
+		GlUtils.setTranslation(mTmpMatrix, 0, 0, -VIEW_DISTANCE);
 		Matrix.multiplyMM(mProjMatrix, 0, mProjMatrix, 0, mTmpMatrix, 0);
 
 		Matrix.invertM(mProjMatrixI, 0, mProjMatrix, 0);
-
-		mv[0] = 0;
-		mv[1] = 1;
-		mv[2] = 0;
-		mv[3] = 1;
-		Matrix.multiplyMV(mv, 0, mProjMatrixI, 0, mv, 0);
-		Log.d(TAG, " " + mv[0] + " " + mv[1] + " " + mv[2]);
-		Log.d(TAG, " " + mv[0] / mv[3] + " " + mv[1] / mv[3] + " " + mv[2] / mv[3]);
-		mv[0] = 0;
-		mv[1] = 1;
-		mv[2] = 1;
-		mv[3] = 1;
-		Matrix.multiplyMV(mv, 0, mProjMatrixI, 0, mv, 0);
-		Log.d(TAG, " " + mv[0] + " " + mv[1] + " " + mv[2]);
-		Log.d(TAG, " " + mv[0] / mv[3] + " " + mv[1] / mv[3] + " " + mv[2] / mv[3]);
 
 		mHeight = height;
 		mWidth = width;
@@ -174,69 +152,86 @@ public class MapViewPosition {
 		if (coords == null)
 			return true;
 
-		//		float tilt = getZ(1);
+		float t = getZ(1);
+		float t2 = getZ(-1);
 
-		float t = getZ2(1);
-		float t2 = getZ2(-1);
-		//Log.d(TAG, "t:" + mTilt + " z: " + tilt + " -> " + t + " " + t2);
-		//
-		//		unproject(-1, 1, tilt, coords, 0); // bottom-left
-		//		unproject(1, 1, tilt, coords, 2); // bottom-right
-		//		unproject(1, -1, -tilt, coords, 4); // top-right
-		//		unproject(-1, -1, -tilt, coords, 6); // top-left
+		unproject(1, -1, t, coords, 0); // top-right
+		unproject(-1, -1, t, coords, 2); // top-left
+		unproject(-1, 1, t2, coords, 4); // bottom-left
+		unproject(1, 1, t2, coords, 6); // bottom-right
 
-		unproject2(-1, 1, t2, coords, 4); // bottom-left
-		unproject2(1, 1, t2, coords, 6); // bottom-right
-		unproject2(1, -1, t, coords, 0); // top-right
-		unproject2(-1, -1, t, coords, 2); // top-left
-		//		Log.d(TAG, "" + coords[0] + ":" + coords[1] + ", " + coords[2] + ":" + coords[3] + ", "
-		//				+ ", " + coords[4] + ":" + coords[5] + ", " + ", " + coords[6] + ":" + coords[7]);
 		return true;
 	}
 
-	private float getZ2(float y) {
+	public static byte calcLinesIntersect(
+
+			double ax2, double ay2,
+			double bx1, double by1,
+			double bx2, double by2,
+			GeometryUtils.Point2D point)
+	{
+		double ua_numr = (bx2 - bx1) * (-by1) - (by2 - by1) * (-bx1);
+		double denr = (by2 - by1) * (ax2) - (bx2 - bx1) * (ay2);
+		double ua = ua_numr / denr;
+
+		point.x = ua * ax2;
+		point.y = ua * ay2;
+		return 1;
+	}
+
+	// get the z-value of the map-plane for a point on screen
+	private float getZ(float y) {
+		// calculate the intersection of a ray from 
+		// camera origin and the map plane
+
+		// origin is moved by VIEW_DISTANCE
+		double cx = VIEW_DISTANCE;
+		// 'height' of the ray 
+		double ry = y * (mHeight / mWidth) * 0.5f;
+
+		// tilt of the plane (center is kept on x = 0)
+		double t = Math.toRadians(mTilt);
+		double px = y * Math.sin(t);
+		double py = y * Math.cos(t);
+
+		double ua = 1 + (px * ry) / (py * cx);
 
 		mv[0] = 0;
-		mv[1] = y;
-		mv[2] = -0.1f; //FIXME! please
+		mv[1] = (float) (ry / ua);
+		mv[2] = (float) (cx - cx / ua);
 		mv[3] = 1;
 
-		Matrix.setRotateM(mTmpMatrix, 0, mTilt, 1, 0, 0);
-		Matrix.multiplyMV(mv, 0, mTmpMatrix, 0, mv, 0);
+		//  GeometryUtils.calcLinesIntersect(
+		//	// point at view origin
+		//	VIEW_DISTANCE, 0, 0, y * 0.5,
+		//	// point at upper lower edge of tilted plane
+		//	0, 0, -y * Math.sin(t), y * Math.cos(t),
+		//	mMovePoint);
+		//	mv[0] = 0;
+		//	mv[1] = (float) mMovePoint.y;
+		//	mv[2] = (float) mMovePoint.x;
+		//	mv[3] = 1;
 
 		Matrix.multiplyMV(mv, 0, mProjMatrix, 0, mv, 0);
 
-		//d = d / (VIEW_FAR - VIEW_NEAR);
-		//Log.d(TAG, " > " + mv[2] / mv[3] + " (" + mv[2] + " " + mv[3] + ")");
-
-		float d = mv[2] / mv[3];
-
-		Matrix.multiplyMV(mv, 0, mUnprojMatrix, 0, mv, 0);
-		//Log.d(TAG, " < " + mv[2] / mv[3] + " (" + mv[2] + " " + mv[3] + ")");
-
-		return d;
+		return mv[2] / mv[3];
 	}
 
-	private void unproject2(float x, float y, float z, float[] coords, int position) {
+	private void unproject(float x, float y, float z, float[] coords, int position) {
 		mv[0] = x;
 		mv[1] = y;
 		mv[2] = z;
 		mv[3] = 1;
-		//float a = (float) Math.sqrt(x * x + y * y + z * z + 1);
-		//		mv[0] /= a;
-		//		mv[1] /= a;
-		//		mv[2] /= a;
-		//mv[3] = a;
 
 		Matrix.multiplyMV(mv, 0, mUnprojMatrix, 0, mv, 0);
 
 		if (mv[3] != 0) {
-			coords[position] = mv[0] / mv[3];
-			coords[position + 1] = (mv[1] / mv[3]);
-
+			coords[position + 0] = mv[0] / mv[3];
+			coords[position + 1] = mv[1] / mv[3];
 		} else {
-			// else what?
-			Log.d(TAG, "uproject failed");
+			coords[position + 0] = 0;
+			coords[position + 1] = 0;
+			Log.d(TAG, "XXX unproject failed");
 		}
 	}
 
@@ -275,19 +270,13 @@ public class MapViewPosition {
 
 		float[] coords = mBBoxCoords;
 
-		//		float tilt = getZ(1);
 		float t = getZ(1);
 		float t2 = getZ(-1);
 
-		//		unproject(-1, 1, -tilt, coords, 0); // top-left
-		//		unproject(1, 1, -tilt, coords, 2); 	// top-right
-		//		unproject(1, -1, tilt, coords, 4); 	// bottom-right
-		//		unproject(-1, -1, tilt, coords, 6); // bottom-left
-
-		unproject2(-1, 1, t2, coords, 4); // bottom-left
-		unproject2(1, 1, t2, coords, 6); // bottom-right
-		unproject2(1, -1, t, coords, 0); // top-right
-		unproject2(-1, -1, t, coords, 2); // top-left
+		unproject(1, -1, t, coords, 0); // top-right
+		unproject(-1, -1, t, coords, 2); // top-left
+		unproject(-1, 1, t2, coords, 4); // bottom-left
+		unproject(1, 1, t2, coords, 6); // bottom-right
 
 		byte z = mZoomLevel;
 		double dx, dy;
@@ -316,23 +305,11 @@ public class MapViewPosition {
 			}
 		}
 
-		return new BoundingBox(minLat, minLon, maxLat, maxLon);
-	}
+		BoundingBox bbox = new BoundingBox(minLat, minLon, maxLat, maxLon);
 
-	private float[] mv = { 0, 0, 0, 1 };
-	private float[] mu = { 0, 0, 0, 1 };
-	private float[] mBBoxCoords = new float[8];
+		Log.d(">>>", "getScreenBoundingBox " + bbox);
 
-	/* get the depth-value of the map for the current tilt, approximately.
-	 * needed to un-project a point on screen to the position on the map. not
-	 * so sure about this, but at least somehow works. */
-	private float getZ(float y) {
-		return (float) Math.sin(Math.toRadians(mTilt))
-				//* 2.2f // for dist = 1
-				//* 1.3f // for dist = 2
-				//* 0.8f // for dist = 4
-				* 0.5f
-				* (mHeight / mWidth) * y;
+		return bbox;
 	}
 
 	/**
@@ -349,7 +326,7 @@ public class MapViewPosition {
 		float mx = ((mWidth / 2) - x) / (mWidth / 2);
 		float my = ((mHeight / 2) - y) / (mHeight / 2);
 
-		unproject2(-mx, my, getZ2(-my), mu, 0);
+		unproject(-mx, my, getZ(-my), mu, 0);
 
 		out.x = (int) (mPosX + mu[0] / mScale);
 		out.y = (int) (mPosY + mu[1] / mScale);
@@ -368,7 +345,7 @@ public class MapViewPosition {
 		float mx = ((mWidth / 2) - x) / (mWidth / 2);
 		float my = ((mHeight / 2) - y) / (mHeight / 2);
 
-		unproject2(-mx, my, getZ2(-my), mu, 0);
+		unproject(-mx, my, getZ(-my), mu, 0);
 
 		double dx = mPosX + mu[0] / mScale;
 		double dy = mPosY + mu[1] / mScale;
@@ -432,32 +409,14 @@ public class MapViewPosition {
 	//		return out;
 	//	}
 
-	private void unproject(float x, float y, float z, float[] coords, int position) {
-		mv[0] = x;
-		mv[1] = y;
-		// -1f when near plane is 1 and map is on near plane..
-		mv[2] = z + 0.4f;
-		mv[3] = 1;
-
-		Matrix.multiplyMV(mv, 0, mUnprojMatrix, 0, mv, 0);
-
-		if (mv[3] != 0) {
-			coords[position] = mv[0] / mv[3];
-			coords[position + 1] = mv[1] / mv[3];
-		} else {
-			// else what?
-			Log.d(TAG, "uproject failed");
-		}
-	}
-
 	private void updateMatrix() {
-		// - view matrix
+		// --- view matrix
 		// 1. scale to window coordinates
 		// 2. rotate
 		// 3. tilt
 
-		// - projection matrix
-		// 4. translate to near-plane
+		// --- projection matrix
+		// 4. translate to VIEW_DISTANCE
 		// 5. apply projection
 
 		Matrix.setRotateM(mRotMatrix, 0, mRotation, 0, 0, 1);
@@ -470,35 +429,25 @@ public class MapViewPosition {
 		Matrix.multiplyMM(mRotMatrix, 0, mTmpMatrix, 0, mRotMatrix, 0);
 
 		// scale to window coordinates
-		Matrix.setIdentityM(mTmpMatrix, 0);
-		Matrix.scaleM(mTmpMatrix, 0, 1f / mWidth, 1f / mWidth, 1);
+		GlUtils.setScaleM(mTmpMatrix, 1 / mWidth, 1 / mWidth, 1);
 
 		Matrix.multiplyMM(mViewMatrix, 0, mRotMatrix, 0, mTmpMatrix, 0);
 
-		// // move to near plane
-		// Matrix.setIdentityM(mTmpMatrix, 0);
-		// Matrix.translateM(mTmpMatrix, 0, 0, 0, -VIEW_DISTANCE);
-		// Matrix.multiplyMM(mViewMatrix, 0, mTmpMatrix, 0, mViewMatrix, 0);
-
-		// get unproject matrix:
-		Matrix.setIdentityM(mUnprojMatrix, 0);
+		//--- unproject matrix:
+		// Matrix.multiplyMM(mTmpMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);
+		// Matrix.invertM(mUnprojMatrix, 0, mTmpMatrix, 0);
 
 		// inverse scale
-		Matrix.scaleM(mUnprojMatrix, 0, mWidth, mWidth, 1);
+		GlUtils.setScaleM(mUnprojMatrix, mWidth, mWidth, 1);
 
-		// inverse rotation
+		// inverse rotation and tilt
 		Matrix.transposeM(mTmpMatrix, 0, mRotMatrix, 0);
 
-		// (AB)^-1 = B^-1*A^-1
+		// (AB)^-1 = B^-1*A^-1, unapply scale, tilt and rotation
 		Matrix.multiplyMM(mTmpMatrix, 0, mUnprojMatrix, 0, mTmpMatrix, 0);
 
-		// unapply projection, tilt, rotate and scale
-		// (AB)^-1 = B^-1*A^-1
+		// (AB)^-1 = B^-1*A^-1, unapply projection
 		Matrix.multiplyMM(mUnprojMatrix, 0, mTmpMatrix, 0, mProjMatrixI, 0);
-
-		Matrix.multiplyMM(mTmpMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);
-		Matrix.invertM(mUnprojMatrix, 0, mTmpMatrix, 0);
-
 	}
 
 	/** @return true if this MapViewPosition is valid, false otherwise. */
