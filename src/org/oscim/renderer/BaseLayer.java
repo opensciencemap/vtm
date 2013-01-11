@@ -22,6 +22,7 @@ import static org.oscim.generator.JobTile.STATE_READY;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -78,28 +79,39 @@ public class BaseLayer {
 		if (tile.lastDraw == mDrawSerial)
 			return;
 
-		float div = FastMath.pow(tile.zoomLevel - pos.zoomLevel);
-
 		tile.lastDraw = mDrawSerial;
 
 		float[] mvp = mMVPMatrix;
-		setMatrix(mvp, tile, div, pos);
 
-		if (tile.holder != null)
-			tile = tile.holder;
+		//setMatrix(mvp, tile, div, pos);
 
-		if (tile.layers == null)
+		MapTile t = tile;
+		if (t.holder != null)
+			t = t.holder;
+
+		if (t.layers == null)
 			return;
 
-		// set depth offset (used for clipping to tile boundaries)
-		GLES20.glPolygonOffset(-1, -GLRenderer.depthOffset(tile));
+		// set Model matrix for tile
+		float div = FastMath.pow(tile.zoomLevel - pos.zoomLevel);
+		float x = (float) (tile.pixelX - pos.x * div);
+		float y = (float) (tile.pixelY - pos.y * div);
+		float scale = pos.scale / div;
+		GlUtils.setTileMatrix(mvp, x, y, scale);
 
-		GLES20.glBindBuffer(GL_ARRAY_BUFFER, tile.vbo.id);
+		// add view-projection matrix
+		Matrix.multiplyMM(mvp, 0, mVPMatrix, 0, mvp, 0);
+
+		// set depth offset (used for clipping to tile boundaries)
+		GLES20.glPolygonOffset(-1, -GLRenderer.depthOffset(t));
+
+		GLES20.glBindBuffer(GL_ARRAY_BUFFER, t.vbo.id);
 
 		boolean clipped = false;
-		int simpleShader = (pos.tilt == 0 ? 1 : 0);
+		// simple line shader does not take forward shortening into account
+		int simpleShader = (pos.tilt < 1 ? 1 : 0);
 
-		for (Layer l = tile.layers.layers; l != null;) {
+		for (Layer l = t.layers.layers; l != null;) {
 
 			switch (l.type) {
 				case Layer.POLYGON:
@@ -118,7 +130,7 @@ public class BaseLayer {
 
 					GLES20.glEnable(GL_BLEND);
 					l = LineRenderer.draw(pos, l, mvp, div, simpleShader,
-							tile.layers.lineOffset);
+							t.layers.lineOffset);
 					break;
 			}
 		}
@@ -131,30 +143,6 @@ public class BaseLayer {
 		//						tile.layers.texOffset);
 		//			}
 		//		}
-	}
-
-	private static void setMatrix(float[] matrix, MapTile tile,
-			float div, MapPosition pos) {
-
-		float x = (float) (tile.pixelX - pos.x * div);
-		float y = (float) (tile.pixelY - pos.y * div);
-		float scale = pos.scale / div;
-
-		for (int i = 0; i < 16; i++)
-			matrix[i] = 0;
-
-		// translate relative to map center
-		matrix[12] = x * scale;
-		matrix[13] = y * scale;
-
-		// scale to tile to world coordinates
-		scale /= GLRenderer.COORD_MULTIPLIER;
-		matrix[0] = scale;
-		matrix[5] = scale;
-		matrix[10] = 1;
-		matrix[15] = 1;
-
-		Matrix.multiplyMM(matrix, 0, mVPMatrix, 0, matrix, 0);
 	}
 
 	private static boolean drawProxyChild(MapTile tile, MapPosition pos) {

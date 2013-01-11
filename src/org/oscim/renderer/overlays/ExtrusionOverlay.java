@@ -54,7 +54,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 	private boolean initialized = false;
 
-	// TODO sum up size used while filling layer only up to:
+	// FIXME sum up size used while filling layer only up to:
 	private int BUFFERSIZE = 65536 * 2;
 	private TileSet mTileSet;
 	private ShortBuffer mShortBuffer;
@@ -104,8 +104,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 		}
 
 		// keep a list of tiles available for rendering
-		if (mTiles == null || mTiles.length != tiles.length)
-			mTiles = new MapTile[tiles.length];
+		if (mTiles == null || mTiles.length < mTileSet.cnt * 4)
+			mTiles = new MapTile[mTileSet.cnt * 4];
 
 		ExtrusionLayer el;
 		if (curPos.zoomLevel >= 17) {
@@ -139,7 +139,6 @@ public class ExtrusionOverlay extends RenderOverlay {
 						if (el == null || !el.compiled)
 							continue;
 
-						// TODO check overflow, even if very unlikely...
 						mTiles[ready++] = c;
 					}
 				}
@@ -317,19 +316,9 @@ public class ExtrusionOverlay extends RenderOverlay {
 		float y = (float) (tile.pixelY - mapPosition.y * div);
 		float scale = mapPosition.scale / div;
 
-		for (int i = 0; i < 16; i++)
-			matrix[i] = 0;
-
-		// translate relative to map center
-		matrix[12] = x * scale;
-		matrix[13] = y * scale;
-
-		// scale to tile to world coordinates
-		scale /= GLRenderer.COORD_MULTIPLIER;
-		matrix[0] = scale;
-		matrix[5] = scale;
-		matrix[10] = scale / 1000f;
-		matrix[15] = 1;
+		GlUtils.setTileMatrix(matrix, x, y, scale);
+		// scale height
+		matrix[10] = scale / (1000f * GLRenderer.COORD_MULTIPLIER);
 
 		Matrix.multiplyMM(matrix, 0, proj, 0, matrix, 0);
 	}
