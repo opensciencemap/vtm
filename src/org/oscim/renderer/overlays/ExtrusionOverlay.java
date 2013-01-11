@@ -235,12 +235,13 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 		// draw to depth buffer
 		for (int i = 0; i < mTileCnt; i++) {
-			ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
+			MapTile t = tiles[i];
+			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
+			int add = GLRenderer.depthOffset(t);
+			GLES20.glPolygonOffset(2, add);
+			//GLES20.glPolygonOffset(1, i * 4 + 10);
 
-			GLES20.glPolygonOffset(2, GLRenderer.depthOffset(tiles[i]) * 4);
-			//GLES20.glPolygonOffset(2, i * 4 + 10);
-
-			setMatrix(pos, mv, proj, tiles[i], div);
+			setMatrix(pos, mv, proj, t, div);
 			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
 
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
@@ -260,13 +261,14 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLES20.glDepthMask(false);
 
 		for (int i = 0; i < mTileCnt; i++) {
-			ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
+			MapTile t = tiles[i];
+			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
 			GLES20.glDepthFunc(GLES20.GL_EQUAL);
+			int add = GLRenderer.depthOffset(t);
+			GLES20.glPolygonOffset(2, add);
+			//GLES20.glPolygonOffset(1, i * 4 + 10);
 
-			GLES20.glPolygonOffset(2, GLRenderer.depthOffset(tiles[i]) * 4);
-			//GLES20.glPolygonOffset(2, i * 4 + 10);
-
-			setMatrix(pos, mv, proj, tiles[i], div);
+			setMatrix(pos, mv, proj, t, div);
 			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
 
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
@@ -397,17 +399,18 @@ public class ExtrusionOverlay extends RenderOverlay {
 					+ "attribute vec4 a_pos;"
 					+ "attribute vec2 a_light;"
 					+ "varying vec4 color;"
+					//+ "varying float z;"
 					+ "const float ff = 255.0;"
-					+ "float c_alpha = 0.8;"
 					+ "void main() {"
 					//   change height by u_alpha
 					+ "  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);"
+					//+ "  z = gl_Position.z;"
 					+ "  if (u_mode == 0)"
 					//     roof / depth pass
 					+ "    color = u_color[0];"
 					+ "  else {"
 					//    decrease contrast with distance
-					+ "   float z = (0.8 + gl_Position.z * 0.2);"
+					+ "   float z = (0.9 + gl_Position.z * 0.1);"
 					+ "   if (u_mode == 1){"
 					//     sides 1 - use 0xff00
 					//     scale direction to -0.5<>0.5 
@@ -422,43 +425,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 					+ "  } else"
 					//     outline
 					+ "    color = u_color[3] * z;"
-					+ "}}",
-			"precision mediump float;"
-					+ "uniform mat4 u_mvp;"
-					+ "uniform vec4 u_color[4];"
-					+ "uniform int u_mode;"
-					+ "uniform float u_alpha;"
-					+ "attribute vec4 a_pos;"
-					+ "attribute vec2 a_light;"
-					+ "varying vec4 color;"
-					+ "varying float z;"
-					+ "const float ff = 255.0;"
-					+ "float c_alpha = 0.8;"
-					+ "void main() {"
-					//   change height by u_alpha
-					+ "  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);"
-					+ "  z = gl_Position.z;"
-					+ "  if (u_mode == 0)"
-					//     roof / depth pass
-					+ "    color = u_color[0];"
-					+ "  else {"
-					//    decrease contrast with distance
-					+ "   float z = (0.96 + gl_Position.z * 0.04);"
-					+ "   if (u_mode == 1){"
-					//     sides 1 - use 0xff00
-					//     scale direction to -0.5<>0.5 
-					+ "    float dir = abs(a_light.y / ff - 0.5);"
-					+ "    color = u_color[1] * z;"
-					+ "    color.rgb *= (0.7 + dir * 0.4);"
-					+ "  } else if (u_mode == 2){"
-					//     sides 2 - use 0x00ff
-					+ "    float dir = abs(a_light.x / ff - 0.5);"
-					+ "    color = u_color[2] * z;"
-					+ "    color.rgb *= (0.7 + dir * 0.4);"
-					+ "  } else"
-					//     outline
-					+ "    color = u_color[3] * z;"
-					+ "}}",
+					+ "}}"
 	};
 
 	final static String extrusionFragmentShader = ""
