@@ -56,15 +56,15 @@ public final class LineRenderer {
 	private static int[] hLineMode = new int[2];
 
 	static boolean init() {
-		lineProgram[0] = GlUtils.createProgram(Shaders.lineVertexShader,
-				Shaders.lineFragmentShader);
+		lineProgram[0] = GlUtils.createProgram(lineVertexShader,
+				lineFragmentShader);
 		if (lineProgram[0] == 0) {
 			Log.e(TAG, "Could not create line program.");
 			return false;
 		}
 
-		lineProgram[1] = GlUtils.createProgram(Shaders.lineVertexShader,
-				Shaders.lineSimpleFragmentShader);
+		lineProgram[1] = GlUtils.createProgram(lineVertexShader,
+				lineSimpleFragmentShader);
 		if (lineProgram[1] == 0) {
 			Log.e(TAG, "Could not create simple line program.");
 			return false;
@@ -212,4 +212,65 @@ public final class LineRenderer {
 
 		return l;
 	}
+
+	private final static String lineVertexShader = ""
+			+ "precision mediump float;"
+			+ "uniform mat4 u_mvp;"
+			+ "uniform float u_width;"
+			+ "attribute vec2 a_position;"
+			+ "attribute vec2 a_st;"
+			+ "varying vec2 v_st;"
+			+ "const float dscale = 8.0/2048.0;"
+			+ "void main() {"
+			// scale extrusion to u_width pixel
+			// just ignore the two most insignificant bits of a_st :)
+			+ "  vec2 dir = dscale * u_width * a_st;"
+			+ "  gl_Position = u_mvp * vec4(a_position + dir, 0.0,1.0);"
+			// last two bits of a_st hold the texture coordinates
+			+ "  v_st = u_width * (abs(mod(a_st,4.0)) - 1.0);"
+			// use bit operations when available (gles 1.3)
+			// + "  v_st = u_width * vec2(ivec2(a_st) & 3 - 1);"
+			+ "}";
+
+	private final static String lineSimpleFragmentShader = ""
+			+ "precision mediump float;"
+			+ "uniform float u_wscale;"
+			+ "uniform float u_width;"
+			+ "uniform int u_mode;"
+			+ "uniform vec4 u_color;"
+			+ "varying vec2 v_st;"
+			+ "void main() {"
+			+ "  float len;"
+			+ "  if (u_mode == 0)"
+			+ "    len = u_width - abs(v_st.s);"
+			+ "  else "
+			+ "    len = u_width - length(v_st);"
+			// fade to alpha. u_wscale is the width in pixel which should be
+			// faded, u_width - len the position of this fragment on the
+			// perpendicular to this line segment, only works with no
+			// perspective
+			+ "  gl_FragColor = u_color * min(1.0, len / u_wscale);"
+			+ "}";
+
+	private final static String lineFragmentShader = ""
+			+ "#extension GL_OES_standard_derivatives : enable\n"
+			+ "precision mediump float;"
+			+ "uniform float u_wscale;"
+			+ "uniform float u_width;"
+			+ "uniform int u_mode;"
+			+ "uniform vec4 u_color;"
+			+ "varying vec2 v_st;"
+			+ "void main() {"
+			+ "  float len;"
+			+ "  float fuzz;"
+			+ "  if (u_mode == 0){"
+			+ "    len = u_width - abs(v_st.s);"
+			+ "    fuzz = u_wscale + fwidth(v_st.s);"
+			+ "  } else {"
+			+ "    len = u_width - length(v_st);"
+			+ "    vec2 st_width = fwidth(v_st);"
+			+ "    fuzz = u_wscale + max(st_width.s, st_width.t);"
+			+ "  }"
+			+ "  gl_FragColor = u_color * min(1.0, len / fuzz);"
+			+ "}";
 }

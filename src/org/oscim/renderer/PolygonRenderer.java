@@ -69,10 +69,10 @@ public final class PolygonRenderer {
 	static boolean init() {
 
 		// Set up the program for rendering polygons
-		//		polygonProgram = GlUtils.createProgram(Shaders.polygonVertexShaderZ,
-		//				Shaders.polygonFragmentShaderZ);
-		polygonProgram = GlUtils.createProgram(Shaders.polygonVertexShader,
-				Shaders.polygonFragmentShader);
+		//		polygonProgram = GlUtils.createProgram(polygonVertexShaderZ,
+		//				polygonFragmentShaderZ);
+		polygonProgram = GlUtils.createProgram(polygonVertexShader,
+				polygonFragmentShader);
 
 		if (polygonProgram == 0) {
 			// Log.e(TAG, "Could not create polygon program.");
@@ -337,4 +337,43 @@ public final class PolygonRenderer {
 
 		GlUtils.checkGlError("draw debug");
 	}
+
+	private final static String polygonVertexShader = ""
+			+ "precision highp float;"
+			+ "uniform mat4 u_mvp;"
+			+ "attribute vec4 a_position;"
+			+ "void main() {"
+			+ "  gl_Position = u_mvp * a_position;"
+			+ "}";
+
+	private final static String polygonFragmentShader = ""
+			+ "precision highp float;"
+			+ "uniform vec4 u_color;"
+			+ "void main() {"
+			+ "  gl_FragColor = u_color;"
+			+ "}";
+
+	private final static String polygonVertexShaderZ = ""
+			+ "precision highp float;"
+			+ "uniform mat4 u_mvp;"
+			+ "attribute vec4 a_position;"
+			+ "varying float z;"
+			+ "void main() {"
+			+ "  gl_Position = u_mvp * a_position;"
+			+ "  z = gl_Position.z;"
+			+ "}";
+	private final static String polygonFragmentShaderZ = ""
+			+ "precision highp float;"
+			+ "uniform vec4 u_color;"
+			+ "varying float z;"
+			+ "void main() {"
+			+ "if (z < -1.0)"
+			+ "  gl_FragColor = vec4(0.0, z + 2.0, 0.0, 1.0)*0.8;"
+			+ "else if (z < 0.0)"
+			+ "  gl_FragColor = vec4(z * -1.0, 0.0, 0.0, 1.0)*0.8;"
+			+ "else if (z < 1.0)"
+			+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0)*0.8;"
+			+ "else"
+			+ "  gl_FragColor = vec4(0.0, z - 1.0, 0.0, 1.0)*0.8;"
+			+ "}";
 }
