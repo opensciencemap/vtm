@@ -226,8 +226,10 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 		GLES20.glUseProgram(extrusionProgram[shaderMode]);
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
-		GLES20.glEnable(GLES20.GL_CULL_FACE);
-		GLES20.glCullFace(GLES20.GL_FRONT);
+		if (pos.scale < 2) {
+			GLES20.glEnable(GLES20.GL_CULL_FACE);
+			GLES20.glCullFace(GLES20.GL_FRONT);
+		}
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 		GLES20.glColorMask(false, false, false, false);
 		GLES20.glUniform1i(uExtMode, 0);
@@ -306,7 +308,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 			tiles[i] = null;
 		}
 
-		GLES20.glDisable(GLES20.GL_CULL_FACE);
+		if (pos.scale < 2)
+			GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
@@ -331,7 +334,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	private final float _g = 0xe8;
 	private final float _b = 0xe6;
 	private final float _o = 55;
-	private final float _s = -10;
+	private final float _s = 20;
 	private final float _l = 16;
 	private float mAlpha = 1;
 	private final float[] mColor = {
@@ -415,16 +418,18 @@ public class ExtrusionOverlay extends RenderOverlay {
 					+ "   if (u_mode == 1){"
 					//     sides 1 - use 0xff00
 					//     scale direction to -0.5<>0.5 
-					+ "    float dir = abs(a_light.y / ff - 0.5);"
+					//+ "    float dir = abs(a_light.y / ff - 0.5);"
+					+ "    float dir = a_light.y / ff;"
 					+ "    float z = (0.98 + gl_Position.z * 0.02);"
 					+ "    color = u_color[1];"
-					+ "    color.rgb *= (0.7 + dir * 0.4) * z;"
+					+ "    color.rgb *= (0.8 + dir * 0.2) * z;"
 					+ "  } else if (u_mode == 2){"
 					//     sides 2 - use 0x00ff
-					+ "    float dir = abs(a_light.x / ff - 0.5);"
+					//+ "    float dir = abs(a_light.x / ff - 0.5);"
+					+ "    float dir = a_light.x / ff;"
 					+ "    float z = (0.95 + gl_Position.z * 0.05);"
 					+ "    color = u_color[2] * z;"
-					+ "    color.rgb *= (0.7 + dir * 0.4) * z;"
+					+ "    color.rgb *= (0.8 + dir * 0.2) * z;"
 					+ "  } else {"
 					//     outline
 					+ "    float z = (0.8 - gl_Position.z * 0.2);"
