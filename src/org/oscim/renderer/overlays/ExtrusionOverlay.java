@@ -412,22 +412,24 @@ public class ExtrusionOverlay extends RenderOverlay {
 					+ "    color = u_color[0];"
 					+ "  else {"
 					//    decrease contrast with distance
-					+ "   float z = (0.9 + gl_Position.z * 0.1);"
 					+ "   if (u_mode == 1){"
 					//     sides 1 - use 0xff00
 					//     scale direction to -0.5<>0.5 
 					+ "    float dir = abs(a_light.y / ff - 0.5);"
-					+ "    color = u_color[1] * z;"
+					+ "    float z = (0.98 + gl_Position.z * 0.02);"
+					+ "    color = u_color[1];"
 					+ "    color.rgb *= (0.7 + dir * 0.4) * z;"
 					+ "  } else if (u_mode == 2){"
 					//     sides 2 - use 0x00ff
 					+ "    float dir = abs(a_light.x / ff - 0.5);"
+					+ "    float z = (0.95 + gl_Position.z * 0.05);"
 					+ "    color = u_color[2] * z;"
 					+ "    color.rgb *= (0.7 + dir * 0.4) * z;"
-					+ "  } else"
+					+ "  } else {"
 					//     outline
+					+ "    float z = (0.8 - gl_Position.z * 0.2);"
 					+ "    color = u_color[3] * z;"
-					+ "}}"
+					+ "}}}"
 	};
 
 	final static String extrusionFragmentShader = ""
@@ -437,16 +439,16 @@ public class ExtrusionOverlay extends RenderOverlay {
 			+ "  gl_FragColor = color;"
 			+ "}";
 
-	//	final static String extrusionFragmentShader = ""
-	//			+ "precision highp float;"
-	//			+ "uniform vec4 u_color;"
-	//			+ "varying float z;"
-	//			+ "void main() {"
-	//			+ "if (z < 0.0)"
-	//			+ "  gl_FragColor = vec4(z * -1.0, 0.0, 0.0, 1.0);"
-	//			+ "else"
-	//			+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0);"
-	//			+ "}";
+	final static String extrusionFragmentShaderZ = ""
+			+ "precision highp float;"
+			+ "uniform vec4 u_color;"
+			+ "varying float z;"
+			+ "void main() {"
+			+ "if (z < 0.0)"
+			+ "  gl_FragColor = vec4(z * -1.0, 0.0, 0.0, 1.0);"
+			+ "else"
+			+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0);"
+			+ "}";
 
 	public void setAlpha(float a) {
 		mAlpha = a;

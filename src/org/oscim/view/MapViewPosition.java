@@ -26,7 +26,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.GeometryUtils;
 import org.oscim.utils.GeometryUtils.Point2D;
 import org.oscim.utils.GlUtils;
 
@@ -98,8 +97,8 @@ public class MapViewPosition {
 	private float mHeight, mWidth;
 
 	public final static float VIEW_DISTANCE = 3.0f;
-	public final static float VIEW_NEAR = 2;
-	public final static float VIEW_FAR = 7;
+	public final static float VIEW_NEAR = 1;
+	public final static float VIEW_FAR = 6;
 	// scale map plane at VIEW_DISTANCE to near plane
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
@@ -161,22 +160,6 @@ public class MapViewPosition {
 		unproject(1, 1, t2, coords, 6); // bottom-right
 
 		return true;
-	}
-
-	public static byte calcLinesIntersect(
-
-			double ax2, double ay2,
-			double bx1, double by1,
-			double bx2, double by2,
-			GeometryUtils.Point2D point)
-	{
-		double ua_numr = (bx2 - bx1) * (-by1) - (by2 - by1) * (-bx1);
-		double denr = (by2 - by1) * (ax2) - (bx2 - bx1) * (ay2);
-		double ua = ua_numr / denr;
-
-		point.x = ua * ax2;
-		point.y = ua * ay2;
-		return 1;
 	}
 
 	// get the z-value of the map-plane for a point on screen
