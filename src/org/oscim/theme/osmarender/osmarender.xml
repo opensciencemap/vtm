@@ -76,9 +76,9 @@
   <!-- <style-line name="building"            stroke="#c9c3c1" width="1.0" fixed="true" cap="butt" fade="15"/>  -->
   <!-- <style-line name="building"            stroke="#d0cec8" width="1.0" fixed="true" cap="butt" fade="15"/> 
   <style-area name="building"            fill="#e9e6e3" fade="15"/>-->
-   <style-line name="building"            stroke="#c4c3c2" width="1.0" fixed="true" cap="butt" fade="15"/> 
+   <style-line name="building"            stroke="#b7b6b3" width="1.0" fixed="true" cap="butt" fade="15"/> 
   <!-- <style-area name="building"            fill="#eae8e6" fade="15"/>-->
-     <style-area name="building"            fill="#f2f0ed" fade="15"/>
+     <style-area name="building"            fill="#eef7f6f3" fade="15"/>
    <!-- ways -->
   <rule e="way" k="*" v="*" >
 
