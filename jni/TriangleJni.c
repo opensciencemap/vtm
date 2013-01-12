@@ -50,11 +50,46 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   in.numberofpoints = num_points;
   in.pointlist = (float *) points;
 
+  int invalid = 0;
+
+  float *i_points = points;
+
+  for (i = 0; i < num_points && !invalid; i++)
+	{
+	  float x = *i_points++;
+	  float y = *i_points++;
+	  float *j_points = i_points;
+
+	  for (j = i+1; j < num_points; j++)
+		{
+		  if (*j_points++ == x && *j_points++ == y)
+			{
+			  snprintf(buf, 128, "\ninavlid polygon: duplicate points at %d, %d:\n", i, j);
+			  mylog(buf);
+			  invalid = 1;
+			  break;
+			}
+		}
+	}
+
+  if (invalid)
+	{
+	  for (i = 0; i < num_points; i++) {
+		snprintf(buf, 128, "%d point: %f, %f\n", i, points[i*2], points[i*2+1]);
+		mylog(buf);
+	  }
+	  snprintf(buf, 128, "points: %d, rings: %d\n\n", num_points, num_rings);
+	  mylog(buf);
+	  return 0;
+	}
+
 #ifdef TESTING
   for (i = 0; i < num_points; i++) {
   	snprintf(buf, 128, "point: %f, %f\n", points[i*2], points[i*2+1]);
   	mylog(buf);
   }
+  snprintf(buf, 128, "points: %d, rings: %d\n", num_points, num_rings);
+  mylog(buf);
 #endif
   int num_segments = num_points; // - (closed ? (num_rings - 1) : 0);
   in.segmentlist = (int *) malloc(num_segments * 2 * sizeof(int));
