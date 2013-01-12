@@ -609,7 +609,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private boolean mNewSurface;
 
-	private static final boolean debugView = false;
+	public static final boolean debugView = false;
 
 	void clearBuffer() {
 		mNewSurface = true;
