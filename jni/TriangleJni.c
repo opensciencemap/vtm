@@ -61,12 +61,10 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	  float y = *i_points++;
 	  float *j_points = i_points;
 
-	  for (j = i + 1; j < num_points; j++)
+	  for (j = i + 1; j < num_points; j++, j_points += 2)
 		{
-		  if (*j_points++ == x && *j_points++ == y)
+		  if ((*j_points == x) && (*(j_points+1) == y))
 			{
-			  snprintf(buf, 128, "\ninavlid polygon: duplicate points at %d, %d:\n", i, j);
-			  mylog(buf);
 			  invalid = 1;
 			  break;
 			}
@@ -75,6 +73,9 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 
   if (invalid)
 	{
+	  snprintf(buf, 128, "\ninavlid polygon: duplicate points at %d, %d:\n", i-1, j);
+	  mylog(buf);
+
 	  for (i = 0; i < num_points; i++) {
 		snprintf(buf, 128, "%d point: %f, %f\n", i, points[i*2], points[i*2+1]);
 		mylog(buf);
