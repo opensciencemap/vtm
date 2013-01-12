@@ -69,11 +69,13 @@ public final class PolygonRenderer {
 	static boolean init() {
 
 		// Set up the program for rendering polygons
-		//		polygonProgram = GlUtils.createProgram(polygonVertexShaderZ,
-		//				polygonFragmentShaderZ);
-		polygonProgram = GlUtils.createProgram(polygonVertexShader,
-				polygonFragmentShader);
-
+		if (GLRenderer.debugView) {
+			polygonProgram = GlUtils.createProgram(polygonVertexShaderZ,
+					polygonFragmentShaderZ);
+		} else {
+			polygonProgram = GlUtils.createProgram(polygonVertexShader,
+					polygonFragmentShader);
+		}
 		if (polygonProgram == 0) {
 			// Log.e(TAG, "Could not create polygon program.");
 			return false;
@@ -352,7 +354,6 @@ public final class PolygonRenderer {
 			+ "void main() {"
 			+ "  gl_FragColor = u_color;"
 			+ "}";
-
 	private final static String polygonVertexShaderZ = ""
 			+ "precision highp float;"
 			+ "uniform mat4 u_mvp;"
