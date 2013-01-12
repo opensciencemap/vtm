@@ -41,6 +41,7 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   jfloat* points = (jfloat*)(*env)->GetDirectBufferAddress(env, point_buf);
   jshort* indices = (jshort*)(*env)->GetDirectBufferAddress(env, indice_buf);
 
+
   char buf[128];
   int i, j;
 
@@ -54,13 +55,13 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 
   float *i_points = points;
 
-  for (i = 0; i < num_points && !invalid; i++)
+  for (i = 0; i < num_points - 1 && !invalid; i++)
 	{
 	  float x = *i_points++;
 	  float y = *i_points++;
 	  float *j_points = i_points;
 
-	  for (j = i+1; j < num_points; j++)
+	  for (j = i + 1; j < num_points; j++)
 		{
 		  if (*j_points++ == x && *j_points++ == y)
 			{
