@@ -99,7 +99,7 @@ public class BuildingOverlay extends Overlay {
 		else
 			a = (1 - max) + (tick / duration) * max;
 
-		Log.d(TAG, "fade " + dir + " " + tick + "\t" + a);
+		//Log.d(TAG, "fade " + dir + " " + tick + "\t" + a);
 
 		mAlpha = a;
 		mExtLayer.setAlpha(a);
