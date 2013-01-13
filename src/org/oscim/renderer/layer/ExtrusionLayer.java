@@ -99,18 +99,14 @@ public class ExtrusionLayer extends Layer {
 				continue;
 			}
 
-			// check: do not to add duplicate end/start point
-			// triangulator can only handle implicity closed polygons
+			// check: drop last point from explicitly closed rings
 			int len = length;
-			boolean closed = false;
 			if (!MapView.enableClosePolygons) {
-				closed = true;
 				len -= 2;
 			} else if (points[ppos] == points[ppos + len - 2]
 					&& points[ppos + 1] == points[ppos + len - 1]) {
 				// vector-tile-map does not produce implicty closed
 				// polygons (yet)
-				closed = true;
 				len -= 2;
 			}
 
@@ -123,10 +119,11 @@ public class ExtrusionLayer extends Layer {
 				simple = false;
 
 			boolean convex = addOutline(points, ppos, len, height, simple);
+
 			if (simple && (convex || len <= 8))
 				addRoofSimple(startVertex, len);
-			else if (ipos == outer && (!closed || simple)) {// only add roof once
-				addRoof(startVertex, index, ipos, points, ppos, closed);
+			else if (ipos == outer) { // add roof only once
+				addRoof(startVertex, index, ipos, points, ppos);
 			}
 		}
 	}
@@ -153,8 +150,7 @@ public class ExtrusionLayer extends Layer {
 		mCurIndices[IND_ROOF].used = i;
 	}
 
-	private void addRoof(int startVertex, short[] index, int ipos, float[] points, int ppos,
-			boolean closed) {
+	private void addRoof(int startVertex, short[] index, int ipos, float[] points, int ppos) {
 		int len = 0;
 		int rings = 0;
 
@@ -162,10 +158,6 @@ public class ExtrusionLayer extends Layer {
 		for (int i = ipos, n = index.length; i < n && index[i] > 0; i++) {
 			len += index[i];
 			rings++;
-		}
-		if (closed) {
-			rings = 1;
-			len = index[ipos] - 2;
 		}
 
 		// triangulate up to 600 points (limited only by prepared buffers)
@@ -176,7 +168,7 @@ public class ExtrusionLayer extends Layer {
 		}
 
 		int used = triangulate(points, ppos, len, index, ipos, rings,
-				startVertex + 1, mCurIndices[IND_ROOF], closed);
+				startVertex + 1, mCurIndices[IND_ROOF]);
 
 		if (used > 0) {
 			// get back to the last item added..
@@ -187,7 +179,8 @@ public class ExtrusionLayer extends Layer {
 		}
 	}
 
-	private boolean addOutline(float[] points, int pos, int len, float height, boolean convex) {
+	private boolean addOutline(float[] points, int pos, int len, float height,
+			boolean convex) {
 
 		// add two vertices for last face to make zigzag indices work
 		boolean addFace = (len % 4 != 0);
@@ -413,7 +406,7 @@ public class ExtrusionLayer extends Layer {
 	private static FloatBuffer fBuf;
 
 	public static synchronized int triangulate(float[] points, int ppos, int plen, short[] index,
-			int ipos, int rings, int vertexOffset, VertexPoolItem item, boolean closed) {
+			int ipos, int rings, int vertexOffset, VertexPoolItem item) {
 
 		if (!initialized) {
 			// FIXME also cleanup on shutdown!
@@ -432,11 +425,8 @@ public class ExtrusionLayer extends Layer {
 		sBuf.clear();
 
 		sBuf.put((short) plen); // all points
-		if (closed) {
-			sBuf.put((short) plen);
-		} else {
-			sBuf.put(index, ipos, rings);
-		}
+		sBuf.put(index, ipos, rings);
+
 		int numTris = TriangleJNI.triangulate(fBuf, rings, sBuf, vertexOffset);
 
 		int numIndices = numTris * 3;
