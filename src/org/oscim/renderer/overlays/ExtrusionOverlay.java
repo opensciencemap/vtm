@@ -203,12 +203,9 @@ public class ExtrusionOverlay extends RenderOverlay {
 				GLES20.glVertexAttribPointer(uExtLightPosition, 2,
 						GLES20.GL_UNSIGNED_BYTE, false, 8, 6);
 
-				GLES20.glUniform4f(uExtColor, 0.6f, 0.6f, 0.6f, 0.8f);
 				GLES20.glDrawElements(GLES20.GL_TRIANGLES,
 						(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
 						GLES20.GL_UNSIGNED_SHORT, 0);
-
-				GLES20.glUniform4f(uExtColor, 1.0f, 0.5f, 0.5f, 0.9f);
 
 				GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
 						GLES20.GL_UNSIGNED_SHORT,
