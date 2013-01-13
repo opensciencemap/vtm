@@ -29,6 +29,16 @@ int pnpoly(int nvert, float *vert, float testx, float testy)
 
 //#define TESTING
 
+int
+compare_dups (const void *a, const void *b)
+{
+  int da = *((const int*)a);
+  int db = *((const int*)b);
+
+  return (da > db) - (da < db);
+}
+
+
 typedef struct triangulateio TriangleIO;
 
 jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
@@ -37,66 +47,81 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 													 jobject indice_buf,
 													 jint offset)
 {
-  TriangleIO in, out;
   jfloat* points = (jfloat*)(*env)->GetDirectBufferAddress(env, point_buf);
   jshort* indices = (jshort*)(*env)->GetDirectBufferAddress(env, indice_buf);
 
-
+  TriangleIO in, out;
   char buf[128];
   int i, j;
 
   memset(&in, 0, sizeof(TriangleIO));
 
-  int num_points = (indices[0])>>1;
-  in.numberofpoints = num_points;
+  //int num_points = (indices[0])>>1;
+  in.numberofpoints = (indices[0])>>1;
   in.pointlist = (float *) points;
 
-  int invalid = 0;
+  // check if explicitly closed
+  if (in.pointlist[0] == in.pointlist[indices[1]-2] &&
+	in.pointlist[1] == in.pointlist[indices[1]-1])
+	{
+	  int point = 0;
+	  for (i = 0; i < num_rings; i++)
+		{
+		  // remove last point in ring
+		  indices[i+1] -= 2;
+		  int last = point + indices[i+1] >> 1;
+
+		  //sprintf(buf, "drop closing point at %d, %d:\n", point, last);
+		  //mylog(buf);
+
+		  if (in.numberofpoints - last > 1)
+			memmove(in.pointlist + (last * 2),
+				in.pointlist + ((last + 1)*2),
+				(in.numberofpoints - last - 1)
+				* 2 * sizeof(float));
+
+		  in.numberofpoints--;
+		  point = last;
+		}
+	}
+
+  int dups = 0;
 
   float *i_points = points;
+  int *skip_list = NULL;
 
-  for (i = 0; i < num_points - 1 && !invalid; i++)
+  // check for duplicate vertices and keep a list
+  // of dups and the first occurence
+  for (i = 0; i < in.numberofpoints - 1; i++)
 	{
 	  float x = *i_points++;
 	  float y = *i_points++;
 	  float *j_points = i_points;
 
-	  for (j = i + 1; j < num_points; j++, j_points += 2)
+	  for (j = i + 1; j < in.numberofpoints; j++, j_points += 2)
 		{
 		  if ((*j_points == x) && (*(j_points+1) == y))
 			{
-			  invalid = 1;
-			  break;
+			  skip_list = realloc(skip_list, (dups + 2) * 2 * sizeof(int));
+			  skip_list[dups*2+0] = j;
+			  skip_list[dups*2+1] = i;
+			  dups++;
 			}
 		}
 	}
 
-  if (invalid)
-	{
-	  snprintf(buf, 128, "\ninavlid polygon: duplicate points at %d, %d:\n", i-1, j);
-	  mylog(buf);
-
-	  for (i = 0; i < num_points; i++) {
-		snprintf(buf, 128, "%d point: %f, %f\n", i, points[i*2], points[i*2+1]);
-		mylog(buf);
-	  }
-	  snprintf(buf, 128, "points: %d, rings: %d\n\n", num_points, num_rings);
-	  mylog(buf);
-	  return 0;
-	}
-
 #ifdef TESTING
-  for (i = 0; i < num_points; i++) {
-  	snprintf(buf, 128, "point: %f, %f\n", points[i*2], points[i*2+1]);
+  for (i = 0; i < in.numberofpoints; i++) {
+  	sprintf(buf, "point: %f, %f\n", points[i*2], points[i*2+1]);
   	mylog(buf);
   }
-  snprintf(buf, 128, "points: %d, rings: %d\n", num_points, num_rings);
+  sprintf(buf, "points: %d, rings: %d\n", in.numberofpoints, num_rings);
   mylog(buf);
 #endif
-  int num_segments = num_points; // - (closed ? (num_rings - 1) : 0);
-  in.segmentlist = (int *) malloc(num_segments * 2 * sizeof(int));
-  in.numberofsegments = num_segments;
+  in.segmentlist = (int *) malloc(in.numberofpoints * 2 * sizeof(int));
+  in.numberofsegments = in.numberofpoints;
   in.numberofholes = num_rings - 1;
+
   int *rings = NULL;
   if (in.numberofholes > 0)
 	{
@@ -107,8 +132,11 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   int   *seg = in.segmentlist;
   float *hole = in.holelist;
 
-  int ring;
+  // counter going through all points
   int point;
+  // counter going through all rings
+  int ring;
+
   // assign all points to segments for each ring
   for (ring = 0, point = 0; ring < num_rings; ring++, point++)
 	{
@@ -156,19 +184,14 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 		  float centerx = cx + vx / 2 - ux;
 		  float centery = cy + vy / 2 - uy;
 
-		  /* snprintf(buf, 128, "a: %f in:(%.2f %.2f) " */
-		  /* 		   "cur:(%.2f %.2f), next:(%.2f %.2f)\n", */
-		  /* 		   a, centerx, centery, cx, cy, nx,ny); */
-		  /* mylog(buf); */
-
 		  *hole++ = centerx;
 		  *hole++ = centery;
 		}
 
-	  //if (!closed){
-	  *seg++ = point + (num_points - 1);
+	  // close ring
+	  int last = point + (num_points - 1);
+	  *seg++ = last;
 	  *seg++ = point;
-	  //}
 
 	  for (len = point + num_points - 1; point < len; point++)
 		{
@@ -176,17 +199,110 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 		  *seg++ = point + 1;
 		}
 	}
+
+  if (dups)
+	{
+	  for (i = 0; i < dups; i++)
+		{
+		  sprintf(buf, "duplicate points at %d, %d: %f,%f\n",
+				  skip_list[i*2], skip_list[i*2+1],
+				  in.pointlist[skip_list[i*2+1]*2],
+				  in.pointlist[skip_list[i*2+1]*2+1]);
+		  mylog(buf);
+		}
+
+	  if (dups == 2)
+		{
+		  if (skip_list[0] > skip_list[2])
+			{
+			  int tmp = skip_list[0];
+			  skip_list[0] = skip_list[2];
+			  tmp = skip_list[1];
+			  skip_list[1] = skip_list[3];
+
+			  sprintf(buf, "flip items\n");
+			  mylog(buf);
+			}
+		}
+	  else if (dups > 2)
+		{
+		  sprintf(buf, "sort dups\n");
+		  mylog(buf);
+
+		  qsort (skip_list, dups, 2 * sizeof (float), compare_dups);
+		}
+
+	  // shift segment indices while removing duplicate points
+	  for (i = 0; i < dups; i++)
+		{
+		  // position of the duplicate vertex
+		  int pos = skip_list[i*2] - i;
+		  // first vertex
+		  int replacement = skip_list[i*2+1];
+
+		  sprintf(buf, "add offset: %d, from pos %d\n", i, pos);
+		  mylog(buf);
+
+		  for (seg = in.segmentlist, j = 0; j < in.numberofsegments*2; j++, seg++)
+			{
+			  if (*seg == pos)
+				{
+				  if (replacement >= pos)
+					*seg = replacement - i;
+				  else
+					*seg = replacement;
+				}
+			  else if(*seg > pos)
+				*seg -= 1;
+			}
+
+		  sprintf(buf, "move %d %d %d\n", pos, pos + 1,
+				  in.numberofpoints - pos - 1);
+		  mylog(buf);
+
+		  if (in.numberofpoints - pos > 1)
+			memmove(in.pointlist + (pos * 2),
+					in.pointlist + ((pos + 1)*2),
+					(in.numberofpoints - pos - 1) * 2 * sizeof(float));
+
+		  in.numberofpoints--;
+
+		  // print poly format to check with triangle/showme
+		  for (j = 0; j < in.numberofpoints; j++)
+			{
+			  sprintf(buf, "%d %f %f\n", j,
+					  in.pointlist[j*2],
+					  in.pointlist[j*2+1]);
+			  mylog(buf);
+			}
+
+		  seg = in.segmentlist;
+		  for (j = 0; j < in.numberofsegments; j++, seg+=2)
+			{
+			  sprintf(buf, "%d %d %d\n",
+					  j, *seg, *(seg+1));
+			  mylog(buf);
+			}
+		}
+	  for (j = 0; j < in.numberofholes; j++)
+		{
+		  sprintf(buf, "%d %f %f\n", j,
+				  in.holelist[j*2], in.holelist[j*2+1]);
+		  mylog(buf);
+		}
+	}
+
 #ifdef TESTING
   for (i = 0; i < in.numberofsegments; i++)
   	{
-  	  snprintf(buf, 128, "segment: %d, %d\n",
+  	  sprintf(buf, "segment: %d, %d\n",
 			   in.segmentlist[i*2], in.segmentlist[i*2+1]);
   	  mylog(buf);
   	}
 
   for (i = 0; i < in.numberofholes; i++)
   	{
-  	  snprintf(buf, 128, "hole: %f, %f\n",
+  	  sprintf(buf, "hole: %f, %f\n",
 			   in.holelist[i*2], in.holelist[i*2+1]);
   	  mylog(buf);
   	}
@@ -205,7 +321,7 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 
   if (in.numberofpoints < out.numberofpoints)
 	{
-	  snprintf(buf, 128, "polygon input is bad! points in:%d out%d\n",
+	  sprintf(buf, "polygon input is bad! points in:%d out%d\n",
 				in.numberofpoints, out.numberofpoints);
 	  mylog(buf);
 
@@ -217,39 +333,50 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 
 
 #ifdef TESTING
-  snprintf(buf, 128, "triangles: %d\n", out.numberoftriangles);
+  sprintf(buf, "triangles: %d\n", out.numberoftriangles);
   mylog(buf);
 
   for (i = 0; i < out.numberoftriangles; i++)
 	{
-	  snprintf(buf, 128, "> %d, %d, %d\n",out.trianglelist[i*3],
+	  sprintf(buf, "> %d, %d, %d\n",out.trianglelist[i*3],
 			   out.trianglelist[i*3+1],
 			   out.trianglelist[i*3+2]);
 	  mylog(buf);
 	}
 #endif
 
-  // ----------- fix offset to vertex buffer indices -------------
+  INDICE *tri;
+  int n, m;
+
+  /* shift back indices from removed duplicates */
+  for (i = 0; i < dups; i++)
+	{
+	  int pos = skip_list[i*2] + i;
+
+	  tri = out.trianglelist;
+	  n = out.numberoftriangles * 3;
+
+	  for (;n-- > 0; tri++)
+		if (*tri >= pos)
+		  *tri += 1;
+	}
+
+  /* fix offset to vertex buffer indices */
 
   // scale to stride and add offset
   short stride = 2;
-  int n, m;
 
   if (offset < 0)
 	offset = 0;
 
-  INDICE *tri = out.trianglelist;
-  n = out.numberoftriangles * 3;
-
-  while (n-- > 0)
+  tri = out.trianglelist;
+  for (n = out.numberoftriangles * 3; n > 0; n--)
 	*tri++ = *tri * stride + offset;
 
   // when a ring has an odd number of points one (or rather two)
   // additional vertices will be added. so the following rings
   // needs extra offset...
-
   int start = offset;
-
   for (j = 0, m = in.numberofholes; j < m; j++)
 	{
 	  start += rings[j] * stride;
@@ -270,6 +397,7 @@ jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
   free(in.segmentlist);
   free(in.holelist);
   free(rings);
+  free(skip_list);
 
   return out.numberoftriangles;
 }
