@@ -207,6 +207,13 @@ public final class SymbolLayer extends TextureLayer {
 				short tx = (short) ((int) (SCALE * it2.x) & LBIT_MASK | (it2.billboard ? 1 : 0));
 				short ty = (short) (SCALE * it2.y);
 
+				if (pos == VertexPoolItem.SIZE) {
+					si.used = VertexPoolItem.SIZE;
+					si = si.next = VertexPool.get();
+					buf = si.vertices;
+					pos = 0;
+				}
+
 				// top-left
 				buf[pos++] = tx;
 				buf[pos++] = ty;
@@ -238,16 +245,8 @@ public final class SymbolLayer extends TextureLayer {
 
 				// six elements used to draw the four vertices
 				curIndices += TextureRenderer.INDICES_PER_SPRITE;
-
-				if (pos == VertexPoolItem.SIZE) {
-					si.used = VertexPoolItem.SIZE;
-					si = si.next = VertexPool.get();
-					buf = si.vertices;
-					pos = 0;
-				}
-
-				x += width;
 			}
+			x += width;
 		}
 
 		to.offset = offsetIndices;
@@ -263,8 +262,10 @@ public final class SymbolLayer extends TextureLayer {
 	protected void clear() {
 		TextureObject.release(textures);
 		SymbolItem.release(symbols);
+		VertexPool.release(pool);
 		textures = null;
 		symbols = null;
+		pool = null;
 		verticesCnt = 0;
 	}
 }

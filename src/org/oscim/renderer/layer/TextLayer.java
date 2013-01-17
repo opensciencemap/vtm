@@ -22,7 +22,7 @@ import android.util.Log;
 
 public final class TextLayer extends TextureLayer {
 
-	// private static String TAG = TextureLayer.class.getSimpleName();
+	//private static String TAG = TextureLayer.class.getName();
 
 	private final static int TEXTURE_WIDTH = TextureObject.TEXTURE_WIDTH;
 	private final static int TEXTURE_HEIGHT = TextureObject.TEXTURE_HEIGHT;
@@ -61,10 +61,8 @@ public final class TextLayer extends TextureLayer {
 				else
 					prev.next = it.next;
 
-				verticesCnt -= 4;
 				return true;
 			}
-
 			prev = it;
 		}
 
@@ -72,21 +70,42 @@ public final class TextLayer extends TextureLayer {
 	}
 
 	public void addText(TextItem item) {
-		verticesCnt += 4;
 		TextItem it = labels;
 
 		for (; it != null; it = it.next) {
-			if (it.text == item.text) {
-				// insert after text of same type
+			// todo add captions at the end
+			//if (item.text.caption && !it.text.caption)
+			//continue;
+			//if (!item.text.caption && it.text.caption)
+			//continue;
+
+			if (item.text == it.text) {
+				while (it.next != null
+						// break if next item uses different text style
+						&& item.text == it.next.text
+						// check same string instance
+						&& item.string != it.string
+						// check same string
+						&& !item.string.equals(it.string))
+					it = it.next;
+
+				// unify duplicate string :)
+				// Note: this is required for 'packing test' in prepare to work! 
+				if (item.string != it.string && item.string.equals(it.string))
+					item.string = it.string;
+
+				// insert after text of same type and/or before same string
 				item.next = it.next;
 				it.next = item;
-
 				return;
 			}
 		}
 
 		item.next = labels;
 		labels = item;
+		//		for (it = labels; it != null; it = it.next)
+		//			Log.d(TAG, "> " + it.text + " " + it.string);
+		//		Log.d(TAG, "< ");
 	}
 
 	@Override
@@ -94,19 +113,14 @@ public final class TextLayer extends TextureLayer {
 		if (TextureRenderer.debug)
 			Log.d("...", "prepare");
 
-		// int numLabel = 0;
-		// int numTextures = 0;
-
 		short numIndices = 0;
 		short offsetIndices = 0;
 
-		curItem = VertexPool.get();
-		pool = curItem;
+		VertexPoolItem vi = pool = VertexPool.get();
+		int pos = vi.used; // 0
+		short buf[] = vi.vertices;
 
-		VertexPoolItem si = curItem;
-
-		int pos = si.used;
-		short buf[] = si.vertices;
+		verticesCnt = 0;
 
 		int advanceY = 0;
 		float x = 0;
@@ -117,8 +131,7 @@ public final class TextLayer extends TextureLayer {
 		textures = to;
 		mCanvas.setBitmap(to.bitmap);
 
-		for (TextItem it = labels; it != null; it = it.next) {
-			// numLabel++;
+		for (TextItem it = labels; it != null;) {
 
 			float width = it.width + 2 * mFontPadX;
 			float height = (int) (it.text.fontHeight) + 2 * mFontPadY + 0.5f;
@@ -165,110 +178,126 @@ public final class TextLayer extends TextureLayer {
 			float hw = width / 2.0f;
 			float hh = height / 2.0f;
 
-			short x1, x2, x3, x4, y1, y3, y2, y4;
-
-			if (it.text.caption) {
-				x1 = x3 = (short) (SCALE * -hw);
-				x2 = x4 = (short) (SCALE * hw);
-				y1 = y2 = (short) (SCALE * hh);
-				y3 = y4 = (short) (SCALE * -hh);
-				// x1 = x3 = (short) (0);
-				// x2 = x4 = (short) (SCALE * width);
-			} else {
-				float vx = it.x1 - it.x2;
-				float vy = it.y1 - it.y2;
-				float a = (float) Math.sqrt(vx * vx + vy * vy);
-				vx = vx / a;
-				vy = vy / a;
-
-				float ux = -vy;
-				float uy = vx;
-
+			float hh2 = 0;
+			if (!it.text.caption) {
 				hw /= mScale;
-				float hh2 = hh + it.text.fontDescent / 2;
+				hh2 = hh + it.text.fontDescent / 2;
 				hh -= it.text.fontDescent / 2;
-
 				hh /= mScale;
 				hh2 /= mScale;
-
-				x1 = (short) (SCALE * (vx * hw - ux * hh));
-				y1 = (short) (SCALE * (vy * hw - uy * hh));
-				x2 = (short) (SCALE * (-vx * hw - ux * hh));
-				y2 = (short) (SCALE * (-vy * hw - uy * hh));
-				x4 = (short) (SCALE * (-vx * hw + ux * hh2));
-				y4 = (short) (SCALE * (-vy * hw + uy * hh2));
-				x3 = (short) (SCALE * (vx * hw + ux * hh2));
-				y3 = (short) (SCALE * (vy * hw + uy * hh2));
 			}
 
+			// texture coordinates
 			short u1 = (short) (SCALE * x);
 			short v1 = (short) (SCALE * y);
 			short u2 = (short) (SCALE * (x + width));
 			short v2 = (short) (SCALE * (y + height));
 
-			// add vertices
-			int tmp = (int) (SCALE * it.x) & LBIT_MASK;
-			short tx = (short) (tmp | (it.text.caption ? 1 : 0));
+			// add symbol items referencing the same bitmap / drawable
+			for (TextItem it2 = it;; it2 = it2.next) {
 
-			short ty = (short) (SCALE * it.y);
+				if (it != it2) {
+					if (it2 == null
+							|| (it2.text != it.text)
+							|| (it2.string != it.string)) {
+						it = it2;
+						break;
+					}
+					//Log.d(TAG, "pack strings: " + it.string);
+				}
 
-			// top-left
-			buf[pos++] = tx;
-			buf[pos++] = ty;
-			buf[pos++] = x1;
-			buf[pos++] = y1;
-			buf[pos++] = u1;
-			buf[pos++] = v2;
-			// top-right
-			buf[pos++] = tx;
-			buf[pos++] = ty;
-			buf[pos++] = x2;
-			buf[pos++] = y2;
-			buf[pos++] = u2;
-			buf[pos++] = v2;
-			// bot-right
-			buf[pos++] = tx;
-			buf[pos++] = ty;
-			buf[pos++] = x4;
-			buf[pos++] = y4;
-			buf[pos++] = u2;
-			buf[pos++] = v1;
-			// bot-left
-			buf[pos++] = tx;
-			buf[pos++] = ty;
-			buf[pos++] = x3;
-			buf[pos++] = y3;
-			buf[pos++] = u1;
-			buf[pos++] = v1;
+				short x1, x2, x3, x4, y1, y3, y2, y4;
 
-			// six indices to draw the four vertices
-			numIndices += 6;
+				if (it.text.caption) {
+					x1 = x3 = (short) (SCALE * -hw);
+					x2 = x4 = (short) (SCALE * hw);
+					y1 = y2 = (short) (SCALE * hh);
+					y3 = y4 = (short) (SCALE * -hh);
+					// x1 = x3 = (short) (0);
+					// x2 = x4 = (short) (SCALE * width);
+				} else {
+					float vx = it2.x1 - it2.x2;
+					float vy = it2.y1 - it2.y2;
+					float a = (float) Math.sqrt(vx * vx + vy * vy);
+					vx = vx / a;
+					vy = vy / a;
 
-			if (pos == VertexPoolItem.SIZE) {
-				si.used = VertexPoolItem.SIZE;
-				si = si.next = VertexPool.get();
-				buf = si.vertices;
-				pos = 0;
+					float ux = -vy;
+					float uy = vx;
+
+					x1 = (short) (SCALE * (vx * hw - ux * hh));
+					y1 = (short) (SCALE * (vy * hw - uy * hh));
+					x2 = (short) (SCALE * (-vx * hw - ux * hh));
+					y2 = (short) (SCALE * (-vy * hw - uy * hh));
+					x4 = (short) (SCALE * (-vx * hw + ux * hh2));
+					y4 = (short) (SCALE * (-vy * hw + uy * hh2));
+					x3 = (short) (SCALE * (vx * hw + ux * hh2));
+					y3 = (short) (SCALE * (vy * hw + uy * hh2));
+				}
+
+				// add vertices
+				int tmp = (int) (SCALE * it2.x) & LBIT_MASK;
+				short tx = (short) (tmp | (it2.text.caption ? 1 : 0));
+				short ty = (short) (SCALE * it2.y);
+
+				if (pos == VertexPoolItem.SIZE) {
+					vi.used = VertexPoolItem.SIZE;
+					vi = vi.next = VertexPool.get();
+					buf = vi.vertices;
+					pos = 0;
+				}
+
+				// top-left
+				buf[pos++] = tx;
+				buf[pos++] = ty;
+				buf[pos++] = x1;
+				buf[pos++] = y1;
+				buf[pos++] = u1;
+				buf[pos++] = v2;
+				// top-right
+				buf[pos++] = tx;
+				buf[pos++] = ty;
+				buf[pos++] = x2;
+				buf[pos++] = y2;
+				buf[pos++] = u2;
+				buf[pos++] = v2;
+				// bot-right
+				buf[pos++] = tx;
+				buf[pos++] = ty;
+				buf[pos++] = x4;
+				buf[pos++] = y4;
+				buf[pos++] = u2;
+				buf[pos++] = v1;
+				// bot-left
+				buf[pos++] = tx;
+				buf[pos++] = ty;
+				buf[pos++] = x3;
+				buf[pos++] = y3;
+				buf[pos++] = u1;
+				buf[pos++] = v1;
+
+				// six indices to draw the four vertices
+				numIndices += TextureRenderer.INDICES_PER_SPRITE;
+				verticesCnt += 4;
+
+				// FIXME this does not work, need to draw bitmap on next
+				// texture...
+				// if (numLabel == TextureRenderer.MAX_ITEMS) {
+				// Log.d(TAG, "--- reached max label per texture " + numLabel);
+				// sbuf.put(buf, 0, pos);
+				// pos = 0;
+				// }
+
 			}
-
-			// FIXME this does not work, need to draw bitmap on next
-			// texture...
-			// if (numLabel == TextureRenderer.MAX_ITEMS) {
-			// Log.d(TAG, "--- reached max label per texture " + numLabel);
-			// sbuf.put(buf, 0, pos);
-			// pos = 0;
-			// }
-
 			x += width;
 		}
+
+		vi.used = pos;
 
 		to.offset = offsetIndices;
 		to.vertices = (short) (numIndices - offsetIndices);
 
-		si.used = pos;
-		curItem = si;
-
-		// Log.d(TAG, "added labels " + numTextures + " " + numLabel);
+		//	Log.d(TAG, "added labels " + numTextures + " " + numLabel);
 
 		return true;
 	}
@@ -277,8 +306,10 @@ public final class TextLayer extends TextureLayer {
 	protected void clear() {
 		TextureObject.release(textures);
 		TextItem.release(labels);
+		VertexPool.release(pool);
 		textures = null;
 		labels = null;
+		pool = null;
 		verticesCnt = 0;
 	}
 }
