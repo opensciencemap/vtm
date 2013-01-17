@@ -121,7 +121,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 *            the MapView
 	 */
 	public TileGenerator(MapView mapView) {
-		//Log.d(TAG, "init TileGenerator");
 		mMapView = mapView;
 	}
 
@@ -161,15 +160,19 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		mLayers = new Layers();
 
-		//Log.d(TAG, "loading: " + tile);
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 68752 && tile.tileY == 42640))
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 68743 && tile.tileY == 42681))
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 68736 && tile.tileY == 42653))
-		// TODO: building with non simple holes (Berlin): 
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 70428 && tile.tileY == 43009)),
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 70463 && tile.tileY == 42990))
-		// FIXME 180 degree angle in building
+		Log.d(TAG, "loading: " + tile);
+		// 180 degree angle in building
 		//if ((tile.zoomLevel != 17) || (tile.tileX == 68728 && tile.tileY == 42634))
+
+		// bad bad poly!
+		// if ((tile.zoomLevel != 17) || (tile.tileX == 69767 && tile.tileY == 47236))
+		//g: [X:69165, Y:42344, Z:17]
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 69165 && tile.tileY == 42344))
+
+		// tram/service elements rendered as buildnig with vts
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 68744 && tile.tileY == 42650))
+
+		//if ((tile.zoomLevel != 17) || (tile.tileX == 68736 && tile.tileY == 42653))
 
 		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
 			//Log.d(TAG, "Failed loading: " + tile);
@@ -190,6 +193,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
 
 			mIndices = debugBoxIndex;
+			if (MapView.enableClosePolygons)
+				mIndices[0] = 8;
+			else
+				mIndices[0] = 10;
+
 			mCoords = debugBoxCoords;
 			mDrawingLayer = 10 * mLevels;
 			TileGenerator.renderTheme.matchWay(this, debugTagBox, (byte) 0, false, true);
