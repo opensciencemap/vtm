@@ -159,11 +159,10 @@ public final class TextureRenderer {
 			+ "void main() {"
 			+ "  vec4 pos;"
 			+ " if (mod(vertex.x, 2.0) == 0.0){"
-			+ "       pos = u_proj * (u_mv * vec4(vertex.xy + vertex.zw * u_scale, 0.02, 1.0));"
-			+ "  } else {"
-			// // place as billboard
+			+ "       pos = u_proj * (u_mv * vec4(vertex.xy + vertex.zw * u_scale, 0.0, 1.0));"
+			+ "  } else {" // place as billboard
 			+ "    vec4 dir = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-			+ "    pos = u_proj * (dir + vec4(vertex.zw * (coord_scale * u_swidth), 0.02, 0.0));"
+			+ "    pos = u_proj * (dir + vec4(vertex.zw * (coord_scale * u_swidth), 0.1, 0.0));"
 			+ "  }"
 			+ "  gl_Position = pos;"
 			+ "  tex_c = tex_coord * div;"
