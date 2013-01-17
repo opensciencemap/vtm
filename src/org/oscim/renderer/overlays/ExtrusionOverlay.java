@@ -293,7 +293,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			// drawing gl_lines with the same coordinates does not result in 
 			// same depth values as polygons, so add offset and draw gl_lequal:
 			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-			GlUtils.addOffsetM(mv, 1000);
+			GlUtils.addOffsetM(mv, 100);
 			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
 
 			GLES20.glUniform1i(uExtMode, 3);
