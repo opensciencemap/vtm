@@ -14,9 +14,9 @@
  */
 package org.oscim.renderer;
 
+import org.oscim.core.Tile;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.renderinstruction.Text;
-import org.oscim.utils.GeometryUtils;
 
 public final class WayDecorator {
 	// /**
@@ -27,7 +27,7 @@ public final class WayDecorator {
 	// /**
 	// * Minimum distance in pixels before the way name is repeated.
 	// */
-	// private static final int DISTANCE_BETWEEN_WAY_NAMES = 500;
+	private static final int DISTANCE_BETWEEN_WAY_NAMES = 100;
 
 	// /**
 	// * Distance in pixels to skip from both ends of a segment.
@@ -104,169 +104,185 @@ public final class WayDecorator {
 		TextItem t = null;
 		// calculate the way name length plus some margin of safety
 		float wayNameWidth = -1;
-		float minWidth = 100;
+		float minWidth = Tile.TILE_SIZE / 10;
 		int skipPixels = 0;
 
 		// get the first way point coordinates
-		int previousX = (int) coordinates[pos + 0];
-		int previousY = (int) coordinates[pos + 1];
-
+		int prevX = (int) coordinates[pos + 0];
+		int prevY = (int) coordinates[pos + 1];
+		if (string.equals("Filip Road")) {
+			System.out.println("blub");
+		}
 		// find way segments long enough to draw the way name on them
 		for (int i = pos + 2; i < pos + len; i += 2) {
 			// get the current way point coordinates
-			int currentX = (int) coordinates[i];
-			int currentY = (int) coordinates[i + 1];
+			int curX = (int) coordinates[i];
+			int curY = (int) coordinates[i + 1];
 
 			// calculate the length of the current segment (Euclidian distance)
-			float diffX = currentX - previousX;
-			float diffY = currentY - previousY;
+			float vx = prevX - curX;
+			float vy = prevY - curY;
+			float a = (float) Math.sqrt(vx * vx + vy * vy);
+			vx /= a;
+			vy /= a;
 
-			for (int j = i + 2; j < pos + len; j += 2) {
-				int nextX = (int) coordinates[j];
-				int nextY = (int) coordinates[j + 1];
+			int last = i;
+			int nextX = 0, nextY = 0;
 
-				if (diffY == 0) {
-					if ((currentY - nextY) != 0)
-						break;
+			// add additional segments if possible
+			for (int j = last + 2; j < pos + len; j += 2) {
+				nextX = (int) coordinates[j];
+				nextY = (int) coordinates[j + 1];
 
-					currentX = nextX;
-					currentY = nextY;
-					continue;
-				} else if ((currentY - nextY) == 0)
+				float wx = curX - nextX;
+				float wy = curY - nextY;
+
+				a = (float) Math.sqrt(wx * wx + wy * wy);
+				wx /= a;
+				wy /= a;
+
+				float ux = vx + wx;
+				float uy = vy + wy;
+
+				float diff = wx * uy - wy * ux;
+
+				if (diff > 0.1 || diff < -0.1)
 					break;
 
-				float diff = diffX / diffY -
-						(float) (currentX - nextX) / (currentY - nextY);
-
-				// skip segments with corners
-				if (diff >= 0.1f || diff <= -0.1f)
-					break;
-
-				currentX = nextX;
-				currentY = nextY;
-			}
-
-			diffX = currentX - previousX;
-			diffY = currentY - previousY;
-
-			if (diffX < 0)
-				diffX = -diffX;
-			if (diffY < 0)
-				diffY = -diffY;
-
-			if (diffX + diffY < minWidth) {
-				previousX = currentX;
-				previousY = currentY;
+				last = j;
+				curX = nextX;
+				curY = nextY;
 				continue;
 			}
 
-			if (wayNameWidth > 0 && diffX + diffY < wayNameWidth) {
-				previousX = currentX;
-				previousY = currentY;
+			vx = curX - prevX;
+			vy = curY - prevY;
+
+			if (vx < 0)
+				vx = -vx;
+			if (vy < 0)
+				vy = -vy;
+
+			// minimum segment to label
+			if (vx + vy < minWidth) {
+				// restart from next node
+				prevX = (int) coordinates[i];
+				prevY = (int) coordinates[i + 1];
 				continue;
 			}
 
-			double segmentLengthInPixel = Math.sqrt(diffX * diffX + diffY * diffY);
+			// compare against max segment length
+			if (wayNameWidth > 0 && vx + vy < wayNameWidth) {
+				// restart from next node
+				prevX = (int) coordinates[i];
+				prevY = (int) coordinates[i + 1];
+				continue;
+			}
+
+			double segmentLength = Math.sqrt(vx * vx + vy * vy);
 
 			if (skipPixels > 0) {
-				skipPixels -= segmentLengthInPixel;
+				skipPixels -= segmentLength;
 
-			} else if (segmentLengthInPixel > minWidth) {
-
-				if (wayNameWidth < 0) {
-					wayNameWidth = text.paint.measureText(string);
-				}
-
-				if (segmentLengthInPixel > wayNameWidth * 0.80) {
-
-					float s = (wayNameWidth + 25) / (float) segmentLengthInPixel;
-					int width, height;
-					int x1, y1, x2, y2;
-
-					if (previousX < currentX) {
-						x1 = previousX;
-						y1 = previousY;
-						x2 = currentX;
-						y2 = currentY;
-					} else {
-						x1 = currentX;
-						y1 = currentY;
-						x2 = previousX;
-						y2 = previousY;
-					}
-
-					// estimate position of text on path
-					width = (x2 - x1) / 2;
-					x2 = x2 - (int) (width - s * width);
-					x1 = x1 + (int) (width - s * width);
-
-					height = (y2 - y1) / 2;
-					y2 = y2 - (int) (height - s * height);
-					y1 = y1 + (int) (height - s * height);
-
-					short top = (short) (y1 < y2 ? y1 : y2);
-					short bot = (short) (y1 < y2 ? y2 : y1);
-
-					boolean intersects = false;
-
-					for (TextItem t2 = items; t2 != null; t2 = t2.next) {
-
-						// check crossings
-						if (GeometryUtils.lineIntersect(x1, y1, x2, y2, t2.x1, t2.y1,
-								t2.x2, t2.y2)) {
-							intersects = true;
-							break;
-						}
-
-						// check overlapping labels of road with more than one
-						// way
-						short top2 = t2.y1 < t2.y2 ? t2.y1 : t2.y2;
-						short bot2 = t2.y1 < t2.y2 ? t2.y2 : t2.y1;
-
-						if (x1 - 10 < t2.x2 && t2.x1 - 10 < x2 && top - 10 < bot2
-								&& top2 - 10 < bot) {
-
-							if (t2.string.equals(string)) {
-								intersects = true;
-								break;
-							}
-						}
-					}
-
-					if (intersects) {
-						previousX = (int) coordinates[pos + i];
-						previousY = (int) coordinates[pos + i + 1];
-						continue;
-					}
-
-					// if (t == null)
-					t = TextItem.get();
-					// t = new TextItem(x1 + (x2 - x1) / 2, y1 + (y2 - y1) / 2,
-					// string,
-					// text, wayNameWidth);
-
-					t.x = x1 + (x2 - x1) / 2f;
-					t.y = y1 + (y2 - y1) / 2f;
-					t.string = string;
-					t.text = text;
-					t.width = wayNameWidth;
-					t.x1 = (short) x1;
-					t.y1 = (short) y1;
-					t.x2 = (short) x2;
-					t.y2 = (short) y2;
-
-					t.next = items;
-					items = t;
-
-					// skipPixels = DISTANCE_BETWEEN_WAY_NAMES;
-
-					return items;
-				}
+			} else if (segmentLength < minWidth) {
+				// restart from next node
+				prevX = (int) coordinates[i];
+				prevY = (int) coordinates[i + 1];
+				continue;
 			}
 
+			if (wayNameWidth < 0) {
+				wayNameWidth = text.paint.measureText(string);
+			}
+
+			if (segmentLength < wayNameWidth * 0.50) {
+				// restart from next node
+				prevX = (int) coordinates[i];
+				prevY = (int) coordinates[i + 1];
+				continue;
+			}
+
+			float s = wayNameWidth / (float) segmentLength;
+			int width, height;
+			int x1, y1, x2, y2;
+
+			if (prevX < curX) {
+				x1 = prevX;
+				y1 = prevY;
+				x2 = curX;
+				y2 = curY;
+			} else {
+				x1 = curX;
+				y1 = curY;
+				x2 = prevX;
+				y2 = prevY;
+			}
+
+			// estimate position of text on path
+			width = (x2 - x1) / 2;
+			x2 = x2 - (int) (width - s * width);
+			x1 = x1 + (int) (width - s * width);
+
+			height = (y2 - y1) / 2;
+			y2 = y2 - (int) (height - s * height);
+			y1 = y1 + (int) (height - s * height);
+
+			//	short top = (short) (y1 < y2 ? y1 : y2);
+			//	short bot = (short) (y1 < y2 ? y2 : y1);
+			//	boolean intersects = false;
+			//
+			//	for (TextItem t2 = items; t2 != null; t2 = t2.next) {
+			//
+			//		// check crossings
+			//		if (GeometryUtils.lineIntersect(x1, y1, x2, y2, t2.x1, t2.y1,
+			//				t2.x2, t2.y2)) {
+			//			intersects = true;
+			//			break;
+			//		}
+			//
+			//		// check overlapping labels of road with more than one
+			//		// way
+			//		short top2 = t2.y1 < t2.y2 ? t2.y1 : t2.y2;
+			//		short bot2 = t2.y1 < t2.y2 ? t2.y2 : t2.y1;
+			//
+			//		if (x1 - 10 < t2.x2 && t2.x1 - 10 < x2 && top - 10 < bot2
+			//				&& top2 - 10 < bot) {
+			//
+			//			if (t2.string.equals(string)) {
+			//				intersects = true;
+			//				break;
+			//			}
+			//		}
+			//	}
+			//
+			//	if (intersects) {
+			//		previousX = (int) coordinates[pos + i];
+			//		previousY = (int) coordinates[pos + i + 1];
+			//		continue;
+			//	}
+
+			t = TextItem.get();
+			t.x = x1 + (x2 - x1) / 2f;
+			t.y = y1 + (y2 - y1) / 2f;
+			t.string = string;
+			t.text = text;
+			t.width = wayNameWidth;
+			t.x1 = (short) x1;
+			t.y1 = (short) y1;
+			t.x2 = (short) x2;
+			t.y2 = (short) y2;
+			t.length = (short) segmentLength;
+
+			t.next = items;
+			items = t;
+
+			skipPixels = DISTANCE_BETWEEN_WAY_NAMES;
+
+			// skip to last
+			i = last;
 			// store the previous way point coordinates
-			previousX = currentX;
-			previousY = currentY;
+			prevX = curX;
+			prevY = curY;
 		}
 		return items;
 	}

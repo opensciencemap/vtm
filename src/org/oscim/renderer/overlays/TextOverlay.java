@@ -138,14 +138,13 @@ public class TextOverlay extends RenderOverlay {
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 
-				if (ti2 == null)
-					ti2 = TextItem.get();
-
-				ti2.move(ti, dx, dy, scale);
-
 				boolean overlaps = false;
 
 				if (ti.text.caption) {
+					if (ti2 == null)
+						ti2 = TextItem.get();
+					ti2.move(ti, dx, dy, scale);
+
 					int tx = (int) (ti2.x);
 					int ty = (int) (ti2.y);
 					int tw = (int) (ti2.width / 2);
@@ -168,6 +167,13 @@ public class TextOverlay extends RenderOverlay {
 						lp = lp.next;
 					}
 				} else {
+
+					if (ti.width > ti.length * scale) {
+						continue;
+					}
+					if (ti2 == null)
+						ti2 = TextItem.get();
+					ti2.move(ti, dx, dy, scale);
 
 					if (cos * (ti.x2 - ti.x1) - sin * (ti.y2 - ti.y1) < 0) {
 						// flip label upside-down

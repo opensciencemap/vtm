@@ -84,6 +84,6 @@ public class TextItem {
 	public Text text;
 	public float width;
 	public short x1, y1, x2, y2;
-
+	public short length;
 	// public byte placement
 }
