@@ -38,8 +38,11 @@ public class TextOverlay extends RenderOverlay {
 	private LabelThread mThread;
 
 	private MapPosition mWorkPos;
+
+	// TextLayer that is updating
 	private TextLayer mWorkLayer;
-	private TextLayer mNewLayer;
+	// TextLayer that is ready to be added to 'layers'
+	private TextLayer mCurLayer;
 
 	/* package */boolean mRun;
 	/* package */boolean mRerun;
@@ -97,8 +100,9 @@ public class TextOverlay extends RenderOverlay {
 
 		// only relabel when tiles belong to the current zoomlevel or its parent
 		if (diff > 1 || diff < -2) {
+			// pass back the current layer
 			synchronized (this) {
-				mNewLayer = tl;
+				mCurLayer = tl;
 			}
 			return;
 		}
@@ -257,7 +261,7 @@ public class TextOverlay extends RenderOverlay {
 
 		// everything synchronized?
 		synchronized (this) {
-			mNewLayer = tl;
+			mCurLayer = tl;
 		}
 	}
 
@@ -268,14 +272,17 @@ public class TextOverlay extends RenderOverlay {
 		if (mHolding)
 			return;
 
-		if (mNewLayer != null) {
-
-			// keep text layer, not recrating its canvas each time...
+		if (mCurLayer != null) {
+			// keep text layer, not recrating its canvas each time
 			mWorkLayer = (TextLayer) layers.textureLayers;
+
+			// clear textures and text items from previous layer
 			layers.clear();
 
-			layers.textureLayers = mNewLayer;
-			mNewLayer = null;
+			// set new TextLayer to be uploaded and used
+			layers.textureLayers = mCurLayer;
+
+			mCurLayer = null;
 
 			// make the 'labeled' MapPosition current
 			MapPosition tmp = mMapPosition;

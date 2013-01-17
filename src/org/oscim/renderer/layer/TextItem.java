@@ -34,6 +34,21 @@ public class TextItem {
 		}
 	}
 
+	public static void append(TextItem ti, TextItem in) {
+		if (ti == null)
+			return;
+		if (ti.next == null) {
+			in.next = ti.next;
+			ti.next = in;
+		}
+		TextItem t = ti;
+		while (t.next != null)
+			t = t.next;
+
+		in.next = t.next;
+		t.next = in;
+	}
+
 	public static void release(TextItem ti) {
 		if (ti == null)
 			return;

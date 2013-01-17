@@ -22,7 +22,6 @@ import android.util.Log;
  * @author Hannes Janetzek
  */
 public class Layers {
-
 	// mixed Polygon and Line layers
 	public Layer layers;
 	public Layer textureLayers;
@@ -33,6 +32,10 @@ public class Layers {
 	// 2. lines afterwards at lineOffset
 	// 3. other layers keep their byte offset in Layer.offset
 	public int lineOffset;
+
+	// time when layers became first rendered (in uptime)
+	// used for animations
+	public long time;
 
 	private Layer mCurLayer;
 
@@ -198,7 +201,6 @@ public class Layers {
 		}
 
 		for (l = textureLayers; l != null; l = l.next) {
-			VertexPool.release(l.pool);
 			l.clear();
 		}
 
