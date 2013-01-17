@@ -301,7 +301,8 @@ public final class LineLayer extends Layer {
 				ux = vx + wx;
 				uy = vy + wy;
 
-				a = -wy * ux + wx * uy;
+				// cross-product
+				a = wx * uy - wy * ux;
 
 				// boolean split = false;
 				if (a < 0.01f && a > -0.01f) {
