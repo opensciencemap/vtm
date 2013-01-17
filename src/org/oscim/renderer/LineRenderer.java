@@ -76,8 +76,8 @@ public final class LineRenderer {
 			hLineWidth[i] = glGetUniformLocation(lineProgram[i], "u_width");
 			hLineColor[i] = glGetUniformLocation(lineProgram[i], "u_color");
 			hLineMode[i] = glGetUniformLocation(lineProgram[i], "u_mode");
-			hLineVertexPosition[i] = glGetAttribLocation(lineProgram[i], "a_position");
-			hLineTexturePosition[i] = glGetAttribLocation(lineProgram[i], "a_st");
+			hLineVertexPosition[i] = glGetAttribLocation(lineProgram[i], "a_pos");
+			//hLineTexturePosition[i] = glGetAttribLocation(lineProgram[i], "a_st");
 		}
 		return true;
 	}
@@ -98,13 +98,13 @@ public final class LineRenderer {
 		int uLineColor = hLineColor[mode];
 		int uLineWidth = hLineWidth[mode];
 
-		GLState.enableVertexArrays(hLineVertexPosition[mode], hLineTexturePosition[mode]);
+		GLState.enableVertexArrays(hLineVertexPosition[mode], -1); // hLineTexturePosition[mode]);
 
-		glVertexAttribPointer(hLineVertexPosition[mode], 2, GL_SHORT,
-				false, 8, bufferOffset + LINE_VERTICES_DATA_POS_OFFSET);
+		glVertexAttribPointer(hLineVertexPosition[mode], 4, GL_SHORT,
+				false, 0, bufferOffset + LINE_VERTICES_DATA_POS_OFFSET);
 
-		glVertexAttribPointer(hLineTexturePosition[mode], 2, GL_SHORT,
-				false, 8, bufferOffset + LINE_VERTICES_DATA_TEX_OFFSET);
+		//		glVertexAttribPointer(hLineTexturePosition[mode], 2, GL_SHORT,
+		//				false, 8, bufferOffset + LINE_VERTICES_DATA_TEX_OFFSET);
 
 		glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 
@@ -217,19 +217,20 @@ public final class LineRenderer {
 			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			+ "uniform float u_width;"
-			+ "attribute vec2 a_position;"
-			+ "attribute vec2 a_st;"
+			+ "attribute vec4 a_pos;"
+			+ "uniform int u_mode;"
+			//+ "attribute vec2 a_st;"
 			+ "varying vec2 v_st;"
 			+ "const float dscale = 8.0/2048.0;"
 			+ "void main() {"
 			// scale extrusion to u_width pixel
 			// just ignore the two most insignificant bits of a_st :)
-			+ "  vec2 dir = dscale * u_width * a_st;"
-			+ "  gl_Position = u_mvp * vec4(a_position + dir, 0.0,1.0);"
+			+ "  vec2 dir = dscale * u_width * a_pos.zw;"
+			+ "  gl_Position = u_mvp * vec4(a_pos.xy + dir, 0.0, 1.0);"
 			// last two bits of a_st hold the texture coordinates
-			+ "  v_st = u_width * (abs(mod(a_st,4.0)) - 1.0);"
+			+ "  v_st = u_width * (abs(mod(a_pos.zw,4.0)) - 1.0);"
 			// use bit operations when available (gles 1.3)
-			// + "  v_st = u_width * vec2(ivec2(a_st) & 3 - 1);"
+			// + "  v_st = u_width * vec2(a_st.x & 3 - 1, a_st.y & 3 - 1);"
 			+ "}";
 
 	private final static String lineSimpleFragmentShader = ""
@@ -247,9 +248,11 @@ public final class LineRenderer {
 			+ "    len = u_width - length(v_st);"
 			// fade to alpha. u_wscale is the width in pixel which should be
 			// faded, u_width - len the position of this fragment on the
-			// perpendicular to this line segment, only works with no
+			// perpendicular to this line segment. this only works with no
 			// perspective
-			+ "  gl_FragColor = u_color * min(1.0, len / u_wscale);"
+			//+ "  gl_FragColor = u_color * min(1.0, len / u_wscale);"
+			+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, len);"
+
 			+ "}";
 
 	private final static String lineFragmentShader = ""
