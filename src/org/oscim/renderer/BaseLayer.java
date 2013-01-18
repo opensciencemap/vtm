@@ -31,6 +31,7 @@ import android.opengl.Matrix;
  * @author Hannes Janetzek
  */
 public class BaseLayer {
+	private final static String TAG = BaseLayer.class.getName();
 
 	// used to not draw a tile twice per frame.
 	private static int mDrawSerial = 0;
@@ -47,11 +48,11 @@ public class BaseLayer {
 	}
 
 	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos) {
-
+		//long start = SystemClock.uptimeMillis();
 		Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, pos.viewMatrix, 0);
 
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
-
+		LineRenderer.beginLines();
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && t.state == STATE_READY)
@@ -67,10 +68,12 @@ public class BaseLayer {
 			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null))
 				drawProxyTile(t, pos);
 		}
+		LineRenderer.endLines();
 
 		GLES20.glDisable(GL_POLYGON_OFFSET_FILL);
-		//GLES20.glFinish()
-		//Log.d(TAG, "building took " + (end - start));
+		//GLES20.glFinish();
+		//long end = SystemClock.uptimeMillis();
+		//Log.d(TAG, "base took " + (end - start));
 		mDrawSerial++;
 	}
 
