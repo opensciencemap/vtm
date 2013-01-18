@@ -35,6 +35,8 @@ public final class LineLayer extends Layer {
 	public Line line;
 	public float width;
 
+	public boolean roundCap;
+
 	LineLayer(int layer) {
 		this.layer = layer;
 		this.type = Layer.LINE;
@@ -51,11 +53,11 @@ public final class LineLayer extends Layer {
 
 	/**
 	 * line extrusion is based on code from GLMap
-	 * (https://github.com/olofsj/GLMap/) by olofsj
+	 * (https://github.com/olofsj/GLMap/)
 	 * @param points
-	 *            array of points as float x_n = i, y_n = i+1
+	 *            array of points as x,y pairs
 	 * @param index
-	 *            array of line indices holding the length of the individual
+	 *            array of indices holding the length of the individual
 	 *            lines
 	 * @param closed
 	 *            whether to connect start- and end-point
@@ -87,6 +89,21 @@ public final class LineLayer extends Layer {
 		if (!MapView.enableClosePolygons)
 			closed = false;
 
+		// Note: just a hack to save some vertices, when there are more than 200 lines
+		// per type
+		if (rounded) {
+			int cnt = 0;
+			for (int i = 0, n = index.length; i < n; i++, cnt++) {
+				if (index[i] < 0)
+					break;
+				if (cnt > 400) {
+					rounded = false;
+					break;
+				}
+			}
+		}
+		roundCap = rounded;
+
 		for (int i = 0, pos = 0, n = index.length; i < n; i++) {
 
 			int length = index[i];
@@ -94,10 +111,6 @@ public final class LineLayer extends Layer {
 			// check end-marker in indices
 			if (length < 0)
 				break;
-
-			// Note: just a hack to save some vertices
-			if (rounded && i > 200)
-				rounded = false;
 
 			// need at least two points
 			if (length < 4) {
