@@ -179,7 +179,7 @@ public final class WayDecorator {
 				continue;
 			}
 
-			double segmentLength = Math.sqrt(vx * vx + vy * vy);
+			float segmentLength = (float) Math.sqrt(vx * vx + vy * vy);
 
 			if (skipPixels > 0) {
 				skipPixels -= segmentLength;
@@ -202,9 +202,9 @@ public final class WayDecorator {
 				continue;
 			}
 
-			float s = wayNameWidth / (float) segmentLength;
-			int width, height;
-			int x1, y1, x2, y2;
+			float s = (wayNameWidth + 20) / segmentLength;
+			float width, height;
+			float x1, y1, x2, y2;
 
 			if (prevX < curX) {
 				x1 = prevX;
@@ -219,13 +219,15 @@ public final class WayDecorator {
 			}
 
 			// estimate position of text on path
-			width = (x2 - x1) / 2;
-			x2 = x2 - (int) (width - s * width);
-			x1 = x1 + (int) (width - s * width);
+			width = (x2 - x1) / 2f;
+			//width += 4 * (width / wayNameWidth);
+			x2 = x2 - (width - s * width);
+			x1 = x1 + (width - s * width);
 
-			height = (y2 - y1) / 2;
-			y2 = y2 - (int) (height - s * height);
-			y1 = y1 + (int) (height - s * height);
+			height = (y2 - y1) / 2f;
+			//height += 4 * (height / wayNameWidth);
+			y2 = y2 - (height - s * height);
+			y1 = y1 + (height - s * height);
 
 			//	short top = (short) (y1 < y2 ? y1 : y2);
 			//	short bot = (short) (y1 < y2 ? y2 : y1);
@@ -260,17 +262,24 @@ public final class WayDecorator {
 			//		previousY = (int) coordinates[pos + i + 1];
 			//		continue;
 			//	}
+			TextItem n = TextItem.get();
 
-			t = TextItem.get();
+			// link items together
+			if (t != null) {
+				t.n1 = n;
+				n.n2 = t;
+			}
+
+			t = n;
 			t.x = x1 + (x2 - x1) / 2f;
 			t.y = y1 + (y2 - y1) / 2f;
 			t.string = string;
 			t.text = text;
 			t.width = wayNameWidth;
-			t.x1 = (short) x1;
-			t.y1 = (short) y1;
-			t.x2 = (short) x2;
-			t.y2 = (short) y2;
+			t.x1 = x1;
+			t.y1 = y1;
+			t.x2 = x2;
+			t.y2 = y2;
 			t.length = (short) segmentLength;
 
 			t.next = items;
