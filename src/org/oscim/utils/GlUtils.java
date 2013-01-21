@@ -14,6 +14,9 @@
  */
 package org.oscim.utils;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 import org.oscim.renderer.GLRenderer;
 
 import android.graphics.Bitmap;
@@ -38,25 +41,59 @@ public class GlUtils {
 		GLES20.glGenTextures(1, textures, 0);
 
 		int textureID = textures[0];
-		// Log.i(TAG, "new texture " + textureID + " " + textureCnt++);
 
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureID);
 
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_MIN_FILTER,
 				GLES20.GL_LINEAR);
 
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_MAG_FILTER,
 				GLES20.GL_LINEAR);
 
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_WRAP_S,
 				GLES20.GL_CLAMP_TO_EDGE);
 
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_WRAP_T,
 				GLES20.GL_CLAMP_TO_EDGE);
 
 		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
 
 		return textureID;
+	}
+
+	public static int loadTexture(byte[] pixel, int width, int height, int format,
+			int wrap_s, int wrap_t) {
+		int[] textureIds = new int[1];
+		GLES20.glGenTextures(1, textureIds, 0);
+
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[0]);
+
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_MIN_FILTER,
+				GLES20.GL_NEAREST);
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_MAG_FILTER,
+				GLES20.GL_NEAREST);
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_WRAP_S,
+				wrap_s); // Set U Wrapping
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_WRAP_T,
+				wrap_t); // Set V Wrapping
+
+		ByteBuffer buf = ByteBuffer.allocateDirect(width * height).order(ByteOrder.nativeOrder());
+		buf.put(pixel);
+		buf.position(0);
+
+		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, format, width, height, 0, format,
+				GLES20.GL_UNSIGNED_BYTE, buf);
+
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+		return textureIds[0];
 	}
 
 	/**

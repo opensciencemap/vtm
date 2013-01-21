@@ -56,14 +56,15 @@ public final class Line extends RenderInstruction {
 		boolean fixed = false;
 		String style = null;
 		float blur = 0;
+		float min = 0;
 
 		if (line != null) {
 			fixed = line.fixed;
 			fade = line.fade;
 			strokeLinecap = line.cap;
 			blur = line.blur;
+			min = line.min;
 		}
-
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
@@ -82,6 +83,8 @@ public final class Line extends RenderInstruction {
 				strokeLinecap = Cap.valueOf(value.toUpperCase(Locale.ENGLISH));
 			} else if ("fade".equals(name)) {
 				fade = Integer.parseInt(value);
+			} else if ("min".equals(name)) {
+				min = Float.parseFloat(value);
 			} else if ("fixed".equals(name)) {
 				fixed = Boolean.parseBoolean(value);
 			} else if ("blur".equals(name)) {
@@ -102,14 +105,14 @@ public final class Line extends RenderInstruction {
 				strokeWidth = 1;
 
 			return new Line(line, style, src, stroke, strokeWidth, stipple,
-					strokeLinecap, level, fixed, fade, blur, isOutline);
+					strokeLinecap, level, fixed, fade, blur, isOutline, min);
 		}
 
 		if (!isOutline)
 			validate(strokeWidth);
 
 		return new Line(style, src, stroke, strokeWidth, stipple, strokeLinecap,
-				level, fixed, fade, blur, isOutline);
+				level, fixed, fade, blur, isOutline, min);
 	}
 
 	public Line(int stroke, float width, Cap cap) {
@@ -122,6 +125,7 @@ public final class Line extends RenderInstruction {
 		this.fixed = true;
 		this.fade = -1;
 		this.stipple = 2;
+		this.min = 0;
 		color = GlUtils.colorToFloatP(stroke);
 	}
 
@@ -163,6 +167,8 @@ public final class Line extends RenderInstruction {
 
 	public final int stipple;
 
+	public final float min;
+
 	/**
 	 * @param style
 	 *            ...
@@ -186,10 +192,11 @@ public final class Line extends RenderInstruction {
 	 *            ...
 	 * @param isOutline
 	 *            ...
+	 * @param min ...
 	 */
 	private Line(String style, String src, int stroke, float strokeWidth,
 			int stipple, Cap strokeLinecap, int level, boolean fixed,
-			int fade, float blur, boolean isOutline) {
+			int fade, float blur, boolean isOutline, float min) {
 		super();
 
 		this.style = style;
@@ -221,6 +228,7 @@ public final class Line extends RenderInstruction {
 		this.blur = blur;
 		this.fade = fade;
 		this.stipple = stipple;
+		this.min = min;
 	}
 
 	/**
@@ -248,10 +256,11 @@ public final class Line extends RenderInstruction {
 	 *            ...
 	 * @param isOutline
 	 *            ...
+	 * @param min ...
 	 */
 	private Line(Line line, String style, String src, int stroke, float strokeWidth,
 			int stipple, Cap strokeLinecap, int level, boolean fixed,
-			int fade, float blur, boolean isOutline) {
+			int fade, float blur, boolean isOutline, float min) {
 		super();
 
 		this.style = style;
@@ -268,6 +277,7 @@ public final class Line extends RenderInstruction {
 		this.cap = strokeLinecap;
 		this.blur = blur;
 		this.stipple = stipple;
+		this.min = min;
 	}
 
 	@Override
