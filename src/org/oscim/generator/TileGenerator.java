@@ -58,7 +58,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private static String TAG = TileGenerator.class.getName();
 
-	private static final double STROKE_INCREASE = Math.sqrt(2);
+	private static final double STROKE_INCREASE = Math.sqrt(2.2);
 	private static final byte LAYERS = 11;
 
 	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
@@ -153,14 +153,14 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		// else
 		// setScaleStrokeWidth(STROKE_MAX_ZOOM_LEVEL);
 
-		// acount for area changes with latitude
+		// account for area changes with latitude
 		mProjectionScaleFactor = 0.5f + 0.5f * (
 				(float) Math.sin(Math.abs(MercatorProjection
 						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180)));
 
 		mLayers = new Layers();
 
-		Log.d(TAG, "loading: " + tile);
+		//Log.d(TAG, "loading: " + tile);
 		// 180 degree angle in building
 		//if ((tile.zoomLevel != 17) || (tile.tileX == 68728 && tile.tileY == 42634))
 
@@ -228,8 +228,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 *            set.
 	 */
 	private void setScaleStrokeWidth(byte zoomLevel) {
-		int zoomLevelDiff = Math.max(zoomLevel - STROKE_MIN_ZOOM_LEVEL, 0);
-		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevelDiff);
+		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevel - STROKE_MIN_ZOOM_LEVEL);
 		if (mStrokeScale < 1)
 			mStrokeScale = 1;
 	}
