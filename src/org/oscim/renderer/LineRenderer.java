@@ -25,9 +25,6 @@ import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glUseProgram;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import org.oscim.core.MapPosition;
 import org.oscim.generator.TileGenerator;
 import org.oscim.renderer.layer.Layer;
@@ -84,6 +81,8 @@ public final class LineRenderer {
 			//hLineTexturePosition[i] = glGetAttribLocation(lineProgram[i], "a_st");
 		}
 
+		// create lookup table as texture for 'length(0..1,0..1)'
+		// using mirrored wrap mode for 'length(-1..1,-1..1)'
 		byte[] pixel = new byte[128 * 128];
 
 		for (int x = 0; x < 128; x++) {
@@ -94,32 +93,11 @@ public final class LineRenderer {
 				if (color > 255)
 					color = 255;
 				pixel[x + y * 128] = (byte) color;
-				//pixel[(127 - x) + (127 - y) * 128] = (byte) color;
 			}
 		}
 
-		int[] textureIds = new int[1];
-		GLES20.glGenTextures(1, textureIds, 0);
-		mTexID = textureIds[0];
-
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexID);
-
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
-				GLES20.GL_NEAREST);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
-				GLES20.GL_NEAREST);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
-				GLES20.GL_MIRRORED_REPEAT); // Set U Wrapping
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
-				GLES20.GL_MIRRORED_REPEAT); // Set V Wrapping
-
-		ByteBuffer buf = ByteBuffer.allocateDirect(128 * 128).order(ByteOrder.nativeOrder());
-		buf.put(pixel);
-		buf.position(0);
-		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_ALPHA, 128, 128, 0, GLES20.GL_ALPHA,
-				GLES20.GL_UNSIGNED_BYTE, buf);
-
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+		mTexID = GlUtils.loadTexture(pixel, 128, 128, GLES20.GL_ALPHA,
+				GLES20.GL_MIRRORED_REPEAT, GLES20.GL_MIRRORED_REPEAT);
 
 		return true;
 	}
@@ -158,9 +136,16 @@ public final class LineRenderer {
 
 		glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 
+		// line scale factor for non fixed lines: within a zoom-
+		// level lines would be scaled by the factor 2 via projection. 
+		// though lines should only scale by sqrt(2). this is achieved 
+		// by inverting scaling of extrusion vector with: width/sqrt(s).
+		// within one zoom-level: 1 <= s <= 2
+		float s = scale / div;
+		float lineScale = (float) Math.sqrt(s * 2 / 2.2);
+
 		// scale factor to map one pixel on tile to one pixel on screen:
 		// only works with orthographic projection
-		float s = scale / div;
 		float pixel = 0;
 
 		if (mode == 1)
@@ -170,8 +155,6 @@ public final class LineRenderer {
 		int lineMode = 0;
 		glUniform1i(uLineMode, lineMode);
 
-		// line scale factor (for non fixed lines)
-		float lineScale = (float) Math.sqrt(s);
 		float blurScale = pixel;
 		boolean blur = false;
 		// dont increase scale when max is reached
@@ -199,13 +182,17 @@ public final class LineRenderer {
 			}
 
 			if (line.outline) {
-				// draw outline for linelayers references by this outline
+				// draw linelayers references by this outline
 				for (LineLayer o = ll.outlines; o != null; o = o.outlines) {
 
 					if (o.line.fixed || strokeMaxZoom) {
 						width = (ll.width + o.width) / s;
 					} else {
 						width = ll.width / s + o.width / lineScale;
+
+						// check min size for outline
+						if (o.line.min > 0 && o.width * lineScale < o.line.min * 2)
+							continue;
 					}
 
 					glUniform1f(uLineWidth, width);
@@ -228,7 +215,6 @@ public final class LineRenderer {
 						lineMode = 0;
 						glUniform1i(uLineMode, lineMode);
 					}
-
 					glDrawArrays(GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
 				}
 			} else {
@@ -239,6 +225,9 @@ public final class LineRenderer {
 					width = ll.width / s;
 				} else {
 					width = ll.width / lineScale;
+
+					if (ll.line.min > 0 && ll.width * lineScale < ll.line.min * 2)
+						width = (ll.width - 0.2f) / lineScale;
 				}
 
 				glUniform1f(uLineWidth, width);
