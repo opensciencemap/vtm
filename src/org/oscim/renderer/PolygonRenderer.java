@@ -82,7 +82,7 @@ public final class PolygonRenderer {
 		}
 		hPolygonMatrix = glGetUniformLocation(polygonProgram, "u_mvp");
 		hPolygonColor = glGetUniformLocation(polygonProgram, "u_color");
-		hPolygonVertexPosition = glGetAttribLocation(polygonProgram, "a_position");
+		hPolygonVertexPosition = glGetAttribLocation(polygonProgram, "a_pos");
 
 		mFillPolys = new PolygonLayer[STENCIL_BITS];
 
@@ -170,6 +170,8 @@ public final class PolygonRenderer {
 	// stencil buffer index to start fill
 	private static int mStart;
 
+	//private final static boolean drawBackground = false;
+
 	/**
 	 * draw polygon layers (unil layer.next is not polygon layer)
 	 * using stencil buffer method
@@ -215,7 +217,8 @@ public final class PolygonRenderer {
 			mStart = mCount;
 		}
 
-		GLState.test(drawClipped, true);
+		//GLState.test(drawClipped, true);
+		GLState.test(true, true);
 
 		Layer l = layer;
 
@@ -226,19 +229,27 @@ public final class PolygonRenderer {
 				continue;
 
 			if (mCount == mStart) {
-				// clear stencilbuffer (tile region) by drawing
-				// a quad with func 'always' and op 'zero'
+				/* clear stencilbuffer (tile region) by drawing
+				 * a quad with func 'always' and op 'zero' */
 
 				// disable drawing to framebuffer
 				glColorMask(false, false, false, false);
+
+				//	if (!first) {
+				//		// first run draw map bg, otherwise
+				//		// disable drawing to framebuffer
+				//		glColorMask(false, false, false, false);
+				//	} else {
+				//		glUniform4fv(hPolygonColor, 1, GLRenderer.mClearColor, 0);
+				//	}
 
 				// never pass the test: always apply fail op
 				glStencilFunc(GL_ALWAYS, 0, 0xFF);
 				glStencilMask(0xFF);
 				glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 
-				// draw clip-region into depth buffer:
-				// this is used for lines and polygons
+				/* draw clip-region into depth buffer:
+				 * this is used for lines and polygons */
 				if (first && drawClipped) {
 					// write to depth buffer
 					glDepthMask(true);
@@ -250,6 +261,10 @@ public final class PolygonRenderer {
 
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+				//	if (first) {
+				//		glColorMask(false, false, false, false);
+				//	}
+
 				if (first && drawClipped) {
 					first = false;
 					// do not modify depth buffer anymore
@@ -259,11 +274,11 @@ public final class PolygonRenderer {
 				}
 
 				// op for stencil method polygon drawing
-				glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
+				glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GL_INVERT);
 			}
 
 			// no need for depth test while drawing stencil
-			GLState.test(false, true);
+			//GLState.test(false, true);
 
 			mFillPolys[mCount] = pl;
 
@@ -295,6 +310,8 @@ public final class PolygonRenderer {
 		if (drawClipped && first) {
 			GLState.test(true, false);
 			GLES20.glColorMask(false, false, false, false);
+			//glUniform4fv(hPolygonColor, 1, GLRenderer.mClearColor, 0);
+
 			GLES20.glDepthMask(true);
 			GLES20.glDepthFunc(GLES20.GL_LESS);
 
@@ -341,26 +358,52 @@ public final class PolygonRenderer {
 	}
 
 	private final static String polygonVertexShader = ""
-			+ "precision highp float;"
+			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
-			+ "attribute vec4 a_position;"
+			+ "attribute vec4 a_pos;"
 			+ "void main() {"
-			+ "  gl_Position = u_mvp * a_position;"
+			+ "  gl_Position = u_mvp * a_pos;"
 			+ "}";
 
 	private final static String polygonFragmentShader = ""
-			+ "precision highp float;"
+			+ "precision mediump float;"
 			+ "uniform vec4 u_color;"
 			+ "void main() {"
 			+ "  gl_FragColor = u_color;"
 			+ "}";
+
+	private final static String polygonTexVertexShader = ""
+			+ "precision mediump float;"
+			+ "uniform mat4 u_mvp;"
+			+ "attribute vec4 a_pos;"
+			+ "varying vec2 v_st;"
+			+ "void main() {"
+			+ "  if(gl_VertexID == 0)"
+			+ "    v_st = vec2(0.0,0.0);"
+			+ "  else if(gl_VertexID == 1)"
+			+ "    v_st = vec2(1.0,0.0);"
+			+ "  else if(gl_VertexID == 2)"
+			+ "    v_st = vec2(1.0,1.0);"
+			+ "  else if(gl_VertexID == 3)"
+			+ "    v_st = vec2(0.0,1.0);"
+			+ "  gl_Position = u_mvp * a_pos;"
+			+ "}";
+	private final static String polygonTexFragmentShader = ""
+			+ "precision mediump float;"
+			+ "uniform vec4 u_color;"
+			+ "uniform sampler2D tex;"
+			+ "varying vec2 v_st;"
+			+ "void main() {"
+			+ "  gl_FragColor =  u_color * texture2D(tex, v_st);"
+			+ "}";
+
 	private final static String polygonVertexShaderZ = ""
 			+ "precision highp float;"
 			+ "uniform mat4 u_mvp;"
-			+ "attribute vec4 a_position;"
+			+ "attribute vec4 a_pos;"
 			+ "varying float z;"
 			+ "void main() {"
-			+ "  gl_Position = u_mvp * a_position;"
+			+ "  gl_Position = u_mvp * a_pos;"
 			+ "  z = gl_Position.z;"
 			+ "}";
 	private final static String polygonFragmentShaderZ = ""
