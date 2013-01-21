@@ -17,7 +17,7 @@ package org.oscim.database.oscimap;
 import org.oscim.core.Tag;
 
 public class Tags {
-	public final static int MAX = 627;
+	public final static int MAX = 628;
 	public final static int LIMIT = 1024;
 
 	private static final String s_limited = "limited".intern();
@@ -580,6 +580,7 @@ public class Tags {
 	private static final String s_boutique = "boutique".intern();
 	private static final String s_boat_storage = "boat_storage".intern();
 	private static final String s_area = "area".intern();
+	private static final String s_urban = "urban".intern();
 
 	// only the keys that were imported via osm2pgsql
 	// FIXME add whats missing, e.g. wheelchair
@@ -1278,5 +1279,6 @@ public class Tags {
 			new Tag(s_amenity, s_shower, false),
 			new Tag(s_waterway, s_lock, false),
 			new Tag(s_area, s_yes, false),
+			new Tag(s_landuse, s_urban, false),
 	};
 }
