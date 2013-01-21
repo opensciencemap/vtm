@@ -114,7 +114,7 @@ public abstract class RenderOverlay {
 				l = PolygonRenderer.draw(pos, l, mvp, true, false);
 			} else {
 				GLES20.glEnable(GLES20.GL_BLEND);
-				l = LineRenderer.draw(pos, l, mvp, 1 / div, 0, layers.lineOffset);
+				l = LineRenderer.draw(pos, l, mvp, div, 0, layers.lineOffset);
 			}
 		}
 
