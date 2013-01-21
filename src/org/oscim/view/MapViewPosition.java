@@ -499,6 +499,12 @@ public class MapViewPosition {
 	 */
 	public synchronized boolean scaleMap(float scale, float pivotX, float pivotY) {
 
+		// sanitize input
+		if (scale < 0.5)
+			scale = 0.5f;
+		else if (scale > 2)
+			scale = 2;
+
 		float newScale = mMapScale * scale;
 
 		int z = FastMath.log2((int) newScale);
@@ -597,10 +603,6 @@ public class MapViewPosition {
 			mZoomLevel = MAX_ZOOMLEVEL;
 		else if (mZoomLevel < MIN_ZOOMLEVEL)
 			mZoomLevel = MIN_ZOOMLEVEL;
-	}
-
-	synchronized void setScale(float scale) {
-		mScale = scale;
 	}
 
 	private void updatePosition() {
