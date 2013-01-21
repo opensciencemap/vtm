@@ -41,4 +41,9 @@ public enum MapDatabases {
 	 * ...
 	 */
 	OSCIMAP_READER,
+
+	/**
+	 * ...
+	 */
+	OSCIMAP_READER_TEST,
 }
