@@ -30,6 +30,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
@@ -104,7 +105,7 @@ public class MapDatabase implements IMapDatabase {
 
 		File f = null;
 
-		mBufferSize = 0;
+		mBufferFill = 0;
 		mBufferPos = 0;
 		mReadPos = 0;
 
@@ -124,17 +125,17 @@ public class MapDatabase implements IMapDatabase {
 				cacheBegin(tile, f);
 				decode();
 			} else {
-				Log.d(TAG, "Network Error: " + tile);
+				Log.d(TAG, tile + " Network Error");
 				result = QueryResult.FAILED;
 			}
 		} catch (SocketException ex) {
-			Log.d(TAG, "Socket exception: " + ex.getMessage());
+			Log.d(TAG, tile + " Socket exception: " + ex.getMessage());
 			result = QueryResult.FAILED;
 		} catch (SocketTimeoutException ex) {
-			Log.d(TAG, "Socket Timeout exception: " + ex.getMessage());
+			Log.d(TAG, tile + " Socket Timeout exception: " + ex.getMessage());
 			result = QueryResult.FAILED;
 		} catch (UnknownHostException ex) {
-			Log.d(TAG, "no network");
+			Log.d(TAG, tile + " no network");
 			result = QueryResult.FAILED;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -267,7 +268,8 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	// /////////////// hand sewed tile protocol buffers decoder ///////////////
-	private int BUFFER_SIZE = 65536;
+	private final int MAX_WAY_COORDS = 16384;
+	private final int BUFFER_SIZE = 65536;
 
 	private byte[] mReadBuffer = new byte[BUFFER_SIZE];
 
@@ -275,7 +277,7 @@ public class MapDatabase implements IMapDatabase {
 	private int mBufferPos;
 
 	// bytes available in buffer
-	private int mBufferSize;
+	private int mBufferFill;
 
 	// overall bytes of content processed
 	private int mBytesProcessed;
@@ -302,9 +304,8 @@ public class MapDatabase implements IMapDatabase {
 
 	private short[] mTmpKeys = new short[100];
 	private short[] mIndices = new short[10];
-	private Tag[] mTmpTags = new Tag[10];
+	private Tag[] mTmpTags = new Tag[20];
 
-	private int MAX_WAY_COORDS = 32768;
 	private float[] mTmpCoords = new float[MAX_WAY_COORDS];
 
 	private boolean decode() throws IOException {
@@ -312,7 +313,7 @@ public class MapDatabase implements IMapDatabase {
 		mCurTagCnt = 0;
 
 		if (debug)
-			Log.d(TAG, "Content length " + mContentLenth);
+			Log.d(TAG, mTile + " Content length " + mContentLenth);
 
 		mBytesProcessed = 0;
 		int val;
@@ -345,7 +346,7 @@ public class MapDatabase implements IMapDatabase {
 					break;
 
 				default:
-					Log.d(TAG, "invalid type for tile: " + tag);
+					Log.d(TAG, mTile + " invalid type for tile: " + tag);
 					return false;
 			}
 		}
@@ -363,7 +364,7 @@ public class MapDatabase implements IMapDatabase {
 		else
 			tag = new Tag(key, tagString, true);
 		if (debug)
-			Log.d(TAG, "add tag: " + curTag + " " + tag);
+			Log.d(TAG, mTile + " add tag: " + curTag + " " + tag);
 		curTags[curTag] = tag;
 
 		return true;
@@ -384,7 +385,7 @@ public class MapDatabase implements IMapDatabase {
 		boolean skip = false;
 		boolean fail = false;
 		if (debug)
-			Log.d(TAG, "decode element: " + type);
+			Log.d(TAG, mTile + " decode element: " + type);
 
 		if (type == TAG_TILE_POINT)
 			coordCnt = 2;
@@ -404,8 +405,6 @@ public class MapDatabase implements IMapDatabase {
 
 				case TAG_ELEM_NUM_INDICES:
 					indexCnt = decodeVarint32();
-					if (debug)
-						Log.d(TAG, "elem num index: " + indexCnt);
 					break;
 
 				case TAG_ELEM_INDEX:
@@ -422,19 +421,17 @@ public class MapDatabase implements IMapDatabase {
 						if (indexCnt < index.length)
 							index[indexCnt] = -1;
 					}
-					if (debug)
-						Log.d(TAG, "elem index: " + coordCnt);
 					break;
 
 				case TAG_ELEM_COORDS:
 					if (coordCnt == 0) {
-						Log.d(TAG, "skipping way");
+						Log.d(TAG, mTile + " skipping way");
 						skip = true;
 					}
 					int cnt = decodeWayCoordinates(skip, coordCnt);
 
 					if (cnt != coordCnt) {
-						Log.d(TAG, "X wrong number of coordintes");
+						Log.d(TAG, mTile + " wrong number of coordintes");
 						fail = true;
 					}
 					break;
@@ -448,14 +445,14 @@ public class MapDatabase implements IMapDatabase {
 					break;
 
 				default:
-					Log.d(TAG, "X invalid type for way: " + tag);
+					Log.d(TAG, mTile + " invalid type for way: " + tag);
 			}
 		}
 
 		if (fail || tags == null || indexCnt == 0) {
-			Log.d(TAG, "failed reading way: bytes:" + bytes + " index:"
-					+ (index == null ? "null" : index.toString()) + " tag:"
-					+ (tags != null ? tags.toString() : "...") + " "
+			Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
+					+ (index != null ? Arrays.toString(index) : "null") + " tag:"
+					+ (tags != null ? Arrays.deepToString(tags) : "null") + " "
 					+ indexCnt + " " + coordCnt);
 			return false;
 		}
@@ -467,11 +464,7 @@ public class MapDatabase implements IMapDatabase {
 		else if (type == TAG_TILE_POLY)
 			mMapGenerator.renderWay((byte) layer, tags, coords, index, true, prio);
 		else {
-			if (debug)
-				Log.d(TAG, "add poi " + coords[1] + " " + coords[0] + " " + tags[0]);
 			mMapGenerator.renderPointOfInterest((byte) layer, tags, coords[1], coords[0]);
-			// for (int i = 0; i < index[0]; i++)
-
 		}
 
 		return true;
@@ -536,38 +529,34 @@ public class MapDatabase implements IMapDatabase {
 		int cnt = 0;
 		int result;
 
-		int x, lastX = 0;
-		int y, lastY = 0;
+		int lastX = 0;
+		int lastY = 0;
 		boolean even = true;
 
 		float scale = mScaleFactor;
 
 		if (nodes * 2 > coords.length) {
-			Log.d(TAG, "increase way coord buffer " + mTile + " to " + (nodes * 2));
+			Log.d(TAG, mTile + " increase way coord buffer to " + (nodes * 2));
 			float[] tmp = new float[nodes * 2];
 			mTmpCoords = coords = tmp;
 		}
 
 		// read repeated sint32
 		while (pos < end) {
-
 			if (buf[pos] >= 0) {
 				result = buf[pos++];
 			} else if (buf[pos + 1] >= 0) {
-				result = (buf[pos] & 0x7f)
-						| buf[pos + 1] << 7;
-				pos += 2;
+				result = (buf[pos++] & 0x7f)
+						| buf[pos++] << 7;
 			} else if (buf[pos + 2] >= 0) {
-				result = (buf[pos] & 0x7f)
-						| (buf[pos + 1] & 0x7f) << 7
-						| (buf[pos + 2]) << 14;
-				pos += 3;
+				result = (buf[pos++] & 0x7f)
+						| (buf[pos++] & 0x7f) << 7
+						| (buf[pos++]) << 14;
 			} else if (buf[pos + 3] >= 0) {
-				result = (buf[pos] & 0x7f)
-						| (buf[pos + 1] & 0x7f) << 7
-						| (buf[pos + 2] & 0x7f) << 14
-						| (buf[pos + 3]) << 21;
-				pos += 4;
+				result = (buf[pos++] & 0x7f)
+						| (buf[pos++] & 0x7f) << 7
+						| (buf[pos++] & 0x7f) << 14
+						| (buf[pos++]) << 21;
 			} else {
 				result = (buf[pos] & 0x7f)
 						| (buf[pos + 1] & 0x7f) << 7
@@ -581,17 +570,19 @@ public class MapDatabase implements IMapDatabase {
 					i++;
 
 				if (i == 10)
-					throw new IOException("X malformed VarInt32");
+					throw new IOException("X malformed VarInt32 in " + mTile);
 
 			}
+
+			// zigzag decoding
+			int s = ((result >>> 1) ^ -(result & 1));
+
 			if (even) {
-				x = ((result >>> 1) ^ -(result & 1));
-				lastX = lastX + x;
+				lastX = lastX + s;
 				coords[cnt++] = lastX / scale;
 				even = false;
 			} else {
-				y = ((result >>> 1) ^ -(result & 1));
-				lastY = lastY + y;
+				lastY = lastY + s;
 				coords[cnt++] = lastY / scale;
 				even = true;
 			}
@@ -604,75 +595,64 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private void readBuffer(int size) throws IOException {
-		//int read = 0;
 
 		// check if buffer already contains the request bytes
-		if (mBufferPos + size < mBufferSize)
-			return;// mBufferSize - mBufferPos;
+		if (mBufferPos + size < mBufferFill)
+			return;
 
 		// check if inputstream is read to the end
 		if (mReadPos == mContentLenth)
-			return; // mBufferSize - mBufferPos;
+			return;
+		int maxSize = mReadBuffer.length;
 
-		if (size > BUFFER_SIZE) {
-			// FIXME throw exception for now, but frankly better
-			// sanitize tile data on compilation. this should only
-			// happen with strings or one ways coordinates are
-			// larger than 64kb
-			//throw new IOException("X requested size too large " + mTile);
-			BUFFER_SIZE = size;
-			byte[] tmp = new byte[BUFFER_SIZE];
+		if (size > maxSize) {
+			Log.d(TAG, mTile + "increase read buffer to " + size + " bytes");
+			maxSize = size;
+			byte[] tmp = new byte[maxSize];
 
-			mBufferSize -= mBufferPos;
-			System.arraycopy(mReadBuffer, mBufferPos, tmp, 0, mBufferSize);
+			mBufferFill -= mBufferPos;
+			System.arraycopy(mReadBuffer, mBufferPos, tmp, 0, mBufferFill);
 			mBufferPos = 0;
 			mReadBuffer = tmp;
-			Log.d(TAG, mTile + "increase read buffer to " + size + " bytes");
 		}
 
-		if (mBufferSize == mBufferPos) {
+		if (mBufferFill == mBufferPos) {
 			mBufferPos = 0;
-			mBufferSize = 0;
-		} else if (mBufferPos + size > BUFFER_SIZE) {
-			//	Log.d(TAG, "wrap buffer - read:" + size
-			//			+ " cur size:" + mBufferSize
-			//			+ " cur pos:" + mBufferPos);
-
-			// copy bytes left to read to the beginning of buffer
-			mBufferSize -= mBufferPos;
-			System.arraycopy(mReadBuffer, mBufferPos, mReadBuffer, 0, mBufferSize);
+			mBufferFill = 0;
+		} else if (mBufferPos + size > maxSize) {
+			// copy bytes left to the beginning of buffer
+			mBufferFill -= mBufferPos;
+			System.arraycopy(mReadBuffer, mBufferPos, mReadBuffer, 0, mBufferFill);
 			mBufferPos = 0;
 		}
 
-		int max = BUFFER_SIZE - mBufferSize;
+		int max = maxSize - mBufferFill;
 
-		while ((mBufferSize - mBufferPos) < size && max > 0) {
+		while ((mBufferFill - mBufferPos) < size && max > 0) {
 
-			max = BUFFER_SIZE - mBufferSize;
+			max = maxSize - mBufferFill;
 			if (max > mContentLenth - mReadPos)
 				max = (int) (mContentLenth - mReadPos);
 
 			// read until requested size is available in buffer
-			int len = mInputStream.read(mReadBuffer, mBufferSize, max);
+			int len = mInputStream.read(mReadBuffer, mBufferFill, max);
 
 			if (len < 0) {
 				// finished reading, mark end
-				mReadBuffer[mBufferSize] = 0;
+				mReadBuffer[mBufferFill] = 0;
 				break;
 			}
 
-			//read += len;
 			mReadPos += len;
 
 			if (mCacheFile != null)
-				mCacheFile.write(mReadBuffer, mBufferSize, len);
+				mCacheFile.write(mReadBuffer, mBufferFill, len);
 
 			if (mReadPos == mContentLenth)
 				break;
 
-			mBufferSize += len;
+			mBufferFill += len;
 		}
-		return; // read;
 	}
 
 	private short[] decodeShortArray(int num, short[] array) throws IOException {
@@ -725,7 +705,7 @@ public class MapDatabase implements IMapDatabase {
 					i++;
 
 				if (i == 10)
-					throw new IOException("X malformed VarInt32");
+					throw new IOException("X malformed VarInt32 in " + mTile);
 
 			}
 
@@ -741,7 +721,7 @@ public class MapDatabase implements IMapDatabase {
 	private int decodeVarint32() throws IOException {
 		int pos = mBufferPos;
 
-		if (pos + 10 > mBufferSize) {
+		if (pos + 10 > mBufferFill) {
 			readBuffer(4096);
 			pos = mBufferPos;
 		}
@@ -788,7 +768,7 @@ public class MapDatabase implements IMapDatabase {
 			read++;
 
 		if (read == 10)
-			throw new IOException("X malformed VarInt32");
+			throw new IOException("X malformed VarInt32 in " + mTile);
 
 		mBufferPos += read;
 		mBytesProcessed += read;
@@ -878,7 +858,7 @@ public class MapDatabase implements IMapDatabase {
 		mContentLenth = decodeInt(buf, end);
 
 		// buffer fill
-		mBufferSize = read;
+		mBufferFill = read;
 		// start of content
 		mBufferPos = end + 4;
 		// bytes of content already read into buffer
@@ -941,7 +921,7 @@ public class MapDatabase implements IMapDatabase {
 			mCommandStream.flush();
 			return true;
 		} catch (IOException e) {
-			Log.d(TAG, "retry - recreate connection");
+			Log.d(TAG, mTile + "  recreate connection");
 		}
 
 		lwHttpConnect();
@@ -1040,7 +1020,7 @@ public class MapDatabase implements IMapDatabase {
 				if (mReadPos > 0) {
 					try {
 						mCacheFile.write(mReadBuffer, mBufferPos,
-								mBufferSize - mBufferPos);
+								mBufferFill - mBufferPos);
 
 					} catch (IOException e) {
 						e.printStackTrace();
