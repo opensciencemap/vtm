@@ -35,7 +35,7 @@
   <style-area name="military"            fill="#eeedea" fade="10"/>
   
   
-  <style-line name="residential"         stroke="#ffffff" width="1.3" />
+  <style-line name="residential"         stroke="#ffffff" width="1.3" min="1.2"/>
  	<style-line name="residential:bridge"  from="residential" cap="square"/>
  	
  	<!-- when inheriting another style with 'from' then 'witdth' is meant relative to the parent -->
@@ -87,7 +87,7 @@
     <!-- landuse base -->      
     <rule e="way" k="landuse" v="*">
      <rule e="way" k="*" v="urban">
-        <area fill="#f4f4f2" />
+        <area fill="#f2f2ef" />
       </rule>
       <rule e="way" k="*" v="residential">
         <use-area name="residential" />
@@ -310,7 +310,7 @@
           <use-line name="water" width="0.3"/>
      	  </rule>
         <rule e="way" k="*" v="*" zoom-max="11">
-           <use-line name="water" width="0.3" fixed="true"/>
+           <use-line name="water" width="0.3" fixed="true" fade="7"/>
         </rule>
       </rule>
       
@@ -985,7 +985,7 @@
     <!-- place -->
     <rule e="node" k="place" v="*">
       <rule e="node" k="*" v="suburb|town|village">
-        <caption k="name" font-size="17" fill="#000000"
+        <caption k="name" font-size="17" fill="#2020bb"
                  stroke="#ffffff" stroke-width="2.0" />
       </rule>
       <rule e="node" k="*" v="island" zoom-min="10">
@@ -1028,7 +1028,7 @@
 		</rule>
 
 
-		<!-- amenity -->
+		<!-- amenity
 		<rule e="node" k="amenity" v="*">
 			<rule e="node" k="amenity" v="atm" zoom-min="17">
 				<symbol src="jar:symbols/atm.png" />
@@ -1069,9 +1069,9 @@
 			<rule e="node" k="amenity" v="hospital" zoom-min="15">
 				<symbol src="jar:symbols/hospital.png" />
 			</rule>
-			<!-- <rule e="node" k="amenity" v="kindergarten" zoom-min="17">
+			 <rule e="node" k="amenity" v="kindergarten" zoom-min="17">
 				<symbol src="jar:symbols/kindergarten.png" />
-			</rule>-->
+			</rule>
 			<rule e="node" k="amenity" v="library" zoom-min="17">
 				<symbol src="jar:symbols/library.png" />
 			</rule>
@@ -1101,9 +1101,9 @@
 			<rule e="node" k="amenity" v="pub|bar" zoom-min="17">
 				<symbol src="jar:symbols/pub.png" />
 			</rule>
-			<!-- <rule e="node" k="amenity" v="recycling" zoom-min="17">
+			<rule e="node" k="amenity" v="recycling" zoom-min="17">
 				<symbol src="jar:symbols/recycling.png" />
-			</rule> -->
+			</rule>
 			<rule e="node" k="amenity" v="restaurant" zoom-min="17">
 				<symbol src="jar:symbols/restaurant.png" />
 			</rule>
@@ -1113,9 +1113,9 @@
 			<rule e="node" k="amenity" v="shelter" zoom-min="17">
 				<symbol src="jar:symbols/shelter.png" />
 			</rule>
-			<!-- <rule e="node" k="amenity" v="telephone" zoom-min="17">
+			<rule e="node" k="amenity" v="telephone" zoom-min="17">
 				<symbol src="jar:symbols/telephone.png" />
-			</rule> -->
+			</rule> 
 			<rule e="node" k="amenity" v="theatre" zoom-min="17">
 				<symbol src="jar:symbols/theatre.png" />
 			</rule>
@@ -1126,12 +1126,12 @@
 				<symbol src="jar:symbols/university.png" />
 			</rule>
 
-		<!-- 	<rule e="node" k="*" v="*" zoom-min="17">
-				<caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
-			</rule>-->
-		</rule>
+			<rule e="node" k="*" v="*" zoom-min="17">
+				<caption k="name"  font-size="15" fill="#bb4040" stroke="#ffffff" stroke-width="2.0" />
+			</rule>
+		</rule>-->
     
-    <!-- shop -->
+    <!-- shop 
 		<rule e="node" k="shop" v="*">
 			<rule e="node" k="shop" v="bakery" zoom-min="17">
 				<symbol src="jar:symbols/bakery.png" />
@@ -1144,12 +1144,12 @@
 			</rule>
 
 			<rule e="node" k="*" v="*" zoom-min="17">
-				<caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
+				<caption k="name" font-size="15" fill="#2020bb" stroke="#ffffff" stroke-width="2.0" />
 			</rule>
-		</rule>
+		</rule>-->
 
 
-		<!-- tourism -->
+		<!-- tourism 
 		<rule e="node" k="tourism" v="*">
 			<rule e="node" k="tourism" v="alpine_hut" zoom-min="16">
 				<symbol src="jar:symbols/alpine_hut.png" />
@@ -1171,9 +1171,9 @@
 			</rule>
 
 			<rule e="node" k="*" v="*" zoom-min="17">
-				<caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
+				<caption k="name" font-size="15" fill="#20aa20" stroke="#ffffff" stroke-width="2.0" />
 			</rule>
-		</rule>
+		</rule>-->
     
   </rule>
 
