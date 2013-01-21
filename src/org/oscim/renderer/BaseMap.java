@@ -30,8 +30,8 @@ import android.opengl.Matrix;
 /**
  * @author Hannes Janetzek
  */
-public class BaseLayer {
-	private final static String TAG = BaseLayer.class.getName();
+public class BaseMap {
+	private final static String TAG = BaseMap.class.getName();
 
 	// used to not draw a tile twice per frame.
 	private static int mDrawSerial = 0;
@@ -47,9 +47,13 @@ public class BaseLayer {
 		mfProjMatrix[14] = 0;
 	}
 
+	private static int mDrawCnt;
+
 	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos) {
 		//long start = SystemClock.uptimeMillis();
 		Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, pos.viewMatrix, 0);
+
+		mDrawCnt = 0;
 
 		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
 		LineRenderer.beginLines();
@@ -66,8 +70,15 @@ public class BaseLayer {
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null))
-				drawProxyTile(t, pos);
+				drawProxyTile(t, pos, true);
 		}
+
+		for (int i = 0; i < tileCnt; i++) {
+			MapTile t = tiles[i];
+			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null))
+				drawProxyTile(t, pos, false);
+		}
+
 		LineRenderer.endLines();
 
 		GLES20.glDisable(GL_POLYGON_OFFSET_FILL);
@@ -106,7 +117,8 @@ public class BaseLayer {
 		Matrix.multiplyMM(mvp, 0, mVPMatrix, 0, mvp, 0);
 
 		// set depth offset (used for clipping to tile boundaries)
-		GLES20.glPolygonOffset(-1, -GLRenderer.depthOffset(t));
+		//GLES20.glPolygonOffset(-1, -GLRenderer.depthOffset(t));
+		GLES20.glPolygonOffset(-1, (mDrawCnt++));
 
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, t.vbo.id);
 
@@ -148,7 +160,7 @@ public class BaseLayer {
 		//		}
 	}
 
-	private static boolean drawProxyChild(MapTile tile, MapPosition pos) {
+	private static int drawProxyChild(MapTile tile, MapPosition pos) {
 		int drawn = 0;
 		for (int i = 0; i < 4; i++) {
 			if ((tile.proxies & 1 << i) == 0)
@@ -161,45 +173,63 @@ public class BaseLayer {
 				drawn++;
 			}
 		}
-		return drawn == 4;
+		return drawn;
 	}
 
-	private static void drawProxyTile(MapTile tile, MapPosition pos) {
+	private static void drawProxyTile(MapTile tile, MapPosition pos, boolean parent) {
 		int diff = pos.zoomLevel - tile.zoomLevel;
 
-		boolean drawn = false;
 		if (pos.scale > 1.5f || diff < 0) {
 			// prefer drawing children
-			if (!drawProxyChild(tile, pos)) {
+			if (drawProxyChild(tile, pos) == 4)
+				return;
+
+			if (parent) {
+				// draw parent proxy
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					MapTile t = tile.rel.parent.tile;
-					if (t.state == STATE_READY) {
-						drawTile(t, pos);
-						drawn = true;
-					}
-				}
-
-				if (!drawn && (tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
-					MapTile t = tile.rel.parent.parent.tile;
 					if (t.state == STATE_READY)
 						drawTile(t, pos);
-
 				}
+			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
+				// check if parent was already drawn
+				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
+					MapTile t = tile.rel.parent.tile;
+					if (t.state == STATE_READY)
+						return;
+				}
+
+				MapTile t = tile.rel.parent.parent.tile;
+				if (t.state == STATE_READY)
+					drawTile(t, pos);
 			}
 		} else {
 			// prefer drawing parent
-			MapTile t = tile.rel.parent.tile;
+			if (parent) {
+				MapTile t = tile.rel.parent.tile;
 
-			if (t != null && t.state == STATE_READY) {
-				drawTile(t, pos);
+				if (t != null && t.state == STATE_READY) {
+					drawTile(t, pos);
+					return;
 
-			} else if (!drawProxyChild(tile, pos)) {
-
-				if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
-					t = tile.rel.parent.parent.tile;
-					if (t.state == STATE_READY)
-						drawTile(t, pos);
 				}
+
+				drawProxyChild(tile, pos);
+
+			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
+				// check if parent was already drawn
+				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
+					MapTile t = tile.rel.parent.tile;
+					if (t.state == STATE_READY)
+						return;
+				}
+				// this will do nothing, just to check
+				if (drawProxyChild(tile, pos) > 0)
+					return;
+
+				MapTile t = tile.rel.parent.parent.tile;
+				if (t.state == STATE_READY)
+					drawTile(t, pos);
 			}
 		}
 	}
