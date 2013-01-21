@@ -64,11 +64,12 @@ public final class GeometryUtils {
 		throw new IllegalStateException();
 	}
 
-	static boolean linesIntersect(double x1, double y1, double x2, double y2, double x3, double y3,
-			double x4, double y4) {
+	public static byte linesIntersect(
+			double x1, double y1, double x2, double y2,
+			double x3, double y3, double x4, double y4) {
 		// Return false if either of the lines have zero length
 		if (x1 == x2 && y1 == y2 || x3 == x4 && y3 == y4) {
-			return false;
+			return 0;
 		}
 		// Fastest method, based on Franklin Antonio's
 		// "Faster Line Segment Intersection" topic "in Graphics Gems III" book
@@ -85,21 +86,21 @@ public final class GeometryUtils {
 
 		if (commonDenominator > 0) {
 			if (alphaNumerator < 0 || alphaNumerator > commonDenominator) {
-				return false;
+				return 0;
 			}
 		} else if (commonDenominator < 0) {
 			if (alphaNumerator > 0 || alphaNumerator < commonDenominator) {
-				return false;
+				return 0;
 			}
 		}
 		double betaNumerator = ax * cy - ay * cx;
 		if (commonDenominator > 0) {
 			if (betaNumerator < 0 || betaNumerator > commonDenominator) {
-				return false;
+				return 0;
 			}
 		} else if (commonDenominator < 0) {
 			if (betaNumerator > 0 || betaNumerator < commonDenominator) {
-				return false;
+				return 0;
 			}
 		}
 		if (commonDenominator == 0) {
@@ -120,13 +121,13 @@ public final class GeometryUtils {
 					if (y1 >= y3 && y1 <= y4 || y1 <= y3 && y1 >= y4 || y2 >= y3 && y2 <= y4
 							|| y2 <= y3 && y2 >= y4
 							|| y3 >= y1 && y3 <= y2 || y3 <= y1 && y3 >= y2) {
-						return true;
+						return 2;
 					}
 				}
 			}
-			return false;
+			return 0;
 		}
-		return true;
+		return 1;
 	}
 
 	static boolean doesIntersect(double l1x1, double l1y1, double l1x2, double l1y2, double l2x1,
@@ -144,27 +145,10 @@ public final class GeometryUtils {
 		return ((ua >= 0.0d) && (ua <= 1.0d) && (ub >= 0.0d) && (ub <= 1.0d));
 	}
 
-	/**
-	 * @param x1
-	 *            ...
-	 * @param y1
-	 *            ...
-	 * @param x2
-	 *            ...
-	 * @param y2
-	 *            ...
-	 * @param x3
-	 *            ...
-	 * @param y3
-	 *            ...
-	 * @param x4
-	 *            ...
-	 * @param y4
-	 *            ...
-	 * @return ...
-	 */
-	public static boolean lineIntersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4,
-			int y4) {
+	public static boolean lineIntersect(
+			int x1, int y1, int x2, int y2,
+			int x3, int y3, int x4, int y4) {
+
 		float denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
 		if (denom == 0.0) { // Lines are parallel.
 			return false;
@@ -172,7 +156,6 @@ public final class GeometryUtils {
 		float ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
 		float ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
 		if (ua >= 0.0f && ua <= 1.0f && ub >= 0.0f && ub <= 1.0f) {
-			// Get the intersection point.
 			return true;
 		}
 

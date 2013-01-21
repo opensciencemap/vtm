@@ -58,6 +58,13 @@ public class TextItem {
 				TextItem next = ti.next;
 
 				ti.next = pool;
+
+				// drop references 
+				ti.string = null;
+				ti.text = null;
+				ti.n1 = null;
+				ti.n2 = null;
+
 				pool = ti;
 
 				ti = next;
@@ -92,13 +99,47 @@ public class TextItem {
 		return this;
 	}
 
+	public static boolean bboxOverlaps(TextItem it1, TextItem it2, float add) {
+		if (it1.y1 < it1.y2) {
+			if (it2.y1 < it2.y2)
+				return (it1.x1 - add < it2.x2)
+						&& (it2.x1 < it1.x2 + add)
+						&& (it1.y1 - add < it2.y2)
+						&& (it2.y1 < it1.y2 + add);
+
+			// flip it2
+			return (it1.x1 - add < it2.x2)
+					&& (it2.x1 < it1.x2 + add)
+					&& (it1.y1 - add < it2.y1)
+					&& (it2.y2 < it1.y2 + add);
+		}
+
+		// flip it1
+		if (it2.y1 < it2.y2)
+			return (it1.x1 - add < it2.x2)
+					&& (it2.x1 < it1.x2 + add)
+					&& (it1.y2 - add < it2.y2)
+					&& (it2.y1 < it1.y1 + add);
+
+		// flip both
+		return (it1.x1 - add < it2.x2)
+				&& (it2.x1 < it1.x2 + add)
+				&& (it1.y2 - add < it2.y1)
+				&& (it2.y2 < it1.y1 + add);
+	}
+
 	public TextItem next;
 
 	public float x, y;
 	public String string;
 	public Text text;
 	public float width;
-	public short x1, y1, x2, y2;
+	public float x1, y1, x2, y2;
 	public short length;
+
+	// link to next/prev label of the way
+	public TextItem n1;
+	public TextItem n2;
+	public boolean active;
 	// public byte placement
 }

@@ -21,18 +21,26 @@ import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.MapTile;
 import org.oscim.renderer.TileManager;
 import org.oscim.renderer.TileSet;
+import org.oscim.renderer.layer.Layer;
+import org.oscim.renderer.layer.Layers;
+import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.TextLayer;
+import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GeometryUtils;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.PausableThread;
 import org.oscim.view.MapView;
 
+import android.graphics.Color;
+import android.graphics.Paint.Cap;
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.Log;
 
 public class TextOverlay extends RenderOverlay {
+	private final static String TAG = TextOverlay.class.getName();
 
 	private TileSet mTiles;
 	private LabelThread mThread;
@@ -51,7 +59,7 @@ public class TextOverlay extends RenderOverlay {
 
 		@Override
 		protected void doWork() {
-			SystemClock.sleep(250);
+			SystemClock.sleep(400);
 			if (!mRun)
 				return;
 
@@ -79,6 +87,80 @@ public class TextOverlay extends RenderOverlay {
 		mThread.start();
 	}
 
+	private TextItem mPool;
+
+	private byte checkOverlap(TextLayer tl, TextItem ti) {
+
+		for (TextItem lp = tl.labels; lp != null;) {
+			if (lp.text.caption) {
+				lp = lp.next;
+				continue;
+			}
+
+			// check bounding box
+			if (!TextItem.bboxOverlaps(ti, lp, 80)) {
+				lp = lp.next;
+				continue;
+			}
+
+			if (lp.text == ti.text && (lp.string == ti.string || lp.string.equals(ti.string))) {
+				// make strings unique
+				ti.string = lp.string;
+
+				Log.d(TAG, "overlap, same label in bbox " + lp.string
+						+ " at " + ti.x + ":" + ti.y + ", " + lp.x + ":" + lp.y);
+				return 3;
+			}
+
+			if (!TextItem.bboxOverlaps(ti, lp, 10)) {
+				lp = lp.next;
+				continue;
+			}
+
+			byte intersect = GeometryUtils.linesIntersect(
+					ti.x1, ti.y1, ti.x2, ti.y2,
+					lp.x1, lp.y1, lp.x2, lp.y2);
+
+			if (intersect != 0) {
+				//Log.d(TAG, "overlap " + lp.string + " <> " + ti.string 
+				//+ " at " + ti.x + ":" + ti.y);
+
+				if ((lp.n1 != null && lp.n1 == ti.n2) ||
+						(lp.n2 != null && lp.n2 == ti.n1)) {
+					//Log.d(TAG, "overlap with adjacent label " + lp.string
+					//		+ " at " + ti.x + ":" + ti.y + ", " + lp.x + ":" + lp.y);
+
+					return intersect;
+				}
+
+				if ((ti.n1 != null || ti.n2 != null) && (lp.n1 == null && lp.n2 == null)) {
+					Log.d(TAG, "overlap, other is unique " + lp.string + " " + ti.string
+							+ " at " + ti.x + ":" + ti.y + ", " + lp.x + ":" + lp.y);
+					return intersect;
+				}
+				// just to make it more deterministic
+				if (lp.x > ti.x) {
+					//Log.d(TAG, "drop " + lp.string);
+
+					TextItem tmp = lp;
+					lp = lp.next;
+
+					tl.removeText(tmp);
+
+					tmp.next = mPool;
+					mPool = tmp;
+					continue;
+				}
+				return intersect;
+			}
+
+			lp = lp.next;
+		}
+		return 0;
+	}
+
+	private final Layers mDebugLayer = null; //new Layers();
+
 	void updateLabels() {
 		mTiles = TileManager.getActiveTiles(mTiles);
 
@@ -102,6 +184,7 @@ public class TextOverlay extends RenderOverlay {
 		if (diff > 1 || diff < -2) {
 			// pass back the current layer
 			synchronized (this) {
+				Log.d(TAG, "drop labels: diff " + diff);
 				mCurLayer = tl;
 			}
 			return;
@@ -112,21 +195,33 @@ public class TextOverlay extends RenderOverlay {
 		float cos = (float) Math.cos(angle);
 		float sin = (float) Math.sin(angle);
 
-		TextItem ti2 = null;
-
 		int maxx = Tile.TILE_SIZE << (mWorkPos.zoomLevel - 1);
 
 		MapTile[] tiles = mTiles.tiles;
+		TextItem ti2 = null;
 
-		// order tiles by x/y coordinate to make placement more consistent 
-		// while map position changes
-		//Arrays.sort(tiles, 0, mTiles.cnt, TileSet.coordComparator);
-
+		if (mDebugLayer != null) {
+			mDebugLayer.clear();
+			LineLayer ll = (LineLayer) mDebugLayer.getLayer(0, Layer.LINE);
+			ll.line = new Line(Color.BLUE, 1, Cap.BUTT);
+			ll.width = 2;
+			ll = (LineLayer) mDebugLayer.getLayer(3, Layer.LINE);
+			ll.line = new Line(Color.YELLOW, 1, Cap.BUTT);
+			ll.width = 2;
+			ll = (LineLayer) mDebugLayer.getLayer(1, Layer.LINE);
+			ll.line = new Line(Color.RED, 1, Cap.BUTT);
+			ll.width = 2;
+			ll = (LineLayer) mDebugLayer.getLayer(2, Layer.LINE);
+			ll.line = new Line(Color.GREEN, 1, Cap.BUTT);
+			ll.width = 2;
+		}
 		// TODO more sophisticated placement :)
 		for (int i = 0, n = mTiles.cnt; i < n; i++) {
 			MapTile t = tiles[i];
 			if (!t.isVisible)
 				continue;
+
+			//	Log.d(TAG, "add: " + t);
 
 			float dx = (float) (t.pixelX - mWorkPos.x);
 			float dy = (float) (t.pixelY - mWorkPos.y);
@@ -142,18 +237,25 @@ public class TextOverlay extends RenderOverlay {
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 
-				boolean overlaps = false;
+				// acquire a TextItem to add to TextLayer
+				if (ti2 == null) {
+					if (mPool == null)
+						ti2 = TextItem.get();
+					else {
+						ti2 = mPool;
+						mPool = mPool.next;
+						ti2.next = null;
+					}
+				}
 
 				if (ti.text.caption) {
-					if (ti2 == null)
-						ti2 = TextItem.get();
 					ti2.move(ti, dx, dy, scale);
-
 					int tx = (int) (ti2.x);
 					int ty = (int) (ti2.y);
 					int tw = (int) (ti2.width / 2);
 					int th = (int) (ti2.text.fontHeight / 2);
 
+					boolean overlaps = false;
 					for (TextItem lp = tl.labels; lp != null;) {
 						int px = (int) (lp.x);
 						int py = (int) (lp.y);
@@ -170,89 +272,91 @@ public class TextOverlay extends RenderOverlay {
 						}
 						lp = lp.next;
 					}
-				} else {
-
-					if (ti.width > ti.length * scale) {
-						continue;
-					}
-					if (ti2 == null)
-						ti2 = TextItem.get();
-					ti2.move(ti, dx, dy, scale);
-
-					if (cos * (ti.x2 - ti.x1) - sin * (ti.y2 - ti.y1) < 0) {
-						// flip label upside-down
-						ti2.x1 = (short) ((ti.x2 * scale + dx));
-						ti2.y1 = (short) ((ti.y2 * scale + dy));
-						ti2.x2 = (short) ((ti.x1 * scale + dx));
-						ti2.y2 = (short) ((ti.y1 * scale + dy));
-					} else {
-						ti2.x1 = (short) ((ti.x1 * scale + dx));
-						ti2.y1 = (short) ((ti.y1 * scale + dy));
-						ti2.x2 = (short) ((ti.x2 * scale + dx));
-						ti2.y2 = (short) ((ti.y2 * scale + dy));
+					if (!overlaps) {
+						tl.addText(ti2);
+						ti2 = null;
 					}
 
-					//float normalLength = (float) Math.hypot(ti2.x2 - ti2.x1, ti2.y2 - ti2.y1);
-
-					for (TextItem lp = tl.labels; lp != null;) {
-						if (lp.text.caption) {
-							lp = lp.next;
-							continue;
-						}
-
-						if (GeometryUtils.lineIntersect(ti2.x1, ti2.y1, ti2.x2, ti2.y2,
-								lp.x1, lp.y1, lp.x2, lp.y2)) {
-							// just to make it more deterministic
-							if (lp.width > ti2.width) {
-								TextItem tmp = lp;
-								lp = lp.next;
-
-								tl.removeText(tmp);
-								tmp.next = null;
-								TextItem.release(tmp);
-								continue;
-							}
-							overlaps = true;
-							break;
-						}
-
-						if ((ti2.x1) < (lp.x2)
-								&& (lp.x1) < (ti2.x2)
-								&& (ti2.y1) < (lp.y2)
-								&& (lp.y1) < (ti2.y2)) {
-
-							// just to make it more deterministic
-							if (lp.width > ti2.width) {
-								TextItem tmp = lp;
-								lp = lp.next;
-
-								tl.removeText(tmp);
-								tmp.next = null;
-								TextItem.release(tmp);
-								continue;
-							}
-							overlaps = true;
-							break;
-						}
-
-						lp = lp.next;
-					}
+					continue;
 				}
 
-				if (!overlaps) {
+				/* text is way label */
+
+				// check if path at current scale is long enough for text
+				if (mDebugLayer == null && ti.width > ti.length * scale)
+					continue;
+
+				// set line endpoints relative to view to be able to
+				// check intersections with label from other tiles
+				float width = (ti.x2 - ti.x1) / 2f;
+				float height = (ti.y2 - ti.y1) / 2f;
+
+				ti2.move(ti, dx, dy, scale);
+				ti2.x2 = (ti2.x + width);
+				ti2.x1 = (ti2.x - width);
+				ti2.y2 = (ti2.y + height);
+				ti2.y1 = (ti2.y - height);
+
+				byte overlaps = checkOverlap(tl, ti2);
+
+				if (mDebugLayer != null) {
+
+					LineLayer ll;
+					if (ti.width > ti.length * scale) {
+						ll = (LineLayer) mDebugLayer.getLayer(1, Layer.LINE);
+						overlaps = 3;
+					}
+					else if (overlaps == 1)
+						ll = (LineLayer) mDebugLayer.getLayer(0, Layer.LINE);
+					else if (overlaps == 2)
+						ll = (LineLayer) mDebugLayer.getLayer(3, Layer.LINE);
+					else
+						ll = (LineLayer) mDebugLayer.getLayer(2, Layer.LINE);
+
+					float[] points = new float[4];
+					short[] indices = { 4 };
+					points[0] = ti2.x1 / scale;
+					points[1] = ti2.y1 / scale;
+					points[2] = ti2.x2 / scale;
+					points[3] = ti2.y2 / scale;
+					ll.addLine(points, indices, false);
+				}
+
+				if (overlaps == 0) {
 					tl.addText(ti2);
 					ti2 = null;
 				}
 			}
 		}
 
-		if (ti2 != null)
-			TextItem.release(ti2);
+		for (TextItem ti = tl.labels; ti != null; ti = ti.next) {
+			// scale back to fixed zoom-level. could be done in setMatrix
+			ti.x /= scale;
+			ti.y /= scale;
 
-		// scale back to fixed zoom-level. could be done in setMatrix..
-		for (TextItem lp = tl.labels; lp != null; lp = lp.next) {
-			lp.x /= scale;
-			lp.y /= scale;
+			if (ti.text.caption)
+				continue;
+
+			// flip label upside-down
+			if (cos * (ti.x2 - ti.x1) - sin * (ti.y2 - ti.y1) < 0) {
+				float tmp = ti.x1;
+				ti.x1 = ti.x2;
+				ti.x2 = tmp;
+
+				tmp = ti.y1;
+				ti.y1 = ti.y2;
+				ti.y2 = tmp;
+			}
+		}
+
+		// release temporarily used TextItems
+		if (ti2 != null) {
+			ti2.next = mPool;
+			mPool = ti2;
+		}
+		if (mPool != null) {
+			TextItem.release(mPool);
+			mPool = null;
 		}
 
 		// draw text to bitmaps and create vertices
@@ -278,6 +382,11 @@ public class TextOverlay extends RenderOverlay {
 
 			// clear textures and text items from previous layer
 			layers.clear();
+
+			if (mDebugLayer != null) {
+				layers.layers = mDebugLayer.layers;
+				mDebugLayer.layers = null;
+			}
 
 			// set new TextLayer to be uploaded and used
 			layers.textureLayers = mCurLayer;
