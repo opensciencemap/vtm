@@ -82,7 +82,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static float[] mTileCoords = new float[8];
 	private static float[] mDebugCoords = new float[8];
 
-	private static float[] mClearColor = null;
+	//private 
+	static float[] mClearColor = null;
 	private static boolean mUpdateColor = false;
 
 	// drawlock to synchronize Main- and GL-Thread
@@ -339,12 +340,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (mUpdateColor) {
 			float cc[] = mClearColor;
 			GLES20.glClearColor(cc[0], cc[1], cc[2], cc[3]);
+			//GLES20.glClearColor(0.8f, 0.8f, 0.8f, 1);
 			mUpdateColor = false;
 		}
 
 		// Note: it seems faster to also clear the stencil buffer even
 		// when not needed. probaly otherwise it is masked out from the
 		// depth buffer as they share the same memory region afaik
+		// or for a better reason see OpenGL Insights chapter 23.
 		GLES20.glDepthMask(true);
 		GLES20.glStencilMask(0xFF);
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT
@@ -457,7 +460,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			overlays.get(i).update(mMapPosition, changed, tilesChanged);
 
 		/* draw base layer */
-		BaseLayer.draw(tiles, tileCnt, pos);
+		BaseMap.draw(tiles, tileCnt, pos);
 
 		// start drawing while overlays uploading textures, etc
 		GLES20.glFlush();
@@ -470,6 +473,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		for (int i = 0, n = overlays.size(); i < n; i++) {
 			RenderOverlay renderOverlay = overlays.get(i);
 
+			// helper to compile layers into single vbo
 			if (renderOverlay.newData) {
 				if (renderOverlay.vbo == null) {
 					renderOverlay.vbo = BufferObject.get();
@@ -477,7 +481,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					if (renderOverlay.vbo == null)
 						continue;
 				}
-
 				if (uploadOverlayData(renderOverlay))
 					renderOverlay.isReady = true;
 			}
@@ -562,9 +565,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			Matrix.multiplyMM(mProjMatrix, 0, mMVPMatrix, 0, mProjMatrix, 0);
 		}
 
-		BaseLayer.setProjection(mProjMatrix);
+		BaseMap.setProjection(mProjMatrix);
 
 		GLES20.glViewport(0, 0, width, height);
+		//GLES20.glScissor(0, 0, width, height);
+		//GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
 
 		if (!mNewSurface) {
 			mMapView.redrawMap();
