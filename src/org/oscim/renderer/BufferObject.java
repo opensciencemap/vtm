@@ -142,8 +142,9 @@ public final class BufferObject {
 	}
 
 	static synchronized void init(int num) {
-		//createBuffers(num);
-		//counter = num;
+		pool = null;
+		createBuffers(num);
+		counter = num;
 	}
 
 	public int id;
