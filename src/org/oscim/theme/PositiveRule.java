@@ -36,21 +36,14 @@ class PositiveRule extends Rule {
 	}
 
 	@Override
-	boolean matchesNode(Tag[] tags, byte zoomLevel) {
-		return (mElement != Element.WAY)
-				&& mZoomMin <= zoomLevel
-				&& mZoomMax >= zoomLevel
-				&& (mKeyMatcher == null || mKeyMatcher.matches(tags))
+	boolean matchesNode(Tag[] tags) {
+		return (mKeyMatcher == null || mKeyMatcher.matches(tags))
 				&& (mValueMatcher == null || mValueMatcher.matches(tags));
 	}
 
 	@Override
-	boolean matchesWay(Tag[] tags, byte zoomLevel, int closed) {
-		return (mElement != Element.NODE)
-				&& mZoomMin <= zoomLevel
-				&& mZoomMax >= zoomLevel
-				&& (mClosed == closed || mClosed == Closed.ANY)
-				&& (mKeyMatcher == null || mKeyMatcher.matches(tags))
-				&& (mValueMatcher == null || mValueMatcher.matches(tags));
+	boolean matchesWay(Tag[] tags) {
+		return (mKeyMatcher == null || mKeyMatcher.matches(tags)) &&
+				(mValueMatcher == null || mValueMatcher.matches(tags));
 	}
 }

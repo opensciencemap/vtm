@@ -27,17 +27,12 @@ class NegativeRule extends Rule {
 	}
 
 	@Override
-	boolean matchesNode(Tag[] tags, byte zoomLevel) {
-		return mZoomMin <= zoomLevel && mZoomMax >= zoomLevel
-				&& (mElement != Element.WAY)
-				&& mAttributeMatcher.matches(tags);
+	boolean matchesNode(Tag[] tags) {
+		return mAttributeMatcher.matches(tags);
 	}
 
 	@Override
-	boolean matchesWay(Tag[] tags, byte zoomLevel, int closed) {
-		return mZoomMin <= zoomLevel && mZoomMax >= zoomLevel
-				&& (mElement != Element.NODE)
-				&& (mClosed == closed || mClosed == Closed.ANY)
-				&& mAttributeMatcher.matches(tags);
+	boolean matchesWay(Tag[] tags) {
+		return mAttributeMatcher.matches(tags);
 	}
 }

@@ -173,8 +173,7 @@ abstract class Rule {
 	final int mElement;
 	final int mClosed;
 
-	Rule(int element, int closed, byte zoomMin,
-			byte zoomMax) {
+	Rule(int element, int closed, byte zoomMin, byte zoomMax) {
 
 		mClosed = closed;
 		mElement = element;
@@ -193,13 +192,17 @@ abstract class Rule {
 		mSubRules.add(rule);
 	}
 
-	abstract boolean matchesNode(Tag[] tags, byte zoomLevel);
+	abstract boolean matchesNode(Tag[] tags);
 
-	abstract boolean matchesWay(Tag[] tags, byte zoomLevel, int closed);
+	abstract boolean matchesWay(Tag[] tags);
 
 	void matchNode(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel,
 			List<RenderInstruction> matchingList) {
-		if (matchesNode(tags, zoomLevel)) {
+		if ((mElement != Element.WAY)
+				&& mZoomMin <= zoomLevel
+				&& mZoomMax >= zoomLevel
+				&& matchesNode(tags)) {
+
 			for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
 				matchingList.add(mRenderInstructionArray[i]);
 
@@ -210,13 +213,19 @@ abstract class Rule {
 	}
 
 	void matchWay(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel,
-			int closed,
-			List<RenderInstruction> matchingList) {
+			int closed, List<RenderInstruction> matchingList) {
 
-		if (matchesWay(tags, zoomLevel, closed)) {
+		if ((mElement != Element.NODE)
+				&& mZoomMin <= zoomLevel
+				&& mZoomMax >= zoomLevel
+				&& (mClosed == closed || mClosed == Closed.ANY)
+				&& (matchesWay(tags))) {
+
+			// add instructions for this rule
 			for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
 				matchingList.add(mRenderInstructionArray[i]);
 
+			// check subrules
 			for (int i = 0, n = mSubRuleArray.length; i < n; i++)
 				mSubRuleArray[i].matchWay(renderCallback, tags, zoomLevel, closed,
 						matchingList);
@@ -230,14 +239,9 @@ abstract class Rule {
 
 		mRenderInstructionArray = new RenderInstruction[mRenderInstructions.size()];
 		mRenderInstructions.toArray(mRenderInstructionArray);
-		// for (int i = 0, n = mRenderInstructions.size(); i < n; i++)
-		// mRenderInstructionArray[i] = mRenderInstructions.get(i);
 
 		mSubRuleArray = new Rule[mSubRules.size()];
 		mSubRules.toArray(mSubRuleArray);
-
-		// for (int i = 0, n = mSubRules.size(); i < n; i++)
-		// mSubRuleArray[i] = mSubRules.get(i);
 
 		mRenderInstructions.clear();
 		mRenderInstructions = null;
