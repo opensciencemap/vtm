@@ -660,13 +660,13 @@ public class TileManager {
 			return true;
 		}
 
-		tile.vbo = BufferObject.get();
-
-		if (tile.vbo == null) {
-			Log.d(TAG, "no VBOs left for " + tile);
-			clearTile(tile);
-			return true;
-		}
+		//		tile.vbo = BufferObject.get(false);
+		//
+		//		if (tile.vbo == null) {
+		//			Log.d(TAG, "no VBOs left for " + tile);
+		//			//clearTile(tile);
+		//			//return true;
+		//		}
 
 		tile.state = STATE_NEW_DATA;
 

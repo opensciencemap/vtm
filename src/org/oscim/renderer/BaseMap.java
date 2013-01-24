@@ -103,7 +103,7 @@ public class BaseMap {
 		if (t.holder != null)
 			t = t.holder;
 
-		if (t.layers == null)
+		if (t.layers == null || t.vbo == null)
 			return;
 
 		// set Model matrix for tile
@@ -149,15 +149,6 @@ public class BaseMap {
 					break;
 			}
 		}
-
-		//		if (tile.layers.textureLayers != null) {
-		//			setMatrix(mvp, tile, div, false);
-		//
-		//			for (Layer l = tile.layers.textureLayers; l != null;) {
-		//				l = TextureRenderer.draw(l, 1, mProjMatrix, mvp,
-		//						tile.layers.texOffset);
-		//			}
-		//		}
 	}
 
 	private static int drawProxyChild(MapTile tile, MapPosition pos) {

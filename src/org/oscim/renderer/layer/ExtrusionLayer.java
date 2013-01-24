@@ -20,6 +20,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.Tile;
+import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.utils.LineClipper;
 import org.oscim.view.MapView;
@@ -31,7 +32,7 @@ import android.util.Log;
 /**
  * @author Hannes Janetzek
  *         FIXME check if polygon has self intersections or 0/180 degree
- *         angles!!!
+ *         angles!
  */
 public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
@@ -44,9 +45,12 @@ public class ExtrusionLayer extends Layer {
 	// indices for:
 	// 0. even sides, 1. odd sides, 2. roof, 3. roof outline
 	public int mIndiceCnt[] = { 0, 0, 0, 0 };
+	public int mNumIndices = 0;
+
 	public int mIndicesBufferID;
 	public int mVertexBufferID;
-	public int mNumIndices = 0;
+	private BufferObject mIndiceBO;
+	private BufferObject mVertexBO;
 
 	//private final static int IND_EVEN_SIDE = 0;
 	//private final static int IND_ODD_SIDE = 1;
@@ -54,7 +58,8 @@ public class ExtrusionLayer extends Layer {
 	private final static int IND_OUTLINE = 3;
 
 	public boolean compiled = false;
-	private int[] mVboIds;
+
+	//private int[] mVboIds;
 
 	public ExtrusionLayer(int level) {
 		this.type = Layer.EXTRUSION;
@@ -345,13 +350,18 @@ public class ExtrusionLayer extends Layer {
 		if (mNumVertices == 0 || compiled)
 			return;
 
-		mVboIds = new int[2];
-		GLES20.glGenBuffers(2, mVboIds, 0);
-		mIndicesBufferID = mVboIds[0];
-		mVertexBufferID = mVboIds[1];
+		//		mVboIds = new int[2];
+		//		GLES20.glGenBuffers(2, mVboIds, 0);
+		//		mIndicesBufferID = mVboIds[0];
+		//		mVertexBufferID = mVboIds[1];
+
+		// FIXME add in_gl_thread param to make sure we get something here
+		mVertexBO = BufferObject.get(0);
+		mIndiceBO = BufferObject.get(0);
+		mIndicesBufferID = mIndiceBO.id;
+		mVertexBufferID = mVertexBO.id;
 
 		// upload indices
-
 		sbuf.clear();
 		mNumIndices = 0;
 		for (int i = 0; i < 4; i++) {
@@ -363,9 +373,10 @@ public class ExtrusionLayer extends Layer {
 		}
 
 		sbuf.flip();
+		mIndiceBO.size = mNumIndices * 2;
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferID);
 		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
-				mNumIndices * 2, sbuf, GLES20.GL_DYNAMIC_DRAW);
+				mIndiceBO.size, sbuf, GLES20.GL_DYNAMIC_DRAW);
 
 		// upload vertices
 		sbuf.clear();
@@ -373,9 +384,10 @@ public class ExtrusionLayer extends Layer {
 			sbuf.put(vi.vertices, 0, vi.used);
 
 		sbuf.flip();
+		mVertexBO.size = mNumVertices * 4 * 2;
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferID);
 		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,
-				mNumVertices * 4 * 2, sbuf, GLES20.GL_DYNAMIC_DRAW);
+				mVertexBO.size, sbuf, GLES20.GL_DYNAMIC_DRAW);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
@@ -393,7 +405,11 @@ public class ExtrusionLayer extends Layer {
 	@Override
 	protected void clear() {
 		if (compiled) {
-			GLES20.glDeleteBuffers(2, mVboIds, 0);
+			BufferObject.release(mIndiceBO);
+			BufferObject.release(mVertexBO);
+			mIndiceBO = null;
+			mVertexBO = null;
+			//GLES20.glDeleteBuffers(2, mVboIds, 0);
 		} else {
 			VertexPool.release(mVertices);
 			for (VertexPoolItem i : mIndices)
