@@ -90,7 +90,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private RenderInstruction[] mRenderInstructions = null;
 
 	//private final String TAG_WATER = "water".intern();
-	private final String TAG_BUILDING = "building".intern();
 
 	private final MapView mMapView;
 
@@ -106,8 +105,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private float mPoiX, mPoiY;
 	private int mPriority;
 
-	private Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
+	private final static Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
+	private final static Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
+
 	private Tag mTagName;
+	private Tag mTagHouseNr;
 
 	private boolean mDebugDrawPolygons;
 	boolean mDebugDrawUnmatched;
@@ -255,8 +257,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			if (tags[i].key == Tag.TAG_KEY_NAME) {
 				mTagName = tags[i];
 				tags[i] = mTagEmptyName;
+			} else if (tags[i].key == Tag.TAG_KEY_HOUSE_NUMBER) {
+				mTagHouseNr = tags[i];
+				tags[i] = mTagEmptyHouseNr;
 			} else if (mCurrentTile.zoomLevel >= 17 &&
-					key == TAG_BUILDING) {
+					key == Tag.TAG_KEY_BUILDING) {
 				mRenderBuildingModel = true;
 			}
 		}
@@ -270,6 +275,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		// reset state
 		mTagName = null;
+		mTagHouseNr = null;
 
 		//if (mMapProjection != null) {
 		//	long x = mCurrentTile.pixelX;
@@ -318,6 +324,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		// reset state
 		mTagName = null;
+		mTagHouseNr = null;
 		mCurLineLayer = null;
 
 		mPriority = prio;
@@ -448,14 +455,19 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	public void renderAreaCaption(Text text) {
 		// Log.d(TAG, "renderAreaCaption: " + mTagName);
 
-		if (mTagName == null)
-			return;
+		if (text.textKey == Tag.TAG_KEY_NAME) {
+			if (mTagName == null)
+				return;
 
-		if (text.textKey == mTagEmptyName.key) {
-
-			// TextItem t = new TextItem(mCoords[0], mCoords[1], mTagName.value,
-			// text);
 			TextItem t = TextItem.get().set(mCoords[0], mCoords[1], mTagName.value, text);
+			t.next = mLabels;
+			mLabels = t;
+		}
+		else if (text.textKey == Tag.TAG_KEY_HOUSE_NUMBER) {
+			if (mTagHouseNr == null)
+				return;
+
+			TextItem t = TextItem.get().set(mCoords[0], mCoords[1], mTagHouseNr.value, text);
 			t.next = mLabels;
 			mLabels = t;
 		}
