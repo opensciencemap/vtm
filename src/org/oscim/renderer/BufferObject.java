@@ -36,7 +36,9 @@ public final class BufferObject {
 		counter--;
 
 		if (size != 0) {
-			// sort so that items larger than requested size are promoted in the list
+			// find an item that has bound more than 'size' bytes.
+			// this has the advantage that either memory can be reused or
+			// a large unused block will be replaced by a smaller one.
 			BufferObject prev = null;
 			for (BufferObject bo = pool; bo != null; bo = bo.next) {
 				if (bo.size > size) {
@@ -46,7 +48,7 @@ public final class BufferObject {
 						prev.next = bo.next;
 
 					bo.next = null;
-					Log.d(TAG, "requested: " + size + " got " + bo.size);
+					//Log.d(TAG, "requested: " + size + " got " + bo.size);
 					return bo;
 				}
 				prev = bo;
@@ -58,38 +60,10 @@ public final class BufferObject {
 		return bo;
 	}
 
-	// static synchronized BufferObject get(int size) {
-	// BufferObject bo, prev = null;
-	//
-	// if (pool == null) {
-	// return null;
-	// }
-	//
-	// int max = size * 4;
-	//
-	// for (bo = pool; bo != null; bo = bo.next) {
-	// if (bo.size > size && size < max)
-	// break;
-	//
-	// prev = bo;
-	// }
-	//
-	// if (prev != null && bo != null) {
-	// prev.next = bo.next;
-	// bo.next = null;
-	// return bo;
-	// }
-	//
-	// bo = pool;
-	// pool = pool.next;
-	// bo.next = null;
-	// return bo;
-	// }
-
 	public static synchronized void release(BufferObject bo) {
-		if (counter > 200) {
-			Log.d(TAG, "should clear some buffers " + counter);
-		}
+		//if (counter > 200) {
+		//	Log.d(TAG, "should clear some buffers " + counter);
+		//}
 
 		bo.next = pool;
 		pool = bo;
