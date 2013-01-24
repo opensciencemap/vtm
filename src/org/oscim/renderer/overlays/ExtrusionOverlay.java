@@ -216,7 +216,10 @@ public class ExtrusionOverlay extends RenderOverlay {
 			}
 			return;
 		}
+
 		GLES20.glDepthMask(true);
+		//GLES20.glStencilMask(0xff);
+		//GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_STENCIL_BUFFER_BIT);
 		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
 
 		GLState.test(true, false);
@@ -343,12 +346,12 @@ public class ExtrusionOverlay extends RenderOverlay {
 			// sligthly differ adjacent side 
 			// faces to improve contrast
 			_a * ((_r - _s + 1) / 255),
-			_a * ((_g - _s) / 255),
+			_a * ((_g - _s + 1) / 255),
 			_a * ((_b - _s) / 255),
 			_a,
 			_a * ((_r - _s) / 255),
 			_a * ((_g - _s) / 255),
-			_a * ((_b - _s - 2) / 255),
+			_a * ((_b - _s) / 255),
 			_a,
 			// roof outline
 			(_r - _o) / 255,
@@ -419,14 +422,14 @@ public class ExtrusionOverlay extends RenderOverlay {
 					+ "    float dir = a_light.y / ff;"
 					+ "    float z = (0.98 + gl_Position.z * 0.02);"
 					+ "    color = u_color[1];"
-					+ "    color.rgb *= (0.8 + dir * 0.2) * z;"
+					+ "    color.rgb *= (0.9 + dir * 0.1) * z;"
 					+ "  } else if (u_mode == 2){"
 					//     sides 2 - use 0x00ff
 					//+ "    float dir = abs(a_light.x / ff - 0.5);"
 					+ "    float dir = a_light.x / ff;"
 					+ "    float z = (0.95 + gl_Position.z * 0.05);"
 					+ "    color = u_color[2] * z;"
-					+ "    color.rgb *= (0.8 + dir * 0.2) * z;"
+					+ "    color.rgb *= (0.9 + dir * 0.1) * z;"
 					+ "  } else {"
 					//     outline
 					+ "    float z = (0.8 - gl_Position.z * 0.2);"
