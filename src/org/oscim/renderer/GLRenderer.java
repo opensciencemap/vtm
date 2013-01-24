@@ -208,13 +208,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private static int uploadCnt = 0;
 
-	private static boolean uploadLayers(Layers layers, BufferObject vbo, boolean addFill) {
-
-		int newSize = layers.getSize();
-		if (newSize == 0) {
-			// Log.d(TAG, "empty");
-			return true;
-		}
+	private static boolean uploadLayers(Layers layers, BufferObject vbo, int newSize,
+			boolean addFill) {
 
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
 
@@ -278,24 +273,34 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (tile.layers == null) {
 			BufferObject.release(tile.vbo);
 			tile.vbo = null;
-		} else if (!uploadLayers(tile.layers, tile.vbo, true)) {
-			Log.d(TAG, "uploadTileData " + tile + " failed!");
-			tile.layers.clear();
-			tile.layers = null;
-			BufferObject.release(tile.vbo);
-			tile.vbo = null;
-		}
+		} else {
+			int newSize = tile.layers.getSize();
 
+			if (newSize > 0) {
+
+				if (tile.vbo == null)
+					tile.vbo = BufferObject.get(newSize);
+
+				if (!uploadLayers(tile.layers, tile.vbo, newSize, true)) {
+					Log.d(TAG, "uploadTileData " + tile + " failed!");
+					tile.layers.clear();
+					tile.layers = null;
+					BufferObject.release(tile.vbo);
+					tile.vbo = null;
+				}
+			}
+		}
 		tile.state = STATE_READY;
 	}
 
 	private static boolean uploadOverlayData(RenderOverlay renderOverlay) {
+		int newSize = renderOverlay.layers.getSize();
+		if (newSize > 0) {
+			if (uploadLayers(renderOverlay.layers, renderOverlay.vbo, newSize, true))
+				renderOverlay.isReady = true;
 
-		if (uploadLayers(renderOverlay.layers, renderOverlay.vbo, true))
-			renderOverlay.isReady = true;
-
-		renderOverlay.newData = false;
-
+			renderOverlay.newData = false;
+		}
 		return renderOverlay.isReady;
 	}
 
@@ -476,7 +481,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			// helper to compile layers into single vbo
 			if (renderOverlay.newData) {
 				if (renderOverlay.vbo == null) {
-					renderOverlay.vbo = BufferObject.get();
+					renderOverlay.vbo = BufferObject.get(0);
 
 					if (renderOverlay.vbo == null)
 						continue;

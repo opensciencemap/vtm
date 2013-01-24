@@ -16,17 +16,42 @@
 package org.oscim.renderer;
 
 import android.opengl.GLES20;
+import android.util.Log;
 
 public final class BufferObject {
+	private final static String TAG = BufferObject.class.getName();
+
 	private static BufferObject pool;
-	static int counter;
+	static int counter = 0;
 
-	static synchronized BufferObject get() {
+	public static synchronized BufferObject get(int size) {
 
-		if (pool == null)
-			return null;
+		if (pool == null) {
+			if (counter != 0)
+				Log.d(TAG, "missing BufferObjects: " + counter);
+
+			createBuffers(10);
+			counter += 10;
+		}
 		counter--;
 
+		if (size != 0) {
+			// sort so that items larger than requested size are promoted in the list
+			BufferObject prev = null;
+			for (BufferObject bo = pool; bo != null; bo = bo.next) {
+				if (bo.size > size) {
+					if (prev == null)
+						pool = bo.next;
+					else
+						prev.next = bo.next;
+
+					bo.next = null;
+					Log.d(TAG, "requested: " + size + " got " + bo.size);
+					return bo;
+				}
+				prev = bo;
+			}
+		}
 		BufferObject bo = pool;
 		pool = pool.next;
 		bo.next = null;
@@ -61,7 +86,11 @@ public final class BufferObject {
 	// return bo;
 	// }
 
-	static synchronized void release(BufferObject bo) {
+	public static synchronized void release(BufferObject bo) {
+		if (counter > 200) {
+			Log.d(TAG, "should clear some buffers " + counter);
+		}
+
 		bo.next = pool;
 		pool = bo;
 		counter++;
@@ -69,49 +98,56 @@ public final class BufferObject {
 
 	// Note: only call from GL-Thread
 	static synchronized int limitUsage(int reduce) {
+		if (pool == null) {
+			Log.d(TAG, "nothing to free");
+			return 0;
+		}
 		int vboIds[] = new int[10];
-		BufferObject[] tmp = new BufferObject[10];
 		int removed = 0;
 		int freed = 0;
+		BufferObject prev = pool;
 
-		for (BufferObject bo = pool; bo != null; bo = bo.next) {
+		for (BufferObject bo = pool.next; bo != null;) {
 			if (bo.size > 0) {
 				freed += bo.size;
 				bo.size = 0;
-				vboIds[removed] = bo.id;
-				tmp[removed++] = bo;
-
+				vboIds[removed++] = bo.id;
+				prev.next = bo.next;
+				bo = bo.next;
 				if (removed == 10 || reduce < freed)
 					break;
+
+			} else {
+				prev = bo;
+				bo = bo.next;
 			}
 		}
 		if (removed > 0) {
 			GLES20.glDeleteBuffers(removed, vboIds, 0);
-			GLES20.glGenBuffers(removed, vboIds, 0);
-
-			for (int i = 0; i < removed; i++)
-				tmp[i].id = vboIds[i];
+			counter -= removed;
 		}
 
 		return freed;
 	}
 
-	static void init(int num) {
+	static void createBuffers(int num) {
 		int[] mVboIds = new int[num];
 		GLES20.glGenBuffers(num, mVboIds, 0);
 
-		BufferObject bo;
-
-		for (int i = 1; i < num; i++) {
-			bo = new BufferObject(mVboIds[i]);
+		for (int i = 0; i < num; i++) {
+			BufferObject bo = new BufferObject(mVboIds[i]);
 			bo.next = pool;
 			pool = bo;
 		}
-		counter = num;
+	}
+
+	static synchronized void init(int num) {
+		//createBuffers(num);
+		//counter = num;
 	}
 
 	public int id;
-	int size;
+	public int size;
 	BufferObject next;
 
 	BufferObject(int id) {
