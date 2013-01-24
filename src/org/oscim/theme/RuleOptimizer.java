@@ -17,7 +17,6 @@ package org.oscim.theme;
 import java.util.Stack;
 
 final class RuleOptimizer {
-	// private static final Logger LOG = Logger.getLogger(RuleOptimizer.class.getName());
 
 	private static AttributeMatcher optimizeKeyMatcher(AttributeMatcher attributeMatcher,
 			Stack<Rule> ruleStack) {
@@ -26,7 +25,7 @@ final class RuleOptimizer {
 				PositiveRule positiveRule = (PositiveRule) ruleStack.get(i);
 				if (positiveRule.mKeyMatcher != null
 						&& positiveRule.mKeyMatcher.isCoveredBy(attributeMatcher)) {
-					return null; // AnyMatcher.getInstance();
+					return null;
 				}
 			}
 		}
@@ -42,7 +41,7 @@ final class RuleOptimizer {
 
 				if (positiveRule.mValueMatcher != null
 						&& positiveRule.mValueMatcher.isCoveredBy(attributeMatcher)) {
-					return null; // AnyMatcher.getInstance();
+					return null;
 				}
 			}
 		}

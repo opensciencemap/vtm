@@ -19,26 +19,22 @@ import org.oscim.core.Tag;
 class MatchingCacheKey {
 	int mHashCodeValue;
 	Tag[] mTags;
-	byte mZoomLevel;
 
 	MatchingCacheKey() {
 	}
 
-	MatchingCacheKey(Tag[] tags, byte zoomLevel) {
+	MatchingCacheKey(Tag[] tags) {
 		mTags = tags;
-		mZoomLevel = zoomLevel;
 		mHashCodeValue = calculateHashCode();
 	}
 
 	MatchingCacheKey(MatchingCacheKey key) {
 		mTags = key.mTags;
-		mZoomLevel = key.mZoomLevel;
 		mHashCodeValue = key.mHashCodeValue;
 	}
 
-	void set(Tag[] tags, byte zoomLevel) {
+	void set(Tag[] tags) {
 		mTags = tags;
-		mZoomLevel = zoomLevel;
 
 		int result = 7;
 
@@ -47,7 +43,7 @@ class MatchingCacheKey {
 				break;
 			result = 31 * result + mTags[i].hashCode();
 		}
-		result = 31 * result + mZoomLevel;
+		result = 31 * result;
 
 		mHashCodeValue = result;
 	}
@@ -57,14 +53,8 @@ class MatchingCacheKey {
 		if (this == obj) {
 			return true;
 		}
-		// else if (!(obj instanceof MatchingCacheKey)) {
-		// return false;
-		// }
 
 		MatchingCacheKey other = (MatchingCacheKey) obj;
-
-		if (mZoomLevel != other.mZoomLevel)
-			return false;
 
 		if (mTags == null) {
 			return (other.mTags == null);
@@ -76,10 +66,14 @@ class MatchingCacheKey {
 			return false;
 		}
 
-		for (int i = 0; i < length; i++)
-			if (mTags[i] != other.mTags[i])
-				return false;
+		for (int i = 0; i < length; i++) {
+			if (mTags[i] == other.mTags[i])
+				continue;
+			if (mTags[i].key == other.mTags[i].key && mTags[i].value == other.mTags[i].value)
+				continue;
 
+			return false;
+		}
 		return true;
 	}
 
@@ -99,7 +93,7 @@ class MatchingCacheKey {
 				break;
 			result = 31 * result + mTags[i].hashCode();
 		}
-		result = 31 * result + mZoomLevel;
+		result = 31 * result;
 
 		return result;
 	}
