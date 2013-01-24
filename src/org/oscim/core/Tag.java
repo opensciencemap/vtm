@@ -43,6 +43,11 @@ public class Tag {
 	public static final String TAG_KEY_ELE = "ele".intern();
 
 	/**
+	 * The key of the elevation OpenStreetMap tag.
+	 */
+	public static final String TAG_KEY_BUILDING = "building".intern();
+
+	/**
 	 * The key of this tag.
 	 */
 	public final String key;
