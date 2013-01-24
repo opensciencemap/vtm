@@ -22,6 +22,7 @@ import org.oscim.overlay.OverlayManager;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
@@ -70,6 +71,8 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 	private final ScaleGestureDetector mScaleGestureDetector;
 	private final GestureDetector mGestureDetector;
 
+	private final float dpi;
+
 	/**
 	 * @param context
 	 *            the Context
@@ -87,10 +90,15 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		mGestureDetector = new GestureDetector(context, this);
 		mGestureDetector.setOnDoubleTapListener(this);
 
-		mInterpolator = new DecelerateInterpolator(1.5f);
+		mInterpolator = new DecelerateInterpolator(2f);
 
 		mScroller = new Scroller(mMapView.getContext(), mInterpolator);
 		mLinearInterpolator = new DecelerateInterpolator(0.8f);//new android.view.animation.LinearInterpolator();
+
+		DisplayMetrics metrics = mapView.getResources().getDisplayMetrics();
+		dpi = metrics.xdpi;
+		Log.d(TAG, "dpi is: " + dpi);
+
 	}
 
 	/**
@@ -363,8 +371,8 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		if (mScaling || mWasMulti)
 			return true;
 
-		int w = Tile.TILE_SIZE * 20;
-		int h = Tile.TILE_SIZE * 20;
+		int w = Tile.TILE_SIZE * 6;
+		int h = Tile.TILE_SIZE * 6;
 		mScrollX = 0;
 		mScrollY = 0;
 
@@ -374,6 +382,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		}
 
 		if (mMapView.enablePagedFling) {
+
 			double a = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
 
 			float vx = (float) (velocityX / a);
@@ -387,7 +396,9 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 			float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
 			mMapPosition.animateTo(vx * move, vy * move, 250);
 		} else {
-			mScroller.fling(0, 0, Math.round(velocityX) / 2, Math.round(velocityY) / 2,
+			float s = (300 / dpi) / 2;
+			mScroller.fling(0, 0, Math.round(velocityX * s),
+					Math.round(velocityY * s),
 					-w, w, -h, h);
 
 			mTimer = new CountDownTimer(1000, 16) {
