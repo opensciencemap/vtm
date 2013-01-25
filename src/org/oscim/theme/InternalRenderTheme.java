@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2013 OpenScienceMap.org
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -16,17 +17,12 @@ package org.oscim.theme;
 
 import java.io.InputStream;
 
-
 /**
  * Enumeration of all internal rendering themes.
  */
 public enum InternalRenderTheme implements Theme {
-	/**
-	 * A rendering theme similar to the OpenStreetMap Osmarender style.
-	 * 
-	 * @see <a href="http://wiki.openstreetmap.org/wiki/Osmarender">Osmarender</a>
-	 */
-	OSMARENDER("/org/oscim/theme/osmarender/osmarender.xml"),
+
+	DEFAULT("/org/oscim/theme/osmarender/default.xml"),
 
 	TRONRENDER("/org/oscim/theme/osmarender/tronrender.xml");
 

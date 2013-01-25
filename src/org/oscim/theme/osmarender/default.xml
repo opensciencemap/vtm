@@ -9,7 +9,7 @@
   
   <style-area name="residential"         fill="#f0eee8" fade="10"/>
   
-  <style-area name="railway|industrial"  fill="#e6e1e4" fade="10"/>
+  <style-area name="railway|industrial"  fill="#e6e3e5" fade="10"/>
   <!-- "#f0fae7" mint green  -->
   <style-area name="farmland"            fill="#fff8bf" fade="11" />
   
@@ -499,12 +499,12 @@
         <area fill="#e9e6e3" fade="15" /> -->
       </rule>
       
-      <!-- <rule e="way" k="*" v="*" zoom-min="17">
+       <rule e="way" k="*" v="*" zoom-min="17">
           <caption k="name" font-style="bold" font-size="10" fill="#4040ff"
           stroke="#ffffff" stroke-width="2.0" />
           <caption k="addr:housenumber" font-style="bold" font-size="10" fill="#606060" 
           stroke="#ffffff" stroke-width="2.0" />
-          </rule> -->
+          </rule>
     </rule>
 
     <!-- outline 1 - 4 -->

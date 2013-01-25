@@ -100,7 +100,6 @@ public abstract class MapActivity extends Activity {
 
 	/**
 	 * This method is called once by each MapView during its setup process.
-	 * 
 	 * @param mapView
 	 *            the calling MapView.
 	 */
@@ -131,16 +130,20 @@ public abstract class MapActivity extends Activity {
 		}
 
 		String theme = sharedPreferences.getString(KEY_THEME,
-				InternalRenderTheme.OSMARENDER.name());
+				InternalRenderTheme.DEFAULT.name());
 
 		if (theme.startsWith("/")) {
 			try {
 				mapView.setRenderTheme(theme);
 			} catch (FileNotFoundException e) {
-				mapView.setRenderTheme(InternalRenderTheme.OSMARENDER);
+				mapView.setRenderTheme(InternalRenderTheme.DEFAULT);
 			}
 		} else {
-			mapView.setRenderTheme(InternalRenderTheme.valueOf(theme));
+			try {
+				mapView.setRenderTheme(InternalRenderTheme.valueOf(theme));
+			} catch (IllegalArgumentException e) {
+				mapView.setRenderTheme(InternalRenderTheme.DEFAULT);
+			}
 		}
 	}
 }
