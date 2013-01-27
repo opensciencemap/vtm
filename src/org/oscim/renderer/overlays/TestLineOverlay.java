@@ -16,7 +16,6 @@ package org.oscim.renderer.overlays;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.MapPosition;
@@ -40,26 +39,64 @@ public class TestLineOverlay extends RenderOverlay {
 		super(mapView);
 	}
 
-	private final float[] box = {
-			// pos      dir len
-			0, 0, 0, 0, // start offset
+	// Interleave two quads to be able to use vertices
+	// twice. pos0 and pos1 use the same vertex array
+	// where pos1 is off-setted by one vertex. The
+	// vertex shader will use pos0 when the vertexId
+	// is even, pos1 when the Id is odd.
+	//
+	// As there is no gl_VertexId in gles 2.0 an
+	// additional 'flip' array is used.
+	// Depending on 'flip' extrusion is inverted.
+	//
+	// Indices and flip buffers can be static.
+	//
+	// First pass: using even vertex array positions
+	//   (used vertices are in braces)
+	// vertex id   0, 1, 2, 3
+	// pos0     - (0) 1 (2) 3  -
+	// pos1        - (0) 1 (2) 3 -
+	// flip        0  1  0  1
+	//
+	// Second pass: using odd vertex array positions
+	// vertex id   0, 1, 2, 3
+	// pos0   - 0 (1) 2 (3) -
+	// pos1      - 0 (1) 2 (3) -
+	// flip        0  1  0  1
+	//
+	// Vertex layout:
+	// x/y pos[16][16], dir_x[8]|dir_y[8], start[4]|length[12]
+	// - 'direction' precision 1/16 maximum line width is 2*32
+	// - texture 'start'  prescision 1
+	//   -> max tex width is 32
+	// - segment 'length' prescision 1/4
+	//   -> max line length is 2^12/4=1024
+	// - texture 'end' is 'length'-'start'
 
-			-800f, 0f, 1, 0,  // first
-			100f, 0f, 1, 0.25f,  // third
-			0f, 0f, 1, 1, // second
-			800f, 0f, 1, 1, // fourth
+	private final short[] box = {
+			//  '-' start
+			0, 0, 0, 0,
+			// 0.
+			-800, 0, 255, 0,
+			// 2.
+			100, 0, 255, 0,
+			// 1.
+			0, 0, 255, 1,
+			// 3.
+			800, 0, 255, 1,
 
-			-800f, 200f, 1, 0,  // first
-			0f, 200f, 1, 0.25f,  // third
-			0f, 200f, 1, 1, // second
-			800f, 200f, 1, 1, // fourth
+			-800, 200, 127, 0,
+			0, 200, 127, 0,
+			0, 200, 127, 1,
+			800, 200, 127, 1,
 
-			-800f, 400f, 1, 0,  // first
-			0f, 400f, 1, 0.25f,  // third
-			0f, 400f, 1, 1, // second
-			800f, 400f, 1, 1, // fourth
+			-800, 400, 255, 0,
+			0, 400, 255, 0,
+			0, 400, 255, 1,
+			800, 400, 255, 1,
 
-			0, 0, 0, 0, // end
+			// '-' end
+			0, 0, 0, 0,
 	};
 
 	private final short[] indices = {
@@ -90,12 +127,16 @@ public class TestLineOverlay extends RenderOverlay {
 			+ "attribute vec4 a_pos1;"
 			+ "attribute float a_flip;"
 			+ "varying vec4 color;"
+			+ "const float ff = 256.0;"
+			+ "const float ffff = 65536.0;"
 			+ "void main() {"
 			+ "  if (a_flip == 0.0){"
-			+ "    gl_Position = u_mvp * vec4(a_pos0.x, a_pos0.y + a_pos0.z * 100.0, 0.0, 1.0);"
+			+ "    vec2 dir = vec2((a_pos0.z / ffff), fract(a_pos0.z/ff))*64.0;"
+			+ "    gl_Position = u_mvp * vec4(a_pos0.xy + dir, 0.0, 1.0);"
 			+ "    color = vec4(0.0,1.0,a_pos0.w,1.0);"
 			+ "  }else {"
-			+ "    gl_Position = u_mvp * vec4(a_pos1.x, a_pos1.y - a_pos1.z * 100.0, 0.0, 1.0);"
+			+ "    vec2 dir = vec2((a_pos1.z / ffff), fract(a_pos1.z/ff))*64.0;"
+			+ "    gl_Position = u_mvp * vec4(a_pos1.xy - dir, 0.0, 1.0);"
 			+ "    color = vec4(1.0,0.5,a_pos1.w,1.0);"
 			+ "}}";
 
@@ -147,11 +188,11 @@ public class TestLineOverlay extends RenderOverlay {
 		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, 18 * 2, sbuf, GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		FloatBuffer fbuf = buf.asFloatBuffer();
-		fbuf.put(box);
-		fbuf.flip();
+		sbuf.clear();
+		sbuf.put(box);
+		sbuf.flip();
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferID);
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 56 * 4, fbuf, GLES20.GL_STATIC_DRAW);
+		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 56 * 2, sbuf, GLES20.GL_STATIC_DRAW);
 
 		buf.clear();
 		buf.put(flip);
@@ -189,13 +230,13 @@ public class TestLineOverlay extends RenderOverlay {
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferID);
 
-		GLES20.glVertexAttribPointer(htestVertexPosition0, 4, GLES20.GL_FLOAT, false, 0, 16);
-		GLES20.glVertexAttribPointer(htestVertexPosition1, 4, GLES20.GL_FLOAT, false, 0, 0);
+		GLES20.glVertexAttribPointer(htestVertexPosition0, 4, GLES20.GL_SHORT, false, 0, 8);
+		GLES20.glVertexAttribPointer(htestVertexPosition1, 4, GLES20.GL_SHORT, false, 0, 0);
 		GLES20.glUniform4f(htestColor, 0.5f, 0.5f, 1.0f, 1.0f);
 		GLES20.glDrawElements(GLES20.GL_TRIANGLES, 18, GLES20.GL_UNSIGNED_SHORT, 0);
 
-		GLES20.glVertexAttribPointer(htestVertexPosition0, 4, GLES20.GL_FLOAT, false, 0, 32);
-		GLES20.glVertexAttribPointer(htestVertexPosition1, 4, GLES20.GL_FLOAT, false, 0, 16);
+		GLES20.glVertexAttribPointer(htestVertexPosition0, 4, GLES20.GL_SHORT, false, 0, 16);
+		GLES20.glVertexAttribPointer(htestVertexPosition1, 4, GLES20.GL_SHORT, false, 0, 8);
 		GLES20.glUniform4f(htestColor, 0.5f, 1.0f, 0.5f, 1.0f);
 		GLES20.glDrawElements(GLES20.GL_TRIANGLES, 18, GLES20.GL_UNSIGNED_SHORT, 0);
 
@@ -209,8 +250,6 @@ public class TestLineOverlay extends RenderOverlay {
 
 	@Override
 	protected void setMatrix(MapPosition curPos, float[] matrix) {
-		// TODO if oPos == curPos this could be simplified
-
 		MapPosition oPos = mMapPosition;
 
 		byte z = oPos.zoomLevel;
