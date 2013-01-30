@@ -52,15 +52,16 @@ public final class TextLayer extends TextureLayer {
 	}
 
 	public boolean removeText(TextItem item) {
-		TextItem prev = null;
 
-		for (TextItem it = labels; it != null; it = it.next) {
+		if (item == labels) {
+			labels = labels.next;
+			return true;
+		}
+
+		for (TextItem prev = labels, it = labels.next; it != null; it = it.next) {
+
 			if (it == item) {
-				if (prev == null)
-					labels = it.next;
-				else
-					prev.next = it.next;
-
+				prev.next = it.next;
 				return true;
 			}
 			prev = it;
@@ -103,9 +104,6 @@ public final class TextLayer extends TextureLayer {
 
 		item.next = labels;
 		labels = item;
-		//		for (it = labels; it != null; it = it.next)
-		//			Log.d(TAG, "> " + it.text + " " + it.string);
-		//		Log.d(TAG, "< ");
 	}
 
 	@Override
@@ -145,10 +143,6 @@ public final class TextLayer extends TextureLayer {
 				advanceY = (int) (height + 0.5f);
 
 				if (y + height > TEXTURE_HEIGHT) {
-					// Log.d(TAG, "reached max labels " + numTextures + " " +
-					// numLabel + " "
-					// + ((numIndices - offsetIndices) / 6));
-
 					to.offset = offsetIndices;
 					to.vertices = (short) (numIndices - offsetIndices);
 					offsetIndices = numIndices;
@@ -193,31 +187,25 @@ public final class TextLayer extends TextureLayer {
 			short u2 = (short) (SCALE * (x + width));
 			short v2 = (short) (SCALE * (y + height));
 
-			// add symbol items referencing the same bitmap / drawable
-			for (TextItem it2 = it;; it2 = it2.next) {
-
-				if (it != it2) {
-					if (it2 == null
-							|| (it2.text != it.text)
-							|| (it2.string != it.string)) {
-						it = it2;
-						break;
-					}
-					//Log.d(TAG, "pack strings: " + it.string);
-				}
+			while (it != null) {
 
 				short x1, x2, x3, x4, y1, y3, y2, y4;
 
 				if (it.text.caption) {
-					x1 = x3 = (short) (SCALE * -hw);
-					x2 = x4 = (short) (SCALE * hw);
-					y1 = y2 = (short) (SCALE * hh);
-					y3 = y4 = (short) (SCALE * -hh);
-					// x1 = x3 = (short) (0);
-					// x2 = x4 = (short) (SCALE * width);
+					if (it.origin == 0) {
+						x1 = x3 = (short) (SCALE * -hw);
+						x2 = x4 = (short) (SCALE * hw);
+						y1 = y2 = (short) (SCALE * hh);
+						y3 = y4 = (short) (SCALE * -hh);
+					} else {
+						x1 = x3 = (short) (SCALE * 0);
+						x2 = x4 = (short) (SCALE * width);
+						y1 = y2 = (short) (SCALE * 0);
+						y3 = y4 = (short) (SCALE * -height);
+					}
 				} else {
-					float vx = it2.x1 - it2.x2;
-					float vy = it2.y1 - it2.y2;
+					float vx = it.x1 - it.x2;
+					float vy = it.y1 - it.y2;
 					float a = (float) Math.sqrt(vx * vx + vy * vy);
 					vx = vx / a;
 					vy = vy / a;
@@ -236,9 +224,9 @@ public final class TextLayer extends TextureLayer {
 				}
 
 				// add vertices
-				int tmp = (int) (SCALE * it2.x) & LBIT_MASK;
-				short tx = (short) (tmp | (it2.text.caption ? 1 : 0));
-				short ty = (short) (SCALE * it2.y);
+				int tmp = (int) (SCALE * it.x) & LBIT_MASK;
+				short tx = (short) (tmp | (it.text.caption ? 1 : 0));
+				short ty = (short) (SCALE * it.y);
 
 				if (pos == VertexPoolItem.SIZE) {
 					vi.used = VertexPoolItem.SIZE;
@@ -280,13 +268,11 @@ public final class TextLayer extends TextureLayer {
 				numIndices += TextureRenderer.INDICES_PER_SPRITE;
 				verticesCnt += 4;
 
-				// FIXME this does not work, need to draw bitmap on next
-				// texture...
-				// if (numLabel == TextureRenderer.MAX_ITEMS) {
-				// Log.d(TAG, "--- reached max label per texture " + numLabel);
-				// sbuf.put(buf, 0, pos);
-				// pos = 0;
-				// }
+				if (it.next == null || (it.next.text != it.text) || (it.next.string != it.string)) {
+					it = it.next;
+					break;
+				}
+				it = it.next;
 
 			}
 			x += width;
@@ -296,8 +282,6 @@ public final class TextLayer extends TextureLayer {
 
 		to.offset = offsetIndices;
 		to.vertices = (short) (numIndices - offsetIndices);
-
-		//	Log.d(TAG, "added labels " + numTextures + " " + numLabel);
 
 		return true;
 	}
