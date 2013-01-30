@@ -16,7 +16,6 @@ package org.oscim.renderer;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_BLEND;
-import static android.opengl.GLES20.GL_POLYGON_OFFSET_FILL;
 import static org.oscim.generator.JobTile.STATE_READY;
 
 import org.oscim.core.MapPosition;
@@ -31,7 +30,7 @@ import android.opengl.Matrix;
  * @author Hannes Janetzek
  */
 public class BaseMap {
-	private final static String TAG = BaseMap.class.getName();
+	//private final static String TAG = BaseMap.class.getName();
 
 	// used to not draw a tile twice per frame.
 	private static int mDrawSerial = 0;
@@ -52,10 +51,10 @@ public class BaseMap {
 	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos) {
 		//long start = SystemClock.uptimeMillis();
 		Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, pos.viewMatrix, 0);
-
 		mDrawCnt = 0;
 
-		GLES20.glEnable(GL_POLYGON_OFFSET_FILL);
+		GLES20.glDepthFunc(GLES20.GL_LESS);
+
 		LineRenderer.beginLines();
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
@@ -63,9 +62,8 @@ public class BaseMap {
 				drawTile(t, pos);
 		}
 
-		// proxies are clipped to the region where nothing was drawn to depth
-		// buffer.
-		// TODO draw all parent before grandparent
+		// proxies are clipped to the region where nothing was drawn to depth buffer.
+		// draw child or parent proxies.
 		// TODO draw proxies for placeholder...
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
@@ -73,6 +71,7 @@ public class BaseMap {
 				drawProxyTile(t, pos, true);
 		}
 
+		// draw grandparents
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null))
@@ -81,8 +80,6 @@ public class BaseMap {
 
 		LineRenderer.endLines();
 
-		GLES20.glDisable(GL_POLYGON_OFFSET_FILL);
-		//GLES20.glFinish();
 		//long end = SystemClock.uptimeMillis();
 		//Log.d(TAG, "base took " + (end - start));
 		mDrawSerial++;
@@ -103,9 +100,10 @@ public class BaseMap {
 		if (t.holder != null)
 			t = t.holder;
 
-		if (t.layers == null || t.vbo == null)
+		if (t.layers == null || t.vbo == null) {
+			//Log.d(TAG, "missing data " + (t.layers == null) + " " + (t.vbo == null));
 			return;
-
+		}
 		// set Model matrix for tile
 		float div = FastMath.pow(tile.zoomLevel - pos.zoomLevel);
 		float x = (float) (tile.pixelX - pos.x * div);
@@ -117,8 +115,7 @@ public class BaseMap {
 		Matrix.multiplyMM(mvp, 0, mVPMatrix, 0, mvp, 0);
 
 		// set depth offset (used for clipping to tile boundaries)
-		//GLES20.glPolygonOffset(-1, -GLRenderer.depthOffset(t));
-		GLES20.glPolygonOffset(-1, (mDrawCnt++));
+		GLES20.glPolygonOffset(1, mDrawCnt++);
 
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, t.vbo.id);
 
@@ -140,8 +137,6 @@ public class BaseMap {
 						PolygonRenderer.draw(pos, null, mvp, true, true);
 						clipped = true;
 					}
-					// clip lines to quad in depth buffer
-					GLState.test(true, false);
 
 					GLES20.glEnable(GL_BLEND);
 					l = LineRenderer.draw(pos, l, mvp, div, simpleShader,
@@ -149,6 +144,7 @@ public class BaseMap {
 					break;
 			}
 		}
+		PolygonRenderer.drawOver(mvp);
 	}
 
 	private static int drawProxyChild(MapTile tile, MapPosition pos) {
@@ -179,8 +175,9 @@ public class BaseMap {
 				// draw parent proxy
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					MapTile t = tile.rel.parent.tile;
-					if (t.state == STATE_READY)
+					if (t.state == STATE_READY) {
 						drawTile(t, pos);
+					}
 				}
 			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
 				// check if parent was already drawn
@@ -197,14 +194,14 @@ public class BaseMap {
 		} else {
 			// prefer drawing parent
 			if (parent) {
-				MapTile t = tile.rel.parent.tile;
+				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
+					MapTile t = tile.rel.parent.tile;
+					if (t != null && t.state == STATE_READY) {
+						drawTile(t, pos);
+						return;
 
-				if (t != null && t.state == STATE_READY) {
-					drawTile(t, pos);
-					return;
-
+					}
 				}
-
 				drawProxyChild(tile, pos);
 
 			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {

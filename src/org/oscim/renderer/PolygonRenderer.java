@@ -18,13 +18,11 @@ import static android.opengl.GLES20.GL_ALWAYS;
 import static android.opengl.GLES20.GL_BLEND;
 import static android.opengl.GLES20.GL_EQUAL;
 import static android.opengl.GLES20.GL_INVERT;
-import static android.opengl.GLES20.GL_LESS;
 import static android.opengl.GLES20.GL_SHORT;
 import static android.opengl.GLES20.GL_TRIANGLE_FAN;
 import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
 import static android.opengl.GLES20.GL_ZERO;
 import static android.opengl.GLES20.glColorMask;
-import static android.opengl.GLES20.glDepthFunc;
 import static android.opengl.GLES20.glDepthMask;
 import static android.opengl.GLES20.glDisable;
 import static android.opengl.GLES20.glDrawArrays;
@@ -36,7 +34,6 @@ import static android.opengl.GLES20.glStencilMask;
 import static android.opengl.GLES20.glStencilOp;
 import static android.opengl.GLES20.glUniform4fv;
 import static android.opengl.GLES20.glUniformMatrix4fv;
-import static android.opengl.GLES20.glUseProgram;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
 import java.nio.ByteBuffer;
@@ -51,7 +48,7 @@ import org.oscim.utils.GlUtils;
 import android.opengl.GLES20;
 
 public final class PolygonRenderer {
-	// private static final String TAG = "PolygonRenderer";
+	//private static final String TAG = PolygonRenderer.class.getName();
 
 	// private static final int NUM_VERTEX_SHORTS = 2;
 	private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
@@ -93,7 +90,7 @@ public final class PolygonRenderer {
 		boolean blend = false;
 
 		/* draw to framebuffer */
-		glColorMask(true, true, true, true);
+		glColorMask(true, true, true, false);
 
 		/* do not modify stencil buffer */
 		glStencilMask(0);
@@ -144,18 +141,10 @@ public final class PolygonRenderer {
 					glUniform4fv(hPolygonColor, 1, l.area.color, 0);
 			}
 
-			// if (alpha < 1) {
-			// if (!blend) {
-			// glEnable(GL_BLEND);
-			// blend = true;
-			// }
-			// } else if (blend) {
-			// glDisable(GL_BLEND);
-			// blend = false;
-			// }
-
-			/* set stencil buffer mask used to draw this layer */
-			glStencilFunc(GL_EQUAL, 0xff, 1 << c);
+			// set stencil buffer mask used to draw this layer 
+			// also check that clip bit is 0 to avoid overdraw
+			// of other tiles
+			glStencilFunc(GL_EQUAL, 0x7f, 0x80 | 1 << c);
 
 			/* draw tile fill coordinates */
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -195,7 +184,7 @@ public final class PolygonRenderer {
 		int zoom = pos.zoomLevel;
 		float scale = pos.scale;
 
-		glUseProgram(polygonProgram);
+		GLState.useProgram(polygonProgram);
 
 		GLState.enableVertexArrays(hPolygonVertexPosition, -1);
 
@@ -204,81 +193,32 @@ public final class PolygonRenderer {
 
 		glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
 
-		// reset start when only two layer left in stencil buffer
-		//	if (mCount > 5) {
-		//	mCount = 0;
-		//	mStart = 0;
-		//	} 
-
-		if (first) {
+		// reset start when only one layer left in stencil buffer
+		if (first || mCount > 5) {
 			mCount = 0;
 			mStart = 0;
 		} else {
 			mStart = mCount;
 		}
 
-		//GLState.test(drawClipped, true);
-		GLState.test(true, true);
+		GLState.test(false, true);
 
 		Layer l = layer;
 
 		for (; l != null && l.type == Layer.POLYGON; l = l.next) {
 			PolygonLayer pl = (PolygonLayer) l;
-			// fade out polygon layers (set in RederTheme)
+
+			// fade out polygon layers (set in RenderTheme)
 			if (pl.area.fade > 0 && pl.area.fade > zoom)
 				continue;
 
 			if (mCount == mStart) {
-				/* clear stencilbuffer (tile region) by drawing
-				 * a quad with func 'always' and op 'zero' */
-
-				// disable drawing to framebuffer
-				glColorMask(false, false, false, false);
-
-				//	if (!first) {
-				//		// first run draw map bg, otherwise
-				//		// disable drawing to framebuffer
-				//		glColorMask(false, false, false, false);
-				//	} else {
-				//		glUniform4fv(hPolygonColor, 1, GLRenderer.mClearColor, 0);
-				//	}
-
-				// never pass the test: always apply fail op
-				glStencilFunc(GL_ALWAYS, 0, 0xFF);
-				glStencilMask(0xFF);
-				glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-
-				/* draw clip-region into depth buffer:
-				 * this is used for lines and polygons */
-				if (first && drawClipped) {
-					// write to depth buffer
-					glDepthMask(true);
-
-					// to prevent overdraw gl_less restricts the 
-					// clip to the area where no other tile has drawn
-					glDepthFunc(GL_LESS);
-				}
-
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-				//	if (first) {
-				//		glColorMask(false, false, false, false);
-				//	}
-
-				if (first && drawClipped) {
-					first = false;
-					// do not modify depth buffer anymore
-					glDepthMask(false);
-					// only draw to this tile
-					glDepthFunc(GL_EQUAL);
-				}
+				drawStencilRegion(drawClipped, first);
+				first = false;
 
 				// op for stencil method polygon drawing
 				glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GL_INVERT);
 			}
-
-			// no need for depth test while drawing stencil
-			//GLState.test(false, true);
 
 			mFillPolys[mCount] = pl;
 
@@ -287,41 +227,111 @@ public final class PolygonRenderer {
 
 			glDrawArrays(GL_TRIANGLE_FAN, l.offset, l.verticesCnt);
 
-			// draw up to 8 layers into stencil buffer
-			if (mCount == STENCIL_BITS) {
-				/* only draw where nothing was drawn yet */
-				if (drawClipped)
-					GLState.test(true, true);
-
+			// draw up to 7 layers into stencil buffer
+			if (mCount == STENCIL_BITS - 1) {
 				fillPolygons(zoom, scale);
 				mCount = 0;
 				mStart = 0;
 			}
 		}
 
-		if (mCount > 0) {
-			/* only draw where nothing was drawn yet */
-			if (drawClipped)
-				GLState.test(true, true);
-
+		if (mCount > 0)
 			fillPolygons(zoom, scale);
+
+		if (drawClipped) {
+			if (first) {
+				drawStencilRegion(drawClipped, first);
+
+				glStencilMask(0x00);
+				glColorMask(true, true, true, false);
+			}
+
+			// clip bit must be zero
+			glStencilFunc(GL_EQUAL, 0x00, 0x80);
 		}
 
-		if (drawClipped && first) {
-			GLState.test(true, false);
-			GLES20.glColorMask(false, false, false, false);
-			//glUniform4fv(hPolygonColor, 1, GLRenderer.mClearColor, 0);
-
-			GLES20.glDepthMask(true);
-			GLES20.glDepthFunc(GLES20.GL_LESS);
-
-			GLES20.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-			GLES20.glDepthMask(false);
-			GLES20.glColorMask(true, true, true, true);
-			GLES20.glDepthFunc(GLES20.GL_EQUAL);
-		}
 		return l;
+	}
+
+	static void drawStencilRegion(boolean clip, boolean first) {
+		/* clear stencilbuffer (tile region) by drawing
+		 * a quad with func 'always' and op 'zero' */
+
+		// disable drawing to framebuffer (will be re-enabled in fill)
+		glColorMask(false, false, false, false);
+		GLES20.glUniform4f(hPolygonColor, 0.7f, 0.7f, 0.7f, 1);
+
+		// write to all bits
+		glStencilMask(0xFF);
+		// zero out area to draw to
+		glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GL_ZERO);
+
+		if (clip) {
+			if (first) {
+				// draw clip-region into depth and stencil buffer:
+				// this is used for tile line and polygon layers
+
+				// always pass stencil test:
+				glStencilFunc(GL_ALWAYS, 0x00, 0x00);
+
+				GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+
+				// test depth. stencil passes always, just keep it enabled
+				GLState.test(true, true);
+				// write to depth buffer
+				glDepthMask(true);
+			}
+			else {
+				// use clip region from stencil buffer
+				glStencilFunc(GL_EQUAL, 0x00, 0x80);
+			}
+		} else {
+			// always pass stencil test:
+			glStencilFunc(GL_ALWAYS, 0x00, 0x00);
+		}
+
+		// draw a quad for the tile region
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		if (clip) {
+			if (first) {
+				// dont modify depth buffer
+				glDepthMask(false);
+
+				GLState.test(false, true);
+
+				GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
+			} else {
+				glStencilFunc(GL_ALWAYS, 0x00, 0x00);
+			}
+		}
+	}
+
+	static void drawOver(float[] matrix) {
+		GLState.useProgram(polygonProgram);
+
+		GLState.enableVertexArrays(hPolygonVertexPosition, -1);
+
+		glVertexAttribPointer(hPolygonVertexPosition, 2, GL_SHORT,
+				false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
+
+		glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
+
+		/* clear stencilbuffer (tile region) by drawing
+		 * a quad with func 'always' and op 'zero' */
+
+		// disable drawing to framebuffer (will be re-enabled in fill)
+		glColorMask(false, false, false, false);
+
+		// always pass stencil test:
+		glStencilFunc(GL_ALWAYS, 0xFF, 0xFF);
+		// write to all bits
+		glStencilMask(0xFF);
+		// zero out area to draw to
+		glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_REPLACE);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glColorMask(true, true, true, true);
 	}
 
 	private static float[] debugFillColor = { 0.3f, 0.0f, 0.0f, 0.3f };
@@ -339,7 +349,7 @@ public final class PolygonRenderer {
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
 		mDebugFill.position(0);
-		glUseProgram(polygonProgram);
+		GLState.useProgram(polygonProgram);
 		GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);
 
 		glVertexAttribPointer(hPolygonVertexPosition, 2, GLES20.GL_FLOAT,

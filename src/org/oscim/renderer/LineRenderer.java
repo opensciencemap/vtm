@@ -20,9 +20,7 @@ import static android.opengl.GLES20.glDrawArrays;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glUniform1f;
-import static android.opengl.GLES20.glUniform1i;
 import static android.opengl.GLES20.glUniformMatrix4fv;
-import static android.opengl.GLES20.glUseProgram;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
 import org.oscim.core.MapPosition;
@@ -119,7 +117,7 @@ public final class LineRenderer {
 		if (layer == null)
 			return null;
 
-		glUseProgram(lineProgram[mode]);
+		GLState.useProgram(lineProgram[mode]);
 
 		int uLineScale = hLineScale[mode];
 		int uLineMode = hLineMode[mode];
@@ -153,7 +151,7 @@ public final class LineRenderer {
 
 		glUniform1f(uLineScale, pixel);
 		int lineMode = 0;
-		glUniform1i(uLineMode, lineMode);
+		glUniform1f(uLineMode, lineMode);
 
 		float blurScale = pixel;
 		boolean blur = false;
@@ -209,11 +207,11 @@ public final class LineRenderer {
 					if (o.roundCap) {
 						if (lineMode != 1) {
 							lineMode = 1;
-							glUniform1i(uLineMode, lineMode);
+							glUniform1f(uLineMode, lineMode);
 						}
 					} else if (lineMode != 0) {
 						lineMode = 0;
-						glUniform1i(uLineMode, lineMode);
+						glUniform1f(uLineMode, lineMode);
 					}
 					glDrawArrays(GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
 				}
@@ -244,11 +242,11 @@ public final class LineRenderer {
 				if (ll.roundCap) {
 					if (lineMode != 1) {
 						lineMode = 1;
-						glUniform1i(uLineMode, lineMode);
+						glUniform1f(uLineMode, lineMode);
 					}
 				} else if (lineMode != 0) {
 					lineMode = 0;
-					glUniform1i(uLineMode, lineMode);
+					glUniform1f(uLineMode, lineMode);
 				}
 
 				glDrawArrays(GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
@@ -263,8 +261,9 @@ public final class LineRenderer {
 			+ "uniform mat4 u_mvp;"
 			+ "uniform float u_width;"
 			+ "attribute vec4 a_pos;"
-			+ "uniform int u_mode;"
+			+ "uniform float u_mode;"
 			+ "varying vec2 v_st;"
+			+ "varying vec2 v_mode;"
 			+ "const float dscale = 8.0/2048.0;"
 			+ "void main() {"
 			// scale extrusion to u_width pixel
@@ -274,22 +273,27 @@ public final class LineRenderer {
 			// last two bits of a_st hold the texture coordinates
 			// ..maybe one could wrap texture so that `abs` is not required
 			+ "  v_st = abs(mod(dir, 4.0)) - 1.0;"
+			+ "  v_mode = vec2(1.0 - u_mode, u_mode);"
 			+ "}";
 
 	private final static String lineSimpleFragmentShader = ""
 			+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
-			+ "uniform int u_mode;"
 			+ "uniform float u_width;"
 			+ "uniform float u_wscale;"
 			+ "uniform vec4 u_color;"
 			+ "varying vec2 v_st;"
+			+ "varying vec2 v_mode;"
 			+ "void main() {"
-			+ "  float len;"
-			+ "  if (u_mode == 0)"
-			+ "    len = abs(v_st.s);"
-			+ "  else"
-			+ "    len = texture2D(tex, v_st).a;"
+			//+ "  float len;"
+			// some say one should not use conditionals 
+			// (FIXME currently required as overlay line renderers dont load the texture)
+			//+ "  if (u_mode == 0)"
+			//+ "    len = abs(v_st.s);"
+			//+ "  else"
+			//+ "    len = texture2D(tex, v_st).a;"
+			// one trick to avoid branching, need to check performance
+			+ " float len = max(v_mode[0] * abs(v_st.s), v_mode[1] * texture2D(tex, v_st).a);"
 			// interpolate alpha between: 0.0 < 1.0 - len < u_wscale
 			// where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2) 
 			+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"
@@ -300,7 +304,7 @@ public final class LineRenderer {
 			+ "#extension GL_OES_standard_derivatives : enable\n"
 			+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
-			+ "uniform int u_mode;"
+			+ "uniform float u_mode;"
 			+ "uniform vec4 u_color;"
 			+ "uniform float u_width;"
 			+ "uniform float u_wscale;"
@@ -308,7 +312,7 @@ public final class LineRenderer {
 			+ "void main() {"
 			+ "  float len;"
 			+ "  float fuzz;"
-			+ "  if (u_mode == 0){"
+			+ "  if (u_mode == 0.0){"
 			+ "    len = abs(v_st.s);"
 			+ "    fuzz = fwidth(v_st.s);"
 			+ "  } else {"
@@ -317,10 +321,12 @@ public final class LineRenderer {
 			+ "    vec2 st_width = fwidth(v_st);"
 			+ "    fuzz = max(st_width.s, st_width.t);"
 			+ "  }"
-			// smoothstep is too sharp, guess one could increase extrusion with z.. 
-			// but this looks ok too:
-			+ "  gl_FragColor = u_color * min(1.0, (1.0 - len) / (u_wscale + fuzz));"
 			//+ "  gl_FragColor = u_color * smoothstep(0.0, fuzz + u_wscale, 1.0 - len);"
+			// smoothstep is too sharp, guess one could increase extrusion with z.. 
+			// this looks ok:
+			//+ "  gl_FragColor = u_color * min(1.0, (1.0 - len) / (u_wscale + fuzz));"
+			// can be faster according to nvidia docs 'Optimize OpenGL ES 2.0 Performace'
+			+ "  gl_FragColor = u_color * clamp((1.0 - len) / (u_wscale + fuzz), 0.0, 1.0);"
 			+ "}";
 
 	//	private final static String lineVertexShader = ""

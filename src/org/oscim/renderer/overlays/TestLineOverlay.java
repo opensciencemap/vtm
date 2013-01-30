@@ -66,7 +66,7 @@ public class TestLineOverlay extends RenderOverlay {
 	//
 	// Vertex layout:
 	// x/y pos[16][16], dir_x[8]|dir_y[8], start[4]|length[12]
-	// - 'direction' precision 1/16 maximum line width is 2*32
+	// - 'direction' precision 1/16, maximum line width is 2*16
 	// - texture 'start'  prescision 1
 	//   -> max tex width is 32
 	// - segment 'length' prescision 1/4
@@ -99,16 +99,18 @@ public class TestLineOverlay extends RenderOverlay {
 			0, 0, 0, 0,
 	};
 
-	private final short[] indices = {
+	private short[] indices = {
 			0, 1, 2,
 			2, 1, 3,
+
 			4, 5, 6,
 			6, 5, 7,
+
 			8, 9, 10,
 			10, 9, 11,
 	};
 
-	private byte[] flip = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
+	private byte[] flip;
 
 	private static int testProgram;
 	private static int htestVertexPosition0;
@@ -131,13 +133,14 @@ public class TestLineOverlay extends RenderOverlay {
 			+ "const float ffff = 65536.0;"
 			+ "void main() {"
 			+ "  if (a_flip == 0.0){"
-			+ "    vec2 dir = vec2((a_pos0.z / ffff), fract(a_pos0.z/ff))*64.0;"
+			//     extract 8 bit direction vector
+			+ "    vec2 dir = a_pos0.zw/16.0;"
 			+ "    gl_Position = u_mvp * vec4(a_pos0.xy + dir, 0.0, 1.0);"
-			+ "    color = vec4(0.0,1.0,a_pos0.w,1.0);"
+			+ "    color = vec4(dir/255.0 + 0.5, 1.0,1.0);"
 			+ "  }else {"
-			+ "    vec2 dir = vec2((a_pos1.z / ffff), fract(a_pos1.z/ff))*64.0;"
+			+ "    vec2 dir = a_pos1.zw/16.0;"
 			+ "    gl_Position = u_mvp * vec4(a_pos1.xy - dir, 0.0, 1.0);"
-			+ "    color = vec4(1.0,0.5,a_pos1.w,1.0);"
+			+ "    color = vec4(dir/255.0 + 0.5, 1.0,1.0);"
 			+ "}}";
 
 	final static String testFragmentShader = ""
@@ -150,6 +153,9 @@ public class TestLineOverlay extends RenderOverlay {
 	private int mIndicesBufferID;
 	private int mVertexBufferID;
 	private int mVertexFlipID;
+
+	private int mNumVertices;
+	private int mNumIndices;
 
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
@@ -178,6 +184,93 @@ public class TestLineOverlay extends RenderOverlay {
 		mVertexBufferID = mVboIds[1];
 		mVertexFlipID = mVboIds[2];
 
+		float points[] = {
+				800, 0,
+				0, 0,
+				//-400, 100,
+				//-600, 200,
+				//-800, 100,
+		};
+
+		//		float[] points = new float[12 * 2];
+		//		for (int i = 0; i < 24; i += 2) {
+		//			points[i + 0] = (float) Math.sin(-i / 11f * Math.PI) * 400;
+		//			points[i + 1] = (float) Math.cos(-i / 11f * Math.PI) * 400;
+		//		}
+
+		mNumVertices = (points.length - 2) * 2;
+
+		short[] vertices = new short[(mNumVertices + 2) * 4];
+
+		int opos = 4;
+
+		float x = points[0];
+		float y = points[1];
+
+		float scale = 127;
+		boolean even = true;
+
+		for (int i = 2; i < points.length;) {
+			float nx = points[i++];
+			float ny = points[i++];
+
+			// Calculate triangle corners for the given width
+			float vx = nx - x;
+			float vy = ny - y;
+
+			float a = (float) Math.sqrt(vx * vx + vy * vy);
+
+			// normal vector
+			vx = (vx / a);
+			vy = (vy / a);
+
+			float ux = -vy;
+			float uy = vx;
+
+			short dx = (short) (ux * scale);
+			short dy = (short) (uy * scale);
+
+			vertices[opos + 0] = (short) x;
+			vertices[opos + 1] = (short) y;
+			vertices[opos + 2] = dx;
+			vertices[opos + 3] = dy;
+
+			vertices[opos + 8] = (short) nx;
+			vertices[opos + 9] = (short) ny;
+			vertices[opos + 10] = dx;
+			vertices[opos + 11] = dy;
+
+			x = nx;
+			y = ny;
+
+			if (even) {
+				opos += 4;
+				even = false;
+			} else {
+				even = true;
+				opos += 12;
+			}
+
+		}
+
+		flip = new byte[(points.length - 2)];
+		for (int i = 0; i < flip.length; i++)
+			flip[i] = (byte) (i % 2);
+
+		short j = 0;
+		mNumIndices = ((points.length) >> 2) * 6;
+
+		indices = new short[mNumIndices];
+		for (int i = 0; i < mNumIndices; i += 6, j += 4) {
+			indices[i + 0] = (short) (j + 0);
+			indices[i + 1] = (short) (j + 1);
+			indices[i + 2] = (short) (j + 2);
+
+			indices[i + 3] = (short) (j + 2);
+			indices[i + 4] = (short) (j + 1);
+			indices[i + 5] = (short) (j + 3);
+		}
+
 		ByteBuffer buf = ByteBuffer.allocateDirect(128 * 4)
 				.order(ByteOrder.nativeOrder());
 
@@ -185,20 +278,24 @@ public class TestLineOverlay extends RenderOverlay {
 		sbuf.put(indices);
 		sbuf.flip();
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferID);
-		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, 18 * 2, sbuf, GLES20.GL_STATIC_DRAW);
+		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, indices.length * 2, sbuf,
+				GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		sbuf.clear();
-		sbuf.put(box);
+		//sbuf.put(box);
+		sbuf.put(vertices);
 		sbuf.flip();
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferID);
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 56 * 2, sbuf, GLES20.GL_STATIC_DRAW);
+		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, vertices.length * 2, sbuf,
+				GLES20.GL_STATIC_DRAW);
 
 		buf.clear();
 		buf.put(flip);
 		buf.flip();
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexFlipID);
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 12, buf, GLES20.GL_STATIC_DRAW);
+		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, flip.length, buf,
+				GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
 		mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
@@ -213,12 +310,13 @@ public class TestLineOverlay extends RenderOverlay {
 		setMatrix(pos, mv);
 		Matrix.multiplyMM(mv, 0, proj, 0, mv, 0);
 
-		GLES20.glUseProgram(testProgram);
+		GLState.useProgram(testProgram);
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLState.test(false, false);
 		GLState.enableVertexArrays(-1, -1);
 		GLES20.glEnableVertexAttribArray(htestVertexPosition0);
 		GLES20.glEnableVertexAttribArray(htestVertexPosition1);
+
 		GLES20.glEnableVertexAttribArray(htestVertexFlip);
 
 		GLES20.glUniformMatrix4fv(htestMatrix, 1, false, mv, 0);
@@ -230,15 +328,23 @@ public class TestLineOverlay extends RenderOverlay {
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferID);
 
-		GLES20.glVertexAttribPointer(htestVertexPosition0, 4, GLES20.GL_SHORT, false, 0, 8);
-		GLES20.glVertexAttribPointer(htestVertexPosition1, 4, GLES20.GL_SHORT, false, 0, 0);
-		GLES20.glUniform4f(htestColor, 0.5f, 0.5f, 1.0f, 1.0f);
-		GLES20.glDrawElements(GLES20.GL_TRIANGLES, 18, GLES20.GL_UNSIGNED_SHORT, 0);
+		GLES20.glVertexAttribPointer(htestVertexPosition0,
+				4, GLES20.GL_SHORT, false, 0, 8);
 
-		GLES20.glVertexAttribPointer(htestVertexPosition0, 4, GLES20.GL_SHORT, false, 0, 16);
-		GLES20.glVertexAttribPointer(htestVertexPosition1, 4, GLES20.GL_SHORT, false, 0, 8);
+		GLES20.glVertexAttribPointer(htestVertexPosition1,
+				4, GLES20.GL_SHORT, false, 0, 0);
+
+		GLES20.glUniform4f(htestColor, 0.5f, 0.5f, 1.0f, 1.0f);
+		GLES20.glDrawElements(GLES20.GL_TRIANGLES, mNumIndices, GLES20.GL_UNSIGNED_SHORT, 0);
+
+		GLES20.glVertexAttribPointer(htestVertexPosition0,
+				4, GLES20.GL_SHORT, false, 0, 16);
+
+		GLES20.glVertexAttribPointer(htestVertexPosition1,
+				4, GLES20.GL_SHORT, false, 0, 8);
+
 		GLES20.glUniform4f(htestColor, 0.5f, 1.0f, 0.5f, 1.0f);
-		GLES20.glDrawElements(GLES20.GL_TRIANGLES, 18, GLES20.GL_UNSIGNED_SHORT, 0);
+		GLES20.glDrawElements(GLES20.GL_TRIANGLES, mNumIndices, GLES20.GL_UNSIGNED_SHORT, 0);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 

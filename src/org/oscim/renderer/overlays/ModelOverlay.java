@@ -172,7 +172,7 @@ public class ModelOverlay extends RenderOverlay {
 		setMatrix(pos, mv);
 		Matrix.multiplyMM(mv, 0, proj, 0, mv, 0);
 
-		GLES20.glUseProgram(polygonProgram);
+		GLState.useProgram(polygonProgram);
 
 		GLState.enableVertexArrays(hPolygonVertexPosition, hPolygonLightPosition);
 

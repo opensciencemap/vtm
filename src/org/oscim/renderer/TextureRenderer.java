@@ -93,7 +93,7 @@ public final class TextureRenderer {
 		GLState.test(false, false);
 		GLES20.glEnable(GLES20.GL_BLEND);
 		// GlUtils.checkGlError("draw texture >");
-		GLES20.glUseProgram(mTextureProgram);
+		GLState.useProgram(mTextureProgram);
 
 		GLState.enableVertexArrays(hTextureTexCoord, hTextureVertex);
 
