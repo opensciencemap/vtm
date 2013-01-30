@@ -350,7 +350,7 @@ public class BuildingOverlay extends RenderOverlay {
 		setMatrix(pos, mv);
 		Matrix.multiplyMM(mv, 0, proj, 0, mv, 0);
 
-		GLES20.glUseProgram(buildingProgram);
+		GLState.useProgram(buildingProgram);
 
 		GLES20.glUniformMatrix4fv(hBuildingMatrix, 1, false, mv, 0);
 		GLES20.glUniform4f(hBuildingColor, 0.5f, 0.5f, 0.5f, 0.7f);

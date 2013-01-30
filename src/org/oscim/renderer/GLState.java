@@ -27,6 +27,7 @@ public class GLState {
 	private static boolean blend = false;
 	private static boolean depth = false;
 	private static boolean stencil = false;
+	private static int shader;
 
 	public static void init() {
 		vertexArray[0] = false;
@@ -34,11 +35,19 @@ public class GLState {
 		blend = false;
 		depth = false;
 		stencil = false;
-
+		shader = -1;
 		GLES20.glDisable(GLES20.GL_STENCIL_TEST);
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 	}
 
+	public static void useProgram(int shaderProgram) {
+		if (shaderProgram != shader) {
+			GLES20.glUseProgram(shaderProgram);
+			shader = shaderProgram;
+		}
+	}
+
+	// TODO
 	public static void blend(boolean enable) {
 		if (blend == enable)
 			return;

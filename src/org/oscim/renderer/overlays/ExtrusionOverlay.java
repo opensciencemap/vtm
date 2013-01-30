@@ -180,7 +180,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		int uExtMode = hExtrusionMode[shaderMode];
 
 		if (debug) {
-			GLES20.glUseProgram(extrusionProgram[shaderMode]);
+			GLState.useProgram(extrusionProgram[shaderMode]);
 
 			GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
 			GLES20.glUniform1i(uExtMode, 0);
@@ -224,9 +224,11 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 		GLState.test(true, false);
 
-		GLES20.glUseProgram(extrusionProgram[shaderMode]);
+		GLState.useProgram(extrusionProgram[shaderMode]);
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
 		if (pos.scale < 2) {
+			// chances are high that one moves through a building 
+			// with scale > 2 also draw back sides in this case.
 			GLES20.glEnable(GLES20.GL_CULL_FACE);
 			GLES20.glCullFace(GLES20.GL_FRONT);
 		}
