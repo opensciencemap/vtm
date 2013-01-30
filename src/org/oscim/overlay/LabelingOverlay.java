@@ -14,7 +14,7 @@
  */
 package org.oscim.overlay;
 
-import org.oscim.renderer.overlays.TextOverlay;
+import org.oscim.renderer.overlays.TextOverlayExp;
 import org.oscim.view.MapView;
 
 import android.util.Log;
@@ -25,11 +25,11 @@ import android.view.MotionEvent;
  */
 public class LabelingOverlay extends Overlay {
 	private final static String TAG = LabelingOverlay.class.getName();
-	final TextOverlay mTextLayer;
+	final TextOverlayExp mTextLayer;
 
 	public LabelingOverlay(MapView mapView) {
 		super();
-		mTextLayer = new TextOverlay(mapView);
+		mTextLayer = new TextOverlayExp(mapView);
 		mLayer = mTextLayer;
 	}
 
