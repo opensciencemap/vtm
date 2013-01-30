@@ -551,6 +551,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		//GLES20.glScissor(0, 0, width, height);
 		//GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
 
+		GLES20.glClearStencil(0x00);
+
+		GLES20.glDisable(GLES20.GL_CULL_FACE);
+		GLES20.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
 		if (!mNewSurface) {
 			mMapView.redrawMap();
 			return;
@@ -585,14 +590,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		TextureRenderer.init();
 		TextureObject.init(10);
 
-		//GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
-
-		// set all bits on clear
-		GLES20.glClearStencil(0xFF);
-		//GLES20.glClearStencil(0);
-
-		GLES20.glDisable(GLES20.GL_CULL_FACE);
-		GLES20.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		mNewSurface = true;
 	}
 

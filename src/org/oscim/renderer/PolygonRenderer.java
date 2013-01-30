@@ -21,7 +21,6 @@ import static android.opengl.GLES20.GL_INVERT;
 import static android.opengl.GLES20.GL_SHORT;
 import static android.opengl.GLES20.GL_TRIANGLE_FAN;
 import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
-import static android.opengl.GLES20.GL_ZERO;
 import static android.opengl.GLES20.glColorMask;
 import static android.opengl.GLES20.glDepthMask;
 import static android.opengl.GLES20.glDisable;
@@ -53,6 +52,7 @@ public final class PolygonRenderer {
 	// private static final int NUM_VERTEX_SHORTS = 2;
 	private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
 	private static final int STENCIL_BITS = 8;
+	private final static int CLIP_BIT = 0x80;
 
 	private static final float FADE_START = 1.3f;
 
@@ -144,7 +144,7 @@ public final class PolygonRenderer {
 			// set stencil buffer mask used to draw this layer 
 			// also check that clip bit is 0 to avoid overdraw
 			// of other tiles
-			glStencilFunc(GL_EQUAL, 0x7f, 0x80 | 1 << c);
+			glStencilFunc(GL_EQUAL, 0xff, CLIP_BIT | 1 << c);
 
 			/* draw tile fill coordinates */
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -173,13 +173,13 @@ public final class PolygonRenderer {
 	 *            mvp matrix
 	 * @param first
 	 *            pass true to clear stencil buffer region
-	 * @param drawClipped
+	 * @param clip
 	 *            clip to first quad in current vbo
 	 * @return
 	 *         next layer
 	 */
 	public static Layer draw(MapPosition pos, Layer layer,
-			float[] matrix, boolean first, boolean drawClipped) {
+			float[] matrix, boolean first, boolean clip) {
 
 		int zoom = pos.zoomLevel;
 		float scale = pos.scale;
@@ -195,8 +195,7 @@ public final class PolygonRenderer {
 
 		// reset start when only one layer left in stencil buffer
 		if (first || mCount > 5) {
-			mCount = 0;
-			mStart = 0;
+			mStart = mCount = 0;
 		} else {
 			mStart = mCount;
 		}
@@ -213,7 +212,7 @@ public final class PolygonRenderer {
 				continue;
 
 			if (mCount == mStart) {
-				drawStencilRegion(drawClipped, first);
+				drawStencilRegion(clip, first);
 				first = false;
 
 				// op for stencil method polygon drawing
@@ -230,24 +229,23 @@ public final class PolygonRenderer {
 			// draw up to 7 layers into stencil buffer
 			if (mCount == STENCIL_BITS - 1) {
 				fillPolygons(zoom, scale);
-				mCount = 0;
-				mStart = 0;
+				mStart = mCount = 0;
 			}
 		}
 
 		if (mCount > 0)
 			fillPolygons(zoom, scale);
 
-		if (drawClipped) {
+		if (clip) {
 			if (first) {
-				drawStencilRegion(drawClipped, first);
-
+				drawStencilRegion(clip, first);
+				// disable writes to stencil buffer
 				glStencilMask(0x00);
+				// enable writes to color buffer
 				glColorMask(true, true, true, false);
 			}
-
-			// clip to the region where  highest bit is zero 
-			glStencilFunc(GL_EQUAL, 0x00, 0x80);
+			// clip to tile region
+			glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
 		}
 
 		return l;
@@ -261,31 +259,28 @@ public final class PolygonRenderer {
 
 		// write to all bits
 		glStencilMask(0xFF);
-		// zero out area to draw to
-		glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GL_ZERO);
+
+		// set clip bit (0x80) for draw region
+		glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_REPLACE);
 
 		if (clip) {
 			if (first) {
 				// draw clip-region into depth and stencil buffer:
 				// this is used for tile line and polygon layers
-
-				// always pass stencil test:
-				glStencilFunc(GL_ALWAYS, 0x00, 0x00);
-
 				GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 
-				// test depth. stencil passes always, just keep it enabled
+				// test depth and write to depth buffer
 				GLState.test(true, true);
-				// write to depth buffer
 				glDepthMask(true);
 			}
 		}
 		if (!clip || first) {
 			// always pass stencil test:
-			glStencilFunc(GL_ALWAYS, 0x00, 0x00);
+			glStencilFunc(GL_ALWAYS, CLIP_BIT, CLIP_BIT);
 		} else {
 			// use clip region from stencil buffer
-			glStencilFunc(GL_EQUAL, 0x00, 0x80);
+			// to clear stencil 'layer-bits' (0x7f)
+			glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
 		}
 
 		// draw a quad for the tile region
@@ -303,7 +298,7 @@ public final class PolygonRenderer {
 		}
 
 		if (first) {
-			glStencilFunc(GL_EQUAL, 0x00, 0x80);
+			glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
 		}
 	}
 
@@ -324,11 +319,11 @@ public final class PolygonRenderer {
 		glColorMask(false, false, false, false);
 
 		// always pass stencil test:
-		glStencilFunc(GL_ALWAYS, 0xFF, 0xFF);
+		glStencilFunc(GL_ALWAYS, 0x00, 0x00);
 		// write to all bits
 		glStencilMask(0xFF);
 		// zero out area to draw to
-		glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_REPLACE);
+		glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_ZERO);
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glColorMask(true, true, true, true);
