@@ -57,15 +57,23 @@ public final class MapTile extends JobTile {
 	int lastDraw = 0;
 
 	// keep track which tiles are locked as proxy for this tile
-	final static int PROXY_CHILD1 = 1 << 0;
-	final static int PROXY_CHILD2 = 1 << 1;
-	final static int PROXY_CHILD3 = 1 << 2;
-	final static int PROXY_CHILD4 = 1 << 3;
-	final static int PROXY_PARENT = 1 << 4;
-	final static int PROXY_GRAMPA = 1 << 5;
-	final static int PROXY_HOLDER = 1 << 6;
+	public final static int PROXY_CHILD1 = 1 << 0;
+	public final static int PROXY_CHILD2 = 1 << 1;
+	public final static int PROXY_CHILD3 = 1 << 2;
+	public final static int PROXY_CHILD4 = 1 << 3;
+	public final static int PROXY_PARENT = 1 << 4;
+	public final static int PROXY_GRAMPA = 1 << 5;
+	public final static int PROXY_HOLDER = 1 << 6;
 
 	public byte proxies;
+
+	// check which labels were joined
+	public final static int JOIN_T = 1 << 0;
+	public final static int JOIN_B = 1 << 1;
+	public final static int JOIN_L = 1 << 2;
+	public final static int JOIN_R = 1 << 3;
+	public final static int JOINED = 15;
+	public byte joined;
 
 	// counting the tiles that use this tile as proxy
 	byte refs;
