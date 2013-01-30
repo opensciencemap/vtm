@@ -27,7 +27,6 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Typeface;
-import android.util.FloatMath;
 
 /**
  * Represents a text along a polyline on the map.
@@ -163,8 +162,8 @@ public final class Text extends RenderInstruction {
 		this.fontSize = fontSize;
 
 		FontMetrics fm = paint.getFontMetrics();
-		fontHeight = FloatMath.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
-		fontDescent = FloatMath.ceil(Math.abs(fm.descent));
+		fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
+		fontDescent = (float) Math.ceil(Math.abs(fm.descent));
 	}
 
 	@Override
