@@ -154,7 +154,7 @@ public class MapView extends RelativeLayout {
 
 		mJobQueue = new JobQueue();
 
-		mTileManager = TileManager.create(this);
+		mTileManager = new TileManager(this);
 
 		mGLView = new GLView(context, this);
 
@@ -479,7 +479,7 @@ public class MapView extends RelativeLayout {
 		if (width != 0 && height != 0)
 			mMapViewPosition.setViewport(width, height);
 
-		TileManager.onSizeChanged(width, height);
+		mTileManager.onSizeChanged(width, height);
 
 		mapWorkersProceed();
 	}
