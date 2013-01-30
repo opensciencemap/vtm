@@ -46,43 +46,39 @@ public class TileManager {
 	private static final int MAX_TILES_IN_QUEUE = 40;
 	private static final int CACHE_THRESHOLD = 30;
 
-	private static MapView mMapView;
+	private final MapView mMapView;
 
-	private static final MapPosition mMapPosition = new MapPosition();
+	private final MapPosition mMapPosition = new MapPosition();
 	private final MapViewPosition mMapViewPosition;
 
 	// all tiles
-	private static MapTile[] mTiles;
+	private MapTile[] mTiles;
 	// actual number of tiles in mTiles
-	private static int mTilesCount;
+	private int mTilesCount;
 	// current end position in mTiles
-	private static int mTilesSize;
+	private int mTilesSize;
 	// first free slot in mTiles
 	//private static int mTilesFirst;
 
 	// new jobs for MapWorkers
-	private static ArrayList<JobTile> mJobs;
+	private ArrayList<JobTile> mJobs;
 
 	// tiles that have new data to upload, see passTile()
-	private static ArrayList<MapTile> mTilesLoaded;
+	private ArrayList<MapTile> mTilesLoaded;
 
-	private static boolean mInitialized;
+	private boolean mInitialized;
 
 	// private static MapPosition mCurPosition, mDrawPosition;
-	private static int mWidth = 0, mHeight = 0;
+	private int mWidth = 0, mHeight = 0;
 
-	// maps zoom-level to available zoom-levels in MapDatabase
-	// e.g. 16->16, 15->16, 14->13, 13->13, 12->13,....
-	// private static int[] mZoomLevels;
+	private float[] mTileCoords = new float[8];
 
-	private static float[] mTileCoords = new float[8];
-
-	static int mUpdateCnt;
-	static Object tilelock = new Object();
-	static TileSet mCurrentTiles;
+	private static int mUpdateCnt;
+	private static Object tilelock = new Object();
+	private static TileSet mCurrentTiles;
 	/* package */static TileSet mNewTiles;
 
-	private static ScanBox mScanBox = new ScanBox() {
+	private final ScanBox mScanBox = new ScanBox() {
 
 		@Override
 		void setVisible(int y, int x1, int x2) {
@@ -129,27 +125,13 @@ public class TileManager {
 		}
 	};
 
-	private static volatile TileManager SINGLETON;
-
-	public static TileManager create(MapView mapView) {
-		if (SINGLETON != null)
-			throw new IllegalStateException();
-
-		return SINGLETON = new TileManager(mapView);
-	}
-
 	public void destroy() {
-		SINGLETON = null;
 		// there might be some leaks in here
 		// mRenderer = null;
-		// mTiles = null;
-		// mTilesLoaded = null;
-		// mJobs = null;
-		// mOverlays = null;
 		// ... free pools
 	}
 
-	private TileManager(MapView mapView) {
+	public TileManager(MapView mapView) {
 		Log.d(TAG, "init TileManager");
 		mMapView = mapView;
 		mMapViewPosition = mapView.getMapViewPosition();
@@ -269,7 +251,7 @@ public class TileManager {
 			return td;
 
 		// dont flip new/currentTiles while copying
-		synchronized (TileManager.tilelock) {
+		synchronized (tilelock) {
 			MapTile[] newTiles = mCurrentTiles.tiles;
 			int cnt = mCurrentTiles.cnt;
 
@@ -313,7 +295,7 @@ public class TileManager {
 	 *            zoom direction
 	 * @return true if new tiles were loaded
 	 */
-	private static boolean updateVisibleList(MapPosition mapPosition, int zdir) {
+	private boolean updateVisibleList(MapPosition mapPosition, int zdir) {
 		// clear JobQueue and set tiles to state == NONE.
 		// one could also append new tiles and sort in JobQueue
 		// but this has the nice side-effect that MapWorkers dont
@@ -342,7 +324,7 @@ public class TileManager {
 		}
 
 		if (changed) {
-			synchronized (TileManager.tilelock) {
+			synchronized (tilelock) {
 				for (int i = 0, n = mNewTiles.cnt; i < n; i++)
 					newTiles[i].lock();
 
@@ -386,7 +368,7 @@ public class TileManager {
 	 * @return ...
 	 */
 
-	/* package */static MapTile addTile(int x, int y, byte zoomLevel, int zdir) {
+	/* package */MapTile addTile(int x, int y, byte zoomLevel, int zdir) {
 		MapTile tile;
 
 		tile = QuadTree.getTile(x, y, zoomLevel);
@@ -431,7 +413,7 @@ public class TileManager {
 		return tile;
 	}
 
-	private static void clearTile(MapTile t) {
+	private void clearTile(MapTile t) {
 		if (t == null)
 			return;
 
@@ -462,9 +444,6 @@ public class TileManager {
 		int diff;
 		long dx, dy;
 
-		// TODO this could need some fixing, and optimization
-		// to consider move/zoom direction
-
 		for (int i = 0; i < size; i++) {
 			JobTile t = (JobTile) tiles[i];
 			if (t == null)
@@ -478,11 +457,8 @@ public class TileManager {
 				dx %= center;
 				dy %= center;
 				t.distance = (dx * dx + dy * dy) * 0.5f;
-				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * 0.25f;
-				//t.distance = (float) Math.sqrt((dx * dx + dy * dy)) * 0.25f;
 			} else if (diff > 0) {
 				// tile zoom level is child of current
-
 				if (diff < 3) {
 					dx = ((t.pixelX + h) >> diff) - x;
 					dy = ((t.pixelY + h) >> diff) - y;
@@ -494,8 +470,6 @@ public class TileManager {
 				dx %= center;
 				dy %= center;
 				t.distance = (dx * dx + dy * dy);
-				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy));
-				//t.distance = (float) Math.sqrt((dx * dx + dy * dy));
 
 			} else {
 				// tile zoom level is parent of current
@@ -504,13 +478,11 @@ public class TileManager {
 				dx %= center;
 				dy %= center;
 				t.distance = (dx * dx + dy * dy) * (-diff * 0.7f);
-				//t.distance = ((dx > 0 ? dx : -dx) + (dy > 0 ? dy : -dy)) * (-diff * 0.5f);
-				//t.distance = (float) Math.sqrt((dx * dx + dy * dy)) * (-diff * 0.5f);
 			}
 		}
 	}
 
-	private static void limitCache(MapPosition mapPosition, int remove) {
+	private void limitCache(MapPosition mapPosition, int remove) {
 		MapTile[] tiles = mTiles;
 		int size = mTilesSize;
 
@@ -570,7 +542,7 @@ public class TileManager {
 		}
 	}
 
-	private static void limitLoadQueue() {
+	private void limitLoadQueue() {
 		int size = mTilesLoaded.size();
 
 		if (size < MAX_TILES_IN_QUEUE)
@@ -651,7 +623,7 @@ public class TileManager {
 		return true;
 	}
 
-	public static void onSizeChanged(int w, int h) {
+	public void onSizeChanged(int w, int h) {
 		Log.d(TAG, "onSizeChanged" + w + " " + h);
 
 		mWidth = w;
