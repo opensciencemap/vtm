@@ -246,7 +246,7 @@ public final class PolygonRenderer {
 				glColorMask(true, true, true, false);
 			}
 
-			// clip bit must be zero
+			// clip to the region where  highest bit is zero 
 			glStencilFunc(GL_EQUAL, 0x00, 0x80);
 		}
 
@@ -254,12 +254,10 @@ public final class PolygonRenderer {
 	}
 
 	static void drawStencilRegion(boolean clip, boolean first) {
-		/* clear stencilbuffer (tile region) by drawing
-		 * a quad with func 'always' and op 'zero' */
+		GLState.useProgram(polygonProgram);
 
 		// disable drawing to framebuffer (will be re-enabled in fill)
 		glColorMask(false, false, false, false);
-		GLES20.glUniform4f(hPolygonColor, 0.7f, 0.7f, 0.7f, 1);
 
 		// write to all bits
 		glStencilMask(0xFF);
@@ -281,13 +279,13 @@ public final class PolygonRenderer {
 				// write to depth buffer
 				glDepthMask(true);
 			}
-			else {
-				// use clip region from stencil buffer
-				glStencilFunc(GL_EQUAL, 0x00, 0x80);
-			}
-		} else {
+		}
+		if (!clip || first) {
 			// always pass stencil test:
 			glStencilFunc(GL_ALWAYS, 0x00, 0x00);
+		} else {
+			// use clip region from stencil buffer
+			glStencilFunc(GL_EQUAL, 0x00, 0x80);
 		}
 
 		// draw a quad for the tile region
@@ -301,9 +299,11 @@ public final class PolygonRenderer {
 				GLState.test(false, true);
 
 				GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
-			} else {
-				glStencilFunc(GL_ALWAYS, 0x00, 0x00);
 			}
+		}
+
+		if (first) {
+			glStencilFunc(GL_EQUAL, 0x00, 0x80);
 		}
 	}
 
