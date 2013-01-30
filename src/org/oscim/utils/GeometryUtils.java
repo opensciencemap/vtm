@@ -207,4 +207,19 @@ public final class GeometryUtils {
 
 		//return 1; //XSEC_FALSE;
 	}
+
+	public static float dist(float x1, float y1, float x2, float y2) {
+		return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y2 - y1) * (y2 - y1));
+	}
+
+	public static float pointLineDistance(float x1, float y1, float x2, float y2, float x3, float y3) {
+		// taken from kartograph/simplify/douglas_peucker.py:
+		// the perpendicular distance from a point (x3,y3) to the line from (x1,y1) to (x2,y2)
+		// taken from http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/
+		float d = dist(x1, y1, x2, y2);
+		float u = (x3 - x1) * (x2 - x1) + (y3 - y1) * (y2 - y1) / (d * d);
+		float x = x1 + u * (x2 - x1);
+		float y = y1 + u * (y2 - y1);
+		return dist(x, y, x3, y3);
+	}
 }
