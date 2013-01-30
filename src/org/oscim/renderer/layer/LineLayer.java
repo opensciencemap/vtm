@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General License as published by the Free Software
@@ -21,6 +21,9 @@ import org.oscim.view.MapView;
 
 import android.graphics.Paint.Cap;
 
+/**
+ * @author Hannes Janetzek
+ */
 public final class LineLayer extends Layer {
 
 	private static final float COORD_SCALE = GLRenderer.COORD_MULTIPLIER;
@@ -77,9 +80,8 @@ public final class LineLayer extends Layer {
 		else if (line.cap == Cap.SQUARE)
 			squared = true;
 
-		if (pool == null) {
-			pool = curItem = VertexPool.get();
-		}
+		if (pool == null)
+			curItem = pool = VertexPool.get();
 
 		VertexPoolItem si = curItem;
 		short v[] = si.vertices;

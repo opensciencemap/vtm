@@ -202,7 +202,14 @@ public final class WayDecorator {
 				continue;
 			}
 
-			float s = (wayNameWidth + 20) / segmentLength;
+			//float s = (wayNameWidth + 20) / segmentLength;
+			float s;
+
+			//if (wayNameWidth < segmentLength)
+			//	s = (segmentLength - 10) / segmentLength;
+			//else
+			s = (wayNameWidth + 20) / segmentLength;
+
 			float width, height;
 			float x1, y1, x2, y2;
 
@@ -229,39 +236,6 @@ public final class WayDecorator {
 			y2 = y2 - (height - s * height);
 			y1 = y1 + (height - s * height);
 
-			//	short top = (short) (y1 < y2 ? y1 : y2);
-			//	short bot = (short) (y1 < y2 ? y2 : y1);
-			//	boolean intersects = false;
-			//
-			//	for (TextItem t2 = items; t2 != null; t2 = t2.next) {
-			//
-			//		// check crossings
-			//		if (GeometryUtils.lineIntersect(x1, y1, x2, y2, t2.x1, t2.y1,
-			//				t2.x2, t2.y2)) {
-			//			intersects = true;
-			//			break;
-			//		}
-			//
-			//		// check overlapping labels of road with more than one
-			//		// way
-			//		short top2 = t2.y1 < t2.y2 ? t2.y1 : t2.y2;
-			//		short bot2 = t2.y1 < t2.y2 ? t2.y2 : t2.y1;
-			//
-			//		if (x1 - 10 < t2.x2 && t2.x1 - 10 < x2 && top - 10 < bot2
-			//				&& top2 - 10 < bot) {
-			//
-			//			if (t2.string.equals(string)) {
-			//				intersects = true;
-			//				break;
-			//			}
-			//		}
-			//	}
-			//
-			//	if (intersects) {
-			//		previousX = (int) coordinates[pos + i];
-			//		previousY = (int) coordinates[pos + i + 1];
-			//		continue;
-			//	}
 			TextItem n = TextItem.get();
 
 			// link items together

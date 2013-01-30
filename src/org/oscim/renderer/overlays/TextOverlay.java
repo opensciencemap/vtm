@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -39,6 +39,9 @@ import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.util.Log;
 
+/**
+ * @author Hannes Janetzek
+ */
 public class TextOverlay extends RenderOverlay {
 	private final static String TAG = TextOverlay.class.getName();
 

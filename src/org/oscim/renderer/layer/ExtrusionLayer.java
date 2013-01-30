@@ -32,7 +32,7 @@ import android.util.Log;
 /**
  * @author Hannes Janetzek
  *         FIXME check if polygon has self intersections or 0/180 degree
- *         angles!
+ *         angles! or bad things might happen in Triangle
  */
 public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
@@ -350,12 +350,6 @@ public class ExtrusionLayer extends Layer {
 		if (mNumVertices == 0 || compiled)
 			return;
 
-		//		mVboIds = new int[2];
-		//		GLES20.glGenBuffers(2, mVboIds, 0);
-		//		mIndicesBufferID = mVboIds[0];
-		//		mVertexBufferID = mVboIds[1];
-
-		// FIXME add in_gl_thread param to make sure we get something here
 		mVertexBO = BufferObject.get(0);
 		mIndiceBO = BufferObject.get(0);
 		mIndicesBufferID = mIndiceBO.id;
