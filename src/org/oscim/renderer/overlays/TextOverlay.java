@@ -42,7 +42,7 @@ import android.util.Log;
 /**
  * @author Hannes Janetzek
  */
-public class TextOverlay extends RenderOverlay {
+public class TextOverlay extends BasicOverlay {
 	private final static String TAG = TextOverlay.class.getName();
 
 	private TileSet mTiles;

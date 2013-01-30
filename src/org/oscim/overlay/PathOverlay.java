@@ -23,7 +23,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
-import org.oscim.renderer.overlays.RenderOverlay;
+import org.oscim.renderer.overlays.BasicOverlay;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.view.MapView;
 
@@ -42,7 +42,7 @@ public class PathOverlay extends Overlay {
 	/** Paint settings. */
 	protected Paint mPaint = new Paint();
 
-	class RenderPath extends RenderOverlay {
+	class RenderPath extends BasicOverlay {
 
 		private static final byte MAX_ZOOM = 20;
 		private static final int MIN_DIST = 4;

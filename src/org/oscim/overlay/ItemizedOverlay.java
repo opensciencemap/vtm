@@ -6,7 +6,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.overlay.OverlayItem.HotspotPlace;
 import org.oscim.renderer.layer.SymbolLayer;
-import org.oscim.renderer.overlays.RenderOverlay;
+import org.oscim.renderer.overlays.BasicOverlay;
 import org.oscim.view.MapView;
 
 import android.graphics.Rect;
@@ -54,7 +54,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	// pre-projected points to zoomlovel 20
 	private static final byte MAX_ZOOM = 20;
 
-	class ItemOverlay extends RenderOverlay {
+	class ItemOverlay extends BasicOverlay {
 
 		private SymbolLayer mSymbolLayer;
 		private float[] mMvp = new float[16];

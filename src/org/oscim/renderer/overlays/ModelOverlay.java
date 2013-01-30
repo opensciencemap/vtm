@@ -246,4 +246,10 @@ public class ModelOverlay extends RenderOverlay {
 		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
 	}
 
+	@Override
+	public void compile() {
+		// TODO Auto-generated method stub
+
+	}
+
 }

@@ -388,4 +388,8 @@ public class TestLineOverlay extends RenderOverlay {
 		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
 	}
 
+	@Override
+	public void compile() {
+	}
+
 }

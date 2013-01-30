@@ -16,19 +16,11 @@ package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
-import org.oscim.renderer.GLState;
-import org.oscim.renderer.LineRenderer;
-import org.oscim.renderer.PolygonRenderer;
-import org.oscim.renderer.TextureRenderer;
-import org.oscim.renderer.layer.Layer;
-import org.oscim.renderer.layer.Layers;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 
-import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 public abstract class RenderOverlay {
@@ -37,61 +29,38 @@ public abstract class RenderOverlay {
 	// keep the Position for which the Overlay is rendered
 	protected MapPosition mMapPosition;
 
-	// current Layers to draw
-	public final Layers layers;
-
 	// flag to set when data is ready for (re)compilation.
 	public boolean newData;
 
 	// flag set by GLRenderer when data is compiled
 	public boolean isReady;
 
-	public BufferObject vbo;
-
-	protected float[] mvp = new float[16];
-
 	public RenderOverlay(MapView mapView) {
 		mMapView = mapView;
 		mMapPosition = new MapPosition();
-		layers = new Layers();
-	}
-
-	/**
-	 * Utility: update mMapPosition
-	 * @return true if position has changed
-	 */
-	protected boolean updateMapPosition() {
-		return mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
 	}
 
 	// /////////////// called from GLRender Thread ////////////////////////
-	// use synchronized (this){} when updating 'layers' from another thread
-
 	/**
+	 * called 1. by GLRenderer. Set 'newData' true when 'compile()' should be
+	 * called
+	 * before next 'render()'
 	 * @param curPos TODO
 	 * @param positionChanged
 	 *            true when MapPosition has changed
 	 * @param tilesChanged
 	 *            true when current tiles changed
 	 */
-	public synchronized void update(MapPosition curPos, boolean positionChanged,
-			boolean tilesChanged) {
-		// // keep position constant (or update layer relative to new position)
-		// mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
-		//
-		// if (first) {
-		// // fix at initial position
-		// // mapView.getMapViewPosition().getMapPosition(mMapPosition, null);
-		// first = false;
-		//
-		// // pass layers to be uploaded and drawn to GL Thread
-		// // afterwards never modify 'layers' outside of this function!
-		// newData = true;
-		// }
-	}
+	public abstract void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged);
 
 	/**
-	 * Default overlay render function
+	 * called 2. compile everything for drawing
+	 * Set 'isReady' true when things are ready for 'render()'
+	 */
+	public abstract void compile();
+
+	/**
+	 * called 3. draw overlay
 	 * @param pos
 	 *            current MapPosition
 	 * @param mv
@@ -99,32 +68,11 @@ public abstract class RenderOverlay {
 	 * @param proj
 	 *            current projection matrix
 	 */
-	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
-		setMatrix(pos, mv);
-		float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
-
-		Matrix.multiplyMM(mvp, 0, proj, 0, mv, 0);
-
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo.id);
-		GLState.test(false, false);
-
-		for (Layer l = layers.layers; l != null;) {
-			if (l.type == Layer.POLYGON) {
-				GLES20.glDisable(GLES20.GL_BLEND);
-				l = PolygonRenderer.draw(pos, l, mvp, true, false);
-			} else {
-				GLES20.glEnable(GLES20.GL_BLEND);
-				l = LineRenderer.draw(pos, l, mvp, div, 0, layers.lineOffset);
-			}
-		}
-
-		for (Layer l = layers.textureLayers; l != null;) {
-			l = TextureRenderer.draw(l, (mMapPosition.scale / pos.scale) * div, proj, mv);
-		}
-	}
+	public abstract void render(MapPosition pos, float[] mv, float[] proj);
 
 	/**
-	 * Utility: set matrix to scale relative to zoomlevel
+	 * Utility: set matrix relative to the difference of current MapPosition
+	 * and the last updated Overlay MapPosition
 	 * @param curPos ...
 	 * @param matrix ...
 	 */
@@ -138,7 +86,6 @@ public abstract class RenderOverlay {
 		float y = (float) (oPos.y - curPos.y * div);
 
 		// flip around date-line
-		// FIXME not sure if this is correct!
 		float max = (Tile.TILE_SIZE << oPos.zoomLevel);
 		if (x < -max / 2)
 			x = max + x;
@@ -155,5 +102,13 @@ public abstract class RenderOverlay {
 				s / GLRenderer.COORD_MULTIPLIER);
 
 		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
+	}
+
+	/**
+	 * Utility: update mMapPosition
+	 * @return true if position has changed
+	 */
+	protected boolean updateMapPosition() {
+		return mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
 	}
 }
