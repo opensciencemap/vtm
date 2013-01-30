@@ -61,6 +61,9 @@ public final class BufferObject {
 	}
 
 	public static synchronized void release(BufferObject bo) {
+		if (bo == null)
+			return;
+
 		//if (counter > 200) {
 		//	Log.d(TAG, "should clear some buffers " + counter);
 		//}
