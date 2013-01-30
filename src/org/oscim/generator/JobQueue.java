@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2012, 2013 OpenScienceMap 
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -27,7 +28,7 @@ public class JobQueue {
 
 	/**
 	 * @param tiles
-	 *            the job to be added to this queue.
+	 *            the jobs to be added to this queue.
 	 */
 	public synchronized void setJobs(JobTile[] tiles) {
 		for (JobTile t : tiles)
@@ -70,13 +71,11 @@ public class JobQueue {
 			return null;
 
 		if (mCurrentJob == 0) {
-			//Arrays.sort(mJobs);
 			int len = mJobs.length;
 			if (len > 1)
 				TileDistanceSort.sort(mJobs, 0, len);
 		}
 
-		//return mPriorityQueue.poll();
 		JobTile t = mJobs[mCurrentJob];
 		mJobs[mCurrentJob] = null;
 
