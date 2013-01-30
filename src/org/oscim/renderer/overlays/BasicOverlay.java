@@ -43,6 +43,9 @@ public abstract class BasicOverlay extends RenderOverlay {
 		layers = new Layers();
 	}
 
+	/**
+	 * use synchronized when modifying layers
+	 */
 	@Override
 	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
 		setMatrix(pos, mv);
