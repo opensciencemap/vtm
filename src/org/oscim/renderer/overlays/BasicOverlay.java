@@ -76,7 +76,10 @@ public abstract class BasicOverlay extends RenderOverlay {
 			if (vbo == null)
 				return;
 		}
-		if (GLRenderer.uploadOverlayData(this))
-			isReady = true;
+		int newSize = layers.getSize();
+		if (newSize > 0) {
+			if (GLRenderer.uploadLayers(layers, vbo, newSize, true))
+				isReady = true;
+		}
 	}
 }

@@ -34,7 +34,6 @@ import javax.microedition.khronos.opengles.GL10;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.layer.Layers;
-import org.oscim.renderer.overlays.BasicOverlay;
 import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.theme.RenderTheme;
 import org.oscim.utils.FastMath;
@@ -204,7 +203,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private static int uploadCnt = 0;
 
-	private static boolean uploadLayers(Layers layers, BufferObject vbo, int newSize,
+	public static boolean uploadLayers(Layers layers, BufferObject vbo, int newSize,
 			boolean addFill) {
 
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
@@ -278,15 +277,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			}
 		}
 		tile.state = STATE_READY;
-	}
-
-	public static boolean uploadOverlayData(BasicOverlay renderOverlay) {
-		int newSize = renderOverlay.layers.getSize();
-		if (newSize > 0) {
-			if (uploadLayers(renderOverlay.layers, renderOverlay.vbo, newSize, true))
-				renderOverlay.isReady = true;
-		}
-		return renderOverlay.isReady;
 	}
 
 	private static void checkBufferUsage(boolean force) {
