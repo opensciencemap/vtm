@@ -14,7 +14,6 @@
  */
 package org.oscim.database.oscimap;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -940,7 +939,7 @@ public class MapDatabase implements IMapDatabase {
 		mSocket.connect(mSockAddr, 30000);
 		mSocket.setTcpNoDelay(true);
 
-		mCommandStream = new BufferedOutputStream(mSocket.getOutputStream());
+		mCommandStream = mSocket.getOutputStream(); //new BufferedOutputStream();
 		mResponseStream = mSocket.getInputStream();
 
 		return true;
