@@ -20,6 +20,7 @@ import static android.opengl.GLES20.glDrawArrays;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glUniform1f;
+import static android.opengl.GLES20.glUniform4fv;
 import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
@@ -153,7 +154,6 @@ public final class LineRenderer {
 		int lineMode = 0;
 		glUniform1f(uLineMode, lineMode);
 
-		float blurScale = pixel;
 		boolean blur = false;
 		// dont increase scale when max is reached
 		boolean strokeMaxZoom = zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL;
@@ -164,15 +164,14 @@ public final class LineRenderer {
 			Line line = ll.line;
 			float width;
 
-			if (line.fade != -1 && line.fade > zoom)
+			if (line.fade < zoom) {
+				glUniform4fv(uLineColor, 1, line.color, 0);
+			} else if (line.fade > zoom) {
 				continue;
-
-			float alpha = 1.0f;
-
-			if (line.fade >= zoom)
-				alpha = (scale > 1.2f ? scale : 1.2f) - alpha;
-
-			GlUtils.setColor(uLineColor, line.color, alpha);
+			} else {
+				float alpha = (scale > 1.2f ? scale : 1.2f) - 1f;
+				GlUtils.setColor(uLineColor, line.color, alpha);
+			}
 
 			if (mode == 0 && blur && line.blur == 0) {
 				glUniform1f(uLineScale, 0);
@@ -196,9 +195,7 @@ public final class LineRenderer {
 					glUniform1f(uLineWidth, width);
 
 					if (line.blur != 0) {
-						//blurScale = (ll.width + o.width) / s - (line.blur / s);
-						blurScale = 1 - (line.blur / s);
-						glUniform1f(uLineScale, blurScale);
+						glUniform1f(uLineScale, 1f - (line.blur / s));
 						blur = true;
 					} else if (mode == 1) {
 						glUniform1f(uLineScale, pixel / width);
@@ -231,9 +228,7 @@ public final class LineRenderer {
 				glUniform1f(uLineWidth, width);
 
 				if (line.blur != 0) {
-					//blurScale = (ll.width / lineScale) * line.blur;
-					blurScale = line.blur;
-					glUniform1f(uLineScale, blurScale);
+					glUniform1f(uLineScale, line.blur);
 					blur = true;
 				} else if (mode == 1) {
 					glUniform1f(uLineScale, pixel / width);
