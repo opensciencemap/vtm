@@ -904,7 +904,7 @@
            /> </rule> <rule e="way" k="admin_level" v="5"> <line stroke="#f9574b" width="0.15" 
            fixed="true" cap="butt" /> </rule> -->
       <rule e="way" k="admin_level" v="4">
-        <line stroke="#8f80dd" width="0.9" fixed="true" cap="butt" />
+        <line stroke="#8f80dd" width="1.2" fixed="true" cap="butt" />
       </rule>
       <rule e="way" k="admin_level" v="3">
         <line stroke="#0000ff" width="1.0" fixed="true" cap="butt" />
