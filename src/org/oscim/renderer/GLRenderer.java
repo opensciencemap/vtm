@@ -298,8 +298,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			CACHE_TILES -= 50;
 	}
 
+	private long lastDraw = 0;
+
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
+		long start = SystemClock.uptimeMillis();
+		long wait = 20 - (start - lastDraw);
+		if (wait > 5) {
+			//Log.d(TAG, "wait " + wait);
+			SystemClock.sleep(wait);
+			lastDraw = start + wait;
+		} else
+			lastDraw = start;
 
 		// prevent main thread recreating all tiles (updateMap)
 		// while rendering is going on.
