@@ -69,8 +69,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static MapViewPosition mMapViewPosition;
 	private static MapPosition mMapPosition;
 
-	private static int rotateBuffers = 2;
-	private static ShortBuffer shortBuffer[];
+	private static ShortBuffer shortBuffer;
 	private static short[] mFillCoords;
 
 	// bytes currently loaded in VBOs
@@ -190,15 +189,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mFillCoords[6] = max;
 		mFillCoords[7] = min;
 
-		shortBuffer = new ShortBuffer[rotateBuffers];
+		ByteBuffer bbuf = ByteBuffer.allocateDirect(MB >> 2)
+				.order(ByteOrder.nativeOrder());
 
-		for (int i = 0; i < rotateBuffers; i++) {
-			ByteBuffer bbuf = ByteBuffer.allocateDirect(MB >> 2)
-					.order(ByteOrder.nativeOrder());
-
-			shortBuffer[i] = bbuf.asShortBuffer();
-			shortBuffer[i].put(mFillCoords, 0, 8);
-		}
+		shortBuffer = bbuf.asShortBuffer();
+		shortBuffer.put(mFillCoords, 0, 8);
 	}
 
 	public static void setRenderTheme(RenderTheme t) {
@@ -213,25 +208,17 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
 
-		// use multiple buffers to avoid overwriting buffer while current
-		// data is uploaded (or rather the blocking which is probably done to
-		// avoid overwriting)
-		int curBuffer = uploadCnt++ % rotateBuffers;
-		//uploadCnt++;
-
-		ShortBuffer sbuf = shortBuffer[curBuffer];
-
 		// add fill coordinates
 		if (addFill)
 			newSize += 8;
 
+		ShortBuffer sbuf = shortBuffer;
+
 		if (sbuf.capacity() < newSize) {
-			sbuf = ByteBuffer
+			shortBuffer = sbuf = ByteBuffer
 					.allocateDirect(newSize * SHORT_BYTES)
 					.order(ByteOrder.nativeOrder())
 					.asShortBuffer();
-
-			shortBuffer[curBuffer] = sbuf;
 		} else {
 			sbuf.clear();
 			// if (addFill)
@@ -263,7 +250,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			mBufferMemoryUsage += newSize - vbo.size;
 			vbo.size = newSize;
 			GLES20.glBufferData(GL_ARRAY_BUFFER, vbo.size, sbuf, GL_DYNAMIC_DRAW);
-			//mBufferMemoryUsage += vbo.size;
 		}
 
 		return true;
@@ -610,8 +596,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		TextureRenderer.init();
 		TextureObject.init(10);
 
-		GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
-		GLES20.glClearStencil(0);
+		//GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
+
+		// set all bits on clear
+		GLES20.glClearStencil(0xFF);
+		//GLES20.glClearStencil(0);
+
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		mNewSurface = true;
