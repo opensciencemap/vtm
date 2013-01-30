@@ -314,6 +314,12 @@ public class TileManager {
 	 * @return true if new tiles were loaded
 	 */
 	private static boolean updateVisibleList(MapPosition mapPosition, int zdir) {
+		// clear JobQueue and set tiles to state == NONE.
+		// one could also append new tiles and sort in JobQueue
+		// but this has the nice side-effect that MapWorkers dont
+		// start with old jobs while new jobs are calculated, which
+		// should increase the chance that they are free when new 
+		// jobs come in.
 		mMapView.addJobs(null);
 
 		mNewTiles.cnt = 0;
@@ -360,7 +366,7 @@ public class TileManager {
 			jobs = mJobs.toArray(jobs);
 			updateTileDistances(jobs, jobs.length, mapPosition);
 
-			// sets tiles to isLoading = true
+			// sets tiles to state == LOADING
 			mMapView.addJobs(jobs);
 			mJobs.clear();
 			return true;
@@ -385,72 +391,44 @@ public class TileManager {
 
 		tile = QuadTree.getTile(x, y, zoomLevel);
 
-		if (tile != null) {
-			if (!tile.isActive())
-				mJobs.add(tile);
+		if (tile == null) {
+			tile = new MapTile(x, y, zoomLevel);
+			QuadTree.add(tile);
 
-			return tile;
+			if (mTilesSize == mTiles.length) {
+				MapTile[] tmp = new MapTile[mTiles.length + 20];
+				System.arraycopy(mTiles, 0, tmp, 0, mTilesSize);
+				mTiles = tmp;
+				Log.d(TAG, "increase tiles: " + mTiles.length);
+			}
+
+			mTiles[mTilesSize++] = tile;
+			mJobs.add(tile);
+			mTilesCount++;
+
+		} else if (!tile.isActive()) {
+			mJobs.add(tile);
 		}
 
-		tile = new MapTile(x, y, zoomLevel);
-		QuadTree.add(tile);
+		if (zoomLevel > 0) {
+			// prefetch parent
+			MapTile p = tile.rel.parent.tile;
 
-		if (mTilesSize == mTiles.length) {
-			MapTile[] tmp = new MapTile[mTiles.length + 20];
-			System.arraycopy(mTiles, 0, tmp, 0, mTilesSize);
-			mTiles = tmp;
-			Log.d(TAG, "increase tiles: " + mTiles.length);
+			if (p == null) {
+				p = new MapTile(x >> 1, y >> 1, (byte) (zoomLevel - 1));
+				QuadTree.add(p);
+
+				p.state = STATE_LOADING;
+				mJobs.add(p);
+
+			} else if (!p.isActive()) {
+				//Log.d(TAG, "prefetch parent " + p);
+				p.state = STATE_LOADING;
+				mJobs.add(p);
+			}
 		}
-		mTiles[mTilesSize++] = tile;
-
-		mJobs.add(tile);
-		mTilesCount++;
 
 		return tile;
-
-		//      mNewTiles.tiles[tiles++] = tile;
-		//		boolean fetchParent = false;
-		//		boolean fetchProxy = false;
-		//		boolean fetchChildren = false;
-		//		if (fetchChildren) {
-		//			byte z = (byte) (zoomLevel + 1);
-		//			for (int i = 0; i < 4; i++) {
-		//				int cx = (x << 1) + (i % 2);
-		//				int cy = (y << 1) + (i >> 1);
-		//
-		//				MapTile c = QuadTree.getTile(cx, cy, z);
-		//
-		//				if (c == null) {
-		//					c = new MapTile(cx, cy, z);
-		//
-		//					QuadTree.add(c);
-		//					mTiles.add(c);
-		//				}
-		//
-		//				if (!c.isActive()) {
-		//					mJobs.add(c);
-		//				}
-		//			}
-		//		}
-		//
-		//		if (fetchParent || (!fetchProxy && zdir > 0 && zoomLevel > 0)) {
-		//			if (zdir > 0 && zoomLevel > 0) {
-		//				// prefetch parent
-		//				MapTile p = tile.rel.parent.tile;
-		//
-		//				if (p == null) {
-		//					p = new MapTile(x >> 1, y >> 1, (byte) (zoomLevel - 1));
-		//
-		//					QuadTree.add(p);
-		//					mTiles.add(p);
-		//					mJobs.add(p);
-		//
-		//				} else if (!p.isActive()) {
-		//					if (!mJobs.contains(p))
-		//						mJobs.add(p);
-		//				}
-		//			}
-		//		}
 	}
 
 	private static void clearTile(MapTile t) {
@@ -648,6 +626,7 @@ public class TileManager {
 		MapTile tile = (MapTile) jobTile;
 
 		if (tile.state != STATE_LOADING) {
+			// - should rather be STATE_FAILED
 			// no one should be able to use this tile now, TileGenerator passed
 			// it, GL-Thread does nothing until newdata is set.
 			//Log.d(TAG, "passTile: failed loading " + tile);
@@ -660,21 +639,13 @@ public class TileManager {
 			return true;
 		}
 
-		//		tile.vbo = BufferObject.get(false);
-		//
-		//		if (tile.vbo == null) {
-		//			Log.d(TAG, "no VBOs left for " + tile);
-		//			//clearTile(tile);
-		//			//return true;
-		//		}
-
 		tile.state = STATE_NEW_DATA;
 
 		mMapView.render();
 
 		synchronized (mTilesLoaded) {
-			if (!mTilesLoaded.contains(tile))
-				mTilesLoaded.add(tile);
+			//if (!mTilesLoaded.contains(tile))
+			mTilesLoaded.add(tile);
 		}
 
 		return true;
