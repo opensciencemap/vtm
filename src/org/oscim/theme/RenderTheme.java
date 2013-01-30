@@ -28,7 +28,7 @@ import android.graphics.Color;
  * A RenderTheme defines how ways and nodes are drawn.
  */
 public class RenderTheme {
-	private final static String TAG = RenderTheme.class.getName();
+	//private final static String TAG = RenderTheme.class.getName();
 
 	private static final int MATCHING_CACHE_SIZE = 512;
 	private static final int RENDER_THEME_VERSION = 1;
@@ -84,9 +84,17 @@ public class RenderTheme {
 	private final int mMapBackground;
 	private final ArrayList<Rule> mRulesList;
 
-	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mMatchingCacheNodes;
-	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mMatchingCacheWay;
-	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mMatchingCacheArea;
+	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mNodesCache;
+	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mWayCache;
+	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mAreaCache;
+
+	private MatchingCacheKey mAreaCacheKey = new MatchingCacheKey();
+	private MatchingCacheKey mWayCacheKey = new MatchingCacheKey();
+	private MatchingCacheKey mNodeCacheKey = new MatchingCacheKey();
+
+	private ArrayList<RenderInstruction> mWayInstructionList = new ArrayList<RenderInstruction>(4);
+	private ArrayList<RenderInstruction> mAreaInstructionList = new ArrayList<RenderInstruction>(4);
+	private ArrayList<RenderInstruction> mNodeInstructionList = new ArrayList<RenderInstruction>(4);
 
 	class RenderInstructionItem {
 		RenderInstructionItem next;
@@ -100,11 +108,11 @@ public class RenderTheme {
 		mBaseTextSize = baseTextSize;
 		mRulesList = new ArrayList<Rule>();
 
-		mMatchingCacheNodes = new LRUCache<MatchingCacheKey, RenderInstructionItem>(
+		mNodesCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(
 				MATCHING_CACHE_SIZE);
-		mMatchingCacheWay = new LRUCache<MatchingCacheKey, RenderInstructionItem>(
+		mWayCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(
 				MATCHING_CACHE_SIZE);
-		mMatchingCacheArea = new LRUCache<MatchingCacheKey, RenderInstructionItem>(
+		mAreaCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(
 				MATCHING_CACHE_SIZE);
 	}
 
@@ -113,9 +121,9 @@ public class RenderTheme {
 	 * resources.
 	 */
 	public void destroy() {
-		mMatchingCacheNodes.clear();
-		mMatchingCacheArea.clear();
-		mMatchingCacheWay.clear();
+		mNodesCache.clear();
+		mAreaCache.clear();
+		mWayCache.clear();
 
 		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
 			mRulesList.get(i).onDestroy();
@@ -153,7 +161,7 @@ public class RenderTheme {
 	 *            ...
 	 * @return ...
 	 */
-	public synchronized RenderInstruction[] matchNode(IRenderCallback renderCallback,
+	public RenderInstruction[] matchNode(IRenderCallback renderCallback,
 			Tag[] tags, byte zoomLevel) {
 
 		// list of renderinsctruction items in cache
@@ -162,75 +170,77 @@ public class RenderTheme {
 		// the item matching tags and zoomlevel
 		RenderInstructionItem ri = null;
 
-		MatchingCacheKey matchingCacheKey = new MatchingCacheKey(tags);
-		boolean found = mMatchingCacheNodes.containsKey(matchingCacheKey);
-		int zoomMask = 1 << zoomLevel;
+		synchronized (mNodesCache) {
+			MatchingCacheKey cacheKey = mNodeCacheKey; //new MatchingCacheKey(tags);
+			cacheKey.set(tags);
+			boolean found = mNodesCache.containsKey(cacheKey);
+			int zoomMask = 1 << zoomLevel;
 
-		if (found) {
-			ris = mMatchingCacheNodes.get(matchingCacheKey);
+			if (found) {
+				ris = mNodesCache.get(cacheKey);
 
-			for (ri = ris; ri != null; ri = ri.next)
-				if ((ri.zoom & zoomMask) != 0)
-					// cache hit
-					break;
-		}
+				for (ri = ris; ri != null; ri = ri.next)
+					if ((ri.zoom & zoomMask) != 0)
+						// cache hit
+						break;
+			}
 
-		if (ri == null) {
-			// cache miss 
-			List<RenderInstruction> matches = mMatchingList;
-			matches.clear();
-			for (int i = 0, n = mRulesList.size(); i < n; ++i)
-				mRulesList.get(i).matchNode(renderCallback, tags, zoomLevel, matches);
+			if (ri == null) {
+				// cache miss 
+				List<RenderInstruction> matches = mNodeInstructionList;
+				matches.clear();
+				for (int i = 0, n = mRulesList.size(); i < n; ++i)
+					mRulesList.get(i).matchNode(renderCallback, tags, zoomLevel, matches);
 
-			int size = matches.size();
+				int size = matches.size();
 
-			// check if same instructions are used in another level
-			for (ri = ris; ri != null; ri = ri.next) {
-				if (size == 0) {
-					if (ri.list != null)
+				// check if same instructions are used in another level
+				for (ri = ris; ri != null; ri = ri.next) {
+					if (size == 0) {
+						if (ri.list != null)
+							continue;
+
+						// both matchinglists are empty
+						break;
+					}
+
+					if (ri.list == null)
 						continue;
 
-					// both matchinglists are empty
-					break;
-				}
+					if (ri.list.length != size)
+						continue;
 
-				if (ri.list == null)
-					continue;
-
-				if (ri.list.length != size)
-					continue;
-
-				int i = 0;
-				for (RenderInstruction r : ri.list) {
-					if (r != matches.get(i))
+					int i = 0;
+					for (RenderInstruction r : ri.list) {
+						if (r != matches.get(i))
+							break;
+						i++;
+					}
+					if (i == size)
+						// both matching lists contain the same items
 						break;
-					i++;
 				}
-				if (i == size)
-					// both matching lists contain the same items
-					break;
-			}
 
-			if (ri != null) {
-				// we found a same matchting list on another zoomlevel
-				ri.zoom |= zoomMask;
-			} else {
+				if (ri != null) {
+					// we found a same matchting list on another zoomlevel
+					ri.zoom |= zoomMask;
+				} else {
 
-				ri = new RenderInstructionItem();
-				ri.zoom = zoomMask;
+					ri = new RenderInstructionItem();
+					ri.zoom = zoomMask;
 
-				if (size > 0) {
-					ri.list = new RenderInstruction[size];
-					matches.toArray(ri.list);
+					if (size > 0) {
+						ri.list = new RenderInstruction[size];
+						matches.toArray(ri.list);
+					}
+					// attach this list to the one found for MatchingKey
+					if (ris != null)
+						ris.next = ri;
+					else
+						mNodesCache.put(new MatchingCacheKey(cacheKey), ri);
 				}
-				// attach this list to the one found for MatchingKey
-				if (ris != null)
-					ris.next = ri;
-				else
-					mMatchingCacheNodes.put(matchingCacheKey, ri);
 			}
 		}
-
 		if (ri.list != null)
 			render(renderCallback, ri.list, tags);
 
@@ -238,10 +248,8 @@ public class RenderTheme {
 
 	}
 
-	private int missCnt = 0;
-	private int hitCnt = 0;
-	private MatchingCacheKey mCacheKey = new MatchingCacheKey();
-	private ArrayList<RenderInstruction> mMatchingList = new ArrayList<RenderInstruction>(4);
+	//private int missCnt = 0;
+	//private int hitCnt = 0;
 
 	/**
 	 * Matches a way with the given parameters against this RenderTheme.
@@ -258,7 +266,7 @@ public class RenderTheme {
 	 *            ...
 	 * @return currently processed render instructions
 	 */
-	public synchronized RenderInstruction[] matchWay(IRenderCallback renderCallback,
+	public RenderInstruction[] matchWay(IRenderCallback renderCallback,
 			Tag[] tags, byte zoomLevel, boolean closed, boolean render) {
 
 		// list of renderinsctruction items in cache
@@ -266,90 +274,95 @@ public class RenderTheme {
 
 		// the item matching tags and zoomlevel
 		RenderInstructionItem ri = null;
+		List<RenderInstruction> matches;
 
 		LRUCache<MatchingCacheKey, RenderInstructionItem> matchingCache;
-		MatchingCacheKey matchingCacheKey;
+		MatchingCacheKey cacheKey;
 
 		if (closed) {
-			matchingCache = mMatchingCacheArea;
+			matchingCache = mAreaCache;
+			cacheKey = mAreaCacheKey;
+			matches = mAreaInstructionList;
 		} else {
-			matchingCache = mMatchingCacheWay;
+			matchingCache = mWayCache;
+			cacheKey = mWayCacheKey;
+			matches = mWayInstructionList;
 		}
 		int zoomMask = 1 << zoomLevel;
 
-		mCacheKey.set(tags);
-		ris = matchingCache.get(mCacheKey);
+		synchronized (matchingCache) {
+			cacheKey.set(tags);
+			ris = matchingCache.get(cacheKey);
 
-		for (ri = ris; ri != null; ri = ri.next)
-			if ((ri.zoom & zoomMask) != 0)
-				// cache hit
-				break;
+			for (ri = ris; ri != null; ri = ri.next)
+				if ((ri.zoom & zoomMask) != 0)
+					// cache hit
+					break;
 
-		if (ri == null) {
-			// cache miss
-			//Log.d(TAG, missCnt++ + " / " + hitCnt + " Cache Miss");
+			if (ri == null) {
+				// cache miss
+				//Log.d(TAG, missCnt++ + " / " + hitCnt + " Cache Miss");
 
-			int c = (closed ? Closed.YES : Closed.NO);
-			List<RenderInstruction> matches = mMatchingList;
-			matches.clear();
+				int c = (closed ? Closed.YES : Closed.NO);
+				//List<RenderInstruction> matches = mMatchingList;
+				matches.clear();
 
-			for (int i = 0, n = mRulesList.size(); i < n; ++i)
-				mRulesList.get(i).matchWay(renderCallback, tags, zoomLevel, c, matches);
+				for (int i = 0, n = mRulesList.size(); i < n; ++i)
+					mRulesList.get(i).matchWay(renderCallback, tags, zoomLevel, c, matches);
 
-			int size = matches.size();
-			// check if same instructions are used in another level
-			for (ri = ris; ri != null; ri = ri.next) {
-				if (size == 0) {
-					if (ri.list != null)
+				int size = matches.size();
+				// check if same instructions are used in another level
+				for (ri = ris; ri != null; ri = ri.next) {
+					if (size == 0) {
+						if (ri.list != null)
+							continue;
+
+						// both matchinglists are empty
+						break;
+					}
+
+					if (ri.list == null)
 						continue;
 
-					// both matchinglists are empty
-					break;
-				}
+					if (ri.list.length != size)
+						continue;
 
-				if (ri.list == null)
-					continue;
-
-				if (ri.list.length != size)
-					continue;
-
-				int i = 0;
-				for (RenderInstruction r : ri.list) {
-					if (r != matches.get(i))
+					int i = 0;
+					for (RenderInstruction r : ri.list) {
+						if (r != matches.get(i))
+							break;
+						i++;
+					}
+					if (i == size)
+						// both matching lists contain the same items
 						break;
-					i++;
-				}
-				if (i == size)
-					// both matching lists contain the same items
-					break;
-			}
-
-			if (ri != null) {
-				// we found a same matchting list on another zoomlevel
-				ri.zoom |= zoomMask;
-				//Log.d(TAG, " same instructions " + size + " " + Arrays.deepToString(tags));
-
-			} else {
-				//Log.d(TAG, " new instructions " + size + " " + Arrays.deepToString(tags));
-
-				ri = new RenderInstructionItem();
-				ri.zoom = zoomMask;
-
-				if (size > 0) {
-					ri.list = new RenderInstruction[size];
-					matches.toArray(ri.list);
 				}
 
-				// attach this list to the one found for MatchingKey
-				if (ris != null) {
-					ris.next = ri;
-				}
-				else {
-					matchingCacheKey = new MatchingCacheKey(mCacheKey);
-					matchingCache.put(matchingCacheKey, ri);
+				if (ri != null) {
+					// we found a same matchting list on another zoomlevel
+					ri.zoom |= zoomMask;
+					//Log.d(TAG, " same instructions " + size + " " + Arrays.deepToString(tags));
+
+				} else {
+					//Log.d(TAG, " new instructions " + size + " " + Arrays.deepToString(tags));
+
+					ri = new RenderInstructionItem();
+					ri.zoom = zoomMask;
+
+					if (size > 0) {
+						ri.list = new RenderInstruction[size];
+						matches.toArray(ri.list);
+					}
+
+					// attach this list to the one found for MatchingKey
+					if (ris != null) {
+						ris.next = ri;
+					}
+					else {
+						matchingCache.put(new MatchingCacheKey(cacheKey), ri);
+					}
 				}
 			}
-
 		}
 		if (render && ri.list != null) {
 			for (int i = 0, n = ri.list.length; i < n; i++)
