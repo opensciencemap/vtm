@@ -23,7 +23,7 @@ import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.renderinstruction.BitmapUtils;
 import org.oscim.view.MapView;
 
-public class TestOverlay extends RenderOverlay {
+public class TestOverlay extends BasicOverlay {
 
 	TextItem labels;
 
@@ -96,7 +96,8 @@ public class TestOverlay extends RenderOverlay {
 	}
 
 	@Override
-	public synchronized void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(MapPosition curPos, boolean positionChanged,
+			boolean tilesChanged) {
 		// keep position constant (or update layer relative to new position)
 		//mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
 

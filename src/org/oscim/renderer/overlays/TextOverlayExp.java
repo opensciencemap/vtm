@@ -40,7 +40,7 @@ import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.util.Log;
 
-public class TextOverlayExp extends RenderOverlay {
+public class TextOverlayExp extends BasicOverlay {
 	private final static String TAG = TextOverlayExp.class.getName();
 
 	private TileSet mTiles;

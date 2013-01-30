@@ -28,7 +28,7 @@ import android.graphics.Color;
 import android.graphics.Paint.Cap;
 import android.util.Log;
 
-public class GridOverlay extends RenderOverlay {
+public class GridOverlay extends BasicOverlay {
 
 	private float[] mPoints;
 	private short[] mIndex;
@@ -110,7 +110,8 @@ public class GridOverlay extends RenderOverlay {
 	}
 
 	@Override
-	public synchronized void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
+	public synchronized void update(MapPosition curPos, boolean positionChanged,
+			boolean tilesChanged) {
 
 		updateMapPosition();
 

@@ -460,4 +460,10 @@ public class ExtrusionOverlay extends RenderOverlay {
 	public void setAlpha(float a) {
 		mAlpha = a;
 	}
+
+	@Override
+	public void compile() {
+		// TODO Auto-generated method stub
+
+	}
 }

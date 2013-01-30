@@ -14,6 +14,7 @@
  */
 package org.oscim.renderer.overlays;
 
+import org.oscim.core.MapPosition;
 import org.oscim.view.MapView;
 
 public class CustomOverlay extends RenderOverlay {
@@ -22,4 +23,19 @@ public class CustomOverlay extends RenderOverlay {
 		super(mapView);
 	}
 
+	@Override
+	public void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
+		// tell GLRender to call 'compile'
+		newData = true;
+	}
+
+	@Override
+	public void compile() {
+		// tell GLRender to call 'render'
+		isReady = true;
+	}
+
+	@Override
+	public void render(MapPosition pos, float[] mv, float[] proj) {
+	}
 }

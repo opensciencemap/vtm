@@ -34,6 +34,7 @@ import javax.microedition.khronos.opengles.GL10;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.layer.Layers;
+import org.oscim.renderer.overlays.BasicOverlay;
 import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.theme.RenderTheme;
 import org.oscim.utils.FastMath;
@@ -279,13 +280,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		tile.state = STATE_READY;
 	}
 
-	private static boolean uploadOverlayData(RenderOverlay renderOverlay) {
+	public static boolean uploadOverlayData(BasicOverlay renderOverlay) {
 		int newSize = renderOverlay.layers.getSize();
 		if (newSize > 0) {
 			if (uploadLayers(renderOverlay.layers, renderOverlay.vbo, newSize, true))
 				renderOverlay.isReady = true;
-
-			renderOverlay.newData = false;
 		}
 		return renderOverlay.isReady;
 	}
@@ -454,7 +453,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		BaseMap.draw(tiles, tileCnt, pos);
 
 		// start drawing while overlays uploading textures, etc
-		GLES20.glFlush();
+		//GLES20.glFlush();
 
 		/* draw overlays */
 
@@ -464,22 +463,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		for (int i = 0, n = overlays.size(); i < n; i++) {
 			RenderOverlay renderOverlay = overlays.get(i);
 
-			// helper to compile layers into single vbo
 			if (renderOverlay.newData) {
-				if (renderOverlay.vbo == null) {
-					renderOverlay.vbo = BufferObject.get(0);
-
-					if (renderOverlay.vbo == null)
-						continue;
-				}
-				if (uploadOverlayData(renderOverlay))
-					renderOverlay.isReady = true;
+				renderOverlay.compile();
+				renderOverlay.newData = false;
 			}
-
-			if (renderOverlay.isReady) {
-				// setMatrix(mMVPMatrix, overlay);
+			if (renderOverlay.isReady)
 				renderOverlay.render(mMapPosition, mMVPMatrix, mProjMatrix);
-			}
 		}
 
 		if (MapView.debugFrameTime) {

@@ -477,6 +477,12 @@ public class BuildingOverlay extends RenderOverlay {
 			+ "  gl_FragColor = color;"
 			+ "}";
 
+	@Override
+	public void compile() {
+		// TODO Auto-generated method stub
+
+	}
+
 	//	private short[] mVertices = {
 	//	// 0 - north
 	//	-200, -200, 0,
