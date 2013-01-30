@@ -83,20 +83,9 @@ public final class SymbolLayer extends TextureLayer {
 		symbols = item;
 	}
 
-	//	@Override
-	//	void compile(ShortBuffer sbuf) {
-	//		if (TextureRenderer.debug)
-	//			Log.d("...", "compile");
-	//
-	//		for (TextureObject to = textures; to != null; to = to.next)
-	//			TextureObject.uploadTexture(to);
-	//
-	//		Layers.addPoolItems(this, sbuf);
-	//	}
-
 	private final static int LBIT_MASK = 0xfffffffe;
 
-	// TODO ... reuse texture when only symbol position changed
+	// TODO reuse texture when only symbol position changed
 	@Override
 	public boolean prepare() {
 
