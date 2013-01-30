@@ -110,9 +110,7 @@ public final class WayDecorator {
 		// get the first way point coordinates
 		int prevX = (int) coordinates[pos + 0];
 		int prevY = (int) coordinates[pos + 1];
-		if (string.equals("Filip Road")) {
-			System.out.println("blub");
-		}
+
 		// find way segments long enough to draw the way name on them
 		for (int i = pos + 2; i < pos + len; i += 2) {
 			// get the current way point coordinates
