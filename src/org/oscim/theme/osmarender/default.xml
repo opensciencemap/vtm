@@ -11,8 +11,8 @@
   
   <style-area name="railway|industrial"  fill="#e6e3e5" fade="10"/>
   <!-- "#f0fae7" mint green  -->
-  <style-area name="farmland"            fill="#fff8bf" fade="11" />
-  
+  <!-- <style-area name="farmland"            fill="#fff8bf" fade="11" />-->
+   <style-area name="farmland"            fill="#faf6ca" fade="11" />
   <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
   <!-- <style-area name="forest|wood"         fill="#ebefe5" fade="7" blend="11" blend-fill="#cee0bc"/>   d3dec8-->
   <style-area name="forest|wood"         fill="#ebefe5" fade="7" blend="11" blend-fill="#c6dbb2"/> 
@@ -222,7 +222,7 @@
 	        <area fill="#f8f8f8" />
 	      </rule>
 	      <rule e="way" k="*" v="beach">
-	        <area fill="#fcfeab" />
+	        <area fill="#f7f5c8" />
 	      </rule>
 	   
 	      <rule e="way" k="*" v="marsh|wetland|mud">
@@ -909,7 +909,7 @@
            /> </rule> <rule e="way" k="admin_level" v="5"> <line stroke="#f9574b" width="0.15" 
            fixed="true" cap="butt" /> </rule> -->
       <rule e="way" k="admin_level" v="4">
-        <line stroke="#afa0dd" width="0.9" fixed="true" cap="butt" />
+        <line stroke="#afa0dd" width="1.0" fixed="true" cap="butt" />
       </rule>
       <rule e="way" k="admin_level" v="3">
         <line stroke="#0000ff" width="0.95" fixed="true" cap="butt" />
