@@ -16,15 +16,25 @@ package org.oscim.renderer.layer;
 
 import org.oscim.theme.renderinstruction.Text;
 
+import android.util.Log;
+
 public class TextItem {
+	private final static String TAG = TextItem.class.getName();
+	private final static int MAX_POOL = 250;
+
 	private static Object lock = new Object();
 	private static TextItem pool;
+	private static int count = 0;
+	private static int inPool = 0;
 
 	public static TextItem get() {
 		synchronized (lock) {
-			if (pool == null)
+			if (pool == null) {
+				count++;
 				return new TextItem();
+			}
 
+			inPool--;
 			TextItem ti = pool;
 			pool = pool.next;
 
@@ -34,29 +44,43 @@ public class TextItem {
 		}
 	}
 
-	public static void append(TextItem ti, TextItem in) {
-		if (ti == null)
-			return;
-		if (ti.next == null) {
-			in.next = ti.next;
-			ti.next = in;
-		}
-		TextItem t = ti;
-		while (t.next != null)
-			t = t.next;
-
-		in.next = t.next;
-		t.next = in;
-	}
+	//	public static void append(TextItem ti, TextItem in) {
+	//		if (ti == null)
+	//			return;
+	//		if (ti.next == null) {
+	//			in.next = ti.next;
+	//			ti.next = in;
+	//		}
+	//		
+	//		TextItem t = ti;
+	//		while (t.next != null)
+	//			t = t.next;
+	//
+	//		in.next = t.next;
+	//		t.next = in;
+	//	}
 
 	public static void release(TextItem ti) {
 		if (ti == null)
 			return;
 
-		synchronized (lock) {
+		if (inPool > MAX_POOL) {
 			while (ti != null) {
 				TextItem next = ti.next;
 
+				// drop references 
+				ti.string = null;
+				ti.text = null;
+				ti.n1 = null;
+				ti.n2 = null;
+				ti = next;
+				count--;
+			}
+		}
+
+		synchronized (lock) {
+			while (ti != null) {
+				TextItem next = ti.next;
 				ti.next = pool;
 
 				// drop references 
@@ -68,8 +92,14 @@ public class TextItem {
 				pool = ti;
 
 				ti = next;
+
+				inPool++;
 			}
 		}
+	}
+
+	public static void printPool() {
+		Log.d(TAG, "in pool " + inPool + " / " + count);
 	}
 
 	public TextItem set(float x, float y, String string, Text text) {
@@ -140,6 +170,9 @@ public class TextItem {
 	// link to next/prev label of the way
 	public TextItem n1;
 	public TextItem n2;
+
+	public byte origin;
+
 	public boolean active;
 	// public byte placement
 }
