@@ -62,7 +62,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	private int mTileCnt;
 
 	@Override
-	public synchronized void update(MapPosition curPos, boolean positionChanged,
+	public void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged) {
 
 		mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
@@ -160,7 +160,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	private final float[] mVPMatrix = new float[16];
 
 	@Override
-	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
+	public void render(MapPosition pos, float[] mv, float[] proj) {
 		// TODO one could render in one pass to texture and then draw the texture
 		// with alpha... might be faster.
 
