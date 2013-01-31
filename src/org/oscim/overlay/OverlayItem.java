@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012 osmdroid
+ * Copyright 2013 OpenScienceMap
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 // Created by plusminus on 00:02:58 - 03.10.2008
 package org.oscim.overlay;
 
@@ -6,10 +22,12 @@ import org.oscim.core.GeoPoint;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 
-/** Immutable class describing a GeoPoint with a Title and a Description.
+/**
+ * Immutable class describing a GeoPoint with a Title and a Description.
  * @author Nicolas Gramlich
  * @author Theodore Hong
- * @author Fred Eisele */
+ * @author Fred Eisele
+ */
 public class OverlayItem {
 
 	// ===========================================================
@@ -21,9 +39,11 @@ public class OverlayItem {
 
 	protected static final Point DEFAULT_MARKER_SIZE = new Point(26, 94);
 
-	/** Indicates a hotspot for an area. This is where the origin (0,0) of a
+	/**
+	 * Indicates a hotspot for an area. This is where the origin (0,0) of a
 	 * point will be located relative to the area. In otherwords this acts as an
-	 * offset. NONE indicates that no adjustment should be made. */
+	 * offset. NONE indicates that no adjustment should be made.
+	 */
 	public enum HotspotPlace {
 		NONE, CENTER, BOTTOM_CENTER, TOP_CENTER, RIGHT_CENTER, LEFT_CENTER, UPPER_RIGHT_CORNER, LOWER_RIGHT_CORNER, UPPER_LEFT_CORNER, LOWER_LEFT_CORNER
 	}
@@ -43,12 +63,14 @@ public class OverlayItem {
 	// Constructors
 	// ===========================================================
 
-	/** @param aTitle
+	/**
+	 * @param aTitle
 	 *            this should be <b>singleLine</b> (no <code>'\n'</code> )
 	 * @param aDescription
 	 *            a <b>multiLine</b> description ( <code>'\n'</code> possible)
 	 * @param aGeoPoint
-	 *            ... */
+	 *            ...
+	 */
 	public OverlayItem(final String aTitle, final String aDescription, final GeoPoint aGeoPoint) {
 		this(null, aTitle, aDescription, aGeoPoint);
 	}
