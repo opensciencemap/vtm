@@ -243,14 +243,20 @@ public final class PolygonRenderer {
 		return l;
 	}
 
+	/**
+	 * @param clip ...
+	 * @param first ...
+	 */
 	static void drawStencilRegion(boolean clip, boolean first) {
 		GLState.useProgram(polygonProgram);
 
 		// disable drawing to framebuffer (will be re-enabled in fill)
 		glColorMask(false, false, false, false);
 
-		// write to all bits
-		glStencilMask(0xFF);
+		if (!first) {
+			// write to all bits 
+			glStencilMask(0xFF);
+		}
 
 		// set clip bit (0x80) for draw region
 		glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_REPLACE);
@@ -295,6 +301,7 @@ public final class PolygonRenderer {
 	}
 
 	static void drawOver(float[] matrix) {
+
 		GLState.useProgram(polygonProgram);
 
 		GLState.enableVertexArrays(hPolygonVertexPosition, -1);

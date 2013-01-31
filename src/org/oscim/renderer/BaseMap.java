@@ -16,6 +16,7 @@ package org.oscim.renderer;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_BLEND;
+import static android.opengl.GLES20.glStencilMask;
 import static org.oscim.generator.JobTile.STATE_READY;
 
 import org.oscim.core.MapPosition;
@@ -54,8 +55,9 @@ public class BaseMap {
 		mDrawCnt = 0;
 
 		GLES20.glDepthFunc(GLES20.GL_LESS);
-
+		glStencilMask(0xFF);
 		LineRenderer.beginLines();
+
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && t.state == STATE_READY)
@@ -79,6 +81,7 @@ public class BaseMap {
 		}
 
 		LineRenderer.endLines();
+		glStencilMask(0x0);
 
 		//long end = SystemClock.uptimeMillis();
 		//Log.d(TAG, "base took " + (end - start));
@@ -144,7 +147,13 @@ public class BaseMap {
 					break;
 			}
 		}
-		PolygonRenderer.drawOver(mvp);
+
+		glStencilMask(0xFF);
+		GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
+		//glStencilMask(0x0);
+
+		//PolygonRenderer.drawOver(mvp);
+		//GLES20.glFlush();
 	}
 
 	private static int drawProxyChild(MapTile tile, MapPosition pos) {
