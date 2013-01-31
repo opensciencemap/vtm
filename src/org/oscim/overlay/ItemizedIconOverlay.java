@@ -1,3 +1,18 @@
+/*
+ * Copyright 2012 osmdroid
+ * Copyright 2013 OpenScienceMap
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.overlay;
 
 import java.util.List;
@@ -183,16 +198,8 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 */
 	private boolean activateSelectedItems(final MotionEvent event, final MapView mapView,
 			final ActiveItem task) {
-
-		//		final Projection pj = mapView.getProjection();
 		final int eventX = (int) event.getX();
 		final int eventY = (int) event.getY();
-
-		//		Log.d("...", "test items " + eventX + " " + eventY);
-
-		/* These objects are created to avoid construct new ones every cycle. */
-		//		pj.fromMapPixels(eventX, eventY, mTouchScreenPoint);
-
 		MapViewPosition mapViewPosition = mMapView.getMapViewPosition();
 
 		byte z = mapViewPosition.getMapPosition().zoomLevel;
@@ -203,33 +210,22 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 		double dist = Double.MAX_VALUE;
 
 		// TODO use intermediate projection and bounding box test
-
 		for (int i = 0; i < this.mItemList.size(); ++i) {
 			final Item item = getItem(i);
 
 			//	final Drawable marker = (item.getMarker(0) == null) ? this.mDefaultMarker : item
 			//		.getMarker(0);
-
-			//	int x = (int) MercatorProjection.longitudeToPixelX(item.getPoint().getLongitude(), z);
-			//	int y = (int) MercatorProjection.latitudeToPixelY(item.getPoint().getLatitude(), z);
 			MercatorProjection.projectPoint(item.getPoint(), z, mItemPoint);
-
-			//	pj.toPixels(item.getPoint(), mItemPoint);
-			//  Log.d("...", (x - mTouchScreenPoint.x) + "  " + (y - mTouchScreenPoint.y));
 
 			float dx = mItemPoint.x - mTouchScreenPoint.x;
 			float dy = mItemPoint.y - mTouchScreenPoint.y;
 			double d = Math.sqrt(dx * dx + dy * dy);
 
 			if (d < 50) {
-				//	Log.d("...", "HIT! " + (x - mTouchScreenPoint.x) + "  " + (y - mTouchScreenPoint.y));
 				if (d < dist) {
 					dist = d;
 					nearest = i;
 				}
-				//	if (hitTest(item, marker, mTouchScreenPoint.x - mItemPoint.x, mTouchScreenPoint.y
-				//	- mItemPoint.y)) {
-
 			}
 		}
 
