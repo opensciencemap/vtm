@@ -15,7 +15,6 @@
 package org.oscim.renderer;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
-import static android.opengl.GLES20.GL_BLEND;
 import static android.opengl.GLES20.glStencilMask;
 import static org.oscim.generator.JobTile.STATE_READY;
 
@@ -130,7 +129,6 @@ public class BaseMap {
 
 			switch (l.type) {
 				case Layer.POLYGON:
-					GLES20.glDisable(GL_BLEND);
 					l = PolygonRenderer.draw(pos, l, mvp, !clipped, true);
 					clipped = true;
 					break;
@@ -140,8 +138,6 @@ public class BaseMap {
 						PolygonRenderer.draw(pos, null, mvp, true, true);
 						clipped = true;
 					}
-
-					GLES20.glEnable(GL_BLEND);
 					l = LineRenderer.draw(pos, l, mvp, div, simpleShader,
 							t.layers.lineOffset);
 					break;

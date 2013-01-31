@@ -91,8 +91,8 @@ public final class TextureRenderer {
 
 	public static Layer draw(Layer layer, float scale, float[] projection, float matrix[]) {
 		GLState.test(false, false);
-		GLES20.glEnable(GLES20.GL_BLEND);
-		// GlUtils.checkGlError("draw texture >");
+		GLState.blend(true);
+
 		GLState.useProgram(mTextureProgram);
 
 		GLState.enableVertexArrays(hTextureTexCoord, hTextureVertex);

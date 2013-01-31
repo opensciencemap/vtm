@@ -15,7 +15,6 @@
 package org.oscim.renderer;
 
 import static android.opengl.GLES20.GL_ALWAYS;
-import static android.opengl.GLES20.GL_BLEND;
 import static android.opengl.GLES20.GL_EQUAL;
 import static android.opengl.GLES20.GL_INVERT;
 import static android.opengl.GLES20.GL_SHORT;
@@ -23,9 +22,7 @@ import static android.opengl.GLES20.GL_TRIANGLE_FAN;
 import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
 import static android.opengl.GLES20.glColorMask;
 import static android.opengl.GLES20.glDepthMask;
-import static android.opengl.GLES20.glDisable;
 import static android.opengl.GLES20.glDrawArrays;
-import static android.opengl.GLES20.glEnable;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glStencilFunc;
@@ -87,7 +84,6 @@ public final class PolygonRenderer {
 	}
 
 	private static void fillPolygons(int zoom, float scale) {
-		boolean blend = false;
 
 		/* draw to framebuffer */
 		glColorMask(true, true, true, false);
@@ -98,36 +94,35 @@ public final class PolygonRenderer {
 		for (int c = mStart; c < mCount; c++) {
 			PolygonLayer l = mFillPolys[c];
 
-			float f = 1.0f;
-
-			if (l.area.fade >= zoom || l.area.color[3] != 1.0) {
+			if (l.area.fade >= zoom) {
+				float f = 1.0f;
 				/* fade in/out || draw alpha color */
 				if (l.area.fade >= zoom) {
-					f = (scale > FADE_START ? scale : FADE_START) - f;
+					if (scale > FADE_START)
+						f = scale - 1;
+					else
+						f = FADE_START - 1;
+				}
+				GLState.blend(true);
 
-				}
-				if (!blend) {
-					glEnable(GL_BLEND);
-					blend = true;
-				}
-				if (f != 1) {
-					f = (f > 1 ? 1 : f) * l.area.color[3];
-					GlUtils.setColor(hPolygonColor, l.area.color, f);
+				if (f < 1) {
+					GlUtils.setColor(hPolygonColor, l.area.color,
+							f * l.area.color[3]);
 				} else {
 					glUniform4fv(hPolygonColor, 1, l.area.color, 0);
 				}
 			} else if (l.area.blend == zoom) {
 				/* blend colors */
-				f = scale - 1.0f;
 				GlUtils.setBlendColors(hPolygonColor,
-						l.area.color, l.area.blendColor, f);
+						l.area.color, l.area.blendColor, scale - 1.0f);
 			} else {
-				/* draw solid */
-				if (blend) {
-					glDisable(GL_BLEND);
-					blend = false;
+				if (l.area.color[3] != 1.0) {
+					GLState.blend(true);
+				} else {
+					GLState.blend(false);
 				}
-				if (l.area.blend <= zoom && l.area.blend > 0)
+
+				if (l.area.blend < zoom && l.area.blend > 0)
 					glUniform4fv(hPolygonColor, 1, l.area.blendColor, 0);
 				else
 					glUniform4fv(hPolygonColor, 1, l.area.color, 0);
@@ -141,17 +136,12 @@ public final class PolygonRenderer {
 			/* draw tile fill coordinates */
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		}
-
-		if (blend)
-			glDisable(GL_BLEND);
 	}
 
 	// layers to fill
 	private static int mCount;
 	// stencil buffer index to start fill
 	private static int mStart;
-
-	//private final static boolean drawBackground = false;
 
 	/**
 	 * draw polygon layers (unil layer.next is not polygon layer)
@@ -209,6 +199,7 @@ public final class PolygonRenderer {
 
 				// op for stencil method polygon drawing
 				glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GL_INVERT);
+				GLState.blend(false);
 			}
 
 			mFillPolys[mCount] = pl;
@@ -248,8 +239,14 @@ public final class PolygonRenderer {
 	 * @param first ...
 	 */
 	static void drawStencilRegion(boolean clip, boolean first) {
-		GLState.useProgram(polygonProgram);
-
+		//if (!first && clip) {
+		//	// only clear 'layer-bits'
+		//	glStencilMask(0x7F);
+		//	GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
+		//	glColorMask(false, false, false, false);
+		//	glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
+		//	return;
+		//}
 		// disable drawing to framebuffer (will be re-enabled in fill)
 		glColorMask(false, false, false, false);
 
