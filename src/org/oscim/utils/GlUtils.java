@@ -185,13 +185,18 @@ public class GlUtils {
 	// this is save as it can only be called from glThread
 	private static float[] tmpColor = new float[4];
 
-	public static void setBlendColors(int handle, float[] c1, float[] c2, float alpha) {
-		tmpColor[0] = c1[0] * (1 - alpha) + c2[0] * alpha;
-		tmpColor[1] = c1[1] * (1 - alpha) + c2[1] * alpha;
-		tmpColor[2] = c1[2] * (1 - alpha) + c2[2] * alpha;
-		tmpColor[3] = c1[3] * (1 - alpha) + c2[3] * alpha;
-
-		GLES20.glUniform4fv(handle, 1, tmpColor, 0);
+	public static void setBlendColors(int handle, float[] c1, float[] c2, float mix) {
+		if (mix <= 0f)
+			GLES20.glUniform4fv(handle, 1, c1, 0);
+		else if (mix >= 1f)
+			GLES20.glUniform4fv(handle, 1, c2, 0);
+		else {
+			tmpColor[0] = c1[0] * (1 - mix) + c2[0] * mix;
+			tmpColor[1] = c1[1] * (1 - mix) + c2[1] * mix;
+			tmpColor[2] = c1[2] * (1 - mix) + c2[2] * mix;
+			tmpColor[3] = c1[3] * (1 - mix) + c2[3] * mix;
+			GLES20.glUniform4fv(handle, 1, tmpColor, 0);
+		}
 	}
 
 	public static void setColor(int handle, float[] c, float alpha) {

@@ -104,16 +104,14 @@ public final class PolygonRenderer {
 				/* fade in/out || draw alpha color */
 				if (l.area.fade >= zoom) {
 					f = (scale > FADE_START ? scale : FADE_START) - f;
-					if (f > 1.0f)
-						f = 1.0f;
-				}
 
+				}
 				if (!blend) {
 					glEnable(GL_BLEND);
 					blend = true;
 				}
 				if (f != 1) {
-					f *= l.area.color[3];
+					f = (f > 1 ? 1 : f) * l.area.color[3];
 					GlUtils.setColor(hPolygonColor, l.area.color, f);
 				} else {
 					glUniform4fv(hPolygonColor, 1, l.area.color, 0);
@@ -121,14 +119,8 @@ public final class PolygonRenderer {
 			} else if (l.area.blend == zoom) {
 				/* blend colors */
 				f = scale - 1.0f;
-				if (f > 1.0f)
-					f = 1.0f;
-				else if (f < 0)
-					f = 0;
-
 				GlUtils.setBlendColors(hPolygonColor,
 						l.area.color, l.area.blendColor, f);
-
 			} else {
 				/* draw solid */
 				if (blend) {
