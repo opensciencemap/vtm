@@ -47,15 +47,15 @@ public class GLState {
 		}
 	}
 
-	// TODO
 	public static void blend(boolean enable) {
 		if (blend == enable)
 			return;
 
-		if (blend)
+		if (enable)
 			GLES20.glEnable(GLES20.GL_BLEND);
 		else
 			GLES20.glDisable(GLES20.GL_BLEND);
+		blend = enable;
 	}
 
 	public static void test(boolean depthTest, boolean stencilTest) {

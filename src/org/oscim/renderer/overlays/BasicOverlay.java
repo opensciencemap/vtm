@@ -58,10 +58,8 @@ public abstract class BasicOverlay extends RenderOverlay {
 
 		for (Layer l = layers.layers; l != null;) {
 			if (l.type == Layer.POLYGON) {
-				GLES20.glDisable(GLES20.GL_BLEND);
 				l = PolygonRenderer.draw(pos, l, mvp, true, false);
 			} else {
-				GLES20.glEnable(GLES20.GL_BLEND);
 				l = LineRenderer.draw(pos, l, mvp, div, 0, layers.lineOffset);
 			}
 		}

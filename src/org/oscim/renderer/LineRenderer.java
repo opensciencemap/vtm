@@ -118,6 +118,8 @@ public final class LineRenderer {
 		if (layer == null)
 			return null;
 
+		GLState.blend(true);
+
 		GLState.useProgram(lineProgram[mode]);
 
 		int uLineScale = hLineScale[mode];

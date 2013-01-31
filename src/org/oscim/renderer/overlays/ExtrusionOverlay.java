@@ -261,6 +261,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
 		GLES20.glColorMask(true, true, true, true);
 		GLES20.glDepthMask(false);
+		GLState.blend(true);
 
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];

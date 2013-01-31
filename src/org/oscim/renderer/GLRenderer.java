@@ -15,7 +15,6 @@
 package org.oscim.renderer;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
-import static android.opengl.GLES20.GL_BLEND;
 import static android.opengl.GLES20.GL_DYNAMIC_DRAW;
 import static android.opengl.GLES20.GL_ONE;
 import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
@@ -452,14 +451,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		/* draw base layer */
 		BaseMap.draw(tiles, tileCnt, pos);
 
-		// start drawing while overlays uploading textures, etc
-		//GLES20.glFlush();
-
 		/* draw overlays */
-
-		//GLState.blend(true);
-		GLES20.glEnable(GL_BLEND);
-
 		for (int i = 0, n = overlays.size(); i < n; i++) {
 			RenderOverlay renderOverlay = overlays.get(i);
 
