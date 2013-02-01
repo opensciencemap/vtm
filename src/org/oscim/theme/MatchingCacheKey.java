@@ -17,84 +17,73 @@ package org.oscim.theme;
 import org.oscim.core.Tag;
 
 class MatchingCacheKey {
-	int mHashCodeValue;
+	int mHash;
 	Tag[] mTags;
 
 	MatchingCacheKey() {
 	}
 
-	MatchingCacheKey(Tag[] tags) {
-		mTags = tags;
-		mHashCodeValue = calculateHashCode();
-	}
-
 	MatchingCacheKey(MatchingCacheKey key) {
-		mTags = key.mTags;
-		mHashCodeValue = key.mHashCodeValue;
+		// need to clone tags as they belong to MapDatabase
+		mTags = key.mTags.clone();
+		mHash = key.mHash;
 	}
 
-	void set(Tag[] tags) {
-		mTags = tags;
+	// set temporary values for comparison
+	boolean set(Tag[] tags, MatchingCacheKey compare) {
+		int length = tags.length;
+
+		if (compare != null && length == mTags.length) {
+			int i = 0;
+			for (; i < length; i++) {
+				Tag t1 = tags[i];
+				Tag t2 = compare.mTags[i];
+
+				if (!(t1 == t2 || (t1.key == t2.key && t1.value == t2.value)))
+					break;
+			}
+			if (i == length)
+				return true;
+		}
 
 		int result = 7;
+		for (int i = 0; i < length; i++)
+			result = 31 * result + tags[i].hashCode();
 
-		for (int i = 0, n = mTags.length; i < n; i++) {
-			if (mTags[i] == null)
-				break;
-			result = 31 * result + mTags[i].hashCode();
-		}
-		result = 31 * result;
+		mHash = 31 * result;
+		mTags = tags;
 
-		mHashCodeValue = result;
+		return false;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if (this == obj)
 			return true;
-		}
 
 		MatchingCacheKey other = (MatchingCacheKey) obj;
 
-		if (mTags == null) {
-			return (other.mTags == null);
-		} else if (other.mTags == null)
-			return false;
+		//		if (mTags == null) {
+		//			return (other.mTags == null);
+		//		} else if (other.mTags == null)
+		//			return false;
 
 		int length = mTags.length;
-		if (length != other.mTags.length) {
+		if (length != other.mTags.length)
 			return false;
-		}
 
 		for (int i = 0; i < length; i++) {
-			if (mTags[i] == other.mTags[i])
-				continue;
-			if (mTags[i].key == other.mTags[i].key && mTags[i].value == other.mTags[i].value)
-				continue;
+			Tag t1 = mTags[i];
+			Tag t2 = other.mTags[i];
 
-			return false;
+			if (!(t1 == t2 || (t1.key == t2.key && t1.value == t2.value)))
+				return false;
 		}
 		return true;
 	}
 
 	@Override
 	public int hashCode() {
-		return mHashCodeValue;
-	}
-
-	/**
-	 * @return the hash code of this object.
-	 */
-	private int calculateHashCode() {
-		int result = 7;
-
-		for (int i = 0, n = mTags.length; i < n; i++) {
-			if (mTags[i] == null) // FIXME
-				break;
-			result = 31 * result + mTags[i].hashCode();
-		}
-		result = 31 * result;
-
-		return result;
+		return mHash;
 	}
 }
