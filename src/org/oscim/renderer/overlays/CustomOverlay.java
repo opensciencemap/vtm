@@ -58,6 +58,9 @@ public class CustomOverlay extends RenderOverlay {
 			newData = true;
 
 			mInitialized = true;
+
+			// fix current MapPosition
+			updateMapPosition();
 		}
 	}
 
@@ -92,8 +95,14 @@ public class CustomOverlay extends RenderOverlay {
 		GLES20.glVertexAttribPointer(hVertexPosition, 3, GLES20.GL_FLOAT, false, 0, mVertices);
 		GLState.enableVertexArrays(hVertexPosition, -1);
 
-		// apply view and projection matrices
-		Matrix.multiplyMM(tmp, 0, proj, 0, pos.viewMatrix, 0);
+		/* apply view and projection matrices */
+		// set mvp (tmp) matrix relative to mMapPosition
+		// i.e. fixed on the map
+		setMatrix(pos, tmp);
+		Matrix.multiplyMM(tmp, 0, proj, 0, tmp, 0);
+		// or set mvp matrix fixed on screen center
+		// Matrix.multiplyMM(tmp, 0, proj, 0, pos.viewMatrix, 0);
+
 		GLES20.glUniformMatrix4fv(hMatrixPosition, 1, false, tmp, 0);
 
 		// Draw the triangle
