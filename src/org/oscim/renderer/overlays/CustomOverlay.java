@@ -37,9 +37,10 @@ public class CustomOverlay extends RenderOverlay {
 
 	private FloatBuffer mVertices;
 	private final float[] mVerticesData = {
-			0, 200, 0,
-			-200, -200, 0,
-			200, -200, 0
+			-200, -200, 1.0f,
+			200, 200, 0,
+			-200, 200, 0.5f,
+			200, -200, 0.5f,
 	};
 	private boolean mInitialized;
 
@@ -54,10 +55,10 @@ public class CustomOverlay extends RenderOverlay {
 			if (!init())
 				return;
 
+			mInitialized = true;
+
 			// tell GLRender to call 'compile' when data has changed
 			newData = true;
-
-			mInitialized = true;
 
 			// fix current MapPosition
 			updateMapPosition();
@@ -91,8 +92,11 @@ public class CustomOverlay extends RenderOverlay {
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
 		// Load the vertex data
-		mVertices.position(0);
+		//mVertices.position(0);
 		GLES20.glVertexAttribPointer(hVertexPosition, 3, GLES20.GL_FLOAT, false, 0, mVertices);
+		//mVertices.position(2);
+		//GLES20.glVertexAttribPointer(hVertexPosition, 2, GLES20.GL_FLOAT, false, 4, mVertices);
+
 		GLState.enableVertexArrays(hVertexPosition, -1);
 
 		/* apply view and projection matrices */
@@ -106,7 +110,7 @@ public class CustomOverlay extends RenderOverlay {
 		GLES20.glUniformMatrix4fv(hMatrixPosition, 1, false, tmp, 0);
 
 		// Draw the triangle
-		GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
 		GlUtils.checkGlError("...");
 	}
@@ -120,6 +124,7 @@ public class CustomOverlay extends RenderOverlay {
 
 		// Handle for vertex position in shader
 		hVertexPosition = GLES20.glGetAttribLocation(programObject, "a_pos");
+
 		hMatrixPosition = GLES20.glGetUniformLocation(programObject, "u_mvp");
 
 		// Store the program object
@@ -135,16 +140,19 @@ public class CustomOverlay extends RenderOverlay {
 			"precision mediump float;"
 					+ "uniform mat4 u_mvp;"
 					+ "attribute vec4 a_pos;"
+					+ "varying float alpha;"
 					+ "void main()"
 					+ "{"
-					+ "   gl_Position = u_mvp * a_pos;"
+					+ "   gl_Position = u_mvp * vec4(a_pos.xy, 0.0, 1.0);"
+					+ "   alpha = a_pos.z;"
 					+ "}";
 
 	private final static String fShaderStr =
 			"precision mediump float;"
+					+ "varying float alpha;"
 					+ "void main()"
 					+ "{"
-					+ "  gl_FragColor = vec4 ( 0.0, 0.0, 0.0, 0.7 );"
+					+ "  gl_FragColor = vec4 (alpha, 1.0-alpha, 0.0, 0.7 );"
 					+ "}";
 
 }
