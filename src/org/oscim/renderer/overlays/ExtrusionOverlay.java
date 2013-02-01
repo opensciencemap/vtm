@@ -332,24 +332,24 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GlUtils.addOffsetM(matrix, delta);
 	}
 
-	private final float _a = 0.8f;
+	private final float _a = 0.86f;
 	private final float _r = 0xe9;
 	private final float _g = 0xe8;
 	private final float _b = 0xe6;
 	private final float _o = 55;
 	private final float _s = 20;
-	private final float _l = 16;
+	private final float _l = 10;
 	private float mAlpha = 1;
 	private final float[] mColor = {
 			// roof color
-			_a * ((_r + _l) / 255),
-			_a * ((_g + _l) / 255),
+			_a * ((_r + _l + 3) / 255),
+			_a * ((_g + _l + 2) / 255),
 			_a * ((_b + _l) / 255),
 			_a,
 			// sligthly differ adjacent side 
 			// faces to improve contrast
-			_a * ((_r - _s + 1) / 255),
-			_a * ((_g - _s + 1) / 255),
+			_a * ((_r - _s) / 255 + 0.01f),
+			_a * ((_g - _s) / 255 + 0.01f),
 			_a * ((_b - _s) / 255),
 			_a,
 			_a * ((_r - _s) / 255),
@@ -430,7 +430,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 					//     sides 2 - use 0x00ff
 					//+ "    float dir = abs(a_light.x / ff - 0.5);"
 					+ "    float dir = a_light.x / ff;"
-					+ "    float z = (0.95 + gl_Position.z * 0.05);"
+					+ "    float z = (0.98 + gl_Position.z * 0.02);"
 					+ "    color = u_color[2] * z;"
 					+ "    color.rgb *= (0.9 + dir * 0.1) * z;"
 					+ "  } else {"
