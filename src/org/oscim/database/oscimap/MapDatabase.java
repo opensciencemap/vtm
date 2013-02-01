@@ -226,6 +226,8 @@ public class MapDatabase implements IMapDatabase {
 
 		mOpenFile = true;
 
+		initDecorder();
+
 		return OpenResult.SUCCESS;
 	}
 
@@ -305,7 +307,19 @@ public class MapDatabase implements IMapDatabase {
 	private short[] mIndices = new short[10];
 	private Tag[] mTmpTags = new Tag[20];
 
-	private float[] mTmpCoords = new float[MAX_WAY_COORDS];
+	private float[] mTmpCoords;
+
+	private Tag[][] mElementTags;
+
+	private void initDecorder() {
+		// reusable tag set 
+		Tag[][] tags = new Tag[10][];
+		for (int i = 0; i < 10; i++)
+			tags[i] = new Tag[i + 1];
+		mElementTags = tags;
+
+		mTmpCoords = new float[MAX_WAY_COORDS];
+	}
 
 	private boolean decode() throws IOException {
 
@@ -503,8 +517,13 @@ public class MapDatabase implements IMapDatabase {
 		if (cnt == 0) {
 			Log.d(TAG, "got no TAG!");
 		}
+		Tag[] tags;
 
-		Tag[] tags = new Tag[cnt];
+		if (cnt < 11)
+			tags = mElementTags[cnt - 1];
+		else
+			tags = new Tag[cnt];
+
 		for (int i = 0; i < cnt; i++)
 			tags[i] = tmp[i];
 
