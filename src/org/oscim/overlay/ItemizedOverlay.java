@@ -112,6 +112,13 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 			int numVisible = 0;
 
 			synchronized (lock) {
+				if (mItems == null) {
+					if (layers.textureLayers != null) {
+						layers.clear();
+						newData = true;
+					}
+					return;
+				}
 
 				// check changes
 				for (InternalItem it = mItems; it != null; it = it.next) {

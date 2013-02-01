@@ -71,13 +71,21 @@ public abstract class BasicOverlay extends RenderOverlay {
 
 	@Override
 	public void compile() {
+		int newSize = layers.getSize();
+		if (newSize == 0) {
+			BufferObject.release(vbo);
+			vbo = null;
+			isReady = false;
+			return;
+		}
+
 		if (vbo == null) {
 			vbo = BufferObject.get(0);
 
 			if (vbo == null)
 				return;
 		}
-		int newSize = layers.getSize();
+
 		if (newSize > 0) {
 			if (GLRenderer.uploadLayers(layers, vbo, newSize, true))
 				isReady = true;
