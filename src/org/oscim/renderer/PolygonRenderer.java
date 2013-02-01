@@ -87,7 +87,7 @@ public final class PolygonRenderer {
 	private static void fillPolygons(int zoom, float scale) {
 
 		/* draw to framebuffer */
-		glColorMask(true, true, true, false);
+		glColorMask(true, true, true, true);
 
 		/* do not modify stencil buffer */
 		glStencilMask(0);
@@ -228,7 +228,7 @@ public final class PolygonRenderer {
 				// disable writes to stencil buffer
 				glStencilMask(0x00);
 				// enable writes to color buffer
-				glColorMask(true, true, true, false);
+				glColorMask(true, true, true, true);
 			}
 			// clip to tile region
 			glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
