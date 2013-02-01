@@ -39,6 +39,7 @@ import java.nio.FloatBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.PolygonLayer;
+import org.oscim.theme.renderinstruction.Area;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
@@ -92,12 +93,12 @@ public final class PolygonRenderer {
 		glStencilMask(0);
 
 		for (int c = mStart; c < mCount; c++) {
-			PolygonLayer l = mFillPolys[c];
+			Area a = mFillPolys[c].area;
 
-			if (l.area.fade >= zoom) {
+			if (a.fade >= zoom) {
 				float f = 1.0f;
-				/* fade in/out || draw alpha color */
-				if (l.area.fade >= zoom) {
+				/* fade in/out */
+				if (a.fade >= zoom) {
 					if (scale > FADE_START)
 						f = scale - 1;
 					else
@@ -106,26 +107,28 @@ public final class PolygonRenderer {
 				GLState.blend(true);
 
 				if (f < 1) {
-					GlUtils.setColor(hPolygonColor, l.area.color,
-							f * l.area.color[3]);
+					GlUtils.setColor(hPolygonColor, a.color,
+							f * a.color[3]);
 				} else {
-					glUniform4fv(hPolygonColor, 1, l.area.color, 0);
+					glUniform4fv(hPolygonColor, 1, a.color, 0);
 				}
-			} else if (l.area.blend == zoom) {
-				/* blend colors */
-				GlUtils.setBlendColors(hPolygonColor,
-						l.area.color, l.area.blendColor, scale - 1.0f);
-			} else {
-				if (l.area.color[3] != 1.0) {
-					GLState.blend(true);
-				} else {
-					GLState.blend(false);
-				}
+			} else if (a.blend > 0 && a.blend <= zoom) {
+				/* blend colors (not alpha) */
+				GLState.blend(false);
 
-				if (l.area.blend < zoom && l.area.blend > 0)
-					glUniform4fv(hPolygonColor, 1, l.area.blendColor, 0);
+				if (a.blend == zoom)
+					GlUtils.setBlendColors(hPolygonColor,
+							a.color, a.blendColor, scale - 1.0f);
 				else
-					glUniform4fv(hPolygonColor, 1, l.area.color, 0);
+					glUniform4fv(hPolygonColor, 1, a.blendColor, 0);
+
+			} else {
+				if (a.color[3] != 1)
+					GLState.blend(true);
+				else
+					GLState.blend(false);
+
+				glUniform4fv(hPolygonColor, 1, a.color, 0);
 			}
 
 			// set stencil buffer mask used to draw this layer 
@@ -199,7 +202,7 @@ public final class PolygonRenderer {
 
 				// op for stencil method polygon drawing
 				glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GL_INVERT);
-				GLState.blend(false);
+				//GLState.blend(false);
 			}
 
 			mFillPolys[mCount] = pl;
