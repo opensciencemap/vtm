@@ -48,7 +48,7 @@ public class MapViewPosition {
 	public final static int MAX_ZOOMLEVEL = 17;
 	public final static int MIN_ZOOMLEVEL = 2;
 
-	private final static float MAX_ANGLE = 50;
+	private final static float MAX_ANGLE = 55;
 
 	private final MapView mMapView;
 
@@ -697,12 +697,12 @@ public class MapViewPosition {
 		double mx = (mStartX + (mEndX - mStartX) * (1.0 - adv));
 		double my = (mStartY + (mEndY - mStartY) * (1.0 - adv));
 		setMapPosition(mx, my);
-		mMapView.redrawMap();
+		mMapView.redrawMap(true);
 	}
 
 	void onFinish() {
 		setMapPosition(mEndX, mEndY);
-		mMapView.redrawMap();
+		mMapView.redrawMap(true);
 	}
 
 	static class AnimationHandler extends Handler {

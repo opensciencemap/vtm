@@ -68,7 +68,7 @@ public class TextOverlay extends BasicOverlay {
 
 			mRun = false;
 			updateLabels();
-			mMapView.redrawMap();
+			mMapView.redrawMap(false);
 		}
 
 		@Override

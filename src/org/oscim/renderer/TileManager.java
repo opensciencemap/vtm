@@ -207,15 +207,15 @@ public class TileManager {
 		float[] coords = mTileCoords;
 		changedPos = mMapViewPosition.getMapPosition(mapPosition, coords);
 
-		if (!changedPos) {
-			mMapView.render();
+		if (changedPos) {
+			//mMapView.render();
+		} else {
 			return;
 		}
 
-		float s = Tile.TILE_SIZE;
 		// load some tiles more than currently visible
 		// TODO limit how many more...
-		float scale = mapPosition.scale * 0.75f;
+		float scale = mapPosition.scale * 0.8f;
 		float px = (float) mapPosition.x;
 		float py = (float) mapPosition.y;
 
@@ -223,15 +223,15 @@ public class TileManager {
 		int zdir = 0;
 
 		for (int i = 0; i < 8; i += 2) {
-			coords[i + 0] = (px + coords[i + 0] / scale) / s;
-			coords[i + 1] = (py + coords[i + 1] / scale) / s;
+			coords[i + 0] = (px + coords[i + 0] / scale) / Tile.TILE_SIZE;
+			coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
 		}
 
 		boolean changed = updateVisibleList(mapPosition, zdir);
 
-		mMapView.render();
-
 		if (changed) {
+			mMapView.render();
+
 			int remove = mTilesCount - GLRenderer.CACHE_TILES;
 			if (remove > CACHE_THRESHOLD)
 				limitCache(mapPosition, remove);
@@ -337,9 +337,6 @@ public class TileManager {
 
 				mUpdateCnt++;
 			}
-
-			// Log.d(TAG, "tiles: " + mTilesCount + " " + BufferObject.counter
-			// + " sum:" + (mTilesCount + BufferObject.counter));
 		}
 
 		if (mJobs.size() > 0) {
@@ -606,13 +603,14 @@ public class TileManager {
 		}
 
 		if (tile.vbo != null) {
-			// BAD Things(tm) happend... 
-			Log.d(TAG, "tile loaded before " + tile);
+			// BAD Things(tm) happend: tile is already loaded
+			Log.d(TAG, "BUG: tile loaded before " + tile);
 			return true;
 		}
 
 		tile.state = STATE_NEW_DATA;
 
+		//if (tile.isVisible)
 		mMapView.render();
 
 		synchronized (mTilesLoaded) {

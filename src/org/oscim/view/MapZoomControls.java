@@ -161,7 +161,7 @@ public class MapZoomControls {
 		}
 
 		mapViewPosition.setZoomLevel((byte) z);
-		mMapView.redrawMap();
+		mMapView.redrawMap(true);
 
 		return true;
 	}

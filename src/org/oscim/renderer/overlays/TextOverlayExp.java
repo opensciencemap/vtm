@@ -15,6 +15,8 @@
 
 package org.oscim.renderer.overlays;
 
+import java.util.HashMap;
+
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.generator.JobTile;
@@ -66,7 +68,7 @@ public class TextOverlayExp extends BasicOverlay {
 
 			mRun = false;
 			if (updateLabels())
-				mMapView.redrawMap();
+				mMapView.redrawMap(false);
 			else
 				mRun = true;
 		}
@@ -88,6 +90,25 @@ public class TextOverlayExp extends BasicOverlay {
 		mWorkPos = new MapPosition();
 		mThread = new LabelThread();
 		mThread.start();
+	}
+
+	private HashMap<TextItem, PlacementItem> mItemMap;
+
+	class PlacementItem extends TextItem {
+		int tileX;
+		int tileY;
+
+		boolean isTileNeighbour(PlacementItem other) {
+			int dx = other.tileX - tileX;
+			if (dx > 1 || dx < -1)
+				return false;
+
+			int dy = other.tileY - tileY;
+			if (dy > 1 || dy < -1)
+				return false;
+
+			return true;
+		}
 	}
 
 	private TextItem mPool;
