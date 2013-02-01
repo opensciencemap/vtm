@@ -106,7 +106,7 @@ public class GridOverlay extends BasicOverlay {
 	void timerFinished() {
 		Log.d("...", "timer finish!");
 		finished = true;
-		mMapView.redrawMap();
+		mMapView.redrawMap(true);
 	}
 
 	@Override

@@ -174,7 +174,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		// double-tap + hold
 		if (mLongPress) {
 			mMapPosition.scaleMap(1 - moveY / 100, 0, 0);
-			mMapView.redrawMap();
+			mMapView.redrawMap(true);
 			return true;
 		}
 
@@ -198,10 +198,10 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		if (!mBeginRotate && !mBeginScale) {
 			/* our naive gesture detector for rotation and tilt.. */
 
-			if (Math.abs(rad) < 0.25 || Math.abs(rad) > Math.PI - 0.25) {
+			if (Math.abs(rad) < 0.30 || Math.abs(rad) > Math.PI - 0.30) {
 				mBeginTilt = true;
 				if (mMapPosition.tilt(moveY / 4)) {
-					mMapView.redrawMap();
+					mMapView.redrawMap(true);
 				}
 
 				return true;
@@ -229,7 +229,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 
 			mMapPosition.rotateMap((float) Math.toDegrees(rad - mAngle), x, y);
 			mAngle = rad;
-			mMapView.redrawMap();
+			mMapView.redrawMap(true);
 		}
 
 		return true;
@@ -338,7 +338,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 
 		if (moveX >= 1 || moveY >= 1 || moveX <= -1 || moveY <= -1) {
 			mMapPosition.moveMap(moveX, moveY);
-			mMapView.redrawMap();
+			mMapView.redrawMap(true);
 			mScrollX = mScroller.getCurrX();
 			mScrollY = mScroller.getCurrY();
 		}
@@ -358,7 +358,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 
 		if (mMulti == 0) {
 			mMapPosition.moveMap(-distanceX, -distanceY);
-			mMapView.redrawMap();
+			mMapView.redrawMap(true);
 		}
 
 		return true;
@@ -447,7 +447,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 
 		if (scale > 1) {
 			mMapPosition.scaleMap(scale, mScrollX / adv, mScrollY / adv);
-			mMapView.redrawMap();
+			mMapView.redrawMap(true);
 		}
 
 		return true;
@@ -505,7 +505,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 		}
 
 		if (mBeginScale && mMapPosition.scaleMap(scale, mFocusX, mFocusY))
-			mMapView.redrawMap();
+			mMapView.redrawMap(true);
 
 		return true;
 	}
@@ -581,7 +581,7 @@ final class TouchHandler implements OnGestureListener, OnScaleGestureListener, O
 			mMapPosition.scaleMap(1 + scale, mFocusX, mFocusY);
 		}
 
-		mMapView.redrawMap();
+		mMapView.redrawMap(true);
 
 		if (tick == 0)
 			mTimer = null;

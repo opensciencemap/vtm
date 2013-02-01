@@ -302,7 +302,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		long start = SystemClock.uptimeMillis();
-		long wait = 20 - (start - lastDraw);
+		long wait = 30 - (start - lastDraw);
 		if (wait > 5) {
 			//Log.d(TAG, "wait " + wait);
 			SystemClock.sleep(wait);
@@ -549,7 +549,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		if (!mNewSurface) {
-			mMapView.redrawMap();
+			mMapView.redrawMap(false);
 			return;
 		}
 
@@ -569,7 +569,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		GLState.init();
 
-		mMapView.redrawMap();
+		mMapView.redrawMap(true);
 	}
 
 	@Override

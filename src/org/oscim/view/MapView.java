@@ -274,10 +274,14 @@ public class MapView extends RelativeLayout {
 
 	/**
 	 * Calculates all necessary tiles and adds jobs accordingly.
+	 * @param changedPos TODO
 	 */
-	public void redrawMap() {
+	public void redrawMap(boolean changedPos) {
 		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
 			return;
+
+		if (changedPos)
+			render();
 
 		if (AndroidUtils.currentThreadIsUiThread()) {
 			boolean changed = mMapViewPosition.getMapPosition(mMapPosition, null);
@@ -583,7 +587,7 @@ public class MapView extends RelativeLayout {
 				+ " lat: " + mapPosition.lat
 				+ " lon: " + mapPosition.lon);
 		mMapViewPosition.setMapCenter(mapPosition);
-		redrawMap();
+		redrawMap(true);
 	}
 
 	/**
