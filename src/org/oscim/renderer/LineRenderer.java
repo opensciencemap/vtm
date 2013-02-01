@@ -127,13 +127,10 @@ public final class LineRenderer {
 		int uLineColor = hLineColor[mode];
 		int uLineWidth = hLineWidth[mode];
 
-		GLState.enableVertexArrays(hLineVertexPosition[mode], -1); // hLineTexturePosition[mode]);
+		GLState.enableVertexArrays(hLineVertexPosition[mode], -1);
 
 		glVertexAttribPointer(hLineVertexPosition[mode], 4, GL_SHORT,
 				false, 0, bufferOffset + LINE_VERTICES_DATA_POS_OFFSET);
-
-		//		glVertexAttribPointer(hLineTexturePosition[mode], 2, GL_SHORT,
-		//				false, 8, bufferOffset + LINE_VERTICES_DATA_TEX_OFFSET);
 
 		glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 
