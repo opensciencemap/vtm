@@ -127,7 +127,6 @@ public class BaseMap {
 		int simpleShader = (pos.tilt < 1 ? 1 : 0);
 
 		for (Layer l = t.layers.layers; l != null;) {
-
 			switch (l.type) {
 				case Layer.POLYGON:
 					l = PolygonRenderer.draw(pos, l, mvp, !clipped, true);
@@ -145,7 +144,7 @@ public class BaseMap {
 			}
 		}
 
-		//PolygonRenderer.drawOver(mvp);
+		PolygonRenderer.drawOver(mvp);
 	}
 
 	private static int drawProxyChild(MapTile tile, MapPosition pos) {
