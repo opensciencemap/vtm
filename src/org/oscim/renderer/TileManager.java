@@ -74,14 +74,14 @@ public class TileManager {
 	private float[] mTileCoords = new float[8];
 
 	private static int mUpdateCnt;
-	private static Object tilelock = new Object();
+	static Object tilelock = new Object();
 	private static TileSet mCurrentTiles;
 	/* package */static TileSet mNewTiles;
 
 	private final ScanBox mScanBox = new ScanBox() {
 
 		@Override
-		void setVisible(int y, int x1, int x2) {
+		public void setVisible(int y, int x1, int x2) {
 			MapTile[] tiles = mNewTiles.tiles;
 			int cnt = mNewTiles.cnt;
 			int max = tiles.length;
@@ -208,14 +208,14 @@ public class TileManager {
 		changedPos = mMapViewPosition.getMapPosition(mapPosition, coords);
 
 		if (changedPos) {
-			//mMapView.render();
+			mMapView.render();
 		} else {
 			return;
 		}
 
 		// load some tiles more than currently visible
 		// TODO limit how many more...
-		float scale = mapPosition.scale * 0.8f;
+		float scale = mapPosition.scale * 0.5f;
 		float px = (float) mapPosition.x;
 		float py = (float) mapPosition.y;
 
@@ -338,7 +338,7 @@ public class TileManager {
 				mUpdateCnt++;
 			}
 		}
-
+		//Log.d(TAG, "tiles: " + mCurrentTiles.cnt + " added: " + mJobs.size());
 		if (mJobs.size() > 0) {
 
 			JobTile[] jobs = new JobTile[mJobs.size()];
@@ -375,10 +375,17 @@ public class TileManager {
 			QuadTree.add(tile);
 
 			if (mTilesSize == mTiles.length) {
-				MapTile[] tmp = new MapTile[mTiles.length + 20];
-				System.arraycopy(mTiles, 0, tmp, 0, mTilesSize);
-				mTiles = tmp;
-				Log.d(TAG, "increase tiles: " + mTiles.length);
+				Log.d(TAG, "repack: " + mTiles.length + " / " + mTilesCount);
+
+				TileDistanceSort.sort(mTiles, 0, mTilesSize);
+
+				if (mTilesCount == mTilesSize) {
+					Log.d(TAG, "realloc tiles");
+					MapTile[] tmp = new MapTile[mTiles.length + 20];
+					System.arraycopy(mTiles, 0, tmp, 0, mTilesCount);
+					mTiles = tmp;
+				}
+				mTilesSize = mTilesCount;
 			}
 
 			mTiles[mTilesSize++] = tile;
