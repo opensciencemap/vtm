@@ -188,6 +188,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 * When a content sensitive action is performed the content item needs to be
 	 * identified. This method does that and then performs the assigned task on
 	 * that item.
+	 *
 	 * @param event
 	 *            ...
 	 * @param mapView
@@ -256,6 +257,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 * When the item is touched one of these methods may be invoked depending on
 	 * the type of touch. Each of them returns true if the event was completely
 	 * handled.
+	 *
 	 * @param <T>
 	 *            ....
 	 */

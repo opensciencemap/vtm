@@ -202,7 +202,7 @@ public class RenderTheme {
 			}
 
 			if (ri == null) {
-				// cache miss 
+				// cache miss
 				List<RenderInstruction> matches = mNodeInstructionList;
 				matches.clear();
 				for (int i = 0, n = mRulesList.size(); i < n; ++i)
@@ -276,6 +276,7 @@ public class RenderTheme {
 
 	/**
 	 * Matches a way with the given parameters against this RenderTheme.
+	 *
 	 * @param renderCallback
 	 *            the callback implementation which will be executed on each
 	 *            match.
@@ -442,6 +443,7 @@ public class RenderTheme {
 
 	/**
 	 * Scales the stroke width of this RenderTheme by the given factor.
+	 *
 	 * @param scaleFactor
 	 *            the factor by which the stroke width should be scaled.
 	 */
@@ -453,6 +455,7 @@ public class RenderTheme {
 
 	/**
 	 * Scales the text size of this RenderTheme by the given factor.
+	 *
 	 * @param scaleFactor
 	 *            the factor by which the text size should be scaled.
 	 */

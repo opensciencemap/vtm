@@ -70,12 +70,14 @@ public class MapPosition {
 	//				(float) (MercatorProjection.latitudeToPixelY(in.getLatitude(), zoomLevel) - y);
 	//	}
 
-	/** @param geoPoint
+	/**
+	 * @param geoPoint
 	 *            the map position.
 	 * @param zoomLevel
 	 *            the zoom level.
 	 * @param scale
-	 *            ... */
+	 *            ...
+	 */
 	public MapPosition(GeoPoint geoPoint, byte zoomLevel, float scale) {
 		this.zoomLevel = zoomLevel;
 		this.scale = scale;

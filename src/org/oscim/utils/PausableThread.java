@@ -111,7 +111,8 @@ public abstract class PausableThread extends Thread {
 	}
 
 	/**
-	 * Called once when this thread continues to work after a pause. The default implementation is empty.
+	 * Called once when this thread continues to work after a pause. The default
+	 * implementation is empty.
 	 */
 	protected void afterPause() {
 		// do nothing
@@ -122,7 +123,8 @@ public abstract class PausableThread extends Thread {
 	}
 
 	/**
-	 * Called once at the end of the {@link #run()} method. The default implementation is empty.
+	 * Called once at the end of the {@link #run()} method. The default
+	 * implementation is empty.
 	 */
 	protected void afterRun() {
 		// do nothing
@@ -130,7 +132,7 @@ public abstract class PausableThread extends Thread {
 
 	/**
 	 * Called when this thread is not paused and should do its work.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 *             if the thread has been interrupted.
 	 */
@@ -142,7 +144,8 @@ public abstract class PausableThread extends Thread {
 	protected abstract String getThreadName();
 
 	/**
-	 * @return the priority of this thread. The default value is {@link Thread#NORM_PRIORITY}.
+	 * @return the priority of this thread. The default value is
+	 *         {@link Thread#NORM_PRIORITY}.
 	 */
 	protected int getThreadPriority() {
 		return Thread.NORM_PRIORITY;

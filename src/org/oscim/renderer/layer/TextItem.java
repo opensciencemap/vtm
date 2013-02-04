@@ -51,7 +51,7 @@ public class TextItem {
 	//			in.next = ti.next;
 	//			ti.next = in;
 	//		}
-	//		
+	//
 	//		TextItem t = ti;
 	//		while (t.next != null)
 	//			t = t.next;
@@ -68,7 +68,7 @@ public class TextItem {
 			while (ti != null) {
 				TextItem next = ti.next;
 
-				// drop references 
+				// drop references
 				ti.string = null;
 				ti.text = null;
 				ti.n1 = null;
@@ -83,7 +83,7 @@ public class TextItem {
 				TextItem next = ti.next;
 				ti.next = pool;
 
-				// drop references 
+				// drop references
 				ti.string = null;
 				ti.text = null;
 				ti.n1 = null;

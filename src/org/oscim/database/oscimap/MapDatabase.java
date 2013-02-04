@@ -48,7 +48,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 /**
- * 
+ *
  *
  */
 public class MapDatabase implements IMapDatabase {
@@ -312,7 +312,7 @@ public class MapDatabase implements IMapDatabase {
 	private Tag[][] mElementTags;
 
 	private void initDecorder() {
-		// reusable tag set 
+		// reusable tag set
 		Tag[][] tags = new Tag[10][];
 		for (int i = 0; i < 10; i++)
 			tags[i] = new Tag[i + 1];

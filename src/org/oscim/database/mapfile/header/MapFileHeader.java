@@ -80,7 +80,7 @@ public class MapFileHeader {
 
 	/**
 	 * Reads and validates the header block from the map file.
-	 * 
+	 *
 	 * @param readBuffer
 	 *            the ReadBuffer for the file data.
 	 * @param fileSize

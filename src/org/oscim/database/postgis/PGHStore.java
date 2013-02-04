@@ -1,7 +1,7 @@
 /*
  * This file has been copied from the following location:
  * http://archives.postgresql.org/pgsql-jdbc/2009-12/msg00037.php
- * 
+ *
  * PostgreSQL code is typically under a BSD licence.
  * http://jdbc.postgresql.org/license.html
  */
@@ -51,7 +51,7 @@ public class PGHStore extends PGobject implements Map<String, String>
 
 	/**
 	 * Initialize a hstore with a given string representation
-	 * 
+	 *
 	 * @param value
 	 *            String representated hstore
 	 * @throws SQLException
@@ -96,7 +96,7 @@ public class PGHStore extends PGobject implements Map<String, String>
 
 	/**
 	 * Returns the stored information as a string
-	 * 
+	 *
 	 * @return String represented hstore
 	 */
 	@Override
@@ -144,7 +144,7 @@ public class PGHStore extends PGobject implements Map<String, String>
 
 	/**
 	 * Returns whether an object is equal to this one or not
-	 * 
+	 *
 	 * @param obj
 	 *            Object to compare with
 	 * @return true if the two hstores are identical

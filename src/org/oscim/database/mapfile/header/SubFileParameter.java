@@ -120,14 +120,18 @@ public class SubFileParameter {
 		this.hashCodeValue = calculateHashCode();
 
 		// calculate the XY numbers of the boundary tiles in this sub-file
-		this.boundaryTileBottom = MercatorProjection.latitudeToTileY(subFileParameterBuilder.boundingBox.minLatitudeE6
-				/ COORDINATES_DIVISOR, this.baseZoomLevel);
-		this.boundaryTileLeft = MercatorProjection.longitudeToTileX(subFileParameterBuilder.boundingBox.minLongitudeE6
-				/ COORDINATES_DIVISOR, this.baseZoomLevel);
-		this.boundaryTileTop = MercatorProjection.latitudeToTileY(subFileParameterBuilder.boundingBox.maxLatitudeE6
-				/ COORDINATES_DIVISOR, this.baseZoomLevel);
-		this.boundaryTileRight = MercatorProjection.longitudeToTileX(subFileParameterBuilder.boundingBox.maxLongitudeE6
-				/ COORDINATES_DIVISOR, this.baseZoomLevel);
+		this.boundaryTileBottom = MercatorProjection.latitudeToTileY(
+				subFileParameterBuilder.boundingBox.minLatitudeE6
+						/ COORDINATES_DIVISOR, this.baseZoomLevel);
+		this.boundaryTileLeft = MercatorProjection.longitudeToTileX(
+				subFileParameterBuilder.boundingBox.minLongitudeE6
+						/ COORDINATES_DIVISOR, this.baseZoomLevel);
+		this.boundaryTileTop = MercatorProjection.latitudeToTileY(
+				subFileParameterBuilder.boundingBox.maxLatitudeE6
+						/ COORDINATES_DIVISOR, this.baseZoomLevel);
+		this.boundaryTileRight = MercatorProjection.longitudeToTileX(
+				subFileParameterBuilder.boundingBox.maxLongitudeE6
+						/ COORDINATES_DIVISOR, this.baseZoomLevel);
 
 		// calculate the horizontal and vertical amount of blocks in this sub-file
 		this.blocksWidth = this.boundaryTileRight - this.boundaryTileLeft + 1;

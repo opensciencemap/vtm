@@ -17,7 +17,7 @@ package org.oscim.database;
 import android.util.AttributeSet;
 
 /**
- * 
+ *
  *
  */
 public final class MapDatabaseFactory {
@@ -25,7 +25,8 @@ public final class MapDatabaseFactory {
 
 	/**
 	 * @param attributeSet
-	 *            A collection of attributes which includes the desired MapDatabase.
+	 *            A collection of attributes which includes the desired
+	 *            MapDatabase.
 	 * @return a new MapDatabase instance.
 	 */
 	public static IMapDatabase createMapDatabase(AttributeSet attributeSet) {

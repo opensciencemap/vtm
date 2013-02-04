@@ -39,6 +39,7 @@ import android.opengl.Matrix;
  * lowest index is drawn as last and therefore the 'topmost' marker. It also
  * gets checked for onTap first. This class is generic, because you then you get
  * your custom item-class passed back in onTap().
+ *
  * @param <Item>
  *            ...
  */
@@ -220,6 +221,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	/**
 	 * Method by which subclasses create the actual Items. This will only be
 	 * called from populate() we'll cache them for later use.
+	 *
 	 * @param i
 	 *            ...
 	 * @return ...
@@ -228,6 +230,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	/**
 	 * The number of items in this overlay.
+	 *
 	 * @return ...
 	 */
 	public abstract int size();
@@ -265,7 +268,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 			InternalItem pool = mItems;
 			mItems = null;
 
-			// flip order to draw in backward cycle, so the items 
+			// flip order to draw in backward cycle, so the items
 			// with the least index are on the front.
 			for (int a = 0; a < size; a++) {
 				InternalItem it;
@@ -293,6 +296,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	/**
 	 * Returns the Item at the given index.
+	 *
 	 * @param position
 	 *            the position of the item to return
 	 * @return the Item of the given index.
@@ -321,6 +325,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	 * Override to modify the way an item is hit tested. The hit point is
 	 * relative to the marker's bounds. The default implementation just checks
 	 * to see if the hit point is within the touchable bounds of the marker.
+	 *
 	 * @param item
 	 *            the item to hit test
 	 * @param marker
@@ -340,6 +345,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	/**
 	 * Set whether or not to draw the focused item. The default is to draw it,
 	 * but some clients may prefer to draw the focused item themselves.
+	 *
 	 * @param drawFocusedItem
 	 *            ...
 	 */
@@ -354,6 +360,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	 * move the map, so if the Item isn't already centered, the user may get
 	 * confused. If the Item is not found, this is a no-op. You can also pass
 	 * null to remove focus.
+	 *
 	 * @param item
 	 *            ...
 	 */
@@ -373,6 +380,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	 * Adjusts a drawable's bounds so that (0,0) is a pixel in the location
 	 * described by the hotspot parameter. Useful for "pin"-like graphics. For
 	 * convenience, returns the same drawable that was passed in.
+	 *
 	 * @param marker
 	 *            the drawable to adjust
 	 * @param hotspot
@@ -441,7 +449,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	//	 * <br/>
 	//	 * The focused item is always drawn last, which puts it visually on top of
 	//	 * the other items.<br/>
-	//	 * 
+	//	 *
 	//	 * @param canvas
 	//	 *            the Canvas upon which to draw. Note that this may already have
 	//	 *            a transformation applied, so be sure to leave it the way you
@@ -478,7 +486,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	//	/**
 	//	 * Draws an item located at the provided screen coordinates to the canvas.
-	//	 * 
+	//	 *
 	//	 * @param canvas
 	//	 *            what the item is drawn upon
 	//	 * @param item

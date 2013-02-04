@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
-
 /**
- * An ExternalRenderTheme allows for customizing the rendering style of the map via an XML file.
+ * An ExternalRenderTheme allows for customizing the rendering style of the map
+ * via an XML file.
  */
 public class ExternalRenderTheme implements Theme {
 	private static final long serialVersionUID = 1L;
@@ -101,7 +101,8 @@ public class ExternalRenderTheme implements Theme {
 		mHashCodeValue = calculateHashCode();
 	}
 
-	private void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
+	private void readObject(ObjectInputStream objectInputStream) throws IOException,
+			ClassNotFoundException {
 		objectInputStream.defaultReadObject();
 		calculateTransientValues();
 	}

@@ -8,14 +8,14 @@ import android.opengl.GLSurfaceView;
 import android.util.Log;
 
 /**
- * 
+ *
  *
  */
 public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 	static private final String TAG = "ConfigChooser";
 
 	/**
-	 * 
+	 *
 	 */
 	public static int stencilSize = 0;
 
@@ -126,7 +126,8 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		int s = findConfigAttrib(egl, display, config, EGL10.EGL_STENCIL_SIZE, 0);
 
 		/*
-		 * EGL_CONFIG_CAVEAT value #define EGL_NONE 0x3038 #define EGL_SLOW_CONFIG 0x3050 #define
+		 * EGL_CONFIG_CAVEAT value #define EGL_NONE 0x3038 #define
+		 * EGL_SLOW_CONFIG 0x3050 #define
 		 * EGL_NON_CONFORMANT_CONFIG 0x3051
 		 */
 

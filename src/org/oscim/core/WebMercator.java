@@ -16,11 +16,11 @@
 package org.oscim.core;
 
 /**
- * 
+ *
  */
 public class WebMercator {
 	/**
-	 * 
+	 *
 	 */
 	public static final String NAME = "SphericalMercator";
 
@@ -85,7 +85,7 @@ public class WebMercator {
 
 	/**
 	 * from http://pauldendulk.com/2011/04/projecting-from-wgs84-to.html
-	 * 
+	 *
 	 * @param lon
 	 *            ...
 	 * @param lat
@@ -106,7 +106,7 @@ public class WebMercator {
 
 	/**
 	 * from http://pauldendulk.com/2011/04/projecting-from-wgs84-to.html
-	 * 
+	 *
 	 * @param x
 	 *            ...
 	 * @param y

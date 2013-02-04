@@ -53,6 +53,7 @@ public interface ResourceProxy {
 	/**
 	 * Use a string resource as a format definition, and format using the
 	 * supplied format arguments.
+	 *
 	 * @param pResId
 	 *            ...
 	 * @param formatArgs
@@ -65,6 +66,7 @@ public interface ResourceProxy {
 
 	/**
 	 * Get a bitmap as a {@link Drawable}
+	 *
 	 * @param pResId
 	 *            ...
 	 * @return ...
@@ -73,6 +75,7 @@ public interface ResourceProxy {
 
 	/**
 	 * Gets the density from the current screen's DisplayMetrics
+	 *
 	 * @return the screen's density
 	 */
 	float getDisplayMetricsDensity();

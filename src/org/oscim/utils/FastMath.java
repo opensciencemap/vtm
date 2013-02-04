@@ -17,7 +17,7 @@ package org.oscim.utils;
 public class FastMath {
 	/**
 	 * from http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
-	 * 
+	 *
 	 * @param v
 	 *            ...
 	 * @return ...

@@ -27,7 +27,8 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 
 /**
- * A MapScaleBar displays the ratio of a distance on the map to the corresponding distance on the ground.
+ * A MapScaleBar displays the ratio of a distance on the map to the
+ * corresponding distance on the ground.
  */
 public class MapScaleBar {
 	/**
@@ -128,7 +129,8 @@ public class MapScaleBar {
 
 	/**
 	 * @param imperialUnits
-	 *            true if imperial units should be used rather than metric units.
+	 *            true if imperial units should be used rather than metric
+	 *            units.
 	 */
 	public void setImperialUnits(boolean imperialUnits) {
 		mImperialUnits = imperialUnits;
@@ -145,7 +147,7 @@ public class MapScaleBar {
 
 	/**
 	 * Overrides the specified text field with the given string.
-	 * 
+	 *
 	 * @param textField
 	 *            the text field to override.
 	 * @param value
@@ -188,7 +190,7 @@ public class MapScaleBar {
 
 	/**
 	 * Redraws the map scale bitmap with the given parameters.
-	 * 
+	 *
 	 * @param scaleBarLength
 	 *            the length of the map scale bar in pixels.
 	 * @param mapScaleValue

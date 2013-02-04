@@ -19,6 +19,7 @@ package org.oscim.overlay;
 
 /**
  * This class contains constants used by the map view.
+ *
  * @author Nicolas Gramlich
  */
 public interface MapViewConstants {

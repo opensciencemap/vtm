@@ -20,7 +20,7 @@ public class VertexPoolItem {
 	public int used;
 	public VertexPoolItem next;
 
-	// must be multiple of 
+	// must be multiple of
 	// 4 (LineLayer/PolygonLayer),
 	// 6 (TexLineLayer)
 	// 24 (TextureLayer)

@@ -27,7 +27,7 @@ import android.graphics.Paint;
 public interface IRenderCallback {
 	/**
 	 * Renders an area with the given parameters.
-	 * 
+	 *
 	 * @param area
 	 *            ...
 	 * @param level
@@ -37,7 +37,7 @@ public interface IRenderCallback {
 
 	/**
 	 * Renders an area symbol with the given bitmap.
-	 * 
+	 *
 	 * @param symbol
 	 *            the symbol to be rendered.
 	 */
@@ -45,7 +45,7 @@ public interface IRenderCallback {
 
 	/**
 	 * Renders a point of interest circle with the given parameters.
-	 * 
+	 *
 	 * @param radius
 	 *            the radius of the circle.
 	 * @param fill
@@ -57,7 +57,7 @@ public interface IRenderCallback {
 
 	/**
 	 * Renders a point of interest symbol with the given bitmap.
-	 * 
+	 *
 	 * @param symbol
 	 *            the symbol to be rendered.
 	 */
@@ -65,7 +65,7 @@ public interface IRenderCallback {
 
 	/**
 	 * Renders a way with the given parameters.
-	 * 
+	 *
 	 * @param line
 	 *            ...
 	 * @param level
@@ -75,7 +75,7 @@ public interface IRenderCallback {
 
 	/**
 	 * Renders a way with the given symbol along the way path.
-	 * 
+	 *
 	 * @param symbol
 	 *            the symbol to be rendered.
 	 * @param alignCenter
@@ -87,7 +87,7 @@ public interface IRenderCallback {
 
 	/**
 	 * Renders a way with the given text along the way path.
-	 * 
+	 *
 	 * @param text
 	 *            ...
 	 */
@@ -95,7 +95,7 @@ public interface IRenderCallback {
 
 	/**
 	 * Renders an area caption with the given text.
-	 * 
+	 *
 	 * @param text
 	 *            the text to be rendered.
 	 */
@@ -103,7 +103,7 @@ public interface IRenderCallback {
 
 	/**
 	 * Renders a point of interest caption with the given text.
-	 * 
+	 *
 	 * @param text
 	 *            the text to be rendered.
 	 */

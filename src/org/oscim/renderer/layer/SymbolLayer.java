@@ -48,7 +48,7 @@ public final class SymbolLayer extends TextureLayer {
 
 		for (SymbolItem it = symbols; it != null; it = it.next) {
 			if (it.bitmap == item.bitmap) {
-				// insert after same bitmap 
+				// insert after same bitmap
 				item.next = it.next;
 				it.next = item;
 				return;

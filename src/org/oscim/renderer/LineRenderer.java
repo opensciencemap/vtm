@@ -135,8 +135,8 @@ public final class LineRenderer {
 		glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 
 		// line scale factor for non fixed lines: within a zoom-
-		// level lines would be scaled by the factor 2 via projection. 
-		// though lines should only scale by sqrt(2). this is achieved 
+		// level lines would be scaled by the factor 2 via projection.
+		// though lines should only scale by sqrt(2). this is achieved
 		// by inverting scaling of extrusion vector with: width/sqrt(s).
 		// within one zoom-level: 1 <= s <= 2
 		float s = scale / div;
@@ -280,7 +280,7 @@ public final class LineRenderer {
 			+ "varying vec2 v_mode;"
 			+ "void main() {"
 			//+ "  float len;"
-			// some say one should not use conditionals 
+			// some say one should not use conditionals
 			// (FIXME currently required as overlay line renderers dont load the texture)
 			//+ "  if (u_mode == 0)"
 			//+ "    len = abs(v_st.s);"
@@ -289,7 +289,7 @@ public final class LineRenderer {
 			// one trick to avoid branching, need to check performance
 			+ " float len = max(v_mode[0] * abs(v_st.s), v_mode[1] * texture2D(tex, v_st).a);"
 			// interpolate alpha between: 0.0 < 1.0 - len < u_wscale
-			// where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2) 
+			// where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2)
 			+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"
 			//+ "  gl_FragColor = u_color * min(1.0, (1.0 - len) / u_wscale);"
 			+ "}";
@@ -316,7 +316,7 @@ public final class LineRenderer {
 			+ "    fuzz = max(st_width.s, st_width.t);"
 			+ "  }"
 			//+ "  gl_FragColor = u_color * smoothstep(0.0, fuzz + u_wscale, 1.0 - len);"
-			// smoothstep is too sharp, guess one could increase extrusion with z.. 
+			// smoothstep is too sharp, guess one could increase extrusion with z..
 			// this looks ok:
 			//+ "  gl_FragColor = u_color * min(1.0, (1.0 - len) / (u_wscale + fuzz));"
 			// can be faster according to nvidia docs 'Optimize OpenGL ES 2.0 Performace'

@@ -28,7 +28,7 @@ import android.opengl.Matrix;
 
 /*
  * This is an example how to integrate custom OpenGL drawing routines as map overlay
- * 
+ *
  * based on chapter 2 from:
  * https://github.com/dalinaum/opengl-es-book-samples/tree/master/Android
  * */

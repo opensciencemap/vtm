@@ -51,7 +51,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 /**
- * 
+ *
  *
  */
 public class MapDatabase implements IMapDatabase {
@@ -1239,8 +1239,10 @@ public class MapDatabase implements IMapDatabase {
 		mCacheFile = null;
 	}
 
-	/* All code below is taken from or based on Google's Protocol Buffers
-	 * implementation: */
+	/*
+	 * All code below is taken from or based on Google's Protocol Buffers
+	 * implementation:
+	 */
 
 	// Protocol Buffers - Google's data interchange format
 	// Copyright 2008 Google Inc. All rights reserved.

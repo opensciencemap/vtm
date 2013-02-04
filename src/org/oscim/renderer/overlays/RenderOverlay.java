@@ -45,6 +45,7 @@ public abstract class RenderOverlay {
 	 * called 1. by GLRenderer. Set 'newData' true when 'compile()' should be
 	 * called
 	 * before next 'render()'
+	 *
 	 * @param curPos TODO
 	 * @param positionChanged
 	 *            true when MapPosition has changed
@@ -61,6 +62,7 @@ public abstract class RenderOverlay {
 
 	/**
 	 * called 3. draw overlay
+	 *
 	 * @param pos
 	 *            current MapPosition
 	 * @param mv
@@ -73,6 +75,7 @@ public abstract class RenderOverlay {
 	/**
 	 * Utility: set matrix relative to the difference of current MapPosition
 	 * and the last updated Overlay MapPosition
+	 *
 	 * @param curPos ...
 	 * @param matrix ...
 	 */
@@ -106,6 +109,7 @@ public abstract class RenderOverlay {
 
 	/**
 	 * Utility: update mMapPosition
+	 *
 	 * @return true if position has changed
 	 */
 	protected boolean updateMapPosition() {

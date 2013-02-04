@@ -156,7 +156,7 @@ public class BuildingOverlay extends RenderOverlay {
 
 		mCurVertices.used = v;
 
-		// fill ZigZagQuadIndices(tm) 
+		// fill ZigZagQuadIndices(tm)
 		for (int j = 0; j < 2; j++) {
 			short[] indices = mCurIndices[j].vertices;
 			int cnt = mCurIndices[j].used;

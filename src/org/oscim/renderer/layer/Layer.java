@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 OpenScienceMap 
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -37,7 +37,7 @@ public abstract class Layer {
 
 	// in case of line and polygon layer:
 	// - number of VERTICES offset for this layertype in VBO
-	// otherwise: 
+	// otherwise:
 	// - offset in byte in VBO
 	public int offset;
 

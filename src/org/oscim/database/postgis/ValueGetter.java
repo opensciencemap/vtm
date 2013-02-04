@@ -1,24 +1,24 @@
 /*
  * ValueGetter.java
- * 
+ *
  * PostGIS extension for PostgreSQL JDBC driver - Binary Parser
- * 
+ *
  * (C) 2005 Markus Schaber, markus.schaber@logix-tt.com
- * 
+ *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General License as published by the Free
  * Software Foundation, either version 2.1 of the License.
- * 
+ *
  * This library is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General License
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or visit the web at
  * http://www.gnu.org.
- * 
+ *
  * $Id: ValueGetter.java 9324 2012-02-27 22:08:12Z pramsey $
  */
 
@@ -37,7 +37,7 @@ abstract class ValueGetter {
 
 	/**
 	 * Get a byte, should be equal for all endians
-	 * 
+	 *
 	 * @return ...
 	 */
 	byte getByte() {
@@ -58,7 +58,7 @@ abstract class ValueGetter {
 
 	/**
 	 * Get a 32-Bit integer
-	 * 
+	 *
 	 * @param index
 	 *            ...
 	 * @return ...
@@ -66,8 +66,9 @@ abstract class ValueGetter {
 	protected abstract int getInt(int index);
 
 	/**
-	 * Get a long value. This is not needed directly, but as a nice side-effect from GetDouble.
-	 * 
+	 * Get a long value. This is not needed directly, but as a nice side-effect
+	 * from GetDouble.
+	 *
 	 * @param index
 	 *            ...
 	 * @return ...
@@ -76,7 +77,7 @@ abstract class ValueGetter {
 
 	/**
 	 * Get a double.
-	 * 
+	 *
 	 * @return ...
 	 */
 	double getDouble() {
@@ -101,9 +102,12 @@ abstract class ValueGetter {
 		protected long getLong(int index) {
 
 			return ((long) (data[index] & 0xFF) << 56) | ((long) (data[index + 1] & 0xFF) << 48)
-					| ((long) (data[index + 2] & 0xFF) << 40) | ((long) (data[index + 3] & 0xFF) << 32)
-					| ((long) (data[index + 4] & 0xFF) << 24) | ((long) (data[index + 5] & 0xFF) << 16)
-					| ((long) (data[index + 6] & 0xFF) << 8) | ((long) (data[index + 7] & 0xFF) << 0);
+					| ((long) (data[index + 2] & 0xFF) << 40)
+					| ((long) (data[index + 3] & 0xFF) << 32)
+					| ((long) (data[index + 4] & 0xFF) << 24)
+					| ((long) (data[index + 5] & 0xFF) << 16)
+					| ((long) (data[index + 6] & 0xFF) << 8)
+					| ((long) (data[index + 7] & 0xFF) << 0);
 		}
 	}
 
@@ -122,9 +126,12 @@ abstract class ValueGetter {
 
 		@Override
 		protected long getLong(int index) {
-			return ((long) (data[index + 7] & 0xFF) << 56) | ((long) (data[index + 6] & 0xFF) << 48)
-					| ((long) (data[index + 5] & 0xFF) << 40) | ((long) (data[index + 4] & 0xFF) << 32)
-					| ((long) (data[index + 3] & 0xFF) << 24) | ((long) (data[index + 2] & 0xFF) << 16)
+			return ((long) (data[index + 7] & 0xFF) << 56)
+					| ((long) (data[index + 6] & 0xFF) << 48)
+					| ((long) (data[index + 5] & 0xFF) << 40)
+					| ((long) (data[index + 4] & 0xFF) << 32)
+					| ((long) (data[index + 3] & 0xFF) << 24)
+					| ((long) (data[index + 2] & 0xFF) << 16)
 					| ((long) (data[index + 1] & 0xFF) << 8) | ((long) (data[index] & 0xFF) << 0);
 
 		}

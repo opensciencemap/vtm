@@ -88,7 +88,7 @@ public class LineClipper {
 	}
 
 	// CohenSutherland clipping algorithm clips a line from
-	// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with 
+	// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
 	// diagonal from (xmin, ymin) to (xmax, ymax).
 	private static boolean clip(int x0, int y0, int x1, int y1,
 			int xmin, int ymin, int xmax, int ymax, int outcode0, int outcode1) {

@@ -14,7 +14,6 @@
  */
 package org.oscim.database.test;
 
-
 import org.oscim.core.BoundingBox;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -27,7 +26,7 @@ import org.oscim.database.QueryResult;
 import org.oscim.generator.JobTile;
 
 /**
- * 
+ *
  *
  */
 public class MapDatabase implements IMapDatabase {

@@ -89,7 +89,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	/**
 	 * Logs the given information about an unknown XML attribute.
-	 * 
+	 *
 	 * @param element
 	 *            the XML element name.
 	 * @param name

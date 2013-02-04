@@ -8,7 +8,7 @@
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -43,7 +43,7 @@ import android.util.Log;
 public class TileManager {
 	static final String TAG = TileManager.class.getSimpleName();
 
-	// TODO this should depend on the number of 
+	// TODO this should depend on the number of
 	// tiles that could be displayed
 	private static final int MAX_TILES_IN_QUEUE = 50;
 
@@ -152,6 +152,7 @@ public class TileManager {
 	 * Update list of visible tiles and passes them to TileManager, when not
 	 * available tiles are created and added to JobQueue (mapView.addJobs) for
 	 * loading by TileGenerator class
+	 *
 	 * @param clear
 	 *            whether to clear and reload all tiles
 	 */
@@ -174,7 +175,7 @@ public class TileManager {
 				for (int i = 0; i < mTilesSize; i++)
 					clearTile(mTiles[i]);
 			} else {
-				// mInitialized is set when surface changed 
+				// mInitialized is set when surface changed
 				// and VBOs might be lost
 				VertexPool.init();
 			}
@@ -292,6 +293,7 @@ public class TileManager {
 	/**
 	 * set mNewTiles for the visible tiles and pass it to GLRenderer, add jobs
 	 * for not yet loaded tiles
+	 *
 	 * @param mapPosition
 	 *            the current MapPosition
 	 * @param zdir
@@ -303,7 +305,7 @@ public class TileManager {
 		// one could also append new tiles and sort in JobQueue
 		// but this has the nice side-effect that MapWorkers dont
 		// start with old jobs while new jobs are calculated, which
-		// should increase the chance that they are free when new 
+		// should increase the chance that they are free when new
 		// jobs come in.
 		mMapView.addJobs(null);
 
@@ -523,9 +525,9 @@ public class TileManager {
 					Log.d(TAG, "limitCache: tile still locked " + t + " " + t.distance);
 					//mTiles.add(t);
 				} else if (t.state == STATE_LOADING) {
-					// NOTE:  when set loading to false the tile could be 
-					// added to load queue again while still processed in 
-					// TileGenerator => need tile.cancel flag. 
+					// NOTE:  when set loading to false the tile could be
+					// added to load queue again while still processed in
+					// TileGenerator => need tile.cancel flag.
 					// t.isLoading = false;
 					//mTiles.add(t);
 					Log.d(TAG, "limitCache: cancel loading " + t + " " + t.distance);
@@ -556,6 +558,7 @@ public class TileManager {
 
 	/**
 	 * called from MapWorker Thread when tile is loaded by TileGenerator
+	 *
 	 * @param jobTile
 	 *            Tile ready for upload to GL
 	 * @return ... caller does not care
@@ -579,7 +582,7 @@ public class TileManager {
 
 		tile.state = STATE_NEW_DATA;
 
-		// locked means the tile is visible or referenced by 
+		// locked means the tile is visible or referenced by
 		// a tile that might be visible.
 		if (tile.isLocked())
 			mMapView.render();

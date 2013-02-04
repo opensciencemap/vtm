@@ -27,7 +27,8 @@ public final class AndroidUtils {
 	private static final String[] EMULATOR_NAMES = { "google_sdk", "sdk" };
 
 	/**
-	 * @return true if the application is running on the Android emulator, false otherwise.
+	 * @return true if the application is running on the Android emulator, false
+	 *         otherwise.
 	 */
 	public static boolean applicationRunsOnAndroidEmulator() {
 		for (int i = 0, n = EMULATOR_NAMES.length; i < n; ++i) {

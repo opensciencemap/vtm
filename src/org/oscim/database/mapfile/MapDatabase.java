@@ -38,7 +38,7 @@ import android.os.Environment;
  * A class for reading binary map files.
  * <p>
  * This class is not thread-safe. Each thread should use its own instance.
- * 
+ *
  * @see <a
  *      href="http://code.google.com/p/mapsforge/wiki/SpecificationBinaryMapFile">Specification</a>
  */
@@ -387,7 +387,7 @@ public class MapDatabase implements IMapDatabase {
 	/**
 	 * Processes a single block and executes the callback functions on all map
 	 * elements.
-	 * 
+	 *
 	 * @param queryParameters
 	 *            the parameters of the current query.
 	 * @param subFileParameter
@@ -567,7 +567,7 @@ public class MapDatabase implements IMapDatabase {
 
 	/**
 	 * Processes the block signature, if present.
-	 * 
+	 *
 	 * @return true if the block signature could be processed successfully,
 	 *         false otherwise.
 	 */
@@ -585,7 +585,7 @@ public class MapDatabase implements IMapDatabase {
 
 	/**
 	 * Processes the given number of POIs.
-	 * 
+	 *
 	 * @param mapDatabaseCallback
 	 *            the callback which handles the extracted POIs.
 	 * @param numberOfPois
@@ -801,7 +801,7 @@ public class MapDatabase implements IMapDatabase {
 
 	/**
 	 * Processes the given number of ways.
-	 * 
+	 *
 	 * @param queryParameters
 	 *            the parameters of the current query.
 	 * @param mapDatabaseCallback
