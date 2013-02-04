@@ -40,11 +40,13 @@ public class GLState {
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 	}
 
-	public static void useProgram(int shaderProgram) {
+	public static boolean useProgram(int shaderProgram) {
 		if (shaderProgram != shader) {
 			GLES20.glUseProgram(shaderProgram);
 			shader = shaderProgram;
+			return true;
 		}
+		return false;
 	}
 
 	public static void blend(boolean enable) {
