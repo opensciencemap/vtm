@@ -70,8 +70,8 @@ public class MapView extends RelativeLayout {
 	public static final boolean testRegionZoom = false;
 	private static final boolean debugDatabase = false;
 
-	public boolean enableRotation = false;
-	public boolean enableCompass = false;
+	public boolean mRotationEnabled = false;
+	public boolean mCompassEnabled = false;
 	public boolean enablePagedFling = false;
 
 	private final MapViewPosition mMapViewPosition;
@@ -81,8 +81,6 @@ public class MapView extends RelativeLayout {
 
 	private final TouchHandler mTouchEventHandler;
 	private final Compass mCompass;
-
-	//private MapDatabases mMapDatabaseType;
 
 	private TileManager mTileManager;
 	private final OverlayManager mOverlayManager;
@@ -96,9 +94,8 @@ public class MapView extends RelativeLayout {
 
 	private MapOptions mMapOptions;
 	private IMapDatabase mMapDatabase;
-
-	private DebugSettings debugSettings;
 	private String mRenderTheme;
+	private DebugSettings mDebugSettings;
 
 	private boolean mClearTiles;
 
@@ -141,8 +138,6 @@ public class MapView extends RelativeLayout {
 
 		MapActivity mapActivity = (MapActivity) context;
 
-		debugSettings = new DebugSettings(false, false, false, false);
-
 		mMapViewPosition = new MapViewPosition(this);
 		mMapPosition = new MapPosition();
 
@@ -159,6 +154,9 @@ public class MapView extends RelativeLayout {
 		mGLView = new GLView(context, this);
 
 		mMapWorkers = new MapWorker[mNumMapWorkers];
+
+		mDebugSettings = new DebugSettings(false, false, false, false);
+		TileGenerator.setDebugSettings(mDebugSettings);
 
 		for (int i = 0; i < mNumMapWorkers; i++) {
 			TileGenerator tileGenerator = new TileGenerator(this);
@@ -181,7 +179,7 @@ public class MapView extends RelativeLayout {
 
 		mMapZoomControls = new MapZoomControls(mapActivity, this);
 		mMapZoomControls.setShowMapZoomControls(true);
-		enableRotation = true;
+		mRotationEnabled = true;
 
 		//mOverlayManager.add(new GenericOverlay(this, new GridOverlay(this)));
 		mOverlayManager.add(new BuildingOverlay(this));
@@ -224,13 +222,6 @@ public class MapView extends RelativeLayout {
 			mGLView.requestRender();
 	}
 
-	//	/**
-	//	 * @return the map database which is used for reading map files.
-	//	 */
-	//	public IMapDatabase getMapDatabase() {
-	//		return mMapDatabase;
-	//	}
-
 	/**
 	 * @return the current position and zoom level of this MapView.
 	 */
@@ -239,7 +230,7 @@ public class MapView extends RelativeLayout {
 	}
 
 	public void enableRotation(boolean enable) {
-		enableRotation = enable;
+		mRotationEnabled = enable;
 
 		if (enable) {
 			enableCompass(false);
@@ -247,10 +238,10 @@ public class MapView extends RelativeLayout {
 	}
 
 	public void enableCompass(boolean enable) {
-		if (enable == this.enableCompass)
+		if (enable == mCompassEnabled)
 			return;
 
-		this.enableCompass = enable;
+		mCompassEnabled = enable;
 
 		if (enable)
 			enableRotation(false);
@@ -259,6 +250,14 @@ public class MapView extends RelativeLayout {
 			mCompass.enable();
 		else
 			mCompass.disable();
+	}
+
+	public boolean getCompassEnabled() {
+		return mCompassEnabled;
+	}
+
+	public boolean getRotationEnabled() {
+		return mRotationEnabled;
 	}
 
 	@Override
@@ -305,7 +304,8 @@ public class MapView extends RelativeLayout {
 	 *            the new DebugSettings for this MapView.
 	 */
 	public void setDebugSettings(DebugSettings debugSettings) {
-		this.debugSettings = debugSettings;
+		mDebugSettings = debugSettings;
+		TileGenerator.setDebugSettings(debugSettings);
 		clearAndRedrawMap();
 	}
 
@@ -313,7 +313,7 @@ public class MapView extends RelativeLayout {
 	 * @return the debug settings which are used in this MapView.
 	 */
 	public DebugSettings getDebugSettings() {
-		return debugSettings;
+		return mDebugSettings;
 	}
 
 	public Map<String, String> getMapOptions() {
@@ -488,27 +488,20 @@ public class MapView extends RelativeLayout {
 		mapWorkersProceed();
 	}
 
-	//	@Override
-	//	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-	//		//		super.onLayout(changed, left, top, right, bottom);
-	//		mMapZoomControls.onLayout(changed, left, top, right, bottom);
-	//	}
-
 	void destroy() {
 		for (MapWorker mapWorker : mMapWorkers) {
 			mapWorker.pause();
 			mapWorker.interrupt();
 
+			mapWorker.getTileGenerator().getMapDatabase().close();
+
 			try {
-				// FIXME this hangs badly sometimes,
-				// just let it crash...
 				mapWorker.join(10000);
 			} catch (InterruptedException e) {
 				// restore the interrupted status
 				Thread.currentThread().interrupt();
 			}
-			TileGenerator tileGenerator = mapWorker.getTileGenerator();
-			tileGenerator.getMapDatabase().close();
+
 		}
 	}
 
@@ -521,7 +514,7 @@ public class MapView extends RelativeLayout {
 		mJobQueue.clear();
 		mapWorkersPause(true);
 
-		if (this.enableCompass)
+		if (this.mCompassEnabled)
 			mCompass.disable();
 
 	}
@@ -530,7 +523,7 @@ public class MapView extends RelativeLayout {
 		Log.d(TAG, "onResume");
 		mapWorkersProceed();
 
-		if (this.enableCompass)
+		if (this.mCompassEnabled)
 			mCompass.enable();
 
 		mPausing = false;
@@ -669,17 +662,6 @@ public class MapView extends RelativeLayout {
 		return new GeoPoint(mMapPosition.lat, mMapPosition.lon);
 	}
 
-	//	@Override
-	//	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-	//	
-	//	@Override
-	//	protected void onMeasure()) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
 	// /**
 	// * Sets the visibility of the zoom controls.
 	// *

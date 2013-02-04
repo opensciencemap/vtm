@@ -46,7 +46,7 @@ import android.util.Log;
 /**
  * @author Hannes Janetzek
  * @note
- *       1. MapWorker calls TileGenerator.execute to load a tile.
+ *       1. The MapWorkers call TileGenerator.execute() to load a tile.
  *       2. The tile data will be loaded from current MapDatabase
  *       3. MapDatabase calls the IMapDatabaseCallback functions
  *       implemented by TileGenerator for WAY and POI items.
@@ -65,10 +65,14 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
 
 	private static RenderTheme renderTheme;
+	private static int renderLevels;
+	private static DebugSettings debug;
 
+	// current MapDatabase used by this TileGenerator
 	private IMapDatabase mMapDatabase;
 
-	private MapTile mCurrentTile;
+	// currently processed tile
+	private MapTile mTile;
 
 	// coordinates of the currently processed way
 	private float[] mCoords;
@@ -83,15 +87,12 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private TextItem mLabels;
 
 	private int mDrawingLayer;
-	private int mLevels;
 
 	private float mStrokeScale = 1.0f;
 
 	private RenderInstruction[] mRenderInstructions = null;
 
-	//private final String TAG_WATER = "water".intern();
-
-	private final MapView mMapView;
+	//private final MapView mMapView;
 
 	private final Tag[] debugTagBox = { new Tag("debug", "box") };
 	private final Tag[] debugTagWay = { new Tag("debug", "way") };
@@ -105,9 +106,9 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private float mPoiX, mPoiY;
 	private int mPriority;
 
+	// replacement for variable value tags that should not be matched by RenderTheme
 	private final static Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
 	private final static Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
-
 	private Tag mTagName;
 	private Tag mTagHouseNr;
 
@@ -116,6 +117,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	public static void setRenderTheme(RenderTheme theme) {
 		renderTheme = theme;
+		renderLevels = theme.getLevels();
+	}
+
+	public static void setDebugSettings(DebugSettings debugSettings) {
+		debug = debugSettings;
 	}
 
 	/**
@@ -123,7 +129,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 *            the MapView
 	 */
 	public TileGenerator(MapView mapView) {
-		mMapView = mapView;
+		//	mMapView = mapView;
 	}
 
 	public void cleanup() {
@@ -135,25 +141,18 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (mMapDatabase == null)
 			return false;
 
-		tile = mCurrentTile = (MapTile) jobTile;
-		DebugSettings debugSettings = mMapView.getDebugSettings();
+		tile = mTile = (MapTile) jobTile;
 
-		mDebugDrawPolygons = !debugSettings.mDisablePolygons;
-		mDebugDrawUnmatched = debugSettings.mDrawUnmatchted;
+		mDebugDrawPolygons = !debug.mDisablePolygons;
+		mDebugDrawUnmatched = debug.mDrawUnmatchted;
 
 		if (tile.layers != null) {
 			// should be fixed now.
-			Log.d(TAG, "XXX tile already loaded " + tile + " " + tile.state);
+			Log.d(TAG, "BUG tile already loaded " + tile + " " + tile.state);
 			return false;
 		}
 
-		mLevels = TileGenerator.renderTheme.getLevels();
-
-		// limit stroke scale at z=17
-		// if (tile.zoomLevel < STROKE_MAX_ZOOM_LEVEL)
 		setScaleStrokeWidth(tile.zoomLevel);
-		// else
-		// setScaleStrokeWidth(STROKE_MAX_ZOOM_LEVEL);
 
 		// account for area changes with latitude
 		mProjectionScaleFactor = 0.5f + 0.5f * (
@@ -161,20 +160,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180)));
 
 		mLayers = new Layers();
-
-		//Log.d(TAG, "loading: " + tile);
-		// 180 degree angle in building
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 68728 && tile.tileY == 42634))
-
-		// bad bad poly!
-		// if ((tile.zoomLevel != 17) || (tile.tileX == 69767 && tile.tileY == 47236))
-		//g: [X:69165, Y:42344, Z:17]
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 69165 && tile.tileY == 42344))
-
-		// tram/service elements rendered as buildnig with vts
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 68744 && tile.tileY == 42650))
-
-		//if ((tile.zoomLevel != 17) || (tile.tileX == 68736 && tile.tileY == 42653))
 
 		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
 			//Log.d(TAG, "Failed loading: " + tile);
@@ -188,7 +173,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			return false;
 		}
 
-		if (debugSettings.mDrawTileFrames) {
+		if (debug.mDrawTileFrames) {
 			mTagName = new Tag("name", tile.toString(), false);
 			mPoiX = Tile.TILE_SIZE >> 1;
 			mPoiY = 10;
@@ -201,7 +186,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				mIndices[0] = 10;
 
 			mCoords = debugBoxCoords;
-			mDrawingLayer = 10 * mLevels;
+			mDrawingLayer = 10 * renderLevels;
 			TileGenerator.renderTheme.matchWay(this, debugTagBox, (byte) 0, false, true);
 		}
 
@@ -249,6 +234,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private boolean mRenderBuildingModel;
 
+	// Replace tags that should not be matched by value in RenderTheme
+	// to avoid caching RenderInstructions for each way of the same type
+	// only with different name.
+	// Maybe this should be done within RenderTheme, also allowing
+	// to set these replacement rules in theme file.
 	private boolean filterTags(Tag[] tags) {
 		mRenderBuildingModel = false;
 
@@ -260,7 +250,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			} else if (tags[i].key == Tag.TAG_KEY_HOUSE_NUMBER) {
 				mTagHouseNr = tags[i];
 				tags[i] = mTagEmptyHouseNr;
-			} else if (mCurrentTile.zoomLevel >= 17 &&
+			} else if (mTile.zoomLevel >= 17 &&
 					key == Tag.TAG_KEY_BUILDING) {
 				mRenderBuildingModel = true;
 			}
@@ -270,17 +260,17 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	// ---------------- MapDatabaseCallback -----------------
 	@Override
-	public void renderPointOfInterest(byte layer, Tag[] tags, float latitude,
-			float longitude) {
+	public void renderPointOfInterest(byte layer, Tag[] tags,
+			float latitude, float longitude) {
 
 		// reset state
 		mTagName = null;
 		mTagHouseNr = null;
 
 		//if (mMapProjection != null) {
-		//	long x = mCurrentTile.pixelX;
-		//	long y = mCurrentTile.pixelY + Tile.TILE_SIZE;
-		//	long z = Tile.TILE_SIZE << mCurrentTile.zoomLevel;
+		//	long x = mTile.pixelX;
+		//	long y = mTile.pixelY + Tile.TILE_SIZE;
+		//	long z = Tile.TILE_SIZE << mTile.zoomLevel;
 		//
 		//	double divx, divy;
 		//	long dx = (x - (z >> 1));
@@ -297,10 +287,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		//		mPoiX = (float) (longitude / divx - dx);
 		//		double sinLat = Math.sin(latitude * PI180);
 		//		mPoiY = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
-		//
-		//		// TODO remove this, only used for mapsforge maps
-		//		if (mPoiX < -10 || mPoiX > Tile.TILE_SIZE + 10 || mPoiY < -10
-		//				|| mPoiY > Tile.TILE_SIZE + 10)
 		//			return;
 		//	}
 		//} else {
@@ -313,7 +299,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		// Log.d(TAG, "renderPointOfInterest: " + mTagName);
 
 		// mNodeRenderInstructions =
-		TileGenerator.renderTheme.matchNode(this, tags, mCurrentTile.zoomLevel);
+		TileGenerator.renderTheme.matchNode(this, tags, mTile.zoomLevel);
 	}
 
 	private boolean mClosed;
@@ -334,23 +320,12 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (!filterTags(tags))
 			return;
 
-		//	mProjected = false;
-		//	mSimplify = 0.5f;
-		//	if (closed) {
-		//		if (mCurrentTile.zoomLevel < 14)
-		//			mSimplify = 0.5f;
-		//		else
-		//			mSimplify = 0.2f;
-		//		if (tags.length == 1 && TAG_WATER == (tags[0].value))
-		//			mSimplify = 0;
-		//	}
-
-		mDrawingLayer = getValidLayer(layer) * mLevels;
+		mDrawingLayer = getValidLayer(layer) * renderLevels;
 		mCoords = coords;
 		mIndices = indices;
 
 		mRenderInstructions = TileGenerator.renderTheme.matchWay(this, tags,
-				(byte) (mCurrentTile.zoomLevel + 0), closed, true);
+				(byte) (mTile.zoomLevel + 0), closed, true);
 
 		if (mRenderInstructions == null && mDebugDrawUnmatched)
 			debugUnmatched(closed, tags);
@@ -380,7 +355,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	public boolean checkWay(Tag[] tags, boolean closed) {
 
 		mRenderInstructions = TileGenerator.renderTheme.matchWay(this, tags,
-				(byte) (mCurrentTile.zoomLevel + 0), closed, false);
+				(byte) (mTile.zoomLevel + 0), closed, false);
 
 		return mRenderInstructions != null;
 	}
@@ -426,7 +401,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		int numLayer = mDrawingLayer + level;
 
 		if (mRenderBuildingModel) {
-			//Log.d(TAG, "add buildings: " + mCurrentTile + " " + mPriority);
+			//Log.d(TAG, "add buildings: " + mTile + " " + mPriority);
 			if (mLayers.extrusionLayers == null)
 				mLayers.extrusionLayers = new ExtrusionLayer(0);
 
@@ -553,9 +528,9 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	//
 	//		float[] coords = mCoords;
 	//
-	//		long x = mCurrentTile.pixelX;
-	//		long y = mCurrentTile.pixelY + Tile.TILE_SIZE;
-	//		long z = Tile.TILE_SIZE << mCurrentTile.zoomLevel;
+	//		long x = mTile.pixelX;
+	//		long y = mTile.pixelY + Tile.TILE_SIZE;
+	//		long z = Tile.TILE_SIZE << mTile.zoomLevel;
 	//		float min = mSimplify;
 	//
 	//		double divx, divy = 0;
