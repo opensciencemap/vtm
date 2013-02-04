@@ -236,7 +236,7 @@
 	      </rule>
 	-->
 	      <rule e="way" k="*" v="swimming_pool">
-	        <area fill="#b4cbdc" stroke="#6060ff" width="0.2" />
+	        <area fill="#b4cbdc" stroke="#6060ff" stroke-width="0.2" />
 	      </rule>
 	      
 	      <!-- <rule e="way" k="*" v="track"> <rule e="way" k="area" v="yes|true"> 
@@ -996,12 +996,12 @@
     <!-- railway -->
     <rule e="node" k="railway" v="*">
       <rule e="node" k="*" v="station" zoom-min="14">
-        <circle r="6" fill="#ec2d2d" stroke="#606060" width="1.5" />
+        <circle r="6" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
         <!-- <caption k="name" dy="-10" font-style="bold" font-size="13" fill="#ec2d2d" 
              stroke="#ffffff" stroke-width="2.0" /> -->
       </rule>
       <rule e="node" k="*" v="halt|tram_stop" zoom-min="17">
-        <circle r="4" fill="#ec2d2d" stroke="#606060" width="1.5" />
+        <circle r="4" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
         <!-- <caption k="name" dy="-15" font-style="bold" font-size="11" fill="#ec2d2d" 
              stroke="#ffffff" stroke-width="2.0" /> -->
       </rule>
