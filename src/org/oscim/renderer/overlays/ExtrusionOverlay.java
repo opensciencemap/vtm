@@ -338,12 +338,12 @@ public class ExtrusionOverlay extends RenderOverlay {
 	private final float _b = 0xe6;
 	private final float _o = 55;
 	private final float _s = 20;
-	private final float _l = 10;
+	private final float _l = 14;
 	private float mAlpha = 1;
 	private final float[] mColor = {
 			// roof color
-			_a * ((_r + _l + 3) / 255),
-			_a * ((_g + _l + 2) / 255),
+			_a * ((_r + _l + 1) / 255),
+			_a * ((_g + _l + 1) / 255),
 			_a * ((_b + _l) / 255),
 			_a,
 			// sligthly differ adjacent side 
