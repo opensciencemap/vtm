@@ -255,6 +255,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	private static void uploadTileData(MapTile tile) {
+		TileManager.tilesForUpload--;
+
 		if (tile.layers == null) {
 			BufferObject.release(tile.vbo);
 			tile.vbo = null;
