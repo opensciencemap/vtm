@@ -91,25 +91,24 @@ public final class MapTile extends JobTile {
 		return state != 0;
 	}
 
+	/**
+	 * @return true if tile could be referenced by another thread
+	 */
 	boolean isLocked() {
 		return locked > 0 || refs > 0;
 	}
 
 	void lock() {
-
-		locked++;
-
-		if (locked > 1)
+		if (locked++ > 0)
 			return;
 
+		// lock all tiles that could serve as proxy
 		MapTile p = rel.parent.tile;
-
 		if (p != null && (p.state != 0)) {
 			proxies |= PROXY_PARENT;
 			p.refs++;
 		}
 
-		// FIXME handle root-tile case?
 		p = rel.parent.parent.tile;
 		if (p != null && (p.state != 0)) {
 			proxies |= PROXY_GRAMPA;
@@ -128,10 +127,7 @@ public final class MapTile extends JobTile {
 	}
 
 	void unlock() {
-
-		locked--;
-
-		if (locked > 0 || proxies == 0)
+		if (--locked > 0 || proxies == 0)
 			return;
 
 		if ((proxies & PROXY_PARENT) != 0)
