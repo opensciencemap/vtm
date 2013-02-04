@@ -49,6 +49,7 @@ public final class MercatorProjection {
 	/**
 	 * Calculates the distance on the ground that is represented by a single
 	 * pixel on the map.
+	 *
 	 * @param latitude
 	 *            the latitude coordinate at which the resolution should be
 	 *            calculated.
@@ -64,6 +65,7 @@ public final class MercatorProjection {
 	/**
 	 * Converts a latitude coordinate (in degrees) to a pixel Y coordinate at a
 	 * certain zoom level.
+	 *
 	 * @param latitude
 	 *            the latitude coordinate that should be converted.
 	 * @param zoomLevel
@@ -84,6 +86,7 @@ public final class MercatorProjection {
 
 	/**
 	 * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
+	 *
 	 * @param latitude
 	 *            the latitude coordinate that should be converted.
 	 * @return the position .
@@ -96,6 +99,7 @@ public final class MercatorProjection {
 	/**
 	 * Converts a latitude coordinate (in degrees) to a tile Y number at a
 	 * certain zoom level.
+	 *
 	 * @param latitude
 	 *            the latitude coordinate that should be converted.
 	 * @param zoomLevel
@@ -138,6 +142,7 @@ public final class MercatorProjection {
 	/**
 	 * Converts a longitude coordinate (in degrees) to a pixel X coordinate at a
 	 * certain zoom level.
+	 *
 	 * @param longitude
 	 *            the longitude coordinate that should be converted.
 	 * @param zoomLevel
@@ -155,6 +160,7 @@ public final class MercatorProjection {
 
 	/**
 	 * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
+	 *
 	 * @param longitude
 	 *            the longitude coordinate that should be converted.
 	 * @return the position .
@@ -166,6 +172,7 @@ public final class MercatorProjection {
 	/**
 	 * Converts a longitude coordinate (in degrees) to the tile X number at a
 	 * certain zoom level.
+	 *
 	 * @param longitude
 	 *            the longitude coordinate that should be converted.
 	 * @param zoomLevel
@@ -179,6 +186,7 @@ public final class MercatorProjection {
 	/**
 	 * Converts a pixel X coordinate at a certain zoom level to a longitude
 	 * coordinate.
+	 *
 	 * @param pixelX
 	 *            the pixel X coordinate that should be converted.
 	 * @param zoomLevel
@@ -191,6 +199,7 @@ public final class MercatorProjection {
 
 	/**
 	 * Converts a pixel X coordinate to the tile X number.
+	 *
 	 * @param pixelX
 	 *            the pixel X coordinate that should be converted.
 	 * @param zoomLevel
@@ -205,6 +214,7 @@ public final class MercatorProjection {
 	/**
 	 * Converts a pixel Y coordinate at a certain zoom level to a latitude
 	 * coordinate.
+	 *
 	 * @param pixelY
 	 *            the pixel Y coordinate that should be converted.
 	 * @param zoomLevel
@@ -218,6 +228,7 @@ public final class MercatorProjection {
 
 	/**
 	 * Converts a pixel Y coordinate to the tile Y number.
+	 *
 	 * @param pixelY
 	 *            the pixel Y coordinate that should be converted.
 	 * @param zoomLevel
@@ -232,6 +243,7 @@ public final class MercatorProjection {
 	/**
 	 * Converts a tile X number at a certain zoom level to a longitude
 	 * coordinate.
+	 *
 	 * @param tileX
 	 *            the tile X number that should be converted.
 	 * @param zoomLevel
@@ -245,6 +257,7 @@ public final class MercatorProjection {
 	/**
 	 * Converts a tile Y number at a certain zoom level to a latitude
 	 * coordinate.
+	 *
 	 * @param tileY
 	 *            the tile Y number that should be converted.
 	 * @param zoomLevel

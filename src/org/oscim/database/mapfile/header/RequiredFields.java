@@ -104,11 +104,13 @@ final class RequiredFields {
 			return new OpenResult("invalid longitude range: " + minLongitude + SPACE + maxLongitude);
 		}
 
-		mapFileInfoBuilder.boundingBox = new BoundingBox(minLatitude, minLongitude, maxLatitude, maxLongitude);
+		mapFileInfoBuilder.boundingBox = new BoundingBox(minLatitude, minLongitude, maxLatitude,
+				maxLongitude);
 		return OpenResult.SUCCESS;
 	}
 
-	static OpenResult readFileSize(ReadBuffer readBuffer, long fileSize, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readFileSize(ReadBuffer readBuffer, long fileSize,
+			MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the file size (8 bytes)
 		long headerFileSize = readBuffer.readLong();
 		if (headerFileSize != fileSize) {
@@ -174,7 +176,8 @@ final class RequiredFields {
 		return OpenResult.SUCCESS;
 	}
 
-	static OpenResult readProjectionName(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readProjectionName(ReadBuffer readBuffer,
+			MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the projection name
 		String projectionName = readBuffer.readUTF8EncodedString();
 		if (!MERCATOR.equals(projectionName)) {

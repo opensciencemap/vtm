@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 
 /**
  * Immutable class describing a GeoPoint with a Title and a Description.
+ *
  * @author Nicolas Gramlich
  * @author Theodore Hong
  * @author Fred Eisele
@@ -102,7 +103,8 @@ public class OverlayItem {
 		return mGeoPoint;
 	}
 
-	/* (copied from Google API docs) Returns the marker that should be used when
+	/*
+	 * (copied from Google API docs) Returns the marker that should be used when
 	 * drawing this item on the map. A null value means that the default marker
 	 * should be drawn. Different markers can be returned for different states.
 	 * The different markers can have different bounds. The default behavior is
@@ -110,7 +112,8 @@ public class OverlayItem {
 	 * overlay item's marker, if it exists, and then return it.
 	 * @param stateBitset The current state.
 	 * @return The marker for the current state, or null if the default marker
-	 * for the overlay should be used. */
+	 * for the overlay should be used.
+	 */
 	public Drawable getMarker(final int stateBitset) {
 		// marker not specified
 		if (mMarker == null) {
@@ -141,12 +144,14 @@ public class OverlayItem {
 	// ===========================================================
 	// Methods
 	// ===========================================================
-	/* (copied from the Google API docs) Sets the state of a drawable to match a
+	/*
+	 * (copied from the Google API docs) Sets the state of a drawable to match a
 	 * given state bitset. This is done by converting the state bitset bits
 	 * into
 	 * a state set of R.attr.state_pressed, R.attr.state_selected and
 	 * R.attr.state_focused attributes, and then calling {@link
-	 * Drawable.setState(int[])}. */
+	 * Drawable.setState(int[])}.
+	 */
 	public static void setState(final Drawable drawable, final int stateBitset) {
 		final int[] states = new int[3];
 		int index = 0;

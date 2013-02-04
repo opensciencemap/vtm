@@ -273,6 +273,7 @@ public class MapView extends RelativeLayout {
 
 	/**
 	 * Calculates all necessary tiles and adds jobs accordingly.
+	 *
 	 * @param changedPos TODO
 	 */
 	public void redrawMap(boolean changedPos) {
@@ -344,6 +345,7 @@ public class MapView extends RelativeLayout {
 
 	/**
 	 * Sets the MapDatabase for this MapView.
+	 *
 	 * @param options
 	 *            the new MapDatabase options.
 	 * @return ...
@@ -395,6 +397,7 @@ public class MapView extends RelativeLayout {
 
 	/**
 	 * Sets the internal theme which is used for rendering the map.
+	 *
 	 * @param internalRenderTheme
 	 *            the internal rendering theme.
 	 * @return ...
@@ -419,6 +422,7 @@ public class MapView extends RelativeLayout {
 
 	/**
 	 * Sets the theme file which is used for rendering the map.
+	 *
 	 * @param renderThemePath
 	 *            the path to the XML file which defines the rendering theme.
 	 * @throws IllegalArgumentException
@@ -572,6 +576,7 @@ public class MapView extends RelativeLayout {
 
 	/**
 	 * Sets the center and zoom level of this MapView and triggers a redraw.
+	 *
 	 * @param mapPosition
 	 *            the new map position of this MapView.
 	 */
@@ -585,6 +590,7 @@ public class MapView extends RelativeLayout {
 
 	/**
 	 * Sets the center of the MapView and triggers a redraw.
+	 *
 	 * @param geoPoint
 	 *            the new center point of the map.
 	 */
@@ -604,6 +610,7 @@ public class MapView extends RelativeLayout {
 
 	/**
 	 * add jobs and remember MapWorkers that stuff needs to be done
+	 *
 	 * @param jobs
 	 *            tile jobs
 	 */
@@ -644,6 +651,7 @@ public class MapView extends RelativeLayout {
 	 * You can add/remove/reorder your Overlays using the List of
 	 * {@link Overlay}. The first (index 0) Overlay gets drawn first, the one
 	 * with the highest as the last one.
+	 *
 	 * @return ...
 	 */
 	public List<Overlay> getOverlays() {

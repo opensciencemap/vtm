@@ -210,6 +210,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	/**
 	 * Sets the scale stroke factor for the given zoom level.
+	 *
 	 * @param zoomLevel
 	 *            the zoom level for which the scale stroke factor should be
 	 *            set.

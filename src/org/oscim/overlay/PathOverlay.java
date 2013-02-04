@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, osmdroid: Viesturs Zarins, Martin Pearman 
+ * Copyright 2012, osmdroid: Viesturs Zarins, Martin Pearman
  * Copyright 2012, Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -192,6 +192,7 @@ public class PathOverlay extends Overlay {
 
 	/**
 	 * Draw a great circle. Calculate a point for every 100km along the path.
+	 *
 	 * @param startPoint
 	 *            start point of the great circle
 	 * @param endPoint
@@ -212,6 +213,7 @@ public class PathOverlay extends Overlay {
 
 	/**
 	 * Draw a great circle.
+	 *
 	 * @param startPoint
 	 *            start point of the great circle
 	 * @param endPoint

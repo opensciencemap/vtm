@@ -91,7 +91,7 @@ public final class TextLayer extends TextureLayer {
 					it = it.next;
 
 				// unify duplicate string :)
-				// Note: this is required for 'packing test' in prepare to work! 
+				// Note: this is required for 'packing test' in prepare to work!
 				if (item.string != it.string && item.string.equals(it.string))
 					item.string = it.string;
 

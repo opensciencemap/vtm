@@ -23,6 +23,7 @@ public final class GeometryUtils {
 	/**
 	 * Calculates the center of the minimum bounding rectangle for the given
 	 * coordinates.
+	 *
 	 * @param coordinates
 	 *            the coordinates for which calculation should be done.
 	 * @return the center coordinates of the minimum bounding rectangle.
@@ -192,7 +193,7 @@ public final class GeometryUtils {
 				return 2; //XSEC_COINCIDENT;
 
 			// lines are parallel
-			return 3; //XSEC_PARALLEL;   
+			return 3; //XSEC_PARALLEL;
 		}
 
 		double ua = ua_numr / denr;

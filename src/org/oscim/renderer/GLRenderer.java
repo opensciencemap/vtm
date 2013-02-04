@@ -80,7 +80,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static float[] mTileCoords = new float[8];
 	private static float[] mDebugCoords = new float[8];
 
-	//private 
+	//private
 	static float[] mClearColor = null;
 	private static boolean mUpdateColor = false;
 

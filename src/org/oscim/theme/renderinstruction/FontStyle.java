@@ -19,7 +19,8 @@ enum FontStyle {
 
 	/**
 	 * @return the constant int value of this FontStyle.
-	 * @see <a href="http://developer.android.com/reference/android/graphics/Typeface.html">Typeface</a>
+	 * @see <a
+	 *      href="http://developer.android.com/reference/android/graphics/Typeface.html">Typeface</a>
 	 */
 	int toInt() {
 		switch (this) {

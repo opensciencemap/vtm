@@ -19,7 +19,7 @@ import org.oscim.database.mapfile.MapDatabase;
 
 /**
  * Contains the immutable metadata of a map file.
- * 
+ *
  * @see MapDatabase#getMapInfo()
  */
 public class MapFileInfo extends org.oscim.database.MapInfo {

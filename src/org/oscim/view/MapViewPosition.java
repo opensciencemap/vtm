@@ -164,12 +164,12 @@ public class MapViewPosition {
 
 	// get the z-value of the map-plane for a point on screen
 	private float getZ(float y) {
-		// calculate the intersection of a ray from 
+		// calculate the intersection of a ray from
 		// camera origin and the map plane
 
 		// origin is moved by VIEW_DISTANCE
 		double cx = VIEW_DISTANCE;
-		// 'height' of the ray 
+		// 'height' of the ray
 		double ry = y * (mHeight / mWidth) * 0.5f;
 
 		// tilt of the plane (center is kept on x = 0)
@@ -247,6 +247,7 @@ public class MapViewPosition {
 
 	/**
 	 * ...
+	 *
 	 * @return BoundingBox containing view
 	 */
 	public synchronized BoundingBox getViewBox() {
@@ -298,6 +299,7 @@ public class MapViewPosition {
 	/**
 	 * for x,y in screen coordinates get the point on the map in map-tile
 	 * coordinates
+	 *
 	 * @param x ...
 	 * @param y ...
 	 * @param reuse ...
@@ -320,6 +322,7 @@ public class MapViewPosition {
 
 	/**
 	 * get the GeoPoint for x,y in screen coordinates
+	 *
 	 * @param x screen pixel x
 	 * @param y screen pixel y
 	 * @return the corresponding GeoPoint
@@ -344,6 +347,7 @@ public class MapViewPosition {
 
 	/**
 	 * get the screen pixel for a GeoPoint
+	 *
 	 * @param geoPoint ...
 	 * @param reuse ...
 	 * @return ...
@@ -456,6 +460,7 @@ public class MapViewPosition {
 
 	/**
 	 * Moves this MapViewPosition by the given amount of pixels.
+	 *
 	 * @param mx the amount of pixels to move the map horizontally.
 	 * @param my the amount of pixels to move the map vertically.
 	 */
@@ -492,6 +497,7 @@ public class MapViewPosition {
 
 	/**
 	 * -
+	 *
 	 * @param scale ...
 	 * @param pivotX ...
 	 * @param pivotY ...
@@ -537,6 +543,7 @@ public class MapViewPosition {
 
 	/**
 	 * rotate map around pivot cx,cy
+	 *
 	 * @param angle ...
 	 * @param cx ...
 	 * @param cy ...

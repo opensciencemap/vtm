@@ -227,7 +227,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLState.useProgram(extrusionProgram[shaderMode]);
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
 		if (pos.scale < 2) {
-			// chances are high that one moves through a building 
+			// chances are high that one moves through a building
 			// with scale > 2 also draw back sides in this case.
 			GLES20.glEnable(GLES20.GL_CULL_FACE);
 			GLES20.glCullFace(GLES20.GL_FRONT);
@@ -296,7 +296,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[1],
 					GLES20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
-			// drawing gl_lines with the same coordinates does not result in 
+			// drawing gl_lines with the same coordinates does not result in
 			// same depth values as polygons, so add offset and draw gl_lequal:
 			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 			GlUtils.addOffsetM(mv, 100);
@@ -346,7 +346,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			_a * ((_g + _l + 1) / 255),
 			_a * ((_b + _l) / 255),
 			_a,
-			// sligthly differ adjacent side 
+			// sligthly differ adjacent side
 			// faces to improve contrast
 			_a * ((_r - _s) / 255 + 0.01f),
 			_a * ((_g - _s) / 255 + 0.01f),
@@ -385,7 +385,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 					+ "   float z = (0.96 + gl_Position.z * 0.04);"
 					+ "   if (u_mode == 1){"
 					//     sides 1 - use 0xff00
-					//     scale direction to -0.5<>0.5 
+					//     scale direction to -0.5<>0.5
 					+ "    float dir = abs(a_light.y / ff - 0.5);"
 					+ "    color = u_color[1] * z;"
 					+ "    color.rgb *= (0.7 + dir * 0.4);"
@@ -420,7 +420,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 					//    decrease contrast with distance
 					+ "   if (u_mode == 1){"
 					//     sides 1 - use 0xff00
-					//     scale direction to -0.5<>0.5 
+					//     scale direction to -0.5<>0.5
 					//+ "    float dir = abs(a_light.y / ff - 0.5);"
 					+ "    float dir = a_light.y / ff;"
 					+ "    float z = (0.98 + gl_Position.z * 0.02);"

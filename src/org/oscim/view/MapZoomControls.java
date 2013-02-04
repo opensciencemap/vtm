@@ -139,7 +139,7 @@ public class MapZoomControls {
 
 	/**
 	 * Zooms in or out by the given amount of zoom levels.
-	 * 
+	 *
 	 * @param zoomLevelDiff
 	 *            the difference to the current zoom level.
 	 * @return true if the zoom level was changed, false otherwise.
@@ -208,7 +208,7 @@ public class MapZoomControls {
 	 * are {@link Gravity#TOP}, {@link Gravity#CENTER_VERTICAL},
 	 * {@link Gravity#BOTTOM}, {@link Gravity#LEFT},
 	 * {@link Gravity#CENTER_HORIZONTAL} and {@link Gravity#RIGHT}.
-	 * 
+	 *
 	 * @param zoomControlsGravity
 	 *            a combination of {@link Gravity} constants describing the
 	 *            desired placement.
@@ -227,7 +227,7 @@ public class MapZoomControls {
 	 * current {@link TileGenerator}. For example, downloading map tiles may
 	 * only be possible up to a certain zoom level. Setting a higher maximum
 	 * zoom level has no effect in this case.
-	 * 
+	 *
 	 * @param zoomLevelMax
 	 *            the maximum zoom level.
 	 * @throws IllegalArgumentException
@@ -243,7 +243,7 @@ public class MapZoomControls {
 
 	/**
 	 * Sets the minimum zoom level of the map.
-	 * 
+	 *
 	 * @param zoomLevelMin
 	 *            the minimum zoom level.
 	 * @throws IllegalArgumentException

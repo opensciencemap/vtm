@@ -130,7 +130,7 @@ public final class PolygonRenderer {
 				glUniform4fv(hPolygonColor, 1, a.color, 0);
 			}
 
-			// set stencil buffer mask used to draw this layer 
+			// set stencil buffer mask used to draw this layer
 			// also check that clip bit is set to avoid overdraw
 			// of other tiles
 			glStencilFunc(GL_EQUAL, 0xff, CLIP_BIT | 1 << c);
@@ -146,6 +146,7 @@ public final class PolygonRenderer {
 	/**
 	 * draw polygon layers (unil layer.next is not polygon layer)
 	 * using stencil buffer method
+	 *
 	 * @param pos
 	 *            used to fade layers accorind to 'fade'
 	 *            in layer.area.
@@ -234,6 +235,7 @@ public final class PolygonRenderer {
 	/**
 	 * Draw a tile filling rectangle to set stencil- and depth buffer
 	 * appropriately
+	 *
 	 * @param first in the first run the clip region is set based on
 	 *            depth buffer and depth buffer is updated
 	 */
@@ -305,8 +307,10 @@ public final class PolygonRenderer {
 			glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
 		}
 
-		/* clear stencilbuffer (tile region) by drawing
-		 * a quad with func 'always' and op 'zero' */
+		/*
+		 * clear stencilbuffer (tile region) by drawing
+		 * a quad with func 'always' and op 'zero'
+		 */
 
 		// disable drawing to framebuffer (will be re-enabled in fill)
 		glColorMask(false, false, false, false);

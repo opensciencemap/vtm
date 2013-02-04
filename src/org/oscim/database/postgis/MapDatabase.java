@@ -39,7 +39,7 @@ import org.postgresql.PGConnection;
 import android.util.Log;
 
 /**
- * 
+ *
  *
  */
 public class MapDatabase implements IMapDatabase {
@@ -248,9 +248,10 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	/**
-	 * Parse a binary encoded geometry. Is synchronized to protect offset counter. (Unfortunately, Java does not have
+	 * Parse a binary encoded geometry. Is synchronized to protect offset
+	 * counter. (Unfortunately, Java does not have
 	 * neither call by reference nor multiple return values.)
-	 * 
+	 *
 	 * @param value
 	 *            ...
 	 * @return ...
@@ -328,7 +329,7 @@ public class MapDatabase implements IMapDatabase {
 
 	/**
 	 * Parse an Array of "full" Geometries
-	 * 
+	 *
 	 * @param data
 	 *            ...
 	 * @param count

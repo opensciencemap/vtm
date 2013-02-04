@@ -21,7 +21,8 @@ enum FontFamily {
 
 	/**
 	 * @return the typeface object of this FontFamily.
-	 * @see <a href="http://developer.android.com/reference/android/graphics/Typeface.html">Typeface</a>
+	 * @see <a
+	 *      href="http://developer.android.com/reference/android/graphics/Typeface.html">Typeface</a>
 	 */
 	Typeface toTypeface() {
 		switch (this) {

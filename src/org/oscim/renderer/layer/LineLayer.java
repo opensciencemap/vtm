@@ -57,6 +57,7 @@ public final class LineLayer extends Layer {
 	/**
 	 * line extrusion is based on code from GLMap
 	 * (https://github.com/olofsj/GLMap/)
+	 *
 	 * @param points
 	 *            array of points as x,y pairs
 	 * @param index

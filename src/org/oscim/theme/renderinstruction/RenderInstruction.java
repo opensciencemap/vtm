@@ -47,7 +47,7 @@ public abstract class RenderInstruction {
 
 	/**
 	 * Scales the stroke width of this RenderInstruction by the given factor.
-	 * 
+	 *
 	 * @param scaleFactor
 	 *            the factor by which the stroke width should be scaled.
 	 */
@@ -56,7 +56,7 @@ public abstract class RenderInstruction {
 
 	/**
 	 * Scales the text size of this RenderInstruction by the given factor.
-	 * 
+	 *
 	 * @param scaleFactor
 	 *            the factor by which the text size should be scaled.
 	 */

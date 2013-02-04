@@ -14,9 +14,9 @@
  */
 package org.oscim.database;
 
-
 /**
- * A FileOpenResult is a simple DTO which is returned by IMapDatabase#openFile(File).
+ * A FileOpenResult is a simple DTO which is returned by
+ * IMapDatabase#openFile(File).
  */
 public class OpenResult {
 	/**
@@ -41,7 +41,7 @@ public class OpenResult {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public OpenResult() {
 		this.success = true;

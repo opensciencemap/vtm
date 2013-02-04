@@ -59,7 +59,8 @@ final class OptionalFields {
 	 */
 	private static final int START_ZOOM_LEVEL_MAX = 22;
 
-	static OpenResult readOptionalFields(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
+	static OpenResult readOptionalFields(ReadBuffer readBuffer,
+			MapFileInfoBuilder mapFileInfoBuilder) {
 		OptionalFields optionalFields = new OptionalFields(readBuffer.readByte());
 		mapFileInfoBuilder.optionalFields = optionalFields;
 
@@ -106,13 +107,15 @@ final class OptionalFields {
 		if (this.hasStartPosition) {
 			// get and check the start position latitude (4 byte)
 			int mapStartLatitude = readBuffer.readInt();
-			if (mapStartLatitude < RequiredFields.LATITUDE_MIN || mapStartLatitude > RequiredFields.LATITUDE_MAX) {
+			if (mapStartLatitude < RequiredFields.LATITUDE_MIN
+					|| mapStartLatitude > RequiredFields.LATITUDE_MAX) {
 				return new OpenResult("invalid map start latitude: " + mapStartLatitude);
 			}
 
 			// get and check the start position longitude (4 byte)
 			int mapStartLongitude = readBuffer.readInt();
-			if (mapStartLongitude < RequiredFields.LONGITUDE_MIN || mapStartLongitude > RequiredFields.LONGITUDE_MAX) {
+			if (mapStartLongitude < RequiredFields.LONGITUDE_MIN
+					|| mapStartLongitude > RequiredFields.LONGITUDE_MAX) {
 				return new OpenResult("invalid map start longitude: " + mapStartLongitude);
 			}
 

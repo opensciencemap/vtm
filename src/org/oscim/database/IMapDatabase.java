@@ -25,6 +25,7 @@ public interface IMapDatabase {
 
 	/**
 	 * Starts a database query with the given parameters.
+	 *
 	 * @param tile
 	 *            the tile to read.
 	 * @param mapDatabaseCallback
@@ -48,6 +49,7 @@ public interface IMapDatabase {
 
 	/**
 	 * Opens MapDatabase
+	 *
 	 * @param options
 	 *            the options.
 	 * @return a OpenResult containing an error message in case of a failure.

@@ -33,6 +33,7 @@ public class DefaultResourceProxyImpl implements ResourceProxy, MapViewConstants
 
 	/**
 	 * Constructor.
+	 *
 	 * @param pContext
 	 *            Used to get the display metrics that are used for scaling the
 	 *            bitmaps returned by {@@link getBitmap}. Can be null,

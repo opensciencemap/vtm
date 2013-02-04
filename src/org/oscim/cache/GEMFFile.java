@@ -16,6 +16,7 @@ import java.util.TreeSet;
 /**
  * GEMF File handler class.
  * Reference: https://sites.google.com/site/abudden/android-map-store
+ *
  * @author A. S. Budden
  * @author Erik Burrows
  */
@@ -62,23 +63,28 @@ public class GEMFFile {
 	// Constructors
 	// ===========================================================
 
-	/* Constructor to read existing GEMF archive
+	/*
+	 * Constructor to read existing GEMF archive
 	 * @param pLocation
-	 * File object representing first GEMF archive file */
+	 * File object representing first GEMF archive file
+	 */
 	public GEMFFile(final File pLocation) throws FileNotFoundException, IOException {
 		this(pLocation.getAbsolutePath());
 	}
 
-	/* Constructor to read existing GEMF archive
+	/*
+	 * Constructor to read existing GEMF archive
 	 * @param pLocation
-	 * String object representing path to first GEMF archive file */
+	 * String object representing path to first GEMF archive file
+	 */
 	public GEMFFile(final String pLocation) throws FileNotFoundException, IOException {
 		mLocation = pLocation;
 		openFiles();
 		readHeader();
 	}
 
-	/* Constructor to create new GEMF file from directory of sources/tiles.
+	/*
+	 * Constructor to create new GEMF file from directory of sources/tiles.
 	 * @param pLocation
 	 * String object representing path to first GEMF archive file.
 	 * Additional files (if archive size exceeds FILE_SIZE_LIMIT
@@ -87,10 +93,12 @@ public class GEMFFile {
 	 * Each specified folder will be imported into the GEMF archive as a
 	 * seperate
 	 * source. The name of the folder will be the name of the source in the
-	 * archive. */
+	 * archive.
+	 */
 	public GEMFFile(final String pLocation, final List<File> pSourceFolders)
 			throws FileNotFoundException, IOException {
-		/* 1. For each source folder
+		/*
+		 * 1. For each source folder
 		 * 1. Create array of zoom levels, X rows, Y rows
 		 * 2. Build index data structure index[source][zoom][range]
 		 * 1. For each S-Z-X find list of Ys values
@@ -105,7 +113,8 @@ public class GEMFFile {
 		 * 4. For each Range record
 		 * 1. For each Range entry
 		 * 1. If over file size limit, start new data file
-		 * 2. Write tile data */
+		 * 2. Write tile data
+		 */
 
 		this.mLocation = pLocation;
 
@@ -398,8 +407,10 @@ public class GEMFFile {
 		}
 	}
 
-	/* Find all files composing this GEMF archive, open them as RandomAccessFile
-	 * and add to the mFiles list. */
+	/*
+	 * Find all files composing this GEMF archive, open them as RandomAccessFile
+	 * and add to the mFiles list.
+	 */
 	private void openFiles() throws FileNotFoundException {
 		// Populate the mFiles array
 
@@ -478,15 +489,19 @@ public class GEMFFile {
 		return mLocation;
 	}
 
-	/* Returns a LinkedHashMap of the sources in this archive, as names and
-	 * indexes. */
+	/*
+	 * Returns a LinkedHashMap of the sources in this archive, as names and
+	 * indexes.
+	 */
 	public LinkedHashMap<Integer, String> getSources() {
 		return mSources;
 	}
 
-	/* Set single source for getInputStream() to use. Otherwise, first tile
+	/*
+	 * Set single source for getInputStream() to use. Otherwise, first tile
 	 * found
-	 * with specified Z/X/Y coordinates will be returned. */
+	 * with specified Z/X/Y coordinates will be returned.
+	 */
 	public void selectSource(final int pSource) {
 		if (mSources.containsKey(new Integer(pSource))) {
 			mSourceLimited = true;
@@ -510,8 +525,10 @@ public class GEMFFile {
 		return zoomLevels;
 	}
 
-	/* Get an InputStream for the tile data specified by the Z/X/Y coordinates.
-	 * @return InputStream of tile data, or null if not found. */
+	/*
+	 * Get an InputStream for the tile data specified by the Z/X/Y coordinates.
+	 * @return InputStream of tile data, or null if not found.
+	 */
 	public InputStream getInputStream(final int pX, final int pY, final int pZ) {
 		GEMFRange range = null;
 

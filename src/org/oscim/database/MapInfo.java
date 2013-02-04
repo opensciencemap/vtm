@@ -20,7 +20,7 @@ import org.oscim.database.mapfile.MapDatabase;
 
 /**
  * Contains the immutable metadata of a map file.
- * 
+ *
  * @see MapDatabase#getMapInfo()
  */
 public class MapInfo {
@@ -80,7 +80,8 @@ public class MapInfo {
 	public final Byte startZoomLevel;
 
 	/**
-	 * Zoomlevels provided by this Database, if null then any zoomlevel can be queried.
+	 * Zoomlevels provided by this Database, if null then any zoomlevel can be
+	 * queried.
 	 */
 	public final int[] zoomLevel;
 

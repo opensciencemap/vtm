@@ -19,11 +19,14 @@ import org.oscim.database.mapfile.MapDatabase;
 
 /**
  * Callback methods which can be triggered from the {@link MapDatabase}.
+ * ____
+ * NOTE: All parameters passed belong to the caller! i.e. dont hold
+ * references to any arrays after callback function returns.
  */
 public interface IMapDatabaseCallback {
 	/**
 	 * Renders a single point of interest node (POI).
-	 * 
+	 *
 	 * @param layer
 	 *            the layer of the node.
 	 * @param tags
@@ -42,17 +45,18 @@ public interface IMapDatabaseCallback {
 
 	/**
 	 * Renders a single way or area (closed way).
-	 * 
+	 *
 	 * @param layer
-	 *            the layer of the way.
+	 *            the osm layer of the way.
 	 * @param tags
 	 *            the tags of the way.
 	 * @param wayNodes
-	 *            the geographical coordinates of the way nodes in the order longitude/latitude.
+	 *            the geographical coordinates of the way nodes in the order
+	 *            longitude/latitude or x/y depending on the projection.
 	 * @param wayLength
 	 *            length of way data in wayNodes
 	 * @param closed
-	 *            way is closed (means need to add endpoint == startpoint)
+	 *            wheter the way is an polygon.
 	 * @param prio TODO
 	 */
 	void renderWay(byte layer, Tag[] tags, float[] wayNodes, short[] wayLength,
@@ -60,12 +64,13 @@ public interface IMapDatabaseCallback {
 
 	/**
 	 * TBD: check if way will be rendered before decoding
-	 * 
+	 *
 	 * @param tags
 	 *            ...
 	 * @param closed
 	 *            ...
-	 * @return true if the way will be rendered (i.e. found match in RenderTheme)
+	 * @return true if the way will be rendered (i.e. found match in
+	 *         RenderTheme)
 	 */
 	boolean checkWay(Tag[] tags, boolean closed);
 

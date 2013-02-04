@@ -1,26 +1,26 @@
 /*
  * Geometry.java
- * 
+ *
  * PostGIS extension for PostgreSQL JDBC driver - geometry model
- * 
+ *
  * (C) 2004 Paul Ramsey, pramsey@refractions.net
- * 
+ *
  * (C) 2005 Markus Schaber, markus.schaber@logix-tt.com
- * 
+ *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General License as published by the Free
  * Software Foundation, either version 2.1 of the License.
- * 
+ *
  * This library is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General License
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or visit the web at
  * http://www.gnu.org.
- * 
+ *
  * $Id: Geometry.java 9324 2012-02-27 22:08:12Z pramsey $
  */
 
@@ -82,7 +82,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * The Text representations of the geometry types
-	 * 
+	 *
 	 * @param type
 	 *            ...
 	 * @return ...
@@ -107,7 +107,8 @@ abstract class Geometry implements Serializable {
 	boolean haveMeasure = false;
 
 	/**
-	 * The OGIS geometry type of this feature. this is final as it never changes, it is bound to the subclass of the
+	 * The OGIS geometry type of this feature. this is final as it never
+	 * changes, it is bound to the subclass of the
 	 * instance.
 	 */
 	final int type;
@@ -124,7 +125,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Parse a SRID value, anything <= 0 is unknown
-	 * 
+	 *
 	 * @param srid
 	 *            ...
 	 * @return ...
@@ -139,7 +140,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Constructor for subclasses
-	 * 
+	 *
 	 * @param type
 	 *            has to be given by all subclasses.
 	 */
@@ -165,8 +166,9 @@ abstract class Geometry implements Serializable {
 	}
 
 	/**
-	 * geometry specific equals implementation - only defined for non-null values
-	 * 
+	 * geometry specific equals implementation - only defined for non-null
+	 * values
+	 *
 	 * @param other
 	 *            ...
 	 * @return ...
@@ -180,9 +182,10 @@ abstract class Geometry implements Serializable {
 	}
 
 	/**
-	 * Whether test coordinates for geometry - subclass specific code Implementors can assume that dimensin, type, srid
+	 * Whether test coordinates for geometry - subclass specific code
+	 * Implementors can assume that dimensin, type, srid
 	 * and haveMeasure are equal, other != null and other is the same subclass.
-	 * 
+	 *
 	 * @param other
 	 *            ...
 	 * @return ...
@@ -191,14 +194,14 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Return the number of Points of the geometry
-	 * 
+	 *
 	 * @return ...
 	 */
 	abstract int numPoints();
 
 	/**
 	 * Get the nth Point of the geometry
-	 * 
+	 *
 	 * @param n
 	 *            the index of the point, from 0 to numPoints()-1;
 	 * @throws ArrayIndexOutOfBoundsException
@@ -219,7 +222,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * The OGIS geometry type number of this geometry.
-	 * 
+	 *
 	 * @return ...
 	 */
 	int getType() {
@@ -228,7 +231,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Return the Type as String
-	 * 
+	 *
 	 * @return ...
 	 */
 	String getTypeString() {
@@ -237,7 +240,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Returns whether we have a measure
-	 * 
+	 *
 	 * @return ....
 	 */
 	boolean isMeasured() {
@@ -245,9 +248,10 @@ abstract class Geometry implements Serializable {
 	}
 
 	/**
-	 * Queries the number of geometric dimensions of this geometry. This does not include measures, as opposed to the
+	 * Queries the number of geometric dimensions of this geometry. This does
+	 * not include measures, as opposed to the
 	 * server.
-	 * 
+	 *
 	 * @return The dimensionality (eg, 2D or 3D) of this geometry.
 	 */
 	int getDimension() {
@@ -256,7 +260,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * The OGIS geometry type number of this geometry.
-	 * 
+	 *
 	 * @return ...
 	 */
 	int getSrid() {
@@ -264,8 +268,9 @@ abstract class Geometry implements Serializable {
 	}
 
 	/**
-	 * Recursively sets the srid on this geometry and all contained subgeometries
-	 * 
+	 * Recursively sets the srid on this geometry and all contained
+	 * subgeometries
+	 *
 	 * @param srid
 	 *            ...
 	 */
@@ -286,8 +291,9 @@ abstract class Geometry implements Serializable {
 	}
 
 	/**
-	 * Render the WKT version of this Geometry (without SRID) into the given StringBuffer.
-	 * 
+	 * Render the WKT version of this Geometry (without SRID) into the given
+	 * StringBuffer.
+	 *
 	 * @param sb
 	 *            ...
 	 * @param putM
@@ -306,8 +312,9 @@ abstract class Geometry implements Serializable {
 	}
 
 	/**
-	 * Render the WKT without the type name, but including the brackets into the StringBuffer
-	 * 
+	 * Render the WKT without the type name, but including the brackets into the
+	 * StringBuffer
+	 *
 	 * @param sb
 	 *            ...
 	 */
@@ -318,8 +325,9 @@ abstract class Geometry implements Serializable {
 	}
 
 	/**
-	 * Render the "inner" part of the WKT (inside the brackets) into the StringBuffer.
-	 * 
+	 * Render the "inner" part of the WKT (inside the brackets) into the
+	 * StringBuffer.
+	 *
 	 * @param SB
 	 *            ...
 	 */
@@ -327,7 +335,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * backwards compatibility method
-	 * 
+	 *
 	 * @return ...
 	 */
 	String getValue() {
@@ -337,12 +345,16 @@ abstract class Geometry implements Serializable {
 	}
 
 	/**
-	 * Do some internal consistency checks on the geometry. Currently, all Geometries must have a valid dimension (2 or
-	 * 3) and a valid type. 2-dimensional Points must have Z=0.0, as well as non-measured Points must have m=0.0.
-	 * Composed geometries must have all equal SRID, dimensionality and measures, as well as that they do not contain
-	 * NULL or inconsistent subgeometries. BinaryParser and WKTParser should only generate consistent geometries.
+	 * Do some internal consistency checks on the geometry. Currently, all
+	 * Geometries must have a valid dimension (2 or
+	 * 3) and a valid type. 2-dimensional Points must have Z=0.0, as well as
+	 * non-measured Points must have m=0.0.
+	 * Composed geometries must have all equal SRID, dimensionality and
+	 * measures, as well as that they do not contain
+	 * NULL or inconsistent subgeometries. BinaryParser and WKTParser should
+	 * only generate consistent geometries.
 	 * BinaryWriter may produce invalid results on inconsistent geometries.
-	 * 
+	 *
 	 * @return true if all checks are passed.
 	 */
 	boolean checkConsistency() {
@@ -351,7 +363,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Splits the SRID=4711; part of a EWKT rep if present and sets the srid.
-	 * 
+	 *
 	 * @param value
 	 *            ...
 	 * @return value without the SRID=4711; part
