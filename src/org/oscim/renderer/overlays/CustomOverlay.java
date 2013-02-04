@@ -26,8 +26,12 @@ import org.oscim.view.MapView;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-// http://safari.informit.com/9780321563835
-// http://www.opengles-book.com
+/*
+ * This is an example how to integrate custom OpenGL drawing routines as map overlay
+ * 
+ * based on chapter 2 from:
+ * https://github.com/dalinaum/opengl-es-book-samples/tree/master/Android
+ * */
 
 public class CustomOverlay extends RenderOverlay {
 
