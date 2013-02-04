@@ -83,16 +83,18 @@
 
 	<!-- rendering instructions -->
 	<xs:complexType name="area">
+			<xs:attribute name="name" type="xs:string" use="optional"
+			default="0" />
 		<xs:attribute name="src" type="tns:src" use="optional" />
 		<xs:attribute name="fill" type="tns:color" use="optional"
 			default="#000000" />
-		<xs:attribute name="stroke" type="tns:color" u se="optional"
+		<xs:attribute name="stroke" type="tns:color" use="optional"
 			default="#00000000" />
 		<xs:attribute name="stroke-width" type="tns:nonNegativeFloat"
 			use="optional" default="0" />
 		<xs:attribute name="fade" type="xs:integer" use="optional"
 			default="-1" />
-			<xs:attribute name="blend" type="xs:integer" use="optional"
+		<xs:attribute name="blend" type="xs:integer" use="optional"
 			default="-1" />
 		<xs:attribute name="blend-fill" type="tns:color" use="optional"
 			default="#000000" />
@@ -129,10 +131,19 @@
 	</xs:complexType>
 
 	<xs:complexType name="line">
+		<!-- named style -->
+		<xs:attribute name="name" type="xs:string" use="optional"
+			default="0" />
+		<!-- inherited style -->
+		<xs:attribute name="from" type="xs:string" use="optional"
+			default="0" />
 		<xs:attribute name="src" type="tns:src" use="optional" />
 		<xs:attribute name="stroke" type="tns:color" use="optional"
 			default="#000000" />
-		<xs:attribute name="width" type="tns:nonNegativeFloat"
+		<xs:attribute name="width" type="xs:float"
+			use="optional" default="0" />
+		<!-- minimum scaled width to draw outline -->
+		<xs:attribute name="min" type="xs:float"
 			use="optional" default="0" />
 		<xs:attribute name="stroke-dasharray" type="tns:strokeDasharray"
 			use="optional" />
@@ -142,18 +153,22 @@
 			default="0" />
 		<xs:attribute name="fade" type="xs:integer" use="optional"
 			default="-1" />
+		<xs:attribute name="blur" type="xs:float" use="optional"
+			default="-1" />
 		<xs:attribute name="fixed" type="xs:boolean" use="optional"
 			default="false" />
 	</xs:complexType>
 
-	<xs:complexType name="outline">
+<!--  <xs:complexType name="outline">
+		<xs:attribute name="name" type="xs:string" use="optional"
+			default="0" />
 		<xs:attribute name="src" type="tns:src" use="optional" />
 		<xs:attribute name="stroke" type="tns:color" use="optional"
 			default="#000000" />
 		<xs:attribute name="stroke-width" type="tns:nonNegativeFloat"
 			use="optional" default="0" />
 	</xs:complexType>
-
+-->
 	<xs:complexType name="lineSymbol">
 		<xs:attribute name="src" type="tns:src" use="required" />
 		<xs:attribute name="align-center" type="xs:boolean" use="optional"
@@ -163,8 +178,11 @@
 	</xs:complexType>
 
 	<xs:complexType name="text">
-		<xs:attribute name="style" type="xs:string" use="optional" default="0"/>
-		<xs:attribute name="k" type="tns:textKey" use="required" />
+		<xs:attribute name="name" type="xs:string" use="optional"
+			default="0" />
+		<xs:attribute name="style" type="xs:string" use="optional"
+			default="0" />
+		<xs:attribute name="k" type="tns:textKey" use="optional" default="name"/>
 		<xs:attribute name="dy" type="xs:float" use="optional"
 			default="0" />
 		<xs:attribute name="font-family" type="tns:fontFamily"
@@ -193,16 +211,22 @@
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<!-- recursion to allow for nested rules -->
 			<xs:element name="rule" type="tns:rule" />
-			
+
 			<xs:element name="area" type="tns:area" />
+			<xs:element name="use-area" type="tns:area" />
 			<xs:element name="caption" type="tns:caption" />
 			<xs:element name="circle" type="tns:circle" />
 			<xs:element name="line" type="tns:line" />
-			<xs:element name="outline" type="tns:outline" />
+			<xs:element name="use-line" type="tns:line" />
+			<xs:element name="outline" type="tns:line" />
+			<xs:element name="use-outline" type="tns:line" />
 			<xs:element name="lineSymbol" type="tns:lineSymbol" />
 			<xs:element name="text" type="tns:text" />
-			<xs:element name="styletext type="xs:string" />
+			<xs:element name="use-text" type="tns:text" />
+			<!-- <xs:element name="styletext type="xs:string" /> -->
 			<xs:element name="symbol" type="tns:symbol" />
+			<!-- outline is defined within rules to match layering -->
+			<xs:element name="style-outline" type="tns:line" />
 		</xs:choice>
 		<xs:attribute name="e" type="tns:elementList" use="required" />
 		<xs:attribute name="k" type="xs:string" use="required" />
@@ -218,14 +242,19 @@
 
 	<!-- rendertheme element -->
 	<xs:complexType name="rendertheme">
-	  <xs:sequence minOccurs="0" maxOccurds="256">
-	  <xs:choice minOccurs="0" maxOccurs="unbounded">
-	  	<xs:element name="style-text" type="tns:text" />
-	  	<xs:element name="style-area" type="tns:area" />
-	  </xs:choice>
-	  </xs:sequence)
-		<xs:sequence minOccurs="0" maxOccurs="unbounded">
-			<xs:element name="rule" type="tns:rule" />
+		<xs:sequence minOccurs="0" maxOccurs="1">
+			<xs:sequence minOccurs="0" maxOccurs="256">
+				<xs:choice minOccurs="0" maxOccurs="unbounded">
+					<xs:element name="style-text" type="tns:text" />
+					<xs:element name="style-area" type="tns:area" />
+					<xs:element name="style-line" type="tns:line" />
+					<xs:element name="style-outline" type="tns:line" />
+				</xs:choice>
+			</xs:sequence>
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			
+				<xs:element name="rule" type="tns:rule" />				
+			</xs:sequence>
 		</xs:sequence>
 		<xs:attribute name="version" type="xs:positiveInteger"
 			use="required" />
