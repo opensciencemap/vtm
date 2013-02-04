@@ -378,17 +378,18 @@ public class TileManager {
 			QuadTree.add(tile);
 
 			if (mTilesSize == mTiles.length) {
-				//Log.d(TAG, "repack: " + mTiles.length + " / " + mTilesCount);
+				if (mTilesSize > mTilesCount) {
+					//Log.d(TAG, "repack: " + mTiles.length + " / " + mTilesCount);
+					TileDistanceSort.sort(mTiles, 0, mTilesSize);
+					mTilesSize = mTilesCount;
+				}
 
-				TileDistanceSort.sort(mTiles, 0, mTilesSize);
-
-				if (mTilesCount == mTilesSize) {
+				if (mTilesSize > mTiles.length - 10) {
 					//Log.d(TAG, "realloc tiles");
-					MapTile[] tmp = new MapTile[mTiles.length + 20];
+					MapTile[] tmp = new MapTile[mTiles.length + 10];
 					System.arraycopy(mTiles, 0, tmp, 0, mTilesCount);
 					mTiles = tmp;
 				}
-				mTilesSize = mTilesCount;
 			}
 
 			mTiles[mTilesSize++] = tile;

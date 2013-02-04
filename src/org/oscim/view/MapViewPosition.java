@@ -121,7 +121,7 @@ public class MapViewPosition {
 	}
 
 	public synchronized boolean getMapPosition(final MapPosition mapPosition,
-			final float[] coords) {
+			final float[] projection) {
 		// if (!isValid())
 		// return false;
 
@@ -148,16 +148,16 @@ public class MapViewPosition {
 		if (mapPosition.viewMatrix != null)
 			System.arraycopy(mViewMatrix, 0, mapPosition.viewMatrix, 0, 16);
 
-		if (coords == null)
+		if (projection == null)
 			return true;
 
 		float t = getZ(1);
 		float t2 = getZ(-1);
 
-		unproject(1, -1, t, coords, 0); // top-right
-		unproject(-1, -1, t, coords, 2); // top-left
-		unproject(-1, 1, t2, coords, 4); // bottom-left
-		unproject(1, 1, t2, coords, 6); // bottom-right
+		unproject(1, -1, t, projection, 0); // top-right
+		unproject(-1, -1, t, projection, 2); // top-left
+		unproject(-1, 1, t2, projection, 4); // bottom-left
+		unproject(1, 1, t2, projection, 6); // bottom-right
 
 		return true;
 	}
@@ -475,7 +475,7 @@ public class MapViewPosition {
 		double dx = mx / mScale;
 		double dy = my / mScale;
 
-		if (mMapView.enableRotation || mMapView.enableCompass) {
+		if (mMapView.mRotationEnabled || mMapView.mCompassEnabled) {
 			double rad = Math.toRadians(mRotation);
 			double rcos = Math.cos(rad);
 			double rsin = Math.sin(rad);

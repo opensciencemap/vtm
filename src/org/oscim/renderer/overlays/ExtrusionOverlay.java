@@ -337,7 +337,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	private final float _g = 0xe8;
 	private final float _b = 0xe6;
 	private final float _o = 55;
-	private final float _s = 20;
+	private final float _s = 25;
 	private final float _l = 14;
 	private float mAlpha = 1;
 	private final float[] mColor = {
@@ -425,14 +425,14 @@ public class ExtrusionOverlay extends RenderOverlay {
 					+ "    float dir = a_light.y / ff;"
 					+ "    float z = (0.98 + gl_Position.z * 0.02);"
 					+ "    color = u_color[1];"
-					+ "    color.rgb *= (0.9 + dir * 0.1) * z;"
+					+ "    color.rgb *= (0.88 + dir * 0.12) * z;"
 					+ "  } else if (u_mode == 2){"
 					//     sides 2 - use 0x00ff
 					//+ "    float dir = abs(a_light.x / ff - 0.5);"
 					+ "    float dir = a_light.x / ff;"
 					+ "    float z = (0.98 + gl_Position.z * 0.02);"
 					+ "    color = u_color[2] * z;"
-					+ "    color.rgb *= (0.9 + dir * 0.1) * z;"
+					+ "    color.rgb *= (0.88 + dir * 0.12) * z;"
 					+ "  } else {"
 					//     outline
 					+ "    float z = (0.8 - gl_Position.z * 0.2);"
