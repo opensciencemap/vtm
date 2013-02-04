@@ -475,7 +475,7 @@ public class MapViewPosition {
 		double dx = mx / mScale;
 		double dy = my / mScale;
 
-		if (mMapView.enableRotation || mMapView.enableCompass) {
+		if (mMapView.mRotationEnabled || mMapView.mCompassEnabled) {
 			double rad = Math.toRadians(mRotation);
 			double rcos = Math.cos(rad);
 			double rsin = Math.sin(rad);

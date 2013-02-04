@@ -15,7 +15,6 @@
  */
 package org.oscim.database;
 
-
 import org.oscim.generator.JobTile;
 
 /**
@@ -57,7 +56,8 @@ public interface IMapDatabase {
 
 	/**
 	 * Closes the map file and destroys all internal caches. Has no effect if no
-	 * map file is currently opened.
+	 * map file is currently opened. Should also force to close Socket so that
+	 * thread cannot hang in socket.read
 	 */
 	public abstract void close();
 
