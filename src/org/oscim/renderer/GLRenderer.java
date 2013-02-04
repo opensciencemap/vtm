@@ -320,6 +320,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 
+	private static Object tilelock = new Object();
+
 	static void draw() {
 		long start = 0;
 
@@ -372,27 +374,31 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		MapTile[] tiles = mDrawTiles.tiles;
 
 		if (changed) {
-			// get visible tiles
-			for (int i = 0; i < tileCnt; i++)
-				tiles[i].isVisible = false;
+			synchronized (GLRenderer.tilelock) {
 
-			// relative zoom-level, 'tiles' could not have been updated after
-			// zoom-level changed.
-			byte z = tiles[0].zoomLevel;
-			float div = FastMath.pow(z - pos.zoomLevel);
+				// get visible tiles
+				for (int i = 0; i < tileCnt; i++)
+					tiles[i].isVisible = false;
 
-			// transform screen coordinates to tile coordinates
-			float scale = pos.scale / div;
-			float px = (float) pos.x * div;
-			float py = (float) pos.y * div;
+				// relative zoom-level, 'tiles' could not have been updated after
+				// zoom-level changed.
+				byte z = tiles[0].zoomLevel;
+				float div = FastMath.pow(z - pos.zoomLevel);
+				if (div != 1)
+					Log.d(TAG, "tiles not from current zoom level");
+				// transform screen coordinates to tile coordinates
+				float scale = pos.scale / div;
+				float px = (float) pos.x * div;
+				float py = (float) pos.y * div;
 
-			for (int i = 0; i < 8; i += 2) {
-				coords[i + 0] = (px + coords[i + 0] / scale) / Tile.TILE_SIZE;
-				coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
+				for (int i = 0; i < 8; i += 2) {
+					coords[i + 0] = (px + coords[i + 0] / scale) / Tile.TILE_SIZE;
+					coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
+				}
+
+				mHolderCount = 0;
+				mScanBox.scan(coords, z);
 			}
-
-			mHolderCount = 0;
-			mScanBox.scan(coords, z);
 		}
 
 		tileCnt += mHolderCount;
@@ -504,6 +510,40 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	public static int depthOffset(MapTile t) {
 		return ((t.tileX % 4) + (t.tileY % 4 * 4) + 1);
+	}
+
+	public static TileSet getVisibleTiles(TileSet td) {
+		if (mDrawTiles == null)
+			return td;
+
+		MapTile[] newTiles = mDrawTiles.tiles;
+		int cnt = mDrawTiles.cnt;
+		MapTile[] nextTiles;
+
+		synchronized (TileManager.tilelock) {
+			// lock tiles (and their proxies) to not be removed from cache
+			for (int i = 0; i < cnt; i++)
+				if (newTiles[i].isVisible)
+					newTiles[i].lock();
+
+			if (td == null)
+				td = new TileSet(newTiles.length);
+
+			nextTiles = td.tiles;
+
+			// unlock previously active tiles
+			for (int i = 0, n = td.cnt; i < n; i++)
+				nextTiles[i].unlock();
+		}
+
+		synchronized (GLRenderer.tilelock) {
+			// copy newTiles to nextTiles
+			td.cnt = 0;
+			for (int i = 0; i < cnt; i++)
+				if (newTiles[i].isVisible)
+					nextTiles[td.cnt++] = newTiles[i];
+		}
+		return td;
 	}
 
 	@Override
