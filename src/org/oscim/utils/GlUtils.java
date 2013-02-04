@@ -200,9 +200,13 @@ public class GlUtils {
 	}
 
 	public static void setColor(int handle, float[] c, float alpha) {
-		if (alpha >= 1)
+		if (alpha >= 1) {
 			GLES20.glUniform4fv(handle, 1, c, 0);
-		else {
+		} else {
+			if (alpha < 0) {
+				Log.d(TAG, "setColor: " + alpha);
+				alpha = 0;
+			}
 			tmpColor[0] = c[0] * alpha;
 			tmpColor[1] = c[1] * alpha;
 			tmpColor[2] = c[2] * alpha;
