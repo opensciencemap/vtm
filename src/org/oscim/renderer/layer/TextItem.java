@@ -39,7 +39,7 @@ public class TextItem {
 			pool = pool.next;
 
 			ti.next = null;
-
+			ti.active = 0;
 			return ti;
 		}
 	}
@@ -173,6 +173,5 @@ public class TextItem {
 
 	public byte origin;
 
-	public boolean active;
-	// public byte placement
+	public int active;
 }
