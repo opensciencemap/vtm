@@ -82,6 +82,12 @@ public final class MercatorProjection {
 				* ((long) Tile.TILE_SIZE << mapPosition.zoomLevel);
 	}
 
+	/**
+	 * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
+	 * @param latitude
+	 *            the latitude coordinate that should be converted.
+	 * @return the position .
+	 */
 	public static double latitudeToY(double latitude) {
 		double sinLatitude = Math.sin(latitude * (Math.PI / 180));
 		return 0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI);
@@ -147,6 +153,12 @@ public final class MercatorProjection {
 				* ((long) Tile.TILE_SIZE << mapPosition.zoomLevel);
 	}
 
+	/**
+	 * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
+	 * @param longitude
+	 *            the longitude coordinate that should be converted.
+	 * @return the position .
+	 */
 	public static double longitudeToX(double longitude) {
 		return (longitude + 180) / 360;
 	}
