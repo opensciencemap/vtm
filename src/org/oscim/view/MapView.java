@@ -280,8 +280,8 @@ public class MapView extends RelativeLayout {
 		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
 			return;
 
-		if (changedPos)
-			render();
+		//if (changedPos)
+		//	render();
 
 		if (AndroidUtils.currentThreadIsUiThread()) {
 			boolean changed = mMapViewPosition.getMapPosition(mMapPosition, null);
