@@ -375,12 +375,12 @@ public class TileManager {
 			QuadTree.add(tile);
 
 			if (mTilesSize == mTiles.length) {
-				Log.d(TAG, "repack: " + mTiles.length + " / " + mTilesCount);
+				//Log.d(TAG, "repack: " + mTiles.length + " / " + mTilesCount);
 
 				TileDistanceSort.sort(mTiles, 0, mTilesSize);
 
 				if (mTilesCount == mTilesSize) {
-					Log.d(TAG, "realloc tiles");
+					//Log.d(TAG, "realloc tiles");
 					MapTile[] tmp = new MapTile[mTiles.length + 20];
 					System.arraycopy(mTiles, 0, tmp, 0, mTilesCount);
 					mTiles = tmp;
