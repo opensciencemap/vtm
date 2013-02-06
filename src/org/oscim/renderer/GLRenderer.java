@@ -512,33 +512,32 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		return ((t.tileX % 4) + (t.tileY % 4 * 4) + 1);
 	}
 
+	// get a TileSet of currently visible tiles
 	public static TileSet getVisibleTiles(TileSet td) {
 		if (mDrawTiles == null)
 			return td;
 
-		MapTile[] newTiles = mDrawTiles.tiles;
-		int cnt = mDrawTiles.cnt;
-
 		// ensure tiles keep visible state
 		synchronized (GLRenderer.tilelock) {
-
-			// lock tiles (and their proxies) to not be removed from cache
-			for (int i = 0; i < cnt; i++)
-				if (newTiles[i].isVisible)
-					newTiles[i].lock();
+			MapTile[] newTiles = mDrawTiles.tiles;
+			int cnt = mDrawTiles.cnt;
 
 			if (td == null)
 				td = new TileSet(newTiles.length);
 
-			// unlock previously active tiles
-			for (int i = 0, n = td.cnt; i < n; i++)
+			// unlock previous tiles
+			for (int i = 0; i < td.cnt; i++)
 				td.tiles[i].unlock();
 
-			// copy newTiles to nextTiles
+			// lock tiles to not be removed from cache
 			td.cnt = 0;
-			for (int i = 0; i < cnt; i++)
-				if (newTiles[i].isVisible)
-					td.tiles[td.cnt++] = newTiles[i];
+			for (int i = 0; i < cnt; i++) {
+				MapTile t = newTiles[i];
+				if (t.isVisible) {
+					t.lock();
+					td.tiles[td.cnt++] = t;
+				}
+			}
 		}
 		return td;
 	}
