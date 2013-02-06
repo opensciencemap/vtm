@@ -21,11 +21,18 @@ public class Point {
 	public float x;
 	public float y;
 
+	public Point() {
+	}
+
 	Point(float x, float y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	Point() {
+	public void set(float x, float y) {
+		this.x = x;
+		this.y = y;
+
 	}
+
 }

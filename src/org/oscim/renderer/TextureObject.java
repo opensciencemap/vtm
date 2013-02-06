@@ -23,25 +23,32 @@ import android.opengl.GLUtils;
 import android.util.Log;
 
 public class TextureObject {
+	private final static String TAG = TextureObject.class.getName();
+
 	private static TextureObject pool;
+	private static int poolCount;
 
 	private static ArrayList<Bitmap> mBitmaps;
 
-	// shared bitmap and canvas for default texture size
 	public final static int TEXTURE_WIDTH = 256;
 	public final static int TEXTURE_HEIGHT = 256;
 
 	private static int mBitmapFormat;
 	private static int mBitmapType;
-	private static int objectCount = 10;
 
+	/**
+	 * Get a TextureObject with Bitmap to draw to.
+	 * 'uploadTexture()' uploads the Bitmap as texture.
+	 *
+	 * @return obtained TextureObject
+	 */
 	public static synchronized TextureObject get() {
 		TextureObject to;
 
 		if (pool == null) {
-			objectCount += 1;
+			poolCount += 1;
 			if (TextureRenderer.debug)
-				Log.d("...", "textures: " + objectCount);
+				Log.d(TAG, "textures: " + poolCount);
 			pool = new TextureObject(-1);
 		}
 
@@ -54,7 +61,7 @@ public class TextureObject {
 		to.bitmap.eraseColor(Color.TRANSPARENT);
 
 		if (TextureRenderer.debug)
-			Log.d("...", "get texture " + to.id + " " + to.bitmap);
+			Log.d(TAG, "get texture " + to.id + " " + to.bitmap);
 
 		return to;
 	}
@@ -62,7 +69,7 @@ public class TextureObject {
 	public static synchronized void release(TextureObject to) {
 		while (to != null) {
 			if (TextureRenderer.debug)
-				Log.d("...", "release texture " + to.id);
+				Log.d(TAG, "release texture " + to.id);
 
 			TextureObject next = to.next;
 
@@ -78,9 +85,14 @@ public class TextureObject {
 		}
 	}
 
+	/**
+	 * This function may only be used in GLRenderer Thread.
+	 *
+	 * @param to the TextureObjet to compile and upload
+	 */
 	public static synchronized void uploadTexture(TextureObject to) {
 		if (TextureRenderer.debug)
-			Log.d("...", "upload texture " + to.id);
+			Log.d(TAG, "upload texture " + to.id);
 
 		if (to.id < 0) {
 			int[] textureIds = new int[1];
@@ -88,7 +100,7 @@ public class TextureObject {
 			to.id = textureIds[0];
 			initTexture(to.id);
 			if (TextureRenderer.debug)
-				Log.d("...", "new texture " + to.id);
+				Log.d(TAG, "new texture " + to.id);
 		}
 
 		uploadTexture(to, to.bitmap, mBitmapFormat, mBitmapType,
@@ -102,7 +114,7 @@ public class TextureObject {
 			int format, int type, int w, int h) {
 
 		if (to == null) {
-			Log.d("...", "no texture!");
+			Log.d(TAG, "no texture!");
 			return;
 		}
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
@@ -130,15 +142,14 @@ public class TextureObject {
 
 	static void init(int num) {
 		pool = null;
-
-		TextureObject to;
+		poolCount = num;
 
 		int[] textureIds = new int[num];
 		GLES20.glGenTextures(num, textureIds, 0);
 
 		for (int i = 1; i < num; i++) {
 			initTexture(textureIds[i]);
-			to = new TextureObject(textureIds[i]);
+			TextureObject to = new TextureObject(textureIds[i]);
 
 			to.next = pool;
 			pool = to;
@@ -147,7 +158,8 @@ public class TextureObject {
 		mBitmaps = new ArrayList<Bitmap>(10);
 
 		for (int i = 0; i < 4; i++) {
-			Bitmap bitmap = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
+			Bitmap bitmap = Bitmap.createBitmap(
+					TEXTURE_WIDTH, TEXTURE_HEIGHT,
 					Bitmap.Config.ARGB_8888);
 
 			mBitmaps.add(bitmap);
@@ -160,29 +172,30 @@ public class TextureObject {
 	private static Bitmap getBitmap() {
 		int size = mBitmaps.size();
 		if (size == 0) {
-			for (int i = 0; i < 4; i++) {
-				Bitmap bitmap = Bitmap.createBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT,
-						Bitmap.Config.ARGB_8888);
+			Bitmap bitmap = Bitmap.createBitmap(
+					TEXTURE_WIDTH, TEXTURE_HEIGHT,
+					Bitmap.Config.ARGB_8888);
 
-				mBitmaps.add(bitmap);
-			}
-			size = 4;
+			return bitmap;
 		}
 		return mBitmaps.remove(size - 1);
 	}
 
+	// -----------------------
 	public TextureObject next;
 
-	public Bitmap bitmap;
-
+	//  texture ID
 	int id;
+
 	int width;
 	int height;
 
 	// vertex offset from which this texture is referenced
-	// or store texture id with vertex?
 	public short offset;
 	public short vertices;
+
+	// temporary Bitmap
+	public Bitmap bitmap;
 
 	TextureObject(int id) {
 		this.id = id;

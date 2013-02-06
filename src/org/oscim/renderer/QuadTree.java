@@ -17,7 +17,7 @@ package org.oscim.renderer;
 import android.util.Log;
 
 public class QuadTree {
-	private static String TAG = "QuadTree";
+	private static String TAG = QuadTree.class.getName();
 
 	// pointer to tile 0/0/0
 	private static QuadTree root;
@@ -45,7 +45,7 @@ public class QuadTree {
 	static boolean remove(MapTile t) {
 		if (t.rel == null) {
 			// Bad Things(tm) happened
-			Log.d(TAG, "already removed " + t);
+			Log.d(TAG, "BUG already removed " + t);
 			return true;
 		}
 

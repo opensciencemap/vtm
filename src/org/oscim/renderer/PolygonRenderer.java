@@ -45,7 +45,7 @@ import org.oscim.utils.GlUtils;
 import android.opengl.GLES20;
 
 public final class PolygonRenderer {
-	private static final String TAG = PolygonRenderer.class.getName();
+	//private static final String TAG = PolygonRenderer.class.getName();
 
 	private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
 	private static final int STENCIL_BITS = 8;
@@ -374,31 +374,6 @@ public final class PolygonRenderer {
 			+ "  gl_FragColor = u_color;"
 			+ "}";
 
-	private final static String polygonTexVertexShader = ""
-			+ "precision mediump float;"
-			+ "uniform mat4 u_mvp;"
-			+ "attribute vec4 a_pos;"
-			+ "varying vec2 v_st;"
-			+ "void main() {"
-			+ "  if(gl_VertexID == 0)"
-			+ "    v_st = vec2(0.0,0.0);"
-			+ "  else if(gl_VertexID == 1)"
-			+ "    v_st = vec2(1.0,0.0);"
-			+ "  else if(gl_VertexID == 2)"
-			+ "    v_st = vec2(1.0,1.0);"
-			+ "  else if(gl_VertexID == 3)"
-			+ "    v_st = vec2(0.0,1.0);"
-			+ "  gl_Position = u_mvp * a_pos;"
-			+ "}";
-	private final static String polygonTexFragmentShader = ""
-			+ "precision mediump float;"
-			+ "uniform vec4 u_color;"
-			+ "uniform sampler2D tex;"
-			+ "varying vec2 v_st;"
-			+ "void main() {"
-			+ "  gl_FragColor =  u_color * texture2D(tex, v_st);"
-			+ "}";
-
 	private final static String polygonVertexShaderZ = ""
 			+ "precision highp float;"
 			+ "uniform mat4 u_mvp;"
@@ -422,4 +397,29 @@ public final class PolygonRenderer {
 			+ "else"
 			+ "  gl_FragColor = vec4(0.0, z - 1.0, 0.0, 1.0)*0.8;"
 			+ "}";
+
+	//	private final static String polygonTexVertexShader = ""
+	//			+ "precision mediump float;"
+	//			+ "uniform mat4 u_mvp;"
+	//			+ "attribute vec4 a_pos;"
+	//			+ "varying vec2 v_st;"
+	//			+ "void main() {"
+	//			+ "  if(gl_VertexID == 0)"
+	//			+ "    v_st = vec2(0.0,0.0);"
+	//			+ "  else if(gl_VertexID == 1)"
+	//			+ "    v_st = vec2(1.0,0.0);"
+	//			+ "  else if(gl_VertexID == 2)"
+	//			+ "    v_st = vec2(1.0,1.0);"
+	//			+ "  else if(gl_VertexID == 3)"
+	//			+ "    v_st = vec2(0.0,1.0);"
+	//			+ "  gl_Position = u_mvp * a_pos;"
+	//			+ "}";
+	//	private final static String polygonTexFragmentShader = ""
+	//			+ "precision mediump float;"
+	//			+ "uniform vec4 u_color;"
+	//			+ "uniform sampler2D tex;"
+	//			+ "varying vec2 v_st;"
+	//			+ "void main() {"
+	//			+ "  gl_FragColor =  u_color * texture2D(tex, v_st);"
+	//			+ "}";
 }
