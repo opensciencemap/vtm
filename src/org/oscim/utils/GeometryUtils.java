@@ -223,4 +223,96 @@ public final class GeometryUtils {
 		float y = y1 + u * (y2 - y1);
 		return dist(x, y, x3, y3);
 	}
+
+	/*
+	 * from World Wind Android:
+	 * Copyright (C) 2012 United States Government as represented by the
+	 * Administrator of the National Aeronautics and Space Administration.
+	 * All Rights Reserved.
+	 * .
+	 * given the current and previous locations of two points, compute the angle
+	 * of the rotation they trace out
+	 */
+	public static double computeRotationAngle(float x, float y, float x2, float y2,
+			float xPrev, float yPrev, float xPrev2, float yPrev2)
+	{
+		// can't compute if no previous points
+		if (xPrev < 0 || yPrev < 0 || xPrev2 < 0 || yPrev2 < 0)
+			return 0;
+
+		if ((x - x2) == 0 || (xPrev - xPrev2) == 0)
+			return 0;
+
+		// 1. compute lines connecting pt1 to pt2, and pt1' to pt2'
+		float slope = (y - y2) / (x - x2);
+		float slopePrev = (yPrev - yPrev2) / (xPrev - xPrev2);
+
+		// b = y - mx
+		float b = y - slope * x;
+		float bPrev = yPrev - slopePrev * xPrev;
+
+		// 2. use Cramer's Rule to find the intersection of the two lines
+		float det1 = -slope * 1 + slopePrev * 1;
+		float det2 = b * 1 - bPrev * 1;
+		float det3 = (-slope * bPrev) - (-slopePrev * b);
+
+		// check for case where lines are parallel
+		if (det1 == 0)
+			return 0;
+
+		// compute the intersection point
+		float isectX = det2 / det1;
+		float isectY = det3 / det1;
+
+		// 3. use the law of Cosines to determine the angle covered
+
+		// compute lengths of sides of triangle created by pt1, pt1Prev and the intersection pt
+		double BC = Math.sqrt(Math.pow(x - isectX, 2) + Math.pow(y - isectY, 2));
+		double AC = Math.sqrt(Math.pow(xPrev - isectX, 2) + Math.pow(yPrev - isectY, 2));
+		double AB = Math.sqrt(Math.pow(x - xPrev, 2) + Math.pow(y - yPrev, 2));
+
+		double dpx, dpy, dcx, dcy;
+
+		//this.point1.set(xPrev - isectX, yPrev - isectY);
+		//this.point2.set(x - isectX, y - isectY);
+
+		// if one finger stayed fixed, may have degenerate triangle, so use other triangle instead
+		if (BC == 0 || AC == 0 || AB == 0)
+		{
+			BC = Math.sqrt(Math.pow(x2 - isectX, 2) + Math.pow(y2 - isectY, 2));
+			AC = Math.sqrt(Math.pow(xPrev2 - isectX, 2) + Math.pow(yPrev2 - isectY, 2));
+			AB = Math.sqrt(Math.pow(x2 - xPrev2, 2) + Math.pow(y2 - yPrev2, 2));
+
+			//this.point1.set(xPrev2 - isectX, yPrev2 - isectY);
+			//this.point2.set(x2 - isectX, y2 - isectY);
+
+			if (BC == 0 || AC == 0 || AB == 0)
+				return 0;
+
+			dpx = xPrev2 - isectX;
+			dpy = yPrev2 - isectY;
+
+			dcx = x2 - isectX;
+			dcy = y2 - isectY;
+		} else {
+			dpx = xPrev - isectX;
+			dpy = yPrev - isectY;
+
+			dcx = x - isectX;
+			dcy = y - isectY;
+		}
+
+		// Law of Cosines
+		double num = (Math.pow(BC, 2) + Math.pow(AC, 2) - Math.pow(AB, 2));
+		double denom = (2 * BC * AC);
+		double BCA = Math.acos(num / denom);
+
+		// use cross product to determine if rotation is positive or negative
+		//if (this.point1.cross3(this.point2).z < 0)
+		if (dpx * dcy - dpy * dcx < 0)
+			BCA = 2 * Math.PI - BCA;
+
+		return Math.toDegrees(BCA);
+	}
+
 }
