@@ -67,18 +67,18 @@ public class TileManager {
 	private volatile int mTilesForUpload;
 
 	// new tile jobs for MapWorkers
-	private ArrayList<JobTile> mJobs;
+	private final ArrayList<JobTile> mJobs;
 
 	// counter to check whether current TileSet has changed
 	private static int mUpdateSerial;
 
 	// lock for TileSets while updating MapTile locks
-	private Object mTilelock = new Object();
+	private final Object mTilelock = new Object();
 
 	private TileSet mCurrentTiles;
 	/* package */TileSet mNewTiles;
 
-	private float[] mTileCoords = new float[8];
+	private final float[] mTileCoords = new float[8];
 
 	public TileManager(MapView mapView) {
 		mMapView = mapView;
@@ -187,8 +187,10 @@ public class TileManager {
 			mMapView.render();
 
 			int remove = mTilesCount - GLRenderer.CACHE_TILES;
+
 			if (remove > CACHE_THRESHOLD ||
 					mTilesForUpload > MAX_TILES_IN_QUEUE)
+
 				limitCache(mapPosition, remove);
 		}
 	}
@@ -330,25 +332,8 @@ public class TileManager {
 		if (tile == null) {
 			tile = new MapTile(x, y, zoomLevel);
 			QuadTree.add(tile);
-
-			if (mTilesSize == mTiles.length) {
-				if (mTilesSize > mTilesCount) {
-					//Log.d(TAG, "repack: " + mTiles.length + " / " + mTilesCount);
-					TileDistanceSort.sort(mTiles, 0, mTilesSize);
-					mTilesSize = mTilesCount;
-				}
-
-				if (mTilesSize > mTiles.length - 10) {
-					//Log.d(TAG, "realloc tiles");
-					MapTile[] tmp = new MapTile[mTiles.length + 10];
-					System.arraycopy(mTiles, 0, tmp, 0, mTilesCount);
-					mTiles = tmp;
-				}
-			}
-
-			mTiles[mTilesSize++] = tile;
 			mJobs.add(tile);
-			mTilesCount++;
+			addToCache(tile);
 
 		} else if (!tile.isActive()) {
 			mJobs.add(tile);
@@ -363,7 +348,7 @@ public class TileManager {
 				QuadTree.add(p);
 				p.state = STATE_LOADING;
 				mJobs.add(p);
-
+				addToCache(p);
 			} else if (!p.isActive()) {
 				p.state = STATE_LOADING;
 				mJobs.add(p);
@@ -371,6 +356,27 @@ public class TileManager {
 		}
 
 		return tile;
+	}
+
+	private void addToCache(MapTile tile) {
+
+		if (mTilesSize == mTiles.length) {
+			if (mTilesSize > mTilesCount) {
+				Log.d(TAG, "repack: " + mTiles.length + " / " + mTilesCount);
+				TileDistanceSort.sort(mTiles, 0, mTilesSize);
+				mTilesSize = mTilesCount;
+			}
+
+			if (mTilesSize > mTiles.length - 10) {
+				Log.d(TAG, "realloc tiles");
+				MapTile[] tmp = new MapTile[mTiles.length + 10];
+				System.arraycopy(mTiles, 0, tmp, 0, mTilesCount);
+				mTiles = tmp;
+			}
+		}
+
+		mTiles[mTilesSize++] = tile;
+		mTilesCount++;
 	}
 
 	private void clearTile(MapTile t) {
@@ -506,7 +512,6 @@ public class TileManager {
 				MapTile t = tiles[i];
 				if (t != null && t.state == STATE_NEW_DATA) {
 					if (!t.isLocked()) {
-
 						clearTile(t);
 						tiles[i] = null;
 						remove--;
