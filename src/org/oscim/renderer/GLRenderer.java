@@ -255,29 +255,25 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	private static void uploadTileData(MapTile tile) {
-		TileManager.tilesForUpload--;
+		tile.state = STATE_READY;
 
-		if (tile.layers == null) {
-			BufferObject.release(tile.vbo);
-			tile.vbo = null;
-		} else {
-			int newSize = tile.layers.getSize();
+		if (tile.layers == null)
+			return;
 
-			if (newSize > 0) {
+		int newSize = tile.layers.getSize();
+		if (newSize > 0) {
 
-				if (tile.vbo == null)
-					tile.vbo = BufferObject.get(newSize);
+			if (tile.vbo == null)
+				tile.vbo = BufferObject.get(newSize);
 
-				if (!uploadLayers(tile.layers, tile.vbo, newSize, true)) {
-					Log.d(TAG, "uploadTileData " + tile + " failed!");
-					tile.layers.clear();
-					tile.layers = null;
-					BufferObject.release(tile.vbo);
-					tile.vbo = null;
-				}
+			if (!uploadLayers(tile.layers, tile.vbo, newSize, true)) {
+				Log.d(TAG, "BUG uploadTileData " + tile + " failed!");
+				tile.layers.clear();
+				tile.layers = null;
+				BufferObject.release(tile.vbo);
+				tile.vbo = null;
 			}
 		}
-		tile.state = STATE_READY;
 	}
 
 	private static void checkBufferUsage(boolean force) {
@@ -352,7 +348,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			serial = mDrawTiles.serial;
 
 		// get current tiles to draw
-		mDrawTiles = TileManager.getActiveTiles(mDrawTiles);
+		mDrawTiles = mMapView.getTileManager().getActiveTiles(mDrawTiles);
 
 		// FIXME what if only drawing overlays?
 		if (mDrawTiles == null || mDrawTiles.cnt == 0) {
@@ -376,9 +372,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		MapTile[] tiles = mDrawTiles.tiles;
 
 		if (changed) {
+			// lock tiles while updating isVisible state
 			synchronized (GLRenderer.tilelock) {
 
-				// get visible tiles
 				for (int i = 0; i < tileCnt; i++)
 					tiles[i].isVisible = false;
 
@@ -386,8 +382,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				// zoom-level changed.
 				byte z = tiles[0].zoomLevel;
 				float div = FastMath.pow(z - pos.zoomLevel);
-				if (div != 1)
-					Log.d(TAG, "tiles not from current zoom level");
+
 				// transform screen coordinates to tile coordinates
 				float scale = pos.scale / div;
 				float px = (float) pos.x * div;
@@ -398,7 +393,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 					coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
 				}
 
+				// count placeholder tiles
 				mHolderCount = 0;
+
+				// check visibile tiles
 				mScanBox.scan(coords, z);
 			}
 		}
@@ -520,9 +518,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		MapTile[] newTiles = mDrawTiles.tiles;
 		int cnt = mDrawTiles.cnt;
-		MapTile[] nextTiles;
 
-		synchronized (TileManager.tilelock) {
+		// ensure tiles keep visible state
+		synchronized (GLRenderer.tilelock) {
+
 			// lock tiles (and their proxies) to not be removed from cache
 			for (int i = 0; i < cnt; i++)
 				if (newTiles[i].isVisible)
@@ -531,19 +530,15 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			if (td == null)
 				td = new TileSet(newTiles.length);
 
-			nextTiles = td.tiles;
-
 			// unlock previously active tiles
 			for (int i = 0, n = td.cnt; i < n; i++)
-				nextTiles[i].unlock();
-		}
+				td.tiles[i].unlock();
 
-		synchronized (GLRenderer.tilelock) {
 			// copy newTiles to nextTiles
 			td.cnt = 0;
 			for (int i = 0; i < cnt; i++)
 				if (newTiles[i].isVisible)
-					nextTiles[td.cnt++] = newTiles[i];
+					td.tiles[td.cnt++] = newTiles[i];
 		}
 		return td;
 	}

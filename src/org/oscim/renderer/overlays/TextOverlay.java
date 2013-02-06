@@ -19,7 +19,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.MapTile;
-import org.oscim.renderer.TileManager;
 import org.oscim.renderer.TileSet;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
@@ -165,7 +164,7 @@ public class TextOverlay extends BasicOverlay {
 	private final Layers mDebugLayer = null; //new Layers();
 
 	void updateLabels() {
-		mTiles = TileManager.getActiveTiles(mTiles);
+		mTiles = mMapView.getTileManager().getActiveTiles(mTiles);
 
 		// Log.d("...", "relabel " + mRerun + " " + x + " " + y);
 		if (mTiles.cnt == 0)

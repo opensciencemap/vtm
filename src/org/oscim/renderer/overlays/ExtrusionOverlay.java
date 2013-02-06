@@ -23,7 +23,6 @@ import org.oscim.generator.JobTile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapTile;
-import org.oscim.renderer.TileManager;
 import org.oscim.renderer.TileSet;
 import org.oscim.renderer.layer.ExtrusionLayer;
 import org.oscim.utils.FastMath;
@@ -95,7 +94,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		}
 
 		int ready = 0;
-		mTileSet = TileManager.getActiveTiles(mTileSet);
+		mTileSet = mMapView.getTileManager().getActiveTiles(mTileSet);
 		MapTile[] tiles = mTileSet.tiles;
 		// FIXME just release tiles in this case
 		if (mAlpha == 0 || curPos.zoomLevel < 16) {
@@ -337,7 +336,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	private final float _g = 0xe8;
 	private final float _b = 0xe6;
 	private final float _o = 55;
-	private final float _s = 25;
+	private final float _s = 20;
 	private final float _l = 14;
 	private float mAlpha = 1;
 	private final float[] mColor = {
