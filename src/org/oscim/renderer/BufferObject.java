@@ -48,7 +48,6 @@ public final class BufferObject {
 						prev.next = bo.next;
 
 					bo.next = null;
-					//Log.d(TAG, "requested: " + size + " got " + bo.size);
 					return bo;
 				}
 				prev = bo;

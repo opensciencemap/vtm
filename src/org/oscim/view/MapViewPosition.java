@@ -43,7 +43,7 @@ import android.util.Log;
 
 public class MapViewPosition {
 
-	private static final String TAG = MapViewPosition.class.getSimpleName();
+	private static final String TAG = MapViewPosition.class.getName();
 
 	public final static int MAX_ZOOMLEVEL = 17;
 	public final static int MIN_ZOOMLEVEL = 2;
@@ -315,7 +315,7 @@ public class MapViewPosition {
 
 		out.x = (int) (mPosX + mu[0] / mScale);
 		out.y = (int) (mPosY + mu[1] / mScale);
-		Log.d(">>>", "getScreenPointOnMap " + reuse);
+		//Log.d(TAG, "getScreenPointOnMap " + reuse);
 
 		return out;
 	}
@@ -340,7 +340,7 @@ public class MapViewPosition {
 				MercatorProjection.pixelYToLatitude(dy, mZoomLevel),
 				MercatorProjection.pixelXToLongitude(dx, mZoomLevel));
 
-		Log.d(">>>", "fromScreenPixels " + p);
+		//Log.d(TAG, "fromScreenPixels " + p);
 
 		return p;
 	}
@@ -550,6 +550,7 @@ public class MapViewPosition {
 	 */
 	public synchronized void rotateMap(float angle, float cx, float cy) {
 		moveMap(cx, cy);
+
 		mRotation += angle;
 
 		updateMatrix();

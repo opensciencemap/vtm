@@ -42,12 +42,10 @@ public final class LineRenderer {
 	private final static String TAG = "LineRenderer";
 
 	private static final int LINE_VERTICES_DATA_POS_OFFSET = 0;
-	//private static final int LINE_VERTICES_DATA_TEX_OFFSET = 4;
 
 	// shader handles
 	private static int[] lineProgram = new int[2];
 	private static int[] hLineVertexPosition = new int[2];
-	//private static int[] hLineTexturePosition = new int[2];
 	private static int[] hLineColor = new int[2];
 	private static int[] hLineMatrix = new int[2];
 	private static int[] hLineScale = new int[2];
@@ -77,7 +75,6 @@ public final class LineRenderer {
 			hLineColor[i] = glGetUniformLocation(lineProgram[i], "u_color");
 			hLineMode[i] = glGetUniformLocation(lineProgram[i], "u_mode");
 			hLineVertexPosition[i] = glGetAttribLocation(lineProgram[i], "a_pos");
-			//hLineTexturePosition[i] = glGetAttribLocation(lineProgram[i], "a_st");
 		}
 
 		// create lookup table as texture for 'length(0..1,0..1)'

@@ -17,7 +17,7 @@ package org.oscim.renderer.layer;
 import android.util.Log;
 
 public class VertexPool {
-	private static final int POOL_LIMIT = 6000;
+	private static final int POOL_LIMIT = 5000;
 
 	static private VertexPoolItem pool = null;
 	static private int count = 0;
@@ -41,7 +41,7 @@ public class VertexPool {
 	public static synchronized VertexPoolItem get() {
 
 		if (pool == null && count > 0) {
-			Log.d("VertexPool", "XXX wrong count: " + count);
+			Log.d("VertexPool", "BUG wrong count: " + count);
 		}
 		if (pool == null) {
 			countAll++;
@@ -56,7 +56,7 @@ public class VertexPool {
 			for (VertexPoolItem tmp = pool; tmp != null; tmp = tmp.next)
 				c++;
 
-			Log.d("VertexPool", "XXX wrong count: " + count + " left" + c);
+			Log.d("VertexPool", "BUG wrong count: " + count + " left" + c);
 			return new VertexPoolItem();
 		}
 
@@ -67,15 +67,9 @@ public class VertexPool {
 		return it;
 	}
 
-	// private static float load = 1.0f;
-	// private static int loadCount = 0;
-
 	public static synchronized void release(VertexPoolItem items) {
 		if (items == null)
 			return;
-
-		// int pall = countAll;
-		// int pcnt = count;
 
 		// limit pool items
 		if (countAll < POOL_LIMIT) {
@@ -84,8 +78,6 @@ public class VertexPool {
 
 			while (true) {
 				count++;
-				// load += (float) last.used / VertexPoolItem.SIZE;
-				// loadCount++;
 
 				if (last.next == null)
 					break;
@@ -95,27 +87,17 @@ public class VertexPool {
 
 			last.next = pool;
 			pool = items;
-			// Log.d("Pool", "added: " + (count - pcnt) + " " + count + " " +
-			// countAll
-			// + " load: " + (load / loadCount));
 
 		} else {
-			// int cleared = 0;
 			VertexPoolItem prev, tmp = items;
 			while (tmp != null) {
 				prev = tmp;
 				tmp = tmp.next;
 
 				countAll--;
-
-				// load += (float) prev.used / VertexPoolItem.SIZE;
-				// loadCount++;
-
 				prev.next = null;
 
 			}
-			// Log.d("Pool", "dropped: " + (pall - countAll) + " " + count + " "
-			// + countAll + " load: " + (load / loadCount));
 		}
 	}
 }
