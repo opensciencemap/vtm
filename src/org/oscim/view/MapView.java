@@ -662,6 +662,10 @@ public class MapView extends RelativeLayout {
 		return mOverlayManager;
 	}
 
+	public TileManager getTileManager() {
+		return mTileManager;
+	}
+
 	public BoundingBox getBoundingBox() {
 		return mMapViewPosition.getViewBox();
 	}

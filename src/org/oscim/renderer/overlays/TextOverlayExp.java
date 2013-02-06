@@ -15,8 +15,6 @@
 
 package org.oscim.renderer.overlays;
 
-import java.util.HashMap;
-
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.generator.JobTile;
@@ -45,10 +43,9 @@ import android.graphics.Paint.Cap;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 public class TextOverlayExp extends BasicOverlay {
-	private final static String TAG = TextOverlayExp.class.getName();
+	//	private final static String TAG = TextOverlayExp.class.getName();
 
 	private TileSet mTileSet;
 	private LabelThread mThread;
@@ -90,8 +87,6 @@ public class TextOverlayExp extends BasicOverlay {
 		}
 	}
 
-	private int mSerial;
-
 	public TextOverlayExp(MapView mapView) {
 		super(mapView);
 
@@ -101,27 +96,26 @@ public class TextOverlayExp extends BasicOverlay {
 		mTmpPos = new MapPosition();
 		mThread = new LabelThread();
 		mThread.start();
-		mSerial = 0;
 	}
 
-	private HashMap<TextItem, PlacementItem> mItemMap;
-
-	class PlacementItem extends TextItem {
-		int tileX;
-		int tileY;
-
-		boolean isTileNeighbour(PlacementItem other) {
-			int dx = other.tileX - tileX;
-			if (dx > 1 || dx < -1)
-				return false;
-
-			int dy = other.tileY - tileY;
-			if (dy > 1 || dy < -1)
-				return false;
-
-			return true;
-		}
-	}
+	//	private HashMap<TextItem, PlacementItem> mItemMap;
+	//
+	//	class PlacementItem extends TextItem {
+	//		int tileX;
+	//		int tileY;
+	//
+	//		boolean isTileNeighbour(PlacementItem other) {
+	//			int dx = other.tileX - tileX;
+	//			if (dx > 1 || dx < -1)
+	//				return false;
+	//
+	//			int dy = other.tileY - tileY;
+	//			if (dy > 1 || dy < -1)
+	//				return false;
+	//
+	//			return true;
+	//		}
+	//	}
 
 	// local pool, avoids synchronized TextItem.get()/release()
 	private TextItem mPool;
@@ -226,8 +220,6 @@ public class TextOverlayExp extends BasicOverlay {
 		if (mTileSet.cnt == 0)
 			return false;
 
-		mSerial++;
-
 		TextLayer tl = mTmpLayer;
 		mTmpLayer = null;
 
@@ -269,7 +261,6 @@ public class TextOverlayExp extends BasicOverlay {
 			ll.line = new Line((Color.GREEN & 0xaaffffff), 1, Cap.BUTT);
 			ll.width = 2;
 		}
-		int added = 0;
 
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 
@@ -391,12 +382,7 @@ public class TextOverlayExp extends BasicOverlay {
 				}
 			}
 		}
-		int count = 0;
 		for (TextItem ti = tl.labels; ti != null; ti = ti.next) {
-			count++;
-
-			//ti.active = mSerial;
-
 			// scale back to fixed zoom-level. could be done in setMatrix
 			ti.x /= scale;
 			ti.y /= scale;
@@ -429,9 +415,6 @@ public class TextOverlayExp extends BasicOverlay {
 		// draw text to bitmaps and create vertices
 		tl.setScale(scale);
 		tl.prepare();
-
-		if (count == 0)
-			Log.d(TAG, "> no labels: " + count + " " + added);
 
 		//TextItem.printPool();
 		//Log.d(TAG, "new labels: " + count);
@@ -487,21 +470,18 @@ public class TextOverlayExp extends BasicOverlay {
 	@Override
 	public void compile() {
 		int newSize = layers.getSize();
-		if (newSize == 0)
-			Log.d(TAG, "text layer size " + newSize);
+		//if (newSize == 0)
+		//	Log.d(TAG, "text layer size " + newSize);
 
 		if (newSize == 0) {
-			BufferObject.release(vbo);
-			vbo = null;
+			//BufferObject.release(vbo);
+			//vbo = null;
 			isReady = false;
 			return;
 		}
 
 		if (vbo == null) {
 			vbo = BufferObject.get(0);
-
-			if (vbo == null)
-				return;
 		}
 
 		if (newSize > 0) {
@@ -552,6 +532,9 @@ public class TextOverlayExp extends BasicOverlay {
 
 	private boolean mHolding;
 
+	/**
+	 * @param enable layer updates
+	 */
 	public synchronized void hold(boolean enable) {
 		//		mHolding = enable;
 		//		if (!enable && !mRun) {
