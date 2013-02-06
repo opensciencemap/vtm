@@ -362,14 +362,14 @@ public class TileManager {
 
 		if (mTilesSize == mTiles.length) {
 			if (mTilesSize > mTilesCount) {
-				Log.d(TAG, "repack: " + mTiles.length + " / " + mTilesCount);
+				//Log.d(TAG, "repack: " + mTiles.length + " / " + mTilesCount);
 				TileDistanceSort.sort(mTiles, 0, mTilesSize);
 				mTilesSize = mTilesCount;
 			}
 
-			if (mTilesSize > mTiles.length - 10) {
-				Log.d(TAG, "realloc tiles");
-				MapTile[] tmp = new MapTile[mTiles.length + 10];
+			if (mTilesSize == mTiles.length) {
+				Log.d(TAG, "realloc tiles " + mTilesSize);
+				MapTile[] tmp = new MapTile[mTiles.length + 20];
 				System.arraycopy(mTiles, 0, tmp, 0, mTilesCount);
 				mTiles = tmp;
 			}
@@ -416,35 +416,30 @@ public class TileManager {
 				continue;
 
 			diff = (t.zoomLevel - zoom);
-
+			float scale;
 			if (diff == 0) {
 				dx = (t.pixelX + h) - x;
 				dy = (t.pixelY + h) - y;
-				dx %= center;
-				dy %= center;
-				t.distance = (dx * dx + dy * dy) * 0.5f;
+				scale = 0.5f;
 			} else if (diff > 0) {
 				// tile zoom level is child of current
 				if (diff < 3) {
 					dx = ((t.pixelX + h) >> diff) - x;
 					dy = ((t.pixelY + h) >> diff) - y;
-				}
-				else {
+				} else {
 					dx = ((t.pixelX + h) >> (diff >> 1)) - x;
 					dy = ((t.pixelY + h) >> (diff >> 1)) - y;
 				}
-				dx %= center;
-				dy %= center;
-				t.distance = (dx * dx + dy * dy);
-
+				scale = 1;
 			} else {
 				// tile zoom level is parent of current
 				dx = ((t.pixelX + h) << -diff) - x;
 				dy = ((t.pixelY + h) << -diff) - y;
-				dx %= center;
-				dy %= center;
-				t.distance = (dx * dx + dy * dy) * (-diff * 0.7f);
+				scale = -diff * 0.7f;
 			}
+			dx %= center;
+			dy %= center;
+			t.distance = (dx * dx + dy * dy) * scale;
 		}
 	}
 
@@ -488,13 +483,13 @@ public class TileManager {
 				if (t.isLocked()) {
 					// dont remove tile used by GLRenderer, or somewhere else
 					Log.d(TAG, "limitCache: tile still locked " + t + " " + t.distance);
-					//mTiles.add(t);
+					// try again in next run.
+					break;
 				} else if (t.state == STATE_LOADING) {
 					// NOTE:  when set loading to false the tile could be
 					// added to load queue again while still processed in
 					// TileGenerator => need tile.cancel flag.
 					// t.isLoading = false;
-					//mTiles.add(t);
 					Log.d(TAG, "limitCache: cancel loading " + t + " " + t.distance);
 				} else {
 					if (t.state == STATE_NEW_DATA)

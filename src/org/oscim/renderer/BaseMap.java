@@ -25,7 +25,6 @@ import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.util.Log;
 
 /**
  * @author Hannes Janetzek
@@ -104,7 +103,7 @@ public class BaseMap {
 			t = t.holder;
 
 		if (t.layers == null || t.vbo == null) {
-			Log.d(TAG, "missing data " + (t.layers == null) + " " + (t.vbo == null));
+			//Log.d(TAG, "missing data " + (t.layers == null) + " " + (t.vbo == null));
 			return;
 		}
 
