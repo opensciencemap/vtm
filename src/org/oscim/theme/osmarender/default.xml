@@ -128,7 +128,7 @@
 
    
 		
-	  <rule e="way" k="landuse|natural|leisure||amenity" v="*">
+	  <rule e="way" k="landuse|natural|leisure||amenity|tourism" v="*">
 			<!-- kind of more like landuse imho -->
 		  <rule e="way" k="leisure|landuse" v="nature_reserve">
 		    <use-area name="greens2" />
@@ -136,7 +136,19 @@
 		       <line stroke="#abe29c" width="1.0" fixed="true" cap="butt" />
 	      </rule>
 	    </rule>
-	  
+	
+		    
+	    <!-- tourism areas 
+	    	Berlin Zoologischer Garten has lots of details that should be drawn above
+	    -->
+      <rule e="way" k="tourism" v="*">
+        <!-- <rule e="way" k="tourism" v="attraction"> <area fill="#f2caea" /> </rule> -->
+           
+        <rule e="way" k="tourism" v="zoo|picnic_site|caravan_site|camp_site">
+          <area fill="#c7d6a0" />
+        </rule>
+      </rule>
+      
 	    <!-- landuse -->
 	    <rule e="way" k="landuse" v="*"  zoom-min="11">
 	      <!-- how about 'leisure' for this one? -->
@@ -171,8 +183,8 @@
 	          <use-area name="forest|wood"/>
 	        <!--  <line stroke="#abcfab" width="1.5" fixed="true" cap="butt"/> -->
 	    </rule>
-	    
-	      
+	  
+     
 			<!-- keep grass above forest:wood and leisure:park! --> 
 			<rule e="way" k="landuse"  v="grass|meadow">
 			   <use-area name="greens"/>
@@ -279,17 +291,20 @@
 	      </rule>
 	    </rule>
 	     
-	      
+	 
+	  
+          
 	   <rule e="way" k="natural" v="water">
 	      <use-area name="water"/>
 	    	<use-line name="water:outline"/>
 	     </rule>
-    </rule>
-     
-     <rule e="way" k="landuse" v="reservoir|basin">
+	     
+	   <rule e="way" k="landuse" v="reservoir|basin">
 	        <use-area name="water" />
-	   </rule>
-	      
+	   </rule> 
+    </rule> <!-- end landuse|natural|leisure||amenity|tourism -->
+ 
+    
     <!-- waterways -->
     <rule e="way" k="waterway" v="*">
 
@@ -340,14 +355,7 @@
          e="way" k="sport" v="tennis"> <area fill="#d18a6a" stroke="#b36c4c" width="0.2" 
          /> </rule> </rule> -->
 
-    <!-- tourism areas -->
-    <rule e="way" k="tourism" v="*">
-      <!-- <rule e="way" k="tourism" v="attraction"> <area fill="#f2caea" /> </rule> -->
-           
-      <rule e="way" k="tourism" v="zoo|picnic_site|caravan_site|camp_site">
-        <area fill="#d7e6b0" />
-      </rule>
-    </rule>
+
 
 
 
