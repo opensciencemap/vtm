@@ -58,8 +58,10 @@ public class BuildingOverlay extends Overlay {
 		} else if (action == MotionEvent.ACTION_CANCEL) {
 			multi = 0;
 			Log.d(TAG, "cancel " + multi);
-			mTimer.cancel();
-			mTimer = null;
+			if (mTimer != null) {
+				mTimer.cancel();
+				mTimer = null;
+			}
 		}
 
 		return false;
