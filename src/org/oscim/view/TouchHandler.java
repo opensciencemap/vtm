@@ -228,9 +228,13 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 
 			mSumScale *= scale;
 
-			if (mSumScale < 0.95 || mSumScale > 1.05) {
+			if (mSumScale < 0.95 || mSumScale > 1.05)
 				mBeginRotate = false;
-			}
+
+			// decrease change of scale by the change of rotation
+			// pi * 10 is just arbitrary
+			scale = 1 + ((scale - 1) * Math.max((1 - (float)(Math.abs(r) * Math.PI) * 10), 0));
+
 			float fx = (x2 + x1) / 2 - width / 2;
 			float fy = (y2 + y1) / 2 - height / 2;
 
