@@ -67,7 +67,8 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 
 	private double mAngle;
 
-	private int mActivePointerId;
+	private int mPointerId1;
+	private int mPointerId2;
 
 	//private final ScaleGestureDetector mScaleGestureDetector;
 	private final GestureDetector mGestureDetector;
@@ -93,7 +94,8 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		mOverlayManager = mapView.getOverlayManager();
 		// ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
 		// mMapMoveDelta = viewConfiguration.getScaledTouchSlop();
-		mActivePointerId = INVALID_POINTER_ID;
+		mPointerId1 = INVALID_POINTER_ID;
+		mPointerId2 = INVALID_POINTER_ID;
 		//mScaleGestureDetector = new ScaleGestureDetector(context, this);
 		mGestureDetector = new GestureDetector(context, this);
 		mGestureDetector.setOnDoubleTapListener(this);
@@ -106,73 +108,58 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 	}
 
 	/**
-	 * @param event
+	 * @param e
 	 *            ...
 	 * @return ...
 	 */
-	public boolean handleMotionEvent(MotionEvent event) {
+	public boolean handleMotionEvent(MotionEvent e) {
 
-		if (mOverlayManager.onTouchEvent(event, mMapView))
+		if (mOverlayManager.onTouchEvent(e, mMapView))
 			return true;
 
-		mGestureDetector.onTouchEvent(event);
+		mGestureDetector.onTouchEvent(e);
 		//boolean scaling = false; //mScaleGestureDetector.onTouchEvent(event);
 
-		int action = getAction(event);
+		int action = getAction(e);
 
 		if (action == MotionEvent.ACTION_DOWN) {
 			mMulti = 0;
 			mWasMulti = false;
-			if (mOverlayManager.onDown(event, mMapView))
+			if (mOverlayManager.onDown(e, mMapView))
 				return true;
 
-			return onActionDown(event);
+			return onActionDown(e);
 		} else if (action == MotionEvent.ACTION_MOVE) {
-			return onActionMove(event);
+			return onActionMove(e);
 		} else if (action == MotionEvent.ACTION_UP) {
-			return onActionUp(event);
+			return onActionUp(e);
 		} else if (action == MotionEvent.ACTION_CANCEL) {
 			return onActionCancel();
 		} else if (action == MotionEvent.ACTION_POINTER_DOWN) {
-			return onActionPointerDown(event);
+			return onActionPointerDown(e);
 		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-			return onActionPointerUp(event);
+			return onActionPointerUp(e);
 		}
 
 		return false;
 	}
 
-	private static int getAction(MotionEvent motionEvent) {
-		return motionEvent.getAction() & MotionEvent.ACTION_MASK;
+	private static int getAction(MotionEvent e) {
+		return e.getAction() & MotionEvent.ACTION_MASK;
 	}
 
 	private boolean onActionCancel() {
-		mActivePointerId = INVALID_POINTER_ID;
+		mPointerId1 = INVALID_POINTER_ID;
 		mLongPress = true;
 		return true;
 	}
 
-	private boolean onActionDown(MotionEvent event) {
-		mPrevX = event.getX();
-		mPrevY = event.getY();
 
-		mBeginRotate = false;
-		mBeginTilt = false;
-		mBeginScale = false;
+	private boolean onActionMove(MotionEvent e) {
+		int id = e.findPointerIndex(mPointerId1);
 
-		// save the ID of the pointer
-		mActivePointerId = event.getPointerId(0);
-
-		return true;
-	}
-
-	//private boolean mScaling = false;
-
-	private boolean onActionMove(MotionEvent event) {
-		int id = event.findPointerIndex(mActivePointerId);
-
-		float x1 = event.getX(id);
-		float y1 = event.getY(id);
+		float x1 = e.getX(id);
+		float y1 = e.getY(id);
 
 		float mx = x1 - mPrevX;
 		float my = y1 - mPrevY;
@@ -196,12 +183,14 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 
 		if (mMulti == 0) {
 			// reset pinch variables
-			mPrevPinchWidth = -1;
+			//mPrevPinchWidth = -1;
 			return true;
 		}
 
-		float x2 = event.getX(1);
-		float y2 = event.getY(1);
+		int id2 = e.findPointerIndex(mPointerId2);
+
+		float x2 = e.getX(id2);
+		float y2 = e.getY(id2);
 
 		float dx = (x1 - x2);
 		float dy = (y1 - y2);
@@ -217,7 +206,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		double rad = Math.atan2(dy, dx);
 		double r = rad - mAngle;
 
-		boolean startScale = (mPrevPinchWidth > 0 && Math.abs(deltaPinchWidth) > PINCH_ZOOM_THRESHOLD);
+		boolean startScale = (Math.abs(deltaPinchWidth) > PINCH_ZOOM_THRESHOLD);
 
 		boolean changed = false;
 
@@ -226,14 +215,15 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 
 			float scale = (float) (pinchWidth / mPrevPinchWidth);
 
+			// decrease change of scale by the change of rotation
+			// * 20 is just arbitrary
+			if (mBeginRotate)
+				scale = 1 + ((scale - 1) * Math.max((1 - (float) Math.abs(r) * 20), 0));
+
 			mSumScale *= scale;
 
 			if (mSumScale < 0.95 || mSumScale > 1.05)
 				mBeginRotate = false;
-
-			// decrease change of scale by the change of rotation
-			// pi * 10 is just arbitrary
-			scale = 1 + ((scale - 1) * Math.max((1 - (float)(Math.abs(r) * Math.PI) * 10), 0));
 
 			float fx = (x2 + x1) / 2 - width / 2;
 			float fy = (y2 + y1) / 2 - height / 2;
@@ -309,24 +299,31 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		mSumScale = 1;
 
 		if (mMulti == 1) {
-			mPrevX2 = event.getX(1);
-			mPrevY2 = event.getY(1);
 
-			double dx = event.getX(0) - mPrevX2;
-			double dy = event.getY(0) - mPrevY2;
+			int masked = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK);
+			int pointerIndex = masked >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+			mPointerId2 = event.getPointerId(pointerIndex);
+
+			mPrevX2 = event.getX(pointerIndex);
+			mPrevY2 = event.getY(pointerIndex);
+			double dx = mPrevX - mPrevX2;
+			double dy = mPrevY - mPrevY2;
 			mAngle = Math.atan2(dy, dx);
+
+			mPrevPinchWidth = Math.sqrt(dx * dx + dy * dy);
+
 		}
 		// Log.d("...", "mMulti down " + mMulti);
 		return true;
 	}
 
-	private boolean onActionPointerUp(MotionEvent motionEvent) {
+	private boolean onActionPointerUp(MotionEvent e) {
 
 		// extract the index of the pointer that left the touch sensor
-		int masked = (motionEvent.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK);
+		int masked = (e.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK);
 		int pointerIndex = masked >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
 
-		if (motionEvent.getPointerId(pointerIndex) == mActivePointerId) {
+		if (e.getPointerId(pointerIndex) == mPointerId1) {
 			// the active pointer has gone up, choose a new one
 			if (pointerIndex == 0) {
 				pointerIndex = 1;
@@ -334,11 +331,17 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 				pointerIndex = 0;
 			}
 			// save the position of the event
-			//	mPrevX = motionEvent.getX(pointerIndex);
-			mPrevY = motionEvent.getY(pointerIndex);
-			mActivePointerId = motionEvent.getPointerId(pointerIndex);
+			mPrevX = e.getX(pointerIndex);
+			mPrevY = e.getY(pointerIndex);
+
+			mPointerId1 = e.getPointerId(pointerIndex);
 		}
+
 		mMulti--;
+
+		if (mMulti == 0){
+			mPointerId2 = INVALID_POINTER_ID;
+		}
 
 		mLongPress = false;
 
@@ -347,18 +350,29 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		return true;
 	}
 
+	private boolean onActionDown(MotionEvent e) {
+		mPrevX = e.getX();
+		mPrevY = e.getY();
+
+		mBeginRotate = false;
+		mBeginTilt = false;
+		mBeginScale = false;
+
+		// save the ID of the pointer
+		mPointerId1 = e.getPointerId(0);
+
+		return true;
+	}
 	/**
-	 * @param motionEvent
-	 *            ...
+	 * @param event
+	 *            unused
 	 * @return ...
 	 */
-	private boolean onActionUp(MotionEvent motionEvent) {
-		mActivePointerId = INVALID_POINTER_ID;
-		//mScaling = false;
+	private boolean onActionUp(MotionEvent event) {
+		mPointerId1 = INVALID_POINTER_ID;
+
 		mLongPress = false;
-
 		mMulti = 0;
-
 		mPrevPinchWidth = -1;
 		mPrevPointerCount = 0;
 
