@@ -54,6 +54,7 @@ import org.xml.sax.SAXException;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
@@ -82,7 +83,7 @@ public class MapView extends RelativeLayout {
 	private final TouchHandler mTouchEventHandler;
 	private final Compass mCompass;
 
-	private TileManager mTileManager;
+	private final TileManager mTileManager;
 	private final OverlayManager mOverlayManager;
 
 	private final GLView mGLView;
@@ -101,6 +102,8 @@ public class MapView extends RelativeLayout {
 
 	// FIXME: keep until old pbmap reader is removed
 	public static boolean enableClosePolygons = false;
+
+	public final float dpi;
 
 	/**
 	 * @param context
@@ -132,6 +135,11 @@ public class MapView extends RelativeLayout {
 		}
 
 		this.setWillNotDraw(true);
+
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
+		dpi = Math.max(metrics.xdpi, metrics.ydpi);
+
+		Log.d(TAG, "dpi is: " + dpi);
 
 		// TODO set tilesize, make this dpi dependent
 		Tile.TILE_SIZE = 400;
@@ -186,32 +194,6 @@ public class MapView extends RelativeLayout {
 		mOverlayManager.add(new LabelingOverlay(this));
 
 		//		mOverlayManager.add(new GenericOverlay(this, new TestOverlay(this)));
-
-		//		ArrayList<OverlayItem> pList = new ArrayList<OverlayItem>();
-		//		pList.add(new OverlayItem("title", "description", new GeoPoint(53.067221, 8.78767)));
-		//		Overlay overlay = new ItemizedIconOverlay<OverlayItem>(this, context, pList, null);
-		//		mOverlayManager.add(overlay);
-
-		//		ArrayList<OverlayItem> pList = new ArrayList<OverlayItem>();
-		//		pList.add(new ExtendedOverlayItem("Bremen", "description",
-		//				new GeoPoint(53.047221, 8.78767), context));
-		//		pList.add(new ExtendedOverlayItem("New York", "description",
-		//				new GeoPoint(40.4251, -74.021), context));
-		//		pList.add(new ExtendedOverlayItem("Tokyo", "description",
-		//				new GeoPoint(35.4122, 139.4130), context));
-		//		Overlay overlay = new ItemizedOverlayWithBubble<OverlayItem>(this, context, pList, null);
-		//		mOverlayManager.add(overlay);
-
-		//		PathOverlay pathOverlay = new PathOverlay(this, Color.BLUE, context);
-		//		pathOverlay.addGreatCircle(
-		//				new GeoPoint(53.047221, 8.78767),
-		//				new GeoPoint(40.4251, -74.021));
-		//		//		pathOverlay.addPoint(new GeoPoint(53.047221, 8.78767));
-		//		//		pathOverlay.addPoint(new GeoPoint(53.067221, 8.78767));
-		//		mOverlayManager.add(pathOverlay);
-
-		//		mMapViewPosition.animateTo(new GeoPoint(53.067221, 8.78767));
-
 		//		if (testRegionZoom)
 		//			mRegionLookup = new RegionLookup(this);
 
@@ -451,7 +433,8 @@ public class MapView extends RelativeLayout {
 		try {
 			inputStream = theme.getRenderThemeAsStream();
 			RenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
-			// FIXME somehow...
+			t.scaleTextSize(1 + (dpi / 240 - 1) * 0.5f);
+			// FIXME
 			GLRenderer.setRenderTheme(t);
 			TileGenerator.setRenderTheme(t);
 			return true;
