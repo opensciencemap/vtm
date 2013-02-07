@@ -121,11 +121,13 @@ public final class Text extends RenderInstruction {
 	public final Paint paint;
 	public Paint stroke;
 	public String textKey;
-	public final float fontHeight;
-	public final float fontDescent;
+
 	public String style;
 	public final boolean caption;
 	public final float dy;
+
+	public float fontHeight;
+	public float fontDescent;
 
 	public static Text createText(float fontSize, float strokeWidth, int fill, int outline,
 			boolean billboard) {
@@ -183,6 +185,11 @@ public final class Text extends RenderInstruction {
 	@Override
 	public void scaleTextSize(float scaleFactor) {
 		paint.setTextSize(fontSize * scaleFactor);
-		stroke.setTextSize(fontSize * scaleFactor);
+		if (stroke != null)
+			stroke.setTextSize(fontSize * scaleFactor);
+
+		FontMetrics fm = paint.getFontMetrics();
+		fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
+		fontDescent = (float) Math.ceil(Math.abs(fm.descent));
 	}
 }
