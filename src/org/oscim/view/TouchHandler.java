@@ -21,7 +21,6 @@ import org.oscim.overlay.OverlayManager;
 
 import android.content.Context;
 import android.os.CountDownTimer;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
@@ -73,12 +72,12 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 	//private final ScaleGestureDetector mScaleGestureDetector;
 	private final GestureDetector mGestureDetector;
 
-	private final float dpi;
+	//private final float dpi;
 
 	protected static final int JUMP_THRESHOLD = 100;
 	protected static final double PINCH_ZOOM_THRESHOLD = 5;
 	protected static final double PINCH_ROTATE_THRESHOLD = 0.02;
-	protected static final double PINCH_TILT_THRESHOLD = 0.002;
+	protected static final float PINCH_TILT_THRESHOLD = 1f;
 	protected int mPrevPointerCount = 0;
 	protected double mPrevPinchWidth = -1;
 
@@ -103,10 +102,6 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 
 		mScroller = new Scroller(mMapView.getContext(), mInterpolator);
 		//mLinearInterpolator = new DecelerateInterpolator(0.8f);//new android.view.animation.LinearInterpolator();
-
-		DisplayMetrics metrics = mapView.getResources().getDisplayMetrics();
-		dpi = metrics.xdpi;
-		Log.d(TAG, "dpi is: " + dpi);
 
 	}
 
@@ -244,21 +239,21 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		}
 
 		if (!mBeginScale && !mBeginRotate && Math.abs(slope) < 2) {
-			// normalize dx, dy with screen width and height, so they are in [0, 1]
-			//	final double xVelocity = dx / width;
 			float my2 = y2 - mPrevY2;
-			final double yVelocity = my / height;
-			final double yVelocity2 = my2 / height;
+			float threshold = PINCH_TILT_THRESHOLD;
 
-			if ((yVelocity > PINCH_TILT_THRESHOLD && yVelocity2 > PINCH_TILT_THRESHOLD)
-					|| (yVelocity < -PINCH_TILT_THRESHOLD && yVelocity2 < -PINCH_TILT_THRESHOLD))
+			//Log.d(TAG, r + " " + slope + " m1:" + my + " m2:" + my2);
+
+			if ((my > threshold && my2 > threshold)
+					|| (my < -threshold && my2 < -threshold))
 			{
 				mBeginTilt = true;
 				changed = mMapPosition.tilt(my / 5);
 			}
 		}
 
-		if (!mBeginTilt && (mBeginRotate || Math.abs(r) > PINCH_ROTATE_THRESHOLD)) {
+		if (!mBeginTilt
+				&& (mBeginRotate || (Math.abs(slope) > 1 && Math.abs(r) > PINCH_ROTATE_THRESHOLD))) {
 			//Log.d(TAG, "rotate: " + mBeginRotate + " " + Math.toDegrees(rad));
 			if (!mBeginRotate) {
 				mAngle = rad;
@@ -368,7 +363,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 
 	/******************* GestureListener *******************/
 
-	private Scroller mScroller;
+	private final Scroller mScroller;
 	private float mScrollX, mScrollY;
 	private boolean fling = false;
 
@@ -469,7 +464,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 			float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
 			mMapPosition.animateTo(vx * move, vy * move, 250);
 		} else {
-			float s = (300 / dpi) / 2;
+			float s = (300 / mMapView.dpi) / 2;
 			mScroller.fling(0, 0, Math.round(velocityX * s),
 					Math.round(velocityY * s),
 					-w, w, -h, h);
