@@ -406,7 +406,7 @@ public class TileManager {
 		double x = mapPosition.x;
 		double y = mapPosition.y;
 		byte zoom = mapPosition.zoomLevel;
-		int h = (Tile.TILE_SIZE >> 1);
+		int h = Tile.TILE_SIZE >> 1;
 		long center = h << zoom;
 
 		for (int i = 0; i < size; i++) {
@@ -420,17 +420,17 @@ public class TileManager {
 			if (diff == 0) {
 				dx = (t.pixelX + h) - x;
 				dy = (t.pixelY + h) - y;
-				dz = 1;
+				dz = 0.5f;
 			} else if (diff > 0) {
 				// tile zoom level is greater than current
 				dx = (t.pixelX + h) - x * (1 << diff);
 				dy = (t.pixelY + h) - y * (1 << diff);
-				dz = 0.5f * (1 << diff);
+				dz = 0.25f * (1 << (diff - 1));
 			} else {
 				// tile zoom level is smaller than current
 				dx = (t.pixelX + h) - x / (1 << -diff);
 				dy = (t.pixelY + h) - y / (1 << -diff);
-				dz = (1 << (1 - diff));
+				dz = 0.5f * (1 << -diff);
 			}
 			dx %= center;
 			dy %= center;
@@ -483,7 +483,7 @@ public class TileManager {
 					Log.d(TAG, "limitCache: tile still locked " + t + " " + t.distance);
 					// try again in next run.
 					//locked = true;
-					//break;
+					break;
 				} else if (t.state == STATE_LOADING) {
 					// NOTE:  when set loading to false the tile could be
 					// added to load queue again while still processed in
@@ -499,16 +499,19 @@ public class TileManager {
 					tiles[i] = null;
 				}
 			}
-			//if (locked) {
-			//	Log.d(TAG, "------------ " + remove + " / " + r + " ----------");
-			//	for (int i = 0; i < size; i++) {
-			//		MapTile t = tiles[i];
-			//		if (t == null)
-			//			continue;
-			//		Log.d(TAG, "limitCache: " + t + " " + t.distance);
+			//			if (locked) {
+			//				Log.d(TAG, "------------ "
+			//						+ remove + " / " + r + " "
+			//						+ mMapPosition.zoomLevel
+			//						+ " ----------");
+			//				for (int i = 0; i < size; i++) {
+			//					MapTile t = tiles[i];
+			//					if (t == null)
+			//						continue;
+			//					Log.d(TAG, "limitCache: " + t + " " + t.distance);
 			//
-			//	}
-			//}
+			//				}
+			//			}
 			remove = (newTileCnt - MAX_TILES_IN_QUEUE) + 10;
 			//int r = remove;
 			for (int i = size - 1; i >= 0 && remove > 0; i--) {
