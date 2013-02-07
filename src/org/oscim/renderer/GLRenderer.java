@@ -542,6 +542,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		return td;
 	}
 
+	public static void releaseTiles(TileSet td) {
+		for (int i = 0; i < td.cnt; i++) {
+			td.tiles[i].unlock();
+			td.tiles[i] = null;
+		}
+		td.cnt = 0;
+	}
+
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		Log.d(TAG, "SurfaceChanged:" + mNewSurface + " " + width + " " + height);

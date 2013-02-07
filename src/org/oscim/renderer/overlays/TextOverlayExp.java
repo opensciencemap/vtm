@@ -48,7 +48,7 @@ public class TextOverlayExp extends BasicOverlay {
 	//	private final static String TAG = TextOverlayExp.class.getName();
 
 	private TileSet mTileSet;
-	private LabelThread mThread;
+	private final LabelThread mThread;
 
 	private MapPosition mTmpPos;
 
@@ -418,6 +418,8 @@ public class TextOverlayExp extends BasicOverlay {
 
 		//TextItem.printPool();
 		//Log.d(TAG, "new labels: " + count);
+
+		GLRenderer.releaseTiles(mTileSet);
 
 		// pass new labels for rendering
 		synchronized (this) {
