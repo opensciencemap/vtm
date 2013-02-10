@@ -54,6 +54,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 	//private final DecelerateInterpolator mLinearInterpolator;
 	private boolean mBeginScale;
 	private float mSumScale;
+	private float mSumRotate;
 
 	private boolean mBeginRotate;
 	private boolean mBeginTilt;
@@ -187,6 +188,11 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 			return true;
 		}
 
+		// TODO improve gesture recognition,
+		// one could check change of rotation / scale within a
+		// given time to estimate if the mode should be changed:
+		// http://en.wikipedia.org/wiki/Viterbi_algorithm
+
 		int id2 = e.findPointerIndex(mPointerId2);
 
 		float x2 = e.getX(id2);
@@ -222,7 +228,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 
 			mSumScale *= scale;
 
-			if (mSumScale < 0.95 || mSumScale > 1.05)
+			if ((mSumScale < 0.99 || mSumScale > 1.01) && mSumRotate < Math.abs(0.02))
 				mBeginRotate = false;
 
 			float fx = (x2 + x1) / 2 - width / 2;
@@ -232,7 +238,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 			changed = mMapPosition.scaleMap(scale, fx, fy);
 		}
 
-		if (!mBeginScale && !mBeginRotate && Math.abs(slope) < 2) {
+		if (!mBeginScale && !mBeginRotate && Math.abs(slope) < 1) {
 			float my2 = y2 - mPrevY2;
 			float threshold = PINCH_TILT_THRESHOLD;
 
@@ -251,37 +257,40 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 			//Log.d(TAG, "rotate: " + mBeginRotate + " " + Math.toDegrees(rad));
 			if (!mBeginRotate) {
 				mAngle = rad;
+
 				mSumScale = 1;
+				mSumRotate = 0;
+
 				mBeginRotate = true;
 
 				mFocusX = (width / 2) - (x1 + x2) / 2;
 				mFocusY = (height / 2) - (y1 + y2) / 2;
 			} else {
 				double da = rad - mAngle;
+				mSumRotate += da;
 
-				if (Math.abs(da) > 0.01) {
+				if (Math.abs(da) > 0.001) {
 					double rsin = Math.sin(r);
 					double rcos = Math.cos(r);
 					float x = (float) (mFocusX * rcos + mFocusY * -rsin - mFocusX);
 					float y = (float) (mFocusX * rsin + mFocusY * rcos - mFocusY);
 
 					mMapPosition.rotateMap((float) Math.toDegrees(da), x, y);
-
 					changed = true;
 				}
 			}
+			mAngle = rad;
 		}
 
-		if (changed)
+		if (changed){
 			mMapView.redrawMap(true);
+			mPrevPinchWidth = pinchWidth;
+		}
 
 		mPrevX = x1;
 		mPrevY = y1;
 		mPrevX2 = x2;
 		mPrevY2 = y2;
-
-		mPrevPinchWidth = pinchWidth;
-		mAngle = rad;
 
 		return true;
 	}
