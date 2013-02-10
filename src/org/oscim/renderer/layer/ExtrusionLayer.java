@@ -38,8 +38,9 @@ public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
 	private static final float S = GLRenderer.COORD_MULTIPLIER;
 	private int mNumVertices = 0;
-	private VertexPoolItem mVertices, mCurVertices;
-	private VertexPoolItem mIndices[], mCurIndices[];
+	private final VertexPoolItem mVertices;
+	private VertexPoolItem mCurVertices;
+	private final VertexPoolItem mIndices[], mCurIndices[];
 	private LineClipper mClipper;
 
 	// indices for:
@@ -290,7 +291,7 @@ public class ExtrusionLayer extends Layer {
 
 			/* check if face is within tile */
 			if (!mClipper.clipNext((int) nx, (int) ny)) {
-				even = (even + 1) % 2;
+				even = (even == 0 ? 1 : 0);
 				continue;
 			}
 
