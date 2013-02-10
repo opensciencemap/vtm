@@ -33,7 +33,7 @@ public final class TextLayer extends TextureLayer {
 	private static int mFontPadY = 1;
 
 	public TextItem labels;
-	private Canvas mCanvas;
+	private final Canvas mCanvas;
 	private float mScale;
 
 	public TextItem getLabels() {
@@ -210,17 +210,23 @@ public final class TextLayer extends TextureLayer {
 					vx = vx / a;
 					vy = vy / a;
 
-					float ux = -vy;
-					float uy = vx;
+					float ux = -vy * hh;
+					float uy = vx * hh;
 
-					x1 = (short) (SCALE * (vx * hw - ux * hh));
-					y1 = (short) (SCALE * (vy * hw - uy * hh));
-					x2 = (short) (SCALE * (-vx * hw - ux * hh));
-					y2 = (short) (SCALE * (-vy * hw - uy * hh));
-					x4 = (short) (SCALE * (-vx * hw + ux * hh2));
-					y4 = (short) (SCALE * (-vy * hw + uy * hh2));
-					x3 = (short) (SCALE * (vx * hw + ux * hh2));
-					y3 = (short) (SCALE * (vy * hw + uy * hh2));
+					float ux2 = -vy * hh2;
+					float uy2 = vx * hh2;
+
+					vx *= hw;
+					vy *= hw;
+
+					x1 = (short) (SCALE * (vx - ux));
+					y1 = (short) (SCALE * (vy - uy));
+					x2 = (short) (SCALE * (-vx - ux));
+					y2 = (short) (SCALE * (-vy - uy));
+					x4 = (short) (SCALE * (-vx + ux2));
+					y4 = (short) (SCALE * (-vy + uy2));
+					x3 = (short) (SCALE * (vx + ux2));
+					y3 = (short) (SCALE * (vy + uy2));
 				}
 
 				// add vertices
