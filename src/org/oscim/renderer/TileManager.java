@@ -415,26 +415,43 @@ public class TileManager {
 				continue;
 
 			int diff = (t.zoomLevel - zoom);
-			double dx, dy, dz;
+			double dx, dy, dz, scale;
+			dz = 0;
 
 			if (diff == 0) {
 				dx = (t.pixelX + h) - x;
 				dy = (t.pixelY + h) - y;
-				dz = 0.5f;
+				scale = 0.5f;
 			} else if (diff > 0) {
 				// tile zoom level is greater than current
+				// NB: distance increase by the factor 2
+				// with each zoom-level, so that children
+				// will be kept less likely than parent tiles.
 				dx = (t.pixelX + h) - x * (1 << diff);
 				dy = (t.pixelY + h) - y * (1 << diff);
-				dz = 0.25f * (1 << (diff - 1));
+				// add tilesize/2 with each zoom-level
+				// so that children near the current
+				// map position but a few levels above
+				// will also be removed
+				dz = diff * h;
+				scale = 0.25f * (1 << diff);
 			} else {
+				diff = -diff;
 				// tile zoom level is smaller than current
-				dx = (t.pixelX + h) - x / (1 << -diff);
-				dy = (t.pixelY + h) - y / (1 << -diff);
-				dz = 0.5f * (1 << -diff);
+				dx = (t.pixelX + h) - x / (1 << diff);
+				dy = (t.pixelY + h) - y / (1 << diff);
+				dz = diff * h;
+				scale = 0.5f * (1 << diff);
 			}
+			if (dx < 0)
+				dx = -dx;
+
+			if (dy < 0)
+				dy = -dy;
+
 			dx %= center;
 			dy %= center;
-			t.distance = (float) ((dx * dx + dy * dy) * dz);
+			t.distance = (float) ((dx + dy + dz) * scale);
 		}
 	}
 
@@ -483,7 +500,7 @@ public class TileManager {
 					Log.d(TAG, "limitCache: tile still locked " + t + " " + t.distance);
 					// try again in next run.
 					//locked = true;
-					break;
+					//break;
 				} else if (t.state == STATE_LOADING) {
 					// NOTE:  when set loading to false the tile could be
 					// added to load queue again while still processed in
@@ -499,19 +516,19 @@ public class TileManager {
 					tiles[i] = null;
 				}
 			}
-			//			if (locked) {
-			//				Log.d(TAG, "------------ "
-			//						+ remove + " / " + r + " "
-			//						+ mMapPosition.zoomLevel
-			//						+ " ----------");
-			//				for (int i = 0; i < size; i++) {
-			//					MapTile t = tiles[i];
-			//					if (t == null)
-			//						continue;
-			//					Log.d(TAG, "limitCache: " + t + " " + t.distance);
-			//
-			//				}
-			//			}
+//			if (locked) {
+//				Log.d(TAG, "------------ "
+//						+ remove + " / " + r + " "
+//						+ mMapPosition.zoomLevel
+//						+ " ----------");
+//				for (int i = 0; i < size; i++) {
+//					MapTile t = tiles[i];
+//					if (t == null)
+//						continue;
+//					Log.d(TAG, "limitCache: " + t + " " + t.distance);
+//
+//				}
+//			}
 			remove = (newTileCnt - MAX_TILES_IN_QUEUE) + 10;
 			//int r = remove;
 			for (int i = size - 1; i >= 0 && remove > 0; i--) {
