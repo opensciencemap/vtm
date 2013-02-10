@@ -22,9 +22,9 @@ import java.io.InputStream;
  */
 public enum InternalRenderTheme implements Theme {
 
-	DEFAULT("/org/oscim/theme/osmarender/default.xml"),
+	DEFAULT("/org/oscim/theme/styles/default.xml"),
 
-	TRONRENDER("/org/oscim/theme/osmarender/tronrender.xml");
+	TRONRENDER("/org/oscim/theme/styles/tronrender.xml");
 
 	private final String mPath;
 
