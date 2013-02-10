@@ -54,4 +54,18 @@ public class FastMath {
 
 		return (pow > 0 ? (1 << pow) : (1.0f / (1 << -pow)));
 	}
+
+	public static float abs(float value){
+		return value < 0 ? -value : value;
+	}
+
+	public static float absMax(float value1, float value2){
+		float a1 = value1 < 0 ? -value1 : value1;
+		float a2 = value2 < 0 ? -value2 : value2;
+		return a2 < a1 ? a1 : a2;
+	}
+
+	public static boolean absMaxCmp(float value1, float value2, float cmp){
+		return value1 < -cmp || value1 > cmp || value2 < -cmp || value2 > cmp;
+	}
 }
