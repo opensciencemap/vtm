@@ -4,8 +4,8 @@
              xsi:schemaLocation="http://mapsforge.org/renderTheme ../renderTheme.xsd"
              version="1" map-background="#fdfdfc">
 
-  <style-text name="road" k="name"    font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
-  <style-text name="major-road" k="name"   font-style="bold" font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" />
+  <style-text name="road" k="name"         font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" priority="2"/>
+  <style-text name="major-road" k="name"   font-style="bold" font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" priority="1"/>
   
   <style-area name="residential"         fill="#f0eee8" fade="10"/>
   
