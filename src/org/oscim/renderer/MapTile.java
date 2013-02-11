@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General License as published by the Free Software
@@ -18,16 +18,13 @@ import org.oscim.generator.JobTile;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.TextItem;
 
+/**
+ * Extends Tile class for concurrent use in TileManager,
+ * TileGenerator and GLRenderer threads.
+ *
+ * @author Hannes Janetzek
+ */
 public final class MapTile extends JobTile {
-
-	/**
-	 * VBO holds all vertex data to draw lines and polygons
-	 * layout:
-	 * 16 bytes fill coordinates,
-	 * n bytes polygon vertices,
-	 * m bytes lines vertices
-	 */
-	BufferObject vbo;
 
 	/**
 	 * Tile data set by TileGenerator.
@@ -39,6 +36,15 @@ public final class MapTile extends JobTile {
 	 * Tile is in view region. Set by GLRenderer.
 	 */
 	public boolean isVisible;
+
+	/**
+	 * VBO holds all vertex data to draw lines and polygons when
+	 * 'layers' are compiled. layout:
+	 * 16 bytes fill coordinates,
+	 * n bytes polygon vertices,
+	 * m bytes lines vertices
+	 */
+	BufferObject vbo;
 
 	/**
 	 * Pointer to access relatives in QuadTree
@@ -78,10 +84,6 @@ public final class MapTile extends JobTile {
 
 	MapTile(int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
-	}
-
-	boolean isActive() {
-		return state != 0;
 	}
 
 	/**

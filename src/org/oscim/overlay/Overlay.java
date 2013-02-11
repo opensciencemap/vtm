@@ -75,7 +75,7 @@ public abstract class Overlay implements OverlayConstants {
 		mResourceProxy = null;
 		mScale = 1;
 		//		mResourceProxy = new DefaultResourceProxyImpl(ctx);
-		//		mScale = ctx.getResources().getDisplayMetrics().density;
+		//	mScale = ctx.getResources().getDisplayMetrics().density;
 	}
 
 	public Overlay(final Context ctx) {
