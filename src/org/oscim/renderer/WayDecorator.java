@@ -223,16 +223,16 @@ public final class WayDecorator {
 				y2 = prevY;
 			}
 
-			// estimate position of text on path
-			width = (x2 - x1) / 2f;
-			//width += 4 * (width / wayNameWidth);
-			x2 = x2 - (width - s * width);
-			x1 = x1 + (width - s * width);
-
-			height = (y2 - y1) / 2f;
-			//height += 4 * (height / wayNameWidth);
-			y2 = y2 - (height - s * height);
-			y1 = y1 + (height - s * height);
+//			// estimate position of text on path
+//			width = (x2 - x1) / 2f;
+//			//width += 4 * (width / wayNameWidth);
+//			x2 = x2 - (width - s * width);
+//			x1 = x1 + (width - s * width);
+//
+//			height = (y2 - y1) / 2f;
+//			//height += 4 * (height / wayNameWidth);
+//			y2 = y2 - (height - s * height);
+//			y1 = y1 + (height - s * height);
 
 			TextItem n = TextItem.get();
 
