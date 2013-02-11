@@ -27,6 +27,10 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 /**
+ * This class is for rendering the Line- and PolygonLayers of visible MapTiles. For
+ * visible tiles that do not have data available yet its parent in children
+ * tiles are rendered when available.
+ *
  * @author Hannes Janetzek
  */
 public class BaseMap {

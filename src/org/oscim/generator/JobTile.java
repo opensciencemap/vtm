@@ -34,6 +34,13 @@ public class JobTile extends Tile {
 		state = STATE_NONE;
 	}
 
+	/**
+	 * @return true if tile is loading, has new data or is ready for rendering
+	 * */
+	public boolean isActive() {
+		return state > STATE_NONE && state < STATE_ERROR;
+	}
+
 	public void setLoading() {
 		if (state != STATE_NONE)
 			Log.d(TAG, "wrong state: " + state);
