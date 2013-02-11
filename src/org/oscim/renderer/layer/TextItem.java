@@ -15,6 +15,7 @@
 package org.oscim.renderer.layer;
 
 import org.oscim.theme.renderinstruction.Text;
+import org.oscim.utils.OBB2D;
 
 import android.util.Log;
 
@@ -120,6 +121,9 @@ public class TextItem {
 		return this;
 	}
 
+	/* copy properties from 'ti' and add offset
+	 *
+	 * */
 	public TextItem move(TextItem ti, float dx, float dy, float scale) {
 		this.x = dx + (ti.x * scale);
 		this.y = dy + (ti.y * scale);
@@ -127,6 +131,13 @@ public class TextItem {
 		this.text = ti.text;
 		this.width = ti.width;
 		return this;
+	}
+
+	public void setAxisAlignedBBox(){
+		this.x1 = x - width / 2;
+		this.y1 = y - text.fontHeight / 2;
+		this.x2 = x + width / 2;
+		this.y2 = y + text.fontHeight / 2;
 	}
 
 	public static boolean bboxOverlaps(TextItem it1, TextItem it2, float add) {
@@ -174,4 +185,5 @@ public class TextItem {
 	public byte origin;
 
 	public int active;
+	public OBB2D bbox;
 }
