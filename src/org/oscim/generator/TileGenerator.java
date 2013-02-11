@@ -160,7 +160,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180)));
 
 		mLayers = new Layers();
-
 		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
 			//Log.d(TAG, "Failed loading: " + tile);
 			mLayers.clear();
@@ -473,9 +472,15 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			return;
 
 		if (text.textKey == mTagEmptyName.key && mTagName.value != null) {
-
-			mLabels = WayDecorator.renderText(mCoords, mTagName.value, text, 0,
-					mIndices[0], mLabels);
+			int offset = 0;
+			for (int i = 0, n = mIndices.length; i < n; i++) {
+				int length = mIndices[i];
+				if (length < 4)
+					break;
+				mLabels = WayDecorator.renderText(mCoords, mTagName.value, text,
+						offset,	length, mLabels);
+				offset += length;
+			}
 		}
 	}
 
