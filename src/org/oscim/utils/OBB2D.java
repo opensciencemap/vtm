@@ -14,22 +14,22 @@
  */
 package org.oscim.utils;
 
-
 /**
  * from http://www.flipcode.com/archives/2D_OBB_Intersection.shtml
+ *
  * @author Morgan McGuire morgan@cs.brown.edu
  * @author Hannes Janetzek
  */
 
 public class OBB2D {
 	// Corners of the box, where 0 is the lower left.
-	private final float[] corner = new float[4 * 2];
+	public final float[] corner = new float[4 * 2];
 
 	// Two edges of the box extended away from corner[0].
-	private final float[] axis = new float[2 * 2];
+	public final float[] axis = new float[2 * 2];
 
 	// origin[a] = corner[0].dot(axis[a]);
-	private final float[] origin = new float[2];
+	public final float[] origin = new float[2];
 
 	// Returns true if other overlaps one dimension of this.
 	private boolean overlaps1Way(OBB2D other) {
@@ -69,30 +69,28 @@ public class OBB2D {
 	// Updates the axes after the corners move.  Assumes the
 	// corners actually form a rectangle.
 	private void computeAxes() {
-		//axis[0] = corner[1] - corner[0];
-		//axis[1] = corner[3] - corner[0];
-
 		Vec2.sub(axis, 0, corner, 1, corner, 0);
 		Vec2.sub(axis, 1, corner, 3, corner, 0);
 
 		// Make the length of each axis 1/edge length so we know any
 		// dot product must be less than 1 to fall within the edge.
-		for (int a = 0; a < 2; a++) {
-			Vec2.normalizeSquared(axis, a);
-			origin[a] = Vec2.dot(corner, 0, axis, a);
-		}
+		Vec2.normalizeSquared(axis, 0);
+		origin[0] = Vec2.dot(corner, 0, axis, 0);
+
+		Vec2.normalizeSquared(axis, 1);
+		origin[1] = Vec2.dot(corner, 0, axis, 1);
 	}
 
 	public OBB2D(float cx, float cy, float w, float h, float angle) {
 		float rcos = (float) Math.cos(angle);
 		float rsin = (float) Math.sin(angle);
 
-		float[] tmp = new float[4*2];
+		float[] tmp = new float[4 * 2];
 		Vec2.set(tmp, 0, rcos, rsin);
 		Vec2.set(tmp, 1, -rsin, rcos);
 
-		Vec2.mul(tmp, 0, w/2);
-		Vec2.mul(tmp, 1, h/2);
+		Vec2.mul(tmp, 0, w / 2);
+		Vec2.mul(tmp, 1, h / 2);
 
 		Vec2.add(tmp, 2, tmp, 0, tmp, 1);
 		Vec2.sub(tmp, 3, tmp, 0, tmp, 1);
@@ -130,7 +128,8 @@ public class OBB2D {
 		computeAxes();
 	}
 
-	public OBB2D(float cx, float cy, float vx, float vy, float width, float height, boolean normalized) {
+	public OBB2D(float cx, float cy, float vx, float vy, float width, float height,
+			boolean normalized) {
 
 		float ux = -vy;
 		float uy = vx;
@@ -164,33 +163,30 @@ public class OBB2D {
 		float vx = cx - dx;
 		float vy = cy - dy;
 
-		float a = (float) (1.0 / Math.sqrt(vx * vx + vy * vy));
-		vx *= a;
-		vy *= a;
-
-		float ux = -vy;
-		float uy = vx;
+		float a = (float) Math.sqrt(vx * vx + vy * vy);
+		vx /= a;
+		vy /= a;
 
 		float hw = width / 2;
 		float hh = height / 2;
 
+		float ux = vy * hh;
+		float uy = -vx * hh;
+
 		vx *= hw;
 		vy *= hw;
 
-		ux *= hh;
-		uy *= hh;
+		corner[0] = cx - vx - ux;
+		corner[1] = cy - vy - uy;
 
-		corner[0] = cx + (vx - ux);
-		corner[1] = cy + (vy - uy);
+		corner[2] = cx + vx - ux;
+		corner[3] = cy + vy - uy;
 
-		corner[2] = cx + (-vx - ux);
-		corner[3] = cy + (-vy - uy);
+		corner[4] = cx + vx + ux;
+		corner[5] = cy + vy + uy;
 
-		corner[4] = cx + (-vx + ux);
-		corner[5] = cy + (-vy + uy);
-
-		corner[6] = cx + (vx + ux);
-		corner[7] = cy + (vy + uy);
+		corner[6] = cx - vx + ux;
+		corner[7] = cy - vy + uy;
 
 		computeAxes();
 	}

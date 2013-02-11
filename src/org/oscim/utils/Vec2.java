@@ -27,8 +27,18 @@ public final class Vec2 {
 
 		float length = x * x + y * y;
 
-		v[(pos << 1) + 0] /= length;
-		v[(pos << 1) + 1] /= length;
+		v[(pos << 1) + 0] = x / length;
+		v[(pos << 1) + 1] = y / length;
+	}
+
+	public final static void normalize(float[] v, int pos) {
+		float x = v[(pos << 1) + 0];
+		float y = v[(pos << 1) + 1];
+
+		double length = Math.sqrt(x * x + y * y);
+
+		v[(pos << 1) + 0] = (float)(x / length);
+		v[(pos << 1) + 1] = (float)(y / length);
 	}
 
 	public final static float length(float[] v, int pos) {
