@@ -315,4 +315,19 @@ public final class GeometryUtils {
 		return Math.toDegrees(BCA);
 	}
 
+	// from www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+	public static boolean pointInPoly(int nvert, float[] vert, float testx, float testy) {
+		int i, j;
+		boolean inside = false;
+		for (i = 0, j = (nvert - 1) * 2; i < nvert * 2; j = i++) {
+			if (((vert[i * 2 + 1] > testy) != (vert[j * j + 1] > testy)) &&
+					(testx < (vert[j * 2] - vert[i * 2])
+							* (testy - vert[i * 2 + 1])
+							/ (vert[j * 2 + 1] - vert[i * 2 + 1]) + vert[i * 2]))
+				inside = !inside;
+		}
+		return inside;
+	}
+
+
 }
