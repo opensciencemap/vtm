@@ -15,6 +15,16 @@
 
 package org.oscim.renderer.overlays;
 
+// TODO
+// 1. rewrite :)
+// 2. compare previous to current state
+// 2.1 test for new labels to be placed
+// 2.2 handle collisions
+// 3 join segments that belong to one feature
+// 4 handle zoom-level changes
+// 5 3D-Tree might be handy
+//
+
 import java.util.HashMap;
 
 import org.oscim.core.MapPosition;
@@ -120,6 +130,15 @@ public class TextOverlayExp extends BasicOverlay {
 		}
 	}
 
+	//private static void setOBB(TextItem ti){
+	//	if (ti.bbox == null)
+	//	ti.bbox = new OBB2D(ti.x, ti.y, ti.x1, ti.y1, ti.width + 10,
+	//			ti.text.fontHeight + 10);
+	//	else
+	//		ti.bbox.set(ti.x, ti.y, ti.x1, ti.y1, ti.width + 10,
+	//			ti.text.fontHeight + 10);
+	//}
+
 	// local pool, avoids synchronized TextItem.get()/release()
 	private TextItem mPool;
 
@@ -141,7 +160,13 @@ public class TextOverlayExp extends BasicOverlay {
 				// make strings unique
 				ti.string = lp.string;
 
-				if (lp.active < ti.active) {
+				//p.active < ti.active ||
+
+				//Log.d(TAG, "overlap, same label in bbox " + lp.string
+				//		+ " at " + ti.x + ":" + ti.y + ", " + lp.x + ":"
+				//+ lp.y + " " + ti.length + "/" + lp.length);
+
+				if (lp.length < ti.length) {
 
 					//if (lp.length > ti.length) {
 					//Log.d(TAG, "drop " + lp.string);
@@ -155,38 +180,30 @@ public class TextOverlayExp extends BasicOverlay {
 
 					continue;
 				}
-				///Log.d(TAG, "overlap, same label in bbox " + lp.string
-				//			+ " at " + ti.x + ":" + ti.y + ", " + lp.x + ":" + lp.y);
 
 				return 3;
 			}
 
-			//			if (!TextItem.bboxOverlaps(ti, lp, 10)) {
-			//				lp = lp.next;
-			//				continue;
-			//			}
-
 			if (ti.bbox == null) {
-				ti.bbox = new OBB2D(ti.x, ti.y, ti.x1, ti.y1, ti.width + 10,
-						ti.text.fontHeight + 10);
-				//Log.d(TAG,"add > " + ti.string + " " + Arrays.toString(ti.bbox.axis)+ " / " + Arrays.toString(ti.bbox.origin));
+				ti.bbox = new OBB2D(ti.x, ti.y, ti.x1, ti.y1,
+						ti.width + 10, ti.text.fontHeight + 10);
 			}
 			if (lp.bbox == null) {
-				lp.bbox = new OBB2D(lp.x, lp.y, lp.x1, lp.y1, lp.width + 10,
-						lp.text.fontHeight + 10);
-				//Log.d(TAG,"add > " + lp.string + " " + Arrays.toString(lp.bbox.axis) + " / " + Arrays.toString(lp.bbox.origin));
+				lp.bbox = new OBB2D(lp.x, lp.y, lp.x1, lp.y1,
+						lp.width + 10, lp.text.fontHeight + 10);
 			}
-			byte intersect = (byte) (ti.bbox.overlaps(lp.bbox) ? 1 : 0);
 
-			//			byte intersect = GeometryUtils.linesIntersect(
-			//					ti.x1, ti.y1, ti.x2, ti.y2,
-			//					lp.x1, lp.y1, lp.x2, lp.y2);
+			boolean intersect = ti.bbox.overlaps(lp.bbox);
 
-			if (intersect != 0) {
-				Log.d(TAG, "intersection " + lp.string + " <> " + ti.string
-						+ " at " + ti.x + ":" + ti.y);
+			//	byte intersect = GeometryUtils.linesIntersect(
+			//		ti.x1, ti.y1, ti.x2, ti.y2,
+			//		lp.x1, lp.y1, lp.x2, lp.y2);
 
-				if (lp.text.priority > ti.text.priority || lp.active < ti.active) {
+			if (intersect) {
+				//Log.d(TAG, "intersection " + lp.string + " <> " + ti.string
+				//		+ " at " + ti.x + ":" + ti.y);
+
+				if (lp.text.priority > ti.text.priority || lp.length < ti.length) {
 					//if (lp.length > ti.length) {
 					//Log.d(TAG, "drop " + lp.string);
 					TextItem tmp = lp;
@@ -200,7 +217,7 @@ public class TextOverlayExp extends BasicOverlay {
 					continue;
 				}
 
-				return intersect;
+				return 1;
 
 				//	if ((lp.n1 != null && lp.n1 == ti.n2) ||
 				//			(lp.n2 != null && lp.n2 == ti.n1)) {
@@ -238,7 +255,7 @@ public class TextOverlayExp extends BasicOverlay {
 		TextLayer tl = mTmpLayer;
 		mTmpLayer = null;
 
-		Layers dbg = null; //new Layers();
+		Layers dbg = null;//new Layers();
 
 		// mTiles might be from another zoomlevel than the current:
 		// this scales MapPosition to the zoomlevel of mTiles...
@@ -256,7 +273,6 @@ public class TextOverlayExp extends BasicOverlay {
 		double angle = Math.toRadians(mTmpPos.angle);
 		float cos = (float) Math.cos(angle);
 		float sin = (float) Math.sin(angle);
-		Log.d(TAG, "angle " + mTmpPos.angle + " " + cos + " " + sin);
 
 		int maxx = Tile.TILE_SIZE << (mTmpPos.zoomLevel - 1);
 
@@ -376,9 +392,9 @@ public class TextOverlayExp extends BasicOverlay {
 					else
 						ll = (LineLayer) dbg.getLayer(2, Layer.LINE);
 
-					//					if (ti2.bbox == null)
-					//						ti2.bbox = new OBB2D(ti2.x, ti2.y, ti2.x1, ti2.y1, ti.width + 10,
-					//								ti.text.fontHeight + 10);
+					//if (ti2.bbox == null)
+					//	ti2.bbox = new OBB2D(ti2.x, ti2.y, ti2.x1, ti2.y1, ti.width + 10,
+					//			ti.text.fontHeight + 10);
 
 					{
 						float[] points = new float[4];
