@@ -118,7 +118,9 @@ public class TextItem {
 		this.string = ti.string;
 		this.text = ti.text;
 		this.width = ti.width;
+		this.length = ti.length;
 		return this;
+
 	}
 
 	/* copy properties from 'ti' and add offset
@@ -130,6 +132,7 @@ public class TextItem {
 		this.string = ti.string;
 		this.text = ti.text;
 		this.width = ti.width;
+		this.length = ti.length;
 		return this;
 	}
 
