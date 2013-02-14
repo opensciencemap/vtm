@@ -238,7 +238,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 			changed = mMapPosition.scaleMap(scale, fx, fy);
 		}
 
-		if (!mBeginScale && !mBeginRotate && Math.abs(slope) < 1) {
+		if (!mBeginRotate && Math.abs(slope) < 1) {
 			float my2 = y2 - mPrevY2;
 			float threshold = PINCH_TILT_THRESHOLD;
 
