@@ -18,13 +18,13 @@
   <style-area name="forest|wood"         fill="#ebefe5" fade="7" blend="11" blend-fill="#c6dbb2"/> 
  
   <!-- grass|meadow|garden|grassland|scrub -->
- 	<style-area name="greens"              fill="#e6edcc" fade="10" />
+ 	<style-area name="greens"              fill="#e2edc9" fade="10" />
  	 	<!-- <style-area name="greens"              fill="#d2e5ce" fade="10" />-->
  	<!-- marsh|wetland|nature_reserve -->
  	<style-area name="greens2"             fill="#deecb9" fade="12" />
  	  
  	<!-- park|common|green|cemetery|golf_course|dog_park -->
- 	<style-area name="park"                fill="#d7e6b0" fade="11" />
+ 	<style-area name="park"                fill="#d0e6aa" fade="11" />
   
   <!-- de:Kleingartengebiet -->
   <style-area name="allotments"          fill="#efeae0" fade="12" />
@@ -145,7 +145,7 @@
         <!-- <rule e="way" k="tourism" v="attraction"> <area fill="#f2caea" /> </rule> -->
            
         <rule e="way" k="tourism" v="zoo|picnic_site|caravan_site|camp_site">
-          <area fill="#c7d6a0" />
+          <area fill="#c0d69a" />
         </rule>
       </rule>
       
