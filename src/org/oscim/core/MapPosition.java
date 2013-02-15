@@ -15,7 +15,6 @@
  */
 package org.oscim.core;
 
-import android.opengl.Matrix;
 
 /** A MapPosition Container. */
 public class MapPosition {
@@ -31,11 +30,6 @@ public class MapPosition {
 	public double x;
 	public double y;
 
-	public float[] viewMatrix;
-
-	//	// DO NOT MODIFY! shared with MapViewPosition
-	//	public float[] projMatrix;
-
 	public MapPosition() {
 		this.zoomLevel = (byte) 1;
 		this.scale = 1;
@@ -44,15 +38,6 @@ public class MapPosition {
 		this.angle = 0;
 		this.x = MercatorProjection.longitudeToPixelX(this.lon, zoomLevel);
 		this.y = MercatorProjection.latitudeToPixelY(this.lat, zoomLevel);
-	}
-
-	// FIXME remove this here
-	public void init() {
-		viewMatrix = new float[16];
-		Matrix.setIdentityM(viewMatrix, 0);
-		//
-		//		rotateMatrix = new float[16];
-		//		Matrix.setIdentityM(rotateMatrix, 0);
 	}
 
 	//	public Point geopointToMap(GeoPoint in, Point reuse) {

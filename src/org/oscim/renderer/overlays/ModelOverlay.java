@@ -22,6 +22,7 @@ import java.nio.ShortBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
@@ -160,17 +161,16 @@ public class ModelOverlay extends RenderOverlay {
 		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 64 * 4, fbuf, GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-		mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
+		mMapView.getMapViewPosition().getMapPosition(mMapPosition);
 
 		// tell GLRenderer to call 'render'
 		isReady = true;
 	}
 
 	@Override
-	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
+	public synchronized void render(MapPosition pos, Matrices m) {
 
-		setMatrix(pos, mv);
-		Matrix.multiplyMM(mv, 0, proj, 0, mv, 0);
+		setMatrix(pos, m);
 
 		GLState.useProgram(polygonProgram);
 
@@ -182,7 +182,7 @@ public class ModelOverlay extends RenderOverlay {
 		GLES20.glVertexAttribPointer(hPolygonVertexPosition, 3, GLES20.GL_FLOAT, false, 16, 0);
 		GLES20.glVertexAttribPointer(hPolygonLightPosition, 1, GLES20.GL_FLOAT, false, 16, 12);
 
-		GLES20.glUniformMatrix4fv(hPolygonMatrix, 1, false, mv, 0);
+		GLES20.glUniformMatrix4fv(hPolygonMatrix, 1, false, m.mvp, 0);
 		GLES20.glUniform4f(hPolygonColor, 0.5f, 0.5f, 0.5f, 0.7f);
 
 		// draw to depth buffer
@@ -211,7 +211,7 @@ public class ModelOverlay extends RenderOverlay {
 	}
 
 	@Override
-	protected void setMatrix(MapPosition curPos, float[] matrix) {
+	protected void setMatrix(MapPosition curPos, Matrices m) {
 		// TODO if oPos == curPos this could be simplified
 
 		MapPosition oPos = mMapPosition;
@@ -231,19 +231,19 @@ public class ModelOverlay extends RenderOverlay {
 
 		float scale = curPos.scale / div;
 
-		Matrix.setIdentityM(matrix, 0);
+		Matrix.setIdentityM(m.mvp, 0);
 
 		// translate relative to map center
-		matrix[12] = x * scale;
-		matrix[13] = y * scale;
+		m.mvp[12] = x * scale;
+		m.mvp[13] = y * scale;
 		// scale to current tile world coordinates
 		scale = (curPos.scale / oPos.scale) / div;
 		scale /= GLRenderer.COORD_MULTIPLIER;
-		matrix[0] = scale;
-		matrix[5] = scale;
-		matrix[10] = scale; // 1000f;
+		m.mvp[0] = scale;
+		m.mvp[5] = scale;
+		m.mvp[10] = scale; // 1000f;
 
-		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
+		Matrix.multiplyMM(m.mvp, 0, m.viewproj, 0, m.mvp, 0);
 	}
 
 	@Override

@@ -66,7 +66,7 @@ public class MapViewPosition {
 	private double mPosX;
 	private double mPosY;
 
-	private AnimationHandler mHandler;
+	private final AnimationHandler mHandler;
 
 	MapViewPosition(MapView mapView) {
 		mMapView = mapView;
@@ -81,18 +81,19 @@ public class MapViewPosition {
 		mHandler = new AnimationHandler(this);
 	}
 
-	private float[] mProjMatrix = new float[16];
-	private float[] mProjMatrixI = new float[16];
-	private float[] mUnprojMatrix = new float[16];
-	private float[] mViewMatrix = new float[16];
-	private float[] mRotMatrix = new float[16];
-	private float[] mTmpMatrix = new float[16];
+	private final float[] mProjMatrix = new float[16];
+	private final float[] mProjMatrixI = new float[16];
+	private final float[] mUnprojMatrix = new float[16];
+	private final float[] mViewMatrix = new float[16];
+	private final float[] mVPMatrix = new float[16];
+	private final float[] mRotMatrix = new float[16];
+	private final float[] mTmpMatrix = new float[16];
 
 	// temporary vars: only use in synchronized functions!
-	private Point2D mMovePoint = new Point2D();
-	private float[] mv = { 0, 0, 0, 1 };
-	private float[] mu = { 0, 0, 0, 1 };
-	private float[] mBBoxCoords = new float[8];
+	private final Point2D mMovePoint = new Point2D();
+	private final float[] mv = { 0, 0, 0, 1 };
+	private final float[] mu = { 0, 0, 0, 1 };
+	private final float[] mBBoxCoords = new float[8];
 
 	private float mHeight, mWidth;
 
@@ -120,8 +121,7 @@ public class MapViewPosition {
 		updateMatrix();
 	}
 
-	public synchronized boolean getMapPosition(final MapPosition mapPosition,
-			final float[] projection) {
+	public synchronized boolean getMapPosition(final MapPosition mapPosition) {
 		// if (!isValid())
 		// return false;
 
@@ -145,21 +145,34 @@ public class MapViewPosition {
 		mapPosition.x = mPosX;
 		mapPosition.y = mPosY;
 
-		if (mapPosition.viewMatrix != null)
-			System.arraycopy(mViewMatrix, 0, mapPosition.viewMatrix, 0, 16);
+		return true;
+	}
 
-		if (projection == null)
-			return true;
+	/**
+	 * get a copy of current matrices
+	 * @param view ...
+	 * @param proj ...
+	 * @param vp view and projection
+	 */
+	public synchronized void getMatrix(float[] view, float[] proj, float[] vp) {
+		if (view != null)
+			System.arraycopy(mViewMatrix, 0, view, 0, 16);
 
+		if (proj!= null)
+			System.arraycopy(mProjMatrix, 0, proj, 0, 16);
+
+		if (vp != null)
+			System.arraycopy(mVPMatrix, 0, vp, 0, 16);
+	}
+
+	public synchronized void getMapViewProjection(float[] box) {
 		float t = getZ(1);
 		float t2 = getZ(-1);
 
-		unproject(1, -1, t, projection, 0); // top-right
-		unproject(-1, -1, t, projection, 2); // top-left
-		unproject(-1, 1, t2, projection, 4); // bottom-left
-		unproject(1, 1, t2, projection, 6); // bottom-right
-
-		return true;
+		unproject(1, -1, t, box, 0); // top-right
+		unproject(-1, -1, t, box, 2); // top-left
+		unproject(-1, 1, t2, box, 4); // bottom-left
+		unproject(1, 1, t2, box, 6); // bottom-right
 	}
 
 	// get the z-value of the map-plane for a point on screen
@@ -365,8 +378,9 @@ public class MapViewPosition {
 		mv[2] = 0;
 		mv[3] = 1;
 
-		Matrix.multiplyMV(mv, 0, mViewMatrix, 0, mv, 0);
-		Matrix.multiplyMV(mv, 0, mProjMatrix, 0, mv, 0);
+		//	Matrix.multiplyMV(mv, 0, mViewMatrix, 0, mv, 0);
+		//	Matrix.multiplyMV(mv, 0, mProjMatrix, 0, mv, 0);
+		Matrix.multiplyMV(mv, 0, mVPMatrix, 0, mv, 0);
 
 		out.x = (int) (mv[0] / mv[3] * mWidth / 2);
 		out.y = (int) (mv[1] / mv[3] * mHeight / 2);
@@ -374,10 +388,6 @@ public class MapViewPosition {
 		//	Log.d(">>>", "project: " + out.x + " " + out.y);
 
 		return out;
-	}
-
-	public synchronized void getMVP(float[] matrix) {
-		Matrix.multiplyMM(matrix, 0, mProjMatrix, 0, mViewMatrix, 0);
 	}
 
 	//	public static Point project(float x, float y, float[] matrix, float[] tmpVec, Point reuse) {
@@ -419,6 +429,8 @@ public class MapViewPosition {
 		GlUtils.setScaleM(mTmpMatrix, 1 / mWidth, 1 / mWidth, 1);
 
 		Matrix.multiplyMM(mViewMatrix, 0, mRotMatrix, 0, mTmpMatrix, 0);
+
+		Matrix.multiplyMM(mVPMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);
 
 		//--- unproject matrix:
 		// Matrix.multiplyMM(mTmpMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);

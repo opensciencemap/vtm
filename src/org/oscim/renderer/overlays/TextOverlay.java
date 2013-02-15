@@ -18,6 +18,7 @@ package org.oscim.renderer.overlays;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.MapTile;
 import org.oscim.renderer.TileSet;
 import org.oscim.renderer.layer.Layer;
@@ -45,7 +46,7 @@ public class TextOverlay extends BasicOverlay {
 	private final static String TAG = TextOverlay.class.getName();
 
 	private TileSet mTiles;
-	private LabelThread mThread;
+	private final LabelThread mThread;
 
 	private MapPosition mWorkPos;
 
@@ -170,7 +171,7 @@ public class TextOverlay extends BasicOverlay {
 		if (mTiles.cnt == 0)
 			return;
 
-		mMapView.getMapViewPosition().getMapPosition(mWorkPos, null);
+		mMapView.getMapViewPosition().getMapPosition(mWorkPos);
 
 		TextLayer tl = mWorkLayer;
 
@@ -415,7 +416,7 @@ public class TextOverlay extends BasicOverlay {
 	}
 
 	@Override
-	protected void setMatrix(MapPosition curPos, float[] matrix) {
+	protected void setMatrix(MapPosition curPos, Matrices m) {
 		MapPosition oPos = mMapPosition;
 
 		float div = FastMath.pow(oPos.zoomLevel - curPos.zoomLevel);
@@ -424,10 +425,10 @@ public class TextOverlay extends BasicOverlay {
 
 		float scale = curPos.scale / div;
 
-		GlUtils.setMatrix(matrix, x * scale, y * scale,
+		GlUtils.setMatrix(m.mvp, x * scale, y * scale,
 				scale / GLRenderer.COORD_MULTIPLIER);
 
-		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
+		Matrix.multiplyMM(m.mvp, 0, m.view, 0, m.mvp, 0);
 	}
 
 	private boolean mHolding;

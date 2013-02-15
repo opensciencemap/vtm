@@ -74,11 +74,20 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// bytes currently loaded in VBOs
 	private static int mBufferMemoryUsage;
 
-	private static float[] mMVPMatrix = new float[16];
-	private static float[] mProjMatrix = new float[16];
-	private static float[] mTmpMatrix = new float[16];
+
 	private static float[] mTileCoords = new float[8];
 	private static float[] mDebugCoords = new float[8];
+
+	public class Matrices {
+		public final float[] viewproj = new float[16];
+		public final float[] proj = new float[16];
+		public final float[] view = new float[16];
+
+		// for temporary use by callee
+		public final float[] mvp = new float[16];
+	}
+
+	private static Matrices mMatrices;
 
 	//private
 	static float[] mClearColor = null;
@@ -171,9 +180,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mMapView = mapView;
 		mMapViewPosition = mapView.getMapViewPosition();
 		mMapPosition = new MapPosition();
-		mMapPosition.init();
 
-		Matrix.setIdentityM(mMVPMatrix, 0);
+		//Matrix.setIdentityM(mMVPMatrix, 0);
+		mMatrices = new Matrices();
 
 		// add half pixel to tile clip/fill coordinates to avoid rounding issues
 		short min = -4;
@@ -366,7 +375,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// coordinates)
 		MapPosition pos = mMapPosition;
 		float[] coords = mTileCoords;
-		boolean changed = mMapViewPosition.getMapPosition(pos, coords);
+		boolean changed;
+		synchronized(mMapViewPosition){
+			changed = mMapViewPosition.getMapPosition(pos);
+			mMapViewPosition.getMapViewProjection(coords);
+			mMapViewPosition.getMatrix(mMatrices.view, null, mMatrices.viewproj);
+		}
 
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
@@ -455,7 +469,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			overlays.get(i).update(mMapPosition, changed, tilesChanged);
 
 		/* draw base layer */
-		BaseMap.draw(tiles, tileCnt, pos);
+		BaseMap.draw(tiles, tileCnt, pos, mMatrices);
 
 		/* draw overlays */
 		for (int i = 0, n = overlays.size(); i < n; i++) {
@@ -466,7 +480,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				renderOverlay.newData = false;
 			}
 			if (renderOverlay.isReady)
-				renderOverlay.render(mMapPosition, mMVPMatrix, mProjMatrix);
+				renderOverlay.render(mMapPosition, mMatrices);
 		}
 
 		if (MapView.debugFrameTime) {
@@ -490,15 +504,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			mDebugCoords[6] = max;
 			mDebugCoords[7] = -ymax;
 
-			PolygonRenderer.debugDraw(mProjMatrix, mDebugCoords, 0);
+			PolygonRenderer.debugDraw(mMatrices.proj, mDebugCoords, 0);
 
 			pos.zoomLevel = -1;
-			mMapViewPosition.getMapPosition(pos, mDebugCoords);
+			mMapViewPosition.getMapViewProjection(mDebugCoords);
 
-			Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0,
-					pos.viewMatrix, 0);
-
-			PolygonRenderer.debugDraw(mMVPMatrix, mDebugCoords, 1);
+			PolygonRenderer.debugDraw(mMatrices.viewproj, mDebugCoords, 1);
 
 		}
 
@@ -560,32 +571,21 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mWidth = width;
 		mHeight = height;
 
-		GLES20.glScissor(0, 0, mWidth, mHeight);
-
-		float s = MapViewPosition.VIEW_SCALE;
-		float aspect = mHeight / (float) mWidth;
-
-		Matrix.frustumM(mProjMatrix, 0, -s, s,
-				aspect * s, -aspect * s, MapViewPosition.VIEW_NEAR,
-				MapViewPosition.VIEW_FAR);
-
-		Matrix.setIdentityM(mTmpMatrix, 0);
-		Matrix.translateM(mTmpMatrix, 0, 0, 0, -MapViewPosition.VIEW_DISTANCE);
-		Matrix.multiplyMM(mProjMatrix, 0, mProjMatrix, 0, mTmpMatrix, 0);
+		mMapViewPosition.getMatrix(null, mMatrices.proj, null);
 
 		if (debugView) {
 			// modify this to scale only the view, to see better which tiles are
 			// rendered
-			Matrix.setIdentityM(mMVPMatrix, 0);
-			Matrix.scaleM(mMVPMatrix, 0, 0.5f, 0.5f, 1);
-			Matrix.multiplyMM(mProjMatrix, 0, mMVPMatrix, 0, mProjMatrix, 0);
+			Matrix.setIdentityM(mMatrices.mvp, 0);
+			Matrix.scaleM(mMatrices.mvp, 0, 0.5f, 0.5f, 1);
+			Matrix.multiplyMM(mMatrices.proj, 0, mMatrices.mvp, 0, mMatrices.proj, 0);
 		}
 
-		BaseMap.setProjection(mProjMatrix);
+		BaseMap.setProjection(mMatrices.proj);
 
 		GLES20.glViewport(0, 0, width, height);
-		//GLES20.glScissor(0, 0, width, height);
-		//GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
+		GLES20.glScissor(0, 0, width, height);
+		GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
 
 		GLES20.glClearStencil(0x00);
 

@@ -21,6 +21,7 @@ import java.nio.ShortBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
@@ -73,31 +74,31 @@ public class TestLineOverlay extends RenderOverlay {
 	//   -> max line length is 2^12/4=1024
 	// - texture 'end' is 'length'-'start'
 
-	private final short[] box = {
-			//  '-' start
-			0, 0, 0, 0,
-			// 0.
-			-800, 0, 255, 0,
-			// 2.
-			100, 0, 255, 0,
-			// 1.
-			0, 0, 255, 1,
-			// 3.
-			800, 0, 255, 1,
-
-			-800, 200, 127, 0,
-			0, 200, 127, 0,
-			0, 200, 127, 1,
-			800, 200, 127, 1,
-
-			-800, 400, 255, 0,
-			0, 400, 255, 0,
-			0, 400, 255, 1,
-			800, 400, 255, 1,
-
-			// '-' end
-			0, 0, 0, 0,
-	};
+	//	private final short[] box = {
+	//			//  '-' start
+	//			0, 0, 0, 0,
+	//			// 0.
+	//			-800, 0, 255, 0,
+	//			// 2.
+	//			100, 0, 255, 0,
+	//			// 1.
+	//			0, 0, 255, 1,
+	//			// 3.
+	//			800, 0, 255, 1,
+	//
+	//			-800, 200, 127, 0,
+	//			0, 200, 127, 0,
+	//			0, 200, 127, 1,
+	//			800, 200, 127, 1,
+	//
+	//			-800, 400, 255, 0,
+	//			0, 400, 255, 0,
+	//			0, 400, 255, 1,
+	//			800, 400, 255, 1,
+	//
+	//			// '-' end
+	//			0, 0, 0, 0,
+	//	};
 
 	private short[] indices = {
 			0, 1, 2,
@@ -298,17 +299,17 @@ public class TestLineOverlay extends RenderOverlay {
 				GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-		mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
+		mMapView.getMapViewPosition().getMapPosition(mMapPosition);
 
 		// tell GLRenderer to call 'render'
 		isReady = true;
 	}
 
 	@Override
-	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
+	public synchronized void render(MapPosition pos, Matrices m) {
 
-		setMatrix(pos, mv);
-		Matrix.multiplyMM(mv, 0, proj, 0, mv, 0);
+		setMatrix(pos, m);
+		//Matrix.multiplyMM(mv, 0, proj, 0, mv, 0);
 
 		GLState.useProgram(testProgram);
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
@@ -319,7 +320,7 @@ public class TestLineOverlay extends RenderOverlay {
 
 		GLES20.glEnableVertexAttribArray(htestVertexFlip);
 
-		GLES20.glUniformMatrix4fv(htestMatrix, 1, false, mv, 0);
+		GLES20.glUniformMatrix4fv(htestMatrix, 1, false, m.mvp, 0);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferID);
 
@@ -355,7 +356,7 @@ public class TestLineOverlay extends RenderOverlay {
 	}
 
 	@Override
-	protected void setMatrix(MapPosition curPos, float[] matrix) {
+	protected void setMatrix(MapPosition curPos, Matrices m) {
 		MapPosition oPos = mMapPosition;
 
 		byte z = oPos.zoomLevel;
@@ -373,19 +374,19 @@ public class TestLineOverlay extends RenderOverlay {
 
 		float scale = curPos.scale / div;
 
-		Matrix.setIdentityM(matrix, 0);
+		Matrix.setIdentityM(m.mvp, 0);
 
 		// translate relative to map center
-		matrix[12] = x * scale;
-		matrix[13] = y * scale;
+		m.mvp[12] = x * scale;
+		m.mvp[13] = y * scale;
 		// scale to current tile world coordinates
 		scale = (curPos.scale / oPos.scale) / div;
 		scale /= GLRenderer.COORD_MULTIPLIER;
-		matrix[0] = scale;
-		matrix[5] = scale;
-		matrix[10] = 1; //scale; // 1000f;
+		m.mvp[0] = scale;
+		m.mvp[5] = scale;
+		m.mvp[10] = 1; //scale; // 1000f;
 
-		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
+		Matrix.multiplyMM(m.mvp, 0, m.viewproj, 0, m.mvp, 0);
 	}
 
 	@Override

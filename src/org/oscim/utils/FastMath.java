@@ -65,7 +65,13 @@ public class FastMath {
 		return a2 < a1 ? a1 : a2;
 	}
 
+	// test if any absolute value is greater than 'cmp'
 	public static boolean absMaxCmp(float value1, float value2, float cmp){
+		return value1 < -cmp || value1 > cmp || value2 < -cmp || value2 > cmp;
+	}
+
+	// test if any absolute value is greater than 'cmp'
+	public static boolean absMaxCmp(int value1, int value2, int cmp){
 		return value1 < -cmp || value1 > cmp || value2 < -cmp || value2 > cmp;
 	}
 }

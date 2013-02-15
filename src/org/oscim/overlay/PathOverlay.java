@@ -25,6 +25,7 @@ import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
 import org.oscim.theme.renderinstruction.Line;
+import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
 import android.content.Context;
@@ -52,10 +53,10 @@ public class PathOverlay extends Overlay {
 
 		// projected points
 		private float[] mPPoints;
-		private short[] mIndex;
+		private final short[] mIndex;
 		private int mSize;
 
-		private Line mLine;
+		private final Line mLine;
 
 		// limit coords
 		private final int max = 2048;
@@ -70,7 +71,8 @@ public class PathOverlay extends Overlay {
 		// note: this is called from GL-Thread. so check your syncs!
 		// TODO use an Overlay-Thread to build up layers (like for Labeling)
 		@Override
-		public synchronized void update(MapPosition curPos, boolean positionChanged,
+		public synchronized void update(MapPosition curPos,
+				boolean positionChanged,
 				boolean tilesChanged) {
 
 			if (!tilesChanged && !mUpdatePoints)
@@ -144,7 +146,7 @@ public class PathOverlay extends Overlay {
 				// skip too near points
 				int dx = x - px;
 				int dy = y - py;
-				if ((i == 0) || dx > MIN_DIST || dx < -MIN_DIST || dy > MIN_DIST || dy < -MIN_DIST) {
+				if ((i == 0) || FastMath.absMaxCmp(dx, dy, MIN_DIST)) {
 					projected[i + 0] = px = x;
 					projected[i + 1] = py = y;
 					i += 2;

@@ -19,6 +19,7 @@ import static android.opengl.GLES20.glStencilMask;
 import static org.oscim.generator.JobTile.STATE_READY;
 
 import org.oscim.core.MapPosition;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
@@ -49,10 +50,10 @@ public class BaseMap {
 		mfProjMatrix[14] = 0;
 	}
 
-	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos) {
+	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m) {
 		mDrawCnt = 0;
 
-		Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, pos.viewMatrix, 0);
+		Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, m.view, 0);
 
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 
