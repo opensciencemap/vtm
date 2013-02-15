@@ -22,19 +22,21 @@ public class DebugSettings {
 	/**
 	 * True if drawing of tile coordinates is enabled, false otherwise.
 	 */
-	public final boolean mDrawTileCoordinates;
+	public final boolean drawTileCoordinates;
 
 	/**
 	 * True if drawing of tile frames is enabled, false otherwise.
 	 */
-	public final boolean mDrawTileFrames;
+	public final boolean drawTileFrames;
 
-	public final boolean mDrawUnmatchted;
+	public final boolean debugTheme;
 
 	/**
 	 * True if highlighting of water tiles is enabled, false otherwise.
 	 */
-	public final boolean mDisablePolygons;
+	public final boolean disablePolygons;
+
+	public final boolean debugLabels;
 
 	/**
 	 * @param drawTileCoordinates
@@ -43,14 +45,24 @@ public class DebugSettings {
 	 *            if drawing of tile frames is enabled.
 	 * @param disablePolygons
 	 *            if highlighting of water tiles is enabled.
-	 * @param drawUnmatched
+	 * @param debugTheme
 	 *            ...
+	 * @param debugLabels ...
 	 */
 	public DebugSettings(boolean drawTileCoordinates, boolean drawTileFrames,
-			boolean disablePolygons, boolean drawUnmatched) {
-		mDrawTileCoordinates = drawTileCoordinates;
-		mDrawTileFrames = drawTileFrames;
-		mDrawUnmatchted = drawUnmatched;
-		mDisablePolygons = disablePolygons;
+			boolean disablePolygons, boolean debugTheme, boolean debugLabels) {
+		this.drawTileCoordinates = drawTileCoordinates;
+		this.drawTileFrames = drawTileFrames;
+		this.debugTheme = debugTheme;
+		this.disablePolygons = disablePolygons;
+		this.debugLabels = debugLabels;
+	}
+
+	public DebugSettings() {
+		this.drawTileCoordinates = false;
+		this.drawTileFrames = false;
+		this.debugTheme = false;
+		this.disablePolygons = false;
+		this.debugLabels = false;
 	}
 }

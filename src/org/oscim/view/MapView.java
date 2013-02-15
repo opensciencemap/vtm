@@ -163,7 +163,7 @@ public class MapView extends RelativeLayout {
 
 		mMapWorkers = new MapWorker[mNumMapWorkers];
 
-		mDebugSettings = new DebugSettings(false, false, false, false);
+		mDebugSettings = new DebugSettings();
 		TileGenerator.setDebugSettings(mDebugSettings);
 
 		for (int i = 0; i < mNumMapWorkers; i++) {
@@ -266,7 +266,7 @@ public class MapView extends RelativeLayout {
 		//	render();
 
 		if (AndroidUtils.currentThreadIsUiThread()) {
-			boolean changed = mMapViewPosition.getMapPosition(mMapPosition, null);
+			boolean changed = mMapViewPosition.getMapPosition(mMapPosition);
 
 			mOverlayManager.onUpdate(mMapPosition, changed);
 		}
