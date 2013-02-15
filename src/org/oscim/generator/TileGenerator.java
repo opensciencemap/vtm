@@ -143,8 +143,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		tile = mTile = (MapTile) jobTile;
 
-		mDebugDrawPolygons = !debug.mDisablePolygons;
-		mDebugDrawUnmatched = debug.mDrawUnmatchted;
+		mDebugDrawPolygons = !debug.disablePolygons;
+		mDebugDrawUnmatched = debug.debugTheme;
 
 		if (tile.layers != null) {
 			// should be fixed now.
@@ -172,11 +172,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			return false;
 		}
 
-		if (debug.mDrawTileFrames) {
-			mTagName = new Tag("name", tile.toString(), false);
-			mPoiX = Tile.TILE_SIZE >> 1;
-			mPoiY = 10;
-			TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
+		if (debug.drawTileFrames) {
+			//mTagName = new Tag("name", tile.toString(), false);
+			//mPoiX = Tile.TILE_SIZE >> 1;
+			//mPoiY = 10;
+			//TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
 
 			mIndices = debugBoxIndex;
 			if (MapView.enableClosePolygons)
