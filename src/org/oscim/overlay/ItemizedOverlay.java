@@ -73,9 +73,9 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	class ItemOverlay extends BasicOverlay {
 
-		private SymbolLayer mSymbolLayer;
-		private float[] mMvp = new float[16];
-		private float[] mVec = new float[4];
+		private final SymbolLayer mSymbolLayer;
+		private final float[] mMvp = new float[16];
+		private final float[] mVec = new float[4];
 
 		public ItemOverlay(MapView mapView) {
 			super(mapView);
@@ -84,7 +84,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 		// note: this is called from GL-Thread. so check your syncs!
 		@Override
-		public synchronized void update(MapPosition curPos, boolean positionChanged,
+		public synchronized void update(MapPosition curPos, 
+				boolean positionChanged,
 				boolean tilesChanged) {
 
 			if (!tilesChanged && !mUpdate)
@@ -97,7 +98,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 			int my = (int) curPos.y;
 
 			// TODO could pass mvp as param
-			mMapView.getMapViewPosition().getMVP(mMvp);
+			mMapView.getMapViewPosition().getMatrix(null, null, mMvp);
 
 			float[] matrix = mMvp;
 			float[] vec = mVec;

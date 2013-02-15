@@ -21,6 +21,7 @@ import java.nio.ShortBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.generator.JobTile;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapTile;
 import org.oscim.renderer.TileSet;
@@ -54,7 +55,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	private boolean initialized = false;
 
 	// FIXME sum up size used while filling layer only up to:
-	private int BUFFERSIZE = 65536 * 2;
+	private final int BUFFERSIZE = 65536 * 2;
 	private TileSet mTileSet;
 	private ShortBuffer mShortBuffer;
 	private MapTile[] mTiles;
@@ -64,7 +65,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	public void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged) {
 
-		mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
+		mMapView.getMapViewPosition().getMapPosition(mMapPosition);
 
 		if (!initialized) {
 			initialized = true;
@@ -155,16 +156,16 @@ public class ExtrusionOverlay extends RenderOverlay {
 		return null;
 	}
 
-	private boolean debug = false;
-	private final float[] mVPMatrix = new float[16];
+	private final boolean debug = false;
+	//private final float[] mVPMatrix = new float[16];
 
 	@Override
-	public void render(MapPosition pos, float[] mv, float[] proj) {
+	public void render(MapPosition pos, Matrices m) {
 		// TODO one could render in one pass to texture and then draw the texture
 		// with alpha... might be faster.
 
-		Matrix.multiplyMM(mVPMatrix, 0, proj, 0, pos.viewMatrix, 0);
-		proj = mVPMatrix;
+		//Matrix.multiplyMM(mVPMatrix, 0, proj, 0, pos.viewMatrix, 0);
+		//proj = mVPMatrix;
 
 		MapTile[] tiles = mTiles;
 
@@ -190,8 +191,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 			for (int i = 0; i < mTileCnt; i++) {
 				ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
 
-				setMatrix(pos, mv, proj, tiles[i], div, 0);
-				GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
+				setMatrix(pos, m, tiles[i], div, 0);
+				GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, m.mvp, 0);
 
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
 				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
@@ -242,8 +243,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 			MapTile t = tiles[i];
 			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
 			int d = GLRenderer.depthOffset(t) * 10;
-			setMatrix(pos, mv, proj, t, div, d);
-			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
+			setMatrix(pos, m, t, div, d);
+			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, m.mvp, 0);
 
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
@@ -268,8 +269,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 			GLES20.glDepthFunc(GLES20.GL_EQUAL);
 			int d = GLRenderer.depthOffset(t) * 10;
-			setMatrix(pos, mv, proj, t, div, d);
-			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
+			setMatrix(pos, m, t, div, d);
+			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, m.mvp, 0);
 
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
@@ -298,8 +299,8 @@ public class ExtrusionOverlay extends RenderOverlay {
 			// drawing gl_lines with the same coordinates does not result in
 			// same depth values as polygons, so add offset and draw gl_lequal:
 			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-			GlUtils.addOffsetM(mv, 100);
-			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, mv, 0);
+			GlUtils.addOffsetM(m.mvp, 100);
+			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, m.mvp, 0);
 
 			GLES20.glUniform1i(uExtMode, 3);
 			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
@@ -315,20 +316,20 @@ public class ExtrusionOverlay extends RenderOverlay {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	private static void setMatrix(MapPosition mapPosition, float[] matrix, float[] proj,
+	private static void setMatrix(MapPosition mapPosition, Matrices m,
 			MapTile tile, float div, int delta) {
 
 		float x = (float) (tile.pixelX - mapPosition.x * div);
 		float y = (float) (tile.pixelY - mapPosition.y * div);
 		float scale = mapPosition.scale / div;
 
-		GlUtils.setTileMatrix(matrix, x, y, scale);
+		GlUtils.setTileMatrix(m.mvp, x, y, scale);
 		// scale height
-		matrix[10] = scale / (1000f * GLRenderer.COORD_MULTIPLIER);
+		m.mvp[10] = scale / (1000f * GLRenderer.COORD_MULTIPLIER);
 
-		Matrix.multiplyMM(matrix, 0, proj, 0, matrix, 0);
+		Matrix.multiplyMM(m.mvp, 0, m.viewproj, 0, m.mvp, 0);
 
-		GlUtils.addOffsetM(matrix, delta);
+		GlUtils.addOffsetM(m.mvp, delta);
 	}
 
 	private final float _a = 0.86f;

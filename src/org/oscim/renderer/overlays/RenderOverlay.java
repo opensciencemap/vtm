@@ -17,6 +17,7 @@ package org.oscim.renderer.overlays;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
@@ -65,21 +66,21 @@ public abstract class RenderOverlay {
 	 *
 	 * @param pos
 	 *            current MapPosition
-	 * @param mv
-	 *            current model-view matrix
-	 * @param proj
-	 *            current projection matrix
+	 * @param m
+	 *            current render matrices + matrix for temporary use
 	 */
-	public abstract void render(MapPosition pos, float[] mv, float[] proj);
+	public abstract void render(MapPosition pos, Matrices m);
 
 	/**
-	 * Utility: set matrix relative to the difference of current MapPosition
+	 * Utility: set m.mvp matrix relative to the difference of current MapPosition
 	 * and the last updated Overlay MapPosition
 	 *
 	 * @param curPos ...
-	 * @param matrix ...
+	 * @param m ...
+	 * @param project
+	 *  apply view and projection, or just view otherwise
 	 */
-	protected void setMatrix(MapPosition curPos, float[] matrix) {
+	protected void setMatrix(MapPosition curPos, Matrices m, boolean project) {
 		MapPosition oPos = mMapPosition;
 
 		float div = FastMath.pow(oPos.zoomLevel - curPos.zoomLevel);
@@ -101,10 +102,24 @@ public abstract class RenderOverlay {
 		// set scale to be relative to current scale
 		float s = (curPos.scale / oPos.scale) / div;
 
-		GlUtils.setMatrix(matrix, x * scale, y * scale,
+		GlUtils.setMatrix(m.mvp, x * scale, y * scale,
 				s / GLRenderer.COORD_MULTIPLIER);
 
-		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
+		if (project)
+			Matrix.multiplyMM(m.mvp, 0, m.viewproj, 0, m.mvp, 0);
+		else
+			Matrix.multiplyMM(m.mvp, 0, m.view, 0, m.mvp, 0);
+	}
+
+	/**
+	 * Utility: set m.mvp matrix relative to the difference of current MapPosition
+	 * and the last updated Overlay MapPosition and add m.viewproj
+	 *
+	 * @param curPos ...
+	 * @param m ...
+	 */
+	protected void setMatrix(MapPosition curPos, Matrices m) {
+		setMatrix(curPos, m, true);
 	}
 
 	/**
@@ -113,6 +128,6 @@ public abstract class RenderOverlay {
 	 * @return true if position has changed
 	 */
 	protected boolean updateMapPosition() {
-		return mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
+		return mMapView.getMapViewPosition().getMapPosition(mMapPosition);
 	}
 }

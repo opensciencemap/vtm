@@ -17,12 +17,13 @@ package org.oscim.renderer.overlays;
 
 // TODO
 // 1. rewrite :)
+// 1.1 test if label is actually visible
 // 2. compare previous to current state
 // 2.1 test for new labels to be placed
 // 2.2 handle collisions
 // 3 join segments that belong to one feature
 // 4 handle zoom-level changes
-// 5 3D-Tree might be handy
+// 5 R-Tree might be handy
 //
 
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import org.oscim.core.Tile;
 import org.oscim.generator.JobTile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.LineRenderer;
 import org.oscim.renderer.MapTile;
@@ -49,6 +51,7 @@ import org.oscim.utils.GlUtils;
 import org.oscim.utils.OBB2D;
 import org.oscim.utils.PausableThread;
 import org.oscim.view.MapView;
+import org.oscim.view.MapViewPosition;
 
 import android.graphics.Color;
 import android.graphics.Paint.Cap;
@@ -60,6 +63,7 @@ import android.util.Log;
 public class TextOverlayExp extends BasicOverlay {
 	private final static String TAG = TextOverlayExp.class.getName();
 
+	private final MapViewPosition mMapViewPosition;
 	private TileSet mTileSet;
 	private final LabelThread mThread;
 
@@ -69,6 +73,8 @@ public class TextOverlayExp extends BasicOverlay {
 	private TextLayer mTmpLayer;
 	// TextLayer that is ready to be added to 'layers'
 	private TextLayer mNextLayer;
+
+	private final float[] mTmpCoords = new float[8];
 
 	/* package */boolean mRun;
 
@@ -102,6 +108,7 @@ public class TextOverlayExp extends BasicOverlay {
 
 	public TextOverlayExp(MapView mapView) {
 		super(mapView);
+		mMapViewPosition = mapView.getMapViewPosition();
 
 		layers.textureLayers = new TextLayer();
 		mTmpLayer = new TextLayer();
@@ -145,10 +152,6 @@ public class TextOverlayExp extends BasicOverlay {
 	private byte checkOverlap(TextLayer tl, TextItem ti) {
 
 		for (TextItem lp = tl.labels; lp != null;) {
-			if (lp.text.caption) {
-				lp = lp.next;
-				continue;
-			}
 
 			// check bounding box
 			if (!TextItem.bboxOverlaps(ti, lp, 100)) {
@@ -186,11 +189,12 @@ public class TextOverlayExp extends BasicOverlay {
 
 			if (ti.bbox == null) {
 				ti.bbox = new OBB2D(ti.x, ti.y, ti.x1, ti.y1,
-						ti.width + 10, ti.text.fontHeight + 10);
+						ti.width + 5, ti.text.fontHeight + 5);
 			}
+
 			if (lp.bbox == null) {
 				lp.bbox = new OBB2D(lp.x, lp.y, lp.x1, lp.y1,
-						lp.width + 10, lp.text.fontHeight + 10);
+						lp.width + 5, lp.text.fontHeight + 5);
 			}
 
 			boolean intersect = ti.bbox.overlaps(lp.bbox);
@@ -203,9 +207,8 @@ public class TextOverlayExp extends BasicOverlay {
 				//Log.d(TAG, "intersection " + lp.string + " <> " + ti.string
 				//		+ " at " + ti.x + ":" + ti.y);
 
-				if (lp.text.priority > ti.text.priority || lp.length < ti.length) {
-					//if (lp.length > ti.length) {
-					//Log.d(TAG, "drop " + lp.string);
+				if (!lp.text.caption
+						&& (lp.text.priority > ti.text.priority || lp.length < ti.length)) {
 					TextItem tmp = lp;
 					lp = lp.next;
 
@@ -241,35 +244,50 @@ public class TextOverlayExp extends BasicOverlay {
 		return 0;
 	}
 
+	private int mMinX;
+	private int mMinY;
+	private int mMaxX;
+	private int mMaxY;
+
+	private boolean isVisible(TextItem ti) {
+
+		return true;
+	}
+
 	private Layers mDebugLayer;
+	private final float[] mMVP = new float[16];
 
 	boolean updateLabels() {
 		if (mTmpLayer == null)
 			return false;
 
+		// get current tiles
 		mTileSet = GLRenderer.getVisibleTiles(mTileSet);
 
 		if (mTileSet.cnt == 0)
 			return false;
 
+		// reuse text layer
 		TextLayer tl = mTmpLayer;
 		mTmpLayer = null;
 
-		Layers dbg = null;//new Layers();
+		Layers dbg = null; //new Layers();
+
+		float[] coords = mTmpCoords;
+		synchronized (mMapViewPosition) {
+			mMapViewPosition.getMapPosition(mTmpPos);
+			mMapViewPosition.getMapViewProjection(coords);
+			mMapViewPosition.getMatrix(null, null, mMVP);
+		}
 
 		// mTiles might be from another zoomlevel than the current:
 		// this scales MapPosition to the zoomlevel of mTiles...
 		// TODO create a helper function in MapPosition
-		mMapView.getMapViewPosition().getMapPosition(mTmpPos, null);
-		// capture current state
-
 		MapTile[] tiles = mTileSet.tiles;
-
 		int diff = tiles[0].zoomLevel - mTmpPos.zoomLevel;
-
 		float div = FastMath.pow(diff);
-
 		float scale = mTmpPos.scale * div;
+
 		double angle = Math.toRadians(mTmpPos.angle);
 		float cos = (float) Math.cos(angle);
 		float sin = (float) Math.sin(angle);
@@ -301,9 +319,6 @@ public class TextOverlayExp extends BasicOverlay {
 			if (t.state == JobTile.STATE_NONE || t.state == JobTile.STATE_LOADING)
 				continue;
 
-			//if (t.joined != MapTile.JOINED)
-			//	joinTile()
-
 			float dx = (float) (t.pixelX - mTmpPos.x);
 			float dy = (float) (t.pixelY - mTmpPos.y);
 
@@ -329,33 +344,70 @@ public class TextOverlayExp extends BasicOverlay {
 					}
 				}
 
-				if (ti.text.caption) {
-					ti2.move(ti, dx, dy, scale);
-					ti2.setAxisAlignedBBox();
-					ti2.bbox = new OBB2D(ti2.x, ti2.y, cos, -sin, ti2.width + 6,
-							ti2.text.fontHeight + 6, true);
-
-					boolean overlaps = false;
-					for (TextItem lp = tl.labels; lp != null; lp = lp.next) {
-						if (!lp.text.caption)
-							continue;
-
-						if (ti2.bbox.overlaps(lp.bbox)) {
-							Log.d(TAG, "overlap > " + ti2.string + " " + lp.string);
-							//if (TextItem.bboxOverlaps(ti2, lp, 4)) {
-							overlaps = true;
-							break;
-						}
-					}
-					if (!overlaps) {
-						tl.addText(ti2);
-						ti2 = null;
-					}
-
+				if (!ti.text.caption)
 					continue;
+
+				ti2.move(ti, dx, dy, scale);
+				ti2.setAxisAlignedBBox();
+
+				ti2.bbox = new OBB2D(ti2.x, ti2.y, cos, -sin, ti2.width + 6,
+						ti2.text.fontHeight + 6, true);
+
+				boolean overlaps = false;
+				for (TextItem lp = tl.labels; lp != null; lp = lp.next) {
+					if (!lp.text.caption)
+						continue;
+
+					if (ti2.bbox.overlaps(lp.bbox)) {
+						Log.d(TAG, "overlap > " + ti2.string + " " + lp.string);
+						//if (TextItem.bboxOverlaps(ti2, lp, 4)) {
+						overlaps = true;
+						break;
+					}
+				}
+				if (!overlaps) {
+					tl.addText(ti2);
+					ti2 = null;
 				}
 
-				/* text is way label */
+			}
+		}
+
+		/* add way labels */
+		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
+
+			MapTile t = tiles[i];
+
+			if (t.state == JobTile.STATE_NONE || t.state == JobTile.STATE_LOADING)
+				continue;
+
+			float dx = (float) (t.pixelX - mTmpPos.x);
+			float dy = (float) (t.pixelY - mTmpPos.y);
+
+			// flip around date-line
+			if (dx > maxx) {
+				dx = dx - maxx * 2;
+			} else if (dx < -maxx) {
+				dx = dx + maxx * 2;
+			}
+			dx *= scale;
+			dy *= scale;
+
+			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
+
+				if (ti.text.caption)
+					continue;
+
+				// acquire a TextItem to add to TextLayer
+				if (ti2 == null) {
+					if (mPool == null)
+						ti2 = TextItem.get();
+					else {
+						ti2 = mPool;
+						mPool = mPool.next;
+						ti2.next = null;
+					}
+				}
 
 				// check if path at current scale is long enough for text
 				if (dbg == null && ti.width > ti.length * scale)
@@ -423,6 +475,7 @@ public class TextOverlayExp extends BasicOverlay {
 				}
 			}
 		}
+
 		for (TextItem ti = tl.labels; ti != null; ti = ti.next) {
 			// scale back to fixed zoom-level. could be done in setMatrix
 			ti.x /= scale;
@@ -457,9 +510,7 @@ public class TextOverlayExp extends BasicOverlay {
 		tl.setScale(scale);
 		tl.prepare();
 
-		//TextItem.printPool();
-		//Log.d(TAG, "new labels: " + count);
-
+		// remove tile locks
 		GLRenderer.releaseTiles(mTileSet);
 
 		// pass new labels for rendering
@@ -514,12 +565,8 @@ public class TextOverlayExp extends BasicOverlay {
 	@Override
 	public void compile() {
 		int newSize = layers.getSize();
-		//if (newSize == 0)
-		//	Log.d(TAG, "text layer size " + newSize);
 
 		if (newSize == 0) {
-			//BufferObject.release(vbo);
-			//vbo = null;
 			isReady = false;
 			return;
 		}
@@ -535,31 +582,34 @@ public class TextOverlayExp extends BasicOverlay {
 	}
 
 	@Override
-	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
-		setMatrix(pos, mv);
+	public synchronized void render(MapPosition pos, Matrices m) {
 		float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
-
-		Matrix.multiplyMM(mvp, 0, proj, 0, mv, 0);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo.id);
 		GLState.test(false, false);
 
-		for (Layer l = layers.layers; l != null;) {
-			if (l.type == Layer.POLYGON) {
-				l = PolygonRenderer.draw(pos, l, mvp, true, false);
-			} else {
-				l = LineRenderer.draw(pos, l, mvp, div, 0, layers.lineOffset);
+		if (layers.layers != null) {
+			setMatrix(pos, m);
+			Matrix.multiplyMM(m.mvp, 0, m.proj, 0, m.mvp,0);
+			for (Layer l = layers.layers; l != null;) {
+				if (l.type == Layer.POLYGON) {
+					l = PolygonRenderer.draw(pos, l, m.mvp, true, false);
+				} else {
+					l = LineRenderer.draw(pos, l, m.mvp, div, 0, layers.lineOffset);
+				}
 			}
 		}
 
+		setMatrix(pos, m);
 		for (Layer l = layers.textureLayers; l != null;) {
-			l = TextureRenderer.draw(l, (mMapPosition.scale / pos.scale) * div, proj, mv);
+			float scale = (mMapPosition.scale / pos.scale) * div;
+			l = TextureRenderer.draw(l, scale, m.proj, m.mvp);
 		}
 
 	}
 
 	@Override
-	protected void setMatrix(MapPosition curPos, float[] matrix) {
+	protected void setMatrix(MapPosition curPos, Matrices m) {
 		MapPosition oPos = mMapPosition;
 
 		float div = FastMath.pow(oPos.zoomLevel - curPos.zoomLevel);
@@ -568,10 +618,10 @@ public class TextOverlayExp extends BasicOverlay {
 
 		float scale = curPos.scale / div;
 
-		GlUtils.setMatrix(matrix, x * scale, y * scale,
+		GlUtils.setMatrix(m.mvp, x * scale, y * scale,
 				scale / GLRenderer.COORD_MULTIPLIER);
 
-		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
+		Matrix.multiplyMM(m.mvp, 0, m.view, 0, m.mvp, 0);
 	}
 
 	private boolean mHolding;

@@ -21,6 +21,7 @@ import java.nio.ShortBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.layer.VertexPool;
 import org.oscim.renderer.layer.VertexPoolItem;
@@ -58,7 +59,7 @@ public class BuildingOverlay extends RenderOverlay {
 	private VertexPoolItem mVertices, mCurVertices;
 	private VertexPoolItem mIndices[], mCurIndices[];
 
-	private int mIndiceCnt[] = { 0, 0, 0 };
+	private final int mIndiceCnt[] = { 0, 0, 0 };
 
 	private void addOutline(float[] points, float height) {
 		int len = points.length;
@@ -338,21 +339,19 @@ public class BuildingOverlay extends RenderOverlay {
 				mNumVertices * 4 * 2, sbuf, GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-		mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
+		mMapView.getMapViewPosition().getMapPosition(mMapPosition);
 
 		// tell GLRenderer to call 'render'
 		isReady = true;
 	}
 
 	@Override
-	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
-
-		setMatrix(pos, mv);
-		Matrix.multiplyMM(mv, 0, proj, 0, mv, 0);
+	public synchronized void render(MapPosition pos, Matrices m) {
+		setMatrix(pos, m);
 
 		GLState.useProgram(buildingProgram);
 
-		GLES20.glUniformMatrix4fv(hBuildingMatrix, 1, false, mv, 0);
+		GLES20.glUniformMatrix4fv(hBuildingMatrix, 1, false, m.mvp, 0);
 		GLES20.glUniform4f(hBuildingColor, 0.5f, 0.5f, 0.5f, 0.7f);
 
 		GLState.enableVertexArrays(hBuildingVertexPosition, hBuildingLightPosition);
@@ -413,7 +412,7 @@ public class BuildingOverlay extends RenderOverlay {
 	}
 
 	@Override
-	protected void setMatrix(MapPosition curPos, float[] matrix) {
+	protected void setMatrix(MapPosition curPos, Matrices m) {
 
 		MapPosition oPos = mMapPosition;
 
@@ -432,19 +431,19 @@ public class BuildingOverlay extends RenderOverlay {
 
 		float scale = curPos.scale / div;
 
-		Matrix.setIdentityM(matrix, 0);
+		Matrix.setIdentityM(m.mvp, 0);
 
 		// translate relative to map center
-		matrix[12] = x * scale;
-		matrix[13] = y * scale;
+		m.mvp[12] = x * scale;
+		m.mvp[13] = y * scale;
 		// scale to current tile world coordinates
 		scale = (curPos.scale / oPos.scale) / div;
 		scale /= GLRenderer.COORD_MULTIPLIER;
-		matrix[0] = scale;
-		matrix[5] = scale;
-		matrix[10] = scale / 1000f;
+		m.mvp[0] = scale;
+		m.mvp[5] = scale;
+		m.mvp[10] = scale / 1000f;
 
-		Matrix.multiplyMM(matrix, 0, curPos.viewMatrix, 0, matrix, 0);
+		Matrix.multiplyMM(m.mvp, 0, m.viewproj, 0, m.mvp, 0);
 	}
 
 	final static String buildingVertexShader = ""

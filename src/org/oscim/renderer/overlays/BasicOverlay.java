@@ -17,6 +17,7 @@ package org.oscim.renderer.overlays;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.LineRenderer;
 import org.oscim.renderer.PolygonRenderer;
@@ -27,7 +28,6 @@ import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 
 // Base class to use the Layers drawing 'API'
 public abstract class BasicOverlay extends RenderOverlay {
@@ -47,25 +47,33 @@ public abstract class BasicOverlay extends RenderOverlay {
 	 * use synchronized when modifying layers
 	 */
 	@Override
-	public synchronized void render(MapPosition pos, float[] mv, float[] proj) {
-		setMatrix(pos, mv);
-		float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
+	public synchronized void render(MapPosition pos, Matrices m) {
 
-		Matrix.multiplyMM(mvp, 0, proj, 0, mv, 0);
+		float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo.id);
 		GLState.test(false, false);
 
-		for (Layer l = layers.layers; l != null;) {
-			if (l.type == Layer.POLYGON) {
-				l = PolygonRenderer.draw(pos, l, mvp, true, false);
-			} else {
-				l = LineRenderer.draw(pos, l, mvp, div, 0, layers.lineOffset);
+		if (layers.layers != null) {
+			setMatrix(pos, m, true);
+
+			for (Layer l = layers.layers; l != null;) {
+				if (l.type == Layer.POLYGON) {
+					l = PolygonRenderer.draw(pos, l, m.mvp, true, false);
+				} else {
+					l = LineRenderer.draw(pos, l, m.mvp, div, 0, layers.lineOffset);
+				}
 			}
 		}
 
-		for (Layer l = layers.textureLayers; l != null;) {
-			l = TextureRenderer.draw(l, (mMapPosition.scale / pos.scale) * div, proj, mv);
+		if (layers.textureLayers != null) {
+			setMatrix(pos, m, false);
+
+			float scale = (mMapPosition.scale / pos.scale) * div;
+
+			for (Layer l = layers.textureLayers; l != null;) {
+				l = TextureRenderer.draw(l, scale, m.proj, m.mvp);
+			}
 		}
 	}
 

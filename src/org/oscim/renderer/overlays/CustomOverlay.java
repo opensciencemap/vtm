@@ -19,12 +19,12 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 
 /*
  * This is an example how to integrate custom OpenGL drawing routines as map overlay
@@ -84,7 +84,7 @@ public class CustomOverlay extends RenderOverlay {
 	}
 
 	@Override
-	public void render(MapPosition pos, float[] tmp, float[] proj) {
+	public void render(MapPosition pos, Matrices m) {
 
 		// Use the program object
 		GLState.useProgram(mProgramObject);
@@ -106,12 +106,14 @@ public class CustomOverlay extends RenderOverlay {
 		/* apply view and projection matrices */
 		// set mvp (tmp) matrix relative to mMapPosition
 		// i.e. fixed on the map
-		setMatrix(pos, tmp);
-		Matrix.multiplyMM(tmp, 0, proj, 0, tmp, 0);
+		setMatrix(pos, m);
+
+		//Matrix.multiplyMM(tmp, 0, proj, 0, tmp, 0);
+
 		// or set mvp matrix fixed on screen center
 		// Matrix.multiplyMM(tmp, 0, proj, 0, pos.viewMatrix, 0);
 
-		GLES20.glUniformMatrix4fv(hMatrixPosition, 1, false, tmp, 0);
+		GLES20.glUniformMatrix4fv(hMatrixPosition, 1, false, m.mvp, 0);
 
 		// Draw the triangle
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);

@@ -29,6 +29,7 @@ import org.oscim.generator.TileDistanceSort;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.VertexPool;
 import org.oscim.view.MapView;
+import org.oscim.view.MapViewPosition;
 
 import android.util.Log;
 
@@ -49,6 +50,7 @@ public class TileManager {
 	private static final int CACHE_THRESHOLD = 30;
 
 	private final MapView mMapView;
+	private final MapViewPosition mMapViewPosition;
 	private final MapPosition mMapPosition;
 	private boolean mInitialized;
 	private int mWidth = 0;
@@ -82,7 +84,7 @@ public class TileManager {
 
 	public TileManager(MapView mapView) {
 		mMapView = mapView;
-
+		mMapViewPosition = mapView.getMapViewPosition();
 		mMapPosition = new MapPosition();
 		mJobs = new ArrayList<JobTile>();
 		mTiles = new MapTile[GLRenderer.CACHE_TILES];
@@ -159,7 +161,11 @@ public class TileManager {
 
 		MapPosition mapPosition = mMapPosition;
 		float[] coords = mTileCoords;
-		changedPos = mMapView.getMapViewPosition().getMapPosition(mapPosition, coords);
+
+		synchronized(mMapViewPosition){
+			changedPos = mMapViewPosition.getMapPosition(mapPosition);
+			mMapViewPosition.getMapViewProjection(coords);
+		}
 
 		if (changedPos) {
 			mMapView.render();
