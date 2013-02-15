@@ -172,13 +172,25 @@ public class TextItem {
 				&& (it2.y2 < it1.y1 + add);
 	}
 
+	// link to next node
 	public TextItem next;
 
+	// center
 	public float x, y;
+
+	// label text
 	public String string;
+
+	// text style
 	public Text text;
+
+	// label width
 	public float width;
+
+	// left and right corner of segment
 	public float x1, y1, x2, y2;
+
+	// segment length
 	public short length;
 
 	// link to next/prev label of the way
