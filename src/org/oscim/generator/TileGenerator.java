@@ -23,7 +23,6 @@ import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.QueryResult;
 import org.oscim.renderer.MapTile;
-import org.oscim.renderer.WayDecorator;
 import org.oscim.renderer.layer.ExtrusionLayer;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
