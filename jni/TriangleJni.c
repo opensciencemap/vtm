@@ -41,7 +41,7 @@ compare_dups (const void *a, const void *b)
 
 typedef struct triangulateio TriangleIO;
 
-jint Java_org_quake_triangle_TriangleJNI_triangulate(JNIEnv *env, jclass c,
+jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 													 jobject point_buf,
 													 jint num_rings,
 													 jobject indice_buf,

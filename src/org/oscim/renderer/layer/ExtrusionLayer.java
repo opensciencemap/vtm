@@ -20,11 +20,11 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.Tile;
+import org.oscim.jni.TriangleJNI;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.utils.LineClipper;
 import org.oscim.view.MapView;
-import org.quake.triangle.TriangleJNI;
 
 import android.opengl.GLES20;
 import android.util.Log;
