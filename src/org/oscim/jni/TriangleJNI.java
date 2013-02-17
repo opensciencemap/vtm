@@ -1,4 +1,4 @@
-package org.quake.triangle;
+package org.oscim.jni;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
