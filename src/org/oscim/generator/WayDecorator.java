@@ -18,123 +18,170 @@ package org.oscim.generator;
 import org.oscim.core.Tile;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.renderinstruction.Text;
+import org.oscim.utils.GeometryUtils;
+import org.oscim.utils.LineClipper;
 
 public final class WayDecorator {
 
-	public static TextItem renderText(float[] coordinates, String string, Text text,
+	public static TextItem renderText(LineClipper clipper, float[] coordinates, String string,
+			Text text,
 			int pos, int len, TextItem textItems) {
 		TextItem items = textItems;
 		TextItem t = null;
+
 		// calculate the way name length plus some margin of safety
 		float wayNameWidth = -1;
 		float minWidth = Tile.TILE_SIZE / 10;
-		//int skipPixels = 0;
 
-		// get the first way point coordinates
-		int prevX = (int) coordinates[pos + 0];
-		int prevY = (int) coordinates[pos + 1];
+		final int min = 0;
+		final int max = Tile.TILE_SIZE;
 
 		// find way segments long enough to draw the way name on them
-		for (int i = pos + 2; i < pos + len; i += 2) {
+		for (int i = pos; i < pos + len - 2; i += 2) {
+			// get the first way point coordinates
+			int prevX = (int) coordinates[i + 0];
+			int prevY = (int) coordinates[i + 1];
+
+			byte edge = 0;
+
+			clipper.clipStart(prevX, prevY);
+
 			// get the current way point coordinates
-			int curX = (int) coordinates[i];
-			int curY = (int) coordinates[i + 1];
+			int curX = (int) coordinates[i + 2];
+			int curY = (int) coordinates[i + 3];
+
+			int clip;
+			if ((clip = clipper.clipNext(curX, curY)) != 0) {
+				if (clip < 0) {
+					prevX = clipper.out[0];
+					prevY = clipper.out[1];
+					curX = clipper.out[2];
+					curY = clipper.out[3];
+
+					if (prevX == min)
+						edge |= 1 << 0;
+					else if (prevX == max)
+						edge |= 1 << 1;
+
+					if (prevY == min)
+						edge |= 1 << 2;
+					else if (prevY == max)
+						edge |= 1 << 3;
+
+					if (curX == min)
+						edge |= 1 << 4;
+					else if (curX == max)
+						edge |= 1 << 5;
+
+					if (curY == min)
+						edge |= 1 << 5;
+					else if (curY == max)
+						edge |= 1 << 6;
+				}
+			}
+
+			int last = i;
 
 			// calculate the length of the current segment (Euclidian distance)
 			float vx = prevX - curX;
 			float vy = prevY - curY;
+			if (vx == 0 && vy == 0)
+				continue;
+
 			float a = (float) Math.sqrt(vx * vx + vy * vy);
-			vx /= a;
-			vy /= a;
 
-			int last = i;
-			int nextX = 0, nextY = 0;
+			// only if not cur segment crosses edge
+			if (edge < (1 << 4)) {
+				vx /= a;
+				vy /= a;
 
-			// add additional segments if possible
-			for (int j = last + 2; j < pos + len; j += 2) {
-				nextX = (int) coordinates[j];
-				nextY = (int) coordinates[j + 1];
+				// add additional segments if possible
+				for (int j = i + 4; j < pos + len; j += 2) {
+					int nextX = (int) coordinates[j + 0];
+					int nextY = (int) coordinates[j + 1];
 
-				float wx = curX - nextX;
-				float wy = curY - nextY;
+					if ((clip = clipper.clipNext(nextX, nextY)) != 0) {
+						if (clip < 0) {
+							curX = clipper.out[0];
+							curY = clipper.out[1];
+							// TODO break when cur has changed
+							nextX = clipper.out[2];
+							nextY = clipper.out[3];
+						}
+					}
 
-				a = (float) Math.sqrt(wx * wx + wy * wy);
-				wx /= a;
-				wy /= a;
+					float wx = nextX - curX;
+					float wy = nextY - curY;
+					if (wx == 0 && wy == 0)
+						continue;
 
-				float ux = vx + wx;
-				float uy = vy + wy;
+					float area = GeometryUtils.area(prevX, prevY, curX, curY, nextX, nextY);
 
-				float diff = wx * uy - wy * ux;
+					if (area > 1000) {
+						//Log.d(">>>", "b: " + string + " " + area );
+						break;
+					}
 
-				if (diff > 0.1 || diff < -0.1)
-					break;
+					a = (float) Math.sqrt(wx * wx + wy * wy);
+					wx /= a;
+					wy /= a;
 
-				last = j;
-				curX = nextX;
-				curY = nextY;
-				continue;
+					// avoid adding short segments that add much area
+					if (area / 2 > a * a) {
+						//Log.d(">>>", "a: " +string + " " + area + " " + a*a);
+						break;
+					}
+
+					float ux = vx + wx;
+					float uy = vy + wy;
+					float diff = wx * uy - wy * ux;
+
+					// maximum angle between segments
+					if (diff > 0.1 || diff < -0.1) {
+						//Log.d(">>>", "c: " + string + " " + area );
+						break;
+					}
+					curX = nextX;
+					curY = nextY;
+					last = j - 2;
+
+					if (clip < 0) {
+						if (nextX == min)
+							edge |= 1 << 4;
+						else if (nextX == max)
+							edge |= 1 << 5;
+
+						if (nextY == min)
+							edge |= 1 << 6;
+						else if (nextY == max)
+							edge |= 1 << 7;
+					}
+				}
+
+				vx = curX - prevX;
+				vy = curY - prevY;
+				a = (float) Math.sqrt(vx * vx + vy * vy);
 			}
 
-			vx = curX - prevX;
-			vy = curY - prevY;
+			float segmentLength = a;
 
-			if (vx < 0)
-				vx = -vx;
-			if (vy < 0)
-				vy = -vy;
+			if (edge == 0) {
+				if (segmentLength < minWidth) {
+					continue;
+				}
 
-			// minimum segment to label
-			if (vx + vy < minWidth) {
-				// restart from next node
-				prevX = (int) coordinates[i];
-				prevY = (int) coordinates[i + 1];
-				continue;
-			}
+				if (wayNameWidth < 0) {
+					wayNameWidth = text.paint.measureText(string);
+				}
 
-			// compare against max segment length
-			if (wayNameWidth > 0 && vx + vy < wayNameWidth) {
-				// restart from next node
-				prevX = (int) coordinates[i];
-				prevY = (int) coordinates[i + 1];
-				continue;
-			}
-
-			float segmentLength = (float) Math.sqrt(vx * vx + vy * vy);
-
-			//if (skipPixels > 0) {
-			//	skipPixels -= segmentLength;
-			//
-			//} else
-
-			if (segmentLength < minWidth) {
-				// restart from next node
-				prevX = (int) coordinates[i];
-				prevY = (int) coordinates[i + 1];
-				continue;
-			}
-
-			if (wayNameWidth < 0) {
+				if (segmentLength < wayNameWidth * 0.50) {
+					continue;
+				}
+			} else if (wayNameWidth < 0) {
 				wayNameWidth = text.paint.measureText(string);
 			}
 
-			if (segmentLength < wayNameWidth * 0.50) {
-				// restart from next node
-				prevX = (int) coordinates[i];
-				prevY = (int) coordinates[i + 1];
-				continue;
-			}
-
-			//float s = (wayNameWidth + 20) / segmentLength;
-			//float s;
-			//if (wayNameWidth < segmentLength)
-			//	s = (segmentLength - 10) / segmentLength;
-			//else
-			//s = (wayNameWidth + 20) / segmentLength;
-			//float width, height;
-
 			float x1, y1, x2, y2;
-
 			if (prevX < curX) {
 				x1 = prevX;
 				y1 = prevY;
@@ -146,17 +193,6 @@ public final class WayDecorator {
 				x2 = prevX;
 				y2 = prevY;
 			}
-
-			//// estimate position of text on path
-			//width = (x2 - x1) / 2f;
-			////width += 4 * (width / wayNameWidth);
-			//x2 = x2 - (width - s * width);
-			//x1 = x1 + (width - s * width);
-			//
-			//height = (y2 - y1) / 2f;
-			////height += 4 * (height / wayNameWidth);
-			//y2 = y2 - (height - s * height);
-			//y1 = y1 + (height - s * height);
 
 			TextItem n = TextItem.get();
 
@@ -177,15 +213,11 @@ public final class WayDecorator {
 			t.x2 = x2;
 			t.y2 = y2;
 			t.length = (short) segmentLength;
-
+			t.edges = edge;
 			t.next = items;
 			items = t;
 
-			// skip to last
 			i = last;
-			// store the previous way point coordinates
-			prevX = curX;
-			prevY = curY;
 		}
 		return items;
 	}

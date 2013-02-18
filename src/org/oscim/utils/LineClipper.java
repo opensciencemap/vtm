@@ -15,9 +15,10 @@
 package org.oscim.utils;
 
 /**
- * @author Hannes Janetzek
- *         taken from http://en.wikipedia.org/wiki/Cohen%E2%80%93
- *         Sutherland_algorithm
+ * from http://en.wikipedia.org/wiki/Cohen%E2%80%93
+ * Sutherland_algorithm
+ *
+ * @adapted by Hannes Janetzek
  */
 
 public class LineClipper {
@@ -28,18 +29,34 @@ public class LineClipper {
 	private static final int BOTTOM = 4; // 0100
 	private static final int TOP = 8; // 1000
 
-	private int xmin, xmax, ymin, ymax;
+	private final int xmin, xmax, ymin, ymax;
+	public final int[] out;
 
 	public LineClipper(int minx, int miny, int maxx, int maxy) {
 		this.xmin = minx;
 		this.ymin = miny;
 		this.xmax = maxx;
 		this.ymax = maxy;
+		this.out = null;
+	}
+
+	public LineClipper(int minx, int miny, int maxx, int maxy, boolean keepResult) {
+		this.xmin = minx;
+		this.ymin = miny;
+		this.xmax = maxx;
+		this.ymax = maxy;
+		if (keepResult)
+			this.out = new int[4];
+		else
+			this.out = null;
 	}
 
 	private int mPrevOutcode;
 	private int mPrevX;
 	private int mPrevY;
+
+	public int outX;
+	public int outY;
 
 	public void clipStart(int x0, int y0) {
 		mPrevX = x0;
@@ -58,8 +75,13 @@ public class LineClipper {
 		mPrevOutcode = outcode;
 	}
 
-	public boolean clipNext(int x1, int y1) {
-		boolean accept;
+	/**
+	 * @param x1 ...
+	 * @param y1 ...
+	 * @return 0 if not intersection, 1 fully within, -1 clipped (and 'out' set to new points)
+	 */
+	public int clipNext(int x1, int y1) {
+		int accept;
 
 		int outcode = INSIDE;
 		if (x1 < xmin)
@@ -73,12 +95,13 @@ public class LineClipper {
 
 		if ((mPrevOutcode | outcode) == 0) {
 			// Bitwise OR is 0. Trivially accept
-			accept = true;
+			accept = 1;
 		} else if ((mPrevOutcode & outcode) != 0) {
 			// Bitwise AND is not 0. Trivially reject
-			accept = false;
+			accept = 0;
 		} else {
-			accept = clip(mPrevX, mPrevY, x1, y1, xmin, ymin, xmax, ymax, mPrevOutcode, outcode);
+			accept = clip(mPrevX, mPrevY, x1, y1, xmin, ymin, xmax, ymax, mPrevOutcode, outcode,
+					this.out) ? -1 : 0;
 		}
 		mPrevOutcode = outcode;
 		mPrevX = x1;
@@ -91,7 +114,7 @@ public class LineClipper {
 	// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
 	// diagonal from (xmin, ymin) to (xmax, ymax).
 	private static boolean clip(int x0, int y0, int x1, int y1,
-			int xmin, int ymin, int xmax, int ymax, int outcode0, int outcode1) {
+			int xmin, int ymin, int xmax, int ymax, int outcode0, int outcode1, int[] out) {
 
 		boolean accept = false;
 
@@ -154,9 +177,12 @@ public class LineClipper {
 				}
 			}
 		}
-
-		// TODO could do sth with the result x0...
+		if (accept && out != null) {
+			out[0] = x0;
+			out[1] = y0;
+			out[2] = x1;
+			out[3] = y1;
+		}
 		return accept;
 	}
-
 }

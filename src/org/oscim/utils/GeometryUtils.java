@@ -329,5 +329,37 @@ public final class GeometryUtils {
 		return inside;
 	}
 
+	public static float areaSigned(Point p1, Point p2, Point p3) {
+		return ((p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y))*0.5f;
+	}
 
+	public static float areaSigned(float ax, float ay, float bx, float by, float cx, float cy) {
+		return ((ax - cx) * (by - cy) - (bx - cx) * (ay - cy)) * 0.5f;
+	}
+
+	public static float area(float ax, float ay, float bx, float by, float cx, float cy) {
+		float area = ((ax - cx) * (by - cy) - (bx - cx) * (ay - cy)) * 0.5f;
+		return area < 0 ? -area : area;
+	}
+
+	public static boolean pointInTri(Point pt, Point p1, Point p2, Point p3) {
+		boolean inside = false;
+		boolean p1s = p1.y > pt.y;
+		boolean p2s = p2.y > pt.y;
+		boolean p3s = p3.y > pt.y;
+
+		if ((p1s != p3s)
+				&& (pt.x < (p3.x - p1.x) * (pt.y - p1.y) / (p3.y - p1.y) + p1.x))
+			inside = !inside;
+
+		if ((p2s != p1s)
+				&& (pt.x < (p1.x - p2.x) * (pt.y - p2.y) / (p1.y - p2.y) + p2.x))
+			inside = !inside;
+
+		if ((p3s != p2s)
+				&& (pt.x < (p2.x - p3.x) * (pt.y - p3.y) / (p2.y - p3.y) + p3.x))
+			inside = !inside;
+
+		return inside;
+	}
 }

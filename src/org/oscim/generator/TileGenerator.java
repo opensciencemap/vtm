@@ -35,6 +35,7 @@ import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.renderinstruction.Text;
+import org.oscim.utils.LineClipper;
 import org.oscim.view.DebugSettings;
 import org.oscim.view.MapView;
 
@@ -114,6 +115,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private boolean mDebugDrawPolygons;
 	boolean mDebugDrawUnmatched;
 
+	private final LineClipper mClipper;
+
 	public static void setRenderTheme(RenderTheme theme) {
 		renderTheme = theme;
 		renderLevels = theme.getLevels();
@@ -129,6 +132,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 */
 	public TileGenerator(MapView mapView) {
 		//	mMapView = mapView;
+		mClipper = new LineClipper(0,0,Tile.TILE_SIZE, Tile.TILE_SIZE, true);
 	}
 
 	public void cleanup() {
@@ -172,10 +176,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		}
 
 		if (debug.drawTileFrames) {
-			//mTagName = new Tag("name", tile.toString(), false);
-			//mPoiX = Tile.TILE_SIZE >> 1;
-			//mPoiY = 10;
-			//TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
+			mTagName = new Tag("name", tile.toString(), false);
+			mPoiX = Tile.TILE_SIZE >> 1;
+			mPoiY = 10;
+			TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
 
 			mIndices = debugBoxIndex;
 			if (MapView.enableClosePolygons)
@@ -476,7 +480,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				int length = mIndices[i];
 				if (length < 4)
 					break;
-				mLabels = WayDecorator.renderText(mCoords, mTagName.value, text,
+				mLabels = WayDecorator.renderText(mClipper,mCoords, mTagName.value, text,
 						offset,	length, mLabels);
 				offset += length;
 			}

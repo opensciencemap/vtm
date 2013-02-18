@@ -158,6 +158,37 @@ public class OBB2D {
 		computeAxes();
 	}
 
+	public void set(float cx, float cy, float dx, float dy, float width, float height){
+		float vx = cx - dx;
+		float vy = cy - dy;
+
+		float a = (float) Math.sqrt(vx * vx + vy * vy);
+		vx /= a;
+		vy /= a;
+
+		float hw = width / 2;
+		float hh = height / 2;
+
+		float ux = vy * hh;
+		float uy = -vx * hh;
+
+		vx *= hw;
+		vy *= hw;
+
+		corner[0] = cx - vx - ux;
+		corner[1] = cy - vy - uy;
+
+		corner[2] = cx + vx - ux;
+		corner[3] = cy + vy - uy;
+
+		corner[4] = cx + vx + ux;
+		corner[5] = cy + vy + uy;
+
+		corner[6] = cx - vx + ux;
+		corner[7] = cy - vy + uy;
+
+		computeAxes();
+	}
 	public OBB2D(float cx, float cy, float dx, float dy, float width, float height) {
 
 		float vx = cx - dx;

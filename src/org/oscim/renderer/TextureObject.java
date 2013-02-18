@@ -91,6 +91,8 @@ public class TextureObject {
 	 * @param to the TextureObjet to compile and upload
 	 */
 	public static synchronized void uploadTexture(TextureObject to) {
+		// FIXME what needs synchronized ?
+
 		if (TextureRenderer.debug)
 			Log.d(TAG, "upload texture " + to.id);
 

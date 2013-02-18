@@ -290,7 +290,7 @@ public class ExtrusionLayer extends Layer {
 			}
 
 			/* check if face is within tile */
-			if (!mClipper.clipNext((int) nx, (int) ny)) {
+			if (mClipper.clipNext((int) nx, (int) ny) == 0) {
 				even = (even == 0 ? 1 : 0);
 				continue;
 			}

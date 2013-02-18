@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 OpenScienceMap
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -17,12 +17,15 @@ package org.oscim.renderer.layer;
 import java.nio.ShortBuffer;
 
 import org.oscim.renderer.TextureObject;
-import org.oscim.renderer.TextureRenderer;
 
-import android.util.Log;
-
+/**
+ * @author Hannes Janetzek
+ */
 public abstract class TextureLayer extends Layer {
+	// holds textures and offset in vbo
 	public TextureObject textures;
+
+	// scale mode
 	public boolean fixed;
 
 	/**
@@ -30,12 +33,11 @@ public abstract class TextureLayer extends Layer {
 	 *            buffer to add vertices
 	 */
 	void compile(ShortBuffer sbuf) {
-		if (TextureRenderer.debug)
-			Log.d("...", "compile");
 
 		for (TextureObject to = textures; to != null; to = to.next)
 			TextureObject.uploadTexture(to);
 
+		// add vertices to vbo
 		Layers.addPoolItems(this, sbuf);
 	}
 

@@ -167,7 +167,8 @@ public final class Text extends RenderInstruction {
 
 		FontMetrics fm = paint.getFontMetrics();
 		fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
-		fontDescent = (float) Math.ceil(Math.abs(fm.descent));
+		//fontDescent = (float) Math.ceil(Math.abs(fm.descent));
+		fontDescent = Math.abs(fm.bottom);
 	}
 
 	@Override
