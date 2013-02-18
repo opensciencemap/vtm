@@ -34,7 +34,6 @@ public final class TextLayer extends TextureLayer {
 
 	public TextItem labels;
 	private final Canvas mCanvas;
-	private float mScale;
 
 	public TextItem getLabels() {
 		return labels;
@@ -44,11 +43,6 @@ public final class TextLayer extends TextureLayer {
 		type = Layer.SYMBOL;
 		mCanvas = new Canvas();
 		fixed = true;
-		mScale = 1;
-	}
-
-	public void setScale(float scale) {
-		mScale = scale;
 	}
 
 	public boolean removeText(TextItem item) {
@@ -132,7 +126,7 @@ public final class TextLayer extends TextureLayer {
 		for (TextItem it = labels; it != null;) {
 
 			float width = it.width + 2 * mFontPadX;
-			float height = (int) (it.text.fontHeight) + 2 * mFontPadY + 0.5f;
+			float height = (int) (it.text.fontHeight) + 0.5f;
 
 			if (height > advanceY)
 				advanceY = (int) height;
@@ -158,7 +152,8 @@ public final class TextLayer extends TextureLayer {
 				}
 			}
 
-			yy = y + (height - 1) - it.text.fontDescent - mFontPadY;
+			//yy = y + (height - 1) - it.text.fontDescent - mFontPadY;
+			yy = y + height - it.text.fontDescent; // - mFontPadY;
 
 			if (it.text.stroke != null)
 				mCanvas.drawText(it.string, x + it.width / 2, yy, it.text.stroke);
@@ -174,11 +169,10 @@ public final class TextLayer extends TextureLayer {
 
 			float hh2 = 0;
 			if (!it.text.caption) {
-				hw /= mScale;
-				hh2 = hh + it.text.fontDescent / 2;
-				hh -= it.text.fontDescent / 2;
-				hh /= mScale;
-				hh2 /= mScale;
+				// displace by baseline
+				float desc = it.text.fontDescent / 2;
+				hh2 = hh + desc;
+				hh =  hh - desc;
 			}
 
 			// texture coordinates
@@ -192,17 +186,17 @@ public final class TextLayer extends TextureLayer {
 				short x1, x2, x3, x4, y1, y3, y2, y4;
 
 				if (it.text.caption) {
-					if (it.origin == 0) {
-						x1 = x3 = (short) (SCALE * -hw);
-						x2 = x4 = (short) (SCALE * hw);
-						y1 = y2 = (short) (SCALE * hh);
-						y3 = y4 = (short) (SCALE * -hh);
-					} else {
-						x1 = x3 = (short) (SCALE * 0);
-						x2 = x4 = (short) (SCALE * width);
-						y1 = y2 = (short) (SCALE * 0);
-						y3 = y4 = (short) (SCALE * -height);
-					}
+					//if (it.origin == 0) {
+					x1 = x3 = (short) (SCALE * -hw);
+					x2 = x4 = (short) (SCALE * hw);
+					y1 = y2 = (short) (SCALE * hh);
+					y3 = y4 = (short) (SCALE * -hh);
+					//} else {
+					//	x1 = x3 = (short) (SCALE * 0);
+					//	x2 = x4 = (short) (SCALE * width);
+					//	y1 = y2 = (short) (SCALE * 0);
+					//	y3 = y4 = (short) (SCALE * -height);
+					//}
 				} else {
 					float vx = it.x1 - it.x2;
 					float vy = it.y1 - it.y2;
@@ -219,12 +213,16 @@ public final class TextLayer extends TextureLayer {
 					vx *= hw;
 					vy *= hw;
 
+					// top-left
 					x1 = (short) (SCALE * (vx - ux));
 					y1 = (short) (SCALE * (vy - uy));
+					// top-right
 					x2 = (short) (SCALE * (-vx - ux));
 					y2 = (short) (SCALE * (-vy - uy));
+					// bot-right
 					x4 = (short) (SCALE * (-vx + ux2));
 					y4 = (short) (SCALE * (-vy + uy2));
+					// bot-left
 					x3 = (short) (SCALE * (vx + ux2));
 					y3 = (short) (SCALE * (vy + uy2));
 				}

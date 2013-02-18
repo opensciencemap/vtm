@@ -363,7 +363,6 @@ public class TextOverlay extends BasicOverlay {
 		}
 
 		// draw text to bitmaps and create vertices
-		tl.setScale(scale);
 		tl.prepare();
 
 		// everything synchronized?

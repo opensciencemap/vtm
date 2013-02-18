@@ -15,7 +15,6 @@
 package org.oscim.renderer.layer;
 
 import org.oscim.theme.renderinstruction.Text;
-import org.oscim.utils.OBB2D;
 
 import android.util.Log;
 
@@ -40,7 +39,33 @@ public class TextItem {
 			pool = pool.next;
 
 			ti.next = null;
-			ti.active = 0;
+			//ti.active = 0;
+			return ti;
+		}
+	}
+
+	public static TextItem copy(TextItem orig) {
+		synchronized (lock) {
+			TextItem ti = pool;
+
+			if (ti == null) {
+				count++;
+				ti = new TextItem();
+			} else {
+				inPool--;
+				pool = pool.next;
+			}
+
+			ti.next = null;
+
+			ti.x = orig.x;
+			ti.y = orig.y;
+
+			ti.x1 = orig.x1;
+			ti.y1 = orig.y1;
+			ti.x2 = orig.x2;
+			ti.y2 = orig.y2;
+
 			return ti;
 		}
 	}
@@ -115,28 +140,24 @@ public class TextItem {
 	public TextItem move(TextItem ti, float dx, float dy) {
 		this.x = dx + ti.x;
 		this.y = dy + ti.y;
-		this.string = ti.string;
-		this.text = ti.text;
-		this.width = ti.width;
-		this.length = ti.length;
 		return this;
 
 	}
 
-	/* copy properties from 'ti' and add offset
-	 *
-	 * */
 	public TextItem move(TextItem ti, float dx, float dy, float scale) {
-		this.x = dx + (ti.x * scale);
-		this.y = dy + (ti.y * scale);
+		this.x = (dx + ti.x) * scale;
+		this.y = (dy + ti.y) * scale;
+		return this;
+	}
+
+	public void clone(TextItem ti){
 		this.string = ti.string;
 		this.text = ti.text;
 		this.width = ti.width;
 		this.length = ti.length;
-		return this;
 	}
 
-	public void setAxisAlignedBBox(){
+	public void setAxisAlignedBBox() {
 		this.x1 = x - width / 2;
 		this.y1 = y - text.fontHeight / 2;
 		this.x2 = x + width / 2;
@@ -197,8 +218,10 @@ public class TextItem {
 	public TextItem n1;
 	public TextItem n2;
 
-	public byte origin;
+	public byte edges;
 
-	public int active;
-	public OBB2D bbox;
+	@Override
+	public String toString() {
+		return x + " " + y + " " + string;
+	}
 }

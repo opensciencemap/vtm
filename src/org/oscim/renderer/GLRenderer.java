@@ -544,7 +544,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			td.cnt = 0;
 			for (int i = 0; i < cnt; i++) {
 				MapTile t = newTiles[i];
-				if (t.isVisible) {
+				if (t.isVisible && t.state == STATE_READY) {
 					t.lock();
 					td.tiles[td.cnt++] = t;
 				}
