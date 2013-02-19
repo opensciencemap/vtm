@@ -29,7 +29,7 @@ public final class LineLayer extends Layer {
 
 	private static final float COORD_SCALE = GLRenderer.COORD_MULTIPLIER;
 	// scale factor mapping extrusion vector to short values
-	private static final float DIR_SCALE = 2048;
+	public static final float DIR_SCALE = 2048;
 	// mask for packing last two bits of extrusion vector with texture
 	// coordinates
 	private static final int DIR_MASK = 0xFFFFFFFC;
