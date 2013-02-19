@@ -57,7 +57,6 @@ import android.graphics.Paint.Cap;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 public class TextOverlayExp extends BasicOverlay {
 	private final static String TAG = TextOverlayExp.class.getName();
@@ -144,6 +143,12 @@ public class TextOverlayExp extends BasicOverlay {
 		Link next;
 		Link prev;
 		Label it;
+	}
+
+	class ActiveTile{
+		MapTile tile;
+		int activeLabels;
+		Label labels;
 	}
 
 	//private static void setOBB(TextItem ti){
@@ -269,27 +274,7 @@ public class TextOverlayExp extends BasicOverlay {
 	void addTile(MapTile t) {
 
 	}
-	private static void addDebugLayers(Layers dbg){
-		dbg.clear();
-		LineLayer ll = (LineLayer) dbg.getLayer(0, Layer.LINE);
-		ll.line = new Line((Color.BLUE & 0xaaffffff), 1, Cap.BUTT);
-		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(3, Layer.LINE);
-		ll.line = new Line((Color.YELLOW & 0xaaffffff), 1, Cap.BUTT);
-		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(1, Layer.LINE);
-		ll.line = new Line((Color.RED & 0xaaffffff), 1, Cap.BUTT);
-		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(2, Layer.LINE);
-		ll.line = new Line((Color.GREEN & 0xaaffffff), 1, Cap.BUTT);
-		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(4, Layer.LINE);
-		ll.line = new Line((Color.CYAN & 0xaaffffff), 1, Cap.BUTT);
-		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(5, Layer.LINE);
-		ll.line = new Line((Color.MAGENTA & 0xaaffffff), 1, Cap.BUTT);
-		ll.width = 2;
-	}
+
 
 	boolean updateLabels() {
 		if (mTmpLayer == null)
@@ -343,14 +328,13 @@ public class TextOverlayExp extends BasicOverlay {
 		mRelabelCnt++;
 
 		for (Label lp = mPrevLabels; lp != null; ) {
-			//l.active = mRelabelCnt;
 
 			// transform screen coordinates to tile coordinates
 			float s = FastMath.pow(lp.tile.zoomLevel - pos.zoomLevel);
 			float sscale = pos.scale / s;
 
 			if (lp.width > lp.length * sscale){
-				Log.d(TAG, "- scale " + lp + " " + s + " " + sscale + " " + lp.length + " " + lp.width);
+				//Log.d(TAG, "- scale " + lp + " " + s + " " + sscale + " " + lp.length + " " + lp.width);
 				TextItem.release(lp.item);
 				lp = (Label) lp.next;
 				continue;
@@ -379,7 +363,7 @@ public class TextOverlayExp extends BasicOverlay {
 				lp.y1 = (lp.y - height);
 
 				if (!wayIsVisible(lp)){
-					Log.d(TAG, "- visible " + lp);
+					//Log.d(TAG, "- visible " + lp);
 					TextItem.release(lp.item);
 					lp = (Label) lp.next;
 					continue;
@@ -418,8 +402,8 @@ public class TextOverlayExp extends BasicOverlay {
 				overlaps = checkOverlap(tl, lp);
 
 				if (overlaps == 0) {
-					if (s != 1)
-					Log.d(TAG, s + "add prev label " + lp);
+					//if (s != 1)
+					//Log.d(TAG, s + "add prev label " + lp);
 
 					Label tmp = lp;
 					lp = (Label) lp.next;
@@ -635,9 +619,31 @@ public class TextOverlayExp extends BasicOverlay {
 			mNextLayer = tl;
 			mDebugLayer = dbg;
 		}
+
 		return true;
 	}
 
+	private static void addDebugLayers(Layers dbg){
+		dbg.clear();
+		LineLayer ll = (LineLayer) dbg.getLayer(0, Layer.LINE);
+		ll.line = new Line((Color.BLUE & 0xaaffffff), 1, Cap.BUTT);
+		ll.width = 2;
+		ll = (LineLayer) dbg.getLayer(3, Layer.LINE);
+		ll.line = new Line((Color.YELLOW & 0xaaffffff), 1, Cap.BUTT);
+		ll.width = 2;
+		ll = (LineLayer) dbg.getLayer(1, Layer.LINE);
+		ll.line = new Line((Color.RED & 0xaaffffff), 1, Cap.BUTT);
+		ll.width = 2;
+		ll = (LineLayer) dbg.getLayer(2, Layer.LINE);
+		ll.line = new Line((Color.GREEN & 0xaaffffff), 1, Cap.BUTT);
+		ll.width = 2;
+		ll = (LineLayer) dbg.getLayer(4, Layer.LINE);
+		ll.line = new Line((Color.CYAN & 0xaaffffff), 1, Cap.BUTT);
+		ll.width = 2;
+		ll = (LineLayer) dbg.getLayer(5, Layer.LINE);
+		ll.line = new Line((Color.MAGENTA & 0xaaffffff), 1, Cap.BUTT);
+		ll.width = 2;
+	}
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged) {
@@ -647,7 +653,6 @@ public class TextOverlayExp extends BasicOverlay {
 			mTmpLayer = (TextLayer) layers.textureLayers;
 
 			// clear textures and text items from previous layer
-			layers.textureLayers = null;
 			layers.clear();
 
 			if (mDebugLayer != null) {
