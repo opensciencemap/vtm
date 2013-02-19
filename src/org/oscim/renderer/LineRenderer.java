@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 OpenScienceMap
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General License as published by the Free Software
@@ -42,6 +42,10 @@ public final class LineRenderer {
 	private final static String TAG = "LineRenderer";
 
 	private static final int LINE_VERTICES_DATA_POS_OFFSET = 0;
+
+	// factor to normalize extrusion vector and scale to coord scale
+	private final static float COORD_SCALE_BY_DIR_SCALE =
+			GLRenderer.COORD_MULTIPLIER / LineLayer.DIR_SCALE;
 
 	// shader handles
 	private static int[] lineProgram = new int[2];
@@ -188,7 +192,7 @@ public final class LineRenderer {
 							continue;
 					}
 
-					glUniform1f(uLineWidth, width);
+					glUniform1f(uLineWidth, width * COORD_SCALE_BY_DIR_SCALE);
 
 					if (line.blur != 0) {
 						glUniform1f(uLineScale, 1f - (line.blur / s));
@@ -221,7 +225,7 @@ public final class LineRenderer {
 						width = (ll.width - 0.2f) / lineScale;
 				}
 
-				glUniform1f(uLineWidth, width);
+				glUniform1f(uLineWidth, width * COORD_SCALE_BY_DIR_SCALE);
 
 				if (line.blur != 0) {
 					glUniform1f(uLineScale, line.blur);
@@ -250,17 +254,18 @@ public final class LineRenderer {
 	private final static String lineVertexShader = ""
 			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
+			// factor to increase line width relative to scale
 			+ "uniform float u_width;"
+			// xy hold position, zw extrusion vector
 			+ "attribute vec4 a_pos;"
 			+ "uniform float u_mode;"
 			+ "varying vec2 v_st;"
 			+ "varying vec2 v_mode;"
-			+ "const float dscale = 8.0/2048.0;"
 			+ "void main() {"
 			// scale extrusion to u_width pixel
 			// just ignore the two most insignificant bits of a_st :)
 			+ "  vec2 dir = a_pos.zw;"
-			+ "  gl_Position = u_mvp * vec4(a_pos.xy + (dscale * u_width * dir), 0.0, 1.0);"
+			+ "  gl_Position = u_mvp * vec4(a_pos.xy + (u_width * dir), 0.0, 1.0);"
 			// last two bits of a_st hold the texture coordinates
 			// ..maybe one could wrap texture so that `abs` is not required
 			+ "  v_st = abs(mod(dir, 4.0)) - 1.0;"
@@ -270,7 +275,6 @@ public final class LineRenderer {
 	private final static String lineSimpleFragmentShader = ""
 			+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
-			+ "uniform float u_width;"
 			+ "uniform float u_wscale;"
 			+ "uniform vec4 u_color;"
 			+ "varying vec2 v_st;"
@@ -297,7 +301,6 @@ public final class LineRenderer {
 			+ "uniform sampler2D tex;"
 			+ "uniform float u_mode;"
 			+ "uniform vec4 u_color;"
-			+ "uniform float u_width;"
 			+ "uniform float u_wscale;"
 			+ "varying vec2 v_st;"
 			+ "void main() {"
