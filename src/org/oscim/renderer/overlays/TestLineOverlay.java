@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 OpenScienceMap
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -222,9 +222,10 @@ public class TestLineOverlay extends RenderOverlay {
 			float a = (float) Math.sqrt(vx * vx + vy * vy);
 
 			// normal vector
-			vx = (vx / a);
-			vy = (vy / a);
+			vx /= a;
+			vy /= a;
 
+			// perpendicular
 			float ux = -vy;
 			float uy = vx;
 
