@@ -39,7 +39,7 @@ import android.util.Log;
  */
 
 public final class LineRenderer {
-	private final static String TAG = "LineRenderer";
+	private final static String TAG = LineRenderer.class.getName();
 
 	private static final int LINE_VERTICES_DATA_POS_OFFSET = 0;
 
@@ -215,10 +215,12 @@ public final class LineRenderer {
 			} else {
 
 				if (line.fixed || strokeMaxZoom) {
-					// invert scaling of extrusion vectors so that line width
-					// stays the same.
+					// invert scaling of extrusion vectors so that line
+					// width stays the same.
 					width = ll.width / s;
 				} else {
+					// reduce linear scaling of extrusion vectors so that
+					// line width increases by sqrt(2.2).
 					width = ll.width / lineScale;
 
 					if (ll.line.min > 0 && ll.width * lineScale < ll.line.min * 2)
