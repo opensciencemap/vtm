@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2012, 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -22,6 +22,9 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
 
+/**
+ * @author Hannes Janetzek
+ */
 public class TextureObject {
 	private final static String TAG = TextureObject.class.getName();
 
@@ -177,6 +180,10 @@ public class TextureObject {
 			Bitmap bitmap = Bitmap.createBitmap(
 					TEXTURE_WIDTH, TEXTURE_HEIGHT,
 					Bitmap.Config.ARGB_8888);
+
+			if (TextureRenderer.debug)
+				Log.d(TAG, "alloc bitmap: " +
+						android.os.Debug.getNativeHeapAllocatedSize() / (1024 * 1024));
 
 			return bitmap;
 		}
