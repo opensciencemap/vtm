@@ -26,8 +26,6 @@ package org.oscim.renderer.overlays;
 // 5 R-Tree might be handy
 //
 
-import java.util.HashMap;
-
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
@@ -72,7 +70,42 @@ public class TextOverlayExp extends BasicOverlay {
 	// TextLayer that is ready to be added to 'layers'
 	private TextLayer mNextLayer;
 
+	// local pool, avoids synchronized TextItem.get()/release()
+	private Label mPool;
+	private Label mPrevLabels;
+
 	private final float[] mTmpCoords = new float[8];
+
+	//private HashMap<MapTile, Label> mItemMap;
+	//private Label mNewLabels;
+	//private final HashMap<MapTile, Link> mActiveTiles;
+
+	class Label extends TextItem {
+		TextItem item;
+
+		//Link blocking;
+		//Link blockedBy;
+		// shared list of all label for a tile
+		//Link siblings;
+
+		MapTile tile;
+
+		public byte origin;
+		public int active;
+		public OBB2D bbox;
+	}
+
+	//	class Link {
+	//		Link next;
+	//		Link prev;
+	//		Label it;
+	//	}
+	//
+	//	class ActiveTile {
+	//		MapTile tile;
+	//		int activeLabels;
+	//		Label labels;
+	//	}
 
 	/* package */boolean mRun;
 
@@ -113,59 +146,13 @@ public class TextOverlayExp extends BasicOverlay {
 
 		layers.textureLayers = new TextLayer();
 		mTmpLayer = new TextLayer();
-		mActiveTiles = new HashMap<MapTile, Link>();
+		//mActiveTiles = new HashMap<MapTile, Link>();
 		mTmpPos = new MapPosition();
 		mThread = new LabelThread();
 		mThread.start();
 
 		mRelabelCnt = 0;
 	}
-
-	private HashMap<MapTile, Label> mItemMap;
-
-	class Label extends TextItem {
-		TextItem item;
-
-		Link blocking;
-		Link blockedBy;
-
-		// shared list of all label for a tile
-		Link siblings;
-
-		MapTile tile;
-
-		public byte origin;
-		public int active;
-		public OBB2D bbox;
-	}
-
-	class Link {
-		Link next;
-		Link prev;
-		Label it;
-	}
-
-	class ActiveTile{
-		MapTile tile;
-		int activeLabels;
-		Label labels;
-	}
-
-	//private static void setOBB(TextItem ti){
-	//	if (ti.bbox == null)
-	//	ti.bbox = new OBB2D(ti.x, ti.y, ti.x1, ti.y1, ti.width + 10,
-	//			ti.text.fontHeight + 10);
-	//	else
-	//		ti.bbox.set(ti.x, ti.y, ti.x1, ti.y1, ti.width + 10,
-	//			ti.text.fontHeight + 10);
-	//}
-
-	// local pool, avoids synchronized TextItem.get()/release()
-	private Label mPool;
-
-	private Label mNewLabels;
-	private Label mPrevLabels;
-	private final HashMap<MapTile, Link> mActiveTiles;
 
 	private byte checkOverlap(TextLayer tl, Label ti) {
 
@@ -199,16 +186,6 @@ public class TextOverlayExp extends BasicOverlay {
 				}
 
 				return 3;
-			}
-
-			if (ti.bbox == null) {
-				ti.bbox = new OBB2D(ti.x, ti.y, ti.x1, ti.y1,
-						ti.width + 5, ti.text.fontHeight + 5);
-			}
-
-			if (lp.bbox == null) {
-				lp.bbox = new OBB2D(lp.x, lp.y, lp.x1, lp.y1,
-						lp.width + 5, lp.text.fontHeight + 5);
 			}
 
 			boolean intersect = ti.bbox.overlaps(lp.bbox);
@@ -269,12 +246,38 @@ public class TextOverlayExp extends BasicOverlay {
 	}
 
 	private Layers mDebugLayer;
+	private final static float[] mDebugPoints = new float[4];
 	private final float[] mMVP = new float[16];
 
 	void addTile(MapTile t) {
 
 	}
 
+	private Label addToPool(Label l) {
+		TextItem.release(l.item);
+		l.item = null;
+
+		Label next = (Label) l.next;
+		l.next = mPool;
+		mPool = l;
+
+		return next;
+	}
+
+	private Label getLabel() {
+		Label l;
+
+		if (mPool == null)
+			l = new Label();
+		else {
+			l = mPool;
+			mPool = (Label) mPool.next;
+			l.next = null;
+		}
+		l.active = Integer.MAX_VALUE;
+
+		return l;
+	}
 
 	boolean updateLabels() {
 		if (mTmpLayer == null)
@@ -290,9 +293,9 @@ public class TextOverlayExp extends BasicOverlay {
 		TextLayer tl = mTmpLayer;
 		mTmpLayer = null;
 
-		mNewLabels = null;
+		//mNewLabels = null;
 
-		Layers dbg = null; //new Layers();
+		Layers dbg = new Layers();
 
 		float[] coords = mTmpCoords;
 		MapPosition pos = mTmpPos;
@@ -327,16 +330,15 @@ public class TextOverlayExp extends BasicOverlay {
 
 		mRelabelCnt++;
 
-		for (Label lp = mPrevLabels; lp != null; ) {
+		for (Label lp = mPrevLabels; lp != null;) {
 
 			// transform screen coordinates to tile coordinates
 			float s = FastMath.pow(lp.tile.zoomLevel - pos.zoomLevel);
 			float sscale = pos.scale / s;
 
-			if (lp.width > lp.length * sscale){
+			if (lp.width > lp.length * sscale) {
 				//Log.d(TAG, "- scale " + lp + " " + s + " " + sscale + " " + lp.length + " " + lp.width);
-				TextItem.release(lp.item);
-				lp = (Label) lp.next;
+				lp = addToPool(lp);
 				continue;
 			}
 
@@ -362,48 +364,22 @@ public class TextOverlayExp extends BasicOverlay {
 				lp.y2 = (lp.y + height);
 				lp.y1 = (lp.y - height);
 
-				if (!wayIsVisible(lp)){
-					//Log.d(TAG, "- visible " + lp);
-					TextItem.release(lp.item);
-					lp = (Label) lp.next;
+				if (!wayIsVisible(lp)) {
+					lp = addToPool(lp);
 					continue;
 				}
 
 				byte overlaps = -1;
-				if (lp.bbox != null)
+
 				lp.bbox.set(lp.x, lp.y, lp.x1, lp.y1,
 						lp.width + 5, lp.text.fontHeight + 5);
-				else lp.bbox= new OBB2D(lp.x, lp.y, lp.x1, lp.y1,
-						lp.width + 5, lp.text.fontHeight + 5);
-
-				if (dbg != null) {
-
-					LineLayer ll;
-					if (overlaps == 1)
-						ll = (LineLayer) dbg.getLayer(4, Layer.LINE);
-					else
-						ll = (LineLayer) dbg.getLayer(5, Layer.LINE);
-
-					{
-						float[] points = new float[4];
-						short[] indices = { 4 };
-						points[0] = (lp.x - width * sscale);
-						points[1] = (lp.y - height * sscale);
-						points[2] = (lp.x + width * sscale);
-						points[3] = (lp.y + height * sscale);
-						ll.addLine(points, indices, false);
-					}
-					if (lp.bbox != null) {
-						short[] indices = { 8 };
-						ll.addLine(lp.bbox.corner, indices, true);
-					}
-				}
 
 				overlaps = checkOverlap(tl, lp);
 
+				if (dbg != null)
+					addDebugBox(dbg, lp, lp.item, overlaps, true, scale);
+
 				if (overlaps == 0) {
-					//if (s != 1)
-					//Log.d(TAG, s + "add prev label " + lp);
 
 					Label tmp = lp;
 					lp = (Label) lp.next;
@@ -414,8 +390,7 @@ public class TextOverlayExp extends BasicOverlay {
 				}
 			}
 
-			TextItem.release(lp.item);
-			lp = (Label) lp.next;
+			lp = addToPool(lp);
 		}
 
 		/* add way labels */
@@ -438,16 +413,8 @@ public class TextOverlayExp extends BasicOverlay {
 					continue;
 
 				// acquire a TextItem to add to TextLayer
-				if (l == null) {
-					if (mPool == null)
-						l = new Label();
-					else {
-						l = mPool;
-						mPool = (Label) mPool.next;
-						l.next = null;
-					}
-					l.active = Integer.MAX_VALUE;
-				}
+				if (l == null)
+					l = getLabel();
 
 				// check if path at current scale is long enough for text
 				if (dbg == null && ti.width > ti.length * scale)
@@ -471,41 +438,17 @@ public class TextOverlayExp extends BasicOverlay {
 
 				byte overlaps = -1;
 
+				if (l.bbox == null)
+					l.bbox = new OBB2D(l.x, l.y, l.x1, l.y1, l.width + 5, l.text.fontHeight + 5);
+				else
+					l.bbox.set(l.x, l.y, l.x1, l.y1, l.width + 5, l.text.fontHeight + 5);
+
 				if (dbg == null || ti.width < ti.length * scale)
 					overlaps = checkOverlap(tl, l);
 
-				if (dbg != null) {
+				if (dbg != null)
+					addDebugBox(dbg, l, ti, overlaps, false, scale);
 
-					LineLayer ll;
-					if (ti.width > ti.length * scale) {
-						ll = (LineLayer) dbg.getLayer(1, Layer.LINE);
-						overlaps = 3;
-					}
-					else if (overlaps == 1)
-						ll = (LineLayer) dbg.getLayer(0, Layer.LINE);
-					else if (overlaps == 2)
-						ll = (LineLayer) dbg.getLayer(3, Layer.LINE);
-					else
-						ll = (LineLayer) dbg.getLayer(2, Layer.LINE);
-
-					//if (ti2.bbox == null)
-					//	ti2.bbox = new OBB2D(ti2.x, ti2.y, ti2.x1, ti2.y1, ti.width + 10,
-					//			ti.text.fontHeight + 10);
-
-					{
-						float[] points = new float[4];
-						short[] indices = { 4 };
-						points[0] = (l.x - width * scale);
-						points[1] = (l.y - height * scale);
-						points[2] = (l.x + width * scale);
-						points[3] = (l.y + height * scale);
-						ll.addLine(points, indices, false);
-					}
-					if (l.bbox != null) {
-						short[] indices = { 8 };
-						ll.addLine(l.bbox.corner, indices, true);
-					}
-				}
 				if (overlaps == 0) {
 					tl.addText(l);
 					l.item = TextItem.copy(ti);
@@ -526,7 +469,7 @@ public class TextOverlayExp extends BasicOverlay {
 			// flip around date-line
 			if (dx > maxx)
 				dx = dx - maxx * 2;
-			 else if (dx < -maxx)
+			else if (dx < -maxx)
 				dx = dx + maxx * 2;
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
@@ -534,16 +477,8 @@ public class TextOverlayExp extends BasicOverlay {
 					continue;
 
 				// acquire a TextItem to add to TextLayer
-				if (l == null) {
-					if (mPool == null)
-						l = new Label();
-					else {
-						l = mPool;
-						mPool = (Label) mPool.next;
-						l.next = null;
-					}
-					l.active = Integer.MAX_VALUE;
-				}
+				if (l == null)
+					l = getLabel();
 
 				l.clone(ti);
 				l.move(ti, dx, dy, scale);
@@ -552,13 +487,16 @@ public class TextOverlayExp extends BasicOverlay {
 
 				l.setAxisAlignedBBox();
 
-				l.bbox = new OBB2D(l.x, l.y, cos, -sin, l.width + 6,
-						l.text.fontHeight + 6, true);
+				if (l.bbox == null)
+					l.bbox = new OBB2D();
+
+				l.bbox.setNormalized(l.x, l.y, cos, -sin, l.width + 6,
+						l.text.fontHeight + 6);
 
 				boolean overlaps = false;
 				for (Label lp = (Label) tl.labels; lp != null; lp = (Label) lp.next) {
-					//if (!lp.text.caption)
-					//	continue;
+
+					// can only be way label
 					if (lp.bbox == null) {
 						lp.bbox = new OBB2D(lp.x, lp.y, lp.x1, lp.y1,
 								lp.width + 5, lp.text.fontHeight + 5);
@@ -581,7 +519,7 @@ public class TextOverlayExp extends BasicOverlay {
 			}
 		}
 
-		for (Label ti = (Label)tl.labels; ti != null; ti = (Label)ti.next) {
+		for (Label ti = (Label) tl.labels; ti != null; ti = (Label) ti.next) {
 
 			if (ti.text.caption)
 				continue;
@@ -598,7 +536,7 @@ public class TextOverlayExp extends BasicOverlay {
 			}
 		}
 
-		// release temporarily used TextItems
+		// keep temporarily used Label
 		if (l != null) {
 			l.next = mPool;
 			mPool = l;
@@ -623,7 +561,42 @@ public class TextOverlayExp extends BasicOverlay {
 		return true;
 	}
 
-	private static void addDebugLayers(Layers dbg){
+	private static void addDebugBox(Layers dbg, Label l, TextItem ti, int overlaps, boolean prev, float scale) {
+
+		LineLayer ll;
+		if (prev) {
+			if (overlaps == 1)
+				ll = (LineLayer) dbg.getLayer(4, Layer.LINE);
+			else
+				ll = (LineLayer) dbg.getLayer(5, Layer.LINE);
+
+		} else {
+			if (ti.width > ti.length * scale) {
+				ll = (LineLayer) dbg.getLayer(1, Layer.LINE);
+				overlaps = 3;
+			}
+			else if (overlaps == 1)
+				ll = (LineLayer) dbg.getLayer(0, Layer.LINE);
+			else if (overlaps == 2)
+				ll = (LineLayer) dbg.getLayer(3, Layer.LINE);
+			else
+				ll = (LineLayer) dbg.getLayer(2, Layer.LINE);
+		}
+		float[] points = mDebugPoints;
+		float width = (ti.x2 - ti.x1) / 2f;
+		float height = (ti.y2 - ti.y1) / 2f;
+		points[0] = (l.x - width * scale);
+		points[1] = (l.y - height * scale);
+		points[2] = (l.x + width * scale);
+		points[3] = (l.y + height * scale);
+		ll.addLine(points, null, false);
+
+		if (l.bbox != null && overlaps != 3) {
+			ll.addLine(l.bbox.corner, null, true);
+		}
+	}
+
+	private static void addDebugLayers(Layers dbg) {
 		dbg.clear();
 		LineLayer ll = (LineLayer) dbg.getLayer(0, Layer.LINE);
 		ll.line = new Line((Color.BLUE & 0xaaffffff), 1, Cap.BUTT);
@@ -644,6 +617,7 @@ public class TextOverlayExp extends BasicOverlay {
 		ll.line = new Line((Color.MAGENTA & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
 	}
+
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged) {
