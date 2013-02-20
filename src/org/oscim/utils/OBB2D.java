@@ -105,6 +105,10 @@ public class OBB2D {
 		computeAxes();
 	}
 
+	public OBB2D(){
+
+	}
+
 	public OBB2D(float cx, float cy, float width, float height, double acos, double asin) {
 
 		float vx = (float) acos * width / 2;
@@ -128,9 +132,7 @@ public class OBB2D {
 		computeAxes();
 	}
 
-	public OBB2D(float cx, float cy, float vx, float vy, float width, float height,
-			boolean normalized) {
-
+	public void setNormalized(float cx, float cy, float vx, float vy, float width, float height) {
 		float ux = -vy;
 		float uy = vx;
 
