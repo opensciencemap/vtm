@@ -295,7 +295,9 @@ public class TextOverlayExp extends BasicOverlay {
 
 		//mNewLabels = null;
 
-		Layers dbg = new Layers();
+		Layers dbg = null;
+		if (mMapView.getDebugSettings().debugLabels)
+			dbg = new Layers();
 
 		float[] coords = mTmpCoords;
 		MapPosition pos = mTmpPos;
