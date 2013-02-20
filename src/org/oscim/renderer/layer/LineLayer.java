@@ -60,12 +60,14 @@ public final class LineLayer extends Layer {
 	 * (https://github.com/olofsj/GLMap/)
 	 *
 	 * @param points
-	 *            array of points as x,y pairs
+	 *            array of points as x,y pairs.
 	 * @param index
 	 *            array of indices holding the length of the individual
-	 *            lines
+	 *            line coordinates (i.e. points * 2).
+	 *            when index is null one a line with points.length
+	 *            is assumed.
 	 * @param closed
-	 *            whether to connect start- and end-point
+	 *            whether to connect start- and end-point.
 	 */
 	public void addLine(float[] points, short[] index, boolean closed) {
 		float x, y, nextX, nextY;
@@ -108,8 +110,19 @@ public final class LineLayer extends Layer {
 		}
 		roundCap = rounded;
 
-		for (int i = 0, pos = 0, n = index.length; i < n; i++) {
-			int length = index[i];
+		int n;
+		int length = 0;
+
+		if (index == null){
+			n = 1;
+			length = points.length;
+		} else{
+			n = index.length;
+		}
+
+		for (int i = 0, pos = 0; i < n; i++) {
+			if (index != null)
+				length = index[i];
 
 			// check end-marker in indices
 			if (length < 0)
