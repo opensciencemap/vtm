@@ -111,9 +111,6 @@ public final class LineRenderer {
 	public static Layer draw(Layers layers, Layer curLayer, MapPosition pos,
 			float[] matrix, float div, int mode) {
 
-		int zoom = pos.zoomLevel;
-		float scale = pos.scale;
-
 		if (curLayer == null)
 			return null;
 
@@ -132,6 +129,9 @@ public final class LineRenderer {
 				false, 0, layers.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
 
 		glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
+
+		int zoom = pos.zoomLevel;
+		float scale = pos.scale;
 
 		// Line scale factor for non fixed lines: Within a zoom-
 		// level lines would be scaled by the factor 2 by view-matrix.
