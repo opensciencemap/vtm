@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 OpenScienceMap
+ * Copyright 2012, 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General License as published by the Free Software
@@ -21,8 +21,6 @@ import org.oscim.renderer.layer.TextItem;
 /**
  * Extends Tile class for concurrent use in TileManager,
  * TileGenerator and GLRenderer threads.
- *
- * @author Hannes Janetzek
  */
 public final class MapTile extends JobTile {
 

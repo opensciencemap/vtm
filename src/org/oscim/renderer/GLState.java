@@ -17,9 +17,6 @@ package org.oscim.renderer;
 import android.opengl.GLES20;
 import android.util.Log;
 
-/**
- * @author Hannes Janetzek
- */
 public class GLState {
 	private final static String TAG = GLState.class.getName();
 

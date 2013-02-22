@@ -229,10 +229,6 @@ public final class Line extends RenderInstruction {
 		this.fade = fade;
 		this.stipple = stipple;
 		this.min = min;
-
-		if (stipple != 0){
-			System.out.println("a");
-		}
 	}
 
 
