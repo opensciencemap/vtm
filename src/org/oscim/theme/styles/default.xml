@@ -867,7 +867,7 @@
             </rule>
           </rule>
         </rule>
-
+ 
         <!-- railway casings and cores -->
         <rule e="way" k="railway" v="tram" zoom-min="15">
           <line stroke="#887766" width="1.0" fixed="true" />
@@ -875,11 +875,16 @@
 
         <rule e="way" k="railway" v="light_rail|subway|narrow_gauge" zoom-min="14">
           <line stroke="#a0a0a0" width="0.9" cap="butt" fixed="true" />
-
         </rule>
-        <rule e="way" k="railway" v="rail|turntable" >
-          <line stroke="#ccaa9988" width="1.0" cap="butt" fixed="true" fade="12"/>
+        
+        <rule e="way" k="railway" v="rail|turntable" zoom-max="14">
+          <line stroke="#ddaa9988" width="1.0" cap="butt" fixed="true" fade="12"/>
         </rule>
+        
+        <rule e="way" k="railway" v="rail|turntable" zoom-min="15">
+          <line stroke="#ddaa9988" width="1.0" cap="butt" fixed="true" fade="12" stipple="1"/>
+        </rule>
+        
         <!-- <rule e="way" k="railway" v="rail" zoom-max="14" zoom-min="13">
              <line stroke="#8888aa" width="0.6" cap="butt"
              fixed="true" />
