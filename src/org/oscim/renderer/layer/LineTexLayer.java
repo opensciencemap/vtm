@@ -18,7 +18,6 @@ import java.nio.ShortBuffer;
 
 import org.oscim.renderer.GLRenderer;
 import org.oscim.theme.renderinstruction.Line;
-import org.oscim.utils.FastMath;
 
 /**
  * Layer for textured or stippled lines
@@ -61,7 +60,7 @@ public final class LineTexLayer extends Layer {
 
 	private static final float COORD_SCALE = GLRenderer.COORD_MULTIPLIER;
 	// scale factor mapping extrusion vector to short values
-	public static final float DIR_SCALE = 255; //2048;
+	public static final float DIR_SCALE = 2048;
 
 	// lines referenced by this outline layer
 	public LineLayer outlines;
@@ -137,7 +136,7 @@ public final class LineTexLayer extends Layer {
 			float y = points[ipos++] * COORD_SCALE;
 
 			// randomize a bit
-			float lineLength = FastMath.abs(x * y) % 20;
+			float lineLength = (x * x + y * y) % 80;
 
 			int end = pos + length;
 
