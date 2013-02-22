@@ -179,7 +179,7 @@ public class TextOverlayExp extends BasicOverlay {
 
 			if (lp.text == ti.text && (lp.string == ti.string || lp.string.equals(ti.string))) {
 
-				// make strings unique
+				// make strings unique, should be done only once..
 				ti.string = lp.string;
 
 				// keep the label that was active earlier
@@ -358,8 +358,8 @@ public class TextOverlayExp extends BasicOverlay {
 			if (!l.text.caption) {
 				// set line endpoints relative to view to be able to
 				// check intersections with label from other tiles
-				float width = (l.x2 - l.x1) / 2f;
-				float height = (l.y2 - l.y1) / 2f;
+				float width = (l.item.x2 - l.item.x1) / 2f;
+				float height = (l.item.y2 - l.item.y1) / 2f;
 
 				l.x2 = (l.x + width);
 				l.x1 = (l.x - width);
