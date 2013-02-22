@@ -30,10 +30,25 @@ import android.util.Log;
 public class GlUtils {
 	private static String TAG = "GlUtils";
 
+	public static void setTextureParameter(int min_filter, int mag_filter, int wrap_s, int wrap_t) {
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_MIN_FILTER,
+				min_filter);
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_MAG_FILTER,
+				mag_filter);
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_WRAP_S,
+				wrap_s); // Set U Wrapping
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+				GLES20.GL_TEXTURE_WRAP_T,
+				wrap_t); // Set V Wrapping
+	}
+
 	/**
 	 * @param bitmap
 	 *            ...
-	 * @return gl identifier
+	 * @return textureId
 	 */
 	public static int loadTextures(Bitmap bitmap) {
 
@@ -44,21 +59,8 @@ public class GlUtils {
 
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureID);
 
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_MIN_FILTER,
-				GLES20.GL_LINEAR);
-
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_MAG_FILTER,
-				GLES20.GL_LINEAR);
-
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_WRAP_S,
-				GLES20.GL_CLAMP_TO_EDGE);
-
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_WRAP_T,
-				GLES20.GL_CLAMP_TO_EDGE);
+		setTextureParameter(GLES20.GL_LINEAR, GLES20.GL_LINEAR,
+				GLES20.GL_CLAMP_TO_EDGE, GLES20.GL_CLAMP_TO_EDGE);
 
 		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
 
@@ -66,24 +68,13 @@ public class GlUtils {
 	}
 
 	public static int loadTexture(byte[] pixel, int width, int height, int format,
-			int wrap_s, int wrap_t) {
+			int min_filter, int mag_filter, int wrap_s, int wrap_t) {
 		int[] textureIds = new int[1];
 		GLES20.glGenTextures(1, textureIds, 0);
 
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[0]);
 
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_MIN_FILTER,
-				GLES20.GL_NEAREST);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_MAG_FILTER,
-				GLES20.GL_NEAREST);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_WRAP_S,
-				wrap_s); // Set U Wrapping
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_WRAP_T,
-				wrap_t); // Set V Wrapping
+		setTextureParameter(min_filter, mag_filter, wrap_s, wrap_t);
 
 		ByteBuffer buf = ByteBuffer.allocateDirect(width * height).order(ByteOrder.nativeOrder());
 		buf.put(pixel);
@@ -94,6 +85,37 @@ public class GlUtils {
 
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
 		return textureIds[0];
+	}
+
+	public static int loadStippleTexture(byte[] stipple) {
+		int sum = 0;
+		for (byte flip : stipple)
+			sum += flip;
+
+		byte[] pixel = new byte[sum];
+
+		boolean on = true;
+		int pos = 0;
+		for (byte flip : stipple) {
+			float max = flip;
+
+			for (int s = 0; s < flip; s++) {
+				float color = Math.abs(s / (max - 1) - 0.5f);
+				if (on)
+					color = 255 * (1 - color);
+				else
+					color = 255 * color;
+
+				pixel[pos + s] = FastMath.clampToByte((int) color);
+			}
+			on = !on;
+			pos += flip;
+		}
+
+		return loadTexture(pixel, sum, 1, GLES20.GL_ALPHA,
+				GLES20.GL_LINEAR, GLES20.GL_LINEAR,
+				//GLES20.GL_NEAREST, GLES20.GL_NEAREST,
+				GLES20.GL_REPEAT, GLES20.GL_REPEAT);
 	}
 
 	/**

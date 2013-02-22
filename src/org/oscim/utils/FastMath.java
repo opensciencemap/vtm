@@ -54,6 +54,13 @@ public class FastMath {
 
 		return (pow > 0 ? (1 << pow) : (1.0f / (1 << -pow)));
 	}
+	public static int clamp(int value, int max, int min){
+		return (value < min ? min : (value > max ? max : value));
+	}
+
+	public static byte clampToByte(int value){
+		return (byte)(value < 0 ? 0 : (value > 255 ? 255 : value));
+	}
 
 	public static float abs(float value){
 		return value < 0 ? -value : value;

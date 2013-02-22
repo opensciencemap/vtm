@@ -386,8 +386,8 @@ public class TextOverlay extends BasicOverlay {
 			layers.clear();
 
 			if (mDebugLayer != null) {
-				layers.layers = mDebugLayer.layers;
-				mDebugLayer.layers = null;
+				layers.baseLayers = mDebugLayer.baseLayers;
+				mDebugLayer.baseLayers = null;
 			}
 
 			// set new TextLayer to be uploaded and used

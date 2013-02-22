@@ -627,7 +627,7 @@ public class TextOverlayExp extends BasicOverlay {
 			layers.clear();
 
 			if (mDebugLayer != null) {
-				layers.layers = mDebugLayer.layers;
+				layers.baseLayers = mDebugLayer.baseLayers;
 				mDebugLayer = null;
 			}
 
@@ -665,12 +665,12 @@ public class TextOverlayExp extends BasicOverlay {
 			return;
 		}
 
-		if (vbo == null) {
-			vbo = BufferObject.get(0);
+		if (layers.vbo == null) {
+			layers.vbo = BufferObject.get(0);
 		}
 
 		if (newSize > 0) {
-			if (GLRenderer.uploadLayers(layers, vbo, newSize, true))
+			if (GLRenderer.uploadLayers(layers, newSize, true))
 				isReady = true;
 		}
 	}
@@ -679,19 +679,19 @@ public class TextOverlayExp extends BasicOverlay {
 	public synchronized void render(MapPosition pos, Matrices m) {
 		float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
 
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo.id);
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, layers.vbo.id);
 		GLState.test(false, false);
 
-		if (layers.layers != null) {
+		if (layers.baseLayers != null) {
 			setMatrix(pos, m, true);
 
 			//Matrix.multiplyMM(m.mvp, 0, m.proj, 0, m.mvp,0);
-			for (Layer l = layers.layers; l != null;) {
+			for (Layer l = layers.baseLayers; l != null;) {
 				if (l.type == Layer.POLYGON) {
 					l = PolygonRenderer.draw(pos, l, m.mvp, true, false);
 				} else {
 					float scale = pos.scale * div;
-					l = LineRenderer.draw(pos, l, m.mvp, scale, 0, layers.lineOffset);
+					l = LineRenderer.draw(layers, l, pos, m.mvp, scale, 0);
 				}
 			}
 		}

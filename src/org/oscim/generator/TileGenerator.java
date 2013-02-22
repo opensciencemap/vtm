@@ -16,6 +16,8 @@ package org.oscim.generator;
 
 import static org.oscim.generator.JobTile.STATE_NONE;
 
+import java.util.Arrays;
+
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -27,6 +29,7 @@ import org.oscim.renderer.layer.ExtrusionLayer;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
+import org.oscim.renderer.layer.LineTexLayer;
 import org.oscim.renderer.layer.PolygonLayer;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.IRenderCallback;
@@ -132,7 +135,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 */
 	public TileGenerator(MapView mapView) {
 		//	mMapView = mapView;
-		mClipper = new LineClipper(0,0,Tile.TILE_SIZE, Tile.TILE_SIZE, true);
+		mClipper = new LineClipper(0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE, true);
 	}
 
 	public void cleanup() {
@@ -254,6 +257,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				mTagHouseNr = tags[i];
 				tags[i] = mTagEmptyHouseNr;
 			} else if (mTile.zoomLevel >= 17 &&
+					// FIXME, allow overlays to intercept
+					// this, or use a theme option for this
 					key == Tag.TAG_KEY_BUILDING) {
 				mRenderBuildingModel = true;
 			}
@@ -270,38 +275,12 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mTagName = null;
 		mTagHouseNr = null;
 
-		//if (mMapProjection != null) {
-		//	long x = mTile.pixelX;
-		//	long y = mTile.pixelY + Tile.TILE_SIZE;
-		//	long z = Tile.TILE_SIZE << mTile.zoomLevel;
-		//
-		//	double divx, divy;
-		//	long dx = (x - (z >> 1));
-		//	long dy = (y - (z >> 1));
-		//
-		//	if (mMapProjection == WebMercator.NAME) {
-		//		double div = WebMercator.f900913 / (z >> 1);
-		//		// divy = f900913 / (z >> 1);
-		//		mPoiX = (float) (longitude / div - dx);
-		//		mPoiY = (float) (latitude / div + dy);
-		//	} else {
-		//		divx = 180000000.0 / (z >> 1);
-		//		divy = z / PIx4;
-		//		mPoiX = (float) (longitude / divx - dx);
-		//		double sinLat = Math.sin(latitude * PI180);
-		//		mPoiY = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
-		//			return;
-		//	}
-		//} else {
 		mPoiX = longitude;
 		mPoiY = latitude;
-		//}
 
 		// remove tags that should not be cached in Rendertheme
 		filterTags(tags);
-		// Log.d(TAG, "renderPointOfInterest: " + mTagName);
 
-		// mNodeRenderInstructions =
 		TileGenerator.renderTheme.matchNode(this, tags, mTile.zoomLevel);
 	}
 
@@ -338,8 +317,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private void debugUnmatched(boolean closed, Tag[] tags) {
 
-		Log.d(TAG, "way not matched: " + tags[0] + " "
-				+ (tags.length > 1 ? tags[1] : "") + " " + closed);
+		Log.d(TAG, "DBG way not matched: " + closed + " " + Arrays.deepToString(tags));
 
 		mTagName = new Tag("name", tags[0].key + ":" + tags[0].value, false);
 
@@ -366,37 +344,62 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	// ----------------- RenderThemeCallback -----------------
 	@Override
 	public void renderWay(Line line, int level) {
-		// projectToTile();
+		// TODO projectToTile();
 
-		if (line.outline && mCurLineLayer == null) {
-			// TODO fix this in RenderTheme
-			Log.e(TAG, "theme issue, cannot add outline: line must come before outline!");
-			return;
-		}
 		int numLayer = (mDrawingLayer * 2) + level;
 
-		LineLayer lineLayer = (LineLayer) mLayers.getLayer(numLayer, Layer.LINE);
-		if (lineLayer == null)
-			return;
-
-		if (lineLayer.line == null) {
-			lineLayer.line = line;
-
-			float w = line.width;
-			if (!line.fixed) {
-				w *= mStrokeScale;
-				w *= mProjectionScaleFactor;
+		if (line.stipple == 0) {
+			if (line.outline && mCurLineLayer == null) {
+				// FIXME in RenderTheme
+				Log.e(TAG, "BUG in theme: line must come before outline!");
+				return;
 			}
-			lineLayer.width = w;
-		}
 
-		if (line.outline) {
-			lineLayer.addOutline(mCurLineLayer);
-			return;
-		}
+			LineLayer lineLayer = (LineLayer)
+					mLayers.getLayer(numLayer, Layer.LINE);
 
-		lineLayer.addLine(mCoords, mIndices, mClosed);
-		mCurLineLayer = lineLayer;
+			if (lineLayer == null)
+				return;
+
+			if (lineLayer.line == null) {
+				lineLayer.line = line;
+
+				float w = line.width;
+				if (!line.fixed) {
+					w *= mStrokeScale;
+					w *= mProjectionScaleFactor;
+				}
+				lineLayer.width = w;
+			}
+
+			if (line.outline) {
+				lineLayer.addOutline(mCurLineLayer);
+				return;
+			}
+
+			lineLayer.addLine(mCoords, mIndices, mClosed);
+			mCurLineLayer = lineLayer;
+		} else {
+			LineTexLayer lineLayer = (LineTexLayer)
+					mLayers.getLayer(numLayer, Layer.TEXLINE);
+
+			if (lineLayer == null)
+				return;
+
+			if (lineLayer.line == null) {
+				lineLayer.line = line;
+
+				float w = line.width;
+				if (!line.fixed) {
+					w *= mStrokeScale;
+					w *= mProjectionScaleFactor;
+				}
+				lineLayer.width = w;
+			}
+
+
+			lineLayer.addLine(mCoords, mIndices);
+		}
 	}
 
 	@Override
@@ -480,8 +483,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				int length = mIndices[i];
 				if (length < 4)
 					break;
-				mLabels = WayDecorator.renderText(mClipper,mCoords, mTagName.value, text,
-						offset,	length, mLabels);
+				mLabels = WayDecorator.renderText(mClipper, mCoords, mTagName.value, text,
+						offset, length, mLabels);
 				offset += length;
 			}
 		}
@@ -520,6 +523,31 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	//	// TODO move this to Projection classes
 	//
+
+	//if (mMapProjection != null) {
+	//	long x = mTile.pixelX;
+	//	long y = mTile.pixelY + Tile.TILE_SIZE;
+	//	long z = Tile.TILE_SIZE << mTile.zoomLevel;
+	//
+	//	double divx, divy;
+	//	long dx = (x - (z >> 1));
+	//	long dy = (y - (z >> 1));
+	//
+	//	if (mMapProjection == WebMercator.NAME) {
+	//		double div = WebMercator.f900913 / (z >> 1);
+	//		// divy = f900913 / (z >> 1);
+	//		mPoiX = (float) (longitude / div - dx);
+	//		mPoiY = (float) (latitude / div + dy);
+	//	} else {
+	//		divx = 180000000.0 / (z >> 1);
+	//		divy = z / PIx4;
+	//		mPoiX = (float) (longitude / divx - dx);
+	//		double sinLat = Math.sin(latitude * PI180);
+	//		mPoiY = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
+	//			return;
+	//	}
+	//} else {
+
 	//  private String mMapProjection;
 	//  private static final double PI180 = (Math.PI / 180) / 1000000.0;
 	//  private static final double PIx4 = Math.PI * 4;

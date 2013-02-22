@@ -14,6 +14,8 @@
  */
 package org.oscim.renderer.layer;
 
+import java.nio.ShortBuffer;
+
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.theme.renderinstruction.Line;
@@ -26,7 +28,6 @@ import android.graphics.Paint.Cap;
  * @author Hannes Janetzek
  */
 public final class LineLayer extends Layer {
-
 	private static final float COORD_SCALE = GLRenderer.COORD_MULTIPLIER;
 	// scale factor mapping extrusion vector to short values
 	public static final float DIR_SCALE = 2048;
@@ -42,7 +43,7 @@ public final class LineLayer extends Layer {
 	public boolean roundCap;
 
 	LineLayer(int layer) {
-		this.layer = layer;
+		this.level = layer;
 		this.type = Layer.LINE;
 	}
 
@@ -312,11 +313,13 @@ public final class LineLayer extends Layer {
 			vx *= -1;
 			vy *= -1;
 
+			int end = pos + length;
+
 			for (;;) {
-				if (ipos < pos + length) {
+				if (ipos < end) {
 					nextX = points[ipos++];
 					nextY = points[ipos++];
-				} else if (closed && ipos < pos + length + 2) {
+				} else if (closed && ipos < end + 2) {
 					// add startpoint == endpoint
 					nextX = points[pos];
 					nextY = points[pos + 1];
@@ -542,5 +545,9 @@ public final class LineLayer extends Layer {
 
 	@Override
 	protected void clear() {
+	}
+
+	@Override
+	protected void compile(ShortBuffer sbuf) {
 	}
 }

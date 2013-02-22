@@ -28,7 +28,8 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 /**
- * This class is for rendering the Line- and PolygonLayers of visible MapTiles. For
+ * This class is for rendering the Line- and PolygonLayers of visible MapTiles.
+ * For
  * visible tiles that do not have data available yet its parent in children
  * tiles are rendered when available.
  *
@@ -107,12 +108,12 @@ public class BaseMap {
 		if (t.holder != null)
 			t = t.holder;
 
-		if (t.layers == null || t.vbo == null) {
+		if (t.layers == null || t.layers.vbo == null) {
 			//Log.d(TAG, "missing data " + (t.layers == null) + " " + (t.vbo == null));
 			return;
 		}
 
-		GLES20.glBindBuffer(GL_ARRAY_BUFFER, t.vbo.id);
+		GLES20.glBindBuffer(GL_ARRAY_BUFFER, t.layers.vbo.id);
 
 		// place tile relative to map position
 		float div = FastMath.pow(tile.zoomLevel - pos.zoomLevel);
@@ -135,8 +136,9 @@ public class BaseMap {
 		int simpleShader = (pos.tilt < 1 ? 1 : 0);
 
 		boolean clipped = false;
+		boolean lineTexture = true;
 
-		for (Layer l = t.layers.layers; l != null;) {
+		for (Layer l = t.layers.baseLayers; l != null;) {
 			switch (l.type) {
 				case Layer.POLYGON:
 					l = PolygonRenderer.draw(pos, l, mvp, !clipped, true);
@@ -144,16 +146,38 @@ public class BaseMap {
 					break;
 
 				case Layer.LINE:
+					//if (!lineTexture) {
+					LineRenderer.beginLines();
+					//	lineTexture = true;
+					//}
 					if (!clipped) {
+						// draw stencil buffer clip region
 						PolygonRenderer.draw(pos, null, mvp, true, true);
 						clipped = true;
 					}
-					l = LineRenderer.draw(pos, l, mvp, div, simpleShader,
-							t.layers.lineOffset);
+					l = LineRenderer.draw(t.layers, l, pos, mvp, div, simpleShader);
+
 					break;
+
+				case Layer.TEXLINE:
+					LineRenderer.endLines();
+
+					if (!clipped) {
+						// draw stencil buffer clip region
+						PolygonRenderer.draw(pos, null, mvp, true, true);
+						clipped = true;
+					}
+					l = LineTexRenderer.draw(t.layers, l, pos, mvp, div);
+					lineTexture = false;
+					break;
+
+				default:
+					// just in case
+					l = l.next;
 			}
 		}
 
+		// clear clip-region and could also draw 'fade-effect'
 		PolygonRenderer.drawOver(mvp);
 	}
 

@@ -38,15 +38,6 @@ public final class MapTile extends JobTile {
 	public boolean isVisible;
 
 	/**
-	 * VBO holds all vertex data to draw lines and polygons when
-	 * 'layers' are compiled. layout:
-	 * 16 bytes fill coordinates,
-	 * n bytes polygon vertices,
-	 * m bytes lines vertices
-	 */
-	BufferObject vbo;
-
-	/**
 	 * Pointer to access relatives in QuadTree
 	 */
 	public QuadTree rel;
