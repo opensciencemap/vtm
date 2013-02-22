@@ -16,22 +16,33 @@ package org.oscim.renderer.layer;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.renderer.BufferObject;
+
 import android.util.Log;
 
-/**
- * @author Hannes Janetzek
- */
 public class Layers {
-	// mixed Polygon and Line layers
-	public Layer layers;
+	private final static String TAG = Layers.class.getName();
+
+	// mixed Polygon- and LineLayer
+	public Layer baseLayers;
 	public Layer textureLayers;
 	public Layer extrusionLayers;
+
+	// VBO holds all vertex data to draw lines and polygons
+	// after are compilation.
+	// Layout:
+	//   16 bytes fill coordinates,
+	//   n bytes polygon vertices,
+	//   m bytes lines vertices
+	//  ...
+	public BufferObject vbo;
 
 	// To not need to switch VertexAttribPointer positions all the time:
 	// 1. polygons are packed in VBO at offset 0
 	// 2. lines afterwards at lineOffset
 	// 3. other layers keep their byte offset in Layer.offset
 	public int lineOffset;
+	public int texLineOffset;
 
 	// time when layers became first rendered (in uptime)
 	// used for animations
@@ -39,78 +50,87 @@ public class Layers {
 
 	private Layer mCurLayer;
 
-	// get or add the line- or polygon-layer for a level.
+	// get or add the Line- or PolygonLayer for a level.
 	public Layer getLayer(int level, byte type) {
-		Layer l = layers;
-		Layer ret = null;
+		Layer l = baseLayers;
+		Layer layer = null;
 
-		if (mCurLayer != null && mCurLayer.layer == level) {
-			ret = mCurLayer;
-		} else if (l == null || l.layer > level) {
-			// insert new layer at start
-			l = null;
+		if (mCurLayer != null && mCurLayer.level == level) {
+			layer = mCurLayer;
 		} else {
-			while (true) {
-				if (l.layer == level) {
-					// found layer
-					ret = l;
-					break;
-				}
 
-				if (l.next == null || l.next.layer > level) {
+			if (l == null || l.level > level) {
+				// insert new layer at start
+				l = null;
+			} else {
+				while (true) {
+					// found layer
+					if (l.level == level) {
+						layer = l;
+						break;
+					}
+
 					// insert new layer between current and next layer
-					break;
+					if (l.next == null || l.next.level > level)
+						break;
+
+					l = l.next;
 				}
-				l = l.next;
+			}
+
+			if (layer == null) {
+				// add a new Layer
+				if (type == Layer.LINE)
+					layer = new LineLayer(level);
+				else if (type == Layer.POLYGON)
+					layer = new PolygonLayer(level);
+				else if (type == Layer.TEXLINE)
+					layer = new LineTexLayer(level);
+				else
+					// TODO throw execption
+					return null;
+
+				if (l == null) {
+					// insert at start
+					layer.next = baseLayers;
+					baseLayers = layer;
+				} else {
+					layer.next = l.next;
+					l.next = layer;
+				}
 			}
 		}
-		if (ret == null) {
-			if (type == Layer.LINE)
-				ret = new LineLayer(level);
-			else if (type == Layer.POLYGON)
-				ret = new PolygonLayer(level);
-			else
-				return null;
 
-			if (l == null) {
-				// insert at start
-				ret.next = layers;
-				layers = ret;
-			} else {
-				ret.next = l.next;
-				l.next = ret;
-			}
-		} else if (ret.type != type) {
-			Log.d("...", "wrong layer type " + ret.type + " " + type);
-			// FIXME thorw exception
+		if (layer.type != type) {
+			// check if found layer matches requested type
+			Log.d(TAG, "BUG wrong layer " + layer.type + " " + type);
+			// TODO throw exception
 			return null;
 		}
 
-		return ret;
+		mCurLayer = layer;
+
+		return layer;
 	}
 
-	private static int LINE_VERTEX_SHORTS = 4;
-	private static int POLY_VERTEX_SHORTS = 2;
-	private static int TEXTURE_VERTEX_SHORTS = 6;
+	private final static int[] VERTEX_SHORT_CNT = {
+			4, // LINE_VERTEX_SHORTS
+			2, // POLY_VERTEX_SHORTS
+			6, // TEXLINE_VERTEX_SHORTS
+	};
 
-	//private static int EXTRUSION_VERTEX_SHORTS = 4;
+	private final static int TEXTURE_VERTEX_SHORTS = 6;
+
+	private final static int SHORT_BYTES = 2;
 
 	public int getSize() {
-
 		int size = 0;
 
-		for (Layer l = layers; l != null; l = l.next) {
-			if (l.type == Layer.LINE)
-				size += l.verticesCnt * LINE_VERTEX_SHORTS;
-			else
-				size += l.verticesCnt * POLY_VERTEX_SHORTS;
-		}
+		for (Layer l = baseLayers; l != null; l = l.next)
+			size += l.verticesCnt * VERTEX_SHORT_CNT[l.type];
 
 		for (Layer l = textureLayers; l != null; l = l.next)
 			size += l.verticesCnt * TEXTURE_VERTEX_SHORTS;
-
-		//for (Layer l = extrusionLayers; l != null; l = l.next)
-		//	size += l.verticesCnt * EXTRUSION_VERTEX_SHORTS;
 
 		return size;
 	}
@@ -118,14 +138,21 @@ public class Layers {
 	public void compile(ShortBuffer sbuf, boolean addFill) {
 		// offset from fill coordinates
 		int pos = 0;
-		if (addFill)
+		int size = 0;
+
+		if (addFill){
 			pos = 4;
+			size = 8;
+		}
 
-		// add polygons first, needed to get the offsets right...
-		addLayerItems(sbuf, layers, Layer.POLYGON, pos);
+		size += addLayerItems(sbuf, baseLayers, Layer.POLYGON, pos);
 
-		lineOffset = sbuf.position() * 2; // * short-bytes
-		addLayerItems(sbuf, layers, Layer.LINE, 0);
+		lineOffset = size * SHORT_BYTES;
+		size += addLayerItems(sbuf, baseLayers, Layer.LINE, 0);
+
+
+		texLineOffset = size * SHORT_BYTES;
+		size += addLayerItems(sbuf, baseLayers, Layer.TEXLINE, 0);
 
 		for (Layer l = textureLayers; l != null; l = l.next) {
 			TextureLayer tl = (TextureLayer) l;
@@ -139,20 +166,33 @@ public class Layers {
 		//		}
 	}
 
-	// optimization for lines and polygon: collect all pool items and add back in one go
-	private static void addLayerItems(ShortBuffer sbuf, Layer l, byte type, int pos) {
+	// optimization for Line- and PolygonLayer:
+	// collect all pool items and add back in one go
+	private static int addLayerItems(ShortBuffer sbuf, Layer l, byte type, int pos) {
 		VertexPoolItem last = null, items = null;
+		int size = 0;
+
+		// HACK, see LineTexLayer
+		boolean addOffset = (type == Layer.TEXLINE);
 
 		for (; l != null; l = l.next) {
 			if (l.type != type)
 				continue;
 
-			for (VertexPoolItem it = l.pool; it != null; it = it.next) {
-				if (it.next == null)
-					sbuf.put(it.vertices, 0, it.used);
-				else
-					sbuf.put(it.vertices, 0, VertexPoolItem.SIZE);
+			if (addOffset){
+				sbuf.position(sbuf.position() + 6);
+				addOffset = false;
+			}
 
+			for (VertexPoolItem it = l.pool; it != null; it = it.next) {
+				if (it.next == null){
+					size += it.used;
+					sbuf.put(it.vertices, 0, it.used);
+				}
+				else{
+					size += VertexPoolItem.SIZE;
+					sbuf.put(it.vertices, 0, VertexPoolItem.SIZE);
+				}
 				last = it;
 			}
 			if (last == null)
@@ -169,11 +209,13 @@ public class Layers {
 			l.curItem = null;
 		}
 		VertexPool.release(items);
+
+		return size;
 	}
 
 	static void addPoolItems(Layer l, ShortBuffer sbuf) {
 		// offset of layer data in vbo
-		l.offset = sbuf.position() * 2; // (* short-bytes)
+		l.offset = sbuf.position() * SHORT_BYTES;
 
 		for (VertexPoolItem it = l.pool; it != null; it = it.next) {
 			if (it.next == null)
@@ -190,7 +232,7 @@ public class Layers {
 	public void clear() {
 
 		// clear line and polygon layers directly
-		Layer l = layers;
+		Layer l = baseLayers;
 		while (l != null) {
 			if (l.pool != null) {
 				VertexPool.release(l.pool);
@@ -207,8 +249,13 @@ public class Layers {
 		for (l = extrusionLayers; l != null; l = l.next) {
 			l.clear();
 		}
-		layers = null;
+		baseLayers = null;
 		textureLayers = null;
 		extrusionLayers = null;
+
+		//		if (vbo != null){
+		//			BufferObject.release(vbo);
+		//			vbo = null;
+		//		}
 	}
 }

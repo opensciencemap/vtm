@@ -162,7 +162,7 @@ public class TileManager {
 		MapPosition mapPosition = mMapPosition;
 		float[] coords = mTileCoords;
 
-		synchronized(mMapViewPosition){
+		synchronized (mMapViewPosition) {
 			changedPos = mMapViewPosition.getMapPosition(mapPosition);
 			mMapViewPosition.getMapViewProjection(coords);
 		}
@@ -390,16 +390,17 @@ public class TileManager {
 			return;
 
 		if (t.layers != null) {
+			// TODO move this to layers clear
+			if (t.layers.vbo != null) {
+				BufferObject.release(t.layers.vbo);
+				t.layers.vbo = null;
+			}
+
 			t.layers.clear();
 			t.layers = null;
 		}
 
 		TextItem.release(t.labels);
-
-		if (t.vbo != null) {
-			BufferObject.release(t.vbo);
-			t.vbo = null;
-		}
 
 		QuadTree.remove(t);
 		t.state = STATE_NONE;
@@ -522,19 +523,19 @@ public class TileManager {
 					tiles[i] = null;
 				}
 			}
-//			if (locked) {
-//				Log.d(TAG, "------------ "
-//						+ remove + " / " + r + " "
-//						+ mMapPosition.zoomLevel
-//						+ " ----------");
-//				for (int i = 0; i < size; i++) {
-//					MapTile t = tiles[i];
-//					if (t == null)
-//						continue;
-//					Log.d(TAG, "limitCache: " + t + " " + t.distance);
-//
-//				}
-//			}
+			//if (locked) {
+			//	Log.d(TAG, "------------ "
+			//			+ remove + " / " + r + " "
+			//			+ mMapPosition.zoomLevel
+			//			+ " ----------");
+			//	for (int i = 0; i < size; i++) {
+			//		MapTile t = tiles[i];
+			//		if (t == null)
+			//			continue;
+			//		Log.d(TAG, "limitCache: " + t + " " + t.distance);
+			//
+			//	}
+			//}
 			remove = (newTileCnt - MAX_TILES_IN_QUEUE) + 10;
 			//int r = remove;
 			for (int i = size - 1; i >= 0 && remove > 0; i--) {
@@ -572,11 +573,11 @@ public class TileManager {
 			return true;
 		}
 
-		if (tile.vbo != null) {
-			// BAD Things(tm) happend: tile is already loaded
-			Log.d(TAG, "BUG: tile loaded before " + tile);
-			return true;
-		}
+		//if (tile.vbo != null) {
+		//	// BAD Things(tm) happend: tile is already loaded
+		//	Log.d(TAG, "BUG: tile loaded before " + tile);
+		//	return true;
+		//}
 
 		tile.state = STATE_NEW_DATA;
 		mTilesForUpload++;

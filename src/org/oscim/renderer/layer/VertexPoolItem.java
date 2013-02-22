@@ -22,7 +22,7 @@ public class VertexPoolItem {
 
 	// must be multiple of
 	// 4 (LineLayer/PolygonLayer),
-	// 6 (TexLineLayer)
+	// 24 (TexLineLayer - one block, i.e. two segments)
 	// 24 (TextureLayer)
 	public static final int SIZE = 360;
 }

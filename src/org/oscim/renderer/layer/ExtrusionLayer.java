@@ -64,7 +64,7 @@ public class ExtrusionLayer extends Layer {
 
 	public ExtrusionLayer(int level) {
 		this.type = Layer.EXTRUSION;
-		this.layer = level;
+		this.level = level;
 
 		mVertices = mCurVertices = VertexPool.get();
 
@@ -346,6 +346,7 @@ public class ExtrusionLayer extends Layer {
 		return convex;
 	}
 
+	@Override
 	public void compile(ShortBuffer sbuf) {
 
 		if (mNumVertices == 0 || compiled)

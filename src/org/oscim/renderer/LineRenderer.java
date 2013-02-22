@@ -27,16 +27,13 @@ import static android.opengl.GLES20.glVertexAttribPointer;
 import org.oscim.core.MapPosition;
 import org.oscim.generator.TileGenerator;
 import org.oscim.renderer.layer.Layer;
+import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
 import android.util.Log;
-
-/**
- * @author Hannes Janetzek
- */
 
 public final class LineRenderer {
 	private final static String TAG = LineRenderer.class.getName();
@@ -97,6 +94,7 @@ public final class LineRenderer {
 		}
 
 		mTexID = GlUtils.loadTexture(pixel, 128, 128, GLES20.GL_ALPHA,
+				GLES20.GL_NEAREST, GLES20.GL_NEAREST,
 				GLES20.GL_MIRRORED_REPEAT, GLES20.GL_MIRRORED_REPEAT);
 
 		return true;
@@ -110,13 +108,13 @@ public final class LineRenderer {
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
 	}
 
-	public static Layer draw(MapPosition pos, Layer layer, float[] matrix, float div,
-			int mode, int bufferOffset) {
+	public static Layer draw(Layers layers, Layer curLayer, MapPosition pos,
+			float[] matrix, float div, int mode) {
 
 		int zoom = pos.zoomLevel;
 		float scale = pos.scale;
 
-		if (layer == null)
+		if (curLayer == null)
 			return null;
 
 		GLState.blend(true);
@@ -131,13 +129,13 @@ public final class LineRenderer {
 		GLState.enableVertexArrays(hLineVertexPosition[mode], -1);
 
 		glVertexAttribPointer(hLineVertexPosition[mode], 4, GL_SHORT,
-				false, 0, bufferOffset + LINE_VERTICES_DATA_POS_OFFSET);
+				false, 0, layers.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
 
 		glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 
-		// line scale factor for non fixed lines: within a zoom-
-		// level lines would be scaled by the factor 2 via projection.
-		// though lines should only scale by sqrt(2). this is achieved
+		// Line scale factor for non fixed lines: Within a zoom-
+		// level lines would be scaled by the factor 2 by view-matrix.
+		// Though lines should only scale by sqrt(2). This is achieved
 		// by inverting scaling of extrusion vector with: width/sqrt(s).
 		// within one zoom-level: 1 <= s <= 2
 		float s = scale / div;
@@ -158,7 +156,7 @@ public final class LineRenderer {
 		// dont increase scale when max is reached
 		boolean strokeMaxZoom = zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL;
 
-		Layer l = layer;
+		Layer l = curLayer;
 		for (; l != null && l.type == Layer.LINE; l = l.next) {
 			LineLayer ll = (LineLayer) l;
 			Line line = ll.line;
@@ -187,7 +185,7 @@ public final class LineRenderer {
 					} else {
 						width = ll.width / s + o.width / lineScale;
 
-						// check min size for outline
+						// check min-size for outline
 						if (o.line.min > 0 && o.width * lineScale < o.line.min * 2)
 							continue;
 					}
@@ -223,7 +221,9 @@ public final class LineRenderer {
 					// line width increases by sqrt(2.2).
 					width = ll.width / lineScale;
 
-					if (ll.line.min > 0 && ll.width * lineScale < ll.line.min * 2)
+					// min-size hack to omit outline when line becomes
+					// very thin
+					if ((ll.line.min > 0) && (ll.width * lineScale < ll.line.min * 2))
 						width = (ll.width - 0.2f) / lineScale;
 				}
 
@@ -262,7 +262,6 @@ public final class LineRenderer {
 			+ "attribute vec4 a_pos;"
 			+ "uniform float u_mode;"
 			+ "varying vec2 v_st;"
-			+ "varying vec2 v_mode;"
 			+ "void main() {"
 			// scale extrusion to u_width pixel
 			// just ignore the two most insignificant bits of a_st :)
@@ -271,26 +270,24 @@ public final class LineRenderer {
 			// last two bits of a_st hold the texture coordinates
 			// ..maybe one could wrap texture so that `abs` is not required
 			+ "  v_st = abs(mod(dir, 4.0)) - 1.0;"
-			+ "  v_mode = vec2(1.0 - u_mode, u_mode);"
 			+ "}";
 
 	private final static String lineSimpleFragmentShader = ""
 			+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
 			+ "uniform float u_wscale;"
+			+ "uniform float u_mode;"
 			+ "uniform vec4 u_color;"
 			+ "varying vec2 v_st;"
-			+ "varying vec2 v_mode;"
 			+ "void main() {"
 			//+ "  float len;"
-			// some say one should not use conditionals
-			// (FIXME currently required as overlay line renderers dont load the texture)
+			// (currently required as overlay line renderers dont load the texture)
 			//+ "  if (u_mode == 0)"
 			//+ "    len = abs(v_st.s);"
 			//+ "  else"
 			//+ "    len = texture2D(tex, v_st).a;"
-			// one trick to avoid branching, need to check performance
-			+ " float len = max(v_mode[0] * abs(v_st.s), v_mode[1] * texture2D(tex, v_st).a);"
+			// this avoids branching, need to check performance
+			+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);"
 			// interpolate alpha between: 0.0 < 1.0 - len < u_wscale
 			// where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2)
 			+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"

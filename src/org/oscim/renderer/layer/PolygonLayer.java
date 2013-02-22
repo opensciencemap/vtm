@@ -14,6 +14,8 @@
  */
 package org.oscim.renderer.layer;
 
+import java.nio.ShortBuffer;
+
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.theme.renderinstruction.Area;
@@ -24,7 +26,7 @@ public final class PolygonLayer extends Layer {
 	public Area area;
 
 	PolygonLayer(int layer) {
-		this.layer = layer;
+		this.level = layer;
 		this.type = Layer.POLYGON;
 		curItem = VertexPool.get();
 		pool = curItem;
@@ -85,6 +87,10 @@ public final class PolygonLayer extends Layer {
 
 		si.used = outPos;
 		curItem = si;
+	}
+
+	@Override
+	protected void compile(ShortBuffer sbuf) {
 	}
 
 	@Override

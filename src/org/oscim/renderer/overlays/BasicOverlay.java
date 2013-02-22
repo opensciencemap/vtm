@@ -20,6 +20,7 @@ import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.LineRenderer;
+import org.oscim.renderer.LineTexRenderer;
 import org.oscim.renderer.PolygonRenderer;
 import org.oscim.renderer.TextureRenderer;
 import org.oscim.renderer.layer.Layer;
@@ -33,8 +34,6 @@ import android.opengl.GLES20;
 public abstract class BasicOverlay extends RenderOverlay {
 
 	public final Layers layers;
-
-	public BufferObject vbo;
 
 	protected float[] mvp = new float[16];
 
@@ -51,17 +50,23 @@ public abstract class BasicOverlay extends RenderOverlay {
 
 		float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
 
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo.id);
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, layers.vbo.id);
 		GLState.test(false, false);
 
-		if (layers.layers != null) {
+		if (layers.baseLayers != null) {
 			setMatrix(pos, m, true);
 
-			for (Layer l = layers.layers; l != null;) {
-				if (l.type == Layer.POLYGON) {
-					l = PolygonRenderer.draw(pos, l, m.mvp, true, false);
-				} else {
-					l = LineRenderer.draw(pos, l, m.mvp, div, 0, layers.lineOffset);
+			for (Layer l = layers.baseLayers; l != null;) {
+				switch (l.type) {
+					case Layer.POLYGON:
+						l = PolygonRenderer.draw(pos, l, m.mvp, true, false);
+						break;
+					case Layer.LINE:
+						l = LineRenderer.draw(layers, l, pos, m.mvp, div, 0);
+						break;
+					case Layer.TEXLINE:
+						l = LineTexRenderer.draw(layers, l, pos, m.mvp, div);
+						break;
 				}
 			}
 		}
@@ -81,21 +86,21 @@ public abstract class BasicOverlay extends RenderOverlay {
 	public void compile() {
 		int newSize = layers.getSize();
 		if (newSize == 0) {
-			BufferObject.release(vbo);
-			vbo = null;
+			BufferObject.release(layers.vbo);
+			layers.vbo = null;
 			isReady = false;
 			return;
 		}
 
-		if (vbo == null) {
-			vbo = BufferObject.get(0);
+		if (layers.vbo == null) {
+			layers.vbo = BufferObject.get(0);
 
-			if (vbo == null)
+			if (layers.vbo == null)
 				return;
 		}
 
 		if (newSize > 0) {
-			if (GLRenderer.uploadLayers(layers, vbo, newSize, true))
+			if (GLRenderer.uploadLayers(layers, newSize, true))
 				isReady = true;
 		}
 	}

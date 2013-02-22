@@ -74,7 +74,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// bytes currently loaded in VBOs
 	private static int mBufferMemoryUsage;
 
-
 	private static float[] mTileCoords = new float[8];
 	private static float[] mDebugCoords = new float[8];
 
@@ -211,10 +210,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private static int uploadCnt = 0;
 
-	public static boolean uploadLayers(Layers layers, BufferObject vbo, int newSize,
+	public static boolean uploadLayers(Layers layers, int newSize,
 			boolean addFill) {
 
-		GLES20.glBindBuffer(GL_ARRAY_BUFFER, vbo.id);
+		GLES20.glBindBuffer(GL_ARRAY_BUFFER, layers.vbo.id);
 
 		// add fill coordinates
 		if (addFill)
@@ -241,23 +240,23 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		if (newSize != sbuf.remaining()) {
 			Log.d(TAG, "wrong size: "
-					+ newSize + " "
-					+ sbuf.position() + " "
-					+ sbuf.limit() + " "
-					+ sbuf.remaining());
+					+ " new size: " + newSize
+					+ " buffer pos: " + sbuf.position()
+					+ " buffer limit: " + sbuf.limit()
+					+ " buffer fill: " + sbuf.remaining());
 			return false;
 		}
 		newSize *= SHORT_BYTES;
 
 		// reuse memory allocated for vbo when possible and allocated
 		// memory is less then four times the new data
-		if (vbo.size > newSize && vbo.size < newSize * 4
+		if (layers.vbo.size > newSize && layers.vbo.size < newSize * 4
 				&& mBufferMemoryUsage < LIMIT_BUFFERS) {
 			GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, newSize, sbuf);
 		} else {
-			mBufferMemoryUsage += newSize - vbo.size;
-			vbo.size = newSize;
-			GLES20.glBufferData(GL_ARRAY_BUFFER, vbo.size, sbuf, GL_DYNAMIC_DRAW);
+			mBufferMemoryUsage += newSize - layers.vbo.size;
+			layers.vbo.size = newSize;
+			GLES20.glBufferData(GL_ARRAY_BUFFER, layers.vbo.size, sbuf, GL_DYNAMIC_DRAW);
 		}
 
 		return true;
@@ -272,15 +271,16 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		int newSize = tile.layers.getSize();
 		if (newSize > 0) {
 
-			if (tile.vbo == null)
-				tile.vbo = BufferObject.get(newSize);
+			if (tile.layers.vbo == null)
+				tile.layers.vbo = BufferObject.get(newSize);
 
-			if (!uploadLayers(tile.layers, tile.vbo, newSize, true)) {
+			if (!uploadLayers(tile.layers, newSize, true)) {
 				Log.d(TAG, "BUG uploadTileData " + tile + " failed!");
+
+				BufferObject.release(tile.layers.vbo);
+				tile.layers.vbo = null;
 				tile.layers.clear();
 				tile.layers = null;
-				BufferObject.release(tile.vbo);
-				tile.vbo = null;
 			}
 		}
 	}
@@ -376,7 +376,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		MapPosition pos = mMapPosition;
 		float[] coords = mTileCoords;
 		boolean changed;
-		synchronized(mMapViewPosition){
+		synchronized (mMapViewPosition) {
 			changed = mMapViewPosition.getMapPosition(pos);
 			mMapViewPosition.getMapViewProjection(coords);
 			mMapViewPosition.getMatrix(mMatrices.view, null, mMatrices.viewproj);
@@ -621,7 +621,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// String ext = GLES20.glGetString(GLES20.GL_EXTENSIONS);
 		// Log.d(TAG, "Extensions: " + ext);
 
+		// classes that require GL context for initialization
 		LineRenderer.init();
+		LineTexRenderer.init();
 		PolygonRenderer.init();
 		TextureRenderer.init();
 		TextureObject.init(10);

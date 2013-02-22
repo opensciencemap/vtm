@@ -32,7 +32,8 @@ public abstract class TextureLayer extends Layer {
 	 * @param sbuf
 	 *            buffer to add vertices
 	 */
-	void compile(ShortBuffer sbuf) {
+	@Override
+	protected void compile(ShortBuffer sbuf) {
 
 		for (TextureObject to = textures; to != null; to = to.next)
 			TextureObject.uploadTexture(to);
