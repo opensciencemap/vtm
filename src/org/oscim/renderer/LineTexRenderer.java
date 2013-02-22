@@ -21,6 +21,7 @@ import java.nio.ShortBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
+import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.layer.LineTexLayer;
 import org.oscim.utils.GlUtils;
 
@@ -29,6 +30,10 @@ import android.util.Log;
 
 public class LineTexRenderer {
 	private final static String TAG = LineTexRenderer.class.getName();
+
+	// factor to normalize extrusion vector and scale to coord scale
+	private final static float COORD_SCALE_BY_DIR_SCALE =
+			GLRenderer.COORD_MULTIPLIER / LineLayer.DIR_SCALE;
 
 	private static int shader;
 	private static int hVertexPosition0;
@@ -40,27 +45,28 @@ public class LineTexRenderer {
 	private static int hTexColor;
 	private static int hBgColor;
 	private static int hScale;
+	private static int hWidth;
 
 	private static int mIndicesBufferID;
 	private static int mVertexFlipID;
 
-	// draw up to 100 quads in one pass
-
+	// draw up to 100 quads in one round
 	private static int maxQuads = 100;
 	private static int maxIndices = maxQuads * 6;
 	private static int mTexID;
 
 	public static void init() {
-		shader = GlUtils.createProgram(vertexShader,
-				fragmentShader);
+		shader = GlUtils.createProgram(vertexShader, fragmentShader);
 		if (shader == 0) {
 			Log.e(TAG, "Could not create  program.");
 			return;
 		}
+
 		hMatrix = GLES20.glGetUniformLocation(shader, "u_mvp");
 		hTexColor = GLES20.glGetUniformLocation(shader, "u_color");
 		hBgColor = GLES20.glGetUniformLocation(shader, "u_bgcolor");
 		hScale = GLES20.glGetUniformLocation(shader, "u_scale");
+		hWidth = GLES20.glGetUniformLocation(shader, "u_width");
 
 		hVertexPosition0 = GLES20.glGetAttribLocation(shader, "a_pos0");
 		hVertexPosition1 = GLES20.glGetAttribLocation(shader, "a_pos1");
@@ -73,16 +79,8 @@ public class LineTexRenderer {
 		mIndicesBufferID = mVboIds[0];
 		mVertexFlipID = mVboIds[1];
 
-		// 0, 1, 0, 1
-		byte[] flip = new byte[maxQuads * 4];
-		for (int i = 0; i < flip.length; i++)
-			flip[i] = (byte) (i % 2);
-
-		short j = 0;
-		//mNumIndices = ((points.length) >> 2) * 6;
-
 		short[] indices = new short[maxIndices];
-		for (int i = 0; i < maxIndices; i += 6, j += 4) {
+		for (int i = 0, j = 0; i < maxIndices; i += 6, j += 4) {
 			indices[i + 0] = (short) (j + 0);
 			indices[i + 1] = (short) (j + 1);
 			indices[i + 2] = (short) (j + 2);
@@ -98,10 +96,16 @@ public class LineTexRenderer {
 		ShortBuffer sbuf = buf.asShortBuffer();
 		sbuf.put(indices);
 		sbuf.flip();
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferID);
-		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, indices.length * 2, sbuf,
-				GLES20.GL_STATIC_DRAW);
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
+				mIndicesBufferID);
+		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
+				indices.length * 2, sbuf, GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		// 0, 1, 0, 1, 0, ...
+		byte[] flip = new byte[maxQuads * 4];
+		for (int i = 0; i < flip.length; i++)
+			flip[i] = (byte) (i % 2);
 
 		buf.clear();
 		buf.put(flip);
@@ -139,7 +143,6 @@ public class LineTexRenderer {
 		GLES20.glEnableVertexAttribArray(hVertexFlip);
 
 		GLES20.glUniformMatrix4fv(hMatrix, 1, false, matrix, 0);
-		GLES20.glUniform1f(hScale, pos.scale / div);
 
 		GLES20.glUniform4f(hTexColor, 1.0f, 1.0f, 1.0f, 1.0f);
 		//aa9988
@@ -159,10 +162,18 @@ public class LineTexRenderer {
 
 		int offset = layers.texLineOffset;
 
+		float s = pos.scale / div;
+
 		Layer l = curLayer;
 		while (l != null && l.type == Layer.TEXLINE) {
 			LineTexLayer ll = (LineTexLayer) l;
 			//Line line = ll.line;
+
+			// scale pattern to twice its size, then reset scale to 1.
+			// (coord scale * pattern size) / scale
+			GLES20.glUniform1f(hScale, (8 * 16) / Math.max((int)(s+0.25f), 1));
+
+			GLES20.glUniform1f(hWidth, ll.width / s * COORD_SCALE_BY_DIR_SCALE);
 
 			// first pass
 			int allIndices = (ll.evenQuads * 6);
@@ -245,6 +256,7 @@ public class LineTexRenderer {
 			+ "uniform mat4 u_mvp;"
 			+ "uniform vec4 u_color;"
 			+ "uniform float u_scale;"
+			+ "uniform float u_width;"
 			+ "attribute vec4 a_pos0;"
 			+ "attribute vec4 a_pos1;"
 			+ "attribute vec2 a_len0;"
@@ -252,14 +264,16 @@ public class LineTexRenderer {
 			+ "attribute float a_flip;"
 			+ "varying vec2 v_st;"
 			+ "void main() {"
-			+ "  float div = (8.0 * 16.0) / max(ceil(log(u_scale)),1.0);"
+			// coord scale 8 * pattern length 16
+			//+ "  float div = (8.0 * 16.0) / max(ceil(log(u_scale)),1.0);"
+			+ "  float div = u_scale;"
 			+ "  if (a_flip == 0.0){"
-			+ "    vec2 dir = a_pos0.zw/16.0;"
-			+ "    gl_Position = u_mvp * vec4(a_pos0.xy + dir / u_scale, 0.0, 1.0);"
-			+ "     v_st = vec2(a_len0.x/div, 1.0);"
+			+ "    vec2 dir = u_width * a_pos0.zw;"
+			+ "    gl_Position = u_mvp * vec4(a_pos0.xy + dir, 0.0, 1.0);"
+			+ "    v_st = vec2(a_len0.x/div, 1.0);"
 			+ "  }else {"
-			+ "    vec2 dir = a_pos1.zw/16.0;"
-			+ "    gl_Position = u_mvp * vec4(a_pos1.xy - dir / u_scale, 0.0, 1.0);"
+			+ "    vec2 dir = u_width * a_pos1.zw ;"
+			+ "    gl_Position = u_mvp * vec4(a_pos1.xy - dir, 0.0, 1.0);"
 			+ "    v_st = vec2(a_len1.x/div, -1.0);"
 			+ " }"
 			+ "}";
@@ -280,8 +294,6 @@ public class LineTexRenderer {
 			+ "  float stipple_w = (1.0 - smoothstep(0.7 - fuzz, 0.7, tex_w));"
 			+ "  float stipple_p = smoothstep(0.495, 0.505, len);"
 			+ "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-
-			//+ "  gl_FragColor = u_color * min(abs(1.0 - mod(v_len, 20.0)/10.0), (1.0 - abs(v_st.x)));"
 			+ "}";
 
 }

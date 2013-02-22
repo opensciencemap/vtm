@@ -47,6 +47,7 @@ public class TestOverlay extends BasicOverlay {
 
 
 		LineTexLayer lt = (LineTexLayer) layers.getLayer(2, Layer.TEXLINE);
+		lt.width = 4;
 		lt.addLine(points, null);
 
 		float[] points2 = {
