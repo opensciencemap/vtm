@@ -257,6 +257,29 @@ public class GlUtils {
 		return c;
 	}
 
+	/**
+	 * public-domain function by Darel Rex Finley
+	 * from http://alienryderflex.com/saturation.html
+	 *
+	 * @param color
+	 *            The passed-in RGB values can be on any desired scale, such as
+	 *            0 to 1, or 0 to 255.
+	 * @param change
+	 *            0.0 creates a black-and-white image.
+	 *            0.5 reduces the color saturation by half.
+	 *            1.0 causes no change.
+	 *            2.0 doubles the color saturation.
+	 */
+	public static void changeSaturation(float color[], float change) {
+		float r = color[0];
+		float g = color[1];
+		float b = color[2];
+		double p = Math.sqrt(r * r * 0.299f + g * g * 0.587f + b * b * 0.114f);
+		color[0] = FastMath.clampN((float) (p + (r - p) * change));
+		color[1] = FastMath.clampN((float) (p + (g - p) * change));
+		color[2] = FastMath.clampN((float) (p + (b - p) * change));
+	}
+
 	private final static float[] mIdentity = {
 			1, 0, 0, 0,
 			0, 1, 0, 0,

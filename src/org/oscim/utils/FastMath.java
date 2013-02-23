@@ -54,31 +54,40 @@ public class FastMath {
 
 		return (pow > 0 ? (1 << pow) : (1.0f / (1 << -pow)));
 	}
-	public static int clamp(int value, int max, int min){
+
+	public static int clamp(int value, int max, int min) {
 		return (value < min ? min : (value > max ? max : value));
 	}
 
-	public static byte clampToByte(int value){
-		return (byte)(value < 0 ? 0 : (value > 255 ? 255 : value));
+	public static float clamp(float value, float max, float min) {
+		return (value < min ? min : (value > max ? max : value));
 	}
 
-	public static float abs(float value){
+	public static float clampN(float value) {
+		return (value < 0f ? 0f : (value > 1f ? 1f : value));
+	}
+
+	public static byte clampToByte(int value) {
+		return (byte) (value < 0 ? 0 : (value > 255 ? 255 : value));
+	}
+
+	public static float abs(float value) {
 		return value < 0 ? -value : value;
 	}
 
-	public static float absMax(float value1, float value2){
+	public static float absMax(float value1, float value2) {
 		float a1 = value1 < 0 ? -value1 : value1;
 		float a2 = value2 < 0 ? -value2 : value2;
 		return a2 < a1 ? a1 : a2;
 	}
 
 	// test if any absolute value is greater than 'cmp'
-	public static boolean absMaxCmp(float value1, float value2, float cmp){
+	public static boolean absMaxCmp(float value1, float value2, float cmp) {
 		return value1 < -cmp || value1 > cmp || value2 < -cmp || value2 > cmp;
 	}
 
 	// test if any absolute value is greater than 'cmp'
-	public static boolean absMaxCmp(int value1, int value2, int cmp){
+	public static boolean absMaxCmp(int value1, int value2, int cmp) {
 		return value1 < -cmp || value1 > cmp || value2 < -cmp || value2 > cmp;
 	}
 }
