@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -18,8 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Stack;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
@@ -45,8 +44,7 @@ import android.util.Log;
  * SAX2 handler to parse XML render theme files.
  */
 public class RenderThemeHandler extends DefaultHandler {
-	private static final Logger LOG = Logger
-			.getLogger(RenderThemeHandler.class.getName());
+	private final static String TAG = RenderThemeHandler.class.getName();
 
 	private static enum Element {
 		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE;
@@ -99,8 +97,8 @@ public class RenderThemeHandler extends DefaultHandler {
 	 * @param attributeIndex
 	 *            the XML attribute index position.
 	 */
-	public static void logUnknownAttribute(String element, String name, String value,
-			int attributeIndex) {
+	public static void logUnknownAttribute(String element, String name,
+			String value, int attributeIndex) {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("unknown attribute in element ");
 		stringBuilder.append(element);
@@ -110,7 +108,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		stringBuilder.append(name);
 		stringBuilder.append('=');
 		stringBuilder.append(value);
-		LOG.info(stringBuilder.toString());
+		Log.d(TAG, stringBuilder.toString());
 	}
 
 	private Rule mCurrentRule;
@@ -146,11 +144,11 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	@Override
 	public void error(SAXParseException exception) {
-		LOG.log(Level.SEVERE, null, exception);
+		Log.d(TAG, exception.getMessage());
 	}
 
-	private static HashMap<String, RenderInstruction> tmpStyleHash = new HashMap<String, RenderInstruction>(
-			10);
+	private static HashMap<String, RenderInstruction> tmpStyleHash =
+			new HashMap<String, RenderInstruction>(10);
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
@@ -175,14 +173,12 @@ public class RenderThemeHandler extends DefaultHandler {
 				checkState(localName, Element.STYLE);
 				Text text = Text.create(localName, attributes, false);
 				tmpStyleHash.put("t" + text.style, text);
-				// System.out.println("add style: " + text.style);
 			}
 
 			else if (ELEMENT_NAME_STYLE_AREA.equals(localName)) {
 				checkState(localName, Element.STYLE);
 				Area area = Area.create(localName, attributes, 0);
 				tmpStyleHash.put("a" + area.style, area);
-				// System.out.println("add style: " + area.style);
 			}
 
 			else if (ELEMENT_NAME_STYLE_LINE.equals(localName)) {
@@ -194,16 +190,13 @@ public class RenderThemeHandler extends DefaultHandler {
 						Line line = Line.create((Line) ri, localName, attributes, 0,
 								false);
 						tmpStyleHash.put("l" + line.style, line);
-						// System.out.println("add style: " + line.style +
-						// " from " + style);
 					}
 					else {
-						Log.d("...", "this aint no style! " + style);
+						Log.d(TAG, "not a style: " + style);
 					}
 				} else {
 					Line line = Line.create(null, localName, attributes, 0, false);
 					tmpStyleHash.put("l" + line.style, line);
-					// System.out.println("add style: " + line.style);
 				}
 			}
 
@@ -266,15 +259,13 @@ public class RenderThemeHandler extends DefaultHandler {
 				if (style != null) {
 					Line line = (Line) tmpStyleHash.get("l" + style);
 					if (line != null) {
-						// System.out.println("found style line : " +
-						// line.style);
 						Line newLine = Line.create(line, localName, attributes,
 								mLevel++, false);
 
 						mCurrentRule.addRenderingInstruction(newLine);
 					}
 					else
-						Log.d("...", "styles not a line! " + style);
+						Log.d(TAG, "BUG: not a line style: " + style);
 				}
 			} else if (ELEMENT_NAME_USE_STYLE_OUTLINE.equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -284,7 +275,7 @@ public class RenderThemeHandler extends DefaultHandler {
 					if (line != null && line.outline)
 						mCurrentRule.addRenderingInstruction(line);
 					else
-						Log.d("...", "styles not bad, but this aint no outline! " + style);
+						Log.d(TAG, "BUG not an outline style: " + style);
 				}
 			} else if (ELEMENT_NAME_USE_STYLE_AREA.equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -295,7 +286,7 @@ public class RenderThemeHandler extends DefaultHandler {
 						mCurrentRule.addRenderingInstruction(new AreaLevel(area,
 								mLevel++));
 					else
-						Log.d("...", "this aint no style inna d'area! " + style);
+						Log.d(TAG, "BUG not an area style: " + style);
 				}
 			} else if (ELEMENT_NAME_USE_STYLE_PATH_TEXT.equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -305,7 +296,7 @@ public class RenderThemeHandler extends DefaultHandler {
 					if (pt != null)
 						mCurrentRule.addRenderingInstruction(pt);
 					else
-						Log.d("...", "this aint no path text style! " + style);
+						Log.d(TAG, "BUG not a path text style: " + style);
 				}
 			} else {
 				throw new SAXException("unknown element: " + localName);
@@ -319,7 +310,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	@Override
 	public void warning(SAXParseException exception) {
-		LOG.log(Level.SEVERE, null, exception);
+		Log.d(TAG, exception.getMessage());
 	}
 
 	private void checkElement(String elementName, Element element) throws SAXException {
