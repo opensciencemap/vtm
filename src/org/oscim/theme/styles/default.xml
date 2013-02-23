@@ -57,7 +57,7 @@
     
   <!-- track|footway|path|cycleway -->
   <style-line name="footway"             stroke="#aaffffff" width="1.8" cap="butt" fixed="true" 
-      									 stipple="16" stipple-width="0.6" stipple-stroke="#cd7750"/>
+      									 stipple="16" stipple-width="0.6" stipple-stroke="#d35c48"/>
   <style-line name="highway:cycleway"    from="footway" width="0.1" stipple-stroke="#4040ee"/>
   <style-line name="highway:track"       from="footway" width="0.1" stipple="10" stipple-stroke="#c3bb88"/>
   <style-line name="highway:path"        from="footway" width="0.1" stipple="10" stipple-stroke="#837b58"/>
@@ -382,19 +382,19 @@
          </rule>
 
          <rule e="way" k="*" v="*" zoom-min="14">
-           <rule e="way" k="*" v="footway" zoom-max="16">
+           <rule e="way" k="*" v="footway" >
             <use-line name="footway"/>
            </rule>
 
-          <rule e="way" k="*" v="cycleway" zoom-max="16">
+          <rule e="way" k="*" v="cycleway">
             <use-line name="highway:cycleway"/>
           </rule>
            		  
- 		  <rule e="way" k="*" v="track" zoom-max="16">
+ 		  <rule e="way" k="*" v="track" >
             <use-line name="highway:track"/>
            </rule>
            
- 		  <rule e="way" k="*" v="path" zoom-max="16">
+ 		  <rule e="way" k="*" v="path">
             <use-line name="highway:path"/>
            </rule>
            
@@ -621,19 +621,19 @@
 	          </rule>
 	
 	          <rule e="way" k="*" v="*" zoom-min="14">
-	            <rule e="way" k="*" v="footway" zoom-max="16">
+	            <rule e="way" k="*" v="footway">
 	              <use-line name="footway"/>
 	            </rule>
 				
-				<rule e="way" k="*" v="cycleway" zoom-max="16">
+				<rule e="way" k="*" v="cycleway">
             		<use-line name="highway:cycleway"/>
           		</rule>
           
-	 	        <rule e="way" k="*" v="track" zoom-max="16">
+	 	        <rule e="way" k="*" v="track">
             	  <use-line name="highway:track"/>
            		</rule>
 
-	 	        <rule e="way" k="*" v="path" zoom-max="16">
+	 	        <rule e="way" k="*" v="path">
                   <use-line name="highway:path"/>
                 </rule>
 	 	        
@@ -726,23 +726,23 @@
 	              <use-line name="footway:z16"/>
 	            </rule>-->
 	            
-	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16">
+	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="15">
 	              <use-line name="footway:z17" cap="butt"/>
 	              <use-outline name="bridge"/>
 	            </rule>
 	          </rule>
 	
 	          <rule e="way" k="*" v="*" zoom-min="14">
-	            <rule e="way" k="*" v="footway" zoom-max="15">
+	            <rule e="way" k="*" v="footway" >
 	               <use-line name="footway"/>
 	            </rule>
-	            <rule e="way" k="*" v="cycleway" zoom-max="16">
+	            <rule e="way" k="*" v="cycleway" >
             	  <use-line name="highway:cycleway"/>
           		</rule>
-	      	    <rule e="way" k="*" v="track" zoom-max="16">
+	      	    <rule e="way" k="*" v="track" >
             	  <use-line name="highway:track"/>
            		</rule>
-           		<rule e="way" k="*" v="path" zoom-max="16">
+           		<rule e="way" k="*" v="path" >
 	              <use-line name="highway:path"/>
 	            </rule>
 	            <rule e="way" k="*" v="bridleway">
