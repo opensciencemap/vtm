@@ -18,7 +18,10 @@ import org.oscim.core.MapPosition;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineTexLayer;
 import org.oscim.renderer.layer.TextItem;
+import org.oscim.theme.renderinstruction.Line;
 import org.oscim.view.MapView;
+
+import android.graphics.Color;
 
 public class TestOverlay extends BasicOverlay {
 
@@ -47,7 +50,8 @@ public class TestOverlay extends BasicOverlay {
 
 
 		LineTexLayer lt = (LineTexLayer) layers.getLayer(2, Layer.TEXLINE);
-		lt.width = 4;
+		lt.line = new Line(Color.BLUE, 1.0f, 8);
+		lt.width = 8;
 		lt.addLine(points, null);
 
 		float[] points2 = {
@@ -57,7 +61,9 @@ public class TestOverlay extends BasicOverlay {
 				-200, 200,
 				-200, -200
 				};
-
+		lt = (LineTexLayer) layers.getLayer(3, Layer.TEXLINE);
+		lt.line = new Line(Color.BLUE, 1.0f, 16);
+		lt.width = 8;
 		lt.addLine(points2, null);
 
 		//

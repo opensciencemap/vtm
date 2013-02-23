@@ -21,6 +21,8 @@ import org.oscim.theme.renderinstruction.Line;
 
 /**
  * Layer for textured or stippled lines
+ *
+ * this would be all so much simpler with geometry shaders...
  */
 public final class LineTexLayer extends Layer {
 	// Interleave two segment quads in one block to be able to use
@@ -57,6 +59,11 @@ public final class LineTexLayer extends Layer {
 	// 2, 1, 3,
 	// 4, 5, 6,
 	// 6, 5, 7,
+	//
+	// BIG NOTE: renderer assumes to be able to offset vertex array position
+	// so that in the first pass 'pos1' offset will be < 0 if no data precedes
+	// - in our case there is always the polygon fill array at start
+	// - see addLine hack otherwise.
 
 	private static final float COORD_SCALE = GLRenderer.COORD_MULTIPLIER;
 	// scale factor mapping extrusion vector to short values
@@ -84,15 +91,11 @@ public final class LineTexLayer extends Layer {
 
 		if (pool == null) {
 			curItem = pool = VertexPool.get();
-			// need to make sure there is one unused
-			// vertex in front for interleaving.
 
-			// HACK add this offset when compiling
-			// otherwise one cant use the full
+			// HACK add one vertex offset when compiling
+			// buffer otherwise one cant use the full
 			// VertexItem
-			//curItem.used = 6;
-
-			verticesCnt = 1;
+			//verticesCnt = 1;
 		}
 
 		VertexPoolItem si = curItem;
@@ -207,14 +210,14 @@ public final class LineTexLayer extends Layer {
 			pos += length;
 		}
 
+		evenSegment = even;
+
 		// advance offset to last written position
 		if (!even)
 			opos += 12;
 
 		si.used = opos;
 		curItem = si;
-
-		evenSegment = even;
 	}
 
 	@Override
