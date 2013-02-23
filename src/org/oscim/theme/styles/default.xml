@@ -56,7 +56,12 @@
   <style-line name="highway-service"     from="residential" width="-0.6" />
     
   <!-- track|footway|path|cycleway -->
-  <style-line name="footway"             stroke="#c1bcb6" width="1.2" cap="butt" fixed="true"/>
+  <style-line name="footway"             stroke="#aaffffff" width="1.8" cap="butt" fixed="true" 
+      									 stipple="16" stipple-width="0.6" stipple-stroke="#cd7750"/>
+  <style-line name="highway:cycleway"    from="footway" width="0.1" stipple-stroke="#4040ee"/>
+  <style-line name="highway:track"       from="footway" width="0.1" stipple="10" stipple-stroke="#c3bb88"/>
+  <style-line name="highway:path"        from="footway" width="0.1" stipple="10" stipple-stroke="#837b58"/>
+  
   <!-- <style-line name="footway:z16"         from="footway" width="-0.95" fixed="false" fade="-1"/>-->
   <style-line name="footway:z17"         stroke="#faf8f5" width="0.3"/>
   
@@ -377,10 +382,22 @@
          </rule>
 
          <rule e="way" k="*" v="*" zoom-min="14">
-           <rule e="way" k="*" v="track|footway|path|cycleway" zoom-max="16">
+           <rule e="way" k="*" v="footway" zoom-max="16">
             <use-line name="footway"/>
            </rule>
 
+          <rule e="way" k="*" v="cycleway" zoom-max="16">
+            <use-line name="highway:cycleway"/>
+          </rule>
+           		  
+ 		  <rule e="way" k="*" v="track" zoom-max="16">
+            <use-line name="highway:track"/>
+           </rule>
+           
+ 		  <rule e="way" k="*" v="path" zoom-max="16">
+            <use-line name="highway:path"/>
+           </rule>
+           
            <rule e="way" k="*" v="bridleway">
              <use-line name="bridleway"/>
            </rule>
@@ -604,10 +621,22 @@
 	          </rule>
 	
 	          <rule e="way" k="*" v="*" zoom-min="14">
-	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-max="16">
+	            <rule e="way" k="*" v="footway" zoom-max="16">
 	              <use-line name="footway"/>
 	            </rule>
-	
+				
+				<rule e="way" k="*" v="cycleway" zoom-max="16">
+            		<use-line name="highway:cycleway"/>
+          		</rule>
+          
+	 	        <rule e="way" k="*" v="track" zoom-max="16">
+            	  <use-line name="highway:track"/>
+           		</rule>
+
+	 	        <rule e="way" k="*" v="path" zoom-max="16">
+                  <use-line name="highway:path"/>
+                </rule>
+	 	        
 	            <rule e="way" k="*" v="bridleway">
 	              <use-line name="bridleway"/>
 	            </rule>
@@ -704,10 +733,18 @@
 	          </rule>
 	
 	          <rule e="way" k="*" v="*" zoom-min="14">
-	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-max="15">
+	            <rule e="way" k="*" v="footway" zoom-max="15">
 	               <use-line name="footway"/>
 	            </rule>
-	
+	            <rule e="way" k="*" v="cycleway" zoom-max="16">
+            	  <use-line name="highway:cycleway"/>
+          		</rule>
+	      	    <rule e="way" k="*" v="track" zoom-max="16">
+            	  <use-line name="highway:track"/>
+           		</rule>
+           		<rule e="way" k="*" v="path" zoom-max="16">
+	              <use-line name="highway:path"/>
+	            </rule>
 	            <rule e="way" k="*" v="bridleway">
 	              <use-line name="bridleway"/>
 	            </rule>
@@ -882,7 +919,8 @@
         </rule>
         
         <rule e="way" k="railway" v="rail|turntable" zoom-min="15">
-          <line stroke="#ddaa9988" width="2.0" cap="butt" fixed="true" fade="12" stipple="1"/>
+          <line stroke="#ddaa9988" width="2.0" cap="butt" fixed="true" fade="12" 
+                stipple="4" stipple-width="0.7" stipple-stroke="#ffffff"/>
         </rule>
         
         <!-- <rule e="way" k="railway" v="rail" zoom-max="14" zoom-min="13">

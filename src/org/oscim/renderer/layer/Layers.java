@@ -150,9 +150,17 @@ public class Layers {
 		lineOffset = size * SHORT_BYTES;
 		size += addLayerItems(sbuf, baseLayers, Layer.LINE, 0);
 
-
 		texLineOffset = size * SHORT_BYTES;
-		size += addLayerItems(sbuf, baseLayers, Layer.TEXLINE, 0);
+		for (Layer l = baseLayers; l != null; l= l.next){
+			if (l.type == Layer.TEXLINE){
+				// HACK, see LineTexLayer
+				//sbuf.position(sbuf.position() + 6);
+				addPoolItems(l, sbuf);
+				//l.offset -= 12;
+			}
+		}
+
+		//size += addLayerItems(sbuf, baseLayers, Layer.TEXLINE, 0);
 
 		for (Layer l = textureLayers; l != null; l = l.next) {
 			TextureLayer tl = (TextureLayer) l;
@@ -172,17 +180,9 @@ public class Layers {
 		VertexPoolItem last = null, items = null;
 		int size = 0;
 
-		// HACK, see LineTexLayer
-		boolean addOffset = (type == Layer.TEXLINE);
-
 		for (; l != null; l = l.next) {
 			if (l.type != type)
 				continue;
-
-			if (addOffset){
-				sbuf.position(sbuf.position() + 6);
-				addOffset = false;
-			}
 
 			for (VertexPoolItem it = l.pool; it != null; it = it.next) {
 				if (it.next == null){
@@ -199,6 +199,7 @@ public class Layers {
 				continue;
 
 			l.offset = pos;
+
 			pos += l.verticesCnt;
 
 			last.next = items;
