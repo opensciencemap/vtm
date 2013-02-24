@@ -147,8 +147,6 @@ public class LineTexRenderer {
 
 		GLES20.glUniformMatrix4fv(hMatrix, 1, false, matrix, 0);
 
-
-
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
 				mIndicesBufferID);
 
@@ -174,12 +172,10 @@ public class LineTexRenderer {
 
 			GLES20.glUniform4fv(hBgColor, 1, line.color, 0);
 
-			//GLES20.glUniform4f(hBgColor, 0x99 / 255f, 0x96 / 255f, 0x93 / 255f, 0.95f);
-
 			// scale pattern to twice its size, then reset scale to 1.
 			// (coord scale * pattern size / tex size) / scale
 			//GLES20.glUniform1f(hPatternScale, (8 * line.stipple / 64) / Math.max((int) s, 1));
-			float ps = FastMath.clamp((int) (s * 1.3f), 1, 4);
+			float ps = FastMath.clamp((int) (s * 1.3f), 1, 3);
 			GLES20.glUniform1f(hPatternScale, (8 * line.stipple) / ps);
 
 			GLES20.glUniform1f(hPatternWidth, line.stippleWidth);
@@ -188,6 +184,8 @@ public class LineTexRenderer {
 
 			GLES20.glUniform1f(hScale, pos.scale);
 			GLES20.glUniform1f(hWidth, ll.width / s * COORD_SCALE_BY_DIR_SCALE);
+
+			GlUtils.checkGlError("0");
 
 			// add offset vertex
 			int vOffset = -STRIDE;
@@ -222,6 +220,8 @@ public class LineTexRenderer {
 						GLES20.GL_UNSIGNED_SHORT, 0);
 			}
 
+			GlUtils.checkGlError("1");
+
 			// second pass
 			allIndices = (ll.oddQuads * 6);
 			for (int i = 0; i < allIndices; i += maxIndices) {
@@ -252,6 +252,8 @@ public class LineTexRenderer {
 			}
 
 			l = l.next;
+			GlUtils.checkGlError("2");
+
 		}
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -261,7 +263,7 @@ public class LineTexRenderer {
 		GLES20.glDisableVertexAttribArray(hVertexLength0);
 		GLES20.glDisableVertexAttribArray(hVertexLength1);
 		GLES20.glDisableVertexAttribArray(hVertexFlip);
-		GlUtils.checkGlError(TAG);
+		GlUtils.checkGlError("end");
 
 		//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
 
