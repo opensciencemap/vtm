@@ -172,7 +172,9 @@ public final class Line extends RenderInstruction {
 	public final float[] stippleColor;
 	public final float stippleWidth;
 
-	private Line(int level, String style, float[] stroke, float width,
+
+
+	private Line(int level, String style, float[] color, float width,
 			Cap cap, boolean fixed,
 			int stipple, float[] stippleColor, float stippleWidth,
 			int fade, float blur, boolean isOutline, float min) {
@@ -194,8 +196,10 @@ public final class Line extends RenderInstruction {
 		// paint.setPathEffect(new DashPathEffect(strokeDasharray, 0));
 		// }
 
+		//GlUtils.changeSaturation(color, 1.02f);
+
 		this.cap = cap;
-		this.color = stroke;
+		this.color = color;
 		this.width = width;
 		this.fixed = fixed;
 
@@ -235,7 +239,7 @@ public final class Line extends RenderInstruction {
 		this.fade = -1;
 		this.stipple = stipple;
 		this.stippleColor = null;
-		this.stippleWidth = 0;
+		this.stippleWidth = 0.6f;
 		this.min = 0;
 		color = GlUtils.colorToFloatP(stroke);
 	}
@@ -249,6 +253,5 @@ public final class Line extends RenderInstruction {
 	// public void scaleStrokeWidth(float scaleFactor) {
 	// paint.setStrokeWidth(strokeWidth * scaleFactor);
 	// }
-
 
 }
