@@ -24,6 +24,7 @@ import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.layer.LineTexLayer;
 import org.oscim.theme.renderinstruction.Line;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
@@ -178,7 +179,8 @@ public class LineTexRenderer {
 			// scale pattern to twice its size, then reset scale to 1.
 			// (coord scale * pattern size / tex size) / scale
 			//GLES20.glUniform1f(hPatternScale, (8 * line.stipple / 64) / Math.max((int) s, 1));
-			GLES20.glUniform1f(hPatternScale, (8 * line.stipple) / Math.max((int) s, 1));
+			float ps = FastMath.clamp((int) (s * 1.3f), 1, 4);
+			GLES20.glUniform1f(hPatternScale, (8 * line.stipple) / ps);
 
 			GLES20.glUniform1f(hPatternWidth, line.stippleWidth);
 			//float f = Math.max((int)(s), 1);
@@ -301,16 +303,16 @@ public class LineTexRenderer {
 			+ " uniform float u_pwidth;"
 			+ " varying vec2 v_st;"
 			+ " void main() {"
-			// 1.0 minus distance on perpendicular to the line
-			+ "  float dist = 1.0 - abs(v_st.t);"
+			//   distance on perpendicular to the line
+			+ "  float dist = abs(v_st.t);"
 			+ "  float fuzz = fwidth(v_st.t);"
 			+ "  float fuzz_p = fwidth(v_st.s);"
-			+ "  float line_w = smoothstep(0.0, fuzz, dist);"
-			+ "  float stipple_w = smoothstep(0.0, u_pwidth + fuzz, dist);"
+			+ "  float line_w = smoothstep(0.0, fuzz, 1.0 - dist);"
+			+ "  float stipple_w = smoothstep(0.0, fuzz, u_pwidth - dist);"
 			+ "  float phase = abs(mod(v_st.s, 2.0) - 1.0);"
 			+ "  float stipple_p = smoothstep(0.5 - fuzz_p, 0.5 + fuzz_p, phase);"
 			+ "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-			+ " } ";	//*/
+			+ " } ";  //*/
 
 	/*
 	final static String fragmentShader = ""
