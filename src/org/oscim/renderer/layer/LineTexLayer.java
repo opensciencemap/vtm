@@ -94,8 +94,13 @@ public final class LineTexLayer extends Layer {
 
 			// HACK add one vertex offset when compiling
 			// buffer otherwise one cant use the full
-			// VertexItem
-			//verticesCnt = 1;
+			// VertexItem (see Layers.compile)
+			// add the two 'x' at front and end
+			//verticesCnt = 2;
+
+			// the additional end vertex to make sure
+			// not to read outside allocated memory
+			verticesCnt = 1;
 		}
 
 		VertexPoolItem si = curItem;

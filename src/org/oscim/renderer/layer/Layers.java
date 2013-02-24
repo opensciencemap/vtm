@@ -157,6 +157,8 @@ public class Layers {
 				//sbuf.position(sbuf.position() + 6);
 				addPoolItems(l, sbuf);
 				//l.offset -= 12;
+
+				sbuf.position(sbuf.position() + 6);
 			}
 		}
 
