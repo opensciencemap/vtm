@@ -193,7 +193,9 @@ public class MapView extends RelativeLayout {
 		mOverlayManager.add(new BuildingOverlay(this));
 		mOverlayManager.add(new LabelingOverlay(this));
 
-		//		mOverlayManager.add(new GenericOverlay(this, new TestOverlay(this)));
+		//mOverlayManager.add(new GenericOverlay(this, new TestLineOverlay(this)));
+		//mOverlayManager.add(new GenericOverlay(this, new TestOverlay(this)));
+
 		//		if (testRegionZoom)
 		//			mRegionLookup = new RegionLookup(this);
 

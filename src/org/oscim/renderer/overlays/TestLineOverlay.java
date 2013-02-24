@@ -150,7 +150,7 @@ public class TestLineOverlay extends RenderOverlay {
 		testProgram = GlUtils.createProgram(testVertexShader,
 				testFragmentShader);
 		if (testProgram == 0) {
-			Log.e("blah", "Could not create test program.");
+			Log.e("...", "Could not create test program.");
 			return;
 		}
 		htestMatrix = GLES20.glGetUniformLocation(testProgram, "u_mvp");

@@ -53,7 +53,7 @@ public class TriangleJNI {
 	 * !!! NOT for general use!!! - this is specifically for ExtrusionLayer
 	 * .
 	 *
-	 * @param points points to use: array of x,y coordinates
+	 * @param points an array of x,y coordinates
 	 * @param numRings number of rings in polygon == outer(1) + inner rings
 	 * @param io input: 1. number of all points, 2.. number of points in rings -
 	 *            times 2!
