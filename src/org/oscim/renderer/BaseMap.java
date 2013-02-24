@@ -136,7 +136,6 @@ public class BaseMap {
 		int simpleShader = (pos.tilt < 1 ? 1 : 0);
 
 		boolean clipped = false;
-		//boolean lineTexture = true;
 
 		for (Layer l = t.layers.baseLayers; l != null;) {
 			switch (l.type) {
@@ -146,29 +145,21 @@ public class BaseMap {
 					break;
 
 				case Layer.LINE:
-					//if (!lineTexture) {
-					//LineRenderer.beginLines();
-					//	lineTexture = true;
-					//}
 					if (!clipped) {
 						// draw stencil buffer clip region
 						PolygonRenderer.draw(pos, null, mvp, true, true);
 						clipped = true;
 					}
 					l = LineRenderer.draw(t.layers, l, pos, mvp, div, simpleShader);
-
 					break;
 
 				case Layer.TEXLINE:
-					//LineRenderer.endLines();
-
 					if (!clipped) {
 						// draw stencil buffer clip region
 						PolygonRenderer.draw(pos, null, mvp, true, true);
 						clipped = true;
 					}
 					l = LineTexRenderer.draw(t.layers, l, pos, mvp, div);
-					//lineTexture = false;
 					break;
 
 				default:
