@@ -55,11 +55,11 @@ public class FastMath {
 		return (pow > 0 ? (1 << pow) : (1.0f / (1 << -pow)));
 	}
 
-	public static int clamp(int value, int max, int min) {
+	public static int clamp(int value, int min, int max) {
 		return (value < min ? min : (value > max ? max : value));
 	}
 
-	public static float clamp(float value, float max, float min) {
+	public static float clamp(float value, float min, float max) {
 		return (value < min ? min : (value > max ? max : value));
 	}
 
