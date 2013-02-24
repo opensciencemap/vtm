@@ -57,10 +57,10 @@
     
   <!-- track|footway|path|cycleway -->
   <style-line name="footway"             stroke="#aaffffff" width="1.8" cap="butt" fixed="true" 
-      									 stipple="16" stipple-width="0.6" stipple-stroke="#d35c48"/>
+      									 stipple="4" stipple-width="0.6" stipple-stroke="#d35c48"/>
   <style-line name="highway:cycleway"    from="footway" width="0.1" stipple-stroke="#4040ee"/>
-  <style-line name="highway:track"       from="footway" width="0.1" stipple="10" stipple-stroke="#c3bb88"/>
-  <style-line name="highway:path"        from="footway" width="0.1" stipple="10" stipple-stroke="#837b58"/>
+  <style-line name="highway:track"       from="footway" width="0.1" stipple="4" stipple-stroke="#c3bb88"/>
+  <style-line name="highway:path"        from="footway" width="0.1" stipple="4" stipple-stroke="#837b58"/>
   
   <!-- <style-line name="footway:z16"         from="footway" width="-0.95" fixed="false" fade="-1"/>-->
   <style-line name="footway:z17"         stroke="#faf8f5" width="0.3"/>
@@ -68,7 +68,8 @@
   <!-- de: ein Weg der für Reiter vorgeshen ist.. -->
   <style-line name="bridleway"           stroke="#d3cb98" width="0.4" cap="butt"/>  
   
-  <style-line name="steps"               stroke="#f1f0f4" width="0.25" cap="butt" />
+  <style-line name="steps"               stroke="#aaffffff" width="4.2" cap="butt" fixed="true" 
+      								     stipple="2" stipple-width="1.0" stipple-stroke="#be6253"/>
   
   <style-line name="water:outline"       stroke="#a4bbcc" width="1.0" fixed="true" cap="butt" /> 
 	<style-line name="water"               stroke="#afcbf3" width="1.0" cap="butt" /> 
@@ -371,10 +372,10 @@
     <rule e="way" k="tunnel" v="yes|true" zoom-min="11">
       <!-- highway tunnels -->
       <rule e="way" k="highway" v="*">
-         <rule e="way" k="*" v="*" zoom-min="15">
+         <rule e="way" k="*" v="*" zoom-min="16">
            <rule e="way" k="*" v="steps">
              <use-line name="steps"/>
-             <use-outline name="0"/>
+            <!-- <use-outline name="0"/>-->
            </rule>
            <!-- <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16">
              <use-line name="footway:z16"/>
@@ -606,10 +607,10 @@
 				    </rule>
 			     
 			    <rule e="way" k="area" v="~|no|false">
-	          <rule e="way" k="*" v="*" zoom-min="15">
+	          <rule e="way" k="*" v="*" zoom-min="16">
 	            <rule e="way" k="*" v="steps">
-	              <use-line name="steps"/>
-	              <use-outline name="2"/>
+	            <use-line name="steps"/>
+	            <!-- <use-outline name="2"/>-->
 	            </rule>
 	            <!-- <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16" zoom-max="16">
 	              <use-line name="footway:z16"/>
@@ -717,21 +718,17 @@
 				 
 	          <style-outline name="bridge" stroke="#aa202020" width="0.08"/>
 	            
-            <rule e="way" k="*" v="*" zoom-min="15">
+            <rule e="way" k="*" v="*" zoom-min="16">
 	            <rule e="way" k="*" v="steps">
 	              <use-line name="steps"/>
-	              <use-outline name="bridge"/>
+	             <!--  <use-outline name="bridge"/>-->
 	            </rule>
-	            <!-- <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16" zoom-max="16">
-	              <use-line name="footway:z16"/>
-	            </rule>-->
-	            
-	            <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="15">
+	          </rule>
+			  <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="15">
 	              <use-line name="footway:z17" cap="butt"/>
 	              <use-outline name="bridge"/>
 	            </rule>
-	          </rule>
-	
+	            
 	          <rule e="way" k="*" v="*" zoom-min="14">
 	            <rule e="way" k="*" v="footway" >
 	               <use-line name="footway"/>
@@ -920,7 +917,7 @@
         
         <rule e="way" k="railway" v="rail|turntable" zoom-min="15">
           <line stroke="#ddaa9988" width="2.0" cap="butt" fixed="true" fade="12" 
-                stipple="4" stipple-width="0.7" stipple-stroke="#ffffff"/>
+                stipple="10" stipple-width="0.6" stipple-stroke="#ffffff"/>
         </rule>
         
         <!-- <rule e="way" k="railway" v="rail" zoom-max="14" zoom-min="13">

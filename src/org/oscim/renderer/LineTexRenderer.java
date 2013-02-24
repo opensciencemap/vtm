@@ -46,14 +46,15 @@ public class LineTexRenderer {
 	private static int hTexColor;
 	private static int hBgColor;
 	private static int hScale;
-	private static int hPatternScale;
 	private static int hWidth;
+	private static int hPatternScale;
+	private static int hPatternWidth;
 
 	private static int mIndicesBufferID;
 	private static int mVertexFlipID;
 
-	// batch up up to 100 quads in one draw call
-	private static int maxQuads = 100;
+	// batch up up to 64 quads in one draw call
+	private static int maxQuads = 64;
 	private static int maxIndices = maxQuads * 6;
 	private static int[] mTexID;
 
@@ -68,8 +69,9 @@ public class LineTexRenderer {
 		hTexColor = GLES20.glGetUniformLocation(shader, "u_color");
 		hBgColor = GLES20.glGetUniformLocation(shader, "u_bgcolor");
 		hScale = GLES20.glGetUniformLocation(shader, "u_scale");
-		hPatternScale = GLES20.glGetUniformLocation(shader, "u_pscale");
 		hWidth = GLES20.glGetUniformLocation(shader, "u_width");
+		hPatternScale = GLES20.glGetUniformLocation(shader, "u_pscale");
+		hPatternWidth = GLES20.glGetUniformLocation(shader, "u_pwidth");
 
 		hVertexPosition0 = GLES20.glGetAttribLocation(shader, "a_pos0");
 		hVertexPosition1 = GLES20.glGetAttribLocation(shader, "a_pos1");
@@ -118,13 +120,11 @@ public class LineTexRenderer {
 				GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-		mTexID = new int[10];
-
-		byte[] stipple = new byte[2];
-		stipple[0] = 32;
-		stipple[1] = 32;
-
-		mTexID[0] = GlUtils.loadStippleTexture(stipple);
+//		mTexID = new int[10];
+//		byte[] stipple = new byte[2];
+//		stipple[0] = 32;
+//		stipple[1] = 32;
+//		mTexID[0] = GlUtils.loadStippleTexture(stipple);
 	}
 
 	private final static int STRIDE = 12;
@@ -159,7 +159,7 @@ public class LineTexRenderer {
 
 		float s = pos.scale / div;
 
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexID[0]);
+		//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexID[0]);
 
 		Layer l = curLayer;
 		while (l != null && l.type == Layer.TEXLINE) {
@@ -176,10 +176,12 @@ public class LineTexRenderer {
 			//GLES20.glUniform4f(hBgColor, 0x99 / 255f, 0x96 / 255f, 0x93 / 255f, 0.95f);
 
 			// scale pattern to twice its size, then reset scale to 1.
-			// (coord scale * pattern size) / scale
-			GLES20.glUniform1f(hPatternScale, (8 * (64 / line.stipple)) / Math.max((int) s, 1));
+			// (coord scale * pattern size / tex size) / scale
+			//GLES20.glUniform1f(hPatternScale, (8 * line.stipple / 64) / Math.max((int) s, 1));
+			GLES20.glUniform1f(hPatternScale, (8 * line.stipple) / Math.max((int) s, 1));
+
+			GLES20.glUniform1f(hPatternWidth, line.stippleWidth);
 			//float f = Math.max((int)(s), 1);
-			//Log.d(TAG, s  + " : " + f);
 			//GLES20.glUniform1f(hPatternScale, (8 * line.stipple) / 1);
 
 			GLES20.glUniform1f(hScale, pos.scale);
@@ -196,7 +198,7 @@ public class LineTexRenderer {
 					numIndices = maxIndices;
 
 				// i / 6 * (24 shorts per block * 2 short bytes)
-				int add = (l.offset + i * 8) + vOffset;;
+				int add = (l.offset + i * 8) + vOffset;
 
 				GLES20.glVertexAttribPointer(hVertexPosition0,
 						4, GLES20.GL_SHORT, false, STRIDE,
@@ -257,9 +259,9 @@ public class LineTexRenderer {
 		GLES20.glDisableVertexAttribArray(hVertexLength0);
 		GLES20.glDisableVertexAttribArray(hVertexLength1);
 		GLES20.glDisableVertexAttribArray(hVertexFlip);
-		GlUtils.checkGlError("...");
+		GlUtils.checkGlError(TAG);
 
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+		//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
 
 		return l;
 	}
@@ -290,6 +292,26 @@ public class LineTexRenderer {
 			+ "  gl_Position = u_mvp * pos;"
 			+ "}";
 
+	//*
+	final static String fragmentShader = ""
+			+ "#extension GL_OES_standard_derivatives : enable\n"
+			+ " precision mediump float;"
+			+ " uniform vec4 u_color;"
+			+ " uniform vec4 u_bgcolor;"
+			+ " uniform float u_pwidth;"
+			+ " varying vec2 v_st;"
+			+ " void main() {"
+			// 1.0 minus distance on perpendicular to the line
+			+ "  float dist = 1.0 - abs(v_st.t);"
+			+ "  float fuzz = fwidth(v_st.t);"
+			+ "  float fuzz_p = fwidth(v_st.s);"
+			+ "  float line_w = smoothstep(0.0, fuzz, dist);"
+			+ "  float stipple_w = smoothstep(0.0, u_pwidth + fuzz, dist);"
+			+ "  float phase = abs(mod(v_st.s, 2.0) - 1.0);"
+			+ "  float stipple_p = smoothstep(0.5 - fuzz_p, 0.5 + fuzz_p, phase);"
+			+ "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
+			+ " } ";	//*/
+
 	/*
 	final static String fragmentShader = ""
 			+ "#extension GL_OES_standard_derivatives : enable\n"
@@ -311,23 +333,24 @@ public class LineTexRenderer {
 			+ "  gl_FragColor =  u_bgcolor * stipple_p;"
 			//			+ "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
 			+ "}"; //*/
-	//*
+	/*
 	final static String fragmentShader = ""
 			+ "#extension GL_OES_standard_derivatives : enable\n"
-			+ "precision mediump float;"
-			+ "uniform sampler2D tex;"
+			+ " precision mediump float;"
+			+ " uniform sampler2D tex;"
 			+ " uniform vec4 u_color;"
 			+ " uniform vec4 u_bgcolor;"
-			+ "varying vec2 v_st;"
-			+ "void main() {"
-			+ "  float len = texture2D(tex, v_st).a;"
+			+ " uniform float u_pwidth;"
+			+ " varying vec2 v_st;"
+			+ " void main() {"
+			+ "  float dist = texture2D(tex, v_st).a;"
 			+ "  float tex_w = abs(v_st.t);"
 			+ "  vec2 st_width = fwidth(v_st);"
 			+ "  float fuzz = max(st_width.s, st_width.t);"
 			+ "  float line_w    = (1.0 - smoothstep(1.0 - fuzz, 1.0, tex_w));"
-			+ "  float stipple_w = (1.0 - smoothstep(0.7 - fuzz, 0.7, tex_w));"
-			+ "  float stipple_p = smoothstep(0.495, 0.505, len);"
+			+ "  float stipple_w = (1.0 - smoothstep(u_pwidth - fuzz, u_pwidth, tex_w));"
+			+ "  float stipple_p = smoothstep(0.495, 0.505, dist);"
 			+ "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-			+ "}";	//*/
+			+ " } ";	//*/
 
 }
