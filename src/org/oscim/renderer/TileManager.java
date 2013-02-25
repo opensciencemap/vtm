@@ -51,10 +51,8 @@ public class TileManager {
 
 	private final MapView mMapView;
 	private final MapViewPosition mMapViewPosition;
-	private final MapPosition mMapPosition;
+
 	private boolean mInitialized;
-	private int mWidth = 0;
-	private int mHeight = 0;
 
 	// cache for all tiles
 	private MapTile[] mTiles;
@@ -85,7 +83,6 @@ public class TileManager {
 	public TileManager(MapView mapView) {
 		mMapView = mapView;
 		mMapViewPosition = mapView.getMapViewPosition();
-		mMapPosition = new MapPosition();
 		mJobs = new ArrayList<JobTile>();
 		mTiles = new MapTile[GLRenderer.CACHE_TILES];
 
@@ -99,7 +96,50 @@ public class TileManager {
 
 	public void destroy() {
 		// there might be some leaks in here
-		// ... free pools
+		// ... free static pools
+	}
+
+	public synchronized void init(int width, int height) {
+
+		// sync with GLRender thread
+		// ... and labeling thread?
+		GLRenderer.drawlock.lock();
+
+		if (mInitialized) {
+			// pass VBOs and VertexItems back to pools
+			for (int i = 0; i < mTilesSize; i++)
+				clearTile(mTiles[i]);
+		} else {
+			// mInitialized is set when surface changed
+			// and VBOs might be lost
+			VertexPool.init();
+		}
+
+		// clear cache index
+		QuadTree.init();
+
+		// clear references to cached MapTiles
+		Arrays.fill(mTiles, null);
+		mTilesSize = 0;
+		mTilesCount = 0;
+
+		// clear all references to previous tiles
+		for (TileSet td : mTileSets) {
+			Arrays.fill(td.tiles, null);
+			td.cnt = 0;
+		}
+
+		// set up TileSet large enough to hold current tiles
+		int num = Math.max(width, height);
+		int size = Tile.TILE_SIZE >> 1;
+		int numTiles = (num * num) / (size * size) * 4;
+		mNewTiles = new TileSet(numTiles);
+		mCurrentTiles = new TileSet(numTiles);
+		Log.d(TAG, "max tiles: " + numTiles);
+
+		mInitialized = true;
+
+		GLRenderer.drawlock.unlock();
 	}
 
 	/**
@@ -107,75 +147,32 @@ public class TileManager {
 	 * available tiles are created and added to JobQueue (mapView.addJobs) for
 	 * loading by TileGenerator class
 	 *
-	 * @param clear
-	 *            whether to clear and reload all tiles
+	 * @param mapPosition
+	 *            current MapPosition
 	 */
-	public synchronized void updateMap(final boolean clear) {
-		boolean changedPos = false;
-
-		if (mMapView == null)
+	public synchronized void updateMap(MapPosition mapPosition) {
+		if (!mInitialized) {
+			Log.d(TAG, "not initialized");
 			return;
-
-		if (clear || !mInitialized) {
-			// make sure onDrawFrame is not running
-			// - and labeling thread?
-			GLRenderer.drawlock.lock();
-
-			// clear all tiles references
-			Log.d(TAG, "CLEAR " + mInitialized);
-
-			if (clear) {
-				// pass VBOs and VertexItems back to pools
-				for (int i = 0; i < mTilesSize; i++)
-					clearTile(mTiles[i]);
-			} else {
-				// mInitialized is set when surface changed
-				// and VBOs might be lost
-				VertexPool.init();
-			}
-
-			QuadTree.init();
-
-			Arrays.fill(mTiles, null);
-			mTilesSize = 0;
-			mTilesCount = 0;
-
-			for (TileSet td : mTileSets) {
-				Arrays.fill(td.tiles, null);
-				td.cnt = 0;
-			}
-
-			// set up TileData arrays that are passed to gl-thread
-			int num = Math.max(mWidth, mHeight);
-			int size = Tile.TILE_SIZE >> 1;
-			int numTiles = (num * num) / (size * size) * 4;
-			mNewTiles = new TileSet(numTiles);
-			mCurrentTiles = new TileSet(numTiles);
-
-			// make sure mMapPosition will be updated
-			mMapPosition.zoomLevel = -1;
-			mInitialized = true;
-
-			GLRenderer.drawlock.unlock();
 		}
 
-		MapPosition mapPosition = mMapPosition;
+		//MapPosition mapPosition = mMapPosition;
 		float[] coords = mTileCoords;
 
-		synchronized (mMapViewPosition) {
-			changedPos = mMapViewPosition.getMapPosition(mapPosition);
-			mMapViewPosition.getMapViewProjection(coords);
-		}
+		//synchronized (mMapViewPosition) {
+		//	changedPos = mMapViewPosition.getMapPosition(mapPosition);
+		mMapViewPosition.getMapViewProjection(coords);
+		//}
 
-		if (changedPos) {
-			mMapView.render();
-		} else {
-			return;
-		}
+		//if (changedPos) {
+		//	mMapView.render();
+		//} else {
+		//	return;
+		//}
 
 		// load some tiles more than currently visible
 		// TODO limit how many more...
-		float scale = mapPosition.scale * 0.5f;
+		float scale = mapPosition.scale * 0.7f;
 		float px = (float) mapPosition.x;
 		float py = (float) mapPosition.y;
 
@@ -588,13 +585,6 @@ public class TileManager {
 			mMapView.render();
 
 		return true;
-	}
-
-	public void onSizeChanged(int w, int h) {
-		Log.d(TAG, "onSizeChanged" + w + " " + h);
-
-		mWidth = w;
-		mHeight = h;
 	}
 
 	private final ScanBox mScanBox = new ScanBox() {

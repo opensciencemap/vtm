@@ -563,7 +563,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
-		Log.d(TAG, "SurfaceChanged:" + mNewSurface + " " + width + " " + height);
+		Log.d(TAG, "SurfaceChanged:" + mNewSurface + " " + width + "x" + height);
 
 		if (width <= 0 || height <= 0)
 			return;
