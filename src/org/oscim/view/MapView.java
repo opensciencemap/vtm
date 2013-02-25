@@ -98,7 +98,10 @@ public class MapView extends RelativeLayout {
 	private String mRenderTheme;
 	private DebugSettings mDebugSettings;
 
-	private boolean mClearTiles;
+	private boolean mClearMap;
+
+	private int mWidth;
+	private int mHeight;
 
 	// FIXME: keep until old pbmap reader is removed
 	public static boolean enableClosePolygons = false;
@@ -198,7 +201,39 @@ public class MapView extends RelativeLayout {
 
 		//		if (testRegionZoom)
 		//			mRegionLookup = new RegionLookup(this);
+		clearMap();
 
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent motionEvent) {
+		// mMapZoomControlsjonMapViewTouchEvent(motionEvent.getAction()
+		// & MotionEvent.ACTION_MASK);
+
+		if (this.isClickable())
+			return mTouchEventHandler.handleMotionEvent(motionEvent);
+
+		return false;
+	}
+
+	@Override
+	protected synchronized void onSizeChanged(int width, int height,
+			int oldWidth, int oldHeight) {
+		Log.d(TAG, "onSizeChanged: " + width + "x" + height);
+
+		mJobQueue.clear();
+		mapWorkersPause(true);
+
+		super.onSizeChanged(width, height, oldWidth, oldHeight);
+
+		mWidth = width;
+		mHeight = height;
+
+		if (width != 0 && height != 0)
+			mMapViewPosition.setViewport(width, height);
+
+		clearMap();
+		mapWorkersProceed();
 	}
 
 	public void render() {
@@ -244,44 +279,46 @@ public class MapView extends RelativeLayout {
 		return mRotationEnabled;
 	}
 
-	@Override
-	public boolean onTouchEvent(MotionEvent motionEvent) {
-		// mMapZoomControls.onMapViewTouchEvent(motionEvent.getAction()
-		// & MotionEvent.ACTION_MASK);
 
-		if (this.isClickable())
-			return mTouchEventHandler.handleMotionEvent(motionEvent);
-
-		return false;
-	}
 
 	/**
 	 * Calculates all necessary tiles and adds jobs accordingly.
 	 *
-	 * @param changedPos TODO
+	 * @param forceRedraw TODO
 	 */
-	public void redrawMap(boolean changedPos) {
-		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
+	public void redrawMap(boolean forceRedraw) {
+		if (mPausing || mWidth == 0 || mHeight == 0)
 			return;
 
-		//if (changedPos)
-		//	render();
+		if (forceRedraw)
+			render();
 
-		if (AndroidUtils.currentThreadIsUiThread()) {
-			boolean changed = mMapViewPosition.getMapPosition(mMapPosition);
+		if (mClearMap){
+			mTileManager.init(mWidth, mHeight);
+			mClearMap = false;
 
-			mOverlayManager.onUpdate(mMapPosition, changed);
+			// make sure mMapPosition will be updated
+			mMapPosition.zoomLevel = -1;
+
+			// TODO clear overlays
 		}
-		mTileManager.updateMap(mClearTiles);
-		mClearTiles = false;
+
+		boolean changed = mMapViewPosition.getMapPosition(mMapPosition);
+
+		//Log.d(TAG, "redraw " + changed + " " + forceRedraw);
+
+		// required when not changed?
+		if (AndroidUtils.currentThreadIsUiThread())
+			mOverlayManager.onUpdate(mMapPosition, changed);
+
+		if (changed) {
+			mTileManager.updateMap(mMapPosition);
+		}
 	}
 
-	public void clearAndRedrawMap() {
-		if (mPausing || this.getWidth() == 0 || this.getHeight() == 0)
-			return;
-
-		//if (AndroidUtils.currentThreadIsUiThread())
-		mTileManager.updateMap(true);
+	private void clearMap(){
+		// clear tile and overlay data before next draw
+		mClearMap = true;
 	}
 
 	/**
@@ -291,7 +328,7 @@ public class MapView extends RelativeLayout {
 	public void setDebugSettings(DebugSettings debugSettings) {
 		mDebugSettings = debugSettings;
 		TileGenerator.setDebugSettings(debugSettings);
-		clearAndRedrawMap();
+		clearMap();
 	}
 
 	/**
@@ -332,13 +369,13 @@ public class MapView extends RelativeLayout {
 	 *
 	 * @param options
 	 *            the new MapDatabase options.
-	 * @return ...
+	 * @return true if MapDatabase changed
 	 */
 	public boolean setMapDatabase(MapOptions options) {
 		if (debugDatabase)
 			return false;
 
-		Log.i(TAG, "setMapDatabase " + options.db.name());
+		Log.i(TAG, "setMapDatabase: " + options.db.name());
 
 		if (mMapOptions != null && mMapOptions.equals(options))
 			return true;
@@ -346,7 +383,6 @@ public class MapView extends RelativeLayout {
 		mapWorkersPause(true);
 
 		mJobQueue.clear();
-		mClearTiles = true;
 		mMapOptions = options;
 
 		for (int i = 0; i < mNumMapWorkers; i++) {
@@ -369,6 +405,8 @@ public class MapView extends RelativeLayout {
 			MapView.enableClosePolygons = true;
 		else
 			MapView.enableClosePolygons = false;
+
+		clearMap();
 
 		mapWorkersProceed();
 
@@ -400,7 +438,9 @@ public class MapView extends RelativeLayout {
 		if (ret) {
 			mRenderTheme = internalRenderTheme.name();
 		}
-		clearAndRedrawMap();
+
+		clearMap();
+
 		return ret;
 	}
 
@@ -424,7 +464,8 @@ public class MapView extends RelativeLayout {
 		if (ret) {
 			mRenderTheme = renderThemePath;
 		}
-		clearAndRedrawMap();
+
+		clearMap();
 	}
 
 	private boolean setRenderTheme(Theme theme) {
@@ -456,26 +497,9 @@ public class MapView extends RelativeLayout {
 			}
 			mapWorkersProceed();
 		}
-
 		return false;
 	}
 
-	@Override
-	protected synchronized void onSizeChanged(int width, int height,
-			int oldWidth, int oldHeight) {
-
-		mJobQueue.clear();
-		mapWorkersPause(true);
-		Log.d(TAG, "onSizeChanged" + width + " " + height);
-		super.onSizeChanged(width, height, oldWidth, oldHeight);
-
-		if (width != 0 && height != 0)
-			mMapViewPosition.setViewport(width, height);
-
-		mTileManager.onSizeChanged(width, height);
-
-		mapWorkersProceed();
-	}
 
 	void destroy() {
 		for (MapWorker mapWorker : mMapWorkers) {
