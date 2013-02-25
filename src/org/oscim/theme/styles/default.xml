@@ -24,7 +24,7 @@
  	<style-area name="greens2"             fill="#deecb9" fade="12" />
  	  
  	<!-- park|common|green|cemetery|golf_course|dog_park -->
- 	<style-area name="park"                fill="#d0e6aa" fade="11" />
+ 	<style-area name="park"                fill="#c7dca2" fade="11" />
   
   <!-- de:Kleingartengebiet -->
   <style-area name="allotments"          fill="#efeae0" fade="12" />
@@ -59,14 +59,15 @@
   <style-line name="footway"             stroke="#aaffffff" width="1.8" cap="butt" fixed="true" 
       									 stipple="4" stipple-width="0.6" stipple-stroke="#d35c48"/>
   <style-line name="highway:cycleway"    from="footway" width="0.1" stipple-stroke="#4040ee"/>
-  <style-line name="highway:track"       from="footway" width="0.1" stipple="4" stipple-stroke="#c3bb88"/>
+  <style-line name="highway:track"       from="footway" width="0.1" stipple="4" stipple-stroke="#a39b68"/>
   <style-line name="highway:path"        from="footway" width="0.1" stipple="4" stipple-stroke="#837b58"/>
   
   <!-- <style-line name="footway:z16"         from="footway" width="-0.95" fixed="false" fade="-1"/>-->
   <style-line name="footway:z17"         stroke="#faf8f5" width="0.3"/>
   
   <!-- de: ein Weg der für Reiter vorgeshen ist.. -->
-  <style-line name="bridleway"           stroke="#d3cb98" width="0.4" cap="butt"/>  
+  <style-line name="bridleway"           from="footway" stroke="#d3cb98" width="0.1" cap="butt"
+      									 stipple-stroke="#837b58"/>  
   
   <style-line name="steps"               stroke="#aaffffff" width="4.2" cap="butt" fixed="true" 
       								     stipple="2" stipple-width="1.0" stipple-stroke="#be6253"/>
