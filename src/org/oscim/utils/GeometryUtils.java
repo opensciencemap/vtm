@@ -362,4 +362,6 @@ public final class GeometryUtils {
 
 		return inside;
 	}
+
+	// TODO compare with http://alienryderflex.com/polygon/
 }
