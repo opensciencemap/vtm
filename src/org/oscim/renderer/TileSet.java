@@ -34,6 +34,14 @@ public final class TileSet {
 		tiles = new MapTile[numTiles];
 	}
 
+	public MapTile getTile(int x, int y){
+		for (int i = 0; i < cnt; i++)
+			if (tiles[i].tileX == x && tiles[i].tileY == y)
+				return tiles[i];
+
+		return null;
+	}
+
 	public static Comparator<MapTile> coordComparator = new CoordComparator();
 
 	public static class CoordComparator implements Comparator<MapTile> {
