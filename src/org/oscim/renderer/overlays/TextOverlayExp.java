@@ -113,7 +113,7 @@ public class TextOverlayExp extends BasicOverlay {
 
 		@Override
 		protected void doWork() {
-			SystemClock.sleep(150);
+			SystemClock.sleep(500);
 			if (!mRun)
 				return;
 
@@ -192,7 +192,7 @@ public class TextOverlayExp extends BasicOverlay {
 					continue;
 				}
 
-				return 3;
+				return 2;
 			}
 
 			boolean intersect = ti.bbox.overlaps(lp.bbox);
@@ -685,7 +685,6 @@ public class TextOverlayExp extends BasicOverlay {
 		if (layers.baseLayers != null) {
 			setMatrix(pos, m, true);
 
-			//Matrix.multiplyMM(m.mvp, 0, m.proj, 0, m.mvp,0);
 			for (Layer l = layers.baseLayers; l != null;) {
 				if (l.type == Layer.POLYGON) {
 					l = PolygonRenderer.draw(pos, l, m.mvp, true, false);
