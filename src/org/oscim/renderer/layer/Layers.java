@@ -255,7 +255,7 @@ public class Layers {
 		baseLayers = null;
 		textureLayers = null;
 		extrusionLayers = null;
-
+		mCurLayer = null;
 		//		if (vbo != null){
 		//			BufferObject.release(vbo);
 		//			vbo = null;
