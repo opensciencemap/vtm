@@ -17,11 +17,10 @@ package org.oscim.database.mapfile;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
+import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapOptions;
@@ -32,7 +31,7 @@ import org.oscim.database.mapfile.header.MapFileInfo;
 import org.oscim.database.mapfile.header.SubFileParameter;
 import org.oscim.generator.JobTile;
 
-import android.os.Environment;
+import android.util.Log;
 
 /**
  * A class for reading binary map files.
@@ -78,7 +77,7 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	private static final String INVALID_FIRST_WAY_OFFSET = "invalid first way offset: ";
 
-	private static final Logger LOG = Logger.getLogger(MapDatabase.class.getName());
+	private static final String TAG = MapDatabase.class.getName();
 
 	/**
 	 * Maximum way nodes sequence length which is considered as valid.
@@ -198,10 +197,11 @@ public class MapDatabase implements IMapDatabase {
 	private int mTileLongitude;
 	private int[] mIntBuffer;
 
-	private float[] mWayNodes = new float[100000];
+	private final float[] mWayNodes = new float[100000];
 	private int mWayNodePosition;
 
 	private int minLat, minLon;
+	private Tile mTile;
 
 	/*
 	 * (non-Javadoc)
@@ -210,6 +210,7 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	@Override
 	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
+
 		if (sMapFileHeader == null)
 			return QueryResult.FAILED;
 
@@ -219,6 +220,7 @@ public class MapDatabase implements IMapDatabase {
 		mWayNodePosition = 0;
 
 		try {
+			mTile = tile;
 			// prepareExecution();
 			QueryParameters queryParameters = new QueryParameters();
 			queryParameters.queryZoomLevel = sMapFileHeader
@@ -227,7 +229,7 @@ public class MapDatabase implements IMapDatabase {
 			SubFileParameter subFileParameter = sMapFileHeader
 					.getSubFileParameter(queryParameters.queryZoomLevel);
 			if (subFileParameter == null) {
-				LOG.warning("no sub-file for zoom level: "
+				Log.w(TAG, "no sub-file for zoom level: "
 						+ queryParameters.queryZoomLevel);
 				return QueryResult.FAILED;
 			}
@@ -236,7 +238,7 @@ public class MapDatabase implements IMapDatabase {
 			QueryCalculations.calculateBlocks(queryParameters, subFileParameter);
 			processBlocks(mapDatabaseCallback, queryParameters, subFileParameter);
 		} catch (IOException e) {
-			LOG.log(Level.SEVERE, null, e);
+			Log.e(TAG, e.getMessage());
 			return QueryResult.FAILED;
 		}
 		return QueryResult.SUCCESS;
@@ -274,26 +276,17 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	@Override
 	public OpenResult open(MapOptions options) {
-		// if (options == null) {
-		// options = new HashMap<String, String>(1);
-		// options.put("mapfile", "/sdcard/bremen.map");
-		// }
 		try {
-			// if (options == null || options.get("mapfile") == null) {
-			// // throw new
-			// // IllegalArgumentException("mapFile must not be null");
-			// return new OpenResult("no file!");
-			// }
+			if (options.get("file") == null) {
+				throw new IllegalArgumentException("'file' must not be null");
+			}
 
 			// make sure to close any previously opened file first
 			close();
 
-			File file = new File(Environment.getExternalStorageDirectory().getPath()
-					+ "/bremen.map");
+			File file = new File(options.get("file"));
 
-			System.out.println("load " + file + " "
-					+ (Environment.getExternalStorageDirectory().getPath()
-					+ "/bremen.map"));
+			Log.d(TAG, file.getAbsolutePath());
 
 			// File file = new File(options.get("mapfile"));
 
@@ -330,7 +323,7 @@ public class MapDatabase implements IMapDatabase {
 
 			return OpenResult.SUCCESS;
 		} catch (IOException e) {
-			LOG.log(Level.SEVERE, null, e);
+			Log.e(TAG, e.getMessage());
 			// make sure that the file is closed
 			close();
 			return new OpenResult(e.getMessage());
@@ -364,7 +357,7 @@ public class MapDatabase implements IMapDatabase {
 
 			mReadBuffer = null;
 		} catch (IOException e) {
-			LOG.log(Level.SEVERE, null, e);
+			Log.e(TAG, e.getMessage());
 		}
 	}
 
@@ -373,8 +366,8 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	private void logDebugSignatures() {
 		if (mDebugFile) {
-			LOG.warning(DEBUG_SIGNATURE_WAY + mSignatureWay);
-			LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+			Log.w(TAG, DEBUG_SIGNATURE_WAY + mSignatureWay);
+			Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 		}
 	}
 
@@ -413,9 +406,9 @@ public class MapDatabase implements IMapDatabase {
 		// get the relative offset to the first stored way in the block
 		int firstWayOffset = mReadBuffer.readUnsignedInt();
 		if (firstWayOffset < 0) {
-			LOG.warning(INVALID_FIRST_WAY_OFFSET + firstWayOffset);
+			Log.w(TAG, INVALID_FIRST_WAY_OFFSET + firstWayOffset);
 			if (mDebugFile) {
-				LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+				Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 			}
 			return;
 		}
@@ -423,9 +416,9 @@ public class MapDatabase implements IMapDatabase {
 		// add the current buffer position to the relative first way offset
 		firstWayOffset += mReadBuffer.getBufferPosition();
 		if (firstWayOffset > mReadBuffer.getBufferSize()) {
-			LOG.warning(INVALID_FIRST_WAY_OFFSET + firstWayOffset);
+			Log.w(TAG, INVALID_FIRST_WAY_OFFSET + firstWayOffset);
 			if (mDebugFile) {
-				LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+				Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 			}
 			return;
 		}
@@ -436,9 +429,9 @@ public class MapDatabase implements IMapDatabase {
 
 		// finished reading POIs, check if the current buffer position is valid
 		if (mReadBuffer.getBufferPosition() > firstWayOffset) {
-			LOG.warning("invalid buffer position: " + mReadBuffer.getBufferPosition());
+			Log.w(TAG, "invalid buffer position: " + mReadBuffer.getBufferPosition());
 			if (mDebugFile) {
-				LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+				Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 			}
 			return;
 		}
@@ -481,8 +474,8 @@ public class MapDatabase implements IMapDatabase {
 				long currentBlockPointer = currentBlockIndexEntry & BITMASK_INDEX_OFFSET;
 				if (currentBlockPointer < 1
 						|| currentBlockPointer > subFileParameter.subFileSize) {
-					LOG.warning("invalid current block pointer: " + currentBlockPointer);
-					LOG.warning("subFileSize: " + subFileParameter.subFileSize);
+					Log.w(TAG, "invalid current block pointer: " + currentBlockPointer);
+					Log.w(TAG, "subFileSize: " + subFileParameter.subFileSize);
 					return;
 				}
 
@@ -498,8 +491,8 @@ public class MapDatabase implements IMapDatabase {
 							& BITMASK_INDEX_OFFSET;
 					if (nextBlockPointer < 1
 							|| nextBlockPointer > subFileParameter.subFileSize) {
-						LOG.warning("invalid next block pointer: " + nextBlockPointer);
-						LOG.warning("sub-file size: " + subFileParameter.subFileSize);
+						Log.w(TAG, "invalid next block pointer: " + nextBlockPointer);
+						Log.w(TAG, "sub-file size: " + subFileParameter.subFileSize);
 						return;
 					}
 				}
@@ -507,7 +500,7 @@ public class MapDatabase implements IMapDatabase {
 				// calculate the size of the current block
 				int currentBlockSize = (int) (nextBlockPointer - currentBlockPointer);
 				if (currentBlockSize < 0) {
-					LOG.warning("current block size must not be negative: "
+					Log.w(TAG, "current block size must not be negative: "
 							+ currentBlockSize);
 					return;
 				} else if (currentBlockSize == 0) {
@@ -516,10 +509,10 @@ public class MapDatabase implements IMapDatabase {
 				} else if (currentBlockSize > ReadBuffer.MAXIMUM_BUFFER_SIZE) {
 					// the current block is too large, continue with the next
 					// block
-					LOG.warning("current block size too large: " + currentBlockSize);
+					Log.w(TAG, "current block size too large: " + currentBlockSize);
 					continue;
 				} else if (currentBlockPointer + currentBlockSize > mFileSize) {
-					LOG.warning("current block largher than file size: "
+					Log.w(TAG, "current block largher than file size: "
 							+ currentBlockSize);
 					return;
 				}
@@ -530,7 +523,7 @@ public class MapDatabase implements IMapDatabase {
 				// read the current block into the buffer
 				if (!mReadBuffer.readFromFile(currentBlockSize)) {
 					// skip the current block
-					LOG.warning("reading current block has failed: " + currentBlockSize);
+					Log.w(TAG, "reading current block has failed: " + currentBlockSize);
 					return;
 				}
 
@@ -544,11 +537,11 @@ public class MapDatabase implements IMapDatabase {
 				mTileLatitude = (int) (tileLatitudeDeg * 1000000);
 				mTileLongitude = (int) (tileLongitudeDeg * 1000000);
 
-				try {
+				//try {
 					processBlock(queryParameters, subFileParameter, mapDatabaseCallback);
-				} catch (ArrayIndexOutOfBoundsException e) {
-					LOG.log(Level.SEVERE, null, e);
-				}
+				//} catch (ArrayIndexOutOfBoundsException e) {
+				//	Log.e(TAG, e.getMessage());
+				//}
 			}
 		}
 
@@ -576,7 +569,7 @@ public class MapDatabase implements IMapDatabase {
 			// get and check the block signature
 			mSignatureBlock = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_BLOCK);
 			if (!mSignatureBlock.startsWith("###TileStart")) {
-				LOG.warning("invalid block signature: " + mSignatureBlock);
+				Log.w(TAG, "invalid block signature: " + mSignatureBlock);
 				return false;
 			}
 		}
@@ -602,8 +595,8 @@ public class MapDatabase implements IMapDatabase {
 				// get and check the POI signature
 				mSignaturePoi = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_POI);
 				if (!mSignaturePoi.startsWith("***POIStart")) {
-					LOG.warning("invalid POI signature: " + mSignaturePoi);
-					LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+					Log.w(TAG, "invalid POI signature: " + mSignaturePoi);
+					Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 					return false;
 				}
 			}
@@ -675,7 +668,7 @@ public class MapDatabase implements IMapDatabase {
 		// get and check the number of way coordinate blocks (VBE-U)
 		int numBlocks = mReadBuffer.readUnsignedInt();
 		if (numBlocks < 1 || numBlocks > Short.MAX_VALUE) {
-			LOG.warning("invalid number of way coordinate blocks: " + numBlocks);
+			Log.w(TAG, "invalid number of way coordinate blocks: " + numBlocks);
 			return null;
 		}
 
@@ -689,7 +682,7 @@ public class MapDatabase implements IMapDatabase {
 			int numWayNodes = mReadBuffer.readUnsignedInt();
 
 			if (numWayNodes < 2 || numWayNodes > MAXIMUM_WAY_NODES_SEQUENCE_LENGTH) {
-				LOG.warning("invalid number of way nodes: " + numWayNodes);
+				Log.w(TAG, "invalid number of way nodes: " + numWayNodes);
 				logDebugSignatures();
 				return null;
 			}
@@ -832,8 +825,8 @@ public class MapDatabase implements IMapDatabase {
 				// get and check the way signature
 				mSignatureWay = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_WAY);
 				if (!mSignatureWay.startsWith("---WayStart")) {
-					LOG.warning("invalid way signature: " + mSignatureWay);
-					LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+					Log.w(TAG, "invalid way signature: " + mSignatureWay);
+					Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 					return false;
 				}
 			}
@@ -865,11 +858,11 @@ public class MapDatabase implements IMapDatabase {
 			} else {
 				int wayDataSize = mReadBuffer.readUnsignedInt();
 				if (wayDataSize < 0) {
-					LOG.warning("invalid way data size: " + wayDataSize);
+					Log.w(TAG, "invalid way data size: " + wayDataSize);
 					if (mDebugFile) {
-						LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+						Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 					}
-					LOG.warning("EEEEEK way... 2");
+					Log.w(TAG, "EEEEEK way... 2");
 					return false;
 				}
 
@@ -941,7 +934,7 @@ public class MapDatabase implements IMapDatabase {
 				wayDataBlocks = mReadBuffer.readUnsignedInt();
 
 				if (wayDataBlocks < 1) {
-					LOG.warning("invalid number of way data blocks: " + wayDataBlocks);
+					Log.w(TAG, "invalid number of way data blocks: " + wayDataBlocks);
 					logDebugSignatures();
 					return false;
 				}
@@ -960,8 +953,8 @@ public class MapDatabase implements IMapDatabase {
 				boolean closed = mWayNodes[0] == mWayNodes[l - 2]
 						&& mWayNodes[1] == mWayNodes[l - 1];
 
-				mapDatabaseCallback
-						.renderWay(layer, tags, mWayNodes, wayLengths, closed, 0);
+				projectToTile(mWayNodes, wayLengths);
+				mapDatabaseCallback.renderWay(layer, tags, mWayNodes, wayLengths, closed, 0);
 			}
 		}
 
@@ -1003,18 +996,18 @@ public class MapDatabase implements IMapDatabase {
 
 			if (cumulatedNumberOfPois < 0
 					|| cumulatedNumberOfPois > MAXIMUM_ZOOM_TABLE_OBJECTS) {
-				LOG.warning("invalid cumulated number of POIs in row " + row + ' '
+				Log.w(TAG, "invalid cumulated number of POIs in row " + row + ' '
 						+ cumulatedNumberOfPois);
 				if (mDebugFile) {
-					LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+					Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 				}
 				return null;
 			} else if (cumulatedNumberOfWays < 0
 					|| cumulatedNumberOfWays > MAXIMUM_ZOOM_TABLE_OBJECTS) {
-				LOG.warning("invalid cumulated number of ways in row " + row + ' '
+				Log.w(TAG, "invalid cumulated number of ways in row " + row + ' '
 						+ cumulatedNumberOfWays);
 				if (sMapFileHeader.getMapFileInfo().debugFile) {
-					LOG.warning(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+					Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 				}
 				return null;
 			}
@@ -1030,5 +1023,60 @@ public class MapDatabase implements IMapDatabase {
 	public void cancel() {
 		// TODO Auto-generated method stub
 
+	}
+
+	private static final double PI180 = (Math.PI / 180) / 1000000.0;
+	private static final double PIx4 = Math.PI * 4;
+
+	private boolean projectToTile(float[] coords, short[] indices) {
+
+		long x = mTile.pixelX;
+		long y = mTile.pixelY + Tile.TILE_SIZE;
+		long z = Tile.TILE_SIZE << mTile.zoomLevel;
+
+		double divx, divy = 0;
+		long dx = (x - (z >> 1));
+		long dy = (y - (z >> 1));
+
+		divx = 180000000.0 / (z >> 1);
+		divy = z / PIx4;
+
+		for (int pos = 0, outPos = 0, i = 0, m = indices.length; i < m; i++) {
+			int len = indices[i];
+			if (len == 0)
+				continue;
+			if (len < 0)
+				break;
+
+			int cnt = 0;
+			float lat, lon, prevLon = 0, prevLat = 0;
+			int first = outPos;
+
+			for (int end = pos + len; pos < end; pos += 2) {
+
+				lon = (float) ((coords[pos]) / divx - dx);
+				double sinLat = Math.sin(coords[pos + 1] * PI180);
+				lat = (float) (Tile.TILE_SIZE - (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy));
+
+				if (cnt != 0) {
+					// drop small distance intermediate nodes
+					if (lat == prevLat && lon == prevLon)
+						continue;
+				}
+				coords[outPos++] = prevLon = lon;
+				coords[outPos++] = prevLat = lat;
+
+				cnt += 2;
+			}
+			if (coords[first] == coords[outPos-2] && coords[first+1] == coords[outPos-1]){
+				//Log.d(TAG, "drop closed");
+				indices[i] = (short) (cnt - 2);
+				outPos -= 2;
+			}
+			else
+				indices[i] = (short) cnt;
+		}
+
+		return true;
 	}
 }
