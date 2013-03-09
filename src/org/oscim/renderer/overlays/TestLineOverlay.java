@@ -425,7 +425,7 @@ public class TestLineOverlay extends RenderOverlay {
 		m.mvp[13] = y * scale;
 		// scale to current tile world coordinates
 		scale = (curPos.scale / oPos.scale) / div;
-		scale /= GLRenderer.COORD_MULTIPLIER;
+		scale /= GLRenderer.COORD_SCALE;
 		m.mvp[0] = scale;
 		m.mvp[5] = scale;
 		m.mvp[10] = 1; //scale; // 1000f;

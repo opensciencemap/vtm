@@ -15,6 +15,17 @@
 
 package org.oscim.renderer.overlays;
 
+// TODO
+// 1. rewrite :)
+// 1.1 test if label is actually visible
+// 2. compare previous to current state
+// 2.1 test for new labels to be placed
+// 2.2 handle collisions
+// 3 join segments that belong to one feature
+// 4 handle zoom-level changes
+// 5 R-Tree might be handy
+//
+
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
@@ -50,10 +61,45 @@ public class TextOverlay extends BasicOverlay {
 
 	private MapPosition mWorkPos;
 
-	// TextLayer that is updating
-	private TextLayer mWorkLayer;
 	// TextLayer that is ready to be added to 'layers'
 	private TextLayer mCurLayer;
+	private TextLayer mNextLayer;
+
+	// local pool, avoids synchronized TextItem.get()/release()
+	private Label mPool;
+	private Label mPrevLabels;
+
+	private final float[] mTmpCoords = new float[8];
+
+	//private HashMap<MapTile, Label> mItemMap;
+	//private Label mNewLabels;
+	//private final HashMap<MapTile, Link> mActiveTiles;
+
+	class Label extends TextItem {
+		TextItem item;
+
+		//Link blocking;
+		//Link blockedBy;
+		// shared list of all label for a tile
+		//Link siblings;
+
+		MapTile tile;
+
+		public byte origin;
+		public int active;
+		public OBB2D bbox;
+	}
+
+	//	class Conflict {
+	//      Conflict next;
+	//		Label other;
+	//	}
+	//
+	//	class ActiveTile {
+	//		MapTile tile;
+	//		int activeLabels;
+	//		Label labels;
+	//	}
 
 	/* package */boolean mRun;
 	/* package */boolean mRerun;
@@ -422,10 +468,10 @@ public class TextOverlay extends BasicOverlay {
 		float x = (float) (oPos.x - curPos.x * div);
 		float y = (float) (oPos.y - curPos.y * div);
 
-		float scale = curPos.scale / div;
-
-		GlUtils.setMatrix(m.mvp, x * scale, y * scale,
-				scale / GLRenderer.COORD_MULTIPLIER);
+		float scale = (curPos.scale / mMapPosition.scale) / div;
+		float s = curPos.scale / div;
+		GlUtils.setMatrix(m.mvp, x * s, y * s,
+				scale / GLRenderer.COORD_SCALE);
 
 		Matrix.multiplyMM(m.mvp, 0, m.view, 0, m.mvp, 0);
 	}

@@ -103,7 +103,7 @@ public abstract class RenderOverlay {
 		float s = (curPos.scale / oPos.scale) / div;
 
 		GlUtils.setMatrix(m.mvp, x * scale, y * scale,
-				s / GLRenderer.COORD_MULTIPLIER);
+				s / GLRenderer.COORD_SCALE);
 
 		if (project)
 			Matrix.multiplyMM(m.mvp, 0, m.viewproj, 0, m.mvp, 0);

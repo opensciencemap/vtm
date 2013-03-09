@@ -28,7 +28,7 @@ import android.graphics.Paint.Cap;
  * @author Hannes Janetzek
  */
 public final class LineLayer extends Layer {
-	private static final float COORD_SCALE = GLRenderer.COORD_MULTIPLIER;
+	private static final float COORD_SCALE = GLRenderer.COORD_SCALE;
 	// scale factor mapping extrusion vector to short values
 	public static final float DIR_SCALE = 2048;
 	// mask for packing last two bits of extrusion vector with texture
