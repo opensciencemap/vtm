@@ -142,9 +142,7 @@ public class MapView extends RelativeLayout {
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		dpi = Math.max(metrics.xdpi, metrics.ydpi);
 
-		Log.d(TAG, "dpi is: " + dpi);
-
-		// TODO set tilesize, make this dpi dependent
+		// TODO make this dpi dependent
 		Tile.TILE_SIZE = 400;
 
 		MapActivity mapActivity = (MapActivity) context;
@@ -179,7 +177,7 @@ public class MapView extends RelativeLayout {
 
 		if (!mMapViewPosition.isValid()) {
 			Log.d(TAG, "set default start position");
-			setMapCenter(getStartPosition());
+			setMapCenter(new MapPosition(new GeoPoint(0,0), (byte) 2, 1));
 		}
 
 		LayoutParams params = new LayoutParams(
@@ -342,13 +340,13 @@ public class MapView extends RelativeLayout {
 		return mMapOptions;
 	}
 
-	private MapPosition getStartPosition() {
+	public MapPosition getMapFileCenter() {
 		if (mMapDatabase == null)
-			return new MapPosition();
+			return null;
 
 		MapInfo mapInfo = mMapDatabase.getMapInfo();
 		if (mapInfo == null)
-			return new MapPosition();
+			return null;
 
 		GeoPoint startPos = mapInfo.startPosition;
 
@@ -361,7 +359,7 @@ public class MapView extends RelativeLayout {
 		if (mapInfo.startZoomLevel != null)
 			return new MapPosition(startPos, (mapInfo.startZoomLevel).byteValue(), 1);
 
-		return new MapPosition(startPos, (byte) 1, 1);
+		return new MapPosition(startPos, (byte) 12, 1);
 	}
 
 	/**
@@ -385,6 +383,8 @@ public class MapView extends RelativeLayout {
 		mJobQueue.clear();
 		mMapOptions = options;
 
+		mMapDatabase = null;
+
 		for (int i = 0; i < mNumMapWorkers; i++) {
 			MapWorker mapWorker = mMapWorkers[i];
 
@@ -399,6 +399,10 @@ public class MapView extends RelativeLayout {
 
 			TileGenerator tileGenerator = mapWorker.getTileGenerator();
 			tileGenerator.setMapDatabase(mapDatabase);
+
+			// TODO this could be done in a cleaner way..
+			if (mMapDatabase == null)
+				mMapDatabase = mapDatabase;
 		}
 
 		if (options.db == MapDatabases.OSCIMAP_READER ||
