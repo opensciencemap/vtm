@@ -37,7 +37,6 @@ import android.util.Log;
 public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
 	private static final float S = GLRenderer.COORD_SCALE;
-	private int mNumVertices = 0;
 	private final VertexPoolItem mVertices;
 	private VertexPoolItem mCurVertices;
 	private final VertexPoolItem mIndices[], mCurIndices[];
@@ -47,6 +46,7 @@ public class ExtrusionLayer extends Layer {
 	// 0. even sides, 1. odd sides, 2. roof, 3. roof outline
 	public int mIndiceCnt[] = { 0, 0, 0, 0 };
 	public int mNumIndices = 0;
+	public int mNumVertices = 0;
 
 	public int mIndicesBufferID;
 	public int mVertexBufferID;
@@ -341,7 +341,6 @@ public class ExtrusionLayer extends Layer {
 		}
 
 		mCurVertices.used = v;
-
 		mNumVertices += vertexCnt;
 		return convex;
 	}
