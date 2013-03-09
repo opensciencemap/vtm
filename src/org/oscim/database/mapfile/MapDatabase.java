@@ -203,6 +203,8 @@ public class MapDatabase implements IMapDatabase {
 	private int minLat, minLon;
 	private Tile mTile;
 
+	private static boolean sMapExperimental;
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.oscim.map.reader.IMapDatabase#executeQuery(org.oscim.core.Tile,
@@ -221,7 +223,7 @@ public class MapDatabase implements IMapDatabase {
 
 		try {
 			mTile = tile;
-			// prepareExecution();
+
 			QueryParameters queryParameters = new QueryParameters();
 			queryParameters.queryZoomLevel = sMapFileHeader
 					.getQueryZoomLevel(tile.zoomLevel);
@@ -258,7 +260,7 @@ public class MapDatabase implements IMapDatabase {
 
 	@Override
 	public String getMapProjection() {
-		return "WSG84"; // getMapFileInfo().projectionName;
+		return "WSG84";
 	}
 
 	/*
@@ -282,7 +284,7 @@ public class MapDatabase implements IMapDatabase {
 			}
 
 			// make sure to close any previously opened file first
-			close();
+			//close();
 
 			File file = new File(options.get("file"));
 
@@ -304,8 +306,8 @@ public class MapDatabase implements IMapDatabase {
 			mFileSize = mInputFile.length();
 			mReadBuffer = new ReadBuffer(mInputFile);
 
-			if (instances > 0) {
-				instances++;
+			Log.d(TAG, "open instance " + instances + " " + file.getAbsolutePath());
+			if (instances++ > 0) {
 				return OpenResult.SUCCESS;
 			}
 
@@ -317,10 +319,10 @@ public class MapDatabase implements IMapDatabase {
 				return openResult;
 			}
 
-			prepareExecution();
+			sDatabaseIndexCache = new IndexCache(mInputFile, INDEX_CACHE_SIZE);
+			sMapExperimental = sMapFileHeader.getMapFileInfo().fileVersion == 4;
 
-			instances++;
-
+			Log.d(TAG, "File version: " + sMapFileHeader.getMapFileInfo().fileVersion);
 			return OpenResult.SUCCESS;
 		} catch (IOException e) {
 			Log.e(TAG, e.getMessage());
@@ -336,7 +338,12 @@ public class MapDatabase implements IMapDatabase {
 	 */
 	@Override
 	public void close() {
+		if (instances == 0)
+			return;
+
 		instances--;
+		Log.d(TAG, "close instance " + instances);
+
 		if (instances > 0) {
 			mReadBuffer = null;
 			return;
@@ -368,12 +375,6 @@ public class MapDatabase implements IMapDatabase {
 		if (mDebugFile) {
 			Log.w(TAG, DEBUG_SIGNATURE_WAY + mSignatureWay);
 			Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-		}
-	}
-
-	private void prepareExecution() {
-		if (sDatabaseIndexCache == null) {
-			sDatabaseIndexCache = new IndexCache(mInputFile, INDEX_CACHE_SIZE);
 		}
 	}
 
@@ -538,7 +539,7 @@ public class MapDatabase implements IMapDatabase {
 				mTileLongitude = (int) (tileLongitudeDeg * 1000000);
 
 				//try {
-					processBlock(queryParameters, subFileParameter, mapDatabaseCallback);
+				processBlock(queryParameters, subFileParameter, mapDatabaseCallback);
 				//} catch (ArrayIndexOutOfBoundsException e) {
 				//	Log.e(TAG, e.getMessage());
 				//}
@@ -589,6 +590,18 @@ public class MapDatabase implements IMapDatabase {
 	private boolean processPOIs(IMapDatabaseCallback mapDatabaseCallback, int numberOfPois) {
 		Tag[] poiTags = sMapFileHeader.getMapFileInfo().poiTags;
 		Tag[] tags = null;
+		Tag[] curTags;
+
+
+		long x = mTile.pixelX;
+		long y = mTile.pixelY + Tile.TILE_SIZE;
+		long z = Tile.TILE_SIZE << mTile.zoomLevel;
+
+		long dx = (x - (z >> 1));
+		long dy = (y - (z >> 1));
+
+		double divx = 180000000.0 / (z >> 1);
+		double divy = z / PIx4;
 
 		for (int elementCounter = numberOfPois; elementCounter != 0; --elementCounter) {
 			if (mDebugFile) {
@@ -600,8 +613,6 @@ public class MapDatabase implements IMapDatabase {
 					return false;
 				}
 			}
-
-			// Log.d("MapDatabase", "read POI");
 
 			// get the POI latitude offset (VBE-S)
 			int latitude = mTileLatitude + mReadBuffer.readSignedInt();
@@ -617,29 +628,26 @@ public class MapDatabase implements IMapDatabase {
 			// bit 5-8 represent the number of tag IDs
 			byte numberOfTags = (byte) (specialByte & POI_NUMBER_OF_TAGS_BITMASK);
 
-			// boolean changed = false;
-
 			if (numberOfTags != 0) {
 				tags = mReadBuffer.readTags(poiTags, numberOfTags);
-				// changed = true;
 			}
+
 			if (tags == null)
 				return false;
+
+			curTags = tags;
 
 			// get the feature bitmask (1 byte)
 			byte featureByte = mReadBuffer.readByte();
 
 			// bit 1-3 enable optional features
-
 			// check if the POI has a name
-			if ((featureByte & POI_FEATURE_NAME) != 0) {
-				// int pos = mReadBuffer.getPositionAndSkip();
+			if ((featureByte & WAY_FEATURE_NAME) != 0) {
 				String str = mReadBuffer.readUTF8EncodedString();
 
-				Tag[] tmp = tags;
-				tags = new Tag[tmp.length + 1];
-				System.arraycopy(tmp, 0, tags, 0, tmp.length);
-				tags[tags.length - 1] = new Tag("name", str, false);
+				curTags = new Tag[tags.length + 1];
+				System.arraycopy(tags, 0, curTags, 0, tags.length);
+				curTags[tags.length] = new Tag(Tag.TAG_KEY_NAME, str, false);
 			}
 
 			// check if the POI has a house number
@@ -657,7 +665,11 @@ public class MapDatabase implements IMapDatabase {
 				// Integer.toString(mReadBuffer.readSignedInt())));
 			}
 
-			mapDatabaseCallback.renderPointOfInterest(layer, tags, latitude, longitude);
+			longitude = (int) (longitude / divx - dx);
+			double sinLat = Math.sin(latitude * PI180);
+			latitude = (int) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
+
+			mapDatabaseCallback.renderPointOfInterest(layer, curTags, latitude, longitude);
 
 		}
 
@@ -809,16 +821,20 @@ public class MapDatabase implements IMapDatabase {
 			int numberOfWays) {
 
 		Tag[] tags = null;
+		Tag[] curTags;
 		Tag[] wayTags = sMapFileHeader.getMapFileInfo().wayTags;
-		int[] textPos = new int[3];
-		// float[] labelPosition;
-		// boolean skippedWays = false;
+
 		int wayDataBlocks;
 
 		// skip string block
-		int stringsSize = mReadBuffer.readUnsignedInt();
-		stringOffset = mReadBuffer.getBufferPosition();
-		mReadBuffer.skipBytes(stringsSize);
+		int stringsSize = 0;
+		stringOffset = 0;
+
+		if (sMapExperimental) {
+			stringsSize = mReadBuffer.readUnsignedInt();
+			stringOffset = mReadBuffer.getBufferPosition();
+			mReadBuffer.skipBytes(stringsSize);
+		}
 
 		for (int elementCounter = numberOfWays; elementCounter != 0; --elementCounter) {
 			if (mDebugFile) {
@@ -841,7 +857,7 @@ public class MapDatabase implements IMapDatabase {
 				if (elementCounter < 0)
 					return false;
 
-				if (mReadBuffer.lastTagPosition > 0) {
+				if (sMapExperimental && mReadBuffer.lastTagPosition > 0) {
 					int pos = mReadBuffer.getBufferPosition();
 					mReadBuffer.setBufferPosition(mReadBuffer.lastTagPosition);
 
@@ -850,8 +866,6 @@ public class MapDatabase implements IMapDatabase {
 					tags = mReadBuffer.readTags(wayTags, numberOfTags);
 					if (tags == null)
 						return false;
-
-					// skippedWays = true;
 
 					mReadBuffer.setBufferPosition(pos);
 				}
@@ -862,7 +876,7 @@ public class MapDatabase implements IMapDatabase {
 					if (mDebugFile) {
 						Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 					}
-					Log.w(TAG, "EEEEEK way... 2");
+					Log.e(TAG, "BUG way 2");
 					return false;
 				}
 
@@ -878,15 +892,13 @@ public class MapDatabase implements IMapDatabase {
 			// bit 5-8 represent the number of tag IDs
 			byte numberOfTags = (byte) (specialByte & WAY_NUMBER_OF_TAGS_BITMASK);
 
-			// boolean changed = skippedWays;
-			// skippedWays = false;
-
-			if (numberOfTags != 0) {
+			if (numberOfTags != 0)
 				tags = mReadBuffer.readTags(wayTags, numberOfTags);
-				// changed = true;
-			}
+
 			if (tags == null)
 				return false;
+
+			curTags = tags;
 
 			// get the feature bitmask (1 byte)
 			byte featureByte = mReadBuffer.readByte();
@@ -894,41 +906,50 @@ public class MapDatabase implements IMapDatabase {
 			// bit 1-6 enable optional features
 			boolean featureWayDoubleDeltaEncoding = (featureByte & WAY_FEATURE_DOUBLE_DELTA_ENCODING) != 0;
 
-			// check if the way has a name
-			if ((featureByte & WAY_FEATURE_NAME) != 0) {
-				textPos[0] = mReadBuffer.readUnsignedInt();
-				// String str =
-				mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos[0]);
-				// if (changed) {
-				// Tag[] tmp = tags;
-				// tags = new Tag[tmp.length + 1];
-				// System.arraycopy(tmp, 0, tags, 0, tmp.length);
-				// }
-				// tags[tags.length - 1] = new Tag(Tag.TAG_KEY_NAME, str,
-				// false);
+			if (sMapExperimental) {
+				// check if the way has a name
+				if ((featureByte & WAY_FEATURE_NAME) != 0) {
+					int textPos = mReadBuffer.readUnsignedInt();
+					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
+
+					curTags = new Tag[tags.length + 1];
+					System.arraycopy(tags, 0, curTags, 0, tags.length);
+					curTags[tags.length] = new Tag(Tag.TAG_KEY_NAME, str, false);
+				}
+
+				// check if the way has a house number
+				if ((featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0) {
+					//int textPos =
+					mReadBuffer.readUnsignedInt();
+				}
+
+				// check if the way has a reference
+				if ((featureByte & WAY_FEATURE_REF) != 0) {
+					//int textPos =
+					mReadBuffer.readUnsignedInt();
+				}
+			} else {
+				if ((featureByte & WAY_FEATURE_NAME) != 0) {
+					String str = mReadBuffer.readUTF8EncodedString();
+
+					curTags = new Tag[tags.length + 1];
+					System.arraycopy(tags, 0, curTags, 0, tags.length);
+					curTags[tags.length] = new Tag(Tag.TAG_KEY_NAME, str, false);
+				}
+
+				// check if the way has a house number
+				if ((featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0) {
+					String str = mReadBuffer.readUTF8EncodedString();
+				}
+
+				// check if the way has a reference
+				if ((featureByte & WAY_FEATURE_REF) != 0) {
+					String str = mReadBuffer.readUTF8EncodedString();
+				}
 			}
-			else
-				textPos[0] = -1;
-
-			// check if the way has a house number
-			if ((featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0) {
-				textPos[1] = mReadBuffer.readUnsignedInt();
-
-			}
-			else
-				textPos[1] = -1;
-
-			// check if the way has a reference
-			if ((featureByte & WAY_FEATURE_REF) != 0)
-				textPos[2] = mReadBuffer.readUnsignedInt();
-			else
-				textPos[2] = -1;
-
 			if ((featureByte & WAY_FEATURE_LABEL_POSITION) != 0)
 				// labelPosition =
 				readOptionalLabelPosition();
-			// else
-			// labelPosition = null;
 
 			if ((featureByte & WAY_FEATURE_DATA_BLOCKS_BYTE) != 0) {
 				wayDataBlocks = mReadBuffer.readUnsignedInt();
@@ -954,7 +975,7 @@ public class MapDatabase implements IMapDatabase {
 						&& mWayNodes[1] == mWayNodes[l - 1];
 
 				projectToTile(mWayNodes, wayLengths);
-				mapDatabaseCallback.renderWay(layer, tags, mWayNodes, wayLengths, closed, 0);
+				mapDatabaseCallback.renderWay(layer, curTags, mWayNodes, wayLengths, closed, 0);
 			}
 		}
 
@@ -1068,7 +1089,7 @@ public class MapDatabase implements IMapDatabase {
 
 				cnt += 2;
 			}
-			if (coords[first] == coords[outPos-2] && coords[first+1] == coords[outPos-1]){
+			if (coords[first] == coords[outPos - 2] && coords[first + 1] == coords[outPos - 1]) {
 				//Log.d(TAG, "drop closed");
 				indices[i] = (short) (cnt - 2);
 				outPos -= 2;
@@ -1079,4 +1100,5 @@ public class MapDatabase implements IMapDatabase {
 
 		return true;
 	}
+
 }
