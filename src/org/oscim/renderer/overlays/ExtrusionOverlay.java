@@ -55,7 +55,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	private boolean initialized = false;
 
 	// FIXME sum up size used while filling layer only up to:
-	private final int BUFFERSIZE = 65536 * 2;
+	public int mBufferSize = 65536;
 	private TileSet mTileSet;
 	private ShortBuffer mShortBuffer;
 	private MapTile[] mTiles;
@@ -86,7 +86,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 				hLightPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_light");
 			}
 
-			ByteBuffer buf = ByteBuffer.allocateDirect(BUFFERSIZE)
+			ByteBuffer buf = ByteBuffer.allocateDirect(mBufferSize)
 					.order(ByteOrder.nativeOrder());
 
 			mShortBuffer = buf.asShortBuffer();
@@ -116,6 +116,15 @@ public class ExtrusionOverlay extends RenderOverlay {
 					continue;
 
 				if (!el.compiled) {
+					int verticesBytes = el.mNumVertices * 8 * 2;
+					if (verticesBytes > mBufferSize) {
+						mBufferSize = verticesBytes;
+						Log.d(TAG, "realloc extrusion buffer " + verticesBytes);
+						ByteBuffer buf = ByteBuffer.allocateDirect(verticesBytes)
+								.order(ByteOrder.nativeOrder());
+
+						mShortBuffer = buf.asShortBuffer();
+					}
 					el.compile(mShortBuffer);
 					GlUtils.checkGlError("...");
 				}
