@@ -33,7 +33,7 @@ class MatchingCacheKey {
 	boolean set(Tag[] tags, MatchingCacheKey compare) {
 		int length = tags.length;
 
-		if (compare != null && length == mTags.length) {
+		if (compare != null && length == compare.mTags.length) {
 			int i = 0;
 			for (; i < length; i++) {
 				Tag t1 = tags[i];
