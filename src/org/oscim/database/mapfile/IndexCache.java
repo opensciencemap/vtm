@@ -16,6 +16,7 @@ package org.oscim.database.mapfile;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,7 +54,7 @@ class IndexCache {
 	 */
 	IndexCache(RandomAccessFile randomAccessFile, int capacity) {
 		this.randomAccessFile = randomAccessFile;
-		this.map = new LRUCache<IndexCacheEntryKey, byte[]>(capacity);
+		this.map = Collections.synchronizedMap(new LRUCache<IndexCacheEntryKey, byte[]>(capacity));
 	}
 
 	/**
@@ -75,7 +76,7 @@ class IndexCache {
 	 *            the number of the block in the map file.
 	 * @return the index entry or -1 if the block number is invalid.
 	 */
-	long getIndexEntry(SubFileParameter subFileParameter, long blockNumber) {
+	synchronized long getIndexEntry(SubFileParameter subFileParameter, long blockNumber) {
 		try {
 			// check if the block number is out of bounds
 			if (blockNumber >= subFileParameter.numberOfBlocks) {

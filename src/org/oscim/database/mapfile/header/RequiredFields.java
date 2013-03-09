@@ -50,7 +50,8 @@ final class RequiredFields {
 	/**
 	 * Version of the map file format which is supported by this implementation.
 	 */
-	private static final int SUPPORTED_FILE_VERSION = 4;
+	private static final int FILE_VERSION_3 = 3;
+	private static final int FILE_VERSION_4 = 4;
 
 	/**
 	 * The maximum latitude values in microdegrees.
@@ -123,7 +124,7 @@ final class RequiredFields {
 	static OpenResult readFileVersion(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the file version (4 bytes)
 		int fileVersion = readBuffer.readInt();
-		if (fileVersion != SUPPORTED_FILE_VERSION) {
+		if (fileVersion != FILE_VERSION_3 && fileVersion != FILE_VERSION_4) {
 			return new OpenResult("unsupported file version: " + fileVersion);
 		}
 		mapFileInfoBuilder.fileVersion = fileVersion;
