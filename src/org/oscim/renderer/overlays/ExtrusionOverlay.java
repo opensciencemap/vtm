@@ -44,13 +44,13 @@ public class ExtrusionOverlay extends RenderOverlay {
 		super(mapView);
 	}
 
-	private static int[] extrusionProgram = new int[2];
-	private static int[] hExtrusionVertexPosition = new int[2];
-	private static int[] hExtrusionLightPosition = new int[2];
-	private static int[] hExtrusionMatrix = new int[2];
-	private static int[] hExtrusionColor = new int[2];
-	private static int[] hExtrusionAlpha = new int[2];
-	private static int[] hExtrusionMode = new int[2];
+	private static int[] shaderProgram = new int[2];
+	private static int[] hVertexPosition = new int[2];
+	private static int[] hLightPosition = new int[2];
+	private static int[] hMatrix = new int[2];
+	private static int[] hColor = new int[2];
+	private static int[] hAlpha = new int[2];
+	private static int[] hMode = new int[2];
 
 	private boolean initialized = false;
 
@@ -72,20 +72,18 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 			for (int i = 1; i < 2; i++) {
 				// Set up the program for rendering extrusions
-				extrusionProgram[i] = GlUtils.createProgram(extrusionVertexShader[i],
+				shaderProgram[i] = GlUtils.createProgram(extrusionVertexShader[i],
 						extrusionFragmentShader);
-				if (extrusionProgram[i] == 0) {
+				if (shaderProgram[i] == 0) {
 					Log.e(TAG, "Could not create extrusion shader program. " + i);
 					return;
 				}
-				hExtrusionMatrix[i] = GLES20.glGetUniformLocation(extrusionProgram[i], "u_mvp");
-				hExtrusionColor[i] = GLES20.glGetUniformLocation(extrusionProgram[i], "u_color");
-				hExtrusionAlpha[i] = GLES20.glGetUniformLocation(extrusionProgram[i], "u_alpha");
-				hExtrusionMode[i] = GLES20.glGetUniformLocation(extrusionProgram[i], "u_mode");
-				hExtrusionVertexPosition[i] = GLES20.glGetAttribLocation(extrusionProgram[i],
-						"a_pos");
-				hExtrusionLightPosition[i] = GLES20.glGetAttribLocation(extrusionProgram[i],
-						"a_light");
+				hMatrix[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_mvp");
+				hColor[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_color");
+				hAlpha[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_alpha");
+				hMode[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_mode");
+				hVertexPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_pos");
+				hLightPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_light");
 			}
 
 			ByteBuffer buf = ByteBuffer.allocateDirect(BUFFERSIZE)
@@ -157,6 +155,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 	}
 
 	private final boolean debug = false;
+
 	//private final float[] mVPMatrix = new float[16];
 
 	@Override
@@ -172,15 +171,15 @@ public class ExtrusionOverlay extends RenderOverlay {
 		float div = FastMath.pow(tiles[0].zoomLevel - pos.zoomLevel);
 
 		int shaderMode = 1;
-		int uExtAlpha = hExtrusionAlpha[shaderMode];
-		int uExtColor = hExtrusionColor[shaderMode];
-		int uExtVertexPosition = hExtrusionVertexPosition[shaderMode];
-		int uExtLightPosition = hExtrusionLightPosition[shaderMode];
-		int uExtMatrix = hExtrusionMatrix[shaderMode];
-		int uExtMode = hExtrusionMode[shaderMode];
+		int uExtAlpha = hAlpha[shaderMode];
+		int uExtColor = hColor[shaderMode];
+		int uExtVertexPosition = hVertexPosition[shaderMode];
+		int uExtLightPosition = hLightPosition[shaderMode];
+		int uExtMatrix = hMatrix[shaderMode];
+		int uExtMode = hMode[shaderMode];
 
 		if (debug) {
-			GLState.useProgram(extrusionProgram[shaderMode]);
+			GLState.useProgram(shaderProgram[shaderMode]);
 
 			GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
 			GLES20.glUniform1i(uExtMode, 0);
@@ -224,7 +223,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 		GLState.test(true, false);
 
-		GLState.useProgram(extrusionProgram[shaderMode]);
+		GLState.useProgram(shaderProgram[shaderMode]);
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
 		if (pos.scale < 2) {
 			// chances are high that one moves through a building
@@ -325,7 +324,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 		GlUtils.setTileMatrix(m.mvp, x, y, scale);
 		// scale height
-		m.mvp[10] = scale / (1000f * GLRenderer.COORD_MULTIPLIER);
+		m.mvp[10] = scale / (1000f * GLRenderer.COORD_SCALE);
 
 		Matrix.multiplyMM(m.mvp, 0, m.viewproj, 0, m.mvp, 0);
 
