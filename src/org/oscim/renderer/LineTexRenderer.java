@@ -35,7 +35,7 @@ public class LineTexRenderer {
 
 	// factor to normalize extrusion vector and scale to coord scale
 	private final static float COORD_SCALE_BY_DIR_SCALE =
-			GLRenderer.COORD_MULTIPLIER / LineLayer.DIR_SCALE;
+			GLRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
 
 	private static int shader;
 	private static int hVertexPosition0;
@@ -172,17 +172,12 @@ public class LineTexRenderer {
 
 			GLES20.glUniform4fv(hBgColor, 1, line.color, 0);
 
-			// scale pattern to twice its size, then reset scale to 1.
-			// (coord scale * pattern size / tex size) / scale
-			//GLES20.glUniform1f(hPatternScale, (8 * line.stipple / 64) / Math.max((int) s, 1));
-			float ps = FastMath.clamp((int) (s * 1.3f), 1, 3);
-			GLES20.glUniform1f(hPatternScale, (8 * line.stipple) / ps);
-
+			float ps = FastMath.clamp((int) (s+0.5f), 1, 3);
+			GLES20.glUniform1f(hPatternScale, (GLRenderer.COORD_SCALE * line.stipple) / ps);
 			GLES20.glUniform1f(hPatternWidth, line.stippleWidth);
-			//float f = Math.max((int)(s), 1);
-			//GLES20.glUniform1f(hPatternScale, (8 * line.stipple) / 1);
 
 			GLES20.glUniform1f(hScale, pos.scale);
+			// keep line width fixed
 			GLES20.glUniform1f(hWidth, ll.width / s * COORD_SCALE_BY_DIR_SCALE);
 
 			GlUtils.checkGlError("0");
@@ -220,8 +215,6 @@ public class LineTexRenderer {
 						GLES20.GL_UNSIGNED_SHORT, 0);
 			}
 
-			GlUtils.checkGlError("1");
-
 			// second pass
 			allIndices = (ll.oddQuads * 6);
 			for (int i = 0; i < allIndices; i += maxIndices) {
@@ -252,8 +245,8 @@ public class LineTexRenderer {
 			}
 
 			l = l.next;
-			GlUtils.checkGlError("2");
 
+			GlUtils.checkGlError(TAG);
 		}
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -263,7 +256,6 @@ public class LineTexRenderer {
 		GLES20.glDisableVertexAttribArray(hVertexLength0);
 		GLES20.glDisableVertexAttribArray(hVertexLength1);
 		GLES20.glDisableVertexAttribArray(hVertexFlip);
-		GlUtils.checkGlError("end");
 
 		//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
 
@@ -311,7 +303,9 @@ public class LineTexRenderer {
 			+ "  float fuzz_p = fwidth(v_st.s);"
 			+ "  float line_w = smoothstep(0.0, fuzz, 1.0 - dist);"
 			+ "  float stipple_w = smoothstep(0.0, fuzz, u_pwidth - dist);"
+			// triangle waveform in the range 0..1 for regular pattern
 			+ "  float phase = abs(mod(v_st.s, 2.0) - 1.0);"
+			// interpolate between on/off phase, 0.5 = equal phase length
 			+ "  float stipple_p = smoothstep(0.5 - fuzz_p, 0.5 + fuzz_p, phase);"
 			+ "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
 			+ " } ";  //*/
