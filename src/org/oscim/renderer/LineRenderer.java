@@ -42,7 +42,7 @@ public final class LineRenderer {
 
 	// factor to normalize extrusion vector and scale to coord scale
 	private final static float COORD_SCALE_BY_DIR_SCALE =
-			GLRenderer.COORD_MULTIPLIER / LineLayer.DIR_SCALE;
+			GLRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
 
 	// shader handles
 	private static int[] lineProgram = new int[2];

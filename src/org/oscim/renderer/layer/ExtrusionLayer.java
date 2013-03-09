@@ -36,7 +36,7 @@ import android.util.Log;
  */
 public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
-	private static final float S = GLRenderer.COORD_MULTIPLIER;
+	private static final float S = GLRenderer.COORD_SCALE;
 	private int mNumVertices = 0;
 	private final VertexPoolItem mVertices;
 	private VertexPoolItem mCurVertices;

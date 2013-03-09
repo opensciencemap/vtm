@@ -21,7 +21,7 @@ import org.oscim.renderer.GLRenderer;
 import org.oscim.theme.renderinstruction.Area;
 
 public final class PolygonLayer extends Layer {
-	private static final float S = GLRenderer.COORD_MULTIPLIER;
+	private static final float S = GLRenderer.COORD_SCALE;
 
 	public Area area;
 

@@ -65,7 +65,7 @@ public final class LineTexLayer extends Layer {
 	// - in our case there is always the polygon fill array at start
 	// - see addLine hack otherwise.
 
-	private static final float COORD_SCALE = GLRenderer.COORD_MULTIPLIER;
+	private static final float COORD_SCALE = GLRenderer.COORD_SCALE;
 	// scale factor mapping extrusion vector to short values
 	public static final float DIR_SCALE = 2048;
 

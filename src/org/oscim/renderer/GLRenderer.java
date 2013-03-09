@@ -58,7 +58,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static final int CACHE_TILES_MAX = 250;
 	private static final int LIMIT_BUFFERS = 16 * MB;
 
-	public static final float COORD_MULTIPLIER = 8.0f;
+	public static final float COORD_SCALE = 8.0f;
 
 	static int CACHE_TILES = CACHE_TILES_MAX;
 
