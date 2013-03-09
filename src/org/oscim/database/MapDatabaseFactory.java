@@ -23,29 +23,11 @@ import android.util.AttributeSet;
 public final class MapDatabaseFactory {
 	private static final String MAP_DATABASE_ATTRIBUTE_NAME = "mapDatabase";
 
-	/**
-	 * @param attributeSet
-	 *            A collection of attributes which includes the desired
-	 *            MapDatabase.
-	 * @return a new MapDatabase instance.
-	 */
-	public static IMapDatabase createMapDatabase(AttributeSet attributeSet) {
-		String mapDatabaseName = attributeSet.getAttributeValue(null,
-				MAP_DATABASE_ATTRIBUTE_NAME);
-		if (mapDatabaseName == null) {
-			return new org.oscim.database.postgis.MapDatabase();
-		}
-
-		MapDatabases mapDatabaseInternal = MapDatabases.valueOf(mapDatabaseName);
-
-		return MapDatabaseFactory.createMapDatabase(mapDatabaseInternal);
-	}
-
 	public static MapDatabases getMapDatabase(AttributeSet attributeSet) {
 		String mapDatabaseName = attributeSet.getAttributeValue(null,
 				MAP_DATABASE_ATTRIBUTE_NAME);
 		if (mapDatabaseName == null) {
-			return MapDatabases.PBMAP_READER;
+			return MapDatabases.OSCIMAP_READER;
 		}
 
 		return MapDatabases.valueOf(mapDatabaseName);
@@ -68,7 +50,6 @@ public final class MapDatabaseFactory {
 				return new org.oscim.database.pbmap.MapDatabase();
 			case OSCIMAP_READER:
 				return new org.oscim.database.oscimap.MapDatabase();
-
 		}
 
 		throw new IllegalArgumentException("unknown enum value: " + mapDatabase);
