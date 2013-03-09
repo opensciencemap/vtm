@@ -42,13 +42,12 @@ import android.util.Log;
  */
 
 public class MapViewPosition {
-
-	private static final String TAG = MapViewPosition.class.getName();
+	//private static final String TAG = MapViewPosition.class.getName();
 
 	public final static int MAX_ZOOMLEVEL = 17;
 	public final static int MIN_ZOOMLEVEL = 2;
 
-	private final static float MAX_ANGLE = 55;
+	private final static float MAX_ANGLE = 65;
 
 	private final MapView mMapView;
 
@@ -99,7 +98,7 @@ public class MapViewPosition {
 
 	public final static float VIEW_DISTANCE = 3.0f;
 	public final static float VIEW_NEAR = 1;
-	public final static float VIEW_FAR = 6;
+	public final static float VIEW_FAR = 8;
 	// scale map plane at VIEW_DISTANCE to near plane
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
@@ -197,17 +196,6 @@ public class MapViewPosition {
 		mv[2] = (float) (cx - cx / ua);
 		mv[3] = 1;
 
-		//  GeometryUtils.calcLinesIntersect(
-		//	// point at view origin
-		//	VIEW_DISTANCE, 0, 0, y * 0.5,
-		//	// point at upper lower edge of tilted plane
-		//	0, 0, -y * Math.sin(t), y * Math.cos(t),
-		//	mMovePoint);
-		//	mv[0] = 0;
-		//	mv[1] = (float) mMovePoint.y;
-		//	mv[2] = (float) mMovePoint.x;
-		//	mv[3] = 1;
-
 		Matrix.multiplyMV(mv, 0, mProjMatrix, 0, mv, 0);
 
 		return mv[2] / mv[3];
@@ -224,10 +212,6 @@ public class MapViewPosition {
 		if (mv[3] != 0) {
 			coords[position + 0] = mv[0] / mv[3];
 			coords[position + 1] = mv[1] / mv[3];
-		} else {
-			coords[position + 0] = 0;
-			coords[position + 1] = 0;
-			Log.d(TAG, "XXX unproject failed");
 		}
 	}
 
@@ -378,14 +362,10 @@ public class MapViewPosition {
 		mv[2] = 0;
 		mv[3] = 1;
 
-		//	Matrix.multiplyMV(mv, 0, mViewMatrix, 0, mv, 0);
-		//	Matrix.multiplyMV(mv, 0, mProjMatrix, 0, mv, 0);
 		Matrix.multiplyMV(mv, 0, mVPMatrix, 0, mv, 0);
 
 		out.x = (int) (mv[0] / mv[3] * mWidth / 2);
 		out.y = (int) (mv[1] / mv[3] * mHeight / 2);
-
-		//	Log.d(">>>", "project: " + out.x + " " + out.y);
 
 		return out;
 	}
