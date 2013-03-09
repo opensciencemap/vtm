@@ -65,7 +65,7 @@ import android.widget.RelativeLayout;
  */
 public class MapView extends RelativeLayout {
 
-	final static String TAG = "MapView";
+	final static String TAG = MapView.class.getName();
 
 	public static final boolean debugFrameTime = false;
 	public static final boolean testRegionZoom = false;
@@ -401,7 +401,8 @@ public class MapView extends RelativeLayout {
 			tileGenerator.setMapDatabase(mapDatabase);
 		}
 
-		if (options.db == MapDatabases.OSCIMAP_READER)
+		if (options.db == MapDatabases.OSCIMAP_READER ||
+				options.db == MapDatabases.MAP_READER)
 			MapView.enableClosePolygons = true;
 		else
 			MapView.enableClosePolygons = false;
