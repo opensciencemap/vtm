@@ -289,7 +289,7 @@ public class GlUtils {
 	public static void setTileMatrix(float[] matrix, float tx, float ty, float s) {
 		System.arraycopy(mIdentity, 0, matrix, 0, 16);
 		// scale tile relative to map scale
-		matrix[0] = matrix[5] = s / GLRenderer.COORD_MULTIPLIER;
+		matrix[0] = matrix[5] = s / GLRenderer.COORD_SCALE;
 		// translate relative to map center
 		matrix[12] = tx * s;
 		matrix[13] = ty * s;
