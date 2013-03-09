@@ -240,7 +240,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private boolean mRenderBuildingModel;
 
-	// Replace tags that should not be matched by value in RenderTheme
+	// Replace tags that should only be matched by key in RenderTheme
 	// to avoid caching RenderInstructions for each way of the same type
 	// only with different name.
 	// Maybe this should be done within RenderTheme, also allowing
@@ -251,11 +251,15 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		for (int i = 0; i < tags.length; i++) {
 			String key = tags[i].key;
 			if (tags[i].key == Tag.TAG_KEY_NAME) {
-				mTagName = tags[i];
-				tags[i] = mTagEmptyName;
+				if (tags[i].value != null) {
+					mTagName = tags[i];
+					tags[i] = mTagEmptyName;
+				}
 			} else if (tags[i].key == Tag.TAG_KEY_HOUSE_NUMBER) {
-				mTagHouseNr = tags[i];
-				tags[i] = mTagEmptyHouseNr;
+				if (tags[i].value != null) {
+					mTagHouseNr = tags[i];
+					tags[i] = mTagEmptyHouseNr;
+				}
 			} else if (mTile.zoomLevel >= 17 &&
 					// FIXME, allow overlays to intercept
 					// this, or use a theme option for this
@@ -397,7 +401,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				lineLayer.width = w;
 			}
 
-
 			lineLayer.addLine(mCoords, mIndices);
 		}
 	}
@@ -520,32 +523,4 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	public void renderWaySymbol(Bitmap symbol, boolean alignCenter, boolean repeat) {
 
 	}
-
-	//	// TODO move this to Projection classes
-	//
-
-	//if (mMapProjection != null) {
-	//	long x = mTile.pixelX;
-	//	long y = mTile.pixelY + Tile.TILE_SIZE;
-	//	long z = Tile.TILE_SIZE << mTile.zoomLevel;
-	//
-	//	double divx, divy;
-	//	long dx = (x - (z >> 1));
-	//	long dy = (y - (z >> 1));
-	//
-	//	if (mMapProjection == WebMercator.NAME) {
-	//		double div = WebMercator.f900913 / (z >> 1);
-	//		// divy = f900913 / (z >> 1);
-	//		mPoiX = (float) (longitude / div - dx);
-	//		mPoiY = (float) (latitude / div + dy);
-	//	} else {
-	//		divx = 180000000.0 / (z >> 1);
-	//		divy = z / PIx4;
-	//		mPoiX = (float) (longitude / divx - dx);
-	//		double sinLat = Math.sin(latitude * PI180);
-	//		mPoiY = (float) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
-	//			return;
-	//	}
-	//} else {
-
 }
