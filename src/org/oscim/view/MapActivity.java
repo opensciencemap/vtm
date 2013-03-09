@@ -40,7 +40,6 @@ import android.content.SharedPreferences.Editor;
 public abstract class MapActivity extends Activity {
 	private static final String KEY_LATITUDE = "latitude";
 	private static final String KEY_LONGITUDE = "longitude";
-	// private static final String KEY_MAP_FILE = "mapFile";
 	private static final String KEY_ZOOM_LEVEL = "zoomLevel";
 	private static final String PREFERENCES_FILE = "MapActivity";
 	private static final String KEY_THEME = "Theme";
@@ -76,11 +75,6 @@ public abstract class MapActivity extends Activity {
 			editor.putInt(KEY_ZOOM_LEVEL, mapPosition.zoomLevel);
 		}
 
-		// if (mMapView.getMapFile() != null) {
-		// // save the map file
-		// editor.putString(KEY_MAP_FILE, mMapView.getMapFile());
-		// }
-
 		editor.putString(KEY_THEME, mMapView.getRenderTheme());
 
 		editor.commit();
@@ -111,13 +105,6 @@ public abstract class MapActivity extends Activity {
 				MODE_PRIVATE);
 
 		if (containsMapViewPosition(sharedPreferences)) {
-			//
-			// if (sharedPreferences.contains(KEY_MAP_FILE)) {
-			// // get and set the map file
-			// mapView.setMapFile(sharedPreferences.getString(KEY_MAP_FILE,
-			// null));
-			// }
-
 			// get and set the map position and zoom level
 			int latitudeE6 = sharedPreferences.getInt(KEY_LATITUDE, 0);
 			int longitudeE6 = sharedPreferences.getInt(KEY_LONGITUDE, 0);
@@ -127,7 +114,6 @@ public abstract class MapActivity extends Activity {
 			MapPosition mapPosition = new MapPosition(geoPoint, (byte) zoomLevel, 1);
 
 			mMapView.getMapViewPosition().setMapCenter(mapPosition);
-			// mapView.setMapCenter(mapPosition);
 		}
 
 		String theme = sharedPreferences.getString(KEY_THEME,
