@@ -176,9 +176,4 @@ public class OverlayItem {
 	public int getHeight() {
 		return this.mMarker.getIntrinsicHeight();
 	}
-
-	// ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
-
 }
