@@ -26,13 +26,12 @@ import org.oscim.view.MapView;
 
 import android.graphics.Color;
 import android.graphics.Paint.Cap;
-import android.util.Log;
 
 public class GridOverlay extends BasicOverlay {
 
-	private float[] mPoints;
-	private short[] mIndex;
-	private Text mText;
+	private final float[] mPoints;
+	private final short[] mIndex;
+	private final Text mText;
 
 	public GridOverlay(MapView mapView) {
 		super(mapView);
@@ -103,11 +102,6 @@ public class GridOverlay extends BasicOverlay {
 
 	private boolean finished;
 
-	void timerFinished() {
-		Log.d("...", "timer finish!");
-		finished = true;
-		mMapView.redrawMap(true);
-	}
 
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
@@ -137,8 +131,6 @@ public class GridOverlay extends BasicOverlay {
 			ll.line = new Line(Color.BLUE, 1.0f, Cap.BUTT);
 			ll.width = 1.5f;
 			ll.addLine(mPoints, mIndex, false);
-
-			Log.d("...", "update labels");
 
 			addLabels(x, y, mCurZ);
 
