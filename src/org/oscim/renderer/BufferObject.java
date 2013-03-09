@@ -21,6 +21,19 @@ import android.util.Log;
 public final class BufferObject {
 	private final static String TAG = BufferObject.class.getName();
 
+	// GL id
+	public int id;
+
+	// allocated bytes
+	public int size;
+
+	BufferObject next;
+
+	BufferObject(int id) {
+		this.id = id;
+	}
+
+	// ---------------------------- pool ----------------------------
 	private static BufferObject pool;
 	static int counter = 0;
 
@@ -28,7 +41,7 @@ public final class BufferObject {
 
 		if (pool == null) {
 			if (counter != 0)
-				Log.d(TAG, "missing BufferObjects: " + counter);
+				Log.d(TAG, "BUG: missing BufferObjects: " + counter);
 
 			createBuffers(10);
 			counter += 10;
@@ -121,13 +134,5 @@ public final class BufferObject {
 		pool = null;
 		createBuffers(num);
 		counter = num;
-	}
-
-	public int id;
-	public int size;
-	BufferObject next;
-
-	BufferObject(int id) {
-		this.id = id;
 	}
 }
