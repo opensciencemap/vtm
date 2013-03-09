@@ -264,68 +264,6 @@ public class ReadBuffer {
 		mBufferPosition = pos;
 	}
 
-	// public void readSignedInt(int[] values, int length) {
-	// int pos = mBufferPosition;
-	// byte[] data = mBufferData;
-	//
-	// for (int i = 0; i < length; i++) {
-	//
-	// if ((data[pos] & 0x80) == 0) {
-	// if ((data[pos] & 0x40) != 0)
-	// values[i] = -(data[pos] & 0x3f);
-	// else
-	// values[i] = (data[pos] & 0x3f);
-	// pos += 1;
-	// } else if ((data[pos + 1] & 0x80) == 0) {
-	// if ((data[pos + 1] & 0x40) != 0)
-	// values[i] = -((data[pos] & 0x7f)
-	// | ((data[pos + 1] & 0x3f) << 7));
-	// else
-	// values[i] = (data[pos] & 0x7f)
-	// | ((data[pos + 1] & 0x3f) << 7);
-	// pos += 2;
-	// } else if ((data[pos + 2] & 0x80) == 0) {
-	// if ((data[pos + 2] & 0x40) != 0)
-	// values[i] = -((data[pos] & 0x7f)
-	// | ((data[pos + 1] & 0x7f) << 7)
-	// | ((data[pos + 2] & 0x3f) << 14));
-	// else
-	// values[i] = (data[pos] & 0x7f)
-	// | ((data[pos + 1] & 0x7f) << 7)
-	// | ((data[pos + 2] & 0x3f) << 14);
-	// pos += 3;
-	// } else if ((data[pos + 3] & 0x80) == 0) {
-	// if ((data[pos + 3] & 0x40) != 0)
-	// values[i] = -((data[pos] & 0x7f)
-	// | ((data[pos + 1] & 0x7f) << 7)
-	// | ((data[pos + 2] & 0x7f) << 14)
-	// | ((data[pos + 3] & 0x3f) << 21));
-	// else
-	// values[i] = (data[pos] & 0x7f)
-	// | ((data[pos + 1] & 0x7f) << 7)
-	// | ((data[pos + 2] & 0x7f) << 14)
-	// | ((data[pos + 3] & 0x3f) << 21);
-	// pos += 4;
-	// } else {
-	// if ((data[pos + 4] & 0x40) != 0)
-	// values[i] = -((data[pos] & 0x7f)
-	// | ((data[pos + 1] & 0x7f) << 7)
-	// | ((data[pos + 2] & 0x7f) << 14)
-	// | ((data[pos + 3] & 0x7f) << 21)
-	// | ((data[pos + 4] & 0x3f) << 28));
-	// else
-	// values[i] = ((data[pos] & 0x7f)
-	// | ((data[pos + 1] & 0x7f) << 7)
-	// | ((data[pos + 2] & 0x7f) << 14)
-	// | ((data[pos + 3] & 0x7f) << 21)
-	// | ((data[pos + 4] & 0x3f) << 28));
-	// pos += 5;
-	// }
-	// }
-	//
-	// mBufferPosition = pos;
-	// }
-
 	/**
 	 * Converts a variable amount of bytes from the read buffer to an unsigned
 	 * int.
