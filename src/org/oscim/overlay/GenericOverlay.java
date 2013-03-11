@@ -25,7 +25,7 @@ public class GenericOverlay extends Overlay {
 	 *            ...
 	 */
 	public GenericOverlay(MapView mapView, RenderOverlay renderer) {
-		super();
+		super(mapView);
 		mLayer = renderer;
 	}
 }

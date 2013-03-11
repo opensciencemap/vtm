@@ -17,6 +17,7 @@
 package org.oscim.overlay;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
@@ -28,7 +29,6 @@ import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Cap;
@@ -162,8 +162,8 @@ public class PathOverlay extends Overlay {
 
 	}
 
-	public PathOverlay(MapView mapView, final int color, final Context ctx) {
-		super();
+	public PathOverlay(MapView mapView, final int color) {
+		super(mapView);
 		this.mPaint.setColor(color);
 		this.mPaint.setStrokeWidth(2.0f);
 		this.mPaint.setStyle(Paint.Style.STROKE);
@@ -262,6 +262,9 @@ public class PathOverlay extends Overlay {
 	}
 
 	public void clearPath() {
+		if (mPoints.isEmpty())
+			return;
+
 		synchronized (mPoints) {
 			mPoints.clear();
 			mUpdatePoints = true;
@@ -270,7 +273,7 @@ public class PathOverlay extends Overlay {
 
 	public void addPoint(final GeoPoint pt) {
 		synchronized (mPoints) {
-			this.mPoints.add(pt);
+			mPoints.add(pt);
 			mUpdatePoints = true;
 
 		}
@@ -278,12 +281,12 @@ public class PathOverlay extends Overlay {
 
 	public void addPoint(final int latitudeE6, final int longitudeE6) {
 		synchronized (mPoints) {
-			this.mPoints.add(new GeoPoint(latitudeE6, longitudeE6));
+			mPoints.add(new GeoPoint(latitudeE6, longitudeE6));
 			mUpdatePoints = true;
 		}
 	}
 
-	public int getNumberOfPoints() {
-		return this.mPoints.size();
+	public List<GeoPoint> getPoints() {
+		return mPoints;
 	}
 }
