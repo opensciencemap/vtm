@@ -37,7 +37,7 @@ import android.graphics.Paint.Cap;
 public class PathOverlay extends Overlay {
 
 	/** Stores points, converted to the map projection. */
-	/* package */final ArrayList<GeoPoint> mPoints;
+	/* package */protected final ArrayList<GeoPoint> mPoints;
 	/* package */boolean mUpdatePoints;
 
 	/** Paint settings. */

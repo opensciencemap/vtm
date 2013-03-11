@@ -15,9 +15,6 @@
  */
 package org.oscim.view;
 
-// TODO:
-// - fix ray intersection for unproject, see getZ()
-
 import java.lang.ref.WeakReference;
 
 import org.oscim.core.BoundingBox;
@@ -149,6 +146,7 @@ public class MapViewPosition {
 
 	/**
 	 * get a copy of current matrices
+	 *
 	 * @param view ...
 	 * @param proj ...
 	 * @param vp view and projection
@@ -157,7 +155,7 @@ public class MapViewPosition {
 		if (view != null)
 			System.arraycopy(mViewMatrix, 0, view, 0, 16);
 
-		if (proj!= null)
+		if (proj != null)
 			System.arraycopy(mProjMatrix, 0, proj, 0, 16);
 
 		if (vp != null)
@@ -639,21 +637,23 @@ public class MapViewPosition {
 		// global scale
 		mMapScale = (1 << mZoomLevel) * mScale;
 		//Log.d(TAG, "zoom: " + bbox + " " + zx + " " + zy + " / " + mScale + " " + mZoomLevel);
-		updatePosition();
+		setMapCenter(bbox.getCenterPoint());
 
-		// reset rotation/tilt
-		mTilt = 0;
-		mRotation = 0;
-		updateMatrix();
-
-		GeoPoint geoPoint = bbox.getCenterPoint();
-		mEndX = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(), mZoomLevel);
-		mEndY = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(), mZoomLevel);
-		mStartX = mPosX;
-		mStartY = mPosY;
-
-		mDuration = 300;
-		mHandler.start((int) mDuration);
+		//		updatePosition();
+		//
+		//		// reset rotation/tilt
+		//		mTilt = 0;
+		//		mRotation = 0;
+		//		updateMatrix();
+		//
+		//		GeoPoint geoPoint = bbox.getCenterPoint();
+		//		mEndX = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(), mZoomLevel);
+		//		mEndY = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(), mZoomLevel);
+		//		mStartX = mPosX;
+		//		mStartY = mPosY;
+		//
+		//		mDuration = 300;
+		//		mHandler.start((int) mDuration);
 	}
 
 	public synchronized void animateTo(GeoPoint geoPoint) {
