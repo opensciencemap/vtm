@@ -157,6 +157,9 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		if (Math.abs(mx) > JUMP_THRESHOLD || Math.abs(my) > JUMP_THRESHOLD)
 			return true;
 
+		if (e.getPointerCount() < 2)
+			return true;
+
 		if (mMulti == 0)
 			return true;
 
