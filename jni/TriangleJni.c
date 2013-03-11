@@ -193,6 +193,10 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 		for (int j = 0; j < in.numberofsegments; j++, seg += 2)
 			printf("%d %d %d\n", j, *seg, *(seg+1));
 
+		for (int j = 0; j < in.numberofholes; j++) {
+			printf("%d %f %f\n", j, in.holelist[j*2], in.holelist[j*2+1]);
+		}
+
 		if (0) {
 			free(in.segmentlist);
 			free(in.holelist);
@@ -246,9 +250,6 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 						(in.numberofpoints - pos - 1) * 2 * sizeof(float));
 
 			in.numberofpoints--;
-		}
-		for (int j = 0; j < in.numberofholes; j++) {
-			printf("%d %f %f\n", j, in.holelist[j*2], in.holelist[j*2+1]);
 		}
 	}
 
