@@ -2,29 +2,31 @@
 <rendertheme xmlns="http://mapsforge.org/renderTheme"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://mapsforge.org/renderTheme ../renderTheme.xsd"
-             version="1" map-background="#fdfdfc">
+             version="1" map-background="#fffcfa"> <!--fdfdfc">-->
 
-  <style-text name="road" k="name"         font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" priority="2"/>
-  <style-text name="major-road" k="name"   font-style="bold" font-size="16" fill="#101010" stroke="#ffffff" stroke-width="2.0" priority="1"/>
+  <style-text name="road" k="name"         font-size="16" fill="#101010" stroke="#eeeeee" stroke-width="2.0" priority="2"/>
+  <style-text name="major-road" k="name"   font-style="bold" font-size="16" fill="#101010" stroke="#eeeeee" stroke-width="2.0" priority="1"/>
   
-  <style-area name="residential"         fill="#f0eee8" fade="10"/>
+  <!--<style-area name="residential"         fill="#e0dfde" fade="10"/>-->
+    <style-area name="residential"         fill="#e8e7e3" fade="10"/>
   
   <style-area name="railway|industrial"  fill="#e6e3e5" fade="10"/>
   <!-- "#f0fae7" mint green  -->
   <!-- <style-area name="farmland"            fill="#fff8bf" fade="11" />-->
-   <style-area name="farmland"            fill="#faf6ca" fade="11" />
-  <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
+   <!--<style-area name="farmland"            fill="#f1ebb2" fade="11" />-->
+   <style-area name="farmland"            fill="#e7dab5" fade="11" />
+   <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
   <!-- <style-area name="forest|wood"         fill="#ebefe5" fade="7" blend="11" blend-fill="#cee0bc"/>   d3dec8-->
-  <style-area name="forest|wood"         fill="#ebefe5" fade="7" blend="11" blend-fill="#c6dbb2"/> 
+  <style-area name="forest|wood"         fill="#d1dbc7" fade="7" blend="10" blend-fill="#9ac56e"/> 
  
   <!-- grass|meadow|garden|grassland|scrub -->
- 	<style-area name="greens"              fill="#e2edc9" fade="10" />
+ 	<style-area name="greens"              fill="#c9dc91" fade="10" />
  	 	<!-- <style-area name="greens"              fill="#d2e5ce" fade="10" />-->
  	<!-- marsh|wetland|nature_reserve -->
  	<style-area name="greens2"             fill="#deecb9" fade="12" />
  	  
  	<!-- park|common|green|cemetery|golf_course|dog_park -->
- 	<style-area name="park"                fill="#c7dca2" fade="11" />
+ 	<style-area name="park"                fill="#a3ca7b" fade="11" />
   
   <!-- de:Kleingartengebiet -->
   <style-area name="allotments"          fill="#efeae0" fade="12" />
@@ -35,7 +37,7 @@
   <style-area name="military"            fill="#eeedea" fade="10"/>
   
   
-  <style-line name="residential"         stroke="#ffffff" width="1.3" min="1.2"/>
+  <style-line name="residential"         stroke="#ffffff" width="1.3"/>
   <style-line name="residential:bridge"  from="residential" cap="square"/>
  	
  	<!-- when inheriting another style with 'from' then 'witdth' is meant relative to the parent -->
@@ -47,10 +49,10 @@
   
   <style-line name="trunk_link"          stroke="#fee16e" width="1.3" cap="butt"/>
   <style-line name="trunk"               stroke="#fedb52" width="1.6"/>
-  <style-line name="primary:z11"         stroke="#fff000" width="1.5"/>
+  <style-line name="primary:z11"         stroke="#fdeb05" width="1.5"/>
   <style-line name="secondary:z11"       from="primary:z11" width="-0.1"/>
    
-  <style-line name="tertiary"            from="residential" width="0.2" />
+  <style-line name="tertiary"            from="residential" stroke="#fefefa" width="0.2" />
   <style-line name="construction"        stroke="#e0e0e0" width="1.2" />
 
   <style-line name="highway-service"     from="residential" width="-0.6" />
@@ -73,8 +75,11 @@
       								     stipple="2" stipple-width="1.0" stipple-stroke="#be6253"/>
   
   <style-line name="water:outline"       stroke="#a4bbcc" width="1.0" fixed="true" cap="butt" /> 
-	<style-line name="water"               stroke="#afcbf3" width="1.0" cap="butt" /> 
-  <style-area name="water"               fill="#afcbf3" />
+	<style-line name="water"               stroke="#afc5e3" width="1.0" cap="butt" /> 
+  
+  <!--<style-area name="water"               fill="#97b7e5" />-->
+	  <style-area name="water"               fill="#afc5e3" />
+  
   <!-- no-go area boundary -->
   <style-line name="fence"               stroke="#444444" width="1.2" fixed="true" cap="butt"/>
  	
@@ -85,7 +90,7 @@
   <style-area name="building"            fill="#e9e6e3" fade="15"/>-->
    <style-line name="building"            stroke="#b7b6b3" width="1.0" fixed="true" cap="butt" fade="15"/> 
   <!-- <style-area name="building"            fill="#eae8e6" fade="15"/>-->
-     <style-area name="building"            fill="#eef6f4f0" fade="15"/>
+     <style-area name="building"            fill="#f2f0eb" fade="15"/>
    <!-- ways -->
   <rule e="way" k="*" v="*" >
 
@@ -94,7 +99,7 @@
     <!-- landuse base -->      
     <rule e="way" k="landuse" v="*">
      <rule e="way" k="*" v="urban">
-        <area fill="#f2f2ef" />
+        <area fill="#efeeea" />
       </rule>
       <rule e="way" k="*" v="residential">
         <use-area name="residential" />
@@ -536,7 +541,7 @@
     <!-- outline 1 - 4 -->
      <style-outline name="1" stroke="#aa807040" width="0.1"/>  
  <!--    <style-outline name="1" stroke="#404030"/>  -->
-    <style-outline name="2" stroke="#c0c0c0" />
+    <style-outline name="2" stroke="#c0c0c0" width="0.1"/>
     <style-outline name="primary"  stroke="#aa7f7700" width="0.1"/>
     <style-outline name="motorway" stroke="#aa805f2e" width="0.1"/>
 
@@ -565,23 +570,23 @@
       <rule e="way" k="*" v="*" zoom-min="5" zoom-max="10">
  			  <rule e="way" k="area" v="~|no|false">
           <rule e="way" k="*" v="secondary|primary_link" zoom-min="9">
-            <line stroke="#f2df6d" width="1.3" cap="butt" fixed="true" fade="9"/>
+            <line stroke="#e2cf5d" width="1.3" cap="butt" fixed="true" fade="9"/>
           </rule>
 
           <rule e="way" k="*" v="trunk_link|motorway_link" zoom-min="8">
-            <line stroke="#fed6a3" width="1.4" cap="butt" fixed="true" fade="8"/>
+            <line stroke="#eec693" width="1.4" cap="butt" fixed="true" fade="8"/>
           </rule>
 
           <rule e="way" k="*" v="primary" zoom-min="5">
-            <line stroke="#f2df6d" width="1.4" cap="butt" fixed="true" fade="5"/>
+            <line stroke="#e2cf5d" width="1.5" cap="butt" fixed="true" fade="5"/>
           </rule>
 
           <rule e="way" k="*" v="trunk" zoom-min="5">
-            <line stroke="#fed6a3" width="1.4" cap="butt" fixed="true" fade="5"/>
+            <line stroke="#ebc493" width="1.5" cap="butt" fixed="true" fade="5"/>
           </rule>
 
           <rule e="way" k="*" v="motorway">
-            <line stroke="#eec693" width="1.5" cap="butt" fixed="true" fade="3"/>
+            <line stroke="#deb683" width="1.6" cap="butt" fixed="true" fade="3"/>
           </rule>
         </rule>
       </rule>
@@ -917,7 +922,7 @@
         </rule>
         
         <rule e="way" k="railway" v="rail|turntable" zoom-min="15">
-          <line stroke="#ddaa9988" width="2.0" cap="butt" fixed="true" fade="12" 
+          <line stroke="#aaa6a4" width="2.0" cap="butt" fixed="true" fade="12" 
                 stipple="10" stipple-width="0.8" stipple-stroke="#ffffff"/>
         </rule>
         
@@ -963,7 +968,8 @@
         <line stroke="#0000ff" width="0.95" fixed="true" cap="butt" />
       </rule>
       <rule e="way" k="admin_level" v="2">
-        <line stroke="#808080" width="1.15" fixed="true" cap="butt" />
+        <line stroke="#ccf0f0f0" width="1.2" fixed="true" cap="butt" 
+            stipple-width="1.0" stipple="4" stipple-stroke="#606060"/>
       </rule>
       <rule e="way" k="admin_level" v="1">
         <line stroke="#ff0000" width="0.95" fixed="true" cap="butt" />
@@ -1033,7 +1039,7 @@
     <!-- place -->
     <rule e="node" k="place" v="*">
       <rule e="node" k="*" v="suburb" zoom-max="14">
-        <caption k="name" font-size="17" fill="#bb2020"
+        <caption k="name" font-style="italic" font-size="17" fill="#606060"
                  stroke="#ffffff" stroke-width="2.0" />
       </rule>
       <rule e="node" k="*" v="village" zoom-max="14">
