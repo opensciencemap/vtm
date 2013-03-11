@@ -84,7 +84,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 		// note: this is called from GL-Thread. so check your syncs!
 		@Override
-		public synchronized void update(MapPosition curPos, 
+		public synchronized void update(MapPosition curPos,
 				boolean positionChanged,
 				boolean tilesChanged) {
 
@@ -236,18 +236,15 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	 */
 	public abstract int size();
 
-	public ItemizedOverlay(MapView mapView, final Drawable pDefaultMarker, final ResourceProxy
-			pResourceProxy) {
+	public ItemizedOverlay(MapView mapView, final Drawable pDefaultMarker) {
 
-		super(pResourceProxy);
+		super();
 
 		if (pDefaultMarker == null) {
 			throw new IllegalArgumentException("You must pass a default marker to ItemizedOverlay.");
 		}
 
 		this.mDefaultMarker = pDefaultMarker;
-
-		//		mInternalItemList = new ArrayList<Item>();
 
 		mMapView = mapView;
 		mLayer = new ItemOverlay(mapView);

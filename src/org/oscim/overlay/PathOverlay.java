@@ -163,7 +163,7 @@ public class PathOverlay extends Overlay {
 	}
 
 	public PathOverlay(MapView mapView, final int color, final Context ctx) {
-		super(ctx);
+		super();
 		this.mPaint.setColor(color);
 		this.mPaint.setStrokeWidth(2.0f);
 		this.mPaint.setStyle(Paint.Style.STROKE);

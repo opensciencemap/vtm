@@ -23,7 +23,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.view.MapView;
 
-import android.content.Context;
 import android.graphics.Point;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -39,7 +38,7 @@ import android.view.MotionEvent;
  *
  * @author Nicolas Gramlich
  */
-public abstract class Overlay implements OverlayConstants {
+public abstract class Overlay {
 
 	// ===========================================================
 	// Constants
@@ -55,8 +54,8 @@ public abstract class Overlay implements OverlayConstants {
 	// Fields
 	// ===========================================================
 
-	protected final ResourceProxy mResourceProxy;
-	protected final float mScale;
+	//protected final ResourceProxy mResourceProxy;
+	//protected final float mScale;
 
 	//	private static final Rect mRect = new Rect();
 	private boolean mEnabled = true;
@@ -72,20 +71,6 @@ public abstract class Overlay implements OverlayConstants {
 	// ===========================================================
 
 	public Overlay() {
-		mResourceProxy = null;
-		mScale = 1;
-		//		mResourceProxy = new DefaultResourceProxyImpl(ctx);
-		//	mScale = ctx.getResources().getDisplayMetrics().density;
-	}
-
-	public Overlay(final Context ctx) {
-		mResourceProxy = new DefaultResourceProxyImpl(ctx);
-		mScale = ctx.getResources().getDisplayMetrics().density;
-	}
-
-	public Overlay(final ResourceProxy pResourceProxy) {
-		mResourceProxy = pResourceProxy;
-		mScale = mResourceProxy.getDisplayMetricsDensity();
 	}
 
 	// ===========================================================

@@ -17,8 +17,8 @@ package org.oscim.overlay;
 
 import java.util.List;
 
+import org.oscim.app.R;
 import org.oscim.core.MercatorProjection;
-import org.oscim.overlay.ResourceProxy.bitmap;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
@@ -42,10 +42,9 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 			final MapView mapView,
 			final List<Item> pList,
 			final Drawable pDefaultMarker,
-			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener,
-			final ResourceProxy pResourceProxy) {
+			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener) {
 
-		super(mapView, pDefaultMarker, pResourceProxy);
+		super(mapView, pDefaultMarker);
 
 		this.mItemList = pList;
 		this.mOnItemGestureListener = pOnItemGestureListener;
@@ -54,23 +53,11 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 
 	public ItemizedIconOverlay(
 			final MapView mapView,
-			final List<Item> pList,
-			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener,
-			final ResourceProxy pResourceProxy) {
-
-		this(mapView, pList, pResourceProxy.getDrawable(bitmap.marker_default),
-				pOnItemGestureListener,
-				pResourceProxy);
-	}
-
-	public ItemizedIconOverlay(
-			final MapView mapView,
 			final Context pContext,
 			final List<Item> pList,
 			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener) {
-		this(mapView, pList, new DefaultResourceProxyImpl(pContext)
-				.getDrawable(bitmap.marker_default),
-				pOnItemGestureListener, new DefaultResourceProxyImpl(pContext));
+		this(mapView, pList, pContext.getResources().getDrawable(R.drawable.marker_default),
+				pOnItemGestureListener);
 	}
 
 	@Override
