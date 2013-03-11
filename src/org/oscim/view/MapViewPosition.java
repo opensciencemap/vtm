@@ -43,6 +43,7 @@ public class MapViewPosition {
 
 	public final static int MAX_ZOOMLEVEL = 17;
 	public final static int MIN_ZOOMLEVEL = 2;
+	public final static int MAX_END_SCALE = 8;
 
 	private final static float MAX_ANGLE = 65;
 
@@ -496,10 +497,7 @@ public class MapViewPosition {
 	public synchronized boolean scaleMap(float scale, float pivotX, float pivotY) {
 
 		// sanitize input
-		if (scale < 0.5)
-			scale = 0.5f;
-		else if (scale > 2)
-			scale = 2;
+		scale = FastMath.clamp(scale, 0.5f, 2);
 
 		float newScale = mMapScale * scale;
 
@@ -552,11 +550,7 @@ public class MapViewPosition {
 	}
 
 	public synchronized boolean tilt(float move) {
-		float tilt = mTilt + move;
-		if (tilt > MAX_ANGLE)
-			tilt = MAX_ANGLE;
-		else if (tilt < 0)
-			tilt = 0;
+		float tilt = FastMath.clamp(mTilt + move, 0, MAX_ANGLE);
 
 		if (mTilt == tilt)
 			return false;
@@ -596,11 +590,7 @@ public class MapViewPosition {
 	}
 
 	private void setZoomLevelLimit(byte zoomLevel) {
-		mZoomLevel = zoomLevel;
-		if (mZoomLevel > MAX_ZOOMLEVEL)
-			mZoomLevel = MAX_ZOOMLEVEL;
-		else if (mZoomLevel < MIN_ZOOMLEVEL)
-			mZoomLevel = MIN_ZOOMLEVEL;
+		mZoomLevel = (byte)FastMath.clamp(zoomLevel, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
 	}
 
 	private void updatePosition() {
@@ -627,14 +617,10 @@ public class MapViewPosition {
 
 		double z = Math.min(zx, zy);
 
-		if (z > MAX_ZOOMLEVEL)
-			z = MAX_ZOOMLEVEL;
-		else if (z < MIN_ZOOMLEVEL)
-			z = MIN_ZOOMLEVEL;
+		setZoomLevelLimit((byte) Math.floor(z));
 
-		mZoomLevel = (byte) Math.floor(z);
-		mScale = (float) (1 + (z - mZoomLevel));
-		// global scale
+		mScale = FastMath.clamp((float) (1 + (z - mZoomLevel)), 1, MAX_END_SCALE);
+
 		mMapScale = (1 << mZoomLevel) * mScale;
 		//Log.d(TAG, "zoom: " + bbox + " " + zx + " " + zy + " / " + mScale + " " + mZoomLevel);
 		setMapCenter(bbox.getCenterPoint());
