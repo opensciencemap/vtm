@@ -63,6 +63,10 @@ public class FastMath {
 		return (value < min ? min : (value > max ? max : value));
 	}
 
+	public static double clamp(double value, double min, double max) {
+		return (value < min ? min : (value > max ? max : value));
+	}
+
 	public static float clampN(float value) {
 		return (value < 0f ? 0f : (value > 1f ? 1f : value));
 	}
