@@ -24,7 +24,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.oscim.core.MapPosition;
 import org.oscim.overlay.Overlay.Snappable;
 import org.oscim.renderer.overlays.RenderOverlay;
-import org.oscim.view.MapView;
 
 import android.graphics.Point;
 import android.view.KeyEvent;
@@ -67,7 +66,7 @@ public class OverlayManager extends AbstractList<Overlay> {
 	}
 
 	private boolean mDirtyOverlays;
-	private List<RenderOverlay> mDrawLayers = new ArrayList<RenderOverlay>();
+	private final List<RenderOverlay> mDrawLayers = new ArrayList<RenderOverlay>();
 
 	public List<RenderOverlay> getRenderLayers() {
 		if (mDirtyOverlays)
@@ -76,12 +75,12 @@ public class OverlayManager extends AbstractList<Overlay> {
 		return mDrawLayers;
 	}
 
-	public void onDetach(final MapView pMapView) {
+	public void onDetach() {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			o.onDetach(pMapView);
+			o.onDetach();
 	}
 
 	Overlay[] mOverlays;
@@ -105,58 +104,57 @@ public class OverlayManager extends AbstractList<Overlay> {
 		mDirtyOverlays = false;
 	}
 
-	public boolean onKeyDown(final int keyCode, final KeyEvent event, final MapView pMapView) {
+	public boolean onKeyDown(final int keyCode, final KeyEvent event) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onKeyDown(keyCode, event, pMapView))
+			if (o.onKeyDown(keyCode, event))
 				return true;
 
 		return false;
 	}
 
-	public boolean onKeyUp(final int keyCode, final KeyEvent event, final MapView pMapView) {
+	public boolean onKeyUp(final int keyCode, final KeyEvent event) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onKeyUp(keyCode, event, pMapView))
+			if (o.onKeyUp(keyCode, event))
 				return true;
 
 		return false;
 	}
 
-	public boolean onTouchEvent(final MotionEvent event, final MapView pMapView) {
+	public boolean onTouchEvent(final MotionEvent event) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onTouchEvent(event, pMapView))
+			if (o.onTouchEvent(event))
 				return true;
 
 		return false;
 	}
 
-	public boolean onTrackballEvent(final MotionEvent event, final MapView pMapView) {
+	public boolean onTrackballEvent(final MotionEvent event) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onTrackballEvent(event, pMapView))
+			if (o.onTrackballEvent(event))
 				return true;
 
 		return false;
 	}
 
-	public boolean onSnapToItem(final int x, final int y, final Point snapPoint,
-			final MapView pMapView) {
+	public boolean onSnapToItem(final int x, final int y, final Point snapPoint) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
 			if (o instanceof Snappable)
-				if (((Snappable) o).onSnapToItem(x, y, snapPoint, pMapView))
+				if (((Snappable) o).onSnapToItem(x, y, snapPoint))
 					return true;
 
 		return false;
@@ -164,34 +162,34 @@ public class OverlayManager extends AbstractList<Overlay> {
 
 	/* GestureDetector.OnDoubleTapListener */
 
-	public boolean onDoubleTap(final MotionEvent e, final MapView pMapView) {
+	public boolean onDoubleTap(final MotionEvent e) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onDoubleTap(e, pMapView))
+			if (o.onDoubleTap(e))
 				return true;
 
 		return false;
 	}
 
-	public boolean onDoubleTapEvent(final MotionEvent e, final MapView pMapView) {
+	public boolean onDoubleTapEvent(final MotionEvent e) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onDoubleTapEvent(e, pMapView))
+			if (o.onDoubleTapEvent(e))
 				return true;
 
 		return false;
 	}
 
-	public boolean onSingleTapConfirmed(final MotionEvent e, final MapView pMapView) {
+	public boolean onSingleTapConfirmed(final MotionEvent e) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onSingleTapConfirmed(e, pMapView))
+			if (o.onSingleTapConfirmed(e))
 				return true;
 
 		return false;
@@ -199,67 +197,67 @@ public class OverlayManager extends AbstractList<Overlay> {
 
 	/* OnGestureListener */
 
-	public boolean onDown(final MotionEvent pEvent, final MapView pMapView) {
+	public boolean onDown(final MotionEvent pEvent) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onDown(pEvent, pMapView))
+			if (o.onDown(pEvent))
 				return true;
 
 		return false;
 	}
 
 	public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pVelocityX, final float pVelocityY, final MapView pMapView) {
+			final float pVelocityX, final float pVelocityY) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY, pMapView))
+			if (o.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY))
 				return true;
 
 		return false;
 	}
 
-	public boolean onLongPress(final MotionEvent pEvent, final MapView pMapView) {
+	public boolean onLongPress(final MotionEvent pEvent) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onLongPress(pEvent, pMapView))
+			if (o.onLongPress(pEvent))
 				return true;
 
 		return false;
 	}
 
 	public boolean onScroll(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pDistanceX, final float pDistanceY, final MapView pMapView) {
+			final float pDistanceX, final float pDistanceY) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onScroll(pEvent1, pEvent2, pDistanceX, pDistanceY, pMapView))
+			if (o.onScroll(pEvent1, pEvent2, pDistanceX, pDistanceY))
 				return true;
 
 		return false;
 	}
 
-	public void onShowPress(final MotionEvent pEvent, final MapView pMapView) {
+	public void onShowPress(final MotionEvent pEvent) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			o.onShowPress(pEvent, pMapView);
+			o.onShowPress(pEvent);
 
 	}
 
-	public boolean onSingleTapUp(final MotionEvent pEvent, final MapView pMapView) {
+	public boolean onSingleTapUp(final MotionEvent pEvent) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
-			if (o.onSingleTapUp(pEvent, pMapView))
+			if (o.onSingleTapUp(pEvent))
 				return true;
 
 		return false;

@@ -60,6 +60,8 @@ public abstract class Overlay {
 	//	private static final Rect mRect = new Rect();
 	private boolean mEnabled = true;
 
+	protected final MapView mMapView;
+
 	protected RenderOverlay mLayer;
 
 	public RenderOverlay getLayer() {
@@ -70,7 +72,8 @@ public abstract class Overlay {
 	// Constructors
 	// ===========================================================
 
-	public Overlay() {
+	public Overlay(MapView mapView) {
+		mMapView = mapView;
 	}
 
 	// ===========================================================
@@ -149,11 +152,8 @@ public abstract class Overlay {
 	/**
 	 * Override to perform clean up of resources before shutdown. By default
 	 * does nothing.
-	 *
-	 * @param mapView
-	 *            ...
 	 */
-	public void onDetach(final MapView mapView) {
+	public void onDetach() {
 	}
 
 	/**
@@ -166,11 +166,9 @@ public abstract class Overlay {
 	 *            ...
 	 * @param event
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onKeyDown(final int keyCode, final KeyEvent event, final MapView mapView) {
+	public boolean onKeyDown(final int keyCode, final KeyEvent event) {
 		return false;
 	}
 
@@ -184,11 +182,9 @@ public abstract class Overlay {
 	 *            ...
 	 * @param event
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onKeyUp(final int keyCode, final KeyEvent event, final MapView mapView) {
+	public boolean onKeyUp(final int keyCode, final KeyEvent event) {
 		return false;
 	}
 
@@ -201,11 +197,9 @@ public abstract class Overlay {
 	 *
 	 * @param e
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onTouchEvent(final MotionEvent e, final MapView mapView) {
+	public boolean onTouchEvent(final MotionEvent e) {
 		return false;
 	}
 
@@ -217,11 +211,9 @@ public abstract class Overlay {
 	 *
 	 * @param e
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onTrackballEvent(final MotionEvent e, final MapView mapView) {
+	public boolean onTrackballEvent(final MotionEvent e) {
 		return false;
 	}
 
@@ -235,11 +227,9 @@ public abstract class Overlay {
 	 *
 	 * @param e
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onDoubleTap(final MotionEvent e, final MapView mapView) {
+	public boolean onDoubleTap(final MotionEvent e) {
 		return false;
 	}
 
@@ -251,11 +241,9 @@ public abstract class Overlay {
 	 *
 	 * @param e
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onDoubleTapEvent(final MotionEvent e, final MapView mapView) {
+	public boolean onDoubleTapEvent(final MotionEvent e) {
 		return false;
 	}
 
@@ -267,11 +255,9 @@ public abstract class Overlay {
 	 *
 	 * @param e
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
+	public boolean onSingleTapConfirmed(final MotionEvent e) {
 		return false;
 	}
 
@@ -285,11 +271,9 @@ public abstract class Overlay {
 	 *
 	 * @param e
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onDown(final MotionEvent e, final MapView mapView) {
+	public boolean onDown(final MotionEvent e) {
 		return false;
 	}
 
@@ -307,12 +291,10 @@ public abstract class Overlay {
 	 *            ...
 	 * @param pVelocityY
 	 *            ...
-	 * @param pMapView
-	 *            ...
 	 * @return ...
 	 */
 	public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pVelocityX, final float pVelocityY, final MapView pMapView) {
+			final float pVelocityX, final float pVelocityY) {
 		return false;
 	}
 
@@ -324,11 +306,9 @@ public abstract class Overlay {
 	 *
 	 * @param e
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onLongPress(final MotionEvent e, final MapView mapView) {
+	public boolean onLongPress(final MotionEvent e) {
 		return false;
 	}
 
@@ -346,22 +326,18 @@ public abstract class Overlay {
 	 *            ...
 	 * @param pDistanceY
 	 *            ...
-	 * @param pMapView
-	 *            ...
 	 * @return ...
 	 */
 	public boolean onScroll(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pDistanceX, final float pDistanceY, final MapView pMapView) {
+			final float pDistanceX, final float pDistanceY) {
 		return false;
 	}
 
 	/**
 	 * @param pEvent
 	 *            ...
-	 * @param pMapView
-	 *            ...
 	 */
-	public void onShowPress(final MotionEvent pEvent, final MapView pMapView) {
+	public void onShowPress(final MotionEvent pEvent) {
 		return;
 	}
 
@@ -373,11 +349,9 @@ public abstract class Overlay {
 	 *
 	 * @param e
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @return ...
 	 */
-	public boolean onSingleTapUp(final MotionEvent e, final MapView mapView) {
+	public boolean onSingleTapUp(final MotionEvent e) {
 		return false;
 	}
 
@@ -389,33 +363,6 @@ public abstract class Overlay {
 	public void onUpdate(MapPosition mapPosition, boolean changed) {
 
 	}
-
-	//	/**
-	//	 * Convenience method to draw a Drawable at an offset. x and y are pixel
-	//	 * coordinates. You can find appropriate coordinates from latitude/longitude
-	//	 * using the MapView.getProjection() method on the MapView passed to you in
-	//	 * draw(Canvas, MapView, boolean).
-	//	 *
-	//	 * @param canvas
-	//	 *            ...
-	//	 * @param drawable
-	//	 *            ...
-	//	 * @param x
-	//	 *            ...
-	//	 * @param y
-	//	 *            ...
-	//	 * @param shadow
-	//	 *            If true, draw only the drawable's shadow. Otherwise, draw the
-	//	 *            drawable itself.
-	//	 */
-	//	protected synchronized static void drawAt(final android.graphics.Canvas canvas,
-	//			final android.graphics.drawable.Drawable drawable, final int x, final int y,
-	//			final boolean shadow) {
-	//		drawable.copyBounds(mRect);
-	//		drawable.setBounds(mRect.left + x, mRect.top + y, mRect.right + x, mRect.bottom + y);
-	//		drawable.draw(canvas);
-	//		drawable.setBounds(mRect);
-	//	}
 
 	// ===========================================================
 	// Inner and Anonymous Classes
@@ -440,13 +387,9 @@ public abstract class Overlay {
 		 *            To be filled with the the interesting point (in screen
 		 *            coordinates) that is closest to the given x and y. Can be
 		 *            untouched if not snapping.
-		 * @param mapView
-		 *            The {@link MapView} that is requesting the snap. Use
-		 *            MapView.getProjection() to convert between on-screen
-		 *            pixels and latitude/longitude pairs.
 		 * @return Whether or not to snap to the interesting point.
 		 */
-		boolean onSnapToItem(int x, int y, Point snapPoint, MapView mapView);
+		boolean onSnapToItem(int x, int y, Point snapPoint);
 	}
 
 }

@@ -94,7 +94,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 	 */
 	public boolean handleMotionEvent(MotionEvent e) {
 
-		if (mOverlayManager.onTouchEvent(e, mMapView))
+		if (mOverlayManager.onTouchEvent(e))
 			return true;
 
 		mGestureDetector.onTouchEvent(e);
@@ -104,7 +104,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		if (action == MotionEvent.ACTION_DOWN) {
 			mMulti = 0;
 			mWasMulti = false;
-			if (mOverlayManager.onDown(e, mMapView))
+			if (mOverlayManager.onDown(e))
 				return true;
 
 			return onActionDown(e);
@@ -343,12 +343,12 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 
 	@Override
 	public void onShowPress(MotionEvent e) {
-		mOverlayManager.onShowPress(e, mMapView);
+		mOverlayManager.onShowPress(e);
 	}
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
-		return mOverlayManager.onSingleTapUp(e, mMapView);
+		return mOverlayManager.onSingleTapUp(e);
 	}
 
 	@Override
@@ -388,7 +388,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 	public boolean onScroll(final MotionEvent e1, final MotionEvent e2, final float distanceX,
 			final float distanceY) {
 
-		if (mOverlayManager.onScroll(e1, e2, distanceX, distanceY, mMapView)) {
+		if (mOverlayManager.onScroll(e1, e2, distanceX, distanceY)) {
 			return true;
 		}
 
@@ -457,7 +457,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		if (mLongPress)
 			return;
 
-		if (mOverlayManager.onLongPress(e, mMapView)) {
+		if (mOverlayManager.onLongPress(e)) {
 			return;
 		}
 
@@ -492,12 +492,12 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 	/******************* DoubleTapListener ****************/
 	@Override
 	public boolean onSingleTapConfirmed(MotionEvent e) {
-		return mOverlayManager.onSingleTapConfirmed(e, mMapView);
+		return mOverlayManager.onSingleTapConfirmed(e);
 	}
 
 	@Override
 	public boolean onDoubleTap(MotionEvent e) {
-		if (mOverlayManager.onDoubleTap(e, mMapView))
+		if (mOverlayManager.onDoubleTap(e))
 			return true;
 
 		mLongPress = true;

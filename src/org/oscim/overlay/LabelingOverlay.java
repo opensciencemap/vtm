@@ -28,7 +28,7 @@ public class LabelingOverlay extends Overlay {
 	final TextOverlay mTextLayer;
 
 	public LabelingOverlay(MapView mapView) {
-		super();
+		super(mapView);
 		mTextLayer = new TextOverlay(mapView);
 		mLayer = mTextLayer;
 	}
@@ -36,7 +36,7 @@ public class LabelingOverlay extends Overlay {
 	private int multi;
 
 	@Override
-	public boolean onTouchEvent(MotionEvent e, MapView mapView) {
+	public boolean onTouchEvent(MotionEvent e) {
 		int action = e.getAction() & MotionEvent.ACTION_MASK;
 		if (action == MotionEvent.ACTION_POINTER_DOWN) {
 			multi++;
