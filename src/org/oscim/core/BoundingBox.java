@@ -16,7 +16,7 @@ package org.oscim.core;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
+import java.util.List;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -201,7 +201,7 @@ public class BoundingBox implements Parcelable {
 
 	/* code below is from osdmroid, @author Nicolas Gramlich */
 
-	public static BoundingBox fromGeoPoints(final ArrayList<? extends GeoPoint> partialPolyLine) {
+	public static BoundingBox fromGeoPoints(final List<? extends GeoPoint> partialPolyLine) {
 		int minLat = Integer.MAX_VALUE;
 		int minLon = Integer.MAX_VALUE;
 		int maxLat = Integer.MIN_VALUE;

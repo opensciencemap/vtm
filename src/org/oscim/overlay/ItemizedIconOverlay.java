@@ -61,8 +61,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	}
 
 	@Override
-	public boolean onSnapToItem(final int pX, final int pY, final Point pSnapPoint,
-			final MapView pMapView) {
+	public boolean onSnapToItem(final int pX, final int pY, final Point pSnapPoint) {
 		// TODO Implement this!
 		return false;
 	}
@@ -124,17 +123,17 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 * ItemGestureListener methods.
 	 */
 	@Override
-	public boolean onSingleTapUp(final MotionEvent event, final MapView mapView) {
-		return (activateSelectedItems(event, mapView, new ActiveItem() {
+	public boolean onSingleTapUp(final MotionEvent event) {
+		return (activateSelectedItems(event, new ActiveItem() {
 			@Override
 			public boolean run(final int index) {
 				final ItemizedIconOverlay<Item> that = ItemizedIconOverlay.this;
 				if (that.mOnItemGestureListener == null) {
 					return false;
 				}
-				return onSingleTapUpHelper(index, that.mItemList.get(index), mapView);
+				return onSingleTapUpHelper(index, that.mItemList.get(index), mMapView);
 			}
-		})) || super.onSingleTapUp(event, mapView);
+		})) || super.onSingleTapUp(event);
 	}
 
 	/**
@@ -151,11 +150,11 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	}
 
 	@Override
-	public boolean onLongPress(final MotionEvent event, final MapView mapView) {
+	public boolean onLongPress(final MotionEvent event) {
 
 		Log.d(TAG, "onLongPress");
 
-		return (activateSelectedItems(event, mapView, new ActiveItem() {
+		return (activateSelectedItems(event, new ActiveItem() {
 			@Override
 			public boolean run(final int index) {
 				final ItemizedIconOverlay<Item> that = ItemizedIconOverlay.this;
@@ -164,7 +163,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 				}
 				return onLongPressHelper(index, getItem(index));
 			}
-		})) || super.onLongPress(event, mapView);
+		})) || super.onLongPress(event);
 	}
 
 	protected boolean onLongPressHelper(final int index, final Item item) {
@@ -178,13 +177,11 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 *
 	 * @param event
 	 *            ...
-	 * @param mapView
-	 *            ...
 	 * @param task
 	 *            ..
 	 * @return true if event is handled false otherwise
 	 */
-	private boolean activateSelectedItems(final MotionEvent event, final MapView mapView,
+	private boolean activateSelectedItems(final MotionEvent event,
 			final ActiveItem task) {
 		final int eventX = (int) event.getX();
 		final int eventY = (int) event.getY();

@@ -48,7 +48,6 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	protected final Drawable mDefaultMarker;
 	protected boolean mDrawFocusedItem = true;
-	protected MapView mMapView;
 
 	class InternalItem {
 		InternalItem next;
@@ -237,16 +236,13 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	public abstract int size();
 
 	public ItemizedOverlay(MapView mapView, final Drawable pDefaultMarker) {
-
-		super();
+		super(mapView);
 
 		if (pDefaultMarker == null) {
 			throw new IllegalArgumentException("You must pass a default marker to ItemizedOverlay.");
 		}
 
 		this.mDefaultMarker = pDefaultMarker;
-
-		mMapView = mapView;
 		mLayer = new ItemOverlay(mapView);
 
 	}

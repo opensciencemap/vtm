@@ -31,20 +31,18 @@ public class BuildingOverlay extends Overlay {
 	final ExtrusionOverlay mExtLayer;
 
 	public BuildingOverlay(MapView mapView) {
-		super();
-		mMapView = mapView;
+		super(mapView);
 		mExtLayer = new ExtrusionOverlay(mapView);
 		mLayer = mExtLayer;
 	}
 
-	private final MapView mMapView;
 	private int multi;
 
-	private float mFadeTime = 300;
+	private final float mFadeTime = 300;
 	private float mAlpha = 1;
 
 	@Override
-	public boolean onTouchEvent(MotionEvent e, MapView mapView) {
+	public boolean onTouchEvent(MotionEvent e) {
 		int action = e.getAction() & MotionEvent.ACTION_MASK;
 		if (action == MotionEvent.ACTION_POINTER_DOWN) {
 			multi++;
