@@ -16,6 +16,7 @@
  */
 package org.oscim.core;
 
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -72,6 +73,11 @@ public class GeoPoint implements Parcelable, Comparable<GeoPoint> {
 	 */
 	public GeoPoint(int latitudeE6, int longitudeE6) {
 		this(latitudeE6 / CONVERSION_FACTOR, longitudeE6 / CONVERSION_FACTOR);
+	}
+
+	public void project(Point2D out) {
+		out.x = MercatorProjection.longitudeToX(this.longitudeE6 / CONVERSION_FACTOR);
+		out.y = MercatorProjection.latitudeToY(this.latitudeE6 / CONVERSION_FACTOR);
 	}
 
 	@Override

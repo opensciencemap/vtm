@@ -27,6 +27,7 @@ public class MapPosition {
 	public float angle;
 	public float tilt;
 
+	// map center in tile coordinates of current zoom-level
 	public double x;
 	public double y;
 
@@ -39,21 +40,6 @@ public class MapPosition {
 		this.x = MercatorProjection.longitudeToPixelX(this.lon, zoomLevel);
 		this.y = MercatorProjection.latitudeToPixelY(this.lat, zoomLevel);
 	}
-
-	//	public Point geopointToMap(GeoPoint in, Point reuse) {
-	//		Point out = reuse == null ? new Point() : reuse;
-	//		out.x = (int) (MercatorProjection.longitudeToPixelX(in.getLongitude(), zoomLevel) - x);
-	//		out.y = (int) (MercatorProjection.latitudeToPixelY(in.getLatitude(), zoomLevel) - y);
-	//
-	//		return out;
-	//	}
-
-	//	public void geopointToMap(GeoPoint in, float[] out, int pos) {
-	//		out[pos * 2 + 0] =
-	//				(float) (MercatorProjection.longitudeToPixelX(in.getLongitude(), zoomLevel) - x);
-	//		out[pos * 2 + 1] =
-	//				(float) (MercatorProjection.latitudeToPixelY(in.getLatitude(), zoomLevel) - y);
-	//	}
 
 	/**
 	 * @param geoPoint

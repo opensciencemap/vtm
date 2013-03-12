@@ -180,12 +180,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mMapViewPosition = mapView.getMapViewPosition();
 		mMapPosition = new MapPosition();
 
-		//Matrix.setIdentityM(mMVPMatrix, 0);
 		mMatrices = new Matrices();
 
-		// add half pixel to tile clip/fill coordinates to avoid rounding issues
-		short min = -4;
-		short max = (short) ((Tile.TILE_SIZE << 3) + 4);
+		short min = 0;
+		short max = (short) ((Tile.TILE_SIZE * COORD_SCALE));
 		mFillCoords = new short[8];
 		mFillCoords[0] = min;
 		mFillCoords[1] = max;
@@ -329,7 +327,40 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private static Object tilelock = new Object();
 
-	static void draw() {
+	private static void updateTileVisibility() {
+		float[] coords = mTileCoords;
+		MapPosition pos = mMapPosition;
+		MapTile[] tiles = mDrawTiles.tiles;
+		// lock tiles while updating isVisible state
+		synchronized (GLRenderer.tilelock) {
+
+			for (int i = 0; i < mDrawTiles.cnt; i++)
+				tiles[i].isVisible = false;
+
+			// relative zoom-level, 'tiles' could not have been updated after
+			// zoom-level changed.
+			byte z = tiles[0].zoomLevel;
+			float div = FastMath.pow(z - pos.zoomLevel);
+
+			// transform screen coordinates to tile coordinates
+			float scale = pos.scale / div;
+			float px = (float) pos.x * div;
+			float py = (float) pos.y * div;
+
+			for (int i = 0; i < 8; i += 2) {
+				coords[i + 0] = (px + coords[i + 0] / scale) / Tile.TILE_SIZE;
+				coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
+			}
+
+			// count placeholder tiles
+			mHolderCount = 0;
+
+			// check visibile tiles
+			mScanBox.scan(coords, z);
+		}
+	}
+
+	private static void draw() {
 		long start = 0;
 
 		if (MapView.debugFrameTime)
@@ -374,46 +405,25 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// get current MapPosition, set mTileCoords (mapping of screen to model
 		// coordinates)
 		MapPosition pos = mMapPosition;
-		float[] coords = mTileCoords;
-		boolean changed;
+		boolean positionChanged;
+
 		synchronized (mMapViewPosition) {
-			changed = mMapViewPosition.getMapPosition(pos);
-			mMapViewPosition.getMapViewProjection(coords);
+			mMapViewPosition.updateAnimation();
+
+			positionChanged = mMapViewPosition.getMapPosition(pos);
+
+			if (positionChanged)
+				mMapViewPosition.getMapViewProjection(mTileCoords);
+
 			mMapViewPosition.getMatrix(mMatrices.view, null, mMatrices.viewproj);
+
 		}
 
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
 
-		if (changed) {
-			// lock tiles while updating isVisible state
-			synchronized (GLRenderer.tilelock) {
-
-				for (int i = 0; i < tileCnt; i++)
-					tiles[i].isVisible = false;
-
-				// relative zoom-level, 'tiles' could not have been updated after
-				// zoom-level changed.
-				byte z = tiles[0].zoomLevel;
-				float div = FastMath.pow(z - pos.zoomLevel);
-
-				// transform screen coordinates to tile coordinates
-				float scale = pos.scale / div;
-				float px = (float) pos.x * div;
-				float py = (float) pos.y * div;
-
-				for (int i = 0; i < 8; i += 2) {
-					coords[i + 0] = (px + coords[i + 0] / scale) / Tile.TILE_SIZE;
-					coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
-				}
-
-				// count placeholder tiles
-				mHolderCount = 0;
-
-				// check visibile tiles
-				mScanBox.scan(coords, z);
-			}
-		}
+		if (positionChanged)
+			updateTileVisibility();
 
 		tileCnt += mHolderCount;
 
@@ -466,7 +476,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		List<RenderOverlay> overlays = mMapView.getOverlayManager().getRenderLayers();
 
 		for (int i = 0, n = overlays.size(); i < n; i++)
-			overlays.get(i).update(mMapPosition, changed, tilesChanged);
+			overlays.get(i).update(mMapPosition, positionChanged, tilesChanged);
 
 		/* draw base layer */
 		BaseMap.draw(tiles, tileCnt, pos, mMatrices);
