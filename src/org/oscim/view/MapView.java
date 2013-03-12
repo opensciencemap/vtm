@@ -78,7 +78,7 @@ public class MapView extends RelativeLayout {
 	private final MapViewPosition mMapViewPosition;
 	private final MapPosition mMapPosition;
 
-	private final MapZoomControls mMapZoomControls;
+	//private final MapZoomControls mMapZoomControls;
 
 	private final TouchHandler mTouchEventHandler;
 	private final Compass mCompass;
@@ -86,7 +86,7 @@ public class MapView extends RelativeLayout {
 	private final TileManager mTileManager;
 	private final OverlayManager mOverlayManager;
 
-	private final GLView mGLView;
+	final GLView mGLView;
 	private final JobQueue mJobQueue;
 
 	// TODO use 1 download and 1 generator thread instead
@@ -161,7 +161,6 @@ public class MapView extends RelativeLayout {
 		mTileManager = new TileManager(this);
 
 		mGLView = new GLView(context, this);
-
 		mMapWorkers = new MapWorker[mNumMapWorkers];
 
 		mDebugSettings = new DebugSettings();
@@ -177,7 +176,7 @@ public class MapView extends RelativeLayout {
 
 		if (!mMapViewPosition.isValid()) {
 			Log.d(TAG, "set default start position");
-			setMapCenter(new MapPosition(new GeoPoint(0,0), (byte) 2, 1));
+			setMapCenter(new MapPosition(new GeoPoint(0, 0), (byte) 2, 1));
 		}
 
 		LayoutParams params = new LayoutParams(
@@ -186,8 +185,8 @@ public class MapView extends RelativeLayout {
 
 		addView(mGLView, params);
 
-		mMapZoomControls = new MapZoomControls(mapActivity, this);
-		mMapZoomControls.setShowMapZoomControls(true);
+		//mMapZoomControls = new MapZoomControls(mapActivity, this);
+		//mMapZoomControls.setShowMapZoomControls(true);
 		mRotationEnabled = true;
 
 		//mOverlayManager.add(new GenericOverlay(this, new GridOverlay(this)));
@@ -277,8 +276,6 @@ public class MapView extends RelativeLayout {
 		return mRotationEnabled;
 	}
 
-
-
 	/**
 	 * Calculates all necessary tiles and adds jobs accordingly.
 	 *
@@ -291,7 +288,7 @@ public class MapView extends RelativeLayout {
 		if (forceRedraw)
 			render();
 
-		if (mClearMap){
+		if (mClearMap) {
 			mTileManager.init(mWidth, mHeight);
 			mClearMap = false;
 
@@ -303,8 +300,6 @@ public class MapView extends RelativeLayout {
 
 		boolean changed = mMapViewPosition.getMapPosition(mMapPosition);
 
-		//Log.d(TAG, "redraw " + changed + " " + forceRedraw);
-
 		// required when not changed?
 		if (AndroidUtils.currentThreadIsUiThread())
 			mOverlayManager.onUpdate(mMapPosition, changed);
@@ -314,7 +309,7 @@ public class MapView extends RelativeLayout {
 		}
 	}
 
-	private void clearMap(){
+	private void clearMap() {
 		// clear tile and overlay data before next draw
 		mClearMap = true;
 	}
@@ -505,7 +500,6 @@ public class MapView extends RelativeLayout {
 		return false;
 	}
 
-
 	void destroy() {
 		for (MapWorker mapWorker : mMapWorkers) {
 			mapWorker.pause();
@@ -580,14 +574,6 @@ public class MapView extends RelativeLayout {
 		return true;
 	}
 
-	//	byte limitZoomLevel(byte zoom) {
-	//		if (mMapZoomControls == null)
-	//			return zoom;
-	//
-	//		return (byte) Math.max(Math.min(zoom, getMaximumPossibleZoomLevel()),
-	//				mMapZoomControls.getZoomLevelMin());
-	//	}
-
 	/**
 	 * Sets the center and zoom level of this MapView and triggers a redraw.
 	 *
@@ -598,6 +584,7 @@ public class MapView extends RelativeLayout {
 		Log.d(TAG, "setMapCenter "
 				+ " lat: " + mapPosition.lat
 				+ " lon: " + mapPosition.lon);
+
 		mMapViewPosition.setMapCenter(mapPosition);
 		redrawMap(true);
 	}
@@ -609,10 +596,9 @@ public class MapView extends RelativeLayout {
 	 *            the new center point of the map.
 	 */
 	public void setCenter(GeoPoint geoPoint) {
-		MapPosition mapPosition = new MapPosition(geoPoint,
-				mMapViewPosition.getZoomLevel(), 1);
 
-		setMapCenter(mapPosition);
+		mMapViewPosition.setMapCenter(geoPoint);
+		redrawMap(true);
 	}
 
 	/**
@@ -687,27 +673,4 @@ public class MapView extends RelativeLayout {
 	public GeoPoint getCenter() {
 		return new GeoPoint(mMapPosition.lat, mMapPosition.lon);
 	}
-
-	// /**
-	// * Sets the visibility of the zoom controls.
-	// *
-	// * @param showZoomControls
-	// * true if the zoom controls should be visible, false otherwise.
-	// */
-	// public void setBuiltInZoomControls(boolean showZoomControls) {
-	// mMapZoomControls.setShowMapZoomControls(showZoomControls);
-	//
-	// }
-
-	// /**
-	// * Sets the text scale for the map rendering. Has no effect in downloading
-	// mode.
-	// *
-	// * @param textScale
-	// * the new text scale for the map rendering.
-	// */
-	// public void setTextScale(float textScale) {
-	// mJobParameters = new JobParameters(mJobParameters.theme, textScale);
-	// clearAndRedrawMapView();
-	// }
 }

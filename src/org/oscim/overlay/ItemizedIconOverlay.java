@@ -18,7 +18,6 @@ package org.oscim.overlay;
 import java.util.List;
 
 import org.oscim.app.R;
-import org.oscim.core.MercatorProjection;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
@@ -34,7 +33,6 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	protected final List<Item> mItemList;
 	protected OnItemGestureListener<Item> mOnItemGestureListener;
 	private int mDrawnItemsLimit = Integer.MAX_VALUE;
-	private final Point mTouchScreenPoint = new Point();
 
 	private final Point mItemPoint = new Point();
 
@@ -181,32 +179,29 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 *            ..
 	 * @return true if event is handled false otherwise
 	 */
-	private boolean activateSelectedItems(final MotionEvent event,
-			final ActiveItem task) {
-		final int eventX = (int) event.getX();
-		final int eventY = (int) event.getY();
+	private boolean activateSelectedItems(MotionEvent event, ActiveItem task) {
+		int eventX = (int) event.getX() - mMapView.getWidth()/2;
+		int eventY = (int) event.getY() - mMapView.getHeight()/2;
 		MapViewPosition mapViewPosition = mMapView.getMapViewPosition();
-
-		byte z = mapViewPosition.getMapPosition().zoomLevel;
-
-		mapViewPosition.getScreenPointOnMap(eventX, eventY, mTouchScreenPoint);
 
 		int nearest = -1;
 		double dist = Double.MAX_VALUE;
 
 		// TODO use intermediate projection and bounding box test
-		for (int i = 0; i < this.mItemList.size(); ++i) {
-			final Item item = getItem(i);
+		for (int i = 0; i < this.mItemList.size(); i++) {
+			Item item = getItem(i);
 
 			//	final Drawable marker = (item.getMarker(0) == null) ? this.mDefaultMarker : item
 			//		.getMarker(0);
-			MercatorProjection.projectPoint(item.getPoint(), z, mItemPoint);
 
-			float dx = mItemPoint.x - mTouchScreenPoint.x;
-			float dy = mItemPoint.y - mTouchScreenPoint.y;
-			double d = Math.sqrt(dx * dx + dy * dy);
+			mapViewPosition.project(item.getPoint(), mItemPoint);
 
-			if (d < 50) {
+			int dx = mItemPoint.x - eventX;
+			int dy = mItemPoint.y - eventY;
+			double d  = dx * dx + dy * dy;
+
+			// squared dist: 50*50 pixel
+			if (d < 2500) {
 				if (d < dist) {
 					dist = d;
 					nearest = i;

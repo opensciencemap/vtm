@@ -15,7 +15,6 @@
  */
 package org.oscim.core;
 
-import android.graphics.Point;
 
 /**
  * An implementation of the spherical Mercator projection.
@@ -197,6 +196,13 @@ public final class MercatorProjection {
 		return 360 * ((pixelX / ((long) Tile.TILE_SIZE << zoomLevel)) - 0.5);
 	}
 
+	public static double toLongitude(double pixelX) {
+		return 360 * (pixelX - 0.5);
+	}
+
+	public static double toLongitude(double pixelX, double scale) {
+		return 360 * ((pixelX / scale) - 0.5);
+	}
 	/**
 	 * Converts a pixel X coordinate to the tile X number.
 	 *
@@ -226,6 +232,15 @@ public final class MercatorProjection {
 		return 90 - 360 * Math.atan(Math.exp(-y * (2 * Math.PI))) / Math.PI;
 	}
 
+	public static double toLatitude(double pixelY) {
+		double y = 0.5 - pixelY;
+		return 90 - 360 * Math.atan(Math.exp(-y * (2 * Math.PI))) / Math.PI;
+	}
+
+	public static double toLatitude(double pixelY, double scale) {
+		double y = 0.5 - pixelY / scale;
+		return 90 - 360 * Math.atan(Math.exp(-y * (2 * Math.PI))) / Math.PI;
+	}
 	/**
 	 * Converts a pixel Y coordinate to the tile Y number.
 	 *
@@ -272,12 +287,14 @@ public final class MercatorProjection {
 		throw new IllegalStateException();
 	}
 
-	public static Point projectPoint(GeoPoint geopoint, byte z, Point reuse) {
-		Point out = reuse == null ? new Point() : reuse;
+//	public static Point projectPoint(GeoPoint geopoint, byte z, Point reuse) {
+//		Point out = reuse == null ? new Point() : reuse;
+//
+//		out.x = (int) MercatorProjection.longitudeToPixelX(geopoint.getLongitude(), z);
+//		out.y = (int) MercatorProjection.latitudeToPixelY(geopoint.getLatitude(), z);
+//
+//		return out;
+//	}
 
-		out.x = (int) MercatorProjection.longitudeToPixelX(geopoint.getLongitude(), z);
-		out.y = (int) MercatorProjection.latitudeToPixelY(geopoint.getLatitude(), z);
 
-		return out;
-	}
 }
