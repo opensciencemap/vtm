@@ -147,17 +147,13 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		if (mDoubleTap) {
 			if (debug)
 				Log.d(TAG, "tap scale: " + mx + " " + my);
-			mMapPosition.scaleMap(1 - my / (height / 5), 0, 0);
+			mMapPosition.scaleMap(1 - my / (height / 8), 0, 0);
 			mMapView.redrawMap(true);
 
 			mPrevX = x1;
 			mPrevY = y1;
 			return true;
 		}
-
-		// return if detect a new gesture, as indicated by a large jump
-		if (Math.abs(mx) > JUMP_THRESHOLD || Math.abs(my) > JUMP_THRESHOLD)
-			return true;
 
 		if (e.getPointerCount() < 2)
 			return true;
@@ -222,7 +218,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 					|| (my < -threshold && my2 < -threshold))
 			{
 				mBeginTilt = true;
-				changed = mMapPosition.tilt(my / 5);
+				changed = mMapPosition.tiltMap(my / 5);
 			}
 		} else if (!mBeginTilt && (mBeginRotate || Math.abs(r) > PINCH_ROTATE_THRESHOLD)) {
 			//Log.d(TAG, "rotate: " + mBeginRotate + " " + Math.toDegrees(rad));
@@ -414,10 +410,9 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 			float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
 			mMapPosition.animateTo(vx * move, vy * move, 250);
 		} else {
-			float s = (300 / mMapView.dpi) / 2;
+			float s = (300 / mMapView.dpi);
 
 			mMapPosition.animateFling(Math.round(velocityX * s), Math.round(velocityY * s), -w, w, -h, h);
-			//			fling = true;
 		}
 		return true;
 	}
@@ -448,8 +443,8 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		if (mOverlayManager.onDoubleTap(e))
 			return true;
 
-		//mDoubleTap = true;
-		mMapPosition.animateZoom(2);
+		mDoubleTap = true;
+		//mMapPosition.animateZoom(2);
 
 		if (debug)
 			printState("onDoubleTap");
@@ -461,119 +456,4 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 	public boolean onDoubleTapEvent(MotionEvent e) {
 		return false;
 	}
-
-	//	/******************* ScaleListener *******************/
-	//private float mPrevScale;
-	//private CountDownTimer mTimer;
-	//boolean mZooutOut;
-	//	private float mCenterX;
-	//	private float mCenterY;
-
-	//	private long mTimeStart;
-	//	private long mTimeEnd;
-	//
-	//	@Override
-	//	public boolean onScale(ScaleGestureDetector gd) {
-	//
-	//		if (mBeginTilt)
-	//			return true;
-	//
-	//		float scale = gd.getScaleFactor();
-	//		mFocusX = gd.getFocusX() - mCenterX;
-	//		mFocusY = gd.getFocusY() - mCenterY;
-	//
-	//		mSumScale *= scale;
-	//
-	//		mTimeEnd = SystemClock.elapsedRealtime();
-	//
-	//		if (!mBeginScale) {
-	//			if (mSumScale > 1.1 || mSumScale < 0.9) {
-	//				// Log.d("...", "begin scale " + mSumScale);
-	//				mBeginScale = true;
-	//				// scale = mSumScale;
-	//			}
-	//		}
-	//
-	//		if (mBeginScale && mMapPosition.scaleMap(scale, mFocusX, mFocusY))
-	//			mMapView.redrawMap(true);
-	//
-	//		return true;
-	//	}
-	//
-	//	@Override
-	//	public boolean onScaleBegin(ScaleGestureDetector gd) {
-	//		mScaling = true;
-	//		mBeginScale = false;
-	//
-	//		mTimeEnd = mTimeStart = SystemClock.elapsedRealtime();
-	//		mSumScale = 1;
-	//		mCenterX = mMapView.getWidth() >> 1;
-	//		mCenterY = mMapView.getHeight() >> 1;
-	//
-	//		if (mTimer != null) {
-	//			mTimer.cancel();
-	//			mTimer = null;
-	//		}
-	//		return true;
-	//	}
-	//
-	//	@Override
-	//	public void onScaleEnd(ScaleGestureDetector gd) {
-	//		// Log.d("ScaleListener", "Sum " + mSumScale + " " + (mTimeEnd -
-	//		// mTimeStart));
-	//
-	//		if (mTimer == null && mTimeEnd - mTimeStart < 150
-	//				&& (mSumScale < 0.99 || mSumScale > 1.01)) {
-	//
-	//			mPrevScale = 0;
-	//
-	//			mZooutOut = mSumScale < 0.99;
-	//
-	//			mTimer = new CountDownTimer((int) SCALE_DURATION, 32) {
-	//				@Override
-	//				public void onTick(long tick) {
-	//					scaleAnim(tick);
-	//				}
-	//
-	//				@Override
-	//				public void onFinish() {
-	//					scaleAnim(0);
-	//				}
-	//			}.start();
-	//		} else {
-	//			mScaling = false;
-	//		}
-	//
-	//		mBeginScale = false;
-	//	}
-	//
-
-	//
-	//	boolean scaleAnim(long tick) {
-	//
-	//		if (mPrevScale >= 1) {
-	//			mTimer = null;
-	//			return false;
-	//		}
-	//
-	//		float adv = (SCALE_DURATION - tick) / SCALE_DURATION;
-	//		//		adv = mInterpolator.getInterpolation(adv);
-	//		adv = mLinearInterpolator.getInterpolation(adv);
-	//
-	//		float scale = adv - mPrevScale;
-	//		mPrevScale += scale;
-	//
-	//		if (mZooutOut) {
-	//			mMapPosition.scaleMap(1 - scale, 0, 0);
-	//		} else {
-	//			mMapPosition.scaleMap(1 + scale, mFocusX, mFocusY);
-	//		}
-	//
-	//		mMapView.redrawMap(true);
-	//
-	//		if (tick == 0)
-	//			mTimer = null;
-	//
-	//		return true;
-	//	}
 }
