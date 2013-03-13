@@ -98,8 +98,10 @@ public class BoundingBox implements Parcelable {
 	 *         otherwise.
 	 */
 	public boolean contains(GeoPoint geoPoint) {
-		return isBetween(geoPoint.latitudeE6, this.minLatitudeE6, this.maxLatitudeE6)
-				&& isBetween(geoPoint.longitudeE6, this.minLongitudeE6, this.maxLongitudeE6);
+		return geoPoint.latitudeE6 <= maxLatitudeE6
+				&& geoPoint.latitudeE6 >= minLatitudeE6
+				&& geoPoint.longitudeE6 <= maxLongitudeE6
+				&& geoPoint.longitudeE6 >= minLongitudeE6;
 	}
 
 	@Override
@@ -110,13 +112,13 @@ public class BoundingBox implements Parcelable {
 			return false;
 		}
 		BoundingBox other = (BoundingBox) obj;
-		if (this.maxLatitudeE6 != other.maxLatitudeE6) {
+		if (maxLatitudeE6 != other.maxLatitudeE6) {
 			return false;
-		} else if (this.maxLongitudeE6 != other.maxLongitudeE6) {
+		} else if (maxLongitudeE6 != other.maxLongitudeE6) {
 			return false;
-		} else if (this.minLatitudeE6 != other.minLatitudeE6) {
+		} else if (minLatitudeE6 != other.minLatitudeE6) {
 			return false;
-		} else if (this.minLongitudeE6 != other.minLongitudeE6) {
+		} else if (minLongitudeE6 != other.minLongitudeE6) {
 			return false;
 		}
 		return true;
@@ -127,9 +129,9 @@ public class BoundingBox implements Parcelable {
 	 *         BoundingBox.
 	 */
 	public GeoPoint getCenterPoint() {
-		int latitudeOffset = (this.maxLatitudeE6 - this.minLatitudeE6) / 2;
-		int longitudeOffset = (this.maxLongitudeE6 - this.minLongitudeE6) / 2;
-		return new GeoPoint(this.minLatitudeE6 + latitudeOffset, this.minLongitudeE6
+		int latitudeOffset = (maxLatitudeE6 - minLatitudeE6) / 2;
+		int longitudeOffset = (maxLongitudeE6 - minLongitudeE6) / 2;
+		return new GeoPoint(minLatitudeE6 + latitudeOffset, minLongitudeE6
 				+ longitudeOffset);
 	}
 
@@ -137,46 +139,46 @@ public class BoundingBox implements Parcelable {
 	 * @return the maximum latitude value of this BoundingBox in degrees.
 	 */
 	public double getMaxLatitude() {
-		return this.maxLatitudeE6 / CONVERSION_FACTOR;
+		return maxLatitudeE6 / CONVERSION_FACTOR;
 	}
 
 	/**
 	 * @return the maximum longitude value of this BoundingBox in degrees.
 	 */
 	public double getMaxLongitude() {
-		return this.maxLongitudeE6 / CONVERSION_FACTOR;
+		return maxLongitudeE6 / CONVERSION_FACTOR;
 	}
 
 	/**
 	 * @return the minimum latitude value of this BoundingBox in degrees.
 	 */
 	public double getMinLatitude() {
-		return this.minLatitudeE6 / CONVERSION_FACTOR;
+		return minLatitudeE6 / CONVERSION_FACTOR;
 	}
 
 	/**
 	 * @return the minimum longitude value of this BoundingBox in degrees.
 	 */
 	public double getMinLongitude() {
-		return this.minLongitudeE6 / CONVERSION_FACTOR;
+		return minLongitudeE6 / CONVERSION_FACTOR;
 	}
 
 	@Override
 	public int hashCode() {
-		return this.hashCodeValue;
+		return hashCodeValue;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("BoundingBox [minLat=");
-		stringBuilder.append(this.minLatitudeE6);
+		stringBuilder.append(minLatitudeE6);
 		stringBuilder.append(", minLon=");
-		stringBuilder.append(this.minLongitudeE6);
+		stringBuilder.append(minLongitudeE6);
 		stringBuilder.append(", maxLat=");
-		stringBuilder.append(this.maxLatitudeE6);
+		stringBuilder.append(maxLatitudeE6);
 		stringBuilder.append(", maxLon=");
-		stringBuilder.append(this.maxLongitudeE6);
+		stringBuilder.append(maxLongitudeE6);
 		stringBuilder.append("]");
 		return stringBuilder.toString();
 	}
@@ -186,10 +188,10 @@ public class BoundingBox implements Parcelable {
 	 */
 	private int calculateHashCode() {
 		int result = 7;
-		result = 31 * result + this.maxLatitudeE6;
-		result = 31 * result + this.maxLongitudeE6;
-		result = 31 * result + this.minLatitudeE6;
-		result = 31 * result + this.minLongitudeE6;
+		result = 31 * result + maxLatitudeE6;
+		result = 31 * result + maxLongitudeE6;
+		result = 31 * result + minLatitudeE6;
+		result = 31 * result + minLongitudeE6;
 		return result;
 	}
 
