@@ -18,23 +18,23 @@ package org.oscim.overlay;
 import java.util.List;
 
 import org.oscim.app.R;
+import org.oscim.core.BoundingBox;
+import org.oscim.core.PointF;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.MotionEvent;
 
 public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverlay<Item> {
-	private static final String TAG = ItemizedIconOverlay.class.getSimpleName();
+	private static final String TAG = ItemizedIconOverlay.class.getName();
 
 	protected final List<Item> mItemList;
 	protected OnItemGestureListener<Item> mOnItemGestureListener;
 	private int mDrawnItemsLimit = Integer.MAX_VALUE;
 
-	private final Point mItemPoint = new Point();
+	private final PointF mItemPoint = new PointF();
 
 	public ItemizedIconOverlay(
 			final MapView mapView,
@@ -59,7 +59,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	}
 
 	@Override
-	public boolean onSnapToItem(final int pX, final int pY, final Point pSnapPoint) {
+	public boolean onSnapToItem(final int pX, final int pY, final PointF pSnapPoint) {
 		// TODO Implement this!
 		return false;
 	}
@@ -122,51 +122,42 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 */
 	@Override
 	public boolean onSingleTapUp(final MotionEvent event) {
-		return (activateSelectedItems(event, new ActiveItem() {
-			@Override
-			public boolean run(final int index) {
-				final ItemizedIconOverlay<Item> that = ItemizedIconOverlay.this;
-				if (that.mOnItemGestureListener == null) {
-					return false;
-				}
-				return onSingleTapUpHelper(index, that.mItemList.get(index), mMapView);
-			}
-		})) || super.onSingleTapUp(event);
+		return activateSelectedItems(event, mActiveItemSingleTap) || super.onSingleTapUp(event);
 	}
 
-	/**
-	 * @param index
-	 *            ...
-	 * @param item
-	 *            ...
-	 * @param mapView
-	 *            ...
-	 * @return ...
-	 */
-	protected boolean onSingleTapUpHelper(final int index, final Item item, final MapView mapView) {
+	protected boolean onSingleTapUpHelper(final int index, final Item item) {
 		return this.mOnItemGestureListener.onItemSingleTapUp(index, item);
 	}
 
+	private final ActiveItem mActiveItemSingleTap = new ActiveItem() {
+		@Override
+		public boolean run(final int index) {
+			final ItemizedIconOverlay<Item> that = ItemizedIconOverlay.this;
+			if (that.mOnItemGestureListener == null) {
+				return false;
+			}
+			return onSingleTapUpHelper(index, that.mItemList.get(index));
+		}
+	};
 	@Override
 	public boolean onLongPress(final MotionEvent event) {
-
-		Log.d(TAG, "onLongPress");
-
-		return (activateSelectedItems(event, new ActiveItem() {
-			@Override
-			public boolean run(final int index) {
-				final ItemizedIconOverlay<Item> that = ItemizedIconOverlay.this;
-				if (that.mOnItemGestureListener == null) {
-					return false;
-				}
-				return onLongPressHelper(index, getItem(index));
-			}
-		})) || super.onLongPress(event);
+		return activateSelectedItems(event, mActiveItemLongPress) || super.onLongPress(event);
 	}
 
 	protected boolean onLongPressHelper(final int index, final Item item) {
 		return this.mOnItemGestureListener.onItemLongPress(index, item);
 	}
+
+	private final ActiveItem mActiveItemLongPress = new ActiveItem() {
+		@Override
+		public boolean run(final int index) {
+			final ItemizedIconOverlay<Item> that = ItemizedIconOverlay.this;
+			if (that.mOnItemGestureListener == null) {
+				return false;
+			}
+			return onLongPressHelper(index, getItem(index));
+		}
+	};
 
 	/**
 	 * When a content sensitive action is performed the content item needs to be
@@ -180,25 +171,37 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	 * @return true if event is handled false otherwise
 	 */
 	private boolean activateSelectedItems(MotionEvent event, ActiveItem task) {
-		int eventX = (int) event.getX() - mMapView.getWidth()/2;
-		int eventY = (int) event.getY() - mMapView.getHeight()/2;
+		int size = mItemList.size();
+		if (size == 0)
+			return false;
+
+		int eventX = (int) event.getX() - mMapView.getWidth() / 2;
+		int eventY = (int) event.getY() - mMapView.getHeight() / 2;
 		MapViewPosition mapViewPosition = mMapView.getMapViewPosition();
+
+		BoundingBox bbox = mapViewPosition.getViewBox();
 
 		int nearest = -1;
 		double dist = Double.MAX_VALUE;
 
-		// TODO use intermediate projection and bounding box test
-		for (int i = 0; i < this.mItemList.size(); i++) {
+		for (int i = 0; i < size; i++) {
 			Item item = getItem(i);
-
+			if (!bbox.contains(item.mGeoPoint)){
+				//Log.d(TAG, "skip: " + item.getTitle());
+				continue;
+			}
 			//	final Drawable marker = (item.getMarker(0) == null) ? this.mDefaultMarker : item
 			//		.getMarker(0);
 
+			// TODO use intermediate projection
 			mapViewPosition.project(item.getPoint(), mItemPoint);
 
-			int dx = mItemPoint.x - eventX;
-			int dy = mItemPoint.y - eventY;
-			double d  = dx * dx + dy * dy;
+			float dx = mItemPoint.x - eventX;
+			float dy = mItemPoint.y - eventY;
+
+			//Log.d(TAG, item.getTitle() + " " + mItemPoint + " " + dx + "/" + dy);
+
+			double d = dx * dx + dy * dy;
 
 			// squared dist: 50*50 pixel
 			if (d < 2500) {
