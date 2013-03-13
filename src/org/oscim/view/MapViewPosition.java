@@ -21,17 +21,19 @@ import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
-import org.oscim.core.Point2D;
+import org.oscim.core.PointD;
+import org.oscim.core.PointF;
 import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 
-import android.graphics.Point;
 import android.opengl.Matrix;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
 
 /**
@@ -48,6 +50,9 @@ public class MapViewPosition {
 	public final static double MAX_SCALE = ((1 << MAX_ZOOMLEVEL) * MAX_END_SCALE);
 	public final static double MIN_SCALE = (1 << MIN_ZOOMLEVEL);
 
+	// needs to fit for int: 2 * 20 * Tile.TILE_SIZE
+	public final static int ABS_ZOOMLEVEL = 20;
+
 	private final static float MAX_ANGLE = 65;
 
 	private final MapView mMapView;
@@ -55,26 +60,24 @@ public class MapViewPosition {
 	private double mLatitude;
 	private double mLongitude;
 
-	private double mMapScale;
+	private double mAbsScale;
+	private double mAbsX;
+	private double mAbsY;
 
-	// mMapScale * Tile.TILE_SIZE
+	// mAbsScale * Tile.TILE_SIZE
 	// i.e. size of tile 0/0/0 at current scale in pixel
-	private double mTileScale;
+	private double mCurScale;
+
+	// mAbsX * mCurScale
+	private double mCurX;
+
+	// mAbsY * mCurScale
+	private double mCurY;
 
 	private float mRotation;
 	public float mTilt;
 
-	// map center in tile coordinates of current zoom-level
-	//private double mPosX;
-	//private double mPosY;
-
-	// NB: mMapScale == 2^mZoomLevel * mScale;
-	private byte mZoomLevel;
-	// 1.0 - 2.0 scale per level
-	private float mScale;
-
 	private final AnimationHandler mHandler;
-
 	private final Scroller mScroller;
 
 	MapViewPosition(MapView mapView) {
@@ -83,10 +86,16 @@ public class MapViewPosition {
 		mLongitude = Double.NaN;
 		mRotation = 0.0f;
 		mTilt = 0;
-		mMapScale = 1;
+		mAbsScale = 1;
 
 		mHandler = new AnimationHandler(this);
-		mScroller = new Scroller(mapView.getContext());
+		mScroller = new Scroller(mapView.getContext(), new LinearInterpolator() {
+			@Override
+			public float getInterpolation(float input) {
+				return (float) Math.sqrt(input);
+
+			}
+		});
 	}
 
 	private final float[] mProjMatrix = new float[16];
@@ -98,7 +107,7 @@ public class MapViewPosition {
 	private final float[] mTmpMatrix = new float[16];
 
 	// temporary vars: only use in synchronized functions!
-	private final Point2D mMovePoint = new Point2D();
+	private final PointD mMovePoint = new PointD();
 	private final float[] mv = new float[4];
 	private final float[] mu = new float[4];
 	private final float[] mBBoxCoords = new float[8];
@@ -137,17 +146,18 @@ public class MapViewPosition {
 	 */
 	public synchronized boolean getMapPosition(MapPosition pos) {
 
-		updateTileScale();
+		int z = FastMath.log2((int) mAbsScale);
+		z = FastMath.clamp(z, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
+		float scale = (float) (mAbsScale / (1 << z));
 
 		if (pos.lat == mLatitude
 				&& pos.lon == mLongitude
-				&& pos.zoomLevel == mZoomLevel
-				&& pos.scale == mScale
+				&& pos.zoomLevel == z
+				&& pos.scale == scale
 				&& pos.angle == mRotation
 				&& pos.tilt == mTilt)
 			return false;
 
-		byte z = mZoomLevel;
 
 		pos.lat = mLatitude;
 		pos.lon = mLongitude;
@@ -155,11 +165,11 @@ public class MapViewPosition {
 		pos.tilt = mTilt;
 
 		// for tiling
-		pos.scale = mScale;
-		pos.zoomLevel = z;
+		pos.scale = scale;
+		pos.zoomLevel = (byte)z;
 
-		pos.x = mAbsX * (Tile.TILE_SIZE << mZoomLevel);
-		pos.y = mAbsY * (Tile.TILE_SIZE << mZoomLevel);
+		pos.x = mAbsX * (Tile.TILE_SIZE << z);
+		pos.y = mAbsY * (Tile.TILE_SIZE << z);
 
 		return true;
 	}
@@ -256,9 +266,12 @@ public class MapViewPosition {
 		if (!isValid()) {
 			return null;
 		}
-		updateTileScale();
 
-		return new MapPosition(mLatitude, mLongitude, mZoomLevel, mScale, mRotation);
+		int z = FastMath.log2((int) mAbsScale);
+		z = FastMath.clamp(z, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
+		float scale = (float) (mAbsScale / (1 << z));
+
+		return new MapPosition(mLatitude, mLongitude, (byte)z, scale, mRotation);
 	}
 
 	/**
@@ -286,8 +299,8 @@ public class MapViewPosition {
 		double maxY = Double.MIN_VALUE;
 
 		for (int i = 0; i < 8; i += 2) {
-			dx = mRealX - coords[i + 0];
-			dy = mRealY - coords[i + 1];
+			dx = mCurX - coords[i + 0];
+			dy = mCurY - coords[i + 1];
 
 			minX = Math.min(minX, dx);
 			maxX = Math.max(maxX, dx);
@@ -295,10 +308,10 @@ public class MapViewPosition {
 			maxY = Math.max(maxY, dy);
 		}
 
-		minX = MercatorProjection.toLongitude(minX, mTileScale);
-		maxX = MercatorProjection.toLongitude(maxX, mTileScale);
-		minY = MercatorProjection.toLatitude(minY, mTileScale);
-		maxY = MercatorProjection.toLatitude(maxY, mTileScale);
+		minX = MercatorProjection.toLongitude(minX, mCurScale);
+		maxX = MercatorProjection.toLongitude(maxX, mCurScale);
+		minY = MercatorProjection.toLatitude(minY, mCurScale);
+		maxY = MercatorProjection.toLatitude(maxY, mCurScale);
 
 		// yea, this is upside down..
 		BoundingBox bbox = new BoundingBox(maxY, minX, minY, maxX);
@@ -317,7 +330,7 @@ public class MapViewPosition {
 	 * @param out Point coords will be set
 	 * @return current map scale
 	 */
-	public synchronized float getScreenPointOnMap(float x, float y, Point2D out) {
+	public synchronized float getScreenPointOnMap(float x, float y, PointD out) {
 
 		// scale to -1..1
 		float mx = 1 - (x / mWidth * 2);
@@ -325,10 +338,10 @@ public class MapViewPosition {
 
 		unproject(-mx, my, getZ(-my), mu, 0);
 
-		out.x = mRealX + mu[0];
-		out.y = mRealY + mu[1];
+		out.x = mCurX + mu[0];
+		out.y = mCurY + mu[1];
 
-		return (float) mMapScale;
+		return (float) mAbsScale;
 	}
 
 	/**
@@ -346,10 +359,10 @@ public class MapViewPosition {
 
 		unproject(-mx, my, getZ(-my), mu, 0);
 
-		double dx = mRealX + mu[0];
-		double dy = mRealY + mu[1];
-		dx /= mMapScale * Tile.TILE_SIZE;
-		dy /= mMapScale * Tile.TILE_SIZE;
+		double dx = mCurX + mu[0];
+		double dy = mCurY + mu[1];
+		dx /= mAbsScale * Tile.TILE_SIZE;
+		dy /= mAbsScale * Tile.TILE_SIZE;
 
 		if (dx > 1) {
 			while (dx > 1)
@@ -374,18 +387,16 @@ public class MapViewPosition {
 	/**
 	 * Get the screen pixel for a GeoPoint
 	 *
-	 * @param geoPoint ...
-	 * @param reuse ...
-	 * @return ...
+	 * @param geoPoint the GeoPoint
+	 * @param out Point projected to screen pixel
 	 */
-	public synchronized Point project(GeoPoint geoPoint, Point reuse) {
-		Point out = reuse == null ? new Point() : reuse;
+	public synchronized void project(GeoPoint geoPoint, PointF out) {
 
-		double x = MercatorProjection.longitudeToX(geoPoint.getLongitude()) * mTileScale;
-		double y = MercatorProjection.latitudeToY(geoPoint.getLatitude()) * mTileScale;
+		double x = MercatorProjection.longitudeToX(geoPoint.getLongitude()) * mCurScale;
+		double y = MercatorProjection.latitudeToY(geoPoint.getLatitude()) * mCurScale;
 
-		mv[0] = (float) (x - mRealX);
-		mv[1] = (float) (y - mRealY);
+		mv[0] = (float) (x - mCurX);
+		mv[1] = (float) (y - mCurY);
 
 		mv[2] = 0;
 		mv[3] = 1;
@@ -395,8 +406,6 @@ public class MapViewPosition {
 		// positive direction is down and right;
 		out.x = (int) ((mv[0] / mv[3]) * (mWidth / 2));
 		out.y = (int) -((mv[1] / mv[3]) * (mHeight / 2));
-
-		return out;
 	}
 
 	private void updateMatrix() {
@@ -463,10 +472,6 @@ public class MapViewPosition {
 		return true;
 	}
 
-	//private double mMaxLat = MercatorProjection.latitudeToY(MercatorProjection.LATITUDE_MAX);
-	private double mAbsX;
-	private double mAbsY;
-
 	/**
 	 * Moves this MapViewPosition by the given amount of pixels.
 	 *
@@ -477,14 +482,14 @@ public class MapViewPosition {
 		// stop animation
 		mHandler.cancel();
 
-		Point2D p = applyRotation(mx, my);
+		PointD p = applyRotation(mx, my);
 
 		move(p.x, p.y);
 	}
 
 	private synchronized void move(double mx, double my) {
-		mAbsX = (mRealX - mx) / mTileScale;
-		mAbsY = (mRealY - my) / mTileScale;
+		mAbsX = (mCurX - mx) / mCurScale;
+		mAbsY = (mCurY - my) / mCurScale;
 
 		// clamp latitude
 		mAbsY = FastMath.clamp(mAbsY, 0, 1);
@@ -501,7 +506,28 @@ public class MapViewPosition {
 		updatePosition();
 	}
 
-	private Point2D applyRotation(float mx, float my) {
+	private synchronized void moveAbs(double x, double y) {
+		double f = Tile.TILE_SIZE << ABS_ZOOMLEVEL;
+
+		mAbsX = x / f;
+		mAbsY = y / f;
+
+		// clamp latitude
+		mAbsY = FastMath.clamp(mAbsY, 0, 1);
+
+		// wrap longitude
+		while (mAbsX > 1)
+			mAbsX -= 1;
+		while (mAbsX < 0)
+			mAbsX += 1;
+
+		mLongitude = MercatorProjection.toLongitude(mAbsX);
+		mLatitude = MercatorProjection.toLatitude(mAbsY);
+
+		updatePosition();
+	}
+
+	private PointD applyRotation(float mx, float my) {
 
 		if (mMapView.mRotationEnabled || mMapView.mCompassEnabled) {
 			double rad = Math.toRadians(mRotation);
@@ -518,15 +544,6 @@ public class MapViewPosition {
 		return mMovePoint;
 	}
 
-	private void updateTileScale() {
-		int z = FastMath.log2((int) mMapScale);
-
-		z = FastMath.clamp(z, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
-		mZoomLevel = (byte) z;
-		mScale = (float) (mMapScale / (1 << z));
-		//Log.d(TAG, "updateTileScale " + mZoomLevel + " " + mScale);
-	}
-
 	/**
 	 * @param scale map by this factor
 	 * @param pivotX ...
@@ -540,16 +557,16 @@ public class MapViewPosition {
 		// just sanitize input
 		scale = FastMath.clamp(scale, 0.5f, 2);
 
-		double newScale = mMapScale * scale;
+		double newScale = mAbsScale * scale;
 
 		newScale = FastMath.clamp(newScale, MIN_SCALE, MAX_SCALE);
 
-		if (newScale == mMapScale)
+		if (newScale == mAbsScale)
 			return false;
 
-		scale = (float) (newScale / mMapScale);
+		scale = (float) (newScale / mAbsScale);
 
-		mMapScale = newScale;
+		mAbsScale = newScale;
 
 		if (pivotX != 0 || pivotY != 0)
 			moveMap(pivotX * (1.0f - scale),
@@ -587,13 +604,14 @@ public class MapViewPosition {
 		updateMatrix();
 	}
 
-	public synchronized boolean tilt(float move) {
+	public synchronized boolean tiltMap(float move) {
 		float tilt = FastMath.clamp(mTilt + move, 0, MAX_ANGLE);
 
 		if (mTilt == tilt)
 			return false;
 
 		setTilt(tilt);
+
 		return true;
 	}
 
@@ -607,7 +625,6 @@ public class MapViewPosition {
 		mLongitude = MercatorProjection.limitLongitude(longitude);
 		mAbsX = MercatorProjection.longitudeToX(mLongitude);
 		mAbsY = MercatorProjection.latitudeToY(mLatitude);
-
 		updatePosition();
 	}
 
@@ -617,42 +634,45 @@ public class MapViewPosition {
 
 	synchronized void setMapCenter(MapPosition mapPosition) {
 		setZoomLevelLimit(mapPosition.zoomLevel);
-		//mMapScale = 1 << mZoomLevel;
-
 		setMapCenter(mapPosition.lat, mapPosition.lon);
 	}
 
 	synchronized void setZoomLevel(byte zoomLevel) {
 		setZoomLevelLimit(zoomLevel);
-		//mMapScale = 1 << mZoomLevel;
-		//mScale = 1;
 		updatePosition();
 	}
 
 	private void setZoomLevelLimit(byte zoomLevel) {
-		mMapScale = FastMath.clamp(1 << zoomLevel, MIN_SCALE, MAX_SCALE);
-
-		//mMapScale = 1 << zoomLevel;
-		//mZoomLevel = (byte) FastMath.clamp(zoomLevel, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
+		mAbsScale = FastMath.clamp(1 << zoomLevel, MIN_SCALE, MAX_SCALE);
 	}
-
-	private double mRealX;
-	private double mRealY;
 
 	private void updatePosition() {
-		mTileScale = mMapScale * Tile.TILE_SIZE;
+		mCurScale = mAbsScale * Tile.TILE_SIZE;
 
-		mRealX = mAbsX * mTileScale;
-		mRealY = mAbsY * mTileScale;
+		mCurX = mAbsX * mCurScale;
+		mCurY = mAbsY * mCurScale;
 	}
 
-	private int mScrollX;
-	private int mScrollY;
+	/************************************************************************/
+	// TODO move to MapAnimator:
+
+	private double mScrollX;
+	private double mScrollY;
+	private double mStartX;
+	private double mStartY;
+	private double mEndX;
+	private double mEndY;
 
 	private double mStartScale;
 	private double mEndScale;
 
 	private float mDuration = 500;
+	private final static double LOG4 = Math.log(4);
+
+	private boolean mAnimMove;
+	private boolean mAnimFling;
+	private boolean mAnimScale;
+	private final DecelerateInterpolator mDecInterpolator = new DecelerateInterpolator(2);
 
 	public synchronized void animateTo(BoundingBox bbox) {
 		double dx = MercatorProjection.longitudeToX(bbox.getMaxLongitude())
@@ -661,68 +681,77 @@ public class MapViewPosition {
 				- MercatorProjection.latitudeToY(bbox.getMaxLatitude());
 
 
-		double log4 = Math.log(4);
+		double z = Math.min(
+				-LOG4 * Math.log(dx) + (mWidth / Tile.TILE_SIZE),
+				-LOG4 * Math.log(dy) + (mHeight / Tile.TILE_SIZE));
 
-		double zx = -log4 * Math.log(dx) + (mWidth / Tile.TILE_SIZE);
-		double zy = -log4 * Math.log(dy) + (mHeight / Tile.TILE_SIZE);
+		double newScale = Math.pow(2, z - 1);
 
-		double z = Math.min(zx, zy);
+		newScale = FastMath.clamp(newScale, MIN_SCALE, 1 << ABS_ZOOMLEVEL);
 
-		double newScale = Math.pow(2, z);
+		float scale = (float) (newScale / mAbsScale);
 
-		//double newScale = (1 << (int)Math.floor(z));
-
-		newScale = FastMath.clamp(newScale, MIN_SCALE, (1 << 15));
-
-		float scale = (float) (newScale / mMapScale);
-
-		Log.d(TAG, "scale to " + bbox + " "+ z + " " + newScale + " " + mMapScale
+		Log.d(TAG, "scale to " + bbox + " " + z + " " + newScale + " " + mAbsScale
 				+ " " + FastMath.log2((int) newScale) + " " + scale);
-		mEndScale = mMapScale * scale;
-		mStartScale = mMapScale;
 
-		//mMapScale = newScale;
-		//updatePosition();
-
-		// ----- mScale = FastMath.clamp((float) (1 + (z - mZoomLevel)), 1, MAX_END_SCALE);
-
-		//mMapScale = (1 << mZoomLevel) * mScale;
-		//Log.d(TAG, "zoom: " + bbox + " " + zx + " " + zy + " / " + mScale + " " + mZoomLevel);
-		//updatePosition();
+		mEndScale = mAbsScale * scale - mAbsScale;
+		mStartScale = mAbsScale;
 
 		// reset rotation/tilt
-		mTilt = 0;
-		mRotation = 0;
-		updateMatrix();
+		//mTilt = 0;
+		//mRotation = 0;
+		//updateMatrix();
+		double f = Tile.TILE_SIZE << ABS_ZOOMLEVEL;
+		mStartX = mAbsX * f;
+		mStartY = mAbsY * f;
 
 		GeoPoint geoPoint = bbox.getCenterPoint();
 
-		//mStartScale = mMapScale;
-
-		double mx = MercatorProjection.longitudeToX(geoPoint.getLongitude()) * mTileScale;
-		double my = MercatorProjection.latitudeToY(geoPoint.getLatitude()) * mTileScale;
-		mx = mRealX - mx;
-		my = mRealY - my;
-
-		mScrollX = 0;
-		mScrollY = 0;
+		mEndX = MercatorProjection.longitudeToX(geoPoint.getLongitude()) * f;
+		mEndY = MercatorProjection.latitudeToY(geoPoint.getLatitude()) * f;
+		mEndX -= mStartX;
+		mEndY -= mStartY;
+		mAnimMove = true;
+		mAnimScale = true;
+		mAnimFling = false;
 		mDuration = 500;
 
-		mScroller.startScroll(0, 0, (int) mx, (int) my, (int)mDuration);
+//		double mx = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(),
+//				(byte) ABS_ZOOMLEVEL);
+//		double my = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(),
+//				(byte) ABS_ZOOMLEVEL);
+//
+//		double f = Tile.TILE_SIZE << ABS_ZOOMLEVEL;
+//		double x = mAbsX * f;
+//		double y = mAbsY * f;
+//
+//		mScroller.startScroll((int) x, (int) y, (int) (mx - x), (int) (my - y), (int) mDuration);
+//		mFling = false;
 
 		mHandler.start((int) mDuration);
 	}
 
 	public synchronized void animateTo(GeoPoint geoPoint) {
-		//MercatorProjection.projectPoint(geoPoint, mZoomLevel, mTmpPoint);
 
-		//mEndX = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(), mZoomLevel);
-		//mEndY = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(), mZoomLevel);
-		//mStartX = mPosX;
-		//mStartY = mPosY;
+		double mx = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(),
+				(byte) ABS_ZOOMLEVEL);
+		double my = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(),
+				(byte) ABS_ZOOMLEVEL);
+
+		double f = Tile.TILE_SIZE << ABS_ZOOMLEVEL;
+		double x = mAbsX * f;
+		double y = mAbsY * f;
+
+		mScroller.startScroll((int) x, (int) y, (int) (mx - x), (int) (my - y), (int) mDuration);
+
+		mAnimFling = false;
+		mAnimScale = false;
+		mAnimMove = false;
+
 		mDuration = 300;
 		mHandler.start((int) mDuration);
 	}
+
 
 	public synchronized void animateFling(int velocityX, int velocityY,
 			int minX, int maxX, int minY, int maxY) {
@@ -731,62 +760,56 @@ public class MapViewPosition {
 		mScrollY = 0;
 
 		mScroller.fling(0, 0, velocityX, velocityY, minX, maxX, minY, maxY);
+		mAnimFling = true;
+		mAnimMove = false;
+		mAnimScale = false;
+
 		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
-		mDuration = 300;
+		mDuration = 250;
 		mHandler.start((int) mDuration);
 	}
 
 	public synchronized void animateZoom(float scale) {
-		mStartScale = mMapScale;
-		mEndScale = mMapScale * scale;
+		mStartScale = mAbsScale;
+		mEndScale = mAbsScale * scale - mAbsScale;
 
-		//mScroller.fling(0, 0, velocityX, velocityY, minX, maxX, minY, maxY);
 		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
 		mDuration = 300;
 		mHandler.start((int) mDuration);
 	}
-
-	//private float mScrollX, mScrollY;
 
 	public void updateAnimation() {
 		//scroll();
 	}
 
-	synchronized boolean scroll(double div) {
+	synchronized boolean scroll() {
 		if (mScroller.isFinished()) {
 			return false;
 		}
-
-		int x = mScrollX; //mScroller.getCurrX();
-		int y = mScrollY; //mScroller.getCurrY();
-
 		mScroller.computeScrollOffset();
 
-		int mx = mScroller.getCurrX() - x;
-		int my = mScroller.getCurrY() - y;
-		mx *= div;
-		my *= div;
+		double dx = mScroller.getCurrX();
+		double dy = mScroller.getCurrY();
 
-		if (mx >= 1 || my >= 1 || mx <= -1 || my <= -1) {
-			moveMap(mx, my);
+		if (mAnimFling) {
+			int mx = (int) (dx - mScrollX);
+			int my = (int) (dy - mScrollY);
 
-			//mMapView.redrawMap(true);
-			mScrollX = mScroller.getCurrX();
-			mScrollY = mScroller.getCurrY();
+			if (mx >= 1 || my >= 1 || mx <= -1 || my <= -1) {
+				moveMap(mx, my);
+				mScrollX = dx;
+				mScrollY = dy;
+			}
 		}
+		else
+			moveAbs(dx, dy);
 		return true;
 	}
 
 	public synchronized void animateTo(float dx, float dy, float duration) {
 		applyRotation(dx, dy);
-
-		//mEndX = mRealX - mMovePoint.x;
-		//mEndY = mRealY - mMovePoint.y;
-
-		//mStartX = mRealX;
-		//mStartY = mRealY;
 
 		mDuration = duration;
 		mHandler.start((int) mDuration);
@@ -794,17 +817,25 @@ public class MapViewPosition {
 
 	void onTick(long millisLeft) {
 		boolean changed = false;
-		double div = 1;
-		if (mStartScale != 0) {
-			double adv = millisLeft / mDuration;
-			mMapScale = (adv * mStartScale) + (mEndScale * (1.0 - adv));
-			div = mMapScale / mStartScale;
+
+		if (mAnimScale) {
+			float adv = (1.0f - millisLeft / mDuration);
+			adv = mDecInterpolator.getInterpolation(adv);
+
+			//adv *= adv;
+			mAbsScale = mStartScale + (mEndScale * (Math.pow(2, adv)-1));
+
+			//div = mAbsScale / mStartScale;
+
+			if (mAnimMove)
+				moveAbs(mStartX + mEndX * adv, mStartY + mEndY * adv);
 
 			updatePosition();
+
 			changed = true;
 		}
 
-		if (scroll(div))
+		if (scroll())
 			changed = true;
 
 		if (changed)
@@ -812,10 +843,18 @@ public class MapViewPosition {
 	}
 
 	void onFinish() {
-		//setMapPosition(mEndX, mEndY);
+		if (!mAnimFling && !mScroller.isFinished())
+			moveAbs(mScroller.getFinalX(), mScroller.getFinalY());
+
+		if (mStartScale != 0) {
+			mAbsScale = mStartScale + mEndScale;
+			updatePosition();
+			mStartScale = 0;
+		}
+
 		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
 		mMapView.redrawMap(true);
-		mStartScale = 0;
 	}
 
 	/**
