@@ -16,6 +16,11 @@
 
 package org.oscim.overlay;
 
+// TODO
+// - need to sort items back to front for rendering
+// - and to make this work for multiple overlays
+//   a global scenegraph is probably required.
+
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
@@ -24,6 +29,7 @@ import org.oscim.renderer.layer.SymbolLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
 import org.oscim.view.MapView;
 
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.opengl.Matrix;
@@ -60,8 +66,6 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	/* package */InternalItem mItems;
 	/* package */Object lock = new Object();
-	//	/* package */final ArrayList<Item> mInternalItemList;
-	private final Rect mRect = new Rect();
 	/* package */Item mFocusedItem;
 	/* package */boolean mUpdate;
 
@@ -87,7 +91,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 				boolean positionChanged,
 				boolean tilesChanged) {
 
-			if (!tilesChanged && !mUpdate)
+			if (!positionChanged && !mUpdate)
 				return;
 
 			mUpdate = false;
@@ -205,8 +209,6 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 					//	} else
 					//		marker = item.getMarker(state);
 
-					boundToHotspot(marker, item.getMarkerHotspot());
-
 					mSymbolLayer.addDrawable(marker, state, it.x, it.y);
 				}
 
@@ -244,7 +246,6 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 		this.mDefaultMarker = pDefaultMarker;
 		mLayer = new ItemOverlay(mapView);
-
 	}
 
 	/**
@@ -370,6 +371,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		return mFocusedItem;
 	}
 
+	private static final Rect mRect = new Rect();
+
 	/**
 	 * Adjusts a drawable's bounds so that (0,0) is a pixel in the location
 	 * described by the hotspot parameter. Useful for "pin"-like graphics. For
@@ -381,7 +384,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	 *            the hotspot for the drawable
 	 * @return the same drawable that was passed in.
 	 */
-	protected synchronized Drawable boundToHotspot(final Drawable marker, HotspotPlace hotspot) {
+	public static synchronized Drawable boundToHotspot(final Drawable marker, HotspotPlace hotspot) {
 		final int markerWidth = marker.getIntrinsicWidth();
 		final int markerHeight = marker.getIntrinsicHeight();
 
@@ -427,6 +430,14 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		return marker;
 	}
 
+	public static Drawable makeMarker(Resources res, int id, HotspotPlace place){
+		Drawable marker = res.getDrawable(id);
+		if (place == null)
+			boundToHotspot(marker, HotspotPlace.CENTER);
+		else
+			boundToHotspot(marker, place);
+		return marker;
+	}
 	//	/**
 	//	 * Draw a marker on each of our items. populate() must have been called
 	//	 * first.<br/>
