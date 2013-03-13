@@ -75,7 +75,7 @@ public class GeoPoint implements Parcelable, Comparable<GeoPoint> {
 		this(latitudeE6 / CONVERSION_FACTOR, longitudeE6 / CONVERSION_FACTOR);
 	}
 
-	public void project(Point2D out) {
+	public void project(PointD out) {
 		out.x = MercatorProjection.longitudeToX(this.longitudeE6 / CONVERSION_FACTOR);
 		out.y = MercatorProjection.latitudeToY(this.latitudeE6 / CONVERSION_FACTOR);
 	}

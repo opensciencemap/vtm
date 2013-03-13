@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,27 +12,19 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.utils;
+package org.oscim.core;
 
-/**
- * without further ado: This class represents a 2D Point using float coordinates
- */
-public class Point {
-	public float x;
-	public float y;
-
-	public Point() {
+public class PointD {
+	public double x;
+	public double y;
+	public PointD() {
 	}
-
-	Point(float x, float y) {
+	PointD(double x, double y){
 		this.x = x;
 		this.y = y;
 	}
-
-	public void set(float x, float y) {
-		this.x = x;
-		this.y = y;
-
+	@Override
+	public String toString(){
+		return x + " " + y;
 	}
-
 }
