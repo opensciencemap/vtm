@@ -674,16 +674,20 @@ public class MapViewPosition {
 	private final AccelerateDecelerateInterpolator mDecInterpolator = new AccelerateDecelerateInterpolator();
 
 	public synchronized void animateTo(BoundingBox bbox) {
-		double dx = MercatorProjection.longitudeToX(bbox.getMaxLongitude())
-				- MercatorProjection.longitudeToX(bbox.getMinLongitude());
-		double dy = MercatorProjection.latitudeToY(bbox.getMinLatitude())
-				- MercatorProjection.latitudeToY(bbox.getMaxLatitude());
 
+		// calculate the minimum scale at which the bbox is completely visible
+		double dx = Math.abs(MercatorProjection.longitudeToX(bbox.getMaxLongitude())
+				- MercatorProjection.longitudeToX(bbox.getMinLongitude()));
+
+		double dy = Math.abs(MercatorProjection.latitudeToY(bbox.getMinLatitude())
+				- MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
+
+		double aspect = (Math.min(mWidth, mHeight) / Tile.TILE_SIZE);
 		double z = Math.min(
-				-LOG4 * Math.log(dx) + (mWidth / Tile.TILE_SIZE),
-				-LOG4 * Math.log(dy) + (mHeight / Tile.TILE_SIZE));
+				-LOG4 * Math.log(dx) + aspect,
+				-LOG4 * Math.log(dy) + aspect);
 
-		double newScale = Math.pow(2, z - 1);
+		double newScale = Math.pow(2, z);
 
 		newScale = FastMath.clamp(newScale, MIN_SCALE, 1 << ABS_ZOOMLEVEL);
 
@@ -693,6 +697,7 @@ public class MapViewPosition {
 				+ " " + FastMath.log2((int) newScale) + " " + scale);
 
 		mEndScale = mAbsScale * scale - mAbsScale;
+		//mEndScale = scale - 1;
 		mStartScale = mAbsScale;
 
 		// reset rotation/tilt
@@ -796,6 +801,10 @@ public class MapViewPosition {
 
 		if (mAnimScale) {
 			if (mEndScale > 0)
+				//	double s = (1 + adv * adv * mEndScale);
+				//	mAbsScale = mStartScale * s;
+				//	Log.d(TAG, "scale: " + s + " " + mAbsScale + " " + mStartScale);
+				//}
 				mAbsScale = mStartScale + (mEndScale * (Math.pow(2, adv) - 1));
 			else
 				mAbsScale = mStartScale + (mEndScale * adv);
@@ -827,8 +836,9 @@ public class MapViewPosition {
 
 		if (mAnimScale) {
 			mAbsScale = mStartScale + mEndScale;
-			updatePosition();
 		}
+
+		updatePosition();
 
 		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
