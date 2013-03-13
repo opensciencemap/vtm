@@ -32,7 +32,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
 
@@ -158,7 +158,6 @@ public class MapViewPosition {
 				&& pos.tilt == mTilt)
 			return false;
 
-
 		pos.lat = mLatitude;
 		pos.lon = mLongitude;
 		pos.angle = mRotation;
@@ -166,7 +165,7 @@ public class MapViewPosition {
 
 		// for tiling
 		pos.scale = scale;
-		pos.zoomLevel = (byte)z;
+		pos.zoomLevel = (byte) z;
 
 		pos.x = mAbsX * (Tile.TILE_SIZE << z);
 		pos.y = mAbsY * (Tile.TILE_SIZE << z);
@@ -271,7 +270,7 @@ public class MapViewPosition {
 		z = FastMath.clamp(z, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
 		float scale = (float) (mAbsScale / (1 << z));
 
-		return new MapPosition(mLatitude, mLongitude, (byte)z, scale, mRotation);
+		return new MapPosition(mLatitude, mLongitude, (byte) z, scale, mRotation);
 	}
 
 	/**
@@ -672,14 +671,13 @@ public class MapViewPosition {
 	private boolean mAnimMove;
 	private boolean mAnimFling;
 	private boolean mAnimScale;
-	private final DecelerateInterpolator mDecInterpolator = new DecelerateInterpolator(2);
+	private final AccelerateDecelerateInterpolator mDecInterpolator = new AccelerateDecelerateInterpolator();
 
 	public synchronized void animateTo(BoundingBox bbox) {
 		double dx = MercatorProjection.longitudeToX(bbox.getMaxLongitude())
 				- MercatorProjection.longitudeToX(bbox.getMinLongitude());
 		double dy = MercatorProjection.latitudeToY(bbox.getMinLatitude())
 				- MercatorProjection.latitudeToY(bbox.getMaxLatitude());
-
 
 		double z = Math.min(
 				-LOG4 * Math.log(dx) + (mWidth / Tile.TILE_SIZE),
@@ -716,42 +714,28 @@ public class MapViewPosition {
 		mAnimFling = false;
 		mDuration = 500;
 
-//		double mx = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(),
-//				(byte) ABS_ZOOMLEVEL);
-//		double my = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(),
-//				(byte) ABS_ZOOMLEVEL);
-//
-//		double f = Tile.TILE_SIZE << ABS_ZOOMLEVEL;
-//		double x = mAbsX * f;
-//		double y = mAbsY * f;
-//
-//		mScroller.startScroll((int) x, (int) y, (int) (mx - x), (int) (my - y), (int) mDuration);
-//		mFling = false;
-
 		mHandler.start((int) mDuration);
 	}
 
 	public synchronized void animateTo(GeoPoint geoPoint) {
-
-		double mx = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(),
-				(byte) ABS_ZOOMLEVEL);
-		double my = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(),
-				(byte) ABS_ZOOMLEVEL);
-
 		double f = Tile.TILE_SIZE << ABS_ZOOMLEVEL;
-		double x = mAbsX * f;
-		double y = mAbsY * f;
 
-		mScroller.startScroll((int) x, (int) y, (int) (mx - x), (int) (my - y), (int) mDuration);
+		mStartX = mAbsX * f;
+		mStartY = mAbsY * f;
 
-		mAnimFling = false;
+		mEndX = MercatorProjection.longitudeToX(geoPoint.getLongitude()) * f;
+		mEndY = MercatorProjection.latitudeToY(geoPoint.getLatitude()) * f;
+
+		mEndX -= mStartX;
+		mEndY -= mStartY;
+
+		mAnimMove = true;
 		mAnimScale = false;
-		mAnimMove = false;
+		mAnimFling = false;
 
 		mDuration = 300;
-		mHandler.start((int) mDuration);
+		mHandler.start(mDuration);
 	}
-
 
 	public synchronized void animateFling(int velocityX, int velocityY,
 			int minX, int maxX, int minY, int maxY) {
@@ -767,7 +751,7 @@ public class MapViewPosition {
 		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
 		mDuration = 250;
-		mHandler.start((int) mDuration);
+		mHandler.start(mDuration);
 	}
 
 	public synchronized void animateZoom(float scale) {
@@ -777,7 +761,7 @@ public class MapViewPosition {
 		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
 		mDuration = 300;
-		mHandler.start((int) mDuration);
+		mHandler.start(mDuration);
 	}
 
 	public void updateAnimation() {
@@ -793,49 +777,42 @@ public class MapViewPosition {
 		double dx = mScroller.getCurrX();
 		double dy = mScroller.getCurrY();
 
-		if (mAnimFling) {
-			int mx = (int) (dx - mScrollX);
-			int my = (int) (dy - mScrollY);
+		int mx = (int) (dx - mScrollX);
+		int my = (int) (dy - mScrollY);
 
-			if (mx >= 1 || my >= 1 || mx <= -1 || my <= -1) {
-				moveMap(mx, my);
-				mScrollX = dx;
-				mScrollY = dy;
-			}
+		if (mx >= 1 || my >= 1 || mx <= -1 || my <= -1) {
+			moveMap(mx, my);
+			mScrollX = dx;
+			mScrollY = dy;
 		}
-		else
-			moveAbs(dx, dy);
 		return true;
-	}
-
-	public synchronized void animateTo(float dx, float dy, float duration) {
-		applyRotation(dx, dy);
-
-		mDuration = duration;
-		mHandler.start((int) mDuration);
 	}
 
 	void onTick(long millisLeft) {
 		boolean changed = false;
 
+		float adv = (1.0f - millisLeft / mDuration);
+		adv = mDecInterpolator.getInterpolation(adv);
+
 		if (mAnimScale) {
-			float adv = (1.0f - millisLeft / mDuration);
-			adv = mDecInterpolator.getInterpolation(adv);
-
-			//adv *= adv;
-			mAbsScale = mStartScale + (mEndScale * (Math.pow(2, adv)-1));
-
-			//div = mAbsScale / mStartScale;
-
-			if (mAnimMove)
-				moveAbs(mStartX + mEndX * adv, mStartY + mEndY * adv);
-
-			updatePosition();
+			if (mEndScale > 0)
+				mAbsScale = mStartScale + (mEndScale * (Math.pow(2, adv) - 1));
+			else
+				mAbsScale = mStartScale + (mEndScale * adv);
 
 			changed = true;
 		}
 
-		if (scroll())
+		if (mAnimMove) {
+			moveAbs(mStartX + mEndX * adv, mStartY + mEndY * adv);
+			changed = true;
+		}
+
+		if (changed) {
+			updatePosition();
+		}
+
+		if (mAnimFling && scroll())
 			changed = true;
 
 		if (changed)
@@ -843,13 +820,14 @@ public class MapViewPosition {
 	}
 
 	void onFinish() {
-		if (!mAnimFling && !mScroller.isFinished())
-			moveAbs(mScroller.getFinalX(), mScroller.getFinalY());
 
-		if (mStartScale != 0) {
+		if (mAnimMove) {
+			moveAbs(mStartX + mEndX, mStartY + mEndY);
+		}
+
+		if (mAnimScale) {
 			mAbsScale = mStartScale + mEndScale;
 			updatePosition();
-			mStartScale = 0;
 		}
 
 		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
@@ -875,8 +853,8 @@ public class MapViewPosition {
 			mMapViewPosition = new WeakReference<MapViewPosition>(mapAnimator);
 		}
 
-		public synchronized final void start(int millis) {
-			mMillisInFuture = millis;
+		public synchronized final void start(float millis) {
+			mMillisInFuture = (int) millis;
 			MapViewPosition animator = mMapViewPosition.get();
 			if (animator == null)
 				return;

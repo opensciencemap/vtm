@@ -354,16 +354,6 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		if (debug)
 			printState("onDown");
 
-		//		if (fling) {
-		//			mScroller.forceFinished(true);
-		//
-		//			if (mTimer != null) {
-		//				mTimer.cancel();
-		//				mTimer = null;
-		//			}
-		//			fling = false;
-		//		}
-
 		return true;
 	}
 
@@ -395,25 +385,22 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		int w = Tile.TILE_SIZE * 6;
 		int h = Tile.TILE_SIZE * 6;
 
-		if (mMapView.enablePagedFling) {
+		//if (mMapView.enablePagedFling) {
+		//	double a = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+		//
+		//	float vx = (float) (velocityX / a);
+		//	float vy = (float) (velocityY / a);
+		//
+		//	if (a < 400)
+		//		return true;
+		//
+		//	float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
+		//	mMapPosition.animateTo(vx * move, vy * move, 250);
+		//} else {
+		float s = (300 / mMapView.dpi);
 
-			double a = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
-
-			float vx = (float) (velocityX / a);
-			float vy = (float) (velocityY / a);
-
-			Log.d(TAG, "velocity: " + a + " " + velocityX + " " + velocityY + " - " + vx + " " + vy);
-
-			if (a < 400)
-				return true;
-
-			float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
-			mMapPosition.animateTo(vx * move, vy * move, 250);
-		} else {
-			float s = (300 / mMapView.dpi);
-
-			mMapPosition.animateFling(Math.round(velocityX * s), Math.round(velocityY * s), -w, w, -h, h);
-		}
+		mMapPosition.animateFling(Math.round(velocityX * s), Math.round(velocityY * s), -w, w, -h,
+				h);
 		return true;
 	}
 
