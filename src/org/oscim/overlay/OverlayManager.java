@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.oscim.core.MapPosition;
+import org.oscim.core.PointF;
 import org.oscim.overlay.Overlay.Snappable;
 import org.oscim.renderer.overlays.RenderOverlay;
 
-import android.graphics.Point;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -148,7 +148,7 @@ public class OverlayManager extends AbstractList<Overlay> {
 		return false;
 	}
 
-	public boolean onSnapToItem(final int x, final int y, final Point snapPoint) {
+	public boolean onSnapToItem(final int x, final int y, final PointF snapPoint) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
