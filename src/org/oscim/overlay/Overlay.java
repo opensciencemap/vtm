@@ -20,10 +20,10 @@ package org.oscim.overlay;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.oscim.core.MapPosition;
+import org.oscim.core.PointF;
 import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.view.MapView;
 
-import android.graphics.Point;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -389,7 +389,7 @@ public abstract class Overlay {
 		 *            untouched if not snapping.
 		 * @return Whether or not to snap to the interesting point.
 		 */
-		boolean onSnapToItem(int x, int y, Point snapPoint);
+		boolean onSnapToItem(int x, int y, PointF snapPoint);
 	}
 
 }
