@@ -397,7 +397,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		//	float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
 		//	mMapPosition.animateTo(vx * move, vy * move, 250);
 		//} else {
-		float s = (300 / mMapView.dpi);
+		float s = (200 / mMapView.dpi);
 
 		mMapPosition.animateFling(Math.round(velocityX * s), Math.round(velocityY * s), -w, w, -h,
 				h);
