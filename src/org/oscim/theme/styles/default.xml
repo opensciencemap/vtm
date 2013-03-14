@@ -161,6 +161,27 @@
         </rule>
       </rule>
 
+       <!-- amenity -->
+	    <rule e="way" k="amenity" v="*">
+	      <rule e="way" k="*" v="kindergarten|school|college|university" zoom-min="15">
+	       <!--  <area fill="#cdabde" />-->
+	       <area fill="#cdbbca" fade="15"/>
+	       <line  stroke="#9aabae" width="1.0" fixed="true" cap="butt" fade="15"/>
+	      </rule>
+
+	      <rule e="way" k="*" v="hospital" zoom-min="14">
+	        <area fill="#e6e4c5" />
+	      </rule>
+
+	      <!--  <rule e="way" k="*" v="parking" zoom-min="15">
+	        <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
+	      </rule>
+
+	      <rule e="way" k="*" v="fountain" closed="yes">
+	        <area fill="#b4cbdc" stroke="#000080" stroke-width="0.15" />
+	      </rule>-->
+	    </rule>
+
 	    <!-- landuse -->
 	    <rule e="way" k="landuse" v="*"  zoom-min="11">
 	      <!-- how about 'leisure' for this one? -->
@@ -213,8 +234,7 @@
 
 	    <!-- amenity -->
 	    <rule e="way" k="amenity" v="*">
-	      <rule e="way" k="*" v="kindergarten|school|college|university" zoom-min="15">
-	       <!--  <area fill="#cdabde" />-->
+	     <!--<rule e="way" k="*" v="kindergarten|school|college|university" zoom-min="15">
 	       <area fill="#cdbbca" fade="15"/>
 	       <line  stroke="#9aabae" width="1.0" fixed="true" cap="butt" fade="15"/>
 	      </rule>
@@ -222,7 +242,7 @@
 	      <rule e="way" k="*" v="hospital" zoom-min="14">
 	        <area fill="#e6e4c5" />
 	      </rule>
-
+			-->
 	      <rule e="way" k="*" v="parking" zoom-min="15">
 	        <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
 	      </rule>
