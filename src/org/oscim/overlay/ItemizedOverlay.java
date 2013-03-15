@@ -25,6 +25,7 @@ import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.overlay.OverlayItem.HotspotPlace;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.SymbolLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
 import org.oscim.view.MapView;
@@ -32,7 +33,6 @@ import org.oscim.view.MapView;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.opengl.Matrix;
 
 /* @author Marc Kurtz
  * @author Nicolas Gramlich
@@ -77,8 +77,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	class ItemOverlay extends BasicOverlay {
 
 		private final SymbolLayer mSymbolLayer;
-		private final float[] mMvp = new float[16];
-		private final float[] mVec = new float[4];
+		private final float[] mVec = new float[3];
 
 		public ItemOverlay(MapView mapView) {
 			super(mapView);
@@ -89,7 +88,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		@Override
 		public synchronized void update(MapPosition curPos,
 				boolean positionChanged,
-				boolean tilesChanged) {
+				boolean tilesChanged, Matrices matrices) {
 
 			if (!positionChanged && !mUpdate)
 				return;
@@ -99,12 +98,6 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 			int diff = MAX_ZOOM - curPos.zoomLevel;
 			int mx = (int) curPos.x;
 			int my = (int) curPos.y;
-
-			// TODO could pass mvp as param
-			mMapView.getMapViewPosition().getMatrix(null, null, mMvp);
-
-			float[] matrix = mMvp;
-			float[] vec = mVec;
 
 			// limit could be 1 if we update on every position change
 			float limit = 1.5f;
@@ -139,13 +132,13 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 					}
 
 					// map points to screen
-					vec[0] = it.x;
-					vec[1] = it.y;
-					vec[2] = 0;
-					vec[3] = 1;
-					Matrix.multiplyMV(vec, 0, matrix, 0, vec, 0);
-					float sx = vec[0] / vec[3];
-					float sy = vec[1] / vec[3];
+					mVec[0] = it.x;
+					mVec[1] = it.y;
+					mVec[2] = 0;
+					matrices.viewproj.prj(mVec);
+
+					float sx = mVec[0];
+					float sy = mVec[1];
 
 					// check if it is visible
 					if (sx < -limit || sx > limit || sy < -limit || sy > limit) {

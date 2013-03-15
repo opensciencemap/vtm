@@ -31,7 +31,6 @@ import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 import android.util.Log;
 
 /**
@@ -63,7 +62,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 	@Override
 	public void update(MapPosition curPos, boolean positionChanged,
-			boolean tilesChanged) {
+			boolean tilesChanged, Matrices matrices) {
 
 		mMapView.getMapViewPosition().getMapPosition(mMapPosition);
 
@@ -172,9 +171,6 @@ public class ExtrusionOverlay extends RenderOverlay {
 		// TODO one could render in one pass to texture and then draw the texture
 		// with alpha... might be faster.
 
-		//Matrix.multiplyMM(mVPMatrix, 0, proj, 0, pos.viewMatrix, 0);
-		//proj = mVPMatrix;
-
 		MapTile[] tiles = mTiles;
 
 		float div = FastMath.pow(tiles[0].zoomLevel - pos.zoomLevel);
@@ -200,7 +196,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 				ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
 
 				setMatrix(pos, m, tiles[i], div, 0);
-				GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, m.mvp, 0);
+				m.mvp.setAsUniform(uExtMatrix);
 
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
 				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
@@ -252,7 +248,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
 			int d = GLRenderer.depthOffset(t) * 10;
 			setMatrix(pos, m, t, div, d);
-			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, m.mvp, 0);
+			m.mvp.setAsUniform(uExtMatrix);
 
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
@@ -278,7 +274,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			GLES20.glDepthFunc(GLES20.GL_EQUAL);
 			int d = GLRenderer.depthOffset(t) * 10;
 			setMatrix(pos, m, t, div, d);
-			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, m.mvp, 0);
+			m.mvp.setAsUniform(uExtMatrix);
 
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
@@ -307,8 +303,9 @@ public class ExtrusionOverlay extends RenderOverlay {
 			// drawing gl_lines with the same coordinates does not result in
 			// same depth values as polygons, so add offset and draw gl_lequal:
 			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-			GlUtils.addOffsetM(m.mvp, 100);
-			GLES20.glUniformMatrix4fv(uExtMatrix, 1, false, m.mvp, 0);
+
+			m.mvp.addDepthOffset(100);
+			m.mvp.setAsUniform(uExtMatrix);
 
 			GLES20.glUniform1i(uExtMode, 3);
 			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
@@ -331,13 +328,15 @@ public class ExtrusionOverlay extends RenderOverlay {
 		float y = (float) (tile.pixelY - mapPosition.y * div);
 		float scale = mapPosition.scale / div;
 
-		GlUtils.setTileMatrix(m.mvp, x, y, scale);
+		m.mvp.setTransScale(x * scale, y * scale,
+				scale / GLRenderer.COORD_SCALE);
+
 		// scale height
-		m.mvp[10] = scale / (1000f * GLRenderer.COORD_SCALE);
+		m.mvp.setValue(10, scale / (1000f * GLRenderer.COORD_SCALE));
 
-		Matrix.multiplyMM(m.mvp, 0, m.viewproj, 0, m.mvp, 0);
+		m.mvp.multiplyMM(m.viewproj, m.mvp);
 
-		GlUtils.addOffsetM(m.mvp, delta);
+		m.mvp.addDepthOffset(delta);
 	}
 
 	private final float _a = 0.86f;

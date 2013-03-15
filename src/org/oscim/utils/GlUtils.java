@@ -17,8 +17,6 @@ package org.oscim.utils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.oscim.renderer.GLRenderer;
-
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
@@ -204,37 +202,33 @@ public class GlUtils {
 		return oom;
 	}
 
-	// this is save as it can only be called from glThread
-	private static float[] tmpColor = new float[4];
-
 	public static void setBlendColors(int handle, float[] c1, float[] c2, float mix) {
 		if (mix <= 0f)
 			GLES20.glUniform4fv(handle, 1, c1, 0);
 		else if (mix >= 1f)
 			GLES20.glUniform4fv(handle, 1, c2, 0);
 		else {
-			tmpColor[0] = c1[0] * (1 - mix) + c2[0] * mix;
-			tmpColor[1] = c1[1] * (1 - mix) + c2[1] * mix;
-			tmpColor[2] = c1[2] * (1 - mix) + c2[2] * mix;
-			tmpColor[3] = c1[3] * (1 - mix) + c2[3] * mix;
-			GLES20.glUniform4fv(handle, 1, tmpColor, 0);
+			GLES20.glUniform4f(handle,
+					c1[0] * (1 - mix) + c2[0] * mix,
+					c1[1] * (1 - mix) + c2[1] * mix,
+					c1[2] * (1 - mix) + c2[2] * mix,
+					c1[3] * (1 - mix) + c2[3] * mix);
 		}
 	}
 
 	public static void setColor(int handle, float[] c, float alpha) {
 		if (alpha >= 1) {
-			GLES20.glUniform4fv(handle, 1, c, 0);
+			GLES20.glUniform4f(handle, c[0], c[1], c[2], c[3]);
 		} else {
 			if (alpha < 0) {
 				Log.d(TAG, "setColor: " + alpha);
 				alpha = 0;
+				GLES20.glUniform4f(handle, 0, 0, 0, 0);
 			}
-			tmpColor[0] = c[0] * alpha;
-			tmpColor[1] = c[1] * alpha;
-			tmpColor[2] = c[2] * alpha;
-			tmpColor[3] = c[3] * alpha;
 
-			GLES20.glUniform4fv(handle, 1, tmpColor, 0);
+			GLES20.glUniform4f(handle,
+					c[0] * alpha, c[1] * alpha,
+					c[2] * alpha, c[3] * alpha);
 		}
 	}
 
@@ -280,56 +274,56 @@ public class GlUtils {
 		color[2] = FastMath.clampN((float) (p + (b - p) * change));
 	}
 
-	private final static float[] mIdentity = {
-			1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1 };
-
-	public static void setTileMatrix(float[] matrix, float tx, float ty, float s) {
-		System.arraycopy(mIdentity, 0, matrix, 0, 16);
-		// scale tile relative to map scale
-		matrix[0] = matrix[5] = s / GLRenderer.COORD_SCALE;
-		// translate relative to map center
-		matrix[12] = tx * s;
-		matrix[13] = ty * s;
-	}
-
-	public static void setTranslation(float[] matrix, float x, float y, float z) {
-		System.arraycopy(mIdentity, 0, matrix, 0, 16);
-		matrix[12] = x;
-		matrix[13] = y;
-		matrix[14] = z;
-	}
-
-	public static void setMatrix(float[] matrix, float tx, float ty, float scale) {
-		System.arraycopy(mIdentity, 0, matrix, 0, 16);
-		matrix[12] = tx;
-		matrix[13] = ty;
-		matrix[0] = scale;
-		matrix[5] = scale;
-		//matrix[10] = scale;
-	}
-
-	public static void setIdentity(float[] matrix) {
-		System.arraycopy(mIdentity, 0, matrix, 0, 16);
-	}
-
-	public static void setScaleM(float[] matrix, float sx, float sy, float sz) {
-		System.arraycopy(mIdentity, 0, matrix, 0, 16);
-		matrix[0] = sx;
-		matrix[5] = sy;
-		matrix[10] = sz;
-	}
-
-	public static void addOffsetM(float[] matrix, int delta) {
-		// from http://www.mathfor3dgameprogramming.com/code/Listing9.1.cpp
-		//		float n = MapViewPosition.VIEW_NEAR;
-		//		float f = MapViewPosition.VIEW_FAR;
-		//		float pz = 1;
-		//		float epsilon = -2.0f * f * n * delta / ((f + n) * pz * (pz + delta));
-		float epsilon = 1.0f / (1 << 11);
-
-		matrix[10] *= 1.0f + epsilon * delta;
-	}
+//	private final static float[] mIdentity = {
+//			1, 0, 0, 0,
+//			0, 1, 0, 0,
+//			0, 0, 1, 0,
+//			0, 0, 0, 1 };
+//
+//	public static void setTileMatrix(float[] matrix, float tx, float ty, float s) {
+//		System.arraycopy(mIdentity, 0, matrix, 0, 16);
+//		// scale tile relative to map scale
+//		matrix[0] = matrix[5] = s / GLRenderer.COORD_SCALE;
+//		// translate relative to map center
+//		matrix[12] = tx * s;
+//		matrix[13] = ty * s;
+//	}
+//
+//	public static void setTranslation(float[] matrix, float x, float y, float z) {
+//		System.arraycopy(mIdentity, 0, matrix, 0, 16);
+//		matrix[12] = x;
+//		matrix[13] = y;
+//		matrix[14] = z;
+//	}
+//
+//	public static void setMatrix(float[] matrix, float tx, float ty, float scale) {
+//		System.arraycopy(mIdentity, 0, matrix, 0, 16);
+//		matrix[12] = tx;
+//		matrix[13] = ty;
+//		matrix[0] = scale;
+//		matrix[5] = scale;
+//		//matrix[10] = scale;
+//	}
+//
+//	public static void setIdentity(float[] matrix) {
+//		System.arraycopy(mIdentity, 0, matrix, 0, 16);
+//	}
+//
+//	public static void setScaleM(float[] matrix, float sx, float sy, float sz) {
+//		System.arraycopy(mIdentity, 0, matrix, 0, 16);
+//		matrix[0] = sx;
+//		matrix[5] = sy;
+//		matrix[10] = sz;
+//	}
+//
+//	public static void addOffsetM(float[] matrix, int delta) {
+//		// from http://www.mathfor3dgameprogramming.com/code/Listing9.1.cpp
+//		//		float n = MapViewPosition.VIEW_NEAR;
+//		//		float f = MapViewPosition.VIEW_FAR;
+//		//		float pz = 1;
+//		//		float epsilon = -2.0f * f * n * delta / ((f + n) * pz * (pz + delta));
+//		float epsilon = 1.0f / (1 << 11);
+//
+//		matrix[10] *= 1.0f + epsilon * delta;
+//	}
 }

@@ -44,7 +44,6 @@ import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.TextLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.GlUtils;
 import org.oscim.utils.OBB2D;
 import org.oscim.utils.PausableThread;
 import org.oscim.view.MapView;
@@ -53,7 +52,6 @@ import org.oscim.view.MapViewPosition;
 import android.graphics.Color;
 import android.graphics.Paint.Cap;
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 import android.os.SystemClock;
 
 public class TextOverlay extends BasicOverlay {
@@ -247,7 +245,7 @@ public class TextOverlay extends BasicOverlay {
 
 	private Layers mDebugLayer;
 	private final static float[] mDebugPoints = new float[4];
-	private final float[] mMVP = new float[16];
+	//private final Matrix4 mMVP = new Matrix4();
 
 	void addTile(MapTile t) {
 
@@ -305,7 +303,7 @@ public class TextOverlay extends BasicOverlay {
 		synchronized (mMapViewPosition) {
 			mMapViewPosition.getMapPosition(pos);
 			mMapViewPosition.getMapViewProjection(coords);
-			mMapViewPosition.getMatrix(null, null, mMVP);
+			//mMapViewPosition.getMatrix(null, null, mMVP);
 		}
 		int mw = (mMapView.getWidth() + Tile.TILE_SIZE) / 2;
 		int mh = (mMapView.getHeight() + Tile.TILE_SIZE) / 2;
@@ -617,7 +615,7 @@ public class TextOverlay extends BasicOverlay {
 
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
-			boolean tilesChanged) {
+			boolean tilesChanged, Matrices matrices) {
 
 		if (mNextLayer != null) {
 			// keep text layer, not recrating its canvas each time
@@ -687,10 +685,10 @@ public class TextOverlay extends BasicOverlay {
 
 			for (Layer l = layers.baseLayers; l != null;) {
 				if (l.type == Layer.POLYGON) {
-					l = PolygonRenderer.draw(pos, l, m.mvp, true, false);
+					l = PolygonRenderer.draw(pos, l, m, true, false);
 				} else {
 					float scale = pos.scale * div;
-					l = LineRenderer.draw(layers, l, pos, m.mvp, scale, 0);
+					l = LineRenderer.draw(layers, l, pos, m, scale, 0);
 				}
 			}
 		}
@@ -699,7 +697,7 @@ public class TextOverlay extends BasicOverlay {
 		for (Layer l = layers.textureLayers; l != null;) {
 			float scale = (mMapPosition.scale / pos.scale) * div;
 
-			l = TextureRenderer.draw(l, scale, m.proj, m.mvp);
+			l = TextureRenderer.draw(l, scale, m);
 		}
 
 	}
@@ -714,10 +712,10 @@ public class TextOverlay extends BasicOverlay {
 
 		float scale = (curPos.scale / mMapPosition.scale) / div;
 		float s = curPos.scale / div;
-		GlUtils.setMatrix(m.mvp, x * s, y * s,
+		m.mvp.setTransScale(x * s, y * s,
 				scale / GLRenderer.COORD_SCALE);
 
-		Matrix.multiplyMM(m.mvp, 0, m.view, 0, m.mvp, 0);
+		m.mvp.multiplyMM(m.view, m.mvp);
 	}
 
 	private boolean mHolding;

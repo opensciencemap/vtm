@@ -59,13 +59,13 @@ public abstract class BasicOverlay extends RenderOverlay {
 			for (Layer l = layers.baseLayers; l != null;) {
 				switch (l.type) {
 					case Layer.POLYGON:
-						l = PolygonRenderer.draw(pos, l, m.mvp, true, false);
+						l = PolygonRenderer.draw(pos, l, m, true, false);
 						break;
 					case Layer.LINE:
-						l = LineRenderer.draw(layers, l, pos, m.mvp, div, 0);
+						l = LineRenderer.draw(layers, l, pos, m, div, 0);
 						break;
 					case Layer.TEXLINE:
-						l = LineTexRenderer.draw(layers, l, pos, m.mvp, div);
+						l = LineTexRenderer.draw(layers, l, pos, m, div);
 						break;
 				}
 			}
@@ -77,7 +77,7 @@ public abstract class BasicOverlay extends RenderOverlay {
 			float scale = (mMapPosition.scale / pos.scale) * div;
 
 			for (Layer l = layers.textureLayers; l != null;) {
-				l = TextureRenderer.draw(l, scale, m.proj, m.mvp);
+				l = TextureRenderer.draw(l, scale, m);
 			}
 		}
 	}

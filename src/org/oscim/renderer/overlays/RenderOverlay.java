@@ -19,10 +19,7 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
-
-import android.opengl.Matrix;
 
 public abstract class RenderOverlay {
 
@@ -52,8 +49,9 @@ public abstract class RenderOverlay {
 	 *            true when MapPosition has changed
 	 * @param tilesChanged
 	 *            true when current tiles changed
+	 * @param matrices TODO
 	 */
-	public abstract void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged);
+	public abstract void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged, Matrices matrices);
 
 	/**
 	 * called 2. compile everything for drawing
@@ -102,13 +100,10 @@ public abstract class RenderOverlay {
 		// set scale to be relative to current scale
 		float s = (curPos.scale / oPos.scale) / div;
 
-		GlUtils.setMatrix(m.mvp, x * scale, y * scale,
+		m.mvp.setTransScale(x * scale, y * scale,
 				s / GLRenderer.COORD_SCALE);
 
-		if (project)
-			Matrix.multiplyMM(m.mvp, 0, m.viewproj, 0, m.mvp, 0);
-		else
-			Matrix.multiplyMM(m.mvp, 0, m.view, 0, m.mvp, 0);
+		m.mvp.multiplyMM(project ? m.viewproj : m.view, m.mvp);
 	}
 
 	/**

@@ -22,10 +22,9 @@ import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.GlUtils;
+import org.oscim.utils.Matrix4;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 
 /**
  * This class is for rendering the Line- and PolygonLayers of visible MapTiles.
@@ -38,9 +37,9 @@ import android.opengl.Matrix;
 public class BaseMap {
 	private final static String TAG = BaseMap.class.getName();
 
-	private static float[] mMVPMatrix = new float[16];
-	private static float[] mVPMatrix = new float[16];
-	private static float[] mfProjMatrix = new float[16];
+	//private static Matrix4 mMVPMatrix = new Matrix4();
+	private static Matrix4 mVPMatrix = new Matrix4();
+	private static Matrix4 mfProjMatrix = new Matrix4();
 
 	// used to increase polygon-offset for each tile drawn.
 	private static int mDrawCnt;
@@ -48,17 +47,26 @@ public class BaseMap {
 	// used to not draw a tile twice per frame.
 	private static int mDrawSerial = 0;
 
-	static void setProjection(float[] projMatrix) {
-		System.arraycopy(projMatrix, 0, mfProjMatrix, 0, 16);
+	static void setProjection(Matrix4 projMatrix) {
+		float[] tmp = new float[16];
+		projMatrix.get(tmp);
+		//System.arraycopy(projMatrix, 0, mfProjMatrix, 0, 16);
 		// set to zero: we modify the z value with polygon-offset for clipping
-		mfProjMatrix[10] = 0;
-		mfProjMatrix[14] = 0;
+		tmp[10] = 0;
+		tmp[14] = 0;
+		mfProjMatrix.set(tmp);
 	}
+
+	private static Matrices mMatrices;
 
 	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m) {
 		mDrawCnt = 0;
+		mMatrices = m;
 
-		Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, m.view, 0);
+		// use our 'flat' projection matrix
+		mVPMatrix.multiplyMM(mfProjMatrix, m.view);
+
+		//Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, m.view, 0);
 
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 
@@ -95,7 +103,11 @@ public class BaseMap {
 		LineRenderer.endLines();
 
 		mDrawSerial++;
+
+		// dont keep the ref...
+		mMatrices = null;
 	}
+
 
 	private static void drawTile(MapTile tile, MapPosition pos) {
 		// draw parents only once
@@ -121,11 +133,11 @@ public class BaseMap {
 		float y = (float) (tile.pixelY - pos.y * div);
 		float scale = pos.scale / div;
 
-		float[] mvp = mMVPMatrix;
-		GlUtils.setTileMatrix(mvp, x, y, scale);
+		Matrices m = mMatrices;
+		m.mvp.setTransScale(x * scale, y * scale, scale / GLRenderer.COORD_SCALE);
 
 		// add view-projection matrix
-		Matrix.multiplyMM(mvp, 0, mVPMatrix, 0, mvp, 0);
+		m.mvp.multiplyMM(mVPMatrix, m.mvp);
 
 		// set depth offset (used for clipping to tile boundaries)
 		GLES20.glPolygonOffset(1, mDrawCnt++);
@@ -140,26 +152,26 @@ public class BaseMap {
 		for (Layer l = t.layers.baseLayers; l != null;) {
 			switch (l.type) {
 				case Layer.POLYGON:
-					l = PolygonRenderer.draw(pos, l, mvp, !clipped, true);
+					l = PolygonRenderer.draw(pos, l, m, !clipped, true);
 					clipped = true;
 					break;
 
 				case Layer.LINE:
 					if (!clipped) {
 						// draw stencil buffer clip region
-						PolygonRenderer.draw(pos, null, mvp, true, true);
+						PolygonRenderer.draw(pos, null, m, true, true);
 						clipped = true;
 					}
-					l = LineRenderer.draw(t.layers, l, pos, mvp, div, simpleShader);
+					l = LineRenderer.draw(t.layers, l, pos, m, div, simpleShader);
 					break;
 
 				case Layer.TEXLINE:
 					if (!clipped) {
 						// draw stencil buffer clip region
-						PolygonRenderer.draw(pos, null, mvp, true, true);
+						PolygonRenderer.draw(pos, null, m, true, true);
 						clipped = true;
 					}
-					l = LineTexRenderer.draw(t.layers, l, pos, mvp, div);
+					l = LineTexRenderer.draw(t.layers, l, pos, m, div);
 					break;
 
 				default:
@@ -169,7 +181,7 @@ public class BaseMap {
 		}
 
 		// clear clip-region and could also draw 'fade-effect'
-		PolygonRenderer.drawOver(mvp);
+		PolygonRenderer.drawOver(m);
 	}
 
 	private static int drawProxyChild(MapTile tile, MapPosition pos) {

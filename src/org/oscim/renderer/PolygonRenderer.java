@@ -37,6 +37,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.PolygonLayer;
 import org.oscim.theme.renderinstruction.Area;
@@ -105,12 +106,8 @@ public final class PolygonRenderer {
 				}
 				GLState.blend(true);
 
-				if (f < 1) {
-					GlUtils.setColor(hPolygonColor, a.color,
-							f * a.color[3]);
-				} else {
-					glUniform4fv(hPolygonColor, 1, a.color, 0);
-				}
+				GlUtils.setColor(hPolygonColor, a.color, f);
+
 			} else if (a.blend > 0 && a.blend <= zoom) {
 				/* blend colors (not alpha) */
 				GLState.blend(false);
@@ -119,7 +116,7 @@ public final class PolygonRenderer {
 					GlUtils.setBlendColors(hPolygonColor,
 							a.color, a.blendColor, scale - 1.0f);
 				else
-					glUniform4fv(hPolygonColor, 1, a.blendColor, 0);
+					GlUtils.setColor(hPolygonColor, a.blendColor, 1);
 
 			} else {
 				if (a.color[3] != 1)
@@ -127,7 +124,7 @@ public final class PolygonRenderer {
 				else
 					GLState.blend(false);
 
-				glUniform4fv(hPolygonColor, 1, a.color, 0);
+				GlUtils.setColor(hPolygonColor, a.color, 1);
 			}
 
 			// set stencil buffer mask used to draw this layer
@@ -152,8 +149,8 @@ public final class PolygonRenderer {
 	 *            in layer.area.
 	 * @param layer
 	 *            layer to draw (referencing vertices in current vbo)
-	 * @param matrix
-	 *            mvp matrix
+	 * @param m
+	 *            current Matrices
 	 * @param first
 	 *            pass true to clear stencil buffer region
 	 * @param clip
@@ -162,7 +159,7 @@ public final class PolygonRenderer {
 	 *         next layer
 	 */
 	public static Layer draw(MapPosition pos, Layer layer,
-			float[] matrix, boolean first, boolean clip) {
+			Matrices m, boolean first, boolean clip) {
 
 		GLState.test(false, true);
 
@@ -170,7 +167,8 @@ public final class PolygonRenderer {
 		GLState.enableVertexArrays(hPolygonVertexPosition, -1);
 		glVertexAttribPointer(hPolygonVertexPosition, 2, GL_SHORT,
 				false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
-		glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
+
+		m.mvp.setAsUniform(hPolygonMatrix);
 
 		int zoom = pos.zoomLevel;
 		int cur = mCount;
@@ -296,7 +294,7 @@ public final class PolygonRenderer {
 		}
 	}
 
-	static void drawOver(float[] matrix) {
+	static void drawOver(Matrices m) {
 		if (GLState.useProgram(polygonProgram)) {
 
 			GLState.enableVertexArrays(hPolygonVertexPosition, -1);
@@ -304,7 +302,7 @@ public final class PolygonRenderer {
 			glVertexAttribPointer(hPolygonVertexPosition, 2, GL_SHORT,
 					false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
 
-			glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
+			m.mvp.setAsUniform(hPolygonMatrix);
 		}
 
 		/*
