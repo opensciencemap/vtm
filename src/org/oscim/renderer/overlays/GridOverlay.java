@@ -16,6 +16,7 @@ package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.layer.TextItem;
@@ -105,7 +106,7 @@ public class GridOverlay extends BasicOverlay {
 
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
-			boolean tilesChanged) {
+			boolean tilesChanged, Matrices matrices) {
 
 		updateMapPosition();
 

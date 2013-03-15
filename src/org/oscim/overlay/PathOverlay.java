@@ -22,6 +22,7 @@ import java.util.List;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
@@ -73,7 +74,7 @@ public class PathOverlay extends Overlay {
 		@Override
 		public synchronized void update(MapPosition curPos,
 				boolean positionChanged,
-				boolean tilesChanged) {
+				boolean tilesChanged, Matrices matrices) {
 
 			if (!tilesChanged && !mUpdatePoints)
 				return;

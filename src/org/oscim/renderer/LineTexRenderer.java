@@ -19,6 +19,7 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
@@ -57,7 +58,7 @@ public class LineTexRenderer {
 	// batch up up to 64 quads in one draw call
 	private static int maxQuads = 64;
 	private static int maxIndices = maxQuads * 6;
-	private static int[] mTexID;
+	//private static int[] mTexID;
 
 	public static void init() {
 		shader = GlUtils.createProgram(vertexShader, fragmentShader);
@@ -132,7 +133,7 @@ public class LineTexRenderer {
 	private final static int LEN_OFFSET = 8;
 
 	public static Layer draw(Layers layers, Layer curLayer,
-			MapPosition pos, float[] matrix, float div) {
+			MapPosition pos, Matrices m, float div) {
 
 		GLState.blend(true);
 		GLState.useProgram(shader);
@@ -145,7 +146,8 @@ public class LineTexRenderer {
 		GLES20.glEnableVertexAttribArray(hVertexLength1);
 		GLES20.glEnableVertexAttribArray(hVertexFlip);
 
-		GLES20.glUniformMatrix4fv(hMatrix, 1, false, matrix, 0);
+		//GLES20.glUniformMatrix4fv(hMatrix, 1, false, matrix, 0);
+		m.mvp.setAsUniform(hMatrix);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
 				mIndicesBufferID);
@@ -179,8 +181,6 @@ public class LineTexRenderer {
 			GLES20.glUniform1f(hScale, pos.scale);
 			// keep line width fixed
 			GLES20.glUniform1f(hWidth, ll.width / s * COORD_SCALE_BY_DIR_SCALE);
-
-			GlUtils.checkGlError("0");
 
 			// add offset vertex
 			int vOffset = -STRIDE;
@@ -246,7 +246,7 @@ public class LineTexRenderer {
 
 			l = l.next;
 
-			GlUtils.checkGlError(TAG);
+			//GlUtils.checkGlError(TAG);
 		}
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);

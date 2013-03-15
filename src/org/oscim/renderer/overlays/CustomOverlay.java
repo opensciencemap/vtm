@@ -54,7 +54,7 @@ public class CustomOverlay extends RenderOverlay {
 
 	// ---------- everything below runs in GLRender Thread ----------
 	@Override
-	public void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged) {
+	public void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged, Matrices matrices) {
 		if (!mInitialized) {
 			if (!init())
 				return;
@@ -107,13 +107,7 @@ public class CustomOverlay extends RenderOverlay {
 		// set mvp (tmp) matrix relative to mMapPosition
 		// i.e. fixed on the map
 		setMatrix(pos, m);
-
-		//Matrix.multiplyMM(tmp, 0, proj, 0, tmp, 0);
-
-		// or set mvp matrix fixed on screen center
-		// Matrix.multiplyMM(tmp, 0, proj, 0, pos.viewMatrix, 0);
-
-		GLES20.glUniformMatrix4fv(hMatrixPosition, 1, false, m.mvp, 0);
+		m.mvp.setAsUniform(hMatrixPosition);
 
 		// Draw the triangle
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);

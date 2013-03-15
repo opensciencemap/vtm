@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.TextureLayer;
 import org.oscim.utils.GlUtils;
@@ -92,7 +93,7 @@ public final class TextureRenderer {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	public static Layer draw(Layer layer, float scale, float[] projection, float matrix[]) {
+	public static Layer draw(Layer layer, float scale, Matrices m) {
 		GLState.test(false, false);
 		GLState.blend(true);
 
@@ -109,8 +110,8 @@ public final class TextureRenderer {
 
 		GLES20.glUniform1f(hTextureScreenScale, 1f / GLRenderer.mWidth);
 
-		GLES20.glUniformMatrix4fv(hTextureProjMatrix, 1, false, projection, 0);
-		GLES20.glUniformMatrix4fv(hTextureMVMatrix, 1, false, matrix, 0);
+		m.proj.setAsUniform(hTextureProjMatrix);
+		m.mvp.setAsUniform(hTextureMVMatrix);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesVBO);
 
@@ -142,8 +143,6 @@ public final class TextureRenderer {
 		}
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		// GlUtils.checkGlError("< draw texture");
 
 		return layer.next;
 	}

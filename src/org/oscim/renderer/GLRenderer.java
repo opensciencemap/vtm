@@ -37,12 +37,12 @@ import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.theme.RenderTheme;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
+import org.oscim.utils.Matrix4;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -75,15 +75,15 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static int mBufferMemoryUsage;
 
 	private static float[] mTileCoords = new float[8];
-	private static float[] mDebugCoords = new float[8];
+	//private static float[] mDebugCoords = new float[8];
 
 	public class Matrices {
-		public final float[] viewproj = new float[16];
-		public final float[] proj = new float[16];
-		public final float[] view = new float[16];
+		public final Matrix4 viewproj = new Matrix4();
+		public final Matrix4 proj = new Matrix4();
+		public final Matrix4 view = new Matrix4();
 
 		// for temporary use by callee
-		public final float[] mvp = new float[16];
+		public final Matrix4 mvp = new Matrix4();
 	}
 
 	private static Matrices mMatrices;
@@ -476,7 +476,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		List<RenderOverlay> overlays = mMapView.getOverlayManager().getRenderLayers();
 
 		for (int i = 0, n = overlays.size(); i < n; i++)
-			overlays.get(i).update(mMapPosition, positionChanged, tilesChanged);
+			overlays.get(i).update(mMapPosition, positionChanged, tilesChanged, mMatrices);
 
 		/* draw base layer */
 		BaseMap.draw(tiles, tileCnt, pos, mMatrices);
@@ -498,30 +498,30 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start));
 		}
 
-		if (debugView) {
-			GLState.test(false, false);
-
-			float mm = 0.5f;
-			float min = -mm;
-			float max = mm;
-			float ymax = mm * mHeight / mWidth;
-			mDebugCoords[0] = min;
-			mDebugCoords[1] = ymax;
-			mDebugCoords[2] = max;
-			mDebugCoords[3] = ymax;
-			mDebugCoords[4] = min;
-			mDebugCoords[5] = -ymax;
-			mDebugCoords[6] = max;
-			mDebugCoords[7] = -ymax;
-
-			PolygonRenderer.debugDraw(mMatrices.proj, mDebugCoords, 0);
-
-			pos.zoomLevel = -1;
-			mMapViewPosition.getMapViewProjection(mDebugCoords);
-
-			PolygonRenderer.debugDraw(mMatrices.viewproj, mDebugCoords, 1);
-
-		}
+		//if (debugView) {
+		//	GLState.test(false, false);
+		//
+		//	float mm = 0.5f;
+		//	float min = -mm;
+		//	float max = mm;
+		//	float ymax = mm * mHeight / mWidth;
+		//	mDebugCoords[0] = min;
+		//	mDebugCoords[1] = ymax;
+		//	mDebugCoords[2] = max;
+		//	mDebugCoords[3] = ymax;
+		//	mDebugCoords[4] = min;
+		//	mDebugCoords[5] = -ymax;
+		//	mDebugCoords[6] = max;
+		//	mDebugCoords[7] = -ymax;
+		//
+		//	PolygonRenderer.debugDraw(mMatrices.proj, mDebugCoords, 0);
+		//
+		//	pos.zoomLevel = -1;
+		//	mMapViewPosition.getMapViewProjection(mDebugCoords);
+		//
+		//	PolygonRenderer.debugDraw(mMatrices.viewproj, mDebugCoords, 1);
+		//
+		//}
 
 		if (GlUtils.checkGlOutOfMemory("finish")) {
 			checkBufferUsage(true);
@@ -583,13 +583,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		mMapViewPosition.getMatrix(null, mMatrices.proj, null);
 
-		if (debugView) {
-			// modify this to scale only the view, to see better which tiles are
-			// rendered
-			Matrix.setIdentityM(mMatrices.mvp, 0);
-			Matrix.scaleM(mMatrices.mvp, 0, 0.5f, 0.5f, 1);
-			Matrix.multiplyMM(mMatrices.proj, 0, mMatrices.mvp, 0, mMatrices.proj, 0);
-		}
+		//if (debugView) {
+		//	// modify this to scale only the view, to see better which tiles are
+		//	// rendered
+		//	Matrix.setIdentityM(mMatrices.mvp, 0);
+		//	Matrix.scaleM(mMatrices.mvp, 0, 0.5f, 0.5f, 1);
+		//	Matrix.multiplyMM(mMatrices.proj, 0, mMatrices.mvp, 0, mMatrices.proj, 0);
+		//}
 
 		BaseMap.setProjection(mMatrices.proj);
 

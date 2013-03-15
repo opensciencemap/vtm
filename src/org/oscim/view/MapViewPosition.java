@@ -25,7 +25,7 @@ import org.oscim.core.PointD;
 import org.oscim.core.PointF;
 import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.GlUtils;
+import org.oscim.utils.Matrix4;
 
 import android.opengl.Matrix;
 import android.os.Handler;
@@ -98,13 +98,13 @@ public class MapViewPosition {
 		});
 	}
 
-	private final float[] mProjMatrix = new float[16];
-	private final float[] mProjMatrixI = new float[16];
-	private final float[] mUnprojMatrix = new float[16];
-	private final float[] mViewMatrix = new float[16];
-	private final float[] mVPMatrix = new float[16];
-	private final float[] mRotMatrix = new float[16];
-	private final float[] mTmpMatrix = new float[16];
+	private final Matrix4 mProjMatrix = new Matrix4();
+	private final Matrix4 mProjMatrixI = new Matrix4();
+	private final Matrix4 mRotMatrix = new Matrix4();
+	private final Matrix4 mViewMatrix = new Matrix4();
+	private final Matrix4 mVPMatrix = new Matrix4();
+	private final Matrix4 mUnprojMatrix = new Matrix4();
+	private final Matrix4 mTmpMatrix = new Matrix4();
 
 	// temporary vars: only use in synchronized functions!
 	private final PointD mMovePoint = new PointD();
@@ -123,14 +123,18 @@ public class MapViewPosition {
 	void setViewport(int width, int height) {
 		float s = VIEW_SCALE;
 		float aspect = height / (float) width;
+		float[] tmp = new float[16];
 
-		Matrix.frustumM(mProjMatrix, 0, -s, s,
+		Matrix.frustumM(tmp, 0, -s, s,
 				aspect * s, -aspect * s, VIEW_NEAR, VIEW_FAR);
 
-		GlUtils.setTranslation(mTmpMatrix, 0, 0, -VIEW_DISTANCE);
-		Matrix.multiplyMM(mProjMatrix, 0, mProjMatrix, 0, mTmpMatrix, 0);
+		mProjMatrix.set(tmp);
+		mTmpMatrix.setTranslation(0, 0, -VIEW_DISTANCE);
+		mProjMatrix.multiplyMM(mTmpMatrix);
+		mProjMatrix.get(tmp);
 
-		Matrix.invertM(mProjMatrixI, 0, mProjMatrix, 0);
+		Matrix.invertM(tmp, 0, tmp, 0);
+		mProjMatrixI.set(tmp);
 
 		mHeight = height;
 		mWidth = width;
@@ -180,15 +184,15 @@ public class MapViewPosition {
 	 * @param proj projection Matrix
 	 * @param vp view and projection
 	 */
-	public synchronized void getMatrix(float[] view, float[] proj, float[] vp) {
+	public synchronized void getMatrix(Matrix4 view, Matrix4 proj, Matrix4 vp) {
 		if (view != null)
-			System.arraycopy(mViewMatrix, 0, view, 0, 16);
+			view.copy(mViewMatrix);
 
 		if (proj != null)
-			System.arraycopy(mProjMatrix, 0, proj, 0, 16);
+			proj.copy(mProjMatrix);
 
 		if (vp != null)
-			System.arraycopy(mVPMatrix, 0, vp, 0, 16);
+			vp.copy(mVPMatrix);
 	}
 
 	/**
@@ -233,23 +237,21 @@ public class MapViewPosition {
 		mv[0] = 0;
 		mv[1] = (float) (ry / ua);
 		mv[2] = (float) (cx - cx / ua);
-		mv[3] = 1;
 
-		Matrix.multiplyMV(mv, 0, mProjMatrix, 0, mv, 0);
+		mProjMatrix.prj(mv);
 
-		return mv[2] / mv[3];
+		return mv[2];
 	}
 
 	private void unproject(float x, float y, float z, float[] coords, int position) {
 		mv[0] = x;
 		mv[1] = y;
 		mv[2] = z;
-		mv[3] = 1;
 
-		Matrix.multiplyMV(mv, 0, mUnprojMatrix, 0, mv, 0);
+		mUnprojMatrix.prj(mv);
 
-		coords[position + 0] = mv[0] / mv[3];
-		coords[position + 1] = mv[1] / mv[3];
+		coords[position + 0] = mv[0];
+		coords[position + 1] = mv[1];
 	}
 
 	/** @return the current center point of the MapView. */
@@ -400,11 +402,9 @@ public class MapViewPosition {
 		mv[2] = 0;
 		mv[3] = 1;
 
-		Matrix.multiplyMV(mv, 0, mVPMatrix, 0, mv, 0);
-
-		// positive direction is down and right;
-		out.x = (int) ((mv[0] / mv[3]) * (mWidth / 2));
-		out.y = (int) -((mv[1] / mv[3]) * (mHeight / 2));
+		mVPMatrix.prj(mv);
+		out.x = (int) (mv[0] * (mWidth / 2));
+		out.y = (int) -(mv[1] * (mHeight / 2));
 	}
 
 	private void updateMatrix() {
@@ -417,37 +417,34 @@ public class MapViewPosition {
 		// 4. translate to VIEW_DISTANCE
 		// 5. apply projection
 
-		Matrix.setRotateM(mRotMatrix, 0, mRotation, 0, 0, 1);
+		mRotMatrix.setRotation(mRotation, 0, 0, 1);
 
 		// tilt map
-		float tilt = mTilt;
-		Matrix.setRotateM(mTmpMatrix, 0, tilt, 1, 0, 0);
+		mTmpMatrix.setRotation(mTilt, 1, 0, 0);
 
 		// apply first rotation, then tilt
-		Matrix.multiplyMM(mRotMatrix, 0, mTmpMatrix, 0, mRotMatrix, 0);
+		mRotMatrix.multiplyMM(mTmpMatrix, mRotMatrix);
 
 		// scale to window coordinates
-		GlUtils.setScaleM(mTmpMatrix, 1 / mWidth, 1 / mWidth, 1);
+		mTmpMatrix.setScale(1 / mWidth, 1 / mWidth, 1);
 
-		Matrix.multiplyMM(mViewMatrix, 0, mRotMatrix, 0, mTmpMatrix, 0);
+		mViewMatrix.multiplyMM(mRotMatrix, mTmpMatrix);
 
-		Matrix.multiplyMM(mVPMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);
+		mVPMatrix.multiplyMM(mProjMatrix, mViewMatrix);
 
 		//--- unproject matrix:
-		// Matrix.multiplyMM(mTmpMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);
-		// Matrix.invertM(mUnprojMatrix, 0, mTmpMatrix, 0);
 
 		// inverse scale
-		GlUtils.setScaleM(mUnprojMatrix, mWidth, mWidth, 1);
+		mUnprojMatrix.setScale(mWidth, mWidth, 1);
 
 		// inverse rotation and tilt
-		Matrix.transposeM(mTmpMatrix, 0, mRotMatrix, 0);
+		mTmpMatrix.transposeM(mRotMatrix);
 
 		// (AB)^-1 = B^-1*A^-1, unapply scale, tilt and rotation
-		Matrix.multiplyMM(mTmpMatrix, 0, mUnprojMatrix, 0, mTmpMatrix, 0);
+		mTmpMatrix.multiplyMM(mUnprojMatrix, mTmpMatrix);
 
 		// (AB)^-1 = B^-1*A^-1, unapply projection
-		Matrix.multiplyMM(mUnprojMatrix, 0, mTmpMatrix, 0, mProjMatrixI, 0);
+		mUnprojMatrix.multiplyMM(mTmpMatrix, mProjMatrixI);
 	}
 
 	/** @return true if this MapViewPosition is valid, false otherwise. */

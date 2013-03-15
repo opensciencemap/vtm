@@ -20,12 +20,11 @@ import static android.opengl.GLES20.glDrawArrays;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glUniform1f;
-import static android.opengl.GLES20.glUniform4fv;
-import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
 import org.oscim.core.MapPosition;
 import org.oscim.generator.TileGenerator;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
@@ -109,7 +108,7 @@ public final class LineRenderer {
 	}
 
 	public static Layer draw(Layers layers, Layer curLayer, MapPosition pos,
-			float[] matrix, float div, int mode) {
+			Matrices m, float div, int mode) {
 
 		if (curLayer == null)
 			return null;
@@ -128,7 +127,8 @@ public final class LineRenderer {
 		glVertexAttribPointer(hLineVertexPosition[mode], 4, GL_SHORT,
 				false, 0, layers.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
 
-		glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
+		//glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
+		m.mvp.setAsUniform(hLineMatrix[mode]);
 
 		int zoom = pos.zoomLevel;
 		float scale = pos.scale;
@@ -163,7 +163,7 @@ public final class LineRenderer {
 			float width;
 
 			if (line.fade < zoom) {
-				glUniform4fv(uLineColor, 1, line.color, 0);
+				GlUtils.setColor(uLineColor, line.color, 1);
 			} else if (line.fade > zoom) {
 				continue;
 			} else {
