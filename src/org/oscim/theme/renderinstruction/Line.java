@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 import org.oscim.core.Tag;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
-import org.oscim.utils.GlUtils;
 import org.xml.sax.Attributes;
 
 import android.graphics.Color;
@@ -66,8 +65,9 @@ public final class Line extends RenderInstruction {
 		int stipple = 0;
 		float stippleWidth = 0;
 
-		float[] color = null;
-		float[] stippleColor = null;
+		int color = Color.RED;
+
+		int stippleColor = Color.BLACK;
 
 		if (line != null) {
 			color = line.color;
@@ -90,8 +90,7 @@ public final class Line extends RenderInstruction {
 			else if ("src".equals(name)) {
 				//src = value;
 			} else if ("stroke".equals(name)) {
-				int stroke = Color.parseColor(value);
-				color = GlUtils.colorToFloatP(stroke);
+				color = Color.parseColor(value);
 			} else if ("width".equals(name)) {
 				width = Float.parseFloat(value);
 			} else if ("cap".equals(name)) {
@@ -101,8 +100,7 @@ public final class Line extends RenderInstruction {
 			} else if ("stipple".equals(name)) {
 				stipple = Integer.parseInt(value);
 			} else if ("stipple-stroke".equals(name)) {
-				int stroke = Color.parseColor(value);
-				stippleColor = GlUtils.colorToFloatP(stroke);
+				stippleColor =  Color.parseColor(value);
 			} else if ("stipple-width".equals(name)) {
 				stippleWidth = Float.parseFloat(value);
 			} else if ("fade".equals(name)) {
@@ -116,13 +114,6 @@ public final class Line extends RenderInstruction {
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
-
-		// hint that sth is missing
-		if (color == null)
-			color = GlUtils.colorToFloatP(Color.RED);
-
-		if (stipple != 0 && stippleColor == null)
-			stippleColor = GlUtils.colorToFloatP(Color.GREEN);
 
 		// inherit properties from 'line'
 		if (line != null) {
@@ -160,7 +151,7 @@ public final class Line extends RenderInstruction {
 
 	public final String style;
 	public final float width;
-	public final float[] color;
+	public final int color;
 	public final Cap cap;
 	public final boolean outline;
 	public final boolean fixed;
@@ -169,14 +160,14 @@ public final class Line extends RenderInstruction {
 	public final float min;
 
 	public final int stipple;
-	public final float[] stippleColor;
+	public final int stippleColor;
 	public final float stippleWidth;
 
 
 
-	private Line(int level, String style, float[] color, float width,
+	private Line(int level, String style, int color, float width,
 			Cap cap, boolean fixed,
-			int stipple, float[] stippleColor, float stippleWidth,
+			int stipple, int stippleColor, float stippleWidth,
 			int fade, float blur, boolean isOutline, float min) {
 
 		this.level = level;
@@ -222,10 +213,10 @@ public final class Line extends RenderInstruction {
 		this.fixed = true;
 		this.fade = -1;
 		this.stipple = 0;
-		this.stippleColor = null;
+		this.stippleColor = Color.BLACK;
 		this.stippleWidth = 0;
 		this.min = 0;
-		this.color = GlUtils.colorToFloatP(stroke);
+		this.color = stroke; //GlUtils.colorToFloatP(stroke);
 	}
 
 	public Line(int stroke, float width, int stipple) {
@@ -238,10 +229,10 @@ public final class Line extends RenderInstruction {
 		this.fixed = true;
 		this.fade = -1;
 		this.stipple = stipple;
-		this.stippleColor = null;
+		this.stippleColor = Color.BLACK;
 		this.stippleWidth = 0.6f;
 		this.min = 0;
-		color = GlUtils.colorToFloatP(stroke);
+		color = stroke; //GlUtils.colorToFloatP(stroke);
 	}
 
 	@Override

@@ -167,12 +167,8 @@ public class LineTexRenderer {
 			LineTexLayer ll = (LineTexLayer) l;
 			Line line = ll.line;
 
-			if (line.stippleColor == null)
-				GLES20.glUniform4f(hTexColor, 1.0f, 1.0f, 1.0f, 1.0f);
-			else
-				GLES20.glUniform4fv(hTexColor, 1, line.stippleColor, 0);
-
-			GLES20.glUniform4fv(hBgColor, 1, line.color, 0);
+			GlUtils.setColor(hTexColor, line.stippleColor, 1);
+			GlUtils.setColor(hBgColor, line.color, 1);
 
 			float ps = FastMath.clamp((int) (s+0.5f), 1, 3);
 			GLES20.glUniform1f(hPatternScale, (GLRenderer.COORD_SCALE * line.stipple) / ps);

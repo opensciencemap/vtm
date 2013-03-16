@@ -26,6 +26,10 @@ import android.util.Log;
  * Utility functions
  */
 public class GlUtils {
+
+	public static native void setColor(int location, int color, float alpha);
+	public static native void setColorBlend(int location, int color1, int color2, float mix);
+
 	private static String TAG = "GlUtils";
 
 	public static void setTextureParameter(int min_filter, int mag_filter, int wrap_s, int wrap_t) {
@@ -201,6 +205,7 @@ public class GlUtils {
 		}
 		return oom;
 	}
+
 
 	public static void setBlendColors(int handle, float[] c1, float[] c2, float mix) {
 		if (mix <= 0f)
