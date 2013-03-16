@@ -467,6 +467,6 @@ public class ExtrusionLayer extends Layer {
 			int ioffset);
 
 	static {
-		System.loadLibrary("triangle-jni");
+		System.loadLibrary("triangle");
 	}
 }
