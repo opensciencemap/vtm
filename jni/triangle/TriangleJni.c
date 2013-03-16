@@ -13,7 +13,8 @@
 int pnpoly(int nvert, float *vert, float testx, float testy)
 {
 	int i, j, c = 0;
-	for (i = 0, j = (nvert-1)*2; i < nvert * 2; j = i++) {
+	for (i = 0, j = (nvert-1)*2; i < nvert * 2; j = i++)
+	{
 		if ( ((vert[i*2+1] > testy) != (vert[j*j+1] > testy)) &&
 				(testx < (vert[j*2]-vert[i*2])
 						* (testy - vert[i*2+1])
@@ -26,7 +27,8 @@ int pnpoly(int nvert, float *vert, float testx, float testy)
 
 //#define TESTING
 
-int compare_dups(const void *a, const void *b) {
+int compare_dups(const void *a, const void *b)
+{
 	int da = *((const int*) a);
 	int db = *((const int*) b);
 
@@ -35,31 +37,42 @@ int compare_dups(const void *a, const void *b) {
 
 typedef struct triangulateio TriangleIO;
 
-jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
-		jobject point_buf, jint num_rings, jobject indice_buf, jint offset) {
-	jfloat* points = (jfloat*) (*env)->GetDirectBufferAddress(env, point_buf);
+jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env,
+		jclass c, jfloatArray obj_points, jint pos, jint len, jint num_rings,
+		jobject indice_buf, jint offset)
+{
+
 	jshort* indices = (jshort*) (*env)->GetDirectBufferAddress(env, indice_buf);
+	jboolean isCopy;
+
+	float* orig_points = (float*) (*env)->GetPrimitiveArrayCritical(env,
+			obj_points, &isCopy);
+	if (orig_points == NULL)
+		return 0;
+
+	if (isCopy)
+		printf("Poor bugger: VM copied array");
+
+	float *points = orig_points + pos;
 
 	TriangleIO in, out;
 	char buf[128];
 
 	memset(&in, 0, sizeof(TriangleIO));
 
-	//int num_points = (indices[0])>>1;
-	in.numberofpoints = (indices[0]) >> 1;
+	in.numberofpoints = len >> 1;
 	in.pointlist = (float *) points;
 
 	// check if explicitly closed
-	if (in.pointlist[0] == in.pointlist[indices[1] - 2]
-			&& in.pointlist[1] == in.pointlist[indices[1] - 1]) {
+	if (in.pointlist[0] == in.pointlist[indices[0] - 2]
+			&& in.pointlist[1] == in.pointlist[indices[0] - 1])
+	{
 		int point = 0;
-		for (int i = 0; i < num_rings; i++) {
+		for (int i = 0; i < num_rings; i++)
+		{
 			// remove last point in ring
-			indices[i + 1] -= 2;
-			int last = point + (indices[i + 1] >> 1);
-
-			//sprintf(buf, "drop closing point at %d, %d:\n", point, last);
-			//mylog(buf);
+			indices[i] -= 2;
+			int last = point + (indices[i] >> 1);
 
 			if (in.numberofpoints - last > 1)
 				memmove(in.pointlist + (last * 2),
@@ -70,7 +83,6 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 			point = last;
 		}
 	}
-	
 
 	int dups = 0;
 
@@ -79,13 +91,16 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 
 	// check for duplicate vertices and keep a list
 	// of dups and the first occurence
-	for (int i = 0; i < in.numberofpoints - 1; i++) {
+	for (int i = 0; i < in.numberofpoints - 1; i++)
+	{
 		float x = *i_points++;
 		float y = *i_points++;
 		float *j_points = i_points;
 
-		for (int j = i + 1; j < in.numberofpoints; j++, j_points += 2) {
-			if ((*j_points == x) && (*(j_points + 1) == y)) {
+		for (int j = i + 1; j < in.numberofpoints; j++, j_points += 2)
+		{
+			if ((*j_points == x) && (*(j_points + 1) == y))
+			{
 				skip_list = realloc(skip_list, (dups + 2) * 2 * sizeof(int));
 				skip_list[dups * 2 + 0] = j;
 				skip_list[dups * 2 + 1] = i;
@@ -95,7 +110,8 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	}
 
 #ifdef TESTING
-	for (i = 0; i < in.numberofpoints; i++) {
+	for (i = 0; i < in.numberofpoints; i++)
+	{
 		printf("point: %f, %f\n", points[i*2], points[i*2+1]);
 	}
 	printf("points: %d, rings: %d\n", in.numberofpoints, num_rings);
@@ -105,7 +121,8 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	in.numberofholes = num_rings - 1;
 
 	int *rings = NULL;
-	if (in.numberofholes > 0) {
+	if (in.numberofholes > 0)
+	{
 		in.holelist = (float *) malloc(in.numberofholes * 2 * sizeof(float));
 		rings = (int*) malloc(num_rings * sizeof(int));
 	}
@@ -119,9 +136,10 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	int ring;
 
 	// assign all points to segments for each ring
-	for (ring = 0, point = 0; ring < num_rings; ring++, point++) {
+	for (ring = 0, point = 0; ring < num_rings; ring++, point++)
+	{
 		int len;
-		int num_points = indices[ring + 1] >> 1;
+		int num_points = indices[ring] >> 1;
 
 		if (rings)
 			rings[ring] = num_points;
@@ -131,7 +149,8 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 		// 'parallel' lines have a distance of at least
 		// 1 unit. you'll notice when things went wrong
 		// when the hole is rendered instead of the poly
-		if (ring > 0) {
+		if (ring > 0)
+		{
 			int k = point * 2;
 
 			float nx = in.pointlist[k++];
@@ -140,7 +159,8 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 			float cx, cy, vx, vy;
 
 			// try to find a large enough segment
-			for (len = (point + num_points) * 2; k < len;) {
+			for (len = (point + num_points) * 2; k < len;)
+			{
 				cx = nx;
 				cy = ny;
 
@@ -171,16 +191,18 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 		*seg++ = last;
 		*seg++ = point;
 
-		for (len = point + num_points - 1; point < len; point++) {
+		for (len = point + num_points - 1; point < len; point++)
+		{
 			*seg++ = point;
 			*seg++ = point + 1;
 		}
 	}
 
-	if (dups) {
-
-		for (int i = 0; i < dups; i++) {
-			printf("duplicate points at %d, %d: %f,%f\n",
+	if (dups)
+	{
+		for (int i = 0; i < dups; i++)
+		{
+			printf( "duplicate points at %d, %d: %f,%f\n",
 					skip_list[i*2], skip_list[i*2+1],
 					in.pointlist[skip_list[i*2+1]*2],
 					in.pointlist[skip_list[i*2+1]*2+1]);
@@ -193,19 +215,23 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 		for (int j = 0; j < in.numberofsegments; j++, seg += 2)
 			printf("%d %d %d\n", j, *seg, *(seg+1));
 
-		for (int j = 0; j < in.numberofholes; j++) {
+		for (int j = 0; j < in.numberofholes; j++)
+		{
 			printf("%d %f %f\n", j, in.holelist[j*2], in.holelist[j*2+1]);
 		}
 
-		if (0) {
+		if (0)
+		{
 			free(in.segmentlist);
 			free(in.holelist);
 			free(rings);
 			free(skip_list);
 			return 0;
 		}
-		if (dups == 2) {
-			if (skip_list[0] > skip_list[2]) {
+		if (dups == 2)
+		{
+			if (skip_list[0] > skip_list[2])
+			{
 				int tmp = skip_list[0];
 				skip_list[0] = skip_list[2];
 				skip_list[2] = tmp;
@@ -216,14 +242,17 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 
 				printf("flip items\n");
 			}
-		} else if (dups > 2) {
+		}
+		else if (dups > 2)
+		{
 			printf("sort dups\n");
 
 			qsort(skip_list, dups, 2 * sizeof(float), compare_dups);
 		}
 
 		// shift segment indices while removing duplicate points
-		for (int i = 0; i < dups; i++) {
+		for (int i = 0; i < dups; i++)
+		{
 			// position of the duplicate vertex
 			int pos = skip_list[i * 2] - i;
 			// first vertex
@@ -231,18 +260,21 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 
 			printf("add offset: %d, from pos %d\n", i, pos);
 			seg = in.segmentlist;
-			for (int j = 0; j < in.numberofsegments * 2;
-					j++, seg++) {
-				if (*seg == pos) {
+			for (int j = 0; j < in.numberofsegments * 2; j++, seg++)
+			{
+				if (*seg == pos)
+				{
 					if (replacement >= pos)
 						*seg = replacement - i;
 					else
 						*seg = replacement;
-				} else if (*seg > pos)
+				}
+				else if (*seg > pos)
 					*seg -= 1;
 			}
 
-			printf("move %d %d %d\n", pos, pos + 1, in.numberofpoints - pos - 1);
+			printf(
+					"move %d %d %d\n", pos, pos + 1, in.numberofpoints - pos - 1);
 
 			if (in.numberofpoints - pos > 1)
 				memmove(in.pointlist + (pos * 2),
@@ -278,19 +310,24 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	// Q - be quiet!
 	triangulate("pzPNBQ", &in, &out, (TriangleIO *) NULL);
 
-	if (in.numberofpoints < out.numberofpoints) {
-		printf(
-				"polygon input is bad! points in:%d out%d\n", in.numberofpoints, out.numberofpoints);
+	if (in.numberofpoints < out.numberofpoints)
+	{
+		printf( "polygon input is bad! points in:%d out%d\n",
+				in.numberofpoints,
+				out.numberofpoints);
 
-		for (int j = 0; j < in.numberofpoints; j++) {
+		for (int j = 0; j < in.numberofpoints; j++)
+		{
 			printf("%d %f %f\n", j, in.pointlist[j*2], in.pointlist[j*2+1]);
 		}
 
 		seg = in.segmentlist;
-		for (int j = 0; j < in.numberofsegments; j++, seg += 2) {
+		for (int j = 0; j < in.numberofsegments; j++, seg += 2)
+		{
 			printf("%d %d %d\n", j, *seg, *(seg+1));
 		}
-
+		(*env)->ReleasePrimitiveArrayCritical(env, obj_points, orig_points,
+				JNI_ABORT);
 		free(in.segmentlist);
 		free(in.holelist);
 		free(rings);
@@ -311,7 +348,8 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	INDICE *tri;
 
 	/* shift back indices from removed duplicates */
-	for (int i = 0; i < dups; i++) {
+	for (int i = 0; i < dups; i++)
+	{
 		int pos = skip_list[i * 2] + i;
 
 		tri = out.trianglelist;
@@ -338,7 +376,8 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 	// additional vertices will be added. so the following rings
 	// needs extra offset...
 	int start = offset;
-	for (int j = 0, m = in.numberofholes; j < m; j++) {
+	for (int j = 0, m = in.numberofholes; j < m; j++)
+	{
 		start += rings[j] * stride;
 		// even number of points?
 		if (!(rings[j] & 1))
@@ -353,6 +392,9 @@ jint Java_org_oscim_jni_TriangleJNI_triangulate(JNIEnv *env, jclass c,
 
 		start += stride;
 	}
+
+	(*env)->ReleasePrimitiveArrayCritical(env, obj_points, orig_points,
+			JNI_ABORT);
 
 	free(in.segmentlist);
 	free(in.holelist);

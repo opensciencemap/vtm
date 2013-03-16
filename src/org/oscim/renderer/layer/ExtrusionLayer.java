@@ -16,11 +16,9 @@ package org.oscim.renderer.layer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.Tile;
-import org.oscim.jni.TriangleJNI;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.utils.LineClipper;
@@ -414,31 +412,22 @@ public class ExtrusionLayer extends Layer {
 
 	private static boolean initialized = false;
 	private static ShortBuffer sBuf;
-	private static FloatBuffer fBuf;
 
 	public static synchronized int triangulate(float[] points, int ppos, int plen, short[] index,
 			int ipos, int rings, int vertexOffset, VertexPoolItem item) {
 
 		if (!initialized) {
 			// FIXME also cleanup on shutdown!
-			fBuf = ByteBuffer.allocateDirect(1200 * 4).order(ByteOrder.nativeOrder())
-					.asFloatBuffer();
-
 			sBuf = ByteBuffer.allocateDirect(1800 * 2).order(ByteOrder.nativeOrder())
 					.asShortBuffer();
 
 			initialized = true;
 		}
 
-		fBuf.clear();
-		fBuf.put(points, ppos, plen);
-
 		sBuf.clear();
-
-		sBuf.put((short) plen); // all points
 		sBuf.put(index, ipos, rings);
 
-		int numTris = TriangleJNI.triangulate(fBuf, rings, sBuf, vertexOffset);
+		int numTris = triangulate(points, ppos, plen, rings, sBuf, vertexOffset);
 
 		int numIndices = numTris * 3;
 		sBuf.limit(numIndices);
@@ -461,5 +450,23 @@ public class ExtrusionLayer extends Layer {
 		}
 
 		return numIndices;
+	}
+
+	/**
+	 * @param points an array of x,y coordinates
+	 * @param pos position in points array
+	 * @param len number of points * 2 (i.e. values to read)
+	 * @param numRings number of rings in polygon == outer(1) + inner rings
+	 * @param io input: number of points in rings - times 2!
+	 *            output: indices of triangles, 3 per triangle :) (indices use
+	 *            stride=2, i.e. 0,2,4...)
+	 * @param ioffset offset used to add offset to indices
+	 * @return number of triangles in io buffer
+	 */
+	public static native int triangulate(float[] points, int pos, int len, int numRings, ShortBuffer io,
+			int ioffset);
+
+	static {
+		System.loadLibrary("triangle-jni");
 	}
 }
