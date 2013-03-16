@@ -28,7 +28,7 @@ import android.graphics.Color;
  * A RenderTheme defines how ways and nodes are drawn.
  */
 public class RenderTheme {
-	private final static String TAG = RenderTheme.class.getName();
+	//private final static String TAG = RenderTheme.class.getName();
 
 	private static final int MATCHING_CACHE_SIZE = 512;
 	private static final int RENDER_THEME_VERSION = 1;
@@ -88,13 +88,13 @@ public class RenderTheme {
 	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mWayCache;
 	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mAreaCache;
 
-	private MatchingCacheKey mAreaCacheKey = new MatchingCacheKey();
-	private MatchingCacheKey mWayCacheKey = new MatchingCacheKey();
-	private MatchingCacheKey mNodeCacheKey = new MatchingCacheKey();
+	private final MatchingCacheKey mAreaCacheKey = new MatchingCacheKey();
+	private final MatchingCacheKey mWayCacheKey = new MatchingCacheKey();
+	private final MatchingCacheKey mNodeCacheKey = new MatchingCacheKey();
 
-	private ArrayList<RenderInstruction> mWayInstructionList = new ArrayList<RenderInstruction>(4);
-	private ArrayList<RenderInstruction> mAreaInstructionList = new ArrayList<RenderInstruction>(4);
-	private ArrayList<RenderInstruction> mNodeInstructionList = new ArrayList<RenderInstruction>(4);
+	private final ArrayList<RenderInstruction> mWayInstructionList = new ArrayList<RenderInstruction>(4);
+	private final ArrayList<RenderInstruction> mAreaInstructionList = new ArrayList<RenderInstruction>(4);
+	private final ArrayList<RenderInstruction> mNodeInstructionList = new ArrayList<RenderInstruction>(4);
 
 	private RenderInstructionItem mPrevAreaItem;
 	private RenderInstructionItem mPrevWayItem;

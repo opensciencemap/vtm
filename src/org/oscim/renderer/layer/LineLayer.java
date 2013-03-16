@@ -162,12 +162,6 @@ public final class LineLayer extends Layer {
 			ux = -vy;
 			uy = vx;
 
-			if (opos == VertexPoolItem.SIZE) {
-				si = si.next = VertexPool.get();
-				v = si.vertices;
-				opos = 0;
-			}
-
 			int ddx, ddy;
 
 			// vertex point coordinate
