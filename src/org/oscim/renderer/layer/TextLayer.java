@@ -246,6 +246,13 @@ public final class TextLayer extends TextureLayer {
 				buf[pos++] = y1;
 				buf[pos++] = u1;
 				buf[pos++] = v2;
+				// bot-left
+				buf[pos++] = tx;
+				buf[pos++] = ty;
+				buf[pos++] = x3;
+				buf[pos++] = y3;
+				buf[pos++] = u1;
+				buf[pos++] = v1;
 				// top-right
 				buf[pos++] = tx;
 				buf[pos++] = ty;
@@ -260,13 +267,7 @@ public final class TextLayer extends TextureLayer {
 				buf[pos++] = y4;
 				buf[pos++] = u2;
 				buf[pos++] = v1;
-				// bot-left
-				buf[pos++] = tx;
-				buf[pos++] = ty;
-				buf[pos++] = x3;
-				buf[pos++] = y3;
-				buf[pos++] = u1;
-				buf[pos++] = v1;
+
 
 				// six indices to draw the four vertices
 				numIndices += TextureRenderer.INDICES_PER_SPRITE;

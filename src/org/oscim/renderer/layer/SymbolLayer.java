@@ -33,8 +33,8 @@ public final class SymbolLayer extends TextureLayer {
 
 	SymbolItem symbols;
 
-	private Canvas mCanvas;
-	private Rect mRect = new Rect();
+	private final Canvas mCanvas;
+	private final Rect mRect = new Rect();
 
 	public SymbolLayer() {
 		type = Layer.SYMBOL;
@@ -210,6 +210,13 @@ public final class SymbolLayer extends TextureLayer {
 				buf[pos++] = y1;
 				buf[pos++] = u1;
 				buf[pos++] = v2;
+				// bot-left
+				buf[pos++] = tx;
+				buf[pos++] = ty;
+				buf[pos++] = x1;
+				buf[pos++] = y2;
+				buf[pos++] = u1;
+				buf[pos++] = v1;
 				// top-right
 				buf[pos++] = tx;
 				buf[pos++] = ty;
@@ -223,13 +230,6 @@ public final class SymbolLayer extends TextureLayer {
 				buf[pos++] = x2;
 				buf[pos++] = y2;
 				buf[pos++] = u2;
-				buf[pos++] = v1;
-				// bot-left
-				buf[pos++] = tx;
-				buf[pos++] = ty;
-				buf[pos++] = x1;
-				buf[pos++] = y2;
-				buf[pos++] = u1;
 				buf[pos++] = v1;
 
 				// six elements used to draw the four vertices

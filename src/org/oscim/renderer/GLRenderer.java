@@ -74,8 +74,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// bytes currently loaded in VBOs
 	private static int mBufferMemoryUsage;
 
-	private static float[] mTileCoords = new float[8];
-	//private static float[] mDebugCoords = new float[8];
+	private static float[] mTileCoords;
+	//private static float[] mDebugCoords;
 
 	public class Matrices {
 		public final Matrix4 viewproj = new Matrix4();
@@ -90,6 +90,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	//private
 	static float[] mClearColor = null;
+
+	static int mQuadIndicesID;
+	final static int maxQuads = 64;
+
 	private static boolean mUpdateColor = false;
 
 	// drawlock to synchronize Main- and GL-Thread
@@ -181,7 +185,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mMapPosition = new MapPosition();
 
 		mMatrices = new Matrices();
+		mTileCoords = new float[8];
 
+		// tile fill coords
 		short min = 0;
 		short max = (short) ((Tile.TILE_SIZE * COORD_SCALE));
 		mFillCoords = new short[8];
@@ -193,12 +199,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mFillCoords[5] = min;
 		mFillCoords[6] = max;
 		mFillCoords[7] = min;
-
-		ByteBuffer bbuf = ByteBuffer.allocateDirect(MB >> 2)
-				.order(ByteOrder.nativeOrder());
-
-		shortBuffer = bbuf.asShortBuffer();
-		shortBuffer.put(mFillCoords, 0, 8);
 	}
 
 	public static void setRenderTheme(RenderTheme t) {
@@ -606,8 +606,38 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			mMapView.redrawMap(false);
 			return;
 		}
-
 		mNewSurface = false;
+
+		ByteBuffer bbuf = ByteBuffer.allocateDirect(MB >> 2)
+				.order(ByteOrder.nativeOrder());
+		shortBuffer = bbuf.asShortBuffer();
+
+		// upload quad indices used by Texture- and LineTexRenderer
+		int[] vboIds = new int[1];
+		GLES20.glGenBuffers(1, vboIds, 0);
+		mQuadIndicesID = vboIds[0];
+		 int maxIndices = maxQuads * 6;
+		short[] indices = new short[maxIndices];
+		for (int i = 0, j = 0; i < maxIndices; i += 6, j += 4) {
+			indices[i + 0] = (short) (j + 0);
+			indices[i + 1] = (short) (j + 1);
+			indices[i + 2] = (short) (j + 2);
+
+			indices[i + 3] = (short) (j + 2);
+			indices[i + 4] = (short) (j + 1);
+			indices[i + 5] = (short) (j + 3);
+		}
+
+		shortBuffer.put(indices);
+		shortBuffer.flip();
+
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
+				mQuadIndicesID);
+		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
+				indices.length * 2, shortBuffer, GLES20.GL_STATIC_DRAW);
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
 		mBufferMemoryUsage = 0;
 		mDrawTiles = null;
 
