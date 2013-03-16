@@ -479,7 +479,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			overlays.get(i).update(mMapPosition, positionChanged, tilesChanged, mMatrices);
 
 		/* draw base layer */
-		BaseMap.draw(tiles, tileCnt, pos, mMatrices);
+		TileRenderer.draw(tiles, tileCnt, pos, mMatrices);
 
 		/* draw overlays */
 		for (int i = 0, n = overlays.size(); i < n; i++) {
