@@ -16,7 +16,6 @@ package org.oscim.renderer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -52,13 +51,7 @@ public class LineTexRenderer {
 	private static int hPatternScale;
 	private static int hPatternWidth;
 
-	private static int mIndicesBufferID;
 	private static int mVertexFlipID;
-
-	// batch up up to 64 quads in one draw call
-	private static int maxQuads = 64;
-	private static int maxIndices = maxQuads * 6;
-	//private static int[] mTexID;
 
 	public static void init() {
 		shader = GlUtils.createProgram(vertexShader, fragmentShader);
@@ -81,46 +74,25 @@ public class LineTexRenderer {
 		hVertexLength1 = GLES20.glGetAttribLocation(shader, "a_len1");
 		hVertexFlip = GLES20.glGetAttribLocation(shader, "a_flip");
 
-		int[] mVboIds = new int[2];
-		GLES20.glGenBuffers(2, mVboIds, 0);
-		mIndicesBufferID = mVboIds[0];
-		mVertexFlipID = mVboIds[1];
-
-		short[] indices = new short[maxIndices];
-		for (int i = 0, j = 0; i < maxIndices; i += 6, j += 4) {
-			indices[i + 0] = (short) (j + 0);
-			indices[i + 1] = (short) (j + 1);
-			indices[i + 2] = (short) (j + 2);
-
-			indices[i + 3] = (short) (j + 2);
-			indices[i + 4] = (short) (j + 1);
-			indices[i + 5] = (short) (j + 3);
-		}
-
-		ByteBuffer buf = ByteBuffer.allocateDirect(maxIndices * 2)
-				.order(ByteOrder.nativeOrder());
-
-		ShortBuffer sbuf = buf.asShortBuffer();
-		sbuf.put(indices);
-		sbuf.flip();
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
-				mIndicesBufferID);
-		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
-				indices.length * 2, sbuf, GLES20.GL_STATIC_DRAW);
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		int[] vboIds = new int[1];
+		GLES20.glGenBuffers(1, vboIds, 0);
+		mVertexFlipID = vboIds[0];
 
 		// 0, 1, 0, 1, 0, ...
-		byte[] flip = new byte[maxQuads * 4];
+		byte[] flip = new byte[GLRenderer.maxQuads * 4];
 		for (int i = 0; i < flip.length; i++)
 			flip[i] = (byte) (i % 2);
 
-		buf.clear();
+		ByteBuffer buf = ByteBuffer.allocateDirect(flip.length)
+				.order(ByteOrder.nativeOrder());
+
 		buf.put(flip);
 		buf.flip();
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexFlipID);
 		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, flip.length, buf,
 				GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
 
 //		mTexID = new int[10];
 //		byte[] stipple = new byte[2];
@@ -146,11 +118,11 @@ public class LineTexRenderer {
 		GLES20.glEnableVertexAttribArray(hVertexLength1);
 		GLES20.glEnableVertexAttribArray(hVertexFlip);
 
-		//GLES20.glUniformMatrix4fv(hMatrix, 1, false, matrix, 0);
 		m.mvp.setAsUniform(hMatrix);
 
+		int maxIndices = GLRenderer.maxQuads * 6;
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
-				mIndicesBufferID);
+				GLRenderer.mQuadIndicesID);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexFlipID);
 		GLES20.glVertexAttribPointer(hVertexFlip, 1,

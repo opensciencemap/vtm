@@ -15,10 +15,6 @@
 
 package org.oscim.renderer;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.TextureLayer;
@@ -39,13 +35,10 @@ public final class TextureRenderer {
 	private static int hTextureScale;
 	private static int hTextureScreenScale;
 	private static int hTextureTexCoord;
-	private static int mIndicesVBO;
 
 	public final static int INDICES_PER_SPRITE = 6;
 	final static int VERTICES_PER_SPRITE = 4;
 	final static int SHORTS_PER_VERTICE = 6;
-	// per texture
-	private final static int MAX_ITEMS = 50;
 
 	static void init() {
 		mTextureProgram = GlUtils.createProgram(textVertexShader,
@@ -57,40 +50,6 @@ public final class TextureRenderer {
 		hTextureScreenScale = GLES20.glGetUniformLocation(mTextureProgram, "u_swidth");
 		hTextureVertex = GLES20.glGetAttribLocation(mTextureProgram, "vertex");
 		hTextureTexCoord = GLES20.glGetAttribLocation(mTextureProgram, "tex_coord");
-
-		int bufferSize = MAX_ITEMS * VERTICES_PER_SPRITE
-				* SHORTS_PER_VERTICE * (Short.SIZE / 8);
-
-		ByteBuffer buf = ByteBuffer.allocateDirect(bufferSize)
-				.order(ByteOrder.nativeOrder());
-
-		ShortBuffer mShortBuffer = buf.asShortBuffer();
-
-		// Setup triangle indices
-		short[] indices = new short[MAX_ITEMS * INDICES_PER_SPRITE];
-		int len = indices.length;
-		short j = 0;
-		for (int i = 0; i < len; i += INDICES_PER_SPRITE, j += VERTICES_PER_SPRITE) {
-			indices[i + 0] = (short) (j + 0);
-			indices[i + 1] = (short) (j + 1);
-			indices[i + 2] = (short) (j + 2);
-			indices[i + 3] = (short) (j + 2);
-			indices[i + 4] = (short) (j + 3);
-			indices[i + 5] = (short) (j + 0);
-		}
-
-		mShortBuffer.clear();
-		mShortBuffer.put(indices, 0, len);
-		mShortBuffer.flip();
-
-		int[] mVboIds = new int[1];
-		GLES20.glGenBuffers(1, mVboIds, 0);
-		mIndicesVBO = mVboIds[0];
-
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesVBO);
-		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, len * (Short.SIZE / 8),
-				mShortBuffer, GLES20.GL_STATIC_DRAW);
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
 	public static Layer draw(Layer layer, float scale, Matrices m) {
@@ -113,16 +72,14 @@ public final class TextureRenderer {
 		m.proj.setAsUniform(hTextureProjMatrix);
 		m.mvp.setAsUniform(hTextureMVMatrix);
 
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesVBO);
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, GLRenderer.mQuadIndicesID);
 
 		for (TextureObject to = tl.textures; to != null; to = to.next) {
-			//if (TextureRenderer.debug)
-			//	Log.d("...", "draw texture: " + to.id + " " + to.offset + " " + to.vertices);
 
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
-			int maxVertices = MAX_ITEMS * INDICES_PER_SPRITE;
+			int maxVertices = GLRenderer.maxQuads * INDICES_PER_SPRITE;
 
-			// can only draw MAX_ITEMS in each iteration
+			// draw up to maxVertices in each iteration
 			for (int i = 0; i < to.vertices; i += maxVertices) {
 				// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
 				int off = (to.offset + i) * 8 + tl.offset;
