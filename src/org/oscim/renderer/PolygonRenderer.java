@@ -113,13 +113,13 @@ public final class PolygonRenderer {
 				GLState.blend(false);
 
 				if (a.blend == zoom)
-					GlUtils.setBlendColors(hPolygonColor,
+					GlUtils.setColorBlend(hPolygonColor,
 							a.color, a.blendColor, scale - 1.0f);
 				else
 					GlUtils.setColor(hPolygonColor, a.blendColor, 1);
 
 			} else {
-				if (a.color[3] != 1)
+				if (a.color < 0xff000000)
 					GLState.blend(true);
 				else
 					GLState.blend(false);

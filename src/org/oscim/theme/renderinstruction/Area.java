@@ -17,7 +17,6 @@ package org.oscim.theme.renderinstruction;
 import org.oscim.core.Tag;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
-import org.oscim.utils.GlUtils;
 import org.xml.sax.Attributes;
 
 import android.graphics.Color;
@@ -85,11 +84,11 @@ public final class Area extends RenderInstruction {
 		this.level = 0;
 		this.style = "";
 		this.fade = -1;
-		blendColor = null;
+		blendColor = 0;
 		blend = -1;
 		strokeWidth = 0;
 
-		color = GlUtils.colorToFloatP(fill);
+		color = fill;
 	}
 
 	/**
@@ -126,12 +125,8 @@ public final class Area extends RenderInstruction {
 		// paintFill.setShader(shader);
 		// }
 
-		color = GlUtils.colorToFloatP(fill);
-
-		if (blend > 0)
-			blendColor = GlUtils.colorToFloatP(blendFill);
-		else
-			blendColor = null;
+		color = fill; //GlUtils.colorToFloatP(fill);
+		blendColor = blendFill; //GlUtils.colorToFloatP(blendFill);
 
 		this.blend = blend;
 		this.strokeWidth = strokeWidth;
@@ -144,18 +139,11 @@ public final class Area extends RenderInstruction {
 		renderCallback.renderArea(this, this.level);
 	}
 
-	// @Override
-	// public void scaleStrokeWidth(float scaleFactor) {
-	// // if (paintOutline != null) {
-	// // paintOutline.setStrokeWidth(strokeWidth * scaleFactor);
-	// // }
-	// }
-
 	public String style;
 	private final int level;
 	public final float strokeWidth;
-	public final float color[];
+	public final int color;
 	public final int fade;
-	public final float blendColor[];
+	public final int blendColor;
 	public final int blend;
 }

@@ -7,19 +7,52 @@
 
 #define JNI(X) JNIEXPORT Java_org_oscim_utils_GlUtils_##X
 
-static const char TAG[] = "org.oscim.utils.GLUtils";
+#define COLOR_R(C) (((C >> 16) & 0xff) / 255.0f)
+#define COLOR_G(C) (((C >> 8) & 0xff) / 255.0f)
+#define COLOR_B(C) (((C >> 0) & 0xff) / 255.0f)
+#define COLOR_A(C) (((C >> 24) & 0xff) / 255.0f)
 
-static void
-nativeClassInit(JNIEnv *_env)
+void JNI(setColor)(JNIEnv *env, jclass* clazz, jint location, jint c, jfloat alpha)
 {
 
+  if (alpha >= 1)
+    alpha = COLOR_A(c);
+  else if (alpha < 0)
+    alpha = 0;
+  else
+    alpha *= COLOR_A(c);
+
+  if (alpha == 1)
+    {
+      glUniform4f((GLint) location,
+          (GLfloat) COLOR_R(c),
+          (GLfloat) COLOR_G(c),
+          (GLfloat) COLOR_B(c),
+          (GLfloat) alpha);
+    }
+  else
+    {
+      glUniform4f((GLint) location,
+          (GLfloat) (COLOR_R(c) * alpha),
+          (GLfloat) (COLOR_G(c) * alpha),
+          (GLfloat) (COLOR_B(c) * alpha),
+          (GLfloat) alpha);
+    }
 }
 
-void JNI(init)(JNIEnv *env, jclass* clazz)
+void JNI(setColorBlend)(JNIEnv *env, jclass* clazz, jint location, jint c1, jint c2, jfloat mix)
 {
-  nativeClassInit(env);
-  __android_log_print(ANDROID_LOG_INFO, TAG, "all initialized");
+  float a1 = COLOR_A(c1) * (1 - mix);
+  float a2 = COLOR_A(c2) * mix;
+
+  glUniform4f((GLint) location,
+      (GLfloat) (COLOR_R(c1) * a1 + COLOR_R(c2) * a2),
+      (GLfloat) (COLOR_G(c1) * a1 + COLOR_G(c2) * a2),
+      (GLfloat) (COLOR_B(c1) * a1 + COLOR_B(c2) * a2),
+      (GLfloat) (a1 + a2));
 }
+
+
 
 #undef JNI
 #define JNI(X) JNIEXPORT Java_org_oscim_utils_Matrix4_##X
@@ -41,7 +74,6 @@ transposeM(float* mTrans, int mTransOffset, float* m, int mOffset);
 
 static inline void
 matrix4_proj(float* mat, float* vec);
-
 
 jlong JNI(alloc)(JNIEnv *env, jclass* clazz)
 {
