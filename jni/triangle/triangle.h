@@ -248,7 +248,6 @@
 /*                                                                           */
 /*****************************************************************************/
 
-
 #define SINGLE
 
 #ifdef SINGLE
@@ -259,42 +258,103 @@
 
 #define INDICE unsigned short
 
+typedef struct triangulateio TriangleIO;
+
 struct triangulateio {
-  REAL *pointlist;                                               /* In / out */
-  REAL *pointattributelist;                                      /* In / out */
-  int *pointmarkerlist;                                          /* In / out */
-  int numberofpoints;                                            /* In / out */
-  int numberofpointattributes;                                   /* In / out */
+   REAL *pointlist; /* In / out */
+   REAL *pointattributelist; /* In / out */
+   int *pointmarkerlist; /* In / out */
+   int numberofpoints; /* In / out */
+   int numberofpointattributes; /* In / out */
 
-  INDICE *trianglelist;                                             /* In / out */
-  REAL *triangleattributelist;                                   /* In / out */
-  REAL *trianglearealist;                                         /* In only */
-  int *neighborlist;                                             /* Out only */
-  int numberoftriangles;                                         /* In / out */
-  int numberofcorners;                                           /* In / out */
-  int numberoftriangleattributes;                                /* In / out */
+   INDICE *trianglelist; /* In / out */
+   REAL *triangleattributelist; /* In / out */
+   REAL *trianglearealist; /* In only */
+   int *neighborlist; /* Out only */
+   int numberoftriangles; /* In / out */
+   int numberofcorners; /* In / out */
+   int numberoftriangleattributes; /* In / out */
 
-  int *segmentlist;                                              /* In / out */
-  int *segmentmarkerlist;                                        /* In / out */
-  int numberofsegments;                                          /* In / out */
+   int *segmentlist; /* In / out */
+   int *segmentmarkerlist; /* In / out */
+   int numberofsegments; /* In / out */
 
-  REAL *holelist;                        /* In / pointer to array copied out */
-  int numberofholes;                                      /* In / copied out */
+   REAL *holelist; /* In / pointer to array copied out */
+   int numberofholes; /* In / copied out */
 
-  REAL *regionlist;                      /* In / pointer to array copied out */
-  int numberofregions;                                    /* In / copied out */
+   REAL *regionlist; /* In / pointer to array copied out */
+   int numberofregions; /* In / copied out */
 
-  int *edgelist;                                                 /* Out only */
-  int *edgemarkerlist;            /* Not used with Voronoi diagram; out only */
-  REAL *normlist;                /* Used only with Voronoi diagram; out only */
-  int numberofedges;                                             /* Out only */
+   int *edgelist; /* Out only */
+   int *edgemarkerlist; /* Not used with Voronoi diagram; out only */
+   REAL *normlist; /* Used only with Voronoi diagram; out only */
+   int numberofedges; /* Out only */
 };
 
-#ifdef ANSI_DECLARATORS
-void triangulate(char *, struct triangulateio *, struct triangulateio *,
-                 struct triangulateio *);
-void trifree(VOID *memptr);
-#else /* not ANSI_DECLARATORS */
-void triangulate();
-void trifree();
-#endif /* not ANSI_DECLARATORS */
+/* Data structure for command line switches and file names.  This structure
+ /*   is used (instead of global variables) to allow reentrancy.
+
+ * Switches for the triangulator.
+ *   poly: -p switch.
+ *   refine: -r switch.
+ *   quality: -q switch.
+ *     minangle: minimum angle bound, specified after -q switch.
+ *     goodangle: cosine squared of minangle.
+ *     offconstant: constant used to place off-center Steiner points.
+ *   vararea: -a switch without number.
+ *   fixedarea: -a switch with number.
+ *     maxarea: maximum area bound, specified after -a switch.
+ *   usertest: -u switch.
+ *   regionattrib: -A switch.
+ *   convex: -c switch.
+ *   weighted: 1 for -w switch, 2 for -W switch.
+ *   jettison: -j switch
+ *   firstnumber: inverse of -z switch.  All items are numbered starting
+ *     from `firstnumber'.
+ *   edgesout: -e switch.
+ *   voronoi: -v switch.
+ *   neighbors: -n switch.
+ *   geomview: -g switch.
+ *   nobound: -B switch.
+ *   nopolywritten: -P switch.
+ *   nonodewritten: -N switch.
+ *   noelewritten: -E switch.
+ *   noiterationnum: -I switch.
+ *   noholes: -O switch.
+ *   noexact: -X switch.
+ *   order: element order, specified after -o switch.
+ *   nobisect: count of how often -Y switch is selected.
+ *   steiner: maximum number of Steiner points, specified after -S switch.
+ *   incremental: -i switch.  sweepline: -F switch.
+ *   dwyer: inverse of -l switch.
+ *    splitseg: -s switch.
+ *   conformdel: -D switch.  docheck: -C switch.
+ *   quiet: -Q switch.  verbose: count of how often -V switch is selected.
+ *   usesegments: -p, -r, -q, or -c switch; determines whether segments are
+ *     used at all.
+ *
+ * Read the instructions to find out the meaning of these switches.          */
+
+typedef struct behavior TriangleOptions;
+
+struct behavior {
+   int poly, refine, quality, vararea, fixedarea, usertest;
+   int regionattrib, convex, weighted, jettison;
+   int firstnumber;
+   int edgesout, voronoi, neighbors, geomview;
+   int nobound, nopolywritten, nonodewritten, noelewritten, noiterationnum;
+   int noholes, noexact, conformdel;
+   int incremental, sweepline, dwyer;
+   int splitseg;
+   int docheck;
+   int quiet, verbose;
+   int usesegments;
+   int order;
+   int nobisect;
+   int steiner;REAL minangle, goodangle, offconstant;REAL maxarea;
+
+};
+void parsecommandline(int argc, char **argv, struct behavior *b);
+void triangulate(struct behavior *, struct triangulateio *, struct triangulateio *,
+      struct triangulateio *);
+
