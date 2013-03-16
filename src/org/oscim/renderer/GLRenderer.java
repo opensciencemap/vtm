@@ -591,8 +591,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		//	Matrix.multiplyMM(mMatrices.proj, 0, mMatrices.mvp, 0, mMatrices.proj, 0);
 		//}
 
-		BaseMap.setProjection(mMatrices.proj);
-
 		GLES20.glViewport(0, 0, width, height);
 		GLES20.glScissor(0, 0, width, height);
 		GLES20.glEnable(GLES20.GL_SCISSOR_TEST);

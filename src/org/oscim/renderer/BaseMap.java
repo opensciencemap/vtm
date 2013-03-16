@@ -22,7 +22,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.Matrix4;
 
 import android.opengl.GLES20;
 
@@ -35,11 +34,7 @@ import android.opengl.GLES20;
  * @author Hannes Janetzek
  */
 public class BaseMap {
-	private final static String TAG = BaseMap.class.getName();
-
-	//private static Matrix4 mMVPMatrix = new Matrix4();
-	private static Matrix4 mVPMatrix = new Matrix4();
-	private static Matrix4 mfProjMatrix = new Matrix4();
+	//private final static String TAG = BaseMap.class.getName();
 
 	// used to increase polygon-offset for each tile drawn.
 	private static int mDrawCnt;
@@ -47,26 +42,11 @@ public class BaseMap {
 	// used to not draw a tile twice per frame.
 	private static int mDrawSerial = 0;
 
-	static void setProjection(Matrix4 projMatrix) {
-		float[] tmp = new float[16];
-		projMatrix.get(tmp);
-		//System.arraycopy(projMatrix, 0, mfProjMatrix, 0, 16);
-		// set to zero: we modify the z value with polygon-offset for clipping
-		tmp[10] = 0;
-		tmp[14] = 0;
-		mfProjMatrix.set(tmp);
-	}
-
 	private static Matrices mMatrices;
 
 	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m) {
 		mDrawCnt = 0;
 		mMatrices = m;
-
-		// use our 'flat' projection matrix
-		mVPMatrix.multiplyMM(mfProjMatrix, m.view);
-
-		//Matrix.multiplyMM(mVPMatrix, 0, mfProjMatrix, 0, m.view, 0);
 
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 
@@ -136,8 +116,7 @@ public class BaseMap {
 		Matrices m = mMatrices;
 		m.mvp.setTransScale(x * scale, y * scale, scale / GLRenderer.COORD_SCALE);
 
-		// add view-projection matrix
-		m.mvp.multiplyMM(mVPMatrix, m.mvp);
+		m.mvp.multiplyMM(m.viewproj, m.mvp);
 
 		// set depth offset (used for clipping to tile boundaries)
 		GLES20.glPolygonOffset(1, mDrawCnt++);
