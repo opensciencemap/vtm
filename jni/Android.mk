@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_CFLAGS := -O -DTRILIBRARY -DREDUCED -DCDT_ONLY -DNO_TIMER -Werror -std=c99
 # -DLINUX -> no fpu_control in bionic, needed ?
 
-LOCAL_MODULE    := triangle-jni
+LOCAL_MODULE    := triangle
 LOCAL_SRC_FILES := triangle/TriangleJni.c triangle/triangle.c triangle/triangle_dbg.c
 LOCAL_LDLIBS    := -llog
 
