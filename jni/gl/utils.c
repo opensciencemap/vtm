@@ -139,6 +139,7 @@ void JNI(setTransScale)(JNIEnv* env, jclass* clazz, jlong ptr, jfloat tx, jfloat
   m[13] = ty;
 }
 
+// set matrix from float array
 void JNI(set)(JNIEnv* env, jclass* clazz, jlong ptr, jfloatArray obj_mat)
 {
   float* m = CAST(ptr);
@@ -146,9 +147,10 @@ void JNI(set)(JNIEnv* env, jclass* clazz, jlong ptr, jfloatArray obj_mat)
 
   memcpy(m, mat, MAT_SIZE);
 
-  (*env)->ReleasePrimitiveArrayCritical(env, obj_mat, mat, 0);
+  (*env)->ReleasePrimitiveArrayCritical(env, obj_mat, mat, JNI_ABORT);
 }
 
+// get float array from matrix
 void JNI(get)(JNIEnv* env, jclass* clazz, jlong ptr, jfloatArray obj_mat)
 {
   float* m = CAST(ptr);
