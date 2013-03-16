@@ -51,10 +51,8 @@ public class MapDatabase implements IMapDatabase {
 					new Byte((byte) 4), new GeoPoint(53.11, 8.85),
 					null, 0, 0, 0, "de", "comment", "author", null);
 
-
 	private static final String CACHE_DIRECTORY = "/Android/data/org.oscim.app/cache/";
 	private static final String CACHE_FILE = "%d-%d-%d.tile";
-
 
 	private final static float REF_TILE_SIZE = 4096.0f;
 
@@ -89,7 +87,7 @@ public class MapDatabase implements IMapDatabase {
 		File f = null;
 
 		if (USE_CACHE) {
-			 f = new File(cacheDir, String.format(CACHE_FILE,
+			f = new File(cacheDir, String.format(CACHE_FILE,
 					Integer.valueOf(tile.zoomLevel),
 					Integer.valueOf(tile.tileX),
 					Integer.valueOf(tile.tileY)));
@@ -158,7 +156,7 @@ public class MapDatabase implements IMapDatabase {
 
 		lwHttp = new LwHttp();
 
-		if (!lwHttp.setServer(options.get("url"))){
+		if (!lwHttp.setServer(options.get("url"))) {
 			return new OpenResult("invalid url: " + options.get("url"));
 		}
 
@@ -211,19 +209,8 @@ public class MapDatabase implements IMapDatabase {
 	// /////////////// hand sewed tile protocol buffers decoder ///////////////
 	private final int MAX_WAY_COORDS = 16384;
 
-	//private final byte[] mReadBuffer = new byte[BUFFER_SIZE];
-
-	// position in buffer
-//	private int mBufferPos;
-
-	// bytes available in buffer
-//	private int mBufferFill;
-
 	// overall bytes of content processed
 	private int mBytesProcessed;
-
-	// overall bytes of content read
-//	private int mReadPos;
 
 	private static final int TAG_TILE_NUM_TAGS = 1;
 	private static final int TAG_TILE_TAG_KEYS = 2;
@@ -360,19 +347,16 @@ public class MapDatabase implements IMapDatabase {
 					break;
 
 				case TAG_ELEM_INDEX:
-					index = decodeShortArray(indexCnt, mIndices);
-					if (index != null) {
-						mIndices = index;
+					mIndices = index = decodeShortArray(indexCnt, mIndices);
 
-						for (int i = 0; i < indexCnt; i++) {
-							int len = index[i] * 2;
-							coordCnt += len;
-							index[i] = (short) len;
-						}
-						// set end marker
-						if (indexCnt < index.length)
-							index[indexCnt] = -1;
+					for (int i = 0; i < indexCnt; i++) {
+						int len = index[i] * 2;
+						coordCnt += len;
+						index[i] = (short) len;
 					}
+					// set end marker
+					if (indexCnt < index.length)
+						index[indexCnt] = -1;
 					break;
 
 				case TAG_ELEM_COORDS:
@@ -436,19 +420,17 @@ public class MapDatabase implements IMapDatabase {
 
 			if (tagNum < 0) {
 				Log.d(TAG, "NULL TAG: " + mTile + " invalid tag:" + tagNum + " " + cnt);
+			} else if (tagNum < Tags.MAX) {
+				tmp[cnt++] = Tags.tags[tagNum];
 			} else {
-				if (tagNum < Tags.MAX)
-					tmp[cnt++] = Tags.tags[tagNum];
-				else {
-					tagNum -= Tags.LIMIT;
+				tagNum -= Tags.LIMIT;
 
-					if (tagNum >= 0 && tagNum < max) {
-						// Log.d(TAG, "variable tag: " + curTags[tagNum]);
-						tmp[cnt++] = curTags[tagNum];
-					} else {
-						Log.d(TAG, "NULL TAG: " + mTile + " could find tag:"
-								+ tagNum + " " + cnt);
-					}
+				if (tagNum >= 0 && tagNum < max) {
+					// Log.d(TAG, "variable tag: " + curTags[tagNum]);
+					tmp[cnt++] = curTags[tagNum];
+				} else {
+					Log.d(TAG, "NULL TAG: " + mTile + " could not find tag:"
+							+ tagNum + " " + cnt);
 				}
 			}
 		}
@@ -554,10 +536,8 @@ public class MapDatabase implements IMapDatabase {
 	private short[] decodeShortArray(int num, short[] array) throws IOException {
 		int bytes = decodeVarint32();
 
-		short[] index = array;
-		if (index.length < num) {
-			index = new short[num];
-		}
+		if (array.length < num)
+			array = new short[num];
 
 		lwHttp.readBuffer(bytes);
 
@@ -605,13 +585,13 @@ public class MapDatabase implements IMapDatabase {
 
 			}
 
-			index[cnt++] = (short) result;
+			array[cnt++] = (short) result;
 		}
 
 		lwHttp.bufferPos = pos;
 		mBytesProcessed += bytes;
 
-		return index;
+		return array;
 	}
 
 	private int decodeVarint32() throws IOException {
@@ -622,7 +602,7 @@ public class MapDatabase implements IMapDatabase {
 			pos = lwHttp.bufferPos;
 		}
 
-		byte[] buf =lwHttp.buffer;
+		byte[] buf = lwHttp.buffer;
 
 		if (buf[pos] >= 0) {
 			lwHttp.bufferPos += 1;

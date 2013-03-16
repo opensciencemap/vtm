@@ -55,7 +55,7 @@ import android.opengl.GLES20;
 import android.os.SystemClock;
 
 public class TextOverlay extends BasicOverlay {
-	private final static String TAG = TextOverlay.class.getName();
+	//private final static String TAG = TextOverlay.class.getName();
 
 	private final MapViewPosition mMapViewPosition;
 	private TileSet mTileSet;
@@ -247,9 +247,8 @@ public class TextOverlay extends BasicOverlay {
 	private final static float[] mDebugPoints = new float[4];
 	//private final Matrix4 mMVP = new Matrix4();
 
-	void addTile(MapTile t) {
-
-	}
+	//void addTile(MapTile t) {
+	//}
 
 	private Label addToPool(Label l) {
 		TextItem.release(l.item);

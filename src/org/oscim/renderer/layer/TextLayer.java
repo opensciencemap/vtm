@@ -30,7 +30,7 @@ public final class TextLayer extends TextureLayer {
 	private final static int LBIT_MASK = 0xfffffffe;
 
 	private static int mFontPadX = 1;
-	private static int mFontPadY = 1;
+	//private static int mFontPadY = 1;
 
 	public TextItem labels;
 	private final Canvas mCanvas;
