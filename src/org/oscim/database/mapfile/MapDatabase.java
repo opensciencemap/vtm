@@ -642,7 +642,7 @@ public class MapDatabase implements IMapDatabase {
 
 			// bit 1-3 enable optional features
 			// check if the POI has a name
-			if ((featureByte & WAY_FEATURE_NAME) != 0) {
+			if ((featureByte & POI_FEATURE_NAME) != 0) {
 				String str = mReadBuffer.readUTF8EncodedString();
 
 				curTags = new Tag[tags.length + 1];
@@ -906,45 +906,46 @@ public class MapDatabase implements IMapDatabase {
 			// bit 1-6 enable optional features
 			boolean featureWayDoubleDeltaEncoding = (featureByte & WAY_FEATURE_DOUBLE_DELTA_ENCODING) != 0;
 
+			boolean hasName = (featureByte & WAY_FEATURE_NAME) != 0;
+			boolean hasHouseNr = (featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0;
+			boolean hasRef = (featureByte & WAY_FEATURE_REF) != 0;
+
+			int add = (hasName ? 1 : 0) + (hasHouseNr ? 1 : 0) + (hasRef ? 1 : 0);
+			int addTag = tags.length;
+
+			if (add > 0){
+				curTags = new Tag[tags.length + add];
+				System.arraycopy(tags, 0, curTags, 0, tags.length);
+			}
+
 			if (sMapExperimental) {
-				// check if the way has a name
-				if ((featureByte & WAY_FEATURE_NAME) != 0) {
+				if (hasName) {
 					int textPos = mReadBuffer.readUnsignedInt();
 					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
-
-					curTags = new Tag[tags.length + 1];
-					System.arraycopy(tags, 0, curTags, 0, tags.length);
-					curTags[tags.length] = new Tag(Tag.TAG_KEY_NAME, str, false);
+					curTags[addTag++] = new Tag(Tag.TAG_KEY_NAME, str, false);
 				}
-
-				// check if the way has a house number
-				if ((featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0) {
-					//int textPos =
-					mReadBuffer.readUnsignedInt();
+				if (hasHouseNr) {
+					int textPos = mReadBuffer.readUnsignedInt();
+					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
+					curTags[addTag++] = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, str, false);
 				}
-
-				// check if the way has a reference
-				if ((featureByte & WAY_FEATURE_REF) != 0) {
-					//int textPos =
-					mReadBuffer.readUnsignedInt();
+				if (hasRef) {
+					int textPos = mReadBuffer.readUnsignedInt();
+					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
+					curTags[addTag++] = new Tag(Tag.TAG_KEY_REF, str, false);
 				}
 			} else {
-				if ((featureByte & WAY_FEATURE_NAME) != 0) {
+				if (hasName) {
 					String str = mReadBuffer.readUTF8EncodedString();
-
-					curTags = new Tag[tags.length + 1];
-					System.arraycopy(tags, 0, curTags, 0, tags.length);
-					curTags[tags.length] = new Tag(Tag.TAG_KEY_NAME, str, false);
+					curTags[addTag++] = new Tag(Tag.TAG_KEY_NAME, str, false);
 				}
-
-				// check if the way has a house number
-				if ((featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0) {
+				if (hasHouseNr) {
 					String str = mReadBuffer.readUTF8EncodedString();
+					curTags[addTag++] = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, str, false);
 				}
-
-				// check if the way has a reference
-				if ((featureByte & WAY_FEATURE_REF) != 0) {
+				if (hasRef) {
 					String str = mReadBuffer.readUTF8EncodedString();
+					curTags[addTag++] = new Tag(Tag.TAG_KEY_REF, str, false);
 				}
 			}
 			if ((featureByte & WAY_FEATURE_LABEL_POSITION) != 0)
