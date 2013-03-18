@@ -16,6 +16,7 @@
 package org.oscim.generator;
 
 import org.oscim.core.Tile;
+import org.oscim.renderer.MapTile;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.renderinstruction.Text;
 import org.oscim.utils.GeometryUtils;
@@ -23,10 +24,9 @@ import org.oscim.utils.LineClipper;
 
 public final class WayDecorator {
 
-	public static TextItem renderText(LineClipper clipper, float[] coordinates, String string,
-			Text text,
-			int pos, int len, TextItem textItems) {
-		TextItem items = textItems;
+	public static void renderText(LineClipper clipper, float[] coordinates, String string,
+			Text text,	int pos, int len, MapTile tile) {
+		//TextItem items = textItems;
 		TextItem t = null;
 
 		// calculate the way name length plus some margin of safety
@@ -214,12 +214,10 @@ public final class WayDecorator {
 			t.y2 = y2;
 			t.length = (short) segmentLength;
 			t.edges = edge;
-			t.next = items;
-			items = t;
+			tile.addLabel(t);
 
 			i = last;
 		}
-		return items;
 	}
 
 	private WayDecorator() {

@@ -18,6 +18,7 @@ import static org.oscim.generator.JobTile.STATE_NONE;
 
 import java.util.Arrays;
 
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -70,9 +71,14 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
 	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
 
-	private final float[] debugBoxCoords = { 0, 0, 0, Tile.TILE_SIZE,
-			Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 0, 0, 0 };
-	private final short[] debugBoxIndex = { 10 };
+	private final GeometryBuffer mDebugPoint = new GeometryBuffer(
+			new float[] { Tile.TILE_SIZE >> 1, 10 },
+			new short[] { 2 });
+
+	private final GeometryBuffer mDebugBox = new GeometryBuffer(
+			new float[] { 0, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE,
+					Tile.TILE_SIZE, Tile.TILE_SIZE, 0, 0, 0 },
+			new short[] { 10 });
 
 	private static RenderTheme renderTheme;
 	private static int renderLevels;
@@ -84,13 +90,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	// currently processed tile
 	private MapTile mTile;
 
-	// coordinates of the currently processed way
-	private float[] mCoords;
-	private short[] mIndices;
-
+	// currently processed geometry
+	private GeometryBuffer mGeom;
 	private boolean mClosed;
 
-	private float mPoiX, mPoiY;
 	private int mPriority;
 
 	// current line layer, will be added to outline layers
@@ -106,9 +109,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private final static Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
 	private Tag mTagName;
 	private Tag mTagHouseNr;
-
-	private boolean mDebugDrawPolygons;
-	boolean mDebugDrawUnmatched;
 
 	private final LineClipper mClipper;
 
@@ -131,65 +131,58 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	}
 
 	public boolean executeJob(JobTile jobTile) {
-		MapTile tile;
 
 		if (mMapDatabase == null)
 			return false;
 
-		tile = mTile = (MapTile) jobTile;
+		mTile = (MapTile) jobTile;
 
-		mDebugDrawPolygons = !debug.disablePolygons;
-		mDebugDrawUnmatched = debug.debugTheme;
-
-		if (tile.layers != null) {
+		if (mTile.layers != null) {
 			// should be fixed now.
-			Log.d(TAG, "BUG tile already loaded " + tile + " " + tile.state);
+			Log.d(TAG, "BUG tile already loaded " + mTile + " " + mTile.state);
+			mTile = null;
 			return false;
 		}
 
-		setScaleStrokeWidth(tile.zoomLevel);
+		setScaleStrokeWidth(mTile.zoomLevel);
 
 		// account for area changes with latitude
-		mLatScaleFactor = 0.5f + 0.5f * (
-				(float) Math.sin(Math.abs(MercatorProjection
-						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180)));
+		mLatScaleFactor = 0.5f + 0.5f * ((float) Math.sin(Math.abs(MercatorProjection
+				.pixelYToLatitude(mTile.pixelY, mTile.zoomLevel)) * (Math.PI / 180)));
 
-		tile.layers = new Layers();
-		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
+		mTile.layers = new Layers();
+
+		// query database, which calls renderWay and renderPOI
+		// callbacks while processing map tile data.
+		if (mMapDatabase.executeQuery(mTile, this) != QueryResult.SUCCESS) {
+
 			//Log.d(TAG, "Failed loading: " + tile);
-			tile.layers.clear();
-			tile.layers = null;
-			TextItem.release(tile.labels);
-			tile.labels = null;
-
+			mTile.layers.clear();
+			mTile.layers = null;
+			TextItem.release(mTile.labels);
+			mTile.labels = null;
 			// FIXME add STATE_FAILED?
-			tile.state = STATE_NONE;
+			mTile.state = STATE_NONE;
+			mTile = null;
 			return false;
 		}
 
 		if (debug.drawTileFrames) {
 			// draw tile coordinate
-			mTagName = new Tag("name", tile.toString(), false);
-			mPoiX = Tile.TILE_SIZE >> 1;
-			mPoiY = 10;
-
+			mTagName = new Tag("name", mTile.toString(), false);
+			mGeom = mDebugPoint;
 			RenderInstruction[] ri;
 			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
 			renderNode(ri, debugTagWay);
-
 			// draw tile box
-			mIndices = debugBoxIndex;
-			if (MapView.enableClosePolygons)
-				mIndices[0] = 8;
-			else
-				mIndices[0] = 10;
-
-			mCoords = debugBoxCoords;
+			mGeom = mDebugBox;
+			mGeom.index[0] = (short) (MapView.enableClosePolygons ? 8 : 10);
 			mDrawingLayer = 10 * renderLevels;
 			ri = renderTheme.matchWay(debugTagBox, (byte) 0, false);
 			renderWay(ri, debugTagBox);
 		}
 
+		mTile = null;
 		return true;
 	}
 
@@ -265,65 +258,60 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	// ---------------- MapDatabaseCallback -----------------
 
 	@Override
-	public void renderPointOfInterest(byte layer, Tag[] tags,
-			float latitude, float longitude) {
+	public void renderPOI(byte layer, Tag[] tags, GeometryBuffer geom) {
 
-		// reset state
-		mTagName = null;
-		mTagHouseNr = null;
-
-		mPoiX = longitude;
-		mPoiY = latitude;
+		clearState();
 
 		// remove tags that should not be cached in Rendertheme
 		filterTags(tags);
 
+		// get render instructions
 		RenderInstruction[] ri = renderTheme.matchNode(tags, mTile.zoomLevel);
 
 		if (ri == null)
 			return;
 
+		mGeom = geom;
 		renderNode(ri, tags);
 	}
 
 	@Override
-	public void renderWay(byte layer, Tag[] tags, float[] coords, short[] indices,
+	public void renderWay(byte layer, Tag[] tags, GeometryBuffer geom,
 			boolean closed, int prio) {
 
-		// reset state
-		mTagName = null;
-		mTagHouseNr = null;
-		mCurLineLayer = null;
+		clearState();
 
 		// replace tags that should not be cached in Rendertheme (e.g. name)
 		if (!filterTags(tags))
 			return;
 
-		mPriority = prio;
-		mClosed = closed;
-
 		mDrawingLayer = getValidLayer(layer) * renderLevels;
-		mCoords = coords;
-		mIndices = indices;
 
+		// get render instructions
 		RenderInstruction[] ri = renderTheme.matchWay(tags,
 				(byte) (mTile.zoomLevel + 0), closed);
 
+		mPriority = prio;
+		mClosed = closed;
+		mGeom = geom;
 		renderWay(ri, tags);
 
-		if (mDebugDrawUnmatched && ri == null)
+		if (debug.debugTheme && ri == null)
 			debugUnmatched(closed, tags);
 
 		mCurLineLayer = null;
 	}
 
 	private void debugUnmatched(boolean closed, Tag[] tags) {
-		Log.d(TAG, "DBG way not matched: " + closed + " " + Arrays.deepToString(tags));
+		Log.d(TAG, "DBG way not matched: " + closed + " "
+				+ Arrays.deepToString(tags));
 
-		mTagName = new Tag("name", tags[0].key + ":" + tags[0].value, false);
+		mTagName = new Tag("name", tags[0].key + ":"
+				+ tags[0].value, false);
 
 		RenderInstruction[] ri;
-		ri = renderTheme.matchWay(closed ? debugTagArea : debugTagWay, (byte) 0, true);
+		ri = renderTheme.matchWay(closed ? debugTagArea : debugTagWay,
+				(byte) 0, true);
 
 		renderWay(ri, tags);
 	}
@@ -344,6 +332,12 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			ri[i].renderNode(this, tags);
 	}
 
+	private void clearState() {
+		mTagName = null;
+		mTagHouseNr = null;
+		mCurLineLayer = null;
+	}
+
 	@Override
 	public void renderWaterBackground() {
 	}
@@ -351,13 +345,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	// ----------------- RenderThemeCallback -----------------
 	@Override
 	public void renderWay(Line line, int level) {
-		// TODO projectToTile();
-
 		int numLayer = (mDrawingLayer * 2) + level;
 
 		if (line.stipple == 0) {
 			if (line.outline && mCurLineLayer == null) {
-				// FIXME in RenderTheme
 				Log.e(TAG, "BUG in theme: line must come before outline!");
 				return;
 			}
@@ -384,8 +375,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				return;
 			}
 
-			lineLayer.addLine(mCoords, mIndices, mClosed);
+			lineLayer.addLine(mGeom.points, mGeom.index, mClosed);
+
+			// keep reference for outline layer
 			mCurLineLayer = lineLayer;
+
 		} else {
 			LineTexLayer lineLayer = (LineTexLayer)
 					mTile.layers.getLayer(numLayer, Layer.TEXLINE);
@@ -404,7 +398,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				lineLayer.width = w;
 			}
 
-			lineLayer.addLine(mCoords, mIndices);
+			lineLayer.addLine(mGeom.points, mGeom.index);
 		}
 	}
 
@@ -417,83 +411,82 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			if (mTile.layers.extrusionLayers == null)
 				mTile.layers.extrusionLayers = new ExtrusionLayer(0);
 
-			((ExtrusionLayer) mTile.layers.extrusionLayers).addBuildings(mCoords, mIndices,
-					mPriority);
+			((ExtrusionLayer) mTile.layers.extrusionLayers)
+					.addBuildings(mGeom.points, mGeom.index, mPriority);
 
 			return;
 		}
 
-		if (!mDebugDrawPolygons)
+		if (debug.disablePolygons)
 			return;
 
-		//	if (!mProjected && !projectToTile())
-		//		return;
+		PolygonLayer layer = (PolygonLayer)
+				mTile.layers.getLayer(numLayer, Layer.POLYGON);
 
-		PolygonLayer layer = (PolygonLayer) mTile.layers.getLayer(numLayer, Layer.POLYGON);
 		if (layer == null)
 			return;
 
 		if (layer.area == null)
 			layer.area = area;
 
-		layer.addPolygon(mCoords, mIndices);
+		layer.addPolygon(mGeom.points, mGeom.index);
+	}
+
+	private String textValueForKey(Text text) {
+		String value = null;
+
+		if (text.textKey == Tag.TAG_KEY_NAME) {
+			if (mTagName != null)
+				value = mTagName.value;
+		} else if (text.textKey == Tag.TAG_KEY_HOUSE_NUMBER) {
+			if (mTagHouseNr != null)
+				value = mTagHouseNr.value;
+		}
+		return value;
 	}
 
 	@Override
 	public void renderAreaCaption(Text text) {
-		// Log.d(TAG, "renderAreaCaption: " + mTagName);
+		// TODO place somewhere on polygon
 
-		if (text.textKey == Tag.TAG_KEY_NAME) {
-			if (mTagName == null)
-				return;
+		String value = textValueForKey(text);
+		if (value == null)
+			return;
 
-			TextItem t = TextItem.get().set(mCoords[0], mCoords[1], mTagName.value, text);
-			t.next = mTile.labels;
-			mTile.labels = t;
-		}
-		else if (text.textKey == Tag.TAG_KEY_HOUSE_NUMBER) {
-			if (mTagHouseNr == null)
-				return;
+		float x = mGeom.points[0];
+		float y = mGeom.points[1];
 
-			TextItem t = TextItem.get().set(mCoords[0], mCoords[1], mTagHouseNr.value, text);
-			t.next = mTile.labels;
-			mTile.labels = t;
-		}
+		mTile.addLabel(TextItem.get().set(x, y, value, text));
 	}
 
 	@Override
 	public void renderPointOfInterestCaption(Text text) {
-		// Log.d(TAG, "renderPointOfInterestCaption: " + mPoiX + " " + mPoiY +
-		// " " + mTagName);
-
-		if (mTagName == null)
+		String value = textValueForKey(text);
+		if (value == null)
 			return;
 
-		if (text.textKey == mTagEmptyName.key) {
-			TextItem t = TextItem.get().set(mPoiX, mPoiY, mTagName.value, text);
-			// TextItem t = new TextItem(mPoiX, mPoiY, mTagName.value, text);
-			t.next = mTile.labels;
-			mTile.labels = t;
+		for (int i = 0, n = mGeom.index[0]; i < n; i += 2) {
+			float x = mGeom.points[i];
+			float y = mGeom.points[i + 1];
+			mTile.addLabel(TextItem.get().set(x, y, value, text));
 		}
 	}
 
 	@Override
 	public void renderWayText(Text text) {
-		// Log.d(TAG, "renderWayText: " + mTagName);
-
-		if (mTagName == null)
+		String value = textValueForKey(text);
+		if (value == null)
 			return;
 
-		if (text.textKey == mTagEmptyName.key && mTagName.value != null) {
-			int offset = 0;
-			for (int i = 0, n = mIndices.length; i < n; i++) {
-				int length = mIndices[i];
-				if (length < 4)
-					break;
-				mTile.labels = WayDecorator.renderText(mClipper, mCoords, mTagName.value, text,
-						offset, length, mTile.labels);
-				offset += length;
-			}
+		int offset = 0;
+		for (int i = 0, n = mGeom.index.length; i < n; i++) {
+			int length = mGeom.index[i];
+			if (length < 4)
+				break;
+
+			WayDecorator.renderText(mClipper, mGeom.points, value, text,
+					offset, length, mTile);
+			offset += length;
 		}
 	}
 

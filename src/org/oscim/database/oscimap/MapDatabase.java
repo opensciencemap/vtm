@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
@@ -207,7 +208,7 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	// /////////////// hand sewed tile protocol buffers decoder ///////////////
-	private final int MAX_WAY_COORDS = 16384;
+	private final int MAX_WAY_COORDS = 1 << 14;
 
 	// overall bytes of content processed
 	private int mBytesProcessed;
@@ -230,10 +231,11 @@ public class MapDatabase implements IMapDatabase {
 	private static final int TAG_ELEM_PRIORITY = 31;
 
 	private short[] mTmpKeys = new short[100];
-	private short[] mIndices = new short[10];
 	private final Tag[] mTmpTags = new Tag[20];
 
-	private float[] mTmpCoords;
+	//private float[] mTmpCoords;
+	//private short[] mIndices = new short[10];
+	private final GeometryBuffer mGeom = new GeometryBuffer(MAX_WAY_COORDS, 128);
 
 	private Tag[][] mElementTags;
 
@@ -243,8 +245,6 @@ public class MapDatabase implements IMapDatabase {
 		for (int i = 0; i < 10; i++)
 			tags[i] = new Tag[i + 1];
 		mElementTags = tags;
-
-		mTmpCoords = new float[MAX_WAY_COORDS];
 	}
 
 	private boolean decode() throws IOException {
@@ -309,25 +309,43 @@ public class MapDatabase implements IMapDatabase {
 		return true;
 	}
 
-	private boolean decodeTileElement(int type) throws IOException {
-		int bytes = decodeVarint32();
+	private int decodeWayIndices(int indexCnt) throws IOException {
+		mGeom.index = decodeShortArray(indexCnt, mGeom.index);
 
-		int end = mBytesProcessed + bytes;
-		int indexCnt = 1;
+		short[] index = mGeom.index;
 		int coordCnt = 0;
-		int layer = 5;
-		int prio = 0;
 
+		for (int i = 0; i < indexCnt; i++) {
+			int len = index[i] * 2;
+			coordCnt += len;
+			index[i] = (short) len;
+		}
+		// set end marker
+		if (indexCnt < index.length)
+			index[indexCnt] = -1;
+
+		return coordCnt;
+	}
+
+	private boolean decodeTileElement(int type) throws IOException {
+
+		int bytes = decodeVarint32();
 		Tag[] tags = null;
 		short[] index = null;
 
+		int end = mBytesProcessed + bytes;
+		int indexCnt = 1;
+		int layer = 5;
+		int prio = 0;
+
 		boolean skip = false;
 		boolean fail = false;
-		if (debug)
-			Log.d(TAG, mTile + " decode element: " + type);
 
-		if (type == TAG_TILE_POINT)
+		int coordCnt = 0;
+		if (type == TAG_TILE_POINT){
 			coordCnt = 2;
+			mGeom.index[0] = 2;
+		}
 
 		while (mBytesProcessed < end) {
 			// read tag and wire type
@@ -347,16 +365,7 @@ public class MapDatabase implements IMapDatabase {
 					break;
 
 				case TAG_ELEM_INDEX:
-					mIndices = index = decodeShortArray(indexCnt, mIndices);
-
-					for (int i = 0; i < indexCnt; i++) {
-						int len = index[i] * 2;
-						coordCnt += len;
-						index[i] = (short) len;
-					}
-					// set end marker
-					if (indexCnt < index.length)
-						index[indexCnt] = -1;
+					coordCnt = decodeWayIndices(indexCnt);
 					break;
 
 				case TAG_ELEM_COORDS:
@@ -387,20 +396,22 @@ public class MapDatabase implements IMapDatabase {
 
 		if (fail || tags == null || indexCnt == 0) {
 			Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
-					+ (index != null ? Arrays.toString(index) : "null") + " tag:"
+					+ (Arrays.toString(index)) + " tag:"
 					+ (tags != null ? Arrays.deepToString(tags) : "null") + " "
 					+ indexCnt + " " + coordCnt);
 			return false;
 		}
 
-		float[] coords = mTmpCoords;
-
-		if (type == TAG_TILE_LINE)
-			mMapGenerator.renderWay((byte) layer, tags, coords, index, false, prio);
-		else if (type == TAG_TILE_POLY)
-			mMapGenerator.renderWay((byte) layer, tags, coords, index, true, prio);
-		else {
-			mMapGenerator.renderPointOfInterest((byte) layer, tags, coords[1], coords[0]);
+		switch (type) {
+			case TAG_TILE_LINE:
+				mMapGenerator.renderWay((byte) layer, tags, mGeom, false, prio);
+				break;
+			case TAG_TILE_POLY:
+				mMapGenerator.renderWay((byte) layer, tags, mGeom, true, prio);
+				break;
+			case TAG_TILE_POINT:
+				mMapGenerator.renderPOI((byte) layer, tags, mGeom);
+				break;
 		}
 
 		return true;
@@ -463,7 +474,6 @@ public class MapDatabase implements IMapDatabase {
 
 		int pos = lwHttp.bufferPos;
 		int end = pos + bytes;
-		float[] coords = mTmpCoords;
 		byte[] buf = lwHttp.buffer;
 		int cnt = 0;
 		int result;
@@ -474,11 +484,13 @@ public class MapDatabase implements IMapDatabase {
 
 		float scale = mScaleFactor;
 
-		if (nodes * 2 > coords.length) {
-			Log.d(TAG, mTile + " increase way coord buffer to " + (nodes * 2));
-			float[] tmp = new float[nodes * 2];
-			mTmpCoords = coords = tmp;
-		}
+		float[] coords = mGeom.ensurePointSize(nodes, false);
+
+		//		if (nodes * 2 > coords.length) {
+		//			Log.d(TAG, mTile + " increase way coord buffer to " + (nodes * 2));
+		//			float[] tmp = new float[nodes * 2];
+		//			mTmpCoords = coords = tmp;
+		//		}
 
 		// read repeated sint32
 		while (pos < end) {
