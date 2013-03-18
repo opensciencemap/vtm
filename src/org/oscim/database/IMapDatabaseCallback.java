@@ -14,6 +14,7 @@
  */
 package org.oscim.database;
 
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tag;
 import org.oscim.database.mapfile.MapDatabase;
 
@@ -36,7 +37,7 @@ public interface IMapDatabaseCallback {
 	 * @param longitude
 	 *            the longitude of the node.
 	 */
-	void renderPointOfInterest(byte layer, Tag[] tags, float latitude, float longitude);
+	void renderPOI(byte layer, Tag[] tags, GeometryBuffer geom);
 
 	/**
 	 * Renders water background for the current tile.
@@ -59,7 +60,7 @@ public interface IMapDatabaseCallback {
 	 *            wheter the way is an polygon.
 	 * @param prio TODO
 	 */
-	void renderWay(byte layer, Tag[] tags, float[] wayNodes, short[] wayLength,
+	void renderWay(byte layer, Tag[] tags, GeometryBuffer geom,
 			boolean closed, int prio);
 
 	//	/**

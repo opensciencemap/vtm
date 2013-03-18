@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -197,8 +198,7 @@ public class MapDatabase implements IMapDatabase {
 	private int mTileLongitude;
 	private int[] mIntBuffer;
 
-	private final float[] mWayNodes = new float[100000];
-	private int mWayNodePosition;
+	private final GeometryBuffer mGeom = new GeometryBuffer(1 << 14, 1 << 8);
 
 	private int minLat, minLon;
 	private Tile mTile;
@@ -218,8 +218,6 @@ public class MapDatabase implements IMapDatabase {
 
 		if (mIntBuffer == null)
 			mIntBuffer = new int[MAXIMUM_WAY_NODES_SEQUENCE_LENGTH * 2];
-
-		mWayNodePosition = 0;
 
 		try {
 			mTile = tile;
@@ -669,24 +667,30 @@ public class MapDatabase implements IMapDatabase {
 			double sinLat = Math.sin(latitude * PI180);
 			latitude = (int) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
 
-			mapDatabaseCallback.renderPointOfInterest(layer, curTags, latitude, longitude);
+			mGeom.points[0] = longitude;
+			mGeom.points[1] = latitude;
+			mGeom.index[0] = 2;
+			mapDatabaseCallback.renderPOI(layer, curTags, mGeom);
 
 		}
 
 		return true;
 	}
 
-	private short[] processWayDataBlock(boolean doubleDeltaEncoding) {
+	private boolean processWayDataBlock(boolean doubleDeltaEncoding) {
 		// get and check the number of way coordinate blocks (VBE-U)
 		int numBlocks = mReadBuffer.readUnsignedInt();
 		if (numBlocks < 1 || numBlocks > Short.MAX_VALUE) {
 			Log.w(TAG, "invalid number of way coordinate blocks: " + numBlocks);
-			return null;
+			return false;
 		}
 
-		short[] wayLengths = new short[numBlocks];
+		//short[] wayLengths = new short[numBlocks];
+		short[] wayLengths = mGeom.ensureIndexSize(numBlocks, false);
+		if (wayLengths.length > numBlocks)
+			wayLengths[numBlocks] = -1;
 
-		mWayNodePosition = 0;
+		mGeom.pointPos = 0;
 
 		// read the way coordinate blocks
 		for (int coordinateBlock = 0; coordinateBlock < numBlocks; ++coordinateBlock) {
@@ -696,7 +700,7 @@ public class MapDatabase implements IMapDatabase {
 			if (numWayNodes < 2 || numWayNodes > MAXIMUM_WAY_NODES_SEQUENCE_LENGTH) {
 				Log.w(TAG, "invalid number of way nodes: " + numWayNodes);
 				logDebugSignatures();
-				return null;
+				return false;
 			}
 
 			// each way node consists of latitude and longitude
@@ -710,16 +714,16 @@ public class MapDatabase implements IMapDatabase {
 			wayLengths[coordinateBlock] = (short) len;
 		}
 
-		return wayLengths;
+		return true;
 	}
 
 	private int decodeWayNodesDoubleDelta(int length) {
 		int[] buffer = mIntBuffer;
-		float[] outBuffer = mWayNodes;
 
 		mReadBuffer.readSignedInt(buffer, length);
 
-		int floatPos = mWayNodePosition;
+		float[] outBuffer = mGeom.ensurePointSize(mGeom.pointPos + length, true);
+		int pointPos = mGeom.pointPos;
 
 		// get the first way node latitude offset (VBE-S)
 		int wayNodeLatitude = mTileLatitude + buffer[0];
@@ -728,8 +732,8 @@ public class MapDatabase implements IMapDatabase {
 		int wayNodeLongitude = mTileLongitude + buffer[1];
 
 		// store the first way node
-		outBuffer[floatPos++] = wayNodeLongitude;
-		outBuffer[floatPos++] = wayNodeLatitude;
+		outBuffer[pointPos++] = wayNodeLongitude;
+		outBuffer[pointPos++] = wayNodeLatitude;
 
 		int singleDeltaLatitude = 0;
 		int singleDeltaLongitude = 0;
@@ -750,23 +754,23 @@ public class MapDatabase implements IMapDatabase {
 
 			if (dLon > minLon || dLon < -minLon || dLat > minLat || dLat < -minLat
 					|| (pos == length - 2)) {
-				outBuffer[floatPos++] = nLon;
-				outBuffer[floatPos++] = nLat;
+				outBuffer[pointPos++] = nLon;
+				outBuffer[pointPos++] = nLat;
 				cnt += 2;
 			}
 		}
 
-		mWayNodePosition = floatPos;
+		mGeom.pointPos = pointPos;
 
 		return cnt;
 	}
 
 	private int decodeWayNodesSingleDelta(int length) {
 		int[] buffer = mIntBuffer;
-		float[] outBuffer = mWayNodes;
 		mReadBuffer.readSignedInt(buffer, length);
 
-		int floatPos = mWayNodePosition;
+		float[] outBuffer = mGeom.ensurePointSize(mGeom.pointPos + length, true);
+		int pointPos = mGeom.pointPos;
 
 		// get the first way node latitude single-delta offset (VBE-S)
 		int wayNodeLatitude = mTileLatitude + buffer[0];
@@ -775,8 +779,8 @@ public class MapDatabase implements IMapDatabase {
 		int wayNodeLongitude = mTileLongitude + buffer[1];
 
 		// store the first way node
-		outBuffer[floatPos++] = wayNodeLongitude;
-		outBuffer[floatPos++] = wayNodeLatitude;
+		outBuffer[pointPos++] = wayNodeLongitude;
+		outBuffer[pointPos++] = wayNodeLatitude;
 
 		int cnt = 2, nLon, nLat, dLat, dLon;
 
@@ -792,13 +796,13 @@ public class MapDatabase implements IMapDatabase {
 
 			if (dLon > minLon || dLon < -minLon || dLat > minLat || dLat < -minLat
 					|| (pos == length - 2)) {
-				outBuffer[floatPos++] = nLon;
-				outBuffer[floatPos++] = nLat;
+				outBuffer[pointPos++] = nLon;
+				outBuffer[pointPos++] = nLat;
 				cnt += 2;
 			}
 		}
 
-		mWayNodePosition = floatPos;
+		mGeom.pointPos = pointPos;
 		return cnt;
 	}
 
@@ -965,18 +969,17 @@ public class MapDatabase implements IMapDatabase {
 			}
 
 			for (int wayDataBlock = 0; wayDataBlock < wayDataBlocks; ++wayDataBlock) {
-				short[] wayLengths = processWayDataBlock(featureWayDoubleDeltaEncoding);
-				if (wayLengths == null)
+				if (!processWayDataBlock(featureWayDoubleDeltaEncoding))
 					return false;
 
 				// wayDataContainer.textPos = textPos;
-				int l = wayLengths[0];
+				int l = mGeom.index[0];
 
-				boolean closed = mWayNodes[0] == mWayNodes[l - 2]
-						&& mWayNodes[1] == mWayNodes[l - 1];
+				boolean closed = mGeom.points[0] == mGeom.points[l - 2]
+						&& mGeom.points[1] == mGeom.points[l - 1];
 
-				projectToTile(mWayNodes, wayLengths);
-				mapDatabaseCallback.renderWay(layer, curTags, mWayNodes, wayLengths, closed, 0);
+				projectToTile(mGeom.points, mGeom.index);
+				mapDatabaseCallback.renderWay(layer, curTags, mGeom, closed, 0);
 			}
 		}
 

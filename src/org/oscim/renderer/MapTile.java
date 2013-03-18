@@ -126,4 +126,9 @@ public final class MapTile extends JobTile {
 		}
 		proxies = 0;
 	}
+
+	public void addLabel(TextItem t){
+		t.next = labels;
+		labels = t;
+	}
 }

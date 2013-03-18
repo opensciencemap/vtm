@@ -63,11 +63,6 @@ class MatchingCacheKey {
 
 		MatchingCacheKey other = (MatchingCacheKey) obj;
 
-		//		if (mTags == null) {
-		//			return (other.mTags == null);
-		//		} else if (other.mTags == null)
-		//			return false;
-
 		int length = mTags.length;
 		if (length != other.mTags.length)
 			return false;

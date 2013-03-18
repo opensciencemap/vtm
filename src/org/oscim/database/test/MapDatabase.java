@@ -15,6 +15,7 @@
 package org.oscim.database.test;
 
 import org.oscim.core.BoundingBox;
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
@@ -32,18 +33,21 @@ import org.oscim.generator.JobTile;
 public class MapDatabase implements IMapDatabase {
 
 	private final static String PROJECTION = "Mercator";
-	private float[] mCoords = new float[20];
-	private short[] mIndex = new short[4];
+	//private float[] mCoords = new float[20];
+	//private short[] mIndex = new short[4];
+
+	GeometryBuffer mGeom = new GeometryBuffer(new float[20], new short[4]);
+
 	// private Tag[] mTags = { new Tag("boundary", "administrative"), new
 	// Tag("admin_level", "2") };
-	private Tag[] mTags = { new Tag("natural", "water") };
-	private Tag[] mTagsWay = { new Tag("highway", "primary"), new Tag("name", "Highway Rd") };
+	private final Tag[] mTags = { new Tag("natural", "water") };
+	private final Tag[] mTagsWay = { new Tag("highway", "primary"), new Tag("name", "Highway Rd") };
 
 	// private Tag[] mNameTags;
 
 	private final MapInfo mMapInfo =
 			new MapInfo(new BoundingBox(-180, -90, 180, 90),
-					new Byte((byte) 0), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me",
+					new Byte((byte) 5), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me",
 					null);
 
 	private boolean mOpenFile = false;
@@ -52,118 +56,102 @@ public class MapDatabase implements IMapDatabase {
 	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 
 		int size = Tile.TILE_SIZE;
+		float[] points = mGeom.points;
+		short[] index = mGeom.index;
 
 		float lat1 = -1;
 		float lon1 = -1;
 		float lat2 = size + 1;
 		float lon2 = size + 1;
 
-		mCoords[0] = lon1;
-		mCoords[1] = lat1;
+		points[0] = lon1;
+		points[1] = lat1;
 
-		mCoords[2] = lon2;
-		mCoords[3] = lat1;
+		points[2] = lon2;
+		points[3] = lat1;
 
-		mCoords[4] = lon2;
-		mCoords[5] = lat2;
+		points[4] = lon2;
+		points[5] = lat2;
 
-		mCoords[6] = lon1;
-		mCoords[7] = lat2;
+		points[6] = lon1;
+		points[7] = lat2;
 
-		mCoords[8] = lon1;
-		mCoords[9] = lat1;
+		points[8] = lon1;
+		points[9] = lat1;
 
-		mIndex[0] = 10;
-		mIndex[1] = 0;
+		index[0] = 10;
+		index[1] = 0;
 
 		lon1 = 40;
 		lon2 = size - 40;
 		lat1 = 40;
 		lat2 = size - 40;
 
-		mCoords[10] = lon1;
-		mCoords[11] = lat1;
+		points[10] = lon1;
+		points[11] = lat1;
 
-		mCoords[12] = lon2;
-		mCoords[13] = lat1;
+		points[12] = lon2;
+		points[13] = lat1;
 
-		mCoords[14] = lon2;
-		mCoords[15] = lat2;
+		points[14] = lon2;
+		points[15] = lat2;
 
-		mCoords[16] = lon1;
-		mCoords[17] = lat2;
+		points[16] = lon1;
+		points[17] = lat2;
 
-		mCoords[18] = lon1;
-		mCoords[19] = lat1;
+		points[18] = lon1;
+		points[19] = lat1;
 
-		mIndex[2] = 10;
-		mIndex[3] = 0;
+		index[2] = 10;
+		index[3] = 0;
 
-		mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, mIndex, true, 0);
+		mapDatabaseCallback.renderWay((byte) 0, mTags, mGeom, true, 0);
 
-		mIndex[0] = 4;
-		mIndex[1] = -1;
+		index[0] = 4;
+		index[1] = -1;
 
 		// middle horizontal
-		mCoords[0] = 0;
-		mCoords[1] = size / 2;
-		mCoords[2] = size;
-		mCoords[3] = size / 2;
-		Tag[] tags = new Tag[2];
-		tags[0] = mTagsWay[0];
-		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex, false, 0);
+		points[0] = 0;
+		points[1] = size / 2;
+		points[2] = size;
+		points[3] = size / 2;
+		mapDatabaseCallback.renderWay((byte) 0, mTagsWay, mGeom, false, 0);
 
 		// center up
-		mCoords[0] = size / 2;
-		mCoords[1] = -size / 2;
-		mCoords[2] = size / 2;
-		mCoords[3] = size / 2;
-		tags = new Tag[2];
-		tags[0] = mTagsWay[0];
-		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex,
+		points[0] = size / 2;
+		points[1] = -size / 2;
+		points[2] = size / 2;
+		points[3] = size / 2;
+		mapDatabaseCallback.renderWay((byte) 0, mTagsWay, mGeom,
 				false, 0);
 
 		// center down
-		mCoords[0] = size / 2;
-		mCoords[1] = size / 2;
-		mCoords[2] = size / 2;
-		mCoords[3] = size / 2 + size;
-		tags = new Tag[2];
-		tags[0] = mTagsWay[0];
-		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 0, tags, mCoords, mIndex, false, 0);
+		points[0] = size / 2;
+		points[1] = size / 2;
+		points[2] = size / 2;
+		points[3] = size / 2 + size;
+		mapDatabaseCallback.renderWay((byte) 0, mTagsWay, mGeom, false, 0);
 
 		// left-top to center
-		mCoords[0] = size / 2;
-		mCoords[1] = size / 2;
-		mCoords[2] = 10;
-		mCoords[3] = 10;
-		tags = new Tag[2];
-		tags[0] = mTagsWay[0];
-		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false, 0);
+		points[0] = size / 2;
+		points[1] = size / 2;
+		points[2] = 10;
+		points[3] = 10;
+		mapDatabaseCallback.renderWay((byte) 1, mTagsWay, mGeom, false, 0);
 
 		// middle horizontal
-		mCoords[0] = 0;
-		mCoords[1] = 10;
-		mCoords[2] = size;
-		mCoords[3] = 10;
-		tags = new Tag[2];
-		tags[0] = mTagsWay[0];
-		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false, 0);
+		points[0] = 0;
+		points[1] = 10;
+		points[2] = size;
+		points[3] = 10;
+		mapDatabaseCallback.renderWay((byte) 1, mTagsWay, mGeom, false, 0);
 
 		// middle horizontal
-		mCoords[0] = 10;
-		mCoords[1] = 0;
-		mCoords[2] = 10;
-		mCoords[3] = size;
-		tags = new Tag[2];
-		tags[0] = mTagsWay[0];
-		tags[1] = mTagsWay[1];
-		mapDatabaseCallback.renderWay((byte) 1, tags, mCoords, mIndex, false, 0);
+		points[0] = 10;
+		points[1] = 0;
+		points[2] = 10;
+		points[3] = size;
+		mapDatabaseCallback.renderWay((byte) 1, mTagsWay, mGeom, false, 0);
 
 		// lon1 = size / 2;
 		// lat1 = size / 2;

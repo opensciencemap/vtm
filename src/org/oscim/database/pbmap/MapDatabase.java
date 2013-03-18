@@ -36,6 +36,7 @@ import java.util.Map;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
@@ -88,9 +89,6 @@ public class MapDatabase implements IMapDatabase {
 	private int MAX_TILE_TAGS = 100;
 	private Tag[] curTags = new Tag[MAX_TILE_TAGS];
 	private int mCurTagCnt;
-
-	//	private HttpClient mClient;
-	//	private HttpGet mRequest = null;
 
 	private IMapDatabaseCallback mMapGenerator;
 	private float mScaleFactor;
@@ -147,76 +145,13 @@ public class MapDatabase implements IMapDatabase {
 				return QueryResult.SUCCESS;
 		}
 
-		//		String url = null;
-		//		HttpGet getRequest;
-
-		//		if (!USE_LW_HTTP) {
-		//			url = String.format(URL,
-		//					Integer.valueOf(tile.zoomLevel),
-		//					Integer.valueOf(tile.tileX),
-		//					Integer.valueOf(tile.tileY));
-		//		}
-
-		//		if (USE_APACHE_HTTP) {
-		//			getRequest = new HttpGet(url);
-		//			mRequest = getRequest;
-		//		}
-
 		try {
-			//			if (USE_LW_HTTP) {
 			if (lwHttpSendRequest(tile) && lwHttpReadHeader() > 0) {
 				cacheBegin(tile, f);
 				decode();
 			} else {
 				result = QueryResult.FAILED;
 			}
-
-			//			}
-			//			else if (USE_APACHE_HTTP) {
-			//				HttpResponse response = mClient.execute(getRequest);
-			//				final int statusCode = response.getStatusLine().getStatusCode();
-			//				final HttpEntity entity = response.getEntity();
-			//
-			//				if (statusCode != HttpStatus.SC_OK) {
-			//					Log.d(TAG, "Http response " + statusCode);
-			//					entity.consumeContent();
-			//					return QueryResult.FAILED;
-			//				}
-			//				if (!mTile.isLoading) {
-			//					Log.d(TAG, "1 loading canceled " + mTile);
-			//					entity.consumeContent();
-			//
-			//					return QueryResult.FAILED;
-			//				}
-			//
-			//				InputStream is = null;
-			//				// GZIPInputStream zis = null;
-			//				try {
-			//					is = entity.getContent();
-			//
-			//					mContentLenth = entity.getContentLength();
-			//					mInputStream = is;
-			//					cacheBegin(tile, f);
-			//					// zis = new GZIPInputStream(is);
-			//					decode();
-			//				} finally {
-			//					// if (zis != null)
-			//					// zis.close();
-			//					if (is != null)
-			//						is.close();
-			//					entity.consumeContent();
-			//				}
-			//			} else {
-			//				HttpURLConnection urlConn =
-			//						(HttpURLConnection) new URL(url).openConnection();
-			//
-			//				InputStream in = urlConn.getInputStream();
-			//				try {
-			//					decode();
-			//				} finally {
-			//					urlConn.disconnect();
-			//				}
-			//			}
 		} catch (SocketException ex) {
 			Log.d(TAG, "Socket exception: " + ex.getMessage());
 			result = QueryResult.FAILED;
@@ -232,9 +167,6 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		mLastRequest = SystemClock.elapsedRealtime();
-
-		//		if (USE_APACHE_HTTP)
-		//			mRequest = null;
 
 		cacheFinish(tile, f, result == QueryResult.SUCCESS);
 
@@ -258,36 +190,8 @@ public class MapDatabase implements IMapDatabase {
 		return mOpenFile;
 	}
 
-	//	private void createClient() {
-	//		mOpenFile = true;
-	//		HttpParams params = new BasicHttpParams();
-	//		HttpConnectionParams.setStaleCheckingEnabled(params, false);
-	//		HttpConnectionParams.setTcpNoDelay(params, true);
-	//		HttpConnectionParams.setConnectionTimeout(params, 20 * 1000);
-	//		HttpConnectionParams.setSoTimeout(params, 60 * 1000);
-	//		HttpConnectionParams.setSocketBufferSize(params, 32768);
-	//		HttpClientParams.setRedirecting(params, false);
-	//
-	//		DefaultHttpClient client = new DefaultHttpClient(params);
-	//		client.removeRequestInterceptorByClass(RequestAddCookies.class);
-	//		client.removeResponseInterceptorByClass(ResponseProcessCookies.class);
-	//		client.removeRequestInterceptorByClass(RequestUserAgent.class);
-	//		client.removeRequestInterceptorByClass(RequestExpectContinue.class);
-	//		client.removeRequestInterceptorByClass(RequestTargetAuthentication.class);
-	//		client.removeRequestInterceptorByClass(RequestProxyAuthentication.class);
-	//
-	//		mClient = client;
-	//
-	//		SchemeRegistry schemeRegistry = new SchemeRegistry();
-	//		schemeRegistry.register(new Scheme("http",
-	//				PlainSocketFactory.getSocketFactory(), 80));
-	//	}
-
 	@Override
 	public OpenResult open(MapOptions options) {
-
-		//if (USE_APACHE_HTTP)
-		//	createClient();
 
 		if (mOpenFile)
 			return OpenResult.SUCCESS;
@@ -344,15 +248,6 @@ public class MapDatabase implements IMapDatabase {
 	@Override
 	public void close() {
 		mOpenFile = false;
-		//		if (USE_APACHE_HTTP) {
-		//			if (mClient != null) {
-		//				mClient.getConnectionManager().shutdown();
-		//				mClient = null;
-		//			}
-		//		}
-
-		//		if (USE_LW_HTTP) {
-
 		mSockAddr = null;
 
 		if (mSocket != null) {
@@ -363,7 +258,7 @@ public class MapDatabase implements IMapDatabase {
 			}
 			mSocket = null;
 		}
-		//		}
+
 		if (USE_CACHE) {
 			cacheDir = null;
 		}
@@ -384,17 +279,6 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	// /////////////// hand sewed tile protocol buffers decoder ////////////////
-	private static final int BUFFER_SIZE = 65536;
-
-	private final byte[] mReadBuffer = new byte[BUFFER_SIZE];
-
-	// position in read buffer
-	private int mBufferPos;
-	// bytes available in read buffer
-	private int mBufferSize;
-	// overall bytes of content processed
-	private int mBytesProcessed;
-
 	private static final int TAG_TILE_TAGS = 1;
 	private static final int TAG_TILE_WAYS = 2;
 	private static final int TAG_TILE_POLY = 3;
@@ -412,6 +296,20 @@ public class MapDatabase implements IMapDatabase {
 	private static final int TAG_NODE_LAYER = 21;
 	private static final int TAG_NODE_NUM_TAGS = 1;
 	private static final int TAG_NODE_NUM_COORDS = 2;
+
+	private static final int BUFFER_SIZE = 65536;
+
+	private final byte[] mReadBuffer = new byte[BUFFER_SIZE];
+
+	// position in read buffer
+	private int mBufferPos;
+	// bytes available in read buffer
+	private int mBufferSize;
+	// overall bytes of content processed
+	private int mBytesProcessed;
+
+	private final GeometryBuffer mGeom = new GeometryBuffer(1 << 14, 1 << 8);
+
 
 	private boolean decode() throws IOException {
 		mBytesProcessed = 0;
@@ -544,19 +442,16 @@ public class MapDatabase implements IMapDatabase {
 
 		if (fail || index == null || tags == null || indexCnt == 0 || tagCnt == 0) {
 			Log.d(TAG, "failed reading way: bytes:" + bytes + " index:"
-					+ (index == null ? "null" : index.toString()) + " tag:"
 					+ (tags != null ? tags.toString() : "...") + " "
 					+ indexCnt + " " + coordCnt + " " + tagCnt);
 			return false;
 		}
 
-		float[] coords = tmpCoords;
-
 		// FIXME, remove all tiles from cache then remove this below
 		if (layer == 0)
 			layer = 5;
 
-		mMapGenerator.renderWay((byte) layer, tags, coords, index, polygon, 0);
+		mMapGenerator.renderWay((byte) layer, tags, mGeom, polygon, 0);
 		return true;
 	}
 
@@ -621,22 +516,23 @@ public class MapDatabase implements IMapDatabase {
 		// read repeated sint32
 		int lastX = 0;
 		int lastY = 0;
+		float[] coords = mGeom.ensurePointSize(numNodes, false);
+
 		while (mBytesProcessed < end && cnt < numNodes) {
 			int lon = decodeZigZag32(decodeVarint32());
 			int lat = decodeZigZag32(decodeVarint32());
 			lastX = lon + lastX;
 			lastY = lat + lastY;
-
-			mMapGenerator.renderPointOfInterest(layer,
-					tags, Tile.TILE_SIZE - lastY / scale, lastX / scale);
-			cnt += 2;
+			coords[cnt++] = lastX / scale;
+			coords[cnt++] = Tile.TILE_SIZE - lastY / scale;
 		}
+
+		mGeom.index[0] = (short)numNodes;
+		mMapGenerator.renderPOI(layer, tags, mGeom);
+
 		return cnt;
 	}
 
-	private int MAX_WAY_COORDS = 32768;
-
-	private float[] tmpCoords = new float[MAX_WAY_COORDS];
 
 	private Tag[] decodeWayTags(int tagCnt) throws IOException {
 		int bytes = decodeVarint32();
@@ -676,15 +572,15 @@ public class MapDatabase implements IMapDatabase {
 		return tags;
 	}
 
-	private short[] mIndices = new short[10];
-
 	private short[] decodeWayIndices(int indexCnt) throws IOException {
 		int bytes = decodeVarint32();
 
-		short[] index = mIndices;
-		if (index.length < indexCnt + 1) {
-			index = mIndices = new short[indexCnt + 1];
-		}
+		short[] index = mGeom.ensureIndexSize(indexCnt, false);
+
+//				mIndices;
+//		if (index.length < indexCnt + 1) {
+//			index = mIndices = new short[indexCnt + 1];
+//		}
 
 		readBuffer(bytes);
 
@@ -762,22 +658,16 @@ public class MapDatabase implements IMapDatabase {
 
 		int pos = mBufferPos;
 		int end = pos + bytes;
-		float[] coords = tmpCoords;
 		byte[] buf = mReadBuffer;
 		int cnt = 0;
 		int result;
 
+		float scale = mScaleFactor;
 		int x, lastX = 0;
 		int y, lastY = 0;
 		boolean even = true;
 
-		float scale = mScaleFactor;
-
-		if (nodes * 2 > coords.length) {
-			Log.d(TAG, "increase way coord buffer " + mTile + " to " + (nodes * 2));
-			float[] tmp = new float[nodes * 2];
-			tmpCoords = coords = tmp;
-		}
+		float[] coords = mGeom.ensurePointSize(nodes, false);
 
 		// read repeated sint32
 		while (pos < end) {

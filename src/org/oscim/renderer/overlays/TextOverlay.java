@@ -28,6 +28,7 @@ package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.generator.JobTile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -395,6 +396,8 @@ public class TextOverlay extends BasicOverlay {
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 
 			MapTile t = tiles[i];
+			if (t.state != JobTile.STATE_READY)
+				continue;
 
 			float dx = (float) (t.pixelX - pos.x);
 			float dy = (float) (t.pixelY - pos.y);
@@ -459,8 +462,9 @@ public class TextOverlay extends BasicOverlay {
 
 		/* add caption */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
-
 			MapTile t = tiles[i];
+			if (t.state != JobTile.STATE_READY)
+				continue;
 
 			float dx = (float) (t.pixelX - pos.x);
 			float dy = (float) (t.pixelY - pos.y);

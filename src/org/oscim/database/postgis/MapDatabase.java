@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tag;
 import org.oscim.core.WebMercator;
 import org.oscim.database.IMapDatabase;
@@ -49,10 +50,11 @@ public class MapDatabase implements IMapDatabase {
 
 	private final float mScale = 1;
 
-	private int mCoordPos = 0;
-	private int mIndexPos = 0;
-	private float[] mCoords;
-	private short[] mIndex;
+//	private int mCoordPos = 0;
+//	private int mIndexPos = 0;
+//	private float[] mCoords;
+//	private short[] mIndex;
+	private final GeometryBuffer mGeom = new GeometryBuffer(1 << 14, 1 << 8);
 
 	private Tag[] mTags;
 
@@ -128,8 +130,8 @@ public class MapDatabase implements IMapDatabase {
 		// int cnt = 0;
 		try {
 			while (r != null && r.next()) {
-				mIndexPos = 0;
-				mCoordPos = 0;
+				mGeom.indexPos = 0;
+				mGeom.pointPos =0;
 				// cnt++;
 				try {
 					Object obj = r.getObject(1);
@@ -172,17 +174,20 @@ public class MapDatabase implements IMapDatabase {
 					continue;
 
 				boolean polygon = parse(b);
-				if (mIndexPos == 0) {
+				if (mGeom.indexPos == 0) {
 					Log.d(TAG, "no index: skip way");
 					continue;
-				} else if (mIndexPos == 1) {
-					mapDatabaseCallback.renderPointOfInterest((byte) 0, mTags,
-							mCoords[1], mCoords[0]);
+				} else if (mGeom.indexPos == 1) {
+					mapDatabaseCallback.renderPOI((byte) 0, mTags,	mGeom);
 				} else {
 
-					short[] idx = new short[mIndexPos];
-					System.arraycopy(mIndex, 0, idx, 0, mIndexPos);
-					mapDatabaseCallback.renderWay((byte) 0, mTags, mCoords, idx, polygon, 0);
+//					short[] idx = new short[mIndexPos];
+//					System.arraycopy(mIndex, 0, idx, 0, mIndexPos);
+//
+					if (mGeom.index.length > mGeom.indexPos)
+						mGeom.index[mGeom.indexPos] = -1;
+
+					mapDatabaseCallback.renderWay((byte) 0, mTags, mGeom, polygon, 0);
 				}
 			}
 		} catch (SQLException e) {
@@ -212,10 +217,6 @@ public class MapDatabase implements IMapDatabase {
 	@Override
 	public OpenResult open(MapOptions options) {
 		mOpenFile = true;
-		if (mCoords == null) {
-			mCoords = new float[100000];
-			mIndex = new short[100000];
-		}
 		return OpenResult.SUCCESS;
 	}
 
@@ -230,8 +231,6 @@ public class MapDatabase implements IMapDatabase {
 				connection = null;
 			}
 		}
-		mCoords = null;
-		mIndex = null;
 		mOpenFile = false;
 	}
 
@@ -315,10 +314,11 @@ public class MapDatabase implements IMapDatabase {
 	private void parsePoint(ValueGetter data, boolean haveZ, boolean haveM) {
 		// double X = data.getDouble();
 		// double Y = data.getDouble();
-		mCoords[0] = (float) (data.getDouble() * mScale);
-		mCoords[1] = (float) (data.getDouble() * mScale);
-		mIndex[0] = 2;
-		mIndexPos = 1;
+		mGeom.points[0] = (float) (data.getDouble() * mScale);
+		mGeom.points[1] = (float) (data.getDouble() * mScale);
+		mGeom.index[0] = 2;
+		mGeom.indexPos= 1;
+
 		if (haveZ)
 			data.getDouble();
 
@@ -338,7 +338,7 @@ public class MapDatabase implements IMapDatabase {
 	private void parseGeometryArray(ValueGetter data, int count) {
 		for (int i = 0; i < count; i++) {
 			parseGeometry(data);
-			mIndex[mIndexPos++] = 0;
+			mGeom.index[mGeom.indexPos++] = 0;
 		}
 	}
 
@@ -357,14 +357,14 @@ public class MapDatabase implements IMapDatabase {
 	private void parseLineString(ValueGetter data, boolean haveZ, boolean haveM) {
 		int count = data.getInt();
 		for (int i = 0; i < count; i++) {
-			mCoords[mCoordPos++] = (float) (data.getDouble()) * mScale;
-			mCoords[mCoordPos++] = (float) (data.getDouble()) * mScale;
+			mGeom.points[mGeom.pointPos++] = (float) (data.getDouble()) * mScale;
+			mGeom.points[mGeom.pointPos++] = (float) (data.getDouble()) * mScale;
 			if (haveZ)
 				data.getDouble();
 			if (haveM)
 				data.getDouble();
 		}
-		mIndex[mIndexPos++] = (short) (count * 2);
+		mGeom.index[mGeom.indexPos++] = (short) (count * 2);
 	}
 
 	private void parsePolygon(ValueGetter data, boolean haveZ, boolean haveM) {
