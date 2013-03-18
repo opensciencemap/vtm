@@ -34,7 +34,7 @@ import android.opengl.GLES20;
  * @author Hannes Janetzek
  */
 public class TileRenderer {
-	//private final static String TAG = BaseMap.class.getName();
+	//private final static String TAG = TileRenderer.class.getName();
 
 	// used to increase polygon-offset for each tile drawn.
 	private static int mDrawCnt;

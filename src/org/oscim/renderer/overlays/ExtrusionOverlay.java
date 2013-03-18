@@ -71,7 +71,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 			for (int i = 1; i < 2; i++) {
 				// Set up the program for rendering extrusions
-				shaderProgram[i] = GlUtils.createProgram(extrusionVertexShader[i],
+				shaderProgram[i] = GlUtils.createProgram(extrusionVertexShader,
 						extrusionFragmentShader);
 				if (shaderProgram[i] == 0) {
 					Log.e(TAG, "Could not create extrusion shader program. " + i);
@@ -371,81 +371,46 @@ public class ExtrusionOverlay extends RenderOverlay {
 			1.0f,
 	};
 
-	final static String[] extrusionVertexShader = {
-			"precision mediump float;"
-					+ "uniform mat4 u_mvp;"
-					+ "uniform vec4 u_color[4];"
-					+ "uniform int u_mode;"
-					+ "uniform float u_alpha;"
-					+ "attribute vec4 a_pos;"
-					+ "attribute vec2 a_light;"
-					+ "varying vec4 color;"
-					+ "const float ff = 255.0;"
-					+ "float c_alpha = 0.8;"
-					+ "void main() {"
-					+ "  gl_Position = u_mvp * a_pos;"
-					+ "  if (u_mode == 0)"
-					//     roof / depth pass
-					+ "    color = u_color[0];"
-					+ "  else {"
-					//    decrease contrast with distance
-					+ "   float z = (0.96 + gl_Position.z * 0.04);"
-					+ "   if (u_mode == 1){"
-					//     sides 1 - use 0xff00
-					//     scale direction to -0.5<>0.5
-					+ "    float dir = abs(a_light.y / ff - 0.5);"
-					+ "    color = u_color[1] * z;"
-					+ "    color.rgb *= (0.7 + dir * 0.4);"
-					+ "  } else if (u_mode == 2){"
-					//     sides 2 - use 0x00ff
-					+ "    float dir = abs(a_light.x / ff - 0.5);"
-					+ "    color = u_color[2] * z;"
-					+ "    color.rgb *= (0.7 + dir * 0.4);"
-					+ "  } else"
-					//     outline
-					+ "    color = u_color[3] * z;"
-					+ "}}",
-
-			"precision mediump float;"
-					+ "uniform mat4 u_mvp;"
-					+ "uniform vec4 u_color[4];"
-					+ "uniform int u_mode;"
-					+ "uniform float u_alpha;"
-					+ "attribute vec4 a_pos;"
-					+ "attribute vec2 a_light;"
-					+ "varying vec4 color;"
-					//+ "varying float z;"
-					+ "const float ff = 255.0;"
-					+ "void main() {"
-					//   change height by u_alpha
-					+ "  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);"
-					//+ "  z = gl_Position.z;"
-					+ "  if (u_mode == 0)"
-					//     roof / depth pass
-					+ "    color = u_color[0];"
-					+ "  else {"
-					//    decrease contrast with distance
-					+ "   if (u_mode == 1){"
-					//     sides 1 - use 0xff00
-					//     scale direction to -0.5<>0.5
-					//+ "    float dir = abs(a_light.y / ff - 0.5);"
-					+ "    float dir = a_light.y / ff;"
-					+ "    float z = (0.98 + gl_Position.z * 0.02);"
-					+ "    color = u_color[1];"
-					+ "    color.rgb *= (0.85 + dir * 0.15) * z;"
-					+ "  } else if (u_mode == 2){"
-					//     sides 2 - use 0x00ff
-					//+ "    float dir = abs(a_light.x / ff - 0.5);"
-					+ "    float dir = a_light.x / ff;"
-					+ "    float z = (0.98 + gl_Position.z * 0.02);"
-					+ "    color = u_color[2] * z;"
-					+ "    color.rgb *= (0.85 + dir * 0.15) * z;"
-					+ "  } else {"
-					//     outline
-					+ "    float z = (0.8 - gl_Position.z * 0.2);"
-					+ "    color = u_color[3] * z;"
-					+ "}}}"
-	};
+	final static String extrusionVertexShader = ""
+			+ "precision mediump float;"
+			+ "uniform mat4 u_mvp;"
+			+ "uniform vec4 u_color[4];"
+			+ "uniform int u_mode;"
+			+ "uniform float u_alpha;"
+			+ "attribute vec4 a_pos;"
+			+ "attribute vec2 a_light;"
+			+ "varying vec4 color;"
+			//+ "varying float z;"
+			+ "const float ff = 255.0;"
+			+ "void main() {"
+			//   change height by u_alpha
+			+ "  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);"
+			//+ "  z = gl_Position.z;"
+			+ "  if (u_mode == 0)"
+			//     roof / depth pass
+			+ "    color = u_color[0];"
+			+ "  else {"
+			//    decrease contrast with distance
+			+ "   if (u_mode == 1){"
+			//     sides 1 - use 0xff00
+			//     scale direction to -0.5<>0.5
+			//+ "    float dir = abs(a_light.y / ff - 0.5);"
+			+ "    float dir = a_light.y / ff;"
+			+ "    float z = (0.98 + gl_Position.z * 0.02);"
+			+ "    color = u_color[1];"
+			+ "    color.rgb *= (0.85 + dir * 0.15) * z;"
+			+ "  } else if (u_mode == 2){"
+			//     sides 2 - use 0x00ff
+			//+ "    float dir = abs(a_light.x / ff - 0.5);"
+			+ "    float dir = a_light.x / ff;"
+			+ "    float z = (0.98 + gl_Position.z * 0.02);"
+			+ "    color = u_color[2] * z;"
+			+ "    color.rgb *= (0.85 + dir * 0.15) * z;"
+			+ "  } else {"
+			//     outline
+			+ "    float z = (0.8 - gl_Position.z * 0.2);"
+			+ "    color = u_color[3] * z;"
+			+ "}}}";
 
 	final static String extrusionFragmentShader = ""
 			+ "precision mediump float;"

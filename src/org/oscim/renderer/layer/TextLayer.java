@@ -68,11 +68,6 @@ public final class TextLayer extends TextureLayer {
 		TextItem it = labels;
 
 		for (; it != null; it = it.next) {
-			// todo add captions at the end
-			//if (item.text.caption && !it.text.caption)
-			//continue;
-			//if (!item.text.caption && it.text.caption)
-			//continue;
 
 			if (item.text == it.text) {
 				while (it.next != null
