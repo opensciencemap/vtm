@@ -196,7 +196,7 @@ abstract class Rule {
 
 	abstract boolean matchesWay(Tag[] tags);
 
-	void matchNode(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel,
+	void matchNode(Tag[] tags, byte zoomLevel,
 			List<RenderInstruction> matchingList) {
 		if ((mElement != Element.WAY)
 				&& mZoomMin <= zoomLevel
@@ -207,12 +207,12 @@ abstract class Rule {
 				matchingList.add(mRenderInstructionArray[i]);
 
 			for (int i = 0, n = mSubRuleArray.length; i < n; i++)
-				mSubRuleArray[i].matchNode(renderCallback, tags, zoomLevel, matchingList);
+				mSubRuleArray[i].matchNode(tags, zoomLevel, matchingList);
 
 		}
 	}
 
-	void matchWay(IRenderCallback renderCallback, Tag[] tags, byte zoomLevel,
+	void matchWay(Tag[] tags, byte zoomLevel,
 			int closed, List<RenderInstruction> matchingList) {
 
 		if ((mElement != Element.NODE)
@@ -227,7 +227,7 @@ abstract class Rule {
 
 			// check subrules
 			for (int i = 0, n = mSubRuleArray.length; i < n; i++)
-				mSubRuleArray[i].matchWay(renderCallback, tags, zoomLevel, closed,
+				mSubRuleArray[i].matchWay(tags, zoomLevel, closed,
 						matchingList);
 
 		}

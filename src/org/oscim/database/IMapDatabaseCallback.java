@@ -62,16 +62,16 @@ public interface IMapDatabaseCallback {
 	void renderWay(byte layer, Tag[] tags, float[] wayNodes, short[] wayLength,
 			boolean closed, int prio);
 
-	/**
-	 * TBD: check if way will be rendered before decoding
-	 *
-	 * @param tags
-	 *            ...
-	 * @param closed
-	 *            ...
-	 * @return true if the way will be rendered (i.e. found match in
-	 *         RenderTheme)
-	 */
-	boolean checkWay(Tag[] tags, boolean closed);
+	//	/**
+	//	 * TBD: check if way will be rendered before decoding - MUST be called before renderWay!
+	//	 *
+	//	 * @param tags
+	//	 *            ...
+	//	 * @param closed
+	//	 *            ...
+	//	 * @return true if the way will be rendered (i.e. found match in
+	//	 *         RenderTheme)
+	//	 */
+	//	boolean matchWay(Tag[] tags, boolean closed);
 
 }

@@ -59,13 +59,21 @@ import android.util.Log;
  */
 public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
-	private static String TAG = TileGenerator.class.getName();
+	private static final String TAG = TileGenerator.class.getName();
 
 	private static final double STROKE_INCREASE = Math.sqrt(2.2);
 	private static final byte LAYERS = 11;
 
 	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
+
+	private static final Tag[] debugTagBox = { new Tag("debug", "box") };
+	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
+	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
+
+	private final float[] debugBoxCoords = { 0, 0, 0, Tile.TILE_SIZE,
+			Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 0, 0, 0 };
+	private final short[] debugBoxIndex = { 10 };
 
 	private static RenderTheme renderTheme;
 	private static int renderLevels;
@@ -93,18 +101,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private float mStrokeScale = 1.0f;
 
-	private RenderInstruction[] mRenderInstructions = null;
-
-	//private final MapView mMapView;
-
-	private final Tag[] debugTagBox = { new Tag("debug", "box") };
-	private final Tag[] debugTagWay = { new Tag("debug", "way") };
-	private final Tag[] debugTagArea = { new Tag("debug", "area") };
-	private final float[] debugBoxCoords = { 0, 0, 0, Tile.TILE_SIZE,
-			Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 0, 0, 0 };
-	private final short[] debugBoxIndex = { 10 };
-
-	private float mProjectionScaleFactor;
+	private float mLatScaleFactor;
 
 	private float mPoiX, mPoiY;
 	private int mPriority;
@@ -130,11 +127,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	}
 
 	/**
-	 * @param mapView
-	 *            the MapView
 	 */
-	public TileGenerator(MapView mapView) {
-		//	mMapView = mapView;
+	public TileGenerator() {
 		mClipper = new LineClipper(0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE, true);
 	}
 
@@ -161,7 +155,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		setScaleStrokeWidth(tile.zoomLevel);
 
 		// account for area changes with latitude
-		mProjectionScaleFactor = 0.5f + 0.5f * (
+		mLatScaleFactor = 0.5f + 0.5f * (
 				(float) Math.sin(Math.abs(MercatorProjection
 						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180)));
 
@@ -299,23 +293,27 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mTagHouseNr = null;
 		mCurLineLayer = null;
 
-		mPriority = prio;
-		mClosed = closed;
-
 		// replace tags that should not be cached in Rendertheme (e.g. name)
 		if (!filterTags(tags))
 			return;
+
+		mPriority = prio;
+		mClosed = closed;
 
 		mDrawingLayer = getValidLayer(layer) * renderLevels;
 		mCoords = coords;
 		mIndices = indices;
 
-		mRenderInstructions = TileGenerator.renderTheme.matchWay(this, tags,
-				(byte) (mTile.zoomLevel + 0), closed, true);
+		RenderInstruction[] ri = TileGenerator.renderTheme.matchWay(this, tags,
+				(byte) (mTile.zoomLevel + 0), closed, false);
 
-		if (mRenderInstructions == null && mDebugDrawUnmatched)
-			debugUnmatched(closed, tags);
-
+		if (ri != null) {
+			for (int i = 0, n = ri.length; i < n; i++)
+				ri[i].renderWay(this, tags);
+		} else {
+			if (mDebugDrawUnmatched)
+				debugUnmatched(closed, tags);
+		}
 		mCurLineLayer = null;
 	}
 
@@ -334,15 +332,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	@Override
 	public void renderWaterBackground() {
-	}
-
-	@Override
-	public boolean checkWay(Tag[] tags, boolean closed) {
-
-		mRenderInstructions = TileGenerator.renderTheme.matchWay(this, tags,
-				(byte) (mTile.zoomLevel + 0), closed, false);
-
-		return mRenderInstructions != null;
 	}
 
 	// ----------------- RenderThemeCallback -----------------
@@ -371,7 +360,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				float w = line.width;
 				if (!line.fixed) {
 					w *= mStrokeScale;
-					w *= mProjectionScaleFactor;
+					w *= mLatScaleFactor;
 				}
 				lineLayer.width = w;
 			}
@@ -396,7 +385,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				float w = line.width;
 				if (!line.fixed) {
 					w *= mStrokeScale;
-					w *= mProjectionScaleFactor;
+					w *= mLatScaleFactor;
 				}
 				lineLayer.width = w;
 			}
