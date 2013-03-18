@@ -95,6 +95,7 @@ public class TileManager {
 	}
 
 	public void destroy() {
+		mInitialized = false;
 		// there might be some leaks in here
 		// ... free static pools
 	}
@@ -143,59 +144,101 @@ public class TileManager {
 	}
 
 	/**
-	 * Update list of visible tiles and passes them to TileManager, when not
-	 * available tiles are created and added to JobQueue (mapView.addJobs) for
-	 * loading by TileGenerator class
+	 * 1. Update mCurrentTiles TileSet of currently visible tiles.
+	 * 2. Add not yet loaded (or loading) tiles to JobQueue.
+	 * 3. Manage cache
 	 *
 	 * @param mapPosition
 	 *            current MapPosition
 	 */
-	public synchronized void updateMap(MapPosition mapPosition) {
-		if (!mInitialized) {
-			Log.d(TAG, "not initialized");
-			return;
-		}
+	public synchronized void update(MapPosition mapPosition) {
+		// clear JobQueue and set tiles to state == NONE.
+		// one could also append new tiles and sort in JobQueue
+		// but this has the nice side-effect that MapWorkers dont
+		// start with old jobs while new jobs are calculated, which
+		// should increase the chance that they are free when new
+		// jobs come in.
+		mMapView.addJobs(null);
 
-		//MapPosition mapPosition = mMapPosition;
-		float[] coords = mTileCoords;
-
-		//synchronized (mMapViewPosition) {
-		//	changedPos = mMapViewPosition.getMapPosition(mapPosition);
-		mMapViewPosition.getMapViewProjection(coords);
-		//}
-
-		//if (changedPos) {
-		//	mMapView.render();
-		//} else {
-		//	return;
-		//}
-
-		// load some tiles more than currently visible
-		// TODO limit how many more...
+		/* load some tiles more than currently visible */
 		float scale = mapPosition.scale * 0.7f;
 		float px = (float) mapPosition.x;
 		float py = (float) mapPosition.y;
 
-		// TODO hint whether to prefetch parent / children
-		int zdir = 0;
+		float[] coords = mTileCoords;
+		mMapViewPosition.getMapViewProjection(coords);
 
+		// scale and translate projection to tile coordinates
 		for (int i = 0; i < 8; i += 2) {
 			coords[i + 0] = (px + coords[i + 0] / scale) / Tile.TILE_SIZE;
 			coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
 		}
 
-		boolean changed = updateVisibleList(mapPosition, zdir);
+		mNewTiles.cnt = 0;
+
+		// scan visible tiles. callback function calls 'addTile'
+		// which sets mNewTiles
+		mScanBox.scan(coords, mapPosition.zoomLevel);
+
+		MapTile[] newTiles = mNewTiles.tiles;
+		MapTile[] curTiles = mCurrentTiles.tiles;
+
+		boolean changed = (mNewTiles.cnt != mCurrentTiles.cnt);
+
+		Arrays.sort(mNewTiles.tiles, 0, mNewTiles.cnt, TileSet.coordComparator);
+
+		if (!changed) {
+			for (int i = 0, n = mNewTiles.cnt; i < n; i++) {
+				if (newTiles[i] != curTiles[i]) {
+					changed = true;
+					break;
+				}
+			}
+		}
 
 		if (changed) {
+			synchronized (mTilelock) {
+				// lock new tiles
+				for (int i = 0, n = mNewTiles.cnt; i < n; i++)
+					newTiles[i].lock();
+
+				// unlock previous tiles
+				for (int i = 0, n = mCurrentTiles.cnt; i < n; i++) {
+					curTiles[i].unlock();
+					curTiles[i] = null;
+				}
+
+				// make new tiles current
+				TileSet tmp = mCurrentTiles;
+				mCurrentTiles = mNewTiles;
+				mNewTiles = tmp;
+
+				mUpdateSerial++;
+			}
+
+			// request rendering as tiles changed
 			mMapView.render();
-
-			int remove = mTilesCount - GLRenderer.CACHE_TILES;
-
-			if (remove > CACHE_THRESHOLD ||
-					mTilesForUpload > MAX_TILES_IN_QUEUE)
-
-				limitCache(mapPosition, remove);
 		}
+
+		/* Add tile jobs to queue */
+		if (mJobs.isEmpty())
+			return;
+
+		JobTile[] jobs = new JobTile[mJobs.size()];
+		jobs = mJobs.toArray(jobs);
+		updateTileDistances(jobs, jobs.length, mapPosition);
+
+		// sets tiles to state == LOADING
+		mMapView.addJobs(jobs);
+		mJobs.clear();
+
+		/* limit cache items */
+		int remove = mTilesCount - GLRenderer.CACHE_TILES;
+
+		if (remove > CACHE_THRESHOLD ||
+				mTilesForUpload > MAX_TILES_IN_QUEUE)
+
+			limitCache(mapPosition, remove);
 	}
 
 	// need to keep track of TileSets to clear on reset...
@@ -240,94 +283,14 @@ public class TileManager {
 		return td;
 	}
 
-	/**
-	 * @param tiles ...
-	 */
-	public void releaseTiles(TileSet tiles) {
+	//	/**
+	//	 * @param tiles ...
+	//	 */
+	//	public void releaseTiles(TileSet tiles) {
+	//
+	//	}
 
-	}
-
-	/**
-	 * set mNewTiles for the visible tiles and pass it to GLRenderer, add jobs
-	 * for not yet loaded tiles
-	 *
-	 * @param mapPosition
-	 *            the current MapPosition
-	 * @param zdir
-	 *            zoom direction
-	 * @return true if new tiles were loaded
-	 */
-	private boolean updateVisibleList(MapPosition mapPosition, int zdir) {
-		// clear JobQueue and set tiles to state == NONE.
-		// one could also append new tiles and sort in JobQueue
-		// but this has the nice side-effect that MapWorkers dont
-		// start with old jobs while new jobs are calculated, which
-		// should increase the chance that they are free when new
-		// jobs come in.
-		mMapView.addJobs(null);
-
-		mNewTiles.cnt = 0;
-		mScanBox.scan(mTileCoords, mapPosition.zoomLevel);
-
-		MapTile[] newTiles = mNewTiles.tiles;
-		MapTile[] curTiles = mCurrentTiles.tiles;
-
-		boolean changed = (mNewTiles.cnt != mCurrentTiles.cnt);
-
-		Arrays.sort(mNewTiles.tiles, 0, mNewTiles.cnt, TileSet.coordComparator);
-
-		if (!changed) {
-			for (int i = 0, n = mNewTiles.cnt; i < n; i++) {
-				if (newTiles[i] != curTiles[i]) {
-					changed = true;
-					break;
-				}
-			}
-		}
-
-		if (changed) {
-			synchronized (mTilelock) {
-				for (int i = 0, n = mNewTiles.cnt; i < n; i++)
-					newTiles[i].lock();
-
-				for (int i = 0, n = mCurrentTiles.cnt; i < n; i++)
-					curTiles[i].unlock();
-
-				TileSet tmp = mCurrentTiles;
-				mCurrentTiles = mNewTiles;
-				mNewTiles = tmp;
-
-				mUpdateSerial++;
-			}
-		}
-		//Log.d(TAG, "tiles: " + mCurrentTiles.cnt + " added: " + mJobs.size());
-		if (mJobs.size() > 0) {
-
-			JobTile[] jobs = new JobTile[mJobs.size()];
-			jobs = mJobs.toArray(jobs);
-			updateTileDistances(jobs, jobs.length, mapPosition);
-
-			// sets tiles to state == LOADING
-			mMapView.addJobs(jobs);
-			mJobs.clear();
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * @param x
-	 *            ...
-	 * @param y
-	 *            ...
-	 * @param zoomLevel
-	 *            ...
-	 * @param zdir
-	 *            ...
-	 * @return ...
-	 */
-
-	/* package */MapTile addTile(int x, int y, byte zoomLevel, int zdir) {
+	/* package */MapTile addTile(int x, int y, byte zoomLevel) {
 		MapTile tile;
 
 		tile = QuadTree.getTile(x, y, zoomLevel);
@@ -337,24 +300,44 @@ public class TileManager {
 			QuadTree.add(tile);
 			mJobs.add(tile);
 			addToCache(tile);
-
 		} else if (!tile.isActive()) {
 			mJobs.add(tile);
 		}
 
-		if (zoomLevel > 0) {
+		if (zoomLevel > 2) {
+			boolean add = false;
+
 			// prefetch parent
 			MapTile p = tile.rel.parent.tile;
 
 			if (p == null) {
 				p = new MapTile(x >> 1, y >> 1, (byte) (zoomLevel - 1));
 				QuadTree.add(p);
-				p.state = STATE_LOADING;
-				mJobs.add(p);
 				addToCache(p);
-			} else if (!p.isActive()) {
+				add = true;
+			}
+
+			if (add || !p.isActive()) {
+				// hack to not add tile twice
 				p.state = STATE_LOADING;
 				mJobs.add(p);
+			}
+
+			if (zoomLevel > 3) {
+				// prefetch grand  parent
+				p = tile.rel.parent.parent.tile;
+				add = false;
+				if (p == null) {
+					p = new MapTile(x >> 2, y >> 2, (byte) (zoomLevel - 2));
+					QuadTree.add(p);
+					addToCache(p);
+					add = true;
+				}
+
+				if (add || !p.isActive()) {
+					p.state = STATE_LOADING;
+					mJobs.add(p);
+				}
 			}
 		}
 
@@ -494,9 +477,6 @@ public class TileManager {
 			// so end of mTiles is at mTilesCount now
 			size = mTilesSize = mTilesCount;
 
-			//boolean locked = false;
-			//int r = remove;
-
 			for (int i = size - 1; i >= 0 && remove > 0; i--) {
 				MapTile t = tiles[i];
 				if (t.isLocked()) {
@@ -520,19 +500,7 @@ public class TileManager {
 					tiles[i] = null;
 				}
 			}
-			//if (locked) {
-			//	Log.d(TAG, "------------ "
-			//			+ remove + " / " + r + " "
-			//			+ mMapPosition.zoomLevel
-			//			+ " ----------");
-			//	for (int i = 0; i < size; i++) {
-			//		MapTile t = tiles[i];
-			//		if (t == null)
-			//			continue;
-			//		Log.d(TAG, "limitCache: " + t + " " + t.distance);
-			//
-			//	}
-			//}
+
 			remove = (newTileCnt - MAX_TILES_IN_QUEUE) + 10;
 			//int r = remove;
 			for (int i = size - 1; i >= 0 && remove > 0; i--) {
@@ -625,7 +593,7 @@ public class TileManager {
 					}
 
 				if (tile == null) {
-					tile = addTile(xx, y, mZoom, 0);
+					tile = addTile(xx, y, mZoom);
 					tiles[cnt++] = tile;
 				}
 			}

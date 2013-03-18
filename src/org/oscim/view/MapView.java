@@ -167,7 +167,7 @@ public class MapView extends RelativeLayout {
 		TileGenerator.setDebugSettings(mDebugSettings);
 
 		for (int i = 0; i < mNumMapWorkers; i++) {
-			TileGenerator tileGenerator = new TileGenerator(this);
+			TileGenerator tileGenerator = new TileGenerator();
 			mMapWorkers[i] = new MapWorker(i, mJobQueue, tileGenerator, mTileManager);
 			mMapWorkers[i].start();
 		}
@@ -305,7 +305,7 @@ public class MapView extends RelativeLayout {
 			mOverlayManager.onUpdate(mMapPosition, changed);
 
 		if (changed) {
-			mTileManager.updateMap(mMapPosition);
+			mTileManager.update(mMapPosition);
 		}
 	}
 
