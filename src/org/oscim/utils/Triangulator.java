@@ -12,9 +12,9 @@ public class Triangulator {
 	/** The accepted error value */
 	private static final float EPSILON = 0.0000000001f;
 	/** The list of points to be triangulated */
-	private PointList poly = new PointList();
+	private final PointList poly = new PointList();
 	/** The list of points describing the triangles */
-	private PointList tris = new PointList();
+	private final PointList tris = new PointList();
 	/** True if we've tried to triangulate */
 	private boolean tried;
 
@@ -213,7 +213,8 @@ public class Triangulator {
 		/* remove nv-2 Vertices, creating 1 triangle every time */
 		int count = 2 * nv; /* error detection */
 
-		for (int m = 0, v = nv - 1; nv > 2;) {
+		//for (int m = 0, v = nv - 1; nv > 2;) {
+		for (int v = nv - 1; nv > 2;) {
 			/* if we loop, it is probably a non-simple polygon */
 			if (0 >= (count--)) {
 				//** Triangulate: ERROR - probable bad polygon!
@@ -244,7 +245,7 @@ public class Triangulator {
 				result.add(contour.get(b));
 				result.add(contour.get(c));
 
-				m++;
+				//m++;
 
 				/* remove v from remaining polygon */
 				for (s = v, t = v + 1; t < nv; s++, t++) {
@@ -267,9 +268,9 @@ public class Triangulator {
 	 */
 	private class Point {
 		/** The x coorindate of this point */
-		private float x;
+		private final float x;
 		/** The y coorindate of this point */
-		private float y;
+		private final float y;
 
 		/**
 		 * Create a new point
@@ -317,7 +318,7 @@ public class Triangulator {
 	 */
 	private class PointList {
 		/** The list of points */
-		private ArrayList<Point> points = new ArrayList<Point>();
+		private final ArrayList<Point> points = new ArrayList<Point>();
 
 		/**
 		 * Create a new empty list
@@ -334,14 +335,14 @@ public class Triangulator {
 			points.add(point);
 		}
 
-		/**
-		 * Remove a point from the list
-		 *
-		 * @param point The point to remove
-		 */
-		public void remove(Point point) {
-			points.remove(point);
-		}
+		///**
+		// * Remove a point from the list
+		// *
+		// * @param point The point to remove
+		// */
+		//public void remove(Point point) {
+		//	points.remove(point);
+		//}
 
 		/**
 		 * Get the size of the list
