@@ -47,7 +47,6 @@ import android.graphics.Paint;
 import android.util.Log;
 
 /**
- * @author Hannes Janetzek
  * @note
  *       1. The MapWorkers call TileGenerator.execute() to load a tile.
  *       2. The tile data will be loaded from current MapDatabase
@@ -89,22 +88,18 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private float[] mCoords;
 	private short[] mIndices;
 
+	private boolean mClosed;
+
+	private float mPoiX, mPoiY;
+	private int mPriority;
+
 	// current line layer, will be added to outline layers
 	private LineLayer mCurLineLayer;
-
-	// layer data prepared for rendering
-	private Layers mLayers;
-
-	private TextItem mLabels;
 
 	private int mDrawingLayer;
 
 	private float mStrokeScale = 1.0f;
-
 	private float mLatScaleFactor;
-
-	private float mPoiX, mPoiY;
-	private int mPriority;
 
 	// replacement for variable value tags that should not be matched by RenderTheme
 	private final static Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
@@ -159,13 +154,13 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				(float) Math.sin(Math.abs(MercatorProjection
 						.pixelYToLatitude(tile.pixelY, tile.zoomLevel)) * (Math.PI / 180)));
 
-		mLayers = new Layers();
+		tile.layers = new Layers();
 		if (mMapDatabase.executeQuery(tile, this) != QueryResult.SUCCESS) {
 			//Log.d(TAG, "Failed loading: " + tile);
-			mLayers.clear();
-			mLayers = null;
-			TextItem.release(mLabels);
-			mLabels = null;
+			tile.layers.clear();
+			tile.layers = null;
+			TextItem.release(tile.labels);
+			tile.labels = null;
 
 			// FIXME add STATE_FAILED?
 			tile.state = STATE_NONE;
@@ -173,11 +168,16 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		}
 
 		if (debug.drawTileFrames) {
+			// draw tile coordinate
 			mTagName = new Tag("name", tile.toString(), false);
 			mPoiX = Tile.TILE_SIZE >> 1;
 			mPoiY = 10;
-			TileGenerator.renderTheme.matchNode(this, debugTagWay, (byte) 0);
 
+			RenderInstruction[] ri;
+			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
+			renderNode(ri, debugTagWay);
+
+			// draw tile box
 			mIndices = debugBoxIndex;
 			if (MapView.enableClosePolygons)
 				mIndices[0] = 8;
@@ -186,16 +186,14 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 			mCoords = debugBoxCoords;
 			mDrawingLayer = 10 * renderLevels;
-			TileGenerator.renderTheme.matchWay(this, debugTagBox, (byte) 0, false, true);
+			ri = renderTheme.matchWay(debugTagBox, (byte) 0, false);
+			renderWay(ri, debugTagBox);
 		}
-
-		tile.layers = mLayers;
-		tile.labels = mLabels;
-		mLayers = null;
-		mLabels = null;
 
 		return true;
 	}
+
+	Tag[] mFilterTags = new Tag[1];
 
 	private static byte getValidLayer(byte layer) {
 		if (layer < 0) {
@@ -265,6 +263,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	}
 
 	// ---------------- MapDatabaseCallback -----------------
+
 	@Override
 	public void renderPointOfInterest(byte layer, Tag[] tags,
 			float latitude, float longitude) {
@@ -279,10 +278,13 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		// remove tags that should not be cached in Rendertheme
 		filterTags(tags);
 
-		TileGenerator.renderTheme.matchNode(this, tags, mTile.zoomLevel);
-	}
+		RenderInstruction[] ri = renderTheme.matchNode(tags, mTile.zoomLevel);
 
-	private boolean mClosed;
+		if (ri == null)
+			return;
+
+		renderNode(ri, tags);
+	}
 
 	@Override
 	public void renderWay(byte layer, Tag[] tags, float[] coords, short[] indices,
@@ -304,30 +306,42 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mCoords = coords;
 		mIndices = indices;
 
-		RenderInstruction[] ri = TileGenerator.renderTheme.matchWay(this, tags,
-				(byte) (mTile.zoomLevel + 0), closed, false);
+		RenderInstruction[] ri = renderTheme.matchWay(tags,
+				(byte) (mTile.zoomLevel + 0), closed);
 
-		if (ri != null) {
-			for (int i = 0, n = ri.length; i < n; i++)
-				ri[i].renderWay(this, tags);
-		} else {
-			if (mDebugDrawUnmatched)
-				debugUnmatched(closed, tags);
-		}
+		renderWay(ri, tags);
+
+		if (mDebugDrawUnmatched && ri == null)
+			debugUnmatched(closed, tags);
+
 		mCurLineLayer = null;
 	}
 
 	private void debugUnmatched(boolean closed, Tag[] tags) {
-
 		Log.d(TAG, "DBG way not matched: " + closed + " " + Arrays.deepToString(tags));
 
 		mTagName = new Tag("name", tags[0].key + ":" + tags[0].value, false);
 
-		if (closed) {
-			TileGenerator.renderTheme.matchWay(this, debugTagArea, (byte) 0, true, true);
-		} else {
-			TileGenerator.renderTheme.matchWay(this, debugTagWay, (byte) 0, true, true);
-		}
+		RenderInstruction[] ri;
+		ri = renderTheme.matchWay(closed ? debugTagArea : debugTagWay, (byte) 0, true);
+
+		renderWay(ri, tags);
+	}
+
+	private void renderWay(RenderInstruction[] ri, Tag[] tags) {
+		if (ri == null)
+			return;
+
+		for (int i = 0, n = ri.length; i < n; i++)
+			ri[i].renderWay(this, tags);
+	}
+
+	private void renderNode(RenderInstruction[] ri, Tag[] tags) {
+		if (ri == null)
+			return;
+
+		for (int i = 0, n = ri.length; i < n; i++)
+			ri[i].renderNode(this, tags);
 	}
 
 	@Override
@@ -349,7 +363,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			}
 
 			LineLayer lineLayer = (LineLayer)
-					mLayers.getLayer(numLayer, Layer.LINE);
+					mTile.layers.getLayer(numLayer, Layer.LINE);
 
 			if (lineLayer == null)
 				return;
@@ -374,7 +388,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			mCurLineLayer = lineLayer;
 		} else {
 			LineTexLayer lineLayer = (LineTexLayer)
-					mLayers.getLayer(numLayer, Layer.TEXLINE);
+					mTile.layers.getLayer(numLayer, Layer.TEXLINE);
 
 			if (lineLayer == null)
 				return;
@@ -400,10 +414,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		if (mRenderBuildingModel) {
 			//Log.d(TAG, "add buildings: " + mTile + " " + mPriority);
-			if (mLayers.extrusionLayers == null)
-				mLayers.extrusionLayers = new ExtrusionLayer(0);
+			if (mTile.layers.extrusionLayers == null)
+				mTile.layers.extrusionLayers = new ExtrusionLayer(0);
 
-			((ExtrusionLayer) mLayers.extrusionLayers).addBuildings(mCoords, mIndices, mPriority);
+			((ExtrusionLayer) mTile.layers.extrusionLayers).addBuildings(mCoords, mIndices,
+					mPriority);
 
 			return;
 		}
@@ -414,7 +429,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		//	if (!mProjected && !projectToTile())
 		//		return;
 
-		PolygonLayer layer = (PolygonLayer) mLayers.getLayer(numLayer, Layer.POLYGON);
+		PolygonLayer layer = (PolygonLayer) mTile.layers.getLayer(numLayer, Layer.POLYGON);
 		if (layer == null)
 			return;
 
@@ -433,16 +448,16 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				return;
 
 			TextItem t = TextItem.get().set(mCoords[0], mCoords[1], mTagName.value, text);
-			t.next = mLabels;
-			mLabels = t;
+			t.next = mTile.labels;
+			mTile.labels = t;
 		}
 		else if (text.textKey == Tag.TAG_KEY_HOUSE_NUMBER) {
 			if (mTagHouseNr == null)
 				return;
 
 			TextItem t = TextItem.get().set(mCoords[0], mCoords[1], mTagHouseNr.value, text);
-			t.next = mLabels;
-			mLabels = t;
+			t.next = mTile.labels;
+			mTile.labels = t;
 		}
 	}
 
@@ -457,8 +472,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (text.textKey == mTagEmptyName.key) {
 			TextItem t = TextItem.get().set(mPoiX, mPoiY, mTagName.value, text);
 			// TextItem t = new TextItem(mPoiX, mPoiY, mTagName.value, text);
-			t.next = mLabels;
-			mLabels = t;
+			t.next = mTile.labels;
+			mTile.labels = t;
 		}
 	}
 
@@ -475,8 +490,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				int length = mIndices[i];
 				if (length < 4)
 					break;
-				mLabels = WayDecorator.renderText(mClipper, mCoords, mTagName.value, text,
-						offset, length, mLabels);
+				mTile.labels = WayDecorator.renderText(mClipper, mCoords, mTagName.value, text,
+						offset, length, mTile.labels);
 				offset += length;
 			}
 		}
