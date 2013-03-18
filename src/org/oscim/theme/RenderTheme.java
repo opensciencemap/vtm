@@ -151,14 +151,7 @@ public class RenderTheme {
 		return mMapBackground;
 	}
 
-	private static void render(IRenderCallback renderCallback,
-			RenderInstruction[] renderInstructions, Tag[] tags) {
-		for (int i = 0, n = renderInstructions.length; i < n; i++)
-			renderInstructions[i].renderNode(renderCallback, tags);
-	}
-
 	/**
-	 * @param renderCallback
 	 *            ...
 	 * @param tags
 	 *            ...
@@ -166,8 +159,7 @@ public class RenderTheme {
 	 *            ...
 	 * @return ...
 	 */
-	public RenderInstruction[] matchNode(IRenderCallback renderCallback,
-			Tag[] tags, byte zoomLevel) {
+	public RenderInstruction[] matchNode(Tag[] tags, byte zoomLevel) {
 
 		// list of renderinsctruction items in cache
 		RenderInstructionItem ris = null;
@@ -206,7 +198,7 @@ public class RenderTheme {
 				List<RenderInstruction> matches = mNodeInstructionList;
 				matches.clear();
 				for (int i = 0, n = mRulesList.size(); i < n; ++i)
-					mRulesList.get(i).matchNode(renderCallback, tags, zoomLevel, matches);
+					mRulesList.get(i).matchNode(tags, zoomLevel, matches);
 
 				int size = matches.size();
 
@@ -262,9 +254,6 @@ public class RenderTheme {
 			}
 		}
 
-		if (ri.list != null)
-			render(renderCallback, ri.list, tags);
-
 		mPrevNodeItem = ri;
 
 		return ri.list;
@@ -277,21 +266,15 @@ public class RenderTheme {
 	/**
 	 * Matches a way with the given parameters against this RenderTheme.
 	 *
-	 * @param renderCallback
-	 *            the callback implementation which will be executed on each
-	 *            match.
 	 * @param tags
 	 *            the tags of the way.
 	 * @param zoomLevel
 	 *            the zoom level at which the way should be matched.
 	 * @param closed
 	 *            way is Closed
-	 * @param render
-	 *            ...
 	 * @return currently processed render instructions
 	 */
-	public RenderInstruction[] matchWay(IRenderCallback renderCallback,
-			Tag[] tags, byte zoomLevel, boolean closed, boolean render) {
+	public RenderInstruction[] matchWay(Tag[] tags, byte zoomLevel, boolean closed) {
 
 		// list of renderinsctruction items in cache
 		RenderInstructionItem ris = null;
@@ -354,7 +337,7 @@ public class RenderTheme {
 				matches.clear();
 
 				for (int i = 0, n = mRulesList.size(); i < n; ++i)
-					mRulesList.get(i).matchWay(renderCallback, tags, zoomLevel, c, matches);
+					mRulesList.get(i).matchWay(tags, zoomLevel, c, matches);
 
 				int size = matches.size();
 				// check if same instructions are used in another level
@@ -419,11 +402,6 @@ public class RenderTheme {
 				mPrevAreaItem = ri;
 			else
 				mPrevWayItem = ri;
-		}
-
-		if (render && ri.list != null) {
-			for (int i = 0, n = ri.list.length; i < n; i++)
-				ri.list[i].renderWay(renderCallback, tags);
 		}
 
 		return ri.list;
