@@ -50,7 +50,7 @@ public abstract class MapActivity extends Activity {
 				&& sharedPreferences.contains(KEY_ZOOM_LEVEL);
 	}
 
-	private MapView mMapView;
+	protected MapView mMapView;
 
 	@Override
 	protected void onDestroy() {
