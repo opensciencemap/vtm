@@ -75,7 +75,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static int mBufferMemoryUsage;
 
 	private static float[] mTileCoords;
-	//private static float[] mDebugCoords;
+
+	private static float[] mDebugCoords;
 
 	public class Matrices {
 		public final Matrix4 viewproj = new Matrix4();
@@ -186,6 +187,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		mMatrices = new Matrices();
 		mTileCoords = new float[8];
+		mDebugCoords = new float[8];
 
 		// tile fill coords
 		short min = 0;
@@ -260,29 +262,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		return true;
 	}
 
-	private static void uploadTileData(MapTile tile) {
-		tile.state = STATE_READY;
-
-		if (tile.layers == null)
-			return;
-
-		int newSize = tile.layers.getSize();
-		if (newSize > 0) {
-
-			if (tile.layers.vbo == null)
-				tile.layers.vbo = BufferObject.get(newSize);
-
-			if (!uploadLayers(tile.layers, newSize, true)) {
-				Log.d(TAG, "BUG uploadTileData " + tile + " failed!");
-
-				BufferObject.release(tile.layers.vbo);
-				tile.layers.vbo = null;
-				tile.layers.clear();
-				tile.layers = null;
-			}
-		}
-	}
-
 	private static void checkBufferUsage(boolean force) {
 		// try to clear some unused vbo when exceding limit
 
@@ -327,6 +306,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private static Object tilelock = new Object();
 
+	/** set tile isVisible flag true for tiles that intersect view */
 	private static void updateTileVisibility() {
 		float[] coords = mTileCoords;
 		MapPosition pos = mMapPosition;
@@ -358,6 +338,80 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			// check visibile tiles
 			mScanBox.scan(coords, z);
 		}
+	}
+
+
+	private static void uploadTileData(MapTile tile) {
+		tile.state = STATE_READY;
+
+		if (tile.layers == null)
+			return;
+
+		int newSize = tile.layers.getSize();
+		if (newSize > 0) {
+
+			if (tile.layers.vbo == null)
+				tile.layers.vbo = BufferObject.get(newSize);
+
+			if (!uploadLayers(tile.layers, newSize, true)) {
+				Log.d(TAG, "BUG uploadTileData " + tile + " failed!");
+
+				BufferObject.release(tile.layers.vbo);
+				tile.layers.vbo = null;
+				tile.layers.clear();
+				tile.layers = null;
+			}
+		}
+	}
+
+	/** compile tile layer data and upload to VBOs */
+	private static void compileTileLayers(MapTile[] tiles, int tileCnt) {
+		uploadCnt = 0;
+		for (int i = 0; i < tileCnt; i++) {
+			MapTile tile = tiles[i];
+
+			if (!tile.isVisible)
+				continue;
+
+			if (tile.state == STATE_READY)
+				continue;
+
+			if (tile.state == STATE_NEW_DATA) {
+				uploadTileData(tile);
+				continue;
+			}
+
+			if (tile.holder != null) {
+				// load tile that is referenced by this holder
+				if (tile.holder.state == STATE_NEW_DATA)
+					uploadTileData(tile.holder);
+
+				tile.state = tile.holder.state;
+				continue;
+			}
+
+			// check near relatives than can serve as proxy
+			if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
+				MapTile rel = tile.rel.parent.tile;
+				if (rel.state == STATE_NEW_DATA)
+					uploadTileData(rel);
+
+				// dont load child proxies
+				continue;
+			}
+
+			for (int c = 0; c < 4; c++) {
+				if ((tile.proxies & 1 << c) == 0)
+					continue;
+
+				MapTile rel = tile.rel.child[c].tile;
+				if (rel != null && rel.state == STATE_NEW_DATA)
+					uploadTileData(rel);
+			}
+		}
+
+		if (uploadCnt > 0)
+			checkBufferUsage(false);
 	}
 
 	private static void draw() {
@@ -427,48 +481,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		tileCnt += mHolderCount;
 
-		/* compile layer data and upload to VBOs */
-		uploadCnt = 0;
-		for (int i = 0; i < tileCnt; i++) {
-			MapTile tile = tiles[i];
-
-			if (!tile.isVisible)
-				continue;
-
-			if (tile.state == STATE_NEW_DATA) {
-				uploadTileData(tile);
-				continue;
-			}
-
-			if (tile.holder != null) {
-				// load tile that is referenced by this holder
-				if (tile.holder.state == STATE_NEW_DATA)
-					uploadTileData(tile.holder);
-
-				tile.state = tile.holder.state;
-
-			} else if (tile.state != STATE_READY) {
-				// check near relatives than can serve as proxy
-				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					MapTile rel = tile.rel.parent.tile;
-					if (rel.state == STATE_NEW_DATA)
-						uploadTileData(rel);
-
-					continue;
-				}
-				for (int c = 0; c < 4; c++) {
-					if ((tile.proxies & 1 << c) == 0)
-						continue;
-
-					MapTile rel = tile.rel.child[c].tile;
-					if (rel != null && rel.state == STATE_NEW_DATA)
-						uploadTileData(rel);
-				}
-			}
-		}
-
-		if (uploadCnt > 0)
-			checkBufferUsage(false);
+		compileTileLayers(tiles, tileCnt);
 
 		tilesChanged |= (uploadCnt > 0);
 
@@ -518,9 +531,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		//
 		//	pos.zoomLevel = -1;
 		//	mMapViewPosition.getMapViewProjection(mDebugCoords);
-		//
 		//	PolygonRenderer.debugDraw(mMatrices.viewproj, mDebugCoords, 1);
-		//
 		//}
 
 		if (GlUtils.checkGlOutOfMemory("finish")) {
@@ -586,9 +597,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		//if (debugView) {
 		//	// modify this to scale only the view, to see better which tiles are
 		//	// rendered
-		//	Matrix.setIdentityM(mMatrices.mvp, 0);
-		//	Matrix.scaleM(mMatrices.mvp, 0, 0.5f, 0.5f, 1);
-		//	Matrix.multiplyMM(mMatrices.proj, 0, mMatrices.mvp, 0, mMatrices.proj, 0);
+		//	mMatrices.mvp.setScale(0.5f, 0.5f, 1);
+		//	mMatrices.proj.multiplyMM(mMatrices.mvp, mMatrices.proj);
 		//}
 
 		GLES20.glViewport(0, 0, width, height);
@@ -614,7 +624,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		int[] vboIds = new int[1];
 		GLES20.glGenBuffers(1, vboIds, 0);
 		mQuadIndicesID = vboIds[0];
-		 int maxIndices = maxQuads * 6;
+		int maxIndices = maxQuads * 6;
 		short[] indices = new short[maxIndices];
 		for (int i = 0, j = 0; i < maxIndices; i += 6, j += 4) {
 			indices[i + 0] = (short) (j + 0);
@@ -634,7 +644,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
 				indices.length * 2, shortBuffer, GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
 
 		mBufferMemoryUsage = 0;
 		mDrawTiles = null;
