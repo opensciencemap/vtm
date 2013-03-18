@@ -382,8 +382,8 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		if (mWasMulti)
 			return true;
 
-		int w = Tile.TILE_SIZE * 6;
-		int h = Tile.TILE_SIZE * 6;
+		int w = Tile.TILE_SIZE * 3;
+		int h = Tile.TILE_SIZE * 3;
 
 		//if (mMapView.enablePagedFling) {
 		//	double a = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
@@ -399,8 +399,10 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		//} else {
 		float s = (200 / mMapView.dpi);
 
-		mMapPosition.animateFling(Math.round(velocityX * s), Math.round(velocityY * s), -w, w, -h,
-				h);
+		mMapPosition.animateFling(
+				Math.round(velocityX * s),
+				Math.round(velocityY * s),
+				-w, w, -h,	h);
 		return true;
 	}
 
