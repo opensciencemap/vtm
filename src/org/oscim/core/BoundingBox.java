@@ -31,9 +31,9 @@ public class BoundingBox implements Parcelable {
 	 */
 	private static final double CONVERSION_FACTOR = 1000000d;
 
-	private static boolean isBetween(int number, int min, int max) {
-		return min <= number && number <= max;
-	}
+	//private static boolean isBetween(int number, int min, int max) {
+	//	return min <= number && number <= max;
+	//}
 
 	/**
 	 * The maximum latitude value of this BoundingBox in microdegrees (degrees *
