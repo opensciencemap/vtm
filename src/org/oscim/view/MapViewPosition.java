@@ -25,6 +25,7 @@ import org.oscim.core.PointD;
 import org.oscim.core.PointF;
 import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.Interpolation;
 import org.oscim.utils.Matrix4;
 
 import android.opengl.Matrix;
@@ -33,8 +34,6 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
-import android.widget.Scroller;
 
 /**
  * A MapPosition stores the latitude and longitude coordinate of a MapView
@@ -78,7 +77,6 @@ public class MapViewPosition {
 	public float mTilt;
 
 	private final AnimationHandler mHandler;
-	private final Scroller mScroller;
 
 	MapViewPosition(MapView mapView) {
 		mMapView = mapView;
@@ -89,13 +87,6 @@ public class MapViewPosition {
 		mAbsScale = 1;
 
 		mHandler = new AnimationHandler(this);
-		mScroller = new Scroller(mapView.getContext(), new LinearInterpolator() {
-			@Override
-			public float getInterpolation(float input) {
-				return (float) Math.sqrt(input);
-
-			}
-		});
 	}
 
 	private final Matrix4 mProjMatrix = new Matrix4();
@@ -739,20 +730,48 @@ public class MapViewPosition {
 		mHandler.start(mDuration);
 	}
 
+
+	synchronized boolean fling(long millisLeft){
+
+	float delta = (mDuration - millisLeft) / mDuration;
+	float adv = Interpolation.exp5Out.apply(delta);
+	//adv *= Interpolation.
+	//float adv = delta;
+	float dx = mVelocityX * adv;
+	float dy = mVelocityY * adv;
+
+	if (dx != 0 || dy != 0){
+		moveMap((float)(dx - mScrollX), (float)(dy - mScrollY));
+
+		mMapView.redrawMap(true);
+		mScrollX = dx;
+		mScrollY = dy;
+	}
+	return true;
+}
+	private float mVelocityX;
+	private float mVelocityY;
+
 	public synchronized void animateFling(int velocityX, int velocityY,
 			int minX, int maxX, int minY, int maxY) {
 
 		mScrollX = 0;
 		mScrollY = 0;
 
-		mScroller.fling(0, 0, velocityX, velocityY, minX, maxX, minY, maxY);
+		mDuration = 300;
+
+		mVelocityX = velocityX * (mDuration / 1000);
+		mVelocityY = velocityY * (mDuration / 1000);
+		FastMath.clamp(mVelocityX, minX, maxX);
+		FastMath.clamp(mVelocityY, minY, maxY);
+
+		// mScroller.fling(0, 0, velocityX, velocityY, minX, maxX, minY, maxY);
 		mAnimFling = true;
 		mAnimMove = false;
 		mAnimScale = false;
 
 		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
-		mDuration = 250;
 		mHandler.start(mDuration);
 	}
 
@@ -768,26 +787,6 @@ public class MapViewPosition {
 
 	public void updateAnimation() {
 		//scroll();
-	}
-
-	synchronized boolean scroll() {
-		if (mScroller.isFinished()) {
-			return false;
-		}
-		mScroller.computeScrollOffset();
-
-		double dx = mScroller.getCurrX();
-		double dy = mScroller.getCurrY();
-
-		int mx = (int) (dx - mScrollX);
-		int my = (int) (dy - mScrollY);
-
-		if (mx >= 1 || my >= 1 || mx <= -1 || my <= -1) {
-			moveMap(mx, my);
-			mScrollX = dx;
-			mScrollY = dy;
-		}
-		return true;
 	}
 
 	void onTick(long millisLeft) {
@@ -818,7 +817,7 @@ public class MapViewPosition {
 			updatePosition();
 		}
 
-		if (mAnimFling && scroll())
+		if (mAnimFling && fling(millisLeft))
 			changed = true;
 
 		if (changed)
