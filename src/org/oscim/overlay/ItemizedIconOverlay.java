@@ -28,7 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
 public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverlay<Item> {
-	private static final String TAG = ItemizedIconOverlay.class.getName();
+	//private static final String TAG = ItemizedIconOverlay.class.getName();
 
 	protected final List<Item> mItemList;
 	protected OnItemGestureListener<Item> mOnItemGestureListener;

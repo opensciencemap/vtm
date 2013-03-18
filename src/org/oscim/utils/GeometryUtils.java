@@ -194,7 +194,7 @@ public final class GeometryUtils {
 		}
 
 		double ua = ua_numr / denr;
-		double ub = ub_numr / denr;
+		//double ub = ub_numr / denr;
 
 		//if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
 		{
