@@ -58,7 +58,6 @@ public abstract class PausableThread extends Thread {
 	public final synchronized void pause() {
 		if (!mShouldPause) {
 			mShouldPause = true;
-			takeabreak();
 			notify();
 		}
 	}
@@ -115,10 +114,6 @@ public abstract class PausableThread extends Thread {
 	 * implementation is empty.
 	 */
 	protected void afterPause() {
-		// do nothing
-	}
-
-	protected void takeabreak() {
 		// do nothing
 	}
 

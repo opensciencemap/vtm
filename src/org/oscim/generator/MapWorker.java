@@ -63,8 +63,6 @@ public class MapWorker extends PausableThread {
 		if (tile == null)
 			return;
 
-		// Log.d("...", "load: " + tile);
-
 		mMapGenerator.executeJob(tile);
 
 		if (!isInterrupted()) {
@@ -78,13 +76,8 @@ public class MapWorker extends PausableThread {
 	}
 
 	@Override
-	protected void takeabreak() {
-		mMapGenerator.getMapDatabase().cancel();
-	}
-
-	@Override
 	protected int getThreadPriority() {
-		return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 3;
+		return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 2;
 	}
 
 	@Override
