@@ -29,7 +29,6 @@ import static android.opengl.GLES20.glStencilFunc;
 import static android.opengl.GLES20.glStencilMask;
 import static android.opengl.GLES20.glStencilOp;
 import static android.opengl.GLES20.glUniform4fv;
-import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
 import java.nio.ByteBuffer;
@@ -42,6 +41,7 @@ import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.PolygonLayer;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.utils.GlUtils;
+import org.oscim.utils.Matrix4;
 
 import android.opengl.GLES20;
 
@@ -328,7 +328,7 @@ public final class PolygonRenderer {
 	private static float[] debugFillColor2 = { .8f, .8f, .8f, .8f };
 	private static FloatBuffer mDebugFill;
 
-	static void debugDraw(float[] matrix, float[] coords, int color) {
+	static void debugDraw(Matrix4 m, float[] coords, int color) {
 		GLState.test(false, false);
 		if (mDebugFill == null)
 			mDebugFill = ByteBuffer.allocateDirect(32).order(ByteOrder.nativeOrder())
@@ -345,7 +345,7 @@ public final class PolygonRenderer {
 		glVertexAttribPointer(hPolygonVertexPosition, 2, GLES20.GL_FLOAT,
 				false, 0, mDebugFill);
 
-		glUniformMatrix4fv(hPolygonMatrix, 1, false, matrix, 0);
+		m.setAsUniform(hPolygonMatrix);
 
 		if (color == 0)
 			glUniform4fv(hPolygonColor, 1, debugFillColor, 0);
@@ -389,7 +389,7 @@ public final class PolygonRenderer {
 			+ "if (z < -1.0)"
 			+ "  gl_FragColor = vec4(0.0, z + 2.0, 0.0, 1.0)*0.8;"
 			+ "else if (z < 0.0)"
-			+ "  gl_FragColor = vec4(z * -1.0, 0.0, 0.0, 1.0)*0.8;"
+			+ "  gl_FragColor = vec4(z + 1.0, 0.0, 0.0, 1.0)*0.8;"
 			+ "else if (z < 1.0)"
 			+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0)*0.8;"
 			+ "else"
