@@ -367,7 +367,7 @@
       </rule>
 
       <rule e="way" k="waterway" v="weir">
-        <line stroke="#000044" width="0.375" cap="butt" />
+        <line stroke="#000088" width="1.0" fixed="true" cap="butt" />
       </rule>
 
       <rule e="way" k="waterway" v="dam" zoom-min="12">
@@ -882,7 +882,7 @@
       <!-- <rule e="way" k="*" v="fence|wall|city_wall" zoom-min="15"> <line
            stroke="#909090" width="0.1" cap="butt" /> </rule> -->
       <rule e="way" k="*" v="retaining_wall" zoom-min="15">
-        <line stroke="#888888" width="0.1" cap="butt" />
+        <line stroke="#888888" width="1.1" fixed="true" cap="butt" />
       </rule>
     </rule>
 
