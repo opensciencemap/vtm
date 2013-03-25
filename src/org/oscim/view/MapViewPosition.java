@@ -25,7 +25,6 @@ import org.oscim.core.PointD;
 import org.oscim.core.PointF;
 import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.Interpolation;
 import org.oscim.utils.Matrix4;
 
 import android.opengl.Matrix;
@@ -731,12 +730,10 @@ public class MapViewPosition {
 	}
 
 
-	synchronized boolean fling(long millisLeft){
+	synchronized boolean fling(float adv){
 
-	float delta = (mDuration - millisLeft) / mDuration;
-	float adv = Interpolation.exp5Out.apply(delta);
-	//adv *= Interpolation.
-	//float adv = delta;
+	//float delta = (mDuration - millisLeft) / mDuration;
+	adv = (float)Math.sqrt(adv);
 	float dx = mVelocityX * adv;
 	float dy = mVelocityY * adv;
 
@@ -817,7 +814,7 @@ public class MapViewPosition {
 			updatePosition();
 		}
 
-		if (mAnimFling && fling(millisLeft))
+		if (mAnimFling && fling(adv))
 			changed = true;
 
 		if (changed)
