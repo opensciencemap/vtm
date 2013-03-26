@@ -65,11 +65,11 @@ public class BuildingOverlay extends Overlay {
 		return false;
 	}
 
-	private byte mPrevZoom = 0;
+	private int mPrevZoom = 0;
 
 	@Override
 	public void onUpdate(MapPosition mapPosition, boolean changed) {
-		byte z = mapPosition.zoomLevel;
+		int z = mapPosition.zoomLevel;
 		if (z == mPrevZoom)
 			return;
 

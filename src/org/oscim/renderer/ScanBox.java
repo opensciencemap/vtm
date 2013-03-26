@@ -46,11 +46,11 @@ public abstract class ScanBox {
 	private Edge ca = new Edge();
 	private float minX, maxX;
 
-	protected byte mZoom;
+	protected int mZoom;
 
 	abstract void setVisible(int y, int x1, int x2);
 
-	public void scan(float[] coords, byte zoom) {
+	public void scan(float[] coords, int zoom) {
 		mZoom = zoom;
 
 		maxX = Float.MIN_VALUE;
