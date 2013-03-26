@@ -290,13 +290,13 @@ public class TileManager {
 	//
 	//	}
 
-	/* package */MapTile addTile(int x, int y, byte zoomLevel) {
+	/* package */MapTile addTile(int x, int y, int zoomLevel) {
 		MapTile tile;
 
 		tile = QuadTree.getTile(x, y, zoomLevel);
 
 		if (tile == null) {
-			tile = new MapTile(x, y, zoomLevel);
+			tile = new MapTile(x, y, (byte)zoomLevel);
 			QuadTree.add(tile);
 			mJobs.add(tile);
 			addToCache(tile);
@@ -392,7 +392,7 @@ public class TileManager {
 		// TODO there is probably  a better quad-tree distance function
 		double x = mapPosition.x;
 		double y = mapPosition.y;
-		byte zoom = mapPosition.zoomLevel;
+		int zoom = mapPosition.zoomLevel;
 		int h = Tile.TILE_SIZE >> 1;
 		long center = h << zoom;
 

@@ -312,28 +312,28 @@ public class MapViewPosition {
 		return bbox;
 	}
 
-	/**
-	 * For x, y in screen coordinates set Point to map-tile
-	 * coordinates at returned scale.
-	 *
-	 * @param x screen coordinate
-	 * @param y screen coordinate
-	 * @param out Point coords will be set
-	 * @return current map scale
-	 */
-	public synchronized float getScreenPointOnMap(float x, float y, PointD out) {
-
-		// scale to -1..1
-		float mx = 1 - (x / mWidth * 2);
-		float my = 1 - (y / mHeight * 2);
-
-		unproject(-mx, my, getZ(-my), mu, 0);
-
-		out.x = mCurX + mu[0];
-		out.y = mCurY + mu[1];
-
-		return (float) mAbsScale;
-	}
+//	/**
+//	 * For x, y in screen coordinates set Point to map-tile
+//	 * coordinates at returned scale.
+//	 *
+//	 * @param x screen coordinate
+//	 * @param y screen coordinate
+//	 * @param out Point coords will be set
+//	 * @return current map scale
+//	 */
+//	public synchronized float getScreenPointOnMap(float x, float y, PointD out) {
+//
+//		// scale to -1..1
+//		float mx = 1 - (x / mWidth * 2);
+//		float my = 1 - (y / mHeight * 2);
+//
+//		unproject(-mx, my, getZ(-my), mu, 0);
+//
+//		out.x = mCurX + mu[0];
+//		out.y = mCurY + mu[1];
+//
+//		return (float) mAbsScale;
+//	}
 
 	/**
 	 * Get the GeoPoint for x,y in screen coordinates.
@@ -628,7 +628,7 @@ public class MapViewPosition {
 		updatePosition();
 	}
 
-	private void setZoomLevelLimit(byte zoomLevel) {
+	private void setZoomLevelLimit(int zoomLevel) {
 		mAbsScale = FastMath.clamp(1 << zoomLevel, MIN_SCALE, MAX_SCALE);
 	}
 

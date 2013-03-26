@@ -99,7 +99,7 @@ public class GridOverlay extends BasicOverlay {
 
 	private int mCurX = -1;
 	private int mCurY = -1;
-	private byte mCurZ = -1;
+	private int mCurZ = -1;
 
 	private boolean finished;
 
