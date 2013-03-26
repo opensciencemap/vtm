@@ -15,7 +15,6 @@
  */
 package org.oscim.core;
 
-
 /** A MapPosition Container. */
 public class MapPosition {
 
@@ -68,6 +67,16 @@ public class MapPosition {
 		this.angle = angle;
 		this.x = MercatorProjection.longitudeToPixelX(longitude, zoomLevel);
 		this.y = MercatorProjection.latitudeToPixelY(latitude, zoomLevel);
+	}
+
+	public void copy(MapPosition other) {
+		this.zoomLevel = other.zoomLevel;
+		this.scale = other.scale;
+		this.lat = other.lat;
+		this.lon = other.lon;
+		this.angle = other.angle;
+		this.x = other.x;
+		this.y = other.y;
 	}
 
 	@Override

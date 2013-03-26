@@ -125,11 +125,11 @@ public class TestOverlay extends BasicOverlay {
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged, Matrices matrices) {
 		// keep position constant (or update layer relative to new position)
-		//mMapView.getMapViewPosition().getMapPosition(mMapPosition, null);
+		//mMapPosition.copy(curPos);
 
 		if (first) {
 			// fix at initial position
-			updateMapPosition();
+			mMapPosition.copy(curPos);
 
 			first = false;
 			//((SymbolLayer) (layers.textureLayers)).prepare();

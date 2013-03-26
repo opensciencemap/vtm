@@ -109,7 +109,7 @@ public class PathOverlay extends Overlay {
 			int size = mSize;
 
 			// keep position to render relative to current state
-			updateMapPosition();
+			mMapPosition.copy(curPos);
 
 			// items are placed relative to scale == 1
 			mMapPosition.scale = 1;
