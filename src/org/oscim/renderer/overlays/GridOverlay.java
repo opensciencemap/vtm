@@ -108,7 +108,7 @@ public class GridOverlay extends BasicOverlay {
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged, Matrices matrices) {
 
-		updateMapPosition();
+		mMapPosition.copy(curPos);
 
 		// fix map position to tile coordinates
 		float size = Tile.TILE_SIZE;

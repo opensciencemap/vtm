@@ -117,12 +117,12 @@ public abstract class RenderOverlay {
 		setMatrix(curPos, m, true);
 	}
 
-	/**
-	 * Utility: update mMapPosition
-	 *
-	 * @return true if position has changed
-	 */
-	protected boolean updateMapPosition() {
-		return mMapView.getMapViewPosition().getMapPosition(mMapPosition);
-	}
+//	/**
+//	 * Utility: update mMapPosition
+//	 *
+//	 * @return true if position has changed
+//	 */
+//	protected boolean updateMapPosition() {
+//		return mMapView.getMapViewPosition().getMapPosition(mMapPosition);
+//	}
 }
