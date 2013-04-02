@@ -328,11 +328,10 @@ public class ExtrusionOverlay extends RenderOverlay {
 		float y = (float) (tile.pixelY - mapPosition.y * div);
 		float scale = mapPosition.scale / div;
 
-		m.mvp.setTransScale(x * scale, y * scale,
-				scale / GLRenderer.COORD_SCALE);
+		m.mvp.setTransScale(x * scale, y * scale, scale / GLRenderer.COORD_SCALE);
 
 		// scale height
-		m.mvp.setValue(10, scale / GLRenderer.COORD_SCALE);
+		m.mvp.setValue(10, scale / 30);
 
 		m.mvp.multiplyMM(m.viewproj, m.mvp);
 
