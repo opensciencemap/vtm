@@ -67,7 +67,7 @@ public final class TextureRenderer {
 		else
 			GLES20.glUniform1f(hTextureScale, 1);
 
-		GLES20.glUniform1f(hTextureScreenScale, 1f / GLRenderer.mWidth);
+		GLES20.glUniform1f(hTextureScreenScale, 1f / GLRenderer.screenWidth);
 
 		m.proj.setAsUniform(hTextureProjMatrix);
 		m.mvp.setAsUniform(hTextureMVMatrix);

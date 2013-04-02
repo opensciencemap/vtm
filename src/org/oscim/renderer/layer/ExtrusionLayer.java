@@ -59,8 +59,6 @@ public class ExtrusionLayer extends Layer {
 
 	public boolean compiled = false;
 
-	//private int[] mVboIds;
-
 	public ExtrusionLayer(int level) {
 		this.type = Layer.EXTRUSION;
 		this.level = level;
@@ -89,12 +87,11 @@ public class ExtrusionLayer extends Layer {
 
 		// just a guessing to make it look ok
 		if (height == 0)
-			height = 10;
-		height = (int) (height * -Math.log(height / 100000f) * 2.0f);
+			height = 14;
 
-		if (minHeight != 0)
-			minHeight = (int) (minHeight * -Math.log(minHeight / 100000f) * 2.0f);
-
+		float sfactor = GLRenderer.COORD_SCALE * (400f / Tile.TILE_SIZE);
+		height *= sfactor;
+		minHeight *= sfactor;
 
 		int length = 0;
 		for (int ipos = 0, ppos = 0, n = way.geom.index.length; ipos < n; ipos++, ppos += length) {

@@ -63,7 +63,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	static int CACHE_TILES = CACHE_TILES_MAX;
 
 	private static MapView mMapView;
-	static int mWidth, mHeight;
+	static int screenWidth, screenHeight;
 
 	private static MapViewPosition mMapViewPosition;
 	private static MapPosition mMapPosition;
@@ -589,8 +589,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (width <= 0 || height <= 0)
 			return;
 
-		mWidth = width;
-		mHeight = height;
+		screenWidth = width;
+		screenHeight = height;
 
 		mMapViewPosition.getMatrix(null, mMatrices.proj, null);
 
@@ -648,8 +648,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mBufferMemoryUsage = 0;
 		mDrawTiles = null;
 
-		int numTiles = (mWidth / (Tile.TILE_SIZE / 2) + 2)
-				* (mHeight / (Tile.TILE_SIZE / 2) + 2);
+		int numTiles = (screenWidth / (Tile.TILE_SIZE / 2) + 2)
+				* (screenHeight / (Tile.TILE_SIZE / 2) + 2);
 
 		// Set up vertex buffer objects
 		int numVBO = (CACHE_TILES + (numTiles * 2));
@@ -681,6 +681,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private boolean mNewSurface;
 
 	public static final boolean debugView = false;
+
 
 	void clearBuffer() {
 		mNewSurface = true;
