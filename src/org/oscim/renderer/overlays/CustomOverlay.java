@@ -106,7 +106,14 @@ public class CustomOverlay extends RenderOverlay {
 		/* apply view and projection matrices */
 		// set mvp (tmp) matrix relative to mMapPosition
 		// i.e. fixed on the map
-		setMatrix(pos, m);
+
+		float ratio = 1f / mMapView.getWidth();
+
+		m.mvp.setScale(ratio, ratio, 1);
+		m.mvp.multiplyMM(m.proj, m.mvp);
+
+
+//		setMatrix(pos, m);
 		m.mvp.setAsUniform(hMatrixPosition);
 
 		// Draw the triangle

@@ -38,12 +38,15 @@ import org.oscim.generator.JobTile;
 import org.oscim.generator.MapWorker;
 import org.oscim.generator.TileGenerator;
 import org.oscim.overlay.BuildingOverlay;
+import org.oscim.overlay.GenericOverlay;
 import org.oscim.overlay.LabelingOverlay;
 import org.oscim.overlay.Overlay;
 import org.oscim.overlay.OverlayManager;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLView;
 import org.oscim.renderer.TileManager;
+import org.oscim.renderer.overlays.CustomOverlay;
+import org.oscim.renderer.overlays.TileOverlay;
 import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.RenderTheme;
@@ -193,8 +196,9 @@ public class MapView extends RelativeLayout {
 		mOverlayManager.add(new BuildingOverlay(this));
 		mOverlayManager.add(new LabelingOverlay(this));
 
-		//mOverlayManager.add(new GenericOverlay(this, new TestLineOverlay(this)));
-		//mOverlayManager.add(new GenericOverlay(this, new TestOverlay(this)));
+		mOverlayManager.add(new GenericOverlay(this, new TileOverlay(this)));
+
+		mOverlayManager.add(new GenericOverlay(this, new CustomOverlay(this)));
 
 		//		if (testRegionZoom)
 		//			mRegionLookup = new RegionLookup(this);

@@ -294,7 +294,7 @@ public final class PolygonRenderer {
 		}
 	}
 
-	static void drawOver(Matrices m) {
+	public static void drawOver(Matrices m) {
 		if (GLState.useProgram(polygonProgram)) {
 
 			GLState.enableVertexArrays(hPolygonVertexPosition, -1);
