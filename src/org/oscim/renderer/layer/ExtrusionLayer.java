@@ -87,9 +87,9 @@ public class ExtrusionLayer extends Layer {
 
 		// just a guessing to make it look ok
 		if (height == 0)
-			height = 14;
+			height = 14 * 100;
 
-		float sfactor = GLRenderer.COORD_SCALE * (400f / Tile.TILE_SIZE);
+		float sfactor = (400f / Tile.TILE_SIZE) / 2f;
 		height *= sfactor;
 		minHeight *= sfactor;
 
