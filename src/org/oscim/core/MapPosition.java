@@ -15,14 +15,13 @@
  */
 package org.oscim.core;
 
-
 /** A MapPosition Container. */
 public class MapPosition {
 
 	public double lon;
 	public double lat;
 
-	public byte zoomLevel;
+	public int zoomLevel;
 	public float scale;
 	public float angle;
 	public float tilt;
@@ -59,13 +58,29 @@ public class MapPosition {
 		this.y = MercatorProjection.latitudeToPixelY(this.lat, zoomLevel);
 	}
 
-	public MapPosition(double latitude, double longitude, byte zoomLevel, float scale,
+	public MapPosition(double latitude, double longitude, int zoomLevel, float scale,
 			float angle) {
 		this.zoomLevel = zoomLevel;
 		this.scale = scale;
 		this.lat = latitude;
 		this.lon = longitude;
 		this.angle = angle;
+		this.x = MercatorProjection.longitudeToPixelX(longitude, zoomLevel);
+		this.y = MercatorProjection.latitudeToPixelY(latitude, zoomLevel);
+	}
+
+	public void copy(MapPosition other) {
+		this.zoomLevel = other.zoomLevel;
+		this.scale = other.scale;
+		this.lat = other.lat;
+		this.lon = other.lon;
+		this.angle = other.angle;
+		this.x = other.x;
+		this.y = other.y;
+	}
+
+	public void setFromLatLon(double latitude, double longitude, int zoomLevel){
+		this.zoomLevel = zoomLevel;
 		this.x = MercatorProjection.longitudeToPixelX(longitude, zoomLevel);
 		this.y = MercatorProjection.latitudeToPixelY(latitude, zoomLevel);
 	}

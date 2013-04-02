@@ -99,7 +99,7 @@ public class GridOverlay extends BasicOverlay {
 
 	private int mCurX = -1;
 	private int mCurY = -1;
-	private byte mCurZ = -1;
+	private int mCurZ = -1;
 
 	private boolean finished;
 
@@ -108,7 +108,7 @@ public class GridOverlay extends BasicOverlay {
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged, Matrices matrices) {
 
-		updateMapPosition();
+		mMapPosition.copy(curPos);
 
 		// fix map position to tile coordinates
 		float size = Tile.TILE_SIZE;

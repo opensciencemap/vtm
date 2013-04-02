@@ -65,7 +65,7 @@ public class CustomOverlay extends RenderOverlay {
 			newData = true;
 
 			// fix current MapPosition
-			updateMapPosition();
+			mMapPosition.copy(curPos);
 		}
 	}
 

@@ -166,7 +166,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				if (tile == null)
 					continue;
 
-				holder = new MapTile(x, y, mZoom);
+				holder = new MapTile(x, y, (byte)mZoom);
 				holder.isVisible = true;
 				holder.holder = tile;
 				tile.isVisible = true;
