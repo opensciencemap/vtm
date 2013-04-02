@@ -332,7 +332,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 				scale / GLRenderer.COORD_SCALE);
 
 		// scale height
-		m.mvp.setValue(10, scale / (1000f * GLRenderer.COORD_SCALE));
+		m.mvp.setValue(10, scale / GLRenderer.COORD_SCALE);
 
 		m.mvp.multiplyMM(m.viewproj, m.mvp);
 
