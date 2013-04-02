@@ -321,10 +321,17 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			// zoom-level changed.
 			float div = FastMath.pow(pos.zoomLevel - tiles[0].zoomLevel);
 
+			// draw additional tiles on max zoom-level:
+			// to make sure buildings that are half visible but
+			// the not ground tile are still drawn.
+			float scale = pos.scale;
+			if (scale > 2)
+				scale = 2;
+
 			// transform screen coordinates to tile coordinates
-			float tileScale = pos.scale * div * Tile.TILE_SIZE;
-			double px = pos.x * pos.scale;
-			double py = pos.y * pos.scale;
+			float tileScale = scale * div * Tile.TILE_SIZE;
+			double px = pos.x * scale;
+			double py = pos.y * scale;
 			for (int i = 0; i < 8; i += 2) {
 				coords[i + 0] = (float) (px + coords[i + 0]) / tileScale;
 				coords[i + 1] = (float) (py + coords[i + 1]) / tileScale;
