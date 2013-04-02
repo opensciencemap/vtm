@@ -20,6 +20,7 @@ import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
+import org.oscim.database.IMapDatabaseCallback.WayData;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
@@ -51,6 +52,7 @@ public class MapDatabase implements IMapDatabase {
 					null);
 
 	private boolean mOpenFile = false;
+	private final WayData mWay = new WayData();
 
 	@Override
 	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
@@ -105,7 +107,12 @@ public class MapDatabase implements IMapDatabase {
 		index[2] = 10;
 		index[3] = 0;
 
-		mapDatabaseCallback.renderWay((byte) 0, mTags, mGeom, true, 0);
+		mWay.geom = mGeom;
+		mWay.tags = mTags;
+		mWay.layer = (byte)0;
+		mWay.closed = true;
+
+		mapDatabaseCallback.renderWay(mWay);
 
 		index[0] = 4;
 		index[1] = -1;
@@ -115,43 +122,43 @@ public class MapDatabase implements IMapDatabase {
 		points[1] = size / 2;
 		points[2] = size;
 		points[3] = size / 2;
-		mapDatabaseCallback.renderWay((byte) 0, mTagsWay, mGeom, false, 0);
+		mapDatabaseCallback.renderWay(mWay);
 
 		// center up
 		points[0] = size / 2;
 		points[1] = -size / 2;
 		points[2] = size / 2;
 		points[3] = size / 2;
-		mapDatabaseCallback.renderWay((byte) 0, mTagsWay, mGeom,
-				false, 0);
+		mapDatabaseCallback.renderWay(mWay);
 
 		// center down
 		points[0] = size / 2;
 		points[1] = size / 2;
 		points[2] = size / 2;
 		points[3] = size / 2 + size;
-		mapDatabaseCallback.renderWay((byte) 0, mTagsWay, mGeom, false, 0);
+		mapDatabaseCallback.renderWay(mWay);
 
+		mWay.layer = (byte)1;
 		// left-top to center
 		points[0] = size / 2;
 		points[1] = size / 2;
 		points[2] = 10;
 		points[3] = 10;
-		mapDatabaseCallback.renderWay((byte) 1, mTagsWay, mGeom, false, 0);
+		mapDatabaseCallback.renderWay(mWay);
 
 		// middle horizontal
 		points[0] = 0;
 		points[1] = 10;
 		points[2] = size;
 		points[3] = 10;
-		mapDatabaseCallback.renderWay((byte) 1, mTagsWay, mGeom, false, 0);
+		mapDatabaseCallback.renderWay(mWay);
 
 		// middle horizontal
 		points[0] = 10;
 		points[1] = 0;
 		points[2] = 10;
 		points[3] = size;
-		mapDatabaseCallback.renderWay((byte) 1, mTagsWay, mGeom, false, 0);
+		mapDatabaseCallback.renderWay(mWay);
 
 		// lon1 = size / 2;
 		// lat1 = size / 2;

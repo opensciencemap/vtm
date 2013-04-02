@@ -25,6 +25,35 @@ import org.oscim.database.mapfile.MapDatabase;
  * references to any arrays after callback function returns.
  */
 public interface IMapDatabaseCallback {
+
+	public class WayData{
+		public WayData(){
+
+		}
+
+		public WayData(GeometryBuffer geom, Tag[] tags) {
+			this.geom = geom;
+			this.tags = tags;
+		}
+
+		public GeometryBuffer geom;
+		// closed == geometry is polygon
+		public boolean closed;
+
+
+		// osm layer of the way.
+		public int layer;
+		// osm tags of the way.
+		public Tag[] tags;
+
+		// building tags
+		public int height;
+		public int minHeight;
+
+		// unused
+		public int priority;
+	}
+
 	/**
 	 * Renders a single point of interest node (POI).
 	 *
@@ -32,10 +61,6 @@ public interface IMapDatabaseCallback {
 	 *            the layer of the node.
 	 * @param tags
 	 *            the tags of the node.
-	 * @param latitude
-	 *            the latitude of the node.
-	 * @param longitude
-	 *            the longitude of the node.
 	 */
 	void renderPOI(byte layer, Tag[] tags, GeometryBuffer geom);
 
@@ -45,23 +70,10 @@ public interface IMapDatabaseCallback {
 	void renderWaterBackground();
 
 	/**
-	 * Renders a single way or area (closed way).
+	 * Renders a single way or area.
 	 *
-	 * @param layer
-	 *            the osm layer of the way.
-	 * @param tags
-	 *            the tags of the way.
-	 * @param wayNodes
-	 *            the geographical coordinates of the way nodes in the order
-	 *            longitude/latitude or x/y depending on the projection.
-	 * @param wayLength
-	 *            length of way data in wayNodes
-	 * @param closed
-	 *            wheter the way is an polygon.
-	 * @param prio TODO
 	 */
-	void renderWay(byte layer, Tag[] tags, GeometryBuffer geom,
-			boolean closed, int prio);
+	void renderWay(WayData way);
 
 	//	/**
 	//	 * TBD: check if way will be rendered before decoding - MUST be called before renderWay!

@@ -19,6 +19,7 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.Tile;
+import org.oscim.database.IMapDatabaseCallback.WayData;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.utils.LineClipper;
@@ -74,7 +75,8 @@ public class ExtrusionLayer extends Layer {
 		mClipper = new LineClipper(0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
 	}
 
-	public void addBuildings(float[] points, short[] index, int height) {
+	public void addBuildings(WayData way) {
+		//
 
 		// start outer ring
 		int outer = 0;
@@ -82,14 +84,21 @@ public class ExtrusionLayer extends Layer {
 		boolean simple = true;
 		int startVertex = mNumVertices;
 
+		float height = way.height;
+		float minHeight = way.minHeight;
+
 		// just a guessing to make it look ok
 		if (height == 0)
 			height = 10;
-		height = (int) (height * -Math.log(height / 100000f) * 3.6f);
+		height = (int) (height * -Math.log(height / 100000f) * 2.0f);
+
+		if (minHeight != 0)
+			minHeight = (int) (minHeight * -Math.log(minHeight / 100000f) * 2.0f);
+
 
 		int length = 0;
-		for (int ipos = 0, ppos = 0, n = index.length; ipos < n; ipos++, ppos += length) {
-			length = index[ipos];
+		for (int ipos = 0, ppos = 0, n = way.geom.index.length; ipos < n; ipos++, ppos += length) {
+			length = way.geom.index[ipos];
 
 			// end marker
 			if (length < 0)
@@ -107,8 +116,8 @@ public class ExtrusionLayer extends Layer {
 			int len = length;
 			if (!MapView.enableClosePolygons) {
 				len -= 2;
-			} else if (points[ppos] == points[ppos + len - 2]
-					&& points[ppos + 1] == points[ppos + len - 1]) {
+			} else if (way.geom.points[ppos] == way.geom.points[ppos + len - 2]
+					&& way.geom.points[ppos + 1] == way.geom.points[ppos + len - 1]) {
 				// vector-tile-map does not produce implicty closed
 				// polygons (yet)
 				len -= 2;
@@ -119,15 +128,15 @@ public class ExtrusionLayer extends Layer {
 				continue;
 
 			// check if polygon contains inner rings
-			if (simple && (ipos < n - 1) && (index[ipos + 1] > 0))
+			if (simple && (ipos < n - 1) && (way.geom.index[ipos + 1] > 0))
 				simple = false;
 
-			boolean convex = addOutline(points, ppos, len, height, simple);
+			boolean convex = addOutline(way.geom.points, ppos, len, minHeight, height, simple);
 
 			if (simple && (convex || len <= 8))
 				addRoofSimple(startVertex, len);
 			else if (ipos == outer) { // add roof only once
-				addRoof(startVertex, index, ipos, points, ppos);
+				addRoof(startVertex, way.geom.index, ipos, way.geom.points, ppos);
 			}
 		}
 	}
@@ -183,7 +192,7 @@ public class ExtrusionLayer extends Layer {
 		}
 	}
 
-	private boolean addOutline(float[] points, int pos, int len, float height,
+	private boolean addOutline(float[] points, int pos, int len, float minHeight, float height,
 			boolean convex) {
 
 		// add two vertices for last face to make zigzag indices work
@@ -191,6 +200,7 @@ public class ExtrusionLayer extends Layer {
 		int vertexCnt = len + (addFace ? 2 : 0);
 
 		short h = (short) height;
+		short mh = (short) minHeight;
 
 		float cx = points[pos + len - 2];
 		float cy = points[pos + len - 1];
@@ -241,7 +251,7 @@ public class ExtrusionLayer extends Layer {
 			vertices[v + 1] = vertices[v + 5] = (short) (cy * S);
 
 			// set height
-			vertices[v + 2] = 0;
+			vertices[v + 2] = mh;
 			vertices[v + 6] = h;
 
 			// get direction to next point
