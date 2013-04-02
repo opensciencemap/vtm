@@ -979,7 +979,7 @@ public class MapDatabase implements IMapDatabase {
 						&& mGeom.points[1] == mGeom.points[l - 1];
 
 				projectToTile(mGeom.points, mGeom.index);
-				mapDatabaseCallback.renderWay(layer, curTags, mGeom, closed, 0);
+				/// FIXME mapDatabaseCallback.renderWay(layer, curTags, mGeom, closed, 0);
 			}
 		}
 

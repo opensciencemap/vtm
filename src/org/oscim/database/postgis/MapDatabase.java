@@ -30,6 +30,7 @@ import org.oscim.core.Tag;
 import org.oscim.core.WebMercator;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
+import org.oscim.database.IMapDatabaseCallback.WayData;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
@@ -70,6 +71,9 @@ public class MapDatabase implements IMapDatabase {
 	private static volatile HashMap<Entry<String, String>, Tag> tagHash =
 			new HashMap<Entry<String, String>, Tag>(100);
 	private PreparedStatement prepQuery = null;
+
+	private final WayData mWay = new WayData();
+
 
 	private boolean connect() {
 		Connection conn = null;
@@ -187,7 +191,12 @@ public class MapDatabase implements IMapDatabase {
 					if (mGeom.index.length > mGeom.indexPos)
 						mGeom.index[mGeom.indexPos] = -1;
 
-					mapDatabaseCallback.renderWay((byte) 0, mTags, mGeom, polygon, 0);
+					mWay.geom = mGeom;
+					mWay.tags = mTags;
+					mWay.layer = 0;
+					mWay.closed = polygon;
+
+					mapDatabaseCallback.renderWay(mWay);
 				}
 			}
 		} catch (SQLException e) {
