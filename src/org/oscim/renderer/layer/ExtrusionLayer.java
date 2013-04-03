@@ -85,11 +85,12 @@ public class ExtrusionLayer extends Layer {
 		float height = way.height;
 		float minHeight = way.minHeight;
 
-		// just a guessing to make it look ok
+		// 12m default
 		if (height == 0)
-			height = 14 * 100;
+			height = 12 * 100;
 
-		float sfactor = (400f / Tile.TILE_SIZE) / 2f;
+		// 5 cm steps
+		float sfactor = (400f / Tile.TILE_SIZE) / 5f;
 		height *= sfactor;
 		minHeight *= sfactor;
 

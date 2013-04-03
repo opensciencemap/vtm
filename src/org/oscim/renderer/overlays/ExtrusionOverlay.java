@@ -331,7 +331,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 		m.mvp.setTransScale(x * scale, y * scale, scale / GLRenderer.COORD_SCALE);
 
 		// scale height
-		m.mvp.setValue(10, scale / 30);
+		m.mvp.setValue(10, scale / 10);
 
 		m.mvp.multiplyMM(m.viewproj, m.mvp);
 
