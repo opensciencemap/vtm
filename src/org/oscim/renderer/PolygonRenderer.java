@@ -294,7 +294,7 @@ public final class PolygonRenderer {
 		}
 	}
 
-	public static void drawOver(Matrices m) {
+	public static void drawOver(Matrices m, boolean drawColor, int color) {
 		if (GLState.useProgram(polygonProgram)) {
 
 			GLState.enableVertexArrays(hPolygonVertexPosition, -1);
@@ -310,9 +310,13 @@ public final class PolygonRenderer {
 		 * a quad with func 'always' and op 'zero'
 		 */
 
-		// disable drawing to framebuffer (will be re-enabled in fill)
-		glColorMask(false, false, false, false);
-
+		if (drawColor) {
+			GlUtils.setColor(hPolygonColor, color, 1);
+			GLState.blend(true);
+		} else {
+			// disable drawing to framebuffer (will be re-enabled in fill)
+			glColorMask(false, false, false, false);
+		}
 		// always pass stencil test:
 		glStencilFunc(GL_ALWAYS, 0x00, 0x00);
 		// write to all bits
@@ -321,7 +325,9 @@ public final class PolygonRenderer {
 		glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_ZERO);
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glColorMask(true, true, true, true);
+
+		if (!drawColor)
+			glColorMask(true, true, true, true);
 	}
 
 	private static float[] debugFillColor = { 0.3f, 0.0f, 0.0f, 0.3f };

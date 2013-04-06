@@ -22,6 +22,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.Matrix4;
 
 import android.opengl.GLES20;
 
@@ -44,9 +45,16 @@ public class TileRenderer {
 
 	private static Matrices mMatrices;
 
+	private static final Matrix4 mProjMatrix = new Matrix4();
+
 	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m) {
 		mDrawCnt = 0;
 		mMatrices = m;
+
+		mProjMatrix.copy(m.viewproj);
+		// discard z projection from tilt
+		mProjMatrix.setValue(10, 0);
+		mProjMatrix.setValue(14, 0);
 
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 
@@ -116,11 +124,11 @@ public class TileRenderer {
 		Matrices m = mMatrices;
 		m.mvp.setTransScale(x * scale, y * scale, scale / GLRenderer.COORD_SCALE);
 
-		m.mvp.multiplyMM(m.viewproj, m.mvp);
+		m.mvp.multiplyMM(mProjMatrix, m.mvp);
 
 		// set depth offset (used for clipping to tile boundaries)
 		GLES20.glPolygonOffset(1, mDrawCnt++);
-		if (mDrawCnt > 20)
+		if (mDrawCnt == 100)
 			mDrawCnt = 0;
 
 		// simple line shader does not take forward shortening into account
@@ -160,7 +168,7 @@ public class TileRenderer {
 		}
 
 		// clear clip-region and could also draw 'fade-effect'
-		PolygonRenderer.drawOver(m);
+		PolygonRenderer.drawOver(m, true, 0x22000000);
 	}
 
 	private static int drawProxyChild(MapTile tile, MapPosition pos) {
