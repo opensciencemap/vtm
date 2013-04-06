@@ -106,6 +106,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private float mStrokeScale = 1.0f;
 	private float mLatScaleFactor;
+	private float mGroundResolution;
 
 	// replacement for variable value tags that should not be matched by RenderTheme
 	private final static Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
@@ -150,8 +151,15 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		setScaleStrokeWidth(mTile.zoomLevel);
 
 		// account for area changes with latitude
-		mLatScaleFactor = 0.5f + 0.5f * ((float) Math.sin(Math.abs(MercatorProjection
-				.pixelYToLatitude(mTile.pixelY, mTile.zoomLevel)) * (Math.PI / 180)));
+		double latitude = MercatorProjection.pixelYToLatitude(mTile.pixelY + (Tile.TILE_SIZE >> 1),
+				mTile.zoomLevel);
+		mLatScaleFactor = 0.5f + 0.5f * ((float) Math.sin(Math.abs(latitude) * (Math.PI / 180)));
+
+		mGroundResolution = (float) (Math.cos(latitude * (Math.PI / 180))
+				* MercatorProjection.EARTH_CIRCUMFERENCE
+				/ ((long) Tile.TILE_SIZE << mTile.zoomLevel));
+
+		Log.d(TAG, mTile + " " + mGroundResolution);
 
 		mTile.layers = new Layers();
 
@@ -409,7 +417,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (mRenderBuildingModel) {
 			//Log.d(TAG, "add buildings: " + mTile + " " + mPriority);
 			if (mTile.layers.extrusionLayers == null)
-				mTile.layers.extrusionLayers = new ExtrusionLayer(0);
+				mTile.layers.extrusionLayers = new ExtrusionLayer(0, mGroundResolution);
 
 			((ExtrusionLayer) mTile.layers.extrusionLayers).addBuildings(mWay);
 

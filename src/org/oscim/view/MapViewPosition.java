@@ -416,7 +416,7 @@ public class MapViewPosition {
 		mRotMatrix.multiplyMM(mTmpMatrix, mRotMatrix);
 
 		// scale to window coordinates
-		mTmpMatrix.setScale(1 / mWidth, 1 / mWidth, 1);
+		mTmpMatrix.setScale(1 / mWidth, 1 / mWidth, 1 / mWidth);
 
 		mViewMatrix.multiplyMM(mRotMatrix, mTmpMatrix);
 

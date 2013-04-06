@@ -58,13 +58,13 @@ public class ExtrusionLayer extends Layer {
 	private final static int IND_OUTLINE = 3;
 
 	public boolean compiled = false;
+	private final float mGroundResolution;
 
-	//private int[] mVboIds;
-
-	public ExtrusionLayer(int level) {
+	public ExtrusionLayer(int level, float groundResolution) {
 		this.type = Layer.EXTRUSION;
 		this.level = level;
 
+		mGroundResolution = groundResolution;
 		mVertices = mCurVertices = VertexPool.get();
 
 		mIndices = new VertexPoolItem[4];
@@ -87,14 +87,23 @@ public class ExtrusionLayer extends Layer {
 		float height = way.height;
 		float minHeight = way.minHeight;
 
-		// just a guessing to make it look ok
+		// 12m default
 		if (height == 0)
-			height = 10;
-		height = (int) (height * -Math.log(height / 100000f) * 2.0f);
+			height = 12 * 100;
 
-		if (minHeight != 0)
-			minHeight = (int) (minHeight * -Math.log(minHeight / 100000f) * 2.0f);
+		// 10 cm steps
+		float sfactor = 1 / 10f;
+		height *= sfactor;
+		minHeight *= sfactor;
 
+		// match height with ground resultion
+		// (meter per pixel)
+		height /= mGroundResolution;
+		minHeight /= mGroundResolution;
+
+		// my preference
+		height *= 0.85;
+		minHeight *= 0.85;
 
 		int length = 0;
 		for (int ipos = 0, ppos = 0, n = way.geom.index.length; ipos < n; ipos++, ppos += length) {

@@ -63,7 +63,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	static int CACHE_TILES = CACHE_TILES_MAX;
 
 	private static MapView mMapView;
-	static int mWidth, mHeight;
+	static int screenWidth, screenHeight;
 
 	private static MapViewPosition mMapViewPosition;
 	private static MapPosition mMapPosition;
@@ -108,7 +108,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// drawing, proxies and text layer. needing to add placeholder only
 	// happens rarely, unless you live on Fidschi
 
-	/* package */static int mHolderCount;
+	/* package */static int mNumTileHolder;
 	/* package */static TileSet mDrawTiles;
 
 	// scanline fill class used to check tile visibility
@@ -148,7 +148,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				if (xx < 0 || xx >= xmax)
 					continue;
 
-				for (int i = cnt; i < cnt + mHolderCount; i++)
+				for (int i = cnt; i < cnt + mNumTileHolder; i++)
 					if (tiles[i].tileX == x && tiles[i].tileY == y) {
 						found = true;
 						break;
@@ -166,11 +166,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				if (tile == null)
 					continue;
 
-				holder = new MapTile(x, y, (byte)mZoom);
+				holder = new MapTile(x, y, (byte) mZoom);
 				holder.isVisible = true;
 				holder.holder = tile;
 				tile.isVisible = true;
-				tiles[cnt + mHolderCount++] = holder;
+				tiles[cnt + mNumTileHolder++] = holder;
 			}
 		}
 	};
@@ -311,35 +311,39 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		float[] coords = mTileCoords;
 		MapPosition pos = mMapPosition;
 		MapTile[] tiles = mDrawTiles.tiles;
+
 		// lock tiles while updating isVisible state
 		synchronized (GLRenderer.tilelock) {
-
 			for (int i = 0; i < mDrawTiles.cnt; i++)
 				tiles[i].isVisible = false;
 
 			// relative zoom-level, 'tiles' could not have been updated after
 			// zoom-level changed.
-			byte z = tiles[0].zoomLevel;
-			float div = FastMath.pow(z - pos.zoomLevel);
+			float div = FastMath.pow(pos.zoomLevel - tiles[0].zoomLevel);
+
+			// draw additional tiles on max zoom-level:
+			// to make sure buildings that are half visible but
+			// the not ground tile are still drawn.
+			float scale = pos.scale;
+			if (scale > 2)
+				scale = 2;
 
 			// transform screen coordinates to tile coordinates
-			float scale = pos.scale / div;
-			float px = (float) pos.x * div;
-			float py = (float) pos.y * div;
-
+			float tileScale = scale * div * Tile.TILE_SIZE;
+			double px = pos.x * scale;
+			double py = pos.y * scale;
 			for (int i = 0; i < 8; i += 2) {
-				coords[i + 0] = (px + coords[i + 0] / scale) / Tile.TILE_SIZE;
-				coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
+				coords[i + 0] = (float) (px + coords[i + 0]) / tileScale;
+				coords[i + 1] = (float) (py + coords[i + 1]) / tileScale;
 			}
 
 			// count placeholder tiles
-			mHolderCount = 0;
+			mNumTileHolder = 0;
 
 			// check visibile tiles
-			mScanBox.scan(coords, z);
+			mScanBox.scan(coords, tiles[0].zoomLevel);
 		}
 	}
-
 
 	private static void uploadTileData(MapTile tile) {
 		tile.state = STATE_READY;
@@ -423,7 +427,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (mUpdateColor) {
 			float cc[] = mClearColor;
 			GLES20.glClearColor(cc[0], cc[1], cc[2], cc[3]);
-			//GLES20.glClearColor(0.8f, 0.8f, 0.8f, 1);
 			mUpdateColor = false;
 		}
 
@@ -444,10 +447,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// get current tiles to draw
 		mDrawTiles = mMapView.getTileManager().getActiveTiles(mDrawTiles);
 
-		// FIXME what if only drawing overlays?
-		if (mDrawTiles == null || mDrawTiles.cnt == 0) {
+		if (mDrawTiles == null || mDrawTiles.cnt == 0)
 			return;
-		}
 
 		boolean tilesChanged = false;
 		// check if the tiles have changed...
@@ -471,6 +472,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 			mMapViewPosition.getMatrix(mMatrices.view, null, mMatrices.viewproj);
 
+			if (debugView) {
+				mMatrices.mvp.setScale(0.5f, 0.5f, 1);
+				mMatrices.viewproj.multiplyMM(mMatrices.mvp, mMatrices.viewproj);
+			}
 		}
 
 		int tileCnt = mDrawTiles.cnt;
@@ -479,8 +484,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (positionChanged)
 			updateTileVisibility();
 
-		tileCnt += mHolderCount;
+		tileCnt += mNumTileHolder;
 
+		/* prepare tile for rendering */
 		compileTileLayers(tiles, tileCnt);
 
 		tilesChanged |= (uploadCnt > 0);
@@ -510,29 +516,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			GLES20.glFinish();
 			Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start));
 		}
-
-		//if (debugView) {
-		//	GLState.test(false, false);
-		//
-		//	float mm = 0.5f;
-		//	float min = -mm;
-		//	float max = mm;
-		//	float ymax = mm * mHeight / mWidth;
-		//	mDebugCoords[0] = min;
-		//	mDebugCoords[1] = ymax;
-		//	mDebugCoords[2] = max;
-		//	mDebugCoords[3] = ymax;
-		//	mDebugCoords[4] = min;
-		//	mDebugCoords[5] = -ymax;
-		//	mDebugCoords[6] = max;
-		//	mDebugCoords[7] = -ymax;
-		//
-		//	PolygonRenderer.debugDraw(mMatrices.proj, mDebugCoords, 0);
-		//
-		//	pos.zoomLevel = -1;
-		//	mMapViewPosition.getMapViewProjection(mDebugCoords);
-		//	PolygonRenderer.debugDraw(mMatrices.viewproj, mDebugCoords, 1);
-		//}
 
 		if (GlUtils.checkGlOutOfMemory("finish")) {
 			checkBufferUsage(true);
@@ -589,17 +572,17 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (width <= 0 || height <= 0)
 			return;
 
-		mWidth = width;
-		mHeight = height;
+		screenWidth = width;
+		screenHeight = height;
 
 		mMapViewPosition.getMatrix(null, mMatrices.proj, null);
 
-		//if (debugView) {
-		//	// modify this to scale only the view, to see better which tiles are
-		//	// rendered
-		//	mMatrices.mvp.setScale(0.5f, 0.5f, 1);
-		//	mMatrices.proj.multiplyMM(mMatrices.mvp, mMatrices.proj);
-		//}
+		if (debugView) {
+			// modify this to scale only the view, to see better which tiles
+			// are rendered
+			mMatrices.mvp.setScale(0.5f, 0.5f, 1);
+			mMatrices.proj.multiplyMM(mMatrices.mvp, mMatrices.proj);
+		}
 
 		GLES20.glViewport(0, 0, width, height);
 		GLES20.glScissor(0, 0, width, height);
@@ -648,8 +631,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mBufferMemoryUsage = 0;
 		mDrawTiles = null;
 
-		int numTiles = (mWidth / (Tile.TILE_SIZE / 2) + 2)
-				* (mHeight / (Tile.TILE_SIZE / 2) + 2);
+		int numTiles = (screenWidth / (Tile.TILE_SIZE / 2) + 2)
+				* (screenHeight / (Tile.TILE_SIZE / 2) + 2);
 
 		// Set up vertex buffer objects
 		int numVBO = (CACHE_TILES + (numTiles * 2));

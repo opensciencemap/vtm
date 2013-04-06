@@ -160,24 +160,23 @@ public class TileManager {
 		// jobs come in.
 		mMapView.addJobs(null);
 
-		/* load some tiles more than currently visible */
-		float scale = mapPosition.scale * 0.7f;
-		float px = (float) mapPosition.x;
-		float py = (float) mapPosition.y;
+		// scale and translate projection to tile coordinates
+		// load some tiles more than currently visible (* 0.75)
+		float scale = mapPosition.scale * 0.75f;
+		float tileScale = scale * Tile.TILE_SIZE;
+		double px = mapPosition.x * scale;
+		double py = mapPosition.y * scale;
 
 		float[] coords = mTileCoords;
 		mMapViewPosition.getMapViewProjection(coords);
-
-		// scale and translate projection to tile coordinates
 		for (int i = 0; i < 8; i += 2) {
-			coords[i + 0] = (px + coords[i + 0] / scale) / Tile.TILE_SIZE;
-			coords[i + 1] = (py + coords[i + 1] / scale) / Tile.TILE_SIZE;
+			coords[i + 0] = (float)(px + coords[i + 0]) / tileScale;
+			coords[i + 1] = (float)(py + coords[i + 1]) / tileScale;
 		}
-
-		mNewTiles.cnt = 0;
 
 		// scan visible tiles. callback function calls 'addTile'
 		// which sets mNewTiles
+		mNewTiles.cnt = 0;
 		mScanBox.scan(coords, mapPosition.zoomLevel);
 
 		MapTile[] newTiles = mNewTiles.tiles;
