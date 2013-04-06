@@ -157,6 +157,10 @@ public class MapViewPosition {
 		pos.angle = mRotation;
 		pos.tilt = mTilt;
 
+		pos.absX = mAbsX;
+		pos.absY = mAbsY;
+		pos.absScale = mAbsScale;
+
 		// for tiling
 		pos.scale = scale;
 		pos.zoomLevel = (byte) z;
@@ -312,28 +316,33 @@ public class MapViewPosition {
 		return bbox;
 	}
 
-//	/**
-//	 * For x, y in screen coordinates set Point to map-tile
-//	 * coordinates at returned scale.
-//	 *
-//	 * @param x screen coordinate
-//	 * @param y screen coordinate
-//	 * @param out Point coords will be set
-//	 * @return current map scale
-//	 */
-//	public synchronized float getScreenPointOnMap(float x, float y, PointD out) {
-//
-//		// scale to -1..1
-//		float mx = 1 - (x / mWidth * 2);
-//		float my = 1 - (y / mHeight * 2);
-//
-//		unproject(-mx, my, getZ(-my), mu, 0);
-//
-//		out.x = mCurX + mu[0];
-//		out.y = mCurY + mu[1];
-//
-//		return (float) mAbsScale;
-//	}
+	/**
+	 * For x, y in screen coordinates set Point to map-tile
+	 * coordinates at returned scale.
+	 *
+	 * @param x screen coordinate
+	 * @param y screen coordinate
+	 * @param out Point coords will be set
+	 */
+	public synchronized void getScreenPointOnMap(float x, float y, double scale, PointD out) {
+
+		// scale to -1..1
+		float mx = 1 - (x / mWidth * 2);
+		float my = 1 - (y / mHeight * 2);
+
+		unproject(-mx, my, getZ(-my), mu, 0);
+
+		//out.x = mCurX + mu[0];
+		//out.y = mCurY + mu[1];
+
+		out.x = mu[0];
+		out.y = mu[1];
+
+		if (scale != 0) {
+			out.x *= scale / mAbsScale;
+			out.y *= scale / mAbsScale;
+		}
+	}
 
 	/**
 	 * Get the GeoPoint for x,y in screen coordinates.
@@ -729,23 +738,23 @@ public class MapViewPosition {
 		mHandler.start(mDuration);
 	}
 
+	synchronized boolean fling(float adv) {
 
-	synchronized boolean fling(float adv){
+		//float delta = (mDuration - millisLeft) / mDuration;
+		adv = (float) Math.sqrt(adv);
+		float dx = mVelocityX * adv;
+		float dy = mVelocityY * adv;
 
-	//float delta = (mDuration - millisLeft) / mDuration;
-	adv = (float)Math.sqrt(adv);
-	float dx = mVelocityX * adv;
-	float dy = mVelocityY * adv;
+		if (dx != 0 || dy != 0) {
+			moveMap((float) (dx - mScrollX), (float) (dy - mScrollY));
 
-	if (dx != 0 || dy != 0){
-		moveMap((float)(dx - mScrollX), (float)(dy - mScrollY));
-
-		mMapView.redrawMap(true);
-		mScrollX = dx;
-		mScrollY = dy;
+			mMapView.redrawMap(true);
+			mScrollX = dx;
+			mScrollY = dy;
+		}
+		return true;
 	}
-	return true;
-}
+
 	private float mVelocityX;
 	private float mVelocityY;
 

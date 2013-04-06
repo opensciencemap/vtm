@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 ...
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,6 +19,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.core.PointD;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
@@ -37,12 +38,22 @@ import android.opengl.GLES20;
 
 public class TileOverlay extends RenderOverlay {
 
-	private final int mOverlayOffsetX = 0;
-	private final int mOverlayOffsetY = 0;
+	private float mDownX = 400;
+	private float mDownY = 400;
+
+	private float mOverlayOffsetX;
+	private float mOverlayOffsetY;
+
 	private final float mOverlayScale = 1.5f;
 
+	private final PointD mScreenPoint = new PointD();
 
 	private TileSet mTileSet;
+
+	private float mScreenWidth;
+	private float mScreenHeight;
+
+	private final Matrix4 mProjMatrix = new Matrix4();
 
 	public TileOverlay(MapView mapView) {
 		super(mapView);
@@ -58,8 +69,10 @@ public class TileOverlay extends RenderOverlay {
 
 			this.isReady = true;
 
-			// fix current MapPosition
-			//mMapPosition.copy(curPos);
+			mProjMatrix.copy(matrices.proj);
+			// discard z projection from tilt
+			mProjMatrix.setValue(10, 0);
+			mProjMatrix.setValue(14, 0);
 		}
 	}
 
@@ -82,13 +95,12 @@ public class TileOverlay extends RenderOverlay {
 		GLState.useProgram(mShaderProgram);
 
 		// set depth offset of overlay circle to be greater
-		// than used for tiles (so that their gl_less test
+		// than those used for tiles (so that their gl_less test
 		// evaluates to true inside the circle)
 		GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
 		GLES20.glPolygonOffset(1, 100);
 
-		//GLState.blend(true);
-		// TODO check, depth test needs to be enabled to write?
+		GLState.blend(true);
 		GLState.test(true, false);
 
 		// unbind previously bound VBOs
@@ -100,26 +112,44 @@ public class TileOverlay extends RenderOverlay {
 
 		GLState.enableVertexArrays(hVertexPosition, -1);
 
+		mScreenWidth = mMapView.getWidth();
+		mScreenHeight = mMapView.getHeight();
 
-		m.mvp.setTranslation(mOverlayOffsetX, mOverlayOffsetY, 0);
+		mOverlayOffsetX = mDownX;
+		mOverlayOffsetY = mDownY;
 
-		float ratio = 1f / mMapView.getWidth();
+		m.mvp.setTranslation(mOverlayOffsetX - mScreenWidth / 2,
+				mOverlayOffsetY - mScreenHeight / 2, 0);
+
+		float ratio = 1f / mScreenWidth;
 		tmpMatrix.setScale(ratio, ratio, ratio);
+
 		m.mvp.multiplyMM(tmpMatrix, m.mvp);
 
 		m.mvp.multiplyMM(m.proj, m.mvp);
 		m.mvp.setAsUniform(hMatrixPosition);
 
-		// Draw the triangle
+		// Draw the circle
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-
-
 
 		// get current tiles
 		mTileSet = GLRenderer.getVisibleTiles(mTileSet);
 
 		mDrawCnt = 0;
 		GLES20.glDepthFunc(GLES20.GL_LESS);
+
+		// scale position passed to Line/PolyRenderer
+		// FIXME scale is used for both alpha fading
+		// and line width...
+		MapPosition scaledPos = mMapPosition;
+		scaledPos.copy(pos);
+		scaledPos.scale *= mOverlayScale;
+
+		// get translation vector from map at screen point to center
+		// relative to current scale
+		mMapView.getMapViewPosition().getScreenPointOnMap(
+				mOverlayOffsetX, mOverlayOffsetY,
+				mMapPosition.absScale, mScreenPoint);
 
 		// load texture for line caps
 		LineRenderer.beginLines();
@@ -156,31 +186,34 @@ public class TileOverlay extends RenderOverlay {
 		float y = (float) (tile.pixelY - pos.y * div);
 		float scale = pos.scale / div;
 
-		x -= mOverlayOffsetX / scale;
-		y -= mOverlayOffsetY / scale;
+		// move screenPoint to center
+		x = (float) (x * scale - mScreenPoint.x);
+		y = (float) (y * scale - mScreenPoint.y);
 
-		m.mvp.setTransScale(x * scale, y * scale, scale / GLRenderer.COORD_SCALE);
+		m.mvp.setTransScale(x, y, scale / GLRenderer.COORD_SCALE);
 		//m.mvp.multiplyMM(m.viewproj, m.mvp);
 
+		// rotate around center
 		tmpMatrix.setRotation(pos.angle, 0, 0, 1);
 		m.mvp.multiplyMM(tmpMatrix, m.mvp);
 
-		float ratio = mOverlayScale / mMapView.getWidth();
+		// translate to overlay circle in screen coordinates
+		tmpMatrix.setTransScale(
+				(mOverlayOffsetX - mScreenWidth / 2),
+				(mOverlayOffsetY - mScreenHeight / 2),
+				mOverlayScale);
+		m.mvp.multiplyMM(tmpMatrix, m.mvp);
+
+		// normalize coordinates, i guess thats how it's called
+		float ratio = 1 / mScreenWidth;
 		tmpMatrix.setScale(ratio, ratio, ratio);
 		m.mvp.multiplyMM(tmpMatrix, m.mvp);
 
-		m.mvp.multiplyMM(m.proj, m.mvp);
-
-		//tmpMatrix.setTransScale(500/0.5f, 500/0.5f, 0.5f);
-
-		//m.mvp.multiplyMM(tmpMatrix, m.mvp);
-
-		//		tmpMatrix.setTransScale(-500, -500, 1);
-		//		m.mvp.multiplyMM(tmpMatrix, m.mvp);
+		m.mvp.multiplyMM(mProjMatrix, m.mvp);
 
 		// set depth offset (used for clipping to tile boundaries)
 		GLES20.glPolygonOffset(1, mDrawCnt++);
-		if (mDrawCnt > 20)
+		if (mDrawCnt == 100)
 			mDrawCnt = 0;
 
 		// simple line shader does not take forward shortening into account
@@ -188,29 +221,31 @@ public class TileOverlay extends RenderOverlay {
 
 		boolean clipped = false;
 
+		MapPosition scaledPos = mMapPosition;
+
 		for (Layer l = t.layers.baseLayers; l != null;) {
 			switch (l.type) {
 				case Layer.POLYGON:
-					l = PolygonRenderer.draw(pos, l, m, !clipped, true);
+					l = PolygonRenderer.draw(scaledPos, l, m, !clipped, true);
 					clipped = true;
 					break;
 
 				case Layer.LINE:
 					if (!clipped) {
 						// draw stencil buffer clip region
-						PolygonRenderer.draw(pos, null, m, true, true);
+						PolygonRenderer.draw(scaledPos, null, m, true, true);
 						clipped = true;
 					}
-					l = LineRenderer.draw(t.layers, l, pos, m, div, simpleShader);
+					l = LineRenderer.draw(t.layers, l, scaledPos, m, div, simpleShader);
 					break;
 
 				case Layer.TEXLINE:
 					if (!clipped) {
 						// draw stencil buffer clip region
-						PolygonRenderer.draw(pos, null, m, true, true);
+						PolygonRenderer.draw(scaledPos, null, m, true, true);
 						clipped = true;
 					}
-					l = LineTexRenderer.draw(t.layers, l, pos, m, div);
+					l = LineTexRenderer.draw(t.layers, l, scaledPos, m, div);
 					break;
 
 				default:
@@ -220,7 +255,7 @@ public class TileOverlay extends RenderOverlay {
 		}
 
 		// clear clip-region and could also draw 'fade-effect'
-		PolygonRenderer.drawOver(m);
+		PolygonRenderer.drawOver(m, false, 0);
 	}
 
 	private int mShaderProgram;
@@ -228,12 +263,6 @@ public class TileOverlay extends RenderOverlay {
 	private int hMatrixPosition;
 
 	private FloatBuffer mVertices;
-	private final float[] mVerticesData = {
-			-200, -200, -1, -1,
-			-200, 200, -1, 1,
-			200, -200, 1, -1,
-			200, 200, 1, 1
-	};
 	private boolean mInitialized;
 
 	private boolean init() {
@@ -249,11 +278,18 @@ public class TileOverlay extends RenderOverlay {
 
 		// Store the program object
 		mShaderProgram = programObject;
+		int halfRadius = 250;
+		float[] vertices = {
+				-halfRadius, -halfRadius, -1, -1,
+				-halfRadius, halfRadius, -1, 1,
+				halfRadius, -halfRadius, 1, -1,
+				halfRadius, halfRadius, 1, 1
+		};
 
-		mVertices = ByteBuffer.allocateDirect(mVerticesData.length * 4)
+		mVertices = ByteBuffer.allocateDirect(vertices.length * 4)
 				.order(ByteOrder.nativeOrder()).asFloatBuffer();
 
-		mVertices.put(mVerticesData);
+		mVertices.put(vertices);
 		mVertices.flip();
 
 		mInitialized = true;
@@ -275,15 +311,19 @@ public class TileOverlay extends RenderOverlay {
 	private final static String fShaderStr =
 			"precision mediump float;"
 					+ "varying vec2 tex;"
+					+ "const vec4 color = vec4(0.95, 0.95, 0.95, 0.95);"
 					+ "void main()"
 					+ "{"
 					+ " if (length(tex) < 1.0)"
-					+ "   gl_FragColor = vec4 (0.65, 0.65, 0.65, 0.7);"
+					+ "   gl_FragColor = color;"
 					+ " else"
 					// dont write pixel (also discards writing to depth buffer)
-					+"    discard;"
-					//+ "   float a = 1.0 - step(1.0, length(tex));"
-					//+ "   float a = 1.0 - smoothstep(0.5, 1.0, length(tex));"
-					//+ "  gl_FragColor = vec4 (a, 0.0, 0.0, a);"
+					+ "    discard;"
 					+ "}";
+
+
+	public void setPointer(float x, float y) {
+		mDownX = x;
+		mDownY = y;
+	}
 }

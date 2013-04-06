@@ -21,7 +21,10 @@ public class MapPosition {
 	public double lon;
 	public double lat;
 
-	public int zoomLevel;
+	public double absX;
+	public double absY;
+	public double absScale;
+
 	public float scale;
 	public float angle;
 	public float tilt;
@@ -29,6 +32,7 @@ public class MapPosition {
 	// map center in tile coordinates of current zoom-level
 	public double x;
 	public double y;
+	public int zoomLevel;
 
 	public MapPosition() {
 		this.zoomLevel = (byte) 1;
