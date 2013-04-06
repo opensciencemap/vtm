@@ -14,9 +14,14 @@
  */
 package org.oscim.renderer.overlays;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.LineRenderer;
 import org.oscim.renderer.LineTexRenderer;
 import org.oscim.renderer.MapTile;
@@ -24,6 +29,7 @@ import org.oscim.renderer.PolygonRenderer;
 import org.oscim.renderer.TileSet;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
 import org.oscim.view.MapView;
 
@@ -31,40 +37,85 @@ import android.opengl.GLES20;
 
 public class TileOverlay extends RenderOverlay {
 
+	private final int mOverlayOffsetX = 0;
+	private final int mOverlayOffsetY = 0;
+	private final float mOverlayScale = 1.5f;
+
+
 	private TileSet mTileSet;
 
 	public TileOverlay(MapView mapView) {
 		super(mapView);
-
-		this.isReady = true;
 	}
 
 	@Override
 	public void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged,
 			Matrices matrices) {
 
-		// TODO Auto-generated method stub
+		if (!mInitialized) {
+			if (!init())
+				return;
 
+			this.isReady = true;
+
+			// fix current MapPosition
+			//mMapPosition.copy(curPos);
+		}
 	}
 
 	@Override
 	public void compile() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void render(MapPosition pos, Matrices m) {
-		GLES20.glDepthMask(true);
-		GLES20.glStencilMask(0xFF);
 
-		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT
-				| GLES20.GL_STENCIL_BUFFER_BIT);
+		GLES20.glDepthMask(true);
+		// set depth buffer to min depth -1
+		GLES20.glClearDepthf(-1);
+		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+		// back to usual
+		GLES20.glClearDepthf(1);
+
+		GLES20.glDepthFunc(GLES20.GL_ALWAYS);
+
+		GLState.useProgram(mShaderProgram);
+
+		// set depth offset of overlay circle to be greater
+		// than used for tiles (so that their gl_less test
+		// evaluates to true inside the circle)
+		GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+		GLES20.glPolygonOffset(1, 100);
+
+		//GLState.blend(true);
+		// TODO check, depth test needs to be enabled to write?
+		GLState.test(true, false);
+
+		// unbind previously bound VBOs
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
+		// Load the vertex data
+		GLES20.glVertexAttribPointer(hVertexPosition, 4,
+				GLES20.GL_FLOAT, false, 0, mVertices);
+
+		GLState.enableVertexArrays(hVertexPosition, -1);
+
+
+		m.mvp.setTranslation(mOverlayOffsetX, mOverlayOffsetY, 0);
+
+		float ratio = 1f / mMapView.getWidth();
+		tmpMatrix.setScale(ratio, ratio, ratio);
+		m.mvp.multiplyMM(tmpMatrix, m.mvp);
+
+		m.mvp.multiplyMM(m.proj, m.mvp);
+		m.mvp.setAsUniform(hMatrixPosition);
+
+		// Draw the triangle
+		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
 
 
 		// get current tiles
-
 		mTileSet = GLRenderer.getVisibleTiles(mTileSet);
 
 		mDrawCnt = 0;
@@ -73,7 +124,7 @@ public class TileOverlay extends RenderOverlay {
 		// load texture for line caps
 		LineRenderer.beginLines();
 
-		for(int i = 0; i < mTileSet.cnt; i++){
+		for (int i = 0; i < mTileSet.cnt; i++) {
 			MapTile t = mTileSet.tiles[i];
 			drawTile(t, pos, m);
 		}
@@ -82,10 +133,11 @@ public class TileOverlay extends RenderOverlay {
 
 	}
 
-	private static Matrix4 scaleMatrix  = new Matrix4();
+	private final Matrix4 tmpMatrix = new Matrix4();
 
-private static int mDrawCnt;
-	private static void drawTile(MapTile tile, MapPosition pos, Matrices m) {
+	private int mDrawCnt;
+
+	private void drawTile(MapTile tile, MapPosition pos, Matrices m) {
 		MapTile t = tile;
 
 		//if (t.holder != null)
@@ -104,15 +156,27 @@ private static int mDrawCnt;
 		float y = (float) (tile.pixelY - pos.y * div);
 		float scale = pos.scale / div;
 
-		x += 400 / scale;
-		y += 400 / scale;
+		x -= mOverlayOffsetX / scale;
+		y -= mOverlayOffsetY / scale;
 
 		m.mvp.setTransScale(x * scale, y * scale, scale / GLRenderer.COORD_SCALE);
-		m.mvp.multiplyMM(m.viewproj, m.mvp);
+		//m.mvp.multiplyMM(m.viewproj, m.mvp);
 
-		scaleMatrix.setScale(0.5f, 0.5f, 1);
+		tmpMatrix.setRotation(pos.angle, 0, 0, 1);
+		m.mvp.multiplyMM(tmpMatrix, m.mvp);
 
-		m.mvp.multiplyMM(scaleMatrix, m.mvp);
+		float ratio = mOverlayScale / mMapView.getWidth();
+		tmpMatrix.setScale(ratio, ratio, ratio);
+		m.mvp.multiplyMM(tmpMatrix, m.mvp);
+
+		m.mvp.multiplyMM(m.proj, m.mvp);
+
+		//tmpMatrix.setTransScale(500/0.5f, 500/0.5f, 0.5f);
+
+		//m.mvp.multiplyMM(tmpMatrix, m.mvp);
+
+		//		tmpMatrix.setTransScale(-500, -500, 1);
+		//		m.mvp.multiplyMM(tmpMatrix, m.mvp);
 
 		// set depth offset (used for clipping to tile boundaries)
 		GLES20.glPolygonOffset(1, mDrawCnt++);
@@ -159,4 +223,67 @@ private static int mDrawCnt;
 		PolygonRenderer.drawOver(m);
 	}
 
+	private int mShaderProgram;
+	private int hVertexPosition;
+	private int hMatrixPosition;
+
+	private FloatBuffer mVertices;
+	private final float[] mVerticesData = {
+			-200, -200, -1, -1,
+			-200, 200, -1, 1,
+			200, -200, 1, -1,
+			200, 200, 1, 1
+	};
+	private boolean mInitialized;
+
+	private boolean init() {
+		// Load the vertex/fragment shaders
+		int programObject = GlUtils.createProgram(vShaderStr, fShaderStr);
+
+		if (programObject == 0)
+			return false;
+
+		// Handle for vertex position in shader
+		hVertexPosition = GLES20.glGetAttribLocation(programObject, "a_pos");
+		hMatrixPosition = GLES20.glGetUniformLocation(programObject, "u_mvp");
+
+		// Store the program object
+		mShaderProgram = programObject;
+
+		mVertices = ByteBuffer.allocateDirect(mVerticesData.length * 4)
+				.order(ByteOrder.nativeOrder()).asFloatBuffer();
+
+		mVertices.put(mVerticesData);
+		mVertices.flip();
+
+		mInitialized = true;
+
+		return true;
+	}
+
+	private final static String vShaderStr =
+			"precision mediump float;"
+					+ "uniform mat4 u_mvp;"
+					+ "attribute vec4 a_pos;"
+					+ "varying vec2 tex;"
+					+ "void main()"
+					+ "{"
+					+ "   gl_Position = u_mvp * vec4(a_pos.xy, 0.0, 1.0);"
+					+ "   tex = a_pos.zw;"
+					+ "}";
+
+	private final static String fShaderStr =
+			"precision mediump float;"
+					+ "varying vec2 tex;"
+					+ "void main()"
+					+ "{"
+					+ " if (length(tex) < 1.0)"
+					+ "   gl_FragColor = vec4 (0.65, 0.65, 0.65, 0.7);"
+					+ " else"
+					// dont write pixel (also discards writing to depth buffer)
+					+"    discard;"
+					//+ "   float a = 1.0 - step(1.0, length(tex));"
+					//+ "   float a = 1.0 - smoothstep(0.5, 1.0, length(tex));"
+					//+ "  gl_FragColor = vec4 (a, 0.0, 0.0, a);"
+					+ "}";
 }
