@@ -31,7 +31,7 @@ public class Projection {
 	 * @return the longitude value of the tile X number.
 	 */
 	public static double tileXToLongitude(long tileX, int zoomLevel) {
-		return MercatorProjection.pixelXToLongitude(tileX * Tile.TILE_SIZE, zoomLevel);
+		return MercatorProjection.pixelXToLongitude(tileX * Tile.SIZE, zoomLevel);
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class Projection {
 	 * @return the latitude value of the tile Y number.
 	 */
 	public static double tileYToLatitude(long tileY, int zoomLevel) {
-		return MercatorProjection.pixelYToLatitude(tileY * Tile.TILE_SIZE, zoomLevel);
+		return MercatorProjection.pixelYToLatitude(tileY * Tile.SIZE, zoomLevel);
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class Projection {
 	 * @return the tile X number.
 	 */
 	public static int pixelXToTileX(double pixelX, int zoomLevel) {
-		return (int) Math.min(Math.max(pixelX / Tile.TILE_SIZE, 0),
+		return (int) Math.min(Math.max(pixelX / Tile.SIZE, 0),
 				Math.pow(2, zoomLevel) - 1);
 	}
 	/**
@@ -99,7 +99,7 @@ public class Projection {
 	 * @return the tile Y number.
 	 */
 	public static int pixelYToTileY(double pixelY, int zoomLevel) {
-		return (int) Math.min(Math.max(pixelY / Tile.TILE_SIZE, 0),
+		return (int) Math.min(Math.max(pixelY / Tile.SIZE, 0),
 				Math.pow(2, zoomLevel) - 1);
 	}
 	private Projection(){

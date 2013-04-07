@@ -135,7 +135,7 @@ public class TileManager {
 
 		// set up TileSet large enough to hold current tiles
 		int num = Math.max(width, height);
-		int size = Tile.TILE_SIZE >> 1;
+		int size = Tile.SIZE >> 1;
 		int numTiles = (num * num) / (size * size) * 4;
 		mNewTiles = new TileSet(numTiles);
 		mCurrentTiles = new TileSet(numTiles);
@@ -166,7 +166,7 @@ public class TileManager {
 		// scale and translate projection to tile coordinates
 		// load some tiles more than currently visible (* 0.75)
 		//		float scale = mapPosition.scale * 0.75f;
-		//		float tileScale = scale * Tile.TILE_SIZE;
+		//		float tileScale = scale * Tile.SIZE;
 		//		double px = mapPosition.x * scale;
 		//		double py = mapPosition.y * scale;
 		//
@@ -180,10 +180,10 @@ public class TileManager {
 		// scale and translate projection to tile coordinates
 		// load some tiles more than currently visible (* 0.75)
 		double scale = pos.scale * 0.75f;
-		double curScale = Tile.TILE_SIZE * scale;
+		double curScale = Tile.SIZE * scale;
 		int zoomLevel = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
 
-		double tileScale = Tile.TILE_SIZE * (scale / (1 << zoomLevel));
+		double tileScale = Tile.SIZE * (scale / (1 << zoomLevel));
 
 		float[] coords = mTileCoords;
 		mMapViewPosition.getMapViewProjection(coords);

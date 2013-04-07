@@ -124,8 +124,8 @@ public class PathOverlay extends Overlay {
 			//int z = curPos.zoomLevel;
 			int z = FastMath.log2((int) curPos.scale);
 			int diff = MAX_ZOOM - z;
-			int mx = (int) (curPos.x * (Tile.TILE_SIZE << z));
-			int my = (int) (curPos.y * (Tile.TILE_SIZE << z));
+			int mx = (int) (curPos.x * (Tile.SIZE << z));
+			int my = (int) (curPos.y * (Tile.SIZE << z));
 
 			for (int j = 0; j < size; j += 2) {
 				// TODO translate mapPosition and do this after clipping

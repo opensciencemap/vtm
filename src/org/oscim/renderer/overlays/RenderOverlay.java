@@ -84,7 +84,7 @@ public abstract class RenderOverlay {
 	protected void setMatrix(MapPosition curPos, Matrices m, boolean project) {
 		MapPosition oPos = mMapPosition;
 
-		double tileScale = Tile.TILE_SIZE * curPos.scale;
+		double tileScale = Tile.SIZE * curPos.scale;
 
 		double x = oPos.x - curPos.x;
 		double y = oPos.y - curPos.y;

@@ -72,7 +72,7 @@ public class ExtrusionLayer extends Layer {
 		for (int i = 0; i < 4; i++)
 			mIndices[i] = mCurIndices[i] = VertexPool.get();
 
-		mClipper = new LineClipper(0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
+		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE);
 	}
 
 	public void addBuildings(WayData way) {

@@ -143,7 +143,7 @@ public class MapView extends RelativeLayout {
 		dpi = Math.max(metrics.xdpi, metrics.ydpi);
 
 		// TODO make this dpi dependent
-		Tile.TILE_SIZE = 400;
+		Tile.SIZE = 400;
 
 		MapActivity mapActivity = (MapActivity) context;
 

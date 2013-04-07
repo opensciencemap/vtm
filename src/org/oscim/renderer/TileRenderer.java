@@ -125,7 +125,7 @@ public class TileRenderer {
 
 		float div = FastMath.pow(z - pos.zoomLevel);
 
-		double curScale = Tile.TILE_SIZE * pos.scale;
+		double curScale = Tile.SIZE * pos.scale;
 		double scale = (pos.scale / (1 << z));
 
 		float x = (float) ((tile.x - pos.x) * curScale);

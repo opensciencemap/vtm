@@ -71,14 +71,14 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
 
 	private final GeometryBuffer mDebugPoint = new GeometryBuffer(
-			new float[] { Tile.TILE_SIZE >> 1, 10 },
+			new float[] { Tile.SIZE >> 1, 10 },
 			new short[] { 2 });
 
 	private final WayData mDebugWay = new WayData(
 			new GeometryBuffer(
-					new float[] { 0, 0, 0, Tile.TILE_SIZE,
-							Tile.TILE_SIZE, Tile.TILE_SIZE,
-							Tile.TILE_SIZE, 0, 0, 0 },
+					new float[] { 0, 0, 0, Tile.SIZE,
+							Tile.SIZE, Tile.SIZE,
+							Tile.SIZE, 0, 0, 0 },
 					new short[] {10}),
 			new Tag[] { new Tag("debug", "box") }
 			);
@@ -127,7 +127,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	/**
 	 */
 	public TileGenerator() {
-		mClipper = new LineClipper(0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE, true);
+		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
 	}
 
 	public void cleanup() {
@@ -156,7 +156,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		mGroundResolution = (float) (Math.cos(latitude * (Math.PI / 180))
 				* MercatorProjection.EARTH_CIRCUMFERENCE
-				/ ((long) Tile.TILE_SIZE << mTile.zoomLevel));
+				/ ((long) Tile.SIZE << mTile.zoomLevel));
 
 		mTile.layers = new Layers();
 

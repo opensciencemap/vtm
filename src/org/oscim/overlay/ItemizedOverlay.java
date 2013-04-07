@@ -105,8 +105,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 			int z = FastMath.log2((int) curPos.scale);
 			int diff = MAX_ZOOM - z;
 
-			int mx = (int) (curPos.x * (Tile.TILE_SIZE << z));
-			int my = (int) (curPos.y * (Tile.TILE_SIZE << z));
+			int mx = (int) (curPos.x * (Tile.SIZE << z));
+			int my = (int) (curPos.y * (Tile.SIZE << z));
 
 			// limit could be 1 if we update on every position change
 			float limit = 1.5f;

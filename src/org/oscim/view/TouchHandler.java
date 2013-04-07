@@ -382,8 +382,8 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 		if (mWasMulti)
 			return true;
 
-		int w = Tile.TILE_SIZE * 3;
-		int h = Tile.TILE_SIZE * 3;
+		int w = Tile.SIZE * 3;
+		int h = Tile.SIZE * 3;
 
 		//if (mMapView.enablePagedFling) {
 		//	double a = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
