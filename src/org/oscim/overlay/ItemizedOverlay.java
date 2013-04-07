@@ -24,10 +24,12 @@ package org.oscim.overlay;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.core.Tile;
 import org.oscim.overlay.OverlayItem.HotspotPlace;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.SymbolLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
+import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
 import android.content.res.Resources;
@@ -71,8 +73,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	private int mSize;
 
-	// pre-projected points to zoomlovel 20
-	private static final byte MAX_ZOOM = 20;
+	// pre-projected points to zoomlovel 18
+	private static final byte MAX_ZOOM = 18;
 
 	class ItemOverlay extends BasicOverlay {
 
@@ -95,9 +97,16 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 			mUpdate = false;
 
-			int diff = MAX_ZOOM - curPos.zoomLevel;
-			int mx = (int) curPos.x;
-			int my = (int) curPos.y;
+			//int mx = (int) curPos.x;
+			//int my = (int) curPos.y;
+
+			//int z = curPos.zoomLevel;
+
+			int z = FastMath.log2((int) curPos.scale);
+			int diff = MAX_ZOOM - z;
+
+			int mx = (int) (curPos.x * (Tile.TILE_SIZE << z));
+			int my = (int) (curPos.y * (Tile.TILE_SIZE << z));
 
 			// limit could be 1 if we update on every position change
 			float limit = 1.5f;
@@ -122,6 +131,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 				for (InternalItem it = mItems; it != null; it = it.next) {
 					it.x = (it.px >> diff) - mx;
 					it.y = (it.py >> diff) - my;
+					//it.x = it.px - mx;
+					//it.y = it.py - my;
 
 					if (it.x > max || it.x < -max || it.y > max || it.y < -max) {
 						if (it.visible) {
@@ -159,21 +170,22 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 				// only update when zoomlevel changed, new items are visible
 				// or more than 10 of the current items became invisible
-				if (((curPos.zoomLevel == mMapPosition.zoomLevel || numVisible == 0)) &&
-						(changedVisible == 0 && changesInvisible < 10))
+				if ((numVisible == 0) && (changedVisible == 0 && changesInvisible < 10))
 					return;
 
 				// keep position for current state
 				// updateMapPosition();
-				// TODO add copy utility function
-				mMapPosition.x = curPos.x;
-				mMapPosition.y = curPos.y;
-				mMapPosition.zoomLevel = curPos.zoomLevel;
-				mMapPosition.scale = curPos.scale;
-				mMapPosition.angle = curPos.angle;
+				mMapPosition.copy(curPos);
+
+				//mMapPosition.x = curPos.x;
+				//mMapPosition.y = curPos.y;
+				//mMapPosition.zoomLevel = curPos.zoomLevel;
+				//mMapPosition.scale = curPos.scale;
+				//mMapPosition.angle = curPos.angle;
 
 				// items are placed relative to scale == 1
-				mMapPosition.scale = 1;
+				// mMapPosition.scale = 1;
+				mMapPosition.scale = 1 << z;
 
 				layers.clear();
 
@@ -423,7 +435,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		return marker;
 	}
 
-	public static Drawable makeMarker(Resources res, int id, HotspotPlace place){
+	public static Drawable makeMarker(Resources res, int id, HotspotPlace place) {
 		Drawable marker = res.getDrawable(id);
 		if (place == null)
 			boundToHotspot(marker, HotspotPlace.CENTER);

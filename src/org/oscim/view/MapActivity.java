@@ -40,14 +40,15 @@ import android.content.SharedPreferences.Editor;
 public abstract class MapActivity extends Activity {
 	private static final String KEY_LATITUDE = "latitude";
 	private static final String KEY_LONGITUDE = "longitude";
-	private static final String KEY_ZOOM_LEVEL = "zoomLevel";
+	private static final String KEY_MAP_SCALE = "map_scale";
+
 	private static final String PREFERENCES_FILE = "MapActivity";
 	private static final String KEY_THEME = "Theme";
 
 	private static boolean containsMapViewPosition(SharedPreferences sharedPreferences) {
 		return sharedPreferences.contains(KEY_LATITUDE)
 				&& sharedPreferences.contains(KEY_LONGITUDE)
-				&& sharedPreferences.contains(KEY_ZOOM_LEVEL);
+				&& sharedPreferences.contains(KEY_MAP_SCALE);
 	}
 
 	protected MapView mMapView;
@@ -66,14 +67,16 @@ public abstract class MapActivity extends Activity {
 		Editor editor = getSharedPreferences(PREFERENCES_FILE, MODE_PRIVATE).edit();
 		editor.clear();
 
-		// save the map position and zoom level
-		MapPosition mapPosition = mMapView.getMapPosition().getMapPosition();
-		if (mapPosition != null) {
-			GeoPoint geoPoint = new GeoPoint(mapPosition.lat, mapPosition.lon);
-			editor.putInt(KEY_LATITUDE, geoPoint.latitudeE6);
-			editor.putInt(KEY_LONGITUDE, geoPoint.longitudeE6);
-			editor.putInt(KEY_ZOOM_LEVEL, mapPosition.zoomLevel);
-		}
+		// save the map position
+		MapPosition mapPosition = new MapPosition();
+
+		mMapView.getMapViewPosition().getMapPosition(mapPosition);
+
+		GeoPoint geoPoint = mapPosition.getGeoPoint();
+
+		editor.putInt(KEY_LATITUDE, geoPoint.latitudeE6);
+		editor.putInt(KEY_LONGITUDE, geoPoint.longitudeE6);
+		editor.putFloat(KEY_MAP_SCALE, (float)mapPosition.scale);
 
 		editor.putString(KEY_THEME, mMapView.getRenderTheme());
 
@@ -108,12 +111,14 @@ public abstract class MapActivity extends Activity {
 			// get and set the map position and zoom level
 			int latitudeE6 = sharedPreferences.getInt(KEY_LATITUDE, 0);
 			int longitudeE6 = sharedPreferences.getInt(KEY_LONGITUDE, 0);
-			int zoomLevel = sharedPreferences.getInt(KEY_ZOOM_LEVEL, -1);
+			float scale = sharedPreferences.getFloat(KEY_MAP_SCALE, 1);
 
-			GeoPoint geoPoint = new GeoPoint(latitudeE6, longitudeE6);
-			MapPosition mapPosition = new MapPosition(geoPoint, (byte) zoomLevel, 1);
 
-			mMapView.getMapViewPosition().setMapCenter(mapPosition);
+			MapPosition mapPosition = new MapPosition();
+			mapPosition.setPosition(latitudeE6 / 1E6, longitudeE6 / 1E6);
+			mapPosition.setScale(scale);
+
+			mMapView.getMapViewPosition().setMapPosition(mapPosition);
 		}
 
 		String theme = sharedPreferences.getString(KEY_THEME,

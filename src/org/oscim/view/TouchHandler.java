@@ -78,7 +78,7 @@ final class TouchHandler implements OnGestureListener, OnDoubleTapListener {
 	 */
 	public TouchHandler(Context context, MapView mapView) {
 		mMapView = mapView;
-		mMapPosition = mapView.getMapPosition();
+		mMapPosition = mapView.getMapViewPosition();
 		mOverlayManager = mapView.getOverlayManager();
 		mGestureDetector = new GestureDetector(context, this);
 		mGestureDetector.setOnDoubleTapListener(this);
