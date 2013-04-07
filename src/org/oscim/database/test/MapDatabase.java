@@ -57,7 +57,7 @@ public class MapDatabase implements IMapDatabase {
 	@Override
 	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 
-		int size = Tile.TILE_SIZE;
+		int size = Tile.SIZE;
 		float[] points = mGeom.points;
 		short[] index = mGeom.index;
 

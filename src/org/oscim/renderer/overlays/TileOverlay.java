@@ -209,7 +209,7 @@ public class TileOverlay extends RenderOverlay {
 		// place tile relative to map position
 		float div = FastMath.pow(tile.zoomLevel - pos.zoomLevel);
 		int z = tile.zoomLevel;
-		double curScale = Tile.TILE_SIZE * pos.scale;
+		double curScale = Tile.SIZE * pos.scale;
 
 		double scale = pos.scale / (1 << z);
 

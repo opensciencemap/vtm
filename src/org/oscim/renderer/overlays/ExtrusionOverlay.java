@@ -326,7 +326,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			MapTile tile, int delta) {
 
 		int z = tile.zoomLevel;
-		double curScale = Tile.TILE_SIZE * pos.scale;
+		double curScale = Tile.SIZE * pos.scale;
 		float scale = (float)(pos.scale / (1 << z));
 
 		float x = (float) ((tile.x - pos.x) * curScale);

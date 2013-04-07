@@ -591,9 +591,9 @@ public class MapDatabase implements IMapDatabase {
 		Tag[] tags = null;
 		Tag[] curTags;
 
-		long x = mTile.tileX * Tile.TILE_SIZE;
-		long y = mTile.tileY * Tile.TILE_SIZE + Tile.TILE_SIZE;
-		long z = Tile.TILE_SIZE << mTile.zoomLevel;
+		long x = mTile.tileX * Tile.SIZE;
+		long y = mTile.tileY * Tile.SIZE + Tile.SIZE;
+		long z = Tile.SIZE << mTile.zoomLevel;
 
 		long dx = (x - (z >> 1));
 		long dy = (y - (z >> 1));
@@ -1055,9 +1055,9 @@ public class MapDatabase implements IMapDatabase {
 
 	private boolean projectToTile(float[] coords, short[] indices) {
 
-		long x = mTile.tileX * Tile.TILE_SIZE;
-		long y = mTile.tileY * Tile.TILE_SIZE + Tile.TILE_SIZE;
-		long z = Tile.TILE_SIZE << mTile.zoomLevel;
+		long x = mTile.tileX * Tile.SIZE;
+		long y = mTile.tileY * Tile.SIZE + Tile.SIZE;
+		long z = Tile.SIZE << mTile.zoomLevel;
 
 		double divx, divy = 0;
 		long dx = (x - (z >> 1));
@@ -1081,7 +1081,7 @@ public class MapDatabase implements IMapDatabase {
 
 				lon = (float) ((coords[pos]) / divx - dx);
 				double sinLat = Math.sin(coords[pos + 1] * PI180);
-				lat = (float) (Tile.TILE_SIZE - (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy));
+				lat = (float) (Tile.SIZE - (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy));
 
 				if (cnt != 0) {
 					// drop small distance intermediate nodes

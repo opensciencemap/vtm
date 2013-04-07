@@ -113,8 +113,8 @@ public class TestOverlay extends BasicOverlay {
 		// TextItem ti = new TextItem(0, 0, "check one, check two", t);
 		// ti.x1 = 0;
 		// ti.y1 = 0;
-		// ti.x2 = (short) Tile.TILE_SIZE;
-		// ti.y2 = (short) Tile.TILE_SIZE;
+		// ti.x2 = (short) Tile.SIZE;
+		// ti.y2 = (short) Tile.SIZE;
 		//
 		// tl.addText(ti);
 		//

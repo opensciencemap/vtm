@@ -74,7 +74,7 @@ public final class LineLayer extends Layer {
 		float x, y, nextX, nextY;
 		float a, ux, uy, vx, vy, wx, wy;
 
-		int tmax = Tile.TILE_SIZE + 4;
+		int tmax = Tile.SIZE + 4;
 		int tmin = -4;
 
 		boolean rounded = false;

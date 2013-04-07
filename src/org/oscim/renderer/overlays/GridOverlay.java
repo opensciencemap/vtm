@@ -37,7 +37,7 @@ public class GridOverlay extends BasicOverlay {
 	public GridOverlay(MapView mapView) {
 		super(mapView);
 
-		int size = Tile.TILE_SIZE;
+		int size = Tile.SIZE;
 		float[] points = new float[64];
 		short[] index = new short[16];
 
@@ -71,7 +71,7 @@ public class GridOverlay extends BasicOverlay {
 	}
 
 	private void addLabels(int x, int y, int z) {
-		int size = Tile.TILE_SIZE;
+		int size = Tile.SIZE;
 
 		TextLayer tl = new TextLayer();
 

@@ -24,7 +24,7 @@ public class Tile {
 	/**
 	 * Width and height of a map tile in pixel.
 	 */
-	public static int TILE_SIZE = 256;
+	public static int SIZE = 256;
 
 	/**
 	 * The X number of this tile.

@@ -86,7 +86,7 @@ public class MapDatabase implements IMapDatabase {
 		mMapGenerator = mapDatabaseCallback;
 
 		// scale coordinates to tile size
-		mScaleFactor = REF_TILE_SIZE / Tile.TILE_SIZE;
+		mScaleFactor = REF_TILE_SIZE / Tile.SIZE;
 
 		File f = null;
 

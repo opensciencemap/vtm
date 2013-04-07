@@ -190,7 +190,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		// tile fill coords
 		short min = 0;
-		short max = (short) ((Tile.TILE_SIZE * COORD_SCALE));
+		short max = (short) ((Tile.SIZE * COORD_SCALE));
 		mFillCoords = new short[8];
 		mFillCoords[0] = min;
 		mFillCoords[1] = max;
@@ -318,8 +318,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 			int z = tiles[0].zoomLevel;
 
-			double curScale = Tile.TILE_SIZE * pos.scale;
-			double tileScale = Tile.TILE_SIZE * (pos.scale / (1 << z));
+			double curScale = Tile.SIZE * pos.scale;
+			double tileScale = Tile.SIZE * (pos.scale / (1 << z));
 
 			for (int i = 0; i < 8; i += 2) {
 				coords[i + 0] = (float) ((pos.x * curScale + coords[i + 0]) / tileScale);
@@ -622,8 +622,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mBufferMemoryUsage = 0;
 		mDrawTiles = null;
 
-		int numTiles = (screenWidth / (Tile.TILE_SIZE / 2) + 2)
-				* (screenHeight / (Tile.TILE_SIZE / 2) + 2);
+		int numTiles = (screenWidth / (Tile.SIZE / 2) + 2)
+				* (screenHeight / (Tile.SIZE / 2) + 2);
 
 		// Set up vertex buffer objects
 		int numVBO = (CACHE_TILES + (numTiles * 2));

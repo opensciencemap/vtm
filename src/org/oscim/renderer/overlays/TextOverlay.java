@@ -306,8 +306,8 @@ public class TextOverlay extends BasicOverlay {
 			mMapViewPosition.getMapViewProjection(coords);
 			//mMapViewPosition.getMatrix(null, null, mMVP);
 		}
-		int mw = (mMapView.getWidth() + Tile.TILE_SIZE) / 2;
-		int mh = (mMapView.getHeight() + Tile.TILE_SIZE) / 2;
+		int mw = (mMapView.getWidth() + Tile.SIZE) / 2;
+		int mh = (mMapView.getHeight() + Tile.SIZE) / 2;
 		mSquareRadius = mw * mw + mh * mh;
 
 		// mTiles might be from another zoomlevel than the current:
@@ -328,7 +328,7 @@ public class TextOverlay extends BasicOverlay {
 		float cos = (float) Math.cos(angle);
 		float sin = (float) Math.sin(angle);
 
-		int maxx = Tile.TILE_SIZE << (pos.zoomLevel - 1);
+		int maxx = Tile.SIZE << (pos.zoomLevel - 1);
 
 		Label l = null;
 
@@ -337,8 +337,8 @@ public class TextOverlay extends BasicOverlay {
 
 		mRelabelCnt++;
 
-		double tileX = (pos.x * (Tile.TILE_SIZE << pos.zoomLevel));
-		double tileY = (pos.y * (Tile.TILE_SIZE << pos.zoomLevel));
+		double tileX = (pos.x * (Tile.SIZE << pos.zoomLevel));
+		double tileY = (pos.y * (Tile.SIZE << pos.zoomLevel));
 
 		for (l = mPrevLabels; l != null;) {
 
@@ -355,8 +355,8 @@ public class TextOverlay extends BasicOverlay {
 				continue;
 			}
 
-			float dx = (float) (l.tile.tileX * Tile.TILE_SIZE - tileX * s);
-			float dy = (float) (l.tile.tileY * Tile.TILE_SIZE - tileY * s);
+			float dx = (float) (l.tile.tileX * Tile.SIZE - tileX * s);
+			float dy = (float) (l.tile.tileY * Tile.SIZE - tileY * s);
 
 			// flip around date-line
 			if (dx > maxx)
@@ -412,8 +412,8 @@ public class TextOverlay extends BasicOverlay {
 			if (t.state != JobTile.STATE_READY)
 				continue;
 
-			float dx = (float) (t.tileX * Tile.TILE_SIZE - tileX);
-			float dy = (float) (t.tileY * Tile.TILE_SIZE - tileY);
+			float dx = (float) (t.tileX * Tile.SIZE - tileX);
+			float dy = (float) (t.tileY * Tile.SIZE - tileY);
 
 			// flip around date-line
 			if (dx > maxx)
@@ -479,8 +479,8 @@ public class TextOverlay extends BasicOverlay {
 			if (t.state != JobTile.STATE_READY)
 				continue;
 
-			float dx = (float) (t.tileX * Tile.TILE_SIZE - tileX);
-			float dy = (float) (t.tileY * Tile.TILE_SIZE - tileY);
+			float dx = (float) (t.tileX * Tile.SIZE - tileX);
+			float dy = (float) (t.tileY * Tile.SIZE - tileY);
 
 			// flip around date-line
 			if (dx > maxx)
@@ -726,7 +726,7 @@ public class TextOverlay extends BasicOverlay {
 	protected void setMatrix(MapPosition curPos, Matrices m) {
 		MapPosition oPos = mMapPosition;
 
-		double tileScale = Tile.TILE_SIZE * curPos.scale;
+		double tileScale = Tile.SIZE * curPos.scale;
 		double scale = (curPos.scale / oPos.scale);
 
 		float x = (float) ((oPos.x - curPos.x) * tileScale);

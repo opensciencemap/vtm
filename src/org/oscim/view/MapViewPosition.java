@@ -37,7 +37,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 public class MapViewPosition {
 	private static final String TAG = MapViewPosition.class.getName();
 
-	// needs to fit for int: 2 * 20 * Tile.TILE_SIZE
+	// needs to fit for int: 2 * 20 * Tile.SIZE
 	public final static int MAX_ZOOMLEVEL = 20;
 	public final static int MIN_ZOOMLEVEL = 2;
 
@@ -54,7 +54,7 @@ public class MapViewPosition {
 	private double mAbsX;
 	private double mAbsY;
 
-	// mAbsScale * Tile.TILE_SIZE
+	// mAbsScale * Tile.SIZE
 	// i.e. size of tile 0/0/0 at current scale in pixel
 	private double mCurScale;
 
@@ -107,7 +107,7 @@ public class MapViewPosition {
 	}
 
 	private void updatePosition() {
-		mCurScale = mAbsScale * Tile.TILE_SIZE;
+		mCurScale = mAbsScale * Tile.SIZE;
 		mCurX = mAbsX * mCurScale;
 		mCurY = mAbsY * mCurScale;
 	}
@@ -341,8 +341,8 @@ public class MapViewPosition {
 
 		double dx = mCurX + mu[0];
 		double dy = mCurY + mu[1];
-		dx /= mAbsScale * Tile.TILE_SIZE;
-		dy /= mAbsScale * Tile.TILE_SIZE;
+		dx /= mAbsScale * Tile.SIZE;
+		dy /= mAbsScale * Tile.SIZE;
 
 		if (dx > 1) {
 			while (dx > 1)
@@ -458,7 +458,7 @@ public class MapViewPosition {
 	}
 
 	private synchronized void moveAbs(double x, double y) {
-		double f = Tile.TILE_SIZE << ABS_ZOOMLEVEL;
+		double f = Tile.SIZE << ABS_ZOOMLEVEL;
 
 		mAbsX = x / f;
 		mAbsY = y / f;
@@ -625,7 +625,7 @@ public class MapViewPosition {
 		double dy = Math.abs(MercatorProjection.latitudeToY(bbox.getMinLatitude())
 				- MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
 
-		double aspect = (Math.min(mWidth, mHeight) / Tile.TILE_SIZE);
+		double aspect = (Math.min(mWidth, mHeight) / Tile.SIZE);
 		double z = Math.min(
 				-LOG4 * Math.log(dx) + aspect,
 				-LOG4 * Math.log(dy) + aspect);
@@ -647,7 +647,7 @@ public class MapViewPosition {
 		//mTilt = 0;
 		//mRotation = 0;
 		//updateMatrix();
-		double f = Tile.TILE_SIZE << ABS_ZOOMLEVEL;
+		double f = Tile.SIZE << ABS_ZOOMLEVEL;
 		mStartX = mAbsX * f;
 		mStartY = mAbsY * f;
 
@@ -666,7 +666,7 @@ public class MapViewPosition {
 	}
 
 	public synchronized void animateTo(GeoPoint geoPoint) {
-		double f = Tile.TILE_SIZE << ABS_ZOOMLEVEL;
+		double f = Tile.SIZE << ABS_ZOOMLEVEL;
 
 		mStartX = mAbsX * f;
 		mStartY = mAbsY * f;

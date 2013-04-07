@@ -57,7 +57,7 @@ public final class MercatorProjection {
 	 */
 	public static double calculateGroundResolution(double latitude, int zoomLevel) {
 		return Math.cos(latitude * (Math.PI / 180)) * EARTH_CIRCUMFERENCE
-				/ ((long) Tile.TILE_SIZE << zoomLevel);
+				/ ((long) Tile.SIZE << zoomLevel);
 	}
 
 	/**
@@ -130,7 +130,7 @@ public final class MercatorProjection {
 	 * @return the longitude value of the pixel X coordinate.
 	 */
 	public static double pixelXToLongitude(double pixelX, int zoomLevel) {
-		return 360 * ((pixelX / ((long) Tile.TILE_SIZE << zoomLevel)) - 0.5);
+		return 360 * ((pixelX / ((long) Tile.SIZE << zoomLevel)) - 0.5);
 	}
 
 	/**
@@ -144,7 +144,7 @@ public final class MercatorProjection {
 	 * @return the pixel X coordinate of the longitude value.
 	 */
 	public static double longitudeToPixelX(double longitude, int zoomLevel) {
-		return (longitude + 180) / 360 * ((long) Tile.TILE_SIZE << zoomLevel);
+		return (longitude + 180) / 360 * ((long) Tile.SIZE << zoomLevel);
 	}
 
 	/**
@@ -158,7 +158,7 @@ public final class MercatorProjection {
 	 * @return the latitude value of the pixel Y coordinate.
 	 */
 	public static double pixelYToLatitude(double pixelY, int zoomLevel) {
-		double y = 0.5 - (pixelY / ((long) Tile.TILE_SIZE << zoomLevel));
+		double y = 0.5 - (pixelY / ((long) Tile.SIZE << zoomLevel));
 		return 90 - 360 * Math.atan(Math.exp(-y * (2 * Math.PI))) / Math.PI;
 	}
 
@@ -175,7 +175,7 @@ public final class MercatorProjection {
 	public static double latitudeToPixelY(double latitude, int zoomLevel) {
 		double sinLatitude = Math.sin(latitude * (Math.PI / 180));
 		return (0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI))
-				* ((long) Tile.TILE_SIZE << zoomLevel);
+				* ((long) Tile.SIZE << zoomLevel);
 	}
 
 	private MercatorProjection() {
