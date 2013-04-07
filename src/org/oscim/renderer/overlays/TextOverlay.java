@@ -246,6 +246,7 @@ public class TextOverlay extends BasicOverlay {
 
 	private Layers mDebugLayer;
 	private final static float[] mDebugPoints = new float[4];
+
 	//private final Matrix4 mMVP = new Matrix4();
 
 	//void addTile(MapTile t) {
@@ -313,9 +314,15 @@ public class TextOverlay extends BasicOverlay {
 		// this scales MapPosition to the zoomlevel of mTiles...
 		// TODO create a helper function in MapPosition
 		MapTile[] tiles = mTileSet.tiles;
+
+		//int zoom = tiles[0].zoomLevel;
+
 		int diff = tiles[0].zoomLevel - pos.zoomLevel;
 		float div = FastMath.pow(diff);
-		float scale = pos.scale * div;
+
+		double scale = pos.getZoomScale() * div;
+
+		//float scale = (float)(pos.absScale / (1 << zoom) );
 
 		double angle = Math.toRadians(pos.angle);
 		float cos = (float) Math.cos(angle);
@@ -330,11 +337,17 @@ public class TextOverlay extends BasicOverlay {
 
 		mRelabelCnt++;
 
+		double tileX = (pos.x * (Tile.TILE_SIZE << pos.zoomLevel));
+		double tileY = (pos.y * (Tile.TILE_SIZE << pos.zoomLevel));
+
 		for (l = mPrevLabels; l != null;) {
 
 			// transform screen coordinates to tile coordinates
 			float s = FastMath.pow(l.tile.zoomLevel - pos.zoomLevel);
-			float sscale = pos.scale / s;
+
+			//float sscale = (float)((1 << l.tile.zoomLevel) / pos.absScale);
+
+			float sscale = (float) (pos.getZoomScale() / s);
 
 			if (l.width > l.length * sscale) {
 				//Log.d(TAG, "- scale " + lp + " " + s + " " + sscale + " " + lp.length + " " + lp.width);
@@ -342,8 +355,8 @@ public class TextOverlay extends BasicOverlay {
 				continue;
 			}
 
-			float dx = (float) (l.tile.pixelX - pos.x * s);
-			float dy = (float) (l.tile.pixelY - pos.y * s);
+			float dx = (float) (l.tile.tileX * Tile.TILE_SIZE - tileX * s);
+			float dy = (float) (l.tile.tileY * Tile.TILE_SIZE - tileY * s);
 
 			// flip around date-line
 			if (dx > maxx)
@@ -399,8 +412,8 @@ public class TextOverlay extends BasicOverlay {
 			if (t.state != JobTile.STATE_READY)
 				continue;
 
-			float dx = (float) (t.pixelX - pos.x);
-			float dy = (float) (t.pixelY - pos.y);
+			float dx = (float) (t.tileX * Tile.TILE_SIZE - tileX);
+			float dy = (float) (t.tileY * Tile.TILE_SIZE - tileY);
 
 			// flip around date-line
 			if (dx > maxx)
@@ -422,7 +435,7 @@ public class TextOverlay extends BasicOverlay {
 					continue;
 
 				l.clone(ti);
-				l.move(ti, dx, dy, scale);
+				l.move(ti, dx, dy, (float) scale);
 
 				// set line endpoints relative to view to be able to
 				// check intersections with label from other tiles
@@ -448,7 +461,7 @@ public class TextOverlay extends BasicOverlay {
 					overlaps = checkOverlap(tl, l);
 
 				if (dbg != null)
-					addDebugBox(dbg, l, ti, overlaps, false, scale);
+					addDebugBox(dbg, l, ti, overlaps, false, (float) scale);
 
 				if (overlaps == 0) {
 					tl.addText(l);
@@ -466,8 +479,8 @@ public class TextOverlay extends BasicOverlay {
 			if (t.state != JobTile.STATE_READY)
 				continue;
 
-			float dx = (float) (t.pixelX - pos.x);
-			float dy = (float) (t.pixelY - pos.y);
+			float dx = (float) (t.tileX * Tile.TILE_SIZE - tileX);
+			float dy = (float) (t.tileY * Tile.TILE_SIZE - tileY);
 
 			// flip around date-line
 			if (dx > maxx)
@@ -484,7 +497,7 @@ public class TextOverlay extends BasicOverlay {
 					l = getLabel();
 
 				l.clone(ti);
-				l.move(ti, dx, dy, scale);
+				l.move(ti, dx, dy, (float) scale);
 				if (!nodeIsVisible(l))
 					continue;
 
@@ -678,7 +691,7 @@ public class TextOverlay extends BasicOverlay {
 
 	@Override
 	public synchronized void render(MapPosition pos, Matrices m) {
-		float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
+		//float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, layers.vbo.id);
 		GLState.test(false, false);
@@ -690,7 +703,10 @@ public class TextOverlay extends BasicOverlay {
 				if (l.type == Layer.POLYGON) {
 					l = PolygonRenderer.draw(pos, l, m, true, false);
 				} else {
-					float scale = pos.scale * div;
+					//float scale = pos.getScale() * div;
+
+					float scale = (float) ((1 << mMapPosition.zoomLevel) / pos.scale);
+
 					l = LineRenderer.draw(layers, l, pos, m, scale, 0);
 				}
 			}
@@ -698,7 +714,8 @@ public class TextOverlay extends BasicOverlay {
 
 		setMatrix(pos, m);
 		for (Layer l = layers.textureLayers; l != null;) {
-			float scale = (mMapPosition.scale / pos.scale) * div;
+			float scale = (float) (mMapPosition.scale / pos.scale);
+			//float scale = (mMapPosition.getScale() / pos.getScale()) * div;
 
 			l = TextureRenderer.draw(l, scale, m);
 		}
@@ -709,14 +726,22 @@ public class TextOverlay extends BasicOverlay {
 	protected void setMatrix(MapPosition curPos, Matrices m) {
 		MapPosition oPos = mMapPosition;
 
-		float div = FastMath.pow(oPos.zoomLevel - curPos.zoomLevel);
-		float x = (float) (oPos.x - curPos.x * div);
-		float y = (float) (oPos.y - curPos.y * div);
+		double tileScale = Tile.TILE_SIZE * curPos.scale;
+		double scale = (curPos.scale / oPos.scale);
 
-		float scale = (curPos.scale / mMapPosition.scale) / div;
-		float s = curPos.scale / div;
-		m.mvp.setTransScale(x * s, y * s,
-				scale / GLRenderer.COORD_SCALE);
+		float x = (float) ((oPos.x - curPos.x) * tileScale);
+		float y = (float) ((oPos.y - curPos.y) * tileScale);
+
+		m.mvp.setTransScale(x, y, (float) (scale / GLRenderer.COORD_SCALE));
+
+		//		float div = FastMath.pow(oPos.zoomLevel - curPos.zoomLevel);
+		//		float x = (float) (oPos.x - curPos.x * div);
+		//		float y = (float) (oPos.y - curPos.y * div);
+		//
+		//		float scale = (curPos.getScale() / oPos.getScale()) / div;
+		//		float s = curPos.getScale() / div;
+		//		m.mvp.setTransScale(x * s, y * s,
+		//				scale / GLRenderer.COORD_SCALE);
 
 		m.mvp.multiplyMM(m.view, m.mvp);
 	}

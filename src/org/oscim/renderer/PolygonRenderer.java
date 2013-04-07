@@ -179,6 +179,8 @@ public final class PolygonRenderer {
 
 		int start = cur;
 
+		float scale = (float)pos.getZoomScale();
+
 		Layer l = layer;
 		for (; l != null && l.type == Layer.POLYGON; l = l.next) {
 			PolygonLayer pl = (PolygonLayer) l;
@@ -204,13 +206,13 @@ public final class PolygonRenderer {
 
 			// draw up to 7 layers into stencil buffer
 			if (cur == STENCIL_BITS - 1) {
-				fillPolygons(start, cur, zoom, pos.scale);
+				fillPolygons(start, cur, zoom, scale);
 				start = cur = 0;
 			}
 		}
 
 		if (cur > 0)
-			fillPolygons(start, cur, zoom, pos.scale);
+			fillPolygons(start, cur, zoom, scale);
 
 		if (clip) {
 			if (first) {
@@ -318,7 +320,9 @@ public final class PolygonRenderer {
 			glColorMask(false, false, false, false);
 		}
 		// always pass stencil test:
-		glStencilFunc(GL_ALWAYS, 0x00, 0x00);
+		//glStencilFunc(GL_ALWAYS, 0x00, 0x00);
+		glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
+
 		// write to all bits
 		glStencilMask(0xFF);
 		// zero out area to draw to

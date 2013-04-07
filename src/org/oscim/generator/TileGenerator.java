@@ -41,7 +41,6 @@ import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.renderinstruction.Text;
 import org.oscim.utils.LineClipper;
 import org.oscim.view.DebugSettings;
-import org.oscim.view.MapView;
 
 import android.graphics.Bitmap;
 import android.graphics.Paint;
@@ -80,7 +79,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 					new float[] { 0, 0, 0, Tile.TILE_SIZE,
 							Tile.TILE_SIZE, Tile.TILE_SIZE,
 							Tile.TILE_SIZE, 0, 0, 0 },
-					new short[1]),
+					new short[] {10}),
 			new Tag[] { new Tag("debug", "box") }
 			);
 
@@ -151,15 +150,13 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		setScaleStrokeWidth(mTile.zoomLevel);
 
 		// account for area changes with latitude
-		double latitude = MercatorProjection.pixelYToLatitude(mTile.pixelY + (Tile.TILE_SIZE >> 1),
-				mTile.zoomLevel);
+		double latitude = MercatorProjection.toLatitude(mTile.y);
+
 		mLatScaleFactor = 0.5f + 0.5f * ((float) Math.sin(Math.abs(latitude) * (Math.PI / 180)));
 
 		mGroundResolution = (float) (Math.cos(latitude * (Math.PI / 180))
 				* MercatorProjection.EARTH_CIRCUMFERENCE
 				/ ((long) Tile.TILE_SIZE << mTile.zoomLevel));
-
-		Log.d(TAG, mTile + " " + mGroundResolution);
 
 		mTile.layers = new Layers();
 
@@ -188,7 +185,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 			// draw tile box
 			mWay = mDebugWay;
-			mWay.geom.index[0] = (short) (MapView.enableClosePolygons ? 8 : 10);
 			mDrawingLayer = 100 * renderLevels;
 			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
 			renderWay(ri, mDebugWay.tags);

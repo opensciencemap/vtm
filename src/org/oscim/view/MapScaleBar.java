@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.oscim.core.MapPosition;
-import org.oscim.core.MercatorProjection;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -173,17 +172,17 @@ public class MapScaleBar {
 			return true;
 		}
 
-		MapPosition currentMapPosition = mMapView.getMapPosition().getMapPosition();
+//		MapPosition mapPosition = mMapView.getMapPosition().getMapPosition();
+//
+//		if (mapPosition.zoomLevel != mMapPosition.zoomLevel) {
+//			return true;
+//		}
 
-		if (currentMapPosition.zoomLevel != mMapPosition.zoomLevel) {
-			return true;
-		}
-
-		double latitudeDiff = Math.abs(currentMapPosition.lat
-				- mMapPosition.lat);
-		if (latitudeDiff > LATITUDE_REDRAW_THRESHOLD) {
-			return true;
-		}
+//		double latitudeDiff = Math.abs(mapPosition.lat
+//				- mMapPosition.lat);
+//		if (latitudeDiff > LATITUDE_REDRAW_THRESHOLD) {
+//			return true;
+//		}
 
 		return false;
 	}
@@ -250,31 +249,31 @@ public class MapScaleBar {
 			return;
 		}
 
-		mMapPosition = mMapView.getMapPosition().getMapPosition();
-		double groundResolution = MercatorProjection.calculateGroundResolution(
-				mMapPosition.lat,
-				mMapPosition.zoomLevel);
-
-		int[] scaleBarValues;
-		if (mImperialUnits) {
-			groundResolution = groundResolution / METER_FOOT_RATIO;
-			scaleBarValues = SCALE_BAR_VALUES_IMPERIAL;
-		} else {
-			scaleBarValues = SCALE_BAR_VALUES_METRIC;
-		}
-
-		float scaleBarLength = 0;
-		int mapScaleValue = 0;
-
-		for (int i = 0; i < scaleBarValues.length; ++i) {
-			mapScaleValue = scaleBarValues[i];
-			scaleBarLength = mapScaleValue / (float) groundResolution;
-			if (scaleBarLength < (BITMAP_WIDTH - 10)) {
-				break;
-			}
-		}
-
-		redrawMapScaleBitmap(scaleBarLength, mapScaleValue);
+//		mMapPosition = mMapView.getMapPosition().getMapPosition();
+//		double groundResolution = MercatorProjection.calculateGroundResolution(
+//				mMapPosition.lat,
+//				mMapPosition.zoomLevel);
+//
+//		int[] scaleBarValues;
+//		if (mImperialUnits) {
+//			groundResolution = groundResolution / METER_FOOT_RATIO;
+//			scaleBarValues = SCALE_BAR_VALUES_IMPERIAL;
+//		} else {
+//			scaleBarValues = SCALE_BAR_VALUES_METRIC;
+//		}
+//
+//		float scaleBarLength = 0;
+//		int mapScaleValue = 0;
+//
+//		for (int i = 0; i < scaleBarValues.length; ++i) {
+//			mapScaleValue = scaleBarValues[i];
+//			scaleBarLength = mapScaleValue / (float) groundResolution;
+//			if (scaleBarLength < (BITMAP_WIDTH - 10)) {
+//				break;
+//			}
+//		}
+//
+//		redrawMapScaleBitmap(scaleBarLength, mapScaleValue);
 		mRedrawNeeded = false;
 	}
 }

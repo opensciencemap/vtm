@@ -24,6 +24,9 @@ import org.oscim.renderer.layer.TextItem;
  */
 public final class MapTile extends JobTile {
 
+	public double x;
+	public double y;
+
 	/**
 	 * Tile data set by TileGenerator.
 	 */
@@ -73,6 +76,8 @@ public final class MapTile extends JobTile {
 
 	MapTile(int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
+		this.x = (double)tileX / (1 << zoomLevel);
+		this.y = (double)tileY / (1 << zoomLevel);
 	}
 
 	/**

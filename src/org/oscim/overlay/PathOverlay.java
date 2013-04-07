@@ -22,6 +22,7 @@ import java.util.List;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
@@ -108,12 +109,6 @@ public class PathOverlay extends Overlay {
 
 			int size = mSize;
 
-			// keep position to render relative to current state
-			mMapPosition.copy(curPos);
-
-			// items are placed relative to scale == 1
-			mMapPosition.scale = 1;
-
 			// layers.clear();
 			LineLayer ll = (LineLayer) layers.getLayer(1, Layer.LINE);
 			// reset verticesCnt to reuse layer
@@ -124,14 +119,21 @@ public class PathOverlay extends Overlay {
 			int x, y, px = 0, py = 0;
 			int i = 0;
 
-			int diff = MAX_ZOOM - mMapPosition.zoomLevel;
-			int mx = (int) mMapPosition.x;
-			int my = (int) mMapPosition.y;
+			//int mx = (int) mMapPosition.x;
+			//int my = (int) mMapPosition.y;
+			//int z = curPos.zoomLevel;
+			int z = FastMath.log2((int) curPos.scale);
+			int diff = MAX_ZOOM - z;
+			int mx = (int) (curPos.x * (Tile.TILE_SIZE << z));
+			int my = (int) (curPos.y * (Tile.TILE_SIZE << z));
 
 			for (int j = 0; j < size; j += 2) {
 				// TODO translate mapPosition and do this after clipping
 				x = (mPreprojected[j + 0] >> diff) - mx;
 				y = (mPreprojected[j + 1] >> diff) - my;
+
+				//x = (mPreprojected[j + 0]) - mx;
+				//y = (mPreprojected[j + 1]) - my;
 
 				// TODO use line clipping, this doesnt work with 'GreatCircle'
 				// TODO clip to view bounding box
@@ -156,6 +158,12 @@ public class PathOverlay extends Overlay {
 
 			mIndex[0] = (short) i;
 			ll.addLine(projected, mIndex, false);
+
+			// keep position to render relative to current state
+			mMapPosition.copy(curPos);
+
+			// items are placed relative to scale 1
+			mMapPosition.scale = 1 << z;
 
 			newData = true;
 

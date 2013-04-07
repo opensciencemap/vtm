@@ -19,6 +19,7 @@ import static android.opengl.GLES20.glStencilMask;
 import static org.oscim.generator.JobTile.STATE_READY;
 
 import org.oscim.core.MapPosition;
+import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
@@ -68,21 +69,25 @@ public class TileRenderer {
 				drawTile(t, pos);
 		}
 
+		 double scale = pos.getZoomScale();
+
 		// Draw parent or children as proxy for visibile tiles that dont
 		// have data yet. Proxies are clipped to the region where nothing
 		// was drawn to depth buffer.
 		// TODO draw proxies for placeholder
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
-			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null))
-				drawProxyTile(t, pos, true);
+			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null)){
+				boolean preferParent = (scale > 1.5) || (pos.zoomLevel - t.zoomLevel < 0);
+				drawProxyTile(t, pos, true, preferParent);
+			}
 		}
 
 		// Draw grandparents
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null))
-				drawProxyTile(t, pos, false);
+				drawProxyTile(t, pos, false, false);
 		}
 
 		// make sure stencil buffer write is disabled
@@ -116,13 +121,18 @@ public class TileRenderer {
 		GLES20.glBindBuffer(GL_ARRAY_BUFFER, t.layers.vbo.id);
 
 		// place tile relative to map position
-		float div = FastMath.pow(tile.zoomLevel - pos.zoomLevel);
-		float x = (float) (tile.pixelX - pos.x * div);
-		float y = (float) (tile.pixelY - pos.y * div);
-		float scale = pos.scale / div;
+		int z = tile.zoomLevel;
+
+		float div = FastMath.pow(z - pos.zoomLevel);
+
+		double curScale = Tile.TILE_SIZE * pos.scale;
+		double scale = (pos.scale / (1 << z));
+
+		float x = (float) ((tile.x - pos.x) * curScale);
+		float y = (float) ((tile.y - pos.y) * curScale);
 
 		Matrices m = mMatrices;
-		m.mvp.setTransScale(x * scale, y * scale, scale / GLRenderer.COORD_SCALE);
+		m.mvp.setTransScale(x, y, (float)(scale / GLRenderer.COORD_SCALE));
 
 		m.mvp.multiplyMM(mProjMatrix, m.mvp);
 
@@ -168,7 +178,8 @@ public class TileRenderer {
 		}
 
 		// clear clip-region and could also draw 'fade-effect'
-		PolygonRenderer.drawOver(m, true, 0x22000000);
+		//PolygonRenderer.drawOver(m, true, 0x22000000);
+		PolygonRenderer.drawOver(m, false, 0);
 	}
 
 	private static int drawProxyChild(MapTile tile, MapPosition pos) {
@@ -187,12 +198,14 @@ public class TileRenderer {
 		return drawn;
 	}
 
-	private static void drawProxyTile(MapTile tile, MapPosition pos, boolean parent) {
-		int diff = pos.zoomLevel - tile.zoomLevel;
+	// just FIXME!
+	private static void drawProxyTile(MapTile tile, MapPosition pos, boolean parent, boolean preferParent) {
+		//int diff = pos.zoomLevel - tile.zoomLevel;
 		QuadTree r = tile.rel;
 		MapTile proxy;
 
-		if (pos.scale > 1.5f || diff < 0) {
+
+		if (!preferParent) {
 			// prefer drawing children
 			if (drawProxyChild(tile, pos) == 4)
 				return;

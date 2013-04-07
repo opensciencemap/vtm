@@ -93,7 +93,6 @@ public class GridOverlay extends BasicOverlay {
 			}
 		}
 		tl.prepare();
-
 		layers.textureLayers = tl;
 	}
 
@@ -101,30 +100,28 @@ public class GridOverlay extends BasicOverlay {
 	private int mCurY = -1;
 	private int mCurZ = -1;
 
-	private boolean finished;
-
-
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
 			boolean tilesChanged, Matrices matrices) {
 
-		mMapPosition.copy(curPos);
+		int z = 1 << curPos.zoomLevel;
 
-		// fix map position to tile coordinates
-		float size = Tile.TILE_SIZE;
-		int x = (int) (mMapPosition.x / size);
-		int y = (int) (mMapPosition.y / size);
-		mMapPosition.x = x * size;
-		mMapPosition.y = y * size;
-
-		if (!finished)
-			mMapPosition.scale = 1;
+		int x = (int) (curPos.x * z);
+		int y = (int) (curPos.y * z);
 
 		// update layers when map moved by at least one tile
-		if (x != mCurX || y != mCurY || mMapPosition.zoomLevel != mCurZ) {
+		if (x != mCurX || y != mCurY || z != mCurZ) {
+
+			MapPosition pos = mMapPosition;
+
+			pos.copy(curPos);
+			pos.x = (double) x / z;
+			pos.y = (double) y / z;
+			pos.scale = z;
+
 			mCurX = x;
 			mCurY = y;
-			mCurZ = mMapPosition.zoomLevel;
+			mCurZ = z;
 
 			layers.clear();
 
@@ -134,9 +131,7 @@ public class GridOverlay extends BasicOverlay {
 			ll.addLine(mPoints, mIndex, false);
 
 			addLabels(x, y, mCurZ);
-
 			newData = true;
-			finished = false;
 		}
 	}
 }

@@ -35,7 +35,6 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.theme.RenderTheme;
-import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
 import org.oscim.view.MapView;
@@ -317,31 +316,21 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			for (int i = 0; i < mDrawTiles.cnt; i++)
 				tiles[i].isVisible = false;
 
-			// relative zoom-level, 'tiles' could not have been updated after
-			// zoom-level changed.
-			float div = FastMath.pow(pos.zoomLevel - tiles[0].zoomLevel);
+			int z = tiles[0].zoomLevel;
 
-			// draw additional tiles on max zoom-level:
-			// to make sure buildings that are half visible but
-			// the not ground tile are still drawn.
-			float scale = pos.scale;
-			if (scale > 2)
-				scale = 2;
+			double curScale = Tile.TILE_SIZE * pos.scale;
+			double tileScale = Tile.TILE_SIZE * (pos.scale / (1 << z));
 
-			// transform screen coordinates to tile coordinates
-			float tileScale = scale * div * Tile.TILE_SIZE;
-			double px = pos.x * scale;
-			double py = pos.y * scale;
 			for (int i = 0; i < 8; i += 2) {
-				coords[i + 0] = (float) (px + coords[i + 0]) / tileScale;
-				coords[i + 1] = (float) (py + coords[i + 1]) / tileScale;
+				coords[i + 0] = (float) ((pos.x * curScale + coords[i + 0]) / tileScale);
+				coords[i + 1] = (float) ((pos.y * curScale + coords[i + 1]) / tileScale);
 			}
 
 			// count placeholder tiles
 			mNumTileHolder = 0;
 
 			// check visibile tiles
-			mScanBox.scan(coords, tiles[0].zoomLevel);
+			mScanBox.scan(coords, z);
 		}
 	}
 
@@ -451,21 +440,23 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			return;
 
 		boolean tilesChanged = false;
+		boolean positionChanged = false;
+
 		// check if the tiles have changed...
 		if (serial != mDrawTiles.serial) {
-			mMapPosition.zoomLevel = -1;
 			tilesChanged = true;
+			// FIXME needed?
+			positionChanged = true;
 		}
 
 		// get current MapPosition, set mTileCoords (mapping of screen to model
 		// coordinates)
 		MapPosition pos = mMapPosition;
-		boolean positionChanged;
 
 		synchronized (mMapViewPosition) {
 			mMapViewPosition.updateAnimation();
 
-			positionChanged = mMapViewPosition.getMapPosition(pos);
+			positionChanged |= mMapViewPosition.getMapPosition(pos);
 
 			if (positionChanged)
 				mMapViewPosition.getMapViewProjection(mTileCoords);

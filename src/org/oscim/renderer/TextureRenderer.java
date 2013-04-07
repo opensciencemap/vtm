@@ -122,7 +122,7 @@ public final class TextureRenderer {
 			+ "       pos = u_proj * (u_mv * vec4(vertex.xy + dir * u_scale, 0.0, 1.0));"
 			+ "  } else {" // place as billboard
 			+ "    vec4 center = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-			+ "    pos = u_proj * (center + vec4(dir * (coord_scale * u_swidth), 0.1, 0.0));"
+			+ "    pos = u_proj * (center + vec4(dir * (coord_scale * u_swidth), 0.0, 0.0));"
 			+ "  }"
 			+ "  gl_Position = pos;"
 			+ "  tex_c = tex_coord * div;"

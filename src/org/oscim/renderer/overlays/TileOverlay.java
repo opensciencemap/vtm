@@ -20,6 +20,7 @@ import java.nio.FloatBuffer;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.PointD;
+import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
@@ -38,13 +39,15 @@ import android.opengl.GLES20;
 
 public class TileOverlay extends RenderOverlay {
 
+	private final static String TAG = TileOverlay.class.getName();
+
 	private float mDownX = 400;
 	private float mDownY = 400;
 
 	private float mOverlayOffsetX;
 	private float mOverlayOffsetY;
 
-	private final float mOverlayScale = 1.5f;
+	private final float mOverlayScale = 1.8f;
 
 	private final PointD mScreenPoint = new PointD();
 
@@ -54,6 +57,7 @@ public class TileOverlay extends RenderOverlay {
 	private float mScreenHeight;
 
 	private final Matrix4 mProjMatrix = new Matrix4();
+	private final Matrix4 mViewProjMatrix = new Matrix4();
 
 	public TileOverlay(MapView mapView) {
 		super(mapView);
@@ -143,13 +147,35 @@ public class TileOverlay extends RenderOverlay {
 		// and line width...
 		MapPosition scaledPos = mMapPosition;
 		scaledPos.copy(pos);
-		scaledPos.scale *= mOverlayScale;
+
+		//FIXME scaledPos.scale *= mOverlayScale;
 
 		// get translation vector from map at screen point to center
 		// relative to current scale
 		mMapView.getMapViewPosition().getScreenPointOnMap(
 				mOverlayOffsetX, mOverlayOffsetY,
-				mMapPosition.absScale, mScreenPoint);
+				mMapPosition.scale, mScreenPoint);
+
+		mViewProjMatrix.setTranslation(
+				-(float)mScreenPoint.x,
+				-(float)mScreenPoint.y, 0);
+
+		// rotate around center
+		tmpMatrix.setRotation(pos.angle, 0, 0, 1);
+		mViewProjMatrix.multiplyMM(tmpMatrix, mViewProjMatrix);
+
+		// translate to overlay circle in screen coordinates
+		tmpMatrix.setTransScale(
+				(mOverlayOffsetX - mScreenWidth / 2),
+				(mOverlayOffsetY - mScreenHeight / 2),
+				mOverlayScale);
+		mViewProjMatrix.multiplyMM(tmpMatrix, mViewProjMatrix);
+
+		// normalize coordinates, i guess thats how it's called
+		tmpMatrix.setScale(ratio, ratio, ratio);
+		mViewProjMatrix.multiplyMM(tmpMatrix, mViewProjMatrix);
+
+		mViewProjMatrix.multiplyMM(mProjMatrix, mViewProjMatrix);
 
 		// load texture for line caps
 		LineRenderer.beginLines();
@@ -182,34 +208,18 @@ public class TileOverlay extends RenderOverlay {
 
 		// place tile relative to map position
 		float div = FastMath.pow(tile.zoomLevel - pos.zoomLevel);
-		float x = (float) (tile.pixelX - pos.x * div);
-		float y = (float) (tile.pixelY - pos.y * div);
-		float scale = pos.scale / div;
+		int z = tile.zoomLevel;
+		double curScale = Tile.TILE_SIZE * pos.scale;
 
-		// move screenPoint to center
-		x = (float) (x * scale - mScreenPoint.x);
-		y = (float) (y * scale - mScreenPoint.y);
+		double scale = pos.scale / (1 << z);
 
-		m.mvp.setTransScale(x, y, scale / GLRenderer.COORD_SCALE);
-		//m.mvp.multiplyMM(m.viewproj, m.mvp);
+		double x = (tile.x - pos.x) * curScale;
+		double y = (tile.y - pos.y) * curScale;
 
-		// rotate around center
-		tmpMatrix.setRotation(pos.angle, 0, 0, 1);
-		m.mvp.multiplyMM(tmpMatrix, m.mvp);
+		m.mvp.setTransScale((float) x, (float) y,
+				(float) (scale / GLRenderer.COORD_SCALE));
 
-		// translate to overlay circle in screen coordinates
-		tmpMatrix.setTransScale(
-				(mOverlayOffsetX - mScreenWidth / 2),
-				(mOverlayOffsetY - mScreenHeight / 2),
-				mOverlayScale);
-		m.mvp.multiplyMM(tmpMatrix, m.mvp);
-
-		// normalize coordinates, i guess thats how it's called
-		float ratio = 1 / mScreenWidth;
-		tmpMatrix.setScale(ratio, ratio, ratio);
-		m.mvp.multiplyMM(tmpMatrix, m.mvp);
-
-		m.mvp.multiplyMM(mProjMatrix, m.mvp);
+		m.mvp.multiplyMM(mViewProjMatrix, m.mvp);
 
 		// set depth offset (used for clipping to tile boundaries)
 		GLES20.glPolygonOffset(1, mDrawCnt++);
@@ -320,7 +330,6 @@ public class TileOverlay extends RenderOverlay {
 					// dont write pixel (also discards writing to depth buffer)
 					+ "    discard;"
 					+ "}";
-
 
 	public void setPointer(float x, float y) {
 		mDownX = x;

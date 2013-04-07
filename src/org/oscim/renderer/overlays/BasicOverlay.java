@@ -46,35 +46,36 @@ public abstract class BasicOverlay extends RenderOverlay {
 	 * use synchronized when modifying layers
 	 */
 	@Override
-	public synchronized void render(MapPosition pos, Matrices m) {
+	public synchronized void render(MapPosition curPos, Matrices m) {
+		MapPosition pos = mMapPosition;
 
-		float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
+		float div = FastMath.pow(pos.zoomLevel - curPos.zoomLevel);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, layers.vbo.id);
 		GLState.test(false, false);
 
 		if (layers.baseLayers != null) {
-			setMatrix(pos, m, true);
+			setMatrix(curPos, m, true);
 
 			for (Layer l = layers.baseLayers; l != null;) {
 				switch (l.type) {
 					case Layer.POLYGON:
-						l = PolygonRenderer.draw(pos, l, m, true, false);
+						l = PolygonRenderer.draw(curPos, l, m, true, false);
 						break;
 					case Layer.LINE:
-						l = LineRenderer.draw(layers, l, pos, m, div, 0);
+						l = LineRenderer.draw(layers, l, curPos, m, div, 0);
 						break;
 					case Layer.TEXLINE:
-						l = LineTexRenderer.draw(layers, l, pos, m, div);
+						l = LineTexRenderer.draw(layers, l, curPos, m, div);
 						break;
 				}
 			}
 		}
 
 		if (layers.textureLayers != null) {
-			setMatrix(pos, m, false);
+			setMatrix(curPos, m, false);
 
-			float scale = (mMapPosition.scale / pos.scale) * div;
+			float scale = (float)(pos.scale / curPos.scale);
 
 			for (Layer l = layers.textureLayers; l != null;) {
 				l = TextureRenderer.draw(l, scale, m);

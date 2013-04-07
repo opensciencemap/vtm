@@ -41,6 +41,8 @@ public class BuildingOverlay extends Overlay {
 	private final float mFadeTime = 300;
 	private float mAlpha = 1;
 
+	private final static int MIN_ZOOM = 17;
+
 	@Override
 	public boolean onTouchEvent(MotionEvent e) {
 		int action = e.getAction() & MotionEvent.ACTION_MASK;
@@ -48,7 +50,7 @@ public class BuildingOverlay extends Overlay {
 			multi++;
 		} else if (action == MotionEvent.ACTION_POINTER_UP) {
 			multi--;
-			if (mPrevZoom != 17 && mAlpha > 0) {
+			if (!mActive && mAlpha > 0) {
 				// finish hiding
 				//Log.d(TAG, "add multi hide timer " + mAlpha);
 				addShowTimer(mFadeTime * mAlpha, false);
@@ -65,19 +67,20 @@ public class BuildingOverlay extends Overlay {
 		return false;
 	}
 
-	private int mPrevZoom = 0;
+	private boolean mActive = false;
 
 	@Override
 	public void onUpdate(MapPosition mapPosition, boolean changed) {
-		int z = mapPosition.zoomLevel;
-		if (z == mPrevZoom)
+		boolean show = mapPosition.scale >= (1 << MIN_ZOOM);
+
+		if (show && mActive)
 			return;
 
-		if (z == 17) {
+		if (show) {
 			// start showing
 			//Log.d(TAG, "add show timer " + mAlpha);
 			addShowTimer(mFadeTime * (1 - mAlpha), true);
-		} else if (mPrevZoom == 17) {
+		} else if (mActive) {
 			// indicate hiding
 			if (multi > 0) {
 				//Log.d(TAG, "add fade timer " + mAlpha);
@@ -87,8 +90,7 @@ public class BuildingOverlay extends Overlay {
 				addShowTimer(mFadeTime * mAlpha, false);
 			}
 		}
-
-		mPrevZoom = z;
+		mActive = show;
 	}
 
 	void fade(float duration, long tick, boolean dir, float max) {

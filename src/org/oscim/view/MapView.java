@@ -39,7 +39,6 @@ import org.oscim.generator.MapWorker;
 import org.oscim.generator.TileGenerator;
 import org.oscim.overlay.BuildingOverlay;
 import org.oscim.overlay.LabelingOverlay;
-import org.oscim.overlay.MapLensOverlay;
 import org.oscim.overlay.Overlay;
 import org.oscim.overlay.OverlayManager;
 import org.oscim.renderer.GLRenderer;
@@ -175,11 +174,6 @@ public class MapView extends RelativeLayout {
 
 		mapActivity.registerMapView(this);
 
-		if (!mMapViewPosition.isValid()) {
-			Log.d(TAG, "set default start position");
-			setMapCenter(new MapPosition(new GeoPoint(0, 0), (byte) 2, 1));
-		}
-
 		LayoutParams params = new LayoutParams(
 				android.view.ViewGroup.LayoutParams.MATCH_PARENT,
 				android.view.ViewGroup.LayoutParams.MATCH_PARENT);
@@ -191,20 +185,63 @@ public class MapView extends RelativeLayout {
 		mRotationEnabled = true;
 
 		//mOverlayManager.add(new GenericOverlay(this, new GridOverlay(this)));
-		mOverlayManager.add(new BuildingOverlay(this));
 
+		mOverlayManager.add(new BuildingOverlay(this));
 		mOverlayManager.add(new LabelingOverlay(this));
 
-
 		//mOverlayManager.add(new GenericOverlay(this, new TileOverlay(this)));
-		mOverlayManager.add(new MapLensOverlay(this));
-
 		//mOverlayManager.add(new GenericOverlay(this, new CustomOverlay(this)));
+		//mOverlayManager.add(new MapLensOverlay(this));
 
-		//		if (testRegionZoom)
-		//			mRegionLookup = new RegionLookup(this);
 		clearMap();
+	}
 
+	void destroy() {
+		mTileManager.destroy();
+
+		for (MapWorker mapWorker : mMapWorkers) {
+			mapWorker.pause();
+			mapWorker.interrupt();
+
+			mapWorker.getTileGenerator().getMapDatabase().close();
+
+			try {
+				mapWorker.join(10000);
+			} catch (InterruptedException e) {
+				// restore the interrupted status
+				Thread.currentThread().interrupt();
+			}
+
+		}
+	}
+
+	private boolean mPausing = false;
+
+	void onPause() {
+		mPausing = true;
+
+		Log.d(TAG, "onPause");
+		mJobQueue.clear();
+		mapWorkersPause(true);
+
+		if (this.mCompassEnabled)
+			mCompass.disable();
+
+	}
+
+	void onResume() {
+		Log.d(TAG, "onResume");
+		mapWorkersProceed();
+
+		if (this.mCompassEnabled)
+			mCompass.enable();
+
+		mPausing = false;
+	}
+
+	public void onStop() {
+		Log.d(TAG, "onStop");
+		//mTileManager.destroy();
 	}
 
 	@Override
@@ -241,13 +278,6 @@ public class MapView extends RelativeLayout {
 	public void render() {
 		if (!MapView.debugFrameTime)
 			mGLView.requestRender();
-	}
-
-	/**
-	 * @return the current position and zoom level of this MapView.
-	 */
-	public MapViewPosition getMapPosition() {
-		return mMapViewPosition;
 	}
 
 	public void enableRotation(boolean enable) {
@@ -356,10 +386,19 @@ public class MapView extends RelativeLayout {
 		if (startPos == null)
 			startPos = new GeoPoint(0, 0);
 
-		if (mapInfo.startZoomLevel != null)
-			return new MapPosition(startPos, (mapInfo.startZoomLevel).byteValue(), 1);
+		MapPosition mapPosition = new MapPosition();
+		mapPosition.setPosition(startPos);
 
-		return new MapPosition(startPos, (byte) 12, 1);
+		if (mapInfo.startZoomLevel == null)
+			mapPosition.setZoomLevel(12);
+		else
+			mapPosition.setZoomLevel((mapInfo.startZoomLevel).byteValue());
+
+		return mapPosition;
+	}
+
+	public void setMapPosition(MapPosition mapPosition) {
+		mMapViewPosition.setMapPosition(mapPosition);
 	}
 
 	/**
@@ -505,95 +544,6 @@ public class MapView extends RelativeLayout {
 		return false;
 	}
 
-	void destroy() {
-		for (MapWorker mapWorker : mMapWorkers) {
-			mapWorker.pause();
-			mapWorker.interrupt();
-
-			mapWorker.getTileGenerator().getMapDatabase().close();
-
-			try {
-				mapWorker.join(10000);
-			} catch (InterruptedException e) {
-				// restore the interrupted status
-				Thread.currentThread().interrupt();
-			}
-
-		}
-	}
-
-	private boolean mPausing = false;
-
-	void onPause() {
-		mPausing = true;
-
-		Log.d(TAG, "onPause");
-		mJobQueue.clear();
-		mapWorkersPause(true);
-
-		if (this.mCompassEnabled)
-			mCompass.disable();
-
-	}
-
-	void onResume() {
-		Log.d(TAG, "onResume");
-		mapWorkersProceed();
-
-		if (this.mCompassEnabled)
-			mCompass.enable();
-
-		mPausing = false;
-	}
-
-	public void onStop() {
-		Log.d(TAG, "onStop");
-		mTileManager.destroy();
-	}
-
-	/**
-	 * @return the maximum possible zoom level.
-	 */
-	byte getMaximumPossibleZoomLevel() {
-		return (byte) MapViewPosition.MAX_ZOOMLEVEL;
-		// Math.min(mMapZoomControls.getZoomLevelMax(),
-		// mMapGenerator.getZoomLevelMax());
-	}
-
-	/**
-	 * @return true if the current center position of this MapView is valid,
-	 *         false otherwise.
-	 */
-	boolean hasValidCenter() {
-		MapInfo mapInfo;
-
-		if (!mMapViewPosition.isValid())
-			return false;
-
-		if ((mapInfo = mMapDatabase.getMapInfo()) == null)
-			return false;
-
-		if (!mapInfo.boundingBox.contains(getMapPosition().getMapCenter()))
-			return false;
-
-		return true;
-	}
-
-	/**
-	 * Sets the center and zoom level of this MapView and triggers a redraw.
-	 *
-	 * @param mapPosition
-	 *            the new map position of this MapView.
-	 */
-	public void setMapCenter(MapPosition mapPosition) {
-		Log.d(TAG, "setMapCenter "
-				+ " lat: " + mapPosition.lat
-				+ " lon: " + mapPosition.lon);
-
-		mMapViewPosition.setMapCenter(mapPosition);
-		redrawMap(true);
-	}
-
 	/**
 	 * Sets the center of the MapView and triggers a redraw.
 	 *
@@ -607,7 +557,7 @@ public class MapView extends RelativeLayout {
 	}
 
 	/**
-	 * @return MapPosition
+	 * @return MapViewPosition
 	 */
 	public MapViewPosition getMapViewPosition() {
 		return mMapViewPosition;
@@ -671,11 +621,10 @@ public class MapView extends RelativeLayout {
 		return mTileManager;
 	}
 
+	/**
+	 * @return estimated visible axis aligned bounding box
+	 */
 	public BoundingBox getBoundingBox() {
 		return mMapViewPosition.getViewBox();
-	}
-
-	public GeoPoint getCenter() {
-		return new GeoPoint(mMapPosition.lat, mMapPosition.lon);
 	}
 }
