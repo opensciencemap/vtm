@@ -23,7 +23,6 @@ import static android.opengl.GLES20.glUniform1f;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
 import org.oscim.core.MapPosition;
-import org.oscim.generator.TileGenerator;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
@@ -130,15 +129,17 @@ public final class LineRenderer {
 		//glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 		m.mvp.setAsUniform(hLineMatrix[mode]);
 
+		//int zoom = FastMath.log2((int) pos.absScale);
 		int zoom = pos.zoomLevel;
-		float scale = pos.scale;
+
+		double scale = pos.getZoomScale();
 
 		// Line scale factor for non fixed lines: Within a zoom-
 		// level lines would be scaled by the factor 2 by view-matrix.
 		// Though lines should only scale by sqrt(2). This is achieved
 		// by inverting scaling of extrusion vector with: width/sqrt(s).
 		// within one zoom-level: 1 <= s <= 2
-		float s = scale / div;
+		double s = scale / div;
 		float lineScale = (float) Math.sqrt(s * 2 / 2.2);
 
 		// scale factor to map one pixel on tile to one pixel on screen:
@@ -146,7 +147,7 @@ public final class LineRenderer {
 		float pixel = 0;
 
 		if (mode == 1)
-			pixel = 1.5f / s;
+			pixel = (float) (1.5 / s);
 
 		glUniform1f(uLineScale, pixel);
 		int lineMode = 0;
@@ -154,7 +155,7 @@ public final class LineRenderer {
 
 		boolean blur = false;
 		// dont increase scale when max is reached
-		boolean strokeMaxZoom = zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL;
+		//boolean strokeMaxZoom = zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL;
 
 		Layer l = curLayer;
 		for (; l != null && l.type == Layer.LINE; l = l.next) {
@@ -167,7 +168,7 @@ public final class LineRenderer {
 			} else if (line.fade > zoom) {
 				continue;
 			} else {
-				float alpha = (scale > 1.2f ? scale : 1.2f) - 1f;
+				float alpha = (float) (scale > 1.2 ? scale : 1.2) - 1;
 				GlUtils.setColor(uLineColor, line.color, alpha);
 			}
 
@@ -180,10 +181,10 @@ public final class LineRenderer {
 				// draw linelayers references by this outline
 				for (LineLayer o = ll.outlines; o != null; o = o.outlines) {
 
-					if (o.line.fixed || strokeMaxZoom) {
-						width = (ll.width + o.width) / s;
+					if (o.line.fixed /* || strokeMaxZoom */) {
+						width = (float) ((ll.width + o.width) / s);
 					} else {
-						width = ll.width / s + o.width / lineScale;
+						width = (float) (ll.width / s + o.width / lineScale);
 
 						// check min-size for outline
 						if (o.line.min > 0 && o.width * lineScale < o.line.min * 2)
@@ -193,7 +194,7 @@ public final class LineRenderer {
 					glUniform1f(uLineWidth, width * COORD_SCALE_BY_DIR_SCALE);
 
 					if (line.blur != 0) {
-						glUniform1f(uLineScale, 1f - (line.blur / s));
+						glUniform1f(uLineScale, (float) (1 - (line.blur / s)));
 						blur = true;
 					} else if (mode == 1) {
 						glUniform1f(uLineScale, pixel / width);
@@ -212,10 +213,10 @@ public final class LineRenderer {
 				}
 			} else {
 
-				if (line.fixed || strokeMaxZoom) {
+				if (line.fixed /* || strokeMaxZoom */) {
 					// invert scaling of extrusion vectors so that line
 					// width stays the same.
-					width = ll.width / s;
+					width = (float) (ll.width / s);
 				} else {
 					// reduce linear scaling of extrusion vectors so that
 					// line width increases by sqrt(2.2).

@@ -130,7 +130,7 @@ public class MapDatabase implements IMapDatabase {
 		mCurTagCnt = 0;
 
 		// scale coordinates to tile size
-		mScaleFactor = REF_TILE_SIZE / Tile.TILE_SIZE;
+		mScaleFactor = REF_TILE_SIZE / Tile.SIZE;
 
 		File f = null;
 
@@ -532,7 +532,7 @@ public class MapDatabase implements IMapDatabase {
 			lastX = lon + lastX;
 			lastY = lat + lastY;
 			coords[cnt++] = lastX / scale;
-			coords[cnt++] = Tile.TILE_SIZE - lastY / scale;
+			coords[cnt++] = Tile.SIZE - lastY / scale;
 		}
 
 		mGeom.index[0] = (short)numNodes;
@@ -722,7 +722,7 @@ public class MapDatabase implements IMapDatabase {
 			} else {
 				y = ((result >>> 1) ^ -(result & 1));
 				lastY = lastY + y;
-				coords[cnt++] = Tile.TILE_SIZE - lastY / scale;
+				coords[cnt++] = Tile.SIZE - lastY / scale;
 				even = true;
 			}
 		}

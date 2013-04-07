@@ -33,7 +33,7 @@ public final class PolygonLayer extends Layer {
 	}
 
 	public void addPolygon(float[] points, short[] index) {
-		short center = (short) ((Tile.TILE_SIZE >> 1) * S);
+		short center = (short) ((Tile.SIZE >> 1) * S);
 
 		VertexPoolItem si = curItem;
 		short[] v = si.vertices;

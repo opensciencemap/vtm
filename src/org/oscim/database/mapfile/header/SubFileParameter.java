@@ -14,7 +14,7 @@
  */
 package org.oscim.database.mapfile.header;
 
-import org.oscim.core.MercatorProjection;
+import org.oscim.database.mapfile.Projection;
 
 /**
  * Holds all parameters of a sub-file.
@@ -110,6 +110,7 @@ public class SubFileParameter {
 	 */
 	private final int hashCodeValue;
 
+
 	SubFileParameter(SubFileParameterBuilder subFileParameterBuilder) {
 		this.startAddress = subFileParameterBuilder.startAddress;
 		this.indexStartAddress = subFileParameterBuilder.indexStartAddress;
@@ -120,16 +121,16 @@ public class SubFileParameter {
 		this.hashCodeValue = calculateHashCode();
 
 		// calculate the XY numbers of the boundary tiles in this sub-file
-		this.boundaryTileBottom = MercatorProjection.latitudeToTileY(
+		this.boundaryTileBottom = Projection.latitudeToTileY(
 				subFileParameterBuilder.boundingBox.minLatitudeE6
 						/ COORDINATES_DIVISOR, this.baseZoomLevel);
-		this.boundaryTileLeft = MercatorProjection.longitudeToTileX(
+		this.boundaryTileLeft = Projection.longitudeToTileX(
 				subFileParameterBuilder.boundingBox.minLongitudeE6
 						/ COORDINATES_DIVISOR, this.baseZoomLevel);
-		this.boundaryTileTop = MercatorProjection.latitudeToTileY(
+		this.boundaryTileTop = Projection.latitudeToTileY(
 				subFileParameterBuilder.boundingBox.maxLatitudeE6
 						/ COORDINATES_DIVISOR, this.baseZoomLevel);
-		this.boundaryTileRight = MercatorProjection.longitudeToTileX(
+		this.boundaryTileRight = Projection.longitudeToTileX(
 				subFileParameterBuilder.boundingBox.maxLongitudeE6
 						/ COORDINATES_DIVISOR, this.baseZoomLevel);
 

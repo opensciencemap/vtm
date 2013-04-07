@@ -31,10 +31,10 @@ public final class WayDecorator {
 
 		// calculate the way name length plus some margin of safety
 		float wayNameWidth = -1;
-		float minWidth = Tile.TILE_SIZE / 10;
+		float minWidth = Tile.SIZE / 10;
 
 		final int min = 0;
-		final int max = Tile.TILE_SIZE;
+		final int max = Tile.SIZE;
 
 		// find way segments long enough to draw the way name on them
 		for (int i = pos; i < pos + len - 2; i += 2) {

@@ -29,7 +29,7 @@ public class Compass {
 				mAngle = event.values[0];
 
 				if (mMapView != null) {
-					mMapView.getMapPosition().setRotation(-mAngle);
+					mMapView.getMapViewPosition().setRotation(-mAngle);
 					mMapView.redrawMap(true);
 				}
 			}
@@ -43,8 +43,8 @@ public class Compass {
 	/* package */float mAngle = 0;
 	/* package */MapView mMapView;
 
-	private SensorManager mSensorManager;
-	private Sensor mSensor;
+	private final SensorManager mSensorManager;
+	private final Sensor mSensor;
 
 	public Compass(MapActivity mapActivity, MapView mapView) {
 		mMapView = mapView;
@@ -61,6 +61,6 @@ public class Compass {
 
 	void disable() {
 		mSensorManager.unregisterListener(mListener);
-		mMapView.getMapPosition().setRotation(0);
+		mMapView.getMapViewPosition().setRotation(0);
 	}
 }

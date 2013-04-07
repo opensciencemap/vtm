@@ -63,7 +63,7 @@ public class WebMercator {
 	 * @return ...
 	 */
 	public static double PixelYtoSphericalMercator(long pixelY, byte z) {
-		long half = (Tile.TILE_SIZE << z) >> 1;
+		long half = (Tile.SIZE << z) >> 1;
 		return ((half - pixelY) / (double) half) * f900913;
 	}
 
@@ -75,7 +75,7 @@ public class WebMercator {
 	 * @return ...
 	 */
 	public static double PixelXtoSphericalMercator(long pixelX, byte z) {
-		long half = (Tile.TILE_SIZE << z) >> 1;
+		long half = (Tile.SIZE << z) >> 1;
 		return ((pixelX - half) / (double) half) * f900913;
 	}
 
