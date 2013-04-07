@@ -349,7 +349,7 @@
       </rule>
 
       <rule e="way" k="waterway" v="stream" zoom-min="14">
-         <use-line name="water" width="-0.7"/>
+         <use-line name="water" width="0.2" fixed="true"/>
       </rule>
 
       <rule e="way" k="waterway" v="river">
