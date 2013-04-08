@@ -18,6 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabaseCallback.WayData;
 import org.oscim.renderer.BufferObject;
@@ -76,13 +77,9 @@ public class ExtrusionLayer extends Layer {
 	}
 
 	public void addBuildings(WayData way) {
-		//
 
-		// start outer ring
-		int outer = 0;
-
-		boolean simple = true;
-		int startVertex = mNumVertices;
+		short[] index = way.geom.index;
+		float[] points = way.geom.points;
 
 		float height = way.height;
 		float minHeight = way.minHeight;
@@ -105,9 +102,19 @@ public class ExtrusionLayer extends Layer {
 		height *= 0.85;
 		minHeight *= 0.85;
 
-		int length = 0;
-		for (int ipos = 0, ppos = 0, n = way.geom.index.length; ipos < n; ipos++, ppos += length) {
-			length = way.geom.index[ipos];
+		int length = 0, ipos = 0, ppos = 0;
+
+		boolean complexOutline = false;
+		int geomIndexPos = 0;
+		int geomPointPos = 0;
+
+		boolean simpleOutline = true;
+
+		// current vertex id
+		int startVertex = mNumVertices;
+
+		for (int n = index.length; ipos < n; ipos++, ppos += length) {
+			length = index[ipos];
 
 			// end marker
 			if (length < 0)
@@ -115,9 +122,12 @@ public class ExtrusionLayer extends Layer {
 
 			// start next polygon
 			if (length == 0) {
-				outer = ipos + 1;
+				if (complexOutline)
+					addRoof(startVertex, way.geom, geomIndexPos, geomPointPos);
+
 				startVertex = mNumVertices;
-				simple = true;
+				simpleOutline = true;
+				complexOutline = false;
 				continue;
 			}
 
@@ -125,8 +135,8 @@ public class ExtrusionLayer extends Layer {
 			int len = length;
 			if (!MapView.enableClosePolygons) {
 				len -= 2;
-			} else if (way.geom.points[ppos] == way.geom.points[ppos + len - 2]
-					&& way.geom.points[ppos + 1] == way.geom.points[ppos + len - 1]) {
+			} else if (points[ppos] == points[ppos + len - 2]
+					&& points[ppos + 1] == points[ppos + len - 1]) {
 				// vector-tile-map does not produce implicty closed
 				// polygons (yet)
 				len -= 2;
@@ -137,17 +147,23 @@ public class ExtrusionLayer extends Layer {
 				continue;
 
 			// check if polygon contains inner rings
-			if (simple && (ipos < n - 1) && (way.geom.index[ipos + 1] > 0))
-				simple = false;
+			if (simpleOutline && (ipos < n - 1) && (index[ipos + 1] > 0))
+				simpleOutline = false;
 
-			boolean convex = addOutline(way.geom.points, ppos, len, minHeight, height, simple);
+			boolean convex = addOutline(points, ppos, len, minHeight, height, simpleOutline);
 
-			if (simple && (convex || len <= 8))
+			if (simpleOutline && (convex || len <= 8))
 				addRoofSimple(startVertex, len);
-			else if (ipos == outer) { // add roof only once
-				addRoof(startVertex, way.geom.index, ipos, way.geom.points, ppos);
+			else if (!complexOutline)  {
+				complexOutline = true;
+				// keep start postion of polygon and defer roof building
+				// as it modifies the geometry array.
+				geomIndexPos = ipos;
+				geomPointPos = ppos;
 			}
 		}
+		if (complexOutline)
+			addRoof(startVertex, way.geom, geomIndexPos, geomPointPos);
 	}
 
 	private void addRoofSimple(int startVertex, int len) {
@@ -172,7 +188,10 @@ public class ExtrusionLayer extends Layer {
 		mCurIndices[IND_ROOF].used = i;
 	}
 
-	private void addRoof(int startVertex, short[] index, int ipos, float[] points, int ppos) {
+	private void addRoof(int startVertex, GeometryBuffer geom, int ipos, int ppos) {
+		short[] index = geom.index;
+		float[] points = geom.points;
+
 		int len = 0;
 		int rings = 0;
 
