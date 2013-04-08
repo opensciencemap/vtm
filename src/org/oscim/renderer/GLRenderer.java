@@ -24,7 +24,6 @@ import static org.oscim.generator.JobTile.STATE_READY;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
-import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -483,17 +482,17 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		tilesChanged |= (uploadCnt > 0);
 
 		/* update overlays */
-		List<RenderOverlay> overlays = mMapView.getOverlayManager().getRenderLayers();
+		RenderOverlay[] overlays = mMapView.getOverlayManager().getRenderLayers();
 
-		for (int i = 0, n = overlays.size(); i < n; i++)
-			overlays.get(i).update(mMapPosition, positionChanged, tilesChanged, mMatrices);
+		for (int i = 0, n = overlays.length; i < n; i++)
+			overlays[i].update(mMapPosition, positionChanged, tilesChanged, mMatrices);
 
 		/* draw base layer */
 		TileRenderer.draw(tiles, tileCnt, pos, mMatrices);
 
 		/* draw overlays */
-		for (int i = 0, n = overlays.size(); i < n; i++) {
-			RenderOverlay renderOverlay = overlays.get(i);
+		for (int i = 0, n = overlays.length; i < n; i++) {
+			RenderOverlay renderOverlay = overlays[i];
 
 			if (renderOverlay.newData) {
 				renderOverlay.compile();
