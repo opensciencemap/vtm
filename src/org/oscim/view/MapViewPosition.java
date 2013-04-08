@@ -312,9 +312,6 @@ public class MapViewPosition {
 
 		unproject(-mx, my, getZ(-my), mu, 0);
 
-		//out.x = mCurX + mu[0];
-		//out.y = mCurY + mu[1];
-
 		out.x = mu[0];
 		out.y = mu[1];
 
@@ -341,8 +338,9 @@ public class MapViewPosition {
 
 		double dx = mCurX + mu[0];
 		double dy = mCurY + mu[1];
-		dx /= mAbsScale * Tile.SIZE;
-		dy /= mAbsScale * Tile.SIZE;
+
+		dx /= mCurScale;
+		dy /= mCurScale;
 
 		if (dx > 1) {
 			while (dx > 1)
@@ -607,6 +605,8 @@ public class MapViewPosition {
 
 	private double mStartScale;
 	private double mEndScale;
+	private float mStartRotation;
+
 
 	private float mDuration = 500;
 	private final static double LOG4 = Math.log(4);
@@ -640,13 +640,9 @@ public class MapViewPosition {
 				+ " " + FastMath.log2((int) newScale) + " " + scale);
 
 		mEndScale = mAbsScale * scale - mAbsScale;
-		//mEndScale = scale - 1;
 		mStartScale = mAbsScale;
+		mStartRotation = mRotation;
 
-		// reset rotation/tilt
-		//mTilt = 0;
-		//mRotation = 0;
-		//updateMatrix();
 		double f = Tile.SIZE << ABS_ZOOMLEVEL;
 		mStartX = mAbsX * f;
 		mStartY = mAbsY * f;
@@ -764,6 +760,11 @@ public class MapViewPosition {
 		if (mAnimMove) {
 			moveAbs(mStartX + mEndX * adv, mStartY + mEndY * adv);
 			changed = true;
+		}
+
+		if (mAnimMove && mAnimScale){
+			mRotation = mStartRotation * (1 - adv);
+			updateMatrix();
 		}
 
 		if (changed) {
