@@ -27,6 +27,24 @@ int pnpoly(int nvert, float *vert, float testx, float testy)
 
 //#define TESTING
 
+
+static void printPoly(TriangleIO *in){
+ // print poly format to check with triangle/showme
+      printf("%d 2 0 0\n", in->numberofpoints);
+      for (int j = 0; j < in->numberofpoints; j++)
+         printf("%d %f %f\n", j, in->pointlist[j*2], in->pointlist[j*2+1]);
+
+     int *seg = in->segmentlist;
+      printf("%d 0\n", in->numberofsegments);
+      for (int j = 0; j < in->numberofsegments; j++, seg += 2)
+         printf("%d %d %d\n", j, *seg, *(seg+1));
+
+      printf("%d 0\n", in->numberofholes);
+      for (int j = 0; j < in->numberofholes; j++) {
+         printf("%d %f %f\n", j, in->holelist[j*2], in->holelist[j*2+1]);
+      }
+}
+
 int compare_dups(const void *a, const void *b) {
    int da = *((const int*) a);
    int db = *((const int*) b);
@@ -45,7 +63,7 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
       return 0;
 
    if (isCopy)
-      printf("Poor bugger: VM copied array");
+      printf("... VM copied array");
 
    float *points = orig_points + pos;
 
@@ -97,13 +115,6 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
       }
    }
 
-#ifdef TESTING
-   for (i = 0; i < in.numberofpoints; i++)
-   {
-      printf("point: %f, %f\n", points[i*2], points[i*2+1]);
-   }
-   printf("points: %d, rings: %d\n", in.numberofpoints, num_rings);
-#endif
    in.segmentlist = (int *) malloc(in.numberofpoints * 2 * sizeof(int));
    in.numberofsegments = in.numberofpoints;
    in.numberofholes = num_rings - 1;
@@ -183,20 +194,12 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
 
    if (dups) {
       for (int i = 0; i < dups; i++) {
-         printf(
-               "duplicate points at %d, %d: %f,%f\n", skip_list[i*2], skip_list[i*2+1], in.pointlist[skip_list[i*2+1]*2], in.pointlist[skip_list[i*2+1]*2+1]);
+         printf("duplicate points at %d, %d: %f,%f\n",
+         skip_list[i*2], skip_list[i*2+1],
+         in.pointlist[skip_list[i*2+1]*2],
+         in.pointlist[skip_list[i*2+1]*2+1]);
       }
-      // print poly format to check with triangle/showme
-      for (int j = 0; j < in.numberofpoints; j++)
-         printf("%d %f %f\n", j, in.pointlist[j*2], in.pointlist[j*2+1]);
-
-      seg = in.segmentlist;
-      for (int j = 0; j < in.numberofsegments; j++, seg += 2)
-         printf("%d %d %d\n", j, *seg, *(seg+1));
-
-      for (int j = 0; j < in.numberofholes; j++) {
-         printf("%d %f %f\n", j, in.holelist[j*2], in.holelist[j*2+1]);
-      }
+      printPoly(&in);
 
       if (0) {
          free(in.segmentlist);
@@ -220,7 +223,6 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
       }
       else if (dups > 2) {
          printf("sort dups\n");
-
          qsort(skip_list, dups, 2 * sizeof(float), compare_dups);
       }
 
@@ -244,7 +246,7 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
                *seg -= 1;
          }
 
-         printf( "move %d %d %d\n", pos, pos + 1, in.numberofpoints - pos - 1);
+         printf( "move %d to %d, cnt %d\n", pos + 1, pos, in.numberofpoints - pos - 1);
 
          if (in.numberofpoints - pos > 1)
             memmove(in.pointlist + (pos * 2), in.pointlist + ((pos + 1) * 2),
@@ -252,21 +254,8 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
 
          in.numberofpoints--;
       }
+      printPoly(&in);
    }
-
-#ifdef TESTING
-   for (i = 0; i < in.numberofsegments; i++)
-   {
-      printf("segment: %d, %d\n",
-            in.segmentlist[i*2], in.segmentlist[i*2+1]);
-   }
-
-   for (i = 0; i < in.numberofholes; i++)
-   {
-      printf("hole: %f, %f\n",
-            in.holelist[i*2], in.holelist[i*2+1]);
-   }
-#endif
 
    memset(&out, 0, sizeof(TriangleIO));
    out.trianglelist = (INDICE*) indices;
@@ -298,31 +287,12 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
    if (in.numberofpoints < out.numberofpoints) {
       printf( "polygon input is bad! points in:%d out%d\n", in.numberofpoints, out.numberofpoints);
 
-      for (int j = 0; j < in.numberofpoints; j++) {
-         printf("%d %f %f\n", j, in.pointlist[j*2], in.pointlist[j*2+1]);
-      }
-
-      seg = in.segmentlist;
-      for (int j = 0; j < in.numberofsegments; j++, seg += 2) {
-         printf("%d %d %d\n", j, *seg, *(seg+1));
-      }
       (*env)->ReleasePrimitiveArrayCritical(env, obj_points, orig_points, JNI_ABORT);
       free(in.segmentlist);
       free(in.holelist);
       free(rings);
       return 0;
    }
-
-#ifdef TESTING
-   printf( "triangles: %d\n", out.numberoftriangles);
-
-   for (int i = 0; i < out.numberoftriangles; i++)
-   {
-      printf("> %d, %d, %d\n",out.trianglelist[i*3],
-            out.trianglelist[i*3+1],
-            out.trianglelist[i*3+2]);
-   }
-#endif
 
    INDICE *tri;
 
@@ -332,6 +302,7 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
 
       tri = out.trianglelist;
       int n = out.numberoftriangles * 3;
+      printf("shift back from: %d\n", pos);
 
       for (; n-- > 0; tri++)
          if (*tri >= pos)
@@ -356,6 +327,10 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
    int start = offset;
    for (int j = 0, m = in.numberofholes; j < m; j++) {
       start += rings[j] * stride;
+
+      if (dups)
+         printf("add offset from %d : %d\n", rings[j], (rings[j] & 1));
+
       // even number of points?
       if (!(rings[j] & 1))
          continue;
