@@ -35,7 +35,6 @@ import org.oscim.view.MapViewPosition;
 import android.util.Log;
 
 /**
- * @author Hannes Janetzek
  * @TODO
  *       - prefetching to cache file
  *       - this class should probably not be in 'renderer' -> tilemap?
@@ -179,7 +178,7 @@ public class TileManager {
 
 		// scale and translate projection to tile coordinates
 		// load some tiles more than currently visible (* 0.75)
-		double scale = pos.scale * 0.75f;
+		double scale = pos.scale * 0.5f;
 		double curScale = Tile.SIZE * scale;
 		int zoomLevel = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
 
