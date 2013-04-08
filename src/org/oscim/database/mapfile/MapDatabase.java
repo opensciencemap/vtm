@@ -23,6 +23,7 @@ import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
+import org.oscim.database.IMapDatabaseCallback.WayData;
 import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
 import org.oscim.database.QueryResult;
@@ -198,10 +199,10 @@ public class MapDatabase implements IMapDatabase {
 	private int[] mIntBuffer;
 
 	private final GeometryBuffer mGeom = new GeometryBuffer(1 << 14, 1 << 8);
+	private final WayData mWay = new WayData();
 
 	private int minLat, minLon;
 	private Tile mTile;
-
 	private static boolean sMapExperimental;
 
 	/*
@@ -979,7 +980,12 @@ public class MapDatabase implements IMapDatabase {
 						&& mGeom.points[1] == mGeom.points[l - 1];
 
 				projectToTile(mGeom.points, mGeom.index);
-				/// FIXME mapDatabaseCallback.renderWay(layer, curTags, mGeom, closed, 0);
+				mWay.geom = mGeom;
+				mWay.layer = layer;
+				mWay.closed = closed;
+				mWay.tags = curTags;
+
+				mapDatabaseCallback.renderWay(mWay);
 			}
 		}
 
