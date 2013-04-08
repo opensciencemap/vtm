@@ -90,10 +90,10 @@ public abstract class RenderOverlay {
 		double y = oPos.y - curPos.y;
 
 		// wrap around date-line
-		while (x < 0)
-			x += 1.0;
-		while (x > 1)
-			x -= 1.0;
+		//	while (x < -1)
+		//		x += 1.0;
+		//	while (x > 2)
+		//		x -= 1.0;
 
 		m.mvp.setTransScale((float) (x * tileScale), (float) (y * tileScale),
 				(float) ((curPos.scale / oPos.scale) / GLRenderer.COORD_SCALE));
