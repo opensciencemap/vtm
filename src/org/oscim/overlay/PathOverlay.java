@@ -119,10 +119,7 @@ public class PathOverlay extends Overlay {
 			int x, y, px = 0, py = 0;
 			int i = 0;
 
-			//int mx = (int) mMapPosition.x;
-			//int my = (int) mMapPosition.y;
-			//int z = curPos.zoomLevel;
-			int z = FastMath.log2((int) curPos.scale);
+			int z = curPos.zoomLevel;
 			int diff = MAX_ZOOM - z;
 			int mx = (int) (curPos.x * (Tile.SIZE << z));
 			int my = (int) (curPos.y * (Tile.SIZE << z));
@@ -131,9 +128,6 @@ public class PathOverlay extends Overlay {
 				// TODO translate mapPosition and do this after clipping
 				x = (mPreprojected[j + 0] >> diff) - mx;
 				y = (mPreprojected[j + 1] >> diff) - my;
-
-				//x = (mPreprojected[j + 0]) - mx;
-				//y = (mPreprojected[j + 1]) - my;
 
 				// TODO use line clipping, this doesnt work with 'GreatCircle'
 				// TODO clip to view bounding box
@@ -166,9 +160,7 @@ public class PathOverlay extends Overlay {
 			mMapPosition.scale = 1 << z;
 
 			newData = true;
-
 		}
-
 	}
 
 	public PathOverlay(MapView mapView, final int color) {

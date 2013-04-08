@@ -62,9 +62,11 @@ public abstract class BasicOverlay extends RenderOverlay {
 					case Layer.POLYGON:
 						l = PolygonRenderer.draw(curPos, l, m, true, false);
 						break;
+
 					case Layer.LINE:
 						l = LineRenderer.draw(layers, l, curPos, m, div, 0);
 						break;
+
 					case Layer.TEXLINE:
 						l = LineTexRenderer.draw(layers, l, curPos, m, div);
 						break;
@@ -75,7 +77,7 @@ public abstract class BasicOverlay extends RenderOverlay {
 		if (layers.textureLayers != null) {
 			setMatrix(curPos, m, false);
 
-			float scale = (float)(pos.scale / curPos.scale);
+			float scale = (float) (pos.scale / curPos.scale);
 
 			for (Layer l = layers.textureLayers; l != null;) {
 				l = TextureRenderer.draw(l, scale, m);
