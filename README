@@ -1,2 +1,5 @@
-VectorTileMap is part of the OpenScienceMap project, developed at University of Bremen. 
+VectorTileMap is part of the OpenScienceMap project, developed at University of Bremen.
 http://www.opensciencemap.org
+
+
+To build the eclipse project the android ndk plugin is required.
