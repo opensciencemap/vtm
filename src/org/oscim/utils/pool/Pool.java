@@ -14,26 +14,44 @@
  */
 package org.oscim.utils.pool;
 
-public class Pool<T extends Inlist<T>> {
+public abstract class Pool<T extends Inlist<T>> {
 
 	T pool;
 
+	/**
+	 * @param item release resources
+	 */
+	protected void clearItem(T item) {
+
+	}
+
+	// release 'item' to pool.
+	// make sure that item is not in any other Inlist!
 	public void release(T item) {
 		if (item == null)
 			return;
+
+		clearItem(item);
+
 		item.next = pool;
 		pool = item;
 	}
 
 	// remove 'item' from 'list' and add back to pool
-	public void release(T list, T item) {
+	public T release(T list, T item) {
 		if (item == null)
-			return;
+			return list;
+
+		clearItem(item);
+
 
 		if (item == list) {
+			T ret = item.next;
+
 			item.next = pool;
 			pool = item;
-			return;
+
+			return ret;
 		}
 
 		for (T prev = list, it = list.next; it != null; it = it.next) {
@@ -43,15 +61,20 @@ public class Pool<T extends Inlist<T>> {
 
 				item.next = pool;
 				pool = item;
-				return;
+				break;
 			}
 			prev = it;
 		}
+
+		return list;
 	}
 
+	protected abstract T createItem();
+
 	public T get() {
+
 		if (pool == null)
-			return null;
+			return createItem();
 
 		T ret = pool;
 		pool = pool.next;

@@ -71,6 +71,7 @@ public abstract class SyncPool<T extends Inlist<T>> {
 		if (fill > maxFill)
 		while (item != null) {
 			clearItem(item);
+
 			item = item.next;
 			count--;
 		}
@@ -99,6 +100,8 @@ public abstract class SyncPool<T extends Inlist<T>> {
 
 		T ret = list;
 
+		clearItem(item);
+
 		if (item == list) {
 			ret = item.next;
 		} else {
@@ -109,8 +112,6 @@ public abstract class SyncPool<T extends Inlist<T>> {
 				prev = it;
 			}
 		}
-
-		clearItem(item);
 
 		if (fill < maxFill) {
 			synchronized (this) {
@@ -127,12 +128,13 @@ public abstract class SyncPool<T extends Inlist<T>> {
 	}
 
 	public T get() {
-		if (pool == null){
-			count++;
-			return createItem();
-		}
 
 		synchronized (this) {
+			if (pool == null){
+				count++;
+				return createItem();
+			}
+
 			fill--;
 
 			T ret = pool;

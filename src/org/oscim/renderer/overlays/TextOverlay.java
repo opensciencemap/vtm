@@ -21,10 +21,14 @@ package org.oscim.renderer.overlays;
 // 2. compare previous to current state
 // 2.1 test for new labels to be placed
 // 2.2 handle collisions
+// 2.3 try to place labels along a way
+// 2.4 use 4 point labeling
 // 3 join segments that belong to one feature
 // 4 handle zoom-level changes
 // 5 R-Tree might be handy
 //
+
+import java.util.HashMap;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -47,6 +51,7 @@ import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
 import org.oscim.utils.PausableThread;
+import org.oscim.utils.pool.LList;
 import org.oscim.utils.pool.Pool;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
@@ -72,34 +77,46 @@ public class TextOverlay extends BasicOverlay {
 	// TextLayer that is ready to be added to 'layers'
 	private TextLayer mNextLayer;
 
-	// local pool, avoids synchronized TextItem.get()/release()
-
-
-	class LabelPool extends Pool<TextItem>{
-		Label releaseAndGetNext(Label l){
-			if (l.item != null){
+	// thread local pool
+	class LabelPool extends Pool<TextItem> {
+		Label releaseAndGetNext(Label l) {
+			if (l.item != null)
 				TextItem.pool.release(l.item);
-				l.item = null;
-			}
+
+			// drop references
+			l.item = null;
+			l.tile = null;
+			l.string = null;
 
 			Label ret = (Label) l.next;
+
 			super.release(l);
 
 			return ret;
 		}
 
+		@Override
+		protected TextItem createItem() {
+			return new Label();
+		}
 	}
 
 	private final LabelPool mPool = new LabelPool();
 
+	// list of previous labels
 	private Label mPrevLabels;
+
+	// list of current labels
 	private Label mLabels;
 
 	private final float[] mTmpCoords = new float[8];
 
-	//private HashMap<MapTile, Label> mItemMap;
-	//private Label mNewLabels;
-	//private final HashMap<MapTile, Link> mActiveTiles;
+	private final HashMap<MapTile, LabelTile> mActiveTiles;
+
+	class LabelTile {
+		Tile tile;
+		LList<Label> labels;
+	}
 
 	class Label extends TextItem {
 		TextItem item;
@@ -141,16 +158,9 @@ public class TextOverlay extends BasicOverlay {
 			this.x2 = x + width / 2;
 			this.y2 = y + text.fontHeight / 2;
 		}
-
-		//
 	}
 
-	//	class Link {
-	//		Link next;
-	//		Link prev;
-	//		Label it;
-	//	}
-	//
+
 	//	class ActiveTile {
 	//		MapTile tile;
 	//		int activeLabels;
@@ -196,7 +206,7 @@ public class TextOverlay extends BasicOverlay {
 
 		layers.textureLayers = new TextLayer();
 		mTmpLayer = new TextLayer();
-		//mActiveTiles = new HashMap<MapTile, Link>();
+		mActiveTiles = new HashMap<MapTile, LabelTile>();
 		mTmpPos = new MapPosition();
 		mThread = new LabelThread();
 		mThread.start();
@@ -206,90 +216,84 @@ public class TextOverlay extends BasicOverlay {
 
 	// remove Label l from mLabels and return l.next
 	private Label removeLabel(Label l) {
-		Label ret = (Label)l.next;
-		mPool.release(mLabels, l);
+		Label ret = (Label) l.next;
+		mLabels = (Label)mPool.release(mLabels, l);
+
 		return ret;
 	}
 
-	public void addLabel(Label item) {
-		TextItem it = mLabels;
+	public void addLabel(Label l) {
+		TextItem ll = mLabels;
 
-		for (; it != null; it = it.next) {
-
-			if (item.text == it.text) {
-				while (it.next != null
+		for (; ll != null; ll = ll.next) {
+			// find other label with same text style
+			if (l.text == ll.text) {
+				while (ll.next != null
 						// break if next item uses different text style
-						&& item.text == it.next.text
+						&& l.text == ll.next.text
 						// check same string instance
-						&& item.string != it.string
+						&& l.string != ll.string
 						// check same string
-						&& !item.string.equals(it.string))
-					it = it.next;
+						&& !l.string.equals(ll.string))
+					ll = ll.next;
 
-				// unify duplicate string :)
 				// Note: this is required for 'packing test' in prepare to work!
-				if (item.string != it.string && item.string.equals(it.string))
-					item.string = it.string;
+				TextItem.shareText(l, ll);
 
 				// insert after text of same type and/or before same string
-				item.next = it.next;
-				it.next = item;
+				l.next = ll.next;
+				ll.next = l;
 				return;
 			}
 		}
 
-		item.next = mLabels;
-		mLabels = item;
+		l.next = mLabels;
+		mLabels = l;
 	}
 
-	private byte checkOverlap(Label ti) {
+	private byte checkOverlap(Label l) {
 
-		for (Label lp = mLabels; lp != null;) {
-
+		for (Label ll = mLabels; ll != null;) {
 			// check bounding box
-			if (!TextItem.bboxOverlaps(ti, lp, 150)) {
-				lp = (Label) lp.next;
+			if (!TextItem.bboxOverlaps(l, ll, 150)) {
+				ll = (Label) ll.next;
 				continue;
 			}
 
-			if (lp.text == ti.text && (lp.string == ti.string || lp.string.equals(ti.string))) {
-
-				// make strings unique, should be done only once..
-				ti.string = lp.string;
+			if (TextItem.shareText(l, ll)) {
 
 				// keep the label that was active earlier
-				if (lp.active <= ti.active)
+				if (ll.active <= l.active)
 					return 1;
 
 				// keep the label with longer segment
-				if (lp.length < ti.length) {
-					lp = removeLabel(lp);
+				if (ll.length < l.length) {
+					ll = removeLabel(ll);
 					continue;
 				}
 
 				return 2;
 			}
 
-			boolean intersect = ti.bbox.overlaps(lp.bbox);
+			boolean intersect = l.bbox.overlaps(ll.bbox);
 
 			if (intersect) {
-
-				if (lp.active <= ti.active)
+				if (ll.active <= l.active)
 					return 1;
 
 				//Log.d(TAG, "intersection " + lp.string + " <> " + ti.string
 				//		+ " at " + ti.x + ":" + ti.y);
 
-				if (!lp.text.caption
-						&& (lp.text.priority > ti.text.priority || lp.length < ti.length)) {
+				if (!ll.text.caption
+						&& (ll.text.priority > l.text.priority || ll.length < l.length)) {
 
-					lp = removeLabel(lp);
+					ll = removeLabel(ll);
 					continue;
 				}
 
 				return 1;
 			}
-			lp = (Label) lp.next;
+			ll = (Label) ll.next;
 		}
 		return 0;
 	}
@@ -324,11 +328,7 @@ public class TextOverlay extends BasicOverlay {
 	private final static float[] mDebugPoints = new float[4];
 
 	private Label getLabel() {
-		Label l = (Label)mPool.get();
-
-		if (l == null)
-			l = new Label();
-
+		Label l = (Label) mPool.get();
 		l.active = Integer.MAX_VALUE;
 
 		return l;
@@ -384,7 +384,6 @@ public class TextOverlay extends BasicOverlay {
 
 		int maxx = Tile.SIZE << (zoom - 1);
 
-		Label l = null;
 
 		if (dbg != null)
 			addDebugLayers(dbg);
@@ -394,7 +393,7 @@ public class TextOverlay extends BasicOverlay {
 		double tileX = (pos.x * (Tile.SIZE << zoom));
 		double tileY = (pos.y * (Tile.SIZE << zoom));
 
-		for (l = mPrevLabels; l != null;) {
+		for (Label l = mPrevLabels; l != null;) {
 			if (l.text.caption) {
 				l = mPool.releaseAndGetNext(l);
 				continue;
@@ -445,20 +444,20 @@ public class TextOverlay extends BasicOverlay {
 				addDebugBox(dbg, l, l.item, overlaps, true, sscale);
 
 			if (overlaps == 0) {
-				Label tmp = l;
+				Label ll = l;
 				l = (Label) l.next;
 
-				tmp.next = null;
-				addLabel(tmp);
+				ll.next = null;
+				addLabel(ll);
 				continue;
 			}
-
 			l = mPool.releaseAndGetNext(l);
 		}
 
+		Label l = null;
+
 		/* add way labels */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
-
 			MapTile t = tiles[i];
 			if (t.state != JobTile.STATE_READY)
 				continue;
@@ -737,10 +736,11 @@ public class TextOverlay extends BasicOverlay {
 
 	@Override
 	public synchronized void render(MapPosition pos, Matrices m) {
-		//float div = FastMath.pow(mMapPosition.zoomLevel - pos.zoomLevel);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, layers.vbo.id);
 		GLState.test(false, false);
+
+		float scale = (float) (mMapPosition.scale / pos.scale);
 
 		if (layers.baseLayers != null) {
 			setMatrix(pos, m, true);
@@ -749,47 +749,16 @@ public class TextOverlay extends BasicOverlay {
 				if (l.type == Layer.POLYGON) {
 					l = PolygonRenderer.draw(pos, l, m, true, false);
 				} else {
-					//float scale = pos.getScale() * div;
-
-					float scale = (float) ((1 << mMapPosition.zoomLevel) / pos.scale);
-
-					l = LineRenderer.draw(layers, l, pos, m, scale, 0);
+					float div = scale * (float) (pos.scale / (1 << pos.zoomLevel));
+					l = LineRenderer.draw(layers, l, pos, m, div, 0);
 				}
 			}
 		}
 
-		setMatrix(pos, m);
-		for (Layer l = layers.textureLayers; l != null;) {
-			float scale = (float) (mMapPosition.scale / pos.scale);
-			//float scale = (mMapPosition.getScale() / pos.getScale()) * div;
+		setMatrix(pos, m, false);
 
+		for (Layer l = layers.textureLayers; l != null;)
 			l = TextureRenderer.draw(l, scale, m);
-		}
-
-	}
-
-	@Override
-	protected void setMatrix(MapPosition curPos, Matrices m) {
-		MapPosition oPos = mMapPosition;
-
-		double tileScale = Tile.SIZE * curPos.scale;
-		double scale = (curPos.scale / oPos.scale);
-
-		float x = (float) ((oPos.x - curPos.x) * tileScale);
-		float y = (float) ((oPos.y - curPos.y) * tileScale);
-
-		m.mvp.setTransScale(x, y, (float) (scale / GLRenderer.COORD_SCALE));
-
-		//		float div = FastMath.pow(oPos.zoomLevel - curPos.zoomLevel);
-		//		float x = (float) (oPos.x - curPos.x * div);
-		//		float y = (float) (oPos.y - curPos.y * div);
-		//
-		//		float scale = (curPos.getScale() / oPos.getScale()) / div;
-		//		float s = curPos.getScale() / div;
-		//		m.mvp.setTransScale(x * s, y * s,
-		//				scale / GLRenderer.COORD_SCALE);
-
-		m.mvp.multiplyMM(m.view, m.mvp);
 	}
 
 	private boolean mHolding;
