@@ -36,9 +36,9 @@ import android.util.Log;
 public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
 	private static final float S = GLRenderer.COORD_SCALE;
-	private final VertexPoolItem mVertices;
-	private VertexPoolItem mCurVertices;
-	private final VertexPoolItem mIndices[], mCurIndices[];
+	private final VertexItem mVertices;
+	private VertexItem mCurVertices;
+	private final VertexItem mIndices[], mCurIndices[];
 	private LineClipper mClipper;
 
 	// indices for:
@@ -65,12 +65,12 @@ public class ExtrusionLayer extends Layer {
 		this.level = level;
 
 		mGroundResolution = groundResolution;
-		mVertices = mCurVertices = VertexPool.get();
+		mVertices = mCurVertices = VertexItem.pool.get();
 
-		mIndices = new VertexPoolItem[4];
-		mCurIndices = new VertexPoolItem[4];
+		mIndices = new VertexItem[4];
+		mCurIndices = new VertexItem[4];
 		for (int i = 0; i < 4; i++)
-			mIndices[i] = mCurIndices[i] = VertexPool.get();
+			mIndices[i] = mCurIndices[i] = VertexItem.pool.get();
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE);
 	}
@@ -158,9 +158,9 @@ public class ExtrusionLayer extends Layer {
 		short first = (short) (startVertex + 1);
 
 		for (int k = 0; k < len - 4; k += 2) {
-			if (i == VertexPoolItem.SIZE) {
-				mCurIndices[IND_ROOF].used = VertexPoolItem.SIZE;
-				mCurIndices[IND_ROOF].next = VertexPool.get();
+			if (i == VertexItem.SIZE) {
+				mCurIndices[IND_ROOF].used = VertexItem.SIZE;
+				mCurIndices[IND_ROOF].next = VertexItem.pool.get();
 				mCurIndices[IND_ROOF] = mCurIndices[2].next;
 				indices = mCurIndices[IND_ROOF].vertices;
 				i = 0;
@@ -194,7 +194,7 @@ public class ExtrusionLayer extends Layer {
 
 		if (used > 0) {
 			// get back to the last item added..
-			VertexPoolItem it = mIndices[IND_ROOF];
+			VertexItem it = mIndices[IND_ROOF];
 			while (it.next != null)
 				it = it.next;
 			mCurIndices[IND_ROOF] = it;
@@ -247,9 +247,9 @@ public class ExtrusionLayer extends Layer {
 			uy = vy;
 
 			/* add bottom and top vertex for each point */
-			if (v == VertexPoolItem.SIZE) {
-				mCurVertices.used = VertexPoolItem.SIZE;
-				mCurVertices.next = VertexPool.get();
+			if (v == VertexItem.SIZE) {
+				mCurVertices.used = VertexItem.SIZE;
+				mCurVertices.next = VertexItem.pool.get();
 				mCurVertices = mCurVertices.next;
 				vertices = mCurVertices.vertices;
 				v = 0;
@@ -329,8 +329,8 @@ public class ExtrusionLayer extends Layer {
 			// index id relative to mCurIndices item
 			int ind = mCurIndices[even].used;
 
-			if (ind == VertexPoolItem.SIZE) {
-				mCurIndices[even].next = VertexPool.get();
+			if (ind == VertexItem.SIZE) {
+				mCurIndices[even].next = VertexItem.pool.get();
 				mCurIndices[even] = mCurIndices[even].next;
 				indices = mCurIndices[even].vertices;
 				ind = 0;
@@ -348,9 +348,9 @@ public class ExtrusionLayer extends Layer {
 			even = (even == 0 ? 1 : 0);
 
 			/* add roof outline indices */
-			VertexPoolItem it = mCurIndices[IND_OUTLINE];
-			if (it.used == VertexPoolItem.SIZE) {
-				it.next = VertexPool.get();
+			VertexItem it = mCurIndices[IND_OUTLINE];
+			if (it.used == VertexItem.SIZE) {
+				it.next = VertexItem.pool.get();
 				it = mCurIndices[IND_OUTLINE] = it.next;
 			}
 			it.vertices[it.used++] = s1;
@@ -377,7 +377,7 @@ public class ExtrusionLayer extends Layer {
 		sbuf.clear();
 		mNumIndices = 0;
 		for (int i = 0; i < 4; i++) {
-			for (VertexPoolItem vi = mIndices[i]; vi != null; vi = vi.next) {
+			for (VertexItem vi = mIndices[i]; vi != null; vi = vi.next) {
 				sbuf.put(vi.vertices, 0, vi.used);
 				mIndiceCnt[i] += vi.used;
 			}
@@ -392,7 +392,7 @@ public class ExtrusionLayer extends Layer {
 
 		// upload vertices
 		sbuf.clear();
-		for (VertexPoolItem vi = mVertices; vi != null; vi = vi.next)
+		for (VertexItem vi = mVertices; vi != null; vi = vi.next)
 			sbuf.put(vi.vertices, 0, vi.used);
 
 		sbuf.flip();
@@ -404,10 +404,10 @@ public class ExtrusionLayer extends Layer {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-		for (VertexPoolItem i : mIndices)
-			VertexPool.release(i);
+		for (VertexItem i : mIndices)
+			VertexItem.pool.releaseAll(i);
 
-		VertexPool.release(mVertices);
+		VertexItem.pool.releaseAll(mVertices);
 
 		mClipper = null;
 
@@ -423,9 +423,9 @@ public class ExtrusionLayer extends Layer {
 			mVertexBO = null;
 			//GLES20.glDeleteBuffers(2, mVboIds, 0);
 		} else {
-			VertexPool.release(mVertices);
-			for (VertexPoolItem i : mIndices)
-				VertexPool.release(i);
+			VertexItem.pool.releaseAll(mVertices);
+			for (VertexItem i : mIndices)
+				VertexItem.pool.releaseAll(i);
 		}
 	}
 
@@ -433,7 +433,7 @@ public class ExtrusionLayer extends Layer {
 	private static ShortBuffer sBuf;
 
 	public static synchronized int triangulate(float[] points, int ppos, int plen, short[] index,
-			int ipos, int rings, int vertexOffset, VertexPoolItem item) {
+			int ipos, int rings, int vertexOffset, VertexItem item) {
 
 		if (!initialized) {
 			// FIXME also cleanup on shutdown!
@@ -454,12 +454,12 @@ public class ExtrusionLayer extends Layer {
 
 		for (int k = 0, cnt = 0; k < numIndices; k += cnt) {
 
-			if (item.used == VertexPoolItem.SIZE) {
-				item.next = VertexPool.get();
+			if (item.used == VertexItem.SIZE) {
+				item.next = VertexItem.pool.get();
 				item = item.next;
 			}
 
-			cnt = VertexPoolItem.SIZE - item.used;
+			cnt = VertexItem.SIZE - item.used;
 
 			if (k + cnt > numIndices)
 				cnt = numIndices - k;

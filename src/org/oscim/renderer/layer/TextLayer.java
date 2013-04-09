@@ -14,18 +14,16 @@
  */
 package org.oscim.renderer.layer;
 
-import org.oscim.renderer.TextureObject;
 import org.oscim.renderer.TextureRenderer;
 
 import android.graphics.Canvas;
-import android.util.Log;
 
 public final class TextLayer extends TextureLayer {
 
 	//private static String TAG = TextureLayer.class.getName();
 
-	private final static int TEXTURE_WIDTH = TextureObject.TEXTURE_WIDTH;
-	private final static int TEXTURE_HEIGHT = TextureObject.TEXTURE_HEIGHT;
+	private final static int TEXTURE_WIDTH = TextureItem.TEXTURE_WIDTH;
+	private final static int TEXTURE_HEIGHT = TextureItem.TEXTURE_HEIGHT;
 	private final static float SCALE = 8.0f;
 	private final static int LBIT_MASK = 0xfffffffe;
 
@@ -43,25 +41,6 @@ public final class TextLayer extends TextureLayer {
 		type = Layer.SYMBOL;
 		mCanvas = new Canvas();
 		fixed = true;
-	}
-
-	public boolean removeText(TextItem item) {
-
-		if (item == labels) {
-			labels = labels.next;
-			return true;
-		}
-
-		for (TextItem prev = labels, it = labels.next; it != null; it = it.next) {
-
-			if (it == item) {
-				prev.next = it.next;
-				return true;
-			}
-			prev = it;
-		}
-
-		return false;
 	}
 
 	public void addText(TextItem item) {
@@ -97,13 +76,11 @@ public final class TextLayer extends TextureLayer {
 
 	@Override
 	public boolean prepare() {
-		if (TextureRenderer.debug)
-			Log.d("...", "prepare");
 
 		short numIndices = 0;
 		short offsetIndices = 0;
 
-		VertexPoolItem vi = pool = VertexPool.get();
+		VertexItem vi = vertexItems = VertexItem.pool.get();
 		int pos = vi.used; // 0
 		short buf[] = vi.vertices;
 
@@ -114,7 +91,7 @@ public final class TextLayer extends TextureLayer {
 		float y = 0;
 		float yy;
 
-		TextureObject to = TextureObject.get();
+		TextureItem to = TextureItem.pool.get();
 		textures = to;
 		mCanvas.setBitmap(to.bitmap);
 
@@ -136,7 +113,7 @@ public final class TextLayer extends TextureLayer {
 					to.vertices = (short) (numIndices - offsetIndices);
 					offsetIndices = numIndices;
 
-					to.next = TextureObject.get();
+					to.next = TextureItem.pool.get();
 					to = to.next;
 
 					mCanvas.setBitmap(to.bitmap);
@@ -227,9 +204,9 @@ public final class TextLayer extends TextureLayer {
 				short tx = (short) (tmp | (it.text.caption ? 1 : 0));
 				short ty = (short) (SCALE * it.y);
 
-				if (pos == VertexPoolItem.SIZE) {
-					vi.used = VertexPoolItem.SIZE;
-					vi = vi.next = VertexPool.get();
+				if (pos == VertexItem.SIZE) {
+					vi.used = VertexItem.SIZE;
+					vi = vi.next = VertexItem.pool.get();
 					buf = vi.vertices;
 					pos = 0;
 				}
@@ -288,12 +265,12 @@ public final class TextLayer extends TextureLayer {
 
 	@Override
 	protected void clear() {
-		TextureObject.release(textures);
-		TextItem.release(labels);
-		VertexPool.release(pool);
+		TextureItem.pool.releaseAll(textures);
+		TextItem.pool.releaseAll(labels);
+		VertexItem.pool.releaseAll(vertexItems);
 		textures = null;
 		labels = null;
-		pool = null;
+		vertexItems = null;
 		verticesCnt = 0;
 	}
 }

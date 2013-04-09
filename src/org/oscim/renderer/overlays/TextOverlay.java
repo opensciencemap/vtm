@@ -47,6 +47,7 @@ import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
 import org.oscim.utils.PausableThread;
+import org.oscim.utils.pool.Pool;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
@@ -57,6 +58,8 @@ import android.os.SystemClock;
 
 public class TextOverlay extends BasicOverlay {
 	//private final static String TAG = TextOverlay.class.getName();
+	private final static float MIN_CAPTION_DIST = 5;
+	private final static float MIN_WAY_DIST = 3;
 
 	private final MapViewPosition mMapViewPosition;
 	private TileSet mTileSet;
@@ -70,8 +73,27 @@ public class TextOverlay extends BasicOverlay {
 	private TextLayer mNextLayer;
 
 	// local pool, avoids synchronized TextItem.get()/release()
-	private Label mPool;
+
+
+	class LabelPool extends Pool<TextItem>{
+		Label releaseAndGetNext(Label l){
+			if (l.item != null){
+				TextItem.pool.release(l.item);
+				l.item = null;
+			}
+
+			Label ret = (Label) l.next;
+			super.release(l);
+
+			return ret;
+		}
+
+	}
+
+	private final LabelPool mPool = new LabelPool();
+
 	private Label mPrevLabels;
+	private Label mLabels;
 
 	private final float[] mTmpCoords = new float[8];
 
@@ -89,9 +111,38 @@ public class TextOverlay extends BasicOverlay {
 
 		MapTile tile;
 
-		public byte origin;
+		//public byte origin;
 		public int active;
 		public OBB2D bbox;
+
+		public TextItem move(TextItem ti, float dx, float dy) {
+			this.x = dx + ti.x;
+			this.y = dy + ti.y;
+			return this;
+
+		}
+
+		public TextItem move(TextItem ti, float dx, float dy, float scale) {
+			this.x = (dx + ti.x) * scale;
+			this.y = (dy + ti.y) * scale;
+			return this;
+		}
+
+		public void clone(TextItem ti) {
+			this.string = ti.string;
+			this.text = ti.text;
+			this.width = ti.width;
+			this.length = ti.length;
+		}
+
+		public void setAxisAlignedBBox() {
+			this.x1 = x - width / 2;
+			this.y1 = y - text.fontHeight / 2;
+			this.x2 = x + width / 2;
+			this.y2 = y + text.fontHeight / 2;
+		}
+
+		//
 	}
 
 	//	class Link {
@@ -112,7 +163,7 @@ public class TextOverlay extends BasicOverlay {
 
 		@Override
 		protected void doWork() {
-			SystemClock.sleep(500);
+			SystemClock.sleep(250);
 			if (!mRun)
 				return;
 
@@ -153,22 +204,47 @@ public class TextOverlay extends BasicOverlay {
 		mRelabelCnt = 0;
 	}
 
-	private Label removeLabel(TextLayer tl, Label l) {
-		Label tmp = l;
-		l = (Label) l.next;
-
-		TextItem.release(tmp.item);
-		tl.removeText(tmp);
-
-		tmp.next = mPool;
-		mPool = tmp;
-
-		return l;
+	// remove Label l from mLabels and return l.next
+	private Label removeLabel(Label l) {
+		Label ret = (Label)l.next;
+		mPool.release(mLabels, l);
+		return ret;
 	}
 
-	private byte checkOverlap(TextLayer tl, Label ti) {
+	public void addLabel(Label item) {
+		TextItem it = mLabels;
 
-		for (Label lp = (Label) tl.labels; lp != null;) {
+		for (; it != null; it = it.next) {
+
+			if (item.text == it.text) {
+				while (it.next != null
+						// break if next item uses different text style
+						&& item.text == it.next.text
+						// check same string instance
+						&& item.string != it.string
+						// check same string
+						&& !item.string.equals(it.string))
+					it = it.next;
+
+				// unify duplicate string :)
+				// Note: this is required for 'packing test' in prepare to work!
+				if (item.string != it.string && item.string.equals(it.string))
+					item.string = it.string;
+
+				// insert after text of same type and/or before same string
+				item.next = it.next;
+				it.next = item;
+				return;
+			}
+		}
+
+		item.next = mLabels;
+		mLabels = item;
+	}
+
+	private byte checkOverlap(Label ti) {
+
+		for (Label lp = mLabels; lp != null;) {
 
 			// check bounding box
 			if (!TextItem.bboxOverlaps(ti, lp, 150)) {
@@ -187,7 +263,7 @@ public class TextOverlay extends BasicOverlay {
 
 				// keep the label with longer segment
 				if (lp.length < ti.length) {
-					lp = removeLabel(tl, lp);
+					lp = removeLabel(lp);
 					continue;
 				}
 
@@ -207,7 +283,7 @@ public class TextOverlay extends BasicOverlay {
 				if (!lp.text.caption
 						&& (lp.text.priority > ti.text.priority || lp.length < ti.length)) {
 
-					lp = removeLabel(tl, lp);
+					lp = removeLabel(lp);
 					continue;
 				}
 
@@ -247,38 +323,29 @@ public class TextOverlay extends BasicOverlay {
 	private Layers mDebugLayer;
 	private final static float[] mDebugPoints = new float[4];
 
-	//private final Matrix4 mMVP = new Matrix4();
-
-	//void addTile(MapTile t) {
-	//}
-
-	private Label addToPool(Label l) {
-		TextItem.release(l.item);
-		l.item = null;
-
-		Label next = (Label) l.next;
-		l.next = mPool;
-		mPool = l;
-
-		return next;
-	}
-
 	private Label getLabel() {
-		Label l;
+		Label l = (Label)mPool.get();
 
-		if (mPool == null)
+		if (l == null)
 			l = new Label();
-		else {
-			l = mPool;
-			mPool = (Label) mPool.next;
-			l.next = null;
-		}
+
 		l.active = Integer.MAX_VALUE;
 
 		return l;
 	}
 
+	private static float flipLatitude(float dx, int max) {
+		// flip around date-line
+		if (dx > max)
+			dx = dx - max * 2;
+		else if (dx < -max)
+			dx = dx + max * 2;
+
+		return dx;
+	}
+
 	boolean updateLabels() {
+		// could this happen?
 		if (mTmpLayer == null)
 			return false;
 
@@ -287,12 +354,6 @@ public class TextOverlay extends BasicOverlay {
 
 		if (mTileSet.cnt == 0)
 			return false;
-
-		// reuse text layer
-		TextLayer tl = mTmpLayer;
-		mTmpLayer = null;
-
-		//mNewLabels = null;
 
 		Layers dbg = null;
 		if (mMapView.getDebugSettings().debugLabels)
@@ -304,31 +365,24 @@ public class TextOverlay extends BasicOverlay {
 		synchronized (mMapViewPosition) {
 			mMapViewPosition.getMapPosition(pos);
 			mMapViewPosition.getMapViewProjection(coords);
-			//mMapViewPosition.getMatrix(null, null, mMVP);
 		}
+
 		int mw = (mMapView.getWidth() + Tile.SIZE) / 2;
 		int mh = (mMapView.getHeight() + Tile.SIZE) / 2;
 		mSquareRadius = mw * mw + mh * mh;
 
-		// mTiles might be from another zoomlevel than the current:
-		// this scales MapPosition to the zoomlevel of mTiles...
-		// TODO create a helper function in MapPosition
 		MapTile[] tiles = mTileSet.tiles;
 
-		//int zoom = tiles[0].zoomLevel;
+		int zoom = tiles[0].zoomLevel;
 
-		int diff = tiles[0].zoomLevel - pos.zoomLevel;
-		float div = FastMath.pow(diff);
-
-		double scale = pos.getZoomScale() * div;
-
-		//float scale = (float)(pos.absScale / (1 << zoom) );
+		// scale of tiles zoom-level relative to current position
+		double scale = pos.scale / (1 << zoom);
 
 		double angle = Math.toRadians(pos.angle);
 		float cos = (float) Math.cos(angle);
 		float sin = (float) Math.sin(angle);
 
-		int maxx = Tile.SIZE << (pos.zoomLevel - 1);
+		int maxx = Tile.SIZE << (zoom - 1);
 
 		Label l = null;
 
@@ -337,72 +391,69 @@ public class TextOverlay extends BasicOverlay {
 
 		mRelabelCnt++;
 
-		double tileX = (pos.x * (Tile.SIZE << pos.zoomLevel));
-		double tileY = (pos.y * (Tile.SIZE << pos.zoomLevel));
+		double tileX = (pos.x * (Tile.SIZE << zoom));
+		double tileY = (pos.y * (Tile.SIZE << zoom));
 
 		for (l = mPrevLabels; l != null;) {
-
-			// transform screen coordinates to tile coordinates
-			float s = FastMath.pow(l.tile.zoomLevel - pos.zoomLevel);
-
-			//float sscale = (float)((1 << l.tile.zoomLevel) / pos.absScale);
-
-			float sscale = (float) (pos.getZoomScale() / s);
-
-			if (l.width > l.length * sscale) {
-				//Log.d(TAG, "- scale " + lp + " " + s + " " + sscale + " " + lp.length + " " + lp.width);
-				l = addToPool(l);
+			if (l.text.caption) {
+				l = mPool.releaseAndGetNext(l);
 				continue;
 			}
 
-			float dx = (float) (l.tile.tileX * Tile.SIZE - tileX * s);
-			float dy = (float) (l.tile.tileY * Tile.SIZE - tileY * s);
+			int diff = l.tile.zoomLevel - zoom;
+			if (diff > 1 || diff < -1) {
+				l = mPool.releaseAndGetNext(l);
+				continue;
+			}
 
-			// flip around date-line
-			if (dx > maxx)
-				dx = dx - maxx * 2;
-			else if (dx < -maxx)
-				dx = dx + maxx * 2;
+			float div = FastMath.pow(diff);
+			float sscale = (float) (pos.scale / (1 << l.tile.zoomLevel));
+
+			if (l.width > l.length * sscale) {
+				l = mPool.releaseAndGetNext(l);
+				continue;
+			}
+
+			float dx = (float) (l.tile.tileX * Tile.SIZE - tileX * div);
+			float dy = (float) (l.tile.tileY * Tile.SIZE - tileY * div);
+
+			dx = flipLatitude(dx, maxx);
 
 			l.move(l.item, dx, dy, sscale);
 
-			if (!l.text.caption) {
-				// set line endpoints relative to view to be able to
-				// check intersections with label from other tiles
-				float width = (l.item.x2 - l.item.x1) / 2f;
-				float height = (l.item.y2 - l.item.y1) / 2f;
+			// set line endpoints relative to view to be able to
+			// check intersections with label from other tiles
+			float w = (l.item.x2 - l.item.x1) / 2f;
+			float h = (l.item.y2 - l.item.y1) / 2f;
+			l.x1 = l.x - w;
+			l.y1 = l.y - h;
+			l.x2 = l.x + w;
+			l.y2 = l.y + h;
 
-				l.x2 = (l.x + width);
-				l.x1 = (l.x - width);
-				l.y2 = (l.y + height);
-				l.y1 = (l.y - height);
-
-				if (!wayIsVisible(l)) {
-					l = addToPool(l);
-					continue;
-				}
-
-				byte overlaps = -1;
-
-				l.bbox.set(l.x, l.y, l.x1, l.y1, l.width + 5, l.text.fontHeight + 5);
-
-				overlaps = checkOverlap(tl, l);
-
-				if (dbg != null)
-					addDebugBox(dbg, l, l.item, overlaps, true, sscale);
-
-				if (overlaps == 0) {
-
-					Label tmp = l;
-					l = (Label) l.next;
-
-					tmp.next = null;
-					tl.addText(tmp);
-					continue;
-				}
+			if (!wayIsVisible(l)) {
+				l = mPool.releaseAndGetNext(l);
+				continue;
 			}
 
-			l = addToPool(l);
+			l.bbox.set(l.x, l.y, l.x1, l.y1,
+					l.width + MIN_WAY_DIST,
+					l.text.fontHeight + MIN_WAY_DIST);
+
+			byte overlaps = checkOverlap(l);
+
+			if (dbg != null)
+				addDebugBox(dbg, l, l.item, overlaps, true, sscale);
+
+			if (overlaps == 0) {
+				Label tmp = l;
+				l = (Label) l.next;
+
+				tmp.next = null;
+				addLabel(tmp);
+				continue;
+			}
+
+			l = mPool.releaseAndGetNext(l);
 		}
 
 		/* add way labels */
@@ -414,12 +465,7 @@ public class TextOverlay extends BasicOverlay {
 
 			float dx = (float) (t.tileX * Tile.SIZE - tileX);
 			float dy = (float) (t.tileY * Tile.SIZE - tileY);
-
-			// flip around date-line
-			if (dx > maxx)
-				dx = dx - maxx * 2;
-			else if (dx < -maxx)
-				dx = dx + maxx * 2;
+			dx = flipLatitude(dx, maxx);
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 
@@ -439,13 +485,13 @@ public class TextOverlay extends BasicOverlay {
 
 				// set line endpoints relative to view to be able to
 				// check intersections with label from other tiles
-				float width = (ti.x2 - ti.x1) / 2f;
-				float height = (ti.y2 - ti.y1) / 2f;
+				float w = (ti.x2 - ti.x1) / 2f;
+				float h = (ti.y2 - ti.y1) / 2f;
 				l.bbox = null;
-				l.x1 = (l.x - width);
-				l.y1 = (l.y - height);
-				l.x2 = (l.x + width);
-				l.y2 = (l.y + height);
+				l.x1 = l.x - w;
+				l.y1 = l.y - h;
+				l.x2 = l.x + w;
+				l.y2 = l.y + h;
 
 				if (!wayIsVisible(l))
 					continue;
@@ -453,18 +499,22 @@ public class TextOverlay extends BasicOverlay {
 				byte overlaps = -1;
 
 				if (l.bbox == null)
-					l.bbox = new OBB2D(l.x, l.y, l.x1, l.y1, l.width + 5, l.text.fontHeight + 5);
+					l.bbox = new OBB2D(l.x, l.y, l.x1, l.y1,
+							l.width + MIN_WAY_DIST,
+							l.text.fontHeight + MIN_WAY_DIST);
 				else
-					l.bbox.set(l.x, l.y, l.x1, l.y1, l.width + 5, l.text.fontHeight + 5);
+					l.bbox.set(l.x, l.y, l.x1, l.y1,
+							l.width + MIN_WAY_DIST,
+							l.text.fontHeight + MIN_WAY_DIST);
 
 				if (dbg == null || ti.width < ti.length * scale)
-					overlaps = checkOverlap(tl, l);
+					overlaps = checkOverlap(l);
 
 				if (dbg != null)
 					addDebugBox(dbg, l, ti, overlaps, false, (float) scale);
 
 				if (overlaps == 0) {
-					tl.addText(l);
+					addLabel(l);
 					l.item = TextItem.copy(ti);
 					l.tile = t;
 					l.active = mRelabelCnt;
@@ -481,12 +531,7 @@ public class TextOverlay extends BasicOverlay {
 
 			float dx = (float) (t.tileX * Tile.SIZE - tileX);
 			float dy = (float) (t.tileY * Tile.SIZE - tileY);
-
-			// flip around date-line
-			if (dx > maxx)
-				dx = dx - maxx * 2;
-			else if (dx < -maxx)
-				dx = dx + maxx * 2;
+			dx = flipLatitude(dx, maxx);
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 				if (!ti.text.caption)
@@ -506,21 +551,20 @@ public class TextOverlay extends BasicOverlay {
 				if (l.bbox == null)
 					l.bbox = new OBB2D();
 
-				l.bbox.setNormalized(l.x, l.y, cos, -sin, l.width + 6,
-						l.text.fontHeight + 6);
+				l.bbox.setNormalized(l.x, l.y, cos, -sin,
+						l.width + MIN_CAPTION_DIST,
+						l.text.fontHeight + MIN_CAPTION_DIST);
 
 				boolean overlaps = false;
-				for (Label lp = (Label) tl.labels; lp != null; lp = (Label) lp.next) {
+				for (Label lp = mLabels; lp != null; lp = (Label) lp.next) {
 
 					if (l.bbox.overlaps(lp.bbox)) {
-						//Log.d(TAG, "overlap > " + ti2.string + " " + lp.string);
-						//if (TextItem.bboxOverlaps(ti2, lp, 4)) {
 						overlaps = true;
 						break;
 					}
 				}
 				if (!overlaps) {
-					tl.addText(l);
+					addLabel(l);
 					l.item = TextItem.copy(ti);
 					l.tile = t;
 					l.active = mRelabelCnt;
@@ -529,8 +573,7 @@ public class TextOverlay extends BasicOverlay {
 			}
 		}
 
-		for (Label ti = (Label) tl.labels; ti != null; ti = (Label) ti.next) {
-
+		for (Label ti = mLabels; ti != null; ti = (Label) ti.next) {
 			if (ti.text.caption)
 				continue;
 
@@ -546,17 +589,20 @@ public class TextOverlay extends BasicOverlay {
 			}
 		}
 
-		// keep temporarily used Label
-		if (l != null) {
-			l.next = mPool;
-			mPool = l;
-		}
+		// temporarily used Label
+		mPool.release(l);
 
+		//reuse text layer
+		TextLayer tl = mTmpLayer;
+		mTmpLayer = null;
+
+		tl.labels = mLabels;
 		// draw text to bitmaps and create vertices
 		tl.prepare();
 
-		// after 'prepare' TextLayer does not need TextItems any longer
-		mPrevLabels = (Label) tl.labels;
+		// after 'prepare' TextLayer does not need TextItems
+		mPrevLabels = mLabels;
+		mLabels = null;
 		tl.labels = null;
 
 		// remove tile locks

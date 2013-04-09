@@ -45,8 +45,8 @@ public abstract class Layer {
 	// - offset in byte in VBO
 	public int offset;
 
-	VertexPoolItem pool;
-	protected VertexPoolItem curItem;
+	VertexItem vertexItems;
+	protected VertexItem curItem;
 
 	abstract protected void compile(ShortBuffer sbuf);
 	abstract protected void clear();

@@ -167,7 +167,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			//Log.d(TAG, "Failed loading: " + tile);
 			mTile.layers.clear();
 			mTile.layers = null;
-			TextItem.release(mTile.labels);
+			TextItem.pool.releaseAll(mTile.labels);
 			mTile.labels = null;
 			// FIXME add STATE_FAILED?
 			mTile.state = STATE_NONE;
@@ -459,7 +459,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		float x = mWay.geom.points[0];
 		float y = mWay.geom.points[1];
 
-		mTile.addLabel(TextItem.get().set(x, y, value, text));
+		mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
 	}
 
 	@Override
@@ -471,7 +471,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		for (int i = 0, n = mGeom.index[0]; i < n; i += 2) {
 			float x = mGeom.points[i];
 			float y = mGeom.points[i + 1];
-			mTile.addLabel(TextItem.get().set(x, y, value, text));
+			mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
 		}
 	}
 

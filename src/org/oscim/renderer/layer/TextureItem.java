@@ -12,9 +12,13 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.renderer.layer;
 
 import java.util.ArrayList;
+
+import org.oscim.renderer.TextureRenderer;
+import org.oscim.utils.pool.Inlist;
+import org.oscim.utils.pool.SyncPool;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -25,11 +29,64 @@ import android.util.Log;
 /**
  * @author Hannes Janetzek
  */
-public class TextureObject {
-	private final static String TAG = TextureObject.class.getName();
+public class TextureItem extends Inlist<TextureItem> {
+	private final static String TAG = TextureItem.class.getName();
 
-	private static TextureObject pool;
-	private static int poolCount;
+	//  texture ID
+	public int id;
+
+	int width;
+	int height;
+
+	// vertex offset from which this texture is referenced
+	public short offset;
+	public short vertices;
+
+	// temporary Bitmap
+	public Bitmap bitmap;
+
+	TextureItem(int id) {
+		this.id = id;
+	}
+
+	public final static SyncPool<TextureItem> pool = new SyncPool<TextureItem>() {
+
+		@Override
+		public void init(int num) {
+			this.pool = null;
+
+			int[] textureIds = new int[num];
+			GLES20.glGenTextures(num, textureIds, 0);
+
+			for (int i = 1; i < num; i++) {
+				initTexture(textureIds[i]);
+				TextureItem to = new TextureItem(textureIds[i]);
+
+				to.next = this.pool;
+				this.pool = to;
+			}
+		}
+
+		@Override
+		public TextureItem get() {
+			TextureItem it = super.get();
+
+			it.bitmap = TextureItem.getBitmap();
+			it.bitmap.eraseColor(Color.TRANSPARENT);
+
+			return it;
+		}
+
+		@Override
+		protected TextureItem createItem() {
+			return new TextureItem(-1);
+		}
+
+		@Override
+		protected void clearItem(TextureItem it) {
+			TextureItem.releaseBitmap(it);
+		}
+	};
 
 	private static ArrayList<Bitmap> mBitmaps;
 
@@ -40,61 +97,11 @@ public class TextureObject {
 	private static int mBitmapType;
 
 	/**
-	 * Get a TextureObject with Bitmap to draw to.
-	 * 'uploadTexture()' uploads the Bitmap as texture.
-	 *
-	 * @return obtained TextureObject
-	 */
-	public static synchronized TextureObject get() {
-		TextureObject to;
-
-		if (pool == null) {
-			poolCount += 1;
-			if (TextureRenderer.debug)
-				Log.d(TAG, "textures: " + poolCount);
-			pool = new TextureObject(-1);
-		}
-
-		to = pool;
-		pool = pool.next;
-
-		to.next = null;
-
-		to.bitmap = getBitmap();
-		to.bitmap.eraseColor(Color.TRANSPARENT);
-
-		if (TextureRenderer.debug)
-			Log.d(TAG, "get texture " + to.id + " " + to.bitmap);
-
-		return to;
-	}
-
-	public static synchronized void release(TextureObject to) {
-		while (to != null) {
-			if (TextureRenderer.debug)
-				Log.d(TAG, "release texture " + to.id);
-
-			TextureObject next = to.next;
-
-			if (to.bitmap != null) {
-				mBitmaps.add(to.bitmap);
-				to.bitmap = null;
-			}
-
-			to.next = pool;
-			pool = to;
-
-			to = next;
-		}
-	}
-
-	/**
 	 * This function may only be used in GLRenderer Thread.
 	 *
 	 * @param to the TextureObjet to compile and upload
 	 */
-	public static synchronized void uploadTexture(TextureObject to) {
-		// FIXME what needs synchronized ?
+	public static void uploadTexture(TextureItem to) {
 
 		if (TextureRenderer.debug)
 			Log.d(TAG, "upload texture " + to.id);
@@ -104,6 +111,7 @@ public class TextureObject {
 			GLES20.glGenTextures(1, textureIds, 0);
 			to.id = textureIds[0];
 			initTexture(to.id);
+
 			if (TextureRenderer.debug)
 				Log.d(TAG, "new texture " + to.id);
 		}
@@ -111,11 +119,10 @@ public class TextureObject {
 		uploadTexture(to, to.bitmap, mBitmapFormat, mBitmapType,
 				TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
-		mBitmaps.add(to.bitmap);
-		to.bitmap = null;
+		TextureItem.releaseBitmap(to);
 	}
 
-	public static void uploadTexture(TextureObject to, Bitmap bitmap,
+	public static void uploadTexture(TextureItem to, Bitmap bitmap,
 			int format, int type, int w, int h) {
 
 		if (to == null) {
@@ -145,20 +152,8 @@ public class TextureObject {
 				GLES20.GL_CLAMP_TO_EDGE); // Set V Wrapping
 	}
 
-	static void init(int num) {
-		pool = null;
-		poolCount = num;
-
-		int[] textureIds = new int[num];
-		GLES20.glGenTextures(num, textureIds, 0);
-
-		for (int i = 1; i < num; i++) {
-			initTexture(textureIds[i]);
-			TextureObject to = new TextureObject(textureIds[i]);
-
-			to.next = pool;
-			pool = to;
-		}
+	public static void init(int num) {
+		pool.init(num);
 
 		mBitmaps = new ArrayList<Bitmap>(10);
 
@@ -174,39 +169,32 @@ public class TextureObject {
 		mBitmapType = GLUtils.getType(mBitmaps.get(0));
 	}
 
-	private static Bitmap getBitmap() {
-		int size = mBitmaps.size();
-		if (size == 0) {
-			Bitmap bitmap = Bitmap.createBitmap(
-					TEXTURE_WIDTH, TEXTURE_HEIGHT,
-					Bitmap.Config.ARGB_8888);
+	static Bitmap getBitmap() {
+		synchronized (mBitmaps) {
 
-			if (TextureRenderer.debug)
-				Log.d(TAG, "alloc bitmap: " +
-						android.os.Debug.getNativeHeapAllocatedSize() / (1024 * 1024));
+			int size = mBitmaps.size();
+			if (size == 0) {
+				Bitmap bitmap = Bitmap.createBitmap(
+						TEXTURE_WIDTH, TEXTURE_HEIGHT,
+						Bitmap.Config.ARGB_8888);
 
-			return bitmap;
+				if (TextureRenderer.debug)
+					Log.d(TAG, "alloc bitmap: " +
+							android.os.Debug.getNativeHeapAllocatedSize() / (1024 * 1024));
+
+				return bitmap;
+			}
+			return mBitmaps.remove(size - 1);
 		}
-		return mBitmaps.remove(size - 1);
 	}
 
-	// -----------------------
-	public TextureObject next;
+	static void releaseBitmap(TextureItem it) {
+		synchronized (mBitmaps) {
 
-	//  texture ID
-	int id;
-
-	int width;
-	int height;
-
-	// vertex offset from which this texture is referenced
-	public short offset;
-	public short vertices;
-
-	// temporary Bitmap
-	public Bitmap bitmap;
-
-	TextureObject(int id) {
-		this.id = id;
+			if (it.bitmap != null) {
+				mBitmaps.add(it.bitmap);
+				it.bitmap = null;
+			}
+		}
 	}
 }
