@@ -15,117 +15,45 @@
 package org.oscim.renderer.layer;
 
 import org.oscim.theme.renderinstruction.Text;
+import org.oscim.utils.pool.Inlist;
+import org.oscim.utils.pool.SyncPool;
 
-import android.util.Log;
-
-public class TextItem {
-	private final static String TAG = TextItem.class.getName();
+public class TextItem extends Inlist<TextItem> {
+	//private final static String TAG = TextItem.class.getName();
 	private final static int MAX_POOL = 250;
 
-	private static Object lock = new Object();
-	private static TextItem pool;
-	private static int count = 0;
-	private static int inPool = 0;
+	public final static SyncPool<TextItem> pool = new SyncPool<TextItem>(MAX_POOL) {
 
-	public static TextItem get() {
-		synchronized (lock) {
-			if (pool == null) {
-				count++;
-				return new TextItem();
-			}
-
-			inPool--;
-			TextItem ti = pool;
-			pool = pool.next;
-
-			ti.next = null;
-			//ti.active = 0;
-			return ti;
+		@Override
+		protected TextItem createItem() {
+			return new TextItem();
 		}
-	}
+
+		@Override
+		protected void clearItem(TextItem ti) {
+			// drop references
+			ti.string = null;
+			ti.text = null;
+			ti.n1 = null;
+			ti.n2 = null;
+		}
+	};
 
 	public static TextItem copy(TextItem orig) {
-		synchronized (lock) {
-			TextItem ti = pool;
 
-			if (ti == null) {
-				count++;
-				ti = new TextItem();
-			} else {
-				inPool--;
-				pool = pool.next;
-			}
+		TextItem ti = pool.get();
 
-			ti.next = null;
+		ti.next = null;
 
-			ti.x = orig.x;
-			ti.y = orig.y;
+		ti.x = orig.x;
+		ti.y = orig.y;
 
-			ti.x1 = orig.x1;
-			ti.y1 = orig.y1;
-			ti.x2 = orig.x2;
-			ti.y2 = orig.y2;
+		ti.x1 = orig.x1;
+		ti.y1 = orig.y1;
+		ti.x2 = orig.x2;
+		ti.y2 = orig.y2;
 
-			return ti;
-		}
-	}
-
-	//	public static void append(TextItem ti, TextItem in) {
-	//		if (ti == null)
-	//			return;
-	//		if (ti.next == null) {
-	//			in.next = ti.next;
-	//			ti.next = in;
-	//		}
-	//
-	//		TextItem t = ti;
-	//		while (t.next != null)
-	//			t = t.next;
-	//
-	//		in.next = t.next;
-	//		t.next = in;
-	//	}
-
-	public static void release(TextItem ti) {
-		if (ti == null)
-			return;
-
-		if (inPool > MAX_POOL) {
-			while (ti != null) {
-				TextItem next = ti.next;
-
-				// drop references
-				ti.string = null;
-				ti.text = null;
-				ti.n1 = null;
-				ti.n2 = null;
-				ti = next;
-				count--;
-			}
-		}
-
-		synchronized (lock) {
-			while (ti != null) {
-				TextItem next = ti.next;
-				ti.next = pool;
-
-				// drop references
-				ti.string = null;
-				ti.text = null;
-				ti.n1 = null;
-				ti.n2 = null;
-
-				pool = ti;
-
-				ti = next;
-
-				inPool++;
-			}
-		}
-	}
-
-	public static void printPool() {
-		Log.d(TAG, "in pool " + inPool + " / " + count);
+		return ti;
 	}
 
 	public TextItem set(float x, float y, String string, Text text) {
@@ -135,33 +63,6 @@ public class TextItem {
 		this.text = text;
 		this.width = text.paint.measureText(string);
 		return this;
-	}
-
-	public TextItem move(TextItem ti, float dx, float dy) {
-		this.x = dx + ti.x;
-		this.y = dy + ti.y;
-		return this;
-
-	}
-
-	public TextItem move(TextItem ti, float dx, float dy, float scale) {
-		this.x = (dx + ti.x) * scale;
-		this.y = (dy + ti.y) * scale;
-		return this;
-	}
-
-	public void clone(TextItem ti){
-		this.string = ti.string;
-		this.text = ti.text;
-		this.width = ti.width;
-		this.length = ti.length;
-	}
-
-	public void setAxisAlignedBBox() {
-		this.x1 = x - width / 2;
-		this.y1 = y - text.fontHeight / 2;
-		this.x2 = x + width / 2;
-		this.y2 = y + text.fontHeight / 2;
 	}
 
 	public static boolean bboxOverlaps(TextItem it1, TextItem it2, float add) {
@@ -194,7 +95,7 @@ public class TextItem {
 	}
 
 	// link to next node
-	public TextItem next;
+	//public TextItem next;
 
 	// center
 	public float x, y;

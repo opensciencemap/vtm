@@ -77,7 +77,7 @@ public class GridOverlay extends BasicOverlay {
 
 		for (int i = -2; i < 2; i++) {
 			for (int j = -2; j < 2; j++) {
-				TextItem ti = TextItem.get().set(size * j + size / 2, size * i + size / 2,
+				TextItem ti = TextItem.pool.get().set(size * j + size / 2, size * i + size / 2,
 						(x + j) + " / " + (y + i) + " / " + z, mText);
 
 				// TextItem ti = new TextItem(size * j + size / 2, size * i +

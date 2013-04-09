@@ -28,14 +28,14 @@ public final class PolygonLayer extends Layer {
 	PolygonLayer(int layer) {
 		this.level = layer;
 		this.type = Layer.POLYGON;
-		curItem = VertexPool.get();
-		pool = curItem;
+		curItem = VertexItem.pool.get();
+		vertexItems = curItem;
 	}
 
 	public void addPolygon(float[] points, short[] index) {
 		short center = (short) ((Tile.SIZE >> 1) * S);
 
-		VertexPoolItem si = curItem;
+		VertexItem si = curItem;
 		short[] v = si.vertices;
 		int outPos = si.used;
 
@@ -54,8 +54,8 @@ public final class PolygonLayer extends Layer {
 
 			int inPos = pos;
 
-			if (outPos == VertexPoolItem.SIZE) {
-				si = si.next = VertexPool.get();
+			if (outPos == VertexItem.SIZE) {
+				si = si.next = VertexItem.pool.get();
 				v = si.vertices;
 				outPos = 0;
 			}
@@ -64,8 +64,8 @@ public final class PolygonLayer extends Layer {
 			v[outPos++] = center;
 
 			for (int j = 0; j < length; j += 2) {
-				if (outPos == VertexPoolItem.SIZE) {
-					si = si.next = VertexPool.get();
+				if (outPos == VertexItem.SIZE) {
+					si = si.next = VertexItem.pool.get();
 					v = si.vertices;
 					outPos = 0;
 				}
@@ -73,8 +73,8 @@ public final class PolygonLayer extends Layer {
 				v[outPos++] = (short) (points[inPos++] * S);
 			}
 
-			if (outPos == VertexPoolItem.SIZE) {
-				si = si.next = VertexPool.get();
+			if (outPos == VertexItem.SIZE) {
+				si = si.next = VertexItem.pool.get();
 				v = si.vertices;
 				outPos = 0;
 			}

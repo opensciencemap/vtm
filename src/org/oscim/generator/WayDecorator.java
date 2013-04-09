@@ -194,7 +194,7 @@ public final class WayDecorator {
 				y2 = prevY;
 			}
 
-			TextItem n = TextItem.get();
+			TextItem n = TextItem.pool.get();
 
 			// link items together
 			if (t != null) {

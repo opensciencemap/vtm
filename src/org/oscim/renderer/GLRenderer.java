@@ -32,6 +32,7 @@ import javax.microedition.khronos.opengles.GL10;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.layer.Layers;
+import org.oscim.renderer.layer.TextureItem;
 import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.theme.RenderTheme;
 import org.oscim.utils.GlUtils;
@@ -646,7 +647,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		LineTexRenderer.init();
 		PolygonRenderer.init();
 		TextureRenderer.init();
-		TextureObject.init(10);
+		TextureItem.init(10);
 
 		mNewSurface = true;
 	}

@@ -14,11 +14,29 @@
  */
 package org.oscim.renderer.layer;
 
-public class VertexPoolItem {
+import org.oscim.utils.pool.Inlist;
+import org.oscim.utils.pool.SyncPool;
+
+public class VertexItem extends Inlist<VertexItem> {
+
+	private static final int MAX_POOL = 500;
+
+	public final static SyncPool<VertexItem> pool = new SyncPool<VertexItem>(MAX_POOL) {
+
+		@Override
+		protected VertexItem createItem() {
+			return new VertexItem();
+		}
+
+		@Override
+		protected void clearItem(VertexItem it) {
+			it.used = 0;
+		}
+	};
+
 	public final short[] vertices = new short[SIZE];
 
 	public int used;
-	public VertexPoolItem next;
 
 	// must be multiple of
 	// 4 (LineLayer/PolygonLayer),

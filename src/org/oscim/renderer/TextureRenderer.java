@@ -18,6 +18,7 @@ package org.oscim.renderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.TextureLayer;
+import org.oscim.renderer.layer.TextureItem;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
@@ -74,7 +75,7 @@ public final class TextureRenderer {
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, GLRenderer.mQuadIndicesID);
 
-		for (TextureObject to = tl.textures; to != null; to = to.next) {
+		for (TextureItem to = tl.textures; to != null; to = to.next) {
 
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
 			int maxVertices = GLRenderer.maxQuads * INDICES_PER_SPRITE;

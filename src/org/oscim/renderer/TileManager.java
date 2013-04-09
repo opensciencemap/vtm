@@ -27,7 +27,6 @@ import org.oscim.core.Tile;
 import org.oscim.generator.JobTile;
 import org.oscim.generator.TileDistanceSort;
 import org.oscim.renderer.layer.TextItem;
-import org.oscim.renderer.layer.VertexPool;
 import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
@@ -112,11 +111,12 @@ public class TileManager {
 			// pass VBOs and VertexItems back to pools
 			for (int i = 0; i < mTilesSize; i++)
 				clearTile(mTiles[i]);
-		} else {
+		}
+		//else {
 			// mInitialized is set when surface changed
 			// and VBOs might be lost
-			VertexPool.init();
-		}
+		//	VertexPool.init();
+		//}
 
 		// clear cache index
 		QuadTree.init();
@@ -397,7 +397,7 @@ public class TileManager {
 			t.layers = null;
 		}
 
-		TextItem.release(t.labels);
+		TextItem.pool.releaseAll(t.labels);
 
 		QuadTree.remove(t);
 		t.state = STATE_NONE;

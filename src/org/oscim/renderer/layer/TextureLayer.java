@@ -16,14 +16,13 @@ package org.oscim.renderer.layer;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.renderer.TextureObject;
 
 /**
  * @author Hannes Janetzek
  */
 public abstract class TextureLayer extends Layer {
 	// holds textures and offset in vbo
-	public TextureObject textures;
+	public TextureItem textures;
 
 	// scale mode
 	public boolean fixed;
@@ -35,8 +34,8 @@ public abstract class TextureLayer extends Layer {
 	@Override
 	protected void compile(ShortBuffer sbuf) {
 
-		for (TextureObject to = textures; to != null; to = to.next)
-			TextureObject.uploadTexture(to);
+		for (TextureItem to = textures; to != null; to = to.next)
+			TextureItem.uploadTexture(to);
 
 		// add vertices to vbo
 		Layers.addPoolItems(this, sbuf);
