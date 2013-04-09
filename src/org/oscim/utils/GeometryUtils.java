@@ -112,8 +112,8 @@ public final class GeometryUtils {
 			// The lines are parallel.
 			// Check if they're collinear.
 			double y3LessY1 = y3 - y1;
-			double collinearityTestForP3 = x1 * (y2 - y3) + x2 * (y3LessY1) + x3 * (y1 - y2); // see
-																								// http://mathworld.wolfram.com/Collinear.html
+			// see http://mathworld.wolfram.com/Collinear.html
+			double collinearityTestForP3 = x1 * (y2 - y3) + x2 * (y3LessY1) + x3 * (y1 - y2);
 			// If p3 is collinear with p1 and p2 then p4 will also be collinear,
 			// since p1-p2 is parallel with p3-p4
 			if (collinearityTestForP3 == 0) {

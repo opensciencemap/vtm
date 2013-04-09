@@ -16,10 +16,11 @@ package org.oscim.renderer.layer;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.utils.pool.Inlist;
 /**
  * @authorHannes Janetzek
  */
-public abstract class Layer {
+public abstract class Layer extends Inlist<Layer>{
 	public final static byte LINE = 0;
 	public final static byte POLYGON = 1;
 	public final static byte TEXLINE = 2;
@@ -30,8 +31,6 @@ public abstract class Layer {
 	public final static byte EXTRUSION = 7;
 
 	public byte type = -1;
-
-	public Layer next;
 
 	// drawing order from bottom to top
 	int level;

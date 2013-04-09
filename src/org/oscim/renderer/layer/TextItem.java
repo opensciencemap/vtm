@@ -43,8 +43,6 @@ public class TextItem extends Inlist<TextItem> {
 
 		TextItem ti = pool.get();
 
-		ti.next = null;
-
 		ti.x = orig.x;
 		ti.y = orig.y;
 
@@ -54,6 +52,22 @@ public class TextItem extends Inlist<TextItem> {
 		ti.y2 = orig.y2;
 
 		return ti;
+	}
+
+	public static boolean shareText(TextItem ti1, TextItem ti2){
+		if (ti1.text != ti2.text)
+			return false;
+
+		if (ti1.string == ti2.string)
+			return true;
+
+		if (ti1.string.equals(ti2.string)){
+			// make strings unique, should be done only once..
+			ti1.string = ti2.string;
+			return true;
+		}
+
+		return false;
 	}
 
 	public TextItem set(float x, float y, String string, Text text) {
