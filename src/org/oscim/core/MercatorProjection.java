@@ -51,13 +51,13 @@ public final class MercatorProjection {
 	 * @param latitude
 	 *            the latitude coordinate at which the resolution should be
 	 *            calculated.
-	 * @param zoomLevel
-	 *            the zoom level at which the resolution should be calculated.
+	 * @param scale
+	 *            the map scale at which the resolution should be calculated.
 	 * @return the ground resolution at the given latitude and zoom level.
 	 */
-	public static double calculateGroundResolution(double latitude, int zoomLevel) {
+	public static double calculateGroundResolution(double latitude, double scale) {
 		return Math.cos(latitude * (Math.PI / 180)) * EARTH_CIRCUMFERENCE
-				/ ((long) Tile.SIZE << zoomLevel);
+				/ (Tile.SIZE * scale);
 	}
 
 	/**
@@ -84,11 +84,23 @@ public final class MercatorProjection {
 	 * @return the position .
 	 */
 	public static double longitudeToX(double longitude) {
-		return (longitude + 180) / 360;
+		return (longitude + 180.0) / 360.0;
 	}
 
 	public static double toLongitude(double x) {
-		return 360 * (x - 0.5);
+		return 360.0 * (x - 0.5);
+	}
+
+	public static PointD project(GeoPoint p, PointD reuse) {
+		if (reuse == null)
+			reuse = new PointD();
+
+		reuse.x = ((p.longitudeE6 / 1E6) + 180.0) / 360.0;
+
+		double sinLatitude = Math.sin((p.latitudeE6 / 1E6) * (Math.PI / 180.0));
+		reuse.y = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude)) / (4.0 * Math.PI);
+
+		return reuse;
 	}
 
 	/**
@@ -117,65 +129,6 @@ public final class MercatorProjection {
 			return Math.max(Math.min(longitude - 360, LONGITUDE_MAX), LONGITUDE_MIN);
 
 		return longitude;
-	}
-
-	/**
-	 * Converts a pixel X coordinate at a certain zoom level to a longitude
-	 * coordinate.
-	 *
-	 * @param pixelX
-	 *            the pixel X coordinate that should be converted.
-	 * @param zoomLevel
-	 *            the zoom level at which the coordinate should be converted.
-	 * @return the longitude value of the pixel X coordinate.
-	 */
-	public static double pixelXToLongitude(double pixelX, int zoomLevel) {
-		return 360 * ((pixelX / ((long) Tile.SIZE << zoomLevel)) - 0.5);
-	}
-
-	/**
-	 * Converts a longitude coordinate (in degrees) to a pixel X coordinate at a
-	 * certain zoom level.
-	 *
-	 * @param longitude
-	 *            the longitude coordinate that should be converted.
-	 * @param zoomLevel
-	 *            the zoom level at which the coordinate should be converted.
-	 * @return the pixel X coordinate of the longitude value.
-	 */
-	public static double longitudeToPixelX(double longitude, int zoomLevel) {
-		return (longitude + 180) / 360 * ((long) Tile.SIZE << zoomLevel);
-	}
-
-	/**
-	 * Converts a pixel Y coordinate at a certain zoom level to a latitude
-	 * coordinate.
-	 *
-	 * @param pixelY
-	 *            the pixel Y coordinate that should be converted.
-	 * @param zoomLevel
-	 *            the zoom level at which the coordinate should be converted.
-	 * @return the latitude value of the pixel Y coordinate.
-	 */
-	public static double pixelYToLatitude(double pixelY, int zoomLevel) {
-		double y = 0.5 - (pixelY / ((long) Tile.SIZE << zoomLevel));
-		return 90 - 360 * Math.atan(Math.exp(-y * (2 * Math.PI))) / Math.PI;
-	}
-
-	/**
-	 * Converts a latitude coordinate (in degrees) to a pixel Y coordinate at a
-	 * certain zoom level.
-	 *
-	 * @param latitude
-	 *            the latitude coordinate that should be converted.
-	 * @param zoomLevel
-	 *            the zoom level at which the coordinate should be converted.
-	 * @return the pixel Y coordinate of the latitude value.
-	 */
-	public static double latitudeToPixelY(double latitude, int zoomLevel) {
-		double sinLatitude = Math.sin(latitude * (Math.PI / 180));
-		return (0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI))
-				* ((long) Tile.SIZE << zoomLevel);
 	}
 
 	private MercatorProjection() {

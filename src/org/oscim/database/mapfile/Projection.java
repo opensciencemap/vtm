@@ -14,7 +14,6 @@
  */
 package org.oscim.database.mapfile;
 
-import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 
 public class Projection {
@@ -31,7 +30,7 @@ public class Projection {
 	 * @return the longitude value of the tile X number.
 	 */
 	public static double tileXToLongitude(long tileX, int zoomLevel) {
-		return MercatorProjection.pixelXToLongitude(tileX * Tile.SIZE, zoomLevel);
+		return pixelXToLongitude(tileX * Tile.SIZE, zoomLevel);
 	}
 
 	/**
@@ -45,7 +44,7 @@ public class Projection {
 	 * @return the latitude value of the tile Y number.
 	 */
 	public static double tileYToLatitude(long tileY, int zoomLevel) {
-		return MercatorProjection.pixelYToLatitude(tileY * Tile.SIZE, zoomLevel);
+		return pixelYToLatitude(tileY * Tile.SIZE, zoomLevel);
 	}
 
 	/**
@@ -59,7 +58,7 @@ public class Projection {
 	 * @return the tile Y number of the latitude value.
 	 */
 	public static long latitudeToTileY(double latitude, int zoomLevel) {
-		return pixelYToTileY(MercatorProjection.latitudeToPixelY(latitude, zoomLevel), zoomLevel);
+		return pixelYToTileY(latitudeToPixelY(latitude, zoomLevel), zoomLevel);
 	}
 
 	/**
@@ -73,7 +72,7 @@ public class Projection {
 	 * @return the tile X number of the longitude value.
 	 */
 	public static long longitudeToTileX(double longitude, int zoomLevel) {
-		return pixelXToTileX(MercatorProjection.longitudeToPixelX(longitude, zoomLevel), zoomLevel);
+		return pixelXToTileX(longitudeToPixelX(longitude, zoomLevel), zoomLevel);
 	}
 
 	/**
@@ -101,6 +100,65 @@ public class Projection {
 	public static int pixelYToTileY(double pixelY, int zoomLevel) {
 		return (int) Math.min(Math.max(pixelY / Tile.SIZE, 0),
 				Math.pow(2, zoomLevel) - 1);
+	}
+
+	/**
+	 * Converts a pixel X coordinate at a certain zoom level to a longitude
+	 * coordinate.
+	 *
+	 * @param pixelX
+	 *            the pixel X coordinate that should be converted.
+	 * @param zoomLevel
+	 *            the zoom level at which the coordinate should be converted.
+	 * @return the longitude value of the pixel X coordinate.
+	 */
+	public static double pixelXToLongitude(double pixelX, int zoomLevel) {
+		return 360 * ((pixelX / ((long) Tile.SIZE << zoomLevel)) - 0.5);
+	}
+
+	/**
+	 * Converts a longitude coordinate (in degrees) to a pixel X coordinate at a
+	 * certain zoom level.
+	 *
+	 * @param longitude
+	 *            the longitude coordinate that should be converted.
+	 * @param zoomLevel
+	 *            the zoom level at which the coordinate should be converted.
+	 * @return the pixel X coordinate of the longitude value.
+	 */
+	public static double longitudeToPixelX(double longitude, int zoomLevel) {
+		return (longitude + 180) / 360 * ((long) Tile.SIZE << zoomLevel);
+	}
+
+	/**
+	 * Converts a pixel Y coordinate at a certain zoom level to a latitude
+	 * coordinate.
+	 *
+	 * @param pixelY
+	 *            the pixel Y coordinate that should be converted.
+	 * @param zoomLevel
+	 *            the zoom level at which the coordinate should be converted.
+	 * @return the latitude value of the pixel Y coordinate.
+	 */
+	public static double pixelYToLatitude(double pixelY, int zoomLevel) {
+		double y = 0.5 - (pixelY / ((long) Tile.SIZE << zoomLevel));
+		return 90 - 360 * Math.atan(Math.exp(-y * (2 * Math.PI))) / Math.PI;
+	}
+
+	/**
+	 * Converts a latitude coordinate (in degrees) to a pixel Y coordinate at a
+	 * certain zoom level.
+	 *
+	 * @param latitude
+	 *            the latitude coordinate that should be converted.
+	 * @param zoomLevel
+	 *            the zoom level at which the coordinate should be converted.
+	 * @return the pixel Y coordinate of the latitude value.
+	 */
+	public static double latitudeToPixelY(double latitude, int zoomLevel) {
+		double sinLatitude = Math.sin(latitude * (Math.PI / 180));
+		return (0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI))
+				* ((long) Tile.SIZE << zoomLevel);
 	}
 	private Projection(){
 
