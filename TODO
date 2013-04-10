@@ -1,21 +1,26 @@
-- refactor projection functions which are currently spread all over the place
+- overlays
+  - general shape render overlay
+  - overpass-api overlay
+  - building model overlay
 
-- rewrite TouchHandler, implement gesture recognition for rotation/tilt/scaling
-
-- cache: 
-	- collect tiles from 4 zoomlevels into one cache-tile (GEM-File?)
+- cache:
+  - collect tiles from 4 zoomlevels into one cache-tile (GEM-File?)
 
 - labeling
-  - use relevance tag, sort labels by relevance for faster dynamic placement 
+  - use relevance tag, sort labels by relevance for faster dynamic placement
   - throw out overlapping labels with less relevance!
 	- use separate datasource?
-  	this would allow for reuse in multiple zoomlevels and 
+  	this would allow for reuse in multiple zoomlevels and
   	reducing the problem of tile clipped ways
   - text renderer for paths
   - interface for different placement algorithms
   - support icon+text items
-  
-- zoom to bounding box animator
+
+
+- extract map position animator
+  - add smooth fly-to
+
+- integrate libosmscout or similar for offline maps/poi search and routing
 
 - gl-compositing of overlay item bubble
 
