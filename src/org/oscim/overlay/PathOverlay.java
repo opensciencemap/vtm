@@ -22,6 +22,7 @@ import java.util.List;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.core.PointD;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
@@ -48,10 +49,12 @@ public class PathOverlay extends Overlay {
 	class RenderPath extends BasicOverlay {
 
 		private static final byte MAX_ZOOM = 20;
+		private final double MAX_SCALE;
 		private static final int MIN_DIST = 4;
 
 		// pre-projected points to zoomlovel 20
 		private int[] mPreprojected;
+		private final PointD mMapPoint;
 
 		// projected points
 		private float[] mPPoints;
@@ -68,6 +71,8 @@ public class PathOverlay extends Overlay {
 			mLine = new Line(Color.BLUE, 3.0f, Cap.BUTT);
 			mIndex = new short[1];
 			mPPoints = new float[1];
+			mMapPoint = new PointD();
+			MAX_SCALE = (1 << MAX_ZOOM) * Tile.SIZE;
 		}
 
 		// note: this is called from GL-Thread. so check your syncs!
@@ -99,10 +104,9 @@ public class PathOverlay extends Overlay {
 
 					for (int i = 0, j = 0; i < size; i++, j += 2) {
 						GeoPoint p = geopoints.get(i);
-						points[j + 0] = (int) MercatorProjection.longitudeToPixelX(
-								p.getLongitude(), MAX_ZOOM);
-						points[j + 1] = (int) MercatorProjection.latitudeToPixelY(
-								p.getLatitude(), MAX_ZOOM);
+						MercatorProjection.project(p, mMapPoint);
+						points[j + 0] = (int) (mMapPoint.x * MAX_SCALE);
+						points[j + 1] = (int) (mMapPoint.y * MAX_SCALE);
 					}
 				}
 			}

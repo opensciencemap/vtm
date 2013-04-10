@@ -21,15 +21,14 @@ package org.oscim.overlay;
 // - and to make this work for multiple overlays
 //   a global scenegraph is probably required.
 
-import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.core.PointD;
 import org.oscim.core.Tile;
 import org.oscim.overlay.OverlayItem.HotspotPlace;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.SymbolLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
-import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
 import android.content.res.Resources;
@@ -73,8 +72,9 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	private int mSize;
 
-	// pre-projected points to zoomlovel 18
-	private static final byte MAX_ZOOM = 18;
+	// pre-projected points to zoomlevel 20
+	private static final byte MAX_ZOOM = 20;
+	private final double MAX_SCALE;
 
 	class ItemOverlay extends BasicOverlay {
 
@@ -97,12 +97,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 			mUpdate = false;
 
-			//int mx = (int) curPos.x;
-			//int my = (int) curPos.y;
-
-			//int z = curPos.zoomLevel;
-
-			int z = FastMath.log2((int) curPos.scale);
+			int z = curPos.zoomLevel;
 			int diff = MAX_ZOOM - z;
 
 			int mx = (int) (curPos.x * (Tile.SIZE << z));
@@ -177,14 +172,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 				// updateMapPosition();
 				mMapPosition.copy(curPos);
 
-				//mMapPosition.x = curPos.x;
-				//mMapPosition.y = curPos.y;
-				//mMapPosition.zoomLevel = curPos.zoomLevel;
-				//mMapPosition.scale = curPos.scale;
-				//mMapPosition.angle = curPos.angle;
-
-				// items are placed relative to scale == 1
-				// mMapPosition.scale = 1;
+				// items are placed relative to zoomLevel
 				mMapPosition.scale = 1 << z;
 
 				layers.clear();
@@ -251,7 +239,11 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 		this.mDefaultMarker = pDefaultMarker;
 		mLayer = new ItemOverlay(mapView);
+
+		MAX_SCALE = (1 << MAX_ZOOM) * Tile.SIZE;
 	}
+
+	private final PointD mMapPoint = new PointD();
 
 	/**
 	 * Utility method to perform all processing on a new ItemizedOverlay.
@@ -286,9 +278,11 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 				it.item = createItem(a);
 
 				// pre-project points
-				GeoPoint p = it.item.mGeoPoint;
-				it.px = (int) MercatorProjection.longitudeToPixelX(p.getLongitude(), MAX_ZOOM);
-				it.py = (int) MercatorProjection.latitudeToPixelY(p.getLatitude(), MAX_ZOOM);
+				MercatorProjection.project(it.item.mGeoPoint, mMapPoint);
+				it.px = (int) (mMapPoint.x * MAX_SCALE);
+				it.py = (int) (mMapPoint.y * MAX_SCALE);
+				//	it.px = (int) MercatorProjection.longitudeToPixelX(p.getLongitude(), MAX_ZOOM);
+				//	it.py = (int) MercatorProjection.latitudeToPixelY(p.getLatitude(), MAX_ZOOM);
 			}
 			mUpdate = true;
 		}
