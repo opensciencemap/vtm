@@ -193,6 +193,13 @@ public class MapView extends RelativeLayout {
 		//mOverlayManager.add(new GenericOverlay(this, new CustomOverlay(this)));
 		//mOverlayManager.add(new MapLensOverlay(this));
 
+		//PathOverlay path = new PathOverlay(this, Color.RED);
+		//path.addGreatCircle(new GeoPoint(53.1, 8.8), new GeoPoint(53.1, -110.0));
+		//mOverlayManager.add(path);
+		//path = new PathOverlay(this, Color.GREEN);
+		//path.addGreatCircle(new GeoPoint(53.1, 140), new GeoPoint(53.1, -110.0));
+		//mOverlayManager.add(path);
+
 		clearMap();
 	}
 
