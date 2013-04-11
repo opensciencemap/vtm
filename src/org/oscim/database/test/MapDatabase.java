@@ -34,17 +34,13 @@ import org.oscim.generator.JobTile;
 public class MapDatabase implements IMapDatabase {
 
 	private final static String PROJECTION = "Mercator";
-	//private float[] mCoords = new float[20];
-	//private short[] mIndex = new short[4];
 
 	GeometryBuffer mGeom = new GeometryBuffer(new float[20], new short[4]);
 
 	// private Tag[] mTags = { new Tag("boundary", "administrative"), new
 	// Tag("admin_level", "2") };
 	private final Tag[] mTags = { new Tag("natural", "water") };
-	private final Tag[] mTagsWay = { new Tag("highway", "primary"), new Tag("name", "Highway Rd") };
-
-	// private Tag[] mNameTags;
+	//private final Tag[] mTagsWay = { new Tag("highway", "primary"), new Tag("name", "Highway Rd") };
 
 	private final MapInfo mMapInfo =
 			new MapInfo(new BoundingBox(-180, -90, 180, 90),
