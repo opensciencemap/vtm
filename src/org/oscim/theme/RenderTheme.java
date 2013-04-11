@@ -19,6 +19,8 @@ import java.util.List;
 
 import org.oscim.core.Tag;
 import org.oscim.theme.renderinstruction.RenderInstruction;
+import org.oscim.theme.rule.Closed;
+import org.oscim.theme.rule.Rule;
 import org.oscim.utils.LRUCache;
 import org.xml.sax.Attributes;
 
@@ -88,13 +90,13 @@ public class RenderTheme {
 	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mWayCache;
 	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mAreaCache;
 
-	private final MatchingCacheKey mAreaCacheKey = new MatchingCacheKey();
-	private final MatchingCacheKey mWayCacheKey = new MatchingCacheKey();
-	private final MatchingCacheKey mNodeCacheKey = new MatchingCacheKey();
+	private final MatchingCacheKey mAreaCacheKey;
+	private final MatchingCacheKey mWayCacheKey;
+	private final MatchingCacheKey mNodeCacheKey;
 
-	private final ArrayList<RenderInstruction> mWayInstructionList = new ArrayList<RenderInstruction>(4);
-	private final ArrayList<RenderInstruction> mAreaInstructionList = new ArrayList<RenderInstruction>(4);
-	private final ArrayList<RenderInstruction> mNodeInstructionList = new ArrayList<RenderInstruction>(4);
+	private final ArrayList<RenderInstruction> mWayInstructionList;
+	private final ArrayList<RenderInstruction> mAreaInstructionList;
+	private final ArrayList<RenderInstruction> mNodeInstructionList;
 
 	private RenderInstructionItem mPrevAreaItem;
 	private RenderInstructionItem mPrevWayItem;
@@ -113,12 +115,17 @@ public class RenderTheme {
 		mBaseTextSize = baseTextSize;
 		mRulesList = new ArrayList<Rule>();
 
-		mNodesCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(
-				MATCHING_CACHE_SIZE);
-		mWayCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(
-				MATCHING_CACHE_SIZE);
-		mAreaCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(
-				MATCHING_CACHE_SIZE);
+		mNodesCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(MATCHING_CACHE_SIZE);
+		mWayCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(MATCHING_CACHE_SIZE);
+		mAreaCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(MATCHING_CACHE_SIZE);
+
+		mWayInstructionList = new ArrayList<RenderInstruction>(4);
+		mAreaInstructionList = new ArrayList<RenderInstruction>(4);
+		mNodeInstructionList = new ArrayList<RenderInstruction>(4);
+
+		mAreaCacheKey = new MatchingCacheKey();
+		mWayCacheKey = new MatchingCacheKey();
+		mNodeCacheKey = new MatchingCacheKey();
 	}
 
 	/**
@@ -152,7 +159,8 @@ public class RenderTheme {
 	}
 
 	/**
-	 *            ...
+	 * ...
+	 *
 	 * @param tags
 	 *            ...
 	 * @param zoomLevel
@@ -259,9 +267,6 @@ public class RenderTheme {
 		return ri.list;
 
 	}
-
-	//private int missCnt = 0;
-	//private int hitCnt = 0;
 
 	/**
 	 * Matches a way with the given parameters against this RenderTheme.
@@ -416,7 +421,10 @@ public class RenderTheme {
 		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
 			mRulesList.get(i).onComplete();
 		}
+	}
 
+	void setLevels(int levels) {
+		mLevels = levels;
 	}
 
 	/**
@@ -441,9 +449,5 @@ public class RenderTheme {
 		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
 			mRulesList.get(i).scaleTextSize(scaleFactor * mBaseTextSize);
 		}
-	}
-
-	void setLevels(int levels) {
-		mLevels = levels;
 	}
 }

@@ -12,31 +12,30 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme;
+package org.oscim.theme.rule;
 
 import org.oscim.core.Tag;
 
-final class AnyMatcher implements AttributeMatcher {
-	private static final AnyMatcher INSTANCE = new AnyMatcher();
+class SingleValueMatcher implements AttributeMatcher {
+	private final String mValue;
 
-	static AnyMatcher getInstance() {
-		return INSTANCE;
-	}
-
-	/**
-	 * Private constructor to prevent instantiation from other classes.
-	 */
-	private AnyMatcher() {
-		// do nothing
+	SingleValueMatcher(String value) {
+		mValue = value.intern();
 	}
 
 	@Override
 	public boolean isCoveredBy(AttributeMatcher attributeMatcher) {
-		return attributeMatcher == this;
+		Tag[] tags = { new Tag(null, mValue) };
+
+		return attributeMatcher == this || attributeMatcher.matches(tags);
 	}
 
 	@Override
 	public boolean matches(Tag[] tags) {
-		return true;
+		for (Tag tag : tags)
+			if (mValue == tag.value)
+				return true;
+
+		return false;
 	}
 }

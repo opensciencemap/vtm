@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme;
+package org.oscim.theme.rule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,10 +24,11 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 
 import org.oscim.core.Tag;
+import org.oscim.theme.RenderThemeHandler;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.xml.sax.Attributes;
 
-abstract class Rule {
+public abstract class Rule {
 	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_KEY = new HashMap<List<String>, AttributeMatcher>();
 	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_VALUE = new HashMap<List<String>, AttributeMatcher>();
 	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\|");
@@ -121,7 +122,7 @@ abstract class Rule {
 		}
 	}
 
-	static Rule create(String elementName, Attributes attributes, Stack<Rule> ruleStack) {
+	public static Rule create(String elementName, Attributes attributes, Stack<Rule> ruleStack) {
 		int element = Element.ANY;
 		String keys = null;
 		String values = null;
@@ -184,11 +185,11 @@ abstract class Rule {
 		mSubRules = new ArrayList<Rule>(4);
 	}
 
-	void addRenderingInstruction(RenderInstruction renderInstruction) {
+	public void addRenderingInstruction(RenderInstruction renderInstruction) {
 		mRenderInstructions.add(renderInstruction);
 	}
 
-	void addSubRule(Rule rule) {
+	public void addSubRule(Rule rule) {
 		mSubRules.add(rule);
 	}
 
@@ -196,7 +197,7 @@ abstract class Rule {
 
 	abstract boolean matchesWay(Tag[] tags);
 
-	void matchNode(Tag[] tags, byte zoomLevel,
+	public void matchNode(Tag[] tags, byte zoomLevel,
 			List<RenderInstruction> matchingList) {
 		if ((mElement != Element.WAY)
 				&& mZoomMin <= zoomLevel
@@ -212,7 +213,7 @@ abstract class Rule {
 		}
 	}
 
-	void matchWay(Tag[] tags, byte zoomLevel,
+	public void matchWay(Tag[] tags, byte zoomLevel,
 			int closed, List<RenderInstruction> matchingList) {
 
 		if ((mElement != Element.NODE)
@@ -233,7 +234,7 @@ abstract class Rule {
 		}
 	}
 
-	void onComplete() {
+	public void onComplete() {
 		MATCHERS_CACHE_KEY.clear();
 		MATCHERS_CACHE_VALUE.clear();
 
@@ -253,7 +254,7 @@ abstract class Rule {
 
 	}
 
-	void onDestroy() {
+	public void onDestroy() {
 		for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
 			mRenderInstructionArray[i].destroy();
 
@@ -262,7 +263,7 @@ abstract class Rule {
 
 	}
 
-	void scaleStrokeWidth(float scaleFactor) {
+	public void scaleStrokeWidth(float scaleFactor) {
 		for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
 			mRenderInstructionArray[i].scaleStrokeWidth(scaleFactor);
 
@@ -271,7 +272,7 @@ abstract class Rule {
 
 	}
 
-	void scaleTextSize(float scaleFactor) {
+	public void scaleTextSize(float scaleFactor) {
 		for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
 			mRenderInstructionArray[i].scaleTextSize(scaleFactor);
 

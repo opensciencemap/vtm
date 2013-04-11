@@ -12,27 +12,38 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme;
+package org.oscim.theme.rule;
 
 import org.oscim.core.Tag;
 
-class NegativeRule extends Rule {
-	final AttributeMatcher mAttributeMatcher;
+class PositiveRule extends Rule {
+	final AttributeMatcher mKeyMatcher;
+	final AttributeMatcher mValueMatcher;
 
-	NegativeRule(int element, int closed, byte zoomMin, byte zoomMax,
-			AttributeMatcher attributeMatcher) {
+	PositiveRule(int element, int closed, byte zoomMin, byte zoomMax,
+			AttributeMatcher keyMatcher, AttributeMatcher valueMatcher) {
 		super(element, closed, zoomMin, zoomMax);
 
-		mAttributeMatcher = attributeMatcher;
+		if (keyMatcher instanceof AnyMatcher)
+			mKeyMatcher = null;
+		else
+			mKeyMatcher = keyMatcher;
+
+		if (valueMatcher instanceof AnyMatcher)
+			mValueMatcher = null;
+		else
+			mValueMatcher = valueMatcher;
 	}
 
 	@Override
 	boolean matchesNode(Tag[] tags) {
-		return mAttributeMatcher.matches(tags);
+		return (mKeyMatcher == null || mKeyMatcher.matches(tags))
+				&& (mValueMatcher == null || mValueMatcher.matches(tags));
 	}
 
 	@Override
 	boolean matchesWay(Tag[] tags) {
-		return mAttributeMatcher.matches(tags);
+		return (mKeyMatcher == null || mKeyMatcher.matches(tags)) &&
+				(mValueMatcher == null || mValueMatcher.matches(tags));
 	}
 }
