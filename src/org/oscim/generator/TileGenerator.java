@@ -36,14 +36,15 @@ import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderTheme;
 import org.oscim.theme.renderinstruction.Area;
+import org.oscim.theme.renderinstruction.Circle;
 import org.oscim.theme.renderinstruction.Line;
+import org.oscim.theme.renderinstruction.LineSymbol;
 import org.oscim.theme.renderinstruction.RenderInstruction;
+import org.oscim.theme.renderinstruction.Symbol;
 import org.oscim.theme.renderinstruction.Text;
 import org.oscim.utils.LineClipper;
 import org.oscim.view.DebugSettings;
 
-import android.graphics.Bitmap;
-import android.graphics.Paint;
 import android.util.Log;
 
 /**
@@ -181,13 +182,13 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			mGeom = mDebugPoint;
 			RenderInstruction[] ri;
 			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
-			renderNode(ri, debugTagWay);
+			renderNode(ri);
 
 			// draw tile box
 			mWay = mDebugWay;
 			mDrawingLayer = 100 * renderLevels;
 			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
-			renderWay(ri, mDebugWay.tags);
+			renderWay(ri);
 		}
 
 		mTile = null;
@@ -278,7 +279,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			return;
 
 		mGeom = geom;
-		renderNode(ri, tags);
+		renderNode(ri);
 	}
 
 	@Override
@@ -297,7 +298,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		RenderInstruction[] ri = renderTheme.matchWay(way.tags,
 				(byte) (mTile.zoomLevel + 0), way.closed);
 
-		renderWay(ri, way.tags);
+		renderWay(ri);
 
 		if (debug.debugTheme && ri == null)
 			debugUnmatched(way.closed, way.tags);
@@ -317,23 +318,23 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		ri = renderTheme.matchWay(closed ? debugTagArea : debugTagWay,
 				(byte) 0, true);
 
-		renderWay(ri, tags);
+		renderWay(ri);
 	}
 
-	private void renderWay(RenderInstruction[] ri, Tag[] tags) {
+	private void renderWay(RenderInstruction[] ri) {
 		if (ri == null)
 			return;
 
 		for (int i = 0, n = ri.length; i < n; i++)
-			ri[i].renderWay(this, tags);
+			ri[i].renderWay(this);
 	}
 
-	private void renderNode(RenderInstruction[] ri, Tag[] tags) {
+	private void renderNode(RenderInstruction[] ri) {
 		if (ri == null)
 			return;
 
 		for (int i = 0, n = ri.length; i < n; i++)
-			ri[i].renderNode(this, tags);
+			ri[i].renderNode(this);
 	}
 
 	private void clearState() {
@@ -494,11 +495,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	}
 
 	@Override
-	public void renderPointOfInterestCircle(float radius, Paint fill, int level) {
+	public void renderPointOfInterestCircle(Circle circle, int level) {
 	}
 
 	@Override
-	public void renderPointOfInterestSymbol(Bitmap bitmap) {
+	public void renderPointOfInterestSymbol(Symbol symbol) {
 		// Log.d(TAG, "add symbol");
 
 		//		if (mLayers.textureLayers == null)
@@ -516,11 +517,11 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	}
 
 	@Override
-	public void renderAreaSymbol(Bitmap symbol) {
+	public void renderAreaSymbol(Symbol symbol) {
 	}
 
 	@Override
-	public void renderWaySymbol(Bitmap symbol, boolean alignCenter, boolean repeat) {
+	public void renderWaySymbol(LineSymbol symbol) {
 
 	}
 }

@@ -33,6 +33,8 @@ import java.util.HashMap;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.generator.JobTile;
+import org.oscim.graphics.Color;
+import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -56,8 +58,6 @@ import org.oscim.utils.pool.Pool;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
-import android.graphics.Color;
-import android.graphics.Paint.Cap;
 import android.opengl.GLES20;
 import android.os.SystemClock;
 

@@ -14,12 +14,12 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.core.Tag;
+import org.oscim.graphics.Color;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
 
-import android.graphics.Color;
+
 
 /**
  * Represents a closed polygon on the map.
@@ -135,7 +135,7 @@ public final class Area extends RenderInstruction {
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
+	public void renderWay(IRenderCallback renderCallback) {
 		renderCallback.renderArea(this, this.level);
 	}
 

@@ -17,13 +17,11 @@ package org.oscim.theme.renderinstruction;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import org.oscim.core.Tag;
+import org.oscim.graphics.Color;
+import org.oscim.graphics.Paint.Cap;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
-
-import android.graphics.Color;
-import android.graphics.Paint.Cap;
 
 /**
  * Represents a polyline on the map.
@@ -236,7 +234,7 @@ public final class Line extends RenderInstruction {
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
+	public void renderWay(IRenderCallback renderCallback) {
 		renderCallback.renderWay(this, level);
 	}
 

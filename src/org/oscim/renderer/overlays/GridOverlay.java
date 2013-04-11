@@ -16,6 +16,8 @@ package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.graphics.Color;
+import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
@@ -25,8 +27,6 @@ import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.Text;
 import org.oscim.view.MapView;
 
-import android.graphics.Color;
-import android.graphics.Paint.Cap;
 
 public class GridOverlay extends BasicOverlay {
 

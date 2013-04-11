@@ -17,15 +17,14 @@ package org.oscim.renderer.layer;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.Tile;
+import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
-import android.graphics.Paint.Cap;
 
 /**
- * @author Hannes Janetzek
  */
 public final class LineLayer extends Layer {
 	private static final float COORD_SCALE = GLRenderer.COORD_SCALE;

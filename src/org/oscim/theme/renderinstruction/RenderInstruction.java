@@ -14,7 +14,6 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.core.Tag;
 import org.oscim.theme.IRenderCallback;
 
 /**
@@ -30,19 +29,15 @@ public abstract class RenderInstruction {
 	/**
 	 * @param renderCallback
 	 *            a reference to the receiver of all render callbacks.
-	 * @param tags
-	 *            the tags of the node.
 	 */
-	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
+	public void renderNode(IRenderCallback renderCallback) {
 	}
 
 	/**
 	 * @param renderCallback
 	 *            a reference to the receiver of all render callbacks.
-	 * @param tags
-	 *            the tags of the way.
 	 */
-	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
+	public void renderWay(IRenderCallback renderCallback) {
 	}
 
 	/**

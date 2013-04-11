@@ -14,7 +14,6 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.core.Tag;
 import org.oscim.theme.IRenderCallback;
 
 public class AreaLevel extends RenderInstruction {
@@ -27,7 +26,7 @@ public class AreaLevel extends RenderInstruction {
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
+	public void renderWay(IRenderCallback renderCallback) {
 		renderCallback.renderArea(this.area, level);
 	}
 }
