@@ -16,7 +16,6 @@ package org.oscim.theme.renderinstruction;
 
 import java.io.IOException;
 
-import org.oscim.core.Tag;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
@@ -68,26 +67,26 @@ public final class LineSymbol extends RenderInstruction {
 		}
 	}
 
-	private final boolean mAlignCenter;
-	private final Bitmap mBitmap;
-	private final boolean mRepeat;
+	public final boolean alignCenter;
+	public final Bitmap bitmap;
+	public final boolean repeat;
 
 	private LineSymbol(String src, boolean alignCenter, boolean repeat)
 			throws IOException {
 		super();
 
-		mBitmap = BitmapUtils.createBitmap(src);
-		mAlignCenter = alignCenter;
-		mRepeat = repeat;
+		this.bitmap = BitmapUtils.createBitmap(src);
+		this.alignCenter = alignCenter;
+		this.repeat = repeat;
 	}
 
 	@Override
 	public void destroy() {
-		mBitmap.recycle();
+		bitmap.recycle();
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
-		renderCallback.renderWaySymbol(mBitmap, mAlignCenter, mRepeat);
+	public void renderWay(IRenderCallback renderCallback) {
+		renderCallback.renderWaySymbol(this);
 	}
 }

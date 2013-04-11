@@ -14,14 +14,11 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.core.Tag;
+import org.oscim.graphics.Color;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
 
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
 
 /**
  * Represents a round area on the map.
@@ -78,65 +75,38 @@ public final class Circle extends RenderInstruction {
 		}
 	}
 
-	private final Paint mFill;
-	private final int mLevel;
-	private final Paint mOutline;
-	private final float mRadius;
-	private float mRenderRadius;
-	private final boolean mScaleRadius;
-	private final float mStrokeWidth;
+	public final int level;
+
+	public final int fill;
+	public final int outline;
+	public final float radius;
+	public  float renderRadius;
+	public final boolean scaleRadius;
+	public final float strokeWidth;
 
 	private Circle(Float radius, boolean scaleRadius, int fill, int stroke,
 			float strokeWidth, int level) {
 		super();
 
-		mRadius = radius.floatValue();
-		mScaleRadius = scaleRadius;
+		this.radius = radius.floatValue();
+		this.scaleRadius = scaleRadius;
 
-		if (fill == Color.TRANSPARENT) {
-			mFill = null;
-		} else {
-			mFill = new Paint(Paint.ANTI_ALIAS_FLAG);
-			mFill.setStyle(Style.FILL);
-			mFill.setColor(fill);
-		}
+		this.fill = fill;
+		this.outline = stroke;
 
-		if (stroke == Color.TRANSPARENT) {
-			mOutline = null;
-		} else {
-			mOutline = new Paint(Paint.ANTI_ALIAS_FLAG);
-			mOutline.setStyle(Style.STROKE);
-			mOutline.setColor(stroke);
-		}
+		this.strokeWidth = strokeWidth;
+		this.level = level;
 
-		mStrokeWidth = strokeWidth;
-		mLevel = level;
-
-		if (!mScaleRadius) {
-			mRenderRadius = mRadius;
-			if (mOutline != null) {
-				mOutline.setStrokeWidth(mStrokeWidth);
-			}
-		}
+//if (!mScaleRadius) {
+//	mRenderRadius = mRadius;
+//	if (mOutline != null) {
+//		mOutline.setStrokeWidth(mStrokeWidth);
+//	}
+//}
 	}
 
 	@Override
-	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
-		if (mOutline != null) {
-			renderCallback.renderPointOfInterestCircle(mRenderRadius, mOutline, mLevel);
-		}
-		if (mFill != null) {
-			renderCallback.renderPointOfInterestCircle(mRenderRadius, mFill, mLevel);
-		}
-	}
-
-	@Override
-	public void scaleStrokeWidth(float scaleFactor) {
-		if (mScaleRadius) {
-			mRenderRadius = mRadius * scaleFactor;
-			if (mOutline != null) {
-				mOutline.setStrokeWidth(mStrokeWidth * scaleFactor);
-			}
-		}
+	public void renderNode(IRenderCallback renderCallback) {
+			renderCallback.renderPointOfInterestCircle(this, this.level);
 	}
 }

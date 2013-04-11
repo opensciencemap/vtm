@@ -14,9 +14,9 @@
  */
 package org.oscim.renderer.layer;
 
+import org.oscim.graphics.Canvas;
+import org.oscim.graphics.Graphics;
 import org.oscim.renderer.TextureRenderer;
-
-import android.graphics.Canvas;
 
 public final class TextLayer extends TextureLayer {
 
@@ -39,7 +39,7 @@ public final class TextLayer extends TextureLayer {
 
 	public TextLayer() {
 		type = Layer.SYMBOL;
-		mCanvas = new Canvas();
+		mCanvas = Graphics.res.getCanvas();
 		fixed = true;
 	}
 
@@ -139,13 +139,15 @@ public final class TextLayer extends TextureLayer {
 			float hw = width / 2.0f;
 			float hh = height / 2.0f;
 
-			float hh2 = 0;
-			if (!it.text.caption) {
-				// displace by baseline
-				float desc = it.text.fontDescent / 2;
-				hh2 = hh + desc;
-				hh =  hh - desc;
-			}
+			float hh2 = hh;
+			//if (!it.text.caption) {
+			//	// displace by baseline
+			//	float desc = 0; //(hh - (height - it.text.fontDescent) / 2);
+			//
+			//	//float desc = it.text.fontDescent / 2;
+			//	hh2 = hh + desc;
+			//	hh = hh - desc;
+			//}
 
 			// texture coordinates
 			short u1 = (short) (SCALE * x);
@@ -239,7 +241,6 @@ public final class TextLayer extends TextureLayer {
 				buf[pos++] = y4;
 				buf[pos++] = u2;
 				buf[pos++] = v1;
-
 
 				// six indices to draw the four vertices
 				numIndices += TextureRenderer.INDICES_PER_SPRITE;

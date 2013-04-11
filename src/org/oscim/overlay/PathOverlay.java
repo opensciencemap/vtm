@@ -24,17 +24,16 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.PointD;
 import org.oscim.core.Tile;
+import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.LineClipper;
 import org.oscim.view.MapView;
 
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Cap;
 
 /** This class draws a path line in given color. */
 public class PathOverlay extends Overlay {
@@ -43,8 +42,8 @@ public class PathOverlay extends Overlay {
 	final ArrayList<GeoPoint> mPoints;
 	/* package */boolean mUpdatePoints;
 
-	/** Paint settings. */
-	protected Paint mPaint = new Paint();
+	/** Line style */
+	/* package */ Line mLineStyle;
 
 	class RenderPath extends BasicOverlay {
 
@@ -60,15 +59,14 @@ public class PathOverlay extends Overlay {
 		private float[] mPPoints;
 		private final short[] mIndex;
 		private int mSize;
-
-		private final Line mLine;
+		private final LineClipper mClipper;
 
 		// limit coords
 		private final int max = 2048;
 
 		public RenderPath(MapView mapView) {
 			super(mapView);
-			mLine = new Line(Color.BLUE, 3.0f, Cap.BUTT);
+			mClipper = new LineClipper(-max, -max, max, max);
 			mIndex = new short[1];
 			mPPoints = new float[1];
 			mMapPoint = new PointD();
@@ -113,12 +111,12 @@ public class PathOverlay extends Overlay {
 
 			int size = mSize;
 
-			// layers.clear();
 			LineLayer ll = (LineLayer) layers.getLayer(1, Layer.LINE);
-			// reset verticesCnt to reuse layer
+			ll.line = mLineStyle;
+			ll.width = ll.line.width;
+
+			// Hack: reset verticesCnt to reuse layer
 			ll.verticesCnt = 0;
-			ll.line = mLine;
-			ll.width = 2.5f;
 
 			int x, y, px = 0, py = 0;
 			int i = 0;
@@ -167,36 +165,19 @@ public class PathOverlay extends Overlay {
 		}
 	}
 
-	public PathOverlay(MapView mapView, final int color) {
+	public PathOverlay(MapView mapView, int lineColor, float lineWidth) {
 		super(mapView);
-		this.mPaint.setColor(color);
-		this.mPaint.setStrokeWidth(2.0f);
-		this.mPaint.setStyle(Paint.Style.STROKE);
+
+		mLineStyle = new Line(lineColor, lineWidth, Cap.BUTT);
 
 		this.mPoints = new ArrayList<GeoPoint>();
 
 		mLayer = new RenderPath(mapView);
 	}
 
-	public void setColor(final int color) {
-		this.mPaint.setColor(color);
+	public PathOverlay(MapView mapView, int lineColor) {
+		this(mapView, lineColor, 2);
 	}
-
-	public void setAlpha(final int a) {
-		this.mPaint.setAlpha(a);
-	}
-
-	public Paint getPaint() {
-		return mPaint;
-	}
-
-	public void setPaint(final Paint pPaint) {
-		if (pPaint == null) {
-			throw new IllegalArgumentException("pPaint argument cannot be null");
-		}
-		mPaint = pPaint;
-	}
-
 	/**
 	 * Draw a great circle. Calculate a point for every 100km along the path.
 	 *
@@ -205,7 +186,7 @@ public class PathOverlay extends Overlay {
 	 * @param endPoint
 	 *            end point of the great circle
 	 */
-	public void addGreatCircle(final GeoPoint startPoint, final GeoPoint endPoint) {
+	public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint) {
 		synchronized (mPoints) {
 
 			// get the great circle path length in meters
@@ -228,7 +209,7 @@ public class PathOverlay extends Overlay {
 	 * @param numberOfPoints
 	 *            number of points to calculate along the path
 	 */
-	public void addGreatCircle(final GeoPoint startPoint, final GeoPoint endPoint,
+	public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint,
 			final int numberOfPoints) {
 		// adapted from page
 		// http://compastic.blogspot.co.uk/2011/07/how-to-draw-great-circle-on-map-in.html
@@ -276,15 +257,22 @@ public class PathOverlay extends Overlay {
 		}
 	}
 
-	public void addPoint(final GeoPoint pt) {
+	public void setPoints(List<GeoPoint> pts) {
 		synchronized (mPoints) {
-			mPoints.add(pt);
+			mPoints.clear();
+			mPoints.addAll(pts);
 			mUpdatePoints = true;
-
 		}
 	}
 
-	public void addPoint(final int latitudeE6, final int longitudeE6) {
+	public void addPoint(GeoPoint pt) {
+		synchronized (mPoints) {
+			mPoints.add(pt);
+			mUpdatePoints = true;
+		}
+	}
+
+	public void addPoint(int latitudeE6, int longitudeE6) {
 		synchronized (mPoints) {
 			mPoints.add(new GeoPoint(latitudeE6, longitudeE6));
 			mUpdatePoints = true;

@@ -15,11 +15,11 @@
 package org.oscim.theme;
 
 import org.oscim.theme.renderinstruction.Area;
+import org.oscim.theme.renderinstruction.Circle;
 import org.oscim.theme.renderinstruction.Line;
+import org.oscim.theme.renderinstruction.LineSymbol;
+import org.oscim.theme.renderinstruction.Symbol;
 import org.oscim.theme.renderinstruction.Text;
-
-import android.graphics.Bitmap;
-import android.graphics.Paint;
 
 /**
  * Callback methods for rendering areas, ways and points of interest (POIs).
@@ -41,19 +41,17 @@ public interface IRenderCallback {
 	 * @param symbol
 	 *            the symbol to be rendered.
 	 */
-	void renderAreaSymbol(Bitmap symbol);
+	void renderAreaSymbol(Symbol symbol);
 
 	/**
 	 * Renders a point of interest circle with the given parameters.
 	 *
-	 * @param radius
-	 *            the radius of the circle.
-	 * @param fill
-	 *            the paint to be used for rendering the circle.
+	 * @param circle
+	 *             the circle.
 	 * @param level
 	 *            the drawing level on which the circle should be rendered.
 	 */
-	void renderPointOfInterestCircle(float radius, Paint fill, int level);
+	void renderPointOfInterestCircle(Circle circle, int level);
 
 	/**
 	 * Renders a point of interest symbol with the given bitmap.
@@ -61,7 +59,7 @@ public interface IRenderCallback {
 	 * @param symbol
 	 *            the symbol to be rendered.
 	 */
-	void renderPointOfInterestSymbol(Bitmap symbol);
+	void renderPointOfInterestSymbol(Symbol symbol);
 
 	/**
 	 * Renders a way with the given parameters.
@@ -78,12 +76,8 @@ public interface IRenderCallback {
 	 *
 	 * @param symbol
 	 *            the symbol to be rendered.
-	 * @param alignCenter
-	 *            true if the symbol should be centered, false otherwise.
-	 * @param repeat
-	 *            true if the symbol should be repeated, false otherwise.
 	 */
-	void renderWaySymbol(Bitmap symbol, boolean alignCenter, boolean repeat);
+	void renderWaySymbol(LineSymbol symbol);
 
 	/**
 	 * Renders a way with the given text along the way path.

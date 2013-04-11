@@ -16,7 +16,6 @@ package org.oscim.theme.renderinstruction;
 
 import java.io.IOException;
 
-import org.oscim.core.Tag;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
@@ -76,12 +75,12 @@ public final class Symbol extends RenderInstruction {
 	}
 
 	@Override
-	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
-		renderCallback.renderPointOfInterestSymbol(bitmap);
+	public void renderNode(IRenderCallback renderCallback) {
+		renderCallback.renderPointOfInterestSymbol(this);
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
-		renderCallback.renderAreaSymbol(bitmap);
+	public void renderWay(IRenderCallback renderCallback) {
+		renderCallback.renderAreaSymbol(this);
 	}
 }

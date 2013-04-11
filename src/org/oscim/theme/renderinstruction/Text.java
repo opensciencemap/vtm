@@ -16,17 +16,16 @@ package org.oscim.theme.renderinstruction;
 
 import java.util.Locale;
 
-import org.oscim.core.Tag;
+import org.oscim.graphics.Color;
+import org.oscim.graphics.Graphics;
+import org.oscim.graphics.Paint;
+import org.oscim.graphics.Paint.Align;
+import org.oscim.graphics.Paint.FontFamily;
+import org.oscim.graphics.Paint.FontStyle;
+import org.oscim.graphics.Paint.Style;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
-
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.Paint.FontMetrics;
-import android.graphics.Paint.Style;
-import android.graphics.Typeface;
 
 /**
  * Represents a text along a polyline on the map.
@@ -85,25 +84,9 @@ public final class Text extends RenderInstruction {
 
 		validate(elementName, textKey, fontSize, strokeWidth);
 
-		Typeface typeface = null;
-		if (fontFamily == FontFamily.DEFAULT) {
-			if (fontStyle == FontStyle.NORMAL)
-				typeface = typefaceNormal;
-			else if (fontStyle == FontStyle.BOLD)
-				typeface = typefaceBold;
-		}
-
-		if (typeface == null)
-			typeface = Typeface.create(fontFamily.toTypeface(), fontStyle.toInt());
-
-		return new Text(style, textKey, typeface, fontSize, fill, stroke, strokeWidth, dy, caption, priority);
+		return new Text(style, textKey, fontFamily, fontStyle, fontSize, fill, stroke, strokeWidth,
+				dy, caption, priority);
 	}
-
-	private static Typeface typefaceNormal = Typeface.create(FontFamily.DEFAULT.toTypeface(),
-			FontStyle.NORMAL.toInt());
-
-	private static Typeface typefaceBold = Typeface.create(FontFamily.DEFAULT.toTypeface(),
-			FontStyle.BOLD.toInt());
 
 	private static void validate(String elementName, String textKey, float fontSize,
 			float strokeWidth) {
@@ -131,13 +114,16 @@ public final class Text extends RenderInstruction {
 
 	public float fontHeight;
 	public float fontDescent;
+
 	public static Text createText(float fontSize, float strokeWidth, int fill, int outline,
 			boolean billboard) {
 
-		return new Text("", "", typefaceNormal, fontSize, fill, outline, strokeWidth, 0, billboard, Integer.MAX_VALUE);
+		return new Text("", "", FontFamily.DEFAULT, FontStyle.NORMAL,
+				fontSize, fill, outline, strokeWidth, 0, billboard, Integer.MAX_VALUE);
 	}
 
-	private Text(String style, String textKey, Typeface typeface, float fontSize,
+	private Text(String style, String textKey, FontFamily fontFamily, FontStyle fontStyle,
+			float fontSize,
 			int fill, int outline, float strokeWidth, float dy, boolean caption, int priority) {
 
 		this.style = style;
@@ -146,17 +132,17 @@ public final class Text extends RenderInstruction {
 		this.dy = dy;
 		this.priority = priority;
 
-		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		paint = Graphics.res.getPaint();
 		paint.setTextAlign(Align.CENTER);
-		paint.setTypeface(typeface);
+		paint.setTypeface(fontFamily, fontStyle);
 		paint.setColor(fill);
 		paint.setTextSize(fontSize);
 
 		if (strokeWidth > 0) {
-			stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+			stroke = Graphics.res.getPaint();
 			stroke.setStyle(Style.STROKE);
 			stroke.setTextAlign(Align.CENTER);
-			stroke.setTypeface(typeface);
+			stroke.setTypeface(fontFamily, fontStyle);
 			stroke.setColor(outline);
 			stroke.setStrokeWidth(strokeWidth);
 			stroke.setTextSize(fontSize);
@@ -164,21 +150,16 @@ public final class Text extends RenderInstruction {
 			stroke = null;
 
 		this.fontSize = fontSize;
-
-		FontMetrics fm = paint.getFontMetrics();
-		fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
-		//fontDescent = (float) Math.ceil(Math.abs(fm.descent));
-		fontDescent = Math.abs(fm.bottom);
 	}
 
 	@Override
-	public void renderNode(IRenderCallback renderCallback, Tag[] tags) {
+	public void renderNode(IRenderCallback renderCallback) {
 		if (caption)
 			renderCallback.renderPointOfInterestCaption(this);
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback, Tag[] tags) {
+	public void renderWay(IRenderCallback renderCallback) {
 		if (caption)
 			renderCallback.renderAreaCaption(this);
 		else
@@ -191,8 +172,11 @@ public final class Text extends RenderInstruction {
 		if (stroke != null)
 			stroke.setTextSize(fontSize * scaleFactor);
 
-		FontMetrics fm = paint.getFontMetrics();
-		fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
-		fontDescent = (float) Math.ceil(Math.abs(fm.descent));
+		//		FontMetrics fm = paint.getFontMetrics();
+		//		fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
+		//		fontDescent = (float) Math.ceil(Math.abs(fm.descent));
+
+		fontHeight = paint.getFontHeight();
+		fontDescent = paint.getFontDescent();
 	}
 }
