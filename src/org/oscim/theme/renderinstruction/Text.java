@@ -106,10 +106,10 @@ public final class Text extends RenderInstruction {
 
 	public final float fontSize;
 	public final Paint paint;
-	public Paint stroke;
-	public String textKey;
+	public final Paint stroke;
+	public final String textKey;
 
-	public String style;
+	public final String style;
 	public final boolean caption;
 	public final float dy;
 	public final int priority;
