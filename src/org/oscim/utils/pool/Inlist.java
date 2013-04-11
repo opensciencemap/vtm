@@ -20,14 +20,14 @@ public class Inlist<T extends Inlist<T>> {
 
 	public T next;
 
-	static <T extends Inlist<T>> int size(Inlist<T> list) {
+	static <T extends Inlist<T>> int size(T list) {
 		int count = 0;
 		for (Inlist<T> l = list; l != null; l = l.next)
 			count++;
 		return count;
 	}
 
-	public static <T extends Inlist<T>> Inlist<T> remove(Inlist<T> list, Inlist<T> item) {
+	public static <T extends Inlist<T>> T remove(T list, T item) {
 		if (item == list) {
 			return item.next;
 		}
@@ -44,12 +44,12 @@ public class Inlist<T extends Inlist<T>> {
 	}
 
 
-	static <T extends Inlist<T>> Inlist<T> prepend(T list, T item) {
+	public static <T extends Inlist<T>> T prepend(T list, T item) {
 		item.next = list;
 		return item;
 	}
 
-	static <T extends Inlist<T>> Inlist<T> append(T list, T item) {
+	public static <T extends Inlist<T>> T append(T list, T item) {
 
 		if (debug) {
 			if (item.next != null) {

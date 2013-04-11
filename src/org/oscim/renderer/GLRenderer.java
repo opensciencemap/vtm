@@ -75,8 +75,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	private static float[] mTileCoords;
 
-	private static float[] mDebugCoords;
-
 	public class Matrices {
 		public final Matrix4 viewproj = new Matrix4();
 		public final Matrix4 proj = new Matrix4();
@@ -186,7 +184,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		mMatrices = new Matrices();
 		mTileCoords = new float[8];
-		mDebugCoords = new float[8];
 
 		// tile fill coords
 		short min = 0;
