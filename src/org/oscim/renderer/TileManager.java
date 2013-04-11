@@ -164,21 +164,7 @@ public class TileManager {
 
 		// scale and translate projection to tile coordinates
 		// load some tiles more than currently visible (* 0.75)
-		//		float scale = mapPosition.scale * 0.75f;
-		//		float tileScale = scale * Tile.SIZE;
-		//		double px = mapPosition.x * scale;
-		//		double py = mapPosition.y * scale;
-		//
-		//		float[] coords = mTileCoords;
-		//		mMapViewPosition.getMapViewProjection(coords);
-		//		for (int i = 0; i < 8; i += 2) {
-		//			coords[i + 0] = (float)(px + coords[i + 0]) / tileScale;
-		//			coords[i + 1] = (float)(py + coords[i + 1]) / tileScale;
-		//		}
-
-		// scale and translate projection to tile coordinates
-		// load some tiles more than currently visible (* 0.75)
-		double scale = pos.scale * 0.5f;
+		double scale = pos.scale * 0.9f;
 		double curScale = Tile.SIZE * scale;
 		int zoomLevel = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
 
@@ -409,44 +395,47 @@ public class TileManager {
 		// TODO there is probably  a better quad-tree distance function
 
 		int zoom = mapPosition.zoomLevel;
-		double x = mapPosition.x * (1 << zoom);
-		double y = mapPosition.y * (1 << zoom);
+		double x = mapPosition.x;
+		double y = mapPosition.y;
 
-		final float h = 0.5f;
-		long center = (long)(h * (1 << zoom));
+		// half tile size at current zoom-level
+		final double h = 1.0 / (2 << zoom);
+
+		//long center = (long)(h * (1 << zoom));
 
 		for (int i = 0; i < size; i++) {
-			JobTile t = (JobTile) tiles[i];
+			MapTile t = (MapTile) tiles[i];
 			if (t == null)
 				continue;
 
 			int diff = (t.zoomLevel - zoom);
-			double dx, dy, dz, scale;
-			dz = 0;
+			double dx, dy, scale;
 
 			if (diff == 0) {
-				dx = (t.tileX + h) - x;
-				dy = (t.tileY + h) - y;
+				dx = (t.x + h) - x;
+				dy = (t.y + h) - y;
 				scale = 0.5f;
 			} else if (diff > 0) {
 				// tile zoom level is greater than current
 				// NB: distance increase by the factor 2
 				// with each zoom-level, so that children
 				// will be kept less likely than parent tiles.
-				dx = (t.tileX + h) - x * (1 << diff);
-				dy = (t.tileY + h) - y * (1 << diff);
+				double dh = 1.0 / (2 << t.zoomLevel);
+				dx = (t.x + dh) - x;
+				dy = (t.y + dh) - y;
 				// add tilesize/2 with each zoom-level
 				// so that children near the current
 				// map position but a few levels above
 				// will also be removed
-				dz = diff * h;
-				scale = 0.25f * (1 << diff);
+				//dz = diff * h;
+				scale = (1 << diff);
 			} else {
 				diff = -diff;
 				// tile zoom level is smaller than current
-				dx = (t.tileX + h) - x / (1 << diff);
-				dy = (t.tileY + h) - y / (1 << diff);
-				dz = diff * h;
+				double dh = 1.0 / (2 << t.zoomLevel);
+
+				dx = (t.x + dh) - x;
+				dy = (t.y + dh) - y;
 				scale = 0.5f * (1 << diff);
 			}
 			if (dx < 0)
@@ -455,9 +444,7 @@ public class TileManager {
 			if (dy < 0)
 				dy = -dy;
 
-			dx %= center;
-			dy %= center;
-			t.distance = (float) ((dx + dy + dz) * scale);
+			t.distance = (float) ((dx + dy) * scale * 1024);
 		}
 	}
 
