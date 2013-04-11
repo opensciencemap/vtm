@@ -12,30 +12,10 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme;
+package org.oscim.theme.rule;
 
-import org.oscim.core.Tag;
-
-class SingleValueMatcher implements AttributeMatcher {
-	private final String mValue;
-
-	SingleValueMatcher(String value) {
-		mValue = value.intern();
-	}
-
-	@Override
-	public boolean isCoveredBy(AttributeMatcher attributeMatcher) {
-		Tag[] tags = { new Tag(null, mValue) };
-
-		return attributeMatcher == this || attributeMatcher.matches(tags);
-	}
-
-	@Override
-	public boolean matches(Tag[] tags) {
-		for (Tag tag : tags)
-			if (mValue == tag.value)
-				return true;
-
-		return false;
-	}
+public final class Closed {
+	public static final int ANY = 0;
+	public static final int NO = 1;
+	public static final int YES = 2;
 }

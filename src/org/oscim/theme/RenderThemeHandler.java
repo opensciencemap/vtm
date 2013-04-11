@@ -31,6 +31,7 @@ import org.oscim.theme.renderinstruction.LineSymbol;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.renderinstruction.Symbol;
 import org.oscim.theme.renderinstruction.Text;
+import org.oscim.theme.rule.Rule;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

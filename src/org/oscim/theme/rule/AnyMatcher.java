@@ -12,43 +12,31 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme;
-
-import java.util.List;
+package org.oscim.theme.rule;
 
 import org.oscim.core.Tag;
 
-class MultiKeyMatcher implements AttributeMatcher {
-	private final String[] mKeys;
+final class AnyMatcher implements AttributeMatcher {
+	private static final AnyMatcher INSTANCE = new AnyMatcher();
 
-	MultiKeyMatcher(List<String> keys) {
-		mKeys = new String[keys.size()];
-		for (int i = 0, n = mKeys.length; i < n; ++i) {
-			mKeys[i] = keys.get(i).intern();
-		}
+	static AnyMatcher getInstance() {
+		return INSTANCE;
+	}
+
+	/**
+	 * Private constructor to prevent instantiation from other classes.
+	 */
+	private AnyMatcher() {
+		// do nothing
 	}
 
 	@Override
 	public boolean isCoveredBy(AttributeMatcher attributeMatcher) {
-		if (attributeMatcher == this) {
-			return true;
-		}
-
-		Tag[] tags = new Tag[mKeys.length];
-		int i = 0;
-		for (String key : mKeys) {
-			tags[i++] = new Tag(key, null);
-		}
-		return attributeMatcher.matches(tags);
+		return attributeMatcher == this;
 	}
 
 	@Override
 	public boolean matches(Tag[] tags) {
-		for (Tag tag : tags)
-			for (String key : mKeys)
-				if (key == tag.key)
-					return true;
-
-		return false;
+		return true;
 	}
 }
