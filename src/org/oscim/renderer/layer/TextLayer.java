@@ -14,9 +14,9 @@
  */
 package org.oscim.renderer.layer;
 
-import org.oscim.graphics.Canvas;
-import org.oscim.graphics.Graphics;
 import org.oscim.renderer.TextureRenderer;
+
+import android.graphics.Canvas;
 
 public final class TextLayer extends TextureLayer {
 
@@ -39,7 +39,8 @@ public final class TextLayer extends TextureLayer {
 
 	public TextLayer() {
 		type = Layer.SYMBOL;
-		mCanvas = Graphics.res.getCanvas();
+		//mCanvas = Graphics.res.getCanvas();
+		mCanvas = new Canvas();
 		fixed = true;
 	}
 
