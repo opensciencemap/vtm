@@ -23,7 +23,6 @@ import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
-
 /**
  */
 public final class LineLayer extends Layer {
@@ -70,6 +69,15 @@ public final class LineLayer extends Layer {
 	 *            whether to connect start- and end-point.
 	 */
 	public void addLine(float[] points, short[] index, boolean closed) {
+		addLine(points, index, -1, closed);
+	}
+
+	public void addLine(float[] points, int numPoints, boolean closed) {
+		if (numPoints >= 4)
+			addLine(points, null, numPoints, closed);
+	}
+
+	private void addLine(float[] points, short[] index, int numPoints, boolean closed) {
 		float x, y, nextX, nextY;
 		float a, ux, uy, vx, vy, wx, wy;
 
@@ -113,10 +121,14 @@ public final class LineLayer extends Layer {
 		int n;
 		int length = 0;
 
-		if (index == null){
+		if (index == null) {
 			n = 1;
-			length = points.length;
-		} else{
+			if (numPoints > 0) {
+				length = numPoints;
+			} else {
+				length = points.length;
+			}
+		} else {
 			n = index.length;
 		}
 

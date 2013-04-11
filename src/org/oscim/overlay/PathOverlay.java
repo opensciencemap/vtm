@@ -34,7 +34,6 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.LineClipper;
 import org.oscim.view.MapView;
 
-
 /** This class draws a path line in given color. */
 public class PathOverlay extends Overlay {
 
@@ -43,13 +42,13 @@ public class PathOverlay extends Overlay {
 	/* package */boolean mUpdatePoints;
 
 	/** Line style */
-	/* package */ Line mLineStyle;
+	/* package */Line mLineStyle;
 
 	class RenderPath extends BasicOverlay {
 
 		private static final byte MAX_ZOOM = 20;
 		private final double MAX_SCALE;
-		private static final int MIN_DIST = 4;
+		private static final int MIN_DIST = 2;
 
 		// pre-projected points to zoomlovel 20
 		private int[] mPreprojected;
@@ -57,7 +56,6 @@ public class PathOverlay extends Overlay {
 
 		// projected points
 		private float[] mPPoints;
-		private final short[] mIndex;
 		private int mSize;
 		private final LineClipper mClipper;
 
@@ -66,8 +64,7 @@ public class PathOverlay extends Overlay {
 
 		public RenderPath(MapView mapView) {
 			super(mapView);
-			mClipper = new LineClipper(-max, -max, max, max);
-			mIndex = new short[1];
+			mClipper = new LineClipper(-max, -max, max, max, true);
 			mPPoints = new float[1];
 			mMapPoint = new PointD();
 			MAX_SCALE = (1 << MAX_ZOOM) * Tile.SIZE;
@@ -110,6 +107,13 @@ public class PathOverlay extends Overlay {
 			}
 
 			int size = mSize;
+			if (size == 0) {
+				if (layers.baseLayers != null) {
+					layers.clear();
+					newData = true;
+				}
+				return;
+			}
 
 			LineLayer ll = (LineLayer) layers.getLayer(1, Layer.LINE);
 			ll.line = mLineStyle;
@@ -118,42 +122,87 @@ public class PathOverlay extends Overlay {
 			// Hack: reset verticesCnt to reuse layer
 			ll.verticesCnt = 0;
 
-			int x, y, px = 0, py = 0;
-			int i = 0;
+			int x, y, prevX, prevY;
 
 			int z = curPos.zoomLevel;
 			int diff = MAX_ZOOM - z;
 			int mx = (int) (curPos.x * (Tile.SIZE << z));
 			int my = (int) (curPos.y * (Tile.SIZE << z));
 
-			for (int j = 0; j < size; j += 2) {
-				// TODO translate mapPosition and do this after clipping
+			int j = 0;
+
+			// flip around dateline. complicated stuff..
+			int flip = 0;
+			int flipMax = Tile.SIZE << (z - 1);
+
+			x = (mPreprojected[j++] >> diff) - mx;
+			y = (mPreprojected[j++] >> diff) - my;
+
+			if (x > flipMax) {
+				x -= (flipMax * 2);
+				flip = -1;
+			} else if (x < -flipMax) {
+				x += (flipMax * 2);
+				flip = 1;
+			}
+
+			mClipper.clipStart(x, y);
+
+			int i = addPoint(projected, 0, x, y);
+
+			prevX = x;
+			prevY = y;
+
+			for (; j < size; j += 2) {
 				x = (mPreprojected[j + 0] >> diff) - mx;
 				y = (mPreprojected[j + 1] >> diff) - my;
 
-				// TODO use line clipping, this doesnt work with 'GreatCircle'
-				// TODO clip to view bounding box
-				if (x > max || x < -max || y > max || y < -max) {
-					if (i > 2) {
-						mIndex[0] = (short) i;
-						ll.addLine(projected, mIndex, false);
+				int curFlip = 0;
+				if (x > flipMax) {
+					x -= flipMax * 2;
+					curFlip = -1;
+				} else if (x < -flipMax) {
+					x += flipMax * 2;
+					curFlip = 1;
+				}
+
+				if (flip != curFlip) {
+					flip = curFlip;
+					if (i > 2)
+						ll.addLine(projected, i, false);
+
+					mClipper.clipStart(x, y);
+					i = addPoint(projected, 0, x, y);
+					continue;
+				}
+
+				int clip = mClipper.clipNext(x, y);
+				if (clip < 1) {
+					if (i > 2)
+						ll.addLine(projected, i, false);
+
+					if (clip < 0) {
+						// add line segment
+						projected[0] = mClipper.out[0];
+						projected[1] = mClipper.out[1];
+
+						projected[2] = prevX = mClipper.out[2];
+						projected[3] = prevY = mClipper.out[3];
+						ll.addLine(projected, 4, false);
 					}
 					i = 0;
 					continue;
 				}
 
-				// skip too near points
-				int dx = x - px;
-				int dy = y - py;
+				int dx = x - prevX;
+				int dy = y - prevY;
 				if ((i == 0) || FastMath.absMaxCmp(dx, dy, MIN_DIST)) {
-					projected[i + 0] = px = x;
-					projected[i + 1] = py = y;
-					i += 2;
+					projected[i++] = prevX = x;
+					projected[i++] = prevY = y;
 				}
 			}
-
-			mIndex[0] = (short) i;
-			ll.addLine(projected, mIndex, false);
+			if (i > 2)
+				ll.addLine(projected, i, false);
 
 			// keep position to render relative to current state
 			mMapPosition.copy(curPos);
@@ -162,6 +211,12 @@ public class PathOverlay extends Overlay {
 			mMapPosition.scale = 1 << z;
 
 			newData = true;
+		}
+
+		private int addPoint(float[] points, int i, int x, int y) {
+			points[i++] = x;
+			points[i++] = y;
+			return i;
 		}
 	}
 
@@ -178,6 +233,7 @@ public class PathOverlay extends Overlay {
 	public PathOverlay(MapView mapView, int lineColor) {
 		this(mapView, lineColor, 2);
 	}
+
 	/**
 	 * Draw a great circle. Calculate a point for every 100km along the path.
 	 *
