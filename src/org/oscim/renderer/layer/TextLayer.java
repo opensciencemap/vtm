@@ -14,17 +14,17 @@
  */
 package org.oscim.renderer.layer;
 
+import static org.oscim.renderer.GLRenderer.COORD_SCALE;
+import static org.oscim.renderer.layer.TextureItem.TEXTURE_HEIGHT;
+import static org.oscim.renderer.layer.TextureItem.TEXTURE_WIDTH;
+
 import org.oscim.renderer.TextureRenderer;
 
 import android.graphics.Canvas;
-
 public final class TextLayer extends TextureLayer {
 
 	//private static String TAG = TextureLayer.class.getName();
 
-	private final static int TEXTURE_WIDTH = TextureItem.TEXTURE_WIDTH;
-	private final static int TEXTURE_HEIGHT = TextureItem.TEXTURE_HEIGHT;
-	private final static float SCALE = 8.0f;
 	private final static int LBIT_MASK = 0xfffffffe;
 
 	private static int mFontPadX = 1;
@@ -151,10 +151,10 @@ public final class TextLayer extends TextureLayer {
 			//}
 
 			// texture coordinates
-			short u1 = (short) (SCALE * x);
-			short v1 = (short) (SCALE * y);
-			short u2 = (short) (SCALE * (x + width));
-			short v2 = (short) (SCALE * (y + height));
+			short u1 = (short) (COORD_SCALE * x);
+			short v1 = (short) (COORD_SCALE * y);
+			short u2 = (short) (COORD_SCALE * (x + width));
+			short v2 = (short) (COORD_SCALE * (y + height));
 
 			while (it != null) {
 
@@ -162,10 +162,10 @@ public final class TextLayer extends TextureLayer {
 
 				if (it.text.caption) {
 					//if (it.origin == 0) {
-					x1 = x3 = (short) (SCALE * -hw);
-					x2 = x4 = (short) (SCALE * hw);
-					y1 = y2 = (short) (SCALE * hh);
-					y3 = y4 = (short) (SCALE * -hh);
+					x1 = x3 = (short) (COORD_SCALE * -hw);
+					x2 = x4 = (short) (COORD_SCALE * hw);
+					y1 = y2 = (short) (COORD_SCALE * hh);
+					y3 = y4 = (short) (COORD_SCALE * -hh);
 					//} else {
 					//	x1 = x3 = (short) (SCALE * 0);
 					//	x2 = x4 = (short) (SCALE * width);
@@ -189,23 +189,23 @@ public final class TextLayer extends TextureLayer {
 					vy *= hw;
 
 					// top-left
-					x1 = (short) (SCALE * (vx - ux));
-					y1 = (short) (SCALE * (vy - uy));
+					x1 = (short) (COORD_SCALE * (vx - ux));
+					y1 = (short) (COORD_SCALE * (vy - uy));
 					// top-right
-					x2 = (short) (SCALE * (-vx - ux));
-					y2 = (short) (SCALE * (-vy - uy));
+					x2 = (short) (COORD_SCALE * (-vx - ux));
+					y2 = (short) (COORD_SCALE * (-vy - uy));
 					// bot-right
-					x4 = (short) (SCALE * (-vx + ux2));
-					y4 = (short) (SCALE * (-vy + uy2));
+					x4 = (short) (COORD_SCALE * (-vx + ux2));
+					y4 = (short) (COORD_SCALE * (-vy + uy2));
 					// bot-left
-					x3 = (short) (SCALE * (vx + ux2));
-					y3 = (short) (SCALE * (vy + uy2));
+					x3 = (short) (COORD_SCALE * (vx + ux2));
+					y3 = (short) (COORD_SCALE * (vy + uy2));
 				}
 
 				// add vertices
-				int tmp = (int) (SCALE * it.x) & LBIT_MASK;
+				int tmp = (int) (COORD_SCALE * it.x) & LBIT_MASK;
 				short tx = (short) (tmp | (it.text.caption ? 1 : 0));
-				short ty = (short) (SCALE * it.y);
+				short ty = (short) (COORD_SCALE * it.y);
 
 				if (pos == VertexItem.SIZE) {
 					vi.used = VertexItem.SIZE;

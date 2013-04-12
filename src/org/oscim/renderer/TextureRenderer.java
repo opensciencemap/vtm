@@ -15,10 +15,14 @@
 
 package org.oscim.renderer;
 
+import static org.oscim.renderer.GLRenderer.COORD_SCALE;
+import static org.oscim.renderer.layer.TextureItem.TEXTURE_HEIGHT;
+import static org.oscim.renderer.layer.TextureItem.TEXTURE_WIDTH;
+
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
-import org.oscim.renderer.layer.TextureLayer;
 import org.oscim.renderer.layer.TextureItem;
+import org.oscim.renderer.layer.TextureLayer;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
@@ -105,8 +109,12 @@ public final class TextureRenderer {
 		return layer.next;
 	}
 
+	private final static double TEX_COORD_DIV_X = 1.0 / (TEXTURE_WIDTH * COORD_SCALE);
+	private final static double TEX_COORD_DIV_Y = 1.0 / (TEXTURE_HEIGHT * COORD_SCALE);
+	private final static double COORD_DIV = 1.0 / GLRenderer.COORD_SCALE;
+
 	private final static String textVertexShader = ""
-			+ "precision highp float; "
+			+ "precision mediump float; "
 			+ "attribute vec4 vertex;"
 			+ "attribute vec2 tex_coord;"
 			+ "uniform mat4 u_mv;"
@@ -114,8 +122,8 @@ public final class TextureRenderer {
 			+ "uniform float u_scale;"
 			+ "uniform float u_swidth;"
 			+ "varying vec2 tex_c;"
-			+ "const vec2 div = vec2(1.0/2048.0,1.0/2048.0);"
-			+ "const float coord_scale = 0.125;"
+			+ "const vec2 div = vec2(" + TEX_COORD_DIV_X + "," + TEX_COORD_DIV_Y + ");"
+			+ "const float coord_scale = " + COORD_DIV + ";"
 			+ "void main() {"
 			+ "  vec4 pos;"
 			+ "  vec2 dir = vertex.zw;"
@@ -130,7 +138,7 @@ public final class TextureRenderer {
 			+ "}";
 
 	private final static String textFragmentShader = ""
-			+ "precision highp float;"
+			+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
 			+ "varying vec2 tex_c;"
 			+ "void main() {"
