@@ -53,6 +53,8 @@ public abstract class BasicOverlay extends RenderOverlay {
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, layers.vbo.id);
 		GLState.test(false, false);
+		GLState.blend(true);
+		int simple = pos.tilt == 0 ? 1 : 0;
 
 		if (layers.baseLayers != null) {
 			setMatrix(curPos, m, true);
@@ -64,7 +66,7 @@ public abstract class BasicOverlay extends RenderOverlay {
 						break;
 
 					case Layer.LINE:
-						l = LineRenderer.draw(layers, l, curPos, m, div, 0);
+						l = LineRenderer.draw(layers, l, curPos, m, div, simple);
 						break;
 
 					case Layer.TEXLINE:
