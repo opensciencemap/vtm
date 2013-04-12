@@ -19,7 +19,6 @@ import org.oscim.core.Tile;
 import org.oscim.graphics.Color;
 import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.renderer.layer.TextLayer;
@@ -125,7 +124,7 @@ public class GridOverlay extends BasicOverlay {
 
 			layers.clear();
 
-			LineLayer ll = (LineLayer) layers.getLayer(1, Layer.LINE);
+			LineLayer ll = layers.getLineLayer(0);
 			ll.line = new Line(Color.BLUE, 1.0f, Cap.BUTT);
 			ll.width = 1.5f;
 			ll.addLine(mPoints, mIndex, false);

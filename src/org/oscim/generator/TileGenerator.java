@@ -27,7 +27,6 @@ import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.QueryResult;
 import org.oscim.renderer.MapTile;
 import org.oscim.renderer.layer.ExtrusionLayer;
-import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.layer.LineTexLayer;
@@ -80,7 +79,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 					new float[] { 0, 0, 0, Tile.SIZE,
 							Tile.SIZE, Tile.SIZE,
 							Tile.SIZE, 0, 0, 0 },
-					new short[] {10}),
+					new short[] { 10 }),
 			new Tag[] { new Tag("debug", "box") }
 			);
 
@@ -358,8 +357,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				return;
 			}
 
-			LineLayer lineLayer = (LineLayer)
-					mTile.layers.getLayer(numLayer, Layer.LINE);
+			LineLayer lineLayer = mTile.layers.getLineLayer(numLayer);
 
 			if (lineLayer == null)
 				return;
@@ -386,8 +384,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			mCurLineLayer = lineLayer;
 
 		} else {
-			LineTexLayer lineLayer = (LineTexLayer)
-					mTile.layers.getLayer(numLayer, Layer.TEXLINE);
+			LineTexLayer lineLayer = mTile.layers.getLineTexLayer(numLayer);
 
 			if (lineLayer == null)
 				return;
@@ -424,8 +421,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (debug.disablePolygons)
 			return;
 
-		PolygonLayer layer = (PolygonLayer)
-				mTile.layers.getLayer(numLayer, Layer.POLYGON);
+		PolygonLayer layer = mTile.layers.getPolygonLayer(numLayer);
 
 		if (layer == null)
 			return;

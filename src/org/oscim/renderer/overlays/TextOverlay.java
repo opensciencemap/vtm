@@ -622,21 +622,21 @@ public class TextOverlay extends BasicOverlay {
 		LineLayer ll;
 		if (prev) {
 			if (overlaps == 1)
-				ll = (LineLayer) dbg.getLayer(4, Layer.LINE);
+				ll = dbg.getLineLayer(4);
 			else
-				ll = (LineLayer) dbg.getLayer(5, Layer.LINE);
+				ll = dbg.getLineLayer(5);
 
 		} else {
 			if (ti.width > ti.length * scale) {
-				ll = (LineLayer) dbg.getLayer(1, Layer.LINE);
+				ll =  dbg.getLineLayer(1);
 				overlaps = 3;
 			}
 			else if (overlaps == 1)
-				ll = (LineLayer) dbg.getLayer(0, Layer.LINE);
+				ll =  dbg.getLineLayer(0);
 			else if (overlaps == 2)
-				ll = (LineLayer) dbg.getLayer(3, Layer.LINE);
+				ll =  dbg.getLineLayer(3);
 			else
-				ll = (LineLayer) dbg.getLayer(2, Layer.LINE);
+				ll =  dbg.getLineLayer(2);
 		}
 		float[] points = mDebugPoints;
 		float width = (ti.x2 - ti.x1) / 2f;
@@ -654,22 +654,22 @@ public class TextOverlay extends BasicOverlay {
 
 	private static void addDebugLayers(Layers dbg) {
 		dbg.clear();
-		LineLayer ll = (LineLayer) dbg.getLayer(0, Layer.LINE);
+		LineLayer ll =  dbg.getLineLayer(0);
 		ll.line = new Line((Color.BLUE & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(3, Layer.LINE);
+		ll =  dbg.getLineLayer(3);
 		ll.line = new Line((Color.YELLOW & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(1, Layer.LINE);
+		ll =  dbg.getLineLayer(1);
 		ll.line = new Line((Color.RED & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(2, Layer.LINE);
+		ll =  dbg.getLineLayer(2);
 		ll.line = new Line((Color.GREEN & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(4, Layer.LINE);
+		ll =  dbg.getLineLayer(4);
 		ll.line = new Line((Color.CYAN & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll = (LineLayer) dbg.getLayer(5, Layer.LINE);
+		ll =  dbg.getLineLayer(5);
 		ll.line = new Line((Color.MAGENTA & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
 	}

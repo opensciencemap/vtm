@@ -50,8 +50,20 @@ public class Layers {
 
 	private Layer mCurLayer;
 
+	public LineLayer getLineLayer(int level) {
+		return (LineLayer)getLayer(level, Layer.LINE);
+	}
+
+	public PolygonLayer getPolygonLayer(int level) {
+		return (PolygonLayer)getLayer(level, Layer.POLYGON);
+	}
+
+	public LineTexLayer getLineTexLayer(int level) {
+		return (LineTexLayer)getLayer(level, Layer.TEXLINE);
+	}
+
 	// get or add the Line- or PolygonLayer for a level.
-	public Layer getLayer(int level, byte type) {
+	private Layer getLayer(int level, byte type) {
 		Layer l = baseLayers;
 		Layer layer = null;
 
