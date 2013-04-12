@@ -26,7 +26,6 @@ import org.oscim.core.PointD;
 import org.oscim.core.Tile;
 import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
 import org.oscim.theme.renderinstruction.Line;
@@ -115,7 +114,7 @@ public class PathOverlay extends Overlay {
 				return;
 			}
 
-			LineLayer ll = (LineLayer) layers.getLayer(1, Layer.LINE);
+			LineLayer ll = layers.getLineLayer(0);
 			ll.line = mLineStyle;
 			ll.width = ll.line.width;
 

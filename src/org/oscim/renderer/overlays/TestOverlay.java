@@ -16,7 +16,6 @@ package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineTexLayer;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.renderinstruction.Line;
@@ -50,7 +49,7 @@ public class TestOverlay extends BasicOverlay {
 		//ll.addLine(points, index, true);
 
 
-		LineTexLayer lt = (LineTexLayer) layers.getLayer(2, Layer.TEXLINE);
+		LineTexLayer lt = layers.getLineTexLayer(2);
 		lt.line = new Line(Color.BLUE, 1.0f, 8);
 		lt.width = 8;
 		lt.addLine(points, null);
@@ -62,7 +61,7 @@ public class TestOverlay extends BasicOverlay {
 				-200, 200,
 				-200, -200
 				};
-		lt = (LineTexLayer) layers.getLayer(3, Layer.TEXLINE);
+		lt = layers.getLineTexLayer(3);
 		lt.line = new Line(Color.BLUE, 1.0f, 16);
 		lt.width = 8;
 		lt.addLine(points2, null);
