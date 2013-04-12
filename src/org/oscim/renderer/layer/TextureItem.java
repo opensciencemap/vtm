@@ -88,7 +88,7 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 	};
 
-	private static ArrayList<Bitmap> mBitmaps;
+	private static ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);;
 
 	public final static int TEXTURE_WIDTH = 512;
 	public final static int TEXTURE_HEIGHT = 256;
