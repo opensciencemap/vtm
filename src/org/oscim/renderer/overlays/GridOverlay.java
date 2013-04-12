@@ -91,7 +91,11 @@ public class GridOverlay extends BasicOverlay {
 				tl.addText(ti);
 			}
 		}
+
 		tl.prepare();
+
+		TextItem.pool.releaseAll(tl.labels);
+
 		layers.textureLayers = tl;
 	}
 
