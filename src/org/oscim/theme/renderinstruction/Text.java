@@ -120,8 +120,12 @@ public final class Text extends RenderInstruction {
 	public static Text createText(float fontSize, float strokeWidth, int fill, int outline,
 			boolean billboard) {
 
-		return new Text("", "", FontFamily.DEFAULT, FontStyle.NORMAL,
+		Text t = new Text("", "", FontFamily.DEFAULT, FontStyle.NORMAL,
 				fontSize, fill, outline, strokeWidth, 0, billboard, Integer.MAX_VALUE);
+		FontMetrics fm = t.paint.getFontMetrics();
+		t.fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
+		t.fontDescent = (float) Math.ceil(Math.abs(fm.bottom));
+		return t;
 	}
 
 	private static int getStyle(FontStyle fontStyle) {
