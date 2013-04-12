@@ -65,8 +65,8 @@ import android.graphics.Bitmap;
 
 public class TextureAtlas {
 	/** Allocated slots */
-	Slot mSlots;
-	Rect mRects;
+	public Slot mSlots;
+	private Rect mRects;
 
 	/** Width (in pixels) of the underlying texture */
 	final int mWidth;
@@ -86,8 +86,8 @@ public class TextureAtlas {
 	/** Atlas data */
 	Bitmap mData;
 
-	class Slot extends Inlist<Slot> {
-		int x, y, w;
+	public static class Slot extends Inlist<Slot> {
+		public int x, y, w;
 
 		public Slot(int x, int y, int w) {
 			this.x = x;
@@ -161,6 +161,7 @@ public class TextureAtlas {
 		Slot curSlot = new Slot(r.x, r.y + height, width);
 		mSlots = Inlist.prependRelative(mSlots, curSlot, bestSlot);
 
+		// split
 		for (prev = curSlot; prev.next != null;) {
 			slot = prev.next;
 
