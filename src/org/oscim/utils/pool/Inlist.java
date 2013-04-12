@@ -14,6 +14,8 @@
  */
 package org.oscim.utils.pool;
 
+
+
 public class Inlist<T extends Inlist<T>> {
 
 	private final static boolean debug = false;
@@ -44,7 +46,34 @@ public class Inlist<T extends Inlist<T>> {
 	}
 
 
-	public static <T extends Inlist<T>> T prepend(T list, T item) {
+	public static <T extends Inlist<T>> T get(T list, int i){
+		if (i < 0)
+			return null;
+
+		while (--i > 0 && list != null)
+			list = list.next;
+
+		if (i == 0)
+			return list;
+
+		return null;
+	}
+
+//	public static <T extends Inlist<T>> T insertAt(T list, T item, int i){
+//		if (i < 0)
+//			return null;
+//
+//		while (--i > 0 && list != null)
+//			list = list.next;
+//
+//		if (i == 0)
+//			return list;
+//
+//		return null;
+//	}
+
+
+	public static <T extends Inlist<T>> T push(T list, T item) {
 		item.next = list;
 		return item;
 	}
@@ -66,6 +95,38 @@ public class Inlist<T extends Inlist<T>> {
 		while (it.next != null)
 			it = it.next;
 
+		it.next = item;
+
+		return list;
+	}
+
+	public static <T extends Inlist<T>> T prependRelative(T list, T item, T other) {
+
+		if (debug) {
+			if (item.next != null) {
+				// warn
+				item.next = null;
+			}
+		}
+
+		if (list == null)
+			throw new IllegalArgumentException("Inlist.prependRelative 'list' is null");
+
+
+		if (list == other){
+			item.next = list;
+			return item;
+		}
+
+		Inlist<T> it = list;
+
+		while (it != null && it.next != other)
+			it = it.next;
+
+		if (it == null)
+			throw new IllegalArgumentException("Inlist.prependRelative 'other' not in 'list'");
+
+		item.next = it.next;
 		it.next = item;
 
 		return list;
