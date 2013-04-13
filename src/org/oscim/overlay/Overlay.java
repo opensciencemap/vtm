@@ -14,10 +14,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Created by plusminus on 20:32:01 - 27.09.2008
 package org.oscim.overlay;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.PointF;
@@ -30,11 +27,10 @@ import android.view.MotionEvent;
 /**
  * Base class representing an overlay which may be displayed on top of a
  * {@link MapView}. To add an overlay, subclass this class, create an instance,
- * and add it to the list obtained from getOverlays() of {@link MapView}. This
- * class implements a form of Gesture Handling similar to
+ * and add via addOverlay() of {@link MapView}.
+ * This class implements a form of Gesture Handling similar to
  * {@link android.view.GestureDetector.SimpleOnGestureListener} and
- * GestureDetector.OnGestureListener. The difference is there is an additional
- * argument for the item.
+ * GestureDetector.OnGestureListener.
  *
  * @author Nicolas Gramlich
  */
@@ -44,24 +40,22 @@ public abstract class Overlay {
 	// Constants
 	// ===========================================================
 
-	private static AtomicInteger sOrdinal = new AtomicInteger();
+	//private static AtomicInteger sOrdinal = new AtomicInteger();
 
 	// From Google Maps API
-	protected static final float SHADOW_X_SKEW = -0.8999999761581421f;
-	protected static final float SHADOW_Y_SCALE = 0.5f;
+	//protected static final float SHADOW_X_SKEW = -0.8999999761581421f;
+	//protected static final float SHADOW_Y_SCALE = 0.5f;
 
 	// ===========================================================
 	// Fields
 	// ===========================================================
 
-	//protected final ResourceProxy mResourceProxy;
-	//protected final float mScale;
-
-	//	private static final Rect mRect = new Rect();
 	private boolean mEnabled = true;
+	private boolean mReceiveEvents = true;
 
 	protected final MapView mMapView;
 
+	/** RenderOverlay used to draw this layer. To be implemented by sub-classes */
 	protected RenderOverlay mLayer;
 
 	public RenderOverlay getLayer() {
@@ -87,8 +81,8 @@ public abstract class Overlay {
 	 * @param pEnabled
 	 *            ...
 	 */
-	public void setEnabled(final boolean pEnabled) {
-		this.mEnabled = pEnabled;
+	public void setEnabled(boolean pEnabled) {
+		mEnabled = pEnabled;
 	}
 
 	/**
@@ -98,62 +92,76 @@ public abstract class Overlay {
 	 * @return true if the Overlay is marked enabled, false otherwise
 	 */
 	public boolean isEnabled() {
-		return this.mEnabled;
+		return mEnabled;
 	}
 
 	/**
-	 * Since the menu-chain will pass through several independent Overlays, menu
-	 * IDs cannot be fixed at compile time. Overlays should use this method to
-	 * obtain and store a menu id for each menu item at construction time. This
-	 * will ensure that two overlays don't use the same id.
+	 * Sets whether the Overlay is marked to be receive touch exents.
 	 *
-	 * @return an integer suitable to be used as a menu identifier
+	 * @param pEnabled
+	 *            ...
 	 */
-	protected final static int getSafeMenuId() {
-		return sOrdinal.getAndIncrement();
+	public void setEnableEvents(boolean pEnabled) {
+		mReceiveEvents = pEnabled;
 	}
 
 	/**
-	 * Similar to <see cref="getSafeMenuId" />, except this reserves a sequence
-	 * of IDs of length <param name="count" />. The returned number is the
-	 * starting index of that sequential list.
+	 * Specifies if the Overlay is marked to be enabled. This should be checked
+	 * before calling draw().
 	 *
-	 * @param count
-	 *            ....
-	 * @return an integer suitable to be used as a menu identifier
+	 * @return true if the Overlay is marked enabled, false otherwise
 	 */
-	protected final static int getSafeMenuIdSequence(final int count) {
-		return sOrdinal.getAndAdd(count);
+	public boolean eventsEnabled() {
+		return mReceiveEvents;
 	}
 
-	// ===========================================================
-	// Methods for SuperClass/Interfaces
-	// ===========================================================
-
-	//	/**
-	//	 * Draw the overlay over the map. This will be called on all active overlays
-	//	 * with shadow=true, to lay down the shadow layer, and then again on all
-	//	 * overlays with shadow=false. Callers should check isEnabled() before
-	//	 * calling draw(). By default, draws nothing.
-	//	 *
-	//	 * @param c
-	//	 *            ...
-	//	 * @param osmv
-	//	 *            ...
-	//	 * @param shadow
-	//	 *            ...
-	//	 */
-	//	protected abstract void draw(final Canvas c, final MapView osmv, final boolean shadow);
+	///**
+	// * Since the menu-chain will pass through several independent Overlays, menu
+	// * IDs cannot be fixed at compile time. Overlays should use this method to
+	// * obtain and store a menu id for each menu item at construction time. This
+	// * will ensure that two overlays don't use the same id.
+	// *
+	// * @return an integer suitable to be used as a menu identifier
+	// */
+	//protected final static int getSafeMenuId() {
+	//	return sOrdinal.getAndIncrement();
+	//}
+	//
+	///**
+	// * Similar to <see cref="getSafeMenuId" />, except this reserves a sequence
+	// * of IDs of length <param name="count" />. The returned number is the
+	// * starting index of that sequential list.
+	// *
+	// * @param count
+	// *            ....
+	// * @return an integer suitable to be used as a menu identifier
+	// */
+	//protected final static int getSafeMenuIdSequence(int count) {
+	//	return sOrdinal.getAndAdd(count);
+	//}
 
 	// ===========================================================
 	// Methods
 	// ===========================================================
 
 	/**
+	 * Called before each frame render request.
+	 *
+	 * @param mapPosition
+	 *            current MapPosition
+	 * @param changed
+	 *            true when MapPosition has changed since last call
+	 */
+	public void onUpdate(MapPosition mapPosition, boolean changed) {
+
+	}
+
+	/**
 	 * Override to perform clean up of resources before shutdown. By default
 	 * does nothing.
 	 */
 	public void onDetach() {
+		// FIXME call to this function is not implemented
 	}
 
 	/**
@@ -168,7 +176,7 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onKeyDown(final int keyCode, final KeyEvent event) {
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		return false;
 	}
 
@@ -184,7 +192,7 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onKeyUp(final int keyCode, final KeyEvent event) {
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		return false;
 	}
 
@@ -199,7 +207,7 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onTouchEvent(final MotionEvent e) {
+	public boolean onTouchEvent(MotionEvent e) {
 		return false;
 	}
 
@@ -213,7 +221,7 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onTrackballEvent(final MotionEvent e) {
+	public boolean onTrackballEvent(MotionEvent e) {
 		return false;
 	}
 
@@ -229,7 +237,7 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onDoubleTap(final MotionEvent e) {
+	public boolean onDoubleTap(MotionEvent e) {
 		return false;
 	}
 
@@ -243,7 +251,7 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onDoubleTapEvent(final MotionEvent e) {
+	public boolean onDoubleTapEvent(MotionEvent e) {
 		return false;
 	}
 
@@ -257,7 +265,7 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onSingleTapConfirmed(final MotionEvent e) {
+	public boolean onSingleTapConfirmed(MotionEvent e) {
 		return false;
 	}
 
@@ -273,7 +281,7 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onDown(final MotionEvent e) {
+	public boolean onDown(MotionEvent e) {
 		return false;
 	}
 
@@ -293,8 +301,8 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pVelocityX, final float pVelocityY) {
+	public boolean onFling(MotionEvent pEvent1, MotionEvent pEvent2,
+			float pVelocityX, float pVelocityY) {
 		return false;
 	}
 
@@ -308,7 +316,7 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onLongPress(final MotionEvent e) {
+	public boolean onLongPress(MotionEvent e) {
 		return false;
 	}
 
@@ -328,8 +336,8 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onScroll(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pDistanceX, final float pDistanceY) {
+	public boolean onScroll(MotionEvent pEvent1, MotionEvent pEvent2,
+			float pDistanceX, float pDistanceY) {
 		return false;
 	}
 
@@ -337,7 +345,7 @@ public abstract class Overlay {
 	 * @param pEvent
 	 *            ...
 	 */
-	public void onShowPress(final MotionEvent pEvent) {
+	public void onShowPress(MotionEvent pEvent) {
 		return;
 	}
 
@@ -351,17 +359,8 @@ public abstract class Overlay {
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onSingleTapUp(final MotionEvent e) {
+	public boolean onSingleTapUp(MotionEvent e) {
 		return false;
-	}
-
-	/**
-	 * @param mapPosition
-	 *            current MapPosition
-	 * @param changed ...
-	 */
-	public void onUpdate(MapPosition mapPosition, boolean changed) {
-
 	}
 
 	// ===========================================================

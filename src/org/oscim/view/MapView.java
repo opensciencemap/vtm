@@ -40,7 +40,6 @@ import org.oscim.generator.TileGenerator;
 import org.oscim.overlay.BuildingOverlay;
 import org.oscim.overlay.LabelingOverlay;
 import org.oscim.overlay.Overlay;
-import org.oscim.overlay.OverlayManager;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLView;
 import org.oscim.renderer.TileManager;
@@ -80,11 +79,10 @@ public class MapView extends RelativeLayout {
 
 	//private final MapZoomControls mMapZoomControls;
 
-	private final TouchHandler mTouchEventHandler;
 	private final Compass mCompass;
 
 	private final TileManager mTileManager;
-	private final OverlayManager mOverlayManager;
+	private final LayerManager mLayerManager;
 
 	final GLView mGLView;
 	private final JobQueue mJobQueue;
@@ -150,9 +148,7 @@ public class MapView extends RelativeLayout {
 		mMapViewPosition = new MapViewPosition(this);
 		mMapPosition = new MapPosition();
 
-		mOverlayManager = new OverlayManager();
-
-		mTouchEventHandler = new TouchHandler(mapActivity, this);
+		mLayerManager = new LayerManager(context);
 
 		mCompass = new Compass(mapActivity, this);
 
@@ -180,25 +176,29 @@ public class MapView extends RelativeLayout {
 
 		addView(mGLView, params);
 
+		mLayerManager.add(new MapEventLayer(this));
+
 		//mMapZoomControls = new MapZoomControls(mapActivity, this);
 		//mMapZoomControls.setShowMapZoomControls(true);
 		mRotationEnabled = true;
 
-		//mOverlayManager.add(new GenericOverlay(this, new GridOverlay(this)));
+		//mLayerManager.add(new GenericOverlay(this, new GridOverlay(this)));
 
-		mOverlayManager.add(new BuildingOverlay(this));
-		mOverlayManager.add(new LabelingOverlay(this));
+		mLayerManager.add(new BuildingOverlay(this));
+		mLayerManager.add(new LabelingOverlay(this));
 
-		//mOverlayManager.add(new GenericOverlay(this, new TileOverlay(this)));
-		//mOverlayManager.add(new GenericOverlay(this, new CustomOverlay(this)));
-		//mOverlayManager.add(new MapLensOverlay(this));
+		//mLayerManager.add(new GenericOverlay(this, new TileOverlay(this)));
+		//mLayerManager.add(new GenericOverlay(this, new CustomOverlay(this)));
+		//mLayerManager.add(new MapLensOverlay(this));
 
 		//PathOverlay path = new PathOverlay(this, Color.RED);
 		//path.addGreatCircle(new GeoPoint(53.1, 8.8), new GeoPoint(53.1, -110.0));
-		//mOverlayManager.add(path);
+		//mLayerManager.add(path);
 		//path = new PathOverlay(this, Color.GREEN);
 		//path.addGreatCircle(new GeoPoint(53.1, 140), new GeoPoint(53.1, -110.0));
-		//mOverlayManager.add(path);
+		//mLayerManager.add(path);
+
+		//mLayerManager.add(new GenericOverlay(this, new AtlasTest(this)));
 
 		clearMap();
 	}
@@ -218,7 +218,6 @@ public class MapView extends RelativeLayout {
 				// restore the interrupted status
 				Thread.currentThread().interrupt();
 			}
-
 		}
 	}
 
@@ -253,13 +252,11 @@ public class MapView extends RelativeLayout {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent motionEvent) {
-		// mMapZoomControlsjonMapViewTouchEvent(motionEvent.getAction()
-		// & MotionEvent.ACTION_MASK);
 
-		if (this.isClickable())
-			return mTouchEventHandler.handleMotionEvent(motionEvent);
+		if (!isClickable())
+			return false;
 
-		return false;
+		return mLayerManager.handleMotionEvent(motionEvent);
 	}
 
 	@Override
@@ -344,7 +341,7 @@ public class MapView extends RelativeLayout {
 
 		// required when not changed?
 		if (AndroidUtils.currentThreadIsUiThread())
-			mOverlayManager.onUpdate(mMapPosition, changed);
+			mLayerManager.onUpdate(mMapPosition, changed);
 
 		if (changed) {
 			mTileManager.update(mMapPosition);
@@ -620,8 +617,8 @@ public class MapView extends RelativeLayout {
 		return this.getOverlayManager();
 	}
 
-	public OverlayManager getOverlayManager() {
-		return mOverlayManager;
+	public LayerManager getOverlayManager() {
+		return mLayerManager;
 	}
 
 	public TileManager getTileManager() {
