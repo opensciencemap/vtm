@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 osmdroid
+ * Copyright 2012 osmdroid authors
  * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -14,25 +14,35 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.oscim.overlay;
+package org.oscim.view;
 
 import java.util.AbstractList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.PointF;
+import org.oscim.overlay.Overlay;
 import org.oscim.overlay.Overlay.Snappable;
 import org.oscim.renderer.overlays.RenderOverlay;
 
+import android.content.Context;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnDoubleTapListener;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-public class OverlayManager extends AbstractList<Overlay> {
+public class LayerManager extends AbstractList<Overlay> implements OnGestureListener,
+		OnDoubleTapListener {
+
+	private final GestureDetector mGestureDetector;
 
 	private final CopyOnWriteArrayList<Overlay> mOverlayList;
 
-	public OverlayManager() {
+	LayerManager(Context context) {
 		mOverlayList = new CopyOnWriteArrayList<Overlay>();
+		mGestureDetector = new GestureDetector(context, this);
+		mGestureDetector.setOnDoubleTapListener(this);
 	}
 
 	@Override
@@ -61,6 +71,17 @@ public class OverlayManager extends AbstractList<Overlay> {
 	public synchronized Overlay set(final int pIndex, final Overlay pElement) {
 		mDirtyOverlays = true;
 		return mOverlayList.set(pIndex, pElement);
+	}
+
+	public boolean handleMotionEvent(MotionEvent e) {
+
+		if (mGestureDetector.onTouchEvent(e))
+			return true;
+
+		if (onTouchEvent(e))
+			return true;
+
+		return false;
 	}
 
 	private boolean mDirtyOverlays;
@@ -111,6 +132,17 @@ public class OverlayManager extends AbstractList<Overlay> {
 		mDirtyOverlays = false;
 	}
 
+	public boolean onTouchEvent(final MotionEvent event) {
+		if (mDirtyOverlays)
+			updateOverlays();
+
+		for (Overlay o : mOverlays)
+			if (o.onTouchEvent(event))
+				return true;
+
+		return false;
+	}
+
 	public boolean onKeyDown(final int keyCode, final KeyEvent event) {
 		if (mDirtyOverlays)
 			updateOverlays();
@@ -128,17 +160,6 @@ public class OverlayManager extends AbstractList<Overlay> {
 
 		for (Overlay o : mOverlays)
 			if (o.onKeyUp(keyCode, event))
-				return true;
-
-		return false;
-	}
-
-	public boolean onTouchEvent(final MotionEvent event) {
-		if (mDirtyOverlays)
-			updateOverlays();
-
-		for (Overlay o : mOverlays)
-			if (o.onTouchEvent(event))
 				return true;
 
 		return false;
@@ -169,6 +190,7 @@ public class OverlayManager extends AbstractList<Overlay> {
 
 	/* GestureDetector.OnDoubleTapListener */
 
+	@Override
 	public boolean onDoubleTap(final MotionEvent e) {
 		if (mDirtyOverlays)
 			updateOverlays();
@@ -180,6 +202,7 @@ public class OverlayManager extends AbstractList<Overlay> {
 		return false;
 	}
 
+	@Override
 	public boolean onDoubleTapEvent(final MotionEvent e) {
 		if (mDirtyOverlays)
 			updateOverlays();
@@ -191,6 +214,7 @@ public class OverlayManager extends AbstractList<Overlay> {
 		return false;
 	}
 
+	@Override
 	public boolean onSingleTapConfirmed(final MotionEvent e) {
 		if (mDirtyOverlays)
 			updateOverlays();
@@ -204,6 +228,7 @@ public class OverlayManager extends AbstractList<Overlay> {
 
 	/* OnGestureListener */
 
+	@Override
 	public boolean onDown(final MotionEvent pEvent) {
 		if (mDirtyOverlays)
 			updateOverlays();
@@ -215,6 +240,7 @@ public class OverlayManager extends AbstractList<Overlay> {
 		return false;
 	}
 
+	@Override
 	public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
 			final float pVelocityX, final float pVelocityY) {
 		if (mDirtyOverlays)
@@ -227,17 +253,17 @@ public class OverlayManager extends AbstractList<Overlay> {
 		return false;
 	}
 
-	public boolean onLongPress(final MotionEvent pEvent) {
+	@Override
+	public void onLongPress(final MotionEvent pEvent) {
 		if (mDirtyOverlays)
 			updateOverlays();
 
 		for (Overlay o : mOverlays)
 			if (o.onLongPress(pEvent))
-				return true;
-
-		return false;
+				return;
 	}
 
+	@Override
 	public boolean onScroll(final MotionEvent pEvent1, final MotionEvent pEvent2,
 			final float pDistanceX, final float pDistanceY) {
 		if (mDirtyOverlays)
@@ -250,6 +276,7 @@ public class OverlayManager extends AbstractList<Overlay> {
 		return false;
 	}
 
+	@Override
 	public void onShowPress(final MotionEvent pEvent) {
 		if (mDirtyOverlays)
 			updateOverlays();
@@ -259,6 +286,7 @@ public class OverlayManager extends AbstractList<Overlay> {
 
 	}
 
+	@Override
 	public boolean onSingleTapUp(final MotionEvent pEvent) {
 		if (mDirtyOverlays)
 			updateOverlays();
