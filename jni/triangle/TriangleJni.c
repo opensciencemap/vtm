@@ -25,31 +25,21 @@ int pnpoly(int nvert, float *vert, float testx, float testy)
 }
 #endif
 
-//#define TESTING
+static void printPoly(TriangleIO *in) {
+   // print poly format to check with triangle/showme
+   printf("%d 2 0 0\n", in->numberofpoints);
+   for (int j = 0; j < in->numberofpoints; j++)
+      printf("%d %f %f\n", j, in->pointlist[j*2], in->pointlist[j*2+1]);
 
+   int *seg = in->segmentlist;
+   printf("%d 0\n", in->numberofsegments);
+   for (int j = 0; j < in->numberofsegments; j++, seg += 2)
+      printf("%d %d %d\n", j, *seg, *(seg+1));
 
-static void printPoly(TriangleIO *in){
- // print poly format to check with triangle/showme
-      printf("%d 2 0 0\n", in->numberofpoints);
-      for (int j = 0; j < in->numberofpoints; j++)
-         printf("%d %f %f\n", j, in->pointlist[j*2], in->pointlist[j*2+1]);
-
-     int *seg = in->segmentlist;
-      printf("%d 0\n", in->numberofsegments);
-      for (int j = 0; j < in->numberofsegments; j++, seg += 2)
-         printf("%d %d %d\n", j, *seg, *(seg+1));
-
-      printf("%d 0\n", in->numberofholes);
-      for (int j = 0; j < in->numberofholes; j++) {
-         printf("%d %f %f\n", j, in->holelist[j*2], in->holelist[j*2+1]);
-      }
-}
-
-int compare_dups(const void *a, const void *b) {
-   int da = *((const int*) a);
-   int db = *((const int*) b);
-
-   return (da > db) - (da < db);
+   printf("%d 0\n", in->numberofholes);
+   for (int j = 0; j < in->numberofholes; j++) {
+      printf("%d %f %f\n", j, in->holelist[j*2], in->holelist[j*2+1]);
+   }
 }
 
 jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclass c,
@@ -61,9 +51,6 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
    float* orig_points = (float*) (*env)->GetPrimitiveArrayCritical(env, obj_points, &isCopy);
    if (orig_points == NULL)
       return 0;
-
-   if (isCopy)
-      printf("... VM copied array");
 
    float *points = orig_points + pos;
 
@@ -195,36 +182,11 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
    if (dups) {
       for (int i = 0; i < dups; i++) {
          printf("duplicate points at %d, %d: %f,%f\n",
-         skip_list[i*2], skip_list[i*2+1],
-         in.pointlist[skip_list[i*2+1]*2],
-         in.pointlist[skip_list[i*2+1]*2+1]);
+               skip_list[i*2], skip_list[i*2+1],
+               in.pointlist[skip_list[i*2+1]*2],
+               in.pointlist[skip_list[i*2+1]*2+1]);
       }
       printPoly(&in);
-
-      if (0) {
-         free(in.segmentlist);
-         free(in.holelist);
-         free(rings);
-         free(skip_list);
-         return 0;
-      }
-      if (dups == 2) {
-         if (skip_list[0] > skip_list[2]) {
-            int tmp = skip_list[0];
-            skip_list[0] = skip_list[2];
-            skip_list[2] = tmp;
-
-            tmp = skip_list[1];
-            skip_list[1] = skip_list[3];
-            skip_list[3] = tmp;
-
-            printf("flip items\n");
-         }
-      }
-      else if (dups > 2) {
-         printf("sort dups\n");
-         qsort(skip_list, dups, 2 * sizeof(float), compare_dups);
-      }
 
       // shift segment indices while removing duplicate points
       for (int i = 0; i < dups; i++) {
@@ -233,28 +195,12 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
          // first vertex
          int replacement = skip_list[i * 2 + 1];
 
-         printf("add offset: %d, from pos %d\n", i, pos);
          seg = in.segmentlist;
          for (int j = 0; j < in.numberofsegments * 2; j++, seg++) {
-            if (*seg == pos) {
-               if (replacement >= pos)
-                  *seg = replacement - i;
-               else
-                  *seg = replacement;
-            }
-            else if (*seg > pos)
-               *seg -= 1;
+            if (*seg == pos)
+               *seg = replacement;
          }
-
-         printf( "move %d to %d, cnt %d\n", pos + 1, pos, in.numberofpoints - pos - 1);
-
-         if (in.numberofpoints - pos > 1)
-            memmove(in.pointlist + (pos * 2), in.pointlist + ((pos + 1) * 2),
-                  (in.numberofpoints - pos - 1) * 2 * sizeof(float));
-
-         in.numberofpoints--;
       }
-      printPoly(&in);
    }
 
    memset(&out, 0, sizeof(TriangleIO));
@@ -286,63 +232,40 @@ jint Java_org_oscim_renderer_layer_ExtrusionLayer_triangulate(JNIEnv *env, jclas
 
    if (in.numberofpoints < out.numberofpoints) {
       printf( "polygon input is bad! points in:%d out%d\n", in.numberofpoints, out.numberofpoints);
-
-      (*env)->ReleasePrimitiveArrayCritical(env, obj_points, orig_points, JNI_ABORT);
-      free(in.segmentlist);
-      free(in.holelist);
-      free(rings);
-      return 0;
+      out.numberoftriangles = 0;
    }
+   else {
+      // scale to stride and add offset
+      short stride = 2;
 
-   INDICE *tri;
+      if (offset < 0)
+         offset = 0;
 
-   /* shift back indices from removed duplicates */
-   for (int i = 0; i < dups; i++) {
-      int pos = skip_list[i * 2] + i;
+      INDICE *tri = out.trianglelist;
 
-      tri = out.trianglelist;
-      int n = out.numberoftriangles * 3;
-      printf("shift back from: %d\n", pos);
+      for (int n = out.numberoftriangles * 3; n > 0; n--)
+         *tri++ = *tri * stride + offset;
 
-      for (; n-- > 0; tri++)
-         if (*tri >= pos)
-            *tri += 1;
-   }
+      // when a ring has an odd number of points one (or rather two)
+      // additional vertices will be added. so the following rings
+      // needs extra offset...
+      int start = offset;
+      for (int j = 0, m = in.numberofholes; j < m; j++) {
+         start += rings[j] * stride;
 
-   /* fix offset to vertex buffer indices */
+         // even number of points?
+         if (!(rings[j] & 1))
+            continue;
 
-   // scale to stride and add offset
-   short stride = 2;
+         tri = out.trianglelist;
+         int n = out.numberoftriangles * 3;
 
-   if (offset < 0)
-      offset = 0;
+         for (; n-- > 0; tri++)
+            if (*tri >= start)
+               *tri += stride;
 
-   tri = out.trianglelist;
-   for (int n = out.numberoftriangles * 3; n > 0; n--)
-      *tri++ = *tri * stride + offset;
-
-   // when a ring has an odd number of points one (or rather two)
-   // additional vertices will be added. so the following rings
-   // needs extra offset...
-   int start = offset;
-   for (int j = 0, m = in.numberofholes; j < m; j++) {
-      start += rings[j] * stride;
-
-      if (dups)
-         printf("add offset from %d : %d\n", rings[j], (rings[j] & 1));
-
-      // even number of points?
-      if (!(rings[j] & 1))
-         continue;
-
-      tri = out.trianglelist;
-      int n = out.numberoftriangles * 3;
-
-      for (; n-- > 0; tri++)
-         if (*tri >= start)
-            *tri += stride;
-
-      start += stride;
+         start += stride;
+      }
    }
 
    (*env)->ReleasePrimitiveArrayCritical(env, obj_points, orig_points, JNI_ABORT);
