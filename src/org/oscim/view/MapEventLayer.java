@@ -25,6 +25,9 @@ import android.view.MotionEvent;
  *
  * @TODO:
  *        - better recognition of tilt/rotate/scale state
+ *        one could check change of rotation / scale within a
+ *        given time to estimate if the mode should be changed:
+ *        http://en.wikipedia.org/wiki/Viterbi_algorithm
  */
 
 public class MapEventLayer extends Overlay {
@@ -38,6 +41,7 @@ public class MapEventLayer extends Overlay {
 	private boolean mBeginRotate;
 	private boolean mBeginTilt;
 	private boolean mDoubleTap;
+	private boolean mWasMulti;
 
 	private float mPrevX;
 	private float mPrevY;
@@ -69,37 +73,29 @@ public class MapEventLayer extends Overlay {
 		int action = getAction(e);
 
 		if (action == MotionEvent.ACTION_DOWN) {
-			mMulti = 0;
+			mBeginRotate = false;
+			mBeginTilt = false;
+			mBeginScale = false;
+			mDoubleTap = false;
 			mWasMulti = false;
+
 			mPrevX = e.getX(0);
 			mPrevY = e.getY(0);
 			return true; //onActionDown(e);
 		} else if (action == MotionEvent.ACTION_MOVE) {
 			return onActionMove(e);
 		} else if (action == MotionEvent.ACTION_UP) {
-			mBeginRotate = false;
-			mBeginTilt = false;
-			mBeginScale = false;
-			mDoubleTap = false;
 			return true;
-			//return onActionUp(e);
-
 		} else if (action == MotionEvent.ACTION_CANCEL) {
 			mDoubleTap = false;
 			return true;
-			//return onActionCancel();
 		} else if (action == MotionEvent.ACTION_POINTER_DOWN) {
-			mMulti++;
 			mWasMulti = true;
-
 			updateMulti(e);
 			return true;
-			//return onActionPointerDown(e);
 		} else if (action == MotionEvent.ACTION_POINTER_UP) {
 			updateMulti(e);
-			mMulti--;
 			return true;
-			//return onActionPointerUp(e);
 		}
 
 		return false;
@@ -137,14 +133,6 @@ public class MapEventLayer extends Overlay {
 
 		if (e.getPointerCount() < 2)
 			return true;
-
-		if (mMulti == 0)
-			return true;
-
-		// TODO improve gesture recognition,
-		// one could check change of rotation / scale within a
-		// given time to estimate if the mode should be changed:
-		// http://en.wikipedia.org/wiki/Viterbi_algorithm
 
 		float x2 = e.getX(1);
 		float y2 = e.getY(1);
@@ -238,9 +226,6 @@ public class MapEventLayer extends Overlay {
 		return true;
 	}
 
-	private int mMulti;
-	private boolean mWasMulti;
-
 	private void updateMulti(MotionEvent e) {
 		int cnt = e.getPointerCount();
 
@@ -275,9 +260,7 @@ public class MapEventLayer extends Overlay {
 	public boolean onScroll(final MotionEvent e1, final MotionEvent e2, final float distanceX,
 			final float distanceY) {
 
-		if (mMulti == 0) {
-			if (debug)
-				printState("onScroll " + distanceX + " " + distanceY);
+		if (e2.getPointerCount() == 1) {
 			mMapPosition.moveMap(-distanceX, -distanceY);
 			mMapView.redrawMap(true);
 			return true;
