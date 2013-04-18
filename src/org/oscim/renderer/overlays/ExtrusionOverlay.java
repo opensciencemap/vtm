@@ -360,7 +360,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			_a * ((_r + _l + 1) / 255),
 			_a * ((_g + _l + 1) / 255),
 			_a * ((_b + _l) / 255),
-			_a,
+			0.8f,
 			// sligthly differ adjacent side
 			// faces to improve contrast
 			_a * ((_r - _s) / 255 + 0.01f),
@@ -375,8 +375,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 			(_r - _o) / 255,
 			(_g - _o) / 255,
 			(_b - _o) / 255,
-			//			1, 0, 0,
-			1.0f,
+			0.9f,
 	};
 
 	final static String extrusionVertexShader = ""
@@ -396,24 +395,24 @@ public class ExtrusionOverlay extends RenderOverlay {
 			//+ "  z = gl_Position.z;"
 			+ "  if (u_mode == 0)"
 			//     roof / depth pass
-			+ "    color = u_color[0];"
+			+ "    color = u_color[0] * u_alpha;"
 			+ "  else {"
 			//    decrease contrast with distance
 			+ "   if (u_mode == 1){"
 			//     sides 1 - use 0xff00
 			//     scale direction to -0.5<>0.5
-			//+ "    float dir = abs(a_light.y / ff - 0.5);"
 			+ "    float dir = a_light.y / ff;"
 			+ "    float z = (0.98 + gl_Position.z * 0.02);"
 			+ "    color = u_color[1];"
 			+ "    color.rgb *= (0.85 + dir * 0.15) * z;"
+			+ "    color *= u_alpha;"
 			+ "  } else if (u_mode == 2){"
 			//     sides 2 - use 0x00ff
-			//+ "    float dir = abs(a_light.x / ff - 0.5);"
 			+ "    float dir = a_light.x / ff;"
 			+ "    float z = (0.98 + gl_Position.z * 0.02);"
-			+ "    color = u_color[2] * z;"
+			+ "    color = u_color[2];"
 			+ "    color.rgb *= (0.85 + dir * 0.15) * z;"
+			+ "    color *= u_alpha;"
 			+ "  } else {"
 			//     outline
 			+ "    float z = (0.8 - gl_Position.z * 0.2);"
