@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 osmdroid
+ * Copyright 2012 osmdroid authors
  * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -29,6 +29,7 @@ import org.oscim.overlay.OverlayItem.HotspotPlace;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.SymbolLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
+import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
 import android.content.res.Resources;
@@ -62,7 +63,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		Item item;
 		boolean visible;
 		boolean changes;
-		int x, y, px, py;
+		float x, y;
+		double px, py;
 	}
 
 	/* package */InternalItem mItems;
@@ -73,7 +75,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	private int mSize;
 
 	// pre-projected points to zoomlevel 20
-	private static final byte MAX_ZOOM = 20;
+	private static final byte MAX_ZOOM = 22;
 	private final double MAX_SCALE;
 
 	class ItemOverlay extends BasicOverlay {
@@ -97,11 +99,11 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 			mUpdate = false;
 
-			int z = curPos.zoomLevel;
-			int diff = MAX_ZOOM - z;
+			int zoom = curPos.zoomLevel;
+			float div = FastMath.pow(zoom - MAX_ZOOM);
 
-			int mx = (int) (curPos.x * (Tile.SIZE << z));
-			int my = (int) (curPos.y * (Tile.SIZE << z));
+			double mx = curPos.x * (Tile.SIZE << zoom);
+			double my = curPos.y * (Tile.SIZE << zoom);
 
 			// limit could be 1 if we update on every position change
 			float limit = 1.5f;
@@ -124,10 +126,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 				// check changes
 				for (InternalItem it = mItems; it != null; it = it.next) {
-					it.x = (it.px >> diff) - mx;
-					it.y = (it.py >> diff) - my;
-					//it.x = it.px - mx;
-					//it.y = it.py - my;
+					it.x = (float)((it.px * div) - mx);
+					it.y = (float)((it.py * div) - my);
 
 					if (it.x > max || it.x < -max || it.y > max || it.y < -max) {
 						if (it.visible) {
@@ -173,7 +173,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 				mMapPosition.copy(curPos);
 
 				// items are placed relative to zoomLevel
-				mMapPosition.scale = 1 << z;
+				mMapPosition.scale = 1 << zoom;
 
 				layers.clear();
 
@@ -186,13 +186,11 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 						continue;
 					}
 
-					Item item = it.item; //mInternalItemList.get(i);
-
 					int state = 0;
-					if (mDrawFocusedItem && (mFocusedItem == item))
+					if (mDrawFocusedItem && (mFocusedItem == it.item))
 						state = OverlayItem.ITEM_STATE_FOCUSED_MASK;
 
-					Drawable marker = item.getDrawable();
+					Drawable marker = it.item.getDrawable();
 					if (marker == null)
 						marker = mDefaultMarker;
 
@@ -206,7 +204,6 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 				}
 
 			}
-			//			Log.d("...", "changed " + changedVisible + " " + changesInvisible);
 			mSymbolLayer.prepare();
 			layers.textureLayers = mSymbolLayer;
 			newData = true;
@@ -279,10 +276,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 				// pre-project points
 				MercatorProjection.project(it.item.mGeoPoint, mMapPoint);
-				it.px = (int) (mMapPoint.x * MAX_SCALE);
-				it.py = (int) (mMapPoint.y * MAX_SCALE);
-				//	it.px = (int) MercatorProjection.longitudeToPixelX(p.getLongitude(), MAX_ZOOM);
-				//	it.py = (int) MercatorProjection.latitudeToPixelY(p.getLatitude(), MAX_ZOOM);
+				it.px = (mMapPoint.x * MAX_SCALE);
+				it.py = (mMapPoint.y * MAX_SCALE);
 			}
 			mUpdate = true;
 		}
