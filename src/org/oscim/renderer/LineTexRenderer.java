@@ -24,7 +24,6 @@ import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.layer.LineTexLayer;
 import org.oscim.theme.renderinstruction.Line;
-import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
@@ -137,15 +136,18 @@ public class LineTexRenderer {
 		//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexID[0]);
 
 		Layer l = curLayer;
-		while (l != null && l.type == Layer.TEXLINE) {
+		for (;l != null && l.type == Layer.TEXLINE; l = l.next) {
 			LineTexLayer ll = (LineTexLayer) l;
 			Line line = ll.line;
 
 			GlUtils.setColor(hTexColor, line.stippleColor, 1);
 			GlUtils.setColor(hBgColor, line.color, 1);
 
-			float ps = FastMath.clamp((int) (s+0.5f), 1, 3);
-			GLES20.glUniform1f(hPatternScale, (GLRenderer.COORD_SCALE * line.stipple) / ps);
+			float pScale = (int) (s+0.5f);
+			if (pScale < 1)
+				pScale = 1;
+
+			GLES20.glUniform1f(hPatternScale, (GLRenderer.COORD_SCALE * line.stipple) / pScale);
 			GLES20.glUniform1f(hPatternWidth, line.stippleWidth);
 
 			GLES20.glUniform1f(hScale, scale);
@@ -213,9 +215,6 @@ public class LineTexRenderer {
 				GLES20.glDrawElements(GLES20.GL_TRIANGLES, numIndices,
 						GLES20.GL_UNSIGNED_SHORT, 0);
 			}
-
-			l = l.next;
-
 			//GlUtils.checkGlError(TAG);
 		}
 
