@@ -124,7 +124,8 @@ public class PathOverlay extends Overlay {
 			int x, y, prevX, prevY;
 
 			int z = curPos.zoomLevel;
-			int diff = MAX_ZOOM - z;
+			float div = FastMath.pow(z - MAX_ZOOM);
+
 			int mx = (int) (curPos.x * (Tile.SIZE << z));
 			int my = (int) (curPos.y * (Tile.SIZE << z));
 
@@ -134,8 +135,8 @@ public class PathOverlay extends Overlay {
 			int flip = 0;
 			int flipMax = Tile.SIZE << (z - 1);
 
-			x = (mPreprojected[j++] >> diff) - mx;
-			y = (mPreprojected[j++] >> diff) - my;
+			x = (int)(mPreprojected[j++] * div) - mx;
+			y = (int)(mPreprojected[j++] * div) - my;
 
 			if (x > flipMax) {
 				x -= (flipMax * 2);
@@ -153,8 +154,8 @@ public class PathOverlay extends Overlay {
 			prevY = y;
 
 			for (; j < size; j += 2) {
-				x = (mPreprojected[j + 0] >> diff) - mx;
-				y = (mPreprojected[j + 1] >> diff) - my;
+				x = (int)(mPreprojected[j + 0] * div) - mx;
+				y = (int)(mPreprojected[j + 1] * div) - my;
 
 				int curFlip = 0;
 				if (x > flipMax) {
