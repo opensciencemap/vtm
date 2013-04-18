@@ -18,14 +18,15 @@ package org.oscim.renderer;
 import org.oscim.core.Tile;
 
 /**
+ * Scan-line fill algorithm to retrieve tile-coordinates.
+ *
  * ScanBox is used to calculate tile coordinates that intersect
- * the box (or trapezoid) which is usually the projection of
- * screen bounds to the map at a given zoom-level.
+ * the box (or trapezoid) which is the projection of screen
+ * bounds to the map.
  *
  * use:
- * MapViewPosition.getMapViewProjection(coords)
- * ScanBox.transScale(pos.x, pos.y, pos.scale, zoomLevel, coords)
- * yourScanBox.scan(coords, zoomLevel);
+ * MapViewPosition.getMapViewProjection(box)
+ * yourScanBox.scan(pos.x, pos.y, pos.scale, zoomLevel, coords);
  *
  * where zoomLevel is the zoom-level for which tile coordinates
  * should be calculated.
@@ -79,9 +80,9 @@ public abstract class ScanBox {
 
 	abstract void setVisible(int y, int x1, int x2);
 
-	public void scan(float[] coords, int zoom) {
+	public void scan(double x, double y, double scale, int zoom, float[] box) {
 		mZoom = zoom;
-
+		transScale(x, y, scale, zoom, box);
 
 		// clip result to min/max as steep angles
 		// cause overshooting in x direction.
@@ -89,11 +90,11 @@ public abstract class ScanBox {
 		float min = Float.MAX_VALUE;
 
 		for(int i = 0; i < 8; i += 2){
-			float x = coords[i];
-			if (x > max)
-				max = x;
-			if (x < min)
-				min = x;
+			float xx = box[i];
+			if (xx > max)
+				max = xx;
+			if (xx < min)
+				min = xx;
 		}
 
 		max = (float)Math.ceil(max);
@@ -105,20 +106,20 @@ public abstract class ScanBox {
 		maxX = (int) max;
 
 		// top-left -> top-right
-		ab.set(coords[0], coords[1], coords[2], coords[3]);
+		ab.set(box[0], box[1], box[2], box[3]);
 		// top-right ->  bottom-right
-		bc.set(coords[2], coords[3], coords[4], coords[5]);
+		bc.set(box[2], box[3], box[4], box[5]);
 		// bottom-right -> bottom-left
-		ca.set(coords[4], coords[5], coords[0], coords[1]);
+		ca.set(box[4], box[5], box[0], box[1]);
 
 		scanTriangle();
 
 		// top-left -> bottom-right
-		ab.set(coords[0], coords[1], coords[4], coords[5]);
+		ab.set(box[0], box[1], box[4], box[5]);
 		// bottom-right -> bottom-left
-		bc.set(coords[4], coords[5], coords[6], coords[7]);
+		bc.set(box[4], box[5], box[6], box[7]);
 		// bottom-left -> top-left
-		ca.set(coords[6], coords[7], coords[0], coords[1]);
+		ca.set(box[6], box[7], box[0], box[1]);
 
 		scanTriangle();
 	}

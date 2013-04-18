@@ -73,7 +73,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// bytes currently loaded in VBOs
 	private static int mBufferMemoryUsage;
 
-	private static float[] mTileCoords;
+	private static float[] mBoxCoords;
 
 	public class Matrices {
 		public final Matrix4 viewproj = new Matrix4();
@@ -183,7 +183,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mMapPosition = new MapPosition();
 
 		mMatrices = new Matrices();
-		mTileCoords = new float[8];
+		mBoxCoords = new float[8];
 
 		// tile fill coords
 		short min = 0;
@@ -304,7 +304,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	/** set tile isVisible flag true for tiles that intersect view */
 	private static void updateTileVisibility() {
-		float[] coords = mTileCoords;
 		MapPosition pos = mMapPosition;
 		MapTile[] tiles = mDrawTiles.tiles;
 
@@ -315,14 +314,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			for (int i = 0; i < mDrawTiles.cnt; i++)
 				tiles[i].isVisible = false;
 
-			// scale and translate projection to tile coordinates
-			ScanBox.transScale(pos.x, pos.y, pos.scale, tileZoom, coords);
-
 			// count placeholder tiles
 			mNumTileHolder = 0;
 
 			// check visibile tiles
-			mScanBox.scan(coords, tileZoom);
+			mScanBox.scan(pos.x, pos.y, pos.scale, tileZoom, mBoxCoords);
 		}
 	}
 
@@ -441,7 +437,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			positionChanged = true;
 		}
 
-		// get current MapPosition, set mTileCoords (mapping of screen to model
+		// get current MapPosition, set mBoxCoords (mapping of screen to model
 		// coordinates)
 		MapPosition pos = mMapPosition;
 
@@ -451,7 +447,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			positionChanged |= mMapViewPosition.getMapPosition(pos);
 
 			if (positionChanged)
-				mMapViewPosition.getMapViewProjection(mTileCoords);
+				mMapViewPosition.getMapViewProjection(mBoxCoords);
 
 			mMapViewPosition.getMatrix(mMatrices.view, null, mMatrices.viewproj);
 
