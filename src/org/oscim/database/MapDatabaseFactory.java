@@ -44,12 +44,13 @@ public final class MapDatabaseFactory {
 				return new org.oscim.database.mapfile.MapDatabase();
 			case TEST_READER:
 				return new org.oscim.database.test.MapDatabase();
-			case POSTGIS_READER:
-				return new org.oscim.database.postgis.MapDatabase();
 			case PBMAP_READER:
 				return new org.oscim.database.pbmap.MapDatabase();
 			case OSCIMAP_READER:
 				return new org.oscim.database.oscimap.MapDatabase();
+			default:
+				break;
+
 		}
 
 		throw new IllegalArgumentException("unknown enum value: " + mapDatabase);
