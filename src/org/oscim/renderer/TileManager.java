@@ -79,7 +79,7 @@ public class TileManager {
 	private TileSet mCurrentTiles;
 	/* package */TileSet mNewTiles;
 
-	private final float[] mTileCoords = new float[8];
+	private final float[] mBoxCoords = new float[8];
 
 	public TileManager(MapView mapView) {
 		mMapView = mapView;
@@ -167,16 +167,12 @@ public class TileManager {
 
 		int tileZoom = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
 
-		float[] coords = mTileCoords;
-		mMapViewPosition.getMapViewProjection(coords);
-
-		// scale and translate projection to tile coordinates
-		ScanBox.transScale(pos.x, pos.y, scale, tileZoom, coords);
+		mMapViewPosition.getMapViewProjection(mBoxCoords);
 
 		// scan visible tiles. callback function calls 'addTile'
-		// which sets mNewTiles
+		// which updates mNewTiles
 		mNewTiles.cnt = 0;
-		mScanBox.scan(coords, tileZoom);
+		mScanBox.scan(pos.x, pos.y, scale, tileZoom, mBoxCoords);
 
 		MapTile[] newTiles = mNewTiles.tiles;
 		MapTile[] curTiles = mCurrentTiles.tiles;
