@@ -79,7 +79,7 @@ public class TileManager {
 	private TileSet mCurrentTiles;
 	/* package */TileSet mNewTiles;
 
-	private final float[] mTileCoords = new float[8];
+	private final float[] mBoxCoords = new float[8];
 
 	public TileManager(MapView mapView) {
 		mMapView = mapView;
@@ -113,8 +113,8 @@ public class TileManager {
 				clearTile(mTiles[i]);
 		}
 		//else {
-			// mInitialized is set when surface changed
-			// and VBOs might be lost
+		// mInitialized is set when surface changed
+		// and VBOs might be lost
 		//	VertexPool.init();
 		//}
 
@@ -162,26 +162,17 @@ public class TileManager {
 		// jobs come in.
 		mMapView.addJobs(null);
 
-		// scale and translate projection to tile coordinates
 		// load some tiles more than currently visible (* 0.75)
 		double scale = pos.scale * 0.9f;
-		double curScale = Tile.SIZE * scale;
-		int zoomLevel = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
 
-		double tileScale = Tile.SIZE * (scale / (1 << zoomLevel));
+		int tileZoom = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
 
-		float[] coords = mTileCoords;
-		mMapViewPosition.getMapViewProjection(coords);
-
-		for (int i = 0; i < 8; i += 2) {
-			coords[i + 0] = (float) ((pos.x * curScale + coords[i + 0]) / tileScale);
-			coords[i + 1] = (float) ((pos.y * curScale + coords[i + 1]) / tileScale);
-		}
+		mMapViewPosition.getMapViewProjection(mBoxCoords);
 
 		// scan visible tiles. callback function calls 'addTile'
-		// which sets mNewTiles
+		// which updates mNewTiles
 		mNewTiles.cnt = 0;
-		mScanBox.scan(coords, zoomLevel);
+		mScanBox.scan(pos.x, pos.y, scale, tileZoom, mBoxCoords);
 
 		MapTile[] newTiles = mNewTiles.tiles;
 		MapTile[] curTiles = mCurrentTiles.tiles;
@@ -562,22 +553,22 @@ public class TileManager {
 	}
 
 	private final ScanBox mScanBox = new ScanBox() {
+
 		@Override
 		public void setVisible(int y, int x1, int x2) {
 			MapTile[] tiles = mNewTiles.tiles;
 			int cnt = mNewTiles.cnt;
-			int max = tiles.length;
+			int maxTiles = tiles.length;
+
 			int xmax = 1 << mZoom;
 
 			for (int x = x1; x < x2; x++) {
 				MapTile tile = null;
 
-				if (cnt == max) {
-					Log.d(TAG, "reached maximum tiles " + max);
+				if (cnt == maxTiles) {
+					Log.d(TAG, "reached maximum tiles " + maxTiles);
 					break;
 				}
-
-				// NOTE to myself: do not modify x!
 				int xx = x;
 
 				if (x < 0 || x >= xmax) {

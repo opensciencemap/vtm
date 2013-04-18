@@ -15,8 +15,38 @@
 
 package org.oscim.renderer;
 
+import org.oscim.core.Tile;
 
+/**
+ * Scan-line fill algorithm to retrieve tile-coordinates.
+ *
+ * ScanBox is used to calculate tile coordinates that intersect
+ * the box (or trapezoid) which is the projection of screen
+ * bounds to the map.
+ *
+ * use:
+ * MapViewPosition.getMapViewProjection(box)
+ * yourScanBox.scan(pos.x, pos.y, pos.scale, zoomLevel, coords);
+ *
+ * where zoomLevel is the zoom-level for which tile coordinates
+ * should be calculated.
+ * */
 public abstract class ScanBox {
+
+	public static void transScale(double x, double y, double scale, int zoom, float[] box){
+		scale *= Tile.SIZE;
+
+		//double curScale = Tile.SIZE * scale;
+		double div = scale / (1 << zoom);
+
+		x *= scale;
+		y *= scale;
+
+		for (int i = 0; i < 8; i += 2) {
+			box[i + 0] = (float) ((x + box[i + 0]) / div);
+			box[i + 1] = (float) ((y + box[i + 1]) / div);
+		}
+	}
 	/*
 	 * ported from Polymaps: Layer.js
 	 */
@@ -44,43 +74,52 @@ public abstract class ScanBox {
 	private Edge ab = new Edge();
 	private Edge bc = new Edge();
 	private Edge ca = new Edge();
-	private float minX, maxX;
+	private int minX, maxX;
 
 	protected int mZoom;
 
 	abstract void setVisible(int y, int x1, int x2);
 
-	public void scan(float[] coords, int zoom) {
+	public void scan(double x, double y, double scale, int zoom, float[] box) {
 		mZoom = zoom;
+		transScale(x, y, scale, zoom, box);
 
-		maxX = Float.MIN_VALUE;
-		minX = Float.MAX_VALUE;
+		// clip result to min/max as steep angles
+		// cause overshooting in x direction.
+		float max = Float.MIN_VALUE;
+		float min = Float.MAX_VALUE;
 
 		for(int i = 0; i < 8; i += 2){
-			float x = coords[i];
-			if (x > maxX)
-				maxX = x;
-			if (x < minX)
-				minX = x;
+			float xx = box[i];
+			if (xx > max)
+				max = xx;
+			if (xx < min)
+				min = xx;
 		}
-		maxX = (float)Math.ceil(maxX);
-		minX = (float)Math.floor(minX);
+
+		max = (float)Math.ceil(max);
+		min = (float)Math.floor(min);
+		if (min == max)
+			max++;
+
+		minX = (int) min;
+		maxX = (int) max;
 
 		// top-left -> top-right
-		ab.set(coords[0], coords[1], coords[2], coords[3]);
+		ab.set(box[0], box[1], box[2], box[3]);
 		// top-right ->  bottom-right
-		bc.set(coords[2], coords[3], coords[4], coords[5]);
+		bc.set(box[2], box[3], box[4], box[5]);
 		// bottom-right -> bottom-left
-		ca.set(coords[4], coords[5], coords[0], coords[1]);
+		ca.set(box[4], box[5], box[0], box[1]);
 
 		scanTriangle();
 
 		// top-left -> bottom-right
-		ab.set(coords[0], coords[1], coords[4], coords[5]);
+		ab.set(box[0], box[1], box[4], box[5]);
 		// bottom-right -> bottom-left
-		bc.set(coords[4], coords[5], coords[6], coords[7]);
+		bc.set(box[4], box[5], box[6], box[7]);
 		// bottom-left -> top-left
-		ca.set(coords[6], coords[7], coords[0], coords[1]);
+		ca.set(box[6], box[7], box[0], box[1]);
 
 		scanTriangle();
 	}
@@ -108,10 +147,10 @@ public abstract class ScanBox {
 		if (ca.dy == 0)
 			return;
 
-		if (ab.dy > 0.1)
+		if (ab.dy > 0.0)
 			scanSpans(ca, ab);
 
-		if (bc.dy > 0.1)
+		if (bc.dy > 0.0)
 			scanSpans(ca, bc);
 	}
 
@@ -152,13 +191,13 @@ public abstract class ScanBox {
 			if (dy > e0.dy)
 				dy = e0.dy;
 
-			float x0 = (float)Math.ceil(e0.x0 + m0 * dy);
+			int x0 = (int)Math.ceil(e0.x0 + m0 * dy);
 
 			dy = d1 + y - e1.y0;
 			if (dy > e1.dy)
 				dy = e1.dy;
 
-			float x1 = (float)Math.floor(e1.x0 + m1 * dy);
+			int x1 = (int)Math.floor(e1.x0 + m1 * dy);
 
 			if (x1 < minX)
 				x1 = minX;
@@ -167,7 +206,7 @@ public abstract class ScanBox {
 				x0 = maxX;
 
 			if (x1 < x0)
-				setVisible(y, (int) x1, (int) x0);
+				setVisible(y, x1, x0);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 osmdroid
+ * Copyright 2012 osmdroid authors
  * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -29,6 +29,7 @@ import org.oscim.overlay.OverlayItem.HotspotPlace;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.SymbolLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
+import org.oscim.utils.GeometryUtils;
 import org.oscim.view.MapView;
 
 import android.content.res.Resources;
@@ -53,6 +54,8 @@ import android.graphics.drawable.Drawable;
 public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay implements
 		Overlay.Snappable {
 
+	//private final static String TAG = ItemizedOverlay.class.getName();
+
 	protected final Drawable mDefaultMarker;
 	protected boolean mDrawFocusedItem = true;
 
@@ -62,7 +65,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		Item item;
 		boolean visible;
 		boolean changes;
-		int x, y, px, py;
+		float x, y;
+		double px, py;
 	}
 
 	/* package */InternalItem mItems;
@@ -72,14 +76,10 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	private int mSize;
 
-	// pre-projected points to zoomlevel 20
-	private static final byte MAX_ZOOM = 20;
-	private final double MAX_SCALE;
-
 	class ItemOverlay extends BasicOverlay {
 
 		private final SymbolLayer mSymbolLayer;
-		private final float[] mVec = new float[3];
+		private final float[] mBox = new float[8];
 
 		public ItemOverlay(MapView mapView) {
 			super(mapView);
@@ -97,21 +97,15 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 			mUpdate = false;
 
-			int z = curPos.zoomLevel;
-			int diff = MAX_ZOOM - z;
-
-			int mx = (int) (curPos.x * (Tile.SIZE << z));
-			int my = (int) (curPos.y * (Tile.SIZE << z));
-
-			// limit could be 1 if we update on every position change
-			float limit = 1.5f;
-
-			// no need to project these
-			int max = (1 << 11);
+			double mx = curPos.x;
+			double my = curPos.y;
+			double scale = Tile.SIZE * curPos.scale;
 
 			int changesInvisible = 0;
 			int changedVisible = 0;
 			int numVisible = 0;
+
+			mMapView.getMapViewPosition().getMapViewProjection(mBox);
 
 			synchronized (lock) {
 				if (mItems == null) {
@@ -122,46 +116,28 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 					return;
 				}
 
-				// check changes
+				// check visibility
 				for (InternalItem it = mItems; it != null; it = it.next) {
-					it.x = (it.px >> diff) - mx;
-					it.y = (it.py >> diff) - my;
-					//it.x = it.px - mx;
-					//it.y = it.py - my;
+					it.x = (float) ((it.px - mx) * scale);
+					it.y = (float) ((it.py - my) * scale);
+					it.changes = false;
 
-					if (it.x > max || it.x < -max || it.y > max || it.y < -max) {
+					if (!GeometryUtils.pointInPoly(it.x, it.y, mBox, 8, 0)) {
 						if (it.visible) {
 							it.changes = true;
 							changesInvisible++;
 						}
 						continue;
 					}
-
-					// map points to screen
-					mVec[0] = it.x;
-					mVec[1] = it.y;
-					mVec[2] = 0;
-					matrices.viewproj.prj(mVec);
-
-					float sx = mVec[0];
-					float sy = mVec[1];
-
-					// check if it is visible
-					if (sx < -limit || sx > limit || sy < -limit || sy > limit) {
-						//	Log.d("..", "outside " + it.x + " " + it.y + " -> " + sx + " " + sy);
-						if (it.visible) {
-							it.changes = true;
-							changesInvisible++;
-						}
-					} else {
-						if (!it.visible) {
-							it.visible = true;
-							changedVisible++;
-						}
-						it.changes = false;
-						numVisible++;
+					if (!it.visible) {
+						it.visible = true;
+						changedVisible++;
 					}
+					numVisible++;
+
 				}
+
+				//Log.d(TAG, numVisible + " " + changedVisible + " " + changesInvisible);
 
 				// only update when zoomlevel changed, new items are visible
 				// or more than 10 of the current items became invisible
@@ -171,9 +147,6 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 				// keep position for current state
 				// updateMapPosition();
 				mMapPosition.copy(curPos);
-
-				// items are placed relative to zoomLevel
-				mMapPosition.scale = 1 << z;
 
 				layers.clear();
 
@@ -186,13 +159,11 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 						continue;
 					}
 
-					Item item = it.item; //mInternalItemList.get(i);
-
 					int state = 0;
-					if (mDrawFocusedItem && (mFocusedItem == item))
+					if (mDrawFocusedItem && (mFocusedItem == it.item))
 						state = OverlayItem.ITEM_STATE_FOCUSED_MASK;
 
-					Drawable marker = item.getDrawable();
+					Drawable marker = it.item.getDrawable();
 					if (marker == null)
 						marker = mDefaultMarker;
 
@@ -206,7 +177,6 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 				}
 
 			}
-			//			Log.d("...", "changed " + changedVisible + " " + changesInvisible);
 			mSymbolLayer.prepare();
 			layers.textureLayers = mSymbolLayer;
 			newData = true;
@@ -239,8 +209,6 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 		this.mDefaultMarker = pDefaultMarker;
 		mLayer = new ItemOverlay(mapView);
-
-		MAX_SCALE = (1 << MAX_ZOOM) * Tile.SIZE;
 	}
 
 	private final PointD mMapPoint = new PointD();
@@ -279,10 +247,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 				// pre-project points
 				MercatorProjection.project(it.item.mGeoPoint, mMapPoint);
-				it.px = (int) (mMapPoint.x * MAX_SCALE);
-				it.py = (int) (mMapPoint.y * MAX_SCALE);
-				//	it.px = (int) MercatorProjection.longitudeToPixelX(p.getLongitude(), MAX_ZOOM);
-				//	it.py = (int) MercatorProjection.latitudeToPixelY(p.getLatitude(), MAX_ZOOM);
+				it.px = mMapPoint.x;
+				it.py = mMapPoint.y;
 			}
 			mUpdate = true;
 		}
