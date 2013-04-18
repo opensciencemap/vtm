@@ -15,8 +15,37 @@
 
 package org.oscim.renderer;
 
+import org.oscim.core.Tile;
 
+/**
+ * ScanBox is used to calculate tile coordinates that intersect
+ * the box (or trapezoid) which is usually the projection of
+ * screen bounds to the map at a given zoom-level.
+ *
+ * use:
+ * MapViewPosition.getMapViewProjection(coords)
+ * ScanBox.transScale(pos.x, pos.y, pos.scale, zoomLevel, coords)
+ * yourScanBox.scan(coords, zoomLevel);
+ *
+ * where zoomLevel is the zoom-level for which tile coordinates
+ * should be calculated.
+ * */
 public abstract class ScanBox {
+
+	public static void transScale(double x, double y, double scale, int zoom, float[] box){
+		scale *= Tile.SIZE;
+
+		//double curScale = Tile.SIZE * scale;
+		double div = scale / (1 << zoom);
+
+		x *= scale;
+		y *= scale;
+
+		for (int i = 0; i < 8; i += 2) {
+			box[i + 0] = (float) ((x + box[i + 0]) / div);
+			box[i + 1] = (float) ((y + box[i + 1]) / div);
+		}
+	}
 	/*
 	 * ported from Polymaps: Layer.js
 	 */
@@ -44,7 +73,7 @@ public abstract class ScanBox {
 	private Edge ab = new Edge();
 	private Edge bc = new Edge();
 	private Edge ca = new Edge();
-	private float minX, maxX;
+	private int minX, maxX;
 
 	protected int mZoom;
 
@@ -53,18 +82,27 @@ public abstract class ScanBox {
 	public void scan(float[] coords, int zoom) {
 		mZoom = zoom;
 
-		maxX = Float.MIN_VALUE;
-		minX = Float.MAX_VALUE;
+
+		// clip result to min/max as steep angles
+		// cause overshooting in x direction.
+		float max = Float.MIN_VALUE;
+		float min = Float.MAX_VALUE;
 
 		for(int i = 0; i < 8; i += 2){
 			float x = coords[i];
-			if (x > maxX)
-				maxX = x;
-			if (x < minX)
-				minX = x;
+			if (x > max)
+				max = x;
+			if (x < min)
+				min = x;
 		}
-		maxX = (float)Math.ceil(maxX);
-		minX = (float)Math.floor(minX);
+
+		max = (float)Math.ceil(max);
+		min = (float)Math.floor(min);
+		if (min == max)
+			max++;
+
+		minX = (int) min;
+		maxX = (int) max;
 
 		// top-left -> top-right
 		ab.set(coords[0], coords[1], coords[2], coords[3]);
@@ -108,10 +146,10 @@ public abstract class ScanBox {
 		if (ca.dy == 0)
 			return;
 
-		if (ab.dy > 0.1)
+		if (ab.dy > 0.0)
 			scanSpans(ca, ab);
 
-		if (bc.dy > 0.1)
+		if (bc.dy > 0.0)
 			scanSpans(ca, bc);
 	}
 
@@ -152,13 +190,13 @@ public abstract class ScanBox {
 			if (dy > e0.dy)
 				dy = e0.dy;
 
-			float x0 = (float)Math.ceil(e0.x0 + m0 * dy);
+			int x0 = (int)Math.ceil(e0.x0 + m0 * dy);
 
 			dy = d1 + y - e1.y0;
 			if (dy > e1.dy)
 				dy = e1.dy;
 
-			float x1 = (float)Math.floor(e1.x0 + m1 * dy);
+			int x1 = (int)Math.floor(e1.x0 + m1 * dy);
 
 			if (x1 < minX)
 				x1 = minX;
@@ -167,7 +205,7 @@ public abstract class ScanBox {
 				x0 = maxX;
 
 			if (x1 < x0)
-				setVisible(y, (int) x1, (int) x0);
+				setVisible(y, x1, x0);
 		}
 	}
 }
