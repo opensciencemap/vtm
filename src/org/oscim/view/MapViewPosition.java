@@ -38,13 +38,14 @@ public class MapViewPosition {
 	private static final String TAG = MapViewPosition.class.getName();
 
 	// needs to fit for int: 2 * 20 * Tile.SIZE
-	public final static int MAX_ZOOMLEVEL = 20;
+	public final static int MAX_ZOOMLEVEL = 24;
 	public final static int MIN_ZOOMLEVEL = 2;
 
 	public final static double MAX_SCALE = (1 << MAX_ZOOMLEVEL);
 	public final static double MIN_SCALE = (1 << MIN_ZOOMLEVEL);
 
-	public final static int ABS_ZOOMLEVEL = 20;
+	// TODO: remove. only used for animations
+	public final static int ABS_ZOOMLEVEL = 22;
 
 	private final static float MAX_ANGLE = 65;
 

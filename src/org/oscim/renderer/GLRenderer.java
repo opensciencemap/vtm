@@ -310,24 +310,19 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		// lock tiles while updating isVisible state
 		synchronized (GLRenderer.tilelock) {
+			int tileZoom = tiles[0].zoomLevel;
+
 			for (int i = 0; i < mDrawTiles.cnt; i++)
 				tiles[i].isVisible = false;
 
-			int z = tiles[0].zoomLevel;
-
-			double curScale = Tile.SIZE * pos.scale;
-			double tileScale = Tile.SIZE * (pos.scale / (1 << z));
-
-			for (int i = 0; i < 8; i += 2) {
-				coords[i + 0] = (float) ((pos.x * curScale + coords[i + 0]) / tileScale);
-				coords[i + 1] = (float) ((pos.y * curScale + coords[i + 1]) / tileScale);
-			}
+			// scale and translate projection to tile coordinates
+			ScanBox.transScale(pos.x, pos.y, pos.scale, tileZoom, coords);
 
 			// count placeholder tiles
 			mNumTileHolder = 0;
 
 			// check visibile tiles
-			mScanBox.scan(coords, z);
+			mScanBox.scan(coords, tileZoom);
 		}
 	}
 
