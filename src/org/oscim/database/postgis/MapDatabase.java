@@ -27,7 +27,6 @@ import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tag;
-import org.oscim.core.WebMercator;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.IMapDatabaseCallback.WayData;
@@ -62,7 +61,7 @@ public class MapDatabase implements IMapDatabase {
 	private final MapInfo mMapInfo =
 			new MapInfo(new BoundingBox(-180, -85, 180, 85),
 					new Byte((byte) 14), new GeoPoint(53.11, 8.85),
-					WebMercator.NAME,
+					null,
 					0, 0, 0, "de", "comment", "author", null);
 
 	private boolean mOpenFile = false;
@@ -210,7 +209,7 @@ public class MapDatabase implements IMapDatabase {
 
 	@Override
 	public String getMapProjection() {
-		return WebMercator.NAME;
+		return null;
 	}
 
 	@Override
