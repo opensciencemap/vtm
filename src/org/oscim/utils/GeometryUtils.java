@@ -313,21 +313,26 @@ public final class GeometryUtils {
 	}
 
 	// from www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-	public static boolean pointInPoly(int nvert, float[] vert, float testx, float testy) {
-		int i, j;
+	/**
+	 * test if point x/y is in polygon defined by vertices[offset ... offset+length]
+	 * */
+	public static boolean pointInPoly(float x, float y, float[] vertices, int length,
+			int offset) {
+
+		int end = (offset + length);
+
 		boolean inside = false;
-		for (i = 0, j = (nvert - 1) * 2; i < nvert * 2; j = i++) {
-			if (((vert[i * 2 + 1] > testy) != (vert[j * j + 1] > testy)) &&
-					(testx < (vert[j * 2] - vert[i * 2])
-							* (testy - vert[i * 2 + 1])
-							/ (vert[j * 2 + 1] - vert[i * 2 + 1]) + vert[i * 2]))
+		for (int i = offset, j = (end - 2); i < end; j = i, i += 2) {
+			if (((vertices[i + 1] > y) != (vertices[j + 1] > y)) &&
+					(x < (vertices[j] - vertices[i]) * (y - vertices[i + 1])
+							/ (vertices[j + 1] - vertices[i + 1]) + vertices[i]))
 				inside = !inside;
 		}
 		return inside;
 	}
 
 	public static float areaSigned(Point p1, Point p2, Point p3) {
-		return ((p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y))*0.5f;
+		return ((p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y)) * 0.5f;
 	}
 
 	public static float areaSigned(float ax, float ay, float bx, float by, float cx, float cy) {
