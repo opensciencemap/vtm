@@ -13,21 +13,24 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.oscim.renderer;
+package org.oscim.layers.tile;
 
-import static org.oscim.generator.JobTile.STATE_LOADING;
-import static org.oscim.generator.JobTile.STATE_NEW_DATA;
-import static org.oscim.generator.JobTile.STATE_NONE;
+import static org.oscim.layers.tile.JobTile.STATE_LOADING;
+import static org.oscim.layers.tile.JobTile.STATE_NEW_DATA;
+import static org.oscim.layers.tile.JobTile.STATE_NONE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.generator.JobTile;
-import org.oscim.generator.TileDistanceSort;
+import org.oscim.renderer.BufferObject;
+import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.ScanBox;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.quadtree.QuadTree;
+import org.oscim.utils.quadtree.QuadTreeIndex;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
@@ -40,6 +43,8 @@ import android.util.Log;
  *       - make it general for reuse in tile-overlays
  */
 public class TileManager {
+	private static final int CACHE_TILES_MAX = 250;
+
 	static final String TAG = TileManager.class.getSimpleName();
 	private final static int MAX_ZOOMLEVEL = 17;
 	private final static int MIN_ZOOMLEVEL = 2;
@@ -71,21 +76,53 @@ public class TileManager {
 	private final ArrayList<JobTile> mJobs;
 
 	// counter to check whether current TileSet has changed
-	private static int mUpdateSerial;
+	private  int mUpdateSerial;
 
 	// lock for TileSets while updating MapTile locks
 	private final Object mTilelock = new Object();
 
+	// need to keep track of TileSets to clear on reset...
+	private final ArrayList<TileSet> mTileSets = new ArrayList<TileSet>(4);
+
 	private TileSet mCurrentTiles;
 	/* package */TileSet mNewTiles;
 
-	private final float[] mBoxCoords = new float[8];
 
-	public TileManager(MapView mapView) {
+	private final QuadTreeIndex<MapTile> mIndex = new QuadTreeIndex<MapTile>(){
+
+		@Override
+		public MapTile create(int x, int y, int z) {
+			QuadTree<MapTile> t = super.add(x, y, z);
+			t.item = new MapTile(x, y, (byte)z);
+			t.item.rel = t;
+
+			return t.item;
+		}
+
+		@Override
+		public void remove(MapTile t) {
+			if (t.rel == null) {
+				Log.d(TAG, "BUG already removed " + t);
+				return;
+			}
+
+			super.remove(t.rel);
+
+			t.rel.item = null;
+			t.rel = null;
+		}
+	};
+
+	private final float[] mBoxCoords = new float[8];
+	private final TileLayer mTileLayer;
+
+	public TileManager(MapView mapView, TileLayer tileLayer) {
 		mMapView = mapView;
+		mTileLayer = tileLayer;
+
 		mMapViewPosition = mapView.getMapViewPosition();
 		mJobs = new ArrayList<JobTile>();
-		mTiles = new MapTile[GLRenderer.CACHE_TILES];
+		mTiles = new MapTile[CACHE_TILES_MAX];
 
 		mTilesSize = 0;
 		mTilesForUpload = 0;
@@ -119,7 +156,7 @@ public class TileManager {
 		//}
 
 		// clear cache index
-		QuadTree.init();
+		//QuadTree.init();
 
 		// clear references to cached MapTiles
 		Arrays.fill(mTiles, null);
@@ -160,7 +197,7 @@ public class TileManager {
 		// start with old jobs while new jobs are calculated, which
 		// should increase the chance that they are free when new
 		// jobs come in.
-		mMapView.addJobs(null);
+		mTileLayer.addJobs(null);
 
 		// load some tiles more than currently visible (* 0.75)
 		double scale = pos.scale * 0.9f;
@@ -223,11 +260,11 @@ public class TileManager {
 		updateTileDistances(jobs, jobs.length, pos);
 
 		// sets tiles to state == LOADING
-		mMapView.addJobs(jobs);
+		mTileLayer.addJobs(jobs);
 		mJobs.clear();
 
 		/* limit cache items */
-		int remove = mTilesCount - GLRenderer.CACHE_TILES;
+		int remove = mTilesCount - CACHE_TILES_MAX;
 
 		if (remove > CACHE_THRESHOLD ||
 				mTilesForUpload > MAX_TILES_IN_QUEUE)
@@ -235,9 +272,13 @@ public class TileManager {
 			limitCache(pos, remove);
 	}
 
-	// need to keep track of TileSets to clear on reset...
-	private static ArrayList<TileSet> mTileSets = new ArrayList<TileSet>(2);
 
+	/**
+	 * Retrive a TileSet of current tiles.
+	 * Tiles remain locked in cache until the set is unlocked by either passing
+	 * it again to this function or to releaseTiles. If passed TileSet is null
+	 * it will be allocated.
+	 */
 	public TileSet getActiveTiles(TileSet td) {
 		if (mCurrentTiles == null)
 			return td;
@@ -287,11 +328,11 @@ public class TileManager {
 	/* package */MapTile addTile(int x, int y, int zoomLevel) {
 		MapTile tile;
 
-		tile = QuadTree.getTile(x, y, zoomLevel);
+		//tile = QuadTree.getTile(x, y, zoomLevel);
+		tile = mIndex.getTile(x, y, zoomLevel);
 
 		if (tile == null) {
-			tile = new MapTile(x, y, (byte) zoomLevel);
-			QuadTree.add(tile);
+			tile = mIndex.create(x, y, zoomLevel);
 			mJobs.add(tile);
 			addToCache(tile);
 		} else if (!tile.isActive()) {
@@ -302,11 +343,11 @@ public class TileManager {
 			boolean add = false;
 
 			// prefetch parent
-			MapTile p = tile.rel.parent.tile;
+			MapTile p = tile.rel.parent.item;
 
 			if (p == null) {
-				p = new MapTile(x >> 1, y >> 1, (byte) (zoomLevel - 1));
-				QuadTree.add(p);
+				p = mIndex.create(x >> 1, y >> 1, zoomLevel - 1);
+
 				addToCache(p);
 				add = true;
 			}
@@ -319,11 +360,10 @@ public class TileManager {
 
 			if (zoomLevel > 3) {
 				// prefetch grand  parent
-				p = tile.rel.parent.parent.tile;
+				p = tile.rel.parent.parent.item;
 				add = false;
 				if (p == null) {
-					p = new MapTile(x >> 2, y >> 2, (byte) (zoomLevel - 2));
-					QuadTree.add(p);
+					p = mIndex.create(x >> 2, y >> 2, zoomLevel - 2);
 					addToCache(p);
 					add = true;
 				}
@@ -376,7 +416,9 @@ public class TileManager {
 
 		TextItem.pool.releaseAll(t.labels);
 
-		QuadTree.remove(t);
+		mIndex.remove(t);
+
+		//QuadTree.remove(t);
 		t.state = STATE_NONE;
 
 		mTilesCount--;
@@ -555,7 +597,7 @@ public class TileManager {
 	private final ScanBox mScanBox = new ScanBox() {
 
 		@Override
-		public void setVisible(int y, int x1, int x2) {
+		protected void setVisible(int y, int x1, int x2) {
 			MapTile[] tiles = mNewTiles.tiles;
 			int cnt = mNewTiles.cnt;
 			int maxTiles = tiles.length;

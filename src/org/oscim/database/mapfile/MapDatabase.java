@@ -27,7 +27,7 @@ import org.oscim.database.MapOptions;
 import org.oscim.database.mapfile.header.MapFileHeader;
 import org.oscim.database.mapfile.header.MapFileInfo;
 import org.oscim.database.mapfile.header.SubFileParameter;
-import org.oscim.generator.JobTile;
+import org.oscim.layers.tile.JobTile;
 
 import android.util.Log;
 

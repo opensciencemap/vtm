@@ -12,11 +12,12 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.generator;
+package org.oscim.layers.tile;
+
 import static org.oscim.core.MapElement.GEOM_LINE;
 import static org.oscim.core.MapElement.GEOM_POINT;
 import static org.oscim.core.MapElement.GEOM_POLY;
-import static org.oscim.generator.JobTile.STATE_NONE;
+import static org.oscim.layers.tile.JobTile.STATE_NONE;
 
 import java.util.Arrays;
 
@@ -25,9 +26,8 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
+import org.oscim.database.IMapDatabase.QueryResult;
 import org.oscim.database.IMapDatabaseCallback;
-import org.oscim.database.QueryResult;
-import org.oscim.renderer.MapTile;
 import org.oscim.renderer.layer.ExtrusionLayer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
@@ -71,11 +71,17 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
 	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
 
+	// replacement for variable value tags that should not be matched by RenderTheme
+	// FIXME make this general, maybe subclass tags
+	private static final Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
+	private static final Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
+
 	private final MapElement mDebugWay, mDebugPoint;
 
-	private static RenderTheme renderTheme;
-	private static int renderLevels;
 	private static DebugSettings debug;
+
+	private RenderTheme renderTheme;
+	private int renderLevels;
 
 	// current MapDatabase used by this TileGenerator
 	private IMapDatabase mMapDatabase;
@@ -95,16 +101,12 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private float mLatScaleFactor;
 	private float mGroundResolution;
 
-	// replacement for variable value tags that should not be matched by RenderTheme
-	// FIXME make this general, maybe subclass tags
-	private final static Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
-	private final static Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
 	private Tag mTagName;
 	private Tag mTagHouseNr;
 
 	private final LineClipper mClipper;
 
-	public static void setRenderTheme(RenderTheme theme) {
+	public void setRenderTheme(RenderTheme theme) {
 		renderTheme = theme;
 		renderLevels = theme.getLevels();
 	}
@@ -118,21 +120,21 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	public TileGenerator() {
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
 
-		 MapElement m = mDebugWay = new MapElement();
-		 m.startLine();
-		 int s = Tile.SIZE;
-		 m.addPoint(0, 0);
-		 m.addPoint(0, s);
-		 m.addPoint(s, s);
-		 m.addPoint(s, 0);
-		 m.addPoint(0, 0);
-		 m.tags = new Tag[] { new Tag("debug", "box") };
-		 m.geometryType = GEOM_LINE;
+		MapElement m = mDebugWay = new MapElement();
+		m.startLine();
+		int s = Tile.SIZE;
+		m.addPoint(0, 0);
+		m.addPoint(0, s);
+		m.addPoint(s, s);
+		m.addPoint(s, 0);
+		m.addPoint(0, 0);
+		m.tags = new Tag[] { new Tag("debug", "box") };
+		m.geometryType = GEOM_LINE;
 
-		 m  = mDebugPoint= new MapElement();
-		 m.startPoints();
-		 m.addPoint(s >> 1, 10);
-		 m.geometryType = GEOM_POINT;
+		m = mDebugPoint = new MapElement();
+		m.startPoints();
+		m.addPoint(s >> 1, 10);
+		m.geometryType = GEOM_POINT;
 	}
 
 	public void cleanup() {
@@ -308,7 +310,6 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 		mElement = null;
 	}
-
 
 	private void debugUnmatched(boolean closed, Tag[] tags) {
 		Log.d(TAG, "DBG way not matched: " + closed + " "

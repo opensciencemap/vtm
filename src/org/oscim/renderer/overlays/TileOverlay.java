@@ -21,14 +21,14 @@ import java.nio.FloatBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.PointD;
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileSet;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.LineRenderer;
 import org.oscim.renderer.LineTexRenderer;
-import org.oscim.renderer.MapTile;
 import org.oscim.renderer.PolygonRenderer;
-import org.oscim.renderer.TileSet;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
@@ -137,7 +137,7 @@ public class TileOverlay extends RenderOverlay {
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
 		// get current tiles
-		mTileSet = GLRenderer.getVisibleTiles(mTileSet);
+		//// FIXME mTileSet = GLRenderer.getVisibleTiles(mTileSet);
 
 		mDrawCnt = 0;
 		GLES20.glDepthFunc(GLES20.GL_LESS);

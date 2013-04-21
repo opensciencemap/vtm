@@ -1,6 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
- *
+ * Copyright 2013 Hannes Hannes Janetzek
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later version.
@@ -12,9 +12,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.generator;
+package org.oscim.layers.tile;
 
-import org.oscim.renderer.TileManager;
 import org.oscim.utils.PausableThread;
 
 /**
@@ -39,6 +38,7 @@ public class MapWorker extends PausableThread {
 	 */
 	public MapWorker(int id, JobQueue jobQueue, TileGenerator tileGenerator,
 			TileManager tileManager) {
+
 		super();
 		mJobQueue = jobQueue;
 		mMapGenerator = tileGenerator;

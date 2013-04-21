@@ -12,11 +12,11 @@
  * You should have received a copy of the GNU Lesser General License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.layers.tile;
 
-import org.oscim.generator.JobTile;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.TextItem;
+import org.oscim.utils.quadtree.QuadTree;
 
 /**
  * Extends Tile class for concurrent use in TileManager,
@@ -41,7 +41,7 @@ public final class MapTile extends JobTile {
 	/**
 	 * Pointer to access relatives in QuadTree
 	 */
-	public QuadTree rel;
+	public QuadTree<MapTile> rel;
 
 	int lastDraw = 0;
 
@@ -92,26 +92,24 @@ public final class MapTile extends JobTile {
 			return;
 
 		// lock all tiles that could serve as proxy
-		MapTile p = rel.parent.tile;
+		MapTile p = rel.parent.item;
 		if (p != null && (p.state != 0)) {
 			proxies |= PROXY_PARENT;
 			p.refs++;
 		}
 
-		p = rel.parent.parent.tile;
+		p = rel.parent.parent.item;
 		if (p != null && (p.state != 0)) {
 			proxies |= PROXY_GRAMPA;
 			p.refs++;
 		}
 
 		for (int j = 0; j < 4; j++) {
-			if (rel.child[j] != null) {
-				p = rel.child[j].tile;
-				if (p != null && (p.state != 0)) {
-					proxies |= (1 << j);
-					p.refs++;
-				}
-			}
+			if ((p = rel.get(j)) == null || p.state == 0)
+				continue;
+
+			proxies |= (1 << j);
+			p.refs++;
 		}
 	}
 
@@ -120,14 +118,14 @@ public final class MapTile extends JobTile {
 			return;
 
 		if ((proxies & PROXY_PARENT) != 0)
-			rel.parent.tile.refs--;
+			rel.parent.item.refs--;
 
 		if ((proxies & PROXY_GRAMPA) != 0)
-			rel.parent.parent.tile.refs--;
+			rel.parent.parent.item.refs--;
 
 		for (int i = 0; i < 4; i++) {
 			if ((proxies & (1 << i)) != 0)
-				rel.child[i].tile.refs--;
+				rel.get(i).refs--;
 		}
 		proxies = 0;
 	}

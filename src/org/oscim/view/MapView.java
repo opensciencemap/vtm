@@ -15,41 +15,21 @@
  */
 package org.oscim.view;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.database.IMapDatabase;
-import org.oscim.database.MapDatabaseFactory;
-import org.oscim.database.MapDatabases;
-import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
-import org.oscim.database.OpenResult;
-import org.oscim.generator.JobQueue;
-import org.oscim.generator.JobTile;
-import org.oscim.generator.MapWorker;
-import org.oscim.generator.TileGenerator;
+import org.oscim.layers.Layer;
+import org.oscim.layers.tile.TileGenerator;
+import org.oscim.layers.tile.TileLayer;
 import org.oscim.overlay.BuildingOverlay;
 import org.oscim.overlay.LabelingOverlay;
 import org.oscim.overlay.Overlay;
-import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLView;
-import org.oscim.renderer.TileManager;
-import org.oscim.theme.ExternalRenderTheme;
-import org.oscim.theme.InternalRenderTheme;
-import org.oscim.theme.RenderTheme;
-import org.oscim.theme.RenderThemeHandler;
-import org.oscim.theme.Theme;
 import org.oscim.utils.AndroidUtils;
-import org.xml.sax.SAXException;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -68,35 +48,20 @@ public class MapView extends RelativeLayout {
 
 	public static final boolean debugFrameTime = false;
 	public static final boolean testRegionZoom = false;
-	private static final boolean debugDatabase = false;
 
 	public boolean mRotationEnabled = false;
 	public boolean mCompassEnabled = false;
 	public boolean enablePagedFling = false;
 
+	private final GLView mGLView;
+
+	private final LayerManager mLayerManager;
 	private final MapViewPosition mMapViewPosition;
 	private final MapPosition mMapPosition;
 
-	//private final MapZoomControls mMapZoomControls;
-
 	private final Compass mCompass;
 
-	private final TileManager mTileManager;
-	private final LayerManager mLayerManager;
-
-	final GLView mGLView;
-	private final JobQueue mJobQueue;
-
-	// TODO use 1 download and 1 generator thread instead
-	private final MapWorker mMapWorkers[];
-	private final int mNumMapWorkers = 4;
-
-	private MapOptions mMapOptions;
-	private IMapDatabase mMapDatabase;
-	private String mRenderTheme;
 	private DebugSettings mDebugSettings;
-
-	private boolean mClearMap;
 
 	private int mWidth;
 	private int mHeight;
@@ -104,7 +69,7 @@ public class MapView extends RelativeLayout {
 	// FIXME: keep until old pbmap reader is removed
 	public static boolean enableClosePolygons = false;
 
-	public final float dpi;
+	public  static float dpi;
 
 	/**
 	 * @param context
@@ -152,21 +117,12 @@ public class MapView extends RelativeLayout {
 
 		mCompass = new Compass(mapActivity, this);
 
-		mJobQueue = new JobQueue();
-
-		mTileManager = new TileManager(this);
-
 		mGLView = new GLView(context, this);
-		mMapWorkers = new MapWorker[mNumMapWorkers];
 
 		mDebugSettings = new DebugSettings();
-		TileGenerator.setDebugSettings(mDebugSettings);
 
-		for (int i = 0; i < mNumMapWorkers; i++) {
-			TileGenerator tileGenerator = new TileGenerator();
-			mMapWorkers[i] = new MapWorker(i, mJobQueue, tileGenerator, mTileManager);
-			mMapWorkers[i].start();
-		}
+		// FIXME
+		TileGenerator.setDebugSettings(mDebugSettings);
 
 		mapActivity.registerMapView(this);
 
@@ -176,7 +132,19 @@ public class MapView extends RelativeLayout {
 
 		addView(mGLView, params);
 
-		mLayerManager.add(new MapEventLayer(this));
+		requestRedraw();
+	}
+
+
+	public TileLayer setBaseMap(MapOptions options){
+		TileLayer baseLayer = new TileLayer(this);
+
+		baseLayer.setMapDatabase(options);
+
+
+		mLayerManager.add(0,new MapEventLayer(this));
+
+		mLayerManager.add(1,baseLayer);
 
 		//mMapZoomControls = new MapZoomControls(mapActivity, this);
 		//mMapZoomControls.setShowMapZoomControls(true);
@@ -184,41 +152,14 @@ public class MapView extends RelativeLayout {
 
 		//mLayerManager.add(new GenericOverlay(this, new GridOverlay(this)));
 
-		mLayerManager.add(new BuildingOverlay(this));
-		mLayerManager.add(new LabelingOverlay(this));
+		mLayerManager.add(new BuildingOverlay(this, baseLayer.getTileLayer()));
+		mLayerManager.add(new LabelingOverlay(this, baseLayer.getTileLayer()));
 
-		//mLayerManager.add(new GenericOverlay(this, new TileOverlay(this)));
-		//mLayerManager.add(new GenericOverlay(this, new CustomOverlay(this)));
-		//mLayerManager.add(new MapLensOverlay(this));
-
-		//PathOverlay path = new PathOverlay(this, Color.RED);
-		//path.addGreatCircle(new GeoPoint(53.1, 8.8), new GeoPoint(53.1, -110.0));
-		//mLayerManager.add(path);
-		//path = new PathOverlay(this, Color.GREEN);
-		//path.addGreatCircle(new GeoPoint(53.1, 140), new GeoPoint(53.1, -110.0));
-		//mLayerManager.add(path);
-
-		//mLayerManager.add(new GenericOverlay(this, new AtlasTest(this)));
-
-		clearMap();
+		return baseLayer;
 	}
 
 	void destroy() {
-		mTileManager.destroy();
-
-		for (MapWorker mapWorker : mMapWorkers) {
-			mapWorker.pause();
-			mapWorker.interrupt();
-
-			mapWorker.getTileGenerator().getMapDatabase().close();
-
-			try {
-				mapWorker.join(10000);
-			} catch (InterruptedException e) {
-				// restore the interrupted status
-				Thread.currentThread().interrupt();
-			}
-		}
+		mLayerManager.destroy();
 	}
 
 	private boolean mPausing = false;
@@ -226,18 +167,12 @@ public class MapView extends RelativeLayout {
 	void onPause() {
 		mPausing = true;
 
-		Log.d(TAG, "onPause");
-		mJobQueue.clear();
-		mapWorkersPause(true);
-
 		if (this.mCompassEnabled)
 			mCompass.disable();
 
 	}
 
 	void onResume() {
-		Log.d(TAG, "onResume");
-		mapWorkersProceed();
 
 		if (this.mCompassEnabled)
 			mCompass.enable();
@@ -247,7 +182,7 @@ public class MapView extends RelativeLayout {
 
 	public void onStop() {
 		Log.d(TAG, "onStop");
-		//mTileManager.destroy();
+		//mLayerManager.destroy();
 	}
 
 	@Override
@@ -264,9 +199,6 @@ public class MapView extends RelativeLayout {
 			int oldWidth, int oldHeight) {
 		Log.d(TAG, "onSizeChanged: " + width + "x" + height);
 
-		mJobQueue.clear();
-		mapWorkersPause(true);
-
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
 
 		mWidth = width;
@@ -274,9 +206,6 @@ public class MapView extends RelativeLayout {
 
 		if (width != 0 && height != 0)
 			mMapViewPosition.setViewport(width, height);
-
-		clearMap();
-		mapWorkersProceed();
 	}
 
 	public void render() {
@@ -315,6 +244,24 @@ public class MapView extends RelativeLayout {
 		return mRotationEnabled;
 	}
 
+
+	boolean mWaitRedraw;
+
+	Runnable mRedrawRequest = new Runnable() {
+		@Override
+		public void run() {
+			mWaitRedraw = false;
+			redrawMap(true);
+		}
+	};
+
+	public void requestRedraw(){
+		if (!mWaitRedraw){
+			mWaitRedraw = true;
+			post(mRedrawRequest);
+		}
+	}
+
 	/**
 	 * Calculates all necessary tiles and adds jobs accordingly.
 	 *
@@ -324,33 +271,27 @@ public class MapView extends RelativeLayout {
 		if (mPausing || mWidth == 0 || mHeight == 0)
 			return;
 
-		if (forceRedraw)
+		boolean changed = false;
+
+		if (forceRedraw){
 			render();
-
-		if (mClearMap) {
-			mTileManager.init(mWidth, mHeight);
-			mClearMap = false;
-
-			// make sure mMapPosition will be updated
-			mMapPosition.zoomLevel = -1;
-
-			// TODO clear overlays
+			changed = true;
 		}
+//		if (mClearMap) {
+//			mTileManager.init(mWidth, mHeight);
+//			mClearMap = false;
+//
+//			// make sure mMapPosition will be updated
+//			mMapPosition.zoomLevel = -1;
+//
+//			// TODO clear overlays
+//		}
 
-		boolean changed = mMapViewPosition.getMapPosition(mMapPosition);
+		changed |= mMapViewPosition.getMapPosition(mMapPosition);
 
 		// required when not changed?
 		if (AndroidUtils.currentThreadIsUiThread())
 			mLayerManager.onUpdate(mMapPosition, changed);
-
-		if (changed) {
-			mTileManager.update(mMapPosition);
-		}
-	}
-
-	private void clearMap() {
-		// clear tile and overlay data before next draw
-		mClearMap = true;
 	}
 
 	/**
@@ -360,7 +301,7 @@ public class MapView extends RelativeLayout {
 	public void setDebugSettings(DebugSettings debugSettings) {
 		mDebugSettings = debugSettings;
 		TileGenerator.setDebugSettings(debugSettings);
-		clearMap();
+		//clearMap();
 	}
 
 	/**
@@ -370,182 +311,8 @@ public class MapView extends RelativeLayout {
 		return mDebugSettings;
 	}
 
-	public Map<String, String> getMapOptions() {
-		return mMapOptions;
-	}
-
-	public MapPosition getMapFileCenter() {
-		if (mMapDatabase == null)
-			return null;
-
-		MapInfo mapInfo = mMapDatabase.getMapInfo();
-		if (mapInfo == null)
-			return null;
-
-		GeoPoint startPos = mapInfo.startPosition;
-
-		if (startPos == null)
-			startPos = mapInfo.mapCenter;
-
-		if (startPos == null)
-			startPos = new GeoPoint(0, 0);
-
-		MapPosition mapPosition = new MapPosition();
-		mapPosition.setPosition(startPos);
-
-		if (mapInfo.startZoomLevel == null)
-			mapPosition.setZoomLevel(12);
-		else
-			mapPosition.setZoomLevel((mapInfo.startZoomLevel).byteValue());
-
-		return mapPosition;
-	}
-
 	public void setMapPosition(MapPosition mapPosition) {
 		mMapViewPosition.setMapPosition(mapPosition);
-	}
-
-	/**
-	 * Sets the MapDatabase for this MapView.
-	 *
-	 * @param options
-	 *            the new MapDatabase options.
-	 * @return true if MapDatabase changed
-	 */
-	public boolean setMapDatabase(MapOptions options) {
-		if (debugDatabase)
-			return false;
-
-		Log.i(TAG, "setMapDatabase: " + options.db.name());
-
-		if (mMapOptions != null && mMapOptions.equals(options))
-			return true;
-
-		mapWorkersPause(true);
-
-		mJobQueue.clear();
-		mMapOptions = options;
-
-		mMapDatabase = null;
-
-		for (int i = 0; i < mNumMapWorkers; i++) {
-			MapWorker mapWorker = mMapWorkers[i];
-
-			IMapDatabase mapDatabase = MapDatabaseFactory
-					.createMapDatabase(options.db);
-
-			OpenResult result = mapDatabase.open(options);
-
-			if (result != OpenResult.SUCCESS) {
-				Log.d(TAG, "failed open db: " + result.getErrorMessage());
-			}
-
-			TileGenerator tileGenerator = mapWorker.getTileGenerator();
-			tileGenerator.setMapDatabase(mapDatabase);
-
-			// TODO this could be done in a cleaner way..
-			if (mMapDatabase == null)
-				mMapDatabase = mapDatabase;
-		}
-
-		if (options.db == MapDatabases.OSCIMAP_READER ||
-				options.db == MapDatabases.MAP_READER)
-			MapView.enableClosePolygons = true;
-		else
-			MapView.enableClosePolygons = false;
-
-		clearMap();
-
-		mapWorkersProceed();
-
-		return true;
-	}
-
-	public String getRenderTheme() {
-		return mRenderTheme;
-	}
-
-	/**
-	 * Sets the internal theme which is used for rendering the map.
-	 *
-	 * @param internalRenderTheme
-	 *            the internal rendering theme.
-	 * @return ...
-	 * @throws IllegalArgumentException
-	 *             if the supplied internalRenderTheme is null.
-	 */
-	public boolean setRenderTheme(InternalRenderTheme internalRenderTheme) {
-		if (internalRenderTheme == null) {
-			throw new IllegalArgumentException("render theme must not be null");
-		}
-
-		if (internalRenderTheme.name() == mRenderTheme)
-			return true;
-
-		boolean ret = setRenderTheme((Theme) internalRenderTheme);
-		if (ret) {
-			mRenderTheme = internalRenderTheme.name();
-		}
-
-		clearMap();
-
-		return ret;
-	}
-
-	/**
-	 * Sets the theme file which is used for rendering the map.
-	 *
-	 * @param renderThemePath
-	 *            the path to the XML file which defines the rendering theme.
-	 * @throws IllegalArgumentException
-	 *             if the supplied internalRenderTheme is null.
-	 * @throws FileNotFoundException
-	 *             if the supplied file does not exist, is a directory or cannot
-	 *             be read.
-	 */
-	public void setRenderTheme(String renderThemePath) throws FileNotFoundException {
-		if (renderThemePath == null) {
-			throw new IllegalArgumentException("render theme path must not be null");
-		}
-
-		boolean ret = setRenderTheme(new ExternalRenderTheme(renderThemePath));
-		if (ret) {
-			mRenderTheme = renderThemePath;
-		}
-
-		clearMap();
-	}
-
-	private boolean setRenderTheme(Theme theme) {
-
-		mapWorkersPause(true);
-
-		InputStream inputStream = null;
-		try {
-			inputStream = theme.getRenderThemeAsStream();
-			RenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
-			t.scaleTextSize(1 + (dpi / 240 - 1) * 0.5f);
-			// FIXME
-			GLRenderer.setRenderTheme(t);
-			TileGenerator.setRenderTheme(t);
-			return true;
-		} catch (ParserConfigurationException e) {
-			Log.e(TAG, e.getMessage());
-		} catch (SAXException e) {
-			Log.e(TAG, e.getMessage());
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
-		} finally {
-			try {
-				if (inputStream != null) {
-					inputStream.close();
-				}
-			} catch (IOException e) {
-				Log.e(TAG, e.getMessage());
-			}
-			mapWorkersProceed();
-		}
-		return false;
 	}
 
 	/**
@@ -568,61 +335,18 @@ public class MapView extends RelativeLayout {
 	}
 
 	/**
-	 * add jobs and remember MapWorkers that stuff needs to be done
-	 *
-	 * @param jobs
-	 *            tile jobs
-	 */
-	public void addJobs(JobTile[] jobs) {
-		if (jobs == null) {
-			mJobQueue.clear();
-			return;
-		}
-		mJobQueue.setJobs(jobs);
-
-		for (int i = 0; i < mNumMapWorkers; i++) {
-			MapWorker m = mMapWorkers[i];
-			synchronized (m) {
-				m.notify();
-			}
-		}
-	}
-
-	private void mapWorkersPause(boolean wait) {
-		for (MapWorker mapWorker : mMapWorkers) {
-			if (!mapWorker.isPausing())
-				mapWorker.pause();
-		}
-		if (wait) {
-			for (MapWorker mapWorker : mMapWorkers) {
-				if (!mapWorker.isPausing())
-					mapWorker.awaitPausing();
-			}
-		}
-	}
-
-	private void mapWorkersProceed() {
-		for (MapWorker mapWorker : mMapWorkers)
-			mapWorker.proceed();
-	}
-
-	/**
 	 * You can add/remove/reorder your Overlays using the List of
 	 * {@link Overlay}. The first (index 0) Overlay gets drawn first, the one
 	 * with the highest as the last one.
 	 *
 	 * @return ...
 	 */
-	public List<Overlay> getOverlays() {
+	public List<Layer> getOverlays() {
 		return this.getOverlayManager();
 	}
 
 	public LayerManager getOverlayManager() {
 		return mLayerManager;
-	}
-
-	public TileManager getTileManager() {
-		return mTileManager;
 	}
 
 	/**
