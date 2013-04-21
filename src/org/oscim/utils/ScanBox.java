@@ -13,7 +13,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.oscim.renderer;
+package org.oscim.utils;
 
 import org.oscim.core.Tile;
 

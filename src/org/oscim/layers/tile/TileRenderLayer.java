@@ -21,8 +21,8 @@ import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.ScanBox;
 import org.oscim.renderer.overlays.RenderOverlay;
+import org.oscim.utils.ScanBox;
 import org.oscim.view.MapView;
 
 import android.util.Log;
