@@ -57,7 +57,7 @@
  *
  *  ============================================================================
  */
-package org.oscim.renderer;
+package org.oscim.renderer.layer;
 
 import org.oscim.utils.pool.Inlist;
 

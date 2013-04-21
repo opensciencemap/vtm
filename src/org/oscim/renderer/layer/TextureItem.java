@@ -16,7 +16,6 @@ package org.oscim.renderer.layer;
 
 import java.util.ArrayList;
 
-import org.oscim.renderer.TextureRenderer;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
@@ -88,7 +87,7 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 	};
 
-	private static ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);;
+	private static ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
 
 	public final static int TEXTURE_WIDTH = 512;
 	public final static int TEXTURE_HEIGHT = 256;
@@ -152,7 +151,7 @@ public class TextureItem extends Inlist<TextureItem> {
 				GLES20.GL_CLAMP_TO_EDGE); // Set V Wrapping
 	}
 
-	public static void init(int num) {
+	static void init(int num) {
 		pool.init(num);
 
 		mBitmaps = new ArrayList<Bitmap>(10);

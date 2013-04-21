@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.renderer.layer;
 
 import static android.opengl.GLES20.GL_SHORT;
 import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
@@ -23,10 +23,9 @@ import static android.opengl.GLES20.glUniform1f;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.Layer;
-import org.oscim.renderer.layer.Layers;
-import org.oscim.renderer.layer.LineLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.GlUtils;
 

@@ -18,7 +18,6 @@ import static org.oscim.renderer.GLRenderer.COORD_SCALE;
 import static org.oscim.renderer.layer.TextureItem.TEXTURE_HEIGHT;
 import static org.oscim.renderer.layer.TextureItem.TEXTURE_WIDTH;
 
-import org.oscim.renderer.TextureRenderer;
 
 import android.graphics.Canvas;
 public final class TextLayer extends TextureLayer {
