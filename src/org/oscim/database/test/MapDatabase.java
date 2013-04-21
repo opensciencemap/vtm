@@ -26,9 +26,8 @@ import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
-import org.oscim.database.OpenResult;
-import org.oscim.database.QueryResult;
 import org.oscim.generator.JobTile;
+
 /**
  *
  *
@@ -47,8 +46,8 @@ public class MapDatabase implements IMapDatabase {
 			new Tag("admin_level", "2")
 	};
 	private final Tag[] mTagsPlace = {
-			 new Tag("place", "city"),
-			 null
+			new Tag("place", "city"),
+			null
 	};
 
 	private final MapInfo mMapInfo =
@@ -63,6 +62,10 @@ public class MapDatabase implements IMapDatabase {
 	public MapDatabase() {
 		mElem = new MapElement();
 	}
+
+	private final boolean renderWays = false;
+	private final boolean renderBoundary = false;
+	private final boolean renderPlace = false;
 
 	@Override
 	public QueryResult executeQuery(JobTile tile,
@@ -85,10 +88,10 @@ public class MapDatabase implements IMapDatabase {
 		e.addPoint(x2, y2);
 		e.addPoint(x1, y2);
 
-		y1 = 40;
-		y2 = size - 40;
-		x1 = 40;
-		x2 = size - 40;
+		y1 = 5;
+		y2 = size - 5;
+		x1 = 5;
+		x2 = size - 5;
 
 		e.startHole();
 		e.addPoint(x1, y1);
@@ -99,68 +102,69 @@ public class MapDatabase implements IMapDatabase {
 		e.set(mTags, 0, GEOM_POLY);
 		mapDatabaseCallback.renderElement(e);
 
-		//--------------
-		e.clear();
+		if (renderWays) {
+			e.clear();
 
-		// middle horizontal
-		e.startLine();
-		e.addPoint(0, size / 2);
-		e.addPoint(size, size / 2);
+			// middle horizontal
+			e.startLine();
+			e.addPoint(0, size / 2);
+			e.addPoint(size, size / 2);
 
-		// center up
-		e.startLine();
-		e.addPoint(size / 2, -size / 2);
-		e.addPoint(size / 2, size / 2);
+			// center up
+			e.startLine();
+			e.addPoint(size / 2, -size / 2);
+			e.addPoint(size / 2, size / 2);
 
-		// center down
-		e.startLine();
-		e.addPoint(size / 2, size / 2);
-		e.addPoint(size / 2, size / 2 + size);
+			// center down
+			e.startLine();
+			e.addPoint(size / 2, size / 2);
+			e.addPoint(size / 2, size / 2 + size);
 
-		e.set(mTagsWay, 0, GEOM_LINE);
-		mapDatabaseCallback.renderElement(e);
+			e.set(mTagsWay, 0, GEOM_LINE);
+			mapDatabaseCallback.renderElement(e);
 
-		//--------------
-		e.clear();
-		// left-top to center
-		e.startLine();
-		e.addPoint(size / 2, size / 2);
-		e.addPoint(10, 10);
+			e.clear();
+			// left-top to center
+			e.startLine();
+			e.addPoint(size / 2, size / 2);
+			e.addPoint(10, 10);
 
-		e.startLine();
-		e.addPoint(0, 10);
-		e.addPoint(size, 10);
+			e.startLine();
+			e.addPoint(0, 10);
+			e.addPoint(size, 10);
 
-		e.startLine();
-		e.addPoint(10, 0);
-		e.addPoint(10, size);
+			e.startLine();
+			e.addPoint(10, 0);
+			e.addPoint(10, size);
 
-		e.set(mTagsWay, 1, GEOM_LINE);
-		mapDatabaseCallback.renderElement(e);
-
-		//--------------
-		e.clear();
-		e.startPolygon();
-		float r = size / 2;
-
-		for (int i = 0; i < 360; i += 4) {
-			double d = Math.toRadians(i);
-			e.addPoint(r + (float) Math.cos(d) * (r - 40),
-					r + (float) Math.sin(d) * (r - 40));
+			e.set(mTagsWay, 1, GEOM_LINE);
+			mapDatabaseCallback.renderElement(e);
 		}
 
-		e.set(mTagsBoundary, 1, GEOM_LINE);
-		mapDatabaseCallback.renderElement(e);
+		if (renderBoundary) {
+			e.clear();
+			e.startPolygon();
+			float r = size / 2;
 
-		//--------------
-		e.clear();
-		e.startPoints();
-		e.addPoint(size/2, size/2);
+			for (int i = 0; i < 360; i += 4) {
+				double d = Math.toRadians(i);
+				e.addPoint(r + (float) Math.cos(d) * (r - 40),
+						r + (float) Math.sin(d) * (r - 40));
+			}
 
-		mTagsPlace[1] = new Tag("name", tile.toString());
-		e.set(mTagsPlace, 0, GEOM_POINT);
-		mapDatabaseCallback.renderElement(e);
+			e.set(mTagsBoundary, 1, GEOM_LINE);
+			mapDatabaseCallback.renderElement(e);
+		}
 
+		if (renderPlace) {
+			e.clear();
+			e.startPoints();
+			e.addPoint(size / 2, size / 2);
+
+			mTagsPlace[1] = new Tag("name", tile.toString());
+			e.set(mTagsPlace, 0, GEOM_POINT);
+			mapDatabaseCallback.renderElement(e);
+		}
 		return QueryResult.SUCCESS;
 	}
 

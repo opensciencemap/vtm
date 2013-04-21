@@ -70,4 +70,72 @@ public interface IMapDatabase {
 	 */
 	public abstract void cancel();
 
+	public static enum QueryResult {
+		SUCCESS,
+		FAILED,
+		TILE_NOT_FOUND,
+		DELAYED,
+	}
+
+	/**
+	 * A FileOpenResult is a simple DTO which is returned by
+	 * IMapDatabase#open().
+	 */
+	public static class OpenResult {
+		/**
+		 * Singleton for a FileOpenResult instance with {@code success=true}.
+		 */
+		public static final OpenResult SUCCESS = new OpenResult();
+
+		private final String errorMessage;
+		private final boolean success;
+
+		/**
+		 * @param errorMessage
+		 *            a textual message describing the error, must not be null.
+		 */
+		public OpenResult(String errorMessage) {
+			if (errorMessage == null) {
+				throw new IllegalArgumentException("error message must not be null");
+			}
+
+			this.success = false;
+			this.errorMessage = errorMessage;
+		}
+
+		/**
+		 *
+		 */
+		public OpenResult() {
+			this.success = true;
+			this.errorMessage = null;
+		}
+
+		/**
+		 * @return a textual error description (might be null).
+		 */
+		public String getErrorMessage() {
+			return this.errorMessage;
+		}
+
+		/**
+		 * @return true if the file could be opened successfully, false
+		 *         otherwise.
+		 */
+		public boolean isSuccess() {
+			return this.success;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("FileOpenResult [success=");
+			stringBuilder.append(this.success);
+			stringBuilder.append(", errorMessage=");
+			stringBuilder.append(this.errorMessage);
+			stringBuilder.append("]");
+			return stringBuilder.toString();
+		}
+	}
+
 }

@@ -17,10 +17,6 @@ package org.oscim.generator;
 import org.oscim.core.Tile;
 
 import android.util.Log;
-
-/**
- * @author Hannes Janetzek
- */
 public class JobTile extends Tile {
 	private final static String TAG = JobTile.class.getName();
 

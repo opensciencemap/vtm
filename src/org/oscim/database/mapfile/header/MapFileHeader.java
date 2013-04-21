@@ -16,7 +16,7 @@ package org.oscim.database.mapfile.header;
 
 import java.io.IOException;
 
-import org.oscim.database.OpenResult;
+import org.oscim.database.IMapDatabase.OpenResult;
 import org.oscim.database.mapfile.ReadBuffer;
 
 /**

@@ -43,8 +43,6 @@ import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
-import org.oscim.database.OpenResult;
-import org.oscim.database.QueryResult;
 import org.oscim.generator.JobTile;
 
 import android.os.Environment;
