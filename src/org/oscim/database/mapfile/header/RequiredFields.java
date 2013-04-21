@@ -18,7 +18,7 @@ import java.io.IOException;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.Tag;
-import org.oscim.database.OpenResult;
+import org.oscim.database.IMapDatabase.OpenResult;
 import org.oscim.database.mapfile.ReadBuffer;
 
 final class RequiredFields {

@@ -15,7 +15,7 @@
 package org.oscim.database.mapfile.header;
 
 import org.oscim.core.GeoPoint;
-import org.oscim.database.OpenResult;
+import org.oscim.database.IMapDatabase.OpenResult;
 import org.oscim.database.mapfile.ReadBuffer;
 
 final class OptionalFields {
