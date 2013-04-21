@@ -13,16 +13,15 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.oscim.renderer;
+package org.oscim.renderer.layer;
 
 import static org.oscim.renderer.GLRenderer.COORD_SCALE;
 import static org.oscim.renderer.layer.TextureItem.TEXTURE_HEIGHT;
 import static org.oscim.renderer.layer.TextureItem.TEXTURE_WIDTH;
 
+import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.Layer;
-import org.oscim.renderer.layer.TextureItem;
-import org.oscim.renderer.layer.TextureLayer;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;

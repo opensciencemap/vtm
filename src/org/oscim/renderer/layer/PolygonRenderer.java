@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.renderer.layer;
 
 import static android.opengl.GLES20.GL_ALWAYS;
 import static android.opengl.GLES20.GL_EQUAL;
@@ -36,9 +36,9 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.Layer;
-import org.oscim.renderer.layer.PolygonLayer;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;

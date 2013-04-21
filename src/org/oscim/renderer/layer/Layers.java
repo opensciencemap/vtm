@@ -23,6 +23,14 @@ import android.util.Log;
 public class Layers {
 	private final static String TAG = Layers.class.getName();
 
+	public static void initRenderer() {
+		LineRenderer.init();
+		LineTexRenderer.init();
+		PolygonRenderer.init();
+		TextureRenderer.init();
+
+		TextureItem.init(10);
+	}
 
 	// mixed Polygon- and LineLayer
 	public Layer baseLayers;

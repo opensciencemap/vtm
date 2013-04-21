@@ -14,7 +14,6 @@
  */
 package org.oscim.renderer.layer;
 
-import org.oscim.renderer.TextureRenderer;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;

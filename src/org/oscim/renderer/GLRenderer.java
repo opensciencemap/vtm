@@ -31,7 +31,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.renderer.layer.Layers;
-import org.oscim.renderer.layer.TextureItem;
 import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.theme.RenderTheme;
 import org.oscim.utils.GlUtils;
@@ -380,21 +379,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		mMapView.redrawMap(true);
 	}
-	public static void initRenderer() {
-		LineRenderer.init();
-		LineTexRenderer.init();
-		PolygonRenderer.init();
-		TextureRenderer.init();
-
-		TextureItem.init(10);
-	}
 
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Log.d(TAG, GLES20.glGetString(GLES20.GL_EXTENSIONS));
 
 		// classes that require GL context for initialization
-		initRenderer();
+		Layers.initRenderer();
 
 		mNewSurface = true;
 	}

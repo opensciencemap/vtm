@@ -12,17 +12,15 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.renderer.layer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.oscim.core.MapPosition;
+import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.Layer;
-import org.oscim.renderer.layer.Layers;
-import org.oscim.renderer.layer.LineLayer;
-import org.oscim.renderer.layer.LineTexLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.GlUtils;
 
