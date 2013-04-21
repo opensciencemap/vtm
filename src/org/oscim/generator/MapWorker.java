@@ -63,7 +63,12 @@ public class MapWorker extends PausableThread {
 		if (tile == null)
 			return;
 
-		mMapGenerator.executeJob(tile);
+		try {
+			mMapGenerator.executeJob(tile);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
 
 		if (!isInterrupted()) {
 			mTileManager.passTile(tile);
