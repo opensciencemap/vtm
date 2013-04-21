@@ -23,6 +23,7 @@ import android.util.Log;
 public class Layers {
 	private final static String TAG = Layers.class.getName();
 
+
 	// mixed Polygon- and LineLayer
 	public Layer baseLayers;
 	public Layer textureLayers;
@@ -51,15 +52,15 @@ public class Layers {
 	private Layer mCurLayer;
 
 	public LineLayer getLineLayer(int level) {
-		return (LineLayer)getLayer(level, Layer.LINE);
+		return (LineLayer) getLayer(level, Layer.LINE);
 	}
 
 	public PolygonLayer getPolygonLayer(int level) {
-		return (PolygonLayer)getLayer(level, Layer.POLYGON);
+		return (PolygonLayer) getLayer(level, Layer.POLYGON);
 	}
 
 	public LineTexLayer getLineTexLayer(int level) {
-		return (LineTexLayer)getLayer(level, Layer.TEXLINE);
+		return (LineTexLayer) getLayer(level, Layer.TEXLINE);
 	}
 
 	// get or add the Line- or PolygonLayer for a level.
@@ -152,7 +153,7 @@ public class Layers {
 		int pos = 0;
 		int size = 0;
 
-		if (addFill){
+		if (addFill) {
 			pos = 4;
 			size = 8;
 		}
@@ -163,8 +164,8 @@ public class Layers {
 		size += addLayerItems(sbuf, baseLayers, Layer.LINE, 0);
 
 		texLineOffset = size * SHORT_BYTES;
-		for (Layer l = baseLayers; l != null; l= l.next){
-			if (l.type == Layer.TEXLINE){
+		for (Layer l = baseLayers; l != null; l = l.next) {
+			if (l.type == Layer.TEXLINE) {
 				// HACK, see LineTexLayer
 				//sbuf.position(sbuf.position() + 6);
 				addPoolItems(l, sbuf);
@@ -199,11 +200,11 @@ public class Layers {
 				continue;
 
 			for (VertexItem it = l.vertexItems; it != null; it = it.next) {
-				if (it.next == null){
+				if (it.next == null) {
 					size += it.used;
 					sbuf.put(it.vertices, 0, it.used);
 				}
-				else{
+				else {
 					size += VertexItem.SIZE;
 					sbuf.put(it.vertices, 0, VertexItem.SIZE);
 				}
