@@ -36,7 +36,6 @@ import java.util.Map;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
-import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -311,8 +310,6 @@ public class MapDatabase implements IMapDatabase {
 	// overall bytes of content processed
 	private int mBytesProcessed;
 
-	private final GeometryBuffer mGeom = new GeometryBuffer(1 << 14, 1 << 8);
-
 
 	private boolean decode() throws IOException {
 		mBytesProcessed = 0;
@@ -451,15 +448,10 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		// FIXME, remove all tiles from cache then remove this below
-		if (layer == 0)
-			layer = 5;
+		//if (layer == 0)
+		//	layer = 5;
 
 		mElement.set(tags, layer, polygon ? MapElement.GEOM_POLY : MapElement.GEOM_LINE);
-
-//		mElement.tags = tags;
-//		mElement.layer = layer;
-//		mElement.closed = polygon;
-
 		mMapGenerator.renderElement(mElement);
 		return true;
 	}
@@ -525,7 +517,7 @@ public class MapDatabase implements IMapDatabase {
 		// read repeated sint32
 		int lastX = 0;
 		int lastY = 0;
-		float[] coords = mGeom.ensurePointSize(numNodes, false);
+		float[] coords = mElement.ensurePointSize(numNodes, false);
 
 		while (mBytesProcessed < end && cnt < numNodes) {
 			int lon = decodeZigZag32(decodeVarint32());
@@ -540,8 +532,6 @@ public class MapDatabase implements IMapDatabase {
 		mElement.index[0] = (short)numNodes;
 		mElement.set(tags, layer, MapElement.GEOM_POINT);
 		mMapGenerator.renderElement(mElement);
-
-		//mMapGenerator.renderPOI(layer, tags, mGeom);
 
 		return cnt;
 	}
@@ -588,12 +578,7 @@ public class MapDatabase implements IMapDatabase {
 	private short[] decodeWayIndices(int indexCnt) throws IOException {
 		int bytes = decodeVarint32();
 
-		short[] index = mGeom.ensureIndexSize(indexCnt, false);
-
-//				mIndices;
-//		if (index.length < indexCnt + 1) {
-//			index = mIndices = new short[indexCnt + 1];
-//		}
+		short[] index = mElement.ensureIndexSize(indexCnt + 1, false);
 
 		readBuffer(bytes);
 
@@ -680,7 +665,7 @@ public class MapDatabase implements IMapDatabase {
 		int y, lastY = 0;
 		boolean even = true;
 
-		float[] coords = mGeom.ensurePointSize(nodes, false);
+		float[] coords = mElement.ensurePointSize(nodes, false);
 
 		// read repeated sint32
 		while (pos < end) {
