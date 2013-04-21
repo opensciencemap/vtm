@@ -33,145 +33,144 @@ import org.oscim.generator.JobTile;
  */
 public class MapDatabase implements IMapDatabase {
 
-	private final static String PROJECTION = "Mercator";
-
-	GeometryBuffer mGeom = new GeometryBuffer(new float[20], new short[4]);
-
-	// private Tag[] mTags = { new Tag("boundary", "administrative"), new
-	// Tag("admin_level", "2") };
-	private final Tag[] mTags = { new Tag("natural", "water") };
-	//private final Tag[] mTagsWay = { new Tag("highway", "primary"), new Tag("name", "Highway Rd") };
+	private final Tag[] mTags = {
+			new Tag("natural", "water")
+	};
+	private final Tag[] mTagsWay = {
+			new Tag("highway", "primary"),
+			new Tag("name", "Highway Rd")
+	};
+	private final Tag[] mTagsBoundary = {
+			new Tag("boundary", "administrative"),
+			new Tag("admin_level", "2")
+	};
+	private final Tag[] mTagsPlace = {
+			 new Tag("place", "city"),
+			 null
+	};
 
 	private final MapInfo mMapInfo =
 			new MapInfo(new BoundingBox(-180, -90, 180, 90),
-					new Byte((byte) 5), null, PROJECTION, 0, 0, 0, "de", "yo!", "by me",
-					null);
+					new Byte((byte) 5), null, null, 0, 0, 0,
+					"", "", "", null);
 
 	private boolean mOpenFile = false;
-	private final WayData mWay = new WayData();
+
+	private final WayData mWay;
+	private final GeometryBuffer mGeom;
+
+	public MapDatabase() {
+		mGeom = new GeometryBuffer(1, 1);
+		mWay = new WayData();
+		mWay.geom = mGeom;
+	}
 
 	@Override
-	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(JobTile tile,
+			IMapDatabaseCallback mapDatabaseCallback) {
 
 		int size = Tile.SIZE;
-		float[] points = mGeom.points;
-		short[] index = mGeom.index;
+		GeometryBuffer g = mGeom;
 
-		float lat1 = -1;
-		float lon1 = -1;
-		float lat2 = size + 1;
-		float lon2 = size + 1;
+		float x1 = -1;
+		float y1 = -1;
+		float x2 = size + 1;
+		float y2 = size + 1;
+		g.clear();
+		g.startPolygon();
+		g.addPoint(x1, y1);
+		g.addPoint(x2, y1);
+		g.addPoint(x2, y2);
+		g.addPoint(x1, y2);
 
-		points[0] = lon1;
-		points[1] = lat1;
+		y1 = 40;
+		y2 = size - 40;
+		x1 = 40;
+		x2 = size - 40;
 
-		points[2] = lon2;
-		points[3] = lat1;
+		g.startHole();
+		g.addPoint(x1, y1);
+		g.addPoint(x2, y1);
+		g.addPoint(x2, y2);
+		g.addPoint(x1, y2);
 
-		points[4] = lon2;
-		points[5] = lat2;
-
-		points[6] = lon1;
-		points[7] = lat2;
-
-		points[8] = lon1;
-		points[9] = lat1;
-
-		index[0] = 10;
-		index[1] = 0;
-
-		lon1 = 40;
-		lon2 = size - 40;
-		lat1 = 40;
-		lat2 = size - 40;
-
-		points[10] = lon1;
-		points[11] = lat1;
-
-		points[12] = lon2;
-		points[13] = lat1;
-
-		points[14] = lon2;
-		points[15] = lat2;
-
-		points[16] = lon1;
-		points[17] = lat2;
-
-		points[18] = lon1;
-		points[19] = lat1;
-
-		index[2] = 10;
-		index[3] = 0;
-
-		mWay.geom = mGeom;
 		mWay.tags = mTags;
-		mWay.layer = (byte)0;
+		mWay.layer = 0;
 		mWay.closed = true;
 
 		mapDatabaseCallback.renderWay(mWay);
 
-		index[0] = 4;
-		index[1] = -1;
+		g.clear();
 
 		// middle horizontal
-		points[0] = 0;
-		points[1] = size / 2;
-		points[2] = size;
-		points[3] = size / 2;
-		mapDatabaseCallback.renderWay(mWay);
+		g.startLine();
+		g.addPoint(0, size / 2);
+		g.addPoint(size, size / 2);
 
 		// center up
-		points[0] = size / 2;
-		points[1] = -size / 2;
-		points[2] = size / 2;
-		points[3] = size / 2;
-		mapDatabaseCallback.renderWay(mWay);
+		g.startLine();
+		g.addPoint(size / 2, -size / 2);
+		g.addPoint(size / 2, size / 2);
 
 		// center down
-		points[0] = size / 2;
-		points[1] = size / 2;
-		points[2] = size / 2;
-		points[3] = size / 2 + size;
+		g.startLine();
+		g.addPoint(size / 2, size / 2);
+		g.addPoint(size / 2, size / 2 + size);
+
+		mWay.closed = false;
+		mWay.layer = 0;
+		mWay.tags = mTagsWay;
 		mapDatabaseCallback.renderWay(mWay);
 
-		mWay.layer = (byte)1;
+		g.clear();
+
 		// left-top to center
-		points[0] = size / 2;
-		points[1] = size / 2;
-		points[2] = 10;
-		points[3] = 10;
+		g.startLine();
+		g.addPoint(size / 2, size / 2);
+		g.addPoint(10, 10);
+
+		g.startLine();
+		g.addPoint(0, 10);
+		g.addPoint(size, 10);
+
+		g.startLine();
+		g.addPoint(10, 0);
+		g.addPoint(10, size);
+
+		mWay.closed = false;
+		mWay.layer = 1;
+		mWay.tags = mTagsWay;
 		mapDatabaseCallback.renderWay(mWay);
 
-		// middle horizontal
-		points[0] = 0;
-		points[1] = 10;
-		points[2] = size;
-		points[3] = 10;
+		g.clear();
+		g.startPolygon();
+		float r = size / 2;
+
+		for (int i = 0; i < 360; i += 4) {
+			double d = Math.toRadians(i);
+			g.addPoint(r + (float) Math.cos(d) * (r - 40), r + (float) Math.sin(d) * (r - 40));
+		}
+
+		mWay.closed = true;
+		mWay.layer = 1;
+		mWay.tags = mTagsBoundary;
 		mapDatabaseCallback.renderWay(mWay);
 
-		// middle horizontal
-		points[0] = 10;
-		points[1] = 0;
-		points[2] = 10;
-		points[3] = size;
-		mapDatabaseCallback.renderWay(mWay);
 
-		// lon1 = size / 2;
-		// lat1 = size / 2;
 
-		// mNameTags = new Tag[2];
-		// mNameTags[0] = new Tag("place", "city");
-		// mNameTags[1] = new Tag("name", tile.toString());
-		// mapDatabaseCallback.renderPointOfInterest((byte) 0, mNameTags, (int)
-		// lat1,
-		// (int) lon1);
+		g.clear();
+		g.startPoints();
+		g.addPoint(size/2, size/2);
+		mTagsPlace[1] = new Tag("name", tile.toString());
+
+		mapDatabaseCallback.renderPOI((byte)0, mTagsPlace, g);
 
 		return QueryResult.SUCCESS;
 	}
 
 	@Override
 	public String getMapProjection() {
-		return null; // PROJECTION;
+		return null;
 	}
 
 	@Override
