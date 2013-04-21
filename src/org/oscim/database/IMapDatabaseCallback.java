@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,77 +14,16 @@
  */
 package org.oscim.database;
 
-import org.oscim.core.GeometryBuffer;
-import org.oscim.core.Tag;
-import org.oscim.database.mapfile.MapDatabase;
+import org.oscim.core.MapElement;
+
 
 /**
- * Callback methods which can be triggered from the {@link MapDatabase}.
+ * MapDatabase callbacks (implemented by  TileGenerator)
  * ____
  * NOTE: All parameters passed belong to the caller! i.e. dont hold
  * references to any arrays after callback function returns.
  */
 public interface IMapDatabaseCallback {
 
-	public class WayData{
-		public WayData(){
-
-		}
-
-		public WayData(GeometryBuffer geom, Tag[] tags) {
-			this.geom = geom;
-			this.tags = tags;
-		}
-
-		public GeometryBuffer geom;
-		// closed == geometry is polygon
-		public boolean closed;
-
-
-		// osm layer of the way.
-		public int layer;
-		// osm tags of the way.
-		public Tag[] tags;
-
-		// building tags
-		public int height;
-		public int minHeight;
-
-		// unused
-		public int priority;
-	}
-
-	/**
-	 * Renders a single point of interest node (POI).
-	 *
-	 * @param layer
-	 *            the layer of the node.
-	 * @param tags
-	 *            the tags of the node.
-	 */
-	void renderPOI(byte layer, Tag[] tags, GeometryBuffer geom);
-
-	/**
-	 * Renders water background for the current tile.
-	 */
-	void renderWaterBackground();
-
-	/**
-	 * Renders a single way or area.
-	 *
-	 */
-	void renderWay(WayData way);
-
-	//	/**
-	//	 * TBD: check if way will be rendered before decoding - MUST be called before renderWay!
-	//	 *
-	//	 * @param tags
-	//	 *            ...
-	//	 * @param closed
-	//	 *            ...
-	//	 * @return true if the way will be rendered (i.e. found match in
-	//	 *         RenderTheme)
-	//	 */
-	//	boolean matchWay(Tag[] tags, boolean closed);
-
+	void renderElement(MapElement element);
 }

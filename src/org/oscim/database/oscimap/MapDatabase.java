@@ -23,12 +23,11 @@ import java.util.Arrays;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
-import org.oscim.core.GeometryBuffer;
+import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
-import org.oscim.database.IMapDatabaseCallback.WayData;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
@@ -75,7 +74,8 @@ public class MapDatabase implements IMapDatabase {
 	private final boolean debug = false;
 	private LwHttp lwHttp;
 
-	private final WayData mWay = new WayData();
+	//private final WayData mWay = new WayData();
+	private final MapElement mElem = new MapElement();
 
 	@Override
 	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
@@ -211,7 +211,7 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	// /////////////// hand sewed tile protocol buffers decoder ///////////////
-	private final int MAX_WAY_COORDS = 1 << 14;
+	//private final int MAX_WAY_COORDS = 1 << 14;
 
 	// overall bytes of content processed
 	private int mBytesProcessed;
@@ -240,7 +240,7 @@ public class MapDatabase implements IMapDatabase {
 
 	//private float[] mTmpCoords;
 	//private short[] mIndices = new short[10];
-	private final GeometryBuffer mGeom = new GeometryBuffer(MAX_WAY_COORDS, 128);
+	//private final GeometryBuffer mElem = new GeometryBuffer(MAX_WAY_COORDS, 128);
 
 	private Tag[][] mElementTags;
 
@@ -315,9 +315,9 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	private int decodeWayIndices(int indexCnt) throws IOException {
-		mGeom.index = decodeShortArray(indexCnt, mGeom.index);
+		mElem.index = decodeShortArray(indexCnt, mElem.index);
 
-		short[] index = mGeom.index;
+		short[] index = mElem.index;
 		int coordCnt = 0;
 
 		for (int i = 0; i < indexCnt; i++) {
@@ -348,13 +348,13 @@ public class MapDatabase implements IMapDatabase {
 		int coordCnt = 0;
 		if (type == TAG_TILE_POINT){
 			coordCnt = 2;
-			mGeom.index[0] = 2;
+			mElem.index[0] = 2;
 		}
 
-		mWay.layer = 5;
-		mWay.priority = 0;
-		mWay.height = 0;
-		mWay.minHeight = 0;
+		mElem.layer = 5;
+		mElem.priority = 0;
+		mElem.height = 0;
+		mElem.minHeight = 0;
 
 		while (mBytesProcessed < end) {
 			// read tag and wire type
@@ -391,19 +391,19 @@ public class MapDatabase implements IMapDatabase {
 					break;
 
 				case TAG_ELEM_LAYER:
-					mWay.layer = decodeVarint32();
+					mElem.layer = decodeVarint32();
 					break;
 
 				case TAG_ELEM_HEIGHT:
-					mWay.height= decodeVarint32();
+					mElem.height= decodeVarint32();
 					break;
 
 				case TAG_ELEM_MIN_HEIGHT:
-					mWay.minHeight = decodeVarint32();
+					mElem.minHeight = decodeVarint32();
 					break;
 
 				case TAG_ELEM_PRIORITY:
-					mWay.priority = decodeVarint32();
+					mElem.priority = decodeVarint32();
 					break;
 
 				default:
@@ -419,22 +419,21 @@ public class MapDatabase implements IMapDatabase {
 			return false;
 		}
 
-		mWay.geom = mGeom;
-		mWay.tags = tags;
+		mElem.tags = tags;
 
 		switch (type) {
 			case TAG_TILE_LINE:
-				mWay.closed = false;
-				mMapGenerator.renderWay(mWay);
+				mElem.geometryType= MapElement.GEOM_LINE;
 				break;
 			case TAG_TILE_POLY:
-				mWay.closed = true;
-				mMapGenerator.renderWay(mWay);
+				mElem.geometryType= MapElement.GEOM_POLY;
 				break;
 			case TAG_TILE_POINT:
-				mMapGenerator.renderPOI((byte) mWay.layer, tags, mGeom);
+				mElem.geometryType= MapElement.GEOM_POINT;
 				break;
 		}
+
+		mMapGenerator.renderElement(mElem);
 
 		return true;
 	}
@@ -506,7 +505,7 @@ public class MapDatabase implements IMapDatabase {
 
 		float scale = mScaleFactor;
 
-		float[] coords = mGeom.ensurePointSize(nodes, false);
+		float[] coords = mElem.ensurePointSize(nodes, false);
 
 		//		if (nodes * 2 > coords.length) {
 		//			Log.d(TAG, mTile + " increase way coord buffer to " + (nodes * 2));

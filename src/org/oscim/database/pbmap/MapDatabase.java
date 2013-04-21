@@ -37,11 +37,11 @@ import java.util.Map;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.GeometryBuffer;
+import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
-import org.oscim.database.IMapDatabaseCallback.WayData;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
 import org.oscim.database.OpenResult;
@@ -103,7 +103,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private static final int MAX_TAGS_CACHE = 100;
 
-	private final WayData mWay = new WayData();
+	private final MapElement mElement = new MapElement();
 
 	private static Map<String, Tag> tagHash = Collections
 			.synchronizedMap(new LinkedHashMap<String, Tag>(
@@ -454,12 +454,13 @@ public class MapDatabase implements IMapDatabase {
 		if (layer == 0)
 			layer = 5;
 
-		mWay.geom = mGeom;
-		mWay.tags = tags;
-		mWay.layer = layer;
-		mWay.closed = polygon;
+		mElement.set(tags, layer, polygon ? MapElement.GEOM_POLY : MapElement.GEOM_LINE);
 
-		mMapGenerator.renderWay(mWay);
+//		mElement.tags = tags;
+//		mElement.layer = layer;
+//		mElement.closed = polygon;
+
+		mMapGenerator.renderElement(mElement);
 		return true;
 	}
 
@@ -535,8 +536,12 @@ public class MapDatabase implements IMapDatabase {
 			coords[cnt++] = Tile.SIZE - lastY / scale;
 		}
 
-		mGeom.index[0] = (short)numNodes;
-		mMapGenerator.renderPOI(layer, tags, mGeom);
+
+		mElement.index[0] = (short)numNodes;
+		mElement.set(tags, layer, MapElement.GEOM_POINT);
+		mMapGenerator.renderElement(mElement);
+
+		//mMapGenerator.renderPOI(layer, tags, mGeom);
 
 		return cnt;
 	}

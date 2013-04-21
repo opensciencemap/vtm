@@ -13,12 +13,14 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.generator;
-
+import static org.oscim.core.MapElement.GEOM_LINE;
+import static org.oscim.core.MapElement.GEOM_POINT;
+import static org.oscim.core.MapElement.GEOM_POLY;
 import static org.oscim.generator.JobTile.STATE_NONE;
 
 import java.util.Arrays;
 
-import org.oscim.core.GeometryBuffer;
+import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -66,22 +68,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
 
-	//private static final Tag[] debugTagBox = ;
 	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
 	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
 
-	private final GeometryBuffer mDebugPoint = new GeometryBuffer(
-			new float[] { Tile.SIZE >> 1, 10 },
-			new short[] { 2 });
-
-	private final WayData mDebugWay = new WayData(
-			new GeometryBuffer(
-					new float[] { 0, 0, 0, Tile.SIZE,
-							Tile.SIZE, Tile.SIZE,
-							Tile.SIZE, 0, 0, 0 },
-					new short[] { 10 }),
-			new Tag[] { new Tag("debug", "box") }
-			);
+	private final MapElement mDebugWay, mDebugPoint;
 
 	private static RenderTheme renderTheme;
 	private static int renderLevels;
@@ -93,10 +83,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	// currently processed tile
 	private MapTile mTile;
 
-	// currently processed geometry
-	private GeometryBuffer mGeom;
-
-	private WayData mWay;
+	// currently processed MapElement
+	private MapElement mElement;
 
 	// current line layer, will be added to outline layers
 	private LineLayer mCurLineLayer;
@@ -108,6 +96,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private float mGroundResolution;
 
 	// replacement for variable value tags that should not be matched by RenderTheme
+	// FIXME make this general, maybe subclass tags
 	private final static Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
 	private final static Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
 	private Tag mTagName;
@@ -128,6 +117,22 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	 */
 	public TileGenerator() {
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
+
+		 MapElement m = mDebugWay = new MapElement();
+		 m.startLine();
+		 int s = Tile.SIZE;
+		 m.addPoint(0, 0);
+		 m.addPoint(0, s);
+		 m.addPoint(s, s);
+		 m.addPoint(s, 0);
+		 m.addPoint(0, 0);
+		 m.tags = new Tag[] { new Tag("debug", "box") };
+		 m.geometryType = GEOM_LINE;
+
+		 m  = mDebugPoint= new MapElement();
+		 m.startPoints();
+		 m.addPoint(s >> 1, 10);
+		 m.geometryType = GEOM_POINT;
 	}
 
 	public void cleanup() {
@@ -178,13 +183,13 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (debug.drawTileFrames) {
 			// draw tile coordinate
 			mTagName = new Tag("name", mTile.toString(), false);
-			mGeom = mDebugPoint;
+			mElement = mDebugPoint;
 			RenderInstruction[] ri;
 			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
 			renderNode(ri);
 
 			// draw tile box
-			mWay = mDebugWay;
+			mElement = mDebugWay;
 			mDrawingLayer = 100 * renderLevels;
 			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
 			renderWay(ri);
@@ -263,48 +268,47 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	}
 
 	// ---------------- MapDatabaseCallback -----------------
-
 	@Override
-	public void renderPOI(byte layer, Tag[] tags, GeometryBuffer geom) {
+	public void renderElement(MapElement element) {
 		clearState();
 
-		// remove tags that should not be cached in Rendertheme
-		filterTags(tags);
+		mElement = element;
 
-		// get render instructions
-		RenderInstruction[] ri = renderTheme.matchNode(tags, mTile.zoomLevel);
+		if (element.geometryType == GEOM_POINT) {
+			// remove tags that should not be cached in Rendertheme
+			filterTags(element.tags);
 
-		if (ri == null)
-			return;
+			// get render instructions
+			RenderInstruction[] ri = renderTheme.matchNode(element.tags, mTile.zoomLevel);
 
-		mGeom = geom;
-		renderNode(ri);
+			if (ri != null)
+				renderNode(ri);
+		}
+		else {
+
+			// replace tags that should not be cached in Rendertheme (e.g. name)
+			if (!filterTags(element.tags))
+				return;
+
+			boolean closed = element.geometryType == GEOM_POLY;
+
+			mDrawingLayer = getValidLayer(element.layer) * renderLevels;
+
+			// get render instructions
+			RenderInstruction[] ri = renderTheme.matchWay(element.tags,
+					(byte) (mTile.zoomLevel + 0), closed);
+
+			renderWay(ri);
+
+			if (debug.debugTheme && ri == null)
+				debugUnmatched(closed, element.tags);
+
+			mCurLineLayer = null;
+		}
+
+		mElement = null;
 	}
 
-	@Override
-	public void renderWay(WayData way) {
-		mWay = way;
-
-		clearState();
-
-		// replace tags that should not be cached in Rendertheme (e.g. name)
-		if (!filterTags(way.tags))
-			return;
-
-		mDrawingLayer = getValidLayer(way.layer) * renderLevels;
-
-		// get render instructions
-		RenderInstruction[] ri = renderTheme.matchWay(way.tags,
-				(byte) (mTile.zoomLevel + 0), way.closed);
-
-		renderWay(ri);
-
-		if (debug.debugTheme && ri == null)
-			debugUnmatched(way.closed, way.tags);
-
-		mCurLineLayer = null;
-		mWay = null;
-	}
 
 	private void debugUnmatched(boolean closed, Tag[] tags) {
 		Log.d(TAG, "DBG way not matched: " + closed + " "
@@ -342,9 +346,9 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		mCurLineLayer = null;
 	}
 
-	@Override
-	public void renderWaterBackground() {
-	}
+	//	@Override
+	//	public void renderWaterBackground() {
+	//	}
 
 	// ----------------- RenderThemeCallback -----------------
 	@Override
@@ -378,7 +382,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				return;
 			}
 
-			lineLayer.addLine(mWay.geom.points, mWay.geom.index, mWay.closed);
+			lineLayer.addLine(mElement.points, mElement.index,
+					mElement.geometryType == GEOM_POLY);
 
 			// keep reference for outline layer
 			mCurLineLayer = lineLayer;
@@ -400,7 +405,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 				lineLayer.width = w;
 			}
 
-			lineLayer.addLine(mWay.geom.points, mWay.geom.index);
+			lineLayer.addLine(mElement.points, mElement.index);
 		}
 	}
 
@@ -413,7 +418,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			if (mTile.layers.extrusionLayers == null)
 				mTile.layers.extrusionLayers = new ExtrusionLayer(0, mGroundResolution);
 
-			((ExtrusionLayer) mTile.layers.extrusionLayers).addBuildings(mWay);
+			((ExtrusionLayer) mTile.layers.extrusionLayers).addBuildings(mElement);
 
 			return;
 		}
@@ -429,7 +434,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (layer.area == null)
 			layer.area = area;
 
-		layer.addPolygon(mWay.geom.points, mWay.geom.index);
+		layer.addPolygon(mElement.points, mElement.index);
 	}
 
 	private String textValueForKey(Text text) {
@@ -453,8 +458,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (value == null)
 			return;
 
-		float x = mWay.geom.points[0];
-		float y = mWay.geom.points[1];
+		float x = mElement.points[0];
+		float y = mElement.points[1];
 
 		mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
 	}
@@ -465,9 +470,9 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		if (value == null)
 			return;
 
-		for (int i = 0, n = mGeom.index[0]; i < n; i += 2) {
-			float x = mGeom.points[i];
-			float y = mGeom.points[i + 1];
+		for (int i = 0, n = mElement.index[0]; i < n; i += 2) {
+			float x = mElement.points[i];
+			float y = mElement.points[i + 1];
 			mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
 		}
 	}
@@ -479,12 +484,12 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			return;
 
 		int offset = 0;
-		for (int i = 0, n = mWay.geom.index.length; i < n; i++) {
-			int length = mWay.geom.index[i];
+		for (int i = 0, n = mElement.index.length; i < n; i++) {
+			int length = mElement.index[i];
 			if (length < 4)
 				break;
 
-			WayDecorator.renderText(mClipper, mWay.geom.points, value, text,
+			WayDecorator.renderText(mClipper, mElement.points, value, text,
 					offset, length, mTile);
 			offset += length;
 		}
