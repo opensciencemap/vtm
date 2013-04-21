@@ -30,9 +30,9 @@ public class BuildingOverlay extends Overlay {
 
 	final ExtrusionOverlay mExtLayer;
 
-	public BuildingOverlay(MapView mapView) {
+	public BuildingOverlay(MapView mapView, org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
 		super(mapView);
-		mExtLayer = new ExtrusionOverlay(mapView);
+		mExtLayer = new ExtrusionOverlay(mapView, tileRenderLayer);
 		mLayer = mExtLayer;
 	}
 

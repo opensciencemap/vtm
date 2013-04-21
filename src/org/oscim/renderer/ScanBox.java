@@ -78,7 +78,7 @@ public abstract class ScanBox {
 
 	protected int mZoom;
 
-	abstract void setVisible(int y, int x1, int x2);
+	protected abstract void setVisible(int y, int x1, int x2);
 
 	public void scan(double x, double y, double scale, int zoom, float[] box) {
 		mZoom = zoom;

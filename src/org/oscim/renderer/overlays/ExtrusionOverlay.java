@@ -20,12 +20,13 @@ import java.nio.ShortBuffer;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.generator.JobTile;
+import org.oscim.layers.tile.JobTile;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileRenderLayer;
+import org.oscim.layers.tile.TileSet;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
-import org.oscim.renderer.MapTile;
-import org.oscim.renderer.TileSet;
 import org.oscim.renderer.layer.ExtrusionLayer;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
@@ -39,8 +40,11 @@ import android.util.Log;
 public class ExtrusionOverlay extends RenderOverlay {
 	private final static String TAG = ExtrusionOverlay.class.getName();
 
-	public ExtrusionOverlay(MapView mapView) {
+	private final TileRenderLayer mTileLayer;
+
+	public ExtrusionOverlay(MapView mapView, org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
 		super(mapView);
+		mTileLayer = tileRenderLayer;
 	}
 
 	private static int[] shaderProgram = new int[2];
@@ -92,7 +96,10 @@ public class ExtrusionOverlay extends RenderOverlay {
 		}
 
 		int ready = 0;
-		mTileSet = mMapView.getTileManager().getActiveTiles(mTileSet);
+		mTileSet = mTileLayer.getVisibleTiles(mTileSet);
+		if (mTileSet == null)
+			return;
+
 		MapTile[] tiles = mTileSet.tiles;
 		// FIXME just release tiles in this case
 		if (mAlpha == 0 || curPos.zoomLevel < 16) {
@@ -135,11 +142,12 @@ public class ExtrusionOverlay extends RenderOverlay {
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				if (!tiles[i].isVisible)
 					continue;
+
 				MapTile t = tiles[i];
 
 				for (byte j = 0; j < 4; j++) {
 					if ((t.proxies & (1 << j)) != 0) {
-						MapTile c = t.rel.child[j].tile;
+						MapTile c = t.rel.get(j);
 						el = getLayer(c);
 
 						if (el == null || !el.compiled)

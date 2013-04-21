@@ -15,7 +15,7 @@
  */
 package org.oscim.database;
 
-import org.oscim.generator.JobTile;
+import org.oscim.layers.tile.JobTile;
 
 /**
  *

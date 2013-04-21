@@ -25,6 +25,7 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.core.PointD;
 import org.oscim.core.Tile;
 import org.oscim.graphics.Paint.Cap;
+import org.oscim.layers.Layer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.LineLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
@@ -34,7 +35,7 @@ import org.oscim.utils.LineClipper;
 import org.oscim.view.MapView;
 
 /** This class draws a path line in given color. */
-public class PathOverlay extends Overlay {
+public class PathOverlay extends Layer {
 
 	/** Stores points, converted to the map projection. */
 	/* package */protected final ArrayList<GeoPoint> mPoints;

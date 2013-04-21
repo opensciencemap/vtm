@@ -26,7 +26,7 @@ import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
-import org.oscim.generator.JobTile;
+import org.oscim.layers.tile.JobTile;
 
 /**
  *

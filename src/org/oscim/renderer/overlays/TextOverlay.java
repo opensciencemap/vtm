@@ -32,18 +32,19 @@ import java.util.HashMap;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.generator.JobTile;
 import org.oscim.graphics.Color;
 import org.oscim.graphics.Paint.Cap;
+import org.oscim.layers.tile.JobTile;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileRenderLayer;
+import org.oscim.layers.tile.TileSet;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.LineRenderer;
-import org.oscim.renderer.MapTile;
 import org.oscim.renderer.PolygonRenderer;
 import org.oscim.renderer.TextureRenderer;
-import org.oscim.renderer.TileSet;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
@@ -199,11 +200,13 @@ public class TextOverlay extends BasicOverlay {
 
 	private float mSquareRadius;
 	private int mRelabelCnt;
+	private final TileRenderLayer mTileLayer;
 
-	public TextOverlay(MapView mapView) {
+	public TextOverlay(MapView mapView, TileRenderLayer baseLayer) {
 		super(mapView);
-		mMapViewPosition = mapView.getMapViewPosition();
 
+		mMapViewPosition = mapView.getMapViewPosition();
+		mTileLayer = baseLayer;
 		layers.textureLayers = new TextLayer();
 		mTmpLayer = new TextLayer();
 		mActiveTiles = new HashMap<MapTile, LabelTile>();
@@ -350,7 +353,9 @@ public class TextOverlay extends BasicOverlay {
 			return false;
 
 		// get current tiles
-		mTileSet = GLRenderer.getVisibleTiles(mTileSet);
+		mTileSet = mTileLayer.getVisibleTiles(mTileSet);
+		if (mTileSet == null)
+			return false;
 
 		if (mTileSet.cnt == 0)
 			return false;
@@ -605,7 +610,7 @@ public class TextOverlay extends BasicOverlay {
 		tl.labels = null;
 
 		// remove tile locks
-		GLRenderer.releaseTiles(mTileSet);
+		mTileLayer.releaseTiles(mTileSet);
 
 		// pass new labels for rendering
 		synchronized (this) {

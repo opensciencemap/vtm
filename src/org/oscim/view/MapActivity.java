@@ -14,11 +14,8 @@
  */
 package org.oscim.view;
 
-import java.io.FileNotFoundException;
-
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
-import org.oscim.theme.InternalRenderTheme;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -78,7 +75,7 @@ public abstract class MapActivity extends Activity {
 		editor.putInt(KEY_LONGITUDE, geoPoint.longitudeE6);
 		editor.putFloat(KEY_MAP_SCALE, (float)mapPosition.scale);
 
-		editor.putString(KEY_THEME, mMapView.getRenderTheme());
+		//editor.putString(KEY_THEME, mMapView.getRenderTheme());
 
 		editor.commit();
 	}
@@ -121,21 +118,21 @@ public abstract class MapActivity extends Activity {
 			mMapView.getMapViewPosition().setMapPosition(mapPosition);
 		}
 
-		String theme = sharedPreferences.getString(KEY_THEME,
-				InternalRenderTheme.DEFAULT.name());
+		//String theme = sharedPreferences.getString(KEY_THEME,
+		//		InternalRenderTheme.DEFAULT.name());
 
-		if (theme.startsWith("/")) {
-			try {
-				mapView.setRenderTheme(theme);
-			} catch (FileNotFoundException e) {
-				mapView.setRenderTheme(InternalRenderTheme.DEFAULT);
-			}
-		} else {
-			try {
-				mapView.setRenderTheme(InternalRenderTheme.valueOf(theme));
-			} catch (IllegalArgumentException e) {
-				mapView.setRenderTheme(InternalRenderTheme.DEFAULT);
-			}
-		}
+//		if (theme.startsWith("/")) {
+//			try {
+//				mapView.setRenderTheme(theme);
+//			} catch (FileNotFoundException e) {
+//				mapView.setRenderTheme(InternalRenderTheme.DEFAULT);
+//			}
+//		} else {
+//			try {
+//				mapView.setRenderTheme(InternalRenderTheme.valueOf(theme));
+//			} catch (IllegalArgumentException e) {
+//				mapView.setRenderTheme(InternalRenderTheme.DEFAULT);
+//			}
+//		}
 	}
 }

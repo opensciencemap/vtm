@@ -13,10 +13,10 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.generator;
+package org.oscim.layers.tile;
 
-import static org.oscim.generator.JobTile.STATE_LOADING;
-import static org.oscim.generator.JobTile.STATE_NONE;
+import static org.oscim.layers.tile.JobTile.STATE_LOADING;
+import static org.oscim.layers.tile.JobTile.STATE_NONE;
 
 /**
  * A JobQueue keeps the list of pending jobs for a MapView and prioritizes them.

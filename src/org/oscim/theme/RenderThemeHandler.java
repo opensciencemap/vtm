@@ -117,6 +117,8 @@ public class RenderThemeHandler extends DefaultHandler {
 	private int mLevel;
 	private RenderTheme mRenderTheme;
 	private final Stack<Rule> mRuleStack = new Stack<Rule>();
+	private final HashMap<String, RenderInstruction> tmpStyleHash =
+			new HashMap<String, RenderInstruction>(10);
 
 	@Override
 	public void endDocument() {
@@ -148,8 +150,6 @@ public class RenderThemeHandler extends DefaultHandler {
 		Log.d(TAG, exception.getMessage());
 	}
 
-	private static HashMap<String, RenderInstruction> tmpStyleHash =
-			new HashMap<String, RenderInstruction>(10);
 
 	@Override
 	public void startElement(String uri, String localName, String qName,

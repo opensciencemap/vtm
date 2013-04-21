@@ -12,9 +12,10 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.layers.tile;
 
 import java.util.Comparator;
+
 
 /**
  * use with TileManager.getActiveTiles(TileSet) to get the current tiles. tiles
@@ -27,10 +28,14 @@ public final class TileSet {
 
 	int serial;
 
+	public int getSerial(){
+		return serial;
+	}
+
 	TileSet() {
 	}
 
-	TileSet(int numTiles) {
+	public TileSet(int numTiles) {
 		tiles = new MapTile[numTiles];
 	}
 

@@ -12,18 +12,23 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.layers.tile;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.glStencilMask;
-import static org.oscim.generator.JobTile.STATE_READY;
+import static org.oscim.layers.tile.JobTile.STATE_READY;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
+import org.oscim.renderer.LineRenderer;
+import org.oscim.renderer.LineTexRenderer;
+import org.oscim.renderer.PolygonRenderer;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.Matrix4;
+import org.oscim.utils.quadtree.QuadTree;
 
 import android.opengl.GLES20;
 
@@ -56,6 +61,8 @@ public class TileRenderer {
 		// discard z projection from tilt
 		mProjMatrix.setValue(10, 0);
 		mProjMatrix.setValue(14, 0);
+		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+		//GLES20.GL_STENCIL_BUFFER_BIT);
 
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 
@@ -188,7 +195,7 @@ public class TileRenderer {
 			if ((tile.proxies & 1 << i) == 0)
 				continue;
 
-			MapTile c = tile.rel.child[i].tile;
+			MapTile c = tile.rel.get(i);
 
 			if (c.state == STATE_READY) {
 				drawTile(c, pos);
@@ -200,10 +207,9 @@ public class TileRenderer {
 
 	// just FIXME!
 	private static void drawProxyTile(MapTile tile, MapPosition pos, boolean parent, boolean preferParent) {
-		//int diff = pos.zoomLevel - tile.zoomLevel;
-		QuadTree r = tile.rel;
-		MapTile proxy;
 
+		QuadTree<MapTile> r = tile.rel;
+		MapTile proxy;
 
 		if (!preferParent) {
 			// prefer drawing children
@@ -213,7 +219,7 @@ public class TileRenderer {
 			if (parent) {
 				// draw parent proxy
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.tile;
+					proxy = r.parent.item;
 					if (proxy.state == STATE_READY) {
 						//Log.d(TAG, "1. draw parent " + proxy);
 						drawTile(proxy, pos);
@@ -222,12 +228,12 @@ public class TileRenderer {
 			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
 				// check if parent was already drawn
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.tile;
+					proxy = r.parent.item;
 					if (proxy.state == STATE_READY)
 						return;
 				}
 
-				proxy = r.parent.parent.tile;
+				proxy = r.parent.parent.item;
 				if (proxy.state == STATE_READY)
 					drawTile(proxy, pos);
 			}
@@ -235,7 +241,7 @@ public class TileRenderer {
 			// prefer drawing parent
 			if (parent) {
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.tile;
+					proxy = r.parent.item;
 					if (proxy != null && proxy.state == STATE_READY) {
 						//Log.d(TAG, "2. draw parent " + proxy);
 						drawTile(proxy, pos);
@@ -248,7 +254,7 @@ public class TileRenderer {
 			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
 				// check if parent was already drawn
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.tile;
+					proxy = r.parent.item;
 					if (proxy.state == STATE_READY)
 						return;
 				}
@@ -256,7 +262,7 @@ public class TileRenderer {
 				if (drawProxyChild(tile, pos) > 0)
 					return;
 
-				proxy = r.parent.parent.tile;
+				proxy = r.parent.parent.item;
 				if (proxy.state == STATE_READY)
 					drawTile(proxy, pos);
 			}

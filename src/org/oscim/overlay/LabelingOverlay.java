@@ -14,6 +14,7 @@
  */
 package org.oscim.overlay;
 
+import org.oscim.layers.tile.TileRenderLayer;
 import org.oscim.renderer.overlays.TextOverlay;
 import org.oscim.view.MapView;
 
@@ -27,9 +28,9 @@ public class LabelingOverlay extends Overlay {
 	private final static String TAG = LabelingOverlay.class.getName();
 	final TextOverlay mTextLayer;
 
-	public LabelingOverlay(MapView mapView) {
+	public LabelingOverlay(MapView mapView, TileRenderLayer tileRenderLayer) {
 		super(mapView);
-		mTextLayer = new TextOverlay(mapView);
+		mTextLayer = new TextOverlay(mapView, tileRenderLayer);
 		mLayer = mTextLayer;
 	}
 
