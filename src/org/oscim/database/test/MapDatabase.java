@@ -75,6 +75,9 @@ public class MapDatabase implements IMapDatabase {
 		float y1 = -1;
 		float x2 = size + 1;
 		float y2 = size + 1;
+
+		// always clear geometry before starting
+		// a different type.
 		e.clear();
 		e.startPolygon();
 		e.addPoint(x1, y1);
@@ -96,6 +99,7 @@ public class MapDatabase implements IMapDatabase {
 		e.set(mTags, 0, GEOM_POLY);
 		mapDatabaseCallback.renderElement(e);
 
+		//--------------
 		e.clear();
 
 		// middle horizontal
@@ -116,8 +120,8 @@ public class MapDatabase implements IMapDatabase {
 		e.set(mTagsWay, 0, GEOM_LINE);
 		mapDatabaseCallback.renderElement(e);
 
+		//--------------
 		e.clear();
-
 		// left-top to center
 		e.startLine();
 		e.addPoint(size / 2, size / 2);
@@ -134,19 +138,21 @@ public class MapDatabase implements IMapDatabase {
 		e.set(mTagsWay, 1, GEOM_LINE);
 		mapDatabaseCallback.renderElement(e);
 
+		//--------------
 		e.clear();
 		e.startPolygon();
 		float r = size / 2;
 
 		for (int i = 0; i < 360; i += 4) {
 			double d = Math.toRadians(i);
-			e.addPoint(r + (float) Math.cos(d) * (r - 40), r + (float) Math.sin(d) * (r - 40));
+			e.addPoint(r + (float) Math.cos(d) * (r - 40),
+					r + (float) Math.sin(d) * (r - 40));
 		}
 
 		e.set(mTagsBoundary, 1, GEOM_LINE);
 		mapDatabaseCallback.renderElement(e);
 
-
+		//--------------
 		e.clear();
 		e.startPoints();
 		e.addPoint(size/2, size/2);
