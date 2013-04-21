@@ -19,8 +19,8 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import org.oscim.core.GeometryBuffer;
+import org.oscim.core.MapElement;
 import org.oscim.core.Tile;
-import org.oscim.database.IMapDatabaseCallback.WayData;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.utils.LineClipper;
@@ -76,13 +76,13 @@ public class ExtrusionLayer extends Layer {
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE);
 	}
 
-	public void addBuildings(WayData way) {
+	public void addBuildings(MapElement element) {
 
-		short[] index = way.geom.index;
-		float[] points = way.geom.points;
+		short[] index = element.index;
+		float[] points = element.points;
 
-		float height = way.height;
-		float minHeight = way.minHeight;
+		float height = element.height;
+		float minHeight = element.minHeight;
 
 		// 12m default
 		if (height == 0)
@@ -123,7 +123,7 @@ public class ExtrusionLayer extends Layer {
 			// start next polygon
 			if (length == 0) {
 				if (complexOutline)
-					addRoof(startVertex, way.geom, geomIndexPos, geomPointPos);
+					addRoof(startVertex, element, geomIndexPos, geomPointPos);
 
 				startVertex = mNumVertices;
 				simpleOutline = true;
@@ -163,7 +163,7 @@ public class ExtrusionLayer extends Layer {
 			}
 		}
 		if (complexOutline)
-			addRoof(startVertex, way.geom, geomIndexPos, geomPointPos);
+			addRoof(startVertex, element, geomIndexPos, geomPointPos);
 	}
 
 	private void addRoofSimple(int startVertex, int len) {
