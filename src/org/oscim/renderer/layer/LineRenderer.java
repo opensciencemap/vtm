@@ -24,8 +24,8 @@ import static android.opengl.GLES20.glVertexAttribPointer;
 
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer;
-import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLRenderer.Matrices;
+import org.oscim.renderer.GLState;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.GlUtils;
 
@@ -153,8 +153,6 @@ public final class LineRenderer {
 		glUniform1f(uLineMode, lineMode);
 
 		boolean blur = false;
-		// dont increase scale when max is reached
-		//boolean strokeMaxZoom = zoom > TileGenerator.STROKE_MAX_ZOOM_LEVEL;
 
 		Layer l = curLayer;
 		for (; l != null && l.type == Layer.LINE; l = l.next) {

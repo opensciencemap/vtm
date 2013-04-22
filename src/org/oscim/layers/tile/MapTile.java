@@ -21,7 +21,7 @@ import org.oscim.utils.quadtree.QuadTree;
 
 /**
  * Extends Tile class to hold state and data for concurrent use in
- * TileManager (Main Thread), TileGenerator (MapWorker Thread) and
+ * TileManager (Main Thread), TileLoader (Worker Threads) and
  * Rendering (GL Thread).
  */
 public final class MapTile extends Tile {
@@ -30,7 +30,7 @@ public final class MapTile extends Tile {
 
 	/**
 	 * STATE_LOADING means the tile is about to be loaded / loading.
-	 * it belongs to MapWorker/TileGenerator thread.
+	 * it belongs to TileLoader thread.
 	 */
 	public final static int STATE_LOADING = 1 << 0;
 
@@ -66,7 +66,7 @@ public final class MapTile extends Tile {
 	public float distance;
 
 	/**
-	 * Tile data set by TileGenerator.
+	 * Tile data set by TileLoader.
 	 */
 	public TextItem labels;
 	public Layers layers;

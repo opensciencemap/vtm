@@ -32,7 +32,7 @@ public interface IMapDatabase {
 	 *            the callback which handles the extracted map elements.
 	 * @return true if successful
 	 */
-	public abstract QueryResult executeQuery(MapTile tile,
+	abstract QueryResult executeQuery(MapTile tile,
 			IMapDatabaseCallback mapDatabaseCallback);
 
 	/**
@@ -40,12 +40,12 @@ public interface IMapDatabase {
 	 * @throws IllegalStateException
 	 *             if no map is currently opened.
 	 */
-	public abstract MapInfo getMapInfo();
+	abstract MapInfo getMapInfo();
 
 	/**
 	 * @return true if a map database is currently opened, false otherwise.
 	 */
-	public abstract boolean isOpen();
+	abstract boolean isOpen();
 
 	/**
 	 * Opens MapDatabase
@@ -54,21 +54,21 @@ public interface IMapDatabase {
 	 *            the options.
 	 * @return a OpenResult containing an error message in case of a failure.
 	 */
-	public abstract OpenResult open(MapOptions options);
+	abstract OpenResult open(MapOptions options);
 
 	/**
 	 * Closes the map file and destroys all internal caches. Has no effect if no
 	 * map file is currently opened. Should also force to close Socket so that
 	 * thread cannot hang in socket.read
 	 */
-	public abstract void close();
+	abstract void close();
 
-	public abstract String getMapProjection();
+	abstract String getMapProjection();
 
 	/**
 	 * Cancel loading
 	 */
-	public abstract void cancel();
+	abstract void cancel();
 
 	public static enum QueryResult {
 		SUCCESS,

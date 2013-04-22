@@ -15,8 +15,8 @@
 package org.oscim.core;
 
 /**
- * MapElement is created by MapDatabase(s) and passed to TileGenerator
- * via IMapDatabaseCallback.renderElement() TileGenerator processes the
+ * MapElement is created by MapDatabase(s) and passed to MapTileLoader
+ * via IMapDatabaseCallback.renderElement() MapTileLoader processes the
  * data into MapTile.layers.
  * -----
  * This is really just a buffer object that belongs to MapDatabase, so
