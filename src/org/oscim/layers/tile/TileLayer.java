@@ -49,38 +49,34 @@ public class TileLayer extends Layer {
 	private final TileManager mTileManager;
 
 	private final JobQueue mJobQueue;
-	// TODO use 1 download and 1 generator thread instead
-		private final MapWorker mMapWorkers[];
-		private final int mNumMapWorkers = 4;
-		private final TileGenerator mTileGenerators[];
+
+	private final int mNumTileWorker = 4;
+	private final TileGenerator mTileWorker[];
 
 	public TileLayer(MapView mapView) {
 		super(mapView);
 		mTileManager = new TileManager(mapView, this);
 		mJobQueue = new JobQueue();
-		mMapWorkers = new MapWorker[mNumMapWorkers];
-		mTileGenerators = new TileGenerator[mNumMapWorkers];
+		mTileWorker = new TileGenerator[mNumTileWorker];
 
 		TileGenerator.setDebugSettings(mapView.getDebugSettings());
 
-		for (int i = 0; i < mNumMapWorkers; i++) {
-			mTileGenerators[i] = new TileGenerator();
-			mMapWorkers[i] = new MapWorker(i, mJobQueue, mTileGenerators[i], mTileManager);
-			mMapWorkers[i].start();
+		for (int i = 0; i < mNumTileWorker; i++) {
+			mTileWorker[i] = new TileGenerator(i, mJobQueue, mTileManager);
+			mTileWorker[i].start();
 		}
 
 		mLayer = new TileRenderLayer(mapView, mTileManager);
 	}
 
-	public TileRenderLayer getTileLayer(){
-		return (TileRenderLayer)mLayer;
+	public TileRenderLayer getTileLayer() {
+		return (TileRenderLayer) mLayer;
 	}
-
 
 	@Override
 	public void onUpdate(MapPosition mapPosition, boolean changed) {
 
-		if (mClearMap){
+		if (mClearMap) {
 			mTileManager.init(mMapView.getWidth(), mMapView.getHeight());
 			mClearMap = false;
 			changed = true;
@@ -90,19 +86,20 @@ public class TileLayer extends Layer {
 			mTileManager.update(mapPosition);
 	}
 
-
 	@Override
-	public void destroy(){
+	public void destroy() {
+
 		mTileManager.destroy();
 
-		for (MapWorker mapWorker : mMapWorkers) {
-			mapWorker.pause();
-			mapWorker.interrupt();
+		for (TileGenerator tileWorker : mTileWorker) {
+			tileWorker.pause();
+			tileWorker.interrupt();
 
-			mapWorker.getTileGenerator().getMapDatabase().close();
+			//tileWorker.getMapDatabase().close();
+			tileWorker.cleanup();
 
 			try {
-				mapWorker.join(10000);
+				tileWorker.join(10000);
 			} catch (InterruptedException e) {
 				// restore the interrupted status
 				Thread.currentThread().interrupt();
@@ -132,15 +129,15 @@ public class TileLayer extends Layer {
 		if (mMapOptions != null && mMapOptions.equals(options))
 			return true;
 
-		mapWorkersPause(true);
+		tileWorkersPause(true);
 
 		mJobQueue.clear();
 		mMapOptions = options;
 
 		mMapDatabase = null;
 
-		for (int i = 0; i < mNumMapWorkers; i++) {
-			MapWorker mapWorker = mMapWorkers[i];
+		for (int i = 0; i < mNumTileWorker; i++) {
+			//TileGenerator tileWorker = mTileWorker[i];
 
 			IMapDatabase mapDatabase = MapDatabaseFactory
 					.createMapDatabase(options.db);
@@ -151,8 +148,10 @@ public class TileLayer extends Layer {
 				Log.d(TAG, "failed open db: " + result.getErrorMessage());
 			}
 
-			TileGenerator tileGenerator = mapWorker.getTileGenerator();
-			tileGenerator.setMapDatabase(mapDatabase);
+			mTileWorker[i].setMapDatabase(mapDatabase);
+
+			//TileGenerator tileGenerator = tileWorker.getTileGenerator();
+			//tileGenerator.setMapDatabase(mapDatabase);
 
 			// TODO this could be done in a cleaner way..
 			if (mMapDatabase == null)
@@ -168,7 +167,7 @@ public class TileLayer extends Layer {
 
 		clearMap();
 
-		mapWorkersProceed();
+		tileWorkersProceed();
 
 		return true;
 	}
@@ -203,9 +202,11 @@ public class TileLayer extends Layer {
 
 		return mapPosition;
 	}
+
 	public String getRenderTheme() {
 		return mRenderTheme;
 	}
+
 	/**
 	 * Sets the internal theme which is used for rendering the map.
 	 *
@@ -232,6 +233,7 @@ public class TileLayer extends Layer {
 
 		return ret;
 	}
+
 	/**
 	 * Sets the theme file which is used for rendering the map.
 	 *
@@ -258,7 +260,7 @@ public class TileLayer extends Layer {
 
 	private boolean setRenderTheme(Theme theme) {
 
-		mapWorkersPause(true);
+		tileWorkersPause(true);
 
 		InputStream inputStream = null;
 		try {
@@ -269,7 +271,7 @@ public class TileLayer extends Layer {
 			// FIXME !!!
 			GLRenderer.setRenderTheme(t);
 
-			for (TileGenerator g : mTileGenerators)
+			for (TileGenerator g : mTileWorker)
 				g.setRenderTheme(t);
 
 			return true;
@@ -287,12 +289,13 @@ public class TileLayer extends Layer {
 			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 			}
-			mapWorkersProceed();
+			tileWorkersProceed();
 		}
 		return false;
 	}
+
 	/**
-	 * add jobs and remember MapWorkers that stuff needs to be done
+	 * add jobs and remember TileGenerators that stuff needs to be done
 	 *
 	 * @param jobs
 	 *            tile jobs
@@ -304,29 +307,29 @@ public class TileLayer extends Layer {
 		}
 		mJobQueue.setJobs(jobs);
 
-		for (int i = 0; i < mNumMapWorkers; i++) {
-			MapWorker m = mMapWorkers[i];
+		for (int i = 0; i < mNumTileWorker; i++) {
+			TileGenerator m = mTileWorker[i];
 			synchronized (m) {
 				m.notify();
 			}
 		}
 	}
 
-	private void mapWorkersPause(boolean wait) {
-		for (MapWorker mapWorker : mMapWorkers) {
-			if (!mapWorker.isPausing())
-				mapWorker.pause();
+	private void tileWorkersPause(boolean wait) {
+		for (TileGenerator tileWorker : mTileWorker) {
+			if (!tileWorker.isPausing())
+				tileWorker.pause();
 		}
 		if (wait) {
-			for (MapWorker mapWorker : mMapWorkers) {
-				if (!mapWorker.isPausing())
-					mapWorker.awaitPausing();
+			for (TileGenerator tileWorker : mTileWorker) {
+				if (!tileWorker.isPausing())
+					tileWorker.awaitPausing();
 			}
 		}
 	}
 
-	private void mapWorkersProceed() {
-		for (MapWorker mapWorker : mMapWorkers)
-			mapWorker.proceed();
+	private void tileWorkersProceed() {
+		for (TileGenerator tileWorker : mTileWorker)
+			tileWorker.proceed();
 	}
 }

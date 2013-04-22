@@ -58,7 +58,7 @@ import android.util.Log;
  *       5. RenderTheme calls IRenderCallback functions with style information
  *       6. Styled items become added to MapTile.layers... roughly
  */
-public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
+public class TileGenerator extends MapWorker implements IRenderCallback, IMapDatabaseCallback, ITileGenerator  {
 
 	private static final String TAG = TileGenerator.class.getName();
 
@@ -117,7 +117,9 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	/**
 	 */
-	public TileGenerator() {
+	public TileGenerator(int id, JobQueue jobQueue,	TileManager tileManager) {
+		super(id, jobQueue, tileManager);
+
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
 
 		MapElement m = mDebugWay = new MapElement();
@@ -137,15 +139,24 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 		m.geometryType = GEOM_POINT;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.oscim.layers.tile.ITileGenerator#cleanup()
+	 */
+	@Override
 	public void cleanup() {
+		mMapDatabase.close();
 	}
 
-	public boolean executeJob(MapTile MapTile) {
+	/* (non-Javadoc)
+	 * @see org.oscim.layers.tile.ITileGenerator#executeJob(org.oscim.layers.tile.MapTile)
+	 */
+	@Override
+	public boolean executeJob(MapTile mapTile) {
 
 		if (mMapDatabase == null)
 			return false;
 
-		mTile = (MapTile) MapTile;
+		mTile = mapTile;
 
 		if (mTile.layers != null) {
 			// should be fixed now.

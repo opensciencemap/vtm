@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Hannes Janetzek
+ *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later version.
@@ -20,10 +21,9 @@ import org.oscim.utils.PausableThread;
  * A MapWorker uses a {@link TileGenerator} to generate map tiles. It runs in a
  * separate thread to avoid blocking the UI thread.
  */
-public class MapWorker extends PausableThread {
+public abstract class MapWorker extends PausableThread {
 	private final String THREAD_NAME;
 	private final JobQueue mJobQueue;
-	private final TileGenerator mMapGenerator;
 	private final TileManager mTileManager;
 
 	/**
@@ -31,29 +31,16 @@ public class MapWorker extends PausableThread {
 	 *            thread id
 	 * @param jobQueue
 	 *            ...
-	 * @param tileGenerator
-	 *            ...
 	 * @param tileManager
 	 *            ...
 	 */
-	public MapWorker(int id, JobQueue jobQueue, TileGenerator tileGenerator,
-			TileManager tileManager) {
+	public MapWorker(int id, JobQueue jobQueue, TileManager tileManager) {
 
 		super();
 		mJobQueue = jobQueue;
-		mMapGenerator = tileGenerator;
 		mTileManager = tileManager;
 
 		THREAD_NAME = "MapWorker" + id;
-	}
-
-	public TileGenerator getTileGenerator() {
-		return mMapGenerator;
-	}
-
-	@Override
-	protected void afterRun() {
-		// empty
 	}
 
 	@Override
@@ -64,16 +51,19 @@ public class MapWorker extends PausableThread {
 			return;
 
 		try {
-			mMapGenerator.executeJob(tile);
+			executeJob(tile);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
 
 		if (!isInterrupted()) {
+			// pass tile to main thread
 			mTileManager.passTile(tile);
 		}
 	}
+
+	protected abstract boolean executeJob(MapTile tile);
 
 	@Override
 	protected String getThreadName() {
