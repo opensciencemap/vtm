@@ -28,8 +28,6 @@ package org.oscim.renderer.overlays;
 // 5 R-Tree might be handy
 //
 
-import java.util.HashMap;
-
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.graphics.Color;
@@ -112,7 +110,7 @@ public class TextOverlay extends BasicOverlay {
 
 	private final float[] mTmpCoords = new float[8];
 
-	private final HashMap<MapTile, LabelTile> mActiveTiles;
+	//private final HashMap<MapTile, LabelTile> mActiveTiles;
 
 	class LabelTile {
 		Tile tile;
@@ -209,7 +207,7 @@ public class TextOverlay extends BasicOverlay {
 		mTileLayer = baseLayer;
 		layers.textureLayers = new TextLayer();
 		mTmpLayer = new TextLayer();
-		mActiveTiles = new HashMap<MapTile, LabelTile>();
+		//mActiveTiles = new HashMap<MapTile, LabelTile>();
 		mTmpPos = new MapPosition();
 		mThread = new LabelThread();
 		mThread.start();
