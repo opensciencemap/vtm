@@ -16,7 +16,7 @@ package org.oscim.layers.tile;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.glStencilMask;
-import static org.oscim.layers.tile.JobTile.STATE_READY;
+import static org.oscim.layers.tile.MapTile.STATE_READY;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;

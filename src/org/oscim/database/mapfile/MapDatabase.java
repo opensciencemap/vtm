@@ -27,7 +27,7 @@ import org.oscim.database.MapOptions;
 import org.oscim.database.mapfile.header.MapFileHeader;
 import org.oscim.database.mapfile.header.MapFileInfo;
 import org.oscim.database.mapfile.header.SubFileParameter;
-import org.oscim.layers.tile.JobTile;
+import org.oscim.layers.tile.MapTile;
 
 import android.util.Log;
 
@@ -209,7 +209,7 @@ public class MapDatabase implements IMapDatabase {
 	 * org.oscim.map.reader.MapDatabaseCallback)
 	 */
 	@Override
-	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(MapTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 
 		if (sMapFileHeader == null)
 			return QueryResult.FAILED;

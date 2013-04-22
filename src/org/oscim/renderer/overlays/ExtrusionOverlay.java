@@ -20,7 +20,7 @@ import java.nio.ShortBuffer;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.JobTile;
+import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileRenderLayer;
 import org.oscim.layers.tile.TileSet;
@@ -165,7 +165,7 @@ public class ExtrusionOverlay extends RenderOverlay {
 
 	private static ExtrusionLayer getLayer(MapTile t) {
 		if (t.layers != null && t.layers.extrusionLayers != null
-				&& t.state == JobTile.STATE_READY)
+				&& t.state == MapTile.STATE_READY)
 			return (ExtrusionLayer) t.layers.extrusionLayers;
 		return null;
 	}

@@ -14,8 +14,8 @@
  */
 package org.oscim.layers.tile;
 
-import static org.oscim.layers.tile.JobTile.STATE_NEW_DATA;
-import static org.oscim.layers.tile.JobTile.STATE_READY;
+import static org.oscim.layers.tile.MapTile.STATE_NEW_DATA;
+import static org.oscim.layers.tile.MapTile.STATE_READY;
 
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;

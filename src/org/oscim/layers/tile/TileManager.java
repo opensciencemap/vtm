@@ -15,9 +15,9 @@
 
 package org.oscim.layers.tile;
 
-import static org.oscim.layers.tile.JobTile.STATE_LOADING;
-import static org.oscim.layers.tile.JobTile.STATE_NEW_DATA;
-import static org.oscim.layers.tile.JobTile.STATE_NONE;
+import static org.oscim.layers.tile.MapTile.STATE_LOADING;
+import static org.oscim.layers.tile.MapTile.STATE_NEW_DATA;
+import static org.oscim.layers.tile.MapTile.STATE_NONE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +73,7 @@ public class TileManager {
 	private volatile int mTilesForUpload;
 
 	// new tile jobs for MapWorkers
-	private final ArrayList<JobTile> mJobs;
+	private final ArrayList<MapTile> mJobs;
 
 	// counter to check whether current TileSet has changed
 	private  int mUpdateSerial;
@@ -121,7 +121,7 @@ public class TileManager {
 		mTileLayer = tileLayer;
 
 		mMapViewPosition = mapView.getMapViewPosition();
-		mJobs = new ArrayList<JobTile>();
+		mJobs = new ArrayList<MapTile>();
 		mTiles = new MapTile[CACHE_TILES_MAX];
 
 		mTilesSize = 0;
@@ -255,7 +255,7 @@ public class TileManager {
 		if (mJobs.isEmpty())
 			return;
 
-		JobTile[] jobs = new JobTile[mJobs.size()];
+		MapTile[] jobs = new MapTile[mJobs.size()];
 		jobs = mJobs.toArray(jobs);
 		updateTileDistances(jobs, jobs.length, pos);
 
@@ -562,12 +562,11 @@ public class TileManager {
 	/**
 	 * called from MapWorker Thread when tile is loaded by TileGenerator
 	 *
-	 * @param jobTile
+	 * @param tile
 	 *            Tile ready for upload to GL
 	 * @return ... caller does not care
 	 */
-	public synchronized boolean passTile(JobTile jobTile) {
-		MapTile tile = (MapTile) jobTile;
+	public synchronized boolean passTile(MapTile tile) {
 
 		if (tile.state != STATE_LOADING) {
 			// - should rather be STATE_FAILED
@@ -576,12 +575,6 @@ public class TileManager {
 			//Log.d(TAG, "passTile: failed loading " + tile);
 			return true;
 		}
-
-		//if (tile.vbo != null) {
-		//	// BAD Things(tm) happend: tile is already loaded
-		//	Log.d(TAG, "BUG: tile loaded before " + tile);
-		//	return true;
-		//}
 
 		tile.state = STATE_NEW_DATA;
 		mTilesForUpload++;
