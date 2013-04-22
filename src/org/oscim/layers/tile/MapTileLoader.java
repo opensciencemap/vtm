@@ -50,17 +50,17 @@ import android.util.Log;
 
 /**
  * @note
- *       1. The MapWorkers call TileGenerator.execute() to load a tile.
+ *       1. The MapWorkers call MapTileLoader.execute() to load a tile.
  *       2. The tile data will be loaded from current MapDatabase
  *       3. MapDatabase calls the IMapDatabaseCallback functions
- *       implemented by TileGenerator for WAY and POI items.
+ *       implemented by MapTileLoader for WAY and POI items.
  *       4. these callbacks then call RenderTheme to get the matching style.
  *       5. RenderTheme calls IRenderCallback functions with style information
  *       6. Styled items become added to MapTile.layers... roughly
  */
-public class TileGenerator extends MapWorker implements IRenderCallback, IMapDatabaseCallback, ITileGenerator  {
+public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDatabaseCallback  {
 
-	private static final String TAG = TileGenerator.class.getName();
+	private static final String TAG = MapTileLoader.class.getName();
 
 	private static final double STROKE_INCREASE = Math.sqrt(2.2);
 	private static final byte LAYERS = 11;
@@ -83,7 +83,7 @@ public class TileGenerator extends MapWorker implements IRenderCallback, IMapDat
 	private IRenderTheme renderTheme;
 	private int renderLevels;
 
-	// current MapDatabase used by this TileGenerator
+	// current MapDatabase used by this MapTileLoader
 	private IMapDatabase mMapDatabase;
 
 	// currently processed tile
@@ -117,8 +117,8 @@ public class TileGenerator extends MapWorker implements IRenderCallback, IMapDat
 
 	/**
 	 */
-	public TileGenerator(int id, JobQueue jobQueue,	TileManager tileManager) {
-		super(id, jobQueue, tileManager);
+	public MapTileLoader(JobQueue jobQueue,	TileManager tileManager) {
+		super(jobQueue, tileManager);
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
 
@@ -140,7 +140,7 @@ public class TileGenerator extends MapWorker implements IRenderCallback, IMapDat
 	}
 
 	/* (non-Javadoc)
-	 * @see org.oscim.layers.tile.ITileGenerator#cleanup()
+	 * @see org.oscim.layers.tile.TileLoader#cleanup()
 	 */
 	@Override
 	public void cleanup() {
@@ -148,7 +148,7 @@ public class TileGenerator extends MapWorker implements IRenderCallback, IMapDat
 	}
 
 	/* (non-Javadoc)
-	 * @see org.oscim.layers.tile.ITileGenerator#executeJob(org.oscim.layers.tile.MapTile)
+	 * @see org.oscim.layers.tile.TileLoader#executeJob(org.oscim.layers.tile.MapTile)
 	 */
 	@Override
 	public boolean executeJob(MapTile mapTile) {

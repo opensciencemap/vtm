@@ -23,8 +23,8 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.database.MapOptions;
 import org.oscim.layers.Layer;
-import org.oscim.layers.tile.TileGenerator;
-import org.oscim.layers.tile.TileLayer;
+import org.oscim.layers.tile.MapTileLayer;
+import org.oscim.layers.tile.MapTileLoader;
 import org.oscim.overlay.BuildingOverlay;
 import org.oscim.overlay.LabelingOverlay;
 import org.oscim.overlay.Overlay;
@@ -121,7 +121,7 @@ public class MapView extends RelativeLayout {
 		mDebugSettings = new DebugSettings();
 
 		// FIXME
-		TileGenerator.setDebugSettings(mDebugSettings);
+		MapTileLoader.setDebugSettings(mDebugSettings);
 
 		mapActivity.registerMapView(this);
 
@@ -134,8 +134,8 @@ public class MapView extends RelativeLayout {
 		redrawMap(false);
 	}
 
-	public TileLayer setBaseMap(MapOptions options) {
-		TileLayer baseLayer = new TileLayer(this);
+	public MapTileLayer setBaseMap(MapOptions options) {
+		MapTileLayer baseLayer = new MapTileLayer(this);
 
 		baseLayer.setMapDatabase(options);
 
@@ -266,7 +266,7 @@ public class MapView extends RelativeLayout {
 	 */
 	public void setDebugSettings(DebugSettings debugSettings) {
 		mDebugSettings = debugSettings;
-		TileGenerator.setDebugSettings(debugSettings);
+		MapTileLoader.setDebugSettings(debugSettings);
 	}
 
 	/**
@@ -351,4 +351,5 @@ public class MapView extends RelativeLayout {
 	public boolean getRotationEnabled() {
 		return mRotationEnabled;
 	}
+
 }

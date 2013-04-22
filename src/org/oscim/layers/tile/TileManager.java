@@ -114,9 +114,9 @@ public class TileManager {
 	};
 
 	private final float[] mBoxCoords = new float[8];
-	private final TileLayer mTileLayer;
+	private final TileLayer<?> mTileLayer;
 
-	public TileManager(MapView mapView, TileLayer tileLayer) {
+	public TileManager(MapView mapView, TileLayer<?> tileLayer) {
 		mMapView = mapView;
 		mTileLayer = tileLayer;
 
@@ -197,7 +197,7 @@ public class TileManager {
 		// start with old jobs while new jobs are calculated, which
 		// should increase the chance that they are free when new
 		// jobs come in.
-		mTileLayer.addJobs(null);
+		mTileLayer.setJobs(null);
 
 		// load some tiles more than currently visible (* 0.75)
 		double scale = pos.scale * 0.9f;
@@ -260,7 +260,7 @@ public class TileManager {
 		updateTileDistances(jobs, jobs.length, pos);
 
 		// sets tiles to state == LOADING
-		mTileLayer.addJobs(jobs);
+		mTileLayer.setJobs(jobs);
 		mJobs.clear();
 
 		/* limit cache items */
@@ -527,7 +527,7 @@ public class TileManager {
 				} else if (t.state == STATE_LOADING) {
 					// NOTE:  when set loading to false the tile could be
 					// added to load queue again while still processed in
-					// TileGenerator => need tile.cancel flag.
+					// MapTileLoader => need tile.cancel flag.
 					// t.isLoading = false;
 					Log.d(TAG, "limitCache: cancel loading " + t + " " + t.distance);
 				} else {
@@ -560,7 +560,7 @@ public class TileManager {
 	}
 
 	/**
-	 * called from MapWorker Thread when tile is loaded by TileGenerator
+	 * called from MapWorker Thread when tile is loaded by MapTileLoader
 	 *
 	 * @param tile
 	 *            Tile ready for upload to GL
@@ -570,7 +570,7 @@ public class TileManager {
 
 		if (tile.state != STATE_LOADING) {
 			// - should rather be STATE_FAILED
-			// no one should be able to use this tile now, TileGenerator passed
+			// no one should be able to use this tile now, MapTileLoader passed
 			// it, GL-Thread does nothing until newdata is set.
 			//Log.d(TAG, "passTile: failed loading " + tile);
 			return true;

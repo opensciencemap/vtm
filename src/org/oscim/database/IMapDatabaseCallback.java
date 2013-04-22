@@ -18,7 +18,7 @@ import org.oscim.core.MapElement;
 
 
 /**
- * MapDatabase callbacks (implemented by  TileGenerator)
+ * MapDatabase callbacks (implemented by  MapTileLoader)
  * ____
  * NOTE: All parameters passed belong to the caller! i.e. dont hold
  * references to any arrays after callback function returns.

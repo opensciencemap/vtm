@@ -51,13 +51,11 @@ public class TileDistanceSort {
 		return 0;
 	}
 
-	private static void binarySort(MapTile[] a, int lo, int hi, int start)
-	{
+	private static void binarySort(MapTile[] a, int lo, int hi, int start)	{
 		assert ((lo <= start) && (start <= hi));
 		if (start == lo)
 			++start;
-		for (; start < hi; ++start)
-		{
+		for (; start < hi; ++start)		{
 			MapTile pivot = a[start];
 
 			int left = lo;
@@ -98,8 +96,7 @@ public class TileDistanceSort {
 		}
 	}
 
-	private static int countRunAndMakeAscending(MapTile[] a, int lo, int hi)
-	{
+	private static int countRunAndMakeAscending(MapTile[] a, int lo, int hi) {
 		assert (lo < hi);
 		int runHi = lo + 1;
 		if (runHi == hi) {
@@ -118,13 +115,15 @@ public class TileDistanceSort {
 		return (runHi - lo);
 	}
 
-	private static void reverseRange(MapTile[] a, int lo, int hi)
-	{
+	private static void reverseRange(MapTile[] a, int lo, int hi) {
 		--hi;
 		while (lo < hi) {
 			MapTile t = a[lo];
 			a[(lo++)] = a[hi];
 			a[(hi--)] = t;
 		}
+	}
+
+	private TileDistanceSort() {
 	}
 }
