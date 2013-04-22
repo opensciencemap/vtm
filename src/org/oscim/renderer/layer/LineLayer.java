@@ -16,6 +16,7 @@ package org.oscim.renderer.layer;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
 import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.GLRenderer;
@@ -70,6 +71,13 @@ public final class LineLayer extends Layer {
 	 */
 	public void addLine(float[] points, short[] index, boolean closed) {
 		addLine(points, index, -1, closed);
+	}
+
+	public void addLine(GeometryBuffer geom) {
+		if (geom.mode == 3)
+			addLine(geom.points, geom.index, -1, true);
+		else if (geom.mode == 2)
+			addLine(geom.points, geom.index, -1, false);
 	}
 
 	public void addLine(float[] points, int numPoints, boolean closed) {
