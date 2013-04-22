@@ -63,11 +63,9 @@ public class GeometryBuffer {
 		if (CHECK_STATE)
 			setOrCheckMode(2);
 
-		if (index[0] >= 0){
-			// start next
-			if (++indexPos >= index.length)
-				ensureIndexSize(indexPos, true);
-		}
+		// start next
+		if ((index[0] >= 0) && (++indexPos >= index.length))
+			ensureIndexSize(indexPos, true);
 
 		// initialize with zero points
 		index[indexPos] = 0;
