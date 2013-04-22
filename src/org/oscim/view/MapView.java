@@ -29,7 +29,6 @@ import org.oscim.overlay.BuildingOverlay;
 import org.oscim.overlay.LabelingOverlay;
 import org.oscim.overlay.Overlay;
 import org.oscim.renderer.GLView;
-import org.oscim.utils.AndroidUtils;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -69,7 +68,7 @@ public class MapView extends RelativeLayout {
 	// FIXME: keep until old pbmap reader is removed
 	public static boolean enableClosePolygons = false;
 
-	public  static float dpi;
+	public static float dpi;
 
 	/**
 	 * @param context
@@ -132,26 +131,21 @@ public class MapView extends RelativeLayout {
 
 		addView(mGLView, params);
 
-		requestRedraw();
+		redrawMap(false);
 	}
 
-
-	public TileLayer setBaseMap(MapOptions options){
+	public TileLayer setBaseMap(MapOptions options) {
 		TileLayer baseLayer = new TileLayer(this);
 
 		baseLayer.setMapDatabase(options);
 
+		mLayerManager.add(0, new MapEventLayer(this));
 
-		mLayerManager.add(0,new MapEventLayer(this));
+		mLayerManager.add(1, baseLayer);
 
-		mLayerManager.add(1,baseLayer);
-
-		//mMapZoomControls = new MapZoomControls(mapActivity, this);
-		//mMapZoomControls.setShowMapZoomControls(true);
 		mRotationEnabled = true;
 
 		//mLayerManager.add(new GenericOverlay(this, new GridOverlay(this)));
-
 		mLayerManager.add(new BuildingOverlay(this, baseLayer.getTileLayer()));
 		mLayerManager.add(new LabelingOverlay(this, baseLayer.getTileLayer()));
 
@@ -208,58 +202,40 @@ public class MapView extends RelativeLayout {
 			mMapViewPosition.setViewport(width, height);
 	}
 
-	public void render() {
-		if (!MapView.debugFrameTime)
-			mGLView.requestRender();
-	}
-
-	public void enableRotation(boolean enable) {
-		mRotationEnabled = enable;
-
-		if (enable) {
-			enableCompass(false);
-		}
-	}
-
-	public void enableCompass(boolean enable) {
-		if (enable == mCompassEnabled)
-			return;
-
-		mCompassEnabled = enable;
-
-		if (enable)
-			enableRotation(false);
-
-		if (enable)
-			mCompass.enable();
-		else
-			mCompass.disable();
-	}
-
-	public boolean getCompassEnabled() {
-		return mCompassEnabled;
-	}
-
-	public boolean getRotationEnabled() {
-		return mRotationEnabled;
-	}
-
-
 	boolean mWaitRedraw;
 
-	Runnable mRedrawRequest = new Runnable() {
+	private final Runnable mRedrawRequest = new Runnable() {
 		@Override
 		public void run() {
 			mWaitRedraw = false;
-			redrawMap(true);
+			redrawMapInternal(false);
 		}
 	};
 
-	public void requestRedraw(){
-		if (!mWaitRedraw){
+	/**
+	 * Request to redraw the map when a global state like position,
+	 * datasource or theme has changed. This will trigger a call
+	 * to onUpdate() to all Layers.
+	 *
+	 * @param requestRender
+	 *            also request to draw a frame
+	 */
+	public void redrawMap(boolean requestRender) {
+		if (requestRender) {
+			if (!(mPausing || mWidth == 0 || mHeight == 0))
+				mGLView.requestRender();
+		}
+		if (!mWaitRedraw) {
 			mWaitRedraw = true;
 			post(mRedrawRequest);
 		}
+	}
+
+	/**
+	 * Request to render a frame. Use this for animations.
+	 */
+	public void render() {
+		mGLView.requestRender();
 	}
 
 	/**
@@ -267,31 +243,21 @@ public class MapView extends RelativeLayout {
 	 *
 	 * @param forceRedraw TODO
 	 */
-	public void redrawMap(boolean forceRedraw) {
+	void redrawMapInternal(boolean forceRedraw) {
+		boolean changed = false;
+
 		if (mPausing || mWidth == 0 || mHeight == 0)
 			return;
 
-		boolean changed = false;
-
-		if (forceRedraw){
-			render();
+		if (forceRedraw) {
+			mGLView.requestRender();
 			changed = true;
 		}
-//		if (mClearMap) {
-//			mTileManager.init(mWidth, mHeight);
-//			mClearMap = false;
-//
-//			// make sure mMapPosition will be updated
-//			mMapPosition.zoomLevel = -1;
-//
-//			// TODO clear overlays
-//		}
 
+		// get the current MapPosition
 		changed |= mMapViewPosition.getMapPosition(mMapPosition);
 
-		// required when not changed?
-		if (AndroidUtils.currentThreadIsUiThread())
-			mLayerManager.onUpdate(mMapPosition, changed);
+		mLayerManager.onUpdate(mMapPosition, changed);
 	}
 
 	/**
@@ -301,7 +267,6 @@ public class MapView extends RelativeLayout {
 	public void setDebugSettings(DebugSettings debugSettings) {
 		mDebugSettings = debugSettings;
 		TileGenerator.setDebugSettings(debugSettings);
-		//clearMap();
 	}
 
 	/**
@@ -354,5 +319,36 @@ public class MapView extends RelativeLayout {
 	 */
 	public BoundingBox getBoundingBox() {
 		return mMapViewPosition.getViewBox();
+	}
+
+	public void enableRotation(boolean enable) {
+		mRotationEnabled = enable;
+
+		if (enable) {
+			enableCompass(false);
+		}
+	}
+
+	public void enableCompass(boolean enable) {
+		if (enable == mCompassEnabled)
+			return;
+
+		mCompassEnabled = enable;
+
+		if (enable)
+			enableRotation(false);
+
+		if (enable)
+			mCompass.enable();
+		else
+			mCompass.disable();
+	}
+
+	public boolean getCompassEnabled() {
+		return mCompassEnabled;
+	}
+
+	public boolean getRotationEnabled() {
+		return mRotationEnabled;
 	}
 }
