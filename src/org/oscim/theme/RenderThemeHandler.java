@@ -17,6 +17,7 @@ package org.oscim.theme;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -75,7 +76,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading from the input stream.
 	 */
-	public static RenderTheme getRenderTheme(InputStream inputStream)
+	public static IRenderTheme getRenderTheme(InputStream inputStream)
 			throws SAXException,
 			ParserConfigurationException, IOException {
 		RenderThemeHandler renderThemeHandler = new RenderThemeHandler();
@@ -112,7 +113,9 @@ public class RenderThemeHandler extends DefaultHandler {
 		Log.d(TAG, stringBuilder.toString());
 	}
 
+	private final ArrayList<Rule> mRulesList = new ArrayList<Rule>();
 	private Rule mCurrentRule;
+
 	private final Stack<Element> mElementStack = new Stack<Element>();
 	private int mLevel;
 	private RenderTheme mRenderTheme;
@@ -126,8 +129,8 @@ public class RenderThemeHandler extends DefaultHandler {
 			throw new IllegalArgumentException("missing element: rules");
 		}
 
-		mRenderTheme.setLevels(mLevel);
-		mRenderTheme.complete();
+		mRenderTheme.complete(mRulesList, mLevel);
+		mRulesList.clear();
 		tmpStyleHash.clear();
 	}
 
@@ -138,7 +141,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		if (ELEMENT_NAME_RULE.equals(localName)) {
 			mRuleStack.pop();
 			if (mRuleStack.empty()) {
-				mRenderTheme.addRule(mCurrentRule);
+				mRulesList.add(mCurrentRule);
 			} else {
 				mCurrentRule = mRuleStack.peek();
 			}

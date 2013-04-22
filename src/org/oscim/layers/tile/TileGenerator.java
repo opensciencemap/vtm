@@ -35,7 +35,7 @@ import org.oscim.renderer.layer.LineTexLayer;
 import org.oscim.renderer.layer.PolygonLayer;
 import org.oscim.renderer.layer.TextItem;
 import org.oscim.theme.IRenderCallback;
-import org.oscim.theme.RenderTheme;
+import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.Circle;
 import org.oscim.theme.renderinstruction.Line;
@@ -80,7 +80,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private static DebugSettings debug;
 
-	private RenderTheme renderTheme;
+	private IRenderTheme renderTheme;
 	private int renderLevels;
 
 	// current MapDatabase used by this TileGenerator
@@ -106,7 +106,7 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 
 	private final LineClipper mClipper;
 
-	public void setRenderTheme(RenderTheme theme) {
+	public void setRenderTheme(IRenderTheme theme) {
 		renderTheme = theme;
 		renderLevels = theme.getLevels();
 	}
@@ -182,20 +182,20 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			return false;
 		}
 
-		if (debug.drawTileFrames) {
-			// draw tile coordinate
-			mTagName = new Tag("name", mTile.toString(), false);
-			mElement = mDebugPoint;
-			RenderInstruction[] ri;
-			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
-			renderNode(ri);
-
-			// draw tile box
-			mElement = mDebugWay;
-			mDrawingLayer = 100 * renderLevels;
-			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
-			renderWay(ri);
-		}
+//		if (debug.drawTileFrames) {
+//			// draw tile coordinate
+//			mTagName = new Tag("name", mTile.toString(), false);
+//			mElement = mDebugPoint;
+//			RenderInstruction[] ri;
+//			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
+//			renderNode(ri);
+//
+//			// draw tile box
+//			mElement = mDebugWay;
+//			mDrawingLayer = 100 * renderLevels;
+//			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
+//			renderWay(ri);
+//		}
 
 		mTile = null;
 		return true;
@@ -281,7 +281,8 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			filterTags(element.tags);
 
 			// get render instructions
-			RenderInstruction[] ri = renderTheme.matchNode(element.tags, mTile.zoomLevel);
+			//RenderInstruction[] ri = renderTheme.matchNode(element.tags, mTile.zoomLevel);
+			RenderInstruction[] ri = renderTheme.matchElement(element, mTile.zoomLevel);
 
 			if (ri != null)
 				renderNode(ri);
@@ -297,8 +298,10 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 			mDrawingLayer = getValidLayer(element.layer) * renderLevels;
 
 			// get render instructions
-			RenderInstruction[] ri = renderTheme.matchWay(element.tags,
-					(byte) (mTile.zoomLevel + 0), closed);
+//			RenderInstruction[] ri = renderTheme.matchWay(element.tags,
+//					(byte) (mTile.zoomLevel + 0), closed);
+
+			RenderInstruction[] ri = renderTheme.matchElement(element, mTile.zoomLevel);
 
 			renderWay(ri);
 
@@ -314,15 +317,15 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	private void debugUnmatched(boolean closed, Tag[] tags) {
 		Log.d(TAG, "DBG way not matched: " + closed + " "
 				+ Arrays.deepToString(tags));
-
-		mTagName = new Tag("name", tags[0].key + ":"
-				+ tags[0].value, false);
-
-		RenderInstruction[] ri;
-		ri = renderTheme.matchWay(closed ? debugTagArea : debugTagWay,
-				(byte) 0, true);
-
-		renderWay(ri);
+		mElement = null;
+//		mTagName = new Tag("name", tags[0].key + ":"
+//				+ tags[0].value, false);
+//
+//		RenderInstruction[] ri;
+//		ri = renderTheme.matchWay(closed ? debugTagArea : debugTagWay,
+//				(byte) 0, true);
+//
+//		renderWay(ri);
 	}
 
 	private void renderWay(RenderInstruction[] ri) {

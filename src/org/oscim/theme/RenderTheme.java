@@ -14,10 +14,13 @@
  */
 package org.oscim.theme;
 
+import static org.oscim.core.MapElement.GEOM_LINE;
+import static org.oscim.core.MapElement.GEOM_POLY;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.oscim.core.Tag;
+import org.oscim.core.MapElement;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.rule.Closed;
 import org.oscim.theme.rule.Rule;
@@ -25,12 +28,13 @@ import org.oscim.utils.LRUCache;
 import org.xml.sax.Attributes;
 
 import android.graphics.Color;
+import android.util.Log;
 
 /**
- * A RenderTheme defines how ways and nodes are drawn.
+ * A RenderTheme defines how map elements are drawn.
  */
-public class RenderTheme {
-	//private final static String TAG = RenderTheme.class.getName();
+public class RenderTheme implements IRenderTheme {
+	private final static String TAG = RenderTheme.class.getName();
 
 	private static final int MATCHING_CACHE_SIZE = 512;
 	private static final int RENDER_THEME_VERSION = 1;
@@ -82,25 +86,26 @@ public class RenderTheme {
 
 	private final float mBaseStrokeWidth;
 	private final float mBaseTextSize;
-	private int mLevels;
 	private final int mMapBackground;
-	private final ArrayList<Rule> mRulesList;
 
-	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mNodesCache;
-	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mWayCache;
-	private final LRUCache<MatchingCacheKey, RenderInstructionItem> mAreaCache;
+	private int mLevels;
+	private Rule[] mRules;
 
-	private final MatchingCacheKey mAreaCacheKey;
-	private final MatchingCacheKey mWayCacheKey;
-	private final MatchingCacheKey mNodeCacheKey;
+	class ElementCache {
+		final LRUCache<MatchingCacheKey, RenderInstructionItem> cache;
+		final MatchingCacheKey cacheKey;
 
-	private final ArrayList<RenderInstruction> mWayInstructionList;
-	private final ArrayList<RenderInstruction> mAreaInstructionList;
-	private final ArrayList<RenderInstruction> mNodeInstructionList;
+		/* temporary matching instructions list */
+		final ArrayList<RenderInstruction> instructionList;
 
-	private RenderInstructionItem mPrevAreaItem;
-	private RenderInstructionItem mPrevWayItem;
-	private RenderInstructionItem mPrevNodeItem;
+		RenderInstructionItem prevItem;
+
+		public ElementCache() {
+			cache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(MATCHING_CACHE_SIZE);
+			instructionList = new ArrayList<RenderInstruction>(4);
+			cacheKey = new MatchingCacheKey();
+		}
+	}
 
 	class RenderInstructionItem {
 		RenderInstructionItem next;
@@ -109,65 +114,60 @@ public class RenderTheme {
 		MatchingCacheKey key;
 	}
 
+	private final ElementCache[] mElementCache;
+
 	RenderTheme(int mapBackground, float baseStrokeWidth, float baseTextSize) {
 		mMapBackground = mapBackground;
 		mBaseStrokeWidth = baseStrokeWidth;
 		mBaseTextSize = baseTextSize;
-		mRulesList = new ArrayList<Rule>();
 
-		mNodesCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(MATCHING_CACHE_SIZE);
-		mWayCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(MATCHING_CACHE_SIZE);
-		mAreaCache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(MATCHING_CACHE_SIZE);
+		mElementCache = new ElementCache[3];
+		for (int i = 0; i < 3; i++)
+			mElementCache[i] = new ElementCache();
 
-		mWayInstructionList = new ArrayList<RenderInstruction>(4);
-		mAreaInstructionList = new ArrayList<RenderInstruction>(4);
-		mNodeInstructionList = new ArrayList<RenderInstruction>(4);
-
-		mAreaCacheKey = new MatchingCacheKey();
-		mWayCacheKey = new MatchingCacheKey();
-		mNodeCacheKey = new MatchingCacheKey();
 	}
 
-	/**
-	 * Must be called when this RenderTheme gets destroyed to clean up and free
-	 * resources.
+	/*
+	 * (non-Javadoc)
+	 * @see org.oscim.theme.IRenderTheme#destroy()
 	 */
+	@Override
 	public void destroy() {
-		mNodesCache.clear();
-		mAreaCache.clear();
-		mWayCache.clear();
 
-		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-			mRulesList.get(i).onDestroy();
+		for (int i = 0; i < 3; i++)
+			mElementCache[i].cache.clear();
+
+		if (mRules != null) {
+			for (int i = 0, n = mRules.length; i < n; i++)
+				mRules[i].onDestroy();
 		}
 	}
 
-	/**
-	 * @return the number of distinct drawing levels required by this
-	 *         RenderTheme.
+	/*
+	 * (non-Javadoc)
+	 * @see org.oscim.theme.IRenderTheme#getLevels()
 	 */
+	@Override
 	public int getLevels() {
 		return mLevels;
 	}
 
-	/**
-	 * @return the map background color of this RenderTheme.
-	 * @see Color
+	/*
+	 * (non-Javadoc)
+	 * @see org.oscim.theme.IRenderTheme#getMapBackground()
 	 */
+	@Override
 	public int getMapBackground() {
 		return mMapBackground;
 	}
 
-	/**
-	 * ...
-	 *
-	 * @param tags
-	 *            ...
-	 * @param zoomLevel
-	 *            ...
-	 * @return ...
+	/*
+	 * (non-Javadoc)
+	 * @see org.oscim.theme.IRenderTheme#matchWay(org.oscim.core.Tag[], byte,
+	 * boolean)
 	 */
-	public RenderInstruction[] matchNode(Tag[] tags, byte zoomLevel) {
+	@Override
+	public RenderInstruction[] matchElement(MapElement element, int zoomLevel) {
 
 		// list of renderinsctruction items in cache
 		RenderInstructionItem ris = null;
@@ -175,157 +175,32 @@ public class RenderTheme {
 		// the item matching tags and zoomlevel
 		RenderInstructionItem ri = null;
 
-		synchronized (mNodesCache) {
-			int zoomMask = 1 << zoomLevel;
-
-			MatchingCacheKey cacheKey = mNodeCacheKey;
-			if (mPrevNodeItem == null || (mPrevNodeItem.zoom & zoomMask) == 0) {
-				// previous instructions zoom does not match
-				cacheKey.set(tags, null);
-			} else {
-				// compare if tags match previous instructions
-				if (cacheKey.set(tags, mPrevNodeItem.key))
-					ri = mPrevNodeItem;
-			}
-
-			if (ri == null) {
-				boolean found = mNodesCache.containsKey(cacheKey);
-
-				if (found) {
-					ris = mNodesCache.get(cacheKey);
-
-					for (ri = ris; ri != null; ri = ri.next)
-						if ((ri.zoom & zoomMask) != 0)
-							// cache hit
-							break;
-				}
-			}
-
-			if (ri == null) {
-				// cache miss
-				List<RenderInstruction> matches = mNodeInstructionList;
-				matches.clear();
-				for (int i = 0, n = mRulesList.size(); i < n; ++i)
-					mRulesList.get(i).matchNode(tags, zoomLevel, matches);
-
-				int size = matches.size();
-
-				// check if same instructions are used in another level
-				for (ri = ris; ri != null; ri = ri.next) {
-					if (size == 0) {
-						if (ri.list != null)
-							continue;
-
-						// both matchinglists are empty
-						break;
-					}
-
-					if (ri.list == null)
-						continue;
-
-					if (ri.list.length != size)
-						continue;
-
-					int i = 0;
-					for (RenderInstruction r : ri.list) {
-						if (r != matches.get(i))
-							break;
-						i++;
-					}
-					if (i == size)
-						// both matching lists contain the same items
-						break;
-				}
-
-				if (ri != null) {
-					// we found a same matchting list on another zoomlevel
-					ri.zoom |= zoomMask;
-				} else {
-
-					ri = new RenderInstructionItem();
-					ri.zoom = zoomMask;
-
-					if (size > 0) {
-						ri.list = new RenderInstruction[size];
-						matches.toArray(ri.list);
-					}
-					// attach this list to the one found for MatchingKey
-					if (ris != null) {
-						ri.next = ris.next;
-						ri.key = ris.key;
-						ris.next = ri;
-					} else {
-						ri.key = new MatchingCacheKey(cacheKey);
-						mNodesCache.put(ri.key, ri);
-					}
-				}
-			}
+		int type = element.geometryType;
+		if (type < 1 || type > 3) {
+			Log.d(TAG, "invalid geometry type for RenderTheme " + type);
+			return null;
 		}
 
-		mPrevNodeItem = ri;
+		ElementCache cache = mElementCache[type - 1];
 
-		return ri.list;
-
-	}
-
-	/**
-	 * Matches a way with the given parameters against this RenderTheme.
-	 *
-	 * @param tags
-	 *            the tags of the way.
-	 * @param zoomLevel
-	 *            the zoom level at which the way should be matched.
-	 * @param closed
-	 *            way is Closed
-	 * @return currently processed render instructions
-	 */
-	public RenderInstruction[] matchWay(Tag[] tags, byte zoomLevel, boolean closed) {
-
-		// list of renderinsctruction items in cache
-		RenderInstructionItem ris = null;
-
-		RenderInstructionItem prevInstructions = null;
-
-		// the item matching tags and zoomlevel
-		RenderInstructionItem ri = null;
-
-		// temporary matching instructions list
-		List<RenderInstruction> matches;
-
-		LRUCache<MatchingCacheKey, RenderInstructionItem> matchingCache;
-		MatchingCacheKey cacheKey;
-
-		if (closed)
-			matchingCache = mAreaCache;
-		else
-			matchingCache = mWayCache;
-
+		// NOTE: maximum zoom level supported is 32
 		int zoomMask = 1 << zoomLevel;
 
-		synchronized (matchingCache) {
-			if (closed) {
-				cacheKey = mAreaCacheKey;
-				matches = mAreaInstructionList;
-				prevInstructions = mPrevAreaItem;
-			} else {
-				cacheKey = mWayCacheKey;
-				matches = mWayInstructionList;
-				prevInstructions = mPrevWayItem;
-			}
+		synchronized (cache) {
 
-			if (prevInstructions == null || (prevInstructions.zoom & zoomMask) == 0) {
+			if (cache.prevItem == null || (cache.prevItem.zoom & zoomMask) == 0) {
 				// previous instructions zoom does not match
-				cacheKey.set(tags, null);
+				cache.cacheKey.set(element.tags, null);
 			} else {
 				// compare if tags match previous instructions
-				if (cacheKey.set(tags, prevInstructions.key)) {
+				if (cache.cacheKey.set(element.tags, cache.prevItem.key)) {
 					//Log.d(TAG, "same as previous " + Arrays.deepToString(tags));
-					ri = prevInstructions;
+					ri = cache.prevItem;
 				}
 			}
 
 			if (ri == null) {
-				ris = matchingCache.get(cacheKey);
+				ris = cache.cache.get(cache.cacheKey);
 
 				for (ri = ris; ri != null; ri = ri.next)
 					if ((ri.zoom & zoomMask) != 0)
@@ -337,12 +212,22 @@ public class RenderTheme {
 				// cache miss
 				//Log.d(TAG, missCnt++ + " / " + hitCnt + " Cache Miss");
 
-				int c = (closed ? Closed.YES : Closed.NO);
-				//List<RenderInstruction> matches = mMatchingList;
+				List<RenderInstruction> matches = cache.instructionList;
 				matches.clear();
 
-				for (int i = 0, n = mRulesList.size(); i < n; ++i)
-					mRulesList.get(i).matchWay(tags, zoomLevel, c, matches);
+				if (type == GEOM_LINE) {
+					for (int i = 0, n = mRules.length; i < n; i++)
+						mRules[i].matchWay(element.tags,
+								(byte) zoomLevel, Closed.NO, matches);
+				} else if (type == GEOM_POLY) {
+					for (int i = 0, n = mRules.length; i < n; i++)
+						mRules[i].matchWay(element.tags,
+								(byte) zoomLevel, Closed.YES, matches);
+				} else {
+					for (int i = 0, n = mRules.length; i < n; i++)
+						mRules[i].matchNode(element.tags,
+								(byte) zoomLevel, matches);
+				}
 
 				int size = matches.size();
 				// check if same instructions are used in another level
@@ -373,12 +258,13 @@ public class RenderTheme {
 				}
 
 				if (ri != null) {
-					// we found a same matchting list on another zoomlevel
+					// we found a same matchting list on another zoomlevel add
+					// this zoom level to the existing RenderInstructionItem.
 					ri.zoom |= zoomMask;
+
 					//Log.d(TAG,
 					//		zoomLevel + " same instructions " + size + " "
 					//				+ Arrays.deepToString(tags));
-
 				} else {
 					//Log.d(TAG,
 					//		zoomLevel + " new instructions " + size + " "
@@ -398,56 +284,49 @@ public class RenderTheme {
 						ri.key = ris.key;
 						ris.next = ri;
 					} else {
-						ri.key = new MatchingCacheKey(cacheKey);
-						matchingCache.put(ri.key, ri);
+						ri.key = new MatchingCacheKey(cache.cacheKey);
+						cache.cache.put(ri.key, ri);
 					}
 				}
 			}
-			if (closed)
-				mPrevAreaItem = ri;
-			else
-				mPrevWayItem = ri;
+
+			cache.prevItem = ri;
 		}
 
 		return ri.list;
 	}
 
-	void addRule(Rule rule) {
-		mRulesList.add(rule);
-	}
 
-	void complete() {
-		mRulesList.trimToSize();
-		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-			mRulesList.get(i).onComplete();
-		}
-	}
-
-	void setLevels(int levels) {
+	void complete(List<Rule> rulesList, int levels) {
 		mLevels = levels;
+
+		mRules = new Rule[rulesList.size()];
+		rulesList.toArray(mRules);
+
+		for (int i = 0, n = mRules.length; i < n; i++) {
+			mRules[i].onComplete();
+		}
 	}
 
-	/**
-	 * Scales the stroke width of this RenderTheme by the given factor.
-	 *
-	 * @param scaleFactor
-	 *            the factor by which the stroke width should be scaled.
+	/*
+	 * (non-Javadoc)
+	 * @see org.oscim.theme.IRenderTheme#scaleStrokeWidth(float)
 	 */
+	@Override
 	public void scaleStrokeWidth(float scaleFactor) {
-		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-			mRulesList.get(i).scaleStrokeWidth(scaleFactor * mBaseStrokeWidth);
-		}
+
+		for (int i = 0, n = mRules.length; i < n; i++)
+			mRules[i].scaleStrokeWidth(scaleFactor * mBaseStrokeWidth);
 	}
 
-	/**
-	 * Scales the text size of this RenderTheme by the given factor.
-	 *
-	 * @param scaleFactor
-	 *            the factor by which the text size should be scaled.
+	/*
+	 * (non-Javadoc)
+	 * @see org.oscim.theme.IRenderTheme#scaleTextSize(float)
 	 */
+	@Override
 	public void scaleTextSize(float scaleFactor) {
-		for (int i = 0, n = mRulesList.size(); i < n; ++i) {
-			mRulesList.get(i).scaleTextSize(scaleFactor * mBaseTextSize);
-		}
+
+		for (int i = 0, n = mRules.length; i < n; i++)
+			mRules[i].scaleTextSize(scaleFactor * mBaseTextSize);
 	}
 }

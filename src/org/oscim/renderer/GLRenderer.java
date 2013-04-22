@@ -32,7 +32,7 @@ import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.overlays.RenderOverlay;
-import org.oscim.theme.RenderTheme;
+import org.oscim.theme.IRenderTheme;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
 import org.oscim.view.MapView;
@@ -124,7 +124,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mFillCoords[7] = min;
 	}
 
-	public static void setRenderTheme(RenderTheme t) {
+	public static void setRenderTheme(IRenderTheme t) {
 		mClearColor = GlUtils.colorToFloat(t.getMapBackground());
 		mUpdateColor = true;
 	}

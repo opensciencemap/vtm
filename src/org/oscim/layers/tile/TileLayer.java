@@ -32,8 +32,8 @@ import org.oscim.database.MapOptions;
 import org.oscim.layers.Layer;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.theme.ExternalRenderTheme;
+import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
-import org.oscim.theme.RenderTheme;
 import org.oscim.theme.RenderThemeHandler;
 import org.oscim.theme.Theme;
 import org.oscim.view.MapView;
@@ -263,7 +263,7 @@ public class TileLayer extends Layer {
 		InputStream inputStream = null;
 		try {
 			inputStream = theme.getRenderThemeAsStream();
-			RenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
+			IRenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
 			t.scaleTextSize(1 + (MapView.dpi / 240 - 1) * 0.5f);
 
 			// FIXME !!!
