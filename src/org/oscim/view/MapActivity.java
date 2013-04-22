@@ -40,7 +40,7 @@ public abstract class MapActivity extends Activity {
 	private static final String KEY_MAP_SCALE = "map_scale";
 
 	private static final String PREFERENCES_FILE = "MapActivity";
-	private static final String KEY_THEME = "Theme";
+	//private static final String KEY_THEME = "Theme";
 
 	private static boolean containsMapViewPosition(SharedPreferences sharedPreferences) {
 		return sharedPreferences.contains(KEY_LATITUDE)

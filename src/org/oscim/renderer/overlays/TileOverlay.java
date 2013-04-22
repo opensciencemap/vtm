@@ -39,7 +39,7 @@ import android.opengl.GLES20;
 
 public class TileOverlay extends RenderOverlay {
 
-	private final static String TAG = TileOverlay.class.getName();
+	//private final static String TAG = TileOverlay.class.getName();
 
 	private float mDownX = 400;
 	private float mDownY = 400;
