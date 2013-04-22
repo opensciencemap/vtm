@@ -297,7 +297,7 @@ public class TileLayer extends Layer {
 	 * @param jobs
 	 *            tile jobs
 	 */
-	public void addJobs(JobTile[] jobs) {
+	public void addJobs(MapTile[] jobs) {
 		if (jobs == null) {
 			mJobQueue.clear();
 			return;

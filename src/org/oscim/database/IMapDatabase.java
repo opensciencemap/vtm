@@ -15,7 +15,7 @@
  */
 package org.oscim.database;
 
-import org.oscim.layers.tile.JobTile;
+import org.oscim.layers.tile.MapTile;
 
 /**
  *
@@ -32,7 +32,7 @@ public interface IMapDatabase {
 	 *            the callback which handles the extracted map elements.
 	 * @return true if successful
 	 */
-	public abstract QueryResult executeQuery(JobTile tile,
+	public abstract QueryResult executeQuery(MapTile tile,
 			IMapDatabaseCallback mapDatabaseCallback);
 
 	/**

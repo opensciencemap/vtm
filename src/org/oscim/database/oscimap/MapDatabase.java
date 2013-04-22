@@ -30,7 +30,7 @@ import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
-import org.oscim.layers.tile.JobTile;
+import org.oscim.layers.tile.MapTile;
 
 import android.os.Environment;
 import android.os.SystemClock;
@@ -65,7 +65,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private IMapDatabaseCallback mMapGenerator;
 	private float mScaleFactor;
-	private JobTile mTile;
+	private MapTile mTile;
 
 	private long mContentLenth;
 
@@ -76,7 +76,7 @@ public class MapDatabase implements IMapDatabase {
 	private final MapElement mElem = new MapElement();
 
 	@Override
-	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(MapTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		QueryResult result = QueryResult.SUCCESS;
 
 		mTile = tile;

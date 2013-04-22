@@ -26,7 +26,7 @@ import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
-import org.oscim.layers.tile.JobTile;
+import org.oscim.layers.tile.MapTile;
 
 /**
  *
@@ -68,7 +68,7 @@ public class MapDatabase implements IMapDatabase {
 	private final boolean renderPlace = false;
 
 	@Override
-	public QueryResult executeQuery(JobTile tile,
+	public QueryResult executeQuery(MapTile tile,
 			IMapDatabaseCallback mapDatabaseCallback) {
 
 		int size = Tile.SIZE;

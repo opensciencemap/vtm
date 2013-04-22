@@ -43,7 +43,7 @@ import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
-import org.oscim.layers.tile.JobTile;
+import org.oscim.layers.tile.MapTile;
 
 import android.os.Environment;
 import android.os.SystemClock;
@@ -90,7 +90,7 @@ public class MapDatabase implements IMapDatabase {
 
 	private IMapDatabaseCallback mMapGenerator;
 	private float mScaleFactor;
-	private JobTile mTile;
+	private MapTile mTile;
 	private FileOutputStream mCacheFile;
 
 	private String mHost;
@@ -117,7 +117,7 @@ public class MapDatabase implements IMapDatabase {
 			});
 
 	@Override
-	public QueryResult executeQuery(JobTile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(MapTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		QueryResult result = QueryResult.SUCCESS;
 		mCacheFile = null;
 

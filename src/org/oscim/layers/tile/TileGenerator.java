@@ -17,7 +17,7 @@ package org.oscim.layers.tile;
 import static org.oscim.core.MapElement.GEOM_LINE;
 import static org.oscim.core.MapElement.GEOM_POINT;
 import static org.oscim.core.MapElement.GEOM_POLY;
-import static org.oscim.layers.tile.JobTile.STATE_NONE;
+import static org.oscim.layers.tile.MapTile.STATE_NONE;
 
 import java.util.Arrays;
 
@@ -140,12 +140,12 @@ public class TileGenerator implements IRenderCallback, IMapDatabaseCallback {
 	public void cleanup() {
 	}
 
-	public boolean executeJob(JobTile jobTile) {
+	public boolean executeJob(MapTile MapTile) {
 
 		if (mMapDatabase == null)
 			return false;
 
-		mTile = (MapTile) jobTile;
+		mTile = (MapTile) MapTile;
 
 		if (mTile.layers != null) {
 			// should be fixed now.

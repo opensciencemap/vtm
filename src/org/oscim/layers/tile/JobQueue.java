@@ -15,8 +15,8 @@
  */
 package org.oscim.layers.tile;
 
-import static org.oscim.layers.tile.JobTile.STATE_LOADING;
-import static org.oscim.layers.tile.JobTile.STATE_NONE;
+import static org.oscim.layers.tile.MapTile.STATE_LOADING;
+import static org.oscim.layers.tile.MapTile.STATE_NONE;
 
 /**
  * A JobQueue keeps the list of pending jobs for a MapView and prioritizes them.
@@ -24,14 +24,14 @@ import static org.oscim.layers.tile.JobTile.STATE_NONE;
 public class JobQueue {
 
 	private int mCurrentJob = 0;
-	private JobTile[] mJobs;
+	private MapTile[] mJobs;
 
 	/**
 	 * @param tiles
 	 *            the jobs to be added to this queue.
 	 */
-	public synchronized void setJobs(JobTile[] tiles) {
-		for (JobTile t : tiles)
+	public synchronized void setJobs(MapTile[] tiles) {
+		for (MapTile t : tiles)
 			t.state = STATE_LOADING;
 
 		mJobs = tiles;
@@ -46,7 +46,7 @@ public class JobQueue {
 			mCurrentJob = 0;
 			return;
 		}
-		JobTile[] tiles = mJobs;
+		MapTile[] tiles = mJobs;
 
 		for (int i = mCurrentJob, n = mJobs.length; i < n; i++) {
 			tiles[i].state = STATE_NONE;
@@ -66,7 +66,7 @@ public class JobQueue {
 	/**
 	 * @return the most important job from this queue or null, if empty.
 	 */
-	public synchronized JobTile poll() {
+	public synchronized MapTile poll() {
 		if (mJobs == null)
 			return null;
 
@@ -76,7 +76,7 @@ public class JobQueue {
 				TileDistanceSort.sort(mJobs, 0, len);
 		}
 
-		JobTile t = mJobs[mCurrentJob];
+		MapTile t = mJobs[mCurrentJob];
 		mJobs[mCurrentJob] = null;
 
 		if (++mCurrentJob == mJobs.length)

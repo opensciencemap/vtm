@@ -21,7 +21,7 @@ package org.oscim.layers.tile;
  */
 
 public class TileDistanceSort {
-	public static void sort(JobTile[] a, int lo, int hi) {
+	public static void sort(MapTile[] a, int lo, int hi) {
 		int nRemaining = hi - lo;
 		if (nRemaining < 2) {
 			return;
@@ -32,7 +32,7 @@ public class TileDistanceSort {
 
 	}
 
-	static int compareTo(JobTile a, JobTile b) {
+	static int compareTo(MapTile a, MapTile b) {
 		if (a == null) {
 			if (b == null)
 				return 0;
@@ -51,14 +51,14 @@ public class TileDistanceSort {
 		return 0;
 	}
 
-	private static void binarySort(JobTile[] a, int lo, int hi, int start)
+	private static void binarySort(MapTile[] a, int lo, int hi, int start)
 	{
 		assert ((lo <= start) && (start <= hi));
 		if (start == lo)
 			++start;
 		for (; start < hi; ++start)
 		{
-			JobTile pivot = a[start];
+			MapTile pivot = a[start];
 
 			int left = lo;
 			int right = start;
@@ -98,7 +98,7 @@ public class TileDistanceSort {
 		}
 	}
 
-	private static int countRunAndMakeAscending(JobTile[] a, int lo, int hi)
+	private static int countRunAndMakeAscending(MapTile[] a, int lo, int hi)
 	{
 		assert (lo < hi);
 		int runHi = lo + 1;
@@ -118,11 +118,11 @@ public class TileDistanceSort {
 		return (runHi - lo);
 	}
 
-	private static void reverseRange(JobTile[] a, int lo, int hi)
+	private static void reverseRange(MapTile[] a, int lo, int hi)
 	{
 		--hi;
 		while (lo < hi) {
-			JobTile t = a[lo];
+			MapTile t = a[lo];
 			a[(lo++)] = a[hi];
 			a[(hi--)] = t;
 		}

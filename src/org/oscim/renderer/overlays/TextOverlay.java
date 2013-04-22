@@ -32,7 +32,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.graphics.Color;
 import org.oscim.graphics.Paint.Cap;
-import org.oscim.layers.tile.JobTile;
+import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileRenderLayer;
 import org.oscim.layers.tile.TileSet;
@@ -462,7 +462,7 @@ public class TextOverlay extends BasicOverlay {
 		/* add way labels */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			if (t.state != JobTile.STATE_READY)
+			if (t.state != MapTile.STATE_READY)
 				continue;
 
 			float dx = (float) (t.tileX * Tile.SIZE - tileX);
@@ -528,7 +528,7 @@ public class TextOverlay extends BasicOverlay {
 		/* add caption */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			if (t.state != JobTile.STATE_READY)
+			if (t.state != MapTile.STATE_READY)
 				continue;
 
 			float dx = (float) (t.tileX * Tile.SIZE - tileX);
