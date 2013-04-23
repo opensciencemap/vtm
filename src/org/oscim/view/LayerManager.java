@@ -27,6 +27,7 @@ import org.oscim.overlay.Overlay.Snappable;
 import org.oscim.renderer.overlays.RenderOverlay;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
@@ -35,6 +36,7 @@ import android.view.MotionEvent;
 
 public class LayerManager extends AbstractList<Layer> implements OnGestureListener,
 		OnDoubleTapListener {
+	private final static String TAG = LayerManager.class.getName();
 
 	private final GestureDetector mGestureDetector;
 
@@ -115,8 +117,14 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		int numRenderLayers = 0;
 		int numInputLayers = 0;
 
+		Log.d(TAG, "update layers:");
+
 		for (int i = 0, n = mLayerList.size(); i < n; i++) {
+
 			Layer o = mLayerList.get(i);
+
+			Log.d(TAG, "\t" + o.getClass().getName());
+
 			if (o.getLayer() != null)
 				numRenderLayers++;
 
