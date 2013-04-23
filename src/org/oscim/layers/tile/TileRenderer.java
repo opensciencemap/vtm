@@ -50,12 +50,14 @@ public class TileRenderer {
 	private static int mDrawSerial = 0;
 
 	private static Matrices mMatrices;
+	private static boolean mFaded;
 
 	private static final Matrix4 mProjMatrix = new Matrix4();
 
-	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m) {
+	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m, boolean fade) {
 		mDrawCnt = 0;
 		mMatrices = m;
+		mFaded = fade;
 
 		mProjMatrix.copy(m.viewproj);
 		// discard z projection from tilt
@@ -76,7 +78,7 @@ public class TileRenderer {
 				drawTile(t, pos);
 		}
 
-		 double scale = pos.getZoomScale();
+		double scale = pos.getZoomScale();
 
 		// Draw parent or children as proxy for visibile tiles that dont
 		// have data yet. Proxies are clipped to the region where nothing
@@ -84,7 +86,7 @@ public class TileRenderer {
 		// TODO draw proxies for placeholder
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
-			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null)){
+			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null)) {
 				boolean preferParent = (scale > 1.5) || (pos.zoomLevel - t.zoomLevel < 0);
 				drawProxyTile(t, pos, true, preferParent);
 			}
@@ -107,7 +109,6 @@ public class TileRenderer {
 		// dont keep the ref...
 		mMatrices = null;
 	}
-
 
 	private static void drawTile(MapTile tile, MapPosition pos) {
 		// draw parents only once
@@ -139,7 +140,7 @@ public class TileRenderer {
 		float y = (float) ((tile.y - pos.y) * curScale);
 
 		Matrices m = mMatrices;
-		m.mvp.setTransScale(x, y, (float)(scale / GLRenderer.COORD_SCALE));
+		m.mvp.setTransScale(x, y, (float) (scale / GLRenderer.COORD_SCALE));
 
 		m.mvp.multiplyMM(mProjMatrix, m.mvp);
 
@@ -185,8 +186,10 @@ public class TileRenderer {
 		}
 
 		// clear clip-region and could also draw 'fade-effect'
-		//PolygonRenderer.drawOver(m, true, 0x22000000);
-		PolygonRenderer.drawOver(m, false, 0);
+		if (mFaded)
+			PolygonRenderer.drawOver(m, true, 0x22000000);
+		else
+			PolygonRenderer.drawOver(m, false, 0);
 	}
 
 	private static int drawProxyChild(MapTile tile, MapPosition pos) {
@@ -206,7 +209,8 @@ public class TileRenderer {
 	}
 
 	// just FIXME!
-	private static void drawProxyTile(MapTile tile, MapPosition pos, boolean parent, boolean preferParent) {
+	private static void drawProxyTile(MapTile tile, MapPosition pos, boolean parent,
+			boolean preferParent) {
 
 		QuadTree<MapTile> r = tile.rel;
 		MapTile proxy;
