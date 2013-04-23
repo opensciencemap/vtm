@@ -123,20 +123,24 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 			if (o instanceof InputLayer)
 				numInputLayers++;
 
-			mLayers[n - i - 1] = o;
+			mLayers[i] = o;
 		}
 
 		mDrawLayers = new RenderOverlay[numRenderLayers];
 		mInputLayer = new InputLayer[numInputLayers];
 
-		for (int i = 0, cntR = 0, cntI = 0, n = mLayerList.size(); i < n; i++) {
+		for (int i = 0, cntR = 0, cntI = 1, n = mLayerList.size(); i < n; i++) {
 			Layer o = mLayerList.get(i);
 			RenderOverlay l = o.getLayer();
 			if (l != null)
 				mDrawLayers[cntR++] = l;
 
-			if (o instanceof InputLayer)
-				mInputLayer[cntI++] = (InputLayer)o;
+			if (o instanceof InputLayer) {
+				// sort from top to bottom, so that highest layers
+				// process event first.
+				mInputLayer[numInputLayers - cntI] = (InputLayer) o;
+				cntI++;
+			}
 		}
 
 		mDirtyLayers = false;
@@ -320,11 +324,10 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (Layer l : mLayers){
+		for (Layer l : mLayers) {
 			l.destroy();
 		}
 	}
-
 
 	// /**
 	// * Gets the optional TilesLayer class.
