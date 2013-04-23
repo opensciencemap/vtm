@@ -24,6 +24,7 @@ import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.Matrix4;
+import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
 
@@ -178,7 +179,9 @@ public class TileRenderer {
 		}
 
 		// clear clip-region and could also draw 'fade-effect'
-		//PolygonRenderer.drawOver(m, true, 0x22000000);
+		if (MapView.fadeBaseMap)
+		PolygonRenderer.drawOver(m, true, 0x22000000);
+		else
 		PolygonRenderer.drawOver(m, false, 0);
 	}
 

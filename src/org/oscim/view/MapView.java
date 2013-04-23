@@ -104,6 +104,10 @@ public class MapView extends RelativeLayout {
 	// FIXME: keep until old pbmap reader is removed
 	public static boolean enableClosePolygons = false;
 
+	// FIXME: only used by zoom lense,
+	// will be fixed in tile_layer branch
+	public static boolean fadeBaseMap;
+
 	public final float dpi;
 
 	/**
@@ -630,5 +634,9 @@ public class MapView extends RelativeLayout {
 	 */
 	public BoundingBox getBoundingBox() {
 		return mMapViewPosition.getViewBox();
+	}
+
+	public void fadeBaseMap(boolean fade){
+		fadeBaseMap = fade;
 	}
 }
