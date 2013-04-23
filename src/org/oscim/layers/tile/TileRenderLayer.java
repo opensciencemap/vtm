@@ -37,6 +37,12 @@ public class TileRenderLayer extends RenderOverlay {
 		mBoxCoords = new float[8];
 	}
 
+	boolean mFaded;
+
+	public void setFaded(boolean faded){
+		mFaded = faded;
+	}
+
 	@Override
 	public void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged,
 			Matrices matrices) {
@@ -81,7 +87,7 @@ public class TileRenderLayer extends RenderOverlay {
 
 		tilesChanged |= (uploadCnt > 0);
 
-		TileRenderer.draw(tiles, tileCnt, curPos, matrices);
+		TileRenderer.draw(tiles, tileCnt, curPos, matrices, mFaded);
 	}
 
 	@Override
