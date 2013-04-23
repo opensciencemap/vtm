@@ -44,11 +44,12 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 	private final static String TAG = MapTileLayer.class.getName();
 
 	public MapTileLayer(MapView mapView) {
-		super(mapView, new TileLoader.Factory<MapTileLoader>(){
-			@Override
-			public MapTileLoader create(JobQueue q, TileManager tm) {
-				return new MapTileLoader(q, tm);
-			}});
+		super(mapView);
+	}
+
+	@Override
+	protected MapTileLoader createLoader(JobQueue q, TileManager tm) {
+		return new MapTileLoader(q, tm);
 	}
 
 	private MapOptions mMapOptions;

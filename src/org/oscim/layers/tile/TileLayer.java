@@ -20,7 +20,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.layers.Layer;
 import org.oscim.view.MapView;
 
-public class TileLayer<T extends TileLoader> extends Layer {
+public abstract class TileLayer<T extends TileLoader> extends Layer {
 	//private final static String TAG = TileLayer.class.getName();
 
 	private boolean mClearMap = true;
@@ -32,7 +32,7 @@ public class TileLayer<T extends TileLoader> extends Layer {
 	protected final int mNumTileLoader = 4;
 	protected final ArrayList<T> mTileLoader;
 
-	public TileLayer(MapView mapView, TileLoader.Factory<T> factory) {
+	public TileLayer(MapView mapView) {
 		super(mapView);
 
 		// TileManager responsible for adding visible tiles
@@ -44,7 +44,7 @@ public class TileLayer<T extends TileLoader> extends Layer {
 		// Instantiate TileLoader threads
 		mTileLoader = new ArrayList<T>();
 		for (int i = 0; i < mNumTileLoader; i++) {
-			T tileGenerator = factory.create(mJobQueue, mTileManager);
+			T tileGenerator = createLoader(mJobQueue, mTileManager);
 			mTileLoader.add(tileGenerator);
 			tileGenerator.start();
 		}
@@ -53,6 +53,8 @@ public class TileLayer<T extends TileLoader> extends Layer {
 		// drawing loaded tiles to screen.
 		mLayer = new TileRenderLayer(mapView, mTileManager);
 	}
+
+	abstract protected T createLoader(JobQueue q, TileManager tm);
 
 	public TileRenderLayer getTileLayer() {
 		return (TileRenderLayer) mLayer;

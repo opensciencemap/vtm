@@ -30,12 +30,12 @@ public class TestTileLayer extends TileLayer<TestTileLoader> {
 	final static String TAG = TestTileLayer.class.getName();
 
 	public TestTileLayer(MapView mapView) {
-		// create an TileLayer instance using TestTileLoader as TileLoader
-		super(mapView, new TileLoader.Factory<TestTileLoader>(){
-			@Override
-			public TestTileLoader create(JobQueue q, TileManager tm) {
-				return new TestTileLoader(q, tm);
-			}});
+		super(mapView);
+	}
+
+	@Override
+	protected TestTileLoader createLoader(JobQueue q, TileManager tm) {
+		return new TestTileLoader(q, tm);
 	}
 
 	static class TestTileLoader extends TileLoader {
