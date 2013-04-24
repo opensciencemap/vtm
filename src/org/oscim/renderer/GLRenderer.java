@@ -243,8 +243,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				| GLES20.GL_DEPTH_BUFFER_BIT
 				| GLES20.GL_STENCIL_BUFFER_BIT);
 
-		boolean tilesChanged = true;
-		boolean positionChanged = true;
+		boolean tilesChanged = false;
+		boolean positionChanged = false;
 
 		// get current MapPosition, set mBoxCoords (mapping of screen to model
 		// coordinates)
@@ -253,7 +253,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		synchronized (mMapViewPosition) {
 			mMapViewPosition.updateAnimation();
 
-			positionChanged |= mMapViewPosition.getMapPosition(pos);
+			positionChanged = mMapViewPosition.getMapPosition(pos);
 
 			if (positionChanged)
 				mMapViewPosition.getMapViewProjection(mBoxCoords);

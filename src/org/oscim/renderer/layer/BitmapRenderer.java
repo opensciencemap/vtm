@@ -17,7 +17,6 @@ package org.oscim.renderer.layer;
 
 import static org.oscim.renderer.GLRenderer.COORD_SCALE;
 import static org.oscim.renderer.layer.TextureItem.TEXTURE_HEIGHT;
-import static org.oscim.renderer.layer.TextureItem.TEXTURE_WIDTH;
 
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -29,9 +28,9 @@ import android.opengl.GLES20;
 /**
  * @author Hannes Janetzek
  */
-public final class TextureRenderer {
-	//private final static String TAG = TextureRenderer.class.getName();
-	public final static boolean debug = false;
+public final class BitmapRenderer {
+	private final static String TAG = BitmapRenderer.class.getName();
+	public final static boolean debug = true;
 
 	private static int mTextureProgram;
 	private static int hTextureMVMatrix;
@@ -75,11 +74,13 @@ public final class TextureRenderer {
 		GLES20.glUniform1f(hTextureScreenScale, 1f / GLRenderer.screenWidth);
 
 		m.proj.setAsUniform(hTextureProjMatrix);
+
 		m.mvp.setAsUniform(hTextureMVMatrix);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, GLRenderer.mQuadIndicesID);
 
 		for (TextureItem ti = tl.textures; ti != null; ti = ti.next) {
+			//Log.d(TAG, "render texture " + ti.id);
 
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, ti.id);
 			int maxVertices = GLRenderer.maxQuads * INDICES_PER_SPRITE;
@@ -109,7 +110,8 @@ public final class TextureRenderer {
 		return layer.next;
 	}
 
-	private final static double TEX_COORD_DIV_X = 1.0 / (TEXTURE_WIDTH * COORD_SCALE);
+	//private final static double TEX_COORD_DIV_X = 1.0 / (TEXTURE_WIDTH * COORD_SCALE);
+	private final static double TEX_COORD_DIV_X = 1.0 / (TEXTURE_HEIGHT* COORD_SCALE);
 	private final static double TEX_COORD_DIV_Y = 1.0 / (TEXTURE_HEIGHT * COORD_SCALE);
 	private final static double COORD_DIV = 1.0 / GLRenderer.COORD_SCALE;
 
@@ -125,15 +127,7 @@ public final class TextureRenderer {
 			+ "const vec2 div = vec2(" + TEX_COORD_DIV_X + "," + TEX_COORD_DIV_Y + ");"
 			+ "const float coord_scale = " + COORD_DIV + ";"
 			+ "void main() {"
-			+ "  vec4 pos;"
-			+ "  vec2 dir = vertex.zw;"
-			+ " if (mod(vertex.x, 2.0) == 0.0){"
-			+ "       pos = u_proj * (u_mv * vec4(vertex.xy + dir * u_scale, 0.0, 1.0));"
-			+ "  } else {" // place as billboard
-			+ "    vec4 center = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-			+ "    pos = u_proj * (center + vec4(dir * (coord_scale * u_swidth), 0.0, 0.0));"
-			+ "  }"
-			+ "  gl_Position = pos;"
+			+ "  gl_Position = u_mv * vec4(vertex.xy, 0.0, 1.0);"
 			+ "  tex_c = tex_coord * div;"
 			+ "}";
 

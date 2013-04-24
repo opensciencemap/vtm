@@ -23,6 +23,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.database.MapOptions;
 import org.oscim.layers.Layer;
+import org.oscim.layers.tile.BitmapTileLayer;
 import org.oscim.layers.tile.MapTileLayer;
 import org.oscim.layers.tile.MapTileLoader;
 import org.oscim.overlay.BuildingOverlay;
@@ -150,6 +151,18 @@ public class MapView extends RelativeLayout {
 		mLayerManager.add(new LabelingOverlay(this, baseLayer.getTileLayer()));
 
 		return baseLayer;
+	}
+
+	public void setBackgroundMap(BitmapTileLayer tileLayer) {
+		mLayerManager.add(0, tileLayer);
+	}
+
+	public MapTileLayer setBaseMap(BitmapTileLayer tileLayer) {
+		mLayerManager.add(0, new MapEventLayer(this));
+		mLayerManager.add(1, tileLayer);
+
+		//mRotationEnabled = true;
+		return null;
 	}
 
 	void destroy() {

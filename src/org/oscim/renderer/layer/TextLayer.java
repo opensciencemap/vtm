@@ -17,8 +17,6 @@ package org.oscim.renderer.layer;
 import static org.oscim.renderer.GLRenderer.COORD_SCALE;
 import static org.oscim.renderer.layer.TextureItem.TEXTURE_HEIGHT;
 import static org.oscim.renderer.layer.TextureItem.TEXTURE_WIDTH;
-
-
 import android.graphics.Canvas;
 public final class TextLayer extends TextureLayer {
 
@@ -91,7 +89,7 @@ public final class TextLayer extends TextureLayer {
 		float y = 0;
 		float yy;
 
-		TextureItem to = TextureItem.pool.get();
+		TextureItem to = TextureItem.get(true);
 		textures = to;
 		mCanvas.setBitmap(to.bitmap);
 
@@ -113,7 +111,7 @@ public final class TextLayer extends TextureLayer {
 					to.vertices = (short) (numIndices - offsetIndices);
 					offsetIndices = numIndices;
 
-					to.next = TextureItem.pool.get();
+					to.next = TextureItem.get(true);
 					to = to.next;
 
 					mCanvas.setBitmap(to.bitmap);
@@ -266,7 +264,7 @@ public final class TextLayer extends TextureLayer {
 
 	@Override
 	protected void clear() {
-		TextureItem.pool.releaseAll(textures);
+		TextureItem.releaseAll(textures);
 		TextItem.pool.releaseAll(labels);
 		VertexItem.pool.releaseAll(vertexItems);
 		textures = null;

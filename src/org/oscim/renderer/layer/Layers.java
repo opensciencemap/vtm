@@ -28,6 +28,7 @@ public class Layers {
 		LineTexRenderer.init();
 		PolygonRenderer.init();
 		TextureRenderer.init();
+		BitmapRenderer.init();
 
 		TextureItem.init(10);
 	}

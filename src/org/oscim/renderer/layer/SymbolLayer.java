@@ -102,7 +102,7 @@ public final class SymbolLayer extends TextureLayer {
 		float x = 0;
 		float y = 0;
 
-		TextureItem to = TextureItem.pool.get();
+		TextureItem to = TextureItem.get(true);
 		textures = to;
 		mCanvas.setBitmap(to.bitmap);
 
@@ -138,7 +138,7 @@ public final class SymbolLayer extends TextureLayer {
 				offsetIndices = numIndices;
 				curIndices = 0;
 
-				to.next = TextureItem.pool.get();
+				to.next = TextureItem.get(true);
 				to = to.next;
 
 				mCanvas.setBitmap(to.bitmap);
@@ -247,7 +247,8 @@ public final class SymbolLayer extends TextureLayer {
 
 	@Override
 	protected void clear() {
-		TextureItem.pool.releaseAll(textures);
+		TextureItem.releaseAll(textures);
+
 		SymbolItem.pool.releaseAll(symbols);
 		VertexItem.pool.releaseAll(vertexItems);
 		textures = null;

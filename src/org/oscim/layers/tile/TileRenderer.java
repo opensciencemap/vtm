@@ -22,6 +22,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
+import org.oscim.renderer.layer.BitmapRenderer;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.LineRenderer;
 import org.oscim.renderer.layer.LineTexRenderer;
@@ -181,6 +182,17 @@ public class TileRenderer {
 
 				default:
 					// just in case
+					l = l.next;
+			}
+		}
+
+		for (Layer l = t.layers.textureLayers; l != null;) {
+			switch (l.type) {
+				case Layer.BITMAP:
+					l = BitmapRenderer.draw(l, 1, m);
+					break;
+
+				default:
 					l = l.next;
 			}
 		}

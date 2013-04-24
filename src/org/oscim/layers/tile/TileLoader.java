@@ -19,9 +19,6 @@ import org.oscim.utils.PausableThread;
 public abstract class TileLoader extends PausableThread {
 	private static int id;
 
-	public interface Factory<T extends TileLoader>{
-		T create(JobQueue jobQueue,	TileManager tileManager);
-	}
 
 	private final String THREAD_NAME;
 	private final JobQueue mJobQueue;

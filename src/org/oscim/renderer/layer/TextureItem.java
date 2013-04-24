@@ -16,6 +16,7 @@ package org.oscim.renderer.layer;
 
 import java.util.ArrayList;
 
+import org.oscim.utils.GlUtils;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
@@ -44,15 +45,30 @@ public class TextureItem extends Inlist<TextureItem> {
 	// temporary Bitmap
 	public Bitmap bitmap;
 
+	boolean ownBitmap;
+
 	TextureItem(int id) {
 		this.id = id;
 	}
 
-	public final static SyncPool<TextureItem> pool = new SyncPool<TextureItem>() {
+	public synchronized static void releaseAll(TextureItem ti) {
+		pool.releaseAll(ti);
+	}
+
+	public synchronized static TextureItem get(boolean initBitmap) {
+		TextureItem ti = pool.get();
+		if (initBitmap) {
+			ti.bitmap = getBitmap();
+			ti.bitmap.eraseColor(Color.TRANSPARENT);
+		}
+		return ti;
+	}
+
+	private final static SyncPool<TextureItem> pool = new SyncPool<TextureItem>(20) {
 
 		@Override
 		public void init(int num) {
-			this.pool = null;
+			super.init(num);
 
 			int[] textureIds = new int[num];
 			GLES20.glGenTextures(num, textureIds, 0);
@@ -60,20 +76,8 @@ public class TextureItem extends Inlist<TextureItem> {
 			for (int i = 1; i < num; i++) {
 				initTexture(textureIds[i]);
 				TextureItem to = new TextureItem(textureIds[i]);
-
-				to.next = this.pool;
-				this.pool = to;
+				pool = Inlist.push(pool, to);
 			}
-		}
-
-		@Override
-		public TextureItem get() {
-			TextureItem it = super.get();
-
-			it.bitmap = TextureItem.getBitmap();
-			it.bitmap.eraseColor(Color.TRANSPARENT);
-
-			return it;
 		}
 
 		@Override
@@ -83,10 +87,22 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		@Override
 		protected void clearItem(TextureItem it) {
-			TextureItem.releaseBitmap(it);
+			//Log.d(TAG, it.ownBitmap + " " + (it.bitmap == null));
+			if (it.ownBitmap)
+				return;
+
+			releaseBitmap(it);
+		}
+
+		@Override
+		protected void freeItem(TextureItem it) {
+			it.width = -1;
+			it.height = -1;
+			releaseTexture(it);
 		}
 	};
 
+	private static ArrayList<Integer> mFreeTextures = new ArrayList<Integer>();
 	private static ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
 
 	public final static int TEXTURE_WIDTH = 512;
@@ -94,6 +110,27 @@ public class TextureItem extends Inlist<TextureItem> {
 
 	private static int mBitmapFormat;
 	private static int mBitmapType;
+	private static int mTexCnt = 0;
+
+	static void releaseTexture(TextureItem it) {
+		synchronized (mFreeTextures) {
+			if (it.id >= 0) {
+				mFreeTextures.add(Integer.valueOf(it.id));
+				it.id = -1;
+			}
+		}
+	}
+
+	static void releaseBitmap(TextureItem it) {
+		synchronized (mBitmaps) {
+			if (it.bitmap != null) {
+				mBitmaps.add(it.bitmap);
+				it.bitmap = null;
+			}
+			it.ownBitmap = false;
+
+		}
+	}
 
 	/**
 	 * This function may only be used in GLRenderer Thread.
@@ -102,23 +139,32 @@ public class TextureItem extends Inlist<TextureItem> {
 	 */
 	public static void uploadTexture(TextureItem to) {
 
-		if (TextureRenderer.debug)
-			Log.d(TAG, "upload texture " + to.id);
+		// free unused textures, find a better place for this TODO
+		synchronized (mFreeTextures) {
+			int size = mFreeTextures.size();
+			int[] tmp = new int[size];
+			for (int i = 0; i < size; i++)
+				tmp[i] = mFreeTextures.get(i).intValue();
+			mFreeTextures.clear();
+			GLES20.glDeleteTextures(size, tmp, 0);
+		}
 
 		if (to.id < 0) {
+			mTexCnt++;
 			int[] textureIds = new int[1];
 			GLES20.glGenTextures(1, textureIds, 0);
 			to.id = textureIds[0];
 			initTexture(to.id);
-
 			if (TextureRenderer.debug)
-				Log.d(TAG, "new texture " + to.id);
+				Log.d(TAG, pool.getCount() + " " + pool.getFill()
+						+ " " + mTexCnt + " new texture " + to.id);
 		}
 
 		uploadTexture(to, to.bitmap, mBitmapFormat, mBitmapType,
 				TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
-		TextureItem.releaseBitmap(to);
+		if (!to.ownBitmap)
+			TextureItem.releaseBitmap(to);
 	}
 
 	public static void uploadTexture(TextureItem to, Bitmap bitmap,
@@ -129,13 +175,21 @@ public class TextureItem extends Inlist<TextureItem> {
 			return;
 		}
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
-		if (to.width == w && to.height == h)
+
+		if (to.ownBitmap) {
+			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+
+		} else if (to.width == w && to.height == h) {
 			GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, bitmap, format, type);
-		else {
+
+		} else {
 			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, format, bitmap, type, 0);
 			to.width = w;
 			to.height = h;
 		}
+
+		if (TextureRenderer.debug)
+			GlUtils.checkGlError(TAG);
 	}
 
 	static void initTexture(int id) {
@@ -166,6 +220,8 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		mBitmapFormat = GLUtils.getInternalFormat(mBitmaps.get(0));
 		mBitmapType = GLUtils.getType(mBitmaps.get(0));
+
+		mTexCnt = num;
 	}
 
 	static Bitmap getBitmap() {
@@ -184,16 +240,6 @@ public class TextureItem extends Inlist<TextureItem> {
 				return bitmap;
 			}
 			return mBitmaps.remove(size - 1);
-		}
-	}
-
-	static void releaseBitmap(TextureItem it) {
-		synchronized (mBitmaps) {
-
-			if (it.bitmap != null) {
-				mBitmaps.add(it.bitmap);
-				it.bitmap = null;
-			}
 		}
 	}
 }
