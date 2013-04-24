@@ -14,10 +14,6 @@
  */
 package org.oscim.database.test;
 
-import static org.oscim.core.MapElement.GEOM_LINE;
-import static org.oscim.core.MapElement.GEOM_POINT;
-import static org.oscim.core.MapElement.GEOM_POLY;
-
 import org.oscim.core.BoundingBox;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
@@ -99,7 +95,7 @@ public class MapDatabase implements IMapDatabase {
 		e.addPoint(x2, y2);
 		e.addPoint(x1, y2);
 
-		e.set(mTags, 0, GEOM_POLY);
+		e.set(mTags, 0);
 		mapDatabaseCallback.renderElement(e);
 
 		if (renderWays) {
@@ -120,7 +116,7 @@ public class MapDatabase implements IMapDatabase {
 			e.addPoint(size / 2, size / 2);
 			e.addPoint(size / 2, size / 2 + size);
 
-			e.set(mTagsWay, 0, GEOM_LINE);
+			e.set(mTagsWay, 0);
 			mapDatabaseCallback.renderElement(e);
 
 			e.clear();
@@ -137,7 +133,7 @@ public class MapDatabase implements IMapDatabase {
 			e.addPoint(10, 0);
 			e.addPoint(10, size);
 
-			e.set(mTagsWay, 1, GEOM_LINE);
+			e.set(mTagsWay, 1);
 			mapDatabaseCallback.renderElement(e);
 		}
 
@@ -152,7 +148,7 @@ public class MapDatabase implements IMapDatabase {
 						r + (float) Math.sin(d) * (r - 40));
 			}
 
-			e.set(mTagsBoundary, 1, GEOM_LINE);
+			e.set(mTagsBoundary, 1);
 			mapDatabaseCallback.renderElement(e);
 		}
 
@@ -162,7 +158,7 @@ public class MapDatabase implements IMapDatabase {
 			e.addPoint(size / 2, size / 2);
 
 			mTagsPlace[1] = new Tag("name", tile.toString());
-			e.set(mTagsPlace, 0, GEOM_POINT);
+			e.set(mTagsPlace, 0);
 			mapDatabaseCallback.renderElement(e);
 		}
 		return QueryResult.SUCCESS;

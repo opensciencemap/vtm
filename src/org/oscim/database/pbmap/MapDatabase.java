@@ -36,6 +36,7 @@ import java.util.Map;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -448,8 +449,8 @@ public class MapDatabase implements IMapDatabase {
 		// FIXME, remove all tiles from cache then remove this below
 		//if (layer == 0)
 		//	layer = 5;
-
-		mElement.set(tags, layer, polygon ? MapElement.GEOM_POLY : MapElement.GEOM_LINE);
+		mElement.type =  polygon ? GeometryType.POLY : GeometryType.LINE;
+		mElement.set(tags, layer);
 		mMapGenerator.renderElement(mElement);
 		return true;
 	}
@@ -528,7 +529,8 @@ public class MapDatabase implements IMapDatabase {
 
 
 		mElement.index[0] = (short)numNodes;
-		mElement.set(tags, layer, MapElement.GEOM_POINT);
+		mElement.type = GeometryType.POINT;
+		mElement.set(tags, layer);
 		mMapGenerator.renderElement(mElement);
 
 		return cnt;

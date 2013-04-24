@@ -74,9 +74,9 @@ public final class LineLayer extends Layer {
 	}
 
 	public void addLine(GeometryBuffer geom) {
-		if (geom.mode == 3)
+		if (geom.isPoly())
 			addLine(geom.points, geom.index, -1, true);
-		else if (geom.mode == 2)
+		else if (geom.isLine())
 			addLine(geom.points, geom.index, -1, false);
 	}
 

@@ -1,6 +1,20 @@
 package org.oscim.core;
 
 public class GeometryBuffer {
+	public enum GeometryType {
+
+		NONE(0),
+		POINT(1),
+		LINE(2),
+		POLY(3);
+
+		private GeometryType(int type) {
+			nativeInt = type;
+		}
+
+		public final int nativeInt;
+
+	}
 
 	// TODO
 	// -- check indexPos < Short.Max
@@ -11,7 +25,9 @@ public class GeometryBuffer {
 	public int indexPos;
 	public int pointPos;
 
-	public int mode;
+	//public int type;
+	// GEOM_*
+	public GeometryType type;
 
 	public GeometryBuffer(float[] points, short[] index) {
 		if (points == null)
@@ -21,14 +37,17 @@ public class GeometryBuffer {
 
 		this.points = points;
 		this.index = index;
-		mode = 0;
-		indexPos = 0;
-		pointPos = 0;
+		this.type = GeometryType.NONE;
+		this.indexPos = 0;
+		this.pointPos = 0;
 	}
 
 	public GeometryBuffer(int numPoints, int numIndices) {
 		this.points = new float[numPoints * 2];
 		this.index = new short[numIndices];
+		this.type = GeometryType.NONE;
+		this.indexPos = 0;
+		this.pointPos = 0;
 	}
 
 	// ---- API ----
@@ -36,7 +55,7 @@ public class GeometryBuffer {
 		index[0] = -1;
 		indexPos = 0;
 		pointPos = 0;
-		mode = 0;
+		type = GeometryType.NONE;
 	}
 
 	public void addPoint(float x, float y) {
@@ -48,6 +67,15 @@ public class GeometryBuffer {
 
 		index[indexPos] += 2;
 	}
+	public boolean isPoly(){
+		return type == GeometryType.POLY;
+	}
+	public boolean isLine(){
+		return type == GeometryType.LINE;
+	}
+	public boolean isPoint(){
+		return type == GeometryType.POINT;
+	}
 
 	public void setPoint(int pos, float x, float y) {
 		points[(pos << 1) + 0] = x;
@@ -56,12 +84,12 @@ public class GeometryBuffer {
 
 	public void startPoints() {
 		if (CHECK_STATE)
-			setOrCheckMode(1);
+			setOrCheckMode(GeometryType.POINT);
 	}
 
 	public void startLine() {
 		if (CHECK_STATE)
-			setOrCheckMode(2);
+			setOrCheckMode(GeometryType.LINE);
 
 		// start next
 		if ((index[0] >= 0) && (++indexPos >= index.length))
@@ -75,7 +103,7 @@ public class GeometryBuffer {
 
 	public void startPolygon() {
 		if (CHECK_STATE)
-			setOrCheckMode(3);
+			setOrCheckMode(GeometryType.POLY);
 
 		if ((indexPos + 4) >= index.length)
 			ensureIndexSize(indexPos + 4, true);
@@ -100,7 +128,7 @@ public class GeometryBuffer {
 
 	public void startHole() {
 		if (CHECK_STATE)
-			checkMode(3);
+			checkMode(GeometryType.POLY);
 
 		if ((indexPos + 3) >= index.length)
 			ensureIndexSize(indexPos, true);
@@ -114,8 +142,6 @@ public class GeometryBuffer {
 		// set new end marker
 		index[indexPos + 1] = -1;
 	}
-
-
 
 	// ---- internals ----
 	public float[] ensurePointSize(int size, boolean copy) {
@@ -143,19 +169,19 @@ public class GeometryBuffer {
 		return index;
 	}
 
-	private void setOrCheckMode(int m) {
-		if (mode == m)
+	private void setOrCheckMode(GeometryType m) {
+		if (type == m)
 			return;
 
-		if (mode != 0)
-			throw new IllegalArgumentException("GeometryBuffer not cleared " + m + "<>" + mode);
+		if (type != GeometryType.NONE)
+			throw new IllegalArgumentException("GeometryBuffer not cleared " + m + "<>" + type);
 
-		mode = m;
+		type = m;
 	}
 
-	private void checkMode(int m) {
-		if (mode != m)
-			throw new IllegalArgumentException("GeometryBuffer not cleared " + m + "<>" + mode);
+	private void checkMode(GeometryType m) {
+		if (type != m)
+			throw new IllegalArgumentException("GeometryBuffer not cleared " + m + "<>" + type);
 	}
 
 }
