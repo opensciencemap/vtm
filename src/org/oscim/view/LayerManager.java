@@ -37,6 +37,7 @@ import android.view.MotionEvent;
 public class LayerManager extends AbstractList<Layer> implements OnGestureListener,
 		OnDoubleTapListener {
 	private final static String TAG = LayerManager.class.getName();
+	private final static boolean debugInput = false;
 
 	private final GestureDetector mGestureDetector;
 
@@ -78,9 +79,16 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 
 	public boolean handleMotionEvent(MotionEvent e) {
 
-		if (mGestureDetector.onTouchEvent(e))
-			return true;
+		if (!mCancelGesture)
+			if (mGestureDetector.onTouchEvent(e))
+				return true;
 
+		if (mCancelGesture) {
+			int action = e.getAction();
+			if (action == MotionEvent.ACTION_CANCEL ||
+					action == MotionEvent.ACTION_UP)
+				mCancelGesture = false;
+		}
 		if (onTouchEvent(e))
 			return true;
 
@@ -117,13 +125,12 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		int numRenderLayers = 0;
 		int numInputLayers = 0;
 
-		Log.d(TAG, "update layers:");
+		//Log.d(TAG, "update layers:");
 
 		for (int i = 0, n = mLayerList.size(); i < n; i++) {
-
 			Layer o = mLayerList.get(i);
 
-			Log.d(TAG, "\t" + o.getClass().getName());
+			//Log.d(TAG, "\t" + o.getClass().getName());
 
 			if (o.getLayer() != null)
 				numRenderLayers++;
@@ -154,14 +161,29 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		mDirtyLayers = false;
 	}
 
+	private boolean mCancelGesture;
+
+	/**
+	 * Call this to not foward events to generic GestureDetector until
+	 * next ACTION_UP or ACTION_CANCEL event. - Use with care for the
+	 * case that an InputLayer recognized the start of its gesture and
+	 * does further processing in only onTouch callback.
+	 */
+	public void cancelGesture() {
+		mCancelGesture = true;
+	}
+
 	public boolean onTouchEvent(final MotionEvent event) {
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (InputLayer o : mInputLayer)
-			if (o.onTouchEvent(event))
+		for (InputLayer o : mInputLayer) {
+			if (o.onTouchEvent(event)) {
+				if (debugInput)
+					Log.d(TAG, "onTouch\t\t" + o.getClass());
 				return true;
-
+			}
+		}
 		return false;
 	}
 
@@ -217,10 +239,13 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (InputLayer o : mInputLayer)
-			if (o.onDoubleTap(e))
+		for (InputLayer o : mInputLayer) {
+			if (o.onDoubleTap(e)) {
+				if (debugInput)
+					Log.d(TAG, "onDoubleTap\t" + o.getClass());
 				return true;
-
+			}
+		}
 		return false;
 	}
 
@@ -229,10 +254,13 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (InputLayer o : mInputLayer)
-			if (o.onDoubleTapEvent(e))
+		for (InputLayer o : mInputLayer) {
+			if (o.onDoubleTapEvent(e)) {
+				if (debugInput)
+					Log.d(TAG, "onDoubleTapEvent\t" + o.getClass());
 				return true;
-
+			}
+		}
 		return false;
 	}
 
@@ -241,10 +269,13 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (InputLayer o : mInputLayer)
-			if (o.onSingleTapConfirmed(e))
+		for (InputLayer o : mInputLayer) {
+			if (o.onSingleTapConfirmed(e)) {
+				if (debugInput)
+					Log.d(TAG, "onSingleTapConfirmed\tt" + o.getClass());
 				return true;
-
+			}
+		}
 		return false;
 	}
 
@@ -255,10 +286,13 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (InputLayer o : mInputLayer)
-			if (o.onDown(pEvent))
+		for (InputLayer o : mInputLayer) {
+			if (o.onDown(pEvent)) {
+				if (debugInput)
+					Log.d(TAG, "onDown\t" + o.getClass());
 				return true;
-
+			}
+		}
 		return false;
 	}
 
@@ -268,10 +302,13 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (InputLayer o : mInputLayer)
-			if (o.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY))
+		for (InputLayer o : mInputLayer) {
+			if (o.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY)) {
+				if (debugInput)
+					Log.d(TAG, "onFling\t" + o.getClass());
 				return true;
-
+			}
+		}
 		return false;
 	}
 
@@ -291,10 +328,13 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (InputLayer o : mInputLayer)
-			if (o.onScroll(pEvent1, pEvent2, pDistanceX, pDistanceY))
+		for (InputLayer o : mInputLayer) {
+			if (o.onScroll(pEvent1, pEvent2, pDistanceX, pDistanceY)) {
+				if (debugInput)
+					Log.d(TAG, "onScroll\t" + o.getClass());
 				return true;
-
+			}
+		}
 		return false;
 	}
 
@@ -313,10 +353,13 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (InputLayer o : mInputLayer)
-			if (o.onSingleTapUp(pEvent))
+		for (InputLayer o : mInputLayer) {
+			if (o.onSingleTapUp(pEvent)) {
+				if (debugInput)
+					Log.d(TAG, "onSingleTapUp\t" + o.getClass());
 				return true;
-
+			}
+		}
 		return false;
 	}
 
