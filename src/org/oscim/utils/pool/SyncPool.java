@@ -21,26 +21,45 @@ public abstract class SyncPool<T extends Inlist<T>> {
 
 	protected T pool;
 
-	public SyncPool(){
+	public SyncPool() {
 		maxFill = 100;
+		fill = 0;
+		count = 0;
 	}
 
 	public SyncPool(int maxItemsInPool) {
 		maxFill = maxItemsInPool;
 		fill = 0;
+		count = 0;
+	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public int getFill() {
+		return fill;
 	}
 
 	/**
 	 * @param items number of initial items
 	 */
-	public void init(int items){
+	public void init(int items) {
+		count = items;
+		fill = items;
+	}
+
+	/**
+	 * @param item set initial state
+	 */
+	protected void clearItem(T item) {
 
 	}
 
 	/**
 	 * @param item release resources
 	 */
-	protected void clearItem(T item) {
+	protected void freeItem(T item) {
 
 	}
 
@@ -59,7 +78,8 @@ public abstract class SyncPool<T extends Inlist<T>> {
 				item.next = pool;
 				pool = item;
 			}
-		} else{
+		} else {
+			freeItem(item);
 			count--;
 		}
 	}
@@ -68,69 +88,36 @@ public abstract class SyncPool<T extends Inlist<T>> {
 		if (item == null)
 			return;
 
-		if (fill > maxFill)
-		while (item != null) {
-			clearItem(item);
+		if (fill > maxFill) {
+			while (item != null) {
+				clearItem(item);
+				freeItem(item);
+				count--;
 
-			item = item.next;
-			count--;
-		}
-
-		if (item == null)
+				item = item.next;
+			}
 			return;
+		}
 
 		synchronized (this) {
 			while (item != null) {
 				T next = item.next;
+
 				clearItem(item);
+				fill++;
 
 				item.next = pool;
 				pool = item;
-				fill++;
 
 				item = next;
 			}
 		}
 	}
 
-	// remove 'item' from 'list' and add back to pool
-	public T release(T list, T item) {
-		if (item == null)
-			return list;
-
-		T ret = list;
-
-		clearItem(item);
-
-		if (item == list) {
-			ret = item.next;
-		} else {
-			for (T prev = list, it = list.next; it != null; it = it.next) {
-				if (it == item) {
-					prev.next = it.next;
-				}
-				prev = it;
-			}
-		}
-
-		if (fill < maxFill) {
-			synchronized (this) {
-				fill++;
-
-				item.next = pool;
-				pool = item;
-			}
-		} else{
-			count--;
-		}
-
-		return ret;
-	}
-
 	public T get() {
 
 		synchronized (this) {
-			if (pool == null){
+			if (pool == null) {
 				count++;
 				return createItem();
 			}

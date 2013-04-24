@@ -33,7 +33,6 @@ import org.oscim.core.Tile;
 import org.oscim.graphics.Color;
 import org.oscim.graphics.Paint.Cap;
 import org.oscim.layers.tile.MapTile;
-import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileRenderLayer;
 import org.oscim.layers.tile.TileSet;
 import org.oscim.renderer.BufferObject;
@@ -61,7 +60,7 @@ import android.opengl.GLES20;
 import android.os.SystemClock;
 
 public class TextOverlay extends BasicOverlay {
-	//private final static String TAG = TextOverlay.class.getName();
+private final static String TAG = TextOverlay.class.getName();
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
 
@@ -179,7 +178,7 @@ public class TextOverlay extends BasicOverlay {
 			mRun = false;
 
 			if (updateLabels()) {
-				mMapView.redrawMap(true);
+				mMapView.render();
 			} else {
 				mRun = true;
 			}
@@ -695,14 +694,15 @@ public class TextOverlay extends BasicOverlay {
 
 			// set new TextLayer to be uploaded and rendered
 			layers.textureLayers = mNextLayer;
+			mNextLayer = null;
 
 			// make the 'labeled' MapPosition current
 			MapPosition tmp = mMapPosition;
 			mMapPosition = mTmpPos;
 			mTmpPos = tmp;
 
-			newData = true;
-			mNextLayer = null;
+			this.newData = true;
+
 			if (!(positionChanged || tilesChanged))
 				return;
 		}
