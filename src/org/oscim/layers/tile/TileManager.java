@@ -46,8 +46,9 @@ public class TileManager {
 	private static final int CACHE_TILES_MAX = 250;
 
 	static final String TAG = TileManager.class.getSimpleName();
-	private final static int MAX_ZOOMLEVEL = 17;
 	private final static int MIN_ZOOMLEVEL = 2;
+
+	private final int mMaxZoom;
 
 	// limit number tiles with new data not uploaded to GL
 	// TODO this should depend on the number of tiles displayed
@@ -116,10 +117,11 @@ public class TileManager {
 	private final float[] mBoxCoords = new float[8];
 	private final TileLayer<?> mTileLayer;
 
-	public TileManager(MapView mapView, TileLayer<?> tileLayer) {
+
+	public TileManager(MapView mapView, TileLayer<?> tileLayer, int maxZoom) {
 		mMapView = mapView;
 		mTileLayer = tileLayer;
-
+		mMaxZoom = maxZoom;
 		mMapViewPosition = mapView.getMapViewPosition();
 		mJobs = new ArrayList<MapTile>();
 		mTiles = new MapTile[CACHE_TILES_MAX];
@@ -202,7 +204,7 @@ public class TileManager {
 		// load some tiles more than currently visible (* 0.75)
 		double scale = pos.scale * 0.9f;
 
-		int tileZoom = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
+		int tileZoom = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, mMaxZoom);
 
 		mMapViewPosition.getMapViewProjection(mBoxCoords);
 

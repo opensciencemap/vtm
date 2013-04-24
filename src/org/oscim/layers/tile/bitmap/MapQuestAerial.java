@@ -23,7 +23,7 @@ public class MapQuestAerial extends AbstractTileSource {
 	public static final MapQuestAerial INSTANCE = new MapQuestAerial("otile1.mqcdn.com", 80);
 	private static final int PARALLEL_REQUESTS_LIMIT = 8;
 	private static final String PROTOCOL = "http";
-	private static final int ZOOM_LEVEL_MAX = 18;
+	private static final int ZOOM_LEVEL_MAX = 8;
 	private static final int ZOOM_LEVEL_MIN = 0;
 
 	public MapQuestAerial(String hostName, int port) {
