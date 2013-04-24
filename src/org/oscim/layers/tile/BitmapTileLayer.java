@@ -35,7 +35,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 	final TileSource mTileSource;
 
 	public BitmapTileLayer(MapView mapView, TileSource tileSource) {
-		super(mapView);
+		super(mapView, tileSource.getZoomLevelMax());
 		mTileSource = tileSource;
 	}
 
