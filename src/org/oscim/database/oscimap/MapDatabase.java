@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -418,16 +419,15 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		mElem.tags = tags;
-
 		switch (type) {
 			case TAG_TILE_LINE:
-				mElem.geometryType= MapElement.GEOM_LINE;
+				mElem.type= GeometryType.LINE;
 				break;
 			case TAG_TILE_POLY:
-				mElem.geometryType= MapElement.GEOM_POLY;
+				mElem.type= GeometryType.POLY;
 				break;
 			case TAG_TILE_POINT:
-				mElem.geometryType= MapElement.GEOM_POINT;
+				mElem.type= GeometryType.POINT;
 				break;
 		}
 

@@ -14,13 +14,11 @@
  */
 package org.oscim.layers.tile;
 
-import static org.oscim.core.MapElement.GEOM_LINE;
-import static org.oscim.core.MapElement.GEOM_POINT;
-import static org.oscim.core.MapElement.GEOM_POLY;
 import static org.oscim.layers.tile.MapTile.STATE_NONE;
 
 import java.util.Arrays;
 
+import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
@@ -131,12 +129,12 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 		m.addPoint(s, 0);
 		m.addPoint(0, 0);
 		m.tags = new Tag[] { new Tag("debug", "box") };
-		m.geometryType = GEOM_LINE;
+		m.type = GeometryType.LINE;
 
 		m = mDebugPoint = new MapElement();
 		m.startPoints();
 		m.addPoint(s >> 1, 10);
-		m.geometryType = GEOM_POINT;
+		m.type = GeometryType.POINT;
 	}
 
 	/* (non-Javadoc)
@@ -287,7 +285,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 
 		mElement = element;
 
-		if (element.geometryType == GEOM_POINT) {
+		if (element.type == GeometryType.POINT) {
 			// remove tags that should not be cached in Rendertheme
 			filterTags(element.tags);
 
@@ -304,7 +302,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 			if (!filterTags(element.tags))
 				return;
 
-			boolean closed = element.geometryType == GEOM_POLY;
+			boolean closed = element.type == GeometryType.POLY;
 
 			mDrawingLayer = getValidLayer(element.layer) * renderLevels;
 
@@ -398,7 +396,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 			}
 
 			lineLayer.addLine(mElement.points, mElement.index,
-					mElement.geometryType == GEOM_POLY);
+					mElement.type == GeometryType.POLY);
 
 			// keep reference for outline layer
 			mCurLineLayer = lineLayer;

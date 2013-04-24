@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -670,8 +671,8 @@ public class MapDatabase implements IMapDatabase {
 
 			mElem.startPoints();
 			mElem.addPoint(longitude, latitude);
-
-			mElem.set(curTags, layer, MapElement.GEOM_POINT);
+			mElem.type =  GeometryType.POINT;
+			mElem.set(curTags, layer);
 			mapDatabaseCallback.renderElement(mElem);
 
 //			mGeom.points[0] = longitude;
@@ -988,8 +989,8 @@ public class MapDatabase implements IMapDatabase {
 				projectToTile(mElem.points, mElem.index);
 				mElem.layer = layer;
 
-				mElem.geometryType = closed ? MapElement.GEOM_POLY : MapElement.GEOM_LINE;
-				mElem.tags = curTags;
+				mElem.type = closed ? GeometryType.POLY : GeometryType.LINE;
+				mElem.set(tags, layer);
 
 				mapDatabaseCallback.renderElement(mElem);
 			}

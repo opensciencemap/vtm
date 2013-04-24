@@ -14,12 +14,10 @@
  */
 package org.oscim.theme;
 
-import static org.oscim.core.MapElement.GEOM_LINE;
-import static org.oscim.core.MapElement.GEOM_POLY;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.rule.Closed;
@@ -175,9 +173,9 @@ public class RenderTheme implements IRenderTheme {
 		// the item matching tags and zoomlevel
 		RenderInstructionItem ri = null;
 
-		int type = element.geometryType;
+		int type = element.type.nativeInt;
 		if (type < 1 || type > 3) {
-			Log.d(TAG, "invalid geometry type for RenderTheme " + type);
+			Log.d(TAG, "invalid geometry type for RenderTheme " + element.type.name());
 			return null;
 		}
 
@@ -215,11 +213,11 @@ public class RenderTheme implements IRenderTheme {
 				List<RenderInstruction> matches = cache.instructionList;
 				matches.clear();
 
-				if (type == GEOM_LINE) {
+				if (element.type == GeometryType.LINE) {
 					for (int i = 0, n = mRules.length; i < n; i++)
 						mRules[i].matchWay(element.tags,
 								(byte) zoomLevel, Closed.NO, matches);
-				} else if (type == GEOM_POLY) {
+				} else if (element.type == GeometryType.POLY) {
 					for (int i = 0, n = mRules.length; i < n; i++)
 						mRules[i].matchWay(element.tags,
 								(byte) zoomLevel, Closed.YES, matches);

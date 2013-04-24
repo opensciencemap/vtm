@@ -23,17 +23,13 @@ package org.oscim.core;
  * dont keep a reference to it when passed as parameter.
  */
 public class MapElement extends GeometryBuffer {
-	public static final int GEOM_NONE = 0;
-	public static final int GEOM_POINT = 1;
-	public static final int GEOM_LINE = 2;
-	public static final int GEOM_POLY = 3;
+
 
 	// osm layer of the way.
 	public int layer;
 	// osm tags of the way.
 	public Tag[] tags;
-	// GEOM_*
-	public int geometryType;
+
 
 	// ---- random stuff, to be removed ----
 	// building tags
@@ -50,9 +46,8 @@ public class MapElement extends GeometryBuffer {
 		super(points, indices);
 	}
 
-	public void set(Tag[] tags, int layer, int type) {
+	public void set(Tag[] tags, int layer) {
 		this.layer = layer;
 		this.tags = tags;
-		this.geometryType = type;
 	}
 }
