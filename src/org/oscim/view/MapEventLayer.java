@@ -15,7 +15,7 @@
 package org.oscim.view;
 
 import org.oscim.core.Tile;
-import org.oscim.overlay.Overlay;
+import org.oscim.layers.InputLayer;
 
 import android.util.Log;
 import android.view.MotionEvent;
@@ -30,7 +30,7 @@ import android.view.MotionEvent;
  *        http://en.wikipedia.org/wiki/Viterbi_algorithm
  */
 
-public class MapEventLayer extends Overlay {
+public class MapEventLayer extends InputLayer {
 	private static final boolean debug = false;
 	private static final String TAG = MapEventLayer.class.getName();
 
