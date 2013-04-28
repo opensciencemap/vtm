@@ -17,6 +17,7 @@ package org.oscim.renderer.overlays;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.layer.Layer;
@@ -31,7 +32,7 @@ import org.oscim.view.MapView;
 import android.opengl.GLES20;
 
 // Base class to use the Layers drawing 'API'
-public abstract class BasicOverlay extends RenderOverlay {
+public abstract class BasicOverlay extends RenderLayer {
 
 	public final Layers layers;
 

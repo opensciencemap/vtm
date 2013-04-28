@@ -31,7 +31,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.renderer.layer.Layers;
-import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
@@ -266,20 +265,21 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			}
 		}
 
-		/* update overlays */
-		RenderOverlay[] overlays = mMapView.getOverlayManager().getRenderLayers();
+		/* update layers*/
+		RenderLayer[] overlays = mMapView.getOverlayManager().getRenderLayers();
 
 		for (int i = 0, n = overlays.length; i < n; i++)
 			overlays[i].update(mMapPosition, positionChanged, tilesChanged, mMatrices);
 
-		/* draw overlays */
+		/* draw layers */
 		for (int i = 0, n = overlays.length; i < n; i++) {
-			RenderOverlay renderLayer = overlays[i];
+			RenderLayer renderLayer = overlays[i];
 
 			if (renderLayer.newData) {
 				renderLayer.compile();
 				renderLayer.newData = false;
 			}
+
 			if (renderLayer.isReady)
 				renderLayer.render(mMapPosition, mMatrices);
 		}

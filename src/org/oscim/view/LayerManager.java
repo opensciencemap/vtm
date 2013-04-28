@@ -24,7 +24,7 @@ import org.oscim.core.PointF;
 import org.oscim.layers.InputLayer;
 import org.oscim.layers.Layer;
 import org.oscim.overlay.Overlay.Snappable;
-import org.oscim.renderer.overlays.RenderOverlay;
+import org.oscim.renderer.RenderLayer;
 
 import android.content.Context;
 import android.util.Log;
@@ -78,9 +78,9 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 	}
 
 	private boolean mDirtyLayers;
-	private RenderOverlay[] mDrawLayers;
+	private RenderLayer[] mDrawLayers;
 
-	public RenderOverlay[] getRenderLayers() {
+	public RenderLayer[] getRenderLayers() {
 		if (mDirtyLayers)
 			updateLayers();
 
@@ -123,12 +123,12 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 			mLayers[i] = o;
 		}
 
-		mDrawLayers = new RenderOverlay[numRenderLayers];
+		mDrawLayers = new RenderLayer[numRenderLayers];
 		mInputLayer = new InputLayer[numInputLayers];
 
 		for (int i = 0, cntR = 0, cntI = 1, n = mLayerList.size(); i < n; i++) {
 			Layer o = mLayerList.get(i);
-			RenderOverlay l = o.getLayer();
+			RenderLayer l = o.getLayer();
 			if (l != null)
 				mDrawLayers[cntR++] = l;
 
