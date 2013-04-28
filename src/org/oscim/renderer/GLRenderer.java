@@ -242,7 +242,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				| GLES20.GL_DEPTH_BUFFER_BIT
 				| GLES20.GL_STENCIL_BUFFER_BIT);
 
-		boolean tilesChanged = false;
 		boolean positionChanged = false;
 
 		// get current MapPosition, set mBoxCoords (mapping of screen to model
@@ -269,7 +268,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		RenderLayer[] overlays = mMapView.getLayerManager().getRenderLayers();
 
 		for (int i = 0, n = overlays.length; i < n; i++)
-			overlays[i].update(mMapPosition, positionChanged, tilesChanged, mMatrices);
+			overlays[i].update(mMapPosition, positionChanged, mMatrices);
 
 		/* draw layers */
 		for (int i = 0, n = overlays.length; i < n; i++) {

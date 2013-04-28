@@ -104,8 +104,7 @@ public class GridOverlay extends BasicOverlay {
 	private int mCurZ = -1;
 
 	@Override
-	public synchronized void update(MapPosition curPos, boolean positionChanged,
-			boolean tilesChanged, Matrices matrices) {
+	public synchronized void update(MapPosition curPos, boolean changed, Matrices m) {
 
 		int z = 1 << curPos.zoomLevel;
 		int x = (int) (curPos.x * z);

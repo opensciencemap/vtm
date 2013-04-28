@@ -678,7 +678,7 @@ private final static String TAG = TextOverlay.class.getName();
 
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
-			boolean tilesChanged, Matrices matrices) {
+			 Matrices matrices) {
 
 		if (mNextLayer != null) {
 			// keep text layer, not recrating its canvas each time
@@ -703,7 +703,7 @@ private final static String TAG = TextOverlay.class.getName();
 
 			this.newData = true;
 
-			if (!(positionChanged || tilesChanged))
+			if (!positionChanged)
 				return;
 		}
 

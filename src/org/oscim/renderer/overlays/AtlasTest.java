@@ -116,8 +116,7 @@ public class AtlasTest extends BasicOverlay {
 	boolean initial = true;
 
 	@Override
-	public void update(MapPosition pos, boolean positionChanged,
-			boolean tilesChanged, Matrices m) {
+	public void update(MapPosition pos, boolean changed, Matrices m) {
 
 		if (initial) {
 			mMapPosition.copy(pos);

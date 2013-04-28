@@ -122,7 +122,7 @@ public class TestOverlay extends BasicOverlay {
 
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
-			boolean tilesChanged, Matrices matrices) {
+			Matrices matrices) {
 		// keep position constant (or update layer relative to new position)
 		//mMapPosition.copy(curPos);
 

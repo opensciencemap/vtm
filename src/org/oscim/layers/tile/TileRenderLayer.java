@@ -20,8 +20,8 @@ import static org.oscim.layers.tile.MapTile.STATE_READY;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
-import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.GLRenderer.Matrices;
+import org.oscim.renderer.RenderLayer;
 import org.oscim.utils.ScanBox;
 import org.oscim.view.MapView;
 
@@ -44,11 +44,10 @@ public class TileRenderLayer extends RenderLayer {
 	}
 
 	@Override
-	public void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged,
-			Matrices matrices) {
+	public void update(MapPosition pos, boolean positionChanged, Matrices m) {
 		int serial = 0;
 
-		mMapPosition.copy(curPos);
+		mMapPosition.copy(pos);
 
 		if (mDrawTiles != null)
 			serial = mDrawTiles.getSerial();
@@ -85,9 +84,9 @@ public class TileRenderLayer extends RenderLayer {
 		/* prepare tile for rendering */
 		int uploadCnt = compileTileLayers(tiles, tileCnt);
 
-		tilesChanged |= (uploadCnt > 0);
+		//tilesChanged |= (uploadCnt > 0);
 
-		TileRenderer.draw(tiles, tileCnt, curPos, matrices, mFaded);
+		TileRenderer.draw(tiles, tileCnt, pos, m, mFaded);
 	}
 
 	@Override

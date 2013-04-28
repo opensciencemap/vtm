@@ -69,13 +69,20 @@ public class PathOverlay extends Layer {
 			mMapPoint = new PointD();
 			MAX_SCALE = (1 << MAX_ZOOM) * Tile.SIZE;
 		}
+		private final int mCurX = -1;
+		private final int mCurY = -1;
+		private final int mCurZ = -1;
 
 		// note: this is called from GL-Thread. so check your syncs!
 		// TODO use an Overlay-Thread to build up layers (like for Labeling)
 		@Override
-		public synchronized void update(MapPosition curPos,
-				boolean positionChanged,
-				boolean tilesChanged, Matrices matrices) {
+		public synchronized void update(MapPosition pos, boolean changed, Matrices m) {
+			int tz = 1 << pos.zoomLevel;
+			int tx = (int) (pos.x * tz);
+			int ty = (int) (pos.y * tz);
+
+			// update layers when map moved by at least one tile
+			boolean tilesChanged =  (tx != mCurX || ty != mCurY || tz != mCurZ);
 
 			if (!tilesChanged && !mUpdatePoints)
 				return;
@@ -122,13 +129,11 @@ public class PathOverlay extends Layer {
 			// Hack: reset verticesCnt to reuse layer
 			ll.verticesCnt = 0;
 
-			int x, y, prevX, prevY;
-
-			int z = curPos.zoomLevel;
+			int z = pos.zoomLevel;
 			float div = FastMath.pow(z - MAX_ZOOM);
 
-			int mx = (int) (curPos.x * (Tile.SIZE << z));
-			int my = (int) (curPos.y * (Tile.SIZE << z));
+			int mx = (int) (pos.x * (Tile.SIZE << z));
+			int my = (int) (pos.y * (Tile.SIZE << z));
 
 			int j = 0;
 
@@ -136,8 +141,8 @@ public class PathOverlay extends Layer {
 			int flip = 0;
 			int flipMax = Tile.SIZE << (z - 1);
 
-			x = (int)(mPreprojected[j++] * div) - mx;
-			y = (int)(mPreprojected[j++] * div) - my;
+			int x = (int)(mPreprojected[j++] * div) - mx;
+			int y = (int)(mPreprojected[j++] * div) - my;
 
 			if (x > flipMax) {
 				x -= (flipMax * 2);
@@ -151,8 +156,8 @@ public class PathOverlay extends Layer {
 
 			int i = addPoint(projected, 0, x, y);
 
-			prevX = x;
-			prevY = y;
+			int prevX = x;
+			int prevY = y;
 
 			for (; j < size; j += 2) {
 				x = (int)(mPreprojected[j + 0] * div) - mx;
@@ -206,7 +211,7 @@ public class PathOverlay extends Layer {
 				ll.addLine(projected, i, false);
 
 			// keep position to render relative to current state
-			mMapPosition.copy(curPos);
+			mMapPosition.copy(pos);
 
 			// items are placed relative to scale 1
 			mMapPosition.scale = 1 << z;
