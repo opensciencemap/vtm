@@ -12,15 +12,14 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.overlays;
+package org.oscim.renderer;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.view.MapView;
 
-public abstract class RenderOverlay {
+public abstract class RenderLayer {
 
 	protected final MapView mMapView;
 	// keep the Position for which the Overlay is rendered
@@ -32,7 +31,7 @@ public abstract class RenderOverlay {
 	// flag set by GLRenderer when data is compiled
 	public boolean isReady;
 
-	public RenderOverlay(MapView mapView) {
+	public RenderLayer(MapView mapView) {
 		mMapView = mapView;
 		mMapPosition = new MapPosition();
 	}

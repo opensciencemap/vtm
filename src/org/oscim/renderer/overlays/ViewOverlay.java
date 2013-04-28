@@ -15,10 +15,11 @@
 package org.oscim.renderer.overlays;
 
 import org.oscim.core.MapPosition;
+import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.view.MapView;
 
-public class ViewOverlay extends RenderOverlay {
+public class ViewOverlay extends RenderLayer {
 
 
 	public ViewOverlay(MapView mapView) {

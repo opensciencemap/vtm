@@ -20,13 +20,13 @@ import static org.oscim.layers.tile.MapTile.STATE_READY;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.overlays.RenderOverlay;
 import org.oscim.utils.ScanBox;
 import org.oscim.view.MapView;
 
 import android.util.Log;
-public class TileRenderLayer extends RenderOverlay {
+public class TileRenderLayer extends RenderLayer {
 	private final static String TAG = TileRenderLayer.class.getName();
 
 	private final float[] mBoxCoords;

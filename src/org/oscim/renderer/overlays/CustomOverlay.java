@@ -21,6 +21,7 @@ import java.nio.FloatBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
+import org.oscim.renderer.RenderLayer;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 
@@ -33,7 +34,7 @@ import android.opengl.GLES20;
  * https://github.com/dalinaum/opengl-es-book-samples/tree/master/Android
  * */
 
-public class CustomOverlay extends RenderOverlay {
+public class CustomOverlay extends RenderLayer {
 
 	private int mProgramObject;
 	private int hVertexPosition;
