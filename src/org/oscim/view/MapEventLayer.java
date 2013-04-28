@@ -253,6 +253,9 @@ public class MapEventLayer extends Overlay {
 		if (debug)
 			printState("onDoubleTap");
 
+		// avoid onLongPress
+		mMapView.getOverlayManager().cancelGesture();
+
 		return true;
 	}
 
@@ -291,7 +294,7 @@ public class MapEventLayer extends Overlay {
 		//	float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
 		//	mMapPosition.animateTo(vx * move, vy * move, 250);
 		//} else {
-		float s = (200 / mMapView.dpi);
+		float s = (200 / MapView.dpi);
 
 		mMapPosition.animateFling(
 				Math.round(velocityX * s),
