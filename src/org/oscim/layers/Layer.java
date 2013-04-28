@@ -15,7 +15,7 @@
 package org.oscim.layers;
 
 import org.oscim.core.MapPosition;
-import org.oscim.renderer.overlays.RenderOverlay;
+import org.oscim.renderer.RenderLayer;
 import org.oscim.view.MapView;
 
 public class Layer {
@@ -26,10 +26,10 @@ public class Layer {
 	private boolean mEnabled = true;
 	protected final MapView mMapView;
 
-	/** RenderOverlay used to draw this layer. To be implemented by sub-classes */
-	protected RenderOverlay mLayer;
+	/** RenderLayer used to draw this layer. To be implemented by sub-classes */
+	protected RenderLayer mLayer;
 
-	public RenderOverlay getLayer() {
+	public RenderLayer getLayer() {
 		return mLayer;
 	}
 
