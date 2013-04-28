@@ -77,24 +77,6 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		return mLayerList.set(pIndex, pElement);
 	}
 
-	public boolean handleMotionEvent(MotionEvent e) {
-
-		if (!mCancelGesture)
-			if (mGestureDetector.onTouchEvent(e))
-				return true;
-
-		if (mCancelGesture) {
-			int action = e.getAction();
-			if (action == MotionEvent.ACTION_CANCEL ||
-					action == MotionEvent.ACTION_UP)
-				mCancelGesture = false;
-		}
-		if (onTouchEvent(e))
-			return true;
-
-		return false;
-	}
-
 	private boolean mDirtyLayers;
 	private RenderOverlay[] mDrawLayers;
 
@@ -162,6 +144,28 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 	}
 
 	private boolean mCancelGesture;
+
+	public boolean handleMotionEvent(MotionEvent e) {
+		boolean handleGesture = true;
+
+		if (mCancelGesture) {
+			int action = e.getAction();
+			handleGesture = (action == MotionEvent.ACTION_CANCEL ||
+					action == MotionEvent.ACTION_UP);
+		}
+
+		if (handleGesture) {
+			if (mGestureDetector.onTouchEvent(e))
+				return true;
+
+			mCancelGesture = false;
+		}
+
+		if (onTouchEvent(e))
+			return true;
+
+		return false;
+	}
 
 	/**
 	 * Call this to not foward events to generic GestureDetector until
@@ -236,6 +240,7 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 
 	@Override
 	public boolean onDoubleTap(final MotionEvent e) {
+
 		if (mDirtyLayers)
 			updateLayers();
 
@@ -314,6 +319,9 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 
 	@Override
 	public void onLongPress(final MotionEvent pEvent) {
+		if (mCancelGesture)
+			return;
+
 		if (mDirtyLayers)
 			updateLayers();
 
