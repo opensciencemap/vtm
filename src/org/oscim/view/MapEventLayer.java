@@ -254,7 +254,7 @@ public class MapEventLayer extends InputLayer {
 			printState("onDoubleTap");
 
 		// avoid onLongPress
-		mMapView.getOverlayManager().cancelGesture();
+		mMapView.getLayerManager().cancelGesture();
 
 		return true;
 	}

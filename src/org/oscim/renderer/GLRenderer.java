@@ -266,7 +266,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 
 		/* update layers*/
-		RenderLayer[] overlays = mMapView.getOverlayManager().getRenderLayers();
+		RenderLayer[] overlays = mMapView.getLayerManager().getRenderLayers();
 
 		for (int i = 0, n = overlays.length; i < n; i++)
 			overlays[i].update(mMapPosition, positionChanged, tilesChanged, mMatrices);

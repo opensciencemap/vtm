@@ -320,10 +320,10 @@ public class MapView extends RelativeLayout {
 	 * @return ...
 	 */
 	public List<Layer> getOverlays() {
-		return this.getOverlayManager();
+		return this.getLayerManager();
 	}
 
-	public LayerManager getOverlayManager() {
+	public LayerManager getLayerManager() {
 		return mLayerManager;
 	}
 
