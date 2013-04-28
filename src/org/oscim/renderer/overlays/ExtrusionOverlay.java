@@ -21,13 +21,12 @@ import java.nio.ShortBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
-import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileRenderLayer;
 import org.oscim.layers.tile.TileSet;
 import org.oscim.renderer.GLRenderer;
-import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
+import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.layer.ExtrusionLayer;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
@@ -66,8 +65,7 @@ public class ExtrusionOverlay extends RenderLayer {
 	private int mTileCnt;
 
 	@Override
-	public void update(MapPosition curPos, boolean positionChanged,
-			boolean tilesChanged, Matrices matrices) {
+	public void update(MapPosition pos, boolean changed, Matrices matrices) {
 
 		mMapView.getMapViewPosition().getMapPosition(mMapPosition);
 
@@ -103,7 +101,7 @@ public class ExtrusionOverlay extends RenderLayer {
 
 		MapTile[] tiles = mTileSet.tiles;
 		// FIXME just release tiles in this case
-		if (mAlpha == 0 || curPos.zoomLevel < 16) {
+		if (mAlpha == 0 || pos.zoomLevel < 16) {
 			isReady = false;
 			return;
 		}
@@ -113,7 +111,7 @@ public class ExtrusionOverlay extends RenderLayer {
 			mTiles = new MapTile[mTileSet.cnt * 4];
 
 		ExtrusionLayer el;
-		if (curPos.zoomLevel >= 17) {
+		if (pos.zoomLevel >= 17) {
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				if (!tiles[i].isVisible)
 					continue;
@@ -139,7 +137,7 @@ public class ExtrusionOverlay extends RenderLayer {
 				if (el.compiled)
 					mTiles[ready++] = tiles[i];
 			}
-		} else if (curPos.zoomLevel == 16) {
+		} else if (pos.zoomLevel == 16) {
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				if (!tiles[i].isVisible)
 					continue;

@@ -38,33 +38,30 @@ public abstract class RenderLayer {
 
 	// /////////////// called from GLRender Thread ////////////////////////
 	/**
-	 * called 1. by GLRenderer. Set 'newData' true when 'compile()' should be
-	 * called
-	 * before next 'render()'
+	 * Called first by GLRenderer: Set 'newData' true when 'compile()' should be
+	 * called before next 'render()'
 	 *
 	 * @param curPos TODO
 	 * @param positionChanged
 	 *            true when MapPosition has changed
-	 * @param tilesChanged
-	 *            true when current tiles changed
 	 * @param matrices TODO
 	 */
-	public abstract void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged,
+	public abstract void update(MapPosition curPos, boolean positionChanged,
 			Matrices matrices);
 
 	/**
-	 * called 2. compile everything for drawing
+	 * 2: Compile everything for drawing
 	 * Set 'isReady' true when things are ready for 'render()'
 	 */
 	public abstract void compile();
 
 	/**
-	 * called 3. draw overlay
+	 * 3: Draw layer
 	 *
 	 * @param pos
-	 *            current MapPosition
+	 *            Current MapPosition
 	 * @param m
-	 *            current render matrices + matrix for temporary use
+	 *            Current render matrices + matrix for temporary use
 	 */
 	public abstract void render(MapPosition pos, Matrices m);
 

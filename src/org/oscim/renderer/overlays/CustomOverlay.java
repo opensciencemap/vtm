@@ -55,7 +55,7 @@ public class CustomOverlay extends RenderLayer {
 
 	// ---------- everything below runs in GLRender Thread ----------
 	@Override
-	public void update(MapPosition curPos, boolean positionChanged, boolean tilesChanged, Matrices matrices) {
+	public void update(MapPosition pos, boolean changed, Matrices matrices) {
 		if (!mInitialized) {
 			if (!init())
 				return;
@@ -66,7 +66,7 @@ public class CustomOverlay extends RenderLayer {
 			newData = true;
 
 			// fix current MapPosition
-			mMapPosition.copy(curPos);
+			mMapPosition.copy(pos);
 		}
 	}
 

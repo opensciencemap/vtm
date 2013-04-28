@@ -88,18 +88,16 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 		// note: this is called from GL-Thread. so check your syncs!
 		@Override
-		public synchronized void update(MapPosition curPos,
-				boolean positionChanged,
-				boolean tilesChanged, Matrices matrices) {
+		public synchronized void update(MapPosition pos, boolean changed, Matrices m) {
 
-			if (!positionChanged && !mUpdate)
+			if (!changed && !mUpdate)
 				return;
 
 			mUpdate = false;
 
-			double mx = curPos.x;
-			double my = curPos.y;
-			double scale = Tile.SIZE * curPos.scale;
+			double mx = pos.x;
+			double my = pos.y;
+			double scale = Tile.SIZE * pos.scale;
 
 			int changesInvisible = 0;
 			int changedVisible = 0;
@@ -146,7 +144,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 				// keep position for current state
 				// updateMapPosition();
-				mMapPosition.copy(curPos);
+				mMapPosition.copy(pos);
 
 				layers.clear();
 
