@@ -76,7 +76,8 @@ public class GridOverlay extends BasicOverlay {
 
 		for (int i = -2; i < 2; i++) {
 			for (int j = -2; j < 2; j++) {
-				TextItem ti = TextItem.pool.get().set(size * j + size / 2, size * i + size / 2,
+				TextItem ti = TextItem.pool.get();
+				ti.set(size * j + size / 2, size * i + size / 2,
 						(x + j) + " / " + (y + i) + " / " + z, mText);
 
 				// TextItem ti = new TextItem(size * j + size / 2, size * i +
@@ -93,8 +94,7 @@ public class GridOverlay extends BasicOverlay {
 		}
 
 		tl.prepare();
-
-		TextItem.pool.releaseAll(tl.labels);
+		tl.clearLabels();
 
 		layers.textureLayers = tl;
 	}
@@ -108,7 +108,6 @@ public class GridOverlay extends BasicOverlay {
 			boolean tilesChanged, Matrices matrices) {
 
 		int z = 1 << curPos.zoomLevel;
-
 		int x = (int) (curPos.x * z);
 		int y = (int) (curPos.y * z);
 
@@ -133,7 +132,7 @@ public class GridOverlay extends BasicOverlay {
 			ll.width = 1.5f;
 			ll.addLine(mPoints, mIndex, false);
 
-			addLabels(x, y, mCurZ);
+			addLabels(x, y, curPos.zoomLevel);
 			newData = true;
 		}
 	}
