@@ -686,6 +686,7 @@ public class MapViewPosition {
 
 		//float delta = (mDuration - millisLeft) / mDuration;
 		adv = (float) Math.sqrt(adv);
+		//adv = Interpolation.pow2Out.apply(adv);
 		float dx = mVelocityX * adv;
 		float dy = mVelocityY * adv;
 
@@ -705,10 +706,13 @@ public class MapViewPosition {
 	public synchronized void animateFling(int velocityX, int velocityY,
 			int minX, int maxX, int minY, int maxY) {
 
+		if (velocityX * velocityX + velocityY * velocityY < 3600)
+			return;
+
 		mScrollX = 0;
 		mScrollY = 0;
 
-		mDuration = 300;
+		mDuration = 500;
 
 		mVelocityX = velocityX * (mDuration / 1000);
 		mVelocityY = velocityY * (mDuration / 1000);
