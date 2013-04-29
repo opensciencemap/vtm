@@ -21,6 +21,7 @@ import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -65,6 +66,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static MapPosition mMapPosition;
 
 	private static ShortBuffer shortBuffer;
+	private static FloatBuffer floatBuffer;
+	private static int tmpBufferSize;
+
 	private static short[] mFillCoords;
 
 	// bytes currently loaded in VBOs
@@ -128,27 +132,51 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mUpdateColor = true;
 	}
 
+	/**
+	 * Only use on GL Thread!
+	 * Get a native ShortBuffer for temporary use.
+	 */
+	public static ShortBuffer getShortBuffer(int size) {
+		if (tmpBufferSize < size * 2)
+			growBuffer(size * 2);
+		else
+			shortBuffer.clear();
+
+		return shortBuffer;
+	}
+
+	/**
+	 * Only use on GL Thread!
+	 * Get a native FloatBuffer for temporary use.
+	 */
+	public static FloatBuffer getFloatBuffer(int size) {
+		if (tmpBufferSize < size * 4)
+			growBuffer(size * 4);
+		else
+			floatBuffer.clear();
+
+		return floatBuffer;
+	}
+
+	private static void growBuffer(int size) {
+		Log.d(TAG, "grow buffer " + size);
+		ByteBuffer buf = ByteBuffer
+				.allocateDirect(size)
+				.order(ByteOrder.nativeOrder());
+
+		floatBuffer = buf.asFloatBuffer();
+		shortBuffer = buf.asShortBuffer();
+		tmpBufferSize = size;
+	}
+
 	public static boolean uploadLayers(Layers layers, int newSize,
 			boolean addFill) {
-
-		GLES20.glBindBuffer(GL_ARRAY_BUFFER, layers.vbo.id);
 
 		// add fill coordinates
 		if (addFill)
 			newSize += 8;
 
-		ShortBuffer sbuf = shortBuffer;
-
-		if (sbuf.capacity() < newSize) {
-			shortBuffer = sbuf = ByteBuffer
-					.allocateDirect(newSize * SHORT_BYTES)
-					.order(ByteOrder.nativeOrder())
-					.asShortBuffer();
-		} else {
-			sbuf.clear();
-			// if (addFill)
-			// sbuf.position(8);
-		}
+		ShortBuffer sbuf = getShortBuffer(newSize);
 
 		if (addFill)
 			sbuf.put(mFillCoords, 0, 8);
@@ -165,6 +193,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			return false;
 		}
 		newSize *= SHORT_BYTES;
+
+		GLES20.glBindBuffer(GL_ARRAY_BUFFER, layers.vbo.id);
 
 		// reuse memory allocated for vbo when possible and allocated
 		// memory is less then four times the new data
@@ -222,8 +252,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 
-
-
 	private static void draw() {
 		long start = 0;
 
@@ -264,7 +292,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			}
 		}
 
-		/* update layers*/
+		/* update layers */
 		RenderLayer[] overlays = mMapView.getLayerManager().getRenderLayers();
 
 		for (int i = 0, n = overlays.length; i < n; i++)
@@ -332,9 +360,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 		mNewSurface = false;
 
-		ByteBuffer bbuf = ByteBuffer.allocateDirect(MB >> 2)
-				.order(ByteOrder.nativeOrder());
-		shortBuffer = bbuf.asShortBuffer();
+		// set initial temp buffer size
+		growBuffer(MB >> 2);
 
 		// upload quad indices used by Texture- and LineTexRenderer
 		int[] vboIds = new int[1];

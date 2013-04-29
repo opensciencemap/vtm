@@ -15,6 +15,8 @@
 
 package org.oscim.renderer;
 
+import java.nio.ByteBuffer;
+
 import android.opengl.GLES20;
 import android.util.Log;
 
@@ -31,6 +33,23 @@ public final class BufferObject {
 
 	BufferObject(int id) {
 		this.id = id;
+	}
+
+	public void uploadArrayBuffer(ByteBuffer buf, int newSize, int type){
+
+		GLES20.glBindBuffer(type, id);
+
+		// reuse memory allocated for vbo when possible and allocated
+		// memory is less then four times the new data
+		if (size > newSize && size < newSize * 4){
+			GLES20.glBufferSubData(type, 0, newSize, buf);
+		} else {
+			//mBufferMemoryUsage += newSize - layers.vbo.size;
+
+			size = newSize;
+
+			GLES20.glBufferData(type, size, buf, GLES20.GL_DYNAMIC_DRAW);
+		}
 	}
 
 	// ---------------------------- pool ----------------------------

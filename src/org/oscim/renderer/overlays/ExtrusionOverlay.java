@@ -14,10 +14,6 @@
  */
 package org.oscim.renderer.overlays;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
@@ -58,9 +54,9 @@ public class ExtrusionOverlay extends RenderLayer {
 	private boolean initialized = false;
 
 	// FIXME sum up size used while filling layer only up to:
-	public int mBufferSize = 65536;
+	//public int mBufferSize = 65536;
+
 	private TileSet mTileSet;
-	private ShortBuffer mShortBuffer;
 	private MapTile[] mTiles;
 	private int mTileCnt;
 
@@ -87,11 +83,6 @@ public class ExtrusionOverlay extends RenderLayer {
 				hVertexPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_pos");
 				hLightPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_light");
 			}
-
-			ByteBuffer buf = ByteBuffer.allocateDirect(mBufferSize)
-					.order(ByteOrder.nativeOrder());
-
-			mShortBuffer = buf.asShortBuffer();
 		}
 
 		int ready = 0;
@@ -121,16 +112,10 @@ public class ExtrusionOverlay extends RenderLayer {
 					continue;
 
 				if (!el.compiled) {
+					// FIXME check 'bytes'?
 					int verticesBytes = el.mNumVertices * 8 * 2;
-					if (verticesBytes > mBufferSize) {
-						mBufferSize = verticesBytes;
-						Log.d(TAG, "realloc extrusion buffer " + verticesBytes);
-						ByteBuffer buf = ByteBuffer.allocateDirect(verticesBytes)
-								.order(ByteOrder.nativeOrder());
 
-						mShortBuffer = buf.asShortBuffer();
-					}
-					el.compile(mShortBuffer);
+					el.compile(GLRenderer.getShortBuffer(verticesBytes));
 					GlUtils.checkGlError("...");
 				}
 
@@ -205,8 +190,8 @@ public class ExtrusionOverlay extends RenderLayer {
 				setMatrix(pos, m, tiles[i], 0);
 				m.mvp.setAsUniform(uExtMatrix);
 
-				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
-				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
+				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
+				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.vboVertices.id);
 
 				GLES20.glVertexAttribPointer(uExtVertexPosition, 3,
 						GLES20.GL_SHORT, false, 8, 0);
@@ -257,8 +242,8 @@ public class ExtrusionOverlay extends RenderLayer {
 			setMatrix(pos, m, t, d);
 			m.mvp.setAsUniform(uExtMatrix);
 
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
+			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.vboVertices.id);
 
 			GLES20.glVertexAttribPointer(uExtVertexPosition, 3,
 					GLES20.GL_SHORT, false, 8, 0);
@@ -283,8 +268,8 @@ public class ExtrusionOverlay extends RenderLayer {
 			setMatrix(pos, m, t, d);
 			m.mvp.setAsUniform(uExtMatrix);
 
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.mIndicesBufferID);
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.mVertexBufferID);
+			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.vboVertices.id);
 
 			GLES20.glVertexAttribPointer(uExtVertexPosition, 3,
 					GLES20.GL_SHORT, false, 8, 0);
