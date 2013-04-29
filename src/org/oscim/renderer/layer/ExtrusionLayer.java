@@ -37,9 +37,10 @@ import android.util.Log;
 public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
 	private static final float S = GLRenderer.COORD_SCALE;
-	private final VertexItem mVertices;
+	private VertexItem mVertices;
 	private VertexItem mCurVertices;
-	private final VertexItem mIndices[], mCurIndices[];
+	private VertexItem mIndices[];
+	private final VertexItem mCurIndices[];
 	private LineClipper mClipper;
 
 	// indices for:
@@ -48,10 +49,8 @@ public class ExtrusionLayer extends Layer {
 	public int mNumIndices = 0;
 	public int mNumVertices = 0;
 
-	public int mIndicesBufferID;
-	public int mVertexBufferID;
-	private BufferObject mIndiceBO;
-	private BufferObject mVertexBO;
+	public BufferObject vboIndices;
+	public BufferObject vboVertices;
 
 	//private final static int IND_EVEN_SIDE = 0;
 	//private final static int IND_ODD_SIDE = 1;
@@ -154,7 +153,7 @@ public class ExtrusionLayer extends Layer {
 
 			if (simpleOutline && (convex || len <= 8))
 				addRoofSimple(startVertex, len);
-			else if (!complexOutline)  {
+			else if (!complexOutline) {
 				complexOutline = true;
 				// keep start postion of polygon and defer roof building
 				// as it modifies the geometry array.
@@ -387,13 +386,12 @@ public class ExtrusionLayer extends Layer {
 		if (mNumVertices == 0 || compiled)
 			return;
 
-		mVertexBO = BufferObject.get(0);
-		mIndiceBO = BufferObject.get(0);
-		mIndicesBufferID = mIndiceBO.id;
-		mVertexBufferID = mVertexBO.id;
+		vboVertices = BufferObject.get(0);
+		vboIndices = BufferObject.get(0);
 
 		// upload indices
-		sbuf.clear();
+		//sbuf.clear();
+
 		mNumIndices = 0;
 		for (int i = 0; i < 4; i++) {
 			for (VertexItem vi = mIndices[i]; vi != null; vi = vi.next) {
@@ -404,10 +402,10 @@ public class ExtrusionLayer extends Layer {
 		}
 
 		sbuf.flip();
-		mIndiceBO.size = mNumIndices * 2;
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferID);
+		vboIndices.size = mNumIndices * 2;
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, vboIndices.id);
 		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
-				mIndiceBO.size, sbuf, GLES20.GL_DYNAMIC_DRAW);
+				vboIndices.size, sbuf, GLES20.GL_DYNAMIC_DRAW);
 
 		// upload vertices
 		sbuf.clear();
@@ -415,19 +413,21 @@ public class ExtrusionLayer extends Layer {
 			sbuf.put(vi.vertices, 0, vi.used);
 
 		sbuf.flip();
-		mVertexBO.size = mNumVertices * 4 * 2;
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferID);
+		vboVertices.size = mNumVertices * 4 * 2;
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vboVertices.id);
 		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,
-				mVertexBO.size, sbuf, GLES20.GL_DYNAMIC_DRAW);
+				vboVertices.size, sbuf, GLES20.GL_DYNAMIC_DRAW);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-		for (VertexItem i : mIndices)
-			VertexItem.pool.releaseAll(i);
+		for (int i = 0; i < 4; i++)
+			VertexItem.pool.releaseAll(mIndices[i]);
 
 		VertexItem.pool.releaseAll(mVertices);
 
+		mIndices = null;
+		mVertices = null;
 		mClipper = null;
 
 		compiled = true;
@@ -436,15 +436,17 @@ public class ExtrusionLayer extends Layer {
 	@Override
 	protected void clear() {
 		if (compiled) {
-			BufferObject.release(mIndiceBO);
-			BufferObject.release(mVertexBO);
-			mIndiceBO = null;
-			mVertexBO = null;
-			//GLES20.glDeleteBuffers(2, mVboIds, 0);
+			BufferObject.release(vboIndices);
+			BufferObject.release(vboVertices);
+			vboIndices = null;
+			vboVertices = null;
 		} else {
+			for (int i = 0; i < 4; i++)
+				VertexItem.pool.releaseAll(mIndices[i]);
+			mIndices = null;
+
 			VertexItem.pool.releaseAll(mVertices);
-			for (VertexItem i : mIndices)
-				VertexItem.pool.releaseAll(i);
+			mVertices = null;
 		}
 	}
 
@@ -501,7 +503,8 @@ public class ExtrusionLayer extends Layer {
 	 * @param ioffset offset used to add offset to indices
 	 * @return number of triangles in io buffer
 	 */
-	public static native int triangulate(float[] points, int pos, int len, int numRings, ShortBuffer io,
+	public static native int triangulate(float[] points, int pos, int len, int numRings,
+			ShortBuffer io,
 			int ioffset);
 
 	static {
