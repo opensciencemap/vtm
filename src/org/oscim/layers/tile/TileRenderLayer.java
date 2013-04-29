@@ -60,9 +60,6 @@ public class TileRenderLayer extends RenderLayer {
 		if (mDrawTiles == null || mDrawTiles.cnt == 0)
 			return;
 
-		if (positionChanged)
-			mMapView.getMapViewPosition().getMapViewProjection(mBoxCoords);
-
 		boolean changed = false;
 		//boolean positionChanged = false;
 
@@ -76,15 +73,16 @@ public class TileRenderLayer extends RenderLayer {
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
 
-		if (changed || positionChanged)
-			updateTileVisibility();
+		if (changed || positionChanged){
+			float[] box = mBoxCoords;
+			mMapView.getMapViewPosition().getMapViewProjection(box);
 
+			updateTileVisibility(box);
+		}
 		tileCnt += mNumTileHolder;
 
 		/* prepare tile for rendering */
-		int uploadCnt = compileTileLayers(tiles, tileCnt);
-
-		//tilesChanged |= (uploadCnt > 0);
+		compileTileLayers(tiles, tileCnt);
 
 		TileRenderer.draw(tiles, tileCnt, pos, m, mFaded);
 	}
@@ -179,7 +177,7 @@ public class TileRenderLayer extends RenderLayer {
 	private final Object tilelock = new Object();
 
 	/** set tile isVisible flag true for tiles that intersect view */
-	private void updateTileVisibility() {
+	private void updateTileVisibility(float[] box) {
 
 		// lock tiles while updating isVisible state
 		synchronized (tilelock) {
@@ -195,7 +193,7 @@ public class TileRenderLayer extends RenderLayer {
 			mNumTileHolder = 0;
 
 			// check visibile tiles
-			mScanBox.scan(pos.x, pos.y, pos.scale, tileZoom, mBoxCoords);
+			mScanBox.scan(pos.x, pos.y, pos.scale, tileZoom, box);
 		}
 	}
 
