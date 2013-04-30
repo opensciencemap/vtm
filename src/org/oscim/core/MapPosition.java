@@ -87,14 +87,19 @@ public class MapPosition {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("MapPosition [");
-		builder.append("lat=");
+		builder.append("[");
+		builder.append("X: ");
+		builder.append((long)(x * (1 << zoomLevel)));
+		builder.append(", Y: ");
+		builder.append((long)(y * (1 << zoomLevel)));
+		builder.append(", Z: ");
+		builder.append(zoomLevel);
+		builder.append("]");
+		builder.append("\tlat=");
 		builder.append(MercatorProjection.toLatitude(y));
 		builder.append(", lon=");
 		builder.append(MercatorProjection.toLongitude(x));
-		builder.append(", zoomLevel=");
-		builder.append(zoomLevel);
-		builder.append("]");
+
 		return builder.toString();
 	}
 }
