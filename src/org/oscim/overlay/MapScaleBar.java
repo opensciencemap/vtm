@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,12 +13,14 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view;
+package org.oscim.overlay;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.oscim.core.MapPosition;
+import org.oscim.layers.Layer;
+import org.oscim.view.MapView;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -29,7 +32,7 @@ import android.graphics.Typeface;
  * A MapScaleBar displays the ratio of a distance on the map to the
  * corresponding distance on the ground.
  */
-public class MapScaleBar {
+public class MapScaleBar extends Layer {
 	/**
 	 * Enumeration of all text fields.
 	 */
@@ -55,8 +58,8 @@ public class MapScaleBar {
 		MILE;
 	}
 
-	private static final int BITMAP_HEIGHT = 50;
-	private static final int BITMAP_WIDTH = 150;
+	private static final int BITMAP_HEIGHT = 32;
+	private static final int BITMAP_WIDTH = 128;
 	private static final double LATITUDE_REDRAW_THRESHOLD = 0.2;
 	private static final int MARGIN_BOTTOM = 5;
 	private static final int MARGIN_LEFT = 5;
@@ -102,10 +105,12 @@ public class MapScaleBar {
 	private boolean mShowMapScaleBar;
 	private final Map<TextField, String> mTextFields;
 
-	MapScaleBar(MapView mapView) {
+	public MapScaleBar(MapView mapView) {
+		super(mapView);
+
 		mMapView = mapView;
 		mMapScaleBitmap = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT,
-				Bitmap.Config.ARGB_4444);
+				Bitmap.Config.ARGB_8888);
 		mMapScaleCanvas = new Canvas(mMapScaleBitmap);
 		mTextFields = new HashMap<TextField, String>();
 		setDefaultTexts();
@@ -235,9 +240,6 @@ public class MapScaleBar {
 		mTextFields.put(TextField.KILOMETER, " km");
 	}
 
-	void destroy() {
-		mMapScaleBitmap.recycle();
-	}
 
 	void draw(Canvas canvas) {
 		int top = mMapView.getHeight() - BITMAP_HEIGHT - MARGIN_BOTTOM;
