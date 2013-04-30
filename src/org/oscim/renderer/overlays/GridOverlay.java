@@ -32,6 +32,8 @@ public class GridOverlay extends BasicOverlay {
 	private final float[] mPoints;
 	private final short[] mIndex;
 	private final Text mText;
+	private final TextLayer mTextLayer;
+	private final LineLayer mLineLayer;
 
 	public GridOverlay(MapView mapView) {
 		super(mapView);
@@ -67,12 +69,21 @@ public class GridOverlay extends BasicOverlay {
 		// mText = Text.createText(20, 3, Color.BLACK, Color.RED, false);
 		mText = Text.createText(22, 0, Color.RED, 0, false);
 		// mText = Text.createText(22, 0, Color.RED, 0, true);
+
+		mTextLayer = new TextLayer();
+		layers.textureLayers = mTextLayer;
+
+		LineLayer ll = layers.getLineLayer(0);
+		ll.line = new Line(Color.BLUE, 1.0f, Cap.BUTT);
+		ll.width = 1.5f;
+		mLineLayer = ll;
 	}
+
 
 	private void addLabels(int x, int y, int z) {
 		int size = Tile.SIZE;
 
-		TextLayer tl = new TextLayer();
+		TextLayer tl = mTextLayer;
 
 		for (int i = -2; i < 2; i++) {
 			for (int j = -2; j < 2; j++) {
@@ -95,8 +106,6 @@ public class GridOverlay extends BasicOverlay {
 
 		tl.prepare();
 		tl.clearLabels();
-
-		layers.textureLayers = tl;
 	}
 
 	private int mCurX = -1;
@@ -124,14 +133,15 @@ public class GridOverlay extends BasicOverlay {
 			mCurY = y;
 			mCurZ = z;
 
-			layers.clear();
-
-			LineLayer ll = layers.getLineLayer(0);
-			ll.line = new Line(Color.BLUE, 1.0f, Cap.BUTT);
-			ll.width = 1.5f;
-			ll.addLine(mPoints, mIndex, false);
+			mTextLayer.clear();
+			mLineLayer.clear();
 
 			addLabels(x, y, curPos.zoomLevel);
+
+			LineLayer ll = mLineLayer;
+			ll.verticesCnt = 0;
+			ll.addLine(mPoints, mIndex, false);
+
 			newData = true;
 		}
 	}
