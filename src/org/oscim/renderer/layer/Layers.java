@@ -35,7 +35,9 @@ public class Layers {
 
 	// mixed Polygon- and LineLayer
 	public Layer baseLayers;
+	// Text- and SymbolLayer
 	public Layer textureLayers;
+	//
 	public Layer extrusionLayers;
 
 	// VBO holds all vertex data to draw lines and polygons
@@ -60,19 +62,31 @@ public class Layers {
 
 	private Layer mCurLayer;
 
+	/**
+	 * Get or add the LineLayer for a level. Levels are ordered from
+	 * bottom (0) to top
+	 */
+
 	public LineLayer getLineLayer(int level) {
 		return (LineLayer) getLayer(level, Layer.LINE);
 	}
+	/**
+	 * Get or add the PolygonLayer for a level. Levels are ordered from
+	 * bottom (0) to top
+	 */
 
 	public PolygonLayer getPolygonLayer(int level) {
 		return (PolygonLayer) getLayer(level, Layer.POLYGON);
 	}
+	/**
+	 * Get or add the TexLineLayer for a level. Levels are ordered from
+	 * bottom (0) to top
+	 */
 
 	public LineTexLayer getLineTexLayer(int level) {
 		return (LineTexLayer) getLayer(level, Layer.TEXLINE);
 	}
 
-	// get or add the Line- or PolygonLayer for a level.
 	private Layer getLayer(int level, byte type) {
 		Layer l = baseLayers;
 		Layer layer = null;
@@ -175,16 +189,12 @@ public class Layers {
 		texLineOffset = size * SHORT_BYTES;
 		for (Layer l = baseLayers; l != null; l = l.next) {
 			if (l.type == Layer.TEXLINE) {
-				// HACK, see LineTexLayer
-				//sbuf.position(sbuf.position() + 6);
 				addPoolItems(l, sbuf);
-				//l.offset -= 12;
-
+				// add additional vertex for interleaving,
+				// see TexLineLayer.
 				sbuf.position(sbuf.position() + 6);
 			}
 		}
-
-		//size += addLayerItems(sbuf, baseLayers, Layer.TEXLINE, 0);
 
 		for (Layer l = textureLayers; l != null; l = l.next) {
 			TextureLayer tl = (TextureLayer) l;
@@ -264,6 +274,7 @@ public class Layers {
 				l.vertexItems = null;
 				l.curItem = null;
 			}
+			l.verticesCnt = 0;
 			l = l.next;
 		}
 
