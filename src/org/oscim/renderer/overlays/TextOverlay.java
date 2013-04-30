@@ -60,7 +60,7 @@ import android.opengl.GLES20;
 import android.os.SystemClock;
 
 public class TextOverlay extends BasicOverlay {
-private final static String TAG = TextOverlay.class.getName();
+	private final static String TAG = TextOverlay.class.getName();
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
 
@@ -158,7 +158,6 @@ private final static String TAG = TextOverlay.class.getName();
 		}
 	}
 
-
 	//	class ActiveTile {
 	//		MapTile tile;
 	//		int activeLabels;
@@ -217,7 +216,7 @@ private final static String TAG = TextOverlay.class.getName();
 	// remove Label l from mLabels and return l.next
 	private Label removeLabel(Label l) {
 		Label ret = (Label) l.next;
-		mLabels = (Label)mPool.release(mLabels, l);
+		mLabels = (Label) mPool.release(mLabels, l);
 
 		return ret;
 	}
@@ -385,7 +384,6 @@ private final static String TAG = TextOverlay.class.getName();
 		float sin = (float) Math.sin(angle);
 
 		int maxx = Tile.SIZE << (zoom - 1);
-
 
 		if (dbg != null)
 			addDebugLayers(dbg);
@@ -557,12 +555,18 @@ private final static String TAG = TextOverlay.class.getName();
 						l.text.fontHeight + MIN_CAPTION_DIST);
 
 				boolean overlaps = false;
-				for (Label lp = mLabels; lp != null; lp = (Label) lp.next) {
 
+				for (Label lp = mLabels; lp != null;) {
 					if (l.bbox.overlaps(lp.bbox)) {
+						if (l.text.priority < lp.text.priority) {
+							lp = removeLabel(lp);
+							continue;
+						}
+
 						overlaps = true;
 						break;
 					}
+					lp = (Label) lp.next;
 				}
 				if (!overlaps) {
 					addLabel(l);
@@ -630,15 +634,15 @@ private final static String TAG = TextOverlay.class.getName();
 
 		} else {
 			if (ti.width > ti.length * scale) {
-				ll =  dbg.getLineLayer(1);
+				ll = dbg.getLineLayer(1);
 				overlaps = 3;
 			}
 			else if (overlaps == 1)
-				ll =  dbg.getLineLayer(0);
+				ll = dbg.getLineLayer(0);
 			else if (overlaps == 2)
-				ll =  dbg.getLineLayer(3);
+				ll = dbg.getLineLayer(3);
 			else
-				ll =  dbg.getLineLayer(2);
+				ll = dbg.getLineLayer(2);
 		}
 		float[] points = mDebugPoints;
 		float width = (ti.x2 - ti.x1) / 2f;
@@ -656,29 +660,29 @@ private final static String TAG = TextOverlay.class.getName();
 
 	private static void addDebugLayers(Layers dbg) {
 		dbg.clear();
-		LineLayer ll =  dbg.getLineLayer(0);
+		LineLayer ll = dbg.getLineLayer(0);
 		ll.line = new Line((Color.BLUE & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll =  dbg.getLineLayer(3);
+		ll = dbg.getLineLayer(3);
 		ll.line = new Line((Color.YELLOW & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll =  dbg.getLineLayer(1);
+		ll = dbg.getLineLayer(1);
 		ll.line = new Line((Color.RED & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll =  dbg.getLineLayer(2);
+		ll = dbg.getLineLayer(2);
 		ll.line = new Line((Color.GREEN & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll =  dbg.getLineLayer(4);
+		ll = dbg.getLineLayer(4);
 		ll.line = new Line((Color.CYAN & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
-		ll =  dbg.getLineLayer(5);
+		ll = dbg.getLineLayer(5);
 		ll.line = new Line((Color.MAGENTA & 0xaaffffff), 1, Cap.BUTT);
 		ll.width = 2;
 	}
 
 	@Override
 	public synchronized void update(MapPosition curPos, boolean positionChanged,
-			 Matrices matrices) {
+			Matrices matrices) {
 
 		if (mNextLayer != null) {
 			// keep text layer, not recrating its canvas each time
