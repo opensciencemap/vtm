@@ -14,7 +14,6 @@
  */
 package org.oscim.layers.tile;
 
-import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.glStencilMask;
 import static org.oscim.layers.tile.MapTile.STATE_READY;
 
@@ -35,19 +34,18 @@ import android.opengl.GLES20;
 
 /**
  * This class is for rendering the Line- and PolygonLayers of visible MapTiles.
- * For
- * visible tiles that do not have data available yet its parent in children
+ * For visible tiles that do not have data available yet its parent in children
  * tiles are rendered when available.
  *
- * @author Hannes Janetzek
  */
 public class TileRenderer {
-	//private final static String TAG = TileRenderer.class.getName();
+	private final static String TAG = TileRenderer.class.getName();
 
-	// used to increase polygon-offset for each tile drawn.
-	private static int mDrawCnt;
+	// Counter increases polygon-offset for each tile drawn.
+	private static int mOffsetCnt;
 
-	// used to not draw a tile twice per frame.
+	// Current number of frames drawn, used to not draw a
+	// tile twice per frame.
 	private static int mDrawSerial = 0;
 
 	private static Matrices mMatrices;
@@ -56,7 +54,7 @@ public class TileRenderer {
 	private static final Matrix4 mProjMatrix = new Matrix4();
 
 	static void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m, boolean fade) {
-		mDrawCnt = 0;
+		mOffsetCnt = -2048;
 		mMatrices = m;
 		mFaded = fade;
 
@@ -64,8 +62,8 @@ public class TileRenderer {
 		// discard z projection from tilt
 		mProjMatrix.setValue(10, 0);
 		mProjMatrix.setValue(14, 0);
+
 		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
-		//GLES20.GL_STENCIL_BUFFER_BIT);
 
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 
@@ -107,7 +105,7 @@ public class TileRenderer {
 
 		mDrawSerial++;
 
-		// dont keep the ref...
+		// clear reference
 		mMatrices = null;
 	}
 
@@ -127,7 +125,7 @@ public class TileRenderer {
 			return;
 		}
 
-		GLES20.glBindBuffer(GL_ARRAY_BUFFER, t.layers.vbo.id);
+		t.layers.vbo.bindArrayBuffer();
 
 		// place tile relative to map position
 		int z = tile.zoomLevel;
@@ -146,11 +144,10 @@ public class TileRenderer {
 		m.mvp.multiplyMM(mProjMatrix, m.mvp);
 
 		// set depth offset (used for clipping to tile boundaries)
-		GLES20.glPolygonOffset(1, mDrawCnt++);
-		if (mDrawCnt == 100)
-			mDrawCnt = 0;
+		GLES20.glPolygonOffset(0, mOffsetCnt++);
 
-		// simple line shader does not take forward shortening into account
+		// simple line shader does not take forward shortening into
+		// account. only used when tilt is 0.
 		int simpleShader = (pos.tilt < 1 ? 1 : 0);
 
 		boolean clipped = false;
