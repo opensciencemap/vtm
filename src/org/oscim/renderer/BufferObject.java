@@ -52,6 +52,14 @@ public final class BufferObject {
 		}
 	}
 
+	public void bindArrayBuffer(){
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, id);
+	}
+
+	public void bindIndexBuffer(){
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, id);
+	}
+
 	// ---------------------------- pool ----------------------------
 	private static BufferObject pool;
 	static int counter = 0;
