@@ -263,7 +263,7 @@ public final class TextLayer extends TextureLayer {
 	}
 
 	@Override
-	protected void clear() {
+	public void clear() {
 		TextureItem.releaseAll(textures);
 		labels = null;
 

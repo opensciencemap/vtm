@@ -557,7 +557,13 @@ public final class LineLayer extends Layer {
 	}
 
 	@Override
-	protected void clear() {
+	public void clear() {
+		if (vertexItems != null) {
+			VertexItem.pool.releaseAll(vertexItems);
+			vertexItems = null;
+			curItem = null;
+		}
+		verticesCnt = 0;
 	}
 
 	@Override
