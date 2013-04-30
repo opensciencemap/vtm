@@ -251,32 +251,34 @@ public class MapViewPosition {
 	}
 
 	/**
-	 * ...
+	 * Get the minimal axis-aligned BoundingBox that encloses
+	 * the visible part of the map.
 	 *
 	 * @return BoundingBox containing view
 	 */
 	public synchronized BoundingBox getViewBox() {
 
 		float[] coords = mBBoxCoords;
-
+		// get depth at bottom and top
 		float t = getZ(1);
 		float t2 = getZ(-1);
 
+		// project screen corners onto map
 		unproject(1, -1, t, coords, 0);
 		unproject(-1, -1, t, coords, 2);
 		unproject(-1, 1, t2, coords, 4);
 		unproject(1, 1, t2, coords, 6);
 
-		double dx, dy;
 		double minX = Double.MAX_VALUE;
 		double minY = Double.MAX_VALUE;
-
 		double maxX = Double.MIN_VALUE;
 		double maxY = Double.MIN_VALUE;
 
+		// get axis-aligned bbox coordinates enclosing
+		// enclosing the map trapezoid
 		for (int i = 0; i < 8; i += 2) {
-			dx = mCurX - coords[i + 0];
-			dy = mCurY - coords[i + 1];
+			double dx = mCurX - coords[i + 0];
+			double dy = mCurY - coords[i + 1];
 
 			minX = Math.min(minX, dx);
 			maxX = Math.max(maxX, dx);
@@ -284,17 +286,15 @@ public class MapViewPosition {
 			maxY = Math.max(maxY, dy);
 		}
 
-		minX = MercatorProjection.toLongitude(minX / mCurScale);
-		maxX = MercatorProjection.toLongitude(maxX / mCurScale);
-		minY = MercatorProjection.toLatitude(minY / mCurScale);
-		maxY = MercatorProjection.toLatitude(maxY / mCurScale);
+		// scale map-pixel coordinates at current scale
+		// to absolute coordinates and apply mercator
+		// projection.
+		double minLon = MercatorProjection.toLongitude(minX / mCurScale);
+		double maxLon = MercatorProjection.toLongitude(maxX / mCurScale);
+		double minLat = MercatorProjection.toLatitude(maxY / mCurScale);
+		double maxLat = MercatorProjection.toLatitude(minY / mCurScale);
 
-		// yea, this is upside down..
-		BoundingBox bbox = new BoundingBox(maxY, minX, minY, maxX);
-
-		Log.d(TAG, "getScreenBoundingBox " + bbox);
-
-		return bbox;
+		return new BoundingBox(minLat, minLon, maxLat, maxLon);
 	}
 
 	/**
@@ -578,7 +578,7 @@ public class MapViewPosition {
 		mAbsY = MercatorProjection.latitudeToY(latitude);
 	}
 
-	 synchronized void setMapPosition(MapPosition mapPosition) {
+	synchronized void setMapPosition(MapPosition mapPosition) {
 		setZoomLevelLimit(mapPosition.zoomLevel);
 		mAbsX = mapPosition.x;
 		mAbsY = mapPosition.y;
@@ -607,7 +607,6 @@ public class MapViewPosition {
 	private double mStartScale;
 	private double mEndScale;
 	private float mStartRotation;
-
 
 	private float mDuration = 500;
 	private final static double LOG4 = Math.log(4);
@@ -767,7 +766,7 @@ public class MapViewPosition {
 			changed = true;
 		}
 
-		if (mAnimMove && mAnimScale){
+		if (mAnimMove && mAnimScale) {
 			mRotation = mStartRotation * (1 - adv);
 			updateMatrix();
 		}
