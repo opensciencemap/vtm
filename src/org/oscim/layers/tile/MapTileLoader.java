@@ -66,15 +66,15 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
 
-	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
-	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
+//	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
+//	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
 
 	// replacement for variable value tags that should not be matched by RenderTheme
 	// FIXME make this general, maybe subclass tags
 	private static final Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
 	private static final Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
 
-	private final MapElement mDebugWay, mDebugPoint;
+//	private final MapElement mDebugWay, mDebugPoint;
 
 	private static DebugSettings debug;
 
@@ -120,21 +120,21 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
 
-		MapElement m = mDebugWay = new MapElement();
-		m.startLine();
-		int s = Tile.SIZE;
-		m.addPoint(0, 0);
-		m.addPoint(0, s);
-		m.addPoint(s, s);
-		m.addPoint(s, 0);
-		m.addPoint(0, 0);
-		m.tags = new Tag[] { new Tag("debug", "box") };
-		m.type = GeometryType.LINE;
-
-		m = mDebugPoint = new MapElement();
-		m.startPoints();
-		m.addPoint(s >> 1, 10);
-		m.type = GeometryType.POINT;
+//		MapElement m = mDebugWay = new MapElement();
+//		m.startLine();
+//		int s = Tile.SIZE;
+//		m.addPoint(0, 0);
+//		m.addPoint(0, s);
+//		m.addPoint(s, s);
+//		m.addPoint(s, 0);
+//		m.addPoint(0, 0);
+//		m.tags = new Tag[] { new Tag("debug", "box") };
+//		m.type = GeometryType.LINE;
+//
+//		m = mDebugPoint = new MapElement();
+//		m.startPoints();
+//		m.addPoint(s >> 1, 10);
+//		m.type = GeometryType.POINT;
 	}
 
 	/* (non-Javadoc)
