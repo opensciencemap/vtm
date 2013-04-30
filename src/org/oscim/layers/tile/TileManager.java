@@ -77,7 +77,7 @@ public class TileManager {
 	private final ArrayList<MapTile> mJobs;
 
 	// counter to check whether current TileSet has changed
-	private  int mUpdateSerial;
+	private int mUpdateSerial;
 
 	// lock for TileSets while updating MapTile locks
 	private final Object mTilelock = new Object();
@@ -88,13 +88,12 @@ public class TileManager {
 	private TileSet mCurrentTiles;
 	/* package */TileSet mNewTiles;
 
-
-	private final QuadTreeIndex<MapTile> mIndex = new QuadTreeIndex<MapTile>(){
+	private final QuadTreeIndex<MapTile> mIndex = new QuadTreeIndex<MapTile>() {
 
 		@Override
 		public MapTile create(int x, int y, int z) {
 			QuadTree<MapTile> t = super.add(x, y, z);
-			t.item = new MapTile(x, y, (byte)z);
+			t.item = new MapTile(x, y, (byte) z);
 			t.item.rel = t;
 
 			return t.item;
@@ -116,7 +115,6 @@ public class TileManager {
 
 	private final float[] mBoxCoords = new float[8];
 	private final TileLayer<?> mTileLayer;
-
 
 	public TileManager(MapView mapView, TileLayer<?> tileLayer, int maxZoom) {
 		mMapView = mapView;
@@ -274,7 +272,6 @@ public class TileManager {
 			limitCache(pos, remove);
 	}
 
-
 	/**
 	 * Retrive a TileSet of current tiles.
 	 * Tiles remain locked in cache until the set is unlocked by either passing
@@ -426,60 +423,39 @@ public class TileManager {
 		mTilesCount--;
 	}
 
-	private static void updateTileDistances(Object[] tiles, int size, MapPosition mapPosition) {
+	private static void updateTileDistances(MapTile[] tiles, int size, MapPosition mapPosition) {
 		// TODO there is probably  a better quad-tree distance function
 
-		int zoom = mapPosition.zoomLevel;
-		double x = mapPosition.x;
-		double y = mapPosition.y;
-
-		// half tile size at current zoom-level
-		final double h = 1.0 / (2 << zoom);
-
-		//long center = (long)(h * (1 << zoom));
+		int zoom = 20;
+		long x = (long) (mapPosition.x * (1 << zoom));
+		long y = (long) (mapPosition.y * (1 << zoom));
 
 		for (int i = 0; i < size; i++) {
-			MapTile t = (MapTile) tiles[i];
+			MapTile t = tiles[i];
 			if (t == null)
 				continue;
 
-			int diff = (t.zoomLevel - zoom);
-			double dx, dy, scale;
+			int diff = (zoom - t.zoomLevel);
+			long dx, dy;
 
 			if (diff == 0) {
-				dx = (t.x + h) - x;
-				dy = (t.y + h) - y;
-				scale = 0.5f;
-			} else if (diff > 0) {
-				// tile zoom level is greater than current
-				// NB: distance increase by the factor 2
-				// with each zoom-level, so that children
-				// will be kept less likely than parent tiles.
-				double dh = 1.0 / (2 << t.zoomLevel);
-				dx = (t.x + dh) - x;
-				dy = (t.y + dh) - y;
-				// add tilesize/2 with each zoom-level
-				// so that children near the current
-				// map position but a few levels above
-				// will also be removed
-				//dz = diff * h;
-				scale = (1 << diff);
-			} else {
-				diff = -diff;
-				// tile zoom level is smaller than current
-				double dh = 1.0 / (2 << t.zoomLevel);
+				dx = t.tileX - x;
+				dy = t.tileY - y;
+			} else { // diff > 0
+				long mx = x >> diff;
+				long my = y >> diff;
 
-				dx = (t.x + dh) - x;
-				dy = (t.y + dh) - y;
-				scale = 0.5f * (1 << diff);
+				dx = t.tileX - mx;
+				dy = t.tileY - my;
 			}
-			if (dx < 0)
-				dx = -dx;
 
-			if (dy < 0)
-				dy = -dy;
+			int dz = (mapPosition.zoomLevel - t.zoomLevel);
+			if (dz == 0)
+				dz = 1;
+			else if (dz < -1)
+				dz *= 0.75;
 
-			t.distance = (float) ((dx + dy) * scale * 1024);
+			t.distance = (dx * dx + dy * dy) * (dz * dz);
 		}
 	}
 
@@ -518,23 +494,33 @@ public class TileManager {
 			// so end of mTiles is at mTilesCount now
 			size = mTilesSize = mTilesCount;
 
+			//Log.d(TAG, "remove:" + remove + "  new:" + newTileCnt);
+			//Log.d(TAG, "cur: " + mapPosition);
+
 			for (int i = size - 1; i >= 0 && remove > 0; i--) {
 				MapTile t = tiles[i];
 				if (t.isLocked()) {
 					// dont remove tile used by GLRenderer, or somewhere else
-					Log.d(TAG, "limitCache: tile still locked " + t + " " + t.distance);
+					Log.d(TAG, "limitCache: tile still locked " + t
+							+ " " + t.distance
+							+ " " + (t.state == STATE_NEW_DATA)
+							+ " " + (t.state == STATE_LOADING));
 					// try again in next run.
-					//locked = true;
-					//break;
 				} else if (t.state == STATE_LOADING) {
 					// NOTE:  when set loading to false the tile could be
 					// added to load queue again while still processed in
 					// MapTileLoader => need tile.cancel flag.
 					// t.isLoading = false;
-					Log.d(TAG, "limitCache: cancel loading " + t + " " + t.distance);
+					Log.d(TAG, "limitCache: cancel loading " + t
+							+ " " + t.distance);
 				} else {
-					if (t.state == STATE_NEW_DATA)
+					// clear unused tile
+
+					if (t.state == STATE_NEW_DATA){
+						//Log.d(TAG, "limitCache: clear unused " + t
+						//		+ " " + t.distance);
 						newTileCnt--;
+					}
 
 					remove--;
 					clearTile(t);
