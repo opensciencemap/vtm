@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile;
+package org.oscim.layers.tile.bitmap;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +20,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
-import org.oscim.layers.tile.bitmap.TileSource;
+import org.oscim.core.Tile;
+import org.oscim.layers.tile.JobQueue;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileLayer;
+import org.oscim.layers.tile.TileLoader;
+import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.layer.BitmapLayer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.view.MapView;
@@ -53,8 +58,8 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 					Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
 					tile.layers = new Layers();
-					BitmapLayer l = new BitmapLayer();
-					l.setBitmap(bitmap);
+					BitmapLayer l = new BitmapLayer(false);
+					l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE);
 
 					tile.layers.textureLayers = l;
 
@@ -62,6 +67,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 					e.printStackTrace();
 					return false;
 				}
+
 				return false;
 			}
 
