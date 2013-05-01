@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile;
+package org.oscim.layers.tile.vector;
 
 import static org.oscim.layers.tile.MapTile.STATE_NONE;
 
@@ -26,6 +26,10 @@ import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabase.QueryResult;
 import org.oscim.database.IMapDatabaseCallback;
+import org.oscim.layers.tile.JobQueue;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileLoader;
+import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.layer.ExtrusionLayer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineLayer;
