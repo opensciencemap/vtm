@@ -15,9 +15,6 @@
 
 package org.oscim.renderer.layer;
 
-import static org.oscim.renderer.GLRenderer.COORD_SCALE;
-import static org.oscim.renderer.layer.TextureItem.TEXTURE_HEIGHT;
-
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
@@ -110,10 +107,8 @@ public final class BitmapRenderer {
 		return layer.next;
 	}
 
-	//private final static double TEX_COORD_DIV_X = 1.0 / (TEXTURE_WIDTH * COORD_SCALE);
-	private final static double TEX_COORD_DIV_X = 1.0 / (TEXTURE_HEIGHT* COORD_SCALE);
-	private final static double TEX_COORD_DIV_Y = 1.0 / (TEXTURE_HEIGHT * COORD_SCALE);
-	private final static double COORD_DIV = 1.0 / GLRenderer.COORD_SCALE;
+	//private final static double TEX_COORD_DIV = 1.0 / (1024 * COORD_SCALE);
+	//private final static double COORD_DIV = 1.0 / GLRenderer.COORD_SCALE;
 
 	private final static String textVertexShader = ""
 			+ "precision mediump float; "
@@ -124,11 +119,11 @@ public final class BitmapRenderer {
 			+ "uniform float u_scale;"
 			+ "uniform float u_swidth;"
 			+ "varying vec2 tex_c;"
-			+ "const vec2 div = vec2(" + TEX_COORD_DIV_X + "," + TEX_COORD_DIV_Y + ");"
-			+ "const float coord_scale = " + COORD_DIV + ";"
+			//+ "const vec2 div = vec2(" + TEX_COORD_DIV + "," + TEX_COORD_DIV + ");"
+			//+ "const float coord_scale = " + COORD_DIV + ";"
 			+ "void main() {"
 			+ "  gl_Position = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-			+ "  tex_c = tex_coord * div;"
+			+ "  tex_c = tex_coord;" // * div;"
 			+ "}";
 
 	private final static String textFragmentShader = ""
