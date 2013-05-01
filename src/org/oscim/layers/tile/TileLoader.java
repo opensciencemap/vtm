@@ -33,11 +33,6 @@ public abstract class TileLoader extends PausableThread {
 
 	public abstract void cleanup();
 
-	/**
-	 * Load data for 'tile' and file tile.layers for rendering.
-	 * (executed on MapWorker threads)
-	 */
-
 	protected abstract boolean executeJob(MapTile tile);
 
 

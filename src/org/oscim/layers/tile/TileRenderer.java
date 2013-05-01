@@ -39,7 +39,7 @@ import android.opengl.GLES20;
  *
  */
 public class TileRenderer {
-	private final static String TAG = TileRenderer.class.getName();
+	//private final static String TAG = TileRenderer.class.getName();
 
 	// Counter increases polygon-offset for each tile drawn.
 	private static int mOffsetCnt;
