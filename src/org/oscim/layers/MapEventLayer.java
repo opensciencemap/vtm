@@ -12,10 +12,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view;
+package org.oscim.layers;
 
 import org.oscim.core.Tile;
-import org.oscim.layers.InputLayer;
+import org.oscim.view.MapView;
+import org.oscim.view.MapViewPosition;
 
 import android.util.Log;
 import android.view.MotionEvent;
