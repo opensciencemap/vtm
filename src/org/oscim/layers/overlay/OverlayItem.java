@@ -15,7 +15,7 @@
  */
 
 // Created by plusminus on 00:02:58 - 03.10.2008
-package org.oscim.overlay;
+package org.oscim.layers.overlay;
 
 import org.oscim.core.GeoPoint;
 

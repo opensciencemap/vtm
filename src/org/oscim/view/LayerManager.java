@@ -23,7 +23,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.PointF;
 import org.oscim.layers.InputLayer;
 import org.oscim.layers.Layer;
-import org.oscim.overlay.Overlay.Snappable;
+import org.oscim.layers.overlay.Overlay.Snappable;
 import org.oscim.renderer.RenderLayer;
 
 import android.content.Context;

@@ -14,7 +14,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.oscim.overlay;
+package org.oscim.layers.overlay;
 
 // TODO
 // - need to sort items back to front for rendering
@@ -25,7 +25,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.PointD;
 import org.oscim.core.Tile;
-import org.oscim.overlay.OverlayItem.HotspotPlace;
+import org.oscim.layers.overlay.OverlayItem.HotspotPlace;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layer.SymbolLayer;
 import org.oscim.renderer.overlays.BasicOverlay;
