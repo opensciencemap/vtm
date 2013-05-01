@@ -84,6 +84,27 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		// for temporary use by callee
 		public final Matrix4 mvp = new Matrix4();
+
+		/**
+		 * Set MVP so that coordinates are in screen pixel coordinates
+		 * with 0,0 being center
+		 */
+		public void useScreenCoordinates(boolean center, float scale) {
+			float ratio = (1f / (scale * screenWidth));
+
+			if (center)
+				mvp.setScale(ratio, ratio, ratio);
+			else
+				mvp.setTransScale(
+						(-screenWidth / 2) * ratio * scale,
+						(-screenHeight / 2) * ratio * scale,
+						ratio);
+			//
+			//				mvp.setTransScale(-screenWidth / ratio,
+			//						screenHeight / ratio, ratio);
+
+			mvp.multiplyMM(proj, mvp);
+		}
 	}
 
 	private static Matrices mMatrices;
