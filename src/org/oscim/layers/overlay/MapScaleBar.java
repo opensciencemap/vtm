@@ -71,6 +71,7 @@ public class MapScaleBar extends Layer {
 	private final Canvas mMapScaleCanvas;
 	private boolean mRedrawNeeded;
 	private double mPrevLatitude = -1;
+	private final double mPrevScale = -1;
 	private final Map<TextField, String> mTextFields;
 
 	/* private */final Bitmap mMapScaleBitmap;
@@ -125,15 +126,17 @@ public class MapScaleBar extends Layer {
 		};
 	}
 
-
 	@Override
 	public void onUpdate(MapPosition mapPosition, boolean changed) {
 		double latitude = MercatorProjection.toLatitude(mapPosition.y);
 
 		if (!mRedrawNeeded) {
-			double latitudeDiff = Math.abs(mPrevLatitude - latitude);
-			if (latitudeDiff < LATITUDE_REDRAW_THRESHOLD)
-				return;
+			double scaleDiff = mPrevScale / mapPosition.scale;
+			if (scaleDiff < 1.1 && scaleDiff > 0.9) {
+				double latitudeDiff = Math.abs(mPrevLatitude - latitude);
+				if (latitudeDiff < LATITUDE_REDRAW_THRESHOLD)
+					return;
+			}
 		}
 		mPrevLatitude = latitude;
 
@@ -165,7 +168,6 @@ public class MapScaleBar extends Layer {
 
 		mRedrawNeeded = false;
 	}
-
 
 	/**
 	 * @return true if imperial units are used, false otherwise.
