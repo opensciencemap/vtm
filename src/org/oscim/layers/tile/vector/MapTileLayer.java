@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile;
+package org.oscim.layers.tile.vector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,6 +29,9 @@ import org.oscim.database.MapDatabaseFactory;
 import org.oscim.database.MapDatabases;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
+import org.oscim.layers.tile.JobQueue;
+import org.oscim.layers.tile.TileLayer;
+import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.IRenderTheme;
