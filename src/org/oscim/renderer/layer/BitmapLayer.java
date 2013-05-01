@@ -16,70 +16,95 @@ package org.oscim.renderer.layer;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
 
 import android.graphics.Bitmap;
 
+/**
+ * Renderer for a single bitmap, width and height must be power of 2.
+ */
 public class BitmapLayer extends TextureLayer {
 	//	private final static String TAG = BitmapLayer.class.getName();
 	private Bitmap mBitmap;
-
-	public BitmapLayer() {
+	private final boolean mReuseBitmap;
+	private final short[] mVertices;
+	/**
+	 * @param reuseBitmap false if the Bitmap should be recycled after
+	 * it is compiled to texture.
+	 * */
+	public BitmapLayer(boolean reuseBitmap) {
 		type = Layer.BITMAP;
+		mReuseBitmap = reuseBitmap;
+		mVertices = new short[24];
+
+		textures = new TextureItem(-1);
+
+		// used for size calculation of Layers buffer.
+		verticesCnt = 4;
 	}
 
-	public void setBitmap(Bitmap bitmap) {
+	public void setBitmap(Bitmap bitmap, int w, int h) {
+		mWidth = w;
+		mHeight = h;
+
 		mBitmap = bitmap;
 
-		vertexItems = VertexItem.pool.get();
-		short[] buf = vertexItems.vertices;
-		short size = (short) (Tile.SIZE * GLRenderer.COORD_SCALE);
-		short center = (short) (size >> 1);
-		short m = (short) (-(size >> 1));
-		short p = center;
-		short t = (8 * 256);
-
-		int pos = 0;
-		// top-left
-		buf[pos++] = 0;
-		buf[pos++] = 0;
-		buf[pos++] = m;
-		buf[pos++] = m;
-		buf[pos++] = 0;
-		buf[pos++] = 0;
-		// bot-left
-		buf[pos++] = 0;
-		buf[pos++] = size;
-		buf[pos++] = m;
-		buf[pos++] = p;
-		buf[pos++] = 0;
-		buf[pos++] = t;
-		// top-right
-		buf[pos++] = size;
-		buf[pos++] = 0;
-		buf[pos++] = p;
-		buf[pos++] = m;
-		buf[pos++] = t;
-		buf[pos++] = 0;
-		// bot-right
-		buf[pos++] = size;
-		buf[pos++] = size;
-		buf[pos++] = p;
-		buf[pos++] = p;
-		buf[pos++] = t;
-		buf[pos++] = t;
-
-		vertexItems.used = 24;
-
-		TextureItem ti = this.textures = new TextureItem(-1);
+		TextureItem ti = this.textures;
 		ti.ownBitmap = true;
 		ti.width = mBitmap.getWidth();
 		ti.height = mBitmap.getHeight();
 		ti.bitmap = mBitmap;
 		ti.vertices = TextureRenderer.INDICES_PER_SPRITE;
+	}
 
-		verticesCnt = 4;
+	private int mWidth, mHeight;
+
+	/**
+	 * Set target dimension to renderthe bitmap */
+	public void setSize(int w, int h){
+		mWidth = w;
+		mHeight = h;
+	}
+
+	private void setVertices(ShortBuffer sbuf){
+		short[] buf = mVertices;
+		short w = (short) (mWidth * GLRenderer.COORD_SCALE);
+		short h = (short) (mHeight* GLRenderer.COORD_SCALE);
+
+		short t = 1;
+
+		int pos = 0;
+		// top-left
+		buf[pos++] = 0;
+		buf[pos++] = 0;
+		buf[pos++] = -1;
+		buf[pos++] = -1;
+		buf[pos++] = 0;
+		buf[pos++] = 0;
+		// bot-left
+		buf[pos++] = 0;
+		buf[pos++] = h;
+		buf[pos++] = -1;
+		buf[pos++] = -1;
+		buf[pos++] = 0;
+		buf[pos++] = t;
+		// top-right
+		buf[pos++] = w;
+		buf[pos++] = 0;
+		buf[pos++] = -1;
+		buf[pos++] = -1;
+		buf[pos++] = t;
+		buf[pos++] = 0;
+		// bot-right
+		buf[pos++] = w;
+		buf[pos++] = h;
+		buf[pos++] = -1;
+		buf[pos++] = -1;
+		buf[pos++] = t;
+		buf[pos++] = t;
+
+		this.offset = sbuf.position() * 2; // bytes
+		sbuf.put(buf);
 	}
 
 	@Override
@@ -89,21 +114,30 @@ public class BitmapLayer extends TextureLayer {
 
 	@Override
 	protected void compile(ShortBuffer sbuf) {
+
 		if (mBitmap == null)
 			return;
 
-		super.compile(sbuf);
+		setVertices(sbuf);
 
-		mBitmap.recycle();
-		mBitmap = null;
-		textures.bitmap = null;
+		//for (TextureItem to = textures; to != null; to = to.next)
+		TextureItem.uploadTexture(textures);
+
+
+		if (!mReuseBitmap) {
+			mBitmap.recycle();
+			mBitmap = null;
+			textures.bitmap = null;
+		}
 	}
 
 	@Override
 	protected void clear() {
 
 		if (mBitmap != null) {
-			mBitmap.recycle();
+			if (!mReuseBitmap)
+				mBitmap.recycle();
+
 			mBitmap = null;
 			textures.bitmap = null;
 		}
