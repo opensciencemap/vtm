@@ -17,9 +17,10 @@ package org.oscim.renderer.overlays;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
-import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
+import org.oscim.renderer.RenderLayer;
+import org.oscim.renderer.layer.BitmapRenderer;
 import org.oscim.renderer.layer.Layer;
 import org.oscim.renderer.layer.Layers;
 import org.oscim.renderer.layer.LineRenderer;
@@ -31,7 +32,9 @@ import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
 
-// Base class to use the Layers drawing 'API'
+/**
+ * Base class to use the renderer.layer.Layers drawing 'API'
+ */
 public abstract class BasicOverlay extends RenderLayer {
 
 	public final Layers layers;
@@ -83,7 +86,14 @@ public abstract class BasicOverlay extends RenderLayer {
 			float scale = (float) (pos.scale / curPos.scale);
 
 			for (Layer l = layers.textureLayers; l != null;) {
-				l = TextureRenderer.draw(l, scale, m);
+				switch (l.type) {
+					case Layer.BITMAP:
+						l = BitmapRenderer.draw(l, 1, m);
+						break;
+
+					default:
+						l = TextureRenderer.draw(l, scale, m);
+				}
 			}
 		}
 	}
