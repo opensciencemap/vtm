@@ -97,8 +97,10 @@ public class GeometryBuffer {
 
 		// initialize with zero points
 		index[indexPos] = 0;
+
 		// set new end marker
-		index[indexPos + 1] = -1;
+		if (index.length > indexPos + 1)
+			index[indexPos + 1] = -1;
 	}
 
 	public void startPolygon() {
@@ -122,8 +124,10 @@ public class GeometryBuffer {
 
 		// initialize with zero points
 		index[indexPos] = 0;
+
 		// set new end marker
-		index[indexPos + 1] = -1;
+		if (index.length > indexPos + 1)
+			index[indexPos + 1] = -1;
 	}
 
 	public void startHole() {
