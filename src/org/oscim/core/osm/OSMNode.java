@@ -14,11 +14,15 @@
  */
 package org.oscim.core.osm;
 
+import org.oscim.core.TagSet;
+
 public class OSMNode extends OSMElement {
+	//public static EMPTY_NODE = new OSMNode()
+
 	public final double lat;
 	public final double lon;
 
-	public OSMNode(double lat, double lon, TagGroup tags, long id) {
+	public OSMNode(double lat, double lon, TagSet tags, long id) {
 		super(tags, id);
 		this.lat = lat;
 		this.lon = lon;

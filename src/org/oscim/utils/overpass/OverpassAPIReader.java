@@ -15,8 +15,6 @@
 
 package org.oscim.utils.overpass;
 
-import static org.oscim.core.osm.TagGroup.EMPTY_TAG_GROUP;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -33,6 +31,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import org.oscim.core.Tag;
+import org.oscim.core.TagSet;
 import org.oscim.core.osm.Bound;
 import org.oscim.core.osm.OSMData;
 import org.oscim.core.osm.OSMElement;
@@ -40,7 +40,6 @@ import org.oscim.core.osm.OSMMember;
 import org.oscim.core.osm.OSMNode;
 import org.oscim.core.osm.OSMRelation;
 import org.oscim.core.osm.OSMWay;
-import org.oscim.core.osm.TagGroup;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -213,7 +212,7 @@ public class OverpassAPIReader  {
 
 		long id = 0;
 		double lat = 0, lon = 0;
-		TagGroup tags = EMPTY_TAG_GROUP;
+		TagSet tags = TagSet.EMPTY_TAG_SET;
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
 
@@ -243,7 +242,7 @@ public class OverpassAPIReader  {
 	private void parseWay(JsonParser jp) throws JsonParseException, IOException {
 
 		long id = 0;
-		TagGroup tags = EMPTY_TAG_GROUP;
+		TagSet tags = TagSet.EMPTY_TAG_SET;
 		ArrayList<OSMNode> wayNodes = new ArrayList<OSMNode>();
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
@@ -278,7 +277,7 @@ public class OverpassAPIReader  {
 			IOException {
 
 		long id = 0;
-		TagGroup tags = EMPTY_TAG_GROUP;
+		TagSet tags = TagSet.EMPTY_TAG_SET;
 		ArrayList<TmpRelation> members = new ArrayList<TmpRelation>();
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
@@ -318,25 +317,26 @@ public class OverpassAPIReader  {
 		relationMembersForRelation.put(relation, members);
 	}
 
-	private static TagGroup parseTags(JsonParser jp) throws JsonParseException,
+	private static TagSet parseTags(JsonParser jp) throws JsonParseException,
 			IOException {
 
-		Map<String, String> tagMap = null;
+		TagSet tags = null;
+
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
 			String key = jp.getCurrentName();
 			jp.nextToken();
 			String val = jp.getText();
-			if (tagMap == null)
-				tagMap = new HashMap<String, String>(10);
+			if (tags== null)
+				tags= new TagSet(4);
 
-			tagMap.put(key, val);
+			tags.add(new Tag(key, val, false));
 
 		}
-		if (tagMap == null)
-			return EMPTY_TAG_GROUP;
+		if (tags== null)
+			return TagSet.EMPTY_TAG_SET;
 
-		return new TagGroup(tagMap);
+		return tags;
 	}
 
 	private static void log(String msg) {

@@ -17,13 +17,15 @@ package org.oscim.core.osm;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.oscim.core.TagSet;
+
 public class OSMRelation extends OSMElement {
 
 	public final List<OSMMember> relationMembers;
 
 	// content added after constructor call
 
-	public OSMRelation(TagGroup tags, long id, int initialMemberSize) {
+	public OSMRelation(TagSet tags, long id, int initialMemberSize) {
 		super(tags, id);
 		this.relationMembers =
 				new ArrayList<OSMMember>(initialMemberSize);

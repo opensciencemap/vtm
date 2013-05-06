@@ -16,14 +16,14 @@ package org.oscim.core.osm;
 
 import java.util.List;
 
+import org.oscim.core.TagSet;
+
 public class OSMWay extends OSMElement {
 
 	public final List<OSMNode> nodes;
 
-	public OSMWay(TagGroup tags, long id, List<OSMNode> nodes) {
+	public OSMWay(TagSet tags, long id, List<OSMNode> nodes) {
 		super(tags, id);
-		for (OSMNode node : nodes)
-			assert node != null;
 		this.nodes = nodes;
 	}
 
