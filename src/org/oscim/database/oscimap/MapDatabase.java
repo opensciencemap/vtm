@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import org.oscim.core.BoundingBox;
@@ -505,12 +506,6 @@ public class MapDatabase implements IMapDatabase {
 
 		float[] coords = mElem.ensurePointSize(nodes, false);
 
-		//		if (nodes * 2 > coords.length) {
-		//			Log.d(TAG, mTile + " increase way coord buffer to " + (nodes * 2));
-		//			float[] tmp = new float[nodes * 2];
-		//			mTmpCoords = coords = tmp;
-		//		}
-
 		// read repeated sint32
 		while (pos < end) {
 			if (buf[pos] >= 0) {
@@ -564,6 +559,8 @@ public class MapDatabase implements IMapDatabase {
 		return cnt;
 	}
 
+	private final static int VARINT_LIMIT = 10;
+
 	private short[] decodeShortArray(int num, short[] array) throws IOException {
 		int bytes = decodeVarint32();
 
@@ -608,10 +605,10 @@ public class MapDatabase implements IMapDatabase {
 				pos += 4;
 				int i = 0;
 
-				while (buf[pos++] < 0 && i < 10)
+				while (buf[pos++] < 0 && i < VARINT_LIMIT)
 					i++;
 
-				if (i == 10)
+				if (i == VARINT_LIMIT)
 					throw new IOException("X malformed VarInt32 in " + mTile);
 
 			}
@@ -628,7 +625,7 @@ public class MapDatabase implements IMapDatabase {
 	private int decodeVarint32() throws IOException {
 		int pos = lwHttp.bufferPos;
 
-		if (pos + 10 > lwHttp.bufferFill) {
+		if (pos + VARINT_LIMIT > lwHttp.bufferFill) {
 			lwHttp.readBuffer(4096);
 			pos = lwHttp.bufferPos;
 		}
@@ -671,10 +668,10 @@ public class MapDatabase implements IMapDatabase {
 
 		// 'Discard upper 32 bits' - the original comment.
 		// havent found this in any document but the code provided by google.
-		while (buf[pos++] < 0 && read < 10)
+		while (buf[pos++] < 0 && read < VARINT_LIMIT)
 			read++;
 
-		if (read == 10)
+		if (read == VARINT_LIMIT)
 			throw new IOException("X malformed VarInt32 in " + mTile);
 
 		lwHttp.bufferPos += read;
@@ -683,11 +680,14 @@ public class MapDatabase implements IMapDatabase {
 		return result;
 	}
 
+	private final static Charset UTF8 = Charset.forName("UTF-8");
+	// TODO: use own String builder that reuses the char conversion array.
+
 	private String decodeString() throws IOException {
 		final int size = decodeVarint32();
 		lwHttp.readBuffer(size);
-		final String result = new String(lwHttp.buffer, lwHttp.bufferPos, size, "UTF-8");
 
+		final String result = new String(lwHttp.buffer, lwHttp.bufferPos, size, UTF8);
 		lwHttp.bufferPos += size;
 		mBytesProcessed += size;
 		return result;
