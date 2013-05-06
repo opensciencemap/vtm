@@ -42,6 +42,9 @@ public class Tag {
 	 */
 	public static final String TAG_KEY_ELE = "ele".intern();
 
+	public static final String TAG_KEY_AMENITY= "amenity".intern();
+
+
 	/**
 	 * The key of the elevation OpenStreetMap tag.
 	 */
@@ -93,15 +96,15 @@ public class Tag {
 	 * @param value
 	 *            the value of the tag.
 	 * @param intern
-	 *            true when string should be intern()alized.
+	 *            true when value string should be intern()alized.
 	 */
 	public Tag(String key, String value, boolean intern) {
+		this.key = key.intern();
+
 		if (intern) {
-			this.key = (key == null ? null : key.intern());
 			this.value = (value == null ? null : value.intern());
 		}
 		else {
-			this.key = key;
 			this.value = value;
 		}
 		this.intern = intern;
