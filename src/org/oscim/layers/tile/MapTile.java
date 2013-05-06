@@ -15,8 +15,9 @@
 package org.oscim.layers.tile;
 
 import org.oscim.core.Tile;
-import org.oscim.renderer.layer.Layers;
-import org.oscim.renderer.layer.TextItem;
+import org.oscim.renderer.BufferObject;
+import org.oscim.renderer.sublayers.Layers;
+import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.utils.quadtree.QuadTree;
 
 /**
@@ -185,4 +186,19 @@ public final class MapTile extends Tile {
 		state = STATE_LOADING;
 	}
 
+	void clear(){
+		if (layers != null) {
+			// TODO move this to layers clear
+			if (layers.vbo != null) {
+				BufferObject.release(layers.vbo);
+				layers.vbo = null;
+			}
+
+			layers.clear();
+			layers = null;
+		}
+
+		TextItem.pool.releaseAll(labels);
+
+	}
 }

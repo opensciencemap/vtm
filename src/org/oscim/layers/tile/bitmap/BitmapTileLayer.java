@@ -26,8 +26,8 @@ import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
-import org.oscim.renderer.layer.BitmapLayer;
-import org.oscim.renderer.layer.Layers;
+import org.oscim.renderer.sublayers.BitmapLayer;
+import org.oscim.renderer.sublayers.Layers;
 import org.oscim.view.MapView;
 
 import android.graphics.Bitmap;

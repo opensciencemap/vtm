@@ -21,10 +21,7 @@ import java.util.Map;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.layers.Layer;
-import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.BitmapLayer;
-import org.oscim.renderer.layer.BitmapRenderer;
-import org.oscim.renderer.overlays.BasicOverlay;
+import org.oscim.renderer.layers.BitmapRenderLayer;
 import org.oscim.view.MapView;
 
 import android.graphics.Bitmap;
@@ -74,8 +71,8 @@ public class MapScaleBar extends Layer {
 	private final double mPrevScale = -1;
 	private final Map<TextField, String> mTextFields;
 
-	/* private */final Bitmap mMapScaleBitmap;
-	/* private */boolean mUpdateBitmap;
+	private final Bitmap mMapScaleBitmap;
+	private final BitmapRenderLayer mBitmapLayer;
 
 	public MapScaleBar(MapView mapView) {
 		super(mapView);
@@ -91,39 +88,10 @@ public class MapScaleBar extends Layer {
 		configurePaints();
 
 		mRedrawNeeded = true;
-
-		mLayer = new BasicOverlay(mapView) {
-			private boolean initialized;
-
-			@Override
-			public void update(MapPosition pos, boolean changed, Matrices m) {
-				if (!initialized) {
-					BitmapLayer l = new BitmapLayer(true);
-					l.setBitmap(mMapScaleBitmap, BITMAP_WIDTH, BITMAP_HEIGHT);
-					layers.textureLayers = l;
-					newData = true;
-				}
-
-				if (mUpdateBitmap) {
-					newData = true;
-					mUpdateBitmap = false;
-				}
-			}
-
-			@Override
-			public void compile() {
-				synchronized (mMapScaleBitmap) {
-					super.compile();
-				}
-			}
-
-			@Override
-			public synchronized void render(MapPosition pos, Matrices m) {
-				// scale up 1.2
-				m.useScreenCoordinates(false, 8 / 1.2f);
-				BitmapRenderer.draw(layers.textureLayers, 1, m);
-			}
-		};
+		mLayer = mBitmapLayer = new BitmapRenderLayer(mapView);
+		mBitmapLayer.setBitmap(mMapScaleBitmap, 0, 0,
+				(int)(BITMAP_WIDTH * 1.2f),
+				(int)(BITMAP_HEIGHT * 1.2f));
 	}
 
 	@Override
@@ -163,8 +131,9 @@ public class MapScaleBar extends Layer {
 		}
 		synchronized (mMapScaleBitmap) {
 			redrawMapScaleBitmap(scaleBarLength, mapScaleValue);
-			mUpdateBitmap = true;
 		}
+
+		mBitmapLayer.updateBitmap();
 
 		mRedrawNeeded = false;
 	}

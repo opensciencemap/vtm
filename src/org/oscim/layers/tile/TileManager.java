@@ -24,9 +24,7 @@ import java.util.Arrays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
-import org.oscim.renderer.layer.TextItem;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.QuadTree;
@@ -154,7 +152,6 @@ public class TileManager {
 		// and VBOs might be lost
 		//	VertexPool.init();
 		//}
-
 		// clear cache index
 		//QuadTree.init();
 
@@ -402,18 +399,7 @@ public class TileManager {
 		if (t == null)
 			return;
 
-		if (t.layers != null) {
-			// TODO move this to layers clear
-			if (t.layers.vbo != null) {
-				BufferObject.release(t.layers.vbo);
-				t.layers.vbo = null;
-			}
-
-			t.layers.clear();
-			t.layers = null;
-		}
-
-		TextItem.pool.releaseAll(t.labels);
+		t.clear();
 
 		mIndex.remove(t);
 

@@ -24,8 +24,8 @@ import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.test.TestTileLayer.TestTileLoader;
-import org.oscim.renderer.layer.Layers;
-import org.oscim.renderer.layer.LineLayer;
+import org.oscim.renderer.sublayers.Layers;
+import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.view.MapView;
 

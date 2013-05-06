@@ -17,7 +17,7 @@ package org.oscim.layers.tile.vector;
 
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
-import org.oscim.renderer.layer.TextItem;
+import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.theme.renderinstruction.Text;
 import org.oscim.utils.GeometryUtils;
 import org.oscim.utils.LineClipper;

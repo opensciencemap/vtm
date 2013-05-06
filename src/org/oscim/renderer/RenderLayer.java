@@ -22,13 +22,17 @@ import org.oscim.view.MapView;
 public abstract class RenderLayer {
 
 	protected final MapView mMapView;
-	// keep the Position for which the Overlay is rendered
+	/**
+	 * Use mMapPosition.copy(position) to keep the position for which
+	 * the Overlay is _compiled_. NOTE: required by setMatrix utility
+	 * functions to draw this layer fixed to the map
+	 */
 	protected MapPosition mMapPosition;
 
-	// flag to set when data is ready for (re)compilation.
+	/** flag to set when data is ready for (re)compilation. */
 	public boolean newData;
 
-	// flag set by GLRenderer when data is compiled
+	/** flag to set when layer is ready for rendering */
 	public boolean isReady;
 
 	public RenderLayer(MapView mapView) {
@@ -36,54 +40,56 @@ public abstract class RenderLayer {
 		mMapPosition = new MapPosition();
 	}
 
-	// /////////////// called from GLRender Thread ////////////////////////
+	/** /////////////// called in GLRender Thread /////////////////////// **/
 	/**
-	 * Called first by GLRenderer: Set 'newData' true when 'compile()' should be
-	 * called before next 'render()'
+	 * 1. Called first by GLRenderer:
+	 * Update the layer state here. Set 'this.newData = true' when
+	 * 'compile()' should be called before next call to 'render()'
 	 *
-	 * @param curPos TODO
-	 * @param positionChanged
-	 *            true when MapPosition has changed
-	 * @param matrices TODO
+	 * @param position current MapPosition
+	 * @param changed
+	 *            true when MapPosition has changed since last frame
+	 * @param matrices contains the current view- and projection-matrices
+	 *            and 'mvp' matrix for temporary use.
 	 */
-	public abstract void update(MapPosition curPos, boolean positionChanged,
+	public abstract void update(MapPosition position, boolean changed,
 			Matrices matrices);
 
 	/**
-	 * 2: Compile everything for drawing
-	 * Set 'isReady' true when things are ready for 'render()'
+	 * 2. Compile vertex buffers and upload textures for drawing:
+	 * Set 'this.isReady = true' when things are ready for 'render()'
 	 */
 	public abstract void compile();
 
 	/**
-	 * 3: Draw layer
+	 * 3. Draw layer:
 	 *
-	 * @param pos
-	 *            Current MapPosition
-	 * @param m
-	 *            Current render matrices + matrix for temporary use
+	 * @param position current MapPosition
+	 * @param matrices contains the current view- and projection-matrices.
+	 *            'matrices.mvp' is for temporary use to build the model-
+	 *            view-projection to set as uniform.
 	 */
-	public abstract void render(MapPosition pos, Matrices m);
+	public abstract void render(MapPosition position, Matrices matrices);
 
 	/**
-	 * Utility: set m.mvp matrix relative to the difference of current
-	 * MapPosition
-	 * and the last updated Overlay MapPosition
+	 * Utility: Set matrices.mvp matrix relative to the difference of current
+	 * MapPosition and the last updated Overlay MapPosition.
+	 * Use this to 'stick' your layer to the map.
 	 *
-	 * @param curPos
+	 * @param position
 	 *            current MapPosition
-	 * @param m
+	 * @param matrices
 	 *            current Matrices
 	 * @param project
-	 *            apply view and projection, or just view otherwise
+	 *            if true apply view- and projection, or just view otherwise.
 	 */
-	protected void setMatrix(MapPosition curPos, Matrices m, boolean project) {
+	protected void setMatrix(MapPosition position, Matrices matrices, boolean project) {
 		MapPosition oPos = mMapPosition;
 
-		double tileScale = Tile.SIZE * curPos.scale;
+		double tileScale = Tile.SIZE * position.scale;
 
-		double x = oPos.x - curPos.x;
-		double y = oPos.y - curPos.y;
+		double x = oPos.x - position.x;
+		double y = oPos.y - position.y;
 
 		// wrap around date-line
 		//	while (x < -1)
@@ -91,21 +97,21 @@ public abstract class RenderLayer {
 		//	while (x > 2)
 		//		x -= 1.0;
 
-		m.mvp.setTransScale((float) (x * tileScale), (float) (y * tileScale),
-				(float) ((curPos.scale / oPos.scale) / GLRenderer.COORD_SCALE));
+		matrices.mvp.setTransScale((float) (x * tileScale), (float) (y * tileScale),
+				(float) ((position.scale / oPos.scale) / GLRenderer.COORD_SCALE));
 
-		m.mvp.multiplyMM(project ? m.viewproj : m.view, m.mvp);
+		matrices.mvp.multiplyMM(project ? matrices.viewproj : matrices.view, matrices.mvp);
 	}
 
 	/**
-	 * Utility: set m.mvp matrix relative to the difference of current
-	 * MapPosition
-	 * and the last updated Overlay MapPosition and add m.viewproj
+	 * Utility: Set matrices.mvp matrix relative to the difference of current
+	 * MapPosition and the last updated Overlay MapPosition and add
+	 * matrices.viewproj
 	 *
-	 * @param curPos ...
-	 * @param m ...
+	 * @param position ...
+	 * @param matrices ...
 	 */
-	protected void setMatrix(MapPosition curPos, Matrices m) {
-		setMatrix(curPos, m, true);
+	protected void setMatrix(MapPosition position, Matrices matrices) {
+		setMatrix(position, matrices, true);
 	}
 }
