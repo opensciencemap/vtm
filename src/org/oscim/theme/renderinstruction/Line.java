@@ -201,46 +201,16 @@ public final class Line extends RenderInstruction {
 		this.min = min;
 	}
 
-	public Line(int stroke, float width, Cap cap) {
-		this.level = 0;
-		this.blur = 0;
-		this.cap = cap;
-		this.outline = false;
-		this.style = "";
-		this.width = width;
-		this.fixed = true;
-		this.fade = -1;
-		this.stipple = 0;
-		this.stippleColor = Color.BLACK;
-		this.stippleWidth = 0;
-		this.min = 0;
-		this.color = stroke; //GlUtils.colorToFloatP(stroke);
+	public Line(int stroke, float width) {
+		this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, 0);
 	}
 
-	public Line(int stroke, float width, int stipple) {
-		this.level = 0;
-		this.blur = 0;
-		this.cap = Cap.BUTT;
-		this.outline = false;
-		this.style = "";
-		this.width = width;
-		this.fixed = true;
-		this.fade = -1;
-		this.stipple = stipple;
-		this.stippleColor = Color.BLACK;
-		this.stippleWidth = 0.6f;
-		this.min = 0;
-		color = stroke; //GlUtils.colorToFloatP(stroke);
+	public Line(int stroke, float width, Cap cap) {
+		this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, 0);
 	}
 
 	@Override
 	public void renderWay(IRenderCallback renderCallback) {
 		renderCallback.renderWay(this, level);
 	}
-
-	// @Override
-	// public void scaleStrokeWidth(float scaleFactor) {
-	// paint.setStrokeWidth(strokeWidth * scaleFactor);
-	// }
-
 }

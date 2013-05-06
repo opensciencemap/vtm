@@ -27,8 +27,8 @@ import org.oscim.core.Tile;
 import org.oscim.graphics.Paint.Cap;
 import org.oscim.layers.Layer;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.LineLayer;
-import org.oscim.renderer.overlays.BasicOverlay;
+import org.oscim.renderer.layers.BasicRenderLayer;
+import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.LineClipper;
@@ -44,7 +44,7 @@ public class PathOverlay extends Layer {
 	/** Line style */
 	/* package */Line mLineStyle;
 
-	class RenderPath extends BasicOverlay {
+	class RenderPath extends BasicRenderLayer {
 
 		private static final byte MAX_ZOOM = 20;
 		private final double MAX_SCALE;

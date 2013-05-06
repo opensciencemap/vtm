@@ -31,7 +31,7 @@ import javax.microedition.khronos.opengles.GL10;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
-import org.oscim.renderer.layer.Layers;
+import org.oscim.renderer.sublayers.Layers;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;

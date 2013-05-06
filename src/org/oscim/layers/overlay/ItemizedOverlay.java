@@ -27,8 +27,8 @@ import org.oscim.core.PointD;
 import org.oscim.core.Tile;
 import org.oscim.layers.overlay.OverlayItem.HotspotPlace;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.renderer.layer.SymbolLayer;
-import org.oscim.renderer.overlays.BasicOverlay;
+import org.oscim.renderer.layers.BasicRenderLayer;
+import org.oscim.renderer.sublayers.SymbolLayer;
 import org.oscim.utils.GeometryUtils;
 import org.oscim.view.MapView;
 
@@ -76,7 +76,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	private int mSize;
 
-	class ItemOverlay extends BasicOverlay {
+	class ItemOverlay extends BasicRenderLayer {
 
 		private final SymbolLayer mSymbolLayer;
 		private final float[] mBox = new float[8];
