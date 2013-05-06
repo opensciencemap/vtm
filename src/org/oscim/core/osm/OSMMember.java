@@ -15,7 +15,11 @@
 package org.oscim.core.osm;
 
 public class OSMMember {
-
+	public enum MemberType{
+		NODE,
+		WAY,
+		RELATIOM
+	}
 	static final boolean useDebugLabels = true;
 
 	public final String role;

@@ -14,12 +14,14 @@
  */
 package org.oscim.core.osm;
 
+import org.oscim.core.TagSet;
+
 public abstract class OSMElement {
 
-	public final TagGroup tags;
+	public final TagSet tags;
 	public final long id;
 
-	public OSMElement(TagGroup tags, long id) {
+	public OSMElement(TagSet tags, long id) {
 		assert tags != null;
 		this.tags = tags;
 		this.id = id;
