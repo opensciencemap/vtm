@@ -183,6 +183,18 @@ public class BoundingBox implements Parcelable {
 		return stringBuilder.toString();
 	}
 
+	public String format() {
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(minLatitudeE6 / CONVERSION_FACTOR);
+		stringBuilder.append(',');
+		stringBuilder.append(minLongitudeE6 / CONVERSION_FACTOR);
+		stringBuilder.append(',');
+		stringBuilder.append(maxLatitudeE6 / CONVERSION_FACTOR);
+		stringBuilder.append(',');
+		stringBuilder.append(maxLongitudeE6 / CONVERSION_FACTOR);
+		return stringBuilder.toString();
+	}
+
 	/**
 	 * @return the hash code of this object.
 	 */
