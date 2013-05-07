@@ -42,8 +42,7 @@ public class Tag {
 	 */
 	public static final String TAG_KEY_ELE = "ele".intern();
 
-	public static final String TAG_KEY_AMENITY= "amenity".intern();
-
+	public static final String TAG_KEY_AMENITY = "amenity".intern();
 
 	/**
 	 * The key of the elevation OpenStreetMap tag.
@@ -101,12 +100,11 @@ public class Tag {
 	public Tag(String key, String value, boolean intern) {
 		this.key = key.intern();
 
-		if (intern) {
+		if (intern)
 			this.value = (value == null ? null : value.intern());
-		}
-		else {
+		else
 			this.value = value;
-		}
+
 		this.intern = intern;
 	}
 
@@ -119,11 +117,14 @@ public class Tag {
 		}
 		Tag other = (Tag) obj;
 
+		if (this.key != other.key)
+			return false;
+
 		if (this.intern && other.intern) {
-			if ((this.key == other.key) && (this.value == other.value))
+			if (this.value == other.value)
 				return true;
 		} else {
-			if ((this.key.equals(other.key)) && (this.value.equals(other.value)))
+			if (this.value.equals(other.value))
 				return true;
 		}
 		return false;
