@@ -33,7 +33,9 @@ import org.oscim.core.Tile;
  * */
 public abstract class ScanBox {
 
-	public static void transScale(double x, double y, double scale, int zoom, float[] box){
+	private final float[] mBox = new float[8];
+
+	private float[] transScale(double x, double y, double scale, int zoom, float[] box){
 		scale *= Tile.SIZE;
 
 		//double curScale = Tile.SIZE * scale;
@@ -43,10 +45,12 @@ public abstract class ScanBox {
 		y *= scale;
 
 		for (int i = 0; i < 8; i += 2) {
-			box[i + 0] = (float) ((x + box[i + 0]) / div);
-			box[i + 1] = (float) ((y + box[i + 1]) / div);
+			mBox[i + 0] = (float) ((x + box[i + 0]) / div);
+			mBox[i + 1] = (float) ((y + box[i + 1]) / div);
 		}
+		return mBox;
 	}
+
 	/*
 	 * ported from Polymaps: Layer.js
 	 */
@@ -74,6 +78,7 @@ public abstract class ScanBox {
 	private Edge ab = new Edge();
 	private Edge bc = new Edge();
 	private Edge ca = new Edge();
+
 	private int minX, maxX;
 
 	protected int mZoom;
@@ -82,7 +87,8 @@ public abstract class ScanBox {
 
 	public void scan(double x, double y, double scale, int zoom, float[] box) {
 		mZoom = zoom;
-		transScale(x, y, scale, zoom, box);
+		// this does not modify 'box' parameter
+		box = transScale(x, y, scale, zoom, box);
 
 		// clip result to min/max as steep angles
 		// cause overshooting in x direction.

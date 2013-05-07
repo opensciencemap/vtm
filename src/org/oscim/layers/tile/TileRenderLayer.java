@@ -26,29 +26,29 @@ import org.oscim.utils.ScanBox;
 import org.oscim.view.MapView;
 
 import android.util.Log;
+
 public class TileRenderLayer extends RenderLayer {
 	private final static String TAG = TileRenderLayer.class.getName();
 
-	private final float[] mBoxCoords;
 	private final TileManager mTileManager;
+
 	public TileRenderLayer(MapView mapView, TileManager tileManager) {
 		super(mapView);
 		mTileManager = tileManager;
-		mBoxCoords = new float[8];
 	}
 
 	boolean mFaded;
 
-	public void setFaded(boolean faded){
+	public void setFaded(boolean faded) {
 		mFaded = faded;
 	}
 
 	@Override
 	public void update(MapPosition pos, boolean positionChanged, Matrices m) {
-		int serial = 0;
 
 		mMapPosition.copy(pos);
 
+		int serial = 0;
 		if (mDrawTiles != null)
 			serial = mDrawTiles.getSerial();
 
@@ -60,25 +60,18 @@ public class TileRenderLayer extends RenderLayer {
 		if (mDrawTiles == null || mDrawTiles.cnt == 0)
 			return;
 
-		boolean changed = false;
-		//boolean positionChanged = false;
+		boolean tilesChanged = false;
 
-		// check if the tiles have changed...
-		if (serial != mDrawTiles.getSerial()) {
-			changed = true;
-			// FIXME needed?
-			//positionChanged = true;
-		}
+		// check if tiles have changed.
+		if (serial != mDrawTiles.getSerial())
+			tilesChanged = true;
 
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
 
-		if (changed || positionChanged){
-			float[] box = mBoxCoords;
-			mMapView.getMapViewPosition().getMapViewProjection(box);
+		if (tilesChanged || positionChanged)
+			updateTileVisibility(m.mapPlane);
 
-			updateTileVisibility(box);
-		}
 		tileCnt += mNumTileHolder;
 
 		/* prepare tile for rendering */
@@ -94,7 +87,6 @@ public class TileRenderLayer extends RenderLayer {
 
 	@Override
 	public void render(MapPosition pos, Matrices m) {
-
 
 	}
 
@@ -236,78 +228,77 @@ public class TileRenderLayer extends RenderLayer {
 		td.cnt = 0;
 	}
 
-
 	// Add additional tiles that serve as placeholer when flipping
-		// over date-line.
-		// I dont really like this but cannot think of a better solution:
-		// the other option would be to run scanbox each time for upload,
-		// drawing, proxies and text layer. needing to add placeholder only
-		// happens rarely, unless you live on Fidschi
+	// over date-line.
+	// I dont really like this but cannot think of a better solution:
+	// The other option would be to run scanbox each time for upload,
+	// drawing, proxies and text layer. Adding placeholder only
+	// happens rarely, unless you live on Fidschi
 
-		/* package */int mNumTileHolder;
-		/* package */TileSet mDrawTiles;
+	/* package */int mNumTileHolder;
+	/* package */TileSet mDrawTiles;
 
-		// scanline fill class used to check tile visibility
-		private final ScanBox mScanBox = new ScanBox() {
-			@Override
-			protected void setVisible(int y, int x1, int x2) {
-				int cnt = mDrawTiles.cnt;
+	// scanline fill class used to check tile visibility
+	private final ScanBox mScanBox = new ScanBox() {
+		@Override
+		protected void setVisible(int y, int x1, int x2) {
+			int cnt = mDrawTiles.cnt;
 
-				MapTile[] tiles = mDrawTiles.tiles;
+			MapTile[] tiles = mDrawTiles.tiles;
 
-				for (int i = 0; i < cnt; i++) {
-					MapTile t = tiles[i];
-					if (t.tileY == y && t.tileX >= x1 && t.tileX < x2)
-						t.isVisible = true;
-				}
-
-				int xmax = 1 << mZoom;
-				if (x1 >= 0 && x2 < xmax)
-					return;
-
-				// add placeholder tiles to show both sides
-				// of date line. a little too complicated...
-				for (int x = x1; x < x2; x++) {
-					MapTile holder = null;
-					MapTile tile = null;
-					boolean found = false;
-
-					if (x >= 0 && x < xmax)
-						continue;
-
-					int xx = x;
-					if (x < 0)
-						xx = xmax + x;
-					else
-						xx = x - xmax;
-
-					if (xx < 0 || xx >= xmax)
-						continue;
-
-					for (int i = cnt; i < cnt + mNumTileHolder; i++)
-						if (tiles[i].tileX == x && tiles[i].tileY == y) {
-							found = true;
-							break;
-						}
-
-					if (found)
-						continue;
-
-					for (int i = 0; i < cnt; i++)
-						if (tiles[i].tileX == xx && tiles[i].tileY == y) {
-							tile = tiles[i];
-							break;
-						}
-
-					if (tile == null)
-						continue;
-
-					holder = new MapTile(x, y, (byte) mZoom);
-					holder.isVisible = true;
-					holder.holder = tile;
-					tile.isVisible = true;
-					tiles[cnt + mNumTileHolder++] = holder;
-				}
+			for (int i = 0; i < cnt; i++) {
+				MapTile t = tiles[i];
+				if (t.tileY == y && t.tileX >= x1 && t.tileX < x2)
+					t.isVisible = true;
 			}
-		};
+
+			int xmax = 1 << mZoom;
+			if (x1 >= 0 && x2 < xmax)
+				return;
+
+			// add placeholder tiles to show both sides
+			// of date line. a little too complicated...
+			for (int x = x1; x < x2; x++) {
+				MapTile holder = null;
+				MapTile tile = null;
+				boolean found = false;
+
+				if (x >= 0 && x < xmax)
+					continue;
+
+				int xx = x;
+				if (x < 0)
+					xx = xmax + x;
+				else
+					xx = x - xmax;
+
+				if (xx < 0 || xx >= xmax)
+					continue;
+
+				for (int i = cnt; i < cnt + mNumTileHolder; i++)
+					if (tiles[i].tileX == x && tiles[i].tileY == y) {
+						found = true;
+						break;
+					}
+
+				if (found)
+					continue;
+
+				for (int i = 0; i < cnt; i++)
+					if (tiles[i].tileX == xx && tiles[i].tileY == y) {
+						tile = tiles[i];
+						break;
+					}
+
+				if (tile == null)
+					continue;
+
+				holder = new MapTile(x, y, (byte) mZoom);
+				holder.isVisible = true;
+				holder.holder = tile;
+				tile.isVisible = true;
+				tiles[cnt + mNumTileHolder++] = holder;
+			}
+		}
+	};
 }
