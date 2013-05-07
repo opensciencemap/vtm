@@ -147,6 +147,11 @@ public class ExtrusionRenderLayer extends RenderLayer {
 		isReady = ready > 0;
 	}
 
+	@Override
+	public void compile() {
+
+	}
+
 	private static ExtrusionLayer getLayer(MapTile t) {
 		if (t.layers != null && t.layers.extrusionLayers != null
 				&& t.state == MapTile.STATE_READY)
@@ -312,6 +317,8 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			GLES20.glDisable(GLES20.GL_CULL_FACE);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		mTileLayer.releaseTiles(mTileSet);
 	}
 
 	private static void setMatrix(MapPosition pos, Matrices m,
@@ -431,11 +438,5 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 	public void setAlpha(float a) {
 		mAlpha = a;
-	}
-
-	@Override
-	public void compile() {
-		// TODO Auto-generated method stub
-
 	}
 }
