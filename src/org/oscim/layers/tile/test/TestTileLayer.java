@@ -18,7 +18,6 @@ import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
 import org.oscim.graphics.Color;
 import org.oscim.graphics.Paint.Cap;
-import org.oscim.layers.tile.JobQueue;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
@@ -39,13 +38,13 @@ public class TestTileLayer extends TileLayer<TestTileLoader> {
 	}
 
 	@Override
-	protected TestTileLoader createLoader(JobQueue q, TileManager tm) {
-		return new TestTileLoader(q, tm);
+	protected TestTileLoader createLoader(TileManager tm) {
+		return new TestTileLoader(tm);
 	}
 
 	static class TestTileLoader extends TileLoader {
-		public TestTileLoader(JobQueue jobQueue, TileManager tileManager) {
-			super(jobQueue, tileManager);
+		public TestTileLoader(TileManager tileManager) {
+			super(tileManager);
 		}
 
 		GeometryBuffer mGeom = new GeometryBuffer(128, 16);

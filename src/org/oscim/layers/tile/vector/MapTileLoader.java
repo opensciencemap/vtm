@@ -26,7 +26,6 @@ import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabase.QueryResult;
 import org.oscim.database.IMapDatabaseCallback;
-import org.oscim.layers.tile.JobQueue;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
@@ -119,8 +118,8 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 
 	/**
 	 */
-	public MapTileLoader(JobQueue jobQueue,	TileManager tileManager) {
-		super(jobQueue, tileManager);
+	public MapTileLoader(TileManager tileManager) {
+		super(tileManager);
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
 

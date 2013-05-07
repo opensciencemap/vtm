@@ -19,14 +19,11 @@ import org.oscim.utils.PausableThread;
 public abstract class TileLoader extends PausableThread {
 	private static int id;
 
-
 	private final String THREAD_NAME;
-	private final JobQueue mJobQueue;
 	private final TileManager mTileManager;
 
-	public TileLoader(JobQueue jobQueue, TileManager tileManager) {
+	public TileLoader(TileManager tileManager) {
 		super();
-		mJobQueue = jobQueue;
 		mTileManager = tileManager;
 		THREAD_NAME = "TileLoader" + (id++);
 	}
@@ -38,7 +35,7 @@ public abstract class TileLoader extends PausableThread {
 
 	@Override
 	protected void doWork() {
-		MapTile tile = mJobQueue.poll();
+		MapTile tile = mTileManager.jobQueue.poll();
 
 		if (tile == null)
 			return;
@@ -69,6 +66,6 @@ public abstract class TileLoader extends PausableThread {
 
 	@Override
 	protected boolean hasWork() {
-		return !mJobQueue.isEmpty();
+		return !mTileManager.jobQueue.isEmpty();
 	}
 }

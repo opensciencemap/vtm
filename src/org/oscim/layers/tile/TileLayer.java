@@ -28,8 +28,6 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 
 	protected final TileManager mTileManager;
 
-	protected final JobQueue mJobQueue;
-
 	protected final int mNumTileLoader = 4;
 	protected final ArrayList<T> mTileLoader;
 
@@ -44,12 +42,10 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 		// to load queue and managing in-memory tile cache.
 		mTileManager = new TileManager(mapView, this, maxZoom);
 
-		mJobQueue = new JobQueue();
-
 		// Instantiate TileLoader threads
 		mTileLoader = new ArrayList<T>();
 		for (int i = 0; i < mNumTileLoader; i++) {
-			T tileGenerator = createLoader(mJobQueue, mTileManager);
+			T tileGenerator = createLoader(mTileManager);
 			mTileLoader.add(tileGenerator);
 			tileGenerator.start();
 		}
@@ -59,7 +55,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 		mLayer = new TileRenderLayer(mapView, mTileManager);
 	}
 
-	abstract protected T createLoader(JobQueue q, TileManager tm);
+	abstract protected T createLoader(TileManager tm);
 
 	public TileRenderLayer getTileLayer() {
 		return (TileRenderLayer) mLayer;
@@ -83,10 +79,9 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 		mTileManager.destroy();
 
 		for (T tileWorker : mTileLoader) {
+
 			tileWorker.pause();
 			tileWorker.interrupt();
-
-			//tileWorker.getMapDatabase().close();
 			tileWorker.cleanup();
 
 			try {
@@ -103,20 +98,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 		mClearMap = true;
 	}
 
-
-	/**
-	 * add jobs and remember TileGenerators that stuff needs to be done
-	 *
-	 * @param jobs
-	 *            tile jobs
-	 */
-	public void setJobs(MapTile[] jobs) {
-		if (jobs == null) {
-			mJobQueue.clear();
-			return;
-		}
-		mJobQueue.setJobs(jobs);
-
+	void notifyLoaders() {
 		for (int i = 0; i < mNumTileLoader; i++) {
 			T m = mTileLoader.get(i);
 			synchronized (m) {

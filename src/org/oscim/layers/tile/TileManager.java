@@ -86,6 +86,8 @@ public class TileManager {
 	private TileSet mCurrentTiles;
 	/* package */TileSet mNewTiles;
 
+	final JobQueue jobQueue;
+
 	private final QuadTreeIndex<MapTile> mIndex = new QuadTreeIndex<MapTile>() {
 
 		@Override
@@ -111,7 +113,7 @@ public class TileManager {
 		}
 	};
 
-	private final float[] mBoxCoords = new float[8];
+	private final float[] mMapPlane = new float[8];
 	private final TileLayer<?> mTileLayer;
 
 	public TileManager(MapView mapView, TileLayer<?> tileLayer, int maxZoom) {
@@ -119,6 +121,8 @@ public class TileManager {
 		mTileLayer = tileLayer;
 		mMaxZoom = maxZoom;
 		mMapViewPosition = mapView.getMapViewPosition();
+
+		jobQueue = new JobQueue();
 		mJobs = new ArrayList<MapTile>();
 		mTiles = new MapTile[CACHE_TILES_MAX];
 
@@ -126,7 +130,6 @@ public class TileManager {
 		mTilesForUpload = 0;
 
 		mUpdateSerial = 0;
-
 		mInitialized = false;
 	}
 
@@ -194,29 +197,33 @@ public class TileManager {
 		// start with old jobs while new jobs are calculated, which
 		// should increase the chance that they are free when new
 		// jobs come in.
-		mTileLayer.setJobs(null);
+		jobQueue.clear();
 
 		// load some tiles more than currently visible (* 0.75)
 		double scale = pos.scale * 0.9f;
 
 		int tileZoom = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, mMaxZoom);
 
-		mMapViewPosition.getMapViewProjection(mBoxCoords);
+		mMapViewPosition.getMapViewProjection(mMapPlane);
 
 		// scan visible tiles. callback function calls 'addTile'
 		// which updates mNewTiles
 		mNewTiles.cnt = 0;
-		mScanBox.scan(pos.x, pos.y, scale, tileZoom, mBoxCoords);
+		mScanBox.scan(pos.x, pos.y, scale, tileZoom, mMapPlane);
 
 		MapTile[] newTiles = mNewTiles.tiles;
+		int newCnt = mNewTiles.cnt;
+
 		MapTile[] curTiles = mCurrentTiles.tiles;
+		int curCnt = mCurrentTiles.cnt;
 
-		boolean changed = (mNewTiles.cnt != mCurrentTiles.cnt);
+		boolean changed = (newCnt != curCnt);
 
-		Arrays.sort(mNewTiles.tiles, 0, mNewTiles.cnt, TileSet.coordComparator);
+		Arrays.sort(newTiles, 0, newCnt, TileSet.coordComparator);
 
 		if (!changed) {
-			for (int i = 0, n = mNewTiles.cnt; i < n; i++) {
+			// compare if any tile has changed
+			for (int i = 0; i < newCnt; i++) {
 				if (newTiles[i] != curTiles[i]) {
 					changed = true;
 					break;
@@ -227,11 +234,11 @@ public class TileManager {
 		if (changed) {
 			synchronized (mTilelock) {
 				// lock new tiles
-				for (int i = 0, n = mNewTiles.cnt; i < n; i++)
+				for (int i = 0; i < newCnt; i++)
 					newTiles[i].lock();
 
 				// unlock previous tiles
-				for (int i = 0, n = mCurrentTiles.cnt; i < n; i++) {
+				for (int i = 0; i < curCnt; i++) {
 					curTiles[i].unlock();
 					curTiles[i] = null;
 				}
@@ -257,7 +264,9 @@ public class TileManager {
 		updateTileDistances(jobs, jobs.length, pos);
 
 		// sets tiles to state == LOADING
-		mTileLayer.setJobs(jobs);
+
+		jobQueue.setJobs(jobs);
+		mTileLayer.notifyLoaders();
 		mJobs.clear();
 
 		/* limit cache items */
@@ -267,6 +276,11 @@ public class TileManager {
 				mTilesForUpload > MAX_TILES_IN_QUEUE)
 
 			limitCache(pos, remove);
+	}
+
+	/** only used in setmapDatabase -- deprecate?*/
+	public void clearJobs() {
+		jobQueue.clear();
 	}
 
 	/**
@@ -409,12 +423,12 @@ public class TileManager {
 		mTilesCount--;
 	}
 
-	private static void updateTileDistances(MapTile[] tiles, int size, MapPosition mapPosition) {
+	private static void updateTileDistances(MapTile[] tiles, int size, MapPosition pos) {
 		// TODO there is probably  a better quad-tree distance function
 
 		int zoom = 20;
-		long x = (long) (mapPosition.x * (1 << zoom));
-		long y = (long) (mapPosition.y * (1 << zoom));
+		long x = (long) (pos.x * (1 << zoom));
+		long y = (long) (pos.y * (1 << zoom));
 
 		for (int i = 0; i < size; i++) {
 			MapTile t = tiles[i];
@@ -435,7 +449,7 @@ public class TileManager {
 				dy = t.tileY - my;
 			}
 
-			int dz = (mapPosition.zoomLevel - t.zoomLevel);
+			int dz = (pos.zoomLevel - t.zoomLevel);
 			if (dz == 0)
 				dz = 1;
 			else if (dz < -1)
@@ -445,7 +459,7 @@ public class TileManager {
 		}
 	}
 
-	private void limitCache(MapPosition mapPosition, int remove) {
+	private void limitCache(MapPosition pos, int remove) {
 		MapTile[] tiles = mTiles;
 		int size = mTilesSize;
 
@@ -472,7 +486,7 @@ public class TileManager {
 		}
 
 		if (remove > 10 || newTileCnt > MAX_TILES_IN_QUEUE) {
-			updateTileDistances(tiles, size, mapPosition);
+			updateTileDistances(tiles, size, pos);
 
 			TileDistanceSort.sort(tiles, 0, size);
 
@@ -502,7 +516,7 @@ public class TileManager {
 				} else {
 					// clear unused tile
 
-					if (t.state == STATE_NEW_DATA){
+					if (t.state == STATE_NEW_DATA) {
 						//Log.d(TAG, "limitCache: clear unused " + t
 						//		+ " " + t.distance);
 						newTileCnt--;
