@@ -48,23 +48,14 @@ public class TileRenderLayer extends RenderLayer {
 
 		mMapPosition.copy(pos);
 
-		int serial = 0;
-		if (mDrawTiles != null)
-			serial = mDrawTiles.getSerial();
-
+		boolean tilesChanged;
 		synchronized (tilelock) {
 			// get current tiles to draw
-			mDrawTiles = mTileManager.getActiveTiles(mDrawTiles);
+			tilesChanged = mTileManager.getActiveTiles(mDrawTiles);
 		}
 
-		if (mDrawTiles == null || mDrawTiles.cnt == 0)
+		if (mDrawTiles.cnt == 0)
 			return;
-
-		boolean tilesChanged = false;
-
-		// check if tiles have changed.
-		if (serial != mDrawTiles.getSerial())
-			tilesChanged = true;
 
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
@@ -88,6 +79,14 @@ public class TileRenderLayer extends RenderLayer {
 	@Override
 	public void render(MapPosition pos, Matrices m) {
 
+	}
+
+	public void clearTiles() {
+		// Clear all references to MapTiles as all current
+		// tiles will also be removed from TileManager.
+		GLRenderer.drawlock.lock();
+		mDrawTiles = new TileSet();
+		GLRenderer.drawlock.unlock();
 	}
 
 	/** compile tile layer data and upload to VBOs */
@@ -189,10 +188,22 @@ public class TileRenderLayer extends RenderLayer {
 		}
 	}
 
-	// get a TileSet of currently visible tiles
-	public TileSet getVisibleTiles(TileSet td) {
-		if (mDrawTiles == null)
-			return td;
+	/**
+	 * Update tileSet with currently visible tiles
+	 * get a TileSet of currently visible tiles
+	 */
+	public boolean getVisibleTiles(TileSet tileSet) {
+		if (tileSet == null)
+			return false;
+
+		if (mDrawTiles == null) {
+			releaseTiles(tileSet);
+			return false;
+		}
+
+		// same tiles as before
+		if (tileSet.serial == mDrawTiles.serial)
+			return false;
 
 		// ensure tiles keep visible state
 		synchronized (tilelock) {
@@ -200,24 +211,26 @@ public class TileRenderLayer extends RenderLayer {
 			MapTile[] newTiles = mDrawTiles.tiles;
 			int cnt = mDrawTiles.cnt;
 
-			if (td == null)
-				td = new TileSet(newTiles.length);
-
 			// unlock previous tiles
-			for (int i = 0; i < td.cnt; i++)
-				td.tiles[i].unlock();
+			for (int i = 0; i < tileSet.cnt; i++)
+				tileSet.tiles[i].unlock();
+
+			// ensure same size
+			if (tileSet.tiles.length != mDrawTiles.tiles.length) {
+				tileSet.tiles = new MapTile[mDrawTiles.tiles.length];
+			}
 
 			// lock tiles to not be removed from cache
-			td.cnt = 0;
+			tileSet.cnt = 0;
 			for (int i = 0; i < cnt; i++) {
 				MapTile t = newTiles[i];
 				if (t.isVisible && t.state == STATE_READY) {
 					t.lock();
-					td.tiles[td.cnt++] = t;
+					tileSet.tiles[tileSet.cnt++] = t;
 				}
 			}
 		}
-		return td;
+		return true;
 	}
 
 	public void releaseTiles(TileSet td) {
@@ -236,7 +249,7 @@ public class TileRenderLayer extends RenderLayer {
 	// happens rarely, unless you live on Fidschi
 
 	/* package */int mNumTileHolder;
-	/* package */TileSet mDrawTiles;
+	/* package */TileSet mDrawTiles = new TileSet();
 
 	// scanline fill class used to check tile visibility
 	private final ScanBox mScanBox = new ScanBox() {
@@ -301,4 +314,5 @@ public class TileRenderLayer extends RenderLayer {
 			}
 		}
 	};
+
 }

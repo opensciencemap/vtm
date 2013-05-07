@@ -95,7 +95,7 @@ public class MapScaleBar extends Layer {
 	}
 
 	@Override
-	public void onUpdate(MapPosition mapPosition, boolean changed) {
+	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
 		double latitude = MercatorProjection.toLatitude(mapPosition.y);
 
 		if (!mRedrawNeeded) {

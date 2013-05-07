@@ -24,9 +24,8 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 	//private final static String TAG = TileLayer.class.getName();
 	private final static int MAX_ZOOMLEVEL = 17;
 
-	private boolean mClearMap = true;
-
 	protected final TileManager mTileManager;
+	protected final TileRenderLayer mRenderLayer;
 
 	protected final int mNumTileLoader = 4;
 	protected final ArrayList<T> mTileLoader;
@@ -52,7 +51,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 
 		// RenderLayer is working in GL Thread and actually
 		// drawing loaded tiles to screen.
-		mLayer = new TileRenderLayer(mapView, mTileManager);
+		mLayer = mRenderLayer = new TileRenderLayer(mapView, mTileManager);
 	}
 
 	abstract protected T createLoader(TileManager tm);
@@ -62,11 +61,11 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 	}
 
 	@Override
-	public void onUpdate(MapPosition mapPosition, boolean changed) {
+	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
 
-		if (mClearMap) {
+		if (clear) {
+			mRenderLayer.clearTiles();
 			mTileManager.init(mMapView.getWidth(), mMapView.getHeight());
-			mClearMap = false;
 			changed = true;
 		}
 		if (changed)
@@ -75,11 +74,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 
 	@Override
 	public void destroy() {
-
-		mTileManager.destroy();
-
 		for (T tileWorker : mTileLoader) {
-
 			tileWorker.pause();
 			tileWorker.interrupt();
 			tileWorker.cleanup();
@@ -91,11 +86,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 				Thread.currentThread().interrupt();
 			}
 		}
-	}
-
-	protected void clearMap() {
-		// clear tile and overlay data before next draw
-		mClearMap = true;
+		mTileManager.destroy();
 	}
 
 	void notifyLoaders() {

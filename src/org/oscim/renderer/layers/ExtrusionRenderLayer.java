@@ -41,6 +41,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 	public ExtrusionRenderLayer(MapView mapView, org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
 		super(mapView);
 		mTileLayer = tileRenderLayer;
+		mTileSet = new TileSet();
 	}
 
 	private static int[] shaderProgram = new int[2];
@@ -56,7 +57,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 	// FIXME sum up size used while filling layer only up to:
 	//public int mBufferSize = 65536;
 
-	private TileSet mTileSet;
+	private final TileSet mTileSet;
 	private MapTile[] mTiles;
 	private int mTileCnt;
 
@@ -85,17 +86,14 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			}
 		}
 
-		int ready = 0;
-		mTileSet = mTileLayer.getVisibleTiles(mTileSet);
-		if (mTileSet == null)
-			return;
-
-		MapTile[] tiles = mTileSet.tiles;
-		// FIXME just release tiles in this case
 		if (mAlpha == 0 || pos.zoomLevel < 16) {
 			isReady = false;
 			return;
 		}
+
+		int ready = 0;
+		mTileLayer.getVisibleTiles(mTileSet);
+		MapTile[] tiles = mTileSet.tiles;
 
 		// keep a list of tiles available for rendering
 		if (mTiles == null || mTiles.length < mTileSet.cnt * 4)
@@ -104,9 +102,6 @@ public class ExtrusionRenderLayer extends RenderLayer {
 		ExtrusionLayer el;
 		if (pos.zoomLevel >= 17) {
 			for (int i = 0; i < mTileSet.cnt; i++) {
-				if (!tiles[i].isVisible)
-					continue;
-
 				el = getLayer(tiles[i]);
 				if (el == null)
 					continue;
@@ -123,12 +118,9 @@ public class ExtrusionRenderLayer extends RenderLayer {
 					mTiles[ready++] = tiles[i];
 			}
 		} else if (pos.zoomLevel == 16) {
+			// check if proxy children are ready
 			for (int i = 0; i < mTileSet.cnt; i++) {
-				if (!tiles[i].isVisible)
-					continue;
-
 				MapTile t = tiles[i];
-
 				for (byte j = 0; j < 4; j++) {
 					if ((t.proxies & (1 << j)) != 0) {
 						MapTile c = t.rel.get(j);

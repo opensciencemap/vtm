@@ -57,6 +57,7 @@ import org.oscim.view.MapViewPosition;
 
 import android.opengl.GLES20;
 import android.os.SystemClock;
+import android.util.Log;
 
 public class TextRenderLayer extends BasicRenderLayer {
 	private final static String TAG = TextRenderLayer.class.getName();
@@ -64,7 +65,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 	private final static float MIN_WAY_DIST = 3;
 
 	private final MapViewPosition mMapViewPosition;
-	private TileSet mTileSet;
+	private final TileSet mTileSet;
 	private final LabelThread mThread;
 
 	private MapPosition mTmpPos;
@@ -170,15 +171,18 @@ public class TextRenderLayer extends BasicRenderLayer {
 		@Override
 		protected void doWork() {
 			SystemClock.sleep(250);
+
 			if (!mRun)
 				return;
 
-			mRun = false;
+			synchronized (this) {
 
-			if (updateLabels()) {
-				mMapView.render();
-			} else {
-				mRun = true;
+				if (updateLabels()) {
+					mRun = false;
+					mMapView.render();
+				} else {
+					mRun = true;
+				}
 			}
 		}
 
@@ -202,8 +206,10 @@ public class TextRenderLayer extends BasicRenderLayer {
 
 		mMapViewPosition = mapView.getMapViewPosition();
 		mTileLayer = baseLayer;
+		mTileSet = new TileSet();
 		layers.textureLayers = new TextLayer();
 		mTmpLayer = new TextLayer();
+
 		//mActiveTiles = new HashMap<MapTile, LabelTile>();
 		mTmpPos = new MapPosition();
 		mThread = new LabelThread();
@@ -348,9 +354,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 			return false;
 
 		// get current tiles
-		mTileSet = mTileLayer.getVisibleTiles(mTileSet);
-		if (mTileSet == null)
-			return false;
+		mTileLayer.getVisibleTiles(mTileSet);
 
 		if (mTileSet.cnt == 0)
 			return false;
@@ -613,10 +617,10 @@ public class TextRenderLayer extends BasicRenderLayer {
 		mTileLayer.releaseTiles(mTileSet);
 
 		// pass new labels for rendering
-		synchronized (this) {
+		//synchronized (this) {
 			mNextLayer = tl;
 			mDebugLayer = dbg;
-		}
+		//}
 
 		return true;
 	}
@@ -773,5 +777,15 @@ public class TextRenderLayer extends BasicRenderLayer {
 		//		} else {
 		//			mRun = false;
 		//		}
+	}
+
+	public void clearLabels() {
+		Log.d(TAG, "clearLabels");
+		synchronized (mThread) {
+			mRun = false;
+			mPool.releaseAll(mPrevLabels);
+			mPrevLabels = null;
+			mTileSet.clear();
+		}
 	}
 }
