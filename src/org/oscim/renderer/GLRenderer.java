@@ -74,13 +74,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// bytes currently loaded in VBOs
 	private static int mBufferMemoryUsage;
 
-	private static float[] mBoxCoords;
-
 	public class Matrices {
 		// do not modify any of these
 		public final Matrix4 viewproj = new Matrix4();
 		public final Matrix4 proj = new Matrix4();
 		public final Matrix4 view = new Matrix4();
+		public final float[] mapPlane = new float[8];
 
 		// for temporary use by callee
 		public final Matrix4 mvp = new Matrix4();
@@ -132,7 +131,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mMapPosition = new MapPosition();
 
 		mMatrices = new Matrices();
-		mBoxCoords = new float[8];
 
 		// tile fill coords
 		short min = 0;
@@ -291,7 +289,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				| GLES20.GL_DEPTH_BUFFER_BIT
 				| GLES20.GL_STENCIL_BUFFER_BIT);
 
-		boolean positionChanged = false;
+		boolean changed = false;
 
 		// get current MapPosition, set mBoxCoords (mapping of screen to model
 		// coordinates)
@@ -300,10 +298,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		synchronized (mMapViewPosition) {
 			mMapViewPosition.updateAnimation();
 
-			positionChanged = mMapViewPosition.getMapPosition(pos);
+			changed = mMapViewPosition.getMapPosition(pos);
 
-			if (positionChanged)
-				mMapViewPosition.getMapViewProjection(mBoxCoords);
+			if (changed)
+				mMapViewPosition.getMapViewProjection(mMatrices.mapPlane);
 
 			mMapViewPosition.getMatrix(mMatrices.view, null, mMatrices.viewproj);
 
@@ -317,7 +315,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		RenderLayer[] overlays = mMapView.getLayerManager().getRenderLayers();
 
 		for (int i = 0, n = overlays.length; i < n; i++)
-			overlays[i].update(mMapPosition, positionChanged, mMatrices);
+			overlays[i].update(pos, changed, mMatrices);
 
 		/* draw layers */
 		for (int i = 0, n = overlays.length; i < n; i++) {
