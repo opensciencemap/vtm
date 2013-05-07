@@ -74,6 +74,7 @@ public class TileDistanceSort {
 			int n = start - left;
 
 			if (n < 16) {
+				// shift in loop for less than 16 items
 				int end = left + n;
 				while (end-- > left)
 					a[end + 1] = a[end];

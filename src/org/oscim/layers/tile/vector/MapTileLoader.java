@@ -93,7 +93,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 	// currently processed MapElement
 	private MapElement mElement;
 
-	// current line layer, will be added to outline layers
+	// current line layer (will be used for following outline layers)
 	private LineLayer mCurLineLayer;
 
 	private int mDrawingLayer;
