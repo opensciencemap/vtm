@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import org.oscim.core.BoundingBox;
@@ -33,6 +32,7 @@ import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
 import org.oscim.layers.tile.MapTile;
+import org.oscim.utils.UTF8Decoder;
 
 import android.os.Environment;
 import android.os.SystemClock;
@@ -74,9 +74,13 @@ public class MapDatabase implements IMapDatabase {
 	private final boolean debug = false;
 	private LwHttp lwHttp;
 
-	//private final WayData mWay = new WayData();
-	private final MapElement mElem = new MapElement();
+	private final UTF8Decoder mStringDecoder;
+	private final MapElement mElem;
 
+	public MapDatabase(){
+		mStringDecoder = new UTF8Decoder();
+		mElem = new MapElement();
+	}
 	@Override
 	public QueryResult executeQuery(MapTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		QueryResult result = QueryResult.SUCCESS;
@@ -175,7 +179,6 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		mOpen = true;
-
 		initDecorder();
 
 		return OpenResult.SUCCESS;
@@ -680,14 +683,11 @@ public class MapDatabase implements IMapDatabase {
 		return result;
 	}
 
-	private final static Charset UTF8 = Charset.forName("UTF-8");
-	// TODO: use own String builder that reuses the char conversion array.
-
 	private String decodeString() throws IOException {
 		final int size = decodeVarint32();
 		lwHttp.readBuffer(size);
+		final String result = mStringDecoder.decode(lwHttp.buffer, lwHttp.bufferPos, size);
 
-		final String result = new String(lwHttp.buffer, lwHttp.bufferPos, size, UTF8);
 		lwHttp.bufferPos += size;
 		mBytesProcessed += size;
 		return result;
