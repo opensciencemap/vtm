@@ -21,7 +21,6 @@ import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.JobQueue;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
@@ -45,8 +44,8 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 	}
 
 	@Override
-	protected TileLoader createLoader(JobQueue q, TileManager tm) {
-		return new TileLoader(q, tm) {
+	protected TileLoader createLoader(TileManager tm) {
+		return new TileLoader(tm) {
 
 			@Override
 			protected boolean executeJob(MapTile tile) {

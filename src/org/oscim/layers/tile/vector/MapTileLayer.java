@@ -29,7 +29,6 @@ import org.oscim.database.MapDatabaseFactory;
 import org.oscim.database.MapDatabases;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
-import org.oscim.layers.tile.JobQueue;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.GLRenderer;
@@ -51,8 +50,8 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 	}
 
 	@Override
-	protected MapTileLoader createLoader(JobQueue q, TileManager tm) {
-		return new MapTileLoader(q, tm);
+	protected MapTileLoader createLoader(TileManager tm) {
+		return new MapTileLoader(tm);
 	}
 
 	private MapOptions mMapOptions;
@@ -74,7 +73,9 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 
 		pauseLoaders(true);
 
-		mJobQueue.clear();
+		//mJobQueue.clear();
+		mTileManager.clearJobs();
+
 		mMapOptions = options;
 
 		mMapDatabase = null;
