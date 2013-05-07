@@ -14,8 +14,8 @@
  */
 package org.oscim.layers.tile;
 
+import java.util.Arrays;
 import java.util.Comparator;
-
 
 /**
  * use with TileManager.getActiveTiles(TileSet) to get the current tiles. tiles
@@ -28,23 +28,29 @@ public final class TileSet {
 
 	int serial;
 
-	public int getSerial(){
+	public int getSerial() {
 		return serial;
 	}
 
-	TileSet() {
+	public TileSet() {
+		tiles = new MapTile[1];
 	}
 
 	public TileSet(int numTiles) {
 		tiles = new MapTile[numTiles];
 	}
 
-	public MapTile getTile(int x, int y){
+	public MapTile getTile(int x, int y) {
 		for (int i = 0; i < cnt; i++)
 			if (tiles[i].tileX == x && tiles[i].tileY == y)
 				return tiles[i];
 
 		return null;
+	}
+
+	public void clear() {
+		Arrays.fill(tiles, null);
+		cnt = 0;
 	}
 
 	public static Comparator<MapTile> coordComparator = new CoordComparator();

@@ -95,6 +95,24 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 			o.onDetach();
 	}
 
+	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+		if (mDirtyLayers)
+			updateLayers();
+
+		for (Layer l : mLayers)
+			l.onUpdate(mapPosition, changed, clear);
+	}
+
+	public void destroy() {
+		if (mDirtyLayers)
+			updateLayers();
+
+		for (Layer l : mLayers) {
+			l.destroy();
+		}
+	}
+
+
 	Layer[] mLayers;
 	InputLayer[] mInputLayer;
 
@@ -371,22 +389,7 @@ public class LayerManager extends AbstractList<Layer> implements OnGestureListen
 		return false;
 	}
 
-	public void onUpdate(MapPosition mapPosition, boolean changed) {
-		if (mDirtyLayers)
-			updateLayers();
 
-		for (Layer l : mLayers)
-			l.onUpdate(mapPosition, changed);
-	}
-
-	public void destroy() {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (Layer l : mLayers) {
-			l.destroy();
-		}
-	}
 
 	// /**
 	// * Gets the optional TilesLayer class.

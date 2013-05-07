@@ -104,7 +104,7 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		else
 			MapView.enableClosePolygons = false;
 
-		clearMap();
+		mMapView.clearMap();
 
 		resumeLoaders();
 
@@ -168,7 +168,7 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 			mRenderTheme = internalRenderTheme.name();
 		}
 
-		clearMap();
+		mMapView.clearMap();
 
 		return ret;
 	}
@@ -194,7 +194,7 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 			mRenderTheme = renderThemePath;
 		}
 
-		clearMap();
+		mMapView.clearMap();
 	}
 
 	private boolean setRenderTheme(Theme theme) {

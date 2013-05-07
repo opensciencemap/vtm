@@ -70,7 +70,7 @@ public class BuildingOverlay extends Overlay {
 	private boolean mActive = false;
 
 	@Override
-	public void onUpdate(MapPosition mapPosition, boolean changed) {
+	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
 		boolean show = mapPosition.scale >= (1 << MIN_ZOOM);
 
 		if (show && mActive)

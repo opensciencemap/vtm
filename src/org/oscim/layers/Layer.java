@@ -18,7 +18,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.view.MapView;
 
-public class Layer {
+public abstract class Layer {
 	public Layer(MapView mapView) {
 		mMapView = mapView;
 	}
@@ -45,7 +45,6 @@ public class Layer {
 		return mEnabled;
 	}
 
-
 	/**
 	 * Called before each frame render request (on main thread).
 	 *
@@ -53,11 +52,14 @@ public class Layer {
 	 *            current MapPosition
 	 * @param changed
 	 *            true when MapPosition has changed since last call
+	 * @param clear
+	 *            Clear all resources that depend on previous map state. Most
+	 *            importantly all resources from previous GL context (hold by
+	 *            RenderLayer)
 	 */
-	public void onUpdate(MapPosition mapPosition, boolean changed) {
+	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
 
 	}
-
 
 	/**
 	 * Override to perform clean up of resources before shutdown. By default
@@ -69,6 +71,5 @@ public class Layer {
 
 	public void destroy() {
 		// TODO Auto-generated method stub
-
 	}
 }

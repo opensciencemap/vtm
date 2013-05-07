@@ -66,6 +66,7 @@ public class MapView extends RelativeLayout {
 
 	private int mWidth;
 	private int mHeight;
+	private boolean mInitialized;
 
 	// FIXME: keep until old pbmap reader is removed
 	public static boolean enableClosePolygons = false;
@@ -133,6 +134,7 @@ public class MapView extends RelativeLayout {
 
 		addView(mGLView, params);
 
+		clearMap();
 		redrawMap(false);
 	}
 
@@ -147,7 +149,7 @@ public class MapView extends RelativeLayout {
 
 		mRotationEnabled = true;
 
-		//mLayerManager.add(new GenericOverlay(this, new GridOverlay(this)));
+		//mLayerManager.add(new GenericOverlay(this, new GridRenderLayer(this)));
 		mLayerManager.add(new BuildingOverlay(this, baseLayer.getTileLayer()));
 		mLayerManager.add(new LabelingOverlay(this, baseLayer.getTileLayer()));
 
@@ -161,13 +163,16 @@ public class MapView extends RelativeLayout {
 	public MapTileLayer setBaseMap(BitmapTileLayer tileLayer) {
 		mLayerManager.add(0, new MapEventLayer(this));
 		mLayerManager.add(1, tileLayer);
-
-		//mRotationEnabled = true;
 		return null;
 	}
 
 	void destroy() {
 		mLayerManager.destroy();
+	}
+
+	public void onStop() {
+		Log.d(TAG, "onStop");
+		//mLayerManager.destroy();
 	}
 
 	private boolean mPausing = false;
@@ -181,16 +186,10 @@ public class MapView extends RelativeLayout {
 	}
 
 	void onResume() {
-
 		if (this.mCompassEnabled)
 			mCompass.enable();
 
 		mPausing = false;
-	}
-
-	public void onStop() {
-		Log.d(TAG, "onStop");
-		//mLayerManager.destroy();
 	}
 
 	@Override
@@ -212,11 +211,13 @@ public class MapView extends RelativeLayout {
 		mWidth = width;
 		mHeight = height;
 
-		if (width != 0 && height != 0)
+		mInitialized = (mWidth > 0 && mWidth > 0);
+
+		if (mInitialized)
 			mMapViewPosition.setViewport(width, height);
 	}
 
-	boolean mWaitRedraw;
+	/* private */boolean mWaitRedraw;
 
 	private final Runnable mRedrawRequest = new Runnable() {
 		@Override
@@ -229,49 +230,62 @@ public class MapView extends RelativeLayout {
 	/**
 	 * Request to redraw the map when a global state like position,
 	 * datasource or theme has changed. This will trigger a call
-	 * to onUpdate() to all Layers.
+	 * to onUpdate() for all Layers.
 	 *
 	 * @param requestRender
 	 *            also request to draw a frame
 	 */
 	public void redrawMap(boolean requestRender) {
-		if (requestRender) {
-			if (!(mPausing || mWidth == 0 || mHeight == 0))
-				mGLView.requestRender();
-		}
+		if (requestRender && !mClearMap && !mPausing && mInitialized)
+			mGLView.requestRender();
+
 		if (!mWaitRedraw) {
 			mWaitRedraw = true;
 			post(mRedrawRequest);
 		}
+	}
+	private boolean mClearMap;
+
+	public void clearMap(){
+		mClearMap = true;
 	}
 
 	/**
 	 * Request to render a frame. Use this for animations.
 	 */
 	public void render() {
-		mGLView.requestRender();
+		if (mClearMap)
+			redrawMap(false);
+		else
+			mGLView.requestRender();
 	}
 
 	/**
-	 * Calculates all necessary tiles and adds jobs accordingly.
+	 * Update all Layers on Main thread.
 	 *
-	 * @param forceRedraw TODO
+	 * @param forceRedraw also render frame
+	 *            FIXME (does nothing atm)
 	 */
 	void redrawMapInternal(boolean forceRedraw) {
-		boolean changed = false;
+		boolean changed = forceRedraw;
 
-		if (mPausing || mWidth == 0 || mHeight == 0)
+		if (mPausing || !mInitialized)
 			return;
 
-		if (forceRedraw) {
+		if (forceRedraw && !mClearMap)
 			mGLView.requestRender();
-			changed = true;
-		}
 
 		// get the current MapPosition
 		changed |= mMapViewPosition.getMapPosition(mMapPosition);
 
-		mLayerManager.onUpdate(mMapPosition, changed);
+		mLayerManager.onUpdate(mMapPosition, changed, mClearMap);
+
+		// delay redraw until all layers had the chance to clear
+		// their state.
+		if (mClearMap){
+			mGLView.requestRender();
+			mClearMap =false;
+		}
 	}
 
 	/**

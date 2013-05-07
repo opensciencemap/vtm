@@ -37,13 +37,28 @@ public abstract class Pool<T extends Inlist<T>> {
 		pool = item;
 	}
 
+	public void releaseAll(T item) {
+		if (item == null)
+			return;
+
+		while (item != null) {
+			T next = item.next;
+
+			clearItem(item);
+
+			item.next = pool;
+			pool = item;
+
+			item = next;
+		}
+	}
+
 	// remove 'item' from 'list' and add back to pool
 	public T release(T list, T item) {
 		if (item == null)
 			return list;
 
 		clearItem(item);
-
 
 		if (item == list) {
 			T ret = item.next;

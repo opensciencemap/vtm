@@ -14,6 +14,7 @@
  */
 package org.oscim.layers.overlay;
 
+import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.TileRenderLayer;
 import org.oscim.renderer.layers.TextRenderLayer;
 import org.oscim.view.MapView;
@@ -32,6 +33,12 @@ public class LabelingOverlay extends Overlay {
 		super(mapView);
 		mTextLayer = new TextRenderLayer(mapView, tileRenderLayer);
 		mLayer = mTextLayer;
+	}
+
+	@Override
+	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+		if (clear)
+			mTextLayer.clearLabels();
 	}
 
 	private int multi;
