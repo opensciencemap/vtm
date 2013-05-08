@@ -30,24 +30,24 @@ public class Tag {
 	/**
 	 * The key of the name OpenStreetMap tag.
 	 */
-	public static final String TAG_KEY_NAME = "name".intern();
+	public static final String TAG_KEY_NAME = "name";
 
 	/**
 	 * The key of the reference OpenStreetMap tag.
 	 */
-	public static final String TAG_KEY_REF = "ref".intern();
+	public static final String TAG_KEY_REF = "ref";
 
 	/**
 	 * The key of the elevation OpenStreetMap tag.
 	 */
-	public static final String TAG_KEY_ELE = "ele".intern();
+	public static final String TAG_KEY_ELE = "ele";
 
-	public static final String TAG_KEY_AMENITY = "amenity".intern();
+	public static final String TAG_KEY_AMENITY = "amenity";
 
 	/**
 	 * The key of the elevation OpenStreetMap tag.
 	 */
-	public static final String TAG_KEY_BUILDING = "building".intern();
+	public static final String TAG_KEY_BUILDING = "building";
 
 	/**
 	 * The key of this tag.
