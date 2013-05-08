@@ -20,634 +20,632 @@ public class Tags {
 	public final static int MAX = 628;
 	public final static int LIMIT = 1024;
 
-	private static final String s_limited = "limited".intern();
-	private static final String s_chain = "chain".intern();
-	private static final String s_viaduct = "viaduct".intern();
-	private static final String s_department_store = "department_store".intern();
-	private static final String s_factory = "factory".intern();
-	private static final String s_recreation_ground = "recreation_ground".intern();
-	private static final String s_nature_reserve = "nature_reserve".intern();
-	private static final String s_apartment = "apartment".intern();
-	private static final String s_preserved = "preserved".intern();
-	private static final String s_stationery = "stationery".intern();
-	private static final String s_gravel = "gravel".intern();
-	private static final String s_hill = "hill".intern();
-	private static final String s_water_well = "water_well".intern();
-	private static final String s_garden = "garden".intern();
-	private static final String s_permissive = "permissive".intern();
-	private static final String s_deli = "deli".intern();
-	private static final String s_industrial_retail = "industrial;retail".intern();
-	private static final String s_city_wall = "city_wall".intern();
-	private static final String s_artwork = "artwork".intern();
-	private static final String s_chapel = "chapel".intern();
-	private static final String s_school = "school".intern();
-	private static final String s_caravan_site = "caravan_site".intern();
-	private static final String s_reservoir_watershed = "reservoir_watershed".intern();
-	private static final String s_local_authority = "local_authority".intern();
-	private static final String s_miniature_golf = "miniature_golf".intern();
-	private static final String s_bus_stop = "bus_stop".intern();
-	private static final String s_convenience = "convenience".intern();
-	private static final String s_kissing_gate = "kissing_gate".intern();
-	private static final String s_subway = "subway".intern();
-	private static final String s_cutline = "cutline".intern();
-	private static final String s_disused = "disused".intern();
-	private static final String s_clothes = "clothes".intern();
-	private static final String s_bicycle = "bicycle".intern();
-	private static final String s_meadow = "meadow".intern();
-	private static final String s_fence = "fence".intern();
-	private static final String s_video = "video".intern();
-	private static final String s_monorail = "monorail".intern();
-	private static final String s_clock = "clock".intern();
-	private static final String s_dirt = "dirt".intern();
-	private static final String s_border_control = "border_control".intern();
-	private static final String s_access = "access".intern();
-	private static final String s_public = "public".intern();
-	private static final String s_fast_food = "fast_food".intern();
-	private static final String s_transportation = "transportation".intern();
-	private static final String s_commercial = "commercial".intern();
-	private static final String s_water = "water".intern();
-	private static final String s_beacon = "beacon".intern();
-	private static final String s_trunk = "trunk".intern();
-	private static final String s_path = "path".intern();
-	private static final String s_bicycle_rental = "bicycle_rental".intern();
-	private static final String s_miniature = "miniature".intern();
-	private static final String s_car_parts = "car_parts".intern();
-	private static final String s_light_rail = "light_rail".intern();
-	private static final String s_military = "military".intern();
-	private static final String s_bog = "bog".intern();
-	private static final String s_hiking = "hiking".intern();
-	private static final String s_lift_gate = "lift_gate".intern();
-	private static final String s_private = "private".intern();
-	private static final String s_county = "county".intern();
-	private static final String s_secondary_link = "secondary_link".intern();
-	private static final String s_marker = "marker".intern();
-	private static final String s_islet = "islet".intern();
-	private static final String s_holding_position = "holding_position".intern();
-	private static final String s_tertiary = "tertiary".intern();
-	private static final String s_water_park = "water_park".intern();
-	private static final String s_stream = "stream".intern();
-	private static final String s_hospital = "hospital".intern();
-	private static final String s_destination = "destination".intern();
-	private static final String s_MDF = "MDF".intern();
-	private static final String s_sports = "sports".intern();
-	private static final String s_vineyard = "vineyard".intern();
-	private static final String s_music = "music".intern();
-	private static final String s_6 = "6".intern();
-	private static final String s_entrance = "entrance".intern();
-	private static final String s_beauty = "beauty".intern();
-	private static final String s_give_way = "give_way".intern();
-	private static final String s_kiosk = "kiosk".intern();
-	private static final String s_stone = "stone".intern();
-	private static final String s_grass_paver = "grass_paver".intern();
-	private static final String s_deciduous = "deciduous".intern();
-	private static final String s_train = "train".intern();
-	private static final String s_organic = "organic".intern();
-	private static final String s_farmyard = "farmyard".intern();
-	private static final String s_riverbank = "riverbank".intern();
-	private static final String s_doityourself = "doityourself".intern();
-	private static final String s_town = "town".intern();
-	private static final String s_dog_park = "dog_park".intern();
-	private static final String s_village_green = "village_green".intern();
-	private static final String s_tunnel = "tunnel".intern();
-	private static final String s_car = "car".intern();
-	private static final String s_roof = "roof".intern();
-	private static final String s_mall = "mall".intern();
-	private static final String s_ferry_terminal = "ferry_terminal".intern();
-	private static final String s_cave_entrance = "cave_entrance".intern();
-	private static final String s_detached = "detached".intern();
-	private static final String s_concrete_plates = "concrete:plates".intern();
-	private static final String s_public_building = "public_building".intern();
-	private static final String s_buffer_stop = "buffer_stop".intern();
-	private static final String s_lock = "lock".intern();
-	private static final String s_dolphin = "dolphin".intern();
-	private static final String s_taxiway = "taxiway".intern();
-	private static final String s_hunting_stand = "hunting_stand".intern();
-	private static final String s_estate_agent = "estate_agent".intern();
-	private static final String s_station = "station".intern();
-	private static final String s_car_repair = "car_repair".intern();
-	private static final String s_dyke = "dyke".intern();
-	private static final String s_hangar = "hangar".intern();
-	private static final String s_information = "information".intern();
-	private static final String s_1 = "1".intern();
-	private static final String s_forest = "forest".intern();
-	private static final String s_gate = "gate".intern();
-	private static final String s_beach = "beach".intern();
-	private static final String s_laundry = "laundry".intern();
-	private static final String s_speed_camera = "speed_camera".intern();
-	private static final String s_staircase = "staircase".intern();
-	private static final String s_farm = "farm".intern();
-	private static final String s_stop = "stop".intern();
-	private static final String s_bump_gate = "bump_gate".intern();
-	private static final String s_motorway = "motorway".intern();
-	private static final String s_water_tower = "water_tower".intern();
-	private static final String s_abutters = "abutters".intern();
-	private static final String s_driving_school = "driving_school".intern();
-	private static final String s_natural = "natural".intern();
-	private static final String s_orchard = "orchard".intern();
-	private static final String s_wheelchair = "wheelchair".intern();
-	private static final String s_swimming_pool = "swimming_pool".intern();
-	private static final String s_switch = "switch".intern();
-	private static final String s_block = "block".intern();
-	private static final String s_turnstile = "turnstile".intern();
-	private static final String s_camp_site = "camp_site".intern();
-	private static final String s_shoes = "shoes".intern();
-	private static final String s_reservoir = "reservoir".intern();
-	private static final String s_pebblestone = "pebblestone".intern();
-	private static final String s_stile = "stile".intern();
-	private static final String s_embassy = "embassy".intern();
-	private static final String s_postal_code = "postal_code".intern();
-	private static final String s_retaining_wall = "retaining_wall".intern();
-	private static final String s_bridleway = "bridleway".intern();
-	private static final String s_pitch = "pitch".intern();
-	private static final String s_agricultural = "agricultural".intern();
-	private static final String s_post_office = "post_office".intern();
-	private static final String s_parking_fuel = "parking;fuel".intern();
-	private static final String s_bureau_de_change = "bureau_de_change".intern();
-	private static final String s_mini_roundabout = "mini_roundabout".intern();
-	private static final String s_hov = "hov".intern();
-	private static final String s_police = "police".intern();
-	private static final String s_courthouse = "courthouse".intern();
-	private static final String s_raceway = "raceway".intern();
-	private static final String s_kindergarten = "kindergarten".intern();
-	private static final String s_attraction = "attraction".intern();
-	private static final String s_marsh = "marsh".intern();
-	private static final String s_reservoir_covered = "reservoir_covered".intern();
-	private static final String s_petroleum_well = "petroleum_well".intern();
-	private static final String s_silo = "silo".intern();
-	private static final String s_toys = "toys".intern();
-	private static final String s_apron = "apron".intern();
-	private static final String s_halt = "halt".intern();
-	private static final String s_dam = "dam".intern();
-	private static final String s_golf_course = "golf_course".intern();
-	private static final String s_detour = "detour".intern();
-	private static final String s_tree_row = "tree_row".intern();
-	private static final String s_copyshop = "copyshop".intern();
-	private static final String s_milestone = "milestone".intern();
-	private static final String s_foot = "foot".intern();
-	private static final String s_tourism = "tourism".intern();
-	private static final String s_bank = "bank".intern();
-	private static final String s_dry_cleaning = "dry_cleaning".intern();
-	private static final String s_tram = "tram".intern();
-	private static final String s_trolleybus = "trolleybus".intern();
-	private static final String s_university = "university".intern();
-	private static final String s_hampshire_gate = "hampshire_gate".intern();
-	private static final String s_embankment = "embankment".intern();
-	private static final String s_rock = "rock".intern();
-	private static final String s_crossing = "crossing".intern();
-	private static final String s_volcano = "volcano".intern();
-	private static final String s_greengrocer = "greengrocer".intern();
-	private static final String s_kerb = "kerb".intern();
-	private static final String s_waste_disposal = "waste_disposal".intern();
-	private static final String s_grave_yard = "grave_yard".intern();
-	private static final String s_coniferous = "coniferous".intern();
-	private static final String s_house = "house".intern();
-	private static final String s_books = "books".intern();
-	private static final String s_neighbourhood = "neighbourhood".intern();
-	private static final String s_hostel = "hostel".intern();
-	private static final String s_alcohol = "alcohol".intern();
-	private static final String s_restricted = "restricted".intern();
-	private static final String s_motel = "motel".intern();
-	private static final String s_sand = "sand".intern();
-	private static final String s_fishmonger = "fishmonger".intern();
-	private static final String s_fountain = "fountain".intern();
-	private static final String s_playground = "playground".intern();
-	private static final String s_7 = "7".intern();
-	private static final String s_parking_aisle = "parking_aisle".intern();
-	private static final String s_protected_area = "protected_area".intern();
-	private static final String s_electronics = "electronics".intern();
-	private static final String s_Paved = "Paved".intern();
-	private static final String s_highway = "highway".intern();
-	private static final String s_fine_gravel = "fine_gravel".intern();
-	private static final String s_barrier = "barrier".intern();
-	private static final String s_hairdresser = "hairdresser".intern();
-	private static final String s_post_box = "post_box".intern();
-	private static final String s_pub = "pub".intern();
-	private static final String s_coastline = "coastline".intern();
-	private static final String s_marina = "marina".intern();
-	private static final String s_reedbed = "reedbed".intern();
-	private static final String s_biergarten = "biergarten".intern();
-	private static final String s_dismantled = "dismantled".intern();
-	private static final String s_farmland = "farmland".intern();
-	private static final String s_yard = "yard".intern();
-	private static final String s_route = "route".intern();
-	private static final String s_atm = "atm".intern();
-	private static final String s_place = "place".intern();
-	private static final String s_bus_station = "bus_station".intern();
-	private static final String s_retail = "retail".intern();
-	private static final String s_industrial = "industrial".intern();
-	private static final String s_municipality = "municipality".intern();
-	private static final String s_primary = "primary".intern();
-	private static final String s_nursing_home = "nursing_home".intern();
-	private static final String s_florist = "florist".intern();
-	private static final String s_ditch = "ditch".intern();
-	private static final String s_national_park = "national_park".intern();
-	private static final String s_city = "city".intern();
-	private static final String s_confectionery = "confectionery".intern();
-	private static final String s_service = "service".intern();
-	private static final String s_unknown = "unknown".intern();
-	private static final String s_cycle_barrier = "cycle_barrier".intern();
-	private static final String s_elevator = "elevator".intern();
-	private static final String s_2 = "2".intern();
-	private static final String s_car_rental = "car_rental".intern();
-	private static final String s_flagpole = "flagpole".intern();
-	private static final String s_cabin = "cabin".intern();
-	private static final String s_paved = "paved".intern();
-	private static final String s_guest_house = "guest_house".intern();
-	private static final String s_mobile_phone = "mobile_phone".intern();
-	private static final String s_lot = "lot".intern();
-	private static final String s_quarry = "quarry".intern();
-	private static final String s_train_station = "train_station".intern();
-	private static final String s_hotel = "hotel".intern();
-	private static final String s_park = "park".intern();
-	private static final String s_hut = "hut".intern();
-	private static final String s_dentist = "dentist".intern();
-	private static final String s_doctors = "doctors".intern();
-	private static final String s_greenhouse = "greenhouse".intern();
-	private static final String s_11 = "11".intern();
-	private static final String s_10 = "10".intern();
-	private static final String s_theme_park = "theme_park".intern();
-	private static final String s_tree = "tree".intern();
-	private static final String s_shower = "shower".intern();
-	private static final String s_siding = "siding".intern();
-	private static final String s_aeroway = "aeroway".intern();
-	private static final String s_emergency_access_point = "emergency_access_point"
-			.intern();
-	private static final String s_watermill = "watermill".intern();
-	private static final String s_college = "college".intern();
-	private static final String s_landuse = "landuse".intern();
-	private static final String s_tracktype = "tracktype".intern();
-	private static final String s_ferry = "ferry".intern();
-	private static final String s_bridge = "bridge".intern();
-	private static final String s_vacant = "vacant".intern();
-	private static final String s_cattle_grid = "cattle_grid".intern();
-	private static final String s_brownfield = "brownfield".intern();
-	private static final String s_allotments = "allotments".intern();
-	private static final String s_alley = "alley".intern();
-	private static final String s_pedestrian = "pedestrian".intern();
-	private static final String s_borough = "borough".intern();
-	private static final String s_bare_rock = "bare_rock".intern();
-	private static final String s_motorcycle = "motorcycle".intern();
-	private static final String s_bakery = "bakery".intern();
-	private static final String s_zoo = "zoo".intern();
-	private static final String s_scree = "scree".intern();
-	private static final String s_fire_station = "fire_station".intern();
-	private static final String s_theatre = "theatre".intern();
-	private static final String s_track = "track".intern();
-	private static final String s_reinforced_slope = "reinforced_slope".intern();
-	private static final String s_slipway = "slipway".intern();
-	private static final String s_mangrove = "mangrove".intern();
-	private static final String s_aerodrome = "aerodrome".intern();
-	private static final String s_byway = "byway".intern();
-	private static final String s_metal = "metal".intern();
-	private static final String s_swamp = "swamp".intern();
-	private static final String s_construction = "construction".intern();
-	private static final String s_grassland = "grassland".intern();
-	private static final String s_shop = "shop".intern();
-	private static final String s_soakhole = "soakhole".intern();
-	private static final String s_asphalt = "asphalt".intern();
-	private static final String s_social_facility = "social_facility".intern();
-	private static final String s_isolated_dwelling = "isolated_dwelling".intern();
-	private static final String s_hamlet = "hamlet".intern();
-	private static final String s_picnic_table = "picnic_table".intern();
-	private static final String s_artificial = "artificial".intern();
-	private static final String s_earth = "earth".intern();
-	private static final String s_grit_bin = "grit_bin".intern();
-	private static final String s_ground = "ground".intern();
-	private static final String s_groyne = "groyne".intern();
-	private static final String s_office = "office".intern();
-	private static final String s_state = "state".intern();
-	private static final String s_terminal = "terminal".intern();
-	private static final String s_wood = "wood".intern();
-	private static final String s_fuel = "fuel".intern();
-	private static final String s_8 = "8".intern();
-	private static final String s_garden_centre = "garden_centre".intern();
-	private static final String s_horse_riding = "horse_riding".intern();
-	private static final String s_viewpoint = "viewpoint".intern();
-	private static final String s_designated = "designated".intern();
-	private static final String s_leisure = "leisure".intern();
-	private static final String s_waste_basket = "waste_basket".intern();
-	private static final String s_hifi = "hifi".intern();
-	private static final String s_hedge = "hedge".intern();
-	private static final String s_spur = "spur".intern();
-	private static final String s_chimney = "chimney".intern();
-	private static final String s_secondary = "secondary".intern();
-	private static final String s_rest_area = "rest_area".intern();
-	private static final String s_bar = "bar".intern();
-	private static final String s_bay = "bay".intern();
-	private static final String s_common = "common".intern();
-	private static final String s_river = "river".intern();
-	private static final String s_ruins = "ruins".intern();
-	private static final String s_terrace = "terrace".intern();
-	private static final String s_art = "art".intern();
-	private static final String s_residental = "residental".intern();
-	private static final String s_newsagent = "newsagent".intern();
-	private static final String s_turntable = "turntable".intern();
-	private static final String s_computer = "computer".intern();
-	private static final String s_wetland = "wetland".intern();
-	private static final String s_driveway = "driveway".intern();
-	private static final String s_parking = "parking".intern();
-	private static final String s_compacted = "compacted".intern();
-	private static final String s_barn = "barn".intern();
-	private static final String s_alpine_hut = "alpine_hut".intern();
-	private static final String s_wire_fence = "wire_fence".intern();
-	private static final String s_unpaved = "unpaved".intern();
-	private static final String s_dormitory = "dormitory".intern();
-	private static final String s_mud = "mud".intern();
-	private static final String s_3 = "3".intern();
-	private static final String s_semi = "semi".intern();
-	private static final String s_boundary = "boundary".intern();
-	private static final String s_field_boundary = "field_boundary".intern();
-	private static final String s_beverages = "beverages".intern();
-	private static final String s_supermarket = "supermarket".intern();
-	private static final String s_store = "store".intern();
-	private static final String s_restaurant = "restaurant".intern();
-	private static final String s_region = "region".intern();
-	private static final String s_variety_store = "variety_store".intern();
-	private static final String s_saltmarsh = "saltmarsh".intern();
-	private static final String s_landform = "landform".intern();
-	private static final String s_helipad = "helipad".intern();
-	private static final String s_railway = "railway".intern();
-	private static final String s_greenhouse_horticulture = "greenhouse_horticulture"
-			.intern();
-	private static final String s_wall = "wall".intern();
-	private static final String s_recycling = "recycling".intern();
-	private static final String s_passing_place = "passing_place".intern();
-	private static final String s_church = "church".intern();
-	private static final String s_pharmacy = "pharmacy".intern();
-	private static final String s_lighthouse = "lighthouse".intern();
-	private static final String s_platform = "platform".intern();
-	private static final String s_cinema = "cinema".intern();
-	private static final String s_political = "political".intern();
-	private static final String s_stadium = "stadium".intern();
-	private static final String s_basin = "basin".intern();
-	private static final String s_gasometer = "gasometer".intern();
-	private static final String s_bicycle_parking = "bicycle_parking".intern();
-	private static final String s_bbq = "bbq".intern();
-	private static final String s_incline_steep = "incline_steep".intern();
-	private static final String s_drinking_water = "drinking_water".intern();
-	private static final String s_living_street = "living_street".intern();
-	private static final String s_chalet = "chalet".intern();
-	private static final String s_narrow_gauge = "narrow_gauge".intern();
-	private static final String s_prison = "prison".intern();
-	private static final String s_mine = "mine".intern();
-	private static final String s_level_crossing = "level_crossing".intern();
-	private static final String s_water_works = "water_works".intern();
-	private static final String s_street_lamp = "street_lamp".intern();
-	private static final String s_main = "main".intern();
-	private static final String s_tank = "tank".intern();
-	private static final String s_abandoned = "abandoned".intern();
-	private static final String s_ski = "ski".intern();
-	private static final String s_runway = "runway".intern();
-	private static final String s_parking_space = "parking_space".intern();
-	private static final String s_dirt_sand = "dirt/sand".intern();
-	private static final String s_salt_pond = "salt_pond".intern();
-	private static final String s_hedge_bank = "hedge_bank".intern();
-	private static final String s_amenity = "amenity".intern();
-	private static final String s_telephone = "telephone".intern();
-	private static final String s_surface = "surface".intern();
-	private static final String s_travel_agency = "travel_agency".intern();
-	private static final String s_hardware = "hardware".intern();
-	private static final String s_wastewater_plant = "wastewater_plant".intern();
-	private static final String s_waterway = "waterway".intern();
-	private static final String s_butcher = "butcher".intern();
-	private static final String s_surveillance = "surveillance".intern();
-	private static final String s_Dirt_Sand = "Dirt/Sand".intern();
-	private static final String s_9 = "9".intern();
-	private static final String s_windmill = "windmill".intern();
-	private static final String s_picnic_site = "picnic_site".intern();
-	private static final String s_rail = "rail".intern();
-	private static final String s_cement = "cement".intern();
-	private static final String s_sauna = "sauna".intern();
-	private static final String s_suburb = "suburb".intern();
-	private static final String s_waterfall = "waterfall".intern();
-	private static final String s_bunker = "bunker".intern();
-	private static final String s_ice_cream = "ice_cream".intern();
-	private static final String s_culvert = "culvert".intern();
-	private static final String s_drain = "drain".intern();
-	private static final String s_dock = "dock".intern();
-	private static final String s_glasshouse = "glasshouse".intern();
-	private static final String s_no = "no".intern();
-	private static final String s_well = "well".intern();
-	private static final String s_wet_meadow = "wet_meadow".intern();
-	private static final String s_concrete = "concrete".intern();
-	private static final String s_dismount = "dismount".intern();
-	private static final String s_vending_machine = "vending_machine".intern();
-	private static final String s_oneway = "oneway".intern();
-	private static final String s_taxi = "taxi".intern();
-	private static final String s_outdoor = "outdoor".intern();
-	private static final String s_proposed = "proposed".intern();
-	private static final String s_sally_port = "sally_port".intern();
-	private static final String s_photo = "photo".intern();
-	private static final String s_plant_nursery = "plant_nursery".intern();
-	private static final String s_clinic = "clinic".intern();
-	private static final String s_fishing = "fishing".intern();
-	private static final String s_yes = "yes".intern();
-	private static final String s_turning_circle = "turning_circle".intern();
-	private static final String s_toilets = "toilets".intern();
-	private static final String s_guard_rail = "guard_rail".intern();
-	private static final String s_townhall = "townhall".intern();
-	private static final String s_community_centre = "community_centre".intern();
-	private static final String s_residential = "residential".intern();
-	private static final String s_cemetery = "cemetery".intern();
-	private static final String s_survey_point = "survey_point".intern();
-	private static final String s_bench = "bench".intern();
-	private static final String s_4 = "4".intern();
-	private static final String s_bollard = "bollard".intern();
-	private static final String s_sports_centre = "sports_centre".intern();
-	private static final String s_paving_stones_30 = "paving_stones:30".intern();
-	private static final String s_administrative = "administrative".intern();
-	private static final String s_Building = "Building".intern();
-	private static final String s_customers = "customers".intern();
-	private static final String s_emergency = "emergency".intern();
-	private static final String s_motorway_junction = "motorway_junction".intern();
-	private static final String s_grade1 = "grade1".intern();
-	private static final String s_grade3 = "grade3".intern();
-	private static final String s_grade2 = "grade2".intern();
-	private static final String s_grade5 = "grade5".intern();
-	private static final String s_grade4 = "grade4".intern();
-	private static final String s_lock_gate = "lock_gate".intern();
-	private static final String s_furniture = "furniture".intern();
-	private static final String s_place_of_worship = "place_of_worship".intern();
-	private static final String s_optician = "optician".intern();
-	private static final String s_gift = "gift".intern();
-	private static final String s_parking_entrance = "parking_entrance".intern();
-	private static final String s_garage = "garage".intern();
-	private static final String s_tram_stop = "tram_stop".intern();
-	private static final String s_steps = "steps".intern();
-	private static final String s_tower = "tower".intern();
-	private static final String s_works = "works".intern();
-	private static final String s_shed = "shed".intern();
-	private static final String s_car_sharing = "car_sharing".intern();
-	private static final String s_apartments = "apartments".intern();
-	private static final String s_spring = "spring".intern();
-	private static final String s_village = "village".intern();
-	private static final String s_library = "library".intern();
-	private static final String s_emergency_access = "emergency_access".intern();
-	private static final String s_home = "home".intern();
-	private static final String s_farm_auxiliary = "farm_auxiliary".intern();
-	private static final String s_primary_link = "primary_link".intern();
-	private static final String s_toll_booth = "toll_booth".intern();
-	private static final String s_jewelry = "jewelry".intern();
-	private static final String s_pet = "pet".intern();
-	private static final String s_veterinary = "veterinary".intern();
-	private static final String s_man_made = "man_made".intern();
-	private static final String s_motorway_link = "motorway_link".intern();
-	private static final String s_offices = "offices".intern();
-	private static final String s_power = "power".intern();
-	private static final String s_weir = "weir".intern();
-	private static final String s_unsurfaced = "unsurfaced".intern();
-	private static final String s_tertiary_link = "tertiary_link".intern();
-	private static final String s_trunk_link = "trunk_link".intern();
-	private static final String s_tyres = "tyres".intern();
-	private static final String s_paving_stones = "paving_stones".intern();
-	private static final String s_pipeline = "pipeline".intern();
-	private static final String s_census = "census".intern();
-	private static final String s_incline = "incline".intern();
-	private static final String s_footway = "footway".intern();
-	private static final String s_drive_through = "drive-through".intern();
-	private static final String s_island = "island".intern();
-	private static final String s_monitoring_station = "monitoring_station".intern();
-	private static final String s_nightclub = "nightclub".intern();
-	private static final String s_unclassified = "unclassified".intern();
-	private static final String s_aquaculture = "aquaculture".intern();
-	private static final String s_mixed = "mixed".intern();
-	private static final String s_road = "road".intern();
-	private static final String s_greenfield = "greenfield".intern();
-	private static final String s_breakwater = "breakwater".intern();
-	private static final String s_services = "services".intern();
-	private static final String s_railway_crossing = "railway_crossing".intern();
-	private static final String s_residentiel1 = "residentiel1".intern();
-	private static final String s_canal = "canal".intern();
-	private static final String s__1 = "-1".intern();
-	private static final String s_ridge = "ridge".intern();
-	private static final String s_fabric = "fabric".intern();
-	private static final String s_museum = "museum".intern();
-	private static final String s_communications_tower = "communications_tower".intern();
-	private static final String s_semi_detached = "semi-detached".intern();
-	private static final String s_conservation = "conservation".intern();
-	private static final String s_way = "way".intern();
-	private static final String s_wood_fence = "wood_fence".intern();
-	private static final String s_manufacture = "manufacture".intern();
-	private static final String s_admin_level = "admin_level".intern();
-	private static final String s_building_concrete = "building_concrete".intern();
-	private static final String s_bus = "bus".intern();
-	private static final String s_collapsed = "collapsed".intern();
-	private static final String s_ford = "ford".intern();
-	private static final String s_delivery = "delivery".intern();
-	private static final String s_garages = "garages".intern();
-	private static final String s_funeral_directors = "funeral_directors".intern();
-	private static final String s_land = "land".intern();
-	private static final String s_interlock = "interlock".intern();
-	private static final String s_reef = "reef".intern();
-	private static final String s_crane = "crane".intern();
-	private static final String s_true = "true".intern();
-	private static final String s_storage_tank = "storage_tank".intern();
-	private static final String s_official = "official".intern();
-	private static final String s_subway_entrance = "subway_entrance".intern();
-	private static final String s_mtb = "mtb".intern();
-	private static final String s_grass = "grass".intern();
-	private static final String s_marketplace = "marketplace".intern();
-	private static final String s_rapids = "rapids".intern();
-	private static final String s_car_wash = "car_wash".intern();
-	private static final String s_general = "general".intern();
-	private static final String s_cafe = "cafe".intern();
-	private static final String s_locality = "locality".intern();
-	private static final String s_glacier = "glacier".intern();
-	private static final String s_storage = "storage".intern();
-	private static final String s_cycleway = "cycleway".intern();
-	private static final String s_forestry = "forestry".intern();
-	private static final String s_field = "field".intern();
-	private static final String s_5 = "5".intern();
-	private static final String s_arts_centre = "arts_centre".intern();
-	private static final String s_warehouse = "warehouse".intern();
-	private static final String s_chemist = "chemist".intern();
-	private static final String s_pier = "pier".intern();
-	private static final String s_scrub = "scrub".intern();
-	private static final String s_shelter = "shelter".intern();
-	private static final String s_emergency_phone = "emergency_phone".intern();
-	private static final String s_tidalflat = "tidalflat".intern();
-	private static final String s_cobblestone = "cobblestone".intern();
-	private static final String s_fell = "fell".intern();
-	private static final String s_peak = "peak".intern();
-	private static final String s_charging_station = "charging_station".intern();
-	private static final String s_cliff = "cliff".intern();
-	private static final String s_building = "building".intern();
-	private static final String s_fire_hydrant = "fire_hydrant".intern();
-	private static final String s_traffic_signals = "traffic_signals".intern();
-	private static final String s_heath = "heath".intern();
-	private static final String s_landfill = "landfill".intern();
-	private static final String s_mast = "mast".intern();
-	private static final String s_boutique = "boutique".intern();
-	private static final String s_boat_storage = "boat_storage".intern();
-	private static final String s_area = "area".intern();
-	private static final String s_urban = "urban".intern();
+	private static final String s_limited = "limited";
+	private static final String s_chain = "chain";
+	private static final String s_viaduct = "viaduct";
+	private static final String s_department_store = "department_store";
+	private static final String s_factory = "factory";
+	private static final String s_recreation_ground = "recreation_ground";
+	private static final String s_nature_reserve = "nature_reserve";
+	private static final String s_apartment = "apartment";
+	private static final String s_preserved = "preserved";
+	private static final String s_stationery = "stationery";
+	private static final String s_gravel = "gravel";
+	private static final String s_hill = "hill";
+	private static final String s_water_well = "water_well";
+	private static final String s_garden = "garden";
+	private static final String s_permissive = "permissive";
+	private static final String s_deli = "deli";
+	private static final String s_industrial_retail = "industrial;retail";
+	private static final String s_city_wall = "city_wall";
+	private static final String s_artwork = "artwork";
+	private static final String s_chapel = "chapel";
+	private static final String s_school = "school";
+	private static final String s_caravan_site = "caravan_site";
+	private static final String s_reservoir_watershed = "reservoir_watershed";
+	private static final String s_local_authority = "local_authority";
+	private static final String s_miniature_golf = "miniature_golf";
+	private static final String s_bus_stop = "bus_stop";
+	private static final String s_convenience = "convenience";
+	private static final String s_kissing_gate = "kissing_gate";
+	private static final String s_subway = "subway";
+	private static final String s_cutline = "cutline";
+	private static final String s_disused = "disused";
+	private static final String s_clothes = "clothes";
+	private static final String s_bicycle = "bicycle";
+	private static final String s_meadow = "meadow";
+	private static final String s_fence = "fence";
+	private static final String s_video = "video";
+	private static final String s_monorail = "monorail";
+	private static final String s_clock = "clock";
+	private static final String s_dirt = "dirt";
+	private static final String s_border_control = "border_control";
+	private static final String s_access = "access";
+	private static final String s_public = "public";
+	private static final String s_fast_food = "fast_food";
+	private static final String s_transportation = "transportation";
+	private static final String s_commercial = "commercial";
+	private static final String s_water = "water";
+	private static final String s_beacon = "beacon";
+	private static final String s_trunk = "trunk";
+	private static final String s_path = "path";
+	private static final String s_bicycle_rental = "bicycle_rental";
+	private static final String s_miniature = "miniature";
+	private static final String s_car_parts = "car_parts";
+	private static final String s_light_rail = "light_rail";
+	private static final String s_military = "military";
+	private static final String s_bog = "bog";
+	private static final String s_hiking = "hiking";
+	private static final String s_lift_gate = "lift_gate";
+	private static final String s_private = "private";
+	private static final String s_county = "county";
+	private static final String s_secondary_link = "secondary_link";
+	private static final String s_marker = "marker";
+	private static final String s_islet = "islet";
+	private static final String s_holding_position = "holding_position";
+	private static final String s_tertiary = "tertiary";
+	private static final String s_water_park = "water_park";
+	private static final String s_stream = "stream";
+	private static final String s_hospital = "hospital";
+	private static final String s_destination = "destination";
+	private static final String s_MDF = "MDF";
+	private static final String s_sports = "sports";
+	private static final String s_vineyard = "vineyard";
+	private static final String s_music = "music";
+	private static final String s_6 = "6";
+	private static final String s_entrance = "entrance";
+	private static final String s_beauty = "beauty";
+	private static final String s_give_way = "give_way";
+	private static final String s_kiosk = "kiosk";
+	private static final String s_stone = "stone";
+	private static final String s_grass_paver = "grass_paver";
+	private static final String s_deciduous = "deciduous";
+	private static final String s_train = "train";
+	private static final String s_organic = "organic";
+	private static final String s_farmyard = "farmyard";
+	private static final String s_riverbank = "riverbank";
+	private static final String s_doityourself = "doityourself";
+	private static final String s_town = "town";
+	private static final String s_dog_park = "dog_park";
+	private static final String s_village_green = "village_green";
+	private static final String s_tunnel = "tunnel";
+	private static final String s_car = "car";
+	private static final String s_roof = "roof";
+	private static final String s_mall = "mall";
+	private static final String s_ferry_terminal = "ferry_terminal";
+	private static final String s_cave_entrance = "cave_entrance";
+	private static final String s_detached = "detached";
+	private static final String s_concrete_plates = "concrete:plates";
+	private static final String s_public_building = "public_building";
+	private static final String s_buffer_stop = "buffer_stop";
+	private static final String s_lock = "lock";
+	private static final String s_dolphin = "dolphin";
+	private static final String s_taxiway = "taxiway";
+	private static final String s_hunting_stand = "hunting_stand";
+	private static final String s_estate_agent = "estate_agent";
+	private static final String s_station = "station";
+	private static final String s_car_repair = "car_repair";
+	private static final String s_dyke = "dyke";
+	private static final String s_hangar = "hangar";
+	private static final String s_information = "information";
+	private static final String s_1 = "1";
+	private static final String s_forest = "forest";
+	private static final String s_gate = "gate";
+	private static final String s_beach = "beach";
+	private static final String s_laundry = "laundry";
+	private static final String s_speed_camera = "speed_camera";
+	private static final String s_staircase = "staircase";
+	private static final String s_farm = "farm";
+	private static final String s_stop = "stop";
+	private static final String s_bump_gate = "bump_gate";
+	private static final String s_motorway = "motorway";
+	private static final String s_water_tower = "water_tower";
+	private static final String s_abutters = "abutters";
+	private static final String s_driving_school = "driving_school";
+	private static final String s_natural = "natural";
+	private static final String s_orchard = "orchard";
+	private static final String s_wheelchair = "wheelchair";
+	private static final String s_swimming_pool = "swimming_pool";
+	private static final String s_switch = "switch";
+	private static final String s_block = "block";
+	private static final String s_turnstile = "turnstile";
+	private static final String s_camp_site = "camp_site";
+	private static final String s_shoes = "shoes";
+	private static final String s_reservoir = "reservoir";
+	private static final String s_pebblestone = "pebblestone";
+	private static final String s_stile = "stile";
+	private static final String s_embassy = "embassy";
+	private static final String s_postal_code = "postal_code";
+	private static final String s_retaining_wall = "retaining_wall";
+	private static final String s_bridleway = "bridleway";
+	private static final String s_pitch = "pitch";
+	private static final String s_agricultural = "agricultural";
+	private static final String s_post_office = "post_office";
+	private static final String s_parking_fuel = "parking;fuel";
+	private static final String s_bureau_de_change = "bureau_de_change";
+	private static final String s_mini_roundabout = "mini_roundabout";
+	private static final String s_hov = "hov";
+	private static final String s_police = "police";
+	private static final String s_courthouse = "courthouse";
+	private static final String s_raceway = "raceway";
+	private static final String s_kindergarten = "kindergarten";
+	private static final String s_attraction = "attraction";
+	private static final String s_marsh = "marsh";
+	private static final String s_reservoir_covered = "reservoir_covered";
+	private static final String s_petroleum_well = "petroleum_well";
+	private static final String s_silo = "silo";
+	private static final String s_toys = "toys";
+	private static final String s_apron = "apron";
+	private static final String s_halt = "halt";
+	private static final String s_dam = "dam";
+	private static final String s_golf_course = "golf_course";
+	private static final String s_detour = "detour";
+	private static final String s_tree_row = "tree_row";
+	private static final String s_copyshop = "copyshop";
+	private static final String s_milestone = "milestone";
+	private static final String s_foot = "foot";
+	private static final String s_tourism = "tourism";
+	private static final String s_bank = "bank";
+	private static final String s_dry_cleaning = "dry_cleaning";
+	private static final String s_tram = "tram";
+	private static final String s_trolleybus = "trolleybus";
+	private static final String s_university = "university";
+	private static final String s_hampshire_gate = "hampshire_gate";
+	private static final String s_embankment = "embankment";
+	private static final String s_rock = "rock";
+	private static final String s_crossing = "crossing";
+	private static final String s_volcano = "volcano";
+	private static final String s_greengrocer = "greengrocer";
+	private static final String s_kerb = "kerb";
+	private static final String s_waste_disposal = "waste_disposal";
+	private static final String s_grave_yard = "grave_yard";
+	private static final String s_coniferous = "coniferous";
+	private static final String s_house = "house";
+	private static final String s_books = "books";
+	private static final String s_neighbourhood = "neighbourhood";
+	private static final String s_hostel = "hostel";
+	private static final String s_alcohol = "alcohol";
+	private static final String s_restricted = "restricted";
+	private static final String s_motel = "motel";
+	private static final String s_sand = "sand";
+	private static final String s_fishmonger = "fishmonger";
+	private static final String s_fountain = "fountain";
+	private static final String s_playground = "playground";
+	private static final String s_7 = "7";
+	private static final String s_parking_aisle = "parking_aisle";
+	private static final String s_protected_area = "protected_area";
+	private static final String s_electronics = "electronics";
+	private static final String s_Paved = "Paved";
+	private static final String s_highway = "highway";
+	private static final String s_fine_gravel = "fine_gravel";
+	private static final String s_barrier = "barrier";
+	private static final String s_hairdresser = "hairdresser";
+	private static final String s_post_box = "post_box";
+	private static final String s_pub = "pub";
+	private static final String s_coastline = "coastline";
+	private static final String s_marina = "marina";
+	private static final String s_reedbed = "reedbed";
+	private static final String s_biergarten = "biergarten";
+	private static final String s_dismantled = "dismantled";
+	private static final String s_farmland = "farmland";
+	private static final String s_yard = "yard";
+	private static final String s_route = "route";
+	private static final String s_atm = "atm";
+	private static final String s_place = "place";
+	private static final String s_bus_station = "bus_station";
+	private static final String s_retail = "retail";
+	private static final String s_industrial = "industrial";
+	private static final String s_municipality = "municipality";
+	private static final String s_primary = "primary";
+	private static final String s_nursing_home = "nursing_home";
+	private static final String s_florist = "florist";
+	private static final String s_ditch = "ditch";
+	private static final String s_national_park = "national_park";
+	private static final String s_city = "city";
+	private static final String s_confectionery = "confectionery";
+	private static final String s_service = "service";
+	private static final String s_unknown = "unknown";
+	private static final String s_cycle_barrier = "cycle_barrier";
+	private static final String s_elevator = "elevator";
+	private static final String s_2 = "2";
+	private static final String s_car_rental = "car_rental";
+	private static final String s_flagpole = "flagpole";
+	private static final String s_cabin = "cabin";
+	private static final String s_paved = "paved";
+	private static final String s_guest_house = "guest_house";
+	private static final String s_mobile_phone = "mobile_phone";
+	private static final String s_lot = "lot";
+	private static final String s_quarry = "quarry";
+	private static final String s_train_station = "train_station";
+	private static final String s_hotel = "hotel";
+	private static final String s_park = "park";
+	private static final String s_hut = "hut";
+	private static final String s_dentist = "dentist";
+	private static final String s_doctors = "doctors";
+	private static final String s_greenhouse = "greenhouse";
+	private static final String s_11 = "11";
+	private static final String s_10 = "10";
+	private static final String s_theme_park = "theme_park";
+	private static final String s_tree = "tree";
+	private static final String s_shower = "shower";
+	private static final String s_siding = "siding";
+	private static final String s_aeroway = "aeroway";
+	private static final String s_emergency_access_point = "emergency_access_point";
+	private static final String s_watermill = "watermill";
+	private static final String s_college = "college";
+	private static final String s_landuse = "landuse";
+	private static final String s_tracktype = "tracktype";
+	private static final String s_ferry = "ferry";
+	private static final String s_bridge = "bridge";
+	private static final String s_vacant = "vacant";
+	private static final String s_cattle_grid = "cattle_grid";
+	private static final String s_brownfield = "brownfield";
+	private static final String s_allotments = "allotments";
+	private static final String s_alley = "alley";
+	private static final String s_pedestrian = "pedestrian";
+	private static final String s_borough = "borough";
+	private static final String s_bare_rock = "bare_rock";
+	private static final String s_motorcycle = "motorcycle";
+	private static final String s_bakery = "bakery";
+	private static final String s_zoo = "zoo";
+	private static final String s_scree = "scree";
+	private static final String s_fire_station = "fire_station";
+	private static final String s_theatre = "theatre";
+	private static final String s_track = "track";
+	private static final String s_reinforced_slope = "reinforced_slope";
+	private static final String s_slipway = "slipway";
+	private static final String s_mangrove = "mangrove";
+	private static final String s_aerodrome = "aerodrome";
+	private static final String s_byway = "byway";
+	private static final String s_metal = "metal";
+	private static final String s_swamp = "swamp";
+	private static final String s_construction = "construction";
+	private static final String s_grassland = "grassland";
+	private static final String s_shop = "shop";
+	private static final String s_soakhole = "soakhole";
+	private static final String s_asphalt = "asphalt";
+	private static final String s_social_facility = "social_facility";
+	private static final String s_isolated_dwelling = "isolated_dwelling";
+	private static final String s_hamlet = "hamlet";
+	private static final String s_picnic_table = "picnic_table";
+	private static final String s_artificial = "artificial";
+	private static final String s_earth = "earth";
+	private static final String s_grit_bin = "grit_bin";
+	private static final String s_ground = "ground";
+	private static final String s_groyne = "groyne";
+	private static final String s_office = "office";
+	private static final String s_state = "state";
+	private static final String s_terminal = "terminal";
+	private static final String s_wood = "wood";
+	private static final String s_fuel = "fuel";
+	private static final String s_8 = "8";
+	private static final String s_garden_centre = "garden_centre";
+	private static final String s_horse_riding = "horse_riding";
+	private static final String s_viewpoint = "viewpoint";
+	private static final String s_designated = "designated";
+	private static final String s_leisure = "leisure";
+	private static final String s_waste_basket = "waste_basket";
+	private static final String s_hifi = "hifi";
+	private static final String s_hedge = "hedge";
+	private static final String s_spur = "spur";
+	private static final String s_chimney = "chimney";
+	private static final String s_secondary = "secondary";
+	private static final String s_rest_area = "rest_area";
+	private static final String s_bar = "bar";
+	private static final String s_bay = "bay";
+	private static final String s_common = "common";
+	private static final String s_river = "river";
+	private static final String s_ruins = "ruins";
+	private static final String s_terrace = "terrace";
+	private static final String s_art = "art";
+	private static final String s_residental = "residental";
+	private static final String s_newsagent = "newsagent";
+	private static final String s_turntable = "turntable";
+	private static final String s_computer = "computer";
+	private static final String s_wetland = "wetland";
+	private static final String s_driveway = "driveway";
+	private static final String s_parking = "parking";
+	private static final String s_compacted = "compacted";
+	private static final String s_barn = "barn";
+	private static final String s_alpine_hut = "alpine_hut";
+	private static final String s_wire_fence = "wire_fence";
+	private static final String s_unpaved = "unpaved";
+	private static final String s_dormitory = "dormitory";
+	private static final String s_mud = "mud";
+	private static final String s_3 = "3";
+	private static final String s_semi = "semi";
+	private static final String s_boundary = "boundary";
+	private static final String s_field_boundary = "field_boundary";
+	private static final String s_beverages = "beverages";
+	private static final String s_supermarket = "supermarket";
+	private static final String s_store = "store";
+	private static final String s_restaurant = "restaurant";
+	private static final String s_region = "region";
+	private static final String s_variety_store = "variety_store";
+	private static final String s_saltmarsh = "saltmarsh";
+	private static final String s_landform = "landform";
+	private static final String s_helipad = "helipad";
+	private static final String s_railway = "railway";
+	private static final String s_greenhouse_horticulture = "greenhouse_horticulture";
+	private static final String s_wall = "wall";
+	private static final String s_recycling = "recycling";
+	private static final String s_passing_place = "passing_place";
+	private static final String s_church = "church";
+	private static final String s_pharmacy = "pharmacy";
+	private static final String s_lighthouse = "lighthouse";
+	private static final String s_platform = "platform";
+	private static final String s_cinema = "cinema";
+	private static final String s_political = "political";
+	private static final String s_stadium = "stadium";
+	private static final String s_basin = "basin";
+	private static final String s_gasometer = "gasometer";
+	private static final String s_bicycle_parking = "bicycle_parking";
+	private static final String s_bbq = "bbq";
+	private static final String s_incline_steep = "incline_steep";
+	private static final String s_drinking_water = "drinking_water";
+	private static final String s_living_street = "living_street";
+	private static final String s_chalet = "chalet";
+	private static final String s_narrow_gauge = "narrow_gauge";
+	private static final String s_prison = "prison";
+	private static final String s_mine = "mine";
+	private static final String s_level_crossing = "level_crossing";
+	private static final String s_water_works = "water_works";
+	private static final String s_street_lamp = "street_lamp";
+	private static final String s_main = "main";
+	private static final String s_tank = "tank";
+	private static final String s_abandoned = "abandoned";
+	private static final String s_ski = "ski";
+	private static final String s_runway = "runway";
+	private static final String s_parking_space = "parking_space";
+	private static final String s_dirt_sand = "dirt/sand";
+	private static final String s_salt_pond = "salt_pond";
+	private static final String s_hedge_bank = "hedge_bank";
+	private static final String s_amenity = "amenity";
+	private static final String s_telephone = "telephone";
+	private static final String s_surface = "surface";
+	private static final String s_travel_agency = "travel_agency";
+	private static final String s_hardware = "hardware";
+	private static final String s_wastewater_plant = "wastewater_plant";
+	private static final String s_waterway = "waterway";
+	private static final String s_butcher = "butcher";
+	private static final String s_surveillance = "surveillance";
+	private static final String s_Dirt_Sand = "Dirt/Sand";
+	private static final String s_9 = "9";
+	private static final String s_windmill = "windmill";
+	private static final String s_picnic_site = "picnic_site";
+	private static final String s_rail = "rail";
+	private static final String s_cement = "cement";
+	private static final String s_sauna = "sauna";
+	private static final String s_suburb = "suburb";
+	private static final String s_waterfall = "waterfall";
+	private static final String s_bunker = "bunker";
+	private static final String s_ice_cream = "ice_cream";
+	private static final String s_culvert = "culvert";
+	private static final String s_drain = "drain";
+	private static final String s_dock = "dock";
+	private static final String s_glasshouse = "glasshouse";
+	private static final String s_no = "no";
+	private static final String s_well = "well";
+	private static final String s_wet_meadow = "wet_meadow";
+	private static final String s_concrete = "concrete";
+	private static final String s_dismount = "dismount";
+	private static final String s_vending_machine = "vending_machine";
+	private static final String s_oneway = "oneway";
+	private static final String s_taxi = "taxi";
+	private static final String s_outdoor = "outdoor";
+	private static final String s_proposed = "proposed";
+	private static final String s_sally_port = "sally_port";
+	private static final String s_photo = "photo";
+	private static final String s_plant_nursery = "plant_nursery";
+	private static final String s_clinic = "clinic";
+	private static final String s_fishing = "fishing";
+	private static final String s_yes = "yes";
+	private static final String s_turning_circle = "turning_circle";
+	private static final String s_toilets = "toilets";
+	private static final String s_guard_rail = "guard_rail";
+	private static final String s_townhall = "townhall";
+	private static final String s_community_centre = "community_centre";
+	private static final String s_residential = "residential";
+	private static final String s_cemetery = "cemetery";
+	private static final String s_survey_point = "survey_point";
+	private static final String s_bench = "bench";
+	private static final String s_4 = "4";
+	private static final String s_bollard = "bollard";
+	private static final String s_sports_centre = "sports_centre";
+	private static final String s_paving_stones_30 = "paving_stones:30";
+	private static final String s_administrative = "administrative";
+	private static final String s_Building = "Building";
+	private static final String s_customers = "customers";
+	private static final String s_emergency = "emergency";
+	private static final String s_motorway_junction = "motorway_junction";
+	private static final String s_grade1 = "grade1";
+	private static final String s_grade3 = "grade3";
+	private static final String s_grade2 = "grade2";
+	private static final String s_grade5 = "grade5";
+	private static final String s_grade4 = "grade4";
+	private static final String s_lock_gate = "lock_gate";
+	private static final String s_furniture = "furniture";
+	private static final String s_place_of_worship = "place_of_worship";
+	private static final String s_optician = "optician";
+	private static final String s_gift = "gift";
+	private static final String s_parking_entrance = "parking_entrance";
+	private static final String s_garage = "garage";
+	private static final String s_tram_stop = "tram_stop";
+	private static final String s_steps = "steps";
+	private static final String s_tower = "tower";
+	private static final String s_works = "works";
+	private static final String s_shed = "shed";
+	private static final String s_car_sharing = "car_sharing";
+	private static final String s_apartments = "apartments";
+	private static final String s_spring = "spring";
+	private static final String s_village = "village";
+	private static final String s_library = "library";
+	private static final String s_emergency_access = "emergency_access";
+	private static final String s_home = "home";
+	private static final String s_farm_auxiliary = "farm_auxiliary";
+	private static final String s_primary_link = "primary_link";
+	private static final String s_toll_booth = "toll_booth";
+	private static final String s_jewelry = "jewelry";
+	private static final String s_pet = "pet";
+	private static final String s_veterinary = "veterinary";
+	private static final String s_man_made = "man_made";
+	private static final String s_motorway_link = "motorway_link";
+	private static final String s_offices = "offices";
+	private static final String s_power = "power";
+	private static final String s_weir = "weir";
+	private static final String s_unsurfaced = "unsurfaced";
+	private static final String s_tertiary_link = "tertiary_link";
+	private static final String s_trunk_link = "trunk_link";
+	private static final String s_tyres = "tyres";
+	private static final String s_paving_stones = "paving_stones";
+	private static final String s_pipeline = "pipeline";
+	private static final String s_census = "census";
+	private static final String s_incline = "incline";
+	private static final String s_footway = "footway";
+	private static final String s_drive_through = "drive-through";
+	private static final String s_island = "island";
+	private static final String s_monitoring_station = "monitoring_station";
+	private static final String s_nightclub = "nightclub";
+	private static final String s_unclassified = "unclassified";
+	private static final String s_aquaculture = "aquaculture";
+	private static final String s_mixed = "mixed";
+	private static final String s_road = "road";
+	private static final String s_greenfield = "greenfield";
+	private static final String s_breakwater = "breakwater";
+	private static final String s_services = "services";
+	private static final String s_railway_crossing = "railway_crossing";
+	private static final String s_residentiel1 = "residentiel1";
+	private static final String s_canal = "canal";
+	private static final String s__1 = "-1";
+	private static final String s_ridge = "ridge";
+	private static final String s_fabric = "fabric";
+	private static final String s_museum = "museum";
+	private static final String s_communications_tower = "communications_tower";
+	private static final String s_semi_detached = "semi-detached";
+	private static final String s_conservation = "conservation";
+	private static final String s_way = "way";
+	private static final String s_wood_fence = "wood_fence";
+	private static final String s_manufacture = "manufacture";
+	private static final String s_admin_level = "admin_level";
+	private static final String s_building_concrete = "building_concrete";
+	private static final String s_bus = "bus";
+	private static final String s_collapsed = "collapsed";
+	private static final String s_ford = "ford";
+	private static final String s_delivery = "delivery";
+	private static final String s_garages = "garages";
+	private static final String s_funeral_directors = "funeral_directors";
+	private static final String s_land = "land";
+	private static final String s_interlock = "interlock";
+	private static final String s_reef = "reef";
+	private static final String s_crane = "crane";
+	private static final String s_true = "true";
+	private static final String s_storage_tank = "storage_tank";
+	private static final String s_official = "official";
+	private static final String s_subway_entrance = "subway_entrance";
+	private static final String s_mtb = "mtb";
+	private static final String s_grass = "grass";
+	private static final String s_marketplace = "marketplace";
+	private static final String s_rapids = "rapids";
+	private static final String s_car_wash = "car_wash";
+	private static final String s_general = "general";
+	private static final String s_cafe = "cafe";
+	private static final String s_locality = "locality";
+	private static final String s_glacier = "glacier";
+	private static final String s_storage = "storage";
+	private static final String s_cycleway = "cycleway";
+	private static final String s_forestry = "forestry";
+	private static final String s_field = "field";
+	private static final String s_5 = "5";
+	private static final String s_arts_centre = "arts_centre";
+	private static final String s_warehouse = "warehouse";
+	private static final String s_chemist = "chemist";
+	private static final String s_pier = "pier";
+	private static final String s_scrub = "scrub";
+	private static final String s_shelter = "shelter";
+	private static final String s_emergency_phone = "emergency_phone";
+	private static final String s_tidalflat = "tidalflat";
+	private static final String s_cobblestone = "cobblestone";
+	private static final String s_fell = "fell";
+	private static final String s_peak = "peak";
+	private static final String s_charging_station = "charging_station";
+	private static final String s_cliff = "cliff";
+	private static final String s_building = "building";
+	private static final String s_fire_hydrant = "fire_hydrant";
+	private static final String s_traffic_signals = "traffic_signals";
+	private static final String s_heath = "heath";
+	private static final String s_landfill = "landfill";
+	private static final String s_mast = "mast";
+	private static final String s_boutique = "boutique";
+	private static final String s_boat_storage = "boat_storage";
+	private static final String s_area = "area";
+	private static final String s_urban = "urban";
 
 	// only the keys that were imported via osm2pgsql
 	// FIXME add whats missing, e.g. wheelchair
 	public final static String[] keys = {
-			"access".intern(),
-			"addr:housename".intern(),
-			"addr:housenumber".intern(),
-			"addr:interpolation".intern(),
-			"admin_level".intern(),
-			"aerialway".intern(),
-			"aeroway".intern(),
-			"amenity".intern(),
-			"area".intern(),
-			"barrier".intern(),
-			"bicycle".intern(),
-			"brand".intern(),
-			"bridge".intern(),
-			"boundary".intern(),
-			"building".intern(),
-			"construction".intern(),
-			"covered".intern(),
-			"culvert".intern(),
-			"cutting".intern(),
-			"denomination".intern(),
-			"disused".intern(),
-			"embankment".intern(),
-			"foot".intern(),
-			"generator:source".intern(),
-			"harbour".intern(),
-			"highway".intern(),
-			"historic".intern(),
-			"horse".intern(),
-			"intermittent".intern(),
-			"junction".intern(),
-			"landuse".intern(),
-			"layer".intern(),
-			"leisure".intern(),
-			"lock".intern(),
-			"man_made".intern(),
-			"military".intern(),
-			"motorcar".intern(),
-			"name".intern(),
-			"natural".intern(),
-			"oneway".intern(),
-			"operator".intern(),
-			"population".intern(),
-			"power".intern(),
-			"power_source".intern(),
-			"place".intern(),
-			"railway".intern(),
-			"ref".intern(),
-			"religion".intern(),
-			"route".intern(),
-			"service".intern(),
-			"shop".intern(),
-			"sport".intern(),
-			"surface".intern(),
-			"toll".intern(),
-			"tourism".intern(),
-			"tower:type".intern(),
-			"tracktype".intern(),
-			"tunnel".intern(),
-			"water".intern(),
-			"waterway".intern(),
-			"wetland".intern(),
-			"width".intern(),
-			"wood".intern()
+			"access",
+			"addr:housename",
+			"addr:housenumber",
+			"addr:interpolation",
+			"admin_level",
+			"aerialway",
+			"aeroway",
+			"amenity",
+			"area",
+			"barrier",
+			"bicycle",
+			"brand",
+			"bridge",
+			"boundary",
+			"building",
+			"construction",
+			"covered",
+			"culvert",
+			"cutting",
+			"denomination",
+			"disused",
+			"embankment",
+			"foot",
+			"generator:source",
+			"harbour",
+			"highway",
+			"historic",
+			"horse",
+			"intermittent",
+			"junction",
+			"landuse",
+			"layer",
+			"leisure",
+			"lock",
+			"man_made",
+			"military",
+			"motorcar",
+			"name",
+			"natural",
+			"oneway",
+			"operator",
+			"population",
+			"power",
+			"power_source",
+			"place",
+			"railway",
+			"ref",
+			"religion",
+			"route",
+			"service",
+			"shop",
+			"sport",
+			"surface",
+			"toll",
+			"tourism",
+			"tower:type",
+			"tracktype",
+			"tunnel",
+			"water",
+			"waterway",
+			"wetland",
+			"width",
+			"wood"
 	};
 
 	// most common tags, ordered by tag count
