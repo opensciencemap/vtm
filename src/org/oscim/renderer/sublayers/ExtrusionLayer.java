@@ -104,9 +104,6 @@ public class ExtrusionLayer extends Layer {
 		int length = 0, ipos = 0, ppos = 0;
 
 		boolean complexOutline = false;
-		int geomIndexPos = 0;
-		int geomPointPos = 0;
-
 		boolean simpleOutline = true;
 
 		// current vertex id
@@ -121,9 +118,6 @@ public class ExtrusionLayer extends Layer {
 
 			// start next polygon
 			if (length == 0) {
-				if (complexOutline)
-					addRoof(startVertex, element, geomIndexPos, geomPointPos);
-
 				startVertex = mNumVertices;
 				simpleOutline = true;
 				complexOutline = false;
@@ -151,22 +145,16 @@ public class ExtrusionLayer extends Layer {
 
 			boolean convex = addOutline(points, ppos, len, minHeight, height, simpleOutline);
 
-			if (simpleOutline && (convex || len <= 8))
+			if (simpleOutline && (convex || len <= 8)){
 				addRoofSimple(startVertex, len);
-			else if (!complexOutline) {
+			} else if (!complexOutline) {
 				complexOutline = true;
-				// keep start postion of polygon and defer roof building
-				// as it modifies the geometry array.
-				geomIndexPos = ipos;
-				geomPointPos = ppos;
+				addRoof(startVertex, element, ipos, ppos);
 			}
 		}
-		if (complexOutline)
-			addRoof(startVertex, element, geomIndexPos, geomPointPos);
 	}
 
 	private void addRoofSimple(int startVertex, int len) {
-
 		// roof indices for convex shapes
 		int i = mCurIndices[IND_ROOF].used;
 		short[] indices = mCurIndices[IND_ROOF].vertices;
@@ -248,6 +236,7 @@ public class ExtrusionLayer extends Layer {
 		int even = 0;
 		int changeX = 0;
 		int changeY = 0;
+		int angleSign = 0;
 
 		// vertex offset for all vertices in layer
 		int vOffset = mNumVertices;
@@ -322,6 +311,18 @@ public class ExtrusionLayer extends Layer {
 
 				if (changeX > 2 || changeY > 2)
 					convex = false;
+
+				float cross = ux * vy - uy * vy;
+
+				if (cross > 0) {
+					if (angleSign == -1)
+						convex = false;
+					angleSign = 1;
+				} else if (cross < 0) {
+					if (angleSign == 1)
+						convex = false;
+					angleSign = -1;
+				}
 			}
 
 			/* check if face is within tile */
