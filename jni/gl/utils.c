@@ -186,6 +186,29 @@ void JNI(smul)(JNIEnv* env, jclass* clazz, jlong ptr_r, jlong ptr_a, jlong ptr_b
   multiplyMM(matr, mata, matb);
 }
 
+void JNI(smulrhs)(JNIEnv* env, jclass* clazz, jlong ptr_r, jlong ptr_rhs)
+{
+  float* matr = CAST(ptr_r);
+  float* mata = alloca(16 * sizeof(float));
+  float* matb = CAST(ptr_rhs);
+
+  memcpy(mata, matr, 16 * sizeof(float));
+
+  multiplyMM(matr, mata, matb);
+}
+
+void JNI(smullhs)(JNIEnv* env, jclass* clazz, jlong ptr_r, jlong ptr_lhs)
+{
+  float* matr = CAST(ptr_r);
+  float* mata = CAST(ptr_lhs);
+  float* matb = alloca(16 * sizeof(float));
+
+  memcpy(matb, matr, 16 * sizeof(float));
+
+  multiplyMM(matr, mata, matb);
+}
+
+
 void JNI(strans)(JNIEnv* env, jclass* clazz, jlong ptr_r, jlong ptr_a)
 {
   float* matr = CAST(ptr_r);

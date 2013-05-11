@@ -39,6 +39,10 @@ public class Matrix4 {
 
 	private native static void smul(long self, long rhs_ptr, long lhs_ptr);
 
+	private native static void smulrhs(long self, long rhs_ptr);
+
+	private native static void smullhs(long self, long lhs_ptr);
+
 	private native static void strans(long self, long rhs_ptr);
 
 	private native static void prj(long self, float[] vec3);
@@ -111,16 +115,30 @@ public class Matrix4 {
 	}
 
 	/**
-	 * Multiply rhs onto Matrix
+	 * Multiply rhs onto Matrix.
 	 *
 	 * @param rhs right hand side
 	 */
-	public void multiplyMM(Matrix4 rhs) {
-		smul(pointer, pointer, rhs.pointer);
+	public void multiplyRhs(Matrix4 rhs) {
+		smulrhs(pointer, rhs.pointer);
 	}
 
 	/**
-	 * Multiply rhs onto lhs and store result in Matrix
+	 * Use this matrix as rhs, multiply it on lhs and store result.
+	 *
+	 * @param lhs right hand side
+	 */
+	public void multiplyLhs(Matrix4 lhs) {
+		smullhs(pointer, lhs.pointer);
+	}
+
+	/**
+	 * Multiply rhs onto lhs and store result in Matrix.
+	 *
+	 * This matrix MUST be different from lhs and rhs!
+	 *
+	 * As you know, when combining matrices for vector projection
+	 * this has the same effect first as applying rhs then lhs.
 	 *
 	 * @param lhs left hand side
 	 * @param rhs right hand side
