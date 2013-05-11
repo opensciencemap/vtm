@@ -31,7 +31,6 @@ import org.oscim.utils.Matrix4;
 import org.oscim.utils.quadtree.QuadTree;
 
 import android.opengl.GLES20;
-
 /**
  * This class is for rendering the Line- and PolygonLayers of visible MapTiles.
  * For visible tiles that do not have data available yet its parent in children
@@ -58,10 +57,12 @@ public class TileRenderer {
 		mMatrices = m;
 		mFaded = fade;
 
-		mProjMatrix.copy(m.viewproj);
-		// discard z projection from tilt
+		mProjMatrix.copy(m.proj);
+		// discard depth projection from tilt, we use depth buffer
+		// for clipping
 		mProjMatrix.setValue(10, 0);
 		mProjMatrix.setValue(14, 0);
+		mProjMatrix.multiplyRhs(m.view);
 
 		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
 
@@ -141,7 +142,7 @@ public class TileRenderer {
 		Matrices m = mMatrices;
 		m.mvp.setTransScale(x, y, (float) (scale / GLRenderer.COORD_SCALE));
 
-		m.mvp.multiplyMM(mProjMatrix, m.mvp);
+		m.mvp.multiplyLhs(mProjMatrix);
 
 		// set depth offset (used for clipping to tile boundaries)
 		GLES20.glPolygonOffset(0, mOffsetCnt++);

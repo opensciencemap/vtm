@@ -123,7 +123,7 @@ public class MapViewPosition {
 
 		mProjMatrix.set(tmp);
 		mTmpMatrix.setTranslation(0, 0, -VIEW_DISTANCE);
-		mProjMatrix.multiplyMM(mTmpMatrix);
+		mProjMatrix.multiplyRhs(mTmpMatrix);
 		mProjMatrix.get(tmp);
 
 		Matrix.invertM(tmp, 0, tmp, 0);

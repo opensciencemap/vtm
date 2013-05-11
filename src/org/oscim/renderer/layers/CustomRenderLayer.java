@@ -111,10 +111,7 @@ public class CustomRenderLayer extends RenderLayer {
 		float ratio = 1f / mMapView.getWidth();
 
 		m.mvp.setScale(ratio, ratio, 1);
-		m.mvp.multiplyMM(m.proj, m.mvp);
-
-
-//		setMatrix(pos, m);
+		m.mvp.multiplyLhs(m.proj);
 		m.mvp.setAsUniform(hMatrixPosition);
 
 		// Draw the triangle
