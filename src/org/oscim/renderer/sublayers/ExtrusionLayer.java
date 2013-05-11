@@ -387,12 +387,6 @@ public class ExtrusionLayer extends Layer {
 		if (mNumVertices == 0 || compiled)
 			return;
 
-		vboVertices = BufferObject.get(0);
-		vboIndices = BufferObject.get(0);
-
-		// upload indices
-		//sbuf.clear();
-
 		mNumIndices = 0;
 		for (int i = 0; i < 4; i++) {
 			for (VertexItem vi = mIndices[i]; vi != null; vi = vi.next) {
@@ -403,10 +397,9 @@ public class ExtrusionLayer extends Layer {
 		}
 
 		sbuf.flip();
-		vboIndices.size = mNumIndices * 2;
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, vboIndices.id);
-		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
-				vboIndices.size, sbuf, GLES20.GL_DYNAMIC_DRAW);
+		int size = mNumIndices*2;
+		vboIndices = BufferObject.get(size);
+		vboIndices.loadBufferData(sbuf,size, GLES20.GL_ELEMENT_ARRAY_BUFFER);
 
 		// upload vertices
 		sbuf.clear();
@@ -414,10 +407,9 @@ public class ExtrusionLayer extends Layer {
 			sbuf.put(vi.vertices, 0, vi.used);
 
 		sbuf.flip();
-		vboVertices.size = mNumVertices * 4 * 2;
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vboVertices.id);
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,
-				vboVertices.size, sbuf, GLES20.GL_DYNAMIC_DRAW);
+		size = mNumVertices * 4 * 2;
+		vboVertices = BufferObject.get(size);
+		vboVertices.loadBufferData(sbuf, size, GLES20.GL_ARRAY_BUFFER);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);

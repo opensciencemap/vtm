@@ -15,7 +15,7 @@
 
 package org.oscim.renderer;
 
-import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 
 import android.opengl.GLES20;
 import android.util.Log;
@@ -23,6 +23,11 @@ import android.util.Log;
 public final class BufferObject {
 	private final static String TAG = BufferObject.class.getName();
 
+	private static final int MB = 1024 * 1024;
+	private static final int LIMIT_BUFFERS = 16 * MB;
+
+
+	// -------------------------------------------------------------
 	// GL id
 	public int id;
 
@@ -35,16 +40,25 @@ public final class BufferObject {
 		this.id = id;
 	}
 
-	public void uploadArrayBuffer(ByteBuffer buf, int newSize, int type){
+	int bufferType;
+
+	public void loadBufferData(ShortBuffer buf, int newSize, int type){
+		boolean clear = false;
+
+		if (type != bufferType){
+			if (bufferType != 0)
+				clear = true;
+			bufferType = type;
+		}
 
 		GLES20.glBindBuffer(type, id);
 
 		// reuse memory allocated for vbo when possible and allocated
 		// memory is less then four times the new data
-		if (size > newSize && size < newSize * 4){
+		if (!clear && (size > newSize) && (size < newSize * 4)){
 			GLES20.glBufferSubData(type, 0, newSize, buf);
 		} else {
-			//mBufferMemoryUsage += newSize - layers.vbo.size;
+			mBufferMemoryUsage += newSize - size;
 
 			size = newSize;
 
@@ -61,6 +75,21 @@ public final class BufferObject {
 	}
 
 	// ---------------------------- pool ----------------------------
+	// bytes currently loaded in VBOs
+	private static int mBufferMemoryUsage;
+
+	public static void checkBufferUsage(boolean force) {
+		// try to clear some unused vbo when exceding limit
+		if (mBufferMemoryUsage < LIMIT_BUFFERS)
+			return;
+
+		Log.d(TAG, "buffer object usage: " + mBufferMemoryUsage / MB + "MB");
+
+		mBufferMemoryUsage -= BufferObject.limitUsage(1024*1024);
+
+		Log.d(TAG, "now: " + mBufferMemoryUsage / MB + "MB");
+	}
+
 	private static BufferObject pool;
 	static int counter = 0;
 

@@ -15,7 +15,6 @@
 package org.oscim.renderer;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
-import static android.opengl.GLES20.GL_DYNAMIC_DRAW;
 import static android.opengl.GLES20.GL_ONE;
 import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
 
@@ -53,7 +52,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static final int MB = 1024 * 1024;
 	private static final int SHORT_BYTES = 2;
 	private static final int CACHE_TILES_MAX = 250;
-	private static final int LIMIT_BUFFERS = 16 * MB;
+
 
 	public static final float COORD_SCALE = 8.0f;
 
@@ -70,9 +69,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private static int tmpBufferSize;
 
 	private static short[] mFillCoords;
-
-	// bytes currently loaded in VBOs
-	private static int mBufferMemoryUsage;
 
 	public class Matrices {
 		// do not modify any of these
@@ -98,11 +94,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 						(-screenWidth / 2) * ratio * scale,
 						(-screenHeight / 2) * ratio * scale,
 						ratio);
-			//
-			//				mvp.setTransScale(-screenWidth / ratio,
-			//						screenHeight / ratio, ratio);
 
-			mvp.multiplyMM(proj, mvp);
+			mvp.multiplyLhs(proj);
 		}
 	}
 
@@ -213,39 +206,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 		newSize *= SHORT_BYTES;
 
-		GLES20.glBindBuffer(GL_ARRAY_BUFFER, layers.vbo.id);
-
-		// reuse memory allocated for vbo when possible and allocated
-		// memory is less then four times the new data
-		if (layers.vbo.size > newSize && layers.vbo.size < newSize * 4
-				&& mBufferMemoryUsage < LIMIT_BUFFERS) {
-			GLES20.glBufferSubData(GL_ARRAY_BUFFER, 0, newSize, sbuf);
-		} else {
-			mBufferMemoryUsage += newSize - layers.vbo.size;
-			layers.vbo.size = newSize;
-			GLES20.glBufferData(GL_ARRAY_BUFFER, layers.vbo.size, sbuf, GL_DYNAMIC_DRAW);
-		}
-
+		layers.vbo.loadBufferData(sbuf, newSize, GL_ARRAY_BUFFER);
 		return true;
-	}
-
-	public static void checkBufferUsage(boolean force) {
-		// try to clear some unused vbo when exceding limit
-
-		if (!force && mBufferMemoryUsage < LIMIT_BUFFERS) {
-			if (CACHE_TILES < CACHE_TILES_MAX)
-				CACHE_TILES += 50;
-			return;
-		}
-
-		Log.d(TAG, "buffer object usage: " + mBufferMemoryUsage / MB + "MB");
-
-		mBufferMemoryUsage -= BufferObject.limitUsage(2 * MB);
-
-		Log.d(TAG, "now: " + mBufferMemoryUsage / MB + "MB");
-
-		if (mBufferMemoryUsage > LIMIT_BUFFERS && CACHE_TILES > 100)
-			CACHE_TILES -= 50;
 	}
 
 	private long lastDraw = 0;
@@ -303,11 +265,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			if (changed)
 				mMapViewPosition.getMapViewProjection(mMatrices.mapPlane);
 
-			mMapViewPosition.getMatrix(mMatrices.view, null, mMatrices.viewproj);
+			mMapViewPosition.getMatrix(mMatrices.view, mMatrices.proj, mMatrices.viewproj);
 
 			if (debugView) {
 				mMatrices.mvp.setScale(0.5f, 0.5f, 1);
-				mMatrices.viewproj.multiplyMM(mMatrices.mvp, mMatrices.viewproj);
+				mMatrices.viewproj.multiplyLhs(mMatrices.mvp);
 			}
 		}
 
@@ -336,7 +298,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 
 		if (GlUtils.checkGlOutOfMemory("finish")) {
-			checkBufferUsage(true);
+			BufferObject.checkBufferUsage(true);
 			// TODO also throw out some textures etc
 		}
 	}
@@ -361,7 +323,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			// modify this to scale only the view, to see better which tiles
 			// are rendered
 			mMatrices.mvp.setScale(0.5f, 0.5f, 1);
-			mMatrices.proj.multiplyMM(mMatrices.mvp, mMatrices.proj);
+			mMatrices.proj.multiplyLhs(mMatrices.mvp);
 		}
 
 		GLES20.glViewport(0, 0, width, height);
@@ -373,10 +335,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
+		//mBufferMemoryUsage = 0;
+
 		if (!mNewSurface) {
 			mMapView.redrawMap(false);
 			return;
 		}
+
 		mNewSurface = false;
 
 		// set initial temp buffer size
@@ -407,16 +372,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				indices.length * 2, shortBuffer, GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		mBufferMemoryUsage = 0;
-		//mDrawTiles = null;
-
-		int numTiles = (screenWidth / (Tile.SIZE / 2) + 2)
-				* (screenHeight / (Tile.SIZE / 2) + 2);
-
-		// Set up vertex buffer objects
-		int numVBO = (CACHE_TILES + (numTiles * 2));
-		BufferObject.init(numVBO);
-
 		if (mClearColor != null)
 			mUpdateColor = true;
 
@@ -431,6 +386,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		// classes that require GL context for initialization
 		Layers.initRenderer();
+
+		// Set up some vertex buffer objects
+		BufferObject.init(CACHE_TILES);
 
 		mNewSurface = true;
 	}
