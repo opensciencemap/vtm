@@ -42,11 +42,10 @@ public abstract class SyncPool<T extends Inlist<T>> {
 	}
 
 	/**
-	 * @param items number of initial items
+	 * @param items number of initial items.
+	 *  NOTE: default does nothing!
 	 */
 	public void init(int items) {
-		count = items;
-		fill = items;
 	}
 
 	/**
