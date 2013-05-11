@@ -31,10 +31,12 @@ public class TileRenderLayer extends RenderLayer {
 	private final static String TAG = TileRenderLayer.class.getName();
 
 	private final TileManager mTileManager;
+	private int mUploadSerial;
 
 	public TileRenderLayer(MapView mapView, TileManager tileManager) {
 		super(mapView);
 		mTileManager = tileManager;
+		mUploadSerial = 0;
 	}
 
 	boolean mFaded;
@@ -66,7 +68,10 @@ public class TileRenderLayer extends RenderLayer {
 		tileCnt += mNumTileHolder;
 
 		/* prepare tile for rendering */
-		compileTileLayers(tiles, tileCnt);
+		if (compileTileLayers(tiles, tileCnt) > 0){
+			mUploadSerial++;
+			BufferObject.checkBufferUsage(false);
+		}
 
 		TileRenderer.draw(tiles, tileCnt, pos, m, mFaded);
 	}
@@ -103,14 +108,14 @@ public class TileRenderLayer extends RenderLayer {
 				continue;
 
 			if (tile.state == STATE_NEW_DATA) {
-				uploadTileData(tile);
+				uploadCnt += uploadTileData(tile);
 				continue;
 			}
 
 			if (tile.holder != null) {
 				// load tile that is referenced by this holder
 				if (tile.holder.state == STATE_NEW_DATA)
-					uploadTileData(tile.holder);
+					uploadCnt += uploadTileData(tile.holder);
 
 				tile.state = tile.holder.state;
 				continue;
@@ -120,7 +125,7 @@ public class TileRenderLayer extends RenderLayer {
 			if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 				MapTile rel = tile.rel.parent.item;
 				if (rel.state == STATE_NEW_DATA)
-					uploadTileData(rel);
+					uploadCnt += uploadTileData(rel);
 
 				// dont load child proxies
 				continue;
@@ -132,21 +137,17 @@ public class TileRenderLayer extends RenderLayer {
 
 				MapTile rel = tile.rel.get(i);
 				if (rel != null && rel.state == STATE_NEW_DATA)
-					uploadTileData(rel);
+					uploadCnt += uploadTileData(rel);
 			}
 		}
-
-		if (uploadCnt > 0)
-			GLRenderer.checkBufferUsage(false);
-
 		return uploadCnt;
 	}
 
-	private static void uploadTileData(MapTile tile) {
+	private static int uploadTileData(MapTile tile) {
 		tile.state = STATE_READY;
 
 		if (tile.layers == null)
-			return;
+			return 0;
 
 		int newSize = tile.layers.getSize();
 		if (newSize > 0) {
@@ -161,8 +162,10 @@ public class TileRenderLayer extends RenderLayer {
 				tile.layers.vbo = null;
 				tile.layers.clear();
 				tile.layers = null;
+				return 0;
 			}
 		}
+		return 1;
 	}
 
 	private final Object tilelock = new Object();
@@ -202,8 +205,10 @@ public class TileRenderLayer extends RenderLayer {
 		}
 
 		// same tiles as before
-		if (tileSet.serial == mDrawTiles.serial)
-			return false;
+		//if (tileSet.serial == mDrawTiles.serial)
+		//return false;
+
+		int prevSerial = tileSet.serial;
 
 		// ensure tiles keep visible state
 		synchronized (tilelock) {
@@ -229,8 +234,10 @@ public class TileRenderLayer extends RenderLayer {
 					tileSet.tiles[tileSet.cnt++] = t;
 				}
 			}
+			tileSet.serial = mUploadSerial;
 		}
-		return true;
+
+		return prevSerial != tileSet.serial;
 	}
 
 	public void releaseTiles(TileSet td) {

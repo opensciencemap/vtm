@@ -99,7 +99,7 @@ public abstract class BasicRenderLayer extends RenderLayer {
 	@Override
 	public void compile() {
 		int newSize = layers.getSize();
-		if (newSize == 0) {
+		if (newSize <= 0) {
 			BufferObject.release(layers.vbo);
 			layers.vbo = null;
 			isReady = false;
@@ -107,15 +107,13 @@ public abstract class BasicRenderLayer extends RenderLayer {
 		}
 
 		if (layers.vbo == null) {
-			layers.vbo = BufferObject.get(0);
+			layers.vbo = BufferObject.get(newSize);
 
 			if (layers.vbo == null)
 				return;
 		}
 
-		if (newSize > 0) {
-			if (GLRenderer.uploadLayers(layers, newSize, true))
-				isReady = true;
-		}
+		if (GLRenderer.uploadLayers(layers, newSize, true))
+			isReady = true;
 	}
 }
