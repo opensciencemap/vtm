@@ -310,7 +310,7 @@ void trifree(VOID *memptr) {
 int error_set = 0;
 void internalerror() {
    error_set = 1;
-
+   printf("Triangle is going to quit its job now\n");
    //printf("  Please report this bug to jrs@cs.berkeley.edu\n");
    ///printf("  Include the message above, your input data set, and the exact\n");
    //printf("    command line you used to run Triangle.\n");
@@ -6670,6 +6670,21 @@ void transfernodes(struct mesh *m, struct behavior *b, REAL *pointlist, REAL *po
          /* If no markers are specified, they default to zero. */
          setvertexmark(vertexloop, 0);
       }
+
+      // ----------------------------------------------
+      for (j = (i - 1) * 2; j >= 0; j -= 2){
+         if (x == pointlist[j] && y == pointlist[j+1]){
+            printf("skip duplicate %d\n", j >> 1);
+            setvertextype(vertexloop, UNDEADVERTEX);
+            vertexloop[0] = 0xffffffff;
+            vertexloop[1] = 0xffffffff;
+            break;
+         }
+      }
+      if (j >= 0)
+         continue;
+      // ----------------------------------------------
+
       setvertextype(vertexloop, INPUTVERTEX);
       /* Determine the smallest and largest x and y coordinates. */
       if (i == 0) {

@@ -23,6 +23,26 @@ int pnpoly(int nvert, float *vert, float testx, float testy)
    }
    return c;
 }
+
+int compare_dups(const void *a, const void *b) {
+   int da = *((const long*) a);
+   int db = *((const long*) b);
+   return (da > db) - (da < db);
+}
+
+void shiftSegment(TriangleIO *in, int *seg, int pos) {
+   int size = (in->numberofsegments - pos - 1) * sizeof(int) * 2;
+   printf("shift %d - %d %d\n", size, in->numberofsegments, pos);
+   if (size > 0)
+      memmove(seg, seg + 2, size);
+
+   in->numberofsegments -= 1;
+}
+struct {
+   int p1;
+   int p2;
+} segment;
+
 #endif
 
 static void printPoly(TriangleIO *in) {
@@ -188,7 +208,7 @@ jint Java_org_oscim_renderer_sublayers_ExtrusionLayer_triangulate(JNIEnv *env, j
       }
       printPoly(&in);
 
-      // shift segment indices while removing duplicate points
+      // replace duplicate positions with first occurence
       for (int i = 0; i < dups; i++) {
          // position of the duplicate vertex
          int pos = skip_list[i * 2] - i;
@@ -197,8 +217,10 @@ jint Java_org_oscim_renderer_sublayers_ExtrusionLayer_triangulate(JNIEnv *env, j
 
          seg = in.segmentlist;
          for (int j = 0; j < in.numberofsegments * 2; j++, seg++) {
-            if (*seg == pos)
+            if (*seg == pos) {
+               printf("%d: %d <- %d", j, pos, replacement);
                *seg = replacement;
+            }
          }
       }
    }
