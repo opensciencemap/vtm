@@ -100,7 +100,7 @@ public abstract class RenderLayer {
 		matrices.mvp.setTransScale((float) (x * tileScale), (float) (y * tileScale),
 				(float) ((position.scale / oPos.scale) / GLRenderer.COORD_SCALE));
 
-		matrices.mvp.multiplyMM(project ? matrices.viewproj : matrices.view, matrices.mvp);
+		matrices.mvp.multiplyLhs(project ? matrices.viewproj : matrices.view);
 	}
 
 	/**

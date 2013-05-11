@@ -333,7 +333,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 		// scale height
 		m.mvp.setValue(10, scale / 10);
 
-		m.mvp.multiplyMM(m.viewproj, m.mvp);
+		m.mvp.multiplyLhs(m.viewproj);
 
 		m.mvp.addDepthOffset(delta);
 	}
