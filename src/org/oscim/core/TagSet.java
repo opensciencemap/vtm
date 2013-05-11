@@ -40,6 +40,29 @@ public class TagSet {
 		}
 		return null;
 	}
+	public boolean containsKey(String key){
+		for (int i = 0; i < numTags; i++) {
+			if (tags[i].key == key)
+				return true;
+		}
+		return false;
+	}
+
+	public String getValue(String key){
+		for (int i = 0; i < numTags; i++) {
+			if (tags[i].key == key)
+				return tags[i].value;
+		}
+		return null;
+	}
+
+	public boolean contains(String key, String value){
+		for (int i = 0; i < numTags; i++) {
+			if (tags[i].key == key)
+				return value.equals(tags[i].value);
+		}
+		return false;
+	}
 
 	public void add(Tag tag) {
 		if (numTags >= tags.length) {
@@ -49,6 +72,7 @@ public class TagSet {
 		}
 		tags[numTags++] = tag;
 	}
+
 
 	public boolean contains(Tag tag) {
 		for (int i = 0; i < numTags; i++) {
