@@ -55,6 +55,10 @@ public class TextureItem extends Inlist<TextureItem> {
 		pool.releaseAll(ti);
 	}
 
+	/**
+	 * Retrieve a TextureItem from pool with default Bitmap
+	 * with dimension TextureRenderer.TEXTURE_WIDTH/HEIGHT.
+	 * */
 	public synchronized static TextureItem get(boolean initBitmap) {
 		TextureItem ti = pool.get();
 		if (initBitmap) {
@@ -68,16 +72,16 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		@Override
 		public void init(int num) {
-			super.init(num);
-
 			int[] textureIds = new int[num];
 			GLES20.glGenTextures(num, textureIds, 0);
 
-			for (int i = 1; i < num; i++) {
+			for (int i = 0; i < num; i++) {
 				initTexture(textureIds[i]);
 				TextureItem to = new TextureItem(textureIds[i]);
 				pool = Inlist.push(pool, to);
 			}
+			count = num;
+			fill = num;
 		}
 
 		@Override
@@ -102,8 +106,8 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 	};
 
-	private static ArrayList<Integer> mFreeTextures = new ArrayList<Integer>();
-	private static ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
+	private final static ArrayList<Integer> mTextures = new ArrayList<Integer>();
+	private final static ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
 
 	public final static int TEXTURE_WIDTH = 512;
 	public final static int TEXTURE_HEIGHT = 256;
@@ -113,22 +117,11 @@ public class TextureItem extends Inlist<TextureItem> {
 	private static int mTexCnt = 0;
 
 	static void releaseTexture(TextureItem it) {
-		synchronized (mFreeTextures) {
+		synchronized (mTextures) {
 			if (it.id >= 0) {
-				mFreeTextures.add(Integer.valueOf(it.id));
+				mTextures.add(Integer.valueOf(it.id));
 				it.id = -1;
 			}
-		}
-	}
-
-	static void releaseBitmap(TextureItem it) {
-		synchronized (mBitmaps) {
-			if (it.bitmap != null) {
-				mBitmaps.add(it.bitmap);
-				it.bitmap = null;
-			}
-			it.ownBitmap = false;
-
 		}
 	}
 
@@ -140,12 +133,12 @@ public class TextureItem extends Inlist<TextureItem> {
 	public static void uploadTexture(TextureItem to) {
 
 		// free unused textures, find a better place for this TODO
-		synchronized (mFreeTextures) {
-			int size = mFreeTextures.size();
+		synchronized (mTextures) {
+			int size = mTextures.size();
 			int[] tmp = new int[size];
 			for (int i = 0; i < size; i++)
-				tmp[i] = mFreeTextures.get(i).intValue();
-			mFreeTextures.clear();
+				tmp[i] = mTextures.get(i).intValue();
+			mTextures.clear();
 			GLES20.glDeleteTextures(size, tmp, 0);
 		}
 
@@ -208,13 +201,13 @@ public class TextureItem extends Inlist<TextureItem> {
 	static void init(int num) {
 		pool.init(num);
 
-		mBitmaps = new ArrayList<Bitmap>(10);
+		mBitmaps.clear();
+		mTextures.clear();
 
 		for (int i = 0; i < 4; i++) {
 			Bitmap bitmap = Bitmap.createBitmap(
 					TEXTURE_WIDTH, TEXTURE_HEIGHT,
 					Bitmap.Config.ARGB_8888);
-
 			mBitmaps.add(bitmap);
 		}
 
@@ -240,6 +233,16 @@ public class TextureItem extends Inlist<TextureItem> {
 				return bitmap;
 			}
 			return mBitmaps.remove(size - 1);
+		}
+	}
+
+	static void releaseBitmap(TextureItem it) {
+		synchronized (mBitmaps) {
+			if (it.bitmap != null) {
+				mBitmaps.add(it.bitmap);
+				it.bitmap = null;
+			}
+			it.ownBitmap = false;
 		}
 	}
 }
