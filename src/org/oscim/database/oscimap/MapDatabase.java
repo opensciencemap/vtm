@@ -69,18 +69,17 @@ public class MapDatabase implements IMapDatabase {
 	private float mScaleFactor;
 	private MapTile mTile;
 
-	private long mContentLenth;
-
 	private final boolean debug = false;
 	private LwHttp lwHttp;
 
 	private final UTF8Decoder mStringDecoder;
 	private final MapElement mElem;
 
-	public MapDatabase(){
+	public MapDatabase() {
 		mStringDecoder = new UTF8Decoder();
 		mElem = new MapElement();
 	}
+
 	@Override
 	public QueryResult executeQuery(MapTile tile, IMapDatabaseCallback mapDatabaseCallback) {
 		QueryResult result = QueryResult.SUCCESS;
@@ -106,7 +105,7 @@ public class MapDatabase implements IMapDatabase {
 
 		try {
 
-			if (lwHttp.sendRequest(tile) && (mContentLenth = lwHttp.readHeader()) >= 0) {
+			if (lwHttp.sendRequest(tile) && lwHttp.readHeader() >= 0) {
 				lwHttp.cacheBegin(tile, f);
 				decode();
 			} else {
@@ -214,10 +213,6 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	// /////////////// hand sewed tile protocol buffers decoder ///////////////
-	//private final int MAX_WAY_COORDS = 1 << 14;
-
-	// overall bytes of content processed
-	private int mBytesProcessed;
 
 	private static final int TAG_TILE_NUM_TAGS = 1;
 	private static final int TAG_TILE_TAG_KEYS = 2;
@@ -240,11 +235,6 @@ public class MapDatabase implements IMapDatabase {
 
 	private short[] mTmpKeys = new short[100];
 	private final Tag[] mTmpTags = new Tag[20];
-
-	//private float[] mTmpCoords;
-	//private short[] mIndices = new short[10];
-	//private final GeometryBuffer mElem = new GeometryBuffer(MAX_WAY_COORDS, 128);
-
 	private Tag[][] mElementTags;
 
 	private void initDecorder() {
@@ -259,14 +249,10 @@ public class MapDatabase implements IMapDatabase {
 
 		mCurTagCnt = 0;
 
-		if (debug)
-			Log.d(TAG, mTile + " Content length " + mContentLenth);
-
-		mBytesProcessed = 0;
 		int val;
 		int numTags = 0;
 
-		while (mBytesProcessed < mContentLenth && (val = decodeVarint32()) > 0) {
+		while (lwHttp.hasData() && (val = decodeVarint32()) > 0) {
 			// read tag and wire type
 			int tag = (val >> 3);
 
@@ -323,11 +309,9 @@ public class MapDatabase implements IMapDatabase {
 		short[] index = mElem.index;
 		int coordCnt = 0;
 
-		for (int i = 0; i < indexCnt; i++) {
-			int len = index[i] * 2;
-			coordCnt += len;
-			index[i] = (short) len;
-		}
+		for (int i = 0; i < indexCnt; i++)
+			coordCnt += index[i] *= 2;
+
 		// set end marker
 		if (indexCnt < index.length)
 			index[indexCnt] = -1;
@@ -341,15 +325,14 @@ public class MapDatabase implements IMapDatabase {
 		Tag[] tags = null;
 		short[] index = null;
 
-		int end = mBytesProcessed + bytes;
+		int end = lwHttp.position() + bytes;
 		int indexCnt = 1;
-		//int layer = 5;
 
 		boolean skip = false;
 		boolean fail = false;
 
 		int coordCnt = 0;
-		if (type == TAG_TILE_POINT){
+		if (type == TAG_TILE_POINT) {
 			coordCnt = 2;
 			mElem.index[0] = 2;
 		}
@@ -359,7 +342,7 @@ public class MapDatabase implements IMapDatabase {
 		mElem.height = 0;
 		mElem.minHeight = 0;
 
-		while (mBytesProcessed < end) {
+		while (lwHttp.position() < end) {
 			// read tag and wire type
 			int val = decodeVarint32();
 			if (val == 0)
@@ -369,7 +352,7 @@ public class MapDatabase implements IMapDatabase {
 
 			switch (tag) {
 				case TAG_ELEM_TAGS:
-					tags = decodeWayTags();
+					tags = decodeElementTags();
 					break;
 
 				case TAG_ELEM_NUM_INDICES:
@@ -382,7 +365,7 @@ public class MapDatabase implements IMapDatabase {
 
 				case TAG_ELEM_COORDS:
 					if (coordCnt == 0) {
-						Log.d(TAG, mTile + " skipping way");
+						Log.d(TAG, mTile + " no coordinates");
 						skip = true;
 					}
 					int cnt = decodeWayCoordinates(skip, coordCnt);
@@ -398,7 +381,7 @@ public class MapDatabase implements IMapDatabase {
 					break;
 
 				case TAG_ELEM_HEIGHT:
-					mElem.height= decodeVarint32();
+					mElem.height = decodeVarint32();
 					break;
 
 				case TAG_ELEM_MIN_HEIGHT:
@@ -425,13 +408,13 @@ public class MapDatabase implements IMapDatabase {
 		mElem.tags = tags;
 		switch (type) {
 			case TAG_TILE_LINE:
-				mElem.type= GeometryType.LINE;
+				mElem.type = GeometryType.LINE;
 				break;
 			case TAG_TILE_POLY:
-				mElem.type= GeometryType.POLY;
+				mElem.type = GeometryType.POLY;
 				break;
 			case TAG_TILE_POINT:
-				mElem.type= GeometryType.POINT;
+				mElem.type = GeometryType.POINT;
 				break;
 		}
 
@@ -440,16 +423,16 @@ public class MapDatabase implements IMapDatabase {
 		return true;
 	}
 
-	private Tag[] decodeWayTags() throws IOException {
+	private Tag[] decodeElementTags() throws IOException {
 		int bytes = decodeVarint32();
 
 		Tag[] tmp = mTmpTags;
 
 		int cnt = 0;
-		int end = mBytesProcessed + bytes;
+		int end = lwHttp.position() + bytes;
 		int max = mCurTagCnt;
 
-		while (mBytesProcessed < end) {
+		while (lwHttp.position() < end) {
 			int tagNum = decodeVarint32();
 
 			if (tagNum < 0) {
@@ -485,6 +468,9 @@ public class MapDatabase implements IMapDatabase {
 		return tags;
 	}
 
+	private final static int VARINT_LIMIT = 5;
+	private final static int VARINT_MAX = 10;
+
 	private int decodeWayCoordinates(boolean skip, int nodes) throws IOException {
 		int bytes = decodeVarint32();
 
@@ -495,55 +481,57 @@ public class MapDatabase implements IMapDatabase {
 			return nodes;
 		}
 
-		int pos = lwHttp.bufferPos;
-		int end = pos + bytes;
-		byte[] buf = lwHttp.buffer;
 		int cnt = 0;
-		int result;
 
 		int lastX = 0;
 		int lastY = 0;
 		boolean even = true;
 
 		float scale = mScaleFactor;
-
 		float[] coords = mElem.ensurePointSize(nodes, false);
 
-		// read repeated sint32
+		byte[] buf = lwHttp.buffer;
+		int pos = lwHttp.bufferPos;
+		int end = pos + bytes;
+		int val;
+
 		while (pos < end) {
 			if (buf[pos] >= 0) {
-				result = buf[pos++];
+				val = buf[pos++];
+
 			} else if (buf[pos + 1] >= 0) {
-				result = (buf[pos++] & 0x7f)
+				val = (buf[pos++] & 0x7f)
 						| buf[pos++] << 7;
+
 			} else if (buf[pos + 2] >= 0) {
-				result = (buf[pos++] & 0x7f)
+				val = (buf[pos++] & 0x7f)
 						| (buf[pos++] & 0x7f) << 7
 						| (buf[pos++]) << 14;
+
 			} else if (buf[pos + 3] >= 0) {
-				result = (buf[pos++] & 0x7f)
+				val = (buf[pos++] & 0x7f)
 						| (buf[pos++] & 0x7f) << 7
 						| (buf[pos++] & 0x7f) << 14
 						| (buf[pos++]) << 21;
+
 			} else {
-				result = (buf[pos] & 0x7f)
-						| (buf[pos + 1] & 0x7f) << 7
-						| (buf[pos + 2] & 0x7f) << 14
-						| (buf[pos + 3] & 0x7f) << 21
-						| (buf[pos + 4]) << 28;
-				pos += 4;
-				int i = 0;
+				val = (buf[pos++] & 0x7f)
+						| (buf[pos++] & 0x7f) << 7
+						| (buf[pos++] & 0x7f) << 14
+						| (buf[pos++] & 0x7f) << 21
+						| (buf[pos]) << 28;
 
-				while (buf[pos++] < 0 && i < 10)
-					i++;
+				int max = pos + VARINT_LIMIT;
+				while (pos < max)
+					if (buf[pos++] >= 0)
+						break;
 
-				if (i == 10)
-					throw new IOException("X malformed VarInt32 in " + mTile);
-
+				if (pos == max)
+					throw new IOException("malformed VarInt32 in " + mTile);
 			}
 
 			// zigzag decoding
-			int s = ((result >>> 1) ^ -(result & 1));
+			int s = ((val >>> 1) ^ -(val & 1));
 
 			if (even) {
 				lastX = lastX + s;
@@ -557,12 +545,9 @@ public class MapDatabase implements IMapDatabase {
 		}
 
 		lwHttp.bufferPos = pos;
-		mBytesProcessed += bytes;
 
 		return cnt;
 	}
-
-	private final static int VARINT_LIMIT = 10;
 
 	private short[] decodeShortArray(int num, short[] array) throws IOException {
 		int bytes = decodeVarint32();
@@ -574,113 +559,97 @@ public class MapDatabase implements IMapDatabase {
 
 		int cnt = 0;
 
+		byte[] buf = lwHttp.buffer;
 		int pos = lwHttp.bufferPos;
 		int end = pos + bytes;
-		byte[] buf = lwHttp.buffer;
-		int result;
+		int val;
 
 		while (pos < end) {
-
 			if (buf[pos] >= 0) {
-				result = buf[pos++];
+				val = buf[pos++];
 			} else if (buf[pos + 1] >= 0) {
-				result = (buf[pos] & 0x7f)
-						| buf[pos + 1] << 7;
-				pos += 2;
+				val = (buf[pos++] & 0x7f)
+						| buf[pos++] << 7;
 			} else if (buf[pos + 2] >= 0) {
-				result = (buf[pos] & 0x7f)
-						| (buf[pos + 1] & 0x7f) << 7
-						| (buf[pos + 2]) << 14;
-				pos += 3;
+				val = (buf[pos++] & 0x7f)
+						| (buf[pos++] & 0x7f) << 7
+						| (buf[pos++]) << 14;
 			} else if (buf[pos + 3] >= 0) {
-				result = (buf[pos] & 0x7f)
-						| (buf[pos + 1] & 0x7f) << 7
-						| (buf[pos + 2] & 0x7f) << 14
-						| (buf[pos + 3]) << 21;
-				pos += 4;
+				val = (buf[pos++] & 0x7f)
+						| (buf[pos++] & 0x7f) << 7
+						| (buf[pos++] & 0x7f) << 14
+						| (buf[pos++]) << 21;
 			} else {
-				result = (buf[pos] & 0x7f)
-						| (buf[pos + 1] & 0x7f) << 7
-						| (buf[pos + 2] & 0x7f) << 14
-						| (buf[pos + 3] & 0x7f) << 21
-						| (buf[pos + 4]) << 28;
+				val = (buf[pos++] & 0x7f)
+						| (buf[pos++] & 0x7f) << 7
+						| (buf[pos++] & 0x7f) << 14
+						| (buf[pos++] & 0x7f) << 21
+						| (buf[pos]) << 28;
 
-				pos += 4;
-				int i = 0;
+				int max = pos + VARINT_LIMIT;
+				while (pos < max)
+					if (buf[pos++] >= 0)
+						break;
 
-				while (buf[pos++] < 0 && i < VARINT_LIMIT)
-					i++;
-
-				if (i == VARINT_LIMIT)
-					throw new IOException("X malformed VarInt32 in " + mTile);
-
+				if (pos == max)
+					throw new IOException("malformed VarInt32 in " + mTile);
 			}
 
-			array[cnt++] = (short) result;
+			array[cnt++] = (short) val;
 		}
 
 		lwHttp.bufferPos = pos;
-		mBytesProcessed += bytes;
 
 		return array;
 	}
 
 	private int decodeVarint32() throws IOException {
-		int pos = lwHttp.bufferPos;
-
-		if (pos + VARINT_LIMIT > lwHttp.bufferFill) {
+		if (lwHttp.bufferPos + VARINT_MAX > lwHttp.bufferFill)
 			lwHttp.readBuffer(4096);
-			pos = lwHttp.bufferPos;
-		}
 
 		byte[] buf = lwHttp.buffer;
+		int pos = lwHttp.bufferPos;
+		int val;
 
 		if (buf[pos] >= 0) {
-			lwHttp.bufferPos += 1;
-			mBytesProcessed += 1;
-			return buf[pos];
-		} else if (buf[pos + 1] >= 0) {
-			lwHttp.bufferPos += 2;
-			mBytesProcessed += 2;
-			return (buf[pos] & 0x7f)
-					| (buf[pos + 1]) << 7;
+			val = buf[pos++];
+		} else {
 
-		} else if (buf[pos + 2] >= 0) {
-			lwHttp.bufferPos += 3;
-			mBytesProcessed += 3;
-			return (buf[pos] & 0x7f)
-					| (buf[pos + 1] & 0x7f) << 7
-					| (buf[pos + 2]) << 14;
-		} else if (buf[pos + 3] >= 0) {
-			lwHttp.bufferPos += 4;
-			mBytesProcessed += 4;
-			return (buf[pos] & 0x7f)
-					| (buf[pos + 1] & 0x7f) << 7
-					| (buf[pos + 2] & 0x7f) << 14
-					| (buf[pos + 3]) << 21;
+			if (buf[pos + 1] >= 0) {
+				val = (buf[pos++] & 0x7f)
+						| (buf[pos++]) << 7;
+
+			} else if (buf[pos + 2] >= 0) {
+				val = (buf[pos++] & 0x7f)
+						| (buf[pos++] & 0x7f) << 7
+						| (buf[pos++]) << 14;
+
+			} else if (buf[pos + 3] >= 0) {
+				val = (buf[pos++] & 0x7f)
+						| (buf[pos++] & 0x7f) << 7
+						| (buf[pos++] & 0x7f) << 14
+						| (buf[pos++]) << 21;
+			} else {
+				val = (buf[pos++] & 0x7f)
+						| (buf[pos++] & 0x7f) << 7
+						| (buf[pos++] & 0x7f) << 14
+						| (buf[pos++] & 0x7f) << 21
+						| (buf[pos]) << 28;
+
+				// 'Discard upper 32 bits'
+				int max = pos + VARINT_LIMIT;
+				while (pos < max)
+					if (buf[pos++] >= 0)
+						break;
+
+				if (pos == max)
+					throw new IOException("malformed VarInt32 in " + mTile);
+			}
 		}
 
-		int result = (buf[pos] & 0x7f)
-				| (buf[pos + 1] & 0x7f) << 7
-				| (buf[pos + 2] & 0x7f) << 14
-				| (buf[pos + 3] & 0x7f) << 21
-				| (buf[pos + 4]) << 28;
+		lwHttp.bufferPos = pos;
 
-		int read = 5;
-		pos += 4;
-
-		// 'Discard upper 32 bits' - the original comment.
-		// havent found this in any document but the code provided by google.
-		while (buf[pos++] < 0 && read < VARINT_LIMIT)
-			read++;
-
-		if (read == VARINT_LIMIT)
-			throw new IOException("X malformed VarInt32 in " + mTile);
-
-		lwHttp.bufferPos += read;
-		mBytesProcessed += read;
-
-		return result;
+		return val;
 	}
 
 	private String decodeString() throws IOException {
@@ -689,15 +658,8 @@ public class MapDatabase implements IMapDatabase {
 		final String result = mStringDecoder.decode(lwHttp.buffer, lwHttp.bufferPos, size);
 
 		lwHttp.bufferPos += size;
-		mBytesProcessed += size;
+
 		return result;
 
 	}
-
-	static int decodeInt(byte[] buffer, int offset) {
-		return buffer[offset] << 24 | (buffer[offset + 1] & 0xff) << 16
-				| (buffer[offset + 2] & 0xff) << 8
-				| (buffer[offset + 3] & 0xff);
-	}
-
 }

@@ -34,23 +34,30 @@ import android.util.Log;
 
 public class LwHttp {
 	private static final String TAG = LwHttp.class.getName();
+	private final static int BUFFER_SIZE = 65536;
 
-	private String mHost;
-	private int mPort;
-	private long mContentLenth;
-	private InputStream mInputStream;
-
-	private final int BUFFER_SIZE = 65536;
-
+	//
 	byte[] buffer = new byte[BUFFER_SIZE];
+
 	// position in buffer
 	int bufferPos;
 
 	// bytes available in buffer
 	int bufferFill;
 
-	// overall bytes of content read
+
+	// offset of buffer in message
+	private int mBufferOffset;
+
+	// max bytes to read: message = header + content
+	private long mReadEnd;
+
+	// overall bytes of message read
 	private int mReadPos;
+
+	private String mHost;
+	private int mPort;
+	private InputStream mInputStream;
 
 	private int mMaxReq = 0;
 	private Socket mSocket;
@@ -158,18 +165,20 @@ public class LwHttp {
 			return -1;
 
 		int contentLength = decodeInt(buf, end);
-		mContentLenth = contentLength;
 
-		// buffer fill
-		bufferFill = read;
 		// start of content
 		bufferPos = end + 4;
-		// bytes of content already read into buffer
-		mReadPos = read - bufferPos;
+		// buffer fill
+		bufferFill = read;
+		mBufferOffset = 0;
+
+		// overall bytes of already read
+		mReadPos = read;
+		mReadEnd = bufferPos + contentLength;
 
 		mInputStream = mResponseStream;
 
-		return contentLength;
+		return 1;
 	}
 
 	boolean sendRequest(Tile tile) throws IOException {
@@ -294,35 +303,45 @@ public class LwHttp {
 				| (buffer[offset + 3] & 0xff);
 	}
 
-	void readBuffer(int size) throws IOException {
+	public boolean hasData() {
+		return mBufferOffset + bufferPos < mReadEnd;
+	}
 
+	public int position() {
+		return mBufferOffset + bufferPos;
+	}
+
+	public void readBuffer(int size) throws IOException {
 		// check if buffer already contains the request bytes
 		if (bufferPos + size < bufferFill)
 			return;
 
 		// check if inputstream is read to the end
-		if (mReadPos == mContentLenth)
+		if (mReadPos == mReadEnd)
 			return;
+
 		int maxSize = buffer.length;
 
 		if (size > maxSize) {
 			Log.d(TAG, "increase read buffer to " + size + " bytes");
 			maxSize = size;
 			byte[] tmp = new byte[maxSize];
-
 			bufferFill -= bufferPos;
 			System.arraycopy(buffer, bufferPos, tmp, 0, bufferFill);
+			mBufferOffset += bufferPos;
 			bufferPos = 0;
 			buffer = tmp;
 		}
 
 		if (bufferFill == bufferPos) {
+			mBufferOffset += bufferPos;
 			bufferPos = 0;
 			bufferFill = 0;
 		} else if (bufferPos + size > maxSize) {
 			// copy bytes left to the beginning of buffer
 			bufferFill -= bufferPos;
 			System.arraycopy(buffer, bufferPos, buffer, 0, bufferFill);
+			mBufferOffset += bufferPos;
 			bufferPos = 0;
 		}
 
@@ -331,8 +350,8 @@ public class LwHttp {
 		while ((bufferFill - bufferPos) < size && max > 0) {
 
 			max = maxSize - bufferFill;
-			if (max > mContentLenth - mReadPos)
-				max = (int) (mContentLenth - mReadPos);
+			if (max > mReadEnd - mReadPos)
+				max = (int) (mReadEnd - mReadPos);
 
 			// read until requested size is available in buffer
 			int len = mInputStream.read(buffer, bufferFill, max);
@@ -348,7 +367,7 @@ public class LwHttp {
 			//			if (mCacheFile != null)
 			//				mCacheFile.write(mReadBuffer, mBufferFill, len);
 
-			if (mReadPos == mContentLenth)
+			if (mReadPos == mReadEnd)
 				break;
 
 			bufferFill += len;
@@ -364,8 +383,8 @@ public class LwHttp {
 			try {
 				in = new FileInputStream(f);
 
-				mContentLenth = f.length();
-				Log.d(TAG, tile + " - using cache: " + mContentLenth);
+				mReadEnd = f.length();
+				Log.d(TAG, tile + " - using cache: " + mReadEnd);
 				mInputStream = in;
 
 				//decode();
