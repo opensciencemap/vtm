@@ -63,7 +63,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 
 	private static final String TAG = MapTileLoader.class.getName();
 
-	private static final double STROKE_INCREASE = Math.sqrt(2.2);
+	private static final double STROKE_INCREASE = Math.sqrt(2.5);
 	private static final byte LAYERS = 11;
 
 	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
@@ -171,7 +171,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 		// account for area changes with latitude
 		double latitude = MercatorProjection.toLatitude(mTile.y);
 
-		mLatScaleFactor = 0.5f + 0.5f * ((float) Math.sin(Math.abs(latitude) * (Math.PI / 180)));
+		mLatScaleFactor = 0.4f + 0.6f * ((float) Math.sin(Math.abs(latitude) * (Math.PI / 180)));
 
 		mGroundResolution = (float) (Math.cos(latitude * (Math.PI / 180))
 				* MercatorProjection.EARTH_CIRCUMFERENCE
@@ -189,6 +189,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 			TextItem.pool.releaseAll(mTile.labels);
 			mTile.labels = null;
 			// FIXME add STATE_FAILED?
+			// in passTile everything but STATE_LOADING is considered failed.
 			mTile.state = STATE_NONE;
 			mTile = null;
 			return false;
