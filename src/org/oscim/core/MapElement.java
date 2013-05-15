@@ -39,7 +39,7 @@ public class MapElement extends GeometryBuffer {
 	public int priority;
 
 	public MapElement() {
-		super(4096, 128);
+		super(1024, 16);
 	}
 
 	public MapElement(int points, int indices) {
