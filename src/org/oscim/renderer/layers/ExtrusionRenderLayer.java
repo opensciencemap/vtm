@@ -137,6 +137,9 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 		mTileCnt = ready;
 		isReady = ready > 0;
+
+		if (!isReady)
+			mTileLayer.releaseTiles(mTileSet);
 	}
 
 	@Override
