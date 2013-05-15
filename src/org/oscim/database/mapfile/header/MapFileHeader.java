@@ -153,21 +153,6 @@ public class MapFileHeader {
 		if (!openResult.isSuccess()) {
 			return openResult;
 		}
-		int[] level = new int[20];
-		level[17] = 16;
-		level[16] = 16;
-		level[15] = 16;
-		level[14] = 13;
-		level[13] = 13;
-		level[12] = 13;
-		level[11] = 10;
-		level[10] = 10;
-		level[9] = 10;
-		level[8] = 7;
-		level[7] = 7;
-		level[6] = 7;
-
-		mapFileInfoBuilder.zoomLevel = level;
 
 		this.mapFileInfo = mapFileInfoBuilder.build();
 
@@ -247,10 +232,15 @@ public class MapFileHeader {
 			updateZoomLevelInformation(tempSubFileParameters[currentSubFile]);
 		}
 
+		mapFileInfoBuilder.zoomLevel = new int[numberOfSubFiles];
+
 		// create and fill the lookup table for the sub-files
 		this.subFileParameters = new SubFileParameter[this.zoomLevelMaximum + 1];
 		for (int currentMapFile = 0; currentMapFile < numberOfSubFiles; ++currentMapFile) {
 			SubFileParameter subFileParameter = tempSubFileParameters[currentMapFile];
+
+			mapFileInfoBuilder.zoomLevel[currentMapFile] = subFileParameter.baseZoomLevel;
+
 			for (byte zoomLevel = subFileParameter.zoomLevelMin; zoomLevel <= subFileParameter.zoomLevelMax; ++zoomLevel) {
 				this.subFileParameters[zoomLevel] = subFileParameter;
 			}
