@@ -141,6 +141,13 @@ public class TileManager {
 		// ... free static pools
 	}
 
+	private int[] mZoomTable;
+
+	public void setZoomTable(int[] zoomLevel) {
+		mZoomTable = zoomLevel;
+
+	}
+
 	public void init(int width, int height) {
 
 		// sync with GLRender thread
@@ -200,6 +207,18 @@ public class TileManager {
 		double scale = pos.scale * 0.9f;
 
 		int tileZoom = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, mMaxZoom);
+
+		if (mZoomTable != null){
+			int match = 0;
+			for (int z : mZoomTable){
+				if (z <= tileZoom && z > match)
+					match = z;
+			}
+			if (match == 0)
+				return;
+
+			tileZoom = match;
+		}
 
 		mMapViewPosition.getMapViewProjection(mMapPlane);
 
@@ -350,7 +369,7 @@ public class TileManager {
 			mJobs.add(tile);
 		}
 
-		if (zoomLevel > 2) {
+		if ((zoomLevel > 2) && (mZoomTable == null)) {
 			boolean add = false;
 
 			// prefetch parent

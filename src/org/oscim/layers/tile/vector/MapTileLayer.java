@@ -104,6 +104,8 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		else
 			MapView.enableClosePolygons = false;
 
+		mTileManager.setZoomTable(mMapDatabase.getMapInfo().zoomLevel);
+
 		mMapView.clearMap();
 
 		resumeLoaders();
