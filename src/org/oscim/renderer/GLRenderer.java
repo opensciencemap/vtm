@@ -126,8 +126,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		mMatrices = new Matrices();
 
 		// tile fill coords
-		short min = 0;
-		short max = (short) ((Tile.SIZE * COORD_SCALE));
+		short min = (short) 0;
+		short max = (short) (Tile.SIZE * COORD_SCALE);
 		mFillCoords = new short[8];
 		mFillCoords[0] = min;
 		mFillCoords[1] = max;
