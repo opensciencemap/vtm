@@ -20,9 +20,11 @@ public abstract class Pool<T extends Inlist<T>> {
 
 	/**
 	 * @param item release resources
+	 * @return whether item should be added to
+	 *         pool. use to manage pool size manually
 	 */
-	protected void clearItem(T item) {
-
+	protected boolean clearItem(T item) {
+		return true;
 	}
 
 	// release 'item' to pool.
@@ -31,7 +33,8 @@ public abstract class Pool<T extends Inlist<T>> {
 		if (item == null)
 			return;
 
-		clearItem(item);
+		if (!clearItem(item))
+			return;
 
 		item.next = pool;
 		pool = item;
