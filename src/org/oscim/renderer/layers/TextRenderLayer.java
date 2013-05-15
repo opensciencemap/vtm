@@ -374,7 +374,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 		}
 
 		if (!changedTiles && !changedPos){
-			Log.d(TAG, "not changed " + changedTiles + " " + changedPos);
+			//Log.d(TAG, "not changed " + changedTiles + " " + changedPos);
 			return false;
 		}
 
