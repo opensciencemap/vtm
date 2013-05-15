@@ -48,6 +48,8 @@ public class Tag {
 	 * The key of the elevation OpenStreetMap tag.
 	 */
 	public static final String TAG_KEY_BUILDING = "building";
+	public static final String TAG_KEY_HIGHWAY = "highway";
+	public static final String TAG_KEY_LANDUSE = "landuse";
 
 	/**
 	 * The key of this tag.
