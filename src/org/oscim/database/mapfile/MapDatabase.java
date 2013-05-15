@@ -949,6 +949,7 @@ public class MapDatabase implements IMapDatabase {
 			} else {
 				if (hasName) {
 					String str = mReadBuffer.readUTF8EncodedString();
+					Log.d(TAG, "way name: " + str);
 					curTags[addTag++] = new Tag(Tag.TAG_KEY_NAME, str, false);
 				}
 				if (hasHouseNr) {
@@ -990,7 +991,7 @@ public class MapDatabase implements IMapDatabase {
 				mElem.layer = layer;
 
 				mElem.type = closed ? GeometryType.POLY : GeometryType.LINE;
-				mElem.set(tags, layer);
+				mElem.set(curTags, layer);
 
 				mapDatabaseCallback.renderElement(mElem);
 			}
