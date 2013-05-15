@@ -324,12 +324,6 @@ public class ExtrusionRenderLayer extends RenderLayer {
 		float y = (float) ((tile.y - pos.y) * curScale);
 		m.mvp.setTransScale(x, y, scale / GLRenderer.COORD_SCALE);
 
-//		float x = (float) (tile.pixelX - mapPosition.x * div);
-//		float y = (float) (tile.pixelY - mapPosition.y * div);
-//		float scale = mapPosition.scale / div;
-//
-//		m.mvp.setTransScale(x * scale, y * scale, scale / GLRenderer.COORD_SCALE);
-
 		// scale height
 		m.mvp.setValue(10, scale / 10);
 
@@ -344,7 +338,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 	private final float _b = 0xe6;
 	private final float _o = 55;
 	private final float _s = 20;
-	private final float _l = 16;
+	private final float _l = 8;
 	private float mAlpha = 1;
 	private final float[] mColor = {
 			// roof color
