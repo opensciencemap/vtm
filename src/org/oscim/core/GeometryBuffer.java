@@ -1,5 +1,6 @@
 package org.oscim.core;
 
+
 public class GeometryBuffer {
 	public enum GeometryType {
 
@@ -17,7 +18,9 @@ public class GeometryBuffer {
 	}
 
 	// TODO
-	// -- check indexPos < Short.Max
+	// - check indexPos < Short.Max
+	// - make internals private
+
 	final static boolean CHECK_STATE = true;
 
 	public float[] points;
@@ -25,8 +28,6 @@ public class GeometryBuffer {
 	public int indexPos;
 	public int pointPos;
 
-	//public int type;
-	// GEOM_*
 	public GeometryType type;
 
 	public GeometryBuffer(float[] points, short[] index) {
@@ -104,13 +105,14 @@ public class GeometryBuffer {
 	}
 
 	public void startPolygon() {
+		boolean start = (type == GeometryType.NONE);
 		if (CHECK_STATE)
 			setOrCheckMode(GeometryType.POLY);
 
-		if ((indexPos + 4) >= index.length)
-			ensureIndexSize(indexPos + 4, true);
+		if ((indexPos + 4) > index.length)
+			ensureIndexSize(indexPos + 3, true);
 
-		if (indexPos > 0) {
+		if (!start) {
 
 			// end ring
 			index[++indexPos] = 0;
@@ -134,8 +136,8 @@ public class GeometryBuffer {
 		if (CHECK_STATE)
 			checkMode(GeometryType.POLY);
 
-		if ((indexPos + 3) >= index.length)
-			ensureIndexSize(indexPos, true);
+		if ((indexPos + 3) > index.length)
+			ensureIndexSize(indexPos + 2, true);
 
 		// end ring
 		index[++indexPos] = 0;
@@ -144,7 +146,8 @@ public class GeometryBuffer {
 		index[++indexPos] = 0;
 
 		// set new end marker
-		index[indexPos + 1] = -1;
+		if (index.length > indexPos + 1)
+			index[indexPos + 1] = -1;
 	}
 
 	// ---- internals ----
@@ -152,7 +155,7 @@ public class GeometryBuffer {
 		if (size * 2 < points.length)
 			return points;
 
-		float[] tmp = new float[size * 2 + 1024];
+		float[] tmp = new float[size * 2 + 512];
 		if (copy)
 			System.arraycopy(points, 0, tmp, 0, points.length);
 
@@ -164,7 +167,7 @@ public class GeometryBuffer {
 		if (size < index.length)
 			return index;
 
-		short[] tmp = new short[size + 128];
+		short[] tmp = new short[size + 64];
 		if (copy)
 			System.arraycopy(index, 0, tmp, 0, index.length);
 
