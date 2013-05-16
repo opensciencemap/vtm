@@ -25,6 +25,7 @@ import org.oscim.core.GeoPoint;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
+import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabaseCallback;
@@ -60,6 +61,7 @@ public class MapDatabase implements IMapDatabase {
 	private LwHttp lwHttp;
 
 	private final UTF8Decoder mStringDecoder;
+	private final String mLocale = "de";
 
 	//private final MapElement mElem;
 
@@ -182,20 +184,9 @@ public class MapDatabase implements IMapDatabase {
 	private static final int TAG_GEOM_LINE = 2;
 	private static final int TAG_GEOM_POLYGON = 3;
 
-	//rivate final short[] mTmpKeys = new short[100];
-	//private final Tag[] mTmpTags = new Tag[20];
-	//private Tag[][] mElementTags;
-
 	private short[] mTmpTags = new short[1024];
 
-	//private final short[] mPrevTags = new short[1024];
-
 	private void initDecorder() {
-		// reusable tag set
-		//		Tag[][] tags = new Tag[10][];
-		//		for (int i = 0; i < 10; i++)
-		//			tags[i] = new Tag[i + 1];
-		//mElementTags = tags;
 	}
 
 	private boolean decode() throws IOException {
@@ -274,62 +265,82 @@ public class MapDatabase implements IMapDatabase {
 			}
 
 		}
-		boolean isRoad = "road".equals(name);
-		boolean isBridge = "bridge".equals(name);
-		boolean isTunnel = "tunnel".equals(name);
-		boolean isBuilding = "building".equals(name);
-		boolean isLanduse = "landuse".equals(name);
-		boolean isWater = "water".equals(name);
 
 		Tag layerTag = new Tag(name, Tag.VALUE_YES);
 
 		if (numFeatures == 0)
 			return true;
 
-		for (Feature f : features) {
-			int addTags = 0;
-			if (isBuilding || isWater)
-				addTags = 1;
+		int[] ignoreLocal = new int[20];
+		int numIgnore = 0;
 
-			Tag[] tags = new Tag[f.numTags + addTags];
+		int fallBackLocal = -1;
+		int matchedLocal = -1;
 
-			if (isBuilding)
-				tags[tags.length - 1] = BUILDING_TAG;
-			if (isWater)
-				tags[tags.length - 1] = WATER_TAG;
-
-			if (tags.length == 0)
+		for (int i = 0; i < keys.size(); i++) {
+			String key = keys.get(i);
+			if (!key.startsWith(Tag.TAG_KEY_NAME))
 				continue;
-
-			for (int j = 0; j < (f.numTags << 1); j += 2) {
-
-				String key = keys.get(f.tags[j]);
-				String val = values.get(f.tags[j + 1]);
-
-				Tag tag = null;
-				if ("class".equals(key)) {
-					if (isRoad || isTunnel || isBridge) {
-						if ("street".equals(val))
-							tag = HIGHWAY_STREET_TAG;
-						else if ("main".equals(val))
-							tag = HIGHWAY_MAIN_TAG;
-						else if ("major".equals(val))
-							tag = HIGHWAY_MAJOR_TAG;
-						else if ("major_rail".equals(val))
-							tag = HIGHWAY_RAIL_TAG;
-						else
-							tag = new Tag(Tag.TAG_KEY_HIGHWAY, val);
-
-					} else if (isLanduse)
-						tag = new Tag(Tag.TAG_KEY_LANDUSE, val);
-				}
-				if (tag == null)
-					tag = new Tag(key, val);
-
-				tags[j >> 1] = tag;
+			int len = key.length();
+			if (len == 4) {
+				fallBackLocal = i;
+				continue;
+			}
+			if (len < 7) {
+				ignoreLocal[numIgnore++] = i;
+				continue;
 			}
 
-			f.elem.set(tags, 5);
+			if (mLocale.equals(key.substring(5))) {
+				//Log.d(TAG, "found local " + key);
+				matchedLocal = i;
+			} else
+				ignoreLocal[numIgnore++] = i;
+
+		}
+
+		for (Feature f : features) {
+			//Log.d(TAG, "geom: " + f.elem.type + " " + f.elem.pointPos + " tags:" + f.numTags + " "
+			//		+ name);
+
+			if (f.elem.type == GeometryType.NONE)
+				continue;
+
+			mTagSet.clear();
+			mTagSet.add(layerTag);
+
+			boolean hasName = false;
+			String fallbackName = null;
+
+			tagLoop: for (int j = 0; j < (f.numTags << 1); j += 2) {
+				int keyIdx = f.tags[j];
+				for (int i = 0; i < numIgnore; i++)
+					if (keyIdx == ignoreLocal[i])
+						continue tagLoop;
+
+				if (keyIdx == fallBackLocal) {
+					fallbackName = values.get(f.tags[j + 1]);
+					continue;
+				}
+
+				String key;
+				String val = values.get(f.tags[j + 1]);
+
+				if (keyIdx == matchedLocal) {
+					hasName = true;
+					mTagSet.add(new Tag(Tag.TAG_KEY_NAME, val, false));
+
+				} else {
+					key = keys.get(keyIdx);
+					mTagSet.add(new Tag(key, val));
+				}
+			}
+
+			if (!hasName && fallbackName != null)
+				mTagSet.add(new Tag(Tag.TAG_KEY_NAME, fallbackName, false));
+
+			// FIXME extract layer tag here
+			f.elem.set(mTagSet.asArray(), 5);
 			mMapGenerator.renderElement(f.elem);
 			mFeaturePool.release(f);
 		}
@@ -337,6 +348,7 @@ public class MapDatabase implements IMapDatabase {
 		return true;
 	}
 
+	private final TagSet mTagSet = new TagSet();
 	private final Pool<Feature> mFeaturePool = new Pool<Feature>() {
 		int count;
 
@@ -348,7 +360,7 @@ public class MapDatabase implements IMapDatabase {
 
 		@Override
 		protected boolean clearItem(Feature item) {
-			if (count > 50) {
+			if (count > 100) {
 				count--;
 				return false;
 			}
@@ -362,17 +374,6 @@ public class MapDatabase implements IMapDatabase {
 			return true;
 		}
 	};
-
-	private final static Tag WATER_TAG = new Tag("natural", "water");
-	private final static Tag BUILDING_TAG = new Tag("building", "yes");
-	private final static Tag HIGHWAY_MAIN_TAG = new Tag("highway", "secondary");
-	private final static Tag HIGHWAY_MAJOR_TAG = new Tag("highway", "primary");
-	private final static Tag HIGHWAY_STREET_TAG = new Tag("highway", "residential");
-	private final static Tag HIGHWAY_RAIL_TAG = new Tag("railway", "rail");
-
-	//private final Tag[] mFallbackTag = new Tag[] { new Tag("debug", "way") };
-
-	//	private int mClipped;
 
 	static class Feature extends Inlist<Feature> {
 		short[] tags;
@@ -511,16 +512,17 @@ public class MapDatabase implements IMapDatabase {
 		} else if (type == TAG_GEOM_UNKNOWN)
 			elem.startPoints();
 
-		int cnt = 0;
-
 		boolean even = true;
 
 		float scale = mScaleFactor;
 
 		byte[] buf = lwHttp.buffer;
 		int pos = lwHttp.bufferPos;
+		lwHttp.bufferPos += bytes;
+
 		int end = pos + bytes;
 		int val;
+
 		int curX = 0;
 		int curY = 0;
 		int prevX = 0;
@@ -528,10 +530,12 @@ public class MapDatabase implements IMapDatabase {
 
 		int cmd = 0;
 		int num = 0;
+
 		boolean first = true;
 		boolean lastClip = false;
 
-		boolean isOuter = true;
+		// test bbox for outer..
+		boolean isOuter = mTile.zoomLevel < 14;
 
 		int xmin = Integer.MAX_VALUE, xmax = Integer.MIN_VALUE;
 		int ymin = Integer.MAX_VALUE, ymax = Integer.MIN_VALUE;
@@ -596,53 +600,53 @@ public class MapDatabase implements IMapDatabase {
 						elem.startHole();
 					}
 				}
-			} else {
-				// zigzag decoding
-				int s = ((val >>> 1) ^ -(val & 1));
-
-				if (even) {
-					even = false;
-					curX = lastX = lastX + s;
-				} else {
-					even = true;
-
-					curY = lastY = lastY + s;
-
-					int dx = (curX - prevX);
-					int dy = (curY - prevY);
-
-					if ((isPoint || cmd == MOVE_TO)
-							|| (dx > pixel || dx < -pixel)
-							|| (dy > pixel || dy < -pixel)
-							// dont clip at tile boundaries
-							|| (curX <= 0 || curX >= 4095)
-							|| (curY <= 0 || curY >= 4095)) {
-						prevX = curX;
-						prevY = curY;
-						elem.addPoint(curX / scale, curY / scale);
-						lastClip = false;
-
-						if (isPoly) {
-							if (curX < xmin)
-								xmin = curX;
-							if (curX > xmax)
-								xmax = curX;
-
-							if (curY < ymin)
-								ymin = curY;
-							if (curY > ymax)
-								ymax = curY;
-
-						}
-
-					} else {
-						lastClip = true;
-					}
-
-					num--;
-					cnt++;
-				}
+				continue;
 			}
+			// zigzag decoding
+			int s = ((val >>> 1) ^ -(val & 1));
+
+			if (even) {
+				// get x coordinate
+				even = false;
+				curX = lastX = lastX + s;
+				continue;
+			}
+			// get y coordinate and add point to geometry
+			num--;
+
+			even = true;
+			curY = lastY = lastY + s;
+
+			int dx = (curX - prevX);
+			int dy = (curY - prevY);
+
+			if ((isPoint || cmd == MOVE_TO)
+					|| (dx > pixel || dx < -pixel)
+					|| (dy > pixel || dy < -pixel)
+					// dont clip at tile boundaries
+					|| (curX <= 0 || curX >= 4095)
+					|| (curY <= 0 || curY >= 4095)) {
+
+				prevX = curX;
+				prevY = curY;
+				elem.addPoint(curX / scale, curY / scale);
+				lastClip = false;
+
+				if (isOuter) {
+					if (curX < xmin)
+						xmin = curX;
+					if (curX > xmax)
+						xmax = curX;
+
+					if (curY < ymin)
+						ymin = curY;
+					if (curY > ymax)
+						ymax = curY;
+				}
+
+				continue;
+			}
+			lastClip = true;
 		}
 
 		if (isPoly && isOuter && !testBBox(xmax - xmin, ymax - ymin)) {
@@ -655,18 +659,13 @@ public class MapDatabase implements IMapDatabase {
 			} else {
 				elem.type = GeometryType.NONE;
 			}
-
-			lwHttp.bufferPos += bytes;
-
 			return 0;
 		}
 
 		if (isLine && lastClip)
 			elem.addPoint(curX / scale, curY / scale);
 
-		lwHttp.bufferPos = pos;
-
-		return cnt;
+		return 1;
 	}
 
 	private static boolean testBBox(int dx, int dy) {
