@@ -25,7 +25,7 @@ public class Tag {
 	/**
 	 * The key of the house number OpenStreetMap tag.
 	 */
-	public static final String TAG_KEY_HOUSE_NUMBER = "addr:housenumber".intern();
+	public static final String TAG_KEY_HOUSE_NUMBER = "addr:housenumber";
 
 	/**
 	 * The key of the name OpenStreetMap tag.
@@ -50,6 +50,8 @@ public class Tag {
 	public static final String TAG_KEY_BUILDING = "building";
 	public static final String TAG_KEY_HIGHWAY = "highway";
 	public static final String TAG_KEY_LANDUSE = "landuse";
+	public static final String VALUE_YES = "yes";
+	public static final String VALUE_NO = "no";
 
 	/**
 	 * The key of this tag.
