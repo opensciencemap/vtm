@@ -14,14 +14,15 @@
  */
 package org.oscim.core;
 
+
 public class TagSet {
 	public static TagSet EMPTY_TAG_SET = new TagSet();
 
 	public Tag[] tags;
 	public int numTags;
 
-	private TagSet() {
-
+	public TagSet() {
+		tags = new Tag[10];
 	}
 
 	public TagSet(int count) {
@@ -30,6 +31,12 @@ public class TagSet {
 
 	public void clear() {
 		numTags = 0;
+	}
+
+	public Tag[] asArray(){
+		Tag[] result = new Tag[numTags];
+		System.arraycopy(tags, 0, result, 0, numTags);
+		return result;
 	}
 
 	/** find Tag by key - NOTE: key must be internal() */
