@@ -59,11 +59,27 @@
  */
 package org.oscim.renderer.sublayers;
 
+import java.util.HashMap;
+
 import org.oscim.utils.pool.Inlist;
 
 import android.graphics.Bitmap;
 
-public class TextureAtlas {
+public class TextureAtlas{
+
+	public static class SpriteManager{
+		TextureAtlas atlas;
+		HashMap<Object, Rect> items;
+
+		public Rect getRegion(Object item){
+			return items.get(item);
+		}
+
+		public Rect addItem(int width, int height){
+			return atlas.getRegion(width, height);
+		}
+	}
+
 	/** Allocated slots */
 	public Slot mSlots;
 	private Rect mRects;
