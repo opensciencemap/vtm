@@ -98,7 +98,7 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		}
 
 		if (options.db == MapDatabases.OSCIMAP_READER ||
-				options.db == MapDatabases.MAP_READER ||
+				options.db == MapDatabases.MAPSFORGE_FILE ||
 				options.db == MapDatabases.TEST_READER)
 			MapView.enableClosePolygons = true;
 		else
