@@ -18,12 +18,12 @@ import org.oscim.core.MapElement;
 
 
 /**
- * MapDatabase callbacks (implemented by  MapTileLoader)
- * ____
- * NOTE: All parameters passed belong to the caller! i.e. dont hold
- * references to any arrays after callback function returns.
+ * MapDatabase callback (implemented by  MapTileLoader)
+ * .
+ * NOTE: MapElement passed belong to the caller! i.e. dont hold
+ * references to its arrays after callback function returns.
  */
-public interface IMapDatabaseCallback {
+public interface IMapDataSink {
 
-	void renderElement(MapElement element);
+	void process(MapElement element);
 }

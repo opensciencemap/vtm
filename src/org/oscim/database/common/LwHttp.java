@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.database.mapnik;
+package org.oscim.database.common;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -30,47 +30,34 @@ import org.oscim.core.Tile;
 import android.os.SystemClock;
 import android.util.Log;
 
-public class LwHttp {
+public class LwHttp extends InputStream{
 	private static final String TAG = LwHttp.class.getName();
-	private final static int BUFFER_SIZE = 65536;
+	//private static final boolean DEBUG = false;
 
-	//
-	byte[] buffer = new byte[BUFFER_SIZE];
+	private final static byte[] RESPONSE_HTTP_OK = "200 OK".getBytes();
+	private final static int RESPONSE_EXPECTED_LIVES = 100;
+	private final static int RESPONSE_TIMEOUT = 10000;
 
-	// position in buffer
-	int bufferPos;
-
-	// bytes available in buffer
-	int bufferFill;
-
-	// offset of buffer in message
-	private int mBufferOffset;
+	private final static int BUFFER_SIZE = 1024;
+	private final byte[] buffer = new byte[BUFFER_SIZE];
 
 	private String mHost;
 	private int mPort;
-	private InputStream mInputStream;
 
 	private int mMaxReq = 0;
 	private Socket mSocket;
 	private OutputStream mCommandStream;
-	private BufferedInputStream mResponseStream;
-	long mLastRequest = 0;
+	private InputStream mResponseStream;
+	private long mLastRequest = 0;
 	private SocketAddress mSockAddr;
-
-	//private final static byte[] RESPONSE_HTTP_OK = "HTTP/1.1 200 OK".getBytes();
-	private final static byte[] RESPONSE_HTTP_OK = "200 OK".getBytes();
-	private final static byte[] RESPONSE_CONTENT_LEN = "Content-Length: ".getBytes();
-	private final static int RESPONSE_EXPECTED_LIVES = 100;
-	private final static int RESPONSE_EXPECTED_TIMEOUT = 10000;
 
 	private byte[] REQUEST_GET_START;
 	private byte[] REQUEST_GET_END;
-
 	private byte[] mRequestBuffer;
 
-	boolean setServer(String urlString) {
-		urlString = "http://d1s11ojcu7opje.cloudfront.net/dev/764e0b8d";
+	private boolean mInflateContent;
 
+	public boolean setServer(String urlString, String extension, boolean zlibDeflate) {
 		URL url;
 		try {
 			url = new URL(urlString);
@@ -87,14 +74,13 @@ public class LwHttp {
 
 		String host = url.getHost();
 		String path = url.getPath();
-		Log.d(TAG, "open database: " + host + " " + port + " " + path);
+		Log.d(TAG, "open oscim database: " + host + " " + port + " " + path);
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
-		REQUEST_GET_END = (".vector.pbf HTTP/1.1\n" +
-				"User-Agent: Wget/1.13.4 (linux-gnu)\n" +
-				"Accept: */*\n" +
+		REQUEST_GET_END = (extension + " HTTP/1.1\n" +
 				"Host: " + host + "\n" +
 				"Connection: Keep-Alive\n\n").getBytes();
+		mInflateContent = zlibDeflate;
 
 		mHost = host;
 		mPort = port;
@@ -102,11 +88,11 @@ public class LwHttp {
 		mRequestBuffer = new byte[1024];
 		System.arraycopy(REQUEST_GET_START, 0,
 				mRequestBuffer, 0, REQUEST_GET_START.length);
-
 		return true;
 	}
 
-	void close() {
+	@Override
+	public void close() {
 		if (mSocket != null) {
 			try {
 				mSocket.close();
@@ -118,23 +104,24 @@ public class LwHttp {
 		}
 	}
 
-	int readHeader() throws IOException {
+	public InputStream readHeader() throws IOException {
 
 		InputStream is = mResponseStream;
-		mResponseStream.mark(1 << 16);
+		is.mark(4096);
 
 		byte[] buf = buffer;
 		boolean first = true;
+
 		int read = 0;
 		int pos = 0;
 		int end = 0;
 		int len = 0;
 
-		int contentLength = 0;
-
 		// header cannot be larger than BUFFER_SIZE for this to work
 		for (; pos < read || (len = is.read(buf, read, BUFFER_SIZE - read)) >= 0; len = 0) {
 			read += len;
+
+			// end of header lines
 			while (end < read && (buf[end] != '\n'))
 				end++;
 
@@ -142,30 +129,17 @@ public class LwHttp {
 				if (first) {
 					// check only for OK
 					first = false;
-					if (!compareBytes(buf, pos + 9, end, RESPONSE_HTTP_OK, 6)){
+					if (!compareBytes(buf, pos + 9, end, RESPONSE_HTTP_OK, 6)) {
 						String line = new String(buf, pos, end - pos - 1);
 						Log.d(TAG, ">" + line + "< ");
-						return -1;
+						return null;
 					}
 				} else if (end - pos == 1) {
 					// check empty line (header end)
 					end += 1;
 					break;
 				}
-				else {
-					// parse Content-Length, TODO just encode this with message
-					for (int i = 0; pos + i < end - 1; i++) {
-						if (i < 16) {
-							if (buf[pos + i] == RESPONSE_CONTENT_LEN[i])
-								continue;
 
-							break;
-						}
-
-						// read int value
-						contentLength = contentLength * 10 + (buf[pos + i]) - '0';
-					}
-				}
 				//String line = new String(buf, pos, end - pos - 1);
 				//Log.d(TAG, ">" + line + "< ");
 
@@ -175,32 +149,21 @@ public class LwHttp {
 		}
 
 		// back to start of content
-		mResponseStream.reset();
-		mResponseStream.mark(0);
-		mResponseStream.skip(end);
+		is.reset();
+		is.mark(0);
+		is.skip(end);
 
-		// start of content
-		bufferPos = 0;
-		mBufferOffset = 0;
+		if (mInflateContent)
+			return new InflaterInputStream(is);
 
-		// buffer fill
-		bufferFill = 0;
-
-		// decode zlib compressed content
-		mInputStream = new InflaterInputStream(mResponseStream);
-
-		return 1;
+		return is;
 	}
 
-	boolean sendRequest(Tile tile) throws IOException {
-
-		bufferFill = 0;
-		bufferPos = 0;
-		//mReadPos = 0;
+	public boolean sendRequest(Tile tile) throws IOException {
 
 		if (mSocket != null && ((mMaxReq-- <= 0)
-				|| (SystemClock.elapsedRealtime() - mLastRequest
-				> RESPONSE_EXPECTED_TIMEOUT))) {
+				|| (SystemClock.elapsedRealtime() - mLastRequest > RESPONSE_TIMEOUT))) {
+
 			try {
 				mSocket.close();
 			} catch (IOException e) {
@@ -217,36 +180,34 @@ public class LwHttp {
 			mMaxReq = RESPONSE_EXPECTED_LIVES;
 			// Log.d(TAG, "create connection");
 		} else {
-			// should not be needed
 			int avail = mResponseStream.available();
-			if (avail > 0) {
-				Log.d(TAG, "Consume left-over bytes: " + avail);
-				mResponseStream.read(buffer, 0, avail);
+			if (avail > 0){
+			Log.d(TAG, "Consume left-over bytes: " + avail);
+
+			while ((avail = mResponseStream.available()) > 0)
+				mResponseStream.read(buffer);
+				Log.d(TAG, "Consumed bytes");
 			}
 		}
 
 		byte[] request = mRequestBuffer;
 		int pos = REQUEST_GET_START.length;
+		int newPos = 0;
 
-		request[pos++] = '/';
-		request[pos++] = pos2hex(tile.tileX);
-		request[pos++] = pos2hex(tile.tileY);
-		request[pos++] = '/';
-		pos = writeInt(tile.zoomLevel, pos, request);
-		request[pos++] = '/';
-		pos = writeInt(tile.tileX, pos, request);
-		request[pos++] = '/';
-		pos = writeInt(tile.tileY, pos, request);
+		if ((newPos = formatTilePath(tile, request, pos)) == 0) {
+			request[pos++] = '/';
+			pos = writeInt(tile.zoomLevel, pos, request);
+			request[pos++] = '/';
+			pos = writeInt(tile.tileX, pos, request);
+			request[pos++] = '/';
+			pos = writeInt(tile.tileY, pos, request);
+		} else {
+			pos = newPos;
+		}
 
 		int len = REQUEST_GET_END.length;
 		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
 		len += pos;
-
-		//Log.d(TAG, "request " + new String(request,0,len));
-		// this does the same but with a few more allocations:
-		// byte[] request = String.format(REQUEST,
-		// Integer.valueOf(tile.zoomLevel),
-		// Integer.valueOf(tile.tileX), Integer.valueOf(tile.tileY)).getBytes();
 
 		try {
 			mCommandStream.write(request, 0, len);
@@ -264,14 +225,6 @@ public class LwHttp {
 		return true;
 	}
 
-	private final static byte[] hexTable = {
-			'0', '1', '2', '3', '4', '5', '6', '7',
-			'8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-
-	private static byte pos2hex(int pos){
-		return hexTable[(pos % 16)];
-	}
-
 	private boolean lwHttpConnect() throws IOException {
 		if (mSockAddr == null)
 			mSockAddr = new InetSocketAddress(mHost, mPort);
@@ -281,13 +234,13 @@ public class LwHttp {
 		mSocket.setTcpNoDelay(true);
 
 		mCommandStream = mSocket.getOutputStream();
-		mResponseStream = new BufferedInputStream(mSocket.getInputStream());
+		mResponseStream = new BufferedInputStream(mSocket.getInputStream(), 4096);
 
 		return true;
 	}
 
 	// write (positive) integer as char sequence to buffer
-	private static int writeInt(int val, int pos, byte[] buf) {
+	protected static int writeInt(int val, int pos, byte[] buf) {
 		if (val == 0) {
 			buf[pos] = '0';
 			return pos + 1;
@@ -326,72 +279,26 @@ public class LwHttp {
 				| (buffer[offset + 3] & 0xff);
 	}
 
-	public boolean hasData() {
-		try {
-			return readBuffer(1);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
+	public void requestCompleted() {
+		mLastRequest = SystemClock.elapsedRealtime();
 	}
 
-	public int position() {
-		return mBufferOffset + bufferPos;
+	/**
+	 * Write custom tile url
+	 *
+	 * @param tile Tile
+	 * @param path to write url string
+	 * @param curPos current position
+	 * @return new position
+	 */
+	protected int formatTilePath(Tile tile, byte[] path, int curPos) {
+		return 0;
 	}
 
-	public boolean readBuffer(int size) throws IOException {
-		// check if buffer already contains the request bytes
-		if (bufferPos + size < bufferFill)
-			return true;
-
-		// check if inputstream is read to the end
-		//if (mReadPos == mReadEnd)
-		//	return;
-
-		int maxSize = buffer.length;
-
-		if (size > maxSize) {
-			Log.d(TAG, "increase read buffer to " + size + " bytes");
-			maxSize = size;
-			byte[] tmp = new byte[maxSize];
-			bufferFill -= bufferPos;
-			System.arraycopy(buffer, bufferPos, tmp, 0, bufferFill);
-			mBufferOffset += bufferPos;
-			bufferPos = 0;
-			buffer = tmp;
-		}
-
-		if (bufferFill == bufferPos) {
-			mBufferOffset += bufferPos;
-			bufferPos = 0;
-			bufferFill = 0;
-		} else if (bufferPos + size > maxSize) {
-			// copy bytes left to the beginning of buffer
-			bufferFill -= bufferPos;
-			System.arraycopy(buffer, bufferPos, buffer, 0, bufferFill);
-			mBufferOffset += bufferPos;
-			bufferPos = 0;
-		}
-
-		int max = maxSize - bufferFill;
-
-		while ((bufferFill - bufferPos) < size && max > 0) {
-
-			max = maxSize - bufferFill;
-
-			// read until requested size is available in buffer
-			int len = mInputStream.read(buffer, bufferFill, max);
-
-			if (len < 0) {
-				// finished reading, mark end
-				buffer[bufferFill] = 0;
-				return false;
-			}
-
-			bufferFill += len;
-		}
-		return true;
+	@Override
+	public int read() throws IOException {
+		return mResponseStream.read();
 	}
+
 
 }

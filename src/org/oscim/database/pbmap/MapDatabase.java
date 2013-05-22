@@ -40,8 +40,8 @@ import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
+import org.oscim.database.IMapDataSink;
 import org.oscim.database.IMapDatabase;
-import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
 import org.oscim.layers.tile.MapTile;
@@ -51,7 +51,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 /**
- *
+ * Deprecated
  *
  */
 public class MapDatabase implements IMapDatabase {
@@ -89,7 +89,7 @@ public class MapDatabase implements IMapDatabase {
 	private Tag[] curTags = new Tag[MAX_TILE_TAGS];
 	private int mCurTagCnt;
 
-	private IMapDatabaseCallback mMapGenerator;
+	private IMapDataSink mMapGenerator;
 	private float mScaleFactor;
 	private MapTile mTile;
 	private FileOutputStream mCacheFile;
@@ -118,13 +118,13 @@ public class MapDatabase implements IMapDatabase {
 			});
 
 	@Override
-	public QueryResult executeQuery(MapTile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(MapTile tile, IMapDataSink mapDataSink) {
 		QueryResult result = QueryResult.SUCCESS;
 		mCacheFile = null;
 
 		mTile = tile;
 
-		mMapGenerator = mapDatabaseCallback;
+		mMapGenerator = mapDataSink;
 		mCurTagCnt = 0;
 
 		// scale coordinates to tile size
@@ -451,7 +451,7 @@ public class MapDatabase implements IMapDatabase {
 		//	layer = 5;
 		mElement.type =  polygon ? GeometryType.POLY : GeometryType.LINE;
 		mElement.set(tags, layer);
-		mMapGenerator.renderElement(mElement);
+		mMapGenerator.process(mElement);
 		return true;
 	}
 
@@ -531,7 +531,7 @@ public class MapDatabase implements IMapDatabase {
 		mElement.index[0] = (short)numNodes;
 		mElement.type = GeometryType.POINT;
 		mElement.set(tags, layer);
-		mMapGenerator.renderElement(mElement);
+		mMapGenerator.process(mElement);
 
 		return cnt;
 	}

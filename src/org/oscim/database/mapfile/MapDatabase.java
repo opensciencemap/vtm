@@ -22,8 +22,8 @@ import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
+import org.oscim.database.IMapDataSink;
 import org.oscim.database.IMapDatabase;
-import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.database.MapOptions;
 import org.oscim.database.mapfile.header.MapFileHeader;
 import org.oscim.database.mapfile.header.MapFileInfo;
@@ -210,7 +210,7 @@ public class MapDatabase implements IMapDatabase {
 	 * org.oscim.map.reader.MapDatabaseCallback)
 	 */
 	@Override
-	public QueryResult executeQuery(MapTile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(MapTile tile, IMapDataSink mapDataSink) {
 
 		if (sMapFileHeader == null)
 			return QueryResult.FAILED;
@@ -235,7 +235,7 @@ public class MapDatabase implements IMapDatabase {
 
 			QueryCalculations.calculateBaseTiles(queryParameters, tile, subFileParameter);
 			QueryCalculations.calculateBlocks(queryParameters, subFileParameter);
-			processBlocks(mapDatabaseCallback, queryParameters, subFileParameter);
+			processBlocks(mapDataSink, queryParameters, subFileParameter);
 		} catch (IOException e) {
 			Log.e(TAG, e.getMessage());
 			return QueryResult.FAILED;
@@ -383,12 +383,12 @@ public class MapDatabase implements IMapDatabase {
 	 *            the parameters of the current query.
 	 * @param subFileParameter
 	 *            the parameters of the current map file.
-	 * @param mapDatabaseCallback
+	 * @param mapDataSink
 	 *            the callback which handles the extracted map elements.
 	 */
 	private void processBlock(QueryParameters queryParameters,
 			SubFileParameter subFileParameter,
-			IMapDatabaseCallback mapDatabaseCallback) {
+			IMapDataSink mapDataSink) {
 		if (!processBlockSignature()) {
 			return;
 		}
@@ -421,7 +421,7 @@ public class MapDatabase implements IMapDatabase {
 			return;
 		}
 
-		if (!processPOIs(mapDatabaseCallback, poisOnQueryZoomLevel)) {
+		if (!processPOIs(mapDataSink, poisOnQueryZoomLevel)) {
 			return;
 		}
 
@@ -436,15 +436,13 @@ public class MapDatabase implements IMapDatabase {
 
 		// move the pointer to the first way
 		mReadBuffer.setBufferPosition(firstWayOffset);
-		if (!processWays(queryParameters, mapDatabaseCallback, waysOnQueryZoomLevel)) {
+		if (!processWays(queryParameters, mapDataSink, waysOnQueryZoomLevel)) {
 			return;
 		}
 
 	}
 
-
-
-	private void processBlocks(IMapDatabaseCallback mapDatabaseCallback,
+	private void processBlocks(IMapDataSink mapDataSink,
 			QueryParameters queryParameters,
 			SubFileParameter subFileParameter) throws IOException {
 		boolean queryIsWater = true;
@@ -538,7 +536,7 @@ public class MapDatabase implements IMapDatabase {
 				mTileLongitude = (int) (tileLongitudeDeg * 1000000);
 
 				//try {
-				processBlock(queryParameters, subFileParameter, mapDatabaseCallback);
+				processBlock(queryParameters, subFileParameter, mapDataSink);
 				//} catch (ArrayIndexOutOfBoundsException e) {
 				//	Log.e(TAG, e.getMessage());
 				//}
@@ -579,14 +577,14 @@ public class MapDatabase implements IMapDatabase {
 	/**
 	 * Processes the given number of POIs.
 	 *
-	 * @param mapDatabaseCallback
+	 * @param mapDataSink
 	 *            the callback which handles the extracted POIs.
 	 * @param numberOfPois
 	 *            how many POIs should be processed.
 	 * @return true if the POIs could be processed successfully, false
 	 *         otherwise.
 	 */
-	private boolean processPOIs(IMapDatabaseCallback mapDatabaseCallback, int numberOfPois) {
+	private boolean processPOIs(IMapDataSink mapDataSink, int numberOfPois) {
 		Tag[] poiTags = sMapFileHeader.getMapFileInfo().poiTags;
 		Tag[] tags = null;
 		Tag[] curTags;
@@ -671,14 +669,14 @@ public class MapDatabase implements IMapDatabase {
 
 			mElem.startPoints();
 			mElem.addPoint(longitude, latitude);
-			mElem.type =  GeometryType.POINT;
+			mElem.type = GeometryType.POINT;
 			mElem.set(curTags, layer);
-			mapDatabaseCallback.renderElement(mElem);
+			mapDataSink.process(mElem);
 
-//			mGeom.points[0] = longitude;
-//			mGeom.points[1] = latitude;
-//			mGeom.index[0] = 2;
-//			mapDatabaseCallback.renderPOI(layer, curTags, mGeom);
+			//			mGeom.points[0] = longitude;
+			//			mGeom.points[1] = latitude;
+			//			mGeom.index[0] = 2;
+			//			mapDatabaseCallback.renderPOI(layer, curTags, mGeom);
 
 		}
 
@@ -821,7 +819,7 @@ public class MapDatabase implements IMapDatabase {
 	 *
 	 * @param queryParameters
 	 *            the parameters of the current query.
-	 * @param mapDatabaseCallback
+	 * @param mapDataSink
 	 *            the callback which handles the extracted ways.
 	 * @param numberOfWays
 	 *            how many ways should be processed.
@@ -829,7 +827,7 @@ public class MapDatabase implements IMapDatabase {
 	 *         otherwise.
 	 */
 	private boolean processWays(QueryParameters queryParameters,
-			IMapDatabaseCallback mapDatabaseCallback,
+			IMapDataSink mapDataSink,
 			int numberOfWays) {
 
 		Tag[] tags = null;
@@ -993,7 +991,7 @@ public class MapDatabase implements IMapDatabase {
 				mElem.type = closed ? GeometryType.POLY : GeometryType.LINE;
 				mElem.set(curTags, layer);
 
-				mapDatabaseCallback.renderElement(mElem);
+				mapDataSink.process(mElem);
 			}
 		}
 
