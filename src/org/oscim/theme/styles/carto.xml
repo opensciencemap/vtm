@@ -703,7 +703,7 @@
       </rule>
     </rule>
 
-    <rule e="node" k="building_label" v="*" zoom-min="15">
+    <rule e="node" k="building_label" v="*" zoom-min="14">
         <caption fill="#1d2e6f" font-size="14" style="italic" k="name" priority="20"
         stroke="#9daeef" stroke-width="0.8" />
     </rule>
