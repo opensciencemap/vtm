@@ -53,6 +53,9 @@ public class Tag {
 	public static final String VALUE_YES = "yes";
 	public static final String VALUE_NO = "no";
 
+	public static final String KEY_HEIGHT = "height";
+	public static final String KEY_MIN_HEIGHT = "min_height";
+
 	/**
 	 * The key of this tag.
 	 */
