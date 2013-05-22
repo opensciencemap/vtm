@@ -23,9 +23,9 @@ import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
+import org.oscim.database.IMapDataSink;
 import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDatabase.QueryResult;
-import org.oscim.database.IMapDatabaseCallback;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
@@ -53,13 +53,13 @@ import android.util.Log;
  * @note
  *       1. The MapWorkers call MapTileLoader.execute() to load a tile.
  *       2. The tile data will be loaded from current MapDatabase
- *       3. MapDatabase calls the IMapDatabaseCallback functions
+ *       3. MapDatabase calls the IMapDataSink functions
  *       implemented by MapTileLoader for WAY and POI items.
  *       4. these callbacks then call RenderTheme to get the matching style.
  *       5. RenderTheme calls IRenderCallback functions with style information
  *       6. Styled items become added to MapTile.layers... roughly
  */
-public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDatabaseCallback  {
+public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDataSink  {
 
 	private static final String TAG = MapTileLoader.class.getName();
 
@@ -282,9 +282,8 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 		return true;
 	}
 
-	// ---------------- MapDatabaseCallback -----------------
 	@Override
-	public void renderElement(MapElement element) {
+	public void process(MapElement element) {
 		clearState();
 
 		mElement = element;

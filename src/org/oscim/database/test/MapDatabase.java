@@ -19,7 +19,7 @@ import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
-import org.oscim.database.IMapDatabaseCallback;
+import org.oscim.database.IMapDataSink;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
 import org.oscim.layers.tile.MapTile;
@@ -65,7 +65,7 @@ public class MapDatabase implements IMapDatabase {
 
 	@Override
 	public QueryResult executeQuery(MapTile tile,
-			IMapDatabaseCallback mapDatabaseCallback) {
+			IMapDataSink mapDataSink) {
 
 		int size = Tile.SIZE;
 		MapElement e = mElem;
@@ -96,7 +96,7 @@ public class MapDatabase implements IMapDatabase {
 		e.addPoint(x1, y2);
 
 		e.set(mTags, 0);
-		mapDatabaseCallback.renderElement(e);
+		mapDataSink.process(e);
 
 		if (renderWays) {
 			e.clear();
@@ -117,7 +117,7 @@ public class MapDatabase implements IMapDatabase {
 			e.addPoint(size / 2, size / 2 + size);
 
 			e.set(mTagsWay, 0);
-			mapDatabaseCallback.renderElement(e);
+			mapDataSink.process(e);
 
 			e.clear();
 			// left-top to center
@@ -134,7 +134,7 @@ public class MapDatabase implements IMapDatabase {
 			e.addPoint(10, size);
 
 			e.set(mTagsWay, 1);
-			mapDatabaseCallback.renderElement(e);
+			mapDataSink.process(e);
 		}
 
 		if (renderBoundary) {
@@ -149,7 +149,7 @@ public class MapDatabase implements IMapDatabase {
 			}
 
 			e.set(mTagsBoundary, 1);
-			mapDatabaseCallback.renderElement(e);
+			mapDataSink.process(e);
 		}
 
 		if (renderPlace) {
@@ -159,7 +159,7 @@ public class MapDatabase implements IMapDatabase {
 
 			mTagsPlace[1] = new Tag("name", tile.toString());
 			e.set(mTagsPlace, 0);
-			mapDatabaseCallback.renderElement(e);
+			mapDataSink.process(e);
 		}
 		return QueryResult.SUCCESS;
 	}

@@ -28,12 +28,12 @@ public interface IMapDatabase {
 	 *
 	 * @param tile
 	 *            the tile to read.
-	 * @param mapDatabaseCallback
+	 * @param mapDataSink
 	 *            the callback which handles the extracted map elements.
 	 * @return true if successful
 	 */
 	abstract QueryResult executeQuery(MapTile tile,
-			IMapDatabaseCallback mapDatabaseCallback);
+			IMapDataSink mapDataSink);
 
 	/**
 	 * @return the metadata for the current map file.
