@@ -14,6 +14,8 @@
  */
 package org.oscim.core;
 
+import java.util.Arrays;
+
 
 public class TagSet {
 	public static TagSet EMPTY_TAG_SET = new TagSet();
@@ -30,6 +32,15 @@ public class TagSet {
 	}
 
 	public void clear() {
+		numTags = 0;
+	}
+
+	/**
+	 * null out current tags
+	 * @param nulltags ...
+	 */
+	public void clear(boolean nulltags) {
+		Arrays.fill(tags, null);
 		numTags = 0;
 	}
 
