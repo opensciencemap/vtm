@@ -60,7 +60,7 @@ public final class Text extends RenderInstruction {
 			if ("name".equals(name))
 				style = value;
 			else if ("k".equals(name)) {
-				textKey = TextKey.getInstance(value);
+				textKey = value.intern();
 			} else if ("font-family".equals(name)) {
 				fontFamily = FontFamily.valueOf(value.toUpperCase(Locale.ENGLISH));
 			} else if ("font-style".equals(name)) {
