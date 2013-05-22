@@ -23,8 +23,8 @@ import java.io.InputStream;
 public enum InternalRenderTheme implements Theme {
 
 	DEFAULT("/org/oscim/theme/styles/default.xml"),
-
-	TRONRENDER("/org/oscim/theme/styles/tronrender.xml");
+	TRONRENDER("/org/oscim/theme/styles/tronrender.xml"),
+	MAPNIK("/org/oscim/theme/styles/carto.xml");
 
 	private final String mPath;
 
