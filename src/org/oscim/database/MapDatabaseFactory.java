@@ -45,7 +45,7 @@ public final class MapDatabaseFactory {
 			case TEST_READER:
 				return new org.oscim.database.test.MapDatabase();
 			case PBMAP_READER:
-				return new org.oscim.database.pbmap.MapDatabase();
+				return new org.oscim.database.oscimap.MapDatabase();
 			case OSCIMAP_READER:
 				return new org.oscim.database.oscimap2.MapDatabase();
 			case OPENSCIENCEMAP4:
