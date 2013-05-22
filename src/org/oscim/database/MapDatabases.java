@@ -21,7 +21,7 @@ public enum MapDatabases {
 	/**
 	 * ...
 	 */
-	MAP_READER,
+	MAPSFORGE_FILE,
 
 	/**
 	 * ...
@@ -41,4 +41,15 @@ public enum MapDatabases {
 	 * ...
 	 */
 	OSCIMAP_READER,
+
+	/**
+	 * ...
+	 */
+	OPENSCIENCEMAP4,
+
+	/**
+	 * ...
+	 */
+	MAPNIK_VECTOR,
+
 }
