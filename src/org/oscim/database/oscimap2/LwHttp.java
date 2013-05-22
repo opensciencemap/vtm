@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.database.oscimap;
+package org.oscim.database.oscimap2;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.database.oscimap;
+package org.oscim.database.oscimap2;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.database.IMapDatabase;
-import org.oscim.database.IMapDatabaseCallback;
+import org.oscim.database.IMapDataSink;
 import org.oscim.database.MapInfo;
 import org.oscim.database.MapOptions;
 import org.oscim.layers.tile.MapTile;
@@ -65,7 +65,7 @@ public class MapDatabase implements IMapDatabase {
 	private Tag[] curTags = new Tag[MAX_TILE_TAGS];
 	private int mCurTagCnt;
 
-	private IMapDatabaseCallback mMapGenerator;
+	private IMapDataSink mMapGenerator;
 	private float mScaleFactor;
 	private MapTile mTile;
 
@@ -81,12 +81,12 @@ public class MapDatabase implements IMapDatabase {
 	}
 
 	@Override
-	public QueryResult executeQuery(MapTile tile, IMapDatabaseCallback mapDatabaseCallback) {
+	public QueryResult executeQuery(MapTile tile, IMapDataSink mapDataSink) {
 		QueryResult result = QueryResult.SUCCESS;
 
 		mTile = tile;
 
-		mMapGenerator = mapDatabaseCallback;
+		mMapGenerator = mapDataSink;
 
 		// scale coordinates to tile size
 		mScaleFactor = REF_TILE_SIZE / Tile.SIZE;
@@ -418,7 +418,7 @@ public class MapDatabase implements IMapDatabase {
 				break;
 		}
 
-		mMapGenerator.renderElement(mElem);
+		mMapGenerator.process(mElem);
 
 		return true;
 	}
