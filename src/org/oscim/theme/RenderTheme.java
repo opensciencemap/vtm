@@ -15,6 +15,7 @@
 package org.oscim.theme;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
@@ -228,6 +229,20 @@ public class RenderTheme implements IRenderTheme {
 				}
 
 				int size = matches.size();
+				if (size > 1){
+					for (int i = 0; i < size-1; i++){
+						RenderInstruction r = matches.get(i);
+						for (int j = i + 1; j < size; j++){
+							if (matches.get(j) == r){
+								Log.d(TAG, "fix duplicate instruction! "
+										+ Arrays.deepToString(element.tags)
+										+ ":"+ zoomLevel);
+								matches.remove(j--);
+								size--;
+							}
+						}
+					}
+				}
 				// check if same instructions are used in another level
 				for (ri = ris; ri != null; ri = ri.next) {
 					if (size == 0) {
