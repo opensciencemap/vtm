@@ -40,15 +40,19 @@ public final class MapDatabaseFactory {
 	 */
 	public static IMapDatabase createMapDatabase(MapDatabases mapDatabase) {
 		switch (mapDatabase) {
-			case MAP_READER:
+			case MAPSFORGE_FILE:
 				return new org.oscim.database.mapfile.MapDatabase();
 			case TEST_READER:
 				return new org.oscim.database.test.MapDatabase();
 			case PBMAP_READER:
-				//return new org.oscim.database.pbmap.MapDatabase();
-				return new org.oscim.database.mapnik.MapDatabase();
+				return new org.oscim.database.pbmap.MapDatabase();
 			case OSCIMAP_READER:
-				return new org.oscim.database.oscimap.MapDatabase();
+				return new org.oscim.database.oscimap2.MapDatabase();
+			case OPENSCIENCEMAP4:
+				return new org.oscim.database.oscimap4.MapDatabase();
+			case MAPNIK_VECTOR:
+				return new org.oscim.database.mapnik.MapDatabase();
+
 			default:
 				break;
 
