@@ -14,95 +14,17 @@
  */
 package org.oscim.database.mapnik;
 
-import java.io.InputStream;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-
-import org.oscim.core.BoundingBox;
-import org.oscim.core.GeoPoint;
 import org.oscim.core.Tile;
-import org.oscim.database.IMapDataSink;
-import org.oscim.database.IMapDatabase;
-import org.oscim.database.MapInfo;
-import org.oscim.database.MapOptions;
 import org.oscim.database.common.LwHttp;
-import org.oscim.layers.tile.MapTile;
+import org.oscim.database.common.ProtobufMapDatabase;
 
-import android.util.Log;
+public class MapDatabase extends ProtobufMapDatabase {
+	//private static final String TAG = MapDatabase.class.getName();
 
-public class MapDatabase implements IMapDatabase {
-	private static final String TAG = MapDatabase.class.getName();
+	public MapDatabase() {
+		super(new TileDecoder());
 
-	private static final MapInfo mMapInfo =
-			new MapInfo(new BoundingBox(-180, -90, 180, 90),
-					new Byte((byte) 4), new GeoPoint(53.11, 8.85),
-					null, 0, 0, 0, "de", "comment", "author",
-					new int[] { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 }
-			);
-
-	// 'open' state
-	private boolean mOpen = false;
-
-	private LwHttp conn;
-	private TileDecoder mTileDecoder;
-
-	@Override
-	public QueryResult executeQuery(MapTile tile, IMapDataSink mapDataSink) {
-		QueryResult result = QueryResult.SUCCESS;
-
-		try {
-			InputStream is;
-			if (conn.sendRequest(tile) && (is = conn.readHeader()) != null) {
-				mTileDecoder.decode(is, tile, mapDataSink);
-			} else {
-				Log.d(TAG, tile + " Network Error");
-				result = QueryResult.FAILED;
-			}
-		} catch (SocketException ex) {
-			Log.d(TAG, tile + " Socket exception: " + ex.getMessage());
-			result = QueryResult.FAILED;
-		} catch (SocketTimeoutException ex) {
-			Log.d(TAG, tile + " Socket Timeout exception: " + ex.getMessage());
-			result = QueryResult.FAILED;
-		} catch (UnknownHostException ex) {
-			Log.d(TAG, tile + " no network");
-			result = QueryResult.FAILED;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			result = QueryResult.FAILED;
-		}
-
-		conn.requestCompleted();
-
-		if (result != QueryResult.SUCCESS) {
-			conn.close();
-		}
-
-		return result;
-	}
-
-	@Override
-	public MapInfo getMapInfo() {
-		return mMapInfo;
-	}
-
-	@Override
-	public boolean isOpen() {
-		return mOpen;
-	}
-
-	@Override
-	public OpenResult open(MapOptions options) {
-		String extension = ".vector.pbf";
-		if (mOpen)
-			return OpenResult.SUCCESS;
-
-		if (options == null || !options.containsKey("url"))
-			return new OpenResult("options missing");
-
-		conn = new LwHttp() {
-
+		mConn = new LwHttp("image/png","vector.pbf", true) {
 			@Override
 			protected int formatTilePath(Tile tile, byte[] path, int pos) {
 				// url formatter for mapbox streets
@@ -122,32 +44,5 @@ public class MapDatabase implements IMapDatabase {
 				return pos;
 			}
 		};
-
-		if (!conn.setServer(options.get("url"), extension, true)) {
-			return new OpenResult("invalid url: " + options.get("url"));
-		}
-
-		mTileDecoder = new TileDecoder();
-
-		mOpen = true;
-		return OpenResult.SUCCESS;
-	}
-
-	@Override
-	public void close() {
-		mOpen = false;
-
-		mTileDecoder = null;
-		conn.close();
-		conn = null;
-	}
-
-	@Override
-	public String getMapProjection() {
-		return null;
-	}
-
-	@Override
-	public void cancel() {
 	}
 }

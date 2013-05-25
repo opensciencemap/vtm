@@ -70,7 +70,12 @@ public class TileDecoder extends ProtobufDecoder {
 	private final static float REF_TILE_SIZE = 4096.0f;
 	private float mScale;
 
-	boolean decode(InputStream is, Tile tile, IMapDataSink mapDataCallback) throws IOException {
+	@Override
+	public boolean decode(Tile tile, IMapDataSink mapDataCallback, InputStream is, int contentLength)
+			throws IOException {
+		if (debug)
+			Log.d(TAG, tile + " decode");
+
 		setInputStream(is, Integer.MAX_VALUE);
 		mTile = tile;
 		mMapDataCallback = mapDataCallback;
@@ -88,9 +93,14 @@ public class TileDecoder extends ProtobufDecoder {
 					break;
 
 				default:
-					Log.d(TAG, mTile + " invalid type for tile: " + tag);
+					error(mTile + " invalid type for tile: " + tag);
 					return false;
 			}
+		}
+
+		if (hasData()){
+			error(tile + " invalid tile");
+			return false;
 		}
 		return true;
 	}
@@ -147,7 +157,7 @@ public class TileDecoder extends ProtobufDecoder {
 					break;
 
 				default:
-					Log.d(TAG, mTile + " invalid type for layer: " + tag);
+					error(mTile + " invalid type for layer: " + tag);
 					break;
 			}
 
@@ -357,7 +367,7 @@ public class TileDecoder extends ProtobufDecoder {
 					break;
 
 				default:
-					Log.d(TAG, mTile + " invalid type for feature: " + tag);
+					error(mTile + " invalid type for feature: " + tag);
 					break;
 			}
 		}
@@ -371,7 +381,7 @@ public class TileDecoder extends ProtobufDecoder {
 
 	private int decodeCoordinates(int type, Feature feature) throws IOException {
 		int bytes = decodeVarint32();
-		readBuffer(bytes);
+		fillBuffer(bytes);
 
 		if (feature == null) {
 			bufferPos += bytes;
@@ -405,7 +415,7 @@ public class TileDecoder extends ProtobufDecoder {
 		int prevY = 0;
 
 		int cmd = 0;
-		int num = 0;
+		int num = 0, cnt = 0;
 
 		boolean first = true;
 		boolean lastClip = false;
@@ -413,7 +423,7 @@ public class TileDecoder extends ProtobufDecoder {
 		// test bbox for outer..
 		boolean isOuter = true;
 		boolean simplify = mTile.zoomLevel < 14;
-		int pixel = simplify ? 7 : 1;
+		int pixel = simplify ? 7 : 3;
 
 		int xmin = Integer.MAX_VALUE, xmax = Integer.MIN_VALUE;
 		int ymin = Integer.MAX_VALUE, ymax = Integer.MIN_VALUE;
@@ -422,7 +432,10 @@ public class TileDecoder extends ProtobufDecoder {
 			val = decodeVarint32Filled();
 
 			if (num == 0) {
+				// number of points
 				num = val >>> 3;
+				cnt = 0;
+				// path command
 				cmd = val & 0x07;
 
 				if (isLine && lastClip) {
@@ -466,17 +479,31 @@ public class TileDecoder extends ProtobufDecoder {
 			int dx = (curX - prevX);
 			int dy = (curY - prevY);
 
+			if (isPoly && num == 0 && cnt > 0){
+				prevX = curX;
+				prevY = curY;
+
+				// only add last point if it is di
+				int ppos = cnt * 2;
+				if (elem.points[elem.pointPos - ppos] != curX
+						|| elem.points[elem.pointPos - ppos + 1] != curY)
+					elem.addPoint(curX / mScale, curY / mScale);
+
+				lastClip = false;
+				continue;
+			}
+
 			if ((isPoint || cmd == MOVE_TO)
 					|| (dx > pixel || dx < -pixel)
 					|| (dy > pixel || dy < -pixel)
-					// dont clip at tile boundaries
+					// hack to not clip at tile boundaries
 					|| (curX <= 0 || curX >= 4095)
 					|| (curY <= 0 || curY >= 4095)) {
 
 				prevX = curX;
 				prevY = curY;
 				elem.addPoint(curX / mScale, curY / mScale);
-				lastClip = false;
+				cnt++;
 
 				if (simplify && isOuter) {
 					if (curX < xmin)
@@ -490,6 +517,7 @@ public class TileDecoder extends ProtobufDecoder {
 						ymax = curY;
 				}
 
+				lastClip = false;
 				continue;
 			}
 			lastClip = true;
@@ -543,11 +571,11 @@ public class TileDecoder extends ProtobufDecoder {
 					break;
 
 				case TAG_VALUE_SINT:
-					value = String.valueOf(decodeVarint32());
+					value = String.valueOf(deZigZag(decodeVarint32()));
 					break;
 
 				case TAG_VALUE_LONG:
-					value = String.valueOf(decodeVarint32());
+					value = String.valueOf(decodeVarint64());
 					break;
 
 				case TAG_VALUE_FLOAT:

@@ -17,15 +17,33 @@ package org.oscim.database.common;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.oscim.core.Tile;
+import org.oscim.database.IMapDataSink;
 import org.oscim.utils.UTF8Decoder;
 
 import android.util.Log;
 
-public class ProtobufDecoder {
+public abstract class ProtobufDecoder {
 	private final static String TAG = ProtobufDecoder.class.getName();
 
-	private final static int VARINT_LIMIT = 6;
-	private final static int VARINT_MAX = 10;
+	protected static final boolean debug = false;
+
+	static class ProtobufException extends IOException {
+		private static final long serialVersionUID = 1L;
+
+		public ProtobufException(String detailMessage) {
+			super(detailMessage);
+		}
+	}
+
+	final static ProtobufException TRUNCATED_MSG = new ProtobufException("truncated msg");
+	protected final static ProtobufException INVALID_VARINT = new ProtobufException("invalid varint");
+	protected final static ProtobufException INVALID_PACKED_SIZE = new ProtobufException(
+			"invalid message size");
+
+	protected void error(String msg) throws IOException {
+		throw new ProtobufException(msg);
+	}
 
 	private final static int BUFFER_SIZE = 1 << 15; // 32kb
 	protected byte[] buffer = new byte[BUFFER_SIZE];
@@ -34,7 +52,7 @@ public class ProtobufDecoder {
 	protected int bufferPos;
 
 	// bytes available in buffer
-	int bufferFill;
+	protected int bufferFill;
 
 	// offset of buffer in message
 	private int mBufferOffset;
@@ -53,25 +71,8 @@ public class ProtobufDecoder {
 		mStringDecoder = new UTF8Decoder();
 	}
 
-	protected static int readUnsignedInt(InputStream is, byte[] buf) throws IOException {
-		// check 4 bytes available..
-		int read = 0;
-		int len = 0;
-
-		while (read < 4 && (len = is.read(buf, read, 4 - read)) >= 0)
-			read += len;
-
-		if (read < 4)
-			return read < 0 ? (read * 10) : read;
-
-		return decodeInt(buf, 0);
-	}
-
-	static int decodeInt(byte[] buffer, int offset) {
-		return buffer[offset] << 24 | (buffer[offset + 1] & 0xff) << 16
-				| (buffer[offset + 2] & 0xff) << 8
-				| (buffer[offset + 3] & 0xff);
-	}
+	public abstract boolean decode(Tile tile, IMapDataSink sink,
+			InputStream is, int contentLength) throws IOException;
 
 	public void setInputStream(InputStream is, int contentLength) {
 		mInputStream = is;
@@ -84,16 +85,105 @@ public class ProtobufDecoder {
 		mMsgEnd = contentLength;
 	}
 
-//	public void skipAvailable() throws IOException {
-//		int bytes = decodeVarint32();
-//		bufferPos += bytes;
-//	}
+	protected int decodeVarint32() throws IOException {
 
-	protected int decodeInterleavedPoints(float[] coords, int numPoints, float scale)
+		int bytesLeft = 0;
+		int val = 0;
+
+		for (int shift = 0; shift < 32; shift += 7) {
+			if (bytesLeft == 0)
+				bytesLeft = fillBuffer(1);
+
+			byte b = buffer[bufferPos++];
+			val |= (b & 0x7f) << shift;
+
+			if (b >= 0)
+				return val;
+
+			bytesLeft--;
+		}
+
+		throw INVALID_VARINT;
+	}
+
+	protected long decodeVarint64() throws IOException {
+
+		int bytesLeft = 0;
+		long val = 0;
+
+		for (int shift = 0; shift < 64; shift += 7) {
+			if (bytesLeft == 0)
+				bytesLeft = fillBuffer(1);
+
+			byte b = buffer[bufferPos++];
+			val |= (long) (b & 0x7f) << shift;
+
+			if (b >= 0)
+				return val;
+
+			bytesLeft--;
+		}
+
+		throw INVALID_VARINT;
+	}
+
+	protected String decodeString() throws IOException {
+		String result;
+
+		final int size = decodeVarint32();
+		fillBuffer(size);
+
+		if (mStringDecoder == null)
+			result = new String(buffer, bufferPos, size, "UTF-8");
+		else
+			result = mStringDecoder.decode(buffer, bufferPos, size);
+
+		bufferPos += size;
+
+		return result;
+
+	}
+
+	protected float decodeFloat() throws IOException {
+		if (bufferPos + 4 > bufferFill)
+			fillBuffer(4);
+
+		int val = (buffer[bufferPos++] & 0xFF
+				| (buffer[bufferPos++] & 0xFF) << 8
+				| (buffer[bufferPos++] & 0xFF) << 16
+				| (buffer[bufferPos++] & 0xFF) << 24);
+
+		return Float.intBitsToFloat(val);
+	}
+
+	protected double decodeDouble() throws IOException {
+		if (bufferPos + 8 > bufferFill)
+			fillBuffer(8);
+
+		long val = (buffer[bufferPos++] & 0xFF
+				| (buffer[bufferPos++] & 0xFF) << 8
+				| (buffer[bufferPos++] & 0xFF) << 16
+				| (buffer[bufferPos++] & 0xFF) << 24
+				| (buffer[bufferPos++] & 0xFF) << 32
+				| (buffer[bufferPos++] & 0xFF) << 40
+				| (buffer[bufferPos++] & 0xFF) << 48
+				| (buffer[bufferPos++] & 0xFF) << 56);
+
+		return Double.longBitsToDouble(val);
+	}
+
+	protected boolean decodeBool() throws IOException {
+		if (bufferPos + 1 > bufferFill)
+			fillBuffer(1);
+
+		return buffer[bufferPos++] != 0;
+	}
+
+	protected int decodeInterleavedPoints(float[] coords, float scale)
 			throws IOException {
-		int bytes = decodeVarint32();
 
-		readBuffer(bytes);
+		int bytes = decodeVarint32();
+		fillBuffer(bytes);
 
 		int cnt = 0;
 		int lastX = 0;
@@ -131,10 +221,8 @@ public class ProtobufDecoder {
 						| (buf[pos++] & 0x7f) << 21
 						| (buf[pos]) << 28;
 
-				int max = pos + VARINT_LIMIT;
-				while (buf[pos++] < 0)
-					if (pos == max)
-						throw new IOException("malformed VarInt32");
+				if (buf[pos++] < 0)
+					throw INVALID_VARINT;
 			}
 
 			// zigzag decoding
@@ -150,29 +238,34 @@ public class ProtobufDecoder {
 				even = true;
 			}
 		}
+
 		if (pos != bufferPos + bytes)
-			throw new IOException("invalid array " + numPoints);
+			throw INVALID_PACKED_SIZE;
 
 		bufferPos = pos;
 
-		return cnt;
+		// return number of points read
+		return (cnt >> 1);
+	}
+
+	protected static int deZigZag(int val) {
+		return ((val >>> 1) ^ -(val & 1));
 	}
 
 	public void decodeVarintArray(int num, short[] array) throws IOException {
 		int bytes = decodeVarint32();
-
-		readBuffer(bytes);
-
-		int cnt = 0;
+		fillBuffer(bytes);
 
 		byte[] buf = buffer;
 		int pos = bufferPos;
 		int end = pos + bytes;
 		int val;
 
+		int cnt = 0;
+
 		while (pos < end) {
 			if (cnt == num)
-				throw new IOException("invalid array size " + num);
+				throw new ProtobufException("invalid array size " + num);
 
 			if (buf[pos] >= 0) {
 				val = buf[pos++];
@@ -188,20 +281,20 @@ public class ProtobufDecoder {
 						| (buf[pos++] & 0x7f) << 7
 						| (buf[pos++] & 0x7f) << 14
 						| (buf[pos++]) << 21;
-			} else if (buf[pos + 4] >= 0) {
+			} else {
 				val = (buf[pos++] & 0x7f)
 						| (buf[pos++] & 0x7f) << 7
 						| (buf[pos++] & 0x7f) << 14
 						| (buf[pos++] & 0x7f) << 21
-						| (buf[pos++]) << 28;
-			} else
-				throw new IOException("malformed VarInt32");
-
+						| (buf[pos]) << 28;
+				if (buf[pos++] < 0)
+					throw INVALID_VARINT;
+			}
 			array[cnt++] = (short) val;
 		}
 
 		if (pos != bufferPos + bytes)
-			throw new IOException("invalid array " + num);
+			throw INVALID_PACKED_SIZE;
 
 		bufferPos = pos;
 	}
@@ -220,7 +313,7 @@ public class ProtobufDecoder {
 			array = new short[32];
 		}
 
-		readBuffer(bytes);
+		fillBuffer(bytes);
 		int cnt = 0;
 
 		byte[] buf = buffer;
@@ -250,13 +343,8 @@ public class ProtobufDecoder {
 						| (buf[pos++] & 0x7f) << 21
 						| (buf[pos]) << 28;
 
-				int max = pos + VARINT_LIMIT;
-				while (pos < max)
-					if (buf[pos++] >= 0)
-						break;
-
-				if (pos > max)
-					throw new IOException("malformed VarInt32");
+				if (buf[pos++] < 0)
+					throw INVALID_VARINT;
 			}
 
 			if (arrayLength <= cnt) {
@@ -269,6 +357,9 @@ public class ProtobufDecoder {
 			array[cnt++] = (short) val;
 		}
 
+		if (pos != bufferPos + bytes)
+			throw INVALID_PACKED_SIZE;
+
 		bufferPos = pos;
 
 		if (arrayLength > cnt)
@@ -277,16 +368,8 @@ public class ProtobufDecoder {
 		return array;
 	}
 
-	protected int decodeVarint32() throws IOException {
-		if (bufferPos + VARINT_MAX > bufferFill)
-			readBuffer(4096);
-
-		return decodeVarint32Filled();
-	}
-
+	// for use int packed varint decoders
 	protected int decodeVarint32Filled() throws IOException {
-		if (bufferPos + VARINT_MAX > bufferFill)
-			readBuffer(4096);
 
 		byte[] buf = buffer;
 		int pos = bufferPos;
@@ -295,7 +378,6 @@ public class ProtobufDecoder {
 		if (buf[pos] >= 0) {
 			val = buf[pos++];
 		} else {
-
 			if (buf[pos + 1] >= 0) {
 				val = (buf[pos++] & 0x7f)
 						| (buf[pos++]) << 7;
@@ -317,14 +399,8 @@ public class ProtobufDecoder {
 						| (buf[pos++] & 0x7f) << 21
 						| (buf[pos]) << 28;
 
-				// 'Discard upper 32 bits'
-				int max = pos + VARINT_LIMIT;
-				while (pos < max)
-					if (buf[pos++] >= 0)
-						break;
-
-				if (pos == max)
-					throw new IOException("malformed VarInt32");
+				if (buf[pos++] < 0)
+					throw INVALID_VARINT;
 			}
 		}
 
@@ -332,173 +408,86 @@ public class ProtobufDecoder {
 
 		return val;
 	}
-	// FIXME this also accept uin64 atm.
-//	protected int decodeVarint32Filled() throws IOException {
-//
-//		if (buffer[bufferPos] >= 0)
-//			return buffer[bufferPos++];
-//
-//		byte[] buf = buffer;
-//		int pos = bufferPos;
-//		int val = 0;
-//
-//		if (buf[pos + 1] >= 0) {
-//			val = (buf[pos++] & 0x7f)
-//					| (buf[pos++]) << 7;
-//
-//		} else if (buf[pos + 2] >= 0) {
-//			val = (buf[pos++] & 0x7f)
-//					| (buf[pos++] & 0x7f) << 7
-//					| (buf[pos++]) << 14;
-//
-//		} else if (buf[pos + 3] >= 0) {
-//			val = (buf[pos++] & 0x7f)
-//					| (buf[pos++] & 0x7f) << 7
-//					| (buf[pos++] & 0x7f) << 14
-//					| (buf[pos++]) << 21;
-//		} else {
-//			val = (buf[pos++] & 0x7f)
-//					| (buf[pos++] & 0x7f) << 7
-//					| (buf[pos++] & 0x7f) << 14
-//					| (buf[pos++] & 0x7f) << 21
-//					| (buf[pos]) << 28;
-//
-//
-//			// 'Discard upper 32 bits'
-//			int max = pos + VARINT_LIMIT;
-//			while (pos < max)
-//				if (buf[pos++] >= 0)
-//					break;
-//			if (pos == max)
-//				throw new IOException("malformed VarInt32");
-//		}
-//		bufferPos = pos;
-//
-//		return val;
-//	}
-
-	public String decodeString() throws IOException {
-		final int size = decodeVarint32();
-		readBuffer(size);
-
-		String result;
-
-		if (mStringDecoder == null)
-			result = new String(buffer, bufferPos, size, "UTF-8");
-		else
-			result = mStringDecoder.decode(buffer, bufferPos, size);
-
-		bufferPos += size;
-
-		return result;
-
-	}
-
-	public float decodeFloat() throws IOException {
-		if (bufferPos + 4 > bufferFill)
-			readBuffer(4096);
-
-		byte[] buf = buffer;
-		int pos = bufferPos;
-
-		int val = (buf[pos++] & 0xFF
-				| (buf[pos++] & 0xFF) << 8
-				| (buf[pos++] & 0xFF) << 16
-				| (buf[pos++] & 0xFF) << 24);
-
-		bufferPos += 4;
-		return Float.intBitsToFloat(val);
-	}
-
-	public double decodeDouble() throws IOException {
-		if (bufferPos + 8 > bufferFill)
-			readBuffer(4096);
-
-		byte[] buf = buffer;
-		int pos = bufferPos;
-
-		long val = (buf[pos++] & 0xFF
-				| (buf[pos++] & 0xFF) << 8
-				| (buf[pos++] & 0xFF) << 16
-				| (buf[pos++] & 0xFF) << 24
-				| (buf[pos++] & 0xFF) << 32
-				| (buf[pos++] & 0xFF) << 40
-				| (buf[pos++] & 0xFF) << 48
-				| (buf[pos++] & 0xFF) << 56);
-
-		bufferPos += 8;
-		return Double.longBitsToDouble(val);
-	}
-
-	public boolean decodeBool() throws IOException {
-		if (bufferPos + 1 > bufferFill)
-			readBuffer(4096);
-
-		return buffer[bufferPos++] != 0;
-	}
 
 	public boolean hasData() throws IOException {
 		if (mBufferOffset + bufferPos >= mMsgEnd)
 			return false;
 
-		return readBuffer(1);
+		return fillBuffer(1) > 0;
 	}
 
 	public int position() {
 		return mBufferOffset + bufferPos;
 	}
 
-	public boolean readBuffer(int size) throws IOException {
+	public int fillBuffer(int size) throws IOException {
+		int bytesLeft = bufferFill - bufferPos;
+
 		// check if buffer already contains the request bytes
-		if (bufferPos + size < bufferFill)
-			return true;
+		if (bytesLeft >= size)
+			return bytesLeft;
 
 		// check if inputstream is read to the end
 		if (mMsgPos >= mMsgEnd)
-			return false;
+			return bytesLeft;
 
 		int maxSize = buffer.length;
 
 		if (size > maxSize) {
-			Log.d(TAG, "increase read buffer to " + size + " bytes");
+
+			if (debug)
+				Log.d(TAG, "increase read buffer to " + size + " bytes");
+
 			maxSize = size;
-			bufferFill -= bufferPos;
 
 			byte[] tmp = buffer;
 			buffer = new byte[maxSize];
-			System.arraycopy(tmp, bufferPos, buffer, 0, bufferFill);
+			System.arraycopy(tmp, bufferPos, buffer, 0, bytesLeft);
 
 			mBufferOffset += bufferPos;
 			bufferPos = 0;
-		}
+			bufferFill = bytesLeft;
 
-		if (bufferFill == bufferPos) {
+		} else if (bytesLeft == 0) {
+			// just advance buffer offset and reset buffer
 			mBufferOffset += bufferPos;
 			bufferPos = 0;
 			bufferFill = 0;
+
 		} else if (bufferPos + size > maxSize) {
 			// copy bytes left to the beginning of buffer
-			bufferFill -= bufferPos;
-			System.arraycopy(buffer, bufferPos, buffer, 0, bufferFill);
+			if (debug)
+				Log.d(TAG, "shift " + bufferFill + " " + bufferPos + " " + size);
+
+			System.arraycopy(buffer, bufferPos, buffer, 0, bytesLeft);
+
 			mBufferOffset += bufferPos;
 			bufferPos = 0;
+			bufferFill = bytesLeft;
 		}
 
-		int max = maxSize - bufferFill;
+		while ((bufferFill - bufferPos) < size) {
 
-		while ((bufferFill - bufferPos) < size && max > 0) {
-
-			max = maxSize - bufferFill;
+			int max = maxSize - bufferFill;
 			if (max > mMsgEnd - mMsgPos)
 				max = mMsgEnd - mMsgPos;
+
+			if (max <= 0) {
+				// should not be possible
+				throw new IOException("burp");
+			}
 
 			// read until requested size is available in buffer
 			int len = mInputStream.read(buffer, bufferFill, max);
 
 			if (len < 0) {
+				mMsgEnd = mMsgPos;
+				if (debug)
+					Log.d(TAG, " finished reading " + mMsgPos);
+
 				// finished reading, mark end
 				buffer[bufferFill] = 0;
-				return false;
+				return bufferFill - bufferPos;
 			}
 
 			mMsgPos += len;
@@ -508,6 +497,26 @@ public class ProtobufDecoder {
 				break;
 
 		}
-		return true;
+		return bufferFill - bufferPos;
+	}
+
+	protected static int readUnsignedInt(InputStream is, byte[] buf) throws IOException {
+		// check 4 bytes available..
+		int read = 0;
+		int len = 0;
+
+		while (read < 4 && (len = is.read(buf, read, 4 - read)) >= 0)
+			read += len;
+
+		if (read < 4)
+			return read < 0 ? (read * 10) : read;
+
+		return decodeInt(buf, 0);
+	}
+
+	static int decodeInt(byte[] buffer, int offset) {
+		return buffer[offset] << 24 | (buffer[offset + 1] & 0xff) << 16
+				| (buffer[offset + 2] & 0xff) << 8
+				| (buffer[offset + 3] & 0xff);
 	}
 }
