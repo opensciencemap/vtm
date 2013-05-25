@@ -73,7 +73,6 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 
 		pauseLoaders(true);
 
-		//mJobQueue.clear();
 		mTileManager.clearJobs();
 
 		mMapOptions = options;
@@ -97,12 +96,10 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 				mMapDatabase = mapDatabase;
 		}
 
-		if (options.db == MapDatabases.OSCIMAP_READER ||
-				options.db == MapDatabases.MAPSFORGE_FILE ||
-				options.db == MapDatabases.TEST_READER)
-			MapView.enableClosePolygons = true;
-		else
+		if (options.db == MapDatabases.OPENSCIENCEMAP1)
 			MapView.enableClosePolygons = false;
+		else
+			MapView.enableClosePolygons = true;
 
 		mTileManager.setZoomTable(mMapDatabase.getMapInfo().zoomLevel);
 

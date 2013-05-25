@@ -21,26 +21,26 @@ public enum MapDatabases {
 	/**
 	 * ...
 	 */
-	MAPSFORGE_FILE,
+	TEST,
 
 	/**
 	 * ...
 	 */
-	TEST_READER,
+	MAPSFORGE,
 
 	/**
 	 * ...
 	 */
-	POSTGIS_READER,
+	POSTGIS,
 
 	/**
 	 * ...
 	 */
-	PBMAP_READER,
+	OPENSCIENCEMAP1,
 	/**
 	 * ...
 	 */
-	OSCIMAP_READER,
+	OPENSCIENCEMAP2,
 
 	/**
 	 * ...

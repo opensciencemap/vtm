@@ -31,9 +31,6 @@ import android.util.Log;
 public class TileDecoder extends ProtobufDecoder {
 	private final static String TAG = TileDecoder.class.getName();
 
-	private final MapElement mElem;
-	private Tile mTile;
-
 	private static final int TAG_TILE_VERSION = 1;
 	//private static final int TAG_TILE_TIMESTAMP = 2;
 	//private static final int TAG_TILE_ISWATER = 3;
@@ -62,6 +59,10 @@ public class TileDecoder extends ProtobufDecoder {
 	//private static final int TAG_ELEM_PRIORITY = 41;
 
 	private short[] mSArray = new short[100];
+
+	private Tile mTile;
+
+	private final MapElement mElem;
 	private final Tag[][] mElementTags;
 
 	private final TagSet curTags = new TagSet(100);
@@ -81,11 +82,12 @@ public class TileDecoder extends ProtobufDecoder {
 
 	}
 
-	boolean decode(InputStream is, Tile tile, IMapDataSink sink)
+	@Override
+	public boolean decode(Tile tile, IMapDataSink sink, InputStream is, int contentLength)
 			throws IOException {
 
 		int byteCount = readUnsignedInt(is, buffer);
-		Log.d(TAG, tile + " contentLength:"+byteCount);
+		Log.d(TAG, tile + " contentLength:" + byteCount);
 		if (byteCount < 0) {
 			Log.d(TAG, "invalid contentLength: " + byteCount);
 			return false;
@@ -229,14 +231,15 @@ public class TileDecoder extends ProtobufDecoder {
 
 	private int decodeWayIndices(int indexCnt) throws IOException {
 		mElem.ensureIndexSize(indexCnt, false);
-		//mElem.index =
 		decodeVarintArray(indexCnt, mElem.index);
 
 		short[] index = mElem.index;
 		int coordCnt = 0;
 
-		for (int i = 0; i < indexCnt; i++)
-			coordCnt += index[i] *= 2;
+		for (int i = 0; i < indexCnt; i++) {
+			coordCnt += index[i];
+			index[i] *= 2;
+		}
 
 		// set end marker
 		if (indexCnt < index.length)
@@ -260,7 +263,7 @@ public class TileDecoder extends ProtobufDecoder {
 
 		int coordCnt = 0;
 		if (type == TAG_TILE_POINT) {
-			coordCnt = 2;
+			coordCnt = 1;
 			mElem.index[0] = 2;
 		}
 
@@ -297,14 +300,14 @@ public class TileDecoder extends ProtobufDecoder {
 				case TAG_ELEM_COORDS:
 					if (coordCnt == 0) {
 						Log.d(TAG, mTile + " no coordinates");
-						//skip = true;
 					}
 
 					mElem.ensurePointSize(coordCnt, false);
-					int cnt = decodeInterleavedPoints(mElem.points, coordCnt, mScaleFactor);
+					int cnt = decodeInterleavedPoints(mElem.points, mScaleFactor);
 
 					if (cnt != coordCnt) {
-						Log.d(TAG, mTile + " wrong number of coordintes");
+						Log.d(TAG, mTile + " wrong number of coordintes "
+								+ coordCnt + "/" + cnt);
 						fail = true;
 					}
 					break;

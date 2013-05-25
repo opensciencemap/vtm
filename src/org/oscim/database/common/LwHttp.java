@@ -30,11 +30,13 @@ import org.oscim.core.Tile;
 import android.os.SystemClock;
 import android.util.Log;
 
-public class LwHttp extends InputStream{
+public class LwHttp {
 	private static final String TAG = LwHttp.class.getName();
 	//private static final boolean DEBUG = false;
 
-	private final static byte[] RESPONSE_HTTP_OK = "200 OK".getBytes();
+	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
+	private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
+	private final static byte[] HEADER_CONTENT_LENGTH = "Content-Length".getBytes();
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
 	private final static int RESPONSE_TIMEOUT = 10000;
 
@@ -55,17 +57,43 @@ public class LwHttp extends InputStream{
 	private byte[] REQUEST_GET_END;
 	private byte[] mRequestBuffer;
 
-	private boolean mInflateContent;
+	private final boolean mInflateContent;
+	private final byte[] mContentType;
+	private final String mExtension;
 
-	public boolean setServer(String urlString, String extension, boolean zlibDeflate) {
+	private int mContentLength = -1;
+
+	public LwHttp(String contentType, String extension, boolean deflate) {
+		mExtension = extension;
+		mContentType = contentType.getBytes();
+		mInflateContent = deflate;
+
+	}
+
+	static class Buffer extends BufferedInputStream {
+		public Buffer(InputStream is) {
+			super(is, 4096);
+		}
+
+		@Override
+		public synchronized int read() throws IOException {
+			return super.read();
+		}
+
+		@Override
+		public synchronized int read(byte[] buffer, int offset, int byteCount) throws IOException {
+			return super.read(buffer, offset, byteCount);
+		}
+	}
+
+	public boolean setServer(String urlString) {
+
 		URL url;
 		try {
 			url = new URL(urlString);
 		} catch (MalformedURLException e) {
-
 			e.printStackTrace();
 			return false;
-			//return new OpenResult("invalid url: " + options.get("url"));
 		}
 
 		int port = url.getPort();
@@ -74,13 +102,14 @@ public class LwHttp extends InputStream{
 
 		String host = url.getHost();
 		String path = url.getPath();
-		Log.d(TAG, "open oscim database: " + host + " " + port + " " + path);
+		Log.d(TAG, "open database: " + host + " " + port + " " + path);
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
-		REQUEST_GET_END = (extension + " HTTP/1.1\n" +
-				"Host: " + host + "\n" +
-				"Connection: Keep-Alive\n\n").getBytes();
-		mInflateContent = zlibDeflate;
+
+		REQUEST_GET_END = ("." + mExtension + " HTTP/1.1" +
+				"\nHost: " + host +
+				"\nConnection: Keep-Alive" +
+				"\n\n").getBytes();
 
 		mHost = host;
 		mPort = port;
@@ -91,7 +120,6 @@ public class LwHttp extends InputStream{
 		return true;
 	}
 
-	@Override
 	public void close() {
 		if (mSocket != null) {
 			try {
@@ -117,6 +145,8 @@ public class LwHttp extends InputStream{
 		int end = 0;
 		int len = 0;
 
+		mContentLength = -1;
+
 		// header cannot be larger than BUFFER_SIZE for this to work
 		for (; pos < read || (len = is.read(buf, read, BUFFER_SIZE - read)) >= 0; len = 0) {
 			read += len;
@@ -129,7 +159,7 @@ public class LwHttp extends InputStream{
 				if (first) {
 					// check only for OK
 					first = false;
-					if (!compareBytes(buf, pos + 9, end, RESPONSE_HTTP_OK, 6)) {
+					if (!check(HEADER_HTTP_OK, 6, buf, pos + 9, end)) {
 						String line = new String(buf, pos, end - pos - 1);
 						Log.d(TAG, ">" + line + "< ");
 						return null;
@@ -138,10 +168,16 @@ public class LwHttp extends InputStream{
 					// check empty line (header end)
 					end += 1;
 					break;
+				} else if (check(HEADER_CONTENT_TYPE, 12, buf, pos, end)) {
+					if (!check(mContentType, mContentType.length, buf, pos + 14, end))
+						return null;
+				} else if (check(HEADER_CONTENT_LENGTH, 14, buf, pos, end)) {
+					mContentLength =  parseInt(pos + 16, end-1, buf);
+
 				}
 
 				//String line = new String(buf, pos, end - pos - 1);
-				//Log.d(TAG, ">" + line + "< ");
+				//Log.d(TAG, ">" + line + "<  " + mContentLength);
 
 				pos += (end - pos) + 1;
 				end = pos;
@@ -181,11 +217,11 @@ public class LwHttp extends InputStream{
 			// Log.d(TAG, "create connection");
 		} else {
 			int avail = mResponseStream.available();
-			if (avail > 0){
-			Log.d(TAG, "Consume left-over bytes: " + avail);
+			if (avail > 0) {
+				Log.d(TAG, "Consume left-over bytes: " + avail);
 
-			while ((avail = mResponseStream.available()) > 0)
-				mResponseStream.read(buffer);
+				while ((avail = mResponseStream.available()) > 0)
+					mResponseStream.read(buffer);
 				Log.d(TAG, "Consumed bytes");
 			}
 		}
@@ -234,12 +270,12 @@ public class LwHttp extends InputStream{
 		mSocket.setTcpNoDelay(true);
 
 		mCommandStream = mSocket.getOutputStream();
-		mResponseStream = new BufferedInputStream(mSocket.getInputStream(), 4096);
+		mResponseStream = new BufferedInputStream(mSocket.getInputStream());
 
 		return true;
 	}
 
-	// write (positive) integer as char sequence to buffer
+	// write (positive) integer to byte array
 	protected static int writeInt(int val, int pos, byte[] buf) {
 		if (val == 0) {
 			buf[pos] = '0';
@@ -259,9 +295,17 @@ public class LwHttp extends InputStream{
 
 		return pos + i;
 	}
+	// parse (positive) integer from byte array
+	protected static int parseInt(int pos, int end, byte[] buf) {
+		int val = 0;
+		for (; pos < end; pos++)
+			val = val * 10 + (buf[pos]) - '0';
 
-	private static boolean compareBytes(byte[] buffer, int position, int available,
-			byte[] string, int length) {
+		return val;
+	}
+
+	private static boolean check(byte[] string, int length, byte[] buffer,
+			int position, int available) {
 
 		if (available - position < length)
 			return false;
@@ -273,16 +317,13 @@ public class LwHttp extends InputStream{
 		return true;
 	}
 
-	static int decodeInt(byte[] buffer, int offset) {
-		return buffer[offset] << 24 | (buffer[offset + 1] & 0xff) << 16
-				| (buffer[offset + 2] & 0xff) << 8
-				| (buffer[offset + 3] & 0xff);
-	}
-
 	public void requestCompleted() {
 		mLastRequest = SystemClock.elapsedRealtime();
 	}
 
+	public int getContentLength(){
+		return mContentLength;
+	}
 	/**
 	 * Write custom tile url
 	 *
@@ -293,11 +334,6 @@ public class LwHttp extends InputStream{
 	 */
 	protected int formatTilePath(Tile tile, byte[] path, int curPos) {
 		return 0;
-	}
-
-	@Override
-	public int read() throws IOException {
-		return mResponseStream.read();
 	}
 
 

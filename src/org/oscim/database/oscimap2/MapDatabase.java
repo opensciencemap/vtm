@@ -14,652 +14,322 @@
  */
 package org.oscim.database.oscimap2;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
+import java.io.InputStream;
 import java.util.Arrays;
 
-import org.oscim.core.BoundingBox;
-import org.oscim.core.GeoPoint;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
-import org.oscim.database.IMapDatabase;
 import org.oscim.database.IMapDataSink;
-import org.oscim.database.MapInfo;
-import org.oscim.database.MapOptions;
-import org.oscim.layers.tile.MapTile;
-import org.oscim.utils.UTF8Decoder;
+import org.oscim.database.common.LwHttp;
+import org.oscim.database.common.ProtobufDecoder;
+import org.oscim.database.common.ProtobufMapDatabase;
 
-import android.os.Environment;
-import android.os.SystemClock;
 import android.util.Log;
 
 /**
- *
- *
+ * Current Protocol Implementation
  */
-public class MapDatabase implements IMapDatabase {
-	private static final String TAG = MapDatabase.class.getName();
-
-	static final boolean USE_CACHE = false;
-
-	private static final MapInfo mMapInfo =
-			new MapInfo(new BoundingBox(-180, -90, 180, 90),
-					new Byte((byte) 4), new GeoPoint(53.11, 8.85),
-					null, 0, 0, 0, "de", "comment", "author", null);
-
-	private static final String CACHE_DIRECTORY = "/Android/data/org.oscim.app/cache/";
-	private static final String CACHE_FILE = "%d-%d-%d.tile";
-
-	private final static float REF_TILE_SIZE = 4096.0f;
-
-	// 'open' state
-	private boolean mOpen = false;
-	private static File cacheDir;
-
-	private final int MAX_TILE_TAGS = 100;
-	private Tag[] curTags = new Tag[MAX_TILE_TAGS];
-	private int mCurTagCnt;
-
-	private IMapDataSink mMapGenerator;
-	private float mScaleFactor;
-	private MapTile mTile;
-
-	private final boolean debug = false;
-	private LwHttp lwHttp;
-
-	private final UTF8Decoder mStringDecoder;
-	private final MapElement mElem;
-
+public class MapDatabase extends ProtobufMapDatabase {
 	public MapDatabase() {
-		mStringDecoder = new UTF8Decoder();
-		mElem = new MapElement();
+		super(new TileDecoder());
+		mConn = new LwHttp("application/osmtile", "osmtile", false);
 	}
 
-	@Override
-	public QueryResult executeQuery(MapTile tile, IMapDataSink mapDataSink) {
-		QueryResult result = QueryResult.SUCCESS;
+	static class TileDecoder extends ProtobufDecoder {
+		private final static String TAG = TileDecoder.class.getName();
+		private static final int TAG_TILE_NUM_TAGS = 1;
+		private static final int TAG_TILE_TAG_KEYS = 2;
+		private static final int TAG_TILE_TAG_VALUES = 3;
 
-		mTile = tile;
+		private static final int TAG_TILE_LINE = 11;
+		private static final int TAG_TILE_POLY = 12;
+		private static final int TAG_TILE_POINT = 13;
+		// private static final int TAG_TILE_LABEL = 21;
+		// private static final int TAG_TILE_WATER = 31;
 
-		mMapGenerator = mapDataSink;
+		private static final int TAG_ELEM_NUM_INDICES = 1;
+		private static final int TAG_ELEM_TAGS = 11;
+		private static final int TAG_ELEM_INDEX = 12;
+		private static final int TAG_ELEM_COORDS = 13;
+		private static final int TAG_ELEM_LAYER = 21;
+		private static final int TAG_ELEM_HEIGHT = 31;
+		private static final int TAG_ELEM_MIN_HEIGHT = 32;
+		private static final int TAG_ELEM_PRIORITY = 41;
+
+		private short[] mSArray = new short[100];
+		private final Tag[] mTmpTags = new Tag[20];
+		private final Tag[][] mElementTags;
+		private final int MAX_TILE_TAGS = 100;
+		private Tag[] curTags = new Tag[MAX_TILE_TAGS];
+		private int mCurTagCnt;
 
 		// scale coordinates to tile size
-		mScaleFactor = REF_TILE_SIZE / Tile.SIZE;
+		private final static float REF_TILE_SIZE = 4096.0f;
+		private float mScale;
 
-		File f = null;
+		private Tile mTile;
 
-		if (USE_CACHE) {
-			f = new File(cacheDir, String.format(CACHE_FILE,
-					Integer.valueOf(tile.zoomLevel),
-					Integer.valueOf(tile.tileX),
-					Integer.valueOf(tile.tileY)));
+		private final MapElement mElem;
 
-			if (lwHttp.cacheRead(tile, f))
-				return QueryResult.SUCCESS;
+		private IMapDataSink mMapDataSink;
+
+		TileDecoder() {
+			mElem = new MapElement();
+
+			// reusable tag set
+			Tag[][] tags = new Tag[10][];
+			for (int i = 0; i < 10; i++)
+				tags[i] = new Tag[i + 1];
+			mElementTags = tags;
+
 		}
 
-		try {
+		@Override
+		public boolean decode(Tile tile, IMapDataSink sink, InputStream is, int contentLength)
+				throws IOException {
 
-			if (lwHttp.sendRequest(tile) && lwHttp.readHeader() >= 0) {
-				lwHttp.cacheBegin(tile, f);
-				decode();
-			} else {
-				Log.d(TAG, tile + " Network Error");
-				result = QueryResult.FAILED;
+			int byteCount = readUnsignedInt(is, buffer);
+			Log.d(TAG, tile + " contentLength:" + byteCount);
+			if (byteCount < 0) {
+				Log.d(TAG, "invalid contentLength: " + byteCount);
+				return false;
 			}
-		} catch (SocketException ex) {
-			Log.d(TAG, tile + " Socket exception: " + ex.getMessage());
-			result = QueryResult.FAILED;
-		} catch (SocketTimeoutException ex) {
-			Log.d(TAG, tile + " Socket Timeout exception: " + ex.getMessage());
-			result = QueryResult.FAILED;
-		} catch (UnknownHostException ex) {
-			Log.d(TAG, tile + " no network");
-			result = QueryResult.FAILED;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			result = QueryResult.FAILED;
-		}
 
-		lwHttp.mLastRequest = SystemClock.elapsedRealtime();
+			setInputStream(is, byteCount);
 
-		if (result == QueryResult.SUCCESS) {
+			mTile = tile;
+			mMapDataSink = sink;
 
-			lwHttp.cacheFinish(tile, f, true);
-		} else {
-			lwHttp.cacheFinish(tile, f, false);
-			lwHttp.close();
-		}
-		return result;
-	}
+			mScale = REF_TILE_SIZE / Tile.SIZE;
 
-	@Override
-	public String getMapProjection() {
-		return null;
-	}
+			mCurTagCnt = 0;
 
-	@Override
-	public MapInfo getMapInfo() {
-		return mMapInfo;
-	}
+			int val;
+			int numTags = 0;
 
-	@Override
-	public boolean isOpen() {
-		return mOpen;
-	}
+			while (hasData() && (val = decodeVarint32()) > 0) {
+				// read tag and wire type
+				int tag = (val >> 3);
 
-	@Override
-	public OpenResult open(MapOptions options) {
-		if (mOpen)
-			return OpenResult.SUCCESS;
+				switch (tag) {
+					case TAG_TILE_NUM_TAGS:
+						numTags = decodeVarint32();
+						if (numTags > curTags.length)
+							curTags = new Tag[numTags];
+						break;
 
-		if (options == null || !options.containsKey("url"))
-			return new OpenResult("options missing");
+					case TAG_TILE_TAG_KEYS:
+						int len = numTags;
+						if (mSArray.length < len)
+							mSArray = new short[len];
 
-		lwHttp = new LwHttp();
+						decodeVarintArray(numTags, mSArray);
+						break;
 
-		if (!lwHttp.setServer(options.get("url"))) {
-			return new OpenResult("invalid url: " + options.get("url"));
-		}
+					case TAG_TILE_TAG_VALUES:
+						// this wastes one byte, as there is no packed string...
+						decodeTileTags(mCurTagCnt++);
+						break;
 
-		if (USE_CACHE) {
-			if (cacheDir == null) {
-				String externalStorageDirectory = Environment
-						.getExternalStorageDirectory()
-						.getAbsolutePath();
-				String cacheDirectoryPath = externalStorageDirectory + CACHE_DIRECTORY;
-				cacheDir = createDirectory(cacheDirectoryPath);
-			}
-		}
+					case TAG_TILE_LINE:
+					case TAG_TILE_POLY:
+					case TAG_TILE_POINT:
+						decodeTileElement(tag);
+						break;
 
-		mOpen = true;
-		initDecorder();
-
-		return OpenResult.SUCCESS;
-	}
-
-	@Override
-	public void close() {
-		mOpen = false;
-
-		lwHttp.close();
-
-		if (USE_CACHE) {
-			cacheDir = null;
-		}
-	}
-
-	@Override
-	public void cancel() {
-	}
-
-	private static File createDirectory(String pathName) {
-		File file = new File(pathName);
-		if (!file.exists() && !file.mkdirs()) {
-			throw new IllegalArgumentException("could not create directory: " + file);
-		} else if (!file.isDirectory()) {
-			throw new IllegalArgumentException("not a directory: " + file);
-		} else if (!file.canRead()) {
-			throw new IllegalArgumentException("cannot read directory: " + file);
-		} else if (!file.canWrite()) {
-			throw new IllegalArgumentException("cannot write directory: " + file);
-		}
-		return file;
-	}
-
-	// /////////////// hand sewed tile protocol buffers decoder ///////////////
-
-	private static final int TAG_TILE_NUM_TAGS = 1;
-	private static final int TAG_TILE_TAG_KEYS = 2;
-	private static final int TAG_TILE_TAG_VALUES = 3;
-
-	private static final int TAG_TILE_LINE = 11;
-	private static final int TAG_TILE_POLY = 12;
-	private static final int TAG_TILE_POINT = 13;
-	// private static final int TAG_TILE_LABEL = 21;
-	// private static final int TAG_TILE_WATER = 31;
-
-	private static final int TAG_ELEM_NUM_INDICES = 1;
-	private static final int TAG_ELEM_TAGS = 11;
-	private static final int TAG_ELEM_INDEX = 12;
-	private static final int TAG_ELEM_COORDS = 13;
-	private static final int TAG_ELEM_LAYER = 21;
-	private static final int TAG_ELEM_HEIGHT = 31;
-	private static final int TAG_ELEM_MIN_HEIGHT = 32;
-	private static final int TAG_ELEM_PRIORITY = 41;
-
-	private short[] mTmpKeys = new short[100];
-	private final Tag[] mTmpTags = new Tag[20];
-	private Tag[][] mElementTags;
-
-	private void initDecorder() {
-		// reusable tag set
-		Tag[][] tags = new Tag[10][];
-		for (int i = 0; i < 10; i++)
-			tags[i] = new Tag[i + 1];
-		mElementTags = tags;
-	}
-
-	private boolean decode() throws IOException {
-
-		mCurTagCnt = 0;
-
-		int val;
-		int numTags = 0;
-
-		while (lwHttp.hasData() && (val = decodeVarint32()) > 0) {
-			// read tag and wire type
-			int tag = (val >> 3);
-
-			switch (tag) {
-				case TAG_TILE_NUM_TAGS:
-					numTags = decodeVarint32();
-					if (numTags > curTags.length)
-						curTags = new Tag[numTags];
-					break;
-
-				case TAG_TILE_TAG_KEYS:
-					mTmpKeys = decodeShortArray(numTags, mTmpKeys);
-					break;
-
-				case TAG_TILE_TAG_VALUES:
-					// this wastes one byte, as there is no packed string...
-					decodeTileTags(mCurTagCnt++);
-					break;
-
-				case TAG_TILE_LINE:
-				case TAG_TILE_POLY:
-				case TAG_TILE_POINT:
-					decodeTileElement(tag);
-					break;
-
-				default:
-					Log.d(TAG, mTile + " invalid type for tile: " + tag);
-					return false;
-			}
-		}
-		return true;
-	}
-
-	private boolean decodeTileTags(int curTag) throws IOException {
-		String tagString = decodeString();
-
-		String key = Tags.keys[mTmpKeys[curTag]];
-		Tag tag;
-
-		if (key == Tag.TAG_KEY_NAME)
-			tag = new Tag(key, tagString, false);
-		else
-			tag = new Tag(key, tagString, true);
-		if (debug)
-			Log.d(TAG, mTile + " add tag: " + curTag + " " + tag);
-		curTags[curTag] = tag;
-
-		return true;
-	}
-
-	private int decodeWayIndices(int indexCnt) throws IOException {
-		mElem.index = decodeShortArray(indexCnt, mElem.index);
-
-		short[] index = mElem.index;
-		int coordCnt = 0;
-
-		for (int i = 0; i < indexCnt; i++)
-			coordCnt += index[i] *= 2;
-
-		// set end marker
-		if (indexCnt < index.length)
-			index[indexCnt] = -1;
-
-		return coordCnt;
-	}
-
-	private boolean decodeTileElement(int type) throws IOException {
-
-		int bytes = decodeVarint32();
-		Tag[] tags = null;
-		short[] index = null;
-
-		int end = lwHttp.position() + bytes;
-		int indexCnt = 1;
-
-		boolean skip = false;
-		boolean fail = false;
-
-		int coordCnt = 0;
-		if (type == TAG_TILE_POINT) {
-			coordCnt = 2;
-			mElem.index[0] = 2;
-		}
-
-		mElem.layer = 5;
-		mElem.priority = 0;
-		mElem.height = 0;
-		mElem.minHeight = 0;
-
-		while (lwHttp.position() < end) {
-			// read tag and wire type
-			int val = decodeVarint32();
-			if (val == 0)
-				break;
-
-			int tag = (val >> 3);
-
-			switch (tag) {
-				case TAG_ELEM_TAGS:
-					tags = decodeElementTags();
-					break;
-
-				case TAG_ELEM_NUM_INDICES:
-					indexCnt = decodeVarint32();
-					break;
-
-				case TAG_ELEM_INDEX:
-					coordCnt = decodeWayIndices(indexCnt);
-					break;
-
-				case TAG_ELEM_COORDS:
-					if (coordCnt == 0) {
-						Log.d(TAG, mTile + " no coordinates");
-						skip = true;
-					}
-					int cnt = decodeWayCoordinates(skip, coordCnt);
-
-					if (cnt != coordCnt) {
-						Log.d(TAG, mTile + " wrong number of coordintes");
-						fail = true;
-					}
-					break;
-
-				case TAG_ELEM_LAYER:
-					mElem.layer = decodeVarint32();
-					break;
-
-				case TAG_ELEM_HEIGHT:
-					mElem.height = decodeVarint32();
-					break;
-
-				case TAG_ELEM_MIN_HEIGHT:
-					mElem.minHeight = decodeVarint32();
-					break;
-
-				case TAG_ELEM_PRIORITY:
-					mElem.priority = decodeVarint32();
-					break;
-
-				default:
-					Log.d(TAG, mTile + " invalid type for way: " + tag);
-			}
-		}
-
-		if (fail || tags == null || indexCnt == 0) {
-			Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
-					+ (Arrays.toString(index)) + " tag:"
-					+ (tags != null ? Arrays.deepToString(tags) : "null") + " "
-					+ indexCnt + " " + coordCnt);
-			return false;
-		}
-
-		mElem.tags = tags;
-		switch (type) {
-			case TAG_TILE_LINE:
-				mElem.type = GeometryType.LINE;
-				break;
-			case TAG_TILE_POLY:
-				mElem.type = GeometryType.POLY;
-				break;
-			case TAG_TILE_POINT:
-				mElem.type = GeometryType.POINT;
-				break;
-		}
-
-		mMapGenerator.process(mElem);
-
-		return true;
-	}
-
-	private Tag[] decodeElementTags() throws IOException {
-		int bytes = decodeVarint32();
-
-		Tag[] tmp = mTmpTags;
-
-		int cnt = 0;
-		int end = lwHttp.position() + bytes;
-		int max = mCurTagCnt;
-
-		while (lwHttp.position() < end) {
-			int tagNum = decodeVarint32();
-
-			if (tagNum < 0) {
-				Log.d(TAG, "NULL TAG: " + mTile + " invalid tag:" + tagNum + " " + cnt);
-			} else if (tagNum < Tags.MAX) {
-				tmp[cnt++] = Tags.tags[tagNum];
-			} else {
-				tagNum -= Tags.LIMIT;
-
-				if (tagNum >= 0 && tagNum < max) {
-					// Log.d(TAG, "variable tag: " + curTags[tagNum]);
-					tmp[cnt++] = curTags[tagNum];
-				} else {
-					Log.d(TAG, "NULL TAG: " + mTile + " could not find tag:"
-							+ tagNum + " " + cnt);
+					default:
+						Log.d(TAG, mTile + " invalid type for tile: " + tag);
+						return false;
 				}
 			}
+			return true;
 		}
 
-		if (cnt == 0) {
-			Log.d(TAG, "got no TAG!");
-		}
-		Tag[] tags;
+		private boolean decodeTileTags(int curTag) throws IOException {
+			String tagString = decodeString();
 
-		if (cnt < 11)
-			tags = mElementTags[cnt - 1];
-		else
-			tags = new Tag[cnt];
+			String key = Tags.keys[mSArray[curTag]];
+			Tag tag;
 
-		for (int i = 0; i < cnt; i++)
-			tags[i] = tmp[i];
+			if (key == Tag.TAG_KEY_NAME)
+				tag = new Tag(key, tagString, false);
+			else
+				tag = new Tag(key, tagString, true);
+			if (debug)
+				Log.d(TAG, mTile + " add tag: " + curTag + " " + tag);
+			curTags[curTag] = tag;
 
-		return tags;
-	}
-
-	private final static int VARINT_LIMIT = 5;
-	private final static int VARINT_MAX = 10;
-
-	private int decodeWayCoordinates(boolean skip, int nodes) throws IOException {
-		int bytes = decodeVarint32();
-
-		lwHttp.readBuffer(bytes);
-
-		if (skip) {
-			lwHttp.bufferPos += bytes;
-			return nodes;
+			return true;
 		}
 
-		int cnt = 0;
+		private int decodeWayIndices(int indexCnt) throws IOException {
+			mElem.ensureIndexSize(indexCnt, false);
+			decodeVarintArray(indexCnt, mElem.index);
 
-		int lastX = 0;
-		int lastY = 0;
-		boolean even = true;
+			short[] index = mElem.index;
+			int coordCnt = 0;
 
-		float scale = mScaleFactor;
-		float[] coords = mElem.ensurePointSize(nodes, false);
+			for (int i = 0; i < indexCnt; i++) {
+				coordCnt += index[i];
+				index[i] *= 2;
+			}
+			// set end marker
+			if (indexCnt < index.length)
+				index[indexCnt] = -1;
 
-		byte[] buf = lwHttp.buffer;
-		int pos = lwHttp.bufferPos;
-		int end = pos + bytes;
-		int val;
+			return coordCnt;
+		}
 
-		while (pos < end) {
-			if (buf[pos] >= 0) {
-				val = buf[pos++];
+		private boolean decodeTileElement(int type) throws IOException {
 
-			} else if (buf[pos + 1] >= 0) {
-				val = (buf[pos++] & 0x7f)
-						| buf[pos++] << 7;
+			int bytes = decodeVarint32();
+			Tag[] tags = null;
+			short[] index = null;
 
-			} else if (buf[pos + 2] >= 0) {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++]) << 14;
+			int end = position() + bytes;
+			int indexCnt = 1;
 
-			} else if (buf[pos + 3] >= 0) {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++]) << 21;
+			boolean fail = false;
 
-			} else {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++] & 0x7f) << 21
-						| (buf[pos]) << 28;
+			int coordCnt = 0;
+			if (type == TAG_TILE_POINT) {
+				coordCnt = 1;
+				mElem.index[0] = 2;
+			}
 
-				int max = pos + VARINT_LIMIT;
-				while (pos < max)
-					if (buf[pos++] >= 0)
+			mElem.layer = 5;
+			mElem.priority = 0;
+			mElem.height = 0;
+			mElem.minHeight = 0;
+
+			while (position() < end) {
+				// read tag and wire type
+				int val = decodeVarint32();
+				if (val == 0)
+					break;
+
+				int tag = (val >> 3);
+
+				switch (tag) {
+					case TAG_ELEM_TAGS:
+						tags = decodeElementTags();
 						break;
 
-				if (pos == max)
-					throw new IOException("malformed VarInt32 in " + mTile);
-			}
-
-			// zigzag decoding
-			int s = ((val >>> 1) ^ -(val & 1));
-
-			if (even) {
-				lastX = lastX + s;
-				coords[cnt++] = lastX / scale;
-				even = false;
-			} else {
-				lastY = lastY + s;
-				coords[cnt++] = lastY / scale;
-				even = true;
-			}
-		}
-
-		lwHttp.bufferPos = pos;
-
-		return cnt;
-	}
-
-	private short[] decodeShortArray(int num, short[] array) throws IOException {
-		int bytes = decodeVarint32();
-
-		if (array.length < num)
-			array = new short[num];
-
-		lwHttp.readBuffer(bytes);
-
-		int cnt = 0;
-
-		byte[] buf = lwHttp.buffer;
-		int pos = lwHttp.bufferPos;
-		int end = pos + bytes;
-		int val;
-
-		while (pos < end) {
-			if (buf[pos] >= 0) {
-				val = buf[pos++];
-			} else if (buf[pos + 1] >= 0) {
-				val = (buf[pos++] & 0x7f)
-						| buf[pos++] << 7;
-			} else if (buf[pos + 2] >= 0) {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++]) << 14;
-			} else if (buf[pos + 3] >= 0) {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++]) << 21;
-			} else {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++] & 0x7f) << 21
-						| (buf[pos]) << 28;
-
-				int max = pos + VARINT_LIMIT;
-				while (pos < max)
-					if (buf[pos++] >= 0)
+					case TAG_ELEM_NUM_INDICES:
+						indexCnt = decodeVarint32();
 						break;
 
-				if (pos == max)
-					throw new IOException("malformed VarInt32 in " + mTile);
-			}
-
-			array[cnt++] = (short) val;
-		}
-
-		lwHttp.bufferPos = pos;
-
-		return array;
-	}
-
-	private int decodeVarint32() throws IOException {
-		if (lwHttp.bufferPos + VARINT_MAX > lwHttp.bufferFill)
-			lwHttp.readBuffer(4096);
-
-		byte[] buf = lwHttp.buffer;
-		int pos = lwHttp.bufferPos;
-		int val;
-
-		if (buf[pos] >= 0) {
-			val = buf[pos++];
-		} else {
-
-			if (buf[pos + 1] >= 0) {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++]) << 7;
-
-			} else if (buf[pos + 2] >= 0) {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++]) << 14;
-
-			} else if (buf[pos + 3] >= 0) {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++]) << 21;
-			} else {
-				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++] & 0x7f) << 21
-						| (buf[pos]) << 28;
-
-				// 'Discard upper 32 bits'
-				int max = pos + VARINT_LIMIT;
-				while (pos < max)
-					if (buf[pos++] >= 0)
+					case TAG_ELEM_INDEX:
+						coordCnt = decodeWayIndices(indexCnt);
 						break;
 
-				if (pos == max)
-					throw new IOException("malformed VarInt32 in " + mTile);
+					case TAG_ELEM_COORDS:
+						if (coordCnt == 0) {
+							Log.d(TAG, mTile + " no coordinates");
+						}
+
+						mElem.ensurePointSize(coordCnt, false);
+						int cnt = decodeInterleavedPoints(mElem.points, mScale);
+
+						if (cnt != coordCnt) {
+							Log.d(TAG, mTile + " wrong number of coordintes");
+							fail = true;
+						}
+						break;
+
+					case TAG_ELEM_LAYER:
+						mElem.layer = decodeVarint32();
+						break;
+
+					case TAG_ELEM_HEIGHT:
+						mElem.height = decodeVarint32();
+						break;
+
+					case TAG_ELEM_MIN_HEIGHT:
+						mElem.minHeight = decodeVarint32();
+						break;
+
+					case TAG_ELEM_PRIORITY:
+						mElem.priority = decodeVarint32();
+						break;
+
+					default:
+						Log.d(TAG, mTile + " invalid type for way: " + tag);
+				}
 			}
+
+			if (fail || tags == null || indexCnt == 0) {
+				Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
+						+ (Arrays.toString(index)) + " tag:"
+						+ (tags != null ? Arrays.deepToString(tags) : "null") + " "
+						+ indexCnt + " " + coordCnt);
+				return false;
+			}
+
+			mElem.tags = tags;
+			switch (type) {
+				case TAG_TILE_LINE:
+					mElem.type = GeometryType.LINE;
+					break;
+				case TAG_TILE_POLY:
+					mElem.type = GeometryType.POLY;
+					break;
+				case TAG_TILE_POINT:
+					mElem.type = GeometryType.POINT;
+					break;
+			}
+
+			mMapDataSink.process(mElem);
+
+			return true;
 		}
 
-		lwHttp.bufferPos = pos;
+		private Tag[] decodeElementTags() throws IOException {
+			int bytes = decodeVarint32();
 
-		return val;
-	}
+			Tag[] tmp = mTmpTags;
 
-	private String decodeString() throws IOException {
-		final int size = decodeVarint32();
-		lwHttp.readBuffer(size);
-		final String result = mStringDecoder.decode(lwHttp.buffer, lwHttp.bufferPos, size);
+			int cnt = 0;
+			int end = position() + bytes;
+			int max = mCurTagCnt;
 
-		lwHttp.bufferPos += size;
+			while (position() < end) {
+				int tagNum = decodeVarint32();
 
-		return result;
+				if (tagNum < 0) {
+					Log.d(TAG, "NULL TAG: " + mTile + " invalid tag:" + tagNum + " " + cnt);
+				} else if (tagNum < Tags.MAX) {
+					tmp[cnt++] = Tags.tags[tagNum];
+				} else {
+					tagNum -= Tags.LIMIT;
 
+					if (tagNum >= 0 && tagNum < max) {
+						// Log.d(TAG, "variable tag: " + curTags[tagNum]);
+						tmp[cnt++] = curTags[tagNum];
+					} else {
+						Log.d(TAG, "NULL TAG: " + mTile + " could not find tag:"
+								+ tagNum + " " + cnt);
+					}
+				}
+			}
+
+			if (cnt == 0) {
+				Log.d(TAG, "got no TAG!");
+			}
+			Tag[] tags;
+
+			if (cnt < 11)
+				tags = mElementTags[cnt - 1];
+			else
+				tags = new Tag[cnt];
+
+			for (int i = 0; i < cnt; i++)
+				tags[i] = tmp[i];
+
+			return tags;
+		}
 	}
 }
