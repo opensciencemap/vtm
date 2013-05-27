@@ -15,11 +15,11 @@
 package org.oscim.core;
 
 /**
- * MapElement is created by MapDatabase(s) and passed to MapTileLoader
- * via IMapDataSink.renderElement() MapTileLoader processes the
+ * MapElement is created by TileDataSource(s) and passed to MapTileLoader
+ * via ITileDataSink.process() MapTileLoader processes the
  * data into MapTile.layers.
  * -----
- * This is really just a buffer object that belongs to MapDatabase, so
+ * This is really just a buffer object that belongs to TileDataSource, so
  * dont keep a reference to it when passed as parameter.
  */
 public class MapElement extends GeometryBuffer {
