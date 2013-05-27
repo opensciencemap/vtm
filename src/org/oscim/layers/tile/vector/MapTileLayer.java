@@ -17,18 +17,11 @@ package org.oscim.layers.tile.vector;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
-import org.oscim.database.IMapDatabase;
-import org.oscim.database.IMapDatabase.OpenResult;
-import org.oscim.database.MapDatabaseFactory;
-import org.oscim.database.MapDatabases;
-import org.oscim.database.MapInfo;
-import org.oscim.database.MapOptions;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.GLRenderer;
@@ -37,6 +30,11 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.RenderThemeHandler;
 import org.oscim.theme.Theme;
+import org.oscim.tilesource.ITileDataSource;
+import org.oscim.tilesource.MapInfo;
+import org.oscim.tilesource.TileSource;
+import org.oscim.tilesource.TileSource.OpenResult;
+import org.oscim.tilesource.oscimap.OSciMap1TileSource;
 import org.oscim.view.MapView;
 import org.xml.sax.SAXException;
 
@@ -54,54 +52,47 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		return new MapTileLoader(tm);
 	}
 
-	private MapOptions mMapOptions;
-	private IMapDatabase mMapDatabase;
+	private TileSource mTileSource;
 	private String mRenderTheme;
 
 	/**
-	 * Sets the MapDatabase for this MapView.
+	 * Sets the TileSource for this MapView.
 	 *
-	 * @param options
-	 *            the new MapDatabase options.
-	 * @return true if MapDatabase changed
+	 * @param tileSource
+	 *            the new TileSource.
+	 * @return true if TileSource changed
 	 */
-	public boolean setMapDatabase(MapOptions options) {
-		Log.i(TAG, "setMapDatabase: " + options.db.name());
-
-		if (mMapOptions != null && mMapOptions.equals(options))
-			return true;
+	public boolean setTileSource(TileSource tileSource) {
 
 		pauseLoaders(true);
 
 		mTileManager.clearJobs();
 
-		mMapOptions = options;
-
-		mMapDatabase = null;
-
-		for (int i = 0; i < mNumTileLoader; i++) {
-			IMapDatabase mapDatabase = MapDatabaseFactory
-					.createMapDatabase(options.db);
-
-			OpenResult result = mapDatabase.open(options);
-
-			if (result != OpenResult.SUCCESS) {
-				Log.d(TAG, "failed open db: " + result.getErrorMessage());
-			}
-
-			mTileLoader.get(i).setMapDatabase(mapDatabase);
-
-			// TODO this could be done in a cleaner way..
-			if (mMapDatabase == null)
-				mMapDatabase = mapDatabase;
+		if (mTileSource != null) {
+			mTileSource.close();
+			mTileSource = null;
 		}
 
-		if (options.db == MapDatabases.OPENSCIENCEMAP1)
+		OpenResult msg = tileSource.open();
+
+		if (msg != OpenResult.SUCCESS) {
+			Log.d(TAG, msg.getErrorMessage());
+			return false;
+		}
+
+		mTileSource = tileSource;
+
+		for (int i = 0; i < mNumTileLoader; i++) {
+			ITileDataSource tileDataSource = tileSource.getDataSource();
+			mTileLoader.get(i).setTileDataSource(tileDataSource);
+		}
+
+		if (tileSource instanceof OSciMap1TileSource)
 			MapView.enableClosePolygons = false;
 		else
 			MapView.enableClosePolygons = true;
 
-		mTileManager.setZoomTable(mMapDatabase.getMapInfo().zoomLevel);
+		mTileManager.setZoomTable(mTileSource.getMapInfo().zoomLevel);
 
 		mMapView.clearMap();
 
@@ -110,15 +101,11 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		return true;
 	}
 
-	public Map<String, String> getMapOptions() {
-		return mMapOptions;
-	}
-
 	public MapPosition getMapFileCenter() {
-		if (mMapDatabase == null)
+		if (mTileSource == null)
 			return null;
 
-		MapInfo mapInfo = mMapDatabase.getMapInfo();
+		MapInfo mapInfo = mTileSource.getMapInfo();
 		if (mapInfo == null)
 			return null;
 

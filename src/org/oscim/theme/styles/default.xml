@@ -228,7 +228,9 @@
 
 
       <!-- keep grass above forest:wood and leisure:park! -->
-      <rule e="way" k="landuse" v="grass|meadow">
+      <!-- http://wiki.openstreetmap.org/wiki/Proposed_features/conservation,
+           often serves as background for leisure=nature_reserve -->
+      <rule e="way" k="landuse" v="grass|meadow|conservation">
         <use-area name="greens" />
       </rule>
 

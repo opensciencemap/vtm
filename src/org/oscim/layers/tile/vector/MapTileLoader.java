@@ -23,9 +23,6 @@ import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
-import org.oscim.database.IMapDataSink;
-import org.oscim.database.IMapDatabase;
-import org.oscim.database.IMapDatabase.QueryResult;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
@@ -44,6 +41,9 @@ import org.oscim.theme.renderinstruction.LineSymbol;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.renderinstruction.Symbol;
 import org.oscim.theme.renderinstruction.Text;
+import org.oscim.tilesource.ITileDataSink;
+import org.oscim.tilesource.ITileDataSource;
+import org.oscim.tilesource.ITileDataSource.QueryResult;
 import org.oscim.utils.LineClipper;
 import org.oscim.view.DebugSettings;
 
@@ -59,7 +59,7 @@ import android.util.Log;
  *       5. RenderTheme calls IRenderCallback functions with style information
  *       6. Styled items become added to MapTile.layers... roughly
  */
-public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDataSink  {
+public class MapTileLoader extends TileLoader implements IRenderCallback, ITileDataSink  {
 
 	private static final String TAG = MapTileLoader.class.getName();
 
@@ -84,8 +84,8 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 	private IRenderTheme renderTheme;
 	private int renderLevels;
 
-	// current MapDatabase used by this MapTileLoader
-	private IMapDatabase mMapDatabase;
+	// current TileDataSource used by this MapTileLoader
+	private ITileDataSource mTileDataSource;
 
 	// currently processed tile
 	private MapTile mTile;
@@ -145,7 +145,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 	 */
 	@Override
 	public void cleanup() {
-		mMapDatabase.close();
+		mTileDataSource.destroy();
 	}
 
 	/* (non-Javadoc)
@@ -154,7 +154,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 	@Override
 	public boolean executeJob(MapTile mapTile) {
 
-		if (mMapDatabase == null)
+		if (mTileDataSource == null)
 			return false;
 
 		mTile = mapTile;
@@ -181,7 +181,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 
 		// query database, which calls renderWay and renderPOI
 		// callbacks while processing map tile data.
-		if (mMapDatabase.executeQuery(mTile, this) != QueryResult.SUCCESS) {
+		if (mTileDataSource.executeQuery(mTile, this) != QueryResult.SUCCESS) {
 
 			//Log.d(TAG, "Failed loading: " + tile);
 			mTile.layers.clear();
@@ -239,15 +239,15 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, IMapDa
 			mStrokeScale = 1;
 	}
 
-	public void setMapDatabase(IMapDatabase mapDatabase) {
-		if (mMapDatabase != null)
-			mMapDatabase.close();
+	public void setTileDataSource(ITileDataSource mapDatabase) {
+		if (mTileDataSource != null)
+			mTileDataSource.destroy();
 
-		mMapDatabase = mapDatabase;
+		mTileDataSource = mapDatabase;
 	}
 
-	public IMapDatabase getMapDatabase() {
-		return mMapDatabase;
+	public ITileDataSource getMapDatabase() {
+		return mTileDataSource;
 	}
 
 	private boolean mRenderBuildingModel;

@@ -21,7 +21,6 @@ import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.database.MapOptions;
 import org.oscim.layers.Layer;
 import org.oscim.layers.MapEventLayer;
 import org.oscim.layers.overlay.BuildingOverlay;
@@ -31,6 +30,7 @@ import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.layers.tile.vector.MapTileLoader;
 import org.oscim.renderer.GLView;
+import org.oscim.tilesource.TileSource;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -138,10 +138,10 @@ public class MapView extends RelativeLayout {
 		redrawMap(false);
 	}
 
-	public MapTileLayer setBaseMap(MapOptions options) {
+	public MapTileLayer setBaseMap(TileSource tileSource) {
 		MapTileLayer baseLayer = new MapTileLayer(this);
 
-		baseLayer.setMapDatabase(options);
+		baseLayer.setTileSource(tileSource);
 
 		mLayerManager.add(0, new MapEventLayer(this));
 
@@ -211,7 +211,7 @@ public class MapView extends RelativeLayout {
 		mWidth = width;
 		mHeight = height;
 
-		mInitialized = (mWidth > 0 && mWidth > 0);
+		mInitialized = (mWidth > 0 && mHeight > 0);
 
 		if (mInitialized)
 			mMapViewPosition.setViewport(width, height);

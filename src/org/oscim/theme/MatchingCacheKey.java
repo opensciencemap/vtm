@@ -24,7 +24,7 @@ class MatchingCacheKey {
 	}
 
 	MatchingCacheKey(MatchingCacheKey key) {
-		// need to clone tags as they belong to MapDatabase
+		// need to clone tags as they belong to TileDataSource
 		mTags = key.mTags.clone();
 		mHash = key.mHash;
 	}
