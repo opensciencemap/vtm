@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -15,7 +16,7 @@
 package org.oscim.theme.rule;
 
 final class Element {
-	public static final int ANY = 0;
-	public static final int NODE = 1;
-	public static final int WAY = 2;
+	public static final int NODE = 1 << 0;
+	public static final int WAY = 1 << 1;
+	public static final int ANY = NODE | WAY;
 }

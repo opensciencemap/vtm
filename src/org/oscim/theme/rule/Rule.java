@@ -45,18 +45,23 @@ public abstract class Rule {
 		List<String> valueList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN
 				.split(values)));
 
+		int zoom = 0;
+		for (int z = zoomMin; z <= zoomMax && z < 32; z++)
+			zoom |= (1 << z);
+
 		if (valueList.remove(STRING_NEGATION)) {
 			AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList,
 					false);
-			return new NegativeRule(element, closed, zoomMin, zoomMax,
+			return new NegativeRule(element, closed, zoom,
 					attributeMatcher);
 		}
+
+
 
 		if (valueList.remove(STRING_EXCLUSIVE)) {
 			AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList,
 					true);
-			return new NegativeRule(element, closed, zoomMin, zoomMax,
-					attributeMatcher);
+			return new NegativeRule(element, closed, zoom, attributeMatcher);
 		}
 		AttributeMatcher keyMatcher = getKeyMatcher(keyList);
 		AttributeMatcher valueMatcher = getValueMatcher(valueList);
@@ -64,7 +69,7 @@ public abstract class Rule {
 		keyMatcher = RuleOptimizer.optimize(keyMatcher, ruleStack);
 		valueMatcher = RuleOptimizer.optimize(valueMatcher, ruleStack);
 
-		return new PositiveRule(element, closed, zoomMin, zoomMax,
+		return new PositiveRule(element, closed, zoom,
 				keyMatcher, valueMatcher);
 	}
 
@@ -169,17 +174,15 @@ public abstract class Rule {
 	private Rule[] mSubRuleArray;
 	private RenderInstruction[] mRenderInstructionArray;
 
-	final byte mZoomMax;
-	final byte mZoomMin;
+	final int mZoom;
 	final int mElement;
 	final int mClosed;
 
-	Rule(int element, int closed, byte zoomMin, byte zoomMax) {
+	Rule(int element, int closed, int zoom) {
 
 		mClosed = closed;
 		mElement = element;
-		mZoomMin = zoomMin;
-		mZoomMax = zoomMax;
+		mZoom = zoom;
 
 		mRenderInstructions = new ArrayList<RenderInstruction>(4);
 		mSubRules = new ArrayList<Rule>(4);
@@ -197,11 +200,10 @@ public abstract class Rule {
 
 	abstract boolean matchesWay(Tag[] tags);
 
-	public void matchNode(Tag[] tags, byte zoomLevel,
+	public void matchNode(Tag[] tags, int zoomLevel,
 			List<RenderInstruction> matchingList) {
-		if ((mElement != Element.WAY)
-				&& mZoomMin <= zoomLevel
-				&& mZoomMax >= zoomLevel
+		if (((mElement & Element.NODE) != 0)
+				&& ((mZoom & zoomLevel) != 0)
 				&& matchesNode(tags)) {
 
 			for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
@@ -213,23 +215,21 @@ public abstract class Rule {
 		}
 	}
 
-	public void matchWay(Tag[] tags, byte zoomLevel,
+	public void matchWay(Tag[] tags, int zoomLevel,
 			int closed, List<RenderInstruction> matchingList) {
 
-		if ((mElement != Element.NODE)
-				&& mZoomMin <= zoomLevel
-				&& mZoomMax >= zoomLevel
-				&& (mClosed == closed || mClosed == Closed.ANY)
+		if (((mElement & Element.WAY) != 0)
+				&& ((mZoom & zoomLevel) != 0)
+				&& ((mClosed & closed) != 0)
 				&& (matchesWay(tags))) {
 
 			// add instructions for this rule
-			for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
-				matchingList.add(mRenderInstructionArray[i]);
+			for (RenderInstruction ri : mRenderInstructionArray)
+				matchingList.add(ri);
 
 			// check subrules
-			for (int i = 0, n = mSubRuleArray.length; i < n; i++)
-				mSubRuleArray[i].matchWay(tags, zoomLevel, closed,
-						matchingList);
+			for (Rule subRule : mSubRuleArray)
+				subRule.matchWay(tags, zoomLevel, closed, matchingList);
 
 		}
 	}
