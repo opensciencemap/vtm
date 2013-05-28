@@ -19,9 +19,9 @@ import org.oscim.core.Tag;
 class NegativeRule extends Rule {
 	final AttributeMatcher mAttributeMatcher;
 
-	NegativeRule(int element, int closed, byte zoomMin, byte zoomMax,
+	NegativeRule(int element, int closed, int zoom,
 			AttributeMatcher attributeMatcher) {
-		super(element, closed, zoomMin, zoomMax);
+		super(element, closed, zoom);
 
 		mAttributeMatcher = attributeMatcher;
 	}

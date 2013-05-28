@@ -20,9 +20,9 @@ class PositiveRule extends Rule {
 	final AttributeMatcher mKeyMatcher;
 	final AttributeMatcher mValueMatcher;
 
-	PositiveRule(int element, int closed, byte zoomMin, byte zoomMax,
+	PositiveRule(int element, int closed, int zoom,
 			AttributeMatcher keyMatcher, AttributeMatcher valueMatcher) {
-		super(element, closed, zoomMin, zoomMax);
+		super(element, closed, zoom);
 
 		if (keyMatcher instanceof AnyMatcher)
 			mKeyMatcher = null;

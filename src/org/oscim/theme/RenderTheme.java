@@ -215,28 +215,25 @@ public class RenderTheme implements IRenderTheme {
 				matches.clear();
 
 				if (element.type == GeometryType.LINE) {
-					for (int i = 0, n = mRules.length; i < n; i++)
-						mRules[i].matchWay(element.tags,
-								(byte) zoomLevel, Closed.NO, matches);
+					for (Rule rule : mRules)
+						rule.matchWay(element.tags, zoomMask, Closed.NO, matches);
 				} else if (element.type == GeometryType.POLY) {
-					for (int i = 0, n = mRules.length; i < n; i++)
-						mRules[i].matchWay(element.tags,
-								(byte) zoomLevel, Closed.YES, matches);
+					for (Rule rule : mRules)
+						rule.matchWay(element.tags, zoomMask, Closed.YES, matches);
 				} else {
-					for (int i = 0, n = mRules.length; i < n; i++)
-						mRules[i].matchNode(element.tags,
-								(byte) zoomLevel, matches);
+					for (Rule rule : mRules)
+						rule.matchNode(element.tags, zoomMask, matches);
 				}
 
 				int size = matches.size();
-				if (size > 1){
-					for (int i = 0; i < size-1; i++){
+				if (size > 1) {
+					for (int i = 0; i < size - 1; i++) {
 						RenderInstruction r = matches.get(i);
-						for (int j = i + 1; j < size; j++){
-							if (matches.get(j) == r){
+						for (int j = i + 1; j < size; j++) {
+							if (matches.get(j) == r) {
 								Log.d(TAG, "fix duplicate instruction! "
 										+ Arrays.deepToString(element.tags)
-										+ ":"+ zoomLevel);
+										+ ":" + zoomLevel);
 								matches.remove(j--);
 								size--;
 							}
@@ -308,7 +305,6 @@ public class RenderTheme implements IRenderTheme {
 
 		return ri.list;
 	}
-
 
 	void complete(List<Rule> rulesList, int levels) {
 		mLevels = levels;
