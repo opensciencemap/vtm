@@ -46,14 +46,14 @@ public abstract class TileSource {
 
 		@Override
 		public boolean equals(Object other) {
-			if (!(other instanceof MapOptions))
+			if (!(other instanceof Options))
 				return false;
 
 			//if (this.db != ((MapOptions) other).db)
 			//	return false;
 
 			// FIXME test if this is correct!
-			if (!this.entrySet().equals(((MapOptions) other).entrySet()))
+			if (!this.entrySet().equals(((Options) other).entrySet()))
 				return false;
 
 			return true;
