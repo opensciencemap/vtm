@@ -229,7 +229,7 @@
 
       <!-- keep grass above forest:wood and leisure:park! -->
       <!-- http://wiki.openstreetmap.org/wiki/Proposed_features/conservation,
-           often serves as background for leisure=nature_reserve -->
+        often serves as background for leisure=nature_reserve -->
       <rule e="way" k="landuse" v="grass|meadow|conservation">
         <use-area name="greens" />
       </rule>
@@ -369,7 +369,7 @@
         </rule>
         <rule e="way" k="*" v="*" zoom-max="11">
           <rule e="way" k="width" v="1|2">
-            <use-line name="water" width="0.3" fixed="true" fade="2"/>
+            <use-line name="water" width="0.3" fixed="true" fade="2" />
           </rule>
           <rule e="way" k="width" v="3" zoom-min="3">
             <use-line name="water" width="0.3" fixed="true" fade="3" />
@@ -550,6 +550,7 @@
       <rule e="way" k="*" v="*" closed="yes">
         <area fill="#dbdbc9" />
       </rule>
+
       <rule e="way" k="*" v="*" closed="no">
         <line stroke="#dbdbc9" width="0.3" />
       </rule>
@@ -872,6 +873,7 @@
             </rule>
           </rule> <!-- end area=~|no|false -->
 
+          <!-- highway area -->
           <rule e="way" k="area" v="yes|true">
             <rule e="way" k="*" v="footway" zoom-min="15">
               <area fill="#fefefe" />
@@ -1004,6 +1006,8 @@
     <rule e="way" k="boundary" v="national_park">
       <area fill="#d7e6b0" />
     </rule>
+
+
     <!--<rule e="way" k="boundary" v="administrative"> -->
     <rule e="way" k="admin_level" v="*">
       <!-- <rule e="way" k="admin_level" v="11"> <line stroke="#f9574b" width="0.1"
@@ -1018,13 +1022,13 @@
         /> </rule> <rule e="way" k="admin_level" v="5"> <line stroke="#f9574b" width="0.15"
         fixed="true" cap="butt" /> </rule> -->
       <rule e="way" k="admin_level" v="4">
-        <line stroke="#ffffff" width="1.1" fixed="true" cap="butt"
-        stipple-width="1.05" stipple="4" stipple-stroke="#606060"/>
+        <line stroke="#ffffff" width="1.1" fixed="true" cap="butt" stipple-width="1.05"
+          stipple="4" stipple-stroke="#606060" />
 
-        </rule>
+      </rule>
       <rule e="way" k="admin_level" v="3">
-        <line stroke="#ffffff" width="1.1" fixed="true" cap="butt"
-            stipple-width="1.05" stipple="6" stipple-stroke="#606060"/>
+        <line stroke="#ffffff" width="1.1" fixed="true" cap="butt" stipple-width="1.05"
+          stipple="6" stipple-stroke="#606060" />
       </rule>
       <rule e="way" k="admin_level" v="2">
         <line stroke="#606060" width="1.2" fixed="true" cap="butt" />
@@ -1116,6 +1120,7 @@
         <caption k="name" font-size="19" fill="#000000" stroke="#ffffff"
           stroke-width="2.0" priority="2" />
       </rule>
+
       <rule e="node" k="*" v="city">
         <caption k="name" font-size="20" fill="#000000" stroke="#ffffff"
           stroke-width="2.0" priority="1" />
