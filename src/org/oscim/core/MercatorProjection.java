@@ -103,6 +103,14 @@ public final class MercatorProjection {
 		return reuse;
 	}
 
+	public static void project(GeoPoint p, double[] out, int pos) {
+
+		out[pos * 2] = ((p.longitudeE6 / 1E6) + 180.0) / 360.0;
+
+		double sinLatitude = Math.sin((p.latitudeE6 / 1E6) * (Math.PI / 180.0));
+		out[pos * 2 +1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude)) / (4.0 * Math.PI);
+	}
+
 	/**
 	 * @param latitude
 	 *            the latitude value which should be checked.
