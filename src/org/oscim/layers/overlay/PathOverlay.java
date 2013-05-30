@@ -22,7 +22,6 @@ import java.util.List;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
-import org.oscim.core.PointD;
 import org.oscim.core.Tile;
 import org.oscim.graphics.Paint.Cap;
 import org.oscim.layers.Layer;
@@ -46,13 +45,10 @@ public class PathOverlay extends Layer {
 
 	class RenderPath extends BasicRenderLayer {
 
-		private static final byte MAX_ZOOM = 20;
-		private final double MAX_SCALE;
-		private static final int MIN_DIST = 2;
+		private static final int MIN_DIST = 4;
 
-		// pre-projected points to zoomlovel 20
-		private int[] mPreprojected;
-		private final PointD mMapPoint;
+		// pre-projected points
+		private double[] mPreprojected;
 
 		// projected points
 		private float[] mPPoints;
@@ -66,12 +62,12 @@ public class PathOverlay extends Layer {
 			super(mapView);
 			mClipper = new LineClipper(-max, -max, max, max, true);
 			mPPoints = new float[1];
-			mMapPoint = new PointD();
-			MAX_SCALE = (1 << MAX_ZOOM) * Tile.SIZE;
+			layers.addLineLayer(0, mLineStyle);
 		}
-		private final int mCurX = -1;
-		private final int mCurY = -1;
-		private final int mCurZ = -1;
+
+		private int mCurX = -1;
+		private int mCurY = -1;
+		private int mCurZ = -1;
 
 		// note: this is called from GL-Thread. so check your syncs!
 		// TODO use an Overlay-Thread to build up layers (like for Labeling)
@@ -82,36 +78,35 @@ public class PathOverlay extends Layer {
 			int ty = (int) (pos.y * tz);
 
 			// update layers when map moved by at least one tile
-			boolean tilesChanged =  (tx != mCurX || ty != mCurY || tz != mCurZ);
+			boolean tilesChanged = (tx != mCurX || ty != mCurY || tz != mCurZ);
 
 			if (!tilesChanged && !mUpdatePoints)
 				return;
 
-			float[] projected = mPPoints;
+			mCurX = tx;
+			mCurY = ty;
+			mCurZ = tz;
+
 
 			if (mUpdatePoints) {
-				// pre-project point on zoomlelvel 20
 				synchronized (mPoints) {
 					mUpdatePoints = false;
 
 					ArrayList<GeoPoint> geopoints = mPoints;
 					int size = geopoints.size();
-					int[] points = mPreprojected;
+					double[] points = mPreprojected;
 					mSize = size * 2;
 
-					if (mSize > projected.length) {
-						points = mPreprojected = new int[mSize];
-						projected = mPPoints = new float[mSize];
+					if (mSize > points.length) {
+						points = mPreprojected = new double[mSize];
+						mPPoints = new float[mSize];
 					}
 
-					for (int i = 0, j = 0; i < size; i++, j += 2) {
-						GeoPoint p = geopoints.get(i);
-						MercatorProjection.project(p, mMapPoint);
-						points[j + 0] = (int) (mMapPoint.x * MAX_SCALE);
-						points[j + 1] = (int) (mMapPoint.y * MAX_SCALE);
-					}
+					for (int i = 0; i < size; i++)
+						MercatorProjection.project(geopoints.get(i), points, i);
 				}
 			}
+
 
 			int size = mSize;
 			if (size == 0) {
@@ -123,26 +118,24 @@ public class PathOverlay extends Layer {
 			}
 
 			LineLayer ll = layers.getLineLayer(0);
+			ll.clear();
+
 			ll.line = mLineStyle;
 			ll.width = ll.line.width;
 
-			// Hack: reset verticesCnt to reuse layer
-			ll.verticesCnt = 0;
-
 			int z = pos.zoomLevel;
-			float div = FastMath.pow(z - MAX_ZOOM);
 
-			int mx = (int) (pos.x * (Tile.SIZE << z));
-			int my = (int) (pos.y * (Tile.SIZE << z));
+			double mx = pos.x;
+			double my = pos.y;
+			double scale = Tile.SIZE * (1 << z);
 
-			int j = 0;
 
 			// flip around dateline. complicated stuff..
 			int flip = 0;
 			int flipMax = Tile.SIZE << (z - 1);
 
-			int x = (int)(mPreprojected[j++] * div) - mx;
-			int y = (int)(mPreprojected[j++] * div) - my;
+			int x = (int) ((mPreprojected[0] - mx) * scale);
+			int y = (int) ((mPreprojected[1] - my) * scale);
 
 			if (x > flipMax) {
 				x -= (flipMax * 2);
@@ -154,14 +147,15 @@ public class PathOverlay extends Layer {
 
 			mClipper.clipStart(x, y);
 
+			float[] projected = mPPoints;
 			int i = addPoint(projected, 0, x, y);
 
 			int prevX = x;
 			int prevY = y;
 
-			for (; j < size; j += 2) {
-				x = (int)(mPreprojected[j + 0] * div) - mx;
-				y = (int)(mPreprojected[j + 1] * div) - my;
+			for (int j = 2; j < size; j += 2) {
+				x = (int) ((mPreprojected[j + 0] - mx) * scale);
+				y = (int) ((mPreprojected[j + 1] - my) * scale);
 
 				int curFlip = 0;
 				if (x > flipMax) {
