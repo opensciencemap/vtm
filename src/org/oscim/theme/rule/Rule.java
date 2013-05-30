@@ -249,35 +249,34 @@ public abstract class Rule {
 		mSubRules.clear();
 		mSubRules = null;
 
-		for (int i = 0, n = mSubRuleArray.length; i < n; i++)
-			mSubRuleArray[i].onComplete();
+		for (Rule subRule : mSubRuleArray)
+			subRule.onComplete();
 
 	}
 
 	public void onDestroy() {
-		for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
-			mRenderInstructionArray[i].destroy();
+		for (RenderInstruction ri : mRenderInstructionArray)
+			ri.destroy();
 
-		for (int i = 0, n = mSubRuleArray.length; i < n; i++)
-			mSubRuleArray[i].onDestroy();
+		for (Rule subRule : mSubRuleArray)
+			subRule.onDestroy();
 
 	}
 
 	public void scaleStrokeWidth(float scaleFactor) {
-		for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
-			mRenderInstructionArray[i].scaleStrokeWidth(scaleFactor);
+		for (RenderInstruction ri : mRenderInstructionArray)
+			ri.scaleStrokeWidth(scaleFactor);
 
-		for (int i = 0, n = mSubRuleArray.length; i < n; i++)
-			mSubRuleArray[i].scaleStrokeWidth(scaleFactor);
+		for (Rule subRule : mSubRuleArray)
+			subRule.scaleStrokeWidth(scaleFactor);
 
 	}
 
 	public void scaleTextSize(float scaleFactor) {
-		for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
-			mRenderInstructionArray[i].scaleTextSize(scaleFactor);
-
-		for (int i = 0, n = mSubRuleArray.length; i < n; i++)
-			mSubRuleArray[i].scaleTextSize(scaleFactor);
+		for (RenderInstruction ri : mRenderInstructionArray)
+			ri.scaleTextSize(scaleFactor);
+		for (Rule subRule : mSubRuleArray)
+			subRule.scaleTextSize(scaleFactor);
 
 	}
 }
