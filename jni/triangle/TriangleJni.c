@@ -181,8 +181,8 @@ jint Java_org_oscim_renderer_sublayers_ExtrusionLayer_triangulate(JNIEnv *env, j
          float ux = -vy / a;
          float uy = vx / a;
 
-         float centerx = cx + vx / 2 - ux;
-         float centery = cy + vy / 2 - uy;
+         float centerx = cx + vx / 2.0 - (ux * 0.1);
+         float centery = cy + vy / 2.0 - (uy * 0.1);
 
          *hole++ = centerx;
          *hole++ = centery;
@@ -253,6 +253,7 @@ jint Java_org_oscim_renderer_sublayers_ExtrusionLayer_triangulate(JNIEnv *env, j
    triangulate(&opt, &in, &out, (TriangleIO *) NULL);
 
    if (in.numberofpoints < out.numberofpoints) {
+      // TODO rerun with 'nonodewritten = 0'
       printf( "polygon input is bad! points in:%d out%d\n", in.numberofpoints, out.numberofpoints);
       out.numberoftriangles = 0;
    }
