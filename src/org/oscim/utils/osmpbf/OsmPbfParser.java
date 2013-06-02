@@ -15,7 +15,8 @@ import org.oscim.utils.osm.OSMNode;
 import org.oscim.utils.osm.OSMRelation;
 import org.oscim.utils.osm.OSMWay;
 
-import org.oscim.backend.Log;
+import android.util.Log;
+
 
 /**
  * Class that reads and parses binary files and sends the contained entities to
