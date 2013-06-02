@@ -12,28 +12,28 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.core.osm;
+package org.oscim.utils.osm;
 
-import java.util.ArrayList;
-import java.util.List;
+public class OSMMember {
+	public enum MemberType{
+		NODE,
+		WAY,
+		RELATIOM
+	}
+	static final boolean useDebugLabels = true;
 
-import org.oscim.core.TagSet;
+	public final String role;
+	public final OSMElement member;
 
-public class OSMRelation extends OSMElement {
-
-	public final List<OSMMember> relationMembers;
-
-	// content added after constructor call
-
-	public OSMRelation(TagSet tags, long id, int initialMemberSize) {
-		super(tags, id);
-		this.relationMembers =
-				new ArrayList<OSMMember>(initialMemberSize);
+	public OSMMember(String role, OSMElement member) {
+		assert role != null && member != null;
+		this.role = role;
+		this.member = member;
 	}
 
 	@Override
 	public String toString() {
-		return "r" + id;
+		return role + ":" + member;
 	}
 
 }
