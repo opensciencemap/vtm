@@ -15,7 +15,7 @@ import org.oscim.utils.osm.OSMNode;
 import org.oscim.utils.osm.OSMRelation;
 import org.oscim.utils.osm.OSMWay;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 
 /**
