@@ -33,13 +33,13 @@ import java.util.zip.InflaterInputStream;
 
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
-import org.oscim.core.osm.Bound;
-import org.oscim.core.osm.OSMData;
-import org.oscim.core.osm.OSMElement;
-import org.oscim.core.osm.OSMMember;
-import org.oscim.core.osm.OSMNode;
-import org.oscim.core.osm.OSMRelation;
-import org.oscim.core.osm.OSMWay;
+import org.oscim.utils.osm.Bound;
+import org.oscim.utils.osm.OSMData;
+import org.oscim.utils.osm.OSMElement;
+import org.oscim.utils.osm.OSMMember;
+import org.oscim.utils.osm.OSMNode;
+import org.oscim.utils.osm.OSMRelation;
+import org.oscim.utils.osm.OSMWay;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;

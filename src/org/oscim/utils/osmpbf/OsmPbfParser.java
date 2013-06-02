@@ -9,13 +9,13 @@ import org.openstreetmap.osmosis.osmbinary.BinaryParser;
 import org.openstreetmap.osmosis.osmbinary.Osmformat;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
-import org.oscim.core.osm.OSMData;
-import org.oscim.core.osm.OSMMember;
-import org.oscim.core.osm.OSMNode;
-import org.oscim.core.osm.OSMRelation;
-import org.oscim.core.osm.OSMWay;
+import org.oscim.utils.osm.OSMData;
+import org.oscim.utils.osm.OSMMember;
+import org.oscim.utils.osm.OSMNode;
+import org.oscim.utils.osm.OSMRelation;
+import org.oscim.utils.osm.OSMWay;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 /**
  * Class that reads and parses binary files and sends the contained entities to

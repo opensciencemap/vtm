@@ -12,25 +12,28 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.core.osm;
+package org.oscim.utils.osm;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.oscim.core.TagSet;
 
-public class OSMNode extends OSMElement {
-	//public static EMPTY_NODE = new OSMNode()
+public class OSMRelation extends OSMElement {
 
-	public final double lat;
-	public final double lon;
+	public final List<OSMMember> relationMembers;
 
-	public OSMNode(double lat, double lon, TagSet tags, long id) {
+	// content added after constructor call
+
+	public OSMRelation(TagSet tags, long id, int initialMemberSize) {
 		super(tags, id);
-		this.lat = lat;
-		this.lon = lon;
+		this.relationMembers =
+				new ArrayList<OSMMember>(initialMemberSize);
 	}
 
 	@Override
 	public String toString() {
-		return "n" + id;
+		return "r" + id;
 	}
 
 }

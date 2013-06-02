@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
-import org.oscim.core.osm.OSMData;
+import org.oscim.utils.osm.OSMData;
 
 public class OsmPbfReader {
 
