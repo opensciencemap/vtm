@@ -100,9 +100,9 @@ public class OSciMap2TileSource extends UrlTileSource {
 				throws IOException {
 
 			int byteCount = readUnsignedInt(is, buffer);
-			Log.d(TAG, tile + " contentLength:" + byteCount);
+			//Log.d(TAG, tile + " contentLength:" + byteCount);
 			if (byteCount < 0) {
-				Log.d(TAG, "invalid contentLength: " + byteCount);
+				Log.d(TAG, tile + " invalid content length: " + byteCount);
 				return false;
 			}
 
