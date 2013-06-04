@@ -23,8 +23,8 @@ import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
-import org.oscim.tilesource.common.PbfDecoder;
 import org.oscim.tilesource.ITileDataSink;
+import org.oscim.tilesource.common.PbfDecoder;
 
 import android.util.Log;
 
@@ -87,7 +87,7 @@ public class TileDecoder extends PbfDecoder {
 			throws IOException {
 
 		int byteCount = readUnsignedInt(is, buffer);
-		Log.d(TAG, tile + " contentLength:" + byteCount);
+		//Log.d(TAG, tile + " contentLength:" + byteCount);
 		if (byteCount < 0) {
 			Log.d(TAG, "invalid contentLength: " + byteCount);
 			return false;
