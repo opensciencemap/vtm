@@ -253,13 +253,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		boolean changed = false;
 
-		// get current MapPosition, set mBoxCoords (mapping of screen to model
-		// coordinates)
 		MapPosition pos = mMapPosition;
 
 		synchronized (mMapViewPosition) {
+			// update MapPosition
 			mMapViewPosition.updateAnimation();
 
+			// get current MapPosition
 			changed = mMapViewPosition.getMapPosition(pos);
 
 			if (changed)
