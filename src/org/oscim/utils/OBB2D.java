@@ -34,15 +34,18 @@ public class OBB2D {
 	// Returns true if other overlaps one dimension of this.
 	private boolean overlaps1Way(OBB2D other) {
 		for (int a = 0; a < 2; a++) {
+			float ax = axis[a * 2];
+			float ay = axis[a * 2 + 1];
 
-			double t = Vec2.dot(other.corner, 0, axis, a);
+			// dot product
+			float t = ax * other.corner[0] + ay * other.corner[1];
 
 			// Find the extent of box 2 on axis a
-			double tMin = t;
-			double tMax = t;
+			float tMin = t;
+			float tMax = t;
 
-			for (int c = 1; c < 4; c++) {
-				t = Vec2.dot(other.corner, c, axis, a);
+			for (int c = 2; c < 8; c += 2) {
+				t = ax * other.corner[c] + ay * other.corner[c + 1];
 
 				if (t < tMin) {
 					tMin = t;
@@ -52,7 +55,6 @@ public class OBB2D {
 			}
 
 			// We have to subtract off the origin
-
 			// See if [tMin, tMax] intersects [0, 1]
 			if ((tMin > 1 + origin[a]) || (tMax < origin[a])) {
 				// There was no intersection along this dimension;
@@ -105,7 +107,7 @@ public class OBB2D {
 		computeAxes();
 	}
 
-	public OBB2D(){
+	public OBB2D() {
 
 	}
 
@@ -160,7 +162,7 @@ public class OBB2D {
 		computeAxes();
 	}
 
-	public void set(float cx, float cy, float dx, float dy, float width, float height){
+	public void set(float cx, float cy, float dx, float dy, float width, float height) {
 		float vx = cx - dx;
 		float vy = cy - dy;
 
@@ -191,6 +193,7 @@ public class OBB2D {
 
 		computeAxes();
 	}
+
 	public OBB2D(float cx, float cy, float dx, float dy, float width, float height) {
 
 		float vx = cx - dx;
