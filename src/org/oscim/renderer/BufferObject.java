@@ -26,11 +26,8 @@ public final class BufferObject {
 	private static final int MB = 1024 * 1024;
 	private static final int LIMIT_BUFFERS = 16 * MB;
 
-
-	// -------------------------------------------------------------
-	// GL id
+	// GL identifier
 	public int id;
-
 	// allocated bytes
 	public int size;
 
@@ -42,10 +39,10 @@ public final class BufferObject {
 
 	int bufferType;
 
-	public void loadBufferData(ShortBuffer buf, int newSize, int type){
+	public void loadBufferData(ShortBuffer buf, int newSize, int type) {
 		boolean clear = false;
 
-		if (type != bufferType){
+		if (type != bufferType) {
 			if (bufferType != 0)
 				clear = true;
 			bufferType = type;
@@ -55,7 +52,7 @@ public final class BufferObject {
 
 		// reuse memory allocated for vbo when possible and allocated
 		// memory is less then four times the new data
-		if (!clear && (size > newSize) && (size < newSize * 4)){
+		if (!clear && (size > newSize) && (size < newSize * 4)) {
 			GLES20.glBufferSubData(type, 0, newSize, buf);
 		} else {
 			mBufferMemoryUsage += newSize - size;
@@ -66,11 +63,11 @@ public final class BufferObject {
 		}
 	}
 
-	public void bindArrayBuffer(){
+	public void bindArrayBuffer() {
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, id);
 	}
 
-	public void bindIndexBuffer(){
+	public void bindIndexBuffer() {
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, id);
 	}
 
@@ -83,9 +80,11 @@ public final class BufferObject {
 		if (mBufferMemoryUsage < LIMIT_BUFFERS)
 			return;
 
-		Log.d(TAG, "buffer object usage: " + mBufferMemoryUsage / MB + "MB");
+		Log.d(TAG, "buffer object usage: "
+				+ mBufferMemoryUsage / MB
+				+ "MB, force: " + force);
 
-		mBufferMemoryUsage -= BufferObject.limitUsage(1024*1024);
+		mBufferMemoryUsage -= BufferObject.limitUsage(1024 * 1024);
 
 		Log.d(TAG, "now: " + mBufferMemoryUsage / MB + "MB");
 	}
@@ -187,6 +186,7 @@ public final class BufferObject {
 	}
 
 	static synchronized void init(int num) {
+		mBufferMemoryUsage = 0;
 		pool = null;
 		createBuffers(num);
 		counter = num;
