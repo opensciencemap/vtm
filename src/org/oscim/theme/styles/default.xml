@@ -368,7 +368,7 @@
           <use-line name="water" width="0.3" />
         </rule>
         <rule e="way" k="*" v="*" zoom-max="11">
-          <rule e="way" k="width" v="1|2">
+          <rule e="way" k="width" v="0|1|2">
             <use-line name="water" width="0.3" fixed="true" fade="2" />
           </rule>
           <rule e="way" k="width" v="3" zoom-min="3">
