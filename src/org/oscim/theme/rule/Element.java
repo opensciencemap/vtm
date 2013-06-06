@@ -15,8 +15,10 @@
  */
 package org.oscim.theme.rule;
 
-final class Element {
+public final class Element {
 	public static final int NODE = 1 << 0;
-	public static final int WAY = 1 << 1;
+	public static final int LINE = 1 << 1;
+	public static final int POLY = 1 << 2;
+	public static final int WAY = LINE | POLY;
 	public static final int ANY = NODE | WAY;
 }

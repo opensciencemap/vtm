@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,20 +20,14 @@ import org.oscim.core.Tag;
 class NegativeRule extends Rule {
 	final AttributeMatcher mAttributeMatcher;
 
-	NegativeRule(int element, int closed, int zoom,
-			AttributeMatcher attributeMatcher) {
-		super(element, closed, zoom);
+	NegativeRule(int element, int zoom, AttributeMatcher attributeMatcher) {
+		super(element, zoom);
 
 		mAttributeMatcher = attributeMatcher;
 	}
 
 	@Override
-	boolean matchesNode(Tag[] tags) {
-		return mAttributeMatcher.matches(tags);
-	}
-
-	@Override
-	boolean matchesWay(Tag[] tags) {
+	boolean matchesTags(Tag[] tags) {
 		return mAttributeMatcher.matches(tags);
 	}
 }

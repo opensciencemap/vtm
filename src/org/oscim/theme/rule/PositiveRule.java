@@ -20,9 +20,8 @@ class PositiveRule extends Rule {
 	final AttributeMatcher mKeyMatcher;
 	final AttributeMatcher mValueMatcher;
 
-	PositiveRule(int element, int closed, int zoom,
-			AttributeMatcher keyMatcher, AttributeMatcher valueMatcher) {
-		super(element, closed, zoom);
+	PositiveRule(int element, int zoom, AttributeMatcher keyMatcher, AttributeMatcher valueMatcher) {
+		super(element, zoom);
 
 		if (keyMatcher instanceof AnyMatcher)
 			mKeyMatcher = null;
@@ -36,14 +35,8 @@ class PositiveRule extends Rule {
 	}
 
 	@Override
-	boolean matchesNode(Tag[] tags) {
+	boolean matchesTags(Tag[] tags) {
 		return (mKeyMatcher == null || mKeyMatcher.matches(tags))
 				&& (mValueMatcher == null || mValueMatcher.matches(tags));
-	}
-
-	@Override
-	boolean matchesWay(Tag[] tags) {
-		return (mKeyMatcher == null || mKeyMatcher.matches(tags)) &&
-				(mValueMatcher == null || mValueMatcher.matches(tags));
 	}
 }

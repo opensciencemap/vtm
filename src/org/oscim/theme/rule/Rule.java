@@ -37,40 +37,57 @@ public abstract class Rule {
 	private static final String STRING_WILDCARD = "*";
 
 	private static Rule createRule(Stack<Rule> ruleStack, int element, String keys,
-			String values, int closed,
-			byte zoomMin, byte zoomMax) {
-
-		List<String> keyList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN
-				.split(keys)));
-		List<String> valueList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN
-				.split(values)));
+			String values, byte zoomMin, byte zoomMax) {
 
 		int zoom = 0;
 		for (int z = zoomMin; z <= zoomMax && z < 32; z++)
 			zoom |= (1 << z);
 
-		if (valueList.remove(STRING_NEGATION)) {
-			AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList,
-					false);
-			return new NegativeRule(element, closed, zoom,
-					attributeMatcher);
+		List<String> keyList = null, valueList = null;
+		boolean negativeRule = false;
+		boolean exclusionRule = false;
+
+		AttributeMatcher keyMatcher, valueMatcher = null;
+
+		if (values == null) {
+			valueMatcher = AnyMatcher.getInstance();
+		} else {
+			valueList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN.split(values)));
+			if (valueList.remove(STRING_NEGATION))
+				negativeRule = true;
+			else if (valueList.remove(STRING_EXCLUSIVE))
+				exclusionRule = true;
+			else {
+				valueMatcher = getValueMatcher(valueList);
+				valueMatcher = RuleOptimizer.optimize(valueMatcher, ruleStack);
+			}
 		}
 
+		if (keys == null) {
+			if (negativeRule || exclusionRule) {
+				throw new IllegalArgumentException("negative rule requires key");
+			}
+			keyMatcher = AnyMatcher.getInstance();
+		} else {
+			keyList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN.split(keys)));
+			keyMatcher = getKeyMatcher(keyList);
 
+			if ((keyMatcher instanceof AnyMatcher) && (negativeRule || exclusionRule)) {
+				throw new IllegalArgumentException("negative rule requires key");
+			}
 
-		if (valueList.remove(STRING_EXCLUSIVE)) {
-			AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList,
-					true);
-			return new NegativeRule(element, closed, zoom, attributeMatcher);
+			if (negativeRule) {
+				AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList, false);
+				return new NegativeRule(element, zoom, attributeMatcher);
+			} else if (exclusionRule) {
+				AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList, true);
+				return new NegativeRule(element, zoom, attributeMatcher);
+			}
+
+			keyMatcher = RuleOptimizer.optimize(keyMatcher, ruleStack);
 		}
-		AttributeMatcher keyMatcher = getKeyMatcher(keyList);
-		AttributeMatcher valueMatcher = getValueMatcher(valueList);
 
-		keyMatcher = RuleOptimizer.optimize(keyMatcher, ruleStack);
-		valueMatcher = RuleOptimizer.optimize(valueMatcher, ruleStack);
-
-		return new PositiveRule(element, closed, zoom,
-				keyMatcher, valueMatcher);
+		return new PositiveRule(element, zoom, keyMatcher, valueMatcher);
 	}
 
 	private static AttributeMatcher getKeyMatcher(List<String> keyList) {
@@ -107,15 +124,8 @@ public abstract class Rule {
 		return attributeMatcher;
 	}
 
-	private static void validate(String elementName, String keys, String values,
-			byte zoomMin, byte zoomMax) {
-		if (keys == null) {
-			throw new IllegalArgumentException("missing attribute k for element: "
-					+ elementName);
-		} else if (values == null) {
-			throw new IllegalArgumentException("missing attribute v for element: "
-					+ elementName);
-		} else if (zoomMin < 0) {
+	private static void validate(byte zoomMin, byte zoomMax) {
+		if (zoomMin < 0) {
 			throw new IllegalArgumentException("zoom-min must not be negative: "
 					+ zoomMin);
 		} else if (zoomMax < 0) {
@@ -129,9 +139,9 @@ public abstract class Rule {
 
 	public static Rule create(String elementName, Attributes attributes, Stack<Rule> ruleStack) {
 		int element = Element.ANY;
+		int closed = Closed.ANY;
 		String keys = null;
 		String values = null;
-		int closed = Closed.ANY;
 		byte zoomMin = 0;
 		byte zoomMax = Byte.MAX_VALUE;
 
@@ -164,8 +174,13 @@ public abstract class Rule {
 			}
 		}
 
-		validate(elementName, keys, values, zoomMin, zoomMax);
-		return createRule(ruleStack, element, keys, values, closed, zoomMin, zoomMax);
+		if (closed == Closed.YES)
+			element = Element.POLY;
+		else if (closed == Closed.NO)
+			element = Element.LINE;
+
+		validate(zoomMin, zoomMax);
+		return createRule(ruleStack, element, keys, values, zoomMin, zoomMax);
 	}
 
 	private ArrayList<RenderInstruction> mRenderInstructions;
@@ -176,12 +191,10 @@ public abstract class Rule {
 
 	final int mZoom;
 	final int mElement;
-	final int mClosed;
 
-	Rule(int element, int closed, int zoom) {
+	Rule(int type, int zoom) {
 
-		mClosed = closed;
-		mElement = element;
+		mElement = type;
 		mZoom = zoom;
 
 		mRenderInstructions = new ArrayList<RenderInstruction>(4);
@@ -196,32 +209,12 @@ public abstract class Rule {
 		mSubRules.add(rule);
 	}
 
-	abstract boolean matchesNode(Tag[] tags);
+	abstract boolean matchesTags(Tag[] tags);
 
-	abstract boolean matchesWay(Tag[] tags);
-
-	public void matchNode(Tag[] tags, int zoomLevel,
+	public void matchElement(int type, Tag[] tags, int zoomLevel,
 			List<RenderInstruction> matchingList) {
-		if (((mElement & Element.NODE) != 0)
-				&& ((mZoom & zoomLevel) != 0)
-				&& matchesNode(tags)) {
 
-			for (int i = 0, n = mRenderInstructionArray.length; i < n; i++)
-				matchingList.add(mRenderInstructionArray[i]);
-
-			for (int i = 0, n = mSubRuleArray.length; i < n; i++)
-				mSubRuleArray[i].matchNode(tags, zoomLevel, matchingList);
-
-		}
-	}
-
-	public void matchWay(Tag[] tags, int zoomLevel,
-			int closed, List<RenderInstruction> matchingList) {
-
-		if (((mElement & Element.WAY) != 0)
-				&& ((mZoom & zoomLevel) != 0)
-				&& ((mClosed & closed) != 0)
-				&& (matchesWay(tags))) {
+		if (((mElement & type) != 0) && ((mZoom & zoomLevel) != 0) && (matchesTags(tags))) {
 
 			// add instructions for this rule
 			for (RenderInstruction ri : mRenderInstructionArray)
@@ -229,7 +222,7 @@ public abstract class Rule {
 
 			// check subrules
 			for (Rule subRule : mSubRuleArray)
-				subRule.matchWay(tags, zoomLevel, closed, matchingList);
+				subRule.matchElement(type, tags, zoomLevel, matchingList);
 
 		}
 	}
