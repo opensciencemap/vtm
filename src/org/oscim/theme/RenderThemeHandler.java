@@ -117,11 +117,12 @@ public class RenderThemeHandler extends DefaultHandler {
 	private Rule mCurrentRule;
 
 	private final Stack<Element> mElementStack = new Stack<Element>();
-	private int mLevel;
-	private RenderTheme mRenderTheme;
 	private final Stack<Rule> mRuleStack = new Stack<Rule>();
 	private final HashMap<String, RenderInstruction> tmpStyleHash =
 			new HashMap<String, RenderInstruction>(10);
+
+	private int mLevel;
+	private RenderTheme mRenderTheme;
 
 	@Override
 	public void endDocument() {
@@ -130,8 +131,11 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 
 		mRenderTheme.complete(mRulesList, mLevel);
+
 		mRulesList.clear();
 		tmpStyleHash.clear();
+		mRuleStack.clear();
+		mElementStack.clear();
 	}
 
 	@Override
@@ -152,7 +156,6 @@ public class RenderThemeHandler extends DefaultHandler {
 	public void error(SAXParseException exception) {
 		Log.d(TAG, exception.getMessage());
 	}
-
 
 	@Override
 	public void startElement(String uri, String localName, String qName,

@@ -18,10 +18,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.theme.renderinstruction.RenderInstruction;
-import org.oscim.theme.rule.Closed;
+import org.oscim.theme.rule.Element;
 import org.oscim.theme.rule.Rule;
 import org.oscim.utils.LRUCache;
 import org.xml.sax.Attributes;
@@ -91,6 +90,7 @@ public class RenderTheme implements IRenderTheme {
 	private Rule[] mRules;
 
 	class ElementCache {
+		final int matchType;
 		final LRUCache<MatchingCacheKey, RenderInstructionItem> cache;
 		final MatchingCacheKey cacheKey;
 
@@ -99,10 +99,11 @@ public class RenderTheme implements IRenderTheme {
 
 		RenderInstructionItem prevItem;
 
-		public ElementCache() {
+		public ElementCache(int type) {
 			cache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(MATCHING_CACHE_SIZE);
 			instructionList = new ArrayList<RenderInstruction>(4);
 			cacheKey = new MatchingCacheKey();
+			matchType = type;
 		}
 	}
 
@@ -121,9 +122,9 @@ public class RenderTheme implements IRenderTheme {
 		mBaseTextSize = baseTextSize;
 
 		mElementCache = new ElementCache[3];
-		for (int i = 0; i < 3; i++)
-			mElementCache[i] = new ElementCache();
-
+		mElementCache[0] = new ElementCache(Element.NODE);
+		mElementCache[1] = new ElementCache(Element.LINE);
+		mElementCache[2] = new ElementCache(Element.POLY);
 	}
 
 	/*
@@ -214,16 +215,8 @@ public class RenderTheme implements IRenderTheme {
 				List<RenderInstruction> matches = cache.instructionList;
 				matches.clear();
 
-				if (element.type == GeometryType.LINE) {
-					for (Rule rule : mRules)
-						rule.matchWay(element.tags, zoomMask, Closed.NO, matches);
-				} else if (element.type == GeometryType.POLY) {
-					for (Rule rule : mRules)
-						rule.matchWay(element.tags, zoomMask, Closed.YES, matches);
-				} else {
-					for (Rule rule : mRules)
-						rule.matchNode(element.tags, zoomMask, matches);
-				}
+				for (Rule rule : mRules)
+					rule.matchElement(cache.matchType, element.tags, zoomMask, matches);
 
 				int size = matches.size();
 				if (size > 1) {

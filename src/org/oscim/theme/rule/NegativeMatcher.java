@@ -21,6 +21,14 @@ import org.oscim.core.Tag;
 class NegativeMatcher implements AttributeMatcher {
 	private final String[] mKeyList;
 	private final String[] mValueList;
+
+	// - exclusive negation matches when either KEY is not present
+	//   or KEY is present and any VALUE is NOT present
+	//
+	// - non-exclusive negation matches when either KEY is not present
+	//   or KEY is present and any VALUE is present
+	//
+	// - TODO 'MUST NOT contain key'
 	private final boolean mExclusive;
 
 	NegativeMatcher(List<String> keyList, List<String> valueList, boolean exclusive) {
@@ -42,25 +50,23 @@ class NegativeMatcher implements AttributeMatcher {
 
 	@Override
 	public boolean matches(Tag[] tags) {
-		if (keyListDoesNotContainKeys(tags)) {
+		if (keyListDoesNotContainKeys(tags))
 			return true;
-		}
 
-		for (Tag tag : tags) {
+		for (Tag tag : tags)
 			for (String value : mValueList)
 				if (value == tag.value)
 					return !mExclusive;
-		}
+
 		return mExclusive;
 	}
 
 	private boolean keyListDoesNotContainKeys(Tag[] tags) {
-		for (Tag tag : tags) {
+		for (Tag tag : tags)
 			for (String key : mKeyList)
 				if (key == tag.key)
 					return false;
 
-		}
 		return true;
 	}
 }
