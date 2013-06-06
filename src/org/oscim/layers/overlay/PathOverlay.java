@@ -48,11 +48,10 @@ public class PathOverlay extends Layer {
 		private static final int MIN_DIST = 4;
 
 		// pre-projected points
-		private double[] mPreprojected;
+		private double[] mPreprojected = new double[2];
 
 		// projected points
 		private float[] mPPoints;
-		private int mSize;
 		private final LineClipper mClipper;
 
 		// limit coords
@@ -87,19 +86,18 @@ public class PathOverlay extends Layer {
 			mCurY = ty;
 			mCurZ = tz;
 
+			int size = mPoints.size();
 
 			if (mUpdatePoints) {
 				synchronized (mPoints) {
 					mUpdatePoints = false;
 
 					ArrayList<GeoPoint> geopoints = mPoints;
-					int size = geopoints.size();
 					double[] points = mPreprojected;
-					mSize = size * 2;
 
-					if (mSize > points.length) {
-						points = mPreprojected = new double[mSize];
-						mPPoints = new float[mSize];
+					if (size * 2 > points.length) {
+						points = mPreprojected = new double[size*2];
+						mPPoints = new float[size*2];
 					}
 
 					for (int i = 0; i < size; i++)
@@ -108,7 +106,6 @@ public class PathOverlay extends Layer {
 			}
 
 
-			int size = mSize;
 			if (size == 0) {
 				if (layers.baseLayers != null) {
 					layers.clear();
@@ -153,7 +150,7 @@ public class PathOverlay extends Layer {
 			int prevX = x;
 			int prevY = y;
 
-			for (int j = 2; j < size; j += 2) {
+			for (int j = 2; j < size * 2; j += 2) {
 				x = (int) ((mPreprojected[j + 0] - mx) * scale);
 				y = (int) ((mPreprojected[j + 1] - my) * scale);
 
