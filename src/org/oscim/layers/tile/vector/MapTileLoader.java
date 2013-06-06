@@ -285,14 +285,12 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 				else if (key == Tag.KEY_HEIGHT) {
 					try {
 						mElement.height = Integer.parseInt(tags[i].value);
-						Log.d(TAG, "height: " + mElement.height);
 					} catch (Exception e) {
 					}
 				}
 				else if (key == Tag.KEY_MIN_HEIGHT) {
 					try {
 						mElement.minHeight = Integer.parseInt(tags[i].value);
-						Log.d(TAG, "minHeight: " + mElement.minHeight);
 					} catch (Exception e) {
 					}
 				}
