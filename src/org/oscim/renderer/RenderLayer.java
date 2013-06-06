@@ -40,8 +40,8 @@ public abstract class RenderLayer {
 		mMapPosition = new MapPosition();
 	}
 
-	/** /////////////// called in GLRender Thread /////////////////////// **/
 	/**
+	 * ////////////////////// GLRender Thread ///////////////////////////
 	 * 1. Called first by GLRenderer:
 	 * Update the layer state here. Set 'this.newData = true' when
 	 * 'compile()' should be called before next call to 'render()'

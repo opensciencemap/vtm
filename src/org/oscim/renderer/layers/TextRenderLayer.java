@@ -54,17 +54,18 @@ import org.oscim.view.MapViewPosition;
 
 import android.opengl.GLES20;
 import android.os.AsyncTask;
-import android.os.SystemClock;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 
 public class TextRenderLayer extends BasicRenderLayer {
 	private final static String TAG = TextRenderLayer.class.getName();
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
 
+	private final static long MAX_RELABEL_DELAY = 200;
+
 	private final MapViewPosition mMapViewPosition;
 	private final TileSet mTileSet;
-	//private final LabelThread mThread;
 
 	private MapPosition mTmpPos;
 
@@ -128,13 +129,6 @@ public class TextRenderLayer extends BasicRenderLayer {
 		public int active;
 		public OBB2D bbox;
 
-		public TextItem move(TextItem ti, float dx, float dy) {
-			this.x = dx + ti.x;
-			this.y = dy + ti.y;
-			return this;
-
-		}
-
 		public TextItem move(TextItem ti, float dx, float dy, float scale) {
 			this.x = (dx + ti.x) * scale;
 			this.y = (dy + ti.y) * scale;
@@ -162,51 +156,9 @@ public class TextRenderLayer extends BasicRenderLayer {
 	//		Label labels;
 	//	}
 
-	/* package */boolean mRun;
-
-	class LabelTask extends AsyncTask<Void, Void, Integer> {
-
-		@Override
-		protected Integer doInBackground(Void... params) {
-			SystemClock.sleep(100);
-			if (!isCancelled() && updateLabels())
-				return null;
-
-			return Integer.valueOf(1);
-		}
-
-		@Override
-		protected void onPostExecute(Integer result) {
-			if (result == null)
-				mMapView.render();
-
-			if (mRun) {
-				mRun = false;
-				mLabelTask = new LabelTask();
-				mLabelTask.execute((Void) null);
-			} else{
-				mLabelTask = null;
-			}
-		}
-
-		@Override
-		protected void onCancelled() {
-			cleanup();
-		}
-	}
-
-	void cleanup() {
-		mPool.releaseAll(mPrevLabels);
-		mPrevLabels = null;
-		mTileSet.clear();
-		mLabelTask = null;
-		mRun = false;
-	}
-
 	private float mSquareRadius;
 	private int mRelabelCnt;
 	private final TileRenderLayer mTileLayer;
-	/* private */AsyncTask<Void, Void, Integer> mLabelTask;
 
 	public TextRenderLayer(MapView mapView, TileRenderLayer baseLayer) {
 		super(mapView);
@@ -361,7 +313,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 		boolean changedTiles = mTileLayer.getVisibleTiles(mTileSet);
 		boolean changedPos;
 
-		if (mTileSet.cnt == 0){
+		if (mTileSet.cnt == 0) {
 			//Log.d(TAG, "no tiles "+ mTileSet.getSerial());
 			return false;
 		}
@@ -373,7 +325,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 			//mMapViewPosition.getMapViewProjection(coords);
 		}
 
-		if (!changedTiles && !changedPos){
+		if (!changedTiles && !changedPos) {
 			//Log.d(TAG, "not changed " + changedTiles + " " + changedPos);
 			return false;
 		}
@@ -713,19 +665,70 @@ public class TextRenderLayer extends BasicRenderLayer {
 		}
 
 		if (!mHolding)
-			runLabelTask();
+			postLabelTask((mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis());
 	}
 
-	private void runLabelTask() {
-		if (mRun)
-			return;
+	/* private */LabelTask mLabelTask;
+	/* private */long mLastRun;
 
-		if (mLabelTask == null) {
-			mLabelTask = new LabelTask();
-			mLabelTask.execute((Void) null);
-		} else {
-			mRun = true;
+	class LabelTask extends AsyncTask<Void, Void, Integer> {
+
+		@Override
+		protected Integer doInBackground(Void... unused) {
+			boolean labelsChanged = false;
+
+			if (!isCancelled())
+				labelsChanged = updateLabels();
+
+			if (!isCancelled() && labelsChanged)
+				mMapView.render();
+
+			//Log.d(TAG, "relabel " + labelsChanged);
+
+			mLastRun = System.currentTimeMillis();
+			mLabelTask = null;
+			return null;
 		}
+
+		@Override
+		protected void onCancelled() {
+			cleanup();
+		}
+	}
+
+	/*private */void cleanup() {
+		mPool.releaseAll(mPrevLabels);
+		mPrevLabels = null;
+		mTileSet.clear();
+		mLabelTask = null;
+	}
+
+	private final Runnable mLabelUpdate = new Runnable() {
+		@Override
+		public void run() {
+
+			if (mLabelTask == null) {
+				mLabelTask = new LabelTask();
+				mLabelTask.execute();
+			} else {
+				postLabelTask(50);
+				//Log.d(TAG, "repost");
+			}
+		}
+	};
+	private Handler mLabelHandler;
+
+	/* private */void postLabelTask(long delay) {
+		if (mLabelHandler == null) {
+			mLabelHandler = new Handler(Looper.getMainLooper());
+		}
+
+		mLabelHandler.removeCallbacks(mLabelUpdate);
+
+		if (delay > 0)
+			mLabelHandler.postDelayed(mLabelUpdate, delay);
+		else
+			mLabelHandler.post(mLabelUpdate);
 	}
 
 	@Override
@@ -766,13 +769,14 @@ public class TextRenderLayer extends BasicRenderLayer {
 		//			runLabelTask();
 	}
 
-	public void clearLabels() {
-		Log.d(TAG, "clearLabels");
-		if (mLabelTask != null) {
-			// FIXME not sure, true?
-			mLabelTask.cancel(false);
-		} else {
+	public synchronized void clearLabels() {
+		if (mLabelHandler != null)
+			mLabelHandler.removeCallbacks(mLabelUpdate);
+
+		if (mLabelTask == null) {
 			cleanup();
+		} else {
+			mLabelTask.cancel(false);
 		}
 	}
 }

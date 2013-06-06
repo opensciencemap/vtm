@@ -15,8 +15,6 @@
  */
 package org.oscim.view;
 
-import java.lang.ref.WeakReference;
-
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
@@ -28,11 +26,7 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.Matrix4;
 
 import android.opengl.Matrix;
-import android.os.Handler;
-import android.os.Message;
-import android.os.SystemClock;
 import android.util.Log;
-import android.view.animation.AccelerateDecelerateInterpolator;
 
 public class MapViewPosition {
 	private static final String TAG = MapViewPosition.class.getName();
@@ -90,8 +84,6 @@ public class MapViewPosition {
 	// scale map plane at VIEW_DISTANCE to near plane
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
-	private final AnimationHandler mHandler;
-
 	MapViewPosition(MapView mapView) {
 		mMapView = mapView;
 
@@ -103,8 +95,6 @@ public class MapViewPosition {
 		mTilt = 0;
 
 		updatePosition();
-
-		mHandler = new AnimationHandler(this);
 	}
 
 	private void updatePosition() {
@@ -433,10 +423,9 @@ public class MapViewPosition {
 	 */
 	public synchronized void moveMap(float mx, float my) {
 		// stop animation
-		mHandler.cancel();
+		animCancel();
 
 		PointD p = applyRotation(mx, my);
-
 		move(p.x, p.y);
 	}
 
@@ -499,7 +488,7 @@ public class MapViewPosition {
 	 */
 	public synchronized boolean scaleMap(float scale, float pivotX, float pivotY) {
 		// stop animation
-		mHandler.cancel();
+		animCancel();
 
 		// just sanitize input
 		scale = FastMath.clamp(scale, 0.5f, 2);
@@ -595,7 +584,7 @@ public class MapViewPosition {
 	}
 
 	/************************************************************************/
-	// TODO move to MapAnimator:
+	// TODO move to MapAnimator
 
 	private double mScrollX;
 	private double mScrollY;
@@ -611,10 +600,11 @@ public class MapViewPosition {
 	private float mDuration = 500;
 	private final static double LOG4 = Math.log(4);
 
+	private long mAnimEnd = -1;
+
 	private boolean mAnimMove;
 	private boolean mAnimFling;
 	private boolean mAnimScale;
-	private final AccelerateDecelerateInterpolator mDecInterpolator = new AccelerateDecelerateInterpolator();
 
 	public synchronized void animateTo(BoundingBox bbox) {
 
@@ -656,9 +646,7 @@ public class MapViewPosition {
 		mAnimMove = true;
 		mAnimScale = true;
 		mAnimFling = false;
-		mDuration = 500;
-
-		mHandler.start((int) mDuration);
+		animStart(500);
 	}
 
 	public synchronized void animateTo(GeoPoint geoPoint) {
@@ -676,23 +664,31 @@ public class MapViewPosition {
 		mAnimMove = true;
 		mAnimScale = false;
 		mAnimFling = false;
+		animStart(300);
+	}
 
-		mDuration = 300;
-		mHandler.start(mDuration);
+	private void animStart(float duration) {
+		mDuration = duration;
+
+		mAnimEnd = System.currentTimeMillis() + (long) duration;
+		mMapView.render();
+	}
+
+	private void animCancel() {
+		mAnimEnd = -1;
 	}
 
 	synchronized boolean fling(float adv) {
 
-		//float delta = (mDuration - millisLeft) / mDuration;
 		adv = (float) Math.sqrt(adv);
-		//adv = Interpolation.pow2Out.apply(adv);
+
 		float dx = mVelocityX * adv;
 		float dy = mVelocityY * adv;
 
 		if (dx != 0 || dy != 0) {
-			moveMap((float) (dx - mScrollX), (float) (dy - mScrollY));
+			PointD p = applyRotation((float) (dx - mScrollX), (float) (dy - mScrollY));
+			move(p.x, p.y);
 
-			mMapView.redrawMap(true);
 			mScrollX = dx;
 			mScrollY = dy;
 		}
@@ -705,55 +701,66 @@ public class MapViewPosition {
 	public synchronized void animateFling(int velocityX, int velocityY,
 			int minX, int maxX, int minY, int maxY) {
 
-		if (velocityX * velocityX + velocityY * velocityY < 3600)
+		if (velocityX * velocityX + velocityY * velocityY < 4096)
 			return;
 
 		mScrollX = 0;
 		mScrollY = 0;
 
-		mDuration = 500;
+		float duration = 500;
 
-		mVelocityX = velocityX * (mDuration / 1000);
-		mVelocityY = velocityY * (mDuration / 1000);
+		// pi times thumb..
+		float flingFactor = (duration / 2500);
+		mVelocityX = velocityX * flingFactor;
+		mVelocityY = velocityY * flingFactor;
 		FastMath.clamp(mVelocityX, minX, maxX);
 		FastMath.clamp(mVelocityY, minY, maxY);
 
-		// mScroller.fling(0, 0, velocityX, velocityY, minX, maxX, minY, maxY);
 		mAnimFling = true;
 		mAnimMove = false;
 		mAnimScale = false;
-
-		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-
-		mHandler.start(mDuration);
+		animStart(duration);
 	}
 
 	public synchronized void animateZoom(float scale) {
 		mStartScale = mAbsScale;
 		mEndScale = mAbsScale * scale - mAbsScale;
-
-		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-
-		mDuration = 300;
-		mHandler.start(mDuration);
+		animStart(300);
 	}
 
+	/**
+	 * called by GLRenderer at begin of each frame.
+	 */
 	public void updateAnimation() {
-		//scroll();
-	}
+		if (mAnimEnd < 0)
+			return;
 
-	void onTick(long millisLeft) {
+		long millisLeft = mAnimEnd - System.currentTimeMillis();
+
+		if (millisLeft <= 0) {
+			// set final position
+			if (mAnimMove) {
+				moveAbs(mStartX + mEndX, mStartY + mEndY);
+			}
+
+			if (mAnimScale) {
+				mAbsScale = mStartScale + mEndScale;
+			}
+
+			updatePosition();
+			mMapView.redrawMap(true);
+
+			mAnimEnd = -1;
+
+			return;
+		}
+
 		boolean changed = false;
 
 		float adv = (1.0f - millisLeft / mDuration);
-		adv = mDecInterpolator.getInterpolation(adv);
 
 		if (mAnimScale) {
 			if (mEndScale > 0)
-				//	double s = (1 + adv * adv * mEndScale);
-				//	mAbsScale = mStartScale * s;
-				//	Log.d(TAG, "scale: " + s + " " + mAbsScale + " " + mStartScale);
-				//}
 				mAbsScale = mStartScale + (mEndScale * (Math.pow(2, adv) - 1));
 			else
 				mAbsScale = mStartScale + (mEndScale * adv);
@@ -778,96 +785,13 @@ public class MapViewPosition {
 		if (mAnimFling && fling(adv))
 			changed = true;
 
-		if (changed)
+		// continue animation
+		if (changed) {
+			// inform other layers that position has changed
 			mMapView.redrawMap(true);
-	}
-
-	void onFinish() {
-
-		if (mAnimMove) {
-			moveAbs(mStartX + mEndX, mStartY + mEndY);
-		}
-
-		if (mAnimScale) {
-			mAbsScale = mStartScale + mEndScale;
-		}
-
-		updatePosition();
-
-		//mMapView.mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
-		mMapView.redrawMap(true);
-	}
-
-	/**
-	 * below is borrowed from CountDownTimer class:
-	 * Copyright (C) 2008 The Android Open Source Project
-	 */
-	static class AnimationHandler extends Handler {
-		private final WeakReference<MapViewPosition> mMapViewPosition;
-		private static final int MSG = 1;
-
-		long mMillisInFuture;
-
-		long mInterval = 16;
-
-		long mStopTimeInFuture;
-
-		AnimationHandler(MapViewPosition mapAnimator) {
-			mMapViewPosition = new WeakReference<MapViewPosition>(mapAnimator);
-		}
-
-		public synchronized final void start(float millis) {
-			mMillisInFuture = (int) millis;
-			MapViewPosition animator = mMapViewPosition.get();
-			if (animator == null)
-				return;
-
-			if (mMillisInFuture <= 0) {
-				animator.onFinish();
-				return;
-			}
-
-			mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture;
-			removeMessages(MSG);
-			sendMessage(obtainMessage(MSG));
-		}
-
-		public final void cancel() {
-			removeMessages(MSG);
-		}
-
-		@Override
-		public void handleMessage(Message msg) {
-			MapViewPosition animator = mMapViewPosition.get();
-			if (animator == null)
-				return;
-
-			final long millisLeft = mStopTimeInFuture
-					- SystemClock.elapsedRealtime();
-
-			if (millisLeft <= 0) {
-				animator.onFinish();
-			} else if (millisLeft < mInterval) {
-				// no tick, just delay until done
-				sendMessageDelayed(obtainMessage(MSG), millisLeft);
-			} else {
-				long lastTickStart = SystemClock.elapsedRealtime();
-				animator.onTick(millisLeft);
-
-				// take into account user's onTick taking time to
-				// execute
-				long delay = lastTickStart + mInterval
-						- SystemClock.elapsedRealtime();
-
-				// special case: user's onTick took more than interval
-				// to
-				// complete, skip to next interval
-				while (delay < 0)
-					delay += mInterval;
-
-				sendMessageDelayed(obtainMessage(MSG), delay);
-			}
+		} else {
+			// just render next frame
+			mMapView.render();
 		}
 	}
 }
