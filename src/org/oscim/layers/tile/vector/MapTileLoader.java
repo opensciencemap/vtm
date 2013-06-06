@@ -59,7 +59,7 @@ import android.util.Log;
  *       5. RenderTheme calls IRenderCallback functions with style information
  *       6. Styled items become added to MapTile.layers... roughly
  */
-public class MapTileLoader extends TileLoader implements IRenderCallback, ITileDataSink  {
+public class MapTileLoader extends TileLoader implements IRenderCallback, ITileDataSink {
 
 	private static final String TAG = MapTileLoader.class.getName();
 
@@ -69,15 +69,15 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
 
-//	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
-//	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
+	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
+	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
 
 	// replacement for variable value tags that should not be matched by RenderTheme
 	// FIXME make this general, maybe subclass tags
 	private static final Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
 	private static final Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
 
-//	private final MapElement mDebugWay, mDebugPoint;
+	//	private final MapElement mDebugWay, mDebugPoint;
 
 	private static DebugSettings debug;
 
@@ -123,24 +123,25 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
 
-//		MapElement m = mDebugWay = new MapElement();
-//		m.startLine();
-//		int s = Tile.SIZE;
-//		m.addPoint(0, 0);
-//		m.addPoint(0, s);
-//		m.addPoint(s, s);
-//		m.addPoint(s, 0);
-//		m.addPoint(0, 0);
-//		m.tags = new Tag[] { new Tag("debug", "box") };
-//		m.type = GeometryType.LINE;
-//
-//		m = mDebugPoint = new MapElement();
-//		m.startPoints();
-//		m.addPoint(s >> 1, 10);
-//		m.type = GeometryType.POINT;
+		//		MapElement m = mDebugWay = new MapElement();
+		//		m.startLine();
+		//		int s = Tile.SIZE;
+		//		m.addPoint(0, 0);
+		//		m.addPoint(0, s);
+		//		m.addPoint(s, s);
+		//		m.addPoint(s, 0);
+		//		m.addPoint(0, 0);
+		//		m.tags = new Tag[] { new Tag("debug", "box") };
+		//		m.type = GeometryType.LINE;
+		//
+		//		m = mDebugPoint = new MapElement();
+		//		m.startPoints();
+		//		m.addPoint(s >> 1, 10);
+		//		m.type = GeometryType.POINT;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.oscim.layers.tile.TileLoader#cleanup()
 	 */
 	@Override
@@ -148,8 +149,11 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		mTileDataSource.destroy();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.oscim.layers.tile.TileLoader#executeJob(org.oscim.layers.tile.MapTile)
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * org.oscim.layers.tile.TileLoader#executeJob(org.oscim.layers.tile.MapTile
+	 * )
 	 */
 	@Override
 	public boolean executeJob(MapTile mapTile) {
@@ -195,20 +199,20 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 			return false;
 		}
 
-//		if (debug.drawTileFrames) {
-//			// draw tile coordinate
-//			mTagName = new Tag("name", mTile.toString(), false);
-//			mElement = mDebugPoint;
-//			RenderInstruction[] ri;
-//			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
-//			renderNode(ri);
-//
-//			// draw tile box
-//			mElement = mDebugWay;
-//			mDrawingLayer = 100 * renderLevels;
-//			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
-//			renderWay(ri);
-//		}
+		//		if (debug.drawTileFrames) {
+		//			// draw tile coordinate
+		//			mTagName = new Tag("name", mTile.toString(), false);
+		//			mElement = mDebugPoint;
+		//			RenderInstruction[] ri;
+		//			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
+		//			renderNode(ri);
+		//
+		//			// draw tile box
+		//			mElement = mDebugWay;
+		//			mDrawingLayer = 100 * renderLevels;
+		//			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
+		//			renderWay(ri);
+		//		}
 
 		mTile = null;
 		return true;
@@ -272,11 +276,26 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 					mTagHouseNr = tags[i];
 					tags[i] = mTagEmptyHouseNr;
 				}
-			} else if (mTile.zoomLevel >= 17 &&
-					// FIXME, allow overlays to intercept
-					// this, or use a theme option for this
-					key == Tag.TAG_KEY_BUILDING) {
-				mRenderBuildingModel = true;
+			} else if (mTile.zoomLevel > 16) {
+				// FIXME, allow overlays to intercept
+				// this, or use a theme option for this
+				if (key == Tag.TAG_KEY_BUILDING)
+					mRenderBuildingModel = true;
+
+				else if (key == Tag.KEY_HEIGHT) {
+					try {
+						mElement.height = Integer.parseInt(tags[i].value);
+						Log.d(TAG, "height: " + mElement.height);
+					} catch (Exception e) {
+					}
+				}
+				else if (key == Tag.KEY_MIN_HEIGHT) {
+					try {
+						mElement.minHeight = Integer.parseInt(tags[i].value);
+						Log.d(TAG, "minHeight: " + mElement.minHeight);
+					} catch (Exception e) {
+					}
+				}
 			}
 		}
 		return true;
@@ -293,13 +312,11 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 			filterTags(element.tags);
 
 			// get render instructions
-			//RenderInstruction[] ri = renderTheme.matchNode(element.tags, mTile.zoomLevel);
 			RenderInstruction[] ri = renderTheme.matchElement(element, mTile.zoomLevel);
 
 			if (ri != null)
 				renderNode(ri);
-		}
-		else {
+		} else {
 
 			// replace tags that should not be cached in Rendertheme (e.g. name)
 			if (!filterTags(element.tags))
@@ -308,10 +325,6 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 			boolean closed = element.type == GeometryType.POLY;
 
 			mDrawingLayer = getValidLayer(element.layer) * renderLevels;
-
-			// get render instructions
-//			RenderInstruction[] ri = renderTheme.matchWay(element.tags,
-//					(byte) (mTile.zoomLevel + 0), closed);
 
 			RenderInstruction[] ri = renderTheme.matchElement(element, mTile.zoomLevel);
 
@@ -329,15 +342,14 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 	private void debugUnmatched(boolean closed, Tag[] tags) {
 		Log.d(TAG, "DBG way not matched: " + closed + " "
 				+ Arrays.deepToString(tags));
-		mElement = null;
-//		mTagName = new Tag("name", tags[0].key + ":"
-//				+ tags[0].value, false);
-//
-//		RenderInstruction[] ri;
-//		ri = renderTheme.matchWay(closed ? debugTagArea : debugTagWay,
-//				(byte) 0, true);
-//
-//		renderWay(ri);
+
+		mTagName = new Tag("name", tags[0].key + ":"
+				+ tags[0].value, false);
+
+		mElement.tags = closed ? debugTagArea : debugTagWay;
+		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
+
+		renderWay(ri);
 	}
 
 	private void renderWay(RenderInstruction[] ri) {
