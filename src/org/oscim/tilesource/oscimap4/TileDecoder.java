@@ -316,17 +316,6 @@ public class TileDecoder extends PbfDecoder {
 					mElem.layer = decodeVarint32();
 					break;
 
-				//					case TAG_ELEM_HEIGHT:
-				//						mElem.height = decodeVarint32();
-				//						break;
-				//
-				//					case TAG_ELEM_MIN_HEIGHT:
-				//						mElem.minHeight = decodeVarint32();
-				//						break;
-				//
-				//					case TAG_ELEM_PRIORITY:
-				//						mElem.priority = decodeVarint32();
-				//						break;
 
 				default:
 					Log.d(TAG, mTile + " invalid type for way: " + tag);
