@@ -93,7 +93,7 @@ public final class Line extends RenderInstruction {
 				width = Float.parseFloat(value);
 			} else if ("cap".equals(name)) {
 				cap = Cap.valueOf(value.toUpperCase(Locale.ENGLISH));
-			} else if ("fixed".equals(name)) {
+			} else if ("fix".equals(name)) {
 				fixed = Boolean.parseBoolean(value);
 			} else if ("stipple".equals(name)) {
 				stipple = Integer.parseInt(value);
