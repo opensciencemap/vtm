@@ -57,7 +57,6 @@ public class TileManager {
 	private final MapView mMapView;
 	private final MapViewPosition mMapViewPosition;
 
-	private boolean mInitialized;
 
 	// cache for all tiles
 	private MapTile[] mTiles;
@@ -132,11 +131,9 @@ public class TileManager {
 		mTilesForUpload = 0;
 
 		mUpdateSerial = 0;
-		mInitialized = false;
 	}
 
 	public void destroy() {
-		mInitialized = false;
 		// there might be some leaks in here
 		// ... free static pools
 	}
@@ -148,13 +145,13 @@ public class TileManager {
 
 	}
 
-	public void init(int width, int height) {
+	public void init(boolean first) {
 
 		// sync with GLRender thread
 		// ... and labeling thread?
 		GLRenderer.drawlock.lock();
 
-		if (mInitialized) {
+		if (!first) {
 			// pass VBOs and VertexItems back to pools
 			for (int i = 0; i < mTilesSize; i++)
 				clearTile(mTiles[i]);
@@ -173,15 +170,13 @@ public class TileManager {
 		mTilesCount = 0;
 
 		// set up TileSet large enough to hold current tiles
-		int num = Math.max(width, height);
+		int num = Math.max(mMapView.getWidth(), mMapView.getHeight());
 		int size = Tile.SIZE >> 1;
 		int numTiles = (num * num) / (size * size) * 4;
 
 		mNewTiles = new TileSet(numTiles);
 		mCurrentTiles = new TileSet(numTiles);
 		Log.d(TAG, "max tiles: " + numTiles);
-
-		mInitialized = true;
 
 		GLRenderer.drawlock.unlock();
 	}
@@ -612,7 +607,7 @@ public class TileManager {
 				MapTile tile = null;
 
 				if (cnt == maxTiles) {
-					Log.d(TAG, "reached maximum tiles " + maxTiles);
+					Log.wtf(TAG, "reached maximum tiles " + maxTiles);
 					break;
 				}
 				int xx = x;

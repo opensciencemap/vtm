@@ -30,6 +30,8 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 	protected final int mNumTileLoader = 4;
 	protected final ArrayList<T> mTileLoader;
 
+	protected boolean mInitial = true;
+
 	public TileLayer(MapView mapView) {
 		this(mapView, MAX_ZOOMLEVEL);
 	}
@@ -63,9 +65,10 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 	@Override
 	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
 
-		if (clear) {
+		if (clear || mInitial) {
 			mRenderLayer.clearTiles();
-			mTileManager.init(mMapView.getWidth(), mMapView.getHeight());
+			mTileManager.init(mInitial);
+			mInitial = false;
 			changed = true;
 		}
 		if (changed)
