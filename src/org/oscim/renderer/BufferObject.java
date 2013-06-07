@@ -15,7 +15,7 @@
 
 package org.oscim.renderer;
 
-import java.nio.ShortBuffer;
+import java.nio.Buffer;
 
 import android.opengl.GLES20;
 import android.util.Log;
@@ -39,7 +39,7 @@ public final class BufferObject {
 
 	int bufferType;
 
-	public void loadBufferData(ShortBuffer buf, int newSize, int type) {
+	public void loadBufferData(Buffer buf, int newSize, int type) {
 		boolean clear = false;
 
 		if (type != bufferType) {
