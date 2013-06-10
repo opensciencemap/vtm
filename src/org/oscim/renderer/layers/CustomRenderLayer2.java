@@ -22,6 +22,7 @@ import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.RenderLayer;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 
@@ -52,7 +53,7 @@ public class CustomRenderLayer2 extends RenderLayer {
 	}
 
 	int mZoom = -1;
-	float mCellScale = 100 * GLRenderer.COORD_SCALE;
+	float mCellScale = 60 * GLRenderer.COORD_SCALE;
 
 	@Override
 	public void update(MapPosition pos, boolean changed, Matrices matrices) {
@@ -67,15 +68,15 @@ public class CustomRenderLayer2 extends RenderLayer {
 
 			// fix current MapPosition
 
-			mMapPosition.setPosition(53.1, 8.8);
-			mMapPosition.setZoomLevel(14);
+			//mMapPosition.setPosition(53.1, 8.8);
+			//mMapPosition.setZoomLevel(14);
 
 		}
 
-//		if (mZoom != pos.zoomLevel){
-//			mMapPosition.copy(pos);
-//			mZoom = pos.zoomLevel;
-//		}
+		if (mZoom != pos.zoomLevel) {
+			mMapPosition.copy(pos);
+			mZoom = pos.zoomLevel;
+		}
 	}
 
 	@Override
@@ -83,16 +84,16 @@ public class CustomRenderLayer2 extends RenderLayer {
 
 		float[] vertices = new float[12];
 
-		for (int i = 0; i < 6; i++){
-			vertices[i*2+0] = (float)Math.cos(Math.PI * 2 * i / 6) * mCellScale;
-			vertices[i*2+1] = (float)Math.sin(Math.PI * 2 * i / 6) * mCellScale;
+		for (int i = 0; i < 6; i++) {
+			vertices[i * 2 + 0] = (float) Math.cos(Math.PI * 2 * i / 6) * mCellScale;
+			vertices[i * 2 + 1] = (float) Math.sin(Math.PI * 2 * i / 6) * mCellScale;
 		}
 		FloatBuffer buf = GLRenderer.getFloatBuffer(12);
 		buf.put(vertices);
 		buf.flip();
 
 		mVBO = BufferObject.get(0);
-		mVBO.loadBufferData(buf, 12*4, GLES20.GL_ARRAY_BUFFER);
+		mVBO.loadBufferData(buf, 12 * 4, GLES20.GL_ARRAY_BUFFER);
 		newData = false;
 
 		// tell GLRender to call 'render'
@@ -122,28 +123,49 @@ public class CustomRenderLayer2 extends RenderLayer {
 		setMatrix(pos, m);
 		m.mvp.setAsUniform(hMatrixPosition);
 
-		int offset_x = 4;
-		int offset_y = 12;
-		for (int x = -offset_x; x <= offset_x; x++){
-			for (int y = -offset_y; y <= offset_y; y++){
-				int xx = x * 2;
+		final int offset_x = 4;
+		final int offset_y = 16;
 
-				if (y % 2 == 0)
-					xx -= 1;
-
-				float yy = y * (float)Math.sqrt(3)/2;
+		float h = (float) (Math.sqrt(3) / 2);
+		for (int y = -offset_y; y < offset_y; y++) {
+			for (int x = -offset_x; x < offset_x; x++) {
+				float xx = x * 2 + (y % 2 == 0 ? 1 : 0);
+				float yy = y * h + h / 2;
 
 				GLES20.glUniform2f(hCenterPosition, xx * (mCellScale * 1.5f), yy * mCellScale);
 
-				float alpha =  (float)Math.sqrt(xx * xx + yy * yy)/10;
-				GlUtils.setColor(hColorPosition, Color.BLACK, alpha);
-				GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 6);
+				//float alpha = 1 + (float) Math.log10(FastMath.clamp(
+				//		(float) Math.sqrt(xx * xx + yy * yy) / offset_y, 0.0f, 1.0f)) * 2;
 
-				GlUtils.setColor(hColorPosition, Color.RED, alpha*2);
-				GLES20.glDrawArrays(GLES20.GL_LINE_LOOP, 0, 6);
+				float alpha	= (float) Math.sqrt(xx * xx + yy * yy) / offset_y;
+
+				float fy = (float) (y + offset_y) / (offset_y * 2);
+				float fx = (float) (x + offset_x) / (offset_x * 2);
+				float fz = FastMath.clamp(
+						(float) (x < 0 || y < 0 ? 1 - Math.sqrt(fx * fx + fy * fy) : 0), 0, 1);
+
+				int c = 0xff << 24
+						| (int) (0xff * fy) << 16
+						| (int) (0xff * fx) << 8
+						| (int) (0xff * fz);
+
+				GlUtils.setColor(hColorPosition, c, alpha);
+
+				GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 6);
 			}
 		}
 
+		GlUtils.setColor(hColorPosition, Color.DKGRAY, 0.3f);
+
+		for (int y = -offset_y; y < offset_y; y++) {
+			for (int x = -offset_x; x < offset_x; x++) {
+				float xx = x * 2 + (y % 2 == 0 ? 1 : 0);
+				float yy = y * h + h / 2;
+
+				GLES20.glUniform2f(hCenterPosition, xx * (mCellScale * 1.5f), yy * mCellScale);
+				GLES20.glDrawArrays(GLES20.GL_LINE_LOOP, 0, 6);
+			}
+		}
 
 		GlUtils.checkGlError("...");
 	}
