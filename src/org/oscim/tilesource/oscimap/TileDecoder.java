@@ -24,8 +24,8 @@ import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
-import org.oscim.tilesource.common.PbfDecoder;
 import org.oscim.tilesource.ITileDataSink;
+import org.oscim.tilesource.common.PbfDecoder;
 
 import android.util.Log;
 
@@ -68,7 +68,6 @@ public class TileDecoder extends PbfDecoder {
 	@Override
 	public boolean decode(Tile tile, ITileDataSink sink, InputStream is, int contentLength)
 			throws IOException {
-
 
 		setInputStream(is, contentLength);
 
@@ -164,7 +163,6 @@ public class TileDecoder extends PbfDecoder {
 		int tagCnt = 0;
 		int coordCnt = 0;
 		int layer = 5;
-		Tag[] tags = null;
 
 		boolean fail = false;
 
@@ -178,11 +176,11 @@ public class TileDecoder extends PbfDecoder {
 
 			switch (tag) {
 				case TAG_WAY_TAGS:
-					tags = decodeWayTags(tagCnt);
+					if (!decodeWayTags(tagCnt))
+						return false;
 					break;
 
 				case TAG_WAY_INDEX:
-					//index =
 					decodeWayIndices(indexCnt);
 					break;
 
@@ -223,9 +221,9 @@ public class TileDecoder extends PbfDecoder {
 			}
 		}
 
-		if (fail || tags == null || indexCnt == 0 || tagCnt == 0) {
+		if (fail || indexCnt == 0 || tagCnt == 0) {
 			Log.d(TAG, "failed reading way: bytes:" + bytes + " index:"
-					+ (tags != null ? tags.toString() : "...") + " "
+					//+ (tags != null ? tags.toString() : "...") + " "
 					+ indexCnt + " " + coordCnt + " " + tagCnt);
 			return false;
 		}
@@ -234,7 +232,7 @@ public class TileDecoder extends PbfDecoder {
 		//if (layer == 0)
 		//	layer = 5;
 		mElem.type = polygon ? GeometryType.POLY : GeometryType.LINE;
-		mElem.set(tags, layer);
+		mElem.setLayer(layer);
 		mSink.process(mElem);
 		return true;
 	}
@@ -246,7 +244,6 @@ public class TileDecoder extends PbfDecoder {
 		int tagCnt = 0;
 		int coordCnt = 0;
 		byte layer = 0;
-		Tag[] tags = null;
 
 		while (position() < end) {
 			// read tag and wire type
@@ -258,11 +255,12 @@ public class TileDecoder extends PbfDecoder {
 
 			switch (tag) {
 				case TAG_NODE_TAGS:
-					tags = decodeWayTags(tagCnt);
+					if (!decodeWayTags(tagCnt))
+						return false;
 					break;
 
 				case TAG_NODE_COORDS:
-					int cnt = decodeNodeCoordinates(coordCnt, layer, tags);
+					int cnt = decodeNodeCoordinates(coordCnt, layer);
 					if (cnt != coordCnt) {
 						Log.d(TAG, "X wrong number of coordintes");
 						return false;
@@ -289,7 +287,7 @@ public class TileDecoder extends PbfDecoder {
 		return true;
 	}
 
-	private int decodeNodeCoordinates(int numNodes, byte layer, Tag[] tags)
+	private int decodeNodeCoordinates(int numNodes, byte layer)
 			throws IOException {
 		int bytes = decodeVarint32();
 
@@ -312,48 +310,54 @@ public class TileDecoder extends PbfDecoder {
 
 		mElem.index[0] = (short) numNodes;
 		mElem.type = GeometryType.POINT;
-		mElem.set(tags, layer);
+		mElem.setLayer(layer);
 		mSink.process(mElem);
 
 		return cnt;
 	}
 
-	private Tag[] decodeWayTags(int tagCnt) throws IOException {
+	private boolean decodeWayTags(int tagCnt) throws IOException {
 		int bytes = decodeVarint32();
 
-		Tag[] tags = new Tag[tagCnt];
+		mElem.tags.clear();
 
 		int cnt = 0;
 		int end = position() + bytes;
 		int max = mCurTagCnt;
 
-		while (position() < end) {
+		for (; position() < end; cnt++) {
 			int tagNum = decodeVarint32();
 
 			if (tagNum < 0 || cnt == tagCnt) {
-				Log.d(TAG, "NULL TAG: " + mTile + " invalid tag:" + tagNum
+				Log.d(TAG, "NULL TAG: " + mTile
+						+ " invalid tag:" + tagNum
 						+ " " + tagCnt + "/" + cnt);
-			} else {
-				if (tagNum < Tags.MAX)
-					tags[cnt++] = Tags.tags[tagNum];
-				else {
-					tagNum -= Tags.LIMIT;
+				continue;
+			}
 
-					if (tagNum >= 0 && tagNum < max) {
-						// Log.d(TAG, "variable tag: " + curTags[tagNum]);
-						tags[cnt++] = curTags[tagNum];
-					} else {
-						Log.d(TAG, "NULL TAG: " + mTile + " could find tag:"
-								+ tagNum + " " + tagCnt + "/" + cnt);
-					}
-				}
+			if (tagNum < Tags.MAX) {
+				mElem.tags.add(Tags.tags[tagNum]);
+				continue;
+			}
+
+			tagNum -= Tags.LIMIT;
+
+			if (tagNum >= 0 && tagNum < max) {
+				mElem.tags.add(curTags[tagNum]);
+			} else {
+				Log.d(TAG, "NULL TAG: " + mTile
+						+ " could find tag:"
+						+ tagNum + " " + tagCnt
+						+ "/" + cnt);
 			}
 		}
 
-		if (tagCnt != cnt)
+		if (tagCnt != cnt) {
 			Log.d(TAG, "NULL TAG: " + mTile);
+			return false;
+		}
 
-		return tags;
+		return true;
 	}
 
 	private int decodeWayIndices(int indexCnt) throws IOException {
@@ -432,7 +436,7 @@ public class TileDecoder extends PbfDecoder {
 				even = false;
 			} else {
 				lastY = lastY + s;
-				coords[cnt++] = Tile.SIZE - lastY /  scale;
+				coords[cnt++] = Tile.SIZE - lastY / scale;
 				even = true;
 			}
 		}

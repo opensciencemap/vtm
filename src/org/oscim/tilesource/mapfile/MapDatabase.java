@@ -471,8 +471,7 @@ public class MapDatabase implements ITileDataSource {
 	 */
 	private boolean processPOIs(ITileDataSink mapDataSink, int numberOfPois) {
 		Tag[] poiTags = mTileSource.fileInfo.poiTags;
-		Tag[] tags = null;
-		Tag[] curTags;
+		int numTags = 0;
 
 		long x = mTile.tileX * Tile.SIZE;
 		long y = mTile.tileY * Tile.SIZE + Tile.SIZE;
@@ -510,13 +509,14 @@ public class MapDatabase implements ITileDataSource {
 			byte numberOfTags = (byte) (specialByte & POI_NUMBER_OF_TAGS_BITMASK);
 
 			if (numberOfTags != 0) {
-				tags = mReadBuffer.readTags(poiTags, numberOfTags);
+				if (!mReadBuffer.readTags(mElem.tags, poiTags, numberOfTags))
+					return false;
+
+				numTags = numberOfTags;
 			}
 
-			if (tags == null)
-				return false;
-
-			curTags = tags;
+			// reset to common tag position
+			mElem.tags.numTags = numTags;
 
 			// get the feature bitmask (1 byte)
 			byte featureByte = mReadBuffer.readByte();
@@ -525,10 +525,7 @@ public class MapDatabase implements ITileDataSource {
 			// check if the POI has a name
 			if ((featureByte & POI_FEATURE_NAME) != 0) {
 				String str = mReadBuffer.readUTF8EncodedString();
-
-				curTags = new Tag[tags.length + 1];
-				System.arraycopy(tags, 0, curTags, 0, tags.length);
-				curTags[tags.length] = new Tag(Tag.TAG_KEY_NAME, str, false);
+				mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, str, false));
 			}
 
 			// check if the POI has a house number
@@ -551,18 +548,12 @@ public class MapDatabase implements ITileDataSource {
 			latitude = (int) (Math.log((1.0 + sinLat) / (1.0 - sinLat)) * divy + dy);
 
 			mElem.clear();
-
 			mElem.startPoints();
 			mElem.addPoint(longitude, latitude);
 			mElem.type = GeometryType.POINT;
-			mElem.set(curTags, layer);
+			mElem.setLayer(layer);
+
 			mapDataSink.process(mElem);
-
-			//			mGeom.points[0] = longitude;
-			//			mGeom.points[1] = latitude;
-			//			mGeom.index[0] = 2;
-			//			mapDatabaseCallback.renderPOI(layer, curTags, mGeom);
-
 		}
 
 		return true;
@@ -715,9 +706,8 @@ public class MapDatabase implements ITileDataSource {
 			ITileDataSink mapDataSink,
 			int numberOfWays) {
 
-		Tag[] tags = null;
-		Tag[] curTags;
 		Tag[] wayTags = mTileSource.fileInfo.wayTags;
+		int numTags = 0;
 
 		int wayDataBlocks;
 
@@ -757,10 +747,10 @@ public class MapDatabase implements ITileDataSource {
 					mReadBuffer.setBufferPosition(mReadBuffer.lastTagPosition);
 
 					byte numberOfTags = (byte) (mReadBuffer.readByte() & WAY_NUMBER_OF_TAGS_BITMASK);
-
-					tags = mReadBuffer.readTags(wayTags, numberOfTags);
-					if (tags == null)
+					if (!mReadBuffer.readTags(mElem.tags, wayTags, numberOfTags))
 						return false;
+
+					numTags = numberOfTags;
 
 					mReadBuffer.setBufferPosition(pos);
 				}
@@ -787,13 +777,13 @@ public class MapDatabase implements ITileDataSource {
 			// bit 5-8 represent the number of tag IDs
 			byte numberOfTags = (byte) (specialByte & WAY_NUMBER_OF_TAGS_BITMASK);
 
-			if (numberOfTags != 0)
-				tags = mReadBuffer.readTags(wayTags, numberOfTags);
+			if (numberOfTags != 0){
 
-			if (tags == null)
-				return false;
+				if (!mReadBuffer.readTags(mElem.tags, wayTags, numberOfTags))
+					return false;
 
-			curTags = tags;
+				numTags = numberOfTags;
+			}
 
 			// get the feature bitmask (1 byte)
 			byte featureByte = mReadBuffer.readByte();
@@ -805,42 +795,36 @@ public class MapDatabase implements ITileDataSource {
 			boolean hasHouseNr = (featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0;
 			boolean hasRef = (featureByte & WAY_FEATURE_REF) != 0;
 
-			int add = (hasName ? 1 : 0) + (hasHouseNr ? 1 : 0) + (hasRef ? 1 : 0);
-			int addTag = tags.length;
-
-			if (add > 0) {
-				curTags = new Tag[tags.length + add];
-				System.arraycopy(tags, 0, curTags, 0, tags.length);
-			}
+			mElem.tags.numTags = numTags;
 
 			if (mTileSource.experimental) {
 				if (hasName) {
 					int textPos = mReadBuffer.readUnsignedInt();
 					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
-					curTags[addTag++] = new Tag(Tag.TAG_KEY_NAME, str, false);
+					mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, str, false));
 				}
 				if (hasHouseNr) {
 					int textPos = mReadBuffer.readUnsignedInt();
 					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
-					curTags[addTag++] = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, str, false);
+					mElem.tags.add(new Tag(Tag.TAG_KEY_HOUSE_NUMBER, str, false));
 				}
 				if (hasRef) {
 					int textPos = mReadBuffer.readUnsignedInt();
 					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
-					curTags[addTag++] = new Tag(Tag.TAG_KEY_REF, str, false);
+					mElem.tags.add(new Tag(Tag.TAG_KEY_REF, str, false));
 				}
 			} else {
 				if (hasName) {
 					String str = mReadBuffer.readUTF8EncodedString();
-					curTags[addTag++] = new Tag(Tag.TAG_KEY_NAME, str, false);
+					mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, str, false));
 				}
 				if (hasHouseNr) {
 					String str = mReadBuffer.readUTF8EncodedString();
-					curTags[addTag++] = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, str, false);
+					mElem.tags.add(new Tag(Tag.TAG_KEY_HOUSE_NUMBER, str, false));
 				}
 				if (hasRef) {
 					String str = mReadBuffer.readUTF8EncodedString();
-					curTags[addTag++] = new Tag(Tag.TAG_KEY_REF, str, false);
+					mElem.tags.add(new Tag(Tag.TAG_KEY_REF, str, false));
 				}
 			}
 			if ((featureByte & WAY_FEATURE_LABEL_POSITION) != 0)
@@ -870,10 +854,9 @@ public class MapDatabase implements ITileDataSource {
 						&& mElem.points[1] == mElem.points[l - 1];
 
 				projectToTile(mElem.points, mElem.index);
-				mElem.layer = layer;
 
 				mElem.type = closed ? GeometryType.POLY : GeometryType.LINE;
-				mElem.set(curTags, layer);
+				mElem.setLayer(layer);
 
 				mapDataSink.process(mElem);
 			}
@@ -893,16 +876,6 @@ public class MapDatabase implements ITileDataSource {
 
 		return labelPosition;
 	}
-
-	// private int readOptionalWayDataBlocksByte(boolean
-	// featureWayDataBlocksByte) {
-	// if (featureWayDataBlocksByte) {
-	// // get and check the number of way data blocks (VBE-U)
-	// return mReadBuffer.readUnsignedInt();
-	// }
-	// // only one way data block exists
-	// return 1;
-	// }
 
 	private int[][] readZoomTable(SubFileParameter subFileParameter) {
 		int rows = subFileParameter.zoomLevelMax - subFileParameter.zoomLevelMin + 1;

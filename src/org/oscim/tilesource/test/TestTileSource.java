@@ -94,7 +94,7 @@ public class TestTileSource implements ITileDataSource {
 		e.addPoint(x2, y2);
 		e.addPoint(x1, y2);
 
-		e.set(mTags, 0);
+		//// FIXME e.setLayer(mTags, 0);
 		mapDataSink.process(e);
 
 		if (renderWays) {
@@ -115,7 +115,7 @@ public class TestTileSource implements ITileDataSource {
 			e.addPoint(size / 2, size / 2);
 			e.addPoint(size / 2, size / 2 + size);
 
-			e.set(mTagsWay, 0);
+			////e.setLayer(mTagsWay, 0);
 			mapDataSink.process(e);
 
 			e.clear();
@@ -132,7 +132,7 @@ public class TestTileSource implements ITileDataSource {
 			e.addPoint(10, 0);
 			e.addPoint(10, size);
 
-			e.set(mTagsWay, 1);
+			//// --e.setLayer(mTagsWay, 1);
 			mapDataSink.process(e);
 		}
 
@@ -147,7 +147,7 @@ public class TestTileSource implements ITileDataSource {
 						r + (float) Math.sin(d) * (r - 40));
 			}
 
-			e.set(mTagsBoundary, 1);
+			//// e.setLayer(mTagsBoundary, 1);
 			mapDataSink.process(e);
 		}
 
@@ -157,7 +157,7 @@ public class TestTileSource implements ITileDataSource {
 			e.addPoint(size / 2, size / 2);
 
 			mTagsPlace[1] = new Tag("name", tile.toString());
-			e.set(mTagsPlace, 0);
+			//// e.setLayer(mTagsPlace, 0);
 			mapDataSink.process(e);
 		}
 		return QueryResult.SUCCESS;

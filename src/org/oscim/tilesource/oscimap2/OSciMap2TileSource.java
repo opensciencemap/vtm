@@ -22,6 +22,7 @@ import java.util.Arrays;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
+import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.tilesource.ITileDataSink;
 import org.oscim.tilesource.ITileDataSource;
@@ -67,32 +68,24 @@ public class OSciMap2TileSource extends UrlTileSource {
 		private static final int TAG_ELEM_MIN_HEIGHT = 32;
 		private static final int TAG_ELEM_PRIORITY = 41;
 
-		private short[] mSArray = new short[100];
-		private final Tag[] mTmpTags = new Tag[20];
-		private final Tag[][] mElementTags;
-		private final int MAX_TILE_TAGS = 100;
-		private Tag[] curTags = new Tag[MAX_TILE_TAGS];
-		private int mCurTagCnt;
+		private short[] mSArray;
+		private final TagSet mTileTags;
+		private final MapElement mElem;
+
+		private Tile mTile;
+
+		private ITileDataSink mMapDataSink;
 
 		// scale coordinates to tile size
 		private final static float REF_TILE_SIZE = 4096.0f;
 		private float mScale;
 
-		private Tile mTile;
-
-		private final MapElement mElem;
-
-		private ITileDataSink mMapDataSink;
-
 		TileDecoder() {
 			mElem = new MapElement();
+			mTileTags = new TagSet(20);
 
-			// reusable tag set
-			Tag[][] tags = new Tag[10][];
-			for (int i = 0; i < 10; i++)
-				tags[i] = new Tag[i + 1];
-			mElementTags = tags;
-
+			// temp array for decoding shorts
+			mSArray = new short[100];
 		}
 
 		@Override
@@ -113,7 +106,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 			mScale = REF_TILE_SIZE / Tile.SIZE;
 
-			mCurTagCnt = 0;
+			mTileTags.clear();
 
 			int val;
 			int numTags = 0;
@@ -125,8 +118,6 @@ public class OSciMap2TileSource extends UrlTileSource {
 				switch (tag) {
 					case TAG_TILE_NUM_TAGS:
 						numTags = decodeVarint32();
-						if (numTags > curTags.length)
-							curTags = new Tag[numTags];
 						break;
 
 					case TAG_TILE_TAG_KEYS:
@@ -139,7 +130,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 					case TAG_TILE_TAG_VALUES:
 						// this wastes one byte, as there is no packed string...
-						decodeTileTags(mCurTagCnt++);
+						decodeTileTags();
 						break;
 
 					case TAG_TILE_LINE:
@@ -156,8 +147,10 @@ public class OSciMap2TileSource extends UrlTileSource {
 			return true;
 		}
 
-		private boolean decodeTileTags(int curTag) throws IOException {
+		private boolean decodeTileTags() throws IOException {
 			String tagString = decodeString();
+
+			int curTag = mTileTags.numTags;
 
 			String key = Tags.keys[mSArray[curTag]];
 			Tag tag;
@@ -168,7 +161,8 @@ public class OSciMap2TileSource extends UrlTileSource {
 				tag = new Tag(key, tagString, true);
 			if (debug)
 				Log.d(TAG, mTile + " add tag: " + curTag + " " + tag);
-			curTags[curTag] = tag;
+
+			mTileTags.add(tag);
 
 			return true;
 		}
@@ -194,7 +188,6 @@ public class OSciMap2TileSource extends UrlTileSource {
 		private boolean decodeTileElement(int type) throws IOException {
 
 			int bytes = decodeVarint32();
-			Tag[] tags = null;
 			short[] index = null;
 
 			int end = position() + bytes;
@@ -223,7 +216,8 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 				switch (tag) {
 					case TAG_ELEM_TAGS:
-						tags = decodeElementTags();
+						if (!decodeElementTags())
+							return false;
 						break;
 
 					case TAG_ELEM_NUM_INDICES:
@@ -269,15 +263,14 @@ public class OSciMap2TileSource extends UrlTileSource {
 				}
 			}
 
-			if (fail || tags == null || indexCnt == 0) {
+			if (fail || indexCnt == 0) {
 				Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
 						+ (Arrays.toString(index)) + " tag:"
-						+ (tags != null ? Arrays.deepToString(tags) : "null") + " "
-						+ indexCnt + " " + coordCnt);
+						+ (mElem.tags.numTags > 0 ? Arrays.deepToString(mElem.tags.tags) : "null")
+						+ " " + indexCnt + " " + coordCnt);
 				return false;
 			}
 
-			mElem.tags = tags;
 			switch (type) {
 				case TAG_TILE_LINE:
 					mElem.type = GeometryType.LINE;
@@ -295,49 +288,46 @@ public class OSciMap2TileSource extends UrlTileSource {
 			return true;
 		}
 
-		private Tag[] decodeElementTags() throws IOException {
+		private boolean decodeElementTags() throws IOException {
 			int bytes = decodeVarint32();
 
-			Tag[] tmp = mTmpTags;
+			mElem.tags.clear();
 
 			int cnt = 0;
 			int end = position() + bytes;
-			int max = mCurTagCnt;
+			int max = mTileTags.numTags - 1;
 
-			while (position() < end) {
+			for (; position() < end; cnt++) {
 				int tagNum = decodeVarint32();
 
 				if (tagNum < 0) {
-					Log.d(TAG, "NULL TAG: " + mTile + " invalid tag:" + tagNum + " " + cnt);
-				} else if (tagNum < Tags.MAX) {
-					tmp[cnt++] = Tags.tags[tagNum];
-				} else {
-					tagNum -= Tags.LIMIT;
-
-					if (tagNum >= 0 && tagNum < max) {
-						// Log.d(TAG, "variable tag: " + curTags[tagNum]);
-						tmp[cnt++] = curTags[tagNum];
-					} else {
-						Log.d(TAG, "NULL TAG: " + mTile + " could not find tag:"
-								+ tagNum + " " + cnt);
-					}
+					Log.d(TAG, "NULL TAG: " + mTile
+							+ " invalid tag:"
+							+ tagNum + " " + cnt);
+					return false;
 				}
+
+				if (tagNum < Tags.MAX) {
+					mElem.tags.add(Tags.tags[tagNum]);
+					continue;
+				}
+				tagNum -= Tags.LIMIT;
+
+				if (tagNum < 0 || tagNum > max) {
+					Log.d(TAG, "NULL TAG: " + mTile
+							+ " could not find tag:"
+							+ tagNum + " " + cnt);
+					return false;
+				}
+
+				mElem.tags.add(mTileTags.tags[tagNum]);
 			}
 
 			if (cnt == 0) {
 				Log.d(TAG, "got no TAG!");
+				return false;
 			}
-			Tag[] tags;
-
-			if (cnt < 11)
-				tags = mElementTags[cnt - 1];
-			else
-				tags = new Tag[cnt];
-
-			for (int i = 0; i < cnt; i++)
-				tags[i] = tmp[i];
-
-			return tags;
+			return true;
 		}
 	}
 }

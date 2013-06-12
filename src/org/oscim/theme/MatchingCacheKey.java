@@ -15,6 +15,7 @@
 package org.oscim.theme;
 
 import org.oscim.core.Tag;
+import org.oscim.core.TagSet;
 
 class MatchingCacheKey {
 	int mHash;
@@ -24,34 +25,38 @@ class MatchingCacheKey {
 	}
 
 	MatchingCacheKey(MatchingCacheKey key) {
-		// need to clone tags as they belong to TileDataSource
-		mTags = key.mTags.clone();
+		mTags = key.mTags;
 		mHash = key.mHash;
 	}
 
 	// set temporary values for comparison
-	boolean set(Tag[] tags, MatchingCacheKey compare) {
-		int length = tags.length;
+	boolean set(TagSet tags, MatchingCacheKey compare) {
+		int numTags = tags.numTags;
 
-		if (compare != null && length == compare.mTags.length) {
+		if (compare != null && numTags == compare.mTags.length) {
 			int i = 0;
-			for (; i < length; i++) {
-				Tag t1 = tags[i];
+			for (; i < numTags; i++) {
+				Tag t1 = tags.tags[i];
 				Tag t2 = compare.mTags[i];
 
 				if (!(t1 == t2 || (t1.key == t2.key && t1.value == t2.value)))
 					break;
 			}
-			if (i == length)
+			if (i == numTags)
 				return true;
 		}
 
+		// need to clone tags as they belong to TileDataSource
+		mTags = new Tag[numTags];
+
 		int result = 7;
-		for (int i = 0; i < length; i++)
-			result = 31 * result + tags[i].hashCode();
+		for (int i = 0; i < numTags; i++){
+			Tag t = tags.tags[i];
+			result = 31 * result + t.hashCode();
+			mTags[i] = t;
+		}
 
 		mHash = 31 * result;
-		mTags = tags;
 
 		return false;
 	}

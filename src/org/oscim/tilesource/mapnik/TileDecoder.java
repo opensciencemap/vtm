@@ -22,10 +22,9 @@ import java.util.ArrayList;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
-import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
-import org.oscim.tilesource.common.PbfDecoder;
 import org.oscim.tilesource.ITileDataSink;
+import org.oscim.tilesource.common.PbfDecoder;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
 
@@ -201,8 +200,8 @@ public class TileDecoder extends PbfDecoder {
 			if (f.elem.type == GeometryType.NONE)
 				continue;
 
-			mTagSet.clear();
-			mTagSet.add(layerTag);
+			f.elem.tags.clear();
+			f.elem.tags.add(layerTag);
 
 			boolean hasName = false;
 			String fallbackName = null;
@@ -223,19 +222,19 @@ public class TileDecoder extends PbfDecoder {
 
 				if (keyIdx == matchedLocal) {
 					hasName = true;
-					mTagSet.add(new Tag(Tag.TAG_KEY_NAME, val, false));
+					f.elem.tags.add(new Tag(Tag.TAG_KEY_NAME, val, false));
 
 				} else {
 					key = keys.get(keyIdx);
-					mTagSet.add(new Tag(key, val));
+					f.elem.tags.add(new Tag(key, val));
 				}
 			}
 
 			if (!hasName && fallbackName != null)
-				mTagSet.add(new Tag(Tag.TAG_KEY_NAME, fallbackName, false));
+				f.elem.tags.add(new Tag(Tag.TAG_KEY_NAME, fallbackName, false));
 
 			// FIXME extract layer tag here
-			f.elem.set(mTagSet.asArray(), 5);
+			f.elem.setLayer(5);
 			mMapDataCallback.process(f.elem);
 			mFeaturePool.release(f);
 		}
@@ -243,7 +242,6 @@ public class TileDecoder extends PbfDecoder {
 		return true;
 	}
 
-	private final TagSet mTagSet = new TagSet();
 	private final Pool<Feature> mFeaturePool = new Pool<Feature>() {
 		int count;
 
@@ -260,7 +258,7 @@ public class TileDecoder extends PbfDecoder {
 				return false;
 			}
 
-			item.elem.tags = null;
+			item.elem.tags.clear();
 			item.elem.clear();
 			item.tags = null;
 			item.type = 0;
@@ -339,9 +337,7 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_FEATURE_TYPE:
 					type = decodeVarint32();
-
 					//Log.d(TAG, "got type " + type);
-
 					break;
 
 				case TAG_FEATURE_GEOMETRY:
