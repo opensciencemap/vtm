@@ -105,6 +105,9 @@ public class RenderTheme implements IRenderTheme {
 			cacheKey = new MatchingCacheKey();
 			matchType = type;
 		}
+		RenderInstructionItem getRenderInstructions(){
+			return cache.get(cacheKey);
+		}
 	}
 
 	class RenderInstructionItem {
@@ -200,7 +203,8 @@ public class RenderTheme implements IRenderTheme {
 			}
 
 			if (ri == null) {
-				ris = cache.cache.get(cache.cacheKey);
+				// get instruction for current cacheKey
+				ris = cache.getRenderInstructions();
 
 				for (ri = ris; ri != null; ri = ri.next)
 					if ((ri.zoom & zoomMask) != 0)
@@ -216,7 +220,7 @@ public class RenderTheme implements IRenderTheme {
 				matches.clear();
 
 				for (Rule rule : mRules)
-					rule.matchElement(cache.matchType, element.tags, zoomMask, matches);
+					rule.matchElement(cache.matchType, cache.cacheKey.mTags, zoomMask, matches);
 
 				int size = matches.size();
 				if (size > 1) {
@@ -225,7 +229,7 @@ public class RenderTheme implements IRenderTheme {
 						for (int j = i + 1; j < size; j++) {
 							if (matches.get(j) == r) {
 								Log.d(TAG, "fix duplicate instruction! "
-										+ Arrays.deepToString(element.tags)
+										+ Arrays.deepToString(cache.cacheKey.mTags)
 										+ ":" + zoomLevel);
 								matches.remove(j--);
 								size--;

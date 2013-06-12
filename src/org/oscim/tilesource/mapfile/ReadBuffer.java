@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
 
 import org.oscim.core.Tag;
+import org.oscim.core.TagSet;
 
 /**
  * Reads from a {@link RandomAccessFile} into a buffer and decodes the data.
@@ -400,8 +401,8 @@ public class ReadBuffer {
 		mBufferPosition += bytes;
 	}
 
-	Tag[] readTags(Tag[] wayTags, byte numberOfTags) {
-		Tag[] tags = new Tag[numberOfTags];
+	boolean readTags(TagSet tags, Tag[] wayTags, byte numberOfTags) {
+		tags.clear();
 
 		int maxTag = wayTags.length;
 
@@ -409,11 +410,11 @@ public class ReadBuffer {
 			int tagId = readUnsignedInt();
 			if (tagId < 0 || tagId >= maxTag) {
 				LOG.warning("invalid tag ID: " + tagId);
-				return null;
+				return true;
 			}
-			tags[i] = wayTags[tagId];
+			tags.add(wayTags[tagId]);
 		}
-		return tags;
+		return true;
 	}
 
 	private static final int WAY_NUMBER_OF_TAGS_BITMASK = 0x0f;

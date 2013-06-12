@@ -1,5 +1,5 @@
 /*
- * Copyright 2013
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -54,32 +54,23 @@ public class TileDecoder extends PbfDecoder {
 	private static final int TAG_ELEM_INDEX = 12;
 	private static final int TAG_ELEM_COORDS = 13;
 	private static final int TAG_ELEM_LAYER = 21;
-	//private static final int TAG_ELEM_HEIGHT = 31;
-	//private static final int TAG_ELEM_MIN_HEIGHT = 32;
-	//private static final int TAG_ELEM_PRIORITY = 41;
 
 	private short[] mSArray = new short[100];
 
 	private Tile mTile;
 
 	private final MapElement mElem;
-	private final Tag[][] mElementTags;
 
-	private final TagSet curTags = new TagSet(100);
+	private final TagSet mTileTags;
 	private ITileDataSink mMapDataSink;
+
 	// scale coordinates to tile size
 	private final static float REF_TILE_SIZE = 4096.0f;
 	private final float mScaleFactor = REF_TILE_SIZE / Tile.SIZE;
 
 	TileDecoder() {
 		mElem = new MapElement();
-
-		// reusable tag set
-		Tag[][] tags = new Tag[10][];
-		for (int i = 0; i < 10; i++)
-			tags[i] = new Tag[i + 1];
-		mElementTags = tags;
-
+		mTileTags = new TagSet(100);
 	}
 
 	@Override
@@ -98,7 +89,7 @@ public class TileDecoder extends PbfDecoder {
 		mTile = tile;
 		mMapDataSink = sink;
 
-		curTags.clear(true);
+		mTileTags.clear(true);
 		int version = -1;
 
 		int val;
@@ -218,12 +209,17 @@ public class TileDecoder extends PbfDecoder {
 
 			// FIXME filter out all variable tags
 			// might depend on theme though
-			if (key == Tag.TAG_KEY_NAME || key == Tag.KEY_HEIGHT || key == Tag.KEY_MIN_HEIGHT)
+			if (key == Tag.TAG_KEY_NAME
+				|| key == Tag.KEY_HEIGHT
+				|| key == Tag.KEY_MIN_HEIGHT
+				|| key == Tag.TAG_KEY_HOUSE_NUMBER
+				|| key == Tag.TAG_KEY_REF
+				|| key == Tag.TAG_KEY_ELE)
 				tag = new Tag(key, val, false);
 			else
 				tag = new Tag(key, val, true);
 
-			curTags.add(tag);
+			mTileTags.add(tag);
 		}
 
 		return true;
@@ -251,7 +247,6 @@ public class TileDecoder extends PbfDecoder {
 	private boolean decodeTileElement(int type) throws IOException {
 
 		int bytes = decodeVarint32();
-		Tag[] tags = null;
 		short[] index = null;
 
 		int end = position() + bytes;
@@ -282,7 +277,8 @@ public class TileDecoder extends PbfDecoder {
 
 			switch (tag) {
 				case TAG_ELEM_TAGS:
-					tags = decodeElementTags(numTags);
+					if (!decodeElementTags(numTags))
+						return false;
 					break;
 
 				case TAG_ELEM_NUM_INDICES:
@@ -322,15 +318,14 @@ public class TileDecoder extends PbfDecoder {
 			}
 		}
 
-		if (fail || tags == null || numIndices == 0) {
+		if (fail || numTags == 0 || numIndices == 0) {
 			Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
 					+ (Arrays.toString(index)) + " tag:"
-					+ (tags != null ? Arrays.deepToString(tags) : "null") + " "
-					+ numIndices + " " + coordCnt);
+					+ (mElem.tags.numTags > 0 ? Arrays.deepToString(mElem.tags.tags) : "null")
+					+ " " + numIndices + " " + coordCnt);
 			return false;
 		}
 
-		mElem.tags = tags;
 		switch (type) {
 			case TAG_TILE_LINE:
 				mElem.type = GeometryType.LINE;
@@ -348,33 +343,27 @@ public class TileDecoder extends PbfDecoder {
 		return true;
 	}
 
-	private Tag[] decodeElementTags(int numTags) throws IOException {
+	private boolean decodeElementTags(int numTags) throws IOException {
 		if (mSArray.length < numTags)
 			mSArray = new short[numTags];
 		short[] tagIds = mSArray;
 
 		decodeVarintArray(numTags, tagIds);
 
-		Tag[] tags;
+		mElem.tags.clear();
 
-		if (numTags < 11)
-			tags = mElementTags[numTags - 1];
-		else
-			tags = new Tag[numTags];
-
-		int max = curTags.numTags;
+		int max = mTileTags.numTags - 1;
 
 		for (int i = 0; i < numTags; i++) {
 			int idx = tagIds[i];
 
 			if (idx < 0 || idx > max) {
 				Log.d(TAG, mTile + " invalid tag:" + idx + " " + i);
-				return null;
+				return false;
 			}
-
-			tags[i] = curTags.tags[idx];
+			mElem.tags.add(mTileTags.tags[idx]);
 		}
 
-		return tags;
+		return true;
 	}
 }

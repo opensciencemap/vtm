@@ -16,12 +16,11 @@ package org.oscim.layers.tile.vector;
 
 import static org.oscim.layers.tile.MapTile.STATE_NONE;
 
-import java.util.Arrays;
-
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
+import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
@@ -261,10 +260,11 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 	// only with different name.
 	// Maybe this should be done within RenderTheme, also allowing
 	// to set these replacement rules in theme file.
-	private boolean filterTags(Tag[] tags) {
+	private boolean filterTags(TagSet in) {
 		mRenderBuildingModel = false;
+		Tag[] tags = in.tags;
 
-		for (int i = 0; i < tags.length; i++) {
+		for (int i = 0; i < in.numTags; i++) {
 			String key = tags[i].key;
 			if (tags[i].key == Tag.TAG_KEY_NAME) {
 				if (tags[i].value != null) {
@@ -337,17 +337,16 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		mElement = null;
 	}
 
-	private void debugUnmatched(boolean closed, Tag[] tags) {
-		Log.d(TAG, "DBG way not matched: " + closed + " "
-				+ Arrays.deepToString(tags));
-
-		mTagName = new Tag("name", tags[0].key + ":"
-				+ tags[0].value, false);
-
-		mElement.tags = closed ? debugTagArea : debugTagWay;
-		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
-
-		renderWay(ri);
+	private void debugUnmatched(boolean closed, TagSet tags) {
+//		Log.d(TAG, "DBG way not matched: " + closed + " "
+//				+ Arrays.deepToString(tags));
+//
+//		mTagName = new Tag("name", tags[0].key + ":"
+//				+ tags[0].value, false);
+//
+//		mElement.tags = closed ? debugTagArea : debugTagWay;
+//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
+//		renderWay(ri);
 	}
 
 	private void renderWay(RenderInstruction[] ri) {

@@ -24,19 +24,12 @@ package org.oscim.core;
  */
 public class MapElement extends GeometryBuffer {
 
-
 	// osm layer of the way.
 	public int layer;
 	// osm tags of the way.
-	public Tag[] tags;
+	//public Tag[] tags;
 
-
-	// ---- random stuff, to be removed ----
-	// building tags
-	public int height;
-	public int minHeight;
-
-	public int priority;
+	public final TagSet tags = new TagSet();
 
 	public MapElement() {
 		super(1024, 16);
@@ -46,8 +39,18 @@ public class MapElement extends GeometryBuffer {
 		super(points, indices);
 	}
 
-	public void set(Tag[] tags, int layer) {
+	public void setLayer(int layer) {
 		this.layer = layer;
-		this.tags = tags;
+		//this.tags = tags;
 	}
+
+	@Override
+	public void clear() {
+		super.clear();
+	}
+	// ---- random stuff, to be removed ----
+	// building tags
+	public int height;
+	public int minHeight;
+	public int priority;
 }
