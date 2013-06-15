@@ -12,25 +12,24 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.overlay;
+package org.oscim.layers.labeling;
 
 import org.oscim.core.MapPosition;
+import org.oscim.layers.InputLayer;
 import org.oscim.layers.tile.TileRenderLayer;
-import org.oscim.renderer.layers.TextRenderLayer;
 import org.oscim.view.MapView;
 
 import android.util.Log;
 import android.view.MotionEvent;
 
-/**
- * @author Hannes Janetzek
- */
-public class LabelingOverlay extends Overlay {
-	private final static String TAG = LabelingOverlay.class.getName();
+public class LabelLayer extends InputLayer {
+	private final static String TAG = LabelLayer.class.getName();
 	final TextRenderLayer mTextLayer;
 
-	public LabelingOverlay(MapView mapView, TileRenderLayer tileRenderLayer) {
+	public LabelLayer(MapView mapView, TileRenderLayer tileRenderLayer) {
 		super(mapView);
+
+		//mTextLayer = new org.oscim.renderer.layers.TextRenderLayer(mapView, tileRenderLayer);
 		mTextLayer = new TextRenderLayer(mapView, tileRenderLayer);
 		mLayer = mTextLayer;
 	}
