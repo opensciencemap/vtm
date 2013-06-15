@@ -22,3 +22,17 @@ LOCAL_SRC_FILES := gl/utils.c
 LOCAL_LDLIBS    := -llog -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE    := tessellate
+#LOCAL_ARM_MODE := arm
+LOCAL_CFLAGS    := -Werror -O2 -ffast-math -std=c99
+LOCAL_SRC_FILES := tessellate/dict.c tessellate/mesh.c \
+	tessellate/render.c tessellate/tess.c tessellate/geom.c \
+	tessellate/memalloc.c tessellate/normal.c \
+	tessellate/priorityq.c tessellate/sweep.c \
+	tessellate/tessmono.c tessellate/tessellate.c
+LOCAL_LDLIBS    := -llog
+
+include $(BUILD_SHARED_LIBRARY)
