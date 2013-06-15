@@ -31,22 +31,26 @@ import static android.opengl.GLES20.glStencilOp;
 import static android.opengl.GLES20.glUniform4fv;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer;
-import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLRenderer.Matrices;
+import org.oscim.renderer.GLState;
 import org.oscim.theme.renderinstruction.Area;
+import org.oscim.theme.renderinstruction.BitmapUtils;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
 
+import android.graphics.Bitmap;
 import android.opengl.GLES20;
+import android.opengl.GLUtils;
 
 public final class PolygonRenderer {
-	//private static final String TAG = PolygonRenderer.class.getName();
+	private static final String TAG = PolygonRenderer.class.getName();
 
 	private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
 	private static final int STENCIL_BITS = 8;
@@ -56,45 +60,97 @@ public final class PolygonRenderer {
 
 	private static PolygonLayer[] mFillPolys;
 
-	private static int polygonProgram;
-	private static int hPolygonVertexPosition;
-	private static int hPolygonMatrix;
-	private static int hPolygonColor;
+	private static int numShaders = 2;
+	private static int polyShader = 0;
+	private static int texShader = 1;
+
+	private static int[] polygonProgram = new int[numShaders];
+
+	private static int[] hPolygonVertexPosition = new int[numShaders];
+	private static int[] hPolygonMatrix = new int[numShaders];
+	private static int[] hPolygonColor = new int[numShaders];
+
+	private static int mTexWater;
+	private static int mTexWood;
+	private static int mTexGrass;
 
 	static boolean init() {
+		for (int i = 0; i < numShaders; i++) {
 
-		// Set up the program for rendering polygons
-		if (GLRenderer.debugView) {
-			polygonProgram = GlUtils.createProgram(polygonVertexShaderZ,
-					polygonFragmentShaderZ);
-		} else {
-			polygonProgram = GlUtils.createProgram(polygonVertexShader,
-					polygonFragmentShader);
+			// Set up the program for rendering polygons
+			if (i == 0) {
+				if (GLRenderer.debugView)
+					polygonProgram[i] = GlUtils.createProgram(polygonVertexShaderZ,
+							polygonFragmentShaderZ);
+				else
+					polygonProgram[i] = GlUtils.createProgram(polygonVertexShader,
+							polygonFragmentShader);
+			} else if (i == 1) {
+				polygonProgram[i] = GlUtils.createProgram(textureVertexShader,
+						textureFragmentShader);
+
+			}
+
+			if (polygonProgram[i] == 0) {
+				// Log.e(TAG, "Could not create polygon program.");
+				return false;
+			}
+			hPolygonMatrix[i] = glGetUniformLocation(polygonProgram[i], "u_mvp");
+			hPolygonColor[i] = glGetUniformLocation(polygonProgram[i], "u_color");
+			hPolygonVertexPosition[i] = glGetAttribLocation(polygonProgram[i], "a_pos");
 		}
-		if (polygonProgram == 0) {
-			// Log.e(TAG, "Could not create polygon program.");
-			return false;
-		}
-		hPolygonMatrix = glGetUniformLocation(polygonProgram, "u_mvp");
-		hPolygonColor = glGetUniformLocation(polygonProgram, "u_color");
-		hPolygonVertexPosition = glGetAttribLocation(polygonProgram, "a_pos");
 
 		mFillPolys = new PolygonLayer[STENCIL_BITS];
+
+		//mTexWood = loadSprite("jar:grass3.png");
+		//mTexWater = loadSprite("jar:water2.png");
+		//mTexGrass= loadSprite("jar:grass2.png");
 
 		return true;
 	}
 
-	private static void fillPolygons(int start, int end, int zoom, float scale) {
+	private static int loadSprite(String name) {
+		int[] textures = new int[1];
+
+		try {
+			Bitmap b = BitmapUtils.createBitmap(name);
+			GLES20.glGenTextures(1, textures, 0);
+
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
+
+			GlUtils.setTextureParameter(GLES20.GL_LINEAR, GLES20.GL_LINEAR,
+					GLES20.GL_REPEAT, GLES20.GL_REPEAT);
+
+			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, b, 0);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return textures[0];
+	}
+
+	private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale) {
 
 		/* draw to framebuffer */
 		glColorMask(true, true, true, true);
 
 		/* do not modify stencil buffer */
 		glStencilMask(0x00);
+		int shader = polyShader;
 
 		for (int c = start; c < end; c++) {
 			Area a = mFillPolys[c].area;
 
+			//if (a.color == 0xFFAFC5E3 || a.color == 0xffd1dbc7 || a.color == 0xffa3ca7b) {
+			//	shader = texShader;
+			//	setShader(texShader, m);
+			//	if (a.color ==  0xFFAFC5E3)
+			//		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexWater);
+			//	else if (a.color == 0xffd1dbc7)
+			//		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexWood);
+			//	else
+			//		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexGrass);
+			//} else
 			if (a.fade >= zoom) {
 				float f = 1.0f;
 				/* fade in/out */
@@ -106,17 +162,17 @@ public final class PolygonRenderer {
 				}
 				GLState.blend(true);
 
-				GlUtils.setColor(hPolygonColor, a.color, f);
+				GlUtils.setColor(hPolygonColor[shader], a.color, f);
 
 			} else if (a.blend > 0 && a.blend <= zoom) {
 				/* blend colors (not alpha) */
 				GLState.blend(false);
 
 				if (a.blend == zoom)
-					GlUtils.setColorBlend(hPolygonColor,
+					GlUtils.setColorBlend(hPolygonColor[shader],
 							a.color, a.blendColor, scale - 1.0f);
 				else
-					GlUtils.setColor(hPolygonColor, a.blendColor, 1);
+					GlUtils.setColor(hPolygonColor[shader], a.blendColor, 1);
 
 			} else {
 				if (a.color < 0xff000000)
@@ -124,7 +180,7 @@ public final class PolygonRenderer {
 				else
 					GLState.blend(false);
 
-				GlUtils.setColor(hPolygonColor, a.color, 1);
+				GlUtils.setColor(hPolygonColor[shader], a.color, 1);
 			}
 
 			// set stencil buffer mask used to draw this layer
@@ -134,11 +190,30 @@ public final class PolygonRenderer {
 
 			/* draw tile fill coordinates */
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+			if (shader != polyShader) {
+				setShader(polyShader, m);
+				shader = polyShader;
+			}
 		}
 	}
 
 	// current layer to fill (0 - STENCIL_BITS-1)
 	private static int mCount;
+
+	private static void setShader(int shader, Matrices m) {
+		//if (
+		GLState.useProgram(polygonProgram[shader]);
+		//		) {
+
+		GLState.enableVertexArrays(hPolygonVertexPosition[shader], -1);
+
+		glVertexAttribPointer(hPolygonVertexPosition[shader], 2, GL_SHORT,
+				false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
+
+		m.mvp.setAsUniform(hPolygonMatrix[shader]);
+		//}
+	}
 
 	/**
 	 * draw polygon layers (unil layer.next is not polygon layer)
@@ -163,12 +238,7 @@ public final class PolygonRenderer {
 
 		GLState.test(false, true);
 
-		GLState.useProgram(polygonProgram);
-		GLState.enableVertexArrays(hPolygonVertexPosition, -1);
-		glVertexAttribPointer(hPolygonVertexPosition, 2, GL_SHORT,
-				false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
-
-		m.mvp.setAsUniform(hPolygonMatrix);
+		setShader(polyShader, m);
 
 		int zoom = pos.zoomLevel;
 		int cur = mCount;
@@ -179,7 +249,7 @@ public final class PolygonRenderer {
 
 		int start = cur;
 
-		float scale = (float)pos.getZoomScale();
+		float scale = (float) pos.getZoomScale();
 
 		Layer l = layer;
 		for (; l != null && l.type == Layer.POLYGON; l = l.next) {
@@ -206,13 +276,13 @@ public final class PolygonRenderer {
 
 			// draw up to 7 layers into stencil buffer
 			if (cur == STENCIL_BITS - 1) {
-				fillPolygons(start, cur, zoom, scale);
+				fillPolygons(m, start, cur, zoom, scale);
 				start = cur = 0;
 			}
 		}
 
 		if (cur > 0)
-			fillPolygons(start, cur, zoom, scale);
+			fillPolygons(m, start, cur, zoom, scale);
 
 		if (clip) {
 			if (first) {
@@ -297,15 +367,7 @@ public final class PolygonRenderer {
 	}
 
 	public static void drawOver(Matrices m, boolean drawColor, int color) {
-		if (GLState.useProgram(polygonProgram)) {
-
-			GLState.enableVertexArrays(hPolygonVertexPosition, -1);
-
-			glVertexAttribPointer(hPolygonVertexPosition, 2, GL_SHORT,
-					false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
-
-			m.mvp.setAsUniform(hPolygonMatrix);
-		}
+		setShader(polyShader, m);
 
 		/*
 		 * clear stencilbuffer (tile region) by drawing
@@ -313,7 +375,7 @@ public final class PolygonRenderer {
 		 */
 
 		if (drawColor) {
-			GlUtils.setColor(hPolygonColor, color, 1);
+			GlUtils.setColor(hPolygonColor[0], color, 1);
 			GLState.blend(true);
 		} else {
 			// disable drawing to framebuffer (will be re-enabled in fill)
@@ -349,18 +411,18 @@ public final class PolygonRenderer {
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
 		mDebugFill.position(0);
-		GLState.useProgram(polygonProgram);
-		GLES20.glEnableVertexAttribArray(hPolygonVertexPosition);
+		GLState.useProgram(polygonProgram[0]);
+		GLES20.glEnableVertexAttribArray(hPolygonVertexPosition[0]);
 
-		glVertexAttribPointer(hPolygonVertexPosition, 2, GLES20.GL_FLOAT,
+		glVertexAttribPointer(hPolygonVertexPosition[0], 2, GLES20.GL_FLOAT,
 				false, 0, mDebugFill);
 
-		m.setAsUniform(hPolygonMatrix);
+		m.setAsUniform(hPolygonMatrix[0]);
 
 		if (color == 0)
-			glUniform4fv(hPolygonColor, 1, debugFillColor, 0);
+			glUniform4fv(hPolygonColor[0], 1, debugFillColor, 0);
 		else
-			glUniform4fv(hPolygonColor, 1, debugFillColor2, 0);
+			glUniform4fv(hPolygonColor[0], 1, debugFillColor2, 0);
 
 		glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
@@ -406,28 +468,22 @@ public final class PolygonRenderer {
 			+ "  gl_FragColor = vec4(0.0, z - 1.0, 0.0, 1.0)*0.8;"
 			+ "}";
 
-	//	private final static String polygonTexVertexShader = ""
-	//			+ "precision mediump float;"
-	//			+ "uniform mat4 u_mvp;"
-	//			+ "attribute vec4 a_pos;"
-	//			+ "varying vec2 v_st;"
-	//			+ "void main() {"
-	//			+ "  if(gl_VertexID == 0)"
-	//			+ "    v_st = vec2(0.0,0.0);"
-	//			+ "  else if(gl_VertexID == 1)"
-	//			+ "    v_st = vec2(1.0,0.0);"
-	//			+ "  else if(gl_VertexID == 2)"
-	//			+ "    v_st = vec2(1.0,1.0);"
-	//			+ "  else if(gl_VertexID == 3)"
-	//			+ "    v_st = vec2(0.0,1.0);"
-	//			+ "  gl_Position = u_mvp * a_pos;"
-	//			+ "}";
-	//	private final static String polygonTexFragmentShader = ""
-	//			+ "precision mediump float;"
-	//			+ "uniform vec4 u_color;"
-	//			+ "uniform sampler2D tex;"
-	//			+ "varying vec2 v_st;"
-	//			+ "void main() {"
-	//			+ "  gl_FragColor =  u_color * texture2D(tex, v_st);"
-	//			+ "}";
+	private final static String textureVertexShader = ""
+			+ "precision mediump float;"
+			+ "uniform mat4 u_mvp;"
+			+ "attribute vec4 a_pos;"
+			+ "varying vec2 v_st;"
+			+ "void main() {"
+			+ "  v_st = clamp(a_pos.xy, 0.0, 1.0) * 2.0;"
+			+ "  gl_Position = u_mvp * a_pos;"
+			+ "}";
+
+	private final static String textureFragmentShader = ""
+			+ "precision mediump float;"
+			+ "uniform vec4 u_color;"
+			+ "uniform sampler2D tex;"
+			+ "varying vec2 v_st;"
+			+ "void main() {"
+			+ "  gl_FragColor =  texture2D(tex, v_st);"
+			+ "}";
 }
