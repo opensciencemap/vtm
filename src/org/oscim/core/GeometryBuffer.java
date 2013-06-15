@@ -7,7 +7,8 @@ public class GeometryBuffer {
 		NONE(0),
 		POINT(1),
 		LINE(2),
-		POLY(3);
+		POLY(3),
+		TRIS(4);
 
 		private GeometryType(int type) {
 			nativeInt = type;
@@ -109,14 +110,10 @@ public class GeometryBuffer {
 		if (CHECK_STATE)
 			setOrCheckMode(GeometryType.POLY);
 
-		if ((indexPos + 4) > index.length)
-			ensureIndexSize(indexPos + 3, true);
+		if ((indexPos + 3) > index.length)
+			ensureIndexSize(indexPos + 2, true);
 
 		if (!start) {
-
-			// end ring
-			index[++indexPos] = 0;
-
 			// end polygon
 			index[++indexPos] = 0;
 
@@ -136,11 +133,8 @@ public class GeometryBuffer {
 		if (CHECK_STATE)
 			checkMode(GeometryType.POLY);
 
-		if ((indexPos + 3) > index.length)
-			ensureIndexSize(indexPos + 2, true);
-
-		// end ring
-		index[++indexPos] = 0;
+		if ((indexPos + 2) > index.length)
+			ensureIndexSize(indexPos + 1, true);
 
 		// initialize with zero points
 		index[++indexPos] = 0;
