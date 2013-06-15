@@ -108,6 +108,8 @@ public final class LineRenderer {
 	public static Layer draw(Layers layers, Layer curLayer, MapPosition pos,
 			Matrices m, float div, int mode) {
 
+		beginLines();
+
 		if (curLayer == null)
 			return null;
 
