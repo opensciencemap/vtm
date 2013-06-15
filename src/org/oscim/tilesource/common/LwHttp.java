@@ -31,7 +31,6 @@ import android.util.Log;
 
 public class LwHttp {
 	private static final String TAG = LwHttp.class.getName();
-	//private static final boolean DEBUG = false;
 
 	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
 	private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
@@ -58,12 +57,10 @@ public class LwHttp {
 
 	private final boolean mInflateContent;
 	private final byte[] mContentType;
-	//private final String mExtension;
 
 	private int mContentLength = -1;
 
 	public LwHttp(URL url, String contentType, String extension, boolean deflate) {
-		//mExtension = extension;
 		mContentType = contentType.getBytes();
 		mInflateContent = deflate;
 
@@ -101,35 +98,11 @@ public class LwHttp {
 		}
 
 		@Override
-		public synchronized int read(byte[] buffer, int offset, int byteCount) throws IOException {
+		public synchronized int read(byte[] buffer, int offset, int byteCount)
+				throws IOException {
 			return super.read(buffer, offset, byteCount);
 		}
 	}
-
-//	public void setServer(URL url) {
-//
-//		int port = url.getPort();
-//		if (port < 0)
-//			port = 80;
-//
-//		String host = url.getHost();
-//		String path = url.getPath();
-//		Log.d(TAG, "open database: " + host + " " + port + " " + path);
-//
-//		REQUEST_GET_START = ("GET " + path).getBytes();
-//
-//		REQUEST_GET_END = ("." + mExtension + " HTTP/1.1" +
-//				"\nHost: " + host +
-//				"\nConnection: Keep-Alive" +
-//				"\n\n").getBytes();
-//
-//		mHost = host;
-//		mPort = port;
-//
-//		mRequestBuffer = new byte[1024];
-//		System.arraycopy(REQUEST_GET_START, 0,
-//				mRequestBuffer, 0, REQUEST_GET_START.length);
-//	}
 
 	public void close() {
 		if (mSocket != null) {
@@ -150,6 +123,7 @@ public class LwHttp {
 
 		byte[] buf = buffer;
 		boolean first = true;
+		boolean ok = true;
 
 		int read = 0;
 		int pos = 0;
@@ -159,41 +133,46 @@ public class LwHttp {
 		mContentLength = -1;
 
 		// header cannot be larger than BUFFER_SIZE for this to work
-		for (; pos < read || (len = is.read(buf, read, BUFFER_SIZE - read)) >= 0; len = 0) {
-			read += len;
+		for (; (pos < read) || ((read < BUFFER_SIZE) &&
+				(len = is.read(buf, read, BUFFER_SIZE - read)) >= 0); len = 0) {
 
+			read += len;
 			// end of header lines
 			while (end < read && (buf[end] != '\n'))
 				end++;
 
-			if (buf[end] == '\n') {
-				if (first) {
-					// check only for OK
-					first = false;
-					if (!check(HEADER_HTTP_OK, 6, buf, pos + 9, end)) {
-						String line = new String(buf, pos, end - pos - 1);
-						Log.d(TAG, ">" + line + "< ");
-						return null;
-					}
-				} else if (end - pos == 1) {
-					// check empty line (header end)
-					end += 1;
-					break;
-				} else if (check(HEADER_CONTENT_TYPE, 12, buf, pos, end)) {
-					if (!check(mContentType, mContentType.length, buf, pos + 14, end))
-						return null;
-				} else if (check(HEADER_CONTENT_LENGTH, 14, buf, pos, end)) {
-					mContentLength =  parseInt(pos + 16, end-1, buf);
+			if (buf[end] != '\n')
+				continue;
 
-				}
-
-				//String line = new String(buf, pos, end - pos - 1);
-				//Log.d(TAG, ">" + line + "<  " + mContentLength);
-
-				pos += (end - pos) + 1;
-				end = pos;
+			if (!ok) {
+				// ignore until end of header
+			} else if (first) {
+				first = false;
+				// check only for OK ("HTTP/1.? ".length == 9)
+				if (!check(HEADER_HTTP_OK, buf, pos + 9, end))
+					ok = false;
+			} else if (end - pos == 1) {
+				// empty line (header end)
+				end += 1;
+				break;
+			} else if (check(HEADER_CONTENT_TYPE, buf, pos, end)) {
+				if (!check(mContentType, buf, pos + HEADER_CONTENT_TYPE.length + 2, end))
+					ok = false;
+			} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
+				mContentLength = parseInt(pos + HEADER_CONTENT_LENGTH.length + 2, end - 1, buf);
 			}
+
+			if (!ok) {
+				String line = new String(buf, pos, end - pos - 1);
+				Log.d(TAG, ">" + line + "< ");
+			}
+
+			pos += (end - pos) + 1;
+			end = pos;
 		}
+
+		if (!ok)
+			return null;
 
 		// back to start of content
 		is.reset();
@@ -214,7 +193,7 @@ public class LwHttp {
 			try {
 				mSocket.close();
 			} catch (IOException e) {
-
+				Log.wtf(TAG, e);
 			}
 
 			// Log.d(TAG, "not alive  - recreate connection " + mMaxReq);
@@ -227,13 +206,12 @@ public class LwHttp {
 			mMaxReq = RESPONSE_EXPECTED_LIVES;
 			// Log.d(TAG, "create connection");
 		} else {
+			// FIXME not sure if this is correct way to drain socket
 			int avail = mResponseStream.available();
 			if (avail > 0) {
 				Log.d(TAG, "Consume left-over bytes: " + avail);
-
 				while ((avail = mResponseStream.available()) > 0)
 					mResponseStream.read(buffer);
-				Log.d(TAG, "Consumed bytes");
 			}
 		}
 
@@ -306,6 +284,7 @@ public class LwHttp {
 
 		return pos + i;
 	}
+
 	// parse (positive) integer from byte array
 	protected static int parseInt(int pos, int end, byte[] buf) {
 		int val = 0;
@@ -315,8 +294,10 @@ public class LwHttp {
 		return val;
 	}
 
-	private static boolean check(byte[] string, int length, byte[] buffer,
+	private static boolean check(byte[] string, byte[] buffer,
 			int position, int available) {
+
+		int length = string.length;
 
 		if (available - position < length)
 			return false;
@@ -332,9 +313,10 @@ public class LwHttp {
 		mLastRequest = SystemClock.elapsedRealtime();
 	}
 
-	public int getContentLength(){
+	public int getContentLength() {
 		return mContentLength;
 	}
+
 	/**
 	 * Write custom tile url
 	 *
@@ -346,6 +328,5 @@ public class LwHttp {
 	protected int formatTilePath(Tile tile, byte[] path, int curPos) {
 		return 0;
 	}
-
 
 }
