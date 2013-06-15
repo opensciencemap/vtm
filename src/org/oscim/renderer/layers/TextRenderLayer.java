@@ -294,7 +294,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 		return l;
 	}
 
-	private static float flipLatitude(float dx, int max) {
+	private static float flipLongitude(float dx, int max) {
 		// flip around date-line
 		if (dx > max)
 			dx = dx - max * 2;
@@ -382,7 +382,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 			float dx = (float) (l.tile.tileX * Tile.SIZE - tileX * div);
 			float dy = (float) (l.tile.tileY * Tile.SIZE - tileY * div);
 
-			dx = flipLatitude(dx, maxx);
+			dx = flipLongitude(dx, maxx);
 
 			l.move(l.item, dx, dy, sscale);
 
@@ -430,7 +430,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 
 			float dx = (float) (t.tileX * Tile.SIZE - tileX);
 			float dy = (float) (t.tileY * Tile.SIZE - tileY);
-			dx = flipLatitude(dx, maxx);
+			dx = flipLongitude(dx, maxx);
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 
@@ -496,7 +496,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 
 			float dx = (float) (t.tileX * Tile.SIZE - tileX);
 			float dy = (float) (t.tileY * Tile.SIZE - tileY);
-			dx = flipLatitude(dx, maxx);
+			dx = flipLongitude(dx, maxx);
 
 			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 				if (!ti.text.caption)
