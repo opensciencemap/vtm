@@ -144,6 +144,12 @@ public class LwHttp {
 			if (buf[end] != '\n')
 				continue;
 
+			// empty line (header end)
+			if (end - pos == 1) {
+				end += 1;
+				break;
+			}
+
 			if (!ok) {
 				// ignore until end of header
 			} else if (first) {
@@ -151,15 +157,15 @@ public class LwHttp {
 				// check only for OK ("HTTP/1.? ".length == 9)
 				if (!check(HEADER_HTTP_OK, buf, pos + 9, end))
 					ok = false;
-			} else if (end - pos == 1) {
-				// empty line (header end)
-				end += 1;
-				break;
+
 			} else if (check(HEADER_CONTENT_TYPE, buf, pos, end)) {
-				if (!check(mContentType, buf, pos + HEADER_CONTENT_TYPE.length + 2, end))
+				if (!check(mContentType, buf,
+						pos + HEADER_CONTENT_TYPE.length + 2, end))
 					ok = false;
+
 			} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
-				mContentLength = parseInt(pos + HEADER_CONTENT_LENGTH.length + 2, end - 1, buf);
+				mContentLength = parseInt(buf,
+						pos + HEADER_CONTENT_LENGTH.length + 2, end - 1);
 			}
 
 			if (!ok) {
@@ -286,7 +292,7 @@ public class LwHttp {
 	}
 
 	// parse (positive) integer from byte array
-	protected static int parseInt(int pos, int end, byte[] buf) {
+	protected static int parseInt(byte[] buf, int pos, int end) {
 		int val = 0;
 		for (; pos < end; pos++)
 			val = val * 10 + (buf[pos]) - '0';
