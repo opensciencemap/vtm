@@ -378,7 +378,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 	// ----------------- RenderThemeCallback -----------------
 	@Override
 	public void renderWay(Line line, int level) {
-		int numLayer = (mDrawingLayer * 2) + level;
+		int numLayer = mDrawingLayer + level;
 
 		if (line.stipple == 0) {
 			if (line.outline && mCurLineLayer == null) {
@@ -456,8 +456,8 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		if (layer == null)
 			return;
 
-		if (layer.area == null)
-			layer.area = area;
+		//if (layer.area == null)
+		layer.area = area;
 
 		layer.addPolygon(mElement.points, mElement.index);
 	}
