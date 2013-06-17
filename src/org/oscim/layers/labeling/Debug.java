@@ -20,7 +20,7 @@ import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.theme.renderinstruction.Line;
 
-public class Debug {
+class Debug {
 
 	private final static float[] mDebugPoints = new float[4];
 

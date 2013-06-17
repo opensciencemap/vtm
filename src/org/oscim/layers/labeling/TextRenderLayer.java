@@ -40,8 +40,10 @@ import org.oscim.renderer.sublayers.Layer;
 import org.oscim.renderer.sublayers.Layers;
 import org.oscim.renderer.sublayers.LineRenderer;
 import org.oscim.renderer.sublayers.PolygonRenderer;
+import org.oscim.renderer.sublayers.SymbolLayer;
 import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.renderer.sublayers.TextLayer;
+import org.oscim.renderer.sublayers.TextureLayer;
 import org.oscim.renderer.sublayers.TextureRenderer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
@@ -55,7 +57,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 
-public class TextRenderLayer extends BasicRenderLayer {
+class TextRenderLayer extends BasicRenderLayer {
 	private final static String TAG = TextRenderLayer.class.getName();
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
@@ -65,14 +67,34 @@ public class TextRenderLayer extends BasicRenderLayer {
 	private final MapViewPosition mMapViewPosition;
 	private final TileSet mTileSet;
 
-	private MapPosition mTmpPos;
 
-	// TextLayer that is updating
-	private TextLayer mTmpLayer;
-	// TextLayer that is ready to be added to 'layers'
-	private TextLayer mNextLayer;
+	class TextureLayers {
+		boolean ready;
 
-	// thread local pool
+		final TextureLayer l;
+		final TextLayer textLayer;
+		final SymbolLayer symbolLayer;
+
+		final MapPosition pos;
+
+		TextureLayers() {
+			pos = new MapPosition();
+
+			symbolLayer = new SymbolLayer();
+			textLayer = new TextLayer();
+
+			l = symbolLayer;
+			l.next = textLayer;
+		}
+	}
+
+	// used by GL thread
+	private TextureLayers mCurLayer;
+
+	// used by labeling thread
+	private TextureLayers mNextLayer;
+
+	// thread local pool (labeling)
 	class LabelPool extends Pool<TextItem> {
 		Label releaseAndGetNext(Label l) {
 			if (l.item != null)
@@ -98,9 +120,6 @@ public class TextRenderLayer extends BasicRenderLayer {
 
 	private final LabelPool mPool = new LabelPool();
 
-	// list of previous labels
-	private Label mPrevLabels;
-
 	// list of current labels
 	private Label mLabels;
 
@@ -113,7 +132,6 @@ public class TextRenderLayer extends BasicRenderLayer {
 		LList<Label> labels;
 	}
 
-
 	private float mSquareRadius;
 	private int mRelabelCnt;
 	private final TileRenderLayer mTileLayer;
@@ -124,11 +142,14 @@ public class TextRenderLayer extends BasicRenderLayer {
 		mMapViewPosition = mapView.getMapViewPosition();
 		mTileLayer = baseLayer;
 		mTileSet = new TileSet();
+
 		layers.textureLayers = new TextLayer();
-		mTmpLayer = new TextLayer();
+		layers.textureLayers.next = new SymbolLayer();
+
+		mCurLayer = new TextureLayers();
+		mNextLayer = new TextureLayers();
 
 		//mActiveTiles = new HashMap<MapTile, LabelTile>();
-		mTmpPos = new MapPosition();
 		mRelabelCnt = 0;
 	}
 
@@ -263,7 +284,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 
 	boolean updateLabels() {
 		// nextLayer is not loaded yet
-		if (mTmpLayer == null)
+		if (mNextLayer.ready)
 			return false;
 
 		// get current tiles
@@ -274,7 +295,8 @@ public class TextRenderLayer extends BasicRenderLayer {
 			//Log.d(TAG, "no tiles "+ mTileSet.getSerial());
 			return false;
 		}
-		MapPosition pos = mTmpPos;
+
+		MapPosition pos = mNextLayer.pos;
 
 		synchronized (mMapViewPosition) {
 			changedPos = mMapViewPosition.getMapPosition(pos);
@@ -315,7 +337,10 @@ public class TextRenderLayer extends BasicRenderLayer {
 		double tileX = (pos.x * (Tile.SIZE << zoom));
 		double tileY = (pos.y * (Tile.SIZE << zoom));
 
-		for (Label l = mPrevLabels; l != null;) {
+		Label prevLabels = mLabels;
+		mLabels = null;
+
+		for (Label l = prevLabels; l != null;) {
 			if (l.text.caption) {
 				l = mPool.releaseAndGetNext(l);
 				continue;
@@ -515,31 +540,21 @@ public class TextRenderLayer extends BasicRenderLayer {
 				ti.y2 = tmp;
 			}
 		}
-
-		// temporarily used Label
+		// temporary used Label
 		mPool.release(l);
 
-		//reuse text layer
-		TextLayer tl = mTmpLayer;
-		mTmpLayer = null;
+		TextLayer tl = mNextLayer.textLayer;
 
 		tl.labels = mLabels;
 		// draw text to bitmaps and create vertices
 		tl.prepare();
-
-		// after 'prepare' TextLayer does not need TextItems
-		mPrevLabels = mLabels;
-		mLabels = null;
 		tl.labels = null;
 
 		// remove tile locks
 		mTileLayer.releaseTiles(mTileSet);
 
-		// pass new labels for rendering
-		//synchronized (this) {
-		mNextLayer = tl;
 		mDebugLayer = dbg;
-		//}
+		mNextLayer.ready = true;
 
 		return true;
 	}
@@ -548,9 +563,12 @@ public class TextRenderLayer extends BasicRenderLayer {
 	public synchronized void update(MapPosition pos, boolean changed,
 			Matrices matrices) {
 
-		if (mNextLayer != null) {
-			// keep text layer, not recrating its canvas each time
-			mTmpLayer = (TextLayer) layers.textureLayers;
+		if (mNextLayer.ready) {
+			// exchange current with next layers
+			TextureLayers tmp = mCurLayer;
+			mCurLayer = mNextLayer;
+			mNextLayer = tmp;
+			mNextLayer.ready = false;
 
 			// clear textures and text items from previous layer
 			layers.clear();
@@ -561,13 +579,8 @@ public class TextRenderLayer extends BasicRenderLayer {
 			}
 
 			// set new TextLayer to be uploaded and rendered
-			layers.textureLayers = mNextLayer;
-			mNextLayer = null;
-
-			// make the 'labeled' MapPosition current
-			MapPosition tmp = mMapPosition;
-			mMapPosition = mTmpPos;
-			mTmpPos = tmp;
+			layers.textureLayers = mCurLayer.l;
+			mMapPosition = mCurLayer.pos;
 
 			this.newData = true;
 		}
@@ -591,8 +604,6 @@ public class TextRenderLayer extends BasicRenderLayer {
 			if (!isCancelled() && labelsChanged)
 				mMapView.render();
 
-			//Log.d(TAG, "relabel " + labelsChanged);
-
 			mLastRun = System.currentTimeMillis();
 			mLabelTask = null;
 			return null;
@@ -605,8 +616,8 @@ public class TextRenderLayer extends BasicRenderLayer {
 	}
 
 	/* private */void cleanup() {
-		mPool.releaseAll(mPrevLabels);
-		mPrevLabels = null;
+		mPool.releaseAll(mLabels);
+		mLabels = null;
 		mTileSet.clear();
 		mLabelTask = null;
 	}
@@ -614,13 +625,11 @@ public class TextRenderLayer extends BasicRenderLayer {
 	private final Runnable mLabelUpdate = new Runnable() {
 		@Override
 		public void run() {
-
 			if (mLabelTask == null) {
 				mLabelTask = new LabelTask();
 				mLabelTask.execute();
 			} else {
 				postLabelTask(50);
-				//Log.d(TAG, "repost");
 			}
 		}
 	};
