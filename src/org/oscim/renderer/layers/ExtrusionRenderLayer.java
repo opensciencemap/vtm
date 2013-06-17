@@ -30,15 +30,13 @@ import org.oscim.view.MapView;
 import android.opengl.GLES20;
 import android.util.Log;
 
-/**
- * @author Hannes Janetzek
- */
 public class ExtrusionRenderLayer extends RenderLayer {
 	private final static String TAG = ExtrusionRenderLayer.class.getName();
 
 	private final TileRenderLayer mTileLayer;
 
-	public ExtrusionRenderLayer(MapView mapView, org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
+	public ExtrusionRenderLayer(MapView mapView,
+			org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
 		super(mapView);
 		mTileLayer = tileRenderLayer;
 		mTileSet = new TileSet();
@@ -54,44 +52,57 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 	private boolean initialized = false;
 
-	// FIXME sum up size used while filling layer only up to:
-	//public int mBufferSize = 65536;
-
 	private final TileSet mTileSet;
 	private MapTile[] mTiles;
 	private int mTileCnt;
+
+	private final static int SHADER = 0;
+
+	private boolean initShader() {
+		initialized = true;
+
+		for (int i = 0; i <= SHADER; i++) {
+			if (i == 0) {
+				shaderProgram[i] = GlUtils.createProgram(extrusionVertexShader,
+						extrusionFragmentShader);
+			} else {
+				shaderProgram[i] = GlUtils.createProgram(extrusionVertexShader,
+						extrusionFragmentShaderZ);
+			}
+
+			if (shaderProgram[i] == 0) {
+				Log.e(TAG, "Could not create extrusion shader program. " + i);
+				return false;
+			}
+
+			hMatrix[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_mvp");
+			hColor[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_color");
+			hAlpha[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_alpha");
+			hMode[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_mode");
+			hVertexPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_pos");
+			hLightPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_light");
+		}
+
+		return true;
+	}
 
 	@Override
 	public void update(MapPosition pos, boolean changed, Matrices matrices) {
 
 		mMapView.getMapViewPosition().getMapPosition(mMapPosition);
 
-		if (!initialized) {
-			initialized = true;
+		if (!initialized && !initShader())
+			return;
 
-			for (int i = 1; i < 2; i++) {
-				// Set up the program for rendering extrusions
-				shaderProgram[i] = GlUtils.createProgram(extrusionVertexShader,
-						extrusionFragmentShader);
-				if (shaderProgram[i] == 0) {
-					Log.e(TAG, "Could not create extrusion shader program. " + i);
-					return;
-				}
-				hMatrix[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_mvp");
-				hColor[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_color");
-				hAlpha[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_alpha");
-				hMode[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_mode");
-				hVertexPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_pos");
-				hLightPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_light");
-			}
-		}
+		if (shaderProgram[0] == 0)
+			return;
 
 		if (mAlpha == 0 || pos.zoomLevel < 16) {
 			isReady = false;
 			return;
 		}
 
-		int ready = 0;
+		int activeTiles = 0;
 		mTileLayer.getVisibleTiles(mTileSet);
 		MapTile[] tiles = mTileSet.tiles;
 
@@ -107,36 +118,35 @@ public class ExtrusionRenderLayer extends RenderLayer {
 					continue;
 
 				if (!el.compiled) {
-					// FIXME check 'bytes'?
-					int verticesBytes = el.mNumVertices * 8 * 2;
-
+					int verticesBytes = el.mNumVertices * 8;
 					el.compile(GLRenderer.getShortBuffer(verticesBytes));
 					GlUtils.checkGlError("...");
 				}
 
 				if (el.compiled)
-					mTiles[ready++] = tiles[i];
+					mTiles[activeTiles++] = tiles[i];
 			}
 		} else if (pos.zoomLevel == 16) {
 			// check if proxy children are ready
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				MapTile t = tiles[i];
 				for (byte j = 0; j < 4; j++) {
-					if ((t.proxies & (1 << j)) != 0) {
-						MapTile c = t.rel.get(j);
-						el = getLayer(c);
+					if ((t.proxies & (1 << j)) == 0)
+						continue;
 
-						if (el == null || !el.compiled)
-							continue;
+					MapTile c = t.rel.get(j);
+					el = getLayer(c);
 
-						mTiles[ready++] = c;
-					}
+					if (el == null || !el.compiled)
+						continue;
+
+					mTiles[activeTiles++] = c;
 				}
 			}
 		}
 
-		mTileCnt = ready;
-		isReady = ready > 0;
+		mTileCnt = activeTiles;
+		isReady = activeTiles > 0;
 
 		if (!isReady)
 			mTileLayer.releaseTiles(mTileSet);
@@ -161,22 +171,19 @@ public class ExtrusionRenderLayer extends RenderLayer {
 	@Override
 	public void render(MapPosition pos, Matrices m) {
 		// TODO one could render in one pass to texture and then draw the texture
-		// with alpha... might be faster.
+		// with alpha... might be faster and would allow postprocessing outlines.
 
 		MapTile[] tiles = mTiles;
 
-		//float div = FastMath.pow(tiles[0].zoomLevel - pos.zoomLevel);
-
-		int shaderMode = 1;
-		int uExtAlpha = hAlpha[shaderMode];
-		int uExtColor = hColor[shaderMode];
-		int uExtVertexPosition = hVertexPosition[shaderMode];
-		int uExtLightPosition = hLightPosition[shaderMode];
-		int uExtMatrix = hMatrix[shaderMode];
-		int uExtMode = hMode[shaderMode];
+		int uExtAlpha = hAlpha[SHADER];
+		int uExtColor = hColor[SHADER];
+		int uExtVertexPosition = hVertexPosition[SHADER];
+		int uExtLightPosition = hLightPosition[SHADER];
+		int uExtMatrix = hMatrix[SHADER];
+		int uExtMode = hMode[SHADER];
 
 		if (debug) {
-			GLState.useProgram(shaderProgram[shaderMode]);
+			GLState.useProgram(shaderProgram[SHADER]);
 
 			GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
 			GLES20.glUniform1i(uExtMode, 0);
@@ -220,7 +227,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 		GLState.test(true, false);
 
-		GLState.useProgram(shaderProgram[shaderMode]);
+		GLState.useProgram(shaderProgram[SHADER]);
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
 		if (pos.scale < (1 << 18)) {
 			// chances are high that one moves through a building
@@ -321,7 +328,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 		int z = tile.zoomLevel;
 		double curScale = Tile.SIZE * pos.scale;
-		float scale = (float)(pos.scale / (1 << z));
+		float scale = (float) (pos.scale / (1 << z));
 
 		float x = (float) ((tile.x - pos.x) * curScale);
 		float y = (float) ((tile.y - pos.y) * curScale);
@@ -335,7 +342,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 		m.mvp.addDepthOffset(delta);
 	}
 
-	private final float _a = 0.86f;
+	private final float _a = 0.88f;
 	private final float _r = 0xe9;
 	private final float _g = 0xe8;
 	private final float _b = 0xe6;
@@ -375,12 +382,12 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			+ "attribute vec4 a_pos;"
 			+ "attribute vec2 a_light;"
 			+ "varying vec4 color;"
-			//+ "varying float z;"
+			+ "varying float depth;"
 			+ "const float ff = 255.0;"
 			+ "void main() {"
 			//   change height by u_alpha
 			+ "  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);"
-			//+ "  z = gl_Position.z;"
+			//+ "  depth = gl_Position.z;"
 			+ "  if (u_mode == 0)"
 			//     roof / depth pass
 			+ "    color = u_color[0] * u_alpha;"
@@ -392,14 +399,14 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			+ "    float dir = a_light.y / ff;"
 			+ "    float z = (0.98 + gl_Position.z * 0.02);"
 			+ "    color = u_color[1];"
-			+ "    color.rgb *= (0.85 + dir * 0.15) * z;"
+			+ "    color.rgb *= (0.8 + dir * 0.2) * z;"
 			+ "    color *= u_alpha;"
 			+ "  } else if (u_mode == 2){"
 			//     sides 2 - use 0x00ff
 			+ "    float dir = a_light.x / ff;"
 			+ "    float z = (0.98 + gl_Position.z * 0.02);"
 			+ "    color = u_color[2];"
-			+ "    color.rgb *= (0.85 + dir * 0.15) * z;"
+			+ "    color.rgb *= (0.8 + dir * 0.2) * z;"
 			+ "    color *= u_alpha;"
 			+ "  } else {"
 			//     outline
@@ -415,14 +422,13 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			+ "}";
 
 	final static String extrusionFragmentShaderZ = ""
-			+ "precision highp float;"
-			+ "uniform vec4 u_color;"
-			+ "varying float z;"
+			+ "precision mediump float;"
+			+ "varying float depth;"
 			+ "void main() {"
-			+ "if (z < 0.0)"
-			+ "  gl_FragColor = vec4(z * -1.0, 0.0, 0.0, 1.0);"
-			+ "else"
-			+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0);"
+			+ "float d = depth * 0.2;"
+			+ "if (d < 0.0)"
+			+ "   d = -d;"
+			+ "  gl_FragColor = vec4(1.0 - d, 1.0 - d, 1.0 - d, 1.0 - d);"
 			+ "}";
 
 	public void setAlpha(float a) {
