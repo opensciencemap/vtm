@@ -82,80 +82,80 @@
   <!-- <style-area name="building" fill="#eae8e6" fade="15"/> -->
   <style-area name="building" fade="15" fill="#f2f0eb" />
   <!-- ways -->
-  <rule e="way" k="*" v="*">
+  <m e="way">
     <!-- landuse base -->
-    <rule e="way" k="landuse" v="*">
+    <m k="landuse">
 
-      <rule e="way" k="*" v="industrial|railway">
+      <m v="industrial|railway">
         <use-area name="railway|industrial" />
-      </rule>
+      </m>
 
-      <rule e="way" k="*" v="school">
+      <m v="school">
         <!-- <area fill="#cdabde" /> -->
         <area fade="15" fill="#cdbbca" />
         <line cap="butt" fade="15" fix="true" stroke="#9aabae" width="1.0" />
-      </rule>
+      </m>
 
-      <rule e="way" k="*" v="hospital">
+      <m v="hospital">
         <area fill="#e6e4c5" />
-      </rule>
+      </m>
 
-      <rule e="way" k="*" v="parking">
+      <m v="parking">
         <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
-      </rule>
+      </m>
 
-      <rule e="way" k="*" v="cemetery">
+      <m v="cemetery">
         <use-area name="park" />
-      </rule>
+      </m>
 
-      <rule e="way" k="*" v="park">
+      <m v="park">
         <use-area name="park" />
-      </rule>
+      </m>
 
       <!-- Heideland, keep below forest -->
-      <rule e="way" k="*" v="sand" zoom-min="11">
+      <m v="sand" zoom-min="11">
         <area fade="11" fill="#fffad1" />
-      </rule>
+      </m>
 
-      <rule e="way" k="*" v="wood">
+      <m v="wood">
         <use-area name="forest|wood" />
-      </rule>
+      </m>
 
-      <rule e="way" k="*" v="pitch">
+      <m v="pitch">
         <area fill="#f4f4de" />
         <line cap="butt" fix="true" stroke="#d9d9a3" width="1.0" />
-      </rule>
-      <rule e="way" k="*" v="swimming_pool">
+      </m>
+      <m v="swimming_pool">
         <area fill="#d4ebfc" stroke="#6060ff" stroke-width="0.2" />
-      </rule>
+      </m>
 
-    </rule>
+    </m>
 
-    <rule e="way" k="water" v="*">
+    <m k="water">
       <use-area name="water" />
       <!-- <use-line name="water:outline"/> -->
-    </rule>
+    </m>
 
     <!-- waterways -->
-    <rule e="way" k="waterway" v="*">
-      <rule e="way" k="type" v="ditch|drain">
+    <m k="waterway">
+      <m k="type" v="ditch|drain">
         <use-line name="water" fix="true" width="0.1" />
-      </rule>
-      <rule e="way" k="type" v="canal">
+      </m>
+      <m k="type" v="canal">
         <use-line name="water" width="-0.2" />
-      </rule>
-      <rule e="way" k="type" v="stream">
+      </m>
+      <m k="type" v="stream">
         <use-line name="water" fix="true" width="0.2" />
-      </rule>
-      <rule e="way" k="type" v="river">
-        <rule e="way" k="*" v="*" zoom-min="12">
+      </m>
+      <m k="type" v="river">
+        <m zoom-min="12">
           <use-line name="water" width="0.3" />
-        </rule>
-        <rule e="way" k="*" v="*" zoom-max="11">
+        </m>
+        <m zoom-max="11">
           <use-line name="water" fade="7" fix="true" width="0.3" />
-        </rule>
-      </rule>
-    </rule>
+        </m>
+      </m>
+    </m>
 
 
     <!-- outline 0 -->
@@ -163,148 +163,148 @@
     <style-outline name="0" stroke="#44000000" width="0.1" />
     <!-- tunnel -->
 
-    <rule e="way" k="tunnel" v="yes" zoom-min="11">
+    <m k="tunnel" v="yes" zoom-min="11">
       <!-- highway tunnels -->
 
-      <rule e="way" k="*" v="*" zoom-min="16">
-        <rule e="way" k="*" v="steps">
+      <m zoom-min="16">
+        <m v="steps">
           <use-line name="steps" />
           <!-- <use-outline name="0"/> -->
-        </rule>
+        </m>
         <!--
-          <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="16">
+          <m v="track|footway|path|cycleway" zoom-min="16">
           <use-line name="footway:z16"/>
-          </rule>
+          </m>
         -->
-      </rule>
-      <rule e="way" k="*" v="*" zoom-min="14">
-        <rule e="way" k="*" v="footway">
+      </m>
+      <m zoom-min="14">
+        <m v="footway">
           <use-line name="footway" />
-        </rule>
-        <rule e="way" k="*" v="cycleway">
+        </m>
+        <m v="cycleway">
           <use-line name="highway:cycleway" />
-        </rule>
-        <rule e="way" k="*" v="track">
+        </m>
+        <m v="track">
           <use-line name="highway:track" />
-        </rule>
-        <rule e="way" k="*" v="path">
+        </m>
+        <m v="path">
           <use-line name="highway:path" />
-        </rule>
-        <rule e="way" k="*" v="bridleway">
+        </m>
+        <m v="bridleway">
           <use-line name="bridleway" />
-        </rule>
-        <rule e="way" k="*" v="construction">
+        </m>
+        <m v="construction">
           <use-line name="construction" />
           <use-outline name="0" />
-        </rule>
-        <rule e="way" k="*" v="service">
-          <rule e="way" k="service" v="~|parking_aisle">
+        </m>
+        <m v="service">
+          <m k="service" v="~|parking_aisle">
             <use-line name="highway-service" />
             <use-outline name="0" />
-          </rule>
-        </rule>
-      </rule>
-      <rule e="way" k="*" v="trunk_link|motorway_link">
+          </m>
+        </m>
+      </m>
+      <m v="trunk_link|motorway_link">
         <use-line name="trunk_link" />
         <use-outline name="0" />
         <use-text name="major-road" />
-      </rule>
-      <rule e="way" k="*" v="*" zoom-min="13">
-        <rule e="way" k="*" v="byway|pedestrian">
+      </m>
+      <m zoom-min="13">
+        <m v="byway|pedestrian">
           <use-line name="pedestrian" />
           <use-outline name="0" />
           <use-text name="road" />
-        </rule>
-        <rule e="way" k="*" v="residential|road|unclassified|living_street">
+        </m>
+        <m v="residential|road|unclassified|living_street">
           <use-line name="residential" />
           <use-outline name="0" />
           <use-text name="road" />
-        </rule>
-      </rule>
-      <rule e="way" k="*" v="tertiary|secondary_link">
+        </m>
+      </m>
+      <m v="tertiary|secondary_link">
         <use-line name="tertiary" />
         <use-outline name="0" />
         <use-text name="road" />
-      </rule>
-      <rule e="way" k="*" v="secondary|primary_link">
+      </m>
+      <m v="secondary|primary_link">
         <use-line name="secondary:z11" />
         <use-outline name="0" />
         <use-text name="major-road" />
-      </rule>
-      <rule e="way" k="*" v="primary">
+      </m>
+      <m v="primary">
         <use-line name="primary:z11" />
         <use-outline name="0" />
         <use-text name="major-road" />
-      </rule>
-      <rule e="way" k="*" v="trunk">
+      </m>
+      <m v="trunk">
         <use-line name="trunk" blur="0.3" />
         <use-outline name="0" />
         <!-- <use-outline name="glow"/> -->
         <use-text name="major-road" />
-      </rule>
-      <rule e="way" k="*" v="motorway">
+      </m>
+      <m v="motorway">
         <use-line name="highway:z11" blur="0.3" />
         <use-outline name="0" />
         <!-- <use-outline name="glow"/> -->
         <use-text name="major-road" />
-      </rule>
+      </m>
 
       <!-- railway tunnel -->
-      <rule e="way" k="railway" v="*">
+      <m k="railway">
         <!--
-          <rule e="way" k="railway" v="tram|subway|light_rail|narrow_gauge">
+          <m k="railway" v="tram|subway|light_rail|narrow_gauge">
           <line stroke="#a0a0a0" width="0.8" cap="butt" fix="true"/>
-          </rule>
+          </m>
         -->
-        <rule e="way" k="railway" v="rail">
+        <m k="railway" v="rail">
           <line cap="butt" fix="true" stroke="#aa888888" width="0.9" />
-        </rule>
-      </rule>
-    </rule> <!-- end tunnel -->
+        </m>
+      </m>
+    </m> <!-- end tunnel -->
     <!-- platform cores -->
-    <rule e="way" k="highway|railway|public_transport" v="platform">
-      <rule closed="yes" e="way" k="*" v="*">
+    <m k="highway|railway|public_transport" v="platform">
+      <m closed="yes">
         <area fill="#dbdbc9" />
-      </rule>
-      <rule closed="no" e="way" k="*" v="*">
+      </m>
+      <m closed="no">
         <line stroke="#dbdbc9" width="0.3" />
-      </rule>
-    </rule>
+      </m>
+    </m>
     <!-- runways areas -->
-    <rule e="way" k="aeroway" v="*">
-      <rule closed="yes" e="way" k="*" v="aerodrome">
+    <m k="aeroway">
+      <m closed="yes" v="aerodrome">
         <area fill="#e8ecde" />
-      </rule>
+      </m>
       <!-- A place where planes are parked -->
-      <rule e="way" k="*" v="apron">
+      <m v="apron">
         <area fill="#f0f0f0" />
-      </rule>
+      </m>
       <!-- TODO taxiway, helipad, runway -->
-    </rule>
+    </m>
 
     <!-- turning circles -->
     <!--
-      <rule e="node" k="highway" v="turning_circle"> <circle r="1.5" scale-radius="true"
+      <m k="highway" v="turning_circle"> <circle r="1.5" scale-radius="true"
       fill="#707070" />
-      </rule>
+      </m>
     -->
     <!-- building -->
-    <rule e="way" k="building" v="*">
-      <rule e="way" k="*" v="*" zoom-max="16" zoom-min="14">
+    <m k="building">
+      <m zoom-max="16" zoom-min="14">
         <use-area name="building" fade="14" />
         <use-line name="building" fade="14" />
         <!--
           <line stroke="#c9c3c1" width="1.0" fix="true" cap="butt" fade="15"/>
           <area fill="#e9e6e3" fade="15" />
         -->
-      </rule>
-      <rule e="way" k="*" v="*" zoom-min="17">
+      </m>
+      <m zoom-min="17">
         <caption fill="#4040ff" font-size="10" font-style="bold" k="name" stroke="#ffffff"
           stroke-width="2.0" />
         <caption fill="#606060" font-size="10" font-style="bold" k="addr:housenumber"
           stroke="#ffffff" stroke-width="2.0" />
-      </rule>
-    </rule>
+      </m>
+    </m>
 
     <!-- outline 1 - 4 -->
     <style-outline name="1" stroke="#aa807040" width="0.1" />
@@ -312,401 +312,401 @@
     <style-outline name="primary" stroke="#aa7f7700" width="0.1" />
     <style-outline name="motorway" stroke="#aa805f2e" width="0.1" />
 
-    <rule e="way" k="*" v="*" zoom-max="10">
+    <m zoom-max="10">
 
-      <rule e="way" k="*" v="main">
+      <m v="main">
         <!-- <line cap="butt" fade="5" fix="true" stroke="#e2cf5d" width="1.5" /> -->
         <line cap="butt" fade="8" fix="true" stroke="#c6c5a2" width="1.3" />
-      </rule>
+      </m>
 
-      <rule e="way" k="*" v="motorway">
+      <m v="motorway">
         <line cap="butt" fade="6" fix="true" stroke="#deb683" width="1.5" />
-      </rule>
+      </m>
 
-      <!-- <rule e="way" k="class" v="-main|motorway">
+      <!-- <m k="class" v="-main|motorway">
         <line cap="butt" fix="true" stroke="#00ff00" width="1.8" />
-        </rule>
+        </m>
       -->
 
-    </rule>
+    </m>
 
-    <rule e="way" k="*" v="*" zoom-min="11">
+    <m zoom-min="11">
 
-      <rule e="way" k="*" v="*" zoom-min="14">
-        <rule e="way" k="*" v="footway">
+      <m zoom-min="14">
+        <m v="footway">
           <use-line name="footway" />
-        </rule>
-        <rule e="way" k="*" v="cycleway">
+        </m>
+        <m v="cycleway">
           <use-line name="highway:cycleway" />
-        </rule>
-        <rule e="way" k="*" v="track">
+        </m>
+        <m v="track">
           <use-line name="highway:track" />
-        </rule>
-        <rule e="way" k="*" v="path">
+        </m>
+        <m v="path">
           <use-line name="highway:path" />
-        </rule>
-        <rule e="way" k="*" v="bridleway">
+        </m>
+        <m v="bridleway">
           <use-line name="bridleway" />
-        </rule>
-        <rule e="way" k="*" v="construction">
+        </m>
+        <m v="construction">
           <use-line name="construction" />
           <use-outline name="1" />
-        </rule>
-        <rule e="way" k="*" v="service">
-          <rule e="way" k="service" v="-|parking_aisle">
+        </m>
+        <m v="service">
+          <m k="service" v="-|parking_aisle">
             <use-line name="highway-service" />
             <use-outline name="1" />
-          </rule>
-          <rule e="way" k="service" v="parking_aisle" zoom-min="16">
+          </m>
+          <m k="service" v="parking_aisle" zoom-min="16">
             <use-line name="highway-service" width="-0.4" />
             <use-outline name="1" />
-          </rule>
-        </rule>
-      </rule>
+          </m>
+        </m>
+      </m>
 
-      <rule e="way" k="*" v="trunk_link|motorway_link">
+      <m v="trunk_link|motorway_link">
         <use-line name="trunk_link" />
         <use-outline name="motorway" />
         <use-text name="major-road" />
-      </rule>
+      </m>
 
-      <rule e="way" k="*" v="*" zoom-min="13">
-        <rule e="way" k="*" v="byway|pedestrian">
+      <m zoom-min="13">
+        <m v="byway|pedestrian">
           <use-line name="residential" width="-0.4" />
           <use-outline name="1" />
           <use-text name="road" />
-        </rule>
-        <rule e="way" k="*" v="street|street_limited">
+        </m>
+        <m v="street|street_limited">
           <use-line name="residential" />
           <use-outline name="1" />
           <use-text name="road" />
-        </rule>
-      </rule>
+        </m>
+      </m>
 
-      <rule e="way" k="*" v="tertiary|secondary_link">
+      <m v="tertiary|secondary_link">
         <use-line name="tertiary" />
         <use-outline name="1" />
         <use-text name="road" />
-      </rule>
-      <rule e="way" k="*" v="secondary|primary_link">
+      </m>
+      <m v="secondary|primary_link">
         <!-- <line stroke="#fff939" width="1.6" /> -->
         <use-line name="secondary:z11" />
         <use-outline name="primary" />
         <use-text name="major-road" />
-      </rule>
-      <rule e="way" k="*" v="main">
+      </m>
+      <m v="main">
         <use-line name="primary:z11" />
         <use-outline name="primary" />
         <use-text name="major-road" />
-      </rule>
-      <rule e="way" k="*" v="trunk">
+      </m>
+      <m v="trunk">
         <use-line name="trunk" />
         <use-outline name="motorway" />
         <use-text name="major-road" />
-      </rule>
-      <rule e="way" k="*" v="motorway">
+      </m>
+      <m v="motorway">
         <use-line name="highway:z11" />
         <use-outline name="motorway" />
         <use-text name="major-road" />
-      </rule>
+      </m>
 
-      <rule e="way" k="bridge" v="yes">
+      <m k="bridge" v="yes">
         <style-outline name="bridge" stroke="#aa202020" width="0.08" />
-        <rule e="way" k="*" v="*" zoom-min="16">
-          <rule e="way" k="*" v="steps">
+        <m zoom-min="16">
+          <m v="steps">
             <use-line name="steps" />
             <!-- <use-outline name="bridge"/> -->
-          </rule>
-        </rule>
-        <rule e="way" k="*" v="track|footway|path|cycleway" zoom-min="15">
+          </m>
+        </m>
+        <m v="track|footway|path|cycleway" zoom-min="15">
           <use-line name="footway:z17" cap="butt" />
           <use-outline name="bridge" />
-        </rule>
-        <rule e="way" k="*" v="*" zoom-min="14">
-          <rule e="way" k="*" v="footway">
+        </m>
+        <m zoom-min="14">
+          <m v="footway">
             <use-line name="footway" />
-          </rule>
-          <rule e="way" k="*" v="cycleway">
+          </m>
+          <m v="cycleway">
             <use-line name="highway:cycleway" />
-          </rule>
-          <rule e="way" k="*" v="track">
+          </m>
+          <m v="track">
             <use-line name="highway:track" />
-          </rule>
-          <rule e="way" k="*" v="path">
+          </m>
+          <m v="path">
             <use-line name="highway:path" />
-          </rule>
-          <rule e="way" k="*" v="bridleway">
+          </m>
+          <m v="bridleway">
             <use-line name="bridleway" />
-          </rule>
-          <rule e="way" k="*" v="construction">
+          </m>
+          <m v="construction">
             <use-line name="construction" cap="square" />
             <use-outline name="bridge" />
-          </rule>
-          <rule e="way" k="*" v="service">
+          </m>
+          <m v="service">
             <use-line name="highway-service" cap="square" />
             <use-outline name="bridge" />
-          </rule>
-        </rule>
+          </m>
+        </m>
 
-        <rule e="way" k="*" v="byway|pedestrian">
+        <m v="byway|pedestrian">
           <use-line name="pedestrian:bridge" />
           <use-outline name="bridge" />
           <use-text name="road" />
-        </rule>
+        </m>
 
-        <rule e="way" k="*" v="street|street_limited">
+        <m v="street|street_limited">
           <use-line name="residential:bridge" />
           <use-outline name="bridge" />
           <use-text name="road" />
-        </rule>
+        </m>
 
-        <rule e="way" k="*" v="main">
+        <m v="main">
           <use-line name="primary:z11" cap="square" />
           <use-outline name="bridge" />
           <use-text name="major-road" />
-        </rule>
+        </m>
 
-        <rule e="way" k="*" v="motorway">
+        <m v="motorway">
           <use-line name="highway:z11" cap="square" />
           <use-outline name="bridge" />
           <use-text name="major-road" />
-        </rule>
-      </rule> <!-- end bridge=yes -->
-    </rule> <!-- end zoom-min=11 -->
+        </m>
+      </m> <!-- end bridge=yes -->
+    </m> <!-- end zoom-min=11 -->
 
 
     <!-- runways cores -->
-    <rule e="way" k="aeroway" v="*">
-      <rule e="way" k="*" v="runway">
+    <m k="aeroway">
+      <m v="runway">
         <use-line name="aeroway:runway" />
-      </rule>
-      <rule e="way" k="*" v="taxiway">
+      </m>
+      <m v="taxiway">
         <use-line name="aeroway:runway" width="-0.8" />
-      </rule>
-    </rule>
+      </m>
+    </m>
     <!-- man_made features -->
     <!--
-      <rule e="way" k="man_made" v="pier">
-      <rule e="way" k="*" v="*" closed="no">
+      <m k="man_made" v="pier">
+      <m closed="no">
       <line stroke="#d0d0d0" width="0.4" cap="butt" />
       <line stroke="#e4e4e4" width="0.3" cap="butt" />
-      </rule>
-      <rule e="way" k="*" v="*" closed="yes">
+      </m>
+      <m closed="yes">
       <area fill="#e4e4e4" stroke="#d0d0d0" stroke-width="0.05" />
-      </rule>
-      </rule>
+      </m>
+      </m>
     -->
     <!-- barriers -->
-    <rule e="way" k="barrier" v="*">
+    <m k="barrier">
       <!--
-        <rule e="way" k="*" v="fence|wall|city_wall" zoom-min="15"> <line
-        stroke="#909090" width="0.1" cap="butt" /> </rule>
+        <m v="fence|wall|city_wall" zoom-min="15"> <line
+        stroke="#909090" width="0.1" cap="butt" /> </m>
       -->
-      <rule e="way" k="*" v="retaining_wall" zoom-min="15">
+      <m v="retaining_wall" zoom-min="15">
         <line cap="butt" fix="true" stroke="#888888" width="1.1" />
-      </rule>
-    </rule>
+      </m>
+    </m>
     <!-- non-physical routes -->
     <!--
-      <rule e="way" k="route" v="ferry"> <line stroke="#707070" width="0.3"
-      stroke-dasharray="15,10" cap="butt" /> </rule>
+      <m k="route" v="ferry"> <line stroke="#707070" width="0.3"
+      stroke-dasharray="15,10" cap="butt" /> </m>
     -->
     <!-- aerial ways -->
     <!--
-      <rule e="way" k="aerialway" v="*"> <line stroke="#202020" width="0.4"
-      cap="butt" /> <rule e="way" k="aerialway" v="cable_car"> <lineSymbol
+      <m k="aerialway"> <line stroke="#202020" width="0.4"
+      cap="butt" /> <m k="aerialway" v="cable_car"> <lineSymbol
       src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/cable_car.png"
-      /> </rule> <rule e="way" k="aerialway" v="chair_lift"> <lineSymbol
+      /> </m> <m k="aerialway" v="chair_lift"> <lineSymbol
       src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/chair_lift_2.png"
-      /> </rule> <rule e="way" k="aerialway" v="gondola"> <lineSymbol src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/gondola.png"
-      /> </rule> <rule e="way" k="*" v="*" zoom-min="14"> <text k="name"
+      /> </m> <m k="aerialway" v="gondola"> <lineSymbol src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/gondola.png"
+      /> </m> <m zoom-min="14"> <text k="name"
       font-style="bold"
-      font-size="10" fill="#606060" stroke="#ffffff" width="2.0" /> </rule>
-      </rule>
+      font-size="10" fill="#606060" stroke="#ffffff" width="2.0" /> </m>
+      </m>
     -->
     <!-- railway (no tunnel) -->
-    <rule e="way" k="road" v="*" zoom-min="12">
-      <rule e="way" k="railway" v="station">
+    <m k="road" zoom-min="12">
+      <m k="railway" v="station">
         <area fill="#dbdbc9" stroke="#707070" stroke-width="0.3" />
-      </rule>
+      </m>
       <!-- railway bridge casings -->
-      <rule e="way" k="*" v="*" zoom-min="14">
-        <rule e="way" k="bridge" v="yes|true">
-          <rule e="way" k="railway" v="tram">
+      <m zoom-min="14">
+        <m k="bridge" v="yes|true">
+          <m k="railway" v="tram">
             <line cap="butt" fix="true" stroke="#777777" width="0.9" />
-          </rule>
-          <rule e="way" k="railway" v="subway|light_rail|narrow_gauge">
+          </m>
+          <m k="railway" v="subway|light_rail|narrow_gauge">
             <line cap="butt" fix="true" stroke="#777777" width="0.9" />
-          </rule>
-          <rule e="way" k="railway" v="rail">
+          </m>
+          <m k="railway" v="rail">
             <line cap="butt" fix="true" stroke="#777777" width="0.9" />
-          </rule>
-        </rule>
-      </rule>
+          </m>
+        </m>
+      </m>
       <!-- railway casings and cores -->
-      <rule e="way" k="railway" v="tram" zoom-min="15">
+      <m k="railway" v="tram" zoom-min="15">
         <line fix="true" stroke="#887766" width="1.0" />
-      </rule>
-      <rule e="way" k="railway" v="light_rail|subway|narrow_gauge" zoom-min="14">
+      </m>
+      <m k="railway" v="light_rail|subway|narrow_gauge" zoom-min="14">
         <line cap="butt" fix="true" stroke="#a0a0a0" width="0.9" />
-      </rule>
-      <rule e="way" k="class" v="major_rail" zoom-max="13">
+      </m>
+      <m k="class" v="major_rail" zoom-max="13">
         <line cap="butt" fade="12" fix="true" stroke="#ddaa9988" width="1.0" />
-      </rule>
-      <rule e="way" k="class" v="major_rail" zoom-min="14">
+      </m>
+      <m k="class" v="major_rail" zoom-min="14">
         <line cap="butt" fade="12" fix="true" stipple="10" stipple-stroke="#ffffff"
           stipple-width="0.8" stroke="#aaa6a4" width="2.0" />
-      </rule>
+      </m>
       <!--
-        <rule e="way" k="railway" v="rail" zoom-max="14" zoom-min="13">
+        <m k="railway" v="rail" zoom-max="14" zoom-min="13">
         <line stroke="#8888aa" width="0.6" cap="butt"
         fix="true" />
-        </rule>
+        </m>
       -->
       <!--
-        <rule e="way" k="railway" v="rail" zoom-max="13" zoom-min="11">
+        <m k="railway" v="rail" zoom-max="13" zoom-min="11">
         <line stroke="#bbbbcc" width="0.8" cap="butt" fix="true" />
-        </rule>
+        </m>
       -->
       <!-- whatever railway:spur means ... -->
-      <rule e="way" k="railway" v="disused|spur|abandoned|preserved">
+      <m k="railway" v="disused|spur|abandoned|preserved">
         <line cap="butt" fade="12" fix="true" stroke="#cccccc" width="0.8" />
-      </rule>
-    </rule>
+      </m>
+    </m>
     <!-- non-physical boundaries -->
     <!--
-      <rule e="way" k="boundary" v="*"> <rule e="way" k="boundary" v="national_park">
+      <m k="boundary"> <m k="boundary" v="national_park">
       <line stroke="#4ef94b" width="0.25" stroke-dasharray="15, 5, 5, 5"
       />
     -->
-    <rule e="way" k="boundary" v="national_park">
+    <m k="boundary" v="national_park">
       <area fill="#d7e6b0" />
-    </rule>
+    </m>
 
-    <rule e="way" k="admin" v="yes">
-      <rule e="way" k="admin_level" v="*">
+    <m k="admin" v="yes">
+      <m k="admin_level">
 
-        <rule e="way" k="admin_level" v="4">
+        <m k="admin_level" v="4">
           <line cap="butt" fix="true" stroke="#afa0dd" width="1.0" />
-        </rule>
-        <rule e="way" k="admin_level" v="3">
+        </m>
+        <m k="admin_level" v="3">
           <line cap="butt" fix="true" stroke="#0000ff" width="0.95" />
-        </rule>
-        <rule e="way" k="admin_level" v="2">
+        </m>
+        <m k="admin_level" v="2">
           <line cap="butt" fix="true" stroke="#808080" width="1.0" />
           <!-- stipple-width="1.0" stipple="4" stipple-stroke="#606060"/> -->
-        </rule>
-      </rule>
-    </rule>
+        </m>
+      </m>
+    </m>
 
 
-    <rule e="way" k="debug" v="area">
+    <m k="debug" v="area">
       <line cap="butt" fix="true" stroke="#ff0000" width="1.2" />
       <area fill="#880000ff" />
       <caption fill="#ff0000" font-size="15" k="name" stroke="#444444"
         stroke-width="2.0" />
-    </rule>
-    <rule e="way" k="debug" v="way">
+    </m>
+    <m k="debug" v="way">
       <line cap="butt" fix="true" stroke="#00ffff" width="1.5" />
       <caption fill="#00ffff" font-size="15" k="name" stroke="#444444"
         stroke-width="2.0" />
-    </rule>
-    <rule e="way" k="debug" v="box">
+    </m>
+    <m k="debug" v="box">
       <line cap="butt" fix="true" stroke="#000000" width="1.5" />
-    </rule>
+    </m>
 
 
 
-  </rule>
+  </m>
 
 
 
-  <rule e="node" k="*" v="*">
+  <m e="node">
     <!-- barrier -->
-    <rule e="node" k="barrier" v="bollard">
+    <m k="barrier" v="bollard">
       <circle fill="#909090" r="1.5" />
-    </rule>
-    <rule e="node" k="debug" v="*">
+    </m>
+    <m k="debug">
       <caption fill="#0000ff" font-size="16" k="name" />
-    </rule>
+    </m>
     <!-- highway -->
     <!--
-      <rule e="node" k="highway" v="*"> <rule e="node" k="highway" v="turning_circle">
-      <circle r="1.4" scale-radius="true" fill="#ffffff" /> </rule> </rule>
+      <m k="highway"> <m k="highway" v="turning_circle">
+      <circle r="1.4" scale-radius="true" fill="#ffffff" /> </m> </m>
     -->
     <!-- historic -->
     <!--
-      <rule e="node" k="historic" v="*"> <circle r="3" fill="#4040ff" stroke="#606060"
-      width="1.5" /> <rule e="node" k="*" v="*" zoom-min="17"> <caption
+      <m k="historic"> <circle r="3" fill="#4040ff" stroke="#606060"
+      width="1.5" /> <m zoom-min="17"> <caption
       k="name" dy="-10" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff"
-      width="2.0" /> </rule> </rule>
+      width="2.0" /> </m> </m>
     -->
     <!-- house numbers -->
     <!--
-      <rule e="node" k="addr:housenumber" v="*" zoom-min="18"> <caption
+      <m k="addr:housenumber" zoom-min="18"> <caption
       k="addr:housenumber" font-style="bold" font-size="10" fill="#606060"
       stroke="#ffffff"
-      width="2.0" /> </rule>
+      width="2.0" /> </m>
     -->
     <!-- place -->
-    <rule e="node" k="place_label" v="*">
-      <rule e="node" k="*" v="suburb" zoom-max="14">
+    <m k="place_label">
+      <m v="suburb" zoom-max="14">
         <caption fill="#606060" font-size="17" font-style="italic" k="name"
           priority="4" stroke="#ffffff" stroke-width="2.0" />
-      </rule>
-      <rule e="node" k="*" v="village" zoom-max="14">
+      </m>
+      <m v="village" zoom-max="14">
         <caption fill="#2020cc" font-size="17" k="name" priority="3" stroke="#ffffff"
           stroke-width="2.0" />
-      </rule>
-      <rule e="node" k="*" v="island" zoom-min="10">
+      </m>
+      <m v="island" zoom-min="10">
         <caption fill="#000000" font-size="20" font-style="bold" k="name"
           priority="1" stroke="#ffffff" stroke-width="2.0" />
-      </rule>
-      <rule e="node" k="*" v="town">
+      </m>
+      <m v="town">
         <caption fill="#000000" font-size="19" k="name" priority="2" stroke="#ffffff"
           stroke-width="2.0" />
-      </rule>
-      <rule e="node" k="*" v="city">
+      </m>
+      <m v="city">
         <caption fill="#000000" font-size="20" k="name" priority="1" stroke="#ffffff"
           stroke-width="2.0" />
-      </rule>
-    </rule>
-    <rule e="node" k="country_label" v="*">
+      </m>
+    </m>
+    <m k="country_label">
       <caption fill="#000000" font-size="20" font-style="bold" k="name" priority="0"
         stroke="#ffffff" stroke-width="2.0" />
-    </rule>
+    </m>
 
     <!-- railway -->
-    <rule e="node" k="railway" v="*">
-      <rule e="node" k="*" v="station" zoom-min="14">
+    <m k="railway">
+      <m v="station" zoom-min="14">
         <circle fill="#ec2d2d" r="6" stroke="#606060" stroke-width="1.5" />
         <!--
           <caption k="name" dy="-10" font-style="bold" font-size="13" fill="#ec2d2d"
           stroke="#ffffff" stroke-width="2.0" />
         -->
-      </rule>
-      <rule e="node" k="*" v="halt|tram_stop" zoom-min="17">
+      </m>
+      <m v="halt|tram_stop" zoom-min="17">
         <circle fill="#ec2d2d" r="4" stroke="#606060" stroke-width="1.5" />
         <!--
           <caption k="name" dy="-15" font-style="bold" font-size="11" fill="#ec2d2d"
           stroke="#ffffff" stroke-width="2.0" />
         -->
-      </rule>
-    </rule>
+      </m>
+    </m>
     <!-- aeroway -->
-    <rule e="node" k="aeroway" v="*">
-      <rule e="node" k="aeroway" v="helipad" zoom-min="17">
+    <m k="aeroway">
+      <m k="aeroway" v="helipad" zoom-min="17">
         <symbol src="jar:symbols/helipad.png" />
-      </rule>
-      <rule e="node" k="aeroway" v="aerodrome|airport" zoom-max="13">
+      </m>
+      <m k="aeroway" v="aerodrome|airport" zoom-max="13">
         <symbol src="jar:symbols/airport.png" />
-      </rule>
-    </rule>
+      </m>
+    </m>
 
-    <rule e="node" k="building_label" v="*" zoom-min="14">
+    <m k="building_label" zoom-min="14">
         <caption fill="#1d2e6f" font-size="14" style="italic" k="name" priority="20"
         stroke="#9daeef" stroke-width="0.8" />
-    </rule>
+    </m>
 
-  </rule>
+  </m>
 </rendertheme>
