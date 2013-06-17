@@ -42,6 +42,7 @@ import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.BitmapUtils;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
 
@@ -49,6 +50,9 @@ import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
+/**
+ * Special Renderer for drawing tile polygon layers
+ */
 public final class PolygonRenderer {
 	private static final String TAG = PolygonRenderer.class.getName();
 
@@ -69,6 +73,7 @@ public final class PolygonRenderer {
 	private static int[] hPolygonVertexPosition = new int[numShaders];
 	private static int[] hPolygonMatrix = new int[numShaders];
 	private static int[] hPolygonColor = new int[numShaders];
+	private static int[] hPolygonScale = new int[numShaders];
 
 	private static int mTexWater;
 	private static int mTexWood;
@@ -97,14 +102,16 @@ public final class PolygonRenderer {
 			}
 			hPolygonMatrix[i] = glGetUniformLocation(polygonProgram[i], "u_mvp");
 			hPolygonColor[i] = glGetUniformLocation(polygonProgram[i], "u_color");
+			hPolygonScale[i] = glGetUniformLocation(polygonProgram[i], "u_scale");
+
 			hPolygonVertexPosition[i] = glGetAttribLocation(polygonProgram[i], "a_pos");
 		}
 
 		mFillPolys = new PolygonLayer[STENCIL_BITS];
 
-		//mTexWood = loadSprite("jar:grass3.png");
-		//mTexWater = loadSprite("jar:water2.png");
-		//mTexGrass= loadSprite("jar:grass2.png");
+		mTexWood = loadSprite("jar:grass3.png");
+		mTexWater = loadSprite("jar:water2.png");
+		mTexGrass = loadSprite("jar:grass2.png");
 
 		return true;
 	}
@@ -129,7 +136,7 @@ public final class PolygonRenderer {
 		return textures[0];
 	}
 
-	private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale) {
+	private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale, float div) {
 
 		/* draw to framebuffer */
 		glColorMask(true, true, true, true);
@@ -141,17 +148,18 @@ public final class PolygonRenderer {
 		for (int c = start; c < end; c++) {
 			Area a = mFillPolys[c].area;
 
-			//if (a.color == 0xFFAFC5E3 || a.color == 0xffd1dbc7 || a.color == 0xffa3ca7b) {
-			//	shader = texShader;
-			//	setShader(texShader, m);
-			//	if (a.color ==  0xFFAFC5E3)
-			//		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexWater);
-			//	else if (a.color == 0xffd1dbc7)
-			//		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexWood);
-			//	else
-			//		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexGrass);
-			//} else
-			if (a.fade >= zoom) {
+			if (a.color == 0xFFAFC5E3 || a.color == 0xffd1dbc7 || a.color == 0xffa3ca7b) {
+				shader = texShader;
+				setShader(texShader, m);
+
+				GLES20.glUniform2f(hPolygonScale[1], FastMath.clamp(scale - 1, 0, 1), div);
+				if (a.color == 0xFFAFC5E3)
+					GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexWater);
+				else if (a.color == 0xffd1dbc7)
+					GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexWood);
+				else
+					GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexGrass);
+			} else if (a.fade >= zoom) {
 				float f = 1.0f;
 				/* fade in/out */
 				if (a.fade >= zoom) {
@@ -228,19 +236,23 @@ public final class PolygonRenderer {
 	 *            current Matrices
 	 * @param first
 	 *            pass true to clear stencil buffer region
+	 * @param div
+	 *            scale relative to 'base scale' of the tile
 	 * @param clip
 	 *            clip to first quad in current vbo
 	 * @return
 	 *         next layer
 	 */
 	public static Layer draw(MapPosition pos, Layer layer,
-			Matrices m, boolean first, boolean clip) {
+			Matrices m, boolean first, float div, boolean clip) {
 
 		GLState.test(false, true);
 
 		setShader(polyShader, m);
 
 		int zoom = pos.zoomLevel;
+		float scale = (float) pos.getZoomScale();
+
 		int cur = mCount;
 
 		// reset start when only one layer left in stencil buffer
@@ -249,7 +261,6 @@ public final class PolygonRenderer {
 
 		int start = cur;
 
-		float scale = (float) pos.getZoomScale();
 
 		Layer l = layer;
 		for (; l != null && l.type == Layer.POLYGON; l = l.next) {
@@ -276,13 +287,13 @@ public final class PolygonRenderer {
 
 			// draw up to 7 layers into stencil buffer
 			if (cur == STENCIL_BITS - 1) {
-				fillPolygons(m, start, cur, zoom, scale);
+				fillPolygons(m, start, cur, zoom, scale, div);
 				start = cur = 0;
 			}
 		}
 
 		if (cur > 0)
-			fillPolygons(m, start, cur, zoom, scale);
+			fillPolygons(m, start, cur, zoom, scale, div);
 
 		if (clip) {
 			if (first) {
@@ -402,11 +413,11 @@ public final class PolygonRenderer {
 
 	static void debugDraw(Matrix4 m, float[] coords, int color) {
 		GLState.test(false, false);
-		if (mDebugFill == null)
+		if (mDebugFill == null) {
 			mDebugFill = ByteBuffer.allocateDirect(32).order(ByteOrder.nativeOrder())
 					.asFloatBuffer();
-
-		mDebugFill.put(coords);
+			mDebugFill.put(coords);
+		}
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
@@ -471,10 +482,13 @@ public final class PolygonRenderer {
 	private final static String textureVertexShader = ""
 			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
+			+ "uniform vec2 u_scale;"
 			+ "attribute vec4 a_pos;"
 			+ "varying vec2 v_st;"
+			+ "varying vec2 v_st2;"
 			+ "void main() {"
-			+ "  v_st = clamp(a_pos.xy, 0.0, 1.0) * 2.0;"
+			+ "  v_st = clamp(a_pos.xy, 0.0, 1.0) * (2.0 / u_scale.y);"
+			+ "  v_st2 = clamp(a_pos.xy, 0.0, 1.0) * (4.0 / u_scale.y);"
 			+ "  gl_Position = u_mvp * a_pos;"
 			+ "}";
 
@@ -482,8 +496,10 @@ public final class PolygonRenderer {
 			+ "precision mediump float;"
 			+ "uniform vec4 u_color;"
 			+ "uniform sampler2D tex;"
+			+ "uniform vec2 u_scale;"
 			+ "varying vec2 v_st;"
+			+ "varying vec2 v_st2;"
 			+ "void main() {"
-			+ "  gl_FragColor =  texture2D(tex, v_st);"
+			+ "  gl_FragColor = mix(texture2D(tex, v_st), texture2D(tex, v_st2), u_scale.x);"
 			+ "}";
 }

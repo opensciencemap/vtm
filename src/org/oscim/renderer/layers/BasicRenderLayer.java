@@ -64,7 +64,7 @@ public abstract class BasicRenderLayer extends RenderLayer {
 			for (Layer l = layers.baseLayers; l != null;) {
 				switch (l.type) {
 					case Layer.POLYGON:
-						l = PolygonRenderer.draw(curPos, l, m, true, false);
+						l = PolygonRenderer.draw(curPos, l, m, true, 1, false);
 						break;
 
 					case Layer.LINE:
