@@ -158,6 +158,10 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		if (!to.ownBitmap)
 			TextureItem.releaseBitmap(to);
+		else{
+			// FIXME when in doubt
+			to.bitmap = null;
+		}
 	}
 
 	public static void uploadTexture(TextureItem to, Bitmap bitmap,
