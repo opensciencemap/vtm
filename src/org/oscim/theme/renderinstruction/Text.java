@@ -167,7 +167,7 @@ public final class Text extends RenderInstruction {
 		this.style = style;
 		this.textKey = textKey;
 		this.caption = caption;
-		this.dy = dy;
+		this.dy = -dy;
 		this.priority = priority;
 
 		//paint = Graphics.res.getPaint();

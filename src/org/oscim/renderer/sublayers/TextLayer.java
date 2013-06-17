@@ -162,8 +162,8 @@ public final class TextLayer extends TextureLayer {
 					//if (it.origin == 0) {
 					x1 = x3 = (short) (COORD_SCALE * -hw);
 					x2 = x4 = (short) (COORD_SCALE * hw);
-					y1 = y2 = (short) (COORD_SCALE * hh);
-					y3 = y4 = (short) (COORD_SCALE * -hh);
+					y1 = y2 = (short) (COORD_SCALE * (it.text.dy + hh));
+					y3 = y4 = (short) (COORD_SCALE * (it.text.dy - hh));
 					//} else {
 					//	x1 = x3 = (short) (SCALE * 0);
 					//	x2 = x4 = (short) (SCALE * width);
