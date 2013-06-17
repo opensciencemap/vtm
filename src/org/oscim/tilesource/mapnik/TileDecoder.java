@@ -524,7 +524,7 @@ public class TileDecoder extends PbfDecoder {
 			// +  (xmax - xmin) * (ymax - ymin));
 			elem.pointPos -= elem.index[elem.indexPos];
 			if (elem.indexPos > 0) {
-				elem.indexPos -= 3;
+				elem.indexPos -= 2;
 				elem.index[elem.indexPos + 1] = -1;
 			} else {
 				elem.type = GeometryType.NONE;
