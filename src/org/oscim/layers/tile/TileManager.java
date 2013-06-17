@@ -517,17 +517,18 @@ public class TileManager {
 				MapTile t = tiles[i];
 				if (t.isLocked()) {
 					// dont remove tile used by GLRenderer, or somewhere else
-					Log.d(TAG, "limitCache: tile still locked " + t
+					Log.d(TAG, "locked " + t
 							+ " " + t.distance
 							+ " " + (t.state == STATE_NEW_DATA)
-							+ " " + (t.state == STATE_LOADING));
+							+ " " + (t.state == STATE_LOADING)
+							+ " " + pos.zoomLevel);
 					// try again in next run.
 				} else if (t.state == STATE_LOADING) {
 					// NOTE:  when set loading to false the tile could be
 					// added to load queue again while still processed in
 					// MapTileLoader => need tile.cancel flag.
 					// t.isLoading = false;
-					Log.d(TAG, "limitCache: cancel loading " + t
+					Log.d(TAG, "cancel loading " + t
 							+ " " + t.distance);
 				} else {
 					// clear unused tile
