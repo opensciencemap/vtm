@@ -85,6 +85,7 @@ public class Layers {
 	public LineLayer getLineLayer(int level) {
 		return (LineLayer) getLayer(level, Layer.LINE);
 	}
+
 	/**
 	 * Get or add the PolygonLayer for a level. Levels are ordered from
 	 * bottom (0) to top
@@ -93,6 +94,7 @@ public class Layers {
 	public PolygonLayer getPolygonLayer(int level) {
 		return (PolygonLayer) getLayer(level, Layer.POLYGON);
 	}
+
 	/**
 	 * Get or add the TexLineLayer for a level. Levels are ordered from
 	 * bottom (0) to top
@@ -160,7 +162,8 @@ public class Layers {
 
 		if (layer.type != type) {
 			// check if found layer matches requested type
-			Log.d(TAG, "BUG wrong layer " + layer.type + " " + type);
+			Log.d(TAG, "BUG wrong layer " + layer.type + " " + type +
+					" on layer " + layer.level);
 			// TODO throw exception
 			return null;
 		}
@@ -288,22 +291,20 @@ public class Layers {
 	public void clear() {
 
 		// clear line and polygon layers directly
-		Layer l = baseLayers;
-		while (l != null) {
+		for (Layer l = baseLayers; l != null; l = l.next) {
 			if (l.vertexItems != null) {
 				VertexItem.pool.releaseAll(l.vertexItems);
 				l.vertexItems = null;
 				l.curItem = null;
 			}
 			l.verticesCnt = 0;
-			l = l.next;
 		}
 
-		for (l = textureLayers; l != null; l = l.next) {
+		for (Layer l = textureLayers; l != null; l = l.next) {
 			l.clear();
 		}
 
-		for (l = extrusionLayers; l != null; l = l.next) {
+		for (Layer l = extrusionLayers; l != null; l = l.next) {
 			l.clear();
 		}
 		baseLayers = null;
