@@ -59,26 +59,13 @@
  */
 package org.oscim.renderer.sublayers;
 
-import java.util.HashMap;
-
 import org.oscim.utils.pool.Inlist;
 
 import android.graphics.Bitmap;
 
-public class TextureAtlas{
+public class TextureAtlas extends Inlist<TextureAtlas> {
 
-	public static class SpriteManager{
-		TextureAtlas atlas;
-		HashMap<Object, Rect> items;
 
-		public Rect getRegion(Object item){
-			return items.get(item);
-		}
-
-		public Rect addItem(int width, int height){
-			return atlas.getRegion(width, height);
-		}
-	}
 
 	/** Allocated slots */
 	public Slot mSlots;
@@ -97,7 +84,7 @@ public class TextureAtlas{
 	int mUsed;
 
 	/** Texture identity (OpenGL) */
-	int mId;
+	int id;
 
 	/** Atlas data */
 	Bitmap mData;
@@ -116,7 +103,7 @@ public class TextureAtlas{
 		public int x, y, w, h;
 	}
 
-	private TextureAtlas(int width, int height, int depth) {
+	TextureAtlas(int width, int height, int depth) {
 		mWidth = width;
 		mHeight = height;
 		mDepth = depth;
@@ -197,15 +184,15 @@ public class TextureAtlas{
 
 		// merge
 		for (slot = mSlots; slot.next != null;) {
-			Slot next = slot.next;
+			Slot nextSlot = slot.next;
 
-			if (slot.y == next.y) {
-				slot.w += next.w;
+			if (slot.y == nextSlot.y) {
+				slot.w += nextSlot.w;
 
 				// erease 'next' slot
-				slot.next = next.next;
+				slot.next = nextSlot.next;
 			} else {
-				slot = next;
+				slot = nextSlot;
 			}
 		}
 
