@@ -156,14 +156,14 @@ public class TileRenderer {
 		for (Layer l = t.layers.baseLayers; l != null;) {
 			switch (l.type) {
 				case Layer.POLYGON:
-					l = PolygonRenderer.draw(pos, l, m, !clipped, true);
+					l = PolygonRenderer.draw(pos, l, m, !clipped, div, true);
 					clipped = true;
 					break;
 
 				case Layer.LINE:
 					if (!clipped) {
 						// draw stencil buffer clip region
-						PolygonRenderer.draw(pos, null, m, true, true);
+						PolygonRenderer.draw(pos, null, m, true, div, true);
 						clipped = true;
 					}
 					l = LineRenderer.draw(t.layers, l, pos, m, div, simpleShader);
@@ -172,7 +172,7 @@ public class TileRenderer {
 				case Layer.TEXLINE:
 					if (!clipped) {
 						// draw stencil buffer clip region
-						PolygonRenderer.draw(pos, null, m, true, true);
+						PolygonRenderer.draw(pos, null, m, true, div, true);
 						clipped = true;
 					}
 					l = LineTexRenderer.draw(t.layers, l, pos, m, div);

@@ -744,7 +744,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 
 			for (Layer l = layers.baseLayers; l != null;) {
 				if (l.type == Layer.POLYGON) {
-					l = PolygonRenderer.draw(pos, l, m, true, false);
+					l = PolygonRenderer.draw(pos, l, m, true, 1, false);
 				} else {
 					float div = scale * (float) (pos.scale / (1 << pos.zoomLevel));
 					l = LineRenderer.draw(layers, l, pos, m, div, 0);

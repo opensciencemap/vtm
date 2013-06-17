@@ -114,13 +114,6 @@ public class TextRenderLayer extends BasicRenderLayer {
 	}
 
 
-
-	//	class ActiveTile {
-	//		MapTile tile;
-	//		int activeLabels;
-	//		Label labels;
-	//	}
-
 	private float mSquareRadius;
 	private int mRelabelCnt;
 	private final TileRenderLayer mTileLayer;
@@ -551,7 +544,6 @@ public class TextRenderLayer extends BasicRenderLayer {
 		return true;
 	}
 
-
 	@Override
 	public synchronized void update(MapPosition pos, boolean changed,
 			Matrices matrices) {
@@ -612,7 +604,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 		}
 	}
 
-	/*private */void cleanup() {
+	/* private */void cleanup() {
 		mPool.releaseAll(mPrevLabels);
 		mPrevLabels = null;
 		mTileSet.clear();
@@ -660,7 +652,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 
 			for (Layer l = layers.baseLayers; l != null;) {
 				if (l.type == Layer.POLYGON) {
-					l = PolygonRenderer.draw(pos, l, m, true, false);
+					l = PolygonRenderer.draw(pos, l, m, true, 1, false);
 				} else {
 					float div = scale * (float) (pos.scale / (1 << pos.zoomLevel));
 					l = LineRenderer.draw(layers, l, pos, m, div, 0);
