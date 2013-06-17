@@ -64,6 +64,8 @@ public final class PolygonRenderer {
 
 	private static PolygonLayer[] mFillPolys;
 
+	private static boolean enableTexture = false;
+
 	private static int numShaders = 2;
 	private static int polyShader = 0;
 	private static int texShader = 1;
@@ -108,11 +110,11 @@ public final class PolygonRenderer {
 		}
 
 		mFillPolys = new PolygonLayer[STENCIL_BITS];
-
-		mTexWood = loadSprite("jar:grass3.png");
-		mTexWater = loadSprite("jar:water2.png");
-		mTexGrass = loadSprite("jar:grass2.png");
-
+		if (enableTexture) {
+			mTexWood = loadSprite("jar:grass3.png");
+			mTexWater = loadSprite("jar:water2.png");
+			mTexGrass = loadSprite("jar:grass2.png");
+		}
 		return true;
 	}
 
@@ -136,7 +138,8 @@ public final class PolygonRenderer {
 		return textures[0];
 	}
 
-	private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale, float div) {
+	private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale,
+			float div) {
 
 		/* draw to framebuffer */
 		glColorMask(true, true, true, true);
@@ -147,8 +150,9 @@ public final class PolygonRenderer {
 
 		for (int c = start; c < end; c++) {
 			Area a = mFillPolys[c].area;
-
-			if (a.color == 0xFFAFC5E3 || a.color == 0xffd1dbc7 || a.color == 0xffa3ca7b) {
+			if (enableTexture && (a.color == 0xFFAFC5E3
+					|| a.color == 0xffd1dbc7
+					|| a.color == 0xffa3ca7b)) {
 				shader = texShader;
 				setShader(texShader, m);
 
@@ -260,7 +264,6 @@ public final class PolygonRenderer {
 			cur = 0;
 
 		int start = cur;
-
 
 		Layer l = layer;
 		for (; l != null && l.type == Layer.POLYGON; l = l.next) {
