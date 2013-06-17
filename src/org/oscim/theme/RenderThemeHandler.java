@@ -53,7 +53,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	}
 
 	private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
-	private static final String ELEMENT_NAME_RULE = "rule";
+	private static final String ELEMENT_NAME_MATCH = "m";
 	private static final String ELEMENT_NAME_STYLE_TEXT = "style-text";
 	private static final String ELEMENT_NAME_STYLE_AREA = "style-area";
 	private static final String ELEMENT_NAME_STYLE_LINE = "style-line";
@@ -142,7 +142,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName) {
 		mElementStack.pop();
 
-		if (ELEMENT_NAME_RULE.equals(localName)) {
+		if (ELEMENT_NAME_MATCH.equals(localName)) {
 			mRuleStack.pop();
 			if (mRuleStack.empty()) {
 				mRulesList.add(mCurrentRule);
@@ -166,7 +166,7 @@ public class RenderThemeHandler extends DefaultHandler {
 				mRenderTheme = RenderTheme.create(localName, attributes);
 			}
 
-			else if (ELEMENT_NAME_RULE.equals(localName)) {
+			else if (ELEMENT_NAME_MATCH.equals(localName)) {
 				checkState(localName, Element.RULE);
 				Rule rule = Rule.create(localName, attributes, mRuleStack);
 				if (!mRuleStack.empty()) {

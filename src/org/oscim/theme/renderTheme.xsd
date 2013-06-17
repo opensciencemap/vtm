@@ -176,11 +176,11 @@
   </xs:complexType>
 
 
-  <!-- rule elements -->
-  <xs:complexType name="rule">
+  <!-- match elements -->
+  <xs:complexType name="m">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
-      <!-- recursion to allow for nested rules -->
-      <xs:element name="rule" type="tns:rule" />
+      <!-- recursion to allow for nested m -->
+      <xs:element name="m" type="tns:m" />
 
       <xs:element name="area" type="tns:area" />
       <xs:element name="use-area" type="tns:area" />
@@ -222,7 +222,7 @@
       </xs:sequence>
       <xs:sequence minOccurs="0" maxOccurs="unbounded">
 
-        <xs:element name="rule" type="tns:rule" />
+        <xs:element name="m" type="tns:m" />
       </xs:sequence>
     </xs:sequence>
     <xs:attribute name="version" type="xs:positiveInteger" use="required" />
