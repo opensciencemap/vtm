@@ -16,8 +16,6 @@
 package org.oscim.renderer.sublayers;
 
 import static org.oscim.renderer.GLRenderer.COORD_SCALE;
-import static org.oscim.renderer.sublayers.TextureItem.TEXTURE_HEIGHT;
-import static org.oscim.renderer.sublayers.TextureItem.TEXTURE_WIDTH;
 
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -37,6 +35,7 @@ public final class TextureRenderer {
 	private static int hTextureScale;
 	private static int hTextureScreenScale;
 	private static int hTextureTexCoord;
+	private static int hTextureSize;
 
 	public final static int INDICES_PER_SPRITE = 6;
 	final static int VERTICES_PER_SPRITE = 4;
@@ -49,6 +48,7 @@ public final class TextureRenderer {
 		hTextureMVMatrix = GLES20.glGetUniformLocation(mTextureProgram, "u_mv");
 		hTextureProjMatrix = GLES20.glGetUniformLocation(mTextureProgram, "u_proj");
 		hTextureScale = GLES20.glGetUniformLocation(mTextureProgram, "u_scale");
+		hTextureSize = GLES20.glGetUniformLocation(mTextureProgram, "u_div");
 		hTextureScreenScale = GLES20.glGetUniformLocation(mTextureProgram, "u_swidth");
 		hTextureVertex = GLES20.glGetAttribLocation(mTextureProgram, "vertex");
 		hTextureTexCoord = GLES20.glGetAttribLocation(mTextureProgram, "tex_coord");
@@ -81,6 +81,10 @@ public final class TextureRenderer {
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, ti.id);
 			int maxVertices = GLRenderer.maxQuads * INDICES_PER_SPRITE;
 
+			GLES20.glUniform2f(hTextureSize,
+					1f / (ti.width * COORD_SCALE),
+					1f / (ti.height * COORD_SCALE));
+
 			// draw up to maxVertices in each iteration
 			for (int i = 0; i < ti.vertices; i += maxVertices) {
 				// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
@@ -106,8 +110,9 @@ public final class TextureRenderer {
 		return layer.next;
 	}
 
-	private final static double TEX_COORD_DIV_X = 1.0 / (TEXTURE_WIDTH * COORD_SCALE);
-	private final static double TEX_COORD_DIV_Y = 1.0 / (TEXTURE_HEIGHT * COORD_SCALE);
+	//private final static double TEX_COORD_DIV_X = 1.0 / (TEXTURE_WIDTH * COORD_SCALE);
+	//private final static double TEX_COORD_DIV_Y = 1.0 / (TEXTURE_HEIGHT * COORD_SCALE);
+
 	private final static double COORD_DIV = 1.0 / GLRenderer.COORD_SCALE;
 
 	private final static String textVertexShader = ""
@@ -118,8 +123,9 @@ public final class TextureRenderer {
 			+ "uniform mat4 u_proj;"
 			+ "uniform float u_scale;"
 			+ "uniform float u_swidth;"
+			+ "uniform vec2 u_div;"
 			+ "varying vec2 tex_c;"
-			+ "const vec2 div = vec2(" + TEX_COORD_DIV_X + "," + TEX_COORD_DIV_Y + ");"
+			//+ "const vec2 div = vec2(" + TEX_COORD_DIV_X + "," + TEX_COORD_DIV_Y + ");"
 			+ "const float coord_scale = " + COORD_DIV + ";"
 			+ "void main() {"
 			+ "  vec4 pos;"
@@ -131,7 +137,7 @@ public final class TextureRenderer {
 			+ "    pos = u_proj * (center + vec4(dir * (coord_scale * u_swidth), 0.0, 0.0));"
 			+ "  }"
 			+ "  gl_Position = pos;"
-			+ "  tex_c = tex_coord * div;"
+			+ "  tex_c = tex_coord * u_div;"
 			+ "}";
 
 	private final static String textFragmentShader = ""

@@ -45,6 +45,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	// temporary Bitmap
 	public Bitmap bitmap;
 
+	// external bitmap (not from pool) use
 	boolean ownBitmap;
 
 	TextureItem(int id) {
@@ -56,14 +57,21 @@ public class TextureItem extends Inlist<TextureItem> {
 	}
 
 	/**
-	 * Retrieve a TextureItem from pool with default Bitmap
-	 * with dimension TextureRenderer.TEXTURE_WIDTH/HEIGHT.
-	 * */
-	public synchronized static TextureItem get(boolean initBitmap) {
+	 * Retrieve a TextureItem from pool.
+	 *
+	 * @param poolBitmap
+	 *            initialize with pooled Bitmap with dimension
+	 *            TextureRenderer.TEXTURE_WIDTH/HEIGHT.
+	 */
+	public synchronized static TextureItem get(boolean poolBitmap) {
 		TextureItem ti = pool.get();
-		if (initBitmap) {
+
+		if (poolBitmap) {
 			ti.bitmap = getBitmap();
 			ti.bitmap.eraseColor(Color.TRANSPARENT);
+			ti.ownBitmap = false;
+		} else {
+			ti.ownBitmap = true;
 		}
 		return ti;
 	}
@@ -158,9 +166,9 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		if (!to.ownBitmap)
 			TextureItem.releaseBitmap(to);
-		else{
+		else {
 			// FIXME when in doubt
-			to.bitmap = null;
+			//to.bitmap = null;
 		}
 	}
 

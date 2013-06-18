@@ -14,35 +14,32 @@
  */
 package org.oscim.renderer.sublayers;
 
+import java.nio.ShortBuffer;
 
-import android.graphics.Canvas;
+import org.oscim.utils.pool.Inlist;
+
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 // TODO share one static texture for all poi map symabols
 
 public final class SymbolLayer extends TextureLayer {
 	private final static String TAG = SymbolLayer.class.getSimpleName();
 
-	private final static int TEXTURE_WIDTH = TextureItem.TEXTURE_WIDTH;
-	private final static int TEXTURE_HEIGHT = TextureItem.TEXTURE_HEIGHT;
 	private final static float SCALE = 8.0f;
+	private final static int VERTICES_PER_SPRITE = 4;
 
-	SymbolItem symbols;
-
-	private final Canvas mCanvas;
-	private final Rect mRect = new Rect();
+	private SymbolItem symbols;
 
 	public SymbolLayer() {
 		type = Layer.SYMBOL;
 		fixed = true;
-		mCanvas = new Canvas();
 	}
 
+	// TODO move sorting items to 'prepare'
 	public void addSymbol(SymbolItem item) {
 
-		verticesCnt += 4;
+		verticesCnt += VERTICES_PER_SPRITE;
 
 		for (SymbolItem it = symbols; it != null; it = it.next) {
 			if (it.bitmap == item.bitmap) {
@@ -59,7 +56,7 @@ public final class SymbolLayer extends TextureLayer {
 
 	public void addDrawable(Drawable drawable, int state, float x, float y) {
 
-		verticesCnt += 4;
+		verticesCnt += VERTICES_PER_SPRITE;
 
 		SymbolItem item = SymbolItem.pool.get();
 		item.drawable = drawable;
@@ -83,31 +80,44 @@ public final class SymbolLayer extends TextureLayer {
 
 	private final static int LBIT_MASK = 0xfffffffe;
 
-	// TODO reuse texture when only symbol position changed
 	@Override
 	public boolean prepare() {
 
+		return true;
+	}
+
+	@Override
+	protected void compile(ShortBuffer sbuf) {
+		// offset of layer data in vbo
+		this.offset = sbuf.position() * 2; //SHORT_BYTES;
+
 		short numIndices = 0;
-		short offsetIndices = 0;
-		short curIndices = 0;
+		//short offsetIndices = 0;
+		//short curIndices = 0;
 
-		curItem = VertexItem.pool.get();
-		vertexItems = curItem;
-		VertexItem si = curItem;
+		//curItem =
+		//vertexItems = curItem;
+		VertexItem si = VertexItem.pool.get();
 
-		int pos = si.used;
+		int pos = 0;
 		short buf[] = si.vertices;
 
-		int advanceY = 0;
-		float x = 0;
-		float y = 0;
+		//int advanceY = 0;
+		final float x = 0;
+		final float y = 0;
 
-		TextureItem to = TextureItem.get(true);
-		textures = to;
-		mCanvas.setBitmap(to.bitmap);
+		TextureItem prevTextures = textures;
+		//TextureItem prev = textures;
+
+		textures = null;
+		TextureItem to = null;
+
+		//TextureItem to = TextureItem.get(true);
+		//textures = to;
+		//mCanvas.setBitmap(to.bitmap);
 
 		for (SymbolItem it = symbols; it != null;) {
-			float width, height;
+			int width, height;
 
 			if (it.bitmap != null) {
 				// add bitmap
@@ -118,61 +128,43 @@ public final class SymbolLayer extends TextureLayer {
 				height = it.drawable.getIntrinsicHeight();
 			}
 
-			if (height > advanceY)
-				advanceY = (int) height;
-
-			if (x + width > TEXTURE_WIDTH) {
-				x = 0;
-				y += advanceY;
-				advanceY = (int) (height + 0.5f);
-
+			for (to = prevTextures; to != null; to = to.next){
+				if (to.bitmap == it.bitmap){
+					prevTextures = Inlist.remove(prevTextures, to);
+					textures = Inlist.append(textures, to);
+					break;
+				}
 			}
 
-			if (y + height > TEXTURE_HEIGHT) {
-				Log.d(TAG, "reached max symbols: " + numIndices);
+			if (to == null){
+				to = TextureItem.get(false);
+				to.bitmap = it.bitmap;
+				to.width = width;
+				to.height= height;
+				textures = Inlist.append(textures, to);
 
-				to.offset = offsetIndices;
-				to.vertices = curIndices;
-
-				numIndices += curIndices;
-				offsetIndices = numIndices;
-				curIndices = 0;
-
-				to.next = TextureItem.get(true);
-				to = to.next;
-
-				mCanvas.setBitmap(to.bitmap);
-
-				x = 0;
-				y = 0;
-				advanceY = (int) height;
+				TextureItem.uploadTexture(to);
 			}
 
-			if (it.bitmap != null) {
-				mCanvas.drawBitmap(it.bitmap, x, y, null);
-			} else {
-				it.drawable.copyBounds(mRect);
-				it.drawable.setBounds((int) x, (int) y, (int) (x + width), (int) (y + height));
-				it.drawable.draw(mCanvas);
-				it.drawable.setBounds(mRect);
-			}
+			to.offset = numIndices;
+			to.vertices = 0;
 
 			short x1, y1, x2, y2;
 
 			if (it.bitmap != null) {
-				float hw = width / 2.0f;
-				float hh = height / 2.0f;
+				float hw = width / 2f;
+				float hh = height / 2f;
 				x1 = (short) (SCALE * (-hw));
 				x2 = (short) (SCALE * (hw));
 				y1 = (short) (SCALE * (hh));
 				y2 = (short) (SCALE * (-hh));
 			} else {
 				// use drawable offsets (for marker hotspot)
+				Rect mRect = it.drawable.getBounds();
 				x2 = (short) (SCALE * (mRect.left));
 				y2 = (short) (SCALE * (mRect.top));
 				x1 = (short) (SCALE * (mRect.right));
 				y1 = (short) (SCALE * (mRect.bottom));
-
 			}
 
 			short u1 = (short) (SCALE * x);
@@ -195,9 +187,7 @@ public final class SymbolLayer extends TextureLayer {
 				short ty = (short) (SCALE * it2.y);
 
 				if (pos == VertexItem.SIZE) {
-					si.used = VertexItem.SIZE;
-					si = si.next = VertexItem.pool.get();
-					buf = si.vertices;
+					sbuf.put(buf, 0, VertexItem.SIZE);
 					pos = 0;
 				}
 
@@ -231,26 +221,42 @@ public final class SymbolLayer extends TextureLayer {
 				buf[pos++] = v1;
 
 				// six elements used to draw the four vertices
-				curIndices += TextureRenderer.INDICES_PER_SPRITE;
+				to.vertices += TextureRenderer.INDICES_PER_SPRITE;
 			}
-			x += width;
+
+			numIndices += to.vertices;
+			//offsetIndices = numIndices;
+
+			//to.offset = offsetIndices;
+			 //= curIndices;
+			//x += width;
+
 		}
+//		if (to != null) {
+//			to.offset = offsetIndices;
+//			to.vertices = curIndices;
+//		}
+		//si.used = pos;
+		//curItem = si;
 
-		to.offset = offsetIndices;
-		to.vertices = curIndices;
+		if (pos > 0)
+			sbuf.put(buf, 0, pos);
 
-		si.used = pos;
-		curItem = si;
+		VertexItem.pool.release(si);
 
-		return true;
+		TextureItem.releaseAll(prevTextures);
+		prevTextures = null;
 	}
+
 
 	@Override
 	protected void clear() {
-		TextureItem.releaseAll(textures);
 
+		TextureItem.releaseAll(textures);
 		SymbolItem.pool.releaseAll(symbols);
-		VertexItem.pool.releaseAll(vertexItems);
+
+		//VertexItem.pool.releaseAll(vertexItems);
+
 		textures = null;
 		symbols = null;
 		vertexItems = null;
