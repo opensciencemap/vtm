@@ -14,7 +14,12 @@
  */
 package org.oscim.utils.pool;
 
-
+/**
+ * Utility class for making poolable objects.
+ * Instead of using an additional list to hold pool items just extend this class.
+ *
+ * Also handy for objects that exist in only *one list* at a time.
+ * */
 
 public class Inlist<T extends Inlist<T>> {
 
@@ -31,12 +36,15 @@ public class Inlist<T extends Inlist<T>> {
 
 	public static <T extends Inlist<T>> T remove(T list, T item) {
 		if (item == list) {
-			return item.next;
+			T head = item.next;
+			item.next = null;
+			return head;
 		}
 		for (Inlist<T> prev = list, it = list.next; it != null; it = it.next) {
 
 			if (it == item) {
-				prev.next = it.next;
+				prev.next = item.next;
+				item.next = null;
 				return list;
 			}
 			prev = it;
