@@ -89,6 +89,10 @@ public abstract class BasicRenderLayer extends RenderLayer {
 						l = BitmapRenderer.draw(l, 1, m);
 						break;
 
+//					case Layer.SYMBOL:
+//						l = BitmapRenderer.draw(l, 1, m);
+//						break;
+
 					default:
 						l = TextureRenderer.draw(l, scale, m);
 				}
