@@ -16,7 +16,7 @@
 package org.oscim.layers.labeling;
 
 // TODO
-// 1. rewrite :)
+// 1. rewrite. seriously
 // 1.1 test if label is actually visible
 // 2. compare previous to current state
 // 2.1 test for new labels to be placed
@@ -40,6 +40,7 @@ import org.oscim.renderer.sublayers.Layer;
 import org.oscim.renderer.sublayers.Layers;
 import org.oscim.renderer.sublayers.LineRenderer;
 import org.oscim.renderer.sublayers.PolygonRenderer;
+import org.oscim.renderer.sublayers.SymbolItem;
 import org.oscim.renderer.sublayers.SymbolLayer;
 import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.renderer.sublayers.TextLayer;
@@ -66,7 +67,6 @@ class TextRenderLayer extends BasicRenderLayer {
 
 	private final MapViewPosition mMapViewPosition;
 	private final TileSet mTileSet;
-
 
 	class TextureLayers {
 		boolean ready;
@@ -317,7 +317,6 @@ class TextRenderLayer extends BasicRenderLayer {
 		mSquareRadius = mw * mw + mh * mh;
 
 		MapTile[] tiles = mTileSet.tiles;
-
 		int zoom = tiles[0].zoomLevel;
 
 		// scale of tiles zoom-level relative to current position
@@ -331,6 +330,9 @@ class TextRenderLayer extends BasicRenderLayer {
 
 		if (dbg != null)
 			Debug.addDebugLayers(dbg);
+
+		SymbolLayer sl = mNextLayer.symbolLayer;
+		sl.clearItems();
 
 		mRelabelCnt++;
 
@@ -515,7 +517,18 @@ class TextRenderLayer extends BasicRenderLayer {
 					}
 					lp = (Label) lp.next;
 				}
+
+				if (ti.text.texture != null){
+					SymbolItem s = SymbolItem.pool.get();
+					s.symbol = ti.text.texture;
+					s.x = l.x;
+					s.y = l.y;
+					s.billboard = true;
+					sl.addSymbol(s);
+				}
+
 				if (!overlaps) {
+
 					addLabel(l);
 					l.item = TextItem.copy(ti);
 					l.tile = t;
@@ -540,6 +553,31 @@ class TextRenderLayer extends BasicRenderLayer {
 				ti.y2 = tmp;
 			}
 		}
+
+		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
+			MapTile t = tiles[i];
+			if (t.state != MapTile.STATE_READY)
+				continue;
+
+			float dx = (float) (t.tileX * Tile.SIZE - tileX);
+			float dy = (float) (t.tileY * Tile.SIZE - tileY);
+			dx = flipLongitude(dx, maxx);
+
+			for (SymbolItem ti = t.symbols; ti != null; ti = ti.next) {
+				if (ti.symbol == null)
+					continue;
+
+					SymbolItem s = SymbolItem.pool.get();
+
+					s.symbol = ti.symbol;
+					s.x = (float)((dx + ti.x) * scale);
+					s.y = (float)((dy + ti.y) * scale);
+					s.billboard = true;
+
+					sl.addSymbol(s);
+			}
+		}
+
 		// temporary used Label
 		mPool.release(l);
 
@@ -656,9 +694,9 @@ class TextRenderLayer extends BasicRenderLayer {
 
 		float scale = (float) (mMapPosition.scale / pos.scale);
 
-		if (layers.baseLayers != null) {
-			setMatrix(pos, m, true);
+		setMatrix(pos, m, true);
 
+		if (layers.baseLayers != null) {
 			for (Layer l = layers.baseLayers; l != null;) {
 				if (l.type == Layer.POLYGON) {
 					l = PolygonRenderer.draw(pos, l, m, true, 1, false);

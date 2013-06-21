@@ -14,11 +14,12 @@
  */
 package org.oscim.renderer.sublayers;
 
+import org.oscim.core.PointF;
+import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 
 public class SymbolItem extends Inlist<SymbolItem> {
 
@@ -32,18 +33,18 @@ public class SymbolItem extends Inlist<SymbolItem> {
 		@Override
 		protected void clearItem(SymbolItem it) {
 			// drop references
-			it.drawable = null;
 			it.bitmap = null;
+			it.symbol = null;
+			it.offset = null;
 		}
 	};
 
-	public Bitmap bitmap;
-	public Drawable drawable;
+	public boolean billboard;
 	public float x;
 	public float y;
-	public boolean billboard;
-	public int state;
 
-	// center, top, bottom, left, right, top-left...
-	//	byte placement;
+	public TextureRegion symbol;
+	public Bitmap bitmap;
+	public PointF offset;
+
 }

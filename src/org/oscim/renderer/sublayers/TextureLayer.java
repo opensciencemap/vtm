@@ -16,10 +16,6 @@ package org.oscim.renderer.sublayers;
 
 import java.nio.ShortBuffer;
 
-
-/**
- * @author Hannes Janetzek
- */
 public abstract class TextureLayer extends Layer {
 	// holds textures and offset in vbo
 	public TextureItem textures;
@@ -42,4 +38,41 @@ public abstract class TextureLayer extends Layer {
 	}
 
 	abstract public boolean prepare();
+
+	static void putSprite(short buf[], int pos,
+			short tx, short ty,
+			short x1, short y1,
+			short x2, short y2,
+			short u1, short v1,
+			short u2, short v2) {
+
+		// top-left
+		buf[pos + 0] = tx;
+		buf[pos + 1] = ty;
+		buf[pos + 2] = x1;
+		buf[pos + 3] = y1;
+		buf[pos + 4] = u1;
+		buf[pos + 5] = v2;
+		// bot-left
+		buf[pos + 6] = tx;
+		buf[pos + 7] = ty;
+		buf[pos + 8] = x1;
+		buf[pos + 9] = y2;
+		buf[pos + 10] = u1;
+		buf[pos + 11] = v1;
+		// top-right
+		buf[pos + 12] = tx;
+		buf[pos + 13] = ty;
+		buf[pos + 14] = x2;
+		buf[pos + 15] = y1;
+		buf[pos + 16] = u2;
+		buf[pos + 17] = v2;
+		// bot-right
+		buf[pos + 18] = tx;
+		buf[pos + 19] = ty;
+		buf[pos + 20] = x2;
+		buf[pos + 21] = y2;
+		buf[pos + 22] = u2;
+		buf[pos + 23] = v1;
+	}
 }
