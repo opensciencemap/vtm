@@ -17,14 +17,11 @@ package org.oscim.layers.overlay;
 
 import java.util.List;
 
-import org.oscim.app.R;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.PointF;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
 public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverlay<Item> {
@@ -36,26 +33,14 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 
 	private final PointF mItemPoint = new PointF();
 
-	public ItemizedIconOverlay(
-			final MapView mapView,
-			final List<Item> pList,
-			final Drawable pDefaultMarker,
-			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener) {
+	public ItemizedIconOverlay(MapView mapView, List<Item> list, OverlayMarker defaultMarker,
+			ItemizedIconOverlay.OnItemGestureListener<Item> onItemGestureListener) {
 
-		super(mapView, pDefaultMarker);
+		super(mapView, defaultMarker);
 
-		this.mItemList = pList;
-		this.mOnItemGestureListener = pOnItemGestureListener;
+		this.mItemList = list;
+		this.mOnItemGestureListener = onItemGestureListener;
 		populate();
-	}
-
-	public ItemizedIconOverlay(
-			final MapView mapView,
-			final Context pContext,
-			final List<Item> pList,
-			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener) {
-		this(mapView, pList, pContext.getResources().getDrawable(R.drawable.marker_default),
-				pOnItemGestureListener);
 	}
 
 	@Override
@@ -139,6 +124,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 			return onSingleTapUpHelper(index, that.mItemList.get(index));
 		}
 	};
+
 	@Override
 	public boolean onLongPress(final MotionEvent event) {
 		return activateSelectedItems(event, mActiveItemLongPress) || super.onLongPress(event);
@@ -186,7 +172,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 
 		for (int i = 0; i < size; i++) {
 			Item item = getItem(i);
-			if (!bbox.contains(item.mGeoPoint)){
+			if (!bbox.contains(item.mGeoPoint)) {
 				//Log.d(TAG, "skip: " + item.getTitle());
 				continue;
 			}

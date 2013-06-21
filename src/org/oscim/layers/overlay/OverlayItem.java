@@ -20,7 +20,6 @@ package org.oscim.layers.overlay;
 import org.oscim.core.GeoPoint;
 
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 
 /**
  * Immutable class describing a GeoPoint with a Title and a Description.
@@ -57,7 +56,7 @@ public class OverlayItem {
 	public final String mTitle;
 	public final String mDescription;
 	public final GeoPoint mGeoPoint;
-	protected Drawable mMarker;
+	protected OverlayMarker mMarker;
 	protected HotspotPlace mHotspotPlace;
 
 	// ===========================================================
@@ -114,18 +113,18 @@ public class OverlayItem {
 	 * @return The marker for the current state, or null if the default marker
 	 * for the overlay should be used.
 	 */
-	public Drawable getMarker(final int stateBitset) {
+	public OverlayMarker getMarker(int stateBitset) {
 		// marker not specified
 		if (mMarker == null) {
 			return null;
 		}
 
 		// set marker state appropriately
-		setState(mMarker, stateBitset);
+		//	setState(mMarker, stateBitset);
 		return mMarker;
 	}
 
-	public void setMarker(final Drawable marker) {
+	public void setMarker(OverlayMarker marker) {
 		this.mMarker = marker;
 	}
 
@@ -152,28 +151,28 @@ public class OverlayItem {
 	 * R.attr.state_focused attributes, and then calling {@link
 	 * Drawable.setState(int[])}.
 	 */
-	public static void setState(final Drawable drawable, final int stateBitset) {
-		final int[] states = new int[3];
-		int index = 0;
-		if ((stateBitset & ITEM_STATE_PRESSED_MASK) > 0)
-			states[index++] = android.R.attr.state_pressed;
-		if ((stateBitset & ITEM_STATE_SELECTED_MASK) > 0)
-			states[index++] = android.R.attr.state_selected;
-		if ((stateBitset & ITEM_STATE_FOCUSED_MASK) > 0)
-			states[index++] = android.R.attr.state_focused;
-
-		drawable.setState(states);
-	}
-
-	public Drawable getDrawable() {
-		return this.mMarker;
-	}
-
-	public int getWidth() {
-		return this.mMarker.getIntrinsicWidth();
-	}
-
-	public int getHeight() {
-		return this.mMarker.getIntrinsicHeight();
-	}
+//	public static void setState(final Drawable drawable, final int stateBitset) {
+//		final int[] states = new int[3];
+//		int index = 0;
+//		if ((stateBitset & ITEM_STATE_PRESSED_MASK) > 0)
+//			states[index++] = android.R.attr.state_pressed;
+//		if ((stateBitset & ITEM_STATE_SELECTED_MASK) > 0)
+//			states[index++] = android.R.attr.state_selected;
+//		if ((stateBitset & ITEM_STATE_FOCUSED_MASK) > 0)
+//			states[index++] = android.R.attr.state_focused;
+//
+//		drawable.setState(states);
+//	}
+//
+//	public Drawable getDrawable() {
+//		return this.mMarker;
+//	}
+//
+//	public int getWidth() {
+//		return this.mMarker.getIntrinsicWidth();
+//	}
+//
+//	public int getHeight() {
+//		return this.mMarker.getIntrinsicHeight();
+//	}
 }
