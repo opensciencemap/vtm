@@ -24,7 +24,7 @@ public class PointF {
 	public PointF() {
 	}
 
-	PointF(float x, float y) {
+	public PointF(float x, float y) {
 		this.x = x;
 		this.y = y;
 	}
