@@ -24,11 +24,9 @@ public abstract class Layer extends Inlist<Layer>{
 	public final static byte LINE = 0;
 	public final static byte POLYGON = 1;
 	public final static byte TEXLINE = 2;
-	public final static byte WAYTEXT = 3;
-	public final static byte POITEXT = 4;
-	public final static byte SYMBOL = 5;
-	public final static byte BITMAP = 6;
-	public final static byte EXTRUSION = 7;
+	public final static byte SYMBOL = 3;
+	public final static byte BITMAP = 4;
+	public final static byte EXTRUSION = 5;
 
 	public byte type = -1;
 
