@@ -17,6 +17,8 @@ package org.oscim.view;
 
 import java.util.List;
 
+import org.oscim.android.Compass;
+import org.oscim.android.MapActivity;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
@@ -151,7 +153,8 @@ public class MapView extends RelativeLayout {
 
 		//mLayerManager.add(new GenericOverlay(this, new GridRenderLayer(this)));
 		mLayerManager.add(new BuildingOverlay(this, baseLayer.getTileLayer()));
-		mLayerManager.add(new LabelLayer(this, baseLayer.getTileLayer()));
+		LabelLayer ll = new LabelLayer(this, baseLayer.getTileLayer());
+		mLayerManager.add(ll);
 
 		return baseLayer;
 	}
@@ -166,7 +169,7 @@ public class MapView extends RelativeLayout {
 		return null;
 	}
 
-	void destroy() {
+	public void destroy() {
 		mLayerManager.destroy();
 	}
 
@@ -177,7 +180,7 @@ public class MapView extends RelativeLayout {
 
 	private boolean mPausing = false;
 
-	void onPause() {
+	public void onPause() {
 		mPausing = true;
 
 		if (this.mCompassEnabled)
@@ -185,7 +188,7 @@ public class MapView extends RelativeLayout {
 
 	}
 
-	void onResume() {
+	public void onResume() {
 		if (this.mCompassEnabled)
 			mCompass.enable();
 

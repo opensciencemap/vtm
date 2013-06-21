@@ -12,7 +12,9 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view;
+package org.oscim.android;
+
+import org.oscim.view.MapView;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -54,12 +56,12 @@ public class Compass {
 		mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 	}
 
-	void enable() {
+	public void enable() {
 		mSensorManager.registerListener(mListener, mSensor,
 				SensorManager.SENSOR_DELAY_UI);
 	}
 
-	void disable() {
+	public void disable() {
 		mSensorManager.unregisterListener(mListener);
 		mMapView.getMapViewPosition().setRotation(0);
 	}

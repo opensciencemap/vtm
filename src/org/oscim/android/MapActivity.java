@@ -12,10 +12,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view;
+package org.oscim.android;
 
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
+import org.oscim.view.MapView;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -98,7 +99,7 @@ public abstract class MapActivity extends Activity {
 	 * @param mapView
 	 *            the calling MapView.
 	 */
-	final void registerMapView(MapView mapView) {
+	public final void registerMapView(MapView mapView) {
 		mMapView = mapView;
 
 		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,

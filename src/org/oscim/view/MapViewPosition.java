@@ -567,7 +567,7 @@ public class MapViewPosition {
 		mAbsY = MercatorProjection.latitudeToY(latitude);
 	}
 
-	synchronized void setMapPosition(MapPosition mapPosition) {
+	public synchronized void setMapPosition(MapPosition mapPosition) {
 		setZoomLevelLimit(mapPosition.zoomLevel);
 		mAbsX = mapPosition.x;
 		mAbsY = mapPosition.y;
