@@ -14,13 +14,10 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import java.io.IOException;
-
+import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
-
-import android.graphics.Bitmap;
 
 /**
  * Represents an icon on the map.
@@ -32,11 +29,8 @@ public final class Symbol extends RenderInstruction {
 	 * @param attributes
 	 *            the attributes of the XML element.
 	 * @return a new Symbol with the given rendering attributes.
-	 * @throws IOException
-	 *             if an I/O error occurs while reading a resource.
 	 */
-	public static Symbol create(String elementName, Attributes attributes)
-			throws IOException {
+	public static Symbol create(String elementName, Attributes attributes) {
 		String src = null;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
@@ -61,17 +55,15 @@ public final class Symbol extends RenderInstruction {
 		}
 	}
 
-	public final Bitmap bitmap;
+	public final String src;
+	public TextureRegion texture;
 
-	public Symbol(String src) throws IOException {
-		super();
-
-		bitmap = BitmapUtils.createBitmap(src);
+	public Symbol(String src) {
+		this.src = src;
 	}
 
 	@Override
 	public void destroy() {
-		bitmap.recycle();
 	}
 
 	@Override
