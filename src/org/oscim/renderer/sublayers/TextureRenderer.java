@@ -110,9 +110,6 @@ public final class TextureRenderer {
 		return layer.next;
 	}
 
-	//private final static double TEX_COORD_DIV_X = 1.0 / (TEXTURE_WIDTH * COORD_SCALE);
-	//private final static double TEX_COORD_DIV_Y = 1.0 / (TEXTURE_HEIGHT * COORD_SCALE);
-
 	private final static double COORD_DIV = 1.0 / GLRenderer.COORD_SCALE;
 
 	private final static String textVertexShader = ""
@@ -125,7 +122,6 @@ public final class TextureRenderer {
 			+ "uniform float u_swidth;"
 			+ "uniform vec2 u_div;"
 			+ "varying vec2 tex_c;"
-			//+ "const vec2 div = vec2(" + TEX_COORD_DIV_X + "," + TEX_COORD_DIV_Y + ");"
 			+ "const float coord_scale = " + COORD_DIV + ";"
 			+ "void main() {"
 			+ "  vec4 pos;"

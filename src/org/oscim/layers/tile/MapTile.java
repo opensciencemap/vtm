@@ -17,6 +17,7 @@ package org.oscim.layers.tile;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.sublayers.Layers;
+import org.oscim.renderer.sublayers.SymbolItem;
 import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.utils.quadtree.QuadTree;
 
@@ -25,7 +26,7 @@ import org.oscim.utils.quadtree.QuadTree;
  * TileManager (Main Thread), TileLoader (Worker Threads) and
  * Rendering (GL Thread).
  */
-public final class MapTile extends Tile {
+public class MapTile extends Tile {
 
 	public final static int STATE_NONE = 0;
 
@@ -67,9 +68,12 @@ public final class MapTile extends Tile {
 	public float distance;
 
 	/**
+	 * FIXME move to VectorMapTile
 	 * Tile data set by TileLoader.
 	 */
 	public TextItem labels;
+	public SymbolItem symbols;
+
 	public Layers layers;
 
 	/**
@@ -82,8 +86,10 @@ public final class MapTile extends Tile {
 	 */
 	public QuadTree<MapTile> rel;
 
-	/** to avoid drawing a tile twice per frame
-	 * FIXME what if multiple layers use the same tile? */
+	/**
+	 * to avoid drawing a tile twice per frame
+	 * FIXME what if multiple layers use the same tile?
+	 */
 	int lastDraw = 0;
 
 	public final static int PROXY_CHILD1 = 1 << 0;
@@ -107,7 +113,7 @@ public final class MapTile extends Tile {
 	// e.g. x:-1,y:0,z:1 for x:1,y:0
 	MapTile holder;
 
-	MapTile(int tileX, int tileY, byte zoomLevel) {
+	protected MapTile(int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
 		this.x = (double) tileX / (1 << zoomLevel);
 		this.y = (double) tileY / (1 << zoomLevel);
@@ -168,10 +174,6 @@ public final class MapTile extends Tile {
 		labels = t;
 	}
 
-	public void clearState() {
-		state = STATE_NONE;
-	}
-
 	/**
 	 * @return true if tile is loading, has new data or is ready for rendering
 	 */
@@ -181,12 +183,16 @@ public final class MapTile extends Tile {
 
 	public void setLoading() {
 		//if (state != STATE_NONE)
-		//Log.d(TAG, "wrong state: " + state);
+		//	Log.wtf(TAG, "wrong state: " + state);
 
 		state = STATE_LOADING;
 	}
 
-	void clear(){
+	public void clearState() {
+		state = STATE_NONE;
+	}
+
+	protected void clear() {
 		if (layers != null) {
 			// TODO move this to layers clear
 			if (layers.vbo != null) {
@@ -195,10 +201,13 @@ public final class MapTile extends Tile {
 			}
 
 			layers.clear();
-			layers = null;
 		}
 
 		TextItem.pool.releaseAll(labels);
+		SymbolItem.pool.releaseAll(symbols);
 
+		layers = null;
+		labels = null;
+		symbols = null;
 	}
 }

@@ -13,7 +13,6 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.renderer.sublayers;
-
 import java.util.ArrayList;
 
 import org.oscim.utils.GlUtils;
@@ -26,17 +25,16 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
 
-/**
- * @author Hannes Janetzek
- */
+// FIXME
+
 public class TextureItem extends Inlist<TextureItem> {
 	private final static String TAG = TextureItem.class.getName();
 
 	//  texture ID
 	public int id;
 
-	int width;
-	int height;
+	public int width;
+	public int height;
 
 	// vertex offset from which this texture is referenced
 	public short offset;
@@ -45,11 +43,31 @@ public class TextureItem extends Inlist<TextureItem> {
 	// temporary Bitmap
 	public Bitmap bitmap;
 
-	// external bitmap (not from pool) use
+	// external bitmap (not from pool)
 	boolean ownBitmap;
+
+	// is only referencing a textureId, does not
+	// release the texture when TextureItem is
+	// released.
+	boolean isClone;
 
 	TextureItem(int id) {
 		this.id = id;
+	}
+
+	TextureItem(TextureItem ti) {
+		this.id = ti.id;
+		this.width = ti.width;
+		this.height = ti.height;
+		this.isClone = true;
+	}
+
+	public TextureItem(Bitmap bitmap) {
+		this.bitmap = bitmap;
+		this.id = -1;
+		this.ownBitmap = true;
+		this.width = bitmap.getWidth();
+		this.height = bitmap.getHeight();
 	}
 
 	public synchronized static void releaseAll(TextureItem ti) {
@@ -80,6 +98,7 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		@Override
 		public void init(int num) {
+
 			int[] textureIds = new int[num];
 			GLES20.glGenTextures(num, textureIds, 0);
 
@@ -103,6 +122,14 @@ public class TextureItem extends Inlist<TextureItem> {
 			if (it.ownBitmap)
 				return;
 
+			if (it.isClone){
+				it.isClone = false;
+				it.id = -1;
+				it.width = -1;
+				it.height = -1;
+				return;
+			}
+
 			releaseBitmap(it);
 		}
 
@@ -110,7 +137,9 @@ public class TextureItem extends Inlist<TextureItem> {
 		protected void freeItem(TextureItem it) {
 			it.width = -1;
 			it.height = -1;
-			releaseTexture(it);
+
+			if (!it.isClone)
+				releaseTexture(it);
 		}
 	};
 
@@ -125,6 +154,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	private static int mTexCnt = 0;
 
 	static void releaseTexture(TextureItem it) {
+
 		synchronized (mTextures) {
 			if (it.id >= 0) {
 				mTextures.add(Integer.valueOf(it.id));

@@ -30,6 +30,7 @@ import org.oscim.renderer.sublayers.Layers;
 import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.renderer.sublayers.LineTexLayer;
 import org.oscim.renderer.sublayers.PolygonLayer;
+import org.oscim.renderer.sublayers.SymbolItem;
 import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.IRenderTheme;
@@ -44,6 +45,7 @@ import org.oscim.tilesource.ITileDataSink;
 import org.oscim.tilesource.ITileDataSource;
 import org.oscim.tilesource.ITileDataSource.QueryResult;
 import org.oscim.utils.LineClipper;
+import org.oscim.utils.pool.Inlist;
 import org.oscim.view.DebugSettings;
 
 import android.util.Log;
@@ -139,21 +141,11 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		//		m.type = GeometryType.POINT;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.oscim.layers.tile.TileLoader#cleanup()
-	 */
 	@Override
 	public void cleanup() {
 		mTileDataSource.destroy();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * org.oscim.layers.tile.TileLoader#executeJob(org.oscim.layers.tile.MapTile
-	 * )
-	 */
 	@Override
 	public boolean executeJob(MapTile mapTile) {
 
@@ -338,15 +330,15 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 	}
 
 	private void debugUnmatched(boolean closed, TagSet tags) {
-//		Log.d(TAG, "DBG way not matched: " + closed + " "
-//				+ Arrays.deepToString(tags));
-//
-//		mTagName = new Tag("name", tags[0].key + ":"
-//				+ tags[0].value, false);
-//
-//		mElement.tags = closed ? debugTagArea : debugTagWay;
-//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
-//		renderWay(ri);
+		//		Log.d(TAG, "DBG way not matched: " + closed + " "
+		//				+ Arrays.deepToString(tags));
+		//
+		//		mTagName = new Tag("name", tags[0].key + ":"
+		//				+ tags[0].value, false);
+		//
+		//		mElement.tags = closed ? debugTagArea : debugTagWay;
+		//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
+		//		renderWay(ri);
 	}
 
 	private void renderWay(RenderInstruction[] ri) {
@@ -526,20 +518,17 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 
 	@Override
 	public void renderPointOfInterestSymbol(Symbol symbol) {
-		// Log.d(TAG, "add symbol");
+		if (symbol.texture == null){
+			Log.d(TAG, "missing symbol for " + mElement.tags.asString());
+			return;
+		}
+		SymbolItem it = SymbolItem.pool.get();
+		it.x = mElement.points[0];
+		it.y = mElement.points[1];
+		it.symbol = symbol.texture;
+		it.billboard = true;
 
-		//		if (mLayers.textureLayers == null)
-		//			mLayers.textureLayers = new SymbolLayer();
-		//
-		//		SymbolLayer sl = (SymbolLayer) mLayers.textureLayers;
-		//
-		//		SymbolItem it = SymbolItem.get();
-		//		it.x = mPoiX;
-		//		it.y = mPoiY;
-		//		it.bitmap = bitmap;
-		//		it.billboard = true;
-		//
-		//		sl.addSymbol(it);
+		mTile.symbols = Inlist.push(mTile.symbols, it);
 	}
 
 	@Override
