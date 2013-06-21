@@ -12,9 +12,10 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.sublayers;
+package org.oscim.renderer.atlas;
 
-import org.oscim.renderer.sublayers.TextureAtlas.Rect;
+import org.oscim.renderer.atlas.TextureAtlas.Rect;
+import org.oscim.renderer.sublayers.TextureItem;
 import org.oscim.utils.pool.Inlist;
 
 import android.graphics.Canvas;

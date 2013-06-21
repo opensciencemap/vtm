@@ -57,15 +57,18 @@
  *
  *  ============================================================================
  */
-package org.oscim.renderer.sublayers;
+package org.oscim.renderer.atlas;
 
+import java.util.HashMap;
+
+import org.oscim.renderer.sublayers.TextureItem;
 import org.oscim.utils.pool.Inlist;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 public class TextureAtlas extends Inlist<TextureAtlas> {
-
-
+	private final static String TAG = TextureAtlas.class.getName();
 
 	/** Allocated slots */
 	public Slot mSlots;
@@ -83,11 +86,23 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 	/** Allocated surface size */
 	int mUsed;
 
-	/** Texture identity (OpenGL) */
-	int id;
 
-	/** Atlas data */
-	Bitmap mData;
+	public TextureItem texture;
+
+	/**
+	 * only call in GL-Thread
+	 */
+	public TextureItem compileTexture() {
+		if (texture != null) {
+			if (texture.id < 1) {
+				TextureItem.uploadTexture(texture);
+			}
+			return texture;
+		}
+
+		Log.wtf(TAG, "Missing atlas texture");
+		return null;
+	}
 
 	public static class Slot extends Inlist<Slot> {
 		public int x, y, w;
@@ -100,6 +115,13 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 	}
 
 	public static class Rect extends Inlist<Rect> {
+		public Rect(int x, int y, int w, int h) {
+			this.x = x;
+			this.y = y;
+			this.w = w;
+			this.h = h;
+		}
+
 		public int x, y, w, h;
 	}
 
@@ -110,12 +132,31 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 		mSlots = new Slot(1, 1, width - 2);
 	}
 
+	public TextureAtlas(Bitmap bitmap) {
+		mDepth = 0;
+		texture = new TextureItem(bitmap);
+		mWidth = texture.width;
+		mHeight = texture.height;
+
+		mRegions = new HashMap<Object, TextureRegion>();
+	}
+
+	private HashMap<Object, TextureRegion> mRegions;
+
+	public void addTextureRegion(Object key, Rect r) {
+
+		mRegions.put(key, new TextureRegion(this, r));
+
+	}
+
+	public TextureRegion getTextureRegion(Object key) {
+		return mRegions.get(key);
+	}
+
 	public Rect getRegion(int width, int height) {
 		int y, bestHeight, bestWidth;
 		Slot slot, prev;
-		Rect r = new Rect();
-		r.w = width;
-		r.h = height;
+		Rect r = new Rect(0, 0, width, height);
 
 		bestHeight = Integer.MAX_VALUE;
 		bestWidth = Integer.MAX_VALUE;
@@ -213,4 +254,11 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 
 		return new TextureAtlas(width, height, depth);
 	}
+
+	//	/// FIXME
+	//	@Override
+	//	protected void finalize(){
+	//		if (texture != null)
+	//			TextureItem.releaseTexture(texture);
+	//	}
 }
