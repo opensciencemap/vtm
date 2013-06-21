@@ -138,4 +138,12 @@ public class TagSet {
 		}
 		return false;
 	}
+
+	public String asString(){
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < numTags; i++)
+			sb.append(tags[i]);
+
+		return sb.toString();
+	}
 }
