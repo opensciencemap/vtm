@@ -19,6 +19,7 @@ import java.util.Locale;
 import org.oscim.graphics.Color;
 import org.oscim.graphics.Paint.FontFamily;
 import org.oscim.graphics.Paint.FontStyle;
+import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
@@ -33,6 +34,7 @@ import android.graphics.Typeface;
  * Represents a text along a polyline on the map.
  */
 public final class Text extends RenderInstruction {
+
 	/**
 	 * @param elementName
 	 *            the name of the XML element.
@@ -53,6 +55,7 @@ public final class Text extends RenderInstruction {
 		String style = null;
 		float dy = 0;
 		int priority = Integer.MAX_VALUE;
+		String symbol = null;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
@@ -79,6 +82,8 @@ public final class Text extends RenderInstruction {
 				priority = Integer.parseInt(value);
 			} else if ("dy".equals(name)) {
 				dy = Float.parseFloat(value);
+			} else if ("symbol".equals(name)) {
+				symbol = value;
 			} else {
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
 			}
@@ -87,7 +92,7 @@ public final class Text extends RenderInstruction {
 		validate(elementName, textKey, fontSize, strokeWidth);
 
 		return new Text(style, textKey, fontFamily, fontStyle, fontSize, fill, stroke, strokeWidth,
-				dy, caption, priority);
+				dy, caption, symbol, priority);
 	}
 
 	private static void validate(String elementName, String textKey, float fontSize,
@@ -104,12 +109,15 @@ public final class Text extends RenderInstruction {
 		}
 	}
 
+	public final String style;
+
 	public final float fontSize;
 	public final Paint paint;
 	public final Paint stroke;
 	public final String textKey;
 
-	public final String style;
+	public final String symbol;
+
 	public final boolean caption;
 	public final float dy;
 	public final int priority;
@@ -117,11 +125,13 @@ public final class Text extends RenderInstruction {
 	public float fontHeight;
 	public float fontDescent;
 
+	public TextureRegion texture;
+
 	public static Text createText(float fontSize, float strokeWidth, int fill, int outline,
 			boolean billboard) {
 
 		Text t = new Text("", "", FontFamily.DEFAULT, FontStyle.NORMAL,
-				fontSize, fill, outline, strokeWidth, 0, billboard, Integer.MAX_VALUE);
+				fontSize, fill, outline, strokeWidth, 0, billboard, null, Integer.MAX_VALUE);
 		FontMetrics fm = t.paint.getFontMetrics();
 		t.fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
 		t.fontDescent = (float) Math.ceil(Math.abs(fm.bottom));
@@ -161,14 +171,15 @@ public final class Text extends RenderInstruction {
 	}
 
 	private Text(String style, String textKey, FontFamily fontFamily, FontStyle fontStyle,
-			float fontSize,
-			int fill, int outline, float strokeWidth, float dy, boolean caption, int priority) {
+			float fontSize, int fill, int outline, float strokeWidth, float dy, boolean caption,
+			String symbol, int priority) {
 
 		this.style = style;
 		this.textKey = textKey;
 		this.caption = caption;
 		this.dy = -dy;
 		this.priority = priority;
+		this.symbol = symbol;
 
 		//paint = Graphics.res.getPaint();
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);

@@ -24,8 +24,11 @@ import java.util.Stack;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.oscim.renderer.atlas.TextureAtlas;
+import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.AreaLevel;
+import org.oscim.theme.renderinstruction.BitmapUtils;
 import org.oscim.theme.renderinstruction.Circle;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.LineSymbol;
@@ -40,6 +43,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 /**
@@ -49,7 +53,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	private final static String TAG = RenderThemeHandler.class.getName();
 
 	private static enum Element {
-		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE;
+		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS;
 	}
 
 	private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
@@ -120,7 +124,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	private final Stack<Rule> mRuleStack = new Stack<Rule>();
 	private final HashMap<String, RenderInstruction> tmpStyleHash =
 			new HashMap<String, RenderInstruction>(10);
-
+	private TextureAtlas mTextureAtlas;
 	private int mLevel;
 	private RenderTheme mRenderTheme;
 
@@ -131,7 +135,9 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 
 		mRenderTheme.complete(mRulesList, mLevel);
+		//mRenderTheme.mTextureAtlas = mTextureAtlas;
 
+		mTextureAtlas = null;
 		mRulesList.clear();
 		tmpStyleHash.clear();
 		mRuleStack.clear();
@@ -226,8 +232,12 @@ public class RenderThemeHandler extends DefaultHandler {
 				Text text = Text.create(localName, attributes, true);
 				mCurrentRule.addRenderingInstruction(text);
 
-				// Caption caption = Caption.create(localName, attributes);
-				// mCurrentRule.addRenderingInstruction(caption);
+				if (text.symbol != null) {
+					if ((text.texture = mTextureAtlas.getTextureRegion(text.symbol)) == null)
+						Log.d(TAG, "missing texture atlas item '" + text.symbol + "'");
+					else
+						Log.d(TAG, "using atlas item '" + text.symbol + "'");
+				}
 			}
 
 			else if ("circle".equals(localName)) {
@@ -258,6 +268,12 @@ public class RenderThemeHandler extends DefaultHandler {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				Symbol symbol = Symbol.create(localName, attributes);
 				mCurrentRule.addRenderingInstruction(symbol);
+
+				if ((symbol.texture = mTextureAtlas.getTextureRegion(symbol.src)) == null)
+					Log.d(TAG, "missing texture atlas item '" + symbol.src + "'");
+				else
+					Log.d(TAG, "using atlas item '" + symbol.src + "'");
+
 			}
 
 			else if (ELEMENT_NAME_USE_STYLE_LINE.equals(localName)) {
@@ -305,6 +321,12 @@ public class RenderThemeHandler extends DefaultHandler {
 					else
 						Log.d(TAG, "BUG not a path text style: " + style);
 				}
+			} else if ("atlas".equals(localName)) {
+				checkState(localName, Element.ATLAS);
+				createAtlas(localName, attributes);
+			} else if ("rect".equals(localName)) {
+				checkState(localName, Element.ATLAS);
+				createTextureRegion(localName, attributes);
 			} else {
 				throw new SAXException("unknown element: " + localName);
 			}
@@ -313,6 +335,60 @@ public class RenderThemeHandler extends DefaultHandler {
 		} catch (IOException e) {
 			throw new SAXException(null, e);
 		}
+	}
+
+	private void createAtlas(String elementName, Attributes attributes) throws IOException {
+		String img = null;
+
+		for (int i = 0; i < attributes.getLength(); i++) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+
+			if ("img".equals(name)) {
+				img = value;
+			} else if ("name".equals(name)) {
+				//img = value;
+			} else {
+				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+			}
+		}
+		if (img == null)
+			throw new IllegalArgumentException(
+					"missing attribute 'img' for element: "
+							+ elementName);
+
+		Bitmap bitmap = BitmapUtils.createBitmap("jar:" + img);
+		mTextureAtlas = new TextureAtlas(bitmap);
+	}
+
+	private void createTextureRegion(String elementName, Attributes attributes) {
+		String regionName = null;
+		Rect r = null;
+
+		for (int i = 0, n = attributes.getLength(); i < n; i++) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+
+			if ("name".equals(name)) {
+				regionName = value;
+			} else if ("pos".equals(name)) {
+				String[] pos = value.split(" ");
+				if (pos.length == 4) {
+					r = new Rect(Integer.parseInt(pos[0]),
+							Integer.parseInt(pos[1]),
+							Integer.parseInt(pos[2]),
+							Integer.parseInt(pos[3]));
+				}
+			} else {
+				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+			}
+		}
+		if (regionName == null || r == null)
+			throw new IllegalArgumentException(
+					"missing attribute 'name' or 'rect' for element: "
+							+ elementName);
+
+		mTextureAtlas.addTextureRegion(regionName.intern(), r);
 	}
 
 	@Override
@@ -346,6 +422,14 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			case RENDERING_INSTRUCTION:
 				if (mElementStack.peek() != Element.RULE) {
+					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+				}
+				return;
+			case ATLAS:
+				parentElement = mElementStack.peek();
+				// FIXME
+				if (parentElement != Element.RENDER_THEME
+						&& parentElement != Element.ATLAS) {
 					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
 				}
 				return;
