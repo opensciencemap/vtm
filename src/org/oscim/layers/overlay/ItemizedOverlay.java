@@ -21,6 +21,8 @@ package org.oscim.layers.overlay;
 // - and to make this work for multiple overlays
 //   a global scenegraph is probably required.
 
+import org.oscim.android.AndroidGraphics;
+import org.oscim.app.R;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.PointD;
@@ -28,11 +30,11 @@ import org.oscim.core.Tile;
 import org.oscim.layers.overlay.OverlayItem.HotspotPlace;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layers.BasicRenderLayer;
+import org.oscim.renderer.sublayers.SymbolItem;
 import org.oscim.renderer.sublayers.SymbolLayer;
 import org.oscim.utils.GeometryUtils;
 import org.oscim.view.MapView;
 
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
@@ -56,7 +58,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 	//private final static String TAG = ItemizedOverlay.class.getName();
 
-	protected final Drawable mDefaultMarker;
+	protected final OverlayMarker mDefaultMarker;
 	protected boolean mDrawFocusedItem = true;
 
 	class InternalItem {
@@ -161,7 +163,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 					if (mDrawFocusedItem && (mFocusedItem == it.item))
 						state = OverlayItem.ITEM_STATE_FOCUSED_MASK;
 
-					Drawable marker = it.item.getDrawable();
+					//Drawable marker = it.item.getDrawable();
+					OverlayMarker marker = it.item.getMarker(0);
 					if (marker == null)
 						marker = mDefaultMarker;
 
@@ -171,13 +174,27 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 					//	} else
 					//		marker = item.getMarker(state);
 
-					mSymbolLayer.addDrawable(marker, state, it.x, it.y);
+					//mSymbolLayer.addDrawable(marker, state, it.x, it.y);
+
+					SymbolItem s = SymbolItem.pool.get();
+					s.bitmap = marker.getBitmap();
+
+					s.x = it.x;
+					s.y = it.y;
+					s.offset = marker.getHotspot();
+					s.billboard = true;
+
+					mSymbolLayer.addSymbol(s);
 				}
 
 			}
 			mSymbolLayer.prepare();
 			layers.textureLayers = mSymbolLayer;
 			newData = true;
+		}
+		@Override
+		public synchronized void compile() {
+			super.compile();
 		}
 	}
 
@@ -198,14 +215,17 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	 */
 	public abstract int size();
 
-	public ItemizedOverlay(MapView mapView, final Drawable pDefaultMarker) {
+	public ItemizedOverlay(MapView mapView, OverlayMarker defaultMarker) {
 		super(mapView);
 
-		if (pDefaultMarker == null) {
-			throw new IllegalArgumentException("You must pass a default marker to ItemizedOverlay.");
+		if (defaultMarker == null) {
+			defaultMarker = AndroidGraphics.makeMarker(mapView.getContext().getResources()
+					.getDrawable(R.drawable.marker_default), null);
+			//throw new IllegalArgumentException("You must pass a default marker to ItemizedOverlay.");
 		}
 
-		this.mDefaultMarker = pDefaultMarker;
+		//this.mDefaultMarker = OverlayMarker.makeMarker(pDefaultMarker, null);
+		mDefaultMarker = defaultMarker;
 		mLayer = new ItemOverlay(mapView);
 	}
 
@@ -270,13 +290,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 			return null;
 		}
-		//			return mInternalItemList.get(position);
 	}
-
-	//	private Drawable getDefaultMarker(final int state) {
-	//		OverlayItem.setState(mDefaultMarker, state);
-	//		return mDefaultMarker;
-	//	}
 
 	/**
 	 * See if a given hit point is within the bounds of an item's marker.
@@ -393,91 +407,4 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		return marker;
 	}
 
-	public static Drawable makeMarker(Resources res, int id, HotspotPlace place) {
-		Drawable marker = res.getDrawable(id);
-		if (place == null)
-			boundToHotspot(marker, HotspotPlace.CENTER);
-		else
-			boundToHotspot(marker, place);
-		return marker;
-	}
-	//	/**
-	//	 * Draw a marker on each of our items. populate() must have been called
-	//	 * first.<br/>
-	//	 * <br/>
-	//	 * The marker will be drawn twice for each Item in the Overlay--once in the
-	//	 * shadow phase, skewed and darkened, then again in the non-shadow phase.
-	//	 * The bottom-center of the marker will be aligned with the geographical
-	//	 * coordinates of the Item.<br/>
-	//	 * <br/>
-	//	 * The order of drawing may be changed by overriding the getIndexToDraw(int)
-	//	 * method. An item may provide an alternate marker via its
-	//	 * OverlayItem.getMarker(int) method. If that method returns null, the
-	//	 * default marker is used.<br/>
-	//	 * <br/>
-	//	 * The focused item is always drawn last, which puts it visually on top of
-	//	 * the other items.<br/>
-	//	 *
-	//	 * @param canvas
-	//	 *            the Canvas upon which to draw. Note that this may already have
-	//	 *            a transformation applied, so be sure to leave it the way you
-	//	 *            found it
-	//	 * @param mapView
-	//	 *            the MapView that requested the draw. Use
-	//	 *            MapView.getProjection() to convert between on-screen pixels
-	//	 *            and latitude/longitude pairs
-	//	 * @param shadow
-	//	 *            if true, draw the shadow layer. If false, draw the overlay
-	//	 *            contents.
-	//	 */
-	//	@Override
-	//	public void draw(final Canvas canvas, final MapView mapView, final boolean shadow) {
-	//
-	//		if (shadow) {
-	//			return;
-	//		}
-	//
-	//		final Projection pj = mapView.getProjection();
-	//		final int size = this.mInternalItemList.size() - 1;
-	//
-	//		/*
-	//		 * Draw in backward cycle, so the items with the least index are on the
-	//		 * front.
-	//		 */
-	//		for (int i = size; i >= 0; i--) {
-	//			final Item item = getItem(i);
-	//			pj.toMapPixels(item.mGeoPoint, mCurScreenCoords);
-	//
-	//			onDrawItem(canvas, item, mCurScreenCoords);
-	//		}
-	//	}
-
-	//	/**
-	//	 * Draws an item located at the provided screen coordinates to the canvas.
-	//	 *
-	//	 * @param canvas
-	//	 *            what the item is drawn upon
-	//	 * @param item
-	//	 *            the item to be drawn
-	//	 * @param curScreenCoords
-	//	 *            the screen coordinates of the item
-	//	 */
-	//	protected void onDrawItem(final Canvas canvas, final Item item, final Point curScreenCoords) {
-	//		int state = 0;
-	//
-	//		if (mDrawFocusedItem && (mFocusedItem == item))
-	//			state = OverlayItem.ITEM_STATE_FOCUSED_MASK;
-	//
-	//		Drawable marker;
-	//
-	//		if (item.getMarker(state) == null)
-	//			marker = getDefaultMarker(state);
-	//		else
-	//			marker = item.getMarker(state);
-	//
-	//		boundToHotspot(marker, item.getMarkerHotspot());
-	//
-	//		// draw it
-	//		Overlay.drawAt(canvas, marker, curScreenCoords.x, curScreenCoords.y, false);
-	//	}
 }
