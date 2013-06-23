@@ -15,7 +15,9 @@
  */
 package org.oscim.android;
 
+import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.android.input.AndroidMotionEvent;
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 import org.oscim.view.MapRenderCallback;
@@ -48,9 +50,13 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 	private int mHeight;
 	private boolean mInitialized;
 
-	public static float dpi;
 
 	private final MapView mMapView;
+
+	static {
+		CanvasAdapter.g = AndroidGraphics.INSTANCE;
+		Log.logger = new AndroidLog();
+	}
 
 	/**
 	 * @param context
@@ -85,7 +91,7 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 		this.setWillNotDraw(true);
 
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
-		dpi = Math.max(metrics.xdpi, metrics.ydpi);
+		CanvasAdapter.dpi = (int)Math.max(metrics.xdpi, metrics.ydpi);
 
 		// TODO make this dpi dependent
 		Tile.SIZE = 400;

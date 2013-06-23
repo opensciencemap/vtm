@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -16,14 +17,15 @@ package org.oscim.backend;
 
 import java.io.InputStream;
 
-import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Paint;
 
 
 public abstract class CanvasAdapter {
-	public static CanvasAdapter g = AndroidGraphics.INSTANCE;
+	public static CanvasAdapter g;
+
+	public static float dpi = 240;
 
 	public enum Color {
 		BLACK, CYAN, TRANSPARENT, WHITE;

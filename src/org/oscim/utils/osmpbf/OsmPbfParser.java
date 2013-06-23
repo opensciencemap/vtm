@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.openstreetmap.osmosis.osmbinary.BinaryParser;
 import org.openstreetmap.osmosis.osmbinary.Osmformat;
+import org.oscim.backend.Log;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.utils.osm.OSMData;
@@ -15,7 +16,6 @@ import org.oscim.utils.osm.OSMNode;
 import org.oscim.utils.osm.OSMRelation;
 import org.oscim.utils.osm.OSMWay;
 
-import android.util.Log;
 
 
 

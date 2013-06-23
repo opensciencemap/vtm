@@ -16,6 +16,9 @@ package org.oscim.renderer.layers;
 
 import java.nio.FloatBuffer;
 
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
@@ -26,8 +29,6 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.view.MapView;
 
-import android.graphics.Color;
-import android.opengl.GLES20;
 
 /*
  * This is an example how to integrate custom OpenGL drawing routines as map overlay
@@ -37,6 +38,8 @@ import android.opengl.GLES20;
  * */
 
 public class CustomRenderLayer2 extends RenderLayer {
+
+	private static final GL20 GL = GLAdapter.INSTANCE;
 
 	private int mProgramObject;
 	private int hVertexPosition;
@@ -93,7 +96,7 @@ public class CustomRenderLayer2 extends RenderLayer {
 		buf.flip();
 
 		mVBO = BufferObject.get(0);
-		mVBO.loadBufferData(buf, 12 * 4, GLES20.GL_ARRAY_BUFFER);
+		mVBO.loadBufferData(buf, 12 * 4, GL20.GL_ARRAY_BUFFER);
 		newData = false;
 
 		// tell GLRender to call 'render'
@@ -110,10 +113,10 @@ public class CustomRenderLayer2 extends RenderLayer {
 		GLState.test(false, false);
 
 		// bind VBO data
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVBO.id);
+		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVBO.id);
 
 		// set VBO vertex layout
-		GLES20.glVertexAttribPointer(hVertexPosition, 2, GLES20.GL_FLOAT, false, 0, 0);
+		GL.glVertexAttribPointer(hVertexPosition, 2, GL20.GL_FLOAT, false, 0, 0);
 
 		GLState.enableVertexArrays(hVertexPosition, -1);
 
@@ -132,7 +135,7 @@ public class CustomRenderLayer2 extends RenderLayer {
 				float xx = x * 2 + (y % 2 == 0 ? 1 : 0);
 				float yy = y * h + h / 2;
 
-				GLES20.glUniform2f(hCenterPosition, xx * (mCellScale * 1.5f), yy * mCellScale);
+				GL.glUniform2f(hCenterPosition, xx * (mCellScale * 1.5f), yy * mCellScale);
 
 				//float alpha = 1 + (float) Math.log10(FastMath.clamp(
 				//		(float) Math.sqrt(xx * xx + yy * yy) / offset_y, 0.0f, 1.0f)) * 2;
@@ -151,7 +154,7 @@ public class CustomRenderLayer2 extends RenderLayer {
 
 				GlUtils.setColor(hColorPosition, c, alpha);
 
-				GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 6);
+				GL.glDrawArrays(GL20.GL_TRIANGLE_FAN, 0, 6);
 			}
 		}
 
@@ -162,8 +165,8 @@ public class CustomRenderLayer2 extends RenderLayer {
 				float xx = x * 2 + (y % 2 == 0 ? 1 : 0);
 				float yy = y * h + h / 2;
 
-				GLES20.glUniform2f(hCenterPosition, xx * (mCellScale * 1.5f), yy * mCellScale);
-				GLES20.glDrawArrays(GLES20.GL_LINE_LOOP, 0, 6);
+				GL.glUniform2f(hCenterPosition, xx * (mCellScale * 1.5f), yy * mCellScale);
+				GL.glDrawArrays(GL20.GL_LINE_LOOP, 0, 6);
 			}
 		}
 
@@ -178,13 +181,13 @@ public class CustomRenderLayer2 extends RenderLayer {
 			return false;
 
 		// Handle for vertex position in shader
-		hVertexPosition = GLES20.glGetAttribLocation(programObject, "a_pos");
+		hVertexPosition = GL.glGetAttribLocation(programObject, "a_pos");
 
-		hMatrixPosition = GLES20.glGetUniformLocation(programObject, "u_mvp");
+		hMatrixPosition = GL.glGetUniformLocation(programObject, "u_mvp");
 
-		hColorPosition = GLES20.glGetUniformLocation(programObject, "u_color");
+		hColorPosition = GL.glGetUniformLocation(programObject, "u_color");
 
-		hCenterPosition = GLES20.glGetUniformLocation(programObject, "u_center");
+		hCenterPosition = GL.glGetUniformLocation(programObject, "u_center");
 
 		// Store the program object
 		mProgramObject = programObject;

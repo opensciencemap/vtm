@@ -14,12 +14,12 @@
  */
 package org.oscim.layers;
 
+import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.Log;
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.Tile;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
-
-import org.oscim.backend.Log;
 
 /**
  * Changes MapViewPosition for scroll, fling, scale, rotation and tilt gestures
@@ -132,8 +132,16 @@ public class MapEventLayer extends InputLayer {
 			return true;
 		}
 
-		if (e.getPointerCount() < 2)
+		if (e.getPointerCount() < 2) {
+			if (mx > 1 || mx < -1 || my > 1 || my < -1) {
+				mMapPosition.moveMap(mx, my);
+				mMapView.updateMap(true);
+
+				mPrevX = x1;
+				mPrevY = y1;
+			}
 			return true;
+		}
 
 		float x2 = e.getX(1);
 		float y2 = e.getY(1);
@@ -295,7 +303,7 @@ public class MapEventLayer extends InputLayer {
 		//	float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
 		//	mMapPosition.animateTo(vx * move, vy * move, 250);
 		//} else {
-		float s = (200 / MapView.dpi);
+		float s = (200 / CanvasAdapter.dpi);
 
 		mMapPosition.animateFling(
 				Math.round(velocityX * s),

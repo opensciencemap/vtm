@@ -20,7 +20,8 @@ import java.io.InputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.oscim.view.MapView;
+import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.Log;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.TileLayer;
@@ -35,10 +36,8 @@ import org.oscim.tilesource.ITileDataSource;
 import org.oscim.tilesource.MapInfo;
 import org.oscim.tilesource.TileSource;
 import org.oscim.tilesource.TileSource.OpenResult;
-import org.oscim.tilesource.oscimap.OSciMap1TileSource;
+import org.oscim.view.MapView;
 import org.xml.sax.SAXException;
-
-import org.oscim.backend.Log;
 
 public class MapTileLayer extends TileLayer<MapTileLoader> {
 	private final static String TAG = MapTileLayer.class.getName();
@@ -87,10 +86,10 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 			mTileLoader.get(i).setTileDataSource(tileDataSource);
 		}
 
-		if (tileSource instanceof OSciMap1TileSource)
-			MapView.enableClosePolygons = false;
-		else
-			MapView.enableClosePolygons = true;
+//if (tileSource instanceof OSciMap1TileSource)
+//	MapView.enableClosePolygons = false;
+//else
+//	MapView.enableClosePolygons = true;
 
 		mTileManager.setZoomTable(mTileSource.getMapInfo().zoomLevel);
 
@@ -191,7 +190,7 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		try {
 			inputStream = theme.getRenderThemeAsStream();
 			IRenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
-			t.scaleTextSize(1 + (MapView.dpi / 240 - 1) * 0.5f);
+			t.scaleTextSize(1 + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
 
 			// FIXME !!!
 			GLRenderer.setRenderTheme(t);

@@ -19,8 +19,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.renderer.layers.ExtrusionRenderLayer;
 import org.oscim.view.MapView;
 
-import android.os.CountDownTimer;
-import org.oscim.backend.Log;
+//import android.os.CountDownTimer;
 
 /**
  * @author Hannes Janetzek
@@ -45,24 +44,24 @@ public class BuildingOverlay extends Overlay {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent e) {
-		int action = e.getAction() & MotionEvent.ACTION_MASK;
-		if (action == MotionEvent.ACTION_POINTER_DOWN) {
-			multi++;
-		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-			multi--;
-			if (!mActive && mAlpha > 0) {
-				// finish hiding
-				//Log.d(TAG, "add multi hide timer " + mAlpha);
-				addShowTimer(mFadeTime * mAlpha, false);
-			}
-		} else if (action == MotionEvent.ACTION_CANCEL) {
-			multi = 0;
-			Log.d(TAG, "cancel " + multi);
-			if (mTimer != null) {
-				mTimer.cancel();
-				mTimer = null;
-			}
-		}
+//		int action = e.getAction() & MotionEvent.ACTION_MASK;
+//		if (action == MotionEvent.ACTION_POINTER_DOWN) {
+//			multi++;
+//		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+//			multi--;
+//			if (!mActive && mAlpha > 0) {
+//				// finish hiding
+//				//Log.d(TAG, "add multi hide timer " + mAlpha);
+//				addShowTimer(mFadeTime * mAlpha, false);
+//			}
+//		} else if (action == MotionEvent.ACTION_CANCEL) {
+//			multi = 0;
+//			Log.d(TAG, "cancel " + multi);
+//			if (mTimer != null) {
+//				mTimer.cancel();
+//				mTimer = null;
+//			}
+//		}
 
 		return false;
 	}
@@ -76,20 +75,20 @@ public class BuildingOverlay extends Overlay {
 		if (show && mActive)
 			return;
 
-		if (show) {
-			// start showing
-			//Log.d(TAG, "add show timer " + mAlpha);
-			addShowTimer(mFadeTime * (1 - mAlpha), true);
-		} else if (mActive) {
-			// indicate hiding
-			if (multi > 0) {
-				//Log.d(TAG, "add fade timer " + mAlpha);
-				addFadeTimer(mFadeTime * mAlpha, false);
-			} else {
-				//Log.d(TAG, "add hide timer " + mAlpha);
-				addShowTimer(mFadeTime * mAlpha, false);
-			}
-		}
+//		if (show) {
+//			// start showing
+//			//Log.d(TAG, "add show timer " + mAlpha);
+//			addShowTimer(mFadeTime * (1 - mAlpha), true);
+//		} else if (mActive) {
+//			// indicate hiding
+//			if (multi > 0) {
+//				//Log.d(TAG, "add fade timer " + mAlpha);
+//				addFadeTimer(mFadeTime * mAlpha, false);
+//			} else {
+//				//Log.d(TAG, "add hide timer " + mAlpha);
+//				addShowTimer(mFadeTime * mAlpha, false);
+//			}
+//		}
 		mActive = show;
 	}
 
@@ -108,43 +107,43 @@ public class BuildingOverlay extends Overlay {
 		mMapView.render();
 	}
 
-	/* package */CountDownTimer mTimer;
-
-	private void addFadeTimer(final float ms, final boolean dir) {
-		if (mTimer != null)
-			mTimer.cancel();
-
-		mTimer = new CountDownTimer((long) ms, 16) {
-			@Override
-			public void onTick(long tick) {
-				fade(ms, tick, dir, 0.2f);
-			}
-
-			@Override
-			public void onFinish() {
-				fade(ms, 0, dir, 0.2f);
-				mTimer = null;
-			}
-		}.start();
-	}
-
-	private void addShowTimer(final float ms, final boolean dir) {
-		final float d = mFadeTime;
-		if (mTimer != null)
-			mTimer.cancel();
-
-		mTimer = new CountDownTimer((long) ms, 16) {
-			@Override
-			public void onTick(long tick) {
-				fade(d, tick, dir, 1);
-			}
-
-			@Override
-			public void onFinish() {
-				fade(d, 0, dir, 1);
-				mTimer = null;
-
-			}
-		}.start();
-	}
+//	/* package */CountDownTimer mTimer;
+//
+//	private void addFadeTimer(final float ms, final boolean dir) {
+//		if (mTimer != null)
+//			mTimer.cancel();
+//
+//		mTimer = new CountDownTimer((long) ms, 16) {
+//			@Override
+//			public void onTick(long tick) {
+//				fade(ms, tick, dir, 0.2f);
+//			}
+//
+//			@Override
+//			public void onFinish() {
+//				fade(ms, 0, dir, 0.2f);
+//				mTimer = null;
+//			}
+//		}.start();
+//	}
+//
+//	private void addShowTimer(final float ms, final boolean dir) {
+//		final float d = mFadeTime;
+//		if (mTimer != null)
+//			mTimer.cancel();
+//
+//		mTimer = new CountDownTimer((long) ms, 16) {
+//			@Override
+//			public void onTick(long tick) {
+//				fade(d, tick, dir, 1);
+//			}
+//
+//			@Override
+//			public void onFinish() {
+//				fade(d, 0, dir, 1);
+//				mTimer = null;
+//
+//			}
+//		}.start();
+//	}
 }

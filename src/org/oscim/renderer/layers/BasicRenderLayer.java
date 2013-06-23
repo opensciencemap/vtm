@@ -14,7 +14,8 @@
  */
 package org.oscim.renderer.layers;
 
-import org.oscim.view.MapView;
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
@@ -29,13 +30,14 @@ import org.oscim.renderer.sublayers.LineTexRenderer;
 import org.oscim.renderer.sublayers.PolygonRenderer;
 import org.oscim.renderer.sublayers.TextureRenderer;
 import org.oscim.utils.FastMath;
-
-import android.opengl.GLES20;
+import org.oscim.view.MapView;
 
 /**
  * Base class to use the renderer.sublayers for drawing
  */
 public abstract class BasicRenderLayer extends RenderLayer {
+
+	private static final GL20 GL = GLAdapter.INSTANCE;
 
 	public final Layers layers;
 
@@ -53,7 +55,7 @@ public abstract class BasicRenderLayer extends RenderLayer {
 
 		float div = FastMath.pow(pos.zoomLevel - curPos.zoomLevel);
 
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, layers.vbo.id);
+		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, layers.vbo.id);
 		GLState.test(false, false);
 		GLState.blend(true);
 		int simple = (curPos.tilt < 1 ? 1 : 0);

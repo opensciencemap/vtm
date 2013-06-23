@@ -17,12 +17,15 @@ package org.oscim.renderer;
 
 import java.nio.Buffer;
 
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
-
-import android.opengl.GLES20;
+import org.oscim.utils.GlUtils;
 
 public final class BufferObject {
 	private final static String TAG = BufferObject.class.getName();
+
+	private final static GL20 GL = GLAdapter.INSTANCE;
 
 	private static final int MB = 1024 * 1024;
 	private static final int LIMIT_BUFFERS = 16 * MB;
@@ -49,27 +52,27 @@ public final class BufferObject {
 			bufferType = type;
 		}
 
-		GLES20.glBindBuffer(type, id);
+		GL.glBindBuffer(type, id);
 
 		// reuse memory allocated for vbo when possible and allocated
 		// memory is less then four times the new data
 		if (!clear && (size > newSize) && (size < newSize * 4)) {
-			GLES20.glBufferSubData(type, 0, newSize, buf);
+			GL.glBufferSubData(type, 0, newSize, buf);
 		} else {
 			mBufferMemoryUsage += newSize - size;
 
 			size = newSize;
 
-			GLES20.glBufferData(type, size, buf, GLES20.GL_DYNAMIC_DRAW);
+			GL.glBufferData(type, size, buf, GL20.GL_DYNAMIC_DRAW);
 		}
 	}
 
 	public void bindArrayBuffer() {
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, id);
+		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, id);
 	}
 
 	public void bindIndexBuffer() {
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, id);
+		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, id);
 	}
 
 	// ---------------------------- pool ----------------------------
@@ -167,8 +170,9 @@ public final class BufferObject {
 				bo = bo.next;
 			}
 		}
+
 		if (removed > 0) {
-			GLES20.glDeleteBuffers(removed, vboIds, 0);
+			GlUtils.glDeleteBuffers(removed, vboIds);
 			counter -= removed;
 		}
 
@@ -176,8 +180,7 @@ public final class BufferObject {
 	}
 
 	static void createBuffers(int num) {
-		int[] mVboIds = new int[num];
-		GLES20.glGenBuffers(num, mVboIds, 0);
+		int[] mVboIds = GlUtils.glGenBuffers(num);
 
 		for (int i = 0; i < num; i++) {
 			BufferObject bo = new BufferObject(mVboIds[i]);

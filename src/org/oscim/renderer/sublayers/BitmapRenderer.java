@@ -15,18 +15,20 @@
 
 package org.oscim.renderer.sublayers;
 
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.utils.GlUtils;
-
-import android.opengl.GLES20;
 
 // TODO merge with TextureRenderer
 
 public final class BitmapRenderer {
 
 	//private final static String TAG = BitmapRenderer.class.getName();
+	private static final GL20 GL = GLAdapter.INSTANCE;
+
 	public final static boolean debug = true;
 
 	private static int mTextureProgram;
@@ -45,12 +47,12 @@ public final class BitmapRenderer {
 		mTextureProgram = GlUtils.createProgram(textVertexShader,
 				textFragmentShader);
 
-		hTextureMVMatrix = GLES20.glGetUniformLocation(mTextureProgram, "u_mv");
-		hTextureProjMatrix = GLES20.glGetUniformLocation(mTextureProgram, "u_proj");
-		hTextureScale = GLES20.glGetUniformLocation(mTextureProgram, "u_scale");
-		hTextureScreenScale = GLES20.glGetUniformLocation(mTextureProgram, "u_swidth");
-		hTextureVertex = GLES20.glGetAttribLocation(mTextureProgram, "vertex");
-		hTextureTexCoord = GLES20.glGetAttribLocation(mTextureProgram, "tex_coord");
+		hTextureMVMatrix = GL.glGetUniformLocation(mTextureProgram, "u_mv");
+		hTextureProjMatrix = GL.glGetUniformLocation(mTextureProgram, "u_proj");
+		hTextureScale = GL.glGetUniformLocation(mTextureProgram, "u_scale");
+		hTextureScreenScale = GL.glGetUniformLocation(mTextureProgram, "u_swidth");
+		hTextureVertex = GL.glGetAttribLocation(mTextureProgram, "vertex");
+		hTextureTexCoord = GL.glGetAttribLocation(mTextureProgram, "tex_coord");
 	}
 
 	public static Layer draw(Layer layer, float scale, Matrices m) {
@@ -64,22 +66,22 @@ public final class BitmapRenderer {
 		TextureLayer tl = (TextureLayer) layer;
 
 		if (tl.fixed)
-			GLES20.glUniform1f(hTextureScale, (float) Math.sqrt(scale));
+			GL.glUniform1f(hTextureScale, (float) Math.sqrt(scale));
 		else
-			GLES20.glUniform1f(hTextureScale, 1);
+			GL.glUniform1f(hTextureScale, 1);
 
-		GLES20.glUniform1f(hTextureScreenScale, 1f / GLRenderer.screenWidth);
+		GL.glUniform1f(hTextureScreenScale, 1f / GLRenderer.screenWidth);
 
 		m.proj.setAsUniform(hTextureProjMatrix);
 
 		m.mvp.setAsUniform(hTextureMVMatrix);
 
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, GLRenderer.mQuadIndicesID);
+		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, GLRenderer.mQuadIndicesID);
 
 		for (TextureItem ti = tl.textures; ti != null; ti = ti.next) {
 			//Log.d(TAG, "render texture " + ti.id);
 
-			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, ti.id);
+			GL.glBindTexture(GL20.GL_TEXTURE_2D, ti.id);
 			int maxVertices = GLRenderer.maxQuads * INDICES_PER_SPRITE;
 
 			// draw up to maxVertices in each iteration
@@ -87,22 +89,22 @@ public final class BitmapRenderer {
 				// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
 				int off = (ti.offset + i) * 8 + tl.offset;
 
-				GLES20.glVertexAttribPointer(hTextureVertex, 4,
-						GLES20.GL_SHORT, false, 12, off);
+				GL.glVertexAttribPointer(hTextureVertex, 4,
+						GL20.GL_SHORT, false, 12, off);
 
-				GLES20.glVertexAttribPointer(hTextureTexCoord, 2,
-						GLES20.GL_SHORT, false, 12, off + 8);
+				GL.glVertexAttribPointer(hTextureTexCoord, 2,
+						GL20.GL_SHORT, false, 12, off + 8);
 
 				int numVertices = ti.vertices - i;
 				if (numVertices > maxVertices)
 					numVertices = maxVertices;
 
-				GLES20.glDrawElements(GLES20.GL_TRIANGLES, numVertices,
-						GLES20.GL_UNSIGNED_SHORT, 0);
+				GL.glDrawElements(GL20.GL_TRIANGLES, numVertices,
+						GL20.GL_UNSIGNED_SHORT, 0);
 			}
 		}
 
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		return layer.next;
 	}

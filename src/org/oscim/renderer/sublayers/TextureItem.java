@@ -16,19 +16,20 @@ package org.oscim.renderer.sublayers;
 import java.util.ArrayList;
 
 import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
+import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
-import android.opengl.GLES20;
-import org.oscim.backend.Log;
-
 // FIXME
 
 public class TextureItem extends Inlist<TextureItem> {
 	private final static String TAG = TextureItem.class.getName();
+	private static final GL20 GL = GLAdapter.INSTANCE;
 
 	//  texture ID
 	public int id;
@@ -94,9 +95,7 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		@Override
 		public void init(int num) {
-
-			int[] textureIds = new int[num];
-			GLES20.glGenTextures(num, textureIds, 0);
+			 int[] textureIds = GlUtils.glGenTextures(num);
 
 			for (int i = 0; i < num; i++) {
 				initTexture(textureIds[i]);
@@ -173,13 +172,12 @@ public class TextureItem extends Inlist<TextureItem> {
 			for (int i = 0; i < size; i++)
 				tmp[i] = mTextures.get(i).intValue();
 			mTextures.clear();
-			GLES20.glDeleteTextures(size, tmp, 0);
+			GlUtils.glDeleteTextures(size, tmp);
 		}
 
 		if (to.id < 0) {
 			mTexCnt++;
-			int[] textureIds = new int[1];
-			GLES20.glGenTextures(1, textureIds, 0);
+			int[] textureIds = GlUtils.glGenTextures(1);
 			to.id = textureIds[0];
 			initTexture(to.id);
 			if (TextureRenderer.debug)
@@ -205,19 +203,19 @@ public class TextureItem extends Inlist<TextureItem> {
 			Log.d(TAG, "no texture!");
 			return;
 		}
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, to.id);
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, to.id);
 
 		if (to.ownBitmap) {
 			bitmap.uploadToTexture(false);
-			//GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+			//GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, bitmap, 0);
 
 		} else if (to.width == w && to.height == h) {
 			bitmap.uploadToTexture(true);
-			//GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, bitmap, format, type);
+			//GLUtils.texSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, bitmap, format, type);
 
 		} else {
 			bitmap.uploadToTexture(false);
-			//GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, format, bitmap, type, 0);
+			//GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, format, bitmap, type, 0);
 			to.width = w;
 			to.height = h;
 		}
@@ -227,16 +225,16 @@ public class TextureItem extends Inlist<TextureItem> {
 	}
 
 	static void initTexture(int id) {
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, id);
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, id);
 
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
-				GLES20.GL_LINEAR);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
-				GLES20.GL_LINEAR);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
-				GLES20.GL_CLAMP_TO_EDGE); // Set U Wrapping
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
-				GLES20.GL_CLAMP_TO_EDGE); // Set V Wrapping
+		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER,
+				GL20.GL_LINEAR);
+		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER,
+				GL20.GL_LINEAR);
+		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
+				GL20.GL_CLAMP_TO_EDGE); // Set U Wrapping
+		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
+				GL20.GL_CLAMP_TO_EDGE); // Set V Wrapping
 	}
 
 	static void init(int num) {

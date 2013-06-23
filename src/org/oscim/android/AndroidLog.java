@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2013
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,28 +14,29 @@
  */
 package org.oscim.android;
 
-import org.oscim.view.MapView;
+import android.util.Log;
 
-import android.content.Context;
-import android.opengl.GLSurfaceView;
 
-public class GLView extends GLSurfaceView {
+public class AndroidLog  implements org.oscim.backend.Log.Logger{
 
-	MapView mMapView;
-	private final AndroidGLRenderer mRenderer;
-
-	public GLView(Context context, MapView mapView) {
-		super(context);
-		mMapView = mapView;
-		// Log.d(TAG, "init GLSurfaceLayer");
-		setEGLConfigChooser(new GlConfigChooser());
-		setEGLContextClientVersion(2);
-
-		setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
-		mRenderer = new AndroidGLRenderer(mMapView);
-		setRenderer(mRenderer);
-
-		//if (!MapView.debugFrameTime)
-			setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+	@Override
+	public void d(String tag, String msg) {
+		Log.d(tag, msg);
 	}
+
+	@Override
+	public void w(String tag, String msg) {
+		Log.w(tag, msg);
+	}
+
+	@Override
+	public void e(String tag, String msg) {
+		Log.e(tag, msg);
+	}
+
+	@Override
+	public void i(String tag, String msg) {
+		Log.i(tag, msg);
+	}
+
 }

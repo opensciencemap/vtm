@@ -14,10 +14,13 @@
  */
 package org.oscim.renderer;
 
-import android.opengl.GLES20;
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 
 public class GLState {
+	private final static GL20 GL = GLAdapter.INSTANCE;
+
 	private final static String TAG = GLState.class.getName();
 
 	private final static boolean[] vertexArray = { false, false };
@@ -33,13 +36,13 @@ public class GLState {
 		depth = false;
 		stencil = false;
 		shader = -1;
-		GLES20.glDisable(GLES20.GL_STENCIL_TEST);
-		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		GL.glDisable(GL20.GL_STENCIL_TEST);
+		GL.glDisable(GL20.GL_DEPTH_TEST);
 	}
 
 	public static boolean useProgram(int shaderProgram) {
 		if (shaderProgram != shader) {
-			GLES20.glUseProgram(shaderProgram);
+			GL.glUseProgram(shaderProgram);
 			shader = shaderProgram;
 			return true;
 		}
@@ -51,9 +54,9 @@ public class GLState {
 			return;
 
 		if (enable)
-			GLES20.glEnable(GLES20.GL_BLEND);
+			GL.glEnable(GL20.GL_BLEND);
 		else
-			GLES20.glDisable(GLES20.GL_BLEND);
+			GL.glDisable(GL20.GL_BLEND);
 		blend = enable;
 	}
 
@@ -61,9 +64,9 @@ public class GLState {
 		if (depth != depthTest) {
 
 			if (depthTest)
-				GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+				GL.glEnable(GL20.GL_DEPTH_TEST);
 			else
-				GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+				GL.glDisable(GL20.GL_DEPTH_TEST);
 
 			depth = depthTest;
 		}
@@ -71,9 +74,9 @@ public class GLState {
 		if (stencil != stencilTest) {
 
 			if (stencilTest)
-				GLES20.glEnable(GLES20.GL_STENCIL_TEST);
+				GL.glEnable(GL20.GL_STENCIL_TEST);
 			else
-				GLES20.glDisable(GLES20.GL_STENCIL_TEST);
+				GL.glDisable(GL20.GL_STENCIL_TEST);
 
 			stencil = stencilTest;
 		}
@@ -85,24 +88,24 @@ public class GLState {
 
 		if ((va1 == 0 || va2 == 0)) {
 			if (!vertexArray[0]) {
-				GLES20.glEnableVertexAttribArray(0);
+				GL.glEnableVertexAttribArray(0);
 				vertexArray[0] = true;
 			}
 		} else {
 			if (vertexArray[0]) {
-				GLES20.glDisableVertexAttribArray(0);
+				GL.glDisableVertexAttribArray(0);
 				vertexArray[0] = false;
 			}
 		}
 
 		if ((va1 == 1 || va2 == 1)) {
 			if (!vertexArray[1]) {
-				GLES20.glEnableVertexAttribArray(1);
+				GL.glEnableVertexAttribArray(1);
 				vertexArray[1] = true;
 			}
 		} else {
 			if (vertexArray[1]) {
-				GLES20.glDisableVertexAttribArray(1);
+				GL.glDisableVertexAttribArray(1);
 				vertexArray[1] = false;
 			}
 		}

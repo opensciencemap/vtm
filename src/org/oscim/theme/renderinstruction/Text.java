@@ -130,47 +130,12 @@ public final class Text extends RenderInstruction {
 
 		Text t = new Text("", "", FontFamily.DEFAULT, FontStyle.NORMAL,
 				fontSize, fill, outline, strokeWidth, 0, billboard, null, Integer.MAX_VALUE);
-		//FontMetrics fm = t.paint.getFontMetrics();
-		//t.fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
-		//t.fontDescent = (float) Math.ceil(Math.abs(fm.bottom));
 
 		t.fontHeight = t.paint.getFontHeight();
 		t.fontDescent = t.paint.getFontDescent();
 
 		return t;
 	}
-
-	//private static int getStyle(FontStyle fontStyle) {
-	//	switch (fontStyle) {
-	//		case BOLD:
-	//			return 1;
-	//		case BOLD_ITALIC:
-	//			return 3;
-	//		case ITALIC:
-	//			return 2;
-	//		case NORMAL:
-	//			return 0;
-	//	}
-	//
-	//	throw new IllegalArgumentException("unknown font style: " + fontStyle);
-	//}
-
-	//private static Typeface getTypeface(FontFamily fontFamily) {
-	//	switch (fontFamily) {
-	//		case DEFAULT:
-	//			return Typeface.DEFAULT;
-	//		case DEFAULT_BOLD:
-	//			return Typeface.DEFAULT_BOLD;
-	//		case MONOSPACE:
-	//			return Typeface.MONOSPACE;
-	//		case SANS_SERIF:
-	//			return Typeface.SANS_SERIF;
-	//		case SERIF:
-	//			return Typeface.SERIF;
-	//	}
-	//
-	//	throw new IllegalArgumentException("unknown font family: " + fontFamily);
-	//}
 
 	private Text(String style, String textKey, FontFamily fontFamily, FontStyle fontStyle,
 			float fontSize, int fill, int outline, float strokeWidth, float dy, boolean caption,
@@ -185,9 +150,7 @@ public final class Text extends RenderInstruction {
 
 		paint = CanvasAdapter.g.getPaint();
 		paint.setTextAlign(Align.CENTER);
-		//Typeface typeFace = Typeface.create(Text.getTypeface(fontFamily), Text.getStyle(fontStyle));
 		paint.setTypeface(fontFamily, fontStyle);
-		//paint.setTypeface(typeFace);
 
 		paint.setColor(fill);
 		paint.setTextSize(fontSize);
@@ -197,7 +160,6 @@ public final class Text extends RenderInstruction {
 			stroke.setStyle(Style.STROKE);
 			stroke.setTextAlign(Align.CENTER);
 			stroke.setTypeface(fontFamily, fontStyle);
-			//stroke.setTypeface(typeFace);
 			stroke.setColor(outline);
 			stroke.setStrokeWidth(strokeWidth);
 			stroke.setTextSize(fontSize);
@@ -205,6 +167,9 @@ public final class Text extends RenderInstruction {
 			stroke = null;
 
 		this.fontSize = fontSize;
+
+		//fontHeight = paint.getFontHeight();
+		//fontDescent = paint.getFontDescent();
 	}
 
 	@Override
@@ -226,10 +191,6 @@ public final class Text extends RenderInstruction {
 		paint.setTextSize(fontSize * scaleFactor);
 		if (stroke != null)
 			stroke.setTextSize(fontSize * scaleFactor);
-
-		//FontMetrics fm = paint.getFontMetrics();
-		//fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
-		//fontDescent = (float) Math.ceil(Math.abs(fm.bottom));
 
 		fontHeight = paint.getFontHeight();
 		fontDescent = paint.getFontDescent();

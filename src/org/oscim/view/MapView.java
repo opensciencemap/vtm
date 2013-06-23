@@ -31,8 +31,7 @@ import org.oscim.tilesource.TileSource;
 
 public class MapView {
 
-	public static int dpi;
-	public static boolean enableClosePolygons;
+	//public static boolean enableClosePolygons;
 	private final LayerManager mLayerManager;
 	private final MapViewPosition mMapViewPosition;
 	private final MapPosition mMapPosition;

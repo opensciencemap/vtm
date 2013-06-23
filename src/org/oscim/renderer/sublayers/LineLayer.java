@@ -16,7 +16,6 @@ package org.oscim.renderer.sublayers;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.view.MapView;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
@@ -108,8 +107,8 @@ public final class LineLayer extends Layer {
 		int opos = si.used;
 
 		// FIXME: remove this when switching to oscimap MapDatabase
-		if (!MapView.enableClosePolygons)
-			closed = false;
+		//if (!MapView.enableClosePolygons)
+		//	closed = false;
 
 		// Note: just a hack to save some vertices, when there are more than 200 lines
 		// per type

@@ -27,7 +27,7 @@ import java.util.zip.InflaterInputStream;
 import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 
-import android.os.SystemClock;
+//import android.os.SystemClock;
 
 public class LwHttp {
 	private static final String TAG = LwHttp.class.getName();
@@ -36,7 +36,7 @@ public class LwHttp {
 	private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
 	private final static byte[] HEADER_CONTENT_LENGTH = "Content-Length".getBytes();
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
-	private final static int RESPONSE_TIMEOUT = 10000;
+	private final static long RESPONSE_TIMEOUT = (long)10E9; // 10 second in nanosecond (I guess)
 
 	private final static int BUFFER_SIZE = 1024;
 	private final byte[] buffer = new byte[BUFFER_SIZE];
@@ -194,7 +194,7 @@ public class LwHttp {
 	public boolean sendRequest(Tile tile) throws IOException {
 
 		if (mSocket != null && ((mMaxReq-- <= 0)
-				|| (SystemClock.elapsedRealtime() - mLastRequest > RESPONSE_TIMEOUT))) {
+				|| (System.nanoTime() - mLastRequest > RESPONSE_TIMEOUT))) {
 
 			try {
 				mSocket.close();
@@ -316,7 +316,7 @@ public class LwHttp {
 	}
 
 	public void requestCompleted() {
-		mLastRequest = SystemClock.elapsedRealtime();
+		mLastRequest = System.nanoTime();
 	}
 
 	public int getContentLength() {

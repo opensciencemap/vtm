@@ -25,16 +25,12 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.PointD;
 import org.oscim.core.Tile;
-import org.oscim.layers.overlay.OverlayItem.HotspotPlace;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layers.BasicRenderLayer;
 import org.oscim.renderer.sublayers.SymbolItem;
 import org.oscim.renderer.sublayers.SymbolLayer;
 import org.oscim.utils.GeometryUtils;
 import org.oscim.view.MapView;
-
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 
 /* @author Marc Kurtz
  * @author Nicolas Gramlich
@@ -190,6 +186,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 			layers.textureLayers = mSymbolLayer;
 			newData = true;
 		}
+
 		@Override
 		public synchronized void compile() {
 			super.compile();
@@ -216,11 +213,11 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	public ItemizedOverlay(MapView mapView, OverlayMarker defaultMarker) {
 		super(mapView);
 
-//		if (defaultMarker == null) {
-//			defaultMarker = AndroidGraphics.makeMarker(mapView.getContext().getResources()
-//					.getDrawable(R.drawable.marker_default), null);
-//			//throw new IllegalArgumentException("You must pass a default marker to ItemizedOverlay.");
-//		}
+		//		if (defaultMarker == null) {
+		//			defaultMarker = AndroidGraphics.makeMarker(mapView.getContext().getResources()
+		//					.getDrawable(R.drawable.marker_default), null);
+		//			//throw new IllegalArgumentException("You must pass a default marker to ItemizedOverlay.");
+		//		}
 
 		//this.mDefaultMarker = OverlayMarker.makeMarker(pDefaultMarker, null);
 		mDefaultMarker = defaultMarker;
@@ -346,63 +343,63 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		return mFocusedItem;
 	}
 
-	private static final Rect mRect = new Rect();
-
-	/**
-	 * Adjusts a drawable's bounds so that (0,0) is a pixel in the location
-	 * described by the hotspot parameter. Useful for "pin"-like graphics. For
-	 * convenience, returns the same drawable that was passed in.
-	 *
-	 * @param marker
-	 *            the drawable to adjust
-	 * @param hotspot
-	 *            the hotspot for the drawable
-	 * @return the same drawable that was passed in.
-	 */
-	public static synchronized Drawable boundToHotspot(final Drawable marker, HotspotPlace hotspot) {
-		final int markerWidth = marker.getIntrinsicWidth();
-		final int markerHeight = marker.getIntrinsicHeight();
-
-		mRect.set(0, 0, 0 + markerWidth, 0 + markerHeight);
-
-		if (hotspot == null) {
-			hotspot = HotspotPlace.BOTTOM_CENTER;
-		}
-
-		switch (hotspot) {
-			default:
-			case NONE:
-				break;
-			case CENTER:
-				mRect.offset(-markerWidth / 2, -markerHeight / 2);
-				break;
-			case BOTTOM_CENTER:
-				mRect.offset(-markerWidth / 2, -markerHeight);
-				break;
-			case TOP_CENTER:
-				mRect.offset(-markerWidth / 2, 0);
-				break;
-			case RIGHT_CENTER:
-				mRect.offset(-markerWidth, -markerHeight / 2);
-				break;
-			case LEFT_CENTER:
-				mRect.offset(0, -markerHeight / 2);
-				break;
-			case UPPER_RIGHT_CORNER:
-				mRect.offset(-markerWidth, 0);
-				break;
-			case LOWER_RIGHT_CORNER:
-				mRect.offset(-markerWidth, -markerHeight);
-				break;
-			case UPPER_LEFT_CORNER:
-				mRect.offset(0, 0);
-				break;
-			case LOWER_LEFT_CORNER:
-				mRect.offset(0, -markerHeight);
-				break;
-		}
-		marker.setBounds(mRect);
-		return marker;
-	}
+	//	private static final Rect mRect = new Rect();
+	//
+	//	/**
+	//	 * Adjusts a drawable's bounds so that (0,0) is a pixel in the location
+	//	 * described by the hotspot parameter. Useful for "pin"-like graphics. For
+	//	 * convenience, returns the same drawable that was passed in.
+	//	 *
+	//	 * @param marker
+	//	 *            the drawable to adjust
+	//	 * @param hotspot
+	//	 *            the hotspot for the drawable
+	//	 * @return the same drawable that was passed in.
+	//	 */
+	//	public static synchronized Drawable boundToHotspot(final Drawable marker, HotspotPlace hotspot) {
+	//		final int markerWidth = marker.getIntrinsicWidth();
+	//		final int markerHeight = marker.getIntrinsicHeight();
+	//
+	//		mRect.set(0, 0, 0 + markerWidth, 0 + markerHeight);
+	//
+	//		if (hotspot == null) {
+	//			hotspot = HotspotPlace.BOTTOM_CENTER;
+	//		}
+	//
+	//		switch (hotspot) {
+	//			default:
+	//			case NONE:
+	//				break;
+	//			case CENTER:
+	//				mRect.offset(-markerWidth / 2, -markerHeight / 2);
+	//				break;
+	//			case BOTTOM_CENTER:
+	//				mRect.offset(-markerWidth / 2, -markerHeight);
+	//				break;
+	//			case TOP_CENTER:
+	//				mRect.offset(-markerWidth / 2, 0);
+	//				break;
+	//			case RIGHT_CENTER:
+	//				mRect.offset(-markerWidth, -markerHeight / 2);
+	//				break;
+	//			case LEFT_CENTER:
+	//				mRect.offset(0, -markerHeight / 2);
+	//				break;
+	//			case UPPER_RIGHT_CORNER:
+	//				mRect.offset(-markerWidth, 0);
+	//				break;
+	//			case LOWER_RIGHT_CORNER:
+	//				mRect.offset(-markerWidth, -markerHeight);
+	//				break;
+	//			case UPPER_LEFT_CORNER:
+	//				mRect.offset(0, 0);
+	//				break;
+	//			case LOWER_LEFT_CORNER:
+	//				mRect.offset(0, -markerHeight);
+	//				break;
+	//		}
+	//		marker.setBounds(mRect);
+	//		return marker;
+	//	}
 
 }
