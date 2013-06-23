@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="libs/jackson-core-2.1.4.jar"/>
+	<classpathentry kind="lib" path="libs/osmosis-osm-binary-0.43.jar"/>
+	<classpathentry kind="lib" path="libs/protobuf-java-2.4.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/vtm"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
