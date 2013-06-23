@@ -28,7 +28,8 @@ package org.oscim.renderer.layers;
 // 5 R-Tree might be handy
 //
 
-import org.oscim.view.MapView;
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -50,17 +51,14 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
 import org.oscim.utils.pool.LList;
 import org.oscim.utils.pool.Pool;
+import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
-import android.opengl.GLES20;
-import android.os.AsyncTask;
-import android.os.SystemClock;
-import org.oscim.backend.Log;
-import android.os.Handler;
-import android.os.Looper;
 
 public class TextRenderLayer extends BasicRenderLayer {
 	private final static String TAG = TextRenderLayer.class.getName();
+	private static final GL20 GL = GLAdapter.INSTANCE;
+
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
 
@@ -666,77 +664,77 @@ public class TextRenderLayer extends BasicRenderLayer {
 			this.newData = true;
 		}
 
-		if (!mHolding)
-			postLabelTask((mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis());
+//		if (!mHolding)
+//			postLabelTask((mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis());
 	}
 
-	/* private */LabelTask mLabelTask;
-	/* private */long mLastRun;
-
-	class LabelTask extends AsyncTask<Void, Void, Integer> {
-
-		@Override
-		protected Integer doInBackground(Void... unused) {
-			boolean labelsChanged = false;
-
-			if (!isCancelled())
-				labelsChanged = updateLabels();
-
-			if (!isCancelled() && labelsChanged)
-				mMapView.render();
-
-			//Log.d(TAG, "relabel " + labelsChanged);
-
-			mLastRun = System.currentTimeMillis();
-			mLabelTask = null;
-			return null;
-		}
-
-		@Override
-		protected void onCancelled() {
-			cleanup();
-		}
-	}
-
-	/*private */void cleanup() {
-		mPool.releaseAll(mPrevLabels);
-		mPrevLabels = null;
-		mTileSet.clear();
-		mLabelTask = null;
-	}
-
-	private final Runnable mLabelUpdate = new Runnable() {
-		@Override
-		public void run() {
-
-			if (mLabelTask == null) {
-				mLabelTask = new LabelTask();
-				mLabelTask.execute();
-			} else {
-				postLabelTask(50);
-				//Log.d(TAG, "repost");
-			}
-		}
-	};
-	private Handler mLabelHandler;
-
-	/* private */void postLabelTask(long delay) {
-		if (mLabelHandler == null) {
-			mLabelHandler = new Handler(Looper.getMainLooper());
-		}
-
-		mLabelHandler.removeCallbacks(mLabelUpdate);
-
-		if (delay > 0)
-			mLabelHandler.postDelayed(mLabelUpdate, delay);
-		else
-			mLabelHandler.post(mLabelUpdate);
-	}
+//	/* private */LabelTask mLabelTask;
+//	/* private */long mLastRun;
+//
+//	class LabelTask extends AsyncTask<Void, Void, Integer> {
+//
+//		@Override
+//		protected Integer doInBackground(Void... unused) {
+//			boolean labelsChanged = false;
+//
+//			if (!isCancelled())
+//				labelsChanged = updateLabels();
+//
+//			if (!isCancelled() && labelsChanged)
+//				mMapView.render();
+//
+//			//Log.d(TAG, "relabel " + labelsChanged);
+//
+//			mLastRun = System.currentTimeMillis();
+//			mLabelTask = null;
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onCancelled() {
+//			cleanup();
+//		}
+//	}
+//
+//	/*private */void cleanup() {
+//		mPool.releaseAll(mPrevLabels);
+//		mPrevLabels = null;
+//		mTileSet.clear();
+//		mLabelTask = null;
+//	}
+//
+//	private final Runnable mLabelUpdate = new Runnable() {
+//		@Override
+//		public void run() {
+//
+//			if (mLabelTask == null) {
+//				mLabelTask = new LabelTask();
+//				mLabelTask.execute();
+//			} else {
+//				postLabelTask(50);
+//				//Log.d(TAG, "repost");
+//			}
+//		}
+//	};
+//	private Handler mLabelHandler;
+//
+//	/* private */void postLabelTask(long delay) {
+//		if (mLabelHandler == null) {
+//			mLabelHandler = new Handler(Looper.getMainLooper());
+//		}
+//
+//		mLabelHandler.removeCallbacks(mLabelUpdate);
+//
+//		if (delay > 0)
+//			mLabelHandler.postDelayed(mLabelUpdate, delay);
+//		else
+//			mLabelHandler.post(mLabelUpdate);
+//	}
 
 	@Override
 	public synchronized void render(MapPosition pos, Matrices m) {
 
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, layers.vbo.id);
+		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, layers.vbo.id);
 		GLState.test(false, false);
 
 		float scale = (float) (mMapPosition.scale / pos.scale);
@@ -772,13 +770,13 @@ public class TextRenderLayer extends BasicRenderLayer {
 	}
 
 	public synchronized void clearLabels() {
-		if (mLabelHandler != null)
-			mLabelHandler.removeCallbacks(mLabelUpdate);
-
-		if (mLabelTask == null) {
-			cleanup();
-		} else {
-			mLabelTask.cancel(false);
-		}
+//		if (mLabelHandler != null)
+//			mLabelHandler.removeCallbacks(mLabelUpdate);
+//
+//		if (mLabelTask == null) {
+//			cleanup();
+//		} else {
+//			mLabelTask.cancel(false);
+//		}
 	}
 }

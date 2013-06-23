@@ -175,7 +175,6 @@ public class LayerManager extends AbstractList<Layer>
 //
 //			mCancelGesture = false;
 //		}
-		Log.d(TAG, "motionEvent");
 
 		if (onTouchEvent(e))
 			return true;

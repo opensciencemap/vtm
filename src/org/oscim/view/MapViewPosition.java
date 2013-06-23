@@ -26,8 +26,6 @@ import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.Matrix4;
 
-import android.opengl.Matrix;
-
 
 public class MapViewPosition {
 	private static final String TAG = MapViewPosition.class.getName();
@@ -109,7 +107,7 @@ public class MapViewPosition {
 		float aspect = height / (float) width;
 		float[] tmp = new float[16];
 
-		Matrix.frustumM(tmp, 0, -s, s,
+		Matrix4.frustumM(tmp, 0, -s, s,
 				aspect * s, -aspect * s, VIEW_NEAR, VIEW_FAR);
 
 		mProjMatrix.set(tmp);
@@ -117,7 +115,7 @@ public class MapViewPosition {
 		mProjMatrix.multiplyRhs(mTmpMatrix);
 		mProjMatrix.get(tmp);
 
-		Matrix.invertM(tmp, 0, tmp, 0);
+		Matrix4.invertM(tmp, 0, tmp, 0);
 		mProjMatrixI.set(tmp);
 
 		mHeight = height;

@@ -14,7 +14,9 @@
  */
 package org.oscim.renderer.layers;
 
-import org.oscim.view.MapView;
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
+import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
@@ -26,12 +28,12 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.sublayers.ExtrusionLayer;
 import org.oscim.utils.GlUtils;
-
-import android.opengl.GLES20;
-import org.oscim.backend.Log;
+import org.oscim.view.MapView;
 
 public class ExtrusionRenderLayer extends RenderLayer {
 	private final static String TAG = ExtrusionRenderLayer.class.getName();
+
+	private static final GL20 GL = GLAdapter.INSTANCE;
 
 	private final TileRenderLayer mTileLayer;
 
@@ -75,12 +77,12 @@ public class ExtrusionRenderLayer extends RenderLayer {
 				return false;
 			}
 
-			hMatrix[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_mvp");
-			hColor[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_color");
-			hAlpha[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_alpha");
-			hMode[i] = GLES20.glGetUniformLocation(shaderProgram[i], "u_mode");
-			hVertexPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_pos");
-			hLightPosition[i] = GLES20.glGetAttribLocation(shaderProgram[i], "a_light");
+			hMatrix[i] = GL.glGetUniformLocation(shaderProgram[i], "u_mvp");
+			hColor[i] = GL.glGetUniformLocation(shaderProgram[i], "u_color");
+			hAlpha[i] = GL.glGetUniformLocation(shaderProgram[i], "u_alpha");
+			hMode[i] = GL.glGetUniformLocation(shaderProgram[i], "u_mode");
+			hVertexPosition[i] = GL.glGetAttribLocation(shaderProgram[i], "a_pos");
+			hLightPosition[i] = GL.glGetAttribLocation(shaderProgram[i], "a_light");
 		}
 
 		return true;
@@ -186,8 +188,8 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			GLState.useProgram(shaderProgram[SHADER]);
 
 			GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
-			GLES20.glUniform1i(uExtMode, 0);
-			GLES20.glUniform4fv(uExtColor, 4, mColor, 0);
+			GL.glUniform1i(uExtMode, 0);
+			GlUtils.glUniform4fv(uExtColor, 4, mColor);
 
 			GLState.test(false, false);
 
@@ -197,21 +199,21 @@ public class ExtrusionRenderLayer extends RenderLayer {
 				setMatrix(pos, m, tiles[i], 0);
 				m.mvp.setAsUniform(uExtMatrix);
 
-				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
-				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.vboVertices.id);
+				GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
+				GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, el.vboVertices.id);
 
-				GLES20.glVertexAttribPointer(uExtVertexPosition, 3,
-						GLES20.GL_SHORT, false, 8, 0);
+				GL.glVertexAttribPointer(uExtVertexPosition, 3,
+						GL20.GL_SHORT, false, 8, 0);
 
-				GLES20.glVertexAttribPointer(uExtLightPosition, 2,
-						GLES20.GL_UNSIGNED_BYTE, false, 8, 6);
+				GL.glVertexAttribPointer(uExtLightPosition, 2,
+						GL20.GL_UNSIGNED_BYTE, false, 8, 6);
 
-				GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+				GL.glDrawElements(GL20.GL_TRIANGLES,
 						(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
-						GLES20.GL_UNSIGNED_SHORT, 0);
+						GL20.GL_UNSIGNED_SHORT, 0);
 
-				GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
-						GLES20.GL_UNSIGNED_SHORT,
+				GL.glDrawElements(GL20.GL_LINES, el.mIndiceCnt[3],
+						GL20.GL_UNSIGNED_SHORT,
 						(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
 
 				// just a temporary reference!
@@ -220,10 +222,10 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			return;
 		}
 
-		GLES20.glDepthMask(true);
-		//GLES20.glStencilMask(0xff);
-		//GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_STENCIL_BUFFER_BIT);
-		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+		GL.glDepthMask(true);
+		//GL.glStencilMask(0xff);
+		//GL.glClear(GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_STENCIL_BUFFER_BIT);
+		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
 		GLState.test(true, false);
 
@@ -232,14 +234,14 @@ public class ExtrusionRenderLayer extends RenderLayer {
 		if (pos.scale < (1 << 18)) {
 			// chances are high that one moves through a building
 			// with scale > 2 also draw back sides in this case.
-			GLES20.glEnable(GLES20.GL_CULL_FACE);
-			GLES20.glCullFace(GLES20.GL_FRONT);
+			GL.glEnable(GL20.GL_CULL_FACE);
+			GL.glCullFace(GL20.GL_FRONT);
 		}
-		GLES20.glDepthFunc(GLES20.GL_LESS);
-		GLES20.glColorMask(false, false, false, false);
-		GLES20.glUniform1i(uExtMode, 0);
-		GLES20.glUniform4fv(uExtColor, 4, mColor, 0);
-		GLES20.glUniform1f(uExtAlpha, mAlpha);
+		GL.glDepthFunc(GL20.GL_LESS);
+		GL.glColorMask(false, false, false, false);
+		GL.glUniform1i(uExtMode, 0);
+		GlUtils.glUniform4fv(uExtColor, 4, mColor);
+		GL.glUniform1f(uExtAlpha, mAlpha);
 
 		// draw to depth buffer
 		for (int i = 0; i < mTileCnt; i++) {
@@ -249,66 +251,66 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			setMatrix(pos, m, t, d);
 			m.mvp.setAsUniform(uExtMatrix);
 
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.vboVertices.id);
+			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
+			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, el.vboVertices.id);
 
-			GLES20.glVertexAttribPointer(uExtVertexPosition, 3,
-					GLES20.GL_SHORT, false, 8, 0);
+			GL.glVertexAttribPointer(uExtVertexPosition, 3,
+					GL20.GL_SHORT, false, 8, 0);
 
-			GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+			GL.glDrawElements(GL20.GL_TRIANGLES,
 					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
-					GLES20.GL_UNSIGNED_SHORT, 0);
+					GL20.GL_UNSIGNED_SHORT, 0);
 		}
 
 		// enable color buffer, use depth mask
 		GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
-		GLES20.glColorMask(true, true, true, true);
-		GLES20.glDepthMask(false);
+		GL.glColorMask(true, true, true, true);
+		GL.glDepthMask(false);
 		GLState.blend(true);
 
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
 			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
 
-			GLES20.glDepthFunc(GLES20.GL_EQUAL);
+			GL.glDepthFunc(GL20.GL_EQUAL);
 			int d = GLRenderer.depthOffset(t) * 10;
 			setMatrix(pos, m, t, d);
 			m.mvp.setAsUniform(uExtMatrix);
 
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, el.vboVertices.id);
+			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
+			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, el.vboVertices.id);
 
-			GLES20.glVertexAttribPointer(uExtVertexPosition, 3,
-					GLES20.GL_SHORT, false, 8, 0);
+			GL.glVertexAttribPointer(uExtVertexPosition, 3,
+					GL20.GL_SHORT, false, 8, 0);
 
-			GLES20.glVertexAttribPointer(uExtLightPosition, 2,
-					GLES20.GL_UNSIGNED_BYTE, false, 8, 6);
+			GL.glVertexAttribPointer(uExtLightPosition, 2,
+					GL20.GL_UNSIGNED_BYTE, false, 8, 6);
 
 			// draw roof
-			GLES20.glUniform1i(uExtMode, 0);
-			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[2],
-					GLES20.GL_UNSIGNED_SHORT, (el.mIndiceCnt[0] + el.mIndiceCnt[1]) * 2);
+			GL.glUniform1i(uExtMode, 0);
+			GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[2],
+					GL20.GL_UNSIGNED_SHORT, (el.mIndiceCnt[0] + el.mIndiceCnt[1]) * 2);
 
 			// draw sides 1
-			GLES20.glUniform1i(uExtMode, 1);
-			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[0],
-					GLES20.GL_UNSIGNED_SHORT, 0);
+			GL.glUniform1i(uExtMode, 1);
+			GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[0],
+					GL20.GL_UNSIGNED_SHORT, 0);
 
 			// draw sides 2
-			GLES20.glUniform1i(uExtMode, 2);
-			GLES20.glDrawElements(GLES20.GL_TRIANGLES, el.mIndiceCnt[1],
-					GLES20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
+			GL.glUniform1i(uExtMode, 2);
+			GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[1],
+					GL20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
 			// drawing gl_lines with the same coordinates does not result in
 			// same depth values as polygons, so add offset and draw gl_lequal:
-			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+			GL.glDepthFunc(GL20.GL_LEQUAL);
 
 			m.mvp.addDepthOffset(100);
 			m.mvp.setAsUniform(uExtMatrix);
 
-			GLES20.glUniform1i(uExtMode, 3);
-			GLES20.glDrawElements(GLES20.GL_LINES, el.mIndiceCnt[3],
-					GLES20.GL_UNSIGNED_SHORT,
+			GL.glUniform1i(uExtMode, 3);
+			GL.glDrawElements(GL20.GL_LINES, el.mIndiceCnt[3],
+					GL20.GL_UNSIGNED_SHORT,
 					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
 
 			// just a temporary reference!
@@ -316,9 +318,9 @@ public class ExtrusionRenderLayer extends RenderLayer {
 		}
 
 		if (pos.scale < (1 << 18))
-			GLES20.glDisable(GLES20.GL_CULL_FACE);
+			GL.glDisable(GL20.GL_CULL_FACE);
 
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		mTileLayer.releaseTiles(mTileSet);
 	}

@@ -17,10 +17,10 @@ package org.oscim.renderer.sublayers;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
 
+import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
 
-import android.util.Log;
 
 public class MeshLayer extends Layer {
 	GeometryBuffer mGeom = new GeometryBuffer(10,10);

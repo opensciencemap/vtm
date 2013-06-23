@@ -14,9 +14,10 @@
  */
 package org.oscim.layers.tile;
 
-import static android.opengl.GLES20.glStencilMask;
 import static org.oscim.layers.tile.MapTile.STATE_READY;
 
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
@@ -30,7 +31,6 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.Matrix4;
 import org.oscim.utils.quadtree.QuadTree;
 
-import android.opengl.GLES20;
 /**
  * This class is for rendering the Line- and PolygonLayers of visible MapTiles.
  * For visible tiles that do not have data available yet its parent in children
@@ -39,6 +39,8 @@ import android.opengl.GLES20;
  */
 public class TileRenderer {
 	//private final static String TAG = TileRenderer.class.getName();
+
+	private static final GL20 GL = GLAdapter.INSTANCE;
 
 	// Counter increases polygon-offset for each tile drawn.
 	private static int mOffsetCnt;
@@ -64,9 +66,9 @@ public class TileRenderer {
 		mProjMatrix.setValue(14, 0);
 		mProjMatrix.multiplyRhs(m.view);
 
-		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
-		GLES20.glDepthFunc(GLES20.GL_LESS);
+		GL.glDepthFunc(GL20.GL_LESS);
 
 		// load texture for line caps
 		LineRenderer.beginLines();
@@ -100,7 +102,7 @@ public class TileRenderer {
 		}
 
 		// make sure stencil buffer write is disabled
-		glStencilMask(0x00);
+		GL.glStencilMask(0x00);
 
 		LineRenderer.endLines();
 
@@ -145,7 +147,7 @@ public class TileRenderer {
 		m.mvp.multiplyLhs(mProjMatrix);
 
 		// set depth offset (used for clipping to tile boundaries)
-		GLES20.glPolygonOffset(0, mOffsetCnt++);
+		GL.glPolygonOffset(0, mOffsetCnt++);
 
 		// simple line shader does not take forward shortening into
 		// account. only used when tilt is 0.

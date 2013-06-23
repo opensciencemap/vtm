@@ -18,14 +18,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * A BoundingBox represents an immutable set of two latitude and two longitude
  * coordinates.
  */
-public class BoundingBox implements Parcelable {
+public class BoundingBox {
 	/**
 	 * Conversion factor from degrees to microdegrees.
 	 */
@@ -231,30 +228,30 @@ public class BoundingBox implements Parcelable {
 		return new BoundingBox(minLat, minLon, maxLat, maxLon);
 	}
 
-	public static final Parcelable.Creator<BoundingBox> CREATOR = new Parcelable.Creator<BoundingBox>() {
-		@Override
-		public BoundingBox createFromParcel(final Parcel in) {
-			return new BoundingBox(in.readInt(), in.readInt(), in.readInt(), in.readInt());
-		}
-
-		@Override
-		public BoundingBox[] newArray(final int size) {
-			return new BoundingBox[size];
-		}
-	};
-
-	@Override
-	public int describeContents() {
-		return 0;
-	}
-
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(minLatitudeE6);
-		dest.writeInt(minLongitudeE6);
-		dest.writeInt(maxLatitudeE6);
-		dest.writeInt(maxLongitudeE6);
-	}
+	//	public static final Parcelable.Creator<BoundingBox> CREATOR = new Parcelable.Creator<BoundingBox>() {
+	//		@Override
+	//		public BoundingBox createFromParcel(final Parcel in) {
+	//			return new BoundingBox(in.readInt(), in.readInt(), in.readInt(), in.readInt());
+	//		}
+	//
+	//		@Override
+	//		public BoundingBox[] newArray(final int size) {
+	//			return new BoundingBox[size];
+	//		}
+	//	};
+	//
+	//	@Override
+	//	public int describeContents() {
+	//		return 0;
+	//	}
+	//
+	//	@Override
+	//	public void writeToParcel(Parcel dest, int flags) {
+	//		dest.writeInt(minLatitudeE6);
+	//		dest.writeInt(minLongitudeE6);
+	//		dest.writeInt(maxLatitudeE6);
+	//		dest.writeInt(maxLongitudeE6);
+	//	}
 
 	//	public BoundingBox(final double north, final double east, final double south,
 	//			final double west) {

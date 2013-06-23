@@ -18,16 +18,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-import org.oscim.view.MapView;
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
+import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.utils.LineClipper;
-
-import android.opengl.GLES20;
-import org.oscim.backend.Log;
 
 /**
  * @author Hannes Janetzek
@@ -36,6 +35,9 @@ import org.oscim.backend.Log;
  */
 public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
+
+	private static final GL20 GL = GLAdapter.INSTANCE;
+
 	private static final float S = GLRenderer.COORD_SCALE;
 	private VertexItem mVertices;
 	private VertexItem mCurVertices;
@@ -126,9 +128,10 @@ public class ExtrusionLayer extends Layer {
 
 			// check: drop last point from explicitly closed rings
 			int len = length;
-			if (!MapView.enableClosePolygons) {
-				len -= 2;
-			} else if (points[ppos] == points[ppos + len - 2]
+			//		if (!MapView.enableClosePolygons) {
+			//			len -= 2;
+			//		} else
+			if (points[ppos] == points[ppos + len - 2]
 					&& points[ppos + 1] == points[ppos + len - 1]) {
 				// vector-tile-map does not produce implicty closed
 				// polygons (yet)
@@ -145,7 +148,7 @@ public class ExtrusionLayer extends Layer {
 
 			boolean convex = addOutline(points, ppos, len, minHeight, height, simpleOutline);
 
-			if (simpleOutline && (convex || len <= 8)){
+			if (simpleOutline && (convex || len <= 8)) {
 				addRoofSimple(startVertex, len);
 			} else if (!complexOutline) {
 				complexOutline = true;
@@ -397,9 +400,9 @@ public class ExtrusionLayer extends Layer {
 		}
 
 		sbuf.flip();
-		int size = mNumIndices*2;
+		int size = mNumIndices * 2;
 		vboIndices = BufferObject.get(size);
-		vboIndices.loadBufferData(sbuf,size, GLES20.GL_ELEMENT_ARRAY_BUFFER);
+		vboIndices.loadBufferData(sbuf, size, GL20.GL_ELEMENT_ARRAY_BUFFER);
 
 		// upload vertices
 		sbuf.clear();
@@ -409,10 +412,10 @@ public class ExtrusionLayer extends Layer {
 		sbuf.flip();
 		size = mNumVertices * 4 * 2;
 		vboVertices = BufferObject.get(size);
-		vboVertices.loadBufferData(sbuf, size, GLES20.GL_ARRAY_BUFFER);
+		vboVertices.loadBufferData(sbuf, size, GL20.GL_ARRAY_BUFFER);
 
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
 		for (int i = 0; i < 4; i++)
 			VertexItem.pool.releaseAll(mIndices[i]);

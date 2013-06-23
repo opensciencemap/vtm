@@ -16,14 +16,20 @@ package org.oscim.utils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
-import android.opengl.GLES20;
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
+import org.oscim.renderer.GLRenderer;
 
 /**
  * Utility functions
  */
 public class GlUtils {
+	private static final GL20 GL = GLAdapter.INSTANCE;
+
 
 	public static native void setColor(int location, int color, float alpha);
 	public static native void setColorBlend(int location, int color1, int color2, float mix);
@@ -31,17 +37,17 @@ public class GlUtils {
 	private static String TAG = "GlUtils";
 
 	public static void setTextureParameter(int min_filter, int mag_filter, int wrap_s, int wrap_t) {
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_MIN_FILTER,
+		GL.glTexParameterf(GL20.GL_TEXTURE_2D,
+				GL20.GL_TEXTURE_MIN_FILTER,
 				min_filter);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_MAG_FILTER,
+		GL.glTexParameterf(GL20.GL_TEXTURE_2D,
+				GL20.GL_TEXTURE_MAG_FILTER,
 				mag_filter);
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_WRAP_S,
+		GL.glTexParameterf(GL20.GL_TEXTURE_2D,
+				GL20.GL_TEXTURE_WRAP_S,
 				wrap_s); // Set U Wrapping
-		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-				GLES20.GL_TEXTURE_WRAP_T,
+		GL.glTexParameterf(GL20.GL_TEXTURE_2D,
+				GL20.GL_TEXTURE_WRAP_T,
 				wrap_t); // Set V Wrapping
 	}
 
@@ -69,10 +75,9 @@ public class GlUtils {
 
 	public static int loadTexture(byte[] pixel, int width, int height, int format,
 			int min_filter, int mag_filter, int wrap_s, int wrap_t) {
-		int[] textureIds = new int[1];
-		GLES20.glGenTextures(1, textureIds, 0);
+		int[] textureIds = GlUtils.glGenTextures(1);
 
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[0]);
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, textureIds[0]);
 
 		setTextureParameter(min_filter, mag_filter, wrap_s, wrap_t);
 
@@ -80,10 +85,10 @@ public class GlUtils {
 		buf.put(pixel);
 		buf.position(0);
 
-		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, format, width, height, 0, format,
-				GLES20.GL_UNSIGNED_BYTE, buf);
+		GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0, format, width, height, 0, format,
+				GL20.GL_UNSIGNED_BYTE, buf);
 
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 		return textureIds[0];
 	}
 
@@ -112,10 +117,10 @@ public class GlUtils {
 			pos += flip;
 		}
 
-		return loadTexture(pixel, sum, 1, GLES20.GL_ALPHA,
-				GLES20.GL_LINEAR, GLES20.GL_LINEAR,
+		return loadTexture(pixel, sum, 1, GL20.GL_ALPHA,
+				GL20.GL_LINEAR, GL20.GL_LINEAR,
 				//GLES20.GL_NEAREST, GLES20.GL_NEAREST,
-				GLES20.GL_REPEAT, GLES20.GL_REPEAT);
+				GL20.GL_REPEAT, GL20.GL_REPEAT);
 	}
 
 	/**
@@ -126,16 +131,17 @@ public class GlUtils {
 	 * @return gl identifier
 	 */
 	public static int loadShader(int shaderType, String source) {
-		int shader = GLES20.glCreateShader(shaderType);
+		int shader = GL.glCreateShader(shaderType);
 		if (shader != 0) {
-			GLES20.glShaderSource(shader, source);
-			GLES20.glCompileShader(shader);
-			int[] compiled = new int[1];
-			GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compiled, 0);
-			if (compiled[0] == 0) {
+			GL.glShaderSource(shader, source);
+			GL.glCompileShader(shader);
+			IntBuffer compiled = GLRenderer.getIntBuffer(1);
+
+			GL.glGetShaderiv(shader, GL20.GL_COMPILE_STATUS, compiled);
+			if (compiled.get() == 0) {
 				Log.e(TAG, "Could not compile shader " + shaderType + ":");
-				Log.e(TAG, GLES20.glGetShaderInfoLog(shader));
-				GLES20.glDeleteShader(shader);
+				Log.e(TAG, GL.glGetShaderInfoLog(shader));
+				GL.glDeleteShader(shader);
 				shader = 0;
 			}
 		}
@@ -150,30 +156,30 @@ public class GlUtils {
 	 * @return gl identifier
 	 */
 	public static int createProgram(String vertexSource, String fragmentSource) {
-		int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexSource);
+		int vertexShader = loadShader(GL20.GL_VERTEX_SHADER, vertexSource);
 		if (vertexShader == 0) {
 			return 0;
 		}
 
-		int pixelShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentSource);
+		int pixelShader = loadShader(GL20.GL_FRAGMENT_SHADER, fragmentSource);
 		if (pixelShader == 0) {
 			return 0;
 		}
 
-		int program = GLES20.glCreateProgram();
+		int program = GL.glCreateProgram();
 		if (program != 0) {
 			checkGlError("glCreateProgram");
-			GLES20.glAttachShader(program, vertexShader);
+			GL.glAttachShader(program, vertexShader);
 			checkGlError("glAttachShader");
-			GLES20.glAttachShader(program, pixelShader);
+			GL.glAttachShader(program, pixelShader);
 			checkGlError("glAttachShader");
-			GLES20.glLinkProgram(program);
-			int[] linkStatus = new int[1];
-			GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, linkStatus, 0);
-			if (linkStatus[0] != GLES20.GL_TRUE) {
+			GL.glLinkProgram(program);
+			IntBuffer linkStatus = GLRenderer.getIntBuffer(1);
+			GL.glGetProgramiv(program, GL20.GL_LINK_STATUS, linkStatus);
+			if (linkStatus.get() != GL20.GL_TRUE) {
 				Log.e(TAG, "Could not link program: ");
-				Log.e(TAG, GLES20.glGetProgramInfoLog(program));
-				GLES20.glDeleteProgram(program);
+				Log.e(TAG, GL.glGetProgramInfoLog(program));
+				GL.glDeleteProgram(program);
 				program = 0;
 			}
 		}
@@ -186,7 +192,7 @@ public class GlUtils {
 	 */
 	public static void checkGlError(String op) {
 		int error;
-		while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+		while ((error = GL.glGetError()) != GL20.GL_NO_ERROR) {
 			Log.e(TAG, op + ": glError " + error);
 			// throw new RuntimeException(op + ": glError " + error);
 		}
@@ -195,7 +201,7 @@ public class GlUtils {
 	public static boolean checkGlOutOfMemory(String op) {
 		int error;
 		boolean oom = false;
-		while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+		while ((error = GL.glGetError()) != GL20.GL_NO_ERROR) {
 			Log.e(TAG, op + ": glError " + error);
 			// throw new RuntimeException(op + ": glError " + error);
 			if (error == 1285)
@@ -205,31 +211,31 @@ public class GlUtils {
 	}
 
 
-	public static void setBlendColors(int handle, float[] c1, float[] c2, float mix) {
-		if (mix <= 0f)
-			GLES20.glUniform4fv(handle, 1, c1, 0);
-		else if (mix >= 1f)
-			GLES20.glUniform4fv(handle, 1, c2, 0);
-		else {
-			GLES20.glUniform4f(handle,
-					c1[0] * (1 - mix) + c2[0] * mix,
-					c1[1] * (1 - mix) + c2[1] * mix,
-					c1[2] * (1 - mix) + c2[2] * mix,
-					c1[3] * (1 - mix) + c2[3] * mix);
-		}
-	}
+//	public static void setBlendColors(int handle, float[] c1, float[] c2, float mix) {
+//		if (mix <= 0f)
+//			GLES20.glUniform4fv(handle, 1, c1, 0);
+//		else if (mix >= 1f)
+//			GLES20.glUniform4fv(handle, 1, c2, 0);
+//		else {
+//			GLES20.glUniform4f(handle,
+//					c1[0] * (1 - mix) + c2[0] * mix,
+//					c1[1] * (1 - mix) + c2[1] * mix,
+//					c1[2] * (1 - mix) + c2[2] * mix,
+//					c1[3] * (1 - mix) + c2[3] * mix);
+//		}
+//	}
 
 	public static void setColor(int handle, float[] c, float alpha) {
 		if (alpha >= 1) {
-			GLES20.glUniform4f(handle, c[0], c[1], c[2], c[3]);
+			GL.glUniform4f(handle, c[0], c[1], c[2], c[3]);
 		} else {
 			if (alpha < 0) {
 				Log.d(TAG, "setColor: " + alpha);
 				alpha = 0;
-				GLES20.glUniform4f(handle, 0, 0, 0, 0);
+				GL.glUniform4f(handle, 0, 0, 0, 0);
 			}
 
-			GLES20.glUniform4f(handle,
+			GL.glUniform4f(handle,
 					c[0] * alpha, c[1] * alpha,
 					c[2] * alpha, c[3] * alpha);
 		}
@@ -275,6 +281,40 @@ public class GlUtils {
 		color[0] = FastMath.clampN((float) (p + (r - p) * change));
 		color[1] = FastMath.clampN((float) (p + (g - p) * change));
 		color[2] = FastMath.clampN((float) (p + (b - p) * change));
+	}
+
+
+	public static void glUniform4fv(int location, int count, float[] val) {
+		FloatBuffer buf = GLRenderer.getFloatBuffer(count * 4);
+		buf.put(val);
+		buf.flip();
+		GL.glUniform4fv(location, count, buf);
+	}
+
+	public static int[] glGenBuffers(int num) {
+		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		GL.glGenBuffers(num, buf);
+		int[] ret = new int[num];
+		buf.get(ret);
+		return ret;
+	}
+	public static void glDeleteBuffers(int num, int[] ids) {
+		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		buf.put(ids, 0, num);
+		GL.glDeleteBuffers(num, buf);
+	}
+
+	public static int[] glGenTextures(int num) {
+		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		GL.glGenTextures(num, buf);
+		int[] ret = new int[num];
+		buf.get(ret);
+		return ret;
+	}
+	public static void glDeleteTextures(int num, int[] ids) {
+		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		buf.put(ids, 0, num);
+		GL.glDeleteTextures(num, buf);
 	}
 
 //	private final static float[] mIdentity = {

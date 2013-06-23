@@ -1,6 +1,5 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
- * Copyright 2012 osmdroid authors: Nicolas Gramlich, Theodore Hong
  * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -16,15 +15,11 @@
  */
 package org.oscim.core;
 
-
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * A GeoPoint represents an immutable pair of latitude and longitude
  * coordinates.
  */
-public class GeoPoint implements Parcelable, Comparable<GeoPoint> {
+public class GeoPoint implements Comparable<GeoPoint> {
 	/**
 	 * Conversion factor from degrees to microdegrees.
 	 */
@@ -39,8 +34,6 @@ public class GeoPoint implements Parcelable, Comparable<GeoPoint> {
 	 * The longitude value of this GeoPoint in microdegrees (degrees * 10^6).
 	 */
 	public final int longitudeE6;
-
-	//	public final int altitude;
 
 	/**
 	 * The hash code of this object.
@@ -155,6 +148,8 @@ public class GeoPoint implements Parcelable, Comparable<GeoPoint> {
 
 	// ===========================================================
 	// Methods from osmdroid
+	// Copyright 2012 osmdroid authors: Nicolas Gramlich,
+	// Theodore Hong
 	// ===========================================================
 
 	public static final float DEG2RAD = (float) (Math.PI / 180.0);
@@ -192,26 +187,26 @@ public class GeoPoint implements Parcelable, Comparable<GeoPoint> {
 	// Parcelable
 	// ===========================================================
 
-	@Override
-	public int describeContents() {
-		return 0;
-	}
-
-	@Override
-	public void writeToParcel(final Parcel out, final int flags) {
-		out.writeInt(latitudeE6);
-		out.writeInt(longitudeE6);
-	}
-
-	public static final Parcelable.Creator<GeoPoint> CREATOR = new Parcelable.Creator<GeoPoint>() {
-		@Override
-		public GeoPoint createFromParcel(final Parcel in) {
-			return new GeoPoint(in.readInt(), in.readInt());
-		}
-
-		@Override
-		public GeoPoint[] newArray(final int size) {
-			return new GeoPoint[size];
-		}
-	};
+	//	@Override
+	//	public int describeContents() {
+	//		return 0;
+	//	}
+	//
+	//	@Override
+	//	public void writeToParcel(final Parcel out, final int flags) {
+	//		out.writeInt(latitudeE6);
+	//		out.writeInt(longitudeE6);
+	//	}
+	//
+	//	public static final Parcelable.Creator<GeoPoint> CREATOR = new Parcelable.Creator<GeoPoint>() {
+	//		@Override
+	//		public GeoPoint createFromParcel(final Parcel in) {
+	//			return new GeoPoint(in.readInt(), in.readInt());
+	//		}
+	//
+	//		@Override
+	//		public GeoPoint[] newArray(final int size) {
+	//			return new GeoPoint[size];
+	//		}
+	//	};
 }

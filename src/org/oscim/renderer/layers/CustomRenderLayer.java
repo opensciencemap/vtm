@@ -18,14 +18,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import org.oscim.view.MapView;
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.utils.GlUtils;
+import org.oscim.view.MapView;
 
-import android.opengl.GLES20;
 
 /*
  * This is an example how to integrate custom OpenGL drawing routines as map overlay
@@ -35,6 +36,8 @@ import android.opengl.GLES20;
  * */
 
 public class CustomRenderLayer extends RenderLayer {
+
+	private static final GL20 GL = GLAdapter.INSTANCE;
 
 	private int mProgramObject;
 	private int hVertexPosition;
@@ -94,13 +97,13 @@ public class CustomRenderLayer extends RenderLayer {
 		GLState.test(false, false);
 
 		// unbind previously bound VBOs
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
 		// Load the vertex data
 		//mVertices.position(0);
-		GLES20.glVertexAttribPointer(hVertexPosition, 3, GLES20.GL_FLOAT, false, 0, mVertices);
+		GL.glVertexAttribPointer(hVertexPosition, 3, GL20.GL_FLOAT, false, 0, mVertices);
 		//mVertices.position(2);
-		//GLES20.glVertexAttribPointer(hVertexPosition, 2, GLES20.GL_FLOAT, false, 4, mVertices);
+		//GL.glVertexAttribPointer(hVertexPosition, 2, GL20.GL_FLOAT, false, 4, mVertices);
 
 		GLState.enableVertexArrays(hVertexPosition, -1);
 
@@ -115,7 +118,7 @@ public class CustomRenderLayer extends RenderLayer {
 		m.mvp.setAsUniform(hMatrixPosition);
 
 		// Draw the triangle
-		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+		GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
 		GlUtils.checkGlError("...");
 	}
@@ -128,9 +131,9 @@ public class CustomRenderLayer extends RenderLayer {
 			return false;
 
 		// Handle for vertex position in shader
-		hVertexPosition = GLES20.glGetAttribLocation(programObject, "a_pos");
+		hVertexPosition = GL.glGetAttribLocation(programObject, "a_pos");
 
-		hMatrixPosition = GLES20.glGetUniformLocation(programObject, "u_mvp");
+		hMatrixPosition = GL.glGetUniformLocation(programObject, "u_mvp");
 
 		// Store the program object
 		mProgramObject = programObject;

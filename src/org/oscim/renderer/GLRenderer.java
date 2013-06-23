@@ -14,16 +14,16 @@
  */
 package org.oscim.renderer;
 
-import static android.opengl.GLES20.GL_ARRAY_BUFFER;
-import static android.opengl.GLES20.GL_ONE;
-import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -35,13 +35,11 @@ import org.oscim.utils.Matrix4;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
-import android.opengl.GLES20;
-
-//import android.os.SystemClock;
 
 public class GLRenderer {
-
 	private static final String TAG = GLRenderer.class.getName();
+
+	private static final GL20 GL = GLAdapter.INSTANCE;
 
 	private static final int MB = 1024 * 1024;
 	private static final int SHORT_BYTES = 2;
@@ -59,6 +57,7 @@ public class GLRenderer {
 
 	private static ShortBuffer shortBuffer;
 	private static FloatBuffer floatBuffer;
+	private static IntBuffer intBuffer;
 	private static int tmpBufferSize;
 
 	private static short[] mFillCoords;
@@ -163,6 +162,19 @@ public class GLRenderer {
 		return floatBuffer;
 	}
 
+	/**
+	 * Only use on GL Thread!
+	 * Get a native IntBuffer for temporary use.
+	 */
+	public static IntBuffer getIntBuffer(int size) {
+		if (tmpBufferSize < size * 4)
+			growBuffer(size * 4);
+		else
+			intBuffer.clear();
+
+		return intBuffer;
+	}
+
 	private static void growBuffer(int size) {
 		Log.d(TAG, "grow buffer " + size);
 		ByteBuffer buf = ByteBuffer
@@ -171,6 +183,7 @@ public class GLRenderer {
 
 		floatBuffer = buf.asFloatBuffer();
 		shortBuffer = buf.asShortBuffer();
+		intBuffer = buf.asIntBuffer();
 		tmpBufferSize = size;
 	}
 
@@ -199,7 +212,7 @@ public class GLRenderer {
 		}
 		newSize *= SHORT_BYTES;
 
-		layers.vbo.loadBufferData(sbuf, newSize, GL_ARRAY_BUFFER);
+		layers.vbo.loadBufferData(sbuf, newSize, GL20.GL_ARRAY_BUFFER);
 		return true;
 	}
 
@@ -233,15 +246,15 @@ public class GLRenderer {
 
 		if (mUpdateColor) {
 			float cc[] = mClearColor;
-			GLES20.glClearColor(cc[0], cc[1], cc[2], cc[3]);
+			GL.glClearColor(cc[0], cc[1], cc[2], cc[3]);
 			mUpdateColor = false;
 		}
 
-		GLES20.glDepthMask(true);
-		GLES20.glStencilMask(0xFF);
-		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT
-				| GLES20.GL_DEPTH_BUFFER_BIT
-				| GLES20.GL_STENCIL_BUFFER_BIT);
+		GL.glDepthMask(true);
+		GL.glStencilMask(0xFF);
+		GL.glClear(GL20.GL_COLOR_BUFFER_BIT
+				| GL20.GL_DEPTH_BUFFER_BIT
+				| GL20.GL_STENCIL_BUFFER_BIT);
 
 		boolean changed = false;
 
@@ -285,7 +298,7 @@ public class GLRenderer {
 		}
 
 		//if (MapView.debugFrameTime) {
-		//	GLES20.glFinish();
+		//	GL.glFinish();
 		//	Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start));
 		//}
 
@@ -317,14 +330,14 @@ public class GLRenderer {
 			mMatrices.proj.multiplyLhs(mMatrices.mvp);
 		}
 
-		GLES20.glViewport(0, 0, width, height);
-		GLES20.glScissor(0, 0, width, height);
-		GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
+		GL.glViewport(0, 0, width, height);
+		GL.glScissor(0, 0, width, height);
+		GL.glEnable(GL20.GL_SCISSOR_TEST);
 
-		GLES20.glClearStencil(0x00);
+		GL.glClearStencil(0x00);
 
-		GLES20.glDisable(GLES20.GL_CULL_FACE);
-		GLES20.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		GL.glDisable(GL20.GL_CULL_FACE);
+		GL.glBlendFunc(GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
 		//mBufferMemoryUsage = 0;
 
@@ -339,8 +352,8 @@ public class GLRenderer {
 		growBuffer(MB >> 2);
 
 		// upload quad indices used by Texture- and LineTexRenderer
-		int[] vboIds = new int[1];
-		GLES20.glGenBuffers(1, vboIds, 0);
+		int[] vboIds = GlUtils.glGenBuffers(1);
+
 		mQuadIndicesID = vboIds[0];
 		int maxIndices = maxQuads * 6;
 		short[] indices = new short[maxIndices];
@@ -357,11 +370,11 @@ public class GLRenderer {
 		shortBuffer.put(indices);
 		shortBuffer.flip();
 
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
+		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER,
 				mQuadIndicesID);
-		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
-				indices.length * 2, shortBuffer, GLES20.GL_STATIC_DRAW);
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		GL.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER,
+				indices.length * 2, shortBuffer, GL20.GL_STATIC_DRAW);
+		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		if (mClearColor != null)
 			mUpdateColor = true;
@@ -372,7 +385,7 @@ public class GLRenderer {
 	}
 
 	public void onSurfaceCreated() {
-		// Log.d(TAG, GLES20.glGetString(GLES20.GL_EXTENSIONS));
+		// Log.d(TAG, GL.glGetString(GL20.GL_EXTENSIONS));
 
 		// classes that require GL context for initialization
 		Layers.initRenderer();
