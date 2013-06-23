@@ -1,3 +1,5 @@
-bin/*
-gen/*
-obj/*
+*/bin/*
+*/gen/*
+*/obj/*
+*.o
+*.class

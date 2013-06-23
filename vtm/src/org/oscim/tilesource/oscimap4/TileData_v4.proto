@@ -1,0 +1,91 @@
+// Protocol Version 4
+
+package org.oscim.database.oscimap4;
+
+message Data {
+	message Element {
+
+		// number of geometry 'indices'
+		optional uint32 num_indices     = 1  [default = 1];
+
+		// number of 'tags'
+		optional uint32 num_tags        = 2  [default = 1];
+
+		// elevation per coordinate
+		// (pixel relative to ground meters)
+		// optional bool has_elevation     = 3  [default = false];
+
+		// reference to tile.tags
+		repeated uint32 tags            = 11 [packed = true];
+
+		// A list of number of coordinates for each geometry.
+		// - polygons are separated by one '0' index
+		// - for single points this can be omitted.
+		// e.g 2,2 for two lines with two points each, or
+		// 4,3,0,4,3 for two polygons with four points in
+		// the outer ring and 3 points in the inner.
+
+		repeated uint32 indices         = 12 [packed = true];
+
+		// single delta encoded coordinate x,y pairs scaled
+		// to a tile size of 4096
+		// note: geometries start at x,y = tile size / 2
+
+		repeated sint32 coordinates     = 13 [packed = true];
+
+		//---------------- optional items ---------------
+		// osm layer [-5 .. 5] -> [0 .. 10]
+		optional uint32 layer           = 21 [default = 5];
+
+		// intended for symbol and label placement, not used
+		//optional uint32 rank           = 32 [packed = true];
+
+		// elevation per coordinate
+		// (pixel relative to ground meters)
+		// repeated sint32 elevation     = 33 [packed = true];
+
+		// building height, precision 1/10m
+		//repeated sint32 height         = 34 [packed = true];
+
+		// building height, precision 1/10m
+		//repeated sint32 min_height     = 35 [packed = true];
+	}
+
+	required uint32 version   = 1;
+
+	// tile creation time
+	optional uint64 timestamp = 2;
+
+	// tile is completely water (not used yet)
+	optional bool water       = 3;
+
+	// number of 'tags'
+	required uint32 num_tags  = 11;
+	optional uint32 num_keys  = 12 [default = 0];
+	optional uint32 num_vals  = 13 [default = 0];
+
+	// strings referenced by tags
+	repeated string keys      = 14;
+	// separate common attributes from label to
+	// allow
+	repeated string values    = 15;
+
+	// (key[0xfffffffc] | type[0x03]), value pairs
+	// key: uint32       -> reference to key-strings
+	// type 0: attribute -> uint32 reference to value-strings
+	// type 1: string    -> uint32 reference to label-strings
+	// type 2: sint32
+	// type 3: float
+	// value: uint32 interpreted according to 'type'
+
+	repeated uint32 tags      = 16 [packed = true];
+
+	// linestring
+	repeated Element lines    = 21;
+
+	// polygons (MUST be implicitly closed)
+	repeated Element polygons = 22;
+
+	// points (POIs)
+	repeated Element points   = 23;
+}
