@@ -249,7 +249,7 @@ public final class LineRenderer {
 	}
 
 	private final static String lineVertexShader = ""
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			// factor to increase line width relative to scale
 			+ "uniform float u_width;"
@@ -268,7 +268,7 @@ public final class LineRenderer {
 			+ "}";
 
 	private final static String lineSimpleFragmentShader = ""
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
 			+ "uniform float u_wscale;"
 			+ "uniform float u_mode;"
@@ -294,7 +294,7 @@ public final class LineRenderer {
 
 	private final static String lineFragmentShader = ""
 			+ "#extension GL_OES_standard_derivatives : enable\n"
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
 			+ "uniform float u_mode;"
 			+ "uniform vec4 u_color;"

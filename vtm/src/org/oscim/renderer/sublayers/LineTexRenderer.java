@@ -230,7 +230,7 @@ public class LineTexRenderer {
 	}
 
 	final static String vertexShader = ""
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			+ "uniform vec4 u_color;"
 			+ "uniform float u_pscale;"
@@ -258,7 +258,7 @@ public class LineTexRenderer {
 	//*
 	final static String fragmentShader = ""
 			+ "#extension GL_OES_standard_derivatives : enable\n"
-			+ " precision mediump float;"
+			//+ " precision mediump float;"
 			+ " uniform vec4 u_color;"
 			+ " uniform vec4 u_bgcolor;"
 			+ " uniform float u_pwidth;"
