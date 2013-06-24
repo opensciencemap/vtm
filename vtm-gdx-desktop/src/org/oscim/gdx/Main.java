@@ -4,9 +4,11 @@ import org.oscim.awt.AwtGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
+import org.oscim.renderer.GLRenderer;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class Main {
 
@@ -17,12 +19,16 @@ public class Main {
 		cfg.width = 1280;
 		cfg.height = 800;
 		cfg.stencil= 8;
+		cfg.foregroundFPS = 20;
 		//cfg.samples = 4;
 
 		// set our globals
         CanvasAdapter.g = AwtGraphics.INSTANCE;
         GLAdapter.INSTANCE = new GdxGLAdapter();
 		Tile.SIZE = 256;
+		GLRenderer.alwaysAllocBuffer = true;
+
+        new SharedLibraryLoader().load("vtm-jni");
 
 		new LwjglApplication(new GdxMap(), cfg);
 	}

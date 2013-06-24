@@ -66,7 +66,8 @@ public class TileRenderer {
 		mProjMatrix.setValue(14, 0);
 		mProjMatrix.multiplyRhs(m.view);
 
-		GL.glDepthMask(true);
+
+		//GL.glDepthMask(true);
 		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
 		GL.glDepthFunc(GL20.GL_LESS);

@@ -326,6 +326,8 @@ public class GlUtils {
 
 	public static int[] glGenBuffers(int num) {
 		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		buf.position(0);
+		buf.limit(num);
 		GL.glGenBuffers(num, buf);
 		int[] ret = new int[num];
 		buf.position(0);
@@ -343,6 +345,8 @@ public class GlUtils {
 
 	public static int[] glGenTextures(int num) {
 		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		buf.position(0);
+		buf.limit(num);
 		GL.glGenTextures(num, buf);
 		int[] ret = new int[num];
 		buf.position(0);

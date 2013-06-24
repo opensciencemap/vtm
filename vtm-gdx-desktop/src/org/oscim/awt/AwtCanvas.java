@@ -1,9 +1,27 @@
+/*
+ * Copyright 2010, 2011, 2012, 2013 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.oscim.awt;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.font.TextLayout;
+import java.awt.geom.AffineTransform;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
@@ -44,16 +62,47 @@ public class AwtCanvas implements Canvas {
 
 
 	}
-
 	@Override
-	public void drawText(String string, float x, float y, Paint stroke) {
-		AwtPaint p = (AwtPaint)stroke;
+	public void drawText(String text, float x, float y, Paint paint) {
 
-		canvas.setFont(p.font);
-		canvas.setColor(p.color);
+//		if (paint.isTransparent()) {
+//			return;
+//		}
 
-		canvas.drawString(string, (int)x, (int)y);
+		AwtPaint awtPaint = (AwtPaint)paint;
+
+		//AwtPaint awtPaint = AwtGraphicFactory.getAwtPaint(paint);
+
+		if (awtPaint.stroke == null) {
+			canvas.setColor(awtPaint.color);
+			canvas.setFont(awtPaint.font);
+			canvas.drawString(text, x, y);
+		} else {
+			setColorAndStroke(awtPaint);
+
+			TextLayout textLayout = new TextLayout(text, awtPaint.font, canvas.getFontRenderContext());
+			AffineTransform affineTransform = new AffineTransform();
+			affineTransform.translate(x, y);
+			canvas.draw(textLayout.getOutline(affineTransform));
+		}
 	}
+
+	private void setColorAndStroke(AwtPaint awtPaint) {
+		canvas.setColor(awtPaint.color);
+		if (awtPaint.stroke != null) {
+			canvas.setStroke(awtPaint.stroke);
+		}
+	}
+
+//	@Override
+//	public void drawText(String string, float x, float y, Paint stroke) {
+//		AwtPaint p = (AwtPaint)stroke;
+//
+//		canvas.setFont(p.font);
+//		canvas.setColor(p.color);
+//
+//		canvas.drawString(string, (int)x, (int)y);
+//	}
 
 	@Override
     public void drawBitmap(Bitmap bitmap, float x, float y) {

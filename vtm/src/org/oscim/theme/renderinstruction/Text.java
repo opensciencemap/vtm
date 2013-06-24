@@ -63,9 +63,9 @@ public final class Text extends RenderInstruction {
 			else if ("k".equals(name)) {
 				textKey = value.intern();
 			} else if ("font-family".equals(name)) {
-				fontFamily = FontFamily.valueOf(value.toUpperCase(Locale.ENGLISH));
+				fontFamily = FontFamily.valueOf(value.toUpperCase());
 			} else if ("font-style".equals(name)) {
-				fontStyle = FontStyle.valueOf(value.toUpperCase(Locale.ENGLISH));
+				fontStyle = FontStyle.valueOf(value.toUpperCase());
 			} else if ("font-size".equals(name)) {
 				fontSize = Float.parseFloat(value);
 			} else if ("fill".equals(name)) {

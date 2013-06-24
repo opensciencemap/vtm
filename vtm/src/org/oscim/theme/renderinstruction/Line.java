@@ -14,9 +14,6 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import java.util.Locale;
-import java.util.regex.Pattern;
-
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.theme.IRenderCallback;
@@ -27,7 +24,7 @@ import org.xml.sax.Attributes;
  * Represents a polyline on the map.
  */
 public final class Line extends RenderInstruction {
-	private static final Pattern SPLIT_PATTERN = Pattern.compile(",");
+	//private static final Pattern SPLIT_PATTERN = Pattern.compile(",");
 
 	/**
 	 * @param line
@@ -92,7 +89,7 @@ public final class Line extends RenderInstruction {
 			} else if ("width".equals(name)) {
 				width = Float.parseFloat(value);
 			} else if ("cap".equals(name)) {
-				cap = Cap.valueOf(value.toUpperCase(Locale.ENGLISH));
+				cap = Cap.valueOf(value.toUpperCase());
 			} else if ("fix".equals(name)) {
 				fixed = Boolean.parseBoolean(value);
 			} else if ("stipple".equals(name)) {
@@ -136,14 +133,14 @@ public final class Line extends RenderInstruction {
 		}
 	}
 
-	static float[] parseFloatArray(String dashString) {
-		String[] dashEntries = SPLIT_PATTERN.split(dashString);
-		float[] dashIntervals = new float[dashEntries.length];
-		for (int i = 0; i < dashEntries.length; ++i) {
-			dashIntervals[i] = Float.parseFloat(dashEntries[i]);
-		}
-		return dashIntervals;
-	}
+//	static float[] parseFloatArray(String dashString) {
+//		String[] dashEntries = SPLIT_PATTERN.split(dashString);
+//		float[] dashIntervals = new float[dashEntries.length];
+//		for (int i = 0; i < dashEntries.length; ++i) {
+//			dashIntervals[i] = Float.parseFloat(dashEntries[i]);
+//		}
+//		return dashIntervals;
+//	}
 
 	private final int level;
 

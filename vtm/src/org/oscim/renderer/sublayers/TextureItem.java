@@ -81,6 +81,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	 */
 	public synchronized static TextureItem get(boolean initBitmap) {
 		TextureItem ti = pool.get();
+		Log.d(TAG, "get texture item " + ti.id);
 		if (initBitmap) {
 			ti.bitmap = getBitmap();
 			ti.bitmap.eraseColor(Color.TRANSPARENT);
@@ -171,8 +172,11 @@ public class TextureItem extends Inlist<TextureItem> {
 			int[] tmp = new int[size];
 			for (int i = 0; i < size; i++)
 				tmp[i] = mTextures.get(i).intValue();
+
 			mTextures.clear();
 			GlUtils.glDeleteTextures(size, tmp);
+
+			mTexCnt -= size;
 		}
 
 		if (to.id < 0) {
@@ -180,9 +184,9 @@ public class TextureItem extends Inlist<TextureItem> {
 			int[] textureIds = GlUtils.glGenTextures(1);
 			to.id = textureIds[0];
 			initTexture(to.id);
-			if (TextureRenderer.debug)
-				Log.d(TAG, pool.getCount() + " " + pool.getFill()
-						+ " " + mTexCnt + " new texture " + to.id);
+			//if (TextureRenderer.debug)
+				Log.d(TAG, "poolCnt:" +  pool.getCount() + " poolFill:" + pool.getFill()
+						+ " texCnt:" + mTexCnt + " new texture " + to.id);
 		}
 
 		uploadTexture(to, to.bitmap, mBitmapFormat, mBitmapType,
@@ -203,8 +207,9 @@ public class TextureItem extends Inlist<TextureItem> {
 			Log.d(TAG, "no texture!");
 			return;
 		}
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, to.id);
 
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, to.id);
+		Log.d(TAG, "upload " + to.id);
 		if (to.ownBitmap) {
 			bitmap.uploadToTexture(false);
 			//GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, bitmap, 0);

@@ -7,6 +7,7 @@ import java.nio.IntBuffer;
 
 import javax.imageio.ImageIO;
 
+import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 
 import com.badlogic.gdx.Gdx;
@@ -27,6 +28,10 @@ public class AwtBitmap implements Bitmap {
 
 	AwtBitmap(InputStream inputStream) throws IOException {
         this.bitmap = ImageIO.read(inputStream);
+        this.width = this.bitmap.getWidth();
+        this.height = this.bitmap.getHeight();
+        if(!this.bitmap.isAlphaPremultiplied())
+        	this.bitmap.coerceData(true);
 }
 	@Override
 	public int getWidth() {
@@ -49,20 +54,23 @@ public class AwtBitmap implements Bitmap {
 		// TODO Auto-generated method stub
 	}
 
-	private static IntBuffer tmpBuffer = BufferUtils.newIntBuffer(256 * 256);
-	private static int[] tmpPixel = new int[256 * 256];
+	private static IntBuffer tmpBuffer = BufferUtils.newIntBuffer(512 * 256);
+	private static int[] tmpPixel = new int[512 * 256];
+
 	@Override
 	public int uploadToTexture(boolean replace) {
 		int[] pixels;
 		IntBuffer buffer;
 
-		if (width == 256 && height == 256){
+		if (width == 512 && height == 256){
 			pixels = tmpPixel;
 			buffer = tmpBuffer;
 			buffer.clear();
+			Log.d("AwtBitmap", "default texture");
 		}else{
 			pixels  = new int[width * height];
 			buffer  = BufferUtils.newIntBuffer(width * height);
+			Log.d("AwtBitmap", "create texture buffer " + width + "x" + height);
 		}
 
 

@@ -82,6 +82,7 @@ public final class TextureRenderer {
 		for (TextureItem ti = tl.textures; ti != null; ti = ti.next) {
 
 			GL.glBindTexture(GL20.GL_TEXTURE_2D, ti.id);
+			
 			int maxVertices = GLRenderer.maxQuads * INDICES_PER_SPRITE;
 
 			GL.glUniform2f(hTextureSize,
@@ -109,6 +110,8 @@ public final class TextureRenderer {
 		}
 
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 
 		return layer.next;
 	}

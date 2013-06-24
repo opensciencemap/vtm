@@ -52,7 +52,7 @@ public class AwtGraphics extends CanvasAdapter {
 	static final Graphics2D canvas;
 
 	static {
-		image  = new BufferedImage(64, 64,	BufferedImage.TYPE_INT_ARGB);
+		image  = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 		canvas = image.createGraphics();
 		canvas.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON );
 		//canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
@@ -72,7 +72,8 @@ public class AwtGraphics extends CanvasAdapter {
 	}
 
 	static synchronized float getTextWidth(FontMetrics fm, String text) {
-		return (float)fm.getStringBounds(text, canvas).getWidth();
+		//return (float)fm.getStringBounds(text, canvas).getWidth();
+		return fm.stringWidth(text);
 	}
 
 	@Override

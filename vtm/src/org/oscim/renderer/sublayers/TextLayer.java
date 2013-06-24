@@ -129,9 +129,9 @@ public final class TextLayer extends TextureLayer {
 			yy = y + height - it.text.fontDescent; // - mFontPadY;
 
 			if (it.text.stroke != null)
-				mCanvas.drawText(it.string, x + it.width / 2, yy, it.text.stroke);
+				mCanvas.drawText(it.string, x, yy, it.text.stroke);
 
-			mCanvas.drawText(it.string, x + it.width / 2, yy, it.text.paint);
+			mCanvas.drawText(it.string, x, yy, it.text.paint);
 
 			// FIXME !!!
 			if (width > TEXTURE_WIDTH)

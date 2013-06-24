@@ -88,15 +88,16 @@ public final class LineRenderer {
 				GL20.GL_NEAREST, GL20.GL_NEAREST,
 				GL20.GL_MIRRORED_REPEAT, GL20.GL_MIRRORED_REPEAT);
 
+		Log.d(TAG, "Line Texture >>>>>>>>> " + mTexID);
 		return true;
 	}
 
 	public static void beginLines() {
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexID);
+		//GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexID);
 	}
 
 	public static void endLines() {
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
+		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 	}
 
 	public static Layer draw(Layers layers, Layer curLayer, MapPosition pos,
@@ -280,8 +281,10 @@ public final class LineRenderer {
 			//+ "    len = abs(v_st.s);"
 			//+ "  else"
 			//+ "    len = texture2D(tex, v_st).a;"
+			//+ "    len = u_mode * length(v_st);"
 			// this avoids branching, need to check performance
-			+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);"
+			//+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);"
+			+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
 			// interpolate alpha between: 0.0 < 1.0 - len < u_wscale
 			// where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2)
 			//+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"
@@ -304,8 +307,8 @@ public final class LineRenderer {
 			+ "    len = abs(v_st.s);"
 			+ "    fuzz = fwidth(v_st.s);"
 			+ "  } else {"
-			+ "    len = texture2D(tex, v_st).a;"
-			//+ "  len = length(v_st);"
+			//+ "    len = texture2D(tex, v_st).a;"
+			+ "    len = length(v_st);"
 			+ "    vec2 st_width = fwidth(v_st);"
 			+ "    fuzz = max(st_width.s, st_width.t);"
 			+ "  }"
