@@ -427,7 +427,7 @@ public final class PolygonRenderer {
 	}
 
 	private final static String polygonVertexShader = ""
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			+ "attribute vec4 a_pos;"
 			+ "void main() {"
@@ -435,14 +435,14 @@ public final class PolygonRenderer {
 			+ "}";
 
 	private final static String polygonFragmentShader = ""
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "uniform vec4 u_color;"
 			+ "void main() {"
 			+ "  gl_FragColor = u_color;"
 			+ "}";
 
 	private final static String polygonVertexShaderZ = ""
-			+ "precision highp float;"
+			//+ "precision highp float;"
 			+ "uniform mat4 u_mvp;"
 			+ "attribute vec4 a_pos;"
 			+ "varying float z;"
@@ -451,7 +451,7 @@ public final class PolygonRenderer {
 			+ "  z = gl_Position.z;"
 			+ "}";
 	private final static String polygonFragmentShaderZ = ""
-			+ "precision highp float;"
+			//+ "precision highp float;"
 			+ "uniform vec4 u_color;"
 			+ "varying float z;"
 			+ "void main() {"
@@ -466,7 +466,7 @@ public final class PolygonRenderer {
 			+ "}";
 
 	private final static String textureVertexShader = ""
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			+ "uniform vec2 u_scale;"
 			+ "attribute vec4 a_pos;"
@@ -479,7 +479,7 @@ public final class PolygonRenderer {
 			+ "}";
 
 	private final static String textureFragmentShader = ""
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "uniform vec4 u_color;"
 			+ "uniform sampler2D tex;"
 			+ "uniform vec2 u_scale;"

@@ -390,7 +390,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 	};
 
 	final static String extrusionVertexShader = ""
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			+ "uniform vec4 u_color[4];"
 			+ "uniform int u_mode;"
@@ -431,14 +431,14 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			+ "}}}";
 
 	final static String extrusionFragmentShader = ""
-			+ "precision mediump float;"
+			//+ "precision mediump float;"
 			+ "varying vec4 color;"
 			+ "void main() {"
 			+ "  gl_FragColor = color;"
 			+ "}";
 
 	final static String extrusionFragmentShaderZ = ""
-			+ "precision mediump float;"
+		//	+ "precision mediump float;"
 			+ "varying float depth;"
 			+ "void main() {"
 			+ "float d = depth * 0.2;"
