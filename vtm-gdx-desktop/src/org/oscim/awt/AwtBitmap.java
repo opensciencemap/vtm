@@ -24,15 +24,18 @@ public class AwtBitmap implements Bitmap {
 		bitmap = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		this.width = width;
 		this.height = height;
+		if (!this.bitmap.isAlphaPremultiplied())
+			this.bitmap.coerceData(true);
 	}
 
 	AwtBitmap(InputStream inputStream) throws IOException {
-        this.bitmap = ImageIO.read(inputStream);
-        this.width = this.bitmap.getWidth();
-        this.height = this.bitmap.getHeight();
-        if(!this.bitmap.isAlphaPremultiplied())
-        	this.bitmap.coerceData(true);
-}
+		this.bitmap = ImageIO.read(inputStream);
+		this.width = this.bitmap.getWidth();
+		this.height = this.bitmap.getHeight();
+		if (!this.bitmap.isAlphaPremultiplied())
+			this.bitmap.coerceData(true);
+	}
+
 	@Override
 	public int getWidth() {
 		return width;
@@ -45,13 +48,11 @@ public class AwtBitmap implements Bitmap {
 
 	@Override
 	public int[] getPixels() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void eraseColor(int transparent) {
-		// TODO Auto-generated method stub
 	}
 
 	private static IntBuffer tmpBuffer = BufferUtils.newIntBuffer(512 * 256);
@@ -62,17 +63,16 @@ public class AwtBitmap implements Bitmap {
 		int[] pixels;
 		IntBuffer buffer;
 
-		if (width == 512 && height == 256){
+		if (width == 512 && height == 256) {
 			pixels = tmpPixel;
 			buffer = tmpBuffer;
 			buffer.clear();
-			Log.d("AwtBitmap", "default texture");
-		}else{
-			pixels  = new int[width * height];
-			buffer  = BufferUtils.newIntBuffer(width * height);
-			Log.d("AwtBitmap", "create texture buffer " + width + "x" + height);
+			//Log.d("AwtBitmap", "default texture");
+		} else {
+			pixels = new int[width * height];
+			buffer = BufferUtils.newIntBuffer(width * height);
+			//Log.d("AwtBitmap", "create texture buffer " + width + "x" + height);
 		}
-
 
 		bitmap.getRGB(0, 0, width, height, pixels, 0, width);
 
@@ -80,14 +80,13 @@ public class AwtBitmap implements Bitmap {
 		buffer.flip();
 
 		Gdx.gl20.glTexImage2D(GL20.GL_TEXTURE_2D, 0, GL20.GL_RGBA, width,
-				height, 0, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, buffer);
+								height, 0, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, buffer);
 
 		return 0;
 	}
 
 	@Override
-    public void recycle() {
-	    // TODO Auto-generated method stub
-
-    }
+	public void recycle() {
+		// TODO Auto-generated method stub
+	}
 }
