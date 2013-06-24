@@ -71,7 +71,7 @@ public class GridRenderLayer extends BasicRenderLayer {
 
 		mTextLayer = layers.addTextLayer(new TextLayer());
 		mLineLayer = layers.addLineLayer(0,
-				new Line(Color.BLUE, 1.5f, Cap.BUTT));
+		                                 new Line(Color.BLUE, 1.5f, Cap.BUTT));
 	}
 
 	private void addLabels(int x, int y, int z) {
@@ -83,11 +83,14 @@ public class GridRenderLayer extends BasicRenderLayer {
 		for (int yy = -2; yy < 2; yy++) {
 			for (int xx = -2; xx < 2; xx++) {
 
-				String label = String.format(
-						Locale.ROOT, TILE_FORMAT,
-						Integer.valueOf(x + xx),
-						Integer.valueOf(y + yy),
-						Integer.valueOf(z));
+				// String label = String.format(
+				// Locale.ROOT, TILE_FORMAT,
+				// Integer.valueOf(x + xx),
+				// Integer.valueOf(y + yy),
+				// Integer.valueOf(z));
+				String label = Integer.valueOf(x + xx) + "/" +
+				               Integer.valueOf(y + yy) + "/" +
+				               Integer.valueOf(z);
 
 				TextItem ti = TextItem.pool.get();
 				ti.set(s * xx + s / 2, s * yy + s / 2, label, mText);

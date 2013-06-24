@@ -600,10 +600,17 @@ class TextRenderLayer extends BasicRenderLayer {
 		return true;
 	}
 
+	long lastDraw = 0;
+
 	@Override
 	public synchronized void update(MapPosition pos, boolean changed,
 			Matrices matrices) {
 
+		if (System.currentTimeMillis() - lastDraw > 1000){
+			updateLabels();
+			lastDraw = System.currentTimeMillis();
+
+		}
 		if (mNextLayer.ready) {
 			// exchange current with next layers
 			TextureLayers tmp = mCurLayer;
@@ -625,6 +632,7 @@ class TextRenderLayer extends BasicRenderLayer {
 
 			this.newData = true;
 		}
+
 
 		//if (!mHolding)
 		//	postLabelTask((mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis());

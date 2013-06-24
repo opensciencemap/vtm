@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/vtm-gdx"/>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/vtm-gdx/libs/gdx.jar" sourcepath="/vtm-gdx/libs/gdx-sources.jar"/>
-	<classpathentry kind="lib" path="/vtm-gdx/libs/gdx-sources.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gdx-backend-gwt.jar" sourcepath="war/WEB-INF/lib/gdx-backend-gwt-sources.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gdx-backend-gwt-sources.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/vtm"/>
-	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+    <classpathentry kind="src" path="src"/>
+    <classpathentry combineaccessrules="false" kind="src" path="/vtm-gdx"/>
+    <classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+    <classpathentry combineaccessrules="false" kind="src" path="/vtm"/>
+    <classpathentry kind="output" path="war/WEB-INF/classes"/>
+    <classpathentry kind="lib" path="war/WEB-INF/lib/gdx-backend-gwt-sources.jar"/>
+    <classpathentry kind="lib" path="war/WEB-INF/lib/gdx-backend-gwt.jar" sourcepath="war/WEB-INF/lib/gdx-backend-gwt-sources.jar"/>
+    <classpathentry kind="lib" path="/vtm-gdx/libs/gdx-sources.jar"/>
+    <classpathentry kind="lib" path="/vtm-gdx/libs/gdx.jar" sourcepath="/vtm-gdx/libs/gdx-sources.jar"/>
 </classpath>

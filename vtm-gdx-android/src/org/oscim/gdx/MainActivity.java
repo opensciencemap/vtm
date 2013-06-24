@@ -14,6 +14,7 @@ import android.os.Bundle;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.backends.android.AndroidGL20;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class MainActivity extends AndroidApplication {
 
@@ -34,6 +35,7 @@ public class MainActivity extends AndroidApplication {
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
         cfg.useGL20 = true;
 
+        new SharedLibraryLoader().load("vtm-jni");
         initialize(new GdxMap(), cfg);
     }
 }

@@ -18,10 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
-import java.util.regex.Pattern;
 
 import org.oscim.core.Tag;
 import org.oscim.theme.RenderThemeHandler;
@@ -31,7 +29,7 @@ import org.xml.sax.Attributes;
 public abstract class Rule {
 	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_KEY = new HashMap<List<String>, AttributeMatcher>();
 	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_VALUE = new HashMap<List<String>, AttributeMatcher>();
-	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\|");
+	//private static final Pattern SPLIT_PATTERN = Pattern.compile("\\|");
 	private static final String STRING_NEGATION = "~";
 	private static final String STRING_EXCLUSIVE = "-";
 	private static final String STRING_WILDCARD = "*";
@@ -52,7 +50,8 @@ public abstract class Rule {
 		if (values == null) {
 			valueMatcher = AnyMatcher.getInstance();
 		} else {
-			valueList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN.split(values)));
+			//valueList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN.split(values)));
+			valueList = new ArrayList<String>(Arrays.asList(values.split("\\|")));
 			if (valueList.remove(STRING_NEGATION))
 				negativeRule = true;
 			else if (valueList.remove(STRING_EXCLUSIVE))
@@ -69,7 +68,8 @@ public abstract class Rule {
 			}
 			keyMatcher = AnyMatcher.getInstance();
 		} else {
-			keyList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN.split(keys)));
+			//keyList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN.split(keys)));
+			keyList = new ArrayList<String>(Arrays.asList(keys.split("\\|")));
 			keyMatcher = getKeyMatcher(keyList);
 
 			if ((keyMatcher instanceof AnyMatcher) && (negativeRule || exclusionRule)) {
@@ -150,7 +150,7 @@ public abstract class Rule {
 			String value = attributes.getValue(i);
 
 			if ("e".equals(name)) {
-				String val = value.toUpperCase(Locale.ENGLISH);
+				String val = value.toUpperCase();
 				if ("WAY".equals(val))
 					element = Element.WAY;
 				else if ("NODE".equals(val))
@@ -160,7 +160,7 @@ public abstract class Rule {
 			} else if ("v".equals(name)) {
 				values = value;
 			} else if ("closed".equals(name)) {
-				String val = value.toUpperCase(Locale.ENGLISH);
+				String val = value.toUpperCase();
 				if ("YES".equals(val))
 					closed = Closed.YES;
 				else if ("NO".equals(val))

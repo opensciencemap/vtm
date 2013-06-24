@@ -1,7 +1,6 @@
 package org.oscim.gdx;
 
 import org.oscim.backend.AssetAdapter;
-import org.oscim.backend.GL20;
 import org.oscim.backend.Log;
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.layers.tile.vector.MapTileLayer;
@@ -9,7 +8,7 @@ import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tilesource.TileSource;
-import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
+import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
 import org.oscim.view.MapRenderCallback;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
@@ -18,11 +17,6 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class GdxMap implements ApplicationListener, MapRenderCallback {
 
@@ -30,22 +24,20 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 	private final GLRenderer mMapRenderer;
 
 	public GdxMap() {
-		new SharedLibraryLoader().load("vtm-jni");
-
 		AssetAdapter.g = new GdxAssetAdapter();
 
 		mMapView = new MapView(this);
 		mMapRenderer = new GLRenderer(mMapView);
 	}
 
-	Stage ui;
-	Label fps;
-	BitmapFont font;
+	// Stage ui;
+	// Label fps;
+	// BitmapFont font;
 
 	@Override
 	public void create() {
 
-		// Gdx.graphics.setContinuousRendering(false);
+		Gdx.graphics.setContinuousRendering(false);
 
 		if (Log.logger == null)
 			Log.logger = new GdxLog();
@@ -58,17 +50,17 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		mWidth = w;
 		mHeight = h;
 
-		// TileSource tileSource = new OSciMap2TileSource();
-		// tileSource.setOption("url",
-		// "http://city.informatik.uni-bremen.de/osci/map-live");
-		TileSource tileSource = new OSciMap4TileSource();
-		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
+		 TileSource tileSource = new OSciMap2TileSource();
+		 tileSource.setOption("url",
+		 "http://city.informatik.uni-bremen.de/osci/map-live");
+		//TileSource tileSource = new OSciMap4TileSource();
+		//tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
 
 		MapTileLayer l = mMapView.setBaseMap(tileSource);
 		l.setRenderTheme(InternalRenderTheme.DEFAULT);
 
-		// mMapView.getLayerManager().add(new GenericOverlay(mMapView, new
-		// GridRenderLayer(mMapView)));
+		//mMapView.getLayerManager().add(new GenericOverlay(mMapView, new
+		 //                                                GridRenderLayer(mMapView)));
 
 		mMapView.getMapViewPosition().setViewport(w, h);
 
@@ -77,21 +69,21 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 		Gdx.input.setInputProcessor(new TouchHandler());
 
-		ui = new Stage(w, h, false);
-
-		font = new BitmapFont(false);
-
-		fps = new Label("fps: 0", new Label.LabelStyle(font, Color.WHITE));
-		fps.setPosition(10, 30);
-		fps.setColor(0, 1, 0, 1);
-		ui.addActor(fps);
+		// ui = new Stage(w, h, false);
+		// font = new BitmapFont(false);
+		// fps = new Label("fps: 0", new Label.LabelStyle(font, Color.WHITE));
+		// fps.setPosition(10, 30);
+		// fps.setColor(0, 1, 0, 1);
+		// ui.addActor(fps);
 	}
 
 	@Override
 	public void dispose() {
 
 	}
+
 	private int fpsCnt = 0;
+
 	@Override
 	public void render() {
 		// GLState.enableVertexArrays(-1, -1);
@@ -101,14 +93,14 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		mMapRenderer.onDrawFrame();
 
 		// Gdx.gl20.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
-
 		// Gdx.gl20.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		int f = Gdx.graphics.getFramesPerSecond();
-		if (f != fpsCnt){
-			Log.d("fps", ">" +f);
-			fpsCnt = f;
-		}
+//		int f = Gdx.graphics.getFramesPerSecond();
+//		if (f != fpsCnt) {
+//			Log.d("fps", ">" + f);
+//			fpsCnt = f;
+//		}
+
 		// fps.setText("fps: " + Gdx.graphics.getFramesPerSecond());
 		// ui.draw();
 	}
@@ -137,16 +129,17 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 	 *            also render frame FIXME (does nothing atm)
 	 */
 	void redrawMapInternal(boolean forceRedraw) {
-
-		if (forceRedraw && !mClearMap)
-			Gdx.graphics.requestRendering();
+		GLState.blend(false);
+		GLState.test(false, false);
+		//if (forceRedraw && !mClearMap)
+		//	Gdx.graphics.requestRendering();
 
 		mMapView.updateLayers();
 
-		if (mClearMap) {
-			Gdx.graphics.requestRendering();
-			mClearMap = false;
-		}
+		//if (mClearMap) {
+		Gdx.graphics.requestRendering();
+		mClearMap = false;
+		//}
 	}
 
 	private boolean mClearMap;
@@ -349,7 +342,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 			}
 
 			if (changed)
-				updateMap(false);
+				updateMap(true);
 
 			return true;
 		}
