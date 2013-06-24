@@ -3,3 +3,6 @@
 */obj/*
 *.o
 *.class
+vtm-gdx-html/war/assets/
+vtm-gdx-html/gwt-unitCache/
+vtm-gdx-ios/
