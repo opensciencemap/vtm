@@ -15,6 +15,7 @@ import org.oscim.view.MapViewPosition;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.InputProcessor;
 
@@ -33,6 +34,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 	// Stage ui;
 	// Label fps;
 	// BitmapFont font;
+	MapTileLayer mMapLayer;
 
 	@Override
 	public void create() {
@@ -50,17 +52,16 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		mWidth = w;
 		mHeight = h;
 
-		 TileSource tileSource = new OSciMap2TileSource();
-		 tileSource.setOption("url",
-		 "http://city.informatik.uni-bremen.de/osci/map-live");
+		TileSource tileSource = new OSciMap2TileSource();
+		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/map-live");
 		//TileSource tileSource = new OSciMap4TileSource();
 		//tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
 
-		MapTileLayer l = mMapView.setBaseMap(tileSource);
-		l.setRenderTheme(InternalRenderTheme.DEFAULT);
+		mMapLayer = mMapView.setBaseMap(tileSource);
+		mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
 
 		//mMapView.getLayerManager().add(new GenericOverlay(mMapView, new
-		 //                                                GridRenderLayer(mMapView)));
+		//                                                GridRenderLayer(mMapView)));
 
 		mMapView.getMapViewPosition().setViewport(w, h);
 
@@ -95,11 +96,11 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		// Gdx.gl20.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 		// Gdx.gl20.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
-//		int f = Gdx.graphics.getFramesPerSecond();
-//		if (f != fpsCnt) {
-//			Log.d("fps", ">" + f);
-//			fpsCnt = f;
-//		}
+		//		int f = Gdx.graphics.getFramesPerSecond();
+		//		if (f != fpsCnt) {
+		//			Log.d("fps", ">" + f);
+		//			fpsCnt = f;
+		//		}
 
 		// fps.setText("fps: " + Gdx.graphics.getFramesPerSecond());
 		// ui.draw();
@@ -241,7 +242,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 		@Override
 		public boolean keyDown(int keycode) {
-			// switch (keycode) {
+			switch (keycode) {
 			//
 			// case Input.Keys.UP:
 			// mMapPosition.moveMap(0, -50);
@@ -260,17 +261,17 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 			// mMapView.redrawMap(true);
 			// break;
 			//
-			// case Input.Keys.R:
-			// mMapView.setRenderTheme(InternalRenderTheme.DEFAULT);
-			// mMapView.redrawMap(true);
-			// break;
-			//
-			// case Input.Keys.T:
-			// mMapView.setRenderTheme(InternalRenderTheme.TRONRENDER);
-			// mMapView.redrawMap(true);
-			// break;
-			//
-			// }
+			case Input.Keys.R:
+				mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
+				mMapView.updateMap(false);
+				break;
+
+			case Input.Keys.T:
+				mMapLayer.setRenderTheme(InternalRenderTheme.TRONRENDER);
+				mMapView.updateMap(false);
+				break;
+
+			}
 			return true;
 		}
 
@@ -285,9 +286,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		}
 
 		@Override
-		public boolean touchDown(int screenX, int screenY, int pointer,
-		                         int button) {
-
+		public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 			if (button == Buttons.MIDDLE) {
 				mActiveScale = true;
 				// mActiveTilt = true;
@@ -316,8 +315,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 			if (mActiveScale) {
 				// changed = mMapPosition.tilt((screenY - mStartY) / 5f);
-				changed = mMapPosition.scaleMap(1 - (screenY - mPosY) / 100f,
-				                                0, 0);
+				changed = mMapPosition.scaleMap(1 - (screenY - mPosY) / 100f, 0, 0);
 				mPosY = screenY;
 				return true;
 			}
