@@ -8,7 +8,7 @@ import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tilesource.TileSource;
-import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
+import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
 import org.oscim.view.MapRenderCallback;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
@@ -52,10 +52,10 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		mWidth = w;
 		mHeight = h;
 
-		TileSource tileSource = new OSciMap2TileSource();
-		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/map-live");
-		//TileSource tileSource = new OSciMap4TileSource();
-		//tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
+		//TileSource tileSource = new OSciMap2TileSource();
+		//tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/map-live");
+		TileSource tileSource = new OSciMap4TileSource();
+		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
 
 		mMapLayer = mMapView.setBaseMap(tileSource);
 		mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
@@ -83,7 +83,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 	}
 
-	private int fpsCnt = 0;
+	//private int fpsCnt = 0;
 
 	@Override
 	public void render() {
