@@ -64,16 +64,6 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 	private final static int SHADER = 0;
 
-	private static ShortBuffer getShortBuffer(int size) {
-		ByteBuffer buf = ByteBuffer
-				.allocateDirect(size)
-				.order(ByteOrder.nativeOrder());
-
-		return buf.asShortBuffer();
-
-	}
-
-
 	private boolean initShader() {
 		initialized = true;
 
@@ -134,8 +124,8 @@ public class ExtrusionRenderLayer extends RenderLayer {
 					continue;
 
 				if (!el.compiled) {
-					int bytes = el.mNumVertices * 8 * 2;
-					el.compile(getShortBuffer(bytes));
+					int numShorts = el.mNumVertices * 8;
+					el.compile(GLRenderer.getShortBuffer(numShorts));
 					GlUtils.checkGlError("...");
 				}
 

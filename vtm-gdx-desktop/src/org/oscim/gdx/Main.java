@@ -4,7 +4,6 @@ import org.oscim.awt.AwtGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
-import org.oscim.renderer.GLRenderer;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -26,7 +25,6 @@ public class Main {
         CanvasAdapter.g = AwtGraphics.INSTANCE;
         GLAdapter.INSTANCE = new GdxGLAdapter();
 		Tile.SIZE = 256;
-		GLRenderer.alwaysAllocBuffer = true;
 
         new SharedLibraryLoader().load("vtm-jni");
 
