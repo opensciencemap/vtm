@@ -13,6 +13,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.renderer.sublayers;
+
 import java.util.ArrayList;
 
 import org.oscim.backend.CanvasAdapter;
@@ -31,7 +32,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	private final static String TAG = TextureItem.class.getName();
 	private static final GL20 GL = GLAdapter.INSTANCE;
 
-	//  texture ID
+	// texture ID
 	public int id;
 
 	public int width;
@@ -76,8 +77,8 @@ public class TextureItem extends Inlist<TextureItem> {
 	}
 
 	/**
-	 * Retrieve a TextureItem from pool with default Bitmap
-	 * with dimension TextureRenderer.TEXTURE_WIDTH/HEIGHT.
+	 * Retrieve a TextureItem from pool with default Bitmap with dimension
+	 * TextureRenderer.TEXTURE_WIDTH/HEIGHT.
 	 */
 	public synchronized static TextureItem get(boolean initBitmap) {
 		TextureItem ti = pool.get();
@@ -96,7 +97,7 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		@Override
 		public void init(int num) {
-			 int[] textureIds = GlUtils.glGenTextures(num);
+			int[] textureIds = GlUtils.glGenTextures(num);
 
 			for (int i = 0; i < num; i++) {
 				initTexture(textureIds[i]);
@@ -114,11 +115,11 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		@Override
 		protected void clearItem(TextureItem it) {
-			//Log.d(TAG, it.ownBitmap + " " + (it.bitmap == null));
+			// Log.d(TAG, it.ownBitmap + " " + (it.bitmap == null));
 			if (it.ownBitmap)
 				return;
 
-			if (it.isClone){
+			if (it.isClone) {
 				it.isClone = false;
 				it.id = -1;
 				it.width = -1;
@@ -162,21 +163,24 @@ public class TextureItem extends Inlist<TextureItem> {
 	/**
 	 * This function may only be used in GLRenderer Thread.
 	 *
-	 * @param to the TextureObjet to compile and upload
+	 * @param to
+	 *            the TextureObjet to compile and upload
 	 */
 	public static void uploadTexture(TextureItem to) {
 
 		// free unused textures, find a better place for this TODO
 		synchronized (mTextures) {
 			int size = mTextures.size();
-			int[] tmp = new int[size];
-			for (int i = 0; i < size; i++)
-				tmp[i] = mTextures.get(i).intValue();
+			if (size > 0) {
+				int[] tmp = new int[size];
+				for (int i = 0; i < size; i++)
+					tmp[i] = mTextures.get(i).intValue();
 
-			mTextures.clear();
-			GlUtils.glDeleteTextures(size, tmp);
+				mTextures.clear();
+				GlUtils.glDeleteTextures(size, tmp);
 
-			mTexCnt -= size;
+				mTexCnt -= size;
+			}
 		}
 
 		if (to.id < 0) {
@@ -184,24 +188,24 @@ public class TextureItem extends Inlist<TextureItem> {
 			int[] textureIds = GlUtils.glGenTextures(1);
 			to.id = textureIds[0];
 			initTexture(to.id);
-			//if (TextureRenderer.debug)
-				Log.d(TAG, "poolCnt:" +  pool.getCount() + " poolFill:" + pool.getFill()
-						+ " texCnt:" + mTexCnt + " new texture " + to.id);
+			// if (TextureRenderer.debug)
+			Log.d(TAG, "poolCnt:" + pool.getCount() + " poolFill:" + pool.getFill()
+			           + " texCnt:" + mTexCnt + " new texture " + to.id);
 		}
 
 		uploadTexture(to, to.bitmap, mBitmapFormat, mBitmapType,
-				TEXTURE_WIDTH, TEXTURE_HEIGHT);
+		              TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
 		if (!to.ownBitmap)
 			TextureItem.releaseBitmap(to);
 		else {
 			// FIXME when in doubt
-			//to.bitmap = null;
+			// to.bitmap = null;
 		}
 	}
 
 	public static void uploadTexture(TextureItem to, Bitmap bitmap,
-			int format, int type, int w, int h) {
+	                                 int format, int type, int w, int h) {
 
 		if (to == null) {
 			Log.d(TAG, "no texture!");
@@ -212,15 +216,17 @@ public class TextureItem extends Inlist<TextureItem> {
 		Log.d(TAG, "upload " + to.id);
 		if (to.ownBitmap) {
 			bitmap.uploadToTexture(false);
-			//GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, bitmap, 0);
+			// GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, bitmap, 0);
 
 		} else if (to.width == w && to.height == h) {
 			bitmap.uploadToTexture(true);
-			//GLUtils.texSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, bitmap, format, type);
+			// GLUtils.texSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, bitmap,
+			// format, type);
 
 		} else {
 			bitmap.uploadToTexture(false);
-			//GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, format, bitmap, type, 0);
+			// GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, format, bitmap, type,
+			// 0);
 			to.width = w;
 			to.height = h;
 		}
@@ -233,13 +239,13 @@ public class TextureItem extends Inlist<TextureItem> {
 		GL.glBindTexture(GL20.GL_TEXTURE_2D, id);
 
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER,
-				GL20.GL_LINEAR);
+		                   GL20.GL_LINEAR);
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER,
-				GL20.GL_LINEAR);
+		                   GL20.GL_LINEAR);
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
-				GL20.GL_CLAMP_TO_EDGE); // Set U Wrapping
+		                   GL20.GL_CLAMP_TO_EDGE); // Set U Wrapping
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
-				GL20.GL_CLAMP_TO_EDGE); // Set V Wrapping
+		                   GL20.GL_CLAMP_TO_EDGE); // Set V Wrapping
 	}
 
 	static void init(int num) {
@@ -250,14 +256,14 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		for (int i = 0; i < 4; i++) {
 			Bitmap bitmap = CanvasAdapter.g.getBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0);
-			//Bitmap bitmap = Bitmap.createBitmap(
-			//		TEXTURE_WIDTH, TEXTURE_HEIGHT,
-			//		Bitmap.Config.ARGB_8888);
+			// Bitmap bitmap = Bitmap.createBitmap(
+			// TEXTURE_WIDTH, TEXTURE_HEIGHT,
+			// Bitmap.Config.ARGB_8888);
 			mBitmaps.add(bitmap);
 		}
 
-		//mBitmapFormat = GLUtils.getInternalFormat(mBitmaps.get(0));
-		//mBitmapType = GLUtils.getType(mBitmaps.get(0));
+		// mBitmapFormat = GLUtils.getInternalFormat(mBitmaps.get(0));
+		// mBitmapType = GLUtils.getType(mBitmaps.get(0));
 
 		mTexCnt = num;
 	}
@@ -267,13 +273,14 @@ public class TextureItem extends Inlist<TextureItem> {
 
 			int size = mBitmaps.size();
 			if (size == 0) {
-				//Bitmap bitmap = Bitmap.createBitmap(
-				//		TEXTURE_WIDTH, TEXTURE_HEIGHT,
-				//		Bitmap.Config.ARGB_8888);
+				// Bitmap bitmap = Bitmap.createBitmap(
+				// TEXTURE_WIDTH, TEXTURE_HEIGHT,
+				// Bitmap.Config.ARGB_8888);
 				//
-				//if (TextureRenderer.debug)
-				//	Log.d(TAG, "alloc bitmap: " +
-				//		android.os.Debug.getNativeHeapAllocatedSize() / (1024 * 1024));
+				// if (TextureRenderer.debug)
+				// Log.d(TAG, "alloc bitmap: " +
+				// android.os.Debug.getNativeHeapAllocatedSize() / (1024 *
+				// 1024));
 
 				return CanvasAdapter.g.getBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0);
 			}
