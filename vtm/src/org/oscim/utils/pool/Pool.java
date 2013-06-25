@@ -16,7 +16,7 @@ package org.oscim.utils.pool;
 
 public abstract class Pool<T extends Inlist<T>> {
 
-	T pool;
+	protected T pool;
 
 	/**
 	 * @param item release resources

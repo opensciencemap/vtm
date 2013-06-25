@@ -14,7 +14,6 @@
  */
 package org.oscim.renderer;
 
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -32,16 +31,16 @@ import org.oscim.renderer.sublayers.Layers;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
+import org.oscim.utils.pool.Inlist;
+import org.oscim.utils.pool.Pool;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
-
 
 public class GLRenderer {
 	private static final String TAG = GLRenderer.class.getName();
 
 	private static final GL20 GL = GLAdapter.INSTANCE;
 
-	private static final int MB = 1024 * 1024;
 	private static final int SHORT_BYTES = 2;
 	private static final int CACHE_TILES_MAX = 250;
 
@@ -54,11 +53,6 @@ public class GLRenderer {
 
 	private static MapViewPosition mMapViewPosition;
 	private static MapPosition mMapPosition;
-
-	private static ShortBuffer shortBuffer;
-	private static FloatBuffer floatBuffer;
-	private static IntBuffer intBuffer;
-	private static int tmpBufferSize;
 
 	private static short[] mFillCoords;
 
@@ -73,8 +67,8 @@ public class GLRenderer {
 		public final Matrix4 mvp = new Matrix4();
 
 		/**
-		 * Set MVP so that coordinates are in screen pixel coordinates
-		 * with 0,0 being center
+		 * Set MVP so that coordinates are in screen pixel coordinates with 0,0
+		 * being center
 		 */
 		public void useScreenCoordinates(boolean center, float scale) {
 			float ratio = (1f / (scale * screenWidth));
@@ -83,9 +77,9 @@ public class GLRenderer {
 				mvp.setScale(ratio, ratio, ratio);
 			else
 				mvp.setTransScale(
-						(-screenWidth / 2) * ratio * scale,
-						(-screenHeight / 2) * ratio * scale,
-						ratio);
+				                  (-screenWidth / 2) * ratio * scale,
+				                  (-screenHeight / 2) * ratio * scale,
+				                  ratio);
 
 			mvp.multiplyLhs(proj);
 		}
@@ -93,7 +87,7 @@ public class GLRenderer {
 
 	private static Matrices mMatrices;
 
-	//private
+	// private
 	static float[] mClearColor = null;
 
 	public static int mQuadIndicesID;
@@ -135,62 +129,99 @@ public class GLRenderer {
 		mClearColor = GlUtils.colorToFloat(t.getMapBackground());
 		mUpdateColor = true;
 	}
-	public static boolean alwaysAllocBuffer = false;
+
+	static class BufferItem extends Inlist<BufferItem> {
+
+		ShortBuffer shortBuffer;
+		FloatBuffer floatBuffer;
+		IntBuffer intBuffer;
+		int tmpBufferSize;
+
+		void growBuffer(int size) {
+			Log.d(TAG, "grow buffer " + size);
+			// 32kb min size
+			if (size < (1 << 15))
+				size = (1 << 15);
+
+			ByteBuffer buf = ByteBuffer
+			        .allocateDirect(size)
+			        .order(ByteOrder.nativeOrder());
+
+			this.floatBuffer = buf.asFloatBuffer();
+			this.shortBuffer = buf.asShortBuffer();
+			this.intBuffer = buf.asIntBuffer();
+			this.tmpBufferSize = size;
+		}
+	}
+	static class BufferPool extends Pool<BufferItem>{
+		private BufferItem mUsedBuffers;
+
+		@Override
+        protected BufferItem createItem() {
+			// unused;
+			return null;
+        }
+
+		public BufferItem get(int size){
+			BufferItem b = pool;
+
+			if (b == null){
+				b = new BufferItem();
+			} else {
+				pool = b.next;
+				b.next = null;
+			}
+			if (b.tmpBufferSize < size)
+				b.growBuffer(size);
+
+			mUsedBuffers = Inlist.push(mUsedBuffers, b);
+
+			return b;
+		}
+
+		public void releaseBuffers(){
+			mBufferPool.releaseAll(mUsedBuffers);
+			mUsedBuffers = null;
+		}
+
+	}
+	// Do not use the same buffer to upload data within a frame twice
+	// - Contrary to what the OpenGL doc says data seems *not* to be
+	// *always* copied after glBufferData returns...
+	// - Somehow it does always copy when using Android GL bindings
+	// but not when using libgdx bindings (LWJGL or AndroidGL20)
+	private static BufferPool mBufferPool = new BufferPool();
+
 
 	/**
-	 * Only use on GL Thread!
-	 * Get a native ShortBuffer for temporary use.
+	 * Only use on GL Thread! Get a native ShortBuffer for temporary use.
 	 */
 	public static ShortBuffer getShortBuffer(int size) {
-		if (alwaysAllocBuffer || tmpBufferSize < size * 2)
-			growBuffer(size * 2);
-		else
-			shortBuffer.clear();
-
-		return shortBuffer;
+		BufferItem b = mBufferPool.get(size * 2);
+		b.shortBuffer.clear();
+		return b.shortBuffer;
 	}
 
 	/**
-	 * Only use on GL Thread!
-	 * Get a native FloatBuffer for temporary use.
+	 * Only use on GL Thread! Get a native FloatBuffer for temporary use.
 	 */
 	public static FloatBuffer getFloatBuffer(int size) {
-		if (alwaysAllocBuffer || tmpBufferSize < size * 4)
-			growBuffer(size * 4);
-		else
-			floatBuffer.clear();
-
-		return floatBuffer;
+		BufferItem b = mBufferPool.get(size * 4);
+		b.floatBuffer.clear();
+		return b.floatBuffer;
 	}
 
 	/**
-	 * Only use on GL Thread!
-	 * Get a native IntBuffer for temporary use.
+	 * Only use on GL Thread! Get a native IntBuffer for temporary use.
 	 */
 	public static IntBuffer getIntBuffer(int size) {
-		if (alwaysAllocBuffer || tmpBufferSize < size * 4)
-			growBuffer(size * 4);
-		else
-			intBuffer.clear();
-
-		return intBuffer;
-	}
-
-	private static void growBuffer(int size) {
-		Log.d(TAG, "grow buffer " + size);
-		ByteBuffer buf = ByteBuffer
-				.allocateDirect(size)
-				.order(ByteOrder.nativeOrder());
-
-		floatBuffer = buf.asFloatBuffer();
-		shortBuffer = buf.asShortBuffer();
-		intBuffer = buf.asIntBuffer();
-		tmpBufferSize = size;
+		BufferItem b = mBufferPool.get(size * 4);
+		b.intBuffer.clear();
+		return b.intBuffer;
 	}
 
 	public static boolean uploadLayers(Layers layers, int newSize,
-			boolean addFill) {
-
+	                                   boolean addFill) {
 		// add fill coordinates
 		if (addFill)
 			newSize += 8;
@@ -205,10 +236,10 @@ public class GLRenderer {
 
 		if (newSize != sbuf.remaining()) {
 			Log.d(TAG, "wrong size: "
-					+ " new size: " + newSize
-					+ " buffer pos: " + sbuf.position()
-					+ " buffer limit: " + sbuf.limit()
-					+ " buffer fill: " + sbuf.remaining());
+			           + " new size: " + newSize
+			           + " buffer pos: " + sbuf.position()
+			           + " buffer limit: " + sbuf.limit()
+			           + " buffer fill: " + sbuf.remaining());
 			return false;
 		}
 		newSize *= SHORT_BYTES;
@@ -217,17 +248,7 @@ public class GLRenderer {
 		return true;
 	}
 
-	//private long lastDraw = 0;
-
 	public void onDrawFrame() {
-		//long start = SystemClock.uptimeMillis();
-		//long wait = 30 - (start - lastDraw);
-		//if (wait > 5) {
-		//	//Log.d(TAG, "wait " + wait);
-		//	SystemClock.sleep(wait);
-		//	lastDraw = start + wait;
-		//} else
-		//	lastDraw = start;
 
 		// prevent main thread recreating all tiles (updateMap)
 		// while rendering is going on.
@@ -237,13 +258,11 @@ public class GLRenderer {
 		} finally {
 			drawlock.unlock();
 		}
+
+		mBufferPool.releaseBuffers();
 	}
 
 	private static void draw() {
-		//long start = 0;
-
-		//if (MapView.debugFrameTime)
-		//	start = SystemClock.uptimeMillis();
 
 		if (mUpdateColor) {
 			float cc[] = mClearColor;
@@ -254,8 +273,8 @@ public class GLRenderer {
 		GL.glDepthMask(true);
 		GL.glStencilMask(0xFF);
 		GL.glClear(GL20.GL_COLOR_BUFFER_BIT
-				| GL20.GL_DEPTH_BUFFER_BIT
-				| GL20.GL_STENCIL_BUFFER_BIT);
+		           | GL20.GL_DEPTH_BUFFER_BIT
+		           | GL20.GL_STENCIL_BUFFER_BIT);
 
 		boolean changed = false;
 
@@ -302,14 +321,9 @@ public class GLRenderer {
 				renderLayer.render(mMapPosition, mMatrices);
 		}
 
-		//if (MapView.debugFrameTime) {
-		//	GL.glFinish();
-		//	Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start));
-		//}
-
 		if (GlUtils.checkGlOutOfMemory("finish")) {
 			BufferObject.checkBufferUsage(true);
-			// TODO also throw out some textures etc
+			// FIXME also throw out some textures etc
 		}
 	}
 
@@ -344,17 +358,12 @@ public class GLRenderer {
 		GL.glDisable(GL20.GL_CULL_FACE);
 		GL.glBlendFunc(GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
-		//mBufferMemoryUsage = 0;
-
 		if (!mNewSurface) {
 			mMapView.updateMap(false);
 			return;
 		}
 
 		mNewSurface = false;
-
-		// set initial temp buffer size
-		growBuffer(MB >> 2);
 
 		// upload quad indices used by Texture- and LineTexRenderer
 		int[] vboIds = GlUtils.glGenBuffers(1);
@@ -371,14 +380,14 @@ public class GLRenderer {
 			indices[i + 4] = (short) (j + 1);
 			indices[i + 5] = (short) (j + 3);
 		}
-		GLRenderer.getShortBuffer(indices.length);
-		shortBuffer.put(indices);
-		shortBuffer.flip();
+		ShortBuffer buf = GLRenderer.getShortBuffer(indices.length);
+		buf.put(indices);
+		buf.flip();
 
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER,
-				mQuadIndicesID);
+		                mQuadIndicesID);
 		GL.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER,
-				indices.length * 2, shortBuffer, GL20.GL_STATIC_DRAW);
+		                indices.length * 2, buf, GL20.GL_STATIC_DRAW);
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		if (mClearColor != null)
@@ -404,8 +413,4 @@ public class GLRenderer {
 	private boolean mNewSurface;
 
 	public static final boolean debugView = false;
-
-	//	void clearBuffer() {
-	//		mNewSurface = true;
-	//	}
 }

@@ -66,9 +66,7 @@ public final class BufferObject {
 			mBufferMemoryUsage += newSize - size;
 			size = newSize;
 			GL.glBufferData(type, size, buf, GL20.GL_DYNAMIC_DRAW);
-			//GL.glBufferData(type, size, buf, GL20.GL_STATIC_DRAW);
 		}
-		//GL.glFinish();
 	}
 
 	public void bindArrayBuffer() {
