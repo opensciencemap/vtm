@@ -4,4 +4,5 @@
     <set-configuration-property name="gdx.assetpath" value="../vtm/assets"/>
     <inherits name="GdxMap"/>
     <inherits name="com.badlogic.gdx.backends.gdx_backends_gwt"/>
+    <super-source path="emu" />
 </module>
