@@ -21,13 +21,9 @@ import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.Layer;
 import org.oscim.layers.MapEventLayer;
-import org.oscim.layers.labeling.LabelLayer;
-import org.oscim.layers.overlay.BuildingOverlay;
 import org.oscim.layers.overlay.Overlay;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.MapTileLayer;
-import org.oscim.layers.tile.vector.MapTileLoader;
-import org.oscim.tilesource.TileSource;
 
 public class MapView {
 
@@ -48,35 +44,35 @@ public class MapView {
 
 		// FIXME
 		mDebugSettings = new DebugSettings();
-		MapTileLoader.setDebugSettings(mDebugSettings);
+		//MapTileLoader.setDebugSettings(mDebugSettings);
 
 		mLayerManager.add(0, new MapEventLayer(this));
 	}
 
-	public MapTileLayer setBaseMap(TileSource tileSource) {
-		MapTileLayer baseLayer = new MapTileLayer(this);
+//	public MapTileLayer setBaseMap(TileSource tileSource) {
+//		MapTileLayer baseLayer = new MapTileLayer(this);
+//
+//		baseLayer.setTileSource(tileSource);
+//
+//		//mLayerManager.add(0, new MapEventLayer(this));
+//
+//		mLayerManager.add(1, baseLayer);
+//
+//		//mRotationEnabled = true;
+//
+//		//mLayerManager.add(new GenericOverlay(this, new GridRenderLayer(this)));
+//		mLayerManager.add(new BuildingOverlay(this, baseLayer.getTileLayer()));
+//		mLayerManager.add(new LabelLayer(this, baseLayer.getTileLayer()));
+//
+//		return baseLayer;
+//	}
 
-		baseLayer.setTileSource(tileSource);
-
-		//mLayerManager.add(0, new MapEventLayer(this));
-
-		mLayerManager.add(1, baseLayer);
-
-		//mRotationEnabled = true;
-
-		//mLayerManager.add(new GenericOverlay(this, new GridRenderLayer(this)));
-		mLayerManager.add(new BuildingOverlay(this, baseLayer.getTileLayer()));
-		mLayerManager.add(new LabelLayer(this, baseLayer.getTileLayer()));
-
-		return baseLayer;
-	}
-
-	public void setBackgroundMap(BitmapTileLayer tileLayer) {
-		mLayerManager.add(0, tileLayer);
-	}
+//	public void setBackgroundMap(BitmapTileLayer tileLayer) {
+//		mLayerManager.add(0, tileLayer);
+//	}
 
 	public MapTileLayer setBaseMap(BitmapTileLayer tileLayer) {
-		mLayerManager.add(0, new MapEventLayer(this));
+		//mLayerManager.add(0, new MapEventLayer(this));
 		mLayerManager.add(1, tileLayer);
 		return null;
 	}
@@ -129,7 +125,7 @@ public class MapView {
 
 	public void setDebugSettings(DebugSettings debugSettings) {
 		mDebugSettings = debugSettings;
-		MapTileLoader.setDebugSettings(debugSettings);
+		//MapTileLoader.setDebugSettings(debugSettings);
 	}
 
 	public DebugSettings getDebugSettings() {
