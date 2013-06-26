@@ -27,6 +27,10 @@ import javax.xml.parsers.SAXParserFactory;
 import org.oscim.backend.BitmapUtils;
 import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
+import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint.Cap;
+import org.oscim.backend.canvas.Paint.FontFamily;
+import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.theme.renderinstruction.Area;
@@ -44,7 +48,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-
 
 /**
  * SAX2 handler to parse XML render theme files.
@@ -81,8 +84,8 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *             if an I/O error occurs while reading from the input stream.
 	 */
 	public static IRenderTheme getRenderTheme(InputStream inputStream)
-			throws SAXException,
-			ParserConfigurationException, IOException {
+	        throws SAXException,
+	        ParserConfigurationException, IOException {
 
 		RenderThemeHandler renderThemeHandler = new RenderThemeHandler();
 
@@ -108,7 +111,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *            the XML attribute index position.
 	 */
 	public static void logUnknownAttribute(String element, String name,
-			String value, int attributeIndex) {
+	                                       String value, int attributeIndex) {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("unknown attribute in element ");
 		stringBuilder.append(element);
@@ -127,7 +130,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	private final Stack<Element> mElementStack = new Stack<Element>();
 	private final Stack<Rule> mRuleStack = new Stack<Rule>();
 	private final HashMap<String, RenderInstruction> tmpStyleHash =
-			new HashMap<String, RenderInstruction>(10);
+	        new HashMap<String, RenderInstruction>(10);
 	private TextureAtlas mTextureAtlas;
 	private int mLevel;
 	private RenderTheme mRenderTheme;
@@ -139,7 +142,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 
 		mRenderTheme.complete(mRulesList, mLevel);
-		//mRenderTheme.mTextureAtlas = mTextureAtlas;
+		// mRenderTheme.mTextureAtlas = mTextureAtlas;
 
 		mTextureAtlas = null;
 		mRulesList.clear();
@@ -169,7 +172,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
-			Attributes attributes) throws SAXException {
+	                         Attributes attributes) throws SAXException {
 		try {
 			if (ELEMENT_NAME_RENDER_THEME.equals(localName)) {
 				checkState(localName, Element.RENDER_THEME);
@@ -188,13 +191,13 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			else if (ELEMENT_NAME_STYLE_TEXT.equals(localName)) {
 				checkState(localName, Element.STYLE);
-				Text text = Text.create(localName, attributes, false);
+				Text text = createText(localName, attributes, false);
 				tmpStyleHash.put("t" + text.style, text);
 			}
 
 			else if (ELEMENT_NAME_STYLE_AREA.equals(localName)) {
 				checkState(localName, Element.STYLE);
-				Area area = Area.create(localName, attributes, 0);
+				Area area = createArea(localName, attributes, 0);
 				tmpStyleHash.put("a" + area.style, area);
 			}
 
@@ -204,36 +207,36 @@ public class RenderThemeHandler extends DefaultHandler {
 				if ((style = attributes.getValue("from")) != null) {
 					RenderInstruction ri = tmpStyleHash.get("l" + style);
 					if (ri instanceof Line) {
-						Line line = Line.create((Line) ri, localName, attributes, 0,
-								false);
+						Line line = createLine((Line) ri, localName, attributes, 0,
+						                       false);
 						tmpStyleHash.put("l" + line.style, line);
 					}
 					else {
 						Log.d(TAG, "not a style: " + style);
 					}
 				} else {
-					Line line = Line.create(null, localName, attributes, 0, false);
+					Line line = createLine(null, localName, attributes, 0, false);
 					tmpStyleHash.put("l" + line.style, line);
 				}
 			}
 
 			else if (ELEMENT_NAME_STYLE_OUTLINE.equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Line line = Line.create(null, localName, attributes, mLevel++, true);
+				Line line = createLine(null, localName, attributes, mLevel++, true);
 				tmpStyleHash.put("o" + line.style, line);
 				// outlineLayers.add(line);
 			}
 
 			else if ("area".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Area area = Area.create(localName, attributes, mLevel++);
+				Area area = createArea(localName, attributes, mLevel++);
 				// mRuleStack.peek().addRenderingInstruction(area);
 				mCurrentRule.addRenderingInstruction(area);
 			}
 
 			else if ("caption".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Text text = Text.create(localName, attributes, true);
+				Text text = createText(localName, attributes, true);
 				mCurrentRule.addRenderingInstruction(text);
 
 				if (text.symbol != null) {
@@ -246,31 +249,31 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			else if ("circle".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Circle circle = Circle.create(localName, attributes, mLevel++);
+				Circle circle = createCircle(localName, attributes, mLevel++);
 				mCurrentRule.addRenderingInstruction(circle);
 			}
 
 			else if ("line".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Line line = Line.create(null, localName, attributes, mLevel++, false);
+				Line line = createLine(null, localName, attributes, mLevel++, false);
 				mCurrentRule.addRenderingInstruction(line);
 			}
 
 			else if ("lineSymbol".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				LineSymbol lineSymbol = LineSymbol.create(localName, attributes);
+				LineSymbol lineSymbol = createLineSymbol(localName, attributes);
 				mCurrentRule.addRenderingInstruction(lineSymbol);
 			}
 
 			else if ("text".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Text text = Text.create(localName, attributes, false);
+				Text text = createText(localName, attributes, false);
 				mCurrentRule.addRenderingInstruction(text);
 			}
 
 			else if ("symbol".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Symbol symbol = Symbol.create(localName, attributes);
+				Symbol symbol = createSymbol(localName, attributes);
 				mCurrentRule.addRenderingInstruction(symbol);
 
 				if ((symbol.texture = mTextureAtlas.getTextureRegion(symbol.src)) == null)
@@ -286,8 +289,8 @@ public class RenderThemeHandler extends DefaultHandler {
 				if (style != null) {
 					Line line = (Line) tmpStyleHash.get("l" + style);
 					if (line != null) {
-						Line newLine = Line.create(line, localName, attributes,
-								mLevel++, false);
+						Line newLine = createLine(line, localName, attributes,
+						                          mLevel++, false);
 
 						mCurrentRule.addRenderingInstruction(newLine);
 					}
@@ -311,7 +314,7 @@ public class RenderThemeHandler extends DefaultHandler {
 					Area area = (Area) tmpStyleHash.get("a" + style);
 					if (area != null)
 						mCurrentRule.addRenderingInstruction(new AreaLevel(area,
-								mLevel++));
+						                                                   mLevel++));
 					else
 						Log.d(TAG, "BUG not an area style: " + style);
 				}
@@ -351,15 +354,15 @@ public class RenderThemeHandler extends DefaultHandler {
 			if ("img".equals(name)) {
 				img = value;
 			} else if ("name".equals(name)) {
-				//img = value;
+				// img = value;
 			} else {
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
 		if (img == null)
 			throw new IllegalArgumentException(
-					"missing attribute 'img' for element: "
-							+ elementName);
+			                                   "missing attribute 'img' for element: "
+			                                           + elementName);
 
 		Bitmap bitmap = BitmapUtils.createBitmap("styles/" + img);
 		mTextureAtlas = new TextureAtlas(bitmap);
@@ -379,9 +382,9 @@ public class RenderThemeHandler extends DefaultHandler {
 				String[] pos = value.split(" ");
 				if (pos.length == 4) {
 					r = new Rect(Integer.parseInt(pos[0]),
-							Integer.parseInt(pos[1]),
-							Integer.parseInt(pos[2]),
-							Integer.parseInt(pos[3]));
+					             Integer.parseInt(pos[1]),
+					             Integer.parseInt(pos[2]),
+					             Integer.parseInt(pos[3]));
 				}
 			} else {
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
@@ -389,8 +392,8 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 		if (regionName == null || r == null)
 			throw new IllegalArgumentException(
-					"missing attribute 'name' or 'rect' for element: "
-							+ elementName);
+			                                   "missing attribute 'name' or 'rect' for element: "
+			                                           + elementName);
 
 		mTextureAtlas.addTextureRegion(regionName.intern(), r);
 	}
@@ -403,40 +406,40 @@ public class RenderThemeHandler extends DefaultHandler {
 	private void checkElement(String elementName, Element element) throws SAXException {
 		Element parentElement;
 		switch (element) {
-			case RENDER_THEME:
-				if (!mElementStack.empty()) {
-					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-				}
-				return;
+		case RENDER_THEME:
+			if (!mElementStack.empty()) {
+				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+			}
+			return;
 
-			case RULE:
-				parentElement = mElementStack.peek();
-				if (parentElement != Element.RENDER_THEME
-						&& parentElement != Element.RULE) {
-					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-				}
-				return;
+		case RULE:
+			parentElement = mElementStack.peek();
+			if (parentElement != Element.RENDER_THEME
+			    && parentElement != Element.RULE) {
+				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+			}
+			return;
 
-			case STYLE:
-				parentElement = mElementStack.peek();
-				if (parentElement != Element.RENDER_THEME) {
-					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-				}
-				return;
+		case STYLE:
+			parentElement = mElementStack.peek();
+			if (parentElement != Element.RENDER_THEME) {
+				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+			}
+			return;
 
-			case RENDERING_INSTRUCTION:
-				if (mElementStack.peek() != Element.RULE) {
-					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-				}
-				return;
-			case ATLAS:
-				parentElement = mElementStack.peek();
-				// FIXME
-				if (parentElement != Element.RENDER_THEME
-						&& parentElement != Element.ATLAS) {
-					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-				}
-				return;
+		case RENDERING_INSTRUCTION:
+			if (mElementStack.peek() != Element.RULE) {
+				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+			}
+			return;
+		case ATLAS:
+			parentElement = mElementStack.peek();
+			// FIXME
+			if (parentElement != Element.RENDER_THEME
+			    && parentElement != Element.ATLAS) {
+				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+			}
+			return;
 		}
 
 		throw new SAXException("unknown enum value: " + element);
@@ -445,5 +448,365 @@ public class RenderThemeHandler extends DefaultHandler {
 	private void checkState(String elementName, Element element) throws SAXException {
 		checkElement(elementName, element);
 		mElementStack.push(element);
+	}
+
+	/**
+	 * @param elementName
+	 *            the name of the XML element.
+	 * @param attributes
+	 *            the attributes of the XML element.
+	 * @param caption
+	 *            ...
+	 * @return a new Text with the given rendering attributes.
+	 */
+	public static Text createText(String elementName, Attributes attributes, boolean caption) {
+		String textKey = null;
+		FontFamily fontFamily = FontFamily.DEFAULT;
+		FontStyle fontStyle = FontStyle.NORMAL;
+		float fontSize = 0;
+		int fill = Color.BLACK;
+		int stroke = Color.BLACK;
+		float strokeWidth = 0;
+		String style = null;
+		float dy = 0;
+		int priority = Integer.MAX_VALUE;
+		String symbol = null;
+
+		for (int i = 0; i < attributes.getLength(); ++i) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+			if ("name".equals(name))
+				style = value;
+			else if ("k".equals(name)) {
+				textKey = value.intern();
+			} else if ("font-family".equals(name)) {
+				fontFamily = FontFamily.valueOf(value.toUpperCase());
+			} else if ("font-style".equals(name)) {
+				fontStyle = FontStyle.valueOf(value.toUpperCase());
+			} else if ("font-size".equals(name)) {
+				fontSize = Float.parseFloat(value);
+			} else if ("fill".equals(name)) {
+				fill = Color.parseColor(value);
+			} else if ("stroke".equals(name)) {
+				stroke = Color.parseColor(value);
+			} else if ("stroke-width".equals(name)) {
+				strokeWidth = Float.parseFloat(value);
+			} else if ("caption".equals(name)) {
+				caption = Boolean.parseBoolean(value);
+			} else if ("priority".equals(name)) {
+				priority = Integer.parseInt(value);
+			} else if ("dy".equals(name)) {
+				dy = Float.parseFloat(value);
+			} else if ("symbol".equals(name)) {
+				symbol = value;
+			} else {
+				logUnknownAttribute(elementName, name, value, i);
+			}
+		}
+
+		validateText(elementName, textKey, fontSize, strokeWidth);
+
+		return new Text(style, textKey, fontFamily, fontStyle, fontSize, fill, stroke, strokeWidth,
+		                dy, caption, symbol, priority);
+	}
+
+	private static void validateText(String elementName, String textKey, float fontSize,
+	                                 float strokeWidth) {
+		if (textKey == null) {
+			throw new IllegalArgumentException("missing attribute k for element: "
+			                                   + elementName);
+		} else if (fontSize < 0) {
+			throw new IllegalArgumentException("font-size must not be negative: "
+			                                   + fontSize);
+		} else if (strokeWidth < 0) {
+			throw new IllegalArgumentException("stroke-width must not be negative: "
+			                                   + strokeWidth);
+		}
+	}
+
+	// private static final Pattern SPLIT_PATTERN = Pattern.compile(",");
+
+	/**
+	 * @param line
+	 *            ...
+	 * @param elementName
+	 *            the name of the XML element.
+	 * @param attributes
+	 *            the attributes of the XML element.
+	 * @param level
+	 *            the drawing level of this instruction.
+	 * @param isOutline
+	 *            ...
+	 * @return a new Line with the given rendering attributes.
+	 */
+	public static Line createLine(Line line, String elementName, Attributes attributes,
+	                              int level, boolean isOutline) {
+
+		// Style name
+		String style = null;
+		// Bitmap
+		// String src = null;
+
+		float width = 0;
+		Cap cap = Cap.ROUND;
+
+		// Extras
+		int fade = -1;
+		boolean fixed = false;
+		float blur = 0;
+		float min = 0;
+
+		// Stipple
+		int stipple = 0;
+		float stippleWidth = 0;
+
+		int color = Color.RED;
+
+		int stippleColor = Color.BLACK;
+
+		if (line != null) {
+			color = line.color;
+			fixed = line.fixed;
+			fade = line.fade;
+			cap = line.cap;
+			blur = line.blur;
+			min = line.min;
+			stipple = line.stipple;
+			stippleColor = line.stippleColor;
+			stippleWidth = line.stippleWidth;
+		}
+
+		for (int i = 0; i < attributes.getLength(); ++i) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+
+			if ("name".equals(name))
+				style = value;
+			else if ("src".equals(name)) {
+				// src = value;
+			} else if ("stroke".equals(name)) {
+				color = Color.parseColor(value);
+			} else if ("width".equals(name)) {
+				width = Float.parseFloat(value);
+			} else if ("cap".equals(name)) {
+				cap = Cap.valueOf(value.toUpperCase());
+			} else if ("fix".equals(name)) {
+				fixed = Boolean.parseBoolean(value);
+			} else if ("stipple".equals(name)) {
+				stipple = Integer.parseInt(value);
+			} else if ("stipple-stroke".equals(name)) {
+				stippleColor = Color.parseColor(value);
+			} else if ("stipple-width".equals(name)) {
+				stippleWidth = Float.parseFloat(value);
+			} else if ("fade".equals(name)) {
+				fade = Integer.parseInt(value);
+			} else if ("min".equals(name)) {
+				min = Float.parseFloat(value);
+			} else if ("blur".equals(name)) {
+				blur = Float.parseFloat(value);
+			} else if ("from".equals(name)) {
+				// ignore
+			} else {
+				logUnknownAttribute(elementName, name, value, i);
+			}
+		}
+
+		// inherit properties from 'line'
+		if (line != null) {
+			// use stroke width relative to 'line'
+			width = line.width + width;
+			if (width <= 0)
+				width = 1;
+
+		} else if (!isOutline) {
+			validateLine(width);
+		}
+
+		return new Line(level, style, color, width, cap, fixed,
+		                stipple, stippleColor, stippleWidth,
+		                fade, blur, isOutline, min);
+	}
+
+	private static void validateLine(float strokeWidth) {
+		if (strokeWidth < 0) {
+			throw new IllegalArgumentException("width must not be negative: "
+			                                   + strokeWidth);
+		}
+	}
+
+	/**
+	 * @param elementName
+	 *            the name of the XML element.
+	 * @param attributes
+	 *            the attributes of the XML element.
+	 * @param level
+	 *            the drawing level of this instruction.
+	 * @return a new Area with the given rendering attributes.
+	 */
+	public static Area createArea(String elementName, Attributes attributes, int level) {
+		String src = null;
+		int fill = Color.BLACK;
+		int stroke = Color.TRANSPARENT;
+		float strokeWidth = 0;
+		int fade = -1;
+		int blend = -1;
+		int blendFill = Color.BLACK;
+		String style = null;
+
+		for (int i = 0; i < attributes.getLength(); ++i) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+			if ("name".equals(name))
+				style = value;
+			else if ("src".equals(name)) {
+				src = value;
+			} else if ("fill".equals(name)) {
+				fill = Color.parseColor(value);
+			} else if ("stroke".equals(name)) {
+				stroke = Color.parseColor(value);
+			} else if ("stroke-width".equals(name)) {
+				strokeWidth = Float.parseFloat(value);
+			} else if ("fade".equals(name)) {
+				fade = Integer.parseInt(value);
+			} else if ("blend".equals(name)) {
+				blend = Integer.parseInt(value);
+			} else if ("blend-fill".equals(name)) {
+				blendFill = Color.parseColor(value);
+			} else {
+				logUnknownAttribute(elementName, name, value, i);
+			}
+		}
+
+		validateArea(strokeWidth);
+		return new Area(style, src, fill, stroke, strokeWidth, fade, level, blend,
+		                blendFill);
+	}
+
+	private static void validateArea(float strokeWidth) {
+		if (strokeWidth < 0) {
+			throw new IllegalArgumentException("stroke-width must not be negative: "
+			                                   + strokeWidth);
+		}
+	}
+
+	/**
+	 * @param elementName
+	 *            the name of the XML element.
+	 * @param attributes
+	 *            the attributes of the XML element.
+	 * @param level
+	 *            the drawing level of this instruction.
+	 * @return a new Circle with the given rendering attributes.
+	 */
+	public static Circle createCircle(String elementName, Attributes attributes, int level) {
+		Float radius = null;
+		boolean scaleRadius = false;
+		int fill = Color.TRANSPARENT;
+		int stroke = Color.TRANSPARENT;
+		float strokeWidth = 0;
+
+		for (int i = 0; i < attributes.getLength(); ++i) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+
+			if ("r".equals(name)) {
+				radius = Float.valueOf(Float.parseFloat(value));
+			} else if ("scale-radius".equals(name)) {
+				scaleRadius = Boolean.parseBoolean(value);
+			} else if ("fill".equals(name)) {
+				fill = Color.parseColor(value);
+			} else if ("stroke".equals(name)) {
+				stroke = Color.parseColor(value);
+			} else if ("stroke-width".equals(name)) {
+				strokeWidth = Float.parseFloat(value);
+			} else {
+				logUnknownAttribute(elementName, name, value, i);
+			}
+		}
+
+		validateCircle(elementName, radius, strokeWidth);
+		return new Circle(radius, scaleRadius, fill, stroke, strokeWidth, level);
+	}
+
+	private static void validateCircle(String elementName, Float radius, float strokeWidth) {
+		if (radius == null) {
+			throw new IllegalArgumentException("missing attribute r for element: "
+			                                   + elementName);
+		} else if (radius.floatValue() < 0) {
+			throw new IllegalArgumentException("radius must not be negative: " + radius);
+		} else if (strokeWidth < 0) {
+			throw new IllegalArgumentException("stroke-width must not be negative: "
+			                                   + strokeWidth);
+		}
+	}
+
+	/**
+	 * @param elementName
+	 *            the name of the XML element.
+	 * @param attributes
+	 *            the attributes of the XML element.
+	 * @return a new LineSymbol with the given rendering attributes.
+	 */
+	public static LineSymbol createLineSymbol(String elementName, Attributes attributes) {
+		String src = null;
+		boolean alignCenter = false;
+		boolean repeat = false;
+
+		for (int i = 0; i < attributes.getLength(); ++i) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+
+			if ("src".equals(name)) {
+				src = value;
+			} else if ("align-center".equals(name)) {
+				alignCenter = Boolean.parseBoolean(value);
+			} else if ("repeat".equals(name)) {
+				repeat = Boolean.parseBoolean(value);
+			} else {
+				logUnknownAttribute(elementName, name, value, i);
+			}
+		}
+
+		validateLineSymbol(elementName, src);
+		return new LineSymbol(src, alignCenter, repeat);
+	}
+
+	private static void validateLineSymbol(String elementName, String src) {
+		if (src == null) {
+			throw new IllegalArgumentException("missing attribute src for element: "
+			                                   + elementName);
+		}
+	}
+
+	/**
+	 * @param elementName
+	 *            the name of the XML element.
+	 * @param attributes
+	 *            the attributes of the XML element.
+	 * @return a new Symbol with the given rendering attributes.
+	 */
+	public static Symbol createSymbol(String elementName, Attributes attributes) {
+		String src = null;
+
+		for (int i = 0; i < attributes.getLength(); ++i) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+
+			if ("src".equals(name)) {
+				src = value;
+			} else {
+				logUnknownAttribute(elementName, name, value, i);
+			}
+		}
+
+		validateSymbol(elementName, src);
+		return new Symbol(src);
+	}
+
+	private static void validateSymbol(String elementName, String src) {
+		if (src == null) {
+			throw new IllegalArgumentException("missing attribute src for element: "
+			                                   + elementName);
+		}
 	}
 }

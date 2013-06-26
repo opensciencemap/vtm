@@ -14,66 +14,14 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.backend.canvas.Color;
 import org.oscim.theme.IRenderCallback;
-import org.oscim.theme.RenderThemeHandler;
-import org.xml.sax.Attributes;
 
 
 /**
  * Represents a round area on the map.
  */
 public final class Circle extends RenderInstruction {
-	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
-	 * @param level
-	 *            the drawing level of this instruction.
-	 * @return a new Circle with the given rendering attributes.
-	 */
-	public static Circle create(String elementName, Attributes attributes, int level) {
-		Float radius = null;
-		boolean scaleRadius = false;
-		int fill = Color.TRANSPARENT;
-		int stroke = Color.TRANSPARENT;
-		float strokeWidth = 0;
 
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-
-			if ("r".equals(name)) {
-				radius = Float.valueOf(Float.parseFloat(value));
-			} else if ("scale-radius".equals(name)) {
-				scaleRadius = Boolean.parseBoolean(value);
-			} else if ("fill".equals(name)) {
-				fill = Color.parseColor(value);
-			} else if ("stroke".equals(name)) {
-				stroke = Color.parseColor(value);
-			} else if ("stroke-width".equals(name)) {
-				strokeWidth = Float.parseFloat(value);
-			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
-			}
-		}
-
-		validate(elementName, radius, strokeWidth);
-		return new Circle(radius, scaleRadius, fill, stroke, strokeWidth, level);
-	}
-
-	private static void validate(String elementName, Float radius, float strokeWidth) {
-		if (radius == null) {
-			throw new IllegalArgumentException("missing attribute r for element: "
-					+ elementName);
-		} else if (radius.floatValue() < 0) {
-			throw new IllegalArgumentException("radius must not be negative: " + radius);
-		} else if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: "
-					+ strokeWidth);
-		}
-	}
 
 	public final int level;
 
@@ -84,7 +32,7 @@ public final class Circle extends RenderInstruction {
 	public final boolean scaleRadius;
 	public final float strokeWidth;
 
-	private Circle(Float radius, boolean scaleRadius, int fill, int stroke,
+	public Circle(Float radius, boolean scaleRadius, int fill, int stroke,
 			float strokeWidth, int level) {
 		super();
 
