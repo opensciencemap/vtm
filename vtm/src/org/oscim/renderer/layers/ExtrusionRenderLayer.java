@@ -37,7 +37,7 @@ import org.oscim.view.MapView;
 public class ExtrusionRenderLayer extends RenderLayer {
 	private final static String TAG = ExtrusionRenderLayer.class.getName();
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	private final TileRenderLayer mTileLayer;
 
@@ -421,14 +421,14 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			+ "}}}";
 
 	final static String extrusionFragmentShader = ""
-			//+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "varying vec4 color;"
 			+ "void main() {"
 			+ "  gl_FragColor = color;"
 			+ "}";
 
 	final static String extrusionFragmentShaderZ = ""
-		//	+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "varying float depth;"
 			+ "void main() {"
 			+ "float d = depth * 0.2;"

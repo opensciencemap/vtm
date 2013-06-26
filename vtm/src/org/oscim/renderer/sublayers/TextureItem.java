@@ -30,7 +30,7 @@ import org.oscim.utils.pool.SyncPool;
 
 public class TextureItem extends Inlist<TextureItem> {
 	private final static String TAG = TextureItem.class.getName();
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	// texture ID
 	public int id;
@@ -254,13 +254,14 @@ public class TextureItem extends Inlist<TextureItem> {
 		mBitmaps.clear();
 		mTextures.clear();
 
-		for (int i = 0; i < 4; i++) {
-			Bitmap bitmap = CanvasAdapter.g.getBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0);
-			// Bitmap bitmap = Bitmap.createBitmap(
-			// TEXTURE_WIDTH, TEXTURE_HEIGHT,
-			// Bitmap.Config.ARGB_8888);
-			mBitmaps.add(bitmap);
-		}
+		// for (int i = 0; i < 4; i++) {
+		// Bitmap bitmap = CanvasAdapter.g.getBitmap(TEXTURE_WIDTH,
+		// TEXTURE_HEIGHT, 0);
+		// // Bitmap bitmap = Bitmap.createBitmap(
+		// // TEXTURE_WIDTH, TEXTURE_HEIGHT,
+		// // Bitmap.Config.ARGB_8888);
+		// mBitmaps.add(bitmap);
+		// }
 
 		// mBitmapFormat = GLUtils.getInternalFormat(mBitmaps.get(0));
 		// mBitmapType = GLUtils.getType(mBitmaps.get(0));

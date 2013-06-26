@@ -40,7 +40,7 @@ import org.oscim.utils.quadtree.QuadTree;
 public class TileRenderer {
 	//private final static String TAG = TileRenderer.class.getName();
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	// Counter increases polygon-offset for each tile drawn.
 	private static int mOffsetCnt;
@@ -153,7 +153,7 @@ public class TileRenderer {
 
 		// simple line shader does not take forward shortening into
 		// account. only used when tilt is 0.
-		int simpleShader = (pos.tilt < 1 ? 1 : 0);
+		int simpleShader = 1; //(pos.tilt < 1 ? 1 : 0);
 
 		boolean clipped = false;
 

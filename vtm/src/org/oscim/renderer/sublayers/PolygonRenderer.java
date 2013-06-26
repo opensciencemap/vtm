@@ -20,6 +20,7 @@ import java.nio.FloatBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
+import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -35,7 +36,7 @@ import org.oscim.utils.Matrix4;
 public final class PolygonRenderer {
 	private static final String TAG = PolygonRenderer.class.getName();
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static GL20 GL;
 
 	private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
 	private static final int STENCIL_BITS = 8;
@@ -63,6 +64,8 @@ public final class PolygonRenderer {
 	private static int mTexGrass;
 
 	static boolean init() {
+		GL = GLAdapter.get();
+
 		for (int i = 0; i < numShaders; i++) {
 
 			// Set up the program for rendering polygons
@@ -80,7 +83,7 @@ public final class PolygonRenderer {
 			}
 
 			if (polygonProgram[i] == 0) {
-				// Log.e(TAG, "Could not create polygon program.");
+				Log.e(TAG, "Could not create polygon program.");
 				return false;
 			}
 			hPolygonMatrix[i] = GL.glGetUniformLocation(polygonProgram[i], "u_mvp");
@@ -427,7 +430,7 @@ public final class PolygonRenderer {
 	}
 
 	private final static String polygonVertexShader = ""
-			//+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			+ "attribute vec4 a_pos;"
 			+ "void main() {"
@@ -435,14 +438,14 @@ public final class PolygonRenderer {
 			+ "}";
 
 	private final static String polygonFragmentShader = ""
-			//+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "uniform vec4 u_color;"
 			+ "void main() {"
 			+ "  gl_FragColor = u_color;"
 			+ "}";
 
 	private final static String polygonVertexShaderZ = ""
-			//+ "precision highp float;"
+			+ "precision highp float;"
 			+ "uniform mat4 u_mvp;"
 			+ "attribute vec4 a_pos;"
 			+ "varying float z;"
@@ -451,7 +454,7 @@ public final class PolygonRenderer {
 			+ "  z = gl_Position.z;"
 			+ "}";
 	private final static String polygonFragmentShaderZ = ""
-			//+ "precision highp float;"
+			+ "precision highp float;"
 			+ "uniform vec4 u_color;"
 			+ "varying float z;"
 			+ "void main() {"
@@ -466,7 +469,7 @@ public final class PolygonRenderer {
 			+ "}";
 
 	private final static String textureVertexShader = ""
-			//+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			+ "uniform vec2 u_scale;"
 			+ "attribute vec4 a_pos;"
@@ -479,7 +482,7 @@ public final class PolygonRenderer {
 			+ "}";
 
 	private final static String textureFragmentShader = ""
-			//+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "uniform vec4 u_color;"
 			+ "uniform sampler2D tex;"
 			+ "uniform vec2 u_scale;"

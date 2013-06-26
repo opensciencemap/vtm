@@ -18,4 +18,8 @@ package org.oscim.backend;
 
 public class GLAdapter {
 	public static GL20 INSTANCE; //= new AndroidGL20();
+
+	public static GL20 get(){
+		return INSTANCE;
+	}
 }

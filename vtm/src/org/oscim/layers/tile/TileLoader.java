@@ -32,6 +32,9 @@ public abstract class TileLoader extends PausableThread {
 
 	protected abstract boolean executeJob(MapTile tile);
 
+	public void go(){
+		notify();
+	}
 
 	@Override
 	protected void doWork() {

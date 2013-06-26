@@ -37,7 +37,7 @@ import org.oscim.view.MapView;
  */
 public abstract class BasicRenderLayer extends RenderLayer {
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	public final Layers layers;
 

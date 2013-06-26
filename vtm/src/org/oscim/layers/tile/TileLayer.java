@@ -77,17 +77,17 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 
 	@Override
 	public void destroy() {
-		for (T tileWorker : mTileLoader) {
-			tileWorker.pause();
-			tileWorker.interrupt();
-			tileWorker.cleanup();
+		for (T loader : mTileLoader) {
+			loader.pause();
+			loader.interrupt();
+			loader.cleanup();
 
-			try {
-				tileWorker.join(10000);
-			} catch (InterruptedException e) {
-				// restore the interrupted status
-				Thread.currentThread().interrupt();
-			}
+//			try {
+//				tileWorker.join(10000);
+//			} catch (InterruptedException e) {
+//				// restore the interrupted status
+//				Thread.currentThread().interrupt();
+//			}
 		}
 		mTileManager.destroy();
 	}
@@ -96,7 +96,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 		for (int i = 0; i < mNumTileLoader; i++) {
 			T m = mTileLoader.get(i);
 			synchronized (m) {
-				m.notify();
+				m.go();
 			}
 		}
 	}

@@ -17,15 +17,16 @@ package org.oscim.layers.tile;
 import static org.oscim.layers.tile.MapTile.STATE_NEW_DATA;
 import static org.oscim.layers.tile.MapTile.STATE_READY;
 
-import org.oscim.view.MapView;
+import java.util.Arrays;
+
+import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.utils.ScanBox;
-
-import org.oscim.backend.Log;
+import org.oscim.view.MapView;
 
 public class TileRenderLayer extends RenderLayer {
 	private final static String TAG = TileRenderLayer.class.getName();
@@ -62,13 +63,15 @@ public class TileRenderLayer extends RenderLayer {
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
 
-		if (tilesChanged || positionChanged)
+		if (tilesChanged || positionChanged){
 			updateTileVisibility(m.mapPlane);
+			Log.d(TAG, tileCnt + " >> " + Arrays.deepToString(tiles));
 
+		}
 		tileCnt += mNumTileHolder;
 
 		/* prepare tile for rendering */
-		if (compileTileLayers(tiles, tileCnt) > 0){
+		if (compileTileLayers(tiles, tileCnt) > 0) {
 			mUploadSerial++;
 			BufferObject.checkBufferUsage(false);
 		}
@@ -89,9 +92,9 @@ public class TileRenderLayer extends RenderLayer {
 	public void clearTiles() {
 		// Clear all references to MapTiles as all current
 		// tiles will also be removed from TileManager.
-		GLRenderer.drawlock.lock();
-		mDrawTiles = new TileSet();
-		GLRenderer.drawlock.unlock();
+		synchronized (GLRenderer.drawlock) {
+			mDrawTiles = new TileSet();
+		}
 	}
 
 	/** compile tile layer data and upload to VBOs */
@@ -192,8 +195,8 @@ public class TileRenderLayer extends RenderLayer {
 	}
 
 	/**
-	 * Update tileSet with currently visible tiles
-	 * get a TileSet of currently visible tiles
+	 * Update tileSet with currently visible tiles get a TileSet of currently
+	 * visible tiles
 	 */
 	public boolean getVisibleTiles(TileSet tileSet) {
 		if (tileSet == null)
@@ -205,8 +208,8 @@ public class TileRenderLayer extends RenderLayer {
 		}
 
 		// same tiles as before
-		//if (tileSet.serial == mDrawTiles.serial)
-		//return false;
+		// if (tileSet.serial == mDrawTiles.serial)
+		// return false;
 
 		int prevSerial = tileSet.serial;
 

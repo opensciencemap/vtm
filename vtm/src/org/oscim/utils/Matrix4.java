@@ -24,7 +24,7 @@ import org.oscim.backend.GLAdapter;
 
 public class Matrix4 {
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	private final static String TAG = Matrix4.class.getName();
 	private final static boolean dbg = false;

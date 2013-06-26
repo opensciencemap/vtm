@@ -34,15 +34,13 @@ import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
 /**
- * @TODO
- *       - prefetching to cache file
- *       - this class should probably not be in 'renderer' -> tilemap?
- *       - make it general for reuse in tile-overlays
+ * @TODO - prefetching to cache file - this class should probably not be in
+ *       'renderer' -> tilemap? - make it general for reuse in tile-overlays
  */
 public class TileManager {
 	private static final int CACHE_TILES_MAX = 250;
 
-	static final String TAG = TileManager.class.getSimpleName();
+	static final String TAG = TileManager.class.getName();
 	private final static int MIN_ZOOMLEVEL = 2;
 
 	private final int mMaxZoom;
@@ -55,7 +53,6 @@ public class TileManager {
 
 	private final MapView mMapView;
 	private final MapViewPosition mMapViewPosition;
-
 
 	// cache for all tiles
 	private MapTile[] mTiles;
@@ -80,7 +77,7 @@ public class TileManager {
 	private final Object mTilelock = new Object();
 
 	// need to keep track of TileSets to clear on reset.
-	//private final ArrayList<TileSet> mTileSets = new ArrayList<TileSet>(4);
+	// private final ArrayList<TileSet> mTileSets = new ArrayList<TileSet>(4);
 
 	private TileSet mCurrentTiles;
 	/* package */TileSet mNewTiles;
@@ -148,42 +145,41 @@ public class TileManager {
 
 		// sync with GLRender thread
 		// ... and labeling thread?
-		GLRenderer.drawlock.lock();
+		synchronized (GLRenderer.drawlock) {
 
-		if (!first) {
-			// pass VBOs and VertexItems back to pools
-			for (int i = 0; i < mTilesSize; i++)
-				clearTile(mTiles[i]);
+			if (!first) {
+				// pass VBOs and VertexItems back to pools
+				for (int i = 0; i < mTilesSize; i++)
+					clearTile(mTiles[i]);
+			}
+
+			// FIXME any of this still needed?
+			// mInitialized is set when surface changed
+			// and VBOs might be lost
+			// VertexPool.init();
+			// clear cache index
+			// QuadTree.init();
+
+			// clear references to cached MapTiles
+			Arrays.fill(mTiles, null);
+			mTilesSize = 0;
+			mTilesCount = 0;
+
+			// set up TileSet large enough to hold current tiles
+			int num = Math.max(mMapView.getWidth(), mMapView.getHeight());
+			int size = Tile.SIZE >> 1;
+			int numTiles = (num * num) / (size * size) * 4;
+
+			mNewTiles = new TileSet(numTiles);
+			mCurrentTiles = new TileSet(numTiles);
+			Log.d(TAG, "max tiles: " + numTiles);
+
 		}
-
-		// FIXME any of this still needed?
-		// mInitialized is set when surface changed
-		// and VBOs might be lost
-		//	VertexPool.init();
-		// clear cache index
-		//  QuadTree.init();
-
-		// clear references to cached MapTiles
-		Arrays.fill(mTiles, null);
-		mTilesSize = 0;
-		mTilesCount = 0;
-
-		// set up TileSet large enough to hold current tiles
-		int num = Math.max(mMapView.getWidth(), mMapView.getHeight());
-		int size = Tile.SIZE >> 1;
-		int numTiles = (num * num) / (size * size) * 4;
-
-		mNewTiles = new TileSet(numTiles);
-		mCurrentTiles = new TileSet(numTiles);
-		Log.d(TAG, "max tiles: " + numTiles);
-
-		GLRenderer.drawlock.unlock();
 	}
 
 	/**
-	 * 1. Update mCurrentTiles TileSet of currently visible tiles.
-	 * 2. Add not yet loaded (or loading) tiles to JobQueue.
-	 * 3. Manage cache
+	 * 1. Update mCurrentTiles TileSet of currently visible tiles. 2. Add not
+	 * yet loaded (or loading) tiles to JobQueue. 3. Manage cache
 	 *
 	 * @param pos
 	 *            current MapPosition
@@ -202,9 +198,9 @@ public class TileManager {
 
 		int tileZoom = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, mMaxZoom);
 
-		if (mZoomTable != null){
+		if (mZoomTable != null) {
 			int match = 0;
-			for (int z : mZoomTable){
+			for (int z : mZoomTable) {
 				if (z <= tileZoom && z > match)
 					match = z;
 			}
@@ -260,7 +256,7 @@ public class TileManager {
 
 				mUpdateSerial++;
 			}
-
+			Log.d(TAG, newCnt + " << " + Arrays.deepToString(mCurrentTiles.tiles));
 			// request rendering as tiles changed
 			mMapView.render();
 		}
@@ -283,7 +279,7 @@ public class TileManager {
 		int remove = mTilesCount - CACHE_TILES_MAX;
 
 		if (remove > CACHE_THRESHOLD ||
-				mTilesForUpload > MAX_TILES_IN_QUEUE)
+		    mTilesForUpload > MAX_TILES_IN_QUEUE)
 
 			limitCache(pos, remove);
 	}
@@ -294,12 +290,12 @@ public class TileManager {
 	}
 
 	/**
-	 * Retrive a TileSet of current tiles.
-	 * Tiles remain locked in cache until the set is unlocked by either passing
-	 * it again to this function or to releaseTiles. If passed TileSet is null
-	 * it will be allocated.
+	 * Retrive a TileSet of current tiles. Tiles remain locked in cache until
+	 * the set is unlocked by either passing it again to this function or to
+	 * releaseTiles. If passed TileSet is null it will be allocated.
 	 *
-	 * @param tileSet to be updated
+	 * @param tileSet
+	 *            to be updated
 	 * @return true if TileSet has changed
 	 */
 	public boolean getActiveTiles(TileSet tileSet) {
@@ -342,17 +338,17 @@ public class TileManager {
 		return true;
 	}
 
-	//	/**
-	//	 * @param tiles ...
-	//	 */
-	//	public void releaseTiles(TileSet tiles) {
+	// /**
+	// * @param tiles ...
+	// */
+	// public void releaseTiles(TileSet tiles) {
 	//
-	//	}
+	// }
 
 	/* package */MapTile addTile(int x, int y, int zoomLevel) {
 		MapTile tile;
 
-		//tile = QuadTree.getTile(x, y, zoomLevel);
+		// tile = QuadTree.getTile(x, y, zoomLevel);
 		tile = mIndex.getTile(x, y, zoomLevel);
 
 		if (tile == null) {
@@ -383,7 +379,7 @@ public class TileManager {
 			}
 
 			if (zoomLevel > 3) {
-				// prefetch grand  parent
+				// prefetch grand parent
 				p = tile.rel.parent.parent.item;
 				add = false;
 				if (p == null) {
@@ -432,14 +428,14 @@ public class TileManager {
 
 		mIndex.remove(t);
 
-		//QuadTree.remove(t);
+		// QuadTree.remove(t);
 		t.state = STATE_NONE;
 
 		mTilesCount--;
 	}
 
 	private static void updateTileDistances(MapTile[] tiles, int size, MapPosition pos) {
-		// TODO there is probably  a better quad-tree distance function
+		// TODO there is probably a better quad-tree distance function
 
 		int zoom = 20;
 		long x = (long) (pos.x * (1 << zoom));
@@ -509,32 +505,32 @@ public class TileManager {
 			// so end of mTiles is at mTilesCount now
 			size = mTilesSize = mTilesCount;
 
-			//Log.d(TAG, "remove:" + remove + "  new:" + newTileCnt);
-			//Log.d(TAG, "cur: " + mapPosition);
+			// Log.d(TAG, "remove:" + remove + "  new:" + newTileCnt);
+			// Log.d(TAG, "cur: " + mapPosition);
 
 			for (int i = size - 1; i >= 0 && remove > 0; i--) {
 				MapTile t = tiles[i];
 				if (t.isLocked()) {
 					// dont remove tile used by GLRenderer, or somewhere else
 					Log.d(TAG, "locked " + t
-							+ " " + t.distance
-							+ " " + (t.state == STATE_NEW_DATA)
-							+ " " + (t.state == STATE_LOADING)
-							+ " " + pos.zoomLevel);
+					           + " " + t.distance
+					           + " " + (t.state == STATE_NEW_DATA)
+					           + " " + (t.state == STATE_LOADING)
+					           + " " + pos.zoomLevel);
 					// try again in next run.
 				} else if (t.state == STATE_LOADING) {
-					// NOTE:  when set loading to false the tile could be
+					// NOTE: when set loading to false the tile could be
 					// added to load queue again while still processed in
 					// MapTileLoader => need tile.cancel flag.
 					// t.isLoading = false;
 					Log.d(TAG, "cancel loading " + t
-							+ " " + t.distance);
+					           + " " + t.distance);
 				} else {
 					// clear unused tile
 
 					if (t.state == STATE_NEW_DATA) {
-						//Log.d(TAG, "limitCache: clear unused " + t
-						//		+ " " + t.distance);
+						// Log.d(TAG, "limitCache: clear unused " + t
+						// + " " + t.distance);
 						newTileCnt--;
 					}
 
@@ -545,7 +541,7 @@ public class TileManager {
 			}
 
 			remove = (newTileCnt - MAX_TILES_IN_QUEUE) + 10;
-			//int r = remove;
+			// int r = remove;
 			for (int i = size - 1; i >= 0 && remove > 0; i--) {
 				MapTile t = tiles[i];
 				if (t != null && t.state == STATE_NEW_DATA) {
@@ -559,7 +555,8 @@ public class TileManager {
 			}
 
 			mTilesForUpload += newTileCnt;
-			//Log.d(TAG, "cleanup load queue " + tilesForUpload + "/" + r + " - " + remove);
+			// Log.d(TAG, "cleanup load queue " + tilesForUpload + "/" + r +
+			// " - " + remove);
 		}
 	}
 
@@ -576,7 +573,7 @@ public class TileManager {
 			// - should rather be STATE_FAILED
 			// no one should be able to use this tile now, MapTileLoader passed
 			// it, GL-Thread does nothing until newdata is set.
-			//Log.d(TAG, "passTile: failed loading " + tile);
+			// Log.d(TAG, "passTile: failed loading " + tile);
 			return true;
 		}
 

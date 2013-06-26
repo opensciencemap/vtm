@@ -27,7 +27,7 @@ import org.oscim.utils.GlUtils;
 public final class LineRenderer {
 	private final static String TAG = LineRenderer.class.getName();
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static GL20 GL;
 
 	private static final int LINE_VERTICES_DATA_POS_OFFSET = 0;
 
@@ -46,6 +46,8 @@ public final class LineRenderer {
 	private static int mTexID;
 
 	static boolean init() {
+		GL = GLAdapter.get();
+
 		lineProgram[0] = GlUtils.createProgram(lineVertexShader,
 				lineFragmentShader);
 		if (lineProgram[0] == 0) {
@@ -93,11 +95,11 @@ public final class LineRenderer {
 	}
 
 	public static void beginLines() {
-		//GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexID);
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexID);
 	}
 
 	public static void endLines() {
-		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 	}
 
 	public static Layer draw(Layers layers, Layer curLayer, MapPosition pos,
@@ -249,7 +251,7 @@ public final class LineRenderer {
 	}
 
 	private final static String lineVertexShader = ""
-			//+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			// factor to increase line width relative to scale
 			+ "uniform float u_width;"
@@ -268,7 +270,7 @@ public final class LineRenderer {
 			+ "}";
 
 	private final static String lineSimpleFragmentShader = ""
-			//+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
 			+ "uniform float u_wscale;"
 			+ "uniform float u_mode;"
@@ -283,8 +285,8 @@ public final class LineRenderer {
 			//+ "    len = texture2D(tex, v_st).a;"
 			//+ "    len = u_mode * length(v_st);"
 			// this avoids branching, need to check performance
-			//+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);"
-			+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
+			+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);"
+			//+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
 			// interpolate alpha between: 0.0 < 1.0 - len < u_wscale
 			// where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2)
 			//+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"
@@ -294,7 +296,7 @@ public final class LineRenderer {
 
 	private final static String lineFragmentShader = ""
 			+ "#extension GL_OES_standard_derivatives : enable\n"
-			//+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
 			+ "uniform float u_mode;"
 			+ "uniform vec4 u_color;"
@@ -307,8 +309,8 @@ public final class LineRenderer {
 			+ "    len = abs(v_st.s);"
 			+ "    fuzz = fwidth(v_st.s);"
 			+ "  } else {"
-			//+ "    len = texture2D(tex, v_st).a;"
-			+ "    len = length(v_st);"
+			+ "    len = texture2D(tex, v_st).a;"
+			//+ "    len = length(v_st);"
 			+ "    vec2 st_width = fwidth(v_st);"
 			+ "    fuzz = max(st_width.s, st_width.t);"
 			+ "  }"

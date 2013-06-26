@@ -36,7 +36,7 @@ import org.oscim.utils.LineClipper;
 public class ExtrusionLayer extends Layer {
 	private final static String TAG = ExtrusionLayer.class.getName();
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	private static final float S = GLRenderer.COORD_SCALE;
 	private VertexItem mVertices;

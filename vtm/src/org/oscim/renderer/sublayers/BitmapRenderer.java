@@ -27,7 +27,7 @@ import org.oscim.utils.GlUtils;
 public final class BitmapRenderer {
 
 	//private final static String TAG = BitmapRenderer.class.getName();
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	public final static boolean debug = true;
 

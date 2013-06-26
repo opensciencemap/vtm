@@ -39,7 +39,7 @@ import org.oscim.view.MapView;
 
 public class CustomRenderLayer2 extends RenderLayer {
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	private int mProgramObject;
 	private int hVertexPosition;

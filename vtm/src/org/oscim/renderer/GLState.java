@@ -19,7 +19,7 @@ import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 
 public class GLState {
-	private final static GL20 GL = GLAdapter.INSTANCE;
+	private final static GL20 GL = GLAdapter.get();
 
 	private final static String TAG = GLState.class.getName();
 
