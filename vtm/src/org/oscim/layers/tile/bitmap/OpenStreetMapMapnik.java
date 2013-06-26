@@ -20,7 +20,8 @@ import java.net.URL;
 import org.oscim.core.Tile;
 
 public class OpenStreetMapMapnik extends AbstractTileSource {
-	public static final OpenStreetMapMapnik INSTANCE = new OpenStreetMapMapnik("tile.openstreetmap.org", 80);
+	//public static final OpenStreetMapMapnik INSTANCE = new OpenStreetMapMapnik("tile.openstreetmap.org", 80);
+	public static final OpenStreetMapMapnik INSTANCE = new OpenStreetMapMapnik("localhost", 80);
 	private static final int PARALLEL_REQUESTS_LIMIT = 8;
 	private static final String PROTOCOL = "http";
 	private static final int ZOOM_LEVEL_MAX = 18;
@@ -39,7 +40,7 @@ public class OpenStreetMapMapnik extends AbstractTileSource {
 	public URL getTileUrl(Tile tile) throws MalformedURLException {
 		StringBuilder stringBuilder = new StringBuilder(32);
 
-		stringBuilder.append('/');
+		stringBuilder.append("/osm/osm/");
 		stringBuilder.append(tile.zoomLevel);
 		stringBuilder.append('/');
 		stringBuilder.append(tile.tileX);
