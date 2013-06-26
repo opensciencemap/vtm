@@ -19,7 +19,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
@@ -39,7 +38,7 @@ import org.oscim.view.MapViewPosition;
 public class GLRenderer {
 	private static final String TAG = GLRenderer.class.getName();
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static GL20 GL = GLAdapter.get();
 
 	private static final int SHORT_BYTES = 2;
 	private static final int CACHE_TILES_MAX = 250;
@@ -97,7 +96,7 @@ public class GLRenderer {
 
 	// drawlock to synchronize Main- and GL-Thread
 	// static ReentrantLock tilelock = new ReentrantLock();
-	public static ReentrantLock drawlock = new ReentrantLock();
+	public static Object drawlock = new Object();
 
 	/**
 	 * @param mapView
@@ -252,11 +251,8 @@ public class GLRenderer {
 
 		// prevent main thread recreating all tiles (updateMap)
 		// while rendering is going on.
-		drawlock.lock();
-		try {
+		synchronized(drawlock){
 			draw();
-		} finally {
-			drawlock.unlock();
 		}
 
 		mBufferPool.releaseBuffers();
@@ -348,7 +344,7 @@ public class GLRenderer {
 			mMatrices.mvp.setScale(0.5f, 0.5f, 1);
 			mMatrices.proj.multiplyLhs(mMatrices.mvp);
 		}
-
+		GL = GLAdapter.get();
 		GL.glViewport(0, 0, width, height);
 		GL.glScissor(0, 0, width, height);
 		GL.glEnable(GL20.GL_SCISSOR_TEST);
@@ -399,6 +395,9 @@ public class GLRenderer {
 	}
 
 	public void onSurfaceCreated() {
+		
+		Log.d(TAG, "surface created");
+		
 		// Log.d(TAG, GL.glGetString(GL20.GL_EXTENSIONS));
 
 		// classes that require GL context for initialization

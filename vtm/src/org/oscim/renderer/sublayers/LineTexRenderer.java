@@ -14,8 +14,7 @@
  */
 package org.oscim.renderer.sublayers;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
@@ -30,7 +29,7 @@ import org.oscim.utils.GlUtils;
 public class LineTexRenderer {
 	private final static String TAG = LineTexRenderer.class.getName();
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	// factor to normalize extrusion vector and scale to coord scale
 	private final static float COORD_SCALE_BY_DIR_SCALE =
@@ -76,18 +75,17 @@ public class LineTexRenderer {
 		int[] vboIds = GlUtils.glGenBuffers(1);
 		mVertexFlipID = vboIds[0];
 
-		// 0, 1, 0, 1, 0, ...
-		byte[] flip = new byte[GLRenderer.maxQuads * 4];
+		// bytes: 0, 1, 0, 1, 0, ...
+		short[] flip = new short[GLRenderer.maxQuads * 2];
 		for (int i = 0; i < flip.length; i++)
-			flip[i] = (byte) (i % 2);
+			flip[i] = 1;
 
-		ByteBuffer buf = ByteBuffer.allocateDirect(flip.length)
-				.order(ByteOrder.nativeOrder());
+		ShortBuffer buf = GLRenderer.getShortBuffer(flip.length);
 
 		buf.put(flip);
 		buf.flip();
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
-		GL.glBufferData(GL20.GL_ARRAY_BUFFER, flip.length, buf,
+		GL.glBufferData(GL20.GL_ARRAY_BUFFER, flip.length * 2, buf,
 				GL20.GL_STATIC_DRAW);
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
@@ -230,7 +228,7 @@ public class LineTexRenderer {
 	}
 
 	final static String vertexShader = ""
-			//+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "uniform mat4 u_mvp;"
 			+ "uniform vec4 u_color;"
 			+ "uniform float u_pscale;"
@@ -258,7 +256,7 @@ public class LineTexRenderer {
 	//*
 	final static String fragmentShader = ""
 			+ "#extension GL_OES_standard_derivatives : enable\n"
-			//+ " precision mediump float;"
+			+ " precision mediump float;"
 			+ " uniform vec4 u_color;"
 			+ " uniform vec4 u_bgcolor;"
 			+ " uniform float u_pwidth;"

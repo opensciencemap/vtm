@@ -57,7 +57,7 @@ import org.oscim.view.MapViewPosition;
 
 public class TextRenderLayer extends BasicRenderLayer {
 	private final static String TAG = TextRenderLayer.class.getName();
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;

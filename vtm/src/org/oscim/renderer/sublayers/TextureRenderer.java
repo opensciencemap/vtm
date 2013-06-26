@@ -27,7 +27,7 @@ import org.oscim.utils.GlUtils;
 public final class TextureRenderer {
 	//private final static String TAG = TextureRenderer.class.getName();
 
-	private static final GL20 GL = GLAdapter.INSTANCE;
+	private static final GL20 GL = GLAdapter.get();
 
 	public final static boolean debug = false;
 
@@ -119,7 +119,7 @@ public final class TextureRenderer {
 	private final static double COORD_DIV = 1.0 / GLRenderer.COORD_SCALE;
 
 	private final static String textVertexShader = ""
-		//	+ "precision mediump float; "
+			+ "precision mediump float; "
 			+ "attribute vec4 vertex;"
 			+ "attribute vec2 tex_coord;"
 			+ "uniform mat4 u_mv;"
@@ -143,7 +143,7 @@ public final class TextureRenderer {
 			+ "}";
 
 	private final static String textFragmentShader = ""
-		//	+ "precision mediump float;"
+			+ "precision mediump float;"
 			+ "uniform sampler2D tex;"
 			+ "varying vec2 tex_c;"
 			+ "void main() {"

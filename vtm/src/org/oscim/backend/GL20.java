@@ -85,7 +85,7 @@ public interface GL20  {
 	public static final int GL_POLYGON_OFFSET_FILL = 0x8037;
 	public static final int GL_SAMPLE_ALPHA_TO_COVERAGE = 0x809E;
 	public static final int GL_SAMPLE_COVERAGE = 0x80A0;
-	public static final int GL_NO_ERROR = 0;
+	//public static final int GL_NO_ERROR = 0;
 	public static final int GL_INVALID_ENUM = 0x0500;
 	public static final int GL_INVALID_VALUE = 0x0501;
 	public static final int GL_INVALID_OPERATION = 0x0502;
