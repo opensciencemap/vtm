@@ -15,7 +15,6 @@
 package org.oscim.core;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.List;
 
 /**
@@ -204,11 +203,11 @@ public class BoundingBox {
 		return result;
 	}
 
-	private void readObject(ObjectInputStream objectInputStream) throws IOException,
-			ClassNotFoundException {
-		objectInputStream.defaultReadObject();
-		this.hashCodeValue = calculateHashCode();
-	}
+//	private void readObject(ObjectInputStream objectInputStream) throws IOException,
+//			ClassNotFoundException {
+//		objectInputStream.defaultReadObject();
+//		this.hashCodeValue = calculateHashCode();
+//	}
 
 	/* code below is from osdmroid, @author Nicolas Gramlich */
 
