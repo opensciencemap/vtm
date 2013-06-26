@@ -14,10 +14,7 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import java.util.Locale;
-
 import org.oscim.backend.CanvasAdapter;
-import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.backend.canvas.Paint.Align;
 import org.oscim.backend.canvas.Paint.FontFamily;
@@ -25,87 +22,12 @@ import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.backend.canvas.Paint.Style;
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderCallback;
-import org.oscim.theme.RenderThemeHandler;
-import org.xml.sax.Attributes;
 
 /**
  * Represents a text along a polyline on the map.
  */
 public final class Text extends RenderInstruction {
 
-	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
-	 * @param caption
-	 *            ...
-	 * @return a new Text with the given rendering attributes.
-	 */
-	public static Text create(String elementName, Attributes attributes, boolean caption) {
-		String textKey = null;
-		FontFamily fontFamily = FontFamily.DEFAULT;
-		FontStyle fontStyle = FontStyle.NORMAL;
-		float fontSize = 0;
-		int fill = Color.BLACK;
-		int stroke = Color.BLACK;
-		float strokeWidth = 0;
-		String style = null;
-		float dy = 0;
-		int priority = Integer.MAX_VALUE;
-		String symbol = null;
-
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-			if ("name".equals(name))
-				style = value;
-			else if ("k".equals(name)) {
-				textKey = value.intern();
-			} else if ("font-family".equals(name)) {
-				fontFamily = FontFamily.valueOf(value.toUpperCase());
-			} else if ("font-style".equals(name)) {
-				fontStyle = FontStyle.valueOf(value.toUpperCase());
-			} else if ("font-size".equals(name)) {
-				fontSize = Float.parseFloat(value);
-			} else if ("fill".equals(name)) {
-				fill = Color.parseColor(value);
-			} else if ("stroke".equals(name)) {
-				stroke = Color.parseColor(value);
-			} else if ("stroke-width".equals(name)) {
-				strokeWidth = Float.parseFloat(value);
-			} else if ("caption".equals(name)) {
-				caption = Boolean.parseBoolean(value);
-			} else if ("priority".equals(name)) {
-				priority = Integer.parseInt(value);
-			} else if ("dy".equals(name)) {
-				dy = Float.parseFloat(value);
-			} else if ("symbol".equals(name)) {
-				symbol = value;
-			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
-			}
-		}
-
-		validate(elementName, textKey, fontSize, strokeWidth);
-
-		return new Text(style, textKey, fontFamily, fontStyle, fontSize, fill, stroke, strokeWidth,
-				dy, caption, symbol, priority);
-	}
-
-	private static void validate(String elementName, String textKey, float fontSize,
-			float strokeWidth) {
-		if (textKey == null) {
-			throw new IllegalArgumentException("missing attribute k for element: "
-					+ elementName);
-		} else if (fontSize < 0) {
-			throw new IllegalArgumentException("font-size must not be negative: "
-					+ fontSize);
-		} else if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: "
-					+ strokeWidth);
-		}
-	}
 
 	public final String style;
 
@@ -137,7 +59,7 @@ public final class Text extends RenderInstruction {
 		return t;
 	}
 
-	private Text(String style, String textKey, FontFamily fontFamily, FontStyle fontStyle,
+	public Text(String style, String textKey, FontFamily fontFamily, FontStyle fontStyle,
 			float fontSize, int fill, int outline, float strokeWidth, float dy, boolean caption,
 			String symbol, int priority) {
 

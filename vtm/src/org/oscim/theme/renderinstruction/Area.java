@@ -25,60 +25,7 @@ import org.xml.sax.Attributes;
  * Represents a closed polygon on the map.
  */
 public final class Area extends RenderInstruction {
-	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
-	 * @param level
-	 *            the drawing level of this instruction.
-	 * @return a new Area with the given rendering attributes.
-	 */
-	public static Area create(String elementName, Attributes attributes, int level) {
-		String src = null;
-		int fill = Color.BLACK;
-		int stroke = Color.TRANSPARENT;
-		float strokeWidth = 0;
-		int fade = -1;
-		int blend = -1;
-		int blendFill = Color.BLACK;
-		String style = null;
 
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-			if ("name".equals(name))
-				style = value;
-			else if ("src".equals(name)) {
-				src = value;
-			} else if ("fill".equals(name)) {
-				fill = Color.parseColor(value);
-			} else if ("stroke".equals(name)) {
-				stroke = Color.parseColor(value);
-			} else if ("stroke-width".equals(name)) {
-				strokeWidth = Float.parseFloat(value);
-			} else if ("fade".equals(name)) {
-				fade = Integer.parseInt(value);
-			} else if ("blend".equals(name)) {
-				blend = Integer.parseInt(value);
-			} else if ("blend-fill".equals(name)) {
-				blendFill = Color.parseColor(value);
-			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
-			}
-		}
-
-		validate(strokeWidth);
-		return new Area(style, src, fill, stroke, strokeWidth, fade, level, blend,
-				blendFill);
-	}
-
-	private static void validate(float strokeWidth) {
-		if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: "
-					+ strokeWidth);
-		}
-	}
 
 	public Area(int fill) {
 		this.level = 0;
@@ -91,29 +38,10 @@ public final class Area extends RenderInstruction {
 		color = fill;
 	}
 
-	/**
-	 * @param style
-	 *            ...
-	 * @param src
-	 *            ...
-	 * @param fill
-	 *            ...
-	 * @param stroke
-	 *            ...
-	 * @param strokeWidth
-	 *            ...
-	 * @param fade
-	 *            ...
-	 * @param level
-	 *            ...
-	 * @param blend
-	 *            ...
-	 * @param blendFill
-	 *            ...
-	 */
-	private Area(String style, String src, int fill, int stroke, float strokeWidth,
+
+	public Area(String style, String src, int fill, int stroke, float strokeWidth,
 			int fade, int level, int blend, int blendFill) {
-		super();
+
 		this.style = style;
 
 		// if (fill == Color.TRANSPARENT) {
@@ -125,8 +53,8 @@ public final class Area extends RenderInstruction {
 		// paintFill.setShader(shader);
 		// }
 
-		color = fill; //GlUtils.colorToFloatP(fill);
-		blendColor = blendFill; //GlUtils.colorToFloatP(blendFill);
+		this.color = fill; //GlUtils.colorToFloatP(fill);
+		this.blendColor = blendFill; //GlUtils.colorToFloatP(blendFill);
 
 		this.blend = blend;
 		this.strokeWidth = strokeWidth;
@@ -139,8 +67,8 @@ public final class Area extends RenderInstruction {
 		renderCallback.renderArea(this, this.level);
 	}
 
-	public String style;
 	private final int level;
+	public String style;
 	public final float strokeWidth;
 	public final int color;
 	public final int fade;

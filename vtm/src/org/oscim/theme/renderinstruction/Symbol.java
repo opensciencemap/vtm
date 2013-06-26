@@ -16,44 +16,11 @@ package org.oscim.theme.renderinstruction;
 
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderCallback;
-import org.oscim.theme.RenderThemeHandler;
-import org.xml.sax.Attributes;
 
 /**
  * Represents an icon on the map.
  */
 public final class Symbol extends RenderInstruction {
-	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
-	 * @return a new Symbol with the given rendering attributes.
-	 */
-	public static Symbol create(String elementName, Attributes attributes) {
-		String src = null;
-
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-
-			if ("src".equals(name)) {
-				src = value;
-			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
-			}
-		}
-
-		validate(elementName, src);
-		return new Symbol(src);
-	}
-
-	private static void validate(String elementName, String src) {
-		if (src == null) {
-			throw new IllegalArgumentException("missing attribute src for element: "
-					+ elementName);
-		}
-	}
 
 	public final String src;
 	public TextureRegion texture;

@@ -24,114 +24,6 @@ import org.xml.sax.Attributes;
  * Represents a polyline on the map.
  */
 public final class Line extends RenderInstruction {
-	//private static final Pattern SPLIT_PATTERN = Pattern.compile(",");
-
-	/**
-	 * @param line
-	 *            ...
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
-	 * @param level
-	 *            the drawing level of this instruction.
-	 * @param isOutline
-	 *            ...
-	 * @return a new Line with the given rendering attributes.
-	 */
-	public static Line create(Line line, String elementName, Attributes attributes,
-			int level, boolean isOutline) {
-
-		// Style name
-		String style = null;
-		// Bitmap
-		//String src = null;
-
-		float width = 0;
-		Cap cap = Cap.ROUND;
-
-		// Extras
-		int fade = -1;
-		boolean fixed = false;
-		float blur = 0;
-		float min = 0;
-
-		// Stipple
-		int stipple = 0;
-		float stippleWidth = 0;
-
-		int color = Color.RED;
-
-		int stippleColor = Color.BLACK;
-
-		if (line != null) {
-			color = line.color;
-			fixed = line.fixed;
-			fade = line.fade;
-			cap = line.cap;
-			blur = line.blur;
-			min = line.min;
-			stipple = line.stipple;
-			stippleColor = line.stippleColor;
-			stippleWidth = line.stippleWidth;
-		}
-
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-
-			if ("name".equals(name))
-				style = value;
-			else if ("src".equals(name)) {
-				//src = value;
-			} else if ("stroke".equals(name)) {
-				color = Color.parseColor(value);
-			} else if ("width".equals(name)) {
-				width = Float.parseFloat(value);
-			} else if ("cap".equals(name)) {
-				cap = Cap.valueOf(value.toUpperCase());
-			} else if ("fix".equals(name)) {
-				fixed = Boolean.parseBoolean(value);
-			} else if ("stipple".equals(name)) {
-				stipple = Integer.parseInt(value);
-			} else if ("stipple-stroke".equals(name)) {
-				stippleColor =  Color.parseColor(value);
-			} else if ("stipple-width".equals(name)) {
-				stippleWidth = Float.parseFloat(value);
-			} else if ("fade".equals(name)) {
-				fade = Integer.parseInt(value);
-			} else if ("min".equals(name)) {
-				min = Float.parseFloat(value);
-			} else if ("blur".equals(name)) {
-				blur = Float.parseFloat(value);
-			} else if ("from".equals(name)) {
-			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
-			}
-		}
-
-		// inherit properties from 'line'
-		if (line != null) {
-			// use stroke width relative to 'line'
-			width = line.width + width;
-			if (width <= 0)
-				width = 1;
-
-		} else if (!isOutline) {
-			validate(width);
-		}
-
-		return new Line(level, style, color, width, cap, fixed,
-				stipple, stippleColor, stippleWidth,
-				fade, blur, isOutline, min);
-	}
-
-	private static void validate(float strokeWidth) {
-		if (strokeWidth < 0) {
-			throw new IllegalArgumentException("width must not be negative: "
-					+ strokeWidth);
-		}
-	}
 
 //	static float[] parseFloatArray(String dashString) {
 //		String[] dashEntries = SPLIT_PATTERN.split(dashString);
@@ -160,7 +52,7 @@ public final class Line extends RenderInstruction {
 
 
 
-	private Line(int level, String style, int color, float width,
+	public Line(int level, String style, int color, float width,
 			Cap cap, boolean fixed,
 			int stipple, int stippleColor, float stippleWidth,
 			int fade, float blur, boolean isOutline, float min) {
