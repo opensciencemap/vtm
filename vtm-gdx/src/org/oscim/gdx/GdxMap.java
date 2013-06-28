@@ -3,12 +3,16 @@ package org.oscim.gdx;
 import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.Log;
 import org.oscim.backend.input.MotionEvent;
+import org.oscim.core.MapPosition;
+import org.oscim.core.Tile;
 import org.oscim.layers.overlay.GenericOverlay;
-import org.oscim.layers.tile.bitmap.BitmapTileLayer;
-import org.oscim.layers.tile.bitmap.OpenStreetMapMapnik;
+import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.layers.GridRenderLayer;
+import org.oscim.theme.InternalRenderTheme;
+import org.oscim.tilesource.TileSource;
+import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
 import org.oscim.view.MapRenderCallback;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
@@ -17,7 +21,12 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.input.GestureDetector.GestureListener;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Timer;
 
 public class GdxMap implements ApplicationListener, MapRenderCallback {
 
@@ -34,7 +43,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 	// Stage ui;
 	// Label fps;
 	// BitmapFont font;
-	// MapTileLayer mMapLayer;
+	MapTileLayer mMapLayer;
 
 	@Override
 	public void create() {
@@ -52,24 +61,39 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		mWidth = w;
 		mHeight = h;
 
-		// TileSource tileSource = new OSciMap2TileSource();
-		// tileSource.setOption("url",
-		// "http://city.informatik.uni-bremen.de/osci/map-live");
+		TileSource tileSource = new OSciMap2TileSource();
+		tileSource.setOption("url",
+				"http://city.informatik.uni-bremen.de/osci/map-live");
+
 		// TileSource tileSource = new OSciMap4TileSource();
 		// tileSource.setOption("url",
 		// "http://city.informatik.uni-bremen.de/osci/testing");
-		// mMapLayer = mMapView.setBaseMap(tileSource);
-		// mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
-		mMapView.setBaseMap(new BitmapTileLayer(mMapView, OpenStreetMapMapnik.INSTANCE));
-		mMapView.getLayerManager().add(new GenericOverlay(mMapView, new
-		                                                  GridRenderLayer(mMapView)));
+
+		// TileSource tileSource = new TestTileSource();
+
+		mMapLayer = mMapView.setBaseMap(tileSource);
+		mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
+
+		// mMapView.setBaseMap(new BitmapTileLayer(mMapView,
+		// OpenStreetMapMapnik.INSTANCE));
+//		mMapView.getLayerManager().add(new GenericOverlay(mMapView, new
+//				GridRenderLayer(mMapView)));
 
 		mMapView.getMapViewPosition().setViewport(w, h);
+		MapPosition p = new MapPosition();
+		p.setZoomLevel(18);
+		p.setPosition(53.1, 8.8);
+		mMapView.setMapPosition(p);
 
 		mMapRenderer.onSurfaceCreated();
 		mMapRenderer.onSurfaceChanged(w, h);
 
-		Gdx.input.setInputProcessor(new TouchHandler());
+		InputMultiplexer mux = new InputMultiplexer();
+		ViewController controller = new ViewController();
+		GestureDetector gestureDetector = new GestureDetector(20, 0.5f, 2, 0.05f, controller);
+		mux.addProcessor(new TouchHandler());
+		mux.addProcessor(gestureDetector);
+		Gdx.input.setInputProcessor(mux);
 
 		// ui = new Stage(w, h, false);
 		// font = new BitmapFont(false);
@@ -88,7 +112,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 	@Override
 	public void render() {
-		//Log.d("yo", )
+		// Log.d("yo", )
 		// GLState.enableVertexArrays(-1, -1);
 		// GLState.blend(false);
 		// GLState.test(false, false);
@@ -98,11 +122,11 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		// Gdx.gl20.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 		// Gdx.gl20.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		 int f = Gdx.graphics.getFramesPerSecond();
-		 if (f != fpsCnt) {
-		 Log.d("fps", ">" + f);
-		 fpsCnt = f;
-		 }
+		// int f = Gdx.graphics.getFramesPerSecond();
+		// if (f != fpsCnt) {
+		// Log.d("fps", ">" + f);
+		// fpsCnt = f;
+		// }
 
 		// fps.setText("fps: " + Gdx.graphics.getFramesPerSecond());
 		// ui.draw();
@@ -246,41 +270,41 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		public boolean keyDown(int keycode) {
 			switch (keycode) {
 
-			case Input.Keys.UP:
-				mMapPosition.moveMap(0, -50);
-				mMapView.updateMap(true);
-				break;
-			case Input.Keys.DOWN:
-				mMapPosition.moveMap(0, 50);
-				mMapView.updateMap(true);
-				break;
-			case Input.Keys.LEFT:
-				mMapPosition.moveMap(-50, 0);
-				mMapView.updateMap(true);
-				break;
-			case Input.Keys.RIGHT:
-				mMapPosition.moveMap(50, 0);
-				mMapView.updateMap(true);
-				break;
-			case Input.Keys.M:
-				 mMapPosition.scaleMap(1.05f, 0, 0);
-				mMapView.updateMap(true);
-				break;
-			case Input.Keys.N:
-				 mMapPosition.scaleMap(0.95f, 0, 0);
-				mMapView.updateMap(true);
-				break;
+				case Input.Keys.UP:
+					mMapPosition.moveMap(0, -50);
+					mMapView.updateMap(true);
+					break;
+				case Input.Keys.DOWN:
+					mMapPosition.moveMap(0, 50);
+					mMapView.updateMap(true);
+					break;
+				case Input.Keys.LEFT:
+					mMapPosition.moveMap(-50, 0);
+					mMapView.updateMap(true);
+					break;
+				case Input.Keys.RIGHT:
+					mMapPosition.moveMap(50, 0);
+					mMapView.updateMap(true);
+					break;
+				case Input.Keys.M:
+					mMapPosition.scaleMap(1.05f, 0, 0);
+					mMapView.updateMap(true);
+					break;
+				case Input.Keys.N:
+					mMapPosition.scaleMap(0.95f, 0, 0);
+					mMapView.updateMap(true);
+					break;
 
-			// case Input.Keys.R:
-			// mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
-			// mMapView.updateMap(false);
-			// break;
-			//
-			// case Input.Keys.T:
-			// mMapLayer.setRenderTheme(InternalRenderTheme.TRONRENDER);
-			// mMapView.updateMap(false);
-			// break;
-			//
+				case Input.Keys.R:
+					mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
+					mMapView.updateMap(false);
+					break;
+
+				case Input.Keys.T:
+					mMapLayer.setRenderTheme(InternalRenderTheme.TRONRENDER);
+					mMapView.updateMap(false);
+					break;
+
 			}
 			return true;
 		}
@@ -353,7 +377,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 			if (changed)
 				updateMap(true);
 
-			return true;
+			return false;
 		}
 
 		@Override
@@ -365,18 +389,232 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 		@Override
 		public boolean scrolled(int amount) {
-			float fx = mPosX - mMapView.getWidth() / 2;
-			float fy = mPosY - mMapView.getHeight() / 2;
+			//float fx = mPosX - mMapView.getWidth() / 2;
+			//float fy = mPosY - mMapView.getHeight() / 2;
 
-			if (amount > 0)
-				mMapPosition.scaleMap(0.9f, fx, fy);
-			else
-				mMapPosition.scaleMap(1.1f, fx, fy);
-
+			if (amount > 0) {
+				mMapPosition.animateZoom(0.9f, 150);
+				//mMapPosition.scaleMap(0.9f, fx, fy);
+			} else {
+				mMapPosition.animateZoom(1.1f, 150);
+				//mMapPosition.scaleMap(1.1f, fx, fy);
+			}
 			updateMap(false);
 
 			return true;
 		}
 
 	}
+
+	class ViewController implements GestureListener {
+
+		private boolean mayFling =true;
+
+		private boolean mPinch;
+
+		private boolean mBeginScale;
+		private float mSumScale;
+		private float mSumRotate;
+
+		private boolean mBeginRotate;
+		private boolean mBeginTilt;
+
+		private float mPrevX;
+		private float mPrevY;
+
+		private float mPrevX2;
+		private float mPrevY2;
+
+		private float mFocusX;
+		private float mFocusY;
+
+		private double mAngle;
+		protected double mPrevPinchWidth = -1;
+
+		protected static final int JUMP_THRESHOLD = 100;
+		protected static final double PINCH_ZOOM_THRESHOLD = 5;
+		protected static final double PINCH_ROTATE_THRESHOLD = 0.02;
+		protected static final float PINCH_TILT_THRESHOLD = 1f;
+
+		private MapViewPosition mMapPosition;
+
+		public ViewController() {
+			mMapPosition = mMapView.getMapViewPosition();
+		}
+
+		@Override
+		public boolean touchDown(float x, float y, int pointer, int button) {
+			mayFling = true;
+			return false;
+		}
+
+		@Override
+		public boolean tap(float x, float y, int count, int button) {
+			return false;
+		}
+
+		@Override
+		public boolean longPress(float x, float y) {
+			return false;
+		}
+
+		@Override
+		public boolean fling(final float velocityX, final float velocityY,
+				int button) {
+			Log.d("", "fling " + button + " " + velocityX + "/" + velocityY);
+			if (mayFling && button == Buttons.LEFT) {
+				int m = Tile.SIZE * 4;
+				mMapPosition.animateFling((int)velocityX, (int)velocityY, -m, m, -m, m);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public boolean pan(float x, float y, float deltaX, float deltaY) {
+			return false;
+		}
+
+		@Override
+		public boolean zoom(float initialDistance, float distance) {
+			mayFling = false;
+			return false;
+		}
+
+		@Override
+		public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2,
+				Vector2 pointer1, Vector2 pointer2) {
+			mayFling = false;
+
+			if (!mPinch) {
+				mPrevX = pointer1.x;
+				mPrevY = pointer1.y;
+				mPrevX2 = pointer2.x;
+				mPrevY2 = pointer2.y;
+
+				double dx = mPrevX - mPrevX2;
+				double dy = mPrevY - mPrevY2;
+
+				mAngle = Math.atan2(dy, dx);
+				mPrevPinchWidth = Math.sqrt(dx * dx + dy * dy);
+
+				mPinch = true;
+				return true;
+			}
+
+			// Log.d(TAG, "pinch " + pointer1 + " " + pointer2);
+
+			float x1 = pointer1.x;
+			float y1 = pointer1.y;
+
+			float mx = x1 - mPrevX;
+			float my = y1 - mPrevY;
+
+			float x2 = pointer2.x;
+			float y2 = pointer2.y;
+
+			float dx = (x1 - x2);
+			float dy = (y1 - y2);
+			float slope = 0;
+
+			if (dx != 0)
+				slope = dy / dx;
+
+			double pinchWidth = Math.sqrt(dx * dx + dy * dy);
+
+			final double deltaPinchWidth = pinchWidth - mPrevPinchWidth;
+
+			double rad = Math.atan2(dy, dx);
+			double r = rad - mAngle;
+
+			boolean startScale = (Math.abs(deltaPinchWidth) > PINCH_ZOOM_THRESHOLD);
+
+			boolean changed = false;
+
+			if (!mBeginTilt && (mBeginScale || startScale)) {
+				mBeginScale = true;
+
+				float scale = (float) (pinchWidth / mPrevPinchWidth);
+
+				// decrease change of scale by the change of rotation
+				// * 20 is just arbitrary
+				if (mBeginRotate)
+					scale = 1 + ((scale - 1) * Math.max(
+							(1 - (float) Math.abs(r) * 20), 0));
+
+				mSumScale *= scale;
+
+				if ((mSumScale < 0.99 || mSumScale > 1.01)
+						&& mSumRotate < Math.abs(0.02))
+					mBeginRotate = false;
+
+				float fx = (x2 + x1) / 2 - mWidth / 2;
+				float fy = (y2 + y1) / 2 - mHeight / 2;
+
+				// Log.d(TAG, "zoom " + deltaPinchWidth + " " + scale + " " +
+				// mSumScale);
+				changed = mMapPosition.scaleMap(scale, fx, fy);
+			}
+
+			if (!mBeginRotate && Math.abs(slope) < 1) {
+				float my2 = y2 - mPrevY2;
+				float threshold = PINCH_TILT_THRESHOLD;
+
+				// Log.d(TAG, r + " " + slope + " m1:" + my + " m2:" + my2);
+
+				if ((my > threshold && my2 > threshold)
+						|| (my < -threshold && my2 < -threshold)) {
+					mBeginTilt = true;
+					changed = mMapPosition.tiltMap(my / 5);
+				}
+			}
+
+			if (!mBeginTilt
+					&& (mBeginRotate || (Math.abs(slope) > 1 && Math.abs(r) > PINCH_ROTATE_THRESHOLD))) {
+				// Log.d(TAG, "rotate: " + mBeginRotate + " " +
+				// Math.toDegrees(rad));
+				if (!mBeginRotate) {
+					mAngle = rad;
+
+					mSumScale = 1;
+					mSumRotate = 0;
+
+					mBeginRotate = true;
+
+					mFocusX = (mWidth / 2) - (x1 + x2) / 2;
+					mFocusY = (mHeight / 2) - (y1 + y2) / 2;
+				} else {
+					double da = rad - mAngle;
+					mSumRotate += da;
+
+					if (Math.abs(da) > 0.001) {
+						double rsin = Math.sin(r);
+						double rcos = Math.cos(r);
+						float x = (float) (mFocusX * rcos + mFocusY * -rsin - mFocusX);
+						float y = (float) (mFocusX * rsin + mFocusY * rcos - mFocusY);
+
+						mMapPosition
+								.rotateMap((float) Math.toDegrees(da), x, y);
+						changed = true;
+					}
+				}
+				mAngle = rad;
+			}
+
+			if (changed) {
+				mMapView.updateMap(true);
+				mPrevPinchWidth = pinchWidth;
+				mPrevY2 = y2;
+
+			}
+
+			mPrevX = x1;
+			mPrevY = y1;
+			mPrevX2 = x2;
+
+			return true;
+		}
+
+	}
+
 }
