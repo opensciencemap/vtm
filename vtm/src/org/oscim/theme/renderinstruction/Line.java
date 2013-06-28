@@ -14,11 +14,8 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.theme.IRenderCallback;
-import org.oscim.theme.RenderThemeHandler;
-import org.xml.sax.Attributes;
 
 /**
  * Represents a polyline on the map.
@@ -92,6 +89,10 @@ public final class Line extends RenderInstruction {
 
 	public Line(int stroke, float width) {
 		this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, 0);
+	}
+
+	public Line(int level, int stroke, float width) {
+		this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, 0);
 	}
 
 	public Line(int stroke, float width, Cap cap) {
