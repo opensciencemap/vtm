@@ -256,7 +256,7 @@ public class TileManager {
 
 				mUpdateSerial++;
 			}
-			Log.d(TAG, newCnt + " << " + Arrays.deepToString(mCurrentTiles.tiles));
+			//Log.d(TAG, newCnt + " << " + Arrays.deepToString(mCurrentTiles.tiles));
 			// request rendering as tiles changed
 			mMapView.render();
 		}
@@ -378,21 +378,21 @@ public class TileManager {
 				mJobs.add(p);
 			}
 
-			if (zoomLevel > 3) {
-				// prefetch grand parent
-				p = tile.rel.parent.parent.item;
-				add = false;
-				if (p == null) {
-					p = mIndex.create(x >> 2, y >> 2, zoomLevel - 2);
-					addToCache(p);
-					add = true;
-				}
-
-				if (add || !p.isActive()) {
-					p.state = STATE_LOADING;
-					mJobs.add(p);
-				}
-			}
+//			if (zoomLevel > 3) {
+//				// prefetch grand parent
+//				p = tile.rel.parent.parent.item;
+//				add = false;
+//				if (p == null) {
+//					p = mIndex.create(x >> 2, y >> 2, zoomLevel - 2);
+//					addToCache(p);
+//					add = true;
+//				}
+//
+//				if (add || !p.isActive()) {
+//					p.state = STATE_LOADING;
+//					mJobs.add(p);
+//				}
+//			}
 		}
 
 		return tile;
