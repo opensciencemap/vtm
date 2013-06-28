@@ -63,7 +63,7 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 		//System.loadLibrary("tessellate");
 
 		CanvasAdapter.g = AndroidGraphics.INSTANCE;
-		GLAdapter.INSTANCE = new AndroidGL20();
+		GLAdapter.g = new AndroidGL20();
 		Log.logger = new AndroidLog();
 	}
 

@@ -14,8 +14,10 @@
  */
 package org.oscim.android.canvas;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import org.oscim.backend.BitmapUtils;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
@@ -113,5 +115,15 @@ public final class AndroidGraphics extends CanvasAdapter {
 		Drawable drawable = res.getDrawable(id);
 
 		return new OverlayMarker(drawableToBitmap(drawable), place);
+	}
+
+	@Override
+	public Bitmap loadBitmapAsset(String fileName) {
+		try {
+			return BitmapUtils.createBitmap(fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
