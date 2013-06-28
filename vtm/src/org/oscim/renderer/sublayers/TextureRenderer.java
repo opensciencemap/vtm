@@ -58,6 +58,9 @@ public final class TextureRenderer {
 	}
 
 	public static Layer draw(Layer layer, float scale, Matrices m) {
+		if (GLAdapter.NON_PREMUL_CANVAS)
+			GL.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
 		GLState.test(false, false);
 		GLState.blend(true);
 
@@ -112,6 +115,9 @@ public final class TextureRenderer {
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
+
+		if (GLAdapter.NON_PREMUL_CANVAS)
+			GL.glBlendFunc(GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
 		return layer.next;
 	}
