@@ -95,8 +95,8 @@ public class CustomRenderLayer2 extends RenderLayer {
 		buf.put(vertices);
 		buf.flip();
 
-		mVBO = BufferObject.get(0);
-		mVBO.loadBufferData(buf, 12 * 4, GL20.GL_ARRAY_BUFFER);
+		mVBO = BufferObject.get(GL20.GL_ARRAY_BUFFER, 0);
+		mVBO.loadBufferData(buf, 12 * 4);
 		newData = false;
 
 		// tell GLRender to call 'render'
@@ -113,7 +113,7 @@ public class CustomRenderLayer2 extends RenderLayer {
 		GLState.test(false, false);
 
 		// bind VBO data
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVBO.id);
+		mVBO.bind();
 
 		// set VBO vertex layout
 		GL.glVertexAttribPointer(hVertexPosition, 2, GL20.GL_FLOAT, false, 0, 0);

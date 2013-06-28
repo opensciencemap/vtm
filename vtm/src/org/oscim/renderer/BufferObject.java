@@ -37,44 +37,35 @@ public final class BufferObject {
 
 	BufferObject next;
 
-	BufferObject(int id) {
+	int target;
+
+	BufferObject(int target, int id) {
 		this.id = id;
+		this.target = target;
 	}
 
-	int bufferType;
-
-	public void loadBufferData(Buffer buf, int newSize, int type) {
+	public void loadBufferData(Buffer buf, int newSize) {
 		boolean clear = false;
 
-		if (type != bufferType) {
-			if (bufferType != 0)
-				clear = true;
-			bufferType = type;
-		}
-
-		if (buf.position() != 0){
+		if (buf.position() != 0) {
 			Log.d(TAG, "rewind your buffer: " + buf.position());
 		}
 
-		GL.glBindBuffer(type, id);
+		GL.glBindBuffer(target, id);
 
 		// reuse memory allocated for vbo when possible and allocated
 		// memory is less then four times the new data
 		if (!clear && (size > newSize) && (size < newSize * 4)) {
-			GL.glBufferSubData(type, 0, newSize, buf);
+			GL.glBufferSubData(target, 0, newSize, buf);
 		} else {
 			mBufferMemoryUsage += newSize - size;
 			size = newSize;
-			GL.glBufferData(type, size, buf, GL20.GL_DYNAMIC_DRAW);
+			GL.glBufferData(target, size, buf, GL20.GL_DYNAMIC_DRAW);
 		}
 	}
 
-	public void bindArrayBuffer() {
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, id);
-	}
-
-	public void bindIndexBuffer() {
-		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, id);
+	public void bind() {
+		GL.glBindBuffer(target, id);
 	}
 
 	// ---------------------------- pool ----------------------------
@@ -87,37 +78,39 @@ public final class BufferObject {
 			return;
 
 		Log.d(TAG, "buffer object usage: "
-				+ mBufferMemoryUsage / MB
-				+ "MB, force: " + force);
+		           + mBufferMemoryUsage / MB
+		           + "MB, force: " + force);
 
 		mBufferMemoryUsage -= BufferObject.limitUsage(1024 * 1024);
 
 		Log.d(TAG, "now: " + mBufferMemoryUsage / MB + "MB");
 	}
 
-	private static BufferObject pool;
-	static int counter = 0;
+	private static BufferObject pool[] = new BufferObject[2];
+	static int counter[] = new int[2];
 
-	public static synchronized BufferObject get(int size) {
+	public static synchronized BufferObject get(int target, int size) {
 
-		if (pool == null) {
-			if (counter != 0)
+		int t = (target == GL20.GL_ARRAY_BUFFER) ? 0 : 1;
+
+		if (pool[t] == null) {
+			if (counter[t] != 0)
 				Log.d(TAG, "BUG: missing BufferObjects: " + counter);
 
-			createBuffers(10);
-			counter += 10;
+			createBuffers(target, 10);
+			counter[t] += 10;
 		}
-		counter--;
+		counter[t]--;
 
 		if (size != 0) {
 			// find an item that has bound more than 'size' bytes.
 			// this has the advantage that either memory can be reused or
 			// a large unused block will be replaced by a smaller one.
 			BufferObject prev = null;
-			for (BufferObject bo = pool; bo != null; bo = bo.next) {
+			for (BufferObject bo = pool[t]; bo != null; bo = bo.next) {
 				if (bo.size > size) {
 					if (prev == null)
-						pool = bo.next;
+						pool[t] = bo.next;
 					else
 						prev.next = bo.next;
 
@@ -127,8 +120,9 @@ public final class BufferObject {
 				prev = bo;
 			}
 		}
-		BufferObject bo = pool;
-		pool = pool.next;
+
+		BufferObject bo = pool[t];
+		pool[t] = pool[t].next;
 		bo.next = null;
 		return bo;
 	}
@@ -137,64 +131,78 @@ public final class BufferObject {
 		if (bo == null)
 			return;
 
-		//if (counter > 200) {
-		//	Log.d(TAG, "should clear some buffers " + counter);
-		//}
+		// if (counter > 200) {
+		// Log.d(TAG, "should clear some buffers " + counter);
+		// }
+		int t = (bo.target == GL20.GL_ARRAY_BUFFER) ? 0 : 1;
 
-		bo.next = pool;
-		pool = bo;
-		counter++;
+		bo.next = pool[t];
+		pool[t] = bo;
+		counter[t]++;
 	}
 
 	// Note: only call from GL-Thread
 	static synchronized int limitUsage(int reduce) {
-		if (pool == null) {
-			Log.d(TAG, "nothing to free");
-			return 0;
-		}
+
 		int vboIds[] = new int[10];
-		int removed = 0;
 		int freed = 0;
-		BufferObject prev = pool;
 
-		for (BufferObject bo = pool.next; bo != null;) {
-			if (bo.size > 0) {
-				freed += bo.size;
-				bo.size = 0;
-				vboIds[removed++] = bo.id;
-				prev.next = bo.next;
-				bo = bo.next;
-				if (removed == 10 || reduce < freed)
-					break;
+		for (int t = 0; t < 2; t++) {
 
-			} else {
-				prev = bo;
-				bo = bo.next;
+			int removed = 0;
+			BufferObject prev = pool[t];
+
+			if (prev == null) {
+				Log.d(TAG, "nothing to free");
+				return 0;
 			}
-		}
 
-		if (removed > 0) {
-			GlUtils.glDeleteBuffers(removed, vboIds);
-			counter -= removed;
+			for (BufferObject bo = pool[t].next; bo != null;) {
+				if (bo.size > 0) {
+					freed += bo.size;
+					bo.size = 0;
+
+					vboIds[removed++] = bo.id;
+					prev.next = bo.next;
+					bo = bo.next;
+
+					if (removed == 10 || reduce < freed)
+						break;
+
+				} else {
+					prev = bo;
+					bo = bo.next;
+				}
+			}
+
+			if (removed > 0) {
+				GlUtils.glDeleteBuffers(removed, vboIds);
+				counter[t] -= removed;
+			}
+
 		}
 
 		return freed;
 	}
 
-	static void createBuffers(int num) {
+	static void createBuffers(int target, int num) {
 		int[] mVboIds = GlUtils.glGenBuffers(num);
 
+		int t = (target == GL20.GL_ARRAY_BUFFER) ? 0 : 1;
+
 		for (int i = 0; i < num; i++) {
-			BufferObject bo = new BufferObject(mVboIds[i]);
-			bo.next = pool;
-			pool = bo;
+			BufferObject bo = new BufferObject(target, mVboIds[i]);
+			bo.next = pool[t];
+			pool[t] = bo;
 		}
 	}
 
 	static synchronized void init(int num) {
 		mBufferMemoryUsage = 0;
-		pool = null;
-		createBuffers(num);
-		counter = num;
+
+		// FIXME!!!!! pool = new BufferObject[2];
+
+		createBuffers(GL20.GL_ARRAY_BUFFER, num);
+		counter[0] = num;
 	}
 }
