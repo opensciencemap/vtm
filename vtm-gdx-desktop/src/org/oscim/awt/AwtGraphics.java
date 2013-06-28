@@ -10,6 +10,7 @@ import java.io.InputStream;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
+import org.oscim.backend.BitmapUtils;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Paint;
 
@@ -86,5 +87,13 @@ public class AwtGraphics extends CanvasAdapter {
         }
 	}
 
-
+	@Override
+	public Bitmap loadBitmapAsset(String fileName) {
+		try {
+			return BitmapUtils.createBitmap(fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

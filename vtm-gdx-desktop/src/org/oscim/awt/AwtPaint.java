@@ -66,26 +66,21 @@ public class AwtPaint implements Paint {
 
 	@Override
 	public int getColor() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public int getTextHeight(String text) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public int getTextWidth(String text) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void setBitmapShader(Bitmap bitmap) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

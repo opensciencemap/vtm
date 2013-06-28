@@ -7,7 +7,6 @@ import java.nio.IntBuffer;
 
 import javax.imageio.ImageIO;
 
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 
 import com.badlogic.gdx.Gdx;
