@@ -27,7 +27,7 @@ public class MainActivity extends AndroidApplication {
 
         // set our globals
         CanvasAdapter.g = AndroidGraphics.INSTANCE;
-        GLAdapter.INSTANCE = new AndroidGLAdapter();
+        GLAdapter.g = new AndroidGLAdapter();
 		Log.logger = new AndroidLog();
 		// TODO make this dpi dependent
 		Tile.SIZE = 400;

@@ -23,7 +23,7 @@ public class Main {
 
 		// set our globals
         CanvasAdapter.g = AwtGraphics.INSTANCE;
-        GLAdapter.INSTANCE = new GdxGLAdapter();
+        GLAdapter.g = new GdxGLAdapter();
 		Tile.SIZE = 256;
 
         new SharedLibraryLoader().load("vtm-jni");
