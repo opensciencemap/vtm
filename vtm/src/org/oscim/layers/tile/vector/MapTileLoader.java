@@ -539,4 +539,10 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 	public void renderWaySymbol(LineSymbol symbol) {
 
 	}
+
+	@Override
+    public void completed(boolean success) {
+	    // TODO Auto-generated method stub
+
+    }
 }
