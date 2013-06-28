@@ -76,7 +76,6 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 						tile.loader.jobCompleted(tile, false);
 					}
 				});
-
 			}
 
 			@Override
@@ -88,6 +87,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 					loadImage(tile, url.toString());
 				} catch (Exception e) {
 					e.printStackTrace();
+					tile.loader.jobCompleted(tile, false);
 					return false;
 				}
 

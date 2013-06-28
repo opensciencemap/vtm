@@ -14,6 +14,7 @@
  */
 package org.oscim.layers.tile;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Timer;
 
 public abstract class TileLoader {
@@ -52,7 +53,7 @@ public abstract class TileLoader {
 	public void proceed() {
 		mPausing = false;
 		// FIXME
-		hasWork = false;
+		mWorking = false;
 		if (!mTileManager.jobQueue.isEmpty())
 			go();
 	}
@@ -64,33 +65,31 @@ public abstract class TileLoader {
 	public void start() {
 		mPausing = false;
 	}
-	boolean hasWork;
+
+	boolean mWorking;
 
 	public void go() {
-		if (hasWork)
+		if (mWorking) {
+			return;
+		}
+
+		MapTile tile = mTileManager.jobQueue.poll();
+
+		if (tile == null)
 			return;
 
-		final TileLoader loader = this;
-		mTimer.scheduleTask(new Timer.Task() {
+		try {
+			tile.loader = this;
+			executeJob(tile);
 
-			@Override
-			public void run() {
+			mWorking = true;
 
-				MapTile tile = mTileManager.jobQueue.poll();
+		} catch (Exception e) {
+			e.printStackTrace();
 
-				if (tile == null)
-					return;
-
-				try {
-					tile.loader = loader;
-					executeJob(tile);
-				} catch (Exception e) {
-					e.printStackTrace();
-					return;
-				}
-			}
-		}, 0.01f);
-		hasWork = true;
+			tile.clear();
+			jobCompleted(tile, false);
+		}
 	}
 
 	public void jobCompleted(MapTile tile, boolean success) {
@@ -100,8 +99,18 @@ public abstract class TileLoader {
 				mTileManager.passTile(tile);
 			}
 		}
-		hasWork = false;
-		if (!mPausing && !mTileManager.jobQueue.isEmpty())
-			go();
+		mWorking = false;
+
+		if (!mPausing && !mTileManager.jobQueue.isEmpty()){
+
+			Gdx.app.postRunnable(new Runnable(){
+
+				@Override
+				public void run() {
+					go();
+				}
+			}
+			);
+		}
 	}
 }
