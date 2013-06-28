@@ -23,7 +23,7 @@ import org.oscim.utils.pool.Inlist;
 
 
 public final class SymbolLayer extends TextureLayer {
-	private final static String TAG = SymbolLayer.class.getSimpleName();
+	private final static String TAG = SymbolLayer.class.getName();
 
 	private final static float SCALE = 8.0f;
 	private final static int VERTICES_PER_SPRITE = 4;
