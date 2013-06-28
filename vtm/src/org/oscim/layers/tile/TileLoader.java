@@ -55,7 +55,9 @@ public abstract class TileLoader extends PausableThread {
 			mTileManager.passTile(tile);
 		}
 	}
+	public void jobCompleted(MapTile tile, boolean success) {
 
+	}
 
 	@Override
 	protected String getThreadName() {
