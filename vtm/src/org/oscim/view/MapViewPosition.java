@@ -700,7 +700,7 @@ public class MapViewPosition {
 	public synchronized void animateFling(int velocityX, int velocityY,
 			int minX, int maxX, int minY, int maxY) {
 
-		if (velocityX * velocityX + velocityY * velocityY < 4096)
+		if (velocityX * velocityX + velocityY * velocityY < 2048)
 			return;
 
 		mScrollX = 0;
@@ -722,9 +722,21 @@ public class MapViewPosition {
 	}
 
 	public synchronized void animateZoom(float scale) {
-		mStartScale = mAbsScale;
-		mEndScale = mAbsScale * scale - mAbsScale;
-		animStart(300);
+		animateZoom(scale, 300);
+	}
+
+	public synchronized void animateZoom(float scale, int duration) {
+		if (mAnimEnd > 0 && mAnimScale){
+			mEndScale = (mEndScale + mStartScale) * scale - (mAbsScale);
+			mStartScale = mAbsScale;
+		} else{
+			mStartScale = mAbsScale;
+			mEndScale = mAbsScale * scale - mAbsScale;
+		}
+		mAnimFling = false;
+		mAnimMove = false;
+		mAnimScale = true;
+		animStart(duration);
 	}
 
 	/**
