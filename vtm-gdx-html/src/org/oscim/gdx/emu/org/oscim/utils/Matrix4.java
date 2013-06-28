@@ -46,8 +46,6 @@ public class Matrix4 {
 	public static final int M32 = 11;// 14;
 	public static final int M33 = 15;// 15;
 
-	//private final static String TAG = Matrix4.class.getName();
-
 	private final FloatBuffer buffer = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
 
 
@@ -103,9 +101,6 @@ public class Matrix4 {
 			throw new IllegalArgumentException(INVALID_INPUT);
 
 		System.arraycopy(m.val, 0, val, 0, 16);
-
-		//set(mat.val);
-		//copy(pointer, mat.pointer);
 	}
 
 	/**
@@ -117,7 +112,6 @@ public class Matrix4 {
 		if (vec3 == null || vec3.length < 3)
 			throw new IllegalArgumentException(INVALID_INPUT);
 
-		//prj(pointer, vec3);
 		matrix4_proj(val, vec3);
 	}
 
@@ -137,7 +131,6 @@ public class Matrix4 {
 	 * @param rhs right hand side
 	 */
 	public void multiplyRhs(Matrix4 rhs) {
-		//smulrhs(pointer, rhs.pointer);
 		matrix4_mul(val, rhs.val);
 	}
 
@@ -147,8 +140,6 @@ public class Matrix4 {
 	 * @param lhs right hand side
 	 */
 	public void multiplyLhs(Matrix4 lhs) {
-		//smullhs(pointer, lhs.pointer);
-
 		System.arraycopy(lhs.val, 0, tmp, 0, 16);
 		matrix4_mul(tmp, val);
 		System.arraycopy(tmp, 0, val, 0, 16);
@@ -166,8 +157,6 @@ public class Matrix4 {
 	 * @param rhs right hand side
 	 */
 	public void multiplyMM(Matrix4 lhs, Matrix4 rhs) {
-		//smul(pointer, lhs.pointer, rhs.pointer);
-
 		System.arraycopy(lhs.val, 0, tmp, 0, 16);
 		matrix4_mul(tmp, rhs.val);
 		System.arraycopy(tmp, 0, val, 0, 16);
@@ -179,7 +168,6 @@ public class Matrix4 {
 	 * @param mat to transpose
 	 */
 	public void transposeM(Matrix4 mat) {
-		//strans(pointer, mat.pointer);
 		val[M00] = mat.val[M00];
 		val[M01] = mat.val[M10];
 		val[M02] = mat.val[M20];
@@ -207,7 +195,6 @@ public class Matrix4 {
 	 * @param z around z-axis
 	 */
 	public void setRotation(float a, float x, float y, float z) {
-		//setRotation(pointer, a, x, y, z);
 		setRotateM(val, 0, a, x, y, z);
 	}
 
@@ -219,7 +206,6 @@ public class Matrix4 {
 	 * @param z along z-axis
 	 */
 	public void setTranslation(float x, float y, float z) {
-		//setTranslation(pointer, x, y, z);
 		setIdentity();
 		val[M03] = x;
 		val[M13] = y;
@@ -234,7 +220,6 @@ public class Matrix4 {
 	 * @param z axis
 	 */
 	public void setScale(float x, float y, float z) {
-		//setScale(pointer, x, y, z);
 		setIdentity();
 		val[M00] = x;
 		val[M11] = y;
@@ -249,15 +234,12 @@ public class Matrix4 {
 	 * @param scale factor x,y
 	 */
 	public void setTransScale(float tx, float ty, float scale) {
-		//setTransScale(pointer, tx, ty, scale);
 		setIdentity();
 		val[M03] = tx;
 		val[M13] = ty;
-		//val[M23] = z;
 
 		val[M00] = scale;
 		val[M11] = scale;
-		//val[M22] = scale;
 	}
 
 	/**
@@ -271,7 +253,6 @@ public class Matrix4 {
 		buffer.position(0);
 		GL = GLAdapter.get();
 		GL.glUniformMatrix4fv(location, 1, false, buffer);
-		//setAsUniform(pointer, location);
 	}
 
 	/**
@@ -281,24 +262,22 @@ public class Matrix4 {
 	 * @param value value to set
 	 */
 	public void setValue(int pos, float value) {
-		//setValueAt(pointer, pos, value);
 		val[pos] = value;
 	}
-
+	static float PiTimesThumb = 1.0f / (1 << 11);
 	/**
 	 * add some offset (similar to glDepthOffset)
 	 *
 	 * @param delta offset
 	 */
 	public void addDepthOffset(int delta) {
-		//addDepthOffset(pointer, delta);
+		 val[10] *= 1.0f + PiTimesThumb * delta;
 	}
 
 	/**
 	 * Set identity matrix
 	 */
 	public void setIdentity() {
-		//identity(pointer);
 		val[M00] = 1;
 		val[M01] = 0;
 		val[M02] = 0;
