@@ -91,11 +91,19 @@ public class TagSet {
 		tags[numTags++] = tag;
 	}
 
+	public void set(Tag[] tagArray){
+		int newTags = tagArray.length;
+		if (newTags > tags.length)
+			tags = new Tag[tagArray.length];
+		System.arraycopy(tagArray, 0, tags, 0, newTags);
+
+		numTags = newTags;
+	}
 
 	public boolean contains(Tag tag) {
 		for (int i = 0; i < numTags; i++) {
 			Tag t = tags[i];
-			if (t == tag || (t.key == tag.key && (t.value == t.value)))
+			if ((t == tag) || (t.key == tag.key && t.value == tag.value))
 				return true;
 		}
 		return false;
