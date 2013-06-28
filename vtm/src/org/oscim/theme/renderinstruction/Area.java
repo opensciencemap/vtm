@@ -14,12 +14,7 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.backend.canvas.Color;
 import org.oscim.theme.IRenderCallback;
-import org.oscim.theme.RenderThemeHandler;
-import org.xml.sax.Attributes;
-
-
 
 /**
  * Represents a closed polygon on the map.
@@ -28,7 +23,11 @@ public final class Area extends RenderInstruction {
 
 
 	public Area(int fill) {
-		this.level = 0;
+		this(0, fill);
+	}
+
+	public Area(int level, int fill) {
+		this.level = level;
 		this.style = "";
 		this.fade = -1;
 		blendColor = 0;
@@ -53,8 +52,8 @@ public final class Area extends RenderInstruction {
 		// paintFill.setShader(shader);
 		// }
 
-		this.color = fill; //GlUtils.colorToFloatP(fill);
-		this.blendColor = blendFill; //GlUtils.colorToFloatP(blendFill);
+		this.color = fill;
+		this.blendColor = blendFill;
 
 		this.blend = blend;
 		this.strokeWidth = strokeWidth;
