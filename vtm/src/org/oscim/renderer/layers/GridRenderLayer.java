@@ -21,13 +21,16 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.sublayers.LineLayer;
+import org.oscim.renderer.sublayers.TextItem;
+import org.oscim.renderer.sublayers.TextLayer;
 import org.oscim.theme.renderinstruction.Line;
+import org.oscim.theme.renderinstruction.Text;
 import org.oscim.view.MapView;
 
 public class GridRenderLayer extends BasicRenderLayer {
-	private final static String TILE_FORMAT = "%d/%d/%d";
-	// private final TextLayer mTextLayer;
-	// private final Text mText;
+	// private final static String TILE_FORMAT = "%d/%d/%d";
+	private final TextLayer mTextLayer;
+	private final Text mText;
 
 	private final LineLayer mLineLayer;
 
@@ -62,44 +65,43 @@ public class GridRenderLayer extends BasicRenderLayer {
 			mLines.addPoint(pos + size * 8, y);
 		}
 
-		// mText = Text.createText(22, 0, Color.RED, 0, false);
+		mText = Text.createText(22, 0, Color.RED, 0, false);
 
-		// mTextLayer = layers.addTextLayer(new TextLayer());
-		mLineLayer = layers.addLineLayer(0,
-		                                 new Line(Color.BLUE, 1.5f, Cap.BUTT));
+		mTextLayer = layers.addTextLayer(new TextLayer());
+		mLineLayer = layers.addLineLayer(0, new Line(0x66000066, 1.5f, Cap.BUTT));
 	}
 
-	// private void addLabels(int x, int y, int z) {
-	// int s = Tile.SIZE;
-	//
-	// TextLayer tl = mTextLayer;
-	// tl.clear();
-	//
-	// for (int yy = -2; yy < 2; yy++) {
-	// for (int xx = -2; xx < 2; xx++) {
-	//
-	// // String label = String.format(
-	// // Locale.ROOT, TILE_FORMAT,
-	// // Integer.valueOf(x + xx),
-	// // Integer.valueOf(y + yy),
-	// // Integer.valueOf(z));
-	// String label = Integer.valueOf(x + xx) + "/" +
-	// Integer.valueOf(y + yy) + "/" +
-	// Integer.valueOf(z);
-	//
-	// TextItem ti = TextItem.pool.get();
-	// ti.set(s * xx + s / 2, s * yy + s / 2, label, mText);
-	//
-	// tl.addText(ti);
-	// }
-	// }
-	//
-	// // render TextItems to a bitmap and prepare vertex buffer data.
-	// tl.prepare();
-	//
-	// // release TextItems
-	// tl.clearLabels();
-	// }
+	private void addLabels(int x, int y, int z) {
+		int s = Tile.SIZE;
+
+		TextLayer tl = mTextLayer;
+		tl.clear();
+
+		for (int yy = -2; yy < 2; yy++) {
+			for (int xx = -2; xx < 2; xx++) {
+
+				// String label = String.format(
+				// Locale.ROOT, TILE_FORMAT,
+				// Integer.valueOf(x + xx),
+				// Integer.valueOf(y + yy),
+				// Integer.valueOf(z));
+				String label = Integer.valueOf(x + xx) + "/" +
+				               Integer.valueOf(y + yy) + "/" +
+				               Integer.valueOf(z);
+
+				TextItem ti = TextItem.pool.get();
+				ti.set(s * xx + s / 2, s * yy + s / 2, label, mText);
+
+				tl.addText(ti);
+			}
+		}
+
+		// render TextItems to a bitmap and prepare vertex buffer data.
+		tl.prepare();
+
+		// release TextItems
+		tl.clearLabels();
+	}
 
 	@Override
 	public void update(MapPosition pos, boolean changed, Matrices m) {
@@ -124,7 +126,7 @@ public class GridRenderLayer extends BasicRenderLayer {
 		layerPos.y = (double) y / z;
 		layerPos.scale = z;
 
-		// addLabels(x, y, pos.zoomLevel);
+		addLabels(x, y, pos.zoomLevel);
 
 		mLineLayer.clear();
 		mLineLayer.addLine(mLines);
