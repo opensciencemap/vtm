@@ -33,12 +33,13 @@ public abstract class CanvasAdapter {
 
 	public abstract Bitmap decodeBitmap(InputStream inputStream);
 
+	public abstract Bitmap loadBitmapAsset(String fileName);
+
 	public abstract int getColor(Color color);
 
 	public abstract Paint getPaint();
 
 	public abstract int parseColor(String colorString);
-
 
 	public abstract Bitmap getBitmap(int width, int height, int format);
 
