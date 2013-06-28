@@ -30,6 +30,8 @@ public class MapTile extends Tile {
 
 	public final static int STATE_NONE = 0;
 
+	public TileLoader loader;
+
 	/**
 	 * STATE_LOADING means the tile is about to be loaded / loading.
 	 * it belongs to TileLoader thread.
