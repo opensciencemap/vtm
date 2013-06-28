@@ -2,7 +2,9 @@
 <module>
     <entry-point class="org.oscim.gdx.client.GwtLauncher"/>
     <set-configuration-property name="gdx.assetpath" value="../vtm/assets"/>
+    <inherits name="com.google.gwt.xml.XML" />
     <inherits name="GdxMap"/>
     <inherits name="com.badlogic.gdx.backends.gdx_backends_gwt"/>
     <super-source path="emu" />
+      <set-property name="user.agent" value="safari"/>
 </module>
