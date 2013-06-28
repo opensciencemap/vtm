@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rendertheme xmlns="http://mapsforge.org/renderTheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://mapsforge.org/renderTheme ../renderTheme.xsd" version="1"
-  map-background="#fffcfa"> <!--fdfdfc"> -->
+  map-background="#fffcfa">
 
   <style-text name="road" k="name" font-size="16" fill="#101010" stroke="#eeeeee"
     stroke-width="2.0" priority="2" />
@@ -646,7 +646,7 @@
     <!-- building -->
     <m k="building">
 
-      <m zoom-min="14" zoom-max="16">
+      <m zoom-min="14"> <!--zoom-max="16">-->
         <m closed="yes">
           <use-area name="building" fade="14" />
         </m>
@@ -1140,9 +1140,9 @@
     </m>
 
     <!-- HACK!!! render building models last -->
-    <m k="building" zoom-min="17">
+    <!--<m k="building" zoom-min="17">
       <use-area name="building" fade="15" />
-    </m>
+    </m>-->
   </m> <!-- end e="way" -->
 
   <m e="node">
