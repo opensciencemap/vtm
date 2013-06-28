@@ -17,8 +17,7 @@ package org.oscim.layers.tile;
 import static org.oscim.layers.tile.MapTile.STATE_NEW_DATA;
 import static org.oscim.layers.tile.MapTile.STATE_READY;
 
-import java.util.Arrays;
-
+import org.oscim.backend.GL20;
 import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
@@ -65,8 +64,6 @@ public class TileRenderLayer extends RenderLayer {
 
 		if (tilesChanged || positionChanged){
 			updateTileVisibility(m.mapPlane);
-			Log.d(TAG, tileCnt + " >> " + Arrays.deepToString(tiles));
-
 		}
 		tileCnt += mNumTileHolder;
 
@@ -156,7 +153,7 @@ public class TileRenderLayer extends RenderLayer {
 		if (newSize > 0) {
 
 			if (tile.layers.vbo == null)
-				tile.layers.vbo = BufferObject.get(newSize);
+				tile.layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
 			if (!GLRenderer.uploadLayers(tile.layers, newSize, true)) {
 				Log.d(TAG, "BUG uploadTileData " + tile + " failed!");

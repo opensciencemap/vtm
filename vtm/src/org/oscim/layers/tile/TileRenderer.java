@@ -130,7 +130,7 @@ public class TileRenderer {
 			return;
 		}
 
-		t.layers.vbo.bindArrayBuffer();
+		t.layers.vbo.bind();
 
 		// place tile relative to map position
 		int z = tile.zoomLevel;

@@ -14,10 +14,6 @@
  */
 package org.oscim.renderer.layers;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
@@ -203,8 +199,8 @@ public class ExtrusionRenderLayer extends RenderLayer {
 				setMatrix(pos, m, tiles[i], 0);
 				m.mvp.setAsUniform(uExtMatrix);
 
-				GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
-				GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, el.vboVertices.id);
+				el.vboIndices.bind();
+				el.vboVertices.bind();
 
 				GL.glVertexAttribPointer(uExtVertexPosition, 3,
 						GL20.GL_SHORT, false, 8, 0);
@@ -255,8 +251,8 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			setMatrix(pos, m, t, d);
 			m.mvp.setAsUniform(uExtMatrix);
 
-			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
-			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, el.vboVertices.id);
+			el.vboIndices.bind();
+			el.vboVertices.bind();
 
 			GL.glVertexAttribPointer(uExtVertexPosition, 3,
 					GL20.GL_SHORT, false, 8, 0);
@@ -281,8 +277,8 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			setMatrix(pos, m, t, d);
 			m.mvp.setAsUniform(uExtMatrix);
 
-			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, el.vboIndices.id);
-			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, el.vboVertices.id);
+			el.vboIndices.bind();
+			el.vboVertices.bind();
 
 			GL.glVertexAttribPointer(uExtVertexPosition, 3,
 					GL20.GL_SHORT, false, 8, 0);

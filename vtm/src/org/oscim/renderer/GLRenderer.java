@@ -137,7 +137,7 @@ public class GLRenderer {
 		int tmpBufferSize;
 
 		void growBuffer(int size) {
-			Log.d(TAG, "grow buffer " + size);
+			//Log.d(TAG, "grow buffer " + size);
 			// 32kb min size
 			if (size < (1 << 15))
 				size = (1 << 15);
@@ -243,7 +243,7 @@ public class GLRenderer {
 		}
 		newSize *= SHORT_BYTES;
 
-		layers.vbo.loadBufferData(sbuf, newSize, GL20.GL_ARRAY_BUFFER);
+		layers.vbo.loadBufferData(sbuf, newSize);
 		return true;
 	}
 
@@ -395,9 +395,9 @@ public class GLRenderer {
 	}
 
 	public void onSurfaceCreated() {
-		
+
 		Log.d(TAG, "surface created");
-		
+
 		// Log.d(TAG, GL.glGetString(GL20.GL_EXTENSIONS));
 
 		// classes that require GL context for initialization

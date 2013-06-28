@@ -28,8 +28,6 @@ package org.oscim.renderer.layers;
 // 5 R-Tree might be handy
 //
 
-import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -56,13 +54,13 @@ import org.oscim.view.MapViewPosition;
 
 
 public class TextRenderLayer extends BasicRenderLayer {
-	private final static String TAG = TextRenderLayer.class.getName();
-	private static final GL20 GL = GLAdapter.get();
+	//private final static String TAG = TextRenderLayer.class.getName();
+	//private static final GL20 GL = GLAdapter.get();
 
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
 
-	private final static long MAX_RELABEL_DELAY = 200;
+	//private final static long MAX_RELABEL_DELAY = 200;
 
 	private final MapViewPosition mMapViewPosition;
 	private final TileSet mTileSet;
@@ -734,7 +732,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 	@Override
 	public synchronized void render(MapPosition pos, Matrices m) {
 
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, layers.vbo.id);
+		layers.vbo.bind();
 		GLState.test(false, false);
 
 		float scale = (float) (mMapPosition.scale / pos.scale);
@@ -758,7 +756,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 			l = TextureRenderer.draw(l, scale, m);
 	}
 
-	private boolean mHolding;
+	//private boolean mHolding;
 
 	/**
 	 * @param enable layer updates

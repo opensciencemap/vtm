@@ -402,9 +402,9 @@ public class ExtrusionLayer extends Layer {
 
 		sbuf.flip();
 		int size = mNumIndices * 2;
-		vboIndices = BufferObject.get(size);
-		vboIndices.loadBufferData(sbuf, size, GL20.GL_ELEMENT_ARRAY_BUFFER);
-		
+		vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
+		vboIndices.loadBufferData(sbuf, size);
+
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		// upload vertices
@@ -414,8 +414,8 @@ public class ExtrusionLayer extends Layer {
 
 		sbuf.flip();
 		size = mNumVertices * 4 * 2;
-		vboVertices = BufferObject.get(size);
-		vboVertices.loadBufferData(sbuf, size, GL20.GL_ARRAY_BUFFER);
+		vboVertices = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
+		vboVertices.loadBufferData(sbuf, size);
 
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
@@ -502,7 +502,8 @@ public class ExtrusionLayer extends Layer {
 	 * @return number of triangles in io buffer
 	 */
 	public static native int triangulate(float[] points, int pos, int len, int numRings,
-			ShortBuffer io,
-			int ioffset);
+			ShortBuffer io,	int ioffset) /*-{
+			return 0;
+	}-*/;
 
 }

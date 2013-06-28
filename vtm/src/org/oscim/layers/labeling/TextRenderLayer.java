@@ -698,7 +698,7 @@ class TextRenderLayer extends BasicRenderLayer {
 	@Override
 	public synchronized void render(MapPosition pos, Matrices m) {
 
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, layers.vbo.id);
+		layers.vbo.bind();
 		GLState.test(false, false);
 
 		float scale = (float) (mMapPosition.scale / pos.scale);

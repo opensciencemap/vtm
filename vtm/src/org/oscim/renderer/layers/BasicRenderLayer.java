@@ -15,7 +15,6 @@
 package org.oscim.renderer.layers;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
@@ -37,8 +36,6 @@ import org.oscim.view.MapView;
  */
 public abstract class BasicRenderLayer extends RenderLayer {
 
-	private static final GL20 GL = GLAdapter.get();
-
 	public final Layers layers;
 
 	public BasicRenderLayer(MapView mapView) {
@@ -55,7 +52,7 @@ public abstract class BasicRenderLayer extends RenderLayer {
 
 		float div = FastMath.pow(pos.zoomLevel - curPos.zoomLevel);
 
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, layers.vbo.id);
+		layers.vbo.bind();
 		GLState.test(false, false);
 		GLState.blend(true);
 		int simple = (curPos.tilt < 1 ? 1 : 0);
@@ -91,10 +88,6 @@ public abstract class BasicRenderLayer extends RenderLayer {
 						l = BitmapRenderer.draw(l, 1, m);
 						break;
 
-//					case Layer.SYMBOL:
-//						l = BitmapRenderer.draw(l, 1, m);
-//						break;
-
 					default:
 						l = TextureRenderer.draw(l, scale, m);
 				}
@@ -113,7 +106,7 @@ public abstract class BasicRenderLayer extends RenderLayer {
 		}
 
 		if (layers.vbo == null) {
-			layers.vbo = BufferObject.get(newSize);
+			layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
 			if (layers.vbo == null)
 				return;
