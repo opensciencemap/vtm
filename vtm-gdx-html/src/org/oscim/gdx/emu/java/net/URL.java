@@ -14,4 +14,8 @@ public class URL {
 	public URL(String protocol, String hostName, int port, String path) {
 		mPath = "http://" +hostName +"/" + path;
 	}
+
+	public URL(String url) throws MalformedURLException {
+		mPath = url;
+	}
 }
