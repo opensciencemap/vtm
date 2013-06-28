@@ -25,4 +25,6 @@ import org.oscim.core.MapElement;
 public interface ITileDataSink {
 
 	void process(MapElement element);
+
+	void completed(boolean success);
 }
