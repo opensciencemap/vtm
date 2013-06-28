@@ -14,8 +14,10 @@
  */
 package org.oscim.android.canvas;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import org.oscim.backend.BitmapUtils;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
@@ -31,10 +33,6 @@ import android.graphics.drawable.Drawable;
 public final class AndroidGraphics extends CanvasAdapter {
 	public static final AndroidGraphics INSTANCE = new AndroidGraphics();
 
-	//	public static android.graphics.Bitmap getAndroidBitmap(Bitmap bitmap) {
-	//		return ((AndroidBitmap) bitmap).bitmap;
-	//	}
-
 	public static android.graphics.Paint getAndroidPaint(Paint paint) {
 		return ((AndroidPaint) paint).mPaint;
 	}
@@ -46,6 +44,16 @@ public final class AndroidGraphics extends CanvasAdapter {
 	@Override
 	public Bitmap decodeBitmap(InputStream inputStream) {
 		return new AndroidBitmap(inputStream);
+	}
+
+	@Override
+	public Bitmap loadBitmapAsset(String fileName) {
+		try {
+			return BitmapUtils.createBitmap(fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
@@ -114,4 +122,5 @@ public final class AndroidGraphics extends CanvasAdapter {
 
 		return new OverlayMarker(drawableToBitmap(drawable), place);
 	}
+
 }
