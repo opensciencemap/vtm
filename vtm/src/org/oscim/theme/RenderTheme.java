@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later version.
@@ -18,16 +19,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.oscim.backend.canvas.Color;
-import org.oscim.core.GeometryBuffer.GeometryType;
+import org.oscim.backend.Log;
 import org.oscim.core.MapElement;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.rule.Element;
 import org.oscim.theme.rule.Rule;
 import org.oscim.utils.LRUCache;
-import org.xml.sax.Attributes;
-
-import org.oscim.backend.Log;
 
 /**
  * A RenderTheme defines how map elements are drawn.
@@ -36,52 +33,6 @@ public class RenderTheme implements IRenderTheme {
 	private final static String TAG = RenderTheme.class.getName();
 
 	private static final int MATCHING_CACHE_SIZE = 512;
-	private static final int RENDER_THEME_VERSION = 1;
-
-	private static void validate(String elementName, Integer version,
-			float baseStrokeWidth, float baseTextSize) {
-		if (version == null) {
-			throw new IllegalArgumentException("missing attribute version for element:"
-					+ elementName);
-		} else if (version.intValue() != RENDER_THEME_VERSION) {
-			throw new IllegalArgumentException("invalid render theme version:" + version);
-		} else if (baseStrokeWidth < 0) {
-			throw new IllegalArgumentException("base-stroke-width must not be negative: "
-					+ baseStrokeWidth);
-		} else if (baseTextSize < 0) {
-			throw new IllegalArgumentException("base-text-size must not be negative: "
-					+ baseTextSize);
-		}
-	}
-
-	static RenderTheme create(String elementName, Attributes attributes) {
-		Integer version = null;
-		int mapBackground = Color.WHITE;
-		float baseStrokeWidth = 1;
-		float baseTextSize = 1;
-
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-
-			if ("schemaLocation".equals(name)) {
-				continue;
-			} else if ("version".equals(name)) {
-				version = Integer.valueOf(Integer.parseInt(value));
-			} else if ("map-background".equals(name)) {
-				mapBackground = Color.parseColor(value);
-			} else if ("base-stroke-width".equals(name)) {
-				baseStrokeWidth = Float.parseFloat(value);
-			} else if ("base-text-size".equals(name)) {
-				baseTextSize = Float.parseFloat(value);
-			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
-			}
-		}
-
-		validate(elementName, version, baseStrokeWidth, baseTextSize);
-		return new RenderTheme(mapBackground, baseStrokeWidth, baseTextSize);
-	}
 
 	private final float mBaseStrokeWidth;
 	private final float mBaseTextSize;
@@ -120,7 +71,7 @@ public class RenderTheme implements IRenderTheme {
 
 	private final ElementCache[] mElementCache;
 
-	RenderTheme(int mapBackground, float baseStrokeWidth, float baseTextSize) {
+	public RenderTheme(int mapBackground, float baseStrokeWidth, float baseTextSize) {
 		mMapBackground = mapBackground;
 		mBaseStrokeWidth = baseStrokeWidth;
 		mBaseTextSize = baseTextSize;
