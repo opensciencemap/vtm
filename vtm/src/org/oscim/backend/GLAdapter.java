@@ -1,5 +1,5 @@
 /*
- * Copyright 2013
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,10 +14,12 @@
  */
 package org.oscim.backend;
 
-//import com.badlogic.gdx.backends.android.AndroidGL20;
 
 public class GLAdapter {
-	public static GL20 INSTANCE; //= new AndroidGL20();
+	public static GL20 INSTANCE;
+
+	public static boolean GDX_WEBGL_QUIRKS;
+	public static boolean NON_PREMUL_CANVAS;
 
 	public static GL20 get(){
 		return INSTANCE;

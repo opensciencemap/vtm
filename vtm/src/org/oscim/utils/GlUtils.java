@@ -238,7 +238,7 @@ public class GlUtils {
 		GL = GLAdapter.get();
 
 		int error;
-		while ((error = GL.glGetError()) != 0) { //GL20.GL_NO_ERROR) {
+		while ((error = GL.glGetError()) != 0) { // GL20.GL_NO_ERROR) {
 			Log.e(TAG, op + ": glError " + error);
 			// throw new RuntimeException(op + ": glError " + error);
 		}
@@ -366,15 +366,22 @@ public class GlUtils {
 
 	public static int[] glGenTextures(int num) {
 		GL = GLAdapter.get();
-
-		IntBuffer buf = GLRenderer.getIntBuffer(num);
-		buf.position(0);
-		buf.limit(num);
-		GL.glGenTextures(num, buf);
 		int[] ret = new int[num];
-		buf.position(0);
-		buf.limit(num);
-		buf.get(ret);
+		IntBuffer buf = GLRenderer.getIntBuffer(num);
+
+		if (GLAdapter.GDX_WEBGL_QUIRKS) {
+			for (int i = 0; i < num; i++) {
+				GL.glGenTextures(num, buf);
+				buf.position(0);
+				ret[i] = buf.get();
+				buf.position(0);
+			}
+		} else {
+			GL.glGenTextures(num, buf);
+			buf.position(0);
+			buf.get(ret);
+		}
+
 		return ret;
 	}
 
