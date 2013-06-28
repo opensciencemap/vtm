@@ -14,6 +14,8 @@
  */
 package org.oscim.renderer.sublayers;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
@@ -76,16 +78,19 @@ public class LineTexRenderer {
 		mVertexFlipID = vboIds[0];
 
 		// bytes: 0, 1, 0, 1, 0, ...
-		short[] flip = new short[GLRenderer.maxQuads * 2];
+		byte[] flip = new byte[GLRenderer.maxQuads * 4];
 		for (int i = 0; i < flip.length; i++)
-			flip[i] = 1;
+			flip[i] = (byte)(i % 2);
 
-		ShortBuffer buf = GLRenderer.getShortBuffer(flip.length);
-
+		ByteBuffer buf = ByteBuffer.allocateDirect(flip.length)
+				.order(ByteOrder.nativeOrder());
 		buf.put(flip);
 		buf.flip();
+
+		ShortBuffer sbuf = buf.asShortBuffer();
+
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
-		GL.glBufferData(GL20.GL_ARRAY_BUFFER, flip.length * 2, buf,
+		GL.glBufferData(GL20.GL_ARRAY_BUFFER, flip.length , sbuf,
 				GL20.GL_STATIC_DRAW);
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
@@ -123,7 +128,7 @@ public class LineTexRenderer {
 		GL.glVertexAttribPointer(hVertexFlip, 1,
 				GL20.GL_BYTE, false, 0, 0);
 
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, layers.vbo.id);
+		layers.vbo.bind();
 
 		float scale = (float) pos.getZoomScale();
 
