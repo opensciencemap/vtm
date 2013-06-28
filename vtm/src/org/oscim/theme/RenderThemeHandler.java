@@ -22,10 +22,11 @@ import java.util.HashMap;
 import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
 
 import org.oscim.backend.BitmapUtils;
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.Log;
+import org.oscim.backend.XMLReaderAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
@@ -43,10 +44,8 @@ import org.oscim.theme.renderinstruction.Symbol;
 import org.oscim.theme.renderinstruction.Text;
 import org.oscim.theme.rule.Rule;
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
@@ -54,6 +53,8 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class RenderThemeHandler extends DefaultHandler {
 	private final static String TAG = RenderThemeHandler.class.getName();
+
+	private static final int RENDER_THEME_VERSION = 1;
 
 	private static enum Element {
 		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS;
@@ -84,17 +85,12 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *             if an I/O error occurs while reading from the input stream.
 	 */
 	public static IRenderTheme getRenderTheme(InputStream inputStream)
-	        throws SAXException,
-	        ParserConfigurationException, IOException {
+	        throws SAXException, IOException {
 
 		RenderThemeHandler renderThemeHandler = new RenderThemeHandler();
 
-		SAXParserFactory factory = SAXParserFactory.newInstance();
-		factory.setNamespaceAware(true);
+		new XMLReaderAdapter().parse(renderThemeHandler, inputStream);
 
-		XMLReader xmlReader = factory.newSAXParser().getXMLReader();
-		xmlReader.setContentHandler(renderThemeHandler);
-		xmlReader.parse(new InputSource(inputStream));
 		return renderThemeHandler.mRenderTheme;
 	}
 
@@ -171,12 +167,17 @@ public class RenderThemeHandler extends DefaultHandler {
 	}
 
 	@Override
+	public void warning(SAXParseException exception) {
+		Log.d(TAG, exception.getMessage());
+	}
+
+	@Override
 	public void startElement(String uri, String localName, String qName,
 	                         Attributes attributes) throws SAXException {
 		try {
 			if (ELEMENT_NAME_RENDER_THEME.equals(localName)) {
 				checkState(localName, Element.RENDER_THEME);
-				mRenderTheme = RenderTheme.create(localName, attributes);
+				mRenderTheme = createRenderTheme(localName, attributes);
 			}
 
 			else if (ELEMENT_NAME_MATCH.equals(localName)) {
@@ -280,7 +281,6 @@ public class RenderThemeHandler extends DefaultHandler {
 					Log.d(TAG, "missing texture atlas item '" + symbol.src + "'");
 				else
 					Log.d(TAG, "using atlas item '" + symbol.src + "'");
-
 			}
 
 			else if (ELEMENT_NAME_USE_STYLE_LINE.equals(localName)) {
@@ -364,7 +364,7 @@ public class RenderThemeHandler extends DefaultHandler {
 			                                   "missing attribute 'img' for element: "
 			                                           + elementName);
 
-		Bitmap bitmap = BitmapUtils.createBitmap("styles/" + img);
+		Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset("styles/" + img);
 		mTextureAtlas = new TextureAtlas(bitmap);
 	}
 
@@ -398,10 +398,6 @@ public class RenderThemeHandler extends DefaultHandler {
 		mTextureAtlas.addTextureRegion(regionName.intern(), r);
 	}
 
-	@Override
-	public void warning(SAXParseException exception) {
-		Log.d(TAG, exception.getMessage());
-	}
 
 	private void checkElement(String elementName, Element element) throws SAXException {
 		Element parentElement;
@@ -450,6 +446,48 @@ public class RenderThemeHandler extends DefaultHandler {
 		mElementStack.push(element);
 	}
 
+
+	static RenderTheme createRenderTheme(String elementName, Attributes attributes) {
+		Integer version = null;
+		int mapBackground = Color.WHITE;
+		float baseStrokeWidth = 1;
+		float baseTextSize = 1;
+
+		for (int i = 0; i < attributes.getLength(); ++i) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+
+			if ("schemaLocation".equals(name)) {
+				continue;
+			} else if ("version".equals(name)) {
+				version = Integer.valueOf(Integer.parseInt(value));
+			} else if ("map-background".equals(name)) {
+				mapBackground = Color.parseColor(value);
+			} else if ("base-stroke-width".equals(name)) {
+				baseStrokeWidth = Float.parseFloat(value);
+			} else if ("base-text-size".equals(name)) {
+				baseTextSize = Float.parseFloat(value);
+			} else {
+				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+			}
+		}
+
+		if (version == null) {
+			throw new IllegalArgumentException("missing attribute version for element:"
+			                                   + elementName);
+		} else if (version.intValue() != RENDER_THEME_VERSION) {
+			throw new IllegalArgumentException("invalid render theme version:" + version);
+		} else if (baseStrokeWidth < 0) {
+			throw new IllegalArgumentException("base-stroke-width must not be negative: "
+			                                   + baseStrokeWidth);
+		} else if (baseTextSize < 0) {
+			throw new IllegalArgumentException("base-text-size must not be negative: "
+			                                   + baseTextSize);
+		}
+
+		return new RenderTheme(mapBackground, baseStrokeWidth, baseTextSize);
+	}
+
 	/**
 	 * @param elementName
 	 *            the name of the XML element.
@@ -459,7 +497,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *            ...
 	 * @return a new Text with the given rendering attributes.
 	 */
-	public static Text createText(String elementName, Attributes attributes, boolean caption) {
+	private static Text createText(String elementName, Attributes attributes, boolean caption) {
 		String textKey = null;
 		FontFamily fontFamily = FontFamily.DEFAULT;
 		FontStyle fontStyle = FontStyle.NORMAL;
@@ -539,8 +577,8 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *            ...
 	 * @return a new Line with the given rendering attributes.
 	 */
-	public static Line createLine(Line line, String elementName, Attributes attributes,
-	                              int level, boolean isOutline) {
+	private static Line createLine(Line line, String elementName, Attributes attributes,
+	                               int level, boolean isOutline) {
 
 		// Style name
 		String style = null;
@@ -643,7 +681,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *            the drawing level of this instruction.
 	 * @return a new Area with the given rendering attributes.
 	 */
-	public static Area createArea(String elementName, Attributes attributes, int level) {
+	private static Area createArea(String elementName, Attributes attributes, int level) {
 		String src = null;
 		int fill = Color.BLACK;
 		int stroke = Color.TRANSPARENT;
@@ -698,7 +736,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *            the drawing level of this instruction.
 	 * @return a new Circle with the given rendering attributes.
 	 */
-	public static Circle createCircle(String elementName, Attributes attributes, int level) {
+	private static Circle createCircle(String elementName, Attributes attributes, int level) {
 		Float radius = null;
 		boolean scaleRadius = false;
 		int fill = Color.TRANSPARENT;
@@ -747,7 +785,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *            the attributes of the XML element.
 	 * @return a new LineSymbol with the given rendering attributes.
 	 */
-	public static LineSymbol createLineSymbol(String elementName, Attributes attributes) {
+	private static LineSymbol createLineSymbol(String elementName, Attributes attributes) {
 		String src = null;
 		boolean alignCenter = false;
 		boolean repeat = false;
@@ -785,7 +823,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *            the attributes of the XML element.
 	 * @return a new Symbol with the given rendering attributes.
 	 */
-	public static Symbol createSymbol(String elementName, Attributes attributes) {
+	private static Symbol createSymbol(String elementName, Attributes attributes) {
 		String src = null;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
