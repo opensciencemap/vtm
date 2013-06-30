@@ -49,13 +49,16 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-/** Implementation of an {@link Application} based on GWT. Clients have to override {@link #getConfig()} and
- * {@link #getApplicationListener()}. Clients can override the default loading screen via
- * {@link #getPreloaderCallback()} and implement any loading screen drawing via GWT widgets.
- * @author mzechner */
+/**
+ * Implementation of an {@link Application} based on GWT. Clients have to
+ * override {@link #getConfig()} and {@link #getApplicationListener()}. Clients
+ * can override the default loading screen via {@link #getPreloaderCallback()}
+ * and implement any loading screen drawing via GWT widgets.
+ *
+ * @author mzechner
+ */
 public abstract class GwtApplication implements EntryPoint, Application {
 	private ApplicationListener listener;
 	private GwtApplicationConfiguration config;
@@ -63,7 +66,6 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	private GwtInput input;
 	private GwtNet net;
 	private Panel root = null;
-	private TextArea log = null;
 	private int logLevel = LOG_ERROR;
 	private Array<Runnable> runnables = new Array<Runnable>();
 	private Array<Runnable> runnablesHelper = new Array<Runnable>();
@@ -74,15 +76,13 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	private ObjectMap<String, Preferences> prefs = new ObjectMap<String, Preferences>();
 
 	/** @return the configuration for the {@link GwtApplication}. */
-	public abstract GwtApplicationConfiguration getConfig ();
+	public abstract GwtApplicationConfiguration getConfig();
 
 	@Override
-	public void onModuleLoad () {
-		consoleLog("onModuleLoad");
+	public void onModuleLoad() {
 		this.agentInfo = computeAgentInfo();
 		this.listener = getApplicationListener();
 		this.config = getConfig();
-		this.log = config.log;
 
 		if (config.rootPanel != null) {
 			this.root = config.rootPanel;
@@ -117,32 +117,32 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		// called (function instanceof Function fails, wtf JS?).
 		new Timer() {
 			@Override
-			public void run () {
+			public void run() {
 				//if (SoundManager.ok()) {
-					final PreloaderCallback callback = getPreloaderCallback();
-					preloader = new Preloader();
-					preloader.preload("assets.txt", new PreloaderCallback() {
-						@Override
-						public void error (String file) {
-							callback.error(file);
-						}
+				final PreloaderCallback callback = getPreloaderCallback();
+				preloader = new Preloader();
+				preloader.preload("assets.txt", new PreloaderCallback() {
+					@Override
+					public void error(String file) {
+						callback.error(file);
+					}
 
-						@Override
-						public void update (PreloaderState state) {
-							callback.update(state);
-							if (state.hasEnded()) {
-								root.clear();
-								setupLoop();
-							}
+					@Override
+					public void update(PreloaderState state) {
+						callback.update(state);
+						if (state.hasEnded()) {
+							root.clear();
+							setupLoop();
 						}
-					});
-					cancel();
+					}
+				});
+				cancel();
 				//}
 			}
 		}.scheduleRepeating(100);
 	}
 
-	private void setupLoop () {
+	private void setupLoop() {
 		// setup modules
 		consoleLog("setupLoop");
 		try {
@@ -152,8 +152,10 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			root.add(new Label("Sorry, your browser doesn't seem to support WebGL"));
 			return;
 		}
+
 		lastWidth = graphics.getWidth();
 		lastHeight = graphics.getHeight();
+
 		Gdx.app = this;
 		//Gdx.audio = new GwtAudio();
 		Gdx.graphics = graphics;
@@ -164,11 +166,15 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		Gdx.input = this.input;
 		this.net = new GwtNet();
 		Gdx.net = this.net;
+		final double pixelRatio = GwtGraphics.getDevicePixelRatioJSNI();
+		consoleLog(">>>> " + config.width + "x"+ config.height + " ratio " + pixelRatio);
 
 		// tell listener about app creation
 		try {
 			listener.create();
-			listener.resize(graphics.getWidth(), graphics.getHeight());
+			listener.resize(
+					(int)(graphics.getWidth()),
+					(int)(graphics.getHeight()));
 		} catch (Throwable t) {
 			error("GwtApplication", "exception: " + t.getMessage(), t);
 			t.printStackTrace();
@@ -178,14 +184,17 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		// setup rendering timer
 		new Timer() {
 			@Override
-			public void run () {
+			public void run() {
 				try {
 					graphics.update();
-					if (Gdx.graphics.getWidth() != lastWidth || Gdx.graphics.getHeight() != lastHeight) {
-						GwtApplication.this.listener.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+					if (Gdx.graphics.getWidth() != lastWidth
+							|| Gdx.graphics.getHeight() != lastHeight) {
+						GwtApplication.this.listener.resize(
+								(int)(Gdx.graphics.getWidth()),
+								(int)(Gdx.graphics.getHeight()));
 						lastWidth = graphics.getWidth();
 						lastHeight = graphics.getHeight();
-						Gdx.gl.glViewport(0, 0, lastWidth, lastHeight);
+						//Gdx.gl.glViewport(0, 0, lastWidth, lastHeight);
 					}
 					runnablesHelper.addAll(runnables);
 					runnables.clear();
@@ -200,16 +209,16 @@ public abstract class GwtApplication implements EntryPoint, Application {
 					throw new RuntimeException(t);
 				}
 			}
-		}.scheduleRepeating((int)((1f / config.fps) * 1000));
+		}.scheduleRepeating((int) ((1f / config.fps) * 1000));
 	}
 
-	public Panel getRootPanel () {
+	public Panel getRootPanel() {
 		return root;
 	}
 
 	long loadStart = TimeUtils.nanoTime();
 
-	public PreloaderCallback getPreloaderCallback () {
+	public PreloaderCallback getPreloaderCallback() {
 		final Panel preloaderPanel = new VerticalPanel();
 		preloaderPanel.setStyleName("gdx-preloader");
 		final Image logo = new Image(GWT.getModuleBaseURL() + "logo.png");
@@ -227,12 +236,12 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		return new PreloaderCallback() {
 
 			@Override
-			public void error (String file) {
+			public void error(String file) {
 				System.out.println("error: " + file);
 			}
 
 			@Override
-			public void update (PreloaderState state) {
+			public void update(PreloaderState state) {
 				meterStyle.setWidth(100f * state.getProgress(), Unit.PCT);
 			}
 
@@ -240,22 +249,22 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	}
 
 	@Override
-	public Graphics getGraphics () {
+	public Graphics getGraphics() {
 		return graphics;
 	}
 
 	@Override
-	public Audio getAudio () {
+	public Audio getAudio() {
 		return Gdx.audio;
 	}
 
 	@Override
-	public Input getInput () {
+	public Input getInput() {
 		return Gdx.input;
 	}
 
 	@Override
-	public Files getFiles () {
+	public Files getFiles() {
 		return Gdx.files;
 	}
 
@@ -264,79 +273,51 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		return Gdx.net;
 	}
 
-	private void checkLogLabel () {
-		if (log == null) {
-			log = new TextArea();
-			log.setSize(graphics.getWidth() + "px", "200px");
-			log.setReadOnly(true);
-			root.add(log);
-		}
-	}
-
 	@Override
-	public void log (String tag, String message) {
+	public void log(String tag, String message) {
 		if (logLevel >= LOG_INFO) {
-			checkLogLabel();
-			log.setText(log.getText() + "\n" + tag + ": " + message);
-			log.setCursorPos(log.getText().length() - 1);
-			System.out.println(tag + ": " + message);
+			consoleLog(tag + ": " + message);
 		}
 	}
 
 	@Override
-	public void log (String tag, String message, Exception exception) {
+	public void log(String tag, String message, Exception exception) {
 		if (logLevel >= LOG_INFO) {
-			checkLogLabel();
-			log.setText(log.getText() + "\n" + tag + ": " + message + "\n" + exception.getMessage() + "\n");
-			log.setCursorPos(log.getText().length() - 1);
-			System.out.println(tag + ": " + message + "\n" + exception.getMessage());
-			System.out.println(getStackTrace(exception));
+			consoleLog(tag + ": " + message + "\n" + exception.getMessage());
+			consoleLog(getStackTrace(exception));
 		}
 	}
 
 	@Override
-	public void error (String tag, String message) {
+	public void error(String tag, String message) {
 		if (logLevel >= LOG_ERROR) {
-			checkLogLabel();
-			log.setText(log.getText() + "\n" + tag + ": " + message);
-			log.setCursorPos(log.getText().length() - 1);
-			System.err.println(tag + ": " + message);
+			consoleLog(tag + ": " + message);
 		}
 	}
 
 	@Override
-	public void error (String tag, String message, Throwable exception) {
+	public void error(String tag, String message, Throwable exception) {
 		if (logLevel >= LOG_ERROR) {
-			checkLogLabel();
-			log.setText(log.getText() + "\n" + tag + ": " + message + "\n" + exception.getMessage());
-			log.setCursorPos(log.getText().length() - 1);
-			System.err.println(tag + ": " + message + "\n" + exception.getMessage() + "\n");
-			System.out.println(getStackTrace(exception));
+			consoleLog(getStackTrace(exception));
 		}
 	}
 
 	@Override
-	public void debug (String tag, String message) {
+	public void debug(String tag, String message) {
 		if (logLevel >= LOG_DEBUG) {
-			checkLogLabel();
-			log.setText(log.getText() + "\n" + tag + ": " + message + "\n");
-			log.setCursorPos(log.getText().length() - 1);
-			System.out.println(tag + ": " + message + "\n");
+			consoleLog(tag + ": " + message + "\n");
 		}
 	}
 
 	@Override
-	public void debug (String tag, String message, Throwable exception) {
+	public void debug(String tag, String message, Throwable exception) {
 		if (logLevel >= LOG_DEBUG) {
-			checkLogLabel();
-			log.setText(log.getText() + "\n" + tag + ": " + message + "\n" + exception.getMessage() + "\n");
-			log.setCursorPos(log.getText().length() - 1);
-			System.out.println(tag + ": " + message + "\n" + exception.getMessage());
-			System.out.println(getStackTrace(exception));
+			consoleLog(tag + ": " + message + "\n" + exception.getMessage());
+			consoleLog(getStackTrace(exception));
 		}
 	}
 
-	private String getStackTrace (Throwable e) {
+	private String getStackTrace(Throwable e) {
 		StringBuffer buffer = new StringBuffer();
 		for (StackTraceElement trace : e.getStackTrace()) {
 			buffer.append(trace.toString() + "\n");
@@ -345,32 +326,32 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	}
 
 	@Override
-	public void setLogLevel (int logLevel) {
+	public void setLogLevel(int logLevel) {
 		this.logLevel = logLevel;
 	}
 
 	@Override
-	public ApplicationType getType () {
+	public ApplicationType getType() {
 		return ApplicationType.WebGL;
 	}
 
 	@Override
-	public int getVersion () {
+	public int getVersion() {
 		return 0;
 	}
 
 	@Override
-	public long getJavaHeap () {
+	public long getJavaHeap() {
 		return 0;
 	}
 
 	@Override
-	public long getNativeHeap () {
+	public long getNativeHeap() {
 		return 0;
 	}
 
 	@Override
-	public Preferences getPreferences (String name) {
+	public Preferences getPreferences(String name) {
 		Preferences pref = prefs.get(name);
 		if (pref == null) {
 			pref = new GwtPreferences(name);
@@ -383,109 +364,112 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	public Clipboard getClipboard() {
 		return new Clipboard() {
 			@Override
-			public String getContents () {
+			public String getContents() {
 				return null;
 			}
 
 			@Override
-			public void setContents (String content) {
+			public void setContents(String content) {
 			}
 		};
 	}
 
 	@Override
-	public void postRunnable (Runnable runnable) {
+	public void postRunnable(Runnable runnable) {
 		runnables.add(runnable);
 	}
 
 	@Override
-	public void exit () {
+	public void exit() {
 	}
 
-	/** Contains precomputed information on the user-agent. Useful for dealing with browser and OS behavioral differences. Kindly
-	 * borrowed from PlayN */
-	public static AgentInfo agentInfo () {
+	/**
+	 * Contains precomputed information on the user-agent. Useful for dealing
+	 * with browser and OS behavioral differences. Kindly
+	 * borrowed from PlayN
+	 */
+	public static AgentInfo agentInfo() {
 		return agentInfo;
 	}
 
 	/** kindly borrowed from PlayN **/
-	private static native AgentInfo computeAgentInfo () /*-{
-																			var userAgent = navigator.userAgent.toLowerCase();
-																			return {
-																			// browser type flags
-																			isFirefox : userAgent.indexOf("firefox") != -1,
-																			isChrome : userAgent.indexOf("chrome") != -1,
-																			isSafari : userAgent.indexOf("safari") != -1,
-																			isOpera : userAgent.indexOf("opera") != -1,
-																			isIE : userAgent.indexOf("msie") != -1,
-																			// OS type flags
-																			isMacOS : userAgent.indexOf("mac") != -1,
-																			isLinux : userAgent.indexOf("linux") != -1,
-																			isWindows : userAgent.indexOf("win") != -1
-																			};
-																			}-*/;
+	private static native AgentInfo computeAgentInfo() /*-{
+		var userAgent = navigator.userAgent.toLowerCase();
+		return {
+			// browser type flags
+			isFirefox : userAgent.indexOf("firefox") != -1,
+			isChrome : userAgent.indexOf("chrome") != -1,
+			isSafari : userAgent.indexOf("safari") != -1,
+			isOpera : userAgent.indexOf("opera") != -1,
+			isIE : userAgent.indexOf("msie") != -1,
+			// OS type flags
+			isMacOS : userAgent.indexOf("mac") != -1,
+			isLinux : userAgent.indexOf("linux") != -1,
+			isWindows : userAgent.indexOf("win") != -1
+		};
+	}-*/;
 
 	/** Returned by {@link #agentInfo}. Kindly borrowed from PlayN. */
 	public static class AgentInfo extends JavaScriptObject {
-		public final native boolean isFirefox () /*-{
-																return this.isFirefox;
-																}-*/;
+		public final native boolean isFirefox() /*-{
+			return this.isFirefox;
+		}-*/;
 
-		public final native boolean isChrome () /*-{
-																return this.isChrome;
-																}-*/;
+		public final native boolean isChrome() /*-{
+			return this.isChrome;
+		}-*/;
 
-		public final native boolean isSafari () /*-{
-																return this.isSafari;
-																}-*/;
+		public final native boolean isSafari() /*-{
+			return this.isSafari;
+		}-*/;
 
-		public final native boolean isOpera () /*-{
-															return this.isOpera;
-															}-*/;
+		public final native boolean isOpera() /*-{
+			return this.isOpera;
+		}-*/;
 
-		public final native boolean isIE () /*-{
-														return this.isIE;
-														}-*/;
+		public final native boolean isIE() /*-{
+			return this.isIE;
+		}-*/;
 
-		public final native boolean isMacOS () /*-{
-															return this.isMacOS;
-															}-*/;
+		public final native boolean isMacOS() /*-{
+			return this.isMacOS;
+		}-*/;
 
-		public final native boolean isLinux () /*-{
-															return this.isLinux;
-															}-*/;
+		public final native boolean isLinux() /*-{
+			return this.isLinux;
+		}-*/;
 
-		public final native boolean isWindows () /*-{
-																return this.isWindows;
-																}-*/;
+		public final native boolean isWindows() /*-{
+			return this.isWindows;
+		}-*/;
 
-		protected AgentInfo () {
+		protected AgentInfo() {
 		}
 	}
 
-	public String getBaseUrl () {
+	public String getBaseUrl() {
 		return preloader.baseUrl;
 	}
 
-	public Preloader getPreloader () {
+	public Preloader getPreloader() {
 		return preloader;
 	}
 
 	@Override
-	public void addLifecycleListener (LifecycleListener listener) {
-		synchronized(lifecycleListeners) {
+	public void addLifecycleListener(LifecycleListener listener) {
+		synchronized (lifecycleListeners) {
 			lifecycleListeners.add(listener);
 		}
 	}
 
 	@Override
-	public void removeLifecycleListener (LifecycleListener listener) {
-		synchronized(lifecycleListeners) {
+	public void removeLifecycleListener(LifecycleListener listener) {
+		synchronized (lifecycleListeners) {
 			lifecycleListeners.removeValue(listener, true);
 		}
 	}
 
-	native void consoleLog(String message) /*-{
-		console.log( "GWT:" + message );
+	private native void consoleLog(String message) /*-{
+		console.log(message);
 	}-*/;
 }
