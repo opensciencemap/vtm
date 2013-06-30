@@ -26,10 +26,12 @@ import com.badlogic.gdx.backends.gwt.widgets.TextInputDialogBox;
 import com.badlogic.gdx.backends.gwt.widgets.TextInputDialogBox.TextInputDialogListener;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.CanvasElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.KeyCodes;
 
 public class GwtInput implements Input {
@@ -46,111 +48,117 @@ public class GwtInput implements Input {
 	final CanvasElement canvas;
 	boolean hasFocus = true;
 
-	public GwtInput (CanvasElement canvas) {
+	public GwtInput(CanvasElement canvas) {
 		this.canvas = canvas;
 		hookEvents();
 	}
 
 	@Override
-	public float getAccelerometerX () {
+	public float getAccelerometerX() {
 		return 0;
 	}
 
 	@Override
-	public float getAccelerometerY () {
+	public float getAccelerometerY() {
 		return 0;
 	}
 
 	@Override
-	public float getAccelerometerZ () {
+	public float getAccelerometerZ() {
 		return 0;
 	}
 
 	@Override
-	public int getX () {
+	public int getX() {
 		return mouseX;
 	}
 
 	@Override
-	public int getX (int pointer) {
-		if (pointer != 0) return 0;
+	public int getX(int pointer) {
+		if (pointer != 0)
+			return 0;
 		return mouseX;
 	}
 
 	@Override
-	public int getDeltaX () {
+	public int getDeltaX() {
 		return deltaX;
 	}
 
 	@Override
-	public int getDeltaX (int pointer) {
-		if (pointer != 0) return 0;
+	public int getDeltaX(int pointer) {
+		if (pointer != 0)
+			return 0;
 		return deltaX;
 	}
 
 	@Override
-	public int getY () {
+	public int getY() {
 		return mouseY;
 	}
 
 	@Override
-	public int getY (int pointer) {
-		if (pointer != 0) return 0;
+	public int getY(int pointer) {
+		if (pointer != 0)
+			return 0;
 		return mouseY;
 	}
 
 	@Override
-	public int getDeltaY () {
+	public int getDeltaY() {
 		return deltaY;
 	}
 
 	@Override
-	public int getDeltaY (int pointer) {
-		if (pointer != 0) return 0;
+	public int getDeltaY(int pointer) {
+		if (pointer != 0)
+			return 0;
 		return deltaY;
 	}
 
 	@Override
-	public boolean isTouched () {
+	public boolean isTouched() {
 		return touched;
 	}
 
 	@Override
-	public boolean justTouched () {
+	public boolean justTouched() {
 		return justTouched;
 	}
 
 	@Override
-	public boolean isTouched (int pointer) {
-		if (pointer != 0) return false;
+	public boolean isTouched(int pointer) {
+		if (pointer != 0)
+			return false;
 		return touched;
 	}
 
 	@Override
-	public boolean isButtonPressed (int button) {
+	public boolean isButtonPressed(int button) {
 		return button == Buttons.LEFT && touched;
 	}
 
 	@Override
-	public boolean isKeyPressed (int key) {
-		if (key == Keys.ANY_KEY) return pressedKeys.size() > 0;
+	public boolean isKeyPressed(int key) {
+		if (key == Keys.ANY_KEY)
+			return pressedKeys.size() > 0;
 		return pressedKeys.contains(key);
 	}
 
 	@Override
-	public void getTextInput (TextInputListener listener, String title, String text) {
+	public void getTextInput(TextInputListener listener, String title, String text) {
 		TextInputDialogBox dialog = new TextInputDialogBox(title, text, null);
 		final TextInputListener capturedListener = listener;
 		dialog.setListener(new TextInputDialogListener() {
 			@Override
-			public void onPositive (String text) {
+			public void onPositive(String text) {
 				if (capturedListener != null) {
 					capturedListener.input(text);
 				}
 			}
 
 			@Override
-			public void onNegative () {
+			public void onNegative() {
 				if (capturedListener != null) {
 					capturedListener.canceled();
 				}
@@ -159,19 +167,19 @@ public class GwtInput implements Input {
 	}
 
 	@Override
-	public void getPlaceholderTextInput (TextInputListener listener, String title, String placeholder) {
+	public void getPlaceholderTextInput(TextInputListener listener, String title, String placeholder) {
 		TextInputDialogBox dialog = new TextInputDialogBox(title, null, placeholder);
 		final TextInputListener capturedListener = listener;
 		dialog.setListener(new TextInputDialogListener() {
 			@Override
-			public void onPositive (String text) {
+			public void onPositive(String text) {
 				if (capturedListener != null) {
 					capturedListener.input(text);
 				}
 			}
 
 			@Override
-			public void onNegative () {
+			public void onNegative() {
 				if (capturedListener != null) {
 					capturedListener.canceled();
 				}
@@ -180,162 +188,181 @@ public class GwtInput implements Input {
 	}
 
 	@Override
-	public void setOnscreenKeyboardVisible (boolean visible) {
+	public void setOnscreenKeyboardVisible(boolean visible) {
 	}
 
 	@Override
-	public void vibrate (int milliseconds) {
+	public void vibrate(int milliseconds) {
 	}
 
 	@Override
-	public void vibrate (long[] pattern, int repeat) {
+	public void vibrate(long[] pattern, int repeat) {
 	}
 
 	@Override
-	public void cancelVibrate () {
+	public void cancelVibrate() {
 	}
 
 	@Override
-	public float getAzimuth () {
+	public float getAzimuth() {
 		return 0;
 	}
 
 	@Override
-	public float getPitch () {
+	public float getPitch() {
 		return 0;
 	}
 
 	@Override
-	public float getRoll () {
+	public float getRoll() {
 		return 0;
 	}
 
 	@Override
-	public void getRotationMatrix (float[] matrix) {
+	public void getRotationMatrix(float[] matrix) {
 	}
 
 	@Override
-	public long getCurrentEventTime () {
+	public long getCurrentEventTime() {
 		return currentEventTimeStamp;
 	}
 
 	@Override
-	public void setCatchBackKey (boolean catchBack) {
+	public void setCatchBackKey(boolean catchBack) {
 	}
 
 	@Override
-	public void setCatchMenuKey (boolean catchMenu) {
+	public void setCatchMenuKey(boolean catchMenu) {
 	}
 
 	@Override
-	public void setInputProcessor (InputProcessor processor) {
+	public void setInputProcessor(InputProcessor processor) {
 		this.processor = processor;
 	}
 
 	@Override
-	public InputProcessor getInputProcessor () {
+	public InputProcessor getInputProcessor() {
 		return processor;
 	}
 
 	@Override
-	public boolean isPeripheralAvailable (Peripheral peripheral) {
-		if (peripheral == Peripheral.Accelerometer) return false;
-		if (peripheral == Peripheral.Compass) return false;
-		if (peripheral == Peripheral.HardwareKeyboard) return true;
-		if (peripheral == Peripheral.MultitouchScreen) return false;
-		if (peripheral == Peripheral.OnscreenKeyboard) return false;
-		if (peripheral == Peripheral.Vibrator) return false;
+	public boolean isPeripheralAvailable(Peripheral peripheral) {
+		if (peripheral == Peripheral.Accelerometer)
+			return false;
+		if (peripheral == Peripheral.Compass)
+			return false;
+		if (peripheral == Peripheral.HardwareKeyboard)
+			return true;
+		if (peripheral == Peripheral.MultitouchScreen)
+			return false;
+		if (peripheral == Peripheral.OnscreenKeyboard)
+			return false;
+		if (peripheral == Peripheral.Vibrator)
+			return false;
 		return false;
 	}
 
 	@Override
-	public int getRotation () {
+	public int getRotation() {
 		return 0;
 	}
 
 	@Override
-	public Orientation getNativeOrientation () {
+	public Orientation getNativeOrientation() {
 		return Orientation.Landscape;
 	}
 
-	/** from https://github.com/toji/game-shim/blob/master/game-shim.js
-	 * @return is Cursor catched */
-	private native boolean isCursorCatchedJSNI () /*-{
-																	if(!navigator.pointer) {
-																	navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
-																	}
-																	if(navigator.pointer) {
-																	if(typeof(navigator.pointer.isLocked) === "boolean") {
-																	// Chrome initially launched with this interface
-																	return navigator.pointer.isLocked;
-																	} else if(typeof(navigator.pointer.isLocked) === "function") {
-																	// Some older builds might provide isLocked as a function
-																	return navigator.pointer.isLocked();
-																	} else if(typeof(navigator.pointer.islocked) === "function") {
-																	// For compatibility with early Firefox build
-																	return navigator.pointer.islocked();
-																	}
-																	}
-																	return false;
-																	}-*/;
+	/**
+	 * from https://github.com/toji/game-shim/blob/master/game-shim.js
+	 *
+	 * @return is Cursor catched
+	 */
+	private native boolean isCursorCatchedJSNI() /*-{
+		if (!navigator.pointer) {
+			navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
+		}
+		if (navigator.pointer) {
+			if (typeof (navigator.pointer.isLocked) === "boolean") {
+				// Chrome initially launched with this interface
+				return navigator.pointer.isLocked;
+			} else if (typeof (navigator.pointer.isLocked) === "function") {
+				// Some older builds might provide isLocked as a function
+				return navigator.pointer.isLocked();
+			} else if (typeof (navigator.pointer.islocked) === "function") {
+				// For compatibility with early Firefox build
+				return navigator.pointer.islocked();
+			}
+		}
+		return false;
+	}-*/;
 
-	/** from https://github.com/toji/game-shim/blob/master/game-shim.js
-	 * @param element Canvas */
-	private native void setCursorCatchedJSNI (CanvasElement element) /*-{
-																							// Navigator pointer is not the right interface according to spec.
-																							// Here for backwards compatibility only
-																							if(!navigator.pointer) {
-																							navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
-																							}
-																							// element.requestPointerLock
-																							if(!element.requestPointerLock) {
-																							element.requestPointerLock = (function() {
-																							return  element.webkitRequestPointerLock ||
-																							element.mozRequestPointerLock    ||
-																							function(){
-																							if(navigator.pointer) {
-																							navigator.pointer.lock(element);
-																							}
-																							};
-																							})();
-																							}
-																							element.requestPointerLock();
-																							}-*/;
+	/**
+	 * from https://github.com/toji/game-shim/blob/master/game-shim.js
+	 *
+	 * @param element Canvas
+	 */
+	private native void setCursorCatchedJSNI(CanvasElement element) /*-{
+		// Navigator pointer is not the right interface according to spec.
+		// Here for backwards compatibility only
+		if (!navigator.pointer) {
+			navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
+		}
+		// element.requestPointerLock
+		if (!element.requestPointerLock) {
+			element.requestPointerLock = (function() {
+				return element.webkitRequestPointerLock
+						|| element.mozRequestPointerLock || function() {
+							if (navigator.pointer) {
+								navigator.pointer.lock(element);
+							}
+						};
+			})();
+		}
+		element.requestPointerLock();
+	}-*/;
 
 	/** from https://github.com/toji/game-shim/blob/master/game-shim.js */
-	private native void exitCursorCatchedJSNI () /*-{
-																if(!$doc.exitPointerLock) {
-																$doc.exitPointerLock = (function() {
-																return  $doc.webkitExitPointerLock ||
-																$doc.mozExitPointerLock ||
-																function(){
-																if(navigator.pointer) {
-																var elem = this;
-																navigator.pointer.unlock();
-																}
-																};
-																})();
-																}
-																}-*/;
+	private native void exitCursorCatchedJSNI() /*-{
+		if (!$doc.exitPointerLock) {
+			$doc.exitPointerLock = (function() {
+				return $doc.webkitExitPointerLock || $doc.mozExitPointerLock
+						|| function() {
+							if (navigator.pointer) {
+								var elem = this;
+								navigator.pointer.unlock();
+							}
+						};
+			})();
+		}
+	}-*/;
 
-	/** from https://github.com/toji/game-shim/blob/master/game-shim.js
+	/**
+	 * from https://github.com/toji/game-shim/blob/master/game-shim.js
+	 *
 	 * @param event JavaScript Mouse Event
-	 * @return movement in x direction */
-	private native float getMovementXJSNI (NativeEvent event) /*-{
-																					return event.movementX || event.webkitMovementX || 0;
-																					}-*/;
+	 * @return movement in x direction
+	 */
+	private native float getMovementXJSNI(NativeEvent event) /*-{
+		return event.movementX || event.webkitMovementX || 0;
+	}-*/;
 
-	/** from https://github.com/toji/game-shim/blob/master/game-shim.js
+	/**
+	 * from https://github.com/toji/game-shim/blob/master/game-shim.js
+	 *
 	 * @param event JavaScript Mouse Event
-	 * @return movement in y direction */
-	private native float getMovementYJSNI (NativeEvent event) /*-{
-																					return event.movementY || event.webkitMovementY || 0;
-																					}-*/;
+	 * @return movement in y direction
+	 */
+	private native float getMovementYJSNI(NativeEvent event) /*-{
+		return event.movementY || event.webkitMovementY || 0;
+	}-*/;
 
-	/** works only for Chrome > Version 18 with enabled Mouse Lock enable in about:flags or start Chrome with the
-	 * --enable-pointer-lock flag */
+	/**
+	 * works only for Chrome > Version 18 with enabled Mouse Lock enable in
+	 * about:flags or start Chrome with the
+	 * --enable-pointer-lock flag
+	 */
 	@Override
-	public void setCursorCatched (boolean catched) {
+	public void setCursorCatched(boolean catched) {
 		if (catched)
 			setCursorCatchedJSNI(canvas);
 		else
@@ -343,76 +370,79 @@ public class GwtInput implements Input {
 	}
 
 	@Override
-	public boolean isCursorCatched () {
+	public boolean isCursorCatched() {
 		return isCursorCatchedJSNI();
 	}
 
 	@Override
-	public void setCursorPosition (int x, int y) {
+	public void setCursorPosition(int x, int y) {
 		// FIXME??
 	}
 
 	// kindly borrowed from our dear playn friends...
-	static native void addEventListener (JavaScriptObject target, String name, GwtInput handler, boolean capture) /*-{
-																																						target
-																																						.addEventListener(
-																																						name,
-																																						function(e) {
-																																						handler.@com.badlogic.gdx.backends.gwt.GwtInput::handleEvent(Lcom/google/gwt/dom/client/NativeEvent;)(e);
-																																						}, capture);
-																																						}-*/;
+	static native void addEventListener(JavaScriptObject target, String name, GwtInput handler,
+			boolean capture) /*-{
+		target
+				.addEventListener(
+						name,
+						function(e) {
+							handler.@com.badlogic.gdx.backends.gwt.GwtInput::handleEvent(Lcom/google/gwt/dom/client/NativeEvent;)(e);
+						}, capture);
+	}-*/;
 
-	private static native float getMouseWheelVelocity (NativeEvent evt) /*-{
-																								var delta = 0.0;
-																								var agentInfo = @com.badlogic.gdx.backends.gwt.GwtApplication::agentInfo()();
+	private static native float getMouseWheelVelocity(NativeEvent evt) /*-{
+		var delta = 0.0;
+		var agentInfo = @com.badlogic.gdx.backends.gwt.GwtApplication::agentInfo()();
 
-																								if (agentInfo.isFirefox) {
-																								if (agentInfo.isMacOS) {
-																								delta = 1.0 * evt.detail;
-																								} else {
-																								delta = 1.0 * evt.detail / 3;
-																								}
-																								} else if (agentInfo.isOpera) {
-																								if (agentInfo.isLinux) {
-																								delta = -1.0 * evt.wheelDelta / 80;
-																								} else {
-																								// on mac
-																								delta = -1.0 * evt.wheelDelta / 40;
-																								}
-																								} else if (agentInfo.isChrome || agentInfo.isSafari) {
-																								delta = -1.0 * evt.wheelDelta / 120;
-																								// handle touchpad for chrome
-																								if (Math.abs(delta) < 1) {
-																								if (agentInfo.isWindows) {
-																								delta = -1.0 * evt.wheelDelta;
-																								} else if (agentInfo.isMacOS) {
-																								delta = -1.0 * evt.wheelDelta / 3;
-																								}
-																								}
-																								}
-																								return delta;
-																								}-*/;
-
-	/** Kindly borrowed from PlayN. **/
-	protected static native String getMouseWheelEvent () /*-{
-																			if (navigator.userAgent.toLowerCase().indexOf('firefox') != -1) {
-																			return "DOMMouseScroll";
-																			} else {
-																			return "mousewheel";
-																			}
-																			}-*/;
+		if (agentInfo.isFirefox) {
+			if (agentInfo.isMacOS) {
+				delta = 1.0 * evt.detail;
+			} else {
+				delta = 1.0 * evt.detail / 3;
+			}
+		} else if (agentInfo.isOpera) {
+			if (agentInfo.isLinux) {
+				delta = -1.0 * evt.wheelDelta / 80;
+			} else {
+				// on mac
+				delta = -1.0 * evt.wheelDelta / 40;
+			}
+		} else if (agentInfo.isChrome || agentInfo.isSafari) {
+			delta = -1.0 * evt.wheelDelta / 120;
+			// handle touchpad for chrome
+			if (Math.abs(delta) < 1) {
+				if (agentInfo.isWindows) {
+					delta = -1.0 * evt.wheelDelta;
+				} else if (agentInfo.isMacOS) {
+					delta = -1.0 * evt.wheelDelta / 3;
+				}
+			}
+		}
+		return delta;
+	}-*/;
 
 	/** Kindly borrowed from PlayN. **/
-	protected static float getRelativeX (NativeEvent e, Element target) {
-		return e.getClientX() - target.getAbsoluteLeft() + target.getScrollLeft() + target.getOwnerDocument().getScrollLeft();
+	protected static native String getMouseWheelEvent() /*-{
+		if (navigator.userAgent.toLowerCase().indexOf('firefox') != -1) {
+			return "DOMMouseScroll";
+		} else {
+			return "mousewheel";
+		}
+	}-*/;
+
+	/** Kindly borrowed from PlayN. **/
+	protected static float getRelativeX(NativeEvent e, Element target) {
+		return e.getClientX() - target.getAbsoluteLeft() + target.getScrollLeft()
+				+ target.getOwnerDocument().getScrollLeft();
 	}
 
 	/** Kindly borrowed from PlayN. **/
-	protected static float getRelativeY (NativeEvent e, Element target) {
-		return e.getClientY() - target.getAbsoluteTop() + target.getScrollTop() + target.getOwnerDocument().getScrollTop();
+	protected static float getRelativeY(NativeEvent e, Element target) {
+		return e.getClientY() - target.getAbsoluteTop() + target.getScrollTop()
+				+ target.getOwnerDocument().getScrollTop();
 	}
 
-	private void hookEvents () {
+	private void hookEvents() {
 		addEventListener(canvas, "mousedown", this, true);
 		addEventListener(Document.get(), "mousedown", this, true);
 		addEventListener(canvas, "mouseup", this, true);
@@ -423,22 +453,71 @@ public class GwtInput implements Input {
 		addEventListener(Document.get(), "keydown", this, false);
 		addEventListener(Document.get(), "keyup", this, false);
 		addEventListener(Document.get(), "keypress", this, false);
+		addEventListener(canvas, "touchstart", this, true);
+		addEventListener(Document.get(), "touchstart", this, true);
+		addEventListener(canvas, "touchend", this, true);
+		addEventListener(Document.get(), "touchend", this, true);
+		addEventListener(canvas, "touchmove", this, true);
+		addEventListener(Document.get(), "touchmove", this, true);
+
 	}
 
-	private int getButton (int button) {
-		if (button == NativeEvent.BUTTON_LEFT) return Buttons.LEFT;
-		if (button == NativeEvent.BUTTON_RIGHT) return Buttons.RIGHT;
-		if (button == NativeEvent.BUTTON_MIDDLE) return Buttons.MIDDLE;
+	private int getButton(int button) {
+		if (button == NativeEvent.BUTTON_LEFT)
+			return Buttons.LEFT;
+		if (button == NativeEvent.BUTTON_RIGHT)
+			return Buttons.RIGHT;
+		if (button == NativeEvent.BUTTON_MIDDLE)
+			return Buttons.MIDDLE;
 		return Buttons.LEFT;
 	}
 
-	private void handleEvent (NativeEvent e) {
+	private void handleEvent(NativeEvent e) {
 
-		if (e.getType().equals("mousedown")) {
+		double r = GwtGraphics.getDevicePixelRatioJSNI();
+
+		if (e.getType().equals("touchstart")) {
+			this.justTouched = true;
+			this.deltaX = 0;
+			this.deltaY = 0;
+			this.currentEventTimeStamp = TimeUtils.nanoTime();
+
+			if (processor != null) {
+				e.preventDefault();
+				JsArray<Touch> ts = e.getChangedTouches();
+				for (int i = 0, n = ts.length(); i < n; i++) {
+					Touch t = ts.get(i);
+					processor.touchDown((int)(r * t.getClientX()), (int) (r * t.getClientY()), t.getIdentifier(),
+							Buttons.LEFT);
+				}
+			}
+		} else if (e.getType().equals("touchend")) {
+			this.currentEventTimeStamp = TimeUtils.nanoTime();
+			if (processor != null) {
+				e.preventDefault();
+				JsArray<Touch> ts = e.getChangedTouches();
+				for (int i = 0, n = ts.length(); i < n; i++) {
+					Touch t = ts.get(i);
+					processor.touchUp((int)(r * t.getClientX()), (int) (r * t.getClientY()), t.getIdentifier(),
+							Buttons.LEFT);
+				}
+			}
+		} else if (e.getType().equals("touchmove")) {
+			this.currentEventTimeStamp = TimeUtils.nanoTime();
+			if (processor != null) {
+				e.preventDefault();
+				JsArray<Touch> ts = e.getChangedTouches();
+				for (int i = 0, n = ts.length(); i < n; i++) {
+					Touch t = ts.get(i);
+					processor.touchDragged((int)(r * t.getClientX()), (int) (r * t.getClientY()), t.getIdentifier());
+				}
+			}
+		} else if (e.getType().equals("mousedown")) {
 			if (!e.getEventTarget().equals(canvas) || touched) {
-				float mouseX = (int)getRelativeX(e, canvas);
-				float mouseY = (int)getRelativeY(e, canvas);
-				if (mouseX < 0 || mouseX > Gdx.graphics.getWidth() || mouseY < 0 || mouseY > Gdx.graphics.getHeight()) {
+				float mouseX = (int) getRelativeX(e, canvas);
+				float mouseY = (int) getRelativeY(e, canvas);
+				if (mouseX < 0 || mouseX > Gdx.graphics.getWidth() || mouseY < 0
+						|| mouseY > Gdx.graphics.getHeight()) {
 					hasFocus = false;
 				}
 				return;
@@ -453,24 +532,23 @@ public class GwtInput implements Input {
 				this.mouseX += getMovementXJSNI(e);
 				this.mouseY += getMovementYJSNI(e);
 			} else {
-				this.mouseX = (int)getRelativeX(e, canvas);
-				this.mouseY = (int)getRelativeY(e, canvas);
+				this.mouseX = (int) getRelativeX(e, canvas);
+				this.mouseY = (int) getRelativeY(e, canvas);
 			}
 			this.currentEventTimeStamp = TimeUtils.nanoTime();
-			if (processor != null) processor.touchDown(mouseX, mouseY, 0, getButton(e.getButton()));
-		}
-
-		if (e.getType().equals("mousemove")) {
+			if (processor != null)
+				processor.touchDown(mouseX, mouseY, 0, getButton(e.getButton()));
+		} else if (e.getType().equals("mousemove")) {
 			if (isCursorCatched()) {
-				this.deltaX = (int)getMovementXJSNI(e);
-				this.deltaY = (int)getMovementYJSNI(e);
+				this.deltaX = (int) getMovementXJSNI(e);
+				this.deltaY = (int) getMovementYJSNI(e);
 				this.mouseX += getMovementXJSNI(e);
 				this.mouseY += getMovementYJSNI(e);
 			} else {
-				this.deltaX = (int)getRelativeX(e, canvas) - mouseX;
-				this.deltaY = (int)getRelativeY(e, canvas) - mouseY;
-				this.mouseX = (int)getRelativeX(e, canvas);
-				this.mouseY = (int)getRelativeY(e, canvas);
+				this.deltaX = (int) getRelativeX(e, canvas) - mouseX;
+				this.deltaY = (int) getRelativeY(e, canvas) - mouseY;
+				this.mouseX = (int) getRelativeX(e, canvas);
+				this.mouseY = (int) getRelativeY(e, canvas);
 			}
 			this.currentEventTimeStamp = TimeUtils.nanoTime();
 			if (processor != null) {
@@ -479,29 +557,27 @@ public class GwtInput implements Input {
 				else
 					processor.mouseMoved(mouseX, mouseY);
 			}
-		}
-
-		if (e.getType().equals("mouseup")) {
-			if (!touched) return;
+		} else if (e.getType().equals("mouseup")) {
+			if (!touched)
+				return;
 			this.pressedButtons.remove(getButton(e.getButton()));
 			this.touched = pressedButtons.size() > 0;
 			if (isCursorCatched()) {
-				this.deltaX = (int)getMovementXJSNI(e);
-				this.deltaY = (int)getMovementYJSNI(e);
+				this.deltaX = (int) getMovementXJSNI(e);
+				this.deltaY = (int) getMovementYJSNI(e);
 				this.mouseX += getMovementXJSNI(e);
 				this.mouseY += getMovementYJSNI(e);
 			} else {
-				this.deltaX = (int)getRelativeX(e, canvas) - mouseX;
-				this.deltaY = (int)getRelativeY(e, canvas) - mouseY;
-				this.mouseX = (int)getRelativeX(e, canvas);
-				this.mouseY = (int)getRelativeY(e, canvas);
+				this.deltaX = (int) getRelativeX(e, canvas) - mouseX;
+				this.deltaY = (int) getRelativeY(e, canvas) - mouseY;
+				this.mouseX = (int) getRelativeX(e, canvas);
+				this.mouseY = (int) getRelativeY(e, canvas);
 			}
 			this.currentEventTimeStamp = TimeUtils.nanoTime();
 			this.touched = false;
-			if (processor != null) processor.touchUp(mouseX, mouseY, 0, getButton(e.getButton()));
-		}
-
-		if (e.getType().equals("keydown") && hasFocus) {
+			if (processor != null)
+				processor.touchUp(mouseX, mouseY, 0, getButton(e.getButton()));
+		} else if (e.getType().equals("keydown") && hasFocus) {
 			System.out.println("keydown");
 			int code = keyForCode(e.getKeyCode());
 			if (code == 67) {
@@ -512,236 +588,234 @@ public class GwtInput implements Input {
 				}
 			} else {
 				this.pressedKeys.add(code);
-				if (processor != null) processor.keyDown(code);
+				if (processor != null)
+					processor.keyDown(code);
 			}
-		}
-
-		if (e.getType().equals("keypress") && hasFocus) {
+		} else if (e.getType().equals("keypress") && hasFocus) {
 			System.out.println("keypress");
-			char c = (char)e.getCharCode();
-			if (processor != null) processor.keyTyped(c);
-		}
-
-		if (e.getType().equals("keyup") && hasFocus) {
+			char c = (char) e.getCharCode();
+			if (processor != null)
+				processor.keyTyped(c);
+		} else if (e.getType().equals("keyup") && hasFocus) {
 			System.out.println("keyup");
 			int code = keyForCode(e.getKeyCode());
 			this.pressedKeys.remove(code);
-			if (processor != null) processor.keyUp(code);
-		}
-
-		if (e.getType().equals("mousewheel") ||e.getType().equals("DOMMouseScroll")){
+			if (processor != null)
+				processor.keyUp(code);
+		} else if (e.getType().equals("mousewheel") || e.getType().equals("DOMMouseScroll")) {
 			float dir = getMouseWheelVelocity(e);
 
-			if (dir != 0 && processor != null) processor.scrolled(dir > 0 ? 1 : -1);
+			if (dir != 0 && processor != null)
+				processor.scrolled(dir > 0 ? 1 : -1);
 
 		}
 
-// if(hasFocus) e.preventDefault();
+		// if(hasFocus) e.preventDefault();
 	}
 
 	/** borrowed from PlayN, thanks guys **/
-	private static int keyForCode (int keyCode) {
+	private static int keyForCode(int keyCode) {
 		switch (keyCode) {
-		case KeyCodes.KEY_ALT:
-			return Keys.ALT_LEFT;
-		case KeyCodes.KEY_BACKSPACE:
-			return Keys.BACKSPACE;
-		case KeyCodes.KEY_CTRL:
-			return Keys.CONTROL_LEFT;
-		case KeyCodes.KEY_DELETE:
-			return Keys.DEL;
-		case KeyCodes.KEY_DOWN:
-			return Keys.DOWN;
-		case KeyCodes.KEY_END:
-			return Keys.END;
-		case KeyCodes.KEY_ENTER:
-			return Keys.ENTER;
-		case KeyCodes.KEY_ESCAPE:
-			return Keys.ESCAPE;
-		case KeyCodes.KEY_HOME:
-			return Keys.HOME;
-		case KeyCodes.KEY_LEFT:
-			return Keys.LEFT;
-		case KeyCodes.KEY_PAGEDOWN:
-			return Keys.PAGE_DOWN;
-		case KeyCodes.KEY_PAGEUP:
-			return Keys.PAGE_UP;
-		case KeyCodes.KEY_RIGHT:
-			return Keys.RIGHT;
-		case KeyCodes.KEY_SHIFT:
-			return Keys.SHIFT_LEFT;
-		case KeyCodes.KEY_TAB:
-			return Keys.TAB;
-		case KeyCodes.KEY_UP:
-			return Keys.UP;
+			case KeyCodes.KEY_ALT:
+				return Keys.ALT_LEFT;
+			case KeyCodes.KEY_BACKSPACE:
+				return Keys.BACKSPACE;
+			case KeyCodes.KEY_CTRL:
+				return Keys.CONTROL_LEFT;
+			case KeyCodes.KEY_DELETE:
+				return Keys.DEL;
+			case KeyCodes.KEY_DOWN:
+				return Keys.DOWN;
+			case KeyCodes.KEY_END:
+				return Keys.END;
+			case KeyCodes.KEY_ENTER:
+				return Keys.ENTER;
+			case KeyCodes.KEY_ESCAPE:
+				return Keys.ESCAPE;
+			case KeyCodes.KEY_HOME:
+				return Keys.HOME;
+			case KeyCodes.KEY_LEFT:
+				return Keys.LEFT;
+			case KeyCodes.KEY_PAGEDOWN:
+				return Keys.PAGE_DOWN;
+			case KeyCodes.KEY_PAGEUP:
+				return Keys.PAGE_UP;
+			case KeyCodes.KEY_RIGHT:
+				return Keys.RIGHT;
+			case KeyCodes.KEY_SHIFT:
+				return Keys.SHIFT_LEFT;
+			case KeyCodes.KEY_TAB:
+				return Keys.TAB;
+			case KeyCodes.KEY_UP:
+				return Keys.UP;
 
-		case KEY_PAUSE:
-			return Keys.UNKNOWN; // FIXME
-		case KEY_CAPS_LOCK:
-			return Keys.UNKNOWN; // FIXME
-		case KEY_SPACE:
-			return Keys.SPACE;
-		case KEY_INSERT:
-			return Keys.INSERT;
-		case KEY_0:
-			return Keys.NUM_0;
-		case KEY_1:
-			return Keys.NUM_1;
-		case KEY_2:
-			return Keys.NUM_2;
-		case KEY_3:
-			return Keys.NUM_3;
-		case KEY_4:
-			return Keys.NUM_4;
-		case KEY_5:
-			return Keys.NUM_5;
-		case KEY_6:
-			return Keys.NUM_6;
-		case KEY_7:
-			return Keys.NUM_7;
-		case KEY_8:
-			return Keys.NUM_8;
-		case KEY_9:
-			return Keys.NUM_9;
-		case KEY_A:
-			return Keys.A;
-		case KEY_B:
-			return Keys.B;
-		case KEY_C:
-			return Keys.C;
-		case KEY_D:
-			return Keys.D;
-		case KEY_E:
-			return Keys.E;
-		case KEY_F:
-			return Keys.F;
-		case KEY_G:
-			return Keys.G;
-		case KEY_H:
-			return Keys.H;
-		case KEY_I:
-			return Keys.I;
-		case KEY_J:
-			return Keys.J;
-		case KEY_K:
-			return Keys.K;
-		case KEY_L:
-			return Keys.L;
-		case KEY_M:
-			return Keys.M;
-		case KEY_N:
-			return Keys.N;
-		case KEY_O:
-			return Keys.O;
-		case KEY_P:
-			return Keys.P;
-		case KEY_Q:
-			return Keys.Q;
-		case KEY_R:
-			return Keys.R;
-		case KEY_S:
-			return Keys.S;
-		case KEY_T:
-			return Keys.T;
-		case KEY_U:
-			return Keys.U;
-		case KEY_V:
-			return Keys.V;
-		case KEY_W:
-			return Keys.W;
-		case KEY_X:
-			return Keys.X;
-		case KEY_Y:
-			return Keys.Y;
-		case KEY_Z:
-			return Keys.Z;
-		case KEY_LEFT_WINDOW_KEY:
-			return Keys.UNKNOWN; // FIXME
-		case KEY_RIGHT_WINDOW_KEY:
-			return Keys.UNKNOWN; // FIXME
-			// case KEY_SELECT_KEY: return Keys.SELECT_KEY;
-		case KEY_NUMPAD0:
-			return Keys.NUM_0;
-		case KEY_NUMPAD1:
-			return Keys.NUM_1;
-		case KEY_NUMPAD2:
-			return Keys.NUM_2;
-		case KEY_NUMPAD3:
-			return Keys.NUM_3;
-		case KEY_NUMPAD4:
-			return Keys.NUM_4;
-		case KEY_NUMPAD5:
-			return Keys.NUM_5;
-		case KEY_NUMPAD6:
-			return Keys.NUM_6;
-		case KEY_NUMPAD7:
-			return Keys.NUM_7;
-		case KEY_NUMPAD8:
-			return Keys.NUM_8;
-		case KEY_NUMPAD9:
-			return Keys.NUM_9;
-		case KEY_MULTIPLY:
-			return Keys.UNKNOWN; // FIXME
-		case KEY_ADD:
-			return Keys.PLUS;
-		case KEY_SUBTRACT:
-			return Keys.MINUS;
-		case KEY_DECIMAL_POINT_KEY:
-			return Keys.PERIOD;
-		case KEY_DIVIDE:
-			return Keys.UNKNOWN; // FIXME
-		case KEY_F1:
-			return Keys.F1;
-		case KEY_F2:
-			return Keys.F2;
-		case KEY_F3:
-			return Keys.F3;
-		case KEY_F4:
-			return Keys.F4;
-		case KEY_F5:
-			return Keys.F5;
-		case KEY_F6:
-			return Keys.F6;
-		case KEY_F7:
-			return Keys.F7;
-		case KEY_F8:
-			return Keys.F8;
-		case KEY_F9:
-			return Keys.F9;
-		case KEY_F10:
-			return Keys.F10;
-		case KEY_F11:
-			return Keys.F11;
-		case KEY_F12:
-			return Keys.F12;
-		case KEY_NUM_LOCK:
-			return Keys.NUM;
-		case KEY_SCROLL_LOCK:
-			return Keys.UNKNOWN; // FIXME
-		case KEY_SEMICOLON:
-			return Keys.SEMICOLON;
-		case KEY_EQUALS:
-			return Keys.EQUALS;
-		case KEY_COMMA:
-			return Keys.COMMA;
-		case KEY_DASH:
-			return Keys.MINUS;
-		case KEY_PERIOD:
-			return Keys.PERIOD;
-		case KEY_FORWARD_SLASH:
-			return Keys.SLASH;
-		case KEY_GRAVE_ACCENT:
-			return Keys.UNKNOWN; // FIXME
-		case KEY_OPEN_BRACKET:
-			return Keys.LEFT_BRACKET;
-		case KEY_BACKSLASH:
-			return Keys.BACKSLASH;
-		case KEY_CLOSE_BRACKET:
-			return Keys.RIGHT_BRACKET;
-		case KEY_SINGLE_QUOTE:
-			return Keys.APOSTROPHE;
-		default:
-			return Keys.UNKNOWN;
+			case KEY_PAUSE:
+				return Keys.UNKNOWN; // FIXME
+			case KEY_CAPS_LOCK:
+				return Keys.UNKNOWN; // FIXME
+			case KEY_SPACE:
+				return Keys.SPACE;
+			case KEY_INSERT:
+				return Keys.INSERT;
+			case KEY_0:
+				return Keys.NUM_0;
+			case KEY_1:
+				return Keys.NUM_1;
+			case KEY_2:
+				return Keys.NUM_2;
+			case KEY_3:
+				return Keys.NUM_3;
+			case KEY_4:
+				return Keys.NUM_4;
+			case KEY_5:
+				return Keys.NUM_5;
+			case KEY_6:
+				return Keys.NUM_6;
+			case KEY_7:
+				return Keys.NUM_7;
+			case KEY_8:
+				return Keys.NUM_8;
+			case KEY_9:
+				return Keys.NUM_9;
+			case KEY_A:
+				return Keys.A;
+			case KEY_B:
+				return Keys.B;
+			case KEY_C:
+				return Keys.C;
+			case KEY_D:
+				return Keys.D;
+			case KEY_E:
+				return Keys.E;
+			case KEY_F:
+				return Keys.F;
+			case KEY_G:
+				return Keys.G;
+			case KEY_H:
+				return Keys.H;
+			case KEY_I:
+				return Keys.I;
+			case KEY_J:
+				return Keys.J;
+			case KEY_K:
+				return Keys.K;
+			case KEY_L:
+				return Keys.L;
+			case KEY_M:
+				return Keys.M;
+			case KEY_N:
+				return Keys.N;
+			case KEY_O:
+				return Keys.O;
+			case KEY_P:
+				return Keys.P;
+			case KEY_Q:
+				return Keys.Q;
+			case KEY_R:
+				return Keys.R;
+			case KEY_S:
+				return Keys.S;
+			case KEY_T:
+				return Keys.T;
+			case KEY_U:
+				return Keys.U;
+			case KEY_V:
+				return Keys.V;
+			case KEY_W:
+				return Keys.W;
+			case KEY_X:
+				return Keys.X;
+			case KEY_Y:
+				return Keys.Y;
+			case KEY_Z:
+				return Keys.Z;
+			case KEY_LEFT_WINDOW_KEY:
+				return Keys.UNKNOWN; // FIXME
+			case KEY_RIGHT_WINDOW_KEY:
+				return Keys.UNKNOWN; // FIXME
+				// case KEY_SELECT_KEY: return Keys.SELECT_KEY;
+			case KEY_NUMPAD0:
+				return Keys.NUM_0;
+			case KEY_NUMPAD1:
+				return Keys.NUM_1;
+			case KEY_NUMPAD2:
+				return Keys.NUM_2;
+			case KEY_NUMPAD3:
+				return Keys.NUM_3;
+			case KEY_NUMPAD4:
+				return Keys.NUM_4;
+			case KEY_NUMPAD5:
+				return Keys.NUM_5;
+			case KEY_NUMPAD6:
+				return Keys.NUM_6;
+			case KEY_NUMPAD7:
+				return Keys.NUM_7;
+			case KEY_NUMPAD8:
+				return Keys.NUM_8;
+			case KEY_NUMPAD9:
+				return Keys.NUM_9;
+			case KEY_MULTIPLY:
+				return Keys.UNKNOWN; // FIXME
+			case KEY_ADD:
+				return Keys.PLUS;
+			case KEY_SUBTRACT:
+				return Keys.MINUS;
+			case KEY_DECIMAL_POINT_KEY:
+				return Keys.PERIOD;
+			case KEY_DIVIDE:
+				return Keys.UNKNOWN; // FIXME
+			case KEY_F1:
+				return Keys.F1;
+			case KEY_F2:
+				return Keys.F2;
+			case KEY_F3:
+				return Keys.F3;
+			case KEY_F4:
+				return Keys.F4;
+			case KEY_F5:
+				return Keys.F5;
+			case KEY_F6:
+				return Keys.F6;
+			case KEY_F7:
+				return Keys.F7;
+			case KEY_F8:
+				return Keys.F8;
+			case KEY_F9:
+				return Keys.F9;
+			case KEY_F10:
+				return Keys.F10;
+			case KEY_F11:
+				return Keys.F11;
+			case KEY_F12:
+				return Keys.F12;
+			case KEY_NUM_LOCK:
+				return Keys.NUM;
+			case KEY_SCROLL_LOCK:
+				return Keys.UNKNOWN; // FIXME
+			case KEY_SEMICOLON:
+				return Keys.SEMICOLON;
+			case KEY_EQUALS:
+				return Keys.EQUALS;
+			case KEY_COMMA:
+				return Keys.COMMA;
+			case KEY_DASH:
+				return Keys.MINUS;
+			case KEY_PERIOD:
+				return Keys.PERIOD;
+			case KEY_FORWARD_SLASH:
+				return Keys.SLASH;
+			case KEY_GRAVE_ACCENT:
+				return Keys.UNKNOWN; // FIXME
+			case KEY_OPEN_BRACKET:
+				return Keys.LEFT_BRACKET;
+			case KEY_BACKSLASH:
+				return Keys.BACKSLASH;
+			case KEY_CLOSE_BRACKET:
+				return Keys.RIGHT_BRACKET;
+			case KEY_SINGLE_QUOTE:
+				return Keys.APOSTROPHE;
+			default:
+				return Keys.UNKNOWN;
 		}
 	}
 
