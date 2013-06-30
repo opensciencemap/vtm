@@ -2,17 +2,16 @@ package org.oscim.gdx;
 
 import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.Log;
-import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.layers.overlay.GenericOverlay;
+import org.oscim.layers.labeling.LabelLayer;
+import org.oscim.layers.overlay.BuildingOverlay;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLState;
-import org.oscim.renderer.layers.GridRenderLayer;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tilesource.TileSource;
-import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
+import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
 import org.oscim.view.MapRenderCallback;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
@@ -26,7 +25,6 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Timer;
 
 public class GdxMap implements ApplicationListener, MapRenderCallback {
 
@@ -61,28 +59,35 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		mWidth = w;
 		mHeight = h;
 
-		TileSource tileSource = new OSciMap2TileSource();
-		tileSource.setOption("url",
-				"http://city.informatik.uni-bremen.de/osci/map-live");
+		if (null == null) {
+			//TileSource tileSource = new OSciMap2TileSource();
+			//tileSource.setOption("url",
+			//		"http://city.informatik.uni-bremen.de/osci/map-live");
 
-		// TileSource tileSource = new OSciMap4TileSource();
-		// tileSource.setOption("url",
-		// "http://city.informatik.uni-bremen.de/osci/testing");
+			 TileSource tileSource = new OSciMap4TileSource();
+			 tileSource.setOption("url",
+			 "http://city.informatik.uni-bremen.de/osci/testing");
 
-		// TileSource tileSource = new TestTileSource();
+			 // TileSource tileSource = new TestTileSource();
 
-		mMapLayer = mMapView.setBaseMap(tileSource);
-		mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
+			mMapLayer = mMapView.setBaseMap(tileSource);
+			mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
+
+			mMapView.getLayerManager().add(new BuildingOverlay(mMapView, mMapLayer.getTileLayer()));
+			mMapView.getLayerManager().add(new LabelLayer(mMapView, mMapLayer.getTileLayer()));
+
+		}
 
 		// mMapView.setBaseMap(new BitmapTileLayer(mMapView,
 		// OpenStreetMapMapnik.INSTANCE));
-//		mMapView.getLayerManager().add(new GenericOverlay(mMapView, new
-//				GridRenderLayer(mMapView)));
+
+		//mMapView.getLayerManager().add(new GenericOverlay(mMapView, new
+		//		GridRenderLayer(mMapView)));
 
 		mMapView.getMapViewPosition().setViewport(w, h);
 		MapPosition p = new MapPosition();
-		p.setZoomLevel(18);
-		p.setPosition(53.1, 8.8);
+		p.setZoomLevel(17);
+		p.setPosition(53.08, 8.83);
 		mMapView.setMapPosition(p);
 
 		mMapRenderer.onSurfaceCreated();
@@ -108,7 +113,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 	}
 
-	private int fpsCnt = 0;
+	//private int fpsCnt = 0;
 
 	@Override
 	public void render() {
@@ -134,6 +139,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 	@Override
 	public void resize(int w, int h) {
+		Log.d("", "resize " + w + "x" + h);
 		mWidth = w;
 		mHeight = h;
 
@@ -210,46 +216,6 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 	@Override
 	public int getHeight() {
 		return mHeight;
-	}
-
-	class GdxMotionEvent extends MotionEvent {
-
-		@Override
-		public int getAction() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public float getX() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public float getY() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public float getX(int idx) {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public float getY(int idx) {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public int getPointerCount() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
 	}
 
 	class TouchHandler implements InputProcessor {
@@ -348,11 +314,13 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		public boolean touchDragged(int screenX, int screenY, int pointer) {
 			boolean changed = false;
 
+			if (!(mActiveScale || mActiveRotate) )
+				return false;
+
 			if (mActiveScale) {
 				// changed = mMapPosition.tilt((screenY - mStartY) / 5f);
 				changed = mMapPosition.scaleMap(1 - (screenY - mPosY) / 100f, 0, 0);
 				mPosY = screenY;
-				return true;
 			}
 
 			if (mActiveRotate) {
@@ -363,21 +331,21 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 				changed = true;
 			}
 
-			if (!(mActiveRotate || mActiveTilt || mActiveScale)) {
-				int dx = screenX - mPosX;
-				int dy = screenY - mPosY;
-				if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
-					mMapPosition.moveMap(dx, dy);
-					mPosX = screenX;
-					mPosY = screenY;
-					changed = true;
-				}
-			}
+//			if (!(mActiveRotate || mActiveTilt || mActiveScale)) {
+//				int dx = screenX - mPosX;
+//				int dy = screenY - mPosY;
+//				if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
+//					mMapPosition.moveMap(dx, dy);
+//					mPosX = screenX;
+//					mPosY = screenY;
+//					changed = true;
+//				}
+//			}
 
-			if (changed)
+			if (changed){
 				updateMap(true);
-
-			return false;
+			}
+			return true;
 		}
 
 		@Override
@@ -408,7 +376,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 	class ViewController implements GestureListener {
 
-		private boolean mayFling =true;
+		private boolean mayFling = true;
 
 		private boolean mPinch;
 
@@ -445,6 +413,8 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		@Override
 		public boolean touchDown(float x, float y, int pointer, int button) {
 			mayFling = true;
+			mPinch = false;
+
 			return false;
 		}
 
@@ -461,10 +431,10 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 		@Override
 		public boolean fling(final float velocityX, final float velocityY,
 				int button) {
-			Log.d("", "fling " + button + " " + velocityX + "/" + velocityY);
+			//Log.d("", "fling " + button + " " + velocityX + "/" + velocityY);
 			if (mayFling && button == Buttons.LEFT) {
 				int m = Tile.SIZE * 4;
-				mMapPosition.animateFling((int)velocityX, (int)velocityY, -m, m, -m, m);
+				mMapPosition.animateFling((int) velocityX, (int) velocityY, -m, m, -m, m);
 				return true;
 			}
 			return false;
@@ -472,12 +442,21 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 		@Override
 		public boolean pan(float x, float y, float deltaX, float deltaY) {
+			if (mPinch)
+				return true;
+
+			mMapPosition.moveMap(deltaX, deltaY);
+			updateMap(true);
+
 			return false;
 		}
 
 		@Override
 		public boolean zoom(float initialDistance, float distance) {
 			mayFling = false;
+//			float fx = mMapView.getWidth() / 2;
+//			float fy = mMapView.getHeight() / 2;
+//			 mMapPosition.scaleMap(initialDistance / distance, fx, fy);
 			return false;
 		}
 
@@ -499,6 +478,11 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 				mPrevPinchWidth = Math.sqrt(dx * dx + dy * dy);
 
 				mPinch = true;
+
+				mBeginTilt = false;
+				mBeginRotate = false;
+				mBeginScale= false;
+
 				return true;
 			}
 
@@ -593,8 +577,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 						float x = (float) (mFocusX * rcos + mFocusY * -rsin - mFocusX);
 						float y = (float) (mFocusX * rsin + mFocusY * rcos - mFocusY);
 
-						mMapPosition
-								.rotateMap((float) Math.toDegrees(da), x, y);
+						mMapPosition.rotateMap(da, x, y);
 						changed = true;
 					}
 				}
