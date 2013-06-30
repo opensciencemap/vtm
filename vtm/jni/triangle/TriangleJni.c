@@ -64,7 +64,7 @@ static void printPoly(TriangleIO *in) {
    }
 }
 
-jint Java_org_oscim_renderer_sublayers_ExtrusionLayer_triangulate(JNIEnv *env, jclass c,
+jint Java_org_oscim_utils_geom_Triangulator_triangulate(JNIEnv *env, jclass c,
       jfloatArray obj_points, jint pos, jint len, jint num_rings, jobject indice_buf, jint offset) {
 
    jshort* indices = (jshort*) (*env)->GetDirectBufferAddress(env, indice_buf);

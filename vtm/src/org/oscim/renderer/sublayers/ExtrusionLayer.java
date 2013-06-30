@@ -14,8 +14,6 @@
  */
 package org.oscim.renderer.sublayers;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
@@ -27,6 +25,7 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.utils.LineClipper;
+import org.oscim.utils.geom.Triangulator;
 
 /**
  * @author Hannes Janetzek
@@ -199,7 +198,7 @@ public class ExtrusionLayer extends Layer {
 			return;
 		}
 
-		int used = triangulate(points, ppos, len, index, ipos, rings,
+		int used = Triangulator.triangulate(points, ppos, len, index, ipos, rings,
 				startVertex + 1, mCurIndices[IND_ROOF]);
 
 		if (used > 0) {
@@ -447,63 +446,4 @@ public class ExtrusionLayer extends Layer {
 			mVertices = null;
 		}
 	}
-
-	private static boolean initialized = false;
-	private static ShortBuffer sBuf;
-
-	public static synchronized int triangulate(float[] points, int ppos, int plen, short[] index,
-			int ipos, int rings, int vertexOffset, VertexItem item) {
-
-		if (!initialized) {
-			// FIXME also cleanup on shutdown!
-			sBuf = ByteBuffer.allocateDirect(1800 * 2).order(ByteOrder.nativeOrder())
-					.asShortBuffer();
-
-			initialized = true;
-		}
-
-		sBuf.clear();
-		sBuf.put(index, ipos, rings);
-
-		int numTris = triangulate(points, ppos, plen, rings, sBuf, vertexOffset);
-
-		int numIndices = numTris * 3;
-		sBuf.limit(numIndices);
-		sBuf.position(0);
-
-		for (int k = 0, cnt = 0; k < numIndices; k += cnt) {
-
-			if (item.used == VertexItem.SIZE) {
-				item.next = VertexItem.pool.get();
-				item = item.next;
-			}
-
-			cnt = VertexItem.SIZE - item.used;
-
-			if (k + cnt > numIndices)
-				cnt = numIndices - k;
-
-			sBuf.get(item.vertices, item.used, cnt);
-			item.used += cnt;
-		}
-
-		return numIndices;
-	}
-
-	/**
-	 * @param points an array of x,y coordinates
-	 * @param pos position in points array
-	 * @param len number of points * 2 (i.e. values to read)
-	 * @param numRings number of rings in polygon == outer(1) + inner rings
-	 * @param io input: number of points in rings - times 2!
-	 *            output: indices of triangles, 3 per triangle :) (indices use
-	 *            stride=2, i.e. 0,2,4...)
-	 * @param ioffset offset used to add offset to indices
-	 * @return number of triangles in io buffer
-	 */
-	public static native int triangulate(float[] points, int pos, int len, int numRings,
-			ShortBuffer io,	int ioffset) /*-{
-			return 0;
-	}-*/;
-
 }
