@@ -85,7 +85,7 @@ public abstract class PbfTileDataSource implements ITileDataSource {
 	}
 
 	public void process(InputStream is, int length) {
-		Log.d(TAG, mTile + " process " + is + " " + length + " " + mSink);
+		//Log.d(TAG, mTile + " process " + is + " " + length + " " + mSink);
 
 		boolean win = false;
 		if (length >= 0) {

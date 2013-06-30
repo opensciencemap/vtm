@@ -15,7 +15,7 @@ public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
 	@Override
 	public void setBitmap(Bitmap bitmap) {
 		this.bitmap = (GwtBitmap) bitmap;
-		this.bitmap.pixmap.setColor(0);
+		//this.bitmap.pixmap.setColor(0x00ffffff);
 		this.bitmap.pixmap.getContext().clearRect(0, 0, this.bitmap.getWidth(), this.bitmap.getHeight());
 	}
 
@@ -30,11 +30,11 @@ public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
 		ctx.setFont(p.font);
 
 		if (p.stroke){
-			Log.d("", "stroke " + p.stroke + " " + p.color + " " + p.font + " "+ string);
+			//Log.d("", "stroke " + p.stroke + " " + p.color + " " + p.font + " "+ string);
 			ctx.setStrokeStyle(p.color);
 			ctx.strokeText(string, x, y);
 		} else{
-			Log.d("", "fill " + p.stroke + " " + p.color + " " + p.font + " "+ string);
+			//Log.d("", "fill " + p.stroke + " " + p.color + " " + p.font + " "+ string);
 			ctx.setFillStyle(p.color);
 			ctx.fillText(string, x, y);
 		}

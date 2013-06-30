@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
@@ -28,18 +27,13 @@ import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 
 public class LwHttp {
-	private static final String TAG = LwHttp.class.getName();
+	//private static final String TAG = LwHttp.class.getName();
 
-
-	private final static int BUFFER_SIZE = 1024;
-	private final byte[] buffer = new byte[BUFFER_SIZE];
-
-	//private final byte[] REQUEST_GET_START;
-	private final byte[] REQUEST_GET_END;
+	private final byte[] EXTENSION;
 	private final byte[] mRequestBuffer;
 
-	private final boolean mInflateContent;
-	private final String mContentType;
+	final boolean mInflateContent;
+	final String mContentType;
 
 	private int mContentLength = -1;
 	private XMLHttpRequest mHttpRequest;
@@ -50,8 +44,7 @@ public class LwHttp {
 		mContentType = contentType;
 		mInflateContent = deflate;
 
-		REQUEST_GET_END = ("." + extension).getBytes();
-
+		EXTENSION = ("." + extension).getBytes();
 		mRequestBuffer = new byte[1024];
 	}
 
@@ -78,7 +71,6 @@ public class LwHttp {
 		if (mHttpRequest != null)
 			mHttpRequest.abort();
 	}
-	private String mCurrentUrl;
 
 	private PbfTileDataSource mDataSource;
 	public boolean sendRequest(Tile tile, PbfTileDataSource dataSource) throws IOException {
@@ -99,12 +91,11 @@ public class LwHttp {
 			pos = newPos;
 		}
 
-		int len = REQUEST_GET_END.length;
-		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
+		int len = EXTENSION.length;
+		System.arraycopy(EXTENSION, 0, request, pos, len);
 
 		String url = "/tiles" + (new String(request, 0, pos + len));
-		Log.d(TAG, "load " + url);
-		mCurrentUrl = url;
+		//Log.d(TAG, "load " + url);
 
 		mHttpRequest = XMLHttpRequest.create();
 		mHttpRequest.open("GET", url);
@@ -116,8 +107,7 @@ public class LwHttp {
 			public void onReadyStateChange(XMLHttpRequest xhr) {
 				int status = xhr.getStatus();
 				int state = xhr.getReadyState();
-
-				Log.d(TAG, mCurrentUrl + "response " + status + "/" + state);
+				//Log.d(TAG, mCurrentUrl + "response " + status + "/" + state);
 
 				if (state == XMLHttpRequest.DONE && status == 200){
 					Uint8Array buf =  Uint8ArrayNative.create(xhr.getResponseArrayBuffer());
