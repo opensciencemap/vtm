@@ -1,35 +1,51 @@
 <!doctype html>
 <html>
-	<head>
-		<title>vtm-gdx</title>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<style>
-			canvas {
-				cursor: default;
-				outline: none;
-			}
-		</style>
-	</head>
-	
-	<body>
-		<div align="center" id="embed-org.oscim.gdx.GwtDefinition"></div>
-		<script type="text/javascript" src="org.oscim.gdx.GwtDefinition/org.oscim.gdx.GwtDefinition.nocache.js"></script>
-	</body>
-	
-	<script>
-		function handleMouseDown(evt) {
-		  evt.preventDefault();
-		  evt.stopPropagation();
-		  evt.target.style.cursor = 'default';
-		}
-		
-		function handleMouseUp(evt) {
-		  evt.preventDefault();
-		  evt.stopPropagation();
-		  evt.target.style.cursor = '';
-		}
-		
-		document.getElementById('embed-org.oscim.gdx.GwtDefinition').addEventListener('mousedown', handleMouseDown, false);
-		document.getElementById('embed-org.oscim.gdx.GwtDefinition').addEventListener('mouseup', handleMouseUp, false);
-	</script>
+<head>
+<title>vtm-gdx</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+<!-- pixel and dpi are way too simple concepts for web devs, lets also have css-pixels! -->
+<!-- http://www.html5rocks.com/de/mobile/touch/ -->
+<!-- http://www.quirksmode.org/mobile/viewports.html -->
+<!-- http://www.quirksmode.org/blog/archives/2012/07/more_about_devi.html  -->
+<!-- devicePixelRatio: http://coding.smashingmagazine.com/2012/08/20/towards-retina-web/ -->
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+<style>
+canvas {
+	cursor: default;
+	outline: none;
+	position: fixed;
+	left: 0;
+	top: 0;
+}
+</style>
+</head>
+
+<body>
+	<script type="text/javascript" src="js/_tessellate.js"></script>
+	<script type="text/javascript" src="js/tessellate.js"></script>
+	<div align="center" id="embed-org.oscim.gdx.GwtDefinition"></div>
+	<script type="text/javascript"
+		src="org.oscim.gdx.GwtDefinition/org.oscim.gdx.GwtDefinition.nocache.js"></script>
+</body>
+
+<script>
+	function handleMouseDown(evt) {
+		evt.preventDefault();
+		evt.stopPropagation();
+		evt.target.style.cursor = 'default';
+	}
+
+	function handleMouseUp(evt) {
+		evt.preventDefault();
+		evt.stopPropagation();
+		evt.target.style.cursor = '';
+	}
+
+	document.getElementById('embed-org.oscim.gdx.GwtDefinition')
+			.addEventListener('mousedown', handleMouseDown, false);
+	document.getElementById('embed-org.oscim.gdx.GwtDefinition')
+			.addEventListener('mouseup', handleMouseUp, false);
+</script>
 </html>
