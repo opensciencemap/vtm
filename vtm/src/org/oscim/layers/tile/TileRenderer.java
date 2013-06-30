@@ -153,7 +153,7 @@ public class TileRenderer {
 
 		// simple line shader does not take forward shortening into
 		// account. only used when tilt is 0.
-		int simpleShader = 1; //(pos.tilt < 1 ? 1 : 0);
+		int simpleShader = (pos.tilt < 1 ? 1 : 0);
 
 		boolean clipped = false;
 
