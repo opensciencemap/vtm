@@ -177,17 +177,6 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		// query database, which calls renderWay and renderPOI
 		// callbacks while processing map tile data.
 		if (mTileDataSource.executeQuery(mTile, this) != QueryResult.SUCCESS) {
-
-			//Log.d(TAG, "Failed loading: " + tile);
-//			mTile.layers.clear();
-//			mTile.layers = null;
-//			TextItem.pool.releaseAll(mTile.labels);
-//			mTile.labels = null;
-//			// FIXME add STATE_FAILED?
-//			// in passTile everything but STATE_LOADING is considered failed.
-//			mTile.state = STATE_NONE;
-//			mTile.loader.jobCompleted(mTile, false);
-//			mTile = null;
 			return false;
 		}
 
@@ -205,18 +194,14 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		//			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
 		//			renderWay(ri);
 		//		}
-		//mTile.loader.jobCompleted(mTile, true);
-		//mTile = null;
 		return true;
 	}
 
-	public void completed(boolean success){
-		Log.d(TAG, mTile + "completed " + success);
-
-		if (success){
-		mTile.loader.jobCompleted(mTile, true);
-		mTile = null;
-		return;
+	public void completed(boolean success) {
+		if (success) {
+			mTile.loader.jobCompleted(mTile, true);
+			mTile = null;
+			return;
 		}
 
 		mTile.layers.clear();
@@ -226,6 +211,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		// FIXME add STATE_FAILED?
 		// in passTile everything but STATE_LOADING is considered failed.
 		mTile.state = STATE_NONE;
+
 		mTile.loader.jobCompleted(mTile, false);
 		mTile = null;
 	}
@@ -289,13 +275,11 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 					mTagHouseNr = tags[i];
 					tags[i] = mTagEmptyHouseNr;
 				}
-			}
-			/*else if (mTile.zoomLevel > 16) {
+			} else if (mTile.zoomLevel > 16) {
 				// FIXME, allow overlays to intercept
 				// this, or use a theme option for this
 				if (key == Tag.TAG_KEY_BUILDING)
 					mRenderBuildingModel = true;
-
 				else if (key == Tag.KEY_HEIGHT) {
 					try {
 						mElement.height = Integer.parseInt(tags[i].value);
@@ -308,7 +292,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 					} catch (Exception e) {
 					}
 				}
-			}*/
+			}
 		}
 		return true;
 	}
@@ -408,7 +392,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 			if (lineLayer.line == null) {
 				lineLayer.line = line;
 
-				float w = line.width;
+				float w = line.width * 0.8f;
 				if (!line.fixed) {
 					w *= mStrokeScale;
 					w *= mLatScaleFactor;
@@ -540,7 +524,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 
 	@Override
 	public void renderPointOfInterestSymbol(Symbol symbol) {
-		if (symbol.texture == null){
+		if (symbol.texture == null) {
 			Log.d(TAG, "missing symbol for " + mElement.tags.asString());
 			return;
 		}
