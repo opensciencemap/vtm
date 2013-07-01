@@ -31,11 +31,12 @@ public class SymbolItem extends Inlist<SymbolItem> {
 		}
 
 		@Override
-		protected void clearItem(SymbolItem it) {
+		protected boolean clearItem(SymbolItem it) {
 			// drop references
 			it.bitmap = null;
 			it.symbol = null;
 			it.offset = null;
+			return true;
 		}
 	};
 

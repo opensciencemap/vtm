@@ -29,8 +29,9 @@ public class VertexItem extends Inlist<VertexItem> {
 		}
 
 		@Override
-		protected void clearItem(VertexItem it) {
+		protected boolean clearItem(VertexItem it) {
 			it.used = 0;
+			return true;
 		}
 	};
 

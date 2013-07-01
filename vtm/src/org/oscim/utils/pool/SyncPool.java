@@ -17,24 +17,17 @@ package org.oscim.utils.pool;
 public abstract class SyncPool<T extends Inlist<T>> {
 	protected final int maxFill;
 	protected int fill;
-	protected int count;
 
 	protected T pool;
 
 	public SyncPool() {
 		maxFill = 100;
 		fill = 0;
-		count = 0;
 	}
 
 	public SyncPool(int maxItemsInPool) {
 		maxFill = maxItemsInPool;
 		fill = 0;
-		count = 0;
-	}
-
-	public int getCount() {
-		return count;
 	}
 
 	public int getFill() {
@@ -42,21 +35,25 @@ public abstract class SyncPool<T extends Inlist<T>> {
 	}
 
 	/**
-	 * @param items number of initial items.
-	 *  NOTE: default does nothing!
+	 * @param items
+	 *            number of initial items. NOTE: default does nothing!
 	 */
 	public void init(int items) {
 	}
 
 	/**
-	 * @param item set initial state
+	 * @param item
+	 *            set initial state
+	 * @return true when item should be added back to pool
+	 *         when returning false freeItem will not be called.
 	 */
-	protected void clearItem(T item) {
-
+	protected boolean clearItem(T item) {
+		return true;
 	}
 
 	/**
-	 * @param item release resources
+	 * @param item
+	 *            release resources
 	 */
 	protected void freeItem(T item) {
 
@@ -68,8 +65,11 @@ public abstract class SyncPool<T extends Inlist<T>> {
 		if (item == null)
 			return;
 
-		clearItem(item);
-
+		if (!clearItem(item)) {
+			// dont add back to pool
+			freeItem(item);
+			return;
+		}
 		if (fill < maxFill) {
 			synchronized (this) {
 				fill++;
@@ -79,7 +79,6 @@ public abstract class SyncPool<T extends Inlist<T>> {
 			}
 		} else {
 			freeItem(item);
-			count--;
 		}
 	}
 
@@ -91,8 +90,6 @@ public abstract class SyncPool<T extends Inlist<T>> {
 			while (item != null) {
 				clearItem(item);
 				freeItem(item);
-				count--;
-
 				item = item.next;
 			}
 			return;
@@ -102,7 +99,13 @@ public abstract class SyncPool<T extends Inlist<T>> {
 			while (item != null) {
 				T next = item.next;
 
-				clearItem(item);
+				if (!clearItem(item)) {
+					// dont add back to pool
+					freeItem(item);
+					item = next;
+					continue;
+				}
+
 				fill++;
 
 				item.next = pool;
@@ -117,7 +120,6 @@ public abstract class SyncPool<T extends Inlist<T>> {
 
 		synchronized (this) {
 			if (pool == null) {
-				count++;
 				return createItem();
 			}
 

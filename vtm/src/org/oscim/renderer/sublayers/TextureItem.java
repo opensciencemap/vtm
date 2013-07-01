@@ -46,22 +46,24 @@ public class TextureItem extends Inlist<TextureItem> {
 	public Bitmap bitmap;
 
 	// external bitmap (not from pool)
-	boolean ownBitmap;
+	private boolean ownBitmap;
 
 	// is only referencing a textureId, does not
 	// release the texture when TextureItem is
 	// released.
-	boolean isClone;
+	private boolean isClone;
 
-	TextureItem(int id) {
+	private TextureItem(int id) {
 		this.id = id;
 	}
 
-	TextureItem(TextureItem ti) {
-		this.id = ti.id;
-		this.width = ti.width;
-		this.height = ti.height;
-		this.isClone = true;
+	public static TextureItem clone(TextureItem ti) {
+		TextureItem clone = new TextureItem(ti.id);
+		clone.id = ti.id;
+		clone.width = ti.width;
+		clone.height = ti.height;
+		clone.isClone = true;
+		return clone;
 	}
 
 	public TextureItem(Bitmap bitmap) {
@@ -80,20 +82,19 @@ public class TextureItem extends Inlist<TextureItem> {
 	 * Retrieve a TextureItem from pool with default Bitmap with dimension
 	 * TextureRenderer.TEXTURE_WIDTH/HEIGHT.
 	 */
-	public synchronized static TextureItem get(boolean initBitmap) {
+	public synchronized static TextureItem get() {
 		TextureItem ti = pool.get();
-		Log.d(TAG, "get texture item " + ti.id);
-		if (initBitmap) {
-			ti.bitmap = getBitmap();
-			ti.bitmap.eraseColor(Color.TRANSPARENT);
-			ti.ownBitmap = false;
-		} else {
-			ti.ownBitmap = true;
-		}
+		ti.bitmap = getBitmap();
+		ti.bitmap.eraseColor(Color.TRANSPARENT);
+
 		return ti;
 	}
 
-	private final static SyncPool<TextureItem> pool = new SyncPool<TextureItem>(20) {
+	static class TextureItemPool extends SyncPool<TextureItem> {
+
+		public TextureItemPool() {
+			super(20);
+		}
 
 		@Override
 		public void init(int num) {
@@ -104,8 +105,11 @@ public class TextureItem extends Inlist<TextureItem> {
 				TextureItem to = new TextureItem(textureIds[i]);
 				pool = Inlist.push(pool, to);
 			}
-			count = num;
 			fill = num;
+		}
+
+		public TextureItem get(int width, int height) {
+			return null;
 		}
 
 		@Override
@@ -114,20 +118,25 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 
 		@Override
-		protected void clearItem(TextureItem it) {
+		protected boolean clearItem(TextureItem it) {
 			// Log.d(TAG, it.ownBitmap + " " + (it.bitmap == null));
-			if (it.ownBitmap)
-				return;
+			if (it.ownBitmap) {
+				it.bitmap = null;
+				it.ownBitmap = false;
+				return false;
+			}
 
 			if (it.isClone) {
 				it.isClone = false;
 				it.id = -1;
 				it.width = -1;
 				it.height = -1;
-				return;
+				return false;
 			}
 
 			releaseBitmap(it);
+
+			return true;
 		}
 
 		@Override
@@ -139,6 +148,8 @@ public class TextureItem extends Inlist<TextureItem> {
 				releaseTexture(it);
 		}
 	};
+
+	private final static SyncPool<TextureItem> pool = new TextureItemPool();
 
 	private final static ArrayList<Integer> mTextures = new ArrayList<Integer>();
 	private final static ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
@@ -189,12 +200,13 @@ public class TextureItem extends Inlist<TextureItem> {
 			to.id = textureIds[0];
 			initTexture(to.id);
 			// if (TextureRenderer.debug)
-			Log.d(TAG, "poolCnt:" + pool.getCount() + " poolFill:" + pool.getFill()
-			           + " texCnt:" + mTexCnt + " new texture " + to.id);
+			Log.d(TAG, "poolFill:" + pool.getFill()
+					+ " texCnt:" + mTexCnt
+					+ " new texture " + to.id);
 		}
 
 		uploadTexture(to, to.bitmap, mBitmapFormat, mBitmapType,
-		              TEXTURE_WIDTH, TEXTURE_HEIGHT);
+				TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
 		if (!to.ownBitmap)
 			TextureItem.releaseBitmap(to);
@@ -205,7 +217,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	}
 
 	public static void uploadTexture(TextureItem to, Bitmap bitmap,
-	                                 int format, int type, int w, int h) {
+			int format, int type, int w, int h) {
 
 		if (to == null) {
 			Log.d(TAG, "no texture!");
@@ -213,7 +225,7 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 
 		GL.glBindTexture(GL20.GL_TEXTURE_2D, to.id);
-		Log.d(TAG, "upload " + to.id);
+		//Log.d(TAG, "upload " + to.id);
 		if (to.ownBitmap) {
 			bitmap.uploadToTexture(false);
 			// GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, bitmap, 0);
@@ -239,17 +251,19 @@ public class TextureItem extends Inlist<TextureItem> {
 		GL.glBindTexture(GL20.GL_TEXTURE_2D, id);
 
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER,
-		                   GL20.GL_LINEAR);
+				GL20.GL_LINEAR);
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER,
-		                   GL20.GL_LINEAR);
+				GL20.GL_LINEAR);
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
-		                   GL20.GL_CLAMP_TO_EDGE); // Set U Wrapping
+				GL20.GL_CLAMP_TO_EDGE); // Set U Wrapping
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
-		                   GL20.GL_CLAMP_TO_EDGE); // Set V Wrapping
+				GL20.GL_CLAMP_TO_EDGE); // Set V Wrapping
 	}
 
 	static void init(int num) {
+
 		pool.init(num);
+		mTexCnt = num;
 
 		mBitmaps.clear();
 		mTextures.clear();
@@ -266,7 +280,6 @@ public class TextureItem extends Inlist<TextureItem> {
 		// mBitmapFormat = GLUtils.getInternalFormat(mBitmaps.get(0));
 		// mBitmapType = GLUtils.getType(mBitmaps.get(0));
 
-		mTexCnt = num;
 	}
 
 	static Bitmap getBitmap() {
