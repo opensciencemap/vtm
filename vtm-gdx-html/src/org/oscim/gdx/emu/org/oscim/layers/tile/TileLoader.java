@@ -14,8 +14,6 @@
  */
 package org.oscim.layers.tile;
 
-import org.oscim.backend.Log;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Timer;
 
@@ -74,7 +72,7 @@ public abstract class TileLoader {
 
 	public void go() {
 		if (mWorking) {
-			Log.d("...", "has work " + jobs);
+			//Log.d("...", "has work " + jobs);
 			return;
 		}
 
@@ -89,7 +87,7 @@ public abstract class TileLoader {
 
 			mWorking = true;
 			jobs++;
-			Log.d("...", "add job " + jobs);
+			//Log.d("...", "add job " + jobs);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -105,7 +103,7 @@ public abstract class TileLoader {
 		}
 		mWorking = false;
 		jobs--;
-		Log.d("...", "finish job " + jobs + " " + success);
+		//Log.d("...", "finish job " + jobs + " " + success);
 
 		if (!mPausing && !mTileManager.jobQueue.isEmpty()){
 
