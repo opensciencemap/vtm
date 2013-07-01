@@ -58,8 +58,7 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 	private final MapView mMapView;
 
 	static {
-		System.loadLibrary("glutils");
-		System.loadLibrary("triangle");
+		System.loadLibrary("vtm-jni");
 		//System.loadLibrary("tessellate");
 
 		CanvasAdapter.g = AndroidGraphics.INSTANCE;
