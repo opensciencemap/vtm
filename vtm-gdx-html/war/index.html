@@ -9,7 +9,8 @@
 <!-- http://www.quirksmode.org/mobile/viewports.html -->
 <!-- http://www.quirksmode.org/blog/archives/2012/07/more_about_devi.html  -->
 <!-- devicePixelRatio: http://coding.smashingmagazine.com/2012/08/20/towards-retina-web/ -->
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=no">
 
 <style>
 canvas {
@@ -20,12 +21,23 @@ canvas {
 	top: 0;
 }
 </style>
+
+<script type="text/javascript">
+	var mapconfig = {
+		tilesource : "oscimap4",
+		tileurl : "/tiles"
+	}
+</script>
+
 </head>
 
 <body>
+
+	<div align="center" id="embed-org.oscim.gdx.GwtDefinition"></div>
+
 	<script type="text/javascript" src="js/_tessellate.js"></script>
 	<script type="text/javascript" src="js/tessellate.js"></script>
-	<div align="center" id="embed-org.oscim.gdx.GwtDefinition"></div>
+
 	<script type="text/javascript"
 		src="org.oscim.gdx.GwtDefinition/org.oscim.gdx.GwtDefinition.nocache.js"></script>
 </body>
