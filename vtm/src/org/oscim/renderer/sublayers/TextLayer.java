@@ -92,7 +92,7 @@ public final class TextLayer extends TextureLayer {
 		float y = 0;
 		float yy;
 
-		TextureItem to = TextureItem.get(true);
+		TextureItem to = TextureItem.get();
 		textures = to;
 		mCanvas.setBitmap(to.bitmap);
 
@@ -114,7 +114,7 @@ public final class TextLayer extends TextureLayer {
 					to.vertices = (short) (numIndices - offsetIndices);
 					offsetIndices = numIndices;
 
-					to.next = TextureItem.get(true);
+					to.next = TextureItem.get();
 					to = to.next;
 
 					mCanvas.setBitmap(to.bitmap);

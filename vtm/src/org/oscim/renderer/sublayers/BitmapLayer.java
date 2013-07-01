@@ -36,8 +36,6 @@ public class BitmapLayer extends TextureLayer {
 		mReuseBitmap = reuseBitmap;
 		mVertices = new short[24];
 
-		textures = new TextureItem(-1);
-
 		// used for size calculation of Layers buffer.
 		verticesCnt = 4;
 	}
@@ -47,12 +45,10 @@ public class BitmapLayer extends TextureLayer {
 		mHeight = h;
 
 		mBitmap = bitmap;
+		if (this.textures == null)
+			this.textures = new TextureItem(mBitmap);
 
 		TextureItem ti = this.textures;
-		ti.ownBitmap = true;
-		ti.width = mBitmap.getWidth();
-		ti.height = mBitmap.getHeight();
-		ti.bitmap = mBitmap;
 		ti.vertices = TextureRenderer.INDICES_PER_SPRITE;
 	}
 

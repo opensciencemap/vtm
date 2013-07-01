@@ -30,12 +30,13 @@ public class TextItem extends Inlist<TextItem> {
 		}
 
 		@Override
-		protected void clearItem(TextItem ti) {
+		protected boolean clearItem(TextItem ti) {
 			// drop references
 			ti.string = null;
 			ti.text = null;
 			ti.n1 = null;
 			ti.n2 = null;
+			return true;
 		}
 	};
 

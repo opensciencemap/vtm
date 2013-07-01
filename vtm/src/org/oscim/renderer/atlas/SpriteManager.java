@@ -47,7 +47,7 @@ public abstract class SpriteManager<T> {
 	protected TextureItem mTexture;
 
 	public SpriteManager() {
-		mTexture = TextureItem.get(true);
+		mTexture = TextureItem.get();
 
 		//mTexture.ownBitmap = true;
 
@@ -74,7 +74,7 @@ public abstract class SpriteManager<T> {
 		items = null;
 
 		//mTexture.bitmap.eraseColor(Color.TRANSPARENT);
-		mTexture = TextureItem.get(true);
+		mTexture = TextureItem.get();
 		mCanvas.setBitmap(mTexture.bitmap);
 	}
 

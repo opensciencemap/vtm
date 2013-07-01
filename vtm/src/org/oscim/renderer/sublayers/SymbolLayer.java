@@ -86,7 +86,7 @@ public final class SymbolLayer extends TextureLayer {
 					to = it.symbol.atlas.compileTexture();
 					// clone TextureItem to use same texID with
 					// multiple TextureItem
-					to = new TextureItem(to);
+					to = TextureItem.clone(to);
 					textures = Inlist.append(textures, to);
 				}
 
