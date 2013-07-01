@@ -28,8 +28,6 @@ import java.util.Map;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Paint;
 
-import com.badlogic.gdx.Gdx;
-
 public class AwtPaint implements Paint {
 
 	private static int getCap(Cap cap) {
