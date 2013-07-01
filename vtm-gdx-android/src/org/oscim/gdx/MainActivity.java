@@ -2,12 +2,13 @@ package org.oscim.gdx;
 
 import org.oscim.android.AndroidLog;
 import org.oscim.android.canvas.AndroidGraphics;
-import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.Tile;
+import org.oscim.tilesource.TileSource;
+import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
 
 import android.os.Bundle;
 
@@ -36,6 +37,10 @@ public class MainActivity extends AndroidApplication {
         cfg.useGL20 = true;
 
         new SharedLibraryLoader().load("vtm-jni");
-        initialize(new GdxMap(), cfg);
+
+        TileSource tileSource = new OSciMap4TileSource();
+		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
+
+        initialize(new GdxMap(tileSource), cfg);
     }
 }

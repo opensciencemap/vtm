@@ -2,6 +2,8 @@ package org.oscim.gdx.client;
 
 // -draftCompile -localWorkers 2
 import org.oscim.core.Tile;
+import org.oscim.tilesource.TileSource;
+import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
@@ -12,10 +14,11 @@ public class GwtLauncher extends GwtApplication {
 
 	@Override
 	public GwtApplicationConfiguration getConfig() {
-		GwtApplicationConfiguration cfg = new GwtApplicationConfiguration(GwtGraphics.getWindowWidthJSNI(),
-				GwtGraphics.getWindowHeightJSNI() );
+		GwtApplicationConfiguration cfg = new GwtApplicationConfiguration(
+				GwtGraphics.getWindowWidthJSNI(),
+				GwtGraphics.getWindowHeightJSNI());
 		cfg.stencil = true;
-		cfg.fps = 25;
+		cfg.fps = 30;
 
 		return cfg;
 	}
@@ -27,6 +30,14 @@ public class GwtLauncher extends GwtApplication {
 		else
 			Tile.SIZE = 360;
 
-		return new GwtGdxMap();
+		String url = getMapConfig("tileurl");
+
+		TileSource tileSource = new OSciMap4TileSource();
+		tileSource.setOption("url", url);
+		return new GwtGdxMap(tileSource);
 	}
+
+	private static native String getMapConfig(String key)/*-{
+		return $wnd.mapconfig && $wnd.mapconfig[key] || null;
+	}-*/;
 }

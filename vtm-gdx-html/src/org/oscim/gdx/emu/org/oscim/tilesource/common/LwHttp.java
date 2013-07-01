@@ -29,7 +29,8 @@ import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 public class LwHttp {
 	//private static final String TAG = LwHttp.class.getName();
 
-	private final byte[] EXTENSION;
+	private final String mUrlFileExtension;
+	private final String mUrlPath;
 	private final byte[] mRequestBuffer;
 
 	final boolean mInflateContent;
@@ -44,7 +45,9 @@ public class LwHttp {
 		mContentType = contentType;
 		mInflateContent = deflate;
 
-		EXTENSION = ("." + extension).getBytes();
+		mUrlPath = url.toString();
+		mUrlFileExtension = "." + extension;
+
 		mRequestBuffer = new byte[1024];
 	}
 
@@ -91,11 +94,7 @@ public class LwHttp {
 			pos = newPos;
 		}
 
-		int len = EXTENSION.length;
-		System.arraycopy(EXTENSION, 0, request, pos, len);
-
-		String url = "/tiles" + (new String(request, 0, pos + len));
-		//Log.d(TAG, "load " + url);
+		String url = mUrlPath + (new String(request, 0, pos) + mUrlFileExtension);
 
 		mHttpRequest = XMLHttpRequest.create();
 		mHttpRequest.open("GET", url);
