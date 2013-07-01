@@ -107,6 +107,10 @@ public class LineTexRenderer {
 	public static Layer draw(Layers layers, Layer curLayer,
 			MapPosition pos, Matrices m, float div) {
 
+		// shader failed to compile
+		if (shader == 0)
+			return curLayer.next;
+
 		GLState.blend(true);
 		GLState.useProgram(shader);
 

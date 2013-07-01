@@ -52,7 +52,7 @@ public final class LineRenderer {
 				lineFragmentShader);
 		if (lineProgram[0] == 0) {
 			Log.e(TAG, "Could not create line program.");
-			return false;
+			//return false;
 		}
 
 		lineProgram[1] = GlUtils.createProgram(lineVertexShader,
@@ -63,6 +63,9 @@ public final class LineRenderer {
 		}
 
 		for (int i = 0; i < 2; i++) {
+			if (lineProgram[i] == 0)
+				continue;
+
 			hLineMatrix[i] = GL.glGetUniformLocation(lineProgram[i], "u_mvp");
 			hLineScale[i] = GL.glGetUniformLocation(lineProgram[i], "u_wscale");
 			hLineWidth[i] = GL.glGetUniformLocation(lineProgram[i], "u_width");
@@ -111,6 +114,10 @@ public final class LineRenderer {
 			return null;
 
 		GLState.blend(true);
+
+		// FIXME HACK: fallback to simple shader
+		if (lineProgram[mode] == 0)
+			mode = 1;
 
 		GLState.useProgram(lineProgram[mode]);
 
@@ -291,7 +298,11 @@ public final class LineRenderer {
 			// where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2)
 			//+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"
 			//+ "  gl_FragColor = mix(vec4(1.0,0.0,0.0,1.0), u_color, smoothstep(0.0, u_wscale, 1.0 - len));"
-			+ "  gl_FragColor = u_color * min(1.0, (1.0 - len) / u_wscale);"
+			+ "  float alpha = min(1.0, (1.0 - len) / u_wscale);"
+			+ "  if (alpha > 0.2)"
+			+ "    gl_FragColor = u_color * alpha;"
+			+ "  else"
+			+ "    discard;"
 			+ "}";
 
 	private final static String lineFragmentShader = ""
