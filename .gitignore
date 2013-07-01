@@ -4,6 +4,7 @@
 *.o
 *.class
 vtm-gdx-html/war/assets/
-vtm-gdx-html/war/
+vtm-gdx-html/war/WEB_INF/
+vtm-gdx-html/war/org.oscim.gdx.GwtDefinition/
 vtm-gdx-html/gwt-unitCache
 vtm-gdx-ios/
