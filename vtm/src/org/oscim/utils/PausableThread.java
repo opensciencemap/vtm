@@ -44,12 +44,12 @@ public abstract class PausableThread extends Thread {
 			super.interrupt();
 		}
 
-		try {
-			this.join(10000);
-		} catch (InterruptedException e) {
-			// restore the interrupted status
-			Thread.currentThread().interrupt();
-		}
+		//try {
+		//	this.join(10000);
+		//} catch (InterruptedException e) {
+		//	// restore the interrupted status
+		//	Thread.currentThread().interrupt();
+		//}
 	}
 
 	/**
