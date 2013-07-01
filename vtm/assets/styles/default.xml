@@ -1075,9 +1075,13 @@
     <!-- <m k="boundary"> <m k="boundary" v="national_park">
       <line stroke="#4ef94b" width="0.25" stroke-dasharray="15, 5, 5, 5"
       /> -->
+
+    <!--
+     maybe use some alpha texture for this
     <m k="boundary" v="national_park">
       <area fill="#d7e6b0" />
     </m>
+    -->
 
 
     <!--<m k="boundary" v="administrative"> -->
