@@ -109,37 +109,23 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			}
 		}
 
-		// initialize SoundManager2
-		//SoundManager.init(GWT.getModuleBaseURL(), 9);
-
-		// wait for soundmanager to load, this is fugly, but for
-		// some reason the ontimeout and onerror callbacks are never
-		// called (function instanceof Function fails, wtf JS?).
-		new Timer() {
+		final PreloaderCallback callback = getPreloaderCallback();
+		preloader = new Preloader();
+		preloader.preload("assets.txt", new PreloaderCallback() {
 			@Override
-			public void run() {
-				//if (SoundManager.ok()) {
-				final PreloaderCallback callback = getPreloaderCallback();
-				preloader = new Preloader();
-				preloader.preload("assets.txt", new PreloaderCallback() {
-					@Override
-					public void error(String file) {
-						callback.error(file);
-					}
-
-					@Override
-					public void update(PreloaderState state) {
-						callback.update(state);
-						if (state.hasEnded()) {
-							root.clear();
-							setupLoop();
-						}
-					}
-				});
-				cancel();
-				//}
+			public void error(String file) {
+				callback.error(file);
 			}
-		}.scheduleRepeating(100);
+
+			@Override
+			public void update(PreloaderState state) {
+				callback.update(state);
+				if (state.hasEnded()) {
+					root.clear();
+					setupLoop();
+				}
+			}
+		});
 	}
 
 	private void setupLoop() {
@@ -167,14 +153,14 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		this.net = new GwtNet();
 		Gdx.net = this.net;
 		final double pixelRatio = GwtGraphics.getDevicePixelRatioJSNI();
-		consoleLog(">>>> " + config.width + "x"+ config.height + " ratio " + pixelRatio);
+		consoleLog("> " + config.width + "x" + config.height + " ratio:" + pixelRatio);
 
 		// tell listener about app creation
 		try {
 			listener.create();
 			listener.resize(
-					(int)(graphics.getWidth()),
-					(int)(graphics.getHeight()));
+					(int) (graphics.getWidth()),
+					(int) (graphics.getHeight()));
 		} catch (Throwable t) {
 			error("GwtApplication", "exception: " + t.getMessage(), t);
 			t.printStackTrace();
@@ -187,13 +173,13 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			public void run() {
 				try {
 					graphics.update();
-					if (Gdx.graphics.getWidth() != lastWidth
-							|| Gdx.graphics.getHeight() != lastHeight) {
-						GwtApplication.this.listener.resize(
-								(int)(Gdx.graphics.getWidth()),
-								(int)(Gdx.graphics.getHeight()));
+					if (graphics.getWidth() != lastWidth
+							|| graphics.getHeight() != lastHeight) {
+
 						lastWidth = graphics.getWidth();
 						lastHeight = graphics.getHeight();
+
+						GwtApplication.this.listener.resize(lastWidth, lastHeight);
 						//Gdx.gl.glViewport(0, 0, lastWidth, lastHeight);
 					}
 					runnablesHelper.addAll(runnables);
