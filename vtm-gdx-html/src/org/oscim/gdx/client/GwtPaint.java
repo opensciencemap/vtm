@@ -14,7 +14,7 @@ public class GwtPaint implements Paint {
 	float fontSize;
 	Align mAlign;
 
-	String font = "15px sans-serif";
+	String font = "12px sans-serif";
 
 	//private int cap;
 
