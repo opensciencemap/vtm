@@ -125,7 +125,7 @@ public final class TextureRenderer {
 	private final static double COORD_DIV = 1.0 / GLRenderer.COORD_SCALE;
 
 	private final static String textVertexShader = ""
-			+ "precision mediump float; "
+			+ "precision highp float;"
 			+ "attribute vec4 vertex;"
 			+ "attribute vec2 tex_coord;"
 			+ "uniform mat4 u_mv;"
@@ -149,7 +149,7 @@ public final class TextureRenderer {
 			+ "}";
 
 	private final static String textFragmentShader = ""
-			+ "precision mediump float;"
+			+ "precision highp float;"
 			+ "uniform sampler2D tex;"
 			+ "varying vec2 tex_c;"
 			+ "void main() {"
