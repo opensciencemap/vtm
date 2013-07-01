@@ -129,8 +129,7 @@ class AndroidPaint implements Paint {
 
 	@Override
 	public void setTextAlign(Align align) {
-
-		mPaint.setTextAlign(android.graphics.Paint.Align.valueOf(align.name()));
+		//mPaint.setTextAlign(android.graphics.Paint.Align.valueOf(align.name()));
 	}
 
 	@Override
