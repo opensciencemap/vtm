@@ -12,10 +12,11 @@ public class URL {
 	String mPath;
 
 	public URL(String protocol, String hostName, int port, String path) {
-		mPath = "http://" +hostName +"/" + path;
+		//mPath = "http://" +hostName +"/" + path;
+		mPath = path;
 	}
 
-	public URL(String url) throws MalformedURLException {
-		mPath = url;
+	public URL(String path) throws MalformedURLException {
+		mPath = path;
 	}
 }
