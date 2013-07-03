@@ -28,7 +28,7 @@ import com.badlogic.gdx.math.Vector2;
 
 public class GdxMap implements ApplicationListener, MapRenderCallback {
 
-	private final MapView mMapView;
+	protected final MapView mMapView;
 	private final GLRenderer mMapRenderer;
 	private final TileSource mTileSource;
 
