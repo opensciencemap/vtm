@@ -18,9 +18,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -46,8 +48,6 @@ public final class PolygonRenderer {
 
 	private static PolygonLayer[] mFillPolys;
 
-	private static boolean enableTexture = false;
-
 	private static int numShaders = 2;
 	private static int polyShader = 0;
 	private static int texShader = 1;
@@ -59,6 +59,7 @@ public final class PolygonRenderer {
 	private static int[] hPolygonColor = new int[numShaders];
 	private static int[] hPolygonScale = new int[numShaders];
 
+	private static boolean enableTexture = true;
 	private static int mTexWater;
 	private static int mTexWood;
 	private static int mTexGrass;
@@ -94,35 +95,33 @@ public final class PolygonRenderer {
 		}
 
 		mFillPolys = new PolygonLayer[STENCIL_BITS];
-		//		if (enableTexture) {
-		//			mTexWood = loadSprite("jar:grass3.png");
-		//			mTexWater = loadSprite("jar:water2.png");
-		//			mTexGrass = loadSprite("jar:grass2.png");
-		//		}
+		if (enableTexture) {
+			mTexWood = loadSprite("grass3.png");
+			mTexWater = loadSprite("water2.png");
+			mTexGrass = loadSprite("grass2.png");
+		}
 		return true;
 	}
 
-	//	private static int loadSprite(String name) {
-	//		int[] textures = new int[1];
-	//
-	//		try {
-	//			Bitmap b = BitmapUtils.createBitmap(name);
-	//			GL.glGenTextures(1, textures, 0);
-	//
-	//			GL.glBindTexture(GL20.GL_TEXTURE_2D, textures[0]);
-	//
-	//			GlUtils.setTextureParameter(GL20.GL_LINEAR, GL20.GL_LINEAR,
-	//					GL20.GL_REPEAT, GL20.GL_REPEAT);
-	//
-	//			b.uploadToTexture(false);
-	//
-	//			//GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, b, 0);
-	//
-	//		} catch (IOException e) {
-	//			e.printStackTrace();
-	//		}
-	//		return textures[0];
-	//	}
+	private static int loadSprite(String name) {
+		int[] textures;
+
+		//Bitmap b = BitmapUtils.createBitmap(name);
+		Bitmap b = CanvasAdapter.g.loadBitmapAsset(name);
+		if (b == null) {
+			Log.d(TAG, "missing asset: " + name);
+			return 0;
+		}
+		textures = GlUtils.glGenTextures(1);
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, textures[0]);
+
+		GlUtils.setTextureParameter(GL20.GL_LINEAR, GL20.GL_LINEAR,
+				GL20.GL_REPEAT, GL20.GL_REPEAT);
+
+		b.uploadToTexture(false);
+
+		return textures[0];
+	}
 
 	private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale,
 			float div) {
