@@ -1,11 +1,17 @@
 package org.oscim.gdx.client;
 
 // -draftCompile -localWorkers 2
+import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
+import org.oscim.gdx.GdxMap;
 import org.oscim.tilesource.TileSource;
+import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
 import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
 
 import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
 import com.badlogic.gdx.backends.gwt.GwtGraphics;
@@ -32,7 +38,12 @@ public class GwtLauncher extends GwtApplication {
 
 		String url = getMapConfig("tileurl");
 
-		TileSource tileSource = new OSciMap4TileSource();
+		TileSource tileSource;
+		if ("oscimap4".equals(getMapConfig("tilesource")))
+			tileSource = new OSciMap4TileSource();
+		else
+			tileSource = new OSciMap2TileSource();
+
 		tileSource.setOption("url", url);
 		return new GwtGdxMap(tileSource);
 	}
@@ -40,4 +51,23 @@ public class GwtLauncher extends GwtApplication {
 	private static native String getMapConfig(String key)/*-{
 		return $wnd.mapconfig && $wnd.mapconfig[key] || null;
 	}-*/;
+
+	class GwtGdxMap extends GdxMap {
+
+		public GwtGdxMap(TileSource tileSource) {
+			super(tileSource);
+		}
+
+		@Override
+		public void create() {
+			CanvasAdapter.g = GwtCanvasAdapter.INSTANCE;
+			GLAdapter.g = (GL20)Gdx.graphics.getGL20();
+			GLAdapter.GDX_WEBGL_QUIRKS = true;
+
+			//GLAdapter.NON_PREMUL_CANVAS = true;
+			//Gdx.app.setLogLevel(Application.LOG_DEBUG);
+
+			super.create();
+		}
+	}
 }
