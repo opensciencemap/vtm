@@ -84,9 +84,12 @@ public class Tags {
 			"wetland",
 			"width",
 			"wood",
+
 			"height",
 			"min_height",
-			"scalerank"
+			"roof:shape",
+			"roof:height",
+			"rank"
 	};
 	public final static int MAX_KEY = keys.length - 1;
 
