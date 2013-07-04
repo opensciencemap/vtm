@@ -80,7 +80,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
 
 	@Override
 	public void onModuleLoad() {
-		this.agentInfo = computeAgentInfo();
+		GwtApplication.agentInfo = computeAgentInfo();
 		this.listener = getApplicationListener();
 		this.config = getConfig();
 
