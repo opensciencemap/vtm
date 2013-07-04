@@ -25,13 +25,11 @@ import java.nio.ShortBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Float32Array;
@@ -434,19 +432,10 @@ public class GwtGL20 implements GL20, org.oscim.backend.GL20{
 		Buffer pixels) {
 		Pixmap pixmap = Pixmap.pixmaps.get(((IntBuffer)pixels).get(0));
 		if (pixmap != null){
-			System.err.println("load texture "+ target + " "+ width + " " + height + " " + type + " " + format);
-			//Canvas canvasTmp = Canvas.createIfSupported();
-		    //Context2d context = canvasTmp.getContext2d();
-
-//		    canvasTmp.setCoordinateSpaceHeight(height);
-//		    canvasTmp.setCoordinateSpaceWidth(width);
-//		    context.drawImage(pixmap.getCanvasElement(), 0, 0);
-//		    ImageData imageData = context.getImageData(0, 0, width, height);
-
-		    //gl.texImage2D(target, level, internalformat, format, type, imageData);
+			Gdx.app.log("GwtGL20", "load texture "+ target + " "+ width + " " + height + " " + type + " " + format);
 		    gl.texImage2D(target, level, internalformat, format, type, pixmap.getCanvasElement());
-		}else if (format == GL20.GL_ALPHA){
-			System.err.println("load byte texture " + width + " " + height + " " + type + " " + format);
+		} else if (format == GL20.GL_ALPHA){
+			Gdx.app.log("GwtGL20", "load byte texture " + width + " " + height + " " + type + " " + format);
 			int tmp[] = new int[(width * height) >> 2];
 			((IntBuffer)pixels).get(tmp);
 
