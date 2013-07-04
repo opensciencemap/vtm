@@ -8,6 +8,9 @@
   <style-text name="major-road" k="name" font-style="bold" font-size="16" fill="#101010"
     stroke="#eeeeee" stroke-width="2.0" priority="1" />
 
+  <style-text name="park" k="name" font-size="17" fill="#93ba8b"
+    stroke="#eeeeee" stroke-width="2.0" priority="1" caption="true"/>
+
   <!--<style-area name="residential" fill="#e0dfde" fade="10"/> -->
   <style-area name="residential" fill="#e8e7e3" fade="10" />
 
@@ -289,6 +292,7 @@
 
       <m k="leisure" v="park|common|green|golf_course|dog_park" zoom-min="11">
         <use-area name="park" />
+        <!-- <use-text name="park" />-->
       </m>
 
       <!-- Heideland, keep below forest -->
@@ -1361,48 +1365,49 @@
       </m>
       </m> -->
 
-    <!-- shop
-      <m k="shop">
-      <m k="shop" v="bakery" zoom-min="17">
-      <symbol src="jar:symbols/bakery.png" />
-      </m>
-      <m k="shop" v="florist" zoom-min="17">
-      <symbol src="jar:symbols/florist.png" />
-      </m>
-      <m k="shop" v="supermarket|organic" zoom-min="17">
-      <symbol src="jar:symbols/supermarket.png" />
-      </m>
+  <m k="shop">
+    <m k="shop" v="bakery" zoom-min="17">
+      <symbol src="bakery" />
+    </m>
+    <m k="shop" v="florist" zoom-min="17">
+      <symbol src="florist" />
+    </m>
+    <m k="shop" v="supermarket|organic" zoom-min="16">
+      <symbol src="supermarket" />
+    </m>
 
-      <m zoom-min="17">
-      <caption k="name" font-size="15" fill="#2020bb" stroke="#ffffff" stroke-width="2.0" />
-      </m>
-      </m> -->
+    <m zoom-min="17">
+      <caption k="name" font-size="15" fill="#2020bb" stroke="#ffffff"
+        stroke-width="2.0" />
+    </m>
+  </m>
 
-    <!-- tourism
-      <m k="tourism">
-      <m k="tourism" v="alpine_hut" zoom-min="16">
-      <symbol src="jar:symbols/alpine_hut.png" />
-      </m>
-      <m k="tourism" v="camp_site" zoom-min="17">
-      <symbol src="jar:symbols/campSite.png" />
-      </m>
-      <m k="tourism" v="hostel" zoom-min="17">
-      <symbol src="jar:symbols/hostel.png" />
-      </m>
-      <m k="tourism" v="hotel" zoom-min="17">
-      <symbol src="jar:symbols/hotel.png" />
-      </m>
-      <m k="tourism" v="information" zoom-min="17">
-      <symbol src="jar:symbols/information.png" />
-      </m>
-      <m k="tourism" v="viewpoint" zoom-min="15">
-      <symbol src="jar:symbols/viewpoint.png" />
-      </m>
 
-      <m zoom-min="17">
-      <caption k="name" font-size="15" fill="#20aa20" stroke="#ffffff" stroke-width="2.0" />
-      </m>
-      </m> -->
+  <m k="tourism">
+    <m k="tourism" v="alpine_hut" zoom-min="16">
+      <symbol src="triangle-stroked" />
+    </m>
+    <m k="tourism" v="camp_site" zoom-min="15">
+      <symbol src="campsite" />
+    </m>
+    <m k="tourism" v="hostel" zoom-min="15">
+      <symbol src="lodging" />
+    </m>
+    <m k="tourism" v="hotel" zoom-min="15">
+      <symbol src="lodging" />
+    </m>
+    <m k="tourism" v="information" zoom-min="16">
+      <symbol src="information" />
+    </m>
+    <m k="tourism" v="viewpoint" zoom-min="15">
+      <symbol src="viewpoint" />
+    </m>
+
+    <m zoom-min="17">
+      <caption k="name" font-size="15" fill="#20aa20" stroke="#ffffff"
+        stroke-width="2.0" />
+    </m>
+  </m>
   </m>
 
 </rendertheme>
