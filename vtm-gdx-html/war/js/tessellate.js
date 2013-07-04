@@ -1,92 +1,103 @@
 tessellate = (function() {
 
-Module.TOTAL_MEMORY = 1024 * 1024;
+	Module.TOTAL_MEMORY = 1024 * 1024;
 
-var c_tessellate = Module.cwrap('tessellate', 'void', ['number', 'number', 'number',
-                                                       'number', 'number', 'number']);
-// special tessellator for extrusion layer
-var tessellate = function(vertices, v_start, v_end, boundaries, b_start, b_end) {
-    var i;
+	var c_tessellate = Module.cwrap('tessellate', 'void', [ 'number', 'number',
+			'number', 'number', 'number', 'number' ]);
 
-    var v_len = (v_end - v_start);
-    var b_len = (b_end - b_start);
+	// special tessellator for extrusion layer - only returns triangle indices
+	var tessellate = function(vertices, v_start, v_end, boundaries, b_start,
+			b_end) {
+		var i;
 
-    var p = Module._malloc(v_len * 8);
+		var v_len = (v_end - v_start);
+		var b_len = (b_end - b_start);
 
-    for (i=0; i< v_len; ++i)
-    	Module.setValue(p+i*8, vertices[v_start + i], 'double');
+		var p = Module._malloc(v_len * 8);
 
-    var contours = Module._malloc((b_len + 1) * 4);
+		for (i = 0; i < v_len; ++i)
+			Module.setValue(p + i * 8, vertices[v_start + i], 'double');
 
-    // pointer to first contour
-    Module.setValue(contours + 0, p + 0, 'i32');
-    var offset = p;
+		var contours = Module._malloc((b_len + 1) * 4);
 
-    // pointer to further contours + end
-    for (i = 0; i<b_len; ++i) {
-        offset += 8 * boundaries[b_start + i];
-    	Module.setValue(contours + 4 * (i + 1), offset, 'i32');
-    }
+		// pointer to first contour
+		Module.setValue(contours + 0, p + 0, 'i32');
+		var offset = p;
 
-    var ppcoordinates_out = Module._malloc(4);
-    var pptris_out = Module._malloc(4);
-    var pnverts = Module._malloc(4);
-    var pntris = Module._malloc(4);
+		// pointer to further contours + end
+		for (i = 0; i < b_len; ++i) {
+			offset += 8 * boundaries[b_start + i];
+			Module.setValue(contours + 4 * (i + 1), offset, 'i32');
+		}
 
-    c_tessellate(ppcoordinates_out, pnverts, pptris_out, pntris,
-                 contours, contours+4*(b_len + 1));
+		var ppcoordinates_out = Module._malloc(4);
+		var pptris_out = Module._malloc(4);
+		var pnverts = Module._malloc(4);
+		var pntris = Module._malloc(4);
 
-    var pcoordinates_out = Module.getValue(ppcoordinates_out, 'i32');
-    var ptris_out = Module.getValue(pptris_out, 'i32');
+		c_tessellate(ppcoordinates_out, pnverts, pptris_out, pntris, contours,
+				contours + 4 * (b_len + 1));
 
-    var nverts = Module.getValue(pnverts, 'i32');
-    var ntris = Module.getValue(pntris, 'i32');
+		var pcoordinates_out = Module.getValue(ppcoordinates_out, 'i32');
+		var ptris_out = Module.getValue(pptris_out, 'i32');
 
-    var result_vertices = new Float32Array(nverts * 2);
-    var result_triangles = new Int32Array(ntris * 3);
+		var nverts = Module.getValue(pnverts, 'i32');
+		var ntris = Module.getValue(pntris, 'i32');
 
-    for (i=0; i<2*nverts; ++i) {
-        result_vertices[i] = Module.getValue(pcoordinates_out + i*8, 'double');
-        if (result_vertices[i] != vertices[v_start + i])
-        	console.log("i:" + i + " " + result_vertices[i] + " " +  vertices[v_start + i]);
-    }
-    for (i=0; i<3*ntris; ++i) {
-        result_triangles[i] = Module.getValue(ptris_out + i*4, 'i32') * 2;
-    }
-    // when a ring has an odd number of points one (or rather two)
-    // additional vertices will be added. so the following rings
-    // needs extra offset...
-    var start = 0;
-    for (var j = 0, m = b_len - 1; j < m; j++) {
-        start += boundaries[b_start + j];
+		// var result_vertices = new Float32Array(nverts * 2);
+		var result_triangles = null;
 
-    	// even number of points?
-       if (!((boundaries[b_start + j] >> 1) & 1))
-          continue;
+		if (nverts * 2 == v_len) {
+			result_triangles = new Int32Array(ntris * 3);
 
-       console.log("shift " + boundaries[b_start + j]);
+			// for (i=0; i<2*nverts; ++i) {
+			// result_vertices[i] = Module.getValue(pcoordinates_out + i*8,
+			// 'double');
+			// if (result_vertices[i] != vertices[v_start + i])
+			// console.log("i:" + i + " " + result_vertices[i] + " " +
+			// vertices[v_start + i]);
+			// }
 
-       for (var n = ntris * 3, tri = 0;  tri < n; tri++)
-          if (result_triangles[tri] >= start)
-             result_triangles[tri] += 2;
+			for (i = 0; i < 3 * ntris; ++i) {
+				result_triangles[i] = Module.getValue(ptris_out + i * 4, 'i32') * 2;
+			}
+			// when a ring has an odd number of points one (or rather two)
+			// additional vertices will be added. so the following rings
+			// needs extra offset...
+			var start = 0;
+			for ( var j = 0, m = b_len - 1; j < m; j++) {
+				start += boundaries[b_start + j];
 
-       start += 2;
-    }
+				// even number of points?
+				if (!((boundaries[b_start + j] >> 1) & 1))
+					continue;
 
-    Module._free(pnverts);
-    Module._free(pntris);
-    Module._free(ppcoordinates_out);
-    Module._free(pptris_out);
-    Module._free(pcoordinates_out);
-    Module._free(ptris_out);
-    Module._free(p);
-    Module._free(contours);
-    return {
-        vertices: result_vertices,
-        triangles: result_triangles
-    };
-};
+				// console.log("shift " + boundaries[b_start + j]);
 
-return tessellate;
+				for ( var n = ntris * 3, tri = 0; tri < n; tri++)
+					if (result_triangles[tri] >= start)
+						result_triangles[tri] += 2;
+
+				start += 2;
+			}
+		}
+
+		Module._free(pnverts);
+		Module._free(pntris);
+		Module._free(ppcoordinates_out);
+		Module._free(pptris_out);
+		Module._free(pcoordinates_out);
+		Module._free(ptris_out);
+		Module._free(p);
+		Module._free(contours);
+
+		return result_triangles;
+		// return {
+		// vertices: result_vertices,
+		// triangles: result_triangles
+		// };
+	};
+
+	return tessellate;
 
 })();
