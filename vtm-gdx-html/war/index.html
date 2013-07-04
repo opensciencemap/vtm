@@ -24,7 +24,7 @@ canvas {
 
 <script type="text/javascript">
 	var mapconfig = {
-		tilesource : "oscimap4",
+		tilesource : "oscimap2",
 		tileurl : "/tiles"
 	}
 </script>
@@ -46,7 +46,7 @@ canvas {
 	function handleMouseDown(evt) {
 		evt.preventDefault();
 		evt.stopPropagation();
-		evt.target.style.cursor = 'default';
+		evt.target.style.cursor = 'move';
 	}
 
 	function handleMouseUp(evt) {
@@ -57,6 +57,8 @@ canvas {
 
 	document.getElementById('embed-org.oscim.gdx.GwtDefinition')
 			.addEventListener('mousedown', handleMouseDown, false);
+	document.getElementById('embed-org.oscim.gdx.GwtDefinition')
+			.addEventListener('contextmenu', handleMouseDown, false);
 	document.getElementById('embed-org.oscim.gdx.GwtDefinition')
 			.addEventListener('mouseup', handleMouseUp, false);
 </script>
