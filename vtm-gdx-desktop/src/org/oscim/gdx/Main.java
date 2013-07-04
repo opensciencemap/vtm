@@ -4,8 +4,10 @@ import org.oscim.awt.AwtGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
+import org.oscim.layers.overlay.GenericOverlay;
+import org.oscim.renderer.layers.GridRenderLayer;
 import org.oscim.tilesource.TileSource;
-import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
+import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -30,9 +32,27 @@ public class Main {
 
 		new SharedLibraryLoader().load("vtm-jni");
 
-		TileSource tileSource = new OSciMap4TileSource();
-		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
+		//TileSource tileSource = new OSciMap4TileSource();
+		//tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing-nocache");
 
-		new LwjglApplication(new GdxMap(tileSource), cfg);
+		TileSource tileSource = new OSciMap2TileSource();
+		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/map-live");
+
+		new LwjglApplication(new GdxMapDesktop(tileSource), cfg);
+	}
+
+	static class GdxMapDesktop extends GdxMap{
+
+		public GdxMapDesktop(TileSource tileSource) {
+	        super(tileSource);
+        }
+
+		@Override
+		public void create() {
+		    super.create();
+
+		    //mMapView.getLayerManager().add(new BitmapTileLayer(mMapView, ArcGISWorldShaded.INSTANCE));
+			//mMapView.getLayerManager().add(new GenericOverlay(mMapView, new GridRenderLayer(mMapView)));
+		}
 	}
 }
