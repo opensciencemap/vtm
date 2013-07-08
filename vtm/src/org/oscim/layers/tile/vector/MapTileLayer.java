@@ -34,6 +34,7 @@ import org.oscim.tilesource.ITileDataSource;
 import org.oscim.tilesource.MapInfo;
 import org.oscim.tilesource.TileSource;
 import org.oscim.tilesource.TileSource.OpenResult;
+import org.oscim.utils.IOUtils;
 import org.oscim.view.MapView;
 
 public class MapTileLayer extends TileLayer<MapTileLoader> {
@@ -141,13 +142,26 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 			return true;
 
 		boolean ret = setRenderTheme((Theme) internalRenderTheme);
-		if (ret) {
+		if (ret)
 			mRenderTheme = internalRenderTheme.name();
-		}
 
 		mMapView.clearMap();
 
 		return ret;
+	}
+
+	public boolean reloadTheme(){
+
+		Theme t = InternalRenderTheme.valueOf(mRenderTheme);
+		if (t == null)
+			return false;
+
+		boolean ret = setRenderTheme(t);
+
+		mMapView.clearMap();
+
+		return ret;
+
 	}
 
 	/**
@@ -167,9 +181,8 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		}
 
 		boolean ret = setRenderTheme(new ExternalRenderTheme(renderThemePath));
-		if (ret) {
+		if (ret)
 			mRenderTheme = renderThemePath;
-		}
 
 		mMapView.clearMap();
 	}
@@ -189,25 +202,13 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 
 			for (MapTileLoader g : mTileLoader)
 				g.setRenderTheme(t);
-
 			return true;
-//		} catch (ParserConfigurationException e) {
-//			Log.e(TAG, e.getMessage());
-//		} catch (SAXException e) {
-//			Log.e(TAG, e.getMessage());
 		} catch (IOException e) {
 			Log.e(TAG, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
-			//Log.e(TAG, e.getMessage());
 		} finally {
-			try {
-				if (inputStream != null) {
-					inputStream.close();
-				}
-			} catch (IOException e) {
-				Log.e(TAG, e.getMessage());
-			}
+			IOUtils.closeQuietly(inputStream);
 			resumeLoaders();
 		}
 		return false;
