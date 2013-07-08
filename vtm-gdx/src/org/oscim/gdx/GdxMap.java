@@ -265,6 +265,11 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 					break;
 
 				case Input.Keys.R:
+					mMapLayer.reloadTheme();
+					mMapView.updateMap(false);
+					break;
+
+				case Input.Keys.D:
 					mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
 					mMapView.updateMap(false);
 					break;
