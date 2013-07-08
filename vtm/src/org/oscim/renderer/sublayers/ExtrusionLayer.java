@@ -127,13 +127,8 @@ public class ExtrusionLayer extends Layer {
 
 			// check: drop last point from explicitly closed rings
 			int len = length;
-			//		if (!MapView.enableClosePolygons) {
-			//			len -= 2;
-			//		} else
 			if (points[ppos] == points[ppos + len - 2]
 					&& points[ppos + 1] == points[ppos + len - 1]) {
-				// vector-tile-map does not produce implicty closed
-				// polygons (yet)
 				len -= 2;
 				Log.d(TAG, "explicit closed poly " + len);
 			}
