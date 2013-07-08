@@ -25,6 +25,7 @@ public abstract class InputLayer extends Layer {
 		super(mapView);
 
 	}
+
 	/**
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
@@ -146,26 +147,26 @@ public abstract class InputLayer extends Layer {
 		return false;
 	}
 
-	/**
-	 * By default does nothing (<code>return false</code>). If you handled the
-	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
-	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
-	 *
-	 * @param pEvent1
-	 *            ...
-	 * @param pEvent2
-	 *            ...
-	 * @param pVelocityX
-	 *            ...
-	 * @param pVelocityY
-	 *            ...
-	 * @return ...
-	 */
-	public boolean onFling(MotionEvent pEvent1, MotionEvent pEvent2,
-			float pVelocityX, float pVelocityY) {
-		return false;
-	}
+	///**
+	// * By default does nothing (<code>return false</code>). If you handled the
+	// * Event, return <code>true</code>, otherwise return <code>false</code>. If
+	// * you returned <code>true</code> none of the following Overlays or the
+	// * underlying {@link MapView} has the chance to handle this event.
+	// *
+	// * @param pEvent1
+	// *            ...
+	// * @param pEvent2
+	// *            ...
+	// * @param pVelocityX
+	// *            ...
+	// * @param pVelocityY
+	// *            ...
+	// * @return ...
+	// */
+	//public boolean onFling(MotionEvent pEvent1, MotionEvent pEvent2,
+	//		float pVelocityX, float pVelocityY) {
+	//	return false;
+	//}
 
 	/**
 	 * By default does nothing (<code>return false</code>). If you handled the

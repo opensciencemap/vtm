@@ -29,21 +29,14 @@ import org.oscim.layers.Layer;
 import org.oscim.layers.overlay.Overlay.Snappable;
 import org.oscim.renderer.RenderLayer;
 
-public class LayerManager extends AbstractList<Layer>
-	//implements OnGestureListener,
-		//OnDoubleTapListener
-		{
+public class LayerManager extends AbstractList<Layer> {
 	private final static String TAG = LayerManager.class.getName();
 	private final static boolean debugInput = false;
-
-	//private final GestureDetector mGestureDetector;
 
 	private final CopyOnWriteArrayList<Layer> mLayerList;
 
 	LayerManager() {
 		mLayerList = new CopyOnWriteArrayList<Layer>();
-		//mGestureDetector = new GestureDetector(context, this);
-		//mGestureDetector.setOnDoubleTapListener(this);
 	}
 
 	@Override
@@ -109,7 +102,6 @@ public class LayerManager extends AbstractList<Layer>
 		}
 	}
 
-
 	Layer[] mLayers;
 	InputLayer[] mInputLayer;
 
@@ -169,12 +161,12 @@ public class LayerManager extends AbstractList<Layer>
 					action == MotionEvent.ACTION_UP);
 		}
 
-//		if (handleGesture) {
-//			if (mGestureDetector.onTouchEvent(e))
-//				return true;
-//
-//			mCancelGesture = false;
-//		}
+		//		if (handleGesture) {
+		//			if (mGestureDetector.onTouchEvent(e))
+		//				return true;
+		//
+		//			mCancelGesture = false;
+		//		}
 
 		if (onTouchEvent(e))
 			return true;
@@ -253,7 +245,6 @@ public class LayerManager extends AbstractList<Layer>
 
 	/* GestureDetector.OnDoubleTapListener */
 
-	//@Override
 	public boolean onDoubleTap(final MotionEvent e) {
 
 		if (mDirtyLayers)
@@ -269,7 +260,6 @@ public class LayerManager extends AbstractList<Layer>
 		return false;
 	}
 
-	//@Override
 	public boolean onDoubleTapEvent(final MotionEvent e) {
 		if (mDirtyLayers)
 			updateLayers();
@@ -284,7 +274,6 @@ public class LayerManager extends AbstractList<Layer>
 		return false;
 	}
 
-	//@Override
 	public boolean onSingleTapConfirmed(final MotionEvent e) {
 		if (mDirtyLayers)
 			updateLayers();
@@ -300,8 +289,6 @@ public class LayerManager extends AbstractList<Layer>
 	}
 
 	/* OnGestureListener */
-
-	//@Override
 	public boolean onDown(final MotionEvent pEvent) {
 		if (mDirtyLayers)
 			updateLayers();
@@ -316,23 +303,22 @@ public class LayerManager extends AbstractList<Layer>
 		return false;
 	}
 
-	//@Override
-	public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pVelocityX, final float pVelocityY) {
-		if (mDirtyLayers)
-			updateLayers();
+	////@Override
+	//public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
+	//		final float pVelocityX, final float pVelocityY) {
+	//	if (mDirtyLayers)
+	//		updateLayers();
+	//
+	//	for (InputLayer o : mInputLayer) {
+	//		if (o.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY)) {
+	//			if (debugInput)
+	//				Log.d(TAG, "onFling\t" + o.getClass());
+	//			return true;
+	//		}
+	//	}
+	//	return false;
+	//}
 
-		for (InputLayer o : mInputLayer) {
-			if (o.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY)) {
-				if (debugInput)
-					Log.d(TAG, "onFling\t" + o.getClass());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	//@Override
 	public void onLongPress(final MotionEvent pEvent) {
 		if (mCancelGesture)
 			return;
@@ -345,7 +331,6 @@ public class LayerManager extends AbstractList<Layer>
 				return;
 	}
 
-	//@Override
 	public boolean onScroll(final MotionEvent pEvent1, final MotionEvent pEvent2,
 			final float pDistanceX, final float pDistanceY) {
 		if (mDirtyLayers)
@@ -361,7 +346,6 @@ public class LayerManager extends AbstractList<Layer>
 		return false;
 	}
 
-	//@Override
 	public void onShowPress(final MotionEvent pEvent) {
 		if (mDirtyLayers)
 			updateLayers();
@@ -371,7 +355,6 @@ public class LayerManager extends AbstractList<Layer>
 
 	}
 
-	//@Override
 	public boolean onSingleTapUp(final MotionEvent pEvent) {
 		if (mDirtyLayers)
 			updateLayers();
@@ -385,8 +368,6 @@ public class LayerManager extends AbstractList<Layer>
 		}
 		return false;
 	}
-
-
 
 	// /**
 	// * Gets the optional TilesLayer class.
