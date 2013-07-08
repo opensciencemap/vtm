@@ -52,5 +52,10 @@ public class AndroidMotionEvent extends MotionEvent {
 		return mEvent.getPointerCount();
 	}
 
+	@Override
+	public long getTime() {
+		return mEvent.getEventTime();
+	}
+
 
 }

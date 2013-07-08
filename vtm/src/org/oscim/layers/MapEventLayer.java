@@ -62,14 +62,19 @@ public class MapEventLayer extends InputLayer {
 	protected static final float PINCH_TILT_THRESHOLD = 1f;
 
 	private final MapViewPosition mMapPosition;
+	private final VelocityTracker mTracker;
 
 	public MapEventLayer(MapView mapView) {
 		super(mapView);
 		mMapPosition = mapView.getMapViewPosition();
+		mTracker = new VelocityTracker();
 	}
+	private long mPrevTime;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent e) {
+
+		mPrevTime = e.getTime();
 
 		int action = getAction(e);
 
@@ -82,10 +87,13 @@ public class MapEventLayer extends InputLayer {
 
 			mPrevX = e.getX(0);
 			mPrevY = e.getY(0);
-			return true; //onActionDown(e);
+
+			mTracker.start(mPrevX, mPrevY, e.getTime());
+			return true;
 		} else if (action == MotionEvent.ACTION_MOVE) {
 			return onActionMove(e);
 		} else if (action == MotionEvent.ACTION_UP) {
+			onFling(mTracker.getVelocityX(), mTracker.getVelocityY());
 			return true;
 		} else if (action == MotionEvent.ACTION_CANCEL) {
 			mDoubleTap = false;
@@ -116,6 +124,8 @@ public class MapEventLayer extends InputLayer {
 		float width = mMapView.getWidth();
 		float height = mMapView.getHeight();
 
+		mTracker.update(x1, y1, e.getTime());
+
 		// return if detect a new gesture, as indicated by a large jump
 		if (Math.abs(mx) > JUMP_THRESHOLD || Math.abs(my) > JUMP_THRESHOLD)
 			return true;
@@ -133,6 +143,7 @@ public class MapEventLayer extends InputLayer {
 		}
 
 		if (e.getPointerCount() < 2) {
+
 			if (mx > 1 || mx < -1 || my > 1 || my < -1) {
 				mMapPosition.moveMap(mx, my);
 				mMapView.updateMap(true);
@@ -281,9 +292,7 @@ public class MapEventLayer extends InputLayer {
 		return false;
 	}
 
-	@Override
-	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-			float velocityY) {
+	private boolean onFling(float velocityX, float velocityY) {
 
 		if (mWasMulti)
 			return true;
@@ -303,7 +312,7 @@ public class MapEventLayer extends InputLayer {
 		//	float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
 		//	mMapPosition.animateTo(vx * move, vy * move, 250);
 		//} else {
-		float s = (200 / CanvasAdapter.dpi);
+		float s = 1; //(200 / CanvasAdapter.dpi);
 
 		mMapPosition.animateFling(
 				Math.round(velocityX * s),
@@ -318,6 +327,104 @@ public class MapEventLayer extends InputLayer {
 				+ " " + mBeginScale
 				+ " " + mBeginRotate
 				+ " " + mBeginTilt);
+	}
+
+	/*******************************************************************************
+	 * Copyright 2011 See libgdx AUTHORS file.
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License.
+	 * You may obtain a copy of the License at
+	 *
+	 *   http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software
+	 * distributed under the License is distributed on an "AS IS" BASIS,
+	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 * See the License for the specific language governing permissions and
+	 * limitations under the License.
+	 ******************************************************************************/
+	class VelocityTracker {
+		int sampleSize = 10;
+		float lastX, lastY;
+		float deltaX, deltaY;
+		long lastTime;
+		int numSamples;
+		float[] meanX = new float[sampleSize];
+		float[] meanY = new float[sampleSize];
+		long[] meanTime = new long[sampleSize];
+
+		public void start (float x, float y, long timeStamp) {
+			lastX = x;
+			lastY = y;
+			deltaX = 0;
+			deltaY = 0;
+			numSamples = 0;
+			for (int i = 0; i < sampleSize; i++) {
+				meanX[i] = 0;
+				meanY[i] = 0;
+				meanTime[i] = 0;
+			}
+			lastTime = timeStamp;
+		}
+
+		public void update (float x, float y, long timeStamp) {
+			long currTime = timeStamp;
+			deltaX = x - lastX;
+			deltaY = y - lastY;
+			lastX = x;
+			lastY = y;
+			long deltaTime = currTime - lastTime;
+			lastTime = currTime;
+			int index = numSamples % sampleSize;
+			meanX[index] = deltaX;
+			meanY[index] = deltaY;
+			meanTime[index] = deltaTime;
+			numSamples++;
+		}
+
+		public float getVelocityX () {
+			float meanX = getAverage(this.meanX, numSamples);
+			float meanTime = getAverage(this.meanTime, numSamples) / 1000.0f;
+			if (meanTime == 0) return 0;
+			return meanX / meanTime;
+		}
+
+		public float getVelocityY () {
+			float meanY = getAverage(this.meanY, numSamples);
+			float meanTime = getAverage(this.meanTime, numSamples) / 1000.0f;
+			if (meanTime == 0) return 0;
+			return meanY / meanTime;
+		}
+
+		private float getAverage (float[] values, int numSamples) {
+			numSamples = Math.min(sampleSize, numSamples);
+			float sum = 0;
+			for (int i = 0; i < numSamples; i++) {
+				sum += values[i];
+			}
+			return sum / numSamples;
+		}
+
+		private long getAverage (long[] values, int numSamples) {
+			numSamples = Math.min(sampleSize, numSamples);
+			long sum = 0;
+			for (int i = 0; i < numSamples; i++) {
+				sum += values[i];
+			}
+			if (numSamples == 0) return 0;
+			return sum / numSamples;
+		}
+
+		private float getSum (float[] values, int numSamples) {
+			numSamples = Math.min(sampleSize, numSamples);
+			float sum = 0;
+			for (int i = 0; i < numSamples; i++) {
+				sum += values[i];
+			}
+			if (numSamples == 0) return 0;
+			return sum;
+		}
 	}
 
 }

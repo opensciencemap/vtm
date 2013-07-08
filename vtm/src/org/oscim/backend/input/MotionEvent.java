@@ -28,6 +28,8 @@ public abstract class MotionEvent {
 	public static final int ACTION_POINTER_INDEX_MASK = 0xff00;
 	public static final int ACTION_POINTER_INDEX_SHIFT = 8;
 
+	public abstract long getTime();
+
 	public abstract int getAction();
 
 	public abstract float getX();
