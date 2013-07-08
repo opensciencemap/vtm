@@ -22,7 +22,8 @@
   <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
   <!-- <style-area name="forest|wood" fill="#ebefe5" fade="7" blend="11" blend-fill="#cee0bc"/>
     d3dec8 -->
-  <style-area name="forest|wood" fill="#d1dbc7" fade="7" blend="10" blend-fill="#9ac56e" />
+  <style-area name="wood" fill="#d1dbc7" fade="7" blend="10" blend-fill="#9ac56e" />
+  <style-line name="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" />
 
   <!-- grass|meadow|garden|grassland|scrub -->
   <style-area name="greens" fill="#c9dc91" fade="10" />
@@ -32,6 +33,7 @@
 
   <!-- park|common|green|cemetery|golf_course|dog_park -->
   <style-area name="park" fill="#a3ca7b" fade="11" />
+  <style-line name="park" stroke="#a3ca7b" width="1.0" fix="true" cap="butt" fade="11" />
 
   <!-- de:Kleingartengebiet -->
   <style-area name="allotments" fill="#efeae0" fade="12" />
@@ -290,8 +292,11 @@
         <use-area name="allotments" />
       </m>
 
-      <m k="leisure" v="park|common|green|golf_course|dog_park" zoom-min="11">
+      <m k="leisure" v="park|common|green|golf_course" zoom-min="11">
         <use-area name="park" />
+        <m zoom-min="14">
+            <use-line name="park"/>
+        </m>
         <!-- <use-text name="park" />-->
       </m>
 
@@ -300,13 +305,11 @@
         <area fill="#fffad1" fade="11" />
       </m>
 
-      <m k="landuse" v="forest">
-        <use-area name="forest|wood" />
-      </m>
-
-      <m k="natural" v="wood">
-        <use-area name="forest|wood" />
-        <!-- <line stroke="#abcfab" width="1.5" fix="true" cap="butt"/> -->
+      <m k="landuse|natural" v="forest|wood">
+        <use-area name="wood" />
+        <m zoom-min="14">
+            <use-line name="wood"/>
+        </m>
       </m>
 
       <!-- keep grass above forest:wood and leisure:park! -->
