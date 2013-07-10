@@ -14,9 +14,12 @@
  */
 package org.oscim.layers.overlay;
 
+import org.oscim.backend.Log;
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.MapPosition;
+import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layers.ExtrusionRenderLayer;
+import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
 //import android.os.CountDownTimer;
@@ -31,119 +34,76 @@ public class BuildingOverlay extends Overlay {
 
 	public BuildingOverlay(MapView mapView, org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
 		super(mapView);
-		mExtLayer = new ExtrusionRenderLayer(mapView, tileRenderLayer);
+		mExtLayer = new ExtrusionRenderLayer(mapView, tileRenderLayer) {
+			private long mStartTime;
+
+			@Override
+			public void update(MapPosition pos, boolean changed, Matrices m) {
+
+				boolean show = pos.scale >= (1 << MIN_ZOOM);
+
+				if (show) {
+					if (mAlpha < 1) {
+						long now = System.currentTimeMillis();
+
+						if (mStartTime == 0) {
+							mStartTime = now;
+						}
+						float a = (now - mStartTime) / mFadeTime;
+						mAlpha = FastMath.clamp(a, 0, 1);
+						mMapView.render();
+					} else
+						mStartTime = 0;
+				} else {
+					if (mAlpha > 0) {
+						long now = System.currentTimeMillis();
+						if (mStartTime == 0) {
+							mStartTime = now + 100;
+						}
+						long diff = (now - mStartTime);
+						if (diff > 0) {
+							float a = 1 - diff / mFadeTime;
+							mAlpha = FastMath.clamp(a, 0, 1);
+						}
+						mMapView.render();
+					} else
+						mStartTime = 0;
+				}
+				//Log.d(TAG, show + " > " + mAlpha);
+				super.update(pos, changed, m);
+			}
+		};
 		mLayer = mExtLayer;
 	}
 
-	private int multi;
+	//private int multi;
 
-	private final float mFadeTime = 300;
-	private float mAlpha = 1;
+	private final float mFadeTime = 500;
 
 	private final static int MIN_ZOOM = 17;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent e) {
-//		int action = e.getAction() & MotionEvent.ACTION_MASK;
-//		if (action == MotionEvent.ACTION_POINTER_DOWN) {
-//			multi++;
-//		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-//			multi--;
-//			if (!mActive && mAlpha > 0) {
-//				// finish hiding
-//				//Log.d(TAG, "add multi hide timer " + mAlpha);
-//				addShowTimer(mFadeTime * mAlpha, false);
-//			}
-//		} else if (action == MotionEvent.ACTION_CANCEL) {
-//			multi = 0;
-//			Log.d(TAG, "cancel " + multi);
-//			if (mTimer != null) {
-//				mTimer.cancel();
-//				mTimer = null;
-//			}
-//		}
+		//		int action = e.getAction() & MotionEvent.ACTION_MASK;
+		//		if (action == MotionEvent.ACTION_POINTER_DOWN) {
+		//			multi++;
+		//		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+		//			multi--;
+		//			if (!mActive && mAlpha > 0) {
+		//				// finish hiding
+		//				//Log.d(TAG, "add multi hide timer " + mAlpha);
+		//				addShowTimer(mFadeTime * mAlpha, false);
+		//			}
+		//		} else if (action == MotionEvent.ACTION_CANCEL) {
+		//			multi = 0;
+		//			Log.d(TAG, "cancel " + multi);
+		//			if (mTimer != null) {
+		//				mTimer.cancel();
+		//				mTimer = null;
+		//			}
+		//		}
 
 		return false;
 	}
 
-	private boolean mActive = false;
-
-	@Override
-	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-		boolean show = mapPosition.scale >= (1 << MIN_ZOOM);
-
-		if (show && mActive)
-			return;
-
-//		if (show) {
-//			// start showing
-//			//Log.d(TAG, "add show timer " + mAlpha);
-//			addShowTimer(mFadeTime * (1 - mAlpha), true);
-//		} else if (mActive) {
-//			// indicate hiding
-//			if (multi > 0) {
-//				//Log.d(TAG, "add fade timer " + mAlpha);
-//				addFadeTimer(mFadeTime * mAlpha, false);
-//			} else {
-//				//Log.d(TAG, "add hide timer " + mAlpha);
-//				addShowTimer(mFadeTime * mAlpha, false);
-//			}
-//		}
-		mActive = show;
-	}
-
-	void fade(float duration, long tick, boolean dir, float max) {
-
-		float a;
-		if (dir)
-			a = (1 - max) + (1 - (tick / duration)) * max;
-		else
-			a = (1 - max) + (tick / duration) * max;
-
-		//Log.d(TAG, "fade " + dir + " " + tick + "\t" + a);
-
-		mAlpha = a;
-		mExtLayer.setAlpha(a);
-		mMapView.render();
-	}
-
-//	/* package */CountDownTimer mTimer;
-//
-//	private void addFadeTimer(final float ms, final boolean dir) {
-//		if (mTimer != null)
-//			mTimer.cancel();
-//
-//		mTimer = new CountDownTimer((long) ms, 16) {
-//			@Override
-//			public void onTick(long tick) {
-//				fade(ms, tick, dir, 0.2f);
-//			}
-//
-//			@Override
-//			public void onFinish() {
-//				fade(ms, 0, dir, 0.2f);
-//				mTimer = null;
-//			}
-//		}.start();
-//	}
-//
-//	private void addShowTimer(final float ms, final boolean dir) {
-//		final float d = mFadeTime;
-//		if (mTimer != null)
-//			mTimer.cancel();
-//
-//		mTimer = new CountDownTimer((long) ms, 16) {
-//			@Override
-//			public void onTick(long tick) {
-//				fade(d, tick, dir, 1);
-//			}
-//
-//			@Override
-//			public void onFinish() {
-//				fade(d, 0, dir, 1);
-//				mTimer = null;
-//
-//			}
-//		}.start();
-//	}
 }
