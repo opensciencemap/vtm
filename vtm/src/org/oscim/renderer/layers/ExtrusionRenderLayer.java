@@ -37,6 +37,8 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 	private final TileRenderLayer mTileLayer;
 
+	protected float mAlpha = 1;
+
 	public ExtrusionRenderLayer(MapView mapView,
 			org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
 		super(mapView);
@@ -108,12 +110,21 @@ public class ExtrusionRenderLayer extends RenderLayer {
 		mTileLayer.getVisibleTiles(mTileSet);
 		MapTile[] tiles = mTileSet.tiles;
 
+		if (mTileSet.cnt == 0) {
+			mTileLayer.releaseTiles(mTileSet);
+
+			isReady = false;
+			return;
+		}
+
 		// keep a list of tiles available for rendering
 		if (mTiles == null || mTiles.length < mTileSet.cnt * 4)
 			mTiles = new MapTile[mTileSet.cnt * 4];
 
+		int zoom = tiles[0].zoomLevel;
+
 		ExtrusionLayer el;
-		if (pos.zoomLevel >= 17) {
+		if (zoom == 17) {
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				el = getLayer(tiles[i]);
 				if (el == null)
@@ -128,7 +139,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 				if (el.compiled)
 					mTiles[activeTiles++] = tiles[i];
 			}
-		} else if (pos.zoomLevel == 16) {
+		} else if (zoom == 16) {
 			// check if proxy children are ready
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				MapTile t = tiles[i];
@@ -351,7 +362,6 @@ public class ExtrusionRenderLayer extends RenderLayer {
 	private final float _o = 55;
 	private final float _s = 20;
 	private final float _l = 8;
-	private float mAlpha = 1;
 	private final float[] mColor = {
 			// roof color
 			_a * ((_r + _l + 1) / 255),
@@ -432,8 +442,4 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			+ "   d = -d;"
 			+ "  gl_FragColor = vec4(1.0 - d, 1.0 - d, 1.0 - d, 1.0 - d);"
 			+ "}";
-
-	public void setAlpha(float a) {
-		mAlpha = a;
-	}
 }
