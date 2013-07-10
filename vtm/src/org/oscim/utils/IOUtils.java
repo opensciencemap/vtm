@@ -16,6 +16,7 @@ package org.oscim.utils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,11 +29,11 @@ public final class IOUtils {
 	/**
 	 * Invokes the {@link Closeable#close()} method on the given object. If an {@link IOException} occurs during the
 	 * method call, it will be caught and logged on level {@link Level#WARNING}.
-	 * 
+	 *
 	 * @param closeable
 	 *            the data source which should be closed (may be null).
 	 */
-	public static void closeQuietly(Closeable closeable) {
+	public static void closeQuietly(InputStream closeable) {
 		try {
 			if (closeable != null) {
 				closeable.close();
