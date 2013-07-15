@@ -18,11 +18,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
-import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -59,10 +57,10 @@ public final class PolygonRenderer {
 	private static int[] hPolygonColor = new int[numShaders];
 	private static int[] hPolygonScale = new int[numShaders];
 
-	private static boolean enableTexture = true;
-	private static int mTexWater;
-	private static int mTexWood;
-	private static int mTexGrass;
+	//private static boolean enableTexture = true;
+	//private static int mTexWater;
+	//private static int mTexWood;
+	//private static int mTexGrass;
 
 	static boolean init() {
 		GL = GLAdapter.get();
@@ -95,32 +93,8 @@ public final class PolygonRenderer {
 		}
 
 		mFillPolys = new PolygonLayer[STENCIL_BITS];
-		if (enableTexture) {
-			mTexWood = loadSprite("grass3.png");
-			mTexWater = loadSprite("water2.png");
-			mTexGrass = loadSprite("grass2.png");
-		}
+
 		return true;
-	}
-
-	private static int loadSprite(String name) {
-		int[] textures;
-
-		//Bitmap b = BitmapUtils.createBitmap(name);
-		Bitmap b = CanvasAdapter.g.loadBitmapAsset(name);
-		if (b == null) {
-			Log.d(TAG, "missing asset: " + name);
-			return 0;
-		}
-		textures = GlUtils.glGenTextures(1);
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, textures[0]);
-
-		GlUtils.setTextureParameter(GL20.GL_LINEAR, GL20.GL_LINEAR,
-				GL20.GL_REPEAT, GL20.GL_REPEAT);
-
-		b.uploadToTexture(false);
-
-		return textures[0];
 	}
 
 	private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale,
@@ -135,19 +109,14 @@ public final class PolygonRenderer {
 
 		for (int c = start; c < end; c++) {
 			Area a = mFillPolys[c].area;
-			if (enableTexture && (a.color == 0xFFAFC5E3
-					|| a.color == 0xffd1dbc7
-					|| a.color == 0xffa3ca7b)) {
+
+			if (a.texture != null){
 				shader = texShader;
 				setShader(texShader, m);
-
 				GL.glUniform2f(hPolygonScale[1], FastMath.clamp(scale - 1, 0, 1), div);
-				if (a.color == 0xFFAFC5E3)
-					GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexWater);
-				else if (a.color == 0xffd1dbc7)
-					GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexWood);
-				else
-					GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexGrass);
+
+				a.texture.bind();
+
 			} else if (a.fade >= zoom) {
 				float f = 1.0f;
 				/* fade in/out */

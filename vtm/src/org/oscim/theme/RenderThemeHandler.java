@@ -23,7 +23,6 @@ import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.oscim.backend.BitmapUtils;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.Log;
 import org.oscim.backend.XMLReaderAdapter;
@@ -34,6 +33,7 @@ import org.oscim.backend.canvas.Paint.FontFamily;
 import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
+import org.oscim.renderer.sublayers.TextureItem;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.AreaLevel;
 import org.oscim.theme.renderinstruction.Circle;
@@ -71,6 +71,8 @@ public class RenderThemeHandler extends DefaultHandler {
 	private static final String ELEMENT_NAME_USE_STYLE_LINE = "use-line";
 	private static final String ELEMENT_NAME_USE_STYLE_OUTLINE = "use-outline";
 	private static final String UNEXPECTED_ELEMENT = "unexpected element: ";
+
+	private static final String IMG_PATH = "styles/";
 
 	/**
 	 * @param inputStream
@@ -364,7 +366,7 @@ public class RenderThemeHandler extends DefaultHandler {
 			                                   "missing attribute 'img' for element: "
 			                                           + elementName);
 
-		Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset("styles/" + img);
+		Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset(IMG_PATH + img);
 		mTextureAtlas = new TextureAtlas(bitmap);
 	}
 
@@ -691,6 +693,8 @@ public class RenderThemeHandler extends DefaultHandler {
 		int blendFill = Color.BLACK;
 		String style = null;
 
+		TextureItem texture = null;
+
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
@@ -715,9 +719,17 @@ public class RenderThemeHandler extends DefaultHandler {
 			}
 		}
 
+
 		validateArea(strokeWidth);
-		return new Area(style, src, fill, stroke, strokeWidth, fade, level, blend,
-		                blendFill);
+
+		if (src != null){
+			Bitmap b = CanvasAdapter.g.loadBitmapAsset(src);
+			if (b != null)
+				texture = new TextureItem(b, true);
+
+		}
+		return new Area(style, fill, stroke, strokeWidth, fade, level, blend,
+		                blendFill, texture);
 	}
 
 	private static void validateArea(float strokeWidth) {
