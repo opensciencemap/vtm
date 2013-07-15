@@ -359,13 +359,13 @@ public class ExtrusionRenderLayer extends RenderLayer {
 	private final float _r = 0xe9;
 	private final float _g = 0xe8;
 	private final float _b = 0xe6;
-	private final float _o = 55;
-	private final float _s = 20;
-	private final float _l = 8;
+	private final float _o = 20;
+	private final float _s = 4;
+	private final float _l = 0;
 	private final float[] mColor = {
 			// roof color
-			_a * ((_r + _l + 1) / 255),
-			_a * ((_g + _l + 1) / 255),
+			_a * ((_r + _l) / 255),
+			_a * ((_g + _l) / 255),
 			_a * ((_b + _l) / 255),
 			0.8f,
 			// sligthly differ adjacent side
@@ -410,19 +410,21 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			//     scale direction to -0.5<>0.5
 			+ "    float dir = a_light.y / ff;"
 			+ "    float z = (0.98 + gl_Position.z * 0.02);"
+			+ "    float h = 0.9 + clamp(a_pos.z / 2000.0, 0.0, 0.1);"
 			+ "    color = u_color[1];"
-			+ "    color.rgb *= (0.8 + dir * 0.2) * z;"
+			+ "    color.rgb *= (0.8 + dir * 0.2) * z * h;"
 			+ "    color *= u_alpha;"
 			+ "  } else if (u_mode == 2){"
 			//     sides 2 - use 0x00ff
 			+ "    float dir = a_light.x / ff;"
 			+ "    float z = (0.98 + gl_Position.z * 0.02);"
+			+ "    float h = 0.9 + clamp(a_pos.z / 2000.0, 0.0, 0.1);"
 			+ "    color = u_color[2];"
-			+ "    color.rgb *= (0.8 + dir * 0.2) * z;"
+			+ "    color.rgb *= (0.8 + dir * 0.2) * z * h;"
 			+ "    color *= u_alpha;"
 			+ "  } else {"
 			//     outline
-			+ "    float z = (0.8 - gl_Position.z * 0.2);"
+			+ "    float z = (0.98 - gl_Position.z * 0.02);"
 			+ "    color = u_color[3] * z;"
 			+ "}}}";
 
