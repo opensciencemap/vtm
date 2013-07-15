@@ -14,6 +14,7 @@
  */
 package org.oscim.theme.renderinstruction;
 
+import org.oscim.renderer.sublayers.TextureItem;
 import org.oscim.theme.IRenderCallback;
 
 /**
@@ -35,11 +36,12 @@ public final class Area extends RenderInstruction {
 		strokeWidth = 0;
 
 		color = fill;
+		texture = null;
 	}
 
 
-	public Area(String style, String src, int fill, int stroke, float strokeWidth,
-			int fade, int level, int blend, int blendFill) {
+	public Area(String style, int fill, int stroke, float strokeWidth,
+			int fade, int level, int blend, int blendFill, TextureItem texture) {
 
 		this.style = style;
 
@@ -59,6 +61,7 @@ public final class Area extends RenderInstruction {
 		this.strokeWidth = strokeWidth;
 		this.fade = fade;
 		this.level = level;
+		this.texture = texture;
 	}
 
 	@Override
@@ -73,4 +76,6 @@ public final class Area extends RenderInstruction {
 	public final int fade;
 	public final int blendColor;
 	public final int blend;
+
+	public final TextureItem texture;
 }

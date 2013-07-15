@@ -37,6 +37,7 @@ public class TextureItem extends Inlist<TextureItem> {
 
 	public int width;
 	public int height;
+	public boolean repeat;
 
 	// vertex offset from which this texture is referenced
 	public short offset;
@@ -52,6 +53,9 @@ public class TextureItem extends Inlist<TextureItem> {
 	// release the texture when TextureItem is
 	// released.
 	private boolean isClone;
+
+	// texture data is ready
+	private boolean isReady;
 
 	private TextureItem(int id) {
 		this.id = id;
@@ -72,6 +76,23 @@ public class TextureItem extends Inlist<TextureItem> {
 		this.ownBitmap = true;
 		this.width = bitmap.getWidth();
 		this.height = bitmap.getHeight();
+	}
+
+	public TextureItem(Bitmap bitmap, boolean repeat) {
+		this.bitmap = bitmap;
+		this.id = -1;
+		this.ownBitmap = true;
+		this.width = bitmap.getWidth();
+		this.height = bitmap.getHeight();
+		this.repeat = repeat;
+	}
+
+	public void bind(){
+		if (!isReady){
+			TextureItem.uploadTexture(this);
+			isReady = true;
+		}
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, id);
 	}
 
 	public synchronized static void releaseAll(TextureItem ti) {
@@ -98,14 +119,16 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		@Override
 		public void init(int num) {
-			int[] textureIds = GlUtils.glGenTextures(num);
+			//int[] textureIds = GlUtils.glGenTextures(num);
+			//
+			//for (int i = 0; i < num; i++) {
+			//	initTexture(textureIds[i]);
+			//	TextureItem to = new TextureItem(textureIds[i]);
+			//	pool = Inlist.push(pool, to);
+			//}
+			//fill = num;
 
-			for (int i = 0; i < num; i++) {
-				initTexture(textureIds[i]);
-				TextureItem to = new TextureItem(textureIds[i]);
-				pool = Inlist.push(pool, to);
-			}
-			fill = num;
+			fill = 0;
 		}
 
 		public TextureItem get(int width, int height) {
@@ -117,12 +140,14 @@ public class TextureItem extends Inlist<TextureItem> {
 			return new TextureItem(-1);
 		}
 
+		/** called when item is added back to pool */
 		@Override
 		protected boolean clearItem(TextureItem it) {
-			// Log.d(TAG, it.ownBitmap + " " + (it.bitmap == null));
+
 			if (it.ownBitmap) {
 				it.bitmap = null;
 				it.ownBitmap = false;
+				releaseTexture(it);
 				return false;
 			}
 
@@ -179,7 +204,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	 */
 	public static void uploadTexture(TextureItem to) {
 
-		// free unused textures, find a better place for this TODO
+		// free unused textures -> TODO find a better place for this
 		synchronized (mTextures) {
 			int size = mTextures.size();
 			if (size > 0) {
@@ -198,14 +223,15 @@ public class TextureItem extends Inlist<TextureItem> {
 			mTexCnt++;
 			int[] textureIds = GlUtils.glGenTextures(1);
 			to.id = textureIds[0];
-			initTexture(to.id);
+			initTexture(to);
 			// if (TextureRenderer.debug)
 			Log.d(TAG, "poolFill:" + pool.getFill()
 					+ " texCnt:" + mTexCnt
 					+ " new texture " + to.id);
 		}
 
-		uploadTexture(to, to.bitmap, mBitmapFormat, mBitmapType,
+		uploadTexture(to, to.bitmap,
+				mBitmapFormat, mBitmapType,
 				TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
 		if (!to.ownBitmap)
@@ -225,20 +251,13 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 
 		GL.glBindTexture(GL20.GL_TEXTURE_2D, to.id);
-		//Log.d(TAG, "upload " + to.id);
+
 		if (to.ownBitmap) {
 			bitmap.uploadToTexture(false);
-			// GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, bitmap, 0);
-
 		} else if (to.width == w && to.height == h) {
 			bitmap.uploadToTexture(true);
-			// GLUtils.texSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, bitmap,
-			// format, type);
-
 		} else {
 			bitmap.uploadToTexture(false);
-			// GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, format, bitmap, type,
-			// 0);
 			to.width = w;
 			to.height = h;
 		}
@@ -247,17 +266,25 @@ public class TextureItem extends Inlist<TextureItem> {
 			GlUtils.checkGlError(TAG);
 	}
 
-	static void initTexture(int id) {
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, id);
+	static void initTexture(TextureItem it) {
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, it.id);
 
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER,
 				GL20.GL_LINEAR);
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER,
 				GL20.GL_LINEAR);
-		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
-				GL20.GL_CLAMP_TO_EDGE); // Set U Wrapping
-		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
-				GL20.GL_CLAMP_TO_EDGE); // Set V Wrapping
+
+		if (it.repeat) {
+			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
+					GL20.GL_REPEAT);
+			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
+					GL20.GL_REPEAT);
+		} else {
+			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
+					GL20.GL_CLAMP_TO_EDGE);
+			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
+					GL20.GL_CLAMP_TO_EDGE);
+		}
 	}
 
 	static void init(int num) {
