@@ -91,6 +91,9 @@ public abstract class TileLoader {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+
+			tile.clear();
+			jobCompleted(tile, false);
 		}
 	}
 
