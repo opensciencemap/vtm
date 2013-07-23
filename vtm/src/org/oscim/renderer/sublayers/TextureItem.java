@@ -87,8 +87,8 @@ public class TextureItem extends Inlist<TextureItem> {
 		this.repeat = repeat;
 	}
 
-	public void bind(){
-		if (!isReady){
+	public void bind() {
+		if (!isReady) {
 			TextureItem.uploadTexture(this);
 			isReady = true;
 		}
@@ -224,10 +224,10 @@ public class TextureItem extends Inlist<TextureItem> {
 			int[] textureIds = GlUtils.glGenTextures(1);
 			to.id = textureIds[0];
 			initTexture(to);
-			// if (TextureRenderer.debug)
-			Log.d(TAG, "poolFill:" + pool.getFill()
-					+ " texCnt:" + mTexCnt
-					+ " new texture " + to.id);
+			if (TextureRenderer.debug)
+				Log.d(TAG, "poolFill:" + pool.getFill()
+						+ " texCnt:" + mTexCnt
+						+ " new texture " + to.id);
 		}
 
 		uploadTexture(to, to.bitmap,
