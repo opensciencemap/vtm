@@ -16,6 +16,7 @@ package org.oscim.view;
 
 import java.util.List;
 
+import org.oscim.backend.Log;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
@@ -25,9 +26,15 @@ import org.oscim.layers.overlay.Overlay;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.layers.tile.vector.MapTileLoader;
+import org.oscim.renderer.GLRenderer;
+import org.oscim.theme.IRenderTheme;
+import org.oscim.theme.InternalRenderTheme;
+import org.oscim.theme.ThemeLoader;
 import org.oscim.tilesource.TileSource;
 
 public class MapView {
+
+	private static final String TAG = MapView.class.getName();
 
 	//public static boolean enableClosePolygons;
 	private final LayerManager mLayerManager;
@@ -50,21 +57,21 @@ public class MapView {
 
 		mLayerManager.add(0, new MapEventLayer(this));
 	}
+	private MapTileLayer mBaseLayer;
 
 	public MapTileLayer setBaseMap(TileSource tileSource) {
-		MapTileLayer baseLayer = new MapTileLayer(this);
+		mBaseLayer = new MapTileLayer(this);
 
-		baseLayer.setTileSource(tileSource);
-
+		mBaseLayer.setTileSource(tileSource);
 		//mLayerManager.add(0, new MapEventLayer(this));
 
-		mLayerManager.add(1, baseLayer);
+		mLayerManager.add(1, mBaseLayer);
 
 		//mRotationEnabled = true;
 
 		//mLayerManager.add(new GenericOverlay(this, new GridRenderLayer(this)));
 
-		return baseLayer;
+		return mBaseLayer;
 	}
 
 	public void setBackgroundMap(BitmapTileLayer tileLayer) {
@@ -75,6 +82,21 @@ public class MapView {
 		//mLayerManager.add(0, new MapEventLayer(this));
 		mLayerManager.add(1, tileLayer);
 		return null;
+	}
+
+	public void setTheme(InternalRenderTheme theme) {
+		if (mBaseLayer == null){
+			Log.e(TAG, "No base layer set");
+			throw new IllegalStateException();
+		}
+
+		IRenderTheme t = ThemeLoader.load(theme);
+		if (t == null){
+			Log.e(TAG, "Invalid theme");
+			throw new IllegalStateException();
+		}
+		mBaseLayer.setRenderTheme(t);
+		GLRenderer.setRenderTheme(t);
 	}
 
 	public void destroy() {
@@ -110,7 +132,7 @@ public class MapView {
 	}
 
 	/**
-	 * Do not call directly. This function is run on main-loop
+	 * Do not call directly! This function is run on main-loop
 	 * before rendering a frame.
 	 */
 	public void updateLayers() {
@@ -199,4 +221,6 @@ public class MapView {
 	public int getHeight() {
 		return mMapRenderCallback.getHeight();
 	}
+
+
 }
