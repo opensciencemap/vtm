@@ -31,6 +31,7 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tilesource.TileSource;
+import org.oscim.utils.GlUtils;
 
 public class MapView {
 
@@ -96,7 +97,7 @@ public class MapView {
 			throw new IllegalStateException();
 		}
 		mBaseLayer.setRenderTheme(t);
-		GLRenderer.setRenderTheme(t);
+		GLRenderer.setBackgroundColor(t.getMapBackground());
 	}
 
 	public void destroy() {
