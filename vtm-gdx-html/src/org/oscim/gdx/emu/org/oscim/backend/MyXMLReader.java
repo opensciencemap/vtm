@@ -36,11 +36,8 @@ public class MyXMLReader {
 
 	void handleElement(Node n) throws SAXException {
 		if (n == null) {
-			//Log.d("..", "null element");
 			return;
 		}
-		//Log.d("..", "handle element " + n.getNodeName());
-
 		if (n.getNodeType() == Node.ELEMENT_NODE) {
 
 			String localName = n.getNodeName();
@@ -49,7 +46,6 @@ public class MyXMLReader {
 			if (n.hasChildNodes()) {
 				NodeList l = n.getChildNodes();
 				for (int i = 0, len = l.getLength(); i < len; i++) {
-					//Log.d("..", "get child " + i + "/" + len);
 					handleElement(l.item(i));
 				}
 			}
