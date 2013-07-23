@@ -27,7 +27,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.renderer.sublayers.Layers;
-import org.oscim.theme.IRenderTheme;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
 import org.oscim.utils.pool.Inlist;
@@ -56,13 +55,17 @@ public class GLRenderer {
 	private static short[] mFillCoords;
 
 	public class Matrices {
-		// do not modify any of these
+
+		/** do not modify! */
 		public final Matrix4 viewproj = new Matrix4();
+		/** do not modify! */
 		public final Matrix4 proj = new Matrix4();
+		/** do not modify! */
 		public final Matrix4 view = new Matrix4();
+		/** do not modify! */
 		public final float[] mapPlane = new float[8];
 
-		// for temporary use by callee
+		/** for temporary use by callee */
 		public final Matrix4 mvp = new Matrix4();
 
 		/**
@@ -124,8 +127,8 @@ public class GLRenderer {
 		mFillCoords[7] = min;
 	}
 
-	public static void setRenderTheme(IRenderTheme t) {
-		mClearColor = GlUtils.colorToFloat(t.getMapBackground());
+	public static void setBackgroundColor(int color){
+		mClearColor = GlUtils.colorToFloat(color);
 		mUpdateColor = true;
 	}
 
