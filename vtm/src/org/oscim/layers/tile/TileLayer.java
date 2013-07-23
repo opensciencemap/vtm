@@ -23,6 +23,8 @@ import org.oscim.view.MapView;
 public abstract class TileLayer<T extends TileLoader> extends Layer {
 	//private final static String TAG = TileLayer.class.getName();
 	private final static int MAX_ZOOMLEVEL = 17;
+	private final static int MIN_ZOOMLEVEL = 2;
+	private final static int CACHE_LIMIT = 250;
 
 	protected final TileManager mTileManager;
 	protected final TileRenderLayer mRenderLayer;
@@ -33,15 +35,15 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 	protected boolean mInitial = true;
 
 	public TileLayer(MapView mapView) {
-		this(mapView, MAX_ZOOMLEVEL);
+		this(mapView, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL, CACHE_LIMIT);
 	}
 
-	public TileLayer(MapView mapView, int maxZoom) {
+	public TileLayer(MapView mapView, int minZoom, int maxZoom, int cacheLimit) {
 		super(mapView);
 
 		// TileManager responsible for adding visible tiles
 		// to load queue and managing in-memory tile cache.
-		mTileManager = new TileManager(mapView, this, maxZoom);
+		mTileManager = new TileManager(mapView, this, minZoom, maxZoom, cacheLimit);
 
 		// Instantiate TileLoader threads
 		mTileLoader = new ArrayList<T>();
