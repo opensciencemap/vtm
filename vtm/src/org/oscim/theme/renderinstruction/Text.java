@@ -59,6 +59,19 @@ public final class Text extends RenderInstruction {
 		return t;
 	}
 
+
+	public static Text createText(String textKey, float fontSize, float strokeWidth, int fill, int outline,
+			boolean billboard) {
+
+		Text t = new Text("", textKey, FontFamily.DEFAULT, FontStyle.NORMAL,
+				fontSize, fill, outline, strokeWidth, 0, billboard, null, Integer.MAX_VALUE);
+
+		t.fontHeight = t.paint.getFontHeight();
+		t.fontDescent = t.paint.getFontDescent();
+
+		return t;
+	}
+
 	public Text(String style, String textKey, FontFamily fontFamily, FontStyle fontStyle,
 			float fontSize, int fill, int outline, float strokeWidth, float dy, boolean caption,
 			String symbol, int priority) {
