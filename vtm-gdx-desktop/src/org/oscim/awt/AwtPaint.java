@@ -47,8 +47,8 @@ public class AwtPaint implements Paint {
 	static {
 		Map<Attribute, Object> textAttributes = new HashMap<Attribute, Object>();
 		textAttributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
-		textAttributes.put(TextAttribute.FAMILY, "SansSerif");
-		textAttributes.put(TextAttribute.SIZE, 13);
+		textAttributes.put(TextAttribute.FAMILY, "Arial");
+		textAttributes.put(TextAttribute.SIZE, 14);
 
 		defaultFont = Font.getFont(textAttributes);
 	}
@@ -126,7 +126,7 @@ public class AwtPaint implements Paint {
 
 	@Override
 	public void setTextSize(float textSize) {
-		font = font.deriveFont(textSize - 4);
+		font = font.deriveFont(textSize - 2);
 
 	}
 
@@ -143,7 +143,7 @@ public class AwtPaint implements Paint {
 
 		float w = AwtGraphics.getTextWidth(fm, text);
 		//Gdx.app.log("text width:", text + " " + w);
-		return w;
+		return w + 4;
 		// return fm.getStringBounds(text, A).getWidth();
 		// return AwtGraphics.getTextWidth(fm, text);
 		// return fm.stringWidth(text);
@@ -173,6 +173,6 @@ public class AwtPaint implements Paint {
 		if (strokeWidth <= 0) {
 			return;
 		}
-		stroke = new BasicStroke(strokeWidth, cap, BasicStroke.JOIN_ROUND, 0, null, 0);
+		stroke = new BasicStroke(strokeWidth, cap, BasicStroke.JOIN_MITER, 1, null, 0);
 	}
 }

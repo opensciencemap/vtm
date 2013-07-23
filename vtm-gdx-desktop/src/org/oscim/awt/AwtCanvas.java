@@ -43,22 +43,17 @@ public class AwtCanvas implements Canvas {
 		AwtBitmap awtBitamp = (AwtBitmap)bitmap;
 
 		canvas = awtBitamp.bitmap.createGraphics();
-		//awtBitamp.bitmap.
-		//bitmap.eraseColor();
-		canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0));
-		//canvas.setBackground(new Color(1,1,1,1));
-		canvas.setColor(Color.BLACK);
 
-		//Gdx.app.log("set bitmap ",  bitmap + " "+ bitmap.getWidth() + " " +bitmap.getHeight());
-		canvas.fillRect(0,0,bitmap.getWidth(),bitmap.getHeight());
-		//canvas.clearRect(0, 0, bitmap.getWidth(),bitmap.getHeight());
+		canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0));
+		canvas.fillRect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
 		canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 
 		canvas.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON );
 		//canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-		//canvas.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		//canvas.setRenderingHint(RenderingHints.KEY_KERNING, RenderingHints.VALUE_RENDER_QUALITY);
+		canvas.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
 
 
 	}
@@ -76,13 +71,12 @@ public class AwtCanvas implements Canvas {
 		if (awtPaint.stroke == null) {
 			canvas.setColor(awtPaint.color);
 			canvas.setFont(awtPaint.font);
-			canvas.drawString(text, x, y);
+			canvas.drawString(text, x + 2, y);
 		} else {
 			setColorAndStroke(awtPaint);
-
 			TextLayout textLayout = new TextLayout(text, awtPaint.font, canvas.getFontRenderContext());
 			AffineTransform affineTransform = new AffineTransform();
-			affineTransform.translate(x, y);
+			affineTransform.translate(x + 2, y);
 			canvas.draw(textLayout.getOutline(affineTransform));
 		}
 	}
