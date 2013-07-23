@@ -105,12 +105,8 @@ public abstract class BasicRenderLayer extends RenderLayer {
 			return;
 		}
 
-		if (layers.vbo == null) {
+		if (layers.vbo == null)
 			layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
-
-			if (layers.vbo == null)
-				return;
-		}
 
 		if (GLRenderer.uploadLayers(layers, newSize, true))
 			isReady = true;
