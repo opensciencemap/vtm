@@ -38,12 +38,11 @@ import org.oscim.view.MapViewPosition;
  *       'renderer' -> tilemap? - make it general for reuse in tile-overlays
  */
 public class TileManager {
-	private static final int CACHE_TILES_MAX = 250;
-
 	static final String TAG = TileManager.class.getName();
-	private final static int MIN_ZOOMLEVEL = 2;
 
-	private final int mMaxZoom;
+	private int mCacheLimit;
+	private int mMinZoom;
+	private int mMaxZoom;
 
 	// limit number tiles with new data not uploaded to GL
 	// TODO this should depend on the number of tiles displayed
@@ -113,15 +112,18 @@ public class TileManager {
 	private final float[] mMapPlane = new float[8];
 	private final TileLayer<?> mTileLayer;
 
-	public TileManager(MapView mapView, TileLayer<?> tileLayer, int maxZoom) {
+	public TileManager(MapView mapView, TileLayer<?> tileLayer, int minZoom, int maxZoom, int cacheLimit) {
 		mMapView = mapView;
 		mTileLayer = tileLayer;
 		mMaxZoom = maxZoom;
+		mMinZoom = minZoom;
+		mCacheLimit = cacheLimit;
+
 		mMapViewPosition = mapView.getMapViewPosition();
 
 		jobQueue = new JobQueue();
 		mJobs = new ArrayList<MapTile>();
-		mTiles = new MapTile[CACHE_TILES_MAX];
+		mTiles = new MapTile[mCacheLimit];
 
 		mTilesSize = 0;
 		mTilesForUpload = 0;
@@ -196,7 +198,7 @@ public class TileManager {
 		// load some tiles more than currently visible (* 0.75)
 		double scale = pos.scale * 0.9f;
 
-		int tileZoom = FastMath.clamp(pos.zoomLevel, MIN_ZOOMLEVEL, mMaxZoom);
+		int tileZoom = FastMath.clamp(pos.zoomLevel, mMinZoom, mMaxZoom);
 
 		if (mZoomTable != null) {
 			int match = 0;
@@ -276,7 +278,7 @@ public class TileManager {
 		mJobs.clear();
 
 		/* limit cache items */
-		int remove = mTilesCount - CACHE_TILES_MAX;
+		int remove = mTilesCount - mCacheLimit;
 
 		if (remove > CACHE_THRESHOLD ||
 		    mTilesForUpload > MAX_TILES_IN_QUEUE)

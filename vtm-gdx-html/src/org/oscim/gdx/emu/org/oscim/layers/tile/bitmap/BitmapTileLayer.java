@@ -16,7 +16,6 @@ package org.oscim.layers.tile.bitmap;
 
 import java.net.URL;
 
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.Tile;
 import org.oscim.gdx.client.GwtBitmap;
@@ -36,13 +35,11 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class BitmapTileLayer extends TileLayer<TileLoader> {
-	private static final int TIMEOUT_CONNECT = 5000;
-	private static final int TIMEOUT_READ = 10000;
 
 	final TileSource mTileSource;
 
 	public BitmapTileLayer(MapView mapView, TileSource tileSource) {
-		super(mapView, tileSource.getZoomLevelMax());
+		super(mapView, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), 100);
 		mTileSource = tileSource;
 	}
 
@@ -57,7 +54,6 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 
 				img.addLoadHandler(new LoadHandler() {
 					public void onLoad(LoadEvent event) {
-						Log.d("sup", "got image " + url);
 
 						Bitmap bitmap = new GwtBitmap(img);
 						tile.layers = new Layers();
@@ -83,7 +79,6 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 				URL url;
 				try {
 					url = mTileSource.getTileUrl(tile);
-					Log.d("sup", "load image " + url);
 					loadImage(tile, url.toString());
 				} catch (Exception e) {
 					e.printStackTrace();
