@@ -31,7 +31,7 @@ public class AwtBitmap implements Bitmap {
 		this.bitmap = ImageIO.read(inputStream);
 		this.width = this.bitmap.getWidth();
 		this.height = this.bitmap.getHeight();
-		if (!this.bitmap.isAlphaPremultiplied())
+		if (!this.bitmap.isAlphaPremultiplied() && this.bitmap.getType() == BufferedImage.TYPE_INT_ARGB)
 			this.bitmap.coerceData(true);
 	}
 
@@ -71,6 +71,7 @@ public class AwtBitmap implements Bitmap {
 			buffer = BufferUtils.newIntBuffer(width * height);
 		}
 
+		// FIXME dont convert to argb when there data is greyscale
 		bitmap.getRGB(0, 0, width, height, pixels, 0, width);
 
 		for (int i = 0, n =  width * height; i < n; i++){
@@ -90,6 +91,5 @@ public class AwtBitmap implements Bitmap {
 
 	@Override
 	public void recycle() {
-		// TODO Auto-generated method stub
 	}
 }
