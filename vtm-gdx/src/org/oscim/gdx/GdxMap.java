@@ -10,6 +10,7 @@ import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.theme.InternalRenderTheme;
+import org.oscim.theme.ThemeLoader;
 import org.oscim.tilesource.TileSource;
 import org.oscim.view.MapRenderCallback;
 import org.oscim.view.MapView;
@@ -69,7 +70,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 			// TileSource tileSource = new TestTileSource();
 
 			mMapLayer = mMapView.setBaseMap(mTileSource);
-			mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
+			mMapView.setTheme(InternalRenderTheme.DEFAULT);
 
 			mMapView.getLayerManager().add(new BuildingOverlay(mMapView, mMapLayer.getTileLayer()));
 			mMapView.getLayerManager().add(new LabelLayer(mMapView, mMapLayer.getTileLayer()));
@@ -87,8 +88,9 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 		mMapView.getMapViewPosition().setViewport(w, h);
 		MapPosition p = new MapPosition();
-		p.setZoomLevel(17);
-		p.setPosition(53.08, 8.83);
+		p.setZoomLevel(3);
+		//p.setPosition(53.08, 8.83);
+		p.setPosition(0.0, 0.0);
 		mMapView.setMapPosition(p);
 
 		mMapRenderer.onSurfaceCreated();
@@ -264,18 +266,18 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 					mMapView.updateMap(true);
 					break;
 
-				case Input.Keys.R:
-					mMapLayer.reloadTheme();
-					mMapView.updateMap(false);
-					break;
+//				case Input.Keys.R:
+//					mMapLayer.reloadTheme();
+//					mMapView.updateMap(false);
+//					break;
 
 				case Input.Keys.D:
-					mMapLayer.setRenderTheme(InternalRenderTheme.DEFAULT);
+					mMapView.setTheme(InternalRenderTheme.DEFAULT);
 					mMapView.updateMap(false);
 					break;
 
 				case Input.Keys.T:
-					mMapLayer.setRenderTheme(InternalRenderTheme.TRONRENDER);
+					mMapView.setTheme(InternalRenderTheme.TRONRENDER);
 					mMapView.updateMap(false);
 					break;
 

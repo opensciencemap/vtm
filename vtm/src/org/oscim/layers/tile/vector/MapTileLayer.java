@@ -14,31 +14,28 @@
  */
 package org.oscim.layers.tile.vector;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.TileLayer;
+import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
-import org.oscim.renderer.GLRenderer;
-import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.IRenderTheme;
-import org.oscim.theme.InternalRenderTheme;
-import org.oscim.theme.RenderThemeHandler;
-import org.oscim.theme.Theme;
 import org.oscim.tilesource.ITileDataSource;
 import org.oscim.tilesource.MapInfo;
 import org.oscim.tilesource.TileSource;
 import org.oscim.tilesource.TileSource.OpenResult;
-import org.oscim.utils.IOUtils;
 import org.oscim.view.MapView;
 
+/**
+ * The vector-tile-map layer. This class manages instances of
+ * {@link MapTileLoader} that load and assemble vector tiles
+ * for rendering.
+ */
 public class MapTileLayer extends TileLayer<MapTileLoader> {
 	private final static String TAG = MapTileLayer.class.getName();
+
+	private TileSource mTileSource;
 
 	public MapTileLayer(MapView mapView) {
 		super(mapView);
@@ -49,15 +46,10 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		return new MapTileLoader(tm);
 	}
 
-	private TileSource mTileSource;
-	private String mRenderTheme;
-
 	/**
-	 * Sets the TileSource for this MapView.
+	 * Sets the {@link TileSource} used by {@link TileLoader}.
 	 *
-	 * @param tileSource
-	 *            the new TileSource.
-	 * @return true if TileSource changed
+	 * @return true when new TileSource was set (has changed)
 	 */
 	public boolean setTileSource(TileSource tileSource) {
 
@@ -93,6 +85,21 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		return true;
 	}
 
+	/**
+	 * Set {@link IRenderTheme} used by {@link TileLoader}
+	 */
+	public void setRenderTheme(IRenderTheme theme) {
+		pauseLoaders(true);
+
+		for (MapTileLoader g : mTileLoader)
+			g.setRenderTheme(theme);
+
+		resumeLoaders();
+	}
+
+	/**
+	 * @deprecated
+	 */
 	public MapPosition getMapFileCenter() {
 		if (mTileSource == null)
 			return null;
@@ -113,105 +120,11 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 		mapPosition.setPosition(startPos);
 
 		if (mapInfo.startZoomLevel == null)
-			mapPosition.setZoomLevel(12);
+			mapPosition.setZoomLevel(2);
 		else
 			mapPosition.setZoomLevel((mapInfo.startZoomLevel).byteValue());
 
 		return mapPosition;
-	}
-
-	public String getRenderTheme() {
-		return mRenderTheme;
-	}
-
-	/**
-	 * Sets the internal theme which is used for rendering the map.
-	 *
-	 * @param internalRenderTheme
-	 *            the internal rendering theme.
-	 * @return ...
-	 * @throws IllegalArgumentException
-	 *             if the supplied internalRenderTheme is null.
-	 */
-	public boolean setRenderTheme(InternalRenderTheme internalRenderTheme) {
-		if (internalRenderTheme == null) {
-			throw new IllegalArgumentException("render theme must not be null");
-		}
-
-		if (internalRenderTheme.name() == mRenderTheme)
-			return true;
-
-		boolean ret = setRenderTheme((Theme) internalRenderTheme);
-		if (ret)
-			mRenderTheme = internalRenderTheme.name();
-
-		mMapView.clearMap();
-
-		return ret;
-	}
-
-	public boolean reloadTheme(){
-
-		Theme t = InternalRenderTheme.valueOf(mRenderTheme);
-		if (t == null)
-			return false;
-
-		boolean ret = setRenderTheme(t);
-
-		mMapView.clearMap();
-
-		return ret;
-
-	}
-
-	/**
-	 * Sets the theme file which is used for rendering the map.
-	 *
-	 * @param renderThemePath
-	 *            the path to the XML file which defines the rendering theme.
-	 * @throws IllegalArgumentException
-	 *             if the supplied internalRenderTheme is null.
-	 * @throws FileNotFoundException
-	 *             if the supplied file does not exist, is a directory or cannot
-	 *             be read.
-	 */
-	public void setRenderTheme(String renderThemePath) throws FileNotFoundException {
-		if (renderThemePath == null) {
-			throw new IllegalArgumentException("render theme path must not be null");
-		}
-
-		boolean ret = setRenderTheme(new ExternalRenderTheme(renderThemePath));
-		if (ret)
-			mRenderTheme = renderThemePath;
-
-		mMapView.clearMap();
-	}
-
-	private boolean setRenderTheme(Theme theme) {
-
-		pauseLoaders(true);
-
-		InputStream inputStream = null;
-		try {
-			inputStream = theme.getRenderThemeAsStream();
-			IRenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
-			t.scaleTextSize(1 + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
-
-			// FIXME !!!
-			GLRenderer.setRenderTheme(t);
-
-			for (MapTileLoader g : mTileLoader)
-				g.setRenderTheme(t);
-			return true;
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			IOUtils.closeQuietly(inputStream);
-			resumeLoaders();
-		}
-		return false;
 	}
 
 }
