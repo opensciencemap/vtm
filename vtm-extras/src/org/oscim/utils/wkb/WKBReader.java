@@ -15,33 +15,46 @@
 package org.oscim.utils.wkb;
 
 import org.oscim.core.GeometryBuffer;
+import org.oscim.core.Tile;
 
 public class WKBReader {
-	interface Callback {
+	public interface Callback {
 		public void process(GeometryBuffer geom);
 	}
 
-	// taken from postgis-java
-
-	private GeometryBuffer mGeom;
-	private final double mScale = 1;
-	private final double mOffsetX = 0;
-	private final double mOffsetY = 0;
+	private final GeometryBuffer mGeom;
+	private final boolean mFlipY;
 
 	private WKBReader.Callback mCallback;
 
-	/**
-	 * Parse a binary encoded geometry.
-	 *
-	 * @param value
-	 *            ...
-	 * @return ...
-	 */
-	boolean parse(byte[] value) {
-		return parseGeometry(valueGetterForEndian(value), 0);
+	public WKBReader(GeometryBuffer geom, boolean flipY) {
+		mGeom = geom;
+		mFlipY = flipY;
 	}
 
-	private boolean parseGeometry(ValueGetter data, int count) {
+	public void setCallback(WKBReader.Callback cb) {
+		mCallback = cb;
+	}
+
+	/**
+	 * Parse a binary encoded geometry.
+	 */
+	public void parse(byte[] value) {
+		parseGeometry(valueGetterForEndian(value), 0);
+	}
+
+	/**
+	 * Parse a hex encoded geometry.
+	 */
+	public void parse(String value) {
+		byte[] b = hexStringToByteArray(value);
+		if (b == null)
+			return;
+
+		parse(b);
+	}
+
+	private void parseGeometry(ValueGetter data, int count) {
 		byte endian = data.getByte(); // skip and test endian flag
 		if (endian != data.endian) {
 			throw new IllegalArgumentException("Endian inconsistency!");
@@ -55,59 +68,59 @@ public class WKBReader {
 		boolean haveS = (typeword & 0x20000000) != 0;
 
 		// int srid = Geometry.UNKNOWN_SRID;
-		boolean polygon = false;
 		if (haveS) {
 			// srid = Geometry.parseSRID(data.getInt());
 			data.getInt();
 		}
 		switch (realtype) {
-			case Geometry.POINT:
-				mGeom.startPoints();
-				parsePoint(data, haveZ, haveM);
-				break;
-			case Geometry.LINESTRING:
-				mGeom.startLine();
-				parseLineString(data, haveZ, haveM);
-				break;
-			case Geometry.POLYGON:
-				mGeom.startPolygon();
-				parsePolygon(data, haveZ, haveM);
-				polygon = true;
-				break;
-			case Geometry.MULTIPOINT:
-				mGeom.startPoints();
-				parseMultiPoint(data);
-				break;
-			case Geometry.MULTILINESTRING:
-				mGeom.startLine();
-				parseMultiLineString(data);
-				break;
-			case Geometry.MULTIPOLYGON:
-				mGeom.startPolygon();
-				parseMultiPolygon(data);
-				polygon = true;
-				break;
-			case Geometry.GEOMETRYCOLLECTION:
-				parseCollection(data);
-				break;
-			default:
-				throw new IllegalArgumentException("Unknown Geometry Type: " + realtype);
+		case Geometry.POINT:
+			mGeom.startPoints();
+			parsePoint(data, haveZ, haveM);
+			break;
+		case Geometry.LINESTRING:
+			mGeom.startLine();
+			parseLineString(data, haveZ, haveM);
+			break;
+		case Geometry.POLYGON:
+			mGeom.startPolygon();
+			parsePolygon(data, haveZ, haveM);
+			break;
+		case Geometry.MULTIPOINT:
+			mGeom.startPoints();
+			parseMultiPoint(data);
+			break;
+		case Geometry.MULTILINESTRING:
+			mGeom.startLine();
+			parseMultiLineString(data);
+			break;
+		case Geometry.MULTIPOLYGON:
+			mGeom.startPolygon();
+			parseMultiPolygon(data);
+			break;
+		case Geometry.GEOMETRYCOLLECTION:
+			parseCollection(data);
+			break;
+		default:
+			throw new IllegalArgumentException("Unknown Geometry Type: " + realtype);
 		}
 
 		if (count == 0) {
 			mCallback.process(mGeom);
+
 			mGeom.clear();
 		}
 		// if (srid != Geometry.UNKNOWN_SRID) {
 		// result.setSrid(srid);
 		// }
-		return polygon;
 	}
 
 	private void parsePoint(ValueGetter data, boolean haveZ, boolean haveM) {
 
-		float x = (float) ((data.getDouble() + mOffsetX) * mScale);
-		float y = (float) ((data.getDouble() + mOffsetY) * mScale);
+		float x = (float) data.getDouble();
+		float y = (float) data.getDouble();
+		if (mFlipY)
+			y = Tile.SIZE - y;
+
 		mGeom.addPoint(x, y);
 
 		if (haveZ)
@@ -125,12 +138,22 @@ public class WKBReader {
 	 * @param count
 	 *            ...
 	 */
-	private void parseGeometryArray(ValueGetter data, int count) {
+	private void parseGeometryArray(ValueGetter data, int count, int type) {
 		mGeom.clear();
 
 		for (int i = 0; i < count; i++) {
+			if (i > 0) {
+				if (type == Geometry.LINESTRING)
+					mGeom.startLine();
+				else if (type == Geometry.POLYGON)
+					mGeom.startPolygon();
+				else {
+					mCallback.process(mGeom);
+					mGeom.clear();
+				}
+			}
 			parseGeometry(data, count);
-			mGeom.index[mGeom.indexPos++] = 0;
+			// mGeom.index[++mGeom.indexPos] = -1;
 		}
 
 		mCallback.process(mGeom);
@@ -138,7 +161,7 @@ public class WKBReader {
 	}
 
 	private void parseMultiPoint(ValueGetter data) {
-		parseGeometryArray(data, data.getInt());
+		parseGeometryArray(data, data.getInt(), Geometry.POINT);
 	}
 
 	private void parseLineString(ValueGetter data, boolean haveZ, boolean haveM) {
@@ -146,8 +169,12 @@ public class WKBReader {
 		int count = data.getInt();
 
 		for (int i = 0; i < count; i++) {
-			float x = (float) ((data.getDouble() + mOffsetX) * mScale);
-			float y = (float) ((data.getDouble() + mOffsetY) * mScale);
+			float x = (float) data.getDouble();
+			float y = (float) data.getDouble();
+
+			if (mFlipY)
+				y = Tile.SIZE - y;
+
 			mGeom.addPoint(x, y);
 
 			// ignore
@@ -166,7 +193,26 @@ public class WKBReader {
 			if (i > 0)
 				mGeom.startHole();
 
-			parseLineString(data, haveZ, haveM);
+
+			int points = data.getInt();
+
+			for (int j = 0; j < points; j++) {
+				float x = (float) data.getDouble();
+				float y = (float) data.getDouble();
+
+				if (mFlipY)
+					y = Tile.SIZE - y;
+
+				// drop redundant closing point
+				if (j < points - 1)
+					mGeom.addPoint(x, y);
+
+				// ignore
+				if (haveZ)
+					data.getDouble();
+				if (haveM)
+					data.getDouble();
+			}
 		}
 	}
 
@@ -176,7 +222,7 @@ public class WKBReader {
 		if (count <= 0)
 			return;
 
-		parseGeometryArray(data, count);
+		parseGeometryArray(data, count, Geometry.LINESTRING);
 	}
 
 	private void parseMultiPolygon(ValueGetter data) {
@@ -184,12 +230,13 @@ public class WKBReader {
 		if (count <= 0)
 			return;
 
-		parseGeometryArray(data, count);
+		parseGeometryArray(data, count, Geometry.POLYGON);
 	}
 
 	private void parseCollection(ValueGetter data) {
 		int count = data.getInt();
-		parseGeometryArray(data, count);
+
+		parseGeometryArray(data, count, Geometry.GEOMETRYCOLLECTION);
 
 		mCallback.process(mGeom);
 		mGeom.clear();
@@ -203,6 +250,26 @@ public class WKBReader {
 		} else {
 			throw new IllegalArgumentException("Unknown Endian type:" + bytes[0]);
 		}
+	}
+
+	/**
+	 * Converting a string of hex character to bytes
+	 *
+	 * from http://stackoverflow.com/questions/140131/convert-a-string-
+	 * representation-of-a-hex-dump-to-a-byte-array-using-java
+	 */
+	public static byte[] hexStringToByteArray(String s) {
+
+		int len = s.length();
+		if (len < 2)
+			return null;
+
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+			        + Character.digit(s.charAt(i + 1), 16));
+		}
+		return data;
 	}
 
 }
