@@ -4,6 +4,7 @@ package org.oscim.gdx.client;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
+import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.gdx.GdxMap;
 import org.oscim.tilesource.TileSource;
@@ -68,6 +69,15 @@ public class GwtLauncher extends GwtApplication {
 			//Gdx.app.setLogLevel(Application.LOG_DEBUG);
 
 			super.create();
+
+			double lat =  Double.parseDouble(getMapConfig("latitude"));
+			double lon =  Double.parseDouble(getMapConfig("longitude"));
+			int zoom =  Integer.parseInt(getMapConfig("zoom"));
+
+			MapPosition p = new MapPosition();
+			p.setZoomLevel(zoom);
+			p.setPosition(lat, lon);
+			mMapView.setMapPosition(p);
 		}
 	}
 }
