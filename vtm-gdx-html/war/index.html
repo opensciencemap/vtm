@@ -24,8 +24,11 @@ canvas {
 
 <script type="text/javascript">
 	var mapconfig = {
-		tilesource : "oscimap2",
-		tileurl : "/tiles"
+		tilesource : "oscimap4",
+		tileurl : "/osci/testing2",
+		zoom: "4",
+		latitude: "0.0",
+		longitude: "0.0"
 	}
 </script>
 
@@ -46,7 +49,7 @@ canvas {
 	function handleMouseDown(evt) {
 		evt.preventDefault();
 		evt.stopPropagation();
-		evt.target.style.cursor = 'move';
+		evt.target.style.cursor = 'default';
 	}
 
 	function handleMouseUp(evt) {
