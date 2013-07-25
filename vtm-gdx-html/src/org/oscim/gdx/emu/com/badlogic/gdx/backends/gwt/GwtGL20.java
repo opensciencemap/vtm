@@ -74,7 +74,7 @@ public class GwtGL20 implements GL20, org.oscim.backend.GL20{
 	protected GwtGL20 (WebGLRenderingContext gl) {
 		;
 		this.gl = gl;
-		this.gl.pixelStorei(WebGLRenderingContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+		this.gl.pixelStorei(WebGLRenderingContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
 	}
 
 	private void ensureCapacity (FloatBuffer buffer) {
@@ -432,10 +432,10 @@ public class GwtGL20 implements GL20, org.oscim.backend.GL20{
 		Buffer pixels) {
 		Pixmap pixmap = Pixmap.pixmaps.get(((IntBuffer)pixels).get(0));
 		if (pixmap != null){
-			Gdx.app.log("GwtGL20", "load texture "+ target + " "+ width + " " + height + " " + type + " " + format);
+			//Gdx.app.log("GwtGL20", "load texture "+ target + " "+ width + " " + height + " " + type + " " + format);
 		    gl.texImage2D(target, level, internalformat, format, type, pixmap.getCanvasElement());
 		} else if (format == GL20.GL_ALPHA){
-			Gdx.app.log("GwtGL20", "load byte texture " + width + " " + height + " " + type + " " + format);
+			//Gdx.app.log("GwtGL20", "load byte texture " + width + " " + height + " " + type + " " + format);
 			int tmp[] = new int[(width * height) >> 2];
 			((IntBuffer)pixels).get(tmp);
 
