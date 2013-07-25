@@ -72,7 +72,10 @@ public class GwtGraphics implements Graphics {
 
 		context = WebGLRenderingContext.getContext(canvas, attributes);
 		context.viewport(0, 0, config.width, config.height);
-
+		
+		// this actually *enables* the option to use std derivatives in shader..  
+		context.getExtension("OES_standard_derivatives");
+		
 		this.gl = config.useDebugGL ? new GwtGL20Debug(context) : new GwtGL20(context);
 
 		Window.addResizeHandler(new ResizeHandler() {
