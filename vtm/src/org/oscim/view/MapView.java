@@ -31,9 +31,8 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tilesource.TileSource;
-import org.oscim.utils.GlUtils;
 
-public class MapView {
+public abstract class MapView {
 
 	private static final String TAG = MapView.class.getName();
 
@@ -43,10 +42,8 @@ public class MapView {
 	private final MapPosition mMapPosition;
 
 	private DebugSettings mDebugSettings;
-	private final MapRenderCallback mMapRenderCallback;
 
-	public MapView(MapRenderCallback mapRenderCallback) {
-		mMapRenderCallback = mapRenderCallback;
+	public MapView() {
 
 		mMapViewPosition = new MapViewPosition(this);
 		mMapPosition = new MapPosition();
@@ -111,11 +108,13 @@ public class MapView {
 	 *
 	 * @param forceRedraw pass true to render next frame
 	 */
-	public void updateMap(boolean forceRedraw) {
-		mMapRenderCallback.updateMap(forceRedraw);
-	}
+	public abstract void updateMap(boolean forceRedraw);
 
-	boolean mClearMap;
+
+	public abstract int getWidth();
+	public abstract int getHeight();
+
+	protected boolean mClearMap;
 
 	/**
 	 * Request to clear all layers before rendering next frame
@@ -126,11 +125,9 @@ public class MapView {
 
 	/**
 	 * Request to render a frame. Request will be handled on main
-	 * thread.
+	 * thread. Use this for animations.
 	 */
-	public void render() {
-		mMapRenderCallback.renderMap();
-	}
+	public abstract void render();
 
 	/**
 	 * Do not call directly! This function is run on main-loop
@@ -200,28 +197,7 @@ public class MapView {
 		return mMapViewPosition.getViewBox();
 	}
 
-	public void onPause() {
-		// TODO Auto-generated method stub
 
-	}
-
-	public void onResume() {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void onStop() {
-		// TODO Auto-generated method stub
-
-	}
-
-	public int getWidth() {
-		return mMapRenderCallback.getWidth();
-	}
-
-	public int getHeight() {
-		return mMapRenderCallback.getHeight();
-	}
 
 
 }

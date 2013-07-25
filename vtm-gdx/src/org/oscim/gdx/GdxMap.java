@@ -10,9 +10,7 @@ import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.theme.InternalRenderTheme;
-import org.oscim.theme.ThemeLoader;
 import org.oscim.tilesource.TileSource;
-import org.oscim.view.MapRenderCallback;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
@@ -27,16 +25,47 @@ import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
 
-public class GdxMap implements ApplicationListener, MapRenderCallback {
+public class GdxMap implements ApplicationListener {
 
 	protected final MapView mMapView;
 	private final GLRenderer mMapRenderer;
 	private final TileSource mTileSource;
 
+	boolean mRenderRequest;
+
 	public GdxMap(TileSource tileSource) {
 		AssetAdapter.g = new GdxAssetAdapter();
 		mTileSource = tileSource;
-		mMapView = new MapView(this);
+
+		mMapView = new MapView() {
+			@Override
+			public int getWidth() {
+				return mWidth;
+			}
+
+			@Override
+			public int getHeight() {
+				return mHeight;
+			}
+
+			@Override
+			public void updateMap(boolean forceRender) {
+				if (!mWaitRedraw) {
+					mWaitRedraw = true;
+					Gdx.app.postRunnable(mRedrawRequest);
+				}
+			}
+
+			@Override
+			public void render() {
+				mRenderRequest = true;
+				if (mClearMap)
+					updateMap(false);
+				else
+					Gdx.graphics.requestRendering();
+			}
+		};
+
 		mMapRenderer = new GLRenderer(mMapView);
 	}
 
@@ -44,6 +73,8 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 	// Label fps;
 	// BitmapFont font;
 	MapTileLayer mMapLayer;
+
+	int mHeight, mWidth;
 
 	@Override
 	public void create() {
@@ -142,8 +173,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 
 		mMapView.getMapViewPosition().setViewport(w, h);
 		mMapRenderer.onSurfaceChanged(w, h);
-
-		renderMap();
+		mMapView.render();
 	}
 
 	@Override
@@ -163,22 +193,11 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 	void redrawMapInternal(boolean forceRedraw) {
 		GLState.blend(false);
 		GLState.test(false, false);
-		// if (forceRedraw && !mClearMap)
-		// Gdx.graphics.requestRendering();
 
 		mMapView.updateLayers();
 
-		// if (mClearMap) {
 		mRenderRequest = true;
 		Gdx.graphics.requestRendering();
-		mClearMap = false;
-		// }
-	}
-
-	private boolean mClearMap;
-
-	public void clearMap() {
-		mClearMap = true;
 	}
 
 	/* private */boolean mWaitRedraw;
@@ -189,39 +208,6 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 			redrawMapInternal(false);
 		}
 	};
-
-	@Override
-	public void updateMap(boolean forceRender) {
-
-		if (!mWaitRedraw) {
-			mWaitRedraw = true;
-			Gdx.app.postRunnable(mRedrawRequest);
-		}
-	}
-
-	private boolean mRenderRequest;
-
-	@Override
-	public void renderMap() {
-		mRenderRequest = true;
-
-		if (mClearMap)
-			updateMap(false);
-		else
-			Gdx.graphics.requestRendering();
-	}
-
-	int mHeight, mWidth;
-
-	@Override
-	public int getWidth() {
-		return mWidth;
-	}
-
-	@Override
-	public int getHeight() {
-		return mHeight;
-	}
 
 	class TouchHandler implements InputProcessor {
 
@@ -265,11 +251,6 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 					mMapPosition.scaleMap(0.95f, 0, 0);
 					mMapView.updateMap(true);
 					break;
-
-//				case Input.Keys.R:
-//					mMapLayer.reloadTheme();
-//					mMapView.updateMap(false);
-//					break;
 
 				case Input.Keys.D:
 					mMapView.setTheme(InternalRenderTheme.DEFAULT);
@@ -339,19 +320,19 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 				changed = true;
 			}
 
-//	if (!(mActiveRotate || mActiveTilt || mActiveScale)) {
-//		int dx = screenX - mPosX;
-//		int dy = screenY - mPosY;
-//		if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
-//			mMapPosition.moveMap(dx, dy);
-//			mPosX = screenX;
-//			mPosY = screenY;
-//			changed = true;
-//		}
-//	}
+			//	if (!(mActiveRotate || mActiveTilt || mActiveScale)) {
+			//		int dx = screenX - mPosX;
+			//		int dy = screenY - mPosY;
+			//		if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
+			//			mMapPosition.moveMap(dx, dy);
+			//			mPosX = screenX;
+			//			mPosY = screenY;
+			//			changed = true;
+			//		}
+			//	}
 
 			if (changed) {
-				updateMap(true);
+				mMapView.updateMap(true);
 			}
 			return true;
 		}
@@ -375,7 +356,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 				mMapPosition.animateZoom(1.1f, 150);
 				//mMapPosition.scaleMap(1.1f, fx, fy);
 			}
-			updateMap(false);
+			mMapView.updateMap(false);
 
 			return true;
 		}
@@ -454,7 +435,7 @@ public class GdxMap implements ApplicationListener, MapRenderCallback {
 				return true;
 
 			mMapPosition.moveMap(deltaX, deltaY);
-			updateMap(true);
+			mMapView.updateMap(true);
 
 			return false;
 		}

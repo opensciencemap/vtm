@@ -60,7 +60,6 @@ public abstract class MapActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		mMapView.onPause();
 
 		Editor editor = getSharedPreferences(PREFERENCES_FILE, MODE_PRIVATE).edit();
 		editor.clear();
@@ -84,13 +83,11 @@ public abstract class MapActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mMapView.onResume();
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		mMapView.onStop();
 	}
 
 	/**

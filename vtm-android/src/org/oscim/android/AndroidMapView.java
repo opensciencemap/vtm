@@ -22,7 +22,6 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.Tile;
-import org.oscim.view.MapRenderCallback;
 import org.oscim.view.MapView;
 
 import android.content.Context;
@@ -36,7 +35,7 @@ import com.badlogic.gdx.backends.android.AndroidGL20;
  * A MapView shows a map on the display of the device. It handles all user input
  * and touch gestures to move and zoom the map.
  */
-public class AndroidMapView extends RelativeLayout implements MapRenderCallback {
+public class AndroidMapView extends RelativeLayout {
 
 	final static String TAG = AndroidMapView.class.getName();
 
@@ -47,15 +46,17 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 	public boolean mCompassEnabled = false;
 	public boolean enablePagedFling = false;
 
-	private final GLView mGLView;
 	private final Compass mCompass;
 
 	private int mWidth;
 	private int mHeight;
-	private boolean mInitialized;
 
 
 	private final MapView mMapView;
+
+	final GLView mGLView;
+	boolean mPausing = false;
+	boolean mInitialized = false;
 
 	static {
 		System.loadLibrary("vtm-jni");
@@ -97,7 +98,6 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 
 		AssetAdapter.g = new AndroidAssetAdapter(context);
 
-
 		this.setWillNotDraw(true);
 
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -108,7 +108,63 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 
 		MapActivity mapActivity = (MapActivity) context;
 
-		mMapView = new MapView(this);
+		final AndroidMapView m = this;
+
+		mMapView = new MapView(){
+
+			boolean mWaitRedraw;
+
+			private final Runnable mRedrawRequest = new Runnable() {
+				@Override
+				public void run() {
+					mWaitRedraw = false;
+					redrawMapInternal(false);
+				}
+			};
+
+			@Override
+			public int getWidth() {
+				return m.getWidth();
+			}
+
+			@Override
+			public int getHeight() {
+				return m.getHeight();
+			}
+
+			@Override
+			public void updateMap(boolean requestRender) {
+				if (requestRender && !mClearMap && !mPausing && mInitialized)
+					mGLView.requestRender();
+
+				if (!mWaitRedraw) {
+					mWaitRedraw = true;
+					post(mRedrawRequest);
+				}
+			}
+
+			@Override
+			public void render() {
+				if (mClearMap)
+					updateMap(false);
+				else
+					mGLView.requestRender();
+			}
+
+			void redrawMapInternal(boolean forceRedraw) {
+				boolean clear = mClearMap;
+
+				if (forceRedraw && !clear)
+					mGLView.requestRender();
+
+				updateLayers();
+
+				if (clear) {
+					mGLView.requestRender();
+					mClearMap = false;
+				}
+			}
+		};
 
 		mGLView = new GLView(context, mMapView);
 
@@ -122,8 +178,8 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 
 		addView(mGLView, params);
 
-		clearMap();
-		updateMap(false);
+		mMapView.clearMap();
+		mMapView.updateMap(false);
 	}
 
 	public MapView getMap() {
@@ -135,7 +191,6 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 		//mLayerManager.destroy();
 	}
 
-	private boolean mPausing = false;
 
 	void onPause() {
 		mPausing = true;
@@ -162,10 +217,9 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 
 		mMotionEvent.wrap(motionEvent);
 
-		//return mMapView.handleMotionEvent(mMotionEvent);
-
 		return mMapView.getLayerManager().handleMotionEvent(mMotionEvent);
 	}
+
 	// synchronized ???
 	@Override
 	protected void onSizeChanged(int width, int height,
@@ -183,70 +237,6 @@ public class AndroidMapView extends RelativeLayout implements MapRenderCallback 
 			mMapView.getMapViewPosition().setViewport(width, height);
 	}
 
-	/* private */boolean mWaitRedraw;
-
-	private final Runnable mRedrawRequest = new Runnable() {
-		@Override
-		public void run() {
-			mWaitRedraw = false;
-			redrawMapInternal(false);
-		}
-	};
-
-	/**
-	 * Request to redraw the map when a global state like position,
-	 * datasource or theme has changed. This will trigger a call
-	 * to onUpdate() for all Layers.
-	 *
-	 * @param requestRender
-	 *            also request to draw a frame
-	 */
-	@Override
-	public void updateMap(boolean requestRender) {
-		if (requestRender && !mClearMap && !mPausing && mInitialized)
-			mGLView.requestRender();
-
-		if (!mWaitRedraw) {
-			mWaitRedraw = true;
-			post(mRedrawRequest);
-		}
-	}
-
-	private boolean mClearMap;
-
-	public void clearMap() {
-		mClearMap = true;
-	}
-
-	/**
-	 * Request to render a frame. Use this for animations.
-	 */
-	@Override
-	public void renderMap() {
-		if (mClearMap)
-			updateMap(false);
-		else
-			mGLView.requestRender();
-	}
-
-	/**
-	 * Update all Layers on Main thread.
-	 *
-	 * @param forceRedraw also render frame
-	 *            FIXME (does nothing atm)
-	 */
-	void redrawMapInternal(boolean forceRedraw) {
-
-		if (forceRedraw && !mClearMap)
-			mGLView.requestRender();
-
-		mMapView.updateLayers();
-
-		if (mClearMap) {
-			mGLView.requestRender();
-			mClearMap = false;
-		}
-	}
 
 	public void enableRotation(boolean enable) {
 		mRotationEnabled = enable;
