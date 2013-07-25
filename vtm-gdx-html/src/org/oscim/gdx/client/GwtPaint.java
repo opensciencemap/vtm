@@ -14,7 +14,8 @@ public class GwtPaint implements Paint {
 	float fontSize;
 	Align mAlign;
 
-	String font = "12px sans-serif";
+	//String font = "12px sans-serif";
+	String font = "13px Helvetica";
 
 	//private int cap;
 
@@ -89,12 +90,12 @@ public class GwtPaint implements Paint {
 
 	@Override
 	public float getFontHeight() {
-		return 16;
+		return 14 + strokeWidth * 2;
 	}
 
 	@Override
 	public float getFontDescent() {
-		return 4;
+		return 4 + strokeWidth;
 	}
 
 }
