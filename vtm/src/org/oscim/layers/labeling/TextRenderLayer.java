@@ -28,8 +28,6 @@ package org.oscim.layers.labeling;
 // 5 R-Tree might be handy
 //
 
-import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
@@ -55,13 +53,8 @@ import org.oscim.utils.pool.Pool;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
-//import android.os.AsyncTask;
-//import android.os.Handler;
-//import android.os.Looper;
-
 class TextRenderLayer extends BasicRenderLayer {
 	private final static String TAG = TextRenderLayer.class.getName();
-	private static final GL20 GL = GLAdapter.get();
 
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
@@ -521,7 +514,7 @@ class TextRenderLayer extends BasicRenderLayer {
 					lp = (Label) lp.next;
 				}
 
-				if (ti.text.texture != null){
+				if (ti.text.texture != null) {
 					SymbolItem s = SymbolItem.pool.get();
 					s.symbol = ti.text.texture;
 					s.x = l.x;
@@ -570,14 +563,14 @@ class TextRenderLayer extends BasicRenderLayer {
 				if (ti.symbol == null)
 					continue;
 
-					SymbolItem s = SymbolItem.pool.get();
+				SymbolItem s = SymbolItem.pool.get();
 
-					s.symbol = ti.symbol;
-					s.x = (float)((dx + ti.x) * scale);
-					s.y = (float)((dy + ti.y) * scale);
-					s.billboard = true;
+				s.symbol = ti.symbol;
+				s.x = (float) ((dx + ti.x) * scale);
+				s.y = (float) ((dy + ti.y) * scale);
+				s.billboard = true;
 
-					sl.addSymbol(s);
+				sl.addSymbol(s);
 			}
 		}
 
@@ -606,11 +599,11 @@ class TextRenderLayer extends BasicRenderLayer {
 	public synchronized void update(MapPosition pos, boolean changed,
 			Matrices matrices) {
 
-		if (System.currentTimeMillis() - lastDraw > 1000){
-			updateLabels();
-			lastDraw = System.currentTimeMillis();
-
-		}
+		//if (System.currentTimeMillis() - lastDraw > 1000){
+		//	updateLabels();
+		//	lastDraw = System.currentTimeMillis();
+		//
+		//}
 		if (mNextLayer.ready) {
 			// exchange current with next layers
 			TextureLayers tmp = mCurLayer;
@@ -633,13 +626,14 @@ class TextRenderLayer extends BasicRenderLayer {
 			this.newData = true;
 		}
 
-
 		//if (!mHolding)
-		//	postLabelTask((mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis());
+		postLabelTask();
 	}
 
 	/* private */LabelTask mLabelTask;
 	/* private */long mLastRun;
+	/* private */boolean mRequestRun;
+	/* private */boolean mRelabel;
 
 	class LabelTask implements Runnable {
 		boolean isCancelled;
@@ -647,17 +641,25 @@ class TextRenderLayer extends BasicRenderLayer {
 		@Override
 		public void run() {
 			boolean labelsChanged = false;
-			if (isCancelled){
+			if (isCancelled) {
 				return;
 			}
+			long now = System.currentTimeMillis();
+			//Log.d(TAG, "relabel after " + (now - mLastRun));
+			mLastRun = now;
 
 			labelsChanged = updateLabels();
 
 			if (!isCancelled && labelsChanged)
 				mMapView.render();
 
-			mLastRun = System.currentTimeMillis();
 			mLabelTask = null;
+			mRequestRun = false;
+
+			if (mRelabel) {
+				mRelabel = false;
+				postLabelTask();
+			}
 		}
 	}
 
@@ -668,32 +670,28 @@ class TextRenderLayer extends BasicRenderLayer {
 		mLabelTask = null;
 	}
 
-//	private final Runnable mLabelUpdate = new Runnable() {
-//		@Override
-//		public void run() {
-//			if (mLabelTask == null) {
-//				mLabelTask = new LabelTask();
-//				mLabelTask.execute();
-//				Log.d(TAG, "relabel run");
-//			} else {
-//				postLabelTask(50);
-//			}
-//		}
-//	};
-//	private Handler mLabelHandler;
-//
-//	/* private */void postLabelTask(long delay) {
-//		if (mLabelHandler == null) {
-//			mLabelHandler = new Handler(Looper.getMainLooper());
-//		}
-//
-//		mLabelHandler.removeCallbacks(mLabelUpdate);
-//
-//		if (delay > 0)
-//			mLabelHandler.postDelayed(mLabelUpdate, delay);
-//		else
-//			mLabelHandler.post(mLabelUpdate);
-//	}
+	private final Runnable mLabelUpdate = new Runnable() {
+		@Override
+		public void run() {
+			if (mLabelTask == null) {
+				mLabelTask = new LabelTask();
+				mMapView.addTask(mLabelTask);
+			}
+		}
+	};
+
+	/* private */void postLabelTask() {
+		synchronized (mLabelUpdate) {
+			if (mRequestRun) {
+				mRelabel = true;
+			} else {
+				mRequestRun = true;
+				long delay = (mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis();
+				//Log.d(TAG, "relabel in: " + delay);
+				mMapView.postDelayed(mLabelUpdate, Math.max(delay, 0));
+			}
+		}
+	}
 
 	@Override
 	public synchronized void render(MapPosition pos, Matrices m) {
@@ -722,7 +720,7 @@ class TextRenderLayer extends BasicRenderLayer {
 			l = TextureRenderer.draw(l, scale, m);
 	}
 
-	private boolean mHolding;
+	//private boolean mHolding;
 
 	/**
 	 * @param enable layer updates
@@ -734,13 +732,13 @@ class TextRenderLayer extends BasicRenderLayer {
 	}
 
 	public synchronized void clearLabels() {
-//		if (mLabelHandler != null)
-//			mLabelHandler.removeCallbacks(mLabelUpdate);
-//
-//		if (mLabelTask == null) {
-//			cleanup();
-//		} else {
-//			mLabelTask.cancel(false);
-//		}
+		//		if (mLabelHandler != null)
+		//			mLabelHandler.removeCallbacks(mLabelUpdate);
+		//
+		//		if (mLabelTask == null) {
+		//			cleanup();
+		//		} else {
+		//			mLabelTask.cancel(false);
+		//		}
 	}
 }
