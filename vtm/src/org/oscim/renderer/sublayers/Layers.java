@@ -30,8 +30,7 @@ public class Layers {
 		PolygonRenderer.init();
 		TextureRenderer.init();
 		BitmapRenderer.init();
-
-		TextureItem.init(10);
+		TextureItem.init(0);
 	}
 
 	// mixed Polygon- and LineLayer

@@ -26,7 +26,7 @@ import org.oscim.utils.GlUtils;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
-// FIXME
+// FIXME needs rewrite!
 
 public class TextureItem extends Inlist<TextureItem> {
 	private final static String TAG = TextureItem.class.getName();
@@ -114,21 +114,26 @@ public class TextureItem extends Inlist<TextureItem> {
 	static class TextureItemPool extends SyncPool<TextureItem> {
 
 		public TextureItemPool() {
-			super(20);
+			super(0);
 		}
 
 		@Override
 		public void init(int num) {
-			//int[] textureIds = GlUtils.glGenTextures(num);
-			//
-			//for (int i = 0; i < num; i++) {
-			//	initTexture(textureIds[i]);
-			//	TextureItem to = new TextureItem(textureIds[i]);
-			//	pool = Inlist.push(pool, to);
-			//}
-			//fill = num;
+			if (pool != null){
+				Log.d(TAG, "still textures in pool! " + fill);
+				pool = null;
+			}
+			
+			int[] textureIds = GlUtils.glGenTextures(num);
 
-			fill = 0;
+			for (int i = 0; i < num; i++) {
+				TextureItem to = new TextureItem(textureIds[i]);
+				initTexture(to);
+
+				pool = Inlist.push(pool, to);
+			}
+
+			fill = num;
 		}
 
 		public TextureItem get(int width, int height) {
@@ -288,9 +293,11 @@ public class TextureItem extends Inlist<TextureItem> {
 	}
 
 	static void init(int num) {
-
-		pool.init(num);
+		Log.d(TAG, "init textures " + num);
 		mTexCnt = num;
+		pool.init(num);
+
+		//mTexCnt = num;
 
 		mBitmaps.clear();
 		mTextures.clear();
