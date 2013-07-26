@@ -16,6 +16,7 @@
 package org.oscim.android;
 
 import org.oscim.android.canvas.AndroidGraphics;
+import org.oscim.android.gl.AndroidGL;
 import org.oscim.android.input.AndroidMotionEvent;
 import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.CanvasAdapter;
@@ -28,8 +29,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.widget.RelativeLayout;
-
-import com.badlogic.gdx.backends.android.AndroidGL20;
 
 /**
  * A MapView shows a map on the display of the device. It handles all user input
@@ -63,7 +62,7 @@ public class AndroidMapView extends RelativeLayout {
 		//System.loadLibrary("tessellate");
 
 		CanvasAdapter.g = AndroidGraphics.INSTANCE;
-		GLAdapter.g = new AndroidGL20();
+		GLAdapter.g = new AndroidGL();
 		Log.logger = new AndroidLog();
 	}
 
