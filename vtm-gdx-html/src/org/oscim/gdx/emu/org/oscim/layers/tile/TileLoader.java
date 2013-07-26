@@ -40,8 +40,6 @@ public abstract class TileLoader {
 		// cancel loading
 	}
 
-	private static int jobs;
-
 	boolean mPausing;
 
 	public boolean isPausing() {
@@ -72,7 +70,6 @@ public abstract class TileLoader {
 
 	public void go() {
 		if (mWorking) {
-			//Log.d("...", "has work " + jobs);
 			return;
 		}
 
@@ -86,8 +83,6 @@ public abstract class TileLoader {
 			executeJob(tile);
 
 			mWorking = true;
-			jobs++;
-			//Log.d("...", "add job " + jobs);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -105,8 +100,6 @@ public abstract class TileLoader {
 			}
 		}
 		mWorking = false;
-		jobs--;
-		//Log.d("...", "finish job " + jobs + " " + success);
 
 		if (!mPausing && !mTileManager.jobQueue.isEmpty()){
 
