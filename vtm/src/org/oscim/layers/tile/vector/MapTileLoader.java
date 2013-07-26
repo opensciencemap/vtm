@@ -540,9 +540,9 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 
 	}
 
+	/**
+	 * used for event-driven loading by html backend */
 	@Override
     public void completed(boolean success) {
-	    // TODO Auto-generated method stub
-
     }
 }
