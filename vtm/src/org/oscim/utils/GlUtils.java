@@ -365,6 +365,9 @@ public class GlUtils {
 	}
 
 	public static int[] glGenTextures(int num) {
+		if (num <= 0)
+			return null;
+
 		GL = GLAdapter.get();
 		int[] ret = new int[num];
 		IntBuffer buf = GLRenderer.getIntBuffer(num);
