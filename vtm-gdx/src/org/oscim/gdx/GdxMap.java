@@ -24,6 +24,8 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 
 public class GdxMap implements ApplicationListener {
 
@@ -66,13 +68,24 @@ public class GdxMap implements ApplicationListener {
 			}
 
 			@Override
-			public boolean postRunnable(Runnable runnable) {
+			public boolean post(Runnable runnable) {
 				Gdx.app.postRunnable(runnable);
+				return true;
+			}
+
+			@Override
+			public boolean postDelayed(final Runnable action, long delay) {
+				Timer.schedule(new Task(){
+					@Override
+					public void run() {
+						action.run();
+					}}, delay / 1000f);
 				return true;
 			}
 		};
 
 		mMapRenderer = new GLRenderer(mMapView);
+
 	}
 
 	// Stage ui;

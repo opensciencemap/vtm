@@ -28,6 +28,7 @@ import org.oscim.view.MapView;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.widget.RelativeLayout;
 
 /**
@@ -138,7 +139,7 @@ public class AndroidMapView extends RelativeLayout {
 
 				if (!mWaitRedraw) {
 					mWaitRedraw = true;
-					post(mRedrawRequest);
+					getView().post(mRedrawRequest);
 				}
 			}
 
@@ -165,8 +166,13 @@ public class AndroidMapView extends RelativeLayout {
 			}
 
 			@Override
-			public boolean postRunnable(Runnable runnable) {
-				return post(runnable);
+			public boolean post(Runnable runnable) {
+				return getView().post(runnable);
+			}
+
+			@Override
+			public boolean postDelayed(Runnable action, long delay) {
+				return getView().postDelayed(action, delay);
 			}
 		};
 
@@ -185,6 +191,9 @@ public class AndroidMapView extends RelativeLayout {
 		mMapView.updateMap(false);
 	}
 
+	View getView(){
+		return this;
+	}
 
 	public MapView getMap() {
 		return mMapView;

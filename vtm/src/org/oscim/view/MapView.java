@@ -31,6 +31,8 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tilesource.TileSource;
+import org.oscim.utils.async.AsyncExecutor;
+import org.oscim.utils.async.AsyncTask;
 
 public abstract class MapView {
 
@@ -40,34 +42,34 @@ public abstract class MapView {
 	private final LayerManager mLayerManager;
 	private final MapViewPosition mMapViewPosition;
 	private final MapPosition mMapPosition;
+	private final AsyncExecutor mAsyncExecutor;
 
 	private DebugSettings mDebugSettings;
+
+	protected boolean mClearMap;
 
 	public MapView() {
 
 		mMapViewPosition = new MapViewPosition(this);
 		mMapPosition = new MapPosition();
 		mLayerManager = new LayerManager();
+		mAsyncExecutor = new AsyncExecutor(2);
 
-		// FIXME
+		// FIXME!
 		mDebugSettings = new DebugSettings();
 		MapTileLoader.setDebugSettings(mDebugSettings);
 
 		mLayerManager.add(0, new MapEventLayer(this));
 	}
+
 	private MapTileLayer mBaseLayer;
+	//private BitmapTileLayer mBackgroundLayer;
 
 	public MapTileLayer setBaseMap(TileSource tileSource) {
 		mBaseLayer = new MapTileLayer(this);
 
 		mBaseLayer.setTileSource(tileSource);
-		//mLayerManager.add(0, new MapEventLayer(this));
-
 		mLayerManager.add(1, mBaseLayer);
-
-		//mRotationEnabled = true;
-
-		//mLayerManager.add(new GenericOverlay(this, new GridRenderLayer(this)));
 
 		return mBaseLayer;
 	}
@@ -77,19 +79,18 @@ public abstract class MapView {
 	}
 
 	public MapTileLayer setBaseMap(BitmapTileLayer tileLayer) {
-		//mLayerManager.add(0, new MapEventLayer(this));
 		mLayerManager.add(1, tileLayer);
 		return null;
 	}
 
 	public void setTheme(InternalRenderTheme theme) {
-		if (mBaseLayer == null){
+		if (mBaseLayer == null) {
 			Log.e(TAG, "No base layer set");
 			throw new IllegalStateException();
 		}
 
 		IRenderTheme t = ThemeLoader.load(theme);
-		if (t == null){
+		if (t == null) {
 			Log.e(TAG, "Invalid theme");
 			throw new IllegalStateException();
 		}
@@ -99,6 +100,7 @@ public abstract class MapView {
 
 	public void destroy() {
 		mLayerManager.destroy();
+		mAsyncExecutor.dispose();
 	}
 
 	/**
@@ -110,12 +112,35 @@ public abstract class MapView {
 	 */
 	public abstract void updateMap(boolean forceRedraw);
 
+	/**
+	 * Request to render a frame. Request will be handled on main
+	 * thread. Use this for animations in RenderLayers.
+	 */
+	public abstract void render();
+
+	/**
+	 * Post a runnable to be executed on main-thread
+	 */
+	public abstract boolean post(Runnable action);
+
+	/**
+	 * Post a runnable to be executed on main-thread. Execution is delayed for
+	 * at least 'delay' milliseconds.
+	 */
+	public abstract boolean postDelayed(Runnable action, long delay);
+
+	/**
+	 * Post a task to run on a shared worker-thread. Only use for
+	 * tasks running less than a second!
+	 * */
+	public void addTask(Runnable task){
+		mAsyncExecutor.post(task);
+	}
 
 	public abstract int getWidth();
-	public abstract int getHeight();
-	public abstract boolean postRunnable(Runnable runnable);
 
-	protected boolean mClearMap;
+	public abstract int getHeight();
+
 
 	/**
 	 * Request to clear all layers before rendering next frame
@@ -123,12 +148,6 @@ public abstract class MapView {
 	public void clearMap() {
 		mClearMap = true;
 	}
-
-	/**
-	 * Request to render a frame. Request will be handled on main
-	 * thread. Use this for animations.
-	 */
-	public abstract void render();
 
 	/**
 	 * Do not call directly! This function is run on main-loop
@@ -197,8 +216,5 @@ public abstract class MapView {
 	public BoundingBox getBoundingBox() {
 		return mMapViewPosition.getViewBox();
 	}
-
-
-
 
 }
