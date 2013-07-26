@@ -93,7 +93,6 @@ public final class LineRenderer {
 				GL20.GL_NEAREST, GL20.GL_NEAREST,
 				GL20.GL_MIRRORED_REPEAT, GL20.GL_MIRRORED_REPEAT);
 
-		Log.d(TAG, "Line Texture >>>>>>>>> " + mTexID);
 		return true;
 	}
 
