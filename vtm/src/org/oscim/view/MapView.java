@@ -113,6 +113,7 @@ public abstract class MapView {
 
 	public abstract int getWidth();
 	public abstract int getHeight();
+	public abstract boolean postRunnable(Runnable runnable);
 
 	protected boolean mClearMap;
 

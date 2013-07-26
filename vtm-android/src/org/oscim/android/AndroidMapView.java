@@ -163,10 +163,14 @@ public class AndroidMapView extends RelativeLayout {
 					mClearMap = false;
 				}
 			}
+
+			@Override
+			public boolean postRunnable(Runnable runnable) {
+				return post(runnable);
+			}
 		};
 
 		mGLView = new GLView(context, mMapView);
-
 		mCompass = new Compass(mapActivity, mMapView);
 
 		mapActivity.registerMapView(mMapView);
@@ -180,6 +184,7 @@ public class AndroidMapView extends RelativeLayout {
 		mMapView.clearMap();
 		mMapView.updateMap(false);
 	}
+
 
 	public MapView getMap() {
 		return mMapView;

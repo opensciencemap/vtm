@@ -64,6 +64,12 @@ public class GdxMap implements ApplicationListener {
 				else
 					Gdx.graphics.requestRendering();
 			}
+
+			@Override
+			public boolean postRunnable(Runnable runnable) {
+				Gdx.app.postRunnable(runnable);
+				return true;
+			}
 		};
 
 		mMapRenderer = new GLRenderer(mMapView);
