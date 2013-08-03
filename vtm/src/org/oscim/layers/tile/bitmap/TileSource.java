@@ -39,4 +39,18 @@ public interface TileSource {
 	 * @return the minimum zoom level which this {@code TileSource} supports.
 	 */
 	byte getZoomLevelMin();
+
+	FadeStep[] getFadeSteps();
+
+	public class FadeStep{
+		public final double scaleStart, scaleEnd;
+		public final float alphaStart, alphaEnd;
+
+		public FadeStep(int zoomStart, int zoomEnd, float alphaStart, float alphaEnd) {
+			this.scaleStart = 1 << zoomStart;
+			this.scaleEnd = 1 << zoomEnd;
+			this.alphaStart = alphaStart;
+			this.alphaEnd = alphaEnd;
+		}
+	}
 }

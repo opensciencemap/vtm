@@ -53,4 +53,9 @@ public abstract class AbstractTileSource implements TileSource {
 		result = prime * result + this.port;
 		return result;
 	}
+
+	@Override
+	public FadeStep[] getFadeSteps() {
+		return null;
+	}
 }

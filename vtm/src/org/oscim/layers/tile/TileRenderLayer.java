@@ -39,16 +39,24 @@ public class TileRenderLayer extends RenderLayer {
 		mUploadSerial = 0;
 	}
 
-	boolean mFaded;
+	private int mOverdraw = 0;
+	private float mAlpha = 1;
 
-	public void setFaded(boolean faded) {
-		mFaded = faded;
+	public void setOverdrawColor(int color) {
+		mOverdraw = color;
+	}
+
+	public void setBitmapAlpha(float alpha) {
+		mAlpha = alpha;
 	}
 
 	@Override
 	public void update(MapPosition pos, boolean positionChanged, Matrices m) {
 
-		//mMapPosition.copy(pos);
+		if (mAlpha == 0){
+			mTileManager.releaseTiles(mDrawTiles);
+			return;
+		}
 
 		boolean tilesChanged;
 		synchronized (tilelock) {
@@ -74,7 +82,7 @@ public class TileRenderLayer extends RenderLayer {
 			BufferObject.checkBufferUsage(false);
 		}
 
-		TileRenderer.draw(tiles, tileCnt, pos, m, mFaded);
+		TileRenderer.draw(tiles, tileCnt, pos, m, mAlpha, mOverdraw);
 	}
 
 	@Override
@@ -327,5 +335,4 @@ public class TileRenderLayer extends RenderLayer {
 			}
 		}
 	};
-
 }

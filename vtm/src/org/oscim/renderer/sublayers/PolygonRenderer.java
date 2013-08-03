@@ -338,7 +338,7 @@ public final class PolygonRenderer {
 		}
 	}
 
-	public static void drawOver(Matrices m, boolean drawColor, int color) {
+	public static void drawOver(Matrices m, int color) {
 		setShader(polyShader, m);
 
 		/*
@@ -346,7 +346,7 @@ public final class PolygonRenderer {
 		 * a quad with func 'always' and op 'zero'
 		 */
 
-		if (drawColor) {
+		if (color != 0) {
 			GlUtils.setColor(hPolygonColor[0], color, 1);
 			GLState.blend(true);
 		} else {
@@ -364,7 +364,7 @@ public final class PolygonRenderer {
 
 		GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
-		if (!drawColor)
+		if (color == 0)
 			GL.glColorMask(true, true, true, true);
 	}
 
