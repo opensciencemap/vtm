@@ -85,7 +85,7 @@ public abstract class BasicRenderLayer extends RenderLayer {
 			for (Layer l = layers.textureLayers; l != null;) {
 				switch (l.type) {
 					case Layer.BITMAP:
-						l = BitmapRenderer.draw(l, 1, m);
+						l = BitmapRenderer.draw(l, m, 1, 1);
 						break;
 
 					default:

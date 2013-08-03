@@ -340,12 +340,15 @@ public class TileManager {
 		return true;
 	}
 
-	// /**
-	// * @param tiles ...
-	// */
-	// public void releaseTiles(TileSet tiles) {
-	//
-	// }
+	/**
+	 * @param tiles ...
+	 */
+	public void releaseTiles(TileSet tileSet) {
+		// unlock previously active tiles
+		for (int i = 0, n = tileSet.cnt; i < n; i++)
+			tileSet.tiles[i].unlock();
+		tileSet.cnt = 0;
+	}
 
 	/* package */MapTile addTile(int x, int y, int zoomLevel) {
 		MapTile tile;

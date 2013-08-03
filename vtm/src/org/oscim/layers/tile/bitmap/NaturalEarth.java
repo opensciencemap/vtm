@@ -20,10 +20,11 @@ import java.net.URL;
 import org.oscim.core.Tile;
 
 public class NaturalEarth extends AbstractTileSource {
-	public static final NaturalEarth INSTANCE = new NaturalEarth("city.informatik.uni-bremen.de", 80);
+	public static final NaturalEarth INSTANCE = new NaturalEarth("city.informatik.uni-bremen.de",
+			80);
 	private static final int PARALLEL_REQUESTS_LIMIT = 4;
 	private static final String PROTOCOL = "http";
-	private static final int ZOOM_LEVEL_MAX = 6;
+	private static final int ZOOM_LEVEL_MAX = 8;
 	private static final int ZOOM_LEVEL_MIN = 0;
 
 	public NaturalEarth(String hostName, int port) {
@@ -38,12 +39,14 @@ public class NaturalEarth extends AbstractTileSource {
 	@Override
 	public URL getTileUrl(Tile tile) throws MalformedURLException {
 		StringBuilder stringBuilder = new StringBuilder(32);
-		stringBuilder.append("/osci/ne_image2/");
+
+		stringBuilder.append("/tiles/ne/");
+		//stringBuilder.append("/osci/ne_image2/");
 		stringBuilder.append(tile.zoomLevel);
 		stringBuilder.append('/');
 		stringBuilder.append(tile.tileX);
 		stringBuilder.append('/');
-		stringBuilder.append((1 << tile.zoomLevel) - tile.tileY - 1);
+		stringBuilder.append(tile.tileY);
 		stringBuilder.append(".png");
 
 		return new URL(PROTOCOL, this.hostName, this.port, stringBuilder.toString());
@@ -57,5 +60,15 @@ public class NaturalEarth extends AbstractTileSource {
 	@Override
 	public byte getZoomLevelMin() {
 		return ZOOM_LEVEL_MIN;
+	}
+
+	@Override
+	public FadeStep[] getFadeSteps() {
+		return new FadeStep[] {
+				new FadeStep(ZOOM_LEVEL_MIN, ZOOM_LEVEL_MAX - 1, 1, 0.7f),
+				// dont fade between zoom-min/max
+				// fade above zoom max + 2, interpolate 1 to 0
+				new FadeStep(ZOOM_LEVEL_MAX - 1, ZOOM_LEVEL_MAX + 1, 0.7f, 0)
+		};
 	}
 }

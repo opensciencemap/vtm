@@ -92,6 +92,6 @@ public class BitmapRenderLayer extends BasicRenderLayer {
 	@Override
 	public synchronized void render(MapPosition pos, Matrices m) {
 		m.useScreenCoordinates(false, 8);
-		BitmapRenderer.draw(layers.textureLayers, 1, m);
+		BitmapRenderer.draw(layers.textureLayers, m, 1, 1);
 	}
 }
