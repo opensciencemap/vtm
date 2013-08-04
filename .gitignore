@@ -8,3 +8,5 @@ vtm-gdx-html/war/WEB_INF/
 vtm-gdx-html/war/org.oscim.gdx.GwtDefinition/
 vtm-gdx-html/gwt-unitCache
 vtm-gdx-ios/
+vtm-spatialite/
+vtm-spatialite-android/
