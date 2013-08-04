@@ -37,16 +37,7 @@ public class GwtLauncher extends GwtApplication {
 		else
 			Tile.SIZE = 360;
 
-		String url = getMapConfig("tileurl");
-
-		TileSource tileSource;
-		if ("oscimap4".equals(getMapConfig("tilesource")))
-			tileSource = new OSciMap4TileSource();
-		else
-			tileSource = new OSciMap2TileSource();
-
-		tileSource.setOption("url", url);
-		return new GwtGdxMap(tileSource);
+		return new GwtGdxMap();
 	}
 
 	private static native String getMapConfig(String key)/*-{
@@ -54,10 +45,6 @@ public class GwtLauncher extends GwtApplication {
 	}-*/;
 
 	class GwtGdxMap extends GdxMap {
-
-		public GwtGdxMap(TileSource tileSource) {
-			super(tileSource);
-		}
 
 		@Override
 		public void create() {
@@ -78,6 +65,17 @@ public class GwtLauncher extends GwtApplication {
 			p.setZoomLevel(zoom);
 			p.setPosition(lat, lon);
 			mMapView.setMapPosition(p);
+
+
+			String url = getMapConfig("tileurl");
+			TileSource tileSource;
+			if ("oscimap4".equals(getMapConfig("tilesource")))
+				tileSource = new OSciMap4TileSource();
+			else
+				tileSource = new OSciMap2TileSource();
+
+			tileSource.setOption("url", url);
+			mMapView.setBaseMap(tileSource);
 		}
 	}
 }
