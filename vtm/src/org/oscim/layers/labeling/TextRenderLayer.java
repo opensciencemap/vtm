@@ -497,7 +497,8 @@ class TextRenderLayer extends BasicRenderLayer {
 
 				l.bbox.setNormalized(l.x, l.y, cos, -sin,
 						l.width + MIN_CAPTION_DIST,
-						l.text.fontHeight + MIN_CAPTION_DIST);
+						l.text.fontHeight + MIN_CAPTION_DIST,
+						l.text.dy);
 
 				boolean overlaps = false;
 
@@ -514,17 +515,7 @@ class TextRenderLayer extends BasicRenderLayer {
 					lp = (Label) lp.next;
 				}
 
-				if (ti.text.texture != null) {
-					SymbolItem s = SymbolItem.pool.get();
-					s.symbol = ti.text.texture;
-					s.x = l.x;
-					s.y = l.y;
-					s.billboard = true;
-					sl.addSymbol(s);
-				}
-
 				if (!overlaps) {
-
 					addLabel(l);
 					l.item = TextItem.copy(ti);
 					l.tile = t;
@@ -535,9 +526,17 @@ class TextRenderLayer extends BasicRenderLayer {
 		}
 
 		for (Label ti = mLabels; ti != null; ti = (Label) ti.next) {
-			if (ti.text.caption)
+			if (ti.text.caption){
+				if (ti.text.texture != null) {
+					SymbolItem s = SymbolItem.pool.get();
+					s.symbol = ti.text.texture;
+					s.x = ti.x;
+					s.y = ti.y;
+					s.billboard = true;
+					sl.addSymbol(s);
+				}
 				continue;
-
+			}
 			// flip label upside-down
 			if (cos * (ti.x2 - ti.x1) - sin * (ti.y2 - ti.y1) < 0) {
 				float tmp = ti.x1;
