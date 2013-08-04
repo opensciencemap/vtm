@@ -30,7 +30,7 @@ import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.GlUtils;
 
 import android.opengl.GLES20;
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public final class LineRenderer {
 	private final static String TAG = LineRenderer.class.getName();

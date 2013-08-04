@@ -21,7 +21,7 @@ import org.oscim.core.Tile;
 import org.oscim.tilesource.ITileDataSink;
 import org.oscim.utils.UTF8Decoder;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public abstract class PbfDecoder {
 	private final static String TAG = PbfDecoder.class.getName();

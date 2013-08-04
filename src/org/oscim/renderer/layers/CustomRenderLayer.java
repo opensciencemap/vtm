@@ -18,12 +18,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.utils.GlUtils;
-import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
 

@@ -17,10 +17,8 @@ package org.oscim.utils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import android.graphics.Bitmap;
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
-import android.util.Log;
+import org.oscim.backend.Log;
 
 /**
  * Utility functions
@@ -47,27 +45,27 @@ public class GlUtils {
 				wrap_t); // Set V Wrapping
 	}
 
-	/**
-	 * @param bitmap
-	 *            ...
-	 * @return textureId
-	 */
-	public static int loadTextures(Bitmap bitmap) {
-
-		int[] textures = new int[1];
-		GLES20.glGenTextures(1, textures, 0);
-
-		int textureID = textures[0];
-
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureID);
-
-		setTextureParameter(GLES20.GL_LINEAR, GLES20.GL_LINEAR,
-				GLES20.GL_CLAMP_TO_EDGE, GLES20.GL_CLAMP_TO_EDGE);
-
-		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-
-		return textureID;
-	}
+//	/**
+//	 * @param bitmap
+//	 *            ...
+//	 * @return textureId
+//	 */
+//	public static int loadTextures(Bitmap bitmap) {
+//
+//		int[] textures = new int[1];
+//		GLES20.glGenTextures(1, textures, 0);
+//
+//		int textureID = textures[0];
+//
+//		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureID);
+//
+//		setTextureParameter(GLES20.GL_LINEAR, GLES20.GL_LINEAR,
+//				GLES20.GL_CLAMP_TO_EDGE, GLES20.GL_CLAMP_TO_EDGE);
+//
+//		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+//
+//		return textureID;
+//	}
 
 	public static int loadTexture(byte[] pixel, int width, int height, int format,
 			int min_filter, int mag_filter, int wrap_s, int wrap_t) {

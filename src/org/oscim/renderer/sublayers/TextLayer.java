@@ -17,7 +17,9 @@ package org.oscim.renderer.sublayers;
 import static org.oscim.renderer.GLRenderer.COORD_SCALE;
 import static org.oscim.renderer.sublayers.TextureItem.TEXTURE_HEIGHT;
 import static org.oscim.renderer.sublayers.TextureItem.TEXTURE_WIDTH;
-import android.graphics.Canvas;
+
+import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.canvas.Canvas;
 
 public final class TextLayer extends TextureLayer {
 
@@ -38,7 +40,7 @@ public final class TextLayer extends TextureLayer {
 	public TextLayer() {
 		type = Layer.SYMBOL;
 		//mCanvas = Graphics.res.getCanvas();
-		mCanvas = new Canvas();
+		mCanvas = CanvasAdapter.g.getCanvas();
 		fixed = true;
 	}
 

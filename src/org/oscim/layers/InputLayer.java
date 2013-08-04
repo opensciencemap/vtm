@@ -15,10 +15,9 @@
  */
 package org.oscim.layers;
 
+import org.oscim.backend.input.KeyEvent;
+import org.oscim.backend.input.MotionEvent;
 import org.oscim.view.MapView;
-
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 
 public abstract class InputLayer extends Layer {
 
@@ -65,11 +64,11 @@ public abstract class InputLayer extends Layer {
 	 * you returned <code>true</code> none of the following Overlays or the
 	 * underlying {@link MapView} has the chance to handle this event.
 	 *
-	 * @param e
+	 * @param event
 	 *            ...
 	 * @return ...
 	 */
-	public boolean onTouchEvent(MotionEvent e) {
+	public boolean onTouchEvent(MotionEvent event) {
 		return false;
 	}
 

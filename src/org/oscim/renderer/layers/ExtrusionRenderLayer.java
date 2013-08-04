@@ -14,6 +14,7 @@
  */
 package org.oscim.renderer.layers;
 
+import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
@@ -25,10 +26,9 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.sublayers.ExtrusionLayer;
 import org.oscim.utils.GlUtils;
-import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public class ExtrusionRenderLayer extends RenderLayer {
 	private final static String TAG = ExtrusionRenderLayer.class.getName();

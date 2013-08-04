@@ -1,5 +1,5 @@
 /*
- * Copyright 2013
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,14 +14,9 @@
  */
 package org.oscim.layers.overlay;
 
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.PointF;
 import org.oscim.layers.overlay.OverlayItem.HotspotPlace;
-
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 
 public class OverlayMarker {
 	final Bitmap[] mBitmap;
@@ -93,32 +88,5 @@ public class OverlayMarker {
 		return mBitmap[0];
 	}
 
-	public static Bitmap drawableToBitmap(Drawable drawable) {
-		if (drawable instanceof BitmapDrawable) {
-			return ((BitmapDrawable) drawable).getBitmap();
-		}
 
-		android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(
-				drawable.getIntrinsicWidth(),
-				drawable.getIntrinsicHeight(),
-				Config.ARGB_8888);
-
-		android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
-		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-		drawable.draw(canvas);
-
-		return bitmap;
-	}
-
-	public static OverlayMarker makeMarker(Resources res, int id, HotspotPlace place) {
-		return makeMarker(res.getDrawable(id), place);
-	}
-
-	public static OverlayMarker makeMarker(Drawable drawable, HotspotPlace place) {
-
-		if (place == null)
-			place = HotspotPlace.CENTER;
-
-		return new OverlayMarker(drawableToBitmap(drawable), place);
-	}
 }

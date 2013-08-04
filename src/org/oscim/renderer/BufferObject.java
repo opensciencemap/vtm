@@ -17,8 +17,9 @@ package org.oscim.renderer;
 
 import java.nio.Buffer;
 
+import org.oscim.backend.Log;
+
 import android.opengl.GLES20;
-import android.util.Log;
 
 public final class BufferObject {
 	private final static String TAG = BufferObject.class.getName();

@@ -16,11 +16,11 @@ package org.oscim.renderer.sublayers;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.backend.Log;
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.utils.pool.Inlist;
 
-import android.graphics.Bitmap;
-import android.util.Log;
 
 public final class SymbolLayer extends TextureLayer {
 	private final static String TAG = SymbolLayer.class.getSimpleName();
@@ -114,7 +114,7 @@ public final class SymbolLayer extends TextureLayer {
 			}
 
 			if (to == null) {
-				Log.wtf(TAG, "Bad SymbolItem");
+				Log.d(TAG, "Bad SymbolItem");
 				continue;
 			}
 

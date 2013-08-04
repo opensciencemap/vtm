@@ -20,6 +20,7 @@ import java.io.InputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.oscim.view.MapView;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.TileLayer;
@@ -35,10 +36,9 @@ import org.oscim.tilesource.MapInfo;
 import org.oscim.tilesource.TileSource;
 import org.oscim.tilesource.TileSource.OpenResult;
 import org.oscim.tilesource.oscimap.OSciMap1TileSource;
-import org.oscim.view.MapView;
 import org.xml.sax.SAXException;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public class MapTileLayer extends TileLayer<MapTileLoader> {
 	private final static String TAG = MapTileLayer.class.getName();

@@ -25,7 +25,7 @@ import org.oscim.tilesource.TileSource;
 import org.oscim.tilesource.mapfile.header.MapFileHeader;
 import org.oscim.tilesource.mapfile.header.MapFileInfo;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public class MapFileTileSource extends TileSource {
 	private final static String TAG = MapFileTileSource.class.getName();

@@ -14,12 +14,12 @@
  */
 package org.oscim.layers;
 
+import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.Tile;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
-import android.util.Log;
-import android.view.MotionEvent;
+import org.oscim.backend.Log;
 
 /**
  * Changes MapViewPosition for scroll, fling, scale, rotation and tilt gestures
@@ -125,7 +125,7 @@ public class MapEventLayer extends InputLayer {
 			if (debug)
 				Log.d(TAG, "tap scale: " + mx + " " + my);
 			mMapPosition.scaleMap(1 - my / (height / 8), 0, 0);
-			mMapView.redrawMap(true);
+			mMapView.updateMap(true);
 
 			mPrevX = x1;
 			mPrevY = y1;
@@ -214,7 +214,7 @@ public class MapEventLayer extends InputLayer {
 		}
 
 		if (changed) {
-			mMapView.redrawMap(true);
+			mMapView.updateMap(true);
 			mPrevPinchWidth = pinchWidth;
 
 			mPrevX2 = x2;
@@ -266,7 +266,7 @@ public class MapEventLayer extends InputLayer {
 
 		if (e2.getPointerCount() == 1) {
 			mMapPosition.moveMap(-distanceX, -distanceY);
-			mMapView.redrawMap(true);
+			mMapView.updateMap(true);
 			return true;
 		}
 

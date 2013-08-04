@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.oscim.backend.canvas.Color;
+import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.rule.Element;
@@ -25,8 +27,7 @@ import org.oscim.theme.rule.Rule;
 import org.oscim.utils.LRUCache;
 import org.xml.sax.Attributes;
 
-import android.graphics.Color;
-import android.util.Log;
+import org.oscim.backend.Log;
 
 /**
  * A RenderTheme defines how map elements are drawn.

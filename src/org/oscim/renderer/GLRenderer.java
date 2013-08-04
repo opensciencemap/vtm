@@ -24,9 +24,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
+import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
@@ -38,21 +36,16 @@ import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
-import android.os.SystemClock;
-import android.util.Log;
 
-/**
- * @author Hannes Janetzek
- */
-public class GLRenderer implements GLSurfaceView.Renderer {
+//import android.os.SystemClock;
+
+public class GLRenderer {
 
 	private static final String TAG = GLRenderer.class.getName();
 
 	private static final int MB = 1024 * 1024;
 	private static final int SHORT_BYTES = 2;
 	private static final int CACHE_TILES_MAX = 250;
-
 
 	public static final float COORD_SCALE = 8.0f;
 
@@ -210,18 +203,17 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		return true;
 	}
 
-	private long lastDraw = 0;
+	//private long lastDraw = 0;
 
-	@Override
-	public void onDrawFrame(GL10 glUnused) {
-		long start = SystemClock.uptimeMillis();
-		long wait = 30 - (start - lastDraw);
-		if (wait > 5) {
-			//Log.d(TAG, "wait " + wait);
-			SystemClock.sleep(wait);
-			lastDraw = start + wait;
-		} else
-			lastDraw = start;
+	public void onDrawFrame() {
+		//long start = SystemClock.uptimeMillis();
+		//long wait = 30 - (start - lastDraw);
+		//if (wait > 5) {
+		//	//Log.d(TAG, "wait " + wait);
+		//	SystemClock.sleep(wait);
+		//	lastDraw = start + wait;
+		//} else
+		//	lastDraw = start;
 
 		// prevent main thread recreating all tiles (updateMap)
 		// while rendering is going on.
@@ -234,10 +226,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	private static void draw() {
-		long start = 0;
+		//long start = 0;
 
-		if (MapView.debugFrameTime)
-			start = SystemClock.uptimeMillis();
+		//if (MapView.debugFrameTime)
+		//	start = SystemClock.uptimeMillis();
 
 		if (mUpdateColor) {
 			float cc[] = mClearColor;
@@ -292,10 +284,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				renderLayer.render(mMapPosition, mMatrices);
 		}
 
-		if (MapView.debugFrameTime) {
-			GLES20.glFinish();
-			Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start));
-		}
+		//if (MapView.debugFrameTime) {
+		//	GLES20.glFinish();
+		//	Log.d(TAG, "draw took " + (SystemClock.uptimeMillis() - start));
+		//}
 
 		if (GlUtils.checkGlOutOfMemory("finish")) {
 			BufferObject.checkBufferUsage(true);
@@ -307,8 +299,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		return ((t.tileX % 4) + (t.tileY % 4 * 4) + 1);
 	}
 
-	@Override
-	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
+	public void onSurfaceChanged(int width, int height) {
 		Log.d(TAG, "SurfaceChanged:" + mNewSurface + " " + width + "x" + height);
 
 		if (width <= 0 || height <= 0)
@@ -338,7 +329,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		//mBufferMemoryUsage = 0;
 
 		if (!mNewSurface) {
-			mMapView.redrawMap(false);
+			mMapView.updateMap(false);
 			return;
 		}
 
@@ -377,11 +368,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		GLState.init();
 
-		mMapView.redrawMap(true);
+		mMapView.updateMap(true);
 	}
 
-	@Override
-	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+	public void onSurfaceCreated() {
 		// Log.d(TAG, GLES20.glGetString(GLES20.GL_EXTENSIONS));
 
 		// classes that require GL context for initialization
@@ -397,7 +387,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	public static final boolean debugView = false;
 
-	void clearBuffer() {
-		mNewSurface = true;
-	}
+	//	void clearBuffer() {
+	//		mNewSurface = true;
+	//	}
 }

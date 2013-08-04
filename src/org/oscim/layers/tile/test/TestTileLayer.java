@@ -14,10 +14,11 @@
  */
 package org.oscim.layers.tile.test;
 
+import org.oscim.view.MapView;
+import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
-import org.oscim.graphics.Color;
-import org.oscim.graphics.Paint.Cap;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
@@ -26,9 +27,8 @@ import org.oscim.layers.tile.test.TestTileLayer.TestTileLoader;
 import org.oscim.renderer.sublayers.Layers;
 import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.theme.renderinstruction.Line;
-import org.oscim.view.MapView;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public class TestTileLayer extends TileLayer<TestTileLoader> {
 	final static String TAG = TestTileLayer.class.getName();

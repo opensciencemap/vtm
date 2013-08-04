@@ -15,6 +15,7 @@
  */
 package org.oscim.view;
 
+import org.oscim.backend.Log;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
@@ -26,7 +27,7 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.Matrix4;
 
 import android.opengl.Matrix;
-import android.util.Log;
+
 
 public class MapViewPosition {
 	private static final String TAG = MapViewPosition.class.getName();
@@ -84,8 +85,8 @@ public class MapViewPosition {
 	// scale map plane at VIEW_DISTANCE to near plane
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
-	MapViewPosition(MapView mapView) {
-		mMapView = mapView;
+	MapViewPosition(MapView map){
+		mMapView = map;
 
 		mAbsScale = 4;
 		mAbsX = 0.5;
@@ -103,7 +104,7 @@ public class MapViewPosition {
 		mCurY = mAbsY * mCurScale;
 	}
 
-	void setViewport(int width, int height) {
+	public void setViewport(int width, int height) {
 		float s = VIEW_SCALE;
 		float aspect = height / (float) width;
 		float[] tmp = new float[16];
@@ -465,7 +466,7 @@ public class MapViewPosition {
 
 	private PointD applyRotation(float mx, float my) {
 
-		if (mMapView.mRotationEnabled || mMapView.mCompassEnabled) {
+		//if (mMapView.mRotationEnabled || mMapView.mCompassEnabled) {
 			double rad = Math.toRadians(mRotation);
 			double rcos = Math.cos(rad);
 			double rsin = Math.sin(rad);
@@ -473,7 +474,7 @@ public class MapViewPosition {
 			float y = (float) (mx * -rsin + my * rcos);
 			mx = x;
 			my = y;
-		}
+		//}
 
 		mMovePoint.x = mx;
 		mMovePoint.y = my;
@@ -748,7 +749,7 @@ public class MapViewPosition {
 			}
 
 			updatePosition();
-			mMapView.redrawMap(true);
+			mMapView.updateMap(true);
 
 			mAnimEnd = -1;
 
@@ -788,7 +789,7 @@ public class MapViewPosition {
 		// continue animation
 		if (changed) {
 			// inform other layers that position has changed
-			mMapView.redrawMap(true);
+			mMapView.updateMap(true);
 		} else {
 			// just render next frame
 			mMapView.render();

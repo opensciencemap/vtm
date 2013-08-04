@@ -22,6 +22,7 @@ import static org.oscim.layers.tile.MapTile.STATE_NONE;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer;
@@ -31,8 +32,6 @@ import org.oscim.utils.quadtree.QuadTree;
 import org.oscim.utils.quadtree.QuadTreeIndex;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
-
-import android.util.Log;
 
 /**
  * @TODO
@@ -608,7 +607,7 @@ public class TileManager {
 				MapTile tile = null;
 
 				if (cnt == maxTiles) {
-					Log.wtf(TAG, "reached maximum tiles " + maxTiles);
+					Log.d(TAG, "reached maximum tiles " + maxTiles);
 					break;
 				}
 				int xx = x;

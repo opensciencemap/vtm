@@ -14,13 +14,13 @@
  */
 package org.oscim.layers.overlay;
 
+import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.layers.ExtrusionRenderLayer;
 import org.oscim.view.MapView;
 
 import android.os.CountDownTimer;
-import android.util.Log;
-import android.view.MotionEvent;
+import org.oscim.backend.Log;
 
 /**
  * @author Hannes Janetzek

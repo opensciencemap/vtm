@@ -23,7 +23,7 @@ import org.oscim.layers.tile.MapTile;
 import org.oscim.tilesource.ITileDataSink;
 import org.oscim.tilesource.ITileDataSource;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 /**
  *

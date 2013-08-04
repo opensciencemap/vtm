@@ -14,11 +14,11 @@
  */
 package org.oscim.renderer.layers.test;
 
+import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layers.BasicRenderLayer;
 import org.oscim.renderer.sublayers.TextItem;
-import org.oscim.view.MapView;
 
 public class TestRenderLayer extends BasicRenderLayer {
 

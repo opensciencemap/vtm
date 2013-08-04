@@ -19,11 +19,12 @@ package org.oscim.layers.overlay;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.oscim.view.MapView;
+import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
-import org.oscim.graphics.Paint.Cap;
 import org.oscim.layers.Layer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layers.BasicRenderLayer;
@@ -31,7 +32,6 @@ import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.LineClipper;
-import org.oscim.view.MapView;
 
 /** This class draws a path line in given color. */
 public class PathOverlay extends Layer {

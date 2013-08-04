@@ -21,8 +21,6 @@ package org.oscim.layers.overlay;
 // - and to make this work for multiple overlays
 //   a global scenegraph is probably required.
 
-import org.oscim.android.AndroidGraphics;
-import org.oscim.app.R;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.PointD;
@@ -164,7 +162,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 						state = OverlayItem.ITEM_STATE_FOCUSED_MASK;
 
 					//Drawable marker = it.item.getDrawable();
-					OverlayMarker marker = it.item.getMarker(0);
+					OverlayMarker marker = it.item.getMarker();
 					if (marker == null)
 						marker = mDefaultMarker;
 
@@ -218,11 +216,11 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	public ItemizedOverlay(MapView mapView, OverlayMarker defaultMarker) {
 		super(mapView);
 
-		if (defaultMarker == null) {
-			defaultMarker = AndroidGraphics.makeMarker(mapView.getContext().getResources()
-					.getDrawable(R.drawable.marker_default), null);
-			//throw new IllegalArgumentException("You must pass a default marker to ItemizedOverlay.");
-		}
+//		if (defaultMarker == null) {
+//			defaultMarker = AndroidGraphics.makeMarker(mapView.getContext().getResources()
+//					.getDrawable(R.drawable.marker_default), null);
+//			//throw new IllegalArgumentException("You must pass a default marker to ItemizedOverlay.");
+//		}
 
 		//this.mDefaultMarker = OverlayMarker.makeMarker(pDefaultMarker, null);
 		mDefaultMarker = defaultMarker;

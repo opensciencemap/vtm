@@ -28,9 +28,10 @@ package org.oscim.renderer.layers;
 // 5 R-Tree might be handy
 //
 
+import org.oscim.view.MapView;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.graphics.Color;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileRenderLayer;
 import org.oscim.layers.tile.TileSet;
@@ -49,11 +50,12 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
 import org.oscim.utils.pool.LList;
 import org.oscim.utils.pool.Pool;
-import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
 
 import android.opengl.GLES20;
 import android.os.AsyncTask;
+import android.os.SystemClock;
+import org.oscim.backend.Log;
 import android.os.Handler;
 import android.os.Looper;
 

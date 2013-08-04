@@ -80,6 +80,10 @@ jlong JNI(alloc)(JNIEnv *env, jclass* clazz)
   return (long) calloc(16, sizeof(float));
 }
 
+jobject JNI(getBuffer)(JNIEnv *env, jclass* clazz,jlong ptr){
+   return (*env)->NewDirectByteBuffer(env,(char*)(uintptr_t)ptr, 16*sizeof(float));
+}
+
 void JNI(delete)(JNIEnv* env, jclass* clazz, jlong ptr)
 {
   free(CAST(ptr));

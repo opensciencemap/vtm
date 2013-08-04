@@ -17,8 +17,8 @@ package org.oscim.theme.renderinstruction;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import org.oscim.graphics.Color;
-import org.oscim.graphics.Paint.Cap;
+import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;

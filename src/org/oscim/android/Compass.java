@@ -32,7 +32,7 @@ public class Compass {
 
 				if (mMapView != null) {
 					mMapView.getMapViewPosition().setRotation(-mAngle);
-					mMapView.redrawMap(true);
+					mMapView.updateMap(true);
 				}
 			}
 		}

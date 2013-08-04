@@ -14,12 +14,12 @@
  */
 package org.oscim.renderer.sublayers;
 
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.PointF;
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
-import android.graphics.Bitmap;
 
 public class SymbolItem extends Inlist<SymbolItem> {
 

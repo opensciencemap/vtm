@@ -19,7 +19,7 @@ import java.nio.ShortBuffer;
 import org.oscim.renderer.BufferObject;
 import org.oscim.theme.renderinstruction.Line;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public class Layers {
 	private final static String TAG = Layers.class.getName();

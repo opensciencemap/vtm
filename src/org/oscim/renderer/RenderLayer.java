@@ -14,10 +14,10 @@
  */
 package org.oscim.renderer;
 
+import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer.Matrices;
-import org.oscim.view.MapView;
 
 public abstract class RenderLayer {
 

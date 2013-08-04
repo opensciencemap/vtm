@@ -14,7 +14,7 @@
  */
 package org.oscim.layers.labeling;
 
-import org.oscim.graphics.Color;
+import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.sublayers.Layers;
 import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.renderer.sublayers.TextItem;

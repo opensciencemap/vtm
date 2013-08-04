@@ -27,7 +27,7 @@ import org.oscim.core.Tile;
 import org.oscim.tilesource.ITileDataSink;
 import org.oscim.tilesource.common.PbfDecoder;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public class TileDecoder extends PbfDecoder {
 	private final static String TAG = TileDecoder.class.getName();

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.oscim.graphics;
+package org.oscim.backend.canvas;
 
 public  class Color {
 	 public static final int BLACK       = 0xFF000000;
@@ -29,6 +29,9 @@ public  class Color {
 	    public static final int MAGENTA     = 0xFFFF00FF;
 	    public static final int TRANSPARENT = 0;
 
+	    public static int get(int r, int g ,int b){
+	    	return 0xff << 24 | r << 16 | g << 8 | b;
+	    }
 
 	    /**
 	     * Parse the color string, and return the corresponding color-int.

@@ -19,7 +19,6 @@ package org.oscim.layers.overlay;
 
 import org.oscim.core.GeoPoint;
 
-import android.graphics.Point;
 
 /**
  * Immutable class describing a GeoPoint with a Title and a Description.
@@ -30,14 +29,11 @@ import android.graphics.Point;
  */
 public class OverlayItem {
 
-	// ===========================================================
-	// Constants
-	// ===========================================================
 	public static final int ITEM_STATE_FOCUSED_MASK = 4;
 	public static final int ITEM_STATE_PRESSED_MASK = 1;
 	public static final int ITEM_STATE_SELECTED_MASK = 2;
 
-	protected static final Point DEFAULT_MARKER_SIZE = new Point(26, 94);
+	//protected static final Point DEFAULT_MARKER_SIZE = new Point(26, 94);
 
 	/**
 	 * Indicates a hotspot for an area. This is where the origin (0,0) of a
@@ -45,12 +41,11 @@ public class OverlayItem {
 	 * offset. NONE indicates that no adjustment should be made.
 	 */
 	public enum HotspotPlace {
-		NONE, CENTER, BOTTOM_CENTER, TOP_CENTER, RIGHT_CENTER, LEFT_CENTER, UPPER_RIGHT_CORNER, LOWER_RIGHT_CORNER, UPPER_LEFT_CORNER, LOWER_LEFT_CORNER
+		NONE, CENTER, BOTTOM_CENTER,
+		TOP_CENTER, RIGHT_CENTER, LEFT_CENTER,
+		UPPER_RIGHT_CORNER, LOWER_RIGHT_CORNER,
+		UPPER_LEFT_CORNER, LOWER_LEFT_CORNER
 	}
-
-	// ===========================================================
-	// Fields
-	// ===========================================================
 
 	public final String mUid;
 	public final String mTitle;
@@ -58,10 +53,6 @@ public class OverlayItem {
 	public final GeoPoint mGeoPoint;
 	protected OverlayMarker mMarker;
 	protected HotspotPlace mHotspotPlace;
-
-	// ===========================================================
-	// Constructors
-	// ===========================================================
 
 	/**
 	 * @param aTitle
@@ -77,15 +68,12 @@ public class OverlayItem {
 
 	public OverlayItem(final String aUid, final String aTitle, final String aDescription,
 			final GeoPoint aGeoPoint) {
-		this.mTitle = aTitle;
-		this.mDescription = aDescription;
-		this.mGeoPoint = aGeoPoint;
-		this.mUid = aUid;
+		mTitle = aTitle;
+		mDescription = aDescription;
+		mGeoPoint = aGeoPoint;
+		mUid = aUid;
 	}
 
-	// ===========================================================
-	// Getter & Setter
-	// ===========================================================
 	public String getUid() {
 		return mUid;
 	}
@@ -113,36 +101,31 @@ public class OverlayItem {
 	 * @return The marker for the current state, or null if the default marker
 	 * for the overlay should be used.
 	 */
-	public OverlayMarker getMarker(int stateBitset) {
-		// marker not specified
-		if (mMarker == null) {
-			return null;
-		}
-
-		// set marker state appropriately
-		//	setState(mMarker, stateBitset);
+	public OverlayMarker getMarker() {
 		return mMarker;
+
+//		// marker not specified
+//		if (mMarker == null) {
+//			return null;
+//		}
+//
+//		// set marker state appropriately
+//		setState(mMarker, stateBitset);
+//		return mMarker;
 	}
 
 	public void setMarker(OverlayMarker marker) {
-		this.mMarker = marker;
+		mMarker = marker;
 	}
 
 	public void setMarkerHotspot(final HotspotPlace place) {
-		this.mHotspotPlace = (place == null) ? HotspotPlace.BOTTOM_CENTER : place;
+		mHotspotPlace = (place == null) ? HotspotPlace.BOTTOM_CENTER : place;
 	}
 
 	public HotspotPlace getMarkerHotspot() {
-		return this.mHotspotPlace;
+		return mHotspotPlace;
 	}
 
-	// ===========================================================
-	// Methods from SuperClass/Interfaces
-	// ===========================================================
-
-	// ===========================================================
-	// Methods
-	// ===========================================================
 	/*
 	 * (copied from the Google API docs) Sets the state of a drawable to match a
 	 * given state bitset. This is done by converting the state bitset bits
@@ -163,16 +146,16 @@ public class OverlayItem {
 //
 //		drawable.setState(states);
 //	}
-//
+
 //	public Drawable getDrawable() {
-//		return this.mMarker;
+//		return mMarker;
 //	}
 //
 //	public int getWidth() {
-//		return this.mMarker.getIntrinsicWidth();
+//		return mMarker.getIntrinsicWidth();
 //	}
 //
 //	public int getHeight() {
-//		return this.mMarker.getIntrinsicHeight();
+//		return mMarker.getIntrinsicHeight();
 //	}
 }

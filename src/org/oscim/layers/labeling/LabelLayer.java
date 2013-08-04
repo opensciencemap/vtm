@@ -14,13 +14,13 @@
  */
 package org.oscim.layers.labeling;
 
+import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.InputLayer;
 import org.oscim.layers.tile.TileRenderLayer;
 import org.oscim.view.MapView;
 
-import android.util.Log;
-import android.view.MotionEvent;
+import org.oscim.backend.Log;
 
 public class LabelLayer extends InputLayer {
 	private final static String TAG = LabelLayer.class.getName();
