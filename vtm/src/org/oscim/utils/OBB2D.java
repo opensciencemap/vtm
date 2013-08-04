@@ -134,12 +134,17 @@ public class OBB2D {
 		computeAxes();
 	}
 
-	public void setNormalized(float cx, float cy, float vx, float vy, float width, float height) {
+	public void setNormalized(float cx, float cy, float vx, float vy, float width, float height, float dy) {
 		float ux = -vy;
 		float uy = vx;
 
 		float hw = width / 2;
 		float hh = height / 2;
+
+		if (dy != 0){
+			cx += vx * dy + vy * dy;
+			cy += -vy * dy + vx * dy;
+		}
 
 		vx *= hw;
 		vy *= hw;
