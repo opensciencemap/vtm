@@ -48,7 +48,7 @@ public class TileRenderLayer extends RenderLayer {
 	@Override
 	public void update(MapPosition pos, boolean positionChanged, Matrices m) {
 
-		mMapPosition.copy(pos);
+		//mMapPosition.copy(pos);
 
 		boolean tilesChanged;
 		synchronized (tilelock) {
@@ -63,8 +63,9 @@ public class TileRenderLayer extends RenderLayer {
 		MapTile[] tiles = mDrawTiles.tiles;
 
 		if (tilesChanged || positionChanged){
-			updateTileVisibility(m.mapPlane);
+			updateTileVisibility(pos, m.mapPlane);
 		}
+
 		tileCnt += mNumTileHolder;
 
 		/* prepare tile for rendering */
@@ -146,8 +147,9 @@ public class TileRenderLayer extends RenderLayer {
 	private static int uploadTileData(MapTile tile) {
 		tile.state = STATE_READY;
 
+		// tile might contain extrusion or label layers
 		if (tile.layers == null)
-			return 0;
+			return 1;
 
 		int newSize = tile.layers.getSize();
 		if (newSize > 0) {
@@ -165,17 +167,17 @@ public class TileRenderLayer extends RenderLayer {
 				return 0;
 			}
 		}
+
 		return 1;
 	}
 
 	private final Object tilelock = new Object();
 
 	/** set tile isVisible flag true for tiles that intersect view */
-	private void updateTileVisibility(float[] box) {
+	private void updateTileVisibility(MapPosition pos, float[] box) {
 
 		// lock tiles while updating isVisible state
 		synchronized (tilelock) {
-			MapPosition pos = mMapPosition;
 			MapTile[] tiles = mDrawTiles.tiles;
 
 			int tileZoom = tiles[0].zoomLevel;
@@ -313,6 +315,10 @@ public class TileRenderLayer extends RenderLayer {
 				if (tile == null)
 					continue;
 
+				if (cnt + mNumTileHolder >= tiles.length){
+					Log.e(TAG, "too many tiles " + cnt + ", " + mNumTileHolder);
+					break;
+				}
 				holder = new MapTile(x, y, (byte) mZoom);
 				holder.isVisible = true;
 				holder.holder = tile;
