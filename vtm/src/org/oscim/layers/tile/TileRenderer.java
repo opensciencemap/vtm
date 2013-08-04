@@ -66,14 +66,10 @@ public class TileRenderer {
 		mProjMatrix.setValue(14, 0);
 		mProjMatrix.multiplyRhs(m.view);
 
-
-		//GL.glDepthMask(true);
+		GL.glDepthMask(true);
 		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
 		GL.glDepthFunc(GL20.GL_LESS);
-
-		// load texture for line caps
-		LineRenderer.beginLines();
 
 		// Draw visible tiles
 		for (int i = 0; i < tileCnt; i++) {
@@ -105,8 +101,7 @@ public class TileRenderer {
 
 		// make sure stencil buffer write is disabled
 		GL.glStencilMask(0x00);
-
-		LineRenderer.endLines();
+		GL.glDepthMask(false);
 
 		mDrawSerial++;
 
@@ -189,6 +184,17 @@ public class TileRenderer {
 		}
 
 		for (Layer l = t.layers.textureLayers; l != null;) {
+			if (!clipped) {
+				// draw stencil buffer clip region
+				PolygonRenderer.draw(pos, null, m, true, div, true);
+				clipped = true;
+			}
+//			if (!clipped) {
+//				// draw stencil buffer clip region
+//				PolygonRenderer.clip(m);
+//				clipped = true;
+//			}
+			//GLState.test(false, false);
 			switch (l.type) {
 				case Layer.BITMAP:
 					l = BitmapRenderer.draw(l, 1, m);

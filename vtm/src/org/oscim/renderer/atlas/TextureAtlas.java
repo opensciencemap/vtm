@@ -92,11 +92,9 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 	/**
 	 * only call in GL-Thread
 	 */
-	public TextureItem compileTexture() {
+	public TextureItem loadTexture() {
 		if (texture != null) {
-			if (texture.id < 1) {
-				TextureItem.uploadTexture(texture);
-			}
+			texture.upload();
 			return texture;
 		}
 

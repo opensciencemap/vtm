@@ -56,7 +56,7 @@ public final class BitmapRenderer {
 	}
 
 	public static Layer draw(Layer layer, float scale, Matrices m) {
-		GLState.test(false, false);
+		//GLState.test(false, false);
 		GLState.blend(true);
 
 		GLState.useProgram(mTextureProgram);
@@ -79,9 +79,9 @@ public final class BitmapRenderer {
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, GLRenderer.mQuadIndicesID);
 
 		for (TextureItem ti = tl.textures; ti != null; ti = ti.next) {
-			//Log.d(TAG, "render texture " + ti.id);
 
-			GL.glBindTexture(GL20.GL_TEXTURE_2D, ti.id);
+			ti.bind();
+
 			int maxVertices = GLRenderer.maxQuads * INDICES_PER_SPRITE;
 
 			// draw up to maxVertices in each iteration

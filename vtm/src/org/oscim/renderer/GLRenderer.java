@@ -275,6 +275,9 @@ public class GLRenderer {
 		           | GL20.GL_DEPTH_BUFFER_BIT
 		           | GL20.GL_STENCIL_BUFFER_BIT);
 
+		GLState.blend(false);
+		GL.glDisable(GL20.GL_BLEND);
+
 		boolean changed = false;
 
 		MapPosition pos = mMapPosition;
@@ -296,6 +299,10 @@ public class GLRenderer {
 				mMatrices.viewproj.multiplyLhs(mMatrices.mvp);
 			}
 		}
+
+		//Log.d(TAG, "begin frame");
+		GLState.bindTex2D(0);
+		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 
 		/* update layers */
 		RenderLayer[] layers = mMapView.getLayerManager().getRenderLayers();
