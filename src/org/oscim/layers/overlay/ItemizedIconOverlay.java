@@ -17,12 +17,11 @@ package org.oscim.layers.overlay;
 
 import java.util.List;
 
+import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.PointF;
 import org.oscim.view.MapView;
 import org.oscim.view.MapViewPosition;
-
-import android.view.MotionEvent;
 
 public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverlay<Item> {
 	//private static final String TAG = ItemizedIconOverlay.class.getName();
@@ -31,17 +30,30 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	protected OnItemGestureListener<Item> mOnItemGestureListener;
 	private int mDrawnItemsLimit = Integer.MAX_VALUE;
 
-	private final PointF mItemPoint = new PointF();
+	private final PointF mTmpPoint = new PointF();
 
-	public ItemizedIconOverlay(MapView mapView, List<Item> list, OverlayMarker defaultMarker,
-			ItemizedIconOverlay.OnItemGestureListener<Item> onItemGestureListener) {
+	public ItemizedIconOverlay(
+			final MapView mapView,
+			final List<Item> pList,
+			final OverlayMarker pDefaultMarker,
+			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener) {
 
-		super(mapView, defaultMarker);
+		super(mapView, pDefaultMarker);
 
-		this.mItemList = list;
-		this.mOnItemGestureListener = onItemGestureListener;
+		this.mItemList = pList;
+		this.mOnItemGestureListener = pOnItemGestureListener;
 		populate();
 	}
+
+//	public ItemizedIconOverlay(
+//			final MapView mapView,
+//			final Context pContext,
+//			final List<Item> pList,
+//			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener) {
+//		this(mapView, pList,
+//				null, //pContext.getResources().getDrawable(R.drawable.marker_default),
+//				pOnItemGestureListener);
+//	}
 
 	@Override
 	public boolean onSnapToItem(final int pX, final int pY, final PointF pSnapPoint) {
@@ -124,7 +136,6 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 			return onSingleTapUpHelper(index, that.mItemList.get(index));
 		}
 	};
-
 	@Override
 	public boolean onLongPress(final MotionEvent event) {
 		return activateSelectedItems(event, mActiveItemLongPress) || super.onLongPress(event);
@@ -172,23 +183,17 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 
 		for (int i = 0; i < size; i++) {
 			Item item = getItem(i);
-			if (!bbox.contains(item.mGeoPoint)) {
-				//Log.d(TAG, "skip: " + item.getTitle());
+
+			if (!bbox.contains(item.mGeoPoint))
 				continue;
-			}
-			//	final Drawable marker = (item.getMarker(0) == null) ? this.mDefaultMarker : item
-			//		.getMarker(0);
 
 			// TODO use intermediate projection
-			mapViewPosition.project(item.getPoint(), mItemPoint);
+			mapViewPosition.project(item.getPoint(), mTmpPoint);
 
-			float dx = mItemPoint.x - eventX;
-			float dy = mItemPoint.y - eventY;
-
-			//Log.d(TAG, item.getTitle() + " " + mItemPoint + " " + dx + "/" + dy);
+			float dx = mTmpPoint.x - eventX;
+			float dy = mTmpPoint.y - eventY;
 
 			double d = dx * dx + dy * dy;
-
 			// squared dist: 50*50 pixel
 			if (d < 2500) {
 				if (d < dist) {
@@ -205,10 +210,6 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 		return false;
 	}
 
-	// ===========================================================
-	// Getter & Setter
-	// ===========================================================
-
 	public int getDrawnItemsLimit() {
 		return this.mDrawnItemsLimit;
 	}
@@ -216,10 +217,6 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	public void setDrawnItemsLimit(final int aLimit) {
 		this.mDrawnItemsLimit = aLimit;
 	}
-
-	// ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
 
 	/**
 	 * When the item is touched one of these methods may be invoked depending on

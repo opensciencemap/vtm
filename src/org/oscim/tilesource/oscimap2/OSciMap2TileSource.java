@@ -31,7 +31,7 @@ import org.oscim.tilesource.common.PbfDecoder;
 import org.oscim.tilesource.common.PbfTileDataSource;
 import org.oscim.tilesource.common.UrlTileSource;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public class OSciMap2TileSource extends UrlTileSource {
 

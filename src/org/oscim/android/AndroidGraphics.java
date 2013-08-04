@@ -14,53 +14,45 @@
  */
 package org.oscim.android;
 
-import org.oscim.layers.overlay.OverlayItem.HotspotPlace;
-import org.oscim.layers.overlay.OverlayMarker;
 
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-
-public class AndroidGraphics {
-
-	public static OverlayMarker makeMarker(Resources res, int id, HotspotPlace place) {
-
-		//		if (place == null)
-		//			place = HotspotPlace.CENTER;
-		//
-		//Drawable drawable = ;
-		//
-		//		return new OverlayMarker(drawableToBitmap(drawable), place);
-		return makeMarker(res.getDrawable(id), place);
-	}
-
-	public static OverlayMarker makeMarker(Drawable drawable, HotspotPlace place) {
-
-		if (place == null)
-			place = HotspotPlace.CENTER;
-
-		//Drawable drawable = res.getDrawable(id);
-
-		return new OverlayMarker(drawableToBitmap(drawable), place);
-	}
-
-
-	public static Bitmap drawableToBitmap(Drawable drawable) {
-		if (drawable instanceof BitmapDrawable) {
-			return ((BitmapDrawable) drawable).getBitmap();
-		}
-
-		android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(
-				drawable.getIntrinsicWidth(),
-				drawable.getIntrinsicHeight(),
-				Config.ARGB_8888);
-
-		android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
-		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-		drawable.draw(canvas);
-
-		return bitmap;
-	}
-}
+//public class AndroidGraphics {
+//
+//	public static OverlayMarker makeMarker(Resources res, int id, HotspotPlace place) {
+//
+//		//		if (place == null)
+//		//			place = HotspotPlace.CENTER;
+//		//
+//		//Drawable drawable = ;
+//		//
+//		//		return new OverlayMarker(drawableToBitmap(drawable), place);
+//		return makeMarker(res.getDrawable(id), place);
+//	}
+//
+//	public static OverlayMarker makeMarker(Drawable drawable, HotspotPlace place) {
+//
+//		if (place == null)
+//			place = HotspotPlace.CENTER;
+//
+//		//Drawable drawable = res.getDrawable(id);
+//
+//		return new OverlayMarker(drawableToBitmap(drawable), place);
+//	}
+//
+//
+//	public static Bitmap drawableToBitmap(Drawable drawable) {
+//		if (drawable instanceof BitmapDrawable) {
+//			return ((BitmapDrawable) drawable).getBitmap();
+//		}
+//
+//		android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(
+//				drawable.getIntrinsicWidth(),
+//				drawable.getIntrinsicHeight(),
+//				Config.ARGB_8888);
+//
+//		android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
+//		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+//		drawable.draw(canvas);
+//
+//		return bitmap;
+//	}
+//}

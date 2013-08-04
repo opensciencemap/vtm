@@ -24,11 +24,13 @@ import java.util.Stack;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.oscim.backend.BitmapUtils;
+import org.oscim.backend.Log;
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.AreaLevel;
-import org.oscim.theme.renderinstruction.BitmapUtils;
 import org.oscim.theme.renderinstruction.Circle;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.LineSymbol;
@@ -43,8 +45,6 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-import android.graphics.Bitmap;
-import android.util.Log;
 
 /**
  * SAX2 handler to parse XML render theme files.

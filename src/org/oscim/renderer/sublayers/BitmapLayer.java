@@ -16,9 +16,8 @@ package org.oscim.renderer.sublayers;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.GLRenderer;
-
-import android.graphics.Bitmap;
 
 /**
  * Renderer for a single bitmap, width and height must be power of 2.

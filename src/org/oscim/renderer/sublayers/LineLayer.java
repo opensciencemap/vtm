@@ -16,13 +16,13 @@ package org.oscim.renderer.sublayers;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.view.MapView;
+import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
-import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
-import org.oscim.view.MapView;
 
 /**
  */

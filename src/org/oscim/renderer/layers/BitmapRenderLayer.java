@@ -14,13 +14,13 @@
  */
 package org.oscim.renderer.layers;
 
+import org.oscim.view.MapView;
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.sublayers.BitmapLayer;
 import org.oscim.renderer.sublayers.BitmapRenderer;
-import org.oscim.view.MapView;
 
-import android.graphics.Bitmap;
 
 /**
  * RenderLayer to draw a custom Bitmap.

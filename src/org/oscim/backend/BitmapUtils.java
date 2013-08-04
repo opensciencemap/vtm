@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.backend;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,10 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
-import android.graphics.Shader.TileMode;
+import org.oscim.backend.canvas.Bitmap;
+
 
 public final class BitmapUtils {
 	private static final String PREFIX_FILE = "file:";
@@ -59,19 +57,12 @@ public final class BitmapUtils {
 		}
 
 		InputStream inputStream = createInputStream(src);
-		Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+		Bitmap bitmap = CanvasAdapter.g.decodeBitmap(inputStream);
 		inputStream.close();
 		return bitmap;
 	}
 
-	static BitmapShader createBitmapShader(String src) throws IOException {
-		Bitmap bitmap = BitmapUtils.createBitmap(src);
-		if (bitmap == null) {
-			return null;
-		}
 
-		return new BitmapShader(bitmap, TileMode.REPEAT, TileMode.REPEAT);
-	}
 
 	private BitmapUtils() {
 		throw new IllegalStateException();

@@ -27,7 +27,7 @@ import org.oscim.tilesource.ITileDataSink;
 import org.oscim.tilesource.ITileDataSource;
 import org.oscim.tilesource.mapfile.header.SubFileParameter;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 /**
  * A class for reading binary map files.

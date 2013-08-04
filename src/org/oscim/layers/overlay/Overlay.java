@@ -16,9 +16,9 @@
 
 package org.oscim.layers.overlay;
 
+import org.oscim.view.MapView;
 import org.oscim.core.PointF;
 import org.oscim.layers.InputLayer;
-import org.oscim.view.MapView;
 
 /**
  * Base class representing an overlay which may be displayed on top of a

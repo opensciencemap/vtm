@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer;
+package org.oscim.android;
 
 import org.oscim.utils.GlConfigChooser;
 import org.oscim.view.MapView;
@@ -23,7 +23,7 @@ import android.opengl.GLSurfaceView;
 public class GLView extends GLSurfaceView {
 
 	MapView mMapView;
-	private GLRenderer mRenderer;
+	private final AndroidGLRenderer mRenderer;
 
 	public GLView(Context context, MapView mapView) {
 		super(context);
@@ -33,10 +33,10 @@ public class GLView extends GLSurfaceView {
 		setEGLContextClientVersion(2);
 
 		setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
-		mRenderer = new GLRenderer(mMapView);
+		mRenderer = new AndroidGLRenderer(mMapView);
 		setRenderer(mRenderer);
 
-		if (!MapView.debugFrameTime)
+		//if (!MapView.debugFrameTime)
 			setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 	}
 }

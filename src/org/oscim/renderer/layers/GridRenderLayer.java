@@ -16,18 +16,18 @@ package org.oscim.renderer.layers;
 
 import java.util.Locale;
 
+import org.oscim.view.MapView;
+import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.graphics.Color;
-import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.renderer.sublayers.TextLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.Text;
-import org.oscim.view.MapView;
 
 public class GridRenderLayer extends BasicRenderLayer {
 	private final static String TILE_FORMAT = "%d/%d/%d";

@@ -17,15 +17,15 @@ package org.oscim.layers.tile;
 import static org.oscim.layers.tile.MapTile.STATE_NEW_DATA;
 import static org.oscim.layers.tile.MapTile.STATE_READY;
 
+import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.utils.ScanBox;
-import org.oscim.view.MapView;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public class TileRenderLayer extends RenderLayer {
 	private final static String TAG = TileRenderLayer.class.getName();

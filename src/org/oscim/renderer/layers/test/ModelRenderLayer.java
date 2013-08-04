@@ -19,10 +19,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.RenderLayer;
-import org.oscim.view.MapView;
 public class ModelRenderLayer extends RenderLayer{
 
 	public ModelRenderLayer(MapView mapView) {

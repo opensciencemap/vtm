@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.graphics;
+package org.oscim.backend.canvas;
 
 public interface Paint {
 
@@ -36,33 +36,33 @@ public interface Paint {
 		BOLD, BOLD_ITALIC, ITALIC, NORMAL;
 	}
 
-//	int getColor();
-//
-//	int getTextHeight(String text);
-//
-//	int getTextWidth(String text);
-//
-//	void setBitmapShader(Bitmap bitmap);
-//
-//	void setColor(int color);
-//
-//	void setDashPathEffect(float[] strokeDasharray);
-//
-//	void setStrokeCap(Cap cap);
-//
-//	void setStrokeWidth(float width);
-//
-//	void setStyle(Style style);
-//
-//	void setTextAlign(Align align);
-//
-//	void setTextSize(float textSize);
-//
-//	void setTypeface(FontFamily fontFamily, FontStyle fontStyle);
-//
-//	float measureText(String text);
-//
-//	float getFontHeight();
-//
-//	float getFontDescent();
+	int getColor();
+
+	int getTextHeight(String text);
+
+	int getTextWidth(String text);
+
+	void setBitmapShader(Bitmap bitmap);
+
+	void setColor(int color);
+
+	void setDashPathEffect(float[] strokeDasharray);
+
+	void setStrokeCap(Cap cap);
+
+	void setStrokeWidth(float width);
+
+	void setStyle(Style style);
+
+	void setTextAlign(Align align);
+
+	void setTextSize(float textSize);
+
+	void setTypeface(FontFamily fontFamily, FontStyle fontStyle);
+
+	float measureText(String text);
+
+	float getFontHeight();
+
+	float getFontDescent();
 }

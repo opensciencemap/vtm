@@ -14,13 +14,10 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import java.io.IOException;
-
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
 
-import android.graphics.Bitmap;
 
 /**
  * Represents an icon along a polyline on the map.
@@ -32,11 +29,8 @@ public final class LineSymbol extends RenderInstruction {
 	 * @param attributes
 	 *            the attributes of the XML element.
 	 * @return a new LineSymbol with the given rendering attributes.
-	 * @throws IOException
-	 *             if an I/O error occurs while reading a resource.
 	 */
-	public static LineSymbol create(String elementName, Attributes attributes)
-			throws IOException {
+	public static LineSymbol create(String elementName, Attributes attributes) {
 		String src = null;
 		boolean alignCenter = false;
 		boolean repeat = false;
@@ -68,21 +62,17 @@ public final class LineSymbol extends RenderInstruction {
 	}
 
 	public final boolean alignCenter;
-	public final Bitmap bitmap;
+	//public final Bitmap bitmap;
 	public final boolean repeat;
+	public final String bitmap;
 
-	private LineSymbol(String src, boolean alignCenter, boolean repeat)
-			throws IOException {
+	private LineSymbol(String src, boolean alignCenter, boolean repeat) {
 		super();
 
-		this.bitmap = BitmapUtils.createBitmap(src);
+		this.bitmap = src;
+		//this.bitmap = BitmapUtils.createBitmap(src);
 		this.alignCenter = alignCenter;
 		this.repeat = repeat;
-	}
-
-	@Override
-	public void destroy() {
-		bitmap.recycle();
 	}
 
 	@Override

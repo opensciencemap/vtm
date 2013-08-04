@@ -61,11 +61,11 @@ package org.oscim.renderer.atlas;
 
 import java.util.HashMap;
 
+import org.oscim.backend.Log;
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.sublayers.TextureItem;
 import org.oscim.utils.pool.Inlist;
 
-import android.graphics.Bitmap;
-import android.util.Log;
 
 public class TextureAtlas extends Inlist<TextureAtlas> {
 	private final static String TAG = TextureAtlas.class.getName();
@@ -100,7 +100,7 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 			return texture;
 		}
 
-		Log.wtf(TAG, "Missing atlas texture");
+		Log.d(TAG, "Missing atlas texture");
 		return null;
 	}
 

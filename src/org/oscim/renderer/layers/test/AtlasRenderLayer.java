@@ -2,9 +2,10 @@ package org.oscim.renderer.layers.test;
 
 import java.util.Arrays;
 
+import org.oscim.view.MapView;
+import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.MapPosition;
-import org.oscim.graphics.Color;
-import org.oscim.graphics.Paint.Cap;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
@@ -15,9 +16,8 @@ import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.renderer.sublayers.TextLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.Text;
-import org.oscim.view.MapView;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 public class AtlasRenderLayer extends BasicRenderLayer {
 

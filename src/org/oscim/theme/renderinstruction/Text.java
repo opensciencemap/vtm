@@ -16,19 +16,17 @@ package org.oscim.theme.renderinstruction;
 
 import java.util.Locale;
 
-import org.oscim.graphics.Color;
-import org.oscim.graphics.Paint.FontFamily;
-import org.oscim.graphics.Paint.FontStyle;
+import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint;
+import org.oscim.backend.canvas.Paint.Align;
+import org.oscim.backend.canvas.Paint.FontFamily;
+import org.oscim.backend.canvas.Paint.FontStyle;
+import org.oscim.backend.canvas.Paint.Style;
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.RenderThemeHandler;
 import org.xml.sax.Attributes;
-
-import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.Paint.FontMetrics;
-import android.graphics.Paint.Style;
-import android.graphics.Typeface;
 
 /**
  * Represents a text along a polyline on the map.
@@ -132,43 +130,47 @@ public final class Text extends RenderInstruction {
 
 		Text t = new Text("", "", FontFamily.DEFAULT, FontStyle.NORMAL,
 				fontSize, fill, outline, strokeWidth, 0, billboard, null, Integer.MAX_VALUE);
-		FontMetrics fm = t.paint.getFontMetrics();
-		t.fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
-		t.fontDescent = (float) Math.ceil(Math.abs(fm.bottom));
+		//FontMetrics fm = t.paint.getFontMetrics();
+		//t.fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
+		//t.fontDescent = (float) Math.ceil(Math.abs(fm.bottom));
+
+		t.fontHeight = t.paint.getFontHeight();
+		t.fontDescent = t.paint.getFontDescent();
+
 		return t;
 	}
 
-	private static int getStyle(FontStyle fontStyle) {
-		switch (fontStyle) {
-			case BOLD:
-				return 1;
-			case BOLD_ITALIC:
-				return 3;
-			case ITALIC:
-				return 2;
-			case NORMAL:
-				return 0;
-		}
+	//private static int getStyle(FontStyle fontStyle) {
+	//	switch (fontStyle) {
+	//		case BOLD:
+	//			return 1;
+	//		case BOLD_ITALIC:
+	//			return 3;
+	//		case ITALIC:
+	//			return 2;
+	//		case NORMAL:
+	//			return 0;
+	//	}
+	//
+	//	throw new IllegalArgumentException("unknown font style: " + fontStyle);
+	//}
 
-		throw new IllegalArgumentException("unknown font style: " + fontStyle);
-	}
-
-	private static Typeface getTypeface(FontFamily fontFamily) {
-		switch (fontFamily) {
-			case DEFAULT:
-				return Typeface.DEFAULT;
-			case DEFAULT_BOLD:
-				return Typeface.DEFAULT_BOLD;
-			case MONOSPACE:
-				return Typeface.MONOSPACE;
-			case SANS_SERIF:
-				return Typeface.SANS_SERIF;
-			case SERIF:
-				return Typeface.SERIF;
-		}
-
-		throw new IllegalArgumentException("unknown font family: " + fontFamily);
-	}
+	//private static Typeface getTypeface(FontFamily fontFamily) {
+	//	switch (fontFamily) {
+	//		case DEFAULT:
+	//			return Typeface.DEFAULT;
+	//		case DEFAULT_BOLD:
+	//			return Typeface.DEFAULT_BOLD;
+	//		case MONOSPACE:
+	//			return Typeface.MONOSPACE;
+	//		case SANS_SERIF:
+	//			return Typeface.SANS_SERIF;
+	//		case SERIF:
+	//			return Typeface.SERIF;
+	//	}
+	//
+	//	throw new IllegalArgumentException("unknown font family: " + fontFamily);
+	//}
 
 	private Text(String style, String textKey, FontFamily fontFamily, FontStyle fontStyle,
 			float fontSize, int fill, int outline, float strokeWidth, float dy, boolean caption,
@@ -181,23 +183,21 @@ public final class Text extends RenderInstruction {
 		this.priority = priority;
 		this.symbol = symbol;
 
-		//paint = Graphics.res.getPaint();
-		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		paint = CanvasAdapter.g.getPaint();
 		paint.setTextAlign(Align.CENTER);
-		Typeface typeFace = Typeface.create(Text.getTypeface(fontFamily), Text.getStyle(fontStyle));
-		//paint.setTypeface(fontFamily, fontStyle);
-		paint.setTypeface(typeFace);
+		//Typeface typeFace = Typeface.create(Text.getTypeface(fontFamily), Text.getStyle(fontStyle));
+		paint.setTypeface(fontFamily, fontStyle);
+		//paint.setTypeface(typeFace);
 
 		paint.setColor(fill);
 		paint.setTextSize(fontSize);
 
 		if (strokeWidth > 0) {
-			stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
-			//stroke = Graphics.res.getPaint();
+			stroke = CanvasAdapter.g.getPaint();
 			stroke.setStyle(Style.STROKE);
 			stroke.setTextAlign(Align.CENTER);
-			//stroke.setTypeface(fontFamily, fontStyle);
-			stroke.setTypeface(typeFace);
+			stroke.setTypeface(fontFamily, fontStyle);
+			//stroke.setTypeface(typeFace);
 			stroke.setColor(outline);
 			stroke.setStrokeWidth(strokeWidth);
 			stroke.setTextSize(fontSize);
@@ -227,11 +227,11 @@ public final class Text extends RenderInstruction {
 		if (stroke != null)
 			stroke.setTextSize(fontSize * scaleFactor);
 
-		FontMetrics fm = paint.getFontMetrics();
-		fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
-		fontDescent = (float) Math.ceil(Math.abs(fm.bottom));
+		//FontMetrics fm = paint.getFontMetrics();
+		//fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top));
+		//fontDescent = (float) Math.ceil(Math.abs(fm.bottom));
 
-		//	fontHeight = paint.getFontHeight();
-		//	fontDescent = paint.getFontDescent();
+		fontHeight = paint.getFontHeight();
+		fontDescent = paint.getFontDescent();
 	}
 }

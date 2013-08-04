@@ -20,6 +20,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
+import org.oscim.view.MapView;
+import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
@@ -27,10 +30,7 @@ import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.sublayers.BitmapLayer;
 import org.oscim.renderer.sublayers.Layers;
-import org.oscim.view.MapView;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 public class BitmapTileLayer extends TileLayer<TileLoader> {
 	private static final int TIMEOUT_CONNECT = 5000;
@@ -54,7 +54,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 					url = mTileSource.getTileUrl(tile);
 					URLConnection urlConnection = getURLConnection(url);
 					InputStream inputStream = getInputStream(urlConnection);
-					Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+					Bitmap bitmap = CanvasAdapter.g.decodeBitmap(inputStream);
 
 					tile.layers = new Layers();
 					BitmapLayer l = new BitmapLayer(false);

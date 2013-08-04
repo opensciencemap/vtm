@@ -5,7 +5,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
 
 import android.opengl.GLSurfaceView;
-import android.util.Log;
+import org.oscim.backend.Log;
 
 /**
  *

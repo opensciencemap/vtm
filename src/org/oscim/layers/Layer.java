@@ -14,9 +14,9 @@
  */
 package org.oscim.layers;
 
+import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.RenderLayer;
-import org.oscim.view.MapView;
 
 public abstract class Layer {
 	public Layer(MapView mapView) {

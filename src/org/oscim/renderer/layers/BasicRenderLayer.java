@@ -14,6 +14,7 @@
  */
 package org.oscim.renderer.layers;
 
+import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
@@ -28,7 +29,6 @@ import org.oscim.renderer.sublayers.LineTexRenderer;
 import org.oscim.renderer.sublayers.PolygonRenderer;
 import org.oscim.renderer.sublayers.TextureRenderer;
 import org.oscim.utils.FastMath;
-import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
 

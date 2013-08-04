@@ -116,7 +116,7 @@ public abstract class MapActivity extends Activity {
 			mapPosition.setPosition(latitudeE6 / 1E6, longitudeE6 / 1E6);
 			mapPosition.setScale(scale);
 
-			mMapView.getMapViewPosition().setMapPosition(mapPosition);
+			mMapView.setMapPosition(mapPosition);
 		}
 
 		//String theme = sharedPreferences.getString(KEY_THEME,

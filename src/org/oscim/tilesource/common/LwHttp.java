@@ -24,10 +24,10 @@ import java.net.SocketAddress;
 import java.net.URL;
 import java.util.zip.InflaterInputStream;
 
+import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 
 import android.os.SystemClock;
-import android.util.Log;
 
 public class LwHttp {
 	private static final String TAG = LwHttp.class.getName();
@@ -199,7 +199,7 @@ public class LwHttp {
 			try {
 				mSocket.close();
 			} catch (IOException e) {
-				Log.wtf(TAG, e);
+				Log.d(TAG, e.getMessage());
 			}
 
 			// Log.d(TAG, "not alive  - recreate connection " + mMaxReq);

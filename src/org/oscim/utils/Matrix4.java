@@ -14,6 +14,12 @@
  */
 package org.oscim.utils;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
+import android.opengl.GLES20;
+
 public class Matrix4 {
 
 	static {
@@ -55,18 +61,22 @@ public class Matrix4 {
 
 	private native static void setTransScale(long self, float tx, float ty, float scale);
 
-	private native static void setAsUniform(long self, int handle);
+	//private native static void setAsUniform(long self, int handle);
 
-	private native void setValueAt(long self, int pos, float value);
+	private native static void setValueAt(long self, int pos, float value);
 
-	private native void addDepthOffset(long self, int delta);
+	private native static void addDepthOffset(long self, int delta);
+
+	private native static ByteBuffer getBuffer(long self);
 
 	private final long pointer;
+	private final FloatBuffer buffer;
 
 	private final static String INVALID_INPUT = "Bad Array!";
 
 	public Matrix4() {
 		pointer = alloc();
+		buffer = (getBuffer(pointer)).order(ByteOrder.nativeOrder()).asFloatBuffer();
 	}
 
 	/**
@@ -207,7 +217,8 @@ public class Matrix4 {
 	 * @param location GL location id
 	 */
 	public void setAsUniform(int location) {
-		setAsUniform(pointer, location);
+		GLES20.glUniformMatrix4fv(location, 1, false, buffer);
+		//setAsUniform(pointer, location);
 	}
 
 	/**

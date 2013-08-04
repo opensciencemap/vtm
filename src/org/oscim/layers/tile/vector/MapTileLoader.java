@@ -48,7 +48,7 @@ import org.oscim.utils.LineClipper;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.view.DebugSettings;
 
-import android.util.Log;
+import org.oscim.backend.Log;
 
 /**
  * @note

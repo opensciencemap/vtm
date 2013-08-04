@@ -1,6 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -17,12 +16,9 @@ package org.oscim.view;
 
 import java.util.List;
 
-import org.oscim.android.Compass;
-import org.oscim.android.MapActivity;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
-import org.oscim.core.Tile;
 import org.oscim.layers.Layer;
 import org.oscim.layers.MapEventLayer;
 import org.oscim.layers.labeling.LabelLayer;
@@ -31,115 +27,31 @@ import org.oscim.layers.overlay.Overlay;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.layers.tile.vector.MapTileLoader;
-import org.oscim.renderer.GLView;
 import org.oscim.tilesource.TileSource;
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.widget.RelativeLayout;
+public class MapView {
 
-/**
- * A MapView shows a map on the display of the device. It handles all user input
- * and touch gestures to move and zoom the map.
- */
-public class MapView extends RelativeLayout {
-
-	final static String TAG = MapView.class.getName();
-
-	public static final boolean debugFrameTime = false;
-	public static final boolean testRegionZoom = false;
-
-	public boolean mRotationEnabled = false;
-	public boolean mCompassEnabled = false;
-	public boolean enablePagedFling = false;
-
-	private final GLView mGLView;
-
+	public static int dpi;
+	public static boolean enableClosePolygons;
 	private final LayerManager mLayerManager;
 	private final MapViewPosition mMapViewPosition;
 	private final MapPosition mMapPosition;
 
-	private final Compass mCompass;
-
 	private DebugSettings mDebugSettings;
+	private final MapRenderCallback mMapRenderCallback;
 
-	private int mWidth;
-	private int mHeight;
-	private boolean mInitialized;
-
-	// FIXME: keep until old pbmap reader is removed
-	public static boolean enableClosePolygons = false;
-
-	public static float dpi;
-
-	/**
-	 * @param context
-	 *            the enclosing MapActivity instance.
-	 * @throws IllegalArgumentException
-	 *             if the context object is not an instance of
-	 *             {@link MapActivity} .
-	 */
-	public MapView(Context context) {
-		this(context, null);
-	}
-
-	/**
-	 * @param context
-	 *            the enclosing MapActivity instance.
-	 * @param attributeSet
-	 *            a set of attributes.
-	 * @throws IllegalArgumentException
-	 *             if the context object is not an instance of
-	 *             {@link MapActivity} .
-	 */
-
-	public MapView(Context context, AttributeSet attributeSet) {
-		super(context, attributeSet);
-
-		if (!(context instanceof MapActivity)) {
-			throw new IllegalArgumentException(
-					"context is not an instance of MapActivity");
-		}
-
-		this.setWillNotDraw(true);
-
-		DisplayMetrics metrics = getResources().getDisplayMetrics();
-		dpi = Math.max(metrics.xdpi, metrics.ydpi);
-
-		// TODO make this dpi dependent
-		Tile.SIZE = 400;
-
-		MapActivity mapActivity = (MapActivity) context;
+	public MapView(MapRenderCallback mapRenderCallback) {
+		mMapRenderCallback = mapRenderCallback;
 
 		mMapViewPosition = new MapViewPosition(this);
 		mMapPosition = new MapPosition();
-
-		mLayerManager = new LayerManager(context);
-
-		mCompass = new Compass(mapActivity, this);
-
-		mGLView = new GLView(context, this);
-
-		mDebugSettings = new DebugSettings();
+		mLayerManager = new LayerManager();
 
 		// FIXME
+		mDebugSettings = new DebugSettings();
 		MapTileLoader.setDebugSettings(mDebugSettings);
 
-		mapActivity.registerMapView(this);
-
-		LayoutParams params = new LayoutParams(
-				android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-				android.view.ViewGroup.LayoutParams.MATCH_PARENT);
-
-		addView(mGLView, params);
-
 		mLayerManager.add(0, new MapEventLayer(this));
-
-		clearMap();
-		redrawMap(false);
 	}
 
 	public MapTileLayer setBaseMap(TileSource tileSource) {
@@ -147,14 +59,15 @@ public class MapView extends RelativeLayout {
 
 		baseLayer.setTileSource(tileSource);
 
+		//mLayerManager.add(0, new MapEventLayer(this));
+
 		mLayerManager.add(1, baseLayer);
 
-		mRotationEnabled = true;
+		//mRotationEnabled = true;
 
 		//mLayerManager.add(new GenericOverlay(this, new GridRenderLayer(this)));
 		mLayerManager.add(new BuildingOverlay(this, baseLayer.getTileLayer()));
-		LabelLayer ll = new LabelLayer(this, baseLayer.getTileLayer());
-		mLayerManager.add(ll);
+		mLayerManager.add(new LabelLayer(this, baseLayer.getTileLayer()));
 
 		return baseLayer;
 	}
@@ -173,136 +86,53 @@ public class MapView extends RelativeLayout {
 		mLayerManager.destroy();
 	}
 
-	public void onStop() {
-		Log.d(TAG, "onStop");
-		//mLayerManager.destroy();
+	/**
+	 * Request call to onUpdate for all layers. This function can
+	 * be called from any thread. Request will be handled on main
+	 * thread.
+	 *
+	 * @param forceRedraw pass true to render next frame
+	 */
+	public void updateMap(boolean forceRedraw) {
+		mMapRenderCallback.updateMap(forceRedraw);
 	}
 
-	private boolean mPausing = false;
-
-	public void onPause() {
-		mPausing = true;
-
-		if (this.mCompassEnabled)
-			mCompass.disable();
-
-	}
-
-	public void onResume() {
-		if (this.mCompassEnabled)
-			mCompass.enable();
-
-		mPausing = false;
-	}
-
-	@Override
-	public boolean onTouchEvent(MotionEvent motionEvent) {
-
-		if (!isClickable())
-			return false;
-
-		return mLayerManager.handleMotionEvent(motionEvent);
-	}
-
-	@Override
-	protected synchronized void onSizeChanged(int width, int height,
-			int oldWidth, int oldHeight) {
-		Log.d(TAG, "onSizeChanged: " + width + "x" + height);
-
-		super.onSizeChanged(width, height, oldWidth, oldHeight);
-
-		mWidth = width;
-		mHeight = height;
-
-		mInitialized = (mWidth > 0 && mHeight > 0);
-
-		if (mInitialized)
-			mMapViewPosition.setViewport(width, height);
-	}
-
-	/* private */boolean mWaitRedraw;
-
-	private final Runnable mRedrawRequest = new Runnable() {
-		@Override
-		public void run() {
-			mWaitRedraw = false;
-			redrawMapInternal(false);
-		}
-	};
+	boolean mClearMap;
 
 	/**
-	 * Request to redraw the map when a global state like position,
-	 * datasource or theme has changed. This will trigger a call
-	 * to onUpdate() for all Layers.
-	 *
-	 * @param requestRender
-	 *            also request to draw a frame
+	 * Request to clear all layers before rendering next frame
 	 */
-	public void redrawMap(boolean requestRender) {
-		if (requestRender && !mClearMap && !mPausing && mInitialized)
-			mGLView.requestRender();
-
-		if (!mWaitRedraw) {
-			mWaitRedraw = true;
-			post(mRedrawRequest);
-		}
-	}
-	private boolean mClearMap;
-
-	public void clearMap(){
+	public void clearMap() {
 		mClearMap = true;
 	}
 
 	/**
-	 * Request to render a frame. Use this for animations.
+	 * Request to render a frame. Request will be handled on main
+	 * thread.
 	 */
 	public void render() {
-		if (mClearMap)
-			redrawMap(false);
-		else
-			mGLView.requestRender();
+		mMapRenderCallback.renderMap();
 	}
 
 	/**
-	 * Update all Layers on Main thread.
-	 *
-	 * @param forceRedraw also render frame
-	 *            FIXME (does nothing atm)
+	 * Do not call directly. This function is run on main-loop
+	 * before rendering a frame.
 	 */
-	void redrawMapInternal(boolean forceRedraw) {
-		boolean changed = forceRedraw;
-
-		if (mPausing || !mInitialized)
-			return;
-
-		if (forceRedraw && !mClearMap)
-			mGLView.requestRender();
+	public void updateLayers() {
+		boolean changed = false;
 
 		// get the current MapPosition
 		changed |= mMapViewPosition.getMapPosition(mMapPosition);
 
 		mLayerManager.onUpdate(mMapPosition, changed, mClearMap);
-
-		// delay redraw until all layers had the chance to clear
-		// their state.
-		if (mClearMap){
-			mGLView.requestRender();
-			mClearMap =false;
-		}
+		mClearMap = false;
 	}
 
-	/**
-	 * @param debugSettings
-	 *            the new DebugSettings for this MapView.
-	 */
 	public void setDebugSettings(DebugSettings debugSettings) {
 		mDebugSettings = debugSettings;
 		MapTileLoader.setDebugSettings(debugSettings);
 	}
 
-	/**
-	 * @return the debug settings which are used in this MapView.
-	 */
 	public DebugSettings getDebugSettings() {
 		return mDebugSettings;
 	}
@@ -320,7 +150,7 @@ public class MapView extends RelativeLayout {
 	public void setCenter(GeoPoint geoPoint) {
 
 		mMapViewPosition.setMapCenter(geoPoint);
-		redrawMap(true);
+		updateMap(true);
 	}
 
 	/**
@@ -352,35 +182,26 @@ public class MapView extends RelativeLayout {
 		return mMapViewPosition.getViewBox();
 	}
 
-	public void enableRotation(boolean enable) {
-		mRotationEnabled = enable;
+	public void onPause() {
+		// TODO Auto-generated method stub
 
-		if (enable) {
-			enableCompass(false);
-		}
 	}
 
-	public void enableCompass(boolean enable) {
-		if (enable == mCompassEnabled)
-			return;
+	public void onResume() {
+		// TODO Auto-generated method stub
 
-		mCompassEnabled = enable;
-
-		if (enable)
-			enableRotation(false);
-
-		if (enable)
-			mCompass.enable();
-		else
-			mCompass.disable();
 	}
 
-	public boolean getCompassEnabled() {
-		return mCompassEnabled;
+	public void onStop() {
+		// TODO Auto-generated method stub
+
 	}
 
-	public boolean getRotationEnabled() {
-		return mRotationEnabled;
+	public int getWidth() {
+		return mMapRenderCallback.getWidth();
 	}
 
+	public int getHeight() {
+		return mMapRenderCallback.getHeight();
+	}
 }

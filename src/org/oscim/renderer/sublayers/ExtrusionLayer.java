@@ -18,16 +18,16 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
+import org.oscim.view.MapView;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.utils.LineClipper;
-import org.oscim.view.MapView;
 
 import android.opengl.GLES20;
-import android.util.Log;
+import org.oscim.backend.Log;
 
 /**
  * @author Hannes Janetzek

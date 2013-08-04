@@ -31,7 +31,6 @@ import static android.opengl.GLES20.glStencilOp;
 import static android.opengl.GLES20.glUniform4fv;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -41,14 +40,11 @@ import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.theme.renderinstruction.Area;
-import org.oscim.theme.renderinstruction.BitmapUtils;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
 
-import android.graphics.Bitmap;
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
 
 /**
  * Special Renderer for drawing tile polygon layers
@@ -110,33 +106,35 @@ public final class PolygonRenderer {
 		}
 
 		mFillPolys = new PolygonLayer[STENCIL_BITS];
-		if (enableTexture) {
-			mTexWood = loadSprite("jar:grass3.png");
-			mTexWater = loadSprite("jar:water2.png");
-			mTexGrass = loadSprite("jar:grass2.png");
-		}
+		//		if (enableTexture) {
+		//			mTexWood = loadSprite("jar:grass3.png");
+		//			mTexWater = loadSprite("jar:water2.png");
+		//			mTexGrass = loadSprite("jar:grass2.png");
+		//		}
 		return true;
 	}
 
-	private static int loadSprite(String name) {
-		int[] textures = new int[1];
-
-		try {
-			Bitmap b = BitmapUtils.createBitmap(name);
-			GLES20.glGenTextures(1, textures, 0);
-
-			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
-
-			GlUtils.setTextureParameter(GLES20.GL_LINEAR, GLES20.GL_LINEAR,
-					GLES20.GL_REPEAT, GLES20.GL_REPEAT);
-
-			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, b, 0);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return textures[0];
-	}
+//	private static int loadSprite(String name) {
+//		int[] textures = new int[1];
+//
+//		try {
+//			Bitmap b = BitmapUtils.createBitmap(name);
+//			GLES20.glGenTextures(1, textures, 0);
+//
+//			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
+//
+//			GlUtils.setTextureParameter(GLES20.GL_LINEAR, GLES20.GL_LINEAR,
+//					GLES20.GL_REPEAT, GLES20.GL_REPEAT);
+//
+//			b.uploadToTexture(false);
+//
+//			//GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, b, 0);
+//
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		return textures[0];
+//	}
 
 	private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale,
 			float div) {
