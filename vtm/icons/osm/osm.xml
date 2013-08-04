@@ -1,0 +1,43 @@
+
+<atlas img="osm.png">
+  <rect name="airport" pos="67 107 16 16" />
+  <rect name="atm" pos="1 19 16 16" />
+  <rect name="bar" pos="1 103 20 20" />
+  <rect name="cafe" pos="23 41 16 16" />
+  <rect name="camping" pos="45 63 16 16" />
+  <rect name="city" pos="117 42 10 10" />
+  <rect name="department_store" pos="67 89 16 16" />
+  <rect name="fast_food" pos="85 107 16 16" />
+  <rect name="florist" pos="1 1 16 16" />
+  <rect name="food_bar" pos="85 89 16 16" />
+  <rect name="food_drinkingtap" pos="1 81 20 20" />
+  <rect name="hostel" pos="23 103 20 20" />
+  <rect name="hotel" pos="1 59 20 20" />
+  <rect name="information" pos="103 107 16 16" />
+  <rect name="library" pos="23 81 20 20" />
+  <rect name="museum" pos="103 89 16 16" />
+  <rect name="parking" pos="67 71 16 16" />
+  <rect name="pharmacy" pos="85 71 16 16" />
+  <rect name="place_of_worship" pos="103 71 16 16" />
+  <rect name="playground" pos="45 103 20 20" />
+  <rect name="police" pos="19 19 16 16" />
+  <rect name="pub" pos="19 1 16 16" />
+  <rect name="rental_bicycle" pos="1 37 20 20" />
+  <rect name="restaurant" pos="41 41 16 16" />
+  <rect name="school" pos="37 23 16 16" />
+  <rect name="shop_bakery" pos="37 5 16 16" />
+  <rect name="shop_butcher" pos="63 53 16 16" />
+  <rect name="shop_clothes" pos="81 53 16 16" />
+  <rect name="shop_convenience" pos="99 53 16 16" />
+  <rect name="shop_diy" pos="59 35 16 16" />
+  <rect name="shop_hairdresser" pos="77 35 16 16" />
+  <rect name="shop_supermarket" pos="95 35 16 16" />
+  <rect name="shopping_bicycle" pos="55 17 16 16" />
+  <rect name="telephone" pos="73 17 16 16" />
+  <rect name="theatre" pos="23 59 20 20" />
+  <rect name="toilets" pos="45 81 20 20" />
+  <rect name="town" pos="55 4 11 11" />
+  <rect name="view_point" pos="91 17 16 16" />
+  <rect name="volcano" pos="68 7 9 8" />
+  <rect name="windmill" pos="117 54 10 15" />
+</atlas>

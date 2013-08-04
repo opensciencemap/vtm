@@ -8,11 +8,14 @@
   <style-text name="major-road" k="name" font-style="bold" font-size="16" fill="#101010"
     stroke="#eeeeee" stroke-width="2.0" priority="1" />
 
-  <style-text name="park" k="name" font-size="17" fill="#93ba8b"
-    stroke="#eeeeee" stroke-width="2.0" priority="1" caption="true"/>
+  <style-text name="park" k="name" font-size="17" fill="#93ba8b" stroke="#eeeeee"
+    stroke-width="2.0" priority="1" caption="true" />
+
+  <style-text name="poi" k="name" font-size="16" fill="#777744" stroke="#aaffffff"
+    stroke-width="2.0" dy="16" caption="true" />
 
   <!--<style-area name="residential" fill="#e0dfde" fade="10"/> -->
-  <style-area name="residential" fill="#e8e7e3" fade="10" />
+  <style-area name="residential" fill="#e8e7e3" fade="11" />
 
   <style-area name="railway|industrial" fill="#e6e3e5" fade="10" />
   <!-- "#f0fae7" mint green -->
@@ -20,20 +23,24 @@
   <!--<style-area name="farmland" fill="#f1ebb2" fade="11" /> -->
   <style-area name="farmland" fill="#e7dab5" fade="11" />
   <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
-  <!-- <style-area name="forest|wood" fill="#ebefe5" fade="7" blend="11" blend-fill="#cee0bc"/>
-    d3dec8 -->
-  <style-area name="wood" fill="#d1dbc7" fade="7" blend="10" blend-fill="#9ac56e" src="grass3.png"/>
+  <style-area name="wood" fill="#d1dbc7" fade="7" blend="11" blend-fill="#9ac56e" />
+  <!--<style-area name="wood" fill="#d1dbc7" fade="7" blend="10" blend-fill="#9ac56e" src="grass3.png"/> -->
   <style-line name="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" />
 
   <!-- grass|meadow|garden|grassland|scrub -->
   <style-area name="greens" fill="#c9dc91" fade="10" />
+  <style-area name="lightgreen" fill="#d3dcb9" fade="10" />
+  <style-area name="darkgreen" fill="#c2cba5" fade="10" />
+
   <!-- <style-area name="greens" fill="#d2e5ce" fade="10" /> -->
   <!-- marsh|wetland|nature_reserve -->
   <style-area name="greens2" fill="#deecb9" fade="12" />
 
   <!-- park|common|green|cemetery|golf_course|dog_park -->
-  <style-area name="park" fill="#a3ca7b" fade="11" src="grass2.png"/>
-  <style-line name="park" stroke="#a3ca7b" width="1.0" fix="true" cap="butt" fade="11" />
+  <!-- <style-area name="park" fill="#a3ca7b" fade="11" src="grass2.png" /> -->
+  <style-area name="park" fill="#a3ca7b" fade="11" />
+  <style-line name="park" stroke="#a3ca7b" width="1.0" fix="true" cap="butt"
+    fade="11" />
 
   <!-- de:Kleingartengebiet -->
   <style-area name="allotments" fill="#efeae0" fade="12" />
@@ -88,8 +95,8 @@
 
   <style-line name="water" stroke="#a4bbcc" width="1.0" cap="butt" />
 
-  <!--<style-area name="water" fill="#97b7e5" /> -->
-  <style-area name="water" fill="#afc5e3" src="water2.png"/>
+  <!--<style-area name="water" fill="#97b7e5" afc5e3 /> -->
+  <style-area name="water" fill="#99badf" src="water2.png" />
 
   <!-- no-go area boundary -->
   <style-line name="fence" stroke="#444444" width="1.2" fix="true" cap="butt" />
@@ -104,100 +111,47 @@
   <!-- <style-area name="building" fill="#eae8e6" fade="15"/> -->
   <style-area name="building" fill="#f2f0eb" fade="15" />
 
-  <atlas img="maki.png">
-    <rect name="airfield" pos="1 105 24 24" />
-    <rect name="airport" pos="1 79 24 24" />
-    <rect name="alcohol-shop" pos="27 105 24 24" />
-    <rect name="america-football" pos="1 53 24 24" />
-    <rect name="art-gallery" pos="27 79 24 24" />
-    <rect name="bank" pos="53 105 24 24" />
-    <rect name="bar" pos="1 27 24 24" />
-    <rect name="baseball" pos="27 53 24 24" />
-    <rect name="basketball" pos="53 79 24 24" />
-    <rect name="beer" pos="79 105 24 24" />
-    <rect name="bicycle" pos="1 1 24 24" />
-    <rect name="building" pos="27 27 24 24" />
-    <rect name="bus" pos="53 53 24 24" />
-    <rect name="cafe" pos="79 79 24 24" />
-    <rect name="campsite" pos="105 105 24 24" />
-    <rect name="cemetery" pos="27 1 24 24" />
-    <rect name="cinema" pos="53 27 24 24" />
-    <rect name="circle" pos="105 79 24 24" />
-    <rect name="circle-stroked" pos="79 53 24 24" />
-    <rect name="city" pos="131 105 24 24" />
-    <rect name="college" pos="53 1 24 24" />
-    <rect name="commercial" pos="79 27 24 24" />
-    <rect name="cricket" pos="105 53 24 24" />
-    <rect name="cross" pos="131 79 24 24" />
-    <rect name="dam" pos="157 105 24 24" />
-    <rect name="danger" pos="79 1 24 24" />
-    <rect name="disability" pos="105 27 24 24" />
-    <rect name="embassy" pos="131 53 24 24" />
-    <rect name="emergency-telephone" pos="157 79 24 24" />
-    <rect name="farm" pos="183 105 24 24" />
-    <rect name="fast-food" pos="105 1 24 24" />
-    <rect name="ferry" pos="131 27 24 24" />
-    <rect name="fire-station" pos="157 53 24 24" />
-    <rect name="fuel" pos="183 79 24 24" />
-    <rect name="garden" pos="209 105 24 24" />
-    <rect name="golf" pos="131 1 24 24" />
-    <rect name="grocery" pos="157 27 24 24" />
-    <rect name="harbor" pos="183 53 24 24" />
-    <rect name="heliport" pos="209 79 24 24" />
-    <rect name="hospital" pos="235 105 24 24" />
-    <rect name="industrial" pos="157 1 24 24" />
-    <rect name="land-use" pos="183 27 24 24" />
-    <rect name="library" pos="209 53 24 24" />
-    <rect name="lodging" pos="235 79 24 24" />
-    <rect name="logging" pos="261 105 24 24" />
-    <rect name="marker" pos="209 27 24 24" />
-    <rect name="marker-stroked" pos="183 1 24 24" />
-    <rect name="monument" pos="235 53 24 24" />
-    <rect name="museum" pos="261 79 24 24" />
-    <rect name="music" pos="287 105 24 24" />
-    <rect name="oil-well" pos="209 1 24 24" />
-    <rect name="park" pos="235 27 24 24" />
-    <rect name="park2" pos="261 53 24 24" />
-    <rect name="parking" pos="313 105 24 24" />
-    <rect name="parking-garage" pos="287 79 24 24" />
-    <rect name="pharmacy" pos="235 1 24 24" />
-    <rect name="pitch" pos="261 27 24 24" />
-    <rect name="place-of-worship" pos="287 53 24 24" />
-    <rect name="police" pos="313 79 24 24" />
-    <rect name="post" pos="339 105 24 24" />
-    <rect name="prison" pos="261 1 24 24" />
-    <rect name="rail" pos="339 79 24 24" />
-    <rect name="rail-above" pos="287 27 24 24" />
-    <rect name="rail-underground" pos="313 53 24 24" />
-    <rect name="religious-christian" pos="365 105 24 24" />
-    <rect name="religious-jewish" pos="287 1 24 24" />
-    <rect name="religious-muslim" pos="313 27 24 24" />
-    <rect name="restaurant" pos="339 53 24 24" />
-    <rect name="roadblock" pos="365 79 24 24" />
-    <rect name="school" pos="391 105 24 24" />
-    <rect name="shop" pos="313 1 24 24" />
-    <rect name="skiing" pos="339 27 24 24" />
-    <rect name="slaughterhouse" pos="365 53 24 24" />
-    <rect name="soccer" pos="391 79 24 24" />
-    <rect name="square" pos="339 1 24 24" />
-    <rect name="square-stroked" pos="417 105 24 24" />
-    <rect name="star" pos="391 53 24 24" />
-    <rect name="star-stroked" pos="365 27 24 24" />
-    <rect name="swimming" pos="417 79 24 24" />
-    <rect name="telephone" pos="443 105 24 24" />
-    <rect name="tennis" pos="365 1 24 24" />
-    <rect name="theatre" pos="391 27 24 24" />
-    <rect name="toilets" pos="417 53 24 24" />
-    <rect name="town" pos="469 105 24 24" />
-    <rect name="town-hall" pos="443 79 24 24" />
-    <rect name="triangle" pos="417 27 24 24" />
-    <rect name="triangle-stroked" pos="391 1 24 24" />
-    <rect name="village" pos="443 53 24 24" />
-    <rect name="warehouse" pos="469 79 24 24" />
-    <rect name="waste-basket" pos="417 1 24 24" />
-    <rect name="water" pos="443 27 24 24" />
-    <rect name="wetland" pos="469 53 24 24" />
-    <rect name="zoo" pos="443 1 24 24" />
+  <atlas img="osm.png">
+    <rect name="airport" pos="67 107 16 16" />
+    <rect name="atm" pos="1 19 16 16" />
+    <rect name="bar" pos="1 103 20 20" />
+    <rect name="cafe" pos="23 41 16 16" />
+    <rect name="camping" pos="45 63 16 16" />
+    <rect name="city" pos="117 42 10 10" />
+    <rect name="department_store" pos="67 89 16 16" />
+    <rect name="fast_food" pos="85 107 16 16" />
+    <rect name="florist" pos="1 1 16 16" />
+    <rect name="food_bar" pos="85 89 16 16" />
+    <rect name="food_drinkingtap" pos="1 81 20 20" />
+    <rect name="hostel" pos="23 103 20 20" />
+    <rect name="hotel" pos="1 59 20 20" />
+    <rect name="information" pos="103 107 16 16" />
+    <rect name="library" pos="23 81 20 20" />
+    <rect name="museum" pos="103 89 16 16" />
+    <rect name="parking" pos="67 71 16 16" />
+    <rect name="pharmacy" pos="85 71 16 16" />
+    <rect name="place_of_worship" pos="103 71 16 16" />
+    <rect name="playground" pos="45 103 20 20" />
+    <rect name="police" pos="19 19 16 16" />
+    <rect name="pub" pos="19 1 16 16" />
+    <rect name="rental_bicycle" pos="1 37 20 20" />
+    <rect name="restaurant" pos="41 41 16 16" />
+    <rect name="school" pos="37 23 16 16" />
+    <rect name="shop_bakery" pos="37 5 16 16" />
+    <rect name="shop_butcher" pos="63 53 16 16" />
+    <rect name="shop_clothes" pos="81 53 16 16" />
+    <rect name="shop_convenience" pos="99 53 16 16" />
+    <rect name="shop_diy" pos="59 35 16 16" />
+    <rect name="shop_hairdresser" pos="77 35 16 16" />
+    <rect name="shop_supermarket" pos="95 35 16 16" />
+    <rect name="shopping_bicycle" pos="55 17 16 16" />
+    <rect name="telephone" pos="73 17 16 16" />
+    <rect name="theatre" pos="23 59 20 20" />
+    <rect name="toilets" pos="45 81 20 20" />
+    <rect name="town" pos="55 4 11 11" />
+    <rect name="view_point" pos="91 17 16 16" />
+    <rect name="volcano" pos="68 7 9 8" />
+    <rect name="windmill" pos="117 54 10 15" />
   </atlas>
 
   <!-- ways -->
@@ -208,13 +162,14 @@
       <m v="urban">
         <area fill="#f4f3f0" />
       </m>
-      <m v="residential">
+
+      <m v="residential|commercial|retail">
         <use-area name="residential" />
       </m>
     </m>
 
     <m k="natural" v="grassland|scrub" zoom-min="10">
-      <use-area name="greens" />
+      <use-area name="darkgreen" />
     </m>
 
     <m k="landuse">
@@ -253,20 +208,21 @@
       <m k="tourism">
         <!-- <m k="tourism" v="attraction"> <area fill="#f2caea" /> </m> -->
 
-        <m k="tourism" v="zoo|picnic_site|caravan_site|camp_site">
+        <m v="zoo|picnic_site|caravan_site|camp_site">
           <area fill="#c0d69a" />
         </m>
       </m>
 
       <!-- amenity -->
-      <m k="amenity">
-        <m v="kindergarten|school|college|university" zoom-min="15">
+      <m k="amenity" zoom-min="14">
+        <m v="kindergarten|school|college|university">
           <!-- <area fill="#cdabde" /> -->
-          <area fill="#cdbbca" fade="15" />
-          <line stroke="#9aabae" width="1.0" fix="true" cap="butt" fade="15" />
+          <area fill="#e6e4c5" fade="14" />
+          <line stroke="#9aabae" width="1.0" fix="true" cap="butt" fade="14" />
         </m>
-        <m v="hospital" zoom-min="14">
-          <area fill="#e6e4c5" />
+
+        <m v="hospital">
+          <area fill="#f2d9b1" />
         </m>
         <!-- <m v="parking" zoom-min="15">
           <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
@@ -295,9 +251,9 @@
       <m k="leisure" v="park|common|green|golf_course" zoom-min="11">
         <use-area name="park" />
         <m zoom-min="14">
-            <use-line name="park"/>
+          <use-line name="park" />
         </m>
-        <!-- <use-text name="park" />-->
+        <!-- <use-text name="park" /> -->
       </m>
 
       <!-- Heideland, keep below forest -->
@@ -308,14 +264,18 @@
       <m k="landuse|natural" v="forest|wood">
         <use-area name="wood" />
         <m zoom-min="14">
-            <use-line name="wood"/>
+          <use-line name="wood" />
         </m>
       </m>
 
       <!-- keep grass above forest:wood and leisure:park! -->
       <!-- http://wiki.openstreetmap.org/wiki/Proposed_features/conservation,
         often serves as background for leisure=nature_reserve -->
-      <m k="landuse" v="grass|meadow|conservation">
+      <m k="landuse" v="grass">
+        <use-area name="lightgreen" />
+      </m>
+
+      <m k="landuse" v="meadow|conservation">
         <use-area name="greens" />
       </m>
 
@@ -441,31 +401,31 @@
           <use-line name="water" width="0.3" />
         </m>
         <m zoom-max="11">
-          <m k="width" v="0|1|2">
+          <m k="rank" v="0|1|2">
             <use-line name="water" width="0.3" fix="true" fade="2" />
           </m>
-          <m k="width" v="3" zoom-min="3">
+          <m k="rank" v="3" zoom-min="3">
             <use-line name="water" width="0.3" fix="true" fade="3" />
           </m>
-          <m k="width" v="4" zoom-min="4">
+          <m k="rank" v="4" zoom-min="4">
             <use-line name="water" width="0.3" fix="true" fade="4" />
           </m>
-          <m k="width" v="5" zoom-min="5">
+          <m k="rank" v="5" zoom-min="5">
             <use-line name="water" width="0.3" fix="true" fade="5" />
           </m>
-          <m k="width" v="6" zoom-min="6">
+          <m k="rank" v="6" zoom-min="6">
             <use-line name="water" width="0.2" fix="true" fade="6" />
           </m>
-          <m k="width" v="7" zoom-min="7">
+          <m k="rank" v="7" zoom-min="7">
             <use-line name="water" width="0.2" fix="true" fade="7" />
           </m>
-          <m k="width" v="8" zoom-min="8">
+          <m k="rank" v="8" zoom-min="8">
             <use-line name="water" width="0.1" fix="true" fade="8" />
           </m>
-          <m k="width" v="9" zoom-min="9">
+          <m k="rank" v="9" zoom-min="9">
             <use-line name="water" width="0.1" fix="true" fade="9" />
           </m>
-          <m k="width" v="-1" zoom-min="9">
+          <m k="rank" v="-1" zoom-min="9">
             <use-line name="water" width="0.2" fix="true" fade="9" />
           </m>
         </m>
@@ -1084,10 +1044,10 @@
       /> -->
 
     <!--
-     maybe use some alpha texture for this
-    <m k="boundary" v="national_park">
+      maybe use some alpha texture for this
+      <m k="boundary" v="national_park">
       <area fill="#d7e6b0" />
-    </m>
+      </m>
     -->
 
 
@@ -1105,13 +1065,12 @@
         /> </m> <m k="admin_level" v="5"> <line stroke="#f9574b" width="0.15"
         fix="true" cap="butt" /> </m> -->
       <m k="admin_level" v="4">
-        <line stroke="#ffffff" width="1.1" fix="true" cap="butt" stipple-width="1.05"
-          stipple="4" stipple-stroke="#606060" />
+        <line stroke="#fafafa" width="1.1" fix="true" cap="butt" stipple-width="1.05"
+          stipple="2" stipple-stroke="#888888" />
 
       </m>
       <m k="admin_level" v="3">
-        <line stroke="#ffffff" width="1.1" fix="true" cap="butt" stipple-width="1.05"
-          stipple="6" stipple-stroke="#606060" />
+        <line stroke="#999999" width="1.2" fix="true" cap="butt" />
       </m>
       <m k="admin_level" v="2">
         <line stroke="#606060" width="1.2" fix="true" cap="butt" />
@@ -1201,12 +1160,12 @@
       </m>
       <m v="town">
         <caption k="name" font-size="19" fill="#000000" stroke="#ffffff"
-          stroke-width="2.0" priority="2" dy="20" symbol="circle-stroked" />
+          stroke-width="2.0" priority="2" dy="20" symbol="town" />
       </m>
 
       <m v="city">
         <caption k="name" font-style="bold" font-size="19" fill="#000000" stroke="#ffffff"
-          stroke-width="2.0" priority="1" dy="22" symbol="circle" />
+          stroke-width="2.0" priority="1" dy="14" symbol="city" />
       </m>
       <m v="country">
         <caption k="name" font-style="bold" font-size="20" fill="#000000" stroke="#ffffff"
@@ -1231,7 +1190,7 @@
 
     <!-- aeroway -->
     <m k="aeroway">
-      <m k="aeroway" v="helipad" zoom-min="15">
+      <m k="aeroway" v="helipad" zoom-min="16">
         <symbol src="heliport" />
       </m>
       <m k="aeroway" v="aerodrome|airport">
@@ -1239,29 +1198,38 @@
       </m>
     </m>
 
-    <m k="amenity">
-      <m k="amenity" v="atm" zoom-min="16">
-        <symbol src="bank" />
-      </m>
-      <m k="amenity" v="cafe" zoom-min="16">
-        <symbol src="cafe" />
-      </m>
-      <m k="amenity" v="pub|bar" zoom-min="16">
-        <symbol src="bar" />
-      </m>
-      <m k="amenity" v="restaurant" zoom-min="16">
-        <symbol src="restaurant" />
-      </m>
-      <m k="amenity" v="toilets" zoom-min="17">
-        <symbol src="toilets" />
-      </m>
-      <m k="amenity" v="hospital" zoom-min="15">
+    <m k="amenity" zoom-min="15">
+      <m v="hospital" zoom-min="15">
         <symbol src="hospital" />
       </m>
 
+      <m zoom-min="16">
+        <m v="atm">
+          <symbol src="atm" />
+        </m>
+        <m v="cafe">
+          <symbol src="cafe" />
+        </m>
+        <m v="pub">
+          <symbol src="pub" />
+        </m>
+        <m v="bar">
+          <symbol src="bar" />
+        </m>
+        <m v="fast_food">
+          <symbol src="fast_food" />
+        </m>
+        <m v="restaurant">
+          <symbol src="restaurant" />
+        </m>
+      </m>
+
+      <m v="toilets" zoom-min="17">
+        <symbol src="toilets" />
+      </m>
+
       <m zoom-min="17">
-        <caption k="name" font-size="16" fill="#bb4040" stroke="#ffffff"
-          stroke-width="2.0" dy="16" />
+        <use-text name="poi" />
       </m>
     </m>
 
@@ -1368,49 +1336,52 @@
       </m>
       </m> -->
 
-  <m k="shop">
-    <m k="shop" v="bakery" zoom-min="17">
-      <symbol src="bakery" />
-    </m>
-    <m k="shop" v="florist" zoom-min="17">
-      <symbol src="florist" />
-    </m>
-    <m k="shop" v="supermarket|organic" zoom-min="16">
-      <symbol src="supermarket" />
+    <m k="shop" zoom-min="16">
+      <m v="bakery">
+        <symbol src="shop_bakery" />
+      </m>
+      <m v="florist">
+        <symbol src="florist" />
+      </m>
+      <m v="hairdresser">
+        <symbol src="shop_hairdresser" />
+      </m>
+      <m v="supermarket|organic">
+        <symbol src="shop_supermarket" />
+      </m>
+
+      <m zoom-min="17">
+        <use-text name="poi" />
+      </m>
     </m>
 
-    <m zoom-min="17">
-      <caption k="name" font-size="15" fill="#2020bb" stroke="#ffffff"
-        stroke-width="2.0" />
-    </m>
-  </m>
 
+    <m k="tourism" zoom-min="15">
+      <m v="alpine_hut">
+        <symbol src="triangle-stroked" />
+      </m>
+      <m v="camp_site">
+        <symbol src="camping" />
+      </m>
+      <m v="hostel">
+        <symbol src="hostel" />
+      </m>
+      <m v="hotel">
+        <symbol src="hotel" />
+      </m>
+      <m v="information">
+        <m k="name">
+          <symbol src="information" />
+        </m>
+      </m>
+      <m v="viewpoint">
+        <symbol src="view_point" />
+      </m>
 
-  <m k="tourism">
-    <m k="tourism" v="alpine_hut" zoom-min="16">
-      <symbol src="triangle-stroked" />
+      <m zoom-min="17">
+        <use-text name="poi" />
+      </m>
     </m>
-    <m k="tourism" v="camp_site" zoom-min="15">
-      <symbol src="campsite" />
-    </m>
-    <m k="tourism" v="hostel" zoom-min="15">
-      <symbol src="lodging" />
-    </m>
-    <m k="tourism" v="hotel" zoom-min="15">
-      <symbol src="lodging" />
-    </m>
-    <m k="tourism" v="information" zoom-min="16">
-      <symbol src="information" />
-    </m>
-    <m k="tourism" v="viewpoint" zoom-min="15">
-      <symbol src="viewpoint" />
-    </m>
-
-    <m zoom-min="17">
-      <caption k="name" font-size="15" fill="#20aa20" stroke="#ffffff"
-        stroke-width="2.0" />
-    </m>
-  </m>
   </m>
 
 </rendertheme>
