@@ -31,7 +31,7 @@ public abstract class TextureLayer extends Layer {
 	protected void compile(ShortBuffer sbuf) {
 
 		for (TextureItem to = textures; to != null; to = to.next)
-			TextureItem.uploadTexture(to);
+			to.upload();
 
 		// add vertices to vbo
 		Layers.addPoolItems(this, sbuf);

@@ -43,7 +43,7 @@ public final class LineRenderer {
 	private static int[] hLineScale = new int[2];
 	private static int[] hLineWidth = new int[2];
 	private static int[] hLineMode = new int[2];
-	private static int mTexID;
+	public static int mTexID;
 
 	static boolean init() {
 		GL = GLAdapter.get();
@@ -93,32 +93,30 @@ public final class LineRenderer {
 				GL20.GL_NEAREST, GL20.GL_NEAREST,
 				GL20.GL_MIRRORED_REPEAT, GL20.GL_MIRRORED_REPEAT);
 
+		Log.d(TAG, "TEX ID: " + mTexID);
 		return true;
-	}
-
-	public static void beginLines() {
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexID);
-	}
-
-	public static void endLines() {
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 	}
 
 	public static Layer draw(Layers layers, Layer curLayer, MapPosition pos,
 			Matrices m, float div, int mode) {
 
-		beginLines();
-
 		if (curLayer == null)
 			return null;
-
-		GLState.blend(true);
 
 		// FIXME HACK: fallback to simple shader
 		if (lineProgram[mode] == 0)
 			mode = 1;
 
 		GLState.useProgram(lineProgram[mode]);
+
+		GLState.blend(true);
+
+		// Somehow we loose the texture after an indefinite
+		// time, when label/symbol textures are used.
+		// Debugging gl on Desktop is most fun imaginable,
+		// so for now:
+		if (!GLAdapter.GDX_DESKTOP_QUIRKS)
+			GLState.bindTex2D(mTexID);
 
 		int uLineScale = hLineScale[mode];
 		int uLineMode = hLineMode[mode];
@@ -291,17 +289,19 @@ public final class LineRenderer {
 			//+ "    len = texture2D(tex, v_st).a;"
 			//+ "    len = u_mode * length(v_st);"
 			// this avoids branching, need to check performance
-			+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);"
-			//+ " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
+			+ (GLAdapter.GDX_DESKTOP_QUIRKS
+					? " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
+					: " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);")
 			// interpolate alpha between: 0.0 < 1.0 - len < u_wscale
 			// where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2)
 			//+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"
 			//+ "  gl_FragColor = mix(vec4(1.0,0.0,0.0,1.0), u_color, smoothstep(0.0, u_wscale, 1.0 - len));"
 			+ "  float alpha = min(1.0, (1.0 - len) / u_wscale);"
-			+ "  if (alpha > 0.2)"
+			+ "  if (alpha > 0.1)"
 			+ "    gl_FragColor = u_color * alpha;"
 			+ "  else"
 			+ "    discard;"
+			//			+ "gl_FragColor = vec4(texture2D(tex, v_st).a);"
 			+ "}";
 
 	private final static String lineFragmentShader = ""
@@ -319,8 +319,9 @@ public final class LineRenderer {
 			+ "    len = abs(v_st.s);"
 			+ "    fuzz = fwidth(v_st.s);"
 			+ "  } else {"
-			+ "    len = texture2D(tex, v_st).a;"
-			//+ "    len = length(v_st);"
+			+ (GLAdapter.GDX_DESKTOP_QUIRKS
+					? "    len = length(v_st);"
+					: "    len = texture2D(tex, v_st).a;")
 			+ "    vec2 st_width = fwidth(v_st);"
 			+ "    fuzz = max(st_width.s, st_width.t);"
 			+ "  }"

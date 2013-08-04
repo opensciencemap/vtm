@@ -83,7 +83,7 @@ public final class SymbolLayer extends TextureLayer {
 				// FIXME this work only with one TextureAtlas per
 				// SymbolLayer.
 				if (textures == null) {
-					to = it.symbol.atlas.compileTexture();
+					to = it.symbol.atlas.loadTexture();
 					// clone TextureItem to use same texID with
 					// multiple TextureItem
 					to = TextureItem.clone(to);
@@ -107,7 +107,7 @@ public final class SymbolLayer extends TextureLayer {
 					//					to.height = it.bitmap.getHeight();
 					textures = Inlist.append(textures, to);
 
-					TextureItem.uploadTexture(to);
+					to.upload();
 				}
 				to.offset = numIndices;
 				to.vertices = 0;

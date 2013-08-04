@@ -16,9 +16,12 @@ package org.oscim.backend;
 
 
 public class GLAdapter {
+
 	public static GL20 g;
 
+	public static boolean GDX_DESKTOP_QUIRKS;
 	public static boolean GDX_WEBGL_QUIRKS;
+
 	public static boolean NON_PREMUL_CANVAS;
 
 	public static GL20 get(){

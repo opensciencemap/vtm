@@ -23,6 +23,7 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.GLState;
 
 /**
  * Utility functions
@@ -114,7 +115,8 @@ public class GlUtils {
 	                              int min_filter, int mag_filter, int wrap_s, int wrap_t) {
 		int[] textureIds = GlUtils.glGenTextures(1);
 		GL = GLAdapter.get();
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, textureIds[0]);
+
+		GLState.bindTex2D(textureIds[0]);
 
 		setTextureParameter(min_filter, mag_filter, wrap_s, wrap_t);
 
@@ -125,7 +127,8 @@ public class GlUtils {
 		GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0, format, width, height, 0, format,
 		                GL20.GL_UNSIGNED_BYTE, intBuf);
 
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
+		GLState.bindTex2D(0);
+
 		return textureIds[0];
 	}
 

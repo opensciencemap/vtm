@@ -115,9 +115,7 @@ public class BitmapLayer extends TextureLayer {
 
 		setVertices(sbuf);
 
-		//for (TextureItem to = textures; to != null; to = to.next)
-		TextureItem.uploadTexture(textures);
-
+		textures.upload();
 
 		if (!mReuseBitmap) {
 			mBitmap.recycle();

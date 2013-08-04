@@ -57,10 +57,7 @@ public final class PolygonRenderer {
 	private static int[] hPolygonColor = new int[numShaders];
 	private static int[] hPolygonScale = new int[numShaders];
 
-	//private static boolean enableTexture = true;
-	//private static int mTexWater;
-	//private static int mTexWood;
-	//private static int mTexGrass;
+	private static boolean enableTexture = false;
 
 	static boolean init() {
 		GL = GLAdapter.get();
@@ -110,7 +107,7 @@ public final class PolygonRenderer {
 		for (int c = start; c < end; c++) {
 			Area a = mFillPolys[c].area;
 
-			if (a.texture != null){
+			if (enableTexture && a.texture != null){
 				shader = texShader;
 				setShader(texShader, m);
 				GL.glUniform2f(hPolygonScale[1], FastMath.clamp(scale - 1, 0, 1), div);
@@ -158,6 +155,7 @@ public final class PolygonRenderer {
 			GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
 			if (shader != polyShader) {
+				// disable texture shader
 				setShader(polyShader, m);
 				shader = polyShader;
 			}
@@ -168,9 +166,7 @@ public final class PolygonRenderer {
 	private static int mCount;
 
 	private static void setShader(int shader, Matrices m) {
-		//if (
 		GLState.useProgram(polygonProgram[shader]);
-		//		) {
 
 		GLState.enableVertexArrays(hPolygonVertexPosition[shader], -1);
 
@@ -178,7 +174,6 @@ public final class PolygonRenderer {
 				false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
 
 		m.mvp.setAsUniform(hPolygonMatrix[shader]);
-		//}
 	}
 
 	/**
@@ -270,6 +265,15 @@ public final class PolygonRenderer {
 		return l;
 	}
 
+	public static void clip(Matrices m){
+		setShader(polyShader, m);
+
+		drawStencilRegion(true);
+		// disable writes to stencil buffer
+		GL.glStencilMask(0x00);
+		// enable writes to color buffer
+		GL.glColorMask(true, true, true, true);
+	}
 	/**
 	 * Draw a tile filling rectangle to set stencil- and depth buffer
 	 * appropriately
