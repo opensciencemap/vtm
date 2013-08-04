@@ -516,7 +516,8 @@ public class TextRenderLayer extends BasicRenderLayer {
 
 				l.bbox.setNormalized(l.x, l.y, cos, -sin,
 						l.width + MIN_CAPTION_DIST,
-						l.text.fontHeight + MIN_CAPTION_DIST);
+						l.text.fontHeight + MIN_CAPTION_DIST,
+						l.text.dy);
 
 				boolean overlaps = false;
 
