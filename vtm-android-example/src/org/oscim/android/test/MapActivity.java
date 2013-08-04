@@ -3,12 +3,10 @@ package org.oscim.android.test;
 import org.oscim.android.AndroidMapView;
 import org.oscim.layers.labeling.LabelLayer;
 import org.oscim.layers.overlay.BuildingOverlay;
-import org.oscim.layers.tile.bitmap.BitmapTileLayer;
-import org.oscim.layers.tile.bitmap.HillShadeTiles;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tilesource.TileSource;
-import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
+import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
 
 import android.os.Bundle;
 import android.view.Menu;
@@ -24,11 +22,11 @@ public class MapActivity extends org.oscim.android.MapActivity {
 		mAndroidMapView = (AndroidMapView) findViewById(R.id.mapView);
 
 		//mMap = mMapView.getMap();
-		TileSource tileSource = new OSciMap2TileSource();
-		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/map-live");
+		//TileSource tileSource = new OSciMap2TileSource();
+		//tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/map-live");
 
-		//TileSource tileSource = new OSciMap4TileSource();
-		//tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
+		TileSource tileSource = new OSciMap4TileSource();
+		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/tiles/vtm");
 
 		MapTileLayer l = mMapView.setBaseMap(tileSource);
 		//mMapView.setDebugSettings(new DebugSettings(false, false, true, false, false));
@@ -39,7 +37,7 @@ public class MapActivity extends org.oscim.android.MapActivity {
 		mMapView.setTheme(InternalRenderTheme.DEFAULT);
 		//mMapView.setTheme(InternalRenderTheme.TRONRENDER);
 
-		mMapView.getLayerManager().add(new BitmapTileLayer(mMapView, HillShadeTiles.INSTANCE));
+		//mMapView.getLayerManager().add(new BitmapTileLayer(mMapView, HillShadeTiles.INSTANCE));
 
 		//mMapView.setBackgroundMap(new BitmapTileLayer(mMapView, StamenWaterTiles.INSTANCE));
 		//mMap.setBackgroundMap(new BitmapTileLayer(mMap, MapQuestAerial.INSTANCE));
