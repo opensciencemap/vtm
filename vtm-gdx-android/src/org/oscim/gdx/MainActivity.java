@@ -8,7 +8,7 @@ import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 import org.oscim.tilesource.TileSource;
-import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
+import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
 
 import android.os.Bundle;
 
@@ -26,10 +26,11 @@ public class MainActivity extends AndroidApplication {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // set our globals
+        // set globals
         CanvasAdapter.g = AndroidGraphics.INSTANCE;
         GLAdapter.g = new AndroidGLAdapter();
 		Log.logger = new AndroidLog();
+
 		// TODO make this dpi dependent
 		Tile.SIZE = 400;
 
@@ -38,9 +39,22 @@ public class MainActivity extends AndroidApplication {
 
         new SharedLibraryLoader().load("vtm-jni");
 
-        TileSource tileSource = new OSciMap4TileSource();
-		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
-
-        initialize(new GdxMap(tileSource), cfg);
+        initialize(new GdxMapAndroid(), cfg);
     }
+
+	class GdxMapAndroid extends GdxMap{
+		@Override
+		public void create() {
+		    super.create();
+
+	        //TileSource ts = new OSciMap4TileSource();
+			//ts.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
+
+	        TileSource ts = new OSciMap2TileSource();
+			ts.setOption("url", "http://city.informatik.uni-bremen.de/osci/map-live");
+
+		    initDefaultMap(ts, true, true, true);
+		}
+
+	}
 }

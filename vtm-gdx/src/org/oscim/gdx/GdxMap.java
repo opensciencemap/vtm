@@ -6,9 +6,11 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.labeling.LabelLayer;
 import org.oscim.layers.overlay.BuildingOverlay;
+import org.oscim.layers.overlay.GenericOverlay;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLState;
+import org.oscim.renderer.layers.GridRenderLayer;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tilesource.TileSource;
 import org.oscim.view.MapView;
@@ -31,13 +33,11 @@ public class GdxMap implements ApplicationListener {
 
 	protected final MapView mMapView;
 	private final GLRenderer mMapRenderer;
-	private final TileSource mTileSource;
 
 	boolean mRenderRequest;
 
-	public GdxMap(TileSource tileSource) {
+	public GdxMap() {
 		AssetAdapter.g = new GdxAssetAdapter();
-		mTileSource = tileSource;
 
 		mMapView = new MapView() {
 			@Override
@@ -75,11 +75,12 @@ public class GdxMap implements ApplicationListener {
 
 			@Override
 			public boolean postDelayed(final Runnable action, long delay) {
-				Timer.schedule(new Task(){
+				Timer.schedule(new Task() {
 					@Override
 					public void run() {
 						action.run();
-					}}, delay / 1000f);
+					}
+				}, delay / 1000f);
 				return true;
 			}
 		};
@@ -88,10 +89,33 @@ public class GdxMap implements ApplicationListener {
 
 	}
 
+	protected void initDefaultMap(TileSource tileSource, boolean tileGrid, boolean labels,
+			boolean buildings) {
+
+		if (tileSource != null) {
+			mMapLayer = mMapView.setBaseMap(tileSource);
+			mMapView.setTheme(InternalRenderTheme.DEFAULT);
+
+			if (buildings)
+				mMapView.getLayerManager().add(
+						new BuildingOverlay(mMapView, mMapLayer.getTileLayer()));
+
+			if (labels)
+				mMapView.getLayerManager().add(new LabelLayer(mMapView,
+						mMapLayer.getTileLayer()));
+		}
+
+		if (tileGrid)
+			mMapView.getLayerManager().add(new GenericOverlay(mMapView,
+					new GridRenderLayer(mMapView)));
+	}
+
 	// Stage ui;
 	// Label fps;
 	// BitmapFont font;
+
 	MapTileLayer mMapLayer;
+	GenericOverlay mGridLayer;
 
 	int mHeight, mWidth;
 
@@ -108,39 +132,11 @@ public class GdxMap implements ApplicationListener {
 		mWidth = w;
 		mHeight = h;
 
-		if (mTileSource != null) {
-			//TileSource tileSource = new OSciMap2TileSource();
-			//tileSource.setOption("url",
-			//		"http://city.informatik.uni-bremen.de/osci/map-live");
-
-			// TileSource tileSource = new OSciMap4TileSource();
-			// tileSource.setOption("url",
-			// "http://city.informatik.uni-bremen.de/osci/testing");
-
-			// TileSource tileSource = new TestTileSource();
-
-			mMapLayer = mMapView.setBaseMap(mTileSource);
-			mMapView.setTheme(InternalRenderTheme.DEFAULT);
-
-			mMapView.getLayerManager().add(new BuildingOverlay(mMapView, mMapLayer.getTileLayer()));
-			mMapView.getLayerManager().add(new LabelLayer(mMapView, mMapLayer.getTileLayer()));
-
-		}
-
-		//mMapView.setBackgroundMap(new BitmapTileLayer(mMapView,
-		//		ArcGISWorldShaded.INSTANCE));
-
-		//mMapView.setBackgroundMap(new BitmapTileLayer(mMapView,
-		//		OpenStreetMapMapnik.INSTANCE));
-
-		//mMapView.getLayerManager().add(new GenericOverlay(mMapView, new
-		//		GridRenderLayer(mMapView)));
-
 		mMapView.getMapViewPosition().setViewport(w, h);
 		MapPosition p = new MapPosition();
-		p.setZoomLevel(3);
-		//p.setPosition(53.08, 8.83);
-		p.setPosition(0.0, 0.0);
+		p.setZoomLevel(14);
+		p.setPosition(53.08, 8.83);
+		//p.setPosition(0.0, 0.0);
 		mMapView.setMapPosition(p);
 
 		mMapRenderer.onSurfaceCreated();
@@ -168,7 +164,6 @@ public class GdxMap implements ApplicationListener {
 
 	@Override
 	public void render() {
-		// Log.d("yo", )
 		// GLState.enableVertexArrays(-1, -1);
 		// GLState.blend(false);
 		// GLState.test(false, false);
@@ -281,6 +276,22 @@ public class GdxMap implements ApplicationListener {
 					mMapView.updateMap(false);
 					break;
 
+				case Input.Keys.G:
+					if (mGridLayer == null) {
+						mGridLayer = new GenericOverlay(mMapView, new GridRenderLayer(mMapView));
+						mGridLayer.setEnabled(true);
+						mMapView.getLayerManager().add(mGridLayer);
+					} else {
+						if (mGridLayer.isEnabled()) {
+							mGridLayer.setEnabled(false);
+							mMapView.getLayerManager().remove(mGridLayer);
+						} else {
+							mGridLayer.setEnabled(true);
+							mMapView.getLayerManager().add(mGridLayer);
+						}
+					}
+					mMapView.render();
+					break;
 			}
 			return true;
 		}
