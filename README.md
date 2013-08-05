@@ -15,10 +15,18 @@ http://www.opensciencemap.org
 - Backends for Android, Desktop and HTML5/WebGL (through libgdx and GWT)
 
 ### Notes
-- To build the android eclipse project the android ndk plugin is required.
 - To set up your own tile server for .vtm tiles see https://github.com/opensciencemap/TileStache/tree/master/TileStache/OSciMap4
 - Almost everything is still in early/experimental stage and subject for being rewritten
 - pull requests welcome :)
+
+### Demo
+work in progress..
+http://city.informatik.uni-bremen.de/~jeff/map/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807
+- hold middle mouse button to change view direction
+- Keys
+  - g - toggle tile-grid layer
+  - d - default theme
+  - t - tubes theme
 
 
 ### Credits
