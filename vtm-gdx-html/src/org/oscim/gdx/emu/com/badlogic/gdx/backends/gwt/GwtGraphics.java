@@ -47,7 +47,7 @@ public class GwtGraphics implements Graphics {
 	boolean inFullscreenMode = false;
 	double pixelRatio;
 
-	public GwtGraphics(Panel root, GwtApplicationConfiguration config) {
+	public GwtGraphics(Panel root, final GwtApplicationConfiguration config) {
 		Canvas canvasWidget = Canvas.createIfSupported();
 		if (canvasWidget == null)
 			throw new GdxRuntimeException("Canvas not supported");
@@ -61,7 +61,6 @@ public class GwtGraphics implements Graphics {
 
 		canvas.getStyle().setWidth(config.width, Unit.PX);
 		canvas.getStyle().setHeight(config.height, Unit.PX);
-
 		this.config = config;
 
 		WebGLContextAttributes attributes = WebGLContextAttributes.create();
@@ -72,17 +71,18 @@ public class GwtGraphics implements Graphics {
 
 		context = WebGLRenderingContext.getContext(canvas, attributes);
 		context.viewport(0, 0, config.width, config.height);
-		
-		// this actually *enables* the option to use std derivatives in shader..  
+
+		// this actually *enables* the option to use std derivatives in shader..
 		context.getExtension("OES_standard_derivatives");
-		
+
 		this.gl = config.useDebugGL ? new GwtGL20Debug(context) : new GwtGL20(context);
+		canvas.setId("gdx-canvas");
 
 		Window.addResizeHandler(new ResizeHandler() {
 			@Override
 			public void onResize(ResizeEvent event) {
-				int w = getWindowWidthJSNI();
-				int h = getWindowHeightJSNI();
+				int w = config.rootPanel.getOffsetWidth();
+				int h = config.rootPanel.getOffsetHeight();
 
 				canvas.getStyle().setWidth(w, Unit.PX);
 				canvas.getStyle().setHeight(h, Unit.PX);

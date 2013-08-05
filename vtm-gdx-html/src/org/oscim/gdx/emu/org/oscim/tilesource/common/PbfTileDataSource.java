@@ -16,15 +16,11 @@ package org.oscim.tilesource.common;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 
+import org.oscim.backend.Log;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.tilesource.ITileDataSink;
 import org.oscim.tilesource.ITileDataSource;
-
-import org.oscim.backend.Log;
 
 /**
  *
@@ -50,42 +46,15 @@ public abstract class PbfTileDataSource implements ITileDataSource {
 		mSink = sink;
 		try {
 			mConn.sendRequest(tile, this);
-			//InputStream is;
-			//			if (!mConn.sendRequest(tile, this)) {
-			//				Log.d(TAG, tile + " Request Failed");
-			//				result = QueryResult.FAILED;
-			//			} else if ((is = mConn.readHeader()) != null) {
-			//				boolean win = mTileDecoder.decode(tile, sink, is, mConn.getContentLength());
-			//				if (!win)
-			//					Log.d(TAG, tile + " failed");
-			//			} else {
-			//				Log.d(TAG, tile + " Network Error");
-			//				result = QueryResult.FAILED;
-			//			}
-			//		} catch (SocketException e) {
-			//			Log.d(TAG, tile + " Socket exception: " + e.getMessage());
-			//			result = QueryResult.FAILED;
-			//		} catch (SocketTimeoutException e) {
-			//			Log.d(TAG, tile + " Socket Timeout");
-			//			result = QueryResult.FAILED;
-			//		} catch (UnknownHostException e) {
-			//			Log.d(TAG, tile + " No Network");
-			//			result = QueryResult.FAILED;
 		} catch (Exception e) {
 			e.printStackTrace();
 			result = QueryResult.FAILED;
 		}
 
-		//mConn.requestCompleted();
-
-		//if (result != QueryResult.SUCCESS)
-		//	mConn.close();
-
 		return result;
 	}
 
 	public void process(InputStream is, int length) {
-		//Log.d(TAG, mTile + " process " + is + " " + length + " " + mSink);
 
 		boolean win = false;
 		if (length >= 0) {
@@ -100,9 +69,6 @@ public abstract class PbfTileDataSource implements ITileDataSource {
 
 		mConn.requestCompleted();
 		mSink.completed(win);
-
-		//mTile = null;
-		//mSink = null;
 	}
 
 	@Override
