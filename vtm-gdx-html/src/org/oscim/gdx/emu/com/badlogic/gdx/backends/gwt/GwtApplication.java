@@ -16,6 +16,8 @@
 
 package com.badlogic.gdx.backends.gwt;
 
+import org.oscim.backend.GL20;
+
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Audio;
@@ -43,7 +45,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -130,7 +131,6 @@ public abstract class GwtApplication implements EntryPoint, Application {
 
 	private void setupLoop() {
 		// setup modules
-		consoleLog("setupLoop");
 		try {
 			graphics = new GwtGraphics(root, config);
 		} catch (Throwable e) {
@@ -167,10 +167,17 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			throw new RuntimeException(t);
 		}
 
+		final int frameTime = (int) ((1f / config.fps) * 1000);
+
+		Gdx.gl.glClearColor(1, 1, 1, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
 		// setup rendering timer
 		new Timer() {
+			//long lastRun;
 			@Override
 			public void run() {
+				//long startRender = 0;
 				try {
 					graphics.update();
 					if (graphics.getWidth() != lastWidth
@@ -188,14 +195,26 @@ public abstract class GwtApplication implements EntryPoint, Application {
 						runnablesHelper.get(i).run();
 					}
 					runnablesHelper.clear();
+					//startRender = System.currentTimeMillis();
 					listener.render();
 					input.justTouched = false;
 				} catch (Throwable t) {
 					error("GwtApplication", "exception: " + t.getMessage(), t);
 					throw new RuntimeException(t);
 				}
+
+				long now = System.currentTimeMillis();
+				int diff = (int)(now - graphics.lastTimeStamp);
+
+				//if (diff > 80)
+				//	consoleLog("diff " + diff + " " + (now - startRender) + " " + graphics.getFramesPerSecond() );
+
+				diff = frameTime - diff;
+				//lastRun = now;
+
+				this.schedule(diff > 5 ? diff : 5);
 			}
-		}.scheduleRepeating((int) ((1f / config.fps) * 1000));
+		}.schedule(0); //scheduleRepeating((int) ((1f / config.fps) * 1000));
 	}
 
 	public Panel getRootPanel() {
@@ -207,9 +226,11 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	public PreloaderCallback getPreloaderCallback() {
 		final Panel preloaderPanel = new VerticalPanel();
 		preloaderPanel.setStyleName("gdx-preloader");
-		final Image logo = new Image(GWT.getModuleBaseURL() + "logo.png");
-		logo.setStyleName("logo");
-		preloaderPanel.add(logo);
+
+		//final Image logo = new Image(GWT.getModuleBaseURL() + "logo.png");
+		//logo.setStyleName("logo");
+		//preloaderPanel.add(logo);
+
 		final Panel meterPanel = new SimplePanel();
 		meterPanel.setStyleName("gdx-meter");
 		meterPanel.addStyleName("red");

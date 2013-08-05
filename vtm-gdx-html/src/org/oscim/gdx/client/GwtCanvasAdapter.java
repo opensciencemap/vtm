@@ -12,8 +12,11 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 
 public class GwtCanvasAdapter extends CanvasAdapter {
 
+	public static boolean NO_STROKE_TEXT = false;
+
 	public static final GwtCanvasAdapter INSTANCE = new GwtCanvasAdapter();
 	static final Context2d ctx;
+
 	static {
 		Canvas canvas = Canvas.createIfSupported();
 		canvas.setCoordinateSpaceWidth(1);
@@ -24,7 +27,7 @@ public class GwtCanvasAdapter extends CanvasAdapter {
 	static synchronized float getTextWidth(String text, String font) {
 		ctx.setFont(font);
 		TextMetrics tm = ctx.measureText(text);
-		return (float)tm.getWidth();
+		return (float) tm.getWidth();
 	}
 
 	@Override

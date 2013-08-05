@@ -9,6 +9,7 @@ import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 
 public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
 	GwtBitmap bitmap;
+
 	public GwtCanvas() {
 		// canvas comes with gdx pixmap
 	}
@@ -16,38 +17,38 @@ public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
 	@Override
 	public void setBitmap(Bitmap bitmap) {
 		this.bitmap = (GwtBitmap) bitmap;
-		//this.bitmap.pixmap.setColor(0x00ffffff);
-		this.bitmap.pixmap.getContext().clearRect(0, 0, this.bitmap.getWidth(), this.bitmap.getHeight());
+		Context2d ctx = this.bitmap.pixmap.getContext();
+
+		ctx.clearRect(0, 0, this.bitmap.getWidth(), this.bitmap.getHeight());
+		ctx.setLineJoin(LineJoin.BEVEL);
 	}
 
 	@Override
 	public void drawText(String string, float x, float y, Paint paint) {
-		if (bitmap == null){
-			Log.d("", "no bitmap set on canvas");
+		if (bitmap == null) {
+			Log.d("BUG", "no bitmap set");
+			return;
 		}
 
 		GwtPaint p = (GwtPaint) paint;
+
+		if (p.stroke && GwtCanvasAdapter.NO_STROKE_TEXT)
+			return;
+
 		Context2d ctx = bitmap.pixmap.getContext();
 		ctx.setFont(p.font);
-		ctx.setLineJoin(LineJoin.ROUND);
-		
-		if (p.stroke){
-			//Log.d("", "stroke " + p.stroke + " " + p.color + " " + p.font + " "+ string);
+
+		if (p.stroke) {
 			ctx.setLineWidth(p.strokeWidth);
 			ctx.setStrokeStyle(p.color);
-			//ctx.strokeText(string, p.strokeWidth + x, p.strokeWidth + y);
-			ctx.strokeText(string, x + 1, y + 1);
-		} else{
-			//Log.d("", "fill " + p.stroke + " " + p.color + " " + p.font + " "+ string);
+			ctx.strokeText(string, (int) (x + 1), (int) (y + 1));
+		} else {
 			ctx.setFillStyle(p.color);
-			ctx.fillText(string, x + 1, y + 1);
+			ctx.fillText(string, (int) (x + 1), (int) (y + 1));
 		}
 	}
 
 	@Override
 	public void drawBitmap(Bitmap bitmap, float x, float y) {
-		// TODO Auto-generated method stub
-
 	}
-
 }

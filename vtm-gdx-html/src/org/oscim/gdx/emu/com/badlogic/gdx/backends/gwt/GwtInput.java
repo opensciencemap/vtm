@@ -382,6 +382,10 @@ public class GwtInput implements Input {
 				.addEventListener(
 						name,
 						function(e) {
+							if (capture){
+								e.preventDefault();
+								e.stopPropagation();
+							}
 							handler.@com.badlogic.gdx.backends.gwt.GwtInput::handleEvent(Lcom/google/gwt/dom/client/NativeEvent;)(e);
 						}, capture);
 	}-*/;
@@ -440,6 +444,7 @@ public class GwtInput implements Input {
 
 	private void hookEvents() {
 		addEventListener(canvas, "mousedown", this, true);
+		addEventListener(canvas, "contextmenu", this, true);
 		addEventListener(Document.get(), "mousedown", this, true);
 		addEventListener(canvas, "mouseup", this, true);
 		addEventListener(Document.get(), "mouseup", this, true);
