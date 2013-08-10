@@ -138,7 +138,6 @@ public class GdxMap implements ApplicationListener {
 		p.setPosition(53.08, 8.83);
 		//p.setPosition(0.0, 0.0);
 		mMapView.setMapPosition(p);
-
 		mMapRenderer.onSurfaceCreated();
 		mMapRenderer.onSurfaceChanged(w, h);
 
@@ -181,7 +180,6 @@ public class GdxMap implements ApplicationListener {
 
 	@Override
 	public void resize(int w, int h) {
-		Log.d("", "resize " + w + "x" + h);
 		mWidth = w;
 		mHeight = h;
 
@@ -293,7 +291,7 @@ public class GdxMap implements ApplicationListener {
 					mMapView.render();
 					break;
 			}
-			return true;
+			return false;
 		}
 
 		@Override
@@ -376,21 +374,20 @@ public class GdxMap implements ApplicationListener {
 
 		@Override
 		public boolean scrolled(int amount) {
-			//float fx = mPosX - mMapView.getWidth() / 2;
-			//float fy = mPosY - mMapView.getHeight() / 2;
 
 			if (amount > 0) {
-				mMapPosition.animateZoom(0.9f, 150);
-				//mMapPosition.scaleMap(0.9f, fx, fy);
+
+				mMapPosition.animateZoom(150, 0.8f, 0, 0);
 			} else {
-				mMapPosition.animateZoom(1.1f, 150);
-				//mMapPosition.scaleMap(1.1f, fx, fy);
+				float fx = mPosX - mMapView.getWidth() / 2;
+				float fy = mPosY - mMapView.getHeight() / 2;
+
+				mMapPosition.animateZoom(150, 1.25f, fx, fy);
 			}
 			mMapView.updateMap(false);
 
 			return true;
 		}
-
 	}
 
 	class ViewController implements GestureListener {
