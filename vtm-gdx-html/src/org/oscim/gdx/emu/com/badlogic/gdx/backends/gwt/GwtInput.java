@@ -382,10 +382,10 @@ public class GwtInput implements Input {
 				.addEventListener(
 						name,
 						function(e) {
-							if (capture){
-								e.preventDefault();
-								e.stopPropagation();
-							}
+							//if (capture){
+							//	e.preventDefault();
+							//	e.stopPropagation();
+							//}
 							handler.@com.badlogic.gdx.backends.gwt.GwtInput::handleEvent(Lcom/google/gwt/dom/client/NativeEvent;)(e);
 						}, capture);
 	}-*/;
@@ -451,9 +451,13 @@ public class GwtInput implements Input {
 		addEventListener(canvas, "mousemove", this, true);
 		addEventListener(Document.get(), "mousemove", this, true);
 		addEventListener(canvas, getMouseWheelEvent(), this, true);
-		addEventListener(Document.get(), "keydown", this, false);
-		addEventListener(Document.get(), "keyup", this, false);
-		addEventListener(Document.get(), "keypress", this, false);
+
+//		addEventListener(Document.get(), "keydown", this, false);
+//		addEventListener(Document.get(), "keyup", this, false);
+//		addEventListener(Document.get(), "keypress", this, false);
+		addEventListener(canvas, "keydown", this, false);
+		addEventListener(canvas, "keyup", this, false);
+		addEventListener(canvas, "keypress", this, false);
 
 		addEventListener(canvas, "touchstart", this, true);
 		addEventListener(canvas, "touchmove", this, true);
@@ -473,6 +477,12 @@ public class GwtInput implements Input {
 	}
 
 	private void handleEvent(NativeEvent e) {
+
+		if (e.getType().equals("contextmenu")) {
+			e.preventDefault();
+			e.stopPropagation();
+			return;
+		}
 
 		if (e.getType().equals("mousedown")) {
 			if (!e.getEventTarget().equals(canvas) || touched[0]) {
@@ -499,7 +509,10 @@ public class GwtInput implements Input {
 			}
 			this.currentEventTimeStamp = TimeUtils.nanoTime();
 			if (processor != null)
-				processor.touchDown(touchX[0], touchY[0], 0, getButton(e.getButton()));
+				if (processor.touchDown(touchX[0], touchY[0], 0, getButton(e.getButton()))){
+					e.preventDefault();
+					e.stopPropagation();
+				}
 		}
 
 		if (e.getType().equals("mousemove")) {
@@ -546,7 +559,7 @@ public class GwtInput implements Input {
 		}
 
 		if (e.getType().equals("keydown") && hasFocus) {
-			System.out.println("keydown");
+			//System.out.println("keydown");
 			int code = keyForCode(e.getKeyCode());
 			if (code == 67) {
 				e.preventDefault();
@@ -562,14 +575,14 @@ public class GwtInput implements Input {
 		}
 
 		if (e.getType().equals("keypress") && hasFocus) {
-			System.out.println("keypress");
+			//System.out.println("keypress");
 			char c = (char) e.getCharCode();
 			if (processor != null)
 				processor.keyTyped(c);
 		}
 
 		if (e.getType().equals("keyup") && hasFocus) {
-			System.out.println("keyup");
+			//System.out.println("keyup");
 			int code = keyForCode(e.getKeyCode());
 			this.pressedKeys.remove(code);
 			if (processor != null)
