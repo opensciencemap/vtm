@@ -19,9 +19,9 @@ package org.oscim.layers.overlay;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.oscim.view.MapView;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
@@ -32,6 +32,7 @@ import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.LineClipper;
+import org.oscim.view.MapView;
 
 /** This class draws a path line in given color. */
 public class PathOverlay extends Layer {
@@ -67,6 +68,7 @@ public class PathOverlay extends Layer {
 		private int mCurX = -1;
 		private int mCurY = -1;
 		private int mCurZ = -1;
+		private int mNumPoints;
 
 		// note: this is called from GL-Thread. so check your syncs!
 		// TODO use an Overlay-Thread to build up layers (like for Labeling)
@@ -86,25 +88,42 @@ public class PathOverlay extends Layer {
 			mCurY = ty;
 			mCurZ = tz;
 
-			int size = mPoints.size();
+			int size = mNumPoints;
 
 			if (mUpdatePoints) {
 				synchronized (mPoints) {
+
 					mUpdatePoints = false;
+					mNumPoints = size = mPoints.size();
 
 					ArrayList<GeoPoint> geopoints = mPoints;
 					double[] points = mPreprojected;
 
 					if (size * 2 > points.length) {
-						points = mPreprojected = new double[size*2];
-						mPPoints = new float[size*2];
+						points = mPreprojected = new double[size * 2];
+						mPPoints = new float[size * 2];
 					}
 
 					for (int i = 0; i < size; i++)
 						MercatorProjection.project(geopoints.get(i), points, i);
 				}
-			}
+			} else if (mGeom != null) {
+				GeometryBuffer geom = mGeom;
+				mGeom = null;
+				size = geom.index[0];
 
+				double[] points = mPreprojected;
+
+				if (size > points.length) {
+					points = mPreprojected = new double[size * 2];
+					mPPoints = new float[size * 2];
+				}
+
+				for (int i = 0; i < size; i += 2)
+					MercatorProjection.project(geom.points[i + 1], geom.points[i], points, i >> 1);
+
+				mNumPoints = size = size >> 1;
+			}
 
 			if (size == 0) {
 				if (layers.baseLayers != null) {
@@ -125,7 +144,6 @@ public class PathOverlay extends Layer {
 			double mx = pos.x;
 			double my = pos.y;
 			double scale = Tile.SIZE * (1 << z);
-
 
 			// flip around dateline. complicated stuff..
 			int flip = 0;
@@ -308,6 +326,12 @@ public class PathOverlay extends Layer {
 			mPoints.clear();
 			mUpdatePoints = true;
 		}
+	}
+
+	GeometryBuffer mGeom;
+
+	public void setGeom(GeometryBuffer geom) {
+		mGeom = geom;
 	}
 
 	public void setPoints(List<GeoPoint> pts) {

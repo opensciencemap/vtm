@@ -111,6 +111,14 @@ public final class MercatorProjection {
 		out[pos * 2 +1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude)) / (4.0 * Math.PI);
 	}
 
+	public static void project(double latitude, double longitude, double[] out, int pos) {
+
+		out[pos * 2] = (longitude + 180.0) / 360.0;
+
+		double sinLatitude = Math.sin(latitude * (Math.PI / 180.0));
+		out[pos * 2 +1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude)) / (4.0 * Math.PI);
+	}
+
 	/**
 	 * @param latitude
 	 *            the latitude value which should be checked.

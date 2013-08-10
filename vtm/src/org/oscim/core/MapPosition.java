@@ -89,9 +89,9 @@ public class MapPosition {
 		StringBuilder builder = new StringBuilder();
 		builder.append("[");
 		builder.append("X: ");
-		builder.append((long)(x * (1 << zoomLevel)));
+		builder.append(x);
 		builder.append(", Y: ");
-		builder.append((long)(y * (1 << zoomLevel)));
+		builder.append(y);
 		builder.append(", Z: ");
 		builder.append(zoomLevel);
 		builder.append("]");
