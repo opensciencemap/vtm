@@ -54,7 +54,7 @@ public class ThemeLoader {
 		try {
 			inputStream = theme.getRenderThemeAsStream();
 			IRenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
-			t.scaleTextSize(1 + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
+			t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
 
 			return t;
 		} catch (IOException e) {

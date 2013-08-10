@@ -26,6 +26,7 @@ public abstract class CanvasAdapter {
 	public static CanvasAdapter g;
 
 	public static float dpi = 240;
+	public static float textScale = 1;
 
 	public enum Color {
 		BLACK, CYAN, TRANSPARENT, WHITE;
