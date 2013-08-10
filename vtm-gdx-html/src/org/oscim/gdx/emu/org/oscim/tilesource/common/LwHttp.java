@@ -55,6 +55,7 @@ public class LwHttp {
 		Uint8Array mBuffer;
 		int mPos;
 		int mEnd;
+
 		public Buffer(Uint8Array buf) {
 			mBuffer = buf;
 			mPos = 0;
@@ -76,6 +77,7 @@ public class LwHttp {
 	}
 
 	private PbfTileDataSource mDataSource;
+
 	public boolean sendRequest(Tile tile, PbfTileDataSource dataSource) throws IOException {
 		mDataSource = dataSource;
 
@@ -104,16 +106,20 @@ public class LwHttp {
 
 			@Override
 			public void onReadyStateChange(XMLHttpRequest xhr) {
-				int status = xhr.getStatus();
 				int state = xhr.getReadyState();
 				//Log.d(TAG, mCurrentUrl + "response " + status + "/" + state);
 
-				if (state == XMLHttpRequest.DONE && status == 200){
-					Uint8Array buf =  Uint8ArrayNative.create(xhr.getResponseArrayBuffer());
+				if (state == XMLHttpRequest.DONE) {
 
-					mDataSource.process(new Buffer(buf), buf.byteLength());
-				} else if (state == XMLHttpRequest.DONE){
-					mDataSource.process(null, 0);
+					int status = xhr.getStatus();
+
+					if (status == 200) {
+						Uint8Array buf = Uint8ArrayNative.create(xhr.getResponseArrayBuffer());
+
+						mDataSource.process(new Buffer(buf), buf.byteLength());
+					} else {
+						mDataSource.process(null, -1);
+					}
 				}
 			}
 		};
