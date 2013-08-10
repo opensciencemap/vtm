@@ -246,7 +246,7 @@ public class TextureItem extends Inlist<TextureItem> {
 			int[] textureIds = GlUtils.glGenTextures(1);
 			t.id = textureIds[0];
 			initTexture(t);
-			//if (TextureRenderer.debug)
+			if (TextureRenderer.debug)
 				Log.d(TAG, "fill:" + pool.getFill()
 						+ " count:" + mTexCnt
 						+ " new texture " + t.id);
