@@ -11,8 +11,12 @@ public class GwtPaint implements Paint {
 	boolean stroke;
 
 	float strokeWidth;
-	float fontSize;
 	Align mAlign;
+
+	float fontSize = 12;
+
+	private FontStyle fontStyle = FontStyle.NORMAL;
+	private FontFamily fontFamily = FontFamily.DEFAULT;
 
 	//String font = "12px sans-serif";
 	String font = "13px Helvetica";
@@ -55,7 +59,6 @@ public class GwtPaint implements Paint {
 	@Override
 	public void setStrokeCap(Cap cap) {
 		stroke = true;
-		// TODO
 	}
 
 	@Override
@@ -76,11 +79,14 @@ public class GwtPaint implements Paint {
 	@Override
 	public void setTextSize(float size) {
 		fontSize = size;
+		buildFont();
 	}
 
 	@Override
 	public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
-
+		this.fontStyle = fontStyle;
+		this.fontFamily = fontFamily;
+		buildFont();
 	}
 
 	@Override
@@ -88,9 +94,10 @@ public class GwtPaint implements Paint {
 		return GwtCanvasAdapter.getTextWidth(text, font);
 	}
 
+	// FIXME all estimates. no idea how to properly measure canvas text..
 	@Override
 	public float getFontHeight() {
-		return 14 + strokeWidth * 2;
+		return 2 + fontSize + strokeWidth * 2;
 	}
 
 	@Override
@@ -98,4 +105,20 @@ public class GwtPaint implements Paint {
 		return 4 + strokeWidth;
 	}
 
+	void buildFont(){
+		StringBuilder sb = new StringBuilder();
+
+		if (this.fontStyle == FontStyle.BOLD)
+			sb.append("bold ");
+		else if (this.fontStyle == FontStyle.ITALIC)
+			sb.append("italic ");
+
+		sb.append(Math.round(this.fontSize));
+		sb.append("px ");
+
+		sb.append("Helvetica");
+
+		this.font = sb.toString();
+
+	}
 }
