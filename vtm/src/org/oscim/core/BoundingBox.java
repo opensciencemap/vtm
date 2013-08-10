@@ -26,10 +26,6 @@ public class BoundingBox {
 	 */
 	private static final double CONVERSION_FACTOR = 1000000d;
 
-	//private static boolean isBetween(int number, int min, int max) {
-	//	return min <= number && number <= max;
-	//}
-
 	/**
 	 * The maximum latitude value of this BoundingBox in microdegrees (degrees *
 	 * 10^6).
@@ -202,14 +198,7 @@ public class BoundingBox {
 		return result;
 	}
 
-//	private void readObject(ObjectInputStream objectInputStream) throws IOException,
-//			ClassNotFoundException {
-//		objectInputStream.defaultReadObject();
-//		this.hashCodeValue = calculateHashCode();
-//	}
-
 	/* code below is from osdmroid, @author Nicolas Gramlich */
-
 	public static BoundingBox fromGeoPoints(final List<? extends GeoPoint> partialPolyLine) {
 		int minLat = Integer.MAX_VALUE;
 		int minLon = Integer.MAX_VALUE;
@@ -225,55 +214,4 @@ public class BoundingBox {
 
 		return new BoundingBox(minLat, minLon, maxLat, maxLon);
 	}
-
-	//	public static final Parcelable.Creator<BoundingBox> CREATOR = new Parcelable.Creator<BoundingBox>() {
-	//		@Override
-	//		public BoundingBox createFromParcel(final Parcel in) {
-	//			return new BoundingBox(in.readInt(), in.readInt(), in.readInt(), in.readInt());
-	//		}
-	//
-	//		@Override
-	//		public BoundingBox[] newArray(final int size) {
-	//			return new BoundingBox[size];
-	//		}
-	//	};
-	//
-	//	@Override
-	//	public int describeContents() {
-	//		return 0;
-	//	}
-	//
-	//	@Override
-	//	public void writeToParcel(Parcel dest, int flags) {
-	//		dest.writeInt(minLatitudeE6);
-	//		dest.writeInt(minLongitudeE6);
-	//		dest.writeInt(maxLatitudeE6);
-	//		dest.writeInt(maxLongitudeE6);
-	//	}
-
-	//	public BoundingBox(final double north, final double east, final double south,
-	//			final double west) {
-	//		this((int) (north * 1E6), (int) (east * 1E6), (int) (south * 1E6), (int) (west * 1E6));
-	//		// this.mLatNorthE6 = (int) (north * 1E6);
-	//		// this.mLonEastE6 = (int) (east * 1E6);
-	//		// this.mLatSouthE6 = (int) (south * 1E6);
-	//		// this.mLonWestE6 = (int) (west * 1E6);
-	//	}
-
-	//	public int getLatNorthE6() {
-	//		return this.maxLatitudeE6;
-	//	}
-	//
-	//	public int getLatSouthE6() {
-	//		return this.minLatitudeE6;
-	//	}
-	//
-	//	public int getLonEastE6() {
-	//		return this.maxLongitudeE6;
-	//	}
-	//
-	//	public int getLonWestE6() {
-	//		return this.minLongitudeE6;
-	//	}
-
 }
