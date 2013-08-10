@@ -306,15 +306,14 @@ public class GdxMap implements ApplicationListener {
 
 		@Override
 		public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-			// if (button == Buttons.MIDDLE) {
-			// mActiveScale = true;
-			// // mActiveTilt = true;
-			// mPosY = screenY;
-			// } else
 			if (button == Buttons.MIDDLE) {
+				mActiveScale = true;
+				mPosY = screenY;
+			} else if (button == Buttons.RIGHT) {
 				mActiveRotate = true;
 				mPosX = screenX;
 				mPosY = screenY;
+				return true;
 			}
 			return false;
 		}
@@ -347,17 +346,6 @@ public class GdxMap implements ApplicationListener {
 				mPosY = screenY;
 				changed = true;
 			}
-
-			//	if (!(mActiveRotate || mActiveTilt || mActiveScale)) {
-			//		int dx = screenX - mPosX;
-			//		int dy = screenY - mPosY;
-			//		if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
-			//			mMapPosition.moveMap(dx, dy);
-			//			mPosX = screenX;
-			//			mPosY = screenY;
-			//			changed = true;
-			//		}
-			//	}
 
 			if (changed) {
 				mMapView.updateMap(true);
