@@ -77,8 +77,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		private final SymbolLayer mSymbolLayer;
 		private final float[] mBox = new float[8];
 
-		public ItemOverlay(MapView mapView) {
-			super(mapView);
+		public ItemOverlay() {
 			mSymbolLayer = new SymbolLayer();
 		}
 
@@ -221,7 +220,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 
 		//this.mDefaultMarker = OverlayMarker.makeMarker(pDefaultMarker, null);
 		mDefaultMarker = defaultMarker;
-		mLayer = new ItemOverlay(mapView);
+		mLayer = new ItemOverlay();
 	}
 
 	private final PointD mMapPoint = new PointD();

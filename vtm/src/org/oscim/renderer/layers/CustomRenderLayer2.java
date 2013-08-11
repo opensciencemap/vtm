@@ -27,7 +27,6 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.GlUtils;
-import org.oscim.view.MapView;
 
 
 /*
@@ -50,10 +49,6 @@ public class CustomRenderLayer2 extends RenderLayer {
 	//private FloatBuffer mVertices;
 	private boolean mInitialized;
 	private BufferObject mVBO;
-
-	public CustomRenderLayer2(MapView mapView) {
-		super(mapView);
-	}
 
 	int mZoom = -1;
 	float mCellScale = 60 * GLRenderer.COORD_SCALE;

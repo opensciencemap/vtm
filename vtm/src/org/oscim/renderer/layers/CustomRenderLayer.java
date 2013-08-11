@@ -39,6 +39,8 @@ public class CustomRenderLayer extends RenderLayer {
 
 	private static final GL20 GL = GLAdapter.get();
 
+	private final MapView mMapView;
+
 	private int mProgramObject;
 	private int hVertexPosition;
 	private int hMatrixPosition;
@@ -53,7 +55,7 @@ public class CustomRenderLayer extends RenderLayer {
 	private boolean mInitialized;
 
 	public CustomRenderLayer(MapView mapView) {
-		super(mapView);
+		mMapView = mapView;
 	}
 
 	// ---------- everything below runs in GLRender Thread ----------

@@ -28,7 +28,6 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.renderer.sublayers.ExtrusionLayer;
 import org.oscim.utils.GlUtils;
-import org.oscim.view.MapView;
 
 public class ExtrusionRenderLayer extends RenderLayer {
 	private final static String TAG = ExtrusionRenderLayer.class.getName();
@@ -39,9 +38,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 	protected float mAlpha = 1;
 
-	public ExtrusionRenderLayer(MapView mapView,
-			org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
-		super(mapView);
+	public ExtrusionRenderLayer(TileRenderLayer tileRenderLayer) {
 		mTileLayer = tileRenderLayer;
 		mTileSet = new TileSet();
 	}
@@ -92,8 +89,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 	@Override
 	public void update(MapPosition pos, boolean changed, Matrices matrices) {
-
-		mMapView.getMapViewPosition().getMapPosition(mMapPosition);
+		mMapPosition.copy(pos);
 
 		if (!initialized && !initShader())
 			return;

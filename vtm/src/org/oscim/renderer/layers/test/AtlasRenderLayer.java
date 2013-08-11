@@ -2,7 +2,7 @@ package org.oscim.renderer.layers.test;
 
 import java.util.Arrays;
 
-import org.oscim.view.MapView;
+import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.MapPosition;
@@ -17,12 +17,9 @@ import org.oscim.renderer.sublayers.TextLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.Text;
 
-import org.oscim.backend.Log;
-
 public class AtlasRenderLayer extends BasicRenderLayer {
 
-	public AtlasRenderLayer(MapView mapView) {
-		super(mapView);
+	public AtlasRenderLayer() {
 
 		TextureAtlas mAtlas = TextureAtlas.create(2048, 2048, 1);
 

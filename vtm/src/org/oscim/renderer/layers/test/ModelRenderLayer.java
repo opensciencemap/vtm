@@ -18,12 +18,7 @@ package org.oscim.renderer.layers.test;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.RenderLayer;
-import org.oscim.view.MapView;
 public class ModelRenderLayer extends RenderLayer{
-
-	public ModelRenderLayer(MapView mapView) {
-		super(mapView);
-	}
 
 	@Override
 	public void update(MapPosition pos, boolean changed, Matrices m) {

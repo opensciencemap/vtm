@@ -25,7 +25,6 @@ import org.oscim.renderer.sublayers.TextItem;
 import org.oscim.renderer.sublayers.TextLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.Text;
-import org.oscim.view.MapView;
 
 public class GridRenderLayer extends BasicRenderLayer {
 	// private final static String TILE_FORMAT = "%d/%d/%d";
@@ -38,8 +37,7 @@ public class GridRenderLayer extends BasicRenderLayer {
 
 	private int mCurX, mCurY, mCurZ;
 
-	public GridRenderLayer(MapView mapView) {
-		super(mapView);
+	public GridRenderLayer() {
 
 		int size = Tile.SIZE;
 

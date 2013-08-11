@@ -14,14 +14,12 @@
  */
 package org.oscim.renderer;
 
-import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer.Matrices;
 
 public abstract class RenderLayer {
 
-	protected final MapView mMapView;
 	/**
 	 * Use mMapPosition.copy(position) to keep the position for which
 	 * the Overlay is _compiled_. NOTE: required by setMatrix utility
@@ -35,8 +33,7 @@ public abstract class RenderLayer {
 	/** flag to set when layer is ready for rendering */
 	public boolean isReady;
 
-	public RenderLayer(MapView mapView) {
-		mMapView = mapView;
+	public RenderLayer() {
 		mMapPosition = new MapPosition();
 	}
 

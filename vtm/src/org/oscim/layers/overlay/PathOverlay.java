@@ -58,8 +58,7 @@ public class PathOverlay extends Layer {
 		// limit coords
 		private final int max = 2048;
 
-		public RenderPath(MapView mapView) {
-			super(mapView);
+		public RenderPath() {
 			mClipper = new LineClipper(-max, -max, max, max, true);
 			mPPoints = new float[1];
 			layers.addLineLayer(0, mLineStyle);
@@ -242,7 +241,7 @@ public class PathOverlay extends Layer {
 
 		this.mPoints = new ArrayList<GeoPoint>();
 
-		mLayer = new RenderPath(mapView);
+		mLayer = new RenderPath();
 	}
 
 	public PathOverlay(MapView mapView, int lineColor) {

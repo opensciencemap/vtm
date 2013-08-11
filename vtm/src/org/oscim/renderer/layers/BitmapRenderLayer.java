@@ -14,7 +14,6 @@
  */
 package org.oscim.renderer.layers;
 
-import org.oscim.view.MapView;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -35,10 +34,6 @@ public class BitmapRenderLayer extends BasicRenderLayer {
 	private int mHeight;
 	private boolean initialized;
 	private boolean mUpdateBitmap;
-
-	public BitmapRenderLayer(MapView mapView) {
-		super(mapView);
-	}
 
 	/**
 	 * @param bitmap

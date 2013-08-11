@@ -22,13 +22,11 @@ import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layers.BasicRenderLayer;
 import org.oscim.renderer.sublayers.SymbolItem;
 import org.oscim.renderer.sublayers.SymbolLayer;
-import org.oscim.view.MapView;
 
 public class SymbolRenderLayer extends BasicRenderLayer {
 	boolean initialize = true;
 
-	public SymbolRenderLayer(MapView mapView) {
-		super(mapView);
+	public SymbolRenderLayer() {
 		SymbolLayer l = new SymbolLayer();
 		layers.textureLayers = l;
 

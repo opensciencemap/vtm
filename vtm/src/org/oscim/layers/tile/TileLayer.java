@@ -55,7 +55,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 
 		// RenderLayer is working in GL Thread and actually
 		// drawing loaded tiles to screen.
-		mLayer = mRenderLayer = new TileRenderLayer(mapView, mTileManager);
+		mLayer = mRenderLayer = new TileRenderLayer(mTileManager);
 	}
 
 	abstract protected T createLoader(TileManager tm);

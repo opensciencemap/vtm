@@ -29,7 +29,6 @@ import org.oscim.renderer.sublayers.LineTexRenderer;
 import org.oscim.renderer.sublayers.PolygonRenderer;
 import org.oscim.renderer.sublayers.TextureRenderer;
 import org.oscim.utils.FastMath;
-import org.oscim.view.MapView;
 
 /**
  * Base class to use the renderer.sublayers for drawing
@@ -38,8 +37,7 @@ public abstract class BasicRenderLayer extends RenderLayer {
 
 	public final Layers layers;
 
-	public BasicRenderLayer(MapView mapView) {
-		super(mapView);
+	public BasicRenderLayer() {
 		layers = new Layers();
 	}
 
