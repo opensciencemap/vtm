@@ -25,7 +25,6 @@ import org.oscim.renderer.GLRenderer;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.utils.ScanBox;
-import org.oscim.view.MapView;
 
 public class TileRenderLayer extends RenderLayer {
 	private final static String TAG = TileRenderLayer.class.getName();
@@ -33,8 +32,7 @@ public class TileRenderLayer extends RenderLayer {
 	private final TileManager mTileManager;
 	private int mUploadSerial;
 
-	public TileRenderLayer(MapView mapView, TileManager tileManager) {
-		super(mapView);
+	public TileRenderLayer(TileManager tileManager) {
 		mTileManager = tileManager;
 		mUploadSerial = 0;
 	}

@@ -14,7 +14,6 @@
  */
 package org.oscim.renderer.layers.test;
 
-import org.oscim.view.MapView;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layers.BasicRenderLayer;
@@ -28,8 +27,7 @@ public class TestRenderLayer extends BasicRenderLayer {
 
 	private boolean first = true;
 
-	public TestRenderLayer(MapView mapView) {
-		super(mapView);
+	public TestRenderLayer() {
 
 		// draw a rectangle
 		//LineLayer ll = (LineLayer) layers.getLayer(1, Layer.LINE);

@@ -14,7 +14,6 @@
  */
 package org.oscim.layers.overlay;
 
-import org.oscim.backend.Log;
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
@@ -22,19 +21,17 @@ import org.oscim.renderer.layers.ExtrusionRenderLayer;
 import org.oscim.utils.FastMath;
 import org.oscim.view.MapView;
 
-//import android.os.CountDownTimer;
-
 /**
  * @author Hannes Janetzek
  */
 public class BuildingOverlay extends Overlay {
-	private final static String TAG = BuildingOverlay.class.getName();
+	//private final static String TAG = BuildingOverlay.class.getName();
 
 	final ExtrusionRenderLayer mExtLayer;
 
 	public BuildingOverlay(MapView mapView, org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
 		super(mapView);
-		mExtLayer = new ExtrusionRenderLayer(mapView, tileRenderLayer) {
+		mExtLayer = new ExtrusionRenderLayer(tileRenderLayer) {
 			private long mStartTime;
 
 			@Override

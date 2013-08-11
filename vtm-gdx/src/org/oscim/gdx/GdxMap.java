@@ -107,7 +107,7 @@ public class GdxMap implements ApplicationListener {
 
 		if (tileGrid)
 			mMapView.getLayerManager().add(new GenericOverlay(mMapView,
-					new GridRenderLayer(mMapView)));
+					new GridRenderLayer()));
 	}
 
 	// Stage ui;
@@ -276,7 +276,7 @@ public class GdxMap implements ApplicationListener {
 
 				case Input.Keys.G:
 					if (mGridLayer == null) {
-						mGridLayer = new GenericOverlay(mMapView, new GridRenderLayer(mMapView));
+						mGridLayer = new GenericOverlay(mMapView, new GridRenderLayer());
 						mGridLayer.setEnabled(true);
 						mMapView.getLayerManager().add(mGridLayer);
 					} else {

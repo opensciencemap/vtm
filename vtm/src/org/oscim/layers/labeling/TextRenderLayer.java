@@ -131,10 +131,10 @@ class TextRenderLayer extends BasicRenderLayer {
 	private float mSquareRadius;
 	private int mRelabelCnt;
 	private final TileRenderLayer mTileLayer;
+	private final MapView mMapView;
 
 	public TextRenderLayer(MapView mapView, TileRenderLayer baseLayer) {
-		super(mapView);
-
+		mMapView = mapView;
 		mMapViewPosition = mapView.getMapViewPosition();
 		mTileLayer = baseLayer;
 		mTileSet = new TileSet();
