@@ -100,7 +100,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 	private int mDrawingLayer;
 
 	private float mStrokeScale = 1.0f;
-	private float mLatScaleFactor;
+	private float mLineScaleFactor;
 	private float mGroundResolution;
 
 	private Tag mTagName;
@@ -164,11 +164,12 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		setScaleStrokeWidth(mTile.zoomLevel);
 
 		// account for area changes with latitude
-		double latitude = MercatorProjection.toLatitude(mTile.y);
+		double lat = MercatorProjection.toLatitude(mTile.y);
 
-		mLatScaleFactor = 0.4f + 0.6f * ((float) Math.sin(Math.abs(latitude) * (Math.PI / 180)));
+		// scale line width relative to latitude
+		mLineScaleFactor = 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
 
-		mGroundResolution = (float) (Math.cos(latitude * (Math.PI / 180))
+		mGroundResolution = (float) (Math.cos(lat * (Math.PI / 180))
 				* MercatorProjection.EARTH_CIRCUMFERENCE
 				/ ((long) Tile.SIZE << mTile.zoomLevel));
 
@@ -389,7 +390,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 				float w = line.width;
 				if (!line.fixed) {
 					w *= mStrokeScale;
-					w *= mLatScaleFactor;
+					w *= mLineScaleFactor;
 				}
 				lineLayer.width = w;
 			}
@@ -417,7 +418,7 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 				float w = line.width;
 				if (!line.fixed) {
 					w *= mStrokeScale;
-					w *= mLatScaleFactor;
+					w *= mLineScaleFactor;
 				}
 				lineLayer.width = w;
 			}
