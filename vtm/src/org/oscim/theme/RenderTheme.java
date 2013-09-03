@@ -82,10 +82,6 @@ public class RenderTheme implements IRenderTheme {
 		mElementCache[2] = new ElementCache(Element.POLY);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.oscim.theme.IRenderTheme#destroy()
-	 */
 	@Override
 	public void destroy() {
 
@@ -98,29 +94,16 @@ public class RenderTheme implements IRenderTheme {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.oscim.theme.IRenderTheme#getLevels()
-	 */
 	@Override
 	public int getLevels() {
 		return mLevels;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.oscim.theme.IRenderTheme#getMapBackground()
-	 */
 	@Override
 	public int getMapBackground() {
 		return mMapBackground;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.oscim.theme.IRenderTheme#matchWay(org.oscim.core.Tag[], byte,
-	 * boolean)
-	 */
 	@Override
 	public RenderInstruction[] matchElement(MapElement element, int zoomLevel) {
 
@@ -143,7 +126,7 @@ public class RenderTheme implements IRenderTheme {
 
 		synchronized (cache) {
 
-			if (cache.prevItem == null || (cache.prevItem.zoom & zoomMask) == 0) {
+			if ((cache.prevItem == null) || (cache.prevItem.zoom & zoomMask) == 0) {
 				// previous instructions zoom does not match
 				cache.cacheKey.set(element.tags, null);
 			} else {
@@ -266,10 +249,6 @@ public class RenderTheme implements IRenderTheme {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.oscim.theme.IRenderTheme#scaleStrokeWidth(float)
-	 */
 	@Override
 	public void scaleStrokeWidth(float scaleFactor) {
 
@@ -277,10 +256,6 @@ public class RenderTheme implements IRenderTheme {
 			mRules[i].scaleStrokeWidth(scaleFactor * mBaseStrokeWidth);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.oscim.theme.IRenderTheme#scaleTextSize(float)
-	 */
 	@Override
 	public void scaleTextSize(float scaleFactor) {
 

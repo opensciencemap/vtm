@@ -223,7 +223,6 @@ public abstract class Rule {
 			// check subrules
 			for (Rule subRule : mSubRuleArray)
 				subRule.matchElement(type, tags, zoomLevel, matchingList);
-
 		}
 	}
 
@@ -244,7 +243,6 @@ public abstract class Rule {
 
 		for (Rule subRule : mSubRuleArray)
 			subRule.onComplete();
-
 	}
 
 	public void onDestroy() {
@@ -253,7 +251,6 @@ public abstract class Rule {
 
 		for (Rule subRule : mSubRuleArray)
 			subRule.onDestroy();
-
 	}
 
 	public void scaleStrokeWidth(float scaleFactor) {
@@ -262,7 +259,6 @@ public abstract class Rule {
 
 		for (Rule subRule : mSubRuleArray)
 			subRule.scaleStrokeWidth(scaleFactor);
-
 	}
 
 	public void scaleTextSize(float scaleFactor) {
@@ -270,6 +266,5 @@ public abstract class Rule {
 			ri.scaleTextSize(scaleFactor);
 		for (Rule subRule : mSubRuleArray)
 			subRule.scaleTextSize(scaleFactor);
-
 	}
 }
