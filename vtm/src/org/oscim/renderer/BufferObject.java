@@ -86,8 +86,8 @@ public final class BufferObject {
 		Log.d(TAG, "now: " + mBufferMemoryUsage / MB + "MB");
 	}
 
-	private static BufferObject pool[] = new BufferObject[2];
-	static int counter[] = new int[2];
+	private final static BufferObject pool[] = new BufferObject[2];
+	private final static int counter[]  = new int[2];
 
 	public static synchronized BufferObject get(int target, int size) {
 
@@ -197,12 +197,19 @@ public final class BufferObject {
 		}
 	}
 
-	static synchronized void init(int num) {
+
+	static synchronized void clear() {
 		mBufferMemoryUsage = 0;
 
-		// FIXME!!!!! pool = new BufferObject[2];
+		pool[0] = null;
+		pool[1] = null;
+		counter[0] = 0;
+		counter[1] = 0;
+	}
+
+	static synchronized void init(int num) {
 
 		createBuffers(GL20.GL_ARRAY_BUFFER, num);
-		counter[0] = num;
+		counter[0] += num;
 	}
 }

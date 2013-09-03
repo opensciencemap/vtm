@@ -104,6 +104,46 @@ public class GLRenderer {
 
 	public static long frametime;
 
+	// Do not use the same buffer to upload data within a frame twice
+	// - Contrary to what the OpenGL doc says data seems *not* to be
+	// *always* copied after glBufferData returns...
+	// - Somehow it does always copy when using Android GL bindings
+	// but not when using libgdx bindings (LWJGL or AndroidGL20)
+
+	static class BufferPool extends Pool<BufferItem> {
+		private BufferItem mUsedBuffers;
+
+		@Override
+		protected BufferItem createItem() {
+			// unused;
+			return null;
+		}
+
+		public BufferItem get(int size) {
+			BufferItem b = pool;
+
+			if (b == null) {
+				b = new BufferItem();
+			} else {
+				pool = b.next;
+				b.next = null;
+			}
+			if (b.tmpBufferSize < size)
+				b.growBuffer(size);
+
+			mUsedBuffers = Inlist.push(mUsedBuffers, b);
+
+			return b;
+		}
+
+		public void releaseBuffers() {
+			releaseAll(mUsedBuffers);
+			mUsedBuffers = null;
+		}
+	}
+
+	private static BufferPool mBufferPool;
+
 	/**
 	 * @param map
 	 *            the MapView
@@ -128,6 +168,12 @@ public class GLRenderer {
 		mFillCoords[5] = min;
 		mFillCoords[6] = max;
 		mFillCoords[7] = min;
+
+		mBufferPool = new BufferPool();
+
+		// FIXME should be done in 'destroy' method
+		// clear all previous vbo refs
+		BufferObject.clear();
 	}
 
 	public static void setBackgroundColor(int color) {
@@ -158,46 +204,6 @@ public class GLRenderer {
 			this.tmpBufferSize = size;
 		}
 	}
-
-	static class BufferPool extends Pool<BufferItem> {
-		private BufferItem mUsedBuffers;
-
-		@Override
-		protected BufferItem createItem() {
-			// unused;
-			return null;
-		}
-
-		public BufferItem get(int size) {
-			BufferItem b = pool;
-
-			if (b == null) {
-				b = new BufferItem();
-			} else {
-				pool = b.next;
-				b.next = null;
-			}
-			if (b.tmpBufferSize < size)
-				b.growBuffer(size);
-
-			mUsedBuffers = Inlist.push(mUsedBuffers, b);
-
-			return b;
-		}
-
-		public void releaseBuffers() {
-			mBufferPool.releaseAll(mUsedBuffers);
-			mUsedBuffers = null;
-		}
-
-	}
-
-	// Do not use the same buffer to upload data within a frame twice
-	// - Contrary to what the OpenGL doc says data seems *not* to be
-	// *always* copied after glBufferData returns...
-	// - Somehow it does always copy when using Android GL bindings
-	// but not when using libgdx bindings (LWJGL or AndroidGL20)
-	private static BufferPool mBufferPool = new BufferPool();
 
 	/**
 	 * Only use on GL Thread! Get a native ShortBuffer for temporary use.
