@@ -310,7 +310,7 @@ public class GLRenderer {
 		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 
 		/* update layers */
-		RenderLayer[] layers = mMap.getLayerManager().getRenderLayers();
+		RenderLayer[] layers = mMap.getLayers().getRenderLayers();
 
 		for (int i = 0, n = layers.length; i < n; i++)
 			layers[i].update(pos, changed, mMatrices);

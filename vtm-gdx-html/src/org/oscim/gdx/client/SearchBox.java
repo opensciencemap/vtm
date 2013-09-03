@@ -186,7 +186,7 @@ public class SearchBox {
 		final TextBox searchField = new TextBox();
 		//searchField.setText("Bremen");
 		final PathOverlay mOverlay = new PathOverlay(map, 0xCC0000FF);
-		map.getLayerManager().add(mOverlay);
+		map.getLayers().add(mOverlay);
 
 		// We can add style names to widgets
 		searchButton.addStyleName("sendButton");

@@ -299,7 +299,7 @@ public class MapEventLayer extends InputLayer {
 			printState("onDoubleTap");
 
 		// avoid onLongPress
-		mMap.getLayerManager().cancelGesture();
+		mMap.getLayers().cancelGesture();
 
 		return true;
 	}

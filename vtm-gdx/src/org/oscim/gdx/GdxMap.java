@@ -97,16 +97,16 @@ public class GdxMap implements ApplicationListener {
 			mMap.setTheme(InternalRenderTheme.DEFAULT);
 
 			if (buildings)
-				mMap.getLayerManager().add(
+				mMap.getLayers().add(
 						new BuildingOverlay(mMap, mMapLayer.getTileLayer()));
 
 			if (labels)
-				mMap.getLayerManager().add(new LabelLayer(mMap,
+				mMap.getLayers().add(new LabelLayer(mMap,
 						mMapLayer.getTileLayer()));
 		}
 
 		if (tileGrid)
-			mMap.getLayerManager().add(new GenericOverlay(mMap,
+			mMap.getLayers().add(new GenericOverlay(mMap,
 					new GridRenderLayer()));
 	}
 
@@ -278,14 +278,14 @@ public class GdxMap implements ApplicationListener {
 					if (mGridLayer == null) {
 						mGridLayer = new GenericOverlay(mMap, new GridRenderLayer());
 						mGridLayer.setEnabled(true);
-						mMap.getLayerManager().add(mGridLayer);
+						mMap.getLayers().add(mGridLayer);
 					} else {
 						if (mGridLayer.isEnabled()) {
 							mGridLayer.setEnabled(false);
-							mMap.getLayerManager().remove(mGridLayer);
+							mMap.getLayers().remove(mGridLayer);
 						} else {
 							mGridLayer.setEnabled(true);
-							mMap.getLayerManager().add(mGridLayer);
+							mMap.getLayers().add(mGridLayer);
 						}
 					}
 					mMap.render();
