@@ -110,16 +110,16 @@ public class RenderThemeHandler extends DefaultHandler {
 	 */
 	public static void logUnknownAttribute(String element, String name,
 	                                       String value, int attributeIndex) {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("unknown attribute in element ");
-		stringBuilder.append(element);
-		stringBuilder.append(" (");
-		stringBuilder.append(attributeIndex);
-		stringBuilder.append("): ");
-		stringBuilder.append(name);
-		stringBuilder.append('=');
-		stringBuilder.append(value);
-		Log.d(TAG, stringBuilder.toString());
+		StringBuilder sb = new StringBuilder();
+		sb.append("unknown attribute in element ");
+		sb.append(element);
+		sb.append(" (");
+		sb.append(attributeIndex);
+		sb.append("): ");
+		sb.append(name);
+		sb.append('=');
+		sb.append(value);
+		Log.d(TAG, sb.toString());
 	}
 
 	private final ArrayList<Rule> mRulesList = new ArrayList<Rule>();
@@ -140,7 +140,6 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 
 		mRenderTheme.complete(mRulesList, mLevel);
-		// mRenderTheme.mTextureAtlas = mTextureAtlas;
 
 		mTextureAtlas = null;
 		mRulesList.clear();
@@ -281,8 +280,8 @@ public class RenderThemeHandler extends DefaultHandler {
 
 				if ((symbol.texture = mTextureAtlas.getTextureRegion(symbol.src)) == null)
 					Log.d(TAG, "missing texture atlas item '" + symbol.src + "'");
-				else
-					Log.d(TAG, "using atlas item '" + symbol.src + "'");
+				//else
+				//	Log.d(TAG, "using atlas item '" + symbol.src + "'");
 			}
 
 			else if (ELEMENT_NAME_USE_STYLE_LINE.equals(localName)) {
