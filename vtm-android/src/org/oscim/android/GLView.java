@@ -14,6 +14,9 @@
  */
 package org.oscim.android;
 
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
 import org.oscim.view.Map;
 
 import android.content.Context;
@@ -21,21 +24,38 @@ import android.opengl.GLSurfaceView;
 
 public class GLView extends GLSurfaceView {
 
-	Map mMap;
-	private final AndroidGLRenderer mRenderer;
+	class GLRenderer extends org.oscim.renderer.GLRenderer implements GLSurfaceView.Renderer{
+
+		public GLRenderer(Map map) {
+			super(map);
+		}
+
+		@Override
+		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+			super.onSurfaceCreated();
+		}
+
+		@Override
+		public void onSurfaceChanged(GL10 gl, int width, int height) {
+			super.onSurfaceChanged(width, height);
+
+		}
+
+		@Override
+		public void onDrawFrame(GL10 gl) {
+			super.onDrawFrame();
+		}
+	}
+
 
 	public GLView(Context context, Map map) {
 		super(context);
-		mMap = map;
-		// Log.d(TAG, "init GLSurfaceLayer");
 		setEGLConfigChooser(new GlConfigChooser());
 		setEGLContextClientVersion(2);
 
 		setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
-		mRenderer = new AndroidGLRenderer(mMap);
-		setRenderer(mRenderer);
+		setRenderer(new GLRenderer(map));
 
-		//if (!MapView.debugFrameTime)
-			setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 	}
 }
