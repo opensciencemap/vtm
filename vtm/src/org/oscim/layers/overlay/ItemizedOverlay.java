@@ -30,7 +30,7 @@ import org.oscim.renderer.layers.BasicRenderLayer;
 import org.oscim.renderer.sublayers.SymbolItem;
 import org.oscim.renderer.sublayers.SymbolLayer;
 import org.oscim.utils.GeometryUtils;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 /* @author Marc Kurtz
  * @author Nicolas Gramlich
@@ -98,7 +98,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 			int changedVisible = 0;
 			int numVisible = 0;
 
-			mMapView.getMapViewPosition().getMapViewProjection(mBox);
+			mMap.getViewport().getMapViewProjection(mBox);
 
 			synchronized (lock) {
 				if (mItems == null) {
@@ -209,11 +209,11 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 	 */
 	public abstract int size();
 
-	public ItemizedOverlay(MapView mapView, OverlayMarker defaultMarker) {
-		super(mapView);
+	public ItemizedOverlay(Map map, OverlayMarker defaultMarker) {
+		super(map);
 
 		//		if (defaultMarker == null) {
-		//			defaultMarker = AndroidGraphics.makeMarker(mapView.getContext().getResources()
+		//			defaultMarker = AndroidGraphics.makeMarker(map.getContext().getResources()
 		//					.getDrawable(R.drawable.marker_default), null);
 		//			//throw new IllegalArgumentException("You must pass a default marker to ItemizedOverlay.");
 		//		}

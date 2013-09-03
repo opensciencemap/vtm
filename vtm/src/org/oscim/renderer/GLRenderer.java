@@ -31,8 +31,8 @@ import org.oscim.utils.GlUtils;
 import org.oscim.utils.Matrix4;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
-import org.oscim.view.MapView;
-import org.oscim.view.MapViewPosition;
+import org.oscim.view.Map;
+import org.oscim.view.Viewport;
 
 public class GLRenderer {
 	private static final String TAG = GLRenderer.class.getName();
@@ -46,10 +46,10 @@ public class GLRenderer {
 
 	static int CACHE_TILES = CACHE_TILES_MAX;
 
-	private static MapView mMapView;
+	private static Map mMap;
 	public static int screenWidth, screenHeight;
 
-	private static MapViewPosition mMapViewPosition;
+	private static Viewport mViewport;
 	private static MapPosition mMapPosition;
 
 	private static short[] mFillCoords;
@@ -79,9 +79,9 @@ public class GLRenderer {
 				mvp.setScale(ratio, ratio, ratio);
 			else
 				mvp.setTransScale(
-				                  (-screenWidth / 2) * ratio * scale,
-				                  (-screenHeight / 2) * ratio * scale,
-				                  ratio);
+						(-screenWidth / 2) * ratio * scale,
+						(-screenHeight / 2) * ratio * scale,
+						ratio);
 
 			mvp.multiplyLhs(proj);
 		}
@@ -93,6 +93,7 @@ public class GLRenderer {
 	static float[] mClearColor = null;
 
 	public static int mQuadIndicesID;
+	private static int mQuadVerticesID;
 	public final static int maxQuads = 64;
 
 	private static boolean mUpdateColor = false;
@@ -101,14 +102,16 @@ public class GLRenderer {
 	// static ReentrantLock tilelock = new ReentrantLock();
 	public static Object drawlock = new Object();
 
+	public static long frametime;
+
 	/**
-	 * @param mapView
+	 * @param map
 	 *            the MapView
 	 */
-	public GLRenderer(MapView mapView) {
+	public GLRenderer(Map map) {
 
-		mMapView = mapView;
-		mMapViewPosition = mapView.getMapViewPosition();
+		mMap = map;
+		mViewport = map.getViewport();
 		mMapPosition = new MapPosition();
 
 		mMatrices = new Matrices();
@@ -127,7 +130,7 @@ public class GLRenderer {
 		mFillCoords[7] = min;
 	}
 
-	public static void setBackgroundColor(int color){
+	public static void setBackgroundColor(int color) {
 		mClearColor = GlUtils.colorToFloat(color);
 		mUpdateColor = true;
 	}
@@ -146,8 +149,8 @@ public class GLRenderer {
 				size = (1 << 15);
 
 			ByteBuffer buf = ByteBuffer
-			        .allocateDirect(size)
-			        .order(ByteOrder.nativeOrder());
+					.allocateDirect(size)
+					.order(ByteOrder.nativeOrder());
 
 			this.floatBuffer = buf.asFloatBuffer();
 			this.shortBuffer = buf.asShortBuffer();
@@ -155,19 +158,20 @@ public class GLRenderer {
 			this.tmpBufferSize = size;
 		}
 	}
-	static class BufferPool extends Pool<BufferItem>{
+
+	static class BufferPool extends Pool<BufferItem> {
 		private BufferItem mUsedBuffers;
 
 		@Override
-        protected BufferItem createItem() {
+		protected BufferItem createItem() {
 			// unused;
 			return null;
-        }
+		}
 
-		public BufferItem get(int size){
+		public BufferItem get(int size) {
 			BufferItem b = pool;
 
-			if (b == null){
+			if (b == null) {
 				b = new BufferItem();
 			} else {
 				pool = b.next;
@@ -181,19 +185,19 @@ public class GLRenderer {
 			return b;
 		}
 
-		public void releaseBuffers(){
+		public void releaseBuffers() {
 			mBufferPool.releaseAll(mUsedBuffers);
 			mUsedBuffers = null;
 		}
 
 	}
+
 	// Do not use the same buffer to upload data within a frame twice
 	// - Contrary to what the OpenGL doc says data seems *not* to be
 	// *always* copied after glBufferData returns...
 	// - Somehow it does always copy when using Android GL bindings
 	// but not when using libgdx bindings (LWJGL or AndroidGL20)
 	private static BufferPool mBufferPool = new BufferPool();
-
 
 	/**
 	 * Only use on GL Thread! Get a native ShortBuffer for temporary use.
@@ -223,7 +227,7 @@ public class GLRenderer {
 	}
 
 	public static boolean uploadLayers(Layers layers, int newSize,
-	                                   boolean addFill) {
+			boolean addFill) {
 		// add fill coordinates
 		if (addFill)
 			newSize += 8;
@@ -238,10 +242,10 @@ public class GLRenderer {
 
 		if (newSize != sbuf.remaining()) {
 			Log.d(TAG, "wrong size: "
-			           + " new size: " + newSize
-			           + " buffer pos: " + sbuf.position()
-			           + " buffer limit: " + sbuf.limit()
-			           + " buffer fill: " + sbuf.remaining());
+					+ " new size: " + newSize
+					+ " buffer pos: " + sbuf.position()
+					+ " buffer limit: " + sbuf.limit()
+					+ " buffer fill: " + sbuf.remaining());
 			return false;
 		}
 		newSize *= SHORT_BYTES;
@@ -254,7 +258,8 @@ public class GLRenderer {
 
 		// prevent main thread recreating all tiles (updateMap)
 		// while rendering is going on.
-		synchronized(drawlock){
+		synchronized (drawlock) {
+			frametime = System.currentTimeMillis();
 			draw();
 		}
 
@@ -272,8 +277,8 @@ public class GLRenderer {
 		GL.glDepthMask(true);
 		GL.glStencilMask(0xFF);
 		GL.glClear(GL20.GL_COLOR_BUFFER_BIT
-		           | GL20.GL_DEPTH_BUFFER_BIT
-		           | GL20.GL_STENCIL_BUFFER_BIT);
+				| GL20.GL_DEPTH_BUFFER_BIT
+				| GL20.GL_STENCIL_BUFFER_BIT);
 
 		GLState.blend(false);
 		GL.glDisable(GL20.GL_BLEND);
@@ -282,17 +287,17 @@ public class GLRenderer {
 
 		MapPosition pos = mMapPosition;
 
-		synchronized (mMapViewPosition) {
+		synchronized (mViewport) {
 			// update MapPosition
-			mMapViewPosition.updateAnimation();
+			mViewport.updateAnimation();
 
 			// get current MapPosition
-			changed = mMapViewPosition.getMapPosition(pos);
+			changed = mViewport.getMapPosition(pos);
 
 			if (changed)
-				mMapViewPosition.getMapViewProjection(mMatrices.mapPlane);
+				mViewport.getMapViewProjection(mMatrices.mapPlane);
 
-			mMapViewPosition.getMatrix(mMatrices.view, mMatrices.proj, mMatrices.viewproj);
+			mViewport.getMatrix(mMatrices.view, mMatrices.proj, mMatrices.viewproj);
 
 			if (debugView) {
 				mMatrices.mvp.setScale(0.5f, 0.5f, 1);
@@ -305,7 +310,7 @@ public class GLRenderer {
 		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 
 		/* update layers */
-		RenderLayer[] layers = mMapView.getLayerManager().getRenderLayers();
+		RenderLayer[] layers = mMap.getLayerManager().getRenderLayers();
 
 		for (int i = 0, n = layers.length; i < n; i++)
 			layers[i].update(pos, changed, mMatrices);
@@ -346,7 +351,7 @@ public class GLRenderer {
 		screenWidth = width;
 		screenHeight = height;
 
-		mMapViewPosition.getMatrix(null, mMatrices.proj, null);
+		mViewport.getMatrix(null, mMatrices.proj, null);
 
 		if (debugView) {
 			// modify this to scale only the view, to see better which tiles
@@ -365,14 +370,14 @@ public class GLRenderer {
 		GL.glBlendFunc(GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
 		if (!mNewSurface) {
-			mMapView.updateMap(false);
+			mMap.updateMap(false);
 			return;
 		}
 
 		mNewSurface = false;
 
 		// upload quad indices used by Texture- and LineTexRenderer
-		int[] vboIds = GlUtils.glGenBuffers(1);
+		int[] vboIds = GlUtils.glGenBuffers(2);
 
 		mQuadIndicesID = vboIds[0];
 		int maxIndices = maxQuads * 6;
@@ -391,17 +396,30 @@ public class GLRenderer {
 		buf.flip();
 
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER,
-		                mQuadIndicesID);
+				mQuadIndicesID);
 		GL.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER,
-		                indices.length * 2, buf, GL20.GL_STATIC_DRAW);
+				indices.length * 2, buf, GL20.GL_STATIC_DRAW);
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		// initialize default quad
+		FloatBuffer floatBuffer = GLRenderer.getFloatBuffer(indices.length);
+
+		float[] quad = new float[] { -1, -1, -1, 1, 1, -1, 1, 1 };
+		floatBuffer.put(quad);
+		floatBuffer.flip();
+		mQuadVerticesID = vboIds[1];
+
+		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mQuadVerticesID);
+		GL.glBufferData(GL20.GL_ARRAY_BUFFER,
+				quad.length * 4, floatBuffer, GL20.GL_STATIC_DRAW);
+		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
 		if (mClearColor != null)
 			mUpdateColor = true;
 
 		GLState.init();
 
-		mMapView.updateMap(true);
+		mMap.updateMap(true);
 	}
 
 	public void onSurfaceCreated() {
@@ -422,4 +440,13 @@ public class GLRenderer {
 	private boolean mNewSurface;
 
 	public static final boolean debugView = false;
+
+	public static int getQuadIndicesVBO() {
+		return mQuadIndicesID;
+	}
+
+	public static int getQuadVertexVBO() {
+		return mQuadVerticesID;
+	}
+
 }

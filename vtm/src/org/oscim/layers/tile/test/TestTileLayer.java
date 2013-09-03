@@ -14,7 +14,7 @@
  */
 package org.oscim.layers.tile.test;
 
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
@@ -33,8 +33,8 @@ import org.oscim.backend.Log;
 public class TestTileLayer extends TileLayer<TestTileLoader> {
 	final static String TAG = TestTileLayer.class.getName();
 
-	public TestTileLayer(MapView mapView) {
-		super(mapView);
+	public TestTileLayer(Map map) {
+		super(map);
 	}
 
 	@Override

@@ -19,7 +19,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layers.ExtrusionRenderLayer;
 import org.oscim.utils.FastMath;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 /**
  * @author Hannes Janetzek
@@ -29,8 +29,8 @@ public class BuildingOverlay extends Overlay {
 
 	final ExtrusionRenderLayer mExtLayer;
 
-	public BuildingOverlay(MapView mapView, org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
-		super(mapView);
+	public BuildingOverlay(Map map, org.oscim.layers.tile.TileRenderLayer tileRenderLayer) {
+		super(map);
 		mExtLayer = new ExtrusionRenderLayer(tileRenderLayer) {
 			private long mStartTime;
 
@@ -48,7 +48,7 @@ public class BuildingOverlay extends Overlay {
 						}
 						float a = (now - mStartTime) / mFadeTime;
 						mAlpha = FastMath.clamp(a, 0, 1);
-						mMapView.render();
+						mMap.render();
 					} else
 						mStartTime = 0;
 				} else {
@@ -62,7 +62,7 @@ public class BuildingOverlay extends Overlay {
 							float a = 1 - diff / mFadeTime;
 							mAlpha = FastMath.clamp(a, 0, 1);
 						}
-						mMapView.render();
+						mMap.render();
 					} else
 						mStartTime = 0;
 				}

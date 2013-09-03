@@ -16,7 +16,7 @@ package org.oscim.android;
 
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -24,7 +24,7 @@ import android.content.SharedPreferences.Editor;
 
 /**
  * MapActivity is the abstract base class which must be extended in order to use
- * a {@link MapView}. There are no abstract methods in this implementation which
+ * a {@link Map}. There are no abstract methods in this implementation which
  * subclasses need to override and no API key or registration is required.
  * <p>
  * A subclass may create a MapView either via one of the MapView constructors or
@@ -43,18 +43,18 @@ public abstract class MapActivity extends Activity {
 	private static final String PREFERENCES_FILE = "MapActivity";
 	//private static final String KEY_THEME = "Theme";
 
-	private static boolean containsMapViewPosition(SharedPreferences sharedPreferences) {
+	private static boolean containsViewport(SharedPreferences sharedPreferences) {
 		return sharedPreferences.contains(KEY_LATITUDE)
 				&& sharedPreferences.contains(KEY_LONGITUDE)
 				&& sharedPreferences.contains(KEY_MAP_SCALE);
 	}
 
-	protected MapView mMapView;
+	protected Map mMap;
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		mMapView.destroy();
+		mMap.destroy();
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public abstract class MapActivity extends Activity {
 		// save the map position
 		MapPosition mapPosition = new MapPosition();
 
-		mMapView.getMapViewPosition().getMapPosition(mapPosition);
+		mMap.getViewport().getMapPosition(mapPosition);
 
 		GeoPoint geoPoint = mapPosition.getGeoPoint();
 
@@ -75,7 +75,7 @@ public abstract class MapActivity extends Activity {
 		editor.putInt(KEY_LONGITUDE, geoPoint.longitudeE6);
 		editor.putFloat(KEY_MAP_SCALE, (float)mapPosition.scale);
 
-		//editor.putString(KEY_THEME, mMapView.getRenderTheme());
+		//editor.putString(KEY_THEME, mMap.getRenderTheme());
 
 		editor.commit();
 	}
@@ -93,16 +93,16 @@ public abstract class MapActivity extends Activity {
 	/**
 	 * This method is called once by each MapView during its setup process.
 	 *
-	 * @param mapView
+	 * @param map
 	 *            the calling MapView.
 	 */
-	public final void registerMapView(MapView mapView) {
-		mMapView = mapView;
+	public final void registerMapView(Map map) {
+		mMap = map;
 
 		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,
 				MODE_PRIVATE);
 
-		if (containsMapViewPosition(sharedPreferences)) {
+		if (containsViewport(sharedPreferences)) {
 			// get and set the map position and zoom level
 			int latitudeE6 = sharedPreferences.getInt(KEY_LATITUDE, 0);
 			int longitudeE6 = sharedPreferences.getInt(KEY_LONGITUDE, 0);
@@ -113,7 +113,7 @@ public abstract class MapActivity extends Activity {
 			mapPosition.setPosition(latitudeE6 / 1E6, longitudeE6 / 1E6);
 			mapPosition.setScale(scale);
 
-			mMapView.setMapPosition(mapPosition);
+			mMap.setMapPosition(mapPosition);
 		}
 
 		//String theme = sharedPreferences.getString(KEY_THEME,
@@ -121,15 +121,15 @@ public abstract class MapActivity extends Activity {
 
 //		if (theme.startsWith("/")) {
 //			try {
-//				mapView.setRenderTheme(theme);
+//				map.setRenderTheme(theme);
 //			} catch (FileNotFoundException e) {
-//				mapView.setRenderTheme(InternalRenderTheme.DEFAULT);
+//				map.setRenderTheme(InternalRenderTheme.DEFAULT);
 //			}
 //		} else {
 //			try {
-//				mapView.setRenderTheme(InternalRenderTheme.valueOf(theme));
+//				map.setRenderTheme(InternalRenderTheme.valueOf(theme));
 //			} catch (IllegalArgumentException e) {
-//				mapView.setRenderTheme(InternalRenderTheme.DEFAULT);
+//				map.setRenderTheme(InternalRenderTheme.DEFAULT);
 //			}
 //		}
 	}

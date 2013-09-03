@@ -19,9 +19,10 @@ import java.util.List;
 
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.BoundingBox;
+import org.oscim.core.PointD;
 import org.oscim.core.PointF;
-import org.oscim.view.MapView;
-import org.oscim.view.MapViewPosition;
+import org.oscim.view.Map;
+import org.oscim.view.Viewport;
 
 public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverlay<Item> {
 	//private static final String TAG = ItemizedIconOverlay.class.getName();
@@ -30,30 +31,30 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	protected OnItemGestureListener<Item> mOnItemGestureListener;
 	private int mDrawnItemsLimit = Integer.MAX_VALUE;
 
-	private final PointF mTmpPoint = new PointF();
+	private final PointD mTmpPoint = new PointD();
 
 	public ItemizedIconOverlay(
-			final MapView mapView,
+			final Map map,
 			final List<Item> pList,
 			final OverlayMarker pDefaultMarker,
 			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener) {
 
-		super(mapView, pDefaultMarker);
+		super(map, pDefaultMarker);
 
 		this.mItemList = pList;
 		this.mOnItemGestureListener = pOnItemGestureListener;
 		populate();
 	}
 
-//	public ItemizedIconOverlay(
-//			final MapView mapView,
-//			final Context pContext,
-//			final List<Item> pList,
-//			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener) {
-//		this(mapView, pList,
-//				null, //pContext.getResources().getDrawable(R.drawable.marker_default),
-//				pOnItemGestureListener);
-//	}
+	//	public ItemizedIconOverlay(
+	//			final MapView map,
+	//			final Context pContext,
+	//			final List<Item> pList,
+	//			final ItemizedIconOverlay.OnItemGestureListener<Item> pOnItemGestureListener) {
+	//		this(map, pList,
+	//				null, //pContext.getResources().getDrawable(R.drawable.marker_default),
+	//				pOnItemGestureListener);
+	//	}
 
 	@Override
 	public boolean onSnapToItem(final int pX, final int pY, final PointF pSnapPoint) {
@@ -136,6 +137,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 			return onSingleTapUpHelper(index, that.mItemList.get(index));
 		}
 	};
+
 	@Override
 	public boolean onLongPress(final MotionEvent event) {
 		return activateSelectedItems(event, mActiveItemLongPress) || super.onLongPress(event);
@@ -172,11 +174,11 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 		if (size == 0)
 			return false;
 
-		int eventX = (int) event.getX() - mMapView.getWidth() / 2;
-		int eventY = (int) event.getY() - mMapView.getHeight() / 2;
-		MapViewPosition mapViewPosition = mMapView.getMapViewPosition();
+		int eventX = (int) event.getX() - mMap.getWidth() / 2;
+		int eventY = (int) event.getY() - mMap.getHeight() / 2;
+		Viewport mapPosition = mMap.getViewport();
 
-		BoundingBox bbox = mapViewPosition.getViewBox();
+		BoundingBox bbox = mapPosition.getViewBox();
 
 		int nearest = -1;
 		double dist = Double.MAX_VALUE;
@@ -188,10 +190,10 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 				continue;
 
 			// TODO use intermediate projection
-			mapViewPosition.project(item.getPoint(), mTmpPoint);
+			mapPosition.project(item.getPoint(), mTmpPoint);
 
-			float dx = mTmpPoint.x - eventX;
-			float dy = mTmpPoint.y - eventY;
+			float dx = (float) (mTmpPoint.x - eventX);
+			float dy = (float) (mTmpPoint.y - eventY);
 
 			double d = dx * dx + dy * dy;
 			// squared dist: 50*50 pixel

@@ -32,7 +32,7 @@ import org.oscim.renderer.sublayers.LineLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.LineClipper;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 /** This class draws a path line in given color. */
 public class PathOverlay extends Layer {
@@ -234,8 +234,8 @@ public class PathOverlay extends Layer {
 		}
 	}
 
-	public PathOverlay(MapView mapView, int lineColor, float lineWidth) {
-		super(mapView);
+	public PathOverlay(Map map, int lineColor, float lineWidth) {
+		super(map);
 
 		mLineStyle = new Line(lineColor, lineWidth, Cap.BUTT);
 
@@ -244,8 +244,8 @@ public class PathOverlay extends Layer {
 		mLayer = new RenderPath();
 	}
 
-	public PathOverlay(MapView mapView, int lineColor) {
-		this(mapView, lineColor, 2);
+	public PathOverlay(Map map, int lineColor) {
+		this(map, lineColor, 2);
 	}
 
 	/**

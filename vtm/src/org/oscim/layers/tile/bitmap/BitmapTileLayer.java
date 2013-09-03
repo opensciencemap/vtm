@@ -32,7 +32,7 @@ import org.oscim.layers.tile.bitmap.TileSource.FadeStep;
 import org.oscim.renderer.sublayers.BitmapLayer;
 import org.oscim.renderer.sublayers.Layers;
 import org.oscim.utils.FastMath;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 
 public class BitmapTileLayer extends TileLayer<TileLoader> {
@@ -43,8 +43,8 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 	final TileSource mTileSource;
 	private final FadeStep[] mFade;
 
-	public BitmapTileLayer(MapView mapView, TileSource tileSource) {
-		super(mapView, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), 100);
+	public BitmapTileLayer(Map map, TileSource tileSource) {
+		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), 100);
 		mTileSource = tileSource;
 		mFade = mTileSource.getFadeSteps();
 

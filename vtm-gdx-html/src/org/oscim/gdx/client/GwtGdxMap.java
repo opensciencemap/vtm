@@ -81,10 +81,10 @@ class GwtGdxMap extends GdxMap {
 
 		p.angle = rotation;
 		p.tilt = tilt;
-		mMapView.setMapPosition(p);
+		mMap.setMapPosition(p);
 
-		//mMapView.getMapViewPosition().setTilt(tilt);
-		//mMapView.getMapViewPosition().setRotation(rotation);
+		//mMap.getViewport().setTilt(tilt);
+		//mMap.getViewport().setRotation(rotation);
 
 		String url = c.getTileUrl();
 		String sourceName = c.getTileSource();
@@ -101,9 +101,9 @@ class GwtGdxMap extends GdxMap {
 		initDefaultMap(tileSource, false, true, true);
 
 		if ("naturalearth".equals(c.getBackgroundLayer()))
-			mMapView.setBackgroundMap(new BitmapTileLayer(mMapView, NaturalEarth.INSTANCE));
+			mMap.setBackgroundMap(new BitmapTileLayer(mMap, NaturalEarth.INSTANCE));
 
-		mSearchBox = new SearchBox(mMapView);
+		mSearchBox = new SearchBox(mMap);
 
 		// update URL hash to current position, every 5 seconds
 		Timer timer = new Timer() {
@@ -111,7 +111,7 @@ class GwtGdxMap extends GdxMap {
 			private MapPosition pos = new MapPosition();
 
 			public void run() {
-				mMapView.getMapViewPosition().getMapPosition(pos);
+				mMap.getViewport().getMapPosition(pos);
 				int lat = (int) (MercatorProjection.toLatitude(pos.y) * 1000);
 				int lon = (int) (MercatorProjection.toLongitude(pos.x) * 1000);
 				int rot = (int) (pos.angle);

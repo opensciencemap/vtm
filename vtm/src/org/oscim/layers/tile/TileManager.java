@@ -30,8 +30,8 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.QuadTree;
 import org.oscim.utils.quadtree.QuadTreeIndex;
-import org.oscim.view.MapView;
-import org.oscim.view.MapViewPosition;
+import org.oscim.view.Map;
+import org.oscim.view.Viewport;
 
 /**
  * @TODO - prefetching to cache file - this class should probably not be in
@@ -50,8 +50,8 @@ public class TileManager {
 	// cache limit threshold
 	private static final int CACHE_THRESHOLD = 30;
 
-	private final MapView mMapView;
-	private final MapViewPosition mMapViewPosition;
+	private final Map mMap;
+	private final Viewport mViewport;
 
 	// cache for all tiles
 	private MapTile[] mTiles;
@@ -112,14 +112,14 @@ public class TileManager {
 	private final float[] mMapPlane = new float[8];
 	private final TileLayer<?> mTileLayer;
 
-	public TileManager(MapView mapView, TileLayer<?> tileLayer, int minZoom, int maxZoom, int cacheLimit) {
-		mMapView = mapView;
+	public TileManager(Map map, TileLayer<?> tileLayer, int minZoom, int maxZoom, int cacheLimit) {
+		mMap = map;
 		mTileLayer = tileLayer;
 		mMaxZoom = maxZoom;
 		mMinZoom = minZoom;
 		mCacheLimit = cacheLimit;
 
-		mMapViewPosition = mapView.getMapViewPosition();
+		mViewport = map.getViewport();
 
 		jobQueue = new JobQueue();
 		mJobs = new ArrayList<MapTile>();
@@ -168,7 +168,7 @@ public class TileManager {
 			mTilesCount = 0;
 
 			// set up TileSet large enough to hold current tiles
-			int num = Math.max(mMapView.getWidth(), mMapView.getHeight());
+			int num = Math.max(mMap.getWidth(), mMap.getHeight());
 			int size = Tile.SIZE >> 1;
 			int numTiles = (num * num) / (size * size) * 4;
 
@@ -212,7 +212,7 @@ public class TileManager {
 			tileZoom = match;
 		}
 
-		mMapViewPosition.getMapViewProjection(mMapPlane);
+		mViewport.getMapViewProjection(mMapPlane);
 
 		// scan visible tiles. callback function calls 'addTile'
 		// which updates mNewTiles
@@ -260,7 +260,7 @@ public class TileManager {
 			}
 			//Log.d(TAG, newCnt + " << " + Arrays.deepToString(mCurrentTiles.tiles));
 			// request rendering as tiles changed
-			mMapView.render();
+			mMap.render();
 		}
 
 		/* Add tile jobs to queue */
@@ -590,7 +590,7 @@ public class TileManager {
 		// locked means the tile is visible or referenced by
 		// a tile that might be visible.
 		if (tile.isLocked())
-			mMapView.render();
+			mMap.render();
 
 		return true;
 	}

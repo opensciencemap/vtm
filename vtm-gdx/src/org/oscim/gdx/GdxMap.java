@@ -13,8 +13,8 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.layers.GridRenderLayer;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tilesource.TileSource;
-import org.oscim.view.MapView;
-import org.oscim.view.MapViewPosition;
+import org.oscim.view.Map;
+import org.oscim.view.Viewport;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
@@ -31,7 +31,7 @@ import com.badlogic.gdx.utils.Timer.Task;
 
 public class GdxMap implements ApplicationListener {
 
-	protected final MapView mMapView;
+	protected final Map mMap;
 	private final GLRenderer mMapRenderer;
 
 	boolean mRenderRequest;
@@ -39,7 +39,7 @@ public class GdxMap implements ApplicationListener {
 	public GdxMap() {
 		AssetAdapter.g = new GdxAssetAdapter();
 
-		mMapView = new MapView() {
+		mMap = new Map() {
 			@Override
 			public int getWidth() {
 				return mWidth;
@@ -85,7 +85,7 @@ public class GdxMap implements ApplicationListener {
 			}
 		};
 
-		mMapRenderer = new GLRenderer(mMapView);
+		mMapRenderer = new GLRenderer(mMap);
 
 	}
 
@@ -93,20 +93,20 @@ public class GdxMap implements ApplicationListener {
 			boolean buildings) {
 
 		if (tileSource != null) {
-			mMapLayer = mMapView.setBaseMap(tileSource);
-			mMapView.setTheme(InternalRenderTheme.DEFAULT);
+			mMapLayer = mMap.setBaseMap(tileSource);
+			mMap.setTheme(InternalRenderTheme.DEFAULT);
 
 			if (buildings)
-				mMapView.getLayerManager().add(
-						new BuildingOverlay(mMapView, mMapLayer.getTileLayer()));
+				mMap.getLayerManager().add(
+						new BuildingOverlay(mMap, mMapLayer.getTileLayer()));
 
 			if (labels)
-				mMapView.getLayerManager().add(new LabelLayer(mMapView,
+				mMap.getLayerManager().add(new LabelLayer(mMap,
 						mMapLayer.getTileLayer()));
 		}
 
 		if (tileGrid)
-			mMapView.getLayerManager().add(new GenericOverlay(mMapView,
+			mMap.getLayerManager().add(new GenericOverlay(mMap,
 					new GridRenderLayer()));
 	}
 
@@ -132,12 +132,12 @@ public class GdxMap implements ApplicationListener {
 		mWidth = w;
 		mHeight = h;
 
-		mMapView.getMapViewPosition().setViewport(w, h);
+		mMap.getViewport().setViewport(w, h);
 		MapPosition p = new MapPosition();
 		p.setZoomLevel(14);
 		p.setPosition(53.08, 8.83);
 		//p.setPosition(0.0, 0.0);
-		mMapView.setMapPosition(p);
+		mMap.setMapPosition(p);
 		mMapRenderer.onSurfaceCreated();
 		mMapRenderer.onSurfaceChanged(w, h);
 
@@ -183,9 +183,9 @@ public class GdxMap implements ApplicationListener {
 		mWidth = w;
 		mHeight = h;
 
-		mMapView.getMapViewPosition().setViewport(w, h);
+		mMap.getViewport().setViewport(w, h);
 		mMapRenderer.onSurfaceChanged(w, h);
-		mMapView.render();
+		mMap.render();
 	}
 
 	@Override
@@ -206,7 +206,7 @@ public class GdxMap implements ApplicationListener {
 		GLState.blend(false);
 		GLState.test(false, false);
 
-		mMapView.updateLayers();
+		mMap.updateLayers();
 
 		mRenderRequest = true;
 		Gdx.graphics.requestRendering();
@@ -223,10 +223,10 @@ public class GdxMap implements ApplicationListener {
 
 	class TouchHandler implements InputProcessor {
 
-		private MapViewPosition mMapPosition;
+		private Viewport mMapPosition;
 
 		public TouchHandler() {
-			mMapPosition = mMapView.getMapViewPosition();
+			mMapPosition = mMap.getViewport();
 		}
 
 		private boolean mActiveScale;
@@ -241,54 +241,54 @@ public class GdxMap implements ApplicationListener {
 
 				case Input.Keys.UP:
 					mMapPosition.moveMap(0, -50);
-					mMapView.updateMap(true);
+					mMap.updateMap(true);
 					break;
 				case Input.Keys.DOWN:
 					mMapPosition.moveMap(0, 50);
-					mMapView.updateMap(true);
+					mMap.updateMap(true);
 					break;
 				case Input.Keys.LEFT:
 					mMapPosition.moveMap(-50, 0);
-					mMapView.updateMap(true);
+					mMap.updateMap(true);
 					break;
 				case Input.Keys.RIGHT:
 					mMapPosition.moveMap(50, 0);
-					mMapView.updateMap(true);
+					mMap.updateMap(true);
 					break;
 				case Input.Keys.M:
 					mMapPosition.scaleMap(1.05f, 0, 0);
-					mMapView.updateMap(true);
+					mMap.updateMap(true);
 					break;
 				case Input.Keys.N:
 					mMapPosition.scaleMap(0.95f, 0, 0);
-					mMapView.updateMap(true);
+					mMap.updateMap(true);
 					break;
 
 				case Input.Keys.D:
-					mMapView.setTheme(InternalRenderTheme.DEFAULT);
-					mMapView.updateMap(false);
+					mMap.setTheme(InternalRenderTheme.DEFAULT);
+					mMap.updateMap(false);
 					break;
 
 				case Input.Keys.T:
-					mMapView.setTheme(InternalRenderTheme.TRONRENDER);
-					mMapView.updateMap(false);
+					mMap.setTheme(InternalRenderTheme.TRONRENDER);
+					mMap.updateMap(false);
 					break;
 
 				case Input.Keys.G:
 					if (mGridLayer == null) {
-						mGridLayer = new GenericOverlay(mMapView, new GridRenderLayer());
+						mGridLayer = new GenericOverlay(mMap, new GridRenderLayer());
 						mGridLayer.setEnabled(true);
-						mMapView.getLayerManager().add(mGridLayer);
+						mMap.getLayerManager().add(mGridLayer);
 					} else {
 						if (mGridLayer.isEnabled()) {
 							mGridLayer.setEnabled(false);
-							mMapView.getLayerManager().remove(mGridLayer);
+							mMap.getLayerManager().remove(mGridLayer);
 						} else {
 							mGridLayer.setEnabled(true);
-							mMapView.getLayerManager().add(mGridLayer);
+							mMap.getLayerManager().add(mGridLayer);
 						}
 					}
-					mMapView.render();
+					mMap.render();
 					break;
 			}
 			return false;
@@ -348,7 +348,7 @@ public class GdxMap implements ApplicationListener {
 			}
 
 			if (changed) {
-				mMapView.updateMap(true);
+				mMap.updateMap(true);
 			}
 			return true;
 		}
@@ -367,12 +367,12 @@ public class GdxMap implements ApplicationListener {
 
 				mMapPosition.animateZoom(150, 0.8f, 0, 0);
 			} else {
-				float fx = mPosX - mMapView.getWidth() / 2;
-				float fy = mPosY - mMapView.getHeight() / 2;
+				float fx = mPosX - mMap.getWidth() / 2;
+				float fy = mPosY - mMap.getHeight() / 2;
 
 				mMapPosition.animateZoom(150, 1.25f, fx, fy);
 			}
-			mMapView.updateMap(false);
+			mMap.updateMap(false);
 
 			return true;
 		}
@@ -408,10 +408,10 @@ public class GdxMap implements ApplicationListener {
 		protected static final double PINCH_ROTATE_THRESHOLD = 0.02;
 		protected static final float PINCH_TILT_THRESHOLD = 1f;
 
-		private MapViewPosition mMapPosition;
+		private Viewport mMapPosition;
 
 		public ViewController() {
-			mMapPosition = mMapView.getMapViewPosition();
+			mMapPosition = mMap.getViewport();
 		}
 
 		@Override
@@ -450,7 +450,7 @@ public class GdxMap implements ApplicationListener {
 				return true;
 
 			mMapPosition.moveMap(deltaX, deltaY);
-			mMapView.updateMap(true);
+			mMap.updateMap(true);
 
 			return false;
 		}
@@ -583,7 +583,7 @@ public class GdxMap implements ApplicationListener {
 			}
 
 			if (changed) {
-				mMapView.updateMap(true);
+				mMap.updateMap(true);
 				mPrevPinchWidth = pinchWidth;
 				mPrevY2 = y2;
 

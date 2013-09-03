@@ -8,7 +8,7 @@ import org.oscim.core.BoundingBox;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.overlay.PathOverlay;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -181,12 +181,12 @@ public class SearchBox {
 		}
 	}
 
-	public SearchBox(final MapView mapView) {
+	public SearchBox(final Map map) {
 		final Button searchButton = new Button("Search");
 		final TextBox searchField = new TextBox();
 		//searchField.setText("Bremen");
-		final PathOverlay mOverlay = new PathOverlay(mapView, 0xCC0000FF);
-		mapView.getLayerManager().add(mOverlay);
+		final PathOverlay mOverlay = new PathOverlay(map, 0xCC0000FF);
+		map.getLayerManager().add(mOverlay);
 
 		// We can add style names to widgets
 		searchButton.addStyleName("sendButton");
@@ -237,9 +237,9 @@ public class SearchBox {
 					if (b.maxLatitudeE6 - b.minLatitudeE6 < 100 &&
 							b.maxLongitudeE6 - b.minLongitudeE6 < 100)
 						// for small bbox use zoom=16 to get an overview
-						mapView.getMapViewPosition().animateTo(500, b.getCenterPoint(), 1 << 16, false);
+						map.getViewport().animateTo(500, b.getCenterPoint(), 1 << 16, false);
 					else
-						mapView.getMapViewPosition().animateTo(b);
+						map.getViewport().animateTo(b);
 					if (d instanceof NominatimData && ((NominatimData) d).getWkt() != null) {
 						String wkt = ((NominatimData) d).getWkt();
 
@@ -261,7 +261,7 @@ public class SearchBox {
 						mOverlay.addPoint(b.maxLatitudeE6, b.minLongitudeE6);
 					}
 					// hide overlay after 5 seconds
-					mapView.postDelayed(new Runnable() {
+					map.postDelayed(new Runnable() {
 						@Override
 						public void run() {
 							mOverlay.clearPath();
@@ -270,13 +270,13 @@ public class SearchBox {
 				} else {
 					MapPosition pos = new MapPosition();
 
-					mapView.getMapViewPosition().setTilt(0);
-					mapView.getMapViewPosition().setRotation(0);
+					map.getViewport().setTilt(0);
+					map.getViewport().setRotation(0);
 
 					pos.setZoomLevel(13);
 					pos.setPosition(d.getLatitude(), d.getLongitude());
-					mapView.setMapPosition(pos);
-					mapView.updateMap(true);
+					map.setMapPosition(pos);
+					map.updateMap(true);
 				}
 
 				scroller.setVisible(false);

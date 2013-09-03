@@ -12,8 +12,29 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.view;
+package org.oscim.core;
 
-public class MapAnimator {
+public class Box {
+	public double minX;
+	public double maxX;
+	public double minY;
+	public double maxY;
 
+	public Box(){
+
+	}
+	public Box(double minX, double minY, double maxX, double maxY) {
+		this.minX = minX;
+		this.minY = minY;
+		this.maxX = maxX;
+		this.maxY = maxY;
+	}
+
+	public boolean contains(double x, double y){
+		return (x >= minX && x <= maxY && y >= minY && y <= maxY);
+	}
+
+	public boolean contains(PointD p){
+		return (p.x >= minX && p.x <= maxY && p.y >= minY && p.y <= maxY);
+	}
 }
