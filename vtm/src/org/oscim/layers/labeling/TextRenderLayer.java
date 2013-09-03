@@ -50,8 +50,8 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
 import org.oscim.utils.pool.LList;
 import org.oscim.utils.pool.Pool;
-import org.oscim.view.MapView;
-import org.oscim.view.MapViewPosition;
+import org.oscim.view.Map;
+import org.oscim.view.Viewport;
 
 class TextRenderLayer extends BasicRenderLayer {
 	private final static String TAG = TextRenderLayer.class.getName();
@@ -61,7 +61,7 @@ class TextRenderLayer extends BasicRenderLayer {
 
 	private final static long MAX_RELABEL_DELAY = 200;
 
-	private final MapViewPosition mMapViewPosition;
+	private final Viewport mViewport;
 	private final TileSet mTileSet;
 
 	class TextureLayers {
@@ -131,11 +131,11 @@ class TextRenderLayer extends BasicRenderLayer {
 	private float mSquareRadius;
 	private int mRelabelCnt;
 	private final TileRenderLayer mTileLayer;
-	private final MapView mMapView;
+	private final Map mMap;
 
-	public TextRenderLayer(MapView mapView, TileRenderLayer baseLayer) {
-		mMapView = mapView;
-		mMapViewPosition = mapView.getMapViewPosition();
+	public TextRenderLayer(Map map, TileRenderLayer baseLayer) {
+		mMap = map;
+		mViewport = map.getViewport();
 		mTileLayer = baseLayer;
 		mTileSet = new TileSet();
 
@@ -294,9 +294,9 @@ class TextRenderLayer extends BasicRenderLayer {
 
 		MapPosition pos = mNextLayer.pos;
 
-		synchronized (mMapViewPosition) {
-			changedPos = mMapViewPosition.getMapPosition(pos);
-			//mMapViewPosition.getMapViewProjection(coords);
+		synchronized (mViewport) {
+			changedPos = mViewport.getMapPosition(pos);
+			//mViewport.getMapViewProjection(coords);
 		}
 
 		if (!changedTiles && !changedPos) {
@@ -305,11 +305,11 @@ class TextRenderLayer extends BasicRenderLayer {
 		}
 
 		Layers dbg = null;
-		if (mMapView.getDebugSettings().debugLabels)
+		if (mMap.getDebugSettings().debugLabels)
 			dbg = new Layers();
 
-		int mw = (mMapView.getWidth() + Tile.SIZE) / 2;
-		int mh = (mMapView.getHeight() + Tile.SIZE) / 2;
+		int mw = (mMap.getWidth() + Tile.SIZE) / 2;
+		int mh = (mMap.getHeight() + Tile.SIZE) / 2;
 		mSquareRadius = mw * mw + mh * mh;
 
 		MapTile[] tiles = mTileSet.tiles;
@@ -650,7 +650,7 @@ class TextRenderLayer extends BasicRenderLayer {
 			labelsChanged = updateLabels();
 
 			if (!isCancelled && labelsChanged)
-				mMapView.render();
+				mMap.render();
 
 			mLabelTask = null;
 			mRequestRun = false;
@@ -674,7 +674,7 @@ class TextRenderLayer extends BasicRenderLayer {
 		public void run() {
 			if (mLabelTask == null) {
 				mLabelTask = new LabelTask();
-				mMapView.addTask(mLabelTask);
+				mMap.addTask(mLabelTask);
 			}
 		}
 	};
@@ -687,7 +687,7 @@ class TextRenderLayer extends BasicRenderLayer {
 				mRequestRun = true;
 				long delay = (mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis();
 				//Log.d(TAG, "relabel in: " + delay);
-				mMapView.postDelayed(mLabelUpdate, Math.max(delay, 0));
+				mMap.postDelayed(mLabelUpdate, Math.max(delay, 0));
 			}
 		}
 	}

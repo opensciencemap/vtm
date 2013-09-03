@@ -33,23 +33,27 @@ import org.oscim.theme.ThemeLoader;
 import org.oscim.tilesource.TileSource;
 import org.oscim.utils.async.AsyncExecutor;
 
-public abstract class MapView {
+public abstract class Map {
 
-	private static final String TAG = MapView.class.getName();
+	private static final String TAG = Map.class.getName();
 
 	//public static boolean enableClosePolygons;
 	private final LayerManager mLayerManager;
-	private final MapViewPosition mMapViewPosition;
+	private final Viewport mViewport;
 	private final MapPosition mMapPosition;
 	private final AsyncExecutor mAsyncExecutor;
 
 	private DebugSettings mDebugSettings;
 
 	protected boolean mClearMap;
+	protected final MapEventLayer mEventLayer;
 
-	public MapView() {
+	private MapTileLayer mBaseLayer;
+	//private BitmapTileLayer mBackgroundLayer;
 
-		mMapViewPosition = new MapViewPosition(this);
+	public Map() {
+
+		mViewport = new Viewport(this);
 		mMapPosition = new MapPosition();
 		mLayerManager = new LayerManager();
 		mAsyncExecutor = new AsyncExecutor(2);
@@ -58,11 +62,13 @@ public abstract class MapView {
 		mDebugSettings = new DebugSettings();
 		MapTileLoader.setDebugSettings(mDebugSettings);
 
-		mLayerManager.add(0, new MapEventLayer(this));
+		mEventLayer = new MapEventLayer(this);
+		mLayerManager.add(0, mEventLayer);
 	}
 
-	private MapTileLayer mBaseLayer;
-	//private BitmapTileLayer mBackgroundLayer;
+	public MapEventLayer getEventLayer() {
+		return mEventLayer;
+	}
 
 	public MapTileLayer setBaseMap(TileSource tileSource) {
 		mBaseLayer = new MapTileLayer(this);
@@ -82,17 +88,25 @@ public abstract class MapView {
 		return null;
 	}
 
+	private InternalRenderTheme mCurrentTheme;
+
 	public void setTheme(InternalRenderTheme theme) {
 		if (mBaseLayer == null) {
 			Log.e(TAG, "No base layer set");
 			throw new IllegalStateException();
 		}
 
+		if (mCurrentTheme == theme){
+			Log.d(TAG, "same theme: " + theme);
+			return;
+		}
 		IRenderTheme t = ThemeLoader.load(theme);
 		if (t == null) {
 			Log.e(TAG, "Invalid theme");
 			throw new IllegalStateException();
 		}
+
+		mCurrentTheme = theme;
 		mBaseLayer.setRenderTheme(t);
 		GLRenderer.setBackgroundColor(t.getMapBackground());
 
@@ -158,7 +172,7 @@ public abstract class MapView {
 		boolean changed = false;
 
 		// get the current MapPosition
-		changed |= mMapViewPosition.getMapPosition(mMapPosition);
+		changed |= mViewport.getMapPosition(mMapPosition);
 
 		mLayerManager.onUpdate(mMapPosition, changed, mClearMap);
 		mClearMap = false;
@@ -174,7 +188,11 @@ public abstract class MapView {
 	}
 
 	public void setMapPosition(MapPosition mapPosition) {
-		mMapViewPosition.setMapPosition(mapPosition);
+		mViewport.setMapPosition(mapPosition);
+	}
+
+	public void getMapPosition(MapPosition mapPosition) {
+		mViewport.getMapPosition(mapPosition);
 	}
 
 	/**
@@ -185,15 +203,15 @@ public abstract class MapView {
 	 */
 	public void setCenter(GeoPoint geoPoint) {
 
-		mMapViewPosition.setMapCenter(geoPoint);
+		mViewport.setMapCenter(geoPoint);
 		updateMap(true);
 	}
 
 	/**
-	 * @return MapViewPosition
+	 * @return Viewport
 	 */
-	public MapViewPosition getMapViewPosition() {
-		return mMapViewPosition;
+	public Viewport getViewport() {
+		return mViewport;
 	}
 
 	/**
@@ -215,7 +233,6 @@ public abstract class MapView {
 	 * @return estimated visible axis aligned bounding box
 	 */
 	public BoundingBox getBoundingBox() {
-		return mMapViewPosition.getViewBox();
+		return mViewport.getViewBox();
 	}
-
 }

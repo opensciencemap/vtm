@@ -18,11 +18,11 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.Log;
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.Tile;
-import org.oscim.view.MapView;
-import org.oscim.view.MapViewPosition;
+import org.oscim.view.Map;
+import org.oscim.view.Viewport;
 
 /**
- * Changes MapViewPosition for scroll, fling, scale, rotation and tilt gestures
+ * Changes Viewport for scroll, fling, scale, rotation and tilt gestures
  *
  * @TODO:
  *        - better recognition of tilt/rotate/scale state
@@ -61,15 +61,40 @@ public class MapEventLayer extends InputLayer {
 	protected static final double PINCH_ROTATE_THRESHOLD = 0.02;
 	protected static final float PINCH_TILT_THRESHOLD = 1f;
 
-	private final MapViewPosition mMapPosition;
+	private final Viewport mMapPosition;
 	private final VelocityTracker mTracker;
 
-	public MapEventLayer(MapView mapView) {
-		super(mapView);
-		mMapPosition = mapView.getMapViewPosition();
+	public MapEventLayer(Map map) {
+		super(map);
+		mMapPosition = map.getViewport();
 		mTracker = new VelocityTracker();
 	}
 	private long mPrevTime;
+
+	private boolean mEnableRotation = true;
+	private boolean mEnableTilt = true;
+	private boolean mEnableMove = true;
+	private boolean mEnableZoom = true;
+
+	public void enableRotation(boolean enable) {
+		mEnableRotation = enable;
+	}
+
+	public boolean rotationEnabled() {
+		return mEnableRotation;
+	}
+
+	public void enableTilt(boolean enable) {
+		mEnableTilt = enable;
+	}
+
+	public void enableMove(boolean enable) {
+		mEnableMove = enable;
+	}
+
+	public void enableZoom(boolean enable) {
+		mEnableZoom = enable;
+	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent e) {
@@ -121,8 +146,8 @@ public class MapEventLayer extends InputLayer {
 		float mx = x1 - mPrevX;
 		float my = y1 - mPrevY;
 
-		float width = mMapView.getWidth();
-		float height = mMapView.getHeight();
+		float width = mMap.getWidth();
+		float height = mMap.getHeight();
 
 		mTracker.update(x1, y1, e.getTime());
 
@@ -135,7 +160,7 @@ public class MapEventLayer extends InputLayer {
 			if (debug)
 				Log.d(TAG, "tap scale: " + mx + " " + my);
 			mMapPosition.scaleMap(1 - my / (height / 8), 0, 0);
-			mMapView.updateMap(true);
+			mMap.updateMap(true);
 
 			mPrevX = x1;
 			mPrevY = y1;
@@ -146,7 +171,7 @@ public class MapEventLayer extends InputLayer {
 
 			if (mx > 1 || mx < -1 || my > 1 || my < -1) {
 				mMapPosition.moveMap(mx, my);
-				mMapView.updateMap(true);
+				mMap.updateMap(true);
 
 				mPrevX = x1;
 				mPrevY = y1;
@@ -233,7 +258,7 @@ public class MapEventLayer extends InputLayer {
 		}
 
 		if (changed) {
-			mMapView.updateMap(true);
+			mMap.updateMap(true);
 			mPrevPinchWidth = pinchWidth;
 
 			mPrevX2 = x2;
@@ -274,7 +299,7 @@ public class MapEventLayer extends InputLayer {
 			printState("onDoubleTap");
 
 		// avoid onLongPress
-		mMapView.getLayerManager().cancelGesture();
+		mMap.getLayerManager().cancelGesture();
 
 		return true;
 	}
@@ -285,7 +310,7 @@ public class MapEventLayer extends InputLayer {
 
 		if (e2.getPointerCount() == 1) {
 			mMapPosition.moveMap(-distanceX, -distanceY);
-			mMapView.updateMap(true);
+			mMap.updateMap(true);
 			return true;
 		}
 
@@ -300,7 +325,7 @@ public class MapEventLayer extends InputLayer {
 		int w = Tile.SIZE * 3;
 		int h = Tile.SIZE * 3;
 
-		//if (mMapView.enablePagedFling) {
+		//if (mMap.enablePagedFling) {
 		//	double a = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
 		//
 		//	float vx = (float) (velocityX / a);
@@ -309,7 +334,7 @@ public class MapEventLayer extends InputLayer {
 		//	if (a < 400)
 		//		return true;
 		//
-		//	float move = Math.min(mMapView.getWidth(), mMapView.getHeight()) * 2 / 3;
+		//	float move = Math.min(mMap.getWidth(), mMap.getHeight()) * 2 / 3;
 		//	mMapPosition.animateTo(vx * move, vy * move, 250);
 		//} else {
 		float s = 1; //(200 / CanvasAdapter.dpi);

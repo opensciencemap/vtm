@@ -17,12 +17,12 @@ package org.oscim.layers;
 
 import org.oscim.backend.input.KeyEvent;
 import org.oscim.backend.input.MotionEvent;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 public abstract class InputLayer extends Layer {
 
-	public InputLayer(MapView mapView) {
-		super(mapView);
+	public InputLayer(Map map) {
+		super(map);
 
 	}
 
@@ -30,7 +30,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param keyCode
 	 *            ...
@@ -46,7 +46,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param keyCode
 	 *            ...
@@ -63,7 +63,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param event
 	 *            ...
@@ -77,7 +77,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param e
 	 *            ...
@@ -93,7 +93,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param e
 	 *            ...
@@ -107,7 +107,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param e
 	 *            ...
@@ -121,7 +121,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param e
 	 *            ...
@@ -137,7 +137,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param e
 	 *            ...
@@ -172,7 +172,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param e
 	 *            ...
@@ -186,7 +186,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param pEvent1
 	 *            ...
@@ -215,7 +215,7 @@ public abstract class InputLayer extends Layer {
 	 * By default does nothing (<code>return false</code>). If you handled the
 	 * Event, return <code>true</code>, otherwise return <code>false</code>. If
 	 * you returned <code>true</code> none of the following Overlays or the
-	 * underlying {@link MapView} has the chance to handle this event.
+	 * underlying {@link Map} has the chance to handle this event.
 	 *
 	 * @param e
 	 *            ...

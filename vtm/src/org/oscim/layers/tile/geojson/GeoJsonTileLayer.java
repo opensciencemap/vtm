@@ -14,7 +14,7 @@
  */
 package org.oscim.layers.tile.geojson;
 
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
@@ -22,8 +22,8 @@ import org.oscim.layers.tile.TileManager;
 
 public class GeoJsonTileLayer extends TileLayer<TileLoader> {
 
-	public GeoJsonTileLayer(MapView mapView) {
-		super(mapView);
+	public GeoJsonTileLayer(Map map) {
+		super(map);
 	}
 
 	@Override

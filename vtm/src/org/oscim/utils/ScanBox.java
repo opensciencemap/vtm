@@ -25,7 +25,7 @@ import org.oscim.core.Tile;
  * bounds to the map.
  *
  * use:
- * MapViewPosition.getMapViewProjection(box)
+ * Viewport.getMapViewProjection(box)
  * yourScanBox.scan(pos.x, pos.y, pos.scale, zoomLevel, coords);
  *
  * where zoomLevel is the zoom-level for which tile coordinates

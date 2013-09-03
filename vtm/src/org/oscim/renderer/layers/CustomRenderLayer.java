@@ -25,7 +25,7 @@ import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.RenderLayer;
 import org.oscim.utils.GlUtils;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 
 /*
@@ -39,7 +39,7 @@ public class CustomRenderLayer extends RenderLayer {
 
 	private static final GL20 GL = GLAdapter.get();
 
-	private final MapView mMapView;
+	private final Map mMap;
 
 	private int mProgramObject;
 	private int hVertexPosition;
@@ -54,8 +54,8 @@ public class CustomRenderLayer extends RenderLayer {
 	};
 	private boolean mInitialized;
 
-	public CustomRenderLayer(MapView mapView) {
-		mMapView = mapView;
+	public CustomRenderLayer(Map map) {
+		mMap = map;
 	}
 
 	// ---------- everything below runs in GLRender Thread ----------
@@ -113,7 +113,7 @@ public class CustomRenderLayer extends RenderLayer {
 		// set mvp (tmp) matrix relative to mMapPosition
 		// i.e. fixed on the map
 
-		float ratio = 1f / mMapView.getWidth();
+		float ratio = 1f / mMap.getWidth();
 
 		m.mvp.setScale(ratio, ratio, 1);
 		m.mvp.multiplyLhs(m.proj);

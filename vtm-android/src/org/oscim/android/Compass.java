@@ -14,7 +14,7 @@
  */
 package org.oscim.android;
 
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -30,9 +30,9 @@ public class Compass {
 			if (Math.abs(event.values[0] - mAngle) > 0.25) {
 				mAngle = event.values[0];
 
-				if (mMapView != null) {
-					mMapView.getMapViewPosition().setRotation(-mAngle);
-					mMapView.updateMap(true);
+				if (mMap != null) {
+					mMap.getViewport().setRotation(-mAngle);
+					mMap.updateMap(true);
 				}
 			}
 		}
@@ -43,13 +43,13 @@ public class Compass {
 	};
 
 	/* package */float mAngle = 0;
-	/* package */MapView mMapView;
+	/* package */Map mMap;
 
 	private final SensorManager mSensorManager;
 	private final Sensor mSensor;
 
-	public Compass(MapActivity mapActivity, MapView mapView) {
-		mMapView = mapView;
+	public Compass(MapActivity mapActivity, Map map) {
+		mMap = map;
 		mSensorManager = (SensorManager) mapActivity
 				.getSystemService(Context.SENSOR_SERVICE);
 
@@ -63,6 +63,6 @@ public class Compass {
 
 	public void disable() {
 		mSensorManager.unregisterListener(mListener);
-		mMapView.getMapViewPosition().setRotation(0);
+		mMap.getViewport().setRotation(0);
 	}
 }

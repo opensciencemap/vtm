@@ -55,7 +55,7 @@ package org.oscim.android;
 //		@Override
 //		public void onClick(View view) {
 //			// if (MapView.testRegionZoom)
-//			// mMapView.mRegionLookup.updateRegion(1, null);
+//			// mMap.mRegionLookup.updateRegion(1, null);
 //			// else
 //			// MapZoomControls.this.zoom((byte) 1);
 //			mMapZoomControls.zoom((byte) 1);
@@ -72,7 +72,7 @@ package org.oscim.android;
 //		@Override
 //		public void onClick(View view) {
 //			// if (MapView.testRegionZoom)
-//			// mMapView.mRegionLookup.updateRegion(-1, null);
+//			// mMap.mRegionLookup.updateRegion(-1, null);
 //			// else
 //			mMapZoomControls.zoom((byte) -1);
 //		}
@@ -117,10 +117,10 @@ package org.oscim.android;
 //	private final Handler mZoomControlsHideHandler;
 //	private byte mZoomLevelMax;
 //	private byte mZoomLevelMin;
-//	private final MapView mMapView;
+//	private final MapView mMap;
 //
-//	MapZoomControls(Context context, final MapView mapView) {
-//		mMapView = mapView;
+//	MapZoomControls(Context context, final MapView map) {
+//		mMap = map;
 //		mZoomControls = new ZoomControls(context);
 //		mShowMapZoomControls = true;
 //		mZoomLevelMax = DEFAULT_ZOOM_LEVEL_MAX;
@@ -135,7 +135,7 @@ package org.oscim.android;
 //
 //		int wrapContent = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 //		LayoutParams layoutParams = new LayoutParams(wrapContent, wrapContent);
-//		mapView.addView(mZoomControls, layoutParams);
+//		map.addView(mZoomControls, layoutParams);
 //	}
 //
 //	/**
@@ -146,8 +146,8 @@ package org.oscim.android;
 //	 * @return true if the zoom level was changed, false otherwise.
 //	 */
 //	boolean zoom(byte zoomLevelDiff) {
-//		MapViewPosition mapViewPosition = mMapView.getMapViewPosition();
-//		int z = mapViewPosition.getZoomLevel() + zoomLevelDiff;
+//		Viewport mapPosition = mMap.getViewport();
+//		int z = mapPosition.getZoomLevel() + zoomLevelDiff;
 //		if (zoomLevelDiff > 0) {
 //			// check if zoom in is possible
 //			if (z > mZoomLevelMax) {
@@ -161,8 +161,8 @@ package org.oscim.android;
 //			}
 //		}
 //
-//		mapViewPosition.setZoomLevel((byte) z);
-//		mMapView.redrawMap(true);
+//		mapPosition.setZoomLevel((byte) z);
+//		mMap.redrawMap(true);
 //
 //		return true;
 //	}

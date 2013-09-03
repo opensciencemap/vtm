@@ -18,14 +18,14 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import org.oscim.renderer.GLRenderer;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 import android.opengl.GLSurfaceView;
 
 public class AndroidGLRenderer extends GLRenderer implements GLSurfaceView.Renderer{
 
-	public AndroidGLRenderer(MapView mapView) {
-		super(mapView);
+	public AndroidGLRenderer(Map map) {
+		super(map);
 	}
 
 	@Override

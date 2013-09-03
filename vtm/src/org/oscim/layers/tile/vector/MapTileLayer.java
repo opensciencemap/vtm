@@ -25,7 +25,7 @@ import org.oscim.tilesource.ITileDataSource;
 import org.oscim.tilesource.MapInfo;
 import org.oscim.tilesource.TileSource;
 import org.oscim.tilesource.TileSource.OpenResult;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 /**
  * The vector-tile-map layer. This class manages instances of
@@ -37,8 +37,8 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 
 	private TileSource mTileSource;
 
-	public MapTileLayer(MapView mapView) {
-		super(mapView);
+	public MapTileLayer(Map map) {
+		super(map);
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class MapTileLayer extends TileLayer<MapTileLoader> {
 
 		mTileManager.setZoomTable(mTileSource.getMapInfo().zoomLevel);
 
-		mMapView.clearMap();
+		mMap.clearMap();
 
 		resumeLoaders();
 

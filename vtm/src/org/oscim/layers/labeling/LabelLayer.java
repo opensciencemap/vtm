@@ -18,7 +18,7 @@ import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.InputLayer;
 import org.oscim.layers.tile.TileRenderLayer;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 import org.oscim.backend.Log;
 
@@ -26,11 +26,11 @@ public class LabelLayer extends InputLayer {
 	private final static String TAG = LabelLayer.class.getName();
 	final TextRenderLayer mTextLayer;
 
-	public LabelLayer(MapView mapView, TileRenderLayer tileRenderLayer) {
-		super(mapView);
+	public LabelLayer(Map map, TileRenderLayer tileRenderLayer) {
+		super(map);
 
-		//mTextLayer = new org.oscim.renderer.layers.TextRenderLayer(mapView, tileRenderLayer);
-		mTextLayer = new TextRenderLayer(mapView, tileRenderLayer);
+		//mTextLayer = new org.oscim.renderer.layers.TextRenderLayer(map, tileRenderLayer);
+		mTextLayer = new TextRenderLayer(map, tileRenderLayer);
 		mLayer = mTextLayer;
 	}
 

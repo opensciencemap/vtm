@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 import org.oscim.core.MapPosition;
 import org.oscim.layers.Layer;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 public abstract class TileLayer<T extends TileLoader> extends Layer {
 	//private final static String TAG = TileLayer.class.getName();
@@ -34,16 +34,16 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 
 	protected boolean mInitial = true;
 
-	public TileLayer(MapView mapView) {
-		this(mapView, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL, CACHE_LIMIT);
+	public TileLayer(Map map) {
+		this(map, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL, CACHE_LIMIT);
 	}
 
-	public TileLayer(MapView mapView, int minZoom, int maxZoom, int cacheLimit) {
-		super(mapView);
+	public TileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
+		super(map);
 
 		// TileManager responsible for adding visible tiles
 		// to load queue and managing in-memory tile cache.
-		mTileManager = new TileManager(mapView, this, minZoom, maxZoom, cacheLimit);
+		mTileManager = new TileManager(map, this, minZoom, maxZoom, cacheLimit);
 
 		// Instantiate TileLoader threads
 		mTileLoader = new ArrayList<T>();

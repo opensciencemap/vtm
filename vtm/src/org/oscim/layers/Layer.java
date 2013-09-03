@@ -14,17 +14,17 @@
  */
 package org.oscim.layers;
 
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.RenderLayer;
 
 public abstract class Layer {
-	public Layer(MapView mapView) {
-		mMapView = mapView;
+	public Layer(Map map) {
+		mMap = map;
 	}
 
 	private boolean mEnabled = true;
-	protected final MapView mMapView;
+	protected final Map mMap;
 
 	/** RenderLayer used to draw this layer. To be implemented by sub-classes */
 	protected RenderLayer mLayer;

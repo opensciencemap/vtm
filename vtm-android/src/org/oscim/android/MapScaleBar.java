@@ -75,8 +75,8 @@ package org.oscim.android;
 //	private final Bitmap mMapScaleBitmap;
 //	private final BitmapRenderLayer mBitmapLayer;
 //
-//	public MapScaleBar(MapView mapView) {
-//		super(mapView);
+//	public MapScaleBar(MapView map) {
+//		super(map);
 //
 //		mMapScaleBitmap = Bitmap.createBitmap(
 //				BITMAP_WIDTH, BITMAP_HEIGHT,
@@ -89,7 +89,7 @@ package org.oscim.android;
 //		configurePaints();
 //
 //		mRedrawNeeded = true;
-//		mLayer = mBitmapLayer = new BitmapRenderLayer(mapView);
+//		mLayer = mBitmapLayer = new BitmapRenderLayer(map);
 //		mBitmapLayer.setBitmap(mMapScaleBitmap, 0, 0,
 //				(int)(BITMAP_WIDTH * 1.2f),
 //				(int)(BITMAP_HEIGHT * 1.2f));

@@ -16,14 +16,14 @@
 
 package org.oscim.layers.overlay;
 
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 import org.oscim.core.PointF;
 import org.oscim.layers.InputLayer;
 
 /**
  * Base class representing an overlay which may be displayed on top of a
- * {@link MapView}. To add an overlay, subclass this class, create an instance,
- * and add via addOverlay() of {@link MapView}.
+ * {@link Map}. To add an overlay, subclass this class, create an instance,
+ * and add via addOverlay() of {@link Map}.
  * This class implements a form of Gesture Handling similar to
  * {@link android.view.GestureDetector.SimpleOnGestureListener} and
  * GestureDetector.OnGestureListener.
@@ -32,8 +32,8 @@ import org.oscim.layers.InputLayer;
  */
 public abstract class Overlay extends InputLayer {
 
-	public Overlay(MapView mapView) {
-		super(mapView);
+	public Overlay(Map map) {
+		super(map);
 	}
 
 	/**

@@ -14,18 +14,18 @@
  */
 package org.oscim.layers.overlay;
 
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 import org.oscim.renderer.RenderLayer;
 
 public class GenericOverlay extends Overlay {
 	/**
-	 * @param mapView
+	 * @param map
 	 *            ...
 	 * @param renderer
 	 *            ...
 	 */
-	public GenericOverlay(MapView mapView, RenderLayer renderer) {
-		super(mapView);
+	public GenericOverlay(Map map, RenderLayer renderer) {
+		super(map);
 		mLayer = renderer;
 	}
 }

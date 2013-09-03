@@ -14,25 +14,25 @@
  */
 package org.oscim.android;
 
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
 public class GLView extends GLSurfaceView {
 
-	MapView mMapView;
+	Map mMap;
 	private final AndroidGLRenderer mRenderer;
 
-	public GLView(Context context, MapView mapView) {
+	public GLView(Context context, Map map) {
 		super(context);
-		mMapView = mapView;
+		mMap = map;
 		// Log.d(TAG, "init GLSurfaceLayer");
 		setEGLConfigChooser(new GlConfigChooser());
 		setEGLContextClientVersion(2);
 
 		setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
-		mRenderer = new AndroidGLRenderer(mMapView);
+		mRenderer = new AndroidGLRenderer(mMap);
 		setRenderer(mRenderer);
 
 		//if (!MapView.debugFrameTime)

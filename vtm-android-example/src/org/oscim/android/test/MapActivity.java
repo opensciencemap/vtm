@@ -1,6 +1,6 @@
 package org.oscim.android.test;
 
-import org.oscim.android.AndroidMapView;
+import org.oscim.android.MapView;
 import org.oscim.layers.labeling.LabelLayer;
 import org.oscim.layers.overlay.BuildingOverlay;
 import org.oscim.layers.tile.vector.MapTileLayer;
@@ -13,38 +13,38 @@ import android.view.Menu;
 
 public class MapActivity extends org.oscim.android.MapActivity {
 
-	private AndroidMapView mAndroidMapView;
+	private MapView mMapView;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
 
-		mAndroidMapView = (AndroidMapView) findViewById(R.id.mapView);
+		mMapView = (MapView) findViewById(R.id.mapView);
 
-		//mMap = mMapView.getMap();
+		//mMap = mMap.getMap();
 		//TileSource tileSource = new OSciMap2TileSource();
 		//tileSource.setOption("url", "http://city.informatik.uni-bremen.de/osci/map-live");
 
 		TileSource tileSource = new OSciMap4TileSource();
 		tileSource.setOption("url", "http://city.informatik.uni-bremen.de/tiles/vtm");
 
-		MapTileLayer l = mMapView.setBaseMap(tileSource);
-		//mMapView.setDebugSettings(new DebugSettings(false, false, true, false, false));
+		MapTileLayer l = mMap.setBaseMap(tileSource);
+		//mMap.setDebugSettings(new DebugSettings(false, false, true, false, false));
 
-		mMapView.getLayerManager().add(new BuildingOverlay(mMapView, l.getTileLayer()));
-		mMapView.getLayerManager().add(new LabelLayer(mMapView, l.getTileLayer()));
+		mMap.getLayerManager().add(new BuildingOverlay(mMap, l.getTileLayer()));
+		mMap.getLayerManager().add(new LabelLayer(mMap, l.getTileLayer()));
 
-		mMapView.setTheme(InternalRenderTheme.DEFAULT);
-		//mMapView.setTheme(InternalRenderTheme.TRONRENDER);
+		mMap.setTheme(InternalRenderTheme.DEFAULT);
+		//mMap.setTheme(InternalRenderTheme.TRONRENDER);
 
-		//mMapView.getLayerManager().add(new BitmapTileLayer(mMapView, HillShadeTiles.INSTANCE));
+		//mMap.getLayerManager().add(new BitmapTileLayer(mMap, HillShadeTiles.INSTANCE));
 
-		//mMapView.setBackgroundMap(new BitmapTileLayer(mMapView, StamenWaterTiles.INSTANCE));
+		//mMap.setBackgroundMap(new BitmapTileLayer(mMap, StamenWaterTiles.INSTANCE));
 		//mMap.setBackgroundMap(new BitmapTileLayer(mMap, MapQuestAerial.INSTANCE));
-		//mMapView.getLayerManager().add(new GenericOverlay(mMapView, new GridRenderLayer(mMapView)));
+		//mMap.getLayerManager().add(new GenericOverlay(mMap, new GridRenderLayer(mMap)));
 
-		mAndroidMapView.setClickable(true);
-		mAndroidMapView.setFocusable(true);
+		mMapView.setClickable(true);
+		mMapView.setFocusable(true);
 	}
 
 	@Override

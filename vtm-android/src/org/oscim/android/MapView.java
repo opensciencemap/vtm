@@ -23,7 +23,7 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.Tile;
-import org.oscim.view.MapView;
+import org.oscim.view.Map;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -35,9 +35,9 @@ import android.widget.RelativeLayout;
  * A MapView shows a map on the display of the device. It handles all user input
  * and touch gestures to move and zoom the map.
  */
-public class AndroidMapView extends RelativeLayout {
+public class MapView extends RelativeLayout {
 
-	final static String TAG = AndroidMapView.class.getName();
+	final static String TAG = MapView.class.getName();
 
 	public static final boolean debugFrameTime = false;
 	public static final boolean testRegionZoom = false;
@@ -52,7 +52,7 @@ public class AndroidMapView extends RelativeLayout {
 	private int mHeight;
 
 
-	private final MapView mMapView;
+	private final Map mMap;
 
 	final GLView mGLView;
 	boolean mPausing = false;
@@ -61,10 +61,6 @@ public class AndroidMapView extends RelativeLayout {
 	static {
 		System.loadLibrary("vtm-jni");
 		//System.loadLibrary("tessellate");
-
-		CanvasAdapter.g = AndroidGraphics.INSTANCE;
-		GLAdapter.g = new AndroidGL();
-		Log.logger = new AndroidLog();
 	}
 
 	/**
@@ -74,7 +70,7 @@ public class AndroidMapView extends RelativeLayout {
 	 *             if the context object is not an instance of
 	 *             {@link MapActivity} .
 	 */
-	public AndroidMapView(Context context) {
+	public MapView(Context context) {
 		this(context, null);
 	}
 
@@ -88,7 +84,7 @@ public class AndroidMapView extends RelativeLayout {
 	 *             {@link MapActivity} .
 	 */
 
-	public AndroidMapView(Context context, AttributeSet attributeSet) {
+	public MapView(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
 
 		if (!(context instanceof MapActivity)) {
@@ -96,7 +92,10 @@ public class AndroidMapView extends RelativeLayout {
 					"context is not an instance of MapActivity");
 		}
 
+		Log.logger = new AndroidLog();
+		CanvasAdapter.g = AndroidGraphics.INSTANCE;
 		AssetAdapter.g = new AndroidAssetAdapter(context);
+		GLAdapter.g = new AndroidGL();
 
 		this.setWillNotDraw(true);
 
@@ -108,9 +107,9 @@ public class AndroidMapView extends RelativeLayout {
 
 		MapActivity mapActivity = (MapActivity) context;
 
-		final AndroidMapView m = this;
+		final MapView m = this;
 
-		mMapView = new MapView(){
+		mMap = new Map(){
 
 			boolean mWaitRedraw;
 
@@ -176,10 +175,10 @@ public class AndroidMapView extends RelativeLayout {
 			}
 		};
 
-		mGLView = new GLView(context, mMapView);
-		mCompass = new Compass(mapActivity, mMapView);
+		mGLView = new GLView(context, mMap);
+		mCompass = new Compass(mapActivity, mMap);
 
-		mapActivity.registerMapView(mMapView);
+		mapActivity.registerMapView(mMap);
 
 		LayoutParams params = new LayoutParams(
 				android.view.ViewGroup.LayoutParams.MATCH_PARENT,
@@ -187,21 +186,21 @@ public class AndroidMapView extends RelativeLayout {
 
 		addView(mGLView, params);
 
-		mMapView.clearMap();
-		mMapView.updateMap(false);
+		mMap.clearMap();
+		mMap.updateMap(false);
 	}
 
 	View getView(){
 		return this;
 	}
 
-	public MapView getMap() {
-		return mMapView;
+	public Map getMap() {
+		return mMap;
 	}
 
 	public void onStop() {
 		Log.d(TAG, "onStop");
-		//mLayerManager.destroy();
+		//mMap.destroy();
 	}
 
 
@@ -230,7 +229,7 @@ public class AndroidMapView extends RelativeLayout {
 
 		mMotionEvent.wrap(motionEvent);
 
-		return mMapView.getLayerManager().handleMotionEvent(mMotionEvent);
+		return mMap.getLayers().handleMotionEvent(mMotionEvent);
 	}
 
 	// synchronized ???
@@ -247,7 +246,7 @@ public class AndroidMapView extends RelativeLayout {
 		mInitialized = (mWidth > 0 && mHeight > 0);
 
 		if (mInitialized)
-			mMapView.getMapViewPosition().setViewport(width, height);
+			mMap.getViewport().setViewport(width, height);
 	}
 
 

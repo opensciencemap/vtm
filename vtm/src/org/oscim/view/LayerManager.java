@@ -428,14 +428,14 @@ public class LayerManager extends AbstractList<Layer> {
 	//
 	// public boolean onCreateOptionsMenu(final Menu pMenu, final int
 	// menuIdOffset,
-	// final MapView mapView) {
+	// final MapView map) {
 	// boolean result = true;
 	// for (final Layer overlay : this.overlaysReversed()) {
 	// if ((overlay instanceof ILayerMenuProvider)
 	// && ((ILayerMenuProvider) overlay).isOptionsMenuEnabled()) {
 	// result &= ((ILayerMenuProvider) overlay).onCreateOptionsMenu(pMenu,
 	// menuIdOffset,
-	// mapView);
+	// map);
 	// }
 	// }
 	//
@@ -443,7 +443,7 @@ public class LayerManager extends AbstractList<Layer> {
 	// ILayerMenuProvider)
 	// && ((ILayerMenuProvider) mTilesLayer).isOptionsMenuEnabled()) {
 	// result &= mTilesLayer.onCreateOptionsMenu(pMenu, menuIdOffset,
-	// mapView);
+	// map);
 	// }
 	//
 	// return result;
@@ -451,19 +451,19 @@ public class LayerManager extends AbstractList<Layer> {
 	//
 	// public boolean onPrepareOptionsMenu(final Menu pMenu, final int
 	// menuIdOffset,
-	// final MapView mapView) {
+	// final MapView map) {
 	// for (final Layer overlay : this.overlaysReversed()) {
 	// if ((overlay instanceof ILayerMenuProvider)
 	// && ((ILayerMenuProvider) overlay).isOptionsMenuEnabled()) {
 	// ((ILayerMenuProvider) overlay).onPrepareOptionsMenu(pMenu,
-	// menuIdOffset, mapView);
+	// menuIdOffset, map);
 	// }
 	// }
 	//
 	// if ((mTilesLayer != null) && (mTilesLayer instanceof
 	// ILayerMenuProvider)
 	// && ((ILayerMenuProvider) mTilesLayer).isOptionsMenuEnabled()) {
-	// mTilesLayer.onPrepareOptionsMenu(pMenu, menuIdOffset, mapView);
+	// mTilesLayer.onPrepareOptionsMenu(pMenu, menuIdOffset, map);
 	// }
 	//
 	// return true;
@@ -471,13 +471,13 @@ public class LayerManager extends AbstractList<Layer> {
 	//
 	// public boolean onOptionsItemSelected(final MenuItem item, final int
 	// menuIdOffset,
-	// final MapView mapView) {
+	// final MapView map) {
 	// for (final Layer overlay : this.overlaysReversed()) {
 	// if ((overlay instanceof ILayerMenuProvider)
 	// && ((ILayerMenuProvider) overlay).isOptionsMenuEnabled()
 	// && ((ILayerMenuProvider) overlay).onOptionsItemSelected(item,
 	// menuIdOffset,
-	// mapView)) {
+	// map)) {
 	// return true;
 	// }
 	// }
@@ -487,7 +487,7 @@ public class LayerManager extends AbstractList<Layer> {
 	// && ((ILayerMenuProvider) mTilesLayer).isOptionsMenuEnabled()
 	// && ((ILayerMenuProvider) mTilesLayer).onOptionsItemSelected(item,
 	// menuIdOffset,
-	// mapView)) {
+	// map)) {
 	// return true;
 	// }
 	//
