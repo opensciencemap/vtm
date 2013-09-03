@@ -17,6 +17,7 @@ package org.oscim.utils;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +44,15 @@ public final class IOUtils {
 		}
 	}
 
+	public static void closeQuietly(OutputStream closeable) {
+		try {
+			if (closeable != null) {
+				closeable.close();
+			}
+		} catch (IOException e) {
+			LOGGER.log(Level.FINE, e.getMessage(), e);
+		}
+	}
 	private IOUtils() {
 		throw new IllegalStateException();
 	}
