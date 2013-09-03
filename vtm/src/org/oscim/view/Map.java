@@ -14,15 +14,11 @@
  */
 package org.oscim.view;
 
-import java.util.List;
-
 import org.oscim.backend.Log;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
-import org.oscim.layers.Layer;
 import org.oscim.layers.MapEventLayer;
-import org.oscim.layers.overlay.Overlay;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.layers.tile.vector.MapTileLoader;
@@ -37,8 +33,7 @@ public abstract class Map {
 
 	private static final String TAG = Map.class.getName();
 
-	//public static boolean enableClosePolygons;
-	private final LayerManager mLayerManager;
+	private final Layers mLayers;
 	private final Viewport mViewport;
 	private final MapPosition mMapPosition;
 	private final AsyncExecutor mAsyncExecutor;
@@ -55,7 +50,7 @@ public abstract class Map {
 
 		mViewport = new Viewport(this);
 		mMapPosition = new MapPosition();
-		mLayerManager = new LayerManager();
+		mLayers = new Layers();
 		mAsyncExecutor = new AsyncExecutor(2);
 
 		// FIXME!
@@ -63,7 +58,7 @@ public abstract class Map {
 		MapTileLoader.setDebugSettings(mDebugSettings);
 
 		mEventLayer = new MapEventLayer(this);
-		mLayerManager.add(0, mEventLayer);
+		mLayers.add(0, mEventLayer);
 	}
 
 	public MapEventLayer getEventLayer() {
@@ -74,17 +69,17 @@ public abstract class Map {
 		mBaseLayer = new MapTileLayer(this);
 
 		mBaseLayer.setTileSource(tileSource);
-		mLayerManager.add(1, mBaseLayer);
+		mLayers.add(1, mBaseLayer);
 
 		return mBaseLayer;
 	}
 
 	public void setBackgroundMap(BitmapTileLayer tileLayer) {
-		mLayerManager.add(1, tileLayer);
+		mLayers.add(1, tileLayer);
 	}
 
 	public MapTileLayer setBaseMap(BitmapTileLayer tileLayer) {
-		mLayerManager.add(1, tileLayer);
+		mLayers.add(1, tileLayer);
 		return null;
 	}
 
@@ -114,7 +109,7 @@ public abstract class Map {
 	}
 
 	public void destroy() {
-		mLayerManager.destroy();
+		mLayers.destroy();
 		mAsyncExecutor.dispose();
 	}
 
@@ -174,7 +169,7 @@ public abstract class Map {
 		// get the current MapPosition
 		changed |= mViewport.getMapPosition(mMapPosition);
 
-		mLayerManager.onUpdate(mMapPosition, changed, mClearMap);
+		mLayers.onUpdate(mMapPosition, changed, mClearMap);
 		mClearMap = false;
 	}
 
@@ -207,26 +202,12 @@ public abstract class Map {
 		updateMap(true);
 	}
 
-	/**
-	 * @return Viewport
-	 */
 	public Viewport getViewport() {
 		return mViewport;
 	}
 
-	/**
-	 * You can add/remove/reorder your Overlays using the List of
-	 * {@link Overlay}. The first (index 0) Overlay gets drawn first, the one
-	 * with the highest as the last one.
-	 *
-	 * @return ...
-	 */
-	public List<Layer> getOverlays() {
-		return this.getLayerManager();
-	}
-
-	public LayerManager getLayerManager() {
-		return mLayerManager;
+	public Layers getLayers() {
+		return mLayers;
 	}
 
 	/**

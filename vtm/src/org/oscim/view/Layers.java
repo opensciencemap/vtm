@@ -29,13 +29,13 @@ import org.oscim.layers.Layer;
 import org.oscim.layers.overlay.Overlay.Snappable;
 import org.oscim.renderer.RenderLayer;
 
-public class LayerManager extends AbstractList<Layer> {
-	private final static String TAG = LayerManager.class.getName();
+public class Layers extends AbstractList<Layer> {
+	private final static String TAG = Layers.class.getName();
 	private final static boolean debugInput = false;
 
 	private final CopyOnWriteArrayList<Layer> mLayerList;
 
-	LayerManager() {
+	Layers() {
 		mLayerList = new CopyOnWriteArrayList<Layer>();
 	}
 

@@ -31,17 +31,17 @@ public class MapActivity extends org.oscim.android.MapActivity {
 		MapTileLayer l = mMap.setBaseMap(tileSource);
 		//mMap.setDebugSettings(new DebugSettings(false, false, true, false, false));
 
-		mMap.getLayerManager().add(new BuildingOverlay(mMap, l.getTileLayer()));
-		mMap.getLayerManager().add(new LabelLayer(mMap, l.getTileLayer()));
+		mMap.getLayers().add(new BuildingOverlay(mMap, l.getTileLayer()));
+		mMap.getLayers().add(new LabelLayer(mMap, l.getTileLayer()));
 
 		mMap.setTheme(InternalRenderTheme.DEFAULT);
 		//mMap.setTheme(InternalRenderTheme.TRONRENDER);
 
-		//mMap.getLayerManager().add(new BitmapTileLayer(mMap, HillShadeTiles.INSTANCE));
+		//mMap.getLayers().add(new BitmapTileLayer(mMap, HillShadeTiles.INSTANCE));
 
 		//mMap.setBackgroundMap(new BitmapTileLayer(mMap, StamenWaterTiles.INSTANCE));
 		//mMap.setBackgroundMap(new BitmapTileLayer(mMap, MapQuestAerial.INSTANCE));
-		//mMap.getLayerManager().add(new GenericOverlay(mMap, new GridRenderLayer(mMap)));
+		//mMap.getLayers().add(new GenericOverlay(mMap, new GridRenderLayer(mMap)));
 
 		mMapView.setClickable(true);
 		mMapView.setFocusable(true);
