@@ -25,7 +25,7 @@ import org.oscim.utils.GlUtils;
 public final class BufferObject {
 	private final static String TAG = BufferObject.class.getName();
 
-	private final static GL20 GL = GLAdapter.get();
+	private static GL20 GL;
 
 	private static final int MB = 1024 * 1024;
 	private static final int LIMIT_BUFFERS = 16 * MB;
@@ -208,6 +208,7 @@ public final class BufferObject {
 	}
 
 	static synchronized void init(int num) {
+		GL = GLAdapter.get();
 
 		createBuffers(GL20.GL_ARRAY_BUFFER, num);
 		counter[0] += num;
