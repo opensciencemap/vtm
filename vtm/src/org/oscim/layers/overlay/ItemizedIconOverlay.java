@@ -19,8 +19,7 @@ import java.util.List;
 
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.BoundingBox;
-import org.oscim.core.PointD;
-import org.oscim.core.PointF;
+import org.oscim.core.Point;
 import org.oscim.view.Map;
 import org.oscim.view.Viewport;
 
@@ -31,7 +30,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	protected OnItemGestureListener<Item> mOnItemGestureListener;
 	private int mDrawnItemsLimit = Integer.MAX_VALUE;
 
-	private final PointD mTmpPoint = new PointD();
+	private final Point mTmpPoint = new Point();
 
 	public ItemizedIconOverlay(
 			final Map map,
@@ -57,7 +56,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 	//	}
 
 	@Override
-	public boolean onSnapToItem(final int pX, final int pY, final PointF pSnapPoint) {
+	public boolean onSnapToItem(final int pX, final int pY, final Point pSnapPoint) {
 		// TODO Implement this!
 		return false;
 	}

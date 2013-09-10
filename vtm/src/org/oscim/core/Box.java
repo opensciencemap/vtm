@@ -34,7 +34,7 @@ public class Box {
 		return (x >= minX && x <= maxY && y >= minY && y <= maxY);
 	}
 
-	public boolean contains(PointD p){
+	public boolean contains(Point p){
 		return (p.x >= minX && p.x <= maxY && p.y >= minY && p.y <= maxY);
 	}
 }

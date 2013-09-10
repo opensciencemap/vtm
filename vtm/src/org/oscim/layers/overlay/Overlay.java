@@ -16,9 +16,9 @@
 
 package org.oscim.layers.overlay;
 
-import org.oscim.view.Map;
-import org.oscim.core.PointF;
+import org.oscim.core.Point;
 import org.oscim.layers.InputLayer;
+import org.oscim.view.Map;
 
 /**
  * Base class representing an overlay which may be displayed on top of a
@@ -60,7 +60,7 @@ public abstract class Overlay extends InputLayer {
 		 *            untouched if not snapping.
 		 * @return Whether or not to snap to the interesting point.
 		 */
-		boolean onSnapToItem(int x, int y, PointF snapPoint);
+		boolean onSnapToItem(int x, int y, Point snapPoint);
 	}
 
 	///**

@@ -23,7 +23,7 @@ import org.oscim.backend.Log;
 import org.oscim.backend.input.KeyEvent;
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.MapPosition;
-import org.oscim.core.PointF;
+import org.oscim.core.Point;
 import org.oscim.layers.InputLayer;
 import org.oscim.layers.Layer;
 import org.oscim.layers.overlay.Overlay.Snappable;
@@ -227,7 +227,7 @@ public class Layers extends AbstractList<Layer> {
 		return false;
 	}
 
-	public boolean onSnapToItem(final int x, final int y, final PointF snapPoint) {
+	public boolean onSnapToItem(int x, int y, Point snapPoint) {
 		if (mDirtyLayers)
 			updateLayers();
 

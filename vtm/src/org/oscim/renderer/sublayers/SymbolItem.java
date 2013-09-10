@@ -15,7 +15,7 @@
 package org.oscim.renderer.sublayers;
 
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.core.PointF;
+import org.oscim.core.Point;
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
@@ -46,6 +46,6 @@ public class SymbolItem extends Inlist<SymbolItem> {
 
 	public TextureRegion symbol;
 	public Bitmap bitmap;
-	public PointF offset;
+	public Point offset;
 
 }

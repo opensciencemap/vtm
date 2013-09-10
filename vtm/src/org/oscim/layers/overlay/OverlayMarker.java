@@ -15,19 +15,19 @@
 package org.oscim.layers.overlay;
 
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.core.PointF;
+import org.oscim.core.Point;
 import org.oscim.layers.overlay.OverlayItem.HotspotPlace;
 
 public class OverlayMarker {
 	final Bitmap[] mBitmap;
 	// Hotspot offset
-	final PointF[] mOffset;
+	final Point[] mOffset;
 
 	public OverlayMarker(Bitmap bitmap, float relX, float relY) {
 		mBitmap = new Bitmap[1];
 		mBitmap[0] = bitmap;
-		mOffset = new PointF[1];
-		mOffset[0] = new PointF(relX, relY);
+		mOffset = new Point[1];
+		mOffset[0] = new Point(relX, relY);
 	}
 
 	public OverlayMarker(Bitmap bitmap, HotspotPlace hotspot) {
@@ -76,11 +76,11 @@ public class OverlayMarker {
 
 		mBitmap = new Bitmap[1];
 		mBitmap[0] = bitmap;
-		mOffset = new PointF[1];
-		mOffset[0] = new PointF(x, y);
+		mOffset = new Point[1];
+		mOffset[0] = new Point(x, y);
 	}
 
-	public PointF getHotspot() {
+	public Point getHotspot() {
 		return mOffset[0];
 	}
 

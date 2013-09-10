@@ -91,9 +91,9 @@ public final class MercatorProjection {
 		return 360.0 * (x - 0.5);
 	}
 
-	public static PointD project(GeoPoint p, PointD reuse) {
+	public static Point project(GeoPoint p, Point reuse) {
 		if (reuse == null)
-			reuse = new PointD();
+			reuse = new Point();
 
 		reuse.x = ((p.longitudeE6 / 1E6) + 180.0) / 360.0;
 

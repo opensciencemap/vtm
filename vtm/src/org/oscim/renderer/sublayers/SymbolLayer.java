@@ -129,8 +129,8 @@ public final class SymbolLayer extends TextureLayer {
 				y1 = (short) (SCALE * (hh));
 				y2 = (short) (SCALE * (-hh));
 			} else {
-				float hw = it.offset.x * width;
-				float hh = it.offset.y * height;
+				float hw = (float)(it.offset.x * width);
+				float hh = (float)(it.offset.y * height);
 				x1 = (short) (SCALE * (-hw));
 				x2 = (short) (SCALE * (width - hw));
 				y1 = (short) (SCALE * (height - hh));

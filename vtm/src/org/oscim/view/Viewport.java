@@ -20,8 +20,7 @@ import org.oscim.core.Box;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
-import org.oscim.core.PointD;
-import org.oscim.core.PointF;
+import org.oscim.core.Point;
 import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.Matrix4;
@@ -66,7 +65,7 @@ public class Viewport {
 	private final Matrix4 mTmpMatrix = new Matrix4();
 
 	// temporary vars: only use in synchronized functions!
-	private final PointD mMovePoint = new PointD();
+	private final Point mMovePoint = new Point();
 	private final float[] mv = new float[4];
 	private final float[] mu = new float[4];
 	private final float[] mViewCoords = new float[8];
@@ -300,7 +299,7 @@ public class Viewport {
 	 * @param y screen coordinate
 	 * @param out Point coords will be set
 	 */
-	public synchronized void getScreenPointOnMap(float x, float y, double scale, PointD out) {
+	public synchronized void getScreenPointOnMap(float x, float y, double scale, Point out) {
 
 		// scale to -1..1
 		float mx = 1 - (x / mWidth * 2);
@@ -338,7 +337,7 @@ public class Viewport {
 	 * @param x screen coordinate
 	 * @param y screen coordinate
 	 */
-	public synchronized void fromScreenPixels(double x, double y, PointD out) {
+	public synchronized void fromScreenPixels(double x, double y, Point out) {
 		// scale to -1..1
 		float mx = (float) (1 - (x / mWidth * 2));
 		float my = (float) (1 - (y / mHeight * 2));
@@ -375,7 +374,7 @@ public class Viewport {
 	 * @param geoPoint the GeoPoint
 	 * @param out Point projected to screen pixel relative to center
 	 */
-	public synchronized void project(GeoPoint geoPoint, PointD out) {
+	public synchronized void project(GeoPoint geoPoint, Point out) {
 		MercatorProjection.project(geoPoint, out);
 		project(out.x, out.y, out);
 	}
@@ -385,7 +384,7 @@ public class Viewport {
 	 *
 	 * @param out Point projected to screen pixel
 	 */
-	public synchronized void project(double x, double y, PointD out) {
+	public synchronized void project(double x, double y, Point out) {
 
 		mv[0] = (float) (x * mCurScale - mCurX);
 		mv[1] = (float) (y * mCurScale - mCurY);
@@ -454,7 +453,7 @@ public class Viewport {
 		// stop animation
 		animCancel();
 
-		PointD p = applyRotation(mx, my);
+		Point p = applyRotation(mx, my);
 		move(p.x, p.y);
 	}
 
@@ -474,7 +473,7 @@ public class Viewport {
 		updatePosition();
 	}
 
-	private PointD applyRotation(float mx, float my) {
+	private Point applyRotation(float mx, float my) {
 		double rad = Math.toRadians(mRotation);
 		double rcos = Math.cos(rad);
 		double rsin = Math.sin(rad);
@@ -720,7 +719,7 @@ public class Viewport {
 		float dy = mVelocityY * adv;
 
 		if (dx != 0 || dy != 0) {
-			PointD p = applyRotation((float) (dx - mScrollX), (float) (dy - mScrollY));
+			Point p = applyRotation((float) (dx - mScrollX), (float) (dy - mScrollY));
 			move(p.x, p.y);
 
 			mScrollX = dx;
@@ -835,7 +834,7 @@ public class Viewport {
 		if (mAnimPivot) {
 			scale = mAbsScale / scale;
 
-			PointD p = applyRotation(
+			Point p = applyRotation(
 					(float) (mScrollX * (1.0 - scale)),
 					(float) (mScrollY * (1.0 - scale)));
 			move(p.x, p.y);

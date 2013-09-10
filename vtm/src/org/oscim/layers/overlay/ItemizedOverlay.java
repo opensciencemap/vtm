@@ -23,7 +23,7 @@ package org.oscim.layers.overlay;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
-import org.oscim.core.PointD;
+import org.oscim.core.Point;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLRenderer.Matrices;
 import org.oscim.renderer.layers.BasicRenderLayer;
@@ -152,9 +152,9 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 						continue;
 					}
 
-					int state = 0;
-					if (mDrawFocusedItem && (mFocusedItem == it.item))
-						state = OverlayItem.ITEM_STATE_FOCUSED_MASK;
+					//int state = 0;
+					//if (mDrawFocusedItem && (mFocusedItem == it.item))
+					//	state = OverlayItem.ITEM_STATE_FOCUSED_MASK;
 
 					//Drawable marker = it.item.getDrawable();
 					OverlayMarker marker = it.item.getMarker();
@@ -223,7 +223,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 		mLayer = new ItemOverlay();
 	}
 
-	private final PointD mMapPoint = new PointD();
+	private final Point mMapPoint = new Point();
 
 	/**
 	 * Utility method to perform all processing on a new ItemizedOverlay.

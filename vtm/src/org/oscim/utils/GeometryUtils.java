@@ -14,7 +14,7 @@
  */
 package org.oscim.utils;
 
-import org.oscim.core.PointD;
+import org.oscim.core.Point;
 
 
 /**
@@ -176,7 +176,7 @@ public final class GeometryUtils {
 			double ax2, double ay2,
 			double bx1, double by1,
 			double bx2, double by2,
-			PointD point)
+			Point point)
 	{
 		double ua_numr = (bx2 - bx1) * (ay1 - by1) - (by2 - by1) * (ax1 - bx1);
 		double ub_numr = (ax2 - ax1) * (ay1 - by1) - (ay2 - ay1) * (ax1 - bx1);
