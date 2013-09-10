@@ -102,7 +102,7 @@ public class GridRenderLayer extends BasicRenderLayer {
 	}
 
 	@Override
-	public void update(MapPosition pos, boolean changed, Matrices m) {
+	protected void update(MapPosition pos, boolean changed, Matrices m) {
 
 		// scale coordinates relative to current 'zoom-level' to
 		// get the position as the nearest tile coordinate
@@ -129,7 +129,6 @@ public class GridRenderLayer extends BasicRenderLayer {
 		mLineLayer.clear();
 		mLineLayer.addLine(mLines);
 
-		// tell GLRender to compile new layer data.
-		this.newData = true;
+		compile();
 	}
 }

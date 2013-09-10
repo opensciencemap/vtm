@@ -660,7 +660,7 @@ public class TextRenderLayer extends BasicRenderLayer {
 			mMapPosition = mTmpPos;
 			mTmpPos = tmp;
 
-			this.newData = true;
+			compile();
 		}
 
 //		if (!mHolding)

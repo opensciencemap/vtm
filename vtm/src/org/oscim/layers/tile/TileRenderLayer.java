@@ -49,7 +49,7 @@ public class TileRenderLayer extends RenderLayer {
 	}
 
 	@Override
-	public void update(MapPosition pos, boolean positionChanged, Matrices m) {
+	protected void update(MapPosition pos, boolean positionChanged, Matrices m) {
 
 		if (mAlpha == 0){
 			mTileManager.releaseTiles(mDrawTiles);
@@ -84,12 +84,12 @@ public class TileRenderLayer extends RenderLayer {
 	}
 
 	@Override
-	public void compile() {
+	protected void compile() {
 
 	}
 
 	@Override
-	public void render(MapPosition pos, Matrices m) {
+	protected void render(MapPosition pos, Matrices m) {
 
 	}
 

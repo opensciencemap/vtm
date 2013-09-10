@@ -104,7 +104,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 				if (mItems == null) {
 					if (layers.textureLayers != null) {
 						layers.clear();
-						newData = true;
+						compile();
 					}
 					return;
 				}
@@ -183,7 +183,8 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends Overlay 
 			}
 			mSymbolLayer.prepare();
 			layers.textureLayers = mSymbolLayer;
-			newData = true;
+
+			compile();
 		}
 
 		@Override

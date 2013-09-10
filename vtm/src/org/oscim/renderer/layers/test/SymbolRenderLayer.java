@@ -40,16 +40,14 @@ public class SymbolRenderLayer extends BasicRenderLayer {
 
 		}
 		l.addSymbol(it);
-
-		// compile layer on next frame
-		newData = true;
 	}
 
 	@Override
-	public void update(MapPosition position, boolean changed, Matrices matrices) {
+	protected void update(MapPosition position, boolean changed, Matrices matrices) {
 		if (initialize){
 			initialize = false;
 			mMapPosition.copy(position);
+			compile();
 		}
 	}
 }

@@ -88,7 +88,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 	}
 
 	@Override
-	public void update(MapPosition pos, boolean changed, Matrices matrices) {
+	protected void update(MapPosition pos, boolean changed, Matrices matrices) {
 		mMapPosition.copy(pos);
 
 		if (!initialized && !initShader())
@@ -98,7 +98,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 			return;
 
 		if (mAlpha == 0 || pos.zoomLevel < 16) {
-			isReady = false;
+			setReady(false);
 			return;
 		}
 
@@ -108,8 +108,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 
 		if (mTileSet.cnt == 0) {
 			mTileLayer.releaseTiles(mTileSet);
-
-			isReady = false;
+			setReady(false);
 			return;
 		}
 
@@ -155,14 +154,15 @@ public class ExtrusionRenderLayer extends RenderLayer {
 		}
 
 		mTileCnt = activeTiles;
-		isReady = activeTiles > 0;
 
-		if (!isReady)
+		if (activeTiles > 0)
+			setReady(true);
+		else
 			mTileLayer.releaseTiles(mTileSet);
 	}
 
 	@Override
-	public void compile() {
+	protected void compile() {
 
 	}
 
@@ -178,7 +178,7 @@ public class ExtrusionRenderLayer extends RenderLayer {
 	//private final float[] mVPMatrix = new float[16];
 
 	@Override
-	public void render(MapPosition pos, Matrices m) {
+	protected void render(MapPosition pos, Matrices m) {
 		// TODO one could render in one pass to texture and then draw the texture
 		// with alpha... might be faster and would allow postprocessing outlines.
 

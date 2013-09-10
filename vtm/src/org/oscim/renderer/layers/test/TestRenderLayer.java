@@ -115,7 +115,7 @@ public class TestRenderLayer extends BasicRenderLayer {
 	}
 
 	@Override
-	public synchronized void update(MapPosition curPos, boolean positionChanged,
+	protected synchronized void update(MapPosition curPos, boolean positionChanged,
 			Matrices matrices) {
 		// keep position constant (or update layer relative to new position)
 		//mMapPosition.copy(curPos);
@@ -129,7 +129,7 @@ public class TestRenderLayer extends BasicRenderLayer {
 
 			// pass layers to be uploaded and drawn to GL Thread
 			// afterwards never modify 'layers' outside of this function!
-			newData = true;
+			compile();
 		}
 	}
 

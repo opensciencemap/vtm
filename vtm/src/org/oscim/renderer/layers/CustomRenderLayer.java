@@ -60,37 +60,33 @@ public class CustomRenderLayer extends RenderLayer {
 
 	// ---------- everything below runs in GLRender Thread ----------
 	@Override
-	public void update(MapPosition pos, boolean changed, Matrices matrices) {
+	protected void update(MapPosition pos, boolean changed, Matrices matrices) {
 		if (!mInitialized) {
 			if (!init())
 				return;
 
 			mInitialized = true;
 
-			// tell GLRender to call 'compile' when data has changed
-			newData = true;
-
 			// fix current MapPosition
 			mMapPosition.copy(pos);
+
+			compile();
 		}
 	}
 
 	@Override
-	public void compile() {
+	protected void compile() {
 		// modify mVerticesData and put in FloatBuffer
 
 		mVertices.clear();
 		mVertices.put(mVerticesData);
 		mVertices.flip();
 
-		newData = false;
-
-		// tell GLRender to call 'render'
-		isReady = true;
+		setReady(true);
 	}
 
 	@Override
-	public void render(MapPosition pos, Matrices m) {
+	protected void render(MapPosition pos, Matrices m) {
 
 		// Use the program object
 		GLState.useProgram(mProgramObject);

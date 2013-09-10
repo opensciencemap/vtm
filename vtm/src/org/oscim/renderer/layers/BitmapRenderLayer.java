@@ -57,7 +57,7 @@ public class BitmapRenderLayer extends BasicRenderLayer {
 	}
 
 	@Override
-	public synchronized void update(MapPosition pos, boolean changed, Matrices m) {
+	protected synchronized void update(MapPosition pos, boolean changed, Matrices m) {
 		if (!initialized) {
 			layers.clear();
 
@@ -65,17 +65,17 @@ public class BitmapRenderLayer extends BasicRenderLayer {
 			l.setBitmap(mBitmap, mWidth, mHeight);
 			layers.textureLayers = l;
 
-			newData = true;
+			mUpdateBitmap = true;
 		}
 
 		if (mUpdateBitmap) {
-			newData = true;
 			mUpdateBitmap = false;
+			compile();
 		}
 	}
 
 	@Override
-	public synchronized void compile() {
+	protected synchronized void compile() {
 		if (mBitmap == null)
 			return;
 
@@ -85,7 +85,7 @@ public class BitmapRenderLayer extends BasicRenderLayer {
 	}
 
 	@Override
-	public synchronized void render(MapPosition pos, Matrices m) {
+	protected synchronized void render(MapPosition pos, Matrices m) {
 		m.useScreenCoordinates(false, 8);
 		BitmapRenderer.draw(layers.textureLayers, m, 1, 1);
 	}

@@ -54,16 +54,14 @@ public class CustomRenderLayer2 extends RenderLayer {
 	float mCellScale = 60 * GLRenderer.COORD_SCALE;
 
 	@Override
-	public void update(MapPosition pos, boolean changed, Matrices matrices) {
+	protected void update(MapPosition pos, boolean changed, Matrices matrices) {
 		if (!mInitialized) {
 			if (!init())
 				return;
 
 			mInitialized = true;
 
-			// tell GLRender to call 'compile' when data has changed
-			newData = true;
-
+			compile();
 			// fix current MapPosition
 
 			//mMapPosition.setPosition(53.1, 8.8);
@@ -78,7 +76,7 @@ public class CustomRenderLayer2 extends RenderLayer {
 	}
 
 	@Override
-	public void compile() {
+	protected void compile() {
 
 		float[] vertices = new float[12];
 
@@ -92,14 +90,12 @@ public class CustomRenderLayer2 extends RenderLayer {
 
 		mVBO = BufferObject.get(GL20.GL_ARRAY_BUFFER, 0);
 		mVBO.loadBufferData(buf, 12 * 4);
-		newData = false;
 
-		// tell GLRender to call 'render'
-		isReady = true;
+		setReady(true);
 	}
 
 	@Override
-	public void render(MapPosition pos, Matrices m) {
+	protected void render(MapPosition pos, Matrices m) {
 
 		// Use the program object
 		GLState.useProgram(mProgramObject);

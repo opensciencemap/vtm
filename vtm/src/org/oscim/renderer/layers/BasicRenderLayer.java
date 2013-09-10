@@ -45,7 +45,7 @@ public abstract class BasicRenderLayer extends RenderLayer {
 	 * Render all 'layers'
 	 */
 	@Override
-	public synchronized void render(MapPosition curPos, Matrices m) {
+	protected synchronized void render(MapPosition curPos, Matrices m) {
 		MapPosition pos = mMapPosition;
 
 		float div = FastMath.pow(pos.zoomLevel - curPos.zoomLevel);
@@ -94,12 +94,12 @@ public abstract class BasicRenderLayer extends RenderLayer {
 	}
 
 	@Override
-	public void compile() {
+	protected void compile() {
 		int newSize = layers.getSize();
 		if (newSize <= 0) {
 			BufferObject.release(layers.vbo);
 			layers.vbo = null;
-			isReady = false;
+			setReady(false);
 			return;
 		}
 
@@ -107,6 +107,6 @@ public abstract class BasicRenderLayer extends RenderLayer {
 			layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
 		if (GLRenderer.uploadLayers(layers, newSize, true))
-			isReady = true;
+			setReady(true);
 	}
 }

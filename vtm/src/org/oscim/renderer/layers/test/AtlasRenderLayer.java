@@ -107,18 +107,18 @@ public class AtlasRenderLayer extends BasicRenderLayer {
 
 		tl.prepare();
 		TextItem.pool.releaseAll(tl.labels);
-
-		this.newData = true;
 	}
 
 	boolean initial = true;
 
 	@Override
-	public void update(MapPosition pos, boolean changed, Matrices m) {
+	protected void update(MapPosition pos, boolean changed, Matrices m) {
 
 		if (initial) {
 			mMapPosition.copy(pos);
-			this.initial = false;
+			initial = false;
+
+			compile();
 		}
 	}
 }

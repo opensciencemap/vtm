@@ -27,11 +27,16 @@ public abstract class RenderLayer {
 	 */
 	protected MapPosition mMapPosition;
 
-	/** flag to set when data is ready for (re)compilation. */
-	public boolean newData;
-
 	/** flag to set when layer is ready for rendering */
-	public boolean isReady;
+	boolean isReady;
+
+	/**
+	 * Set 'ready for render' state when layer data is ready for rendering.
+	 * This will
+	 * */
+	protected void setReady(boolean ready){
+		isReady = ready;
+	}
 
 	public RenderLayer() {
 		mMapPosition = new MapPosition();
@@ -40,8 +45,7 @@ public abstract class RenderLayer {
 	/**
 	 * ////////////////////// GLRender Thread ///////////////////////////
 	 * 1. Called first by GLRenderer:
-	 * Update the layer state here. Set 'this.newData = true' when
-	 * 'compile()' should be called before next call to 'render()'
+	 * Update the layer state here.
 	 *
 	 * @param position current MapPosition
 	 * @param changed
@@ -49,14 +53,15 @@ public abstract class RenderLayer {
 	 * @param matrices contains the current view- and projection-matrices
 	 *            and 'mvp' matrix for temporary use.
 	 */
-	public abstract void update(MapPosition position, boolean changed,
+	protected abstract void update(MapPosition position, boolean changed,
 			Matrices matrices);
 
 	/**
-	 * 2. Compile vertex buffers and upload textures for drawing:
-	 * Set 'this.isReady = true' when things are ready for 'render()'
+	 * 2. Compile vertex buffers and upload textures for drawing.
+	 * Not strictly required but useful when subclassing a RenderLayer.
+	 * Should only be called from update()
 	 */
-	public abstract void compile();
+	protected abstract void compile();
 
 	/**
 	 * 3. Draw layer:
@@ -66,7 +71,7 @@ public abstract class RenderLayer {
 	 *            'matrices.mvp' is for temporary use to build the model-
 	 *            view-projection to set as uniform.
 	 */
-	public abstract void render(MapPosition position, Matrices matrices);
+	protected abstract void render(MapPosition position, Matrices matrices);
 
 	/**
 	 * Utility: Set matrices.mvp matrix relative to the difference of current

@@ -622,7 +622,7 @@ class TextRenderLayer extends BasicRenderLayer {
 			layers.textureLayers = mCurLayer.l;
 			mMapPosition = mCurLayer.pos;
 
-			this.newData = true;
+			compile();
 		}
 
 		//if (!mHolding)

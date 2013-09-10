@@ -127,7 +127,7 @@ public class PathOverlay extends Layer {
 			if (size == 0) {
 				if (layers.baseLayers != null) {
 					layers.clear();
-					newData = true;
+					compile();
 				}
 				return;
 			}
@@ -224,7 +224,7 @@ public class PathOverlay extends Layer {
 			// items are placed relative to scale 1
 			mMapPosition.scale = 1 << z;
 
-			newData = true;
+			compile();
 		}
 
 		private int addPoint(float[] points, int i, int x, int y) {

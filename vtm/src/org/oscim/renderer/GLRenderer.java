@@ -317,21 +317,10 @@ public class GLRenderer {
 		/* update layers */
 		RenderLayer[] layers = mMap.getLayers().getRenderLayers();
 
-		for (int i = 0, n = layers.length; i < n; i++)
-			layers[i].update(pos, changed, mMatrices);
-
-		/* compile layers */
 		for (int i = 0, n = layers.length; i < n; i++) {
 			RenderLayer renderLayer = layers[i];
 
-			if (renderLayer.newData) {
-				renderLayer.compile();
-				renderLayer.newData = false;
-			}
-		}
-
-		for (int i = 0, n = layers.length; i < n; i++) {
-			RenderLayer renderLayer = layers[i];
+			renderLayer.update(pos, changed, mMatrices);
 
 			if (renderLayer.isReady)
 				renderLayer.render(mMapPosition, mMatrices);
@@ -450,6 +439,10 @@ public class GLRenderer {
 		return mQuadIndicesID;
 	}
 
+	/**
+	 * Get VBO ID for a simple quad. Handy for simple custom RenderLayers
+	 * Vertices: { -1, -1, -1, 1, 1, -1, 1, 1 }
+	 */
 	public static int getQuadVertexVBO() {
 		return mQuadVerticesID;
 	}
