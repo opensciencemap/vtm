@@ -78,7 +78,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDetach() {
 		for (T loader : mTileLoader) {
 			loader.pause();
 			loader.interrupt();

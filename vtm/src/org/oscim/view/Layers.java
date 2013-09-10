@@ -77,14 +77,6 @@ public class Layers extends AbstractList<Layer> {
 		return mDrawLayers;
 	}
 
-	public void onDetach() {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (Layer o : mLayers)
-			o.onDetach();
-	}
-
 	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
 		if (mDirtyLayers)
 			updateLayers();
@@ -97,9 +89,8 @@ public class Layers extends AbstractList<Layer> {
 		if (mDirtyLayers)
 			updateLayers();
 
-		for (Layer l : mLayers) {
-			l.destroy();
-		}
+		for (Layer o : mLayers)
+			o.onDetach();
 	}
 
 	Layer[] mLayers;

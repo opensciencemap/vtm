@@ -66,10 +66,5 @@ public abstract class Layer {
 	 * does nothing.
 	 */
 	public void onDetach() {
-		// FIXME call to this function is not implemented
-	}
-
-	public void destroy() {
-		// TODO Auto-generated method stub
 	}
 }
