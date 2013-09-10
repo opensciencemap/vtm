@@ -35,6 +35,8 @@ public abstract class Map {
 
 	private final Layers mLayers;
 	private final Viewport mViewport;
+	private final MapAnimator mAnimator;
+
 	private final MapPosition mMapPosition;
 	private final AsyncExecutor mAsyncExecutor;
 
@@ -49,11 +51,12 @@ public abstract class Map {
 	public Map() {
 
 		mViewport = new Viewport(this);
+		mAnimator = new MapAnimator(this, mViewport);
+
 		mMapPosition = new MapPosition();
 		mLayers = new Layers();
 		mAsyncExecutor = new AsyncExecutor(2);
 
-		// FIXME!
 		mDebugSettings = new DebugSettings();
 		MapTileLoader.setDebugSettings(mDebugSettings);
 
@@ -215,5 +218,9 @@ public abstract class Map {
 	 */
 	public BoundingBox getBoundingBox() {
 		return mViewport.getViewBox();
+	}
+
+	public MapAnimator getAnimator() {
+		return mAnimator;
 	}
 }

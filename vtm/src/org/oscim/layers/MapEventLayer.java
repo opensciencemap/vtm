@@ -299,7 +299,7 @@ public class MapEventLayer extends InputLayer {
 		int w = Tile.SIZE * 3;
 		int h = Tile.SIZE * 3;
 
-		mMapPosition.animateFling(
+		mMap.getAnimator().animateFling(
 				Math.round(velocityX),
 				Math.round(velocityY),
 				-w, w, -h, h);

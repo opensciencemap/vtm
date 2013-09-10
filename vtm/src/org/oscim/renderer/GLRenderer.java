@@ -294,8 +294,7 @@ public class GLRenderer {
 		MapPosition pos = mMapPosition;
 
 		synchronized (mViewport) {
-			// update MapPosition
-			mViewport.updateAnimation();
+			mMap.getAnimator().updateAnimation();
 
 			// get current MapPosition
 			changed = mViewport.getMapPosition(pos);

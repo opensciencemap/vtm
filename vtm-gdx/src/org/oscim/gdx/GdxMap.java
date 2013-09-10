@@ -365,12 +365,12 @@ public class GdxMap implements ApplicationListener {
 
 			if (amount > 0) {
 
-				mMapPosition.animateZoom(150, 0.8f, 0, 0);
+				mMap.getAnimator().animateZoom(150, 0.8f, 0, 0);
 			} else {
 				float fx = mPosX - mMap.getWidth() / 2;
 				float fy = mPosY - mMap.getHeight() / 2;
 
-				mMapPosition.animateZoom(150, 1.25f, fx, fy);
+				mMap.getAnimator().animateZoom(150, 1.25f, fx, fy);
 			}
 			mMap.updateMap(false);
 
@@ -438,7 +438,7 @@ public class GdxMap implements ApplicationListener {
 			//Log.d("", "fling " + button + " " + velocityX + "/" + velocityY);
 			if (mayFling && button == Buttons.LEFT) {
 				int m = Tile.SIZE * 4;
-				mMapPosition.animateFling((int) velocityX, (int) velocityY, -m, m, -m, m);
+				mMap.getAnimator().animateFling((int) velocityX, (int) velocityY, -m, m, -m, m);
 				return true;
 			}
 			return false;

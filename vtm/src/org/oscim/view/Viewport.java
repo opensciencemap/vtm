@@ -28,7 +28,6 @@ import org.oscim.utils.Matrix4;
 public class Viewport {
 	//private static final String TAG = Viewport.class.getName();
 
-	// needs to fit for int: 2 * 20 * Tile.SIZE
 	public final static int MAX_ZOOMLEVEL = 20;
 	public final static int MIN_ZOOMLEVEL = 2;
 
@@ -37,24 +36,7 @@ public class Viewport {
 
 	private final static float MAX_TILT = 65;
 
-	private final Map mMap;
-
-	private double mAbsScale;
-	private double mAbsX;
-	private double mAbsY;
-
-	// mAbsScale * Tile.SIZE
-	// i.e. size of tile 0/0/0 at current scale in pixel
-	private double mCurScale;
-
-	// mAbsX * mCurScale
-	private double mCurX;
-
-	// mAbsY * mCurScale
-	private double mCurY;
-
-	private float mRotation;
-	private float mTilt;
+	private final MapPosition mPos = new MapPosition();
 
 	private final Matrix4 mProjMatrix = new Matrix4();
 	private final Matrix4 mProjMatrixI = new Matrix4();
@@ -81,22 +63,13 @@ public class Viewport {
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
 	Viewport(Map map) {
-		mMap = map;
 
-		mAbsScale = 4;
-		mAbsX = 0.5;
-		mAbsY = 0.5;
+		mPos.scale = 4;
+		mPos.x = 0.5;
+		mPos.y = 0.5;
 
-		mRotation = 0;
-		mTilt = 0;
-
-		updatePosition();
-	}
-
-	private void updatePosition() {
-		mCurScale = mAbsScale * Tile.SIZE;
-		mCurX = mAbsX * mCurScale;
-		mCurY = mAbsY * mCurScale;
+		mPos.angle = 0;
+		mPos.tilt = 0;
 	}
 
 	public void setViewport(int width, int height) {
@@ -129,25 +102,23 @@ public class Viewport {
 	 */
 	public synchronized boolean getMapPosition(MapPosition pos) {
 
-		int z = FastMath.log2((int) mAbsScale);
-		//z = FastMath.clamp(z, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
-		//float scale = (float) (mAbsScale / (1 << z));
+		int z = FastMath.log2((int) mPos.scale);
 
 		boolean changed = (pos.zoomLevel != z
-				|| pos.x != mAbsX
-				|| pos.y != mAbsY
-				|| pos.scale != mAbsScale
-				|| pos.angle != mRotation
-				|| pos.tilt != mTilt);
+				|| pos.x != mPos.x
+				|| pos.y != mPos.y
+				|| pos.scale != mPos.scale
+				|| pos.angle != mPos.angle
+				|| pos.tilt != mPos.tilt);
 
-		pos.angle = mRotation;
-		pos.tilt = mTilt;
+		pos.angle = mPos.angle;
+		pos.tilt = mPos.tilt;
 
-		pos.x = mAbsX;
-		pos.y = mAbsY;
-		pos.scale = mAbsScale;
+		pos.x = mPos.x;
+		pos.y = mPos.y;
+		pos.scale = mPos.scale;
 
-		// for tiling
+		// handy for tiling
 		pos.zoomLevel = z;
 
 		return changed;
@@ -212,7 +183,7 @@ public class Viewport {
 			ua = 1;
 		else {
 			// tilt of the plane (center is kept on x = 0)
-			double t = Math.toRadians(mTilt);
+			double t = Math.toRadians(mPos.tilt);
 			double px = y * Math.sin(t);
 			double py = y * Math.cos(t);
 			ua = 1 + (px * ry) / (py * cx);
@@ -240,8 +211,8 @@ public class Viewport {
 
 	/** @return the current center point of the MapView. */
 	public synchronized GeoPoint getMapCenter() {
-		return new GeoPoint(MercatorProjection.toLatitude(mAbsY),
-				MercatorProjection.toLongitude(mAbsX));
+		return new GeoPoint(MercatorProjection.toLatitude(mPos.y),
+				MercatorProjection.toLongitude(mPos.x));
 	}
 
 	/**
@@ -285,10 +256,15 @@ public class Viewport {
 			box.maxY = Math.max(box.maxY, coords[i + 1]);
 		}
 
-		box.minX = (mCurX + box.minX) / mCurScale;
-		box.maxX = (mCurX + box.maxX) / mCurScale;
-		box.minY = (mCurY + box.minY) / mCurScale;
-		box.maxY = (mCurY + box.maxY) / mCurScale;
+		//updatePosition();
+		double cs = mPos.scale * Tile.SIZE;
+		double cx = mPos.x * cs;
+		double cy = mPos.y * cs;
+
+		box.minX = (cx + box.minX) / cs;
+		box.maxX = (cx + box.maxX) / cs;
+		box.minY = (cy + box.minY) / cs;
+		box.maxY = (cy + box.maxY) / cs;
 	}
 
 	/**
@@ -311,8 +287,8 @@ public class Viewport {
 		out.y = mu[1];
 
 		if (scale != 0) {
-			out.x *= scale / mAbsScale;
-			out.y *= scale / mAbsScale;
+			out.x *= scale / mPos.scale;
+			out.y *= scale / mPos.scale;
 		}
 	}
 
@@ -344,11 +320,15 @@ public class Viewport {
 
 		unproject(-mx, my, getZ(-my), mu, 0);
 
-		double dx = mCurX + mu[0];
-		double dy = mCurY + mu[1];
+		double cs = mPos.scale * Tile.SIZE;
+		double cx = mPos.x * cs;
+		double cy = mPos.y * cs;
 
-		dx /= mCurScale;
-		dy /= mCurScale;
+		double dx = cx + mu[0];
+		double dy = cy + mu[1];
+
+		dx /= cs;
+		dy /= cs;
 
 		if (dx > 1) {
 			while (dx > 1)
@@ -386,8 +366,13 @@ public class Viewport {
 	 */
 	public synchronized void project(double x, double y, Point out) {
 
-		mv[0] = (float) (x * mCurScale - mCurX);
-		mv[1] = (float) (y * mCurScale - mCurY);
+		//updatePosition();
+		double cs = mPos.scale * Tile.SIZE;
+		double cx = mPos.x * cs;
+		double cy = mPos.y * cs;
+
+		mv[0] = (float) (x * cs - cx);
+		mv[1] = (float) (y * cs - cy);
 
 		mv[2] = 0;
 		mv[3] = 1;
@@ -408,15 +393,15 @@ public class Viewport {
 		// 4. translate to VIEW_DISTANCE
 		// 5. apply projection
 
-		while (mRotation > 360)
-			mRotation -= 360;
-		while (mRotation < 0)
-			mRotation += 360;
+		while (mPos.angle > 360)
+			mPos.angle -= 360;
+		while (mPos.angle < 0)
+			mPos.angle += 360;
 
-		mRotMatrix.setRotation(mRotation, 0, 0, 1);
+		mRotMatrix.setRotation(mPos.angle, 0, 0, 1);
 
 		// tilt map
-		mTmpMatrix.setRotation(mTilt, 1, 0, 0);
+		mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
 
 		// apply first rotation, then tilt
 		mRotMatrix.multiplyMM(mTmpMatrix, mRotMatrix);
@@ -450,35 +435,42 @@ public class Viewport {
 	 * @param my the amount of pixels to move the map vertically.
 	 */
 	public synchronized void moveMap(float mx, float my) {
-		// stop animation
-		animCancel();
-
 		Point p = applyRotation(mx, my);
-		move(p.x, p.y);
+		double tileScale = mPos.scale * Tile.SIZE;
+
+		moveBy(p.x / tileScale, p.y / tileScale);
 	}
 
-	private synchronized void move(double mx, double my) {
-		mAbsX = (mCurX - mx) / mCurScale;
-		mAbsY = (mCurY - my) / mCurScale;
+	void moveInternal(double mx, double my){
+		Point p = applyRotation(mx, my);
+		moveBy(p.x, p.y);
+	}
+
+	void moveBy(double mx, double my) {
+		mPos.x -= mx;
+		mPos.y -= my;
 
 		// clamp latitude
-		mAbsY = FastMath.clamp(mAbsY, 0, 1);
+		mPos.y = FastMath.clamp(mPos.y, 0, 1);
 
 		// wrap longitude
-		while (mAbsX > 1)
-			mAbsX -= 1;
-		while (mAbsX < 0)
-			mAbsX += 1;
-
-		updatePosition();
+		while (mPos.x > 1)
+			mPos.x -= 1;
+		while (mPos.x < 0)
+			mPos.x += 1;
 	}
 
-	private Point applyRotation(float mx, float my) {
-		double rad = Math.toRadians(mRotation);
-		double rcos = Math.cos(rad);
-		double rsin = Math.sin(rad);
-		mMovePoint.x = mx * rcos + my * rsin;
-		mMovePoint.y = mx * -rsin + my * rcos;
+	Point applyRotation(double mx, double my) {
+		if (mPos.angle == 0) {
+			mMovePoint.x = mx;
+			mMovePoint.y = my;
+		} else {
+			double rad = Math.toRadians(mPos.angle);
+			double rcos = Math.cos(rad);
+			double rsin = Math.sin(rad);
+			mMovePoint.x = mx * rcos + my * rsin;
+			mMovePoint.y = mx * -rsin + my * rcos;
+		}
 		return mMovePoint;
 	}
 
@@ -489,28 +481,25 @@ public class Viewport {
 	 * @return true if scale was changed
 	 */
 	public synchronized boolean scaleMap(float scale, float pivotX, float pivotY) {
-		// stop animation
-		animCancel();
-
 		// just sanitize input
-		scale = FastMath.clamp(scale, 0.5f, 2);
+		//scale = FastMath.clamp(scale, 0.5f, 2);
+		if (scale < 0.000001)
+			return false;
 
-		double newScale = mAbsScale * scale;
+		double newScale = mPos.scale * scale;
 
 		newScale = FastMath.clamp(newScale, MIN_SCALE, MAX_SCALE);
 
-		if (newScale == mAbsScale)
+		if (newScale == mPos.scale)
 			return false;
 
-		scale = (float) (newScale / mAbsScale);
+		scale = (float) (newScale / mPos.scale);
 
-		mAbsScale = newScale;
+		mPos.scale = newScale;
 
 		if (pivotX != 0 || pivotY != 0)
 			moveMap(pivotX * (1.0f - scale),
 					pivotY * (1.0f - scale));
-		else
-			updatePosition();
 
 		return true;
 	}
@@ -519,341 +508,64 @@ public class Viewport {
 	 * rotate map around pivot cx,cy
 	 *
 	 * @param radians ...
-	 * @param cx ...
-	 * @param cy ...
+	 * @param pivotX ...
+	 * @param pivotY ...
 	 */
-	public synchronized void rotateMap(double radians, float cx, float cy) {
+	public synchronized void rotateMap(double radians, float pivotX, float pivotY) {
 
 		double rsin = Math.sin(radians);
 		double rcos = Math.cos(radians);
 
-		float x = (float) (cx * rcos + cy * -rsin - cx);
-		float y = (float) (cx * rsin + cy * rcos - cy);
+		float x = (float) (pivotX * rcos + pivotY * -rsin - pivotX);
+		float y = (float) (pivotX * rsin + pivotY * rcos - pivotY);
 
 		moveMap(x, y);
 
-		mRotation += Math.toDegrees(radians);
+		mPos.angle += Math.toDegrees(radians);
 
 		updateMatrix();
 	}
 
 	public synchronized void setRotation(float f) {
 
-		mRotation = f;
+		mPos.angle = f;
 		updateMatrix();
 	}
 
 	public synchronized boolean tiltMap(float move) {
-		return setTilt(mTilt + move);
+		return setTilt(mPos.tilt + move);
 	}
 
 	public synchronized boolean setTilt(float tilt) {
 		tilt = FastMath.clamp(tilt, 0, MAX_TILT);
-		if (tilt == mTilt)
+		if (tilt == mPos.tilt)
 			return false;
-		mTilt = tilt;
+		mPos.tilt = tilt;
 		updateMatrix();
 		return true;
 	}
 
 	public synchronized float getTilt() {
-		return mTilt;
+		return mPos.tilt;
 	}
 
 	private void setMapCenter(double latitude, double longitude) {
 		latitude = MercatorProjection.limitLatitude(latitude);
 		longitude = MercatorProjection.limitLongitude(longitude);
-		mAbsX = MercatorProjection.longitudeToX(longitude);
-		mAbsY = MercatorProjection.latitudeToY(latitude);
+		mPos.x = MercatorProjection.longitudeToX(longitude);
+		mPos.y = MercatorProjection.latitudeToY(latitude);
 	}
 
 	public synchronized void setMapPosition(MapPosition mapPosition) {
-		mAbsScale = FastMath.clamp(mapPosition.scale, MIN_SCALE, MAX_SCALE);
-		mAbsX = mapPosition.x;
-		mAbsY = mapPosition.y;
-		mTilt = mapPosition.tilt;
-		mRotation = mapPosition.angle;
-		updatePosition();
+		mPos.scale = FastMath.clamp(mapPosition.scale, MIN_SCALE, MAX_SCALE);
+		mPos.x = mapPosition.x;
+		mPos.y = mapPosition.y;
+		mPos.tilt = mapPosition.tilt;
+		mPos.angle = mapPosition.angle;
 		updateMatrix();
 	}
 
 	synchronized void setMapCenter(GeoPoint geoPoint) {
 		setMapCenter(geoPoint.getLatitude(), geoPoint.getLongitude());
-		updatePosition();
-	}
-
-	/************************************************************************/
-
-	// TODO move to MapAnimator
-	class AnimState {
-
-	}
-
-	private double mScrollX;
-	private double mScrollY;
-	private double mStartX;
-	private double mStartY;
-	private double mEndX;
-	private double mEndY;
-
-	private double mStartScale;
-	private double mEndScale;
-	private float mStartRotation;
-
-	private float mDuration = 500;
-	private long mAnimEnd = -1;
-
-	private boolean mAnimMove;
-	private boolean mAnimFling;
-	private boolean mAnimScale;
-	private boolean mAnimPivot;
-	private GeoPoint mEndPos;
-	private double mFinalScale;
-
-	public synchronized void animateTo(BoundingBox bbox) {
-		// calculate the maximum scale at which the bbox is completely visible
-		double dx = Math.abs(MercatorProjection.longitudeToX(bbox.getMaxLongitude())
-				- MercatorProjection.longitudeToX(bbox.getMinLongitude()));
-
-		double dy = Math.abs(MercatorProjection.latitudeToY(bbox.getMinLatitude())
-				- MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
-
-		double zx = mWidth / (dx * Tile.SIZE);
-		double zy = mHeight / (dy * Tile.SIZE);
-		double newScale = Math.min(zx, zy);
-
-		//Log.d(TAG, "scale to " + bbox + " " + newScale + " " + mAbsScale
-		//		+ " " + FastMath.log2((int) newScale));
-
-		animateTo(500, bbox.getCenterPoint(), newScale, false);
-	}
-
-	public synchronized void animateTo(long duration, GeoPoint geoPoint, double scale,
-			boolean relative) {
-
-		if (relative) {
-			if (mAnimEnd > 0 && mAnimScale)
-				scale = mFinalScale * scale;
-			else
-				scale = mAbsScale * scale;
-		}
-
-		scale = FastMath.clamp(scale, MIN_SCALE, MAX_SCALE);
-		mFinalScale = scale;
-
-		scale = (float) (scale / mAbsScale);
-
-		mEndScale = mAbsScale * scale - mAbsScale;
-		mStartScale = mAbsScale;
-		mStartRotation = mRotation;
-
-		mStartX = mAbsX;
-		mStartY = mAbsY;
-
-		mEndX = MercatorProjection.longitudeToX(geoPoint.getLongitude());
-		mEndY = MercatorProjection.latitudeToY(geoPoint.getLatitude());
-		mEndX -= mStartX;
-		mEndY -= mStartY;
-		mAnimMove = true;
-		mAnimScale = true;
-		mAnimFling = false;
-
-		mEndPos = geoPoint;
-
-		animStart(duration);
-	}
-
-	public synchronized void animateZoom(long duration, double scale, double pivotX, double pivotY) {
-
-		if (mAnimEnd > 0 && mAnimScale)
-			scale = mFinalScale * scale;
-		else
-			scale = mAbsScale * scale;
-
-		scale = FastMath.clamp(scale, MIN_SCALE, MAX_SCALE);
-		mFinalScale = scale;
-
-		scale = (float) (scale / mAbsScale);
-
-		mEndScale = mAbsScale * scale - mAbsScale;
-		mStartScale = mAbsScale;
-		mStartRotation = mRotation;
-
-		mScrollX = pivotX;
-		mScrollY = pivotY;
-
-		mAnimScale = true;
-		mAnimPivot = (pivotX != 0 || pivotY != 0);
-
-		mAnimFling = false;
-		mAnimMove = false;
-
-		animStart(duration);
-	}
-
-	public synchronized void animateTo(GeoPoint geoPoint) {
-		animateTo(300, geoPoint, 1, true);
-	}
-
-	private void animStart(float duration) {
-		mDuration = duration;
-
-		mAnimEnd = System.currentTimeMillis() + (long) duration;
-		mMap.render();
-	}
-
-	private void animCancel() {
-		mAnimEnd = -1;
-		mEndPos = null;
-		mAnimScale = false;
-		mAnimFling = false;
-		mAnimMove = false;
-		mAnimPivot = false;
-	}
-
-	synchronized boolean fling(float adv) {
-
-		adv = (float) Math.sqrt(adv);
-
-		float dx = mVelocityX * adv;
-		float dy = mVelocityY * adv;
-
-		if (dx != 0 || dy != 0) {
-			Point p = applyRotation((float) (dx - mScrollX), (float) (dy - mScrollY));
-			move(p.x, p.y);
-
-			mScrollX = dx;
-			mScrollY = dy;
-		}
-		return true;
-	}
-
-	private float mVelocityX;
-	private float mVelocityY;
-
-	public synchronized void animateFling(int velocityX, int velocityY,
-			int minX, int maxX, int minY, int maxY) {
-
-		if (velocityX * velocityX + velocityY * velocityY < 2048)
-			return;
-
-		mScrollX = 0;
-		mScrollY = 0;
-
-		float duration = 500;
-
-		// pi times thumb..
-		float flingFactor = (duration / 2500);
-		mVelocityX = velocityX * flingFactor;
-		mVelocityY = velocityY * flingFactor;
-		FastMath.clamp(mVelocityX, minX, maxX);
-		FastMath.clamp(mVelocityY, minY, maxY);
-
-		mAnimFling = true;
-		mAnimMove = false;
-		mAnimScale = false;
-		animStart(duration);
-	}
-
-	/**
-	 * called by GLRenderer at begin of each frame.
-	 */
-	public void updateAnimation() {
-		if (mAnimEnd < 0)
-			return;
-
-		long millisLeft = mAnimEnd - System.currentTimeMillis();
-
-		if (millisLeft <= 0) {
-			// set final position
-			if (mAnimMove) {
-				if (mEndPos == null)
-					doMove(mStartX + mEndX, mStartY + mEndY);
-				else {
-					setMapCenter(mEndPos);
-					mEndPos = null;
-				}
-			}
-
-			if (mAnimScale) {
-				doScale(mFinalScale);
-			}
-
-			updatePosition();
-			mMap.updateMap(true);
-
-			animCancel();
-			return;
-		}
-
-		boolean changed = false;
-
-		float adv = (1.0f - millisLeft / mDuration);
-
-		if (mAnimScale) {
-			if (mEndScale > 0)
-				doScale(mStartScale + (mEndScale * (Math.pow(2, adv) - 1)));
-			else
-				doScale(mStartScale + (mEndScale * adv));
-
-			changed = true;
-		}
-
-		if (mAnimMove) {
-			doMove(mStartX + mEndX * adv, mStartY + mEndY * adv);
-			changed = true;
-		}
-
-		if (mAnimMove && mAnimScale) {
-			mRotation = mStartRotation * (1 - adv);
-			updateMatrix();
-		}
-
-		if (changed) {
-			updatePosition();
-		}
-
-		if (mAnimFling && fling(adv))
-			changed = true;
-
-		// continue animation
-		if (changed) {
-			// inform other layers that position has changed
-			mMap.updateMap(true);
-		} else {
-			// just render next frame
-			mMap.render();
-		}
-	}
-
-	private void doScale(double newScale) {
-		double scale = mAbsScale;
-
-		mAbsScale = newScale;
-
-		if (mAnimPivot) {
-			scale = mAbsScale / scale;
-
-			Point p = applyRotation(
-					(float) (mScrollX * (1.0 - scale)),
-					(float) (mScrollY * (1.0 - scale)));
-			move(p.x, p.y);
-		}
-	}
-
-	private void doMove(double x, double y) {
-		mAbsX = x;
-		mAbsY = y;
-
-		// clamp latitude
-		mAbsY = FastMath.clamp(mAbsY, 0, 1);
-
-		// wrap longitude
-		while (mAbsX > 1)
-			mAbsX -= 1;
-		while (mAbsX < 0)
-			mAbsX += 1;
-
-		updatePosition();
 	}
 }

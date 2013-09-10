@@ -237,9 +237,9 @@ public class SearchBox {
 					if (b.maxLatitudeE6 - b.minLatitudeE6 < 100 &&
 							b.maxLongitudeE6 - b.minLongitudeE6 < 100)
 						// for small bbox use zoom=16 to get an overview
-						map.getViewport().animateTo(500, b.getCenterPoint(), 1 << 16, false);
+						map.getAnimator().animateTo(500, b.getCenterPoint(), 1 << 16, false);
 					else
-						map.getViewport().animateTo(b);
+						map.getAnimator().animateTo(b);
 					if (d instanceof NominatimData && ((NominatimData) d).getWkt() != null) {
 						String wkt = ((NominatimData) d).getWkt();
 
