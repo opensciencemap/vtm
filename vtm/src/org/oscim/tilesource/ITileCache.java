@@ -46,13 +46,6 @@ public interface ITileCache {
 	 */
 	void setCacheSize(long size);
 
-	/**
-	 * @param path
-	 *            The path for the cache directionary in device.
-	 */
-	void setStoragePath(String path);
-
-
 	public interface TileReader {
 		Tile getTile();
 		InputStream getInputStream();
