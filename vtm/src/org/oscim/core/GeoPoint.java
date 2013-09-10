@@ -127,13 +127,13 @@ public class GeoPoint implements Comparable<GeoPoint> {
 
 	@Override
 	public String toString() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("GeoPoint [lat=");
-		stringBuilder.append(this.getLatitude());
-		stringBuilder.append(", lon=");
-		stringBuilder.append(this.getLongitude());
-		stringBuilder.append("]");
-		return stringBuilder.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("GeoPoint [lat=");
+		sb.append(this.getLatitude());
+		sb.append(", lon=");
+		sb.append(this.getLongitude());
+		sb.append("]");
+		return sb.toString();
 	}
 
 	/**
@@ -182,31 +182,4 @@ public class GeoPoint implements Comparable<GeoPoint> {
 
 		return (int) (RADIUS_EARTH_METERS * tt);
 	}
-
-	// ===========================================================
-	// Parcelable
-	// ===========================================================
-
-	//	@Override
-	//	public int describeContents() {
-	//		return 0;
-	//	}
-	//
-	//	@Override
-	//	public void writeToParcel(final Parcel out, final int flags) {
-	//		out.writeInt(latitudeE6);
-	//		out.writeInt(longitudeE6);
-	//	}
-	//
-	//	public static final Parcelable.Creator<GeoPoint> CREATOR = new Parcelable.Creator<GeoPoint>() {
-	//		@Override
-	//		public GeoPoint createFromParcel(final Parcel in) {
-	//			return new GeoPoint(in.readInt(), in.readInt());
-	//		}
-	//
-	//		@Override
-	//		public GeoPoint[] newArray(final int size) {
-	//			return new GeoPoint[size];
-	//		}
-	//	};
 }

@@ -35,8 +35,8 @@ public abstract class Layer {
 
 	/**
 	 */
-	public void setEnabled(boolean pEnabled) {
-		mEnabled = pEnabled;
+	public void setEnabled(boolean enabled) {
+		mEnabled = enabled;
 	}
 
 	/**

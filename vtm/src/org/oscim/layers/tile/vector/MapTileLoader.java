@@ -117,28 +117,10 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		debug = debugSettings;
 	}
 
-	/**
-	 */
 	public MapTileLoader(TileManager tileManager) {
 		super(tileManager);
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
-
-		//		MapElement m = mDebugWay = new MapElement();
-		//		m.startLine();
-		//		int s = Tile.SIZE;
-		//		m.addPoint(0, 0);
-		//		m.addPoint(0, s);
-		//		m.addPoint(s, s);
-		//		m.addPoint(s, 0);
-		//		m.addPoint(0, 0);
-		//		m.tags = new Tag[] { new Tag("debug", "box") };
-		//		m.type = GeometryType.LINE;
-		//
-		//		m = mDebugPoint = new MapElement();
-		//		m.startPoints();
-		//		m.addPoint(s >> 1, 10);
-		//		m.type = GeometryType.POINT;
 	}
 
 	@Override

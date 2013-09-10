@@ -54,7 +54,7 @@ import org.oscim.view.Map;
 import org.oscim.view.Viewport;
 
 class TextRenderLayer extends BasicRenderLayer {
-	private final static String TAG = TextRenderLayer.class.getName();
+	//private final static String TAG = TextRenderLayer.class.getName();
 
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;

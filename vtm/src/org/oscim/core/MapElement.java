@@ -14,20 +14,21 @@
  */
 package org.oscim.core;
 
+// TODO
+// - make this class (and description) more generic or
+// move it to tilesource package
+
 /**
- * MapElement is created by TileDataSource(s) and passed to MapTileLoader
- * via ITileDataSink.process() MapTileLoader processes the
- * data into MapTile.layers.
- * -----
- * This is really just a buffer object that belongs to TileDataSource, so
- * dont keep a reference to it when passed as parameter.
+ * Reusable containter for geometry with tags.
+ * MapElement is created by TileDataSource(s) and passed to
+ * MapTileLoader via ITileDataSink.process().
+ * This is just a buffer that belongs to TileDataSource,
+ * so dont keep a reference to it when passed as parameter.
  */
 public class MapElement extends GeometryBuffer {
 
-	// osm layer of the way.
+	// OSM layer of the way.
 	public int layer;
-	// osm tags of the way.
-	//public Tag[] tags;
 
 	public final TagSet tags = new TagSet();
 
@@ -41,13 +42,13 @@ public class MapElement extends GeometryBuffer {
 
 	public void setLayer(int layer) {
 		this.layer = layer;
-		//this.tags = tags;
 	}
 
 	@Override
 	public void clear() {
 		super.clear();
 	}
+
 	// ---- random stuff, to be removed ----
 	// building tags
 	public int height;

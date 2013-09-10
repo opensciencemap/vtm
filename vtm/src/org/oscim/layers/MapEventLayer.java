@@ -14,7 +14,6 @@
  */
 package org.oscim.layers;
 
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.Log;
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.Tile;
@@ -69,7 +68,8 @@ public class MapEventLayer extends InputLayer {
 		mMapPosition = map.getViewport();
 		mTracker = new VelocityTracker();
 	}
-	private long mPrevTime;
+
+	//private long mPrevTime;
 
 	private boolean mEnableRotation = true;
 	private boolean mEnableTilt = true;
@@ -99,7 +99,7 @@ public class MapEventLayer extends InputLayer {
 	@Override
 	public boolean onTouchEvent(MotionEvent e) {
 
-		mPrevTime = e.getTime();
+		//mPrevTime = e.getTime();
 
 		int action = getAction(e);
 
@@ -168,6 +168,8 @@ public class MapEventLayer extends InputLayer {
 		}
 
 		if (e.getPointerCount() < 2) {
+			if (!mEnableMove)
+				return true;
 
 			if (mx > 1 || mx < -1 || my > 1 || my < -1) {
 				mMapPosition.moveMap(mx, my);
@@ -200,7 +202,7 @@ public class MapEventLayer extends InputLayer {
 
 		boolean changed = false;
 
-		if (!mBeginTilt && (mBeginScale || startScale)) {
+		if (mEnableZoom && !mBeginTilt && (mBeginScale || startScale)) {
 			mBeginScale = true;
 
 			float scale = (float) (pinchWidth / mPrevPinchWidth);
@@ -222,7 +224,7 @@ public class MapEventLayer extends InputLayer {
 			changed = mMapPosition.scaleMap(scale, fx, fy);
 		}
 
-		if (!mBeginRotate && Math.abs(slope) < 1) {
+		if (mEnableTilt && !mBeginRotate && Math.abs(slope) < 1) {
 			float my2 = y2 - mPrevY2;
 			float threshold = PINCH_TILT_THRESHOLD;
 			//Log.d(TAG, r + " " + slope + " m1:" + my + " m2:" + my2);
@@ -233,7 +235,8 @@ public class MapEventLayer extends InputLayer {
 				mBeginTilt = true;
 				changed = mMapPosition.tiltMap(my / 5);
 			}
-		} else if (!mBeginTilt && (mBeginRotate || Math.abs(r) > PINCH_ROTATE_THRESHOLD)) {
+		} else if (mEnableRotation && !mBeginTilt &&
+				(mBeginRotate || Math.abs(r) > PINCH_ROTATE_THRESHOLD)) {
 			//Log.d(TAG, "rotate: " + mBeginRotate + " " + Math.toDegrees(rad));
 			if (!mBeginRotate) {
 				mAngle = rad;
@@ -289,80 +292,64 @@ public class MapEventLayer extends InputLayer {
 		}
 	}
 
-	@Override
-	public boolean onDoubleTap(MotionEvent e) {
-
-		mDoubleTap = true;
-		//mMapPosition.animateZoom(2);
-
-		if (debug)
-			printState("onDoubleTap");
-
-		// avoid onLongPress
-		mMap.getLayers().cancelGesture();
-
-		return true;
-	}
-
-	@Override
-	public boolean onScroll(final MotionEvent e1, final MotionEvent e2, final float distanceX,
-			final float distanceY) {
-
-		if (e2.getPointerCount() == 1) {
-			mMapPosition.moveMap(-distanceX, -distanceY);
-			mMap.updateMap(true);
-			return true;
-		}
-
-		return false;
-	}
-
 	private boolean onFling(float velocityX, float velocityY) {
-
 		if (mWasMulti)
 			return true;
 
 		int w = Tile.SIZE * 3;
 		int h = Tile.SIZE * 3;
 
-		//if (mMap.enablePagedFling) {
-		//	double a = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
-		//
-		//	float vx = (float) (velocityX / a);
-		//	float vy = (float) (velocityY / a);
-		//
-		//	if (a < 400)
-		//		return true;
-		//
-		//	float move = Math.min(mMap.getWidth(), mMap.getHeight()) * 2 / 3;
-		//	mMapPosition.animateTo(vx * move, vy * move, 250);
-		//} else {
-		float s = 1; //(200 / CanvasAdapter.dpi);
-
 		mMapPosition.animateFling(
-				Math.round(velocityX * s),
-				Math.round(velocityY * s),
+				Math.round(velocityX),
+				Math.round(velocityY),
 				-w, w, -h, h);
 		return true;
 	}
 
-	private void printState(String action) {
-		Log.d(TAG, action
-				+ " " + mDoubleTap
-				+ " " + mBeginScale
-				+ " " + mBeginRotate
-				+ " " + mBeginTilt);
-	}
+	//@Override
+	//public boolean onDoubleTap(MotionEvent e) {
+	//
+	//	mDoubleTap = true;
+	//	//mMapPosition.animateZoom(2);
+	//
+	//	if (debug)
+	//		printState("onDoubleTap");
+	//
+	//	// avoid onLongPress
+	//	mMap.getLayers().cancelGesture();
+	//
+	//	return true;
+	//}
+	//
+	//@Override
+	//public boolean onScroll(final MotionEvent e1, final MotionEvent e2, final float distanceX,
+	//		final float distanceY) {
+	//
+	//	if (e2.getPointerCount() == 1) {
+	//		mMapPosition.moveMap(-distanceX, -distanceY);
+	//		mMap.updateMap(true);
+	//		return true;
+	//	}
+	//
+	//	return false;
+	//}
+	//
+
+	//
+	//private void printState(String action) {
+	//		Log.d(TAG, action
+	//				+ " " + mDoubleTap
+	//				+ " " + mBeginScale
+	//				+ " " + mBeginRotate
+	//				+ " " + mBeginTilt);
+	//}
 
 	/*******************************************************************************
 	 * Copyright 2011 See libgdx AUTHORS file.
-	 *
 	 * Licensed under the Apache License, Version 2.0 (the "License");
 	 * you may not use this file except in compliance with the License.
 	 * You may obtain a copy of the License at
-	 *
-	 *   http://www.apache.org/licenses/LICENSE-2.0
-	 *
+	 * http://www.apache.org/licenses/LICENSE-2.0
 	 * Unless required by applicable law or agreed to in writing, software
 	 * distributed under the License is distributed on an "AS IS" BASIS,
 	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -379,7 +366,7 @@ public class MapEventLayer extends InputLayer {
 		float[] meanY = new float[sampleSize];
 		long[] meanTime = new long[sampleSize];
 
-		public void start (float x, float y, long timeStamp) {
+		public void start(float x, float y, long timeStamp) {
 			lastX = x;
 			lastY = y;
 			deltaX = 0;
@@ -393,7 +380,7 @@ public class MapEventLayer extends InputLayer {
 			lastTime = timeStamp;
 		}
 
-		public void update (float x, float y, long timeStamp) {
+		public void update(float x, float y, long timeStamp) {
 			long currTime = timeStamp;
 			deltaX = x - lastX;
 			deltaY = y - lastY;
@@ -408,21 +395,23 @@ public class MapEventLayer extends InputLayer {
 			numSamples++;
 		}
 
-		public float getVelocityX () {
+		public float getVelocityX() {
 			float meanX = getAverage(this.meanX, numSamples);
 			float meanTime = getAverage(this.meanTime, numSamples) / 1000.0f;
-			if (meanTime == 0) return 0;
+			if (meanTime == 0)
+				return 0;
 			return meanX / meanTime;
 		}
 
-		public float getVelocityY () {
+		public float getVelocityY() {
 			float meanY = getAverage(this.meanY, numSamples);
 			float meanTime = getAverage(this.meanTime, numSamples) / 1000.0f;
-			if (meanTime == 0) return 0;
+			if (meanTime == 0)
+				return 0;
 			return meanY / meanTime;
 		}
 
-		private float getAverage (float[] values, int numSamples) {
+		private float getAverage(float[] values, int numSamples) {
 			numSamples = Math.min(sampleSize, numSamples);
 			float sum = 0;
 			for (int i = 0; i < numSamples; i++) {
@@ -431,25 +420,26 @@ public class MapEventLayer extends InputLayer {
 			return sum / numSamples;
 		}
 
-		private long getAverage (long[] values, int numSamples) {
+		private long getAverage(long[] values, int numSamples) {
 			numSamples = Math.min(sampleSize, numSamples);
 			long sum = 0;
 			for (int i = 0; i < numSamples; i++) {
 				sum += values[i];
 			}
-			if (numSamples == 0) return 0;
+			if (numSamples == 0)
+				return 0;
 			return sum / numSamples;
 		}
 
-		private float getSum (float[] values, int numSamples) {
-			numSamples = Math.min(sampleSize, numSamples);
-			float sum = 0;
-			for (int i = 0; i < numSamples; i++) {
-				sum += values[i];
-			}
-			if (numSamples == 0) return 0;
-			return sum;
-		}
+		//private float getSum (float[] values, int numSamples) {
+		//	numSamples = Math.min(sampleSize, numSamples);
+		//	float sum = 0;
+		//	for (int i = 0; i < numSamples; i++) {
+		//		sum += values[i];
+		//	}
+		//	if (numSamples == 0) return 0;
+		//	return sum;
+		//}
 	}
 
 }

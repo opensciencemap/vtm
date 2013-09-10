@@ -40,8 +40,8 @@ public class Layers extends AbstractList<Layer> {
 	}
 
 	@Override
-	public synchronized Layer get(final int pIndex) {
-		return mLayerList.get(pIndex);
+	public synchronized Layer get(int index) {
+		return mLayerList.get(index);
 	}
 
 	@Override
@@ -50,21 +50,21 @@ public class Layers extends AbstractList<Layer> {
 	}
 
 	@Override
-	public synchronized void add(final int pIndex, final Layer pElement) {
-		mLayerList.add(pIndex, pElement);
+	public synchronized void add(int index, Layer element) {
+		mLayerList.add(index, element);
 		mDirtyLayers = true;
 	}
 
 	@Override
-	public synchronized Layer remove(final int pIndex) {
+	public synchronized Layer remove(int index) {
 		mDirtyLayers = true;
-		return mLayerList.remove(pIndex);
+		return mLayerList.remove(index);
 	}
 
 	@Override
-	public synchronized Layer set(final int pIndex, final Layer pElement) {
+	public synchronized Layer set(int index, Layer element) {
 		mDirtyLayers = true;
-		return mLayerList.set(pIndex, pElement);
+		return mLayerList.set(index, element);
 	}
 
 	private boolean mDirtyLayers;
@@ -114,12 +114,8 @@ public class Layers extends AbstractList<Layer> {
 		int numRenderLayers = 0;
 		int numInputLayers = 0;
 
-		//Log.d(TAG, "update layers:");
-
 		for (int i = 0, n = mLayerList.size(); i < n; i++) {
 			Layer o = mLayerList.get(i);
-
-			//Log.d(TAG, "\t" + o.getClass().getName());
 
 			if (o.getLayer() != null)
 				numRenderLayers++;
@@ -150,23 +146,23 @@ public class Layers extends AbstractList<Layer> {
 		mDirtyLayers = false;
 	}
 
-	private boolean mCancelGesture;
+	//private boolean mCancelGesture;
 
 	public boolean handleMotionEvent(MotionEvent e) {
-		boolean handleGesture = true;
+		//boolean handleGesture = true;
 
-		if (mCancelGesture) {
-			int action = e.getAction();
-			handleGesture = (action == MotionEvent.ACTION_CANCEL ||
-					action == MotionEvent.ACTION_UP);
-		}
+		//if (mCancelGesture) {
+		//	int action = e.getAction();
+		//	handleGesture = (action == MotionEvent.ACTION_CANCEL ||
+		//			action == MotionEvent.ACTION_UP);
+		//}
 
-		//		if (handleGesture) {
-		//			if (mGestureDetector.onTouchEvent(e))
-		//				return true;
+		//if (handleGesture) {
+		//	if (mGestureDetector.onTouchEvent(e))
+		//		return true;
 		//
-		//			mCancelGesture = false;
-		//		}
+		//	mCancelGesture = false;
+		//}
 
 		if (onTouchEvent(e))
 			return true;
@@ -174,17 +170,17 @@ public class Layers extends AbstractList<Layer> {
 		return false;
 	}
 
-	/**
-	 * Call this to not foward events to generic GestureDetector until
-	 * next ACTION_UP or ACTION_CANCEL event. - Use with care for the
-	 * case that an InputLayer recognized the start of its gesture and
-	 * does further processing in only onTouch callback.
-	 */
-	public void cancelGesture() {
-		mCancelGesture = true;
-	}
+	///**
+	// * Call this to not foward events to generic GestureDetector until
+	// * next ACTION_UP or ACTION_CANCEL event. - Use with care for the
+	// * case that an InputLayer recognized the start of its gesture and
+	// * does further processing in only onTouch callback.
+	// */
+	//public void cancelGesture() {
+	//	mCancelGesture = true;
+	//}
 
-	public boolean onTouchEvent(final MotionEvent event) {
+	public boolean onTouchEvent(MotionEvent event) {
 		if (mDirtyLayers)
 			updateLayers();
 
@@ -198,7 +194,7 @@ public class Layers extends AbstractList<Layer> {
 		return false;
 	}
 
-	public boolean onKeyDown(final int keyCode, final KeyEvent event) {
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (mDirtyLayers)
 			updateLayers();
 
@@ -209,7 +205,7 @@ public class Layers extends AbstractList<Layer> {
 		return false;
 	}
 
-	public boolean onKeyUp(final int keyCode, final KeyEvent event) {
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (mDirtyLayers)
 			updateLayers();
 
@@ -220,7 +216,7 @@ public class Layers extends AbstractList<Layer> {
 		return false;
 	}
 
-	public boolean onTrackballEvent(final MotionEvent event) {
+	public boolean onTrackballEvent(MotionEvent event) {
 		if (mDirtyLayers)
 			updateLayers();
 
@@ -243,254 +239,113 @@ public class Layers extends AbstractList<Layer> {
 		return false;
 	}
 
-	/* GestureDetector.OnDoubleTapListener */
-
-	public boolean onDoubleTap(final MotionEvent e) {
-
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer) {
-			if (o.onDoubleTap(e)) {
-				if (debugInput)
-					Log.d(TAG, "onDoubleTap\t" + o.getClass());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean onDoubleTapEvent(final MotionEvent e) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer) {
-			if (o.onDoubleTapEvent(e)) {
-				if (debugInput)
-					Log.d(TAG, "onDoubleTapEvent\t" + o.getClass());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean onSingleTapConfirmed(final MotionEvent e) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer) {
-			if (o.onSingleTapConfirmed(e)) {
-				if (debugInput)
-					Log.d(TAG, "onSingleTapConfirmed\tt" + o.getClass());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/* OnGestureListener */
-	public boolean onDown(final MotionEvent pEvent) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer) {
-			if (o.onDown(pEvent)) {
-				if (debugInput)
-					Log.d(TAG, "onDown\t" + o.getClass());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	////@Override
-	//public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
-	//		final float pVelocityX, final float pVelocityY) {
-	//	if (mDirtyLayers)
-	//		updateLayers();
+	//	/* GestureDetector.OnDoubleTapListener */
 	//
-	//	for (InputLayer o : mInputLayer) {
-	//		if (o.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY)) {
-	//			if (debugInput)
-	//				Log.d(TAG, "onFling\t" + o.getClass());
-	//			return true;
-	//		}
-	//	}
-	//	return false;
-	//}
-
-	public void onLongPress(final MotionEvent pEvent) {
-		if (mCancelGesture)
-			return;
-
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer)
-			if (o.onLongPress(pEvent))
-				return;
-	}
-
-	public boolean onScroll(final MotionEvent pEvent1, final MotionEvent pEvent2,
-			final float pDistanceX, final float pDistanceY) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer) {
-			if (o.onScroll(pEvent1, pEvent2, pDistanceX, pDistanceY)) {
-				if (debugInput)
-					Log.d(TAG, "onScroll\t" + o.getClass());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public void onShowPress(final MotionEvent pEvent) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer)
-			o.onShowPress(pEvent);
-
-	}
-
-	public boolean onSingleTapUp(final MotionEvent pEvent) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer) {
-			if (o.onSingleTapUp(pEvent)) {
-				if (debugInput)
-					Log.d(TAG, "onSingleTapUp\t" + o.getClass());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// /**
-	// * Gets the optional TilesLayer class.
-	// *
-	// * @return the tilesLayer
-	// */
-	// public TilesLayer getTilesLayer() {
-	// return mTilesLayer;
-	// }
+	//	public boolean onDoubleTap(MotionEvent e) {
 	//
-	// /**
-	// * Sets the optional TilesLayer class. If set, this overlay will be
-	// drawn before all other
-	// * overlays and will not be included in the editable list of overlays and
-	// can't be cleared
-	// * except by a subsequent call to setTilesLayer().
-	// *
-	// * @param tilesLayer
-	// * the tilesLayer to set
-	// */
-	// public void setTilesLayer(final TilesLayer tilesLayer) {
-	// mTilesLayer = tilesLayer;
-	// }
-
-	//	public void onDraw(final Canvas c, final MapView pMapView) {
-	//		// if ((mTilesLayer != null) && mTilesLayer.isEnabled()) {
-	//		// mTilesLayer.draw(c, pMapView, true);
-	//		// }
-	//		//
-	//		// if ((mTilesLayer != null) && mTilesLayer.isEnabled()) {
-	//		// mTilesLayer.draw(c, pMapView, false);
-	//		// }
+	//		if (mDirtyLayers)
+	//			updateLayers();
 	//
-	//		for (final Layer overlay : mLayerList) {
-	//			if (overlay.isEnabled()) {
-	//				overlay.draw(c, pMapView, true);
+	//		for (InputLayer o : mInputLayer) {
+	//			if (o.onDoubleTap(e)) {
+	//				if (debugInput)
+	//					Log.d(TAG, "onDoubleTap\t" + o.getClass());
+	//				return true;
 	//			}
 	//		}
+	//		return false;
+	//	}
 	//
-	//		for (final Layer overlay : mLayerList) {
-	//			if (overlay.isEnabled()) {
-	//				overlay.draw(c, pMapView, false);
+	//	public boolean onDoubleTapEvent(MotionEvent e) {
+	//		if (mDirtyLayers)
+	//			updateLayers();
+	//
+	//		for (InputLayer o : mInputLayer) {
+	//			if (o.onDoubleTapEvent(e)) {
+	//				if (debugInput)
+	//					Log.d(TAG, "onDoubleTapEvent\t" + o.getClass());
+	//				return true;
 	//			}
 	//		}
+	//		return false;
+	//	}
+	//
+	//	public boolean onSingleTapConfirmed(MotionEvent e) {
+	//		if (mDirtyLayers)
+	//			updateLayers();
+	//
+	//		for (InputLayer o : mInputLayer) {
+	//			if (o.onSingleTapConfirmed(e)) {
+	//				if (debugInput)
+	//					Log.d(TAG, "onSingleTapConfirmed\tt" + o.getClass());
+	//				return true;
+	//			}
+	//		}
+	//		return false;
+	//	}
+	//
+	//	/* OnGestureListener */
+	//	public boolean onDown(MotionEvent e) {
+	//		if (mDirtyLayers)
+	//			updateLayers();
+	//
+	//		for (InputLayer o : mInputLayer) {
+	//			if (o.onDown(e)) {
+	//				if (debugInput)
+	//					Log.d(TAG, "onDown\t" + o.getClass());
+	//				return true;
+	//			}
+	//		}
+	//		return false;
+	//	}
+	//
+	//	public void onLongPress(MotionEvent e) {
+	//		if (mCancelGesture)
+	//			return;
+	//
+	//		if (mDirtyLayers)
+	//			updateLayers();
+	//
+	//		for (InputLayer o : mInputLayer)
+	//			if (o.onLongPress(e))
+	//				return;
+	//	}
+	//
+	//	public boolean onScroll(MotionEvent e1, MotionEvent e2,
+	//			float dx, float dy) {
+	//		if (mDirtyLayers)
+	//			updateLayers();
+	//
+	//		for (InputLayer o : mInputLayer) {
+	//			if (o.onScroll(e1, e2, dx, dy)) {
+	//				if (debugInput)
+	//					Log.d(TAG, "onScroll\t" + o.getClass());
+	//				return true;
+	//			}
+	//		}
+	//		return false;
+	//	}
+	//
+	//	public void onShowPress(MotionEvent e) {
+	//		if (mDirtyLayers)
+	//			updateLayers();
+	//
+	//		for (InputLayer o : mInputLayer)
+	//			o.onShowPress(e);
 	//
 	//	}
-
-	// ** Options Menu **//
-
-	// public void setOptionsMenusEnabled(final boolean pEnabled) {
-	// for (final Layer overlay : mLayerList) {
-	// if ((overlay instanceof ILayerMenuProvider)
-	// && ((ILayerMenuProvider) overlay).isOptionsMenuEnabled()) {
-	// ((ILayerMenuProvider) overlay).setOptionsMenuEnabled(pEnabled);
-	// }
-	// }
-	// }
 	//
-	// public boolean onCreateOptionsMenu(final Menu pMenu, final int
-	// menuIdOffset,
-	// final MapView map) {
-	// boolean result = true;
-	// for (final Layer overlay : this.overlaysReversed()) {
-	// if ((overlay instanceof ILayerMenuProvider)
-	// && ((ILayerMenuProvider) overlay).isOptionsMenuEnabled()) {
-	// result &= ((ILayerMenuProvider) overlay).onCreateOptionsMenu(pMenu,
-	// menuIdOffset,
-	// map);
-	// }
-	// }
+	//	public boolean onSingleTapUp(MotionEvent e) {
+	//		if (mDirtyLayers)
+	//			updateLayers();
 	//
-	// if ((mTilesLayer != null) && (mTilesLayer instanceof
-	// ILayerMenuProvider)
-	// && ((ILayerMenuProvider) mTilesLayer).isOptionsMenuEnabled()) {
-	// result &= mTilesLayer.onCreateOptionsMenu(pMenu, menuIdOffset,
-	// map);
-	// }
-	//
-	// return result;
-	// }
-	//
-	// public boolean onPrepareOptionsMenu(final Menu pMenu, final int
-	// menuIdOffset,
-	// final MapView map) {
-	// for (final Layer overlay : this.overlaysReversed()) {
-	// if ((overlay instanceof ILayerMenuProvider)
-	// && ((ILayerMenuProvider) overlay).isOptionsMenuEnabled()) {
-	// ((ILayerMenuProvider) overlay).onPrepareOptionsMenu(pMenu,
-	// menuIdOffset, map);
-	// }
-	// }
-	//
-	// if ((mTilesLayer != null) && (mTilesLayer instanceof
-	// ILayerMenuProvider)
-	// && ((ILayerMenuProvider) mTilesLayer).isOptionsMenuEnabled()) {
-	// mTilesLayer.onPrepareOptionsMenu(pMenu, menuIdOffset, map);
-	// }
-	//
-	// return true;
-	// }
-	//
-	// public boolean onOptionsItemSelected(final MenuItem item, final int
-	// menuIdOffset,
-	// final MapView map) {
-	// for (final Layer overlay : this.overlaysReversed()) {
-	// if ((overlay instanceof ILayerMenuProvider)
-	// && ((ILayerMenuProvider) overlay).isOptionsMenuEnabled()
-	// && ((ILayerMenuProvider) overlay).onOptionsItemSelected(item,
-	// menuIdOffset,
-	// map)) {
-	// return true;
-	// }
-	// }
-	//
-	// if ((mTilesLayer != null)
-	// && (mTilesLayer instanceof ILayerMenuProvider)
-	// && ((ILayerMenuProvider) mTilesLayer).isOptionsMenuEnabled()
-	// && ((ILayerMenuProvider) mTilesLayer).onOptionsItemSelected(item,
-	// menuIdOffset,
-	// map)) {
-	// return true;
-	// }
-	//
-	// return false;
-	// }
+	//		for (InputLayer o : mInputLayer) {
+	//			if (o.onSingleTapUp(e)) {
+	//				if (debugInput)
+	//					Log.d(TAG, "onSingleTapUp\t" + o.getClass());
+	//				return true;
+	//			}
+	//		}
+	//		return false;
+	//	}
 }

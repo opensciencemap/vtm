@@ -161,29 +161,29 @@ public class BoundingBox {
 
 	@Override
 	public String toString() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("BoundingBox [minLat=");
-		stringBuilder.append(minLatitudeE6);
-		stringBuilder.append(", minLon=");
-		stringBuilder.append(minLongitudeE6);
-		stringBuilder.append(", maxLat=");
-		stringBuilder.append(maxLatitudeE6);
-		stringBuilder.append(", maxLon=");
-		stringBuilder.append(maxLongitudeE6);
-		stringBuilder.append("]");
-		return stringBuilder.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("BoundingBox [minLat=");
+		sb.append(minLatitudeE6);
+		sb.append(", minLon=");
+		sb.append(minLongitudeE6);
+		sb.append(", maxLat=");
+		sb.append(maxLatitudeE6);
+		sb.append(", maxLon=");
+		sb.append(maxLongitudeE6);
+		sb.append("]");
+		return sb.toString();
 	}
 
 	public String format() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append(minLatitudeE6 / CONVERSION_FACTOR);
-		stringBuilder.append(',');
-		stringBuilder.append(minLongitudeE6 / CONVERSION_FACTOR);
-		stringBuilder.append(',');
-		stringBuilder.append(maxLatitudeE6 / CONVERSION_FACTOR);
-		stringBuilder.append(',');
-		stringBuilder.append(maxLongitudeE6 / CONVERSION_FACTOR);
-		return stringBuilder.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append(minLatitudeE6 / CONVERSION_FACTOR);
+		sb.append(',');
+		sb.append(minLongitudeE6 / CONVERSION_FACTOR);
+		sb.append(',');
+		sb.append(maxLatitudeE6 / CONVERSION_FACTOR);
+		sb.append(',');
+		sb.append(maxLongitudeE6 / CONVERSION_FACTOR);
+		return sb.toString();
 	}
 
 	/**

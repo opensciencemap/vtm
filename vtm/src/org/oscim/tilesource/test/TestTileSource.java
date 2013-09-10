@@ -79,9 +79,9 @@ public class TestTileSource extends TileSource {
 			mElem = new MapElement();
 		}
 
-		private final boolean renderWays = true;
-		private final boolean renderBoundary = false;
-		private final boolean renderPlace = false;
+		private boolean renderWays = true;
+		private boolean renderBoundary = true;
+		private boolean renderPlace = false;
 
 		@Override
 		public QueryResult executeQuery(MapTile tile,
@@ -171,7 +171,7 @@ public class TestTileSource extends TileSource {
 				}
 
 				e.setLayer(1);
-				e.tags.set(mTagsWay);
+				e.tags.set(mTagsBoundary);
 				mapDataSink.process(e);
 			}
 
