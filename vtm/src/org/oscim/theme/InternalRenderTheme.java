@@ -26,7 +26,8 @@ public enum InternalRenderTheme implements Theme {
 
 	DEFAULT("styles/default.xml"),
 	TRONRENDER("styles/tronrender.xml"),
-	MAPNIK("styles/carto.xml");
+	MAPNIK("styles/carto.xml"),
+	OSMARENDER("styles/osmarender.xml");
 
 	private final String mPath;
 
