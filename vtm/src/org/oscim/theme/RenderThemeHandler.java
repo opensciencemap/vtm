@@ -87,7 +87,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *             if an I/O error occurs while reading from the input stream.
 	 */
 	public static IRenderTheme getRenderTheme(InputStream inputStream)
-	        throws SAXException, IOException {
+			throws SAXException, IOException {
 
 		RenderThemeHandler renderThemeHandler = new RenderThemeHandler();
 
@@ -109,7 +109,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *            the XML attribute index position.
 	 */
 	public static void logUnknownAttribute(String element, String name,
-	                                       String value, int attributeIndex) {
+			String value, int attributeIndex) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("unknown attribute in element ");
 		sb.append(element);
@@ -128,7 +128,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	private final Stack<Element> mElementStack = new Stack<Element>();
 	private final Stack<Rule> mRuleStack = new Stack<Rule>();
 	private final HashMap<String, RenderInstruction> tmpStyleHash =
-	        new HashMap<String, RenderInstruction>(10);
+			new HashMap<String, RenderInstruction>(10);
 	private TextureAtlas mTextureAtlas;
 	private int mLevel;
 	private RenderTheme mRenderTheme;
@@ -174,7 +174,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
-	                         Attributes attributes) throws SAXException {
+			Attributes attributes) throws SAXException {
 		try {
 			if (ELEMENT_NAME_RENDER_THEME.equals(localName)) {
 				checkState(localName, Element.RENDER_THEME);
@@ -210,7 +210,7 @@ public class RenderThemeHandler extends DefaultHandler {
 					RenderInstruction ri = tmpStyleHash.get("l" + style);
 					if (ri instanceof Line) {
 						Line line = createLine((Line) ri, localName, attributes, 0,
-						                       false);
+								false);
 						tmpStyleHash.put("l" + line.style, line);
 					}
 					else {
@@ -277,11 +277,12 @@ public class RenderThemeHandler extends DefaultHandler {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				Symbol symbol = createSymbol(localName, attributes);
 				mCurrentRule.addRenderingInstruction(symbol);
-
-				if ((symbol.texture = mTextureAtlas.getTextureRegion(symbol.src)) == null)
-					Log.d(TAG, "missing texture atlas item '" + symbol.src + "'");
-				//else
-				//	Log.d(TAG, "using atlas item '" + symbol.src + "'");
+				if (mTextureAtlas != null) {
+					if ((symbol.texture = mTextureAtlas.getTextureRegion(symbol.src)) == null)
+						Log.d(TAG, "missing texture atlas item '" + symbol.src + "'");
+					//else
+					//	Log.d(TAG, "using atlas item '" + symbol.src + "'");
+				}
 			}
 
 			else if (ELEMENT_NAME_USE_STYLE_LINE.equals(localName)) {
@@ -291,7 +292,7 @@ public class RenderThemeHandler extends DefaultHandler {
 					Line line = (Line) tmpStyleHash.get("l" + style);
 					if (line != null) {
 						Line newLine = createLine(line, localName, attributes,
-						                          mLevel++, false);
+								mLevel++, false);
 
 						mCurrentRule.addRenderingInstruction(newLine);
 					}
@@ -315,7 +316,7 @@ public class RenderThemeHandler extends DefaultHandler {
 					Area area = (Area) tmpStyleHash.get("a" + style);
 					if (area != null)
 						mCurrentRule.addRenderingInstruction(new AreaLevel(area,
-						                                                   mLevel++));
+								mLevel++));
 					else
 						Log.d(TAG, "BUG not an area style: " + style);
 				}
@@ -336,6 +337,7 @@ public class RenderThemeHandler extends DefaultHandler {
 				checkState(localName, Element.ATLAS);
 				createTextureRegion(localName, attributes);
 			} else {
+				//Log.d(TAG, "unknown element: " + localName);
 				throw new SAXException("unknown element: " + localName);
 			}
 		} catch (IllegalArgumentException e) {
@@ -362,8 +364,8 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 		if (img == null)
 			throw new IllegalArgumentException(
-			                                   "missing attribute 'img' for element: "
-			                                           + elementName);
+					"missing attribute 'img' for element: "
+							+ elementName);
 
 		Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset(IMG_PATH + img);
 		mTextureAtlas = new TextureAtlas(bitmap);
@@ -383,9 +385,9 @@ public class RenderThemeHandler extends DefaultHandler {
 				String[] pos = value.split(" ");
 				if (pos.length == 4) {
 					r = new Rect(Integer.parseInt(pos[0]),
-					             Integer.parseInt(pos[1]),
-					             Integer.parseInt(pos[2]),
-					             Integer.parseInt(pos[3]));
+							Integer.parseInt(pos[1]),
+							Integer.parseInt(pos[2]),
+							Integer.parseInt(pos[3]));
 				}
 			} else {
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
@@ -393,50 +395,49 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 		if (regionName == null || r == null)
 			throw new IllegalArgumentException(
-			                                   "missing attribute 'name' or 'rect' for element: "
-			                                           + elementName);
+					"missing attribute 'name' or 'rect' for element: "
+							+ elementName);
 
 		mTextureAtlas.addTextureRegion(regionName.intern(), r);
 	}
 
-
 	private void checkElement(String elementName, Element element) throws SAXException {
 		Element parentElement;
 		switch (element) {
-		case RENDER_THEME:
-			if (!mElementStack.empty()) {
-				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-			}
-			return;
+			case RENDER_THEME:
+				if (!mElementStack.empty()) {
+					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+				}
+				return;
 
-		case RULE:
-			parentElement = mElementStack.peek();
-			if (parentElement != Element.RENDER_THEME
-			    && parentElement != Element.RULE) {
-				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-			}
-			return;
+			case RULE:
+				parentElement = mElementStack.peek();
+				if (parentElement != Element.RENDER_THEME
+						&& parentElement != Element.RULE) {
+					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+				}
+				return;
 
-		case STYLE:
-			parentElement = mElementStack.peek();
-			if (parentElement != Element.RENDER_THEME) {
-				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-			}
-			return;
+			case STYLE:
+				parentElement = mElementStack.peek();
+				if (parentElement != Element.RENDER_THEME) {
+					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+				}
+				return;
 
-		case RENDERING_INSTRUCTION:
-			if (mElementStack.peek() != Element.RULE) {
-				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-			}
-			return;
-		case ATLAS:
-			parentElement = mElementStack.peek();
-			// FIXME
-			if (parentElement != Element.RENDER_THEME
-			    && parentElement != Element.ATLAS) {
-				throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-			}
-			return;
+			case RENDERING_INSTRUCTION:
+				if (mElementStack.peek() != Element.RULE) {
+					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+				}
+				return;
+			case ATLAS:
+				parentElement = mElementStack.peek();
+				// FIXME
+				if (parentElement != Element.RENDER_THEME
+						&& parentElement != Element.ATLAS) {
+					throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+				}
+				return;
 		}
 
 		throw new SAXException("unknown enum value: " + element);
@@ -446,7 +447,6 @@ public class RenderThemeHandler extends DefaultHandler {
 		checkElement(elementName, element);
 		mElementStack.push(element);
 	}
-
 
 	static RenderTheme createRenderTheme(String elementName, Attributes attributes) {
 		Integer version = null;
@@ -475,15 +475,15 @@ public class RenderThemeHandler extends DefaultHandler {
 
 		if (version == null) {
 			throw new IllegalArgumentException("missing attribute version for element:"
-			                                   + elementName);
+					+ elementName);
 		} else if (version.intValue() != RENDER_THEME_VERSION) {
 			throw new IllegalArgumentException("invalid render theme version:" + version);
 		} else if (baseStrokeWidth < 0) {
 			throw new IllegalArgumentException("base-stroke-width must not be negative: "
-			                                   + baseStrokeWidth);
+					+ baseStrokeWidth);
 		} else if (baseTextSize < 0) {
 			throw new IllegalArgumentException("base-text-size must not be negative: "
-			                                   + baseTextSize);
+					+ baseTextSize);
 		}
 
 		return new RenderTheme(mapBackground, baseStrokeWidth, baseTextSize);
@@ -546,20 +546,20 @@ public class RenderThemeHandler extends DefaultHandler {
 		validateText(elementName, textKey, fontSize, strokeWidth);
 
 		return new Text(style, textKey, fontFamily, fontStyle, fontSize, fill, stroke, strokeWidth,
-		                dy, caption, symbol, priority);
+				dy, caption, symbol, priority);
 	}
 
 	private static void validateText(String elementName, String textKey, float fontSize,
-	                                 float strokeWidth) {
+			float strokeWidth) {
 		if (textKey == null) {
 			throw new IllegalArgumentException("missing attribute k for element: "
-			                                   + elementName);
+					+ elementName);
 		} else if (fontSize < 0) {
 			throw new IllegalArgumentException("font-size must not be negative: "
-			                                   + fontSize);
+					+ fontSize);
 		} else if (strokeWidth < 0) {
 			throw new IllegalArgumentException("stroke-width must not be negative: "
-			                                   + strokeWidth);
+					+ strokeWidth);
 		}
 	}
 
@@ -579,7 +579,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 * @return a new Line with the given rendering attributes.
 	 */
 	private static Line createLine(Line line, String elementName, Attributes attributes,
-	                               int level, boolean isOutline) {
+			int level, boolean isOutline) {
 
 		// Style name
 		String style = null;
@@ -645,6 +645,8 @@ public class RenderThemeHandler extends DefaultHandler {
 				blur = Float.parseFloat(value);
 			} else if ("from".equals(name)) {
 				// ignore
+			} else if ("dasharray".equals(name)) {
+				// ignore
 			} else {
 				logUnknownAttribute(elementName, name, value, i);
 			}
@@ -662,14 +664,14 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 
 		return new Line(level, style, color, width, cap, fixed,
-		                stipple, stippleColor, stippleWidth,
-		                fade, blur, isOutline, min);
+				stipple, stippleColor, stippleWidth,
+				fade, blur, isOutline, min);
 	}
 
 	private static void validateLine(float strokeWidth) {
 		if (strokeWidth < 0) {
 			throw new IllegalArgumentException("width must not be negative: "
-			                                   + strokeWidth);
+					+ strokeWidth);
 		}
 	}
 
@@ -718,23 +720,28 @@ public class RenderThemeHandler extends DefaultHandler {
 			}
 		}
 
-
 		validateArea(strokeWidth);
 
-		if (src != null){
-			Bitmap b = CanvasAdapter.g.loadBitmapAsset(src);
-			if (b != null)
-				texture = new TextureItem(b, true);
+		if (src != null) {
+			try {
+				Bitmap b = CanvasAdapter.g.loadBitmapAsset(src);
+				if (b != null)
+
+					texture = new TextureItem(b, true);
+
+			} catch (Exception e) {
+				Log.d(TAG, e.getMessage());
+			}
 
 		}
 		return new Area(style, fill, stroke, strokeWidth, fade, level, blend,
-		                blendFill, texture);
+				blendFill, texture);
 	}
 
 	private static void validateArea(float strokeWidth) {
 		if (strokeWidth < 0) {
 			throw new IllegalArgumentException("stroke-width must not be negative: "
-			                                   + strokeWidth);
+					+ strokeWidth);
 		}
 	}
 
@@ -758,7 +765,7 @@ public class RenderThemeHandler extends DefaultHandler {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
-			if ("r".equals(name)) {
+			if ("r".equals(name) || "radius".equals(name)) {
 				radius = Float.valueOf(Float.parseFloat(value));
 			} else if ("scale-radius".equals(name)) {
 				scaleRadius = Boolean.parseBoolean(value);
@@ -780,12 +787,12 @@ public class RenderThemeHandler extends DefaultHandler {
 	private static void validateCircle(String elementName, Float radius, float strokeWidth) {
 		if (radius == null) {
 			throw new IllegalArgumentException("missing attribute r for element: "
-			                                   + elementName);
+					+ elementName);
 		} else if (radius.floatValue() < 0) {
 			throw new IllegalArgumentException("radius must not be negative: " + radius);
 		} else if (strokeWidth < 0) {
 			throw new IllegalArgumentException("stroke-width must not be negative: "
-			                                   + strokeWidth);
+					+ strokeWidth);
 		}
 	}
 
@@ -823,7 +830,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	private static void validateLineSymbol(String elementName, String src) {
 		if (src == null) {
 			throw new IllegalArgumentException("missing attribute src for element: "
-			                                   + elementName);
+					+ elementName);
 		}
 	}
 
@@ -855,7 +862,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	private static void validateSymbol(String elementName, String src) {
 		if (src == null) {
 			throw new IllegalArgumentException("missing attribute src for element: "
-			                                   + elementName);
+					+ elementName);
 		}
 	}
 }
