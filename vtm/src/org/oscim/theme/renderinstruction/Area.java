@@ -14,7 +14,7 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.renderer.sublayers.TextureItem;
+import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.IRenderCallback;
 
 /**

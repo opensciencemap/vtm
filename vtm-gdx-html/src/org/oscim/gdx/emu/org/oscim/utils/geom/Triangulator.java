@@ -1,7 +1,7 @@
 package org.oscim.utils.geom;
 
 import org.oscim.backend.Log;
-import org.oscim.renderer.sublayers.VertexItem;
+import org.oscim.renderer.elements.VertexItem;
 
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JsArrayInteger;

@@ -16,7 +16,7 @@ package org.oscim.android;
 
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
-import org.oscim.view.Map;
+import org.oscim.map.Map;
 
 import android.app.Activity;
 import android.content.SharedPreferences;

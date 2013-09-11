@@ -22,7 +22,7 @@ import java.nio.IntBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
-import org.oscim.renderer.GLRenderer;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.GLState;
 
 /**
@@ -178,7 +178,7 @@ public class GlUtils {
 		if (shader != 0) {
 			GL.glShaderSource(shader, source);
 			GL.glCompileShader(shader);
-			IntBuffer compiled = GLRenderer.getIntBuffer(1);
+			IntBuffer compiled = MapRenderer.getIntBuffer(1);
 
 			GL.glGetShaderiv(shader, GL20.GL_COMPILE_STATUS, compiled);
 			compiled.position(0);
@@ -220,7 +220,7 @@ public class GlUtils {
 			GL.glAttachShader(program, pixelShader);
 			checkGlError("glAttachShader");
 			GL.glLinkProgram(program);
-			IntBuffer linkStatus = GLRenderer.getIntBuffer(1);
+			IntBuffer linkStatus = MapRenderer.getIntBuffer(1);
 			GL.glGetProgramiv(program, GL20.GL_LINK_STATUS, linkStatus);
 			linkStatus.position(0);
 			if (linkStatus.get() != GL20.GL_TRUE) {
@@ -338,7 +338,7 @@ public class GlUtils {
 	public static void glUniform4fv(int location, int count, float[] val) {
 		GL = GLAdapter.get();
 
-		FloatBuffer buf = GLRenderer.getFloatBuffer(count * 4);
+		FloatBuffer buf = MapRenderer.getFloatBuffer(count * 4);
 		buf.put(val);
 		buf.flip();
 		GL.glUniform4fv(location, count, buf);
@@ -347,7 +347,7 @@ public class GlUtils {
 	public static int[] glGenBuffers(int num) {
 		GL = GLAdapter.get();
 
-		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.position(0);
 		buf.limit(num);
 		GL.glGenBuffers(num, buf);
@@ -361,7 +361,7 @@ public class GlUtils {
 	public static void glDeleteBuffers(int num, int[] ids) {
 		GL = GLAdapter.get();
 
-		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.put(ids, 0, num);
 		buf.position(0);
 		GL.glDeleteBuffers(num, buf);
@@ -373,7 +373,7 @@ public class GlUtils {
 
 		GL = GLAdapter.get();
 		int[] ret = new int[num];
-		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		IntBuffer buf = MapRenderer.getIntBuffer(num);
 
 		if (GLAdapter.GDX_WEBGL_QUIRKS) {
 			for (int i = 0; i < num; i++) {
@@ -394,7 +394,7 @@ public class GlUtils {
 	public static void glDeleteTextures(int num, int[] ids) {
 		GL = GLAdapter.get();
 
-		IntBuffer buf = GLRenderer.getIntBuffer(num);
+		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.put(ids, 0, num);
 		buf.position(0);
 		GL.glDeleteTextures(num, buf);

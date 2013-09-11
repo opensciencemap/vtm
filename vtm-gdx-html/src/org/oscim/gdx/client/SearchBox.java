@@ -7,8 +7,8 @@ import org.oscim.backend.Log;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
-import org.oscim.layers.overlay.PathOverlay;
-import org.oscim.view.Map;
+import org.oscim.layers.PathLayer;
+import org.oscim.map.Map;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -185,7 +185,7 @@ public class SearchBox {
 		final Button searchButton = new Button("Search");
 		final TextBox searchField = new TextBox();
 		//searchField.setText("Bremen");
-		final PathOverlay mOverlay = new PathOverlay(map, 0xCC0000FF);
+		final PathLayer mOverlay = new PathLayer(map, 0xCC0000FF);
 		map.getLayers().add(mOverlay);
 
 		// We can add style names to widgets

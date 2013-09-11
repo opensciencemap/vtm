@@ -18,7 +18,10 @@ import java.util.ArrayList;
 
 import org.oscim.core.MapPosition;
 import org.oscim.layers.Layer;
-import org.oscim.view.Map;
+import org.oscim.map.Map;
+import org.oscim.tiling.TileLoader;
+import org.oscim.tiling.TileManager;
+import org.oscim.tiling.TileRenderer;
 
 public abstract class TileLayer<T extends TileLoader> extends Layer {
 	//private final static String TAG = TileLayer.class.getName();
@@ -27,7 +30,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 	private final static int CACHE_LIMIT = 250;
 
 	protected final TileManager mTileManager;
-	protected final TileRenderLayer mRenderLayer;
+	protected final TileRenderer mRenderLayer;
 
 	protected final int mNumTileLoader = 4;
 	protected final ArrayList<T> mTileLoader;
@@ -43,7 +46,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 
 		// TileManager responsible for adding visible tiles
 		// to load queue and managing in-memory tile cache.
-		mTileManager = new TileManager(map, this, minZoom, maxZoom, cacheLimit);
+		mTileManager = new TileManager(map, minZoom, maxZoom, cacheLimit);
 
 		// Instantiate TileLoader threads
 		mTileLoader = new ArrayList<T>();
@@ -55,13 +58,13 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 
 		// RenderLayer is working in GL Thread and actually
 		// drawing loaded tiles to screen.
-		mLayer = mRenderLayer = new TileRenderLayer(mTileManager);
+		mRenderer = mRenderLayer = new TileRenderer(mTileManager);
 	}
 
 	abstract protected T createLoader(TileManager tm);
 
-	public TileRenderLayer getTileLayer() {
-		return (TileRenderLayer) mLayer;
+	public TileRenderer getTileLayer() {
+		return (TileRenderer) mRenderer;
 	}
 
 	@Override
@@ -73,8 +76,9 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 			mInitial = false;
 			changed = true;
 		}
-		if (changed)
-			mTileManager.update(mapPosition);
+
+		if (changed && mTileManager.update(mapPosition))
+			notifyLoaders();
 	}
 
 	@Override
@@ -84,12 +88,12 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 			loader.interrupt();
 			loader.cleanup();
 
-//			try {
-//				tileWorker.join(10000);
-//			} catch (InterruptedException e) {
-//				// restore the interrupted status
-//				Thread.currentThread().interrupt();
-//			}
+			//			try {
+			//				tileWorker.join(10000);
+			//			} catch (InterruptedException e) {
+			//				// restore the interrupted status
+			//				Thread.currentThread().interrupt();
+			//			}
 		}
 		mTileManager.destroy();
 	}

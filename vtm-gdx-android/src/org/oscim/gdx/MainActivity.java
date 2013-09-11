@@ -7,8 +7,8 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.Tile;
-import org.oscim.tilesource.TileSource;
-import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
+import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.source.oscimap2.OSciMap2TileSource;
 
 import android.os.Bundle;
 

@@ -23,7 +23,7 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.Tile;
-import org.oscim.view.Map;
+import org.oscim.map.Map;
 
 import android.content.Context;
 import android.util.AttributeSet;

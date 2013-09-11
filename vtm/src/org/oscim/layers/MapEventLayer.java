@@ -17,8 +17,8 @@ package org.oscim.layers;
 import org.oscim.backend.Log;
 import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.Tile;
-import org.oscim.view.Map;
-import org.oscim.view.Viewport;
+import org.oscim.map.Map;
+import org.oscim.map.Viewport;
 
 /**
  * Changes Viewport for scroll, fling, scale, rotation and tilt gestures

@@ -9,10 +9,10 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.gdx.GdxMap;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.bitmap.NaturalEarth;
-import org.oscim.renderer.GLRenderer;
-import org.oscim.tilesource.TileSource;
-import org.oscim.tilesource.oscimap2.OSciMap2TileSource;
-import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
+import org.oscim.renderer.MapRenderer;
+import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.source.oscimap2.OSciMap2TileSource;
+import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
@@ -39,7 +39,7 @@ class GwtGdxMap extends GdxMap {
 		CanvasAdapter.textScale = 0.7f;
 		GLAdapter.g = (GL20) Gdx.graphics.getGL20();
 		GLAdapter.GDX_WEBGL_QUIRKS = true;
-		GLRenderer.setBackgroundColor(0xffffff);
+		MapRenderer.setBackgroundColor(0xffffff);
 		//Gdx.app.setLogLevel(Application.LOG_DEBUG);
 
 		super.create();

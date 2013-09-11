@@ -17,7 +17,7 @@ package org.oscim.renderer.atlas;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
-import org.oscim.renderer.sublayers.TextureItem;
+import org.oscim.renderer.elements.TextureItem;
 import org.oscim.utils.pool.Inlist;
 
 

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-import org.oscim.renderer.sublayers.VertexItem;
+import org.oscim.renderer.elements.VertexItem;
 
 public class Triangulator {
 	private static boolean initialized = false;

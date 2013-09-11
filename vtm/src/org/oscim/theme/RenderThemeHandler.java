@@ -33,7 +33,7 @@ import org.oscim.backend.canvas.Paint.FontFamily;
 import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
-import org.oscim.renderer.sublayers.TextureItem;
+import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.AreaLevel;
 import org.oscim.theme.renderinstruction.Circle;

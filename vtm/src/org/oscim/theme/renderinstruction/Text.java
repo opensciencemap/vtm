@@ -19,7 +19,6 @@ import org.oscim.backend.canvas.Paint;
 import org.oscim.backend.canvas.Paint.Align;
 import org.oscim.backend.canvas.Paint.FontFamily;
 import org.oscim.backend.canvas.Paint.FontStyle;
-import org.oscim.backend.canvas.Paint.Style;
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderCallback;
 
@@ -86,7 +85,7 @@ public final class Text extends RenderInstruction {
 
 		if (strokeWidth > 0) {
 			stroke = CanvasAdapter.g.getPaint();
-			stroke.setStyle(Style.STROKE);
+			stroke.setStyle(Paint.Style.STROKE);
 			stroke.setTextAlign(Align.CENTER);
 			stroke.setTypeface(fontFamily, fontStyle);
 			stroke.setColor(outline);

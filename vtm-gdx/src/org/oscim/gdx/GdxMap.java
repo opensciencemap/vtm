@@ -4,17 +4,17 @@ import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.layers.labeling.LabelLayer;
-import org.oscim.layers.overlay.BuildingOverlay;
-import org.oscim.layers.overlay.GenericOverlay;
-import org.oscim.layers.tile.vector.MapTileLayer;
-import org.oscim.renderer.GLRenderer;
+import org.oscim.layers.GenericLayer;
+import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.vector.VectorTileLayer;
+import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.map.Map;
+import org.oscim.map.Viewport;
+import org.oscim.renderer.GridRenderer;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.GLState;
-import org.oscim.renderer.layers.GridRenderLayer;
 import org.oscim.theme.InternalRenderTheme;
-import org.oscim.tilesource.TileSource;
-import org.oscim.view.Map;
-import org.oscim.view.Viewport;
+import org.oscim.tiling.source.TileSource;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
@@ -32,7 +32,7 @@ import com.badlogic.gdx.utils.Timer.Task;
 public class GdxMap implements ApplicationListener {
 
 	protected final Map mMap;
-	private final GLRenderer mMapRenderer;
+	private final MapRenderer mMapRenderer;
 
 	boolean mRenderRequest;
 
@@ -85,7 +85,7 @@ public class GdxMap implements ApplicationListener {
 			}
 		};
 
-		mMapRenderer = new GLRenderer(mMap);
+		mMapRenderer = new MapRenderer(mMap);
 
 	}
 
@@ -98,7 +98,7 @@ public class GdxMap implements ApplicationListener {
 
 			if (buildings)
 				mMap.getLayers().add(
-						new BuildingOverlay(mMap, mMapLayer.getTileLayer()));
+						new BuildingLayer(mMap, mMapLayer.getTileLayer()));
 
 			if (labels)
 				mMap.getLayers().add(new LabelLayer(mMap,
@@ -106,16 +106,16 @@ public class GdxMap implements ApplicationListener {
 		}
 
 		if (tileGrid)
-			mMap.getLayers().add(new GenericOverlay(mMap,
-					new GridRenderLayer()));
+			mMap.getLayers().add(new GenericLayer(mMap,
+					new GridRenderer()));
 	}
 
 	// Stage ui;
 	// Label fps;
 	// BitmapFont font;
 
-	MapTileLayer mMapLayer;
-	GenericOverlay mGridLayer;
+	VectorTileLayer mMapLayer;
+	GenericLayer mGridLayer;
 
 	int mHeight, mWidth;
 
@@ -276,7 +276,7 @@ public class GdxMap implements ApplicationListener {
 
 				case Input.Keys.G:
 					if (mGridLayer == null) {
-						mGridLayer = new GenericOverlay(mMap, new GridRenderLayer());
+						mGridLayer = new GenericLayer(mMap, new GridRenderer());
 						mGridLayer.setEnabled(true);
 						mMap.getLayers().add(mGridLayer);
 					} else {

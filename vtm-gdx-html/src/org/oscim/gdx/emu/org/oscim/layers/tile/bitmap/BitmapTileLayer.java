@@ -20,15 +20,15 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.gdx.client.GwtBitmap;
-import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
-import org.oscim.layers.tile.TileLoader;
-import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.bitmap.TileSource.FadeStep;
-import org.oscim.renderer.sublayers.BitmapLayer;
-import org.oscim.renderer.sublayers.Layers;
+import org.oscim.map.Map;
+import org.oscim.renderer.elements.BitmapLayer;
+import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.tiling.MapTile;
+import org.oscim.tiling.TileLoader;
+import org.oscim.tiling.TileManager;
 import org.oscim.utils.FastMath;
-import org.oscim.view.Map;
 
 import com.google.gwt.event.dom.client.ErrorEvent;
 import com.google.gwt.event.dom.client.ErrorHandler;
@@ -90,7 +90,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 					public void onLoad(LoadEvent event) {
 
 						Bitmap bitmap = new GwtBitmap(img);
-						tile.layers = new Layers();
+						tile.layers = new ElementLayers();
 						BitmapLayer l = new BitmapLayer(false);
 						l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE);
 

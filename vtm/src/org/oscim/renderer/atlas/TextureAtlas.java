@@ -63,7 +63,7 @@ import java.util.HashMap;
 
 import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.renderer.sublayers.TextureItem;
+import org.oscim.renderer.elements.TextureItem;
 import org.oscim.utils.pool.Inlist;
 
 

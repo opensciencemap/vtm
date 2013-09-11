@@ -17,14 +17,14 @@ package org.oscim.android;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.oscim.view.Map;
+import org.oscim.map.Map;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
 public class GLView extends GLSurfaceView {
 
-	class GLRenderer extends org.oscim.renderer.GLRenderer implements GLSurfaceView.Renderer{
+	class GLRenderer extends org.oscim.renderer.MapRenderer implements GLSurfaceView.Renderer{
 
 		public GLRenderer(Map map) {
 			super(map);

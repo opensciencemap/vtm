@@ -14,9 +14,9 @@
  */
 package org.oscim.layers;
 
-import org.oscim.view.Map;
 import org.oscim.core.MapPosition;
-import org.oscim.renderer.RenderLayer;
+import org.oscim.map.Map;
+import org.oscim.renderer.LayerRenderer;
 
 public abstract class Layer {
 	public Layer(Map map) {
@@ -26,11 +26,10 @@ public abstract class Layer {
 	private boolean mEnabled = true;
 	protected final Map mMap;
 
-	/** RenderLayer used to draw this layer. To be implemented by sub-classes */
-	protected RenderLayer mLayer;
+	protected LayerRenderer mRenderer;
 
-	public RenderLayer getLayer() {
-		return mLayer;
+	public LayerRenderer getRenderer() {
+		return mRenderer;
 	}
 
 	/**

@@ -4,8 +4,8 @@ import org.oscim.awt.AwtGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
-import org.oscim.tilesource.TileSource;
-import org.oscim.tilesource.oscimap4.OSciMap4TileSource;
+import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
