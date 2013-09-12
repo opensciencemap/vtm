@@ -129,12 +129,12 @@ jint Java_org_oscim_utils_geom_Triangulator_triangulate(JNIEnv *env, jclass c,
 
    int *rings = NULL;
    if (in.numberofholes > 0) {
-      in.holelist = (float *) malloc(in.numberofholes * 2 * sizeof(float));
+      in.holelist = (double *) malloc(in.numberofholes * 2 * sizeof(double));
       rings = (int*) malloc(num_rings * sizeof(int));
    }
 
    int *seg = in.segmentlist;
-   float *hole = in.holelist;
+   double *hole = in.holelist;
 
    // counter going through all points
    int point;
@@ -182,8 +182,8 @@ jint Java_org_oscim_utils_geom_Triangulator_triangulate(JNIEnv *env, jclass c,
          float ux = -vy / a;
          float uy = vx / a;
 
-         float centerx = cx + vx / 2.0 - (ux * 0.1);
-         float centery = cy + vy / 2.0 - (uy * 0.1);
+         double centerx = cx + vx / 2.0 - (ux * 0.1);
+         double centery = cy + vy / 2.0 - (uy * 0.1);
 
          *hole++ = centerx;
          *hole++ = centery;
@@ -268,8 +268,8 @@ jint Java_org_oscim_utils_geom_Triangulator_triangulate(JNIEnv *env, jclass c,
 
       INDICE *tri = out.trianglelist;
 
-      for (int n = out.numberoftriangles * 3; n > 0; n--, tri++)
-         *tri = *tri * stride + offset;
+      for (int n = out.numberoftriangles * 3; n > 0; n--)
+         *tri++ = *tri * stride + offset;
 
       // when a ring has an odd number of points one (or rather two)
       // additional vertices will be added. so the following rings

@@ -248,7 +248,7 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#define SINGLE
+//#define SINGLE
 
 #ifdef SINGLE
 #define REAL float
@@ -256,13 +256,15 @@
 #define REAL double
 #endif /* not SINGLE */
 
+#define IO_REAL float
+
 #define INDICE unsigned short
 
 typedef struct triangulateio TriangleIO;
 
 struct triangulateio {
-   REAL *pointlist; /* In / out */
-   REAL *pointattributelist; /* In / out */
+   IO_REAL *pointlist; /* In / out */
+   IO_REAL *pointattributelist; /* In / out */
    int *pointmarkerlist; /* In / out */
    int numberofpoints; /* In / out */
    int numberofpointattributes; /* In / out */

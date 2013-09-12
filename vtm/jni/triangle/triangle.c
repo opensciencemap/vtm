@@ -311,10 +311,6 @@ int error_set = 0;
 void internalerror() {
    error_set = 1;
    printf("Triangle is going to quit its job now\n");
-   //printf("  Please report this bug to jrs@cs.berkeley.edu\n");
-   ///printf("  Include the message above, your input data set, and the exact\n");
-   //printf("    command line you used to run Triangle.\n");
-   //triexit(1);
 }
 
 /*****************************************************************************/
@@ -328,8 +324,6 @@ void parsecommandline(int argc, char **argv, struct behavior *b) {
    error_set = 0;
 
 #define STARTINDEX 0
-
-   int i, j;
 
    b->poly = b->refine = b->quality = 0;
    b->vararea = b->fixedarea = b->usertest = 0;
@@ -350,6 +344,8 @@ void parsecommandline(int argc, char **argv, struct behavior *b) {
    b->minangle = 0.0;
    b->maxarea = -1.0;
    b->quiet = b->verbose = 0;
+
+   int i, j;
 
    for (i = STARTINDEX; i < argc; i++) {
       for (j = STARTINDEX; argv[i][j] != '\0'; j++) {
@@ -3862,8 +3858,9 @@ enum insertvertexresult insertvertex(struct mesh *m, struct behavior *b, vertex 
                   sorg(brokensubseg, encroached->subsegorg);
                   sdest(brokensubseg, encroached->subsegdest);
                   if (b->verbose > 2) {
-                     printf(
-                           "  Queueing encroached subsegment (%.12g, %.12g) (%.12g, %.12g).\n", encroached->subsegorg[0], encroached->subsegorg[1], encroached->subsegdest[0], encroached->subsegdest[1]);
+                     printf("  Queueing encroached subsegment (%.12g, %.12g) (%.12g, %.12g).\n",
+                           encroached->subsegorg[0], encroached->subsegorg[1],
+                           encroached->subsegdest[0], encroached->subsegdest[1]);
                   }
                }
             }
@@ -5143,10 +5140,10 @@ long divconqdelaunay(struct mesh *m, struct behavior *b) {
    i = 0;
    for (j = 1; j < m->invertices; j++) {
       if ((sortarray[i][0] == sortarray[j][0]) && (sortarray[i][1] == sortarray[j][1])) {
-         if (!b->quiet) {
-            printf(
-                  "Warning:  A duplicate vertex at (%.12g, %.12g) appeared and was ignored.\n", sortarray[j][0], sortarray[j][1]);
-         }
+         //if (!b->quiet) {
+            printf("Warning:  A duplicate vertex at (%.12g, %.12g) appeared and was ignored.\n",
+                  sortarray[j][0], sortarray[j][1]);
+         //}
          setvertextype(sortarray[j], UNDEADVERTEX);
          m->undeads++;
       }
@@ -5305,6 +5302,7 @@ enum finddirectionresult finddirection(struct mesh *m, struct behavior *b, struc
          printf("  triangle leading from (%.12g, %.12g) to", startvertex[0], startvertex[1]);
          printf("  (%.12g, %.12g).\n", searchpoint[0], searchpoint[1]);
          internalerror();
+         return 0;
        }
       apex(*searchtri, leftvertex);
       rightccw = leftccw;
@@ -5319,6 +5317,7 @@ enum finddirectionresult finddirection(struct mesh *m, struct behavior *b, struc
          printf("  triangle leading from (%.12g, %.12g) to", startvertex[0], startvertex[1]);
          printf("  (%.12g, %.12g).\n", searchpoint[0], searchpoint[1]);
          internalerror();
+         return 0;
       }
       dest(*searchtri, rightvertex);
       leftccw = rightccw;
@@ -5434,6 +5433,8 @@ void segmentintersection(struct mesh *m, struct behavior *b, struct otri *splitt
 
   // FIXME collinear =
    finddirection(m, b, splittri, endpoint1);
+   if (error_set)
+      return;
 
    dest(*splittri, rightvertex);
    apex(*splittri, leftvertex);
@@ -5750,6 +5751,9 @@ void constrainededge(struct mesh *m, struct behavior *b, struct otri *starttri, 
                collision = 1;
                /* Insert a vertex at the intersection. */
                segmentintersection(m, b, &fixuptri, &crosssubseg, endpoint2);
+               if (error_set)
+                  return;
+
                done = 1;
             }
          }
@@ -5802,6 +5806,7 @@ void insertsegment(struct mesh *m, struct behavior *b, vertex endpoint1, vertex 
          printf( "Internal error in insertsegment():  Unable to locate PSLG vertex\n");
          printf("  (%.12g, %.12g) in triangulation.\n", endpoint1[0], endpoint1[1]);
          internalerror();
+         return;
       }
    }
    /* Remember this triangle to improve subsequent point location. */
@@ -5833,6 +5838,7 @@ void insertsegment(struct mesh *m, struct behavior *b, vertex endpoint1, vertex 
          printf( "Internal error in insertsegment():  Unable to locate PSLG vertex\n");
          printf("  (%.12g, %.12g) in triangulation.\n", endpoint2[0], endpoint2[1]);
          internalerror();
+         return;
       }
    }
    /* Remember this triangle to improve subsequent point location. */
@@ -5847,24 +5853,8 @@ void insertsegment(struct mesh *m, struct behavior *b, vertex endpoint1, vertex 
    /*   vertex on the segment occurred.                                       */
    org(searchtri2, endpoint2);
 
-#ifndef REDUCED
-#ifndef CDT_ONLY
-   if (b->splitseg)
-   {
-      /* Insert vertices to force the segment into the triangulation. */
-      conformingedge(m, b, endpoint1, endpoint2, newmark);
-   }
-   else
-   {
-#endif /* not CDT_ONLY */
-#endif /* not REDUCED */
    /* Insert the segment directly into the triangulation. */
    constrainededge(m, b, &searchtri1, endpoint2, newmark);
-#ifndef REDUCED
-#ifndef CDT_ONLY
-}
-#endif /* not CDT_ONLY */
-#endif /* not REDUCED */
 }
 
 /*****************************************************************************/
@@ -5974,6 +5964,8 @@ void formskeleton(struct mesh *m, struct behavior *b, int *segmentlist, int *seg
             }
             else {
                insertsegment(m, b, endpoint1, endpoint2, boundmarker);
+               if (error_set)
+                  return;
             }
          }
       }
@@ -6630,7 +6622,7 @@ void highorder(struct mesh *m, struct behavior *b) {
 /*                                                                           */
 /*****************************************************************************/
 
-void transfernodes(struct mesh *m, struct behavior *b, REAL *pointlist, REAL *pointattriblist,
+void transfernodes(struct mesh *m, struct behavior *b, IO_REAL *pointlist, IO_REAL *pointattriblist,
       int *pointmarkerlist, int numberofpoints, int numberofpointattribs) {
    vertex vertexloop;
    REAL x, y;
@@ -6674,15 +6666,18 @@ void transfernodes(struct mesh *m, struct behavior *b, REAL *pointlist, REAL *po
       }
 
       // ----------------------------------------------
-      for (j = (i - 1) * 2; j >= 0; j -= 2){
-         if (x == pointlist[j] && y == pointlist[j+1]){
-            printf("skip duplicate %d\n", j >> 1);
-            setvertextype(vertexloop, UNDEADVERTEX);
-            vertexloop[0] = 0xffffffff;
-            vertexloop[1] = 0xffffffff;
-            break;
-         }
-      }
+//      for (j = (i - 1) * 2; j >= 0; j -= 2){
+//         if (x == pointlist[j] && y == pointlist[j+1]){
+//            printf("skip duplicate %d\n", j >> 1);
+//            setvertextype(vertexloop, UNDEADVERTEX);
+//            m->undeads++;
+//
+//            vertexloop[0] = 0xffffffff;
+//            vertexloop[1] = 0xffffffff;
+//            break;
+//         }
+//      }
+
       if (j >= 0)
          continue;
       // ----------------------------------------------
@@ -7250,6 +7245,8 @@ void triangulate(struct behavior *command, struct triangulateio *in, struct tria
       if (!b->refine) {
          /* Insert PSLG segments and/or convex hull segments. */
          formskeleton(&m, b, in->segmentlist, in->segmentmarkerlist, in->numberofsegments);
+         if (error_set)
+            return;
       }
    }
 
@@ -7328,10 +7325,10 @@ void triangulate(struct behavior *command, struct triangulateio *in, struct tria
       }
       numbernodes(&m, b); /* We must remember to number the vertices. */
    }
-   else {
+   //else {
       /* writenodes() numbers the vertices too. */
-      writenodes(&m, b, &out->pointlist, &out->pointattributelist, &out->pointmarkerlist);
-   }
+   //   writenodes(&m, b, &out->pointlist, &out->pointattributelist, &out->pointmarkerlist);
+   //}
    if (b->noelewritten) {
       if (!b->quiet) {
          printf("NOT writing triangles.\n");
@@ -7358,18 +7355,19 @@ void triangulate(struct behavior *command, struct triangulateio *in, struct tria
             out->regionlist = in->regionlist;
          }
          else {
-            out->holelist = (REAL *) NULL;
-            out->regionlist = (REAL *) NULL;
+            out->holelist = NULL;
+            out->regionlist = NULL;
          }
       }
    }
    if (b->edgesout) {
       writeedges(&m, b, &out->edgelist, &out->edgemarkerlist);
    }
-   if (b->voronoi) {
-      writevoronoi(&m, b, &vorout->pointlist, &vorout->pointattributelist, &vorout->pointmarkerlist,
-            &vorout->edgelist, &vorout->edgemarkerlist, &vorout->normlist);
-   }
+
+   //if (b->voronoi) {
+   //   writevoronoi(&m, b, &vorout->pointlist, &vorout->pointattributelist, &vorout->pointmarkerlist,
+   //         &vorout->edgelist, &vorout->edgemarkerlist, &vorout->normlist);
+   //}
    if (b->neighbors) {
       writeneighbors(&m, b, &out->neighborlist);
    }
