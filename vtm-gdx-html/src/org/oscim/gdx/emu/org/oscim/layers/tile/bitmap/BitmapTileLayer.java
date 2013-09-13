@@ -19,6 +19,8 @@ import java.net.URL;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.event.MapEvent;
+import org.oscim.event.UpdateEvent;
 import org.oscim.gdx.client.GwtBitmap;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.bitmap.TileSource.FadeStep;
@@ -48,33 +50,66 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 		mFade = mTileSource.getFadeSteps();
 	}
 
+	//	@Override
+	//	public void onUpdate(MapPosition pos, boolean changed, boolean clear) {
+	//		super.onUpdate(pos, changed, clear);
+	//
+	//		if (mFade == null) {
+	//			mRenderLayer.setBitmapAlpha(1);
+	//			return;
+	//		}
+	//
+	//		float alpha = 0;
+	//		for (FadeStep f : mFade) {
+	//			if (pos.scale < f.scaleStart || pos.scale > f.scaleEnd)
+	//				continue;
+	//
+	//			if (f.alphaStart == f.alphaEnd) {
+	//				alpha = f.alphaStart;
+	//				break;
+	//			}
+	//			double range = f.scaleEnd / f.scaleStart;
+	//			float a = (float)((range - (pos.scale / f.scaleStart)) / range);
+	//			a = FastMath.clamp(a, 0, 1);
+	//			// interpolate alpha between start and end
+	//			alpha = a * f.alphaStart + (1 - a) * f.alphaEnd;
+	//			break;
+	//		}
+	//
+	//		mRenderLayer.setBitmapAlpha(alpha);
+	//	}
+
 	@Override
-	public void onUpdate(MapPosition pos, boolean changed, boolean clear) {
-		super.onUpdate(pos, changed, clear);
+	public void handleEvent(MapEvent event) {
+		super.handleEvent(event);
 
-		if (mFade == null) {
-			mRenderLayer.setBitmapAlpha(1);
-			return;
-		}
+		if (event instanceof UpdateEvent) {
 
-		float alpha = 0;
-		for (FadeStep f : mFade) {
-			if (pos.scale < f.scaleStart || pos.scale > f.scaleEnd)
-				continue;
+			if (mFade == null) {
+				mRenderLayer.setBitmapAlpha(1);
+				return;
+			}
+			MapPosition pos = mMap.getMapPosition();
 
-			if (f.alphaStart == f.alphaEnd) {
-				alpha = f.alphaStart;
+			float alpha = 0;
+			for (FadeStep f : mFade) {
+				if (pos.scale < f.scaleStart || pos.scale > f.scaleEnd)
+					continue;
+
+				if (f.alphaStart == f.alphaEnd) {
+					alpha = f.alphaStart;
+					break;
+				}
+				double range = f.scaleEnd / f.scaleStart;
+				float a = (float) ((range - (pos.scale / f.scaleStart)) / range);
+				a = FastMath.clamp(a, 0, 1);
+				// interpolate alpha between start and end
+				alpha = a * f.alphaStart + (1 - a) * f.alphaEnd;
 				break;
 			}
-			double range = f.scaleEnd / f.scaleStart;
-			float a = (float)((range - (pos.scale / f.scaleStart)) / range);
-			a = FastMath.clamp(a, 0, 1);
-			// interpolate alpha between start and end
-			alpha = a * f.alphaStart + (1 - a) * f.alphaEnd;
-			break;
-		}
 
-		mRenderLayer.setBitmapAlpha(alpha);
+			mRenderLayer.setBitmapAlpha(alpha);
+		}
 	}
 
 	@Override

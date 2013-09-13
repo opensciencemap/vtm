@@ -16,14 +16,16 @@ package org.oscim.layers.tile;
 
 import java.util.ArrayList;
 
-import org.oscim.core.MapPosition;
+import org.oscim.event.EventListener;
+import org.oscim.event.MapEvent;
+import org.oscim.event.UpdateEvent;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
 import org.oscim.tiling.TileRenderer;
 
-public abstract class TileLayer<T extends TileLoader> extends Layer {
+public abstract class TileLayer<T extends TileLoader> extends Layer implements EventListener {
 	//private final static String TAG = TileLayer.class.getName();
 	private final static int MAX_ZOOMLEVEL = 17;
 	private final static int MIN_ZOOMLEVEL = 2;
@@ -59,6 +61,8 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 		// RenderLayer is working in GL Thread and actually
 		// drawing loaded tiles to screen.
 		mRenderer = mRenderLayer = new TileRenderer(mTileManager);
+
+		map.addListener(UpdateEvent.TYPE, this);
 	}
 
 	abstract protected T createLoader(TileManager tm);
@@ -67,22 +71,44 @@ public abstract class TileLayer<T extends TileLoader> extends Layer {
 		return (TileRenderer) mRenderer;
 	}
 
+	//	@Override
+	//	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+	//
+	//		if (clear || mInitial) {
+	//			mRenderLayer.clearTiles();
+	//			mTileManager.init(mInitial);
+	//			mInitial = false;
+	//			changed = true;
+	//		}
+	//
+	//		if (changed && mTileManager.update(mapPosition))
+	//			notifyLoaders();
+	//	}
+
 	@Override
-	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+	public void handleEvent(MapEvent event) {
+		if (event instanceof UpdateEvent) {
 
-		if (clear || mInitial) {
-			mRenderLayer.clearTiles();
-			mTileManager.init(mInitial);
-			mInitial = false;
-			changed = true;
+			UpdateEvent e = (UpdateEvent) event;
+
+			boolean changed = e.positionChanged;
+
+			if (e.clearMap || mInitial) {
+				mRenderLayer.clearTiles();
+				mTileManager.init(mInitial);
+				mInitial = false;
+				changed = true;
+			}
+
+			if (changed && mTileManager.update(mMap.getMapPosition()))
+				notifyLoaders();
 		}
-
-		if (changed && mTileManager.update(mapPosition))
-			notifyLoaders();
 	}
 
 	@Override
 	public void onDetach() {
+		mMap.removeListener(UpdateEvent.TYPE, this);
+
 		for (T loader : mTileLoader) {
 			loader.pause();
 			loader.interrupt();

@@ -20,9 +20,9 @@ import java.util.AbstractList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.oscim.backend.Log;
-import org.oscim.backend.input.KeyEvent;
-import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.MapPosition;
+import org.oscim.event.KeyEvent;
+import org.oscim.event.MotionEvent;
 import org.oscim.layers.InputLayer;
 import org.oscim.layers.Layer;
 import org.oscim.renderer.LayerRenderer;
@@ -74,14 +74,14 @@ public class Layers extends AbstractList<Layer> {
 
 		return mLayerRenderer;
 	}
-
-	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (Layer l : mLayers)
-			l.onUpdate(mapPosition, changed, clear);
-	}
+//
+//	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+//		if (mDirtyLayers)
+//			updateLayers();
+//
+//		for (Layer l : mLayers)
+//			l.onUpdate(mapPosition, changed, clear);
+//	}
 
 	public void destroy() {
 		if (mDirtyLayers)

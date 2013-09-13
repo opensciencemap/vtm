@@ -15,8 +15,10 @@
 package org.oscim.layers;
 
 import org.oscim.backend.Log;
-import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.Tile;
+import org.oscim.event.EventListener;
+import org.oscim.event.MapEvent;
+import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 
@@ -30,7 +32,7 @@ import org.oscim.map.Viewport;
  *        http://en.wikipedia.org/wiki/Viterbi_algorithm
  */
 
-public class MapEventLayer extends InputLayer {
+public class MapEventLayer extends Layer implements EventListener {
 	private static final boolean debug = false;
 	private static final String TAG = MapEventLayer.class.getName();
 
@@ -65,10 +67,21 @@ public class MapEventLayer extends InputLayer {
 
 	public MapEventLayer(Map map) {
 		super(map);
+		map.addListener(MotionEvent.TYPE, this);
 		mMapPosition = map.getViewport();
 		mTracker = new VelocityTracker();
 	}
 
+	@Override
+	public void onDetach() {
+		mMap.removeListener(MotionEvent.TYPE, this);
+	}
+
+	@Override
+	public void handleEvent(MapEvent event){
+		if (event instanceof MotionEvent)
+			onTouchEvent((MotionEvent)event);
+	}
 	//private long mPrevTime;
 
 	private boolean mEnableRotation = true;
@@ -96,7 +109,7 @@ public class MapEventLayer extends InputLayer {
 		mEnableZoom = enable;
 	}
 
-	@Override
+	//@Override
 	public boolean onTouchEvent(MotionEvent e) {
 
 		//mPrevTime = e.getTime();
@@ -441,5 +454,4 @@ public class MapEventLayer extends InputLayer {
 		//	return sum;
 		//}
 	}
-
 }

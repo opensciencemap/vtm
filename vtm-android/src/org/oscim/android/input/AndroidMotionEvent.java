@@ -13,9 +13,18 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.android.input;
-import org.oscim.backend.input.MotionEvent;
+import org.oscim.event.MotionEvent;
 
 public class AndroidMotionEvent extends MotionEvent {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public AndroidMotionEvent(Object source) {
+		super(source);
+	}
 
 	android.view.MotionEvent mEvent;
 

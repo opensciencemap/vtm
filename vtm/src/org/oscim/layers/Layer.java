@@ -14,11 +14,12 @@
  */
 package org.oscim.layers;
 
-import org.oscim.core.MapPosition;
+
 import org.oscim.map.Map;
 import org.oscim.renderer.LayerRenderer;
 
-public abstract class Layer {
+public abstract class Layer  {
+
 	public Layer(Map map) {
 		mMap = map;
 	}
@@ -32,33 +33,34 @@ public abstract class Layer {
 		return mRenderer;
 	}
 
-	/**
-	 */
 	public void setEnabled(boolean enabled) {
 		mEnabled = enabled;
 	}
 
-	/**
-	 */
 	public boolean isEnabled() {
 		return mEnabled;
 	}
 
-	/**
-	 * Called before each frame render request (on main thread).
-	 *
-	 * @param mapPosition
-	 *            current MapPosition
-	 * @param changed
-	 *            true when MapPosition has changed since last call
-	 * @param clear
-	 *            Clear all resources that depend on previous map state. Most
-	 *            importantly all resources from previous GL context (hold by
-	 *            RenderLayer)
-	 */
-	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+//	/**
+//	 * Called before each frame render request (on main thread).
+//	 *
+//	 * @param mapPosition
+//	 *            current MapPosition
+//	 * @param changed
+//	 *            true when MapPosition has changed since last call
+//	 * @param clear
+//	 *            Clear all resources that depend on previous map state. Most
+//	 *            importantly all resources from previous GL context (hold by
+//	 *            RenderLayer)
+//	 */
+//	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+//
+//	}
 
-	}
+//	@Override
+//	public void handleEvent(MapEvent e){
+//
+//	}
 
 	/**
 	 * Override to perform clean up of resources before shutdown. By default

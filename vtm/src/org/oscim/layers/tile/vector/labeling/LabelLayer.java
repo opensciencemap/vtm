@@ -14,20 +14,25 @@
  */
 package org.oscim.layers.tile.vector.labeling;
 
-import org.oscim.backend.input.MotionEvent;
-import org.oscim.core.MapPosition;
-import org.oscim.layers.InputLayer;
+import org.oscim.backend.Log;
+import org.oscim.event.EventListener;
+import org.oscim.event.MapEvent;
+import org.oscim.event.MotionEvent;
+import org.oscim.event.UpdateEvent;
+import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.tiling.TileRenderer;
 
-import org.oscim.backend.Log;
-
-public class LabelLayer extends InputLayer {
+public class LabelLayer extends Layer implements EventListener {
 	private final static String TAG = LabelLayer.class.getName();
-	final TextRenderer mTextRenderer;
+	private final TextRenderer mTextRenderer;
+
+	private int multi;
 
 	public LabelLayer(Map map, TileRenderer tileRenderLayer) {
 		super(map);
+		map.addListener(UpdateEvent.TYPE, this);
+		map.addListener(MotionEvent.TYPE, this);
 
 		//mTextLayer = new org.oscim.renderer.layers.TextRenderLayer(map, tileRenderLayer);
 		mTextRenderer = new TextRenderer(map, tileRenderLayer);
@@ -35,33 +40,64 @@ public class LabelLayer extends InputLayer {
 	}
 
 	@Override
-	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-		if (clear)
-			mTextRenderer.clearLabels();
-	}
-
-	private int multi;
-
-	@Override
-	public boolean onTouchEvent(MotionEvent e) {
-		int action = e.getAction() & MotionEvent.ACTION_MASK;
-		if (action == MotionEvent.ACTION_POINTER_DOWN) {
-			multi++;
-			mTextRenderer.hold(true);
-		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-			multi--;
-			if (multi == 0)
-				mTextRenderer.hold(false);
-		} else if (action == MotionEvent.ACTION_CANCEL) {
-			multi = 0;
-			Log.d(TAG, "cancel " + multi);
-			mTextRenderer.hold(false);
-		}
-
-		return false;
-	}
-	
-	@Override
 	public void onDetach() {
+		mMap.removeListener(UpdateEvent.TYPE, this);
+		mMap.removeListener(MotionEvent.TYPE, this);
+
+		// TODO stop and clear labeling thread
+		super.onDetach();
 	}
+
+	@Override
+	public void handleEvent(MapEvent event) {
+		if (event instanceof UpdateEvent) {
+
+			UpdateEvent e = (UpdateEvent) event;
+			if (e.clearMap)
+				mTextRenderer.clearLabels();
+
+		} else if (event instanceof MotionEvent) {
+			MotionEvent e = (MotionEvent) event;
+
+			int action = e.getAction() & MotionEvent.ACTION_MASK;
+			if (action == MotionEvent.ACTION_POINTER_DOWN) {
+				multi++;
+				mTextRenderer.hold(true);
+			} else if (action == MotionEvent.ACTION_POINTER_UP) {
+				multi--;
+				if (multi == 0)
+					mTextRenderer.hold(false);
+			} else if (action == MotionEvent.ACTION_CANCEL) {
+				multi = 0;
+				Log.d(TAG, "cancel " + multi);
+				mTextRenderer.hold(false);
+			}
+		}
+	}
+
+	//	@Override
+	//	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+	//		if (clear)
+	//			mTextRenderer.clearLabels();
+	//	}
+
+	//	@Override
+	//	public boolean onTouchEvent(MotionEvent e) {
+	//		int action = e.getAction() & MotionEvent.ACTION_MASK;
+	//		if (action == MotionEvent.ACTION_POINTER_DOWN) {
+	//			multi++;
+	//			mTextRenderer.hold(true);
+	//		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+	//			multi--;
+	//			if (multi == 0)
+	//				mTextRenderer.hold(false);
+	//		} else if (action == MotionEvent.ACTION_CANCEL) {
+	//			multi = 0;
+	//			Log.d(TAG, "cancel " + multi);
+	//			mTextRenderer.hold(false);
+	//		}
+	//
+	//		return false;
+	//	}
+
 }

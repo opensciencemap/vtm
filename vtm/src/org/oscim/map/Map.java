@@ -14,10 +14,16 @@
  */
 package org.oscim.map;
 
+import java.util.ArrayList;
+
 import org.oscim.backend.Log;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
+import org.oscim.event.EventDispatcher;
+import org.oscim.event.EventListener;
+import org.oscim.event.MotionEvent;
+import org.oscim.event.UpdateEvent;
 import org.oscim.layers.MapEventLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -29,7 +35,7 @@ import org.oscim.theme.ThemeLoader;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.utils.async.AsyncExecutor;
 
-public abstract class Map {
+public abstract class Map implements EventDispatcher {
 
 	private static final String TAG = Map.class.getName();
 
@@ -172,7 +178,15 @@ public abstract class Map {
 		// get the current MapPosition
 		changed |= mViewport.getMapPosition(mMapPosition);
 
-		mLayers.onUpdate(mMapPosition, changed, mClearMap);
+		//mLayers.onUpdate(mMapPosition, changed, mClearMap);
+
+		UpdateEvent e = new UpdateEvent(this);
+		e.clearMap = mClearMap;
+		e.positionChanged = changed;
+
+		for (EventListener l : mUpdateListeners)
+			l.handleEvent(e);
+
 		mClearMap = false;
 	}
 
@@ -222,5 +236,34 @@ public abstract class Map {
 
 	public MapAnimator getAnimator() {
 		return mAnimator;
+	}
+
+
+	ArrayList<EventListener> mUpdateListeners = new ArrayList<EventListener>();
+	ArrayList<EventListener> mMotionListeners = new ArrayList<EventListener>();
+
+	@Override
+	public void addListener(String type, EventListener listener) {
+		if (type == UpdateEvent.TYPE)
+			mUpdateListeners.add(listener);
+		else if (type == MotionEvent.TYPE)
+			mMotionListeners.add(listener);
+
+	}
+	@Override
+	public void removeListener(String type, EventListener listener) {
+		if (type == UpdateEvent.TYPE)
+			mUpdateListeners.remove(listener);
+		else if (type == MotionEvent.TYPE)
+			mMotionListeners.remove(listener);
+	}
+
+	public MapPosition getMapPosition() {
+		return mMapPosition;
+	}
+
+	public void handleMotionEvent(MotionEvent e) {
+		for (EventListener l : mMotionListeners)
+			l.handleEvent(e);
 	}
 }

@@ -15,8 +15,8 @@
  */
 package org.oscim.layers;
 
-import org.oscim.backend.input.KeyEvent;
-import org.oscim.backend.input.MotionEvent;
+import org.oscim.event.KeyEvent;
+import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
 
 public abstract class InputLayer extends Layer {

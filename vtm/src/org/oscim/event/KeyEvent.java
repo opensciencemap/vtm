@@ -12,8 +12,14 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.backend.input;
+package org.oscim.event;
 
-public class KeyEvent {
+public class KeyEvent extends MapEvent{
+
+	private static final long serialVersionUID = 1L;
+
+	public KeyEvent(Object source) {
+		super(source);
+	}
 
 }

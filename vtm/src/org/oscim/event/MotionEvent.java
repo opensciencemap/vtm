@@ -12,9 +12,18 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.backend.input;
+package org.oscim.event;
 
-public abstract class MotionEvent {
+
+public abstract class MotionEvent extends MapEvent {
+
+	private static final long serialVersionUID = 1L;
+
+	public static final String TYPE = "MotionEvent";
+
+	public MotionEvent(Object source) {
+		super(source);
+	}
 
 	public static final int ACTION_DOWN = 0;
 	public static final int ACTION_UP = 1;

@@ -17,9 +17,9 @@ package org.oscim.layers.marker;
 
 import java.util.List;
 
-import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.Point;
+import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 

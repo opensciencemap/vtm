@@ -14,8 +14,8 @@
  */
 package org.oscim.layers.tile.vector;
 
-import org.oscim.backend.input.MotionEvent;
 import org.oscim.core.MapPosition;
+import org.oscim.event.MotionEvent;
 import org.oscim.layers.InputLayer;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;

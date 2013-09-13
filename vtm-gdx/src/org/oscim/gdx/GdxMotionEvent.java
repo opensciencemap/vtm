@@ -1,11 +1,16 @@
 package org.oscim.gdx;
 
-import org.oscim.backend.input.MotionEvent;
+import org.oscim.event.MotionEvent;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 
 public class GdxMotionEvent extends MotionEvent implements InputProcessor{
+
+	private static final long serialVersionUID = 1L;
+
+	public GdxMotionEvent(Object source) {
+		super(source);
+	}
 
 	@Override
 	public int getAction() {

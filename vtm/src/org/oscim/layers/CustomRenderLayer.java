@@ -44,14 +44,14 @@ public class CustomRenderLayer extends Layer {
 
 	private int someConccurentVariable;
 
-	@Override
-	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-
-		synchronized (mRenderer) {
-			// chang
-			someConccurentVariable++;
-		}
-
-	}
+//	@Override
+//	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+//
+//		synchronized (mRenderer) {
+//			// chang
+//			someConccurentVariable++;
+//		}
+//
+//	}
 
 }

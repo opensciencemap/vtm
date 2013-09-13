@@ -219,7 +219,7 @@ public class MapView extends RelativeLayout {
 		mPausing = false;
 	}
 
-	AndroidMotionEvent mMotionEvent = new AndroidMotionEvent();
+	AndroidMotionEvent mMotionEvent = new AndroidMotionEvent(this);
 
 	@Override
 	public boolean onTouchEvent(android.view.MotionEvent motionEvent) {
@@ -228,8 +228,9 @@ public class MapView extends RelativeLayout {
 			return false;
 
 		mMotionEvent.wrap(motionEvent);
+		mMap.handleMotionEvent(mMotionEvent);
 
-		return mMap.getLayers().handleMotionEvent(mMotionEvent);
+		return true;
 	}
 
 	// synchronized ???
