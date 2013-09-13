@@ -16,17 +16,14 @@ package org.oscim.layers.tile.vector;
 
 import org.oscim.core.MapPosition;
 import org.oscim.event.MotionEvent;
-import org.oscim.layers.InputLayer;
+import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.tiling.TileRenderer;
 import org.oscim.utils.FastMath;
 
-/**
- * @author Hannes Janetzek
- */
-public class BuildingLayer extends InputLayer {
+public class BuildingLayer extends Layer {
 	//private final static String TAG = BuildingOverlay.class.getName();
 
 	final ExtrusionRenderer mExtLayer;
@@ -81,28 +78,28 @@ public class BuildingLayer extends InputLayer {
 
 	private final static int MIN_ZOOM = 17;
 
-	@Override
-	public boolean onTouchEvent(MotionEvent e) {
-		//		int action = e.getAction() & MotionEvent.ACTION_MASK;
-		//		if (action == MotionEvent.ACTION_POINTER_DOWN) {
-		//			multi++;
-		//		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-		//			multi--;
-		//			if (!mActive && mAlpha > 0) {
-		//				// finish hiding
-		//				//Log.d(TAG, "add multi hide timer " + mAlpha);
-		//				addShowTimer(mFadeTime * mAlpha, false);
-		//			}
-		//		} else if (action == MotionEvent.ACTION_CANCEL) {
-		//			multi = 0;
-		//			Log.d(TAG, "cancel " + multi);
-		//			if (mTimer != null) {
-		//				mTimer.cancel();
-		//				mTimer = null;
-		//			}
-		//		}
-
-		return false;
-	}
+	//@Override
+	//public boolean onTouchEvent(MotionEvent e) {
+	//	int action = e.getAction() & MotionEvent.ACTION_MASK;
+	//	if (action == MotionEvent.ACTION_POINTER_DOWN) {
+	//		multi++;
+	//	} else if (action == MotionEvent.ACTION_POINTER_UP) {
+	//		multi--;
+	//		if (!mActive && mAlpha > 0) {
+	//			// finish hiding
+	//			//Log.d(TAG, "add multi hide timer " + mAlpha);
+	//			addShowTimer(mFadeTime * mAlpha, false);
+	//		}
+	//	} else if (action == MotionEvent.ACTION_CANCEL) {
+	//		multi = 0;
+	//		Log.d(TAG, "cancel " + multi);
+	//		if (mTimer != null) {
+	//			mTimer.cancel();
+	//			mTimer = null;
+	//		}
+	//	}
+	//
+	//	return false;
+	//}
 
 }

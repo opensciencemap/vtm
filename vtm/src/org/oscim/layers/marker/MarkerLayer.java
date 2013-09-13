@@ -17,20 +17,10 @@
 package org.oscim.layers.marker;
 
 import org.oscim.core.Point;
-import org.oscim.layers.InputLayer;
+import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 
-/**
- * Base class representing an overlay which may be displayed on top of a
- * {@link Map}. To add an overlay, subclass this class, create an instance,
- * and add via addOverlay() of {@link Map}.
- * This class implements a form of Gesture Handling similar to
- * {@link android.view.GestureDetector.SimpleOnGestureListener} and
- * GestureDetector.OnGestureListener.
- *
- * @author Nicolas Gramlich
- */
-public abstract class MarkerLayer extends InputLayer {
+public abstract class MarkerLayer extends Layer {
 
 	public MarkerLayer(Map map) {
 		super(map);

@@ -19,11 +19,6 @@ package org.oscim.map;
 import java.util.AbstractList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.oscim.backend.Log;
-import org.oscim.core.MapPosition;
-import org.oscim.event.KeyEvent;
-import org.oscim.event.MotionEvent;
-import org.oscim.layers.InputLayer;
 import org.oscim.layers.Layer;
 import org.oscim.renderer.LayerRenderer;
 
@@ -92,7 +87,7 @@ public class Layers extends AbstractList<Layer> {
 	}
 
 	Layer[] mLayers;
-	InputLayer[] mInputLayer;
+//	InputLayer[] mInputLayer;
 
 	private synchronized void updateLayers() {
 		if (!mDirtyLayers)
@@ -109,14 +104,14 @@ public class Layers extends AbstractList<Layer> {
 			if (o.getRenderer() != null)
 				numRenderLayers++;
 
-			if (o instanceof InputLayer)
-				numInputLayers++;
+//			if (o instanceof InputLayer)
+//				numInputLayers++;
 
 			mLayers[i] = o;
 		}
 
 		mLayerRenderer = new LayerRenderer[numRenderLayers];
-		mInputLayer = new InputLayer[numInputLayers];
+//		mInputLayer = new InputLayer[numInputLayers];
 
 		for (int i = 0, cntR = 0, cntI = 1, n = mLayerList.size(); i < n; i++) {
 			Layer o = mLayerList.get(i);
@@ -124,12 +119,12 @@ public class Layers extends AbstractList<Layer> {
 			if (l != null)
 				mLayerRenderer[cntR++] = l;
 
-			if (o instanceof InputLayer) {
-				// sort from top to bottom, so that highest layers
-				// process event first.
-				mInputLayer[numInputLayers - cntI] = (InputLayer) o;
-				cntI++;
-			}
+//			if (o instanceof InputLayer) {
+//				// sort from top to bottom, so that highest layers
+//				// process event first.
+//				mInputLayer[numInputLayers - cntI] = (InputLayer) o;
+//				cntI++;
+//			}
 		}
 
 		mDirtyLayers = false;
@@ -137,27 +132,27 @@ public class Layers extends AbstractList<Layer> {
 
 	//private boolean mCancelGesture;
 
-	public boolean handleMotionEvent(MotionEvent e) {
-		//boolean handleGesture = true;
-
-		//if (mCancelGesture) {
-		//	int action = e.getAction();
-		//	handleGesture = (action == MotionEvent.ACTION_CANCEL ||
-		//			action == MotionEvent.ACTION_UP);
-		//}
-
-		//if (handleGesture) {
-		//	if (mGestureDetector.onTouchEvent(e))
-		//		return true;
-		//
-		//	mCancelGesture = false;
-		//}
-
-		if (onTouchEvent(e))
-			return true;
-
-		return false;
-	}
+//public boolean handleMotionEvent(MotionEvent e) {
+//	//boolean handleGesture = true;
+//
+//	//if (mCancelGesture) {
+//	//	int action = e.getAction();
+//	//	handleGesture = (action == MotionEvent.ACTION_CANCEL ||
+//	//			action == MotionEvent.ACTION_UP);
+//	//}
+//
+//	//if (handleGesture) {
+//	//	if (mGestureDetector.onTouchEvent(e))
+//	//		return true;
+//	//
+//	//	mCancelGesture = false;
+//	//}
+//
+//	if (onTouchEvent(e))
+//		return true;
+//
+//	return false;
+//}
 
 	///**
 	// * Call this to not foward events to generic GestureDetector until
@@ -169,52 +164,52 @@ public class Layers extends AbstractList<Layer> {
 	//	mCancelGesture = true;
 	//}
 
-	public boolean onTouchEvent(MotionEvent event) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer) {
-			if (o.onTouchEvent(event)) {
-				if (debugInput)
-					Log.d(TAG, "onTouch\t\t" + o.getClass());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer)
-			if (o.onKeyDown(keyCode, event))
-				return true;
-
-		return false;
-	}
-
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer)
-			if (o.onKeyUp(keyCode, event))
-				return true;
-
-		return false;
-	}
-
-	public boolean onTrackballEvent(MotionEvent event) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (InputLayer o : mInputLayer)
-			if (o.onTrackballEvent(event))
-				return true;
-
-		return false;
-	}
+//public boolean onTouchEvent(MotionEvent event) {
+//	if (mDirtyLayers)
+//		updateLayers();
+//
+//	for (InputLayer o : mInputLayer) {
+//		if (o.onTouchEvent(event)) {
+//			if (debugInput)
+//				Log.d(TAG, "onTouch\t\t" + o.getClass());
+//			return true;
+//		}
+//	}
+//	return false;
+//}
+//
+//public boolean onKeyDown(int keyCode, KeyEvent event) {
+//	if (mDirtyLayers)
+//		updateLayers();
+//
+//	for (InputLayer o : mInputLayer)
+//		if (o.onKeyDown(keyCode, event))
+//			return true;
+//
+//	return false;
+//}
+//
+//public boolean onKeyUp(int keyCode, KeyEvent event) {
+//	if (mDirtyLayers)
+//		updateLayers();
+//
+//	for (InputLayer o : mInputLayer)
+//		if (o.onKeyUp(keyCode, event))
+//			return true;
+//
+//	return false;
+//}
+//
+//public boolean onTrackballEvent(MotionEvent event) {
+//	if (mDirtyLayers)
+//		updateLayers();
+//
+//	for (InputLayer o : mInputLayer)
+//		if (o.onTrackballEvent(event))
+//			return true;
+//
+//	return false;
+//}
 
 	//	/* GestureDetector.OnDoubleTapListener */
 	//

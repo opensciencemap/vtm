@@ -98,37 +98,37 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 		return result;
 	}
 
-	/**
-	 * Each of these methods performs a item sensitive check. If the item is
-	 * located its corresponding method is called. The result of the call is
-	 * returned. Helper methods are provided so that child classes may more
-	 * easily override behavior without resorting to overriding the
-	 * ItemGestureListener methods.
-	 */
-	@Override
-	public boolean onSingleTapUp(MotionEvent event) {
-		return activateSelectedItems(event, mActiveItemSingleTap) || super.onSingleTapUp(event);
-	}
-
-	protected boolean onSingleTapUpHelper(int index, Item item) {
-		return this.mOnItemGestureListener.onItemSingleTapUp(index, item);
-	}
-
-	private final ActiveItem mActiveItemSingleTap = new ActiveItem() {
-		@Override
-		public boolean run(int index) {
-			final ItemizedIconLayer<Item> that = ItemizedIconLayer.this;
-			if (that.mOnItemGestureListener == null) {
-				return false;
-			}
-			return onSingleTapUpHelper(index, that.mItemList.get(index));
-		}
-	};
-
-	@Override
-	public boolean onLongPress(MotionEvent event) {
-		return activateSelectedItems(event, mActiveItemLongPress) || super.onLongPress(event);
-	}
+//	/**
+//	 * Each of these methods performs a item sensitive check. If the item is
+//	 * located its corresponding method is called. The result of the call is
+//	 * returned. Helper methods are provided so that child classes may more
+//	 * easily override behavior without resorting to overriding the
+//	 * ItemGestureListener methods.
+//	 */
+//	@Override
+//	public boolean onSingleTapUp(MotionEvent event) {
+//		return activateSelectedItems(event, mActiveItemSingleTap) || super.onSingleTapUp(event);
+//	}
+//
+//	protected boolean onSingleTapUpHelper(int index, Item item) {
+//		return this.mOnItemGestureListener.onItemSingleTapUp(index, item);
+//	}
+//
+//	private final ActiveItem mActiveItemSingleTap = new ActiveItem() {
+//		@Override
+//		public boolean run(int index) {
+//			final ItemizedIconLayer<Item> that = ItemizedIconLayer.this;
+//			if (that.mOnItemGestureListener == null) {
+//				return false;
+//			}
+//			return onSingleTapUpHelper(index, that.mItemList.get(index));
+//		}
+//	};
+//
+//	@Override
+//	public boolean onLongPress(MotionEvent event) {
+//		return activateSelectedItems(event, mActiveItemLongPress) || super.onLongPress(event);
+//	}
 
 	protected boolean onLongPressHelper(int index, Item item) {
 		return this.mOnItemGestureListener.onItemLongPress(index, item);
