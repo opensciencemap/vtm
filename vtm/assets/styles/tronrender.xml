@@ -1,111 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rendertheme xmlns="http://mapsforge.org/renderTheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://mapsforge.org/renderTheme ../renderTheme.xsd" version="1"
+  xsi:schemaLocation="http://mapsforge.org/renderTheme ../../renderTheme.xsd" version="1"
   map-background="#050508">
 
-  <style-text name="road" k="name" font-style="bold" font-size="18" stroke="#606050"
+  <style-text id="road" k="name" font-style="bold" font-size="18" stroke="#606050"
     fill="#eeffee" stroke-width="2.5" />
-  <style-text name="major-road" k="name" font-style="bold" font-size="19" fill="#e2cf5d"
+  <style-text id="major-road" k="name" font-style="bold" font-size="19" fill="#e2cf5d"
     stroke="#101010" stroke-width="2.5" />
 
-  <style-area name="residential" fill="#ff0000" fade="10" />
+  <style-area id="residential" fill="#ff0000" fade="10" />
 
-  <style-area name="railway|industrial" fill="#f2eeef" fade="10" />
+  <style-area id="railway|industrial" fill="#f2eeef" fade="10" />
   <!-- "#f0fae7" mint green -->
-  <style-area name="farmland" fill="#fff8bf" fade="11" />
+  <style-area id="farmland" fill="#fff8bf" fade="11" />
 
   <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
-  <style-area name="forest|wood" fill="#151806" fade="7" blend="11" blend-fill="#1e2205" />
+  <style-area id="forest|wood" fill="#151806" fade="7" blend="11" blend-fill="#1e2205" />
 
   <!-- grass|meadow|garden|grassland|scrub -->
-  <style-area name="greens" fill="#33390c" fade="10" />
+  <style-area id="greens" fill="#33390c" fade="10" />
 
   <!-- marsh|wetland|nature_reserve -->
-  <style-area name="greens2" fill="#627100" fade="12" />
+  <style-area id="greens2" fill="#627100" fade="12" />
 
   <!-- park|common|green|cemetery|golf_course|dog_park -->
-  <style-area name="park" fill="#627100" fade="11" />
+  <style-area id="park" fill="#627100" fade="11" />
 
   <!-- de:Kleingartengebiet -->
-  <style-area name="allotments" fill="#efeae0" fade="12" />
+  <style-area id="allotments" fill="#efeae0" fade="12" />
 
   <!-- de:Steinbruch, Schotter-, Kies-, Sand- und Tongrube -->
-  <style-area name="quarry" fill="#ddddcc" fade="10" />
+  <style-area id="quarry" fill="#ddddcc" fade="10" />
 
-  <style-area name="military" fill="#eeedea" fade="10" />
+  <style-area id="military" fill="#eeedea" fade="10" />
 
 
-  <style-line name="residential" stroke="#ffffff" width="1.0" blur="1.0" fade="13" />
-  <style-line name="residential:bridge" from="residential" cap="square" />
+  <style-line id="residential" stroke="#ffffff" width="1.0" blur="1.0" fade="13" />
+  <style-line id="residential:bridge" use="residential" cap="square" />
 
   <!-- when inheriting another style with 'from' then 'witdth' is meant relative to the parent -->
-  <style-line name="pedestrian" from="residential" width="-0.4" />
-  <style-line name="pedestrian:bridge" from="pedestrian" cap="square" />
+  <style-line id="pedestrian" use="residential" width="-0.4" />
+  <style-line id="pedestrian:bridge" use="pedestrian" cap="square" />
 
-  <style-line name="highway:z11" stroke="#fcba5a" width="1.8" blur="0.9" />
-  <!-- <style-line name="highway:z11:bridge" from="highway:z11" cap="butt" /> -->
+  <style-line id="highway:z11" stroke="#fcba5a" width="1.8" blur="0.9" />
+  <!-- <style-line id="highway:z11:bridge" use="highway:z11" cap="butt" /> -->
 
-  <style-line name="trunk_link" stroke="#fee16e" width="1.3" cap="butt" blur="0.9" />
-  <style-line name="trunk" stroke="#fedb52" width="1.6" blur="0.9" />
-  <style-line name="primary:z11" stroke="#f2df6d" width="1.5" blur="0.9" />
-  <style-line name="secondary:z11" from="primary:z11" width="-0.1" />
+  <style-line id="trunk_link" stroke="#fee16e" width="1.3" cap="butt" blur="0.9" />
+  <style-line id="trunk" stroke="#fedb52" width="1.6" blur="0.9" />
+  <style-line id="primary:z11" stroke="#f2df6d" width="1.5" blur="0.9" />
+  <style-line id="secondary:z11" use="primary:z11" width="-0.1" />
 
-  <style-line name="tertiary" from="residential" width="0.2" fade="11" />
-  <style-line name="construction" stroke="#e0e0e0" width="1.2" />
+  <style-line id="tertiary" use="residential" width="0.2" fade="11" />
+  <style-line id="construction" stroke="#e0e0e0" width="1.2" />
 
-  <style-line name="highway-service" from="residential" width="-0.6" />
+  <style-line id="highway-service" use="residential" width="-0.6" />
 
   <!-- track|footway|path|cycleway -->
-  <style-line name="footway" stroke="#c1bcb6" width="1.2" cap="butt" fix="true" />
-  <style-line name="footway:z16" from="footway" width="-1.0" fixed="false"
+  <style-line id="footway" stroke="#c1bcb6" width="1.2" cap="butt" fix="true" />
+  <style-line id="footway:z16" use="footway" width="-1.0" fix="false"
     fade="-1" />
-  <style-line name="footway:z17" stroke="#faf8f5" width="0.3" />
+  <style-line id="footway:z17" stroke="#faf8f5" width="0.3" />
 
   <!-- de: ein Weg der für Reiter vorgeshen ist.. -->
-  <style-line name="bridleway" stroke="#d3cb98" width="0.4" cap="butt" />
+  <style-line id="bridleway" stroke="#d3cb98" width="0.4" cap="butt" />
 
-  <style-line name="steps" stroke="#f1f0f4" width="0.25" cap="butt" />
+  <style-line id="steps" stroke="#f1f0f4" width="0.25" cap="butt" />
 
-  <style-line name="water:outline" stroke="#a4bbcc" width="1.0" cap="butt" />
-  <style-line name="water" stroke="#cca4bbcc" width="0.6" cap="butt" />
-  <style-area name="water" fill="#001223" />
+  <style-line id="water:outline" stroke="#a4bbcc" width="1.0" cap="butt" />
+  <style-line id="water" stroke="#cca4bbcc" width="0.6" cap="butt" />
+  <style-area id="water" fill="#001223" />
   <!-- no-go area boundary -->
-  <style-line name="fence" stroke="#444444" width="1.2" fix="true" cap="butt" />
+  <style-line id="fence" stroke="#444444" width="1.2" fix="true" cap="butt" />
 
-  <style-line name="aeroway:runway" stroke="#008888" width="1.8" cap="butt"
+  <style-line id="aeroway:runway" stroke="#008888" width="1.8" cap="butt"
     blur="0.7" />
 
-  <style-line name="building" stroke="#dd888888" width="1.5" fix="true" cap="butt" />
-  <style-area name="building" fill="#ee202020" fade="15" />
+  <style-line id="building" stroke="#dd888888" width="1.5" fix="true" cap="butt" />
+  <style-area id="building" fill="#ee202020" fade="15" />
 
   <!-- ways -->
   <m e="way">
 
     <m k="natural" v="grassland|scrub" zoom-min="10">
-      <use-area name="greens" />
+      <area use="greens" />
     </m>
 
     <!-- landuse base -->
     <m k="landuse">
 
       <!-- <m zoom-min="10" v="farmland|farm|orchard|vineyard|greenhouse_horticulture|plant_nursery">
-        <use-area name="farmland"/>
+        <area use="farmland"/>
         </m>
 
         <m v="quarry">
-        <use-area name="quarry"/>
+        <area use="quarry"/>
         </m>
 
         <m v="residential|farmyard|retail|commercial|industrial;retail">
-        <use-area name="residential" />
+        <area use="residential" />
         </m>
 
         <m v="industrial|railway">
-        <use-area name ="railway|industrial"/>
+        <area use ="railway|industrial"/>
         </m>
       -->
       <!-- <m v="military">
-        <use-area name="military"/>
+        <area use="military"/>
         </m> -->
 
       <!--<m k="landuse" v="construction|greenfield"> <area fill="#a47c41"
@@ -118,7 +118,7 @@
     <m k="landuse|natural|leisure||amenity">
       <!-- kind of more like landuse imho -->
       <m k="leisure|landuse" v="nature_reserve">
-        <use-area name="greens2" />
+        <area use="greens2" />
         <m zoom-min="14">
           <line stroke="#abe29c" width="1.0" fix="true" cap="butt" />
         </m>
@@ -128,24 +128,24 @@
       <m k="landuse" zoom-min="11">
         <!-- how about 'leisure' for this one? -->
         <m v="cemetery">
-          <use-area name="park" />
+          <area use="park" />
         </m>
 
         <m v="reservoir|basin">
-          <use-area name="water" />
+          <area use="water" />
         </m>
       </m>
 
       <m k="landuse" v="village_green|recreation_ground">
-        <use-area name="greens" />
+        <area use="greens" />
       </m>
 
       <!-- <m k="landuse" v="allotments" zoom-min="12">
-        <use-area name="allotments"/>
+        <area use="allotments"/>
         </m> -->
 
       <m k="leisure" v="park|common|green|golf_course|dog_park" zoom-min="11">
-        <use-area name="park" />
+        <area use="park" />
       </m>
 
       <!-- Heideland, keep below forest -->
@@ -154,21 +154,21 @@
       </m>
 
       <m k="landuse" v="forest">
-        <use-area name="forest|wood" />
+        <area use="forest|wood" />
       </m>
 
       <m k="natural" v="wood">
-        <use-area name="forest|wood" />
+        <area use="forest|wood" />
         <!-- <line stroke="#abcfab" width="1.5" fix="true" cap="butt"/> -->
       </m>
 
       <!-- keep grass above forest:wood and leisure:park! -->
       <m k="landuse" v="grass|meadow">
-        <use-area name="greens" />
+        <area use="greens" />
       </m>
 
       <m k="leisure" v="garden">
-        <use-area name="greens" />
+        <area use="greens" />
       </m>
 
 
@@ -211,7 +211,7 @@
           </m> -->
 
         <m v="marsh|wetland|mud">
-          <use-area name="greens2" />
+          <area use="greens2" />
         </m>
       </m>
 
@@ -260,7 +260,7 @@
         </m>
 
         <m v="military">
-          <use-line name="fence" />
+          <line use="fence" />
         </m>
       </m>
     </m>
@@ -272,38 +272,38 @@
     <m k="waterway">
 
       <m k="waterway" v="ditch|drain" zoom-min="14">
-        <use-line name="water" width="0.1" fix="true" />
+        <line use="water" width="0.1" fix="true" />
       </m>
 
       <m k="waterway" v="canal">
-        <use-line name="water" width="-0.2" />
+        <line use="water" width="-0.2" />
       </m>
 
       <m k="waterway" v="stream" zoom-min="14">
-        <use-line name="water" width="-0.1" />
+        <line use="water" width="-0.1" />
       </m>
 
-      <style-outline name="river" width="1.0" stroke="#456799" blur="1.0" />
+      <style-outline id="river" width="1.0" stroke="#456799" blur="1.0" />
 
       <m k="waterway" v="river" closed="no">
         <m zoom-min="12">
-          <use-line name="water" width="0.5" />
-          <use-outline name="river" />
+          <line use="water" width="0.5" />
+          <outline use="river" />
         </m>
         <m zoom-max="12">
-          <use-line name="water" width="1.0" fix="true" fade="9" />
+          <line use="water" width="1.0" fix="true" fade="9" />
         </m>
       </m>
 
 
       <m k="waterway" v="riverbank|dock">
-        <use-area name="water" />
-        <use-line name="water" width="1.0" fix="true" />
+        <area use="water" />
+        <line use="water" width="1.0" fix="true" />
       </m>
 
       <m k="waterway" v="river" closed="yes">
-        <use-area name="water" />
-        <use-line name="water" width="1.0" fix="true" />
+        <area use="water" />
+        <line use="water" width="1.0" fix="true" />
       </m>
 
 
@@ -322,8 +322,8 @@
     </m>
 
     <m k="natural" v="water">
-      <use-area name="water" />
-      <use-line name="water:outline" width="0.5" fix="true" />
+      <area use="water" />
+      <line use="water:outline" width="0.5" fix="true" />
     </m>
 
 
@@ -347,94 +347,94 @@
 
     <!-- outline 0 -->
 
-    <style-outline name="0" stroke="#44000000" width="0.1" />
+    <style-outline id="0" stroke="#44000000" width="0.1" />
     <!-- tunnel -->
     <m k="tunnel" v="yes|true" zoom-min="11">
       <!-- highway tunnels -->
       <m k="highway">
         <m zoom-min="15">
           <m v="steps">
-            <use-line name="steps" />
-            <use-outline name="0" />
+            <line use="steps" />
+            <outline use="0" />
           </m>
           <m v="track|footway|path|cycleway" zoom-min="16">
-            <use-line name="footway:z16" />
+            <line use="footway:z16" />
           </m>
         </m>
 
         <m zoom-min="14">
           <m v="track|footway|path|cycleway" zoom-max="15">
-            <use-line name="footway" />
+            <line use="footway" />
           </m>
 
           <m v="bridleway">
-            <use-line name="bridleway" />
+            <line use="bridleway" />
           </m>
 
           <m v="construction">
-            <use-line name="construction" />
-            <use-outline name="0" />
+            <line use="construction" />
+            <outline use="0" />
           </m>
 
           <m v="service">
             <m k="service" v="-|parking_aisle">
-              <use-line name="highway-service" />
-              <use-outline name="0" />
+              <line use="highway-service" />
+              <outline use="0" />
             </m>
           </m>
         </m>
 
         <m v="trunk_link|motorway_link">
-          <use-line name="trunk_link" />
-          <use-outline name="0" />
-          <use-text name="major-road" />
+          <line use="trunk_link" />
+          <outline use="0" />
+          <text use="major-road" />
         </m>
 
         <m zoom-min="13">
           <m v="byway|pedestrian">
-            <use-line name="pedestrian" />
-            <use-outline name="0" />
-            <use-text name="road" />
+            <line use="pedestrian" />
+            <outline use="0" />
+            <text use="road" />
           </m>
 
 
           <m v="residential|road|unclassified|living_street">
-            <use-line name="residential" />
-            <use-outline name="0" />
-            <use-text name="road" />
+            <line use="residential" />
+            <outline use="0" />
+            <text use="road" />
           </m>
         </m>
 
         <m v="tertiary|secondary_link">
-          <use-line name="tertiary" />
-          <use-outline name="0" />
-          <use-text name="road" />
+          <line use="tertiary" />
+          <outline use="0" />
+          <text use="road" />
         </m>
 
         <m v="secondary|primary_link">
-          <use-line name="secondary:z11" />
-          <use-outline name="0" />
-          <use-text name="major-road" />
+          <line use="secondary:z11" />
+          <outline use="0" />
+          <text use="major-road" />
         </m>
 
         <m v="primary">
-          <use-line name="primary:z11" />
-          <use-outline name="0" />
-          <use-text name="major-road" />
+          <line use="primary:z11" />
+          <outline use="0" />
+          <text use="major-road" />
         </m>
 
         <m v="trunk">
-          <use-line name="trunk" blur="0.3" />
-          <use-outline name="0" />
-          <!-- <use-outline name="glow"/> -->
-          <use-text name="major-road" />
+          <line use="trunk" blur="0.3" />
+          <outline use="0" />
+          <!-- <outline use="glow"/> -->
+          <text use="major-road" />
         </m>
 
         <m v="motorway">
-          <use-line name="highway:z11" blur="0.3" />
-          <use-outline name="0" />
-          <!-- <use-outline name="glow"/> -->
-          <use-text name="major-road" />
+          <line use="highway:z11" blur="0.3" />
+          <outline use="0" />
+          <!-- <outline use="glow"/> -->
+          <text use="major-road" />
         </m>
       </m>
 
@@ -471,8 +471,8 @@
         </m> -->
       <!-- Airport passenger building -->
       <m v="terminal|hangar">
-        <use-area name="building" />
-        <use-line name="building" />
+        <area use="building" />
+        <line use="building" />
       </m>
     </m>
 
@@ -485,8 +485,8 @@
     <m k="building">
 
       <m zoom-min="15">
-        <use-area name="building" fade="15" />
-        <use-line name="building" fade="15" />
+        <area use="building" fade="15" />
+        <line use="building" fade="15" />
         <!-- <line stroke="#c9c3c1" width="1.0" fix="true" cap="butt" fade="15"/>
           <area fill="#e9e6e3" fade="15" /> -->
       </m>
@@ -500,16 +500,16 @@
     </m>
 
     <!-- outline 1 - 4 -->
-    <style-outline name="glow3" stroke="#ddffffff" width="0.8" blur="0.5"
+    <style-outline id="glow3" stroke="#ddffffff" width="0.8" blur="0.5"
       fade="13" />
-    <!-- > <style-outline name="glow" stroke="#ee909090" width="0.8" blur="0.5" fade="14"/> -->
-    <style-outline name="glow2" width="1.0" stroke="#ffffff" blur="1.0"
+    <!-- > <style-outline id="glow" stroke="#ee909090" width="0.8" blur="0.5" fade="14"/> -->
+    <style-outline id="glow2" width="1.0" stroke="#ffffff" blur="1.0"
       fade="13" />
-    <style-outline name="1" stroke="#dd000000" width="-0.3" fade="14" />
-    <!-- <style-outline name="1" stroke="#404030"/> -->
-    <style-outline name="2" stroke="#c0c0c0" />
-    <style-outline name="primary" stroke="#7f7700" width="0.025" />
-    <style-outline name="motorway" stroke="#805f2e" width="0.025" />
+    <style-outline id="1" stroke="#dd000000" width="-0.3" fade="14" />
+    <!-- <style-outline id="1" stroke="#404030"/> -->
+    <style-outline id="2" stroke="#c0c0c0" />
+    <style-outline id="primary" stroke="#7f7700" width="0.025" />
+    <style-outline id="motorway" stroke="#805f2e" width="0.025" />
 
 
     <!-- highway -->
@@ -581,98 +581,98 @@
           <m k="area" v="~|no|false">
             <m zoom-min="15">
               <m v="steps">
-                <use-line name="steps" />
-                <use-outline name="2" />
+                <line use="steps" />
+                <outline use="2" />
               </m>
               <m v="track|footway|path|cycleway" zoom-min="16" zoom-max="16">
-                <use-line name="footway:z16" />
+                <line use="footway:z16" />
               </m>
               <m v="track|footway|path|cycleway" zoom-min="17">
-                <use-line name="footway:z17" />
-                <!-- <use-outline name="1"/> -->
+                <line use="footway:z17" />
+                <!-- <outline use="1"/> -->
               </m>
             </m>
 
             <m zoom-min="14">
               <m v="track|footway|path|cycleway" zoom-max="15">
-                <use-line name="footway" />
+                <line use="footway" />
               </m>
 
               <m v="bridleway">
-                <use-line name="bridleway" />
+                <line use="bridleway" />
               </m>
 
               <m v="construction">
-                <use-line name="construction" />
-                <use-outline name="1" />
+                <line use="construction" />
+                <outline use="1" />
               </m>
 
               <m v="service">
                 <m k="service" v="-|parking_aisle">
-                  <use-line name="highway-service" />
-                  <use-outline name="1" />
+                  <line use="highway-service" />
+                  <outline use="1" />
                 </m>
                 <!-- <m k="service" v="parking_aisle" zoom-min="16">
-                  <use-line name="highway-service" width="-0.4"/>
-                  <use-outline name="1"/>
+                  <line use="highway-service" width="-0.4"/>
+                  <outline use="1"/>
                   </m> -->
               </m>
             </m>
 
             <m v="trunk_link|motorway_link">
-              <use-line name="trunk_link" />
-              <use-outline name="motorway" />
-              <use-text name="major-road" />
+              <line use="trunk_link" />
+              <outline use="motorway" />
+              <text use="major-road" />
             </m>
 
             <m zoom-min="13">
               <m v="byway|pedestrian">
-                <use-line name="residential" width="-0.4" />
-                <use-outline name="1" />
-                <use-text name="road" />
+                <line use="residential" width="-0.4" />
+                <outline use="1" />
+                <text use="road" />
               </m>
 
               <m v="residential|road|unclassified|living_street">
-                <use-line name="residential" />
-                <use-outline name="1" />
+                <line use="residential" />
+                <outline use="1" />
 
-                <use-outline name="glow" />
-                <use-text name="road" />
+                <outline use="glow" />
+                <text use="road" />
               </m>
             </m>
 
             <m v="tertiary|secondary_link">
-              <use-line name="tertiary" />
-              <use-outline name="1" />
+              <line use="tertiary" />
+              <outline use="1" />
 
-              <use-outline name="glow" />
+              <outline use="glow" />
 
-              <use-text name="road" />
+              <text use="road" />
             </m>
 
             <m v="secondary|primary_link">
               <!-- <line stroke="#fff939" width="1.6" /> -->
-              <use-line name="secondary:z11" />
-              <use-outline name="primary" />
-              <use-text name="major-road" />
+              <line use="secondary:z11" />
+              <outline use="primary" />
+              <text use="major-road" />
             </m>
 
             <m v="primary">
-              <use-line name="primary:z11" />
-              <use-outline name="primary" />
-              <use-text name="major-road" />
+              <line use="primary:z11" />
+              <outline use="primary" />
+              <text use="major-road" />
             </m>
 
             <m v="trunk">
-              <use-line name="trunk" />
-              <use-outline name="motorway" />
-              <use-text name="major-road" />
+              <line use="trunk" />
+              <outline use="motorway" />
+              <text use="major-road" />
             </m>
 
             <m v="motorway">
-              <use-line name="highway:z11" />
-              <use-outline name="motorway" />
-              <use-text name="major-road" />
+              <line use="highway:z11" />
+              <outline use="motorway" />
+              <text use="major-road" />
             </m>
           </m> <!-- end area=~|no|false -->
         </m> <!-- end tunnel|bridge=~|no|false -->
@@ -681,91 +681,91 @@
         <m k="bridge" v="yes|true|viaduct|suspension">
           <m k="area" v="~|no|false">
 
-            <style-outline name="bridge" stroke="#aa202020" width="0.08" />
+            <style-outline id="bridge" stroke="#aa202020" width="0.08" />
 
             <m zoom-min="15">
               <m v="steps">
-                <use-line name="steps" />
-                <use-outline name="bridge" />
+                <line use="steps" />
+                <outline use="bridge" />
               </m>
               <m v="track|footway|path|cycleway" zoom-min="16" zoom-max="16">
-                <use-line name="footway:z16" />
+                <line use="footway:z16" />
               </m>
 
               <m v="track|footway|path|cycleway" zoom-min="17">
-                <use-line name="footway:z17" cap="butt" />
-                <use-outline name="bridge" />
+                <line use="footway:z17" cap="butt" />
+                <outline use="bridge" />
               </m>
             </m>
 
             <m zoom-min="14">
               <m v="track|footway|path|cycleway" zoom-max="15">
-                <use-line name="footway" />
+                <line use="footway" />
               </m>
 
               <m v="bridleway">
-                <use-line name="bridleway" />
+                <line use="bridleway" />
               </m>
 
               <m v="construction">
-                <use-line name="construction" cap="square" />
-                <use-outline name="bridge" />
+                <line use="construction" cap="square" />
+                <outline use="bridge" />
               </m>
 
               <m v="service">
-                <use-line name="highway-service" cap="square" />
-                <use-outline name="bridge" />
+                <line use="highway-service" cap="square" />
+                <outline use="bridge" />
               </m>
             </m>
 
             <m zoom-min="13">
               <m v="byway|pedestrian">
-                <use-line name="pedestrian:bridge" />
-                <use-outline name="bridge" />
-                <use-text name="road" />
+                <line use="pedestrian:bridge" />
+                <outline use="bridge" />
+                <text use="road" />
               </m>
               <m v="residential|road|unclassified|living_street">
-                <use-line name="residential:bridge" />
-                <use-outline name="bridge" />
-                <use-text name="road" />
+                <line use="residential:bridge" />
+                <outline use="bridge" />
+                <text use="road" />
               </m>
             </m>
 
             <m v="tertiary|secondary_link">
-              <use-line name="tertiary" cap="square" />
-              <use-outline name="bridge" />
-              <use-text name="road" />
+              <line use="tertiary" cap="square" />
+              <outline use="bridge" />
+              <text use="road" />
             </m>
 
             <m v="trunk_link|motorway_link">
-              <use-line name="trunk_link" cap="square" />
-              <use-outline name="bridge" />
-              <use-text name="major-road" />
+              <line use="trunk_link" cap="square" />
+              <outline use="bridge" />
+              <text use="major-road" />
             </m>
 
             <m v="secondary|primary_link">
               <!-- <line stroke="#fff939" width="1.6" cap="butt" /> -->
-              <use-line name="secondary:z11" cap="square" />
-              <use-outline name="bridge" />
-              <use-text name="major-road" />
+              <line use="secondary:z11" cap="square" />
+              <outline use="bridge" />
+              <text use="major-road" />
             </m>
 
             <m v="primary">
-              <use-line name="primary:z11" cap="square" />
-              <use-outline name="bridge" />
-              <use-text name="major-road" />
+              <line use="primary:z11" cap="square" />
+              <outline use="bridge" />
+              <text use="major-road" />
             </m>
 
             <m v="trunk">
-              <use-line name="trunk" cap="square" />
-              <use-outline name="bridge" />
-              <use-text name="major-road" />
+              <line use="trunk" cap="square" />
+              <outline use="bridge" />
+              <text use="major-road" />
             </m>
 
             <m v="motorway">
-              <use-line name="highway:z11" cap="square" />
-              <use-outline name="bridge" />
-              <use-text name="major-road" />
+              <line use="highway:z11" cap="square" />
+              <outline use="bridge" />
+              <text use="major-road" />
             </m>
           </m> <!-- end area=~|no|false -->
 
@@ -792,10 +792,10 @@
     <!-- runways cores -->
     <m k="aeroway">
       <m v="runway">
-        <use-line name="aeroway:runway" />
+        <line use="aeroway:runway" />
       </m>
       <m v="taxiway">
-        <use-line name="aeroway:runway" width="-0.8" />
+        <line use="aeroway:runway" width="-0.8" />
       </m>
     </m>
 

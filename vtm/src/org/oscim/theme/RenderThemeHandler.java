@@ -60,16 +60,8 @@ public class RenderThemeHandler extends DefaultHandler {
 		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS;
 	}
 
-	private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
+	//private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
 	private static final String ELEMENT_NAME_MATCH = "m";
-	private static final String ELEMENT_NAME_STYLE_TEXT = "style-text";
-	private static final String ELEMENT_NAME_STYLE_AREA = "style-area";
-	private static final String ELEMENT_NAME_STYLE_LINE = "style-line";
-	private static final String ELEMENT_NAME_STYLE_OUTLINE = "style-outline";
-	private static final String ELEMENT_NAME_USE_STYLE_PATH_TEXT = "use-text";
-	private static final String ELEMENT_NAME_USE_STYLE_AREA = "use-area";
-	private static final String ELEMENT_NAME_USE_STYLE_LINE = "use-line";
-	private static final String ELEMENT_NAME_USE_STYLE_OUTLINE = "use-outline";
 	private static final String UNEXPECTED_ELEMENT = "unexpected element: ";
 
 	private static final String IMG_PATH = "styles/";
@@ -176,12 +168,11 @@ public class RenderThemeHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 		try {
-			if (ELEMENT_NAME_RENDER_THEME.equals(localName)) {
+			if ("rendertheme".equals(localName)) {
 				checkState(localName, Element.RENDER_THEME);
 				mRenderTheme = createRenderTheme(localName, attributes);
-			}
 
-			else if (ELEMENT_NAME_MATCH.equals(localName)) {
+			} else if (ELEMENT_NAME_MATCH.equals(localName)) {
 				checkState(localName, Element.RULE);
 				Rule rule = Rule.create(localName, attributes, mRuleStack);
 				if (!mRuleStack.empty()) {
@@ -189,54 +180,56 @@ public class RenderThemeHandler extends DefaultHandler {
 				}
 				mCurrentRule = rule;
 				mRuleStack.push(mCurrentRule);
-			}
 
-			else if (ELEMENT_NAME_STYLE_TEXT.equals(localName)) {
+			} else if ("style-text".equals(localName)) {
 				checkState(localName, Element.STYLE);
 				Text text = createText(localName, attributes, false);
 				tmpStyleHash.put("t" + text.style, text);
-			}
 
-			else if (ELEMENT_NAME_STYLE_AREA.equals(localName)) {
+			} else if ("style-area".equals(localName)) {
 				checkState(localName, Element.STYLE);
 				Area area = createArea(localName, attributes, 0);
 				tmpStyleHash.put("a" + area.style, area);
-			}
 
-			else if (ELEMENT_NAME_STYLE_LINE.equals(localName)) {
+			} else if ("style-line".equals(localName)) {
 				checkState(localName, Element.STYLE);
 				String style = null;
-				if ((style = attributes.getValue("from")) != null) {
+				if ((style = attributes.getValue("use")) != null) {
 					RenderInstruction ri = tmpStyleHash.get("l" + style);
 					if (ri instanceof Line) {
 						Line line = createLine((Line) ri, localName, attributes, 0,
 								false);
 						tmpStyleHash.put("l" + line.style, line);
-					}
-					else {
+					} else
 						Log.d(TAG, "not a style: " + style);
-					}
 				} else {
 					Line line = createLine(null, localName, attributes, 0, false);
 					tmpStyleHash.put("l" + line.style, line);
 				}
-			}
 
-			else if (ELEMENT_NAME_STYLE_OUTLINE.equals(localName)) {
+			} else if ("style-outline".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				Line line = createLine(null, localName, attributes, mLevel++, true);
 				tmpStyleHash.put("o" + line.style, line);
 				// outlineLayers.add(line);
-			}
 
-			else if ("area".equals(localName)) {
+			} else if ("area".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Area area = createArea(localName, attributes, mLevel++);
-				// mRuleStack.peek().addRenderingInstruction(area);
-				mCurrentRule.addRenderingInstruction(area);
-			}
+				String style = attributes.getValue("use");
+				if (style == null) {
+					Area area = createArea(localName, attributes, mLevel++);
+					// mRuleStack.peek().addRenderingInstruction(area);
+					mCurrentRule.addRenderingInstruction(area);
+				} else {
+					Area area = (Area) tmpStyleHash.get("a" + style);
+					if (area != null)
+						mCurrentRule.addRenderingInstruction(new AreaLevel(area,
+								mLevel++));
+					else
+						Log.d(TAG, "BUG not an area style: " + style);
+				}
 
-			else if ("caption".equals(localName)) {
+			} else if ("caption".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				Text text = createText(localName, attributes, true);
 				mCurrentRule.addRenderingInstruction(text);
@@ -247,33 +240,49 @@ public class RenderThemeHandler extends DefaultHandler {
 					else
 						Log.d(TAG, "using atlas item '" + text.symbol + "'");
 				}
-			}
 
-			else if ("circle".equals(localName)) {
+			} else if ("circle".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				Circle circle = createCircle(localName, attributes, mLevel++);
 				mCurrentRule.addRenderingInstruction(circle);
-			}
 
-			else if ("line".equals(localName)) {
+			} else if ("line".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Line line = createLine(null, localName, attributes, mLevel++, false);
-				mCurrentRule.addRenderingInstruction(line);
-			}
+				String style = attributes.getValue("use");
+				if (style == null) {
+					Line line = createLine(null, localName, attributes, mLevel++, false);
+					mCurrentRule.addRenderingInstruction(line);
+				} else {
+					Line line = (Line) tmpStyleHash.get("l" + style);
+					if (line != null) {
+						Line newLine = createLine(line, localName, attributes,
+								mLevel++, false);
 
-			else if ("lineSymbol".equals(localName)) {
+						mCurrentRule.addRenderingInstruction(newLine);
+					} else
+						Log.d(TAG, "BUG: not a line style: " + style);
+				}
+
+			} else if ("lineSymbol".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				LineSymbol lineSymbol = createLineSymbol(localName, attributes);
 				mCurrentRule.addRenderingInstruction(lineSymbol);
-			}
 
-			else if ("text".equals(localName)) {
+			} else if ("text".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Text text = createText(localName, attributes, false);
-				mCurrentRule.addRenderingInstruction(text);
-			}
+				String style = attributes.getValue("use");
+				if (style == null) {
+					Text text = createText(localName, attributes, false);
+					mCurrentRule.addRenderingInstruction(text);
+				} else {
+					Text pt = (Text) tmpStyleHash.get("t" + style);
+					if (pt != null)
+						mCurrentRule.addRenderingInstruction(pt);
+					else
+						Log.d(TAG, "BUG not a path text style: " + style);
+				}
 
-			else if ("symbol".equals(localName)) {
+			} else if ("symbol".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				Symbol symbol = createSymbol(localName, attributes);
 				mCurrentRule.addRenderingInstruction(symbol);
@@ -283,25 +292,10 @@ public class RenderThemeHandler extends DefaultHandler {
 					//else
 					//	Log.d(TAG, "using atlas item '" + symbol.src + "'");
 				}
-			}
 
-			else if (ELEMENT_NAME_USE_STYLE_LINE.equals(localName)) {
+			} else if ("outline".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				String style = attributes.getValue("name");
-				if (style != null) {
-					Line line = (Line) tmpStyleHash.get("l" + style);
-					if (line != null) {
-						Line newLine = createLine(line, localName, attributes,
-								mLevel++, false);
-
-						mCurrentRule.addRenderingInstruction(newLine);
-					}
-					else
-						Log.d(TAG, "BUG: not a line style: " + style);
-				}
-			} else if (ELEMENT_NAME_USE_STYLE_OUTLINE.equals(localName)) {
-				checkState(localName, Element.RENDERING_INSTRUCTION);
-				String style = attributes.getValue("name");
+				String style = attributes.getValue("use");
 				if (style != null) {
 					Line line = (Line) tmpStyleHash.get("o" + style);
 					if (line != null && line.outline)
@@ -309,36 +303,18 @@ public class RenderThemeHandler extends DefaultHandler {
 					else
 						Log.d(TAG, "BUG not an outline style: " + style);
 				}
-			} else if (ELEMENT_NAME_USE_STYLE_AREA.equals(localName)) {
-				checkState(localName, Element.RENDERING_INSTRUCTION);
-				String style = attributes.getValue("name");
-				if (style != null) {
-					Area area = (Area) tmpStyleHash.get("a" + style);
-					if (area != null)
-						mCurrentRule.addRenderingInstruction(new AreaLevel(area,
-								mLevel++));
-					else
-						Log.d(TAG, "BUG not an area style: " + style);
-				}
-			} else if (ELEMENT_NAME_USE_STYLE_PATH_TEXT.equals(localName)) {
-				checkState(localName, Element.RENDERING_INSTRUCTION);
-				String style = attributes.getValue("name");
-				if (style != null) {
-					Text pt = (Text) tmpStyleHash.get("t" + style);
-					if (pt != null)
-						mCurrentRule.addRenderingInstruction(pt);
-					else
-						Log.d(TAG, "BUG not a path text style: " + style);
-				}
+
 			} else if ("atlas".equals(localName)) {
 				checkState(localName, Element.ATLAS);
 				createAtlas(localName, attributes);
+
 			} else if ("rect".equals(localName)) {
 				checkState(localName, Element.ATLAS);
 				createTextureRegion(localName, attributes);
+
 			} else {
-				//Log.d(TAG, "unknown element: " + localName);
-				throw new SAXException("unknown element: " + localName);
+				Log.d(TAG, "unknown element: " + localName);
+				//throw new SAXException("unknown element: " + localName);
 			}
 		} catch (IllegalArgumentException e) {
 			throw new SAXException(null, e);
@@ -356,8 +332,6 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			if ("img".equals(name)) {
 				img = value;
-			} else if ("name".equals(name)) {
-				// img = value;
 			} else {
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
 			}
@@ -379,7 +353,7 @@ public class RenderThemeHandler extends DefaultHandler {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
-			if ("name".equals(name)) {
+			if ("id".equals(name)) {
 				regionName = value;
 			} else if ("pos".equals(name)) {
 				String[] pos = value.split(" ");
@@ -514,7 +488,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
-			if ("name".equals(name))
+			if ("id".equals(name))
 				style = value;
 			else if ("k".equals(name)) {
 				textKey = value.intern();
@@ -563,11 +537,9 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 	}
 
-	// private static final Pattern SPLIT_PATTERN = Pattern.compile(",");
-
 	/**
 	 * @param line
-	 *            ...
+	 *            optional: line style defaults
 	 * @param elementName
 	 *            the name of the XML element.
 	 * @param attributes
@@ -575,7 +547,7 @@ public class RenderThemeHandler extends DefaultHandler {
 	 * @param level
 	 *            the drawing level of this instruction.
 	 * @param isOutline
-	 *            ...
+	 *            is outline layer
 	 * @return a new Line with the given rendering attributes.
 	 */
 	private static Line createLine(Line line, String elementName, Attributes attributes,
@@ -583,9 +555,6 @@ public class RenderThemeHandler extends DefaultHandler {
 
 		// Style name
 		String style = null;
-		// Bitmap
-		// String src = null;
-
 		float width = 0;
 		Cap cap = Cap.ROUND;
 
@@ -600,7 +569,6 @@ public class RenderThemeHandler extends DefaultHandler {
 		float stippleWidth = 0;
 
 		int color = Color.RED;
-
 		int stippleColor = Color.BLACK;
 
 		if (line != null) {
@@ -619,15 +587,15 @@ public class RenderThemeHandler extends DefaultHandler {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
-			if ("name".equals(name))
+			if ("id".equals(name))
 				style = value;
 			else if ("src".equals(name)) {
 				// src = value;
 			} else if ("stroke".equals(name)) {
 				color = Color.parseColor(value);
-			} else if ("width".equals(name)) {
+			} else if ("width".equals(name) || "stroke-width".equals(name)) {
 				width = Float.parseFloat(value);
-			} else if ("cap".equals(name)) {
+			} else if ("cap".equals(name) || "stroke-linecap".equals(name)) {
 				cap = Cap.valueOf(value.toUpperCase());
 			} else if ("fix".equals(name)) {
 				fixed = Boolean.parseBoolean(value);
@@ -643,7 +611,7 @@ public class RenderThemeHandler extends DefaultHandler {
 				min = Float.parseFloat(value);
 			} else if ("blur".equals(name)) {
 				blur = Float.parseFloat(value);
-			} else if ("from".equals(name)) {
+			} else if ("style".equals(name)) {
 				// ignore
 			} else if ("dasharray".equals(name)) {
 				// ignore
@@ -699,7 +667,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
-			if ("name".equals(name))
+			if ("id".equals(name))
 				style = value;
 			else if ("src".equals(name)) {
 				src = value;
@@ -726,13 +694,10 @@ public class RenderThemeHandler extends DefaultHandler {
 			try {
 				Bitmap b = CanvasAdapter.g.loadBitmapAsset(src);
 				if (b != null)
-
 					texture = new TextureItem(b, true);
-
 			} catch (Exception e) {
 				Log.d(TAG, e.getMessage());
 			}
-
 		}
 		return new Area(style, fill, stroke, strokeWidth, fade, level, blend,
 				blendFill, texture);

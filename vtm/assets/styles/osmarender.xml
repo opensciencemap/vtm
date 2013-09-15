@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <rendertheme xmlns="http://mapsforge.org/renderTheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://mapsforge.org/renderTheme ../renderTheme.xsd" version="1" map-background="#fffcfa">
+  xsi:schemaLocation="http://mapsforge.org/renderTheme ../../renderTheme.xsd" version="1" map-background="#fffcfa">
 
   <!-- ways -->
   <m e="way">
@@ -417,63 +417,61 @@
     </m> -->
 
 
-  <!-- ways -->
   <m e="way">
-    <!-- no tunnel -->
+
+    <style-outline id="casing" stroke="#707070" width="0.15" />
+
+    <!-- highway casings -->
+
     <m k="tunnel" v="~|no|false">
-      <!-- no area -->
       <m k="area" v="~|no|false">
-        <!-- highway -->
         <m k="highway">
-          <!-- no bridge -->
-          <m k="bridge" v="~|no|false">
-            <!-- highway casings -->
+          <!--
+            <m k="bridge" v="~|no|false">
             <m v="steps">
-              <line stroke="#707070" width="0.6" />
+            <line stroke="#707070" width="0.6" />
             </m>
             <m v="footway|path">
-              <line stroke="#707070" width="0.6" dasharray="2,2" cap="butt" />
+            <line stroke="#707070" width="0.6" dasharray="2,2" cap="butt" />
             </m>
             <m v="track">
-              <m k="tracktype" v="grade1">
-                <line stroke="#d79331" width="1.0" />
-              </m>
-              <m k="tracktype" v="grade2">
-                <line stroke="#d79331" width="1.0" dasharray="18,9" cap="butt" />
-              </m>
-              <m k="tracktype" v="grade3">
-                <line stroke="#d79331" width="1.0" dasharray="10,13" cap="butt" />
-              </m>
-              <m k="tracktype" v="grade4">
-                <line stroke="#d79331" width="1.0" dasharray="5,10,3,10" cap="butt" />
-              </m>
-              <m k="tracktype" v="grade5">
-                <line stroke="#d79331" width="1.0" dasharray="3,10" cap="butt" />
-              </m>
-              <m k="tracktype" v="~|no|false">
-                <line stroke="#d79331" width="1.0" dasharray="18,2" cap="butt" />
-              </m>
+            <m k="tracktype" v="grade1">
+            <line stroke="#d79331" width="1.0" />
+            </m>
+            <m k="tracktype" v="grade2">
+            <line stroke="#d79331" width="1.0" dasharray="18,9" cap="butt" />
+            </m>
+            <m k="tracktype" v="grade3">
+            <line stroke="#d79331" width="1.0" dasharray="10,13" cap="butt" />
+            </m>
+            <m k="tracktype" v="grade4">
+            <line stroke="#d79331" width="1.0" dasharray="5,10,3,10" cap="butt" />
+            </m>
+            <m k="tracktype" v="grade5">
+            <line stroke="#d79331" width="1.0" dasharray="3,10" cap="butt" />
+            </m>
+            <m k="tracktype" v="~|no|false">
+            <line stroke="#d79331" width="1.0" dasharray="18,2" cap="butt" />
+            </m>
             </m>
             <m v="cycleway|bridleway|service">
-              <line stroke="#707070" width="1.0" />
+            <line stroke="#707070" width="1.0" />
             </m>
             <m v="byway">
-              <line stroke="#707070" width="1.5" dasharray="7,2" cap="butt" />
+            <line stroke="#707070" width="1.5" dasharray="7,2" cap="butt" />
             </m>
             <m v="pedestrian|unclassified|residential|living_street">
-              <line stroke="#707070" width="1.5" />
+            <line stroke="#707070" width="1.5" />
             </m>
             <m v="tertiary|secondary_link|primary_link|trunk_link|motorway_link|secondary|primary|trunk">
-              <line stroke="#707070" width="1.8" cap="butt" />
+            <line stroke="#707070" width="1.8" cap="butt" />
             </m>
             <m v="motorway">
-              <line stroke="#707070" width="2.0" cap="butt" />
+            <line stroke="#707070" width="2.0" cap="butt" />
             </m>
-          </m>
-
-          <!-- bridge -->
+            </m>
+          -->
           <m k="bridge" v="yes|true">
-            <!-- highway casings -->
             <m v="steps|footway|path">
               <line stroke="#000000" width="0.7" cap="butt" />
             </m>
@@ -504,7 +502,7 @@
     <!-- building -->
     <m k="building">
       <area fill="#f3d6b6" stroke="#6a5a8e" stroke-width="0.2" />
-
+      <line stroke="#6a5a8e" width="1.0" fix="true" />
       <m zoom-min="17">
         <caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
         <caption k="addr:housenumber" font-style="bold" font-size="10" fill="#606060" stroke="#ffffff"
@@ -574,90 +572,135 @@
           </m>
           <m v="cycleway">
             <line stroke="#d1fad1" width="0.85" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="15">
               <text k="name" font-style="bold" font-size="10" stroke="#d1fad1" stroke-width="2.0" />
             </m>
           </m>
           <m v="bridleway">
             <line stroke="#d3cb98" width="0.85" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="15">
               <text k="name" font-style="bold" font-size="10" stroke="#d3cb98" stroke-width="2.0" />
             </m>
           </m>
           <m v="service">
             <line stroke="#ffffff" width="0.85" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="15">
               <text k="name" font-style="bold" font-size="10" stroke="#ffffff" stroke-width="2.0" />
             </m>
           </m>
           <m v="construction">
             <line stroke="#d0d0d0" width="1.0" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="15">
               <text k="name" font-style="bold" font-size="10" stroke="#d0d0d0" stroke-width="2.0" />
             </m>
           </m>
           <m v="road">
             <line stroke="#d0d0d0" width="1.25" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="15">
               <text k="name" font-style="bold" font-size="10" stroke="#d0d0d0" stroke-width="2.0" />
             </m>
           </m>
           <m v="pedestrian">
             <line stroke="#e5e0c2" width="1.35" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="15">
               <text k="name" font-style="bold" font-size="10" stroke="#e5e0c2" stroke-width="2.0" />
             </m>
           </m>
           <m v="unclassified|residential|living_street">
             <line stroke="#ffffff" width="1.35" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="15">
               <text k="name" font-style="bold" font-size="10" stroke="#ffffff" stroke-width="2.0" />
             </m>
           </m>
           <m v="byway">
             <line stroke="#efadaa" width="1.35" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="15">
               <text k="name" font-style="bold" font-size="10" stroke="#efadaa" stroke-width="2.0" />
             </m>
           </m>
           <m v="tertiary">
             <line stroke="#ffff90" width="1.5" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="14">
               <text k="name" font-style="bold" font-size="10" stroke="#ffff90" stroke-width="2.0" />
             </m>
           </m>
           <m v="secondary_link">
             <line stroke="#fdbf6f" width="1.5" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="14">
               <text k="name" font-style="bold" font-size="10" stroke="#fdbf6f" stroke-width="2.0" />
             </m>
           </m>
           <m v="primary_link">
             <line stroke="#e46d71" width="1.5" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="14">
               <text k="name" font-style="bold" font-size="10" stroke="#e46d71" stroke-width="2.0" />
             </m>
           </m>
           <m v="trunk_link">
             <line stroke="#7fc97f" width="1.5" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="14">
               <text k="name" font-style="bold" font-size="10" stroke="#7fc97f" stroke-width="2.0" />
             </m>
           </m>
           <m v="motorway_link">
             <line stroke="#809bc0" width="1.5" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="14">
               <text k="name" font-style="bold" font-size="10" stroke="#809bc0" stroke-width="2.0" />
             </m>
           </m>
           <m v="secondary">
             <line stroke="#fdbf6f" width="1.5" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="14">
               <text k="name" font-style="bold" font-size="10" stroke="#fdbf6f" stroke-width="2.0" />
             </m>
           </m>
           <m v="primary">
             <line stroke="#e46d71" width="1.5" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="14">
               <text k="name" font-style="bold" font-size="10" stroke="#e46d71" stroke-width="2.0" />
               <text k="ref" font-style="bold" font-size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
@@ -665,6 +708,9 @@
           </m>
           <m v="trunk">
             <line stroke="#7fc97f" width="1.5" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="14">
               <text k="name" font-style="bold" font-size="10" stroke="#7fc97f" stroke-width="2.0" />
               <text k="ref" font-style="bold" font-size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
@@ -672,6 +718,9 @@
           </m>
           <m v="motorway">
             <line stroke="#809bc0" width="1.7" />
+            <m k="bridge" v="~|no|false">
+              <outline use="casing" />
+            </m>
             <m zoom-min="14">
               <text k="name" font-style="bold" font-size="10" stroke="#809bc0" stroke-width="2.0" />
               <text k="ref" font-style="bold" font-size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
@@ -836,13 +885,13 @@
 
         <m k="bridge" v="yes|true">
           <m k="railway" v="tram">
-            <line stroke="#000000" width="0.4" cap="butt" />
+            <line stroke="#cc000000" width="0.4" cap="butt" />
           </m>
           <m k="railway" v="subway|light_rail|narrow_gauge">
-            <line stroke="#000000" width="0.6" cap="butt" />
+            <line stroke="#cc000000" width="0.6" cap="butt" />
           </m>
           <m k="railway" v="rail">
-            <line stroke="#000000" width="0.8" cap="butt" />
+            <line stroke="#cc000000" width="0.6" cap="butt" />
           </m>
         </m>
 
@@ -855,9 +904,12 @@
           <line stroke="#b7b7e6" width="0.25" dasharray="12,18" cap="butt" />
         </m>
         <m k="railway" v="light_rail">
-          <line stroke="#0f4c0f" width="0.4" cap="butt" />
+          <!-- <line stroke="#0f4c0f" width="0.4" cap="butt" />
           <line stroke="#b7e6e6" width="0.25" cap="butt" />
-          <line stroke="#0f4c0f" width="0.25" dasharray="12,18" cap="butt" />
+          <line stroke="#0f4c0f" width="0.25" dasharray="12,18" cap="butt" />-->
+          <line stroke="#0f4c0f" width="0.4" cap="butt" fade="12"
+               stipple="10" stipple-width="0.8"
+              stipple-stroke="#b7e6e6" />
         </m>
         <m k="railway" v="narrow_gauge">
           <line stroke="#333333" width="0.4" cap="butt" />
@@ -865,9 +917,12 @@
           <line stroke="#333333" width="0.25" dasharray="18,18" cap="butt" />
         </m>
         <m k="railway" v="rail">
-          <line stroke="#333333" width="0.55" cap="butt" />
+          <!-- <line stroke="#333333" width="0.55" cap="butt" />
           <line stroke="#e6e6e6" width="0.4" cap="butt" />
-          <line stroke="#333333" width="0.4" dasharray="15,15" cap="butt" />
+          <line stroke="#333333" width="0.4" dasharray="15,15" cap="butt" />-->
+             <line stroke="#333333" width="1.6" cap="butt" fade="12" fix="true"
+               stipple="10" stipple-width="0.8"
+              stipple-stroke="#e6e6e6" />
         </m>
       </m>
     </m>
@@ -875,44 +930,45 @@
 
     <m k="boundary">
       <m k="boundary" v="national_park">
-        <line stroke="#4ef94b" width="0.25" dasharray="15, 5, 5, 5" />
+        <line stroke="#4ef94b" width="1.25" fix="true" dasharray="15, 5, 5, 5" />
       </m>
       <m k="boundary" v="administrative">
         <m k="admin_level">
           <m k="admin_level" v="11">
-            <line stroke="#f9574b" width="0.1" dasharray="1, 5" />
+            <line stroke="#f9574b" width="1.1" fix="true" dasharray="1, 5" />
           </m>
           <m k="admin_level" v="10">
-            <line stroke="#f9574b" width="0.1" dasharray="5, 25" />
+            <line stroke="#f9574b" width="1.1" fix="true" dasharray="5, 25" />
           </m>
           <m k="admin_level" v="9">
-            <line stroke="#f9574b" width="0.1" dasharray="15, 15" />
+            <line stroke="#f9574b" width="1.1" fix="true" dasharray="15, 15" />
           </m>
           <m k="admin_level" v="8">
-            <line stroke="#f9574b" width="0.1" dasharray="15, 5, 5, 5" />
+            <line stroke="#f9574b" width="1.1" fix="true" dasharray="15, 5, 5, 5" />
           </m>
           <m k="admin_level" v="7">
-            <line stroke="#f9574b" width="0.1" />
+            <line stroke="#f9574b" width="1.1" fix="true" />
           </m>
           <m k="admin_level" v="6">
-            <line stroke="#f9574b" width="0.25" dasharray="5, 5" />
+            <line stroke="#f9574b" width="1.25" fix="true" dasharray="5, 5" />
           </m>
           <m k="admin_level" v="5">
-            <line stroke="#f9574b" width="0.25" dasharray="15, 15" />
+            <line stroke="#f9574b" width="1.25" fix="true" dasharray="15, 15" />
           </m>
           <m k="admin_level" v="4">
-            <line stroke="#f9574b" width="0.25" dasharray="15, 5, 5, 5" />
+            <line stroke="#00000000" width="1.25" fix="true"
+              stipple="4" stipple-width="0.9" stipple-stroke="#f9574b"
+              dasharray="15, 5, 5, 5" />
           </m>
           <m k="admin_level" v="3">
-            <line stroke="#f9574b" width="0.25" />
+            <line stroke="#f9574b" width="1.25" fix="true"  />
           </m>
           <m k="admin_level" v="2">
-            <line stroke="#80ffff00" width="0.75" />
-            <line stroke="#f9574b" width="0.25" dasharray="15, 15" />
-          </m>
-          <m k="admin_level" v="1">
-            <line stroke="#80ffff00" width="1.75" />
-            <line stroke="#f9574b" width="0.25" dasharray="15, 5, 5, 5" />
+            <!-- <line stroke="#80ffff00" width="0.75" />
+            <line stroke="#f9574b" width="1.25" fix="true" dasharray="15, 15" />-->
+            <line stroke="#f9574b" width="1.25" fix="true"
+              stipple="6" stipple-width="0.9" stipple-stroke="#80ffff00"
+              dasharray="15, 5, 5, 5" />
           </m>
         </m>
       </m>
@@ -932,276 +988,266 @@
   </m>
 
 
-  <!-- nodes
-    <m e="node">
-
-    <m k="aeroway">
-    <m k="aeroway" v="helipad" zoom-min="17">
-    <symbol src="jar:symbols/helipad.png" />
-    </m>
-    <m k="aeroway" v="aerodrome|airport" zoom-max="13">
-    <symbol src="jar:symbols/airport.png" />
-    </m>
-    </m>
-
-
-    <m k="amenity">
-    <m k="amenity" v="atm" zoom-min="17">
-    <symbol src="jar:symbols/atm.png" />
-    </m>
-    <m k="amenity" v="bank" zoom-min="17">
-    <symbol src="jar:symbols/bank.png" />
-    </m>
-    <m k="amenity" v="bench" zoom-min="17">
-    <symbol src="jar:symbols/bench.png" />
-    </m>
-    <m k="amenity" v="bicycle_rental" zoom-min="17">
-    <symbol src="jar:symbols/bicycle_rental.png" />
-    </m>
-    <m k="amenity" v="bus_station" zoom-min="17">
-    <symbol src="jar:symbols/bus_sta.png" />
-    </m>
-    <m k="amenity" v="cafe" zoom-min="17">
-    <symbol src="jar:symbols/cafe.png" />
-    </m>
-    <m k="amenity" v="cinema" zoom-min="17">
-    <symbol src="jar:symbols/cinema.png" />
-    </m>
-    <m k="amenity" v="drinking_water" zoom-min="17">
-    <symbol src="jar:symbols/drinking_water.png" />
-    </m>
-    <m k="amenity" v="fast_food" zoom-min="17">
-    <symbol src="jar:symbols/fastfood.png" />
-    </m>
-    <m k="amenity" v="fire_station" zoom-min="17">
-    <symbol src="jar:symbols/firebrigade.png" />
-    </m>
-    <m k="amenity" v="fountain" zoom-min="17">
-    <symbol src="jar:symbols/fountain.png" />
-    </m>
-    <m k="amenity" v="fuel" zoom-min="17">
-    <symbol src="jar:symbols/petrolStation.png" />
-    </m>
-    <m k="amenity" v="hospital" zoom-min="15">
-    <symbol src="jar:symbols/hospital.png" />
-    </m>
-    <m k="amenity" v="kindergarten" zoom-min="17">
-    <symbol src="jar:symbols/kindergarten.png" />
-    </m>
-    <m k="amenity" v="library" zoom-min="17">
-    <symbol src="jar:symbols/library.png" />
-    </m>
-    <m k="amenity" v="parking" zoom-min="17">
-    <symbol src="jar:symbols/parking.png" />
-    </m>
-    <m k="amenity" v="pharmacy" zoom-min="17">
-    <symbol src="jar:symbols/pharmacy.png" />
-    </m>
-    <m k="amenity" v="place_of_worship" zoom-min="17">
-    <m k="denomination|religion" v="jewish">
-    <symbol src="jar:symbols/synagogue.png" />
-    </m>
-    <m k="denomination|religion" v="muslim|moslem">
-    <symbol src="jar:symbols/mosque.png" />
-    </m>
-    <m k="denomination|religion" v="christian">
-    <symbol src="jar:symbols/church.png" />
-    </m>
-    </m>
-    <m k="amenity" v="post_box" zoom-min="17">
-    <symbol src="jar:symbols/postbox.png" />
-    </m>
-    <m k="amenity" v="post_office" zoom-min="17">
-    <symbol src="jar:symbols/postoffice.png" />
-    </m>
-    <m k="amenity" v="pub|bar" zoom-min="17">
-    <symbol src="jar:symbols/pub.png" />
-    </m>
-    <m k="amenity" v="recycling" zoom-min="17">
-    <symbol src="jar:symbols/recycling.png" />
-    </m>
-    <m k="amenity" v="restaurant" zoom-min="17">
-    <symbol src="jar:symbols/restaurant.png" />
-    </m>
-    <m k="amenity" v="school" zoom-min="17">
-    <symbol src="jar:symbols/school.png" />
-    </m>
-    <m k="amenity" v="shelter" zoom-min="17">
-    <symbol src="jar:symbols/shelter.png" />
-    </m>
-    <m k="amenity" v="telephone" zoom-min="17">
-    <symbol src="jar:symbols/telephone.png" />
-    </m>
-    <m k="amenity" v="theatre" zoom-min="17">
-    <symbol src="jar:symbols/theatre.png" />
-    </m>
-    <m k="amenity" v="toilets" zoom-min="17">
-    <symbol src="jar:symbols/toilets.png" />
-    </m>
-    <m k="amenity" v="university|college" zoom-min="17">
-    <symbol src="jar:symbols/university.png" />
-    </m>
-
-    <m zoom-min="17">
-    <caption k="name" font-style="bold" font-size="10" fill="#4040ff"
-    stroke="#ffffff" width="2.0" />
-    </m>
-    </m>
+  <m e="node">
+    <!--
+      <m k="aeroway">
+      <m k="aeroway" v="helipad" zoom-min="17">
+      <symbol src="jar:symbols/helipad.png" />
+      </m>
+      <m k="aeroway" v="aerodrome|airport" zoom-max="13">
+      <symbol src="jar:symbols/airport.png" />
+      </m>
+      </m>
 
 
-    <m k="barrier" v="bollard">
-    <circle radius="1.5" fill="#707070" />
-    </m>
+      <m k="amenity">
+      <m k="amenity" v="atm" zoom-min="17">
+      <symbol src="jar:symbols/atm.png" />
+      </m>
+      <m k="amenity" v="bank" zoom-min="17">
+      <symbol src="jar:symbols/bank.png" />
+      </m>
+      <m k="amenity" v="bench" zoom-min="17">
+      <symbol src="jar:symbols/bench.png" />
+      </m>
+      <m k="amenity" v="bicycle_rental" zoom-min="17">
+      <symbol src="jar:symbols/bicycle_rental.png" />
+      </m>
+      <m k="amenity" v="bus_station" zoom-min="17">
+      <symbol src="jar:symbols/bus_sta.png" />
+      </m>
+      <m k="amenity" v="cafe" zoom-min="17">
+      <symbol src="jar:symbols/cafe.png" />
+      </m>
+      <m k="amenity" v="cinema" zoom-min="17">
+      <symbol src="jar:symbols/cinema.png" />
+      </m>
+      <m k="amenity" v="drinking_water" zoom-min="17">
+      <symbol src="jar:symbols/drinking_water.png" />
+      </m>
+      <m k="amenity" v="fast_food" zoom-min="17">
+      <symbol src="jar:symbols/fastfood.png" />
+      </m>
+      <m k="amenity" v="fire_station" zoom-min="17">
+      <symbol src="jar:symbols/firebrigade.png" />
+      </m>
+      <m k="amenity" v="fountain" zoom-min="17">
+      <symbol src="jar:symbols/fountain.png" />
+      </m>
+      <m k="amenity" v="fuel" zoom-min="17">
+      <symbol src="jar:symbols/petrolStation.png" />
+      </m>
+      <m k="amenity" v="hospital" zoom-min="15">
+      <symbol src="jar:symbols/hospital.png" />
+      </m>
+      <m k="amenity" v="kindergarten" zoom-min="17">
+      <symbol src="jar:symbols/kindergarten.png" />
+      </m>
+      <m k="amenity" v="library" zoom-min="17">
+      <symbol src="jar:symbols/library.png" />
+      </m>
+      <m k="amenity" v="parking" zoom-min="17">
+      <symbol src="jar:symbols/parking.png" />
+      </m>
+      <m k="amenity" v="pharmacy" zoom-min="17">
+      <symbol src="jar:symbols/pharmacy.png" />
+      </m>
+      <m k="amenity" v="place_of_worship" zoom-min="17">
+      <m k="denomination|religion" v="jewish">
+      <symbol src="jar:symbols/synagogue.png" />
+      </m>
+      <m k="denomination|religion" v="muslim|moslem">
+      <symbol src="jar:symbols/mosque.png" />
+      </m>
+      <m k="denomination|religion" v="christian">
+      <symbol src="jar:symbols/church.png" />
+      </m>
+      </m>
+      <m k="amenity" v="post_box" zoom-min="17">
+      <symbol src="jar:symbols/postbox.png" />
+      </m>
+      <m k="amenity" v="post_office" zoom-min="17">
+      <symbol src="jar:symbols/postoffice.png" />
+      </m>
+      <m k="amenity" v="pub|bar" zoom-min="17">
+      <symbol src="jar:symbols/pub.png" />
+      </m>
+      <m k="amenity" v="recycling" zoom-min="17">
+      <symbol src="jar:symbols/recycling.png" />
+      </m>
+      <m k="amenity" v="restaurant" zoom-min="17">
+      <symbol src="jar:symbols/restaurant.png" />
+      </m>
+      <m k="amenity" v="school" zoom-min="17">
+      <symbol src="jar:symbols/school.png" />
+      </m>
+      <m k="amenity" v="shelter" zoom-min="17">
+      <symbol src="jar:symbols/shelter.png" />
+      </m>
+      <m k="amenity" v="telephone" zoom-min="17">
+      <symbol src="jar:symbols/telephone.png" />
+      </m>
+      <m k="amenity" v="theatre" zoom-min="17">
+      <symbol src="jar:symbols/theatre.png" />
+      </m>
+      <m k="amenity" v="toilets" zoom-min="17">
+      <symbol src="jar:symbols/toilets.png" />
+      </m>
+      <m k="amenity" v="university|college" zoom-min="17">
+      <symbol src="jar:symbols/university.png" />
+      </m>
+
+      <m zoom-min="17">
+      <caption k="name" font-style="bold" font-size="10" fill="#4040ff"
+      stroke="#ffffff" width="2.0" />
+      </m>
+      </m>
 
 
-    <m k="highway">
-    <m k="highway" v="bus_stop" zoom-min="16">
-    <symbol src="jar:symbols/bus.png" />
-    </m>
-    <m k="highway" v="traffic_signals" zoom-min="17">
-    <symbol src="jar:symbols/traffic_signal.png" />
-    </m>
-    <m k="highway" v="turning_circle">
-    <circle radius="1.4" scale-radius="true" fill="#ffffff" />
-    </m>
-    </m>
+      <m k="barrier" v="bollard">
+      <circle radius="1.5" fill="#707070" />
+      </m>
 
 
-    <m k="historic">
-    <circle radius="3" fill="#4040ff" stroke="#606060" width="1.5" />
-
-    <m zoom-min="17">
-    <caption k="name" dy="-10" font-style="bold" font-size="10" fill="#4040ff"
-    stroke="#ffffff" width="2.0" />
-    </m>
-    </m>
-
-
-    <m k="addr:housenumber" zoom-min="18">
-    <caption k="addr:housenumber" font-style="bold" font-size="10" fill="#606060"
-    stroke="#ffffff" width="2.0" />
-    </m>
+      <m k="highway">
+      <m k="highway" v="bus_stop" zoom-min="16">
+      <symbol src="jar:symbols/bus.png" />
+      </m>
+      <m k="highway" v="traffic_signals" zoom-min="17">
+      <symbol src="jar:symbols/traffic_signal.png" />
+      </m>
+      <m k="highway" v="turning_circle">
+      <circle radius="1.4" scale-radius="true" fill="#ffffff" />
+      </m>
+      </m>
 
 
-    <m k="leisure" v="playground" zoom-min="17">
-    <symbol src="jar:symbols/playground.png" />
-    </m>
+      <m k="historic">
+      <circle radius="3" fill="#4040ff" stroke="#606060" width="1.5" />
+
+      <m zoom-min="17">
+      <caption k="name" dy="-10" font-style="bold" font-size="10" fill="#4040ff"
+      stroke="#ffffff" width="2.0" />
+      </m>
+      </m>
 
 
-    <m k="man_made" v="windmill" zoom-min="17">
-    <symbol src="jar:symbols/windmill.png" />
-    </m>
+      <m k="addr:housenumber" zoom-min="18">
+      <caption k="addr:housenumber" font-style="bold" font-size="10" fill="#606060"
+      stroke="#ffffff" width="2.0" />
+      </m>
 
 
-    <m k="natural">
-    <m k="natural" v="cave_entrance" zoom-min="15">
-    <symbol src="jar:symbols/cave_entrance.png" />
-    </m>
-    <m k="natural" v="peak" zoom-min="12">
-    <symbol src="jar:symbols/peak.png" />
-    <caption k="ele" dy="20" font-style="bold" font-size="10" fill="#000000"
-    stroke="#ffffff" width="2.0" />
-    </m>
-    <m k="natural" v="tree" zoom-min="16">
-    <symbol src="jar:symbols/tree.png" />
-    </m>
-    <m k="natural" v="volcano" zoom-min="12">
-    <symbol src="jar:symbols/vulcan.png" />
-    </m>
-
-    <m zoom-min="17">
-    <caption k="name" font-style="bold" font-size="10" fill="#000000"
-    stroke="#ffffff" width="2.0" />
-    </m>
-    </m>
+      <m k="leisure" v="playground" zoom-min="17">
+      <symbol src="jar:symbols/playground.png" />
+      </m>
 
 
+      <m k="man_made" v="windmill" zoom-min="17">
+      <symbol src="jar:symbols/windmill.png" />
+      </m>
+
+
+      <m k="natural">
+      <m k="natural" v="cave_entrance" zoom-min="15">
+      <symbol src="jar:symbols/cave_entrance.png" />
+      </m>
+      <m k="natural" v="peak" zoom-min="12">
+      <symbol src="jar:symbols/peak.png" />
+      <caption k="ele" dy="20" font-style="bold" font-size="10" fill="#000000"
+      stroke="#ffffff" width="2.0" />
+      </m>
+      <m k="natural" v="tree" zoom-min="16">
+      <symbol src="jar:symbols/tree.png" />
+      </m>
+      <m k="natural" v="volcano" zoom-min="12">
+      <symbol src="jar:symbols/vulcan.png" />
+      </m>
+
+      <m zoom-min="17">
+      <caption k="name" font-style="bold" font-size="10" fill="#000000"
+      stroke="#ffffff" width="2.0" />
+      </m>
+      </m>
+
+    -->
     <m k="place">
-    <m k="place" v="hamlet" zoom-min="13">
-    <caption k="name" font-style="bold" font-size="13" fill="#000000"
-    stroke="#ffffff" width="2.0" />
-    </m>
-    <m k="place" v="suburb|town|village" zoom-min="12">
-    <caption k="name" font-style="bold" font-size="15" fill="#000000"
-    stroke="#ffffff" width="2.0" />
-    </m>
-    <m k="place" v="island" zoom-min="10">
-    <caption k="name" font-style="bold" font-size="20" fill="#000000"
-    stroke="#ffffff" width="2.0" />
-    </m>
-    <m k="place" v="city" zoom-max="14">
-    <caption k="name" font-style="bold" font-size="25" fill="#000000"
-    stroke="#ffffff" width="2.0" />
-    </m>
-    <m k="place" v="country" zoom-max="6">
-    <caption k="name" font-style="bold" font-size="25" fill="#000000"
-    stroke="#ffffff" width="2.0" />
-    </m>
+      <m k="place" v="hamlet" zoom-min="13">
+        <caption k="name" font-style="bold" font-size="13" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+      </m>
+      <m k="place" v="suburb|town|village" zoom-min="12">
+        <caption k="name" font-style="bold" font-size="15" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+      </m>
+      <m k="place" v="island" zoom-min="10">
+        <caption k="name" font-style="bold" font-size="20" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+      </m>
+      <m k="place" v="city" zoom-max="14">
+        <caption k="name" font-style="bold" font-size="25" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+      </m>
+      <m k="place" v="country" zoom-max="6">
+        <caption k="name" font-style="bold" font-size="25" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+      </m>
     </m>
 
 
     <m k="railway">
-    <m k="railway" v="crossing" zoom-min="16">
-    <symbol src="jar:symbols/railway-crossing-small.png" />
-    </m>
-    <m k="railway" v="level_crossing" zoom-min="16">
-    <symbol src="jar:symbols/railway-crossing.png" />
-    </m>
-    <m k="railway" v="station" zoom-min="14">
-    <circle radius="6" fill="#ec2d2d" stroke="#606060" width="1.5" />
-    <caption k="name" dy="-10" font-style="bold" font-size="13" fill="#ec2d2d"
-    stroke="#ffffff" width="2.0" />
-    </m>
-    <m k="railway" v="halt|tram_stop" zoom-min="17">
-    <circle radius="4" fill="#ec2d2d" stroke="#606060" width="1.5" />
-    <caption k="name" dy="-15" font-style="bold" font-size="11" fill="#ec2d2d"
-    stroke="#ffffff" width="2.0" />
-    </m>
+      <!-- <m k="railway" v="crossing" zoom-min="16">
+        <symbol src="jar:symbols/railway-crossing-small.png" />
+      </m>
+      <m k="railway" v="level_crossing" zoom-min="16">
+        <symbol src="jar:symbols/railway-crossing.png" />
+      </m>-->
+      <m k="railway" v="station" zoom-min="14">
+        <circle r="6" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
+        <caption k="name" dy="-10" font-style="bold" font-size="13" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
+      </m>
+      <m k="railway" v="halt|tram_stop" zoom-min="17">
+        <circle r="4" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
+        <caption k="name" dy="-15" font-style="bold" font-size="11" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
+      </m>
     </m>
 
 
     <m k="shop">
-    <m v="bakery" zoom-min="17">
-    <symbol src="jar:symbols/bakery.png" />
-    </m>
-    <m v="florist" zoom-min="17">
-    <symbol src="jar:symbols/florist.png" />
-    </m>
-    <m v="supermarket|organic" zoom-min="17">
-    <symbol src="jar:symbols/supermarket.png" />
-    </m>
+      <m v="bakery" zoom-min="17">
+        <symbol src="jar:symbols/bakery.png" />
+      </m>
+      <m v="florist" zoom-min="17">
+        <symbol src="jar:symbols/florist.png" />
+      </m>
+      <m v="supermarket|organic" zoom-min="17">
+        <symbol src="jar:symbols/supermarket.png" />
+      </m>
 
-    <m zoom-min="17">
-    <caption k="name" font-style="bold" font-size="10" fill="#4040ff"
-    stroke="#ffffff" width="2.0" />
-    </m>
+      <m zoom-min="17">
+        <caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
+      </m>
     </m>
 
 
     <m k="tourism">
-    <m v="alpine_hut" zoom-min="16">
-    <symbol src="jar:symbols/alpine_hut.png" />
-    </m>
-    <m v="camp_site" zoom-min="17">
-    <symbol src="jar:symbols/campSite.png" />
-    </m>
-    <m v="hostel" zoom-min="17">
-    <symbol src="jar:symbols/hostel.png" />
-    </m>
-    <m v="hotel" zoom-min="17">
-    <symbol src="jar:symbols/hotel.png" />
-    </m>
-    <m v="information" zoom-min="17">
-    <symbol src="jar:symbols/information.png" />
-    </m>
-    <m v="viewpoint" zoom-min="15">
-    <symbol src="jar:symbols/viewpoint.png" />
-    </m>
+      <m v="alpine_hut" zoom-min="16">
+        <symbol src="jar:symbols/alpine_hut.png" />
+      </m>
+      <m v="camp_site" zoom-min="17">
+        <symbol src="jar:symbols/campSite.png" />
+      </m>
+      <m v="hostel" zoom-min="17">
+        <symbol src="jar:symbols/hostel.png" />
+      </m>
+      <m v="hotel" zoom-min="17">
+        <symbol src="jar:symbols/hotel.png" />
+      </m>
+      <m v="information" zoom-min="17">
+        <symbol src="jar:symbols/information.png" />
+      </m>
+      <m v="viewpoint" zoom-min="15">
+        <symbol src="jar:symbols/viewpoint.png" />
+      </m>
 
-    <m zoom-min="17">
-    <caption k="name" font-style="bold" font-size="10" fill="#4040ff"
-    stroke="#ffffff" width="2.0" />
+      <m zoom-min="17">
+        <caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
+      </m>
     </m>
-    </m>
-    </m> -->
+  </m>
 </rendertheme>
