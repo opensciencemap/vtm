@@ -15,7 +15,7 @@
 package org.oscim.theme.renderinstruction;
 
 import org.oscim.renderer.atlas.TextureRegion;
-import org.oscim.theme.IRenderCallback;
+import org.oscim.theme.IRenderTheme.Callback;
 
 /**
  * Represents an icon on the map.
@@ -34,12 +34,12 @@ public final class Symbol extends RenderInstruction {
 	}
 
 	@Override
-	public void renderNode(IRenderCallback renderCallback) {
-		renderCallback.renderPointOfInterestSymbol(this);
+	public void renderNode(Callback renderCallback) {
+		renderCallback.renderPointSymbol(this);
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback) {
+	public void renderWay(Callback renderCallback) {
 		renderCallback.renderAreaSymbol(this);
 	}
 }

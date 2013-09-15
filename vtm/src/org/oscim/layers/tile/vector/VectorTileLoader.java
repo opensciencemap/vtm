@@ -16,6 +16,7 @@ package org.oscim.layers.tile.vector;
 
 import static org.oscim.tiling.MapTile.STATE_NONE;
 
+import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -24,14 +25,13 @@ import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.labeling.WayDecorator;
 import org.oscim.map.DebugSettings;
-import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
-import org.oscim.theme.IRenderCallback;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.Circle;
@@ -49,8 +49,6 @@ import org.oscim.tiling.source.ITileDataSource.QueryResult;
 import org.oscim.utils.LineClipper;
 import org.oscim.utils.pool.Inlist;
 
-import org.oscim.backend.Log;
-
 /**
  * @note
  *       0.
@@ -62,7 +60,7 @@ import org.oscim.backend.Log;
  *       5. RenderTheme calls IRenderCallback functions with style information
  *       6. Styled items become added to MapTile.layers...
  */
-public class VectorTileLoader extends TileLoader implements IRenderCallback, ITileDataSink {
+public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback, ITileDataSink {
 
 	private static final String TAG = VectorTileLoader.class.getName();
 
@@ -453,7 +451,7 @@ public class VectorTileLoader extends TileLoader implements IRenderCallback, ITi
 	}
 
 	@Override
-	public void renderAreaCaption(Text text) {
+	public void renderAreaText(Text text) {
 		// TODO place somewhere on polygon
 
 		String value = textValueForKey(text);
@@ -467,7 +465,7 @@ public class VectorTileLoader extends TileLoader implements IRenderCallback, ITi
 	}
 
 	@Override
-	public void renderPointOfInterestCaption(Text text) {
+	public void renderPointText(Text text) {
 		String value = textValueForKey(text);
 		if (value == null)
 			return;
@@ -498,11 +496,11 @@ public class VectorTileLoader extends TileLoader implements IRenderCallback, ITi
 	}
 
 	@Override
-	public void renderPointOfInterestCircle(Circle circle, int level) {
+	public void renderPointCircle(Circle circle, int level) {
 	}
 
 	@Override
-	public void renderPointOfInterestSymbol(Symbol symbol) {
+	public void renderPointSymbol(Symbol symbol) {
 		if (symbol.texture == null){
 			Log.d(TAG, "missing symbol for " + mElement.tags.asString());
 			return;

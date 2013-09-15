@@ -15,7 +15,7 @@
 package org.oscim.theme.renderinstruction;
 
 import org.oscim.renderer.elements.TextureItem;
-import org.oscim.theme.IRenderCallback;
+import org.oscim.theme.IRenderTheme.Callback;
 
 /**
  * Represents a closed polygon on the map.
@@ -65,7 +65,7 @@ public final class Area extends RenderInstruction {
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback) {
+	public void renderWay(Callback renderCallback) {
 		renderCallback.renderArea(this, this.level);
 	}
 
@@ -76,6 +76,5 @@ public final class Area extends RenderInstruction {
 	public final int fade;
 	public final int blendColor;
 	public final int blend;
-
 	public final TextureItem texture;
 }

@@ -14,7 +14,7 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.theme.IRenderCallback;
+import org.oscim.theme.IRenderTheme.Callback;
 
 
 /**
@@ -44,17 +44,10 @@ public final class Circle extends RenderInstruction {
 
 		this.strokeWidth = strokeWidth;
 		this.level = level;
-
-//if (!mScaleRadius) {
-//	mRenderRadius = mRadius;
-//	if (mOutline != null) {
-//		mOutline.setStrokeWidth(mStrokeWidth);
-//	}
-//}
 	}
 
 	@Override
-	public void renderNode(IRenderCallback renderCallback) {
-			renderCallback.renderPointOfInterestCircle(this, this.level);
+	public void renderNode(Callback renderCallback) {
+			renderCallback.renderPointCircle(this, this.level);
 	}
 }

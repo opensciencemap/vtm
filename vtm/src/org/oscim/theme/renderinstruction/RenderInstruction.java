@@ -14,7 +14,7 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.theme.IRenderCallback;
+import org.oscim.theme.IRenderTheme.Callback;
 
 /**
  * A RenderInstruction is a basic graphical primitive to draw a map.
@@ -30,14 +30,14 @@ public abstract class RenderInstruction {
 	 * @param renderCallback
 	 *            a reference to the receiver of all render callbacks.
 	 */
-	public void renderNode(IRenderCallback renderCallback) {
+	public void renderNode(Callback renderCallback) {
 	}
 
 	/**
 	 * @param renderCallback
 	 *            a reference to the receiver of all render callbacks.
 	 */
-	public void renderWay(IRenderCallback renderCallback) {
+	public void renderWay(Callback renderCallback) {
 	}
 
 	/**

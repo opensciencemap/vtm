@@ -14,7 +14,7 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.theme.IRenderCallback;
+import org.oscim.theme.IRenderTheme.Callback;
 
 public class AreaLevel extends RenderInstruction {
 	private final Area area;
@@ -26,7 +26,7 @@ public class AreaLevel extends RenderInstruction {
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback) {
+	public void renderWay(Callback renderCallback) {
 		renderCallback.renderArea(this.area, level);
 	}
 }

@@ -14,7 +14,7 @@
  */
 package org.oscim.theme.renderinstruction;
 
-import org.oscim.theme.IRenderCallback;
+import org.oscim.theme.IRenderTheme.Callback;
 
 /**
  * Represents an icon along a polyline on the map.
@@ -36,7 +36,7 @@ public final class LineSymbol extends RenderInstruction {
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback) {
+	public void renderWay(Callback renderCallback) {
 		renderCallback.renderWaySymbol(this);
 	}
 }

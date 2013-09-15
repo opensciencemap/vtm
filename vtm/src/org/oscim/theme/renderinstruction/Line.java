@@ -15,7 +15,7 @@
 package org.oscim.theme.renderinstruction;
 
 import org.oscim.backend.canvas.Paint.Cap;
-import org.oscim.theme.IRenderCallback;
+import org.oscim.theme.IRenderTheme.Callback;
 
 /**
  * Represents a polyline on the map.
@@ -100,7 +100,7 @@ public final class Line extends RenderInstruction {
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback) {
+	public void renderWay(Callback renderCallback) {
 		renderCallback.renderWay(this, level);
 	}
 }

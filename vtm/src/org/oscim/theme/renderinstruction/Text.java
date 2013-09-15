@@ -20,7 +20,7 @@ import org.oscim.backend.canvas.Paint.Align;
 import org.oscim.backend.canvas.Paint.FontFamily;
 import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.renderer.atlas.TextureRegion;
-import org.oscim.theme.IRenderCallback;
+import org.oscim.theme.IRenderTheme.Callback;
 
 /**
  * Represents a text along a polyline on the map.
@@ -101,15 +101,15 @@ public final class Text extends RenderInstruction {
 	}
 
 	@Override
-	public void renderNode(IRenderCallback renderCallback) {
+	public void renderNode(Callback renderCallback) {
 		if (caption)
-			renderCallback.renderPointOfInterestCaption(this);
+			renderCallback.renderPointText(this);
 	}
 
 	@Override
-	public void renderWay(IRenderCallback renderCallback) {
+	public void renderWay(Callback renderCallback) {
 		if (caption)
-			renderCallback.renderAreaCaption(this);
+			renderCallback.renderAreaText(this);
 		else
 			renderCallback.renderWayText(this);
 	}
