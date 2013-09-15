@@ -14,9 +14,7 @@
  */
 package org.oscim.renderer.test;
 
-import java.io.IOException;
-
-import org.oscim.backend.BitmapUtils;
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
@@ -34,8 +32,8 @@ public class SymbolRenderLayer extends ElementRenderer {
 		it.billboard = false;
 
 		try {
-			it.bitmap = BitmapUtils.createBitmap("jar:symbols/cafe.png");
-		} catch (IOException e) {
+			it.bitmap = CanvasAdapter.g.loadBitmapAsset("jar:symbols/cafe.png");
+		} catch (Exception e) {
 			e.printStackTrace();
 
 		}

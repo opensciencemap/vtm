@@ -8,10 +8,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
-import org.oscim.backend.BitmapUtils;
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Paint;
 
 public class AwtGraphics extends CanvasAdapter {
@@ -90,7 +89,7 @@ public class AwtGraphics extends CanvasAdapter {
 	@Override
 	public Bitmap loadBitmapAsset(String fileName) {
 		try {
-			return BitmapUtils.createBitmap(fileName);
+			return createBitmap(fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

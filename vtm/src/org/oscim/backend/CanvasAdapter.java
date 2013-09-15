@@ -15,6 +15,7 @@
  */
 package org.oscim.backend;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.oscim.backend.canvas.Bitmap;
@@ -23,6 +24,8 @@ import org.oscim.backend.canvas.Paint;
 
 
 public abstract class CanvasAdapter {
+	protected static final String TAG = CanvasAdapter.class.getName();
+
 	public static CanvasAdapter g;
 
 	public static float dpi = 240;
@@ -45,4 +48,21 @@ public abstract class CanvasAdapter {
 	public abstract Bitmap getBitmap(int width, int height, int format);
 
 	public abstract Canvas getCanvas();
+
+	protected static Bitmap createBitmap(String src) throws IOException {
+		if (src == null || src.length() == 0) {
+			// no image source defined
+			return null;
+		}
+
+		InputStream inputStream = AssetAdapter.g.openFileAsStream(src);
+		if (inputStream == null){
+			Log.e(TAG, "invalid bitmap source: " + src);
+			return null;
+		}
+
+		Bitmap bitmap = CanvasAdapter.g.decodeBitmap(inputStream);
+		inputStream.close();
+		return bitmap;
+	}
 }
