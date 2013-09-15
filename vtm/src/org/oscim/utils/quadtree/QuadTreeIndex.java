@@ -14,8 +14,7 @@
  */
 package org.oscim.utils.quadtree;
 
-public abstract class QuadTreeIndex<T>  {
-
+public abstract class QuadTreeIndex<T> {
 
 	QuadTree<T> pool;
 
@@ -152,7 +151,7 @@ public abstract class QuadTreeIndex<T>  {
 		QuadTree<T> cur = item;
 		QuadTree<T> next;
 
-		for (; cur != root;) {
+		while (cur != root) {
 			if (cur == null)
 				throw new IllegalArgumentException("QuadTree.remove: item not in index");
 
