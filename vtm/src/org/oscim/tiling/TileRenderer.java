@@ -50,6 +50,9 @@ public class TileRenderer extends LayerRenderer {
 	private int mOverdraw = 0;
 	private float mAlpha = 1;
 
+	private int mRenderOverdraw;
+	private float mRenderAlpha;
+
 	public void setOverdrawColor(int color) {
 		mOverdraw = color;
 	}
@@ -90,7 +93,11 @@ public class TileRenderer extends LayerRenderer {
 			BufferObject.checkBufferUsage(false);
 		}
 
-		draw(tiles, tileCnt, pos, m, mAlpha, mOverdraw);
+		// keep constant while rendering frame
+		mRenderAlpha = mAlpha;
+		mRenderOverdraw = mOverdraw;
+
+		draw(tiles, tileCnt, pos, m);
 	}
 
 
@@ -336,24 +343,17 @@ public class TileRenderer extends LayerRenderer {
 		}
 	};
 
-
-
-
 	private static final GL20 GL = GLAdapter.get();
 
 	// Counter increases polygon-offset for each tile drawn.
-	private static int mOffsetCnt;
+	private int mOffsetCnt;
 
 	// Current number of frames drawn, used to not draw a
 	// tile twice per frame.
-	private static int mDrawSerial = 0;
+	private int mDrawSerial = 0;
 
-	private static Matrices mMatrices;
-
-	private static float mFade;
-	//private static int mOverdraw;
-
-	private static final Matrix4 mProjMatrix = new Matrix4();
+	private Matrices mMatrices;
+	private final Matrix4 mProjMatrix = new Matrix4();
 
 	/**
 	 * Draw tiles:
@@ -363,14 +363,10 @@ public class TileRenderer extends LayerRenderer {
 	 * @param overdrawColor
 	 *            draw color on top, e.g. to darken the layer temporarily
 	 */
-	private void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m, float fade,
-			int overdrawColor) {
+	private void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m) {
 
 		mOffsetCnt = -2048;
 		mMatrices = m;
-
-		mFade = fade;
-		//mOverdraw = overdrawColor;
 
 		mProjMatrix.copy(m.proj);
 		// discard depth projection from tilt, we use depth buffer
@@ -510,7 +506,7 @@ public class TileRenderer extends LayerRenderer {
 			//GLState.test(false, false);
 			switch (l.type) {
 				case RenderElement.BITMAP:
-					l = BitmapLayer.Renderer.draw(l, m, 1, mFade);
+					l = BitmapLayer.Renderer.draw(l, m, 1, mRenderAlpha);
 					break;
 
 				default:
@@ -518,7 +514,7 @@ public class TileRenderer extends LayerRenderer {
 			}
 		}
 
-		PolygonLayer.Renderer.drawOver(m, mOverdraw);
+		PolygonLayer.Renderer.drawOver(m, mRenderOverdraw);
 	}
 
 	private int drawProxyChild(MapTile tile, MapPosition pos) {
