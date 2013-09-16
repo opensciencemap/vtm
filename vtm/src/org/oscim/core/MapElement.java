@@ -19,7 +19,8 @@ package org.oscim.core;
 // move it to tilesource package
 
 /**
- * Reusable containter for geometry with tags.
+ * The MapElement class is a reusable containter for a geometry
+ * with tags.
  * MapElement is created by TileDataSource(s) and passed to
  * MapTileLoader via ITileDataSink.process().
  * This is just a buffer that belongs to TileDataSource,

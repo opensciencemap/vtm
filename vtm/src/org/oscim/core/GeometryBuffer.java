@@ -1,22 +1,29 @@
 package org.oscim.core;
 
+// TODO: Auto-generated Javadoc
 // TODO
 // - getter methods!
 // - check indexPos < Short.Max
 // - should make internals private, maybe
 
 /**
- * Class to hold temporary geometry data for processing. Only One
- * geometry type can be set at a time. Use 'clear()' to reset the
+ * The GeometryBuffer class holds temporary geometry data for processing.
+ * Only One geometry type can be set at a time. Use 'clear()' to reset the
  * internal state.
- * - 'points[]' holds the coordinates
- * - 'index[]' is used to encode multi-linestrings and (multi-)polygons.
+ * <p>
+ * 'points[]' holds interleaved x,y coordinates
+ * <p>
+ * 'index[]' is used to store number of points within a geometry and encode
+ * multi-linestrings and (multi-)polygons.
  */
 public class GeometryBuffer {
 
 	private final static int GROW_INDICES = 64;
 	private final static int GROW_POINTS = 512;
 
+	/**
+	 * The Enum GeometryType.
+	 */
 	public enum GeometryType {
 		NONE(0),
 		POINT(1),
@@ -31,13 +38,27 @@ public class GeometryBuffer {
 		public final int nativeInt;
 	}
 
+	/** The points. */
 	public float[] points;
+
+	/** The indexes. */
 	public short[] index;
+
+	/** The current index position. */
 	public int indexPos;
+
+	/** The current position in points array. */
 	public int pointPos;
 
+	/** The current geometry type. */
 	public GeometryType type;
 
+	/**
+	 * Instantiates a new geometry buffer.
+	 *
+	 * @param points the points
+	 * @param index the index
+	 */
 	public GeometryBuffer(float[] points, short[] index) {
 		if (points == null)
 			points = new float[GROW_POINTS];
@@ -51,11 +72,20 @@ public class GeometryBuffer {
 		this.pointPos = 0;
 	}
 
+	/**
+	 * Instantiates a new geometry buffer.
+	 *
+	 * @param numPoints the num points
+	 * @param numIndices the num indices
+	 */
 	public GeometryBuffer(int numPoints, int numIndices) {
 		this(new float[numPoints * 2], new short[numIndices]);
 	}
 
 	// ---- API ----
+	/**
+	 * Reset buffer.
+	 */
 	public void clear() {
 		index[0] = -1;
 		indexPos = 0;
@@ -63,6 +93,12 @@ public class GeometryBuffer {
 		type = GeometryType.NONE;
 	}
 
+	/**
+	 * Adds a point with the coordinates x and y.
+	 *
+	 * @param x the x ordinate
+	 * @param y the y ordinate
+	 */
 	public void addPoint(float x, float y) {
 		if (pointPos >= points.length - 1)
 			ensurePointSize((pointPos >> 1) + 1, true);
@@ -85,15 +121,28 @@ public class GeometryBuffer {
 		return type == GeometryType.POINT;
 	}
 
+	/**
+	 * Sets the point x,y at position pos.
+	 *
+	 * @param pos the pos
+	 * @param x the x ordinate
+	 * @param y the y ordinate
+	 */
 	public void setPoint(int pos, float x, float y) {
 		points[(pos << 1) + 0] = x;
 		points[(pos << 1) + 1] = y;
 	}
 
+	/**
+	 * Set geometry type for points.
+	 */
 	public void startPoints() {
 		setOrCheckMode(GeometryType.POINT);
 	}
 
+	/**
+	 * Start a new line. Sets geometry type for lines.
+	 */
 	public void startLine() {
 		setOrCheckMode(GeometryType.LINE);
 
@@ -109,6 +158,9 @@ public class GeometryBuffer {
 			index[indexPos + 1] = -1;
 	}
 
+	/**
+	 * Start a new polygon. Sets geometry type for polygons.
+	 */
 	public void startPolygon() {
 		boolean start = (type == GeometryType.NONE);
 		setOrCheckMode(GeometryType.POLY);
@@ -132,6 +184,9 @@ public class GeometryBuffer {
 			index[indexPos + 1] = -1;
 	}
 
+	/**
+	 * Starts a new polygon hole (inner ring).
+	 */
 	public void startHole() {
 		checkMode(GeometryType.POLY);
 
@@ -147,6 +202,13 @@ public class GeometryBuffer {
 	}
 
 	// ---- internals ----
+	/**
+	 * Ensure point size.
+	 *
+	 * @param size the size
+	 * @param copy the copy
+	 * @return the float[] array holding current coordinates
+	 */
 	public float[] ensurePointSize(int size, boolean copy) {
 		if (size * 2 < points.length)
 			return points;
@@ -159,6 +221,13 @@ public class GeometryBuffer {
 		return points;
 	}
 
+	/**
+	 * Ensure index size.
+	 *
+	 * @param size the size
+	 * @param copy the copy
+	 * @return the short[] array holding current index
+	 */
 	public short[] ensureIndexSize(int size, boolean copy) {
 		if (size < index.length)
 			return index;
