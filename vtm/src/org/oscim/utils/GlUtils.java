@@ -174,6 +174,18 @@ public class GlUtils {
 	 */
 	public static int loadShader(int shaderType, String source) {
 
+		if (GLAdapter.GDX_DESKTOP_QUIRKS) {
+			// Strip precision modifer
+			int start = source.indexOf("precision");
+			if (start >= 0) {
+				int end = source.indexOf(';', start) + 1;
+				if (start > 0)
+					source = source.substring(0, start) + source.substring(end);
+				else
+					source = source.substring(end);
+			}
+		}
+
 		int shader = GL.glCreateShader(shaderType);
 		if (shader != 0) {
 			GL.glShaderSource(shader, source);
