@@ -2,7 +2,6 @@ package org.oscim.gdx;
 
 import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.Log;
-import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.GenericLayer;
 import org.oscim.layers.tile.vector.BuildingLayer;
@@ -10,9 +9,9 @@ import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.GridRenderer;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.GLState;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tiling.source.TileSource;
 
@@ -29,7 +28,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 
-public class GdxMap implements ApplicationListener {
+public abstract class GdxMap implements ApplicationListener {
 
 	protected final Map mMap;
 	private final MapRenderer mMapRenderer;
@@ -89,7 +88,7 @@ public class GdxMap implements ApplicationListener {
 
 	}
 
-	protected void initDefaultMap(TileSource tileSource, boolean tileGrid, boolean labels,
+	protected void initDefaultLayers(TileSource tileSource, boolean tileGrid, boolean labels,
 			boolean buildings) {
 
 		if (tileSource != null) {
@@ -133,11 +132,13 @@ public class GdxMap implements ApplicationListener {
 		mHeight = h;
 
 		mMap.getViewport().setViewport(w, h);
-		MapPosition p = new MapPosition();
-		p.setZoomLevel(14);
-		p.setPosition(53.08, 8.83);
+
+		//MapPosition p = new MapPosition();
+		//p.setZoomLevel(14);
+		//p.setPosition(53.08, 8.83);
 		//p.setPosition(0.0, 0.0);
-		mMap.setMapPosition(p);
+		//mMap.setMapPosition(p);
+
 		mMapRenderer.onSurfaceCreated();
 		mMapRenderer.onSurfaceChanged(w, h);
 
@@ -154,7 +155,10 @@ public class GdxMap implements ApplicationListener {
 		// fps.setPosition(10, 30);
 		// fps.setColor(0, 1, 0, 1);
 		// ui.addActor(fps);
+		createLayers();
 	}
+
+	protected abstract void createLayers();
 
 	@Override
 	public void dispose() {

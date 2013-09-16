@@ -19,42 +19,41 @@ import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class MainActivity extends AndroidApplication {
 
-	private final class AndroidGLAdapter extends AndroidGL20 implements GL20{
+	private final class AndroidGLAdapter extends AndroidGL20 implements GL20 {
 	}
 
 	@Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        // set globals
-        CanvasAdapter.g = AndroidGraphics.INSTANCE;
-        GLAdapter.g = new AndroidGLAdapter();
+		// set globals
+		CanvasAdapter.g = AndroidGraphics.INSTANCE;
+		GLAdapter.g = new AndroidGLAdapter();
 		Log.logger = new AndroidLog();
 
 		// TODO make this dpi dependent
 		Tile.SIZE = 400;
 
-        AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
-        cfg.useGL20 = true;
+		AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
+		cfg.useGL20 = true;
 
-        new SharedLibraryLoader().load("vtm-jni");
+		new SharedLibraryLoader().load("vtm-jni");
 
-        initialize(new GdxMapAndroid(), cfg);
-    }
+		initialize(new GdxMapAndroid(), cfg);
+	}
 
-	class GdxMapAndroid extends GdxMap{
+	class GdxMapAndroid extends GdxMap {
+
 		@Override
-		public void create() {
-		    super.create();
+		public void createLayers() {
 
-	        //TileSource ts = new OSciMap4TileSource();
-			//ts.setOption("url", "http://city.informatik.uni-bremen.de/osci/testing");
+			//TileSource ts = new OSciMap4TileSource();
+			//ts.setOption("url", "http://opensciencemap.org/tiles/vtm");
 
-	        TileSource ts = new OSciMap2TileSource();
-			ts.setOption("url", "http://city.informatik.uni-bremen.de/osci/map-live");
+			TileSource ts = new OSciMap2TileSource();
+			ts.setOption("url", "http://opensciencemap.org/osci/map-live");
 
-		    initDefaultMap(ts, true, true, true);
+			initDefaultLayers(ts, true, true, true);
 		}
-
 	}
 }

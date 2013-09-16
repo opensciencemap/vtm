@@ -98,7 +98,7 @@ class GwtGdxMap extends GdxMap {
 
 		tileSource.setOption("url", url);
 
-		initDefaultMap(tileSource, false, true, true);
+		initDefaultLayers(tileSource, false, true, true);
 
 		if ("naturalearth".equals(c.getBackgroundLayer()))
 			mMap.setBackgroundMap(new BitmapTileLayer(mMap, NaturalEarth.INSTANCE));
@@ -138,5 +138,9 @@ class GwtGdxMap extends GdxMap {
 			}
 		};
 		timer.scheduleRepeating(5000);
+	}
+
+	@Override
+	protected void createLayers() {
 	}
 }

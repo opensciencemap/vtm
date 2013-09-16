@@ -11,9 +11,22 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
-public class Main {
+public class GdxMapApp extends GdxMap {
+
+	static {
+		// set our globals
+		new SharedLibraryLoader().load("vtm-jni");
+		CanvasAdapter.g = AwtGraphics.INSTANCE;
+		GLAdapter.g = new GdxGLAdapter();
+		GLAdapter.GDX_DESKTOP_QUIRKS = true;
+	}
 
 	public static void main(String[] args) {
+		Tile.SIZE = 360;
+		new LwjglApplication(new GdxMapApp(), getConfig());
+	}
+
+	static protected LwjglApplicationConfiguration getConfig() {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "vtm-gdx";
 		cfg.useGL20 = true;
@@ -21,34 +34,13 @@ public class Main {
 		cfg.height = 800;
 		cfg.stencil = 8;
 		cfg.foregroundFPS = 20;
-		// cfg.samples = 4;
-
-		// set our globals
-		CanvasAdapter.g = AwtGraphics.INSTANCE;
-		GLAdapter.g = new GdxGLAdapter();
-		GLAdapter.GDX_DESKTOP_QUIRKS = true;
-
-		Tile.SIZE = 360;
-
-		new SharedLibraryLoader().load("vtm-jni");
-
-		new LwjglApplication(new GdxMapDesktop(), cfg);
+		return cfg;
 	}
 
-	static class GdxMapDesktop extends GdxMap {
-
-		public GdxMapDesktop() {
-			super();
-		}
-
-		@Override
-		public void create() {
-			super.create();
-
-			TileSource tileSource = new OSciMap4TileSource();
-			tileSource.setOption("url", "http://city.informatik.uni-bremen.de/tiles/vtm");
-
-			initDefaultMap(tileSource, false, true, true);
-		}
+	@Override
+	public void createLayers() {
+		TileSource tileSource = new OSciMap4TileSource();
+		tileSource.setOption("url", "http://opensciencemap.org/tiles/vtm");
+		initDefaultLayers(tileSource, false, true, true);
 	}
 }
