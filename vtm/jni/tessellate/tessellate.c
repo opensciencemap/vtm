@@ -9,9 +9,10 @@
 #include <android/log.h>
 #endif
 
-#ifndef uintptr_t
-typedef unsigned long           uintptr_t;
-#endif
+//#ifndef uintptr_t
+//typedef unsigned long           uintptr_t;
+//#endif
+
 /******************************************************************************/
 
 typedef struct Triangle {
@@ -167,7 +168,7 @@ void begin(GLenum which, void *poly_data)
       ctx->vertex_cb = &fan_vertex;
       break;
    default:
-      printf(stderr, "ERROR, can't handle %d\n", (int) which);
+      //printf(stderr, "ERROR, can't handle %d\n", (int) which);
       ctx->vertex_cb = &skip_vertex;
       break;
    }
@@ -249,6 +250,46 @@ TessContext *tessellate(
 
    return ctx;
 }
+
+TessContext *tessellateD(
+      int *nverts,
+      int *ntris,
+      const double **contoursbegin,
+      const double **contoursend)
+{
+   const double *contourbegin, *contourend;
+   Vertex *current_vertex;
+   GLUtesselator *tess;
+   TessContext *ctx;
+
+   tess = gluNewTess();
+   ctx = new_tess_context();
+
+   gluTessCallback(tess, GLU_TESS_VERTEX_DATA, (GLvoid (*)()) &vertex);
+   gluTessCallback(tess, GLU_TESS_BEGIN_DATA, (GLvoid (*)()) &begin);
+   gluTessCallback(tess, GLU_TESS_COMBINE_DATA, (GLvoid (*)()) &combine);
+
+   gluTessBeginPolygon(tess, ctx);
+   do {
+      contourbegin = *contoursbegin++;
+      contourend = *contoursbegin;
+      gluTessBeginContour(tess);
+      while (contourbegin != contourend) {
+         current_vertex = new_vertex(ctx, contourbegin[0], contourbegin[1]);
+         contourbegin += 2;
+         gluTessVertex(tess, current_vertex->pt, current_vertex);
+      }
+      gluTessEndContour(tess);
+   } while (contoursbegin != (contoursend - 1));
+   gluTessEndPolygon(tess);
+
+   //write_output(ctx, verts, tris, nverts, ntris);
+   //destroy_tess_context(ctx);
+
+   gluDeleteTess(tess);
+
+   return ctx;
+}
 #ifdef __ANDROID__
 #define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "Tesselate", __VA_ARGS__)
 #endif
@@ -287,8 +328,8 @@ jint Java_org_oscim_renderer_sublayers_MeshLayer_tessGetCoordinates(JNIEnv *env,
       return 0;
    }
 
-   int n_verts = 1 + ctx->latest_v->index;
-   int n_tris_copy = ctx->n_tris;
+   //int n_verts = 1 + ctx->latest_v->index;
+   //int n_tris_copy = ctx->n_tris;
 
    int cnt = 0;
    for (; ctx->latest_v && cnt < length; cnt += 2) {
@@ -303,6 +344,33 @@ jint Java_org_oscim_renderer_sublayers_MeshLayer_tessGetCoordinates(JNIEnv *env,
    return cnt;
 }
 
+jint Java_org_oscim_renderer_sublayers_MeshLayer_tessGetCoordinatesD(JNIEnv *env, jclass c,
+      jlong ptr_context, jdoubleArray obj_coords) {
+
+   TessContext *ctx = CAST_CTX(ptr_context);
+
+   int length = (*env)->GetArrayLength(env, obj_coords);
+
+   jdouble* coords = (jdouble*) (*env)->GetPrimitiveArrayCritical(env, obj_coords, 0);
+   if (coords == NULL) {
+      return 0;
+   }
+
+   //int n_verts = 1 + ctx->latest_v->index;
+   //int n_tris_copy = ctx->n_tris;
+
+   int cnt = 0;
+   for (; ctx->latest_v && cnt < length; cnt += 2) {
+      coords[cnt + 0] = ctx->latest_v->pt[0];
+      coords[cnt + 1] = ctx->latest_v->pt[1];
+      Vertex *prev = ctx->latest_v->prev;
+      free(ctx->latest_v);
+      ctx->latest_v = prev;
+   }
+   (*env)->ReleasePrimitiveArrayCritical(env, obj_coords, coords, JNI_ABORT);
+
+   return cnt;
+}
 jint Java_org_oscim_renderer_sublayers_MeshLayer_tessGetIndices(JNIEnv *env, jclass c,
       jlong ptr_context, jshortArray obj_indices) {
 
@@ -371,6 +439,51 @@ jlong Java_org_oscim_renderer_sublayers_MeshLayer_tessellate(JNIEnv *env, jclass
    int nverts, ntris;
 
    TessContext *ctx = tessellate(&nverts, &ntris,
+         rings, rings + (num_rings + 1));
+
+   free(rings);
+
+   (*env)->ReleasePrimitiveArrayCritical(env, obj_index, orig_indices, JNI_ABORT);
+   (*env)->ReleasePrimitiveArrayCritical(env, obj_points, orig_points, JNI_ABORT);
+
+   return (long) ctx;
+}
+
+
+jlong Java_org_oscim_renderer_sublayers_MeshLayer_tessellateD(JNIEnv *env, jclass c,
+      jdoubleArray obj_points, jint pos,
+      jshortArray obj_index, jint ipos,
+      jint num_rings) { //, jintArray obj_out) {
+
+   jboolean isCopy;
+
+   printf("add %d %d %d\n", pos, ipos, num_rings);
+
+   double* orig_points = (double*) (*env)->GetPrimitiveArrayCritical(env, obj_points, &isCopy);
+   if (orig_points == NULL)
+      return 0;
+
+   const double *points = orig_points + pos;
+
+   jshort* orig_indices = (jshort*) (*env)->GetPrimitiveArrayCritical(env, obj_index, &isCopy);
+   if (orig_indices == NULL) {
+      (*env)->ReleasePrimitiveArrayCritical(env, obj_points, orig_points, JNI_ABORT);
+      return 0;
+   }
+
+   jshort* indices = orig_indices + ipos;
+
+   const double **rings = malloc(sizeof(double*) * (num_rings + 1));
+   int offset = 0;
+   for (int i = 0; i < num_rings; i++) {
+      rings[i] = points + offset;
+      offset += indices[i];
+   }
+   rings[num_rings] = points + offset;
+
+   int nverts, ntris;
+
+   TessContext *ctx = tessellateD(&nverts, &ntris,
          rings, rings + (num_rings + 1));
 
    free(rings);

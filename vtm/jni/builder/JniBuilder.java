@@ -1,4 +1,3 @@
-package org.oscim.jni;
 
 
 import com.badlogic.gdx.jnigen.AntScriptGenerator;
@@ -9,8 +8,28 @@ import com.badlogic.gdx.jnigen.BuildTarget.TargetOs;
 public class JniBuilder {
 	public static void main(String[] args) {
 		String[] headers = { "." };
-		String[] sources = { "gl/utils.c", "triangle/TriangleJni.c", "triangle/triangle.c", "triangle/triangle_dbg.c"  };
-		String cflags = " -Wall -std=c99 -O2 -DTRILIBRARY -DREDUCED -DCDT_ONLY -DNO_TIMER"; // -Werror";
+		String[] sources = {
+				// Matrix stuff
+				"gl/utils.c",
+				// Triangle
+				"triangle/TriangleJni.c",
+				"triangle/triangle.c",
+				"triangle/triangle_dbg.c",
+				// libtessellate
+				"tessellate/dict.c",
+				"tessellate/mesh.c",
+				"tessellate/render.c",
+				"tessellate/tess.c",
+				"tessellate/geom.c",
+				"tessellate/memalloc.c",
+				"tessellate/normal.c",
+				"tessellate/priorityq.c",
+				"tessellate/sweep.c",
+				"tessellate/tessmono.c",
+				"tessellate/tessellate.c"
+				};
+
+		String cflags = " -Wall -std=c99 -O2 -ffast-math -DTRILIBRARY -DREDUCED -DCDT_ONLY -DNO_TIMER";
 
 		BuildTarget win32home = BuildTarget.newDefaultTarget(TargetOs.Windows,
 				false);
@@ -73,8 +92,13 @@ public class JniBuilder {
 		new AntScriptGenerator().generate(new BuildConfig("vtm-jni"),
 				//win32home, win32, win64, lin32,
 				lin64, android);
+
 //		BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v clean");
 //		BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v");
 //		BuildExecutor.executeAnt("jni/build.xml", "pack-natives -v");
+
+
+
+
 	}
 }
