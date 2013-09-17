@@ -23,8 +23,7 @@ import org.oscim.layers.Layer;
 import org.oscim.renderer.LayerRenderer;
 
 public class Layers extends AbstractList<Layer> {
-	private final static String TAG = Layers.class.getName();
-	private final static boolean debugInput = false;
+	//private final static String TAG = Layers.class.getName();
 
 	private final CopyOnWriteArrayList<Layer> mLayerList;
 
@@ -69,14 +68,6 @@ public class Layers extends AbstractList<Layer> {
 
 		return mLayerRenderer;
 	}
-//
-//	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-//		if (mDirtyLayers)
-//			updateLayers();
-//
-//		for (Layer l : mLayers)
-//			l.onUpdate(mapPosition, changed, clear);
-//	}
 
 	public void destroy() {
 		if (mDirtyLayers)
@@ -87,7 +78,6 @@ public class Layers extends AbstractList<Layer> {
 	}
 
 	Layer[] mLayers;
-//	InputLayer[] mInputLayer;
 
 	private synchronized void updateLayers() {
 		if (!mDirtyLayers)
@@ -96,228 +86,24 @@ public class Layers extends AbstractList<Layer> {
 		mLayers = new Layer[mLayerList.size()];
 
 		int numRenderLayers = 0;
-		int numInputLayers = 0;
 
 		for (int i = 0, n = mLayerList.size(); i < n; i++) {
 			Layer o = mLayerList.get(i);
 
 			if (o.getRenderer() != null)
 				numRenderLayers++;
-
-//			if (o instanceof InputLayer)
-//				numInputLayers++;
-
 			mLayers[i] = o;
 		}
 
 		mLayerRenderer = new LayerRenderer[numRenderLayers];
-//		mInputLayer = new InputLayer[numInputLayers];
 
-		for (int i = 0, cntR = 0, cntI = 1, n = mLayerList.size(); i < n; i++) {
+		for (int i = 0, cntR = 0, n = mLayerList.size(); i < n; i++) {
 			Layer o = mLayerList.get(i);
 			LayerRenderer l = o.getRenderer();
 			if (l != null)
 				mLayerRenderer[cntR++] = l;
-
-//			if (o instanceof InputLayer) {
-//				// sort from top to bottom, so that highest layers
-//				// process event first.
-//				mInputLayer[numInputLayers - cntI] = (InputLayer) o;
-//				cntI++;
-//			}
 		}
 
 		mDirtyLayers = false;
 	}
-
-	//private boolean mCancelGesture;
-
-//public boolean handleMotionEvent(MotionEvent e) {
-//	//boolean handleGesture = true;
-//
-//	//if (mCancelGesture) {
-//	//	int action = e.getAction();
-//	//	handleGesture = (action == MotionEvent.ACTION_CANCEL ||
-//	//			action == MotionEvent.ACTION_UP);
-//	//}
-//
-//	//if (handleGesture) {
-//	//	if (mGestureDetector.onTouchEvent(e))
-//	//		return true;
-//	//
-//	//	mCancelGesture = false;
-//	//}
-//
-//	if (onTouchEvent(e))
-//		return true;
-//
-//	return false;
-//}
-
-	///**
-	// * Call this to not foward events to generic GestureDetector until
-	// * next ACTION_UP or ACTION_CANCEL event. - Use with care for the
-	// * case that an InputLayer recognized the start of its gesture and
-	// * does further processing in only onTouch callback.
-	// */
-	//public void cancelGesture() {
-	//	mCancelGesture = true;
-	//}
-
-//public boolean onTouchEvent(MotionEvent event) {
-//	if (mDirtyLayers)
-//		updateLayers();
-//
-//	for (InputLayer o : mInputLayer) {
-//		if (o.onTouchEvent(event)) {
-//			if (debugInput)
-//				Log.d(TAG, "onTouch\t\t" + o.getClass());
-//			return true;
-//		}
-//	}
-//	return false;
-//}
-//
-//public boolean onKeyDown(int keyCode, KeyEvent event) {
-//	if (mDirtyLayers)
-//		updateLayers();
-//
-//	for (InputLayer o : mInputLayer)
-//		if (o.onKeyDown(keyCode, event))
-//			return true;
-//
-//	return false;
-//}
-//
-//public boolean onKeyUp(int keyCode, KeyEvent event) {
-//	if (mDirtyLayers)
-//		updateLayers();
-//
-//	for (InputLayer o : mInputLayer)
-//		if (o.onKeyUp(keyCode, event))
-//			return true;
-//
-//	return false;
-//}
-//
-//public boolean onTrackballEvent(MotionEvent event) {
-//	if (mDirtyLayers)
-//		updateLayers();
-//
-//	for (InputLayer o : mInputLayer)
-//		if (o.onTrackballEvent(event))
-//			return true;
-//
-//	return false;
-//}
-
-	//	/* GestureDetector.OnDoubleTapListener */
-	//
-	//	public boolean onDoubleTap(MotionEvent e) {
-	//
-	//		if (mDirtyLayers)
-	//			updateLayers();
-	//
-	//		for (InputLayer o : mInputLayer) {
-	//			if (o.onDoubleTap(e)) {
-	//				if (debugInput)
-	//					Log.d(TAG, "onDoubleTap\t" + o.getClass());
-	//				return true;
-	//			}
-	//		}
-	//		return false;
-	//	}
-	//
-	//	public boolean onDoubleTapEvent(MotionEvent e) {
-	//		if (mDirtyLayers)
-	//			updateLayers();
-	//
-	//		for (InputLayer o : mInputLayer) {
-	//			if (o.onDoubleTapEvent(e)) {
-	//				if (debugInput)
-	//					Log.d(TAG, "onDoubleTapEvent\t" + o.getClass());
-	//				return true;
-	//			}
-	//		}
-	//		return false;
-	//	}
-	//
-	//	public boolean onSingleTapConfirmed(MotionEvent e) {
-	//		if (mDirtyLayers)
-	//			updateLayers();
-	//
-	//		for (InputLayer o : mInputLayer) {
-	//			if (o.onSingleTapConfirmed(e)) {
-	//				if (debugInput)
-	//					Log.d(TAG, "onSingleTapConfirmed\tt" + o.getClass());
-	//				return true;
-	//			}
-	//		}
-	//		return false;
-	//	}
-	//
-	//	/* OnGestureListener */
-	//	public boolean onDown(MotionEvent e) {
-	//		if (mDirtyLayers)
-	//			updateLayers();
-	//
-	//		for (InputLayer o : mInputLayer) {
-	//			if (o.onDown(e)) {
-	//				if (debugInput)
-	//					Log.d(TAG, "onDown\t" + o.getClass());
-	//				return true;
-	//			}
-	//		}
-	//		return false;
-	//	}
-	//
-	//	public void onLongPress(MotionEvent e) {
-	//		if (mCancelGesture)
-	//			return;
-	//
-	//		if (mDirtyLayers)
-	//			updateLayers();
-	//
-	//		for (InputLayer o : mInputLayer)
-	//			if (o.onLongPress(e))
-	//				return;
-	//	}
-	//
-	//	public boolean onScroll(MotionEvent e1, MotionEvent e2,
-	//			float dx, float dy) {
-	//		if (mDirtyLayers)
-	//			updateLayers();
-	//
-	//		for (InputLayer o : mInputLayer) {
-	//			if (o.onScroll(e1, e2, dx, dy)) {
-	//				if (debugInput)
-	//					Log.d(TAG, "onScroll\t" + o.getClass());
-	//				return true;
-	//			}
-	//		}
-	//		return false;
-	//	}
-	//
-	//	public void onShowPress(MotionEvent e) {
-	//		if (mDirtyLayers)
-	//			updateLayers();
-	//
-	//		for (InputLayer o : mInputLayer)
-	//			o.onShowPress(e);
-	//
-	//	}
-	//
-	//	public boolean onSingleTapUp(MotionEvent e) {
-	//		if (mDirtyLayers)
-	//			updateLayers();
-	//
-	//		for (InputLayer o : mInputLayer) {
-	//			if (o.onSingleTapUp(e)) {
-	//				if (debugInput)
-	//					Log.d(TAG, "onSingleTapUp\t" + o.getClass());
-	//				return true;
-	//			}
-	//		}
-	//		return false;
-	//	}
 }
