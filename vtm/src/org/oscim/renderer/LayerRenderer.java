@@ -39,6 +39,10 @@ public abstract class LayerRenderer {
 		isReady = ready;
 	}
 
+	protected boolean isReady() {
+		return isReady;
+	}
+
 	public LayerRenderer() {
 		mMapPosition = new MapPosition();
 	}
