@@ -16,10 +16,6 @@ package org.oscim.utils;
 
 import org.oscim.core.Point;
 
-
-/**
- * @author Hannes Janetzek
- */
 public final class GeometryUtils {
 	/**
 	 * Calculates the center of the minimum bounding rectangle for the given

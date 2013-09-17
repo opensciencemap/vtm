@@ -60,7 +60,7 @@ public class AwtPaint implements Paint {
 
 	private int cap;
 	private float strokeWidth;
-	private Align mAlign;
+	//private Align mAlign;
 
 	@Override
 	public int getColor() {
@@ -121,7 +121,7 @@ public class AwtPaint implements Paint {
 
 	@Override
 	public void setTextAlign(Align align) {
-		mAlign = align;
+		//mAlign = align;
 	}
 
 	@Override

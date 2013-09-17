@@ -22,7 +22,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  * Allows asnynchronous execution of {@link AsyncTask} instances on a separate thread.
  * Needs to be disposed via a call to {@link #dispose()} when no longer used, in which
@@ -82,7 +81,6 @@ public class AsyncExecutor {
 	 * then destroys any resources like threads. Can not be used
 	 * after this method is called.
 	 */
-	//@Override
 	public void dispose () {
 		executor.shutdown();
 		try {

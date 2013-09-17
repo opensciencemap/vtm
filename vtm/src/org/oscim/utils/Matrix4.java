@@ -21,53 +21,12 @@ import java.nio.FloatBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 
-
 public class Matrix4 {
 
 	private static final GL20 GL = GLAdapter.get();
 
 	private final static String TAG = Matrix4.class.getName();
 	private final static boolean dbg = false;
-
-	private native static long alloc();
-
-	private native static void delete(long self);
-
-	private native static void set(long self, float[] m);
-
-	private native static void copy(long self, long other);
-
-	private native static void identity(long self);
-
-	private native static void get(long self, float[] m);
-
-	private native static void mul(long self, long lhs_ptr);
-
-	private native static void smul(long self, long rhs_ptr, long lhs_ptr);
-
-	private native static void smulrhs(long self, long rhs_ptr);
-
-	private native static void smullhs(long self, long lhs_ptr);
-
-	private native static void strans(long self, long rhs_ptr);
-
-	private native static void prj(long self, float[] vec3);
-
-	private native static void setRotation(long self, float a, float x, float y, float z);
-
-	private native static void setScale(long self, float x, float y, float z);
-
-	private native static void setTranslation(long self, float x, float y, float z);
-
-	private native static void setTransScale(long self, float tx, float ty, float scale);
-
-	//private native static void setAsUniform(long self, int handle);
-
-	private native static void setValueAt(long self, int pos, float value);
-
-	private native static void addDepthOffset(long self, int delta);
-
-	private native static ByteBuffer getBuffer(long self);
 
 	private final long pointer;
 	private final FloatBuffer buffer;
@@ -247,6 +206,9 @@ public class Matrix4 {
 		identity(pointer);
 	}
 
+	/**
+	 * Free native object
+	 * */
 	@Override
 	public void finalize() {
 		if (pointer != 0)
@@ -452,4 +414,43 @@ public class Matrix4 {
         return true;
     }
 
+    private native static long alloc();
+
+	private native static void delete(long self);
+
+	private native static void set(long self, float[] m);
+
+	private native static void copy(long self, long other);
+
+	private native static void identity(long self);
+
+	private native static void get(long self, float[] m);
+
+	private native static void mul(long self, long lhs_ptr);
+
+	private native static void smul(long self, long rhs_ptr, long lhs_ptr);
+
+	private native static void smulrhs(long self, long rhs_ptr);
+
+	private native static void smullhs(long self, long lhs_ptr);
+
+	private native static void strans(long self, long rhs_ptr);
+
+	private native static void prj(long self, float[] vec3);
+
+	private native static void setRotation(long self, float a, float x, float y, float z);
+
+	private native static void setScale(long self, float x, float y, float z);
+
+	private native static void setTranslation(long self, float x, float y, float z);
+
+	private native static void setTransScale(long self, float tx, float ty, float scale);
+
+	//private native static void setAsUniform(long self, int handle);
+
+	private native static void setValueAt(long self, int pos, float value);
+
+	private native static void addDepthOffset(long self, int delta);
+
+	private native static ByteBuffer getBuffer(long self);
 }

@@ -16,7 +16,7 @@ public class GwtPaint implements Paint {
 	float fontSize = 12;
 
 	private FontStyle fontStyle = FontStyle.NORMAL;
-	private FontFamily fontFamily = FontFamily.DEFAULT;
+	//private FontFamily fontFamily = FontFamily.DEFAULT;
 
 	//String font = "12px sans-serif";
 	String font = "13px Helvetica";
@@ -85,7 +85,7 @@ public class GwtPaint implements Paint {
 	@Override
 	public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
 		this.fontStyle = fontStyle;
-		this.fontFamily = fontFamily;
+		//this.fontFamily = fontFamily;
 		buildFont();
 	}
 

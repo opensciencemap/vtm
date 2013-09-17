@@ -2,7 +2,6 @@ package org.oscim.utils.async;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.Timer;
 
 /**
  * GWT emulation of AsynchExecutor, will call tasks immediately :D
@@ -26,7 +25,7 @@ public class AsyncExecutor implements Disposable {
 	 * will be queued.
 	 * @param task the task to execute asynchronously
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> AsyncResult<T> submit(final AsyncTask<T> task) {
 
 		T result = null;
@@ -37,6 +36,9 @@ public class AsyncExecutor implements Disposable {
 		} catch(Throwable t) {
 			error = true;
 		}
+		if (error)
+			return null;
+
 		return new AsyncResult(result);
 	}
 
