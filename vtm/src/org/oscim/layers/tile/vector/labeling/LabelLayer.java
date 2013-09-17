@@ -15,15 +15,15 @@
 package org.oscim.layers.tile.vector.labeling;
 
 import org.oscim.backend.Log;
+import org.oscim.core.MapPosition;
 import org.oscim.event.EventListener;
 import org.oscim.event.MapEvent;
 import org.oscim.event.MotionEvent;
-import org.oscim.event.UpdateEvent;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.tiling.TileRenderer;
 
-public class LabelLayer extends Layer implements EventListener {
+public class LabelLayer extends Layer implements EventListener, Map.UpdateListener {
 	private final static String TAG = LabelLayer.class.getName();
 	private final TextRenderer mTextRenderer;
 
@@ -31,7 +31,7 @@ public class LabelLayer extends Layer implements EventListener {
 
 	public LabelLayer(Map map, TileRenderer tileRenderLayer) {
 		super(map);
-		map.addListener(UpdateEvent.TYPE, this);
+
 		map.addListener(MotionEvent.TYPE, this);
 
 		//mTextLayer = new org.oscim.renderer.layers.TextRenderLayer(map, tileRenderLayer);
@@ -41,7 +41,6 @@ public class LabelLayer extends Layer implements EventListener {
 
 	@Override
 	public void onDetach() {
-		mMap.removeListener(UpdateEvent.TYPE, this);
 		mMap.removeListener(MotionEvent.TYPE, this);
 
 		// TODO stop and clear labeling thread
@@ -50,13 +49,7 @@ public class LabelLayer extends Layer implements EventListener {
 
 	@Override
 	public void handleEvent(MapEvent event) {
-		if (event instanceof UpdateEvent) {
-
-			UpdateEvent e = (UpdateEvent) event;
-			if (e.clearMap)
-				mTextRenderer.clearLabels();
-
-		} else if (event instanceof MotionEvent) {
+		 if (event instanceof MotionEvent) {
 			MotionEvent e = (MotionEvent) event;
 
 			int action = e.getAction() & MotionEvent.ACTION_MASK;
@@ -75,11 +68,11 @@ public class LabelLayer extends Layer implements EventListener {
 		}
 	}
 
-	//	@Override
-	//	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-	//		if (clear)
-	//			mTextRenderer.clearLabels();
-	//	}
+		@Override
+		public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+			if (clear)
+				mTextRenderer.clearLabels();
+		}
 
 	//	@Override
 	//	public boolean onTouchEvent(MotionEvent e) {

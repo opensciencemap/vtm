@@ -82,6 +82,33 @@ public abstract class GdxMap implements ApplicationListener {
 				}, delay / 1000f);
 				return true;
 			}
+
+			/**
+			 * Update all Layers on Main thread.
+			 *
+			 * @param forceRedraw
+			 *            also render frame FIXME (does nothing atm)
+			 */
+			private void redrawMapInternal(boolean forceRedraw) {
+				// FIXME needed?
+				GLState.blend(false);
+				GLState.test(false, false);
+
+				updateLayers();
+
+				mRenderRequest = true;
+				Gdx.graphics.requestRendering();
+			}
+
+			/* private */boolean mWaitRedraw;
+			private final Runnable mRedrawRequest = new Runnable() {
+				@Override
+				public void run() {
+					mWaitRedraw = false;
+					redrawMapInternal(false);
+				}
+			};
+
 		};
 
 		mMapRenderer = new MapRenderer(mMap);
@@ -200,30 +227,6 @@ public abstract class GdxMap implements ApplicationListener {
 	public void resume() {
 	}
 
-	/**
-	 * Update all Layers on Main thread.
-	 *
-	 * @param forceRedraw
-	 *            also render frame FIXME (does nothing atm)
-	 */
-	void redrawMapInternal(boolean forceRedraw) {
-		GLState.blend(false);
-		GLState.test(false, false);
-
-		mMap.updateLayers();
-
-		mRenderRequest = true;
-		Gdx.graphics.requestRendering();
-	}
-
-	/* private */boolean mWaitRedraw;
-	private final Runnable mRedrawRequest = new Runnable() {
-		@Override
-		public void run() {
-			mWaitRedraw = false;
-			redrawMapInternal(false);
-		}
-	};
 
 	class TouchHandler implements InputProcessor {
 

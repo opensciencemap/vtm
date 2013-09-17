@@ -14,20 +14,24 @@
  */
 package org.oscim.map;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.oscim.backend.Log;
 import org.oscim.core.BoundingBox;
-import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
+import org.oscim.core.MercatorProjection;
+import org.oscim.event.Dispatcher;
 import org.oscim.event.EventDispatcher;
 import org.oscim.event.EventListener;
+import org.oscim.event.IListener;
 import org.oscim.event.MotionEvent;
-import org.oscim.event.UpdateEvent;
+import org.oscim.layers.Layer;
 import org.oscim.layers.MapEventLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.layers.tile.vector.VectorTileLoader;
+import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
@@ -94,16 +98,21 @@ public abstract class Map implements EventDispatcher {
 
 	private InternalRenderTheme mCurrentTheme;
 
+	/**
+	 * Utility function to set theme of base vector-layer and
+	 * use map background color from theme.
+	 */
 	public void setTheme(InternalRenderTheme theme) {
 		if (mBaseLayer == null) {
 			Log.e(TAG, "No base layer set");
 			throw new IllegalStateException();
 		}
 
-		if (mCurrentTheme == theme){
+		if (mCurrentTheme == theme) {
 			Log.d(TAG, "same theme: " + theme);
 			return;
 		}
+
 		IRenderTheme t = ThemeLoader.load(theme);
 		if (t == null) {
 			Log.e(TAG, "Invalid theme");
@@ -126,7 +135,7 @@ public abstract class Map implements EventDispatcher {
 	 * Request call to onUpdate for all layers. This function can
 	 * be called from any thread. Request will be handled on main
 	 * thread.
-	 *
+	 * 
 	 * @param forceRedraw pass true to render next frame
 	 */
 	public abstract void updateMap(boolean forceRedraw);
@@ -151,15 +160,20 @@ public abstract class Map implements EventDispatcher {
 	/**
 	 * Post a task to run on a shared worker-thread. Only use for
 	 * tasks running less than a second!
-	 * */
-	public void addTask(Runnable task){
+	 */
+	public void addTask(Runnable task) {
 		mAsyncExecutor.post(task);
 	}
 
+	/**
+	 * Return screen width in pixel.
+	 */
 	public abstract int getWidth();
 
+	/**
+	 * Return screen height in pixel.
+	 */
 	public abstract int getHeight();
-
 
 	/**
 	 * Request to clear all layers before rendering next frame
@@ -169,27 +183,9 @@ public abstract class Map implements EventDispatcher {
 	}
 
 	/**
-	 * Do not call directly! This function is run on main-loop
-	 * before rendering a frame.
+	 * This function is run on main-loop before rendering a frame.
+	 * Caution: Do not call directly!
 	 */
-	public void updateLayers() {
-		boolean changed = false;
-
-		// get the current MapPosition
-		changed |= mViewport.getMapPosition(mMapPosition);
-
-		//mLayers.onUpdate(mMapPosition, changed, mClearMap);
-
-		UpdateEvent e = new UpdateEvent(this);
-		e.clearMap = mClearMap;
-		e.positionChanged = changed;
-
-		for (EventListener l : mUpdateListeners)
-			l.handleEvent(e);
-
-		mClearMap = false;
-	}
-
 	public void setDebugSettings(DebugSettings debugSettings) {
 		mDebugSettings = debugSettings;
 		//MapTileLoader.setDebugSettings(debugSettings);
@@ -197,6 +193,9 @@ public abstract class Map implements EventDispatcher {
 
 	public DebugSettings getDebugSettings() {
 		return mDebugSettings;
+
+	protected void updateLayers() {
+		mUpdateDispatcher.dispatch();
 	}
 
 	public void setMapPosition(MapPosition mapPosition) {
@@ -242,32 +241,169 @@ public abstract class Map implements EventDispatcher {
 		return mAnimator;
 	}
 
-
-	ArrayList<EventListener> mUpdateListeners = new ArrayList<EventListener>();
 	ArrayList<EventListener> mMotionListeners = new ArrayList<EventListener>();
 
 	@Override
 	public void addListener(String type, EventListener listener) {
-		if (type == UpdateEvent.TYPE)
-			mUpdateListeners.add(listener);
-		else if (type == MotionEvent.TYPE)
+		if (type == MotionEvent.TYPE)
 			mMotionListeners.add(listener);
-
 	}
+
 	@Override
 	public void removeListener(String type, EventListener listener) {
-		if (type == UpdateEvent.TYPE)
-			mUpdateListeners.remove(listener);
-		else if (type == MotionEvent.TYPE)
+		if (type == MotionEvent.TYPE)
 			mMotionListeners.remove(listener);
-	}
-
-	public MapPosition getMapPosition() {
-		return mMapPosition;
 	}
 
 	public void handleMotionEvent(MotionEvent e) {
 		for (EventListener l : mMotionListeners)
 			l.handleEvent(e);
+	}
+
+	/**
+	 * Listener interface for map update notifications. 
+	 * 
+	 * NOTE: Layers implementing this interface they will be automatically 
+	 * registered when the layer is added to the map and unresitered when
+	 * the layer is removed.
+	 */
+	public interface UpdateListener extends IListener {
+		void onMapUpdate(MapPosition mapPosition, boolean positionChanged, boolean clear);
+	}
+
+	private class UpdateDispatcher extends Dispatcher<UpdateListener> {
+		@Override
+		public void dispatch() {
+			boolean changed = false;
+
+			// get the current MapPosition
+			changed |= mViewport.getMapPosition(mMapPosition);
+
+			for (UpdateListener l : listeners)
+				l.onMapUpdate(mMapPosition, changed, mClearMap);
+
+			mClearMap = false;
+		}
+	}
+
+	private final UpdateDispatcher mUpdateDispatcher = new UpdateDispatcher();
+
+	/**
+	 * Register UpdateListener
+	 */
+	public void addUpdateListener(UpdateListener l) {
+		mUpdateDispatcher.addListener(l);
+	}
+
+	/**
+	 * Unregister UpdateListener
+	 */
+	public void removeUpdateListener(UpdateListener l) {
+		mUpdateDispatcher.removeListener(l);
+	}
+
+	public final class Layers extends AbstractList<Layer> {
+
+		private final CopyOnWriteArrayList<Layer> mLayerList;
+
+		Layers() {
+			mLayerList = new CopyOnWriteArrayList<Layer>();
+		}
+
+		@Override
+		public synchronized Layer get(int index) {
+			return mLayerList.get(index);
+		}
+
+		@Override
+		public synchronized int size() {
+			return mLayerList.size();
+		}
+
+		@Override
+		public synchronized void add(int index, Layer layer) {
+			if (mLayerList.contains(layer))
+				throw new IllegalArgumentException("layer added twice");
+
+			if (layer instanceof UpdateListener)
+				addUpdateListener((UpdateListener) layer);
+
+			mLayerList.add(index, layer);
+			mDirtyLayers = true;
+		}
+
+		@Override
+		public synchronized Layer remove(int index) {
+			mDirtyLayers = true;
+
+			Layer remove = mLayerList.remove(index);
+
+			if (remove instanceof UpdateListener)
+				removeUpdateListener((UpdateListener) remove);
+
+			return remove;
+		}
+
+		@Override
+		public synchronized Layer set(int index, Layer layer) {
+			if (mLayerList.contains(layer))
+				throw new IllegalArgumentException("layer added twice");
+
+			mDirtyLayers = true;
+			Layer remove = mLayerList.set(index, layer);
+
+			if (remove instanceof UpdateListener)
+				removeUpdateListener((UpdateListener) remove);
+
+			return remove;
+		}
+
+		private boolean mDirtyLayers;
+		private LayerRenderer[] mLayerRenderer;
+
+		public LayerRenderer[] getLayerRenderer() {
+			if (mDirtyLayers)
+				updateLayers();
+
+			return mLayerRenderer;
+		}
+
+		public void destroy() {
+			if (mDirtyLayers)
+				updateLayers();
+
+			for (Layer o : mLayers)
+				o.onDetach();
+		}
+
+		Layer[] mLayers;
+
+		private synchronized void updateLayers() {
+			if (!mDirtyLayers)
+				return;
+
+			mLayers = new Layer[mLayerList.size()];
+
+			int numRenderLayers = 0;
+
+			for (int i = 0, n = mLayerList.size(); i < n; i++) {
+				Layer o = mLayerList.get(i);
+
+				if (o.getRenderer() != null)
+					numRenderLayers++;
+				mLayers[i] = o;
+			}
+
+			mLayerRenderer = new LayerRenderer[numRenderLayers];
+
+			for (int i = 0, cntR = 0, n = mLayerList.size(); i < n; i++) {
+				Layer o = mLayerList.get(i);
+				LayerRenderer l = o.getRenderer();
+				if (l != null)
+					mLayerRenderer[cntR++] = l;
+			}
+
+			mDirtyLayers = false;
+		}
 	}
 }
