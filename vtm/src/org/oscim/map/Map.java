@@ -208,14 +208,18 @@ public abstract class Map implements EventDispatcher {
 	}
 
 	/**
-	 * Sets the center of the MapView and triggers a redraw.
-	 *
-	 * @param geoPoint
-	 *            the new center point of the map.
+	 * Set center of the map viewport and trigger a redraw.
+	 * 
+	 * @param latitude
+	 * @param longitude
 	 */
-	public void setCenter(GeoPoint geoPoint) {
+	public void setMapCenter(double latitude, double longitude) {
+		latitude = MercatorProjection.limitLatitude(latitude);
+		longitude = MercatorProjection.limitLongitude(longitude);
+		mViewport.setPos(
+				MercatorProjection.longitudeToX(longitude),
+				MercatorProjection.latitudeToY(latitude));
 
-		mViewport.setMapCenter(geoPoint);
 		updateMap(true);
 	}
 

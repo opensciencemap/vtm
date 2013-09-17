@@ -1,5 +1,4 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2012 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -25,6 +24,13 @@ import org.oscim.core.Tile;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.Matrix4;
 
+/**
+ * The Viewport class contains a MapPosition and the projection matrices.
+ * It provides functions to modify the MapPosition and translate between
+ * map and screen coordinates.
+ * <p>
+ * Public methods are thread safe.
+ */
 public class Viewport {
 	//private static final String TAG = Viewport.class.getName();
 
@@ -63,16 +69,14 @@ public class Viewport {
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
 	Viewport(Map map) {
-
-		mPos.scale = 4;
+		mPos.scale = MIN_SCALE;
 		mPos.x = 0.5;
 		mPos.y = 0.5;
-
 		mPos.angle = 0;
 		mPos.tilt = 0;
 	}
 
-	public void setViewport(int width, int height) {
+	public synchronized void setViewport(int width, int height) {
 		float s = VIEW_SCALE;
 		float aspect = height / (float) width;
 		float[] tmp = new float[16];
@@ -95,19 +99,16 @@ public class Viewport {
 	}
 
 	/**
-	 * Get the current MapPosition
-	 *
-	 * @param pos MapPosition object to be updated
-	 * @return true if current position is different from 'pos'.
+	 * Get the current MapPosition.
+	 * 
+	 * @param pos MapPosition to be updated.
+	 * @return true if current position is different from pos.
 	 */
 	public synchronized boolean getMapPosition(MapPosition pos) {
 
-		int z = FastMath.log2((int) mPos.scale);
-
-		boolean changed = (pos.zoomLevel != z
+		boolean changed = (pos.scale != mPos.scale
 				|| pos.x != mPos.x
 				|| pos.y != mPos.y
-				|| pos.scale != mPos.scale
 				|| pos.angle != mPos.angle
 				|| pos.tilt != mPos.tilt);
 
@@ -117,16 +118,14 @@ public class Viewport {
 		pos.x = mPos.x;
 		pos.y = mPos.y;
 		pos.scale = mPos.scale;
-
-		// handy for tiling
-		pos.zoomLevel = z;
+		pos.zoomLevel = FastMath.log2((int) mPos.scale);
 
 		return changed;
 	}
 
 	/**
 	 * Get a copy of current matrices
-	 *
+	 * 
 	 * @param view view Matrix
 	 * @param proj projection Matrix
 	 * @param vp view and projection
@@ -146,12 +145,12 @@ public class Viewport {
 	 * Get the inverse projection of the viewport, i.e. the
 	 * coordinates with z==0 that will be projected exactly
 	 * to screen corners by current view-projection-matrix.
-	 *
+	 * 
 	 * @param box float[8] will be set.
 	 */
 	public synchronized void getMapViewProjection(float[] box) {
-		float t = getZ(1);
-		float t2 = getZ(-1);
+		float t = getDepth(1);
+		float t2 = getDepth(-1);
 
 		// top-right
 		unproject(1, -1, t, box, 0);
@@ -168,7 +167,7 @@ public class Viewport {
 	 * calculate the intersection of a ray from camera origin
 	 * and the map plane
 	 */
-	private float getZ(float y) {
+	private float getDepth(float y) {
 		if (y == 0)
 			return 0;
 
@@ -209,16 +208,10 @@ public class Viewport {
 		coords[position + 1] = mv[1];
 	}
 
-	/** @return the current center point of the MapView. */
-	public synchronized GeoPoint getMapCenter() {
-		return new GeoPoint(MercatorProjection.toLatitude(mPos.y),
-				MercatorProjection.toLongitude(mPos.x));
-	}
-
 	/**
 	 * Get the minimal axis-aligned BoundingBox that encloses
 	 * the visible part of the map.
-	 *
+	 * 
 	 * @return BoundingBox containing view
 	 */
 	public synchronized BoundingBox getViewBox() {
@@ -267,41 +260,40 @@ public class Viewport {
 		box.maxY = (cy + box.maxY) / cs;
 	}
 
-	/**
-	 * For x, y in screen coordinates set Point to map-tile
-	 * coordinates at returned scale.
-	 *
-	 * @param x screen coordinate
-	 * @param y screen coordinate
-	 * @param out Point coords will be set
-	 */
-	public synchronized void getScreenPointOnMap(float x, float y, double scale, Point out) {
-
-		// scale to -1..1
-		float mx = 1 - (x / mWidth * 2);
-		float my = 1 - (y / mHeight * 2);
-
-		unproject(-mx, my, getZ(-my), mu, 0);
-
-		out.x = mu[0];
-		out.y = mu[1];
-
-		if (scale != 0) {
-			out.x *= scale / mPos.scale;
-			out.y *= scale / mPos.scale;
-		}
-	}
+	//	/**
+	//	 * For x, y in screen coordinates set Point to map-tile
+	//	 * coordinates at returned scale.
+	//	 *
+	//	 * @param x screen coordinate
+	//	 * @param y screen coordinate
+	//	 * @param out Point coords will be set
+	//	 */
+	//	public synchronized void getScreenPointOnMap(float x, float y, double scale, Point out) {
+	//
+	//		// scale to -1..1
+	//		float mx = 1 - (x / mWidth * 2);
+	//		float my = 1 - (y / mHeight * 2);
+	//
+	//		unproject(-mx, my, getDepth(-my), mu, 0);
+	//
+	//		out.x = mu[0];
+	//		out.y = mu[1];
+	//
+	//		if (scale != 0) {
+	//			out.x *= scale / mPos.scale;
+	//			out.y *= scale / mPos.scale;
+	//		}
+	//	}
 
 	/**
 	 * Get the GeoPoint for x,y in screen coordinates.
-	 *
-	 * @deprecated
+	 * 
 	 * @param x screen coordinate
 	 * @param y screen coordinate
 	 * @return the corresponding GeoPoint
 	 */
-	public synchronized GeoPoint fromScreenPixels(float x, float y) {
-		fromScreenPixels(x, y, mMovePoint);
+	public synchronized GeoPoint fromScreenPoint(float x, float y) {
+		fromScreenPoint(x, y, mMovePoint);
 		return new GeoPoint(
 				MercatorProjection.toLatitude(mMovePoint.y),
 				MercatorProjection.toLongitude(mMovePoint.x));
@@ -309,16 +301,16 @@ public class Viewport {
 
 	/**
 	 * Get the map position for x,y in screen coordinates.
-	 *
+	 * 
 	 * @param x screen coordinate
 	 * @param y screen coordinate
 	 */
-	public synchronized void fromScreenPixels(double x, double y, Point out) {
+	public synchronized void fromScreenPoint(double x, double y, Point out) {
 		// scale to -1..1
 		float mx = (float) (1 - (x / mWidth * 2));
 		float my = (float) (1 - (y / mHeight * 2));
 
-		unproject(-mx, my, getZ(-my), mu, 0);
+		unproject(-mx, my, getDepth(-my), mu, 0);
 
 		double cs = mPos.scale * Tile.SIZE;
 		double cx = mPos.x * cs;
@@ -349,24 +341,22 @@ public class Viewport {
 
 	/**
 	 * Get the screen pixel for a GeoPoint
-	 *
-	 * @deprecated
+	 * 
 	 * @param geoPoint the GeoPoint
 	 * @param out Point projected to screen pixel relative to center
 	 */
-	public synchronized void project(GeoPoint geoPoint, Point out) {
+	public synchronized void toScreenPoint(GeoPoint geoPoint, Point out) {
 		MercatorProjection.project(geoPoint, out);
-		project(out.x, out.y, out);
+		toScreenPoint(out.x, out.y, out);
 	}
 
 	/**
-	 * Get the screen pixel for map position
-	 *
-	 * @param out Point projected to screen pixel
+	 * Get the screen pixel for map coordinates
+	 * 
+	 * @param out Point projected to screen coordinate
 	 */
-	public synchronized void project(double x, double y, Point out) {
+	public synchronized void toScreenPoint(double x, double y, Point out) {
 
-		//updatePosition();
 		double cs = mPos.scale * Tile.SIZE;
 		double cx = mPos.x * cs;
 		double cy = mPos.y * cs;
@@ -384,19 +374,14 @@ public class Viewport {
 	}
 
 	private void updateMatrix() {
-		// --- view matrix
+		// - view matrix
 		// 1. scale to window coordinates
-		// 2. rotate
-		// 3. tilt
+		// 2. apply rotate
+		// 3. apply tilt
 
-		// --- projection matrix
+		// - projection matrix
 		// 4. translate to VIEW_DISTANCE
 		// 5. apply projection
-
-		while (mPos.angle > 360)
-			mPos.angle -= 360;
-		while (mPos.angle < 0)
-			mPos.angle += 360;
 
 		mRotMatrix.setRotation(mPos.angle, 0, 0, 1);
 
@@ -430,7 +415,7 @@ public class Viewport {
 
 	/**
 	 * Moves this Viewport by the given amount of pixels.
-	 *
+	 * 
 	 * @param mx the amount of pixels to move the map horizontally.
 	 * @param my the amount of pixels to move the map vertically.
 	 */
@@ -441,11 +426,13 @@ public class Viewport {
 		moveBy(p.x / tileScale, p.y / tileScale);
 	}
 
-	void moveInternal(double mx, double my){
+	/* used by MapAnimator */
+	void moveInternal(double mx, double my) {
 		Point p = applyRotation(mx, my);
 		moveBy(p.x, p.y);
 	}
 
+	/* used by MapAnimator */
 	void moveBy(double mx, double my) {
 		mPos.x -= mx;
 		mPos.y -= my;
@@ -475,9 +462,12 @@ public class Viewport {
 	}
 
 	/**
-	 * @param scale map by this factor
-	 * @param pivotX ...
-	 * @param pivotY ...
+	 * Scale map by scale width center at pivot in pixel relative to
+	 * screen center. Map scale is clamp to MIN_SCALE and MAX_SCALE.
+	 * 
+	 * @param scale
+	 * @param pivotX
+	 * @param pivotY
 	 * @return true if scale was changed
 	 */
 	public synchronized boolean scaleMap(float scale, float pivotX, float pivotY) {
@@ -505,11 +495,12 @@ public class Viewport {
 	}
 
 	/**
-	 * rotate map around pivot cx,cy
-	 *
-	 * @param radians ...
-	 * @param pivotX ...
-	 * @param pivotY ...
+	 * Rotate map by radians around pivot. Pivot is in pixel relative
+	 * to screen center.
+	 * 
+	 * @param radians
+	 * @param pivotX
+	 * @param pivotY
 	 */
 	public synchronized void rotateMap(double radians, float pivotX, float pivotY) {
 
@@ -521,14 +512,16 @@ public class Viewport {
 
 		moveMap(x, y);
 
-		mPos.angle += Math.toDegrees(radians);
-
-		updateMatrix();
+		setRotation(mPos.angle + Math.toDegrees(radians));
 	}
 
-	public synchronized void setRotation(float f) {
+	public synchronized void setRotation(double degree) {
+		while (degree > 360)
+			degree -= 360;
+		while (degree < 0)
+			degree += 360;
 
-		mPos.angle = f;
+		mPos.angle = (float) degree;
 		updateMatrix();
 	}
 
@@ -545,17 +538,6 @@ public class Viewport {
 		return true;
 	}
 
-	public synchronized float getTilt() {
-		return mPos.tilt;
-	}
-
-	private void setMapCenter(double latitude, double longitude) {
-		latitude = MercatorProjection.limitLatitude(latitude);
-		longitude = MercatorProjection.limitLongitude(longitude);
-		mPos.x = MercatorProjection.longitudeToX(longitude);
-		mPos.y = MercatorProjection.latitudeToY(latitude);
-	}
-
 	public synchronized void setMapPosition(MapPosition mapPosition) {
 		mPos.scale = FastMath.clamp(mapPosition.scale, MIN_SCALE, MAX_SCALE);
 		mPos.x = mapPosition.x;
@@ -565,7 +547,8 @@ public class Viewport {
 		updateMatrix();
 	}
 
-	synchronized void setMapCenter(GeoPoint geoPoint) {
-		setMapCenter(geoPoint.getLatitude(), geoPoint.getLongitude());
+	synchronized void setPos(double x, double y) {
+		mPos.x = x;
+		mPos.y = y;
 	}
 }

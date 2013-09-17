@@ -156,7 +156,6 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 	 *            ..
 	 * @return true if event is handled false otherwise
 	 */
-	@SuppressWarnings("deprecation")
 	private boolean activateSelectedItems(MotionEvent event, ActiveItem task) {
 		int size = mItemList.size();
 		if (size == 0)
@@ -178,7 +177,7 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 				continue;
 
 			// TODO use intermediate projection
-			mapPosition.project(item.getPoint(), mTmpPoint);
+			mapPosition.toScreenPoint(item.getPoint(), mTmpPoint);
 
 			float dx = (float) (mTmpPoint.x - eventX);
 			float dy = (float) (mTmpPoint.y - eventY);
