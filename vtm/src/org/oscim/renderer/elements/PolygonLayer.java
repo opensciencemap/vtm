@@ -22,6 +22,7 @@ import java.nio.ShortBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.MapRenderer;
@@ -44,6 +45,10 @@ public final class PolygonLayer extends RenderElement {
 		this.type = RenderElement.POLYGON;
 		curItem = VertexItem.pool.get();
 		vertexItems = curItem;
+	}
+
+	public void addPolygon(GeometryBuffer geom){
+		addPolygon(geom.points, geom.index);
 	}
 
 	public void addPolygon(float[] points, short[] index) {
