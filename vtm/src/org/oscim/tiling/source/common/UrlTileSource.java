@@ -17,19 +17,10 @@ package org.oscim.tiling.source.common;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.oscim.core.BoundingBox;
-import org.oscim.core.GeoPoint;
-import org.oscim.tiling.source.MapInfo;
 import org.oscim.tiling.source.TileSource;
 
-public abstract class UrlTileSource extends TileSource{
+public abstract class UrlTileSource extends TileSource {
 	private final static String KEY_URL = "url";
-
-	private static final MapInfo mMapInfo =
-			new MapInfo(new BoundingBox(-180, -90, 180, 90),
-					new Byte((byte) 4), new GeoPoint(53.11, 8.85),
-					null, 0, 0, 0, "de", "comment", "author", null);
-
 
 	protected URL mUrl;
 
@@ -53,15 +44,8 @@ public abstract class UrlTileSource extends TileSource{
 
 	}
 
-	public boolean setUrl(String urlString){
+	public boolean setUrl(String urlString) {
 		options.put("url", urlString);
 		return open() == OpenResult.SUCCESS;
 	}
-
-	@Override
-	public MapInfo getMapInfo() {
-		return mMapInfo;
-	}
-
 }
-

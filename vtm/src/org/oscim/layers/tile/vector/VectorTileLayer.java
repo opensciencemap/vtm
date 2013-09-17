@@ -15,15 +15,12 @@
 package org.oscim.layers.tile.vector;
 
 import org.oscim.backend.Log;
-import org.oscim.core.GeoPoint;
-import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.map.Map;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
 import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.MapInfo;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.TileSource.OpenResult;
 
@@ -76,7 +73,7 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 			mTileLoader.get(i).setTileDataSource(tileDataSource);
 		}
 
-		mTileManager.setZoomTable(mTileSource.getMapInfo().zoomLevel);
+		//mTileManager.setZoomTable(mTileSource.getMapInfo().zoomLevel);
 
 		mMap.clearMap();
 
@@ -96,35 +93,4 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 
 		resumeLoaders();
 	}
-
-	/**
-	 * @deprecated
-	 */
-	public MapPosition getMapFileCenter() {
-		if (mTileSource == null)
-			return null;
-
-		MapInfo mapInfo = mTileSource.getMapInfo();
-		if (mapInfo == null)
-			return null;
-
-		GeoPoint startPos = mapInfo.startPosition;
-
-		if (startPos == null)
-			startPos = mapInfo.mapCenter;
-
-		if (startPos == null)
-			startPos = new GeoPoint(0, 0);
-
-		MapPosition mapPosition = new MapPosition();
-		mapPosition.setPosition(startPos);
-
-		if (mapInfo.startZoomLevel == null)
-			mapPosition.setZoomLevel(2);
-		else
-			mapPosition.setZoomLevel((mapInfo.startZoomLevel).byteValue());
-
-		return mapPosition;
-	}
-
 }

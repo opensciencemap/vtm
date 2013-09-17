@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.MapInfo;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.mapfile.header.MapFileHeader;
 import org.oscim.tiling.source.mapfile.header.MapFileInfo;
@@ -129,7 +128,6 @@ public class MapFileTileSource extends TileSource {
 		}
 	}
 
-	@Override
 	public MapInfo getMapInfo() {
 		return fileInfo;
 	}

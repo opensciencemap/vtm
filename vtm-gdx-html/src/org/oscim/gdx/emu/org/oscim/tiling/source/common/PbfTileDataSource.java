@@ -21,7 +21,6 @@ import org.oscim.backend.Log;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.ITileDataSource.QueryResult;
 
 /**
  *

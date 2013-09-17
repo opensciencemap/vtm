@@ -19,26 +19,20 @@ import java.util.HashMap;
 public abstract class TileSource {
 
 	public abstract ITileDataSource getDataSource();
+
 	public abstract OpenResult open();
+
 	public abstract void close();
 
 	protected final Options options = new Options();
 
-	public void setOption(String key, String value){
+	public void setOption(String key, String value) {
 		options.put(key, value);
 	}
 
-	public String getOption(String key){
+	public String getOption(String key) {
 		return options.get(key);
 	}
-
-	/**
-	 * @return the metadata for the current map file.
-	 * @throws IllegalStateException
-	 *             if no map is currently opened.
-	 */
-	public abstract MapInfo getMapInfo();
-
 
 	public static class Options extends HashMap<String, String> {
 
@@ -59,6 +53,7 @@ public abstract class TileSource {
 			return true;
 		}
 	}
+
 	/**
 	 * A FileOpenResult is a simple DTO which is returned by
 	 * IMapDatabase#open().

@@ -14,22 +14,15 @@
  */
 package org.oscim.tiling.source.test;
 
-import org.oscim.core.BoundingBox;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.MapInfo;
 import org.oscim.tiling.source.TileSource;
 
 public class TestTileSource extends TileSource {
-
-	private final MapInfo mMapInfo =
-	        new MapInfo(new BoundingBox(-180, -90, 180, 90),
-	                    new Byte((byte) 5), null, null, 0, 0, 0,
-	                    "", "", "", null);
 
 	// private boolean mOpenFile = false;
 
@@ -47,11 +40,6 @@ public class TestTileSource extends TileSource {
 	@Override
 	public void close() {
 		// mOpenFile = false;
-	}
-
-	@Override
-	public MapInfo getMapInfo() {
-		return mMapInfo;
 	}
 
 	static class TileDataSource implements ITileDataSource {

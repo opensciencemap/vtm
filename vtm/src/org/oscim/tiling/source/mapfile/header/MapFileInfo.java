@@ -20,7 +20,7 @@ import org.oscim.core.Tag;
  * Contains the immutable metadata of a map file.
  *
  */
-public class MapFileInfo extends org.oscim.tiling.source.MapInfo {
+public class MapFileInfo extends org.oscim.tiling.source.mapfile.MapInfo {
 
 	/**
 	 * True if the map file includes debug information, false otherwise.
