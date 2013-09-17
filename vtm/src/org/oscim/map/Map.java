@@ -50,13 +50,10 @@ public abstract class Map implements EventDispatcher {
 	private final MapPosition mMapPosition;
 	private final AsyncExecutor mAsyncExecutor;
 
-	private DebugSettings mDebugSettings;
-
 	protected boolean mClearMap;
 	protected final MapEventLayer mEventLayer;
 
 	private VectorTileLayer mBaseLayer;
-	//private BitmapTileLayer mBackgroundLayer;
 
 	public Map() {
 
@@ -66,9 +63,6 @@ public abstract class Map implements EventDispatcher {
 		mMapPosition = new MapPosition();
 		mLayers = new Layers();
 		mAsyncExecutor = new AsyncExecutor(2);
-
-		mDebugSettings = new DebugSettings();
-		VectorTileLoader.setDebugSettings(mDebugSettings);
 
 		mEventLayer = new MapEventLayer(this);
 		mLayers.add(0, mEventLayer);
@@ -186,14 +180,6 @@ public abstract class Map implements EventDispatcher {
 	 * This function is run on main-loop before rendering a frame.
 	 * Caution: Do not call directly!
 	 */
-	public void setDebugSettings(DebugSettings debugSettings) {
-		mDebugSettings = debugSettings;
-		//MapTileLoader.setDebugSettings(debugSettings);
-	}
-
-	public DebugSettings getDebugSettings() {
-		return mDebugSettings;
-
 	protected void updateLayers() {
 		mUpdateDispatcher.dispatch();
 	}

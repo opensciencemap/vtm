@@ -304,8 +304,8 @@ class TextRenderer extends ElementRenderer {
 		}
 
 		ElementLayers dbg = null;
-		if (mMap.getDebugSettings().debugLabels)
-			dbg = new ElementLayers();
+		//if (mMap.getDebugSettings().debugLabels)
+		//	dbg = new ElementLayers();
 
 		int mw = (mMap.getWidth() + Tile.SIZE) / 2;
 		int mh = (mMap.getHeight() + Tile.SIZE) / 2;
@@ -323,8 +323,8 @@ class TextRenderer extends ElementRenderer {
 
 		int maxx = Tile.SIZE << (zoom - 1);
 
-		if (dbg != null)
-			Debug.addDebugLayers(dbg);
+		//if (dbg != null)
+		//	Debug.addDebugLayers(dbg);
 
 		SymbolLayer sl = mNextLayer.symbolLayer;
 		sl.clearItems();

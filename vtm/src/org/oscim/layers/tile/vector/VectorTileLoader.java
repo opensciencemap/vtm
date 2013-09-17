@@ -24,7 +24,6 @@ import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.labeling.WayDecorator;
-import org.oscim.map.DebugSettings;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
@@ -49,17 +48,6 @@ import org.oscim.tiling.source.ITileDataSource.QueryResult;
 import org.oscim.utils.LineClipper;
 import org.oscim.utils.pool.Inlist;
 
-/**
- * @note
- *       0.
- *       1. The ... call MapTileLoader.executeJob() to load a tile.
- *       2. The tile data will be loaded from current TileSource
- *       3. TileSource calls the IMapDataSink process()
- *       .  implemented by MapTileLoader for MapElement items.
- *       4. these callbacks then call RenderTheme to get the matching RenderInstructions (style).
- *       5. RenderTheme calls IRenderCallback functions with style information
- *       6. Styled items become added to MapTile.layers...
- */
 public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback, ITileDataSink {
 
 	private static final String TAG = VectorTileLoader.class.getName();
@@ -70,8 +58,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
 
-	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
-	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
+	//private static final Tag[] debugTagWay = { new Tag("debug", "way") };
+	//private static final Tag[] debugTagArea = { new Tag("debug", "area") };
 
 	// replacement for variable value tags that should not be matched by RenderTheme
 	// FIXME make this general, maybe subclass tags
@@ -79,8 +67,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	private static final Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
 
 	//	private final MapElement mDebugWay, mDebugPoint;
-
-	private static DebugSettings debug;
 
 	private IRenderTheme renderTheme;
 	private int renderLevels;
@@ -111,10 +97,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void setRenderTheme(IRenderTheme theme) {
 		renderTheme = theme;
 		renderLevels = theme.getLevels();
-	}
-
-	public static void setDebugSettings(DebugSettings debugSettings) {
-		debug = debugSettings;
 	}
 
 	public VectorTileLoader(TileManager tileManager) {
@@ -206,7 +188,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	/**
 	 * Sets the scale stroke factor for the given zoom level.
-	 *
+	 * 
 	 * @param zoomLevel
 	 *            the zoom level for which the scale stroke factor should be
 	 *            set.
@@ -284,27 +266,22 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			// remove tags that should not be cached in Rendertheme
 			filterTags(element.tags);
 
-			// get render instructions
-			RenderInstruction[] ri = renderTheme.matchElement(element, mTile.zoomLevel);
-
-			if (ri != null)
-				renderNode(ri);
+			// get and apply render instructions
+			renderNode(renderTheme.matchElement(element, mTile.zoomLevel));
 		} else {
 
 			// replace tags that should not be cached in Rendertheme (e.g. name)
 			if (!filterTags(element.tags))
 				return;
 
-			boolean closed = element.type == GeometryType.POLY;
-
 			mDrawingLayer = getValidLayer(element.layer) * renderLevels;
 
-			RenderInstruction[] ri = renderTheme.matchElement(element, mTile.zoomLevel);
+			// get and apply render instructions
+			renderWay(renderTheme.matchElement(element, mTile.zoomLevel));
 
-			renderWay(ri);
-
-			if (debug.debugTheme && ri == null)
-				debugUnmatched(closed, element.tags);
+			//boolean closed = element.type == GeometryType.POLY;
+			//if (debug.debugTheme && ri == null)
+			//	debugUnmatched(closed, element.tags);
 
 			mCurLineLayer = null;
 		}
@@ -312,17 +289,17 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mElement = null;
 	}
 
-	private void debugUnmatched(boolean closed, TagSet tags) {
-		//		Log.d(TAG, "DBG way not matched: " + closed + " "
-		//				+ Arrays.deepToString(tags));
-		//
-		//		mTagName = new Tag("name", tags[0].key + ":"
-		//				+ tags[0].value, false);
-		//
-		//		mElement.tags = closed ? debugTagArea : debugTagWay;
-		//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
-		//		renderWay(ri);
-	}
+	//private void debugUnmatched(boolean closed, TagSet tags) {
+	//		Log.d(TAG, "DBG way not matched: " + closed + " "
+	//				+ Arrays.deepToString(tags));
+	//
+	//		mTagName = new Tag("name", tags[0].key + ":"
+	//				+ tags[0].value, false);
+	//
+	//		mElement.tags = closed ? debugTagArea : debugTagWay;
+	//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
+	//		renderWay(ri);
+	//}
 
 	private void renderWay(RenderInstruction[] ri) {
 		if (ri == null)
@@ -345,10 +322,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mTagHouseNr = null;
 		mCurLineLayer = null;
 	}
-
-	//	@Override
-	//	public void renderWaterBackground() {
-	//	}
 
 	// ----------------- RenderThemeCallback -----------------
 	@Override
@@ -423,17 +396,12 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			return;
 		}
 
-		if (debug.disablePolygons)
-			return;
-
 		PolygonLayer layer = mTile.layers.getPolygonLayer(numLayer);
 
 		if (layer == null)
 			return;
 
-		//if (layer.area == null)
 		layer.area = area;
-
 		layer.addPolygon(mElement.points, mElement.index);
 	}
 
@@ -501,7 +469,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void renderPointSymbol(Symbol symbol) {
-		if (symbol.texture == null){
+		if (symbol.texture == null) {
 			Log.d(TAG, "missing symbol for " + mElement.tags.asString());
 			return;
 		}
@@ -524,8 +492,9 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	/**
-	 * used for event-driven loading by html backend */
+	 * used for event-driven loading by html backend
+	 */
 	@Override
-    public void completed(boolean success) {
-    }
+	public void completed(boolean success) {
+	}
 }

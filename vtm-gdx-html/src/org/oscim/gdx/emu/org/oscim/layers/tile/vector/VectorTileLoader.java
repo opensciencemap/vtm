@@ -22,7 +22,6 @@ import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.labeling.WayDecorator;
-import org.oscim.map.DebugSettings;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
@@ -67,17 +66,13 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
 
-	private static final Tag[] debugTagWay = { new Tag("debug", "way") };
-	private static final Tag[] debugTagArea = { new Tag("debug", "area") };
+	//private static final Tag[] debugTagWay = { new Tag("debug", "way") };
+	//private static final Tag[] debugTagArea = { new Tag("debug", "area") };
 
 	// replacement for variable value tags that should not be matched by RenderTheme
 	// FIXME make this general, maybe subclass tags
 	private static final Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
 	private static final Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
-
-	//	private final MapElement mDebugWay, mDebugPoint;
-
-	private static DebugSettings debug;
 
 	private IRenderTheme renderTheme;
 	private int renderLevels;
@@ -108,10 +103,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void setRenderTheme(IRenderTheme theme) {
 		renderTheme = theme;
 		renderLevels = theme.getLevels();
-	}
-
-	public static void setDebugSettings(DebugSettings debugSettings) {
-		debug = debugSettings;
 	}
 
 	/**
@@ -315,16 +306,10 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			if (!filterTags(element.tags))
 				return;
 
-			boolean closed = element.type == GeometryType.POLY;
-
 			mDrawingLayer = getValidLayer(element.layer) * renderLevels;
 
 			RenderInstruction[] ri = renderTheme.matchElement(element, mTile.zoomLevel);
-
 			renderWay(ri);
-
-			if (debug.debugTheme && ri == null)
-				debugUnmatched(closed, element.tags);
 
 			mCurLineLayer = null;
 		}
@@ -332,17 +317,17 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mElement = null;
 	}
 
-	private void debugUnmatched(boolean closed, TagSet tags) {
-		//		Log.d(TAG, "DBG way not matched: " + closed + " "
-		//				+ Arrays.deepToString(tags));
-		//
-		//		mTagName = new Tag("name", tags[0].key + ":"
-		//				+ tags[0].value, false);
-		//
-		//		mElement.tags = closed ? debugTagArea : debugTagWay;
-		//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
-		//		renderWay(ri);
-	}
+	//private void debugUnmatched(boolean closed, TagSet tags) {
+	//		Log.d(TAG, "DBG way not matched: " + closed + " "
+	//				+ Arrays.deepToString(tags));
+	//
+	//		mTagName = new Tag("name", tags[0].key + ":"
+	//				+ tags[0].value, false);
+	//
+	//		mElement.tags = closed ? debugTagArea : debugTagWay;
+	//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
+	//		renderWay(ri);
+	//}
 
 	private void renderWay(RenderInstruction[] ri) {
 		if (ri == null)
@@ -442,9 +427,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 			return;
 		}
-
-		if (debug.disablePolygons)
-			return;
 
 		PolygonLayer layer = mTile.layers.getPolygonLayer(numLayer);
 
