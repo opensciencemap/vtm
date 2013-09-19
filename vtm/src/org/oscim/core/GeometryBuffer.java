@@ -21,6 +21,8 @@ public class GeometryBuffer {
 	private final static int GROW_INDICES = 64;
 	private final static int GROW_POINTS = 512;
 
+	private PointF mTmpPoint = new PointF();
+
 	/**
 	 * The Enum GeometryType.
 	 */
@@ -55,7 +57,7 @@ public class GeometryBuffer {
 
 	/**
 	 * Instantiates a new geometry buffer.
-	 *
+	 * 
 	 * @param points the points
 	 * @param index the index
 	 */
@@ -72,9 +74,19 @@ public class GeometryBuffer {
 		this.pointPos = 0;
 	}
 
+	public PointF getPoint(int i) {
+		mTmpPoint.x = points[(i << 1)];
+		mTmpPoint.y = points[(i << 1) + 1];
+		return mTmpPoint;
+	}
+
+	public int getNumPoints() {
+		return index[0] >> 1;
+	}
+
 	/**
 	 * Instantiates a new geometry buffer.
-	 *
+	 * 
 	 * @param numPoints the num points
 	 * @param numIndices the num indices
 	 */
@@ -95,7 +107,7 @@ public class GeometryBuffer {
 
 	/**
 	 * Adds a point with the coordinates x and y.
-	 *
+	 * 
 	 * @param x the x ordinate
 	 * @param y the y ordinate
 	 */
@@ -123,7 +135,7 @@ public class GeometryBuffer {
 
 	/**
 	 * Sets the point x,y at position pos.
-	 *
+	 * 
 	 * @param pos the pos
 	 * @param x the x ordinate
 	 * @param y the y ordinate
@@ -146,6 +158,10 @@ public class GeometryBuffer {
 	public void startLine() {
 		setOrCheckMode(GeometryType.LINE);
 
+		// ignore
+		if (index[indexPos] == 0)
+			return;
+
 		// start next
 		if ((index[0] >= 0) && (++indexPos >= index.length))
 			ensureIndexSize(indexPos, true);
@@ -164,6 +180,10 @@ public class GeometryBuffer {
 	public void startPolygon() {
 		boolean start = (type == GeometryType.NONE);
 		setOrCheckMode(GeometryType.POLY);
+
+		// ignore
+		if (index[indexPos] == 0)
+			return;
 
 		if ((indexPos + 3) > index.length)
 			ensureIndexSize(indexPos + 2, true);
@@ -204,7 +224,7 @@ public class GeometryBuffer {
 	// ---- internals ----
 	/**
 	 * Ensure point size.
-	 *
+	 * 
 	 * @param size the size
 	 * @param copy the copy
 	 * @return the float[] array holding current coordinates
@@ -223,7 +243,7 @@ public class GeometryBuffer {
 
 	/**
 	 * Ensure index size.
-	 *
+	 * 
 	 * @param size the size
 	 * @param copy the copy
 	 * @return the short[] array holding current index
