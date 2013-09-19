@@ -53,8 +53,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	private static final double STROKE_INCREASE = Math.sqrt(2.5);
 	private static final byte LAYERS = 11;
 
-	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
-	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
+	public static final byte STROKE_MIN_ZOOM = 12;
+	public static final byte STROKE_MAX_ZOOM = 17;
 
 	//private static final Tag[] debugTagWay = { new Tag("debug", "way") };
 	//private static final Tag[] debugTagArea = { new Tag("debug", "area") };
@@ -83,8 +83,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	private int mDrawingLayer;
 
-	private float mStrokeScale = 1.0f;
-	private float mGroundResolution;
+	private float mLineScale = 1.0f;
+	private float mGroundScale;
 
 	private Tag mTagName;
 	private Tag mTagHouseNr;
@@ -108,30 +108,34 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public boolean executeJob(MapTile mapTile) {
+	public boolean executeJob(MapTile tile) {
 
 		if (mTileDataSource == null)
 			return false;
 
-		mTile = mapTile;
-
 		// account for area changes with latitude
-		double lat = MercatorProjection.toLatitude(mTile.y);
+		double lat = MercatorProjection.toLatitude(tile.y);
 
-		setScaleStrokeWidth(mTile.zoomLevel, lat);
+		mLineScale = (float) Math.pow(STROKE_INCREASE, tile.zoomLevel - STROKE_MIN_ZOOM);
+		if (mLineScale < 1)
+			mLineScale = 1;
 
-		mGroundResolution = (float) (Math.cos(lat * (Math.PI / 180))
-		                             * MercatorProjection.EARTH_CIRCUMFERENCE
-		                             / ((long) Tile.SIZE << mTile.zoomLevel));
+		// scale line width relative to latitude + PI * thumb
+		mLineScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
 
+		mGroundScale = (float) (Math.cos(lat * (Math.PI / 180))
+		                        * MercatorProjection.EARTH_CIRCUMFERENCE
+		                        / ((long) Tile.SIZE << tile.zoomLevel));
+
+		mTile = tile;
 		mTile.layers = new ElementLayers();
 
-		// query database, which calls renderWay and renderPOI
-		// callbacks while processing map tile data.
-		if (mTileDataSource.executeQuery(mTile, this) != QueryResult.SUCCESS) {
-			mTile = null;
-			return false;
-		}
+		// query database, which calls 'process' callback
+		QueryResult result = mTileDataSource.executeQuery(mTile, this);
+
+		mTile = null;
+
+		clearState();
 
 		//		if (debug.drawTileFrames) {
 		//			// draw tile coordinate
@@ -148,8 +152,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		//			renderWay(ri);
 		//		}
 
-		mTile = null;
-		return true;
+		return (result == QueryResult.SUCCESS);
 	}
 
 	Tag[] mFilterTags = new Tag[1];
@@ -164,32 +167,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	/**
-	 * Sets the scale stroke factor for the given zoom level.
-	 * 
-	 * @param zoomLevel
-	 *            the zoom level for which the scale stroke factor should be
-	 *            set.
-	 */
-	private void setScaleStrokeWidth(byte zoomLevel, double latitude) {
-		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevel - STROKE_MIN_ZOOM_LEVEL);
-		if (mStrokeScale < 1)
-			mStrokeScale = 1;
-
-		// scale line width relative to latitude
-		mStrokeScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(latitude) * (Math.PI / 180)));
-
-	}
-
 	public void setTileDataSource(ITileDataSource mapDatabase) {
 		if (mTileDataSource != null)
 			mTileDataSource.destroy();
 
 		mTileDataSource = mapDatabase;
-	}
-
-	public ITileDataSource getMapDatabase() {
-		return mTileDataSource;
 	}
 
 	private boolean mRenderBuildingModel;
@@ -305,7 +287,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mCurLineLayer = null;
 	}
 
-	// ----------------- RenderThemeCallback -----------------
+	/*** RenderThemeCallback ***/
 	@Override
 	public void renderWay(Line line, int level) {
 		int numLayer = mDrawingLayer + level;
@@ -325,9 +307,9 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				lineLayer.line = line;
 
 				float w = line.width;
-				if (!line.fixed) {
-					w *= mStrokeScale;
-				}
+				if (!line.fixed)
+					w *= mLineScale;
+
 				lineLayer.width = w;
 			}
 
@@ -336,8 +318,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				return;
 			}
 
-			lineLayer.addLine(mElement.points, mElement.index,
-			                  mElement.type == GeometryType.POLY);
+			lineLayer.addLine(mElement);
 
 			// keep reference for outline layer
 			mCurLineLayer = lineLayer;
@@ -352,13 +333,13 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				lineLayer.line = line;
 
 				float w = line.width;
-				if (!line.fixed) {
-					w *= mStrokeScale;
-				}
+				if (!line.fixed)
+					w *= mLineScale;
+
 				lineLayer.width = w;
 			}
 
-			lineLayer.addLine(mElement.points, mElement.index);
+			lineLayer.addLine(mElement);
 		}
 	}
 
@@ -369,7 +350,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		if (mRenderBuildingModel) {
 			//Log.d(TAG, "add buildings: " + mTile + " " + mPriority);
 			if (mTile.layers.extrusionLayers == null)
-				mTile.layers.extrusionLayers = new ExtrusionLayer(0, mGroundResolution);
+				mTile.layers.extrusionLayers = new ExtrusionLayer(0, mGroundScale);
 
 			((ExtrusionLayer) mTile.layers.extrusionLayers).addBuildings(mElement);
 

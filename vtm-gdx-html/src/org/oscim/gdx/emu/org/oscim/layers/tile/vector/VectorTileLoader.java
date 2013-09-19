@@ -63,8 +63,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	private static final double STROKE_INCREASE = Math.sqrt(2.5);
 	private static final byte LAYERS = 11;
 
-	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
-	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
+	public static final byte STROKE_MIN_ZOOM = 12;
+	public static final byte STROKE_MAX_ZOOM = 17;
 
 	// replacement for variable value tags that should not be matched by RenderTheme
 	// FIXME make this general, maybe subclass tags
@@ -179,7 +179,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	 *            set.
 	 */
 	private void setScaleStrokeWidth(byte zoomLevel) {
-		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevel - STROKE_MIN_ZOOM_LEVEL);
+		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevel - STROKE_MIN_ZOOM);
 		if (mStrokeScale < 1)
 			mStrokeScale = 1;
 	}
