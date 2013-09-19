@@ -18,6 +18,7 @@ import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
+import org.oscim.core.PointF;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
@@ -405,10 +406,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		if (value == null)
 			return;
 
-		float x = mElement.points[0];
-		float y = mElement.points[1];
-
-		mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
+		PointF p = mElement.getPoint(0);
+		mTile.addLabel(TextItem.pool.get().set(p.x, p.y, value, text));
 	}
 
 	@Override
@@ -417,10 +416,9 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		if (value == null)
 			return;
 
-		for (int i = 0, n = mElement.index[0]; i < n; i += 2) {
-			float x = mElement.points[i];
-			float y = mElement.points[i + 1];
-			mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
+		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
+			PointF p = mElement.getPoint(i);
+			mTile.addLabel(TextItem.pool.get().set(p.x, p.y, value, text));
 		}
 	}
 
