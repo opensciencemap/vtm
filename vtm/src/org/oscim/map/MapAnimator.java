@@ -19,6 +19,11 @@ public class MapAnimator {
 		mMap = map;
 	}
 
+	private final int ANIM_NONE = 0;
+	private final int ANIM_MOVE = 1 << 1;
+	private final int ANIM_SCALE = 1 << 2;
+	private final int ANIM_FLING = 1 << 3;
+
 	private final Map mMap;
 	private final Viewport mViewport;
 
@@ -35,19 +40,17 @@ public class MapAnimator {
 	private float mDuration = 500;
 	private long mAnimEnd = -1;
 
-	private boolean mAnimMove;
-	private boolean mAnimFling;
-	private boolean mAnimScale;
+	private int mState = ANIM_NONE;
 
 	public synchronized void animateTo(BoundingBox bbox) {
 		// TODO for large distatance first scale out, then in
 
 		// calculate the maximum scale at which the bbox is completely visible
 		double dx = Math.abs(MercatorProjection.longitudeToX(bbox.getMaxLongitude())
-				- MercatorProjection.longitudeToX(bbox.getMinLongitude()));
+		                     - MercatorProjection.longitudeToX(bbox.getMinLongitude()));
 
 		double dy = Math.abs(MercatorProjection.latitudeToY(bbox.getMinLatitude())
-				- MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
+		                     - MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
 
 		double zx = mMap.getWidth() / (dx * Tile.SIZE);
 		double zy = mMap.getHeight() / (dy * Tile.SIZE);
@@ -57,12 +60,12 @@ public class MapAnimator {
 	}
 
 	public synchronized void animateTo(long duration, GeoPoint geoPoint, double scale,
-			boolean relative) {
+	        boolean relative) {
 
 		mViewport.getMapPosition(mPos);
 
 		if (relative) {
-			if (mAnimEnd > 0 && mAnimScale)
+			if (mAnimEnd > 0 && (mState & ANIM_SCALE) != 0)
 				scale = mDeltaPos.scale * scale;
 			else
 				scale = mPos.scale * scale;
@@ -86,9 +89,7 @@ public class MapAnimator {
 		mDeltaPos.x -= mStartPos.x;
 		mDeltaPos.y -= mStartPos.y;
 
-		mAnimMove = true;
-		mAnimScale = true;
-		mAnimFling = false;
+		mState = ANIM_MOVE | ANIM_SCALE;
 
 		animStart(duration);
 	}
@@ -97,7 +98,7 @@ public class MapAnimator {
 
 		mViewport.getMapPosition(mPos);
 
-		if (mAnimEnd > 0 && mAnimScale)
+		if (mAnimEnd > 0 && (mState & ANIM_SCALE) != 0)
 			scale = mDeltaPos.scale * scale;
 		else
 			scale = mPos.scale * scale;
@@ -109,16 +110,13 @@ public class MapAnimator {
 
 		mScaleBy = mPos.scale * scale - mPos.scale;
 
-
 		mStartPos.scale = mPos.scale;
 		mStartPos.angle = mPos.angle;
 
 		mPivot.x = pivotX;
 		mPivot.y = pivotY;
 
-		mAnimScale = true;
-		mAnimFling = false;
-		mAnimMove = false;
+		mState = ANIM_SCALE;
 
 		animStart(duration);
 	}
@@ -128,7 +126,7 @@ public class MapAnimator {
 	}
 
 	public synchronized void animateFling(int velocityX, int velocityY,
-			int minX, int maxX, int minY, int maxY) {
+	        int minX, int maxX, int minY, int maxY) {
 
 		if (velocityX * velocityX + velocityY * velocityY < 2048)
 			return;
@@ -147,54 +145,28 @@ public class MapAnimator {
 		FastMath.clamp(mVelocity.x, minX, maxX);
 		FastMath.clamp(mVelocity.y, minY, maxY);
 
-		mAnimFling = true;
-		mAnimMove = false;
-		mAnimScale = false;
+		mState = ANIM_FLING;
+
 		animStart(duration);
 	}
 
-
 	private void animStart(float duration) {
 		mDuration = duration;
-
 		mAnimEnd = System.currentTimeMillis() + (long) duration;
 		mMap.render();
 	}
 
 	private void animCancel() {
-		mAnimEnd = -1;
-		mAnimScale = false;
-		mAnimFling = false;
-		mAnimMove = false;
-
+		mState = ANIM_NONE;
 		mPivot.x = 0;
 		mPivot.y = 0;
-	}
-
-	private boolean fling(float adv) {
-		synchronized (mViewport) {
-
-			adv = (float) Math.sqrt(adv);
-
-			double dx = mVelocity.x * adv;
-			double dy = mVelocity.y * adv;
-
-			if (dx == 0 && dy == 0)
-				return false;
-
-			mViewport.moveMap((float) (dx - mScroll.x), (float) (dy - mScroll.y));
-
-			mScroll.x = dx;
-			mScroll.y = dy;
-		}
-		return true;
 	}
 
 	/**
 	 * called by GLRenderer at begin of each frame.
 	 */
 	public void updateAnimation() {
-		if (mAnimEnd < 0)
+		if (mState == ANIM_NONE)
 			return;
 
 		long millisLeft = mAnimEnd - System.currentTimeMillis();
@@ -210,17 +182,18 @@ public class MapAnimator {
 
 			if (millisLeft <= 0) {
 				// set final position
-				if (mAnimMove && !mAnimFling)
-					mViewport.moveInternal(mStartPos.x + mDeltaPos.x, mStartPos.y + mDeltaPos.y);
+				if ((mState & ANIM_MOVE) != 0)
+					mViewport.moveInternal(mStartPos.x + mDeltaPos.x,
+					                       mStartPos.y + mDeltaPos.y);
 
-				if (mAnimScale) {
+				if ((mState & ANIM_SCALE) != 0) {
 					if (mScaleBy > 0)
 						doScale(mStartPos.scale + (mScaleBy - 1));
 					else
 						doScale(mStartPos.scale + mScaleBy);
 				}
-				mMap.updateMap(true);
 
+				mMap.updateMap(true);
 				animCancel();
 				return;
 			}
@@ -229,7 +202,7 @@ public class MapAnimator {
 
 			float adv = (1.0f - millisLeft / mDuration);
 
-			if (mAnimScale) {
+			if ((mState & ANIM_SCALE) != 0) {
 				if (mScaleBy > 0)
 					doScale(mStartPos.scale + (mScaleBy * (Math.pow(2, adv) - 1)));
 				else
@@ -238,11 +211,9 @@ public class MapAnimator {
 				changed = true;
 			}
 
-			if (mAnimMove) {
-				mViewport.moveInternal(
-						mStartPos.x + mDeltaPos.x * adv,
-						mStartPos.y + mDeltaPos.y * adv);
-
+			if ((mState & ANIM_MOVE) != 0) {
+				mViewport.moveInternal(mStartPos.x + mDeltaPos.x * adv,
+				                       mStartPos.y + mDeltaPos.y * adv);
 				changed = true;
 			}
 
@@ -251,12 +222,22 @@ public class MapAnimator {
 			//	updateMatrix();
 			//}
 
-			if (mAnimFling && fling(adv))
-				changed = true;
+			if ((mState & ANIM_FLING) != 0) {
+				adv = (float) Math.sqrt(adv);
+				double dx = mVelocity.x * adv;
+				double dy = mVelocity.y * adv;
+				if ((dx - mScroll.x) != 0 || (dy - mScroll.y) != 0) {
 
+					mViewport.moveMap((float) (dx - mScroll.x), (float) (dy - mScroll.y));
+					mScroll.x = dx;
+					mScroll.y = dy;
+
+					changed = true;
+				}
+			}
 			// continue animation
 			if (changed) {
-				// inform other layers that position has changed
+				// render and inform layers that position has changed
 				mMap.updateMap(true);
 			} else {
 				// just render next frame
@@ -269,6 +250,7 @@ public class MapAnimator {
 	}
 
 	private void doScale(double newScale) {
-		mViewport.scaleMap((float) (newScale / mPos.scale), (float)mPivot.x, (float)mPivot.y);
+		mViewport.scaleMap((float) (newScale / mPos.scale),
+		                   (float) mPivot.x, (float) mPivot.y);
 	}
 }

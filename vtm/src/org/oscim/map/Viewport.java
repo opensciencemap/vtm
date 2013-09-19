@@ -82,7 +82,7 @@ public class Viewport {
 		float[] tmp = new float[16];
 
 		Matrix4.frustumM(tmp, 0, -s, s,
-				aspect * s, -aspect * s, VIEW_NEAR, VIEW_FAR);
+		                 aspect * s, -aspect * s, VIEW_NEAR, VIEW_FAR);
 
 		mProjMatrix.set(tmp);
 		mTmpMatrix.setTranslation(0, 0, -VIEW_DISTANCE);
@@ -107,10 +107,10 @@ public class Viewport {
 	public synchronized boolean getMapPosition(MapPosition pos) {
 
 		boolean changed = (pos.scale != mPos.scale
-				|| pos.x != mPos.x
-				|| pos.y != mPos.y
-				|| pos.angle != mPos.angle
-				|| pos.tilt != mPos.tilt);
+		                   || pos.x != mPos.x
+		                   || pos.y != mPos.y
+		                   || pos.angle != mPos.angle
+		                   || pos.tilt != mPos.tilt);
 
 		pos.angle = mPos.angle;
 		pos.tilt = mPos.tilt;
@@ -295,8 +295,8 @@ public class Viewport {
 	public synchronized GeoPoint fromScreenPoint(float x, float y) {
 		fromScreenPoint(x, y, mMovePoint);
 		return new GeoPoint(
-				MercatorProjection.toLatitude(mMovePoint.y),
-				MercatorProjection.toLongitude(mMovePoint.x));
+		                    MercatorProjection.toLatitude(mMovePoint.y),
+		                    MercatorProjection.toLongitude(mMovePoint.x));
 	}
 
 	/**
@@ -423,19 +423,18 @@ public class Viewport {
 		Point p = applyRotation(mx, my);
 		double tileScale = mPos.scale * Tile.SIZE;
 
-		moveBy(p.x / tileScale, p.y / tileScale);
+		moveTo(mPos.x - p.x / tileScale, mPos.y - p.y / tileScale);
 	}
 
 	/* used by MapAnimator */
 	void moveInternal(double mx, double my) {
 		Point p = applyRotation(mx, my);
-		moveBy(p.x, p.y);
+		moveTo(p.x, p.y);
 	}
 
-	/* used by MapAnimator */
-	void moveBy(double mx, double my) {
-		mPos.x -= mx;
-		mPos.y -= my;
+	private void moveTo(double x, double y) {
+		mPos.x = x;
+		mPos.y = y;
 
 		// clamp latitude
 		mPos.y = FastMath.clamp(mPos.y, 0, 1);
@@ -447,7 +446,7 @@ public class Viewport {
 			mPos.x += 1;
 	}
 
-	Point applyRotation(double mx, double my) {
+	private Point applyRotation(double mx, double my) {
 		if (mPos.angle == 0) {
 			mMovePoint.x = mx;
 			mMovePoint.y = my;
@@ -489,7 +488,7 @@ public class Viewport {
 
 		if (pivotX != 0 || pivotY != 0)
 			moveMap(pivotX * (1.0f - scale),
-					pivotY * (1.0f - scale));
+			        pivotY * (1.0f - scale));
 
 		return true;
 	}
