@@ -139,7 +139,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				MapTile t = tiles[i];
 				for (byte j = 0; j < 4; j++) {
-					if ((t.proxies & (1 << j)) == 0)
+					if (!t.hasProxy(1 << j))
 						continue;
 
 					MapTile c = t.rel.get(j);
@@ -168,7 +168,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 	private static ExtrusionLayer getLayer(MapTile t) {
 		if (t.layers != null && t.layers.extrusionLayers != null
-				&& t.state == MapTile.STATE_READY)
+				&& t.state(MapTile.STATE_READY))
 			return (ExtrusionLayer) t.layers.extrusionLayers;
 		return null;
 	}

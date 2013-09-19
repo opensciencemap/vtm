@@ -14,8 +14,6 @@
  */
 package org.oscim.layers.tile.vector;
 
-import static org.oscim.tiling.MapTile.STATE_NONE;
-
 import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -46,7 +44,6 @@ import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDataSource.QueryResult;
 import org.oscim.utils.LineClipper;
-import org.oscim.utils.pool.Inlist;
 
 public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback, ITileDataSink {
 
@@ -120,7 +117,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		if (mTile.layers != null) {
 			// should be fixed now.
-			Log.d(TAG, "BUG tile already loaded " + mTile + " " + mTile.state);
+			Log.d(TAG, "BUG tile already loaded " + mTile + " " + mTile.getState());
 			mTile = null;
 			return false;
 		}
@@ -142,15 +139,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		// query database, which calls renderWay and renderPOI
 		// callbacks while processing map tile data.
 		if (mTileDataSource.executeQuery(mTile, this) != QueryResult.SUCCESS) {
-
-			//Log.d(TAG, "Failed loading: " + tile);
-			mTile.layers.clear();
-			mTile.layers = null;
-			TextItem.pool.releaseAll(mTile.labels);
-			mTile.labels = null;
-			// FIXME add STATE_FAILED?
-			// in passTile everything but STATE_LOADING is considered failed.
-			mTile.state = STATE_NONE;
 			mTile = null;
 			return false;
 		}
@@ -478,8 +466,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		it.y = mElement.points[1];
 		it.texRegion = symbol.texture;
 		it.billboard = true;
-
-		mTile.symbols = Inlist.push(mTile.symbols, it);
+		mTile.addSymbol(it);
 	}
 
 	@Override

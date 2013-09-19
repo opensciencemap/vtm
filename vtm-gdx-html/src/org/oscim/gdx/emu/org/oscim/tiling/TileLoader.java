@@ -38,7 +38,7 @@ public abstract class TileLoader {
 
 	boolean isInterrupted;
 
-	void interrupt() {
+	public void interrupt() {
 		isInterrupted = true;
 		// cancel loading
 	}
@@ -96,24 +96,24 @@ public abstract class TileLoader {
 	}
 
 	public void jobCompleted(MapTile tile, boolean success) {
-		if (success) {
-			if (!isInterrupted) {
-				// pass tile to main thread
-				mTileManager.passTile(tile);
-			}
+		//if (success) {
+		if (!isInterrupted) {
+			// pass tile to main thread
+			mTileManager.passTile(tile, success);
 		}
+		//}
+
 		mWorking = false;
 
-		if (!mPausing && !mTileManager.jobQueue.isEmpty()){
+		if (!mPausing && !mTileManager.jobQueue.isEmpty()) {
 
-			Gdx.app.postRunnable(new Runnable(){
+			Gdx.app.postRunnable(new Runnable() {
 
 				@Override
 				public void run() {
 					go();
 				}
-			}
-			);
+			});
 		}
 	}
 }

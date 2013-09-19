@@ -403,7 +403,7 @@ class TextRenderer extends ElementRenderer {
 		/* add way labels */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			if (t.state != MapTile.STATE_READY)
+			if (!t.state(MapTile.STATE_READY))
 				continue;
 
 			float dx = (float) (t.tileX * Tile.SIZE - tileX);
@@ -469,7 +469,7 @@ class TextRenderer extends ElementRenderer {
 		/* add caption */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			if (t.state != MapTile.STATE_READY)
+			if (!t.state(MapTile.STATE_READY))
 				continue;
 
 			float dx = (float) (t.tileX * Tile.SIZE - tileX);
@@ -550,7 +550,7 @@ class TextRenderer extends ElementRenderer {
 
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			if (t.state != MapTile.STATE_READY)
+			if (!t.state(MapTile.STATE_READY))
 				continue;
 
 			float dx = (float) (t.tileX * Tile.SIZE - tileX);

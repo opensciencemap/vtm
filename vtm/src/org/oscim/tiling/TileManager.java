@@ -528,14 +528,11 @@ public class TileManager {
 	 *            Tile ready for upload in TileRenderLayer
 	 * @return caller does not care
 	 */
-	public boolean passTile(MapTile tile) {
+	public void passTile(MapTile tile, boolean success) {
 
-		if (tile.state != STATE_LOADING) {
-			// - should rather be STATE_FAILED
-			// no one should be able to use this tile now, MapTileLoader passed
-			// it, GL-Thread does nothing until newdata is set.
-			// Log.d(TAG, "passTile: failed loading " + tile);
-			return true;
+		if (!success) {
+			tile.clear();
+			return;
 		}
 
 		tile.state = STATE_NEW_DATA;
@@ -547,8 +544,6 @@ public class TileManager {
 		// a tile that might be visible.
 		if (tile.isLocked())
 			mMap.render();
-
-		return true;
 	}
 
 	private final ScanBox mScanBox = new ScanBox() {

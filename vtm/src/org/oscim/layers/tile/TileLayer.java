@@ -99,10 +99,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 
 	void notifyLoaders() {
 		for (int i = 0; i < mNumTileLoader; i++) {
-			T m = mTileLoader.get(i);
-			synchronized (m) {
-				m.go();
-			}
+			mTileLoader.get(i).go();
 		}
 	}
 

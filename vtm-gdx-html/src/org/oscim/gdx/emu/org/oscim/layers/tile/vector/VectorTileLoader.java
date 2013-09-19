@@ -66,9 +66,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public static final byte STROKE_MIN_ZOOM_LEVEL = 12;
 	public static final byte STROKE_MAX_ZOOM_LEVEL = 17;
 
-	//private static final Tag[] debugTagWay = { new Tag("debug", "way") };
-	//private static final Tag[] debugTagArea = { new Tag("debug", "area") };
-
 	// replacement for variable value tags that should not be matched by RenderTheme
 	// FIXME make this general, maybe subclass tags
 	private static final Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
@@ -109,24 +106,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	 */
 	public VectorTileLoader(TileManager tileManager) {
 		super(tileManager);
-
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
-
-		//		MapElement m = mDebugWay = new MapElement();
-		//		m.startLine();
-		//		int s = Tile.SIZE;
-		//		m.addPoint(0, 0);
-		//		m.addPoint(0, s);
-		//		m.addPoint(s, s);
-		//		m.addPoint(s, 0);
-		//		m.addPoint(0, 0);
-		//		m.tags = new Tag[] { new Tag("debug", "box") };
-		//		m.type = GeometryType.LINE;
-		//
-		//		m = mDebugPoint = new MapElement();
-		//		m.startPoints();
-		//		m.addPoint(s >> 1, 10);
-		//		m.type = GeometryType.POINT;
 	}
 
 	@Override
@@ -144,7 +124,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		if (mTile.layers != null) {
 			// should be fixed now.
-			Log.d(TAG, "BUG tile already loaded " + mTile + " " + mTile.state);
+			Log.d(TAG, "BUG tile already loaded " + mTile + " " + mTile.getState());
 			mTile = null;
 			return false;
 		}
@@ -168,20 +148,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			return false;
 		}
 
-		//		if (debug.drawTileFrames) {
-		//			// draw tile coordinate
-		//			mTagName = new Tag("name", mTile.toString(), false);
-		//			mElement = mDebugPoint;
-		//			RenderInstruction[] ri;
-		//			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
-		//			renderNode(ri);
-		//
-		//			// draw tile box
-		//			mElement = mDebugWay;
-		//			mDrawingLayer = 100 * renderLevels;
-		//			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
-		//			renderWay(ri);
-		//		}
 		return true;
 	}
 
@@ -191,17 +157,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			mTile = null;
 			return;
 		}
-
-		mTile.layers.clear();
-		mTile.layers = null;
-		TextItem.pool.releaseAll(mTile.labels);
-		mTile.labels = null;
-		// FIXME add STATE_FAILED?
-		// in passTile everything but STATE_LOADING is considered failed.
-		mTile.state = MapTile.STATE_NONE;
-
-		mTile.loader.jobCompleted(mTile, false);
-		mTile = null;
 	}
 
 	Tag[] mFilterTags = new Tag[1];
@@ -317,18 +272,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mElement = null;
 	}
 
-	//private void debugUnmatched(boolean closed, TagSet tags) {
-	//		Log.d(TAG, "DBG way not matched: " + closed + " "
-	//				+ Arrays.deepToString(tags));
-	//
-	//		mTagName = new Tag("name", tags[0].key + ":"
-	//				+ tags[0].value, false);
-	//
-	//		mElement.tags = closed ? debugTagArea : debugTagWay;
-	//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
-	//		renderWay(ri);
-	//}
-
 	private void renderWay(RenderInstruction[] ri) {
 		if (ri == null)
 			return;
@@ -350,10 +293,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mTagHouseNr = null;
 		mCurLineLayer = null;
 	}
-
-	//	@Override
-	//	public void renderWaterBackground() {
-	//	}
 
 	// ----------------- RenderThemeCallback -----------------
 	@Override

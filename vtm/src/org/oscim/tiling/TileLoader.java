@@ -32,8 +32,10 @@ public abstract class TileLoader extends PausableThread {
 
 	protected abstract boolean executeJob(MapTile tile);
 
-	public void go(){
-		notify();
+	public void go() {
+		synchronized (this) {
+			notify();
+        }
 	}
 
 	@Override
@@ -43,18 +45,20 @@ public abstract class TileLoader extends PausableThread {
 		if (tile == null)
 			return;
 
+		boolean success = false;
+
 		try {
-			executeJob(tile);
+			success = executeJob(tile);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
 
 		if (!isInterrupted()) {
-			// pass tile to main thread
-			mTileManager.passTile(tile);
+			mTileManager.passTile(tile, success);
 		}
 	}
+
 	public void jobCompleted(MapTile tile, boolean success) {
 
 	}

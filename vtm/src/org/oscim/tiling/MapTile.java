@@ -19,50 +19,51 @@ import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
+import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.quadtree.QuadTree;
 
 /**
  * Extends Tile class to hold state and data for concurrent use in
  * TileManager (Main Thread), TileLoader (Worker Threads) and
- * Rendering (GL Thread).
+ * TileRenderer (GL Thread).
  */
 public class MapTile extends Tile {
 
-	public final static int STATE_NONE = 0;
-
+	/**
+	 * 
+	 * */
 	public TileLoader loader;
+
+	public final static byte STATE_NONE = 0;
 
 	/**
 	 * STATE_LOADING means the tile is about to be loaded / loading.
-	 * it belongs to TileLoader thread.
+	 * Tile belongs to TileLoader thread.
 	 */
-	public final static int STATE_LOADING = 1 << 0;
+	public final static byte STATE_LOADING = 1 << 0;
 
 	/**
-	 * STATE_NEW_DATA: tile data is prepared for rendering. While
-	 * 'locked' it belongs to GL Thread.
+	 * STATE_NEW_DATA: tile data is prepared for rendering.
+	 * While 'locked' it belongs to GL Thread.
 	 */
-	public final static int STATE_NEW_DATA = 1 << 1;
+	public final static byte STATE_NEW_DATA = 1 << 1;
 
 	/**
-	 * STATE_READY: tile data is uploaded to GL.While
-	 * 'locked' it belongs to GL Thread.
+	 * STATE_READY: tile data is uploaded to GL.
+	 * While 'locked' it belongs to GL Thread.
 	 */
-	public final static int STATE_READY = 1 << 2;
+	public final static byte STATE_READY = 1 << 2;
 
 	/**
 	 * TBD
 	 */
-	public final static int STATE_ERROR = 1 << 3;
+	public final static byte STATE_ERROR = 1 << 3;
 
 	/**
 	 * absolute tile coordinates: tileX,Y / Math.pow(2, zoomLevel)
 	 */
 	public double x;
 	public double y;
-
-	/** STATE_* */
-	public byte state;
 
 	/**
 	 * distance from map center
@@ -75,8 +76,15 @@ public class MapTile extends Tile {
 	 */
 	public TextItem labels;
 	public SymbolItem symbols;
-
 	public ElementLayers layers;
+
+	public void addLabel(TextItem it) {
+		labels = Inlist.push(labels, it);
+	}
+
+	public void addSymbol(SymbolItem it) {
+		symbols = Inlist.push(symbols, it);
+	}
 
 	/**
 	 * Tile is in view region. Set by GLRenderer.
@@ -102,8 +110,19 @@ public class MapTile extends Tile {
 	public final static int PROXY_GRAMPA = 1 << 5;
 	public final static int PROXY_HOLDER = 1 << 6;
 
+	/** STATE_* */
+	byte state;
+
+	public boolean state(byte testState) {
+		return state == testState;
+	}
+
+	public byte getState() {
+		return state;
+	}
+
 	/** keep track which tiles are locked as proxy for this tile */
-	public byte proxies;
+	byte proxies;
 
 	/** counting the tiles that use this tile as proxy */
 	byte refs;
@@ -122,12 +141,18 @@ public class MapTile extends Tile {
 	}
 
 	/**
-	 * @return true when tile might be referenced by another thread.
+	 * @return true when tile might be referenced by render thread.
 	 */
 	boolean isLocked() {
 		return locked > 0 || refs > 0;
 	}
 
+	/**
+	 * Set this tile to be locked, i.e. to no be modified or cleared
+	 * while rendering. Renderable parent, grand-parent and children
+	 * will also be locked. Dont forget to unlock when tile is not longer
+	 * used. This function should only be called through {@link TileManager}
+	 */
 	void lock() {
 		if (locked++ > 0)
 			return;
@@ -154,6 +179,9 @@ public class MapTile extends Tile {
 		}
 	}
 
+	/**
+	 * Unlocks this tile when it cannot be used by render-thread.
+	 */
 	void unlock() {
 		if (--locked > 0 || proxies == 0)
 			return;
@@ -171,29 +199,27 @@ public class MapTile extends Tile {
 		proxies = 0;
 	}
 
-	public void addLabel(TextItem t) {
-		t.next = labels;
-		labels = t;
-	}
-
 	/**
-	 * @return true if tile is loading, has new data or is ready for rendering
+	 * @return true if tile is loading, has new data or is ready
+	 *         for rendering
 	 */
 	public boolean isActive() {
 		return state > STATE_NONE && state < STATE_ERROR;
 	}
 
-	public void setLoading() {
-		//if (state != STATE_NONE)
-		//	Log.wtf(TAG, "wrong state: " + state);
-
-		state = STATE_LOADING;
+	/**
+	 * Test whether it is save to access a proxy item through
+	 * this.rel.*
+	 */
+	public boolean hasProxy(int proxy) {
+		return (proxies & proxy) != 0;
 	}
 
-	public void clearState() {
-		state = STATE_NONE;
-	}
-
+	/**
+	 * CAUTION: This function should only be called by {@link TileManager} when
+	 * tile is removed from cache or from {@link TileLoader} when
+	 * tile has failed to get loaded.
+	 */
 	protected void clear() {
 		if (layers != null) {
 			// TODO move this to layers clear
@@ -211,5 +237,7 @@ public class MapTile extends Tile {
 		layers = null;
 		labels = null;
 		symbols = null;
+
+		state = STATE_NONE;
 	}
 }
