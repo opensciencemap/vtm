@@ -33,10 +33,6 @@ import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.QuadTree;
 import org.oscim.utils.quadtree.QuadTreeIndex;
 
-/**
- * @TODO - prefetching to cache file - this class should probably not be in
- *       'renderer' -> tilemap? - make it general for reuse in tile-overlays
- */
 public class TileManager {
 	static final String TAG = TileManager.class.getName();
 
@@ -110,6 +106,7 @@ public class TileManager {
 	};
 
 	private final float[] mMapPlane = new float[8];
+
 	//private final TileLayer<?> mTileLayer;
 
 	public TileManager(Map map, int minZoom, int maxZoom, int cacheLimit) {
@@ -182,7 +179,7 @@ public class TileManager {
 	/**
 	 * 1. Update mCurrentTiles TileSet of currently visible tiles. 2. Add not
 	 * yet loaded (or loading) tiles to JobQueue. 3. Manage cache
-	 *
+	 * 
 	 * @param pos
 	 *            current MapPosition
 	 */
@@ -242,14 +239,10 @@ public class TileManager {
 		if (changed) {
 			synchronized (mTilelock) {
 				// lock new tiles
-				for (int i = 0; i < newCnt; i++)
-					newTiles[i].lock();
+				mNewTiles.lockTiles();
 
 				// unlock previous tiles
-				for (int i = 0; i < curCnt; i++) {
-					curTiles[i].unlock();
-					curTiles[i] = null;
-				}
+				mCurrentTiles.releaseTiles();
 
 				// make new tiles current
 				TileSet tmp = mCurrentTiles;
@@ -258,7 +251,7 @@ public class TileManager {
 
 				mUpdateSerial++;
 			}
-			//Log.d(TAG, newCnt + " << " + Arrays.deepToString(mCurrentTiles.tiles));
+
 			// request rendering as tiles changed
 			mMap.render();
 		}
@@ -272,9 +265,7 @@ public class TileManager {
 		updateTileDistances(jobs, jobs.length, pos);
 
 		// sets tiles to state == LOADING
-
 		jobQueue.setJobs(jobs);
-		//mTileLayer.notifyLoaders();
 
 		mJobs.clear();
 
@@ -298,7 +289,7 @@ public class TileManager {
 	 * Retrive a TileSet of current tiles. Tiles remain locked in cache until
 	 * the set is unlocked by either passing it again to this function or to
 	 * releaseTiles. If passed TileSet is null it will be allocated.
-	 *
+	 * 
 	 * @param tileSet
 	 *            to be updated
 	 * @return true if TileSet has changed
@@ -313,44 +304,22 @@ public class TileManager {
 		if (tileSet.serial == mUpdateSerial)
 			return false;
 
-		// dont flip new/currentTiles while copying
+		// dont flip mNew/mCurrentTiles while copying
 		synchronized (mTilelock) {
-			MapTile[] newTiles = mCurrentTiles.tiles;
-			int cnt = mCurrentTiles.cnt;
-
-			// lock tiles (and their proxies) to not be removed from cache
-			for (int i = 0; i < cnt; i++)
-				newTiles[i].lock();
-
-			MapTile[] nextTiles;
-			nextTiles = tileSet.tiles;
-
-			// unlock previously active tiles
-			for (int i = 0, n = tileSet.cnt; i < n; i++)
-				nextTiles[i].unlock();
-
-			if (nextTiles.length != mCurrentTiles.tiles.length) {
-				tileSet.tiles = nextTiles = new MapTile[mCurrentTiles.tiles.length];
-			}
-
-			// copy newTiles to nextTiles
-			System.arraycopy(newTiles, 0, nextTiles, 0, cnt);
-
+			tileSet.setTiles(mCurrentTiles);
 			tileSet.serial = mUpdateSerial;
-			tileSet.cnt = cnt;
 		}
 
 		return true;
 	}
 
 	/**
-	 * @param tiles ...
+	 * Unlock tiles and clear all item references.
+	 * 
+	 * @param tiles
 	 */
 	public void releaseTiles(TileSet tileSet) {
-		// unlock previously active tiles
-		for (int i = 0, n = tileSet.cnt; i < n; i++)
-			tileSet.tiles[i].unlock();
-		tileSet.cnt = 0;
+		tileSet.releaseTiles();
 	}
 
 	/* package */MapTile addTile(int x, int y, int zoomLevel) {
@@ -385,22 +354,6 @@ public class TileManager {
 				p.state = STATE_LOADING;
 				mJobs.add(p);
 			}
-
-//			if (zoomLevel > 3) {
-//				// prefetch grand parent
-//				p = tile.rel.parent.parent.item;
-//				add = false;
-//				if (p == null) {
-//					p = mIndex.create(x >> 2, y >> 2, zoomLevel - 2);
-//					addToCache(p);
-//					add = true;
-//				}
-//
-//				if (add || !p.isActive()) {
-//					p.state = STATE_LOADING;
-//					mJobs.add(p);
-//				}
-//			}
 		}
 
 		return tile;
@@ -570,7 +523,7 @@ public class TileManager {
 
 	/**
 	 * called from MapWorker Thread when tile is loaded by MapTileLoader
-	 *
+	 * 
 	 * @param tile
 	 *            Tile ready for upload in TileRenderLayer
 	 * @return caller does not care

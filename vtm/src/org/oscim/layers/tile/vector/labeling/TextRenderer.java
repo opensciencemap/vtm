@@ -664,7 +664,7 @@ class TextRenderer extends ElementRenderer {
 	/* private */void cleanup() {
 		mPool.releaseAll(mLabels);
 		mLabels = null;
-		mTileSet.clear();
+		mTileSet.releaseTiles();
 		mLabelTask = null;
 	}
 

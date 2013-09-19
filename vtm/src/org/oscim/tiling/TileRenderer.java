@@ -221,10 +221,6 @@ public class TileRenderer extends LayerRenderer {
 			return false;
 		}
 
-		// same tiles as before
-		// if (tileSet.serial == mDrawTiles.serial)
-		// return false;
-
 		int prevSerial = tileSet.serial;
 
 		// ensure tiles keep visible state
@@ -234,9 +230,8 @@ public class TileRenderer extends LayerRenderer {
 			int cnt = mDrawTiles.cnt;
 
 			// unlock previous tiles
-			for (int i = 0; i < tileSet.cnt; i++)
-				tileSet.tiles[i].unlock();
-
+			tileSet.releaseTiles();
+			
 			// ensure same size
 			if (tileSet.tiles.length != mDrawTiles.tiles.length) {
 				tileSet.tiles = new MapTile[mDrawTiles.tiles.length];
@@ -251,18 +246,15 @@ public class TileRenderer extends LayerRenderer {
 					tileSet.tiles[tileSet.cnt++] = t;
 				}
 			}
+			
 			tileSet.serial = mUploadSerial;
 		}
 
 		return prevSerial != tileSet.serial;
 	}
 
-	public void releaseTiles(TileSet td) {
-		for (int i = 0; i < td.cnt; i++) {
-			td.tiles[i].unlock();
-			td.tiles[i] = null;
-		}
-		td.cnt = 0;
+	public void releaseTiles(TileSet tileSet) {
+		tileSet.releaseTiles();
 	}
 
 	// Add additional tiles that serve as placeholer when flipping
