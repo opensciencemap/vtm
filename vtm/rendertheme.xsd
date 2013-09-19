@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://mapsforge.org/renderTheme"
-  xmlns:tns="http://mapsforge.org/renderTheme" elementFormDefault="qualified" xml:lang="en">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://opensciencemap.org/rendertheme"
+  xmlns:tns="http://opensciencemap.org/rendertheme" elementFormDefault="qualified" xml:lang="en">
   <!-- attribute types -->
   <xs:simpleType name="cap">
     <xs:restriction base="xs:string">

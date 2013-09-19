@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rendertheme xmlns="http://mapsforge.org/renderTheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://mapsforge.org/renderTheme ../../renderTheme.xsd" version="1"
-  map-background="#050508">
+<rendertheme xmlns="http://opensciencemap.org/rendertheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd" version="1" map-background="#050508">
 
   <style-text id="road" k="name" font-style="bold" font-size="18" stroke="#606050"
     fill="#eeffee" stroke-width="2.5" />

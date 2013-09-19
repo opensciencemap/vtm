@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<rendertheme xmlns="http://mapsforge.org/renderTheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://mapsforge.org/renderTheme ../../renderTheme.xsd" version="1" map-background="#fffcfa">
+<rendertheme xmlns="http://opensciencemap.org/rendertheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd" version="1" map-background="#fffcfa">
 
   <!-- ways -->
   <m e="way">
