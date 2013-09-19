@@ -450,12 +450,13 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			Log.d(TAG, "missing symbol for " + mElement.tags.asString());
 			return;
 		}
-		SymbolItem it = SymbolItem.pool.get();
-		it.x = mElement.points[0];
-		it.y = mElement.points[1];
-		it.texRegion = symbol.texture;
-		it.billboard = true;
-		mTile.addSymbol(it);
+		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
+			PointF p = mElement.getPoint(i);
+
+			SymbolItem it = SymbolItem.pool.get();
+			it.set(p.x, p.y, symbol.texture, true);
+			mTile.addSymbol(it);
+		}
 	}
 
 	@Override

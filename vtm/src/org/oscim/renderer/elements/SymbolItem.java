@@ -20,7 +20,6 @@ import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
-
 public class SymbolItem extends Inlist<SymbolItem> {
 
 	public final static SyncPool<SymbolItem> pool = new SyncPool<SymbolItem>() {
@@ -47,5 +46,19 @@ public class SymbolItem extends Inlist<SymbolItem> {
 	public TextureRegion texRegion;
 	public Bitmap bitmap;
 	public Point offset;
+
+	public void set(float x, float y, TextureRegion texture, boolean billboard) {
+		this.x = x;
+		this.y = y;
+		this.texRegion = texture;
+		this.billboard = billboard;
+	}
+
+	public void set(float x, float y, Bitmap bitmap, boolean billboard) {
+		this.x = x;
+		this.y = y;
+		this.bitmap = bitmap;
+		this.billboard = billboard;
+	}
 
 }
