@@ -16,6 +16,8 @@ package org.oscim.utils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.logging.Level;
 
 import org.oscim.backend.Log;
@@ -33,7 +35,7 @@ public final class IOUtils {
 	 * @param closeable
 	 *            the data source which should be closed (may be null).
 	 */
-	public static void closeQuietly(Closeable closeable) {
+	public static void closeQuietly(OutputStream closeable) {
 		try {
 			if (closeable != null) {
 				closeable.close();
@@ -43,6 +45,15 @@ public final class IOUtils {
 		}
 	}
 
+	public static void closeQuietly(InputStream closeable) {
+		try {
+			if (closeable != null) {
+				closeable.close();
+			}
+		} catch (IOException e) {
+			Log.d(IOUtils.class.getName(), e.getMessage() + " " + e);
+		}
+	}
 	private IOUtils() {
 	}
 }
