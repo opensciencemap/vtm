@@ -276,7 +276,6 @@ public class SearchBox {
 					pos.setZoomLevel(13);
 					pos.setPosition(d.getLatitude(), d.getLongitude());
 					map.setMapPosition(pos);
-					map.updateMap(true);
 				}
 
 				scroller.setVisible(false);

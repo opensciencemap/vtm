@@ -21,7 +21,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.oscim.backend.Log;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.MapPosition;
-import org.oscim.core.MercatorProjection;
 import org.oscim.event.Dispatcher;
 import org.oscim.event.EventDispatcher;
 import org.oscim.event.EventListener;
@@ -129,7 +128,6 @@ public abstract class Map implements EventDispatcher {
 	 * Request call to onUpdate for all layers. This function can
 	 * be called from any thread. Request will be handled on main
 	 * thread.
-	 * 
 	 * @param forceRedraw pass true to render next frame
 	 */
 	public abstract void updateMap(boolean forceRedraw);
@@ -184,28 +182,29 @@ public abstract class Map implements EventDispatcher {
 		mUpdateDispatcher.dispatch();
 	}
 
+	/**
+	 * Set {@link MapPosition} of {@link Viewport} and trigger a redraw.
+	 */
 	public void setMapPosition(MapPosition mapPosition) {
 		mViewport.setMapPosition(mapPosition);
-	}
-
-	public void getMapPosition(MapPosition mapPosition) {
-		mViewport.getMapPosition(mapPosition);
+		updateMap(true);
 	}
 
 	/**
-	 * Set center of the map viewport and trigger a redraw.
-	 * 
-	 * @param latitude
-	 * @param longitude
+	 * Get current {@link MapPosition}.
+	 * @param mapPosition
 	 */
-	public void setMapCenter(double latitude, double longitude) {
-		latitude = MercatorProjection.limitLatitude(latitude);
-		longitude = MercatorProjection.limitLongitude(longitude);
-		mViewport.setPos(
-				MercatorProjection.longitudeToX(longitude),
-				MercatorProjection.latitudeToY(latitude));
+	public boolean getMapPosition(MapPosition mapPosition) {
+		return mViewport.getMapPosition(mapPosition);
+	}
 
-		updateMap(true);
+	/**
+	 * Get current {@link MapPosition}.
+	 */
+	public MapPosition getMapPostion() {
+		MapPosition pos = new MapPosition();
+		mViewport.getMapPosition(pos);
+		return pos;
 	}
 
 	public Viewport getViewport() {
@@ -247,9 +246,8 @@ public abstract class Map implements EventDispatcher {
 	}
 
 	/**
-	 * Listener interface for map update notifications. 
-	 * 
-	 * NOTE: Layers implementing this interface they will be automatically 
+	 * Listener interface for map update notifications.
+	 * NOTE: Layers implementing this interface they will be automatically
 	 * registered when the layer is added to the map and unresitered when
 	 * the layer is removed.
 	 */

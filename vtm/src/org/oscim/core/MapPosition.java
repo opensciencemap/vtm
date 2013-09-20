@@ -84,6 +84,14 @@ public class MapPosition {
 				MercatorProjection.toLongitude(x));
 	}
 
+	public double getLatitude() {
+		return MercatorProjection.toLatitude(y);
+	}
+
+	public double getLongitude() {
+		return MercatorProjection.toLongitude(x);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -102,4 +110,5 @@ public class MapPosition {
 
 		return builder.toString();
 	}
+
 }
