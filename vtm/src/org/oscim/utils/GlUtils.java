@@ -29,11 +29,9 @@ import org.oscim.renderer.GLState;
  * Utility functions
  */
 public class GlUtils {
-	private static GL20 GL = GLAdapter.get();
+	private static String TAG = GlUtils.class.getName();
 
-	// public static native void setColor(int location, int color, float alpha);
-	// public static native void setColorBlend(int location, int color1, int
-	// color2, float mix);
+	private static GL20 GL = GLAdapter.get();
 
 	public static void setColor(int location, int color, float alpha) {
 		GL = GLAdapter.get();
@@ -64,14 +62,12 @@ public class GlUtils {
 		float a2 = (((color2 >>> 24) & 0xff) / 255f) * mix;
 		GL = GLAdapter.get();
 		GL.glUniform4f
-		        (location,
-		         ((((color1 >>> 16) & 0xff) / 255f) * a1 + (((color2 >>> 16) & 0xff) / 255f) * a2),
-		         ((((color1 >>> 8) & 0xff) / 255f) * a1 + (((color2 >>> 8) & 0xff) / 255f) * a2),
-		         ((((color1 >>> 0) & 0xff) / 255f) * a1 + (((color2 >>> 0) & 0xff) / 255f) * a2),
-		         (a1 + a2));
+		  (location,
+		   ((((color1 >>> 16) & 0xff) / 255f) * a1 + (((color2 >>> 16) & 0xff) / 255f) * a2),
+		   ((((color1 >>> 8) & 0xff) / 255f) * a1 + (((color2 >>> 8) & 0xff) / 255f) * a2),
+		   ((((color1 >>> 0) & 0xff) / 255f) * a1 + (((color2 >>> 0) & 0xff) / 255f) * a2),
+		   (a1 + a2));
 	}
-
-	private static String TAG = "GlUtils";
 
 	public static void setTextureParameter(int min_filter, int mag_filter, int wrap_s, int wrap_t) {
 		GL = GLAdapter.get();
@@ -89,30 +85,8 @@ public class GlUtils {
 		                   wrap_t); // Set V Wrapping
 	}
 
-	// /**
-	// * @param bitmap
-	// * ...
-	// * @return textureId
-	// */
-	// public static int loadTextures(Bitmap bitmap) {
-	//
-	// int[] textures = new int[1];
-	// GLES20.glGenTextures(1, textures, 0);
-	//
-	// int textureID = textures[0];
-	//
-	// GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureID);
-	//
-	// setTextureParameter(GLES20.GL_LINEAR, GLES20.GL_LINEAR,
-	// GLES20.GL_CLAMP_TO_EDGE, GLES20.GL_CLAMP_TO_EDGE);
-	//
-	// GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-	//
-	// return textureID;
-	// }
-
 	public static int loadTexture(byte[] pixel, int width, int height, int format,
-	                              int min_filter, int mag_filter, int wrap_s, int wrap_t) {
+	        int min_filter, int mag_filter, int wrap_s, int wrap_t) {
 		int[] textureIds = GlUtils.glGenTextures(1);
 		GL = GLAdapter.get();
 
@@ -273,21 +247,6 @@ public class GlUtils {
 		return oom;
 	}
 
-	// public static void setBlendColors(int handle, float[] c1, float[] c2,
-	// float mix) {
-	// if (mix <= 0f)
-	// GLES20.glUniform4fv(handle, 1, c1, 0);
-	// else if (mix >= 1f)
-	// GLES20.glUniform4fv(handle, 1, c2, 0);
-	// else {
-	// GLES20.glUniform4f(handle,
-	// c1[0] * (1 - mix) + c2[0] * mix,
-	// c1[1] * (1 - mix) + c2[1] * mix,
-	// c1[2] * (1 - mix) + c2[2] * mix,
-	// c1[3] * (1 - mix) + c2[3] * mix);
-	// }
-	// }
-
 	public static void setColor(int handle, float[] c, float alpha) {
 		GL = GLAdapter.get();
 
@@ -328,7 +287,7 @@ public class GlUtils {
 	/**
 	 * public-domain function by Darel Rex Finley from
 	 * http://alienryderflex.com/saturation.html
-	 *
+	 * 
 	 * @param color
 	 *            The passed-in RGB values can be on any desired scale, such as
 	 *            0 to 1, or 0 to 255.
@@ -411,61 +370,4 @@ public class GlUtils {
 		buf.position(0);
 		GL.glDeleteTextures(num, buf);
 	}
-
-	// private final static float[] mIdentity = {
-	// 1, 0, 0, 0,
-	// 0, 1, 0, 0,
-	// 0, 0, 1, 0,
-	// 0, 0, 0, 1 };
-	//
-	// public static void setTileMatrix(float[] matrix, float tx, float ty,
-	// float s) {
-	// System.arraycopy(mIdentity, 0, matrix, 0, 16);
-	// // scale tile relative to map scale
-	// matrix[0] = matrix[5] = s / GLRenderer.COORD_SCALE;
-	// // translate relative to map center
-	// matrix[12] = tx * s;
-	// matrix[13] = ty * s;
-	// }
-	//
-	// public static void setTranslation(float[] matrix, float x, float y, float
-	// z) {
-	// System.arraycopy(mIdentity, 0, matrix, 0, 16);
-	// matrix[12] = x;
-	// matrix[13] = y;
-	// matrix[14] = z;
-	// }
-	//
-	// public static void setMatrix(float[] matrix, float tx, float ty, float
-	// scale) {
-	// System.arraycopy(mIdentity, 0, matrix, 0, 16);
-	// matrix[12] = tx;
-	// matrix[13] = ty;
-	// matrix[0] = scale;
-	// matrix[5] = scale;
-	// //matrix[10] = scale;
-	// }
-	//
-	// public static void setIdentity(float[] matrix) {
-	// System.arraycopy(mIdentity, 0, matrix, 0, 16);
-	// }
-	//
-	// public static void setScaleM(float[] matrix, float sx, float sy, float
-	// sz) {
-	// System.arraycopy(mIdentity, 0, matrix, 0, 16);
-	// matrix[0] = sx;
-	// matrix[5] = sy;
-	// matrix[10] = sz;
-	// }
-	//
-	// public static void addOffsetM(float[] matrix, int delta) {
-	// // from http://www.mathfor3dgameprogramming.com/code/Listing9.1.cpp
-	// // float n = Viewport.VIEW_NEAR;
-	// // float f = Viewport.VIEW_FAR;
-	// // float pz = 1;
-	// // float epsilon = -2.0f * f * n * delta / ((f + n) * pz * (pz + delta));
-	// float epsilon = 1.0f / (1 << 11);
-	//
-	// matrix[10] *= 1.0f + epsilon * delta;
-	// }
 }
