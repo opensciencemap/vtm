@@ -18,24 +18,31 @@ package org.oscim.utils;
 import org.oscim.core.Tile;
 
 /**
- * Scan-line fill algorithm to retrieve tile-coordinates.
- *
- * ScanBox is used to calculate tile coordinates that intersect
- * the box (or trapezoid) which is the projection of screen
- * bounds to the map.
- *
- * use:
+ * Scan-line fill algorithm to retrieve tile-coordinates from
+ * Viewport.
+ * <p>
+ * ScanBox is used to calculate tile coordinates that intersect the box (or
+ * trapezoid) which is the projection of screen bounds to the map. Usage:
+ * 
+ * <pre>
  * Viewport.getMapViewProjection(box)
- * yourScanBox.scan(pos.x, pos.y, pos.scale, zoomLevel, coords);
- *
- * where zoomLevel is the zoom-level for which tile coordinates
- * should be calculated.
- * */
+ * 	ScanBox sb = new ScanBox(){
+ * 		@Override
+ *          protected void setVisible(int y, int x1, int x2) {
+ *          }
+ * 	};
+ * sb.scan(pos.x, pos.y, pos.scale, * zoomLevel, coords);
+ * 
+ * </pre>
+ * 
+ * where zoomLevel is the zoom-level for which tile coordinates should be
+ * calculated.
+ */
 public abstract class ScanBox {
 
 	private final float[] mBox = new float[8];
 
-	private float[] transScale(double x, double y, double scale, int zoom, float[] box){
+	private float[] transScale(double x, double y, double scale, int zoom, float[] box) {
 		scale *= Tile.SIZE;
 
 		//double curScale = Tile.SIZE * scale;
@@ -95,7 +102,7 @@ public abstract class ScanBox {
 		float max = Float.MIN_VALUE;
 		float min = Float.MAX_VALUE;
 
-		for(int i = 0; i < 8; i += 2){
+		for (int i = 0; i < 8; i += 2) {
 			float xx = box[i];
 			if (xx > max)
 				max = xx;
@@ -103,8 +110,8 @@ public abstract class ScanBox {
 				min = xx;
 		}
 
-		max = (float)Math.ceil(max);
-		min = (float)Math.floor(min);
+		max = (float) Math.ceil(max);
+		min = (float) Math.floor(min);
 		if (min == max)
 			max++;
 
@@ -197,13 +204,13 @@ public abstract class ScanBox {
 			if (dy > e0.dy)
 				dy = e0.dy;
 
-			int x0 = (int)Math.ceil(e0.x0 + m0 * dy);
+			int x0 = (int) Math.ceil(e0.x0 + m0 * dy);
 
 			dy = d1 + y - e1.y0;
 			if (dy > e1.dy)
 				dy = e1.dy;
 
-			int x1 = (int)Math.floor(e1.x0 + m1 * dy);
+			int x1 = (int) Math.floor(e1.x0 + m1 * dy);
 
 			if (x1 < minX)
 				x1 = minX;
