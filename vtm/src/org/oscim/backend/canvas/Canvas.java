@@ -1,6 +1,5 @@
 package org.oscim.backend.canvas;
 
-
 public interface Canvas {
 
 	void setBitmap(Bitmap bitmap);

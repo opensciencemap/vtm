@@ -17,23 +17,29 @@ package org.oscim.backend;
 public class Log {
 	public static Logger logger;
 
-	public static void d(String tag, String msg){
+	public static void d(String tag, String msg) {
 		logger.d(tag, msg);
 	}
-	public static void w(String tag, String msg){
+
+	public static void w(String tag, String msg) {
 		logger.w(tag, msg);
 	}
-	public static void e(String tag, String msg){
+
+	public static void e(String tag, String msg) {
 		logger.e(tag, msg);
 	}
-	public static void i(String tag, String msg){
+
+	public static void i(String tag, String msg) {
 		logger.i(tag, msg);
 	}
 
-	public interface Logger{
+	public interface Logger {
 		void d(String tag, String msg);
+
 		void w(String tag, String msg);
+
 		void e(String tag, String msg);
+
 		void i(String tag, String msg);
 	}
 }

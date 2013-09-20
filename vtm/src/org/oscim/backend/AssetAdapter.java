@@ -11,10 +11,9 @@ public abstract class AssetAdapter {
 
 	/**
 	 * Open file as stream.
-	 *
+	 * 
 	 * @param name the name
 	 * @return the input stream
 	 */
 	public abstract InputStream openFileAsStream(String name);
-
 }

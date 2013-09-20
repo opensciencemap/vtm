@@ -17,9 +17,14 @@ package org.oscim.backend.canvas;
 public interface Bitmap {
 
 	int getWidth();
+
 	int getHeight();
+
 	void recycle();
+
 	int[] getPixels();
+
 	void eraseColor(int color);
+
 	int uploadToTexture(boolean replace);
 }

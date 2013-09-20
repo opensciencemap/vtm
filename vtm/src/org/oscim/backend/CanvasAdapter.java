@@ -22,7 +22,6 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Paint;
 
-
 public abstract class CanvasAdapter {
 	protected static final String TAG = CanvasAdapter.class.getName();
 
@@ -56,7 +55,7 @@ public abstract class CanvasAdapter {
 		}
 
 		InputStream inputStream = AssetAdapter.g.openFileAsStream(src);
-		if (inputStream == null){
+		if (inputStream == null) {
 			Log.e(TAG, "invalid bitmap source: " + src);
 			return null;
 		}

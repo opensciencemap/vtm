@@ -12,7 +12,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class XMLReaderAdapter {
-	public void parse(DefaultHandler handler, InputStream is) throws IOException  {
+	public void parse(DefaultHandler handler, InputStream is) throws IOException {
 
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		factory.setNamespaceAware(true);
@@ -23,9 +23,9 @@ public class XMLReaderAdapter {
 			xmlReader.parse(new InputSource(is));
 
 		} catch (SAXException e) {
-	        e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-	        e.printStackTrace();
-        }
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
 	}
 }

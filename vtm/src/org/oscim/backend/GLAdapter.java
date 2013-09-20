@@ -14,7 +14,6 @@
  */
 package org.oscim.backend;
 
-
 public class GLAdapter {
 
 	public static GL20 g;
@@ -24,7 +23,7 @@ public class GLAdapter {
 
 	public static boolean NON_PREMUL_CANVAS;
 
-	public static GL20 get(){
+	public static GL20 get() {
 		if (g == null)
 			throw new IllegalStateException();
 
