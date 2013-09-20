@@ -18,12 +18,15 @@ package org.oscim.layers.marker;
 import java.util.List;
 
 import org.oscim.core.BoundingBox;
+import org.oscim.core.MapPosition;
 import org.oscim.core.Point;
 import org.oscim.event.MotionEvent;
+import org.oscim.event.TouchListener;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 
-public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<Item> {
+public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<Item>
+		implements TouchListener {
 	//private static final String TAG = ItemizedIconOverlay.class.getName();
 
 	protected final List<Item> mItemList;
@@ -98,37 +101,37 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 		return result;
 	}
 
-//	/**
-//	 * Each of these methods performs a item sensitive check. If the item is
-//	 * located its corresponding method is called. The result of the call is
-//	 * returned. Helper methods are provided so that child classes may more
-//	 * easily override behavior without resorting to overriding the
-//	 * ItemGestureListener methods.
-//	 */
-//	@Override
-//	public boolean onSingleTapUp(MotionEvent event) {
-//		return activateSelectedItems(event, mActiveItemSingleTap) || super.onSingleTapUp(event);
-//	}
-//
-//	protected boolean onSingleTapUpHelper(int index, Item item) {
-//		return this.mOnItemGestureListener.onItemSingleTapUp(index, item);
-//	}
-//
-//	private final ActiveItem mActiveItemSingleTap = new ActiveItem() {
-//		@Override
-//		public boolean run(int index) {
-//			final ItemizedIconLayer<Item> that = ItemizedIconLayer.this;
-//			if (that.mOnItemGestureListener == null) {
-//				return false;
-//			}
-//			return onSingleTapUpHelper(index, that.mItemList.get(index));
-//		}
-//	};
-//
-//	@Override
-//	public boolean onLongPress(MotionEvent event) {
-//		return activateSelectedItems(event, mActiveItemLongPress) || super.onLongPress(event);
-//	}
+	/**
+	 * Each of these methods performs a item sensitive check. If the item is
+	 * located its corresponding method is called. The result of the call is
+	 * returned. Helper methods are provided so that child classes may more
+	 * easily override behavior without resorting to overriding the
+	 * ItemGestureListener methods.
+	 */
+	@Override
+	public boolean onTap(MotionEvent event, MapPosition pos) {
+		return activateSelectedItems(event, mActiveItemSingleTap);
+	}
+
+	protected boolean onSingleTapUpHelper(int index, Item item) {
+		return this.mOnItemGestureListener.onItemSingleTapUp(index, item);
+	}
+
+	private final ActiveItem mActiveItemSingleTap = new ActiveItem() {
+		@Override
+		public boolean run(int index) {
+			final ItemizedIconLayer<Item> that = ItemizedIconLayer.this;
+			if (that.mOnItemGestureListener == null) {
+				return false;
+			}
+			return onSingleTapUpHelper(index, that.mItemList.get(index));
+		}
+	};
+
+	@Override
+	public boolean onLongPress(MotionEvent event, MapPosition pos) {
+		return activateSelectedItems(event, mActiveItemLongPress);
+	}
 
 	protected boolean onLongPressHelper(int index, Item item) {
 		return this.mOnItemGestureListener.onItemLongPress(index, item);
@@ -145,11 +148,15 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 		}
 	};
 
+	@Override
+	public boolean onPress(MotionEvent e, MapPosition pos) {
+		return false;
+	}
+
 	/**
 	 * When a content sensitive action is performed the content item needs to be
 	 * identified. This method does that and then performs the assigned task on
 	 * that item.
-	 *
 	 * @param event
 	 *            ...
 	 * @param task
@@ -211,7 +218,6 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 	 * When the item is touched one of these methods may be invoked depending on
 	 * the type of touch. Each of them returns true if the event was completely
 	 * handled.
-	 *
 	 * @param <T>
 	 *            ....
 	 */
