@@ -37,6 +37,7 @@ import org.oscim.renderer.MapRenderer.Matrices;
 public class CustomRenderer extends LayerRenderer {
 
 	private final Map mMap;
+	private final MapPosition mMapPosition;
 
 	private int mProgramObject;
 	private int hVertexPosition;
@@ -53,6 +54,7 @@ public class CustomRenderer extends LayerRenderer {
 
 	public CustomRenderer(Map map) {
 		mMap = map;
+		mMapPosition = new MapPosition();
 	}
 
 	// ---------- everything below runs in GLRender Thread ----------
@@ -71,7 +73,6 @@ public class CustomRenderer extends LayerRenderer {
 		}
 	}
 
-	@Override
 	protected void compile() {
 		// modify mVerticesData and put in FloatBuffer
 

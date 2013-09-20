@@ -316,12 +316,17 @@ public class MapRenderer {
 		LayerRenderer[] layers = mMap.getLayers().getLayerRenderer();
 
 		for (int i = 0, n = layers.length; i < n; i++) {
-			LayerRenderer renderLayer = layers[i];
+			LayerRenderer renderer = layers[i];
 
-			renderLayer.update(pos, changed, mMatrices);
+			if (!renderer.isInitialized){
+				renderer.setup();
+				renderer.isInitialized = true;
+			}
 
-			if (renderLayer.isReady)
-				renderLayer.render(mMapPosition, mMatrices);
+			renderer.update(pos, changed, mMatrices);
+
+			if (renderer.isReady)
+				renderer.render(mMapPosition, mMatrices);
 		}
 
 		if (GLUtils.checkGlOutOfMemory("finish")) {

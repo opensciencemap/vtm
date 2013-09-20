@@ -20,9 +20,9 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
+import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
-import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.utils.FastMath;
@@ -35,7 +35,7 @@ import org.oscim.utils.FastMath;
  * https://github.com/dalinaum/opengl-es-book-samples/tree/master/Android
  * */
 
-public class CustomRenderer2 extends LayerRenderer {
+public class CustomRenderer2 extends ElementRenderer {
 
 	private int mProgramObject;
 	private int hVertexPosition;

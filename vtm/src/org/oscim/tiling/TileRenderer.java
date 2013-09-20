@@ -587,12 +587,6 @@ public class TileRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected void compile() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	protected void render(MapPosition position, Matrices matrices) {
 		// TODO Auto-generated method stub
 

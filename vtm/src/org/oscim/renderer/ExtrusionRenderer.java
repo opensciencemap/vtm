@@ -85,7 +85,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 	@Override
 	protected void update(MapPosition pos, boolean changed, Matrices matrices) {
-		mMapPosition.copy(pos);
 
 		if (!initialized && !initShader())
 			return;
@@ -155,11 +154,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 			setReady(true);
 		else
 			mTileLayer.releaseTiles(mTileSet);
-	}
-
-	@Override
-	protected void compile() {
-
 	}
 
 	private static ExtrusionLayer getLayer(MapTile t) {

@@ -16,13 +16,14 @@ package org.oscim.renderer;
 
 import org.oscim.backend.GL20;
 import org.oscim.core.MapPosition;
+import org.oscim.core.Tile;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.BitmapLayer;
-import org.oscim.renderer.elements.RenderElement;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.PolygonLayer;
+import org.oscim.renderer.elements.RenderElement;
 import org.oscim.renderer.elements.TextureLayer;
 import org.oscim.utils.FastMath;
 
@@ -31,10 +32,18 @@ import org.oscim.utils.FastMath;
  */
 public abstract class ElementRenderer extends LayerRenderer {
 
+	/**
+	 * Use mMapPosition.copy(position) to keep the position for which
+	 * the Overlay is _compiled_. NOTE: required by setMatrix utility
+	 * functions to draw this layer fixed to the map
+	 */
+	protected MapPosition mMapPosition;
+
 	public final ElementLayers layers;
 
 	public ElementRenderer() {
 		layers = new ElementLayers();
+		mMapPosition = new MapPosition();
 	}
 
 	/**
@@ -89,7 +98,11 @@ public abstract class ElementRenderer extends LayerRenderer {
 		}
 	}
 
-	@Override
+	/**
+	 * Compiles all layers into one BufferObject. Sets renderer to be ready
+	 * when successful. When no data is available (layer.getSize() == 0) then
+	 * BufferObject will be released and layers will not be rendered.
+	 */
 	protected void compile() {
 		int newSize = layers.getSize();
 		if (newSize <= 0) {
@@ -104,5 +117,51 @@ public abstract class ElementRenderer extends LayerRenderer {
 
 		if (MapRenderer.uploadLayers(layers, newSize, true))
 			setReady(true);
+	}
+
+	/**
+	 * Utility: Set matrices.mvp matrix relative to the difference of current
+	 * MapPosition and the last updated Overlay MapPosition.
+	 * Use this to 'stick' your layer to the map. Note: Vertex coordinates
+	 * are assumed to be scaled by MapRenderer.COORD_SCALE (== 8).
+	 * 
+	 * @param position
+	 *            current MapPosition
+	 * @param matrices
+	 *            current Matrices
+	 * @param project
+	 *            if true apply view- and projection, or just view otherwise.
+	 */
+	protected void setMatrix(MapPosition position, Matrices matrices, boolean project) {
+		MapPosition oPos = mMapPosition;
+
+		double tileScale = Tile.SIZE * position.scale;
+
+		double x = oPos.x - position.x;
+		double y = oPos.y - position.y;
+
+		// wrap around date-line
+		//	while (x < -1)
+		//		x += 1.0;
+		//	while (x > 2)
+		//		x -= 1.0;
+
+		matrices.mvp.setTransScale((float) (x * tileScale),
+		                           (float) (y * tileScale),
+		                           (float) ((position.scale / oPos.scale) / MapRenderer.COORD_SCALE));
+
+		matrices.mvp.multiplyLhs(project ? matrices.viewproj : matrices.view);
+	}
+
+	/**
+	 * Utility: Set matrices.mvp matrix relative to the difference of current
+	 * MapPosition and the last updated Overlay MapPosition and add
+	 * matrices.viewproj
+	 * 
+	 * @param position ...
+	 * @param matrices ...
+	 */
+	protected void setMatrix(MapPosition position, Matrices matrices) {
+		setMatrix(position, matrices, true);
 	}
 }

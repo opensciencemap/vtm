@@ -20,12 +20,12 @@ public class CustomRenderLayer extends Layer {
 
 			synchronized (this) {
 				currentState = someConccurentVariable;
+				compile();
 			}
 			Log.d(TAG, "state " + currentState);
 
 		}
 
-		@Override
 		protected void compile() {
 			setReady(true);
 		}
