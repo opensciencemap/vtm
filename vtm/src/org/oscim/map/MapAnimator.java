@@ -21,9 +21,9 @@ public class MapAnimator {
 	}
 
 	private final int ANIM_NONE = 0;
-	private final int ANIM_MOVE = 1 << 1;
-	private final int ANIM_SCALE = 1 << 2;
-	private final int ANIM_FLING = 1 << 3;
+	private final int ANIM_MOVE = 1 << 0;
+	private final int ANIM_SCALE = 1 << 1;
+	private final int ANIM_FLING = 1 << 2;
 
 	private final Map mMap;
 	private final Viewport mViewport;
@@ -48,10 +48,10 @@ public class MapAnimator {
 
 		// calculate the maximum scale at which the bbox is completely visible
 		double dx = Math.abs(MercatorProjection.longitudeToX(bbox.getMaxLongitude())
-		                     - MercatorProjection.longitudeToX(bbox.getMinLongitude()));
+		    - MercatorProjection.longitudeToX(bbox.getMinLongitude()));
 
 		double dy = Math.abs(MercatorProjection.latitudeToY(bbox.getMinLatitude())
-		                     - MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
+		    - MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
 
 		double zx = mMap.getWidth() / (dx * Tile.SIZE);
 		double zy = mMap.getHeight() / (dy * Tile.SIZE);
@@ -166,11 +166,13 @@ public class MapAnimator {
 	/**
 	 * called by MapRenderer at begin of each frame.
 	 */
-	public void updateAnimation() {
+	public synchronized void updateAnimation() {
 		if (mState == ANIM_NONE)
 			return;
 
 		long millisLeft = mAnimEnd - MapRenderer.frametime;
+
+		boolean changed = false;
 
 		synchronized (mViewport) {
 
@@ -200,8 +202,6 @@ public class MapAnimator {
 			}
 
 			float adv = FastMath.clamp(1.0f - millisLeft / mDuration, 0, 1);
-			boolean changed = false;
-
 
 			if ((mState & ANIM_SCALE) != 0) {
 				if (mScaleBy > 0)
@@ -218,11 +218,6 @@ public class MapAnimator {
 				changed = true;
 			}
 
-			//if (mAnimMove && mAnimScale) {
-			//	mPos.angle = mStartPos.angle * (1 - adv);
-			//	updateMatrix();
-			//}
-
 			if ((mState & ANIM_FLING) != 0) {
 				adv = (float) Math.sqrt(adv);
 				double dx = mVelocity.x * adv;
@@ -236,18 +231,20 @@ public class MapAnimator {
 					changed = true;
 				}
 			}
-			// continue animation
-			if (changed) {
-				// render and inform layers that position has changed
-				mMap.updateMap(true);
-			} else {
-				// just render next frame
-				mMap.render();
-			}
-
 			// remember current map position
 			mViewport.getMapPosition(mPos);
+
 		}
+
+		// continue animation
+		if (changed) {
+			// render and inform layers that position has changed
+			mMap.updateMap(true);
+		} else {
+			// just render next frame
+			mMap.render();
+		}
+
 	}
 
 	private void doScale(double newScale) {
