@@ -16,21 +16,21 @@ package org.oscim.renderer.elements;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.backend.GL20;
+import org.oscim.backend.Log;
 import org.oscim.renderer.BufferObject;
 import org.oscim.theme.renderinstruction.Line;
-
-import org.oscim.backend.Log;
 
 public class ElementLayers {
 	private final static String TAG = ElementLayers.class.getName();
 
-	public static void initRenderer() {
-		LineLayer.Renderer.init();
-		LineTexLayer.Renderer.init();
-		PolygonLayer.Renderer.init();
-		TextureLayer.Renderer.init();
-		BitmapLayer.Renderer.init();
-		TextureItem.init(0);
+	public static void initRenderer(GL20 gl) {
+		LineLayer.Renderer.init(gl);
+		LineTexLayer.Renderer.init(gl);
+		PolygonLayer.Renderer.init(gl);
+		TextureLayer.Renderer.init(gl);
+		BitmapLayer.Renderer.init(gl);
+		TextureItem.init(gl, 0);
 	}
 
 	// mixed Polygon- and LineLayer

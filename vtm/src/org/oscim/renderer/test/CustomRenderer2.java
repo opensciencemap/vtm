@@ -17,16 +17,15 @@ package org.oscim.renderer.test;
 import java.nio.FloatBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
+import org.oscim.renderer.GLState;
+import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
-import org.oscim.renderer.GLState;
-import org.oscim.renderer.LayerRenderer;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.GlUtils;
 
 
 /*
@@ -37,8 +36,6 @@ import org.oscim.utils.GlUtils;
  * */
 
 public class CustomRenderer2 extends LayerRenderer {
-
-	private static final GL20 GL = GLAdapter.get();
 
 	private int mProgramObject;
 	private int hVertexPosition;
@@ -143,13 +140,13 @@ public class CustomRenderer2 extends LayerRenderer {
 						| (int) (0xff * fx) << 8
 						| (int) (0xff * fz);
 
-				GlUtils.setColor(hColorPosition, c, alpha);
+				GLUtils.setColor(hColorPosition, c, alpha);
 
 				GL.glDrawArrays(GL20.GL_TRIANGLE_FAN, 0, 6);
 			}
 		}
 
-		GlUtils.setColor(hColorPosition, Color.DKGRAY, 0.3f);
+		GLUtils.setColor(hColorPosition, Color.DKGRAY, 0.3f);
 
 		for (int y = -offset_y; y < offset_y; y++) {
 			for (int x = -offset_x; x < offset_x; x++) {
@@ -161,12 +158,12 @@ public class CustomRenderer2 extends LayerRenderer {
 			}
 		}
 
-		GlUtils.checkGlError("...");
+		GLUtils.checkGlError("...");
 	}
 
 	private boolean init() {
 		// Load the vertex/fragment shaders
-		int programObject = GlUtils.createProgram(vShaderStr, fShaderStr);
+		int programObject = GLUtils.createProgram(vShaderStr, fShaderStr);
 
 		if (programObject == 0)
 			return false;

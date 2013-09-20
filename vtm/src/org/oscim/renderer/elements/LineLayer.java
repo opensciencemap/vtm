@@ -23,12 +23,12 @@ import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.GlUtils;
 
 /**
  */
@@ -64,9 +64,7 @@ public final class LineLayer extends RenderElement {
 	}
 
 	/**
-	 * line extrusion is based on code from GLMap
-	 * (https://github.com/olofsj/GLMap/)
-	 *
+	 * @deprecated
 	 * @param points
 	 *            array of points as x,y pairs.
 	 * @param index
@@ -86,6 +84,8 @@ public final class LineLayer extends RenderElement {
 			addLine(geom.points, geom.index, -1, true);
 		else if (geom.isLine())
 			addLine(geom.points, geom.index, -1, false);
+		else
+			Log.d(TAG, "geometry must be LINE or POLYGON");
 	}
 
 	public void addLine(float[] points, int numPoints, boolean closed) {
@@ -598,17 +598,17 @@ public final class LineLayer extends RenderElement {
 		private static int[] hLineMode = new int[2];
 		public static int mTexID;
 
-		static boolean init() {
-			GL = GLAdapter.get();
+		static boolean init(GL20 gl) {
+			GL = gl;
 
-			lineProgram[0] = GlUtils.createProgram(lineVertexShader,
+			lineProgram[0] = GLUtils.createProgram(lineVertexShader,
 					lineFragmentShader);
 			if (lineProgram[0] == 0) {
 				Log.e(TAG, "Could not create line program.");
 				//return false;
 			}
 
-			lineProgram[1] = GlUtils.createProgram(lineVertexShader,
+			lineProgram[1] = GLUtils.createProgram(lineVertexShader,
 					lineSimpleFragmentShader);
 			if (lineProgram[1] == 0) {
 				Log.e(TAG, "Could not create simple line program.");
@@ -642,7 +642,7 @@ public final class LineLayer extends RenderElement {
 				}
 			}
 
-			mTexID = GlUtils.loadTexture(pixel, 128, 128, GL20.GL_ALPHA,
+			mTexID = GLUtils.loadTexture(pixel, 128, 128, GL20.GL_ALPHA,
 					GL20.GL_NEAREST, GL20.GL_NEAREST,
 					GL20.GL_MIRRORED_REPEAT, GL20.GL_MIRRORED_REPEAT);
 
@@ -650,7 +650,8 @@ public final class LineLayer extends RenderElement {
 			return true;
 		}
 
-		public static RenderElement draw(ElementLayers layers, RenderElement curLayer, MapPosition pos,
+		public static RenderElement draw(ElementLayers layers, RenderElement curLayer,
+				MapPosition pos,
 				Matrices m, float div, int mode) {
 
 			if (curLayer == null)
@@ -717,12 +718,12 @@ public final class LineLayer extends RenderElement {
 				float width;
 
 				if (line.fade < zoom) {
-					GlUtils.setColor(uLineColor, line.color, 1);
+					GLUtils.setColor(uLineColor, line.color, 1);
 				} else if (line.fade > zoom) {
 					continue;
 				} else {
 					float alpha = (float) (scale > 1.2 ? scale : 1.2) - 1;
-					GlUtils.setColor(uLineColor, line.color, alpha);
+					GLUtils.setColor(uLineColor, line.color, alpha);
 				}
 
 				if (mode == 0 && blur && line.blur == 0) {

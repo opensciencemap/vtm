@@ -29,15 +29,13 @@ import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.tiling.MapTile;
-import org.oscim.utils.GlUtils;
-import org.oscim.utils.Matrix4;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
 
 public class MapRenderer {
 	private static final String TAG = MapRenderer.class.getName();
 
-	private static GL20 GL = GLAdapter.get();
+	static GL20 GL;
 
 	private static final int SHORT_BYTES = 2;
 	private static final int CACHE_TILES_MAX = 250;
@@ -56,17 +54,17 @@ public class MapRenderer {
 
 	public class Matrices {
 
-		/** do not modify! */
-		public final Matrix4 viewproj = new Matrix4();
-		/** do not modify! */
-		public final Matrix4 proj = new Matrix4();
-		/** do not modify! */
-		public final Matrix4 view = new Matrix4();
-		/** do not modify! */
+		/** Do not modify! */
+		public final GLMatrix viewproj = new GLMatrix();
+		/** Do not modify! */
+		public final GLMatrix proj = new GLMatrix();
+		/** Do not modify! */
+		public final GLMatrix view = new GLMatrix();
+		/** Do not modify! */
 		public final float[] mapPlane = new float[8];
 
-		/** for temporary use by callee */
-		public final Matrix4 mvp = new Matrix4();
+		/** For temporary use, to setup MVP-Matrix */
+		public final GLMatrix mvp = new GLMatrix();
 
 		/**
 		 * Set MVP so that coordinates are in screen pixel coordinates with 0,0
@@ -177,7 +175,7 @@ public class MapRenderer {
 	}
 
 	public static void setBackgroundColor(int color) {
-		mClearColor = GlUtils.colorToFloat(color);
+		mClearColor = GLUtils.colorToFloat(color);
 		mUpdateColor = true;
 	}
 
@@ -326,7 +324,7 @@ public class MapRenderer {
 				renderLayer.render(mMapPosition, mMatrices);
 		}
 
-		if (GlUtils.checkGlOutOfMemory("finish")) {
+		if (GLUtils.checkGlOutOfMemory("finish")) {
 			BufferObject.checkBufferUsage(true);
 			// FIXME also throw out some textures etc
 		}
@@ -353,7 +351,7 @@ public class MapRenderer {
 			mMatrices.mvp.setScale(0.5f, 0.5f, 1);
 			mMatrices.proj.multiplyLhs(mMatrices.mvp);
 		}
-		GL = GLAdapter.get();
+
 		GL.glViewport(0, 0, width, height);
 		GL.glScissor(0, 0, width, height);
 		GL.glEnable(GL20.GL_SCISSOR_TEST);
@@ -371,7 +369,7 @@ public class MapRenderer {
 		mNewSurface = false;
 
 		// upload quad indices used by Texture- and LineTexRenderer
-		int[] vboIds = GlUtils.glGenBuffers(2);
+		int[] vboIds = GLUtils.glGenBuffers(2);
 
 		mQuadIndicesID = vboIds[0];
 		int maxIndices = maxQuads * 6;
@@ -411,22 +409,27 @@ public class MapRenderer {
 		if (mClearColor != null)
 			mUpdateColor = true;
 
-		GLState.init();
+		GLState.init(GL);
 
 		mMap.updateMap(true);
 	}
 
 	public void onSurfaceCreated() {
+		GL = GLAdapter.get();
 
-		Log.d(TAG, "surface created");
-
+		// Log.d(TAG, "surface created");
 		// Log.d(TAG, GL.glGetString(GL20.GL_EXTENSIONS));
 
-		// classes that require GL context for initialization
-		ElementLayers.initRenderer();
+		GLState.init(GL);
+		GLUtils.init(GL);
 
 		// Set up some vertex buffer objects
-		BufferObject.init(CACHE_TILES);
+		BufferObject.init(GL, CACHE_TILES);
+
+		// classes that require GL context for initialization
+		ElementLayers.initRenderer(GL);
+
+		LayerRenderer.init(GL);
 
 		mNewSurface = true;
 	}

@@ -18,12 +18,11 @@ import java.util.ArrayList;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.GLState;
-import org.oscim.utils.GlUtils;
+import org.oscim.renderer.GLUtils;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
@@ -31,7 +30,8 @@ import org.oscim.utils.pool.SyncPool;
 
 public class TextureItem extends Inlist<TextureItem> {
 	private final static String TAG = TextureItem.class.getName();
-	private static final GL20 GL = GLAdapter.get();
+
+	private static GL20 GL;
 
 	// texture ID
 	public int id;
@@ -135,7 +135,7 @@ public class TextureItem extends Inlist<TextureItem> {
 				pool = null;
 			}
 
-			int[] textureIds = GlUtils.glGenTextures(num);
+			int[] textureIds = GLUtils.glGenTextures(num);
 
 			for (int i = 0; i < num; i++) {
 				TextureItem to = new TextureItem(textureIds[i]);
@@ -216,7 +216,7 @@ public class TextureItem extends Inlist<TextureItem> {
 
 	/**
 	 * This function may only be used in GLRenderer Thread.
-	 *
+	 * 
 	 * @param t
 	 *            the TextureObjet to compile and upload
 	 */
@@ -231,11 +231,11 @@ public class TextureItem extends Inlist<TextureItem> {
 			int size = mTextures.size();
 			if (size > 0) {
 				int[] tmp = new int[size];
-				for (int i = 0; i < size; i++){
+				for (int i = 0; i < size; i++) {
 					tmp[i] = mTextures.get(i).intValue();
 				}
 				mTextures.clear();
-				GlUtils.glDeleteTextures(size, tmp);
+				GLUtils.glDeleteTextures(size, tmp);
 
 				mTexCnt -= size;
 			}
@@ -243,20 +243,20 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		if (t.id < 0) {
 			mTexCnt++;
-			int[] textureIds = GlUtils.glGenTextures(1);
+			int[] textureIds = GLUtils.glGenTextures(1);
 			t.id = textureIds[0];
 			initTexture(t);
 			if (TextureLayer.Renderer.debug)
 				Log.d(TAG, "fill:" + pool.getFill()
-						+ " count:" + mTexCnt
-						+ " new texture " + t.id);
+				           + " count:" + mTexCnt
+				           + " new texture " + t.id);
 		}
 
 		//Log.d(TAG, "UPLOAD ID: " + t.id);
 
 		uploadTexture(t, t.bitmap,
-				mBitmapFormat, mBitmapType,
-				TEXTURE_WIDTH, TEXTURE_HEIGHT);
+		              mBitmapFormat, mBitmapType,
+		              TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
 		if (!t.ownBitmap)
 			TextureItem.releaseBitmap(t);
@@ -267,7 +267,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	}
 
 	public static void uploadTexture(TextureItem t, Bitmap bitmap,
-			int format, int type, int w, int h) {
+	        int format, int type, int w, int h) {
 
 		if (t == null) {
 			Log.d(TAG, "no texture!");
@@ -287,31 +287,33 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 
 		if (TextureLayer.Renderer.debug)
-			GlUtils.checkGlError(TAG);
+			GLUtils.checkGlError(TAG);
 	}
 
 	private static void initTexture(TextureItem t) {
 		GLState.bindTex2D(t.id);
 
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER,
-				GL20.GL_LINEAR);
+		                   GL20.GL_LINEAR);
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER,
-				GL20.GL_LINEAR);
+		                   GL20.GL_LINEAR);
 
 		if (t.repeat) {
 			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
-					GL20.GL_REPEAT);
+			                   GL20.GL_REPEAT);
 			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
-					GL20.GL_REPEAT);
+			                   GL20.GL_REPEAT);
 		} else {
 			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
-					GL20.GL_CLAMP_TO_EDGE);
+			                   GL20.GL_CLAMP_TO_EDGE);
 			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
-					GL20.GL_CLAMP_TO_EDGE);
+			                   GL20.GL_CLAMP_TO_EDGE);
 		}
 	}
 
-	static void init(int num) {
+	static void init(GL20 gl, int num) {
+		GL = gl;
+
 		Log.d(TAG, "init textures " + num);
 		mTexCnt = num;
 		pool.init(num);

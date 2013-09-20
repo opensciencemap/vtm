@@ -35,8 +35,6 @@ import org.oscim.utils.geom.Triangulator;
 public class ExtrusionLayer extends RenderElement {
 	private final static String TAG = ExtrusionLayer.class.getName();
 
-	private static final GL20 GL = GLAdapter.get();
-
 	private static final float S = MapRenderer.COORD_SCALE;
 	private VertexItem mVertices;
 	private VertexItem mCurVertices;
@@ -399,6 +397,7 @@ public class ExtrusionLayer extends RenderElement {
 		vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
 		vboIndices.loadBufferData(sbuf, size);
 
+		GL20 GL = GLAdapter.get();
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		// upload vertices

@@ -15,7 +15,6 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -24,15 +23,12 @@ import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileRenderer;
 import org.oscim.tiling.TileSet;
-import org.oscim.utils.GlUtils;
 
 // TODO move MapTile part to BuildingLayer and make
 // this class work on ExtrusionLayers
 
 public class ExtrusionRenderer extends LayerRenderer {
 	private final static String TAG = ExtrusionRenderer.class.getName();
-
-	private static final GL20 GL = GLAdapter.get();
 
 	private final TileRenderer mTileLayer;
 
@@ -64,10 +60,10 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		for (int i = 0; i <= SHADER; i++) {
 			if (i == 0) {
-				shaderProgram[i] = GlUtils.createProgram(extrusionVertexShader,
+				shaderProgram[i] = GLUtils.createProgram(extrusionVertexShader,
 						extrusionFragmentShader);
 			} else {
-				shaderProgram[i] = GlUtils.createProgram(extrusionVertexShader,
+				shaderProgram[i] = GLUtils.createProgram(extrusionVertexShader,
 						extrusionFragmentShaderZ);
 			}
 
@@ -128,7 +124,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 				if (!el.compiled) {
 					int numShorts = el.mNumVertices * 8;
 					el.compile(MapRenderer.getShortBuffer(numShorts));
-					GlUtils.checkGlError("...");
+					GLUtils.checkGlError("...");
 				}
 
 				if (el.compiled)
@@ -196,7 +192,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 			GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
 			GL.glUniform1i(uExtMode, 0);
-			GlUtils.glUniform4fv(uExtColor, 4, mColor);
+			GLUtils.glUniform4fv(uExtColor, 4, mColor);
 
 			GLState.test(false, false);
 
@@ -247,7 +243,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		GL.glDepthFunc(GL20.GL_LESS);
 		GL.glColorMask(false, false, false, false);
 		GL.glUniform1i(uExtMode, 0);
-		GlUtils.glUniform4fv(uExtColor, 4, mColor);
+		GLUtils.glUniform4fv(uExtColor, 4, mColor);
 		GL.glUniform1f(uExtAlpha, mAlpha);
 
 		// draw to depth buffer

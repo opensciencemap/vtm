@@ -19,13 +19,12 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.GLState;
+import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.LayerRenderer;
-import org.oscim.utils.GlUtils;
+import org.oscim.renderer.MapRenderer.Matrices;
 
 
 /*
@@ -36,8 +35,6 @@ import org.oscim.utils.GlUtils;
  * */
 
 public class CustomRenderer extends LayerRenderer {
-
-	private static final GL20 GL = GLAdapter.get();
 
 	private final Map mMap;
 
@@ -118,12 +115,12 @@ public class CustomRenderer extends LayerRenderer {
 		// Draw the triangle
 		GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
-		GlUtils.checkGlError("...");
+		GLUtils.checkGlError("...");
 	}
 
 	private boolean init() {
 		// Load the vertex/fragment shaders
-		int programObject = GlUtils.createProgram(vShaderStr, fShaderStr);
+		int programObject = GLUtils.createProgram(vShaderStr, fShaderStr);
 
 		if (programObject == 0)
 			return false;

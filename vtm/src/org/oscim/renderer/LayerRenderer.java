@@ -14,6 +14,7 @@
  */
 package org.oscim.renderer;
 
+import org.oscim.backend.GL20;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.MapRenderer.Matrices;
@@ -43,12 +44,22 @@ public abstract class LayerRenderer {
 		return isReady;
 	}
 
+	protected boolean isInitialized;
+
 	public LayerRenderer() {
 		mMapPosition = new MapPosition();
 	}
 
+	////////////////////// MapRender Thread ///////////////////////////
+
 	/**
-	 * ////////////////////// MapRender Thread ///////////////////////////
+	 * Called on GL Thread before first update().
+	 * */
+	protected boolean setup() {
+		return true;
+	}
+
+	/**
 	 * 1. Called first by MapRenderer: Update the state here.
 	 *
 	 * @param position current MapPosition
@@ -74,7 +85,7 @@ public abstract class LayerRenderer {
 	 * @param matrices contains the current view- and projection-matrices.
 	 *            'matrices.mvp' is for temporary use to build the model-
 	 *            view-projection to set as uniform.
-	 */
+	 */ 
 	protected abstract void render(MapPosition position, Matrices matrices);
 
 	/**
@@ -120,4 +131,10 @@ public abstract class LayerRenderer {
 	protected void setMatrix(MapPosition position, Matrices matrices) {
 		setMatrix(position, matrices, true);
 	}
+
+	protected static GL20 GL;
+
+	static void init(GL20 gl) {
+		GL = gl;
+    }
 }

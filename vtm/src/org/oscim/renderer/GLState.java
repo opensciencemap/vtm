@@ -15,13 +15,12 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 
 public class GLState {
-	private final static GL20 GL = GLAdapter.get();
-
 	private final static String TAG = GLState.class.getName();
+
+	private static GL20 GL;
 
 	private final static boolean[] vertexArray = { false, false };
 	private static boolean blend = false;
@@ -31,7 +30,8 @@ public class GLState {
 
 	private static int currentTexId;
 
-	public static void init() {
+	static void init(GL20 gl) {
+		GL = gl;
 		vertexArray[0] = false;
 		vertexArray[1] = false;
 		blend = false;

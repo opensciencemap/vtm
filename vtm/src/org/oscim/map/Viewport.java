@@ -21,8 +21,8 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
+import org.oscim.renderer.GLMatrix;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.Matrix4;
 
 /**
  * The Viewport class contains a MapPosition and the projection matrices.
@@ -44,13 +44,13 @@ public class Viewport {
 
 	private final MapPosition mPos = new MapPosition();
 
-	private final Matrix4 mProjMatrix = new Matrix4();
-	private final Matrix4 mProjMatrixI = new Matrix4();
-	private final Matrix4 mRotMatrix = new Matrix4();
-	private final Matrix4 mViewMatrix = new Matrix4();
-	private final Matrix4 mVPMatrix = new Matrix4();
-	private final Matrix4 mUnprojMatrix = new Matrix4();
-	private final Matrix4 mTmpMatrix = new Matrix4();
+	private final GLMatrix mProjMatrix = new GLMatrix();
+	private final GLMatrix mProjMatrixI = new GLMatrix();
+	private final GLMatrix mRotMatrix = new GLMatrix();
+	private final GLMatrix mViewMatrix = new GLMatrix();
+	private final GLMatrix mVPMatrix = new GLMatrix();
+	private final GLMatrix mUnprojMatrix = new GLMatrix();
+	private final GLMatrix mTmpMatrix = new GLMatrix();
 
 	// temporary vars: only use in synchronized functions!
 	private final Point mMovePoint = new Point();
@@ -81,7 +81,7 @@ public class Viewport {
 		float aspect = height / (float) width;
 		float[] tmp = new float[16];
 
-		Matrix4.frustumM(tmp, 0, -s, s,
+		GLMatrix.frustumM(tmp, 0, -s, s,
 		                 aspect * s, -aspect * s, VIEW_NEAR, VIEW_FAR);
 
 		mProjMatrix.set(tmp);
@@ -89,7 +89,7 @@ public class Viewport {
 		mProjMatrix.multiplyRhs(mTmpMatrix);
 		mProjMatrix.get(tmp);
 
-		Matrix4.invertM(tmp, 0, tmp, 0);
+		GLMatrix.invertM(tmp, 0, tmp, 0);
 		mProjMatrixI.set(tmp);
 
 		mHeight = height;
@@ -130,7 +130,7 @@ public class Viewport {
 	 * @param proj projection Matrix
 	 * @param vp view and projection
 	 */
-	public synchronized void getMatrix(Matrix4 view, Matrix4 proj, Matrix4 vp) {
+	public synchronized void getMatrix(GLMatrix view, GLMatrix proj, GLMatrix vp) {
 		if (view != null)
 			view.copy(mViewMatrix);
 

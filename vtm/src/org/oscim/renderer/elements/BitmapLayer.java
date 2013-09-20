@@ -17,12 +17,11 @@ package org.oscim.renderer.elements;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.GLState;
+import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
-import org.oscim.utils.GlUtils;
 
 /**
  * Renderer for a single bitmap, width and height must be power of 2.
@@ -152,7 +151,7 @@ public class BitmapLayer extends TextureLayer {
 	public static final class Renderer {
 
 		//private final static String TAG = BitmapRenderer.class.getName();
-		private static final GL20 GL = GLAdapter.get();
+		private static GL20 GL;
 
 		public final static boolean debug = true;
 
@@ -170,8 +169,10 @@ public class BitmapLayer extends TextureLayer {
 		final static int VERTICES_PER_SPRITE = 4;
 		final static int SHORTS_PER_VERTICE = 6;
 
-		static void init() {
-			mTextureProgram = GlUtils.createProgram(textVertexShader,
+		static void init(GL20 gl) {
+			GL = gl;
+
+			mTextureProgram = GLUtils.createProgram(textVertexShader,
 					textFragmentShader);
 
 			hTextureMVMatrix = GL.glGetUniformLocation(mTextureProgram, "u_mv");
@@ -183,7 +184,8 @@ public class BitmapLayer extends TextureLayer {
 			hAlpha = GL.glGetUniformLocation(mTextureProgram, "u_alpha");
 		}
 
-		public static RenderElement draw(RenderElement renderElement, Matrices m, float scale, float alpha) {
+		public static RenderElement draw(RenderElement renderElement, Matrices m, float scale,
+				float alpha) {
 			//GLState.test(false, false);
 			GLState.blend(true);
 

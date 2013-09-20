@@ -19,18 +19,17 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.GLState;
+import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.renderinstruction.Line;
-import org.oscim.utils.GlUtils;
 
 /**
  * RenderElement for textured or stippled lines
- *
  * this would be all so much simpler with geometry shaders...
  */
 public final class LineTexLayer extends RenderElement {
@@ -97,6 +96,10 @@ public final class LineTexLayer extends RenderElement {
 		this.level = layer;
 		this.type = RenderElement.TEXLINE;
 		this.evenSegment = true;
+	}
+
+	public void addLine(GeometryBuffer geom) {
+		addLine(geom.points, geom.index);
 	}
 
 	public void addLine(float[] points, short[] index) {
@@ -247,11 +250,12 @@ public final class LineTexLayer extends RenderElement {
 
 	public final static class Renderer {
 
-		private static final GL20 GL = GLAdapter.get();
+		private static GL20 GL;
 
 		// factor to normalize extrusion vector and scale to coord scale
 		private final static float COORD_SCALE_BY_DIR_SCALE =
-				MapRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
+				MapRenderer.COORD_SCALE
+						/ LineLayer.DIR_SCALE;
 
 		private static int shader;
 		private static int hVertexPosition0;
@@ -269,8 +273,10 @@ public final class LineTexLayer extends RenderElement {
 
 		private static int mVertexFlipID;
 
-		public static void init() {
-			shader = GlUtils.createProgram(vertexShader, fragmentShader);
+		public static void init(GL20 gl) {
+			GL = gl;
+
+			shader = GLUtils.createProgram(vertexShader, fragmentShader);
 			if (shader == 0) {
 				Log.e(TAG, "Could not create  program.");
 				return;
@@ -290,13 +296,13 @@ public final class LineTexLayer extends RenderElement {
 			hVertexLength1 = GL.glGetAttribLocation(shader, "a_len1");
 			hVertexFlip = GL.glGetAttribLocation(shader, "a_flip");
 
-			int[] vboIds = GlUtils.glGenBuffers(1);
+			int[] vboIds = GLUtils.glGenBuffers(1);
 			mVertexFlipID = vboIds[0];
 
 			// bytes: 0, 1, 0, 1, 0, ...
 			byte[] flip = new byte[MapRenderer.maxQuads * 4];
 			for (int i = 0; i < flip.length; i++)
-				flip[i] = (byte)(i % 2);
+				flip[i] = (byte) (i % 2);
 
 			ByteBuffer buf = ByteBuffer.allocateDirect(flip.length)
 					.order(ByteOrder.nativeOrder());
@@ -306,7 +312,7 @@ public final class LineTexLayer extends RenderElement {
 			ShortBuffer sbuf = buf.asShortBuffer();
 
 			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
-			GL.glBufferData(GL20.GL_ARRAY_BUFFER, flip.length , sbuf,
+			GL.glBufferData(GL20.GL_ARRAY_BUFFER, flip.length, sbuf,
 					GL20.GL_STATIC_DRAW);
 			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
@@ -361,8 +367,8 @@ public final class LineTexLayer extends RenderElement {
 				LineTexLayer ll = (LineTexLayer) l;
 				Line line = ll.line;
 
-				GlUtils.setColor(hTexColor, line.stippleColor, 1);
-				GlUtils.setColor(hBgColor, line.color, 1);
+				GLUtils.setColor(hTexColor, line.stippleColor, 1);
+				GLUtils.setColor(hBgColor, line.color, 1);
 
 				float pScale = (int) (s + 0.5f);
 				if (pScale < 1)
@@ -500,8 +506,7 @@ public final class LineTexLayer extends RenderElement {
 				+ "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
 				+ " } ";  //*/
 
-		/*
-		 * final static String fragmentShader = ""
+		/* final static String fragmentShader = ""
 		 * + "#extension GL_OES_standard_derivatives : enable\n"
 		 * + " precision mediump float;"
 		 * + " uniform sampler2D tex;"
@@ -522,10 +527,8 @@ public final class LineTexLayer extends RenderElement {
 		 * + "  gl_FragColor =  u_bgcolor * stipple_p;"
 		 * // +
 		 * "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-		 * + "}"; //
-		 */
-		/*
-		 * final static String fragmentShader = ""
+		 * + "}"; // */
+		/* final static String fragmentShader = ""
 		 * + "#extension GL_OES_standard_derivatives : enable\n"
 		 * + " precision mediump float;"
 		 * + " uniform sampler2D tex;"
@@ -544,8 +547,7 @@ public final class LineTexLayer extends RenderElement {
 		 * + "  float stipple_p = smoothstep(0.495, 0.505, dist);"
 		 * +
 		 * "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-		 * + " } "; //
-		 */
+		 * + " } "; // */
 
 	}
 }

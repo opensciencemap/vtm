@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.utils;
+package org.oscim.renderer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -22,19 +22,21 @@ import java.nio.IntBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
-import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.GLState;
+import org.oscim.utils.FastMath;
 
 /**
  * Utility functions
  */
-public class GlUtils {
-	private static String TAG = GlUtils.class.getName();
+public class GLUtils {
+	private static String TAG = GLUtils.class.getName();
 
-	private static GL20 GL = GLAdapter.get();
-
+	private static GL20 GL;
+	
+	static void init(GL20 gl){
+		GL = gl;
+	}
+	
 	public static void setColor(int location, int color, float alpha) {
-		GL = GLAdapter.get();
 		if (alpha >= 1)
 			alpha = ((color >>> 24) & 0xff) / 255f;
 		else if (alpha < 0)
@@ -60,7 +62,6 @@ public class GlUtils {
 	public static void setColorBlend(int location, int color1, int color2, float mix) {
 		float a1 = (((color1 >>> 24) & 0xff) / 255f) * (1 - mix);
 		float a2 = (((color2 >>> 24) & 0xff) / 255f) * mix;
-		GL = GLAdapter.get();
 		GL.glUniform4f
 		  (location,
 		   ((((color1 >>> 16) & 0xff) / 255f) * a1 + (((color2 >>> 16) & 0xff) / 255f) * a2),
@@ -70,7 +71,6 @@ public class GlUtils {
 	}
 
 	public static void setTextureParameter(int min_filter, int mag_filter, int wrap_s, int wrap_t) {
-		GL = GLAdapter.get();
 		GL.glTexParameterf(GL20.GL_TEXTURE_2D,
 		                   GL20.GL_TEXTURE_MIN_FILTER,
 		                   min_filter);
@@ -87,9 +87,8 @@ public class GlUtils {
 
 	public static int loadTexture(byte[] pixel, int width, int height, int format,
 	        int min_filter, int mag_filter, int wrap_s, int wrap_t) {
-		int[] textureIds = GlUtils.glGenTextures(1);
-		GL = GLAdapter.get();
 
+		int[] textureIds = GLUtils.glGenTextures(1);
 		GLState.bindTex2D(textureIds[0]);
 
 		setTextureParameter(min_filter, mag_filter, wrap_s, wrap_t);
@@ -107,8 +106,6 @@ public class GlUtils {
 	}
 
 	public static int loadStippleTexture(byte[] stipple) {
-		GL = GLAdapter.get();
-
 		int sum = 0;
 		for (byte flip : stipple)
 			sum += flip;
@@ -186,8 +183,6 @@ public class GlUtils {
 	 * @return gl identifier
 	 */
 	public static int createProgram(String vertexSource, String fragmentSource) {
-		GL = GLAdapter.get();
-
 		int vertexShader = loadShader(GL20.GL_VERTEX_SHADER, vertexSource);
 		if (vertexShader == 0) {
 			return 0;
@@ -224,7 +219,7 @@ public class GlUtils {
 	 *            ...
 	 */
 	public static void checkGlError(String op) {
-		GL = GLAdapter.get();
+		//GL = GLAdapter.get();
 
 		int error;
 		while ((error = GL.glGetError()) != 0) { // GL20.GL_NO_ERROR) {
@@ -234,8 +229,6 @@ public class GlUtils {
 	}
 
 	public static boolean checkGlOutOfMemory(String op) {
-		GL = GLAdapter.get();
-
 		int error;
 		boolean oom = false;
 		while ((error = GL.glGetError()) != 0) {// GL20.GL_NO_ERROR) {
@@ -248,8 +241,6 @@ public class GlUtils {
 	}
 
 	public static void setColor(int handle, float[] c, float alpha) {
-		GL = GLAdapter.get();
-
 		if (alpha >= 1) {
 			GL.glUniform4f(handle, c[0], c[1], c[2], c[3]);
 		} else {
@@ -307,8 +298,6 @@ public class GlUtils {
 	}
 
 	public static void glUniform4fv(int location, int count, float[] val) {
-		GL = GLAdapter.get();
-
 		FloatBuffer buf = MapRenderer.getFloatBuffer(count * 4);
 		buf.put(val);
 		buf.flip();
@@ -316,8 +305,6 @@ public class GlUtils {
 	}
 
 	public static int[] glGenBuffers(int num) {
-		GL = GLAdapter.get();
-
 		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.position(0);
 		buf.limit(num);
@@ -330,8 +317,6 @@ public class GlUtils {
 	}
 
 	public static void glDeleteBuffers(int num, int[] ids) {
-		GL = GLAdapter.get();
-
 		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.put(ids, 0, num);
 		buf.position(0);
@@ -342,7 +327,6 @@ public class GlUtils {
 		if (num <= 0)
 			return null;
 
-		GL = GLAdapter.get();
 		int[] ret = new int[num];
 		IntBuffer buf = MapRenderer.getIntBuffer(num);
 
@@ -363,8 +347,6 @@ public class GlUtils {
 	}
 
 	public static void glDeleteTextures(int num, int[] ids) {
-		GL = GLAdapter.get();
-
 		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.put(ids, 0, num);
 		buf.position(0);

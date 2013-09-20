@@ -72,7 +72,7 @@ void JNI(setColorBlend)(JNIEnv *env, jclass* clazz, jint location, jint c1, jint
 #endif // 0
 
 #undef JNI
-#define JNI(X) JNIEXPORT Java_org_oscim_utils_Matrix4_##X
+#define JNI(X) JNIEXPORT Java_org_oscim_renderer_GLMatrix_##X
 
 #define CAST(x) (float *)(uintptr_t) x
 #define MAT_SIZE 16 * sizeof(float)

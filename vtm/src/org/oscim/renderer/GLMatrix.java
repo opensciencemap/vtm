@@ -1,94 +1,60 @@
-/*******************************************************************************
- * Copyright 2011 See libgdx AUTHORS file.
+/*
  * Copyright 2013 Hannes Janetzek
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
-
-package org.oscim.utils;
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.oscim.renderer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
+public class GLMatrix {
 
+	private final static String TAG = GLMatrix.class.getName();
+	private final static boolean dbg = false;
 
-public class Matrix4 {
-
-	private static GL20 GL = GLAdapter.get();
-
-	public static final int M00 = 0;// 0;
-	public static final int M01 = 4;// 1;
-	public static final int M02 = 8;// 2;
-	public static final int M03 = 12;// 3;
-	public static final int M10 = 1;// 4;
-	public static final int M11 = 5;// 5;
-	public static final int M12 = 9;// 6;
-	public static final int M13 = 13;// 7;
-	public static final int M20 = 2;// 8;
-	public static final int M21 = 6;// 9;
-	public static final int M22 = 10;// 10;
-	public static final int M23 = 14;// 11;
-	public static final int M30 = 3;// 12;
-	public static final int M31 = 7;// 13;
-	public static final int M32 = 11;// 14;
-	public static final int M33 = 15;// 15;
-
-	private final FloatBuffer buffer = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-
+	private final long pointer;
+	private final FloatBuffer buffer;
 
 	private final static String INVALID_INPUT = "Bad Array!";
 
-	public final float tmp[] = new float[16];
-	public final float val[] = new float[16];
-
-	/** Sets the matrix to the given matrix as a float array. The float array must have at least 16 elements; the first 16 will be
-	 * copied.
-	 *
-	 * @param values The matrix, in float form, that is to be copied. Remember that this matrix is in <a
-	 *           href="http://en.wikipedia.org/wiki/Row-major_order">column major</a> order.
-	 * @return This matrix for the purpose of chaining methods together. */
-	public void set (float[] values) {
-		val[M00] = values[M00];
-		val[M10] = values[M10];
-		val[M20] = values[M20];
-		val[M30] = values[M30];
-		val[M01] = values[M01];
-		val[M11] = values[M11];
-		val[M21] = values[M21];
-		val[M31] = values[M31];
-		val[M02] = values[M02];
-		val[M12] = values[M12];
-		val[M22] = values[M22];
-		val[M32] = values[M32];
-		val[M03] = values[M03];
-		val[M13] = values[M13];
-		val[M23] = values[M23];
-		val[M33] = values[M33];
+	public GLMatrix() {
+		pointer = alloc();
+		buffer = (getBuffer(pointer)).order(ByteOrder.nativeOrder()).asFloatBuffer();
 	}
+
+	/**
+	 * Set the Matrix from float array
+	 *
+	 * @param m float array to copy
+	 */
+	public void set(float[] m) {
+		if (m == null || m.length != 16)
+			throw new IllegalArgumentException(INVALID_INPUT);
+
+		set(pointer, m);
+	}
+
 	/**
 	 * Get the Matrix as float array
 	 *
 	 * @param m float array to store Matrix
 	 */
 	public void get(float[] m) {
-
 		if (m == null || m.length != 16)
 			throw new IllegalArgumentException(INVALID_INPUT);
 
-		System.arraycopy(val, 0, m, 0, 16);
+		get(pointer, m);
 	}
 
 	/**
@@ -96,11 +62,8 @@ public class Matrix4 {
 	 *
 	 * @param mat Matrix to copy
 	 */
-	public void copy(Matrix4 m) {
-		if (m == null || m.val.length != 16)
-			throw new IllegalArgumentException(INVALID_INPUT);
-
-		System.arraycopy(m.val, 0, val, 0, 16);
+	public void copy(GLMatrix mat) {
+		copy(pointer, mat.pointer);
 	}
 
 	/**
@@ -112,17 +75,7 @@ public class Matrix4 {
 		if (vec3 == null || vec3.length < 3)
 			throw new IllegalArgumentException(INVALID_INPUT);
 
-		matrix4_proj(val, vec3);
-	}
-
-	static void matrix4_proj (float[] mat, float[] vec) {
-		float inv_w = 1.0f / (vec[0] * mat[M30] + vec[1] * mat[M31] + vec[2] * mat[M32] + mat[M33]);
-		float x = (vec[0] * mat[M00] + vec[1] * mat[M01] + vec[2] * mat[M02] + mat[M03]) * inv_w;
-		float y = (vec[0] * mat[M10] + vec[1] * mat[M11] + vec[2] * mat[M12] + mat[M13]) * inv_w;
-		float z = (vec[0] * mat[M20] + vec[1] * mat[M21] + vec[2] * mat[M22] + mat[M23]) * inv_w;
-		vec[0] = x;
-		vec[1] = y;
-		vec[2] = z;
+		prj(pointer, vec3);
 	}
 
 	/**
@@ -130,8 +83,8 @@ public class Matrix4 {
 	 *
 	 * @param rhs right hand side
 	 */
-	public void multiplyRhs(Matrix4 rhs) {
-		matrix4_mul(val, rhs.val);
+	public void multiplyRhs(GLMatrix rhs) {
+		smulrhs(pointer, rhs.pointer);
 	}
 
 	/**
@@ -139,10 +92,8 @@ public class Matrix4 {
 	 *
 	 * @param lhs right hand side
 	 */
-	public void multiplyLhs(Matrix4 lhs) {
-		System.arraycopy(lhs.val, 0, tmp, 0, 16);
-		matrix4_mul(tmp, val);
-		System.arraycopy(tmp, 0, val, 0, 16);
+	public void multiplyLhs(GLMatrix lhs) {
+		smullhs(pointer, lhs.pointer);
 	}
 
 	/**
@@ -156,10 +107,8 @@ public class Matrix4 {
 	 * @param lhs left hand side
 	 * @param rhs right hand side
 	 */
-	public void multiplyMM(Matrix4 lhs, Matrix4 rhs) {
-		System.arraycopy(lhs.val, 0, tmp, 0, 16);
-		matrix4_mul(tmp, rhs.val);
-		System.arraycopy(tmp, 0, val, 0, 16);
+	public void multiplyMM(GLMatrix lhs, GLMatrix rhs) {
+		smul(pointer, lhs.pointer, rhs.pointer);
 	}
 
 	/**
@@ -167,23 +116,8 @@ public class Matrix4 {
 	 *
 	 * @param mat to transpose
 	 */
-	public void transposeM(Matrix4 mat) {
-		val[M00] = mat.val[M00];
-		val[M01] = mat.val[M10];
-		val[M02] = mat.val[M20];
-		val[M03] = mat.val[M30];
-		val[M10] = mat.val[M01];
-		val[M11] = mat.val[M11];
-		val[M12] = mat.val[M21];
-		val[M13] = mat.val[M31];
-		val[M20] = mat.val[M02];
-		val[M21] = mat.val[M12];
-		val[M22] = mat.val[M22];
-		val[M23] = mat.val[M32];
-		val[M30] = mat.val[M03];
-		val[M31] = mat.val[M13];
-		val[M32] = mat.val[M23];
-		val[M33] = mat.val[M33];
+	public void transposeM(GLMatrix mat) {
+		strans(pointer, mat.pointer);
 	}
 
 	/**
@@ -195,7 +129,7 @@ public class Matrix4 {
 	 * @param z around z-axis
 	 */
 	public void setRotation(float a, float x, float y, float z) {
-		setRotateM(val, 0, a, x, y, z);
+		setRotation(pointer, a, x, y, z);
 	}
 
 	/**
@@ -206,10 +140,7 @@ public class Matrix4 {
 	 * @param z along z-axis
 	 */
 	public void setTranslation(float x, float y, float z) {
-		setIdentity();
-		val[M03] = x;
-		val[M13] = y;
-		val[M23] = z;
+		setTranslation(pointer, x, y, z);
 	}
 
 	/**
@@ -220,10 +151,7 @@ public class Matrix4 {
 	 * @param z axis
 	 */
 	public void setScale(float x, float y, float z) {
-		setIdentity();
-		val[M00] = x;
-		val[M11] = y;
-		val[M22] = z;
+		setScale(pointer, x, y, z);
 	}
 
 	/**
@@ -234,12 +162,7 @@ public class Matrix4 {
 	 * @param scale factor x,y
 	 */
 	public void setTransScale(float tx, float ty, float scale) {
-		setIdentity();
-		val[M03] = tx;
-		val[M13] = ty;
-
-		val[M00] = scale;
-		val[M11] = scale;
+		setTransScale(pointer, tx, ty, scale);
 	}
 
 	/**
@@ -248,11 +171,8 @@ public class Matrix4 {
 	 * @param location GL location id
 	 */
 	public void setAsUniform(int location) {
-		buffer.clear();
-		buffer.put(val, 0, 16);
-		buffer.position(0);
-		GL = GLAdapter.get();
-		GL.glUniformMatrix4fv(location, 1, false, buffer);
+		MapRenderer.GL.glUniformMatrix4fv(location, 1, false, buffer);
+		//setAsUniform(pointer, location);
 	}
 
 	/**
@@ -262,66 +182,33 @@ public class Matrix4 {
 	 * @param value value to set
 	 */
 	public void setValue(int pos, float value) {
-		val[pos] = value;
+		setValueAt(pointer, pos, value);
 	}
-	static float PiTimesThumb = 1.0f / (1 << 11);
+
 	/**
 	 * add some offset (similar to glDepthOffset)
 	 *
 	 * @param delta offset
 	 */
 	public void addDepthOffset(int delta) {
-		 val[10] *= 1.0f + PiTimesThumb * delta;
+		addDepthOffset(pointer, delta);
 	}
 
 	/**
 	 * Set identity matrix
 	 */
 	public void setIdentity() {
-		val[M00] = 1;
-		val[M01] = 0;
-		val[M02] = 0;
-		val[M03] = 0;
-		val[M10] = 0;
-		val[M11] = 1;
-		val[M12] = 0;
-		val[M13] = 0;
-		val[M20] = 0;
-		val[M21] = 0;
-		val[M22] = 1;
-		val[M23] = 0;
-		val[M30] = 0;
-		val[M31] = 0;
-		val[M32] = 0;
-		val[M33] = 1;
+		identity(pointer);
 	}
 
-	static void matrix4_mul (float[] mata, float[] matb) {
-		float tmp[] = new float[16];
-		tmp[M00] = mata[M00] * matb[M00] + mata[M01] * matb[M10] + mata[M02] * matb[M20] + mata[M03] * matb[M30];
-		tmp[M01] = mata[M00] * matb[M01] + mata[M01] * matb[M11] + mata[M02] * matb[M21] + mata[M03] * matb[M31];
-		tmp[M02] = mata[M00] * matb[M02] + mata[M01] * matb[M12] + mata[M02] * matb[M22] + mata[M03] * matb[M32];
-		tmp[M03] = mata[M00] * matb[M03] + mata[M01] * matb[M13] + mata[M02] * matb[M23] + mata[M03] * matb[M33];
-		tmp[M10] = mata[M10] * matb[M00] + mata[M11] * matb[M10] + mata[M12] * matb[M20] + mata[M13] * matb[M30];
-		tmp[M11] = mata[M10] * matb[M01] + mata[M11] * matb[M11] + mata[M12] * matb[M21] + mata[M13] * matb[M31];
-		tmp[M12] = mata[M10] * matb[M02] + mata[M11] * matb[M12] + mata[M12] * matb[M22] + mata[M13] * matb[M32];
-		tmp[M13] = mata[M10] * matb[M03] + mata[M11] * matb[M13] + mata[M12] * matb[M23] + mata[M13] * matb[M33];
-		tmp[M20] = mata[M20] * matb[M00] + mata[M21] * matb[M10] + mata[M22] * matb[M20] + mata[M23] * matb[M30];
-		tmp[M21] = mata[M20] * matb[M01] + mata[M21] * matb[M11] + mata[M22] * matb[M21] + mata[M23] * matb[M31];
-		tmp[M22] = mata[M20] * matb[M02] + mata[M21] * matb[M12] + mata[M22] * matb[M22] + mata[M23] * matb[M32];
-		tmp[M23] = mata[M20] * matb[M03] + mata[M21] * matb[M13] + mata[M22] * matb[M23] + mata[M23] * matb[M33];
-		tmp[M30] = mata[M30] * matb[M00] + mata[M31] * matb[M10] + mata[M32] * matb[M20] + mata[M33] * matb[M30];
-		tmp[M31] = mata[M30] * matb[M01] + mata[M31] * matb[M11] + mata[M32] * matb[M21] + mata[M33] * matb[M31];
-		tmp[M32] = mata[M30] * matb[M02] + mata[M31] * matb[M12] + mata[M32] * matb[M22] + mata[M33] * matb[M32];
-		tmp[M33] = mata[M30] * matb[M03] + mata[M31] * matb[M13] + mata[M32] * matb[M23] + mata[M33] * matb[M33];
-		System.arraycopy(tmp, 0, mata, 0, 16);
+	/**
+	 * Free native object
+	 * */
+	@Override
+	public void finalize() {
+		if (pointer != 0)
+			delete(pointer);
 	}
-
-//	@Override
-//	public void finalize() {
-//		if (pointer != 0)
-//			delete(pointer);
-//	}
 
 	/*
 	 * Copyright (C) 2007 The Android Open Source Project
@@ -522,80 +409,43 @@ public class Matrix4 {
         return true;
     }
 
-    void setRotateM(float[] rm, int rmOffset, float a, float x, float y, float z)
-    {
-      rm[rmOffset + 3] = 0;
-      rm[rmOffset + 7] = 0;
-      rm[rmOffset + 11] = 0;
-      rm[rmOffset + 12] = 0;
-      rm[rmOffset + 13] = 0;
-      rm[rmOffset + 14] = 0;
-      rm[rmOffset + 15] = 1;
-      a *= (float) (Math.PI / 180.0f);
-      float s = (float) Math.sin(a);
-      float c = (float) Math.cos(a);
-      if (1.0f == x && 0.0f == y && 0.0f == z)
-        {
-          rm[rmOffset + 5] = c;
-          rm[rmOffset + 10] = c;
-          rm[rmOffset + 6] = s;
-          rm[rmOffset + 9] = -s;
-          rm[rmOffset + 1] = 0;
-          rm[rmOffset + 2] = 0;
-          rm[rmOffset + 4] = 0;
-          rm[rmOffset + 8] = 0;
-          rm[rmOffset + 0] = 1;
-        }
-      else if (0.0f == x && 1.0f == y && 0.0f == z)
-        {
-          rm[rmOffset + 0] = c;
-          rm[rmOffset + 10] = c;
-          rm[rmOffset + 8] = s;
-          rm[rmOffset + 2] = -s;
-          rm[rmOffset + 1] = 0;
-          rm[rmOffset + 4] = 0;
-          rm[rmOffset + 6] = 0;
-          rm[rmOffset + 9] = 0;
-          rm[rmOffset + 5] = 1;
-        }
-      else if (0.0f == x && 0.0f == y && 1.0f == z)
-        {
-          rm[rmOffset + 0] = c;
-          rm[rmOffset + 5] = c;
-          rm[rmOffset + 1] = s;
-          rm[rmOffset + 4] = -s;
-          rm[rmOffset + 2] = 0;
-          rm[rmOffset + 6] = 0;
-          rm[rmOffset + 8] = 0;
-          rm[rmOffset + 9] = 0;
-          rm[rmOffset + 10] = 1;
-        }
-      else
-        {
-          float len = (float) Math.sqrt(x * x + y * y + z * z);
-          if (1.0f != len)
-            {
-              float recipLen = 1.0f / len;
-              x *= recipLen;
-              y *= recipLen;
-              z *= recipLen;
-            }
-          float nc = 1.0f - c;
-          float xy = x * y;
-          float yz = y * z;
-          float zx = z * x;
-          float xs = x * s;
-          float ys = y * s;
-          float zs = z * s;
-          rm[rmOffset + 0] = x * x * nc + c;
-          rm[rmOffset + 4] = xy * nc - zs;
-          rm[rmOffset + 8] = zx * nc + ys;
-          rm[rmOffset + 1] = xy * nc + zs;
-          rm[rmOffset + 5] = y * y * nc + c;
-          rm[rmOffset + 9] = yz * nc - xs;
-          rm[rmOffset + 2] = zx * nc - ys;
-          rm[rmOffset + 6] = yz * nc + xs;
-          rm[rmOffset + 10] = z * z * nc + c;
-        }
-    }
+    private native static long alloc();
+
+	private native static void delete(long self);
+
+	private native static void set(long self, float[] m);
+
+	private native static void copy(long self, long other);
+
+	private native static void identity(long self);
+
+	private native static void get(long self, float[] m);
+
+	private native static void mul(long self, long lhs_ptr);
+
+	private native static void smul(long self, long rhs_ptr, long lhs_ptr);
+
+	private native static void smulrhs(long self, long rhs_ptr);
+
+	private native static void smullhs(long self, long lhs_ptr);
+
+	private native static void strans(long self, long rhs_ptr);
+
+	private native static void prj(long self, float[] vec3);
+
+	private native static void setRotation(long self, float a, float x, float y, float z);
+
+	private native static void setScale(long self, float x, float y, float z);
+
+	private native static void setTranslation(long self, float x, float y, float z);
+
+	private native static void setTransScale(long self, float tx, float ty, float scale);
+
+	//private native static void setAsUniform(long self, int handle);
+
+	private native static void setValueAt(long self, int pos, float value);
+
+	private native static void addDepthOffset(long self, int delta);
+
+	private native static ByteBuffer getBuffer(long self);
 }

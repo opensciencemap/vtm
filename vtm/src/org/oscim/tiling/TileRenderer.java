@@ -18,21 +18,20 @@ import static org.oscim.tiling.MapTile.STATE_NEW_DATA;
 import static org.oscim.tiling.MapTile.STATE_READY;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
+import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.BitmapLayer;
-import org.oscim.renderer.elements.RenderElement;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.PolygonLayer;
+import org.oscim.renderer.elements.RenderElement;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.Matrix4;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.QuadTree;
 
@@ -335,8 +334,6 @@ public class TileRenderer extends LayerRenderer {
 		}
 	};
 
-	private static final GL20 GL = GLAdapter.get();
-
 	// Counter increases polygon-offset for each tile drawn.
 	private int mOffsetCnt;
 
@@ -345,7 +342,7 @@ public class TileRenderer extends LayerRenderer {
 	private int mDrawSerial = 0;
 
 	private Matrices mMatrices;
-	private final Matrix4 mProjMatrix = new Matrix4();
+	private final GLMatrix mProjMatrix = new GLMatrix();
 
 	/**
 	 * Draw tiles:

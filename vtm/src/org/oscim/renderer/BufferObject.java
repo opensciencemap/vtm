@@ -18,9 +18,7 @@ package org.oscim.renderer;
 import java.nio.Buffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
-import org.oscim.utils.GlUtils;
 
 public final class BufferObject {
 	private final static String TAG = BufferObject.class.getName();
@@ -176,7 +174,7 @@ public final class BufferObject {
 			}
 
 			if (removed > 0) {
-				GlUtils.glDeleteBuffers(removed, vboIds);
+				GLUtils.glDeleteBuffers(removed, vboIds);
 				counter[t] -= removed;
 			}
 
@@ -186,7 +184,7 @@ public final class BufferObject {
 	}
 
 	static void createBuffers(int target, int num) {
-		int[] mVboIds = GlUtils.glGenBuffers(num);
+		int[] mVboIds = GLUtils.glGenBuffers(num);
 
 		int t = (target == GL20.GL_ARRAY_BUFFER) ? 0 : 1;
 
@@ -207,8 +205,8 @@ public final class BufferObject {
 		counter[1] = 0;
 	}
 
-	static synchronized void init(int num) {
-		GL = GLAdapter.get();
+	static synchronized void init(GL20 gl, int num) {
+		GL = gl;
 
 		createBuffers(GL20.GL_ARRAY_BUFFER, num);
 		counter[0] += num;

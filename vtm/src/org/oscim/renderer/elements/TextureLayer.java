@@ -19,11 +19,10 @@ import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.GLState;
+import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
-import org.oscim.utils.GlUtils;
 
 public abstract class TextureLayer extends RenderElement {
 	// holds textures and offset in vbo
@@ -88,7 +87,7 @@ public abstract class TextureLayer extends RenderElement {
 	public static final class Renderer {
 		//private final static String TAG = TextureRenderer.class.getName();
 
-		private static final GL20 GL = GLAdapter.get();
+		private static GL20 GL;
 
 		public final static boolean debug = false;
 
@@ -105,8 +104,10 @@ public abstract class TextureLayer extends RenderElement {
 		final static int VERTICES_PER_SPRITE = 4;
 		final static int SHORTS_PER_VERTICE = 6;
 
-		static void init() {
-			mTextureProgram = GlUtils.createProgram(textVertexShader,
+		static void init(GL20 gl) {
+			GL = gl;
+
+			mTextureProgram = GLUtils.createProgram(textVertexShader,
 					textFragmentShader);
 
 			hTextureMVMatrix = GL.glGetUniformLocation(mTextureProgram, "u_mv");

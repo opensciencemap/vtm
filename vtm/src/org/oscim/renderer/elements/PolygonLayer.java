@@ -20,18 +20,17 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.MapRenderer;
+import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.GLState;
+import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.GlUtils;
-import org.oscim.utils.Matrix4;
 
 public final class PolygonLayer extends RenderElement {
 	private static final String TAG = PolygonLayer.class.getName();
@@ -144,21 +143,21 @@ public final class PolygonLayer extends RenderElement {
 
 		private static boolean enableTexture = false;
 
-		static boolean init() {
-			GL = GLAdapter.get();
+		static boolean init(GL20 gl) {
+			GL = gl;
 
 			for (int i = 0; i < numShaders; i++) {
 
 				// Set up the program for rendering polygons
 				if (i == 0) {
 					if (MapRenderer.debugView)
-						polygonProgram[i] = GlUtils.createProgram(polygonVertexShaderZ,
+						polygonProgram[i] = GLUtils.createProgram(polygonVertexShaderZ,
 								polygonFragmentShaderZ);
 					else
-						polygonProgram[i] = GlUtils.createProgram(polygonVertexShader,
+						polygonProgram[i] = GLUtils.createProgram(polygonVertexShader,
 								polygonFragmentShader);
 				} else if (i == 1) {
-					polygonProgram[i] = GlUtils.createProgram(textureVertexShader,
+					polygonProgram[i] = GLUtils.createProgram(textureVertexShader,
 							textureFragmentShader);
 
 				}
@@ -210,17 +209,17 @@ public final class PolygonLayer extends RenderElement {
 					}
 					GLState.blend(true);
 
-					GlUtils.setColor(hPolygonColor[shader], a.color, f);
+					GLUtils.setColor(hPolygonColor[shader], a.color, f);
 
 				} else if (a.blend > 0 && a.blend <= zoom) {
 					/* blend colors (not alpha) */
 					GLState.blend(false);
 
 					if (a.blend == zoom)
-						GlUtils.setColorBlend(hPolygonColor[shader],
+						GLUtils.setColorBlend(hPolygonColor[shader],
 								a.color, a.blendColor, scale - 1.0f);
 					else
-						GlUtils.setColor(hPolygonColor[shader], a.blendColor, 1);
+						GLUtils.setColor(hPolygonColor[shader], a.blendColor, 1);
 
 				} else {
 					if (a.color < 0xff000000)
@@ -228,7 +227,7 @@ public final class PolygonLayer extends RenderElement {
 					else
 						GLState.blend(false);
 
-					GlUtils.setColor(hPolygonColor[shader], a.color, 1);
+					GLUtils.setColor(hPolygonColor[shader], a.color, 1);
 				}
 
 				// set stencil buffer mask used to draw this layer
@@ -433,7 +432,7 @@ public final class PolygonLayer extends RenderElement {
 			 */
 
 			if (color != 0) {
-				GlUtils.setColor(hPolygonColor[0], color, 1);
+				GLUtils.setColor(hPolygonColor[0], color, 1);
 				GLState.blend(true);
 			} else {
 				// disable drawing to framebuffer (will be re-enabled in fill)
@@ -458,7 +457,7 @@ public final class PolygonLayer extends RenderElement {
 		private static float[] debugFillColor2 = { .8f, .8f, .8f, .8f };
 		private static FloatBuffer mDebugFill;
 
-		static void debugDraw(Matrix4 m, float[] coords, int color) {
+		static void debugDraw(GLMatrix m, float[] coords, int color) {
 			GLState.test(false, false);
 			if (mDebugFill == null) {
 				mDebugFill = ByteBuffer.allocateDirect(32).order(ByteOrder.nativeOrder())
@@ -478,13 +477,13 @@ public final class PolygonLayer extends RenderElement {
 			m.setAsUniform(hPolygonMatrix[0]);
 
 			if (color == 0)
-				GlUtils.glUniform4fv(hPolygonColor[0], 1, debugFillColor);
+				GLUtils.glUniform4fv(hPolygonColor[0], 1, debugFillColor);
 			else
-				GlUtils.glUniform4fv(hPolygonColor[0], 1, debugFillColor2);
+				GLUtils.glUniform4fv(hPolygonColor[0], 1, debugFillColor2);
 
 			GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
-			GlUtils.checkGlError("draw debug");
+			GLUtils.checkGlError("draw debug");
 		}
 
 		private final static String polygonVertexShader = ""
