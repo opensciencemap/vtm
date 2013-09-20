@@ -199,9 +199,9 @@ public class MapAnimator {
 				return;
 			}
 
+			float adv = FastMath.clamp(1.0f - millisLeft / mDuration, 0, 1);
 			boolean changed = false;
 
-			float adv = (1.0f - millisLeft / mDuration);
 
 			if ((mState & ANIM_SCALE) != 0) {
 				if (mScaleBy > 0)
