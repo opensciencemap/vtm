@@ -1,11 +1,23 @@
+/*
+ * Copyright 2012, 2013 Hannes Janetzek
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.oscim.utils;
-
-
-
 
 public final class Vec2 {
 
-	public static void set(float[] v, int pos, float x, float y){
+	public static void set(float[] v, int pos, float x, float y) {
 		v[(pos << 1) + 0] = x;
 		v[(pos << 1) + 1] = y;
 	}
@@ -37,8 +49,8 @@ public final class Vec2 {
 
 		double length = Math.sqrt(x * x + y * y);
 
-		v[(pos << 1) + 0] = (float)(x / length);
-		v[(pos << 1) + 1] = (float)(y / length);
+		v[(pos << 1) + 0] = (float) (x / length);
+		v[(pos << 1) + 1] = (float) (y / length);
 	}
 
 	public final static float length(float[] v, int pos) {
@@ -58,7 +70,7 @@ public final class Vec2 {
 		result[(rpos << 1) + 1] = a[(apos << 1) + 1] - b[(bpos << 1) + 1];
 	}
 
-	public final static void mul(float[] v, int pos, float a){
+	public final static void mul(float[] v, int pos, float a) {
 		v[(pos << 1) + 0] *= a;
 		v[(pos << 1) + 1] *= a;
 	}
