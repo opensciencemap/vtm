@@ -4,6 +4,7 @@
 #include "tess.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #ifdef __ANDROID__
 #include <android/log.h>
