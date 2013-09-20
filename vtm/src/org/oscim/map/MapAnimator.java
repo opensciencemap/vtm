@@ -6,6 +6,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.FastMath;
 
 // TODO: rewrite
@@ -163,13 +164,13 @@ public class MapAnimator {
 	}
 
 	/**
-	 * called by GLRenderer at begin of each frame.
+	 * called by MapRenderer at begin of each frame.
 	 */
 	public void updateAnimation() {
 		if (mState == ANIM_NONE)
 			return;
 
-		long millisLeft = mAnimEnd - System.currentTimeMillis();
+		long millisLeft = mAnimEnd - MapRenderer.frametime;
 
 		synchronized (mViewport) {
 
