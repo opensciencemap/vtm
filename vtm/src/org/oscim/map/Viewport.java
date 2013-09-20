@@ -260,31 +260,6 @@ public class Viewport {
 		box.maxY = (cy + box.maxY) / cs;
 	}
 
-	//	/**
-	//	 * For x, y in screen coordinates set Point to map-tile
-	//	 * coordinates at returned scale.
-	//	 *
-	//	 * @param x screen coordinate
-	//	 * @param y screen coordinate
-	//	 * @param out Point coords will be set
-	//	 */
-	//	public synchronized void getScreenPointOnMap(float x, float y, double scale, Point out) {
-	//
-	//		// scale to -1..1
-	//		float mx = 1 - (x / mWidth * 2);
-	//		float my = 1 - (y / mHeight * 2);
-	//
-	//		unproject(-mx, my, getDepth(-my), mu, 0);
-	//
-	//		out.x = mu[0];
-	//		out.y = mu[1];
-	//
-	//		if (scale != 0) {
-	//			out.x *= scale / mPos.scale;
-	//			out.y *= scale / mPos.scale;
-	//		}
-	//	}
-
 	/**
 	 * Get the GeoPoint for x,y in screen coordinates.
 	 * 
@@ -422,7 +397,6 @@ public class Viewport {
 	public synchronized void moveMap(float mx, float my) {
 		Point p = applyRotation(mx, my);
 		double tileScale = mPos.scale * Tile.SIZE;
-
 		moveTo(mPos.x - p.x / tileScale, mPos.y - p.y / tileScale);
 	}
 
