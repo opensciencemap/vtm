@@ -319,7 +319,7 @@ public class GLUtils {
 	public static void glDeleteBuffers(int num, int[] ids) {
 		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.put(ids, 0, num);
-		buf.position(0);
+		buf.flip();
 		GL.glDeleteBuffers(num, buf);
 	}
 
@@ -349,7 +349,7 @@ public class GLUtils {
 	public static void glDeleteTextures(int num, int[] ids) {
 		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.put(ids, 0, num);
-		buf.position(0);
+		buf.flip();
 		GL.glDeleteTextures(num, buf);
 	}
 }
