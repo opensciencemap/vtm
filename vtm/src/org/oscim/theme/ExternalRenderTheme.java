@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
+import org.oscim.backend.AssetAdapter;
+
 /**
  * An ExternalRenderTheme allows for customizing the rendering style of the map
  * via an XML file.
@@ -32,6 +34,8 @@ public class ExternalRenderTheme implements Theme {
 	private transient int mHashCodeValue;
 	private final String mRenderThemePath;
 
+	private InputStream mInputStream;
+
 	/**
 	 * @param renderThemePath
 	 *            the path to the XML render theme file.
@@ -39,6 +43,12 @@ public class ExternalRenderTheme implements Theme {
 	 *             if the file does not exist or cannot be read.
 	 */
 	public ExternalRenderTheme(String renderThemePath) throws FileNotFoundException {
+		mInputStream = AssetAdapter.g.openFileAsStream(renderThemePath);
+		if (mInputStream != null) {
+			mRenderThemePath = null;
+			mFileModificationDate = 0;
+			return;
+		}
 		File renderThemeFile = new File(renderThemePath);
 		if (!renderThemeFile.exists()) {
 			throw new FileNotFoundException("file does not exist: " + renderThemePath);
@@ -76,6 +86,9 @@ public class ExternalRenderTheme implements Theme {
 
 	@Override
 	public InputStream getRenderThemeAsStream() throws FileNotFoundException {
+		if (mInputStream != null)
+			return mInputStream;
+
 		return new FileInputStream(mRenderThemePath);
 	}
 
@@ -102,7 +115,7 @@ public class ExternalRenderTheme implements Theme {
 	}
 
 	private void readObject(ObjectInputStream objectInputStream) throws IOException,
-			ClassNotFoundException {
+	        ClassNotFoundException {
 		objectInputStream.defaultReadObject();
 		calculateTransientValues();
 	}
