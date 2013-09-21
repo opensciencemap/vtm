@@ -25,7 +25,7 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.LineClipper;
-import org.oscim.utils.geom.Triangulator;
+import org.oscim.utils.Tessellator;
 
 /**
  * @author Hannes Janetzek
@@ -126,7 +126,7 @@ public class ExtrusionLayer extends RenderElement {
 			// check: drop last point from explicitly closed rings
 			int len = length;
 			if (points[ppos] == points[ppos + len - 2]
-					&& points[ppos + 1] == points[ppos + len - 1]) {
+			    && points[ppos + 1] == points[ppos + len - 1]) {
 				len -= 2;
 				Log.d(TAG, "explicit closed poly " + len);
 			}
@@ -184,15 +184,8 @@ public class ExtrusionLayer extends RenderElement {
 			rings++;
 		}
 
-		// triangulate up to 600 points (limited only by prepared buffers)
-		// some buildings in paris have even more...
-		if (len > 1200) {
-			Log.d(TAG, ">>> skip building : " + len + " <<<");
-			return;
-		}
-
-		int used = Triangulator.triangulate(points, ppos, len, index, ipos, rings,
-				startVertex + 1, mCurIndices[IND_ROOF]);
+		int used = Tessellator.triangulate(points, ppos, len, index, ipos, rings,
+		                                    startVertex + 1, mCurIndices[IND_ROOF]);
 
 		if (used > 0) {
 			// get back to the last item added..
@@ -204,7 +197,7 @@ public class ExtrusionLayer extends RenderElement {
 	}
 
 	private boolean addOutline(float[] points, int pos, int len, float minHeight, float height,
-			boolean convex) {
+	        boolean convex) {
 
 		// add two vertices for last face to make zigzag indices work
 		boolean addFace = (len % 4 != 0);

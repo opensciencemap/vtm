@@ -165,8 +165,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 	private final boolean debug = false;
 
-	//private final float[] mVPMatrix = new float[16];
-
 	@Override
 	protected void render(MapPosition pos, Matrices m) {
 		// TODO one could render in one pass to texture and then draw the texture

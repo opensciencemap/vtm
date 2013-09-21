@@ -1,4 +1,4 @@
-package org.oscim.utils.geom;
+package org.oscim.utils;
 
 import org.oscim.backend.Log;
 import org.oscim.renderer.elements.VertexItem;
@@ -9,7 +9,7 @@ import com.google.gwt.core.client.JsArrayNumber;
 import com.google.gwt.core.client.JsArrayUtils;
 import com.google.gwt.typedarrays.shared.Int32Array;
 
-public class Triangulator {
+public class Tessellator {
 
 	public static synchronized int triangulate(float[] points, int ppos, int plen, short[] index,
 			int ipos, int rings, int vertexOffset, VertexItem outTris) {

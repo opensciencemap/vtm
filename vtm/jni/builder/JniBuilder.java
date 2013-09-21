@@ -1,5 +1,4 @@
 
-
 import com.badlogic.gdx.jnigen.AntScriptGenerator;
 import com.badlogic.gdx.jnigen.BuildConfig;
 import com.badlogic.gdx.jnigen.BuildTarget;
@@ -9,30 +8,28 @@ public class JniBuilder {
 	public static void main(String[] args) {
 		String[] headers = { "." };
 		String[] sources = {
-				// Matrix stuff
-				"gl/utils.c",
-				// Triangle
-				"triangle/TriangleJni.c",
-				"triangle/triangle.c",
-				"triangle/triangle_dbg.c",
-				// libtessellate
-				"tessellate/dict.c",
-				"tessellate/mesh.c",
-				"tessellate/render.c",
-				"tessellate/tess.c",
-				"tessellate/geom.c",
-				"tessellate/memalloc.c",
-				"tessellate/normal.c",
-				"tessellate/priorityq.c",
-				"tessellate/sweep.c",
-				"tessellate/tessmono.c",
-				"tessellate/tessellate.c"
-				};
+		    // Matrix stuff
+		    "gl/utils.c",
 
-		String cflags = " -Wall -std=c99 -O2 -ffast-math -DTRILIBRARY -DREDUCED -DCDT_ONLY -DNO_TIMER";
+		    // libtessellate
+		    "tessellate/dict.c",
+		    "tessellate/mesh.c",
+		    "tessellate/render.c",
+		    "tessellate/tess.c",
+		    "tessellate/geom.c",
+		    "tessellate/memalloc.c",
+		    "tessellate/normal.c",
+		    "tessellate/priorityq.c",
+		    "tessellate/sweep.c",
+		    "tessellate/tessmono.c",
+		    "tessellate/tessellate.c",
+		    "tessellate/TessellateJni.c"
+		};
+
+		String cflags = " -Wall -std=c99 -O2 -ffast-math";
 
 		BuildTarget win32home = BuildTarget.newDefaultTarget(TargetOs.Windows,
-				false);
+		                                                     false);
 		win32home.compilerPrefix = "";
 		win32home.buildFileName = "build-windows32home.xml";
 		win32home.excludeFromMasterBuildFile = true;
@@ -42,14 +39,14 @@ public class JniBuilder {
 		win32home.cppFlags += cflags;
 
 		BuildTarget win32 = BuildTarget.newDefaultTarget(TargetOs.Windows,
-				false);
+		                                                 false);
 		win32.headerDirs = headers;
 		win32.cIncludes = sources;
 		win32.cFlags += cflags;
 		win32.cppFlags += cflags;
 
 		BuildTarget win64 = BuildTarget
-				.newDefaultTarget(TargetOs.Windows, true);
+		                               .newDefaultTarget(TargetOs.Windows, true);
 		win64.headerDirs = headers;
 		win64.cIncludes = sources;
 		win64.cFlags += cflags;
@@ -76,7 +73,7 @@ public class JniBuilder {
 		// mac.linkerFlags += " -framework CoreServices -framework Carbon";
 
 		BuildTarget android = BuildTarget.newDefaultTarget(TargetOs.Android,
-				false);
+		                                                   false);
 		android.headerDirs = headers;
 		android.cIncludes = sources;
 		android.cFlags += cflags;
@@ -90,15 +87,11 @@ public class JniBuilder {
 
 		//new NativeCodeGenerator().generate();
 		new AntScriptGenerator().generate(new BuildConfig("vtm-jni"),
-				//win32home, win32, win64, lin32,
-				lin64, android);
+		                                  //win32home, win32, win64, lin32,
+		                                  lin64, android);
 
-//		BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v clean");
-//		BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v");
-//		BuildExecutor.executeAnt("jni/build.xml", "pack-natives -v");
-
-
-
-
+		//		BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v clean");
+		//		BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v");
+		//		BuildExecutor.executeAnt("jni/build.xml", "pack-natives -v");
 	}
 }
