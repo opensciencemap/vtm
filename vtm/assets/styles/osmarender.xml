@@ -7,7 +7,7 @@
     <!-- landuse -->
     <m k="landuse">
       <m v="military">
-        <area src="jar:patterns/military.png" stroke="#e4e4e4" stroke-width="0.2" />
+        <area src="patterns/military.png" stroke="#e4e4e4" stroke-width="0.2" />
       </m>
       <m v="residential|farmyard">
         <area fill="#e4e4e4" />
@@ -106,7 +106,7 @@
         <area fill="#e9dd72" stroke="#556b2f" stroke-width="0.2" />
       </m>
       <m v="cemetery">
-        <area src="jar:patterns/cemetery.png" stroke="#e4e4e4" stroke-width="0.2" />
+        <area src="patterns/cemetery.png" stroke="#e4e4e4" stroke-width="0.2" />
       </m>
       <m v="field|farm|farmland|meadow|grass">
         <area fill="#ebfff2" stroke="#9ee673" stroke-width="0.1" />
@@ -127,13 +127,13 @@
     <m k="natural|landuse" v="forest|wood|scrub">
       <m k="wood">
         <m k="wood" v="coniferous">
-          <area src="jar:patterns/wood-coniferous.png" />
+          <area src="patterns/wood-coniferous.png" />
         </m>
         <m k="wood" v="deciduous">
-          <area src="jar:patterns/wood-deciduous.png" />
+          <area src="patterns/wood-deciduous.png" />
         </m>
         <m k="wood" v="mixed">
-          <area src="jar:patterns/wood-mixed.png" />
+          <area src="patterns/wood-mixed.png" />
         </m>
       </m>
       <m k="wood" v="~">
@@ -152,31 +152,31 @@
         <area fill="#cdabde" stroke="#e9dd72" stroke-width="0.2" />
       </m>
       <m v="grave_yard">
-        <area src="jar:patterns/cemetery.png" stroke="#e4e4e4" stroke-width="0.2" />
+        <area src="patterns/cemetery.png" stroke="#e4e4e4" stroke-width="0.2" />
       </m>
       <m v="parking">
         <area fill="#ffffc0" stroke="#e9dd72" stroke-width="0.2" />
         <m k="access" v="private" zoom-min="15">
-          <area src="jar:patterns/access-private.png" />
+          <area src="patterns/access-private.png" />
         </m>
         <m zoom-min="17">
-          <symbol src="jar:symbols/parking.png" />
+          <symbol src="symbols/parking.png" />
         </m>
       </m>
       <m v="fountain" closed="yes">
         <area fill="#b5d6f1" stroke="#000080" stroke-width="0.15" />
         <m zoom-min="17">
-          <symbol src="jar:symbols/fountain.png" />
+          <symbol src="symbols/fountain.png" />
         </m>
       </m>
       <m v="hospital" zoom-min="15">
-        <symbol src="jar:symbols/hospital.png" />
+        <symbol src="symbols/hospital.png" />
       </m>
       <m v="theatre" zoom-min="17">
-        <symbol src="jar:symbols/theatre.png" />
+        <symbol src="symbols/theatre.png" />
       </m>
       <m v="toilets" zoom-min="17">
-        <symbol src="jar:symbols/toilets.png" />
+        <symbol src="symbols/toilets.png" />
       </m>
 
       <m zoom-min="17">
@@ -208,7 +208,7 @@
         <area fill="#ffffc0" stroke="#ffff90" stroke-width="0.2" />
       </m>
       <m v="marsh|wetland">
-        <area src="jar:patterns/marsh.png" />
+        <area src="patterns/marsh.png" />
       </m>
 
       <m zoom-min="16">
@@ -225,11 +225,11 @@
       <m v="playground|playing_fields|pitch|dog_park">
         <area fill="#c7f1a3" stroke="#6fc18e" stroke-width="0.2" />
         <m v="playground" zoom-min="17">
-          <symbol src="jar:symbols/playground.png" />
+          <symbol src="symbols/playground.png" />
         </m>
       </m>
       <m v="nature_reserve">
-        <area src="jar:patterns/nature-reserve.png" stroke="#6fc18e" stroke-width="0.2" />
+        <area src="patterns/nature-reserve.png" stroke="#6fc18e" stroke-width="0.2" />
       </m>
 
       <m v="stadium|sports_centre|water_park">
@@ -302,14 +302,14 @@
 
     <!-- military -->
     <m k="military">
-      <area src="jar:patterns/military.png" stroke="#e4e4e4" stroke-width="0.2" />
+      <area src="patterns/military.png" stroke="#e4e4e4" stroke-width="0.2" />
     </m>
 
 
     <!-- sport -->
     <m k="sport">
       <m v="soccer" zoom-min="17">
-        <symbol src="jar:symbols/soccer-borderless.png" />
+        <symbol src="symbols/soccer-borderless.png" />
       </m>
       <m v="swimming|canoe|diving|scuba_diving">
         <area fill="#b5d6f1" stroke="#6060ff" stroke-width="0.2" />
@@ -317,7 +317,7 @@
       <m v="tennis">
         <area fill="#d18a6a" stroke="#b36c4c" stroke-width="0.2" />
         <m zoom-min="17">
-          <symbol src="jar:symbols/tennis.png" />
+          <symbol src="symbols/tennis.png" />
         </m>
       </m>
     </m>
@@ -396,12 +396,13 @@
       <m v="terminal">
         <area fill="#f3d6b6" stroke="#6a5a8e" stroke-width="0.2" />
       </m>
-      <m v="runway">
+      
+      <!-- <m v="runway">
         <line stroke="#000000" width="6.3" cap="square" />
       </m>
       <m v="taxiway">
         <line stroke="#000000" width="2.7" cap="butt" />
-      </m>
+      </m>-->
 
       <m zoom-min="16">
         <caption k="name" font-style="bold" font-size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
@@ -726,14 +727,14 @@
             </m>
           </m>
 
-          <m zoom-min="16">
+          <!-- <m zoom-min="16">
             <m k="access" v="destination">
-              <line src="jar:patterns/access-destination.png" width="1.5" />
+              <line src="patterns/access-destination.png" width="1.5" />
             </m>
             <m k="access" v="private">
-              <line src="jar:patterns/access-private.png" width="1.5" />
+              <line src="patterns/access-private.png" width="1.5" />
             </m>
-          </m>
+          </m>-->
         </m>
       </m>
     </m>
@@ -743,9 +744,11 @@
     <m k="aeroway">
       <m k="aeroway" v="runway">
         <line stroke="#d4dcbd" width="4.5" cap="square" />
-      </m>
+        <outline use="casing" />
+        </m>
       <m k="aeroway" v="taxiway">
         <line stroke="#d4dcbd" width="1.8" cap="butt" />
+        <outline use="casing" />
       </m>
     </m>
 
@@ -784,7 +787,7 @@
       <m k="area" v="~|false|no">
       <m k="highway">
       <m k="oneway" v="yes|true" zoom-min="16">
-      <lineSymbol src="jar:symbols/oneway.png" align-center="true"
+      <lineSymbol src="symbols/oneway.png" align-center="true"
       repeat="true" />
       </m>
       </m>
@@ -862,13 +865,13 @@
       <line stroke="#202020" width="0.4" cap="butt" />
       <line stroke="#202020" width="4.0" dasharray="2,200" cap="butt" />
       <m k="aerialway" v="cable_car">
-        <lineSymbol src="jar:symbols/cable_car.png" />
+        <lineSymbol src="symbols/cable_car.png" />
       </m>
       <m k="aerialway" v="chair_lift">
-        <lineSymbol src="jar:symbols/chair_lift_2.png" />
+        <lineSymbol src="symbols/chair_lift_2.png" />
       </m>
       <m k="aerialway" v="gondola">
-        <lineSymbol src="jar:symbols/gondola.png" />
+        <lineSymbol src="symbols/gondola.png" />
       </m>
       <m zoom-min="14">
         <text k="name" font-style="bold" font-size="10" fill="#606060" stroke="#ffffff" stroke-width="2.0" />
@@ -991,109 +994,109 @@
     <!--
       <m k="aeroway">
       <m k="aeroway" v="helipad" zoom-min="17">
-      <symbol src="jar:symbols/helipad.png" />
+      <symbol src="symbols/helipad.png" />
       </m>
       <m k="aeroway" v="aerodrome|airport" zoom-max="13">
-      <symbol src="jar:symbols/airport.png" />
+      <symbol src="symbols/airport.png" />
       </m>
       </m>
 
 
       <m k="amenity">
       <m k="amenity" v="atm" zoom-min="17">
-      <symbol src="jar:symbols/atm.png" />
+      <symbol src="symbols/atm.png" />
       </m>
       <m k="amenity" v="bank" zoom-min="17">
-      <symbol src="jar:symbols/bank.png" />
+      <symbol src="symbols/bank.png" />
       </m>
       <m k="amenity" v="bench" zoom-min="17">
-      <symbol src="jar:symbols/bench.png" />
+      <symbol src="symbols/bench.png" />
       </m>
       <m k="amenity" v="bicycle_rental" zoom-min="17">
-      <symbol src="jar:symbols/bicycle_rental.png" />
+      <symbol src="symbols/bicycle_rental.png" />
       </m>
       <m k="amenity" v="bus_station" zoom-min="17">
-      <symbol src="jar:symbols/bus_sta.png" />
+      <symbol src="symbols/bus_sta.png" />
       </m>
       <m k="amenity" v="cafe" zoom-min="17">
-      <symbol src="jar:symbols/cafe.png" />
+      <symbol src="symbols/cafe.png" />
       </m>
       <m k="amenity" v="cinema" zoom-min="17">
-      <symbol src="jar:symbols/cinema.png" />
+      <symbol src="symbols/cinema.png" />
       </m>
       <m k="amenity" v="drinking_water" zoom-min="17">
-      <symbol src="jar:symbols/drinking_water.png" />
+      <symbol src="symbols/drinking_water.png" />
       </m>
       <m k="amenity" v="fast_food" zoom-min="17">
-      <symbol src="jar:symbols/fastfood.png" />
+      <symbol src="symbols/fastfood.png" />
       </m>
       <m k="amenity" v="fire_station" zoom-min="17">
-      <symbol src="jar:symbols/firebrigade.png" />
+      <symbol src="symbols/firebrigade.png" />
       </m>
       <m k="amenity" v="fountain" zoom-min="17">
-      <symbol src="jar:symbols/fountain.png" />
+      <symbol src="symbols/fountain.png" />
       </m>
       <m k="amenity" v="fuel" zoom-min="17">
-      <symbol src="jar:symbols/petrolStation.png" />
+      <symbol src="symbols/petrolStation.png" />
       </m>
       <m k="amenity" v="hospital" zoom-min="15">
-      <symbol src="jar:symbols/hospital.png" />
+      <symbol src="symbols/hospital.png" />
       </m>
       <m k="amenity" v="kindergarten" zoom-min="17">
-      <symbol src="jar:symbols/kindergarten.png" />
+      <symbol src="symbols/kindergarten.png" />
       </m>
       <m k="amenity" v="library" zoom-min="17">
-      <symbol src="jar:symbols/library.png" />
+      <symbol src="symbols/library.png" />
       </m>
       <m k="amenity" v="parking" zoom-min="17">
-      <symbol src="jar:symbols/parking.png" />
+      <symbol src="symbols/parking.png" />
       </m>
       <m k="amenity" v="pharmacy" zoom-min="17">
-      <symbol src="jar:symbols/pharmacy.png" />
+      <symbol src="symbols/pharmacy.png" />
       </m>
       <m k="amenity" v="place_of_worship" zoom-min="17">
       <m k="denomination|religion" v="jewish">
-      <symbol src="jar:symbols/synagogue.png" />
+      <symbol src="symbols/synagogue.png" />
       </m>
       <m k="denomination|religion" v="muslim|moslem">
-      <symbol src="jar:symbols/mosque.png" />
+      <symbol src="symbols/mosque.png" />
       </m>
       <m k="denomination|religion" v="christian">
-      <symbol src="jar:symbols/church.png" />
+      <symbol src="symbols/church.png" />
       </m>
       </m>
       <m k="amenity" v="post_box" zoom-min="17">
-      <symbol src="jar:symbols/postbox.png" />
+      <symbol src="symbols/postbox.png" />
       </m>
       <m k="amenity" v="post_office" zoom-min="17">
-      <symbol src="jar:symbols/postoffice.png" />
+      <symbol src="symbols/postoffice.png" />
       </m>
       <m k="amenity" v="pub|bar" zoom-min="17">
-      <symbol src="jar:symbols/pub.png" />
+      <symbol src="symbols/pub.png" />
       </m>
       <m k="amenity" v="recycling" zoom-min="17">
-      <symbol src="jar:symbols/recycling.png" />
+      <symbol src="symbols/recycling.png" />
       </m>
       <m k="amenity" v="restaurant" zoom-min="17">
-      <symbol src="jar:symbols/restaurant.png" />
+      <symbol src="symbols/restaurant.png" />
       </m>
       <m k="amenity" v="school" zoom-min="17">
-      <symbol src="jar:symbols/school.png" />
+      <symbol src="symbols/school.png" />
       </m>
       <m k="amenity" v="shelter" zoom-min="17">
-      <symbol src="jar:symbols/shelter.png" />
+      <symbol src="symbols/shelter.png" />
       </m>
       <m k="amenity" v="telephone" zoom-min="17">
-      <symbol src="jar:symbols/telephone.png" />
+      <symbol src="symbols/telephone.png" />
       </m>
       <m k="amenity" v="theatre" zoom-min="17">
-      <symbol src="jar:symbols/theatre.png" />
+      <symbol src="symbols/theatre.png" />
       </m>
       <m k="amenity" v="toilets" zoom-min="17">
-      <symbol src="jar:symbols/toilets.png" />
+      <symbol src="symbols/toilets.png" />
       </m>
       <m k="amenity" v="university|college" zoom-min="17">
-      <symbol src="jar:symbols/university.png" />
+      <symbol src="symbols/university.png" />
       </m>
 
       <m zoom-min="17">
@@ -1110,10 +1113,10 @@
 
       <m k="highway">
       <m k="highway" v="bus_stop" zoom-min="16">
-      <symbol src="jar:symbols/bus.png" />
+      <symbol src="symbols/bus.png" />
       </m>
       <m k="highway" v="traffic_signals" zoom-min="17">
-      <symbol src="jar:symbols/traffic_signal.png" />
+      <symbol src="symbols/traffic_signal.png" />
       </m>
       <m k="highway" v="turning_circle">
       <circle radius="1.4" scale-radius="true" fill="#ffffff" />
@@ -1138,29 +1141,29 @@
 
 
       <m k="leisure" v="playground" zoom-min="17">
-      <symbol src="jar:symbols/playground.png" />
+      <symbol src="symbols/playground.png" />
       </m>
 
 
       <m k="man_made" v="windmill" zoom-min="17">
-      <symbol src="jar:symbols/windmill.png" />
+      <symbol src="symbols/windmill.png" />
       </m>
 
 
       <m k="natural">
       <m k="natural" v="cave_entrance" zoom-min="15">
-      <symbol src="jar:symbols/cave_entrance.png" />
+      <symbol src="symbols/cave_entrance.png" />
       </m>
       <m k="natural" v="peak" zoom-min="12">
-      <symbol src="jar:symbols/peak.png" />
+      <symbol src="symbols/peak.png" />
       <caption k="ele" dy="20" font-style="bold" font-size="10" fill="#000000"
       stroke="#ffffff" width="2.0" />
       </m>
       <m k="natural" v="tree" zoom-min="16">
-      <symbol src="jar:symbols/tree.png" />
+      <symbol src="symbols/tree.png" />
       </m>
       <m k="natural" v="volcano" zoom-min="12">
-      <symbol src="jar:symbols/vulcan.png" />
+      <symbol src="symbols/vulcan.png" />
       </m>
 
       <m zoom-min="17">
@@ -1191,10 +1194,10 @@
 
     <m k="railway">
       <!-- <m k="railway" v="crossing" zoom-min="16">
-        <symbol src="jar:symbols/railway-crossing-small.png" />
+        <symbol src="symbols/railway-crossing-small.png" />
       </m>
       <m k="railway" v="level_crossing" zoom-min="16">
-        <symbol src="jar:symbols/railway-crossing.png" />
+        <symbol src="symbols/railway-crossing.png" />
       </m>-->
       <m k="railway" v="station" zoom-min="14">
         <circle r="6" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
@@ -1209,13 +1212,13 @@
 
     <m k="shop">
       <m v="bakery" zoom-min="17">
-        <symbol src="jar:symbols/bakery.png" />
+        <symbol src="symbols/bakery.png" />
       </m>
       <m v="florist" zoom-min="17">
-        <symbol src="jar:symbols/florist.png" />
+        <symbol src="symbols/florist.png" />
       </m>
       <m v="supermarket|organic" zoom-min="17">
-        <symbol src="jar:symbols/supermarket.png" />
+        <symbol src="symbols/supermarket.png" />
       </m>
 
       <m zoom-min="17">
@@ -1226,22 +1229,22 @@
 
     <m k="tourism">
       <m v="alpine_hut" zoom-min="16">
-        <symbol src="jar:symbols/alpine_hut.png" />
+        <symbol src="symbols/alpine_hut.png" />
       </m>
       <m v="camp_site" zoom-min="17">
-        <symbol src="jar:symbols/campSite.png" />
+        <symbol src="symbols/campSite.png" />
       </m>
       <m v="hostel" zoom-min="17">
-        <symbol src="jar:symbols/hostel.png" />
+        <symbol src="symbols/hostel.png" />
       </m>
       <m v="hotel" zoom-min="17">
-        <symbol src="jar:symbols/hotel.png" />
+        <symbol src="symbols/hotel.png" />
       </m>
       <m v="information" zoom-min="17">
-        <symbol src="jar:symbols/information.png" />
+        <symbol src="symbols/information.png" />
       </m>
       <m v="viewpoint" zoom-min="15">
-        <symbol src="jar:symbols/viewpoint.png" />
+        <symbol src="symbols/viewpoint.png" />
       </m>
 
       <m zoom-min="17">
