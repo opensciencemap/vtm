@@ -152,7 +152,7 @@ public final class BufferObject {
 
 			if (prev == null) {
 				Log.d(TAG, "nothing to free");
-				return 0;
+				continue;
 			}
 
 			for (BufferObject bo = pool[t].next; bo != null;) {
