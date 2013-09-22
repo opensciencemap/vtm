@@ -134,7 +134,7 @@ public class MapTile extends Tile {
 	// e.g. x:-1,y:0,z:1 for x:1,y:0
 	MapTile holder;
 
-	protected MapTile(int tileX, int tileY, byte zoomLevel) {
+	public MapTile(int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
 		this.x = (double) tileX / (1 << zoomLevel);
 		this.y = (double) tileY / (1 << zoomLevel);
