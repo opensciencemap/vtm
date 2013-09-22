@@ -31,11 +31,17 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.Interpolation;
 
+/**
+ * Special Renderer for drawing tile polygons
+ */
 public final class PolygonLayer extends RenderElement {
 	private static final String TAG = PolygonLayer.class.getName();
 
 	private static final float S = MapRenderer.COORD_SCALE;
+
+	private static final boolean enableTexture = true;
 
 	public Area area;
 
@@ -115,9 +121,6 @@ public final class PolygonLayer extends RenderElement {
 	protected void clear() {
 	}
 
-	/**
-	 * Special Renderer for drawing tile polygon layers
-	 */
 	public static final class Renderer {
 
 		private static GL20 GL;
@@ -140,8 +143,6 @@ public final class PolygonLayer extends RenderElement {
 		private static int[] hPolygonMatrix = new int[numShaders];
 		private static int[] hPolygonColor = new int[numShaders];
 		private static int[] hPolygonScale = new int[numShaders];
-
-		private static boolean enableTexture = false;
 
 		static boolean init(GL20 gl) {
 			GL = gl;
@@ -194,8 +195,12 @@ public final class PolygonLayer extends RenderElement {
 				if (enableTexture && a.texture != null) {
 					shader = texShader;
 					setShader(texShader, m);
-					GL.glUniform2f(hPolygonScale[1], FastMath.clamp(scale - 1, 0, 1), div);
+					float num = (Tile.SIZE / a.texture.width) >> 1;
+					float transition = Interpolation.exp5.apply(FastMath.clamp(scale - 1, 0, 1));
+					GL.glUniform2f(hPolygonScale[1], transition, div / num);
 
+					//if (a.texture.alpha);
+					GLState.blend(true);
 					a.texture.bind();
 
 				} else if (a.fade >= zoom) {
