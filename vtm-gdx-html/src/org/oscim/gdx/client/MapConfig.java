@@ -34,4 +34,3 @@ class MapConfig extends JavaScriptObject {
 		return this.background;
 	}-*/;
 }
-

@@ -51,7 +51,6 @@ public class MapView extends RelativeLayout {
 	private int mWidth;
 	private int mHeight;
 
-
 	private final Map mMap;
 
 	final GLView mGLView;
@@ -89,7 +88,7 @@ public class MapView extends RelativeLayout {
 
 		if (!(context instanceof MapActivity)) {
 			throw new IllegalArgumentException(
-					"context is not an instance of MapActivity");
+			                                   "context is not an instance of MapActivity");
 		}
 
 		Log.logger = new AndroidLog();
@@ -100,7 +99,7 @@ public class MapView extends RelativeLayout {
 		this.setWillNotDraw(true);
 
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
-		CanvasAdapter.dpi = (int)Math.max(metrics.xdpi, metrics.ydpi);
+		CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
 
 		// TODO make this dpi dependent
 		Tile.SIZE = 400;
@@ -109,7 +108,7 @@ public class MapView extends RelativeLayout {
 
 		final MapView m = this;
 
-		mMap = new Map(){
+		mMap = new Map() {
 
 			boolean mWaitRedraw;
 
@@ -181,8 +180,8 @@ public class MapView extends RelativeLayout {
 		mapActivity.registerMapView(mMap);
 
 		LayoutParams params = new LayoutParams(
-				android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-				android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+		                                       android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+		                                       android.view.ViewGroup.LayoutParams.MATCH_PARENT);
 
 		addView(mGLView, params);
 
@@ -190,7 +189,7 @@ public class MapView extends RelativeLayout {
 		mMap.updateMap(false);
 	}
 
-	View getView(){
+	View getView() {
 		return this;
 	}
 
@@ -202,7 +201,6 @@ public class MapView extends RelativeLayout {
 		Log.d(TAG, "onStop");
 		//mMap.destroy();
 	}
-
 
 	void onPause() {
 		mPausing = true;
@@ -236,7 +234,7 @@ public class MapView extends RelativeLayout {
 	// synchronized ???
 	@Override
 	protected void onSizeChanged(int width, int height,
-			int oldWidth, int oldHeight) {
+	        int oldWidth, int oldHeight) {
 		Log.d(TAG, "onSizeChanged: " + width + "x" + height);
 
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
@@ -249,7 +247,6 @@ public class MapView extends RelativeLayout {
 		if (mInitialized)
 			mMap.getViewport().setViewport(width, height);
 	}
-
 
 	public void enableRotation(boolean enable) {
 		mRotationEnabled = enable;

@@ -36,7 +36,7 @@ public class LwHttp {
 	private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
 	private final static byte[] HEADER_CONTENT_LENGTH = "Content-Length".getBytes();
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
-	private final static long RESPONSE_TIMEOUT = (long)10E9; // 10 second in nanosecond (I guess)
+	private final static long RESPONSE_TIMEOUT = (long) 10E9; // 10 second in nanosecond (I guess)
 
 	private final static int BUFFER_SIZE = 1024;
 	private final byte[] buffer = new byte[BUFFER_SIZE];
@@ -75,16 +75,16 @@ public class LwHttp {
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
 		REQUEST_GET_END = ("." + extension + " HTTP/1.1" +
-				"\nHost: " + host +
-				"\nConnection: Keep-Alive" +
-				"\n\n").getBytes();
+		        "\nHost: " + host +
+		        "\nConnection: Keep-Alive" +
+		        "\n\n").getBytes();
 
 		mHost = host;
 		mPort = port;
 
 		mRequestBuffer = new byte[1024];
 		System.arraycopy(REQUEST_GET_START, 0,
-				mRequestBuffer, 0, REQUEST_GET_START.length);
+		                 mRequestBuffer, 0, REQUEST_GET_START.length);
 	}
 
 	static class Buffer extends BufferedInputStream {
@@ -99,7 +99,7 @@ public class LwHttp {
 
 		@Override
 		public synchronized int read(byte[] buffer, int offset, int byteCount)
-				throws IOException {
+		        throws IOException {
 			return super.read(buffer, offset, byteCount);
 		}
 	}
@@ -134,7 +134,7 @@ public class LwHttp {
 
 		// header cannot be larger than BUFFER_SIZE for this to work
 		for (; (pos < read) || ((read < BUFFER_SIZE) &&
-				(len = is.read(buf, read, BUFFER_SIZE - read)) >= 0); len = 0) {
+		        (len = is.read(buf, read, BUFFER_SIZE - read)) >= 0); len = 0) {
 
 			read += len;
 			// end of header lines
@@ -160,12 +160,12 @@ public class LwHttp {
 
 			} else if (check(HEADER_CONTENT_TYPE, buf, pos, end)) {
 				if (!check(mContentType, buf,
-						pos + HEADER_CONTENT_TYPE.length + 2, end))
+				           pos + HEADER_CONTENT_TYPE.length + 2, end))
 					ok = false;
 
 			} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
 				mContentLength = parseInt(buf,
-						pos + HEADER_CONTENT_LENGTH.length + 2, end - 1);
+				                          pos + HEADER_CONTENT_LENGTH.length + 2, end - 1);
 			}
 
 			if (!ok) {
@@ -194,7 +194,7 @@ public class LwHttp {
 	public boolean sendRequest(Tile tile) throws IOException {
 
 		if (mSocket != null && ((mMaxReq-- <= 0)
-				|| (System.nanoTime() - mLastRequest > RESPONSE_TIMEOUT))) {
+		        || (System.nanoTime() - mLastRequest > RESPONSE_TIMEOUT))) {
 
 			try {
 				mSocket.close();
@@ -301,7 +301,7 @@ public class LwHttp {
 	}
 
 	private static boolean check(byte[] string, byte[] buffer,
-			int position, int available) {
+	        int position, int available) {
 
 		int length = string.length;
 
@@ -325,7 +325,7 @@ public class LwHttp {
 
 	/**
 	 * Write custom tile url
-	 *
+	 * 
 	 * @param tile Tile
 	 * @param path to write url string
 	 * @param curPos current position

@@ -52,7 +52,7 @@ public final class PolygonLayer extends RenderElement {
 		vertexItems = curItem;
 	}
 
-	public void addPolygon(GeometryBuffer geom){
+	public void addPolygon(GeometryBuffer geom) {
 		addPolygon(geom.points, geom.index);
 	}
 
@@ -153,13 +153,13 @@ public final class PolygonLayer extends RenderElement {
 				if (i == 0) {
 					if (MapRenderer.debugView)
 						polygonProgram[i] = GLUtils.createProgram(polygonVertexShaderZ,
-								polygonFragmentShaderZ);
+						                                          polygonFragmentShaderZ);
 					else
 						polygonProgram[i] = GLUtils.createProgram(polygonVertexShader,
-								polygonFragmentShader);
+						                                          polygonFragmentShader);
 				} else if (i == 1) {
 					polygonProgram[i] = GLUtils.createProgram(textureVertexShader,
-							textureFragmentShader);
+					                                          textureFragmentShader);
 
 				}
 
@@ -180,7 +180,7 @@ public final class PolygonLayer extends RenderElement {
 		}
 
 		private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale,
-				float div) {
+		        float div) {
 
 			/* draw to framebuffer */
 			GL.glColorMask(true, true, true, true);
@@ -222,7 +222,7 @@ public final class PolygonLayer extends RenderElement {
 
 					if (a.blend == zoom)
 						GLUtils.setColorBlend(hPolygonColor[shader],
-								a.color, a.blendColor, scale - 1.0f);
+						                      a.color, a.blendColor, scale - 1.0f);
 					else
 						GLUtils.setColor(hPolygonColor[shader], a.blendColor, 1);
 
@@ -260,7 +260,7 @@ public final class PolygonLayer extends RenderElement {
 			GLState.enableVertexArrays(hPolygonVertexPosition[shader], -1);
 
 			GL.glVertexAttribPointer(hPolygonVertexPosition[shader], 2, GL20.GL_SHORT,
-					false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
+			                         false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
 
 			m.mvp.setAsUniform(hPolygonMatrix[shader]);
 		}
@@ -268,7 +268,7 @@ public final class PolygonLayer extends RenderElement {
 		/**
 		 * draw polygon layers (unil layer.next is not polygon layer)
 		 * using stencil buffer method
-		 *
+		 * 
 		 * @param pos
 		 *            used to fade layers accorind to 'fade'
 		 *            in layer.area.
@@ -286,7 +286,7 @@ public final class PolygonLayer extends RenderElement {
 		 *         next layer
 		 */
 		public static RenderElement draw(MapPosition pos, RenderElement renderElement,
-				Matrices m, boolean first, float div, boolean clip) {
+		        Matrices m, boolean first, float div, boolean clip) {
 
 			GLState.test(false, true);
 
@@ -367,7 +367,7 @@ public final class PolygonLayer extends RenderElement {
 		/**
 		 * Draw a tile filling rectangle to set stencil- and depth buffer
 		 * appropriately
-		 *
+		 * 
 		 * @param first in the first run the clip region is set based on
 		 *            depth buffer and depth buffer is updated
 		 */
@@ -465,8 +465,10 @@ public final class PolygonLayer extends RenderElement {
 		static void debugDraw(GLMatrix m, float[] coords, int color) {
 			GLState.test(false, false);
 			if (mDebugFill == null) {
-				mDebugFill = ByteBuffer.allocateDirect(32).order(ByteOrder.nativeOrder())
-						.asFloatBuffer();
+				mDebugFill = ByteBuffer
+				    .allocateDirect(32)
+				    .order(ByteOrder.nativeOrder())
+				    .asFloatBuffer();
 				mDebugFill.put(coords);
 			}
 
@@ -477,7 +479,7 @@ public final class PolygonLayer extends RenderElement {
 			GL.glEnableVertexAttribArray(hPolygonVertexPosition[0]);
 
 			GL.glVertexAttribPointer(hPolygonVertexPosition[0], 2, GL20.GL_FLOAT,
-					false, 0, mDebugFill);
+			                         false, 0, mDebugFill);
 
 			m.setAsUniform(hPolygonMatrix[0]);
 
@@ -492,67 +494,67 @@ public final class PolygonLayer extends RenderElement {
 		}
 
 		private final static String polygonVertexShader = ""
-				+ "precision mediump float;"
-				+ "uniform mat4 u_mvp;"
-				+ "attribute vec4 a_pos;"
-				+ "void main() {"
-				+ "  gl_Position = u_mvp * a_pos;"
-				+ "}";
+		        + "precision mediump float;"
+		        + "uniform mat4 u_mvp;"
+		        + "attribute vec4 a_pos;"
+		        + "void main() {"
+		        + "  gl_Position = u_mvp * a_pos;"
+		        + "}";
 
 		private final static String polygonFragmentShader = ""
-				+ "precision mediump float;"
-				+ "uniform vec4 u_color;"
-				+ "void main() {"
-				+ "  gl_FragColor = u_color;"
-				+ "}";
+		        + "precision mediump float;"
+		        + "uniform vec4 u_color;"
+		        + "void main() {"
+		        + "  gl_FragColor = u_color;"
+		        + "}";
 
 		private final static String polygonVertexShaderZ = ""
-				+ "precision highp float;"
-				+ "uniform mat4 u_mvp;"
-				+ "attribute vec4 a_pos;"
-				+ "varying float z;"
-				+ "void main() {"
-				+ "  gl_Position = u_mvp * a_pos;"
-				+ "  z = gl_Position.z;"
-				+ "}";
+		        + "precision highp float;"
+		        + "uniform mat4 u_mvp;"
+		        + "attribute vec4 a_pos;"
+		        + "varying float z;"
+		        + "void main() {"
+		        + "  gl_Position = u_mvp * a_pos;"
+		        + "  z = gl_Position.z;"
+		        + "}";
 		private final static String polygonFragmentShaderZ = ""
-				+ "precision highp float;"
-				+ "uniform vec4 u_color;"
-				+ "varying float z;"
-				+ "void main() {"
-				+ "if (z < -1.0)"
-				+ "  gl_FragColor = vec4(0.0, z + 2.0, 0.0, 1.0)*0.8;"
-				+ "else if (z < 0.0)"
-				+ "  gl_FragColor = vec4(z + 1.0, 0.0, 0.0, 1.0)*0.8;"
-				+ "else if (z < 1.0)"
-				+ "  gl_FragColor = vec4(0.0, 0.0, z, 1.0)*0.8;"
-				+ "else"
-				+ "  gl_FragColor = vec4(0.0, z - 1.0, 0.0, 1.0)*0.8;"
-				+ "}";
+		        + "precision highp float;"
+		        + "uniform vec4 u_color;"
+		        + "varying float z;"
+		        + "void main() {"
+		        + "if (z < -1.0)"
+		        + "  gl_FragColor = vec4(0.0, z + 2.0, 0.0, 1.0)*0.8;"
+		        + "else if (z < 0.0)"
+		        + "  gl_FragColor = vec4(z + 1.0, 0.0, 0.0, 1.0)*0.8;"
+		        + "else if (z < 1.0)"
+		        + "  gl_FragColor = vec4(0.0, 0.0, z, 1.0)*0.8;"
+		        + "else"
+		        + "  gl_FragColor = vec4(0.0, z - 1.0, 0.0, 1.0)*0.8;"
+		        + "}";
 
 		private final static String textureVertexShader = ""
-				+ "precision mediump float;"
-				+ "uniform mat4 u_mvp;"
-				+ "uniform vec2 u_scale;"
-				+ "attribute vec4 a_pos;"
-				+ "varying vec2 v_st;"
-				+ "varying vec2 v_st2;"
-				+ "void main() {"
-				+ "  v_st = clamp(a_pos.xy, 0.0, 1.0) * (2.0 / u_scale.y);"
-				+ "  v_st2 = clamp(a_pos.xy, 0.0, 1.0) * (4.0 / u_scale.y);"
-				+ "  gl_Position = u_mvp * a_pos;"
-				+ "}";
+		        + "precision mediump float;"
+		        + "uniform mat4 u_mvp;"
+		        + "uniform vec2 u_scale;"
+		        + "attribute vec4 a_pos;"
+		        + "varying vec2 v_st;"
+		        + "varying vec2 v_st2;"
+		        + "void main() {"
+		        + "  v_st = clamp(a_pos.xy, 0.0, 1.0) * (2.0 / u_scale.y);"
+		        + "  v_st2 = clamp(a_pos.xy, 0.0, 1.0) * (4.0 / u_scale.y);"
+		        + "  gl_Position = u_mvp * a_pos;"
+		        + "}";
 
 		private final static String textureFragmentShader = ""
-				+ "precision mediump float;"
-				+ "uniform vec4 u_color;"
-				+ "uniform sampler2D tex;"
-				+ "uniform vec2 u_scale;"
-				+ "varying vec2 v_st;"
-				+ "varying vec2 v_st2;"
-				+ "void main() {"
-				+ "  gl_FragColor = mix(texture2D(tex, v_st), texture2D(tex, v_st2), u_scale.x);"
-				+ "}";
+		        + "precision mediump float;"
+		        + "uniform vec4 u_color;"
+		        + "uniform sampler2D tex;"
+		        + "uniform vec2 u_scale;"
+		        + "varying vec2 v_st;"
+		        + "varying vec2 v_st2;"
+		        + "void main() {"
+		        + "  gl_FragColor = mix(texture2D(tex, v_st), texture2D(tex, v_st2), u_scale.x);"
+		        + "}";
 	}
 
 }

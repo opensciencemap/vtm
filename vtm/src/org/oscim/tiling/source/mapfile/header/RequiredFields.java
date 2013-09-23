@@ -106,12 +106,12 @@ final class RequiredFields {
 		}
 
 		mapFileInfoBuilder.boundingBox = new BoundingBox(minLatitude, minLongitude, maxLatitude,
-				maxLongitude);
+		                                                 maxLongitude);
 		return OpenResult.SUCCESS;
 	}
 
 	static OpenResult readFileSize(ReadBuffer readBuffer, long fileSize,
-			MapFileInfoBuilder mapFileInfoBuilder) {
+	        MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the file size (8 bytes)
 		long headerFileSize = readBuffer.readLong();
 		if (headerFileSize != fileSize) {
@@ -178,7 +178,7 @@ final class RequiredFields {
 	}
 
 	static OpenResult readProjectionName(ReadBuffer readBuffer,
-			MapFileInfoBuilder mapFileInfoBuilder) {
+	        MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the projection name
 		String projectionName = readBuffer.readUTF8EncodedString();
 		if (!MERCATOR.equals(projectionName)) {

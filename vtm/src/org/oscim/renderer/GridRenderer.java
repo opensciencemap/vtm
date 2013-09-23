@@ -84,8 +84,8 @@ public class GridRenderer extends ElementRenderer {
 				// Integer.valueOf(y + yy),
 				// Integer.valueOf(z));
 				String label = Integer.valueOf(x + xx) + "/" +
-				               Integer.valueOf(y + yy) + "/" +
-				               Integer.valueOf(z);
+				        Integer.valueOf(y + yy) + "/" +
+				        Integer.valueOf(z);
 
 				TextItem ti = TextItem.pool.get();
 				ti.set(s * xx + s / 2, s * yy + s / 2, label, mText);

@@ -17,7 +17,7 @@ package org.oscim.utils;
 /**
  * from http://en.wikipedia.org/wiki/Cohen%E2%80%93
  * Sutherland_algorithm
- *
+ * 
  * @adapted by Hannes Janetzek
  */
 
@@ -78,7 +78,8 @@ public class LineClipper {
 	/**
 	 * @param x1 ...
 	 * @param y1 ...
-	 * @return 0 if not intersection, 1 fully within, -1 clipped (and 'out' set to new points)
+	 * @return 0 if not intersection, 1 fully within, -1 clipped (and 'out' set
+	 *         to new points)
 	 */
 	public int clipNext(int x1, int y1) {
 		int accept;
@@ -101,7 +102,7 @@ public class LineClipper {
 			accept = 0;
 		} else {
 			accept = clip(mPrevX, mPrevY, x1, y1, xmin, ymin, xmax, ymax, mPrevOutcode, outcode,
-					this.out) ? -1 : 0;
+			              this.out) ? -1 : 0;
 		}
 		mPrevOutcode = outcode;
 		mPrevX = x1;
@@ -114,7 +115,7 @@ public class LineClipper {
 	// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
 	// diagonal from (xmin, ymin) to (xmax, ymax).
 	private static boolean clip(int x0, int y0, int x1, int y1,
-			int xmin, int ymin, int xmax, int ymax, int outcode0, int outcode1, int[] out) {
+	        int xmin, int ymin, int xmax, int ymax, int outcode0, int outcode1, int[] out) {
 
 		boolean accept = false;
 

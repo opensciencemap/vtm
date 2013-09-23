@@ -249,7 +249,7 @@ public class PathLayer extends Layer {
 
 	/**
 	 * Draw a great circle. Calculate a point for every 100km along the path.
-	 *
+	 * 
 	 * @param startPoint
 	 *            start point of the great circle
 	 * @param endPoint
@@ -270,7 +270,7 @@ public class PathLayer extends Layer {
 
 	/**
 	 * Draw a great circle.
-	 *
+	 * 
 	 * @param startPoint
 	 *            start point of the great circle
 	 * @param endPoint
@@ -279,7 +279,7 @@ public class PathLayer extends Layer {
 	 *            number of points to calculate along the path
 	 */
 	public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint,
-			final int numberOfPoints) {
+	        final int numberOfPoints) {
 		// adapted from page
 		// http://compastic.blogspot.co.uk/2011/07/how-to-draw-great-circle-on-map-in.html
 		// which was adapted from page http://maps.forum.nu/gm_flight_path.html
@@ -291,13 +291,14 @@ public class PathLayer extends Layer {
 		final double lon2 = endPoint.getLongitude() * Math.PI / 180;
 
 		final double d = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat1 - lat2) / 2), 2)
-				+ Math.cos(lat1) * Math.cos(lat2)
-				* Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
+		        + Math.cos(lat1) * Math.cos(lat2)
+		        * Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
 		double bearing = Math.atan2(
-				Math.sin(lon1 - lon2) * Math.cos(lat2),
-				Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2)
-						* Math.cos(lon1 - lon2))
-				/ -(Math.PI / 180);
+		                            Math.sin(lon1 - lon2) * Math.cos(lat2),
+		                            Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+		                                    * Math.cos(lat2)
+		                                    * Math.cos(lon1 - lon2))
+		        / -(Math.PI / 180);
 		bearing = bearing < 0 ? 360 + bearing : bearing;
 
 		for (int i = 0, j = numberOfPoints + 1; i < j; i++) {
@@ -305,9 +306,9 @@ public class PathLayer extends Layer {
 			final double A = Math.sin((1 - f) * d) / Math.sin(d);
 			final double B = Math.sin(f * d) / Math.sin(d);
 			final double x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2)
-					* Math.cos(lon2);
+			        * Math.cos(lon2);
 			final double y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2)
-					* Math.sin(lon2);
+			        * Math.sin(lon2);
 			final double z = A * Math.sin(lat1) + B * Math.sin(lat2);
 
 			final double latN = Math.atan2(z, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));

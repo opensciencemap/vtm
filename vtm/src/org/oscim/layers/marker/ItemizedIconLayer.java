@@ -26,7 +26,7 @@ import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 
 public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<Item>
-		implements TouchListener {
+        implements TouchListener {
 	//private static final String TAG = ItemizedIconOverlay.class.getName();
 
 	protected final List<Item> mItemList;
@@ -36,8 +36,8 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 	private final Point mTmpPoint = new Point();
 
 	public ItemizedIconLayer(Map map, List<Item> list,
-			MarkerSymbol defaultMarker,
-			ItemizedIconLayer.OnItemGestureListener<Item> onItemGestureListener) {
+	        MarkerSymbol defaultMarker,
+	        ItemizedIconLayer.OnItemGestureListener<Item> onItemGestureListener) {
 
 		super(map, defaultMarker);
 
@@ -157,6 +157,7 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 	 * When a content sensitive action is performed the content item needs to be
 	 * identified. This method does that and then performs the assigned task on
 	 * that item.
+	 * 
 	 * @param event
 	 *            ...
 	 * @param task
@@ -218,6 +219,7 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 	 * When the item is touched one of these methods may be invoked depending on
 	 * the type of touch. Each of them returns true if the event was completely
 	 * handled.
+	 * 
 	 * @param <T>
 	 *            ....
 	 */

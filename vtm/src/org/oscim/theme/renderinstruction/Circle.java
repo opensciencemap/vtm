@@ -16,24 +16,22 @@ package org.oscim.theme.renderinstruction;
 
 import org.oscim.theme.IRenderTheme.Callback;
 
-
 /**
  * Represents a round area on the map.
  */
 public final class Circle extends RenderInstruction {
-
 
 	public final int level;
 
 	public final int fill;
 	public final int outline;
 	public final float radius;
-	public  float renderRadius;
+	public float renderRadius;
 	public final boolean scaleRadius;
 	public final float strokeWidth;
 
 	public Circle(Float radius, boolean scaleRadius, int fill, int stroke,
-			float strokeWidth, int level) {
+	        float strokeWidth, int level) {
 		super();
 
 		this.radius = radius.floatValue();
@@ -48,6 +46,6 @@ public final class Circle extends RenderInstruction {
 
 	@Override
 	public void renderNode(Callback renderCallback) {
-			renderCallback.renderPointCircle(this, this.level);
+		renderCallback.renderPointCircle(this, this.level);
 	}
 }

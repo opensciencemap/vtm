@@ -12,18 +12,18 @@ public class DefaultHandler {
 	public void error(SAXParseException exception) {
 
 	}
+
 	public void warning(SAXParseException exception) {
 
 	}
 
 	public void startElement(String uri, String localName, String qName,
-			Attributes attributes) throws SAXException {
+	        Attributes attributes) throws SAXException {
 
 	}
 
 	public void endElement(String uri, String localName, String qName) {
 
 	}
-
 
 }

@@ -48,10 +48,10 @@ public class MapAnimator {
 
 		// calculate the maximum scale at which the bbox is completely visible
 		double dx = Math.abs(MercatorProjection.longitudeToX(bbox.getMaxLongitude())
-		    - MercatorProjection.longitudeToX(bbox.getMinLongitude()));
+		        - MercatorProjection.longitudeToX(bbox.getMinLongitude()));
 
 		double dy = Math.abs(MercatorProjection.latitudeToY(bbox.getMinLatitude())
-		    - MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
+		        - MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
 
 		double zx = mMap.getWidth() / (dx * Tile.SIZE);
 		double zy = mMap.getHeight() / (dy * Tile.SIZE);

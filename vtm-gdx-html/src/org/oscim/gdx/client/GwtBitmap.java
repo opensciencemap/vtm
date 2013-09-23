@@ -15,6 +15,7 @@ public class GwtBitmap implements Bitmap {
 	Pixmap pixmap;
 	Image image;
 	boolean disposable;
+
 	public GwtBitmap(Image data) {
 		ImageElement imageElement = ImageElement.as(data.getElement());
 		pixmap = new Pixmap(imageElement);
@@ -60,12 +61,11 @@ public class GwtBitmap implements Bitmap {
 	public int uploadToTexture(boolean replace) {
 
 		Gdx.gl.glTexImage2D(GL10.GL_TEXTURE_2D, 0, pixmap.getGLInternalFormat(), pixmap.getWidth(),
-				pixmap.getHeight(), 0,
-				pixmap.getGLFormat(), pixmap.getGLType(), pixmap.getPixels());
+		                    pixmap.getHeight(), 0,
+		                    pixmap.getGLFormat(), pixmap.getGLType(), pixmap.getPixels());
 
-
-		if (disposable || image != null){
-			Log.d("", "dispose pixmap " +getWidth() +"/" + getHeight());
+		if (disposable || image != null) {
+			Log.d("", "dispose pixmap " + getWidth() + "/" + getHeight());
 			pixmap.dispose();
 
 			if (image != null)

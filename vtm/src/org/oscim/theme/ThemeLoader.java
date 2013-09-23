@@ -28,18 +28,17 @@ public class ThemeLoader {
 
 	/**
 	 * Load internal theme, see {@link InternalRenderTheme}.
-	 *
+	 * 
 	 * @param internalRenderTheme ...
 	 * @return ...
 	 */
 	public static IRenderTheme load(InternalRenderTheme internalRenderTheme) {
-		 return load((Theme) internalRenderTheme);
+		return load((Theme) internalRenderTheme);
 	}
-
 
 	/**
 	 * Load theme from XML file.
-	 *
+	 * 
 	 * @param renderThemePath ..
 	 * @return ...
 	 * @throws FileNotFoundException ...

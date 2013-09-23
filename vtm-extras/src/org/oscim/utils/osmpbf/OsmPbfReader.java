@@ -22,7 +22,7 @@ import org.oscim.utils.osm.OSMData;
 
 public class OsmPbfReader {
 
-	public static OSMData process(InputStream is){
+	public static OSMData process(InputStream is) {
 		OsmPbfParser parser = new OsmPbfParser();
 
 		try {

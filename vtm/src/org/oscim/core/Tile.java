@@ -79,7 +79,7 @@ public class Tile {
 		Tile o = (Tile) obj;
 
 		if (o.tileX == this.tileX && o.tileY == this.tileY
-				&& o.zoomLevel == this.zoomLevel)
+		        && o.zoomLevel == this.zoomLevel)
 			return true;
 
 		return false;

@@ -21,9 +21,8 @@ import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
 
-
 public class MeshLayer extends RenderElement {
-	GeometryBuffer mGeom = new GeometryBuffer(10,10);
+	GeometryBuffer mGeom = new GeometryBuffer(10, 10);
 
 	public MeshLayer() {
 		GeometryBuffer e = mGeom;
@@ -58,18 +57,18 @@ public class MeshLayer extends RenderElement {
 		addMesh(e);
 	}
 
-	public void addMesh(GeometryBuffer geom){
+	public void addMesh(GeometryBuffer geom) {
 		int numRings = 2;
 
 		long ctx = tessellate(geom.points, 0, geom.index, 0, numRings);
 
 		short[] coordinates = new short[100];
 
-		while (tessGetCoordinates(ctx, coordinates, 2) > 0){
+		while (tessGetCoordinates(ctx, coordinates, 2) > 0) {
 			Log.d("..", Arrays.toString(coordinates));
 		}
 
-		while (tessGetIndices(ctx, coordinates) > 0){
+		while (tessGetIndices(ctx, coordinates) > 0) {
 			Log.d("..", Arrays.toString(coordinates));
 		}
 
@@ -95,7 +94,7 @@ public class MeshLayer extends RenderElement {
 	 * @return number of triangles in io buffer
 	 */
 	public static native int tessellate(float[] points, int pos,
-			short[] index, int ipos, int numRings);
+	        short[] index, int ipos, int numRings);
 
 	public static native void tessFinish(long ctx);
 

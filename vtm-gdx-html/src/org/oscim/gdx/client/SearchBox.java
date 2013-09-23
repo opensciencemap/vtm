@@ -66,7 +66,7 @@ public class SearchBox {
 	}
 
 	final static class NominatimData extends JavaScriptObject implements
-			PoiData {
+	        PoiData {
 
 		protected NominatimData() {
 		}
@@ -83,7 +83,8 @@ public class SearchBox {
 		}
 
 		@Override
-		public final native String getId() /*-{
+		public final native String getId()
+		/*-{
 			return this.osm_id;
 		}-*/;
 
@@ -155,7 +156,7 @@ public class SearchBox {
 
 		@Override
 		public void render(com.google.gwt.cell.client.Cell.Context context,
-				PoiData value, SafeHtmlBuilder sb) {
+		        PoiData value, SafeHtmlBuilder sb) {
 
 			// Value can be null, so do a null check..
 			if (value == null) {
@@ -203,10 +204,10 @@ public class SearchBox {
 
 		// Create a CellList that uses the cell.
 		final CellList<PoiData> cellList = new CellList<PoiData>(poiCell,
-				PoiData.KEY_PROVIDER);
+		                                                         PoiData.KEY_PROVIDER);
 
 		final SingleSelectionModel<PoiData> selectionModel = new SingleSelectionModel<PoiData>(
-				PoiData.KEY_PROVIDER);
+		                                                                                       PoiData.KEY_PROVIDER);
 		cellList.setSelectionModel(selectionModel);
 
 		final ScrollPanel scroller = new ScrollPanel(cellList);
@@ -235,7 +236,7 @@ public class SearchBox {
 				BoundingBox b = d.getBoundingBox();
 				if (b != null) {
 					if (b.maxLatitudeE6 - b.minLatitudeE6 < 100 &&
-							b.maxLongitudeE6 - b.minLongitudeE6 < 100)
+					        b.maxLongitudeE6 - b.minLongitudeE6 < 100)
 						// for small bbox use zoom=16 to get an overview
 						map.getAnimator().animateTo(500, b.getCenterPoint(), 1 << 16, false);
 					else
@@ -311,8 +312,8 @@ public class SearchBox {
 				searchButton.setEnabled(false);
 
 				String url = URL
-						.encode(NOMINATIM_GLOBAL
-								+ textToServer);
+				    .encode(NOMINATIM_GLOBAL
+				            + textToServer);
 
 				JsonpRequestBuilder builder = new JsonpRequestBuilder();
 				builder.setCallbackParam("json_callback");

@@ -27,7 +27,6 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.utils.FastMath;
 
-
 /*
  * This is an example how to integrate custom OpenGL drawing routines as map overlay
  *
@@ -128,17 +127,20 @@ public class CustomRenderer2 extends ElementRenderer {
 				//float alpha = 1 + (float) Math.log10(FastMath.clamp(
 				//		(float) Math.sqrt(xx * xx + yy * yy) / offset_y, 0.0f, 1.0f)) * 2;
 
-				float alpha	= (float) Math.sqrt(xx * xx + yy * yy) / offset_y;
+				float alpha = (float) Math.sqrt(xx * xx + yy * yy) / offset_y;
 
 				float fy = (float) (y + offset_y) / (offset_y * 2);
 				float fx = (float) (x + offset_x) / (offset_x * 2);
 				float fz = FastMath.clamp(
-						(float) (x < 0 || y < 0 ? 1 - Math.sqrt(fx * fx + fy * fy) : 0), 0, 1);
+				                          (float) (x < 0 || y < 0 ? 1 - Math.sqrt(fx * fx + fy * fy)
+				                                  : 0),
+				                          0,
+				                          1);
 
 				int c = 0xff << 24
-						| (int) (0xff * fy) << 16
-						| (int) (0xff * fx) << 8
-						| (int) (0xff * fz);
+				        | (int) (0xff * fy) << 16
+				        | (int) (0xff * fx) << 8
+				        | (int) (0xff * fz);
 
 				GLUtils.setColor(hColorPosition, c, alpha);
 
@@ -183,23 +185,23 @@ public class CustomRenderer2 extends ElementRenderer {
 		return true;
 	}
 
-	private final static String vShaderStr =
-			"precision mediump float;"
-					+ "uniform mat4 u_mvp;"
-					+ "uniform vec2 u_center;"
-					+ "attribute vec2 a_pos;"
-					+ "void main()"
-					+ "{"
-					+ "   gl_Position = u_mvp * vec4(u_center + a_pos, 0.0, 1.0);"
-					+ "}";
+	private final static String vShaderStr = "" +
+	        "precision mediump float;"
+	        + "uniform mat4 u_mvp;"
+	        + "uniform vec2 u_center;"
+	        + "attribute vec2 a_pos;"
+	        + "void main()"
+	        + "{"
+	        + "   gl_Position = u_mvp * vec4(u_center + a_pos, 0.0, 1.0);"
+	        + "}";
 
-	private final static String fShaderStr =
-			"precision mediump float;"
-					+ "varying float alpha;"
-					+ "uniform vec4 u_color;"
-					+ "void main()"
-					+ "{"
-					+ "  gl_FragColor = u_color;"
-					+ "}";
+	private final static String fShaderStr = "" +
+	        "precision mediump float;"
+	        + "varying float alpha;"
+	        + "uniform vec4 u_color;"
+	        + "void main()"
+	        + "{"
+	        + "  gl_FragColor = u_color;"
+	        + "}";
 
 }

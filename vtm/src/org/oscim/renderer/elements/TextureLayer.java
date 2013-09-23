@@ -48,11 +48,11 @@ public abstract class TextureLayer extends RenderElement {
 	abstract public boolean prepare();
 
 	static void putSprite(short buf[], int pos,
-			short tx, short ty,
-			short x1, short y1,
-			short x2, short y2,
-			short u1, short v1,
-			short u2, short v2) {
+	        short tx, short ty,
+	        short x1, short y1,
+	        short x2, short y2,
+	        short u1, short v1,
+	        short u2, short v2) {
 
 		// top-left
 		buf[pos + 0] = tx;
@@ -108,7 +108,7 @@ public abstract class TextureLayer extends RenderElement {
 			GL = gl;
 
 			mTextureProgram = GLUtils.createProgram(textVertexShader,
-					textFragmentShader);
+			                                        textFragmentShader);
 
 			hTextureMVMatrix = GL.glGetUniformLocation(mTextureProgram, "u_mv");
 			hTextureProjMatrix = GL.glGetUniformLocation(mTextureProgram, "u_proj");
@@ -149,8 +149,8 @@ public abstract class TextureLayer extends RenderElement {
 				int maxVertices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
 
 				GL.glUniform2f(hTextureSize,
-						1f / (ti.width * COORD_SCALE),
-						1f / (ti.height * COORD_SCALE));
+				               1f / (ti.width * COORD_SCALE),
+				               1f / (ti.height * COORD_SCALE));
 
 				// draw up to maxVertices in each iteration
 				for (int i = 0; i < ti.vertices; i += maxVertices) {
@@ -158,17 +158,17 @@ public abstract class TextureLayer extends RenderElement {
 					int off = (ti.offset + i) * 8 + tl.offset;
 
 					GL.glVertexAttribPointer(hTextureVertex, 4,
-							GL20.GL_SHORT, false, 12, off);
+					                         GL20.GL_SHORT, false, 12, off);
 
 					GL.glVertexAttribPointer(hTextureTexCoord, 2,
-							GL20.GL_SHORT, false, 12, off + 8);
+					                         GL20.GL_SHORT, false, 12, off + 8);
 
 					int numVertices = ti.vertices - i;
 					if (numVertices > maxVertices)
 						numVertices = maxVertices;
 
 					GL.glDrawElements(GL20.GL_TRIANGLES, numVertices,
-							GL20.GL_UNSIGNED_SHORT, 0);
+					                  GL20.GL_UNSIGNED_SHORT, 0);
 				}
 			}
 
@@ -180,35 +180,35 @@ public abstract class TextureLayer extends RenderElement {
 		private final static double COORD_DIV = 1.0 / MapRenderer.COORD_SCALE;
 
 		private final static String textVertexShader = ""
-				+ "precision highp float;"
-				+ "attribute vec4 vertex;"
-				+ "attribute vec2 tex_coord;"
-				+ "uniform mat4 u_mv;"
-				+ "uniform mat4 u_proj;"
-				+ "uniform float u_scale;"
-				+ "uniform float u_swidth;"
-				+ "uniform vec2 u_div;"
-				+ "varying vec2 tex_c;"
-				+ "const float coord_scale = " + COORD_DIV + ";"
-				+ "void main() {"
-				+ "  vec4 pos;"
-				+ "  vec2 dir = vertex.zw;"
-				+ " if (mod(vertex.x, 2.0) == 0.0){"
-				+ "       pos = u_proj * (u_mv * vec4(vertex.xy + dir * u_scale, 0.0, 1.0));"
-				+ "  } else {" // place as billboard
-				+ "    vec4 center = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-				+ "    pos = u_proj * (center + vec4(dir * (coord_scale * u_swidth), 0.0, 0.0));"
-				+ "  }"
-				+ "  gl_Position = pos;"
-				+ "  tex_c = tex_coord * u_div;"
-				+ "}";
+		        + "precision highp float;"
+		        + "attribute vec4 vertex;"
+		        + "attribute vec2 tex_coord;"
+		        + "uniform mat4 u_mv;"
+		        + "uniform mat4 u_proj;"
+		        + "uniform float u_scale;"
+		        + "uniform float u_swidth;"
+		        + "uniform vec2 u_div;"
+		        + "varying vec2 tex_c;"
+		        + "const float coord_scale = " + COORD_DIV + ";"
+		        + "void main() {"
+		        + "  vec4 pos;"
+		        + "  vec2 dir = vertex.zw;"
+		        + " if (mod(vertex.x, 2.0) == 0.0){"
+		        + "       pos = u_proj * (u_mv * vec4(vertex.xy + dir * u_scale, 0.0, 1.0));"
+		        + "  } else {" // place as billboard
+		        + "    vec4 center = u_mv * vec4(vertex.xy, 0.0, 1.0);"
+		        + "    pos = u_proj * (center + vec4(dir * (coord_scale * u_swidth), 0.0, 0.0));"
+		        + "  }"
+		        + "  gl_Position = pos;"
+		        + "  tex_c = tex_coord * u_div;"
+		        + "}";
 
 		private final static String textFragmentShader = ""
-				+ "precision highp float;"
-				+ "uniform sampler2D tex;"
-				+ "varying vec2 tex_c;"
-				+ "void main() {"
-				+ "   gl_FragColor = texture2D(tex, tex_c.xy);"
-				+ "}";
+		        + "precision highp float;"
+		        + "uniform sampler2D tex;"
+		        + "varying vec2 tex_c;"
+		        + "void main() {"
+		        + "   gl_FragColor = texture2D(tex, tex_c.xy);"
+		        + "}";
 	}
 }

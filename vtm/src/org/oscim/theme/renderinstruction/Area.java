@@ -22,7 +22,6 @@ import org.oscim.theme.IRenderTheme.Callback;
  */
 public final class Area extends RenderInstruction {
 
-
 	public Area(int fill) {
 		this(0, fill);
 	}
@@ -39,9 +38,8 @@ public final class Area extends RenderInstruction {
 		texture = null;
 	}
 
-
 	public Area(String style, int fill, int stroke, float strokeWidth,
-			int fade, int level, int blend, int blendFill, TextureItem texture) {
+	        int fade, int level, int blend, int blendFill, TextureItem texture) {
 
 		this.style = style;
 

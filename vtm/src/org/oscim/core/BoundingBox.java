@@ -74,7 +74,7 @@ public class BoundingBox {
 	}
 
 	public BoundingBox(double minLatitude, double minLongitude, double maxLatitude,
-			double maxLongitude) {
+	        double maxLongitude) {
 		this.minLatitudeE6 = (int) (minLatitude * 1E6);
 		this.minLongitudeE6 = (int) (minLongitude * 1E6);
 		this.maxLatitudeE6 = (int) (maxLatitude * 1E6);
@@ -90,9 +90,9 @@ public class BoundingBox {
 	 */
 	public boolean contains(GeoPoint geoPoint) {
 		return geoPoint.latitudeE6 <= maxLatitudeE6
-				&& geoPoint.latitudeE6 >= minLatitudeE6
-				&& geoPoint.longitudeE6 <= maxLongitudeE6
-				&& geoPoint.longitudeE6 >= minLongitudeE6;
+		        && geoPoint.latitudeE6 >= minLatitudeE6
+		        && geoPoint.longitudeE6 <= maxLongitudeE6
+		        && geoPoint.longitudeE6 >= minLongitudeE6;
 	}
 
 	@Override
@@ -123,7 +123,7 @@ public class BoundingBox {
 		int latitudeOffset = (maxLatitudeE6 - minLatitudeE6) / 2;
 		int longitudeOffset = (maxLongitudeE6 - minLongitudeE6) / 2;
 		return new GeoPoint(minLatitudeE6 + latitudeOffset, minLongitudeE6
-				+ longitudeOffset);
+		        + longitudeOffset);
 	}
 
 	/**

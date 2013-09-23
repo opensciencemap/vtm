@@ -44,7 +44,7 @@ public class ReadBuffer {
 
 	/**
 	 * Returns one signed byte from the read buffer.
-	 *
+	 * 
 	 * @return the byte value.
 	 */
 	public byte readByte() {
@@ -56,7 +56,7 @@ public class ReadBuffer {
 	 * resets the internal buffer position. If
 	 * the capacity of the read buffer is too small, a larger one is created
 	 * automatically.
-	 *
+	 * 
 	 * @param length
 	 *            the amount of bytes to read from the file.
 	 * @return true if the whole data was read successfully, false otherwise.
@@ -85,7 +85,7 @@ public class ReadBuffer {
 	 * Converts four bytes from the read buffer to a signed int.
 	 * <p>
 	 * The byte order is big-endian.
-	 *
+	 * 
 	 * @return the int value.
 	 */
 	public int readInt() {
@@ -94,16 +94,16 @@ public class ReadBuffer {
 		mBufferPosition += 4;
 
 		return data[pos] << 24
-				| (data[pos + 1] & 0xff) << 16
-				| (data[pos + 2] & 0xff) << 8
-				| (data[pos + 3] & 0xff);
+		        | (data[pos + 1] & 0xff) << 16
+		        | (data[pos + 2] & 0xff) << 8
+		        | (data[pos + 3] & 0xff);
 	}
 
 	/**
 	 * Converts eight bytes from the read buffer to a signed long.
 	 * <p>
 	 * The byte order is big-endian.
-	 *
+	 * 
 	 * @return the long value.
 	 */
 	public long readLong() {
@@ -112,13 +112,13 @@ public class ReadBuffer {
 		mBufferPosition += 8;
 
 		return (data[pos] & 0xffL) << 56
-				| (data[pos + 1] & 0xffL) << 48
-				| (data[pos + 2] & 0xffL) << 40
-				| (data[pos + 3] & 0xffL) << 32
-				| (data[pos + 4] & 0xffL) << 24
-				| (data[pos + 5] & 0xffL) << 16
-				| (data[pos + 6] & 0xffL) << 8
-				| (data[pos + 7] & 0xffL);
+		        | (data[pos + 1] & 0xffL) << 48
+		        | (data[pos + 2] & 0xffL) << 40
+		        | (data[pos + 3] & 0xffL) << 32
+		        | (data[pos + 4] & 0xffL) << 24
+		        | (data[pos + 5] & 0xffL) << 16
+		        | (data[pos + 6] & 0xffL) << 8
+		        | (data[pos + 7] & 0xffL);
 
 	}
 
@@ -126,7 +126,7 @@ public class ReadBuffer {
 	 * Converts two bytes from the read buffer to a signed int.
 	 * <p>
 	 * The byte order is big-endian.
-	 *
+	 * 
 	 * @return the int value.
 	 */
 	public int readShort() {
@@ -140,7 +140,7 @@ public class ReadBuffer {
 	 * The first bit is for continuation info, the other six (last byte) or
 	 * seven (all other bytes) bits are for data. The second bit in the last
 	 * byte indicates the sign of the number.
-	 *
+	 * 
 	 * @return the value.
 	 */
 	public int readSignedInt() {
@@ -160,7 +160,7 @@ public class ReadBuffer {
 			flag = ((data[pos + 1] & 0x40) >> 6);
 
 			return (((data[pos] & 0x7f)
-					| (data[pos + 1] & 0x3f) << 7) ^ -flag) + flag;
+			        | (data[pos + 1] & 0x3f) << 7) ^ -flag) + flag;
 
 		}
 
@@ -169,8 +169,8 @@ public class ReadBuffer {
 			flag = ((data[pos + 2] & 0x40) >> 6);
 
 			return (((data[pos] & 0x7f)
-					| (data[pos + 1] & 0x7f) << 7
-					| (data[pos + 2] & 0x3f) << 14) ^ -flag) + flag;
+			        | (data[pos + 1] & 0x7f) << 7
+			        | (data[pos + 2] & 0x3f) << 14) ^ -flag) + flag;
 
 		}
 
@@ -179,19 +179,19 @@ public class ReadBuffer {
 			flag = ((data[pos + 3] & 0x40) >> 6);
 
 			return (((data[pos] & 0x7f)
-					| ((data[pos + 1] & 0x7f) << 7)
-					| ((data[pos + 2] & 0x7f) << 14)
-					| ((data[pos + 3] & 0x3f) << 21)) ^ -flag) + flag;
+			        | ((data[pos + 1] & 0x7f) << 7)
+			        | ((data[pos + 2] & 0x7f) << 14)
+			        | ((data[pos + 3] & 0x3f) << 21)) ^ -flag) + flag;
 		}
 
 		mBufferPosition += 5;
 		flag = ((data[pos + 4] & 0x40) >> 6);
 
 		return ((((data[pos] & 0x7f)
-				| (data[pos + 1] & 0x7f) << 7
-				| (data[pos + 2] & 0x7f) << 14
-				| (data[pos + 3] & 0x7f) << 21
-				| (data[pos + 4] & 0x3f) << 28)) ^ -flag) + flag;
+		        | (data[pos + 1] & 0x7f) << 7
+		        | (data[pos + 2] & 0x7f) << 14
+		        | (data[pos + 3] & 0x7f) << 21
+		        | (data[pos + 4] & 0x3f) << 28)) ^ -flag) + flag;
 
 	}
 
@@ -202,7 +202,7 @@ public class ReadBuffer {
 	 * The first bit is for continuation info, the other six (last byte) or
 	 * seven (all other bytes) bits are for data. The second bit in the last
 	 * byte indicates the sign of the number.
-	 *
+	 * 
 	 * @param values
 	 *            result values
 	 * @param length
@@ -227,7 +227,7 @@ public class ReadBuffer {
 				flag = ((data[pos + 1] & 0x40) >> 6);
 
 				values[i] = (((data[pos] & 0x7f)
-						| ((data[pos + 1] & 0x3f) << 7)) ^ -flag) + flag;
+				        | ((data[pos + 1] & 0x3f) << 7)) ^ -flag) + flag;
 				pos += 2;
 
 			} else if ((data[pos + 2] & 0x80) == 0) {
@@ -235,8 +235,8 @@ public class ReadBuffer {
 				flag = ((data[pos + 2] & 0x40) >> 6);
 
 				values[i] = (((data[pos] & 0x7f)
-						| ((data[pos + 1] & 0x7f) << 7)
-						| ((data[pos + 2] & 0x3f) << 14)) ^ -flag) + flag;
+				        | ((data[pos + 1] & 0x7f) << 7)
+				        | ((data[pos + 2] & 0x3f) << 14)) ^ -flag) + flag;
 				pos += 3;
 
 			} else if ((data[pos + 3] & 0x80) == 0) {
@@ -244,19 +244,19 @@ public class ReadBuffer {
 				flag = ((data[pos + 3] & 0x40) >> 6);
 
 				values[i] = (((data[pos] & 0x7f)
-						| ((data[pos + 1] & 0x7f) << 7)
-						| ((data[pos + 2] & 0x7f) << 14)
-						| ((data[pos + 3] & 0x3f) << 21)) ^ -flag) + flag;
+				        | ((data[pos + 1] & 0x7f) << 7)
+				        | ((data[pos + 2] & 0x7f) << 14)
+				        | ((data[pos + 3] & 0x3f) << 21)) ^ -flag) + flag;
 
 				pos += 4;
 			} else {
 				flag = ((data[pos + 4] & 0x40) >> 6);
 
 				values[i] = ((((data[pos] & 0x7f)
-						| ((data[pos + 1] & 0x7f) << 7)
-						| ((data[pos + 2] & 0x7f) << 14)
-						| ((data[pos + 3] & 0x7f) << 21)
-						| ((data[pos + 4] & 0x3f) << 28))) ^ -flag) + flag;
+				        | ((data[pos + 1] & 0x7f) << 7)
+				        | ((data[pos + 2] & 0x7f) << 14)
+				        | ((data[pos + 3] & 0x7f) << 21)
+				        | ((data[pos + 4] & 0x3f) << 28))) ^ -flag) + flag;
 
 				pos += 5;
 			}
@@ -271,7 +271,7 @@ public class ReadBuffer {
 	 * <p>
 	 * The first bit is for continuation info, the other seven bits are for
 	 * data.
-	 *
+	 * 
 	 * @return the int value.
 	 */
 	public int readUnsignedInt() {
@@ -286,35 +286,35 @@ public class ReadBuffer {
 		if ((data[pos + 1] & 0x80) == 0) {
 			mBufferPosition += 2;
 			return (data[pos] & 0x7f)
-					| (data[pos + 1] & 0x7f) << 7;
+			        | (data[pos + 1] & 0x7f) << 7;
 		}
 
 		if ((data[pos + 2] & 0x80) == 0) {
 			mBufferPosition += 3;
 			return (data[pos] & 0x7f)
-					| ((data[pos + 1] & 0x7f) << 7)
-					| ((data[pos + 2] & 0x7f) << 14);
+			        | ((data[pos + 1] & 0x7f) << 7)
+			        | ((data[pos + 2] & 0x7f) << 14);
 		}
 
 		if ((data[pos + 3] & 0x80) == 0) {
 			mBufferPosition += 4;
 			return (data[pos] & 0x7f)
-					| ((data[pos + 1] & 0x7f) << 7)
-					| ((data[pos + 2] & 0x7f) << 14)
-					| ((data[pos + 3] & 0x7f) << 21);
+			        | ((data[pos + 1] & 0x7f) << 7)
+			        | ((data[pos + 2] & 0x7f) << 14)
+			        | ((data[pos + 3] & 0x7f) << 21);
 		}
 
 		mBufferPosition += 5;
 		return (data[pos] & 0x7f)
-				| ((data[pos + 1] & 0x7f) << 7)
-				| ((data[pos + 2] & 0x7f) << 14)
-				| ((data[pos + 3] & 0x7f) << 21)
-				| ((data[pos + 4] & 0x7f) << 28);
+		        | ((data[pos + 1] & 0x7f) << 7)
+		        | ((data[pos + 2] & 0x7f) << 14)
+		        | ((data[pos + 3] & 0x7f) << 21)
+		        | ((data[pos + 4] & 0x7f) << 28);
 	}
 
 	/**
 	 * Decodes a variable amount of bytes from the read buffer to a string.
-	 *
+	 * 
 	 * @return the UTF-8 decoded string (may be null).
 	 */
 	public String readUTF8EncodedString() {
@@ -333,7 +333,7 @@ public class ReadBuffer {
 
 	/**
 	 * Decodes the given amount of bytes from the read buffer to a string.
-	 *
+	 * 
 	 * @param stringLength
 	 *            the length of the string in bytes.
 	 * @return the UTF-8 decoded string (may be null).
@@ -343,7 +343,7 @@ public class ReadBuffer {
 			mBufferPosition += stringLength;
 			try {
 				return new String(mBufferData, mBufferPosition - stringLength, stringLength,
-						CHARSET_UTF8);
+				                  CHARSET_UTF8);
 			} catch (UnsupportedEncodingException e) {
 				throw new IllegalStateException(e);
 			}
@@ -354,7 +354,7 @@ public class ReadBuffer {
 
 	/**
 	 * Decodes a variable amount of bytes from the read buffer to a string.
-	 *
+	 * 
 	 * @param position
 	 *            buffer offset position of string
 	 * @return the UTF-8 decoded string (may be null).
@@ -383,7 +383,7 @@ public class ReadBuffer {
 
 	/**
 	 * Sets the buffer position to the given offset.
-	 *
+	 * 
 	 * @param bufferPosition
 	 *            the buffer position.
 	 */
@@ -393,7 +393,7 @@ public class ReadBuffer {
 
 	/**
 	 * Skips the given number of bytes in the read buffer.
-	 *
+	 * 
 	 * @param bytes
 	 *            the number of bytes to skip.
 	 */
@@ -435,25 +435,25 @@ public class ReadBuffer {
 				pos += 1;
 			} else if ((data[pos + 1] & 0x80) == 0) {
 				skip = (data[pos] & 0x7f)
-						| (data[pos + 1] & 0x7f) << 7;
+				        | (data[pos + 1] & 0x7f) << 7;
 				pos += 2;
 			} else if ((data[pos + 2] & 0x80) == 0) {
 				skip = (data[pos] & 0x7f)
-						| ((data[pos + 1] & 0x7f) << 7)
-						| ((data[pos + 2] & 0x7f) << 14);
+				        | ((data[pos + 1] & 0x7f) << 7)
+				        | ((data[pos + 2] & 0x7f) << 14);
 				pos += 3;
 			} else if ((data[pos + 3] & 0x80) == 0) {
 				skip = (data[pos] & 0x7f)
-						| ((data[pos + 1] & 0x7f) << 7)
-						| ((data[pos + 2] & 0x7f) << 14)
-						| ((data[pos + 3] & 0x7f) << 21);
+				        | ((data[pos + 1] & 0x7f) << 7)
+				        | ((data[pos + 2] & 0x7f) << 14)
+				        | ((data[pos + 3] & 0x7f) << 21);
 				pos += 4;
 			} else {
 				skip = (data[pos] & 0x7f)
-						| ((data[pos + 1] & 0x7f) << 7)
-						| ((data[pos + 2] & 0x7f) << 14)
-						| ((data[pos + 3] & 0x7f) << 21)
-						| ((data[pos + 4] & 0x7f) << 28);
+				        | ((data[pos + 1] & 0x7f) << 7)
+				        | ((data[pos + 2] & 0x7f) << 14)
+				        | ((data[pos + 3] & 0x7f) << 21)
+				        | ((data[pos + 4] & 0x7f) << 28);
 				pos += 5;
 			}
 			// invalid way size

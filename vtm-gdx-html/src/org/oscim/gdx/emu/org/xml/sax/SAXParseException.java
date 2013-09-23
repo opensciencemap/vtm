@@ -10,6 +10,7 @@ public class SAXParseException extends SAXException {
 	public SAXParseException(String str) {
 		super(str);
 	}
+
 	public SAXParseException(String str, Throwable throwable)
 	{
 		super(str);

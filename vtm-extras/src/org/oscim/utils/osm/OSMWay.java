@@ -29,7 +29,7 @@ public class OSMWay extends OSMElement {
 
 	public boolean isClosed() {
 		return nodes.size() > 0 &&
-				nodes.get(0).equals(nodes.get(nodes.size() - 1));
+		        nodes.get(0).equals(nodes.get(nodes.size() - 1));
 	}
 
 	@Override

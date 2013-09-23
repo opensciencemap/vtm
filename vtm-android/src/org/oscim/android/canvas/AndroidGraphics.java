@@ -100,10 +100,10 @@ public final class AndroidGraphics extends CanvasAdapter {
 			return new AndroidBitmap(((BitmapDrawable) drawable).getBitmap());
 		}
 
-		android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(
-				drawable.getIntrinsicWidth(),
-				drawable.getIntrinsicHeight(),
-				Config.ARGB_8888);
+		android.graphics.Bitmap bitmap = android.graphics.Bitmap
+		    .createBitmap(drawable.getIntrinsicWidth(),
+		                  drawable.getIntrinsicHeight(),
+		                  Config.ARGB_8888);
 
 		android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
 		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());

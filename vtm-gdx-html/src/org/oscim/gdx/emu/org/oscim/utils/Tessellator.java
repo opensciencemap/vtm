@@ -12,14 +12,14 @@ import com.google.gwt.typedarrays.shared.Int32Array;
 public class Tessellator {
 
 	public static synchronized int triangulate(float[] points, int ppos, int plen, short[] index,
-			int ipos, int rings, int vertexOffset, VertexItem outTris) {
+	        int ipos, int rings, int vertexOffset, VertexItem outTris) {
 
 		//JavaScriptObject o;
 		Int32Array io;
-		try{
+		try {
 			io = tessellate(JsArrayUtils.readOnlyJsArray(points), ppos, plen,
-				JsArrayUtils.readOnlyJsArray(index), ipos, rings);
-		} catch(JavaScriptException e){
+			                JsArrayUtils.readOnlyJsArray(index), ipos, rings);
+		} catch (JavaScriptException e) {
 			e.printStackTrace();
 			return 0;
 		}
@@ -27,22 +27,22 @@ public class Tessellator {
 		//Float32Array vo = getPoints(o);
 		//Int32Array io = getIndices(o);
 
-		if (io == null){
+		if (io == null) {
 			Log.d("Triangulator", "building tessellation failed");
 			return 0;
 		}
 
-//		if (vo.length() != plen) {
-//			// TODO handle different output points
-//			Log.d("", "other points out" + plen + ":" + vo.length() + ", " + io.length());
-//
-//			//for (int i = 0; i < vo.length(); i += 2)
-//			//	Log.d("<", vo.get(i) + " " + vo.get(i + 1));
-//			//for (int i = ppos; i < ppos + plen; i += 2)
-//			//	Log.d(">",  points[i]+ " " + points[i + 1]);
-//
-//			return 0;
-//		}
+		//		if (vo.length() != plen) {
+		//			// TODO handle different output points
+		//			Log.d("", "other points out" + plen + ":" + vo.length() + ", " + io.length());
+		//
+		//			//for (int i = 0; i < vo.length(); i += 2)
+		//			//	Log.d("<", vo.get(i) + " " + vo.get(i + 1));
+		//			//for (int i = ppos; i < ppos + plen; i += 2)
+		//			//	Log.d(">",  points[i]+ " " + points[i + 1]);
+		//
+		//			return 0;
+		//		}
 
 		int numIndices = io.length();
 
@@ -58,7 +58,7 @@ public class Tessellator {
 			if (k + cnt > numIndices)
 				cnt = numIndices - k;
 
-			for (int i = 0; i < cnt; i++){
+			for (int i = 0; i < cnt; i++) {
 				int idx = (vertexOffset + io.get(k + i));
 				outTris.vertices[outTris.used + i] = (short) idx;
 			}
@@ -69,25 +69,25 @@ public class Tessellator {
 	}
 
 	static native Int32Array tessellate(JsArrayNumber points, int pOffset, int pLength,
-			JsArrayInteger bounds, int bOffset, int bLength)/*-{
+	        JsArrayInteger bounds, int bOffset, int bLength)/*-{
 
 		return $wnd.tessellate(points, pOffset, pOffset + pLength, bounds,
 				bOffset, bOffset + bLength);
 	}-*/;
 
-//	static native JavaScriptObject tessellate(JsArrayNumber points, int pOffset, int pLength,
-//			JsArrayInteger bounds, int bOffset, int bLength)/*-{
-//
-//		return $wnd.tessellate(points, pOffset, pOffset + pLength, bounds,
-//				bOffset, bOffset + bLength);
-//	}-*/;
+	//	static native JavaScriptObject tessellate(JsArrayNumber points, int pOffset, int pLength,
+	//			JsArrayInteger bounds, int bOffset, int bLength)/*-{
+	//
+	//		return $wnd.tessellate(points, pOffset, pOffset + pLength, bounds,
+	//				bOffset, bOffset + bLength);
+	//	}-*/;
 
-//	static native Float32Array getPoints(JavaScriptObject result)/*-{
-//		return result.vertices;
-//	}-*/;
+	//	static native Float32Array getPoints(JavaScriptObject result)/*-{
+	//		return result.vertices;
+	//	}-*/;
 
-//	static native Int32Array getIndices(JavaScriptObject result)/*-{
-//		return result.triangles;
-//	}-*/;
+	//	static native Int32Array getIndices(JavaScriptObject result)/*-{
+	//		return result.triangles;
+	//	}-*/;
 
 }

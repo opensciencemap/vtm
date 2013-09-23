@@ -31,11 +31,11 @@ public class GLUtils {
 	private static String TAG = GLUtils.class.getName();
 
 	private static GL20 GL;
-	
-	static void init(GL20 gl){
+
+	static void init(GL20 gl) {
 		GL = gl;
 	}
-	
+
 	public static void setColor(int location, int color, float alpha) {
 		if (alpha >= 1)
 			alpha = ((color >>> 24) & 0xff) / 255f;
@@ -62,12 +62,14 @@ public class GLUtils {
 	public static void setColorBlend(int location, int color1, int color2, float mix) {
 		float a1 = (((color1 >>> 24) & 0xff) / 255f) * (1 - mix);
 		float a2 = (((color2 >>> 24) & 0xff) / 255f) * mix;
-		GL.glUniform4f
-		  (location,
-		   ((((color1 >>> 16) & 0xff) / 255f) * a1 + (((color2 >>> 16) & 0xff) / 255f) * a2),
-		   ((((color1 >>> 8) & 0xff) / 255f) * a1 + (((color2 >>> 8) & 0xff) / 255f) * a2),
-		   ((((color1 >>> 0) & 0xff) / 255f) * a1 + (((color2 >>> 0) & 0xff) / 255f) * a2),
-		   (a1 + a2));
+		GL.glUniform4f(location,
+		               ((((color1 >>> 16) & 0xff) / 255f) * a1
+		               + (((color2 >>> 16) & 0xff) / 255f) * a2),
+		               ((((color1 >>> 8) & 0xff) / 255f) * a1
+		               + (((color2 >>> 8) & 0xff) / 255f) * a2),
+		               ((((color1 >>> 0) & 0xff) / 255f) * a1
+		               + (((color2 >>> 0) & 0xff) / 255f) * a2),
+		               (a1 + a2));
 	}
 
 	public static void setTextureParameter(int min_filter, int mag_filter, int wrap_s, int wrap_t) {
@@ -133,7 +135,8 @@ public class GLUtils {
 		return loadTexture(pixel, sum, 1, GL20.GL_ALPHA,
 		                   GL20.GL_LINEAR, GL20.GL_LINEAR,
 		                   // GLES20.GL_NEAREST, GLES20.GL_NEAREST,
-		                   GL20.GL_REPEAT, GL20.GL_REPEAT);
+		                   GL20.GL_REPEAT,
+		                   GL20.GL_REPEAT);
 	}
 
 	/**

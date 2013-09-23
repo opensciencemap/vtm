@@ -24,7 +24,7 @@ import org.oscim.map.Viewport;
 
 /**
  * Changes Viewport for scroll, fling, scale, rotation and tilt gestures
- *
+ * 
  * @TODO:
  *        - better recognition of tilt/rotate/scale state
  *        one could check change of rotation / scale within a
@@ -78,10 +78,11 @@ public class MapEventLayer extends Layer implements EventListener {
 	}
 
 	@Override
-	public void handleEvent(MapEvent event){
+	public void handleEvent(MapEvent event) {
 		if (event instanceof MotionEvent)
-			onTouchEvent((MotionEvent)event);
+			onTouchEvent((MotionEvent) event);
 	}
+
 	//private long mPrevTime;
 
 	private boolean mEnableRotation = true;
@@ -243,13 +244,13 @@ public class MapEventLayer extends Layer implements EventListener {
 			//Log.d(TAG, r + " " + slope + " m1:" + my + " m2:" + my2);
 
 			if ((my > threshold && my2 > threshold)
-					|| (my < -threshold && my2 < -threshold))
+			        || (my < -threshold && my2 < -threshold))
 			{
 				mBeginTilt = true;
 				changed = mMapPosition.tiltMap(my / 5);
 			}
 		} else if (mEnableRotation && !mBeginTilt &&
-				(mBeginRotate || Math.abs(r) > PINCH_ROTATE_THRESHOLD)) {
+		        (mBeginRotate || Math.abs(r) > PINCH_ROTATE_THRESHOLD)) {
 			//Log.d(TAG, "rotate: " + mBeginRotate + " " + Math.toDegrees(rad));
 			if (!mBeginRotate) {
 				mAngle = rad;
@@ -312,10 +313,9 @@ public class MapEventLayer extends Layer implements EventListener {
 		int w = Tile.SIZE * 3;
 		int h = Tile.SIZE * 3;
 
-		mMap.getAnimator().animateFling(
-				Math.round(velocityX),
-				Math.round(velocityY),
-				-w, w, -h, h);
+		mMap.getAnimator().animateFling(Math.round(velocityX),
+		                                Math.round(velocityY),
+		                                -w, w, -h, h);
 		return true;
 	}
 

@@ -36,10 +36,14 @@ public abstract class PbfDecoder {
 		}
 	}
 
-	final static ProtobufException TRUNCATED_MSG = new ProtobufException("truncated msg");
-	protected final static ProtobufException INVALID_VARINT = new ProtobufException("invalid varint");
-	protected final static ProtobufException INVALID_PACKED_SIZE = new ProtobufException(
-			"invalid message size");
+	final static ProtobufException TRUNCATED_MSG =
+	        new ProtobufException("truncated msg");
+
+	protected final static ProtobufException INVALID_VARINT =
+	        new ProtobufException("invalid varint");
+
+	protected final static ProtobufException INVALID_PACKED_SIZE =
+	        new ProtobufException("invalid message size");
 
 	protected void error(String msg) throws IOException {
 		throw new ProtobufException(msg);
@@ -72,7 +76,7 @@ public abstract class PbfDecoder {
 	}
 
 	public abstract boolean decode(Tile tile, ITileDataSink sink,
-			InputStream is, int contentLength) throws IOException;
+	        InputStream is, int contentLength) throws IOException;
 
 	public void setInputStream(InputStream is, int contentLength) {
 		mInputStream = is;
@@ -149,9 +153,9 @@ public abstract class PbfDecoder {
 			fillBuffer(4);
 
 		int val = (buffer[bufferPos++] & 0xFF
-				| (buffer[bufferPos++] & 0xFF) << 8
-				| (buffer[bufferPos++] & 0xFF) << 16
-				| (buffer[bufferPos++] & 0xFF) << 24);
+		        | (buffer[bufferPos++] & 0xFF) << 8
+		        | (buffer[bufferPos++] & 0xFF) << 16
+		        | (buffer[bufferPos++] & 0xFF) << 24);
 
 		return Float.intBitsToFloat(val);
 	}
@@ -161,13 +165,13 @@ public abstract class PbfDecoder {
 			fillBuffer(8);
 
 		long val = (buffer[bufferPos++] & 0xFF
-				| (buffer[bufferPos++] & 0xFF) << 8
-				| (buffer[bufferPos++] & 0xFF) << 16
-				| (buffer[bufferPos++] & 0xFF) << 24
-				| (buffer[bufferPos++] & 0xFF) << 32
-				| (buffer[bufferPos++] & 0xFF) << 40
-				| (buffer[bufferPos++] & 0xFF) << 48
-				| (buffer[bufferPos++] & 0xFF) << 56);
+		        | (buffer[bufferPos++] & 0xFF) << 8
+		        | (buffer[bufferPos++] & 0xFF) << 16
+		        | (buffer[bufferPos++] & 0xFF) << 24
+		        | (buffer[bufferPos++] & 0xFF) << 32
+		        | (buffer[bufferPos++] & 0xFF) << 40
+		        | (buffer[bufferPos++] & 0xFF) << 48
+		        | (buffer[bufferPos++] & 0xFF) << 56);
 
 		return Double.longBitsToDouble(val);
 	}
@@ -180,7 +184,7 @@ public abstract class PbfDecoder {
 	}
 
 	protected int decodeInterleavedPoints(float[] coords, float scale)
-			throws IOException {
+	        throws IOException {
 
 		int bytes = decodeVarint32();
 		fillBuffer(bytes);
@@ -201,25 +205,25 @@ public abstract class PbfDecoder {
 
 			} else if (buf[pos + 1] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| buf[pos++] << 7;
+				        | buf[pos++] << 7;
 
 			} else if (buf[pos + 2] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++]) << 14;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++]) << 14;
 
 			} else if (buf[pos + 3] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++]) << 21;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++]) << 21;
 
 			} else {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++] & 0x7f) << 21
-						| (buf[pos]) << 28;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++] & 0x7f) << 21
+				        | (buf[pos]) << 28;
 
 				if (buf[pos++] < 0)
 					throw INVALID_VARINT;
@@ -271,22 +275,22 @@ public abstract class PbfDecoder {
 				val = buf[pos++];
 			} else if (buf[pos + 1] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| buf[pos++] << 7;
+				        | buf[pos++] << 7;
 			} else if (buf[pos + 2] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++]) << 14;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++]) << 14;
 			} else if (buf[pos + 3] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++]) << 21;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++]) << 21;
 			} else {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++] & 0x7f) << 21
-						| (buf[pos]) << 28;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++] & 0x7f) << 21
+				        | (buf[pos]) << 28;
 				if (buf[pos++] < 0)
 					throw INVALID_VARINT;
 			}
@@ -326,22 +330,22 @@ public abstract class PbfDecoder {
 				val = buf[pos++];
 			} else if (buf[pos + 1] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| buf[pos++] << 7;
+				        | buf[pos++] << 7;
 			} else if (buf[pos + 2] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++]) << 14;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++]) << 14;
 			} else if (buf[pos + 3] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++]) << 21;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++]) << 21;
 			} else {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++] & 0x7f) << 21
-						| (buf[pos]) << 28;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++] & 0x7f) << 21
+				        | (buf[pos]) << 28;
 
 				if (buf[pos++] < 0)
 					throw INVALID_VARINT;
@@ -380,24 +384,24 @@ public abstract class PbfDecoder {
 		} else {
 			if (buf[pos + 1] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++]) << 7;
+				        | (buf[pos++]) << 7;
 
 			} else if (buf[pos + 2] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++]) << 14;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++]) << 14;
 
 			} else if (buf[pos + 3] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++]) << 21;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++]) << 21;
 			} else {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++] & 0x7f) << 21
-						| (buf[pos]) << 28;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++] & 0x7f) << 21
+				        | (buf[pos]) << 28;
 
 				if (buf[pos++] < 0)
 					throw INVALID_VARINT;
@@ -516,7 +520,7 @@ public abstract class PbfDecoder {
 
 	static int decodeInt(byte[] buffer, int offset) {
 		return buffer[offset] << 24 | (buffer[offset + 1] & 0xff) << 16
-				| (buffer[offset + 2] & 0xff) << 8
-				| (buffer[offset + 3] & 0xff);
+		        | (buffer[offset + 2] & 0xff) << 8
+		        | (buffer[offset + 3] & 0xff);
 	}
 }

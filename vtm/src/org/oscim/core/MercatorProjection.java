@@ -47,7 +47,7 @@ public final class MercatorProjection {
 	/**
 	 * Calculates the distance on the ground that is represented by a single
 	 * pixel on the map.
-	 *
+	 * 
 	 * @param latitude
 	 *            the latitude coordinate at which the resolution should be
 	 *            calculated.
@@ -57,12 +57,12 @@ public final class MercatorProjection {
 	 */
 	public static double calculateGroundResolution(double latitude, double scale) {
 		return Math.cos(latitude * (Math.PI / 180)) * EARTH_CIRCUMFERENCE
-				/ (Tile.SIZE * scale);
+		        / (Tile.SIZE * scale);
 	}
 
 	/**
 	 * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
-	 *
+	 * 
 	 * @param latitude
 	 *            the latitude coordinate that should be converted.
 	 * @return the position .
@@ -78,7 +78,7 @@ public final class MercatorProjection {
 
 	/**
 	 * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
-	 *
+	 * 
 	 * @param longitude
 	 *            the longitude coordinate that should be converted.
 	 * @return the position .
@@ -108,7 +108,8 @@ public final class MercatorProjection {
 		out[pos * 2] = ((p.longitudeE6 / 1E6) + 180.0) / 360.0;
 
 		double sinLatitude = Math.sin((p.latitudeE6 / 1E6) * (Math.PI / 180.0));
-		out[pos * 2 +1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude)) / (4.0 * Math.PI);
+		out[pos * 2 + 1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude))
+		        / (4.0 * Math.PI);
 	}
 
 	public static void project(double latitude, double longitude, double[] out, int pos) {
@@ -116,7 +117,8 @@ public final class MercatorProjection {
 		out[pos * 2] = (longitude + 180.0) / 360.0;
 
 		double sinLatitude = Math.sin(latitude * (Math.PI / 180.0));
-		out[pos * 2 +1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude)) / (4.0 * Math.PI);
+		out[pos * 2 + 1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude))
+		        / (4.0 * Math.PI);
 	}
 
 	/**

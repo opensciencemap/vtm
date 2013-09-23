@@ -137,8 +137,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mLatScaleFactor = 0.4f + 0.6f * ((float) Math.sin(Math.abs(latitude) * (Math.PI / 180)));
 
 		mGroundResolution = (float) (Math.cos(latitude * (Math.PI / 180))
-				* MercatorProjection.EARTH_CIRCUMFERENCE
-				/ ((long) Tile.SIZE << mTile.zoomLevel));
+		        * MercatorProjection.EARTH_CIRCUMFERENCE
+		        / ((long) Tile.SIZE << mTile.zoomLevel));
 
 		mTile.layers = new ElementLayers();
 
@@ -173,7 +173,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	/**
 	 * Sets the scale stroke factor for the given zoom level.
-	 *
+	 * 
 	 * @param zoomLevel
 	 *            the zoom level for which the scale stroke factor should be
 	 *            set.
@@ -327,7 +327,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			}
 
 			lineLayer.addLine(mElement.points, mElement.index,
-					mElement.type == GeometryType.POLY);
+			                  mElement.type == GeometryType.POLY);
 
 			// keep reference for outline layer
 			mCurLineLayer = lineLayer;
@@ -431,7 +431,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				break;
 
 			WayDecorator.renderText(mClipper, mElement.points, value, text,
-					offset, length, mTile);
+			                        offset, length, mTile);
 			offset += length;
 		}
 	}

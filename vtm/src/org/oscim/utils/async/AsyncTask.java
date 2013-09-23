@@ -17,11 +17,14 @@
 package org.oscim.utils.async;
 
 /**
- * Task to be submitted to an {@link AsyncExecutor}, returning a result of type T.
+ * Task to be submitted to an {@link AsyncExecutor}, returning a result of type
+ * T.
+ * 
  * @author badlogic
- *
+ * 
  */
-public interface AsyncTask<T> extends Runnable{
+public interface AsyncTask<T> extends Runnable {
 	public boolean cancel();
+
 	public T getResult() throws Exception;
 }

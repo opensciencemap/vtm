@@ -173,7 +173,7 @@ public class BitmapLayer extends TextureLayer {
 			GL = gl;
 
 			mTextureProgram = GLUtils.createProgram(textVertexShader,
-					textFragmentShader);
+			                                        textFragmentShader);
 
 			hTextureMVMatrix = GL.glGetUniformLocation(mTextureProgram, "u_mv");
 			hTextureProjMatrix = GL.glGetUniformLocation(mTextureProgram, "u_proj");
@@ -185,7 +185,7 @@ public class BitmapLayer extends TextureLayer {
 		}
 
 		public static RenderElement draw(RenderElement renderElement, Matrices m, float scale,
-				float alpha) {
+		        float alpha) {
 			//GLState.test(false, false);
 			GLState.blend(true);
 
@@ -221,17 +221,17 @@ public class BitmapLayer extends TextureLayer {
 					int off = (ti.offset + i) * 8 + tl.offset;
 
 					GL.glVertexAttribPointer(hTextureVertex, 4,
-							GL20.GL_SHORT, false, 12, off);
+					                         GL20.GL_SHORT, false, 12, off);
 
 					GL.glVertexAttribPointer(hTextureTexCoord, 2,
-							GL20.GL_SHORT, false, 12, off + 8);
+					                         GL20.GL_SHORT, false, 12, off + 8);
 
 					int numVertices = ti.vertices - i;
 					if (numVertices > maxVertices)
 						numVertices = maxVertices;
 
 					GL.glDrawElements(GL20.GL_TRIANGLES, numVertices,
-							GL20.GL_UNSIGNED_SHORT, 0);
+					                  GL20.GL_UNSIGNED_SHORT, 0);
 				}
 			}
 
@@ -241,27 +241,27 @@ public class BitmapLayer extends TextureLayer {
 		}
 
 		private final static String textVertexShader = ""
-				+ "precision mediump float; "
-				+ "attribute vec4 vertex;"
-				+ "attribute vec2 tex_coord;"
-				+ "uniform mat4 u_mv;"
-				+ "uniform mat4 u_proj;"
-				+ "uniform float u_scale;"
-				+ "uniform float u_swidth;"
-				+ "varying vec2 tex_c;"
-				+ "void main() {"
-				+ "  gl_Position = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-				+ "  tex_c = tex_coord;"
-				+ "}";
+		        + "precision mediump float; "
+		        + "attribute vec4 vertex;"
+		        + "attribute vec2 tex_coord;"
+		        + "uniform mat4 u_mv;"
+		        + "uniform mat4 u_proj;"
+		        + "uniform float u_scale;"
+		        + "uniform float u_swidth;"
+		        + "varying vec2 tex_c;"
+		        + "void main() {"
+		        + "  gl_Position = u_mv * vec4(vertex.xy, 0.0, 1.0);"
+		        + "  tex_c = tex_coord;"
+		        + "}";
 
 		private final static String textFragmentShader = ""
-				+ "precision mediump float;"
-				+ "uniform sampler2D tex;"
-				+ "uniform float u_alpha;"
-				+ "varying vec2 tex_c;"
-				+ "void main() {"
-				+ "   gl_FragColor = texture2D(tex, tex_c.xy) * u_alpha;"
-				+ "}";
+		        + "precision mediump float;"
+		        + "uniform sampler2D tex;"
+		        + "uniform float u_alpha;"
+		        + "varying vec2 tex_c;"
+		        + "void main() {"
+		        + "   gl_FragColor = texture2D(tex, tex_c.xy) * u_alpha;"
+		        + "}";
 	}
 
 }

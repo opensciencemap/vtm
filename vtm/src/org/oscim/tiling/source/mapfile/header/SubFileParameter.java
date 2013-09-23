@@ -110,7 +110,6 @@ public class SubFileParameter {
 	 */
 	private final int hashCodeValue;
 
-
 	SubFileParameter(SubFileParameterBuilder subFileParameterBuilder) {
 		this.startAddress = subFileParameterBuilder.startAddress;
 		this.indexStartAddress = subFileParameterBuilder.indexStartAddress;
@@ -122,17 +121,21 @@ public class SubFileParameter {
 
 		// calculate the XY numbers of the boundary tiles in this sub-file
 		this.boundaryTileBottom = Projection.latitudeToTileY(
-				subFileParameterBuilder.boundingBox.minLatitudeE6
-						/ COORDINATES_DIVISOR, this.baseZoomLevel);
+		                                                     subFileParameterBuilder.boundingBox.minLatitudeE6
+		                                                             / COORDINATES_DIVISOR,
+		                                                     this.baseZoomLevel);
 		this.boundaryTileLeft = Projection.longitudeToTileX(
-				subFileParameterBuilder.boundingBox.minLongitudeE6
-						/ COORDINATES_DIVISOR, this.baseZoomLevel);
+		                                                    subFileParameterBuilder.boundingBox.minLongitudeE6
+		                                                            / COORDINATES_DIVISOR,
+		                                                    this.baseZoomLevel);
 		this.boundaryTileTop = Projection.latitudeToTileY(
-				subFileParameterBuilder.boundingBox.maxLatitudeE6
-						/ COORDINATES_DIVISOR, this.baseZoomLevel);
+		                                                  subFileParameterBuilder.boundingBox.maxLatitudeE6
+		                                                          / COORDINATES_DIVISOR,
+		                                                  this.baseZoomLevel);
 		this.boundaryTileRight = Projection.longitudeToTileX(
-				subFileParameterBuilder.boundingBox.maxLongitudeE6
-						/ COORDINATES_DIVISOR, this.baseZoomLevel);
+		                                                     subFileParameterBuilder.boundingBox.maxLongitudeE6
+		                                                             / COORDINATES_DIVISOR,
+		                                                     this.baseZoomLevel);
 
 		// calculate the horizontal and vertical amount of blocks in this sub-file
 		this.blocksWidth = this.boundaryTileRight - this.boundaryTileLeft + 1;

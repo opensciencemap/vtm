@@ -25,15 +25,15 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
 		// Try to find a normal multisample configuration first.
 		int[] configSpec = {
-				EGL10.EGL_RED_SIZE, 5,
-				EGL10.EGL_GREEN_SIZE, 6,
-				EGL10.EGL_BLUE_SIZE, 5,
-				EGL10.EGL_ALPHA_SIZE, 8,
-				EGL10.EGL_DEPTH_SIZE, 16,
-				// Requires that setEGLContextClientVersion(2) is called on the view.
-				EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
-				EGL10.EGL_STENCIL_SIZE, 8,
-				EGL10.EGL_NONE };
+		        EGL10.EGL_RED_SIZE, 5,
+		        EGL10.EGL_GREEN_SIZE, 6,
+		        EGL10.EGL_BLUE_SIZE, 5,
+		        EGL10.EGL_ALPHA_SIZE, 8,
+		        EGL10.EGL_DEPTH_SIZE, 16,
+		        // Requires that setEGLContextClientVersion(2) is called on the view.
+		        EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
+		        EGL10.EGL_STENCIL_SIZE, 8,
+		        EGL10.EGL_NONE };
 
 		if (!egl.eglChooseConfig(display, configSpec, null, 0, mValue)) {
 			throw new IllegalArgumentException("eglChooseConfig failed");
@@ -44,15 +44,15 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 			stencilSize = 4;
 
 			configSpec = new int[] {
-					// EGL10.EGL_RENDERABLE_TYPE, 4, EGL10.EGL_NONE };
-					EGL10.EGL_RED_SIZE, 8,
-					EGL10.EGL_GREEN_SIZE, 8,
-					EGL10.EGL_BLUE_SIZE, 8,
-					EGL10.EGL_ALPHA_SIZE, 8,
-					EGL10.EGL_DEPTH_SIZE, 16,
-					EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
-					EGL10.EGL_STENCIL_SIZE, 8,
-					EGL10.EGL_NONE };
+			        // EGL10.EGL_RENDERABLE_TYPE, 4, EGL10.EGL_NONE };
+			        EGL10.EGL_RED_SIZE, 8,
+			        EGL10.EGL_GREEN_SIZE, 8,
+			        EGL10.EGL_BLUE_SIZE, 8,
+			        EGL10.EGL_ALPHA_SIZE, 8,
+			        EGL10.EGL_DEPTH_SIZE, 16,
+			        EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
+			        EGL10.EGL_STENCIL_SIZE, 8,
+			        EGL10.EGL_NONE };
 
 			if (!egl.eglChooseConfig(display, configSpec, null, 0, mValue)) {
 				throw new IllegalArgumentException("eglChooseConfig failed");
@@ -116,7 +116,7 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
 	// from quake2android
 	private String printConfig(EGL10 egl, EGLDisplay display,
-			EGLConfig config) {
+	        EGLConfig config) {
 
 		int r = findConfigAttrib(egl, display, config, EGL10.EGL_RED_SIZE, 0);
 		int g = findConfigAttrib(egl, display, config, EGL10.EGL_GREEN_SIZE, 0);
@@ -132,22 +132,22 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		 */
 
 		return String.format("EGLConfig rgba=%d%d%d%d depth=%d stencil=%d",
-				Integer.valueOf(r), Integer.valueOf(g),
-				Integer.valueOf(b), Integer.valueOf(a), Integer.valueOf(d),
-				Integer.valueOf(s))
-				+ " native="
-				+ findConfigAttrib(egl, display, config, EGL10.EGL_NATIVE_RENDERABLE, 0)
-				+ " buffer="
-				+ findConfigAttrib(egl, display, config, EGL10.EGL_BUFFER_SIZE, 0)
-				+ String.format(
-						" caveat=0x%04x",
-						Integer.valueOf(findConfigAttrib(egl, display, config,
-								EGL10.EGL_CONFIG_CAVEAT, 0)));
+		                     Integer.valueOf(r), Integer.valueOf(g),
+		                     Integer.valueOf(b), Integer.valueOf(a), Integer.valueOf(d),
+		                     Integer.valueOf(s))
+		        + " native="
+		        + findConfigAttrib(egl, display, config, EGL10.EGL_NATIVE_RENDERABLE, 0)
+		        + " buffer="
+		        + findConfigAttrib(egl, display, config, EGL10.EGL_BUFFER_SIZE, 0)
+		        + String.format(
+		                        " caveat=0x%04x",
+		                        Integer.valueOf(findConfigAttrib(egl, display, config,
+		                                                         EGL10.EGL_CONFIG_CAVEAT, 0)));
 
 	}
 
 	private int findConfigAttrib(EGL10 egl, EGLDisplay display, EGLConfig config,
-			int attribute, int defaultValue) {
+	        int attribute, int defaultValue) {
 		if (egl.eglGetConfigAttrib(display, config, attribute, mValue)) {
 			return mValue[0];
 		}

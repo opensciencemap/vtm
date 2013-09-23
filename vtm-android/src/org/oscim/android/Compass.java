@@ -51,14 +51,14 @@ public class Compass {
 	public Compass(MapActivity mapActivity, Map map) {
 		mMap = map;
 		mSensorManager = (SensorManager) mapActivity
-				.getSystemService(Context.SENSOR_SERVICE);
+		    .getSystemService(Context.SENSOR_SERVICE);
 
 		mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 	}
 
 	public void enable() {
 		mSensorManager.registerListener(mListener, mSensor,
-				SensorManager.SENSOR_DELAY_UI);
+		                                SensorManager.SENSOR_DELAY_UI);
 	}
 
 	public void disable() {

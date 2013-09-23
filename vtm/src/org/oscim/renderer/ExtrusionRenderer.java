@@ -61,10 +61,10 @@ public class ExtrusionRenderer extends LayerRenderer {
 		for (int i = 0; i <= SHADER; i++) {
 			if (i == 0) {
 				shaderProgram[i] = GLUtils.createProgram(extrusionVertexShader,
-						extrusionFragmentShader);
+				                                         extrusionFragmentShader);
 			} else {
 				shaderProgram[i] = GLUtils.createProgram(extrusionVertexShader,
-						extrusionFragmentShaderZ);
+				                                         extrusionFragmentShaderZ);
 			}
 
 			if (shaderProgram[i] == 0) {
@@ -158,7 +158,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 	private static ExtrusionLayer getLayer(MapTile t) {
 		if (t.layers != null && t.layers.extrusionLayers != null
-				&& t.state(MapTile.STATE_READY))
+		        && t.state(MapTile.STATE_READY))
 			return (ExtrusionLayer) t.layers.extrusionLayers;
 		return null;
 	}
@@ -198,18 +198,18 @@ public class ExtrusionRenderer extends LayerRenderer {
 				el.vboVertices.bind();
 
 				GL.glVertexAttribPointer(uExtVertexPosition, 3,
-						GL20.GL_SHORT, false, 8, 0);
+				                         GL20.GL_SHORT, false, 8, 0);
 
 				GL.glVertexAttribPointer(uExtLightPosition, 2,
-						GL20.GL_UNSIGNED_BYTE, false, 8, 6);
+				                         GL20.GL_UNSIGNED_BYTE, false, 8, 6);
 
 				GL.glDrawElements(GL20.GL_TRIANGLES,
-						(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
-						GL20.GL_UNSIGNED_SHORT, 0);
+				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
+				                  GL20.GL_UNSIGNED_SHORT, 0);
 
 				GL.glDrawElements(GL20.GL_LINES, el.mIndiceCnt[3],
-						GL20.GL_UNSIGNED_SHORT,
-						(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
+				                  GL20.GL_UNSIGNED_SHORT,
+				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
 
 				// just a temporary reference!
 				tiles[i] = null;
@@ -250,11 +250,11 @@ public class ExtrusionRenderer extends LayerRenderer {
 			el.vboVertices.bind();
 
 			GL.glVertexAttribPointer(uExtVertexPosition, 3,
-					GL20.GL_SHORT, false, 8, 0);
+			                         GL20.GL_SHORT, false, 8, 0);
 
 			GL.glDrawElements(GL20.GL_TRIANGLES,
-					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
-					GL20.GL_UNSIGNED_SHORT, 0);
+			                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
+			                  GL20.GL_UNSIGNED_SHORT, 0);
 		}
 
 		// enable color buffer, use depth mask
@@ -276,25 +276,25 @@ public class ExtrusionRenderer extends LayerRenderer {
 			el.vboVertices.bind();
 
 			GL.glVertexAttribPointer(uExtVertexPosition, 3,
-					GL20.GL_SHORT, false, 8, 0);
+			                         GL20.GL_SHORT, false, 8, 0);
 
 			GL.glVertexAttribPointer(uExtLightPosition, 2,
-					GL20.GL_UNSIGNED_BYTE, false, 8, 6);
+			                         GL20.GL_UNSIGNED_BYTE, false, 8, 6);
 
 			// draw roof
 			GL.glUniform1i(uExtMode, 0);
 			GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[2],
-					GL20.GL_UNSIGNED_SHORT, (el.mIndiceCnt[0] + el.mIndiceCnt[1]) * 2);
+			                  GL20.GL_UNSIGNED_SHORT, (el.mIndiceCnt[0] + el.mIndiceCnt[1]) * 2);
 
 			// draw sides 1
 			GL.glUniform1i(uExtMode, 1);
 			GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[0],
-					GL20.GL_UNSIGNED_SHORT, 0);
+			                  GL20.GL_UNSIGNED_SHORT, 0);
 
 			// draw sides 2
 			GL.glUniform1i(uExtMode, 2);
 			GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[1],
-					GL20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
+			                  GL20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
 			// drawing gl_lines with the same coordinates does not result in
 			// same depth values as polygons, so add offset and draw gl_lequal:
@@ -305,8 +305,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 			GL.glUniform1i(uExtMode, 3);
 			GL.glDrawElements(GL20.GL_LINES, el.mIndiceCnt[3],
-					GL20.GL_UNSIGNED_SHORT,
-					(el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
+			                  GL20.GL_UNSIGNED_SHORT,
+			                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
 
 			// just a temporary reference!
 			tiles[i] = null;
@@ -321,7 +321,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 	}
 
 	private static void setMatrix(MapPosition pos, Matrices m,
-			MapTile tile, int delta) {
+	        MapTile tile, int delta) {
 
 		int z = tile.zoomLevel;
 		double curScale = Tile.SIZE * pos.scale;
@@ -347,85 +347,85 @@ public class ExtrusionRenderer extends LayerRenderer {
 	private final float _s = 4;
 	private final float _l = 0;
 	private final float[] mColor = {
-			// roof color
-			_a * ((_r + _l) / 255),
-			_a * ((_g + _l) / 255),
-			_a * ((_b + _l) / 255),
-			0.8f,
-			// sligthly differ adjacent side
-			// faces to improve contrast
-			_a * ((_r - _s) / 255 + 0.01f),
-			_a * ((_g - _s) / 255 + 0.01f),
-			_a * ((_b - _s) / 255),
-			_a,
-			_a * ((_r - _s) / 255),
-			_a * ((_g - _s) / 255),
-			_a * ((_b - _s) / 255),
-			_a,
-			// roof outline
-			(_r - _o) / 255,
-			(_g - _o) / 255,
-			(_b - _o) / 255,
-			0.9f,
+	        // roof color
+	        _a * ((_r + _l) / 255),
+	        _a * ((_g + _l) / 255),
+	        _a * ((_b + _l) / 255),
+	        0.8f,
+	        // sligthly differ adjacent side
+	        // faces to improve contrast
+	        _a * ((_r - _s) / 255 + 0.01f),
+	        _a * ((_g - _s) / 255 + 0.01f),
+	        _a * ((_b - _s) / 255),
+	        _a,
+	        _a * ((_r - _s) / 255),
+	        _a * ((_g - _s) / 255),
+	        _a * ((_b - _s) / 255),
+	        _a,
+	        // roof outline
+	        (_r - _o) / 255,
+	        (_g - _o) / 255,
+	        (_b - _o) / 255,
+	        0.9f,
 	};
 
 	final static String extrusionVertexShader = ""
-			//+ "precision mediump float;"
-			+ "uniform mat4 u_mvp;"
-			+ "uniform vec4 u_color[4];"
-			+ "uniform int u_mode;"
-			+ "uniform float u_alpha;"
-			+ "attribute vec4 a_pos;"
-			+ "attribute vec2 a_light;"
-			+ "varying vec4 color;"
-			+ "varying float depth;"
-			+ "const float ff = 255.0;"
-			+ "void main() {"
-			//   change height by u_alpha
-			+ "  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);"
-			//+ "  depth = gl_Position.z;"
-			+ "  if (u_mode == 0)"
-			//     roof / depth pass
-			+ "    color = u_color[0] * u_alpha;"
-			+ "  else {"
-			//    decrease contrast with distance
-			+ "   if (u_mode == 1){"
-			//     sides 1 - use 0xff00
-			//     scale direction to -0.5<>0.5
-			+ "    float dir = a_light.y / ff;"
-			+ "    float z = (0.98 + gl_Position.z * 0.02);"
-			+ "    float h = 0.9 + clamp(a_pos.z / 2000.0, 0.0, 0.1);"
-			+ "    color = u_color[1];"
-			+ "    color.rgb *= (0.8 + dir * 0.2) * z * h;"
-			+ "    color *= u_alpha;"
-			+ "  } else if (u_mode == 2){"
-			//     sides 2 - use 0x00ff
-			+ "    float dir = a_light.x / ff;"
-			+ "    float z = (0.98 + gl_Position.z * 0.02);"
-			+ "    float h = 0.9 + clamp(a_pos.z / 2000.0, 0.0, 0.1);"
-			+ "    color = u_color[2];"
-			+ "    color.rgb *= (0.8 + dir * 0.2) * z * h;"
-			+ "    color *= u_alpha;"
-			+ "  } else {"
-			//     outline
-			+ "    float z = (0.98 - gl_Position.z * 0.02);"
-			+ "    color = u_color[3] * z;"
-			+ "}}}";
+	        //+ "precision mediump float;"
+	        + "uniform mat4 u_mvp;"
+	        + "uniform vec4 u_color[4];"
+	        + "uniform int u_mode;"
+	        + "uniform float u_alpha;"
+	        + "attribute vec4 a_pos;"
+	        + "attribute vec2 a_light;"
+	        + "varying vec4 color;"
+	        + "varying float depth;"
+	        + "const float ff = 255.0;"
+	        + "void main() {"
+	        //   change height by u_alpha
+	        + "  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);"
+	        //+ "  depth = gl_Position.z;"
+	        + "  if (u_mode == 0)"
+	        //     roof / depth pass
+	        + "    color = u_color[0] * u_alpha;"
+	        + "  else {"
+	        //    decrease contrast with distance
+	        + "   if (u_mode == 1){"
+	        //     sides 1 - use 0xff00
+	        //     scale direction to -0.5<>0.5
+	        + "    float dir = a_light.y / ff;"
+	        + "    float z = (0.98 + gl_Position.z * 0.02);"
+	        + "    float h = 0.9 + clamp(a_pos.z / 2000.0, 0.0, 0.1);"
+	        + "    color = u_color[1];"
+	        + "    color.rgb *= (0.8 + dir * 0.2) * z * h;"
+	        + "    color *= u_alpha;"
+	        + "  } else if (u_mode == 2){"
+	        //     sides 2 - use 0x00ff
+	        + "    float dir = a_light.x / ff;"
+	        + "    float z = (0.98 + gl_Position.z * 0.02);"
+	        + "    float h = 0.9 + clamp(a_pos.z / 2000.0, 0.0, 0.1);"
+	        + "    color = u_color[2];"
+	        + "    color.rgb *= (0.8 + dir * 0.2) * z * h;"
+	        + "    color *= u_alpha;"
+	        + "  } else {"
+	        //     outline
+	        + "    float z = (0.98 - gl_Position.z * 0.02);"
+	        + "    color = u_color[3] * z;"
+	        + "}}}";
 
 	final static String extrusionFragmentShader = ""
-			+ "precision mediump float;"
-			+ "varying vec4 color;"
-			+ "void main() {"
-			+ "  gl_FragColor = color;"
-			+ "}";
+	        + "precision mediump float;"
+	        + "varying vec4 color;"
+	        + "void main() {"
+	        + "  gl_FragColor = color;"
+	        + "}";
 
 	final static String extrusionFragmentShaderZ = ""
-			+ "precision mediump float;"
-			+ "varying float depth;"
-			+ "void main() {"
-			+ "float d = depth * 0.2;"
-			+ "if (d < 0.0)"
-			+ "   d = -d;"
-			+ "  gl_FragColor = vec4(1.0 - d, 1.0 - d, 1.0 - d, 1.0 - d);"
-			+ "}";
+	        + "precision mediump float;"
+	        + "varying float depth;"
+	        + "void main() {"
+	        + "float d = depth * 0.2;"
+	        + "if (d < 0.0)"
+	        + "   d = -d;"
+	        + "  gl_FragColor = vec4(1.0 - d, 1.0 - d, 1.0 - d, 1.0 - d);"
+	        + "}";
 }

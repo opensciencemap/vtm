@@ -50,7 +50,7 @@ class MatchingCacheKey {
 		mTags = new Tag[numTags];
 
 		int result = 7;
-		for (int i = 0; i < numTags; i++){
+		for (int i = 0; i < numTags; i++) {
 			Tag t = tags.tags[i];
 			result = 31 * result + t.hashCode();
 			mTags[i] = t;

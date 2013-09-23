@@ -19,12 +19,12 @@ package org.oscim.utils.async;
 //import java.util.concurrent.ExecutionException;
 //import java.util.concurrent.Future;
 
-
 /**
  * Returned by {@link AsyncExecutor#submit(AsyncTask)}, allows to poll
  * for the result of the asynch workload.
+ * 
  * @author badlogic
- *
+ * 
  */
 public class AsyncResult<T> {
 	private final T result;
@@ -41,7 +41,8 @@ public class AsyncResult<T> {
 	}
 
 	/**
-	 * @return the result, or null if there was an error, no result, or the task is still running
+	 * @return the result, or null if there was an error, no result, or the task
+	 *         is still running
 	 */
 	public T get() {
 		return result;

@@ -46,7 +46,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
-public class OverpassAPIReader  {
+public class OverpassAPIReader {
 	private static final String OVERPASS_API = "http://city.informatik.uni-bremen.de/oapi/interpreter";
 	private static final int RESPONSECODE_OK = 200;
 
@@ -75,7 +75,7 @@ public class OverpassAPIReader  {
 
 	/**
 	 * Creates a new instance with the specified geographical coordinates.
-	 *
+	 * 
 	 * @param left
 	 *            The longitude marking the left edge of the bounding box.
 	 * @param right
@@ -89,12 +89,12 @@ public class OverpassAPIReader  {
 	 *            http://www.openstreetmap.org/api/0.5).
 	 */
 	public OverpassAPIReader(final double left, final double right,
-			final double top, final double bottom, final String baseUrl,
-			final String query) {
+	        final double top, final double bottom, final String baseUrl,
+	        final String query) {
 
 		String bbox = "(" + Math.min(top, bottom) + "," + Math.min(left, right)
-				+ "," + Math.max(top, bottom) + "," + Math.max(left, right)
-				+ ")";
+		        + "," + Math.max(top, bottom) + "," + Math.max(left, right)
+		        + ")";
 
 		this.query = query.replaceAll("\\{\\{bbox\\}\\}", bbox);
 
@@ -103,7 +103,7 @@ public class OverpassAPIReader  {
 	/**
 	 * Open a connection to the given url and return a reader on the input
 	 * stream from that connection.
-	 *
+	 * 
 	 * @param pUrlStr
 	 *            The exact url to connect to.
 	 * @return An reader reading the input stream (servers answer) or
@@ -120,7 +120,7 @@ public class OverpassAPIReader  {
 		myActiveConnection = (HttpURLConnection) url.openConnection();
 
 		myActiveConnection.setRequestProperty("Accept-Encoding",
-				"gzip, deflate");
+		                                      "gzip, deflate");
 
 		responseCode = myActiveConnection.getResponseCode();
 
@@ -132,11 +132,11 @@ public class OverpassAPIReader  {
 
 			if (apiErrorMessage != null) {
 				message = "Received API HTTP response code " + responseCode
-						+ " with message \"" + apiErrorMessage
-						+ "\" for URL \"" + pUrlStr + "\".";
+				        + " with message \"" + apiErrorMessage
+				        + "\" for URL \"" + pUrlStr + "\".";
 			} else {
 				message = "Received API HTTP response code " + responseCode
-						+ " for URL \"" + pUrlStr + "\".";
+				        + " for URL \"" + pUrlStr + "\".";
 			}
 
 			throw new IOException(message);
@@ -151,7 +151,7 @@ public class OverpassAPIReader  {
 			responseStream = new GZIPInputStream(responseStream);
 		} else if (encoding != null && encoding.equalsIgnoreCase("deflate")) {
 			responseStream = new InflaterInputStream(responseStream,
-					new Inflater(true));
+			                                         new Inflater(true));
 		}
 
 		return responseStream;
@@ -168,12 +168,12 @@ public class OverpassAPIReader  {
 	private Map<Long, OSMWay> waysById = new HashMap<Long, OSMWay>();
 	private Map<Long, OSMRelation> relationsById = new HashMap<Long, OSMRelation>();
 	private Map<OSMRelation, List<TmpRelation>> relationMembersForRelation =
-			new HashMap<OSMRelation, List<TmpRelation>>();
+	        new HashMap<OSMRelation, List<TmpRelation>>();
 
 	private final Collection<OSMNode> ownNodes = new ArrayList<OSMNode>(10000);
 	private final Collection<OSMWay> ownWays = new ArrayList<OSMWay>(1000);
 	private final Collection<OSMRelation> ownRelations = new ArrayList<OSMRelation>(
-			100);
+	                                                                                100);
 
 	public void parse(InputStream in) throws IOException {
 		JsonFactory jsonFactory = new JsonFactory();
@@ -208,7 +208,7 @@ public class OverpassAPIReader  {
 	}
 
 	private void parseNode(JsonParser jp) throws JsonParseException,
-			IOException {
+	        IOException {
 
 		long id = 0;
 		double lat = 0, lon = 0;
@@ -274,7 +274,7 @@ public class OverpassAPIReader  {
 	}
 
 	private void parseRelation(JsonParser jp) throws JsonParseException,
-			IOException {
+	        IOException {
 
 		long id = 0;
 		TagSet tags = TagSet.EMPTY_TAG_SET;
@@ -318,22 +318,21 @@ public class OverpassAPIReader  {
 	}
 
 	private static TagSet parseTags(JsonParser jp) throws JsonParseException,
-			IOException {
+	        IOException {
 
 		TagSet tags = null;
-
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
 			String key = jp.getCurrentName();
 			jp.nextToken();
 			String val = jp.getText();
-			if (tags== null)
-				tags= new TagSet(4);
+			if (tags == null)
+				tags = new TagSet(4);
 
 			tags.add(new Tag(key, val, false));
 
 		}
-		if (tags== null)
+		if (tags == null)
 			return TagSet.EMPTY_TAG_SET;
 
 		return tags;
@@ -342,7 +341,6 @@ public class OverpassAPIReader  {
 	private static void log(String msg) {
 		System.out.println(msg);
 	}
-
 
 	public OSMData getData() {
 
@@ -374,7 +372,7 @@ public class OverpassAPIReader  {
 		}
 
 		for (Entry<OSMRelation, List<TmpRelation>> entry : relationMembersForRelation
-				.entrySet()) {
+		    .entrySet()) {
 
 			OSMRelation relation = entry.getKey();
 
@@ -395,14 +393,14 @@ public class OverpassAPIReader  {
 
 				if (memberObject != null) {
 					OSMMember ownMember = new OSMMember(member.role,
-							memberObject);
+					                                    memberObject);
 
 					relation.relationMembers.add(ownMember);
 				}
 			}
 		}
 		log("nodes: " + ownNodes.size() + " ways: " + ownWays.size()
-				+ " relations: " + ownRelations.size());
+		        + " relations: " + ownRelations.size());
 
 		// give up references to original collections
 		nodesById = null;

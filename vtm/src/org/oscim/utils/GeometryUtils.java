@@ -32,8 +32,8 @@ public final class GeometryUtils {
 		boolean inside = false;
 		for (int i = offset, j = (end - 2); i < end; j = i, i += 2) {
 			if (((vertices[i + 1] > y) != (vertices[j + 1] > y)) &&
-			    (x < (vertices[j] - vertices[i]) * (y - vertices[i + 1])
-			         / (vertices[j + 1] - vertices[i + 1]) + vertices[i]))
+			        (x < (vertices[j] - vertices[i]) * (y - vertices[i + 1])
+			                / (vertices[j + 1] - vertices[i + 1]) + vertices[i]))
 				inside = !inside;
 		}
 		return inside;

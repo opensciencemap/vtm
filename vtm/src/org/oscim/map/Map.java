@@ -128,6 +128,7 @@ public abstract class Map implements EventDispatcher {
 	 * Request call to onUpdate for all layers. This function can
 	 * be called from any thread. Request will be handled on main
 	 * thread.
+	 * 
 	 * @param forceRedraw pass true to render next frame
 	 */
 	public abstract void updateMap(boolean forceRedraw);
@@ -192,6 +193,7 @@ public abstract class Map implements EventDispatcher {
 
 	/**
 	 * Get current {@link MapPosition}.
+	 * 
 	 * @param mapPosition
 	 */
 	public boolean getMapPosition(MapPosition mapPosition) {

@@ -52,12 +52,14 @@ public class AwtGraphics extends CanvasAdapter {
 	static final Graphics2D canvas;
 
 	static {
-		image  = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+		image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 		canvas = image.createGraphics();
-		canvas.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON );
+		canvas.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+		                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		//canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		//canvas.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 	}
+
 	static synchronized FontMetrics getFontMetrics(Font font) {
 		canvas.setFont(font);
 		// get character measurements
@@ -77,13 +79,13 @@ public class AwtGraphics extends CanvasAdapter {
 	}
 
 	@Override
-    public Bitmap decodeBitmap(InputStream inputStream) {
+	public Bitmap decodeBitmap(InputStream inputStream) {
 		try {
-	        return new AwtBitmap(inputStream);
-        } catch (IOException e) {
-	        e.printStackTrace();
-	        return null;
-        }
+			return new AwtBitmap(inputStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override

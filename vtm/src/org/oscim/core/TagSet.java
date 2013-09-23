@@ -16,7 +16,6 @@ package org.oscim.core;
 
 import java.util.Arrays;
 
-
 public class TagSet {
 	public static TagSet EMPTY_TAG_SET = new TagSet();
 
@@ -37,6 +36,7 @@ public class TagSet {
 
 	/**
 	 * null out current tags
+	 * 
 	 * @param nulltags ...
 	 */
 	public void clear(boolean nulltags) {
@@ -44,7 +44,7 @@ public class TagSet {
 		numTags = 0;
 	}
 
-	public Tag[] asArray(){
+	public Tag[] asArray() {
 		Tag[] result = new Tag[numTags];
 		System.arraycopy(tags, 0, result, 0, numTags);
 		return result;
@@ -58,7 +58,8 @@ public class TagSet {
 		}
 		return null;
 	}
-	public boolean containsKey(String key){
+
+	public boolean containsKey(String key) {
 		for (int i = 0; i < numTags; i++) {
 			if (tags[i].key == key)
 				return true;
@@ -66,7 +67,7 @@ public class TagSet {
 		return false;
 	}
 
-	public String getValue(String key){
+	public String getValue(String key) {
 		for (int i = 0; i < numTags; i++) {
 			if (tags[i].key == key)
 				return tags[i].value;
@@ -74,7 +75,7 @@ public class TagSet {
 		return null;
 	}
 
-	public boolean contains(String key, String value){
+	public boolean contains(String key, String value) {
 		for (int i = 0; i < numTags; i++) {
 			if (tags[i].key == key)
 				return value.equals(tags[i].value);
@@ -91,7 +92,7 @@ public class TagSet {
 		tags[numTags++] = tag;
 	}
 
-	public void set(Tag[] tagArray){
+	public void set(Tag[] tagArray) {
 		int newTags = tagArray.length;
 		if (newTags > tags.length)
 			tags = new Tag[tagArray.length];
@@ -147,7 +148,7 @@ public class TagSet {
 		return false;
 	}
 
-	public String asString(){
+	public String asString() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < numTags; i++)
 			sb.append(tags[i]);

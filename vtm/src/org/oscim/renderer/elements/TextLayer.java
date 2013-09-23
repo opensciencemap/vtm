@@ -51,12 +51,12 @@ public final class TextLayer extends TextureLayer {
 
 			if (item.text == it.text) {
 				while (it.next != null
-						// break if next item uses different text style
-						&& item.text == it.next.text
-						// check same string instance
-						&& item.string != it.string
-						// check same string
-						&& !item.string.equals(it.string))
+				        // break if next item uses different text style
+				        && item.text == it.next.text
+				        // check same string instance
+				        && item.string != it.string
+				        // check same string
+				        && !item.string.equals(it.string))
 					it = it.next;
 
 				// unify duplicate string :)
@@ -248,7 +248,7 @@ public final class TextLayer extends TextureLayer {
 				verticesCnt += 4;
 
 				if (it.next == null || (it.next.text != it.text)
-						|| (it.next.string != it.string)) {
+				        || (it.next.string != it.string)) {
 					it = it.next;
 					break;
 				}

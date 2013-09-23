@@ -35,7 +35,6 @@ public abstract class PbfTileDataSource implements ITileDataSource {
 	protected LwHttp mConn;
 	protected final PbfDecoder mTileDecoder;
 
-
 	public PbfTileDataSource(PbfDecoder tileDecoder) {
 		mTileDecoder = tileDecoder;
 	}

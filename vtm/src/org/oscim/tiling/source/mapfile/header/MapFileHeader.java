@@ -80,7 +80,7 @@ public class MapFileHeader {
 
 	/**
 	 * Reads and validates the header block from the map file.
-	 *
+	 * 
 	 * @param readBuffer
 	 *            the ReadBuffer for the file data.
 	 * @param fileSize
@@ -108,8 +108,7 @@ public class MapFileHeader {
 			return openResult;
 		}
 
-		openResult = RequiredFields
-				.readFileSize(readBuffer, fileSize, mapFileInfoBuilder);
+		openResult = RequiredFields.readFileSize(readBuffer, fileSize, mapFileInfoBuilder);
 		if (!openResult.isSuccess()) {
 			return openResult;
 		}
@@ -160,7 +159,7 @@ public class MapFileHeader {
 	}
 
 	private OpenResult readSubFileParameters(ReadBuffer readBuffer, long fileSize,
-			MapFileInfoBuilder mapFileInfoBuilder) {
+	        MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the number of sub-files (1 byte)
 		byte numberOfSubFiles = readBuffer.readByte();
 		if (numberOfSubFiles < 1) {
@@ -200,7 +199,7 @@ public class MapFileHeader {
 			// check for valid zoom level range
 			if (zoomLevelMin > zoomLevelMax) {
 				return new OpenResult("invalid zoom level range: " + zoomLevelMin + SPACE
-						+ zoomLevelMax);
+				        + zoomLevelMax);
 			}
 
 			// get and check the start address of the sub-file (8 bytes)

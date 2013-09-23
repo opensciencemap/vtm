@@ -1,4 +1,5 @@
 package org.oscim.android;
+
 ///*
 // * Copyright 2010, 2011, 2012 mapsforge.org
 // *

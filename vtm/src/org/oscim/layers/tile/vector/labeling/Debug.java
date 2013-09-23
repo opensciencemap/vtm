@@ -25,7 +25,7 @@ class Debug {
 	private final static float[] mDebugPoints = new float[4];
 
 	static void addDebugBox(ElementLayers dbg, Label l, TextItem ti, int overlaps, boolean prev,
-			float scale) {
+	        float scale) {
 
 		LineLayer ll;
 		if (prev) {

@@ -124,8 +124,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mLineScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
 
 		mGroundScale = (float) (Math.cos(lat * (Math.PI / 180))
-		                        * MercatorProjection.EARTH_CIRCUMFERENCE
-		                        / ((long) Tile.SIZE << tile.zoomLevel));
+		        * MercatorProjection.EARTH_CIRCUMFERENCE
+		        / ((long) Tile.SIZE << tile.zoomLevel));
 
 		mTile = tile;
 		mTile.layers = new ElementLayers();

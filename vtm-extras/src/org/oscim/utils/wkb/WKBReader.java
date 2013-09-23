@@ -73,35 +73,35 @@ public class WKBReader {
 			data.getInt();
 		}
 		switch (realtype) {
-		case Geometry.POINT:
-			mGeom.startPoints();
-			parsePoint(data, haveZ, haveM);
-			break;
-		case Geometry.LINESTRING:
-			mGeom.startLine();
-			parseLineString(data, haveZ, haveM);
-			break;
-		case Geometry.POLYGON:
-			mGeom.startPolygon();
-			parsePolygon(data, haveZ, haveM);
-			break;
-		case Geometry.MULTIPOINT:
-			mGeom.startPoints();
-			parseMultiPoint(data);
-			break;
-		case Geometry.MULTILINESTRING:
-			mGeom.startLine();
-			parseMultiLineString(data);
-			break;
-		case Geometry.MULTIPOLYGON:
-			mGeom.startPolygon();
-			parseMultiPolygon(data);
-			break;
-		case Geometry.GEOMETRYCOLLECTION:
-			parseCollection(data);
-			break;
-		default:
-			throw new IllegalArgumentException("Unknown Geometry Type: " + realtype);
+			case Geometry.POINT:
+				mGeom.startPoints();
+				parsePoint(data, haveZ, haveM);
+				break;
+			case Geometry.LINESTRING:
+				mGeom.startLine();
+				parseLineString(data, haveZ, haveM);
+				break;
+			case Geometry.POLYGON:
+				mGeom.startPolygon();
+				parsePolygon(data, haveZ, haveM);
+				break;
+			case Geometry.MULTIPOINT:
+				mGeom.startPoints();
+				parseMultiPoint(data);
+				break;
+			case Geometry.MULTILINESTRING:
+				mGeom.startLine();
+				parseMultiLineString(data);
+				break;
+			case Geometry.MULTIPOLYGON:
+				mGeom.startPolygon();
+				parseMultiPolygon(data);
+				break;
+			case Geometry.GEOMETRYCOLLECTION:
+				parseCollection(data);
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown Geometry Type: " + realtype);
 		}
 
 		if (count == 0) {
@@ -132,7 +132,7 @@ public class WKBReader {
 
 	/**
 	 * Parse an Array of "full" Geometries
-	 *
+	 * 
 	 * @param data
 	 *            ...
 	 * @param count
@@ -192,7 +192,6 @@ public class WKBReader {
 
 			if (i > 0)
 				mGeom.startHole();
-
 
 			int points = data.getInt();
 
@@ -254,7 +253,7 @@ public class WKBReader {
 
 	/**
 	 * Converting a string of hex character to bytes
-	 *
+	 * 
 	 * from http://stackoverflow.com/questions/140131/convert-a-string-
 	 * representation-of-a-hex-dump-to-a-byte-array-using-java
 	 */

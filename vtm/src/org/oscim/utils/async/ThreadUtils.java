@@ -17,7 +17,7 @@ package org.oscim.utils.async;
 
 /**
  * Utilities for threaded programming.
- *
+ * 
  * @author badlogic
  */
 public class ThreadUtils {

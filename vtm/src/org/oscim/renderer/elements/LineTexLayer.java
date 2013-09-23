@@ -254,8 +254,8 @@ public final class LineTexLayer extends RenderElement {
 
 		// factor to normalize extrusion vector and scale to coord scale
 		private final static float COORD_SCALE_BY_DIR_SCALE =
-				MapRenderer.COORD_SCALE
-						/ LineLayer.DIR_SCALE;
+		        MapRenderer.COORD_SCALE
+		                / LineLayer.DIR_SCALE;
 
 		private static int shader;
 		private static int hVertexPosition0;
@@ -305,7 +305,7 @@ public final class LineTexLayer extends RenderElement {
 				flip[i] = (byte) (i % 2);
 
 			ByteBuffer buf = ByteBuffer.allocateDirect(flip.length)
-					.order(ByteOrder.nativeOrder());
+			    .order(ByteOrder.nativeOrder());
 			buf.put(flip);
 			buf.flip();
 
@@ -313,7 +313,7 @@ public final class LineTexLayer extends RenderElement {
 
 			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
 			GL.glBufferData(GL20.GL_ARRAY_BUFFER, flip.length, sbuf,
-					GL20.GL_STATIC_DRAW);
+			                GL20.GL_STATIC_DRAW);
 			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
 			//		mTexID = new int[10];
@@ -327,7 +327,7 @@ public final class LineTexLayer extends RenderElement {
 		private final static int LEN_OFFSET = 8;
 
 		public static RenderElement draw(ElementLayers layers, RenderElement curLayer,
-				MapPosition pos, Matrices m, float div) {
+		        MapPosition pos, Matrices m, float div) {
 
 			// shader failed to compile
 			if (shader == 0)
@@ -348,11 +348,11 @@ public final class LineTexLayer extends RenderElement {
 
 			int maxIndices = MapRenderer.maxQuads * 6;
 			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER,
-					MapRenderer.mQuadIndicesID);
+			                MapRenderer.mQuadIndicesID);
 
 			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
 			GL.glVertexAttribPointer(hVertexFlip, 1,
-					GL20.GL_BYTE, false, 0, 0);
+			                         GL20.GL_BYTE, false, 0, 0);
 
 			layers.vbo.bind();
 
@@ -395,23 +395,23 @@ public final class LineTexLayer extends RenderElement {
 					int add = (l.offset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(hVertexPosition0,
-							4, GL20.GL_SHORT, false, STRIDE,
-							add + STRIDE);
+					                         4, GL20.GL_SHORT, false, STRIDE,
+					                         add + STRIDE);
 
 					GL.glVertexAttribPointer(hVertexLength0,
-							2, GL20.GL_SHORT, false, STRIDE,
-							add + STRIDE + LEN_OFFSET);
+					                         2, GL20.GL_SHORT, false, STRIDE,
+					                         add + STRIDE + LEN_OFFSET);
 
 					GL.glVertexAttribPointer(hVertexPosition1,
-							4, GL20.GL_SHORT, false, STRIDE,
-							add);
+					                         4, GL20.GL_SHORT, false, STRIDE,
+					                         add);
 
 					GL.glVertexAttribPointer(hVertexLength1,
-							2, GL20.GL_SHORT, false, STRIDE,
-							add + LEN_OFFSET);
+					                         2, GL20.GL_SHORT, false, STRIDE,
+					                         add + LEN_OFFSET);
 
 					GL.glDrawElements(GL20.GL_TRIANGLES, numIndices,
-							GL20.GL_UNSIGNED_SHORT, 0);
+					                  GL20.GL_UNSIGNED_SHORT, 0);
 				}
 
 				// second pass
@@ -424,23 +424,23 @@ public final class LineTexLayer extends RenderElement {
 					int add = (l.offset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(hVertexPosition0,
-							4, GL20.GL_SHORT, false, STRIDE,
-							add + 2 * STRIDE);
+					                         4, GL20.GL_SHORT, false, STRIDE,
+					                         add + 2 * STRIDE);
 
 					GL.glVertexAttribPointer(hVertexLength0,
-							2, GL20.GL_SHORT, false, STRIDE,
-							add + 2 * STRIDE + LEN_OFFSET);
+					                         2, GL20.GL_SHORT, false, STRIDE,
+					                         add + 2 * STRIDE + LEN_OFFSET);
 
 					GL.glVertexAttribPointer(hVertexPosition1,
-							4, GL20.GL_SHORT, false, STRIDE,
-							add + STRIDE);
+					                         4, GL20.GL_SHORT, false, STRIDE,
+					                         add + STRIDE);
 
 					GL.glVertexAttribPointer(hVertexLength1,
-							2, GL20.GL_SHORT, false, STRIDE,
-							add + STRIDE + LEN_OFFSET);
+					                         2, GL20.GL_SHORT, false, STRIDE,
+					                         add + STRIDE + LEN_OFFSET);
 
 					GL.glDrawElements(GL20.GL_TRIANGLES, numIndices,
-							GL20.GL_UNSIGNED_SHORT, 0);
+					                  GL20.GL_UNSIGNED_SHORT, 0);
 				}
 				//GlUtils.checkGlError(TAG);
 			}
@@ -459,54 +459,55 @@ public final class LineTexLayer extends RenderElement {
 		}
 
 		final static String vertexShader = ""
-				+ "precision mediump float;"
-				+ "uniform mat4 u_mvp;"
-				+ "uniform vec4 u_color;"
-				+ "uniform float u_pscale;"
-				+ "uniform float u_width;"
-				+ "attribute vec4 a_pos0;"
-				+ "attribute vec4 a_pos1;"
-				+ "attribute vec2 a_len0;"
-				+ "attribute vec2 a_len1;"
-				+ "attribute float a_flip;"
-				+ "varying vec2 v_st;"
-				+ "void main() {"
-				+ "  vec4 pos;"
-				+ "  if (a_flip == 0.0){"
-				//+ "    vec2 dir = u_width * a_pos0.zw;"
-				+ "    pos = vec4(a_pos0.xy + (u_width * a_pos0.zw), 0.0, 1.0);"
-				+ "    v_st = vec2(a_len0.x / u_pscale, 1.0);"
-				+ "  } else {"
-				//+ "    vec2 dir = u_width * a_pos1.zw;"
-				+ "     pos = vec4(a_pos1.xy - (u_width * a_pos1.zw), 0.0, 1.0);"
-				+ "    v_st = vec2(a_len1.x / u_pscale, -1.0);"
-				+ "  }"
-				+ "  gl_Position = u_mvp * pos;"
-				+ "}";
+		        + "precision mediump float;"
+		        + "uniform mat4 u_mvp;"
+		        + "uniform vec4 u_color;"
+		        + "uniform float u_pscale;"
+		        + "uniform float u_width;"
+		        + "attribute vec4 a_pos0;"
+		        + "attribute vec4 a_pos1;"
+		        + "attribute vec2 a_len0;"
+		        + "attribute vec2 a_len1;"
+		        + "attribute float a_flip;"
+		        + "varying vec2 v_st;"
+		        + "void main() {"
+		        + "  vec4 pos;"
+		        + "  if (a_flip == 0.0){"
+		        //+ "    vec2 dir = u_width * a_pos0.zw;"
+		        + "    pos = vec4(a_pos0.xy + (u_width * a_pos0.zw), 0.0, 1.0);"
+		        + "    v_st = vec2(a_len0.x / u_pscale, 1.0);"
+		        + "  } else {"
+		        //+ "    vec2 dir = u_width * a_pos1.zw;"
+		        + "     pos = vec4(a_pos1.xy - (u_width * a_pos1.zw), 0.0, 1.0);"
+		        + "    v_st = vec2(a_len1.x / u_pscale, -1.0);"
+		        + "  }"
+		        + "  gl_Position = u_mvp * pos;"
+		        + "}";
 
 		//*
 		final static String fragmentShader = ""
-				+ "#extension GL_OES_standard_derivatives : enable\n"
-				+ " precision mediump float;"
-				+ " uniform vec4 u_color;"
-				+ " uniform vec4 u_bgcolor;"
-				+ " uniform float u_pwidth;"
-				+ " varying vec2 v_st;"
-				+ " void main() {"
-				//   distance on perpendicular to the line
-				+ "  float dist = abs(v_st.t);"
-				+ "  float fuzz = fwidth(v_st.t);"
-				+ "  float fuzz_p = fwidth(v_st.s);"
-				+ "  float line_w = smoothstep(0.0, fuzz, 1.0 - dist);"
-				+ "  float stipple_w = smoothstep(0.0, fuzz, u_pwidth - dist);"
-				// triangle waveform in the range 0..1 for regular pattern
-				+ "  float phase = abs(mod(v_st.s, 2.0) - 1.0);"
-				// interpolate between on/off phase, 0.5 = equal phase length
-				+ "  float stipple_p = smoothstep(0.5 - fuzz_p, 0.5 + fuzz_p, phase);"
-				+ "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-				+ " } ";  //*/
+		        + "#extension GL_OES_standard_derivatives : enable\n"
+		        + " precision mediump float;"
+		        + " uniform vec4 u_color;"
+		        + " uniform vec4 u_bgcolor;"
+		        + " uniform float u_pwidth;"
+		        + " varying vec2 v_st;"
+		        + " void main() {"
+		        //   distance on perpendicular to the line
+		        + "  float dist = abs(v_st.t);"
+		        + "  float fuzz = fwidth(v_st.t);"
+		        + "  float fuzz_p = fwidth(v_st.s);"
+		        + "  float line_w = smoothstep(0.0, fuzz, 1.0 - dist);"
+		        + "  float stipple_w = smoothstep(0.0, fuzz, u_pwidth - dist);"
+		        // triangle waveform in the range 0..1 for regular pattern
+		        + "  float phase = abs(mod(v_st.s, 2.0) - 1.0);"
+		        // interpolate between on/off phase, 0.5 = equal phase length
+		        + "  float stipple_p = smoothstep(0.5 - fuzz_p, 0.5 + fuzz_p, phase);"
+		        + "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
+		        + " } ";  //*/
 
-		/* final static String fragmentShader = ""
+		/*
+		 * final static String fragmentShader = ""
 		 * + "#extension GL_OES_standard_derivatives : enable\n"
 		 * + " precision mediump float;"
 		 * + " uniform sampler2D tex;"
@@ -527,8 +528,10 @@ public final class LineTexLayer extends RenderElement {
 		 * + "  gl_FragColor =  u_bgcolor * stipple_p;"
 		 * // +
 		 * "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-		 * + "}"; // */
-		/* final static String fragmentShader = ""
+		 * + "}"; //
+		 */
+		/*
+		 * final static String fragmentShader = ""
 		 * + "#extension GL_OES_standard_derivatives : enable\n"
 		 * + " precision mediump float;"
 		 * + " uniform sampler2D tex;"
@@ -547,7 +550,8 @@ public final class LineTexLayer extends RenderElement {
 		 * + "  float stipple_p = smoothstep(0.495, 0.505, dist);"
 		 * +
 		 * "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-		 * + " } "; // */
+		 * + " } "; //
+		 */
 
 	}
 }

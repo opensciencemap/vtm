@@ -163,12 +163,12 @@ class TextRenderer extends ElementRenderer {
 			// find other label with same text style
 			if (l.text == ll.text) {
 				while (ll.next != null
-						// break if next item uses different text style
-						&& l.text == ll.next.text
-						// check same string instance
-						&& l.string != ll.string
-						// check same string
-						&& !l.string.equals(ll.string))
+				        // break if next item uses different text style
+				        && l.text == ll.next.text
+				        // check same string instance
+				        && l.string != ll.string
+				        // check same string
+				        && !l.string.equals(ll.string))
 					ll = ll.next;
 
 				// Note: this is required for 'packing test' in prepare to work!
@@ -219,7 +219,7 @@ class TextRenderer extends ElementRenderer {
 				//		+ " at " + ti.x + ":" + ti.y);
 
 				if (!ll.text.caption
-						&& (ll.text.priority > l.text.priority || ll.length < l.length)) {
+				        && (ll.text.priority > l.text.priority || ll.length < l.length)) {
 
 					ll = removeLabel(ll);
 					continue;
@@ -379,8 +379,8 @@ class TextRenderer extends ElementRenderer {
 			}
 
 			l.bbox.set(l.x, l.y, l.x1, l.y1,
-					l.width + MIN_WAY_DIST,
-					l.text.fontHeight + MIN_WAY_DIST);
+			           l.width + MIN_WAY_DIST,
+			           l.text.fontHeight + MIN_WAY_DIST);
 
 			byte overlaps = checkOverlap(l);
 
@@ -443,12 +443,12 @@ class TextRenderer extends ElementRenderer {
 
 				if (l.bbox == null)
 					l.bbox = new OBB2D(l.x, l.y, l.x1, l.y1,
-							l.width + MIN_WAY_DIST,
-							l.text.fontHeight + MIN_WAY_DIST);
+					                   l.width + MIN_WAY_DIST,
+					                   l.text.fontHeight + MIN_WAY_DIST);
 				else
 					l.bbox.set(l.x, l.y, l.x1, l.y1,
-							l.width + MIN_WAY_DIST,
-							l.text.fontHeight + MIN_WAY_DIST);
+					           l.width + MIN_WAY_DIST,
+					           l.text.fontHeight + MIN_WAY_DIST);
 
 				if (dbg == null || ti.width < ti.length * scale)
 					overlaps = checkOverlap(l);
@@ -495,9 +495,9 @@ class TextRenderer extends ElementRenderer {
 					l.bbox = new OBB2D();
 
 				l.bbox.setNormalized(l.x, l.y, cos, -sin,
-						l.width + MIN_CAPTION_DIST,
-						l.text.fontHeight + MIN_CAPTION_DIST,
-						l.text.dy);
+				                     l.width + MIN_CAPTION_DIST,
+				                     l.text.fontHeight + MIN_CAPTION_DIST,
+				                     l.text.dy);
 
 				boolean overlaps = false;
 
@@ -525,7 +525,7 @@ class TextRenderer extends ElementRenderer {
 		}
 
 		for (Label ti = mLabels; ti != null; ti = (Label) ti.next) {
-			if (ti.text.caption){
+			if (ti.text.caption) {
 				if (ti.text.texture != null) {
 					SymbolItem s = SymbolItem.pool.get();
 					s.texRegion = ti.text.texture;
@@ -595,7 +595,7 @@ class TextRenderer extends ElementRenderer {
 
 	@Override
 	public synchronized void update(MapPosition pos, boolean changed,
-			Matrices matrices) {
+	        Matrices matrices) {
 
 		//if (System.currentTimeMillis() - lastDraw > 1000){
 		//	updateLabels();

@@ -16,8 +16,9 @@ package org.oscim.utils.pool;
 
 /**
  * Utility class for making poolable objects.
- * Instead of using an additional list to hold pool items just extend this class.
- *
+ * Instead of using an additional list to hold pool items just extend this
+ * class.
+ * 
  * Also handy for objects that exist in only *one list* at a time.
  * */
 
@@ -53,8 +54,7 @@ public class Inlist<T extends Inlist<T>> {
 		return list;
 	}
 
-
-	public static <T extends Inlist<T>> T get(T list, int i){
+	public static <T extends Inlist<T>> T get(T list, int i) {
 		if (i < 0)
 			return null;
 
@@ -67,19 +67,18 @@ public class Inlist<T extends Inlist<T>> {
 		return null;
 	}
 
-//	public static <T extends Inlist<T>> T insertAt(T list, T item, int i){
-//		if (i < 0)
-//			return null;
-//
-//		while (--i > 0 && list != null)
-//			list = list.next;
-//
-//		if (i == 0)
-//			return list;
-//
-//		return null;
-//	}
-
+	//	public static <T extends Inlist<T>> T insertAt(T list, T item, int i){
+	//		if (i < 0)
+	//			return null;
+	//
+	//		while (--i > 0 && list != null)
+	//			list = list.next;
+	//
+	//		if (i == 0)
+	//			return list;
+	//
+	//		return null;
+	//	}
 
 	public static <T extends Inlist<T>> T push(T list, T item) {
 		item.next = list;
@@ -120,8 +119,7 @@ public class Inlist<T extends Inlist<T>> {
 		if (list == null)
 			throw new IllegalArgumentException("Inlist.prependRelative 'list' is null");
 
-
-		if (list == other){
+		if (list == other) {
 			item.next = list;
 			return item;
 		}

@@ -37,6 +37,6 @@ class PositiveRule extends Rule {
 	@Override
 	boolean matchesTags(Tag[] tags) {
 		return (mKeyMatcher == null || mKeyMatcher.matches(tags))
-				&& (mValueMatcher == null || mValueMatcher.matches(tags));
+		        && (mValueMatcher == null || mValueMatcher.matches(tags));
 	}
 }

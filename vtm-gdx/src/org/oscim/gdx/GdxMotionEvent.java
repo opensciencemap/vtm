@@ -4,7 +4,7 @@ import org.oscim.event.MotionEvent;
 
 import com.badlogic.gdx.InputProcessor;
 
-public class GdxMotionEvent extends MotionEvent implements InputProcessor{
+public class GdxMotionEvent extends MotionEvent implements InputProcessor {
 
 	private static final long serialVersionUID = 1L;
 

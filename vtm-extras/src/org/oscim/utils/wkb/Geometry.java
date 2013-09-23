@@ -75,14 +75,14 @@ abstract class Geometry implements Serializable {
 	static final int GEOMETRYCOLLECTION = 7;
 
 	static final String[] ALLTYPES = new String[] {
-			"", // internally used LinearRing does not have any text in front of
-				// it
-			"POINT", "LINESTRING", "POLYGON", "MULTIPOINT", "MULTILINESTRING",
-			"MULTIPOLYGON", "GEOMETRYCOLLECTION" };
+	        "", // internally used LinearRing does not have any text in front of
+	            // it
+	        "POINT", "LINESTRING", "POLYGON", "MULTIPOINT", "MULTILINESTRING",
+	        "MULTIPOLYGON", "GEOMETRYCOLLECTION" };
 
 	/**
 	 * The Text representations of the geometry types
-	 *
+	 * 
 	 * @param type
 	 *            ...
 	 * @return ...
@@ -125,7 +125,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Parse a SRID value, anything <= 0 is unknown
-	 *
+	 * 
 	 * @param srid
 	 *            ...
 	 * @return ...
@@ -140,7 +140,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Constructor for subclasses
-	 *
+	 * 
 	 * @param type
 	 *            has to be given by all subclasses.
 	 */
@@ -162,30 +162,30 @@ abstract class Geometry implements Serializable {
 	@Override
 	public boolean equals(Object other) {
 		return (other != null) && (other instanceof Geometry)
-				&& equals((Geometry) other);
+		        && equals((Geometry) other);
 	}
 
 	/**
 	 * geometry specific equals implementation - only defined for non-null
 	 * values
-	 *
+	 * 
 	 * @param other
 	 *            ...
 	 * @return ...
 	 */
 	public boolean equals(Geometry other) {
 		return (other != null) && (this.dimension == other.dimension)
-				&& (this.type == other.type) && (this.srid == other.srid)
-				&& (this.haveMeasure == other.haveMeasure)
-				&& other.getClass().equals(this.getClass())
-				&& this.equalsintern(other);
+		        && (this.type == other.type) && (this.srid == other.srid)
+		        && (this.haveMeasure == other.haveMeasure)
+		        && other.getClass().equals(this.getClass())
+		        && this.equalsintern(other);
 	}
 
 	/**
 	 * Whether test coordinates for geometry - subclass specific code
 	 * Implementors can assume that dimensin, type, srid
 	 * and haveMeasure are equal, other != null and other is the same subclass.
-	 *
+	 * 
 	 * @param other
 	 *            ...
 	 * @return ...
@@ -194,14 +194,14 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Return the number of Points of the geometry
-	 *
+	 * 
 	 * @return ...
 	 */
 	abstract int numPoints();
 
 	/**
 	 * Get the nth Point of the geometry
-	 *
+	 * 
 	 * @param n
 	 *            the index of the point, from 0 to numPoints()-1;
 	 * @throws ArrayIndexOutOfBoundsException
@@ -222,7 +222,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * The OGIS geometry type number of this geometry.
-	 *
+	 * 
 	 * @return ...
 	 */
 	int getType() {
@@ -231,7 +231,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Return the Type as String
-	 *
+	 * 
 	 * @return ...
 	 */
 	String getTypeString() {
@@ -240,7 +240,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Returns whether we have a measure
-	 *
+	 * 
 	 * @return ....
 	 */
 	boolean isMeasured() {
@@ -251,7 +251,7 @@ abstract class Geometry implements Serializable {
 	 * Queries the number of geometric dimensions of this geometry. This does
 	 * not include measures, as opposed to the
 	 * server.
-	 *
+	 * 
 	 * @return The dimensionality (eg, 2D or 3D) of this geometry.
 	 */
 	int getDimension() {
@@ -260,7 +260,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * The OGIS geometry type number of this geometry.
-	 *
+	 * 
 	 * @return ...
 	 */
 	int getSrid() {
@@ -270,7 +270,7 @@ abstract class Geometry implements Serializable {
 	/**
 	 * Recursively sets the srid on this geometry and all contained
 	 * subgeometries
-	 *
+	 * 
 	 * @param srid
 	 *            ...
 	 */
@@ -293,7 +293,7 @@ abstract class Geometry implements Serializable {
 	/**
 	 * Render the WKT version of this Geometry (without SRID) into the given
 	 * StringBuffer.
-	 *
+	 * 
 	 * @param sb
 	 *            ...
 	 * @param putM
@@ -314,7 +314,7 @@ abstract class Geometry implements Serializable {
 	/**
 	 * Render the WKT without the type name, but including the brackets into the
 	 * StringBuffer
-	 *
+	 * 
 	 * @param sb
 	 *            ...
 	 */
@@ -327,7 +327,7 @@ abstract class Geometry implements Serializable {
 	/**
 	 * Render the "inner" part of the WKT (inside the brackets) into the
 	 * StringBuffer.
-	 *
+	 * 
 	 * @param SB
 	 *            ...
 	 */
@@ -335,7 +335,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * backwards compatibility method
-	 *
+	 * 
 	 * @return ...
 	 */
 	String getValue() {
@@ -354,7 +354,7 @@ abstract class Geometry implements Serializable {
 	 * NULL or inconsistent subgeometries. BinaryParser and WKTParser should
 	 * only generate consistent geometries.
 	 * BinaryWriter may produce invalid results on inconsistent geometries.
-	 *
+	 * 
 	 * @return true if all checks are passed.
 	 */
 	boolean checkConsistency() {
@@ -363,7 +363,7 @@ abstract class Geometry implements Serializable {
 
 	/**
 	 * Splits the SRID=4711; part of a EWKT rep if present and sets the srid.
-	 *
+	 * 
 	 * @param value
 	 *            ...
 	 * @return value without the SRID=4711; part
@@ -374,7 +374,7 @@ abstract class Geometry implements Serializable {
 			int index = v.indexOf(';', 5); // sridprefix length is 5
 			if (index == -1) {
 				throw new IllegalArgumentException(
-						"Error parsing Geometry - SRID not delimited with ';' ");
+				                                   "Error parsing Geometry - SRID not delimited with ';' ");
 			}
 			this.srid = Integer.parseInt(v.substring(5, index));
 			return v.substring(index + 1).trim();

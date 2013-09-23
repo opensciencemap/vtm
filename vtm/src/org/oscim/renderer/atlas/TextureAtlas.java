@@ -66,7 +66,6 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.utils.pool.Inlist;
 
-
 public class TextureAtlas extends Inlist<TextureAtlas> {
 	private final static String TAG = TextureAtlas.class.getName();
 
@@ -85,7 +84,6 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 
 	/** Allocated surface size */
 	int mUsed;
-
 
 	public TextureItem texture;
 

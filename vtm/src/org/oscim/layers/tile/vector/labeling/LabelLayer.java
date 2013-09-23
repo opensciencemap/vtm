@@ -49,7 +49,7 @@ public class LabelLayer extends Layer implements EventListener, Map.UpdateListen
 
 	@Override
 	public void handleEvent(MapEvent event) {
-		 if (event instanceof MotionEvent) {
+		if (event instanceof MotionEvent) {
 			MotionEvent e = (MotionEvent) event;
 
 			int action = e.getAction() & MotionEvent.ACTION_MASK;
@@ -68,11 +68,11 @@ public class LabelLayer extends Layer implements EventListener, Map.UpdateListen
 		}
 	}
 
-		@Override
-		public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-			if (clear)
-				mTextRenderer.clearLabels();
-		}
+	@Override
+	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+		if (clear)
+			mTextRenderer.clearLabels();
+	}
 
 	//	@Override
 	//	public boolean onTouchEvent(MotionEvent e) {

@@ -32,12 +32,12 @@ public class AwtPaint implements Paint {
 
 	private static int getCap(Cap cap) {
 		switch (cap) {
-		case BUTT:
-			return BasicStroke.CAP_BUTT;
-		case ROUND:
-			return BasicStroke.CAP_ROUND;
-		case SQUARE:
-			return BasicStroke.CAP_SQUARE;
+			case BUTT:
+				return BasicStroke.CAP_BUTT;
+			case ROUND:
+				return BasicStroke.CAP_ROUND;
+			case SQUARE:
+				return BasicStroke.CAP_SQUARE;
 		}
 
 		throw new IllegalArgumentException("unknown cap: " + cap);
@@ -60,6 +60,7 @@ public class AwtPaint implements Paint {
 
 	private int cap;
 	private float strokeWidth;
+
 	//private Align mAlign;
 
 	@Override

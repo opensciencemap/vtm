@@ -56,7 +56,7 @@ public class MapPosition {
 		this.scale = scale;
 	}
 
-	public void setPosition(GeoPoint geoPoint){
+	public void setPosition(GeoPoint geoPoint) {
 		setPosition(geoPoint.getLatitude(), geoPoint.getLongitude());
 	}
 
@@ -81,7 +81,7 @@ public class MapPosition {
 
 	public GeoPoint getGeoPoint() {
 		return new GeoPoint(MercatorProjection.toLatitude(y),
-				MercatorProjection.toLongitude(x));
+		                    MercatorProjection.toLongitude(x));
 	}
 
 	public double getLatitude() {

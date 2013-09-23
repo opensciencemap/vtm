@@ -20,12 +20,9 @@ import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.utils.pool.Inlist;
 
-
-
-
 public abstract class SpriteManager<T> {
 
-	public class Sprite extends Inlist<Sprite>{
+	public class Sprite extends Inlist<Sprite> {
 
 		public Sprite(T i, TextureAtlas a, Rect r) {
 			atlas = a;
@@ -52,9 +49,9 @@ public abstract class SpriteManager<T> {
 		//mTexture.ownBitmap = true;
 
 		mAtlas = new TextureAtlas(
-				TextureItem.TEXTURE_WIDTH,
-				TextureItem.TEXTURE_HEIGHT,
-				32);
+		                          TextureItem.TEXTURE_WIDTH,
+		                          TextureItem.TEXTURE_HEIGHT,
+		                          32);
 
 		mCanvas.setBitmap(mTexture.bitmap);
 	}
@@ -68,7 +65,7 @@ public abstract class SpriteManager<T> {
 		return null;
 	}
 
-	public void clear(){
+	public void clear() {
 		TextureItem.releaseAll(mTexture);
 		mAtlas.clear();
 		items = null;
@@ -78,7 +75,7 @@ public abstract class SpriteManager<T> {
 		mCanvas.setBitmap(mTexture.bitmap);
 	}
 
-	public TextureItem getTextures(){
+	public TextureItem getTextures() {
 		return mTexture;
 	}
 

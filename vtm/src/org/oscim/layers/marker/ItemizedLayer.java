@@ -43,12 +43,12 @@ import org.oscim.utils.GeometryUtils;
  * lowest index is drawn as last and therefore the 'topmost' marker. It also
  * gets checked for onTap first. This class is generic, because you then you get
  * your custom item-class passed back in onTap().
- *
+ * 
  * @param <Item>
  *            ...
  */
 public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer implements
-		MarkerLayer.Snappable {
+        MarkerLayer.Snappable {
 
 	//private final static String TAG = ItemizedOverlay.class.getName();
 
@@ -183,7 +183,7 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 	/**
 	 * Method by which subclasses create the actual Items. This will only be
 	 * called from populate() we'll cache them for later use.
-	 *
+	 * 
 	 * @param i
 	 *            ...
 	 * @return ...
@@ -192,7 +192,7 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 
 	/**
 	 * The number of items in this overlay.
-	 *
+	 * 
 	 * @return ...
 	 */
 	public abstract int size();
@@ -249,7 +249,7 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 
 	/**
 	 * Returns the Item at the given index.
-	 *
+	 * 
 	 * @param position
 	 *            the position of the item to return
 	 * @return the Item of the given index.
@@ -274,7 +274,7 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 	 * move the map, so if the Item isn't already centered, the user may get
 	 * confused. If the Item is not found, this is a no-op. You can also pass
 	 * null to remove focus.
-	 *
+	 * 
 	 * @param item
 	 *            ...
 	 */

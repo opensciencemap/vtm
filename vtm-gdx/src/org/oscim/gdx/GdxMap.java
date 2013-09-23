@@ -85,7 +85,7 @@ public abstract class GdxMap implements ApplicationListener {
 
 			/**
 			 * Update all Layers on Main thread.
-			 *
+			 * 
 			 * @param forceRedraw
 			 *            also render frame FIXME (does nothing atm)
 			 */
@@ -116,24 +116,24 @@ public abstract class GdxMap implements ApplicationListener {
 	}
 
 	protected void initDefaultLayers(TileSource tileSource, boolean tileGrid, boolean labels,
-			boolean buildings) {
+	        boolean buildings) {
 
 		if (tileSource != null) {
 			mMapLayer = mMap.setBaseMap(tileSource);
 			mMap.setTheme(InternalRenderTheme.DEFAULT);
 
 			if (buildings)
-				mMap.getLayers().add(
-						new BuildingLayer(mMap, mMapLayer.getTileLayer()));
+				mMap.getLayers()
+				    .add(new BuildingLayer(mMap, mMapLayer.getTileLayer()));
 
 			if (labels)
-				mMap.getLayers().add(new LabelLayer(mMap,
-						mMapLayer.getTileLayer()));
+				mMap.getLayers()
+				    .add(new LabelLayer(mMap, mMapLayer.getTileLayer()));
 		}
 
 		if (tileGrid)
-			mMap.getLayers().add(new GenericLayer(mMap,
-					new GridRenderer()));
+			mMap.getLayers()
+			    .add(new GenericLayer(mMap, new GridRenderer()));
 	}
 
 	// Stage ui;
@@ -226,7 +226,6 @@ public abstract class GdxMap implements ApplicationListener {
 	@Override
 	public void resume() {
 	}
-
 
 	class TouchHandler implements InputProcessor {
 
@@ -446,7 +445,7 @@ public abstract class GdxMap implements ApplicationListener {
 
 		@Override
 		public boolean fling(final float velocityX, final float velocityY,
-				int button) {
+		        int button) {
 			//Log.d("", "fling " + button + " " + velocityX + "/" + velocityY);
 			if (mayFling && button == Buttons.LEFT) {
 				int m = Tile.SIZE * 4;
@@ -474,7 +473,7 @@ public abstract class GdxMap implements ApplicationListener {
 
 		@Override
 		public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2,
-				Vector2 pointer1, Vector2 pointer2) {
+		        Vector2 pointer1, Vector2 pointer2) {
 			mayFling = false;
 
 			if (!mPinch) {
@@ -533,13 +532,12 @@ public abstract class GdxMap implements ApplicationListener {
 				// decrease change of scale by the change of rotation
 				// * 20 is just arbitrary
 				if (mBeginRotate)
-					scale = 1 + ((scale - 1) * Math.max(
-							(1 - (float) Math.abs(r) * 20), 0));
+					scale = 1 + ((scale - 1) * Math.max((1 - (float) Math.abs(r) * 20), 0));
 
 				mSumScale *= scale;
 
 				if ((mSumScale < 0.99 || mSumScale > 1.01)
-						&& mSumRotate < Math.abs(0.02))
+				        && mSumRotate < Math.abs(0.02))
 					mBeginRotate = false;
 
 				float fx = (x2 + x1) / 2 - mWidth / 2;
@@ -557,14 +555,14 @@ public abstract class GdxMap implements ApplicationListener {
 				// Log.d(TAG, r + " " + slope + " m1:" + my + " m2:" + my2);
 
 				if ((my > threshold && my2 > threshold)
-						|| (my < -threshold && my2 < -threshold)) {
+				        || (my < -threshold && my2 < -threshold)) {
 					mBeginTilt = true;
 					changed = mMapPosition.tiltMap(my / 5);
 				}
 			}
 
 			if (!mBeginTilt
-					&& (mBeginRotate || (Math.abs(slope) > 1 && Math.abs(r) > PINCH_ROTATE_THRESHOLD))) {
+			        && (mBeginRotate || (Math.abs(slope) > 1 && Math.abs(r) > PINCH_ROTATE_THRESHOLD))) {
 				// Log.d(TAG, "rotate: " + mBeginRotate + " " +
 				// Math.toDegrees(rad));
 				if (!mBeginRotate) {

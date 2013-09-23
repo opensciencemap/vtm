@@ -24,7 +24,7 @@ import android.opengl.GLSurfaceView;
 
 public class GLView extends GLSurfaceView {
 
-	class GLRenderer extends org.oscim.renderer.MapRenderer implements GLSurfaceView.Renderer{
+	class GLRenderer extends org.oscim.renderer.MapRenderer implements GLSurfaceView.Renderer {
 
 		public GLRenderer(Map map) {
 			super(map);
@@ -46,7 +46,6 @@ public class GLView extends GLSurfaceView {
 			super.onDrawFrame();
 		}
 	}
-
 
 	public GLView(Context context, Map map) {
 		super(context);

@@ -1,4 +1,3 @@
-
 package org.oscim.utils;
 
 /*
@@ -29,7 +28,7 @@ public class UTF8Decoder {
 	public String decode(byte[] data, int offset, int byteCount) {
 		if ((offset | byteCount) < 0 || byteCount > data.length - offset) {
 			throw new IllegalArgumentException("Brrr " + data.length
-					+ " " + offset + " " + byteCount);
+			        + " " + offset + " " + byteCount);
 		}
 
 		byte[] d = data;
@@ -51,7 +50,7 @@ public class UTF8Decoder {
 				int val = b0 & 0xff;
 				v[s++] = (char) val;
 			} else if (((b0 & 0xe0) == 0xc0) || ((b0 & 0xf0) == 0xe0) ||
-					((b0 & 0xf8) == 0xf0) || ((b0 & 0xfc) == 0xf8) || ((b0 & 0xfe) == 0xfc)) {
+			        ((b0 & 0xf8) == 0xf0) || ((b0 & 0xfc) == 0xf8) || ((b0 & 0xfe) == 0xfc)) {
 				int utfCount = 1;
 				if ((b0 & 0xf0) == 0xe0)
 					utfCount = 2;

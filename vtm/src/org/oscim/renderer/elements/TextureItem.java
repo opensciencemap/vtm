@@ -248,8 +248,8 @@ public class TextureItem extends Inlist<TextureItem> {
 			initTexture(t);
 			if (TextureLayer.Renderer.debug)
 				Log.d(TAG, "fill:" + pool.getFill()
-				           + " count:" + mTexCnt
-				           + " new texture " + t.id);
+				        + " count:" + mTexCnt
+				        + " new texture " + t.id);
 		}
 
 		//Log.d(TAG, "UPLOAD ID: " + t.id);

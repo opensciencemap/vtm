@@ -20,9 +20,10 @@ import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.common.LwHttp;
 import org.oscim.tiling.source.common.PbfTileDataSource;
 import org.oscim.tiling.source.common.UrlTileSource;
+
 /**
  * Deprecated
- *
+ * 
  */
 public class OSciMap1TileSource extends UrlTileSource {
 

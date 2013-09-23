@@ -67,7 +67,7 @@ public class TileDecoder extends PbfDecoder {
 
 	@Override
 	public boolean decode(Tile tile, ITileDataSink sink, InputStream is, int contentLength)
-			throws IOException {
+	        throws IOException {
 
 		setInputStream(is, contentLength);
 
@@ -78,19 +78,20 @@ public class TileDecoder extends PbfDecoder {
 	}
 
 	private static final int MAX_TAGS_CACHE = 100;
-	private static Map<String, Tag> tagHash = Collections
-			.synchronizedMap(new LinkedHashMap<String, Tag>(
-					MAX_TAGS_CACHE, 0.75f, true) {
+	private static Map<String, Tag> tagHash =
+	        Collections.synchronizedMap(new LinkedHashMap<String, Tag>(MAX_TAGS_CACHE,
+	                                                                   0.75f,
+	                                                                   true) {
 
-				private static final long serialVersionUID = 1L;
+		        private static final long serialVersionUID = 1L;
 
-//				@Override
-//				protected boolean removeEldestEntry(Entry<String, Tag> e) {
-//					if (size() < MAX_TAGS_CACHE)
-//						return false;
-//					return true;
-//				}
-			});
+		        //@Override
+		        //protected boolean removeEldestEntry(Entry<String, Tag> e) {
+		        //if (size() < MAX_TAGS_CACHE)
+		        //return false;
+		        //return true;
+		        //}
+	        });
 
 	private boolean decode() throws IOException {
 		int val;
@@ -194,7 +195,7 @@ public class TileDecoder extends PbfDecoder {
 
 					if (cnt != coordCnt) {
 						Log.d(TAG, mTile + " wrong number of coordintes "
-								+ coordCnt + "/" + cnt);
+						        + coordCnt + "/" + cnt);
 						fail = true;
 					}
 
@@ -223,8 +224,8 @@ public class TileDecoder extends PbfDecoder {
 
 		if (fail || indexCnt == 0 || tagCnt == 0) {
 			Log.d(TAG, "failed reading way: bytes:" + bytes + " index:"
-					//+ (tags != null ? tags.toString() : "...") + " "
-					+ indexCnt + " " + coordCnt + " " + tagCnt);
+			        //+ (tags != null ? tags.toString() : "...") + " "
+			        + indexCnt + " " + coordCnt + " " + tagCnt);
 			return false;
 		}
 
@@ -288,7 +289,7 @@ public class TileDecoder extends PbfDecoder {
 	}
 
 	private int decodeNodeCoordinates(int numNodes, byte layer)
-			throws IOException {
+	        throws IOException {
 		int bytes = decodeVarint32();
 
 		fillBuffer(bytes);
@@ -330,8 +331,8 @@ public class TileDecoder extends PbfDecoder {
 
 			if (tagNum < 0 || cnt == tagCnt) {
 				Log.d(TAG, "NULL TAG: " + mTile
-						+ " invalid tag:" + tagNum
-						+ " " + tagCnt + "/" + cnt);
+				        + " invalid tag:" + tagNum
+				        + " " + tagCnt + "/" + cnt);
 				continue;
 			}
 
@@ -346,9 +347,9 @@ public class TileDecoder extends PbfDecoder {
 				mElem.tags.add(curTags[tagNum]);
 			} else {
 				Log.d(TAG, "NULL TAG: " + mTile
-						+ " could find tag:"
-						+ tagNum + " " + tagCnt
-						+ "/" + cnt);
+				        + " could find tag:"
+				        + tagNum + " " + tagCnt
+				        + "/" + cnt);
 			}
 		}
 
@@ -382,7 +383,7 @@ public class TileDecoder extends PbfDecoder {
 
 	@Override
 	protected int decodeInterleavedPoints(float[] coords, float scale)
-			throws IOException {
+	        throws IOException {
 
 		int bytes = decodeVarint32();
 		fillBuffer(bytes);
@@ -403,25 +404,25 @@ public class TileDecoder extends PbfDecoder {
 
 			} else if (buf[pos + 1] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| buf[pos++] << 7;
+				        | buf[pos++] << 7;
 
 			} else if (buf[pos + 2] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++]) << 14;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++]) << 14;
 
 			} else if (buf[pos + 3] >= 0) {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++]) << 21;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++]) << 21;
 
 			} else {
 				val = (buf[pos++] & 0x7f)
-						| (buf[pos++] & 0x7f) << 7
-						| (buf[pos++] & 0x7f) << 14
-						| (buf[pos++] & 0x7f) << 21
-						| (buf[pos]) << 28;
+				        | (buf[pos++] & 0x7f) << 7
+				        | (buf[pos++] & 0x7f) << 14
+				        | (buf[pos++] & 0x7f) << 21
+				        | (buf[pos]) << 28;
 
 				if (buf[pos++] < 0)
 					throw INVALID_VARINT;

@@ -40,7 +40,7 @@ public class Box {
 
 	/**
 	 * Instantiates a new Box.
-	 *
+	 * 
 	 * @param minX the min x
 	 * @param minY the min y
 	 * @param maxX the max x
@@ -55,7 +55,7 @@ public class Box {
 
 	/**
 	 * Check if Box contains point defined by coordinates x and y.
-	 *
+	 * 
 	 * @param x the x ordinate
 	 * @param y the y ordinate
 	 * @return true, if point is inside box.
@@ -66,7 +66,7 @@ public class Box {
 
 	/**
 	 * Check if Box contains Point.
-	 *
+	 * 
 	 * @param p the point
 	 * @return true, if point is inside box.
 	 */

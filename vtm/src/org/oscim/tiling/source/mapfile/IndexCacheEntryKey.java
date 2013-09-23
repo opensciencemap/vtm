@@ -26,7 +26,7 @@ class IndexCacheEntryKey {
 
 	/**
 	 * Creates an immutable key to be stored in a map.
-	 *
+	 * 
 	 * @param subFileParameter
 	 *            the parameters of the map file.
 	 * @param indexBlockNumber
@@ -49,7 +49,7 @@ class IndexCacheEntryKey {
 		if (this.subFileParameter == null && other.subFileParameter != null) {
 			return false;
 		} else if (this.subFileParameter != null
-				&& !this.subFileParameter.equals(other.subFileParameter)) {
+		        && !this.subFileParameter.equals(other.subFileParameter)) {
 			return false;
 		} else if (this.indexBlockNumber != other.indexBlockNumber) {
 			return false;
@@ -68,7 +68,7 @@ class IndexCacheEntryKey {
 	private int calculateHashCode() {
 		int result = 7;
 		result = 31 * result
-				+ ((this.subFileParameter == null) ? 0 : this.subFileParameter.hashCode());
+		        + ((this.subFileParameter == null) ? 0 : this.subFileParameter.hashCode());
 		result = 31 * result + (int) (this.indexBlockNumber ^ (this.indexBlockNumber >>> 32));
 		return result;
 	}

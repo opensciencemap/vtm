@@ -18,7 +18,7 @@ import org.oscim.core.Tag;
 
 /**
  * Contains the immutable metadata of a map file.
- *
+ * 
  */
 public class MapFileInfo extends org.oscim.tiling.source.mapfile.MapInfo {
 
@@ -49,16 +49,16 @@ public class MapFileInfo extends org.oscim.tiling.source.mapfile.MapInfo {
 
 	MapFileInfo(MapFileInfoBuilder mapFileInfoBuilder) {
 		super(mapFileInfoBuilder.boundingBox,
-				mapFileInfoBuilder.optionalFields.startZoomLevel,
-				mapFileInfoBuilder.optionalFields.startPosition,
-				mapFileInfoBuilder.projectionName,
-				mapFileInfoBuilder.mapDate,
-				mapFileInfoBuilder.fileSize,
-				mapFileInfoBuilder.fileVersion,
-				mapFileInfoBuilder.optionalFields.languagePreference,
-				mapFileInfoBuilder.optionalFields.comment,
-				mapFileInfoBuilder.optionalFields.createdBy,
-				mapFileInfoBuilder.zoomLevel);
+		      mapFileInfoBuilder.optionalFields.startZoomLevel,
+		      mapFileInfoBuilder.optionalFields.startPosition,
+		      mapFileInfoBuilder.projectionName,
+		      mapFileInfoBuilder.mapDate,
+		      mapFileInfoBuilder.fileSize,
+		      mapFileInfoBuilder.fileVersion,
+		      mapFileInfoBuilder.optionalFields.languagePreference,
+		      mapFileInfoBuilder.optionalFields.comment,
+		      mapFileInfoBuilder.optionalFields.createdBy,
+		      mapFileInfoBuilder.zoomLevel);
 
 		debugFile = mapFileInfoBuilder.optionalFields.isDebugFile;
 

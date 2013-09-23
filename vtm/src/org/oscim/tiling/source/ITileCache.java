@@ -48,13 +48,17 @@ public interface ITileCache {
 
 	public interface TileReader {
 		Tile getTile();
+
 		InputStream getInputStream();
+
 		int getBytes();
 	}
 
 	public interface TileWriter {
 		Tile getTile();
+
 		OutputStream getOutputStream();
+
 		void complete(boolean success);
 	}
 }

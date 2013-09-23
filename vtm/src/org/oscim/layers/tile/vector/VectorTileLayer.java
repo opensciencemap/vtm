@@ -45,7 +45,7 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 
 	/**
 	 * Sets the {@link TileSource} used by {@link TileLoader}.
-	 *
+	 * 
 	 * @return true when new TileSource was set (has changed)
 	 */
 	public boolean setTileSource(TileSource tileSource) {

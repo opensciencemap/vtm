@@ -14,7 +14,7 @@
  */
 package org.oscim.event;
 
-public class KeyEvent extends MapEvent{
+public class KeyEvent extends MapEvent {
 
 	private static final long serialVersionUID = 1L;
 

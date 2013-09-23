@@ -23,11 +23,13 @@ import android.content.Context;
 
 public class AndroidAssetAdapter extends AssetAdapter {
 	Context mContext;
+
 	public AndroidAssetAdapter(Context ctx) {
 		mContext = ctx;
 	}
+
 	@Override
-	public InputStream openFileAsStream(String fileName)  {
+	public InputStream openFileAsStream(String fileName) {
 		try {
 			return mContext.getAssets().open(fileName);
 		} catch (IOException e) {

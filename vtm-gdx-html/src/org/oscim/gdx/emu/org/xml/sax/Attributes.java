@@ -1,6 +1,5 @@
 package org.xml.sax;
 
-
 public abstract interface Attributes {
 	public abstract int getLength();
 

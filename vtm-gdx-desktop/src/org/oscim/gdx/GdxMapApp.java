@@ -18,7 +18,7 @@ public class GdxMapApp extends GdxMap {
 		// set our globals
 		new SharedLibraryLoader().load("vtm-jni");
 		CanvasAdapter.g = AwtGraphics.INSTANCE;
-		GLAdapter.g = new GdxGLAdapter();
+		GLAdapter.g = new GdxGL20();
 		GLAdapter.GDX_DESKTOP_QUIRKS = true;
 	}
 

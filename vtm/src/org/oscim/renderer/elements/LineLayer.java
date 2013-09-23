@@ -586,7 +586,7 @@ public final class LineLayer extends RenderElement {
 
 		// factor to normalize extrusion vector and scale to coord scale
 		private final static float COORD_SCALE_BY_DIR_SCALE =
-				MapRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
+		        MapRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
 
 		// shader handles
 		private static int[] lineProgram = new int[2];
@@ -602,14 +602,14 @@ public final class LineLayer extends RenderElement {
 			GL = gl;
 
 			lineProgram[0] = GLUtils.createProgram(lineVertexShader,
-					lineFragmentShader);
+			                                       lineFragmentShader);
 			if (lineProgram[0] == 0) {
 				Log.e(TAG, "Could not create line program.");
 				//return false;
 			}
 
 			lineProgram[1] = GLUtils.createProgram(lineVertexShader,
-					lineSimpleFragmentShader);
+			                                       lineSimpleFragmentShader);
 			if (lineProgram[1] == 0) {
 				Log.e(TAG, "Could not create simple line program.");
 				return false;
@@ -643,16 +643,16 @@ public final class LineLayer extends RenderElement {
 			}
 
 			mTexID = GLUtils.loadTexture(pixel, 128, 128, GL20.GL_ALPHA,
-					GL20.GL_NEAREST, GL20.GL_NEAREST,
-					GL20.GL_MIRRORED_REPEAT, GL20.GL_MIRRORED_REPEAT);
+			                             GL20.GL_NEAREST, GL20.GL_NEAREST,
+			                             GL20.GL_MIRRORED_REPEAT, GL20.GL_MIRRORED_REPEAT);
 
 			Log.d(TAG, "TEX ID: " + mTexID);
 			return true;
 		}
 
 		public static RenderElement draw(ElementLayers layers, RenderElement curLayer,
-				MapPosition pos,
-				Matrices m, float div, int mode) {
+		        MapPosition pos,
+		        Matrices m, float div, int mode) {
 
 			if (curLayer == null)
 				return null;
@@ -680,7 +680,7 @@ public final class LineLayer extends RenderElement {
 			GLState.enableVertexArrays(hLineVertexPosition[mode], -1);
 
 			GL.glVertexAttribPointer(hLineVertexPosition[mode], 4, GL20.GL_SHORT,
-					false, 0, layers.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
+			                         false, 0, layers.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
 
 			//glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 			m.mvp.setAsUniform(hLineMatrix[mode]);
@@ -809,84 +809,84 @@ public final class LineLayer extends RenderElement {
 		}
 
 		private final static String lineVertexShader = ""
-				+ "precision mediump float;"
-				+ "uniform mat4 u_mvp;"
-				// factor to increase line width relative to scale
-				+ "uniform float u_width;"
-				// xy hold position, zw extrusion vector
-				+ "attribute vec4 a_pos;"
-				+ "uniform float u_mode;"
-				+ "varying vec2 v_st;"
-				+ "void main() {"
-				// scale extrusion to u_width pixel
-				// just ignore the two most insignificant bits of a_st :)
-				+ "  vec2 dir = a_pos.zw;"
-				+ "  gl_Position = u_mvp * vec4(a_pos.xy + (u_width * dir), 0.0, 1.0);"
-				// last two bits of a_st hold the texture coordinates
-				// ..maybe one could wrap texture so that `abs` is not required
-				+ "  v_st = abs(mod(dir, 4.0)) - 1.0;"
-				+ "}";
+		        + "precision mediump float;"
+		        + "uniform mat4 u_mvp;"
+		        // factor to increase line width relative to scale
+		        + "uniform float u_width;"
+		        // xy hold position, zw extrusion vector
+		        + "attribute vec4 a_pos;"
+		        + "uniform float u_mode;"
+		        + "varying vec2 v_st;"
+		        + "void main() {"
+		        // scale extrusion to u_width pixel
+		        // just ignore the two most insignificant bits of a_st :)
+		        + "  vec2 dir = a_pos.zw;"
+		        + "  gl_Position = u_mvp * vec4(a_pos.xy + (u_width * dir), 0.0, 1.0);"
+		        // last two bits of a_st hold the texture coordinates
+		        // ..maybe one could wrap texture so that `abs` is not required
+		        + "  v_st = abs(mod(dir, 4.0)) - 1.0;"
+		        + "}";
 
 		private final static String lineSimpleFragmentShader = ""
-				+ "precision mediump float;"
-				+ "uniform sampler2D tex;"
-				+ "uniform float u_wscale;"
-				+ "uniform float u_mode;"
-				+ "uniform vec4 u_color;"
-				+ "varying vec2 v_st;"
-				+ "void main() {"
-				//+ "  float len;"
-				// (currently required as overlay line renderers dont load the texture)
-				//+ "  if (u_mode == 0)"
-				//+ "    len = abs(v_st.s);"
-				//+ "  else"
-				//+ "    len = texture2D(tex, v_st).a;"
-				//+ "    len = u_mode * length(v_st);"
-				// this avoids branching, need to check performance
-				+ (GLAdapter.GDX_DESKTOP_QUIRKS
-						? " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
-						: " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);")
-				// interpolate alpha between: 0.0 < 1.0 - len < u_wscale
-				// where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2)
-				//+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"
-				//+ "  gl_FragColor = mix(vec4(1.0,0.0,0.0,1.0), u_color, smoothstep(0.0, u_wscale, 1.0 - len));"
-				+ "  float alpha = min(1.0, (1.0 - len) / u_wscale);"
-				+ "  if (alpha > 0.1)"
-				+ "    gl_FragColor = u_color * alpha;"
-				+ "  else"
-				+ "    discard;"
-				//			+ "gl_FragColor = vec4(texture2D(tex, v_st).a);"
-				+ "}";
+		        + "precision mediump float;"
+		        + "uniform sampler2D tex;"
+		        + "uniform float u_wscale;"
+		        + "uniform float u_mode;"
+		        + "uniform vec4 u_color;"
+		        + "varying vec2 v_st;"
+		        + "void main() {"
+		        //+ "  float len;"
+		        // (currently required as overlay line renderers dont load the texture)
+		        //+ "  if (u_mode == 0)"
+		        //+ "    len = abs(v_st.s);"
+		        //+ "  else"
+		        //+ "    len = texture2D(tex, v_st).a;"
+		        //+ "    len = u_mode * length(v_st);"
+		        // this avoids branching, need to check performance
+		        + (GLAdapter.GDX_DESKTOP_QUIRKS
+		                ? " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
+		                : " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);")
+		        // interpolate alpha between: 0.0 < 1.0 - len < u_wscale
+		        // where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2)
+		        //+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"
+		        //+ "  gl_FragColor = mix(vec4(1.0,0.0,0.0,1.0), u_color, smoothstep(0.0, u_wscale, 1.0 - len));"
+		        + "  float alpha = min(1.0, (1.0 - len) / u_wscale);"
+		        + "  if (alpha > 0.1)"
+		        + "    gl_FragColor = u_color * alpha;"
+		        + "  else"
+		        + "    discard;"
+		        //			+ "gl_FragColor = vec4(texture2D(tex, v_st).a);"
+		        + "}";
 
 		private final static String lineFragmentShader = ""
-				+ "#extension GL_OES_standard_derivatives : enable\n"
-				+ "precision mediump float;"
-				+ "uniform sampler2D tex;"
-				+ "uniform float u_mode;"
-				+ "uniform vec4 u_color;"
-				+ "uniform float u_wscale;"
-				+ "varying vec2 v_st;"
-				+ "void main() {"
-				+ "  float len;"
-				+ "  float fuzz;"
-				+ "  if (u_mode == 0.0){"
-				+ "    len = abs(v_st.s);"
-				+ "    fuzz = fwidth(v_st.s);"
-				+ "  } else {"
-				+ (GLAdapter.GDX_DESKTOP_QUIRKS
-						? "    len = length(v_st);"
-						: "    len = texture2D(tex, v_st).a;")
-				+ "    vec2 st_width = fwidth(v_st);"
-				+ "    fuzz = max(st_width.s, st_width.t);"
-				+ "  }"
-				//+ "  gl_FragColor = u_color * smoothstep(0.0, fuzz + u_wscale, 1.0 - len);"
-				// smoothstep is too sharp, guess one could increase extrusion with z..
-				// this looks ok:
-				//+ "  gl_FragColor = u_color * min(1.0, (1.0 - len) / (u_wscale + fuzz));"
-				// can be faster according to nvidia docs 'Optimize OpenGL ES 2.0 Performace'
-				+ "  gl_FragColor = u_color * clamp((1.0 - len) / (u_wscale + fuzz), 0.0, 1.0);"
-				//+ "  gl_FragColor = mix(vec4(0.0,1.0,0.0,1.0), u_color, clamp((1.0 - len) / (u_wscale + fuzz), 0.0, 1.0));"
-				+ "}";
+		        + "#extension GL_OES_standard_derivatives : enable\n"
+		        + "precision mediump float;"
+		        + "uniform sampler2D tex;"
+		        + "uniform float u_mode;"
+		        + "uniform vec4 u_color;"
+		        + "uniform float u_wscale;"
+		        + "varying vec2 v_st;"
+		        + "void main() {"
+		        + "  float len;"
+		        + "  float fuzz;"
+		        + "  if (u_mode == 0.0){"
+		        + "    len = abs(v_st.s);"
+		        + "    fuzz = fwidth(v_st.s);"
+		        + "  } else {"
+		        + (GLAdapter.GDX_DESKTOP_QUIRKS
+		                ? "    len = length(v_st);"
+		                : "    len = texture2D(tex, v_st).a;")
+		        + "    vec2 st_width = fwidth(v_st);"
+		        + "    fuzz = max(st_width.s, st_width.t);"
+		        + "  }"
+		        //+ "  gl_FragColor = u_color * smoothstep(0.0, fuzz + u_wscale, 1.0 - len);"
+		        // smoothstep is too sharp, guess one could increase extrusion with z..
+		        // this looks ok:
+		        //+ "  gl_FragColor = u_color * min(1.0, (1.0 - len) / (u_wscale + fuzz));"
+		        // can be faster according to nvidia docs 'Optimize OpenGL ES 2.0 Performace'
+		        + "  gl_FragColor = u_color * clamp((1.0 - len) / (u_wscale + fuzz), 0.0, 1.0);"
+		        //+ "  gl_FragColor = mix(vec4(0.0,1.0,0.0,1.0), u_color, clamp((1.0 - len) / (u_wscale + fuzz), 0.0, 1.0));"
+		        + "}";
 
 		//	private final static String lineVertexShader = ""
 		//			+ "precision mediump float;"

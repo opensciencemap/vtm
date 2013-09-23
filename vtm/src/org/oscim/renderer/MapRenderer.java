@@ -77,9 +77,9 @@ public class MapRenderer {
 				mvp.setScale(ratio, ratio, ratio);
 			else
 				mvp.setTransScale(
-						(-screenWidth / 2) * ratio * scale,
-						(-screenHeight / 2) * ratio * scale,
-						ratio);
+				                  (-screenWidth / 2) * ratio * scale,
+				                  (-screenHeight / 2) * ratio * scale,
+				                  ratio);
 
 			mvp.multiplyLhs(proj);
 		}
@@ -193,8 +193,8 @@ public class MapRenderer {
 				size = (1 << 15);
 
 			ByteBuffer buf = ByteBuffer
-					.allocateDirect(size)
-					.order(ByteOrder.nativeOrder());
+			    .allocateDirect(size)
+			    .order(ByteOrder.nativeOrder());
 
 			this.floatBuffer = buf.asFloatBuffer();
 			this.shortBuffer = buf.asShortBuffer();
@@ -231,7 +231,7 @@ public class MapRenderer {
 	}
 
 	public static boolean uploadLayers(ElementLayers layers, int newSize,
-			boolean addFill) {
+	        boolean addFill) {
 		// add fill coordinates
 		if (addFill)
 			newSize += 8;
@@ -246,10 +246,10 @@ public class MapRenderer {
 
 		if (newSize != sbuf.remaining()) {
 			Log.d(TAG, "wrong size: "
-					+ " new size: " + newSize
-					+ " buffer pos: " + sbuf.position()
-					+ " buffer limit: " + sbuf.limit()
-					+ " buffer fill: " + sbuf.remaining());
+			        + " new size: " + newSize
+			        + " buffer pos: " + sbuf.position()
+			        + " buffer limit: " + sbuf.limit()
+			        + " buffer fill: " + sbuf.remaining());
 			return false;
 		}
 		newSize *= SHORT_BYTES;
@@ -281,8 +281,8 @@ public class MapRenderer {
 		GL.glDepthMask(true);
 		GL.glStencilMask(0xFF);
 		GL.glClear(GL20.GL_COLOR_BUFFER_BIT
-				| GL20.GL_DEPTH_BUFFER_BIT
-				| GL20.GL_STENCIL_BUFFER_BIT);
+		        | GL20.GL_DEPTH_BUFFER_BIT
+		        | GL20.GL_STENCIL_BUFFER_BIT);
 
 		GLState.blend(false);
 		GL.glDisable(GL20.GL_BLEND);
@@ -318,7 +318,7 @@ public class MapRenderer {
 		for (int i = 0, n = layers.length; i < n; i++) {
 			LayerRenderer renderer = layers[i];
 
-			if (!renderer.isInitialized){
+			if (!renderer.isInitialized) {
 				renderer.setup();
 				renderer.isInitialized = true;
 			}
@@ -393,9 +393,9 @@ public class MapRenderer {
 		buf.flip();
 
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER,
-				mQuadIndicesID);
+		                mQuadIndicesID);
 		GL.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER,
-				indices.length * 2, buf, GL20.GL_STATIC_DRAW);
+		                indices.length * 2, buf, GL20.GL_STATIC_DRAW);
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		// initialize default quad
@@ -408,7 +408,7 @@ public class MapRenderer {
 
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mQuadVerticesID);
 		GL.glBufferData(GL20.GL_ARRAY_BUFFER,
-				quad.length * 4, floatBuffer, GL20.GL_STATIC_DRAW);
+		                quad.length * 4, floatBuffer, GL20.GL_STATIC_DRAW);
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
 		if (mClearColor != null)

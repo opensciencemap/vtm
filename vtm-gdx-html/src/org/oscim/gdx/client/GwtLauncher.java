@@ -19,9 +19,9 @@ public class GwtLauncher extends GwtApplication {
 
 	@Override
 	public GwtApplicationConfiguration getConfig() {
-		GwtApplicationConfiguration cfg = new GwtApplicationConfiguration(
-				GwtGraphics.getWindowWidthJSNI(),
-				GwtGraphics.getWindowHeightJSNI());
+		GwtApplicationConfiguration cfg =
+		        new GwtApplicationConfiguration(GwtGraphics.getWindowWidthJSNI(),
+		                                        GwtGraphics.getWindowHeightJSNI());
 
 		DockLayoutPanel p = new DockLayoutPanel(Unit.EM);
 		p.setHeight("100%");

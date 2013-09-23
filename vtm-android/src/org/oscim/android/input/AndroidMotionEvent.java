@@ -13,6 +13,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.android.input;
+
 import org.oscim.event.MotionEvent;
 
 public class AndroidMotionEvent extends MotionEvent {
@@ -28,7 +29,7 @@ public class AndroidMotionEvent extends MotionEvent {
 
 	android.view.MotionEvent mEvent;
 
-	public void wrap(android.view.MotionEvent e){
+	public void wrap(android.view.MotionEvent e) {
 		mEvent = e;
 	}
 
@@ -36,6 +37,7 @@ public class AndroidMotionEvent extends MotionEvent {
 	public int getAction() {
 		return mEvent.getAction();
 	}
+
 	@Override
 	public float getX() {
 		return mEvent.getX();
@@ -65,6 +67,5 @@ public class AndroidMotionEvent extends MotionEvent {
 	public long getTime() {
 		return mEvent.getEventTime();
 	}
-
 
 }

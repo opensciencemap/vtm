@@ -28,13 +28,12 @@ public interface IRenderTheme {
 
 	/**
 	 * Matches a MapElement with the given parameters against this RenderTheme.
-	 *
+	 * 
 	 * @param zoomLevel
 	 *            the zoom level at which the way should be matched.
 	 * @return matching render instructions
 	 */
 	public abstract RenderInstruction[] matchElement(MapElement element, int zoomLevel);
-
 
 	/**
 	 * Must be called when this RenderTheme gets destroyed to clean up and free
@@ -55,7 +54,7 @@ public interface IRenderTheme {
 
 	/**
 	 * Scales the stroke width of this RenderTheme by the given factor.
-	 *
+	 * 
 	 * @param scaleFactor
 	 *            the factor by which the stroke width should be scaled.
 	 */
@@ -63,12 +62,11 @@ public interface IRenderTheme {
 
 	/**
 	 * Scales the text size of this RenderTheme by the given factor.
-	 *
+	 * 
 	 * @param scaleFactor
 	 *            the factor by which the text size should be scaled.
 	 */
 	public abstract void scaleTextSize(float scaleFactor);
-
 
 	/**
 	 * Callback methods for rendering areas, ways and points of interest (POIs).
@@ -76,7 +74,7 @@ public interface IRenderTheme {
 	public interface Callback {
 		/**
 		 * Renders an area with the given parameters.
-		 *
+		 * 
 		 * @param area
 		 * @param level
 		 */
@@ -84,7 +82,7 @@ public interface IRenderTheme {
 
 		/**
 		 * Renders an area symbol with the given bitmap.
-		 *
+		 * 
 		 * @param symbol
 		 *            the symbol to be rendered.
 		 */
@@ -92,7 +90,7 @@ public interface IRenderTheme {
 
 		/**
 		 * Renders an area caption with the given text.
-		 *
+		 * 
 		 * @param text
 		 *            the text to be rendered.
 		 */
@@ -100,7 +98,7 @@ public interface IRenderTheme {
 
 		/**
 		 * Renders a point of interest circle with the given parameters.
-		 *
+		 * 
 		 * @param circle
 		 *            the circle.
 		 * @param level
@@ -110,7 +108,7 @@ public interface IRenderTheme {
 
 		/**
 		 * Renders a point of interest symbol with the given bitmap.
-		 *
+		 * 
 		 * @param symbol
 		 *            the symbol to be rendered.
 		 */
@@ -118,7 +116,7 @@ public interface IRenderTheme {
 
 		/**
 		 * Renders a point of interest caption with the given text.
-		 *
+		 * 
 		 * @param text
 		 *            the text to be rendered.
 		 */
@@ -126,7 +124,7 @@ public interface IRenderTheme {
 
 		/**
 		 * Renders a way with the given parameters.
-		 *
+		 * 
 		 * @param line
 		 * @param level
 		 */
@@ -134,7 +132,7 @@ public interface IRenderTheme {
 
 		/**
 		 * Renders a way with the given symbol along the way path.
-		 *
+		 * 
 		 * @param symbol
 		 *            the symbol to be rendered.
 		 */
@@ -142,7 +140,7 @@ public interface IRenderTheme {
 
 		/**
 		 * Renders a way with the given text along the way path.
-		 *
+		 * 
 		 * @param text
 		 */
 		void renderWayText(Text text);

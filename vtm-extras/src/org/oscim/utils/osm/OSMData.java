@@ -27,7 +27,7 @@ public class OSMData {
 	private final Collection<OSMRelation> relations;
 
 	public OSMData(Collection<Bound> bounds, Collection<OSMNode> nodes,
-			Collection<OSMWay> ways, Collection<OSMRelation> relations) {
+	        Collection<OSMWay> ways, Collection<OSMRelation> relations) {
 
 		this.bounds = bounds;
 		this.nodes = nodes;

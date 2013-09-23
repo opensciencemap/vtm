@@ -19,7 +19,7 @@ import org.oscim.core.GeoPoint;
 
 /**
  * Contains the immutable metadata of a map file.
- *
+ * 
  */
 public class MapInfo {
 	/**
@@ -108,8 +108,8 @@ public class MapInfo {
 	 *            TODO
 	 */
 	public MapInfo(BoundingBox bbox, Byte zoom, GeoPoint start, String projection,
-			long date, long size, int version, String language, String comment,
-			String createdBy, int[] zoomLevel) {
+	        long date, long size, int version, String language, String comment,
+	        String createdBy, int[] zoomLevel) {
 
 		this.startZoomLevel = zoom;
 		this.zoomLevel = zoomLevel;

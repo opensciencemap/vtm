@@ -57,7 +57,8 @@ public class RenderTheme implements IRenderTheme {
 			cacheKey = new MatchingCacheKey();
 			matchType = type;
 		}
-		RenderInstructionItem getRenderInstructions(){
+
+		RenderInstructionItem getRenderInstructions() {
 			return cache.get(cacheKey);
 		}
 	}
@@ -164,8 +165,8 @@ public class RenderTheme implements IRenderTheme {
 						for (int j = i + 1; j < size; j++) {
 							if (matches.get(j) == r) {
 								Log.d(TAG, "fix duplicate instruction! "
-										+ Arrays.deepToString(cache.cacheKey.mTags)
-										+ ":" + zoomLevel);
+								        + Arrays.deepToString(cache.cacheKey.mTags)
+								        + ":" + zoomLevel);
 								matches.remove(j--);
 								size--;
 							}

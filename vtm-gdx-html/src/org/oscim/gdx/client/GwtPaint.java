@@ -47,7 +47,7 @@ public class GwtPaint implements Paint {
 		float a = ((color >>> 24) & 0xff) / 255f;
 		int r = (color >>> 16) & 0xff;
 		int g = (color >>> 8) & 0xff;
-		int b = (color & 0xff) ;
+		int b = (color & 0xff);
 
 		this.color = Pixmap.make(r, g, b, a);
 	}
@@ -105,7 +105,7 @@ public class GwtPaint implements Paint {
 		return 4 + strokeWidth;
 	}
 
-	void buildFont(){
+	void buildFont() {
 		StringBuilder sb = new StringBuilder();
 
 		if (this.fontStyle == FontStyle.BOLD)

@@ -119,7 +119,7 @@ class GwtGdxMap extends GdxMap {
 				//rot = rot < 0 ? -rot : rot;
 
 				if (curZoom != pos.zoomLevel || curLat != lat || curLon != lon
-						|| curTilt != rot || curRot != (int) (pos.angle)) {
+				        || curTilt != rot || curRot != (int) (pos.angle)) {
 
 					curLat = lat;
 					curLon = lon;
@@ -128,11 +128,11 @@ class GwtGdxMap extends GdxMap {
 					curRot = rot;
 
 					String newURL = Window.Location
-							.createUrlBuilder()
-							.setHash("scale=" + pos.zoomLevel + ",rot=" + curRot
-									+ ",tilt=" + curTilt + ",lat=" + (curLat / 1000f)
-									+ ",lon=" + (curLon / 1000f))
-							.buildString();
+					    .createUrlBuilder()
+					    .setHash("scale=" + pos.zoomLevel + ",rot=" + curRot
+					            + ",tilt=" + curTilt + ",lat=" + (curLat / 1000f)
+					            + ",lon=" + (curLon / 1000f))
+					    .buildString();
 					Window.Location.replace(newURL);
 				}
 			}

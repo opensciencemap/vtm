@@ -37,7 +37,7 @@ abstract class ValueGetter {
 
 	/**
 	 * Get a byte, should be equal for all endians
-	 *
+	 * 
 	 * @return ...
 	 */
 	byte getByte() {
@@ -58,7 +58,7 @@ abstract class ValueGetter {
 
 	/**
 	 * Get a 32-Bit integer
-	 *
+	 * 
 	 * @param index
 	 *            ...
 	 * @return ...
@@ -68,7 +68,7 @@ abstract class ValueGetter {
 	/**
 	 * Get a long value. This is not needed directly, but as a nice side-effect
 	 * from GetDouble.
-	 *
+	 * 
 	 * @param index
 	 *            ...
 	 * @return ...
@@ -77,7 +77,7 @@ abstract class ValueGetter {
 
 	/**
 	 * Get a double.
-	 *
+	 * 
 	 * @return ...
 	 */
 	double getDouble() {
@@ -95,19 +95,19 @@ abstract class ValueGetter {
 		@Override
 		protected int getInt(int index) {
 			return ((data[index] & 0xFF) << 24) + ((data[index + 1] & 0xFF) << 16)
-					+ ((data[index + 2] & 0xFF) << 8) + (data[index + 3] & 0xFF);
+			        + ((data[index + 2] & 0xFF) << 8) + (data[index + 3] & 0xFF);
 		}
 
 		@Override
 		protected long getLong(int index) {
 
 			return ((long) (data[index] & 0xFF) << 56) | ((long) (data[index + 1] & 0xFF) << 48)
-					| ((long) (data[index + 2] & 0xFF) << 40)
-					| ((long) (data[index + 3] & 0xFF) << 32)
-					| ((long) (data[index + 4] & 0xFF) << 24)
-					| ((long) (data[index + 5] & 0xFF) << 16)
-					| ((long) (data[index + 6] & 0xFF) << 8)
-					| ((long) (data[index + 7] & 0xFF) << 0);
+			        | ((long) (data[index + 2] & 0xFF) << 40)
+			        | ((long) (data[index + 3] & 0xFF) << 32)
+			        | ((long) (data[index + 4] & 0xFF) << 24)
+			        | ((long) (data[index + 5] & 0xFF) << 16)
+			        | ((long) (data[index + 6] & 0xFF) << 8)
+			        | ((long) (data[index + 7] & 0xFF) << 0);
 		}
 	}
 
@@ -121,18 +121,18 @@ abstract class ValueGetter {
 		@Override
 		protected int getInt(int index) {
 			return ((data[index + 3] & 0xFF) << 24) + ((data[index + 2] & 0xFF) << 16)
-					+ ((data[index + 1] & 0xFF) << 8) + (data[index] & 0xFF);
+			        + ((data[index + 1] & 0xFF) << 8) + (data[index] & 0xFF);
 		}
 
 		@Override
 		protected long getLong(int index) {
 			return ((long) (data[index + 7] & 0xFF) << 56)
-					| ((long) (data[index + 6] & 0xFF) << 48)
-					| ((long) (data[index + 5] & 0xFF) << 40)
-					| ((long) (data[index + 4] & 0xFF) << 32)
-					| ((long) (data[index + 3] & 0xFF) << 24)
-					| ((long) (data[index + 2] & 0xFF) << 16)
-					| ((long) (data[index + 1] & 0xFF) << 8) | ((long) (data[index] & 0xFF) << 0);
+			        | ((long) (data[index + 6] & 0xFF) << 48)
+			        | ((long) (data[index + 5] & 0xFF) << 40)
+			        | ((long) (data[index + 4] & 0xFF) << 32)
+			        | ((long) (data[index + 3] & 0xFF) << 24)
+			        | ((long) (data[index + 2] & 0xFF) << 16)
+			        | ((long) (data[index + 1] & 0xFF) << 8) | ((long) (data[index] & 0xFF) << 0);
 
 		}
 	}

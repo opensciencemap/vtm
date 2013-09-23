@@ -25,7 +25,7 @@ public interface ITileDataSource {
 
 	/**
 	 * Starts a database query with the given parameters.
-	 *
+	 * 
 	 * @param tile
 	 *            the tile to read.
 	 * @param mapDataSink
@@ -33,8 +33,7 @@ public interface ITileDataSource {
 	 * @return true if successful
 	 */
 	abstract QueryResult executeQuery(MapTile tile,
-			ITileDataSink mapDataSink);
-
+	        ITileDataSink mapDataSink);
 
 	abstract void destroy();
 

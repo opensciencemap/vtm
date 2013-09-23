@@ -3,15 +3,15 @@ package org.oscim.layers;
 import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
+import org.oscim.map.Map.UpdateListener;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 
-public class CustomRenderLayer extends Layer {
+public class CustomRenderLayer extends Layer implements UpdateListener {
 
 	private static final String TAG = CustomRenderLayer.class.getName();
 
 	class CustomRenderer extends LayerRenderer {
-
 
 		// functions running on MapRender Thread
 		@Override
@@ -33,7 +33,6 @@ public class CustomRenderLayer extends Layer {
 		@Override
 		protected void render(MapPosition pos, Matrices m) {
 		}
-
 	}
 
 	public CustomRenderLayer(Map map, LayerRenderer renderer) {
@@ -44,14 +43,11 @@ public class CustomRenderLayer extends Layer {
 
 	private int someConccurentVariable;
 
-//	@Override
-//	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-//
-//		synchronized (mRenderer) {
-//			// chang
-//			someConccurentVariable++;
-//		}
-//
-//	}
+	@Override
+	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
 
+		synchronized (mRenderer) {
+			someConccurentVariable++;
+		}
+	}
 }

@@ -62,8 +62,7 @@ class AndroidPaint implements Paint {
 	final android.graphics.Paint mPaint;
 
 	AndroidPaint() {
-		mPaint = new android.graphics.Paint(
-				android.graphics.Paint.ANTI_ALIAS_FLAG);
+		mPaint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
 	}
 
 	@Override
@@ -92,10 +91,10 @@ class AndroidPaint implements Paint {
 		}
 
 		android.graphics.Bitmap androidBitmap = android.graphics.Bitmap
-				.createBitmap(bitmap.getPixels(), bitmap.getWidth(),
-						bitmap.getHeight(), Config.ARGB_8888);
+		    .createBitmap(bitmap.getPixels(), bitmap.getWidth(),
+		                  bitmap.getHeight(), Config.ARGB_8888);
 		Shader shader = new BitmapShader(androidBitmap, TileMode.REPEAT,
-				TileMode.REPEAT);
+		                                 TileMode.REPEAT);
 		mPaint.setShader(shader);
 	}
 
@@ -113,7 +112,7 @@ class AndroidPaint implements Paint {
 	@Override
 	public void setStrokeCap(Cap cap) {
 		android.graphics.Paint.Cap androidCap = android.graphics.Paint.Cap
-				.valueOf(cap.name());
+		    .valueOf(cap.name());
 		mPaint.setStrokeCap(androidCap);
 	}
 
@@ -141,7 +140,7 @@ class AndroidPaint implements Paint {
 	@Override
 	public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
 		Typeface typeface = Typeface.create(getTypeface(fontFamily),
-				getStyle(fontStyle));
+		                                    getStyle(fontStyle));
 		mPaint.setTypeface(typeface);
 	}
 

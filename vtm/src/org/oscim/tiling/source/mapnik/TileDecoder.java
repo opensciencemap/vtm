@@ -14,7 +14,6 @@
  */
 package org.oscim.tiling.source.mapnik;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -70,8 +69,9 @@ public class TileDecoder extends PbfDecoder {
 	private float mScale;
 
 	@Override
-	public boolean decode(Tile tile, ITileDataSink mapDataCallback, InputStream is, int contentLength)
-			throws IOException {
+	public boolean decode(Tile tile, ITileDataSink mapDataCallback, InputStream is,
+	        int contentLength)
+	        throws IOException {
 		if (debug)
 			Log.d(TAG, tile + " decode");
 
@@ -97,7 +97,7 @@ public class TileDecoder extends PbfDecoder {
 			}
 		}
 
-		if (hasData()){
+		if (hasData()) {
 			error(tile + " invalid tile");
 			return false;
 		}
@@ -475,14 +475,14 @@ public class TileDecoder extends PbfDecoder {
 			int dx = (curX - prevX);
 			int dy = (curY - prevY);
 
-			if (isPoly && num == 0 && cnt > 0){
+			if (isPoly && num == 0 && cnt > 0) {
 				prevX = curX;
 				prevY = curY;
 
 				// only add last point if it is di
 				int ppos = cnt * 2;
 				if (elem.points[elem.pointPos - ppos] != curX
-						|| elem.points[elem.pointPos - ppos + 1] != curY)
+				        || elem.points[elem.pointPos - ppos + 1] != curY)
 					elem.addPoint(curX / mScale, curY / mScale);
 
 				lastClip = false;
@@ -490,11 +490,11 @@ public class TileDecoder extends PbfDecoder {
 			}
 
 			if ((isPoint || cmd == MOVE_TO)
-					|| (dx > pixel || dx < -pixel)
-					|| (dy > pixel || dy < -pixel)
-					// hack to not clip at tile boundaries
-					|| (curX <= 0 || curX >= 4095)
-					|| (curY <= 0 || curY >= 4095)) {
+			        || (dx > pixel || dx < -pixel)
+			        || (dy > pixel || dy < -pixel)
+			        // hack to not clip at tile boundaries
+			        || (curX <= 0 || curX >= 4095)
+			        || (curY <= 0 || curY >= 4095)) {
 
 				prevX = curX;
 				prevY = curY;

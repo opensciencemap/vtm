@@ -134,7 +134,7 @@ public abstract class PausableThread extends Thread {
 
 	/**
 	 * Called when this thread is not paused and should do its work.
-	 *
+	 * 
 	 * @throws InterruptedException
 	 *             if the thread has been interrupted.
 	 */

@@ -21,7 +21,7 @@ import org.oscim.core.Tile;
 
 public class NaturalEarth extends AbstractTileSource {
 	public static final NaturalEarth INSTANCE = new NaturalEarth("city.informatik.uni-bremen.de",
-			80);
+	                                                             80);
 	private static final int PARALLEL_REQUESTS_LIMIT = 4;
 	private static final String PROTOCOL = "http";
 	private static final int ZOOM_LEVEL_MAX = 8;
@@ -65,10 +65,10 @@ public class NaturalEarth extends AbstractTileSource {
 	@Override
 	public FadeStep[] getFadeSteps() {
 		return new FadeStep[] {
-				new FadeStep(ZOOM_LEVEL_MIN, ZOOM_LEVEL_MAX - 1, 1, 0.7f),
-				// dont fade between zoom-min/max
-				// fade above zoom max + 2, interpolate 1 to 0
-				new FadeStep(ZOOM_LEVEL_MAX - 1, ZOOM_LEVEL_MAX + 1, 0.7f, 0)
+		        new FadeStep(ZOOM_LEVEL_MIN, ZOOM_LEVEL_MAX - 1, 1, 0.7f),
+		        // dont fade between zoom-min/max
+		        // fade above zoom max + 2, interpolate 1 to 0
+		        new FadeStep(ZOOM_LEVEL_MAX - 1, ZOOM_LEVEL_MAX + 1, 0.7f, 0)
 		};
 	}
 }

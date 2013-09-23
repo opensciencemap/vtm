@@ -25,7 +25,7 @@ import org.oscim.utils.LineClipper;
 public final class WayDecorator {
 
 	public static void renderText(LineClipper clipper, float[] coordinates, String string,
-			Text text,	int pos, int len, MapTile tile) {
+	        Text text, int pos, int len, MapTile tile) {
 		//TextItem items = textItems;
 		TextItem t = null;
 

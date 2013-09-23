@@ -21,7 +21,7 @@ import org.oscim.core.GeoPoint;
 
 /**
  * Immutable class describing a GeoPoint with a Title and a Description.
- *
+ * 
  * @author Nicolas Gramlich
  * @author Theodore Hong
  * @author Fred Eisele
@@ -64,7 +64,7 @@ public class MarkerItem {
 	}
 
 	public MarkerItem(String uid, String title, String description,
-			GeoPoint geoPoint) {
+	        GeoPoint geoPoint) {
 		mTitle = title;
 		mDescription = description;
 		mGeoPoint = geoPoint;

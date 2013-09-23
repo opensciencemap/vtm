@@ -116,7 +116,7 @@ public class TestRenderLayer extends ElementRenderer {
 
 	@Override
 	protected synchronized void update(MapPosition curPos, boolean positionChanged,
-			Matrices matrices) {
+	        Matrices matrices) {
 		// keep position constant (or update layer relative to new position)
 		//mMapPosition.copy(curPos);
 

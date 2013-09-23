@@ -39,7 +39,7 @@ public class AwtCanvas implements Canvas {
 		if (canvas != null)
 			canvas.dispose();
 
-		AwtBitmap awtBitamp = (AwtBitmap)bitmap;
+		AwtBitmap awtBitamp = (AwtBitmap) bitmap;
 
 		canvas = awtBitamp.bitmap.createGraphics();
 
@@ -48,22 +48,22 @@ public class AwtCanvas implements Canvas {
 
 		canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 
-		canvas.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON );
+		canvas.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+		                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		//canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		canvas.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-
-
 	}
+
 	@Override
 	public void drawText(String text, float x, float y, Paint paint) {
 
-//		if (paint.isTransparent()) {
-//			return;
-//		}
+		//		if (paint.isTransparent()) {
+		//			return;
+		//		}
 
-		AwtPaint awtPaint = (AwtPaint)paint;
+		AwtPaint awtPaint = (AwtPaint) paint;
 
 		//AwtPaint awtPaint = AwtGraphicFactory.getAwtPaint(paint);
 
@@ -73,7 +73,9 @@ public class AwtCanvas implements Canvas {
 			canvas.drawString(text, x + 2, y);
 		} else {
 			setColorAndStroke(awtPaint);
-			TextLayout textLayout = new TextLayout(text, awtPaint.font, canvas.getFontRenderContext());
+			TextLayout textLayout = new TextLayout(text,
+			                                       awtPaint.font,
+			                                       canvas.getFontRenderContext());
 			AffineTransform affineTransform = new AffineTransform();
 			affineTransform.translate(x + 2, y);
 			canvas.draw(textLayout.getOutline(affineTransform));
@@ -87,19 +89,19 @@ public class AwtCanvas implements Canvas {
 		}
 	}
 
-//	@Override
-//	public void drawText(String string, float x, float y, Paint stroke) {
-//		AwtPaint p = (AwtPaint)stroke;
-//
-//		canvas.setFont(p.font);
-//		canvas.setColor(p.color);
-//
-//		canvas.drawString(string, (int)x, (int)y);
-//	}
+	//	@Override
+	//	public void drawText(String string, float x, float y, Paint stroke) {
+	//		AwtPaint p = (AwtPaint)stroke;
+	//
+	//		canvas.setFont(p.font);
+	//		canvas.setColor(p.color);
+	//
+	//		canvas.drawString(string, (int)x, (int)y);
+	//	}
 
 	@Override
-    public void drawBitmap(Bitmap bitmap, float x, float y) {
-	    // TODO Auto-generated method stub
-	    throw new UnknownError("not implemented");
-    }
+	public void drawBitmap(Bitmap bitmap, float x, float y) {
+		// TODO Auto-generated method stub
+		throw new UnknownError("not implemented");
+	}
 }

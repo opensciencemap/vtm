@@ -27,15 +27,18 @@ import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.xml.sax.Attributes;
 
 public abstract class Rule {
-	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_KEY = new HashMap<List<String>, AttributeMatcher>();
-	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_VALUE = new HashMap<List<String>, AttributeMatcher>();
+	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_KEY =
+	        new HashMap<List<String>, AttributeMatcher>();
+	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_VALUE =
+	        new HashMap<List<String>, AttributeMatcher>();
+
 	//private static final Pattern SPLIT_PATTERN = Pattern.compile("\\|");
 	private static final String STRING_NEGATION = "~";
 	private static final String STRING_EXCLUSIVE = "-";
 	private static final String STRING_WILDCARD = "*";
 
 	private static Rule createRule(Stack<Rule> ruleStack, int element, String keys,
-			String values, byte zoomMin, byte zoomMax) {
+	        String values, byte zoomMin, byte zoomMax) {
 
 		int zoom = 0;
 		for (int z = zoomMin; z <= zoomMax && z < 32; z++)
@@ -127,13 +130,13 @@ public abstract class Rule {
 	private static void validate(byte zoomMin, byte zoomMax) {
 		if (zoomMin < 0) {
 			throw new IllegalArgumentException("zoom-min must not be negative: "
-					+ zoomMin);
+			        + zoomMin);
 		} else if (zoomMax < 0) {
 			throw new IllegalArgumentException("zoom-max must not be negative: "
-					+ zoomMax);
+			        + zoomMax);
 		} else if (zoomMin > zoomMax) {
-			throw new IllegalArgumentException(
-					"zoom-min must be less or equal zoom-max: " + zoomMin);
+			throw new IllegalArgumentException("zoom-min must be less or equal zoom-max: "
+			        + zoomMin);
 		}
 	}
 
@@ -212,7 +215,7 @@ public abstract class Rule {
 	abstract boolean matchesTags(Tag[] tags);
 
 	public void matchElement(int type, Tag[] tags, int zoomLevel,
-			List<RenderInstruction> matchingList) {
+	        List<RenderInstruction> matchingList) {
 
 		if (((mElement & type) != 0) && ((mZoom & zoomLevel) != 0) && (matchesTags(tags))) {
 

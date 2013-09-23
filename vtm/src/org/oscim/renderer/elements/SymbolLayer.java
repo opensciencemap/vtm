@@ -21,7 +21,6 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.utils.pool.Inlist;
 
-
 public final class SymbolLayer extends TextureLayer {
 	private final static String TAG = SymbolLayer.class.getName();
 
@@ -129,8 +128,8 @@ public final class SymbolLayer extends TextureLayer {
 				y1 = (short) (SCALE * (hh));
 				y2 = (short) (SCALE * (-hh));
 			} else {
-				float hw = (float)(it.offset.x * width);
-				float hh = (float)(it.offset.y * height);
+				float hw = (float) (it.offset.x * width);
+				float hh = (float) (it.offset.y * height);
 				x1 = (short) (SCALE * (-hw));
 				x2 = (short) (SCALE * (width - hw));
 				y1 = (short) (SCALE * (height - hh));
@@ -146,15 +145,15 @@ public final class SymbolLayer extends TextureLayer {
 			for (SymbolItem it2 = it;; it2 = it2.next) {
 
 				if (it2 == null
-						|| (it.bitmap != null && it2.bitmap != it.bitmap)
-						|| (it.texRegion != null && it2.texRegion != it.texRegion)) {
+				        || (it.bitmap != null && it2.bitmap != it.bitmap)
+				        || (it.texRegion != null && it2.texRegion != it.texRegion)) {
 					it = it2;
 					break;
 				}
 
 				// add vertices
 				short tx = (short) ((int) (SCALE * it2.x) & LBIT_MASK
-						| (it2.billboard ? 1 : 0));
+				        | (it2.billboard ? 1 : 0));
 
 				short ty = (short) (SCALE * it2.y);
 
@@ -164,7 +163,7 @@ public final class SymbolLayer extends TextureLayer {
 				}
 
 				TextureLayer.putSprite(buf, pos, tx, ty,
-						x1, y1, x2, y2, u1, v1, u2, v2);
+				                       x1, y1, x2, y2, u1, v1, u2, v2);
 
 				// TextureRenderer.VERTICES_PER_SPRITE
 				// * TextureRenderer.SHORTS_PER_VERTICE;

@@ -63,7 +63,7 @@ public class TileRenderer extends LayerRenderer {
 	@Override
 	protected void update(MapPosition pos, boolean positionChanged, Matrices m) {
 
-		if (mAlpha == 0){
+		if (mAlpha == 0) {
 			mTileManager.releaseTiles(mDrawTiles);
 			return;
 		}
@@ -80,7 +80,7 @@ public class TileRenderer extends LayerRenderer {
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
 
-		if (tilesChanged || positionChanged){
+		if (tilesChanged || positionChanged) {
 			updateTileVisibility(pos, m.mapPlane);
 		}
 
@@ -98,8 +98,6 @@ public class TileRenderer extends LayerRenderer {
 
 		draw(tiles, tileCnt, pos, m);
 	}
-
-
 
 	public void clearTiles() {
 		// Clear all references to MapTiles as all current
@@ -230,7 +228,7 @@ public class TileRenderer extends LayerRenderer {
 
 			// unlock previous tiles
 			tileSet.releaseTiles();
-			
+
 			// ensure same size
 			if (tileSet.tiles.length != mDrawTiles.tiles.length) {
 				tileSet.tiles = new MapTile[mDrawTiles.tiles.length];
@@ -245,7 +243,7 @@ public class TileRenderer extends LayerRenderer {
 					tileSet.tiles[tileSet.cnt++] = t;
 				}
 			}
-			
+
 			tileSet.serial = mUploadSerial;
 		}
 
@@ -321,7 +319,7 @@ public class TileRenderer extends LayerRenderer {
 				if (tile == null)
 					continue;
 
-				if (cnt + mNumTileHolder >= tiles.length){
+				if (cnt + mNumTileHolder >= tiles.length) {
 					Log.e(TAG, "too many tiles " + cnt + ", " + mNumTileHolder);
 					break;
 				}
@@ -346,7 +344,7 @@ public class TileRenderer extends LayerRenderer {
 
 	/**
 	 * Draw tiles:
-	 *
+	 * 
 	 * @param fade
 	 *            alpha value for bitmap tiles
 	 * @param overdrawColor
@@ -487,11 +485,11 @@ public class TileRenderer extends LayerRenderer {
 				PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
 				clipped = true;
 			}
-//			if (!clipped) {
-//				// draw stencil buffer clip region
-//				PolygonRenderer.clip(m);
-//				clipped = true;
-//			}
+			//			if (!clipped) {
+			//				// draw stencil buffer clip region
+			//				PolygonRenderer.clip(m);
+			//				clipped = true;
+			//			}
 			//GLState.test(false, false);
 			switch (l.type) {
 				case RenderElement.BITMAP:
@@ -523,7 +521,7 @@ public class TileRenderer extends LayerRenderer {
 	}
 
 	private void drawProxyTile(MapTile tile, MapPosition pos, boolean parent,
-			boolean preferParent) {
+	        boolean preferParent) {
 
 		QuadTree<MapTile> r = tile.rel;
 		MapTile proxy;

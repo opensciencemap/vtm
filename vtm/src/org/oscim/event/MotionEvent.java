@@ -14,7 +14,6 @@
  */
 package org.oscim.event;
 
-
 public abstract class MotionEvent extends MapEvent {
 
 	private static final long serialVersionUID = 1L;

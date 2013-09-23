@@ -162,7 +162,7 @@ public class ElementLayers {
 		if (renderElement.type != type) {
 			// check if found layer matches requested type
 			Log.d(TAG, "BUG wrong layer " + renderElement.type + " " + type +
-					" on layer " + renderElement.level);
+			        " on layer " + renderElement.level);
 			// TODO throw exception
 			return null;
 		}
@@ -173,9 +173,9 @@ public class ElementLayers {
 	}
 
 	private final static int[] VERTEX_SHORT_CNT = {
-			4, // LINE_VERTEX_SHORTS
-			2, // POLY_VERTEX_SHORTS
-			6, // TEXLINE_VERTEX_SHORTS
+	        4, // LINE_VERTEX_SHORTS
+	        2, // POLY_VERTEX_SHORTS
+	        6, // TEXLINE_VERTEX_SHORTS
 	};
 
 	private final static int TEXTURE_VERTEX_SHORTS = 6;

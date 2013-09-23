@@ -82,7 +82,7 @@ public class Viewport {
 		float[] tmp = new float[16];
 
 		GLMatrix.frustumM(tmp, 0, -s, s,
-		                 aspect * s, -aspect * s, VIEW_NEAR, VIEW_FAR);
+		                  aspect * s, -aspect * s, VIEW_NEAR, VIEW_FAR);
 
 		mProjMatrix.set(tmp);
 		mTmpMatrix.setTranslation(0, 0, -VIEW_DISTANCE);
@@ -107,10 +107,10 @@ public class Viewport {
 	public synchronized boolean getMapPosition(MapPosition pos) {
 
 		boolean changed = (pos.scale != mPos.scale
-		                   || pos.x != mPos.x
-		                   || pos.y != mPos.y
-		                   || pos.angle != mPos.angle
-		                   || pos.tilt != mPos.tilt);
+		        || pos.x != mPos.x
+		        || pos.y != mPos.y
+		        || pos.angle != mPos.angle
+		        || pos.tilt != mPos.tilt);
 
 		pos.angle = mPos.angle;
 		pos.tilt = mPos.tilt;

@@ -35,7 +35,7 @@ public abstract class TileLoader extends PausableThread {
 	public void go() {
 		synchronized (this) {
 			notify();
-        }
+		}
 	}
 
 	@Override

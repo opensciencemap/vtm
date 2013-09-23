@@ -19,12 +19,12 @@ import java.util.Stack;
 final class RuleOptimizer {
 
 	private static AttributeMatcher optimizeKeyMatcher(AttributeMatcher attributeMatcher,
-			Stack<Rule> ruleStack) {
+	        Stack<Rule> ruleStack) {
 		for (int i = 0, n = ruleStack.size(); i < n; ++i) {
 			if (ruleStack.get(i) instanceof PositiveRule) {
 				PositiveRule positiveRule = (PositiveRule) ruleStack.get(i);
 				if (positiveRule.mKeyMatcher != null
-						&& positiveRule.mKeyMatcher.isCoveredBy(attributeMatcher)) {
+				        && positiveRule.mKeyMatcher.isCoveredBy(attributeMatcher)) {
 					return null;
 				}
 			}
@@ -34,13 +34,13 @@ final class RuleOptimizer {
 	}
 
 	private static AttributeMatcher optimizeValueMatcher(
-			AttributeMatcher attributeMatcher, Stack<Rule> ruleStack) {
+	        AttributeMatcher attributeMatcher, Stack<Rule> ruleStack) {
 		for (int i = 0, n = ruleStack.size(); i < n; ++i) {
 			if (ruleStack.get(i) instanceof PositiveRule) {
 				PositiveRule positiveRule = (PositiveRule) ruleStack.get(i);
 
 				if (positiveRule.mValueMatcher != null
-						&& positiveRule.mValueMatcher.isCoveredBy(attributeMatcher)) {
+				        && positiveRule.mValueMatcher.isCoveredBy(attributeMatcher)) {
 					return null;
 				}
 			}
@@ -50,7 +50,7 @@ final class RuleOptimizer {
 	}
 
 	static AttributeMatcher optimize(AttributeMatcher attributeMatcher,
-			Stack<Rule> ruleStack) {
+	        Stack<Rule> ruleStack) {
 		if (attributeMatcher instanceof AnyMatcher)
 			return attributeMatcher;// return null;
 		else if (attributeMatcher instanceof NegativeMatcher) {
@@ -65,7 +65,7 @@ final class RuleOptimizer {
 			return optimizeValueMatcher(attributeMatcher, ruleStack);
 		}
 		throw new IllegalArgumentException("unknown AttributeMatcher: "
-				+ attributeMatcher);
+		        + attributeMatcher);
 	}
 
 	// static ClosedMatcher optimize(ClosedMatcher closedMatcher, Stack<Rule> ruleStack) {

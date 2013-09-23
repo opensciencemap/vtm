@@ -14,7 +14,7 @@ public class RenderThemeHandler2 {
 	private final static int LINE_HIGHWAY = 2;
 	private final static Tag TAG_WATER = new Tag("natural", "water");
 	private final static Tag TAG_WOOD = new Tag("natural", "wood");
-	private final static Tag TAG_FOREST= new Tag("landuse", "forest");
+	private final static Tag TAG_FOREST = new Tag("landuse", "forest");
 
 	private static RenderInstruction[][] instructions = {
 	        // water
@@ -38,7 +38,7 @@ public class RenderThemeHandler2 {
 				if (e.tags.contains(TAG_WATER))
 					return instructions[AREA_WATER];
 
-				if (e.tags.contains(TAG_WOOD) ||e.tags.contains(TAG_FOREST))
+				if (e.tags.contains(TAG_WOOD) || e.tags.contains(TAG_FOREST))
 					return instructions[AREA_WOOD];
 
 			} else if (e.isLine()) {

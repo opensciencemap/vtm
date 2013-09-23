@@ -99,7 +99,7 @@ final class QueryCalculations {
 	}
 
 	static void calculateBaseTiles(QueryParameters queryParameters, Tile tile,
-			SubFileParameter subFileParameter) {
+	        SubFileParameter subFileParameter) {
 		if (tile.zoomLevel < subFileParameter.baseZoomLevel) {
 			// calculate the XY numbers of the upper left and lower right
 			// sub-tiles
@@ -107,9 +107,9 @@ final class QueryCalculations {
 			queryParameters.fromBaseTileX = tile.tileX << zoomLevelDifference;
 			queryParameters.fromBaseTileY = tile.tileY << zoomLevelDifference;
 			queryParameters.toBaseTileX = queryParameters.fromBaseTileX
-					+ (1 << zoomLevelDifference) - 1;
+			        + (1 << zoomLevelDifference) - 1;
 			queryParameters.toBaseTileY = queryParameters.fromBaseTileY
-					+ (1 << zoomLevelDifference) - 1;
+			        + (1 << zoomLevelDifference) - 1;
 			queryParameters.useTileBitmask = false;
 		} else if (tile.zoomLevel > subFileParameter.baseZoomLevel) {
 			// calculate the XY numbers of the parent base tile
@@ -133,15 +133,15 @@ final class QueryCalculations {
 	static void calculateBlocks(QueryParameters queryParameters, SubFileParameter subFileParameter) {
 		// calculate the blocks in the file which need to be read
 		queryParameters.fromBlockX = Math.max(queryParameters.fromBaseTileX
-				- subFileParameter.boundaryTileLeft, 0);
+		        - subFileParameter.boundaryTileLeft, 0);
 		queryParameters.fromBlockY = Math.max(queryParameters.fromBaseTileY
-				- subFileParameter.boundaryTileTop, 0);
+		        - subFileParameter.boundaryTileTop, 0);
 		queryParameters.toBlockX = Math.min(queryParameters.toBaseTileX
-				- subFileParameter.boundaryTileLeft,
-				subFileParameter.blocksWidth - 1);
+		        - subFileParameter.boundaryTileLeft,
+		                                    subFileParameter.blocksWidth - 1);
 		queryParameters.toBlockY = Math.min(queryParameters.toBaseTileY
-				- subFileParameter.boundaryTileTop,
-				subFileParameter.blocksHeight - 1);
+		        - subFileParameter.boundaryTileTop,
+		                                    subFileParameter.blocksHeight - 1);
 	}
 
 	static int calculateTileBitmask(Tile tile, int zoomLevelDifference) {

@@ -22,7 +22,7 @@ import java.util.Map;
  * automatically removed from the cache when
  * new mappings are added. This implementation uses an {@link LinkedHashMap}
  * internally.
- *
+ * 
  * @param <K>
  *            the type of the map key, see {@link Map}.
  * @param <V>

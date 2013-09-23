@@ -75,7 +75,7 @@ public class TileDecoder extends PbfDecoder {
 
 	@Override
 	public boolean decode(Tile tile, ITileDataSink sink, InputStream is, int contentLength)
-			throws IOException {
+	        throws IOException {
 
 		int byteCount = readUnsignedInt(is, buffer);
 		//Log.d(TAG, tile + " contentLength:" + byteCount);
@@ -210,11 +210,11 @@ public class TileDecoder extends PbfDecoder {
 			// FIXME filter out all variable tags
 			// might depend on theme though
 			if (key == Tag.TAG_KEY_NAME
-				|| key == Tag.KEY_HEIGHT
-				|| key == Tag.KEY_MIN_HEIGHT
-				|| key == Tag.TAG_KEY_HOUSE_NUMBER
-				|| key == Tag.TAG_KEY_REF
-				|| key == Tag.TAG_KEY_ELE)
+			        || key == Tag.KEY_HEIGHT
+			        || key == Tag.KEY_MIN_HEIGHT
+			        || key == Tag.TAG_KEY_HOUSE_NUMBER
+			        || key == Tag.TAG_KEY_REF
+			        || key == Tag.TAG_KEY_ELE)
 				tag = new Tag(key, val, false);
 			else
 				tag = new Tag(key, val, true);
@@ -303,7 +303,7 @@ public class TileDecoder extends PbfDecoder {
 
 					if (cnt != coordCnt) {
 						Log.d(TAG, mTile + " wrong number of coordintes "
-								+ coordCnt + "/" + cnt);
+						        + coordCnt + "/" + cnt);
 						fail = true;
 					}
 					break;
@@ -312,7 +312,6 @@ public class TileDecoder extends PbfDecoder {
 					mElem.layer = decodeVarint32();
 					break;
 
-
 				default:
 					Log.d(TAG, mTile + " invalid type for way: " + tag);
 			}
@@ -320,9 +319,9 @@ public class TileDecoder extends PbfDecoder {
 
 		if (fail || numTags == 0 || numIndices == 0) {
 			Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
-					+ (Arrays.toString(index)) + " tag:"
-					+ (mElem.tags.numTags > 0 ? Arrays.deepToString(mElem.tags.tags) : "null")
-					+ " " + numIndices + " " + coordCnt);
+			        + (Arrays.toString(index)) + " tag:"
+			        + (mElem.tags.numTags > 0 ? Arrays.deepToString(mElem.tags.tags) : "null")
+			        + " " + numIndices + " " + coordCnt);
 			return false;
 		}
 

@@ -90,7 +90,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 		@Override
 		public boolean decode(Tile tile, ITileDataSink sink, InputStream is, int contentLength)
-				throws IOException {
+		        throws IOException {
 
 			int byteCount = readUnsignedInt(is, buffer);
 			//Log.d(TAG, tile + " contentLength:" + byteCount);
@@ -265,9 +265,9 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 			if (fail || indexCnt == 0) {
 				Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
-						+ (Arrays.toString(index)) + " tag:"
-						+ (mElem.tags.numTags > 0 ? Arrays.deepToString(mElem.tags.tags) : "null")
-						+ " " + indexCnt + " " + coordCnt);
+				        + (Arrays.toString(index)) + " tag:"
+				        + (mElem.tags.numTags > 0 ? Arrays.deepToString(mElem.tags.tags) : "null")
+				        + " " + indexCnt + " " + coordCnt);
 				return false;
 			}
 
@@ -302,8 +302,8 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 				if (tagNum < 0) {
 					Log.d(TAG, "NULL TAG: " + mTile
-							+ " invalid tag:"
-							+ tagNum + " " + cnt);
+					        + " invalid tag:"
+					        + tagNum + " " + cnt);
 					return false;
 				}
 
@@ -315,8 +315,8 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 				if (tagNum < 0 || tagNum > max) {
 					Log.d(TAG, "NULL TAG: " + mTile
-							+ " could not find tag:"
-							+ tagNum + " " + cnt);
+					        + " could not find tag:"
+					        + tagNum + " " + cnt);
 					return false;
 				}
 

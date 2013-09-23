@@ -273,7 +273,7 @@ public class TileManager {
 		int remove = mTilesCount - mCacheLimit;
 
 		if (remove > CACHE_THRESHOLD ||
-		    mTilesForUpload > MAX_TILES_IN_QUEUE)
+		        mTilesForUpload > MAX_TILES_IN_QUEUE)
 
 			limitCache(pos, remove);
 
@@ -474,10 +474,10 @@ public class TileManager {
 				if (t.isLocked()) {
 					// dont remove tile used by GLRenderer, or somewhere else
 					Log.d(TAG, "locked " + t
-					           + " " + t.distance
-					           + " " + (t.state == STATE_NEW_DATA)
-					           + " " + (t.state == STATE_LOADING)
-					           + " " + pos.zoomLevel);
+					        + " " + t.distance
+					        + " " + (t.state == STATE_NEW_DATA)
+					        + " " + (t.state == STATE_LOADING)
+					        + " " + pos.zoomLevel);
 					// try again in next run.
 				} else if (t.state == STATE_LOADING) {
 					// NOTE: when set loading to false the tile could be
@@ -485,7 +485,7 @@ public class TileManager {
 					// MapTileLoader => need tile.cancel flag.
 					// t.isLoading = false;
 					Log.d(TAG, "cancel loading " + t
-					           + " " + t.distance);
+					        + " " + t.distance);
 				} else {
 					// clear unused tile
 

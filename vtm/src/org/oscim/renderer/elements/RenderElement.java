@@ -18,7 +18,7 @@ import java.nio.ShortBuffer;
 
 import org.oscim.utils.pool.Inlist;
 
-public abstract class RenderElement extends Inlist<RenderElement>{
+public abstract class RenderElement extends Inlist<RenderElement> {
 	public final static byte LINE = 0;
 	public final static byte POLYGON = 1;
 	public final static byte TEXLINE = 2;
@@ -44,5 +44,6 @@ public abstract class RenderElement extends Inlist<RenderElement>{
 	protected VertexItem curItem;
 
 	abstract protected void compile(ShortBuffer sbuf);
+
 	abstract protected void clear();
 }

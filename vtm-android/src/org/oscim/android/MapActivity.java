@@ -41,12 +41,13 @@ public abstract class MapActivity extends Activity {
 	private static final String KEY_MAP_SCALE = "map_scale";
 
 	private static final String PREFERENCES_FILE = "MapActivity";
+
 	//private static final String KEY_THEME = "Theme";
 
 	private static boolean containsViewport(SharedPreferences sharedPreferences) {
 		return sharedPreferences.contains(KEY_LATITUDE)
-				&& sharedPreferences.contains(KEY_LONGITUDE)
-				&& sharedPreferences.contains(KEY_MAP_SCALE);
+		        && sharedPreferences.contains(KEY_LONGITUDE)
+		        && sharedPreferences.contains(KEY_MAP_SCALE);
 	}
 
 	protected Map mMap;
@@ -73,7 +74,7 @@ public abstract class MapActivity extends Activity {
 
 		editor.putInt(KEY_LATITUDE, geoPoint.latitudeE6);
 		editor.putInt(KEY_LONGITUDE, geoPoint.longitudeE6);
-		editor.putFloat(KEY_MAP_SCALE, (float)mapPosition.scale);
+		editor.putFloat(KEY_MAP_SCALE, (float) mapPosition.scale);
 
 		//editor.putString(KEY_THEME, mMap.getRenderTheme());
 
@@ -92,7 +93,7 @@ public abstract class MapActivity extends Activity {
 
 	/**
 	 * This method is called once by each MapView during its setup process.
-	 *
+	 * 
 	 * @param map
 	 *            the calling MapView.
 	 */
@@ -100,14 +101,13 @@ public abstract class MapActivity extends Activity {
 		mMap = map;
 
 		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,
-				MODE_PRIVATE);
+		                                                           MODE_PRIVATE);
 
 		if (containsViewport(sharedPreferences)) {
 			// get and set the map position and zoom level
 			int latitudeE6 = sharedPreferences.getInt(KEY_LATITUDE, 0);
 			int longitudeE6 = sharedPreferences.getInt(KEY_LONGITUDE, 0);
 			float scale = sharedPreferences.getFloat(KEY_MAP_SCALE, 1);
-
 
 			MapPosition mapPosition = new MapPosition();
 			mapPosition.setPosition(latitudeE6 / 1E6, longitudeE6 / 1E6);
@@ -119,18 +119,18 @@ public abstract class MapActivity extends Activity {
 		//String theme = sharedPreferences.getString(KEY_THEME,
 		//		InternalRenderTheme.DEFAULT.name());
 
-//		if (theme.startsWith("/")) {
-//			try {
-//				map.setRenderTheme(theme);
-//			} catch (FileNotFoundException e) {
-//				map.setRenderTheme(InternalRenderTheme.DEFAULT);
-//			}
-//		} else {
-//			try {
-//				map.setRenderTheme(InternalRenderTheme.valueOf(theme));
-//			} catch (IllegalArgumentException e) {
-//				map.setRenderTheme(InternalRenderTheme.DEFAULT);
-//			}
-//		}
+		//		if (theme.startsWith("/")) {
+		//			try {
+		//				map.setRenderTheme(theme);
+		//			} catch (FileNotFoundException e) {
+		//				map.setRenderTheme(InternalRenderTheme.DEFAULT);
+		//			}
+		//		} else {
+		//			try {
+		//				map.setRenderTheme(InternalRenderTheme.valueOf(theme));
+		//			} catch (IllegalArgumentException e) {
+		//				map.setRenderTheme(InternalRenderTheme.DEFAULT);
+		//			}
+		//		}
 	}
 }

@@ -76,8 +76,8 @@ public final class BufferObject {
 			return;
 
 		Log.d(TAG, "buffer object usage: "
-		           + mBufferMemoryUsage / MB
-		           + "MB, force: " + force);
+		        + mBufferMemoryUsage / MB
+		        + "MB, force: " + force);
 
 		mBufferMemoryUsage -= BufferObject.limitUsage(1024 * 1024);
 
@@ -85,7 +85,7 @@ public final class BufferObject {
 	}
 
 	private final static BufferObject pool[] = new BufferObject[2];
-	private final static int counter[]  = new int[2];
+	private final static int counter[] = new int[2];
 
 	public static synchronized BufferObject get(int target, int size) {
 
@@ -194,7 +194,6 @@ public final class BufferObject {
 			pool[t] = bo;
 		}
 	}
-
 
 	static synchronized void clear() {
 		mBufferMemoryUsage = 0;

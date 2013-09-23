@@ -54,6 +54,7 @@ public final class IOUtils {
 			Log.d(IOUtils.class.getName(), e.getMessage() + " " + e);
 		}
 	}
+
 	private IOUtils() {
 	}
 }

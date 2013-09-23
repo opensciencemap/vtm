@@ -42,7 +42,7 @@ public class SymbolRenderLayer extends ElementRenderer {
 
 	@Override
 	protected void update(MapPosition position, boolean changed, Matrices matrices) {
-		if (initialize){
+		if (initialize) {
 			initialize = false;
 			mMapPosition.copy(position);
 			compile();

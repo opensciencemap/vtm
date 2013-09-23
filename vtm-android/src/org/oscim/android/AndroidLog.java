@@ -16,8 +16,7 @@ package org.oscim.android;
 
 import android.util.Log;
 
-
-public class AndroidLog  implements org.oscim.backend.Log.Logger{
+public class AndroidLog implements org.oscim.backend.Log.Logger {
 
 	@Override
 	public void d(String tag, String msg) {

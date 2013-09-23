@@ -19,11 +19,11 @@ package org.oscim.utils;
 /**
  * Takes a linear value in the range of 0-1 and outputs a (usually) non-linear,
  * interpolated value.
- *
+ * 
  * @author Nathan Sweet
  */
 public abstract class Interpolation {
-	/** @param a Alpha value between 0 and 1.*/
+	/** @param a Alpha value between 0 and 1. */
 	abstract public float apply(float a);
 
 	/** @param a Alpha value between 0 and 1. */
@@ -226,12 +226,12 @@ public abstract class Interpolation {
 			if (a <= 0.5f) {
 				a *= 2;
 				return (float) Math.pow(value, power * (a - 1)) * MathUtils.sin(a * 20) * 1.0955f
-						/ 2;
+				        / 2;
 			}
 			a = 1 - a;
 			a *= 2;
 			return 1 - (float) Math.pow(value, power * (a - 1)) * MathUtils.sin((a) * 20) * 1.0955f
-					/ 2;
+			        / 2;
 		}
 	}
 

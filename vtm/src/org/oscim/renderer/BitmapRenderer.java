@@ -41,8 +41,8 @@ public class BitmapRenderer extends ElementRenderer {
 	 *            TODO height used
 	 */
 	public synchronized void setBitmap(Bitmap bitmap,
-			int srcWidth, int srcHeight,
-			int targetWidth, int targetHeight) {
+	        int srcWidth, int srcHeight,
+	        int targetWidth, int targetHeight) {
 		mWidth = targetWidth;
 		mHeight = targetHeight;
 		mBitmap = bitmap;

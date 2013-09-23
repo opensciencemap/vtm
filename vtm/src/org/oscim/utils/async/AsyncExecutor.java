@@ -23,25 +23,29 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Allows asnynchronous execution of {@link AsyncTask} instances on a separate thread.
- * Needs to be disposed via a call to {@link #dispose()} when no longer used, in which
+ * Allows asnynchronous execution of {@link AsyncTask} instances on a separate
+ * thread.
+ * Needs to be disposed via a call to {@link #dispose()} when no longer used, in
+ * which
  * case the executor waits for running tasks to finish. Scheduled but not yet
  * running tasks will not be executed.
+ * 
  * @author badlogic
- *
+ * 
  */
 public class AsyncExecutor {
 	private final ExecutorService executor;
 
 	/**
-	 * Creates a new AsynchExecutor that allows maxConcurrent
-	 * {@link Runnable} instances to run in parallel.
+	 * Creates a new AsynchExecutor that allows maxConcurrent {@link Runnable}
+	 * instances to run in parallel.
+	 * 
 	 * @param maxConcurrent
 	 */
 	public AsyncExecutor(int maxConcurrent) {
 		executor = Executors.newFixedThreadPool(maxConcurrent, new ThreadFactory() {
 			@Override
-			public Thread newThread (Runnable r) {
+			public Thread newThread(Runnable r) {
 				Thread thread = new Thread(r, "VtmAsyncExecutor");
 				thread.setDaemon(true);
 				return thread;
@@ -53,13 +57,14 @@ public class AsyncExecutor {
 	 * Submits a {@link Runnable} to be executed asynchronously. If
 	 * maxConcurrent runnables are already running, the runnable
 	 * will be queued.
+	 * 
 	 * @param task the task to execute asynchronously
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> AsyncResult<T> submit(final AsyncTask<T> task) {
 		return new AsyncResult(executor.submit(new Callable<T>() {
 			@Override
-			public T call () throws Exception {
+			public T call() throws Exception {
 				task.run();
 				return task.getResult();
 			}
@@ -70,6 +75,7 @@ public class AsyncExecutor {
 	 * Submits a {@link Runnable} to be executed asynchronously. If
 	 * maxConcurrent runnables are already running, the runnable
 	 * will be queued.
+	 * 
 	 * @param task the task to execute asynchronously
 	 */
 	public void post(Runnable task) {
@@ -81,7 +87,7 @@ public class AsyncExecutor {
 	 * then destroys any resources like threads. Can not be used
 	 * after this method is called.
 	 */
-	public void dispose () {
+	public void dispose() {
 		executor.shutdown();
 		try {
 			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);

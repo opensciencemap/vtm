@@ -55,14 +55,14 @@ public class TextItem extends Inlist<TextItem> {
 		return ti;
 	}
 
-	public static boolean shareText(TextItem ti1, TextItem ti2){
+	public static boolean shareText(TextItem ti1, TextItem ti2) {
 		if (ti1.text != ti2.text)
 			return false;
 
 		if (ti1.string == ti2.string)
 			return true;
 
-		if (ti1.string.equals(ti2.string)){
+		if (ti1.string.equals(ti2.string)) {
 			// make strings unique, should be done only once..
 			ti1.string = ti2.string;
 			return true;
@@ -88,29 +88,29 @@ public class TextItem extends Inlist<TextItem> {
 		if (it1.y1 < it1.y2) {
 			if (it2.y1 < it2.y2)
 				return (it1.x1 - add < it2.x2)
-						&& (it2.x1 < it1.x2 + add)
-						&& (it1.y1 - add < it2.y2)
-						&& (it2.y1 < it1.y2 + add);
+				        && (it2.x1 < it1.x2 + add)
+				        && (it1.y1 - add < it2.y2)
+				        && (it2.y1 < it1.y2 + add);
 
 			// flip it2
 			return (it1.x1 - add < it2.x2)
-					&& (it2.x1 < it1.x2 + add)
-					&& (it1.y1 - add < it2.y1)
-					&& (it2.y2 < it1.y2 + add);
+			        && (it2.x1 < it1.x2 + add)
+			        && (it1.y1 - add < it2.y1)
+			        && (it2.y2 < it1.y2 + add);
 		}
 
 		// flip it1
 		if (it2.y1 < it2.y2)
 			return (it1.x1 - add < it2.x2)
-					&& (it2.x1 < it1.x2 + add)
-					&& (it1.y2 - add < it2.y2)
-					&& (it2.y1 < it1.y1 + add);
+			        && (it2.x1 < it1.x2 + add)
+			        && (it1.y2 - add < it2.y2)
+			        && (it2.y1 < it1.y1 + add);
 
 		// flip both
 		return (it1.x1 - add < it2.x2)
-				&& (it2.x1 < it1.x2 + add)
-				&& (it1.y2 - add < it2.y1)
-				&& (it2.y2 < it1.y1 + add);
+		        && (it2.x1 < it1.x2 + add)
+		        && (it1.y2 - add < it2.y1)
+		        && (it2.y2 < it1.y1 + add);
 	}
 
 	// link to next node

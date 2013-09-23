@@ -22,14 +22,14 @@ import org.oscim.theme.IRenderTheme.Callback;
  */
 public final class Line extends RenderInstruction {
 
-//	static float[] parseFloatArray(String dashString) {
-//		String[] dashEntries = SPLIT_PATTERN.split(dashString);
-//		float[] dashIntervals = new float[dashEntries.length];
-//		for (int i = 0; i < dashEntries.length; ++i) {
-//			dashIntervals[i] = Float.parseFloat(dashEntries[i]);
-//		}
-//		return dashIntervals;
-//	}
+	//	static float[] parseFloatArray(String dashString) {
+	//		String[] dashEntries = SPLIT_PATTERN.split(dashString);
+	//		float[] dashIntervals = new float[dashEntries.length];
+	//		for (int i = 0; i < dashEntries.length; ++i) {
+	//			dashIntervals[i] = Float.parseFloat(dashEntries[i]);
+	//		}
+	//		return dashIntervals;
+	//	}
 
 	private final int level;
 
@@ -47,12 +47,10 @@ public final class Line extends RenderInstruction {
 	public final int stippleColor;
 	public final float stippleWidth;
 
-
-
 	public Line(int level, String style, int color, float width,
-			Cap cap, boolean fixed,
-			int stipple, int stippleColor, float stippleWidth,
-			int fade, float blur, boolean isOutline, float min) {
+	        Cap cap, boolean fixed,
+	        int stipple, int stippleColor, float stippleWidth,
+	        int fade, float blur, boolean isOutline, float min) {
 
 		this.level = level;
 		this.style = style;

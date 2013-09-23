@@ -51,11 +51,11 @@ public class TileDistanceSort {
 		return 0;
 	}
 
-	private static void binarySort(MapTile[] a, int lo, int hi, int start)	{
+	private static void binarySort(MapTile[] a, int lo, int hi, int start) {
 		assert ((lo <= start) && (start <= hi));
 		if (start == lo)
 			++start;
-		for (; start < hi; ++start)		{
+		for (; start < hi; ++start) {
 			MapTile pivot = a[start];
 
 			int left = lo;

@@ -21,7 +21,8 @@ import org.oscim.core.Tile;
 
 public interface TileSource {
 	/**
-	 * @return the maximum number of parallel requests which this {@code TileSource} supports.
+	 * @return the maximum number of parallel requests which this
+	 *         {@code TileSource} supports.
 	 */
 	int getParallelRequestsLimit();
 
@@ -42,7 +43,7 @@ public interface TileSource {
 
 	FadeStep[] getFadeSteps();
 
-	public class FadeStep{
+	public class FadeStep {
 		public final double scaleStart, scaleEnd;
 		public final float alphaStart, alphaEnd;
 

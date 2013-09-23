@@ -5,10 +5,10 @@ import org.xml.sax.Attributes;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
 
-public class MyAttributes implements Attributes{
+public class MyAttributes implements Attributes {
 	private NamedNodeMap map;
 
-	public MyAttributes(Node n){
+	public MyAttributes(Node n) {
 		map = n.getAttributes();
 	}
 

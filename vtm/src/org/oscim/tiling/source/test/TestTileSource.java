@@ -73,7 +73,7 @@ public class TestTileSource extends TileSource {
 
 		@Override
 		public QueryResult executeQuery(MapTile tile,
-		                                ITileDataSink mapDataSink) {
+		        ITileDataSink mapDataSink) {
 
 			int size = Tile.SIZE;
 			MapElement e = mElem;

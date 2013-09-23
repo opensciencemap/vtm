@@ -20,8 +20,10 @@ import java.net.URL;
 import org.oscim.core.Tile;
 //http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/5/14/14
 //http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer
+
 public class ArcGISWorldShaded extends AbstractTileSource {
-	public static final ArcGISWorldShaded INSTANCE = new ArcGISWorldShaded("server.arcgisonline.com", 80);
+	public static final ArcGISWorldShaded INSTANCE = new ArcGISWorldShaded("server.arcgisonline.com",
+	                                                                       80);
 	private static final int PARALLEL_REQUESTS_LIMIT = 4;
 	private static final String PROTOCOL = "http";
 	private static final int ZOOM_LEVEL_MAX = 6;

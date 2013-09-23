@@ -31,11 +31,12 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 	/**
 	 * @param format ignored always ARGB8888
 	 */
-	public AndroidBitmap(int width, int height, int format){
+	public AndroidBitmap(int width, int height, int format) {
 		mBitmap = android.graphics.Bitmap
-				.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+		    .createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
 	}
-	AndroidBitmap(android.graphics.Bitmap bitmap){
+
+	AndroidBitmap(android.graphics.Bitmap bitmap) {
 		mBitmap = bitmap;
 	}
 
@@ -72,7 +73,7 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 
 		if (replace)
 			GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mBitmap, format,
-					type);
+			                      type);
 		else
 			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, format, mBitmap, type, 0);
 

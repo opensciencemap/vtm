@@ -12,6 +12,7 @@ public class SAXException extends IOException {
 	public SAXException(String str) {
 		super(str);
 	}
+
 	public SAXException(String str, Throwable throwable)
 	{
 		super(str);

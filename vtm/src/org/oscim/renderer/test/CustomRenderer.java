@@ -26,7 +26,6 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 
-
 /*
  * This is an example how to integrate custom OpenGL drawing routines as map overlay
  *
@@ -45,10 +44,10 @@ public class CustomRenderer extends LayerRenderer {
 
 	private FloatBuffer mVertices;
 	private final float[] mVerticesData = {
-			-200, -200, 1.0f,
-			200, 200, 0,
-			-200, 200, 0.5f,
-			200, -200, 0.5f,
+	        -200, -200, 1.0f,
+	        200, 200, 0,
+	        -200, 200, 0.5f,
+	        200, -200, 0.5f,
 	};
 	private boolean mInitialized;
 
@@ -135,28 +134,28 @@ public class CustomRenderer extends LayerRenderer {
 		mProgramObject = programObject;
 
 		mVertices = ByteBuffer.allocateDirect(mVerticesData.length * 4)
-				.order(ByteOrder.nativeOrder()).asFloatBuffer();
+		    .order(ByteOrder.nativeOrder()).asFloatBuffer();
 
 		return true;
 	}
 
-	private final static String vShaderStr =
-			"precision mediump float;"
-					+ "uniform mat4 u_mvp;"
-					+ "attribute vec4 a_pos;"
-					+ "varying float alpha;"
-					+ "void main()"
-					+ "{"
-					+ "   gl_Position = u_mvp * vec4(a_pos.xy, 0.0, 1.0);"
-					+ "   alpha = a_pos.z;"
-					+ "}";
+	private final static String vShaderStr = "" +
+	        "precision mediump float;"
+	        + "uniform mat4 u_mvp;"
+	        + "attribute vec4 a_pos;"
+	        + "varying float alpha;"
+	        + "void main()"
+	        + "{"
+	        + "   gl_Position = u_mvp * vec4(a_pos.xy, 0.0, 1.0);"
+	        + "   alpha = a_pos.z;"
+	        + "}";
 
-	private final static String fShaderStr =
-			"precision mediump float;"
-					+ "varying float alpha;"
-					+ "void main()"
-					+ "{"
-					+ "  gl_FragColor = vec4 (alpha, 1.0-alpha, 0.0, 0.7 );"
-					+ "}";
+	private final static String fShaderStr = "" +
+	        "precision mediump float;"
+	        + "varying float alpha;"
+	        + "void main()"
+	        + "{"
+	        + "  gl_FragColor = vec4 (alpha, 1.0-alpha, 0.0, 0.7 );"
+	        + "}";
 
 }

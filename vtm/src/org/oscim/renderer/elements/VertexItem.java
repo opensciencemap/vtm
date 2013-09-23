@@ -36,12 +36,13 @@ public class VertexItem extends Inlist<VertexItem> {
 	};
 
 	/**
-	 * Add VertexItems back to pool. Make sure to not use the reference afterwards!
+	 * Add VertexItems back to pool. Make sure to not use the reference
+	 * afterwards!
 	 * i.e.:
 	 * vertexItem.release();
 	 * vertexItem = null;
 	 * */
-	public void release(){
+	public void release() {
 		VertexItem.pool.releaseAll(this);
 	}
 
