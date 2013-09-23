@@ -14,7 +14,11 @@ import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Paint;
 
 public class AwtGraphics extends CanvasAdapter {
-	public static final AwtGraphics INSTANCE = new AwtGraphics();
+	private static final AwtGraphics INSTANCE = new AwtGraphics();
+
+	public static final AwtGraphics get() {
+		return INSTANCE;
+	}
 
 	private AwtGraphics() {
 		// do nothing
