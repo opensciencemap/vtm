@@ -32,8 +32,8 @@ public abstract class MotionEvent extends MapEvent {
 	public static final int ACTION_POINTER_DOWN = 5;
 	public static final int ACTION_POINTER_UP = 6;
 
+	// FIXME this should not be in the API!
 	public static final int ACTION_MASK = 0xff;
-
 	public static final int ACTION_POINTER_INDEX_MASK = 0xff00;
 	public static final int ACTION_POINTER_INDEX_SHIFT = 8;
 
