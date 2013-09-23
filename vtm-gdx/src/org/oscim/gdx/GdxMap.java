@@ -281,6 +281,11 @@ public abstract class GdxMap implements ApplicationListener {
 					mMap.updateMap(false);
 					break;
 
+				case Input.Keys.R:
+					mMap.setTheme(InternalRenderTheme.OSMARENDER);
+					mMap.updateMap(false);
+					break;
+
 				case Input.Keys.G:
 					if (mGridLayer == null) {
 						mGridLayer = new GenericLayer(mMap, new GridRenderer());
