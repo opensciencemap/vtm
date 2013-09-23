@@ -14,11 +14,10 @@
  */
 package org.oscim.layers;
 
-
 import org.oscim.map.Map;
 import org.oscim.renderer.LayerRenderer;
 
-public abstract class Layer  {
+public abstract class Layer {
 
 	public Layer(Map map) {
 		mMap = map;
@@ -33,6 +32,12 @@ public abstract class Layer  {
 		return mRenderer;
 	}
 
+	/**
+	 * Enabled layers will be considered for rendering and receive onMapUpdate()
+	 * calls when they implement MapUpdateListener.
+	 * 
+	 * @param enabled
+	 */
 	public void setEnabled(boolean enabled) {
 		mEnabled = enabled;
 	}
@@ -41,30 +46,8 @@ public abstract class Layer  {
 		return mEnabled;
 	}
 
-//	/**
-//	 * Called before each frame render request (on main thread).
-//	 *
-//	 * @param mapPosition
-//	 *            current MapPosition
-//	 * @param changed
-//	 *            true when MapPosition has changed since last call
-//	 * @param clear
-//	 *            Clear all resources that depend on previous map state. Most
-//	 *            importantly all resources from previous GL context (hold by
-//	 *            RenderLayer)
-//	 */
-//	public void onUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-//
-//	}
-
-//	@Override
-//	public void handleEvent(MapEvent e){
-//
-//	}
-
 	/**
-	 * Override to perform clean up of resources before shutdown. By default
-	 * does nothing.
+	 * Override to perform clean up of resources before shutdown.
 	 */
 	public void onDetach() {
 	}
