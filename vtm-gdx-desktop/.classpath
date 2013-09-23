@@ -4,9 +4,9 @@
 	<classpathentry kind="src" path="assets"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/vtm-gdx"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="libs/gdx-backend-lwjgl-natives.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/gdx-backend-lwjgl.jar" sourcepath="libs/gdx-backend-lwjgl-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/gdx-natives.jar"/>
-	<classpathentry exported="true" kind="lib" path="/vtm/libs/vtm-jni-natives.jar"/>
+	<classpathentry kind="lib" path="/vtm-libs/gdx/gdx-backend-lwjgl-natives.jar"/>
+	<classpathentry exported="true" kind="lib" path="/vtm-libs/gdx/gdx-backend-lwjgl.jar"/>
+	<classpathentry kind="lib" path="/vtm-libs/gdx/gdx-natives.jar"/>
+	<classpathentry kind="lib" path="/vtm-libs/gdx/vtm-jni-natives.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
