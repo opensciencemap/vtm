@@ -46,6 +46,14 @@ public class VertexItem extends Inlist<VertexItem> {
 		VertexItem.pool.releaseAll(this);
 	}
 
+	public int getSize() {
+		int size = used;
+		for (VertexItem it = next; it != null; it = it.next)
+			size += it.used;
+
+		return size;
+	}
+
 	public final short[] vertices = new short[SIZE];
 
 	public int used;
