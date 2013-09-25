@@ -25,20 +25,8 @@ public class AwtGraphics extends CanvasAdapter {
 	}
 
 	@Override
-	public int getColor(Color color) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public Paint getPaint() {
 		return new AwtPaint();
-	}
-
-	@Override
-	public int parseColor(String colorString) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override

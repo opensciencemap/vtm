@@ -1,5 +1,5 @@
 /*
- * Copyright 2013
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,17 +14,48 @@
  */
 package org.oscim.backend.canvas;
 
+/**
+ * The Interface Bitmap.
+ */
 public interface Bitmap {
 
+	/**
+	 * Gets the width.
+	 * 
+	 * @return the width
+	 */
 	int getWidth();
 
+	/**
+	 * Gets the height.
+	 * 
+	 * @return the height
+	 */
 	int getHeight();
 
+	/**
+	 * Recycle.
+	 */
 	void recycle();
 
+	/**
+	 * Gets the pixels as ARGB int array.
+	 * 
+	 * @return the pixels
+	 */
 	int[] getPixels();
 
+	/**
+	 * Erase color, clear Bitmap.
+	 * 
+	 * @param color the color
+	 */
 	void eraseColor(int color);
 
-	int uploadToTexture(boolean replace);
+	/**
+	 * Upload Bitmap to currently bound GL texture.
+	 * 
+	 * @param replace true, when glSubImage2D can be used for upload
+	 */
+	void uploadToTexture(boolean replace);
 }

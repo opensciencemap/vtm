@@ -16,6 +16,7 @@ package org.oscim.backend;
 
 public class GLAdapter {
 
+	/** The instance provided by backend */
 	public static GL20 g;
 
 	public static boolean GDX_DESKTOP_QUIRKS;

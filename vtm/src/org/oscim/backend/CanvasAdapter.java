@@ -1,5 +1,4 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -22,31 +21,59 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Paint;
 
+/**
+ * The Class CanvasAdapter.
+ */
 public abstract class CanvasAdapter {
-	protected static final String TAG = CanvasAdapter.class.getName();
 
+	/** The instance provided by backend */
 	public static CanvasAdapter g;
 
+	/** The dpi. */
 	public static float dpi = 240;
+
+	/** The text scale. */
 	public static float textScale = 1;
 
-	public enum Color {
-		BLACK, CYAN, TRANSPARENT, WHITE;
-	}
+	/**
+	 * Create a Canvas.
+	 * 
+	 * @return the canvas
+	 */
+	public abstract Canvas getCanvas();
 
-	public abstract Bitmap decodeBitmap(InputStream inputStream);
-
-	public abstract Bitmap loadBitmapAsset(String fileName);
-
-	public abstract int getColor(Color color);
-
+	/**
+	 * Create Paint.
+	 * 
+	 * @return the paint
+	 */
 	public abstract Paint getPaint();
 
-	public abstract int parseColor(String colorString);
-
+	/**
+	 * Create {@link Bitmap} with given dimensions.
+	 * 
+	 * @param width the width
+	 * @param height the height
+	 * @param format the format
+	 * @return the bitmap
+	 */
 	public abstract Bitmap getBitmap(int width, int height, int format);
 
-	public abstract Canvas getCanvas();
+	/**
+	 * Create {@link Bitmap} from InputStream.
+	 * 
+	 * @param inputStream the input stream
+	 * @return the bitmap
+	 */
+	public abstract Bitmap decodeBitmap(InputStream inputStream);
+
+	/**
+	 * Create {@link Bitmap} from bundled assets.
+	 * 
+	 * @param fileName the file name
+	 * @return the bitmap
+	 */
+	public abstract Bitmap loadBitmapAsset(String fileName);
 
 	protected static Bitmap createBitmap(String src) throws IOException {
 		if (src == null || src.length() == 0) {
@@ -56,7 +83,7 @@ public abstract class CanvasAdapter {
 
 		InputStream inputStream = AssetAdapter.g.openFileAsStream(src);
 		if (inputStream == null) {
-			Log.e(TAG, "invalid bitmap source: " + src);
+			Log.e(CanvasAdapter.class.getName(), "invalid bitmap source: " + src);
 			return null;
 		}
 

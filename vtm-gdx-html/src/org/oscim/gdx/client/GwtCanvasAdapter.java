@@ -42,20 +42,8 @@ public class GwtCanvasAdapter extends CanvasAdapter {
 	}
 
 	@Override
-	public int getColor(Color color) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public Paint getPaint() {
 		return new GwtPaint();
-	}
-
-	@Override
-	public int parseColor(String colorString) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override

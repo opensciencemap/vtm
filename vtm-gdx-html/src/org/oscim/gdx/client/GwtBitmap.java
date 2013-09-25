@@ -58,7 +58,7 @@ public class GwtBitmap implements Bitmap {
 	}
 
 	@Override
-	public int uploadToTexture(boolean replace) {
+	public void uploadToTexture(boolean replace) {
 
 		Gdx.gl.glTexImage2D(GL10.GL_TEXTURE_2D, 0, pixmap.getGLInternalFormat(), pixmap.getWidth(),
 		                    pixmap.getHeight(), 0,
@@ -71,8 +71,6 @@ public class GwtBitmap implements Bitmap {
 			if (image != null)
 				RootPanel.get().remove(image);
 		}
-
-		return 1;
 	}
 
 }

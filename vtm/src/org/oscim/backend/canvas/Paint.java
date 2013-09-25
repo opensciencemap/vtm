@@ -14,6 +14,9 @@
  */
 package org.oscim.backend.canvas;
 
+/**
+ * The Interface Paint.
+ */
 public interface Paint {
 
 	public static enum Align {

@@ -56,32 +56,8 @@ public final class AndroidGraphics extends CanvasAdapter {
 	}
 
 	@Override
-	public int getColor(Color color) {
-		switch (color) {
-			case BLACK:
-				return android.graphics.Color.BLACK;
-
-			case CYAN:
-				return android.graphics.Color.CYAN;
-
-			case TRANSPARENT:
-				return android.graphics.Color.TRANSPARENT;
-
-			case WHITE:
-				return android.graphics.Color.WHITE;
-		}
-
-		throw new IllegalArgumentException("unknown color value: " + color);
-	}
-
-	@Override
 	public Paint getPaint() {
 		return new AndroidPaint();
-	}
-
-	@Override
-	public int parseColor(String colorString) {
-		return android.graphics.Color.parseColor(colorString);
 	}
 
 	@Override

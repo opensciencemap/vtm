@@ -67,7 +67,7 @@ public class AwtBitmap implements Bitmap {
 	private int dbgCnt;
 
 	@Override
-	public int uploadToTexture(boolean replace) {
+	public void uploadToTexture(boolean replace) {
 		int[] pixels;
 		IntBuffer buffer;
 
@@ -113,8 +113,6 @@ public class AwtBitmap implements Bitmap {
 
 		Gdx.gl20.glTexImage2D(GL20.GL_TEXTURE_2D, 0, GL20.GL_RGBA, width,
 		                      height, 0, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, buffer);
-
-		return 0;
 	}
 
 	@Override

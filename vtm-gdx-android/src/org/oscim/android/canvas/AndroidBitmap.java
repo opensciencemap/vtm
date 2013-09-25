@@ -16,9 +16,10 @@ package org.oscim.android.canvas;
 
 import java.io.InputStream;
 
+import org.oscim.backend.GL20;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
 public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
@@ -66,18 +67,16 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 	}
 
 	@Override
-	public int uploadToTexture(boolean replace) {
+	public void uploadToTexture(boolean replace) {
 
 		int format = GLUtils.getInternalFormat(mBitmap);
 		int type = GLUtils.getType(mBitmap);
 
 		if (replace)
-			GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mBitmap, format,
+			GLUtils.texSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, mBitmap, format,
 			                      type);
 		else
-			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, format, mBitmap, type, 0);
-
-		return 0;
+			GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, format, mBitmap, type, 0);
 	}
 
 	@Override

@@ -66,7 +66,7 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 	}
 
 	@Override
-	public int uploadToTexture(boolean replace) {
+	public void uploadToTexture(boolean replace) {
 
 		int format = GLUtils.getInternalFormat(mBitmap);
 		int type = GLUtils.getType(mBitmap);
@@ -76,8 +76,6 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 			                      type);
 		else
 			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, format, mBitmap, type, 0);
-
-		return 0;
 	}
 
 	@Override

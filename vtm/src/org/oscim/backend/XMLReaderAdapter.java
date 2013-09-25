@@ -11,6 +11,10 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * The Class XMLReaderAdapter. Used by RenderTheme. Note: GWT Backend provides
+ * its own implementation.
+ */
 public class XMLReaderAdapter {
 	public void parse(DefaultHandler handler, InputStream is) throws IOException {
 

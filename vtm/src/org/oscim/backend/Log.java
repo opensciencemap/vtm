@@ -15,6 +15,8 @@
 package org.oscim.backend;
 
 public class Log {
+
+	/** The instance provided by backend */
 	public static Logger logger;
 
 	public static void d(String tag, String msg) {

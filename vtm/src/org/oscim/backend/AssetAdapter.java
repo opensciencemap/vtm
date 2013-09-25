@@ -7,10 +7,11 @@ import java.io.InputStream;
  */
 public abstract class AssetAdapter {
 
+	/** The instance provided by backend */
 	public static AssetAdapter g;
 
 	/**
-	 * Open file as stream.
+	 * Open file from asset path as stream.
 	 * 
 	 * @param name the name
 	 * @return the input stream

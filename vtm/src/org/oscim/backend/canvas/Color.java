@@ -15,20 +15,55 @@
  */
 package org.oscim.backend.canvas;
 
+/**
+ * The Class Color.
+ */
 public class Color {
+
+	/** The Constant BLACK. */
 	public static final int BLACK = 0xFF000000;
+
+	/** The Constant DKGRAY. */
 	public static final int DKGRAY = 0xFF444444;
+
+	/** The Constant GRAY. */
 	public static final int GRAY = 0xFF888888;
+
+	/** The Constant LTGRAY. */
 	public static final int LTGRAY = 0xFFCCCCCC;
+
+	/** The Constant WHITE. */
 	public static final int WHITE = 0xFFFFFFFF;
+
+	/** The Constant RED. */
 	public static final int RED = 0xFFFF0000;
+
+	/** The Constant GREEN. */
 	public static final int GREEN = 0xFF00FF00;
+
+	/** The Constant BLUE. */
 	public static final int BLUE = 0xFF0000FF;
+
+	/** The Constant YELLOW. */
 	public static final int YELLOW = 0xFFFFFF00;
+
+	/** The Constant CYAN. */
 	public static final int CYAN = 0xFF00FFFF;
+
+	/** The Constant MAGENTA. */
 	public static final int MAGENTA = 0xFFFF00FF;
+
+	/** The Constant TRANSPARENT. */
 	public static final int TRANSPARENT = 0;
 
+	/**
+	 * Pack 8 bit r, g, b into one int.
+	 * 
+	 * @param r the r
+	 * @param g the g
+	 * @param b the b
+	 * @return the int
+	 */
 	public static int get(int r, int g, int b) {
 		return 0xff << 24 | r << 16 | g << 8 | b;
 	}
@@ -41,6 +76,9 @@ public class Color {
 	 * #AARRGGBB
 	 * 'red', 'blue', 'green', 'black', 'white', 'gray', 'cyan', 'magenta',
 	 * 'yellow', 'lightgray', 'darkgray'
+	 * 
+	 * @param colorString the color string
+	 * @return the int
 	 */
 	public static int parseColor(String colorString) {
 		if (colorString.charAt(0) == '#') {
