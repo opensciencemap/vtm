@@ -26,9 +26,14 @@ import java.util.zip.InflaterInputStream;
 
 import org.oscim.backend.Log;
 import org.oscim.core.Tile;
+import org.oscim.utils.ArrayUtils;
 
-//import android.os.SystemClock;
-
+/**
+ * Lightweight HTTP connection for tile loading.
+ * 
+ * Default tile url format is 'z/x/y'. Override formatTilePath() for a
+ * different format.
+ */
 public class LwHttp {
 	private static final String TAG = LwHttp.class.getName();
 
@@ -36,7 +41,7 @@ public class LwHttp {
 	private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
 	private final static byte[] HEADER_CONTENT_LENGTH = "Content-Length".getBytes();
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
-	private final static long RESPONSE_TIMEOUT = (long) 10E9; // 10 second in nanosecond (I guess)
+	private final static long RESPONSE_TIMEOUT = (long) 10E9; // 10 second in nanosecond
 
 	private final static int BUFFER_SIZE = 1024;
 	private final byte[] buffer = new byte[BUFFER_SIZE];
@@ -60,6 +65,16 @@ public class LwHttp {
 
 	private int mContentLength = -1;
 
+	/**
+	 * @param url
+	 *            Base url for tiles
+	 * @param contentType
+	 *            Expected Content-Type
+	 * @param extension
+	 *            'file' extension, usually .png
+	 * @param deflate
+	 *            true when content uses gzip compression
+	 */
 	public LwHttp(URL url, String contentType, String extension, boolean deflate) {
 		mContentType = contentType.getBytes();
 		mInflateContent = deflate;
@@ -132,7 +147,7 @@ public class LwHttp {
 
 		mContentLength = -1;
 
-		// header cannot be larger than BUFFER_SIZE for this to work
+		// header may not be larger than BUFFER_SIZE for this to work
 		for (; (pos < read) || ((read < BUFFER_SIZE) &&
 		        (len = is.read(buf, read, BUFFER_SIZE - read)) >= 0); len = 0) {
 
@@ -159,13 +174,16 @@ public class LwHttp {
 					ok = false;
 
 			} else if (check(HEADER_CONTENT_TYPE, buf, pos, end)) {
-				if (!check(mContentType, buf,
-				           pos + HEADER_CONTENT_TYPE.length + 2, end))
+				// check that response contains the expected
+				// Content-Type
+				if (!check(mContentType, buf, pos +
+				        HEADER_CONTENT_TYPE.length + 2, end))
 					ok = false;
 
 			} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
-				mContentLength = parseInt(buf,
-				                          pos + HEADER_CONTENT_LENGTH.length + 2, end - 1);
+				// parse Content-Length
+				mContentLength = parseInt(buf, pos +
+				        HEADER_CONTENT_LENGTH.length + 2, end - 1);
 			}
 
 			if (!ok) {
@@ -281,12 +299,7 @@ public class LwHttp {
 		for (int n = val; n > 0; n = n / 10, i++)
 			buf[pos + i] = (byte) ('0' + n % 10);
 
-		// reverse bytes
-		for (int j = pos, end = pos + i - 1, mid = pos + i / 2; j < mid; j++, end--) {
-			byte tmp = buf[j];
-			buf[j] = buf[end];
-			buf[end] = tmp;
-		}
+		ArrayUtils.reverse(buf, pos, pos + i);
 
 		return pos + i;
 	}
