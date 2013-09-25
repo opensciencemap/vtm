@@ -24,10 +24,11 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 
 	public final static byte LINE = 0;
 	public final static byte POLYGON = 1;
-	public final static byte TEXLINE = 2;
-	public final static byte SYMBOL = 3;
-	public final static byte BITMAP = 4;
-	public final static byte EXTRUSION = 5;
+	public static final byte MESH = 2;
+	public final static byte TEXLINE = 3;
+	public final static byte SYMBOL = 4;
+	public final static byte BITMAP = 5;
+	public final static byte EXTRUSION = 6;
 
 	protected RenderElement(byte type) {
 		this.type = type;

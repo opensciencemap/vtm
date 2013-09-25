@@ -32,8 +32,12 @@ public class ElementLayers {
 		PolygonLayer.Renderer.init();
 		TextureLayer.Renderer.init();
 		BitmapLayer.Renderer.init();
+		MeshLayer.Renderer.init();
+
 		TextureItem.init(gl, 0);
 	}
+
+	// FIXME use one ArrayList for these!
 
 	// mixed Polygon- and LineLayer
 	public RenderElement baseLayers;
@@ -88,6 +92,14 @@ public class ElementLayers {
 	}
 
 	/**
+	 * Get or add the MeshLayer for a level. Levels are ordered from
+	 * bottom (0) to top
+	 */
+	public MeshLayer getMeshLayer(int level) {
+		return (MeshLayer) getLayer(level, RenderElement.MESH);
+	}
+
+	/**
 	 * Get or add the PolygonLayer for a level. Levels are ordered from
 	 * bottom (0) to top
 	 */
@@ -114,6 +126,12 @@ public class ElementLayers {
 	private RenderElement getLayer(int level, byte type) {
 		RenderElement l = baseLayers;
 		RenderElement renderElement = null;
+
+		if (!(type == RenderElement.LINE
+		        || type == RenderElement.POLYGON
+		        || type == RenderElement.TEXLINE
+		        || type == RenderElement.MESH))
+			throw new IllegalArgumentException("invalid layer type");
 
 		if (mCurLayer != null && mCurLayer.level == level) {
 			renderElement = mCurLayer;
@@ -146,9 +164,8 @@ public class ElementLayers {
 					renderElement = new PolygonLayer(level);
 				else if (type == RenderElement.TEXLINE)
 					renderElement = new LineTexLayer(level);
-				else
-					// TODO throw execption
-					return null;
+				else if (type == RenderElement.MESH)
+					renderElement = new MeshLayer(level);
 
 				if (l == null) {
 					// insert at start
@@ -177,6 +194,7 @@ public class ElementLayers {
 	private final static int[] VERTEX_SHORT_CNT = {
 	        4, // LINE_VERTEX_SHORTS
 	        2, // POLY_VERTEX_SHORTS
+	        2, // MESH_VERTEX_SHORTS
 	        6, // TEXLINE_VERTEX_SHORTS
 	};
 
@@ -212,6 +230,7 @@ public class ElementLayers {
 		size += addLayerItems(sbuf, baseLayers, RenderElement.LINE, 0);
 
 		texLineOffset = size * SHORT_BYTES;
+
 		for (RenderElement l = baseLayers; l != null; l = l.next) {
 			if (l.type == RenderElement.TEXLINE) {
 				addPoolItems(l, sbuf);
@@ -221,9 +240,14 @@ public class ElementLayers {
 			}
 		}
 
+		for (RenderElement l = baseLayers; l != null; l = l.next) {
+			if (l.type == RenderElement.MESH)
+				l.compile(sbuf);
+		}
+
 		for (RenderElement l = textureLayers; l != null; l = l.next) {
-			TextureLayer tl = (TextureLayer) l;
-			tl.compile(sbuf);
+			//TextureLayer tl = (TextureLayer) l;
+			l.compile(sbuf);
 		}
 
 		// extrusion layers are compiled by extrusion overlay
