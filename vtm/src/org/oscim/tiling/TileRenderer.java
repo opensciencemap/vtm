@@ -22,6 +22,7 @@ import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
+import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
@@ -169,7 +170,7 @@ public class TileRenderer extends LayerRenderer {
 			if (tile.layers.vbo == null)
 				tile.layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
-			if (!MapRenderer.uploadLayers(tile.layers, newSize, true)) {
+			if (!ElementRenderer.uploadLayers(tile.layers, newSize, true)) {
 				Log.d(TAG, "BUG uploadTileData " + tile + " failed!");
 
 				BufferObject.release(tile.layers.vbo);

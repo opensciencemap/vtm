@@ -24,7 +24,6 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
-import org.oscim.core.Tile;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.elements.ElementLayers;
@@ -37,20 +36,14 @@ public class MapRenderer {
 
 	static GL20 GL;
 
-	private static final int SHORT_BYTES = 2;
-	private static final int CACHE_TILES_MAX = 250;
-
+	/** scale factor used for short vertices */
 	public static final float COORD_SCALE = 8.0f;
-
-	static int CACHE_TILES = CACHE_TILES_MAX;
 
 	private static Map mMap;
 	public static int screenWidth, screenHeight;
 
 	private static Viewport mViewport;
 	private static MapPosition mMapPosition;
-
-	private static short[] mFillCoords;
 
 	public class Matrices {
 
@@ -153,20 +146,6 @@ public class MapRenderer {
 		mMapPosition = new MapPosition();
 
 		mMatrices = new Matrices();
-
-		// tile fill coords
-		short min = (short) 0;
-		short max = (short) (Tile.SIZE * COORD_SCALE);
-		mFillCoords = new short[8];
-		mFillCoords[0] = min;
-		mFillCoords[1] = max;
-		mFillCoords[2] = max;
-		mFillCoords[3] = max;
-		mFillCoords[4] = min;
-		mFillCoords[5] = min;
-		mFillCoords[6] = max;
-		mFillCoords[7] = min;
-
 		mBufferPool = new BufferPool();
 
 		// FIXME should be done in 'destroy' method
@@ -228,34 +207,6 @@ public class MapRenderer {
 		BufferItem b = mBufferPool.get(size * 4);
 		b.intBuffer.clear();
 		return b.intBuffer;
-	}
-
-	public static boolean uploadLayers(ElementLayers layers, int newSize,
-	        boolean addFill) {
-		// add fill coordinates
-		if (addFill)
-			newSize += 8;
-
-		ShortBuffer sbuf = getShortBuffer(newSize);
-
-		if (addFill)
-			sbuf.put(mFillCoords, 0, 8);
-
-		layers.compile(sbuf, addFill);
-		sbuf.flip();
-
-		if (newSize != sbuf.remaining()) {
-			Log.d(TAG, "wrong size: "
-			        + " new size: " + newSize
-			        + " buffer pos: " + sbuf.position()
-			        + " buffer limit: " + sbuf.limit()
-			        + " buffer fill: " + sbuf.remaining());
-			return false;
-		}
-		newSize *= SHORT_BYTES;
-
-		layers.vbo.loadBufferData(sbuf, newSize);
-		return true;
 	}
 
 	public void onDrawFrame() {
@@ -429,7 +380,7 @@ public class MapRenderer {
 		GLUtils.init(GL);
 
 		// Set up some vertex buffer objects
-		BufferObject.init(GL, CACHE_TILES);
+		BufferObject.init(GL, 200);
 
 		// classes that require GL context for initialization
 		ElementLayers.initRenderer(GL);

@@ -14,7 +14,10 @@
  */
 package org.oscim.renderer;
 
+import java.nio.ShortBuffer;
+
 import org.oscim.backend.GL20;
+import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.MapRenderer.Matrices;
@@ -22,15 +25,20 @@ import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
+import org.oscim.renderer.elements.MeshLayer;
 import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.RenderElement;
 import org.oscim.renderer.elements.TextureLayer;
 import org.oscim.utils.FastMath;
 
 /**
- * Base class to use the renderer.sublayers for drawing
+ * Base class to use the renderer.elements for drawing
  */
 public abstract class ElementRenderer extends LayerRenderer {
+
+	private static final String TAG = ElementRenderer.class.getName();
+
+	private static short[] fillCoords;
 
 	/**
 	 * Use mMapPosition.copy(position) to keep the position for which
@@ -44,6 +52,21 @@ public abstract class ElementRenderer extends LayerRenderer {
 	public ElementRenderer() {
 		layers = new ElementLayers();
 		mMapPosition = new MapPosition();
+
+		if (fillCoords == null) {
+			// tile fill coords
+			short min = (short) 0;
+			short max = (short) (Tile.SIZE * MapRenderer.COORD_SCALE);
+			fillCoords = new short[8];
+			fillCoords[0] = min;
+			fillCoords[1] = max;
+			fillCoords[2] = max;
+			fillCoords[3] = max;
+			fillCoords[4] = min;
+			fillCoords[5] = min;
+			fillCoords[6] = max;
+			fillCoords[7] = min;
+		}
 	}
 
 	/**
@@ -76,6 +99,15 @@ public abstract class ElementRenderer extends LayerRenderer {
 					case RenderElement.TEXLINE:
 						l = LineTexLayer.Renderer.draw(layers, l, curPos, m, div);
 						break;
+
+					case RenderElement.MESH:
+						l = MeshLayer.Renderer.draw(pos, l, m);
+						break;
+
+					default:
+						Log.d(TAG, "invalid layer");
+						l = l.next;
+						break;
 				}
 			}
 		}
@@ -105,6 +137,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 	 */
 	protected void compile() {
 		int newSize = layers.getSize();
+
 		if (newSize <= 0) {
 			BufferObject.release(layers.vbo);
 			layers.vbo = null;
@@ -115,8 +148,38 @@ public abstract class ElementRenderer extends LayerRenderer {
 		if (layers.vbo == null)
 			layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
-		if (MapRenderer.uploadLayers(layers, newSize, true))
+		if (uploadLayers(layers, newSize, true))
 			setReady(true);
+	}
+
+	public static boolean uploadLayers(ElementLayers layers, int newSize,
+	        boolean addFill) {
+		// add fill coordinates
+		if (addFill)
+			newSize += 8;
+
+		ShortBuffer sbuf = MapRenderer.getShortBuffer(newSize);
+
+		if (addFill)
+			sbuf.put(fillCoords, 0, 8);
+
+		layers.compile(sbuf, addFill);
+		sbuf.flip();
+
+		if (newSize != sbuf.remaining()) {
+			Log.d(TAG, "wrong size: "
+			        + " new size: " + newSize
+			        + " buffer pos: " + sbuf.position()
+			        + " buffer limit: " + sbuf.limit()
+			        + " buffer fill: " + sbuf.remaining());
+			return false;
+		}
+
+		// * SHORT_BYTES
+		newSize *= 2;
+
+		layers.vbo.loadBufferData(sbuf, newSize);
+		return true;
 	}
 
 	/**
@@ -148,7 +211,8 @@ public abstract class ElementRenderer extends LayerRenderer {
 
 		matrices.mvp.setTransScale((float) (x * tileScale),
 		                           (float) (y * tileScale),
-		                           (float) ((position.scale / oPos.scale) / MapRenderer.COORD_SCALE));
+		                           (float) (position.scale / oPos.scale)
+		                                   / MapRenderer.COORD_SCALE);
 
 		matrices.mvp.multiplyLhs(project ? matrices.viewproj : matrices.view);
 	}
