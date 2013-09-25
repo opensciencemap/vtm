@@ -503,7 +503,7 @@ public class MapDatabase implements ITileDataSource {
 			// check if the POI has a name
 			if ((featureByte & POI_FEATURE_NAME) != 0) {
 				String str = mReadBuffer.readUTF8EncodedString();
-				mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, str, false));
+				mElem.tags.add(new Tag(Tag.KEY_NAME, str, false));
 			}
 
 			// check if the POI has a house number
@@ -801,30 +801,30 @@ public class MapDatabase implements ITileDataSource {
 				if (hasName) {
 					int textPos = mReadBuffer.readUnsignedInt();
 					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
-					mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, str, false));
+					mElem.tags.add(new Tag(Tag.KEY_NAME, str, false));
 				}
 				if (hasHouseNr) {
 					int textPos = mReadBuffer.readUnsignedInt();
 					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
-					mElem.tags.add(new Tag(Tag.TAG_KEY_HOUSE_NUMBER, str, false));
+					mElem.tags.add(new Tag(Tag.KEY_HOUSE_NUMBER, str, false));
 				}
 				if (hasRef) {
 					int textPos = mReadBuffer.readUnsignedInt();
 					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
-					mElem.tags.add(new Tag(Tag.TAG_KEY_REF, str, false));
+					mElem.tags.add(new Tag(Tag.KEY_REF, str, false));
 				}
 			} else {
 				if (hasName) {
 					String str = mReadBuffer.readUTF8EncodedString();
-					mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, str, false));
+					mElem.tags.add(new Tag(Tag.KEY_NAME, str, false));
 				}
 				if (hasHouseNr) {
 					String str = mReadBuffer.readUTF8EncodedString();
-					mElem.tags.add(new Tag(Tag.TAG_KEY_HOUSE_NUMBER, str, false));
+					mElem.tags.add(new Tag(Tag.KEY_HOUSE_NUMBER, str, false));
 				}
 				if (hasRef) {
 					String str = mReadBuffer.readUTF8EncodedString();
-					mElem.tags.add(new Tag(Tag.TAG_KEY_REF, str, false));
+					mElem.tags.add(new Tag(Tag.KEY_REF, str, false));
 				}
 			}
 			if ((featureByte & WAY_FEATURE_LABEL_POSITION) != 0)

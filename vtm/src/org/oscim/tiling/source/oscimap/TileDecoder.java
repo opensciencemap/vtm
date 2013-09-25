@@ -130,19 +130,20 @@ public class TileDecoder extends PbfDecoder {
 		String tagString = decodeString();
 
 		if (tagString == null || tagString.length() == 0) {
-			curTags[mCurTagCnt++] = new Tag(Tag.TAG_KEY_NAME, "...");
+			curTags[mCurTagCnt++] = new Tag(Tag.KEY_NAME, "...");
 			return false;
 		}
 
 		Tag tag = tagHash.get(tagString);
 
 		if (tag == null) {
-			if (tagString.startsWith(Tag.TAG_KEY_NAME))
-				tag = new Tag(Tag.TAG_KEY_NAME, tagString.substring(5), false);
+			if (tagString.startsWith(Tag.KEY_NAME))
+				tag = new Tag(Tag.KEY_NAME, tagString.substring(5), false);
 			else
-				tag = new Tag(tagString);
+				tag = Tag.parse(tagString);
 
-			tagHash.put(tagString, tag);
+			if (tag != null)
+				tagHash.put(tagString, tag);
 		}
 
 		if (mCurTagCnt >= MAX_TILE_TAGS) {

@@ -209,12 +209,12 @@ public class TileDecoder extends PbfDecoder {
 
 			// FIXME filter out all variable tags
 			// might depend on theme though
-			if (key == Tag.TAG_KEY_NAME
+			if (key == Tag.KEY_NAME
 			        || key == Tag.KEY_HEIGHT
 			        || key == Tag.KEY_MIN_HEIGHT
-			        || key == Tag.TAG_KEY_HOUSE_NUMBER
-			        || key == Tag.TAG_KEY_REF
-			        || key == Tag.TAG_KEY_ELE)
+			        || key == Tag.KEY_HOUSE_NUMBER
+			        || key == Tag.KEY_REF
+			        || key == Tag.KEY_ELE)
 				tag = new Tag(key, val, false);
 			else
 				tag = new Tag(key, val, true);

@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -15,46 +16,31 @@
 package org.oscim.core;
 
 /**
- * A tag represents an immutable key-value pair.
+ * A tag represents an immutable key-value pair. Keys are always intern().
  */
 
-// TODO: use own stringshare method instead of internalized strings
-
 public class Tag {
-	private static final char KEY_VALUE_SEPARATOR = '=';
-	/**
-	 * The key of the house number OpenStreetMap tag.
-	 */
-	public static final String TAG_KEY_HOUSE_NUMBER = "addr:housenumber";
+	/** The key of the house number OpenStreetMap tag. */
+	public static final String KEY_HOUSE_NUMBER = "addr:housenumber";
 
-	/**
-	 * The key of the name OpenStreetMap tag.
-	 */
-	public static final String TAG_KEY_NAME = "name";
+	/** The key of the name OpenStreetMap tag. */
+	public static final String KEY_NAME = "name";
 
-	/**
-	 * The key of the reference OpenStreetMap tag.
-	 */
-	public static final String TAG_KEY_REF = "ref";
+	/** The key of the reference OpenStreetMap tag. */
+	public static final String KEY_REF = "ref";
 
-	/**
-	 * The key of the elevation OpenStreetMap tag.
-	 */
-	public static final String TAG_KEY_ELE = "ele";
+	/** The key of the elevation OpenStreetMap tag. */
+	public static final String KEY_ELE = "ele";
 
-	public static final String TAG_KEY_AMENITY = "amenity";
-
-	/**
-	 * The key of the elevation OpenStreetMap tag.
-	 */
-	public static final String TAG_KEY_BUILDING = "building";
-	public static final String TAG_KEY_HIGHWAY = "highway";
-	public static final String TAG_KEY_LANDUSE = "landuse";
-	public static final String VALUE_YES = "yes";
-	public static final String VALUE_NO = "no";
-
+	public static final String KEY_AMENITY = "amenity";
+	public static final String KEY_BUILDING = "building";
+	public static final String KEY_HIGHWAY = "highway";
+	public static final String KEY_LANDUSE = "landuse";
 	public static final String KEY_HEIGHT = "height";
 	public static final String KEY_MIN_HEIGHT = "min_height";
+
+	public static final String VALUE_YES = "yes";
+	public static final String VALUE_NO = "no";
 
 	/**
 	 * The key of this tag.
@@ -66,23 +52,12 @@ public class Tag {
 	 */
 	public String value;
 
-	private int hashCodeValue = 0;
+	/**
+	 * true when value is intern().
+	 */
 	private final boolean intern;
 
-	/**
-	 * @param tag
-	 *            the textual representation of the tag.
-	 */
-
-	public Tag(String tag) {
-		int splitPosition = tag.indexOf(KEY_VALUE_SEPARATOR);
-		if (splitPosition < 0) {
-			System.out.println("TAG:" + tag);
-		}
-		this.key = tag.substring(0, splitPosition).intern();
-		this.value = tag.substring(splitPosition + 1).intern();
-		this.intern = true;
-	}
+	private int hashCodeValue = 0;
 
 	/**
 	 * @param key
@@ -164,5 +139,18 @@ public class Tag {
 		result = 31 * result + ((this.key == null) ? 0 : this.key.hashCode());
 		result = 31 * result + ((this.value == null) ? 0 : this.value.hashCode());
 		return result;
+	}
+
+	/**
+	 * @param tag
+	 *            the textual representation of the tag.
+	 */
+	public static Tag parse(String tag) {
+		int splitPosition = tag.indexOf("=");
+		if (splitPosition < 0) {
+			return new Tag(tag, "");
+		}
+
+		return new Tag(tag.substring(0, splitPosition), tag.substring(splitPosition + 1));
 	}
 }

@@ -175,7 +175,7 @@ public class TileDecoder extends PbfDecoder {
 
 		for (int i = 0; i < keys.size(); i++) {
 			String key = keys.get(i);
-			if (!key.startsWith(Tag.TAG_KEY_NAME))
+			if (!key.startsWith(Tag.KEY_NAME))
 				continue;
 			int len = key.length();
 			if (len == 4) {
@@ -222,7 +222,7 @@ public class TileDecoder extends PbfDecoder {
 
 				if (keyIdx == matchedLocal) {
 					hasName = true;
-					f.elem.tags.add(new Tag(Tag.TAG_KEY_NAME, val, false));
+					f.elem.tags.add(new Tag(Tag.KEY_NAME, val, false));
 
 				} else {
 					key = keys.get(keyIdx);
@@ -231,7 +231,7 @@ public class TileDecoder extends PbfDecoder {
 			}
 
 			if (!hasName && fallbackName != null)
-				f.elem.tags.add(new Tag(Tag.TAG_KEY_NAME, fallbackName, false));
+				f.elem.tags.add(new Tag(Tag.KEY_NAME, fallbackName, false));
 
 			// FIXME extract layer tag here
 			f.elem.setLayer(5);

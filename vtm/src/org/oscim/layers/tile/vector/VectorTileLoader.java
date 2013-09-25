@@ -61,8 +61,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	// replacement for variable value tags that should not be matched by RenderTheme
 	// FIXME make this general, maybe subclass tags
-	private static final Tag mTagEmptyName = new Tag(Tag.TAG_KEY_NAME, null, false);
-	private static final Tag mTagEmptyHouseNr = new Tag(Tag.TAG_KEY_HOUSE_NUMBER, null, false);
+	private static final Tag mTagEmptyName = new Tag(Tag.KEY_NAME, null, false);
+	private static final Tag mTagEmptyHouseNr = new Tag(Tag.KEY_HOUSE_NUMBER, null, false);
 
 	//	private final MapElement mDebugWay, mDebugPoint;
 
@@ -187,12 +187,12 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		for (int i = 0; i < in.numTags; i++) {
 			String key = tags[i].key;
-			if (tags[i].key == Tag.TAG_KEY_NAME) {
+			if (tags[i].key == Tag.KEY_NAME) {
 				if (tags[i].value != null) {
 					mTagName = tags[i];
 					tags[i] = mTagEmptyName;
 				}
-			} else if (tags[i].key == Tag.TAG_KEY_HOUSE_NUMBER) {
+			} else if (tags[i].key == Tag.KEY_HOUSE_NUMBER) {
 				if (tags[i].value != null) {
 					mTagHouseNr = tags[i];
 					tags[i] = mTagEmptyHouseNr;
@@ -200,7 +200,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			} else if (mTile.zoomLevel > 16) {
 				// FIXME, allow overlays to intercept
 				// this, or use a theme option for this
-				if (key == Tag.TAG_KEY_BUILDING)
+				if (key == Tag.KEY_BUILDING)
 					mRenderBuildingModel = true;
 
 				else if (key == Tag.KEY_HEIGHT) {
@@ -369,10 +369,10 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	private String textValueForKey(Text text) {
 		String value = null;
 
-		if (text.textKey == Tag.TAG_KEY_NAME) {
+		if (text.textKey == Tag.KEY_NAME) {
 			if (mTagName != null)
 				value = mTagName.value;
-		} else if (text.textKey == Tag.TAG_KEY_HOUSE_NUMBER) {
+		} else if (text.textKey == Tag.KEY_HOUSE_NUMBER) {
 			if (mTagHouseNr != null)
 				value = mTagHouseNr.value;
 		}

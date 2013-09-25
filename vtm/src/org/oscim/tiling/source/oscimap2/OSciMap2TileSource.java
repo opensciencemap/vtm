@@ -155,7 +155,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 			String key = Tags.keys[mSArray[curTag]];
 			Tag tag;
 
-			if (key == Tag.TAG_KEY_NAME)
+			if (key == Tag.KEY_NAME)
 				tag = new Tag(key, tagString, false);
 			else
 				tag = new Tag(key, tagString, true);

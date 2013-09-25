@@ -171,7 +171,7 @@ final class RequiredFields {
 			if (tag == null) {
 				return new OpenResult("POI tag must not be null: " + currentTagId);
 			}
-			poiTags[currentTagId] = new Tag(tag);
+			poiTags[currentTagId] = Tag.parse(tag);
 		}
 		mapFileInfoBuilder.poiTags = poiTags;
 		return OpenResult.SUCCESS;
@@ -227,7 +227,7 @@ final class RequiredFields {
 			if (tag == null) {
 				return new OpenResult("way tag must not be null: " + currentTagId);
 			}
-			wayTags[currentTagId] = new Tag(tag);
+			wayTags[currentTagId] = Tag.parse(tag);
 		}
 		mapFileInfoBuilder.wayTags = wayTags;
 		return OpenResult.SUCCESS;
