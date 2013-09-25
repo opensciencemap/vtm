@@ -85,12 +85,11 @@ public class Inlist<T extends Inlist<T>> {
 		return item;
 	}
 
-	public static <T extends Inlist<T>> T append(T list, T item) {
+	public static <T extends Inlist<T>> T appendItem(T list, T item) {
 
 		if (debug) {
 			if (item.next != null) {
-				// warn
-				item.next = null;
+				throw new IllegalArgumentException("item is list");
 			}
 		}
 
@@ -105,6 +104,37 @@ public class Inlist<T extends Inlist<T>> {
 		it.next = item;
 
 		return list;
+	}
+
+	public static <T extends Inlist<T>> T appendList(T list, T list2) {
+
+		if (list == null)
+			return list2;
+
+		if (list == list2)
+			return list;
+
+		Inlist<T> it = list;
+
+		while (it.next != null) {
+			if (it.next == list2)
+				// hmmmm, already in list
+				return list;
+
+			it = it.next;
+		}
+		it.next = list2;
+
+		return list;
+	}
+
+	public static <T extends Inlist<T>> T last(T list) {
+		while (list != null) {
+			if (list.next == null)
+				return list;
+			list = list.next;
+		}
+		return null;
 	}
 
 	public static <T extends Inlist<T>> T prependRelative(T list, T item, T other) {

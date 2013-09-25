@@ -30,7 +30,7 @@ public final class SymbolLayer extends TextureLayer {
 	private SymbolItem symbols;
 
 	public SymbolLayer() {
-		type = RenderElement.SYMBOL;
+		super(RenderElement.SYMBOL);
 		fixed = true;
 	}
 
@@ -86,7 +86,7 @@ public final class SymbolLayer extends TextureLayer {
 					// clone TextureItem to use same texID with
 					// multiple TextureItem
 					to = TextureItem.clone(to);
-					textures = Inlist.append(textures, to);
+					textures = Inlist.appendItem(textures, to);
 				}
 
 				TextureAtlas.Rect r = it.texRegion.rect;
@@ -104,7 +104,7 @@ public final class SymbolLayer extends TextureLayer {
 					//					to.bitmap = it.bitmap;
 					//					to.width = it.bitmap.getWidth();
 					//					to.height = it.bitmap.getHeight();
-					textures = Inlist.append(textures, to);
+					textures = Inlist.appendItem(textures, to);
 
 					to.upload();
 				}
@@ -190,7 +190,7 @@ public final class SymbolLayer extends TextureLayer {
 		for (to = prevTextures; to != null; to = to.next) {
 			if (to.bitmap == bitmap) {
 				prevTextures = Inlist.remove(prevTextures, to);
-				textures = Inlist.append(textures, to);
+				textures = Inlist.appendItem(textures, to);
 				break;
 			}
 		}

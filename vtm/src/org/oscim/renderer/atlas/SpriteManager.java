@@ -87,7 +87,7 @@ public abstract class SpriteManager<T> {
 		}
 		Sprite sprite = new Sprite(item, mAtlas, r);
 
-		items = Inlist.append(items, sprite);
+		items = Inlist.appendItem(items, sprite);
 
 		draw(item, r);
 
