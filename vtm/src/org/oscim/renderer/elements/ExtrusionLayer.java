@@ -60,7 +60,7 @@ public class ExtrusionLayer extends RenderElement {
 	private final float mGroundResolution;
 
 	public ExtrusionLayer(int level, float groundResolution) {
-		this.type = RenderElement.EXTRUSION;
+		super(RenderElement.EXTRUSION);
 		this.level = level;
 
 		mGroundResolution = groundResolution;

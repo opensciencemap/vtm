@@ -27,6 +27,7 @@ import org.oscim.renderer.MapRenderer.Matrices;
  * Renderer for a single bitmap, width and height must be power of 2.
  */
 public class BitmapLayer extends TextureLayer {
+
 	//	private final static String TAG = BitmapLayer.class.getName();
 	private Bitmap mBitmap;
 	private final boolean mReuseBitmap;
@@ -37,7 +38,8 @@ public class BitmapLayer extends TextureLayer {
 	 *            it is compiled to texture.
 	 */
 	public BitmapLayer(boolean reuseBitmap) {
-		type = RenderElement.BITMAP;
+		super(RenderElement.BITMAP);
+
 		mReuseBitmap = reuseBitmap;
 		mVertices = new short[24];
 
@@ -151,7 +153,6 @@ public class BitmapLayer extends TextureLayer {
 	public static final class Renderer {
 
 		//private final static String TAG = BitmapRenderer.class.getName();
-		private static GL20 GL;
 
 		public final static boolean debug = true;
 
@@ -169,9 +170,7 @@ public class BitmapLayer extends TextureLayer {
 		final static int VERTICES_PER_SPRITE = 4;
 		final static int SHORTS_PER_VERTICE = 6;
 
-		static void init(GL20 gl) {
-			GL = gl;
-
+		static void init() {
 			mTextureProgram = GLUtils.createProgram(textVertexShader,
 			                                        textFragmentShader);
 

@@ -25,6 +25,11 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 
 public abstract class TextureLayer extends RenderElement {
+
+	protected TextureLayer(byte type) {
+		super(type);
+	}
+
 	// holds textures and offset in vbo
 	public TextureItem textures;
 
@@ -87,8 +92,6 @@ public abstract class TextureLayer extends RenderElement {
 	public static final class Renderer {
 		//private final static String TAG = TextureRenderer.class.getName();
 
-		private static GL20 GL;
-
 		public final static boolean debug = false;
 
 		private static int mTextureProgram;
@@ -104,8 +107,7 @@ public abstract class TextureLayer extends RenderElement {
 		final static int VERTICES_PER_SPRITE = 4;
 		final static int SHORTS_PER_VERTICE = 6;
 
-		static void init(GL20 gl) {
-			GL = gl;
+		static void init() {
 
 			mTextureProgram = GLUtils.createProgram(textVertexShader,
 			                                        textFragmentShader);

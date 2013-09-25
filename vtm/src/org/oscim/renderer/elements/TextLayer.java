@@ -38,7 +38,7 @@ public final class TextLayer extends TextureLayer {
 	}
 
 	public TextLayer() {
-		type = RenderElement.SYMBOL;
+		super(RenderElement.SYMBOL);
 		//mCanvas = Graphics.res.getCanvas();
 		mCanvas = CanvasAdapter.g.getCanvas();
 		fixed = true;

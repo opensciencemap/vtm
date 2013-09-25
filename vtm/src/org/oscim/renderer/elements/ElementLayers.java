@@ -25,11 +25,13 @@ public class ElementLayers {
 	private final static String TAG = ElementLayers.class.getName();
 
 	public static void initRenderer(GL20 gl) {
-		LineLayer.Renderer.init(gl);
-		LineTexLayer.Renderer.init(gl);
-		PolygonLayer.Renderer.init(gl);
-		TextureLayer.Renderer.init(gl);
-		BitmapLayer.Renderer.init(gl);
+		RenderElement.GL = gl;
+
+		LineLayer.Renderer.init();
+		LineTexLayer.Renderer.init();
+		PolygonLayer.Renderer.init();
+		TextureLayer.Renderer.init();
+		BitmapLayer.Renderer.init();
 		TextureItem.init(gl, 0);
 	}
 

@@ -50,8 +50,8 @@ public final class LineLayer extends RenderElement {
 	public boolean roundCap;
 
 	LineLayer(int layer) {
+		super(RenderElement.LINE);
 		this.level = layer;
-		this.type = RenderElement.LINE;
 	}
 
 	public void addOutline(LineLayer link) {
@@ -580,8 +580,6 @@ public final class LineLayer extends RenderElement {
 
 	public static final class Renderer {
 
-		private static GL20 GL;
-
 		private static final int LINE_VERTICES_DATA_POS_OFFSET = 0;
 
 		// factor to normalize extrusion vector and scale to coord scale
@@ -598,8 +596,7 @@ public final class LineLayer extends RenderElement {
 		private static int[] hLineMode = new int[2];
 		public static int mTexID;
 
-		static boolean init(GL20 gl) {
-			GL = gl;
+		static boolean init() {
 
 			lineProgram[0] = GLUtils.createProgram(lineVertexShader,
 			                                       lineFragmentShader);

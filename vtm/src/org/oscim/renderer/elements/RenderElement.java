@@ -16,9 +16,12 @@ package org.oscim.renderer.elements;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.backend.GL20;
 import org.oscim.utils.pool.Inlist;
 
 public abstract class RenderElement extends Inlist<RenderElement> {
+	protected static GL20 GL;
+
 	public final static byte LINE = 0;
 	public final static byte POLYGON = 1;
 	public final static byte TEXLINE = 2;
@@ -26,7 +29,11 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 	public final static byte BITMAP = 4;
 	public final static byte EXTRUSION = 5;
 
-	public byte type = -1;
+	protected RenderElement(byte type) {
+		this.type = type;
+	}
+
+	public final byte type;
 
 	// drawing order from bottom to top
 	int level;

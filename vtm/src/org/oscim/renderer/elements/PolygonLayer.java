@@ -46,8 +46,9 @@ public final class PolygonLayer extends RenderElement {
 	public Area area;
 
 	PolygonLayer(int layer) {
-		this.level = layer;
-		this.type = RenderElement.POLYGON;
+		super(RenderElement.POLYGON);
+
+		level = layer;
 		curItem = VertexItem.pool.get();
 		vertexItems = curItem;
 	}
@@ -123,7 +124,7 @@ public final class PolygonLayer extends RenderElement {
 
 	public static final class Renderer {
 
-		private static GL20 GL;
+		//private static GL20 GL;
 
 		private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
 		private static final int STENCIL_BITS = 8;
@@ -144,8 +145,7 @@ public final class PolygonLayer extends RenderElement {
 		private static int[] hPolygonColor = new int[numShaders];
 		private static int[] hPolygonScale = new int[numShaders];
 
-		static boolean init(GL20 gl) {
-			GL = gl;
+		static boolean init() {
 
 			for (int i = 0; i < numShaders; i++) {
 

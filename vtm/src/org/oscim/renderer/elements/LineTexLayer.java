@@ -93,8 +93,9 @@ public final class LineTexLayer extends RenderElement {
 	private boolean evenSegment;
 
 	LineTexLayer(int layer) {
+		super(RenderElement.TEXLINE);
+
 		this.level = layer;
-		this.type = RenderElement.TEXLINE;
 		this.evenSegment = true;
 	}
 
@@ -250,8 +251,6 @@ public final class LineTexLayer extends RenderElement {
 
 	public final static class Renderer {
 
-		private static GL20 GL;
-
 		// factor to normalize extrusion vector and scale to coord scale
 		private final static float COORD_SCALE_BY_DIR_SCALE =
 		        MapRenderer.COORD_SCALE
@@ -273,8 +272,7 @@ public final class LineTexLayer extends RenderElement {
 
 		private static int mVertexFlipID;
 
-		public static void init(GL20 gl) {
-			GL = gl;
+		public static void init() {
 
 			shader = GLUtils.createProgram(vertexShader, fragmentShader);
 			if (shader == 0) {
