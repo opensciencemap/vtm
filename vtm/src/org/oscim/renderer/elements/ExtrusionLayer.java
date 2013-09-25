@@ -26,6 +26,7 @@ import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.LineClipper;
 import org.oscim.utils.Tessellator;
+import org.oscim.utils.pool.Inlist;
 
 /**
  * @author Hannes Janetzek
@@ -139,7 +140,8 @@ public class ExtrusionLayer extends RenderElement {
 			if (simpleOutline && (ipos < n - 1) && (index[ipos + 1] > 0))
 				simpleOutline = false;
 
-			boolean convex = addOutline(points, ppos, len, minHeight, height, simpleOutline);
+			boolean convex = addOutline(points, ppos, len, minHeight,
+			                            height, simpleOutline);
 
 			if (simpleOutline && (convex || len <= 8)) {
 				addRoofSimple(startVertex, len);
@@ -184,20 +186,14 @@ public class ExtrusionLayer extends RenderElement {
 			rings++;
 		}
 
-		int used = Tessellator.triangulate(points, ppos, len, index, ipos, rings,
-		                                   startVertex + 1, mCurIndices[IND_ROOF]);
+		Tessellator.tessellate(points, ppos, len, index, ipos, rings,
+		                       startVertex + 1, mCurIndices[IND_ROOF]);
 
-		if (used > 0) {
-			// get back to the last item added..
-			VertexItem it = mIndices[IND_ROOF];
-			while (it.next != null)
-				it = it.next;
-			mCurIndices[IND_ROOF] = it;
-		}
+		mCurIndices[IND_ROOF] = Inlist.last(mCurIndices[IND_ROOF]);
 	}
 
-	private boolean addOutline(float[] points, int pos, int len, float minHeight, float height,
-	        boolean convex) {
+	private boolean addOutline(float[] points, int pos, int len, float minHeight,
+	        float height, boolean convex) {
 
 		// add two vertices for last face to make zigzag indices work
 		boolean addFace = (len % 4 != 0);

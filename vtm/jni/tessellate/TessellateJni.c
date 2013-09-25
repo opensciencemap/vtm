@@ -31,8 +31,20 @@ void Java_org_oscim_utils_Tessellator_tessFinish(JNIEnv *env, jclass c, jlong pt
    free(ctx);
 }
 
-jint Java_org_oscim_utils_Tessellator_tessGetCoordinates(JNIEnv *env, jclass c,
-      jlong ptr_context, jshortArray obj_coords, jfloat scale) {
+Vertex *reverse(Vertex *root) {
+   Vertex *start = 0;
+
+   while (root) {
+      Vertex *prev = root->prev;
+      root->prev = start;
+      start = root;
+      root = prev;
+   }
+   return start;
+}
+
+jint Java_org_oscim_utils_Tessellator_tessGetVerticesWO(JNIEnv *env, jclass c,
+      jlong ptr_context, jshortArray obj_coords, jint offset, jfloat scale) {
 
    TessContext *ctx = CAST_CTX(ptr_context);
 
@@ -43,23 +55,33 @@ jint Java_org_oscim_utils_Tessellator_tessGetCoordinates(JNIEnv *env, jclass c,
       return 0;
    }
 
-   //int n_verts = 1 + ctx->latest_v->index;
-   //int n_tris_copy = ctx->n_tris;
+   if (!ctx->reversed) {
+      ctx->reversed = 1;
+      ctx->latest_v = reverse(ctx->latest_v);
+   }
 
-   int cnt = 0;
-   for (; ctx->latest_v && cnt < length; cnt += 2) {
-      coords[cnt + 0] = (ctx->latest_v->pt[0] * scale) + 0.5f;
-      coords[cnt + 1] = (ctx->latest_v->pt[1] * scale) + 0.5f;
+   int pos = offset;
+
+   for (; ctx->latest_v && pos < length; pos += 2) {
+      coords[pos + 0] = (ctx->latest_v->pt[0] * scale) + 0.5f;
+      coords[pos + 1] = (ctx->latest_v->pt[1] * scale) + 0.5f;
       Vertex *prev = ctx->latest_v->prev;
       free(ctx->latest_v);
       ctx->latest_v = prev;
    }
    (*env)->ReleasePrimitiveArrayCritical(env, obj_coords, coords, JNI_ABORT);
 
-   return cnt;
+   return pos - offset;
 }
 
-jint Java_org_oscim_utils_Tessellator_tessGetCoordinatesD(JNIEnv *env, jclass c,
+jint Java_org_oscim_utils_Tessellator_tessGetVertices(JNIEnv *env, jclass c,
+      jlong ptr_context, jshortArray obj_coords, jfloat scale) {
+
+   return Java_org_oscim_utils_Tessellator_tessGetVerticesWO(env, c, ptr_context, obj_coords, 0,
+         scale);
+}
+
+jint Java_org_oscim_utils_Tessellator_tessGetVerticesD(JNIEnv *env, jclass c,
       jlong ptr_context, jdoubleArray obj_coords) {
 
    TessContext *ctx = CAST_CTX(ptr_context);
@@ -71,8 +93,10 @@ jint Java_org_oscim_utils_Tessellator_tessGetCoordinatesD(JNIEnv *env, jclass c,
       return 0;
    }
 
-   //int n_verts = 1 + ctx->latest_v->index;
-   //int n_tris_copy = ctx->n_tris;
+   if (!ctx->reversed) {
+      ctx->reversed = 1;
+      ctx->latest_v = reverse(ctx->latest_v);
+   }
 
    int cnt = 0;
    for (; ctx->latest_v && cnt < length; cnt += 2) {
@@ -88,8 +112,8 @@ jint Java_org_oscim_utils_Tessellator_tessGetCoordinatesD(JNIEnv *env, jclass c,
    return cnt;
 }
 
-jint Java_org_oscim_utils_Tessellator_tessGetIndices(JNIEnv *env, jclass c,
-      jlong ptr_context, jshortArray obj_indices) {
+jint Java_org_oscim_utils_Tessellator_tessGetIndicesWO(JNIEnv *env, jclass c,
+      jlong ptr_context, jshortArray obj_indices, int offset) {
 
    TessContext *ctx = CAST_CTX(ptr_context);
 
@@ -102,12 +126,12 @@ jint Java_org_oscim_utils_Tessellator_tessGetIndices(JNIEnv *env, jclass c,
 
    int n_tris_copy = ctx->n_tris;
 
-   int cnt = 0;
+   int pos = offset;
 
-   for (; ctx->latest_t && cnt < length; cnt += 3) {
-      tris[cnt + 0] = ctx->latest_t->v[0];
-      tris[cnt + 1] = ctx->latest_t->v[1];
-      tris[cnt + 2] = ctx->latest_t->v[2];
+   for (; ctx->latest_t && pos < length; pos += 3) {
+      tris[pos + 0] = ctx->latest_t->v[0];
+      tris[pos + 1] = ctx->latest_t->v[1];
+      tris[pos + 2] = ctx->latest_t->v[2];
       Triangle *prev = ctx->latest_t->prev;
 
       free(ctx->latest_t);
@@ -119,7 +143,15 @@ jint Java_org_oscim_utils_Tessellator_tessGetIndices(JNIEnv *env, jclass c,
 
    (*env)->ReleasePrimitiveArrayCritical(env, obj_indices, tris, JNI_ABORT);
 
-   return cnt;
+   return pos - offset;
+}
+
+
+jint Java_org_oscim_utils_Tessellator_tessGetIndices(JNIEnv *env, jclass c,
+      jlong ptr_context, jshortArray obj_indices, int offset){
+
+   return Java_org_oscim_utils_Tessellator_tessGetIndicesWO(env, c,
+         ptr_context, obj_indices, 0);
 }
 
 jlong Java_org_oscim_utils_Tessellator_tessellate(JNIEnv *env, jclass c,
@@ -165,7 +197,6 @@ jlong Java_org_oscim_utils_Tessellator_tessellate(JNIEnv *env, jclass c,
 
    nverts = 1 + ctx->latest_v->index;
    ntris = ctx->n_tris;
-
 
    jint* out = (jint*) (*env)->GetPrimitiveArrayCritical(env, obj_out, &isCopy);
    if (out == NULL) {

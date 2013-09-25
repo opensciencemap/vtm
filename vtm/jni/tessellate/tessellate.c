@@ -24,6 +24,7 @@ TessContext *new_tess_context()
    result->v_prev = NULL;
    result->vertex_cb = &skip_vertex;
    result->odd_even_strip = 0;
+   result->reversed = 0;
    return result;
 }
 

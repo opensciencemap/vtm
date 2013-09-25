@@ -1,6 +1,7 @@
 package org.oscim.utils;
 
 import org.oscim.backend.Log;
+import org.oscim.core.GeometryBuffer;
 import org.oscim.renderer.elements.VertexItem;
 
 import com.google.gwt.core.client.JavaScriptException;
@@ -11,7 +12,7 @@ import com.google.gwt.typedarrays.shared.Int32Array;
 
 public class Tessellator {
 
-	public static synchronized int triangulate(float[] points, int ppos, int plen, short[] index,
+	public static int tessellate(float[] points, int ppos, int plen, short[] index,
 	        int ipos, int rings, int vertexOffset, VertexItem outTris) {
 
 		//JavaScriptObject o;
@@ -66,6 +67,15 @@ public class Tessellator {
 		}
 
 		return numIndices;
+	}
+
+	public static int tessellate(GeometryBuffer geom, GeometryBuffer out) {
+		return 0;
+	}
+
+	public static int tessellate(GeometryBuffer geom, float scale,
+	        VertexItem outPoints, VertexItem outTris, int vertexOffset) {
+		return 0;
 	}
 
 	static native Int32Array tessellate(JsArrayNumber points, int pOffset, int pLength,

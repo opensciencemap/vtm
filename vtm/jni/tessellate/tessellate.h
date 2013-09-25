@@ -14,6 +14,7 @@ typedef struct Vertex {
 typedef struct TessContext {
    Triangle *latest_t;
    int n_tris;
+   int reversed;
 
    Vertex *v_prev;
    Vertex *v_prevprev;
