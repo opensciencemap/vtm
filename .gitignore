@@ -2,6 +2,7 @@
 */gen/*
 */obj/*
 *.o
+*.so
 *.jar
 *.class
 vtm/jni/jni-headers/
@@ -22,3 +23,4 @@ tmp/
 themes/
 vtm/assets/freizeitkarte/
 vtm/jni/target/
+target/
