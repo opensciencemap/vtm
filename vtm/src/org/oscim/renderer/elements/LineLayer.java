@@ -121,7 +121,7 @@ public final class LineLayer extends RenderElement {
 
 		// Note: just a hack to save some vertices, when there are more than 200 lines
 		// per type
-		if (rounded) {
+		if (rounded && index != null) {
 			int cnt = 0;
 			for (int i = 0, n = index.length; i < n; i++, cnt++) {
 				if (index[i] < 0)
@@ -579,19 +579,25 @@ public final class LineLayer extends RenderElement {
 	}
 
 	public static final class Renderer {
-
-		private static final int LINE_VERTICES_DATA_POS_OFFSET = 0;
+		// TODO: http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter22.html
 
 		// factor to normalize extrusion vector and scale to coord scale
 		private final static float COORD_SCALE_BY_DIR_SCALE =
 		        MapRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
+
+		private final static int CAP_THIN = 0;
+		private final static int CAP_BUTT = 1;
+		private final static int CAP_ROUND = 2;
+
+		private final static int SHADER_FLAT = 1;
+		private final static int SHADER_PROJ = 0;
 
 		// shader handles
 		private static int[] lineProgram = new int[2];
 		private static int[] hLineVertexPosition = new int[2];
 		private static int[] hLineColor = new int[2];
 		private static int[] hLineMatrix = new int[2];
-		private static int[] hLineScale = new int[2];
+		private static int[] hLineFade = new int[2];
 		private static int[] hLineWidth = new int[2];
 		private static int[] hLineMode = new int[2];
 		public static int mTexID;
@@ -617,7 +623,7 @@ public final class LineLayer extends RenderElement {
 					continue;
 
 				hLineMatrix[i] = GL.glGetUniformLocation(lineProgram[i], "u_mvp");
-				hLineScale[i] = GL.glGetUniformLocation(lineProgram[i], "u_wscale");
+				hLineFade[i] = GL.glGetUniformLocation(lineProgram[i], "u_fade");
 				hLineWidth[i] = GL.glGetUniformLocation(lineProgram[i], "u_width");
 				hLineColor[i] = GL.glGetUniformLocation(lineProgram[i], "u_color");
 				hLineMode[i] = GL.glGetUniformLocation(lineProgram[i], "u_mode");
@@ -642,21 +648,14 @@ public final class LineLayer extends RenderElement {
 			mTexID = GLUtils.loadTexture(pixel, 128, 128, GL20.GL_ALPHA,
 			                             GL20.GL_NEAREST, GL20.GL_NEAREST,
 			                             GL20.GL_MIRRORED_REPEAT, GL20.GL_MIRRORED_REPEAT);
-
-			Log.d(TAG, "TEX ID: " + mTexID);
 			return true;
 		}
 
 		public static RenderElement draw(ElementLayers layers, RenderElement curLayer,
-		        MapPosition pos,
-		        Matrices m, float div, int mode) {
+		        MapPosition pos, Matrices m, float div, int mode) {
 
 			if (curLayer == null)
 				return null;
-
-			// FIXME HACK: fallback to simple shader
-			if (lineProgram[mode] == 0)
-				mode = 1;
 
 			GLState.useProgram(lineProgram[mode]);
 
@@ -669,21 +668,17 @@ public final class LineLayer extends RenderElement {
 			if (!GLAdapter.GDX_DESKTOP_QUIRKS)
 				GLState.bindTex2D(mTexID);
 
-			int uLineScale = hLineScale[mode];
+			int uLineFade = hLineFade[mode];
 			int uLineMode = hLineMode[mode];
 			int uLineColor = hLineColor[mode];
 			int uLineWidth = hLineWidth[mode];
 
 			GLState.enableVertexArrays(hLineVertexPosition[mode], -1);
 
-			GL.glVertexAttribPointer(hLineVertexPosition[mode], 4, GL20.GL_SHORT,
-			                         false, 0, layers.lineOffset + LINE_VERTICES_DATA_POS_OFFSET);
+			GL.glVertexAttribPointer(hLineVertexPosition[mode], 4, GL20.GL_SHORT, false, 0,
+			                         layers.lineOffset);
 
-			//glUniformMatrix4fv(hLineMatrix[mode], 1, false, matrix, 0);
 			m.mvp.setAsUniform(hLineMatrix[mode]);
-
-			//int zoom = FastMath.log2((int) pos.absScale);
-			int zoom = pos.zoomLevel;
 
 			double scale = pos.getZoomScale();
 
@@ -692,113 +687,115 @@ public final class LineLayer extends RenderElement {
 			// Though lines should only scale by sqrt(2). This is achieved
 			// by inverting scaling of extrusion vector with: width/sqrt(s).
 			// within one zoom-level: 1 <= s <= 2
-			double s = scale / div;
-			float lineScale = (float) Math.sqrt(s * 2 / 2.2);
+			double relativeScale = scale / div;
+			double variableScale = (float) Math.sqrt(relativeScale * 2 / 2.2);
 
 			// scale factor to map one pixel on tile to one pixel on screen:
-			// only works with orthographic projection
-			float pixel = 0;
+			// used with orthographic projection, (shader mode == 1)
+			double pixel = (mode == SHADER_PROJ) ? 0 : (1.5 / relativeScale);
 
-			if (mode == 1)
-				pixel = (float) (1.5 / s);
+			GL.glUniform1f(uLineFade, (float) pixel);
 
-			GL.glUniform1f(uLineScale, pixel);
-			int lineMode = 0;
-			GL.glUniform1f(uLineMode, lineMode);
+			int capMode = 0;
+			GL.glUniform1f(uLineMode, capMode);
 
 			boolean blur = false;
+			double width;
 
 			RenderElement l = curLayer;
 			for (; l != null && l.type == RenderElement.LINE; l = l.next) {
 				LineLayer ll = (LineLayer) l;
 				Line line = ll.line;
-				float width;
 
-				if (line.fade < zoom) {
+				if (line.fade < pos.zoomLevel) {
 					GLUtils.setColor(uLineColor, line.color, 1);
-				} else if (line.fade > zoom) {
+				} else if (line.fade > pos.zoomLevel) {
 					continue;
 				} else {
 					float alpha = (float) (scale > 1.2 ? scale : 1.2) - 1;
 					GLUtils.setColor(uLineColor, line.color, alpha);
 				}
 
-				if (mode == 0 && blur && line.blur == 0) {
-					GL.glUniform1f(uLineScale, 0);
+				if (mode == SHADER_PROJ && blur && line.blur == 0) {
+					GL.glUniform1f(uLineFade, 0);
 					blur = false;
 				}
 
-				if (line.outline) {
-					// draw linelayers references by this outline
-					for (LineLayer o = ll.outlines; o != null; o = o.outlines) {
+				// draw LineLayer
+				if (!line.outline) {
 
-						if (o.line.fixed /* || strokeMaxZoom */) {
-							width = (float) ((ll.width + o.width) / s);
-						} else {
-							width = (float) (ll.width / s + o.width / lineScale);
-
-							// check min-size for outline
-							if (o.line.min > 0 && o.width * lineScale < o.line.min * 2)
-								continue;
-						}
-
-						GL.glUniform1f(uLineWidth, width * COORD_SCALE_BY_DIR_SCALE);
-
-						if (line.blur != 0) {
-							GL.glUniform1f(uLineScale, (float) (1 - (line.blur / s)));
-							blur = true;
-						} else if (mode == 1) {
-							GL.glUniform1f(uLineScale, pixel / width);
-						}
-
-						if (o.roundCap) {
-							if (lineMode != 1) {
-								lineMode = 1;
-								GL.glUniform1f(uLineMode, lineMode);
-							}
-						} else if (lineMode != 0) {
-							lineMode = 0;
-							GL.glUniform1f(uLineMode, lineMode);
-						}
-						GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
-					}
-				} else {
-
-					if (line.fixed /* || strokeMaxZoom */) {
+					if (line.fixed) {
 						// invert scaling of extrusion vectors so that line
-						// width stays the same.
-						width = (float) (ll.width / s);
+						// width stays the same. 'max'?
+						width = Math.max(ll.width, 1) / relativeScale;
 					} else {
-						// reduce linear scaling of extrusion vectors so that
-						// line width increases by sqrt(2.2).
-						width = ll.width / lineScale;
-
-						// min-size hack to omit outline when line becomes
-						// very thin
-						if ((ll.line.min > 0) && (ll.width * lineScale < ll.line.min * 2))
-							width = (ll.width - 0.2f) / lineScale;
+						width = ll.width / variableScale;
 					}
 
-					GL.glUniform1f(uLineWidth, width * COORD_SCALE_BY_DIR_SCALE);
+					GL.glUniform1f(uLineWidth, (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
-					if (line.blur != 0) {
-						GL.glUniform1f(uLineScale, line.blur);
+					// Line-edge fade
+					if (line.blur > 0) {
+						GL.glUniform1f(uLineFade, line.blur);
 						blur = true;
-					} else if (mode == 1) {
-						GL.glUniform1f(uLineScale, pixel / width);
+					} else if (mode == SHADER_FLAT) {
+						GL.glUniform1f(uLineFade, (float) (pixel / width));
+						//GL.glUniform1f(uLineScale, (float)(pixel / (ll.width / s)));
 					}
 
-					if (ll.roundCap) {
-						if (lineMode != 1) {
-							lineMode = 1;
-							GL.glUniform1f(uLineMode, lineMode);
+					// Cap mode
+					if (ll.width < 1.5 /*|| ll.line.fixed*/) {
+						if (capMode != CAP_THIN) {
+							capMode = CAP_THIN;
+							GL.glUniform1f(uLineMode, capMode);
 						}
-					} else if (lineMode != 0) {
-						lineMode = 0;
-						GL.glUniform1f(uLineMode, lineMode);
+					} else if (ll.roundCap) {
+						if (capMode != CAP_ROUND) {
+							capMode = CAP_ROUND;
+							GL.glUniform1f(uLineMode, capMode);
+						}
+					} else if (capMode != CAP_BUTT) {
+						capMode = CAP_BUTT;
+						GL.glUniform1f(uLineMode, capMode);
 					}
 
 					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
+
+					continue;
+				}
+
+				// draw LineLayers references by this outline
+				for (LineLayer o = ll.outlines; o != null; o = o.outlines) {
+
+					if (o.line.fixed)
+						width = (ll.width + o.width) / relativeScale;
+					else
+						width = ll.width / relativeScale + o.width / variableScale;
+
+					GL.glUniform1f(uLineWidth, (float) (width * COORD_SCALE_BY_DIR_SCALE));
+
+					// Line-edge fade
+					if (line.blur > 0) {
+						//GL.glUniform1f(uLineFade, (float) FastMath.clamp((1 - (line.blur / relativeScale)), 0, 1));
+						//GL.glUniform1f(uLineFade, (float) (1 - (line.blur / relativeScale)));
+						GL.glUniform1f(uLineFade, line.blur);
+						blur = true;
+					} else if (mode == SHADER_FLAT) {
+						GL.glUniform1f(uLineFade, (float) (pixel / width));
+					}
+
+					// Cap mode
+					if (o.roundCap) {
+						if (capMode != CAP_ROUND) {
+							capMode = CAP_ROUND;
+							GL.glUniform1f(uLineMode, capMode);
+						}
+					} else if (capMode != CAP_BUTT) {
+						capMode = CAP_BUTT;
+						GL.glUniform1f(uLineMode, capMode);
+					}
+
+					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
 				}
 			}
 
@@ -815,44 +812,53 @@ public final class LineLayer extends RenderElement {
 		        + "uniform float u_mode;"
 		        + "varying vec2 v_st;"
 		        + "void main() {"
+
 		        // scale extrusion to u_width pixel
-		        // just ignore the two most insignificant bits of a_st :)
+		        // just ignore the two most insignificant bits.
 		        + "  vec2 dir = a_pos.zw;"
 		        + "  gl_Position = u_mvp * vec4(a_pos.xy + (u_width * dir), 0.0, 1.0);"
-		        // last two bits of a_st hold the texture coordinates
-		        // ..maybe one could wrap texture so that `abs` is not required
+
+		        // last two bits hold the texture coordinates.
 		        + "  v_st = abs(mod(dir, 4.0)) - 1.0;"
 		        + "}";
 
+		/** Antialising for orthonogonal projection */
 		private final static String lineSimpleFragmentShader = ""
 		        + "precision mediump float;"
 		        + "uniform sampler2D tex;"
-		        + "uniform float u_wscale;"
+		        + "uniform float u_fade;"
 		        + "uniform float u_mode;"
 		        + "uniform vec4 u_color;"
 		        + "varying vec2 v_st;"
 		        + "void main() {"
-		        //+ "  float len;"
-		        // (currently required as overlay line renderers dont load the texture)
-		        //+ "  if (u_mode == 0)"
-		        //+ "    len = abs(v_st.s);"
-		        //+ "  else"
-		        //+ "    len = texture2D(tex, v_st).a;"
-		        //+ "    len = u_mode * length(v_st);"
-		        // this avoids branching, need to check performance
+		        + "float len;"
+		        + "  if (u_mode == 2.0){"
+		        //   round cap line
 		        + (GLAdapter.GDX_DESKTOP_QUIRKS
-		                ? " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
-		                : " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);")
-		        // interpolate alpha between: 0.0 < 1.0 - len < u_wscale
-		        // where wscale is 'filter width' / 'line width' and 0 <= len <= sqrt(2)
-		        //+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, 1.0 - len);"
-		        //+ "  gl_FragColor = mix(vec4(1.0,0.0,0.0,1.0), u_color, smoothstep(0.0, u_wscale, 1.0 - len));"
-		        + "  float alpha = min(1.0, (1.0 - len) / u_wscale);"
-		        + "  if (alpha > 0.1)"
-		        + "    gl_FragColor = u_color * alpha;"
-		        + "  else"
-		        + "    discard;"
-		        //			+ "gl_FragColor = vec4(texture2D(tex, v_st).a);"
+		                ? "    len = length(v_st);"
+		                : "    len = texture2D(tex, v_st).a;")
+		        + "  } else {"
+		        //     flat cap line
+		        + "    len = abs(v_st.s);"
+		        + "  }"
+		        //   u_mode == 0.0 -> thin line
+		        + "  len = len * clamp(u_mode, len, 1.0);"
+
+		        // use 'max' to avoid branching, need to check performance
+		        //+ (GLAdapter.GDX_DESKTOP_QUIRKS
+		        //        ? " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
+		        //        : " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);")
+
+		        // Antialias line-edges:
+		        // - 'len' is 0 at center of line. -> (1.0 - len) is 0 at the edges
+		        // - 'u_fade' is 'pixel' / 'width', i.e. the inverse width of the
+		        //   line in pixel on screen.
+		        // - 'pixel' is 1.5 / relativeScale
+		        // - '(1.0 - len) / u_fade' interpolates the 'pixel' on line-edge
+		        //   between 0 and 1 (it is greater 1 for all inner pixel).
+		        + "  gl_FragColor = u_color * clamp((1.0 - len) / u_fade, 0.0, 1.0);"
+		        // -> nicer for thin lines
+		        //+ "  gl_FragColor = u_color * clamp((1.0 - (len * len)) / u_fade, 0.0, 1.0);"
 		        + "}";
 
 		private final static String lineFragmentShader = ""
@@ -861,92 +867,32 @@ public final class LineLayer extends RenderElement {
 		        + "uniform sampler2D tex;"
 		        + "uniform float u_mode;"
 		        + "uniform vec4 u_color;"
-		        + "uniform float u_wscale;"
+		        + "uniform float u_fade;"
 		        + "varying vec2 v_st;"
 		        + "void main() {"
 		        + "  float len;"
 		        + "  float fuzz;"
-		        + "  if (u_mode == 0.0){"
-		        + "    len = abs(v_st.s);"
-		        + "    fuzz = fwidth(v_st.s);"
-		        + "  } else {"
+		        + "  if (u_mode == 2.0){"
+		        //   round cap line
 		        + (GLAdapter.GDX_DESKTOP_QUIRKS
 		                ? "    len = length(v_st);"
 		                : "    len = texture2D(tex, v_st).a;")
 		        + "    vec2 st_width = fwidth(v_st);"
 		        + "    fuzz = max(st_width.s, st_width.t);"
+		        + "  } else {"
+		        //     flat cap line
+		        + "    len = abs(v_st.s);"
+		        + "    fuzz = fwidth(v_st.s);"
 		        + "  }"
-		        //+ "  gl_FragColor = u_color * smoothstep(0.0, fuzz + u_wscale, 1.0 - len);"
-		        // smoothstep is too sharp, guess one could increase extrusion with z..
-		        // this looks ok:
-		        //+ "  gl_FragColor = u_color * min(1.0, (1.0 - len) / (u_wscale + fuzz));"
-		        // can be faster according to nvidia docs 'Optimize OpenGL ES 2.0 Performace'
-		        + "  gl_FragColor = u_color * clamp((1.0 - len) / (u_wscale + fuzz), 0.0, 1.0);"
-		        //+ "  gl_FragColor = mix(vec4(0.0,1.0,0.0,1.0), u_color, clamp((1.0 - len) / (u_wscale + fuzz), 0.0, 1.0));"
+		        //   u_mode == 0.0 -> thin line
+		        + "  len = len * clamp(u_mode, len, 1.0);"
+		        + "  if (fuzz > 2.0)"
+		        + "  gl_FragColor = u_color * 0.5;" //vec4(1.0, 1.0, 1.0, 1.0);"
+		        + "  else"
+		        + "  gl_FragColor = u_color * clamp((1.0 - len) / max(u_fade, fuzz), 0.0, 1.0);"
+		        //+ "  gl_FragColor = u_color * clamp((1.0 - len), 0.0, 1.0);"
 		        + "}";
 
-		//	private final static String lineVertexShader = ""
-		//			+ "precision mediump float;"
-		//			+ "uniform mat4 u_mvp;"
-		//			+ "uniform float u_width;"
-		//			+ "attribute vec4 a_pos;"
-		//			+ "uniform int u_mode;"
-		//			//+ "attribute vec2 a_st;"
-		//			+ "varying vec2 v_st;"
-		//			+ "const float dscale = 8.0/2048.0;"
-		//			+ "void main() {"
-		//			// scale extrusion to u_width pixel
-		//			// just ignore the two most insignificant bits of a_st :)
-		//			+ "  vec2 dir = a_pos.zw;"
-		//			+ "  gl_Position = u_mvp * vec4(a_pos.xy + (dscale * u_width * dir), 0.0, 1.0);"
-		//			// last two bits of a_st hold the texture coordinates
-		//			+ "  v_st = u_width * (abs(mod(dir, 4.0)) - 1.0);"
-		//			// use bit operations when available (gles 1.3)
-		//			// + "  v_st = u_width * vec2(a_st.x & 3 - 1, a_st.y & 3 - 1);"
-		//			+ "}";
-		//
-		//	private final static String lineSimpleFragmentShader = ""
-		//			+ "precision mediump float;"
-		//			+ "uniform float u_wscale;"
-		//			+ "uniform float u_width;"
-		//			+ "uniform int u_mode;"
-		//			+ "uniform vec4 u_color;"
-		//			+ "varying vec2 v_st;"
-		//			+ "void main() {"
-		//			+ "  float len;"
-		//			+ "  if (u_mode == 0)"
-		//			+ "    len = abs(v_st.s);"
-		//			+ "  else "
-		//			+ "    len = length(v_st);"
-		//			// fade to alpha. u_wscale is the width in pixel which should be
-		//			// faded, u_width - len the position of this fragment on the
-		//			// perpendicular to this line segment. this only works with no
-		//			// perspective
-		//			//+ "  gl_FragColor = min(1.0, (u_width - len) / u_wscale) * u_color;"
-		//			+ "  gl_FragColor = u_color * smoothstep(0.0, u_wscale, (u_width - len));"
-		//			+ "}";
-		//
-		//	private final static String lineFragmentShader = ""
-		//			+ "#extension GL_OES_standard_derivatives : enable\n"
-		//			+ "precision mediump float;"
-		//			+ "uniform float u_wscale;"
-		//			+ "uniform float u_width;"
-		//			+ "uniform int u_mode;"
-		//			+ "uniform vec4 u_color;"
-		//			+ "varying vec2 v_st;"
-		//			+ "void main() {"
-		//			+ "  float len;"
-		//			+ "  float fuzz;"
-		//			+ "  if (u_mode == 0){"
-		//			+ "    len = abs(v_st.s);"
-		//			+ "    fuzz = u_wscale + fwidth(v_st.s);"
-		//			+ "  } else {"
-		//			+ "    len = length(v_st);"
-		//			+ "    vec2 st_width = fwidth(v_st);"
-		//			+ "    fuzz = u_wscale + max(st_width.s, st_width.t);"
-		//			+ "  }"
-		//			+ "  gl_FragColor = u_color * min(1.0, (u_width - len) / fuzz);"
-		//			+ "}";
 	}
 
 }
