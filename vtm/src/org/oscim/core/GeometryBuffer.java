@@ -221,7 +221,22 @@ public class GeometryBuffer {
 			index[indexPos + 1] = -1;
 	}
 
-	// ---- internals ----
+	public GeometryBuffer translate(float dx, float dy) {
+		for (int i = 0; i < pointPos; i += 2) {
+			points[i] += dx;
+			points[i+1] += dy;
+		}
+		return this;
+	}
+
+	public GeometryBuffer scale(float scaleX, float scaleY) {
+		for (int i = 0; i < pointPos; i += 2) {
+			points[i] *= scaleX;
+			points[i+1] *= scaleY;
+		}
+		return this;
+	}
+
 	/**
 	 * Ensure point size.
 	 * 
