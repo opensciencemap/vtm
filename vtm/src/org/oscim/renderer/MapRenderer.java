@@ -260,7 +260,8 @@ public class MapRenderer {
 		}
 
 		//Log.d(TAG, "begin frame");
-		GLState.bindTex2D(0);
+		GLState.bindTex2D(-1);
+		GLState.useProgram(-1);
 		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 
 		/* update layers */
@@ -275,6 +276,9 @@ public class MapRenderer {
 			}
 
 			renderer.update(pos, changed, mMatrices);
+
+			if (GLAdapter.debug)
+				GLUtils.checkGlError(renderer.getClass().getName());
 
 			if (renderer.isReady)
 				renderer.render(mMapPosition, mMatrices);
@@ -316,6 +320,9 @@ public class MapRenderer {
 
 		GL.glDisable(GL20.GL_CULL_FACE);
 		GL.glBlendFunc(GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+		GL.glFrontFace(GL20.GL_CW);
+		GL.glCullFace(GL20.GL_BACK);
 
 		if (!mNewSurface) {
 			mMap.updateMap(false);

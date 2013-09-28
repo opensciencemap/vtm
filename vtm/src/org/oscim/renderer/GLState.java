@@ -41,15 +41,12 @@ public class GLState {
 
 		GL.glDisable(GL20.GL_STENCIL_TEST);
 		GL.glDisable(GL20.GL_DEPTH_TEST);
-
-		//		if (currentTexId != 0) {
-		//			GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
-		//			currentTexId = 0;
-		//		}
 	}
 
 	public static boolean useProgram(int shaderProgram) {
-		if (shaderProgram != shader) {
+		if (shaderProgram < 0) {
+			shader = -1;
+		} else if (shaderProgram != shader) {
 			GL.glUseProgram(shaderProgram);
 			shader = shaderProgram;
 			return true;
@@ -120,13 +117,10 @@ public class GLState {
 	}
 
 	public static void bindTex2D(int id) {
-		//		if (GLAdapter.GDX_DESKTOP_QUIRKS){
-		//			GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
-		//if (GLAdapter.GDX_DESKTOP_QUIRKS && id != 0)
-		//	GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
-		//		} else
-
-		if (currentTexId != id) {
+		if (id < 0) {
+			GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
+			currentTexId = 0;
+		} else if (currentTexId != id) {
 			GL.glBindTexture(GL20.GL_TEXTURE_2D, id);
 			currentTexId = id;
 		}

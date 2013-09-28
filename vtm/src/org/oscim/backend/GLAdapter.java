@@ -24,6 +24,8 @@ public class GLAdapter {
 
 	public static boolean NON_PREMUL_CANVAS;
 
+	public final static boolean debug = true;
+
 	public static GL20 get() {
 		if (g == null)
 			throw new IllegalStateException();
