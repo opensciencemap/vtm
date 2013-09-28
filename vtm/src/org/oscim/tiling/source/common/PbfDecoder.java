@@ -17,11 +17,10 @@ package org.oscim.tiling.source.common;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.utils.UTF8Decoder;
-
-import org.oscim.backend.Log;
 
 public abstract class PbfDecoder {
 	private final static String TAG = PbfDecoder.class.getName();
@@ -164,14 +163,14 @@ public abstract class PbfDecoder {
 		if (bufferPos + 8 > bufferFill)
 			fillBuffer(8);
 
-		long val = (buffer[bufferPos++] & 0xFF
-		        | (buffer[bufferPos++] & 0xFF) << 8
-		        | (buffer[bufferPos++] & 0xFF) << 16
-		        | (buffer[bufferPos++] & 0xFF) << 24
-		        | (buffer[bufferPos++] & 0xFF) << 32
-		        | (buffer[bufferPos++] & 0xFF) << 40
-		        | (buffer[bufferPos++] & 0xFF) << 48
-		        | (buffer[bufferPos++] & 0xFF) << 56);
+		long val = ((long) buffer[bufferPos++] & 0xFF
+		        | ((long) buffer[bufferPos++] & 0xFF) << 8
+		        | ((long) buffer[bufferPos++] & 0xFF) << 16
+		        | ((long) buffer[bufferPos++] & 0xFF) << 24
+		        | ((long) buffer[bufferPos++] & 0xFF) << 32
+		        | ((long) buffer[bufferPos++] & 0xFF) << 40
+		        | ((long) buffer[bufferPos++] & 0xFF) << 48
+		        | ((long) buffer[bufferPos++] & 0xFF) << 56);
 
 		return Double.longBitsToDouble(val);
 	}
