@@ -167,6 +167,9 @@ public class ElementLayers {
 				else if (type == RenderElement.MESH)
 					renderElement = new MeshLayer(level);
 
+				if (renderElement == null)
+					throw new IllegalArgumentException();
+
 				if (l == null) {
 					// insert at start
 					renderElement.next = baseLayers;
@@ -182,8 +185,8 @@ public class ElementLayers {
 			// check if found layer matches requested type
 			Log.d(TAG, "BUG wrong layer " + renderElement.type + " " + type +
 			        " on layer " + renderElement.level);
-			// TODO throw exception
-			return null;
+
+			throw new IllegalArgumentException();
 		}
 
 		mCurLayer = renderElement;
