@@ -19,10 +19,30 @@ public final class GeometryUtils {
 	private GeometryUtils() {
 	}
 
-	// from www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 	/**
-	 * test if point x/y is in polygon defined by vertices[offset ...
+	 * Test if point x/y is in polygon defined by vertices[offset ...
 	 * offset+length]
+	 * <p>
+	 * -- from www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+	 * <p>
+	 * If there is only one connected component, then it is optional to repeat
+	 * the first vertex at the end. It's also optional to surround the component
+	 * with zero vertices.
+	 * <p>
+	 * The polygon may contain multiple separate components, and/or holes,
+	 * provided that you separate the components and holes with a (0,0) vertex,
+	 * as follows.
+	 * <li>First, include a (0,0) vertex.
+	 * <li>Then include the first component' vertices, repeating its first
+	 * vertex after the last vertex.
+	 * <li>Include another (0,0) vertex.
+	 * <li>Include another component or hole, repeating its first vertex after
+	 * the last vertex.
+	 * <li>Repeat the above two steps for each component and hole.
+	 * <li>Include a final (0,0) vertex.
+	 * <p>
+	 * Each component or hole's vertices may be listed either clockwise or
+	 * counter-clockwise.
 	 */
 	public static boolean pointInPoly(float x, float y, float[] vertices,
 	        int length, int offset) {
