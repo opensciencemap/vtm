@@ -92,7 +92,7 @@ public class AsyncExecutor {
 		try {
 			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
-			new RuntimeException("Couldn't shutdown loading thread");
+			throw new RuntimeException("Couldn't shutdown loading thread");
 		}
 	}
 }
