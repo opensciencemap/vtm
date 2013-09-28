@@ -125,13 +125,17 @@ public class Tessellator {
 				break;
 		}
 
-		long ctx = Tessellator.tessellate(geom.points, 0, geom.index, 0, numRings, result);
+		long ctx = Tessellator.tessellate(geom.points, 0,
+		                                  geom.index, 0,
+		                                  numRings, result);
 
-		Log.d(TAG, "got " + result[RESULT_VERTICES] + " " + result[RESULT_TRIANGLES]);
+		//Log.d(TAG, "got "
+		//        + result[RESULT_VERTICES] + " "
+		//        + result[RESULT_TRIANGLES]);
 
 		boolean verticesAdded = false;
 		if (numPoints < result[RESULT_VERTICES] * 2) {
-			Log.d(TAG, "grow vertices" + geom.pointPos);
+			//Log.d(TAG, "grow vertices" + geom.pointPos);
 			verticesAdded = true;
 		}
 
@@ -188,6 +192,7 @@ public class Tessellator {
 			numRings++;
 			numPoints += (geom.index[i]) / 2;
 		}
+
 		if (numRings == 0 || numPoints == 0) {
 			Log.d(TAG, "missing " + numPoints + ":" + numRings);
 			return 0;
@@ -212,7 +217,6 @@ public class Tessellator {
 		                                            outPoints.vertices,
 		                                            outPoints.used,
 		                                            scale)) > 0) {
-
 			outPoints.used += cnt;
 
 			if (outPoints.used == VertexItem.SIZE) {
@@ -234,7 +238,6 @@ public class Tessellator {
 		while ((cnt = Tessellator.tessGetIndicesWO(ctx,
 		                                           outTris.vertices,
 		                                           outTris.used)) > 0) {
-
 			// shift by vertexOffset
 			for (int pos = outTris.used, end = pos + cnt; pos < end; pos++)
 				outTris.vertices[pos] += vertexOffset;
