@@ -27,35 +27,34 @@ import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
 // FIXME needs rewrite!
+// TODO use separate pools for different bitmap types and dimensions
 
 public class TextureItem extends Inlist<TextureItem> {
 	private final static String TAG = TextureItem.class.getName();
 
 	private static GL20 GL;
 
-	// texture ID
+	/** texture ID */
 	public int id;
 
 	public int width;
 	public int height;
 	public boolean repeat;
 
-	// vertex offset from which this texture is referenced
+	/** vertex offset from which this texture is referenced */
 	public short offset;
 	public short vertices;
 
-	// temporary Bitmap
+	/** temporary Bitmap */
 	public Bitmap bitmap;
 
-	// external bitmap (not from pool)
+	/** external bitmap (not from pool) */
 	private boolean ownBitmap;
 
-	// is only referencing a textureId, does not
-	// release the texture when TextureItem is
-	// released.
+	/** do not release the texture when TextureItem is released. */
 	private boolean isClone;
 
-	// texture data is ready
+	/** texture data is ready */
 	private boolean isReady;
 
 	private TextureItem(int id) {
