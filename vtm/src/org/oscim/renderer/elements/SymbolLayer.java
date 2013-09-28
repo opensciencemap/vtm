@@ -26,7 +26,9 @@ public final class SymbolLayer extends TextureLayer {
 
 	private final static float SCALE = 8.0f;
 	private final static int VERTICES_PER_SPRITE = 4;
+	private final static int LBIT_MASK = 0xfffffffe;
 
+	private TextureItem prevTextures;
 	private SymbolItem symbols;
 
 	public SymbolLayer() {
@@ -53,8 +55,6 @@ public final class SymbolLayer extends TextureLayer {
 		symbols = item;
 	}
 
-	private final static int LBIT_MASK = 0xfffffffe;
-
 	@Override
 	protected void compile(ShortBuffer sbuf) {
 		// offset of layer data in vbo
@@ -67,8 +67,7 @@ public final class SymbolLayer extends TextureLayer {
 		int pos = 0;
 		short buf[] = si.vertices;
 
-		TextureItem prevTextures = textures;
-
+		prevTextures = textures;
 		textures = null;
 		TextureItem to = null;
 
@@ -98,12 +97,9 @@ public final class SymbolLayer extends TextureLayer {
 			} else if (it.bitmap != null) {
 				width = it.bitmap.getWidth();
 				height = it.bitmap.getHeight();
-				to = getTexture(prevTextures, it.bitmap);
+				to = getTexture(it.bitmap);
 				if (to == null) {
 					to = new TextureItem(it.bitmap);
-					//					to.bitmap = it.bitmap;
-					//					to.width = it.bitmap.getWidth();
-					//					to.height = it.bitmap.getHeight();
 					textures = Inlist.appendItem(textures, to);
 
 					to.upload();
@@ -184,7 +180,7 @@ public final class SymbolLayer extends TextureLayer {
 		prevTextures = null;
 	}
 
-	private TextureItem getTexture(TextureItem prevTextures, Bitmap bitmap) {
+	private TextureItem getTexture(Bitmap bitmap) {
 		TextureItem to;
 
 		for (to = prevTextures; to != null; to = to.next) {
