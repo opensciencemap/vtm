@@ -95,7 +95,7 @@ public final class BufferObject {
 
 		if (pool[t] == null) {
 			if (counter[t] != 0)
-				Log.d(TAG, "BUG: missing BufferObjects: " + counter);
+				throw new IllegalStateException("lost BufferObjects: " + counter[t]);
 
 			createBuffers(target, 10);
 			counter[t] += 10;
