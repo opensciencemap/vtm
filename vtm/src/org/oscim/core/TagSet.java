@@ -17,7 +17,6 @@ package org.oscim.core;
 import java.util.Arrays;
 
 public class TagSet {
-	public static TagSet EMPTY_TAG_SET = new TagSet();
 
 	public Tag[] tags;
 	public int numTags;

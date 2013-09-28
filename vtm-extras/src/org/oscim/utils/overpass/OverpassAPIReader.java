@@ -212,7 +212,7 @@ public class OverpassAPIReader {
 
 		long id = 0;
 		double lat = 0, lon = 0;
-		TagSet tags = TagSet.EMPTY_TAG_SET;
+		TagSet tags = null; 
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
 
@@ -242,7 +242,7 @@ public class OverpassAPIReader {
 	private void parseWay(JsonParser jp) throws JsonParseException, IOException {
 
 		long id = 0;
-		TagSet tags = TagSet.EMPTY_TAG_SET;
+		TagSet tags = null;
 		ArrayList<OSMNode> wayNodes = new ArrayList<OSMNode>();
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
@@ -277,7 +277,7 @@ public class OverpassAPIReader {
 	        IOException {
 
 		long id = 0;
-		TagSet tags = TagSet.EMPTY_TAG_SET;
+		TagSet tags = null;
 		ArrayList<TmpRelation> members = new ArrayList<TmpRelation>();
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
@@ -332,8 +332,6 @@ public class OverpassAPIReader {
 			tags.add(new Tag(key, val, false));
 
 		}
-		if (tags == null)
-			return TagSet.EMPTY_TAG_SET;
 
 		return tags;
 	}
