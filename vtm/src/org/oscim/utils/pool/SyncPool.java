@@ -59,6 +59,11 @@ public abstract class SyncPool<T extends Inlist<T>> {
 
 	}
 
+	/**
+	 * Creates the item. To be implemented by subclass.
+	 * 
+	 * @return the item
+	 */
 	protected abstract T createItem();
 
 	public void release(T item) {
@@ -82,6 +87,12 @@ public abstract class SyncPool<T extends Inlist<T>> {
 		}
 	}
 
+	/**
+	 * Release all items from 'item'. Do not use the
+	 * 'item' reference afterwards!
+	 * 
+	 * @param item the item (or list or items)
+	 */
 	public void releaseAll(T item) {
 		if (item == null)
 			return;
@@ -116,6 +127,12 @@ public abstract class SyncPool<T extends Inlist<T>> {
 		}
 	}
 
+	/**
+	 * Gets an 'item' from pool, if pool is empty a new
+	 * item will be created by createItem().
+	 * 
+	 * @return the item
+	 */
 	public T get() {
 
 		synchronized (this) {
