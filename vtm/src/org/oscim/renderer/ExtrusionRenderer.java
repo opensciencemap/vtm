@@ -230,7 +230,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 			// chances are high that one moves through a building
 			// with scale > 2 also draw back sides in this case.
 			GL.glEnable(GL20.GL_CULL_FACE);
-			GL.glCullFace(GL20.GL_FRONT);
 		}
 		GL.glDepthFunc(GL20.GL_LESS);
 		GL.glColorMask(false, false, false, false);
