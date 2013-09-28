@@ -15,7 +15,7 @@
 package org.oscim.renderer.elements;
 
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.core.Point;
+import org.oscim.core.PointF;
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
@@ -45,7 +45,7 @@ public class SymbolItem extends Inlist<SymbolItem> {
 
 	public TextureRegion texRegion;
 	public Bitmap bitmap;
-	public Point offset;
+	public PointF offset;
 
 	public void set(float x, float y, TextureRegion texture, boolean billboard) {
 		this.x = x;

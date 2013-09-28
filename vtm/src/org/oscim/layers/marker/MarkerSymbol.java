@@ -1,19 +1,18 @@
 package org.oscim.layers.marker;
 
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.core.Point;
+import org.oscim.core.PointF;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 
 public class MarkerSymbol {
 	final Bitmap[] mBitmap;
 	// Hotspot offset
-	final Point[] mOffset;
+	final PointF mOffset;
 
 	public MarkerSymbol(Bitmap bitmap, float relX, float relY) {
 		mBitmap = new Bitmap[1];
 		mBitmap[0] = bitmap;
-		mOffset = new Point[1];
-		mOffset[0] = new Point(relX, relY);
+		mOffset = new PointF(relX, relY);
 	}
 
 	public MarkerSymbol(Bitmap bitmap, HotspotPlace hotspot) {
@@ -62,12 +61,11 @@ public class MarkerSymbol {
 
 		mBitmap = new Bitmap[1];
 		mBitmap[0] = bitmap;
-		mOffset = new Point[1];
-		mOffset[0] = new Point(x, y);
+		mOffset = new PointF(x, y);
 	}
 
-	public Point getHotspot() {
-		return mOffset[0];
+	public PointF getHotspot() {
+		return mOffset;
 	}
 
 	public Bitmap getBitmap() {

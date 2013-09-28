@@ -14,13 +14,29 @@
  */
 package org.oscim.core;
 
+/**
+ * The Class PointF represents a point in 2D.
+ */
 public class PointF {
+
+	/** The x ordinate */
 	public float x;
+
+	/** The y ordinate */
 	public float y;
 
+	/**
+	 * Instantiates a new Point.
+	 */
 	public PointF() {
 	}
 
+	/**
+	 * Instantiates a new Point with coordinates x and y.
+	 * 
+	 * @param x the x
+	 * @param y the y
+	 */
 	public PointF(float x, float y) {
 		this.x = x;
 		this.y = y;
