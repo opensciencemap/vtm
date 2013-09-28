@@ -106,4 +106,12 @@ public final class TileSet {
 			return -1;
 		}
 	}
+
+	public boolean contains(MapTile t) {
+		for (int i = 0; i < cnt; i++)
+			if (tiles[i].equals(t))
+				return true;
+
+		return false;
+    }
 }
