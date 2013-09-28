@@ -223,11 +223,7 @@ public class MapTile extends Tile {
 	protected void clear() {
 		if (layers != null) {
 			// TODO move this to layers clear
-			if (layers.vbo != null) {
-				BufferObject.release(layers.vbo);
-				layers.vbo = null;
-			}
-
+			layers.vbo = BufferObject.release(layers.vbo);
 			layers.clear();
 		}
 

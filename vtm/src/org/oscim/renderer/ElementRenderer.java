@@ -139,8 +139,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 		int newSize = layers.getSize();
 
 		if (newSize <= 0) {
-			BufferObject.release(layers.vbo);
-			layers.vbo = null;
+			layers.vbo = BufferObject.release(layers.vbo);
 			setReady(false);
 			return;
 		}

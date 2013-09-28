@@ -416,10 +416,8 @@ public class ExtrusionLayer extends RenderElement {
 	@Override
 	protected void clear() {
 		if (compiled) {
-			BufferObject.release(vboIndices);
-			BufferObject.release(vboVertices);
-			vboIndices = null;
-			vboVertices = null;
+			vboIndices = BufferObject.release(vboIndices);
+			vboVertices = BufferObject.release(vboVertices);
 		} else {
 			for (int i = 0; i < 4; i++)
 				VertexItem.pool.releaseAll(mIndices[i]);

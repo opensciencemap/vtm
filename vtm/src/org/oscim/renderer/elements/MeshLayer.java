@@ -43,6 +43,10 @@ public class MeshLayer extends RenderElement {
 	}
 
 	public void addMesh(GeometryBuffer geom) {
+		if (geom.index[0] < 6) {
+			Log.d(TAG, "invalid poly");
+			return;
+		}
 		if (vertexItems == null) {
 			vertexItems = VertexItem.pool.get();
 			indiceItems = VertexItem.pool.get();
@@ -69,9 +73,10 @@ public class MeshLayer extends RenderElement {
 	@Override
 	protected void compile(ShortBuffer sbuf) {
 		if (indiceItems == null) {
-
+			indicesVbo = BufferObject.release(indicesVbo);
 			return;
 		}
+
 		Log.d(TAG, "compile");
 		// add vertices to shared VBO
 		ElementLayers.addPoolItems(this, sbuf);
@@ -95,19 +100,20 @@ public class MeshLayer extends RenderElement {
 
 		sbuf.flip();
 
-		indicesVbo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		if (indicesVbo == null)
+			indicesVbo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
 		indicesVbo.loadBufferData(sbuf, sbuf.limit() * 2);
 	}
 
 	@Override
 	protected void clear() {
-		BufferObject.release(indicesVbo);
+		indicesVbo = BufferObject.release(indicesVbo);
 		VertexItem.pool.releaseAll(indiceItems);
 		VertexItem.pool.releaseAll(vertexItems);
 
 		indiceItems = null;
 		vertexItems = null;
-		indicesVbo = null;
 	}
 
 	public static class Renderer {
@@ -146,6 +152,9 @@ public class MeshLayer extends RenderElement {
 
 			for (; l != null && l.type == RenderElement.MESH; l = l.next) {
 				MeshLayer ml = (MeshLayer) l;
+
+				if (ml.indicesVbo == null)
+					continue;
 
 				ml.indicesVbo.bind();
 

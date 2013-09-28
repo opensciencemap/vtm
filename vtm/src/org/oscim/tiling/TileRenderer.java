@@ -173,8 +173,7 @@ public class TileRenderer extends LayerRenderer {
 			if (!ElementRenderer.uploadLayers(tile.layers, newSize, true)) {
 				Log.d(TAG, "BUG uploadTileData " + tile + " failed!");
 
-				BufferObject.release(tile.layers.vbo);
-				tile.layers.vbo = null;
+				tile.layers.vbo = BufferObject.release(tile.layers.vbo);
 				tile.layers.clear();
 				tile.layers = null;
 				return 0;

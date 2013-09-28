@@ -17,6 +17,8 @@ package org.oscim.renderer;
 
 import java.nio.Buffer;
 
+import javax.annotation.CheckReturnValue;
+
 import org.oscim.backend.GL20;
 import org.oscim.backend.Log;
 
@@ -125,9 +127,10 @@ public final class BufferObject {
 		return bo;
 	}
 
-	public static synchronized void release(BufferObject bo) {
+	@CheckReturnValue
+	public static synchronized BufferObject release(BufferObject bo) {
 		if (bo == null)
-			return;
+			return null;
 
 		// if (counter > 200) {
 		// Log.d(TAG, "should clear some buffers " + counter);
@@ -137,6 +140,8 @@ public final class BufferObject {
 		bo.next = pool[t];
 		pool[t] = bo;
 		counter[t]++;
+
+		return null;
 	}
 
 	// Note: only call from GL-Thread
