@@ -46,6 +46,11 @@ public class MapPosition {
 		this.angle = 0;
 	}
 
+	public MapPosition(double latitude, double longitude, double scale) {
+		setPosition(latitude, longitude);
+		setScale(scale);
+	}
+
 	public void setZoomLevel(int zoomLevel) {
 		this.zoomLevel = zoomLevel;
 		this.scale = 1 << zoomLevel;
@@ -75,6 +80,9 @@ public class MapPosition {
 		this.y = other.y;
 	}
 
+	/**
+	 * @return scale relative to zoom-level.
+	 */
 	public double getZoomScale() {
 		return scale / (1 << zoomLevel);
 	}

@@ -191,6 +191,11 @@ public abstract class Map implements EventDispatcher {
 		updateMap(true);
 	}
 
+	public void setMapPosition(double latitude, double longitude, double scale) {
+		mViewport.setMapPosition(new MapPosition(latitude, longitude, scale));
+		updateMap(true);
+	}
+
 	/**
 	 * Get current {@link MapPosition}.
 	 * 
