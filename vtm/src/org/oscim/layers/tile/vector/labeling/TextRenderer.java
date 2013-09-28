@@ -35,10 +35,10 @@ import org.oscim.map.Viewport;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapRenderer.Matrices;
-import org.oscim.renderer.elements.RenderElement;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.PolygonLayer;
+import org.oscim.renderer.elements.RenderElement;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.SymbolLayer;
 import org.oscim.renderer.elements.TextItem;
@@ -49,7 +49,6 @@ import org.oscim.tiling.TileRenderer;
 import org.oscim.tiling.TileSet;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
-import org.oscim.utils.pool.LList;
 import org.oscim.utils.pool.Pool;
 
 class TextRenderer extends ElementRenderer {
@@ -121,11 +120,6 @@ class TextRenderer extends ElementRenderer {
 	//private final float[] mTmpCoords = new float[8];
 
 	//private final HashMap<MapTile, LabelTile> mActiveTiles;
-
-	class LabelTile {
-		Tile tile;
-		LList<Label> labels;
-	}
 
 	private float mSquareRadius;
 	private int mRelabelCnt;
@@ -476,7 +470,7 @@ class TextRenderer extends ElementRenderer {
 			float dy = (float) (t.tileY * Tile.SIZE - tileY);
 			dx = flipLongitude(dx, maxx);
 
-			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
+			O: for (TextItem ti = t.labels; ti != null; ti = ti.next) {
 				if (!ti.text.caption)
 					continue;
 
@@ -499,28 +493,22 @@ class TextRenderer extends ElementRenderer {
 				                     l.text.fontHeight + MIN_CAPTION_DIST,
 				                     l.text.dy);
 
-				boolean overlaps = false;
-
 				for (Label lp = mLabels; lp != null;) {
 					if (l.bbox.overlaps(lp.bbox)) {
 						if (l.text.priority < lp.text.priority) {
 							lp = removeLabel(lp);
 							continue;
 						}
-
-						overlaps = true;
-						break;
+						continue O;
 					}
 					lp = (Label) lp.next;
 				}
 
-				if (!overlaps) {
-					addLabel(l);
-					l.item = TextItem.copy(ti);
-					l.tile = t;
-					l.active = mRelabelCnt;
-					l = null;
-				}
+				addLabel(l);
+				l.item = TextItem.copy(ti);
+				l.tile = t;
+				l.active = mRelabelCnt;
+				l = null;
 			}
 		}
 
