@@ -94,4 +94,13 @@ public class Color {
 		}
 		throw new IllegalArgumentException("Unknown color");
 	}
+
+	public static int fade(int color, double alpha) {
+		alpha *= ((color >>> 24) & 0xff);
+
+		return ((int) alpha) << 24
+		        | ((int) alpha * ((color >>> 16) & 0xff)) << 16
+		        | ((int) alpha * ((color >>> 8) & 0xff)) << 8
+		        | ((int) alpha * ((color) & 0xff));
+	}
 }
