@@ -227,6 +227,10 @@ public abstract class GdxMap implements ApplicationListener {
 	public void resume() {
 	}
 
+	protected boolean onKeyDown(int keycode) {
+		return false;
+	}
+
 	class TouchHandler implements InputProcessor {
 
 		private Viewport mMapPosition;
@@ -243,6 +247,9 @@ public abstract class GdxMap implements ApplicationListener {
 
 		@Override
 		public boolean keyDown(int keycode) {
+			if (onKeyDown(keycode))
+				return true;
+
 			switch (keycode) {
 
 				case Input.Keys.UP:
