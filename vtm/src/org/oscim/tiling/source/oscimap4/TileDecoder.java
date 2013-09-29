@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
@@ -25,8 +26,6 @@ import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.common.PbfDecoder;
-
-import org.oscim.backend.Log;
 
 public class TileDecoder extends PbfDecoder {
 	private final static String TAG = TileDecoder.class.getName();
@@ -264,8 +263,6 @@ public class TileDecoder extends PbfDecoder {
 
 		mElem.layer = 5;
 		mElem.priority = 0;
-		mElem.height = 0;
-		mElem.minHeight = 0;
 
 		while (position() < end) {
 			// read tag and wire type

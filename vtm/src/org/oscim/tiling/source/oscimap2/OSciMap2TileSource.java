@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 
+import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
@@ -30,8 +31,6 @@ import org.oscim.tiling.source.common.LwHttp;
 import org.oscim.tiling.source.common.PbfDecoder;
 import org.oscim.tiling.source.common.PbfTileDataSource;
 import org.oscim.tiling.source.common.UrlTileSource;
-
-import org.oscim.backend.Log;
 
 public class OSciMap2TileSource extends UrlTileSource {
 
@@ -203,8 +202,8 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 			mElem.layer = 5;
 			mElem.priority = 0;
-			mElem.height = 0;
-			mElem.minHeight = 0;
+			//mElem.height = 0;
+			//mElem.minHeight = 0;
 
 			while (position() < end) {
 				// read tag and wire type
@@ -247,11 +246,13 @@ public class OSciMap2TileSource extends UrlTileSource {
 						break;
 
 					case TAG_ELEM_HEIGHT:
-						mElem.height = decodeVarint32();
+						//mElem.height = 
+						decodeVarint32();
 						break;
 
 					case TAG_ELEM_MIN_HEIGHT:
-						mElem.minHeight = decodeVarint32();
+						//mElem.minHeight = 
+						decodeVarint32();
 						break;
 
 					case TAG_ELEM_PRIORITY:

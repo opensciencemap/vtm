@@ -347,16 +347,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void renderArea(Area area, int level) {
 		int numLayer = mDrawingLayer + level;
 
-		if (mRenderBuildingModel) {
-			//Log.d(TAG, "add buildings: " + mTile + " " + mPriority);
-			if (mTile.layers.extrusionLayers == null)
-				mTile.layers.extrusionLayers = new ExtrusionLayer(0, mGroundScale);
-
-			((ExtrusionLayer) mTile.layers.extrusionLayers).addBuildings(mElement);
-
-			return;
-		}
-
 		PolygonLayer layer = mTile.layers.getPolygonLayer(numLayer);
 
 		if (layer == null)

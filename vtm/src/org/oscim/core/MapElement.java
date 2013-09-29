@@ -28,8 +28,11 @@ package org.oscim.core;
  */
 public class MapElement extends GeometryBuffer {
 
-	// OSM layer of the way.
+	/** OSM layer of the way */
 	public int layer;
+
+	/** priority for labeling */
+	public int priority;
 
 	public final TagSet tags = new TagSet();
 
@@ -49,10 +52,4 @@ public class MapElement extends GeometryBuffer {
 	public void clear() {
 		super.clear();
 	}
-
-	// ---- random stuff, to be removed ----
-	// building tags
-	public int height;
-	public int minHeight;
-	public int priority;
 }

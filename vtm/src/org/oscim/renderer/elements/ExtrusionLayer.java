@@ -75,13 +75,10 @@ public class ExtrusionLayer extends RenderElement {
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE);
 	}
 
-	public void addBuildings(MapElement element) {
+	public void add(MapElement element, float height, float minHeight) {
 
 		short[] index = element.index;
 		float[] points = element.points;
-
-		float height = element.height;
-		float minHeight = element.minHeight;
 
 		// 12m default
 		if (height == 0)
