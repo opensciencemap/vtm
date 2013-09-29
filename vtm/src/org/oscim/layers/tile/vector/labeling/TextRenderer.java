@@ -92,7 +92,7 @@ class TextRenderer extends ElementRenderer {
 	class LabelPool extends Pool<TextItem> {
 		Label releaseAndGetNext(Label l) {
 			if (l.item != null)
-				TextItem.pool.release(l.item);
+				l.item = TextItem.pool.release(l.item);
 
 			// drop references
 			l.item = null;
@@ -101,6 +101,7 @@ class TextRenderer extends ElementRenderer {
 
 			Label ret = (Label) l.next;
 
+			// ignore warning
 			super.release(l);
 
 			return ret;
@@ -561,7 +562,7 @@ class TextRenderer extends ElementRenderer {
 		}
 
 		// temporary used Label
-		mPool.release(l);
+		l = (Label) mPool.release(l);
 
 		TextLayer tl = mNextLayer.textLayer;
 
@@ -650,8 +651,7 @@ class TextRenderer extends ElementRenderer {
 	}
 
 	/* private */void cleanup() {
-		mPool.releaseAll(mLabels);
-		mLabels = null;
+		mLabels = (Label) mPool.releaseAll(mLabels);
 		mTileSet.releaseTiles();
 		mLabelTask = null;
 	}

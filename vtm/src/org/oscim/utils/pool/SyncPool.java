@@ -14,6 +14,8 @@
  */
 package org.oscim.utils.pool;
 
+import javax.annotation.CheckReturnValue;
+
 public abstract class SyncPool<T extends Inlist<T>> {
 	protected final int maxFill;
 	protected int fill;
@@ -66,14 +68,21 @@ public abstract class SyncPool<T extends Inlist<T>> {
 	 */
 	protected abstract T createItem();
 
-	public void release(T item) {
+	/**
+	 * Release 'item' to pool.
+	 * <p>
+	 * Usage item = pool.release(item), to ensure to not keep a reference to
+	 * item!
+	 */
+	@CheckReturnValue
+	public T release(T item) {
 		if (item == null)
-			return;
+			return null;
 
 		if (!clearItem(item)) {
 			// dont add back to pool
 			freeItem(item);
-			return;
+			return null;
 		}
 		if (fill < maxFill) {
 			synchronized (this) {
@@ -85,17 +94,19 @@ public abstract class SyncPool<T extends Inlist<T>> {
 		} else {
 			freeItem(item);
 		}
+		return null;
 	}
 
 	/**
-	 * Release all items from 'item'. Do not use the
-	 * 'item' reference afterwards!
-	 * 
-	 * @param item the item (or list or items)
+	 * Release 'list' to pool.
+	 * <p>
+	 * Usage list = pool.releaseAll(list), to ensure to not keep a reference to
+	 * list!
 	 */
-	public void releaseAll(T item) {
+	@CheckReturnValue
+	public T releaseAll(T item) {
 		if (item == null)
-			return;
+			return null;
 
 		if (fill > maxFill) {
 			while (item != null) {
@@ -103,7 +114,7 @@ public abstract class SyncPool<T extends Inlist<T>> {
 				freeItem(item);
 				item = item.next;
 			}
-			return;
+			return null;
 		}
 
 		synchronized (this) {
@@ -125,6 +136,7 @@ public abstract class SyncPool<T extends Inlist<T>> {
 				item = next;
 			}
 		}
+		return null;
 	}
 
 	/**

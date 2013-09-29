@@ -146,8 +146,7 @@ public class BitmapLayer extends TextureLayer {
 		TextureItem.releaseTexture(textures);
 		textures = null;
 
-		VertexItem.pool.releaseAll(vertexItems);
-		vertexItems = null;
+		vertexItems = VertexItem.pool.releaseAll(vertexItems);
 	}
 
 	public static final class Renderer {

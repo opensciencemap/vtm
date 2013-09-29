@@ -106,7 +106,7 @@ public class AtlasRenderLayer extends ElementRenderer {
 		}
 
 		tl.prepare();
-		TextItem.pool.releaseAll(tl.labels);
+		tl.labels = TextItem.pool.releaseAll(tl.labels);
 	}
 
 	boolean initial = true;

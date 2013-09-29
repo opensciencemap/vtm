@@ -14,6 +14,8 @@
  */
 package org.oscim.utils.pool;
 
+import javax.annotation.CheckReturnValue;
+
 public abstract class Pool<T extends Inlist<T>> {
 
 	protected T pool;
@@ -27,33 +29,48 @@ public abstract class Pool<T extends Inlist<T>> {
 		return true;
 	}
 
-	// release 'item' to pool.
-	// make sure that item is not in any other Inlist!
-	public void release(T item) {
+	/**
+	 * Release 'item' to pool.
+	 * <p>
+	 * Usage item = pool.release(item), to ensure to not keep a reference to
+	 * item!
+	 */
+	@CheckReturnValue
+	public T release(T item) {
 		if (item == null)
-			return;
+			return null;
 
 		if (!clearItem(item))
-			return;
+			return null;
 
 		item.next = pool;
 		pool = item;
+
+		return null;
 	}
 
-	public void releaseAll(T item) {
-		if (item == null)
-			return;
+	/**
+	 * Release 'list' to pool.
+	 * <p>
+	 * Usage list = pool.releaseAll(list), to ensure to not keep a reference to
+	 * list!
+	 */
+	@CheckReturnValue
+	public T releaseAll(T list) {
+		if (list == null)
+			return null;
 
-		while (item != null) {
-			T next = item.next;
+		while (list != null) {
+			T next = list.next;
 
-			clearItem(item);
+			clearItem(list);
 
-			item.next = pool;
-			pool = item;
+			list.next = pool;
+			pool = list;
 
-			item = next;
+			list = next;
 		}
+		return null;
 	}
 
 	// remove 'item' from 'list' and add back to pool

@@ -14,6 +14,8 @@
  */
 package org.oscim.utils.pool;
 
+import javax.annotation.CheckReturnValue;
+
 /**
  * Utility class for making poolable objects.
  * Instead of using an additional list to hold pool items just extend this
@@ -33,6 +35,7 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param item the item
 	 * @return the new head of 'list' (item)
 	 */
+	@CheckReturnValue
 	public static <T extends Inlist<T>> T push(T list, T item) {
 		item.next = list;
 		return item;
@@ -58,6 +61,7 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param item the item
 	 * @return the new head of 'list'
 	 */
+	@CheckReturnValue
 	public static <T extends Inlist<T>> T remove(T list, T item) {
 		if (item == list) {
 			T head = item.next;
@@ -84,6 +88,7 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param i the index
 	 * @return the item or null
 	 */
+	@CheckReturnValue
 	public static <T extends Inlist<T>> T get(T list, int i) {
 		if (i < 0)
 			return null;
@@ -105,6 +110,7 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param item the item
 	 * @return the new head of 'list'
 	 */
+	@CheckReturnValue
 	public static <T extends Inlist<T>> T appendItem(T list, T item) {
 
 		if (item.next != null)
@@ -130,6 +136,7 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param other the other
 	 * @return the head of 'list'
 	 */
+	@CheckReturnValue
 	public static <T extends Inlist<T>> T appendList(T list, T other) {
 
 		if (list == null)
@@ -157,6 +164,7 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param list the list
 	 * @return the last item
 	 */
+	@CheckReturnValue
 	public static <T extends Inlist<T>> T last(T list) {
 		while (list != null) {
 			if (list.next == null)
@@ -174,6 +182,7 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param other the other list
 	 * @return the new head of list
 	 */
+	@CheckReturnValue
 	public static <T extends Inlist<T>> T prependRelative(T list, T item, T other) {
 
 		if (item.next != null)

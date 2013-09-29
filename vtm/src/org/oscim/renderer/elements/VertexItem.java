@@ -35,17 +35,6 @@ public class VertexItem extends Inlist<VertexItem> {
 		}
 	};
 
-	/**
-	 * Add VertexItems back to pool. Make sure to not use the reference
-	 * afterwards!
-	 * i.e.:
-	 * vertexItem.release();
-	 * vertexItem = null;
-	 * */
-	public void release() {
-		VertexItem.pool.releaseAll(this);
-	}
-
 	public int getSize() {
 		int size = used;
 		for (VertexItem it = next; it != null; it = it.next)

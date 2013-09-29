@@ -174,10 +174,9 @@ public final class SymbolLayer extends TextureLayer {
 		if (pos > 0)
 			sbuf.put(buf, 0, pos);
 
-		VertexItem.pool.release(si);
+		si = VertexItem.pool.release(si);
 
-		TextureItem.releaseAll(prevTextures);
-		prevTextures = null;
+		prevTextures = TextureItem.pool.releaseAll(prevTextures);
 	}
 
 	private TextureItem getTexture(Bitmap bitmap) {
@@ -195,19 +194,16 @@ public final class SymbolLayer extends TextureLayer {
 	}
 
 	public void clearItems() {
-		SymbolItem.pool.releaseAll(symbols);
-		symbols = null;
+		symbols = SymbolItem.pool.releaseAll(symbols);
 		verticesCnt = 0;
 	}
 
 	@Override
 	public void clear() {
-		TextureItem.releaseAll(textures);
-		SymbolItem.pool.releaseAll(symbols);
+		textures = TextureItem.pool.releaseAll(textures);
+		symbols = SymbolItem.pool.releaseAll(symbols);
+		vertexItems = VertexItem.pool.releaseAll(vertexItems);
 
-		textures = null;
-		symbols = null;
-		vertexItems = null;
 		verticesCnt = 0;
 	}
 

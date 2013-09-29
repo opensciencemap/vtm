@@ -225,14 +225,11 @@ public class MapTile extends Tile {
 			// TODO move this to layers clear
 			layers.vbo = BufferObject.release(layers.vbo);
 			layers.clear();
+			layers = null;
 		}
 
-		TextItem.pool.releaseAll(labels);
-		SymbolItem.pool.releaseAll(symbols);
-
-		layers = null;
-		labels = null;
-		symbols = null;
+		labels = TextItem.pool.releaseAll(labels);
+		symbols = SymbolItem.pool.releaseAll(symbols);
 
 		state = STATE_NONE;
 	}

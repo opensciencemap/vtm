@@ -128,8 +128,7 @@ public class MapRenderer {
 		}
 
 		public void releaseBuffers() {
-			releaseAll(mUsedBuffers);
-			mUsedBuffers = null;
+			mUsedBuffers = releaseAll(mUsedBuffers);
 		}
 	}
 

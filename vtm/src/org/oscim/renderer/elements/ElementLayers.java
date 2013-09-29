@@ -295,7 +295,7 @@ public class ElementLayers {
 			l.vertexItems = null;
 			l.curItem = null;
 		}
-		VertexItem.pool.releaseAll(items);
+		items = VertexItem.pool.releaseAll(items);
 
 		return size;
 	}
@@ -311,8 +311,7 @@ public class ElementLayers {
 				sbuf.put(it.vertices, 0, VertexItem.SIZE);
 		}
 
-		VertexItem.pool.releaseAll(l.vertexItems);
-		l.vertexItems = null;
+		l.vertexItems = VertexItem.pool.releaseAll(l.vertexItems);
 	}
 
 	// cleanup only when layers are not used by tile or overlay anymore!
@@ -321,8 +320,7 @@ public class ElementLayers {
 		// clear line and polygon layers directly
 		for (RenderElement l = baseLayers; l != null; l = l.next) {
 			if (l.vertexItems != null) {
-				VertexItem.pool.releaseAll(l.vertexItems);
-				l.vertexItems = null;
+				l.vertexItems = VertexItem.pool.releaseAll(l.vertexItems);
 				l.curItem = null;
 			}
 			l.verticesCnt = 0;

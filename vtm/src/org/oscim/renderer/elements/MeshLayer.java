@@ -62,11 +62,8 @@ public class MeshLayer extends RenderElement {
 		Log.d(TAG, "-> " + verticesCnt + " " + numIndices);
 
 		if (numIndices <= 0) {
-			vertexItems.release();
-			vertexItems = null;
-
-			indiceItems.release();
-			indiceItems = null;
+			vertexItems = VertexItem.pool.releaseAll(vertexItems);
+			indiceItems = VertexItem.pool.releaseAll(indiceItems);
 		}
 	}
 
@@ -95,8 +92,7 @@ public class MeshLayer extends RenderElement {
 		for (VertexItem it = indiceItems; it != null; it = it.next)
 			sbuf.put(it.vertices, 0, it.used);
 
-		VertexItem.pool.releaseAll(indiceItems);
-		indiceItems = null;
+		indiceItems = VertexItem.pool.releaseAll(indiceItems);
 
 		sbuf.flip();
 
@@ -109,11 +105,8 @@ public class MeshLayer extends RenderElement {
 	@Override
 	protected void clear() {
 		indicesVbo = BufferObject.release(indicesVbo);
-		VertexItem.pool.releaseAll(indiceItems);
-		VertexItem.pool.releaseAll(vertexItems);
-
-		indiceItems = null;
-		vertexItems = null;
+		indiceItems = VertexItem.pool.releaseAll(indiceItems);
+		vertexItems = VertexItem.pool.releaseAll(vertexItems);
 	}
 
 	public static class Renderer {

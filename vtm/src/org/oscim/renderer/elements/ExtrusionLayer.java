@@ -401,16 +401,10 @@ public class ExtrusionLayer extends RenderElement {
 
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
-		for (int i = 0; i < 4; i++)
-			VertexItem.pool.releaseAll(mIndices[i]);
-
-		VertexItem.pool.releaseAll(mVertices);
-
-		mIndices = null;
-		mVertices = null;
-		mClipper = null;
-
+		clear();
 		compiled = true;
+
+		mClipper = null;
 	}
 
 	@Override
@@ -420,11 +414,10 @@ public class ExtrusionLayer extends RenderElement {
 			vboVertices = BufferObject.release(vboVertices);
 		} else {
 			for (int i = 0; i < 4; i++)
-				VertexItem.pool.releaseAll(mIndices[i]);
+				mIndices[i] = VertexItem.pool.releaseAll(mIndices[i]);
 			mIndices = null;
 
-			VertexItem.pool.releaseAll(mVertices);
-			mVertices = null;
+			mVertices = VertexItem.pool.releaseAll(mVertices);
 		}
 	}
 }

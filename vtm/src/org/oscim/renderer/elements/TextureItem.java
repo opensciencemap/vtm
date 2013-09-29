@@ -105,10 +105,6 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 	}
 
-	public synchronized static void releaseAll(TextureItem ti) {
-		pool.releaseAll(ti);
-	}
-
 	/**
 	 * Retrieve a TextureItem from pool with default Bitmap with dimension
 	 * TextureRenderer.TEXTURE_WIDTH/HEIGHT.
@@ -191,7 +187,7 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 	};
 
-	private final static SyncPool<TextureItem> pool = new TextureItemPool();
+	public final static SyncPool<TextureItem> pool = new TextureItemPool();
 
 	private final static ArrayList<Integer> mTextures = new ArrayList<Integer>();
 	private final static ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);

@@ -66,7 +66,7 @@ public abstract class SpriteManager<T> {
 	}
 
 	public void clear() {
-		TextureItem.releaseAll(mTexture);
+		mTexture = TextureItem.pool.releaseAll(mTexture);
 		mAtlas.clear();
 		items = null;
 

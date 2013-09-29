@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
@@ -26,8 +27,6 @@ import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.common.PbfDecoder;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
-
-import org.oscim.backend.Log;
 
 public class TileDecoder extends PbfDecoder {
 	private final static String TAG = TileDecoder.class.getName();
@@ -236,7 +235,7 @@ public class TileDecoder extends PbfDecoder {
 			// FIXME extract layer tag here
 			f.elem.setLayer(5);
 			mMapDataCallback.process(f.elem);
-			mFeaturePool.release(f);
+			f = mFeaturePool.release(f);
 		}
 
 		return true;

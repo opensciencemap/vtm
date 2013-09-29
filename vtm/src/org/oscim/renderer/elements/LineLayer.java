@@ -23,9 +23,9 @@ import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
@@ -567,8 +567,7 @@ public final class LineLayer extends RenderElement {
 	@Override
 	public void clear() {
 		if (vertexItems != null) {
-			VertexItem.pool.releaseAll(vertexItems);
-			vertexItems = null;
+			vertexItems = VertexItem.pool.releaseAll(vertexItems);
 			curItem = null;
 		}
 		verticesCnt = 0;
@@ -744,7 +743,7 @@ public final class LineLayer extends RenderElement {
 					}
 
 					// Cap mode
-					if (ll.width < 1.5 /*|| ll.line.fixed*/) {
+					if (ll.width < 1.5 /* || ll.line.fixed */) {
 						if (capMode != CAP_THIN) {
 							capMode = CAP_THIN;
 							GL.glUniform1f(uLineMode, capMode);
