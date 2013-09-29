@@ -18,6 +18,7 @@ import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
+import org.oscim.core.PointF;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
@@ -32,6 +33,7 @@ import org.oscim.renderer.elements.TextItem;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.Circle;
+import org.oscim.theme.renderinstruction.Extrusion;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.LineSymbol;
 import org.oscim.theme.renderinstruction.RenderInstruction;
@@ -44,18 +46,7 @@ import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDataSource.QueryResult;
 import org.oscim.utils.LineClipper;
-import org.oscim.utils.pool.Inlist;
 
-/**
- * @note
- *       1. The MapWorkers call MapTileLoader.execute() to load a tile.
- *       2. The tile data will be loaded from current MapDatabase
- *       3. MapDatabase calls the IMapDataSink functions
- *       implemented by MapTileLoader for WAY and POI items.
- *       4. these callbacks then call RenderTheme to get the matching style.
- *       5. RenderTheme calls IRenderCallback functions with style information
- *       6. Styled items become added to MapTile.layers... roughly
- */
 public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback, ITileDataSink {
 
 	private static final String TAG = VectorTileLoader.class.getName();
@@ -66,47 +57,41 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public static final byte STROKE_MIN_ZOOM = 12;
 	public static final byte STROKE_MAX_ZOOM = 17;
 
-	// replacement for variable value tags that should not be matched by RenderTheme
-	// FIXME make this general, maybe subclass tags
-	private static final Tag mTagEmptyName = new Tag(Tag.KEY_NAME, null, false);
-	private static final Tag mTagEmptyHouseNr = new Tag(Tag.KEY_HOUSE_NUMBER, null, false);
-
 	private IRenderTheme renderTheme;
 	private int renderLevels;
 
-	// current TileDataSource used by this MapTileLoader
+	/** current TileDataSource used by this MapTileLoader */
 	private ITileDataSource mTileDataSource;
 
-	// currently processed tile
+	/** currently processed tile */
 	private MapTile mTile;
 
-	// currently processed MapElement
+	/** currently processed MapElement */
 	private MapElement mElement;
 
-	// current line layer (will be used for following outline layers)
+	/** current line layer (will be used for outline layers) */
 	private LineLayer mCurLineLayer;
 
-	private int mDrawingLayer;
+	/** Current layer for adding elements */
+	private int mCurLayer;
 
-	private float mStrokeScale = 1.0f;
-	private float mLatScaleFactor;
-	private float mGroundResolution;
-
-	private Tag mTagName;
-	private Tag mTagHouseNr;
+	/** Line-scale-factor depending on zoom and latitude */
+	private float mLineScale = 1.0f;
 
 	private final LineClipper mClipper;
+
+	private final TagSet mFilteredTags;
 
 	public void setRenderTheme(IRenderTheme theme) {
 		renderTheme = theme;
 		renderLevels = theme.getLevels();
 	}
 
-	/**
-	 */
 	public VectorTileLoader(TileManager tileManager) {
 		super(tileManager);
+
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
+		mFilteredTags = new TagSet();
 	}
 
 	@Override
@@ -115,31 +100,22 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public boolean executeJob(MapTile mapTile) {
+	public boolean executeJob(MapTile tile) {
 
 		if (mTileDataSource == null)
 			return false;
 
-		mTile = mapTile;
-
-		if (mTile.layers != null) {
-			// should be fixed now.
-			Log.d(TAG, "BUG tile already loaded " + mTile + " " + mTile.getState());
-			mTile = null;
-			return false;
-		}
-
-		setScaleStrokeWidth(mTile.zoomLevel);
-
 		// account for area changes with latitude
-		double latitude = MercatorProjection.toLatitude(mTile.y);
+		double lat = MercatorProjection.toLatitude(tile.y);
 
-		mLatScaleFactor = 0.4f + 0.6f * ((float) Math.sin(Math.abs(latitude) * (Math.PI / 180)));
+		mLineScale = (float) Math.pow(STROKE_INCREASE, tile.zoomLevel - STROKE_MIN_ZOOM);
+		if (mLineScale < 1)
+			mLineScale = 1;
 
-		mGroundResolution = (float) (Math.cos(latitude * (Math.PI / 180))
-		        * MercatorProjection.EARTH_CIRCUMFERENCE
-		        / ((long) Tile.SIZE << mTile.zoomLevel));
+		// scale line width relative to latitude + PI * thumb
+		mLineScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
 
+		mTile = tile;
 		mTile.layers = new ElementLayers();
 
 		// query database, which calls renderWay and renderPOI
@@ -159,8 +135,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	Tag[] mFilterTags = new Tag[1];
-
 	private static int getValidLayer(int layer) {
 		if (layer < 0) {
 			return 0;
@@ -171,19 +145,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	/**
-	 * Sets the scale stroke factor for the given zoom level.
-	 * 
-	 * @param zoomLevel
-	 *            the zoom level for which the scale stroke factor should be
-	 *            set.
-	 */
-	private void setScaleStrokeWidth(byte zoomLevel) {
-		mStrokeScale = (float) Math.pow(STROKE_INCREASE, zoomLevel - STROKE_MIN_ZOOM);
-		if (mStrokeScale < 1)
-			mStrokeScale = 1;
-	}
-
 	public void setTileDataSource(ITileDataSource mapDatabase) {
 		if (mTileDataSource != null)
 			mTileDataSource.destroy();
@@ -191,52 +152,47 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mTileDataSource = mapDatabase;
 	}
 
-	public ITileDataSource getMapDatabase() {
-		return mTileDataSource;
-	}
+	static class TagReplacement {
+		public TagReplacement(String key) {
+			this.key = key;
+			this.tag = new Tag(key, null);
+		}
 
-	private boolean mRenderBuildingModel;
+		String key;
+		Tag tag;
+	}
 
 	// Replace tags that should only be matched by key in RenderTheme
 	// to avoid caching RenderInstructions for each way of the same type
 	// only with different name.
 	// Maybe this should be done within RenderTheme, also allowing
 	// to set these replacement rules in theme file.
-	private boolean filterTags(TagSet in) {
-		mRenderBuildingModel = false;
-		Tag[] tags = in.tags;
+	private static final TagReplacement[] mTagReplacement = {
+	        new TagReplacement(Tag.KEY_NAME),
+	        new TagReplacement(Tag.KEY_HOUSE_NUMBER),
+	        new TagReplacement(Tag.KEY_REF),
+	        new TagReplacement(Tag.KEY_HEIGHT),
+	        new TagReplacement(Tag.KEY_MIN_HEIGHT)
+	};
 
-		for (int i = 0; i < in.numTags; i++) {
-			String key = tags[i].key;
-			if (key == Tag.KEY_NAME) {
-				if (tags[i].value != null) {
-					mTagName = tags[i];
-					tags[i] = mTagEmptyName;
-				}
-			} else if (key == Tag.KEY_HOUSE_NUMBER) {
-				if (tags[i].value != null) {
-					mTagHouseNr = tags[i];
-					tags[i] = mTagEmptyHouseNr;
-				}
-			} else if (mTile.zoomLevel > 16) {
-				// FIXME, allow overlays to intercept
-				// this, or use a theme option for this
-				if (key == Tag.KEY_BUILDING)
-					mRenderBuildingModel = true;
-				else if (key == Tag.KEY_HEIGHT) {
-					try {
-						mElement.height = Integer.parseInt(tags[i].value);
-					} catch (Exception e) {
-					}
-				}
-				else if (key == Tag.KEY_MIN_HEIGHT) {
-					try {
-						mElement.minHeight = Integer.parseInt(tags[i].value);
-					} catch (Exception e) {
-					}
+	private boolean filterTags(TagSet tagSet) {
+		Tag[] tags = tagSet.tags;
+
+		mFilteredTags.clear();
+
+		O: for (int i = 0, n = tagSet.numTags; i < n; i++) {
+			Tag t = tags[i];
+
+			for (TagReplacement replacement : mTagReplacement) {
+				if (t.key == replacement.key) {
+					mFilteredTags.add(replacement.tag);
+					continue O;
 				}
 			}
+
+			mFilteredTags.add(t);
 		}
+
 		return true;
 	}
 
@@ -250,27 +206,40 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			// remove tags that should not be cached in Rendertheme
 			filterTags(element.tags);
 
-			// get render instructions
-			RenderInstruction[] ri = renderTheme.matchElement(element, mTile.zoomLevel);
-
-			if (ri != null)
-				renderNode(ri);
+			// get and apply render instructions
+			renderNode(renderTheme.matchElement(element.type, mFilteredTags, mTile.zoomLevel));
 		} else {
 
 			// replace tags that should not be cached in Rendertheme (e.g. name)
 			if (!filterTags(element.tags))
 				return;
 
-			mDrawingLayer = getValidLayer(element.layer) * renderLevels;
+			mCurLayer = getValidLayer(element.layer) * renderLevels;
 
-			RenderInstruction[] ri = renderTheme.matchElement(element, mTile.zoomLevel);
-			renderWay(ri);
+			// get and apply render instructions
+			renderWay(renderTheme.matchElement(element.type, mFilteredTags, mTile.zoomLevel));
+
+			//boolean closed = element.type == GeometryType.POLY;
+			//if (debug.debugTheme && ri == null)
+			//	debugUnmatched(closed, element.tags);
 
 			mCurLineLayer = null;
 		}
 
 		mElement = null;
 	}
+
+	//private void debugUnmatched(boolean closed, TagSet tags) {
+	//		Log.d(TAG, "DBG way not matched: " + closed + " "
+	//				+ Arrays.deepToString(tags));
+	//
+	//		mTagName = new Tag("name", tags[0].key + ":"
+	//				+ tags[0].value, false);
+	//
+	//		mElement.tags = closed ? debugTagArea : debugTagWay;
+	//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
+	//		renderWay(ri);
+	//}
 
 	private void renderWay(RenderInstruction[] ri) {
 		if (ri == null)
@@ -289,15 +258,13 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	private void clearState() {
-		mTagName = null;
-		mTagHouseNr = null;
 		mCurLineLayer = null;
 	}
 
-	// ----------------- RenderThemeCallback -----------------
+	/*** RenderThemeCallback ***/
 	@Override
 	public void renderWay(Line line, int level) {
-		int numLayer = mDrawingLayer + level;
+		int numLayer = mCurLayer + level;
 
 		if (line.stipple == 0) {
 			if (line.outline && mCurLineLayer == null) {
@@ -313,11 +280,10 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			if (lineLayer.line == null) {
 				lineLayer.line = line;
 
-				float w = line.width * 0.8f;
-				if (!line.fixed) {
-					w *= mStrokeScale;
-					w *= mLatScaleFactor;
-				}
+				float w = line.width;
+				if (!line.fixed)
+					w *= mLineScale;
+
 				lineLayer.width = w;
 			}
 
@@ -326,8 +292,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				return;
 			}
 
-			lineLayer.addLine(mElement.points, mElement.index,
-			                  mElement.type == GeometryType.POLY);
+			lineLayer.addLine(mElement);
 
 			// keep reference for outline layer
 			mCurLineLayer = lineLayer;
@@ -342,85 +307,55 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				lineLayer.line = line;
 
 				float w = line.width;
-				if (!line.fixed) {
-					w *= mStrokeScale;
-					w *= mLatScaleFactor;
-				}
+				if (!line.fixed)
+					w *= mLineScale;
+
 				lineLayer.width = w;
 			}
 
-			lineLayer.addLine(mElement.points, mElement.index);
+			lineLayer.addLine(mElement);
 		}
 	}
 
 	@Override
 	public void renderArea(Area area, int level) {
-		int numLayer = mDrawingLayer + level;
-
-		if (mRenderBuildingModel) {
-			//Log.d(TAG, "add buildings: " + mTile + " " + mPriority);
-			if (mTile.layers.extrusionLayers == null)
-				mTile.layers.extrusionLayers = new ExtrusionLayer(0, mGroundResolution);
-
-			((ExtrusionLayer) mTile.layers.extrusionLayers).addBuildings(mElement);
-
-			return;
-		}
+		int numLayer = mCurLayer + level;
 
 		PolygonLayer layer = mTile.layers.getPolygonLayer(numLayer);
 
 		if (layer == null)
 			return;
 
-		//if (layer.area == null)
 		layer.area = area;
-
 		layer.addPolygon(mElement.points, mElement.index);
-	}
-
-	private String textValueForKey(Text text) {
-		String value = null;
-
-		if (text.textKey == Tag.KEY_NAME) {
-			if (mTagName != null)
-				value = mTagName.value;
-		} else if (text.textKey == Tag.KEY_HOUSE_NUMBER) {
-			if (mTagHouseNr != null)
-				value = mTagHouseNr.value;
-		}
-		return value;
 	}
 
 	@Override
 	public void renderAreaText(Text text) {
 		// TODO place somewhere on polygon
-
-		String value = textValueForKey(text);
+		String value = mElement.tags.getValue(text.textKey);
 		if (value == null)
 			return;
 
-		float x = mElement.points[0];
-		float y = mElement.points[1];
-
-		mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
+		PointF p = mElement.getPoint(0);
+		mTile.addLabel(TextItem.pool.get().set(p.x, p.y, value, text));
 	}
 
 	@Override
 	public void renderPointText(Text text) {
-		String value = textValueForKey(text);
+		String value = mElement.tags.getValue(text.textKey);
 		if (value == null)
 			return;
 
-		for (int i = 0, n = mElement.index[0]; i < n; i += 2) {
-			float x = mElement.points[i];
-			float y = mElement.points[i + 1];
-			mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
+		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
+			PointF p = mElement.getPoint(i);
+			mTile.addLabel(TextItem.pool.get().set(p.x, p.y, value, text));
 		}
 	}
 
 	@Override
 	public void renderWayText(Text text) {
-		String value = textValueForKey(text);
+		String value = mElement.tags.getValue(text.textKey);
 		if (value == null)
 			return;
 
@@ -436,8 +371,26 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
+	Tag TREE_TAG = new Tag("natural", "tree");
+
 	@Override
 	public void renderPointCircle(Circle circle, int level) {
+
+		if (mElement.tags.contains(TREE_TAG))
+
+			for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
+				PointF p = mElement.getPoint(i);
+
+				SymbolItem it = SymbolItem.pool.get();
+				//it.set(p.x, p.y, null, true);
+
+				it.x = p.x;
+				it.y = p.y;
+				it.tag = mElement.tags.get(TREE_TAG.key);
+
+				mTile.addSymbol(it);
+			}
+
 	}
 
 	@Override
@@ -446,13 +399,13 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			Log.d(TAG, "missing symbol for " + mElement.tags.asString());
 			return;
 		}
-		SymbolItem it = SymbolItem.pool.get();
-		it.x = mElement.points[0];
-		it.y = mElement.points[1];
-		it.texRegion = symbol.texture;
-		it.billboard = true;
+		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
+			PointF p = mElement.getPoint(i);
 
-		mTile.symbols = Inlist.push(mTile.symbols, it);
+			SymbolItem it = SymbolItem.pool.get();
+			it.set(p.x, p.y, symbol.texture, true);
+			mTile.addSymbol(it);
+		}
 	}
 
 	@Override
@@ -462,5 +415,31 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public void renderWaySymbol(LineSymbol symbol) {
 
+	}
+
+	@Override
+	public void renderExtrusion(Extrusion extrusion, int level) {
+
+		int height = 0;
+		int minHeight = 0;
+
+		String v = mElement.tags.getValue(Tag.KEY_HEIGHT);
+		if (v != null)
+			height = Integer.parseInt(v);
+		v = mElement.tags.getValue(Tag.KEY_MIN_HEIGHT);
+		if (v != null)
+			minHeight = Integer.parseInt(v);
+
+		ExtrusionLayer l = (ExtrusionLayer) mTile.layers.extrusionLayers;
+
+		if (l == null) {
+			double lat = MercatorProjection.toLatitude(mTile.y);
+			float groundScale = (float) (Math.cos(lat * (Math.PI / 180))
+			        * MercatorProjection.EARTH_CIRCUMFERENCE
+			        / ((long) Tile.SIZE << mTile.zoomLevel));
+
+			mTile.layers.extrusionLayers = l = new ExtrusionLayer(0, groundScale);
+		}
+		l.add(mElement, height, minHeight);
 	}
 }
