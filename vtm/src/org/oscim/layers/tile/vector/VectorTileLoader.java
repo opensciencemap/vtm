@@ -371,7 +371,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public void renderPointSymbol(Symbol symbol) {
 		if (symbol.texture == null) {
-			Log.d(TAG, "missing symbol for " + mElement.tags.asString());
+			Log.d(TAG, "missing symbol for " + mElement.tags.toString());
 			return;
 		}
 		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {

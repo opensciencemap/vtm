@@ -16,40 +16,65 @@ package org.oscim.core;
 
 import java.util.Arrays;
 
+/**
+ * The Class TagSet holds a set of Tags.
+ */
 public class TagSet {
 
+	/** The Tags. */
 	public Tag[] tags;
+
+	/** The number of current Tags in set. */
 	public int numTags;
 
+	/**
+	 * Instantiates a new TagSet with initial size of 10.
+	 */
 	public TagSet() {
 		tags = new Tag[10];
 	}
 
-	public TagSet(int count) {
-		tags = new Tag[count];
+	/**
+	 * Instantiates a new tag set initialized with the given size.
+	 * 
+	 * @param size the initial size.
+	 */
+	public TagSet(int size) {
+		tags = new Tag[size];
 	}
 
+	/**
+	 * Reset the TagSet to contain 0 tags.
+	 */
 	public void clear() {
 		numTags = 0;
 	}
 
 	/**
-	 * null out current tags
-	 * 
-	 * @param nulltags ...
+	 * Clear. Reset the TagSet to contain 0 tags and null out tags.
 	 */
-	public void clear(boolean nulltags) {
+	public void clearAndNullTags() {
 		Arrays.fill(tags, null);
 		numTags = 0;
 	}
 
+	/**
+	 * Return Tags contained in TagSet as new array.
+	 * 
+	 * @return the tag[]
+	 */
 	public Tag[] asArray() {
 		Tag[] result = new Tag[numTags];
 		System.arraycopy(tags, 0, result, 0, numTags);
 		return result;
 	}
 
-	/** find Tag by key - NOTE: key must be internal() */
+	/**
+	 * Find Tag by given key.
+	 * 
+	 * @param key the key as intern String.
+	 * @return the tag if found, null otherwise.
+	 */
 	public Tag get(String key) {
 		for (int i = 0; i < numTags; i++) {
 			if (tags[i].key == key)
@@ -58,6 +83,12 @@ public class TagSet {
 		return null;
 	}
 
+	/**
+	 * Checks if any tag has the key 'key'.
+	 * 
+	 * @param key the key as intern String.
+	 * @return true, iff any tag has the given key
+	 */
 	public boolean containsKey(String key) {
 		for (int i = 0; i < numTags; i++) {
 			if (tags[i].key == key)
@@ -66,6 +97,12 @@ public class TagSet {
 		return false;
 	}
 
+	/**
+	 * Get the value for a given key.
+	 * 
+	 * @param key the key as intern String
+	 * @return the value when found, null otherwise
+	 */
 	public String getValue(String key) {
 		for (int i = 0; i < numTags; i++) {
 			if (tags[i].key == key)
@@ -74,14 +111,11 @@ public class TagSet {
 		return null;
 	}
 
-	public boolean contains(String key, String value) {
-		for (int i = 0; i < numTags; i++) {
-			if (tags[i].key == key)
-				return value.equals(tags[i].value);
-		}
-		return false;
-	}
-
+	/**
+	 * Adds the Tag tag to TagSet.
+	 * 
+	 * @param tag the Tag to be added
+	 */
 	public void add(Tag tag) {
 		if (numTags >= tags.length) {
 			Tag[] tmp = tags;
@@ -91,6 +125,11 @@ public class TagSet {
 		tags[numTags++] = tag;
 	}
 
+	/**
+	 * Sets the tags from 'tagArray'.
+	 * 
+	 * @param tagArray the tag array
+	 */
 	public void set(Tag[] tagArray) {
 		int newTags = tagArray.length;
 		if (newTags > tags.length)
@@ -100,6 +139,12 @@ public class TagSet {
 		numTags = newTags;
 	}
 
+	/**
+	 * Checks if 'tag' is contained in TagSet.
+	 * 
+	 * @param tag the tag
+	 * @return true, iff tag is in TagSet
+	 */
 	public boolean contains(Tag tag) {
 		for (int i = 0; i < numTags; i++) {
 			Tag t = tags[i];
@@ -109,45 +154,23 @@ public class TagSet {
 		return false;
 	}
 
-	public boolean hasKey(String[] keys) {
+	/**
+	 * Checks if a Tag with given key and value is contained in TagSet.
+	 * 
+	 * @param key the key as intern String
+	 * @param value the value as intern String
+	 * @return true, iff any tag has the given key and value
+	 */
+	public boolean contains(String key, String value) {
 		for (int i = 0; i < numTags; i++) {
-			Tag t = tags[i];
-			for (String key : keys)
-				if (key == t.key)
-					return true;
+			if (tags[i].key == key)
+				return value.equals(tags[i].value);
 		}
 		return false;
 	}
 
-	public boolean hasKey(String key) {
-		for (int i = 0; i < numTags; i++) {
-			Tag t = tags[i];
-			if (key == t.key)
-				return true;
-		}
-		return false;
-	}
-
-	public boolean hasValue(String[] vals) {
-		for (int i = 0; i < numTags; i++) {
-			Tag t = tags[i];
-			for (String value : vals)
-				if (value == t.value)
-					return true;
-		}
-		return false;
-	}
-
-	public boolean hasValue(String value) {
-		for (int i = 0; i < numTags; i++) {
-			Tag t = tags[i];
-			if (value == t.value)
-				return true;
-		}
-		return false;
-	}
-
-	public String asString() {
+	@Override
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < numTags; i++)
 			sb.append(tags[i]);

@@ -88,7 +88,7 @@ public class TileDecoder extends PbfDecoder {
 		mTile = tile;
 		mMapDataSink = sink;
 
-		mTileTags.clear(true);
+		mTileTags.clearAndNullTags();
 		int version = -1;
 
 		int val;
