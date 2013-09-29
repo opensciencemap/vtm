@@ -61,6 +61,14 @@ public class RenderThemeHandler extends DefaultHandler {
 		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS;
 	}
 
+	static class ThemeException extends IllegalArgumentException {
+		public ThemeException(String string) {
+			super(string);
+		}
+
+		private static final long serialVersionUID = 1L;
+	}
+
 	//private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
 	private static final String ELEMENT_NAME_MATCH = "m";
 	private static final String UNEXPECTED_ELEMENT = "unexpected element: ";
@@ -322,7 +330,7 @@ public class RenderThemeHandler extends DefaultHandler {
 				Log.d(TAG, "unknown element: " + localName);
 				//throw new SAXException("unknown element: " + localName);
 			}
-		} catch (IllegalArgumentException e) {
+		} catch (ThemeException e) {
 			throw new SAXException(null, e);
 		} catch (IOException e) {
 			throw new SAXException(null, e);
@@ -343,8 +351,7 @@ public class RenderThemeHandler extends DefaultHandler {
 			}
 		}
 		if (img == null)
-			throw new IllegalArgumentException("missing attribute 'img' for element: "
-			        + elementName);
+			throw new ThemeException("missing attribute 'img' for element: " + elementName);
 
 		Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset(IMG_PATH + img);
 		mTextureAtlas = new TextureAtlas(bitmap);
@@ -373,7 +380,7 @@ public class RenderThemeHandler extends DefaultHandler {
 			}
 		}
 		if (regionName == null || r == null)
-			throw new IllegalArgumentException("missing attribute 'name' or 'rect' for element: "
+			throw new ThemeException("missing attribute 'name' or 'rect' for element: "
 			        + elementName);
 
 		mTextureAtlas.addTextureRegion(regionName.intern(), r);
@@ -436,33 +443,34 @@ public class RenderThemeHandler extends DefaultHandler {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
-			if ("schemaLocation".equals(name)) {
+			if ("schemaLocation".equals(name))
 				continue;
-			} else if ("version".equals(name)) {
+
+			else if ("version".equals(name))
 				version = Integer.valueOf(Integer.parseInt(value));
-			} else if ("map-background".equals(name)) {
+
+			else if ("map-background".equals(name))
 				mapBackground = Color.parseColor(value);
-			} else if ("base-stroke-width".equals(name)) {
+
+			else if ("base-stroke-width".equals(name))
 				baseStrokeWidth = Float.parseFloat(value);
-			} else if ("base-text-size".equals(name)) {
+
+			else if ("base-text-size".equals(name))
 				baseTextSize = Float.parseFloat(value);
-			} else {
+
+			else
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
-			}
+
 		}
 
-		if (version == null) {
-			throw new IllegalArgumentException("missing attribute version for element:"
-			        + elementName);
-		} else if (version.intValue() != RENDER_THEME_VERSION) {
-			throw new IllegalArgumentException("invalid render theme version:" + version);
-		} else if (baseStrokeWidth < 0) {
-			throw new IllegalArgumentException("base-stroke-width must not be negative: "
-			        + baseStrokeWidth);
-		} else if (baseTextSize < 0) {
-			throw new IllegalArgumentException("base-text-size must not be negative: "
-			        + baseTextSize);
-		}
+		if (version == null)
+			throw new ThemeException("missing attribute version for element:" + elementName);
+		else if (version.intValue() != RENDER_THEME_VERSION)
+			throw new ThemeException("invalid render theme version:" + version);
+		else if (baseStrokeWidth < 0)
+			throw new ThemeException("base-stroke-width must not be negative: " + baseStrokeWidth);
+		else if (baseTextSize < 0)
+			throw new ThemeException("base-text-size must not be negative: " + baseTextSize);
 
 		return new RenderTheme(mapBackground, baseStrokeWidth, baseTextSize);
 	}
@@ -492,33 +500,46 @@ public class RenderThemeHandler extends DefaultHandler {
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
+
 			if ("id".equals(name))
 				style = value;
-			else if ("k".equals(name)) {
+
+			else if ("k".equals(name))
 				textKey = value.intern();
-			} else if ("font-family".equals(name)) {
+
+			else if ("font-family".equals(name))
 				fontFamily = FontFamily.valueOf(value.toUpperCase());
-			} else if ("font-style".equals(name)) {
+
+			else if ("font-style".equals(name))
 				fontStyle = FontStyle.valueOf(value.toUpperCase());
-			} else if ("font-size".equals(name)) {
+
+			else if ("font-size".equals(name))
 				fontSize = Float.parseFloat(value);
-			} else if ("fill".equals(name)) {
+
+			else if ("fill".equals(name))
 				fill = Color.parseColor(value);
-			} else if ("stroke".equals(name)) {
+
+			else if ("stroke".equals(name))
 				stroke = Color.parseColor(value);
-			} else if ("stroke-width".equals(name)) {
+
+			else if ("stroke-width".equals(name))
 				strokeWidth = Float.parseFloat(value);
-			} else if ("caption".equals(name)) {
+
+			else if ("caption".equals(name))
 				caption = Boolean.parseBoolean(value);
-			} else if ("priority".equals(name)) {
+
+			else if ("priority".equals(name))
 				priority = Integer.parseInt(value);
-			} else if ("dy".equals(name)) {
+
+			else if ("dy".equals(name))
 				dy = Float.parseFloat(value);
-			} else if ("symbol".equals(name)) {
+
+			else if ("symbol".equals(name))
 				symbol = value;
-			} else {
+
+			else
 				logUnknownAttribute(elementName, name, value, i);
-			}
+
 		}
 
 		validateText(elementName, textKey, fontSize, strokeWidth);
@@ -529,16 +550,12 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	private static void validateText(String elementName, String textKey, float fontSize,
 	        float strokeWidth) {
-		if (textKey == null) {
-			throw new IllegalArgumentException("missing attribute k for element: "
-			        + elementName);
-		} else if (fontSize < 0) {
-			throw new IllegalArgumentException("font-size must not be negative: "
-			        + fontSize);
-		} else if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: "
-			        + strokeWidth);
-		}
+		if (textKey == null)
+			throw new ThemeException("missing attribute k for element: " + elementName);
+		else if (fontSize < 0)
+			throw new ThemeException("font-size must not be negative: " + fontSize);
+		else if (strokeWidth < 0)
+			throw new ThemeException("stroke-width must not be negative: " + strokeWidth);
 	}
 
 	/**
@@ -593,35 +610,48 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			if ("id".equals(name))
 				style = value;
-			else if ("src".equals(name)) {
-				// src = value;
-			} else if ("stroke".equals(name)) {
+
+			else if ("src".equals(name))
+				;// src = value;
+
+			else if ("stroke".equals(name))
 				color = Color.parseColor(value);
-			} else if ("width".equals(name) || "stroke-width".equals(name)) {
+
+			else if ("width".equals(name) || "stroke-width".equals(name))
 				width = Float.parseFloat(value);
-			} else if ("cap".equals(name) || "stroke-linecap".equals(name)) {
+
+			else if ("cap".equals(name) || "stroke-linecap".equals(name))
 				cap = Cap.valueOf(value.toUpperCase());
-			} else if ("fix".equals(name)) {
+
+			else if ("fix".equals(name))
 				fixed = Boolean.parseBoolean(value);
-			} else if ("stipple".equals(name)) {
+
+			else if ("stipple".equals(name))
 				stipple = Integer.parseInt(value);
-			} else if ("stipple-stroke".equals(name)) {
+
+			else if ("stipple-stroke".equals(name))
 				stippleColor = Color.parseColor(value);
-			} else if ("stipple-width".equals(name)) {
+
+			else if ("stipple-width".equals(name))
 				stippleWidth = Float.parseFloat(value);
-			} else if ("fade".equals(name)) {
+
+			else if ("fade".equals(name))
 				fade = Integer.parseInt(value);
-			} else if ("min".equals(name)) {
+
+			else if ("min".equals(name))
 				min = Float.parseFloat(value);
-			} else if ("blur".equals(name)) {
+
+			else if ("blur".equals(name))
 				blur = Float.parseFloat(value);
-			} else if ("style".equals(name)) {
-				// ignore
-			} else if ("dasharray".equals(name)) {
-				// ignore
-			} else {
+
+			else if ("style".equals(name))
+				; // ignore
+
+			else if ("dasharray".equals(name))
+				; // TBD
+
+			else
 				logUnknownAttribute(elementName, name, value, i);
-			}
 		}
 
 		// inherit properties from 'line'
@@ -641,10 +671,8 @@ public class RenderThemeHandler extends DefaultHandler {
 	}
 
 	private static void validateLine(float strokeWidth) {
-		if (strokeWidth < 0) {
-			throw new IllegalArgumentException("width must not be negative: "
-			        + strokeWidth);
-		}
+		if (strokeWidth < 0)
+			throw new ThemeException("width must not be negative: " + strokeWidth);
 	}
 
 	/**
@@ -671,28 +699,36 @@ public class RenderThemeHandler extends DefaultHandler {
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
+
 			if ("id".equals(name))
 				style = value;
-			else if ("src".equals(name)) {
+
+			else if ("src".equals(name))
 				src = value;
-			} else if ("fill".equals(name)) {
+
+			else if ("fill".equals(name))
 				fill = Color.parseColor(value);
-			} else if ("stroke".equals(name)) {
+
+			else if ("stroke".equals(name))
 				stroke = Color.parseColor(value);
-			} else if ("stroke-width".equals(name)) {
+
+			else if ("stroke-width".equals(name))
 				strokeWidth = Float.parseFloat(value);
-			} else if ("fade".equals(name)) {
+
+			else if ("fade".equals(name))
 				fade = Integer.parseInt(value);
-			} else if ("blend".equals(name)) {
+
+			else if ("blend".equals(name))
 				blend = Integer.parseInt(value);
-			} else if ("blend-fill".equals(name)) {
+
+			else if ("blend-fill".equals(name))
 				blendFill = Color.parseColor(value);
-			} else {
+
+			else
 				logUnknownAttribute(elementName, name, value, i);
-			}
 		}
 
-		validateArea(strokeWidth);
+		validateLine(strokeWidth);
 
 		if (src != null) {
 			try {
@@ -705,13 +741,6 @@ public class RenderThemeHandler extends DefaultHandler {
 		}
 		return new Area(style, fill, stroke, strokeWidth, fade, level, blend,
 		                blendFill, texture);
-	}
-
-	private static void validateArea(float strokeWidth) {
-		if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: "
-			        + strokeWidth);
-		}
 	}
 
 	/**
@@ -734,19 +763,23 @@ public class RenderThemeHandler extends DefaultHandler {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
-			if ("r".equals(name) || "radius".equals(name)) {
+			if ("r".equals(name) || "radius".equals(name))
 				radius = Float.valueOf(Float.parseFloat(value));
-			} else if ("scale-radius".equals(name)) {
+
+			else if ("scale-radius".equals(name))
 				scaleRadius = Boolean.parseBoolean(value);
-			} else if ("fill".equals(name)) {
+
+			else if ("fill".equals(name))
 				fill = Color.parseColor(value);
-			} else if ("stroke".equals(name)) {
+
+			else if ("stroke".equals(name))
 				stroke = Color.parseColor(value);
-			} else if ("stroke-width".equals(name)) {
+
+			else if ("stroke-width".equals(name))
 				strokeWidth = Float.parseFloat(value);
-			} else {
+
+			else
 				logUnknownAttribute(elementName, name, value, i);
-			}
 		}
 
 		validateCircle(elementName, radius, strokeWidth);
@@ -754,15 +787,12 @@ public class RenderThemeHandler extends DefaultHandler {
 	}
 
 	private static void validateCircle(String elementName, Float radius, float strokeWidth) {
-		if (radius == null) {
-			throw new IllegalArgumentException("missing attribute r for element: "
-			        + elementName);
-		} else if (radius.floatValue() < 0) {
-			throw new IllegalArgumentException("radius must not be negative: " + radius);
-		} else if (strokeWidth < 0) {
-			throw new IllegalArgumentException("stroke-width must not be negative: "
-			        + strokeWidth);
-		}
+		if (radius == null)
+			throw new ThemeException("missing attribute r for element: " + elementName);
+		else if (radius.floatValue() < 0)
+			throw new ThemeException("radius must not be negative: " + radius);
+		else if (strokeWidth < 0)
+			throw new ThemeException("stroke-width must not be negative: " + strokeWidth);
 	}
 
 	/**
@@ -781,26 +811,21 @@ public class RenderThemeHandler extends DefaultHandler {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
-			if ("src".equals(name)) {
+			if ("src".equals(name))
 				src = value;
-			} else if ("align-center".equals(name)) {
+
+			else if ("align-center".equals(name))
 				alignCenter = Boolean.parseBoolean(value);
-			} else if ("repeat".equals(name)) {
+
+			else if ("repeat".equals(name))
 				repeat = Boolean.parseBoolean(value);
-			} else {
+
+			else
 				logUnknownAttribute(elementName, name, value, i);
-			}
 		}
 
-		validateLineSymbol(elementName, src);
+		validateSymbol(elementName, src);
 		return new LineSymbol(src, alignCenter, repeat);
-	}
-
-	private static void validateLineSymbol(String elementName, String src) {
-		if (src == null) {
-			throw new IllegalArgumentException("missing attribute src for element: "
-			        + elementName);
-		}
 	}
 
 	/**
@@ -817,11 +842,11 @@ public class RenderThemeHandler extends DefaultHandler {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
-			if ("src".equals(name)) {
+			if ("src".equals(name))
 				src = value;
-			} else {
+
+			else
 				logUnknownAttribute(elementName, name, value, i);
-			}
 		}
 
 		validateSymbol(elementName, src);
