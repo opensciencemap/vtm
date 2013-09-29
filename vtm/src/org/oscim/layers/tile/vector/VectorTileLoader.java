@@ -33,6 +33,7 @@ import org.oscim.renderer.elements.TextItem;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.Circle;
+import org.oscim.theme.renderinstruction.Extrusion;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.LineSymbol;
 import org.oscim.theme.renderinstruction.RenderInstruction;
@@ -389,6 +390,32 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public void renderWaySymbol(LineSymbol symbol) {
 
+	}
+
+	@Override
+	public void renderExtrusion(Extrusion extrusion, int level) {
+
+		int height = 0;
+		int minHeight = 0;
+
+		String v = mElement.tags.getValue(Tag.KEY_HEIGHT);
+		if (v != null)
+			height = Integer.parseInt(v);
+		v = mElement.tags.getValue(Tag.KEY_MIN_HEIGHT);
+		if (v != null)
+			minHeight = Integer.parseInt(v);
+
+		ExtrusionLayer l = (ExtrusionLayer) mTile.layers.extrusionLayers;
+
+		if (l == null) {
+			double lat = MercatorProjection.toLatitude(mTile.y);
+			float groundScale = (float) (Math.cos(lat * (Math.PI / 180))
+			        * MercatorProjection.EARTH_CIRCUMFERENCE
+			        / ((long) Tile.SIZE << mTile.zoomLevel));
+
+			mTile.layers.extrusionLayers = l = new ExtrusionLayer(0, groundScale);
+		}
+		l.add(mElement, height, minHeight);
 	}
 
 	/**

@@ -37,6 +37,7 @@ import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.AreaLevel;
 import org.oscim.theme.renderinstruction.Circle;
+import org.oscim.theme.renderinstruction.Extrusion;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.LineSymbol;
 import org.oscim.theme.renderinstruction.RenderInstruction;
@@ -303,6 +304,11 @@ public class RenderThemeHandler extends DefaultHandler {
 					else
 						Log.d(TAG, "BUG not an outline style: " + style);
 				}
+
+			} else if ("extrusion".equals(localName)) {
+				checkState(localName, Element.RENDERING_INSTRUCTION);
+				Extrusion extrusion = createExtrusion(localName, attributes, mLevel++);
+				mCurrentRule.addRenderingInstruction(extrusion);
 
 			} else if ("atlas".equals(localName)) {
 				checkState(localName, Element.ATLAS);
@@ -827,5 +833,30 @@ public class RenderThemeHandler extends DefaultHandler {
 			throw new IllegalArgumentException("missing attribute src for element: "
 			        + elementName);
 		}
+	}
+
+	private Extrusion createExtrusion(String elementName, Attributes attributes, int level) {
+		int colorSide = 0;
+		int colorTop = 0;
+		int colorLine = 0;
+
+		for (int i = 0; i < attributes.getLength(); ++i) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+
+			if ("fill-sides".equals(name))
+				colorSide = Color.parseColor(value);
+
+			else if ("fill-top".equals(name))
+				colorTop = Color.parseColor(value);
+
+			else if ("stroke".equals(name))
+				colorLine = Color.parseColor(value);
+
+			else
+				logUnknownAttribute(elementName, name, value, i);
+		}
+
+		return new Extrusion(level, colorSide, colorTop, colorLine);
 	}
 }

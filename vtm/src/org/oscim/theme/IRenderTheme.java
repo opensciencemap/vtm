@@ -19,6 +19,7 @@ import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.Circle;
+import org.oscim.theme.renderinstruction.Extrusion;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.LineSymbol;
 import org.oscim.theme.renderinstruction.RenderInstruction;
@@ -80,6 +81,14 @@ public interface IRenderTheme {
 		 * @param level
 		 */
 		void renderArea(Area area, int level);
+
+		/**
+		 * Renders an extrusion with the given parameters.
+		 * 
+		 * @param extrusion
+		 * @param level
+		 */
+		void renderExtrusion(Extrusion extrusion, int level);
 
 		/**
 		 * Renders an area symbol with the given bitmap.
