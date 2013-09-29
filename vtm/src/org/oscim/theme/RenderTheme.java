@@ -20,7 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.oscim.backend.Log;
-import org.oscim.core.MapElement;
+import org.oscim.core.GeometryBuffer.GeometryType;
+import org.oscim.core.TagSet;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.rule.Element;
 import org.oscim.theme.rule.Rule;
@@ -106,7 +107,7 @@ public class RenderTheme implements IRenderTheme {
 	}
 
 	@Override
-	public RenderInstruction[] matchElement(MapElement element, int zoomLevel) {
+	public RenderInstruction[] matchElement(GeometryType geometryType, TagSet tags, int zoomLevel) {
 
 		// list of renderinsctruction items in cache
 		RenderInstructionItem ris = null;
@@ -114,9 +115,9 @@ public class RenderTheme implements IRenderTheme {
 		// the item matching tags and zoomlevel
 		RenderInstructionItem ri = null;
 
-		int type = element.type.nativeInt;
+		int type = geometryType.nativeInt;
 		if (type < 1 || type > 3) {
-			Log.d(TAG, "invalid geometry type for RenderTheme " + element.type.name());
+			Log.d(TAG, "invalid geometry type for RenderTheme " + geometryType.name());
 			return null;
 		}
 
@@ -129,10 +130,10 @@ public class RenderTheme implements IRenderTheme {
 
 			if ((cache.prevItem == null) || (cache.prevItem.zoom & zoomMask) == 0) {
 				// previous instructions zoom does not match
-				cache.cacheKey.set(element.tags, null);
+				cache.cacheKey.set(tags, null);
 			} else {
 				// compare if tags match previous instructions
-				if (cache.cacheKey.set(element.tags, cache.prevItem.key)) {
+				if (cache.cacheKey.set(tags, cache.prevItem.key)) {
 					//Log.d(TAG, "same as previous " + Arrays.deepToString(tags));
 					ri = cache.prevItem;
 				}

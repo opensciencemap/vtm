@@ -15,7 +15,8 @@
  */
 package org.oscim.theme;
 
-import org.oscim.core.MapElement;
+import org.oscim.core.GeometryBuffer.GeometryType;
+import org.oscim.core.TagSet;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.Circle;
 import org.oscim.theme.renderinstruction.Line;
@@ -33,7 +34,7 @@ public interface IRenderTheme {
 	 *            the zoom level at which the way should be matched.
 	 * @return matching render instructions
 	 */
-	public abstract RenderInstruction[] matchElement(MapElement element, int zoomLevel);
+	public abstract RenderInstruction[] matchElement(GeometryType type, TagSet tags, int zoomLevel);
 
 	/**
 	 * Must be called when this RenderTheme gets destroyed to clean up and free

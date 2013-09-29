@@ -56,40 +56,30 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public static final byte STROKE_MIN_ZOOM = 12;
 	public static final byte STROKE_MAX_ZOOM = 17;
 
-	//private static final Tag[] debugTagWay = { new Tag("debug", "way") };
-	//private static final Tag[] debugTagArea = { new Tag("debug", "area") };
-
-	// replacement for variable value tags that should not be matched by RenderTheme
-	// FIXME make this general, maybe subclass tags
-	private static final Tag mTagEmptyName = new Tag(Tag.KEY_NAME, null, false);
-	private static final Tag mTagEmptyHouseNr = new Tag(Tag.KEY_HOUSE_NUMBER, null, false);
-
-	//	private final MapElement mDebugWay, mDebugPoint;
-
 	private IRenderTheme renderTheme;
 	private int renderLevels;
 
-	// current TileDataSource used by this MapTileLoader
+	/** current TileDataSource used by this MapTileLoader */
 	private ITileDataSource mTileDataSource;
 
-	// currently processed tile
+	/** currently processed tile */
 	private MapTile mTile;
 
-	// currently processed MapElement
+	/** currently processed MapElement */
 	private MapElement mElement;
 
-	// current line layer (will be used for following outline layers)
+	/** current line layer (will be used for outline layers) */
 	private LineLayer mCurLineLayer;
 
-	private int mDrawingLayer;
+	/** Current layer for adding elements */
+	private int mCurLayer;
 
+	/** Line-scale-factor depending on zoom and latitude */
 	private float mLineScale = 1.0f;
-	private float mGroundScale;
-
-	private Tag mTagName;
-	private Tag mTagHouseNr;
 
 	private final LineClipper mClipper;
+
+	private final TagSet mFilteredTags;
 
 	public void setRenderTheme(IRenderTheme theme) {
 		renderTheme = theme;
@@ -100,6 +90,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		super(tileManager);
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
+		mFilteredTags = new TagSet();
 	}
 
 	@Override
@@ -123,10 +114,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		// scale line width relative to latitude + PI * thumb
 		mLineScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
 
-		mGroundScale = (float) (Math.cos(lat * (Math.PI / 180))
-		        * MercatorProjection.EARTH_CIRCUMFERENCE
-		        / ((long) Tile.SIZE << tile.zoomLevel));
-
 		mTile = tile;
 		mTile.layers = new ElementLayers();
 
@@ -137,25 +124,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		clearState();
 
-		//		if (debug.drawTileFrames) {
-		//			// draw tile coordinate
-		//			mTagName = new Tag("name", mTile.toString(), false);
-		//			mElement = mDebugPoint;
-		//			RenderInstruction[] ri;
-		//			ri = renderTheme.matchNode(debugTagWay, (byte) 0);
-		//			renderNode(ri);
-		//
-		//			// draw tile box
-		//			mElement = mDebugWay;
-		//			mDrawingLayer = 100 * renderLevels;
-		//			ri = renderTheme.matchWay(mDebugWay.tags, (byte) 0, false);
-		//			renderWay(ri);
-		//		}
-
 		return (result == QueryResult.SUCCESS);
 	}
-
-	Tag[] mFilterTags = new Tag[1];
 
 	private static int getValidLayer(int layer) {
 		if (layer < 0) {
@@ -174,49 +144,47 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mTileDataSource = mapDatabase;
 	}
 
-	private boolean mRenderBuildingModel;
+	static class TagReplacement {
+		public TagReplacement(String key) {
+			this.key = key;
+			this.tag = new Tag(key, null);
+		}
+
+		String key;
+		Tag tag;
+	}
 
 	// Replace tags that should only be matched by key in RenderTheme
 	// to avoid caching RenderInstructions for each way of the same type
 	// only with different name.
 	// Maybe this should be done within RenderTheme, also allowing
 	// to set these replacement rules in theme file.
-	private boolean filterTags(TagSet in) {
-		mRenderBuildingModel = false;
-		Tag[] tags = in.tags;
+	private static final TagReplacement[] mTagReplacement = {
+	        new TagReplacement(Tag.KEY_NAME),
+	        new TagReplacement(Tag.KEY_HOUSE_NUMBER),
+	        new TagReplacement(Tag.KEY_REF),
+	        new TagReplacement(Tag.KEY_HEIGHT),
+	        new TagReplacement(Tag.KEY_MIN_HEIGHT)
+	};
 
-		for (int i = 0; i < in.numTags; i++) {
-			String key = tags[i].key;
-			if (tags[i].key == Tag.KEY_NAME) {
-				if (tags[i].value != null) {
-					mTagName = tags[i];
-					tags[i] = mTagEmptyName;
-				}
-			} else if (tags[i].key == Tag.KEY_HOUSE_NUMBER) {
-				if (tags[i].value != null) {
-					mTagHouseNr = tags[i];
-					tags[i] = mTagEmptyHouseNr;
-				}
-			} else if (mTile.zoomLevel > 16) {
-				// FIXME, allow overlays to intercept
-				// this, or use a theme option for this
-				if (key == Tag.KEY_BUILDING)
-					mRenderBuildingModel = true;
+	private boolean filterTags(TagSet tagSet) {
+		Tag[] tags = tagSet.tags;
 
-				else if (key == Tag.KEY_HEIGHT) {
-					try {
-						mElement.height = Integer.parseInt(tags[i].value);
-					} catch (Exception e) {
-					}
-				}
-				else if (key == Tag.KEY_MIN_HEIGHT) {
-					try {
-						mElement.minHeight = Integer.parseInt(tags[i].value);
-					} catch (Exception e) {
-					}
+		mFilteredTags.clear();
+
+		O: for (int i = 0, n = tagSet.numTags; i < n; i++) {
+			Tag t = tags[i];
+
+			for (TagReplacement replacement : mTagReplacement) {
+				if (t.key == replacement.key) {
+					mFilteredTags.add(replacement.tag);
+					continue O;
 				}
 			}
+
+			mFilteredTags.add(t);
 		}
+
 		return true;
 	}
 
@@ -231,17 +199,17 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			filterTags(element.tags);
 
 			// get and apply render instructions
-			renderNode(renderTheme.matchElement(element, mTile.zoomLevel));
+			renderNode(renderTheme.matchElement(element.type, mFilteredTags, mTile.zoomLevel));
 		} else {
 
 			// replace tags that should not be cached in Rendertheme (e.g. name)
 			if (!filterTags(element.tags))
 				return;
 
-			mDrawingLayer = getValidLayer(element.layer) * renderLevels;
+			mCurLayer = getValidLayer(element.layer) * renderLevels;
 
 			// get and apply render instructions
-			renderWay(renderTheme.matchElement(element, mTile.zoomLevel));
+			renderWay(renderTheme.matchElement(element.type, mFilteredTags, mTile.zoomLevel));
 
 			//boolean closed = element.type == GeometryType.POLY;
 			//if (debug.debugTheme && ri == null)
@@ -282,15 +250,13 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	private void clearState() {
-		mTagName = null;
-		mTagHouseNr = null;
 		mCurLineLayer = null;
 	}
 
 	/*** RenderThemeCallback ***/
 	@Override
 	public void renderWay(Line line, int level) {
-		int numLayer = mDrawingLayer + level;
+		int numLayer = mCurLayer + level;
 
 		if (line.stipple == 0) {
 			if (line.outline && mCurLineLayer == null) {
@@ -345,7 +311,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void renderArea(Area area, int level) {
-		int numLayer = mDrawingLayer + level;
+		int numLayer = mCurLayer + level;
 
 		PolygonLayer layer = mTile.layers.getPolygonLayer(numLayer);
 
@@ -356,24 +322,10 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		layer.addPolygon(mElement.points, mElement.index);
 	}
 
-	private String textValueForKey(Text text) {
-		String value = null;
-
-		if (text.textKey == Tag.KEY_NAME) {
-			if (mTagName != null)
-				value = mTagName.value;
-		} else if (text.textKey == Tag.KEY_HOUSE_NUMBER) {
-			if (mTagHouseNr != null)
-				value = mTagHouseNr.value;
-		}
-		return value;
-	}
-
 	@Override
 	public void renderAreaText(Text text) {
 		// TODO place somewhere on polygon
-
-		String value = textValueForKey(text);
+		String value = mElement.tags.getValue(text.textKey);
 		if (value == null)
 			return;
 
@@ -383,7 +335,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void renderPointText(Text text) {
-		String value = textValueForKey(text);
+		String value = mElement.tags.getValue(text.textKey);
 		if (value == null)
 			return;
 
@@ -395,7 +347,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void renderWayText(Text text) {
-		String value = textValueForKey(text);
+		String value = mElement.tags.getValue(text.textKey);
 		if (value == null)
 			return;
 
