@@ -40,6 +40,11 @@ public abstract class ElementRenderer extends LayerRenderer {
 
 	private static short[] fillCoords;
 
+	static {
+		short s = (short) (Tile.SIZE * MapRenderer.COORD_SCALE);
+		fillCoords = new short[] { 0, s, s, s, 0, 0, s, 0 };
+	}
+
 	/**
 	 * Use mMapPosition.copy(position) to keep the position for which
 	 * the Overlay is _compiled_. NOTE: required by setMatrix utility
@@ -52,21 +57,6 @@ public abstract class ElementRenderer extends LayerRenderer {
 	public ElementRenderer() {
 		layers = new ElementLayers();
 		mMapPosition = new MapPosition();
-
-		if (fillCoords == null) {
-			// tile fill coords
-			short min = (short) 0;
-			short max = (short) (Tile.SIZE * MapRenderer.COORD_SCALE);
-			fillCoords = new short[8];
-			fillCoords[0] = min;
-			fillCoords[1] = max;
-			fillCoords[2] = max;
-			fillCoords[3] = max;
-			fillCoords[4] = min;
-			fillCoords[5] = min;
-			fillCoords[6] = max;
-			fillCoords[7] = min;
-		}
 	}
 
 	/**
