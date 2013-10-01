@@ -24,6 +24,7 @@ public class MapAnimator {
 	private final int ANIM_MOVE = 1 << 0;
 	private final int ANIM_SCALE = 1 << 1;
 	private final int ANIM_FLING = 1 << 2;
+	private final int ANIM_BBOX = 1 << 3;
 
 	private final Map mMap;
 	private final Viewport mViewport;
@@ -58,6 +59,8 @@ public class MapAnimator {
 		double newScale = Math.min(zx, zy);
 
 		animateTo(500, bbox.getCenterPoint(), newScale, false);
+
+		mState = ANIM_MOVE | ANIM_SCALE | ANIM_BBOX;
 	}
 
 	public synchronized void animateTo(long duration, GeoPoint geoPoint, double scale,
@@ -75,9 +78,7 @@ public class MapAnimator {
 		scale = FastMath.clamp(scale, Viewport.MIN_SCALE, Viewport.MAX_SCALE);
 		mDeltaPos.scale = scale;
 
-		scale = (float) (scale / mPos.scale);
-
-		mScaleBy = mPos.scale * scale - mPos.scale;
+		mScaleBy = scale - mPos.scale;
 
 		mStartPos.scale = mPos.scale;
 		mStartPos.angle = mPos.angle;
@@ -87,6 +88,7 @@ public class MapAnimator {
 
 		mDeltaPos.x = MercatorProjection.longitudeToX(geoPoint.getLongitude());
 		mDeltaPos.y = MercatorProjection.latitudeToY(geoPoint.getLatitude());
+
 		mDeltaPos.x -= mStartPos.x;
 		mDeltaPos.y -= mStartPos.y;
 
@@ -107,9 +109,7 @@ public class MapAnimator {
 		scale = FastMath.clamp(scale, Viewport.MIN_SCALE, Viewport.MAX_SCALE);
 		mDeltaPos.scale = scale;
 
-		scale = (float) (scale / mPos.scale);
-
-		mScaleBy = mPos.scale * scale - mPos.scale;
+		mScaleBy = scale - mPos.scale;
 
 		mStartPos.scale = mPos.scale;
 		mStartPos.angle = mPos.angle;
@@ -186,8 +186,8 @@ public class MapAnimator {
 			if (millisLeft <= 0) {
 				// set final position
 				if ((mState & ANIM_MOVE) != 0)
-					mViewport.moveInternal(mStartPos.x + mDeltaPos.x,
-					                       mStartPos.y + mDeltaPos.y);
+					mViewport.moveTo(mStartPos.x + mDeltaPos.x,
+					                 mStartPos.y + mDeltaPos.y);
 
 				if ((mState & ANIM_SCALE) != 0) {
 					if (mScaleBy > 0)
@@ -213,9 +213,16 @@ public class MapAnimator {
 			}
 
 			if ((mState & ANIM_MOVE) != 0) {
-				mViewport.moveInternal(mStartPos.x + mDeltaPos.x * adv,
-				                       mStartPos.y + mDeltaPos.y * adv);
+				mViewport.moveTo(mStartPos.x + mDeltaPos.x * adv,
+				                 mStartPos.y + mDeltaPos.y * adv);
 				changed = true;
+			}
+
+			if ((mState & ANIM_BBOX) != 0) {
+				if (mPos.angle > 180)
+					mPos.angle -= 360;
+				mViewport.setRotation(mPos.angle * (1 - adv));
+				mViewport.setTilt(mPos.tilt * (1 - adv));
 			}
 
 			if ((mState & ANIM_FLING) != 0) {

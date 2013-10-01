@@ -401,12 +401,7 @@ public class Viewport {
 	}
 
 	/* used by MapAnimator */
-	void moveInternal(double mx, double my) {
-		Point p = applyRotation(mx, my);
-		moveTo(p.x, p.y);
-	}
-
-	private void moveTo(double x, double y) {
+	void moveTo(double x, double y) {
 		mPos.x = x;
 		mPos.y = y;
 
