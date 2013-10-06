@@ -371,26 +371,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	Tag TREE_TAG = new Tag("natural", "tree");
-
 	@Override
 	public void renderPointCircle(Circle circle, int level) {
-
-		if (mElement.tags.contains(TREE_TAG))
-
-			for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
-				PointF p = mElement.getPoint(i);
-
-				SymbolItem it = SymbolItem.pool.get();
-				//it.set(p.x, p.y, null, true);
-
-				it.x = p.x;
-				it.y = p.y;
-				it.tag = mElement.tags.get(TREE_TAG.key);
-
-				mTile.addSymbol(it);
-			}
-
 	}
 
 	@Override
@@ -438,7 +420,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			        * MercatorProjection.EARTH_CIRCUMFERENCE
 			        / ((long) Tile.SIZE << mTile.zoomLevel));
 
-			mTile.layers.extrusionLayers = l = new ExtrusionLayer(0, groundScale);
+			mTile.layers.extrusionLayers = l = new ExtrusionLayer(0, groundScale, extrusion.colors);
 		}
 		l.add(mElement, height, minHeight);
 	}

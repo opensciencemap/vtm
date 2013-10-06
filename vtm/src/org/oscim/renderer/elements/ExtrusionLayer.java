@@ -43,6 +43,8 @@ public class ExtrusionLayer extends RenderElement {
 	private final VertexItem mCurIndices[];
 	private LineClipper mClipper;
 
+	public final float[] colors;
+
 	// indices for:
 	// 0. even sides, 1. odd sides, 2. roof, 3. roof outline
 	public int mIndiceCnt[] = { 0, 0, 0, 0 };
@@ -60,9 +62,10 @@ public class ExtrusionLayer extends RenderElement {
 	public boolean compiled = false;
 	private final float mGroundResolution;
 
-	public ExtrusionLayer(int level, float groundResolution) {
+	public ExtrusionLayer(int level, float groundResolution, float[] colors) {
 		super(RenderElement.EXTRUSION);
 		this.level = level;
+		this.colors = colors;
 
 		mGroundResolution = groundResolution;
 		mVertices = mCurVertices = VertexItem.pool.get();

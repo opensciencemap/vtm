@@ -16,6 +16,7 @@ package org.oscim.renderer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.Log;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.MapRenderer.Matrices;
@@ -95,6 +96,13 @@ public class ExtrusionRenderer extends LayerRenderer {
 		if (mAlpha == 0 || pos.zoomLevel < 16) {
 			setReady(false);
 			return;
+		}
+
+		if (mUpdateColors) {
+			synchronized (this) {
+				System.arraycopy(mNewColors, 0, mColor, 0, 16);
+				mUpdateColors = false;
+			}
 		}
 
 		int activeTiles = 0;
@@ -233,8 +241,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 		}
 		GL.glDepthFunc(GL20.GL_LESS);
 		GL.glColorMask(false, false, false, false);
-		GL.glUniform1i(uExtMode, 0);
-		GLUtils.glUniform4fv(uExtColor, 4, mColor);
+		GL.glUniform1i(uExtMode, -1);
+		//GLUtils.glUniform4fv(uExtColor, 4, mColor);
 		GL.glUniform1f(uExtAlpha, mAlpha);
 
 		// draw to depth buffer
@@ -262,9 +270,19 @@ public class ExtrusionRenderer extends LayerRenderer {
 		GL.glDepthMask(false);
 		GLState.blend(true);
 
+		float[] currentColor = null;
+
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
 			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
+
+			if (el.colors == null) {
+				currentColor = mColor;
+				GLUtils.glUniform4fv(uExtColor, 4, currentColor);
+			} else if (currentColor != el.colors) {
+				currentColor = el.colors;
+				GLUtils.glUniform4fv(uExtColor, 4, currentColor);
+			}
 
 			GL.glDepthFunc(GL20.GL_EQUAL);
 			int d = MapRenderer.depthOffset(t) * 10;
@@ -338,6 +356,41 @@ public class ExtrusionRenderer extends LayerRenderer {
 		m.mvp.addDepthOffset(delta);
 	}
 
+	public synchronized void setColors(float[] colors) {
+		System.arraycopy(colors, 0, mNewColors, 0, 16);
+		mUpdateColors = true;
+	}
+
+	public synchronized void setColors(int sides, int top, int lines) {
+		fillColors(sides, top, lines);
+		mUpdateColors = true;
+	}
+
+	private void fillColors(int sides, int top, int lines) {
+		mNewColors[0] = Color.rToFloat(top);
+		mNewColors[1] = Color.gToFloat(top);
+		mNewColors[2] = Color.bToFloat(top);
+		mNewColors[3] = Color.aToFloat(top);
+
+		mNewColors[4] = Color.rToFloat(sides);
+		mNewColors[5] = Color.gToFloat(sides);
+		mNewColors[6] = Color.bToFloat(sides);
+		mNewColors[7] = Color.aToFloat(sides);
+
+		mNewColors[8] = Color.rToFloat(sides);
+		mNewColors[9] = Color.gToFloat(sides);
+		mNewColors[10] = Color.bToFloat(sides);
+		mNewColors[11] = Color.aToFloat(sides);
+
+		mNewColors[12] = Color.rToFloat(lines);
+		mNewColors[13] = Color.gToFloat(lines);
+		mNewColors[14] = Color.bToFloat(lines);
+		mNewColors[15] = Color.aToFloat(lines);
+	}
+
+	private boolean mUpdateColors;
+	private final float[] mNewColors = new float[16];
+
 	private final float _a = 0.88f;
 	private final float _r = 0xe9;
 	private final float _g = 0xe8;
@@ -383,7 +436,10 @@ public class ExtrusionRenderer extends LayerRenderer {
 	        //   change height by u_alpha
 	        + "  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);"
 	        //+ "  depth = gl_Position.z;"
-	        + "  if (u_mode == 0)"
+	        + "  if (u_mode == -1) ;"
+	        //     roof / depth pass
+	        //+ "    color = u_color[0] * u_alpha;"
+	        + "  else if (u_mode == 0)"
 	        //     roof / depth pass
 	        + "    color = u_color[0] * u_alpha;"
 	        + "  else {"

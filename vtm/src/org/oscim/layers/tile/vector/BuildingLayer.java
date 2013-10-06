@@ -68,6 +68,8 @@ public class BuildingLayer extends Layer {
 				super.update(pos, changed, m);
 			}
 		};
+
+		//mExtLayer.setColors(Color.LTGRAY, Color.GRAY, Color.DKGRAY);
 		mRenderer = mExtLayer;
 	}
 

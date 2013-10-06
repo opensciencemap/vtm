@@ -188,6 +188,12 @@
     <xs:attribute name="src" type="tns:src" use="required" />
   </xs:complexType>
 
+  <xs:complexType name="extrusion">
+    <xs:attribute name="line-color" type="tns:color" use="optional" />
+    <xs:attribute name="side-color" type="tns:color" use="required" />
+    <xs:attribute name="top-color" type="tns:color" use="required" />
+  </xs:complexType>
+
 
   <!-- match elements -->
   <xs:complexType name="m">
@@ -202,10 +208,11 @@
       <xs:element name="outline" type="tns:line" />
       <xs:element name="lineSymbol" type="tns:lineSymbol" />
       <xs:element name="text" type="tns:text" />
-      <!-- <xs:element name="styletext type="xs:string" /> -->
+      <xs:element name="extrusion" type="tns:extrusion" />
       <xs:element name="symbol" type="tns:symbol" />
+
       <!-- outline is defined within rules to match layering -->
-      <xs:element name="style-outline" type="tns:line" />
+      <xs:element name="outline-layer" type="tns:line" />
     </xs:choice>
 
     <xs:attribute name="select" type="tns:selectorList" use="optional" default="any"/>
@@ -236,7 +243,7 @@
           <xs:element name="style-text" type="tns:text" />
           <xs:element name="style-area" type="tns:area" />
           <xs:element name="style-line" type="tns:line" />
-          <xs:element name="style-outline" type="tns:line" />
+          <!-- <xs:element name="style-outline" type="tns:line" /> -->
         </xs:choice>
       </xs:sequence>
 

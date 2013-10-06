@@ -902,6 +902,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		int colorSide = 0;
 		int colorTop = 0;
 		int colorLine = 0;
+		int defaultHeight = 0;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
@@ -916,10 +917,13 @@ public class RenderThemeHandler extends DefaultHandler {
 			else if ("line-color".equals(name))
 				colorLine = Color.parseColor(value);
 
+			else if ("default-height".equals(name))
+				defaultHeight = Integer.parseInt(value);
+
 			else
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		return new Extrusion(level, colorSide, colorTop, colorLine);
+		return new Extrusion(level, colorSide, colorTop, colorLine, defaultHeight);
 	}
 }

@@ -439,7 +439,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			        * MercatorProjection.EARTH_CIRCUMFERENCE
 			        / ((long) Tile.SIZE << mTile.zoomLevel));
 
-			mTile.layers.extrusionLayers = l = new ExtrusionLayer(0, groundScale);
+			mTile.layers.extrusionLayers = l = new ExtrusionLayer(0, groundScale, extrusion.colors);
 		}
 		l.add(mElement, height, minHeight);
 	}
