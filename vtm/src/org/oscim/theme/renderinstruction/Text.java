@@ -34,8 +34,6 @@ public final class Text extends RenderInstruction {
 	public final Paint stroke;
 	public final String textKey;
 
-	public final String symbol;
-
 	public final boolean caption;
 	public final float dy;
 	public final int priority;
@@ -43,7 +41,7 @@ public final class Text extends RenderInstruction {
 	public float fontHeight;
 	public float fontDescent;
 
-	public TextureRegion texture;
+	public final TextureRegion texture;
 
 	public static Text createText(float fontSize, float strokeWidth, int fill, int outline,
 	        boolean billboard) {
@@ -76,14 +74,14 @@ public final class Text extends RenderInstruction {
 
 	public Text(String style, String textKey, FontFamily fontFamily, FontStyle fontStyle,
 	        float fontSize, int fill, int outline, float strokeWidth, float dy, boolean caption,
-	        String symbol, int priority) {
+	        TextureRegion symbol, int priority) {
 
 		this.style = style;
 		this.textKey = textKey;
 		this.caption = caption;
 		this.dy = -dy;
 		this.priority = priority;
-		this.symbol = symbol;
+		this.texture = symbol;
 
 		paint = CanvasAdapter.g.getPaint();
 		paint.setTextAlign(Align.CENTER);

@@ -32,6 +32,13 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="selectorList">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="first" />
+      <xs:enumeration value="any" />
+    </xs:restriction>
+  </xs:simpleType>
+  
   <xs:simpleType name="fontFamily">
     <xs:restriction base="xs:string">
       <xs:enumeration value="default" />
@@ -96,8 +103,8 @@
     <xs:attribute name="k" type="tns:textKey" use="required" />
     <xs:attribute name="dy" type="xs:float" use="optional" default="0" />
     <xs:attribute name="font-family" type="tns:fontFamily" use="optional" default="default" />
-    <xs:attribute name="font-style" type="tns:fontStyle" use="optional" default="normal" />
-    <xs:attribute name="font-size" type="tns:nonNegativeFloat" use="optional" default="0" />
+    <xs:attribute name="style" type="tns:fontStyle" use="optional" default="normal" />
+    <xs:attribute name="size" type="tns:nonNegativeFloat" use="optional" default="0" />
     <xs:attribute name="fill" type="tns:color" use="optional" default="#000000" />
     <xs:attribute name="stroke" type="tns:color" use="optional" default="#000000" />
     <xs:attribute name="stroke-width" type="tns:nonNegativeFloat" use="optional" default="0" />
@@ -130,7 +137,7 @@
     <xs:attribute name="min" type="xs:float" use="optional" default="0" />
     <xs:attribute name="dasharray" type="tns:strokeDasharray" use="optional" />
     <xs:attribute name="cap" type="tns:cap" use="optional" default="round" />
-    <xs:attribute name="outline" type="xs:integer" use="optional" default="0" />
+    <xs:attribute name="outline" type="xs:string" use="optional" default="" />
     <xs:attribute name="fade" type="xs:integer" use="optional" default="-1" />
     <xs:attribute name="blur" type="xs:float" use="optional" default="-1" />
     <xs:attribute name="fix" type="xs:boolean" use="optional" default="false" />
@@ -167,8 +174,8 @@
     <xs:attribute name="k" type="tns:textKey" use="optional" default="name" />
     <xs:attribute name="dy" type="xs:float" use="optional" default="0" />
     <xs:attribute name="font-family" type="tns:fontFamily" use="optional" default="default" />
-    <xs:attribute name="font-style" type="tns:fontStyle" use="optional" default="normal" />
-    <xs:attribute name="font-size" type="tns:nonNegativeFloat" use="optional" default="0" />
+    <xs:attribute name="style" type="tns:fontStyle" use="optional" default="normal" />
+    <xs:attribute name="size" type="tns:nonNegativeFloat" use="optional" default="0" />
     <xs:attribute name="fill" type="tns:color" use="optional" default="#000000" />
     <xs:attribute name="stroke" type="tns:color" use="optional" default="#000000" />
     <xs:attribute name="stroke-width" type="tns:nonNegativeFloat" use="optional" default="0" />
@@ -201,6 +208,7 @@
       <xs:element name="style-outline" type="tns:line" />
     </xs:choice>
 
+    <xs:attribute name="select" type="tns:selectorList" use="optional" default="any"/>
     <xs:attribute name="e" type="tns:elementList" use="optional" />
     <xs:attribute name="k" type="xs:string" use="optional" />
     <xs:attribute name="v" type="xs:string" use="optional" />

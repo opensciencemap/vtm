@@ -167,7 +167,8 @@ public class RenderTheme implements IRenderTheme {
 							if (matches.get(j) == r) {
 								Log.d(TAG, "fix duplicate instruction! "
 								        + Arrays.deepToString(cache.cacheKey.mTags)
-								        + ":" + zoomLevel);
+								        + " zoom:" + zoomLevel + " "
+								        + r.getClass().getName());
 								matches.remove(j--);
 								size--;
 							}

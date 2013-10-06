@@ -22,11 +22,10 @@ import org.oscim.theme.IRenderTheme.Callback;
  */
 public final class Symbol extends RenderInstruction {
 
-	public final String src;
-	public TextureRegion texture;
+	public final TextureRegion texture;
 
-	public Symbol(String src) {
-		this.src = src;
+	public Symbol(TextureRegion symbol) {
+		this.texture = symbol;
 	}
 
 	@Override

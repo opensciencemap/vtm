@@ -28,5 +28,7 @@ public class AreaLevel extends RenderInstruction {
 	@Override
 	public void renderWay(Callback renderCallback) {
 		renderCallback.renderArea(this.area, level);
+		if (this.area.outline != null)
+			renderCallback.renderWay(this.area.outline, level + 1);
 	}
 }

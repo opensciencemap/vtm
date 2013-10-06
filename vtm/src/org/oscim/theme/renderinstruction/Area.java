@@ -14,6 +14,7 @@
  */
 package org.oscim.theme.renderinstruction;
 
+import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.IRenderTheme.Callback;
 
@@ -30,46 +31,43 @@ public final class Area extends RenderInstruction {
 		this.level = level;
 		this.style = "";
 		this.fade = -1;
-		blendColor = 0;
-		blend = -1;
-		strokeWidth = 0;
-
-		color = fill;
-		texture = null;
+		this.blendColor = 0;
+		this.blend = -1;
+		this.color = fill;
+		this.texture = null;
+		this.outline = null;
 	}
 
 	public Area(String style, int fill, int stroke, float strokeWidth,
 	        int fade, int level, int blend, int blendFill, TextureItem texture) {
 
 		this.style = style;
-
-		// if (fill == Color.TRANSPARENT) {
-		// paintFill = null;
-		// } else {
-		// paintFill = new Paint(Paint.ANTI_ALIAS_FLAG);
-		// if (src != null) {
-		// Shader shader = BitmapUtils.createBitmapShader(src);
-		// paintFill.setShader(shader);
-		// }
-
 		this.color = fill;
 		this.blendColor = blendFill;
-
 		this.blend = blend;
-		this.strokeWidth = strokeWidth;
 		this.fade = fade;
 		this.level = level;
 		this.texture = texture;
+
+		if (stroke == Color.TRANSPARENT) {
+			this.outline = null;
+			return;
+		}
+
+		this.outline = new Line(level + 1, stroke, strokeWidth);
 	}
 
 	@Override
 	public void renderWay(Callback renderCallback) {
-		renderCallback.renderArea(this, this.level);
+		renderCallback.renderArea(this, level);
+
+		if (outline != null)
+			renderCallback.renderWay(outline, level + 1);
 	}
 
 	private final int level;
 	public String style;
-	public final float strokeWidth;
+	public final Line outline;
 	public final int color;
 	public final int fade;
 	public final int blendColor;
