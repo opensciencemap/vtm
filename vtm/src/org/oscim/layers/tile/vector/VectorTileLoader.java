@@ -327,11 +327,21 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void renderAreaText(Text text) {
 		// TODO place somewhere on polygon
 		String value = mElement.tags.getValue(text.textKey);
-		if (value == null)
+		if (value == null || value.length() == 0)
 			return;
 
-		PointF p = mElement.getPoint(0);
-		mTile.addLabel(TextItem.pool.get().set(p.x, p.y, value, text));
+		float x = 0;
+		float y = 0;
+		int n = mElement.index[0];
+
+		for (int i = 0; i < n;) {
+			x += mElement.points[i++];
+			y += mElement.points[i++];
+		}
+		x /= (n / 2);
+		y /= (n / 2);
+
+		mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
 	}
 
 	@Override
