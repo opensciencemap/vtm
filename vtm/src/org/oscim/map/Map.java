@@ -42,6 +42,8 @@ public abstract class Map implements EventDispatcher {
 
 	private static final String TAG = Map.class.getName();
 
+	public static final boolean debugTheme = false;
+
 	private final Layers mLayers;
 	private final Viewport mViewport;
 	private final MapAnimator mAnimator;

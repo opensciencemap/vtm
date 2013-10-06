@@ -23,6 +23,7 @@ import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.labeling.WayDecorator;
+import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
@@ -102,8 +103,18 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public boolean executeJob(MapTile tile) {
 
-		if (mTileDataSource == null)
+		if (mTileDataSource == null) {
+			Log.d(TAG, "no tile source is set");
 			return false;
+		}
+
+		if (renderTheme == null) {
+			Log.d(TAG, "no theme is set");
+			return false;
+		}
+
+		if (Map.debugTheme)
+			Log.d(TAG, tile.toString());
 
 		// account for area changes with latitude
 		double lat = MercatorProjection.toLatitude(tile.y);
@@ -213,8 +224,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			renderWay(renderTheme.matchElement(element.type, mFilteredTags, mTile.zoomLevel));
 
 			//boolean closed = element.type == GeometryType.POLY;
-			//if (debug.debugTheme && ri == null)
-			//	debugUnmatched(closed, element.tags);
 
 			mCurLineLayer = null;
 		}
@@ -235,16 +244,21 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	//}
 
 	private void renderWay(RenderInstruction[] ri) {
-		if (ri == null)
+		if (ri == null) {
+			if (Map.debugTheme)
+				Log.d(TAG, "no rule for way: " + mElement.tags);
 			return;
-
+		}
 		for (int i = 0, n = ri.length; i < n; i++)
 			ri[i].renderWay(this);
 	}
 
 	private void renderNode(RenderInstruction[] ri) {
-		if (ri == null)
+		if (ri == null) {
+			if (Map.debugTheme)
+				Log.d(TAG, "no rule for node: " + mElement.tags);
 			return;
+		}
 
 		for (int i = 0, n = ri.length; i < n; i++)
 			ri[i].renderNode(this);
@@ -261,7 +275,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		if (line.stipple == 0) {
 			if (line.outline && mCurLineLayer == null) {
-				Log.e(TAG, "BUG in theme: line must come before outline!");
+				Log.d(TAG, "missing line for outline! " + mElement.tags
+				        + " lvl:" + level + " layer:" + mElement.layer);
 				return;
 			}
 
@@ -347,7 +362,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public void renderPointText(Text text) {
 		String value = mElement.tags.getValue(text.textKey);
-		if (value == null)
+		if (value == null || value.length() == 0)
 			return;
 
 		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
@@ -359,7 +374,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public void renderWayText(Text text) {
 		String value = mElement.tags.getValue(text.textKey);
-		if (value == null)
+		if (value == null || value.length() == 0)
 			return;
 
 		int offset = 0;
@@ -381,7 +396,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public void renderPointSymbol(Symbol symbol) {
 		if (symbol.texture == null) {
-			Log.d(TAG, "missing symbol for " + mElement.tags.toString());
+			if (Map.debugTheme)
+				Log.d(TAG, "missing symbol for " + mElement.tags.toString());
 			return;
 		}
 		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
