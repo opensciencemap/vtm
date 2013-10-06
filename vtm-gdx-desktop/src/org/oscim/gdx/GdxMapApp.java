@@ -9,6 +9,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.oscim.utils.FastMath;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -25,7 +26,7 @@ public class GdxMapApp extends GdxMap {
 		}
 	}
 
-	static {
+	public static void init() {
 		// load native library
 		new SharedLibraryLoader().load("vtm-jni");
 		// init globals
@@ -37,7 +38,14 @@ public class GdxMapApp extends GdxMap {
 
 	public static void main(String[] args) {
 		Tile.SIZE = 360;
+		init();
 		new LwjglApplication(new GdxMapApp(), getConfig());
+	}
+
+	public static void run(GdxMap map, LwjglApplicationConfiguration config, int tileSize) {
+		Tile.SIZE = FastMath.clamp(tileSize, 128, 512);
+
+		new LwjglApplication(map, (config == null ? getConfig() : config));
 	}
 
 	static protected LwjglApplicationConfiguration getConfig() {
