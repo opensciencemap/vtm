@@ -109,7 +109,7 @@ public abstract class Map implements EventDispatcher {
 		IRenderTheme t = ThemeLoader.load(theme);
 		if (t == null) {
 			Log.e(TAG, "Invalid theme");
-			throw new IllegalStateException();
+			return;
 		}
 
 		mCurrentTheme = theme;
