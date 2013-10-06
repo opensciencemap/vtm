@@ -613,6 +613,9 @@ class TextRenderer extends ElementRenderer {
 			compile();
 		}
 
+		if (mRequestClear)
+			cleanup();
+
 		//if (!mHolding)
 		postLabelTask();
 	}
@@ -620,6 +623,7 @@ class TextRenderer extends ElementRenderer {
 	/* private */LabelTask mLabelTask;
 	/* private */long mLastRun;
 	/* private */boolean mRequestRun;
+	/* private */boolean mRequestClear;
 	/* private */boolean mRelabel;
 
 	class LabelTask implements Runnable {
@@ -654,6 +658,7 @@ class TextRenderer extends ElementRenderer {
 		mLabels = (Label) mPool.releaseAll(mLabels);
 		mTileSet.releaseTiles();
 		mLabelTask = null;
+		mRequestClear = false;
 	}
 
 	private final Runnable mLabelUpdate = new Runnable() {
@@ -718,6 +723,14 @@ class TextRenderer extends ElementRenderer {
 	}
 
 	public synchronized void clearLabels() {
+		if (mRequestRun) {
+			mRequestClear = true;
+			mRelabel = true;
+		} else {
+			cleanup();
+			postLabelTask();
+		}
+
 		//		if (mLabelHandler != null)
 		//			mLabelHandler.removeCallbacks(mLabelUpdate);
 		//
