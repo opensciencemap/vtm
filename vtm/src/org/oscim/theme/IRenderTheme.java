@@ -156,4 +156,12 @@ public interface IRenderTheme {
 		void renderWayText(Text text);
 
 	}
+
+	public static class ThemeException extends IllegalArgumentException {
+		public ThemeException(String string) {
+			super(string);
+		}
+
+		private static final long serialVersionUID = 1L;
+	}
 }

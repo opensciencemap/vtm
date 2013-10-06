@@ -34,6 +34,7 @@ import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.renderer.elements.TextureItem;
+import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.AreaLevel;
 import org.oscim.theme.renderinstruction.Circle;
@@ -59,14 +60,6 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	private static enum Element {
 		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS;
-	}
-
-	static class ThemeException extends IllegalArgumentException {
-		public ThemeException(String string) {
-			super(string);
-		}
-
-		private static final long serialVersionUID = 1L;
 	}
 
 	//private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
