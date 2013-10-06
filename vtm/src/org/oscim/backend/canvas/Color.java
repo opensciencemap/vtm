@@ -103,4 +103,17 @@ public class Color {
 		        | ((int) alpha * ((color >>> 8) & 0xff)) << 8
 		        | ((int) alpha * ((color) & 0xff));
 	}
+
+	public static float rToFloat(int color) {
+	    return ((color >>> 16) & 0xff)/255f;
+    }
+	public static float gToFloat(int color) {
+	    return ((color >>> 8) & 0xff)/255f;
+    }
+	public static float bToFloat(int color) {
+	    return ((color) & 0xff)/255f;
+    }
+	public static float aToFloat(int color) {
+	    return ((color >>> 24) & 0xff)/255f;
+    }
 }
