@@ -20,8 +20,8 @@ import org.oscim.core.Tag;
 class NegativeRule extends Rule {
 	final AttributeMatcher mAttributeMatcher;
 
-	NegativeRule(int element, int zoom, AttributeMatcher attributeMatcher) {
-		super(element, zoom);
+	NegativeRule(int element, int zoom, boolean matchFirst, AttributeMatcher attributeMatcher) {
+		super(element, zoom, matchFirst);
 
 		mAttributeMatcher = attributeMatcher;
 	}

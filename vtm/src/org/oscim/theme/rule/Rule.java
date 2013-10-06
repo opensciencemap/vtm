@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.oscim.core.Tag;
+import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.RenderThemeHandler;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.xml.sax.Attributes;
@@ -32,14 +33,14 @@ public abstract class Rule {
 	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_VALUE =
 	        new HashMap<List<String>, AttributeMatcher>();
 
-	//private static final Pattern SPLIT_PATTERN = Pattern.compile("\\|");
 	private static final String STRING_NEGATION = "~";
 	private static final String STRING_EXCLUSIVE = "-";
 	private static final String STRING_WILDCARD = "*";
 
 	private static Rule createRule(Stack<Rule> ruleStack, int element, String keys,
-	        String values, byte zoomMin, byte zoomMax) {
+	        String values, byte zoomMin, byte zoomMax, boolean matchFirst) {
 
+		// zoom-level bitmask
 		int zoom = 0;
 		for (int z = zoomMin; z <= zoomMax && z < 32; z++)
 			zoom |= (1 << z);
@@ -53,7 +54,6 @@ public abstract class Rule {
 		if (values == null) {
 			valueMatcher = AnyMatcher.getInstance();
 		} else {
-			//valueList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN.split(values)));
 			valueList = new ArrayList<String>(Arrays.asList(values.split("\\|")));
 			if (valueList.remove(STRING_NEGATION))
 				negativeRule = true;
@@ -67,30 +67,29 @@ public abstract class Rule {
 
 		if (keys == null) {
 			if (negativeRule || exclusionRule) {
-				throw new IllegalArgumentException("negative rule requires key");
+				throw new ThemeException("negative rule requires key");
 			}
 			keyMatcher = AnyMatcher.getInstance();
 		} else {
-			//keyList = new ArrayList<String>(Arrays.asList(SPLIT_PATTERN.split(keys)));
 			keyList = new ArrayList<String>(Arrays.asList(keys.split("\\|")));
 			keyMatcher = getKeyMatcher(keyList);
 
 			if ((keyMatcher instanceof AnyMatcher) && (negativeRule || exclusionRule)) {
-				throw new IllegalArgumentException("negative rule requires key");
+				throw new ThemeException("negative rule requires key");
 			}
 
 			if (negativeRule) {
-				AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList, false);
-				return new NegativeRule(element, zoom, attributeMatcher);
+				AttributeMatcher m = new NegativeMatcher(keyList, valueList, false);
+				return new NegativeRule(element, zoom, matchFirst, m);
 			} else if (exclusionRule) {
-				AttributeMatcher attributeMatcher = new NegativeMatcher(keyList, valueList, true);
-				return new NegativeRule(element, zoom, attributeMatcher);
+				AttributeMatcher m = new NegativeMatcher(keyList, valueList, true);
+				return new NegativeRule(element, zoom, matchFirst, m);
 			}
 
 			keyMatcher = RuleOptimizer.optimize(keyMatcher, ruleStack);
 		}
 
-		return new PositiveRule(element, zoom, keyMatcher, valueMatcher);
+		return new PositiveRule(element, zoom, matchFirst, keyMatcher, valueMatcher);
 	}
 
 	private static AttributeMatcher getKeyMatcher(List<String> keyList) {
@@ -128,16 +127,12 @@ public abstract class Rule {
 	}
 
 	private static void validate(byte zoomMin, byte zoomMax) {
-		if (zoomMin < 0) {
-			throw new IllegalArgumentException("zoom-min must not be negative: "
-			        + zoomMin);
-		} else if (zoomMax < 0) {
-			throw new IllegalArgumentException("zoom-max must not be negative: "
-			        + zoomMax);
-		} else if (zoomMin > zoomMax) {
-			throw new IllegalArgumentException("zoom-min must be less or equal zoom-max: "
-			        + zoomMin);
-		}
+		if (zoomMin < 0)
+			throw new ThemeException("zoom-min must not be negative: " + zoomMin);
+		else if (zoomMax < 0)
+			throw new ThemeException("zoom-max must not be negative: " + zoomMax);
+		else if (zoomMin > zoomMax)
+			throw new ThemeException("zoom-min must be less or equal zoom-max: " + zoomMin);
 	}
 
 	public static Rule create(String elementName, Attributes attributes, Stack<Rule> ruleStack) {
@@ -147,6 +142,7 @@ public abstract class Rule {
 		String values = null;
 		byte zoomMin = 0;
 		byte zoomMax = Byte.MAX_VALUE;
+		boolean matchFirst = false;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
@@ -172,6 +168,8 @@ public abstract class Rule {
 				zoomMin = Byte.parseByte(value);
 			} else if ("zoom-max".equals(name)) {
 				zoomMax = Byte.parseByte(value);
+			} else if ("select".equals(name)) {
+				matchFirst = "first".equals(value);
 			} else {
 				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
 			}
@@ -183,91 +181,114 @@ public abstract class Rule {
 			element = Element.LINE;
 
 		validate(zoomMin, zoomMax);
-		return createRule(ruleStack, element, keys, values, zoomMin, zoomMax);
+
+		return createRule(ruleStack, element, keys, values, zoomMin, zoomMax, matchFirst);
 	}
 
-	private ArrayList<RenderInstruction> mRenderInstructions;
-	private ArrayList<Rule> mSubRules;
-
-	private Rule[] mSubRuleArray;
-	private RenderInstruction[] mRenderInstructionArray;
+	private Rule[] mSubRules;
+	private RenderInstruction[] mRenderInstructions;
 
 	final int mZoom;
 	final int mElement;
+	final boolean mMatchFirst;
 
-	Rule(int type, int zoom) {
+	static class Builder {
+		ArrayList<RenderInstruction> renderInstructions = new ArrayList<RenderInstruction>(4);
+		ArrayList<Rule> subRules = new ArrayList<Rule>(4);
 
+		public void clear() {
+			renderInstructions.clear();
+			renderInstructions = null;
+			subRules.clear();
+			subRules = null;
+		}
+	}
+
+	private Builder builder;
+
+	Rule(int type, int zoom, boolean matchFirst) {
+		builder = new Builder();
 		mElement = type;
 		mZoom = zoom;
-
-		mRenderInstructions = new ArrayList<RenderInstruction>(4);
-		mSubRules = new ArrayList<Rule>(4);
+		mMatchFirst = matchFirst;
 	}
 
 	public void addRenderingInstruction(RenderInstruction renderInstruction) {
-		mRenderInstructions.add(renderInstruction);
+		builder.renderInstructions.add(renderInstruction);
 	}
 
 	public void addSubRule(Rule rule) {
-		mSubRules.add(rule);
+		builder.subRules.add(rule);
 	}
 
 	abstract boolean matchesTags(Tag[] tags);
 
-	public void matchElement(int type, Tag[] tags, int zoomLevel,
+	public boolean matchElement(int type, Tag[] tags, int zoomLevel,
 	        List<RenderInstruction> matchingList) {
 
 		if (((mElement & type) != 0) && ((mZoom & zoomLevel) != 0) && (matchesTags(tags))) {
 
-			// add instructions for this rule
-			for (RenderInstruction ri : mRenderInstructionArray)
-				matchingList.add(ri);
+			boolean matched = false;
 
 			// check subrules
-			for (Rule subRule : mSubRuleArray)
-				subRule.matchElement(type, tags, zoomLevel, matchingList);
+			for (Rule subRule : mSubRules) {
+				if (subRule.matchElement(type, tags, zoomLevel, matchingList) && mMatchFirst) {
+					matched = true;
+					break;
+				}
+			}
+
+			if (!mMatchFirst || matched) {
+				// add instructions for this rule
+				for (RenderInstruction ri : mRenderInstructions)
+					matchingList.add(ri);
+			}
+
+			// this rule did match
+			return true;
 		}
+
+		// this rule did not match
+		return false;
 	}
 
 	public void onComplete() {
 		MATCHERS_CACHE_KEY.clear();
 		MATCHERS_CACHE_VALUE.clear();
 
-		mRenderInstructionArray = new RenderInstruction[mRenderInstructions.size()];
-		mRenderInstructions.toArray(mRenderInstructionArray);
+		mRenderInstructions = new RenderInstruction[builder.renderInstructions.size()];
+		builder.renderInstructions.toArray(mRenderInstructions);
 
-		mSubRuleArray = new Rule[mSubRules.size()];
-		mSubRules.toArray(mSubRuleArray);
+		mSubRules = new Rule[builder.subRules.size()];
+		builder.subRules.toArray(mSubRules);
 
-		mRenderInstructions.clear();
-		mRenderInstructions = null;
-		mSubRules.clear();
-		mSubRules = null;
+		builder.clear();
+		builder = null;
 
-		for (Rule subRule : mSubRuleArray)
+		for (Rule subRule : mSubRules)
 			subRule.onComplete();
 	}
 
 	public void onDestroy() {
-		for (RenderInstruction ri : mRenderInstructionArray)
+		for (RenderInstruction ri : mRenderInstructions)
 			ri.destroy();
 
-		for (Rule subRule : mSubRuleArray)
+		for (Rule subRule : mSubRules)
 			subRule.onDestroy();
 	}
 
 	public void scaleStrokeWidth(float scaleFactor) {
-		for (RenderInstruction ri : mRenderInstructionArray)
+		for (RenderInstruction ri : mRenderInstructions)
 			ri.scaleStrokeWidth(scaleFactor);
 
-		for (Rule subRule : mSubRuleArray)
+		for (Rule subRule : mSubRules)
 			subRule.scaleStrokeWidth(scaleFactor);
 	}
 
 	public void scaleTextSize(float scaleFactor) {
-		for (RenderInstruction ri : mRenderInstructionArray)
+		for (RenderInstruction ri : mRenderInstructions)
 			ri.scaleTextSize(scaleFactor);
-		for (Rule subRule : mSubRuleArray)
+		for (Rule subRule : mSubRules)
 			subRule.scaleTextSize(scaleFactor);
 	}
 }
