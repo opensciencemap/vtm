@@ -29,6 +29,7 @@ import org.oscim.tiling.MapTile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.mapfile.header.SubFileParameter;
+import org.oscim.utils.TileClipper;
 
 /**
  * A class for reading binary map files.
@@ -253,8 +254,8 @@ public class MapDatabase implements ITileDataSource {
 	 *            the callback which handles the extracted map elements.
 	 */
 	private void processBlock(QueryParameters queryParameters,
-	        SubFileParameter subFileParameter,
-	        ITileDataSink mapDataSink) {
+	        SubFileParameter subFileParameter, ITileDataSink mapDataSink) {
+
 		if (!processBlockSignature()) {
 			return;
 		}
@@ -302,11 +303,15 @@ public class MapDatabase implements ITileDataSource {
 
 		// move the pointer to the first way
 		mReadBuffer.setBufferPosition(firstWayOffset);
+
 		if (!processWays(queryParameters, mapDataSink, waysOnQueryZoomLevel)) {
 			return;
 		}
 
 	}
+
+	private long mCurrentRow;
+	private long mCurrentCol;
 
 	private void processBlocks(ITileDataSink mapDataSink,
 	        QueryParameters queryParameters,
@@ -315,8 +320,10 @@ public class MapDatabase implements ITileDataSource {
 		// boolean queryReadWaterInfo = false;
 
 		// read and process all blocks from top to bottom and from left to right
-		for (long row = queryParameters.fromBlockY; row <= queryParameters.toBlockY; ++row) {
-			for (long column = queryParameters.fromBlockX; column <= queryParameters.toBlockX; ++column) {
+		for (long row = queryParameters.fromBlockY; row <= queryParameters.toBlockY; row++) {
+			for (long column = queryParameters.fromBlockX; column <= queryParameters.toBlockX; column++) {
+				mCurrentCol = column - queryParameters.fromBlockX;
+				mCurrentRow = row - queryParameters.fromBlockY;
 
 				// calculate the actual block number of the needed block in the
 				// file
@@ -701,8 +708,7 @@ public class MapDatabase implements ITileDataSource {
 	 *         otherwise.
 	 */
 	private boolean processWays(QueryParameters queryParameters,
-	        ITileDataSink mapDataSink,
-	        int numberOfWays) {
+	        ITileDataSink mapDataSink, int numberOfWays) {
 
 		Tag[] wayTags = mTileSource.fileInfo.wayTags;
 		int numTags = 0;
@@ -717,6 +723,36 @@ public class MapDatabase implements ITileDataSource {
 			stringsSize = mReadBuffer.readUnsignedInt();
 			stringOffset = mReadBuffer.getBufferPosition();
 			mReadBuffer.skipBytes(stringsSize);
+		}
+
+		long numRows = queryParameters.toBlockY - queryParameters.fromBlockY;
+		long numCols = queryParameters.toBlockX - queryParameters.fromBlockX;
+
+		//Log.d(TAG, numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
+		if (numRows > 0) {
+			int minX = -2;
+			int minY = -2;
+			int maxX = Tile.SIZE + 2;
+			int maxY = Tile.SIZE + 2;
+
+			int w = (int) (Tile.SIZE / (numCols + 1));
+			int h = (int) (Tile.SIZE / (numRows + 1));
+
+			if (mCurrentCol > 0)
+				minX = (int) (mCurrentCol * w);
+
+			if (mCurrentCol < numCols)
+				maxX = (int) (mCurrentCol * w + w);
+
+			if (mCurrentRow > 0)
+				minY = (int) (mCurrentRow * h);
+
+			if (mCurrentRow < numRows)
+				maxY = (int) (mCurrentRow * h + h);
+			//Log.d(TAG, minX + " " + minY + " " + maxX + " " + maxY);
+			mTileClipper.setRect(minX, minY, maxX, maxY);
+		} else {
+			mTileClipper.setRect(-2, -2, Tile.SIZE + 2, Tile.SIZE + 2);
 		}
 
 		for (int elementCounter = numberOfWays; elementCounter != 0; --elementCounter) {
@@ -856,6 +892,12 @@ public class MapDatabase implements ITileDataSource {
 
 				projectToTile(mElem);
 
+				if (mElem.isPoly()) {
+					if (!mTileClipper.clip(mElem)) {
+						continue;
+					}
+				}
+
 				mElem.setLayer(layer);
 				mapDataSink.process(mElem);
 			}
@@ -863,6 +905,8 @@ public class MapDatabase implements ITileDataSource {
 
 		return true;
 	}
+
+	private final TileClipper mTileClipper = new TileClipper(-2, -2, Tile.SIZE + 2, Tile.SIZE + 2);
 
 	private float[] readOptionalLabelPosition() {
 		float[] labelPosition = new float[2];
@@ -883,7 +927,7 @@ public class MapDatabase implements ITileDataSource {
 		int cumulatedNumberOfPois = 0;
 		int cumulatedNumberOfWays = 0;
 
-		for (int row = 0; row < rows; ++row) {
+		for (int row = 0; row < rows; row++) {
 			cumulatedNumberOfPois += mReadBuffer.readUnsignedInt();
 			cumulatedNumberOfWays += mReadBuffer.readUnsignedInt();
 
