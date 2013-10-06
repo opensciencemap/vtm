@@ -59,7 +59,7 @@ public class MeshLayer extends RenderElement {
 
 		verticesCnt = vertexItems.getSize() / 2;
 
-		Log.d(TAG, "-> " + verticesCnt + " " + numIndices);
+		//Log.d(TAG, "-> " + verticesCnt + " " + numIndices);
 
 		if (numIndices <= 0) {
 			vertexItems = VertexItem.pool.releaseAll(vertexItems);
@@ -74,13 +74,13 @@ public class MeshLayer extends RenderElement {
 			return;
 		}
 
-		Log.d(TAG, "compile");
+		//Log.d(TAG, "compile");
 		// add vertices to shared VBO
 		ElementLayers.addPoolItems(this, sbuf);
 
 		int cnt = indiceItems.getSize();
 
-		Log.d(TAG, "check " + cnt + ":" + numIndices);
+		//Log.d(TAG, "check " + cnt + ":" + numIndices);
 
 		if (cnt != numIndices) {
 			numIndices = cnt;
@@ -94,12 +94,10 @@ public class MeshLayer extends RenderElement {
 
 		indiceItems = VertexItem.pool.releaseAll(indiceItems);
 
-		sbuf.flip();
-
 		if (indicesVbo == null)
 			indicesVbo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		indicesVbo.loadBufferData(sbuf, sbuf.limit() * 2);
+		indicesVbo.loadBufferData(sbuf.flip(), sbuf.limit() * 2);
 	}
 
 	@Override

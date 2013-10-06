@@ -153,9 +153,8 @@ public abstract class ElementRenderer extends LayerRenderer {
 			sbuf.put(fillCoords, 0, 8);
 
 		layers.compile(sbuf, addFill);
-		sbuf.flip();
 
-		if (newSize != sbuf.remaining()) {
+		if (newSize != sbuf.position()) {
 			Log.d(TAG, "wrong size: "
 			        + " new size: " + newSize
 			        + " buffer pos: " + sbuf.position()
@@ -164,10 +163,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 			return false;
 		}
 
-		// * SHORT_BYTES
-		newSize *= 2;
-
-		layers.vbo.loadBufferData(sbuf, newSize);
+		layers.vbo.loadBufferData(sbuf.flip(), newSize * 2);
 		return true;
 	}
 

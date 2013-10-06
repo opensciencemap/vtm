@@ -378,10 +378,9 @@ public class ExtrusionLayer extends RenderElement {
 			mNumIndices += mIndiceCnt[i];
 		}
 
-		sbuf.flip();
 		int size = mNumIndices * 2;
 		vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
-		vboIndices.loadBufferData(sbuf, size);
+		vboIndices.loadBufferData(sbuf.flip(), size);
 
 		GL20 GL = GLAdapter.get();
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -391,10 +390,9 @@ public class ExtrusionLayer extends RenderElement {
 		for (VertexItem vi = mVertices; vi != null; vi = vi.next)
 			sbuf.put(vi.vertices, 0, vi.used);
 
-		sbuf.flip();
 		size = mNumVertices * 4 * 2;
 		vboVertices = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
-		vboVertices.loadBufferData(sbuf, size);
+		vboVertices.loadBufferData(sbuf.flip(), size);
 
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 

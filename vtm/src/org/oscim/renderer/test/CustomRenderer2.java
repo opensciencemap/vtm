@@ -82,10 +82,9 @@ public class CustomRenderer2 extends ElementRenderer {
 		}
 		FloatBuffer buf = MapRenderer.getFloatBuffer(12);
 		buf.put(vertices);
-		buf.flip();
 
 		mVBO = BufferObject.get(GL20.GL_ARRAY_BUFFER, 0);
-		mVBO.loadBufferData(buf, 12 * 4);
+		mVBO.loadBufferData(buf.flip(), 12 * 4);
 
 		setReady(true);
 	}

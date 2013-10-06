@@ -24,22 +24,23 @@ import org.oscim.backend.Log;
 
 public final class BufferObject {
 	private final static String TAG = BufferObject.class.getName();
-
-	private static GL20 GL;
-
 	private static final int MB = 1024 * 1024;
 	private static final int LIMIT_BUFFERS = 16 * MB;
 
-	// GL identifier
-	public int id;
-	// allocated bytes
-	public int size;
+	private static GL20 GL;
 
-	BufferObject next;
+	/** GL identifier */
+	private int id;
 
-	int target;
+	/** allocated bytes */
+	private int size;
 
-	BufferObject(int target, int id) {
+	/** GL_ARRAY_BUFFER or GL_ELEMENT_ARRAY_BUFFER */
+	private int target;
+
+	private BufferObject next;
+
+	private BufferObject(int target, int id) {
 		this.id = id;
 		this.target = target;
 	}
@@ -47,9 +48,10 @@ public final class BufferObject {
 	public void loadBufferData(Buffer buf, int newSize) {
 		boolean clear = false;
 
-		if (buf.position() != 0) {
-			Log.d(TAG, "rewind your buffer: " + buf.position());
-		}
+		if (buf.position() != 0)
+			buf.flip();
+
+		//throw new IllegalArgumentException("rewind buffer! " + buf.position());
 
 		GL.glBindBuffer(target, id);
 
@@ -68,6 +70,10 @@ public final class BufferObject {
 		GL.glBindBuffer(target, id);
 	}
 
+	public void unbind() {
+		GL.glBindBuffer(target, 0);
+	}
+
 	// ---------------------------- pool ----------------------------
 	// bytes currently loaded in VBOs
 	private static int mBufferMemoryUsage;
@@ -77,9 +83,7 @@ public final class BufferObject {
 		if (mBufferMemoryUsage < LIMIT_BUFFERS)
 			return;
 
-		Log.d(TAG, "buffer object usage: "
-		        + mBufferMemoryUsage / MB
-		        + "MB, force: " + force);
+		Log.d(TAG, "use: " + mBufferMemoryUsage / MB + "MB");
 
 		mBufferMemoryUsage -= BufferObject.limitUsage(1024 * 1024);
 
