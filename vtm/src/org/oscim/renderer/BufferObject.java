@@ -219,4 +219,8 @@ public final class BufferObject {
 		createBuffers(GL20.GL_ARRAY_BUFFER, num);
 		counter[0] += num;
 	}
+
+	public static boolean isMaxFill() {
+		return mBufferMemoryUsage > LIMIT_BUFFERS;
+	}
 }

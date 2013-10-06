@@ -27,6 +27,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
+import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
@@ -37,6 +38,8 @@ public class TileManager {
 	static final String TAG = TileManager.class.getName();
 
 	private int mCacheLimit;
+	private int mCacheReduce;
+
 	private int mMinZoom;
 	private int mMaxZoom;
 
@@ -107,14 +110,12 @@ public class TileManager {
 
 	private final float[] mMapPlane = new float[8];
 
-	//private final TileLayer<?> mTileLayer;
-
 	public TileManager(Map map, int minZoom, int maxZoom, int cacheLimit) {
 		mMap = map;
-		//mTileLayer = tileLayer;
 		mMaxZoom = maxZoom;
 		mMinZoom = minZoom;
 		mCacheLimit = cacheLimit;
+		mCacheReduce = 0;
 
 		mViewport = map.getViewport();
 
@@ -269,8 +270,16 @@ public class TileManager {
 
 		mJobs.clear();
 
+		if (mCacheReduce < mCacheLimit / 2) {
+			if (BufferObject.isMaxFill()) {
+				mCacheReduce += 10;
+				Log.d(TAG, "reduce tile cache " + (mCacheLimit - mCacheReduce));
+			} else
+				mCacheReduce = 0;
+		}
+
 		/* limit cache items */
-		int remove = mTilesCount - mCacheLimit;
+		int remove = mTilesCount - (mCacheLimit - mCacheReduce);
 
 		if (remove > CACHE_THRESHOLD ||
 		        mTilesForUpload > MAX_TILES_IN_QUEUE)
@@ -473,12 +482,12 @@ public class TileManager {
 				MapTile t = tiles[i];
 				if (t.isLocked()) {
 					// dont remove tile used by GLRenderer, or somewhere else
-					Log.d(TAG, "locked " + t
-					        + " " + t.distance
-					        + " " + (t.state == STATE_NEW_DATA)
-					        + " " + (t.state == STATE_LOADING)
-					        + " " + pos.zoomLevel);
 					// try again in next run.
+					//Log.d(TAG, "locked " + t
+					//        + " " + t.distance
+					//        + " " + (t.state == STATE_NEW_DATA)
+					//        + " " + (t.state == STATE_LOADING)
+					//        + " " + pos.zoomLevel);
 				} else if (t.state == STATE_LOADING) {
 					// NOTE: when set loading to false the tile could be
 					// added to load queue again while still processed in
