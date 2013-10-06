@@ -195,7 +195,7 @@ public final class PolygonLayer extends RenderElement {
 				if (enableTexture && a.texture != null) {
 					shader = texShader;
 					setShader(texShader, m);
-					float num = (Tile.SIZE / a.texture.width) >> 1;
+					float num = FastMath.clamp((Tile.SIZE / a.texture.width) >> 1, 1, Tile.SIZE);
 					float transition = Interpolation.exp5.apply(FastMath.clamp(scale - 1, 0, 1));
 					GL.glUniform2f(hPolygonScale[1], transition, div / num);
 
