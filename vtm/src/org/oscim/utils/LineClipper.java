@@ -23,11 +23,11 @@ package org.oscim.utils;
 
 public class LineClipper {
 
-	private static final int INSIDE = 0; // 0000
-	private static final int LEFT = 1; // 0001
-	private static final int RIGHT = 2; // 0010
-	private static final int BOTTOM = 4; // 0100
-	private static final int TOP = 8; // 1000
+	public static final int INSIDE = 0; // 0000
+	public static final int LEFT = 1; // 0001
+	public static final int RIGHT = 2; // 0010
+	public static final int BOTTOM = 4; // 0100
+	public static final int TOP = 8; // 1000
 
 	private final int xmin, xmax, ymin, ymax;
 	public final int[] out;
@@ -62,17 +62,15 @@ public class LineClipper {
 		mPrevX = x0;
 		mPrevY = y0;
 
-		int outcode = INSIDE;
+		mPrevOutcode = INSIDE;
 		if (x0 < xmin)
-			outcode |= LEFT;
+			mPrevOutcode |= LEFT;
 		else if (x0 > xmax)
-			outcode |= RIGHT;
+			mPrevOutcode |= RIGHT;
 		if (y0 < ymin)
-			outcode |= BOTTOM;
+			mPrevOutcode |= BOTTOM;
 		else if (y0 > ymax)
-			outcode |= TOP;
-
-		mPrevOutcode = outcode;
+			mPrevOutcode |= TOP;
 	}
 
 	/**
@@ -135,7 +133,6 @@ public class LineClipper {
 
 				// At least one endpoint is outside the clip rectangle; pick it.
 				int outcodeOut = (outcode0 == 0) ? outcode1 : outcode0;
-
 				// Now find the intersection point;
 				// use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
 				if ((outcodeOut & TOP) != 0) { // point is above the clip rectangle
