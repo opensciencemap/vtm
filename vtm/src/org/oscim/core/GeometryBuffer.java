@@ -1,6 +1,5 @@
 package org.oscim.core;
 
-// TODO: Auto-generated Javadoc
 // TODO
 // - getter methods!
 // - check indexPos < Short.Max
@@ -99,7 +98,7 @@ public class GeometryBuffer {
 	 * Reset buffer.
 	 */
 	public void clear() {
-		index[0] = -1;
+		index[0] = 0;
 		indexPos = 0;
 		pointPos = 0;
 		type = GeometryType.NONE;
@@ -224,7 +223,7 @@ public class GeometryBuffer {
 	public GeometryBuffer translate(float dx, float dy) {
 		for (int i = 0; i < pointPos; i += 2) {
 			points[i] += dx;
-			points[i+1] += dy;
+			points[i + 1] += dy;
 		}
 		return this;
 	}
@@ -232,7 +231,7 @@ public class GeometryBuffer {
 	public GeometryBuffer scale(float scaleX, float scaleY) {
 		for (int i = 0; i < pointPos; i += 2) {
 			points[i] *= scaleX;
-			points[i+1] *= scaleY;
+			points[i + 1] *= scaleY;
 		}
 		return this;
 	}
