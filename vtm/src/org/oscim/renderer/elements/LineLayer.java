@@ -841,7 +841,7 @@ public final class LineLayer extends RenderElement {
 		        + "    len = abs(v_st.s);"
 		        + "  }"
 		        //   u_mode == 0.0 -> thin line
-		        + "  len = len * clamp(u_mode, len, 1.0);"
+		        //+ "  len = len * clamp(u_mode, len, 1.0);"
 
 		        // use 'max' to avoid branching, need to check performance
 		        //+ (GLAdapter.GDX_DESKTOP_QUIRKS
@@ -884,7 +884,8 @@ public final class LineLayer extends RenderElement {
 		        + "    fuzz = fwidth(v_st.s);"
 		        + "  }"
 		        //   u_mode == 0.0 -> thin line
-		        + "  len = len * clamp(u_mode, len, 1.0);"
+		        //+ "  len = len * clamp(u_mode, len, 1.0);"
+
 		        + "  if (fuzz > 2.0)"
 		        + "  gl_FragColor = u_color * 0.5;" //vec4(1.0, 1.0, 1.0, 1.0);"
 		        + "  else"
