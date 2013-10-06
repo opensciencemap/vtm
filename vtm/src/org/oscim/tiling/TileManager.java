@@ -81,7 +81,7 @@ public class TileManager {
 	/* package */TileSet mNewTiles;
 
 	// job queue filled in TileManager and polled by TileLoaders
-	final JobQueue jobQueue;
+	private final JobQueue jobQueue;
 
 	private final QuadTreeIndex<MapTile> mIndex = new QuadTreeIndex<MapTile>() {
 
@@ -292,6 +292,14 @@ public class TileManager {
 	/** only used in setmapDatabase -- deprecate? */
 	public void clearJobs() {
 		jobQueue.clear();
+	}
+
+	public boolean hasTileJobs() {
+		return !jobQueue.isEmpty();
+	}
+
+	public MapTile getTileJob() {
+		return jobQueue.poll();
 	}
 
 	/**
@@ -537,7 +545,7 @@ public class TileManager {
 	 *            Tile ready for upload in TileRenderLayer
 	 * @return caller does not care
 	 */
-	public void passTile(MapTile tile, boolean success) {
+	public void jobCompleted(MapTile tile, boolean success) {
 
 		if (!success) {
 			tile.clear();
@@ -547,7 +555,7 @@ public class TileManager {
 		tile.state = STATE_NEW_DATA;
 
 		// is volatile
-		mTilesForUpload++;
+		mTilesForUpload += 1;
 
 		// locked means the tile is visible or referenced by
 		// a tile that might be visible.

@@ -40,7 +40,7 @@ public abstract class TileLoader extends PausableThread {
 
 	@Override
 	protected void doWork() {
-		MapTile tile = mTileManager.jobQueue.poll();
+		MapTile tile = mTileManager.getTileJob();
 
 		if (tile == null)
 			return;
@@ -54,9 +54,10 @@ public abstract class TileLoader extends PausableThread {
 			return;
 		}
 
-		if (!isInterrupted()) {
-			mTileManager.passTile(tile, success);
-		}
+		if (isInterrupted())
+			success = false;
+
+		mTileManager.jobCompleted(tile, success);
 	}
 
 	public void jobCompleted(MapTile tile, boolean success) {
@@ -75,6 +76,6 @@ public abstract class TileLoader extends PausableThread {
 
 	@Override
 	protected boolean hasWork() {
-		return !mTileManager.jobQueue.isEmpty();
+		return mTileManager.hasTileJobs();
 	}
 }

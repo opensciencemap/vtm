@@ -57,7 +57,7 @@ public abstract class TileLoader {
 		mPausing = false;
 		// FIXME
 		mWorking = false;
-		if (!mTileManager.jobQueue.isEmpty())
+		if (mTileManager.hasTileJobs())
 			go();
 	}
 
@@ -76,7 +76,7 @@ public abstract class TileLoader {
 			return;
 		}
 
-		MapTile tile = mTileManager.jobQueue.poll();
+		MapTile tile = mTileManager.getTileJob();
 
 		if (tile == null)
 			return;
@@ -96,16 +96,14 @@ public abstract class TileLoader {
 	}
 
 	public void jobCompleted(MapTile tile, boolean success) {
-		//if (success) {
-		if (!isInterrupted) {
-			// pass tile to main thread
-			mTileManager.passTile(tile, success);
-		}
-		//}
+		if (isInterrupted)
+			success = false;
+
+		mTileManager.jobCompleted(tile, success);
 
 		mWorking = false;
 
-		if (!mPausing && !mTileManager.jobQueue.isEmpty()) {
+		if (!mPausing && mTileManager.hasTileJobs()) {
 
 			Gdx.app.postRunnable(new Runnable() {
 
