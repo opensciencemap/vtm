@@ -1,5 +1,5 @@
 /*
- * Copyright 2013
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -24,6 +24,16 @@ import org.oscim.utils.UTF8Decoder;
 
 public abstract class PbfDecoder {
 	private final static String TAG = PbfDecoder.class.getName();
+
+	private final static int S1 = 7;
+	private final static int S2 = 14;
+	private final static int S3 = 21;
+	private final static int S4 = 28;
+
+	private final static int M1 = (1 << S1) - 1;
+	private final static int M2 = (1 << S2) - 1;
+	private final static int M3 = (1 << S3) - 1;
+	private final static int M4 = (1 << S4) - 1;
 
 	protected static final boolean debug = false;
 
@@ -196,38 +206,29 @@ public abstract class PbfDecoder {
 		byte[] buf = buffer;
 		int pos = bufferPos;
 		int end = pos + bytes;
-		int val;
 
 		while (pos < end) {
-			if (buf[pos] >= 0) {
-				val = buf[pos++];
+			byte b = buf[pos++];
+			int val = b;
 
-			} else if (buf[pos + 1] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | buf[pos++] << 7;
-
-			} else if (buf[pos + 2] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++]) << 14;
-
-			} else if (buf[pos + 3] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++] & 0x7f) << 14
-				        | (buf[pos++]) << 21;
-
-			} else {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++] & 0x7f) << 14
-				        | (buf[pos++] & 0x7f) << 21
-				        | (buf[pos]) << 28;
-
-				if (buf[pos++] < 0)
-					throw INVALID_VARINT;
+			if (b < 0) {
+				b = buf[pos++];
+				val = (val & M1) | (b << S1);
+				if (b < 0) {
+					b = buf[pos++];
+					val = (val & M2) | (b << S2);
+					if (b < 0) {
+						b = buf[pos++];
+						val = (val & M3) | (b << S3);
+						if (b < 0) {
+							b = buf[pos++];
+							val = (val & M4) | (b << S4);
+							if (b < 0)
+								throw INVALID_VARINT;
+						}
+					}
+				}
 			}
-
 			// zigzag decoding
 			int s = ((val >>> 1) ^ -(val & 1));
 
@@ -259,41 +260,37 @@ public abstract class PbfDecoder {
 		int bytes = decodeVarint32();
 		fillBuffer(bytes);
 
-		byte[] buf = buffer;
+		final byte[] buf = buffer;
 		int pos = bufferPos;
-		int end = pos + bytes;
-		int val;
-
 		int cnt = 0;
 
-		while (pos < end) {
+		for (int end = pos + bytes; pos < end; cnt++) {
 			if (cnt == num)
 				throw new ProtobufException("invalid array size " + num);
 
-			if (buf[pos] >= 0) {
-				val = buf[pos++];
-			} else if (buf[pos + 1] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | buf[pos++] << 7;
-			} else if (buf[pos + 2] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++]) << 14;
-			} else if (buf[pos + 3] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++] & 0x7f) << 14
-				        | (buf[pos++]) << 21;
-			} else {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++] & 0x7f) << 14
-				        | (buf[pos++] & 0x7f) << 21
-				        | (buf[pos]) << 28;
-				if (buf[pos++] < 0)
-					throw INVALID_VARINT;
+			byte b = buf[pos++];
+			int val = b;
+
+			if (b < 0) {
+				b = buf[pos++];
+				val = (val & M1) | (b << S1);
+				if (b < 0) {
+					b = buf[pos++];
+					val = (val & M2) | (b << S2);
+					if (b < 0) {
+						b = buf[pos++];
+						val = (val & M3) | (b << S3);
+						if (b < 0) {
+							b = buf[pos++];
+							val = (val & M4) | (b << S4);
+							if (b < 0)
+								throw INVALID_VARINT;
+						}
+					}
+				}
 			}
-			array[cnt++] = (short) val;
+
+			array[cnt] = (short) val;
 		}
 
 		if (pos != bufferPos + bytes)
@@ -319,35 +316,31 @@ public abstract class PbfDecoder {
 		fillBuffer(bytes);
 		int cnt = 0;
 
-		byte[] buf = buffer;
+		final byte[] buf = buffer;
 		int pos = bufferPos;
-		int end = pos + bytes;
-		int val;
 
-		while (pos < end) {
-			if (buf[pos] >= 0) {
-				val = buf[pos++];
-			} else if (buf[pos + 1] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | buf[pos++] << 7;
-			} else if (buf[pos + 2] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++]) << 14;
-			} else if (buf[pos + 3] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++] & 0x7f) << 14
-				        | (buf[pos++]) << 21;
-			} else {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++] & 0x7f) << 14
-				        | (buf[pos++] & 0x7f) << 21
-				        | (buf[pos]) << 28;
+		for (int end = pos + bytes; pos < end; cnt++) {
 
-				if (buf[pos++] < 0)
-					throw INVALID_VARINT;
+			byte b = buf[pos++];
+			int val = b;
+
+			if (b < 0) {
+				b = buf[pos++];
+				val = (val & M1) | (b << S1);
+				if (b < 0) {
+					b = buf[pos++];
+					val = (val & M2) | (b << S2);
+					if (b < 0) {
+						b = buf[pos++];
+						val = (val & M3) | (b << S3);
+						if (b < 0) {
+							b = buf[pos++];
+							val = (val & M4) | (b << S4);
+							if (b < 0)
+								throw INVALID_VARINT;
+						}
+					}
+				}
 			}
 
 			if (arrayLength <= cnt) {
@@ -357,7 +350,7 @@ public abstract class PbfDecoder {
 				System.arraycopy(tmp, 0, array, 0, cnt);
 			}
 
-			array[cnt++] = (short) val;
+			array[cnt] = (short) val;
 		}
 
 		if (pos != bufferPos + bytes)
@@ -376,34 +369,26 @@ public abstract class PbfDecoder {
 
 		byte[] buf = buffer;
 		int pos = bufferPos;
-		int val;
 
-		if (buf[pos] >= 0) {
-			val = buf[pos++];
-		} else {
-			if (buf[pos + 1] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++]) << 7;
+		byte b = buf[pos++];
+		int val = b;
 
-			} else if (buf[pos + 2] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++]) << 14;
-
-			} else if (buf[pos + 3] >= 0) {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++] & 0x7f) << 14
-				        | (buf[pos++]) << 21;
-			} else {
-				val = (buf[pos++] & 0x7f)
-				        | (buf[pos++] & 0x7f) << 7
-				        | (buf[pos++] & 0x7f) << 14
-				        | (buf[pos++] & 0x7f) << 21
-				        | (buf[pos]) << 28;
-
-				if (buf[pos++] < 0)
-					throw INVALID_VARINT;
+		if (b < 0) {
+			b = buf[pos++];
+			val = (val & M1) | (b << S1);
+			if (b < 0) {
+				b = buf[pos++];
+				val = (val & M2) | (b << S2);
+				if (b < 0) {
+					b = buf[pos++];
+					val = (val & M3) | (b << S3);
+					if (b < 0) {
+						b = buf[pos++];
+						val = (val & M4) | (b << S4);
+						if (b < 0)
+							throw INVALID_VARINT;
+					}
+				}
 			}
 		}
 
