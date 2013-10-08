@@ -24,7 +24,6 @@ import java.util.Stack;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.oscim.backend.CanvasAdapter;
-import org.oscim.backend.Log;
 import org.oscim.backend.XMLReaderAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
@@ -45,6 +44,8 @@ import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.renderinstruction.Symbol;
 import org.oscim.theme.renderinstruction.Text;
 import org.oscim.theme.rule.Rule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -54,7 +55,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * SAX2 handler to parse XML render theme files.
  */
 public class RenderThemeHandler extends DefaultHandler {
-	private final static String TAG = RenderThemeHandler.class.getName();
+	static final Logger log = LoggerFactory.getLogger(RenderThemeHandler.class);
 
 	private static final int RENDER_THEME_VERSION = 1;
 
@@ -119,7 +120,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		sb.append(name);
 		sb.append('=');
 		sb.append(value);
-		Log.d(TAG, sb.toString());
+		log.debug(sb.toString());
 	}
 
 	private ArrayList<Rule> mRulesList = new ArrayList<Rule>();
@@ -171,12 +172,12 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	@Override
 	public void error(SAXParseException exception) {
-		Log.d(TAG, exception.getMessage());
+		log.debug(exception.getMessage());
 	}
 
 	@Override
 	public void warning(SAXParseException exception) {
-		Log.d(TAG, exception.getMessage());
+		log.debug(exception.getMessage());
 	}
 
 	@Override
@@ -247,7 +248,7 @@ public class RenderThemeHandler extends DefaultHandler {
 					if (pt != null)
 						mCurrentRule.addRenderingInstruction(pt);
 					else
-						Log.d(TAG, "BUG not a path text style: " + style);
+						log.debug("BUG not a path text style: " + style);
 				}
 
 			} else if ("symbol".equals(localName)) {
@@ -273,7 +274,7 @@ public class RenderThemeHandler extends DefaultHandler {
 				createTextureRegion(localName, attributes);
 
 			} else {
-				Log.d(TAG, "unknown element: " + localName);
+				log.debug("unknown element: " + localName);
 				//throw new SAXException("unknown element: " + localName);
 			}
 		} catch (ThemeException e) {
@@ -290,7 +291,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		TextureRegion texture = mTextureAtlas.getTextureRegion(src);
 
 		if (texture == null)
-			Log.d(TAG, "missing texture atlas item '" + src + "'");
+			log.debug("missing texture atlas item '" + src + "'");
 
 		return texture;
 	}
@@ -304,7 +305,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		if (use != null) {
 			style = (Line) mStyles.get(LINE_STYLE + use);
 			if (style == null) {
-				Log.d(TAG, "missing line style 'use': " + use);
+				log.debug("missing line style 'use': " + use);
 				return;
 			}
 		}
@@ -453,7 +454,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		if (use != null) {
 			style = (Area) mStyles.get(AREA_STYLE + use);
 			if (style == null) {
-				Log.d(TAG, "missing area style 'use': " + use);
+				log.debug("missing area style 'use': " + use);
 				return;
 			}
 		}
@@ -545,7 +546,7 @@ public class RenderThemeHandler extends DefaultHandler {
 				if (b != null)
 					texture = new TextureItem(b, true);
 			} catch (Exception e) {
-				Log.d(TAG, e.getMessage());
+				log.debug(e.getMessage());
 			}
 		}
 		return new Area(style, fill, stroke, strokeWidth, fade, level, blend,
@@ -558,7 +559,7 @@ public class RenderThemeHandler extends DefaultHandler {
 			if (line != null && line.outline)
 				mCurrentRule.addRenderingInstruction(line);
 			else
-				Log.d(TAG, "BUG not an outline style: " + style);
+				log.debug("BUG not an outline style: " + style);
 		}
 	}
 

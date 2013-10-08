@@ -24,7 +24,7 @@ import org.oscim.tiling.TileManager;
 import org.oscim.tiling.TileRenderer;
 
 public abstract class TileLayer<T extends TileLoader> extends Layer implements Map.UpdateListener {
-	//private final static String TAG = TileLayer.class.getName();
+	//static final Logger log = LoggerFactory.getLogger(TileLayer.class);
 	private final static int MAX_ZOOMLEVEL = 17;
 	private final static int MIN_ZOOMLEVEL = 2;
 	private final static int CACHE_LIMIT = 250;

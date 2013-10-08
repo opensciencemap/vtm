@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
@@ -26,9 +25,11 @@ import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.common.PbfDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TileDecoder extends PbfDecoder {
-	private final static String TAG = TileDecoder.class.getName();
+	static final Logger log = LoggerFactory.getLogger(TileDecoder.class);
 
 	private static final int TAG_TILE_VERSION = 1;
 	//private static final int TAG_TILE_TIMESTAMP = 2;
@@ -77,9 +78,9 @@ public class TileDecoder extends PbfDecoder {
 	        throws IOException {
 
 		int byteCount = readUnsignedInt(is, buffer);
-		//Log.d(TAG, tile + " contentLength:" + byteCount);
+		//log.debug(tile + " contentLength:" + byteCount);
 		if (byteCount < 0) {
-			Log.d(TAG, "invalid contentLength: " + byteCount);
+			log.debug("invalid contentLength: " + byteCount);
 			return false;
 		}
 
@@ -105,7 +106,7 @@ public class TileDecoder extends PbfDecoder {
 		while (hasData() && (val = decodeVarint32()) > 0) {
 			// read tag and wire type
 			int tag = (val >> 3);
-			//Log.d(TAG, "tag: " + tag);
+			//log.debug("tag: " + tag);
 
 			switch (tag) {
 				case TAG_TILE_LINE:
@@ -116,7 +117,7 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_TILE_TAG_KEYS:
 					if (keys == null || curKey >= numKeys) {
-						Log.d(TAG, mTile + " wrong number of keys " + numKeys);
+						log.debug(mTile + " wrong number of keys " + numKeys);
 						return false;
 					}
 					keys[curKey++] = decodeString();
@@ -124,7 +125,7 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_TILE_TAG_VALUES:
 					if (values == null || curValue >= numValues) {
-						Log.d(TAG, mTile + " wrong number of values " + numValues);
+						log.debug(mTile + " wrong number of values " + numValues);
 						return false;
 					}
 					values[curValue++] = decodeString();
@@ -132,18 +133,18 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_TILE_NUM_TAGS:
 					numTags = decodeVarint32();
-					//Log.d(TAG, "num tags " + numTags);
+					//log.debug("num tags " + numTags);
 					break;
 
 				case TAG_TILE_NUM_KEYS:
 					numKeys = decodeVarint32();
-					//Log.d(TAG, "num keys " + numKeys);
+					//log.debug("num keys " + numKeys);
 					keys = new String[numKeys];
 					break;
 
 				case TAG_TILE_NUM_VALUES:
 					numValues = decodeVarint32();
-					//Log.d(TAG, "num values " + numValues);
+					//log.debug("num values " + numValues);
 					values = new String[numValues];
 					break;
 
@@ -154,7 +155,7 @@ public class TileDecoder extends PbfDecoder {
 
 					decodeVarintArray(len, mSArray);
 					if (!decodeTileTags(numTags, mSArray, keys, values)) {
-						Log.d(TAG, mTile + " invalid tags");
+						log.debug(mTile + " invalid tags");
 						return false;
 					}
 					break;
@@ -162,13 +163,13 @@ public class TileDecoder extends PbfDecoder {
 				case TAG_TILE_VERSION:
 					version = decodeVarint32();
 					if (version != 4) {
-						Log.d(TAG, mTile + " invalid version " + version);
+						log.debug(mTile + " invalid version " + version);
 						return false;
 					}
 					break;
 
 				default:
-					Log.d(TAG, mTile + " invalid type for tile: " + tag);
+					log.debug(mTile + " invalid type for tile: " + tag);
 					return false;
 			}
 		}
@@ -292,14 +293,14 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_ELEM_COORDS:
 					if (coordCnt == 0) {
-						Log.d(TAG, mTile + " no coordinates");
+						log.debug(mTile + " no coordinates");
 					}
 
 					mElem.ensurePointSize(coordCnt, false);
 					int cnt = decodeInterleavedPoints(mElem.points, mScaleFactor);
 
 					if (cnt != coordCnt) {
-						Log.d(TAG, mTile + " wrong number of coordintes "
+						log.debug(mTile + " wrong number of coordintes "
 						        + coordCnt + "/" + cnt);
 						fail = true;
 					}
@@ -310,12 +311,12 @@ public class TileDecoder extends PbfDecoder {
 					break;
 
 				default:
-					Log.d(TAG, mTile + " invalid type for way: " + tag);
+					log.debug(mTile + " invalid type for way: " + tag);
 			}
 		}
 
 		if (fail || numTags == 0 || numIndices == 0) {
-			Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
+			log.debug(mTile + " failed reading way: bytes:" + bytes + " index:"
 			        + (Arrays.toString(index)) + " tag:"
 			        + (mElem.tags.numTags > 0 ? Arrays.deepToString(mElem.tags.tags) : "null")
 			        + " " + numIndices + " " + coordCnt);
@@ -354,7 +355,7 @@ public class TileDecoder extends PbfDecoder {
 			int idx = tagIds[i];
 
 			if (idx < 0 || idx > max) {
-				Log.d(TAG, mTile + " invalid tag:" + idx + " " + i);
+				log.debug("{} invalid tag:{}", mTile, idx + ' ' + i);
 				return false;
 			}
 			mElem.tags.add(mTileTags.tags[idx]);

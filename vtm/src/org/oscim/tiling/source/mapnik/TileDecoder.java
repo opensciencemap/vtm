@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
@@ -27,9 +26,11 @@ import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.common.PbfDecoder;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TileDecoder extends PbfDecoder {
-	private final static String TAG = TileDecoder.class.getName();
+	static final Logger log = LoggerFactory.getLogger(TileDecoder.class);
 
 	private static final int TAG_TILE_LAYERS = 3;
 
@@ -72,7 +73,7 @@ public class TileDecoder extends PbfDecoder {
 	        int contentLength)
 	        throws IOException {
 		if (debug)
-			Log.d(TAG, tile + " decode");
+			log.debug(tile + " decode");
 
 		setInputStream(is, Integer.MAX_VALUE);
 		mTile = tile;
@@ -187,7 +188,7 @@ public class TileDecoder extends PbfDecoder {
 			}
 
 			if (mLocale.equals(key.substring(5))) {
-				//Log.d(TAG, "found local " + key);
+				//log.debug("found local " + key);
 				matchedLocal = i;
 			} else
 				ignoreLocal[numIgnore++] = i;
@@ -309,7 +310,7 @@ public class TileDecoder extends PbfDecoder {
 		Feature curFeature = null;
 		int numTags = 0;
 
-		//Log.d(TAG, "start feature");
+		//log.debug("start feature");
 		while (position() < end) {
 			// read tag and wire type
 			int val = decodeVarint32();
@@ -336,7 +337,7 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_FEATURE_TYPE:
 					type = decodeVarint32();
-					//Log.d(TAG, "got type " + type);
+					//log.debug("got type " + type);
 					break;
 
 				case TAG_FEATURE_GEOMETRY:
@@ -519,7 +520,7 @@ public class TileDecoder extends PbfDecoder {
 		}
 
 		if (isPoly && isOuter && simplify && !testBBox(xmax - xmin, ymax - ymin)) {
-			//Log.d(TAG, "skip small poly "+ elem.indexPos + " > "
+			//log.debug("skip small poly "+ elem.indexPos + " > "
 			// +  (xmax - xmin) * (ymax - ymin));
 			elem.pointPos -= elem.index[elem.indexPos];
 			if (elem.indexPos > 0) {

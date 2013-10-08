@@ -83,7 +83,7 @@ public abstract class CanvasAdapter {
 
 		InputStream inputStream = AssetAdapter.g.openFileAsStream(src);
 		if (inputStream == null) {
-			Log.e(CanvasAdapter.class.getName(), "invalid bitmap source: " + src);
+			//log.error("invalid bitmap source: " + src);
 			return null;
 		}
 

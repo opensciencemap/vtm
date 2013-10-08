@@ -20,10 +20,11 @@ import java.nio.Buffer;
 import javax.annotation.CheckReturnValue;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class BufferObject {
-	private final static String TAG = BufferObject.class.getName();
+	static final Logger log = LoggerFactory.getLogger(BufferObject.class);
 	private static final int MB = 1024 * 1024;
 	private static final int LIMIT_BUFFERS = 16 * MB;
 
@@ -83,11 +84,11 @@ public final class BufferObject {
 		if (mBufferMemoryUsage < LIMIT_BUFFERS)
 			return;
 
-		Log.d(TAG, "use: " + mBufferMemoryUsage / MB + "MB");
+		log.debug("use: " + mBufferMemoryUsage / MB + "MB");
 
 		mBufferMemoryUsage -= BufferObject.limitUsage(1024 * 1024);
 
-		Log.d(TAG, "now: " + mBufferMemoryUsage / MB + "MB");
+		log.debug("now: " + mBufferMemoryUsage / MB + "MB");
 	}
 
 	private final static BufferObject pool[] = new BufferObject[2];
@@ -137,7 +138,7 @@ public final class BufferObject {
 			return null;
 
 		// if (counter > 200) {
-		// Log.d(TAG, "should clear some buffers " + counter);
+		// log.debug("should clear some buffers " + counter);
 		// }
 		int t = (bo.target == GL20.GL_ARRAY_BUFFER) ? 0 : 1;
 
@@ -160,7 +161,7 @@ public final class BufferObject {
 			BufferObject prev = pool[t];
 
 			if (prev == null) {
-				Log.d(TAG, "nothing to free");
+				log.debug("nothing to free");
 				continue;
 			}
 

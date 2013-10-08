@@ -18,7 +18,8 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tile;
@@ -34,7 +35,7 @@ import org.oscim.utils.pool.Inlist;
  *         angles! or bad things might happen in Triangle
  */
 public class ExtrusionLayer extends RenderElement {
-	private final static String TAG = ExtrusionLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(ExtrusionLayer.class);
 
 	private static final float S = MapRenderer.COORD_SCALE;
 	private VertexItem mVertices;
@@ -129,7 +130,7 @@ public class ExtrusionLayer extends RenderElement {
 			if (points[ppos] == points[ppos + len - 2]
 			        && points[ppos + 1] == points[ppos + len - 1]) {
 				len -= 2;
-				Log.d(TAG, "explicit closed poly " + len);
+				log.debug("explicit closed poly " + len);
 			}
 
 			// need at least three points

@@ -19,19 +19,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.rule.Element;
 import org.oscim.theme.rule.Rule;
 import org.oscim.utils.LRUCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A RenderTheme defines how map elements are drawn.
  */
 public class RenderTheme implements IRenderTheme {
-	private final static String TAG = RenderTheme.class.getName();
+	static final Logger log = LoggerFactory.getLogger(RenderTheme.class);
 
 	private static final int MATCHING_CACHE_SIZE = 512;
 
@@ -117,7 +118,7 @@ public class RenderTheme implements IRenderTheme {
 
 		int type = geometryType.nativeInt;
 		if (type < 1 || type > 3) {
-			Log.d(TAG, "invalid geometry type for RenderTheme " + geometryType.name());
+			log.debug("invalid geometry type for RenderTheme " + geometryType.name());
 			return null;
 		}
 
@@ -134,7 +135,7 @@ public class RenderTheme implements IRenderTheme {
 			} else {
 				// compare if tags match previous instructions
 				if (cache.cacheKey.set(tags, cache.prevItem.key)) {
-					//Log.d(TAG, "same as previous " + Arrays.deepToString(tags));
+					//log.debug("same as previous " + Arrays.deepToString(tags));
 					ri = cache.prevItem;
 				}
 			}
@@ -151,7 +152,7 @@ public class RenderTheme implements IRenderTheme {
 
 			if (ri == null) {
 				// cache miss
-				//Log.d(TAG, missCnt++ + " / " + hitCnt + " Cache Miss");
+				//log.debug(missCnt++ + " / " + hitCnt + " Cache Miss");
 
 				List<RenderInstruction> matches = cache.instructionList;
 				matches.clear();
@@ -165,7 +166,7 @@ public class RenderTheme implements IRenderTheme {
 						RenderInstruction r = matches.get(i);
 						for (int j = i + 1; j < size; j++) {
 							if (matches.get(j) == r) {
-								Log.d(TAG, "fix duplicate instruction! "
+								log.debug("fix duplicate instruction! "
 								        + Arrays.deepToString(cache.cacheKey.mTags)
 								        + " zoom:" + zoomLevel + " "
 								        + r.getClass().getName());
@@ -207,12 +208,10 @@ public class RenderTheme implements IRenderTheme {
 					// this zoom level to the existing RenderInstructionItem.
 					ri.zoom |= zoomMask;
 
-					//Log.d(TAG,
-					//		zoomLevel + " same instructions " + size + " "
+					//log.debug(					//		zoomLevel + " same instructions " + size + " "
 					//				+ Arrays.deepToString(tags));
 				} else {
-					//Log.d(TAG,
-					//		zoomLevel + " new instructions " + size + " "
+					//log.debug(					//		zoomLevel + " new instructions " + size + " "
 					//				+ Arrays.deepToString(tags));
 
 					ri = new RenderInstructionItem();

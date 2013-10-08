@@ -15,10 +15,11 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GLState {
-	private final static String TAG = GLState.class.getName();
+	static final Logger log = LoggerFactory.getLogger(GLState.class);
 
 	private static GL20 GL;
 
@@ -89,7 +90,7 @@ public class GLState {
 
 	public static void enableVertexArrays(int va1, int va2) {
 		if (va1 > 1 || va2 > 1)
-			Log.d(TAG, "FIXME: enableVertexArrays...");
+			log.debug("FIXME: enableVertexArrays...");
 
 		if ((va1 == 0 || va2 == 0)) {
 			if (!vertexArray[0]) {

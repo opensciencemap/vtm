@@ -17,13 +17,14 @@ package org.oscim.tiling.source.common;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.utils.UTF8Decoder;
 
 public abstract class PbfDecoder {
-	private final static String TAG = PbfDecoder.class.getName();
+	static final Logger log = LoggerFactory.getLogger(PbfDecoder.class);
 
 	private final static int S1 = 7;
 	private final static int S2 = 14;
@@ -424,7 +425,7 @@ public abstract class PbfDecoder {
 		if (size > maxSize) {
 
 			if (debug)
-				Log.d(TAG, "increase read buffer to " + size + " bytes");
+				log.debug("increase read buffer to " + size + " bytes");
 
 			maxSize = size;
 
@@ -445,7 +446,7 @@ public abstract class PbfDecoder {
 		} else if (bufferPos + size > maxSize) {
 			// copy bytes left to the beginning of buffer
 			if (debug)
-				Log.d(TAG, "shift " + bufferFill + " " + bufferPos + " " + size);
+				log.debug("shift " + bufferFill + " " + bufferPos + " " + size);
 
 			System.arraycopy(buffer, bufferPos, buffer, 0, bytesLeft);
 
@@ -471,7 +472,7 @@ public abstract class PbfDecoder {
 			if (len < 0) {
 				mMsgEnd = mMsgPos;
 				if (debug)
-					Log.d(TAG, " finished reading " + mMsgPos);
+					log.debug(" finished reading " + mMsgPos);
 
 				// finished reading, mark end
 				buffer[bufferFill] = 0;

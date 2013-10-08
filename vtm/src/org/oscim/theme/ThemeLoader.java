@@ -20,11 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.oscim.backend.CanvasAdapter;
-import org.oscim.backend.Log;
 import org.oscim.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ThemeLoader {
-	private final static String TAG = ThemeLoader.class.getName();
+	static final Logger log = LoggerFactory.getLogger(ThemeLoader.class);
 
 	/**
 	 * Load internal theme, see {@link InternalRenderTheme}.
@@ -59,7 +60,7 @@ public class ThemeLoader {
 
 			return t;
 		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
+			log.error(e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 

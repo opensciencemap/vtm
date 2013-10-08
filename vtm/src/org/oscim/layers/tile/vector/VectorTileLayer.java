@@ -14,7 +14,6 @@
  */
 package org.oscim.layers.tile.vector;
 
-import org.oscim.backend.Log;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.map.Map;
 import org.oscim.theme.IRenderTheme;
@@ -23,6 +22,8 @@ import org.oscim.tiling.TileManager;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.TileSource.OpenResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The vector-tile-map layer. This class manages instances of
@@ -30,7 +31,7 @@ import org.oscim.tiling.source.TileSource.OpenResult;
  * for rendering.
  */
 public class VectorTileLayer extends TileLayer<VectorTileLoader> {
-	private final static String TAG = VectorTileLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(VectorTileLayer.class);
 
 	private TileSource mTileSource;
 
@@ -62,7 +63,7 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 		OpenResult msg = tileSource.open();
 
 		if (msg != OpenResult.SUCCESS) {
-			Log.d(TAG, msg.getErrorMessage());
+			log.debug(msg.getErrorMessage());
 			return false;
 		}
 

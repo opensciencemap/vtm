@@ -2,12 +2,13 @@ package org.oscim.utils;
 
 import java.util.Arrays;
 
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.renderer.elements.VertexItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Tessellator {
-	private static final String TAG = Tessellator.class.getName();
+	static final Logger log = LoggerFactory.getLogger(Tessellator.class);
 
 	private static final int RESULT_VERTICES = 0;
 	private static final int RESULT_TRIANGLES = 1;
@@ -37,7 +38,7 @@ public class Tessellator {
 
 		long ctx = Tessellator.tessellate(points, ppos, index, ipos, rings, result);
 		if ((numPoints / 2) < result[RESULT_VERTICES]) {
-			Log.d(TAG, "skip poly: " + Arrays.toString(result) + " " + numPoints);
+			log.debug("skip poly: " + Arrays.toString(result) + " " + numPoints);
 			Tessellator.tessFinish(ctx);
 			return 0;
 		}
@@ -129,13 +130,13 @@ public class Tessellator {
 		                                  geom.index, 0,
 		                                  numRings, result);
 
-		//Log.d(TAG, "got "
+		//log.debug("got "
 		//        + result[RESULT_VERTICES] + " "
 		//        + result[RESULT_TRIANGLES]);
 
 		boolean verticesAdded = false;
 		if (numPoints < result[RESULT_VERTICES] * 2) {
-			//Log.d(TAG, "grow vertices" + geom.pointPos);
+			//log.debug("grow vertices" + geom.pointPos);
 			verticesAdded = true;
 		}
 
@@ -194,7 +195,7 @@ public class Tessellator {
 		}
 
 		if (numRings == 0 || numPoints == 0) {
-			Log.d(TAG, "missing " + numPoints + ":" + numRings);
+			log.debug("missing " + numPoints + ":" + numRings);
 			return 0;
 		}
 

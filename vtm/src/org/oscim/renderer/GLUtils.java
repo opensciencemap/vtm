@@ -21,14 +21,15 @@ import java.nio.IntBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
-import org.oscim.backend.Log;
 import org.oscim.utils.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility functions
  */
 public class GLUtils {
-	private static String TAG = GLUtils.class.getName();
+	static final Logger log = LoggerFactory.getLogger(GLUtils.class);
 
 	private static GL20 GL;
 
@@ -169,8 +170,8 @@ public class GLUtils {
 			GL.glGetShaderiv(shader, GL20.GL_COMPILE_STATUS, compiled);
 			compiled.position(0);
 			if (compiled.get() == 0) {
-				Log.e(TAG, "Could not compile shader " + shaderType + ":");
-				Log.e(TAG, GL.glGetShaderInfoLog(shader));
+				log.error("Could not compile shader " + shaderType + ":");
+				log.error(GL.glGetShaderInfoLog(shader));
 				GL.glDeleteShader(shader);
 				shader = 0;
 			}
@@ -208,8 +209,8 @@ public class GLUtils {
 			GL.glGetProgramiv(program, GL20.GL_LINK_STATUS, linkStatus);
 			linkStatus.position(0);
 			if (linkStatus.get() != GL20.GL_TRUE) {
-				Log.e(TAG, "Could not link program: ");
-				Log.e(TAG, GL.glGetProgramInfoLog(program));
+				log.error("Could not link program: ");
+				log.error(GL.glGetProgramInfoLog(program));
 				GL.glDeleteProgram(program);
 				program = 0;
 			}
@@ -226,7 +227,7 @@ public class GLUtils {
 
 		int error;
 		while ((error = GL.glGetError()) != 0) { // GL20.GL_NO_ERROR) {
-			Log.e(TAG, op + ": glError " + error);
+			log.error(op + ": glError " + error);
 			// throw new RuntimeException(op + ": glError " + error);
 		}
 	}
@@ -235,7 +236,7 @@ public class GLUtils {
 		int error;
 		boolean oom = false;
 		while ((error = GL.glGetError()) != 0) {// GL20.GL_NO_ERROR) {
-			Log.e(TAG, op + ": glError " + error);
+			log.error(op + ": glError " + error);
 			// throw new RuntimeException(op + ": glError " + error);
 			if (error == 1285)
 				oom = true;
@@ -248,7 +249,7 @@ public class GLUtils {
 			GL.glUniform4f(handle, c[0], c[1], c[2], c[3]);
 		} else {
 			if (alpha < 0) {
-				Log.d(TAG, "setColor: " + alpha);
+				log.debug("setColor: " + alpha);
 				alpha = 0;
 				GL.glUniform4f(handle, 0, 0, 0, 0);
 			}

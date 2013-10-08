@@ -33,11 +33,15 @@ import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
 import org.oscim.utils.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BitmapTileLayer extends TileLayer<TileLoader> {
+
+	protected static final Logger log = LoggerFactory.getLogger(BitmapTileLayer.class);
+
 	private static final int TIMEOUT_CONNECT = 5000;
 	private static final int TIMEOUT_READ = 10000;
-	protected static final String TAG = BitmapTileLayer.class.getName();
 
 	final TileSource mTileSource;
 	private final FadeStep[] mFade;

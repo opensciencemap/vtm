@@ -27,7 +27,7 @@ import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 
 public class LwHttp {
-	//private static final String TAG = LwHttp.class.getName();
+	//static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
 	private final String mUrlFileExtension;
 	private final String mUrlPath;
@@ -107,7 +107,7 @@ public class LwHttp {
 			@Override
 			public void onReadyStateChange(XMLHttpRequest xhr) {
 				int state = xhr.getReadyState();
-				//Log.d(TAG, mCurrentUrl + "response " + status + "/" + state);
+				//log.debug(mCurrentUrl + "response " + status + "/" + state);
 
 				if (state == XMLHttpRequest.DONE) {
 

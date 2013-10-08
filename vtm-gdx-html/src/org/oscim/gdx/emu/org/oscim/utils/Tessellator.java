@@ -1,6 +1,5 @@
 package org.oscim.utils;
 
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.renderer.elements.VertexItem;
 
@@ -29,18 +28,18 @@ public class Tessellator {
 		//Int32Array io = getIndices(o);
 
 		if (io == null) {
-			Log.d("Triangulator", "building tessellation failed");
+			//log.debug("building tessellation failed");
 			return 0;
 		}
 
 		//		if (vo.length() != plen) {
 		//			// TODO handle different output points
-		//			Log.d("", "other points out" + plen + ":" + vo.length() + ", " + io.length());
+		//			log.debug(" + io.length());
 		//
 		//			//for (int i = 0; i < vo.length(); i += 2)
-		//			//	Log.d("<", vo.get(i) + " " + vo.get(i + 1));
+		//			//	log.debug(vo.get(i) + " " + vo.get(i + 1));
 		//			//for (int i = ppos; i < ppos + plen; i += 2)
-		//			//	Log.d(">",  points[i]+ " " + points[i + 1]);
+		//			//	log.debug( points[i]+ " " + points[i + 1]);
 		//
 		//			return 0;
 		//		}

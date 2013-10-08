@@ -19,7 +19,6 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLState;
@@ -27,6 +26,8 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.renderinstruction.Line;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * RenderElement for textured or stippled lines
@@ -34,7 +35,7 @@ import org.oscim.theme.renderinstruction.Line;
  */
 public final class LineTexLayer extends RenderElement {
 
-	private final static String TAG = LineTexLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(LineTexLayer.class);
 
 	// Interleave two segment quads in one block to be able to use
 	// vertices twice. pos0 and pos1 use the same vertex array where
@@ -276,7 +277,7 @@ public final class LineTexLayer extends RenderElement {
 
 			shader = GLUtils.createProgram(vertexShader, fragmentShader);
 			if (shader == 0) {
-				Log.e(TAG, "Could not create  program.");
+				log.error("Could not create  program.");
 				return;
 			}
 

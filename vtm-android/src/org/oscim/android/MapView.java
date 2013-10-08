@@ -21,9 +21,10 @@ import org.oscim.android.input.AndroidMotionEvent;
 import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
-import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -37,7 +38,7 @@ import android.widget.RelativeLayout;
  */
 public class MapView extends RelativeLayout {
 
-	final static String TAG = MapView.class.getName();
+	static final Logger log = LoggerFactory.getLogger(MapView.class);
 
 	public static final boolean debugFrameTime = false;
 	public static final boolean testRegionZoom = false;
@@ -91,7 +92,7 @@ public class MapView extends RelativeLayout {
 			                                   "context is not an instance of MapActivity");
 		}
 
-		Log.logger = new AndroidLog();
+		//Log.logger = new AndroidLog();
 		CanvasAdapter.g = AndroidGraphics.INSTANCE;
 		AssetAdapter.g = new AndroidAssetAdapter(context);
 		GLAdapter.g = new AndroidGL();
@@ -198,7 +199,7 @@ public class MapView extends RelativeLayout {
 	}
 
 	public void onStop() {
-		Log.d(TAG, "onStop");
+		log.debug("onStop");
 		//mMap.destroy();
 	}
 
@@ -235,7 +236,7 @@ public class MapView extends RelativeLayout {
 	@Override
 	protected void onSizeChanged(int width, int height,
 	        int oldWidth, int oldHeight) {
-		Log.d(TAG, "onSizeChanged: " + width + "x" + height);
+		log.debug("onSizeChanged: " + width + "x" + height);
 
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
 
@@ -280,7 +281,7 @@ public class MapView extends RelativeLayout {
 	}
 
 	public void destroy() {
-		Log.d(TAG, "TODO Auto-generated method stub");
+		log.debug("TODO Auto-generated method stub");
 
 	}
 

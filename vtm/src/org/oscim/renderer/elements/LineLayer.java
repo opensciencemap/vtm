@@ -18,7 +18,8 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
@@ -33,7 +34,7 @@ import org.oscim.utils.FastMath;
 /**
  */
 public final class LineLayer extends RenderElement {
-	private final static String TAG = LineLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(LineLayer.class);
 
 	private static final float COORD_SCALE = MapRenderer.COORD_SCALE;
 	// scale factor mapping extrusion vector to short values
@@ -85,7 +86,7 @@ public final class LineLayer extends RenderElement {
 		else if (geom.isLine())
 			addLine(geom.points, geom.index, -1, false);
 		else
-			Log.d(TAG, "geometry must be LINE or POLYGON");
+			log.debug("geometry must be LINE or POLYGON");
 	}
 
 	public void addLine(float[] points, int numPoints, boolean closed) {
@@ -606,14 +607,14 @@ public final class LineLayer extends RenderElement {
 			lineProgram[0] = GLUtils.createProgram(lineVertexShader,
 			                                       lineFragmentShader);
 			if (lineProgram[0] == 0) {
-				Log.e(TAG, "Could not create line program.");
+				log.error("Could not create line program.");
 				//return false;
 			}
 
 			lineProgram[1] = GLUtils.createProgram(lineVertexShader,
 			                                       lineSimpleFragmentShader);
 			if (lineProgram[1] == 0) {
-				Log.e(TAG, "Could not create simple line program.");
+				log.error("Could not create simple line program.");
 				return false;
 			}
 

@@ -20,7 +20,6 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -32,12 +31,14 @@ import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.renderinstruction.Area;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.Interpolation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Special Renderer for drawing tile polygons
  */
 public final class PolygonLayer extends RenderElement {
-	private static final String TAG = PolygonLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(PolygonLayer.class);
 
 	private static final float S = MapRenderer.COORD_SCALE;
 
@@ -164,7 +165,7 @@ public final class PolygonLayer extends RenderElement {
 				}
 
 				if (polygonProgram[i] == 0) {
-					Log.e(TAG, "Could not create polygon program.");
+					log.error("Could not create polygon program.");
 					return false;
 				}
 				hPolygonMatrix[i] = GL.glGetUniformLocation(polygonProgram[i], "u_mvp");

@@ -61,13 +61,14 @@ package org.oscim.renderer.atlas;
 
 import java.util.HashMap;
 
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.utils.pool.Inlist;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TextureAtlas extends Inlist<TextureAtlas> {
-	private final static String TAG = TextureAtlas.class.getName();
+	static final Logger log = LoggerFactory.getLogger(TextureAtlas.class);
 
 	/** Allocated slots */
 	public Slot mSlots;
@@ -96,7 +97,7 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 			return texture;
 		}
 
-		Log.d(TAG, "Missing atlas texture");
+		log.debug("Missing atlas texture");
 		return null;
 	}
 

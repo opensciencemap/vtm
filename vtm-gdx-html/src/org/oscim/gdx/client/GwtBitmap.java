@@ -1,6 +1,5 @@
 package org.oscim.gdx.client;
 
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 
 import com.badlogic.gdx.Gdx;
@@ -65,7 +64,7 @@ public class GwtBitmap implements Bitmap {
 		                    pixmap.getGLFormat(), pixmap.getGLType(), pixmap.getPixels());
 
 		if (disposable || image != null) {
-			Log.d("", "dispose pixmap " + getWidth() + "/" + getHeight());
+			//log.debug("dispose pixmap " + getWidth() + "/" + getHeight());
 			pixmap.dispose();
 
 			if (image != null)

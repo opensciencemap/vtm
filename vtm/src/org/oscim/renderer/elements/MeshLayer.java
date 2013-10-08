@@ -17,7 +17,6 @@ package org.oscim.renderer.elements;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
@@ -28,9 +27,11 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.pool.Inlist;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeshLayer extends RenderElement {
-	private static final String TAG = MeshLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(MeshLayer.class);
 
 	BufferObject indicesVbo;
 	int numIndices;
@@ -44,7 +45,7 @@ public class MeshLayer extends RenderElement {
 
 	public void addMesh(GeometryBuffer geom) {
 		if (geom.index[0] < 6) {
-			Log.d(TAG, "invalid poly");
+			log.debug("invalid poly");
 			return;
 		}
 		if (vertexItems == null) {
@@ -59,7 +60,7 @@ public class MeshLayer extends RenderElement {
 
 		verticesCnt = vertexItems.getSize() / 2;
 
-		//Log.d(TAG, "-> " + verticesCnt + " " + numIndices);
+		//log.debug("-> " + verticesCnt + " " + numIndices);
 
 		if (numIndices <= 0) {
 			vertexItems = VertexItem.pool.releaseAll(vertexItems);
@@ -74,13 +75,13 @@ public class MeshLayer extends RenderElement {
 			return;
 		}
 
-		//Log.d(TAG, "compile");
+		//log.debug("compile");
 		// add vertices to shared VBO
 		ElementLayers.addPoolItems(this, sbuf);
 
 		int cnt = indiceItems.getSize();
 
-		//Log.d(TAG, "check " + cnt + ":" + numIndices);
+		//log.debug("check " + cnt + ":" + numIndices);
 
 		if (cnt != numIndices) {
 			numIndices = cnt;

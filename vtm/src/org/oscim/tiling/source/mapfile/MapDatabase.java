@@ -18,7 +18,6 @@ package org.oscim.tiling.source.mapfile;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -30,6 +29,8 @@ import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.mapfile.header.SubFileParameter;
 import org.oscim.utils.TileClipper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class for reading binary map files.
@@ -56,7 +57,7 @@ public class MapDatabase implements ITileDataSource {
 	/** Error message for an invalid first way offset. */
 	private static final String INVALID_FIRST_WAY_OFFSET = "invalid first way offset: ";
 
-	private static final String TAG = MapDatabase.class.getName();
+	static final Logger log = LoggerFactory.getLogger(MapDatabase.class);
 
 	/** Maximum way nodes sequence length which is considered as valid. */
 	private static final int MAXIMUM_WAY_NODES_SEQUENCE_LENGTH = 8192;
@@ -172,7 +173,7 @@ public class MapDatabase implements ITileDataSource {
 			//mReductionCnt = 0;
 			//mSkipPoly = 0;
 
-			//Log.d(TAG, "simplify by " + minLat + "/" + minLon);
+			//log.debug("simplify by " + minLat + "/" + minLon);
 
 			QueryParameters queryParameters = new QueryParameters();
 			queryParameters.queryZoomLevel =
@@ -183,7 +184,7 @@ public class MapDatabase implements ITileDataSource {
 			        mTileSource.fileHeader.getSubFileParameter(queryParameters.queryZoomLevel);
 
 			if (subFileParameter == null) {
-				Log.w(TAG, "no sub-file for zoom level: "
+				log.warn("no sub-file for zoom level: "
 				        + queryParameters.queryZoomLevel);
 
 				return QueryResult.FAILED;
@@ -193,11 +194,11 @@ public class MapDatabase implements ITileDataSource {
 			QueryCalculations.calculateBlocks(queryParameters, subFileParameter);
 			processBlocks(mapDataSink, queryParameters, subFileParameter);
 		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
+			log.error(e.getMessage());
 			return QueryResult.FAILED;
 		}
 
-		//Log.d(TAG, "reduced points " + mReductionCnt + " / polys " + mSkipPoly);
+		//log.debug("reduced points " + mReductionCnt + " / polys " + mSkipPoly);
 
 		return QueryResult.SUCCESS;
 	}
@@ -211,7 +212,7 @@ public class MapDatabase implements ITileDataSource {
 			mReadBuffer = new ReadBuffer(mInputFile);
 
 		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
+			log.error(e.getMessage());
 			// make sure that the file is closed
 			destroy();
 			throw new IOException();
@@ -227,7 +228,7 @@ public class MapDatabase implements ITileDataSource {
 				mInputFile.close();
 				mInputFile = null;
 			} catch (IOException e) {
-				Log.e(TAG, e.getMessage());
+				log.error(e.getMessage());
 			}
 		}
 	}
@@ -237,8 +238,8 @@ public class MapDatabase implements ITileDataSource {
 	 */
 	private void logDebugSignatures() {
 		if (mDebugFile) {
-			Log.w(TAG, DEBUG_SIGNATURE_WAY + mSignatureWay);
-			Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+			log.warn(DEBUG_SIGNATURE_WAY + mSignatureWay);
+			log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 		}
 	}
 
@@ -271,9 +272,9 @@ public class MapDatabase implements ITileDataSource {
 		// get the relative offset to the first stored way in the block
 		int firstWayOffset = mReadBuffer.readUnsignedInt();
 		if (firstWayOffset < 0) {
-			Log.w(TAG, INVALID_FIRST_WAY_OFFSET + firstWayOffset);
+			log.warn(INVALID_FIRST_WAY_OFFSET + firstWayOffset);
 			if (mDebugFile) {
-				Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+				log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 			}
 			return;
 		}
@@ -281,9 +282,9 @@ public class MapDatabase implements ITileDataSource {
 		// add the current buffer position to the relative first way offset
 		firstWayOffset += mReadBuffer.getBufferPosition();
 		if (firstWayOffset > mReadBuffer.getBufferSize()) {
-			Log.w(TAG, INVALID_FIRST_WAY_OFFSET + firstWayOffset);
+			log.warn(INVALID_FIRST_WAY_OFFSET + firstWayOffset);
 			if (mDebugFile) {
-				Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+				log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 			}
 			return;
 		}
@@ -294,9 +295,9 @@ public class MapDatabase implements ITileDataSource {
 
 		// finished reading POIs, check if the current buffer position is valid
 		if (mReadBuffer.getBufferPosition() > firstWayOffset) {
-			Log.w(TAG, "invalid buffer position: " + mReadBuffer.getBufferPosition());
+			log.warn("invalid buffer position: " + mReadBuffer.getBufferPosition());
 			if (mDebugFile) {
-				Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+				log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 			}
 			return;
 		}
@@ -345,8 +346,8 @@ public class MapDatabase implements ITileDataSource {
 				long currentBlockPointer = currentBlockIndexEntry & BITMASK_INDEX_OFFSET;
 				if (currentBlockPointer < 1
 				        || currentBlockPointer > subFileParameter.subFileSize) {
-					Log.w(TAG, "invalid current block pointer: " + currentBlockPointer);
-					Log.w(TAG, "subFileSize: " + subFileParameter.subFileSize);
+					log.warn("invalid current block pointer: " + currentBlockPointer);
+					log.warn("subFileSize: " + subFileParameter.subFileSize);
 					return;
 				}
 
@@ -363,8 +364,8 @@ public class MapDatabase implements ITileDataSource {
 					                & BITMASK_INDEX_OFFSET;
 					if (nextBlockPointer < 1
 					        || nextBlockPointer > subFileParameter.subFileSize) {
-						Log.w(TAG, "invalid next block pointer: " + nextBlockPointer);
-						Log.w(TAG, "sub-file size: " + subFileParameter.subFileSize);
+						log.warn("invalid next block pointer: " + nextBlockPointer);
+						log.warn("sub-file size: " + subFileParameter.subFileSize);
 						return;
 					}
 				}
@@ -372,7 +373,7 @@ public class MapDatabase implements ITileDataSource {
 				// calculate the size of the current block
 				int currentBlockSize = (int) (nextBlockPointer - currentBlockPointer);
 				if (currentBlockSize < 0) {
-					Log.w(TAG, "current block size must not be negative: "
+					log.warn("current block size must not be negative: "
 					        + currentBlockSize);
 					return;
 				} else if (currentBlockSize == 0) {
@@ -381,10 +382,10 @@ public class MapDatabase implements ITileDataSource {
 				} else if (currentBlockSize > ReadBuffer.MAXIMUM_BUFFER_SIZE) {
 					// the current block is too large, continue with the next
 					// block
-					Log.w(TAG, "current block size too large: " + currentBlockSize);
+					log.warn("current block size too large: " + currentBlockSize);
 					continue;
 				} else if (currentBlockPointer + currentBlockSize > mFileSize) {
-					Log.w(TAG, "current block larger than file size: "
+					log.warn("current block larger than file size: "
 					        + currentBlockSize);
 					return;
 				}
@@ -395,7 +396,7 @@ public class MapDatabase implements ITileDataSource {
 				// read the current block into the buffer
 				if (!mReadBuffer.readFromFile(currentBlockSize)) {
 					// skip the current block
-					Log.w(TAG, "reading current block has failed: " + currentBlockSize);
+					log.warn("reading current block has failed: " + currentBlockSize);
 					return;
 				}
 
@@ -437,7 +438,7 @@ public class MapDatabase implements ITileDataSource {
 			// get and check the block signature
 			mSignatureBlock = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_BLOCK);
 			if (!mSignatureBlock.startsWith("###TileStart")) {
-				Log.w(TAG, "invalid block signature: " + mSignatureBlock);
+				log.warn("invalid block signature: " + mSignatureBlock);
 				return false;
 			}
 		}
@@ -473,8 +474,8 @@ public class MapDatabase implements ITileDataSource {
 				// get and check the POI signature
 				mSignaturePoi = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_POI);
 				if (!mSignaturePoi.startsWith("***POIStart")) {
-					Log.w(TAG, "invalid POI signature: " + mSignaturePoi);
-					Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+					log.warn("invalid POI signature: " + mSignaturePoi);
+					log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 					return false;
 				}
 			}
@@ -549,7 +550,7 @@ public class MapDatabase implements ITileDataSource {
 		// get and check the number of way coordinate blocks (VBE-U)
 		int numBlocks = mReadBuffer.readUnsignedInt();
 		if (numBlocks < 1 || numBlocks > Short.MAX_VALUE) {
-			Log.w(TAG, "invalid number of way coordinate blocks: " + numBlocks);
+			log.warn("invalid number of way coordinate blocks: " + numBlocks);
 			return false;
 		}
 
@@ -566,7 +567,7 @@ public class MapDatabase implements ITileDataSource {
 			int numWayNodes = mReadBuffer.readUnsignedInt();
 
 			if (numWayNodes < 2 || numWayNodes > MAXIMUM_WAY_NODES_SEQUENCE_LENGTH) {
-				Log.w(TAG, "invalid number of way nodes: " + numWayNodes);
+				log.warn("invalid number of way nodes: " + numWayNodes);
 				logDebugSignatures();
 				return false;
 			}
@@ -728,7 +729,7 @@ public class MapDatabase implements ITileDataSource {
 		long numRows = queryParameters.toBlockY - queryParameters.fromBlockY;
 		long numCols = queryParameters.toBlockX - queryParameters.fromBlockX;
 
-		//Log.d(TAG, numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
+		//log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
 		if (numRows > 0) {
 			int minX = -2;
 			int minY = -2;
@@ -749,7 +750,7 @@ public class MapDatabase implements ITileDataSource {
 
 			if (mCurrentRow < numRows)
 				maxY = (int) (mCurrentRow * h + h);
-			//Log.d(TAG, minX + " " + minY + " " + maxX + " " + maxY);
+			//log.debug(minX + " " + minY + " " + maxX + " " + maxY);
 			mTileClipper.setRect(minX, minY, maxX, maxY);
 		} else {
 			mTileClipper.setRect(-2, -2, Tile.SIZE + 2, Tile.SIZE + 2);
@@ -760,8 +761,8 @@ public class MapDatabase implements ITileDataSource {
 				// get and check the way signature
 				mSignatureWay = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_WAY);
 				if (!mSignatureWay.startsWith("---WayStart")) {
-					Log.w(TAG, "invalid way signature: " + mSignatureWay);
-					Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+					log.warn("invalid way signature: " + mSignatureWay);
+					log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 					return false;
 				}
 			}
@@ -792,11 +793,11 @@ public class MapDatabase implements ITileDataSource {
 			} else {
 				int wayDataSize = mReadBuffer.readUnsignedInt();
 				if (wayDataSize < 0) {
-					Log.w(TAG, "invalid way data size: " + wayDataSize);
+					log.warn("invalid way data size: " + wayDataSize);
 					if (mDebugFile) {
-						Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+						log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 					}
-					Log.e(TAG, "BUG way 2");
+					log.error("BUG way 2");
 					return false;
 				}
 
@@ -871,7 +872,7 @@ public class MapDatabase implements ITileDataSource {
 				wayDataBlocks = mReadBuffer.readUnsignedInt();
 
 				if (wayDataBlocks < 1) {
-					Log.w(TAG, "invalid number of way data blocks: " + wayDataBlocks);
+					log.warn("invalid number of way data blocks: " + wayDataBlocks);
 					logDebugSignatures();
 					return false;
 				}
@@ -933,18 +934,18 @@ public class MapDatabase implements ITileDataSource {
 
 			if (cumulatedNumberOfPois < 0
 			        || cumulatedNumberOfPois > MAXIMUM_ZOOM_TABLE_OBJECTS) {
-				Log.w(TAG, "invalid cumulated number of POIs in row " + row + ' '
+				log.warn("invalid cumulated number of POIs in row " + row + ' '
 				        + cumulatedNumberOfPois);
 				if (mDebugFile) {
-					Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+					log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 				}
 				return null;
 			} else if (cumulatedNumberOfWays < 0
 			        || cumulatedNumberOfWays > MAXIMUM_ZOOM_TABLE_OBJECTS) {
-				Log.w(TAG, "invalid cumulated number of ways in row " + row + ' '
+				log.warn("invalid cumulated number of ways in row " + row + ' '
 				        + cumulatedNumberOfWays);
 				if (mTileSource.fileInfo.debugFile) {
-					Log.w(TAG, DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+					log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
 				}
 				return null;
 			}
@@ -995,7 +996,7 @@ public class MapDatabase implements ITileDataSource {
 				if (cnt != 0) {
 					// drop small distance intermediate nodes
 					if (lat == prevLat && lon == prevLon) {
-						//Log.d(TAG, "drop zero delta ");
+						//log.debug("drop zero delta ");
 						continue;
 					}
 				}
@@ -1006,7 +1007,7 @@ public class MapDatabase implements ITileDataSource {
 			}
 
 			if (coords[first] == prevLon && coords[first + 1] == prevLat) {
-				//Log.d(TAG, "drop closed");
+				//log.debug("drop closed");
 				indices[i] = (short) (cnt - 2);
 				outPos -= 2;
 			}

@@ -18,19 +18,20 @@ import java.util.ArrayList;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // FIXME needs rewrite!
 // TODO use separate pools for different bitmap types and dimensions
 
 public class TextureItem extends Inlist<TextureItem> {
-	private final static String TAG = TextureItem.class.getName();
+	static final Logger log = LoggerFactory.getLogger(TextureItem.class);
 
 	private static GL20 GL;
 
@@ -126,7 +127,7 @@ public class TextureItem extends Inlist<TextureItem> {
 		@Override
 		public void init(int num) {
 			if (pool != null) {
-				Log.d(TAG, "still textures in pool! " + fill);
+				log.debug("still textures in pool! " + fill);
 				pool = null;
 			}
 
@@ -242,12 +243,12 @@ public class TextureItem extends Inlist<TextureItem> {
 			t.id = textureIds[0];
 			initTexture(t);
 			if (TextureLayer.Renderer.debug)
-				Log.d(TAG, "fill:" + pool.getFill()
+				log.debug("fill:" + pool.getFill()
 				        + " count:" + mTexCnt
 				        + " new texture " + t.id);
 		}
 
-		//Log.d(TAG, "UPLOAD ID: " + t.id);
+		//log.debug("UPLOAD ID: " + t.id);
 
 		uploadTexture(t, t.bitmap,
 		              mBitmapFormat, mBitmapType,
@@ -265,7 +266,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	        int format, int type, int w, int h) {
 
 		if (t == null) {
-			Log.d(TAG, "no texture!");
+			log.debug("no texture!");
 			return;
 		}
 
@@ -282,7 +283,7 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 
 		if (TextureLayer.Renderer.debug)
-			GLUtils.checkGlError(TAG);
+			GLUtils.checkGlError(TextureItem.class.getName());
 	}
 
 	private static void initTexture(TextureItem t) {
@@ -309,7 +310,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	static void init(GL20 gl, int num) {
 		GL = gl;
 
-		Log.d(TAG, "init textures " + num);
+		log.debug("init textures " + num);
 		mTexCnt = num;
 		pool.init(num);
 
@@ -342,7 +343,7 @@ public class TextureItem extends Inlist<TextureItem> {
 				// Bitmap.Config.ARGB_8888);
 				//
 				// if (TextureRenderer.debug)
-				// Log.d(TAG, "alloc bitmap: " +
+				// log.debug("alloc bitmap: " +
 				// android.os.Debug.getNativeHeapAllocatedSize() / (1024 *
 				// 1024));
 

@@ -1,7 +1,6 @@
 package org.oscim.gdx.client;
 
 // -draftCompile -localWorkers 2
-import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 
 import com.badlogic.gdx.ApplicationListener;
@@ -66,7 +65,7 @@ public class GwtLauncher extends GwtApplication {
 
 			@Override
 			public void error(String file) {
-				Log.d(this.getClass().getName(), "error loading " + file);
+				//log.debug("error loading " + file);
 			}
 		};
 	}

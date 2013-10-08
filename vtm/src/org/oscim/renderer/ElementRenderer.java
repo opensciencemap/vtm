@@ -17,7 +17,6 @@ package org.oscim.renderer;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.MapRenderer.Matrices;
@@ -30,13 +29,15 @@ import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.RenderElement;
 import org.oscim.renderer.elements.TextureLayer;
 import org.oscim.utils.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class to use the renderer.elements for drawing
  */
 public abstract class ElementRenderer extends LayerRenderer {
 
-	private static final String TAG = ElementRenderer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(ElementRenderer.class);
 
 	private static short[] fillCoords;
 
@@ -95,7 +96,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 						break;
 
 					default:
-						Log.d(TAG, "invalid layer");
+						log.debug("invalid layer");
 						l = l.next;
 						break;
 				}
@@ -155,7 +156,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 		layers.compile(sbuf, addFill);
 
 		if (newSize != sbuf.position()) {
-			Log.d(TAG, "wrong size: "
+			log.debug("wrong size: "
 			        + " new size: " + newSize
 			        + " buffer pos: " + sbuf.position()
 			        + " buffer limit: " + sbuf.limit()

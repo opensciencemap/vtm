@@ -52,7 +52,7 @@ import org.oscim.utils.OBB2D;
 import org.oscim.utils.pool.Pool;
 
 class TextRenderer extends ElementRenderer {
-	//private final static String TAG = TextRenderLayer.class.getName();
+	//static final Logger log = LoggerFactory.getLogger(TextRenderLayer.class);
 
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
@@ -210,7 +210,7 @@ class TextRenderer extends ElementRenderer {
 				if (ll.active <= l.active)
 					return 1;
 
-				//Log.d(TAG, "intersection " + lp.string + " <> " + ti.string
+				//log.debug("intersection " + lp.string + " <> " + ti.string
 				//		+ " at " + ti.x + ":" + ti.y);
 
 				if (!ll.text.caption
@@ -282,7 +282,7 @@ class TextRenderer extends ElementRenderer {
 		boolean changedPos;
 
 		if (mTileSet.cnt == 0) {
-			//Log.d(TAG, "no tiles "+ mTileSet.getSerial());
+			//log.debug("no tiles "+ mTileSet.getSerial());
 			return false;
 		}
 
@@ -294,7 +294,7 @@ class TextRenderer extends ElementRenderer {
 		}
 
 		if (!changedTiles && !changedPos) {
-			//Log.d(TAG, "not changed " + changedTiles + " " + changedPos);
+			//log.debug("not changed " + changedTiles + " " + changedPos);
 			return false;
 		}
 
@@ -636,7 +636,7 @@ class TextRenderer extends ElementRenderer {
 				return;
 			}
 			long now = System.currentTimeMillis();
-			//Log.d(TAG, "relabel after " + (now - mLastRun));
+			//log.debug("relabel after " + (now - mLastRun));
 			mLastRun = now;
 
 			labelsChanged = updateLabels();
@@ -678,7 +678,7 @@ class TextRenderer extends ElementRenderer {
 			} else {
 				mRequestRun = true;
 				long delay = (mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis();
-				//Log.d(TAG, "relabel in: " + delay);
+				//log.debug("relabel in: " + delay);
 				mMap.postDelayed(mLabelUpdate, Math.max(delay, 0));
 			}
 		}

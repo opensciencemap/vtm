@@ -14,7 +14,8 @@
  */
 package org.oscim.layers.tile.vector;
 
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -50,7 +51,7 @@ import org.oscim.utils.LineClipper;
 
 public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback, ITileDataSink {
 
-	private static final String TAG = VectorTileLoader.class.getName();
+	static final Logger log = LoggerFactory.getLogger(VectorTileLoader.class);
 
 	private static final double STROKE_INCREASE = Math.sqrt(2.5);
 	private static final byte LAYERS = 11;
@@ -104,17 +105,17 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public boolean executeJob(MapTile tile) {
 
 		if (mTileDataSource == null) {
-			Log.d(TAG, "no tile source is set");
+			log.debug("no tile source is set");
 			return false;
 		}
 
 		if (renderTheme == null) {
-			Log.d(TAG, "no theme is set");
+			log.debug("no theme is set");
 			return false;
 		}
 
 		if (Map.debugTheme)
-			Log.d(TAG, tile.toString());
+			log.debug(tile.toString());
 
 		// account for area changes with latitude
 		double lat = MercatorProjection.toLatitude(tile.y);
@@ -232,7 +233,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	//private void debugUnmatched(boolean closed, TagSet tags) {
-	//		Log.d(TAG, "DBG way not matched: " + closed + " "
+	//		log.debug("DBG way not matched: " + closed + " "
 	//				+ Arrays.deepToString(tags));
 	//
 	//		mTagName = new Tag("name", tags[0].key + ":"
@@ -246,7 +247,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	private void renderWay(RenderInstruction[] ri) {
 		if (ri == null) {
 			if (Map.debugTheme)
-				Log.d(TAG, "no rule for way: " + mElement.tags);
+				log.debug("no rule for way: " + mElement.tags);
 			return;
 		}
 		for (int i = 0, n = ri.length; i < n; i++)
@@ -256,7 +257,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	private void renderNode(RenderInstruction[] ri) {
 		if (ri == null) {
 			if (Map.debugTheme)
-				Log.d(TAG, "no rule for node: " + mElement.tags);
+				log.debug("no rule for node: " + mElement.tags);
 			return;
 		}
 
@@ -275,7 +276,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		if (line.stipple == 0) {
 			if (line.outline && mCurLineLayer == null) {
-				Log.d(TAG, "missing line for outline! " + mElement.tags
+				log.debug("missing line for outline! " + mElement.tags
 				        + " lvl:" + level + " layer:" + mElement.layer);
 				return;
 			}
@@ -397,7 +398,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void renderPointSymbol(Symbol symbol) {
 		if (symbol.texture == null) {
 			if (Map.debugTheme)
-				Log.d(TAG, "missing symbol for " + mElement.tags.toString());
+				log.debug("missing symbol for " + mElement.tags.toString());
 			return;
 		}
 		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {

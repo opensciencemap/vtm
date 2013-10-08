@@ -3,7 +3,6 @@ package org.oscim.backend;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.oscim.backend.Log;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -14,7 +13,6 @@ import com.google.gwt.xml.client.XMLParser;
 
 public class MyXMLReader {
 	public void parse(InputStream is) throws SAXException {
-		Log.d("..", "read theme");
 		StringBuilder sb = new StringBuilder();
 		byte[] buf = new byte[8192];
 		int read;

@@ -18,7 +18,6 @@ import static org.oscim.tiling.MapTile.STATE_NEW_DATA;
 import static org.oscim.tiling.MapTile.STATE_READY;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
@@ -35,9 +34,11 @@ import org.oscim.renderer.elements.RenderElement;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.QuadTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TileRenderer extends LayerRenderer {
-	private final static String TAG = TileRenderer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(TileRenderer.class);
 
 	private final TileManager mTileManager;
 	private int mUploadSerial;
@@ -171,7 +172,7 @@ public class TileRenderer extends LayerRenderer {
 				tile.layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
 			if (!ElementRenderer.uploadLayers(tile.layers, newSize, true)) {
-				Log.d(TAG, "BUG uploadTileData " + tile + " failed!");
+				log.debug("BUG uploadTileData " + tile + " failed!");
 
 				tile.layers.vbo = BufferObject.release(tile.layers.vbo);
 				tile.layers.clear();
@@ -320,7 +321,7 @@ public class TileRenderer extends LayerRenderer {
 					continue;
 
 				if (cnt + mNumTileHolder >= tiles.length) {
-					Log.e(TAG, "too many tiles " + cnt + ", " + mNumTileHolder);
+					//log.error(" + mNumTileHolder");
 					break;
 				}
 				holder = new MapTile(x, y, (byte) mZoom);
@@ -417,7 +418,7 @@ public class TileRenderer extends LayerRenderer {
 			t = t.holder;
 
 		if (t.layers == null || t.layers.vbo == null) {
-			//Log.d(TAG, "missing data " + (t.layers == null) + " " + (t.vbo == null));
+			//log.debug("missing data " + (t.layers == null) + " " + (t.vbo == null));
 			return;
 		}
 
@@ -536,7 +537,7 @@ public class TileRenderer extends LayerRenderer {
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					proxy = r.parent.item;
 					if (proxy.state == STATE_READY) {
-						//Log.d(TAG, "1. draw parent " + proxy);
+						//log.debug("1. draw parent " + proxy);
 						drawTile(proxy, pos);
 					}
 				}
@@ -558,7 +559,7 @@ public class TileRenderer extends LayerRenderer {
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					proxy = r.parent.item;
 					if (proxy != null && proxy.state == STATE_READY) {
-						//Log.d(TAG, "2. draw parent " + proxy);
+						//log.debug("2. draw parent " + proxy);
 						drawTile(proxy, pos);
 						return;
 

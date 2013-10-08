@@ -18,9 +18,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class GLMatrix {
 
-	private final static String TAG = GLMatrix.class.getName();
+	static final Logger log = LoggerFactory.getLogger(GLMatrix.class);
 	private final static boolean dbg = false;
 
 	private final long pointer;

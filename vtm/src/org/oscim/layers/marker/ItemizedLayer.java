@@ -50,7 +50,7 @@ import org.oscim.utils.GeometryUtils;
 public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer implements
         MarkerLayer.Snappable {
 
-	//private final static String TAG = ItemizedOverlay.class.getName();
+	//static final Logger log = LoggerFactory.getLogger(ItemizedOverlay.class);
 
 	protected final MarkerSymbol mDefaultMarker;
 	protected boolean mDrawFocusedItem = true;
@@ -130,7 +130,7 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 
 				}
 
-				//Log.d(TAG, numVisible + " " + changedVisible + " " + changesInvisible);
+				//log.debug(numVisible + " " + changedVisible + " " + changesInvisible);
 
 				// only update when zoomlevel changed, new items are visible
 				// or more than 10 of the current items became invisible

@@ -1,15 +1,16 @@
 package org.oscim.layers;
 
-import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
 import org.oscim.map.Map.UpdateListener;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CustomRenderLayer extends Layer implements UpdateListener {
 
-	private static final String TAG = CustomRenderLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(CustomRenderLayer.class);
 
 	class CustomRenderer extends LayerRenderer {
 
@@ -22,7 +23,7 @@ public class CustomRenderLayer extends Layer implements UpdateListener {
 				currentState = someConccurentVariable;
 				compile();
 			}
-			Log.d(TAG, "state " + currentState);
+			log.debug("state " + currentState);
 
 		}
 

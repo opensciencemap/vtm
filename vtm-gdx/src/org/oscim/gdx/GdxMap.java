@@ -1,7 +1,6 @@
 package org.oscim.gdx;
 
 import org.oscim.backend.AssetAdapter;
-import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 import org.oscim.layers.GenericLayer;
 import org.oscim.layers.tile.vector.BuildingLayer;
@@ -149,8 +148,6 @@ public abstract class GdxMap implements ApplicationListener {
 	public void create() {
 
 		Gdx.graphics.setContinuousRendering(false);
-
-		Log.logger = new GdxLog();
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 
 		int w = Gdx.graphics.getWidth();
@@ -453,7 +450,7 @@ public abstract class GdxMap implements ApplicationListener {
 		@Override
 		public boolean fling(final float velocityX, final float velocityY,
 		        int button) {
-			//Log.d("", "fling " + button + " " + velocityX + "/" + velocityY);
+			//log.debug("fling " + button + " " + velocityX + "/" + velocityY);
 			if (mayFling && button == Buttons.LEFT) {
 				int m = Tile.SIZE * 4;
 				mMap.getAnimator().animateFling((int) velocityX, (int) velocityY, -m, m, -m, m);
@@ -550,7 +547,7 @@ public abstract class GdxMap implements ApplicationListener {
 				float fx = (x2 + x1) / 2 - mWidth / 2;
 				float fy = (y2 + y1) / 2 - mHeight / 2;
 
-				// Log.d(TAG, "zoom " + deltaPinchWidth + " " + scale + " " +
+				// log.debug("zoom " + deltaPinchWidth + " " + scale + " " +
 				// mSumScale);
 				changed = mMapPosition.scaleMap(scale, fx, fy);
 			}
@@ -559,7 +556,7 @@ public abstract class GdxMap implements ApplicationListener {
 				float my2 = y2 - mPrevY2;
 				float threshold = PINCH_TILT_THRESHOLD;
 
-				// Log.d(TAG, r + " " + slope + " m1:" + my + " m2:" + my2);
+				// log.debug(r + " " + slope + " m1:" + my + " m2:" + my2);
 
 				if ((my > threshold && my2 > threshold)
 				        || (my < -threshold && my2 < -threshold)) {
@@ -570,7 +567,7 @@ public abstract class GdxMap implements ApplicationListener {
 
 			if (!mBeginTilt
 			        && (mBeginRotate || (Math.abs(slope) > 1 && Math.abs(r) > PINCH_ROTATE_THRESHOLD))) {
-				// Log.d(TAG, "rotate: " + mBeginRotate + " " +
+				// log.debug("rotate: " + mBeginRotate + " " +
 				// Math.toDegrees(rad));
 				if (!mBeginRotate) {
 					mAngle = rad;

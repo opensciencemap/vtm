@@ -26,11 +26,11 @@ import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.common.PbfDecoder;
-
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TileDecoder extends PbfDecoder {
-	private final static String TAG = TileDecoder.class.getName();
+	static final Logger log = LoggerFactory.getLogger(TileDecoder.class);
 
 	private final static float REF_TILE_SIZE = 4096.0f;
 
@@ -119,7 +119,7 @@ public class TileDecoder extends PbfDecoder {
 					break;
 
 				default:
-					Log.d(TAG, "invalid type for tile: " + tag);
+					log.debug("invalid type for tile: " + tag);
 					return false;
 			}
 		}
@@ -188,14 +188,14 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_WAY_COORDS:
 					if (coordCnt == 0) {
-						Log.d(TAG, mTile + " no coordinates");
+						log.debug(mTile + " no coordinates");
 					}
 
 					mElem.ensurePointSize(coordCnt, false);
 					int cnt = decodeInterleavedPoints(mElem.points, mScale);
 
 					if (cnt != coordCnt) {
-						Log.d(TAG, mTile + " wrong number of coordintes "
+						log.debug(mTile + " wrong number of coordintes "
 						        + coordCnt + "/" + cnt);
 						fail = true;
 					}
@@ -219,12 +219,12 @@ public class TileDecoder extends PbfDecoder {
 					break;
 
 				default:
-					Log.d(TAG, "X invalid type for way: " + tag);
+					log.debug("X invalid type for way: " + tag);
 			}
 		}
 
 		if (fail || indexCnt == 0 || tagCnt == 0) {
-			Log.d(TAG, "failed reading way: bytes:" + bytes + " index:"
+			log.debug("failed reading way: bytes:" + bytes + " index:"
 			        //+ (tags != null ? tags.toString() : "...") + " "
 			        + indexCnt + " " + coordCnt + " " + tagCnt);
 			return false;
@@ -264,7 +264,7 @@ public class TileDecoder extends PbfDecoder {
 				case TAG_NODE_COORDS:
 					int cnt = decodeNodeCoordinates(coordCnt, layer);
 					if (cnt != coordCnt) {
-						Log.d(TAG, "X wrong number of coordintes");
+						log.debug("X wrong number of coordintes");
 						return false;
 					}
 					break;
@@ -282,7 +282,7 @@ public class TileDecoder extends PbfDecoder {
 					break;
 
 				default:
-					Log.d(TAG, "X invalid type for node: " + tag);
+					log.debug("X invalid type for node: " + tag);
 			}
 		}
 
@@ -331,7 +331,7 @@ public class TileDecoder extends PbfDecoder {
 			int tagNum = decodeVarint32();
 
 			if (tagNum < 0 || cnt == tagCnt) {
-				Log.d(TAG, "NULL TAG: " + mTile
+				log.debug("NULL TAG: " + mTile
 				        + " invalid tag:" + tagNum
 				        + " " + tagCnt + "/" + cnt);
 				continue;
@@ -347,7 +347,7 @@ public class TileDecoder extends PbfDecoder {
 			if (tagNum >= 0 && tagNum < max) {
 				mElem.tags.add(curTags[tagNum]);
 			} else {
-				Log.d(TAG, "NULL TAG: " + mTile
+				log.debug("NULL TAG: " + mTile
 				        + " could find tag:"
 				        + tagNum + " " + tagCnt
 				        + "/" + cnt);
@@ -355,7 +355,7 @@ public class TileDecoder extends PbfDecoder {
 		}
 
 		if (tagCnt != cnt) {
-			Log.d(TAG, "NULL TAG: " + mTile);
+			log.debug("NULL TAG: " + mTile);
 			return false;
 		}
 

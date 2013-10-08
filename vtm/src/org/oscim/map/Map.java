@@ -18,7 +18,6 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.oscim.backend.Log;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.MapPosition;
 import org.oscim.event.Dispatcher;
@@ -37,10 +36,12 @@ import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.utils.async.AsyncExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Map implements EventDispatcher {
 
-	private static final String TAG = Map.class.getName();
+	static final Logger log = LoggerFactory.getLogger(Map.class);
 
 	public static final boolean debugTheme = false;
 
@@ -99,18 +100,18 @@ public abstract class Map implements EventDispatcher {
 	 */
 	public void setTheme(InternalRenderTheme theme) {
 		if (mBaseLayer == null) {
-			Log.e(TAG, "No base layer set");
+			log.error("No base layer set");
 			throw new IllegalStateException();
 		}
 
 		if (mCurrentTheme == theme) {
-			Log.d(TAG, "same theme: " + theme);
+			log.debug("same theme: " + theme);
 			return;
 		}
 
 		IRenderTheme t = ThemeLoader.load(theme);
 		if (t == null) {
-			Log.e(TAG, "Invalid theme");
+			log.error("Invalid theme");
 			return;
 		}
 

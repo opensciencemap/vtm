@@ -27,7 +27,7 @@ import org.oscim.map.Viewport;
 
 public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<Item>
         implements TouchListener {
-	//private static final String TAG = ItemizedIconOverlay.class.getName();
+	//static final Logger log = LoggerFactory.getLogger(ItemizedIconOverlay.class);
 
 	protected final List<Item> mItemList;
 	protected OnItemGestureListener<Item> mOnItemGestureListener;

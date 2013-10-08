@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.openstreetmap.osmosis.osmbinary.BinaryParser;
 import org.openstreetmap.osmosis.osmbinary.Osmformat;
-import org.oscim.backend.Log;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.utils.osm.OSMData;
@@ -311,7 +310,7 @@ public class OsmPbfParser extends BinaryParser {
 		ArrayList<OSMWay> ways = new ArrayList<OSMWay>(mWayMap.values());
 		ArrayList<OSMNode> nodes = new ArrayList<OSMNode>(mNodeMap.values());
 
-		Log.d("..", "nodes: " + nodes.size() + " ways: " + ways.size());
+		//log.debug("nodes: " + nodes.size() + " ways: " + ways.size());
 
 		return new OSMData(null, nodes, ways, null);
 	}

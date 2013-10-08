@@ -14,7 +14,8 @@
  */
 package org.oscim.layers.tile.vector;
 
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -49,7 +50,7 @@ import org.oscim.utils.LineClipper;
 
 public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback, ITileDataSink {
 
-	private static final String TAG = VectorTileLoader.class.getName();
+	static final Logger log = LoggerFactory.getLogger(VectorTileLoader.class);
 
 	private static final double STROKE_INCREASE = Math.sqrt(2.5);
 	private static final byte LAYERS = 11;
@@ -230,7 +231,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	//private void debugUnmatched(boolean closed, TagSet tags) {
-	//		Log.d(TAG, "DBG way not matched: " + closed + " "
+	//		log.debug("DBG way not matched: " + closed + " "
 	//				+ Arrays.deepToString(tags));
 	//
 	//		mTagName = new Tag("name", tags[0].key + ":"
@@ -268,7 +269,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		if (line.stipple == 0) {
 			if (line.outline && mCurLineLayer == null) {
-				Log.e(TAG, "BUG in theme: line must come before outline!");
+				log.error("BUG in theme: line must come before outline!");
 				return;
 			}
 
@@ -378,7 +379,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public void renderPointSymbol(Symbol symbol) {
 		if (symbol.texture == null) {
-			Log.d(TAG, "missing symbol for " + mElement.tags.toString());
+			log.debug("missing symbol for " + mElement.tags.toString());
 			return;
 		}
 		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {

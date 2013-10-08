@@ -22,7 +22,8 @@ import static org.oscim.tiling.MapTile.STATE_NONE;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
@@ -35,7 +36,7 @@ import org.oscim.utils.quadtree.QuadTree;
 import org.oscim.utils.quadtree.QuadTreeIndex;
 
 public class TileManager {
-	static final String TAG = TileManager.class.getName();
+	static final Logger log = LoggerFactory.getLogger(TileManager.class);
 
 	private int mCacheLimit;
 	private int mCacheReduce;
@@ -97,7 +98,7 @@ public class TileManager {
 		@Override
 		public void remove(MapTile t) {
 			if (t.rel == null) {
-				Log.d(TAG, "BUG already removed " + t);
+				log.debug("BUG already removed " + t);
 				return;
 			}
 
@@ -172,7 +173,7 @@ public class TileManager {
 
 			mNewTiles = new TileSet(numTiles);
 			mCurrentTiles = new TileSet(numTiles);
-			Log.d(TAG, "max tiles: " + numTiles);
+			log.debug("max tiles: " + numTiles);
 
 		}
 	}
@@ -273,7 +274,7 @@ public class TileManager {
 		if (mCacheReduce < mCacheLimit / 2) {
 			if (BufferObject.isMaxFill()) {
 				mCacheReduce += 10;
-				Log.d(TAG, "reduce tile cache " + (mCacheLimit - mCacheReduce));
+				log.debug("reduce tile cache " + (mCacheLimit - mCacheReduce));
 			} else
 				mCacheReduce = 0;
 		}
@@ -387,7 +388,7 @@ public class TileManager {
 			}
 
 			if (mTilesSize == mTiles.length) {
-				Log.d(TAG, "realloc tiles " + mTilesSize);
+				log.debug("realloc tiles " + mTilesSize);
 				MapTile[] tmp = new MapTile[mTiles.length + 20];
 				System.arraycopy(mTiles, 0, tmp, 0, mTilesCount);
 				mTiles = tmp;
@@ -483,15 +484,15 @@ public class TileManager {
 			// so end of mTiles is at mTilesCount now
 			size = mTilesSize = mTilesCount;
 
-			// Log.d(TAG, "remove:" + remove + "  new:" + newTileCnt);
-			// Log.d(TAG, "cur: " + mapPosition);
+			// log.debug("remove:" + remove + "  new:" + newTileCnt);
+			// log.debug("cur: " + mapPosition);
 
 			for (int i = size - 1; i >= 0 && remove > 0; i--) {
 				MapTile t = tiles[i];
 				if (t.isLocked()) {
 					// dont remove tile used by GLRenderer, or somewhere else
 					// try again in next run.
-					//Log.d(TAG, "locked " + t
+					//log.debug("locked " + t
 					//        + " " + t.distance
 					//        + " " + (t.state == STATE_NEW_DATA)
 					//        + " " + (t.state == STATE_LOADING)
@@ -501,13 +502,13 @@ public class TileManager {
 					// added to load queue again while still processed in
 					// MapTileLoader => need tile.cancel flag.
 					// t.isLoading = false;
-					Log.d(TAG, "cancel loading " + t
+					log.debug("cancel loading " + t
 					        + " " + t.distance);
 				} else {
 					// clear unused tile
 
 					if (t.state == STATE_NEW_DATA) {
-						// Log.d(TAG, "limitCache: clear unused " + t
+						// log.debug("limitCache: clear unused " + t
 						// + " " + t.distance);
 						newTileCnt--;
 					}
@@ -533,7 +534,7 @@ public class TileManager {
 			}
 
 			mTilesForUpload += newTileCnt;
-			// Log.d(TAG, "cleanup load queue " + tilesForUpload + "/" + r +
+			// log.debug("cleanup load queue " + tilesForUpload + "/" + r +
 			// " - " + remove);
 		}
 	}
@@ -577,7 +578,7 @@ public class TileManager {
 				MapTile tile = null;
 
 				if (cnt == maxTiles) {
-					Log.d(TAG, "reached maximum tiles " + maxTiles);
+					log.debug("reached maximum tiles " + maxTiles);
 					break;
 				}
 				int xx = x;

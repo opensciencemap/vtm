@@ -14,13 +14,14 @@
  */
 package org.oscim.layers;
 
-import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 import org.oscim.event.EventListener;
 import org.oscim.event.MapEvent;
 import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Changes Viewport for scroll, fling, scale, rotation and tilt gestures
@@ -34,7 +35,7 @@ import org.oscim.map.Viewport;
 
 public class MapEventLayer extends Layer implements EventListener {
 	private static final boolean debug = false;
-	private static final String TAG = MapEventLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(MapEventLayer.class);
 
 	private float mSumScale;
 	private float mSumRotate;
@@ -172,7 +173,7 @@ public class MapEventLayer extends Layer implements EventListener {
 		// double-tap + hold
 		if (mDoubleTap) {
 			if (debug)
-				Log.d(TAG, "tap scale: " + mx + " " + my);
+				log.debug("tap scale: " + mx + " " + my);
 			mMapPosition.scaleMap(1 - my / (height / 8), 0, 0);
 			mMap.updateMap(true);
 
@@ -234,14 +235,14 @@ public class MapEventLayer extends Layer implements EventListener {
 			float fx = (x2 + x1) / 2 - width / 2;
 			float fy = (y2 + y1) / 2 - height / 2;
 
-			//Log.d(TAG, "zoom " + deltaPinchWidth + " " + scale + " " + mSumScale);
+			//log.debug("zoom " + deltaPinchWidth + " " + scale + " " + mSumScale);
 			changed = mMapPosition.scaleMap(scale, fx, fy);
 		}
 
 		if (mEnableTilt && !mBeginRotate && Math.abs(slope) < 1) {
 			float my2 = y2 - mPrevY2;
 			float threshold = PINCH_TILT_THRESHOLD;
-			//Log.d(TAG, r + " " + slope + " m1:" + my + " m2:" + my2);
+			//log.debug(r + " " + slope + " m1:" + my + " m2:" + my2);
 
 			if ((my > threshold && my2 > threshold)
 			        || (my < -threshold && my2 < -threshold))
@@ -251,7 +252,7 @@ public class MapEventLayer extends Layer implements EventListener {
 			}
 		} else if (mEnableRotation && !mBeginTilt &&
 		        (mBeginRotate || Math.abs(r) > PINCH_ROTATE_THRESHOLD)) {
-			//Log.d(TAG, "rotate: " + mBeginRotate + " " + Math.toDegrees(rad));
+			//log.debug("rotate: " + mBeginRotate + " " + Math.toDegrees(rad));
 			if (!mBeginRotate) {
 				mAngle = rad;
 
@@ -350,7 +351,7 @@ public class MapEventLayer extends Layer implements EventListener {
 
 	//
 	//private void printState(String action) {
-	//		Log.d(TAG, action
+	//		log.debug(action
 	//				+ " " + mDoubleTap
 	//				+ " " + mBeginScale
 	//				+ " " + mBeginRotate

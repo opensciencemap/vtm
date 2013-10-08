@@ -3,7 +3,8 @@ package org.oscim.gdx.client;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.gdx.GdxMap;
@@ -20,7 +21,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 
 class GwtGdxMap extends GdxMap {
-	private static final String TAG = GwtGdxMap.class.getName();
+	static final Logger log = LoggerFactory.getLogger(GwtGdxMap.class);
 
 	SearchBox mSearchBox;
 
@@ -77,7 +78,7 @@ class GwtGdxMap extends GdxMap {
 		MapPosition p = new MapPosition();
 		p.setZoomLevel(zoom);
 		p.setPosition(lat, lon);
-		Log.d(TAG, "map position: " + p.x + "/" + p.y + " " + lat + "/" + lon);
+		log.debug("map position: " + p.x + "/" + p.y + " " + lat + "/" + lon);
 
 		p.angle = rotation;
 		p.tilt = tilt;

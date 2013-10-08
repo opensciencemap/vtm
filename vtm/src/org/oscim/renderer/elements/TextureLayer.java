@@ -90,7 +90,7 @@ public abstract class TextureLayer extends RenderElement {
 	}
 
 	public static final class Renderer {
-		//private final static String TAG = TextureRenderer.class.getName();
+		//static final Logger log = LoggerFactory.getLogger(TextureRenderer.class);
 
 		public final static boolean debug = false;
 

@@ -3,7 +3,8 @@ package org.oscim.gdx.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
@@ -40,7 +41,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
  */
 public class SearchBox {
 
-	protected static final String TAG = SearchBox.class.getName();
+	protected static final Logger log = LoggerFactory.getLogger(SearchBox.class);
 
 	private static final String NOMINATIM_GLOBAL = "http://nominatim.openstreetmap.org/search?polygon_text=1&addressdetails=0&format=json&limit=25&q=";
 
@@ -230,7 +231,7 @@ public class SearchBox {
 
 				mOverlay.clearPath();
 
-				//Log.d(TAG, "selected " + d.getName() + " " + d.getLatitude() + " "
+				//log.debug("selected " + d.getName() + " " + d.getLatitude() + " "
 				//		+ d.getLongitude());
 
 				BoundingBox b = d.getBoundingBox();
@@ -249,11 +250,11 @@ public class SearchBox {
 						try {
 							r.parse(wkt, g);
 						} catch (Exception e) {
-							Log.d(TAG, wkt);
+							log.debug(wkt);
 						}
 						mOverlay.setGeom(g);
 
-						//Log.d(TAG, "add polygon " + p.length());
+						//log.debug("add polygon " + p.length());
 					} else {
 						mOverlay.addPoint(b.maxLatitudeE6, b.minLongitudeE6);
 						mOverlay.addPoint(b.maxLatitudeE6, b.maxLongitudeE6);
@@ -319,7 +320,7 @@ public class SearchBox {
 				builder.setCallbackParam("json_callback");
 				builder.requestObject(url, new AsyncCallback<JsArray<NominatimData>>() {
 					public void onFailure(Throwable caught) {
-						Log.d(TAG, "request failed");
+						log.debug("request failed");
 						searchButton.setEnabled(true);
 					}
 

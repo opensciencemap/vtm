@@ -22,7 +22,6 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
-import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
@@ -30,9 +29,11 @@ import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.tiling.MapTile;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MapRenderer {
-	private static final String TAG = MapRenderer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(MapRenderer.class);
 
 	static GL20 GL;
 
@@ -165,7 +166,7 @@ public class MapRenderer {
 		int tmpBufferSize;
 
 		void growBuffer(int size) {
-			//Log.d(TAG, "grow buffer " + size);
+			//log.debug("grow buffer " + size);
 			// 32kb min size
 			if (size < (1 << 15))
 				size = (1 << 15);
@@ -258,7 +259,7 @@ public class MapRenderer {
 			}
 		}
 
-		//Log.d(TAG, "begin frame");
+		//log.debug("begin frame");
 		GLState.bindTex2D(-1);
 		GLState.useProgram(-1);
 		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
@@ -294,7 +295,7 @@ public class MapRenderer {
 	}
 
 	public void onSurfaceChanged(int width, int height) {
-		Log.d(TAG, "SurfaceChanged:" + mNewSurface + " " + width + "x" + height);
+		log.debug("SurfaceChanged:" + mNewSurface + " " + width + "x" + height);
 
 		if (width <= 0 || height <= 0)
 			return;
@@ -379,8 +380,8 @@ public class MapRenderer {
 	public void onSurfaceCreated() {
 		GL = GLAdapter.get();
 
-		// Log.d(TAG, "surface created");
-		// Log.d(TAG, GL.glGetString(GL20.GL_EXTENSIONS));
+		// log.debug("surface created");
+		// log.debug(GL.glGetString(GL20.GL_EXTENSIONS));
 
 		GLState.init(GL);
 		GLUtils.init(GL);

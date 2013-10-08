@@ -23,11 +23,11 @@ import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.mapfile.header.MapFileHeader;
 import org.oscim.tiling.source.mapfile.header.MapFileInfo;
-
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MapFileTileSource extends TileSource {
-	private final static String TAG = MapFileTileSource.class.getName();
+	static final Logger log = LoggerFactory.getLogger(MapFileTileSource.class);
 
 	/**
 	 * Amount of cache blocks that the index cache should store.
@@ -95,10 +95,10 @@ public class MapFileTileSource extends TileSource {
 
 			experimental = fileInfo.fileVersion == 4;
 
-			Log.d(TAG, "File version: " + fileInfo.fileVersion);
+			log.debug("File version: " + fileInfo.fileVersion);
 			return OpenResult.SUCCESS;
 		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
+			log.error(e.getMessage());
 			// make sure that the file is closed
 			close();
 			return new OpenResult(e.getMessage());
@@ -110,7 +110,7 @@ public class MapFileTileSource extends TileSource {
 		try {
 			return new MapDatabase(this);
 		} catch (IOException e) {
-			Log.d(TAG, e.getMessage());
+			log.debug(e.getMessage());
 		}
 		return null;
 	}

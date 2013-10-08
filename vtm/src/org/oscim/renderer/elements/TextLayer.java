@@ -23,7 +23,7 @@ import org.oscim.backend.canvas.Canvas;
 
 public final class TextLayer extends TextureLayer {
 
-	//private static String TAG = TextureLayer.class.getName();
+	//static final Logger log = LoggerFactory.getLogger(TextureLayer.class);
 
 	private final static int LBIT_MASK = 0xfffffffe;
 

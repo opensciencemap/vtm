@@ -18,8 +18,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.logging.Level;
 
-import org.oscim.backend.Log;
-
 /**
  * A utility class with IO-specific helper methods.
  */
@@ -39,7 +37,7 @@ public final class IOUtils {
 				closeable.close();
 			}
 		} catch (IOException e) {
-			Log.d(IOUtils.class.getName(), e.getMessage() + " " + e);
+			//log.debug(e.getMessage() + " " + e);
 		}
 	}
 

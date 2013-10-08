@@ -23,7 +23,7 @@ import org.oscim.tiling.TileRenderer;
 import org.oscim.utils.FastMath;
 
 public class BuildingLayer extends Layer {
-	//private final static String TAG = BuildingOverlay.class.getName();
+	//static final Logger log = LoggerFactory.getLogger(BuildingOverlay.class);
 
 	final ExtrusionRenderer mExtLayer;
 
@@ -64,7 +64,7 @@ public class BuildingLayer extends Layer {
 					} else
 						mStartTime = 0;
 				}
-				//Log.d(TAG, show + " > " + mAlpha);
+				//log.debug(show + " > " + mAlpha);
 				super.update(pos, changed, m);
 			}
 		};
@@ -88,12 +88,12 @@ public class BuildingLayer extends Layer {
 	//		multi--;
 	//		if (!mActive && mAlpha > 0) {
 	//			// finish hiding
-	//			//Log.d(TAG, "add multi hide timer " + mAlpha);
+	//			//log.debug("add multi hide timer " + mAlpha);
 	//			addShowTimer(mFadeTime * mAlpha, false);
 	//		}
 	//	} else if (action == MotionEvent.ACTION_CANCEL) {
 	//		multi = 0;
-	//		Log.d(TAG, "cancel " + multi);
+	//		log.debug("cancel " + multi);
 	//		if (mTimer != null) {
 	//			mTimer.cancel();
 	//			mTimer = null;

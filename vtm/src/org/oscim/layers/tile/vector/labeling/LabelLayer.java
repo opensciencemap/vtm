@@ -14,7 +14,6 @@
  */
 package org.oscim.layers.tile.vector.labeling;
 
-import org.oscim.backend.Log;
 import org.oscim.core.MapPosition;
 import org.oscim.event.EventListener;
 import org.oscim.event.MapEvent;
@@ -22,9 +21,11 @@ import org.oscim.event.MotionEvent;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.tiling.TileRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LabelLayer extends Layer implements EventListener, Map.UpdateListener {
-	private final static String TAG = LabelLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(LabelLayer.class);
 	private final TextRenderer mTextRenderer;
 
 	private int multi;
@@ -62,7 +63,7 @@ public class LabelLayer extends Layer implements EventListener, Map.UpdateListen
 					mTextRenderer.hold(false);
 			} else if (action == MotionEvent.ACTION_CANCEL) {
 				multi = 0;
-				Log.d(TAG, "cancel " + multi);
+				log.debug("cancel " + multi);
 				mTextRenderer.hold(false);
 			}
 		}
@@ -86,7 +87,7 @@ public class LabelLayer extends Layer implements EventListener, Map.UpdateListen
 	//				mTextRenderer.hold(false);
 	//		} else if (action == MotionEvent.ACTION_CANCEL) {
 	//			multi = 0;
-	//			Log.d(TAG, "cancel " + multi);
+	//			log.debug("cancel " + multi);
 	//			mTextRenderer.hold(false);
 	//		}
 	//

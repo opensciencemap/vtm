@@ -34,49 +34,41 @@ public class MyAttributes implements Attributes {
 
 	@Override
 	public String getURI(int paramInt) {
-		Log.d("..", "missing");
 		return null;
 	}
 
 	@Override
 	public String getQName(int paramInt) {
-		Log.d("..", "missing");
 		return null;
 	}
 
 	@Override
 	public String getType(int paramInt) {
-		Log.d("..", "missing");
 		return null;
 	}
 
 	@Override
 	public int getIndex(String paramString1, String paramString2) {
-		Log.d("..", "missing");
 		return 0;
 	}
 
 	@Override
 	public int getIndex(String paramString) {
-		Log.d("..", "missing");
 		return 0;
 	}
 
 	@Override
 	public String getType(String paramString1, String paramString2) {
-		Log.d("..", "missing");
 		return null;
 	}
 
 	@Override
 	public String getType(String paramString) {
-		Log.d("..", "missing");
 		return null;
 	}
 
 	@Override
 	public String getValue(String paramString1, String paramString2) {
-		Log.d("..", "missing");
 		return null;
 	}
 

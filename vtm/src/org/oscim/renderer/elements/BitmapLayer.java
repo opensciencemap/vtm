@@ -28,7 +28,7 @@ import org.oscim.renderer.MapRenderer.Matrices;
  */
 public class BitmapLayer extends TextureLayer {
 
-	//	private final static String TAG = BitmapLayer.class.getName();
+	//	static final Logger log = LoggerFactory.getLogger(BitmapLayer.class);
 	private Bitmap mBitmap;
 	private final boolean mReuseBitmap;
 	private final short[] mVertices;
@@ -151,7 +151,7 @@ public class BitmapLayer extends TextureLayer {
 
 	public static final class Renderer {
 
-		//private final static String TAG = BitmapRenderer.class.getName();
+		//static final Logger log = LoggerFactory.getLogger(BitmapRenderer.class);
 
 		public final static boolean debug = true;
 

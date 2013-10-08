@@ -1,6 +1,5 @@
 package org.oscim.gdx.client;
 
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Paint;
 
@@ -26,7 +25,7 @@ public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
 	@Override
 	public void drawText(String string, float x, float y, Paint paint) {
 		if (bitmap == null) {
-			Log.d("BUG", "no bitmap set");
+			//log.debug("no bitmap set");
 			return;
 		}
 

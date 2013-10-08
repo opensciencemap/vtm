@@ -14,7 +14,6 @@
  */
 package org.oscim.layers.tile.example;
 
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
@@ -28,9 +27,11 @@ import org.oscim.theme.renderinstruction.Line;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestTileLayer extends TileLayer<TestTileLoader> {
-	final static String TAG = TestTileLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(TestTileLayer.class);
 
 	public TestTileLayer(Map map) {
 		super(map);
@@ -51,7 +52,7 @@ public class TestTileLayer extends TileLayer<TestTileLoader> {
 
 		@Override
 		public boolean executeJob(MapTile tile) {
-			Log.d(TAG, "load tile " + tile);
+			log.debug("load tile " + tile);
 			tile.layers = new ElementLayers();
 
 			LineLayer ll = tile.layers.getLineLayer(0);

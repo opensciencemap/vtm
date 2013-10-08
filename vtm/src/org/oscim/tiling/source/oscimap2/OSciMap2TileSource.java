@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
@@ -31,6 +30,8 @@ import org.oscim.tiling.source.common.LwHttp;
 import org.oscim.tiling.source.common.PbfDecoder;
 import org.oscim.tiling.source.common.PbfTileDataSource;
 import org.oscim.tiling.source.common.UrlTileSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OSciMap2TileSource extends UrlTileSource {
 
@@ -47,7 +48,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 	}
 
 	static class TileDecoder extends PbfDecoder {
-		private final static String TAG = TileDecoder.class.getName();
+		static final Logger log = LoggerFactory.getLogger(TileDecoder.class);
 		private static final int TAG_TILE_NUM_TAGS = 1;
 		private static final int TAG_TILE_TAG_KEYS = 2;
 		private static final int TAG_TILE_TAG_VALUES = 3;
@@ -92,9 +93,9 @@ public class OSciMap2TileSource extends UrlTileSource {
 		        throws IOException {
 
 			int byteCount = readUnsignedInt(is, buffer);
-			//Log.d(TAG, tile + " contentLength:" + byteCount);
+			//log.debug(tile + " contentLength:" + byteCount);
 			if (byteCount < 0) {
-				Log.d(TAG, tile + " invalid content length: " + byteCount);
+				log.debug(tile + " invalid content length: " + byteCount);
 				return false;
 			}
 
@@ -139,7 +140,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 						break;
 
 					default:
-						Log.d(TAG, mTile + " invalid type for tile: " + tag);
+						log.debug(mTile + " invalid type for tile: " + tag);
 						return false;
 				}
 			}
@@ -159,7 +160,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 			else
 				tag = new Tag(key, tagString, true);
 			if (debug)
-				Log.d(TAG, mTile + " add tag: " + curTag + " " + tag);
+				log.debug(mTile + " add tag: " + curTag + " " + tag);
 
 			mTileTags.add(tag);
 
@@ -229,14 +230,14 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 					case TAG_ELEM_COORDS:
 						if (coordCnt == 0) {
-							Log.d(TAG, mTile + " no coordinates");
+							log.debug(mTile + " no coordinates");
 						}
 
 						mElem.ensurePointSize(coordCnt, false);
 						int cnt = decodeInterleavedPoints(mElem.points, mScale);
 
 						if (cnt != coordCnt) {
-							Log.d(TAG, mTile + " wrong number of coordintes");
+							log.debug(mTile + " wrong number of coordintes");
 							fail = true;
 						}
 						break;
@@ -260,12 +261,12 @@ public class OSciMap2TileSource extends UrlTileSource {
 						break;
 
 					default:
-						Log.d(TAG, mTile + " invalid type for way: " + tag);
+						log.debug(mTile + " invalid type for way: " + tag);
 				}
 			}
 
 			if (fail || indexCnt == 0) {
-				Log.d(TAG, mTile + " failed reading way: bytes:" + bytes + " index:"
+				log.debug(mTile + " failed reading way: bytes:" + bytes + " index:"
 				        + (Arrays.toString(index)) + " tag:"
 				        + (mElem.tags.numTags > 0 ? Arrays.deepToString(mElem.tags.tags) : "null")
 				        + " " + indexCnt + " " + coordCnt);
@@ -302,7 +303,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 				int tagNum = decodeVarint32();
 
 				if (tagNum < 0) {
-					Log.d(TAG, "NULL TAG: " + mTile
+					log.debug("NULL TAG: " + mTile
 					        + " invalid tag:"
 					        + tagNum + " " + cnt);
 					return false;
@@ -315,7 +316,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 				tagNum -= Tags.LIMIT;
 
 				if (tagNum < 0 || tagNum > max) {
-					Log.d(TAG, "NULL TAG: " + mTile
+					log.debug("NULL TAG: " + mTile
 					        + " could not find tag:"
 					        + tagNum + " " + cnt);
 					return false;
@@ -325,7 +326,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 			}
 
 			if (cnt == 0) {
-				Log.d(TAG, "got no TAG!");
+				log.debug("got no TAG!");
 				return false;
 			}
 			return true;

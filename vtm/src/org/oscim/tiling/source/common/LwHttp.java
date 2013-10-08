@@ -24,9 +24,10 @@ import java.net.SocketAddress;
 import java.net.URL;
 import java.util.zip.InflaterInputStream;
 
-import org.oscim.backend.Log;
 import org.oscim.core.Tile;
 import org.oscim.utils.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Lightweight HTTP connection for tile loading.
@@ -35,7 +36,7 @@ import org.oscim.utils.ArrayUtils;
  * different format.
  */
 public class LwHttp {
-	private static final String TAG = LwHttp.class.getName();
+	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
 	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
 	private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
@@ -85,7 +86,7 @@ public class LwHttp {
 
 		String host = url.getHost();
 		String path = url.getPath();
-		Log.d(TAG, "open database: " + host + " " + port + " " + path);
+		log.debug("open database: " + host + " " + port + " " + path);
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
@@ -188,7 +189,7 @@ public class LwHttp {
 
 			if (!ok) {
 				String line = new String(buf, pos, end - pos - 1);
-				Log.d(TAG, ">" + line + "< ");
+				log.debug(">" + line + "< ");
 			}
 
 			pos += (end - pos) + 1;
@@ -217,10 +218,10 @@ public class LwHttp {
 			try {
 				mSocket.close();
 			} catch (IOException e) {
-				Log.d(TAG, e.getMessage());
+				log.debug(e.getMessage());
 			}
 
-			// Log.d(TAG, "not alive  - recreate connection " + mMaxReq);
+			// log.debug("not alive  - recreate connection " + mMaxReq);
 			mSocket = null;
 		}
 
@@ -228,12 +229,12 @@ public class LwHttp {
 			lwHttpConnect();
 			// we know our server
 			mMaxReq = RESPONSE_EXPECTED_LIVES;
-			// Log.d(TAG, "create connection");
+			// log.debug("create connection");
 		} else {
 			// FIXME not sure if this is correct way to drain socket
 			int avail = mResponseStream.available();
 			if (avail > 0) {
-				Log.d(TAG, "Consume left-over bytes: " + avail);
+				log.debug("Consume left-over bytes: " + avail);
 				while ((avail = mResponseStream.available()) > 0)
 					mResponseStream.read(buffer);
 			}
@@ -263,7 +264,7 @@ public class LwHttp {
 			mCommandStream.flush();
 			return true;
 		} catch (IOException e) {
-			Log.d(TAG, "recreate connection");
+			log.debug("recreate connection");
 		}
 
 		lwHttpConnect();

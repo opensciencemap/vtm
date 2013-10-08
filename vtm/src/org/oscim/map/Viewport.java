@@ -32,7 +32,7 @@ import org.oscim.utils.FastMath;
  * Public methods are thread safe.
  */
 public class Viewport {
-	//private static final String TAG = Viewport.class.getName();
+	//static final Logger log = LoggerFactory.getLogger(Viewport.class);
 
 	public final static int MAX_ZOOMLEVEL = 22;
 	public final static int MIN_ZOOMLEVEL = 2;

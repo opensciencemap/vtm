@@ -15,7 +15,8 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -29,7 +30,7 @@ import org.oscim.tiling.TileSet;
 // this class work on ExtrusionLayers
 
 public class ExtrusionRenderer extends LayerRenderer {
-	private final static String TAG = ExtrusionRenderer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(ExtrusionRenderer.class);
 
 	private final TileRenderer mTileLayer;
 
@@ -69,7 +70,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 			}
 
 			if (shaderProgram[i] == 0) {
-				Log.e(TAG, "Could not create extrusion shader program. " + i);
+				log.error("Could not create extrusion shader program. " + i);
 				return false;
 			}
 

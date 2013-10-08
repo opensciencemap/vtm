@@ -16,13 +16,14 @@ package org.oscim.renderer.elements;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.utils.pool.Inlist;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class SymbolLayer extends TextureLayer {
-	private final static String TAG = SymbolLayer.class.getName();
+	static final Logger log = LoggerFactory.getLogger(SymbolLayer.class);
 
 	private final static float SCALE = 8.0f;
 	private final static int VERTICES_PER_SPRITE = 4;
@@ -109,7 +110,7 @@ public final class SymbolLayer extends TextureLayer {
 			}
 
 			if (to == null) {
-				Log.d(TAG, "Bad SymbolItem");
+				log.debug("Bad SymbolItem");
 				continue;
 			}
 

@@ -5,14 +5,12 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
 
 import android.opengl.GLSurfaceView;
-import org.oscim.backend.Log;
 
 /**
  *
  *
  */
 public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
-	static private final String TAG = "ConfigChooser";
 
 	/**
 	 *
@@ -78,7 +76,7 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		// You need to explicitly filter the data returned by eglChooseConfig!
 
 		// for (int i = 0; i < configs.length; ++i) {
-		// Log.i(TAG, printConfig(egl, display, configs[i]));
+		// log.info(configs[i]));
 		// }
 
 		// int index = -1;
@@ -100,12 +98,12 @@ public class GlConfigChooser implements GLSurfaceView.EGLConfigChooser {
 		// }
 		// }
 		// if (index == -1) {
-		// Log.w(TAG, "Did not find sane config, using first");
+		// log.warn(using first");
 		// index = 0;
 		// }
 		int index = 0;
 
-		Log.i(TAG, "using: " + printConfig(egl, display, configs[index]));
+		//log.info(configs[index]);
 
 		EGLConfig config = configs.length > 0 ? configs[index] : null;
 		if (config == null) {

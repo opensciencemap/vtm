@@ -13,7 +13,7 @@ import org.oscim.utils.FastMath;
 
 public class MapAnimator {
 
-	//private static final String TAG = MapAnimator.class.getName();
+	//static final Logger log = LoggerFactory.getLogger(MapAnimator.class);
 
 	public MapAnimator(Map map, Viewport viewport) {
 		mViewport = viewport;

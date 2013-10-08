@@ -22,15 +22,15 @@ import java.net.UnknownHostException;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
-
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  *
  */
 public abstract class PbfTileDataSource implements ITileDataSource {
-	private static final String TAG = PbfTileDataSource.class.getName();
+	static final Logger log = LoggerFactory.getLogger(PbfTileDataSource.class);
 
 	protected LwHttp mConn;
 	protected final PbfDecoder mTileDecoder;
@@ -46,24 +46,24 @@ public abstract class PbfTileDataSource implements ITileDataSource {
 		try {
 			InputStream is;
 			if (!mConn.sendRequest(tile)) {
-				Log.d(TAG, tile + " Request Failed");
+				log.debug(tile + " Request Failed");
 				result = QueryResult.FAILED;
 			} else if ((is = mConn.readHeader()) != null) {
 				boolean win = mTileDecoder.decode(tile, sink, is, mConn.getContentLength());
 				if (!win)
-					Log.d(TAG, tile + " failed");
+					log.debug(tile + " failed");
 			} else {
-				Log.d(TAG, tile + " Network Error");
+				log.debug(tile + " Network Error");
 				result = QueryResult.FAILED;
 			}
 		} catch (SocketException e) {
-			Log.d(TAG, tile + " Socket exception: " + e.getMessage());
+			log.debug(tile + " Socket exception: " + e.getMessage());
 			result = QueryResult.FAILED;
 		} catch (SocketTimeoutException e) {
-			Log.d(TAG, tile + " Socket Timeout");
+			log.debug(tile + " Socket Timeout");
 			result = QueryResult.FAILED;
 		} catch (UnknownHostException e) {
-			Log.d(TAG, tile + " No Network");
+			log.debug(tile + " No Network");
 			result = QueryResult.FAILED;
 		} catch (Exception e) {
 			e.printStackTrace();

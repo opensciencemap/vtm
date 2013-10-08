@@ -17,7 +17,8 @@ package org.oscim.tiling.source.common;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
@@ -27,7 +28,7 @@ import org.oscim.tiling.source.ITileDataSource;
  *
  */
 public abstract class PbfTileDataSource implements ITileDataSource {
-	private static final String TAG = PbfTileDataSource.class.getName();
+	static final Logger log = LoggerFactory.getLogger(PbfTileDataSource.class);
 
 	protected LwHttp mConn;
 	protected final PbfDecoder mTileDecoder;
@@ -65,7 +66,7 @@ public abstract class PbfTileDataSource implements ITileDataSource {
 			}
 		}
 		if (!win)
-			Log.d(TAG, mTile + " failed");
+			log.debug(mTile + " failed");
 
 		mConn.requestCompleted();
 		mSink.completed(win);

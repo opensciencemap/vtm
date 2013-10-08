@@ -118,7 +118,7 @@ public final class WayDecorator {
 					float area = GeometryUtils.area(prevX, prevY, curX, curY, nextX, nextY);
 
 					if (area > 1000) {
-						//Log.d(">>>", "b: " + string + " " + area );
+						//log.debug("b: " + string + " " + area );
 						break;
 					}
 
@@ -128,7 +128,7 @@ public final class WayDecorator {
 
 					// avoid adding short segments that add much area
 					if (area / 2 > a * a) {
-						//Log.d(">>>", "a: " +string + " " + area + " " + a*a);
+						//log.debug("a: " +string + " " + area + " " + a*a);
 						break;
 					}
 
@@ -138,7 +138,7 @@ public final class WayDecorator {
 
 					// maximum angle between segments
 					if (diff > 0.1 || diff < -0.1) {
-						//Log.d(">>>", "c: " + string + " " + area );
+						//log.debug("c: " + string + " " + area );
 						break;
 					}
 					curX = nextX;

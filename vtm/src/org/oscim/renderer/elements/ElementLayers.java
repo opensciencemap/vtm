@@ -17,12 +17,13 @@ package org.oscim.renderer.elements;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.oscim.renderer.BufferObject;
 import org.oscim.theme.renderinstruction.Line;
 
 public class ElementLayers {
-	private final static String TAG = ElementLayers.class.getName();
+	static final Logger log = LoggerFactory.getLogger(ElementLayers.class);
 
 	public static void initRenderer(GL20 gl) {
 		RenderElement.GL = gl;
@@ -183,7 +184,7 @@ public class ElementLayers {
 
 		if (renderElement.type != type) {
 			// check if found layer matches requested type
-			Log.d(TAG, "BUG wrong layer " + renderElement.type + " " + type +
+			log.debug("BUG wrong layer " + renderElement.type + " " + type +
 			        " on layer " + renderElement.level);
 
 			throw new IllegalArgumentException();

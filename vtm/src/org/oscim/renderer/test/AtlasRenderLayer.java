@@ -2,7 +2,6 @@ package org.oscim.renderer.test;
 
 import java.util.Arrays;
 
-import org.oscim.backend.Log;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.MapPosition;
@@ -16,8 +15,12 @@ import org.oscim.renderer.elements.TextItem;
 import org.oscim.renderer.elements.TextLayer;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AtlasRenderLayer extends ElementRenderer {
+
+	Logger log = LoggerFactory.getLogger(AtlasRenderLayer.class);
 
 	public AtlasRenderLayer() {
 
@@ -46,7 +49,7 @@ public class AtlasRenderLayer extends ElementRenderer {
 			int h = (int) (20 + Math.random() * 56);
 			Rect r = mAtlas.getRegion(w, h);
 			if (r == null) {
-				Log.d("...", "no space left");
+				log.debug("no space left");
 				continue;
 			}
 			r.x += 1;
@@ -77,7 +80,7 @@ public class AtlasRenderLayer extends ElementRenderer {
 			points[8] = r.x;
 			points[9] = r.y;
 
-			Log.d("...", "add region: " + Arrays.toString(points));
+			log.debug("add region: " + Arrays.toString(points));
 			ll2.addLine(points, 10, false);
 
 			TextItem ti = TextItem.pool.get();
