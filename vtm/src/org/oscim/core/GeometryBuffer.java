@@ -20,8 +20,6 @@ public class GeometryBuffer {
 	private final static int GROW_INDICES = 64;
 	private final static int GROW_POINTS = 512;
 
-	private PointF mTmpPoint = new PointF();
-
 	/**
 	 * The Enum GeometryType.
 	 */
@@ -54,6 +52,9 @@ public class GeometryBuffer {
 	/** The current geometry type. */
 	public GeometryType type;
 
+	private PointF mTmpPoint = new PointF();
+	private int pointLimit;
+
 	/**
 	 * Instantiates a new geometry buffer.
 	 * 
@@ -71,6 +72,7 @@ public class GeometryBuffer {
 		this.type = GeometryType.NONE;
 		this.indexPos = 0;
 		this.pointPos = 0;
+		this.pointLimit = points.length - 2;
 	}
 
 	public PointF getPoint(int i) {
@@ -105,13 +107,13 @@ public class GeometryBuffer {
 	}
 
 	/**
-	 * Adds a point with the coordinates x and y.
+	 * Adds a point with the coordinate x, y.
 	 * 
 	 * @param x the x ordinate
 	 * @param y the y ordinate
 	 */
 	public void addPoint(float x, float y) {
-		if (pointPos >= points.length - 1)
+		if (pointPos > pointLimit)
 			ensurePointSize((pointPos >> 1) + 1, true);
 
 		points[pointPos++] = x;
@@ -180,14 +182,10 @@ public class GeometryBuffer {
 		boolean start = (type == GeometryType.NONE);
 		setOrCheckMode(GeometryType.POLY);
 
-		// ignore
-		if (index[indexPos] == 0)
-			return;
-
 		if ((indexPos + 3) > index.length)
 			ensureIndexSize(indexPos + 2, true);
 
-		if (!start) {
+		if (!start && index[indexPos] != 0) {
 			// end polygon
 			index[++indexPos] = 0;
 
@@ -237,21 +235,25 @@ public class GeometryBuffer {
 	}
 
 	/**
-	 * Ensure point size.
+	 * Ensure that 'points' array can hold the number of points.
 	 * 
-	 * @param size the size
-	 * @param copy the copy
+	 * @param size the number of points to hold
+	 * @param copy the the current data when array is reallocated
 	 * @return the float[] array holding current coordinates
 	 */
 	public float[] ensurePointSize(int size, boolean copy) {
 		if (size * 2 < points.length)
 			return points;
 
-		float[] tmp = new float[size * 2 + GROW_POINTS];
-		if (copy)
-			System.arraycopy(points, 0, tmp, 0, points.length);
+		size = size * 2 + GROW_POINTS;
 
-		points = tmp;
+		float[] newPoints = new float[size];
+		if (copy)
+			System.arraycopy(points, 0, newPoints, 0, points.length);
+
+		points = newPoints;
+		pointLimit = size - 2;
+
 		return points;
 	}
 
@@ -266,11 +268,11 @@ public class GeometryBuffer {
 		if (size < index.length)
 			return index;
 
-		short[] tmp = new short[size + GROW_INDICES];
+		short[] newIndex = new short[size + GROW_INDICES];
 		if (copy)
-			System.arraycopy(index, 0, tmp, 0, index.length);
+			System.arraycopy(index, 0, newIndex, 0, index.length);
 
-		index = tmp;
+		index = newIndex;
 
 		return index;
 	}
