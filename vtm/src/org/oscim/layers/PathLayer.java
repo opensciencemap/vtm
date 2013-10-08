@@ -59,7 +59,7 @@ public class PathLayer extends Layer {
 
 		public RenderPath() {
 			mClipper = new LineClipper(-max, -max, max, max, true);
-			mPPoints = new float[1];
+			mPPoints = new float[0];
 			layers.addLineLayer(0, mLineStyle);
 		}
 
