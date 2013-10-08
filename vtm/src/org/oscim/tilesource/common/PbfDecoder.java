@@ -89,12 +89,14 @@ public abstract class PbfDecoder {
 
 		int bytesLeft = 0;
 		int val = 0;
+		
+		byte[] buf = buffer;
 
 		for (int shift = 0; shift < 32; shift += 7) {
 			if (bytesLeft == 0)
 				bytesLeft = fillBuffer(1);
 
-			byte b = buffer[bufferPos++];
+			byte b = buf[bufferPos++];
 			val |= (b & 0x7f) << shift;
 
 			if (b >= 0)
@@ -110,12 +112,14 @@ public abstract class PbfDecoder {
 
 		int bytesLeft = 0;
 		long val = 0;
+		
+		byte[] buf = buffer;
 
 		for (int shift = 0; shift < 64; shift += 7) {
 			if (bytesLeft == 0)
 				bytesLeft = fillBuffer(1);
 
-			byte b = buffer[bufferPos++];
+			byte b = buf[bufferPos++];
 			val |= (long) (b & 0x7f) << shift;
 
 			if (b >= 0)
@@ -147,11 +151,16 @@ public abstract class PbfDecoder {
 	protected float decodeFloat() throws IOException {
 		if (bufferPos + 4 > bufferFill)
 			fillBuffer(4);
+		
+		byte[] buf = buffer;
+		int pos = bufferPos;
 
-		int val = (buffer[bufferPos++] & 0xFF
-				| (buffer[bufferPos++] & 0xFF) << 8
-				| (buffer[bufferPos++] & 0xFF) << 16
-				| (buffer[bufferPos++] & 0xFF) << 24);
+		int val = (buf[pos++] & 0xFF
+				| (buf[pos++] & 0xFF) << 8
+				| (buf[pos++] & 0xFF) << 16
+				| (buf[pos++] & 0xFF) << 24);
+		
+		bufferPos = pos;
 
 		return Float.intBitsToFloat(val);
 	}
@@ -159,16 +168,21 @@ public abstract class PbfDecoder {
 	protected double decodeDouble() throws IOException {
 		if (bufferPos + 8 > bufferFill)
 			fillBuffer(8);
+		
+		byte[] buf = buffer;
+		int pos = bufferPos;
 
-		long val = (buffer[bufferPos++] & 0xFF
-				| (buffer[bufferPos++] & 0xFF) << 8
-				| (buffer[bufferPos++] & 0xFF) << 16
-				| (buffer[bufferPos++] & 0xFF) << 24
-				| (buffer[bufferPos++] & 0xFF) << 32
-				| (buffer[bufferPos++] & 0xFF) << 40
-				| (buffer[bufferPos++] & 0xFF) << 48
-				| (buffer[bufferPos++] & 0xFF) << 56);
+		long val = (buf[pos++] & 0xFF
+				| (buf[pos++] & 0xFF) << 8
+				| (buf[pos++] & 0xFF) << 16
+				| (buf[pos++] & 0xFF) << 24
+				| (buf[pos++] & 0xFF) << 32
+				| (buf[pos++] & 0xFF) << 40
+				| (buf[pos++] & 0xFF) << 48
+				| (buf[pos++] & 0xFF) << 56);
 
+		bufferPos = pos;
+		
 		return Double.longBitsToDouble(val);
 	}
 

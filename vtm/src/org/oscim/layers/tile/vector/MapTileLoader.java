@@ -257,14 +257,14 @@ public class MapTileLoader extends TileLoader implements IRenderCallback, ITileD
 		mRenderBuildingModel = false;
 		Tag[] tags = in.tags;
 
-		for (int i = 0; i < in.numTags; i++) {
+		for (int i = 0, n= in.numTags; i < n; i++) {
 			String key = tags[i].key;
-			if (tags[i].key == Tag.TAG_KEY_NAME) {
+			if (key == Tag.TAG_KEY_NAME) {
 				if (tags[i].value != null) {
 					mTagName = tags[i];
 					tags[i] = mTagEmptyName;
 				}
-			} else if (tags[i].key == Tag.TAG_KEY_HOUSE_NUMBER) {
+			} else if (key == Tag.TAG_KEY_HOUSE_NUMBER) {
 				if (tags[i].value != null) {
 					mTagHouseNr = tags[i];
 					tags[i] = mTagEmptyHouseNr;
