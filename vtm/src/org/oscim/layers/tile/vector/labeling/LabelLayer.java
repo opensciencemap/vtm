@@ -45,6 +45,9 @@ public class LabelLayer extends Layer implements EventListener, Map.UpdateListen
 		mMap.removeListener(MotionEvent.TYPE, this);
 
 		// TODO stop and clear labeling thread
+		log.debug("DETACH");
+		mTextRenderer.clearLabels();
+
 		super.onDetach();
 	}
 

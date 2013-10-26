@@ -627,7 +627,7 @@ class TextRenderer extends ElementRenderer {
 	/* private */boolean mRelabel;
 
 	class LabelTask implements Runnable {
-		boolean isCancelled;
+		private boolean isCancelled;
 
 		@Override
 		public void run() {
@@ -646,11 +646,16 @@ class TextRenderer extends ElementRenderer {
 
 			mLabelTask = null;
 			mRequestRun = false;
+			isCancelled = false;
 
 			if (mRelabel) {
 				mRelabel = false;
 				postLabelTask();
 			}
+		}
+
+		public void cancel() {
+			isCancelled = true;
 		}
 	}
 
@@ -725,19 +730,10 @@ class TextRenderer extends ElementRenderer {
 	public synchronized void clearLabels() {
 		if (mRequestRun) {
 			mRequestClear = true;
-			mRelabel = true;
+			//mRelabel = true;
 		} else {
 			cleanup();
-			postLabelTask();
+			//postLabelTask();
 		}
-
-		//		if (mLabelHandler != null)
-		//			mLabelHandler.removeCallbacks(mLabelUpdate);
-		//
-		//		if (mLabelTask == null) {
-		//			cleanup();
-		//		} else {
-		//			mLabelTask.cancel(false);
-		//		}
 	}
 }
