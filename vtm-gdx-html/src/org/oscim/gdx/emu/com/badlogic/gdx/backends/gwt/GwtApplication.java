@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2011 See libgdx AUTHORS file.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,8 +15,6 @@
  ******************************************************************************/
 
 package com.badlogic.gdx.backends.gwt;
-
-import org.oscim.backend.GL20;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
@@ -31,6 +29,7 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.backends.gwt.preloader.Preloader;
 import com.badlogic.gdx.backends.gwt.preloader.Preloader.PreloaderCallback;
 import com.badlogic.gdx.backends.gwt.preloader.Preloader.PreloaderState;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -45,11 +44,13 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -57,7 +58,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * override {@link #getConfig()} and {@link #getApplicationListener()}. Clients
  * can override the default loading screen via {@link #getPreloaderCallback()}
  * and implement any loading screen drawing via GWT widgets.
- *
+ * 
  * @author mzechner
  */
 public abstract class GwtApplication implements EntryPoint, Application {
@@ -67,23 +68,30 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	private GwtInput input;
 	private GwtNet net;
 	private Panel root = null;
+	private TextArea log = null;
 	private int logLevel = LOG_ERROR;
 	private Array<Runnable> runnables = new Array<Runnable>();
 	private Array<Runnable> runnablesHelper = new Array<Runnable>();
 	private Array<LifecycleListener> lifecycleListeners = new Array<LifecycleListener>();
-	private int lastWidth, lastHeight;
-	private Preloader preloader;
+	private int lastWidth;
+	private int lastHeight;
+	Preloader preloader;
 	private static AgentInfo agentInfo;
 	private ObjectMap<String, Preferences> prefs = new ObjectMap<String, Preferences>();
 
 	/** @return the configuration for the {@link GwtApplication}. */
 	public abstract GwtApplicationConfiguration getConfig();
 
+	public String getPreloaderBaseURL() {
+		return GWT.getHostPageBaseURL() + "assets/";
+	}
+
 	@Override
 	public void onModuleLoad() {
 		GwtApplication.agentInfo = computeAgentInfo();
 		this.listener = getApplicationListener();
 		this.config = getConfig();
+		this.log = config.log;
 
 		if (config.rootPanel != null) {
 			this.root = config.rootPanel;
@@ -110,8 +118,13 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			}
 		}
 
+		//// initialize SoundManager2
+		//SoundManager.init(GWT.getModuleBaseURL(), 9, true, new SoundManager.SoundManagerCallback() {
+		//
+		//	@Override
+		//	public void onready () {
 		final PreloaderCallback callback = getPreloaderCallback();
-		preloader = new Preloader();
+		preloader = createPreloader();
 		preloader.preload("assets.txt", new PreloaderCallback() {
 			@Override
 			public void error(String file) {
@@ -122,14 +135,21 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			public void update(PreloaderState state) {
 				callback.update(state);
 				if (state.hasEnded()) {
-					root.clear();
+					getRootPanel().clear();
 					setupLoop();
 				}
 			}
 		});
+		//}
+		//@Override
+		//public void ontimeout (String status, String errorType) {
+		//	error("SoundManager", status + " " + errorType);
+		//	}
+		//
+		//});
 	}
 
-	private void setupLoop() {
+	void setupLoop() {
 		// setup modules
 		try {
 			graphics = new GwtGraphics(root, config);
@@ -138,10 +158,8 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			root.add(new Label("Sorry, your browser doesn't seem to support WebGL"));
 			return;
 		}
-
 		lastWidth = graphics.getWidth();
 		lastHeight = graphics.getHeight();
-
 		Gdx.app = this;
 		//Gdx.audio = new GwtAudio();
 		Gdx.graphics = graphics;
@@ -152,69 +170,58 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		Gdx.input = this.input;
 		this.net = new GwtNet();
 		Gdx.net = this.net;
-		final double pixelRatio = GwtGraphics.getDevicePixelRatioJSNI();
-		consoleLog("> " + config.width + "x" + config.height + " ratio:" + pixelRatio);
 
 		// tell listener about app creation
 		try {
 			listener.create();
-			listener.resize(
-					(int) (graphics.getWidth()),
-					(int) (graphics.getHeight()));
+			listener.resize(graphics.getWidth(), graphics.getHeight());
 		} catch (Throwable t) {
 			error("GwtApplication", "exception: " + t.getMessage(), t);
 			t.printStackTrace();
 			throw new RuntimeException(t);
 		}
 
-		final int frameTime = (int) ((1f / config.fps) * 1000);
-
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+		final int frameTime = (int) ((1f / config.fps) * 1000);
+
 		// setup rendering timer
 		new Timer() {
-			//long lastRun;
 			@Override
 			public void run() {
-				//long startRender = 0;
 				try {
-					graphics.update();
-					if (graphics.getWidth() != lastWidth
-							|| graphics.getHeight() != lastHeight) {
-
-						lastWidth = graphics.getWidth();
-						lastHeight = graphics.getHeight();
-
-						GwtApplication.this.listener.resize(lastWidth, lastHeight);
-						//Gdx.gl.glViewport(0, 0, lastWidth, lastHeight);
-					}
-					runnablesHelper.addAll(runnables);
-					runnables.clear();
-					for (int i = 0; i < runnablesHelper.size; i++) {
-						runnablesHelper.get(i).run();
-					}
-					runnablesHelper.clear();
-					//startRender = System.currentTimeMillis();
-					listener.render();
-					input.justTouched = false;
+					mainLoop(this, frameTime);
 				} catch (Throwable t) {
 					error("GwtApplication", "exception: " + t.getMessage(), t);
 					throw new RuntimeException(t);
 				}
-
-				long now = System.currentTimeMillis();
-				int diff = (int)(now - graphics.lastTimeStamp);
-
-				//if (diff > 80)
-				//	consoleLog("diff " + diff + " " + (now - startRender) + " " + graphics.getFramesPerSecond() );
-
-				diff = frameTime - diff;
-				//lastRun = now;
-
-				this.schedule(diff > 5 ? diff : 5);
 			}
-		}.schedule(0); //scheduleRepeating((int) ((1f / config.fps) * 1000));
+			//}.scheduleRepeating((int) ((1f / config.fps) * 1000));
+		}.schedule(1);
+	}
+
+	void mainLoop(Timer timer, int frameTime) {
+		graphics.update();
+		if (Gdx.graphics.getWidth() != lastWidth || Gdx.graphics.getHeight() != lastHeight) {
+			GwtApplication.this.listener.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+			lastWidth = graphics.getWidth();
+			lastHeight = graphics.getHeight();
+			Gdx.gl.glViewport(0, 0, lastWidth, lastHeight);
+		}
+		runnablesHelper.addAll(runnables);
+		runnables.clear();
+		for (int i = 0; i < runnablesHelper.size; i++) {
+			runnablesHelper.get(i).run();
+		}
+		runnablesHelper.clear();
+		listener.render();
+		input.justTouched = false;
+
+		long now = System.currentTimeMillis();
+		int diff = (int) (now - graphics.lastTimeStamp);
+		diff = frameTime - diff;
+		timer.schedule(diff > 5 ? diff : 5);
 	}
 
 	public Panel getRootPanel() {
@@ -223,14 +230,16 @@ public abstract class GwtApplication implements EntryPoint, Application {
 
 	long loadStart = TimeUtils.nanoTime();
 
+	public Preloader createPreloader() {
+		return new Preloader(getPreloaderBaseURL());
+	}
+
 	public PreloaderCallback getPreloaderCallback() {
 		final Panel preloaderPanel = new VerticalPanel();
 		preloaderPanel.setStyleName("gdx-preloader");
-
-		//final Image logo = new Image(GWT.getModuleBaseURL() + "logo.png");
-		//logo.setStyleName("logo");
-		//preloaderPanel.add(logo);
-
+		final Image logo = new Image(GWT.getModuleBaseURL() + "logo.png");
+		logo.setStyleName("logo");
+		preloaderPanel.add(logo);
 		final Panel meterPanel = new SimplePanel();
 		meterPanel.setStyleName("gdx-meter");
 		meterPanel.addStyleName("red");
@@ -288,7 +297,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	}
 
 	@Override
-	public void log(String tag, String message, Exception exception) {
+	public void log(String tag, String message, Throwable exception) {
 		if (logLevel >= LOG_INFO) {
 			consoleLog(tag + ": " + message + "\n" + exception.getMessage());
 			consoleLog(getStackTrace(exception));
@@ -335,6 +344,11 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	@Override
 	public void setLogLevel(int logLevel) {
 		this.logLevel = logLevel;
+	}
+
+	@Override
+	public int getLogLevel() {
+		return logLevel;
 	}
 
 	@Override
