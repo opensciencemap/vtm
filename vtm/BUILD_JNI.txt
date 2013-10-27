@@ -9,6 +9,7 @@ java -cp ../vtm-ext-libs/gdx/gdx-jnigen.jar:../vtm-ext-libs/gdx/gdx-jnigen-sourc
 
 # - to build android:
 export ANDROID_HOME=/home/jeff/android-sdk
+export NDK_HOME=/home/jeff/android-ndk-r8d
 
 # - compile
 cd jni
