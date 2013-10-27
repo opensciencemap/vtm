@@ -98,6 +98,8 @@ public class MapView extends RelativeLayout {
 		GLAdapter.g = new AndroidGL();
 
 		this.setWillNotDraw(true);
+		this.setClickable(true);
+		this.setFocusable(true);
 
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
