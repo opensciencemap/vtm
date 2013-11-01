@@ -6,12 +6,6 @@ import com.badlogic.gdx.InputProcessor;
 
 public class GdxMotionEvent extends MotionEvent implements InputProcessor {
 
-	private static final long serialVersionUID = 1L;
-
-	public GdxMotionEvent(Object source) {
-		super(source);
-	}
-
 	@Override
 	public int getAction() {
 		return 0;

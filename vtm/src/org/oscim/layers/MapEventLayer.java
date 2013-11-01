@@ -15,8 +15,6 @@
 package org.oscim.layers;
 
 import org.oscim.core.Tile;
-import org.oscim.event.EventListener;
-import org.oscim.event.MapEvent;
 import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
@@ -33,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *        http://en.wikipedia.org/wiki/Viterbi_algorithm
  */
 
-public class MapEventLayer extends Layer implements EventListener {
+public class MapEventLayer extends Layer implements Map.InputListener {
 	private static final boolean debug = false;
 	static final Logger log = LoggerFactory.getLogger(MapEventLayer.class);
 
@@ -68,23 +66,14 @@ public class MapEventLayer extends Layer implements EventListener {
 
 	public MapEventLayer(Map map) {
 		super(map);
-		map.addListener(MotionEvent.TYPE, this);
 		mMapPosition = map.getViewport();
 		mTracker = new VelocityTracker();
 	}
 
 	@Override
-	public void onDetach() {
-		mMap.removeListener(MotionEvent.TYPE, this);
+	public void onMotionEvent(MotionEvent event) {
+		onTouchEvent(event);
 	}
-
-	@Override
-	public void handleEvent(MapEvent event) {
-		if (event instanceof MotionEvent)
-			onTouchEvent((MotionEvent) event);
-	}
-
-	//private long mPrevTime;
 
 	private boolean mEnableRotation = true;
 	private boolean mEnableTilt = true;
@@ -111,10 +100,7 @@ public class MapEventLayer extends Layer implements EventListener {
 		mEnableZoom = enable;
 	}
 
-	//@Override
 	public boolean onTouchEvent(MotionEvent e) {
-
-		//mPrevTime = e.getTime();
 
 		int action = getAction(e);
 

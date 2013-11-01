@@ -15,8 +15,6 @@
 package org.oscim.layers.tile.vector.labeling;
 
 import org.oscim.core.MapPosition;
-import org.oscim.event.EventListener;
-import org.oscim.event.MapEvent;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
@@ -24,7 +22,7 @@ import org.oscim.tiling.TileRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LabelLayer extends Layer implements EventListener, Map.UpdateListener {
+public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateListener {
 	static final Logger log = LoggerFactory.getLogger(LabelLayer.class);
 	private final TextRenderer mTextRenderer;
 
@@ -33,8 +31,6 @@ public class LabelLayer extends Layer implements EventListener, Map.UpdateListen
 	public LabelLayer(Map map, TileRenderer tileRenderLayer) {
 		super(map);
 
-		map.addListener(MotionEvent.TYPE, this);
-
 		//mTextLayer = new org.oscim.renderer.layers.TextRenderLayer(map, tileRenderLayer);
 		mTextRenderer = new TextRenderer(map, tileRenderLayer);
 		mRenderer = mTextRenderer;
@@ -42,8 +38,6 @@ public class LabelLayer extends Layer implements EventListener, Map.UpdateListen
 
 	@Override
 	public void onDetach() {
-		mMap.removeListener(MotionEvent.TYPE, this);
-
 		// TODO stop and clear labeling thread
 		log.debug("DETACH");
 		mTextRenderer.clearLabels();
@@ -52,23 +46,19 @@ public class LabelLayer extends Layer implements EventListener, Map.UpdateListen
 	}
 
 	@Override
-	public void handleEvent(MapEvent event) {
-		if (event instanceof MotionEvent) {
-			MotionEvent e = (MotionEvent) event;
-
-			int action = e.getAction() & MotionEvent.ACTION_MASK;
-			if (action == MotionEvent.ACTION_POINTER_DOWN) {
-				multi++;
-				mTextRenderer.hold(true);
-			} else if (action == MotionEvent.ACTION_POINTER_UP) {
-				multi--;
-				if (multi == 0)
-					mTextRenderer.hold(false);
-			} else if (action == MotionEvent.ACTION_CANCEL) {
-				multi = 0;
-				log.debug("cancel " + multi);
+	public void onMotionEvent(MotionEvent e) {
+		int action = e.getAction() & MotionEvent.ACTION_MASK;
+		if (action == MotionEvent.ACTION_POINTER_DOWN) {
+			multi++;
+			mTextRenderer.hold(true);
+		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+			multi--;
+			if (multi == 0)
 				mTextRenderer.hold(false);
-			}
+		} else if (action == MotionEvent.ACTION_CANCEL) {
+			multi = 0;
+			log.debug("cancel " + multi);
+			mTextRenderer.hold(false);
 		}
 	}
 

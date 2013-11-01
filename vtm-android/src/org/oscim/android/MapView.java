@@ -218,7 +218,7 @@ public class MapView extends RelativeLayout {
 		mPausing = false;
 	}
 
-	AndroidMotionEvent mMotionEvent = new AndroidMotionEvent(this);
+	AndroidMotionEvent mMotionEvent = new AndroidMotionEvent();
 
 	@Override
 	public boolean onTouchEvent(android.view.MotionEvent motionEvent) {

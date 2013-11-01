@@ -15,15 +15,12 @@
 package org.oscim.map;
 
 import java.util.AbstractList;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.core.MapPosition;
-import org.oscim.event.Dispatcher;
-import org.oscim.event.EventDispatcher;
-import org.oscim.event.EventListener;
-import org.oscim.event.IListener;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.Layer;
 import org.oscim.layers.MapEventLayer;
@@ -39,9 +36,29 @@ import org.oscim.utils.async.AsyncExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Map implements EventDispatcher {
+public abstract class Map {
 
 	static final Logger log = LoggerFactory.getLogger(Map.class);
+
+	/**
+	 * Listener interface for map update notifications.
+	 * Layers implementing this interface they will be automatically
+	 * regiseter when the layer is added to the map and unregistered when
+	 * the layer is removed.
+	 */
+	public interface UpdateListener {
+		void onMapUpdate(MapPosition mapPosition, boolean positionChanged, boolean clear);
+	}
+
+	/**
+	 * Listener interface for input events.
+	 * Layers implementing this interface they will be automatically
+	 * regiseter when the layer is added to the map and unregistered when
+	 * the layer is removed.
+	 */
+	public interface InputListener {
+		void onMotionEvent(MotionEvent e);
+	}
 
 	public static final boolean debugTheme = false;
 
@@ -56,6 +73,9 @@ public abstract class Map implements EventDispatcher {
 	protected final MapEventLayer mEventLayer;
 
 	private VectorTileLayer mBaseLayer;
+
+	private Set<InputListener> mMotionListeners = new LinkedHashSet<InputListener>();
+	private Set<UpdateListener> mUpdateListeners = new LinkedHashSet<UpdateListener>();
 
 	public Map() {
 
@@ -183,7 +203,15 @@ public abstract class Map implements EventDispatcher {
 	 * Caution: Do not call directly!
 	 */
 	protected void updateLayers() {
-		mUpdateDispatcher.dispatch();
+		boolean changed = false;
+
+		// get the current MapPosition
+		changed |= mViewport.getMapPosition(mMapPosition);
+
+		for (UpdateListener l : mUpdateListeners)
+			l.onMapUpdate(mMapPosition, changed, mClearMap);
+
+		mClearMap = false;
 	}
 
 	/**
@@ -236,64 +264,31 @@ public abstract class Map implements EventDispatcher {
 		return mAnimator;
 	}
 
-	ArrayList<EventListener> mMotionListeners = new ArrayList<EventListener>();
-
-	@Override
-	public void addListener(String type, EventListener listener) {
-		if (type == MotionEvent.TYPE)
-			mMotionListeners.add(listener);
+	public void bind(InputListener listener) {
+		mMotionListeners.add(listener);
 	}
 
-	@Override
-	public void removeListener(String type, EventListener listener) {
-		if (type == MotionEvent.TYPE)
-			mMotionListeners.remove(listener);
+	public void unbind(InputListener listener) {
+		mMotionListeners.remove(listener);
 	}
 
 	public void handleMotionEvent(MotionEvent e) {
-		for (EventListener l : mMotionListeners)
-			l.handleEvent(e);
+		for (InputListener l : mMotionListeners)
+			l.onMotionEvent(e);
 	}
-
-	/**
-	 * Listener interface for map update notifications.
-	 * NOTE: Layers implementing this interface they will be automatically
-	 * registered when the layer is added to the map and unresitered when
-	 * the layer is removed.
-	 */
-	public interface UpdateListener extends IListener {
-		void onMapUpdate(MapPosition mapPosition, boolean positionChanged, boolean clear);
-	}
-
-	private class UpdateDispatcher extends Dispatcher<UpdateListener> {
-		@Override
-		public void dispatch() {
-			boolean changed = false;
-
-			// get the current MapPosition
-			changed |= mViewport.getMapPosition(mMapPosition);
-
-			for (UpdateListener l : listeners)
-				l.onMapUpdate(mMapPosition, changed, mClearMap);
-
-			mClearMap = false;
-		}
-	}
-
-	private final UpdateDispatcher mUpdateDispatcher = new UpdateDispatcher();
 
 	/**
 	 * Register UpdateListener
 	 */
-	public void addUpdateListener(UpdateListener l) {
-		mUpdateDispatcher.addListener(l);
+	public void bind(UpdateListener l) {
+		mUpdateListeners.add(l);
 	}
 
 	/**
 	 * Unregister UpdateListener
 	 */
-	public void removeUpdateListener(UpdateListener l) {
-		mUpdateDispatcher.removeListener(l);
+	public void unbind(UpdateListener l) {
+		mUpdateListeners.remove(l);
 	}
 
 	public final class Layers extends AbstractList<Layer> {
@@ -320,7 +315,9 @@ public abstract class Map implements EventDispatcher {
 				throw new IllegalArgumentException("layer added twice");
 
 			if (layer instanceof UpdateListener)
-				addUpdateListener((UpdateListener) layer);
+				bind((UpdateListener) layer);
+			if (layer instanceof InputListener)
+				bind((InputListener) layer);
 
 			mLayerList.add(index, layer);
 			mDirtyLayers = true;
@@ -333,7 +330,9 @@ public abstract class Map implements EventDispatcher {
 			Layer remove = mLayerList.remove(index);
 
 			if (remove instanceof UpdateListener)
-				removeUpdateListener((UpdateListener) remove);
+				unbind((UpdateListener) remove);
+			if (remove instanceof InputListener)
+				unbind((InputListener) remove);
 
 			return remove;
 		}
@@ -346,8 +345,11 @@ public abstract class Map implements EventDispatcher {
 			mDirtyLayers = true;
 			Layer remove = mLayerList.set(index, layer);
 
+			// unbind replaced layer
 			if (remove instanceof UpdateListener)
-				removeUpdateListener((UpdateListener) remove);
+				unbind((UpdateListener) remove);
+			if (remove instanceof InputListener)
+				unbind((InputListener) remove);
 
 			return remove;
 		}

@@ -18,15 +18,6 @@ import org.oscim.event.MotionEvent;
 
 public class AndroidMotionEvent extends MotionEvent {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
-
-	public AndroidMotionEvent(Object source) {
-		super(source);
-	}
-
 	android.view.MotionEvent mEvent;
 
 	public void wrap(android.view.MotionEvent e) {
