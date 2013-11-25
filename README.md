@@ -15,6 +15,7 @@ http://www.opensciencemap.org
 - Backends for Android, Desktop and HTML5/WebGL (through libgdx and GWT)
 
 ### Notes
+- checkout required libraries with 'git submodule init && git submodule update'
 - To set up your own tile server for .vtm tiles see https://github.com/opensciencemap/TileStache/tree/master/TileStache/OSciMap4
 - Almost everything is still in early/experimental stage and subject for being rewritten
 - pull requests welcome :)
