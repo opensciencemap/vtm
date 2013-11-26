@@ -16,6 +16,8 @@
 
 package com.badlogic.gdx.backends.gwt;
 
+import org.oscim.gdx.client.GwtGLAdapter;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.GL10;
@@ -75,7 +77,7 @@ public class GwtGraphics implements Graphics {
 		// this actually *enables* the option to use std derivatives in shader..
 		context.getExtension("OES_standard_derivatives");
 
-		this.gl = config.useDebugGL ? new GwtGL20Debug(context) : new GwtGL20(context);
+		this.gl = config.useDebugGL ? new GwtGL20Debug(context) : new GwtGLAdapter(context);
 		canvas.setId("gdx-canvas");
 
 		Window.addResizeHandler(new ResizeHandler() {
@@ -193,7 +195,7 @@ public class GwtGraphics implements Graphics {
 	@Override
 	public DisplayMode[] getDisplayModes() {
 		return new DisplayMode[] { new DisplayMode(getScreenWidthJSNI(), getScreenHeightJSNI(), 60,
-				8) {
+		                                           8) {
 		} };
 	}
 
@@ -227,7 +229,8 @@ public class GwtGraphics implements Graphics {
 			element.width = $wnd.screen.width;
 			element.height = $wnd.screen.height;
 			element.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-			$doc.addEventListener(
+			$doc
+					.addEventListener(
 							"webkitfullscreenchange",
 							function() {
 								graphics.@com.badlogic.gdx.backends.gwt.GwtGraphics::fullscreenChanged()();
@@ -238,7 +241,8 @@ public class GwtGraphics implements Graphics {
 			element.width = $wnd.screen.width;
 			element.height = $wnd.screen.height;
 			element.mozRequestFullScreen();
-			$doc.addEventListener(
+			$doc
+					.addEventListener(
 							"mozfullscreenchange",
 							function() {
 								graphics.@com.badlogic.gdx.backends.gwt.GwtGraphics::fullscreenChanged()();
@@ -264,7 +268,7 @@ public class GwtGraphics implements Graphics {
 	@Override
 	public boolean setDisplayMode(DisplayMode displayMode) {
 		if (displayMode.width != getScreenWidthJSNI()
-				&& displayMode.height != getScreenHeightJSNI())
+		        && displayMode.height != getScreenHeightJSNI())
 			return false;
 		return setFullscreenJSNI(this, canvas);
 	}

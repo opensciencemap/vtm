@@ -8,13 +8,19 @@
     <inherits name="de.benediktmeurer.gwt.slf4j.jul.JUL"/> -->
   <set-property name='gwt.logging.enabled' value='TRUE' />
   <set-property name='gwt.logging.consoleHandler' value='ENABLED' />
-  <set-property name='gwt.logging.firebugHandler' value='ENABLED' />
+  <set-property name='gwt.logging.firebugHandler' value='DISABLED' />
   <set-property name='gwt.logging.popupHandler' value='DISABLED' />
 
   <inherits name="GdxMap" />
   <inherits name="com.badlogic.gdx.backends.gdx_backends_gwt" />
   <inherits name="com.google.gwt.user.theme.chrome.Chrome" />
+  
+  <!-- super dev mode -->
+  <add-linker name="xsiframe"/>
+  <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
+  <set-configuration-property name="devModeRedirectEnabled" value="true"/>
+  
   <super-source path="emu" />
   <set-configuration-property name="gdx.assetpath" value="../vtm/assets" />
-  <!--<set-property name="user.agent" value="safari"/> -->
+  <set-property name="user.agent" value="safari"/>
 </module>
