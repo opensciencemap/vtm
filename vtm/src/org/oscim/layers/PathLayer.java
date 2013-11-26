@@ -163,8 +163,8 @@ public class PathLayer extends Layer {
 			float[] projected = mPPoints;
 			int i = addPoint(projected, 0, x, y);
 
-			int prevX = x;
-			int prevY = y;
+			float prevX = x;
+			float prevY = y;
 
 			for (int j = 2; j < size * 2; j += 2) {
 				x = (int) ((mPreprojected[j + 0] - mx) * scale);
@@ -207,8 +207,8 @@ public class PathLayer extends Layer {
 					continue;
 				}
 
-				int dx = x - prevX;
-				int dy = y - prevY;
+				float dx = x - prevX;
+				float dy = y - prevY;
 				if ((i == 0) || FastMath.absMaxCmp(dx, dy, MIN_DIST)) {
 					projected[i++] = prevX = x;
 					projected[i++] = prevY = y;

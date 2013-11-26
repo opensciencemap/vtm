@@ -39,16 +39,16 @@ public final class WayDecorator {
 		// find way segments long enough to draw the way name on them
 		for (int i = pos; i < pos + len - 2; i += 2) {
 			// get the first way point coordinates
-			int prevX = (int) coordinates[i + 0];
-			int prevY = (int) coordinates[i + 1];
+			float prevX = coordinates[i + 0];
+			float prevY = coordinates[i + 1];
 
 			byte edge = 0;
 
 			clipper.clipStart(prevX, prevY);
 
 			// get the current way point coordinates
-			int curX = (int) coordinates[i + 2];
-			int curY = (int) coordinates[i + 3];
+			float curX = coordinates[i + 2];
+			float curY = coordinates[i + 3];
 
 			int clip;
 			if ((clip = clipper.clipNext(curX, curY)) != 0) {
@@ -97,8 +97,8 @@ public final class WayDecorator {
 
 				// add additional segments if possible
 				for (int j = i + 4; j < pos + len; j += 2) {
-					int nextX = (int) coordinates[j + 0];
-					int nextY = (int) coordinates[j + 1];
+					float nextX = coordinates[j + 0];
+					float nextY = coordinates[j + 1];
 
 					if ((clip = clipper.clipNext(nextX, nextY)) != 0) {
 						if (clip < 0) {
