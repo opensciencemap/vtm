@@ -17,6 +17,7 @@ package org.oscim.renderer.elements;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.canvas.Bitmap;
+import org.oscim.core.PointF;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
@@ -114,33 +115,36 @@ public final class SymbolLayer extends TextureLayer {
 				continue;
 			}
 
-			short x1, y1, x2, y2;
-
-			if (it.offset == null) {
-				float hw = width / 2f;
-				float hh = height / 2f;
-
-				x1 = (short) (SCALE * (-hw));
-				x2 = (short) (SCALE * (hw));
-				y1 = (short) (SCALE * (hh));
-				y2 = (short) (SCALE * (-hh));
-			} else {
-				float hw = (float) (it.offset.x * width);
-				float hh = (float) (it.offset.y * height);
-				x1 = (short) (SCALE * (-hw));
-				x2 = (short) (SCALE * (width - hw));
-				y1 = (short) (SCALE * (height - hh));
-				y2 = (short) (SCALE * (-hh));
-			}
-
 			short u1 = (short) (SCALE * x);
 			short v1 = (short) (SCALE * y);
 			short u2 = (short) (SCALE * (x + width));
 			short v2 = (short) (SCALE * (y + height));
 
+			PointF prevOffset = null;
+			short x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+
 			// add symbol items referencing the same bitmap /
 			for (SymbolItem it2 = it;; it2 = it2.next) {
 
+				if (it == it2 || it.offset != prevOffset) {
+					prevOffset = it.offset;
+					if (it.offset == null) {
+						float hw = width / 2f;
+						float hh = height / 2f;
+
+						x1 = (short) (SCALE * (-hw));
+						x2 = (short) (SCALE * (hw));
+						y1 = (short) (SCALE * (hh));
+						y2 = (short) (SCALE * (-hh));
+					} else {
+						float hw = (float) (it.offset.x * width);
+						float hh = (float) (it.offset.y * height);
+						x1 = (short) (SCALE * (-hw));
+						x2 = (short) (SCALE * (width - hw));
+						y1 = (short) (SCALE * (height - hh));
+						y2 = (short) (SCALE * (-hh));
+					}
+				}
 				if (it2 == null
 				        || (it.bitmap != null && it2.bitmap != it.bitmap)
 				        || (it.texRegion != null && it2.texRegion != it.texRegion)) {
