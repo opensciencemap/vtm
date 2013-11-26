@@ -29,6 +29,10 @@ public class QuadTree<T> {
 	// number of children and grandchildren
 	int refs = 0;
 
+	public T getParent() {
+		return parent.item;
+	}
+
 	public T get(int i) {
 		switch (i) {
 			case 0:
