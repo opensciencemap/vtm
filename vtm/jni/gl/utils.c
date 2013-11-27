@@ -3,9 +3,14 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <alloca.h>
 #include <math.h>
 #include <stdint.h>
+
+#ifndef __WIN32__
+#include <alloca.h>
+#else
+#define alloca(size) __builtin_alloca(size)
+#endif
 
 //#ifndef uintptr_t
 //typedef unsigned long           uintptr_t;
