@@ -81,7 +81,7 @@ public final class PolygonLayer extends RenderElement {
 			int inPos = pos;
 
 			if (outPos == VertexItem.SIZE) {
-				si = si.next = VertexItem.pool.get();
+				si = VertexItem.pool.getNext(si);
 				v = si.vertices;
 				outPos = 0;
 			}
@@ -91,7 +91,7 @@ public final class PolygonLayer extends RenderElement {
 
 			for (int j = 0; j < length; j += 2) {
 				if (outPos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					outPos = 0;
 				}
@@ -100,7 +100,7 @@ public final class PolygonLayer extends RenderElement {
 			}
 
 			if (outPos == VertexItem.SIZE) {
-				si = si.next = VertexItem.pool.get();
+				si = VertexItem.pool.getNext(si);
 				v = si.vertices;
 				outPos = 0;
 			}

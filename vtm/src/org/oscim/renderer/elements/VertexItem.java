@@ -21,7 +21,10 @@ public class VertexItem extends Inlist<VertexItem> {
 
 	private static final int MAX_POOL = 500;
 
-	public final static SyncPool<VertexItem> pool = new SyncPool<VertexItem>(MAX_POOL) {
+	public final static class Pool extends SyncPool<VertexItem> {
+		public Pool() {
+			super(MAX_POOL);
+		}
 
 		@Override
 		protected VertexItem createItem() {
@@ -33,7 +36,14 @@ public class VertexItem extends Inlist<VertexItem> {
 			it.used = 0;
 			return true;
 		}
-	};
+
+		public VertexItem getNext(VertexItem it) {
+			it.next = get();
+			return it.next;
+		}
+	}
+
+	public final static Pool pool = new Pool();
 
 	public int getSize() {
 		int size = used;

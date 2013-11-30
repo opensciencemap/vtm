@@ -107,8 +107,8 @@ public final class LineTexLayer extends RenderElement {
 	public void addLine(float[] points, short[] index) {
 
 		if (vertexItems == null) {
-			curItem = vertexItems = VertexItem.pool.get();
-
+			vertexItems = VertexItem.pool.get();
+			curItem = vertexItems;
 			// HACK add one vertex offset when compiling
 			// buffer otherwise one cant use the full
 			// VertexItem (see Layers.compile)
@@ -187,7 +187,7 @@ public final class LineTexLayer extends RenderElement {
 				short dy = (short) (uy * DIR_SCALE);
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}

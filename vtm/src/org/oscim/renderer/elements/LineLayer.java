@@ -18,8 +18,6 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
@@ -30,6 +28,8 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.utils.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
@@ -109,8 +109,10 @@ public final class LineLayer extends RenderElement {
 		else if (line.cap == Cap.SQUARE)
 			squared = true;
 
-		if (vertexItems == null)
-			curItem = vertexItems = VertexItem.pool.get();
+		if (vertexItems == null) {
+			vertexItems = VertexItem.pool.get();
+			curItem = vertexItems;
+		}
 
 		VertexItem si = curItem;
 		short v[] = si.vertices;
@@ -204,7 +206,7 @@ public final class LineLayer extends RenderElement {
 			boolean outside = (x < tmin || x > tmax || y < tmin || y > tmax);
 
 			if (opos == VertexItem.SIZE) {
-				si = si.next = VertexItem.pool.get();
+				si = VertexItem.pool.getNext(si);
 				v = si.vertices;
 				opos = 0;
 			}
@@ -222,7 +224,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dy;
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -233,7 +235,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dy;
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -247,7 +249,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (2 | ddy & DIR_MASK);
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -262,7 +264,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -302,7 +304,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dy;
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -313,7 +315,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dy;
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -395,7 +397,7 @@ public final class LineLayer extends RenderElement {
 					ddy = -ddy;
 				}
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -406,7 +408,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -430,8 +432,7 @@ public final class LineLayer extends RenderElement {
 			outside = (x < tmin || x > tmax || y < tmin || y > tmax);
 
 			if (opos == VertexItem.SIZE) {
-				si.next = VertexItem.pool.get();
-				si = si.next;
+				si = VertexItem.pool.getNext(si);
 				opos = 0;
 				v = si.vertices;
 			}
@@ -454,7 +455,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -465,7 +466,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (1 | -ddy & DIR_MASK);
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -483,7 +484,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dy;
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -500,7 +501,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dy;
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -531,7 +532,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (1 | (flip ? -ddy : ddy) & DIR_MASK);
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -548,7 +549,7 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dy;
 
 				if (opos == VertexItem.SIZE) {
-					si = si.next = VertexItem.pool.get();
+					si = VertexItem.pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}

@@ -209,7 +209,7 @@ public final class TextLayer extends TextureLayer {
 
 				if (pos == VertexItem.SIZE) {
 					vi.used = VertexItem.SIZE;
-					vi = vi.next = VertexItem.pool.get();
+					vi = VertexItem.pool.getNext(vi);
 					buf = vi.vertices;
 					pos = 0;
 				}

@@ -46,10 +46,8 @@ public class Tessellator {
 		int cnt;
 		int numIndices = 0;
 
-		if (outTris.used == VertexItem.SIZE) {
-			outTris.next = VertexItem.pool.get();
-			outTris = outTris.next;
-		}
+		if (outTris.used == VertexItem.SIZE)
+			outTris = VertexItem.pool.getNext(outTris);
 
 		while ((cnt = Tessellator.tessGetIndicesWO(ctx,
 		                                           outTris.vertices,
@@ -87,8 +85,7 @@ public class Tessellator {
 			numIndices += cnt;
 
 			if (outTris.used == VertexItem.SIZE) {
-				outTris.next = VertexItem.pool.get();
-				outTris = outTris.next;
+				outTris = VertexItem.pool.getNext(outTris);
 				continue;
 			}
 
@@ -208,8 +205,7 @@ public class Tessellator {
 		}
 
 		if (outPoints.used == VertexItem.SIZE) {
-			outPoints.next = VertexItem.pool.get();
-			outPoints = outPoints.next;
+			outPoints = VertexItem.pool.getNext(outPoints);
 		}
 
 		int cnt;
@@ -221,8 +217,7 @@ public class Tessellator {
 			outPoints.used += cnt;
 
 			if (outPoints.used == VertexItem.SIZE) {
-				outPoints.next = VertexItem.pool.get();
-				outPoints = outPoints.next;
+				outPoints = VertexItem.pool.getNext(outPoints);
 				continue;
 			}
 			// no more points to get.
@@ -232,8 +227,7 @@ public class Tessellator {
 		int numIndices = 0;
 
 		if (outTris.used == VertexItem.SIZE) {
-			outTris.next = VertexItem.pool.get();
-			outTris = outTris.next;
+			outTris = VertexItem.pool.getNext(outTris);
 		}
 
 		while ((cnt = Tessellator.tessGetIndicesWO(ctx,
@@ -247,8 +241,7 @@ public class Tessellator {
 			numIndices += cnt;
 
 			if (outTris.used == VertexItem.SIZE) {
-				outTris.next = VertexItem.pool.get();
-				outTris = outTris.next;
+				outTris = VertexItem.pool.getNext(outTris);
 				continue;
 			}
 
