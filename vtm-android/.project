@@ -5,7 +5,6 @@
 	<projects>
 	</projects>
 	<buildSpec>
-
 		<buildCommand>
 			<name>com.android.ide.eclipse.adt.ResourceManagerBuilder</name>
 			<arguments>
@@ -31,4 +30,11 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>libs</name>
+			<type>2</type>
+			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/vtm-ext-libs/vtm-android</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
