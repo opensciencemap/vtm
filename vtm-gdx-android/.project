@@ -36,5 +36,10 @@
 			<type>2</type>
 			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/vtm/assets</locationURI>
 		</link>
+		<link>
+			<name>libs</name>
+			<type>2</type>
+			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/vtm-ext-libs/vtm-gdx-android</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>
