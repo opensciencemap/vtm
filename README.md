@@ -18,11 +18,21 @@ http://www.opensciencemap.org
 - checkout required libraries with 'git submodule init && git submodule update'
 - To set up your own tile server for .vtm tiles see https://github.com/opensciencemap/TileStache/tree/master/TileStache/OSciMap4
 - Almost everything is still in early/experimental stage and subject for being rewritten
+- Projects are expected to be build within eclipse (for now) 
 - pull requests welcome :)
+
+### Projects
+- **vtm** contains the core library
+- **vtm-android** Android backend - (no libgdx required)
+- **vtm-android-example** provides examples using **vtm-android**
+- **vtm-gdx** Common libgdx backend code
+- **vtm-gdx-desktop** Desktop application 
+- **vtm-gdx-html** HTML5/GWT application
+- **vtm-gdx-android** Android application using libgdx backend
 
 ### Demo
 work in progress..
-http://city.informatik.uni-bremen.de/~jeff/map/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807
+http://opensciencemap.org/map/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807
 - hold middle mouse button to change view direction
 - Keys
   - g - toggle tile-grid layer
