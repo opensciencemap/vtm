@@ -40,6 +40,7 @@ public class MapFileTileSource extends TileSource {
 	IndexCache databaseIndexCache;
 	boolean experimental;
 	File mapFile;
+	RandomAccessFile mInputFile;
 
 	public boolean setMapFile(String filename) {
 		setOption("file", filename);
@@ -78,7 +79,7 @@ public class MapFileTileSource extends TileSource {
 			}
 
 			// open the file in read only mode
-			RandomAccessFile mInputFile = new RandomAccessFile(file, READ_ONLY_MODE);
+			mInputFile = new RandomAccessFile(file, READ_ONLY_MODE);
 			long mFileSize = mInputFile.length();
 			ReadBuffer mReadBuffer = new ReadBuffer(mInputFile);
 
@@ -117,7 +118,14 @@ public class MapFileTileSource extends TileSource {
 
 	@Override
 	public void close() {
+		if (mInputFile != null) {
+			try {
+				mInputFile.close();
+			} catch (IOException e) {
+			}
+		}
 
+		mInputFile = null;
 		fileHeader = null;
 		fileInfo = null;
 		mapFile = null;
