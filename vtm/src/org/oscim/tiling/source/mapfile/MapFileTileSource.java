@@ -23,6 +23,7 @@ import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.mapfile.header.MapFileHeader;
 import org.oscim.tiling.source.mapfile.header.MapFileInfo;
+import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,13 +119,7 @@ public class MapFileTileSource extends TileSource {
 
 	@Override
 	public void close() {
-		if (mInputFile != null) {
-			try {
-				mInputFile.close();
-			} catch (IOException e) {
-			}
-		}
-
+		IOUtils.closeQuietly(mInputFile);
 		mInputFile = null;
 		fileHeader = null;
 		fileInfo = null;
