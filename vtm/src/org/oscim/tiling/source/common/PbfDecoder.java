@@ -17,11 +17,11 @@ package org.oscim.tiling.source.common;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.utils.UTF8Decoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class PbfDecoder {
 	static final Logger log = LoggerFactory.getLogger(PbfDecoder.class);

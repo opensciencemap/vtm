@@ -18,8 +18,6 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tile;
@@ -28,6 +26,8 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.LineClipper;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.pool.Inlist;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hannes Janetzek

@@ -14,8 +14,6 @@
  */
 package org.oscim.layers.tile.vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -48,6 +46,8 @@ import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDataSource.QueryResult;
 import org.oscim.utils.LineClipper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback, ITileDataSink {
 

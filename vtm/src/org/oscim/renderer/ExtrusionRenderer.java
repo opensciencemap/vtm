@@ -15,8 +15,6 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.GL20;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -25,6 +23,8 @@ import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileRenderer;
 import org.oscim.tiling.TileSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO move MapTile part to BuildingLayer and make
 // this class work on ExtrusionLayers

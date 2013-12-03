@@ -17,10 +17,10 @@ package org.oscim.renderer.elements;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.oscim.renderer.BufferObject;
 import org.oscim.theme.renderinstruction.Line;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ElementLayers {
 	static final Logger log = LoggerFactory.getLogger(ElementLayers.class);

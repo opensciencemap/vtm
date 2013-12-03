@@ -22,8 +22,6 @@ import static org.oscim.tiling.MapTile.STATE_NONE;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
@@ -34,6 +32,8 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.QuadTree;
 import org.oscim.utils.quadtree.QuadTreeIndex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TileManager {
 	static final Logger log = LoggerFactory.getLogger(TileManager.class);
