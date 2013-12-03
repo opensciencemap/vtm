@@ -23,6 +23,7 @@ import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.mapfile.header.MapFileHeader;
 import org.oscim.tiling.source.mapfile.header.MapFileInfo;
+import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,7 @@ public class MapFileTileSource extends TileSource {
 	IndexCache databaseIndexCache;
 	boolean experimental;
 	File mapFile;
+	RandomAccessFile mInputFile;
 
 	public boolean setMapFile(String filename) {
 		setOption("file", filename);
@@ -78,7 +80,7 @@ public class MapFileTileSource extends TileSource {
 			}
 
 			// open the file in read only mode
-			RandomAccessFile mInputFile = new RandomAccessFile(file, READ_ONLY_MODE);
+			mInputFile = new RandomAccessFile(file, READ_ONLY_MODE);
 			long mFileSize = mInputFile.length();
 			ReadBuffer mReadBuffer = new ReadBuffer(mInputFile);
 
@@ -117,7 +119,8 @@ public class MapFileTileSource extends TileSource {
 
 	@Override
 	public void close() {
-
+		IOUtils.closeQuietly(mInputFile);
+		mInputFile = null;
 		fileHeader = null;
 		fileInfo = null;
 		mapFile = null;
