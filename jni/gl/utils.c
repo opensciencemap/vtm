@@ -8,8 +8,8 @@
 
 #ifndef __WIN32__
 #include <alloca.h>
-#else
-#define alloca(size) __builtin_alloca(size)
+//#else
+//#define alloca(size) __builtin_alloca(size)
 #endif
 
 //#ifndef uintptr_t
