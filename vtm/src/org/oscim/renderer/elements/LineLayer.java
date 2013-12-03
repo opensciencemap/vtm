@@ -64,22 +64,6 @@ public final class LineLayer extends RenderElement {
 		outlines = link;
 	}
 
-	/**
-	 * @deprecated
-	 * @param points
-	 *            array of points as x,y pairs.
-	 * @param index
-	 *            array of indices holding the length of the individual
-	 *            line coordinates (i.e. points * 2).
-	 *            when index is null one a line with points.length
-	 *            is assumed.
-	 * @param closed
-	 *            whether to connect start- and end-point.
-	 */
-	public void addLine(float[] points, short[] index, boolean closed) {
-		addLine(points, index, -1, closed);
-	}
-
 	public void addLine(GeometryBuffer geom) {
 		if (geom.isPoly())
 			addLine(geom.points, geom.index, -1, true);

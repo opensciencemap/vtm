@@ -1,5 +1,5 @@
 /*
- * Copyright 2013
+ * Copyright 2013 Hannes Janetzek
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -53,10 +53,10 @@ class Debug {
 		points[1] = (l.y - height * scale);
 		points[2] = (l.x + width * scale);
 		points[3] = (l.y + height * scale);
-		ll.addLine(points, null, false);
+		ll.addLine(points, 4, false);
 
 		if (l.bbox != null && overlaps != 3) {
-			ll.addLine(l.bbox.corner, null, true);
+			ll.addLine(l.bbox.corner, 8, true);
 		}
 	}
 
