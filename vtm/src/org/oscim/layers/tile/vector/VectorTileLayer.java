@@ -39,6 +39,10 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 		super(map);
 	}
 
+	public VectorTileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
+		super(map, minZoom, maxZoom, cacheLimit);
+	}
+
 	@Override
 	protected VectorTileLoader createLoader(TileManager tm) {
 		return new VectorTileLoader(tm);

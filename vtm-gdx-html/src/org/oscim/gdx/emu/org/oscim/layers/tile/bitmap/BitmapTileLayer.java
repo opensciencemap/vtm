@@ -39,11 +39,17 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class BitmapTileLayer extends TileLayer<TileLoader> {
 
+	private final static int CACHE_LIMIT = 50;
+
 	final TileSource mTileSource;
 	private final FadeStep[] mFade;
 
 	public BitmapTileLayer(Map map, TileSource tileSource) {
-		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), 100);
+		this(map, tileSource, CACHE_LIMIT);
+	}
+
+	public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit) {
+		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), cacheLimit);
 		mTileSource = tileSource;
 		mFade = mTileSource.getFadeSteps();
 	}

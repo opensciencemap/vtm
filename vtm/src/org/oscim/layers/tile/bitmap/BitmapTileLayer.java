@@ -40,6 +40,8 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 
 	protected static final Logger log = LoggerFactory.getLogger(BitmapTileLayer.class);
 
+	private final static int CACHE_LIMIT = 50;
+
 	private static final int TIMEOUT_CONNECT = 5000;
 	private static final int TIMEOUT_READ = 10000;
 
@@ -47,10 +49,13 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 	private final FadeStep[] mFade;
 
 	public BitmapTileLayer(Map map, TileSource tileSource) {
-		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), 100);
+		this(map, tileSource, CACHE_LIMIT);
+	}
+
+	public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit) {
+		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), cacheLimit);
 		mTileSource = tileSource;
 		mFade = mTileSource.getFadeSteps();
-
 	}
 
 	@Override
@@ -105,7 +110,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 					return false;
 				}
 
-				return false;
+				return true;
 			}
 
 			@Override
