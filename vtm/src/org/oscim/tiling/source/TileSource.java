@@ -26,8 +26,9 @@ public abstract class TileSource {
 
 	protected final Options options = new Options();
 
-	public void setOption(String key, String value) {
+	public TileSource setOption(String key, String value) {
 		options.put(key, value);
+		return this;
 	}
 
 	public String getOption(String key) {
