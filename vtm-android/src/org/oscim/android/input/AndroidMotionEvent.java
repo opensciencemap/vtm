@@ -20,8 +20,9 @@ public class AndroidMotionEvent extends MotionEvent {
 
 	android.view.MotionEvent mEvent;
 
-	public void wrap(android.view.MotionEvent e) {
+	public MotionEvent wrap(android.view.MotionEvent e) {
 		mEvent = e;
+		return this;
 	}
 
 	@Override

@@ -18,15 +18,15 @@ package org.oscim.layers.marker;
 import java.util.List;
 
 import org.oscim.core.BoundingBox;
-import org.oscim.core.MapPosition;
 import org.oscim.core.Point;
+import org.oscim.event.Gesture;
+import org.oscim.event.GestureListener;
 import org.oscim.event.MotionEvent;
-import org.oscim.event.TouchListener;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 
 public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<Item>
-        implements TouchListener {
+        implements GestureListener {
 	//static final Logger log = LoggerFactory.getLogger(ItemizedIconOverlay.class);
 
 	protected final List<Item> mItemList;
@@ -108,13 +108,13 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 	 * easily override behavior without resorting to overriding the
 	 * ItemGestureListener methods.
 	 */
-	@Override
-	public boolean onTap(MotionEvent event, MapPosition pos) {
-		return activateSelectedItems(event, mActiveItemSingleTap);
-	}
+	//	@Override
+	//	public boolean onTap(MotionEvent event, MapPosition pos) {
+	//		return activateSelectedItems(event, mActiveItemSingleTap);
+	//	}
 
 	protected boolean onSingleTapUpHelper(int index, Item item) {
-		return this.mOnItemGestureListener.onItemSingleTapUp(index, item);
+		return mOnItemGestureListener.onItemSingleTapUp(index, item);
 	}
 
 	private final ActiveItem mActiveItemSingleTap = new ActiveItem() {
@@ -128,30 +128,30 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 		}
 	};
 
-	@Override
-	public boolean onLongPress(MotionEvent event, MapPosition pos) {
-		return activateSelectedItems(event, mActiveItemLongPress);
-	}
+	//	@Override
+	//	public boolean onLongPress(MotionEvent event, MapPosition pos) {
+	//		return activateSelectedItems(event, mActiveItemLongPress);
+	//	}
 
-	protected boolean onLongPressHelper(int index, Item item) {
-		return this.mOnItemGestureListener.onItemLongPress(index, item);
-	}
+	//	protected boolean onLongPressHelper(int index, Item item) {
+	//		return this.mOnItemGestureListener.onItemLongPress(index, item);
+	//	}
+	//
+	//	private final ActiveItem mActiveItemLongPress = new ActiveItem() {
+	//		@Override
+	//		public boolean run(final int index) {
+	//			final ItemizedIconLayer<Item> that = ItemizedIconLayer.this;
+	//			if (that.mOnItemGestureListener == null) {
+	//				return false;
+	//			}
+	//			return onLongPressHelper(index, getItem(index));
+	//		}
+	//	};
 
-	private final ActiveItem mActiveItemLongPress = new ActiveItem() {
-		@Override
-		public boolean run(final int index) {
-			final ItemizedIconLayer<Item> that = ItemizedIconLayer.this;
-			if (that.mOnItemGestureListener == null) {
-				return false;
-			}
-			return onLongPressHelper(index, getItem(index));
-		}
-	};
-
-	@Override
-	public boolean onPress(MotionEvent e, MapPosition pos) {
-		return false;
-	}
+	//	@Override
+	//	public boolean onPress(MotionEvent e, MapPosition pos) {
+	//		return false;
+	//	}
 
 	/**
 	 * When a content sensitive action is performed the content item needs to be
@@ -164,7 +164,7 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 	 *            ..
 	 * @return true if event is handled false otherwise
 	 */
-	private boolean activateSelectedItems(MotionEvent event, ActiveItem task) {
+	protected boolean activateSelectedItems(MotionEvent event, ActiveItem task) {
 		int size = mItemList.size();
 		if (size == 0)
 			return false;
@@ -231,5 +231,13 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 
 	public static interface ActiveItem {
 		public boolean run(int aIndex);
+	}
+
+	@Override
+	public boolean onGesture(Gesture g, MotionEvent e) {
+		if (g instanceof Gesture.Tap)
+			return activateSelectedItems(e, mActiveItemSingleTap);
+
+		return false;
 	}
 }

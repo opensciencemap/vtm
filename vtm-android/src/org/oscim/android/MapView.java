@@ -22,6 +22,7 @@ import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
+import org.oscim.event.Gesture;
 import org.oscim.map.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,9 @@ import org.slf4j.LoggerFactory;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 
@@ -40,6 +44,10 @@ public class MapView extends RelativeLayout {
 
 	static final Logger log = LoggerFactory.getLogger(MapView.class);
 
+	static {
+		System.loadLibrary("vtm-jni");
+	}
+
 	public static final boolean debugFrameTime = false;
 	public static final boolean testRegionZoom = false;
 
@@ -48,20 +56,14 @@ public class MapView extends RelativeLayout {
 	public boolean enablePagedFling = false;
 
 	private final Compass mCompass;
+	private final GestureDetector mGestureDetector;
 
 	private int mWidth;
 	private int mHeight;
 
-	private final Map mMap;
+	final AndroidMap mMap;
 
-	final GLView mGLView;
-	boolean mPausing = false;
 	boolean mInitialized = false;
-
-	static {
-		System.loadLibrary("vtm-jni");
-		//System.loadLibrary("tessellate");
-	}
 
 	/**
 	 * @param context
@@ -87,12 +89,9 @@ public class MapView extends RelativeLayout {
 	public MapView(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
 
-		if (!(context instanceof MapActivity)) {
-			throw new IllegalArgumentException(
-			                                   "context is not an instance of MapActivity");
-		}
+		if (!(context instanceof MapActivity))
+			throw new IllegalArgumentException("context is not an instance of MapActivity");
 
-		//Log.logger = new AndroidLog();
 		CanvasAdapter.g = AndroidGraphics.INSTANCE;
 		AssetAdapter.g = new AndroidAssetAdapter(context);
 		GLAdapter.g = new AndroidGL();
@@ -109,87 +108,64 @@ public class MapView extends RelativeLayout {
 
 		MapActivity mapActivity = (MapActivity) context;
 
-		final MapView m = this;
+		mMap = new AndroidMap(this);
 
-		mMap = new Map() {
-
-			boolean mWaitRedraw;
-
-			private final Runnable mRedrawRequest = new Runnable() {
-				@Override
-				public void run() {
-					mWaitRedraw = false;
-					redrawMapInternal(false);
-				}
-			};
-
-			@Override
-			public int getWidth() {
-				return m.getWidth();
-			}
-
-			@Override
-			public int getHeight() {
-				return m.getHeight();
-			}
-
-			@Override
-			public void updateMap(boolean requestRender) {
-				if (requestRender && !mClearMap && !mPausing && mInitialized)
-					mGLView.requestRender();
-
-				if (!mWaitRedraw) {
-					mWaitRedraw = true;
-					getView().post(mRedrawRequest);
-				}
-			}
-
-			@Override
-			public void render() {
-				if (mClearMap)
-					updateMap(false);
-				else
-					mGLView.requestRender();
-			}
-
-			void redrawMapInternal(boolean forceRedraw) {
-				boolean clear = mClearMap;
-
-				if (forceRedraw && !clear)
-					mGLView.requestRender();
-
-				updateLayers();
-
-				if (clear) {
-					mGLView.requestRender();
-					mClearMap = false;
-				}
-			}
-
-			@Override
-			public boolean post(Runnable runnable) {
-				return getView().post(runnable);
-			}
-
-			@Override
-			public boolean postDelayed(Runnable action, long delay) {
-				return getView().postDelayed(action, delay);
-			}
-		};
-
-		mGLView = new GLView(context, mMap);
 		mCompass = new Compass(mapActivity, mMap);
 
 		mapActivity.registerMapView(mMap);
 
-		LayoutParams params = new LayoutParams(
-		                                       android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-		                                       android.view.ViewGroup.LayoutParams.MATCH_PARENT);
-
-		addView(mGLView, params);
-
 		mMap.clearMap();
 		mMap.updateMap(false);
+
+		mGestureDetector = new GestureDetector(context, new OnGestureListener() {
+			@Override
+			public boolean onSingleTapUp(MotionEvent e) {
+				return mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
+			}
+
+			@Override
+			public void onShowPress(MotionEvent e) {
+			}
+
+			@Override
+			public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+				return false;
+			}
+
+			@Override
+			public void onLongPress(MotionEvent e) {
+				mMap.handleGesture(Gesture.LONG_PRESS, mMotionEvent.wrap(e));
+			}
+
+			@Override
+			public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+				return false;
+			}
+
+			@Override
+			public boolean onDown(MotionEvent e) {
+				return mMap.handleGesture(Gesture.PRESS, mMotionEvent.wrap(e));
+			}
+		});
+
+		//mGestureDetector.setOnDoubleTapListener(new OnDoubleTapListener() {
+		//
+		//	@Override
+		//	public boolean onSingleTapConfirmed(MotionEvent e) {
+		//		return false;
+		//	}
+		//
+		//	@Override
+		//	public boolean onDoubleTapEvent(MotionEvent e) {
+		//		return false;
+		//	}
+		//
+		//	@Override
+		//	public boolean onDoubleTap(MotionEvent e) {
+		//		return false;
+		//	}
+		//});
+
 	}
 
 	View getView() {
@@ -206,7 +182,7 @@ public class MapView extends RelativeLayout {
 	}
 
 	void onPause() {
-		mPausing = true;
+		mMap.pause(true);
 
 		if (this.mCompassEnabled)
 			mCompass.disable();
@@ -217,16 +193,19 @@ public class MapView extends RelativeLayout {
 		if (this.mCompassEnabled)
 			mCompass.enable();
 
-		mPausing = false;
+		mMap.pause(false);
 	}
 
-	AndroidMotionEvent mMotionEvent = new AndroidMotionEvent();
+	final AndroidMotionEvent mMotionEvent = new AndroidMotionEvent();
 
 	@Override
 	public boolean onTouchEvent(android.view.MotionEvent motionEvent) {
 
 		if (!isClickable())
 			return false;
+
+		if (mGestureDetector.onTouchEvent(motionEvent))
+			return true;
 
 		mMotionEvent.wrap(motionEvent);
 		mMap.handleMotionEvent(mMotionEvent);

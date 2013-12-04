@@ -14,19 +14,16 @@
  */
 package org.oscim.map;
 
-import java.util.AbstractList;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.oscim.core.BoundingBox;
 import org.oscim.core.MapPosition;
+import org.oscim.event.Gesture;
+import org.oscim.event.GestureDetector;
 import org.oscim.event.MotionEvent;
-import org.oscim.layers.Layer;
 import org.oscim.layers.MapEventLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
@@ -71,10 +68,11 @@ public abstract class Map {
 
 	protected boolean mClearMap;
 	protected final MapEventLayer mEventLayer;
+	protected GestureDetector mGestureDetector;
 
 	private VectorTileLayer mBaseLayer;
 
-	private Set<InputListener> mMotionListeners = new LinkedHashSet<InputListener>();
+	private Set<InputListener> mInputListeners = new LinkedHashSet<InputListener>();
 	private Set<UpdateListener> mUpdateListeners = new LinkedHashSet<UpdateListener>();
 
 	public Map() {
@@ -83,11 +81,13 @@ public abstract class Map {
 		mAnimator = new MapAnimator(this, mViewport);
 
 		mMapPosition = new MapPosition();
-		mLayers = new Layers();
+		mLayers = new Layers(this);
 		mAsyncExecutor = new AsyncExecutor(2);
 
 		mEventLayer = new MapEventLayer(this);
 		mLayers.add(0, mEventLayer);
+
+		//mGestureDetector = new GestureDetector(this, mLayers);
 	}
 
 	public MapEventLayer getEventLayer() {
@@ -254,27 +254,24 @@ public abstract class Map {
 	}
 
 	/**
-	 * @return estimated visible axis aligned bounding box
+	 * @return MapAnimator instance
 	 */
-	public BoundingBox getBoundingBox() {
-		return mViewport.getViewBox();
-	}
-
 	public MapAnimator getAnimator() {
 		return mAnimator;
 	}
 
+	/**
+	 * Register InputListener
+	 */
 	public void bind(InputListener listener) {
-		mMotionListeners.add(listener);
+		mInputListeners.add(listener);
 	}
 
+	/**
+	 * Unregister InputListener
+	 */
 	public void unbind(InputListener listener) {
-		mMotionListeners.remove(listener);
-	}
-
-	public void handleMotionEvent(MotionEvent e) {
-		for (InputListener l : mMotionListeners)
-			l.onMotionEvent(e);
+		mInputListeners.remove(listener);
 	}
 
 	/**
@@ -291,115 +288,16 @@ public abstract class Map {
 		mUpdateListeners.remove(l);
 	}
 
-	public final class Layers extends AbstractList<Layer> {
+	// TODO make protected
+	public void handleMotionEvent(MotionEvent e) {
+		mLayers.handleMotionEvent(e);
 
-		private final CopyOnWriteArrayList<Layer> mLayerList;
-
-		Layers() {
-			mLayerList = new CopyOnWriteArrayList<Layer>();
-		}
-
-		@Override
-		public synchronized Layer get(int index) {
-			return mLayerList.get(index);
-		}
-
-		@Override
-		public synchronized int size() {
-			return mLayerList.size();
-		}
-
-		@Override
-		public synchronized void add(int index, Layer layer) {
-			if (mLayerList.contains(layer))
-				throw new IllegalArgumentException("layer added twice");
-
-			if (layer instanceof UpdateListener)
-				bind((UpdateListener) layer);
-			if (layer instanceof InputListener)
-				bind((InputListener) layer);
-
-			mLayerList.add(index, layer);
-			mDirtyLayers = true;
-		}
-
-		@Override
-		public synchronized Layer remove(int index) {
-			mDirtyLayers = true;
-
-			Layer remove = mLayerList.remove(index);
-
-			if (remove instanceof UpdateListener)
-				unbind((UpdateListener) remove);
-			if (remove instanceof InputListener)
-				unbind((InputListener) remove);
-
-			return remove;
-		}
-
-		@Override
-		public synchronized Layer set(int index, Layer layer) {
-			if (mLayerList.contains(layer))
-				throw new IllegalArgumentException("layer added twice");
-
-			mDirtyLayers = true;
-			Layer remove = mLayerList.set(index, layer);
-
-			// unbind replaced layer
-			if (remove instanceof UpdateListener)
-				unbind((UpdateListener) remove);
-			if (remove instanceof InputListener)
-				unbind((InputListener) remove);
-
-			return remove;
-		}
-
-		private boolean mDirtyLayers;
-		private LayerRenderer[] mLayerRenderer;
-
-		public LayerRenderer[] getLayerRenderer() {
-			if (mDirtyLayers)
-				updateLayers();
-
-			return mLayerRenderer;
-		}
-
-		public void destroy() {
-			if (mDirtyLayers)
-				updateLayers();
-
-			for (Layer o : mLayers)
-				o.onDetach();
-		}
-
-		Layer[] mLayers;
-
-		private synchronized void updateLayers() {
-			if (!mDirtyLayers)
-				return;
-
-			mLayers = new Layer[mLayerList.size()];
-
-			int numRenderLayers = 0;
-
-			for (int i = 0, n = mLayerList.size(); i < n; i++) {
-				Layer o = mLayerList.get(i);
-
-				if (o.getRenderer() != null)
-					numRenderLayers++;
-				mLayers[i] = o;
-			}
-
-			mLayerRenderer = new LayerRenderer[numRenderLayers];
-
-			for (int i = 0, cntR = 0, n = mLayerList.size(); i < n; i++) {
-				Layer o = mLayerList.get(i);
-				LayerRenderer l = o.getRenderer();
-				if (l != null)
-					mLayerRenderer[cntR++] = l;
-			}
-
-			mDirtyLayers = false;
-		}
+		for (InputListener l : mInputListeners)
+			l.onMotionEvent(e);
 	}
+
+	public boolean handleGesture(Gesture g, MotionEvent e) {
+		return mLayers.handleGesture(g, e);
+	}
+
 }
