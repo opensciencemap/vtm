@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="vtm-gdx-html">
+	<property environment="env" />
+	<property name="gwt.location" value="/home/src/gwt-2.5.1" />
+	<property name="vtm-libs.location" value="../vtm-ext-libs" />
+	<property name="vtm.location" value="../vtm" />
+	<property name="vtm-gdx.location" value="../vtm-gdx" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.6" />
+	<property name="source" value="1.6" />
+	<path id="vtm.classpath">
+		<pathelement location="${vtm.location}/bin" />
+		<pathelement location="${vtm-libs.location}/findbugs/annotations.jar" />
+		<pathelement location="${vtm-libs.location}/libs/slf4j-api-1.7.5.jar" />
+	</path>
+	<path id="vtm-gdx.classpath">
+		<pathelement location="${vtm-gdx.location}/bin" />
+		<path refid="vtm.classpath" />
+		<pathelement location="${vtm-libs.location}/gdx/gdx.jar" />
+	</path>
+	<path id="GWT SDK [gwt-2.5.1 - 2.5.1].libraryclasspath">
+		<pathelement location="${gwt.location}/gwt-user.jar" />
+		<pathelement location="${gwt.location}/gwt-dev.jar" />
+		<pathelement location="${gwt.location}/validation-api-1.0.0.GA.jar" />
+		<pathelement location="${gwt.location}/validation-api-1.0.0.GA-sources.jar" />
+	</path>
+	<path id="vtm-gdx-html.classpath">
+		<pathelement location="war/WEB-INF/classes" />
+		<path refid="vtm-gdx.classpath" />
+		<path refid="GWT SDK [gwt-2.5.1 - 2.5.1].libraryclasspath" />
+		<path refid="vtm.classpath" />
+		<pathelement location="${vtm-libs.location}/gdx/gdx-backend-gwt-sources.jar" />
+		<pathelement location="${vtm-libs.location}/gdx/gdx-backend-gwt.jar" />
+		<pathelement location="${vtm-libs.location}/gdx/gdx-sources.jar" />
+		<pathelement location="${vtm-libs.location}/gdx/gdx.jar" />
+		<pathelement location="${vtm-libs.location}/libs/hudson-gwt-slf4j-2.1.2.jar" />
+	</path>
+	<path id="run.VTMSuperDevMode.classpath">
+		<path refid="vtm-gdx-html.classpath" />
+		<pathelement location="${gwt.location}/gwt-codeserver.jar" />
+	</path>
+	<target name="init">
+		<mkdir dir="war/WEB-INF/classes" />
+		<copy includeemptydirs="false" todir="war/WEB-INF/classes">
+			<fileset dir="src">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+				<exclude name="org/oscim/gdx/emu/" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="war/WEB-INF/classes">
+			<fileset dir="src/org/oscim/gdx/emu">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="clean">
+		<delete dir="war/WEB-INF/classes" />
+	</target>
+	<target depends="clean" name="cleanall">
+		<ant antfile="build.xml" dir="${vtm.location}" inheritAll="false" target="clean" />
+		<ant antfile="build.xml" dir="${vtm-gdx.location}" inheritAll="false" target="clean" />
+	</target>
+	<target depends="build-subprojects,build-project" name="build" />
+	<target name="build-subprojects">
+		<ant antfile="build.xml" dir="${vtm.location}" inheritAll="false" target="build-project" />
+		<ant antfile="build.xml" dir="${vtm-gdx.location}" inheritAll="false" target="build-project" />
+	</target>
+	<target depends="init" name="build-project">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="war/WEB-INF/classes" includeantruntime="false" source="${source}" target="${target}">
+			<src path="src" />
+			<src path="src/org/oscim/gdx/emu" />
+			<exclude name="org/oscim/gdx/emu/" />
+			<classpath refid="vtm-gdx-html.classpath" />
+		</javac>
+	</target>
+	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects" />
+	
+	<target name="extract-jars">
+		<unzip src="${vtm-libs.location}/gdx/gdx-sources.jar" dest="war/WEB-INF/lib/">
+		</unzip>
+		<unzip src="${vtm-libs.location}/gdx/gdx-backend-gwt-sources.jar" dest="war/WEB-INF/lib/">
+		</unzip>
+		<unzip src="${vtm-libs.location}/libs/hudson-gwt-slf4j-2.1.2.jar" dest="war/WEB-INF/lib/">
+		</unzip>
+	</target>
+	<target name="VTMSuperDevMode">
+		<java classname="com.google.gwt.dev.codeserver.CodeServer" failonerror="true" fork="yes">
+			<arg line="-src src/ -src ../vtm/src/ -src ../vtm-gdx/src/ -src war/WEB-INF/lib/ org.oscim.gdx.GwtDefinition" />
+			<classpath refid="run.VTMSuperDevMode.classpath" />
+		</java>
+	</target>
+</project>

@@ -13,7 +13,7 @@ target/
 /vtm/jni/poly2tri/
 /vtm/libs/
 /vtm-gdx-html/war/assets/
-/vtm-gdx-html/war/WEB_INF/
+/vtm-gdx-html/war/WEB-INF/
 /vtm-gdx-html/war/org.oscim.gdx.GwtDefinition/
 /vtm-gdx-html/gwt-unitCache
 /vtm-gdx-ios/
