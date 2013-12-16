@@ -18,6 +18,7 @@ import java.net.URL;
 
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSource;
+import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.common.LwHttp;
 import org.oscim.tiling.source.common.PbfTileDataSource;
 import org.oscim.tiling.source.common.UrlTileSource;
@@ -26,13 +27,13 @@ public class MapnikVectorTileSource extends UrlTileSource {
 
 	@Override
 	public ITileDataSource getDataSource() {
-		return new TileDataSource(mUrl);
+		return new TileDataSource(this, mUrl);
 	}
 
 	static class TileDataSource extends PbfTileDataSource {
 
-		public TileDataSource(URL url) {
-			super(new TileDecoder());
+		public TileDataSource(TileSource tileSource, URL url) {
+			super(new TileDecoder(), tileSource.tileCache);
 
 			mConn = new LwHttp(url, "image/png", "vector.pbf", true) {
 				@Override

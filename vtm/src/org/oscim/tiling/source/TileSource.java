@@ -26,6 +26,12 @@ public abstract class TileSource {
 
 	protected final Options options = new Options();
 
+	public ITileCache tileCache;
+
+	public void setCache(ITileCache cache) {
+		tileCache = cache;
+	}
+
 	public TileSource setOption(String key, String value) {
 		options.put(key, value);
 		return this;

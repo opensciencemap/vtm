@@ -104,20 +104,38 @@ public class LwHttp {
 	}
 
 	static class Buffer extends BufferedInputStream {
-		public Buffer(InputStream is) {
+		final OutputStream mCache;
+
+		public Buffer(InputStream is, OutputStream cache) {
 			super(is, 4096);
+			mCache = cache;
 		}
 
 		@Override
 		public synchronized int read() throws IOException {
-			return super.read();
+			int data = super.read();
+			if (data >= 0)
+				mCache.write(data);
+
+			return data;
 		}
 
 		@Override
 		public synchronized int read(byte[] buffer, int offset, int byteCount)
 		        throws IOException {
-			return super.read(buffer, offset, byteCount);
+			int len = super.read(buffer, offset, byteCount);
+
+			if (len >= 0)
+				mCache.write(buffer, offset, len);
+
+			return len;
 		}
+	}
+
+	OutputStream mCacheOutputStream;
+
+	public void setOutputStream(OutputStream outputStream) {
+		mCacheOutputStream = outputStream;
 	}
 
 	public void close() {
@@ -203,6 +221,10 @@ public class LwHttp {
 		is.reset();
 		is.mark(0);
 		is.skip(end);
+
+		if (mCacheOutputStream != null) {
+			is = new Buffer(is, mCacheOutputStream);
+		}
 
 		if (mInflateContent)
 			return new InflaterInputStream(is);

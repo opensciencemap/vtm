@@ -14,14 +14,17 @@
  */
 package org.oscim.tiling.source.common;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 import org.oscim.tiling.MapTile;
+import org.oscim.tiling.source.ITileCache;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
+import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,48 +37,76 @@ public abstract class PbfTileDataSource implements ITileDataSource {
 
 	protected LwHttp mConn;
 	protected final PbfDecoder mTileDecoder;
+	protected final ITileCache mTileCache;
 
-	public PbfTileDataSource(PbfDecoder tileDecoder) {
+	public PbfTileDataSource(PbfDecoder tileDecoder, ITileCache tileCache) {
 		mTileDecoder = tileDecoder;
+		mTileCache = tileCache;
 	}
 
 	@Override
 	public QueryResult executeQuery(MapTile tile, ITileDataSink sink) {
-		QueryResult result = QueryResult.SUCCESS;
+		boolean success = true;
+
+		ITileCache.TileWriter cacheWriter = null;
+
+		if (mTileCache != null) {
+			ITileCache.TileReader c = mTileCache.getTile(tile);
+			if (c == null) {
+				// create new cache entry
+				cacheWriter = mTileCache.writeTile(tile);
+				mConn.setOutputStream(cacheWriter.getOutputStream());
+			} else {
+				try {
+					InputStream is = c.getInputStream();
+					if (mTileDecoder.decode(tile, sink, is, c.getBytes())) {
+						IOUtils.closeQuietly(is);
+						return QueryResult.SUCCESS;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				log.debug(tile + " Cache read failed");
+			}
+		}
 
 		try {
 			InputStream is;
 			if (!mConn.sendRequest(tile)) {
-				log.debug(tile + " Request Failed");
-				result = QueryResult.FAILED;
+				log.debug(tile + " Request failed");
+				success = false;
 			} else if ((is = mConn.readHeader()) != null) {
-				boolean win = mTileDecoder.decode(tile, sink, is, mConn.getContentLength());
-				if (!win)
-					log.debug(tile + " failed");
+				int bytes = mConn.getContentLength();
+				success = mTileDecoder.decode(tile, sink, is, bytes);
+				if (!success)
+					log.debug(tile + " Decoding failed");
 			} else {
 				log.debug(tile + " Network Error");
-				result = QueryResult.FAILED;
+				success = false;
 			}
 		} catch (SocketException e) {
 			log.debug(tile + " Socket exception: " + e.getMessage());
-			result = QueryResult.FAILED;
+			success = false;
 		} catch (SocketTimeoutException e) {
 			log.debug(tile + " Socket Timeout");
-			result = QueryResult.FAILED;
+			success = false;
 		} catch (UnknownHostException e) {
 			log.debug(tile + " No Network");
-			result = QueryResult.FAILED;
+			success = false;
 		} catch (Exception e) {
 			e.printStackTrace();
-			result = QueryResult.FAILED;
+			success = false;
 		}
 
 		mConn.requestCompleted();
 
-		if (result != QueryResult.SUCCESS)
+		if (cacheWriter != null)
+			cacheWriter.complete(success);
+
+		if (success)
 			mConn.close();
 
-		return result;
+		return success ? QueryResult.SUCCESS : QueryResult.FAILED;
 	}
 
 	@Override

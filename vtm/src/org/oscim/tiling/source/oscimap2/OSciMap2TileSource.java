@@ -26,6 +26,7 @@ import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
+import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.common.LwHttp;
 import org.oscim.tiling.source.common.PbfDecoder;
 import org.oscim.tiling.source.common.PbfTileDataSource;
@@ -37,12 +38,12 @@ public class OSciMap2TileSource extends UrlTileSource {
 
 	@Override
 	public ITileDataSource getDataSource() {
-		return new TileDataSource(mUrl);
+		return new TileDataSource(this, mUrl);
 	}
 
 	class TileDataSource extends PbfTileDataSource {
-		public TileDataSource(URL url) {
-			super(new TileDecoder());
+		public TileDataSource(TileSource tileSource, URL url) {
+			super(new TileDecoder(), tileSource.tileCache);
 			mConn = new LwHttp(url, "application/osmtile", "osmtile", false);
 		}
 	}
