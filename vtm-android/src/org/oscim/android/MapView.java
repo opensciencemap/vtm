@@ -120,7 +120,9 @@ public class MapView extends RelativeLayout {
 		mGestureDetector = new GestureDetector(context, new OnGestureListener() {
 			@Override
 			public boolean onSingleTapUp(MotionEvent e) {
-				return mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
+				boolean handled = mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
+				mMotionEvent.wrap(null);
+				return handled;
 			}
 
 			@Override
@@ -135,6 +137,7 @@ public class MapView extends RelativeLayout {
 			@Override
 			public void onLongPress(MotionEvent e) {
 				mMap.handleGesture(Gesture.LONG_PRESS, mMotionEvent.wrap(e));
+				mMotionEvent.wrap(null);
 			}
 
 			@Override
@@ -144,7 +147,9 @@ public class MapView extends RelativeLayout {
 
 			@Override
 			public boolean onDown(MotionEvent e) {
-				return mMap.handleGesture(Gesture.PRESS, mMotionEvent.wrap(e));
+				boolean handled =  mMap.handleGesture(Gesture.PRESS, mMotionEvent.wrap(e));
+				mMotionEvent.wrap(null);
+				return handled;
 			}
 		});
 
@@ -207,8 +212,8 @@ public class MapView extends RelativeLayout {
 		if (mGestureDetector.onTouchEvent(motionEvent))
 			return true;
 
-		mMotionEvent.wrap(motionEvent);
-		mMap.handleMotionEvent(mMotionEvent);
+		mMap.handleMotionEvent(mMotionEvent.wrap(motionEvent));
+		mMotionEvent.wrap(null);
 
 		return true;
 	}
