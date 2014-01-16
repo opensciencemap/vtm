@@ -1,6 +1,8 @@
 /*
- * Copyright 2012, osmdroid: Viesturs Zarins, Martin Pearman
- * Copyright 2012, Hannes Janetzek
+ * Copyright 2012 osmdroid authors: Viesturs Zarins, Martin Pearman
+ * Copyright 2012 Hannes Janetzek
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
