@@ -16,117 +16,48 @@
  */
 package org.oscim.tiling;
 
-/**
- * Sort Tiles by 'distance' value.
- * based on ComparableTimSort:
- * everything below is Copyright OpenJDK, Oracle
- */
+import java.util.Comparator;
 
-public class TileDistanceSort {
+import org.oscim.utils.TimSort;
+
+public class TileDistanceSort extends TimSort<MapTile> {
+
+	static TileDistanceSort INSTANCE = new TileDistanceSort();
+
+	private TileDistanceSort() {
+		super();
+	}
+
 	public static void sort(MapTile[] a, int lo, int hi) {
 		int nRemaining = hi - lo;
 		if (nRemaining < 2) {
 			return;
 		}
 
-		int initRunLen = countRunAndMakeAscending(a, lo, hi);
-		binarySort(a, lo, hi, lo + initRunLen);
-
+		synchronized (INSTANCE) {
+			INSTANCE.doSort(a, DistanceComparator, lo, hi);
+		}
 	}
 
-	static int compareTo(MapTile a, MapTile b) {
-		if (a == null) {
+	final static Comparator<MapTile> DistanceComparator = new Comparator<MapTile>() {
+		@Override
+		public int compare(MapTile a, MapTile b) {
+			if (a == null) {
+				if (b == null)
+					return 0;
+
+				return 1;
+			}
 			if (b == null)
-				return 0;
+				return -1;
 
-			return 1;
-		}
-		if (b == null)
-			return -1;
-
-		if (a.distance < b.distance) {
-			return -1;
-		}
-		if (a.distance > b.distance) {
-			return 1;
-		}
-		return 0;
-	}
-
-	private static void binarySort(MapTile[] a, int lo, int hi, int start) {
-		assert ((lo <= start) && (start <= hi));
-		if (start == lo)
-			++start;
-		for (; start < hi; ++start) {
-			MapTile pivot = a[start];
-
-			int left = lo;
-			int right = start;
-			assert (left <= right);
-
-			while (left < right) {
-				int mid = left + right >>> 1;
-				if (compareTo(pivot, a[mid]) < 0)
-					right = mid;
-				else
-					left = mid + 1;
+			if (a.distance < b.distance) {
+				return -1;
 			}
-			assert (left == right);
-
-			int n = start - left;
-
-			if (n < 16) {
-				// shift in loop for less than 16 items
-				int end = left + n;
-				while (end-- > left)
-					a[end + 1] = a[end];
-			} else {
-				System.arraycopy(a, left, a, left + 1, n);
+			if (a.distance > b.distance) {
+				return 1;
 			}
-
-			//	switch (n)
-			//	{
-			//	case 2:
-			//	a[(left + 2)] = a[(left + 1)];
-			//	//$FALL-THROUGH$
-			//	case 1:
-			//	a[(left + 1)] = a[left];
-			//	break;
-			//	default:
-			//	System.arraycopy(a, left, a, left + 1, n);
-			//	}
-			a[left] = pivot;
+			return 0;
 		}
-	}
-
-	private static int countRunAndMakeAscending(MapTile[] a, int lo, int hi) {
-		assert (lo < hi);
-		int runHi = lo + 1;
-		if (runHi == hi) {
-			return 1;
-		}
-
-		if (compareTo((a[(runHi++)]), a[lo]) < 0) {
-			while ((runHi < hi) && (compareTo((a[runHi]), a[(runHi - 1)]) < 0))
-				++runHi;
-			reverseRange(a, lo, runHi);
-		} else {
-			while ((runHi < hi) && (compareTo((a[runHi]), a[(runHi - 1)]) >= 0)) {
-				++runHi;
-			}
-		}
-		return (runHi - lo);
-	}
-
-	private static void reverseRange(MapTile[] a, int lo, int hi) {
-		--hi;
-		while (lo < hi) {
-			MapTile t = a[lo];
-			a[(lo++)] = a[hi];
-			a[(hi--)] = t;
-		}
-	}
-
-	private TileDistanceSort() {
-	}
+	};
 }
