@@ -17,11 +17,12 @@ package org.oscim.tiling.source.common;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.oscim.tiling.MapTile;
+import org.oscim.tiling.source.ITileCache;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -33,7 +34,7 @@ public abstract class PbfTileDataSource implements ITileDataSource {
 	protected LwHttp mConn;
 	protected final PbfDecoder mTileDecoder;
 
-	public PbfTileDataSource(PbfDecoder tileDecoder) {
+	public PbfTileDataSource(PbfDecoder tileDecoder, ITileCache cache) {
 		mTileDecoder = tileDecoder;
 	}
 
