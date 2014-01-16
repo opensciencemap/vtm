@@ -57,14 +57,6 @@ public interface IRenderTheme {
 	public abstract int getMapBackground();
 
 	/**
-	 * Scales the stroke width of this RenderTheme by the given factor.
-	 * 
-	 * @param scaleFactor
-	 *            the factor by which the stroke width should be scaled.
-	 */
-	public abstract void scaleStrokeWidth(float scaleFactor);
-
-	/**
 	 * Scales the text size of this RenderTheme by the given factor.
 	 * 
 	 * @param scaleFactor

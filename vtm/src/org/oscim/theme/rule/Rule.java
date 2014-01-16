@@ -280,14 +280,6 @@ public abstract class Rule {
 			subRule.onDestroy();
 	}
 
-	public void scaleStrokeWidth(float scaleFactor) {
-		for (RenderInstruction ri : mRenderInstructions)
-			ri.scaleStrokeWidth(scaleFactor);
-
-		for (Rule subRule : mSubRules)
-			subRule.scaleStrokeWidth(scaleFactor);
-	}
-
 	public void scaleTextSize(float scaleFactor) {
 		for (RenderInstruction ri : mRenderInstructions)
 			ri.scaleTextSize(scaleFactor);

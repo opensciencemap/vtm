@@ -38,7 +38,6 @@ public class RenderTheme implements IRenderTheme {
 
 	private static final int MATCHING_CACHE_SIZE = 512;
 
-	private final float mBaseStrokeWidth;
 	private final float mBaseTextSize;
 	private final int mMapBackground;
 
@@ -78,7 +77,6 @@ public class RenderTheme implements IRenderTheme {
 
 	public RenderTheme(int mapBackground, float baseStrokeWidth, float baseTextSize) {
 		mMapBackground = mapBackground;
-		mBaseStrokeWidth = baseStrokeWidth;
 		mBaseTextSize = baseTextSize;
 
 		mElementCache = new ElementCache[3];
@@ -251,13 +249,6 @@ public class RenderTheme implements IRenderTheme {
 		for (int i = 0, n = mRules.length; i < n; i++) {
 			mRules[i].onComplete();
 		}
-	}
-
-	@Override
-	public void scaleStrokeWidth(float scaleFactor) {
-
-		for (int i = 0, n = mRules.length; i < n; i++)
-			mRules[i].scaleStrokeWidth(scaleFactor * mBaseStrokeWidth);
 	}
 
 	@Override
