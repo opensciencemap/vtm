@@ -1,6 +1,4 @@
-## VTM - Very experimental Tile Map library
-
-Future development branch based on https://github.com/opensciencemap/vtm-android
+## A Vector Tile Map Library
 
 VectorTileMap is part of the OpenScienceMap project, developed at University of Bremen.
 http://www.opensciencemap.org
@@ -16,10 +14,8 @@ http://www.opensciencemap.org
 
 ### Notes
 - checkout required libraries with 'git submodule init && git submodule update'
+- Projects are expected to be build within eclipse (maybe gradle in future)
 - To set up your own tile server for .vtm tiles see https://github.com/opensciencemap/TileStache/tree/master/TileStache/OSciMap4
-- Almost everything is still in early/experimental stage and subject for being rewritten
-- Projects are expected to be build within eclipse (for now) 
-- pull requests welcome :)
 
 ### Projects
 - **vtm** contains the core library
@@ -30,8 +26,7 @@ http://www.opensciencemap.org
 - **vtm-gdx-html** HTML5/GWT application
 - **vtm-gdx-android** Android application using libgdx backend
 
-### Demo
-work in progress..
+### WebGL Demo
 http://opensciencemap.org/map/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807
 - hold middle mouse button to change view direction
 - Keys
@@ -42,8 +37,8 @@ http://opensciencemap.org/map/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807
 
 ### Credits
 This library contains code from several projects:
-- mapsforge: based on 0.2.4
-- osmdroid: some overlay code
-- libgdx: AsyncTask, some modfied classes
-- android: some Matrix code
-- Triangle: stripped down for simple triangulation (through jni)
+- mapsforge: based on 0.2.4 (http://mapsforge.org)
+- osmdroid: some overlay classes (http://code.google.com/p/osmdroid/)
+- libgdx: AsyncTask, MathUtils and Interpolation classes (https://github.com/libgdx)
+- Android: some Matrix code, TimSort (http://source.android.com)
+- tessellate: (https://github.com/cscheid/tessellate)
