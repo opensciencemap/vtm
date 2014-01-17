@@ -102,6 +102,8 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 
 			mMap.getViewport().getMapViewProjection(mBox);
 
+			float flipMax = (float) (Tile.SIZE * pos.scale) / 2;
+
 			synchronized (lock) {
 				if (mItems == null) {
 					if (layers.textureLayers != null) {
@@ -113,9 +115,14 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 
 				// check visibility
 				for (InternalItem it = mItems; it != null; it = it.next) {
+					it.changes = false;
 					it.x = (float) ((it.px - mx) * scale);
 					it.y = (float) ((it.py - my) * scale);
-					it.changes = false;
+
+					if (it.x > flipMax)
+						it.x -= (flipMax * 2);
+					else if (it.x < -flipMax)
+						it.x += (flipMax * 2);
 
 					if (!GeometryUtils.pointInPoly(it.x, it.y, mBox, 8, 0)) {
 						if (it.visible) {
@@ -129,7 +136,6 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 						changedVisible++;
 					}
 					numVisible++;
-
 				}
 
 				//log.debug(numVisible + " " + changedVisible + " " + changesInvisible);
