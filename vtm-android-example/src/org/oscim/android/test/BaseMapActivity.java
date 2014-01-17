@@ -28,6 +28,8 @@ import android.view.Menu;
 
 public class BaseMapActivity extends MapActivity {
 
+	private final static boolean USE_CACHE = false;
+
 	MapView mMapView;
 	VectorTileLayer mBaseLayer;
 	TileSource mTileSource;
@@ -44,18 +46,20 @@ public class BaseMapActivity extends MapActivity {
 		mTileSource = new OSciMap4TileSource();
 		mTileSource.setOption("url", "http://opensciencemap.org/tiles/vtm");
 
-
-		mCache = new TileCache(this, "cachedir", "testdb");
-		mCache.setCacheSize(512 * (1 << 10));
-		mTileSource.setCache(mCache);
-
+		if (USE_CACHE) {
+			mCache = new TileCache(this, "cachedir", "testdb");
+			mCache.setCacheSize(512 * (1 << 10));
+			mTileSource.setCache(mCache);
+		}
 		mBaseLayer = mMap.setBaseMap(mTileSource);
 	}
 
 	@Override
 	protected void onDestroy() {
-	    super.onDestroy();
-	    mCache.dispose();
+		super.onDestroy();
+
+		if (USE_CACHE)
+			mCache.dispose();
 	}
 
 	@Override
