@@ -58,8 +58,8 @@ public final class Layers extends AbstractList<Layer> {
 
 		if (layer instanceof UpdateListener)
 			mMap.bind((UpdateListener) layer);
-		//if (layer instanceof InputListener)
-		//	mMap.bind((InputListener) layer);
+		if (layer instanceof InputListener)
+			mMap.bind((InputListener) layer);
 
 		mLayerList.add(index, layer);
 		mDirtyLayers = true;
@@ -73,8 +73,8 @@ public final class Layers extends AbstractList<Layer> {
 
 		if (remove instanceof UpdateListener)
 			mMap.unbind((UpdateListener) remove);
-		//if (remove instanceof InputListener)
-		//	mMap.unbind((InputListener) remove);
+		if (remove instanceof InputListener)
+			mMap.unbind((InputListener) remove);
 
 		return remove;
 	}
@@ -90,8 +90,8 @@ public final class Layers extends AbstractList<Layer> {
 		// unbind replaced layer
 		if (remove instanceof UpdateListener)
 			mMap.unbind((UpdateListener) remove);
-		//if (remove instanceof InputListener)
-		//	mMap.unbind((InputListener) remove);
+		if (remove instanceof InputListener)
+			mMap.unbind((InputListener) remove);
 
 		return remove;
 	}
@@ -114,8 +114,6 @@ public final class Layers extends AbstractList<Layer> {
 
 		for (Layer o : mLayers)
 			o.onDetach();
-
-		// TODO need to clear lists here?
 	}
 
 	boolean handleGesture(Gesture g, MotionEvent e) {
@@ -128,15 +126,6 @@ public final class Layers extends AbstractList<Layer> {
 					return true;
 
 		return false;
-	}
-
-	void handleMotionEvent(MotionEvent e) {
-		if (mDirtyLayers)
-			updateLayers();
-
-		for (Layer o : mLayers)
-			if (o instanceof InputListener)
-				((InputListener) o).onMotionEvent(e);
 	}
 
 	private synchronized void updateLayers() {

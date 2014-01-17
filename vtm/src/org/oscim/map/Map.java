@@ -74,11 +74,13 @@ public abstract class Map {
 
 	private VectorTileLayer mBaseLayer;
 
-	private Set<InputListener> mInputListeners = new LinkedHashSet<InputListener>();
-	private Set<UpdateListener> mUpdateListeners = new LinkedHashSet<UpdateListener>();
+	private Set<InputListener> mInputListenerSet = new LinkedHashSet<InputListener>();
+	private InputListener[] mInputListeners;
+
+	private Set<UpdateListener> mUpdateListenerSet = new LinkedHashSet<UpdateListener>();
+	private UpdateListener[] mUpdateListeners;
 
 	public Map() {
-
 		mViewport = new Viewport(this);
 		mAnimator = new MapAnimator(this, mViewport);
 
@@ -88,8 +90,6 @@ public abstract class Map {
 
 		mEventLayer = new MapEventLayer(this);
 		mLayers.add(0, mEventLayer);
-
-		//mGestureDetector = new GestureDetector(this, mLayers);
 	}
 
 	public MapEventLayer getEventLayer() {
@@ -201,22 +201,6 @@ public abstract class Map {
 	}
 
 	/**
-	 * This function is run on main-loop before rendering a frame.
-	 * Caution: Do not call directly!
-	 */
-	protected void updateLayers() {
-		boolean changed = false;
-
-		// get the current MapPosition
-		changed |= mViewport.getMapPosition(mMapPosition);
-
-		for (UpdateListener l : mUpdateListeners)
-			l.onMapUpdate(mMapPosition, changed, mClearMap);
-
-		mClearMap = false;
-	}
-
-	/**
 	 * Set {@link MapPosition} of {@link Viewport} and trigger a redraw.
 	 */
 	public void setMapPosition(MapPosition mapPosition) {
@@ -263,36 +247,64 @@ public abstract class Map {
 	}
 
 	/**
-	 * Register InputListener
-	 */
-	public void bind(InputListener listener) {
-		mInputListeners.add(listener);
-	}
-
-	/**
-	 * Unregister InputListener
-	 */
-	public void unbind(InputListener listener) {
-		mInputListeners.remove(listener);
-	}
-
-	/**
 	 * Register UpdateListener
 	 */
 	public void bind(UpdateListener l) {
-		mUpdateListeners.add(l);
+		if (mUpdateListenerSet.add(l))
+			mUpdateListeners = null;
 	}
 
 	/**
 	 * Unregister UpdateListener
 	 */
 	public void unbind(UpdateListener l) {
-		mUpdateListeners.remove(l);
+		if (mUpdateListenerSet.remove(l))
+			mUpdateListeners = null;
 	}
 
-	// TODO make protected
+	/**
+	 * This function is run on main-loop before rendering a frame.
+	 * Caution: Do not call directly!
+	 */
+	protected void updateLayers() {
+		boolean changed = false;
+
+		// get the current MapPosition
+		changed |= mViewport.getMapPosition(mMapPosition);
+
+		if (mUpdateListeners == null) {
+			mUpdateListeners = new UpdateListener[mUpdateListenerSet.size()];
+			mUpdateListenerSet.toArray(mUpdateListeners);
+		}
+
+		for (UpdateListener l : mUpdateListeners)
+			l.onMapUpdate(mMapPosition, changed, mClearMap);
+
+		mClearMap = false;
+	}
+
+	/**
+	 * Register InputListener
+	 */
+	public void bind(InputListener listener) {
+		if (mInputListenerSet.add(listener))
+			mInputListeners = null;
+	}
+
+	/**
+	 * Unregister InputListener
+	 */
+	public void unbind(InputListener listener) {
+		if (mInputListenerSet.remove(listener))
+			mInputListeners = null;
+	}
+
 	public void handleMotionEvent(MotionEvent e) {
-		mLayers.handleMotionEvent(e);
+
+		if (mInputListeners == null) {
+			mInputListeners = new InputListener[mInputListenerSet.size()];
+			mInputListenerSet.toArray(mInputListeners);
+		}
 
 		for (InputListener l : mInputListeners)
 			l.onMotionEvent(e);
