@@ -23,14 +23,13 @@ import android.widget.RelativeLayout.LayoutParams;
 public class AndroidMap extends Map {
 
 	private final MapView mMapView;
-	boolean mWaitRedraw;
+	private boolean mWaitRedraw;
 	final GLView mGLView;
 	boolean mPausing = false;
 
 	private final Runnable mRedrawRequest = new Runnable() {
 		@Override
 		public void run() {
-			mWaitRedraw = false;
 			redrawMapInternal(false);
 		}
 	};
@@ -61,7 +60,7 @@ public class AndroidMap extends Map {
 	}
 
 	@Override
-	public void updateMap(boolean requestRender) {
+	public synchronized void updateMap(boolean requestRender) {
 		if (requestRender && !mClearMap && !mPausing) // && mInitialized)
 			mGLView.requestRender();
 
@@ -72,15 +71,16 @@ public class AndroidMap extends Map {
 	}
 
 	@Override
-	public void render() {
+	public synchronized void render() {
 		if (mClearMap)
 			updateMap(false);
 		else
 			mGLView.requestRender();
 	}
 
-	void redrawMapInternal(boolean forceRedraw) {
+	synchronized void redrawMapInternal(boolean forceRedraw) {
 		boolean clear = mClearMap;
+		mWaitRedraw = false;
 
 		if (forceRedraw && !clear)
 			mGLView.requestRender();
@@ -104,7 +104,7 @@ public class AndroidMap extends Map {
 	}
 
 
-	public void pause(boolean pause) {
+	public synchronized void pause(boolean pause) {
 	    mPausing = pause;
     }
 
