@@ -99,7 +99,7 @@ public class PathLayer extends Layer {
 					ArrayList<GeoPoint> geopoints = mPoints;
 					double[] points = mPreprojected;
 
-					if (size * 2 > points.length) {
+					if (size * 2 >= points.length) {
 						points = mPreprojected = new double[size * 2];
 						mPPoints = new float[size * 2];
 					}
