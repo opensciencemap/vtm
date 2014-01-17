@@ -12,16 +12,22 @@ http://www.opensciencemap.org
   - bitmap: any quadtree-scheme tiles as texture
 - Backends for Android, Desktop and HTML5/WebGL (through libgdx and GWT)
 
-### Notes
-- checkout required libraries with 'git submodule init && git submodule update'
-- Projects are expected to be build within eclipse (maybe gradle in future)
-- To set up your own tile server for .vtm tiles see https://github.com/opensciencemap/TileStache/tree/master/TileStache/OSciMap4
+### Getting started
+```
+git clone https://github.com/opensciencemap/vtm
+cd vtm
+git submodule init && git submodule update
+ln -s ../../vtm/assets/styles vtm-android-app/assets/styles
+ln -s ../../vtm/assets/patterns vtm-android-app/assets/patterns
+```
+
+Then import projects into eclipse. To set up a tile server for .vtm tiles see https://github.com/opensciencemap/TileStache/tree/master/TileStache/OSciMap4
 
 ### Projects
 - **vtm** contains the core library
 - **vtm-android** Android backend - (no libgdx required)
 - **vtm-android-example** provides examples using **vtm-android**
-- **vtm-gdx** Common libgdx backend code
+- **vtm-gdx** common libgdx backend code
 - **vtm-gdx-desktop** Desktop application 
 - **vtm-gdx-html** HTML5/GWT application
 - **vtm-gdx-android** Android application using libgdx backend
