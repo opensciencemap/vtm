@@ -37,7 +37,12 @@
       android:name="org.oscim.android.test.PathOverlayActivity"
       android:label="@string/title_activity_map" >
     </activity>
-    
+  
+       
+     <activity
+      android:name="org.oscim.android.test.MarkerOverlayActivity"
+      android:label="@string/title_activity_map" >
+    </activity>
   </application>
 
 </manifest>
