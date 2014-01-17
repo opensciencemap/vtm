@@ -121,15 +121,26 @@ public class Color {
 	}
 
 	public static float rToFloat(int color) {
-	    return ((color >>> 16) & 0xff)/255f;
-    }
+		return ((color >>> 16) & 0xff) / 255f;
+	}
+
 	public static float gToFloat(int color) {
-	    return ((color >>> 8) & 0xff)/255f;
-    }
+		return ((color >>> 8) & 0xff) / 255f;
+	}
+
 	public static float bToFloat(int color) {
-	    return ((color) & 0xff)/255f;
-    }
+		return ((color) & 0xff) / 255f;
+	}
+
 	public static float aToFloat(int color) {
-	    return ((color >>> 24) & 0xff)/255f;
-    }
+		return ((color >>> 24) & 0xff) / 255f;
+	}
+
+	public static int rainbow(float pos) {
+		float i = 255 * pos;
+		int r = (int) Math.round(Math.sin(0.024 * i + 0) * 127 + 128);
+		int g = (int) Math.round(Math.sin(0.024 * i + 2) * 127 + 128);
+		int b = (int) Math.round(Math.sin(0.024 * i + 4) * 127 + 128);
+		return 0xff000000 | (r << 16) | (g << 8) | b;
+	}
 }
