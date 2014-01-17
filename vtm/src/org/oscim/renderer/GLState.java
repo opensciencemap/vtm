@@ -35,6 +35,7 @@ public class GLState {
 
 	static void init(GL20 gl) {
 		GL = gl;
+
 		vertexArray[0] = false;
 		vertexArray[1] = false;
 		blend = false;
@@ -44,6 +45,7 @@ public class GLState {
 
 		GL.glDisable(GL20.GL_STENCIL_TEST);
 		GL.glDisable(GL20.GL_DEPTH_TEST);
+		GL.glDisable(GL20.GL_BLEND);
 	}
 
 	public static boolean useProgram(int shaderProgram) {

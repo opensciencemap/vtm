@@ -348,8 +348,8 @@ public final class LineTexLayer extends RenderElement {
 			m.mvp.setAsUniform(hMatrix);
 
 			int maxIndices = MapRenderer.maxQuads * 6;
-			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER,
-			                MapRenderer.mQuadIndicesID);
+
+			MapRenderer.bindQuadIndicesVBO(true);
 
 			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
 			GL.glVertexAttribPointer(hVertexFlip, 1,
@@ -446,7 +446,7 @@ public final class LineTexLayer extends RenderElement {
 				//GlUtils.checkGlError(TAG);
 			}
 
-			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+			MapRenderer.bindQuadIndicesVBO(false);
 
 			GL.glDisableVertexAttribArray(hVertexPosition0);
 			GL.glDisableVertexAttribArray(hVertexPosition1);

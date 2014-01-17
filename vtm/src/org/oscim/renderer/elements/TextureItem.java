@@ -133,13 +133,13 @@ public class TextureItem extends Inlist<TextureItem> {
 				pool = null;
 			}
 
-			int[] textureIds = GLUtils.glGenTextures(num);
-
-			for (int i = 0; i < num; i++) {
-				TextureItem to = new TextureItem(textureIds[i]);
-				initTexture(to);
-
-				pool = Inlist.push(pool, to);
+			if (num > 0) {
+				int[] textureIds = GLUtils.glGenTextures(num);
+				for (int i = 0; i < num; i++) {
+					TextureItem to = new TextureItem(textureIds[i]);
+					initTexture(to);
+					pool = Inlist.push(pool, to);
+				}
 			}
 
 			fill = num;

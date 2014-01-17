@@ -207,7 +207,7 @@ public class BitmapLayer extends TextureLayer {
 
 			m.mvp.setAsUniform(hTextureMVMatrix);
 
-			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, MapRenderer.mQuadIndicesID);
+			MapRenderer.bindQuadIndicesVBO(true);
 
 			for (TextureItem ti = tl.textures; ti != null; ti = ti.next) {
 
@@ -235,7 +235,7 @@ public class BitmapLayer extends TextureLayer {
 				}
 			}
 
-			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+			MapRenderer.bindQuadIndicesVBO(false);
 
 			return renderElement.next;
 		}

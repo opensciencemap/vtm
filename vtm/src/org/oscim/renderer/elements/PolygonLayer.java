@@ -22,6 +22,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -154,7 +155,7 @@ public final class PolygonLayer extends RenderElement {
 
 				// Set up the program for rendering polygons
 				if (i == 0) {
-					if (MapRenderer.debugView)
+					if (GLAdapter.debugView)
 						polygonProgram[i] = GLUtils.createProgram(polygonVertexShaderZ,
 						                                          polygonFragmentShaderZ);
 					else

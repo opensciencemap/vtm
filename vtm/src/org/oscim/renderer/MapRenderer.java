@@ -24,6 +24,7 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
@@ -41,12 +42,10 @@ public class MapRenderer {
 
 	/** scale factor used for short vertices */
 	public static final float COORD_SCALE = 8.0f;
-
-	private static Map mMap;
 	public static int screenWidth, screenHeight;
 
-	private static Viewport mViewport;
-	private static MapPosition mMapPosition;
+	private final Map mMap;
+	private final MapPosition mMapPosition;
 
 	public class Matrices {
 
@@ -81,16 +80,15 @@ public class MapRenderer {
 		}
 	}
 
-	private static Matrices mMatrices;
+	private final Matrices mMatrices;
 
-	// private
-	static float[] mClearColor = null;
+	private static float[] mClearColor = null;
 
-	public static int mQuadIndicesID;
+	private static int mQuadIndicesID;
 	private static int mQuadVerticesID;
 	public final static int maxQuads = 64;
 
-	private static boolean mUpdateColor = false;
+	private static volatile boolean mUpdateColor = false;
 
 	// drawlock to synchronize Main- and GL-Thread
 	// static ReentrantLock tilelock = new ReentrantLock();
@@ -144,7 +142,6 @@ public class MapRenderer {
 	public MapRenderer(Map map) {
 
 		mMap = map;
-		mViewport = map.getViewport();
 		mMapPosition = new MapPosition();
 
 		mMatrices = new Matrices();
@@ -153,6 +150,7 @@ public class MapRenderer {
 		// FIXME should be done in 'destroy' method
 		// clear all previous vbo refs
 		BufferObject.clear();
+		setBackgroundColor(Color.DKGRAY);
 	}
 
 	public static void setBackgroundColor(int color) {
@@ -223,7 +221,7 @@ public class MapRenderer {
 		mBufferPool.releaseBuffers();
 	}
 
-	private static void draw() {
+	private void draw() {
 
 		if (mUpdateColor) {
 			float cc[] = mClearColor;
@@ -238,33 +236,34 @@ public class MapRenderer {
 		        | GL20.GL_STENCIL_BUFFER_BIT);
 
 		GLState.blend(false);
-		GL.glDisable(GL20.GL_BLEND);
+		GLState.bindTex2D(-1);
+		GLState.useProgram(-1);
 
 		boolean changed = false;
 
 		MapPosition pos = mMapPosition;
 
-		synchronized (mViewport) {
+		Viewport viewport = mMap.getViewport();
+
+		synchronized (viewport) {
 			mMap.getAnimator().updateAnimation();
 
 			// get current MapPosition
-			changed = mViewport.getMapPosition(pos);
+			changed = viewport.getMapPosition(pos);
 
 			if (changed)
-				mViewport.getMapViewProjection(mMatrices.mapPlane);
+				viewport.getMapViewProjection(mMatrices.mapPlane);
 
-			mViewport.getMatrix(mMatrices.view, mMatrices.proj, mMatrices.viewproj);
+			viewport.getMatrix(mMatrices.view, mMatrices.proj, mMatrices.viewproj);
 
-			if (debugView) {
+			if (GLAdapter.debugView) {
+				// modify this to scale only the view, to see
+				// which tiles are rendered
 				mMatrices.mvp.setScale(0.5f, 0.5f, 1);
 				mMatrices.viewproj.multiplyLhs(mMatrices.mvp);
+				mMatrices.proj.multiplyLhs(mMatrices.mvp);
 			}
 		}
-
-		//log.debug("begin frame");
-		GLState.bindTex2D(-1);
-		GLState.useProgram(-1);
-		//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 
 		/* update layers */
 		LayerRenderer[] layers = mMap.getLayers().getLayerRenderer();
@@ -279,11 +278,11 @@ public class MapRenderer {
 
 			renderer.update(pos, changed, mMatrices);
 
+			if (renderer.isReady)
+				renderer.render(pos, mMatrices);
+
 			if (GLAdapter.debug)
 				GLUtils.checkGlError(renderer.getClass().getName());
-
-			if (renderer.isReady)
-				renderer.render(mMapPosition, mMatrices);
 		}
 
 		if (GLUtils.checkGlOutOfMemory("finish")) {
@@ -297,7 +296,7 @@ public class MapRenderer {
 	}
 
 	public void onSurfaceChanged(int width, int height) {
-		log.debug("SurfaceChanged:" + mNewSurface + " " + width + "x" + height);
+		log.debug("SurfaceChanged: " + mNewSurface + " " + width + "x" + height);
 
 		if (width <= 0 || height <= 0)
 			return;
@@ -305,14 +304,7 @@ public class MapRenderer {
 		screenWidth = width;
 		screenHeight = height;
 
-		mViewport.getMatrix(null, mMatrices.proj, null);
-
-		if (debugView) {
-			// modify this to scale only the view, to see better which tiles
-			// are rendered
-			mMatrices.mvp.setScale(0.5f, 0.5f, 1);
-			mMatrices.proj.multiplyLhs(mMatrices.mvp);
-		}
+		mMap.getViewport().getMatrix(null, mMatrices.proj, null);
 
 		GL.glViewport(0, 0, width, height);
 		GL.glScissor(0, 0, width, height);
@@ -381,8 +373,6 @@ public class MapRenderer {
 
 	public void onSurfaceCreated() {
 		GL = GLAdapter.get();
-
-		// log.debug("surface created");
 		// log.debug(GL.glGetString(GL20.GL_EXTENSIONS));
 
 		GLState.init(GL);
@@ -393,7 +383,6 @@ public class MapRenderer {
 
 		// classes that require GL context for initialization
 		ElementLayers.initRenderer(GL);
-
 		LayerRenderer.init(GL);
 
 		mNewSurface = true;
@@ -401,18 +390,26 @@ public class MapRenderer {
 
 	private boolean mNewSurface;
 
-	public static final boolean debugView = false;
-
-	public static int getQuadIndicesVBO() {
-		return mQuadIndicesID;
+	/**
+	 * Bind VBO for a simple quad. Handy for simple custom RenderLayers
+	 * Vertices: float[]{ -1, -1, -1, 1, 1, -1, 1, 1 }
+	 * 
+	 * @param bind - true to activate, false to unbind
+	 */
+	public static void bindQuadVertexVBO(int location, boolean bind) {
+		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mQuadVerticesID);
+		if (location > 0)
+			GL.glVertexAttribPointer(location, 2, GL20.GL_FLOAT, false, 0, 0);
 	}
 
 	/**
-	 * Get VBO ID for a simple quad. Handy for simple custom RenderLayers
-	 * Vertices: { -1, -1, -1, 1, 1, -1, 1, 1 }
-	 */
-	public static int getQuadVertexVBO() {
-		return mQuadVerticesID;
+	 * Bind indices for rendering up to 64 (MapRenderer.maxQuads) in
+	 * one draw call. Vertex order is 0-1-2 2-1-3
+	 * 
+	 * @param bind - true to activate, false to unbind (dont forget!)
+	 * */
+	public static void bindQuadIndicesVBO(boolean bind) {
+		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, bind ? mQuadIndicesID : 0);
 	}
 
 }

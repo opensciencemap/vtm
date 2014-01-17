@@ -18,6 +18,9 @@ package org.oscim.backend;
 
 public class GLAdapter {
 
+	public final static boolean debug = false;
+	public final static boolean debugView = false;
+
 	/** The instance provided by backend */
 	public static GL20 g;
 
@@ -25,8 +28,6 @@ public class GLAdapter {
 	public static boolean GDX_WEBGL_QUIRKS;
 
 	public static boolean NON_PREMUL_CANVAS;
-
-	public final static boolean debug = true;
 
 	public static GL20 get() {
 		if (g == null)
