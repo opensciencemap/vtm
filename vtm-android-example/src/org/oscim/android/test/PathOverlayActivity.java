@@ -1,6 +1,8 @@
 /*
  * Copyright 2014 Hannes Janetzek
  *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later version.
@@ -19,10 +21,10 @@ import java.util.List;
 
 import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.PathLayer;
 
-import android.graphics.Color;
 import android.os.Bundle;
 
 public class PathOverlayActivity extends MapActivity {
@@ -36,36 +38,36 @@ public class PathOverlayActivity extends MapActivity {
 
 		mMapView = (MapView) findViewById(R.id.mapView);
 
-
-		for (double lon = -180; lon <= 180; lon += 10) {
-			PathLayer pathLayer = new PathLayer(mMap, Color.CYAN);
-			pathLayer.addGreatCircle(new GeoPoint(-90, lon), new GeoPoint(90, lon));
-			mMap.getLayers().add(pathLayer);
-
-		}
-
-		for (double lat = -90; lat <= 90; lat += 10) {
+		for (double lon = -180; lon < 180; lon += 5) {
 			List<GeoPoint> pts = new ArrayList<GeoPoint>();
 
-			for (double lon = -180; lon <= 180; lon += 10)
-				pts.add(new GeoPoint(lat, lon));
+			for (double lat = -90; lat <= 90; lat += 5)
+				//pts.add(new GeoPoint(lat, lon));
+				pts.add(new GeoPoint(lat, Math.sin((lat + 180) / 360 * Math.PI) * lon));
 
-			PathLayer pathLayer = new PathLayer(mMap, Color.CYAN);
+			PathLayer pathLayer = new PathLayer(mMap,
+			                                    Color.rainbow((float) (lon + 180) / 360),
+			                                    3);
 			pathLayer.setPoints(pts);
 
 			mMap.getLayers().add(pathLayer);
 		}
 
+		for (double lat = -90; lat <= 90; lat += 5) {
+			List<GeoPoint> pts = new ArrayList<GeoPoint>();
 
-		for (double lat = -90; lat <= 90; lat += 10) {
-			PathLayer pathLayer = new PathLayer(mMap, Color.LTGRAY, 4);
-			pathLayer.addGreatCircle(new GeoPoint(lat, -90), new GeoPoint(lat, 0));
+			for (double lon = -180; lon <= 180; lon += 1)
+				//pts.add(new GeoPoint(lat, lon));
+				pts.add(new GeoPoint(Math.sin(lon/6 * Math.PI) * 3 + lat, lon));
+
+			PathLayer pathLayer = new PathLayer(mMap,
+			                                    Color.rainbow((float) (lat + 90) / 180),
+			                                    3);
+			pathLayer.setPoints(pts);
+
 			mMap.getLayers().add(pathLayer);
 		}
 
-		for (double lat = -90; lat <= 90; lat += 10) {
-			PathLayer pathLayer = new PathLayer(mMap, Color.LTGRAY, 4);
-			mMap.getLayers().add(pathLayer);
-		}
+		mMap.setMapPosition(0, 0, 1);
 	}
 }
