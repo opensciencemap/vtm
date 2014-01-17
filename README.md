@@ -21,7 +21,9 @@ ln -s ../../vtm/assets/styles vtm-android-app/assets/styles
 ln -s ../../vtm/assets/patterns vtm-android-app/assets/patterns
 ```
 
-Then import projects into eclipse. To set up a tile server for .vtm tiles see https://github.com/opensciencemap/TileStache/tree/master/TileStache/OSciMap4
+Then import projects into eclipse. Dont forget 'git submodule update' after git pull/checkout!
+
+To set up a tile server for .vtm tiles see https://github.com/opensciencemap/TileStache/tree/master/TileStache/OSciMap4
 
 ### Projects
 - **vtm** contains the core library
