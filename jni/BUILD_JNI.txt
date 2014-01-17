@@ -7,16 +7,16 @@
 javac -cp ../vtm-ext-libs/gdx/gdx-jnigen.jar jni/builder/JniBuilder.java
 java -cp ../vtm-ext-libs/gdx/gdx-jnigen.jar:../vtm-ext-libs/gdx/gdx-jnigen-sources.jar:jni/builder JniBuilder
 
-# - to build android:
+## to build android:
 export ANDROID_HOME=/home/jeff/android-sdk
 export NDK_HOME=/home/jeff/android-ndk-r8d
 
-# - compile
+## compile
 cd jni
 ant -v
 
-# - copy vtm/libs/armeabi* to vtm-android/libs
-rm -rf ../../vtm-android/libs/*
-cp -r ../libs/armeabi* ../../vtm-android/libs/
+## copy vtm/libs/armeabi* to vtm-android/libs
+rm -rf ../../vtm-ext-libs/vtm-android/libs/*
+cp -r ../libs/armeabi* ../../vtm-ext-libs/vtm-android/libs/
 
 
