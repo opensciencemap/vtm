@@ -52,8 +52,9 @@ public class AsyncExecutor implements Disposable {
 	 * 
 	 * @param task the task to execute asynchronously
 	 */
-	public void post(Runnable task) {
+	public boolean post(Runnable task) {
 		Gdx.app.postRunnable(task);
+		return true;
 	}
 
 	/**

@@ -19,6 +19,7 @@ package org.oscim.utils.async;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
@@ -78,8 +79,13 @@ public class AsyncExecutor {
 	 * 
 	 * @param task the task to execute asynchronously
 	 */
-	public void post(Runnable task) {
-		executor.execute(task);
+	public boolean post(Runnable task) {
+		try {
+			executor.execute(task);
+		} catch (RejectedExecutionException e) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
