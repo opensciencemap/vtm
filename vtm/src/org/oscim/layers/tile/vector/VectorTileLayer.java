@@ -56,9 +56,7 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 	 * @return true when new TileSource was set (has changed)
 	 */
 	public boolean setTileSource(TileSource tileSource) {
-
 		pauseLoaders(true);
-
 		mTileManager.clearJobs();
 
 		if (mTileSource != null) {
@@ -94,6 +92,7 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 	 */
 	public void setRenderTheme(IRenderTheme theme) {
 		pauseLoaders(true);
+		mTileManager.clearJobs();
 
 		for (VectorTileLoader g : mTileLoader)
 			g.setRenderTheme(theme);
