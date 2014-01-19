@@ -4,5 +4,8 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_map">MapActivity</string>
+    <string name="theme_default">Default</string>
+    <string name="theme_tubes">Tubes</string>
+    <string name="theme_osmarender">Osmarender</string>
 
 </resources>
