@@ -280,6 +280,10 @@ public class MapRenderer {
 			BufferObject.checkBufferUsage(true);
 			// FIXME also throw out some textures etc
 		}
+		if (rerender) {
+			mMap.render();
+			rerender = false;
+		}
 	}
 
 	public static int depthOffset(MapTile t) {
@@ -403,4 +407,13 @@ public class MapRenderer {
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, bind ? mQuadIndicesID : 0);
 	}
 
+	private static boolean rerender;
+
+	/**
+	 * Trigger next redraw from GL-Thread. This should be used to animate
+	 * LayerRenderers instead of calling Map.render().
+	 */
+	public static void animate() {
+		rerender = true;
+	}
 }
