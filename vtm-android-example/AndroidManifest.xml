@@ -10,7 +10,7 @@
 
   <uses-sdk
     android:minSdkVersion="10"
-    android:targetSdkVersion="18" />
+    android:targetSdkVersion="10" />
 
   <application
     android:allowBackup="true"
@@ -30,17 +30,26 @@
     
     <activity
       android:name="org.oscim.android.test.SimpleMapActivity"
+      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
       android:label="@string/title_activity_map" >
     </activity>
     
      <activity
       android:name="org.oscim.android.test.PathOverlayActivity"
+      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
       android:label="@string/title_activity_map" >
     </activity>
   
        
      <activity
       android:name="org.oscim.android.test.MarkerOverlayActivity"
+      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+      android:label="@string/title_activity_map" >
+    </activity>
+    
+      <activity
+      android:name="org.oscim.android.test.BitmapTileMapActivity"
+      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
       android:label="@string/title_activity_map" >
     </activity>
   </application>
