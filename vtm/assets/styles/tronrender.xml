@@ -697,8 +697,7 @@
               <m v="residential|road|unclassified|living_street">
                 <line use="residential" />
                 <outline use="1" />
-
-                <outline use="glow" />
+                 <!-- <outline use="glow" />-->
                 <text use="road" />
               </m>
             </m>
@@ -706,9 +705,7 @@
             <m v="tertiary|secondary_link">
               <line use="tertiary" />
               <outline use="1" />
-
-              <outline use="glow" />
-
+              <!-- <outline use="glow" />-->
               <text use="road" />
             </m>
 
@@ -1215,7 +1212,7 @@
 
 
     <m k="historic">
-      <circle radius="3" fill="#4040ff" stroke="#606060" width="1.5" />
+      <circle radius="3" fill="#4040ff" stroke="#606060" stroke-width="1.5" />
 
       <m zoom-min="17">
         <text use="caption-small-blue" />
@@ -1260,7 +1257,7 @@
     </m>
 
 
-    <m k="place" firt="true">
+    <m k="place" select="first">
       <m v="hamlet" zoom-min="13">
         <caption k="name" style="bold" size="13" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
       </m>
