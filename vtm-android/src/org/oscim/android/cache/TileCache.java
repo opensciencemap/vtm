@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -108,9 +107,14 @@ public class TileCache implements ITileCache {
 			mDatabase.close();
 	}
 
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 	public TileCache(Context context, String cacheDirectory, String dbName) {
 
 		dbHelper = new SQLiteHelper(context);
+
+		if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+			dbHelper.setWriteAheadLoggingEnabled(true);
+
 		mDatabase = dbHelper.getWritableDatabase();
 
 		mStmtGetTile = mDatabase.compileStatement("" +
@@ -154,7 +158,7 @@ public class TileCache implements ITileCache {
 	class SQLiteHelper extends SQLiteOpenHelper {
 
 		private static final String DATABASE_NAME = "tile.db";
-		private static final int DATABASE_VERSION = 3;
+		private static final int DATABASE_VERSION = 8;
 
 		private static final String DATABASE_CREATE =
 		        "CREATE TABLE "
@@ -209,13 +213,12 @@ public class TileCache implements ITileCache {
 			mStmtPutTile.bindBlob(6, bytes);
 
 			mStmtPutTile.execute();
-
 			mStmtPutTile.clearBindings();
 		}
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	public synchronized TileReader getTileApi11(Tile tile) {
+	public TileReader getTileApi11(Tile tile) {
 		InputStream in = null;
 
 		mStmtGetTile.bindLong(1, tile.tileX);
@@ -242,8 +245,8 @@ public class TileCache implements ITileCache {
 	@Override
 	public synchronized TileReader getTile(Tile tile) {
 
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
-			return getTileApi11(tile);
+		//if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
+		//	return getTileApi11(tile);
 
 		mQueryVals[0] = String.valueOf(tile.zoomLevel);
 		mQueryVals[1] = String.valueOf(tile.tileX);
@@ -268,12 +271,7 @@ public class TileCache implements ITileCache {
 		return new CacheTileReader(tile, in, Integer.MAX_VALUE);
 	}
 
-	public SQLiteDatabase open() throws SQLException {
-		return dbHelper.getWritableDatabase();
-	}
-
 	@Override
 	public void setCacheSize(long size) {
-		// TODO Auto-generated method stub
 	}
 }

@@ -24,6 +24,8 @@ import org.oscim.android.MapView;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.PathLayer;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer;
+import org.oscim.layers.tile.bitmap.StamenTonerTiles;
 
 import android.os.Bundle;
 
@@ -37,6 +39,9 @@ public class PathOverlayActivity extends MapActivity {
 		setContentView(R.layout.activity_map);
 
 		mMapView = (MapView) findViewById(R.id.mapView);
+		registerMapView(mMapView);
+
+		mMap.getLayers().add(new BitmapTileLayer(mMap, StamenTonerTiles.INSTANCE, 20));
 
 		for (double lon = -180; lon < 180; lon += 5) {
 			List<GeoPoint> pts = new ArrayList<GeoPoint>();

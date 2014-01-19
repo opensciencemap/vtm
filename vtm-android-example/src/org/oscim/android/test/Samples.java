@@ -36,6 +36,7 @@ public class Samples extends Activity {
 		setContentView(R.layout.activity_samples);
 		LinearLayout linearLayout = (LinearLayout) findViewById(R.id.samples);
 		linearLayout.addView(createButton(SimpleMapActivity.class));
+		linearLayout.addView(createButton(BitmapTileMapActivity.class));
 		linearLayout.addView(createButton(PathOverlayActivity.class));
 		linearLayout.addView(createButton(MarkerOverlayActivity.class));
 	}
