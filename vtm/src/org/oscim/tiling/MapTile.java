@@ -61,6 +61,8 @@ public class MapTile extends Tile {
 	 */
 	public final static byte STATE_ERROR = 1 << 3;
 
+	public final static byte STATE_CANCEL = 1 << 4;
+
 	/**
 	 * absolute tile coordinates: tileX,Y / Math.pow(2, zoomLevel)
 	 */
@@ -89,7 +91,7 @@ public class MapTile extends Tile {
 	}
 
 	/**
-	 * Tile is in view region. Set by GLRenderer.
+	 * Tile is in view region. Set by TileRenderer.
 	 */
 	public boolean isVisible;
 
@@ -100,7 +102,6 @@ public class MapTile extends Tile {
 
 	/**
 	 * to avoid drawing a tile twice per frame
-	 * FIXME what if multiple layers use the same tile?
 	 */
 	int lastDraw = 0;
 

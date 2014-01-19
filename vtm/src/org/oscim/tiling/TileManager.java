@@ -17,9 +17,9 @@
 
 package org.oscim.tiling;
 
+import static org.oscim.tiling.MapTile.STATE_CANCEL;
 import static org.oscim.tiling.MapTile.STATE_LOADING;
 import static org.oscim.tiling.MapTile.STATE_NEW_DATA;
-import static org.oscim.tiling.MapTile.STATE_NONE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +29,6 @@ import org.oscim.core.Tile;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.QuadTree;
@@ -383,13 +382,14 @@ public class TileManager {
 		if (t == null)
 			return;
 
-		t.clear();
+		synchronized (t) {
+			// still belongs to TileLoader thread
+			if (t.state != STATE_LOADING)
+				t.clear();
 
-		mIndex.remove(t);
-
-		// QuadTree.remove(t);
-		t.state = STATE_NONE;
-
+			t.state = STATE_CANCEL;
+			mIndex.remove(t);
+		}
 		mTilesCount--;
 	}
 
@@ -527,8 +527,7 @@ public class TileManager {
 	 * @return caller does not care
 	 */
 	public void jobCompleted(MapTile tile, boolean success) {
-
-		if (!success) {
+		if (!success || tile.state == STATE_CANCEL) {
 			tile.clear();
 			return;
 		}
