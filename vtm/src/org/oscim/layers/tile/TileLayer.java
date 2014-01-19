@@ -91,11 +91,6 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 		for (T loader : mTileLoader) {
 			loader.pause();
 			loader.interrupt();
-			try {
-				loader.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 			loader.cleanup();
 		}
 	}

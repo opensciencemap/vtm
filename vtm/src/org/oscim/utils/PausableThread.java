@@ -57,6 +57,11 @@ public abstract class PausableThread extends Thread {
 		synchronized (this) {
 			super.interrupt();
 		}
+		//try {
+		//	join();
+		//} catch (InterruptedException e) {
+		//	e.printStackTrace();
+		//}
 	}
 
 	/**
