@@ -24,9 +24,12 @@ import org.oscim.map.Map;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
 import org.oscim.tiling.TileRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class TileLayer<T extends TileLoader> extends Layer implements Map.UpdateListener {
-	//static final Logger log = LoggerFactory.getLogger(TileLayer.class);
+	static final Logger log = LoggerFactory.getLogger(TileLayer.class);
+
 	private final static int MAX_ZOOMLEVEL = 17;
 	private final static int MIN_ZOOMLEVEL = 2;
 	private final static int CACHE_LIMIT = 250;
@@ -36,8 +39,6 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 
 	protected final int mNumTileLoader = 4;
 	protected final ArrayList<T> mTileLoader;
-
-	protected boolean mInitial = true;
 
 	public TileLayer(Map map) {
 		this(map, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL, CACHE_LIMIT);
@@ -71,10 +72,13 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 
 	@Override
 	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-		if (clear || mInitial) {
-			mRenderLayer.clearTiles();
-			mTileManager.init(mInitial);
-			mInitial = false;
+		if (clear) {
+			// sync with TileRenderer
+			synchronized (mRenderLayer) {
+				mRenderLayer.clearTiles();
+				mTileManager.init();
+			}
+
 			changed = true;
 		}
 
@@ -87,16 +91,13 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 		for (T loader : mTileLoader) {
 			loader.pause();
 			loader.interrupt();
+			try {
+				loader.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			loader.cleanup();
-
-			//try {
-			//	tileWorker.join(10000);
-			//} catch (InterruptedException e) {
-			//	// restore the interrupted status
-			//	Thread.currentThread().interrupt();
-			//}
 		}
-		mTileManager.destroy();
 	}
 
 	void notifyLoaders() {
@@ -110,11 +111,12 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 			if (!loader.isPausing())
 				loader.pause();
 		}
-		if (wait) {
-			for (T loader : mTileLoader) {
-				if (!loader.isPausing())
-					loader.awaitPausing();
-			}
+		if (!wait)
+			return;
+
+		for (T loader : mTileLoader) {
+			if (!loader.isPausing())
+				loader.awaitPausing();
 		}
 	}
 

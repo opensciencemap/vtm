@@ -64,8 +64,11 @@ public class TileRenderer extends LayerRenderer {
 		mAlpha = alpha;
 	}
 
+	/**
+	 * synced with clearTiles
+	 */
 	@Override
-	protected void update(MapPosition pos, boolean positionChanged, Matrices m) {
+	protected synchronized void update(MapPosition pos, boolean positionChanged, Matrices m) {
 
 		if (mAlpha == 0) {
 			mTileManager.releaseTiles(mDrawTiles);
@@ -106,9 +109,7 @@ public class TileRenderer extends LayerRenderer {
 	public void clearTiles() {
 		// Clear all references to MapTiles as all current
 		// tiles will also be removed from TileManager.
-		synchronized (MapRenderer.drawlock) {
-			mDrawTiles = new TileSet();
-		}
+		mDrawTiles = new TileSet();
 	}
 
 	/** compile tile layer data and upload to VBOs */

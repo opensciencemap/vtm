@@ -42,6 +42,7 @@ public abstract class TileLoader extends PausableThread {
 
 	@Override
 	protected void doWork() {
+
 		MapTile tile = mTileManager.getTileJob();
 
 		if (tile == null)
@@ -53,7 +54,7 @@ public abstract class TileLoader extends PausableThread {
 			success = executeJob(tile);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return;
+			success = false;
 		}
 
 		if (isInterrupted())

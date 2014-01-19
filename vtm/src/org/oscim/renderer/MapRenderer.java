@@ -90,10 +90,6 @@ public class MapRenderer {
 
 	private static volatile boolean mUpdateColor = false;
 
-	// drawlock to synchronize Main- and GL-Thread
-	// static ReentrantLock tilelock = new ReentrantLock();
-	public static Object drawlock = new Object();
-
 	public static long frametime;
 
 	// Do not use the same buffer to upload data within a frame twice
@@ -210,13 +206,8 @@ public class MapRenderer {
 	}
 
 	public void onDrawFrame() {
-
-		// prevent main thread recreating all tiles (updateMap)
-		// while rendering is going on.
-		synchronized (drawlock) {
-			frametime = System.currentTimeMillis();
-			draw();
-		}
+		frametime = System.currentTimeMillis();
+		draw();
 
 		mBufferPool.releaseBuffers();
 	}
