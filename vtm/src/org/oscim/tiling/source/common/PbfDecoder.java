@@ -19,13 +19,12 @@ package org.oscim.tiling.source.common;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.oscim.core.Tile;
-import org.oscim.tiling.source.ITileDataSink;
+import org.oscim.tiling.source.ITileDecoder;
 import org.oscim.utils.UTF8Decoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class PbfDecoder {
+public abstract class PbfDecoder implements ITileDecoder {
 	static final Logger log = LoggerFactory.getLogger(PbfDecoder.class);
 
 	private final static int S1 = 7;
@@ -86,9 +85,6 @@ public abstract class PbfDecoder {
 	public PbfDecoder() {
 		mStringDecoder = new UTF8Decoder();
 	}
-
-	public abstract boolean decode(Tile tile, ITileDataSink sink,
-	        InputStream is, int contentLength) throws IOException;
 
 	public void setInputStream(InputStream is, int contentLength) {
 		mInputStream = is;

@@ -22,7 +22,7 @@ import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.common.LwHttp;
-import org.oscim.tiling.source.common.PbfTileDataSource;
+import org.oscim.tiling.source.common.UrlTileDataSource;
 import org.oscim.tiling.source.common.UrlTileSource;
 
 public class MapnikVectorTileSource extends UrlTileSource {
@@ -32,7 +32,7 @@ public class MapnikVectorTileSource extends UrlTileSource {
 		return new TileDataSource(this, mUrl);
 	}
 
-	static class TileDataSource extends PbfTileDataSource {
+	static class TileDataSource extends UrlTileDataSource {
 
 		public TileDataSource(TileSource tileSource, URL url) {
 			super(new TileDecoder(), tileSource.tileCache);

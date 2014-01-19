@@ -76,9 +76,9 @@ public class LwHttp {
 			mHttpRequest.abort();
 	}
 
-	private PbfTileDataSource mDataSource;
+	private UrlTileDataSource mDataSource;
 
-	public boolean sendRequest(Tile tile, PbfTileDataSource dataSource) throws IOException {
+	public boolean sendRequest(Tile tile, UrlTileDataSource dataSource) throws IOException {
 		mDataSource = dataSource;
 
 		byte[] request = mRequestBuffer;

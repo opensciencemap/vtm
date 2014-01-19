@@ -21,7 +21,7 @@ import java.net.URL;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.common.LwHttp;
-import org.oscim.tiling.source.common.PbfTileDataSource;
+import org.oscim.tiling.source.common.UrlTileDataSource;
 import org.oscim.tiling.source.common.UrlTileSource;
 
 public class OSciMap4TileSource extends UrlTileSource {
@@ -31,7 +31,7 @@ public class OSciMap4TileSource extends UrlTileSource {
 		return new TileDataSource(this, mUrl);
 	}
 
-	class TileDataSource extends PbfTileDataSource {
+	class TileDataSource extends UrlTileDataSource {
 		public TileDataSource(TileSource tileSource, URL url) {
 			super(new TileDecoder(), tileSource.tileCache);
 			//mConn = new LwHttp(url, "application/x-protobuf", "vtm", false);

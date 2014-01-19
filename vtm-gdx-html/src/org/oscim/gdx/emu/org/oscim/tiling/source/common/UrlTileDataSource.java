@@ -21,6 +21,7 @@ import org.oscim.tiling.MapTile;
 import org.oscim.tiling.source.ITileCache;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
+import org.oscim.tiling.source.ITileDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +29,13 @@ import org.slf4j.LoggerFactory;
  *
  *
  */
-public abstract class PbfTileDataSource implements ITileDataSource {
-	static final Logger log = LoggerFactory.getLogger(PbfTileDataSource.class);
+public abstract class UrlTileDataSource implements ITileDataSource {
+	static final Logger log = LoggerFactory.getLogger(UrlTileDataSource.class);
 
 	protected LwHttp mConn;
-	protected final PbfDecoder mTileDecoder;
+	protected final ITileDecoder mTileDecoder;
 
-	public PbfTileDataSource(PbfDecoder tileDecoder, ITileCache cache) {
+	public UrlTileDataSource(ITileDecoder tileDecoder, ITileCache cache) {
 		mTileDecoder = tileDecoder;
 	}
 
