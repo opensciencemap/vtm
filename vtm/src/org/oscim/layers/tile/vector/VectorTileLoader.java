@@ -16,6 +16,8 @@
  */
 package org.oscim.layers.tile.vector;
 
+import java.util.concurrent.CancellationException;
+
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -131,14 +133,18 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		mTile = tile;
 		mTile.layers = new ElementLayers();
-
-		// query database, which calls 'process' callback
-		QueryResult result = mTileDataSource.executeQuery(mTile, this);
-
-		mTile = null;
-
-		clearState();
-
+		QueryResult result = null;
+		try {
+			// query database, which calls 'process' callback
+			result = mTileDataSource.executeQuery(mTile, this);
+		} catch (CancellationException e) {
+			log.debug("canceled {}", mTile);
+		} catch (Exception e) {
+			log.debug("{}", e);
+		} finally {
+			mTile = null;
+			clearState();
+		}
 		return (result == QueryResult.SUCCESS);
 	}
 
@@ -205,7 +211,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void process(MapElement element) {
+
 		clearState();
+
+		if (isCanceled())
+			throw new CancellationException();
 
 		mElement = element;
 

@@ -30,10 +30,6 @@ import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- *
- */
 public abstract class PbfTileDataSource implements ITileDataSource {
 	static final Logger log = LoggerFactory.getLogger(PbfTileDataSource.class);
 
@@ -48,66 +44,55 @@ public abstract class PbfTileDataSource implements ITileDataSource {
 
 	@Override
 	public QueryResult executeQuery(MapTile tile, ITileDataSink sink) {
-		boolean success = true;
 
 		ITileCache.TileWriter cacheWriter = null;
 
 		if (mTileCache != null) {
 			ITileCache.TileReader c = mTileCache.getTile(tile);
 			if (c == null) {
-				// create new cache entry
 				cacheWriter = mTileCache.writeTile(tile);
-				mConn.setOutputStream(cacheWriter.getOutputStream());
 			} else {
+				InputStream is = c.getInputStream();
 				try {
-					InputStream is = c.getInputStream();
 					if (mTileDecoder.decode(tile, sink, is, c.getBytes())) {
-						IOUtils.closeQuietly(is);
 						return QueryResult.SUCCESS;
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
+				} finally {
+					IOUtils.closeQuietly(is);
 				}
-				log.debug(tile + " Cache read failed");
 			}
 		}
 
+		boolean success = false;
 		try {
+			if (cacheWriter != null)
+				mConn.setOutputStream(cacheWriter.getOutputStream());
+
 			InputStream is;
 			if (!mConn.sendRequest(tile)) {
-				log.debug(tile + " Request failed");
-				success = false;
-			} else if ((is = mConn.readHeader()) != null) {
+				log.debug("{} Request failed", tile);
+			} else if ((is = mConn.readHeader()) == null) {
+				log.debug("{} Network Error", tile);
+			} else {
 				int bytes = mConn.getContentLength();
 				success = mTileDecoder.decode(tile, sink, is, bytes);
-				if (!success)
-					log.debug(tile + " Decoding failed");
-			} else {
-				log.debug(tile + " Network Error");
-				success = false;
 			}
 		} catch (SocketException e) {
-			log.debug(tile + " Socket exception: " + e.getMessage());
-			success = false;
+			log.debug("{} Socket exception: {}", tile, e.getMessage());
 		} catch (SocketTimeoutException e) {
-			log.debug(tile + " Socket Timeout");
-			success = false;
+			log.debug("{} Socket Timeout", tile);
 		} catch (UnknownHostException e) {
-			log.debug(tile + " No Network");
-			success = false;
-		} catch (Exception e) {
+			log.debug("{} No Network", tile);
+		} catch (IOException e) {
 			e.printStackTrace();
-			success = false;
+		} finally {
+			mConn.requestCompleted(success);
+
+			if (cacheWriter != null)
+				cacheWriter.complete(success);
 		}
-
-		mConn.requestCompleted();
-
-		if (cacheWriter != null)
-			cacheWriter.complete(success);
-
-		if (success)
-			mConn.close();
-
 		return success ? QueryResult.SUCCESS : QueryResult.FAILED;
 	}
 
