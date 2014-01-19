@@ -51,6 +51,7 @@ import org.oscim.tiling.TileRenderer;
 import org.oscim.tiling.TileSet;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
+import org.oscim.utils.async.ContinuousTask;
 import org.oscim.utils.pool.Pool;
 
 class TextRenderer extends ElementRenderer {
@@ -143,6 +144,8 @@ class TextRenderer extends ElementRenderer {
 
 		//mActiveTiles = new HashMap<MapTile, LabelTile>();
 		mRelabelCnt = 0;
+
+		mLabelTask = new LabelTask(map);
 	}
 
 	// remove Label l from mLabels and return l.next
@@ -274,6 +277,108 @@ class TextRenderer extends ElementRenderer {
 		return dx;
 	}
 
+	private Label updateWayLabels(MapTile t, Label l, float dx, float dy, double scale,
+	        ElementLayers dbg) {
+
+		for (TextItem ti = t.labels; ti != null; ti = ti.next) {
+			if (ti.text.caption)
+				continue;
+
+			// acquire a TextItem to add to TextLayer
+			if (l == null)
+				l = getLabel();
+
+			// check if path at current scale is long enough for text
+			if (dbg == null && ti.width > ti.length * scale)
+				continue;
+
+			l.clone(ti);
+			l.move(ti, dx, dy, (float) scale);
+
+			// set line endpoints relative to view to be able to
+			// check intersections with label from other tiles
+			float w = (ti.x2 - ti.x1) / 2f;
+			float h = (ti.y2 - ti.y1) / 2f;
+			l.bbox = null;
+			l.x1 = l.x - w;
+			l.y1 = l.y - h;
+			l.x2 = l.x + w;
+			l.y2 = l.y + h;
+
+			if (!wayIsVisible(l))
+				continue;
+
+			byte overlaps = -1;
+
+			if (l.bbox == null)
+				l.bbox = new OBB2D(l.x, l.y, l.x1, l.y1,
+				                   l.width + MIN_WAY_DIST,
+				                   l.text.fontHeight + MIN_WAY_DIST);
+			else
+				l.bbox.set(l.x, l.y, l.x1, l.y1,
+				           l.width + MIN_WAY_DIST,
+				           l.text.fontHeight + MIN_WAY_DIST);
+
+			if (dbg == null || ti.width < ti.length * scale)
+				overlaps = checkOverlap(l);
+
+			if (dbg != null)
+				Debug.addDebugBox(dbg, l, ti, overlaps, false, (float) scale);
+
+			if (overlaps == 0) {
+				addLabel(l);
+				l.item = TextItem.copy(ti);
+				l.tile = t;
+				l.active = mRelabelCnt;
+				l = null;
+			}
+		}
+		return l;
+	}
+
+	private Label updateNodeLabels(MapTile t, Label l, float dx, float dy, double scale, float cos,
+	        float sin) {
+		O: for (TextItem ti = t.labels; ti != null; ti = ti.next) {
+			if (!ti.text.caption)
+				continue;
+
+			// acquire a TextItem to add to TextLayer
+			if (l == null)
+				l = getLabel();
+
+			l.clone(ti);
+			l.move(ti, dx, dy, (float) scale);
+			if (!nodeIsVisible(l))
+				continue;
+
+			if (l.bbox == null)
+				l.bbox = new OBB2D();
+
+			l.bbox.setNormalized(l.x, l.y, cos, -sin,
+			                     l.width + MIN_CAPTION_DIST,
+			                     l.text.fontHeight + MIN_CAPTION_DIST,
+			                     l.text.dy);
+
+			for (Label lp = mLabels; lp != null;) {
+				if (l.bbox.overlaps(lp.bbox)) {
+					if (l.text.priority < lp.text.priority) {
+						lp = removeLabel(lp);
+						continue;
+					}
+					continue O;
+				}
+				lp = (Label) lp.next;
+			}
+
+			addLabel(l);
+			l.item = TextItem.copy(ti);
+			l.tile = t;
+			l.active = mRelabelCnt;
+			l = null;
+		}
+		return l;
+	}
+
 	boolean updateLabels() {
 		// nextLayer is not loaded yet
 		if (mNextLayer.ready)
@@ -400,118 +505,30 @@ class TextRenderer extends ElementRenderer {
 		/* add way labels */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			if (!t.state(MapTile.STATE_READY))
-				continue;
-
-			float dx = (float) (t.tileX * Tile.SIZE - tileX);
-			float dy = (float) (t.tileY * Tile.SIZE - tileY);
-			dx = flipLongitude(dx, maxx);
-
-			for (TextItem ti = t.labels; ti != null; ti = ti.next) {
-
-				if (ti.text.caption)
+			synchronized (t) {
+				if (!t.state(MapTile.STATE_READY))
 					continue;
 
-				// acquire a TextItem to add to TextLayer
-				if (l == null)
-					l = getLabel();
+				float dx = (float) (t.tileX * Tile.SIZE - tileX);
+				float dy = (float) (t.tileY * Tile.SIZE - tileY);
+				dx = flipLongitude(dx, maxx);
 
-				// check if path at current scale is long enough for text
-				if (dbg == null && ti.width > ti.length * scale)
-					continue;
-
-				l.clone(ti);
-				l.move(ti, dx, dy, (float) scale);
-
-				// set line endpoints relative to view to be able to
-				// check intersections with label from other tiles
-				float w = (ti.x2 - ti.x1) / 2f;
-				float h = (ti.y2 - ti.y1) / 2f;
-				l.bbox = null;
-				l.x1 = l.x - w;
-				l.y1 = l.y - h;
-				l.x2 = l.x + w;
-				l.y2 = l.y + h;
-
-				if (!wayIsVisible(l))
-					continue;
-
-				byte overlaps = -1;
-
-				if (l.bbox == null)
-					l.bbox = new OBB2D(l.x, l.y, l.x1, l.y1,
-					                   l.width + MIN_WAY_DIST,
-					                   l.text.fontHeight + MIN_WAY_DIST);
-				else
-					l.bbox.set(l.x, l.y, l.x1, l.y1,
-					           l.width + MIN_WAY_DIST,
-					           l.text.fontHeight + MIN_WAY_DIST);
-
-				if (dbg == null || ti.width < ti.length * scale)
-					overlaps = checkOverlap(l);
-
-				if (dbg != null)
-					Debug.addDebugBox(dbg, l, ti, overlaps, false, (float) scale);
-
-				if (overlaps == 0) {
-					addLabel(l);
-					l.item = TextItem.copy(ti);
-					l.tile = t;
-					l.active = mRelabelCnt;
-					l = null;
-				}
+				l = updateWayLabels(t, l, dx, dy, scale, dbg);
 			}
 		}
 
 		/* add caption */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			if (!t.state(MapTile.STATE_READY))
-				continue;
-
-			float dx = (float) (t.tileX * Tile.SIZE - tileX);
-			float dy = (float) (t.tileY * Tile.SIZE - tileY);
-			dx = flipLongitude(dx, maxx);
-
-			O: for (TextItem ti = t.labels; ti != null; ti = ti.next) {
-				if (!ti.text.caption)
+			synchronized (t) {
+				if (!t.state(MapTile.STATE_READY))
 					continue;
 
-				// acquire a TextItem to add to TextLayer
-				if (l == null)
-					l = getLabel();
+				float dx = (float) (t.tileX * Tile.SIZE - tileX);
+				float dy = (float) (t.tileY * Tile.SIZE - tileY);
+				dx = flipLongitude(dx, maxx);
 
-				l.clone(ti);
-				l.move(ti, dx, dy, (float) scale);
-				if (!nodeIsVisible(l))
-					continue;
-
-				//l.setAxisAlignedBBox();
-
-				if (l.bbox == null)
-					l.bbox = new OBB2D();
-
-				l.bbox.setNormalized(l.x, l.y, cos, -sin,
-				                     l.width + MIN_CAPTION_DIST,
-				                     l.text.fontHeight + MIN_CAPTION_DIST,
-				                     l.text.dy);
-
-				for (Label lp = mLabels; lp != null;) {
-					if (l.bbox.overlaps(lp.bbox)) {
-						if (l.text.priority < lp.text.priority) {
-							lp = removeLabel(lp);
-							continue;
-						}
-						continue O;
-					}
-					lp = (Label) lp.next;
-				}
-
-				addLabel(l);
-				l.item = TextItem.copy(ti);
-				l.tile = t;
-				l.active = mRelabelCnt;
-				l = null;
+				l = updateNodeLabels(t, l, dx, dy, scale, cos, sin);
 			}
 		}
 
@@ -541,25 +558,27 @@ class TextRenderer extends ElementRenderer {
 
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			if (!t.state(MapTile.STATE_READY))
-				continue;
-
-			float dx = (float) (t.tileX * Tile.SIZE - tileX);
-			float dy = (float) (t.tileY * Tile.SIZE - tileY);
-			dx = flipLongitude(dx, maxx);
-
-			for (SymbolItem ti = t.symbols; ti != null; ti = ti.next) {
-				if (ti.texRegion == null)
+			synchronized (t) {
+				if (!t.state(MapTile.STATE_READY))
 					continue;
 
-				SymbolItem s = SymbolItem.pool.get();
+				float dx = (float) (t.tileX * Tile.SIZE - tileX);
+				float dy = (float) (t.tileY * Tile.SIZE - tileY);
+				dx = flipLongitude(dx, maxx);
 
-				s.texRegion = ti.texRegion;
-				s.x = (float) ((dx + ti.x) * scale);
-				s.y = (float) ((dy + ti.y) * scale);
-				s.billboard = true;
+				for (SymbolItem ti = t.symbols; ti != null; ti = ti.next) {
+					if (ti.texRegion == null)
+						continue;
 
-				sl.addSymbol(s);
+					SymbolItem s = SymbolItem.pool.get();
+
+					s.texRegion = ti.texRegion;
+					s.x = (float) ((dx + ti.x) * scale);
+					s.y = (float) ((dy + ti.y) * scale);
+					s.billboard = true;
+
+					sl.addSymbol(s);
+				}
 			}
 		}
 
@@ -588,11 +607,6 @@ class TextRenderer extends ElementRenderer {
 	public synchronized void update(MapPosition pos, boolean changed,
 	        Matrices matrices) {
 
-		//if (System.currentTimeMillis() - lastDraw > 1000){
-		//	updateLabels();
-		//	lastDraw = System.currentTimeMillis();
-		//
-		//}
 		if (mNextLayer.ready) {
 			// exchange current with next layers
 			TextureLayers tmp = mCurLayer;
@@ -615,127 +629,68 @@ class TextRenderer extends ElementRenderer {
 			compile();
 		}
 
-		if (mRequestClear)
-			cleanup();
-
-		//if (!mHolding)
-		postLabelTask();
-	}
-
-	/* private */LabelTask mLabelTask;
-	/* private */long mLastRun;
-	/* private */boolean mRequestRun;
-	/* private */boolean mRequestClear;
-	/* private */boolean mRelabel;
-
-	class LabelTask implements Runnable {
-		private boolean isCancelled;
-
-		@Override
-		public void run() {
-			boolean labelsChanged = false;
-			if (isCancelled) {
-				return;
-			}
-			long now = System.currentTimeMillis();
-			//log.debug("relabel after " + (now - mLastRun));
-			mLastRun = now;
-
-			labelsChanged = updateLabels();
-
-			if (!isCancelled && labelsChanged)
-				mMap.render();
-
-			mLabelTask = null;
-			mRequestRun = false;
-			isCancelled = false;
-
-			if (mRelabel) {
-				mRelabel = false;
-				postLabelTask();
-			}
-		}
-
-		public void cancel() {
-			isCancelled = true;
-		}
-	}
-
-	/* private */void cleanup() {
-		mLabels = (Label) mPool.releaseAll(mLabels);
-		mTileSet.releaseTiles();
-		mLabelTask = null;
-		mRequestClear = false;
-	}
-
-	private final Runnable mLabelUpdate = new Runnable() {
-		@Override
-		public void run() {
-			if (mLabelTask == null) {
-				mLabelTask = new LabelTask();
-				mMap.addTask(mLabelTask);
-			}
-		}
-	};
-
-	/* private */void postLabelTask() {
-		synchronized (mLabelUpdate) {
-			if (mRequestRun) {
-				mRelabel = true;
-			} else {
-				mRequestRun = true;
-				long delay = (mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis();
-				//log.debug("relabel in: " + delay);
-				mMap.postDelayed(mLabelUpdate, Math.max(delay, 0));
-			}
-		}
+		mLabelTask.submit((mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis());
 	}
 
 	@Override
 	public synchronized void render(MapPosition pos, Matrices m) {
-
-		layers.vbo.bind();
 		GLState.test(false, false);
 
 		float scale = (float) (mMapPosition.scale / pos.scale);
 
 		setMatrix(pos, m, true);
 
-		if (layers.baseLayers != null) {
-			for (RenderElement l = layers.baseLayers; l != null;) {
-				if (l.type == RenderElement.POLYGON) {
-					l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
-				} else {
-					float div = scale * (float) (pos.scale / (1 << pos.zoomLevel));
-					l = LineLayer.Renderer.draw(layers, l, pos, m, div, 0);
+		synchronized (layers) {
+			layers.vbo.bind();
+			if (layers.baseLayers != null) {
+				for (RenderElement l = layers.baseLayers; l != null;) {
+					if (l.type == RenderElement.POLYGON) {
+						l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
+					} else {
+						float div = scale * (float) (pos.scale / (1 << pos.zoomLevel));
+						l = LineLayer.Renderer.draw(layers, l, pos, m, div, 0);
+					}
 				}
 			}
+
+			setMatrix(pos, m, false);
+
+			for (RenderElement l = layers.textureLayers; l != null;)
+				l = TextureLayer.Renderer.draw(l, scale, m);
 		}
-
-		setMatrix(pos, m, false);
-
-		for (RenderElement l = layers.textureLayers; l != null;)
-			l = TextureLayer.Renderer.draw(l, scale, m);
 	}
 
-	//private boolean mHolding;
+	final class LabelTask extends ContinuousTask {
 
-	/**
-	 * @param enable layer updates
-	 */
-	public synchronized void hold(boolean enable) {
-		//		mHolding = enable;
-		//		if (!enable)
-		//			runLabelTask();
+		public LabelTask(Map map) {
+			super(map, 10);
+		}
+
+		@Override
+		public void doWork() {
+
+			if (updateLabels())
+				mMap.render();
+
+			mLastRun = System.currentTimeMillis();
+		}
+
+		@Override
+		public void cleanup() {
+			clearLabelsInternal();
+		}
 	}
 
-	public synchronized void clearLabels() {
-		if (mRequestRun) {
-			mRequestClear = true;
-			//mRelabel = true;
-		} else {
-			cleanup();
-			//postLabelTask();
-		}
+	private final LabelTask mLabelTask;
+
+	/* private */long mLastRun;
+
+	/* private */void clearLabelsInternal() {
+		mLabels = (Label) mPool.releaseAll(mLabels);
+		mTileSet.releaseTiles();
+	}
+
+	public void clearLabels() {
+		mLabelTask.cancel();
 	}
 }

@@ -28,7 +28,7 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 	static final Logger log = LoggerFactory.getLogger(LabelLayer.class);
 	private final TextRenderer mTextRenderer;
 
-	private int multi;
+	//private int multi;
 
 	public LabelLayer(Map map, TileRenderer tileRenderLayer) {
 		super(map);
@@ -49,19 +49,19 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 
 	@Override
 	public void onMotionEvent(MotionEvent e) {
-		int action = e.getAction() & MotionEvent.ACTION_MASK;
-		if (action == MotionEvent.ACTION_POINTER_DOWN) {
-			multi++;
-			mTextRenderer.hold(true);
-		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-			multi--;
-			if (multi == 0)
-				mTextRenderer.hold(false);
-		} else if (action == MotionEvent.ACTION_CANCEL) {
-			multi = 0;
-			log.debug("cancel " + multi);
-			mTextRenderer.hold(false);
-		}
+		//	int action = e.getAction() & MotionEvent.ACTION_MASK;
+		//	if (action == MotionEvent.ACTION_POINTER_DOWN) {
+		//		multi++;
+		//		mTextRenderer.hold(true);
+		//	} else if (action == MotionEvent.ACTION_POINTER_UP) {
+		//		multi--;
+		//		if (multi == 0)
+		//			mTextRenderer.hold(false);
+		//	} else if (action == MotionEvent.ACTION_CANCEL) {
+		//		multi = 0;
+		//		log.debug("cancel " + multi);
+		//		mTextRenderer.hold(false);
+		//	}
 	}
 
 	@Override
