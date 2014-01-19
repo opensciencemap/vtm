@@ -17,12 +17,18 @@
  */
 package org.oscim.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * An abstract base class for threads which support pausing and resuming.
  */
 public abstract class PausableThread extends Thread {
+	private final static Logger log = LoggerFactory.getLogger(PausableThread.class);
+	private final static boolean DEBUG = false;
+
 	private boolean mPausing = true;
-	private boolean mShouldPause;
+	private boolean mShouldPause = false;
 
 	/**
 	 * Causes the current thread to wait until this thread is pausing.
@@ -30,8 +36,10 @@ public abstract class PausableThread extends Thread {
 	public final void awaitPausing() {
 		synchronized (this) {
 			while (!isInterrupted() && !isPausing()) {
+				if (DEBUG)
+					log.debug("await {}", getThreadName());
 				try {
-					wait(100);
+					wait(10);
 				} catch (InterruptedException e) {
 					// restore the interrupted status
 					Thread.currentThread().interrupt();
@@ -42,17 +50,13 @@ public abstract class PausableThread extends Thread {
 
 	@Override
 	public void interrupt() {
+		if (DEBUG)
+			log.debug("interrupt {}", getThreadName());
+
 		// first acquire the monitor which is used to call wait()
 		synchronized (this) {
 			super.interrupt();
 		}
-
-		//try {
-		//	this.join(10000);
-		//} catch (InterruptedException e) {
-		//	// restore the interrupted status
-		//	Thread.currentThread().interrupt();
-		//}
 	}
 
 	/**
@@ -72,14 +76,16 @@ public abstract class PausableThread extends Thread {
 		}
 	}
 
+	public final synchronized boolean isCanceled() {
+		return mShouldPause;
+	}
+
 	/**
 	 * The paused thread should continue with its work.
 	 */
 	public final synchronized void proceed() {
 		if (mShouldPause) {
 			mShouldPause = false;
-			mPausing = false;
-			afterPause();
 			notify();
 		}
 	}
@@ -102,6 +108,14 @@ public abstract class PausableThread extends Thread {
 						interrupt();
 					}
 				}
+
+				if (mPausing) {
+					mPausing = false;
+					afterPause();
+				}
+
+				if (DEBUG)
+					log.debug("resume {}", getThreadName());
 			}
 
 			if (isInterrupted()) {
@@ -115,6 +129,11 @@ public abstract class PausableThread extends Thread {
 				interrupt();
 			}
 		}
+
+		if (DEBUG)
+			log.debug("finish {}", getThreadName());
+
+		mPausing = true;
 
 		afterRun();
 	}
