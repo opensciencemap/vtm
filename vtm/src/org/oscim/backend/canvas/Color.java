@@ -31,6 +31,8 @@
  */
 package org.oscim.backend.canvas;
 
+import org.oscim.utils.FastMath;
+
 /**
  * The Class Color.
  */
@@ -112,12 +114,18 @@ public class Color {
 	}
 
 	public static int fade(int color, double alpha) {
-		alpha *= ((color >>> 24) & 0xff);
+		alpha = FastMath.clamp(alpha, 0, 1);
 
-		return ((int) alpha) << 24
-		        | ((int) alpha * ((color >>> 16) & 0xff)) << 16
-		        | ((int) alpha * ((color >>> 8) & 0xff)) << 8
-		        | ((int) alpha * ((color) & 0xff));
+		alpha *= (color >>> 24) & 0xff;
+		int c = (((int) alpha) & 0xff) << 24;
+
+		alpha /= 255;
+
+		c |= ((int) (alpha * ((color >>> 16) & 0xff))) << 16;
+		c |= ((int) (alpha * ((color >>> 8) & 0xff))) << 8;
+		c |= ((int) (alpha * (color & 0xff)));
+
+		return c;
 	}
 
 	public static float rToFloat(int color) {
