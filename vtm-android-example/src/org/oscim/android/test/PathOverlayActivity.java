@@ -37,6 +37,7 @@ public class PathOverlayActivity extends MapActivity {
 		setContentView(R.layout.activity_map);
 
 		mMapView = (MapView) findViewById(R.id.mapView);
+		registerMapView(mMapView);
 
 		for (double lon = -180; lon < 180; lon += 5) {
 			List<GeoPoint> pts = new ArrayList<GeoPoint>();

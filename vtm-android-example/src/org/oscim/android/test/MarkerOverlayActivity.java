@@ -43,6 +43,7 @@ public class MarkerOverlayActivity extends MapActivity implements OnItemGestureL
 		setContentView(R.layout.activity_map);
 
 		mMapView = (MapView) findViewById(R.id.mapView);
+		registerMapView(mMapView);
 
 		MarkerSymbol symbol = AndroidGraphics.makeMarker(getResources(),
 		                                                 R.drawable.marker_poi,

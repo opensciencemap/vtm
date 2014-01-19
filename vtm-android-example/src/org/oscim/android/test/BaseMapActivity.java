@@ -28,7 +28,7 @@ import android.view.Menu;
 
 public class BaseMapActivity extends MapActivity {
 
-	private final static boolean USE_CACHE = false;
+	private final static boolean USE_CACHE = true;
 
 	MapView mMapView;
 	VectorTileLayer mBaseLayer;
@@ -42,6 +42,7 @@ public class BaseMapActivity extends MapActivity {
 		setContentView(R.layout.activity_map);
 
 		mMapView = (MapView) findViewById(R.id.mapView);
+		registerMapView(mMapView);
 
 		mTileSource = new OSciMap4TileSource();
 		mTileSource.setOption("url", "http://opensciencemap.org/tiles/vtm");

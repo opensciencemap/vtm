@@ -50,9 +50,9 @@ public class Compass {
 	private final SensorManager mSensorManager;
 	private final Sensor mSensor;
 
-	public Compass(MapActivity mapActivity, Map map) {
+	public Compass(Context context, Map map) {
 		mMap = map;
-		mSensorManager = (SensorManager) mapActivity
+		mSensorManager = (SensorManager) context
 		    .getSystemService(Context.SENSOR_SERVICE);
 
 		mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);

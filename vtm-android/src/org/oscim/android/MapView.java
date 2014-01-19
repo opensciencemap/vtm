@@ -35,7 +35,6 @@ import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.RelativeLayout;
 
 /**
@@ -91,9 +90,6 @@ public class MapView extends RelativeLayout {
 	public MapView(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
 
-		if (!(context instanceof MapActivity))
-			throw new IllegalArgumentException("context is not an instance of MapActivity");
-
 		CanvasAdapter.g = AndroidGraphics.INSTANCE;
 		AssetAdapter.g = new AndroidAssetAdapter(context);
 		GLAdapter.g = new AndroidGL();
@@ -108,13 +104,8 @@ public class MapView extends RelativeLayout {
 		// TODO make this dpi dependent
 		Tile.SIZE = 400;
 
-		MapActivity mapActivity = (MapActivity) context;
-
 		mMap = new AndroidMap(this);
-
-		mCompass = new Compass(mapActivity, mMap);
-
-		mapActivity.registerMapView(mMap);
+		mCompass = new Compass(context, mMap);
 
 		mMap.clearMap();
 		mMap.updateMap(false);
@@ -122,9 +113,7 @@ public class MapView extends RelativeLayout {
 		mGestureDetector = new GestureDetector(context, new OnGestureListener() {
 			@Override
 			public boolean onSingleTapUp(MotionEvent e) {
-				boolean handled = mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
-				mMotionEvent.wrap(null);
-				return handled;
+				return  mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
 			}
 
 			@Override
@@ -139,7 +128,6 @@ public class MapView extends RelativeLayout {
 			@Override
 			public void onLongPress(MotionEvent e) {
 				mMap.handleGesture(Gesture.LONG_PRESS, mMotionEvent.wrap(e));
-				mMotionEvent.wrap(null);
 			}
 
 			@Override
@@ -149,34 +137,9 @@ public class MapView extends RelativeLayout {
 
 			@Override
 			public boolean onDown(MotionEvent e) {
-				boolean handled =  mMap.handleGesture(Gesture.PRESS, mMotionEvent.wrap(e));
-				mMotionEvent.wrap(null);
-				return handled;
+				return mMap.handleGesture(Gesture.PRESS, mMotionEvent.wrap(e));
 			}
 		});
-
-		//mGestureDetector.setOnDoubleTapListener(new OnDoubleTapListener() {
-		//
-		//	@Override
-		//	public boolean onSingleTapConfirmed(MotionEvent e) {
-		//		return false;
-		//	}
-		//
-		//	@Override
-		//	public boolean onDoubleTapEvent(MotionEvent e) {
-		//		return false;
-		//	}
-		//
-		//	@Override
-		//	public boolean onDoubleTap(MotionEvent e) {
-		//		return false;
-		//	}
-		//});
-
-	}
-
-	View getView() {
-		return this;
 	}
 
 	public Map getMap() {
@@ -220,7 +183,6 @@ public class MapView extends RelativeLayout {
 		return true;
 	}
 
-	// synchronized ???
 	@Override
 	protected void onSizeChanged(int width, int height,
 	        int oldWidth, int oldHeight) {

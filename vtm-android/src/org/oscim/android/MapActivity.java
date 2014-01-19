@@ -45,8 +45,6 @@ public abstract class MapActivity extends Activity {
 
 	private static final String PREFERENCES_FILE = "MapActivity";
 
-	//private static final String KEY_THEME = "Theme";
-
 	private static boolean containsViewport(SharedPreferences sharedPreferences) {
 		return sharedPreferences.contains(KEY_LATITUDE)
 		        && sharedPreferences.contains(KEY_LONGITUDE)
@@ -100,8 +98,8 @@ public abstract class MapActivity extends Activity {
 	 * @param map
 	 *            the calling MapView.
 	 */
-	public final void registerMapView(Map map) {
-		mMap = map;
+	public final void registerMapView(MapView map) {
+		mMap = map.getMap();
 
 		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,
 		                                                           MODE_PRIVATE);
