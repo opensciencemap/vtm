@@ -68,7 +68,6 @@ public abstract class Map {
 	private final MapPosition mMapPosition;
 	private final AsyncExecutor mAsyncExecutor;
 
-	protected boolean mClearMap;
 	protected final MapEventLayer mEventLayer;
 	protected GestureDetector mGestureDetector;
 
@@ -79,6 +78,8 @@ public abstract class Map {
 
 	private Set<UpdateListener> mUpdateListenerSet = new LinkedHashSet<UpdateListener>();
 	private UpdateListener[] mUpdateListeners;
+
+	protected boolean mClearMap;
 
 	public Map() {
 		mViewport = new Viewport(this);
@@ -114,8 +115,6 @@ public abstract class Map {
 		return null;
 	}
 
-	private InternalRenderTheme mCurrentTheme;
-
 	/**
 	 * Utility function to set theme of base vector-layer and
 	 * use map background color from theme.
@@ -126,18 +125,12 @@ public abstract class Map {
 			throw new IllegalStateException();
 		}
 
-		if (mCurrentTheme == theme) {
-			log.debug("same theme: " + theme);
-			return;
-		}
-
 		IRenderTheme t = ThemeLoader.load(theme);
 		if (t == null) {
 			log.error("Invalid theme");
 			return;
 		}
 
-		mCurrentTheme = theme;
 		mBaseLayer.setRenderTheme(t);
 		MapRenderer.setBackgroundColor(t.getMapBackground());
 
@@ -154,9 +147,9 @@ public abstract class Map {
 	 * be called from any thread. Request will be handled on main
 	 * thread.
 	 * 
-	 * @param forceRedraw pass true to render next frame
+	 * @param redraw pass true to render next frame
 	 */
-	public abstract void updateMap(boolean forceRedraw);
+	public abstract void updateMap(boolean redraw);
 
 	/**
 	 * Request to render a frame. Request will be handled on main
@@ -198,6 +191,7 @@ public abstract class Map {
 	 */
 	public void clearMap() {
 		mClearMap = true;
+		updateMap(true);
 	}
 
 	/**
@@ -268,9 +262,10 @@ public abstract class Map {
 	 */
 	protected void updateLayers() {
 		boolean changed = false;
+		MapPosition pos = mMapPosition;
 
 		// get the current MapPosition
-		changed |= mViewport.getMapPosition(mMapPosition);
+		changed |= mViewport.getMapPosition(pos);
 
 		if (mUpdateListeners == null) {
 			mUpdateListeners = new UpdateListener[mUpdateListenerSet.size()];
@@ -278,7 +273,7 @@ public abstract class Map {
 		}
 
 		for (UpdateListener l : mUpdateListeners)
-			l.onMapUpdate(mMapPosition, changed, mClearMap);
+			l.onMapUpdate(pos, changed, mClearMap);
 
 		mClearMap = false;
 	}
