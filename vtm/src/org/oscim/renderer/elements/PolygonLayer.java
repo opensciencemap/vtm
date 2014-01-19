@@ -432,7 +432,7 @@ public final class PolygonLayer extends RenderElement {
 			}
 		}
 
-		public static void drawOver(Matrices m, int color) {
+		public static void drawOver(Matrices m, int color, float alpha) {
 			setShader(polyShader, m);
 
 			/*
@@ -441,7 +441,7 @@ public final class PolygonLayer extends RenderElement {
 			 */
 
 			if (color != 0) {
-				GLUtils.setColor(hPolygonColor[0], color, 1);
+				GLUtils.setColor(hPolygonColor[0], color, alpha);
 				GLState.blend(true);
 			} else {
 				// disable drawing to framebuffer (will be re-enabled in fill)

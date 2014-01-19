@@ -20,6 +20,7 @@ import static org.oscim.tiling.MapTile.STATE_NEW_DATA;
 import static org.oscim.tiling.MapTile.STATE_READY;
 
 import org.oscim.backend.GL20;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
@@ -42,6 +43,8 @@ import org.slf4j.LoggerFactory;
 public class TileRenderer extends LayerRenderer {
 	static final Logger log = LoggerFactory.getLogger(TileRenderer.class);
 
+	private static final boolean debugOverdraw = false;
+
 	private final TileManager mTileManager;
 	private int mUploadSerial;
 
@@ -56,16 +59,22 @@ public class TileRenderer extends LayerRenderer {
 	private int mRenderOverdraw;
 	private float mRenderAlpha;
 
-	public void setOverdrawColor(int color) {
+	/**
+	 * Threadsafe
+	 */
+	public synchronized void setOverdrawColor(int color) {
 		mOverdraw = color;
 	}
 
-	public void setBitmapAlpha(float alpha) {
+	/**
+	 * Threadsafe
+	 */
+	public synchronized void setBitmapAlpha(float alpha) {
 		mAlpha = alpha;
 	}
 
 	/**
-	 * synced with clearTiles
+	 * synced with clearTiles, setOverdrawColor and setBitmapAlpha
 	 */
 	@Override
 	protected synchronized void update(MapPosition pos, boolean positionChanged, Matrices m) {
@@ -75,14 +84,18 @@ public class TileRenderer extends LayerRenderer {
 			return;
 		}
 
+		// get current tiles to draw
 		boolean tilesChanged;
 		synchronized (tilelock) {
-			// get current tiles to draw
 			tilesChanged = mTileManager.getActiveTiles(mDrawTiles);
 		}
 
 		if (mDrawTiles.cnt == 0)
 			return;
+
+		// keep constant while rendering frame
+		mRenderAlpha = mAlpha;
+		mRenderOverdraw = mOverdraw;
 
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
@@ -93,15 +106,11 @@ public class TileRenderer extends LayerRenderer {
 
 		tileCnt += mNumTileHolder;
 
-		/* prepare tile for rendering */
+		// prepare tiles for rendering
 		if (compileTileLayers(tiles, tileCnt) > 0) {
 			mUploadSerial++;
 			BufferObject.checkBufferUsage(false);
 		}
-
-		// keep constant while rendering frame
-		mRenderAlpha = mAlpha;
-		mRenderOverdraw = mOverdraw;
 
 		draw(tiles, tileCnt, pos, m);
 	}
@@ -234,8 +243,8 @@ public class TileRenderer extends LayerRenderer {
 			tileSet.releaseTiles();
 
 			// ensure same size
-			if (tileSet.tiles.length != mDrawTiles.tiles.length) {
-				tileSet.tiles = new MapTile[mDrawTiles.tiles.length];
+			if (tileSet.tiles.length != newTiles.length) {
+				tileSet.tiles = new MapTile[newTiles.length];
 			}
 
 			// lock tiles to not be removed from cache
@@ -282,17 +291,13 @@ public class TileRenderer extends LayerRenderer {
 					t.isVisible = true;
 			}
 
+			// add placeholder tiles to show both sides
+			// of date line. a little too complicated...
 			int xmax = 1 << mZoom;
 			if (x1 >= 0 && x2 < xmax)
 				return;
 
-			// add placeholder tiles to show both sides
-			// of date line. a little too complicated...
-			for (int x = x1; x < x2; x++) {
-				MapTile holder = null;
-				MapTile tile = null;
-				boolean found = false;
-
+			O: for (int x = x1; x < x2; x++) {
 				if (x >= 0 && x < xmax)
 					continue;
 
@@ -306,14 +311,10 @@ public class TileRenderer extends LayerRenderer {
 					continue;
 
 				for (int i = cnt; i < cnt + mNumTileHolder; i++)
-					if (tiles[i].tileX == x && tiles[i].tileY == y) {
-						found = true;
-						break;
-					}
+					if (tiles[i].tileX == x && tiles[i].tileY == y)
+						continue O;
 
-				if (found)
-					continue;
-
+				MapTile tile = null;
 				for (int i = 0; i < cnt; i++)
 					if (tiles[i].tileX == xx && tiles[i].tileY == y) {
 						tile = tiles[i];
@@ -327,7 +328,7 @@ public class TileRenderer extends LayerRenderer {
 					//log.error(" + mNumTileHolder");
 					break;
 				}
-				holder = new MapTile(x, y, (byte) mZoom);
+				MapTile holder = new MapTile(x, y, (byte) mZoom);
 				holder.isVisible = true;
 				holder.holder = tile;
 				tile.isVisible = true;
@@ -335,6 +336,29 @@ public class TileRenderer extends LayerRenderer {
 			}
 		}
 	};
+
+	private long getMinFade(MapTile t) {
+		long maxFade = MapRenderer.frametime - 50;
+
+		for (int c = 0; c < 4; c++) {
+			MapTile ci = t.rel.get(c);
+			if (ci == null)
+				continue;
+
+			if (ci.state == MapTile.STATE_READY || ci.fadeTime > 0)
+				maxFade = Math.min(maxFade, ci.fadeTime);
+		}
+		MapTile p = t.rel.getParent();
+		if (p != null && (p.state == MapTile.STATE_READY || p.fadeTime > 0)) {
+			maxFade = Math.min(maxFade, p.fadeTime);
+
+			p = p.rel.getParent();
+			if (p != null && (p.state == MapTile.STATE_READY || p.fadeTime > 0))
+				maxFade = Math.min(maxFade, p.fadeTime);
+		}
+
+		return maxFade;
+	}
 
 	// Counter increases polygon-offset for each tile drawn.
 	private int mOffsetCnt;
@@ -368,7 +392,6 @@ public class TileRenderer extends LayerRenderer {
 
 		GL.glDepthMask(true);
 		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
-
 		GL.glDepthFunc(GL20.GL_LESS);
 
 		// Draw visible tiles
@@ -505,7 +528,27 @@ public class TileRenderer extends LayerRenderer {
 			}
 		}
 
-		PolygonLayer.Renderer.drawOver(m, mRenderOverdraw);
+		if (t.fadeTime == 0)
+			t.fadeTime = getMinFade(t);
+
+		if (debugOverdraw) {
+			if (t.zoomLevel > pos.zoomLevel)
+				PolygonLayer.Renderer.drawOver(m, Color.BLUE, 0.5f);
+			else if (t.zoomLevel < pos.zoomLevel)
+				PolygonLayer.Renderer.drawOver(m, Color.RED, 0.5f);
+			else
+				PolygonLayer.Renderer.drawOver(m, Color.GREEN, 0.5f);
+
+			return;
+		}
+
+		if (mRenderOverdraw != 0 && MapRenderer.frametime - t.fadeTime < 500) {
+			float fade = 1 - (MapRenderer.frametime - t.fadeTime) / 500f;
+			PolygonLayer.Renderer.drawOver(m, mRenderOverdraw, fade * fade);
+			MapRenderer.animate();
+		} else {
+			PolygonLayer.Renderer.drawOver(m, 0, 1);
+		}
 	}
 
 	private int drawProxyChild(MapTile tile, MapPosition pos) {
@@ -590,7 +633,5 @@ public class TileRenderer extends LayerRenderer {
 
 	@Override
 	protected void render(MapPosition position, Matrices matrices) {
-		// TODO Auto-generated method stub
-
 	}
 }

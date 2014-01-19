@@ -94,6 +94,7 @@ public class MapTile extends Tile {
 	 * Tile is in view region. Set by TileRenderer.
 	 */
 	public boolean isVisible;
+	public long fadeTime;
 
 	/**
 	 * Pointer to access relatives in QuadTree

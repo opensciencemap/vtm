@@ -78,10 +78,7 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 			mTileLoader.get(i).setTileDataSource(tileDataSource);
 		}
 
-		//mTileManager.setZoomTable(mTileSource.getMapInfo().zoomLevel);
-
 		mMap.clearMap();
-
 		resumeLoaders();
 
 		return true;
@@ -91,11 +88,16 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 	 * Set {@link IRenderTheme} used by {@link TileLoader}
 	 */
 	public void setRenderTheme(IRenderTheme theme) {
+		// wait for loaders to finish all current jobs to
+		// not change theme instance hold by loader instance
+		// while running
 		pauseLoaders(true);
 		mTileManager.clearJobs();
 
 		for (VectorTileLoader g : mTileLoader)
 			g.setRenderTheme(theme);
+
+		mRenderLayer.setOverdrawColor(theme.getMapBackground());
 
 		resumeLoaders();
 	}
