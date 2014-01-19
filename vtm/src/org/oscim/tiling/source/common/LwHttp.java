@@ -56,6 +56,7 @@ public class LwHttp {
 	private Socket mSocket;
 	private OutputStream mCommandStream;
 	private InputStream mResponseStream;
+	private OutputStream mCacheOutputStream;
 	private long mLastRequest = 0;
 	private SocketAddress mSockAddr;
 
@@ -106,38 +107,32 @@ public class LwHttp {
 	}
 
 	static class Buffer extends BufferedInputStream {
-		final OutputStream mCache;
+		final OutputStream mCacheOutputstream;
 
 		public Buffer(InputStream is, OutputStream cache) {
 			super(is, 4096);
-			mCache = cache;
+			mCacheOutputstream = cache;
 		}
 
 		@Override
-		public synchronized int read() throws IOException {
+		public int read() throws IOException {
 			int data = super.read();
 			if (data >= 0)
-				mCache.write(data);
+				mCacheOutputstream.write(data);
 
 			return data;
 		}
 
 		@Override
-		public synchronized int read(byte[] buffer, int offset, int byteCount)
+		public int read(byte[] buffer, int offset, int byteCount)
 		        throws IOException {
 			int len = super.read(buffer, offset, byteCount);
 
 			if (len >= 0)
-				mCache.write(buffer, offset, len);
+				mCacheOutputstream.write(buffer, offset, len);
 
 			return len;
 		}
-	}
-
-	OutputStream mCacheOutputStream;
-
-	public void setOutputStream(OutputStream outputStream) {
-		mCacheOutputStream = outputStream;
 	}
 
 	public void close() {
@@ -177,6 +172,10 @@ public class LwHttp {
 			while (end < read && (buf[end] != '\n'))
 				end++;
 
+			if (end == BUFFER_SIZE) {
+				return null;
+			}
+
 			if (buf[end] != '\n')
 				continue;
 
@@ -209,7 +208,7 @@ public class LwHttp {
 
 			if (!ok) {
 				String line = new String(buf, pos, end - pos - 1);
-				log.debug(">" + line + "< ");
+				log.debug("> {} <", line);
 			}
 
 			pos += (end - pos) + 1;
@@ -255,12 +254,14 @@ public class LwHttp {
 			mMaxReq = RESPONSE_EXPECTED_LIVES;
 			// log.debug("create connection");
 		} else {
-			// FIXME not sure if this is correct way to drain socket
 			int avail = mResponseStream.available();
 			if (avail > 0) {
-				log.debug("Consume left-over bytes: " + avail);
-				while ((avail = mResponseStream.available()) > 0)
-					mResponseStream.read(buffer);
+				log.debug("left-over bytes: " + avail);
+				close();
+				lwHttpConnect();
+				// FIXME not sure if this is correct way to drain socket
+				//while ((avail = mResponseStream.available()) > 0)
+				//	mResponseStream.read(buffer);
 			}
 		}
 
@@ -353,8 +354,16 @@ public class LwHttp {
 		return true;
 	}
 
-	public void requestCompleted() {
+	public void setOutputStream(OutputStream outputStream) {
+		mCacheOutputStream = outputStream;
+	}
+
+	public void requestCompleted(boolean keepConnection) {
 		mLastRequest = System.nanoTime();
+		mCacheOutputStream = null;
+
+		if (!keepConnection)
+			close();
 	}
 
 	public int getContentLength() {

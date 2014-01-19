@@ -17,9 +17,9 @@
 
 package org.oscim.tiling;
 
+import static org.oscim.tiling.MapTile.STATE_CANCEL;
 import static org.oscim.tiling.MapTile.STATE_LOADING;
 import static org.oscim.tiling.MapTile.STATE_NEW_DATA;
-import static org.oscim.tiling.MapTile.STATE_NONE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +29,6 @@ import org.oscim.core.Tile;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.QuadTree;
@@ -132,11 +131,6 @@ public class TileManager {
 		mUpdateSerial = 0;
 	}
 
-	public void destroy() {
-		// there might be some leaks in here
-		// ... free static pools
-	}
-
 	private int[] mZoomTable;
 
 	public void setZoomTable(int[] zoomLevel) {
@@ -144,40 +138,23 @@ public class TileManager {
 
 	}
 
-	public void init(boolean first) {
+	public void init() {
+		// pass VBOs and VertexItems back to pools
+		for (int i = 0; i < mTilesSize; i++)
+			clearTile(mTiles[i]);
 
-		// sync with GLRender thread
-		// ... and labeling thread?
-		synchronized (MapRenderer.drawlock) {
+		// clear references to cached MapTiles
+		Arrays.fill(mTiles, null);
+		mTilesSize = 0;
+		mTilesCount = 0;
 
-			if (!first) {
-				// pass VBOs and VertexItems back to pools
-				for (int i = 0; i < mTilesSize; i++)
-					clearTile(mTiles[i]);
-			}
+		// set up TileSet large enough to hold current tiles
+		int num = Math.max(mMap.getWidth(), mMap.getHeight());
+		int size = Tile.SIZE >> 1;
+		int numTiles = (num * num) / (size * size) * 4;
 
-			// FIXME any of this still needed?
-			// mInitialized is set when surface changed
-			// and VBOs might be lost
-			// VertexPool.init();
-			// clear cache index
-			// QuadTree.init();
-
-			// clear references to cached MapTiles
-			Arrays.fill(mTiles, null);
-			mTilesSize = 0;
-			mTilesCount = 0;
-
-			// set up TileSet large enough to hold current tiles
-			int num = Math.max(mMap.getWidth(), mMap.getHeight());
-			int size = Tile.SIZE >> 1;
-			int numTiles = (num * num) / (size * size) * 4;
-
-			mNewTiles = new TileSet(numTiles);
-			mCurrentTiles = new TileSet(numTiles);
-			log.debug("max tiles: " + numTiles);
-
-		}
+		mNewTiles = new TileSet(numTiles);
+		mCurrentTiles = new TileSet(numTiles);
 	}
 
 	/**
@@ -187,7 +164,7 @@ public class TileManager {
 	 * @param pos
 	 *            current MapPosition
 	 */
-	public synchronized boolean update(MapPosition pos) {
+	public boolean update(MapPosition pos) {
 		// clear JobQueue and set tiles to state == NONE.
 		// one could also append new tiles and sort in JobQueue
 		// but this has the nice side-effect that MapWorkers dont
@@ -405,13 +382,14 @@ public class TileManager {
 		if (t == null)
 			return;
 
-		t.clear();
+		synchronized (t) {
+			// still belongs to TileLoader thread
+			if (t.state != STATE_LOADING)
+				t.clear();
 
-		mIndex.remove(t);
-
-		// QuadTree.remove(t);
-		t.state = STATE_NONE;
-
+			t.state = STATE_CANCEL;
+			mIndex.remove(t);
+		}
 		mTilesCount--;
 	}
 
@@ -549,8 +527,7 @@ public class TileManager {
 	 * @return caller does not care
 	 */
 	public void jobCompleted(MapTile tile, boolean success) {
-
-		if (!success) {
+		if (!success || tile.state == STATE_CANCEL) {
 			tile.clear();
 			return;
 		}

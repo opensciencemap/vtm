@@ -23,16 +23,10 @@ import android.widget.RelativeLayout.LayoutParams;
 public class AndroidMap extends Map {
 
 	private final MapView mMapView;
-	private boolean mWaitRedraw;
 	final GLView mGLView;
-	boolean mPausing = false;
 
-	private final Runnable mRedrawRequest = new Runnable() {
-		@Override
-		public void run() {
-			redrawMapInternal(false);
-		}
-	};
+	private volatile boolean mWaitRedraw;
+	private volatile boolean mPausing;
 
 	public AndroidMap(MapView mapView) {
 		super();
@@ -45,8 +39,6 @@ public class AndroidMap extends Map {
 		                         android.view.ViewGroup.LayoutParams.MATCH_PARENT);
 
 		mapView.addView(mGLView, params);
-
-		//mGestureDetector =
 	}
 
 	@Override
@@ -60,9 +52,9 @@ public class AndroidMap extends Map {
 	}
 
 	@Override
-	public synchronized void updateMap(boolean requestRender) {
-		if (requestRender && !mClearMap && !mPausing) // && mInitialized)
-			mGLView.requestRender();
+	public void updateMap(boolean redraw) {
+		//if (redraw && !mClearMap && !mPausing)
+		//	mGLView.requestRender();
 
 		if (!mWaitRedraw) {
 			mWaitRedraw = true;
@@ -71,26 +63,29 @@ public class AndroidMap extends Map {
 	}
 
 	@Override
-	public synchronized void render() {
+	public void render() {
+		if (mPausing)
+			return;
+
 		if (mClearMap)
 			updateMap(false);
 		else
 			mGLView.requestRender();
 	}
 
-	synchronized void redrawMapInternal(boolean forceRedraw) {
-		boolean clear = mClearMap;
-		mWaitRedraw = false;
+	private final Runnable mRedrawRequest = new Runnable() {
+		@Override
+		public void run() {
+			redrawMapInternal();
+		}
+	};
 
-		if (forceRedraw && !clear)
-			mGLView.requestRender();
+	void redrawMapInternal() {
+		mWaitRedraw = false;
 
 		updateLayers();
 
-		if (clear) {
-			mGLView.requestRender();
-			mClearMap = false;
-		}
+		mGLView.requestRender();
 	}
 
 	@Override
@@ -103,9 +98,7 @@ public class AndroidMap extends Map {
 		return mMapView.postDelayed(action, delay);
 	}
 
-
-	public synchronized void pause(boolean pause) {
-	    mPausing = pause;
-    }
-
+	public void pause(boolean pause) {
+		mPausing = pause;
+	}
 }
