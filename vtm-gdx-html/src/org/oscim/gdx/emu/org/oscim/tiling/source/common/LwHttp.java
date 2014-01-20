@@ -116,9 +116,9 @@ public class LwHttp {
 					if (status == 200) {
 						Uint8Array buf = Uint8ArrayNative.create(xhr.getResponseArrayBuffer());
 
-						mDataSource.process(new Buffer(buf), buf.byteLength());
+						mDataSource.process(new Buffer(buf));
 					} else {
-						mDataSource.process(null, -1);
+						mDataSource.process(null);
 					}
 				}
 			}

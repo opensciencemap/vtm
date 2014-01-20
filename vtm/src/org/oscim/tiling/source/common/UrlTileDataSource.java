@@ -55,7 +55,7 @@ public abstract class UrlTileDataSource implements ITileDataSource {
 			} else {
 				InputStream is = c.getInputStream();
 				try {
-					if (mTileDecoder.decode(tile, sink, is, c.getBytes())) {
+					if (mTileDecoder.decode(tile, sink, is)) {
 						return QueryResult.SUCCESS;
 					}
 				} catch (IOException e) {
@@ -77,15 +77,14 @@ public abstract class UrlTileDataSource implements ITileDataSource {
 			} else if ((is = mConn.readHeader()) == null) {
 				log.debug("{} Network Error", tile);
 			} else {
-				int bytes = mConn.getContentLength();
-				success = mTileDecoder.decode(tile, sink, is, bytes);
+				success = mTileDecoder.decode(tile, sink, is);
 			}
 		} catch (SocketException e) {
 			log.debug("{} Socket exception: {}", tile, e.getMessage());
 		} catch (SocketTimeoutException e) {
 			log.debug("{} Socket Timeout", tile);
 		} catch (UnknownHostException e) {
-			log.debug("{} No Network", tile);
+			log.debug("{} Unknown host: {}", tile, e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {

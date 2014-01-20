@@ -7,6 +7,6 @@ import org.oscim.core.Tile;
 
 public interface ITileDecoder {
 
-	boolean decode(Tile tile, ITileDataSink sink, InputStream is, int contentLength)
+	boolean decode(Tile tile, ITileDataSink sink, InputStream is)
 	        throws IOException;
 }

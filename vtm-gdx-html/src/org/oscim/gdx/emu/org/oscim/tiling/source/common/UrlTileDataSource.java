@@ -57,12 +57,12 @@ public abstract class UrlTileDataSource implements ITileDataSource {
 		return result;
 	}
 
-	public void process(InputStream is, int length) {
+	public void process(InputStream is) {
 
 		boolean win = false;
-		if (length >= 0) {
+		if (is != null) {
 			try {
-				win = mTileDecoder.decode(mTile, mSink, is, length);
+				win = mTileDecoder.decode(mTile, mSink, is);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

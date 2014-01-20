@@ -68,10 +68,10 @@ public class TileDecoder extends PbfDecoder {
 	}
 
 	@Override
-	public boolean decode(Tile tile, ITileDataSink sink, InputStream is, int contentLength)
+	public boolean decode(Tile tile, ITileDataSink sink, InputStream is)
 	        throws IOException {
 
-		setInputStream(is, contentLength);
+		setInputStream(is);
 
 		mTile = tile;
 		mSink = sink;

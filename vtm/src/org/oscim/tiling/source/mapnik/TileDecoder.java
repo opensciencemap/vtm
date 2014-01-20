@@ -71,13 +71,13 @@ public class TileDecoder extends PbfDecoder {
 	private float mScale;
 
 	@Override
-	public boolean decode(Tile tile, ITileDataSink mapDataCallback, InputStream is,
-	        int contentLength)
+	public boolean decode(Tile tile, ITileDataSink mapDataCallback, InputStream is)
 	        throws IOException {
+
 		if (debug)
 			log.debug(tile + " decode");
 
-		setInputStream(is, Integer.MAX_VALUE);
+		setInputStream(is);
 		mTile = tile;
 		mMapDataCallback = mapDataCallback;
 		mScale = REF_TILE_SIZE / Tile.SIZE;
