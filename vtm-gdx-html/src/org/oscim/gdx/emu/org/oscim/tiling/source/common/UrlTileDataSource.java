@@ -18,25 +18,22 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.oscim.tiling.MapTile;
-import org.oscim.tiling.source.ITileCache;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDecoder;
+import org.oscim.tiling.source.TileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- *
- */
-public abstract class UrlTileDataSource implements ITileDataSource {
+public class UrlTileDataSource implements ITileDataSource {
 	static final Logger log = LoggerFactory.getLogger(UrlTileDataSource.class);
 
-	protected LwHttp mConn;
+	protected final LwHttp mConn;
 	protected final ITileDecoder mTileDecoder;
 
-	public UrlTileDataSource(ITileDecoder tileDecoder, ITileCache cache) {
+	public UrlTileDataSource(TileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
 		mTileDecoder = tileDecoder;
+		mConn = conn;
 	}
 
 	private ITileDataSink mSink;

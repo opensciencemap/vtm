@@ -57,10 +57,7 @@ public class MainActivity extends AndroidApplication {
 	class GdxMapAndroid extends GdxMap {
 		@Override
 		public void createLayers() {
-
 			TileSource ts = new OSciMap4TileSource();
-			ts.setOption("url", "http://opensciencemap.org/tiles/vtm");
-
 			initDefaultLayers(ts, true, true, true);
 		}
 	}

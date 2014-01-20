@@ -22,32 +22,26 @@ import java.net.URL;
 import org.oscim.tiling.source.TileSource;
 
 public abstract class UrlTileSource extends TileSource {
-	private final static String KEY_URL = "url";
 
-	protected URL mUrl;
+	protected final URL mUrl;
+
+	public UrlTileSource(String urlString) {
+		URL url = null;
+		try {
+			url = new URL(urlString);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		mUrl = url;
+	}
 
 	@Override
 	public OpenResult open() {
-		if (!options.containsKey(KEY_URL))
-			return new OpenResult("no url set");
-		String urlString = options.get(KEY_URL);
-		try {
-			mUrl = new URL(urlString);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return new OpenResult("invalid url " + urlString);
-		}
-
 		return OpenResult.SUCCESS;
 	}
 
 	@Override
 	public void close() {
 
-	}
-
-	public boolean setUrl(String urlString) {
-		options.put("url", urlString);
-		return open() == OpenResult.SUCCESS;
 	}
 }

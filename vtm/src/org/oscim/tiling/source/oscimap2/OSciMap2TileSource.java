@@ -18,7 +18,6 @@ package org.oscim.tiling.source.oscimap2;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Arrays;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
@@ -28,7 +27,6 @@ import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.common.LwHttp;
 import org.oscim.tiling.source.common.PbfDecoder;
 import org.oscim.tiling.source.common.UrlTileDataSource;
@@ -38,16 +36,14 @@ import org.slf4j.LoggerFactory;
 
 public class OSciMap2TileSource extends UrlTileSource {
 
-	@Override
-	public ITileDataSource getDataSource() {
-		return new TileDataSource(this, mUrl);
+	public OSciMap2TileSource(String url) {
+		super(url);
 	}
 
-	class TileDataSource extends UrlTileDataSource {
-		public TileDataSource(TileSource tileSource, URL url) {
-			super(new TileDecoder(), tileSource.tileCache);
-			mConn = new LwHttp(url, "application/osmtile", "osmtile", false);
-		}
+	@Override
+	public ITileDataSource getDataSource() {
+		LwHttp conn = new LwHttp(mUrl, "application/osmtile", ".osmtile", false);
+		return new UrlTileDataSource(this, new TileDecoder(), conn);
 	}
 
 	static class TileDecoder extends PbfDecoder {

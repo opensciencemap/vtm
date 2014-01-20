@@ -27,20 +27,22 @@ import org.oscim.tiling.source.ITileCache;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDecoder;
+import org.oscim.tiling.source.TileSource;
 import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class UrlTileDataSource implements ITileDataSource {
+public class UrlTileDataSource implements ITileDataSource {
 	static final Logger log = LoggerFactory.getLogger(UrlTileDataSource.class);
 
-	protected LwHttp mConn;
+	protected final LwHttp mConn;
 	protected final ITileDecoder mTileDecoder;
 	protected final ITileCache mTileCache;
 
-	public UrlTileDataSource(ITileDecoder tileDecoder, ITileCache tileCache) {
+	public UrlTileDataSource(TileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
 		mTileDecoder = tileDecoder;
-		mTileCache = tileCache;
+		mTileCache = tileSource.tileCache;
+		mConn = conn;
 	}
 
 	@Override

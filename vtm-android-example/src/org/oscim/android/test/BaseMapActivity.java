@@ -45,7 +45,6 @@ public class BaseMapActivity extends MapActivity {
 		registerMapView(mMapView);
 
 		mTileSource = new OSciMap4TileSource();
-		mTileSource.setOption("url", "http://opensciencemap.org/tiles/vtm");
 
 		if (USE_CACHE) {
 			mCache = new TileCache(this, "cachedir", "testdb");

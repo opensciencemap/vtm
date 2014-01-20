@@ -47,7 +47,7 @@ public class LwHttp {
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
 	private final static long RESPONSE_TIMEOUT = (long) 10E9; // 10 second in nanosecond
 
-	private final static int BUFFER_SIZE = 4096;
+	private final static int BUFFER_SIZE = 8192;
 	private final byte[] buffer = new byte[BUFFER_SIZE];
 
 	private final String mHost;
@@ -92,7 +92,7 @@ public class LwHttp {
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
-		REQUEST_GET_END = ("." + extension + " HTTP/1.1" +
+		REQUEST_GET_END = (extension + " HTTP/1.1" +
 		        "\nHost: " + host +
 		        "\nConnection: Keep-Alive" +
 		        "\n\n").getBytes();
@@ -161,6 +161,10 @@ public class LwHttp {
 				mCacheOutputstream.write(buffer, offset, byteCount);
 
 			return len;
+		}
+
+		public byte[] getArray() {
+			return buf;
 		}
 	}
 
@@ -292,18 +296,8 @@ public class LwHttp {
 
 		byte[] request = mRequestBuffer;
 		int pos = REQUEST_GET_START.length;
-		int newPos = 0;
 
-		if ((newPos = formatTilePath(tile, request, pos)) == 0) {
-			request[pos++] = '/';
-			pos = writeInt(tile.zoomLevel, pos, request);
-			request[pos++] = '/';
-			pos = writeInt(tile.tileX, pos, request);
-			request[pos++] = '/';
-			pos = writeInt(tile.tileY, pos, request);
-		} else {
-			pos = newPos;
-		}
+		pos = formatTilePath(tile, request, pos);
 
 		int len = REQUEST_GET_END.length;
 		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
@@ -402,8 +396,14 @@ public class LwHttp {
 	 * @param curPos current position
 	 * @return new position
 	 */
-	protected int formatTilePath(Tile tile, byte[] path, int curPos) {
-		return 0;
+	protected int formatTilePath(Tile tile, byte[] request, int pos) {
+		request[pos++] = '/';
+		pos = writeInt(tile.zoomLevel, pos, request);
+		request[pos++] = '/';
+		pos = writeInt(tile.tileX, pos, request);
+		request[pos++] = '/';
+		pos = writeInt(tile.tileY, pos, request);
+		return pos;
 	}
 
 }

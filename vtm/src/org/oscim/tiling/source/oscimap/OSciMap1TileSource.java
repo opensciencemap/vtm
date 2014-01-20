@@ -16,10 +16,7 @@
  */
 package org.oscim.tiling.source.oscimap;
 
-import java.net.URL;
-
 import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.common.LwHttp;
 import org.oscim.tiling.source.common.UrlTileDataSource;
 import org.oscim.tiling.source.common.UrlTileSource;
@@ -30,15 +27,13 @@ import org.oscim.tiling.source.common.UrlTileSource;
  */
 public class OSciMap1TileSource extends UrlTileSource {
 
-	@Override
-	public ITileDataSource getDataSource() {
-		return new TileDataSource(this, mUrl);
+	public OSciMap1TileSource(String url) {
+		super(url);
 	}
 
-	class TileDataSource extends UrlTileDataSource {
-		public TileDataSource(TileSource tileSource, URL url) {
-			super(new TileDecoder(), tileSource.tileCache);
-			mConn = new LwHttp(url, "application/osmtile", "osmtile", false);
-		}
+	@Override
+	public ITileDataSource getDataSource() {
+		LwHttp conn = new LwHttp(mUrl, "application/osmtile", ".osmtile", false);
+		return new UrlTileDataSource(this, new TileDecoder(), conn);
 	}
 }
