@@ -14,8 +14,7 @@
  */
 package org.oscim.layers.tile.vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -47,6 +46,8 @@ import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDataSource.QueryResult;
 import org.oscim.utils.LineClipper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback, ITileDataSink {
 
@@ -424,5 +425,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			mTile.layers.extrusionLayers = l = new ExtrusionLayer(0, groundScale, extrusion.colors);
 		}
 		l.add(mElement, height, minHeight);
+	}
+
+	@Override
+	public void setTileImage(Bitmap bitmap) {
+		// TODO Auto-generated method stub
+
 	}
 }
