@@ -58,6 +58,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), cacheLimit);
 		mTileSource = tileSource;
 		mFade = mTileSource.getFadeSteps();
+		initLoader();
 	}
 
 	@Override
