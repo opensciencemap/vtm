@@ -25,9 +25,13 @@ import android.opengl.GLUtils;
 
 public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 	final Bitmap mBitmap;
-
 	public AndroidBitmap(InputStream inputStream) {
 		mBitmap = BitmapFactory.decodeStream(inputStream);
+	}
+
+	@Override
+	public boolean isValid(){
+		return mBitmap != null;
 	}
 
 	/**

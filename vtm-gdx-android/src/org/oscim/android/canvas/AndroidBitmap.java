@@ -85,4 +85,9 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 	public void recycle() {
 		mBitmap.recycle();
 	}
+
+	@Override
+	public boolean isValid() {
+		return mBitmap != null;
+	}
 }
