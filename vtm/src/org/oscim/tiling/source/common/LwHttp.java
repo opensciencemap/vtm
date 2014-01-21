@@ -57,7 +57,6 @@ public class LwHttp {
 	private Socket mSocket;
 	private OutputStream mCommandStream;
 	private Buffer mResponseStream;
-	private OutputStream mCacheOutputStream;
 	private long mLastRequest = 0;
 	private SocketAddress mSockAddr;
 
@@ -109,7 +108,7 @@ public class LwHttp {
 	// to avoid a copy in PbfDecoder one could manage the buffer
 	// array directly and provide access to it.
 	static class Buffer extends BufferedInputStream {
-		OutputStream mCacheOutputstream;
+		OutputStream mCache;
 		int sumRead = 0;
 		int mContentLength;
 
@@ -118,12 +117,16 @@ public class LwHttp {
 		}
 
 		public void setCache(OutputStream cache) {
-			mCacheOutputstream = cache;
+			mCache = cache;
 		}
 
 		public void start(int length) {
 			sumRead = 0;
 			mContentLength = length;
+		}
+
+		public boolean finishedReading() {
+			return sumRead == mContentLength;
 		}
 
 		@Override
@@ -138,8 +141,8 @@ public class LwHttp {
 			if (DBG)
 				log.debug("read {} {}", sumRead, mContentLength);
 
-			if (mCacheOutputstream != null)
-				mCacheOutputstream.write(data);
+			if (mCache != null)
+				mCache.write(data);
 
 			return data;
 		}
@@ -152,19 +155,19 @@ public class LwHttp {
 				return -1;
 
 			int len = super.read(buffer, offset, byteCount);
-			sumRead += len;
 
 			if (DBG)
 				log.debug("read {} {} {}", len, sumRead, mContentLength);
 
-			if (mCacheOutputstream != null)
-				mCacheOutputstream.write(buffer, offset, byteCount);
+			if (len <= 0)
+				return len;
+
+			sumRead += len;
+
+			if (mCache != null)
+				mCache.write(buffer, offset, len);
 
 			return len;
-		}
-
-		public byte[] getArray() {
-			return buf;
 		}
 	}
 
@@ -256,8 +259,6 @@ public class LwHttp {
 		is.reset();
 		is.mark(0);
 		is.skip(end);
-
-		is.setCache(mCacheOutputStream);
 		is.start(contentLength);
 
 		if (mInflateContent)
@@ -376,16 +377,26 @@ public class LwHttp {
 		return true;
 	}
 
-	public void setOutputStream(OutputStream outputStream) {
-		mCacheOutputStream = outputStream;
+	public void setCache(OutputStream os) {
+		mResponseStream.setCache(os);
 	}
 
-	public void requestCompleted(boolean keepConnection) {
+	public boolean requestCompleted(boolean success) {
 		mLastRequest = System.nanoTime();
-		mCacheOutputStream = null;
+		mResponseStream.setCache(null);
 
-		if (!keepConnection)
+		if (!mResponseStream.finishedReading()) {
+			log.debug("invalid buffer position");
 			close();
+			return false;
+		}
+
+		if (!success) {
+			close();
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
