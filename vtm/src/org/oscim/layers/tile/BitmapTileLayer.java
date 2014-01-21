@@ -14,26 +14,23 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile.bitmap;
+package org.oscim.layers.tile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.zip.GZIPInputStream;
-
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
+import org.oscim.core.MapElement;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.TileLayer;
-import org.oscim.layers.tile.bitmap.TileSource.FadeStep;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
+import org.oscim.tiling.source.ITileDataSink;
+import org.oscim.tiling.source.ITileDataSource;
+import org.oscim.tiling.source.ITileDataSource.QueryResult;
+import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.source.bitmap.BitmapTileSource;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,20 +41,27 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 
 	private final static int CACHE_LIMIT = 50;
 
-	private static final int TIMEOUT_CONNECT = 5000;
-	private static final int TIMEOUT_READ = 10000;
+	private final BitmapTileSource mTileSource;
 
-	final TileSource mTileSource;
-	private final FadeStep[] mFade;
+	public static class FadeStep {
+		public final double scaleStart, scaleEnd;
+		public final float alphaStart, alphaEnd;
 
-	public BitmapTileLayer(Map map, TileSource tileSource) {
+		public FadeStep(int zoomStart, int zoomEnd, float alphaStart, float alphaEnd) {
+			this.scaleStart = 1 << zoomStart;
+			this.scaleEnd = 1 << zoomEnd;
+			this.alphaStart = alphaStart;
+			this.alphaEnd = alphaEnd;
+		}
+	}
+
+	public BitmapTileLayer(Map map, BitmapTileSource tileSource) {
 		this(map, tileSource, CACHE_LIMIT);
 	}
 
-	public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit) {
+	public BitmapTileLayer(Map map, BitmapTileSource tileSource, int cacheLimit) {
 		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), cacheLimit);
 		mTileSource = tileSource;
-		mFade = mTileSource.getFadeSteps();
 		initLoader();
 	}
 
@@ -65,13 +69,15 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 	public void onMapUpdate(MapPosition pos, boolean changed, boolean clear) {
 		super.onMapUpdate(pos, changed, clear);
 
-		if (mFade == null) {
+		FadeStep[] fade = mTileSource.getFadeSteps();
+
+		if (fade == null) {
 			mRenderLayer.setBitmapAlpha(1);
 			return;
 		}
 
 		float alpha = 0;
-		for (FadeStep f : mFade) {
+		for (FadeStep f : fade) {
 			if (pos.scale < f.scaleStart || pos.scale > f.scaleEnd)
 				continue;
 
@@ -92,47 +98,54 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 
 	@Override
 	protected TileLoader createLoader(TileManager tm) {
-		return new TileLoader(tm) {
-
-			@Override
-			protected boolean executeJob(MapTile tile) {
-				URL url;
-				try {
-					url = mTileSource.getTileUrl(tile);
-					URLConnection urlConnection = getURLConnection(url);
-					InputStream inputStream = getInputStream(urlConnection);
-					Bitmap bitmap = CanvasAdapter.g.decodeBitmap(inputStream);
-
-					tile.layers = new ElementLayers();
-					BitmapLayer l = new BitmapLayer(false);
-					l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE);
-
-					tile.layers.textureLayers = l;
-				} catch (Exception e) {
-					e.printStackTrace();
-					return false;
-				}
-
-				return true;
-			}
-
-			@Override
-			public void cleanup() {
-			}
-
-			private InputStream getInputStream(URLConnection urlConnection) throws IOException {
-				if ("gzip".equals(urlConnection.getContentEncoding())) {
-					return new GZIPInputStream(urlConnection.getInputStream());
-				}
-				return urlConnection.getInputStream();
-			}
-
-			private URLConnection getURLConnection(URL url) throws IOException {
-				URLConnection urlConnection = url.openConnection();
-				urlConnection.setConnectTimeout(TIMEOUT_CONNECT);
-				urlConnection.setReadTimeout(TIMEOUT_READ);
-				return urlConnection;
-			}
-		};
+		return new BitmapTileLoader(tm, mTileSource);
 	}
+
+	class BitmapTileLoader extends TileLoader implements ITileDataSink {
+
+		private final ITileDataSource mTileDataSource;
+		private MapTile mTile;
+
+		public BitmapTileLoader(TileManager tileManager, TileSource tileSource) {
+			super(tileManager);
+			mTileDataSource = tileSource.getDataSource();
+		}
+
+		@Override
+		public void cleanup() {
+
+		}
+
+		@Override
+		protected boolean executeJob(MapTile tile) {
+			QueryResult result;
+
+			try {
+				mTile = tile;
+				result = mTileDataSource.executeQuery(tile, this);
+			} finally {
+				mTile = null;
+			}
+			return result == QueryResult.SUCCESS;
+		}
+
+		@Override
+		public void setTileImage(Bitmap bitmap) {
+			BitmapLayer l = new BitmapLayer(false);
+			l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE);
+			mTile.layers = new ElementLayers();
+			mTile.layers.textureLayers = l;
+		}
+
+		@Override
+		public void process(MapElement element) {
+
+		}
+
+		@Override
+		public void completed(boolean success) {
+
+		}
+	}
+
 }

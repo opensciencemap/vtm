@@ -22,10 +22,10 @@ import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.gdx.GdxMap;
-import org.oscim.layers.tile.bitmap.BitmapTileLayer;
-import org.oscim.layers.tile.bitmap.NaturalEarth;
+import org.oscim.layers.tile.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.source.bitmap.DefaultSources.NaturalEarth;
 import org.oscim.tiling.source.oscimap2.OSciMap2TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.slf4j.Logger;
@@ -116,7 +116,7 @@ class GwtGdxMap extends GdxMap {
 		initDefaultLayers(tileSource, false, true, true);
 
 		if ("naturalearth".equals(c.getBackgroundLayer()))
-			mMap.setBackgroundMap(new BitmapTileLayer(mMap, NaturalEarth.INSTANCE));
+			mMap.setBackgroundMap(new BitmapTileLayer(mMap, new NaturalEarth()));
 
 		mSearchBox = new SearchBox(mMap);
 
