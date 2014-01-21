@@ -40,6 +40,7 @@ import android.os.ParcelFileDescriptor;
 public class TileCache implements ITileCache {
 
 	final static org.slf4j.Logger log = LoggerFactory.getLogger(TileCache.class);
+	final static boolean debug = false;
 
 	class CacheTileReader implements TileReader {
 		final InputStream mInputStream;
@@ -199,7 +200,8 @@ public class TileCache implements ITileCache {
 			mCacheBuffers.add(data);
 		}
 
-		log.debug("store tile {} {}", tile, Boolean.valueOf(success));
+		if (debug)
+			log.debug("store tile {} {}", tile, Boolean.valueOf(success));
 
 		if (!success)
 			return;
@@ -235,7 +237,8 @@ public class TileCache implements ITileCache {
 			mStmtGetTile.clearBindings();
 		}
 
-		log.debug("load tile {}", tile);
+		if (debug)
+			log.debug("load tile {}", tile);
 
 		return new CacheTileReader(tile, in, Integer.MAX_VALUE);
 	}
@@ -257,7 +260,8 @@ public class TileCache implements ITileCache {
 		        " WHERE z=? AND x=? AND y=?", mQueryVals);
 
 		if (!cursor.moveToFirst()) {
-			log.debug("not in cache {}", tile);
+			if (debug)
+				log.debug("not in cache {}", tile);
 			return null;
 		}
 
@@ -266,7 +270,8 @@ public class TileCache implements ITileCache {
 		if (!cursor.isClosed())
 			cursor.close();
 
-		log.debug("load tile {}", tile);
+		if (debug)
+			log.debug("load tile {}", tile);
 
 		return new CacheTileReader(tile, in, Integer.MAX_VALUE);
 	}
