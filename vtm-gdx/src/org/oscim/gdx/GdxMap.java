@@ -24,7 +24,6 @@ import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
-import org.oscim.renderer.GLState;
 import org.oscim.renderer.GridRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.InternalRenderTheme;
@@ -105,9 +104,6 @@ public abstract class GdxMap implements ApplicationListener {
 			 *            also render frame FIXME (does nothing atm)
 			 */
 			private void redrawMapInternal(boolean forceRedraw) {
-				// FIXME needed?
-				GLState.blend(false);
-				GLState.test(false, false);
 
 				updateLayers();
 
