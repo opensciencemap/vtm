@@ -27,9 +27,9 @@ public abstract class QuadTreeIndex<T> {
 		root.parent = root;
 	}
 
-	static void checkIndex(int x, int y, int z) {
-		if (x < 0 || x >= 1 << z || y < 0 || y >= 1 << z) {
-			throw new IllegalArgumentException("invalid position " + x + '/' + y + '/' + z);
+	static void checkIndex(int x, int y, int max) {
+		if (x < 0 || x >= max || y < 0 || y >= max) {
+			throw new IllegalArgumentException("invalid position " + x + '/' + y + '/' + (max >> 1));
 		}
 	}
 
@@ -39,7 +39,7 @@ public abstract class QuadTreeIndex<T> {
 
 	public QuadTree<T> add(int x, int y, int z) {
 
-		checkIndex(x, y, z);
+		checkIndex(x, y, 1 << z);
 
 		QuadTree<T> leaf = root;
 
@@ -107,7 +107,7 @@ public abstract class QuadTreeIndex<T> {
 
 	public T getTile(int x, int y, int z) {
 
-		checkIndex(x, y, z);
+		checkIndex(x, y, 1 << z);
 
 		QuadTree<T> leaf = root;
 
