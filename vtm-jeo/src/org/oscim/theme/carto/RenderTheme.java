@@ -13,16 +13,15 @@ import org.jeo.map.CartoCSS;
 import org.jeo.map.RGB;
 import org.jeo.map.Rule;
 import org.jeo.map.RuleList;
-import org.jeo.map.Selector;
 import org.jeo.map.Style;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.theme.IRenderTheme;
-import org.oscim.theme.renderinstruction.Area;
-import org.oscim.theme.renderinstruction.Line;
-import org.oscim.theme.renderinstruction.RenderInstruction;
+import org.oscim.theme.styles.Area;
+import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.RenderStyle;
 
 public class RenderTheme implements IRenderTheme {
 
@@ -117,7 +116,7 @@ public class RenderTheme implements IRenderTheme {
 
 	class StyleSet {
 		int level;
-		RenderInstruction[] ri = new RenderInstruction[2];
+		RenderStyle[] ri = new RenderStyle[2];
 	}
 
 	Map<Rule, StyleSet> mStyleSets = new HashMap<Rule, StyleSet>();
@@ -131,11 +130,6 @@ public class RenderTheme implements IRenderTheme {
 			pad += " ";
 
 		sb.append(pad);
-
-		for (Selector s : r.getSelectors()) {
-			sb.append(RuleDebug.formatSelector(s));
-			sb.append(",");
-		}
 
 		if (sb.length() > 0)
 			sb.setLength(sb.length() - 1);
@@ -183,7 +177,7 @@ public class RenderTheme implements IRenderTheme {
 	}
 
 	@Override
-	public synchronized RenderInstruction[] matchElement(GeometryType type, TagSet tags,
+	public synchronized RenderStyle[] matchElement(GeometryType type, TagSet tags,
 	        int zoomLevel) {
 		MatcherFeature f = mMatchFeature;
 
@@ -203,7 +197,7 @@ public class RenderTheme implements IRenderTheme {
 		if (type == GeometryType.POLY) {
 			RGB c = r.color(f, CartoCSS.POLYGON_FILL, RGB.black);
 			out.println(z + " " + c);
-			return new RenderInstruction[] {
+			return new RenderStyle[] {
 			        new Area(z, color(c))
 			};
 
@@ -212,7 +206,7 @@ public class RenderTheme implements IRenderTheme {
 			float width = r.number(f, CartoCSS.LINE_WIDTH, 2f);
 			//out.println(z + " " + c);
 
-			return new RenderInstruction[] {
+			return new RenderStyle[] {
 			        new Line(100 + z, color(c), width)
 			};
 
@@ -261,6 +255,12 @@ public class RenderTheme implements IRenderTheme {
 
 		t.matchElement(GeometryType.POLY, e.tags, 16);
 		t.matchElement(GeometryType.POLY, e.tags, 15);
+	}
+
+	@Override
+	public void updateInstructions() {
+		// TODO Auto-generated method stub
+
 	}
 
 }

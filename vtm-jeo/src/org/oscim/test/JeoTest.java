@@ -1,11 +1,15 @@
-package org.oscim.layers;
+package org.oscim.test;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.jeo.carto.Carto;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
+import org.jeo.data.VectorDataset;
 import org.jeo.data.mem.MemVector;
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.feature.Feature;
@@ -13,28 +17,79 @@ import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.geojson.GeoJSONDataset;
+import org.jeo.geojson.GeoJSONReader;
 import org.jeo.geom.GeomBuilder;
 import org.jeo.map.Style;
+import org.oscim.layers.OSMIndoorLayer;
+import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.vector.VectorTileLayer;
+import org.oscim.map.Map;
+import org.oscim.renderer.MapRenderer;
+import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class JeoTestData {
+public class JeoTest {
+
+	public static void indoorSketch(Map map, String file) {
+		MapRenderer.setBackgroundColor(0xff909090);
+		VectorTileLayer baseLayer = map.setBaseMap(new OSciMap4TileSource());
+		map.layers().add(new BuildingLayer(map, baseLayer));
+
+		VectorDataset data = null;
+		try {
+			data = JeoTest.readGeoJson(new FileInputStream(new File(file)));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		Style style = JeoTest.getStyle();
+		map.layers().add(new OSMIndoorLayer(map, data, style));
+	}
 
 	public static Style getStyle() {
 		Style style = null;
 
 		try {
 			style = Carto.parse("" +
-			        "#things {" +
+			        "#way {" +
+			        "  line-width: 2;" +
 			        "  line-color: #c80;" +
-			        "  polygon-fill: #00a;" +
+			        "  polygon-fill: #44111111;" +
+			        "  " +
 			        "}" +
 			        "#states {" +
-			        "  polygon-fill: #0dc;" +
+			        "  line-width: 2.2;" +
+			        "  line-color: #c80;" +
+			        "  polygon-fill: #44111111;" +
+			        "  " +
 			        "}"
 			    );
 
 			return style;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static VectorDataset readGeoJson(InputStream is) {
+		GeoJSONReader r = new GeoJSONReader();
+
+		@SuppressWarnings("resource")
+		MemWorkspace mem = new MemWorkspace();
+
+		//mem.put("layer", data);
+		try {
+			Schema s = new SchemaBuilder("way").schema();
+
+			MemVector memData = mem.create(s);
+
+			for (Feature f : r.features(is)) {
+				//System.out.println("loaded: " + f);
+				memData.add(f);
+			}
+			return memData;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -53,6 +108,7 @@ public class JeoTestData {
 		}
 
 		if (memory) {
+			@SuppressWarnings("resource")
 			MemWorkspace mem = new MemWorkspace();
 
 			//mem.put("layer", data);
@@ -79,6 +135,7 @@ public class JeoTestData {
 	public static Dataset getMemWorkspace(String layer) {
 		GeomBuilder gb = new GeomBuilder(4326);
 
+		@SuppressWarnings("resource")
 		MemWorkspace mem = new MemWorkspace();
 		Schema schema = new SchemaBuilder(layer)
 		    .field("geometry", Geometry.class)
@@ -90,11 +147,9 @@ public class JeoTestData {
 		try {
 			data = mem.create(schema);
 		} catch (UnsupportedOperationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}

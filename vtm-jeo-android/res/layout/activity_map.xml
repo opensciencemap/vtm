@@ -1,0 +1,93 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <org.oscim.android.MapView
+        android:id="@+id/mapView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+    </org.oscim.android.MapView>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:alpha="0.7"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <ToggleButton
+            android:id="@+id/level7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:textOff="7"
+            android:textOn="7" />
+
+        <ToggleButton
+            android:id="@+id/level6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:textOff="6"
+            android:textOn="6" />
+
+        <ToggleButton
+            android:id="@+id/level5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:textOff="5"
+            android:textOn="5" />
+
+        <ToggleButton
+            android:id="@+id/level4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:textOff="4"
+            android:textOn="4" />
+
+        <ToggleButton
+            android:id="@+id/level3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:textOff="3"
+            android:textOn="3" />
+
+        <ToggleButton
+            android:id="@+id/level2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:textOff="2"
+            android:textOn="2" />
+
+        <ToggleButton
+            android:id="@+id/level1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:textOff="1"
+            android:textOn="1" />
+
+        <ToggleButton
+            android:id="@+id/level0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:textOff="0"
+            android:textOn="0" />
+
+        <ToggleButton
+            android:id="@+id/level_u1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:textOff="-1"
+            android:textOn="-1" />
+    </LinearLayout>
+
+</RelativeLayout>
