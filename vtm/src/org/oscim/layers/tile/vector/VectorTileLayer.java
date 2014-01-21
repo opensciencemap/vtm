@@ -39,10 +39,12 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 
 	public VectorTileLayer(Map map) {
 		super(map);
+		initLoader();
 	}
 
 	public VectorTileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
 		super(map, minZoom, maxZoom, cacheLimit);
+		initLoader();
 	}
 
 	@Override

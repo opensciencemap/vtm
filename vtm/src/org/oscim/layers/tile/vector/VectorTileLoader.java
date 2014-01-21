@@ -18,6 +18,7 @@ package org.oscim.layers.tile.vector;
 
 import java.util.concurrent.CancellationException;
 
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -462,5 +463,10 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	 */
 	@Override
 	public void completed(boolean success) {
+	}
+
+	@Override
+	public void setTileImage(Bitmap bitmap) {
+
 	}
 }

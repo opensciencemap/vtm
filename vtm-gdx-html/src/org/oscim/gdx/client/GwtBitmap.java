@@ -88,4 +88,9 @@ public class GwtBitmap implements Bitmap {
 		}
 	}
 
+	@Override
+	public boolean isValid() {
+		return true;
+	}
+
 }

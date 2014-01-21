@@ -19,17 +19,17 @@ package org.oscim.gdx.client;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.gdx.GdxMap;
-import org.oscim.layers.tile.bitmap.BitmapTileLayer;
-import org.oscim.layers.tile.bitmap.NaturalEarth;
+import org.oscim.layers.tile.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.source.bitmap.DefaultSources.NaturalEarth;
 import org.oscim.tiling.source.oscimap2.OSciMap2TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
@@ -108,17 +108,15 @@ class GwtGdxMap extends GdxMap {
 
 		TileSource tileSource;
 		if ("oscimap4".equals(sourceName))
-			tileSource = new OSciMap4TileSource();
+			tileSource = new OSciMap4TileSource(url);
 		else
 			//if ("oscimap2".equals(source))
-			tileSource = new OSciMap2TileSource();
-
-		tileSource.setOption("url", url);
+			tileSource = new OSciMap2TileSource(url);
 
 		initDefaultLayers(tileSource, false, true, true);
 
 		if ("naturalearth".equals(c.getBackgroundLayer()))
-			mMap.setBackgroundMap(new BitmapTileLayer(mMap, NaturalEarth.INSTANCE));
+			mMap.setBackgroundMap(new BitmapTileLayer(mMap, new NaturalEarth()));
 
 		mSearchBox = new SearchBox(mMap);
 

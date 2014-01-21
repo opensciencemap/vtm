@@ -134,4 +134,9 @@ public class AwtBitmap implements Bitmap {
 	@Override
 	public void recycle() {
 	}
+
+	@Override
+	public boolean isValid() {
+		return true;
+	}
 }

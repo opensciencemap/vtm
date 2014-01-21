@@ -19,13 +19,12 @@ package org.oscim.tiling.source.common;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.oscim.core.Tile;
-import org.oscim.tiling.source.ITileDataSink;
+import org.oscim.tiling.source.ITileDecoder;
 import org.oscim.utils.UTF8Decoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class PbfDecoder {
+public abstract class PbfDecoder implements ITileDecoder {
 	static final Logger log = LoggerFactory.getLogger(PbfDecoder.class);
 
 	private final static int S1 = 7;
@@ -73,9 +72,6 @@ public abstract class PbfDecoder {
 	// offset of buffer in message
 	private int mBufferOffset;
 
-	// max bytes to read: message = header + content
-	private int mMsgEnd;
-
 	// overall bytes of message read
 	private int mMsgPos;
 
@@ -87,10 +83,7 @@ public abstract class PbfDecoder {
 		mStringDecoder = new UTF8Decoder();
 	}
 
-	public abstract boolean decode(Tile tile, ITileDataSink sink,
-	        InputStream is, int contentLength) throws IOException;
-
-	public void setInputStream(InputStream is, int contentLength) {
+	public void setInputStream(InputStream is) {
 		mInputStream = is;
 
 		bufferFill = 0;
@@ -98,7 +91,6 @@ public abstract class PbfDecoder {
 		mBufferOffset = 0;
 
 		mMsgPos = 0;
-		mMsgEnd = contentLength;
 	}
 
 	protected int decodeVarint32() throws IOException {
@@ -401,8 +393,8 @@ public abstract class PbfDecoder {
 	}
 
 	public boolean hasData() throws IOException {
-		if (mBufferOffset + bufferPos >= mMsgEnd)
-			return false;
+		//if (mBufferOffset + bufferPos >= mMsgEnd)
+		//	return false;
 
 		return fillBuffer(1) > 0;
 	}
@@ -416,10 +408,6 @@ public abstract class PbfDecoder {
 
 		// check if buffer already contains the request bytes
 		if (bytesLeft >= size)
-			return bytesLeft;
-
-		// check if inputstream is read to the end
-		if (mMsgPos >= mMsgEnd)
 			return bytesLeft;
 
 		int maxSize = buffer.length;
@@ -458,10 +446,7 @@ public abstract class PbfDecoder {
 		}
 
 		while ((bufferFill - bufferPos) < size) {
-
 			int max = maxSize - bufferFill;
-			if (max > mMsgEnd - mMsgPos)
-				max = mMsgEnd - mMsgPos;
 
 			if (max <= 0) {
 				// should not be possible
@@ -472,9 +457,8 @@ public abstract class PbfDecoder {
 			int len = mInputStream.read(buffer, bufferFill, max);
 
 			if (len < 0) {
-				mMsgEnd = mMsgPos;
 				if (debug)
-					log.debug(" finished reading " + mMsgPos);
+					log.debug("finished reading {}", mMsgPos);
 
 				// finished reading, mark end
 				buffer[bufferFill] = 0;
@@ -483,10 +467,6 @@ public abstract class PbfDecoder {
 
 			mMsgPos += len;
 			bufferFill += len;
-
-			if (mMsgPos == mMsgEnd)
-				break;
-
 		}
 		return bufferFill - bufferPos;
 	}

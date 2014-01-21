@@ -60,4 +60,6 @@ public interface Bitmap {
 	 * @param replace true, when glSubImage2D can be used for upload
 	 */
 	void uploadToTexture(boolean replace);
+
+	boolean isValid();
 }

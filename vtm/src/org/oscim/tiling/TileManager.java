@@ -165,6 +165,11 @@ public class TileManager {
 	 *            current MapPosition
 	 */
 	public boolean update(MapPosition pos) {
+
+		// FIXME cant expect init to be called otherwise
+		if (mNewTiles == null)
+			init();
+
 		// clear JobQueue and set tiles to state == NONE.
 		// one could also append new tiles and sort in JobQueue
 		// but this has the nice side-effect that MapWorkers dont

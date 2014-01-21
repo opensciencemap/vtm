@@ -16,6 +16,7 @@
  */
 package org.oscim.tiling.source;
 
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
 
 /**
@@ -27,6 +28,8 @@ import org.oscim.core.MapElement;
 public interface ITileDataSink {
 
 	void process(MapElement element);
+
+	void setTileImage(Bitmap bitmap);
 
 	void completed(boolean success);
 }

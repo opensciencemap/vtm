@@ -53,15 +53,18 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 
 		// Instantiate TileLoader threads
 		mTileLoader = new ArrayList<T>();
+
+		// RenderLayer is working in GL Thread and actually
+		// drawing loaded tiles to screen.
+		mRenderer = mRenderLayer = new TileRenderer(mTileManager);
+	}
+
+	protected void initLoader() {
 		for (int i = 0; i < mNumTileLoader; i++) {
 			T tileGenerator = createLoader(mTileManager);
 			mTileLoader.add(tileGenerator);
 			tileGenerator.start();
 		}
-
-		// RenderLayer is working in GL Thread and actually
-		// drawing loaded tiles to screen.
-		mRenderer = mRenderLayer = new TileRenderer(mTileManager);
 	}
 
 	abstract protected T createLoader(TileManager tm);

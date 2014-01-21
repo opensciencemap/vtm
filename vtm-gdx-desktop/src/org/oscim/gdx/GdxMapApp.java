@@ -21,7 +21,6 @@ import java.nio.Buffer;
 import org.oscim.awt.AwtGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
-import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
@@ -33,6 +32,9 @@ import com.badlogic.gdx.backends.lwjgl.LwjglGL20;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class GdxMapApp extends GdxMap {
+	static {
+		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
+	}
 
 	// wrap LwjglGL20 to add GL20 interface
 	static class GdxGL extends LwjglGL20 implements org.oscim.backend.GL20 {
@@ -78,16 +80,16 @@ public class GdxMapApp extends GdxMap {
 	@Override
 	public void createLayers() {
 		TileSource tileSource = new OSciMap4TileSource();
-		tileSource.setOption("url", "http://opensciencemap.org/tiles/vtm");
 
 		// TileSource tileSource = new MapFileTileSource();
 		// tileSource.setOption("file", "/home/jeff/germany.map");
 
 		initDefaultLayers(tileSource, false, true, true);
 
-		MapPosition p = new MapPosition();
-		p.setZoomLevel(14);
-		p.setPosition(53.08, 8.83);
-		mMap.setMapPosition(p);
+		//mMap.getLayers().add(new BitmapTileLayer(mMap, new ImagicoLandcover(), 20));
+		//mMap.getLayers().add(new BitmapTileLayer(mMap, new OSMTileSource(), 20));
+		//mMap.getLayers().add(new BitmapTileLayer(mMap, new ArcGISWorldShaded(), 20));
+
+		mMap.setMapPosition(0, 0, 1 << 2);
 	}
 }

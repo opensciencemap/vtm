@@ -76,17 +76,13 @@ public class TileDecoder extends PbfDecoder {
 	}
 
 	@Override
-	public boolean decode(Tile tile, ITileDataSink sink, InputStream is, int contentLength)
+	public boolean decode(Tile tile, ITileDataSink sink, InputStream is)
 	        throws IOException {
 
-		int byteCount = readUnsignedInt(is, buffer);
+		readUnsignedInt(is, buffer);
 		//log.debug(tile + " contentLength:" + byteCount);
-		if (byteCount < 0) {
-			log.debug("invalid contentLength: " + byteCount);
-			return false;
-		}
 
-		setInputStream(is, byteCount);
+		setInputStream(is);
 
 		mTile = tile;
 		mMapDataSink = sink;

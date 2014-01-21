@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LwHttp {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
+	static final boolean DBG = false;
 
 	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
 	private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
@@ -46,7 +47,7 @@ public class LwHttp {
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
 	private final static long RESPONSE_TIMEOUT = (long) 10E9; // 10 second in nanosecond
 
-	private final static int BUFFER_SIZE = 1024;
+	private final static int BUFFER_SIZE = 8192;
 	private final byte[] buffer = new byte[BUFFER_SIZE];
 
 	private final String mHost;
@@ -55,7 +56,7 @@ public class LwHttp {
 	private int mMaxReq = 0;
 	private Socket mSocket;
 	private OutputStream mCommandStream;
-	private InputStream mResponseStream;
+	private Buffer mResponseStream;
 	private OutputStream mCacheOutputStream;
 	private long mLastRequest = 0;
 	private SocketAddress mSockAddr;
@@ -66,8 +67,6 @@ public class LwHttp {
 
 	private final boolean mInflateContent;
 	private final byte[] mContentType;
-
-	private int mContentLength = -1;
 
 	/**
 	 * @param url
@@ -93,7 +92,7 @@ public class LwHttp {
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
-		REQUEST_GET_END = ("." + extension + " HTTP/1.1" +
+		REQUEST_GET_END = (extension + " HTTP/1.1" +
 		        "\nHost: " + host +
 		        "\nConnection: Keep-Alive" +
 		        "\n\n").getBytes();
@@ -106,18 +105,40 @@ public class LwHttp {
 		                 mRequestBuffer, 0, REQUEST_GET_START.length);
 	}
 
+	// TODO:
+	// to avoid a copy in PbfDecoder one could manage the buffer
+	// array directly and provide access to it.
 	static class Buffer extends BufferedInputStream {
-		final OutputStream mCacheOutputstream;
+		OutputStream mCacheOutputstream;
+		int sumRead = 0;
+		int mContentLength;
 
-		public Buffer(InputStream is, OutputStream cache) {
-			super(is, 4096);
+		public Buffer(InputStream is) {
+			super(is, BUFFER_SIZE);
+		}
+
+		public void setCache(OutputStream cache) {
 			mCacheOutputstream = cache;
+		}
+
+		public void start(int length) {
+			sumRead = 0;
+			mContentLength = length;
 		}
 
 		@Override
 		public int read() throws IOException {
+			if (sumRead >= mContentLength)
+				return -1;
+
 			int data = super.read();
-			if (data >= 0)
+
+			sumRead += 1;
+
+			if (DBG)
+				log.debug("read {} {}", sumRead, mContentLength);
+
+			if (mCacheOutputstream != null)
 				mCacheOutputstream.write(data);
 
 			return data;
@@ -126,12 +147,24 @@ public class LwHttp {
 		@Override
 		public int read(byte[] buffer, int offset, int byteCount)
 		        throws IOException {
-			int len = super.read(buffer, offset, byteCount);
 
-			if (len >= 0)
-				mCacheOutputstream.write(buffer, offset, len);
+			if (sumRead >= mContentLength)
+				return -1;
+
+			int len = super.read(buffer, offset, byteCount);
+			sumRead += len;
+
+			if (DBG)
+				log.debug("read {} {} {}", len, sumRead, mContentLength);
+
+			if (mCacheOutputstream != null)
+				mCacheOutputstream.write(buffer, offset, byteCount);
 
 			return len;
+		}
+
+		public byte[] getArray() {
+			return buf;
 		}
 	}
 
@@ -149,8 +182,9 @@ public class LwHttp {
 
 	public InputStream readHeader() throws IOException {
 
-		InputStream is = mResponseStream;
-		is.mark(4096);
+		Buffer is = mResponseStream;
+		is.mark(BUFFER_SIZE);
+		is.start(BUFFER_SIZE);
 
 		byte[] buf = buffer;
 		boolean first = true;
@@ -161,7 +195,7 @@ public class LwHttp {
 		int end = 0;
 		int len = 0;
 
-		mContentLength = -1;
+		int contentLength = -1;
 
 		// header may not be larger than BUFFER_SIZE for this to work
 		for (; (pos < read) || ((read < BUFFER_SIZE) &&
@@ -202,11 +236,11 @@ public class LwHttp {
 
 			} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
 				// parse Content-Length
-				mContentLength = parseInt(buf, pos +
+				contentLength = parseInt(buf, pos +
 				        HEADER_CONTENT_LENGTH.length + 2, end - 1);
 			}
 
-			if (!ok) {
+			if (!ok || DBG) {
 				String line = new String(buf, pos, end - pos - 1);
 				log.debug("> {} <", line);
 			}
@@ -223,9 +257,8 @@ public class LwHttp {
 		is.mark(0);
 		is.skip(end);
 
-		if (mCacheOutputStream != null) {
-			is = new Buffer(is, mCacheOutputStream);
-		}
+		is.setCache(mCacheOutputStream);
+		is.start(contentLength);
 
 		if (mInflateContent)
 			return new InflaterInputStream(is);
@@ -238,14 +271,10 @@ public class LwHttp {
 		if (mSocket != null && ((mMaxReq-- <= 0)
 		        || (System.nanoTime() - mLastRequest > RESPONSE_TIMEOUT))) {
 
-			try {
-				mSocket.close();
-			} catch (IOException e) {
-				log.debug(e.getMessage());
-			}
+			close();
 
-			// log.debug("not alive  - recreate connection " + mMaxReq);
-			mSocket = null;
+			if (DBG)
+				log.debug("not alive  - recreate connection " + mMaxReq);
 		}
 
 		if (mSocket == null) {
@@ -267,22 +296,15 @@ public class LwHttp {
 
 		byte[] request = mRequestBuffer;
 		int pos = REQUEST_GET_START.length;
-		int newPos = 0;
 
-		if ((newPos = formatTilePath(tile, request, pos)) == 0) {
-			request[pos++] = '/';
-			pos = writeInt(tile.zoomLevel, pos, request);
-			request[pos++] = '/';
-			pos = writeInt(tile.tileX, pos, request);
-			request[pos++] = '/';
-			pos = writeInt(tile.tileY, pos, request);
-		} else {
-			pos = newPos;
-		}
+		pos = formatTilePath(tile, request, pos);
 
 		int len = REQUEST_GET_END.length;
 		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
 		len += pos;
+
+		if (DBG)
+			log.debug("request: {}", new String(request, 0, len));
 
 		try {
 			mCommandStream.write(request, 0, len);
@@ -309,7 +331,7 @@ public class LwHttp {
 		mSocket.setTcpNoDelay(true);
 
 		mCommandStream = mSocket.getOutputStream();
-		mResponseStream = new BufferedInputStream(mSocket.getInputStream());
+		mResponseStream = new Buffer(mSocket.getInputStream());
 
 		return true;
 	}
@@ -366,10 +388,6 @@ public class LwHttp {
 			close();
 	}
 
-	public int getContentLength() {
-		return mContentLength;
-	}
-
 	/**
 	 * Write custom tile url
 	 * 
@@ -378,8 +396,14 @@ public class LwHttp {
 	 * @param curPos current position
 	 * @return new position
 	 */
-	protected int formatTilePath(Tile tile, byte[] path, int curPos) {
-		return 0;
+	protected int formatTilePath(Tile tile, byte[] request, int pos) {
+		request[pos++] = '/';
+		pos = writeInt(tile.zoomLevel, pos, request);
+		request[pos++] = '/';
+		pos = writeInt(tile.tileX, pos, request);
+		request[pos++] = '/';
+		pos = writeInt(tile.tileY, pos, request);
+		return pos;
 	}
 
 }

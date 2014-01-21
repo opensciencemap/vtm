@@ -16,50 +16,43 @@
  */
 package org.oscim.tiling.source.mapnik;
 
-import java.net.URL;
-
 import org.oscim.core.Tile;
 import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.common.LwHttp;
-import org.oscim.tiling.source.common.PbfTileDataSource;
+import org.oscim.tiling.source.common.UrlTileDataSource;
 import org.oscim.tiling.source.common.UrlTileSource;
 
 public class MapnikVectorTileSource extends UrlTileSource {
 
-	@Override
-	public ITileDataSource getDataSource() {
-		return new TileDataSource(this, mUrl);
+	public MapnikVectorTileSource() {
+		super("http://d1s11ojcu7opje.cloudfront.net/dev/764e0b8d");
 	}
 
-	static class TileDataSource extends PbfTileDataSource {
+	@Override
+	public ITileDataSource getDataSource() {
+		LwHttp conn = new LwHttp(mUrl, "image/png", ".vector.pbf", true) {
+			@Override
+			protected int formatTilePath(Tile tile, byte[] path, int pos) {
+				// url formatter for mapbox streets
+				byte[] hexTable = {
+				        '0', '1', '2', '3',
+				        '4', '5', '6', '7',
+				        '8', '9', 'a', 'b',
+				        'c', 'd', 'e', 'f'
+				};
 
-		public TileDataSource(TileSource tileSource, URL url) {
-			super(new TileDecoder(), tileSource.tileCache);
-
-			mConn = new LwHttp(url, "image/png", "vector.pbf", true) {
-				@Override
-				protected int formatTilePath(Tile tile, byte[] path, int pos) {
-					// url formatter for mapbox streets
-					byte[] hexTable = {
-					        '0', '1', '2', '3',
-					        '4', '5', '6', '7',
-					        '8', '9', 'a', 'b',
-					        'c', 'd', 'e', 'f'
-					};
-
-					path[pos++] = '/';
-					path[pos++] = hexTable[(tile.tileX) % 16];
-					path[pos++] = hexTable[(tile.tileY) % 16];
-					path[pos++] = '/';
-					pos = LwHttp.writeInt(tile.zoomLevel, pos, path);
-					path[pos++] = '/';
-					pos = LwHttp.writeInt(tile.tileX, pos, path);
-					path[pos++] = '/';
-					pos = LwHttp.writeInt(tile.tileY, pos, path);
-					return pos;
-				}
-			};
-		}
+				path[pos++] = '/';
+				path[pos++] = hexTable[(tile.tileX) % 16];
+				path[pos++] = hexTable[(tile.tileY) % 16];
+				path[pos++] = '/';
+				pos = LwHttp.writeInt(tile.zoomLevel, pos, path);
+				path[pos++] = '/';
+				pos = LwHttp.writeInt(tile.tileX, pos, path);
+				path[pos++] = '/';
+				pos = LwHttp.writeInt(tile.tileY, pos, path);
+				return pos;
+			}
+		};
+		return new UrlTileDataSource(this, new TileDecoder(), conn);
 	}
 }
