@@ -41,6 +41,22 @@ public abstract class BitmapTileSource extends UrlTileSource {
 		mMimeType = mimeType;
 	}
 
+	public int getZoomLevelMax() {
+		return mZoomMax;
+	}
+
+	public int getZoomLevelMin() {
+		return mZoomMin;
+	}
+
+	public FadeStep[] getFadeSteps() {
+		return null;
+	}
+
+	public String getTileUrl(Tile tile) {
+		return null;
+	}
+
 	@Override
 	public ITileDataSource getDataSource() {
 		LwHttp conn = new LwHttp(mUrl, mMimeType, mFileExtension, false) {
@@ -59,22 +75,6 @@ public abstract class BitmapTileSource extends UrlTileSource {
 		return new UrlTileDataSource(this, new BitmapTileDecoder(), conn);
 	}
 
-	public int getZoomLevelMax() {
-		return mZoomMax;
-	}
-
-	public int getZoomLevelMin() {
-		return mZoomMin;
-	}
-
-	public FadeStep[] getFadeSteps() {
-		return null;
-	}
-
-	public String getTileUrl(Tile tile) {
-		return null;
-	}
-
 	public class BitmapTileDecoder implements ITileDecoder {
 
 		@Override
@@ -83,7 +83,7 @@ public abstract class BitmapTileSource extends UrlTileSource {
 
 			Bitmap bitmap = CanvasAdapter.g.decodeBitmap(is);
 			if (!bitmap.isValid()) {
-				log.debug("invalid bitmap");
+				log.debug("{} invalid bitmap", tile);
 				return false;
 			}
 			sink.setTileImage(bitmap);
