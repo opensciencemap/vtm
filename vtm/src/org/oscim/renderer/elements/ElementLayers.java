@@ -50,7 +50,7 @@ public class ElementLayers {
 	public RenderElement extrusionLayers;
 
 	// VBO holds all vertex data to draw lines and polygons
-	// after are compilation.
+	// after compilation.
 	// Layout:
 	//   16 bytes fill coordinates,
 	//   n bytes polygon vertices,
@@ -106,7 +106,6 @@ public class ElementLayers {
 	 * Get or add the PolygonLayer for a level. Levels are ordered from
 	 * bottom (0) to top
 	 */
-
 	public PolygonLayer getPolygonLayer(int level) {
 		return (PolygonLayer) getLayer(level, RenderElement.POLYGON);
 	}
@@ -115,7 +114,6 @@ public class ElementLayers {
 	 * Get or add the TexLineLayer for a level. Levels are ordered from
 	 * bottom (0) to top
 	 */
-
 	public LineTexLayer getLineTexLayer(int level) {
 		return (LineTexLayer) getLayer(level, RenderElement.TEXLINE);
 	}
