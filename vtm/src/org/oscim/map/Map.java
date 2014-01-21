@@ -59,8 +59,6 @@ public abstract class Map {
 		void onMotionEvent(MotionEvent e);
 	}
 
-	public static final boolean debugTheme = false;
-
 	private final Layers mLayers;
 	private final Viewport mViewport;
 	private final MapAnimator mAnimator;

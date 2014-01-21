@@ -27,7 +27,6 @@ import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.labeling.WayDecorator;
-import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
@@ -118,9 +117,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			log.debug("no theme is set");
 			return false;
 		}
-
-		if (Map.debugTheme)
-			log.debug(tile.toString());
 
 		// account for area changes with latitude
 		double lat = MercatorProjection.toLatitude(tile.y);
@@ -258,21 +254,16 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	//}
 
 	private void renderWay(RenderInstruction[] ri) {
-		if (ri == null) {
-			if (Map.debugTheme)
-				log.debug("no rule for way: " + mElement.tags);
+		if (ri == null)
 			return;
-		}
+
 		for (int i = 0, n = ri.length; i < n; i++)
 			ri[i].renderWay(this);
 	}
 
 	private void renderNode(RenderInstruction[] ri) {
-		if (ri == null) {
-			if (Map.debugTheme)
-				log.debug("no rule for node: " + mElement.tags);
+		if (ri == null)
 			return;
-		}
 
 		for (int i = 0, n = ri.length; i < n; i++)
 			ri[i].renderNode(this);
@@ -409,11 +400,9 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void renderPointSymbol(Symbol symbol) {
-		if (symbol.texture == null) {
-			if (Map.debugTheme)
-				log.debug("missing symbol for " + mElement.tags.toString());
+		if (symbol.texture == null)
 			return;
-		}
+
 		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
 			PointF p = mElement.getPoint(i);
 
