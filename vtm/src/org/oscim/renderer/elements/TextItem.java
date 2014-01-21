@@ -16,7 +16,7 @@
  */
 package org.oscim.renderer.elements;
 
-import org.oscim.theme.renderinstruction.Text;
+import org.oscim.theme.styles.Text;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 

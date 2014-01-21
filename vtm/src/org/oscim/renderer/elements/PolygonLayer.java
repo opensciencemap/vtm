@@ -31,7 +31,7 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
-import org.oscim.theme.renderinstruction.Area;
+import org.oscim.theme.styles.Area;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.Interpolation;
 import org.slf4j.Logger;

@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.theme.styles;
 
 import org.oscim.theme.IRenderTheme.Callback;
 
 /**
  * Represents a round area on the map.
  */
-public final class Circle extends RenderInstruction {
+public final class Circle extends RenderStyle {
 
 	public final int level;
 

@@ -29,8 +29,8 @@ import org.oscim.renderer.atlas.TextureAtlas.Slot;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.renderer.elements.TextLayer;
-import org.oscim.theme.renderinstruction.Line;
-import org.oscim.theme.renderinstruction.Text;
+import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

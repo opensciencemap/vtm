@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -14,23 +15,31 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.theme.styles;
 
 import org.oscim.theme.IRenderTheme.Callback;
 
-public class AreaLevel extends RenderInstruction {
-	private final Area area;
-	private final int level;
+/**
+ * Represents an icon along a polyline on the map.
+ */
+public final class LineSymbol extends RenderStyle {
 
-	public AreaLevel(Area area, int level) {
-		this.area = area;
-		this.level = level;
+	public final boolean alignCenter;
+	// public final Bitmap bitmap;
+	public final boolean repeat;
+	public final String bitmap;
+
+	public LineSymbol(String src, boolean alignCenter, boolean repeat) {
+		super();
+
+		this.bitmap = src;
+		// this.bitmap = BitmapUtils.createBitmap(src);
+		this.alignCenter = alignCenter;
+		this.repeat = repeat;
 	}
 
 	@Override
 	public void renderWay(Callback renderCallback) {
-		renderCallback.renderArea(this.area, level);
-		if (this.area.outline != null)
-			renderCallback.renderWay(this.area.outline, level + 1);
+		renderCallback.renderWaySymbol(this);
 	}
 }

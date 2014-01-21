@@ -15,40 +15,33 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.theme.styles;
 
+import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderTheme.Callback;
 
 /**
- * A RenderInstruction is a basic graphical primitive to draw a map.
+ * Represents an icon on the map.
  */
-public abstract class RenderInstruction {
-	/**
-	 * Destroys this RenderInstruction and cleans up all its internal resources.
-	 */
+public final class Symbol extends RenderStyle {
+
+	public final TextureRegion texture;
+
+	public Symbol(TextureRegion symbol) {
+		this.texture = symbol;
+	}
+
+	@Override
 	public void destroy() {
 	}
 
-	/**
-	 * @param renderCallback
-	 *            a reference to the receiver of all render callbacks.
-	 */
+	@Override
 	public void renderNode(Callback renderCallback) {
+		renderCallback.renderPointSymbol(this);
 	}
 
-	/**
-	 * @param renderCallback
-	 *            a reference to the receiver of all render callbacks.
-	 */
+	@Override
 	public void renderWay(Callback renderCallback) {
-	}
-
-	/**
-	 * Scales the text size of this RenderInstruction by the given factor.
-	 * 
-	 * @param scaleFactor
-	 *            the factor by which the text size should be scaled.
-	 */
-	public void scaleTextSize(float scaleFactor) {
+		renderCallback.renderAreaSymbol(this);
 	}
 }

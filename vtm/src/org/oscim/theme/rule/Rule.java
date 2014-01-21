@@ -27,7 +27,7 @@ import java.util.Stack;
 import org.oscim.core.Tag;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.RenderThemeHandler;
-import org.oscim.theme.renderinstruction.RenderInstruction;
+import org.oscim.theme.styles.RenderStyle;
 import org.xml.sax.Attributes;
 
 public abstract class Rule {
@@ -189,14 +189,14 @@ public abstract class Rule {
 	}
 
 	private Rule[] mSubRules;
-	private RenderInstruction[] mRenderInstructions;
+	private RenderStyle[] mRenderInstructions;
 
 	final int mZoom;
 	final int mElement;
 	final boolean mMatchFirst;
 
 	static class Builder {
-		ArrayList<RenderInstruction> renderInstructions = new ArrayList<RenderInstruction>(4);
+		ArrayList<RenderStyle> renderInstructions = new ArrayList<RenderStyle>(4);
 		ArrayList<Rule> subRules = new ArrayList<Rule>(4);
 
 		public void clear() {
@@ -216,7 +216,7 @@ public abstract class Rule {
 		mMatchFirst = matchFirst;
 	}
 
-	public void addRenderingInstruction(RenderInstruction renderInstruction) {
+	public void addRenderingInstruction(RenderStyle renderInstruction) {
 		builder.renderInstructions.add(renderInstruction);
 	}
 
@@ -227,7 +227,7 @@ public abstract class Rule {
 	abstract boolean matchesTags(Tag[] tags);
 
 	public boolean matchElement(int type, Tag[] tags, int zoomLevel,
-	        List<RenderInstruction> matchingList) {
+	        List<RenderStyle> matchingList) {
 
 		if (((mElement & type) != 0) && ((mZoom & zoomLevel) != 0) && (matchesTags(tags))) {
 
@@ -243,8 +243,8 @@ public abstract class Rule {
 
 			if (!mMatchFirst || matched) {
 				// add instructions for this rule
-				for (RenderInstruction ri : mRenderInstructions)
-					matchingList.add(ri);
+				for (RenderStyle style : mRenderInstructions)
+					matchingList.add(style);
 			}
 
 			// this rule did match
@@ -259,7 +259,7 @@ public abstract class Rule {
 		MATCHERS_CACHE_KEY.clear();
 		MATCHERS_CACHE_VALUE.clear();
 
-		mRenderInstructions = new RenderInstruction[builder.renderInstructions.size()];
+		mRenderInstructions = new RenderStyle[builder.renderInstructions.size()];
 		builder.renderInstructions.toArray(mRenderInstructions);
 
 		mSubRules = new Rule[builder.subRules.size()];
@@ -273,16 +273,16 @@ public abstract class Rule {
 	}
 
 	public void onDestroy() {
-		for (RenderInstruction ri : mRenderInstructions)
-			ri.destroy();
+		for (RenderStyle style : mRenderInstructions)
+			style.destroy();
 
 		for (Rule subRule : mSubRules)
 			subRule.onDestroy();
 	}
 
 	public void scaleTextSize(float scaleFactor) {
-		for (RenderInstruction ri : mRenderInstructions)
-			ri.scaleTextSize(scaleFactor);
+		for (RenderStyle style : mRenderInstructions)
+			style.scaleTextSize(scaleFactor);
 		for (Rule subRule : mSubRules)
 			subRule.scaleTextSize(scaleFactor);
 	}

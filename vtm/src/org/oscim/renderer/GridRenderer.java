@@ -25,8 +25,8 @@ import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.renderer.elements.TextLayer;
-import org.oscim.theme.renderinstruction.Line;
-import org.oscim.theme.renderinstruction.Text;
+import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.Text;
 
 public class GridRenderer extends ElementRenderer {
 	// private final static String TILE_FORMAT = "%d/%d/%d";

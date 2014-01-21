@@ -20,7 +20,7 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.TextItem;
-import org.oscim.theme.renderinstruction.Line;
+import org.oscim.theme.styles.Line;
 
 class Debug {
 

@@ -2,12 +2,12 @@ package org.oscim.theme;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
-import org.oscim.theme.renderinstruction.RenderInstruction;
+import org.oscim.theme.styles.RenderStyle;
 
 public class DebugTheme implements IRenderTheme {
 
 	@Override
-	public RenderInstruction[] matchElement(GeometryType type, TagSet tags, int zoomLevel) {
+	public RenderStyle[] matchElement(GeometryType type, TagSet tags, int zoomLevel) {
 		return null;
 	}
 

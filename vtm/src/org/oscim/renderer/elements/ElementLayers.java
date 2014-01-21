@@ -20,7 +20,7 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.renderer.BufferObject;
-import org.oscim.theme.renderinstruction.Line;
+import org.oscim.theme.styles.Line;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

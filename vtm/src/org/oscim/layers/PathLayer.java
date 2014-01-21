@@ -31,7 +31,7 @@ import org.oscim.map.Map;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.LineLayer;
-import org.oscim.theme.renderinstruction.Line;
+import org.oscim.theme.styles.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.LineClipper;
 

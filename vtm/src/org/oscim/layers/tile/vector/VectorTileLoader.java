@@ -35,14 +35,14 @@ import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.theme.IRenderTheme;
-import org.oscim.theme.renderinstruction.Area;
-import org.oscim.theme.renderinstruction.Circle;
-import org.oscim.theme.renderinstruction.Extrusion;
-import org.oscim.theme.renderinstruction.Line;
-import org.oscim.theme.renderinstruction.LineSymbol;
-import org.oscim.theme.renderinstruction.RenderInstruction;
-import org.oscim.theme.renderinstruction.Symbol;
-import org.oscim.theme.renderinstruction.Text;
+import org.oscim.theme.styles.Area;
+import org.oscim.theme.styles.Circle;
+import org.oscim.theme.styles.Extrusion;
+import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.LineSymbol;
+import org.oscim.theme.styles.RenderStyle;
+import org.oscim.theme.styles.Symbol;
+import org.oscim.theme.styles.Text;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
@@ -253,20 +253,20 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	//		renderWay(ri);
 	//}
 
-	private void renderWay(RenderInstruction[] ri) {
-		if (ri == null)
+	private void renderWay(RenderStyle[] style) {
+		if (style == null)
 			return;
 
-		for (int i = 0, n = ri.length; i < n; i++)
-			ri[i].renderWay(this);
+		for (int i = 0, n = style.length; i < n; i++)
+			style[i].renderWay(this);
 	}
 
-	private void renderNode(RenderInstruction[] ri) {
-		if (ri == null)
+	private void renderNode(RenderStyle[] style) {
+		if (style == null)
 			return;
 
-		for (int i = 0, n = ri.length; i < n; i++)
-			ri[i].renderNode(this);
+		for (int i = 0, n = style.length; i < n; i++)
+			style[i].renderNode(this);
 	}
 
 	private void clearState() {

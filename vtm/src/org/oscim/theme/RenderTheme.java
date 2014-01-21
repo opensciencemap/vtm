@@ -23,9 +23,9 @@ import java.util.List;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
-import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.rule.Element;
 import org.oscim.theme.rule.Rule;
+import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.LRUCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,52 +44,52 @@ public class RenderTheme implements IRenderTheme {
 	private int mLevels;
 	private Rule[] mRules;
 
-	class ElementCache {
+	class RenderStyleCache {
 		final int matchType;
-		final LRUCache<MatchingCacheKey, RenderInstructionItem> cache;
+		final LRUCache<MatchingCacheKey, RenderStyleItem> cache;
 		final MatchingCacheKey cacheKey;
 
 		/* temporary matching instructions list */
-		final ArrayList<RenderInstruction> instructionList;
+		final ArrayList<RenderStyle> instructionList;
 
-		RenderInstructionItem prevItem;
+		RenderStyleItem prevItem;
 
-		public ElementCache(int type) {
-			cache = new LRUCache<MatchingCacheKey, RenderInstructionItem>(MATCHING_CACHE_SIZE);
-			instructionList = new ArrayList<RenderInstruction>(4);
+		public RenderStyleCache(int type) {
+			cache = new LRUCache<MatchingCacheKey, RenderStyleItem>(MATCHING_CACHE_SIZE);
+			instructionList = new ArrayList<RenderStyle>(4);
 			cacheKey = new MatchingCacheKey();
 			matchType = type;
 		}
 
-		RenderInstructionItem getRenderInstructions() {
+		RenderStyleItem getRenderInstructions() {
 			return cache.get(cacheKey);
 		}
 	}
 
-	class RenderInstructionItem {
-		RenderInstructionItem next;
+	class RenderStyleItem {
+		RenderStyleItem next;
 		int zoom;
-		RenderInstruction[] list;
+		RenderStyle[] list;
 		MatchingCacheKey key;
 	}
 
-	private final ElementCache[] mElementCache;
+	private final RenderStyleCache[] mStyleCache;
 
 	public RenderTheme(int mapBackground, float baseStrokeWidth, float baseTextSize) {
 		mMapBackground = mapBackground;
 		mBaseTextSize = baseTextSize;
 
-		mElementCache = new ElementCache[3];
-		mElementCache[0] = new ElementCache(Element.NODE);
-		mElementCache[1] = new ElementCache(Element.LINE);
-		mElementCache[2] = new ElementCache(Element.POLY);
+		mStyleCache = new RenderStyleCache[3];
+		mStyleCache[0] = new RenderStyleCache(Element.NODE);
+		mStyleCache[1] = new RenderStyleCache(Element.LINE);
+		mStyleCache[2] = new RenderStyleCache(Element.POLY);
 	}
 
 	@Override
 	public void destroy() {
 
 		for (int i = 0; i < 3; i++)
-			mElementCache[i].cache.clear();
+			mStyleCache[i].cache.clear();
 
 		if (mRules != null) {
 			for (int i = 0, n = mRules.length; i < n; i++)
@@ -108,13 +108,13 @@ public class RenderTheme implements IRenderTheme {
 	}
 
 	@Override
-	public RenderInstruction[] matchElement(GeometryType geometryType, TagSet tags, int zoomLevel) {
+	public RenderStyle[] matchElement(GeometryType geometryType, TagSet tags, int zoomLevel) {
 
 		// list of renderinsctruction items in cache
-		RenderInstructionItem ris = null;
+		RenderStyleItem ris = null;
 
 		// the item matching tags and zoomlevel
-		RenderInstructionItem ri = null;
+		RenderStyleItem ri = null;
 
 		int type = geometryType.nativeInt;
 		if (type < 1 || type > 3) {
@@ -122,7 +122,7 @@ public class RenderTheme implements IRenderTheme {
 			return null;
 		}
 
-		ElementCache cache = mElementCache[type - 1];
+		RenderStyleCache cache = mStyleCache[type - 1];
 
 		// NOTE: maximum zoom level supported is 32
 		int zoomMask = 1 << zoomLevel;
@@ -154,7 +154,7 @@ public class RenderTheme implements IRenderTheme {
 				// cache miss
 				//log.debug(missCnt++ + " / " + hitCnt + " Cache Miss");
 
-				List<RenderInstruction> matches = cache.instructionList;
+				List<RenderStyle> matches = cache.instructionList;
 				matches.clear();
 
 				for (Rule rule : mRules)
@@ -163,7 +163,7 @@ public class RenderTheme implements IRenderTheme {
 				int size = matches.size();
 				if (size > 1) {
 					for (int i = 0; i < size - 1; i++) {
-						RenderInstruction r = matches.get(i);
+						RenderStyle r = matches.get(i);
 						for (int j = i + 1; j < size; j++) {
 							if (matches.get(j) == r) {
 								log.debug("fix duplicate instruction! "
@@ -193,8 +193,8 @@ public class RenderTheme implements IRenderTheme {
 						continue;
 
 					int i = 0;
-					for (RenderInstruction r : ri.list) {
-						if (r != matches.get(i))
+					for (RenderStyle style : ri.list) {
+						if (style != matches.get(i))
 							break;
 						i++;
 					}
@@ -208,17 +208,17 @@ public class RenderTheme implements IRenderTheme {
 					// this zoom level to the existing RenderInstructionItem.
 					ri.zoom |= zoomMask;
 
-					//log.debug(					//		zoomLevel + " same instructions " + size + " "
+					//log.debug(zoomLevel + " same instructions " + size + " "
 					//				+ Arrays.deepToString(tags));
 				} else {
-					//log.debug(					//		zoomLevel + " new instructions " + size + " "
+					//log.debug(zoomLevel + " new instructions " + size + " "
 					//				+ Arrays.deepToString(tags));
 
-					ri = new RenderInstructionItem();
+					ri = new RenderStyleItem();
 					ri.zoom = zoomMask;
 
 					if (size > 0) {
-						ri.list = new RenderInstruction[size];
+						ri.list = new RenderStyle[size];
 						matches.toArray(ri.list);
 					}
 

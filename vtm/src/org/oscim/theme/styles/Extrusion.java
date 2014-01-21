@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.theme.styles;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.theme.IRenderTheme.Callback;
 
-public class Extrusion extends RenderInstruction {
+public class Extrusion extends RenderStyle {
 
 	public Extrusion(int level, int colorSides, int colorTop, int colorLine, int defaultHeight) {
 

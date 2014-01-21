@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.theme.styles;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Paint;
@@ -28,7 +28,7 @@ import org.oscim.theme.IRenderTheme.Callback;
 /**
  * Represents a text along a polyline on the map.
  */
-public final class Text extends RenderInstruction {
+public final class Text extends RenderStyle {
 
 	public final String style;
 

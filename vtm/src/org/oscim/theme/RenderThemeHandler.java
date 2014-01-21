@@ -37,15 +37,15 @@ import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.IRenderTheme.ThemeException;
-import org.oscim.theme.renderinstruction.Area;
-import org.oscim.theme.renderinstruction.Circle;
-import org.oscim.theme.renderinstruction.Extrusion;
-import org.oscim.theme.renderinstruction.Line;
-import org.oscim.theme.renderinstruction.LineSymbol;
-import org.oscim.theme.renderinstruction.RenderInstruction;
-import org.oscim.theme.renderinstruction.Symbol;
-import org.oscim.theme.renderinstruction.Text;
 import org.oscim.theme.rule.Rule;
+import org.oscim.theme.styles.Area;
+import org.oscim.theme.styles.Circle;
+import org.oscim.theme.styles.Extrusion;
+import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.LineSymbol;
+import org.oscim.theme.styles.RenderStyle;
+import org.oscim.theme.styles.Symbol;
+import org.oscim.theme.styles.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -130,8 +130,8 @@ public class RenderThemeHandler extends DefaultHandler {
 
 	private Stack<Element> mElementStack = new Stack<Element>();
 	private Stack<Rule> mRuleStack = new Stack<Rule>();
-	private HashMap<String, RenderInstruction> mStyles =
-	        new HashMap<String, RenderInstruction>(10);
+	private HashMap<String, RenderStyle> mStyles =
+	        new HashMap<String, RenderStyle>(10);
 
 	private TextureAtlas mTextureAtlas;
 

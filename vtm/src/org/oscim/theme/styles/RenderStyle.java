@@ -15,31 +15,40 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.theme.styles;
 
 import org.oscim.theme.IRenderTheme.Callback;
 
 /**
- * Represents an icon along a polyline on the map.
+ * A RenderInstruction is a basic graphical primitive to draw a map.
  */
-public final class LineSymbol extends RenderInstruction {
-
-	public final boolean alignCenter;
-	// public final Bitmap bitmap;
-	public final boolean repeat;
-	public final String bitmap;
-
-	public LineSymbol(String src, boolean alignCenter, boolean repeat) {
-		super();
-
-		this.bitmap = src;
-		// this.bitmap = BitmapUtils.createBitmap(src);
-		this.alignCenter = alignCenter;
-		this.repeat = repeat;
+public abstract class RenderStyle {
+	/**
+	 * Destroys this RenderInstruction and cleans up all its internal resources.
+	 */
+	public void destroy() {
 	}
 
-	@Override
+	/**
+	 * @param renderCallback
+	 *            a reference to the receiver of all render callbacks.
+	 */
+	public void renderNode(Callback renderCallback) {
+	}
+
+	/**
+	 * @param renderCallback
+	 *            a reference to the receiver of all render callbacks.
+	 */
 	public void renderWay(Callback renderCallback) {
-		renderCallback.renderWaySymbol(this);
+	}
+
+	/**
+	 * Scales the text size of this RenderInstruction by the given factor.
+	 * 
+	 * @param scaleFactor
+	 *            the factor by which the text size should be scaled.
+	 */
+	public void scaleTextSize(float scaleFactor) {
 	}
 }

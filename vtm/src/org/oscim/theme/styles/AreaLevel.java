@@ -1,5 +1,4 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -15,33 +14,23 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.theme.styles;
 
-import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderTheme.Callback;
 
-/**
- * Represents an icon on the map.
- */
-public final class Symbol extends RenderInstruction {
+public class AreaLevel extends RenderStyle {
+	private final Area area;
+	private final int level;
 
-	public final TextureRegion texture;
-
-	public Symbol(TextureRegion symbol) {
-		this.texture = symbol;
-	}
-
-	@Override
-	public void destroy() {
-	}
-
-	@Override
-	public void renderNode(Callback renderCallback) {
-		renderCallback.renderPointSymbol(this);
+	public AreaLevel(Area area, int level) {
+		this.area = area;
+		this.level = level;
 	}
 
 	@Override
 	public void renderWay(Callback renderCallback) {
-		renderCallback.renderAreaSymbol(this);
+		renderCallback.renderArea(this.area, level);
+		if (this.area.outline != null)
+			renderCallback.renderWay(this.area.outline, level + 1);
 	}
 }

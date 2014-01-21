@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.theme.styles;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.elements.TextureItem;
@@ -24,7 +24,7 @@ import org.oscim.theme.IRenderTheme.Callback;
 /**
  * Represents a closed polygon on the map.
  */
-public final class Area extends RenderInstruction {
+public final class Area extends RenderStyle {
 
 	public Area(int fill) {
 		this(0, fill);

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.theme.renderinstruction;
+package org.oscim.theme.styles;
 
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.theme.IRenderTheme.Callback;
@@ -23,7 +23,7 @@ import org.oscim.theme.IRenderTheme.Callback;
 /**
  * Represents a polyline on the map.
  */
-public final class Line extends RenderInstruction {
+public final class Line extends RenderStyle {
 
 	//	static float[] parseFloatArray(String dashString) {
 	//		String[] dashEntries = SPLIT_PATTERN.split(dashString);

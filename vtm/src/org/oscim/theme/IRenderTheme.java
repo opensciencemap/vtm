@@ -19,14 +19,14 @@ package org.oscim.theme;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
-import org.oscim.theme.renderinstruction.Area;
-import org.oscim.theme.renderinstruction.Circle;
-import org.oscim.theme.renderinstruction.Extrusion;
-import org.oscim.theme.renderinstruction.Line;
-import org.oscim.theme.renderinstruction.LineSymbol;
-import org.oscim.theme.renderinstruction.RenderInstruction;
-import org.oscim.theme.renderinstruction.Symbol;
-import org.oscim.theme.renderinstruction.Text;
+import org.oscim.theme.styles.Area;
+import org.oscim.theme.styles.Circle;
+import org.oscim.theme.styles.Extrusion;
+import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.LineSymbol;
+import org.oscim.theme.styles.RenderStyle;
+import org.oscim.theme.styles.Symbol;
+import org.oscim.theme.styles.Text;
 
 public interface IRenderTheme {
 
@@ -37,7 +37,7 @@ public interface IRenderTheme {
 	 *            the zoom level at which the way should be matched.
 	 * @return matching render instructions
 	 */
-	public abstract RenderInstruction[] matchElement(GeometryType type, TagSet tags, int zoomLevel);
+	public abstract RenderStyle[] matchElement(GeometryType type, TagSet tags, int zoomLevel);
 
 	/**
 	 * Must be called when this RenderTheme gets destroyed to clean up and free
