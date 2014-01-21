@@ -285,48 +285,42 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				return;
 			}
 
-			LineLayer lineLayer = mTile.layers.getLineLayer(numLayer);
+			LineLayer l = mTile.layers.getLineLayer(numLayer);
 
-			if (lineLayer == null)
-				return;
-
-			if (lineLayer.line == null) {
-				lineLayer.line = line;
+			if (l.line == null) {
+				l.line = line;
 
 				float w = line.width;
 				if (!line.fixed)
 					w *= mLineScale;
 
-				lineLayer.width = w;
+				l.width = w;
 			}
 
 			if (line.outline) {
-				lineLayer.addOutline(mCurLineLayer);
+				l.addOutline(mCurLineLayer);
 				return;
 			}
 
-			lineLayer.addLine(mElement);
+			l.addLine(mElement);
 
-			// keep reference for outline layer
-			mCurLineLayer = lineLayer;
+			// NB: keep reference for outline layer(s)
+			mCurLineLayer = l;
 
 		} else {
-			LineTexLayer lineLayer = mTile.layers.getLineTexLayer(numLayer);
+			LineTexLayer l = mTile.layers.getLineTexLayer(numLayer);
 
-			if (lineLayer == null)
-				return;
-
-			if (lineLayer.line == null) {
-				lineLayer.line = line;
+			if (l.line == null) {
+				l.line = line;
 
 				float w = line.width;
 				if (!line.fixed)
 					w *= mLineScale;
 
-				lineLayer.width = w;
+				l.width = w;
 			}
 
-			lineLayer.addLine(mElement);
+			l.addLine(mElement);
 		}
 	}
 
@@ -334,13 +328,10 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void renderArea(Area area, int level) {
 		int numLayer = mCurLayer + level;
 
-		PolygonLayer layer = mTile.layers.getPolygonLayer(numLayer);
+		PolygonLayer l = mTile.layers.getPolygonLayer(numLayer);
 
-		if (layer == null)
-			return;
-
-		layer.area = area;
-		layer.addPolygon(mElement.points, mElement.index);
+		l.area = area;
+		l.addPolygon(mElement.points, mElement.index);
 	}
 
 	@Override
@@ -434,7 +425,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		if (v != null)
 			minHeight = Integer.parseInt(v);
 
-		ExtrusionLayer l = (ExtrusionLayer) mTile.layers.extrusionLayers;
+		ExtrusionLayer l = mTile.layers.getExtrusionLayers();
 
 		if (l == null) {
 			double lat = MercatorProjection.toLatitude(mTile.y);
@@ -442,7 +433,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			        * MercatorProjection.EARTH_CIRCUMFERENCE
 			        / ((long) Tile.SIZE << mTile.zoomLevel));
 
-			mTile.layers.extrusionLayers = l = new ExtrusionLayer(0, groundScale, extrusion.colors);
+			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
+			mTile.layers.add(l);
 		}
 		l.add(mElement, height, minHeight);
 	}
