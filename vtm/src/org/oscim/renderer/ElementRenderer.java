@@ -35,7 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class to use the renderer.elements for drawing
+ * Base class to use the renderer.elements for drawing.
+ * 
+ * All methods that modify 'layers' MUST be synchronized!
  */
 public abstract class ElementRenderer extends LayerRenderer {
 
@@ -128,7 +130,8 @@ public abstract class ElementRenderer extends LayerRenderer {
 	 * when successful. When no data is available (layer.getSize() == 0) then
 	 * BufferObject will be released and layers will not be rendered.
 	 */
-	protected void compile() {
+	protected synchronized void compile() {
+
 		int newSize = layers.getSize();
 
 		if (newSize <= 0) {
