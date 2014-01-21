@@ -8,6 +8,7 @@
 	<classpathentry exported="true" kind="lib" path="/vtm-libs/gdx/gdx-natives.jar"/>
 	<classpathentry exported="true" kind="lib" path="/vtm-libs/gdx/vtm-jni-natives.jar"/>
 	<classpathentry exported="true" kind="lib" path="/vtm-libs/gdx/gdx-backend-lwjgl.jar"/>
-	<classpathentry kind="lib" path="/vtm-libs/libs/slf4j-simple-1.7.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="/vtm-libs/libs/slf4j-simple-1.7.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="/vtm-libs/libs/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
