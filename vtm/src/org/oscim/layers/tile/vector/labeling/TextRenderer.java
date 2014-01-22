@@ -51,7 +51,7 @@ import org.oscim.tiling.TileRenderer;
 import org.oscim.tiling.TileSet;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
-import org.oscim.utils.async.ContinuousTask;
+import org.oscim.utils.async.SimpleWorker;
 import org.oscim.utils.pool.Pool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,14 +69,14 @@ class TextRenderer extends ElementRenderer {
 
 	//private ElementLayers mDebugLayer;
 
-	class TextureLayers {
+	class LabelTask {
 		final TextureLayer layers;
 		final TextLayer textLayer;
 		final SymbolLayer symbolLayer;
 
 		final MapPosition pos;
 
-		TextureLayers() {
+		LabelTask() {
 			pos = new MapPosition();
 
 			symbolLayer = new SymbolLayer();
@@ -126,6 +126,7 @@ class TextRenderer extends ElementRenderer {
 	private int mRelabelCnt;
 	private final TileRenderer mTileLayer;
 	private final Map mMap;
+	private final Worker mWorker;
 
 	public TextRenderer(Map map, TileRenderer baseLayer) {
 		mMap = map;
@@ -139,7 +140,7 @@ class TextRenderer extends ElementRenderer {
 		//mActiveTiles = new HashMap<MapTile, LabelTile>();
 		mRelabelCnt = 0;
 
-		mLabelTask = new LabelTask(map);
+		mWorker = new Worker(map);
 	}
 
 	// remove Label l from mLabels and return l.next
@@ -380,7 +381,7 @@ class TextRenderer extends ElementRenderer {
 		return l;
 	}
 
-	boolean updateLabels(TextureLayers work) {
+	boolean updateLabels(LabelTask work) {
 		// nextLayer is not loaded yet
 		//if (mNextLayer.ready)
 		//	return false;
@@ -610,10 +611,10 @@ class TextRenderer extends ElementRenderer {
 	public synchronized void update(MapPosition pos, boolean changed,
 	        Matrices matrices) {
 
-		TextureLayers t;
-		synchronized (mLabelTask) {
+		LabelTask t;
+		synchronized (mWorker) {
 
-			t = mLabelTask.poll();
+			t = mWorker.poll();
 
 			if (t == null)
 				return;
@@ -656,14 +657,14 @@ class TextRenderer extends ElementRenderer {
 			l = TextureLayer.Renderer.draw(l, scale, m);
 	}
 
-	final class LabelTask extends ContinuousTask<TextureLayers> {
+	final class Worker extends SimpleWorker<LabelTask> {
 
-		public LabelTask(Map map) {
-			super(map, 10, new TextureLayers(), new TextureLayers());
+		public Worker(Map map) {
+			super(map, 10, new LabelTask(), new LabelTask());
 		}
 
 		@Override
-		public boolean doWork(TextureLayers t) {
+		public boolean doWork(LabelTask t) {
 
 			if (updateLabels(t)) {
 				mMap.render();
@@ -674,7 +675,7 @@ class TextRenderer extends ElementRenderer {
 		}
 
 		@Override
-		public void cleanup(TextureLayers t) {
+		public void cleanup(LabelTask t) {
 		}
 
 		@Override
@@ -684,13 +685,11 @@ class TextRenderer extends ElementRenderer {
 		}
 	}
 
-	private final LabelTask mLabelTask;
-
 	public void clearLabels() {
-		mLabelTask.cancel(true);
+		mWorker.cancel(true);
 	}
 
 	public void update() {
-		mLabelTask.submit(MAX_RELABEL_DELAY);
+		mWorker.submit(MAX_RELABEL_DELAY);
 	}
 }

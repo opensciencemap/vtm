@@ -6,7 +6,7 @@ import org.oscim.map.Map;
  * Simple 'Double Buffering' worker for running Tasks on AsyncExecutor
  * thread.
  */
-public abstract class ContinuousTask<T> implements Runnable {
+public abstract class SimpleWorker<T> implements Runnable {
 
 	private final Map mMap;
 
@@ -26,7 +26,7 @@ public abstract class ContinuousTask<T> implements Runnable {
 	/** Stuff that is ready - will not be modified in the worker. */
 	protected T mTaskLocked;
 
-	public ContinuousTask(Map map, long minDelay, T t1, T t2) {
+	public SimpleWorker(Map map, long minDelay, T t1, T t2) {
 		mMap = map;
 		mMinDelay = minDelay;
 
