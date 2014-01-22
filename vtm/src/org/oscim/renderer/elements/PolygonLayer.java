@@ -128,8 +128,6 @@ public final class PolygonLayer extends RenderElement {
 
 	public static final class Renderer {
 
-		//private static GL20 GL;
-
 		private static final int POLYGON_VERTICES_DATA_POS_OFFSET = 0;
 		private static final int STENCIL_BITS = 8;
 		private final static int CLIP_BIT = 0x80;

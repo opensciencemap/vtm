@@ -80,11 +80,6 @@ public class GridRenderer extends ElementRenderer {
 		for (int yy = -2; yy < 2; yy++) {
 			for (int xx = -2; xx < 2; xx++) {
 
-				// String label = String.format(
-				// Locale.ROOT, TILE_FORMAT,
-				// Integer.valueOf(x + xx),
-				// Integer.valueOf(y + yy),
-				// Integer.valueOf(z));
 				String label = Integer.valueOf(x + xx) + "/" +
 				        Integer.valueOf(y + yy) + "/" +
 				        Integer.valueOf(z);
@@ -120,11 +115,10 @@ public class GridRenderer extends ElementRenderer {
 		mCurY = y;
 		mCurZ = z;
 
-		MapPosition layerPos = mMapPosition;
-		layerPos.copy(pos);
-		layerPos.x = (double) x / z;
-		layerPos.y = (double) y / z;
-		layerPos.scale = z;
+		mMapPosition.copy(pos);
+		mMapPosition.x = (double) x / z;
+		mMapPosition.y = (double) y / z;
+		mMapPosition.scale = z;
 
 		addLabels(x, y, pos.zoomLevel);
 

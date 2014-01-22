@@ -46,7 +46,7 @@ public class LwHttp {
 		mInflateContent = deflate;
 
 		mUrlPath = url.toString();
-		mUrlFileExtension = "." + extension;
+		mUrlFileExtension = extension;
 
 		mRequestBuffer = new byte[1024];
 	}

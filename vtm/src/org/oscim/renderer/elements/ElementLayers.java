@@ -41,34 +41,31 @@ public class ElementLayers {
 		TextureItem.init(gl, 0);
 	}
 
-	// FIXME use one ArrayList for these!
-
-	// mixed Polygon- and LineLayer
+	/** mixed Polygon- and LineLayer */
 	public RenderElement baseLayers;
-	// Text- and SymbolLayer
-	public RenderElement textureLayers;
-	//
-	public RenderElement extrusionLayers;
 
-	// VBO holds all vertex data to draw lines and polygons
-	// after compilation.
-	// Layout:
-	//   16 bytes fill coordinates,
-	//   n bytes polygon vertices,
-	//   m bytes lines vertices
-	//  ...
+	/** Text- and SymbolLayer */
+	public RenderElement textureLayers;
+
+	public RenderElement extrusionLayers;
+	/**
+	 * VBO holds all vertex data to draw lines and polygons after compilation.
+	 * Layout:
+	 * 16 bytes fill coordinates,
+	 * n bytes polygon vertices,
+	 * m bytes lines vertices
+	 * ...
+	 */
 	public BufferObject vbo;
 
-	// To not need to switch VertexAttribPointer positions all the time:
-	// 1. polygons are packed in VBO at offset 0
-	// 2. lines afterwards at lineOffset
-	// 3. other layers keep their byte offset in RenderElement.offset
+	/**
+	 * To not need to switch VertexAttribPointer positions all the time:
+	 * 1. polygons are packed in VBO at offset 0
+	 * 2. lines afterwards at lineOffset
+	 * 3. other layers keep their byte offset in RenderElement.offset
+	 */
 	public int lineOffset;
 	public int texLineOffset;
-
-	// time when layers became first rendered (in uptime)
-	// used for animations
-	public long time;
 
 	private RenderElement mCurLayer;
 
@@ -328,13 +325,12 @@ public class ElementLayers {
 			l.verticesCnt = 0;
 		}
 
-		for (RenderElement l = textureLayers; l != null; l = l.next) {
+		for (RenderElement l = textureLayers; l != null; l = l.next)
 			l.clear();
-		}
 
-		for (RenderElement l = extrusionLayers; l != null; l = l.next) {
+		for (RenderElement l = extrusionLayers; l != null; l = l.next)
 			l.clear();
-		}
+
 		baseLayers = null;
 		textureLayers = null;
 		extrusionLayers = null;
