@@ -27,6 +27,7 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.theme.styles.Area;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ public class MeshLayer extends RenderElement {
 	int numIndices;
 
 	VertexItem indiceItems;
+	public Area area;
 
 	public MeshLayer(int level) {
 		super(RenderElement.MESH);
@@ -62,9 +64,8 @@ public class MeshLayer extends RenderElement {
 
 		verticesCnt = vertexItems.getSize() / 2;
 
-		//log.debug("-> " + verticesCnt + " " + numIndices);
-
 		if (numIndices <= 0) {
+			log.debug("empty " + geom.index);
 			vertexItems = VertexItem.pool.releaseAll(vertexItems);
 			indiceItems = VertexItem.pool.releaseAll(indiceItems);
 		}
@@ -77,17 +78,8 @@ public class MeshLayer extends RenderElement {
 			return;
 		}
 
-		//log.debug("compile");
 		// add vertices to shared VBO
 		ElementLayers.addPoolItems(this, sbuf);
-
-		int cnt = indiceItems.getSize();
-
-		//log.debug("check " + cnt + ":" + numIndices);
-
-		if (cnt != numIndices) {
-			numIndices = cnt;
-		}
 
 		// add indices to indicesVbo
 		sbuf = MapRenderer.getShortBuffer(numIndices);
@@ -127,22 +119,16 @@ public class MeshLayer extends RenderElement {
 			return true;
 		}
 
-		public static RenderElement draw(MapPosition pos, RenderElement layer,
+		public static RenderElement draw(MapPosition pos, RenderElement l,
 		        Matrices m) {
 
 			GLState.blend(true);
-
-			RenderElement l = layer;
 
 			GLState.useProgram(shaderProgram);
 
 			GLState.enableVertexArrays(hVertexPosition, -1);
 
-			//m.viewproj.setAsUniform(hMatrix);
-			//m.useScreenCoordinates(true, 1f);
 			m.mvp.setAsUniform(hMatrix);
-
-			GLUtils.setColor(hColor, Color.BLUE, 0.4f);
 
 			for (; l != null && l.type == RenderElement.MESH; l = l.next) {
 				MeshLayer ml = (MeshLayer) l;
@@ -151,6 +137,11 @@ public class MeshLayer extends RenderElement {
 					continue;
 
 				ml.indicesVbo.bind();
+
+				if (ml.area == null)
+					GLUtils.setColor(hColor, Color.BLUE, 0.4f);
+				else
+					GLUtils.setColor(hColor, ml.area.color, 1);
 
 				GL.glVertexAttribPointer(hVertexPosition, 2, GL20.GL_SHORT,
 				                         false, 0, ml.offset);
