@@ -455,23 +455,19 @@ public class TileRenderer extends LayerRenderer {
 
 		float div = FastMath.pow(z - pos.zoomLevel);
 
-		double curScale = Tile.SIZE * pos.scale;
-		double scale = (pos.scale / (1 << z));
+		double tileScale = Tile.SIZE * pos.scale;
+		float x = (float) ((tile.x - pos.x) * tileScale);
+		float y = (float) ((tile.y - pos.y) * tileScale);
 
-		float x = (float) ((tile.x - pos.x) * curScale);
-		float y = (float) ((tile.y - pos.y) * curScale);
+		// scale relative to zoom-level of this tile
+		float scale = (float) (pos.scale / (1 << z));
 
 		Matrices m = mMatrices;
-		m.mvp.setTransScale(x, y, (float) (scale / MapRenderer.COORD_SCALE));
-
+		m.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
 		m.mvp.multiplyLhs(mProjMatrix);
 
 		// set depth offset (used for clipping to tile boundaries)
 		GL.glPolygonOffset(0, mOffsetCnt++);
-
-		// simple line shader does not take forward shortening into
-		// account. only used when tilt is 0.
-		int simpleShader = (pos.tilt < 1 ? 1 : 0);
 
 		boolean clipped = false;
 
@@ -488,7 +484,7 @@ public class TileRenderer extends LayerRenderer {
 						PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
 						clipped = true;
 					}
-					l = LineLayer.Renderer.draw(t.layers, l, pos, m, div, simpleShader);
+					l = LineLayer.Renderer.draw(t.layers, l, pos, m, scale);
 					break;
 
 				case RenderElement.TEXLINE:

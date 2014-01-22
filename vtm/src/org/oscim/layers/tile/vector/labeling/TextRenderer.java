@@ -648,7 +648,7 @@ class TextRenderer extends ElementRenderer {
 						l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
 					} else {
 						float div = scale * (float) (pos.scale / (1 << pos.zoomLevel));
-						l = LineLayer.Renderer.draw(layers, l, pos, m, div, 0);
+						l = LineLayer.Renderer.draw(layers, l, pos, m, div);
 					}
 				}
 			}

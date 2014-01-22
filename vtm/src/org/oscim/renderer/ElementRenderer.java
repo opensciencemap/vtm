@@ -30,7 +30,6 @@ import org.oscim.renderer.elements.MeshLayer;
 import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.RenderElement;
 import org.oscim.renderer.elements.TextureLayer;
-import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,12 +70,13 @@ public abstract class ElementRenderer extends LayerRenderer {
 	protected synchronized void render(MapPosition curPos, Matrices m) {
 		MapPosition pos = mMapPosition;
 
-		float div = FastMath.pow(pos.zoomLevel - curPos.zoomLevel);
+		float div = (float) (curPos.scale / pos.scale);
+
+		//float div = FastMath.pow(pos.zoomLevel - curPos.zoomLevel);
 
 		layers.vbo.bind();
 		GLState.test(false, false);
 		GLState.blend(true);
-		int simple = (curPos.tilt < 1 ? 1 : 0);
 
 		if (layers.baseLayers != null) {
 			setMatrix(curPos, m, true);
@@ -88,7 +88,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 						break;
 
 					case RenderElement.LINE:
-						l = LineLayer.Renderer.draw(layers, l, curPos, m, div, simple);
+						l = LineLayer.Renderer.draw(layers, l, curPos, m, div);
 						break;
 
 					case RenderElement.TEXLINE:
@@ -110,8 +110,6 @@ public abstract class ElementRenderer extends LayerRenderer {
 		if (layers.textureLayers != null) {
 			setMatrix(curPos, m, false);
 
-			float scale = (float) (pos.scale / curPos.scale);
-
 			for (RenderElement l = layers.textureLayers; l != null;) {
 				switch (l.type) {
 					case RenderElement.BITMAP:
@@ -119,7 +117,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 						break;
 
 					default:
-						l = TextureLayer.Renderer.draw(l, scale, m);
+						l = TextureLayer.Renderer.draw(l, 1 / div, m);
 				}
 			}
 		}

@@ -639,13 +639,16 @@ public final class LineLayer extends RenderElement {
 		}
 
 		public static RenderElement draw(ElementLayers layers, RenderElement curLayer,
-		        MapPosition pos, Matrices m, float div, int mode) {
+		        MapPosition pos, Matrices m, float scale) {
 
 			if (curLayer == null)
 				return null;
 
-			GLState.useProgram(lineProgram[mode]);
+			// simple line shader does not take forward shortening into
+			// account. only used when tilt is 0.
+			int mode = pos.tilt < 1 ? 1 : 0;
 
+			GLState.useProgram(lineProgram[mode]);
 			GLState.blend(true);
 
 			// Somehow we loose the texture after an indefinite
@@ -662,24 +665,20 @@ public final class LineLayer extends RenderElement {
 
 			GLState.enableVertexArrays(hLineVertexPosition[mode], -1);
 
-			GL.glVertexAttribPointer(hLineVertexPosition[mode], 4, GL20.GL_SHORT, false, 0,
-			                         layers.lineOffset);
+			GL.glVertexAttribPointer(hLineVertexPosition[mode], 4, GL20.GL_SHORT,
+			                         false, 0, layers.lineOffset);
 
 			m.mvp.setAsUniform(hLineMatrix[mode]);
-
-			double scale = pos.getZoomScale();
 
 			// Line scale factor for non fixed lines: Within a zoom-
 			// level lines would be scaled by the factor 2 by view-matrix.
 			// Though lines should only scale by sqrt(2). This is achieved
 			// by inverting scaling of extrusion vector with: width/sqrt(s).
-			// within one zoom-level: 1 <= s <= 2
-			double relativeScale = scale / div;
-			double variableScale = (float) Math.sqrt(relativeScale * 2 / 2.2);
+			double variableScale = Math.sqrt(scale);
 
 			// scale factor to map one pixel on tile to one pixel on screen:
 			// used with orthographic projection, (shader mode == 1)
-			double pixel = (mode == SHADER_PROJ) ? 0 : (1.5 / relativeScale);
+			double pixel = (mode == SHADER_PROJ) ? 0 : 1.5 / scale;
 
 			GL.glUniform1f(uLineFade, (float) pixel);
 
@@ -711,13 +710,9 @@ public final class LineLayer extends RenderElement {
 				// draw LineLayer
 				if (!line.outline) {
 
-					if (line.fixed) {
-						// invert scaling of extrusion vectors so that line
-						// width stays the same. 'max'?
-						width = Math.max(ll.width, 1) / relativeScale;
-					} else {
-						width = ll.width / variableScale;
-					}
+					// invert scaling of extrusion vectors so that line
+					// width stays the same.
+					width = ll.width / (line.fixed ? scale : variableScale);
 
 					GL.glUniform1f(uLineWidth, (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
@@ -755,16 +750,14 @@ public final class LineLayer extends RenderElement {
 				for (LineLayer o = ll.outlines; o != null; o = o.outlines) {
 
 					if (o.line.fixed)
-						width = (ll.width + o.width) / relativeScale;
+						width = (ll.width + o.width) / scale;
 					else
-						width = ll.width / relativeScale + o.width / variableScale;
+						width = ll.width / scale + o.width / variableScale;
 
 					GL.glUniform1f(uLineWidth, (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
 					// Line-edge fade
 					if (line.blur > 0) {
-						//GL.glUniform1f(uLineFade, (float) FastMath.clamp((1 - (line.blur / relativeScale)), 0, 1));
-						//GL.glUniform1f(uLineFade, (float) (1 - (line.blur / relativeScale)));
 						GL.glUniform1f(uLineFade, line.blur);
 						blur = true;
 					} else if (mode == SHADER_FLAT) {
