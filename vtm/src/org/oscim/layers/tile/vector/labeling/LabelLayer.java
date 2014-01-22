@@ -68,6 +68,8 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
 		if (clear)
 			mTextRenderer.clearLabels();
+
+		mTextRenderer.update();
 	}
 
 	//	@Override

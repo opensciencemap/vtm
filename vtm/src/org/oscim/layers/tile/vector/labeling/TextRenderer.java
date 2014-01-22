@@ -53,9 +53,11 @@ import org.oscim.utils.FastMath;
 import org.oscim.utils.OBB2D;
 import org.oscim.utils.async.ContinuousTask;
 import org.oscim.utils.pool.Pool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class TextRenderer extends ElementRenderer {
-	//static final Logger log = LoggerFactory.getLogger(TextRenderLayer.class);
+	static final Logger log = LoggerFactory.getLogger(TextRenderer.class);
 
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
@@ -65,10 +67,10 @@ class TextRenderer extends ElementRenderer {
 	private final Viewport mViewport;
 	private final TileSet mTileSet;
 
-	class TextureLayers {
-		boolean ready;
+	//private ElementLayers mDebugLayer;
 
-		final TextureLayer l;
+	class TextureLayers {
+		final TextureLayer layers;
 		final TextLayer textLayer;
 		final SymbolLayer symbolLayer;
 
@@ -80,16 +82,11 @@ class TextRenderer extends ElementRenderer {
 			symbolLayer = new SymbolLayer();
 			textLayer = new TextLayer();
 
-			l = symbolLayer;
-			l.next = textLayer;
+			layers = symbolLayer;
+			symbolLayer.next = textLayer;
+
 		}
 	}
-
-	// used by GL thread
-	private TextureLayers mCurLayer;
-
-	// used by labeling thread
-	private TextureLayers mNextLayer;
 
 	// thread local pool (labeling)
 	class LabelPool extends Pool<TextItem> {
@@ -138,9 +135,6 @@ class TextRenderer extends ElementRenderer {
 
 		layers.textureLayers = new TextLayer();
 		layers.textureLayers.next = new SymbolLayer();
-
-		mCurLayer = new TextureLayers();
-		mNextLayer = new TextureLayers();
 
 		//mActiveTiles = new HashMap<MapTile, LabelTile>();
 		mRelabelCnt = 0;
@@ -241,6 +235,15 @@ class TextRenderer extends ElementRenderer {
 		return true;
 	}
 
+	private boolean iconIsVisible(int x, int y) {
+		// rough filter
+		float dist = x * x + y * y;
+		if (dist > mSquareRadius)
+			return false;
+
+		return true;
+	}
+
 	private boolean wayIsVisible(TextItem ti) {
 		// rough filter
 		float dist = ti.x * ti.x + ti.y * ti.y;
@@ -257,8 +260,6 @@ class TextRenderer extends ElementRenderer {
 
 		return false;
 	}
-
-	private ElementLayers mDebugLayer;
 
 	private Label getLabel() {
 		Label l = (Label) mPool.get();
@@ -379,10 +380,10 @@ class TextRenderer extends ElementRenderer {
 		return l;
 	}
 
-	boolean updateLabels() {
+	boolean updateLabels(TextureLayers work) {
 		// nextLayer is not loaded yet
-		if (mNextLayer.ready)
-			return false;
+		//if (mNextLayer.ready)
+		//	return false;
 
 		// get current tiles
 		boolean changedTiles = mTileLayer.getVisibleTiles(mTileSet);
@@ -393,7 +394,7 @@ class TextRenderer extends ElementRenderer {
 			return false;
 		}
 
-		MapPosition pos = mNextLayer.pos;
+		MapPosition pos = work.pos;
 
 		synchronized (mViewport) {
 			changedPos = mViewport.getMapPosition(pos);
@@ -428,7 +429,7 @@ class TextRenderer extends ElementRenderer {
 		//if (dbg != null)
 		//	Debug.addDebugLayers(dbg);
 
-		SymbolLayer sl = mNextLayer.symbolLayer;
+		SymbolLayer sl = work.symbolLayer;
 		sl.clearItems();
 
 		mRelabelCnt++;
@@ -570,13 +571,17 @@ class TextRenderer extends ElementRenderer {
 					if (ti.texRegion == null)
 						continue;
 
+					int x = (int) ((dx + ti.x) * scale);
+					int y = (int) ((dy + ti.y) * scale);
+
+					if (!iconIsVisible(x, y))
+						continue;
+
 					SymbolItem s = SymbolItem.pool.get();
-
 					s.texRegion = ti.texRegion;
-					s.x = (float) ((dx + ti.x) * scale);
-					s.y = (float) ((dy + ti.y) * scale);
+					s.x = x;
+					s.y = y;
 					s.billboard = true;
-
 					sl.addSymbol(s);
 				}
 			}
@@ -585,18 +590,16 @@ class TextRenderer extends ElementRenderer {
 		// temporary used Label
 		l = (Label) mPool.release(l);
 
-		TextLayer tl = mNextLayer.textLayer;
-
-		tl.labels = mLabels;
 		// draw text to bitmaps and create vertices
-		tl.prepare();
-		tl.labels = null;
+		work.textLayer.labels = mLabels;
+		work.textLayer.prepare();
+		work.textLayer.labels = null;
 
 		// remove tile locks
 		mTileLayer.releaseTiles(mTileSet);
 
-		mDebugLayer = dbg;
-		mNextLayer.ready = true;
+		//mDebugLayer = dbg;
+		//mNextLayer.ready = true;
 
 		return true;
 	}
@@ -607,90 +610,87 @@ class TextRenderer extends ElementRenderer {
 	public synchronized void update(MapPosition pos, boolean changed,
 	        Matrices matrices) {
 
-		if (mNextLayer.ready) {
-			// exchange current with next layers
-			TextureLayers tmp = mCurLayer;
-			mCurLayer = mNextLayer;
-			mNextLayer = tmp;
-			mNextLayer.ready = false;
+		TextureLayers t;
+		synchronized (mLabelTask) {
 
-			// clear textures and text items from previous layer
+			t = mLabelTask.poll();
+
+			if (t == null)
+				return;
+
 			layers.clear();
-
-			if (mDebugLayer != null) {
-				layers.baseLayers = mDebugLayer.baseLayers;
-				mDebugLayer = null;
-			}
-
-			// set new TextLayer to be uploaded and rendered
-			layers.textureLayers = mCurLayer.l;
-			mMapPosition = mCurLayer.pos;
-
-			compile();
 		}
 
-		mLabelTask.submit((mLastRun + MAX_RELABEL_DELAY) - System.currentTimeMillis());
+		// set new TextLayer to be uploaded and rendered
+		layers.textureLayers = t.layers;
+		mMapPosition = t.pos;
+		compile();
+
+		update();
 	}
 
 	@Override
 	public synchronized void render(MapPosition pos, Matrices m) {
 		GLState.test(false, false);
 
+		layers.vbo.bind();
+
 		float scale = (float) (mMapPosition.scale / pos.scale);
 
-		setMatrix(pos, m, true);
+		if (layers.baseLayers != null) {
+			setMatrix(pos, m, true);
 
-		synchronized (layers) {
-			layers.vbo.bind();
-			if (layers.baseLayers != null) {
-				for (RenderElement l = layers.baseLayers; l != null;) {
-					if (l.type == RenderElement.POLYGON) {
-						l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
-					} else {
-						float div = scale * (float) (pos.scale / (1 << pos.zoomLevel));
-						l = LineLayer.Renderer.draw(layers, l, pos, m, div);
-					}
+			for (RenderElement l = layers.baseLayers; l != null;) {
+				if (l.type == RenderElement.POLYGON) {
+					l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
+				} else {
+					float div = (float) (mMapPosition.scale / (1 << pos.zoomLevel));
+					l = LineLayer.Renderer.draw(layers, l, pos, m, div);
 				}
 			}
-
-			setMatrix(pos, m, false);
-
-			for (RenderElement l = layers.textureLayers; l != null;)
-				l = TextureLayer.Renderer.draw(l, scale, m);
 		}
+
+		setMatrix(pos, m, false);
+
+		for (RenderElement l = layers.textureLayers; l != null;)
+			l = TextureLayer.Renderer.draw(l, scale, m);
 	}
 
-	final class LabelTask extends ContinuousTask {
+	final class LabelTask extends ContinuousTask<TextureLayers> {
 
 		public LabelTask(Map map) {
-			super(map, 10);
+			super(map, 10, new TextureLayers(), new TextureLayers());
 		}
 
 		@Override
-		public void doWork() {
+		public boolean doWork(TextureLayers t) {
 
-			if (updateLabels())
+			if (updateLabels(t)) {
 				mMap.render();
+				return true;
+			}
 
-			mLastRun = System.currentTimeMillis();
+			return false;
 		}
 
 		@Override
-		public void cleanup() {
-			clearLabelsInternal();
+		public void cleanup(TextureLayers t) {
+		}
+
+		@Override
+		public void finish() {
+			mLabels = (Label) mPool.releaseAll(mLabels);
+			mTileSet.releaseTiles();
 		}
 	}
 
 	private final LabelTask mLabelTask;
 
-	/* private */long mLastRun;
-
-	/* private */void clearLabelsInternal() {
-		mLabels = (Label) mPool.releaseAll(mLabels);
-		mTileSet.releaseTiles();
+	public void clearLabels() {
+		mLabelTask.cancel(true);
 	}
 
-	public void clearLabels() {
-		mLabelTask.cancel();
+	public void update() {
+		mLabelTask.submit(MAX_RELABEL_DELAY);
 	}
 }

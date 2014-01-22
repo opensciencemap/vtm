@@ -2,7 +2,12 @@ package org.oscim.utils.async;
 
 import org.oscim.map.Map;
 
-public abstract class ContinuousTask implements Runnable {
+/**
+ * Simple 'Double Buffering' worker for running Tasks on AsyncExecutor
+ * thread.
+ */
+public abstract class ContinuousTask<T> implements Runnable {
+
 	private final Map mMap;
 
 	protected boolean mRunning;
@@ -12,30 +17,40 @@ public abstract class ContinuousTask implements Runnable {
 
 	protected long mMinDelay;
 
-	public ContinuousTask(Map map, long minDelay) {
+	/** Stuff which can be processed on the worker thread. */
+	protected T mTaskTodo;
+
+	/** Stuff that is done an ready for being fetched by poll(). */
+	protected T mTaskDone;
+
+	/** Stuff that is ready - will not be modified in the worker. */
+	protected T mTaskLocked;
+
+	public ContinuousTask(Map map, long minDelay, T t1, T t2) {
 		mMap = map;
 		mMinDelay = minDelay;
+
+		mTaskTodo = t1;
+		mTaskLocked = t2;
 	}
 
 	@Override
 	public void run() {
 
 		synchronized (this) {
-			//System.out.println("run " + mRunning + " " 
-			// + mCancel + " " + mDelayed + " " + mWait);
-
 			if (mCancel) {
 				mCancel = false;
 				mRunning = false;
 				mDelayed = false;
 				mWait = false;
-				cleanup();
+				cleanup(mTaskTodo);
+				finish();
 				return;
 			}
-			if (mDelayed) {
+
+			if (mDelayed || mTaskTodo == null) {
 				// entered on main-loop
 				mDelayed = false;
-				mWait = false;
 				// unset running temporarily
 				mRunning = false;
 				submit(0);
@@ -43,32 +58,43 @@ public abstract class ContinuousTask implements Runnable {
 			}
 		}
 
-		doWork();
+		boolean done = doWork(mTaskTodo);
 
 		synchronized (this) {
 			mRunning = false;
 
-			if (mCancel)
-				cleanup();
-			else if (mWait)
+			if (mCancel) {
+				cleanup(mTaskTodo);
+				finish();
+				mCancel = false;
+			} else if (done) {
+				mTaskDone = mTaskTodo;
+				mTaskTodo = null;
+			} else if (mWait) {
+				// only submit if not 'done'
+				// as otherwise there is no
+				// mStuffTodo
 				submit(mMinDelay);
-
-			mCancel = false;
-			mWait = false;
+				mWait = false;
+			}
 		}
 	}
 
-	public abstract void doWork();
+	public abstract boolean doWork(T task);
 
-	public abstract void cleanup();
+	public abstract void cleanup(T task);
+
+	public void finish() {
+
+	}
 
 	public synchronized void submit(long delay) {
-		//System.out.println("submit " + mRunning + " " + mCancel + " " + delay);
 
 		if (mRunning) {
 			mWait = true;
 			return;
 		}
+
 		mRunning = true;
 		if (delay <= 0) {
 			mMap.addTask(this);
@@ -80,12 +106,31 @@ public abstract class ContinuousTask implements Runnable {
 
 	}
 
-	public synchronized void cancel() {
+	public synchronized T poll() {
+		if (mTaskDone == null)
+			return null;
+
+		cleanup(mTaskLocked);
+		mTaskTodo = mTaskLocked;
+
+		mTaskLocked = mTaskDone;
+		mTaskDone = null;
+
+		if (mWait) {
+			submit(mMinDelay);
+			mWait = false;
+		}
+
+		return mTaskLocked;
+	}
+
+	public synchronized void cancel(boolean clear) {
 		if (mRunning) {
 			mCancel = true;
 			return;
 		}
 
-		cleanup();
+		cleanup(mTaskTodo);
+		finish();
 	}
 }
