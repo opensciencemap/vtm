@@ -32,6 +32,7 @@ import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
+import org.oscim.renderer.elements.MeshLayer;
 import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.RenderElement;
 import org.oscim.utils.FastMath;
@@ -480,20 +481,26 @@ public class TileRenderer extends LayerRenderer {
 
 				case RenderElement.LINE:
 					if (!clipped) {
-						// draw stencil buffer clip region
-						PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
 						clipped = true;
+						PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
 					}
 					l = LineLayer.Renderer.draw(t.layers, l, pos, m, scale);
 					break;
 
 				case RenderElement.TEXLINE:
 					if (!clipped) {
-						// draw stencil buffer clip region
-						PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
 						clipped = true;
+						PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
 					}
 					l = LineTexLayer.Renderer.draw(t.layers, l, pos, m, div);
+					break;
+
+				case RenderElement.MESH:
+					if (!clipped) {
+						clipped = true;
+						PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
+					}
+					l = MeshLayer.Renderer.draw(pos, l, m);
 					break;
 
 				default:

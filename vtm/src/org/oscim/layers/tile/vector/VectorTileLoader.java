@@ -31,6 +31,7 @@ import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
+import org.oscim.renderer.elements.MeshLayer;
 import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
@@ -324,14 +325,22 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
+	// slower to load (requires tesselation) and uses
+	// more memory but should be faster to render
+	private final static boolean USE_MESH_POLY = false;
+
 	@Override
 	public void renderArea(Area area, int level) {
 		int numLayer = mCurLayer + level;
-
-		PolygonLayer l = mTile.layers.getPolygonLayer(numLayer);
-
-		l.area = area;
-		l.addPolygon(mElement.points, mElement.index);
+		if (USE_MESH_POLY) {
+			MeshLayer l = mTile.layers.getMeshLayer(numLayer);
+			l.area = area;
+			l.addMesh(mElement);
+		} else {
+			PolygonLayer l = mTile.layers.getPolygonLayer(numLayer);
+			l.area = area;
+			l.addPolygon(mElement.points, mElement.index);
+		}
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
+import org.oscim.renderer.elements.MeshLayer;
 import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
@@ -319,17 +320,20 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
+	private final static boolean USE_MESH_POLY = false;
+
 	@Override
 	public void renderArea(Area area, int level) {
 		int numLayer = mCurLayer + level;
-
-		PolygonLayer layer = mTile.layers.getPolygonLayer(numLayer);
-
-		if (layer == null)
-			return;
-
-		layer.area = area;
-		layer.addPolygon(mElement.points, mElement.index);
+		if (USE_MESH_POLY) {
+			MeshLayer l = mTile.layers.getMeshLayer(numLayer);
+			l.area = area;
+			l.addMesh(mElement);
+		} else {
+			PolygonLayer l = mTile.layers.getPolygonLayer(numLayer);
+			l.area = area;
+			l.addPolygon(mElement.points, mElement.index);
+		}
 	}
 
 	@Override
