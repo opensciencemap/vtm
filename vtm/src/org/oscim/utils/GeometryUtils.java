@@ -62,7 +62,18 @@ public final class GeometryUtils {
 	}
 
 	public static float area(float ax, float ay, float bx, float by, float cx, float cy) {
-		float area = ((ax - cx) * (by - cy) - (bx - cx) * (ay - cy)) * 0.5f;
-		return area < 0 ? -area : area;
+
+		float area = ((ax - cx) * (by - cy)
+		        - (bx - cx) * (ay - cy));
+
+		return (area < 0 ? -area : area) * 0.5f;
+	}
+
+	public static float area(float[] a, int p1, int p2, int p3) {
+
+		float area = ((a[p1] - a[p3]) * (a[p2 + 1] - a[p3 + 1])
+		        - (a[p2] - a[p3]) * (a[p1 + 1] - a[p3 + 1]));
+
+		return (area < 0 ? -area : area) * 0.5f;
 	}
 }
