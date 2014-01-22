@@ -7,7 +7,7 @@ tessellate = (function() {
 
 	// special tessellator for extrusion layer - only returns triangle indices
 	var tessellate = function(vertices, v_start, v_end, boundaries, b_start,
-			b_end) {
+			b_end, mode) {
 		var i;
 
 		var v_len = (v_end - v_start);
@@ -44,58 +44,62 @@ tessellate = (function() {
 		var nverts = Module.getValue(pnverts, 'i32');
 		var ntris = Module.getValue(pntris, 'i32');
 
-		// var result_vertices = new Float32Array(nverts * 2);
 		var result_triangles = null;
+		var result_vertices = null;
 
-		if (nverts * 2 == v_len) {
+		if (mode){
 			result_triangles = new Int32Array(ntris * 3);
+			for (i = 0; i < 3 * ntris; ++i)
+				result_triangles[i] = Module.getValue(ptris_out + i * 4, 'i32');
+			
+			result_vertices = new Float32Array(nverts * 2);
+			for (i = 0; i < 2 * nverts; ++i)
+				result_vertices[i] = Module.getValue(pcoordinates_out + i * 8, 'double');
+		
+		} else {
+			if (nverts * 2 == v_len) {
+				result_triangles = new Int32Array(ntris * 3);
+				
+				for (i = 0; i < 3 * ntris; ++i) {
+					result_triangles[i] = Module.getValue(ptris_out + i * 4, 'i32') * 2;
+				}
+				// when a ring has an odd number of points one (or rather two)
+				// additional vertices will be added. so the following rings
+				// needs extra offset...
+				var start = 0;
+				for ( var j = 0, m = b_len - 1; j < m; j++) {
+					start += boundaries[b_start + j];
 
-			// for (i=0; i<2*nverts; ++i) {
-			// result_vertices[i] = Module.getValue(pcoordinates_out + i*8,
-			// 'double');
-			// if (result_vertices[i] != vertices[v_start + i])
-			// console.log("i:" + i + " " + result_vertices[i] + " " +
-			// vertices[v_start + i]);
-			// }
+					// even number of points?
+					if (!((boundaries[b_start + j] >> 1) & 1))
+						continue;
 
-			for (i = 0; i < 3 * ntris; ++i) {
-				result_triangles[i] = Module.getValue(ptris_out + i * 4, 'i32') * 2;
-			}
-			// when a ring has an odd number of points one (or rather two)
-			// additional vertices will be added. so the following rings
-			// needs extra offset...
-			var start = 0;
-			for ( var j = 0, m = b_len - 1; j < m; j++) {
-				start += boundaries[b_start + j];
+					for ( var n = ntris * 3, tri = 0; tri < n; tri++)
+						if (result_triangles[tri] >= start)
+							result_triangles[tri] += 2;
 
-				// even number of points?
-				if (!((boundaries[b_start + j] >> 1) & 1))
-					continue;
-
-				// console.log("shift " + boundaries[b_start + j]);
-
-				for ( var n = ntris * 3, tri = 0; tri < n; tri++)
-					if (result_triangles[tri] >= start)
-						result_triangles[tri] += 2;
-
-				start += 2;
-			}
+					start += 2;
+				}
+			}	
 		}
-
+		
 		Module._free(pnverts);
 		Module._free(pntris);
+		
 		Module._free(ppcoordinates_out);
-		Module._free(pptris_out);
 		Module._free(pcoordinates_out);
+		
+		Module._free(pptris_out);
 		Module._free(ptris_out);
+
 		Module._free(p);
 		Module._free(contours);
-
-		return result_triangles;
-		// return {
-		// vertices: result_vertices,
-		// triangles: result_triangles
-		// };
+		
+		if (mode)
+			 	return { vertices: result_vertices, triangles: result_triangles };
+			else
+				return result_triangles;
+		
 	};
 
 	return tessellate;

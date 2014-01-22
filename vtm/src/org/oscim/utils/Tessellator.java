@@ -125,9 +125,6 @@ public class Tessellator {
 
 		int[] result = new int[2];
 
-		//int numPoints = 0;
-		//for (int i = 0; i < rings; i++)
-		//	numPoints += index[ipos + i];
 		int numRings = 0;
 		int numPoints = 0;
 
@@ -142,10 +139,6 @@ public class Tessellator {
 		long ctx = Tessellator.tessellate(geom.points, 0,
 		                                  geom.index, 0,
 		                                  numRings, result);
-
-		//log.debug("got "
-		//        + result[RESULT_VERTICES] + " "
-		//        + result[RESULT_TRIANGLES]);
 
 		boolean verticesAdded = false;
 		if (numPoints < result[RESULT_VERTICES] * 2) {
@@ -190,82 +183,96 @@ public class Tessellator {
 	public static int tessellate(GeometryBuffer geom, float scale,
 	        VertexItem outPoints, VertexItem outTris, int vertexOffset) {
 
+		int numIndices = 0;
+		int indexPos = 0;
+		int pointPos = 0;
+		int indexEnd = geom.index.length;
+
 		int[] result = new int[2];
 
-		//int numPoints = 0;
-		//for (int i = 0; i < rings; i++)
-		//	numPoints += index[ipos + i];
+		float s = scale;
+		scale = 1;
 
-		int numRings = 0;
-		int numPoints = 0;
+		for (int idx = 0; idx < indexEnd && geom.index[idx] > 0; idx++) {
+			indexPos = idx;
 
-		for (int i = 0; i <= geom.indexPos; i++) {
-			if (geom.index[i] <= 0)
-				break;
+			int numRings = 1;
+			int numPoints = geom.index[idx++];
 
-			numRings++;
-			numPoints += (geom.index[i]) / 2;
-		}
+			for (; idx < indexEnd && geom.index[idx] > 0; idx++) {
+				numRings++;
+				numPoints += geom.index[idx];
+			}
 
-		if (numRings == 0 || numPoints == 0) {
-			log.debug("missing " + numPoints + ":" + numRings);
-			return 0;
-		}
+			for (int i = pointPos; i < pointPos + numPoints; i += 2) {
+				geom.points[i + 0] = (int) (geom.points[i + 0] * s);
+				geom.points[i + 1] = (int) (geom.points[i + 1] * s);
+			}
 
-		long ctx = Tessellator.tessellate(geom.points, 0,
-		                                  geom.index, 0,
-		                                  numRings, result);
+			long ctx = Tessellator.tessellate(geom.points, pointPos,
+			                                  geom.index, indexPos,
+			                                  numRings, result);
 
-		if (numPoints >= result[RESULT_VERTICES]) {
-			// TODO use vertices from geom.points
-		}
-
-		if (outPoints.used == VertexItem.SIZE) {
-			outPoints = VertexItem.pool.getNext(outPoints);
-		}
-
-		int cnt;
-
-		while ((cnt = Tessellator.tessGetVerticesWO(ctx,
-		                                            outPoints.vertices,
-		                                            outPoints.used,
-		                                            scale)) > 0) {
-			outPoints.used += cnt;
-
-			if (outPoints.used == VertexItem.SIZE) {
-				outPoints = VertexItem.pool.getNext(outPoints);
+			if (result[RESULT_VERTICES] == 0 || result[RESULT_TRIANGLES] == 0) {
+				log.debug("ppos " + pointPos + " ipos:" + indexPos +
+				        " rings:" + numRings + " " + Arrays.toString(geom.index));
 				continue;
 			}
-			// no more points to get.
-			break;
-		}
 
-		int numIndices = 0;
+			pointPos += numPoints;
 
-		if (outTris.used == VertexItem.SIZE) {
-			outTris = VertexItem.pool.getNext(outTris);
-		}
-
-		while ((cnt = Tessellator.tessGetIndicesWO(ctx,
-		                                           outTris.vertices,
-		                                           outTris.used)) > 0) {
-			// shift by vertexOffset
-			for (int pos = outTris.used, end = pos + cnt; pos < end; pos++)
-				outTris.vertices[pos] += vertexOffset;
-
-			outTris.used += cnt;
-			numIndices += cnt;
-
-			if (outTris.used == VertexItem.SIZE) {
+			if (outTris.used == VertexItem.SIZE)
 				outTris = VertexItem.pool.getNext(outTris);
-				continue;
+
+			while (true) {
+				int cnt = Tessellator.tessGetIndicesWO(ctx,
+				                                       outTris.vertices,
+				                                       outTris.used);
+				if (cnt <= 0)
+					break;
+
+				// shift by vertexOffset
+				for (int pos = outTris.used, end = pos + cnt; pos < end; pos++)
+					outTris.vertices[pos] += vertexOffset;
+
+				outTris.used += cnt;
+				numIndices += cnt;
+
+				if (outTris.used < VertexItem.SIZE)
+					break;
+
+				outTris = VertexItem.pool.getNext(outTris);
 			}
 
-			// no more indices to get.
-			break;
+			if (outPoints.used == VertexItem.SIZE)
+				outPoints = VertexItem.pool.getNext(outPoints);
+
+			while (true) {
+				int cnt = Tessellator.tessGetVerticesWO(ctx,
+				                                        outPoints.vertices,
+				                                        outPoints.used,
+				                                        scale);
+				if (cnt <= 0)
+					break;
+
+				outPoints.used += cnt;
+				vertexOffset += cnt >> 1;
+
+				if (outPoints.used < VertexItem.SIZE)
+					break;
+
+				outPoints = VertexItem.pool.getNext(outPoints);
+			}
+
+			Tessellator.tessFinish(ctx);
+
+			if (idx >= indexEnd || geom.index[idx] < 0)
+				break;
 		}
 
-		Tessellator.tessFinish(ctx);
+		if (vertexOffset > Short.MAX_VALUE) {
+			log.debug("too much !!!" + Arrays.toString(geom.index));
+		}
 
 		return numIndices;
 	}
