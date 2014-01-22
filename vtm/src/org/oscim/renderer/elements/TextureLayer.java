@@ -152,7 +152,7 @@ public abstract class TextureLayer extends RenderElement {
 			TextureLayer tl = (TextureLayer) l;
 
 			if (tl.fixed)
-				GL.glUniform1f(hTextureScale, (float) Math.sqrt(scale));
+				GL.glUniform1f(hTextureScale, scale);
 			else
 				GL.glUniform1f(hTextureScale, 1);
 
