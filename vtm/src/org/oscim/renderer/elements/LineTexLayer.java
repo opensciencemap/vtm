@@ -28,6 +28,7 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.styles.Line;
+import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,21 +109,23 @@ public final class LineTexLayer extends RenderElement {
 
 	public void addLine(float[] points, short[] index) {
 
-		if (vertexItems == null) {
-			vertexItems = VertexItem.pool.get();
-			curItem = vertexItems;
+		VertexItem si = Inlist.last(vertexItems);
+
+		if (si == null) {
+			si = VertexItem.pool.get();
+			vertexItems = si;
+
+			//curItem = vertexItems;
 			// HACK add one vertex offset when compiling
 			// buffer otherwise one cant use the full
 			// VertexItem (see Layers.compile)
 			// add the two 'x' at front and end
-			//verticesCnt = 2;
+			//numVertices = 2;
 
 			// the additional end vertex to make sure
 			// not to read outside allocated memory
-			verticesCnt = 1;
+			numVertices = 1;
 		}
-
-		VertexItem si = curItem;
 
 		short v[] = si.vertices;
 		int opos = si.used;
@@ -218,7 +221,7 @@ public final class LineTexLayer extends RenderElement {
 					even = false;
 
 					// vertex 0 and 2 were added
-					verticesCnt += 3;
+					numVertices += 3;
 					evenQuads++;
 				} else {
 					// go to next block
@@ -226,7 +229,7 @@ public final class LineTexLayer extends RenderElement {
 					opos += 18;
 
 					// vertex 1 and 3 were added
-					verticesCnt += 1;
+					numVertices += 1;
 					oddQuads++;
 				}
 			}
@@ -241,7 +244,6 @@ public final class LineTexLayer extends RenderElement {
 			opos += 12;
 
 		si.used = opos;
-		curItem = si;
 	}
 
 	@Override
@@ -367,6 +369,7 @@ public final class LineTexLayer extends RenderElement {
 			for (; l != null && l.type == RenderElement.TEXLINE; l = l.next) {
 				LineTexLayer ll = (LineTexLayer) l;
 				Line line = ll.line;
+				int lOffset = l.getOffset();
 
 				GLUtils.setColor(hTexColor, line.stippleColor, 1);
 				GLUtils.setColor(hBgColor, line.color, 1);
@@ -393,7 +396,7 @@ public final class LineTexLayer extends RenderElement {
 						numIndices = maxIndices;
 
 					// i / 6 * (24 shorts per block * 2 short bytes)
-					int add = (l.offset + i * 8) + vOffset;
+					int add = (lOffset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(hVertexPosition0,
 					                         4, GL20.GL_SHORT, false, STRIDE,
@@ -422,7 +425,7 @@ public final class LineTexLayer extends RenderElement {
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;
 					// i / 6 * (24 shorts per block * 2 short bytes)
-					int add = (l.offset + i * 8) + vOffset;
+					int add = (lOffset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(hVertexPosition0,
 					                         4, GL20.GL_SHORT, false, STRIDE,

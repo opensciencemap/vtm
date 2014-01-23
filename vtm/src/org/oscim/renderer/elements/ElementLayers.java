@@ -208,10 +208,10 @@ public class ElementLayers {
 		int size = 0;
 
 		for (RenderElement l = baseLayers; l != null; l = l.next)
-			size += l.verticesCnt * VERTEX_SHORT_CNT[l.type];
+			size += l.numVertices * VERTEX_SHORT_CNT[l.type];
 
 		for (RenderElement l = textureLayers; l != null; l = l.next)
-			size += l.verticesCnt * TEXTURE_VERTEX_SHORTS;
+			size += l.numVertices * TEXTURE_VERTEX_SHORTS;
 
 		return size;
 	}
@@ -283,16 +283,14 @@ public class ElementLayers {
 			if (last == null)
 				continue;
 
-			l.offset = pos;
-
-			pos += l.verticesCnt;
+			l.setOffset(pos);
+			pos += l.numVertices;
 
 			last.next = items;
 			items = l.vertexItems;
 			last = null;
 
 			l.vertexItems = null;
-			l.curItem = null;
 		}
 		items = VertexItem.pool.releaseAll(items);
 
@@ -301,7 +299,7 @@ public class ElementLayers {
 
 	static void addPoolItems(RenderElement l, ShortBuffer sbuf) {
 		// offset of layer data in vbo
-		l.offset = sbuf.position() * SHORT_BYTES;
+		l.setOffset(sbuf.position() * SHORT_BYTES);
 
 		for (VertexItem it = l.vertexItems; it != null; it = it.next) {
 			if (it.next == null)
@@ -318,11 +316,9 @@ public class ElementLayers {
 
 		// clear line and polygon layers directly
 		for (RenderElement l = baseLayers; l != null; l = l.next) {
-			if (l.vertexItems != null) {
+			if (l.vertexItems != null)
 				l.vertexItems = VertexItem.pool.releaseAll(l.vertexItems);
-				l.curItem = null;
-			}
-			l.verticesCnt = 0;
+			l.numVertices = 0;
 		}
 
 		for (RenderElement l = textureLayers; l != null; l = l.next)

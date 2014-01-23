@@ -60,9 +60,9 @@ public class MeshLayer extends RenderElement {
 		numIndices += Tessellator.tessellate(geom, MapRenderer.COORD_SCALE,
 		                                     Inlist.last(vertexItems),
 		                                     Inlist.last(indiceItems),
-		                                     verticesCnt);
+		                                     numVertices);
 
-		verticesCnt = vertexItems.getSize() / 2;
+		numVertices = vertexItems.getSize() / 2;
 
 		if (numIndices <= 0) {
 			log.debug("empty " + geom.index);
@@ -144,7 +144,7 @@ public class MeshLayer extends RenderElement {
 					GLUtils.setColor(hColor, ml.area.color, 1);
 
 				GL.glVertexAttribPointer(hVertexPosition, 2, GL20.GL_SHORT,
-				                         false, 0, ml.offset);
+				                         false, 0, ml.getOffset());
 
 				GL.glDrawElements(GL20.GL_TRIANGLES, ml.numIndices,
 				                  GL20.GL_UNSIGNED_SHORT, 0);

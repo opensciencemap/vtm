@@ -34,6 +34,7 @@ import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.styles.Area;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.Interpolation;
+import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +54,7 @@ public final class PolygonLayer extends RenderElement {
 		super(RenderElement.POLYGON);
 
 		level = layer;
-		curItem = VertexItem.pool.get();
-		vertexItems = curItem;
+		vertexItems = VertexItem.pool.get();
 	}
 
 	public void addPolygon(GeometryBuffer geom) {
@@ -64,7 +64,7 @@ public final class PolygonLayer extends RenderElement {
 	public void addPolygon(float[] points, short[] index) {
 		short center = (short) ((Tile.SIZE >> 1) * S);
 
-		VertexItem si = curItem;
+		VertexItem si = Inlist.last(vertexItems);
 		short[] v = si.vertices;
 		int outPos = si.used;
 
@@ -79,7 +79,7 @@ public final class PolygonLayer extends RenderElement {
 				continue;
 			}
 
-			verticesCnt += length / 2 + 2;
+			numVertices += length / 2 + 2;
 
 			int inPos = pos;
 
@@ -115,7 +115,6 @@ public final class PolygonLayer extends RenderElement {
 		}
 
 		si.used = outPos;
-		curItem = si;
 	}
 
 	@Override
@@ -326,7 +325,7 @@ public final class PolygonLayer extends RenderElement {
 				// set stencil mask to draw to
 				GL.glStencilMask(1 << cur++);
 
-				GL.glDrawArrays(GL20.GL_TRIANGLE_FAN, l.offset, l.verticesCnt);
+				GL.glDrawArrays(GL20.GL_TRIANGLE_FAN, l.getOffset(), l.numVertices);
 
 				// draw up to 7 layers into stencil buffer
 				if (cur == STENCIL_BITS - 1) {

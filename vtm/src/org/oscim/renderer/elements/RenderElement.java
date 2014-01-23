@@ -26,7 +26,7 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 
 	public final static byte LINE = 0;
 	public final static byte POLYGON = 1;
-	public static final byte MESH = 2;
+	public final static byte MESH = 2;
 	public final static byte TEXLINE = 3;
 	public final static byte SYMBOL = 4;
 	public final static byte BITMAP = 5;
@@ -38,22 +38,31 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 
 	public final byte type;
 
-	// drawing order from bottom to top
+	/** drawing order from bottom to top */
 	int level;
 
-	// number of vertices for this layer
-	public int verticesCnt;
+	/** number of vertices for this layer */
+	protected int numVertices;
 
-	// in case of line and polygon layer:
-	// - number of VERTICES offset for this layertype in VBO
-	// otherwise:
-	// - offset in byte in VBO
-	public int offset;
-
-	VertexItem vertexItems;
-	protected VertexItem curItem;
+	protected VertexItem vertexItems;
 
 	abstract protected void compile(ShortBuffer sbuf);
 
 	abstract protected void clear();
+
+	/**
+	 * for line and polygon layers:
+	 * - number of VERTICES mOffset for this layertype in VBO
+	 * otherwise:
+	 * - offset in byte in VBO
+	 */
+	private int mOffset;
+
+	public int getOffset() {
+		return mOffset;
+	}
+
+	public void setOffset(int offset) {
+		mOffset = offset;
+	}
 }

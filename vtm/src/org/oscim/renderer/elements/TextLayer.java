@@ -84,7 +84,7 @@ public final class TextLayer extends TextureLayer {
 		int pos = vi.used; // 0
 		short buf[] = vi.vertices;
 
-		verticesCnt = 0;
+		numVertices = 0;
 
 		int advanceY = 0;
 		float x = 0;
@@ -246,8 +246,8 @@ public final class TextLayer extends TextureLayer {
 				buf[pos++] = v1;
 
 				// six indices to draw the four vertices
-				verticesCnt += 4;
 				numIndices += TextureLayer.INDICES_PER_SPRITE;
+				numVertices += 4;
 
 				if (it.next == null || (it.next.text != it.text)
 				        || (it.next.string != it.string)) {
@@ -276,7 +276,7 @@ public final class TextLayer extends TextureLayer {
 		clearLabels();
 		//labels = TextItem.pool.releaseAll(labels);
 		//vertexItems = VertexItem.pool.releaseAll(vertexItems);
-		//verticesCnt = 0;
+		//numVertices = 0;
 	}
 
 	public void clearLabels() {

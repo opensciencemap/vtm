@@ -44,7 +44,7 @@ public final class SymbolLayer extends TextureLayer {
 	public void addSymbol(SymbolItem item) {
 
 		// needed to calculate 'sbuf' size for compile
-		verticesCnt += VERTICES_PER_SPRITE;
+		numVertices += VERTICES_PER_SPRITE;
 
 		for (SymbolItem it = symbols; it != null; it = it.next) {
 			if (it.bitmap == item.bitmap) {
@@ -62,7 +62,7 @@ public final class SymbolLayer extends TextureLayer {
 	@Override
 	protected void compile(ShortBuffer sbuf) {
 		// offset of layer data in vbo
-		this.offset = sbuf.position() * 2; //SHORT_BYTES;
+		setOffset(sbuf.position() * 2); //SHORT_BYTES;
 
 		short numIndices = 0;
 
@@ -202,7 +202,7 @@ public final class SymbolLayer extends TextureLayer {
 
 	public void clearItems() {
 		symbols = SymbolItem.pool.releaseAll(symbols);
-		//verticesCnt = 0;
+		//numVertices = 0;
 	}
 
 	@Override
@@ -213,7 +213,7 @@ public final class SymbolLayer extends TextureLayer {
 
 		//symbols = SymbolItem.pool.releaseAll(symbols);
 		//vertexItems = VertexItem.pool.releaseAll(vertexItems);
-		//verticesCnt = 0;
+		//numVertices = 0;
 	}
 
 	@Override

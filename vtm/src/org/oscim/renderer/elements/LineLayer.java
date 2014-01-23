@@ -30,6 +30,7 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.styles.Line;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,12 +96,10 @@ public final class LineLayer extends RenderElement {
 		else if (line.cap == Cap.SQUARE)
 			squared = true;
 
-		if (vertexItems == null) {
+		if (vertexItems == null)
 			vertexItems = VertexItem.pool.get();
-			curItem = vertexItems;
-		}
 
-		VertexItem si = curItem;
+		VertexItem si = Inlist.last(vertexItems);
 		short v[] = si.vertices;
 		int opos = si.used;
 
@@ -155,7 +154,7 @@ public final class LineLayer extends RenderElement {
 			// + 2 for drawing triangle-strip
 			// + 4 for round caps
 			// + 2 for closing polygons
-			verticesCnt += length + (rounded ? 6 : 2) + (closed ? 2 : 0);
+			numVertices += length + (rounded ? 6 : 2) + (closed ? 2 : 0);
 
 			int ipos = pos;
 
@@ -276,7 +275,7 @@ public final class LineLayer extends RenderElement {
 				}
 
 				if (rounded)
-					verticesCnt -= 2;
+					numVertices -= 2;
 
 				// add first vertex twice
 				ddx = (int) ((ux - tx) * DIR_SCALE);
@@ -507,7 +506,7 @@ public final class LineLayer extends RenderElement {
 				}
 
 				if (rounded)
-					verticesCnt -= 2;
+					numVertices -= 2;
 
 				ddx = (int) ((ux - vx) * DIR_SCALE);
 				ddy = (int) ((uy - vy) * DIR_SCALE);
@@ -549,16 +548,13 @@ public final class LineLayer extends RenderElement {
 		}
 
 		si.used = opos;
-		curItem = si;
+		//curItem = si;
 	}
 
 	@Override
 	public void clear() {
-		if (vertexItems != null) {
-			vertexItems = VertexItem.pool.releaseAll(vertexItems);
-			curItem = null;
-		}
-		verticesCnt = 0;
+		vertexItems = VertexItem.pool.releaseAll(vertexItems);
+		numVertices = 0;
 	}
 
 	@Override
@@ -634,7 +630,8 @@ public final class LineLayer extends RenderElement {
 
 			mTexID = GLUtils.loadTexture(pixel, 128, 128, GL20.GL_ALPHA,
 			                             GL20.GL_NEAREST, GL20.GL_NEAREST,
-			                             GL20.GL_MIRRORED_REPEAT, GL20.GL_MIRRORED_REPEAT);
+			                             GL20.GL_MIRRORED_REPEAT,
+			                             GL20.GL_MIRRORED_REPEAT);
 			return true;
 		}
 
@@ -714,7 +711,8 @@ public final class LineLayer extends RenderElement {
 					// width stays the same.
 					width = ll.width / (line.fixed ? scale : variableScale);
 
-					GL.glUniform1f(uLineWidth, (float) (width * COORD_SCALE_BY_DIR_SCALE));
+					GL.glUniform1f(uLineWidth,
+					               (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
 					// Line-edge fade
 					if (line.blur > 0) {
@@ -741,7 +739,8 @@ public final class LineLayer extends RenderElement {
 						GL.glUniform1f(uLineMode, capMode);
 					}
 
-					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, l.offset, l.verticesCnt);
+					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
+					                l.getOffset(), l.numVertices);
 
 					continue;
 				}
@@ -754,7 +753,8 @@ public final class LineLayer extends RenderElement {
 					else
 						width = ll.width / scale + o.width / variableScale;
 
-					GL.glUniform1f(uLineWidth, (float) (width * COORD_SCALE_BY_DIR_SCALE));
+					GL.glUniform1f(uLineWidth,
+					               (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
 					// Line-edge fade
 					if (line.blur > 0) {
@@ -775,7 +775,8 @@ public final class LineLayer extends RenderElement {
 						GL.glUniform1f(uLineMode, capMode);
 					}
 
-					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, o.offset, o.verticesCnt);
+					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
+					                o.getOffset(), o.numVertices);
 				}
 			}
 
