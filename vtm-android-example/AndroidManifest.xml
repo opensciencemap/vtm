@@ -10,7 +10,7 @@
 
   <uses-sdk
     android:minSdkVersion="10"
-    android:targetSdkVersion="10" />
+    android:targetSdkVersion="18" />
 
   <application
     android:allowBackup="true"
@@ -20,7 +20,7 @@
     <!-- android:theme="@android:style/Theme.NoTitleBar.Fullscreen" -->
     <activity
       android:name="org.oscim.android.test.Samples"
-      android:label="Samples" >
+      android:label="VTM Samples" >
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
 
