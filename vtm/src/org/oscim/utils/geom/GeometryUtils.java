@@ -108,4 +108,28 @@ public final class GeometryUtils {
 		return dx * dx + dy * dy;
 	}
 
+	public static double distance(float[] p, int a, int b) {
+		float dx = p[a] - p[b];
+		float dy = p[a + 1] - p[b + 1];
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	public static double dotProduct(float[] p, int a, int b, int c) {
+
+		double ab = distance(p, a, b);
+		double bc = distance(p, b, c);
+		double d = ab * bc;
+		double dotp = 0;
+
+		if (d > 0) {
+			dotp = ((p[a] - p[b]) * (p[c] - p[b]) +
+			        (p[a + 1] - p[b + 1]) * (p[c + 1] - p[b + 1]))
+			        / d;
+			if (dotp > 1)
+				dotp = 1;
+			else if (dotp < 0)
+				dotp = 0;
+		}
+		return dotp;
+	}
 }
