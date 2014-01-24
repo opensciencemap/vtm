@@ -24,7 +24,7 @@ import org.oscim.theme.styles.Line;
 
 class Debug {
 
-	private final static float[] mDebugPoints = new float[4];
+	private final static float[] mDebugPoints = new float[8];
 
 	static void addDebugBox(ElementLayers dbg, Label l, TextItem ti, int overlaps, boolean prev,
 	        float scale) {
@@ -57,8 +57,9 @@ class Debug {
 		points[3] = (l.y + height * scale);
 		ll.addLine(points, 4, false);
 
+		System.arraycopy(l.bbox.vec, 2, points, 0, 8);
 		if (l.bbox != null && overlaps != 3) {
-			ll.addLine(l.bbox.corner, 8, true);
+			ll.addLine(points, 8, true);
 		}
 	}
 
