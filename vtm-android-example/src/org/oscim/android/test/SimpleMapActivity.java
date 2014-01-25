@@ -15,8 +15,10 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */package org.oscim.android.test;
 
+import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.InternalRenderTheme;
+import org.oscim.tiling.TileRenderer;
 
 import android.os.Bundle;
 import android.view.Menu;
@@ -28,9 +30,9 @@ public class SimpleMapActivity extends BaseMapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		//mMap.getLayers().add(new BuildingLayer(mMap, mBaseLayer.getTileLayer()));
-
-		mMap.getLayers().add(new LabelLayer(mMap, mBaseLayer.getTileLayer()));
+		TileRenderer l = mBaseLayer.getTileRenderer();
+		mMap.getLayers().add(new BuildingLayer(mMap, l));
+		mMap.getLayers().add(new LabelLayer(mMap, l));
 
 		//mMap.getLayers().add(new GenericLayer(mMap, new GridRenderer()));
 
