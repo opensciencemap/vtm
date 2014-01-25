@@ -96,4 +96,12 @@ public class FastMath {
 	public static boolean absMaxCmp(int value1, int value2, int cmp) {
 		return value1 < -cmp || value1 > cmp || value2 < -cmp || value2 > cmp;
 	}
+
+	public static boolean withinSquaredDist(int dx, int dy, int distance) {
+		return dx * dx + dy * dy < distance;
+	}
+
+	public static boolean withinSquaredDist(float dx, float dy, float distance) {
+		return dx * dx + dy * dy < distance;
+	}
 }
