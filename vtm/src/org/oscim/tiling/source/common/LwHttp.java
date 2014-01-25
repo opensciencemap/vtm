@@ -139,8 +139,23 @@ public class LwHttp {
 
 		@Override
 		public synchronized long skip(long n) throws IOException {
-			sumRead += n;
-			return super.skip(n);
+			// Android Image decoder *requires* skip to
+			// actually skip the requested amout.
+			// https://code.google.com/p/android/issues/detail?id=6066
+			long sumSkipped = 0L;
+			while (sumSkipped < n) {
+				long skipped = super.skip(n - sumSkipped);
+				if (skipped != 0) {
+					sumSkipped += skipped;
+					continue;
+				}
+				if (read() < 0)
+					break; // EOF
+
+				sumSkipped += 1;
+			}
+			sumRead += sumSkipped;
+			return sumSkipped;
 		}
 
 		@Override
