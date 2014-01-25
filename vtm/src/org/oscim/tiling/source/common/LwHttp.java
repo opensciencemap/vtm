@@ -110,6 +110,7 @@ public class LwHttp {
 	static class Buffer extends BufferedInputStream {
 		OutputStream mCache;
 		int sumRead = 0;
+		int marked = -1;
 		int mContentLength;
 
 		public Buffer(InputStream is) {
@@ -127,6 +128,20 @@ public class LwHttp {
 
 		public boolean finishedReading() {
 			return sumRead == mContentLength;
+		}
+
+		@Override
+		public synchronized void mark(int readlimit) {
+			marked = sumRead;
+			super.mark(readlimit);
+		}
+
+		@Override
+		public synchronized void reset() throws IOException {
+			if (marked >= 0)
+				sumRead = marked;
+			// TODO could check if the mark is  already invalid
+			super.reset();
 		}
 
 		@Override
