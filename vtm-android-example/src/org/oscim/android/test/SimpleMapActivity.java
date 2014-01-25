@@ -17,6 +17,7 @@
 
 import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.map.Layers;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tiling.TileRenderer;
 
@@ -31,10 +32,11 @@ public class SimpleMapActivity extends BaseMapActivity {
 		super.onCreate(savedInstanceState);
 
 		TileRenderer l = mBaseLayer.getTileRenderer();
-		mMap.getLayers().add(new BuildingLayer(mMap, l));
-		mMap.getLayers().add(new LabelLayer(mMap, l));
+		Layers layers = mMap.getLayers();
+		layers.add(new BuildingLayer(mMap, l));
+		layers.add(new LabelLayer(mMap, l));
 
-		//mMap.getLayers().add(new GenericLayer(mMap, new GridRenderer()));
+		//layers.add(new TileGridLayer(mMap));
 
 		mMap.setTheme(InternalRenderTheme.DEFAULT);
 		//mMap.setTheme(InternalRenderTheme.TRONRENDER);

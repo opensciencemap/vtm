@@ -23,13 +23,12 @@ import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.core.GeoPoint;
-import org.oscim.layers.GenericLayer;
+import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.marker.ItemizedIconLayer;
 import org.oscim.layers.marker.ItemizedIconLayer.OnItemGestureListener;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 import org.oscim.layers.marker.MarkerSymbol;
-import org.oscim.renderer.GridRenderer;
 
 import android.os.Bundle;
 import android.widget.Toast;
@@ -65,7 +64,7 @@ public class MarkerOverlayActivity extends MapActivity implements OnItemGestureL
 
 		markerLayer.addItems(pts);
 
-		mMap.getLayers().add(new GenericLayer(mMap, new GridRenderer()));
+		mMap.getLayers().add(new TileGridLayer(mMap));
 		mMap.setMapPosition(0, 0, 1);
 	}
 

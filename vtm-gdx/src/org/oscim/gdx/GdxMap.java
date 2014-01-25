@@ -19,12 +19,13 @@ package org.oscim.gdx;
 import org.oscim.backend.AssetAdapter;
 import org.oscim.core.Tile;
 import org.oscim.layers.GenericLayer;
+import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.map.Layers;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
-import org.oscim.renderer.GridRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tiling.source.TileSource;
@@ -128,23 +129,21 @@ public abstract class GdxMap implements ApplicationListener {
 
 	protected void initDefaultLayers(TileSource tileSource, boolean tileGrid, boolean labels,
 	        boolean buildings) {
+		Layers layers = mMap.getLayers();
 
 		if (tileSource != null) {
 			mMapLayer = mMap.setBaseMap(tileSource);
 			mMap.setTheme(InternalRenderTheme.DEFAULT);
 
 			if (buildings)
-				mMap.getLayers()
-				    .add(new BuildingLayer(mMap, mMapLayer.getTileRenderer()));
+				layers.add(new BuildingLayer(mMap, mMapLayer.getTileRenderer()));
 
 			if (labels)
-				mMap.getLayers()
-				    .add(new LabelLayer(mMap, mMapLayer.getTileRenderer()));
+				layers.add(new LabelLayer(mMap, mMapLayer.getTileRenderer()));
 		}
 
 		if (tileGrid)
-			mMap.getLayers()
-			    .add(new GenericLayer(mMap, new GridRenderer()));
+			layers.add(new TileGridLayer(mMap));
 	}
 
 	// Stage ui;
@@ -303,7 +302,7 @@ public abstract class GdxMap implements ApplicationListener {
 
 				case Input.Keys.G:
 					if (mGridLayer == null) {
-						mGridLayer = new GenericLayer(mMap, new GridRenderer());
+						mGridLayer = new TileGridLayer(mMap);
 						mGridLayer.setEnabled(true);
 						mMap.getLayers().add(mGridLayer);
 					} else {

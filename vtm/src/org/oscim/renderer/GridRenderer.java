@@ -29,18 +29,20 @@ import org.oscim.theme.styles.Line;
 import org.oscim.theme.styles.Text;
 
 public class GridRenderer extends ElementRenderer {
-	// private final static String TILE_FORMAT = "%d/%d/%d";
 	private final TextLayer mTextLayer;
 	private final Text mText;
-
 	private final LineLayer mLineLayer;
-
 	private final GeometryBuffer mLines;
+	private final StringBuffer mStringBuffer;
 
 	private int mCurX, mCurY, mCurZ;
 
 	public GridRenderer() {
+		this(1, new Line(Color.LTGRAY, 1.2f, Cap.BUTT),
+		     Text.createText(22, 0, Color.RED, 0, false));
+	}
 
+	public GridRenderer(int numLines, Line lineStyle, Text textStyle) {
 		int size = Tile.SIZE;
 
 		// not needed to set but we know:
@@ -50,25 +52,33 @@ public class GridRenderer extends ElementRenderer {
 		float pos = -size * 4;
 
 		// 8 vertical lines
-		for (int i = 0; i < 8; i++) {
-			float x = pos + i * size;
+		for (int i = 0; i < 8 * numLines; i++) {
+			float x = pos + i * size / numLines;
 			mLines.startLine();
 			mLines.addPoint(x, pos);
 			mLines.addPoint(x, pos + size * 8);
 		}
 
 		// 8 horizontal lines
-		for (int j = 0; j < 8; j++) {
-			float y = pos + j * size;
+		for (int j = 0; j < 8 * numLines; j++) {
+			float y = pos + j * size / numLines;
 			mLines.startLine();
 			mLines.addPoint(pos, y);
 			mLines.addPoint(pos + size * 8, y);
 		}
 
-		mText = Text.createText(22, 0, Color.RED, 0, false);
+		mText = textStyle;
 
-		mTextLayer = layers.addTextLayer(new TextLayer());
-		mLineLayer = layers.addLineLayer(0, new Line(0x66000066, 1.5f, Cap.BUTT));
+		if (mText != null) {
+			mTextLayer = layers.addTextLayer(new TextLayer());
+		} else {
+			mTextLayer = null;
+		}
+
+		mLineLayer = layers.addLineLayer(0, lineStyle);
+		mLineLayer.addLine(mLines);
+
+		mStringBuffer = new StringBuffer(32);
 	}
 
 	private void addLabels(int x, int y, int z) {
@@ -77,15 +87,20 @@ public class GridRenderer extends ElementRenderer {
 		TextLayer tl = mTextLayer;
 		tl.clear();
 
+		StringBuffer sb = mStringBuffer;
+
 		for (int yy = -2; yy < 2; yy++) {
 			for (int xx = -2; xx < 2; xx++) {
 
-				String label = Integer.valueOf(x + xx) + "/" +
-				        Integer.valueOf(y + yy) + "/" +
-				        Integer.valueOf(z);
+				sb.setLength(0);
+				sb.append(x + xx);
+				sb.append(" / ");
+				sb.append(y + yy);
+				sb.append(" / ");
+				sb.append(z);
 
 				TextItem ti = TextItem.pool.get();
-				ti.set(s * xx + s / 2, s * yy + s / 2, label, mText);
+				ti.set(s * xx + s / 2, s * yy + s / 2, sb.toString(), mText);
 
 				tl.addText(ti);
 			}
@@ -120,10 +135,11 @@ public class GridRenderer extends ElementRenderer {
 		mMapPosition.y = (double) y / z;
 		mMapPosition.scale = z;
 
-		addLabels(x, y, pos.zoomLevel);
-
-		mLineLayer.clear();
-		mLineLayer.addLine(mLines);
+		if (mText != null) {
+			addLabels(x, y, pos.zoomLevel);
+			mLineLayer.clear();
+			mLineLayer.addLine(mLines);
+		}
 
 		compile();
 	}
