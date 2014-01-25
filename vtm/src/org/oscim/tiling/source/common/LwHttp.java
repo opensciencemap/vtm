@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LwHttp {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
-	static final boolean DBG = false;
+	static final boolean dbg = false;
 
 	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
 	private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
@@ -160,7 +160,7 @@ public class LwHttp {
 
 			sumRead += 1;
 
-			if (DBG)
+			if (dbg)
 				log.debug("read {} {}", sumRead, mContentLength);
 
 			if (mCache != null)
@@ -178,7 +178,7 @@ public class LwHttp {
 
 			int len = super.read(buffer, offset, byteCount);
 
-			if (DBG)
+			if (dbg)
 				log.debug("read {} {} {}", len, sumRead, mContentLength);
 
 			if (len <= 0)
@@ -265,7 +265,7 @@ public class LwHttp {
 				        HEADER_CONTENT_LENGTH.length + 2, end - 1);
 			}
 
-			if (!ok || DBG) {
+			if (!ok || dbg) {
 				String line = new String(buf, pos, end - pos - 1);
 				log.debug("> {} <", line);
 			}
@@ -296,7 +296,7 @@ public class LwHttp {
 
 			close();
 
-			if (DBG)
+			if (dbg)
 				log.debug("not alive  - recreate connection " + mMaxReq);
 		}
 
@@ -326,7 +326,7 @@ public class LwHttp {
 		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
 		len += pos;
 
-		if (DBG)
+		if (dbg)
 			log.debug("request: {}", new String(request, 0, len));
 
 		try {
