@@ -76,4 +76,32 @@ public final class GeometryUtils {
 
 		return (area < 0 ? -area : area) * 0.5f;
 	}
+
+	/** square distance from a point a to a segment b,c */
+	// modified from https://github.com/ekeneijeoma/simplify-java
+	public static float squareSegmentDistance(float[] p, int a, int b, int c) {
+		float x = p[b];
+		float y = p[b + 1];
+
+		float dx = p[c] - x;
+		float dy = p[c + 1] - y;
+
+		if (dx != 0 || dy != 0) {
+			float t = ((p[a] - x) * dx + (p[a + 1] - y) * dy) / (dx * dx + dy * dy);
+
+			if (t > 1) {
+				x = p[c];
+				y = p[c + 1];
+			} else if (t > 0) {
+				x += dx * t;
+				y += dy * t;
+			}
+		}
+
+		dx = p[a] - x;
+		dy = p[a + 1] - y;
+
+		return dx * dx + dy * dy;
+	}
+
 }
