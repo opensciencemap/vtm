@@ -29,15 +29,17 @@ import org.oscim.renderer.MapRenderer.Matrices;
  * Renderer for a single bitmap, width and height must be power of 2.
  */
 public class BitmapLayer extends TextureLayer {
+	// TODO share layers.vbo() between BitmapTileLayers
 
 	//	static final Logger log = LoggerFactory.getLogger(BitmapLayer.class);
 	private Bitmap mBitmap;
 	private final boolean mReuseBitmap;
 	private final short[] mVertices;
+	private int mWidth, mHeight;
 
 	/**
-	 * @param reuseBitmap false if the Bitmap should be recycled after
-	 *            it is compiled to texture.
+	 * @param reuseBitmap false if the Bitmap should be disposed
+	 *            after loading to texture.
 	 */
 	public BitmapLayer(boolean reuseBitmap) {
 		super(RenderElement.BITMAP);
@@ -49,26 +51,19 @@ public class BitmapLayer extends TextureLayer {
 		verticesCnt = 4;
 	}
 
+	/**
+	 * w/h sets also target dimension to render the bitmap.
+	 */
 	public void setBitmap(Bitmap bitmap, int w, int h) {
 		mWidth = w;
 		mHeight = h;
 
 		mBitmap = bitmap;
-		if (this.textures == null)
-			this.textures = new TextureItem(mBitmap);
+		if (textures == null)
+			textures = new TextureItem(mBitmap);
 
-		TextureItem ti = this.textures;
-		ti.vertices = TextureLayer.Renderer.INDICES_PER_SPRITE;
-	}
-
-	private int mWidth, mHeight;
-
-	/**
-	 * Set target dimension to renderthe bitmap
-	 */
-	public void setSize(int w, int h) {
-		mWidth = w;
-		mHeight = h;
+		TextureItem t = textures;
+		t.vertices = TextureLayer.INDICES_PER_SPRITE;
 	}
 
 	private void setVertices(ShortBuffer sbuf) {
@@ -76,37 +71,40 @@ public class BitmapLayer extends TextureLayer {
 		short w = (short) (mWidth * MapRenderer.COORD_SCALE);
 		short h = (short) (mHeight * MapRenderer.COORD_SCALE);
 
-		short t = 1;
+		short texMin = 0;
+		short texMax = 1;
 
+		//	putSprite(buf, pos, tx, ty, x1, y1, x2, y2, u1, v1, u2, v2);
 		int pos = 0;
+
 		// top-left
 		buf[pos++] = 0;
 		buf[pos++] = 0;
 		buf[pos++] = -1;
 		buf[pos++] = -1;
-		buf[pos++] = 0;
-		buf[pos++] = 0;
+		buf[pos++] = texMin;
+		buf[pos++] = texMin;
 		// bot-left
 		buf[pos++] = 0;
 		buf[pos++] = h;
 		buf[pos++] = -1;
 		buf[pos++] = -1;
-		buf[pos++] = 0;
-		buf[pos++] = t;
+		buf[pos++] = texMin;
+		buf[pos++] = texMax;
 		// top-right
 		buf[pos++] = w;
 		buf[pos++] = 0;
 		buf[pos++] = -1;
 		buf[pos++] = -1;
-		buf[pos++] = t;
-		buf[pos++] = 0;
+		buf[pos++] = texMax;
+		buf[pos++] = texMin;
 		// bot-right
 		buf[pos++] = w;
 		buf[pos++] = h;
 		buf[pos++] = -1;
 		buf[pos++] = -1;
-		buf[pos++] = t;
-		buf[pos++] = t;
+		buf[pos++] = texMax;
+		buf[pos++] = texMax;
 
 		this.offset = sbuf.position() * 2; // bytes
 		sbuf.put(buf);
@@ -137,25 +135,24 @@ public class BitmapLayer extends TextureLayer {
 	@Override
 	protected void clear() {
 
-		if (mBitmap != null) {
-			if (!mReuseBitmap)
-				mBitmap.recycle();
+		// release textures and vertexItems
+		super.clear();
 
-			mBitmap = null;
-			textures.bitmap = null;
-		}
+		if (mBitmap == null)
+			return;
 
-		TextureItem.releaseTexture(textures);
-		textures = null;
+		if (!mReuseBitmap)
+			mBitmap.recycle();
 
-		vertexItems = VertexItem.pool.releaseAll(vertexItems);
+		mBitmap = null;
+
+		//textures.bitmap = null;
+		//textures.dispose();
+		//TextureItem.pool.releaseTexture(textures);
+		//textures = null;
 	}
 
 	public static final class Renderer {
-
-		//static final Logger log = LoggerFactory.getLogger(BitmapRenderer.class);
-
-		public final static boolean debug = true;
 
 		private static int mTextureProgram;
 		private static int hTextureMVMatrix;
@@ -209,16 +206,16 @@ public class BitmapLayer extends TextureLayer {
 
 			MapRenderer.bindQuadIndicesVBO(true);
 
-			for (TextureItem ti = tl.textures; ti != null; ti = ti.next) {
+			for (TextureItem t = tl.textures; t != null; t = t.next) {
 
-				ti.bind();
+				t.bind();
 
 				int maxVertices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
 
 				// draw up to maxVertices in each iteration
-				for (int i = 0; i < ti.vertices; i += maxVertices) {
+				for (int i = 0; i < t.vertices; i += maxVertices) {
 					// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
-					int off = (ti.offset + i) * 8 + tl.offset;
+					int off = (t.offset + i) * 8 + tl.offset;
 
 					GL.glVertexAttribPointer(hTextureVertex, 4,
 					                         GL20.GL_SHORT, false, 12, off);
@@ -226,7 +223,7 @@ public class BitmapLayer extends TextureLayer {
 					GL.glVertexAttribPointer(hTextureTexCoord, 2,
 					                         GL20.GL_SHORT, false, 12, off + 8);
 
-					int numVertices = ti.vertices - i;
+					int numVertices = t.vertices - i;
 					if (numVertices > maxVertices)
 						numVertices = maxVertices;
 
@@ -245,9 +242,6 @@ public class BitmapLayer extends TextureLayer {
 		        + "attribute vec4 vertex;"
 		        + "attribute vec2 tex_coord;"
 		        + "uniform mat4 u_mv;"
-		        + "uniform mat4 u_proj;"
-		        + "uniform float u_scale;"
-		        + "uniform float u_swidth;"
 		        + "varying vec2 tex_c;"
 		        + "void main() {"
 		        + "  gl_Position = u_mv * vec4(vertex.xy, 0.0, 1.0);"

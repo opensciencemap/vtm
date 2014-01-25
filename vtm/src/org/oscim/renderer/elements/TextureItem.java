@@ -18,6 +18,8 @@ package org.oscim.renderer.elements;
 
 import java.util.ArrayList;
 
+import javax.annotation.CheckReturnValue;
+
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Bitmap;
@@ -29,19 +31,16 @@ import org.oscim.utils.pool.SyncPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO use separate pools for different bitmap types and dimensions
-
 public class TextureItem extends Inlist<TextureItem> {
 	static final Logger log = LoggerFactory.getLogger(TextureItem.class);
-
-	private static GL20 GL;
 
 	/** texture ID */
 	public int id;
 
-	public int width;
-	public int height;
-	public boolean repeat;
+	/** current settings */
+	public final int width;
+	public final int height;
+	public final boolean repeat;
 
 	/** vertex offset from which this texture is referenced */
 	public short offset;
@@ -50,272 +49,290 @@ public class TextureItem extends Inlist<TextureItem> {
 	/** temporary Bitmap */
 	public Bitmap bitmap;
 
-	/** external bitmap (not from pool) */
-	private boolean ownBitmap;
-
 	/** do not release the texture when TextureItem is released. */
-	private boolean isClone;
+	private boolean ref;
 
 	/** texture data is ready */
-	private boolean isReady;
+	private boolean ready;
 
-	private TextureItem(int id) {
+	final TexturePool pool;
+
+	private TextureItem(TexturePool pool, int id) {
 		this.id = id;
-	}
-
-	public static TextureItem clone(TextureItem ti) {
-		TextureItem clone = new TextureItem(ti.id);
-		clone.id = ti.id;
-		clone.width = ti.width;
-		clone.height = ti.height;
-		clone.isClone = true;
-		// original texture needs to be loaded
-		clone.isReady = true;
-		return clone;
+		this.width = pool.mWidth;
+		this.height = pool.mHeight;
+		this.pool = pool;
+		this.repeat = false;
 	}
 
 	public TextureItem(Bitmap bitmap) {
 		this.bitmap = bitmap;
 		this.id = -1;
-		this.ownBitmap = true;
 		this.width = bitmap.getWidth();
 		this.height = bitmap.getHeight();
+		this.pool = NOPOOL;
+		this.repeat = false;
+
 	}
 
 	public TextureItem(Bitmap bitmap, boolean repeat) {
 		this.bitmap = bitmap;
 		this.id = -1;
-		this.ownBitmap = true;
 		this.width = bitmap.getWidth();
 		this.height = bitmap.getHeight();
 		this.repeat = repeat;
+		this.pool = NOPOOL;
+
 	}
 
+	private TextureItem(TexturePool pool, int id, int width, int height) {
+		this.id = id;
+		this.width = width;
+		this.height = height;
+		this.pool = pool;
+		this.repeat = false;
+	}
+
+	public static TextureItem clone(TextureItem ti) {
+		// original texture needs to be loaded
+		if (!ti.ready)
+			throw new IllegalStateException();
+
+		TextureItem clone = new TextureItem(ti.pool, ti.id, ti.width, ti.height);
+		clone.id = ti.id;
+		clone.ref = true;
+		clone.ready = true;
+		return clone;
+	}
+
+	/**
+	 * Upload Image to Texture
+	 * [on GL-Thread]
+	 */
 	public void upload() {
-		if (!isReady) {
-			TextureItem.uploadTexture(this);
-			isReady = true;
+		if (!ready) {
+			pool.uploadTexture(this);
+			ready = true;
 		}
 	}
 
+	/**
+	 * Bind Texture for rendering
+	 * [on GL-Thread]
+	 */
 	public void bind() {
-		if (!isReady) {
-			TextureItem.uploadTexture(this);
-			isReady = true;
+		if (!ready) {
+			pool.uploadTexture(this);
+			ready = true;
 		} else {
 			GLState.bindTex2D(id);
 		}
 	}
 
 	/**
-	 * Retrieve a TextureItem from pool with default Bitmap with dimension
-	 * TextureRenderer.TEXTURE_WIDTH/HEIGHT.
+	 * Dispose TextureItem
+	 * [Threadsafe]
+	 * 
+	 * @return this.next
 	 */
-	public synchronized static TextureItem get() {
-		TextureItem ti = pool.get();
-		ti.bitmap = getBitmap();
-		ti.bitmap.eraseColor(Color.TRANSPARENT);
-
-		return ti;
+	@CheckReturnValue
+	public TextureItem dispose() {
+		TextureItem n = this.next;
+		this.next = null;
+		pool.release(this);
+		return n;
 	}
 
-	static class TextureItemPool extends SyncPool<TextureItem> {
+	public static class TexturePool extends SyncPool<TextureItem> {
 
-		public TextureItemPool() {
-			super(10);
+		private final ArrayList<Integer> mTexDisposed = new ArrayList<Integer>();
+		private final ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
+
+		private final int mHeight;
+		private final int mWidth;
+		//private final int mBitmapFormat;
+		//private final int mBitmapType;
+
+		protected int mTexCnt = 0;
+
+		public TexturePool(int maxFill, int width, int height) {
+			super(maxFill);
+			mWidth = width;
+			mHeight = height;
 		}
 
 		@Override
-		public void init(int num) {
-			if (pool != null) {
-				log.debug("still textures in pool! " + fill);
-				pool = null;
-			}
+		public TextureItem releaseAll(TextureItem t) {
+			throw new RuntimeException("use TextureItem.dispose()");
+		}
 
-			if (num > 0) {
-				int[] textureIds = GLUtils.glGenTextures(num);
-				for (int i = 0; i < num; i++) {
-					TextureItem to = new TextureItem(textureIds[i]);
-					initTexture(to);
-					pool = Inlist.push(pool, to);
+		/**
+		 * Retrieve a TextureItem from pool.
+		 */
+		public synchronized TextureItem get() {
+			TextureItem t = super.get();
+
+			synchronized (mBitmaps) {
+				int size = mBitmaps.size();
+				if (size == 0)
+					t.bitmap = CanvasAdapter.g.getBitmap(mWidth, mHeight, 0);
+				else {
+					t.bitmap = mBitmaps.remove(size - 1);
+					t.bitmap.eraseColor(Color.TRANSPARENT);
 				}
 			}
 
-			fill = num;
-		}
-
-		public TextureItem get(int width, int height) {
-			return null;
+			return t;
 		}
 
 		@Override
 		protected TextureItem createItem() {
-			return new TextureItem(-1);
+			return new TextureItem(this, -1);
 		}
 
-		/** called when item is added back to pool */
 		@Override
 		protected boolean clearItem(TextureItem t) {
 
-			if (t.ownBitmap) {
-				t.bitmap = null;
-				t.ownBitmap = false;
-				releaseTexture(t);
+			//if (t.ownBitmap) {
+			//	t.bitmap = null;
+			//	t.ownBitmap = false;
+			//	releaseTexture(t);
+			//	return false;
+			//}
+
+			if (t.ref)
 				return false;
-			}
 
-			if (t.isClone) {
-				t.isClone = false;
-				t.id = -1;
-				t.width = -1;
-				t.height = -1;
-				return false;
-			}
-
-			t.isReady = false;
-
+			t.ready = false;
 			releaseBitmap(t);
 
-			return true;
+			// only add back to pool when a texture
+			// is already assigned
+			return t.id >= 0;
 		}
 
 		@Override
 		protected void freeItem(TextureItem t) {
-			t.width = -1;
-			t.height = -1;
 
-			if (!t.isClone)
-				releaseTexture(t);
+			if (!t.ref) {
+				synchronized (mTexDisposed) {
+					if (t.id >= 0) {
+						mTexDisposed.add(Integer.valueOf(t.id));
+						t.id = -1;
+					}
+				}
+			}
+		}
+
+		protected void releaseBitmap(TextureItem t) {
+
+			if (t.bitmap == null)
+				return;
+
+			synchronized (mBitmaps) {
+				mBitmaps.add(t.bitmap);
+				t.bitmap = null;
+			}
+		}
+
+		private void uploadTexture(TextureItem t) {
+
+			if (t.bitmap == null)
+				throw new RuntimeException("Missing bitmap for texture");
+
+			synchronized (mTexDisposed) {
+				int size = mTexDisposed.size();
+				if (size > 0) {
+					int[] tmp = new int[size];
+					for (int i = 0; i < size; i++)
+						tmp[i] = mTexDisposed.get(i).intValue();
+
+					mTexDisposed.clear();
+					GLUtils.glDeleteTextures(size, tmp);
+					mTexCnt -= size;
+				}
+			}
+
+			if (t.id < 0) {
+				int[] textureIds = GLUtils.glGenTextures(1);
+				t.id = textureIds[0];
+
+				initTexture(t);
+
+				if (TextureLayer.Renderer.debug)
+					log.debug("fill:" + getFill()
+					        + " count:" + mTexCnt
+					        + " new texture " + t.id);
+
+				mTexCnt++;
+
+				t.bitmap.uploadToTexture(false);
+			} else {
+				GLState.bindTex2D(t.id);
+				// use faster subimage upload 
+				t.bitmap.uploadToTexture(true);
+			}
+
+			//if (t.ownBitmap) {
+			//	t.bitmap.uploadToTexture(false);
+			//} else 
+
+			//if (t.width == mWidth && t.height == mHeight) {
+			//	// use faster subimage upload 
+			//	t.bitmap.uploadToTexture(true);
+			//} else {
+			//	t.bitmap.uploadToTexture(false);
+			//}
+
+			if (TextureLayer.Renderer.debug)
+				GLUtils.checkGlError(TextureItem.class.getName());
+
+			releaseBitmap(t);
+		}
+
+		protected void initTexture(TextureItem t) {
+			GLState.bindTex2D(t.id);
+
+			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER,
+			                   GL20.GL_LINEAR);
+			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER,
+			                   GL20.GL_LINEAR);
+
+			if (t.repeat) {
+				GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
+				                   GL20.GL_REPEAT);
+				GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
+				                   GL20.GL_REPEAT);
+			} else {
+				GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
+				                   GL20.GL_CLAMP_TO_EDGE);
+				GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
+				                   GL20.GL_CLAMP_TO_EDGE);
+			}
 		}
 	};
 
-	public final static SyncPool<TextureItem> pool = new TextureItemPool();
+	// Pool for not-pooled textures. Disposed items will only be released 
+	// on the GL-Thread and will not be put back in any pool.
+	final static TexturePool NOPOOL = new TexturePool(0, 0, 0) {
+		protected void releaseBitmap(TextureItem t) {
+			// TODO
+		};
+	};
 
-	private final static ArrayList<Integer> mTextures = new ArrayList<Integer>();
-	private final static ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
+	//	public final static TexturePool nopool(){
+	//		return NOPOOL;
+	//	}
 
-	public final static int TEXTURE_WIDTH = 512;
-	public final static int TEXTURE_HEIGHT = 256;
+	private static GL20 GL;
 
-	//private static int mBitmapFormat;
-	//private static int mBitmapType;
-	private static int mTexCnt = 0;
-
-	static void releaseTexture(TextureItem it) {
-
-		synchronized (mTextures) {
-			if (it.id >= 0) {
-				mTextures.add(Integer.valueOf(it.id));
-				it.id = -1;
-			}
-		}
-	}
-
-	/**
-	 * This function may only be used in GLRenderer Thread.
-	 * 
-	 * @param t
-	 *            the TextureObjet to compile and upload
-	 */
-	private static void uploadTexture(TextureItem t) {
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
-		if (t.bitmap == null) {
-			throw new RuntimeException("Missing bitmap for texture");
-		}
-
-		// free unused textures -> TODO find a better place for this
-		synchronized (mTextures) {
-			int size = mTextures.size();
-			if (size > 0) {
-				int[] tmp = new int[size];
-				for (int i = 0; i < size; i++) {
-					tmp[i] = mTextures.get(i).intValue();
-				}
-				mTextures.clear();
-				GLUtils.glDeleteTextures(size, tmp);
-
-				mTexCnt -= size;
-			}
-		}
-
-		if (t.id < 0) {
-			mTexCnt++;
-			int[] textureIds = GLUtils.glGenTextures(1);
-			t.id = textureIds[0];
-			initTexture(t);
-			if (TextureLayer.Renderer.debug)
-				log.debug("fill:" + pool.getFill()
-				        + " count:" + mTexCnt
-				        + " new texture " + t.id);
-		}
-
-		GLState.bindTex2D(t.id);
-
-		if (t.ownBitmap) {
-			t.bitmap.uploadToTexture(false);
-		} else if (t.width == TEXTURE_WIDTH && t.height == TEXTURE_HEIGHT) {
-			t.bitmap.uploadToTexture(true);
-		} else {
-			t.bitmap.uploadToTexture(false);
-			t.width = TEXTURE_WIDTH;
-			t.height = TEXTURE_HEIGHT;
-		}
-
-		if (TextureLayer.Renderer.debug)
-			GLUtils.checkGlError(TextureItem.class.getName());
-
-		if (!t.ownBitmap)
-			TextureItem.releaseBitmap(t);
-	}
-
-	private static void initTexture(TextureItem t) {
-		GLState.bindTex2D(t.id);
-
-		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER,
-		                   GL20.GL_LINEAR);
-		GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER,
-		                   GL20.GL_LINEAR);
-
-		if (t.repeat) {
-			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
-			                   GL20.GL_REPEAT);
-			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
-			                   GL20.GL_REPEAT);
-		} else {
-			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
-			                   GL20.GL_CLAMP_TO_EDGE);
-			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
-			                   GL20.GL_CLAMP_TO_EDGE);
-		}
-	}
-
-	static void init(GL20 gl, int num) {
+	static void init(GL20 gl) {
 		GL = gl;
 
-		mTexCnt = num;
-		pool.init(num);
-
-		mBitmaps.clear();
-		mTextures.clear();
-	}
-
-	static Bitmap getBitmap() {
-		synchronized (mBitmaps) {
-			int size = mBitmaps.size();
-			if (size == 0) {
-				return CanvasAdapter.g.getBitmap(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0);
-			}
-
-			return mBitmaps.remove(size - 1);
-		}
-	}
-
-	static void releaseBitmap(TextureItem it) {
-		synchronized (mBitmaps) {
-			if (it.bitmap != null) {
-				mBitmaps.add(it.bitmap);
-				it.bitmap = null;
-			}
-		}
+		//		mTexCnt = num;
+		//		NOPOOL.init(num);
+		//
+		//		mBitmaps.clear();
+		//		mTexDisposed.clear();
 	}
 }

@@ -20,9 +20,14 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.renderer.elements.TextureItem;
+import org.oscim.renderer.elements.TextureItem.TexturePool;
 import org.oscim.utils.pool.Inlist;
 
+/**
+ * UNUSED
+ * */
 public abstract class SpriteManager<T> {
+	TexturePool pool;
 
 	public class Sprite extends Inlist<Sprite> {
 
@@ -46,14 +51,11 @@ public abstract class SpriteManager<T> {
 	protected TextureItem mTexture;
 
 	public SpriteManager() {
-		mTexture = TextureItem.get();
+		mTexture = pool.get();
 
 		//mTexture.ownBitmap = true;
 
-		mAtlas = new TextureAtlas(
-		                          TextureItem.TEXTURE_WIDTH,
-		                          TextureItem.TEXTURE_HEIGHT,
-		                          32);
+		mAtlas = new TextureAtlas(256, 256, 32);
 
 		mCanvas.setBitmap(mTexture.bitmap);
 	}
@@ -68,12 +70,12 @@ public abstract class SpriteManager<T> {
 	}
 
 	public void clear() {
-		mTexture = TextureItem.pool.releaseAll(mTexture);
+		for (TextureItem t = mTexture; t != null; t = t.dispose());
 		mAtlas.clear();
 		items = null;
 
 		//mTexture.bitmap.eraseColor(Color.TRANSPARENT);
-		mTexture = TextureItem.get();
+		mTexture = pool.get();
 		mCanvas.setBitmap(mTexture.bitmap);
 	}
 

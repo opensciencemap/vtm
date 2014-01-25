@@ -17,14 +17,11 @@
 package org.oscim.renderer.elements;
 
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
-import static org.oscim.renderer.elements.TextureItem.TEXTURE_HEIGHT;
-import static org.oscim.renderer.elements.TextureItem.TEXTURE_WIDTH;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Canvas;
 
 public final class TextLayer extends TextureLayer {
-
 	//static final Logger log = LoggerFactory.getLogger(TextureLayer.class);
 
 	private final static int LBIT_MASK = 0xfffffffe;
@@ -94,14 +91,17 @@ public final class TextLayer extends TextureLayer {
 		float y = 0;
 		float yy;
 
-		TextureItem to = TextureItem.get();
-		textures = to;
-		mCanvas.setBitmap(to.bitmap);
+		TextureItem t = pool.get();
+		textures = t;
+		mCanvas.setBitmap(t.bitmap);
 
 		for (TextItem it = labels; it != null;) {
 
 			float width = it.width + 2 * mFontPadX;
 			float height = (int) (it.text.fontHeight) + 0.5f;
+
+			if (height > TEXTURE_HEIGHT)
+				height = TEXTURE_HEIGHT;
 
 			if (height > advanceY)
 				advanceY = (int) height;
@@ -112,14 +112,14 @@ public final class TextLayer extends TextureLayer {
 				advanceY = (int) (height + 0.5f);
 
 				if (y + height > TEXTURE_HEIGHT) {
-					to.offset = offsetIndices;
-					to.vertices = (short) (numIndices - offsetIndices);
+					t.offset = offsetIndices;
+					t.vertices = (short) (numIndices - offsetIndices);
 					offsetIndices = numIndices;
 
-					to.next = TextureItem.get();
-					to = to.next;
+					t.next = pool.get();
+					t = t.next;
 
-					mCanvas.setBitmap(to.bitmap);
+					mCanvas.setBitmap(t.bitmap);
 
 					x = 0;
 					y = 0;
@@ -246,8 +246,8 @@ public final class TextLayer extends TextureLayer {
 				buf[pos++] = v1;
 
 				// six indices to draw the four vertices
-				numIndices += TextureLayer.Renderer.INDICES_PER_SPRITE;
 				verticesCnt += 4;
+				numIndices += TextureLayer.INDICES_PER_SPRITE;
 
 				if (it.next == null || (it.next.text != it.text)
 				        || (it.next.string != it.string)) {
@@ -262,18 +262,21 @@ public final class TextLayer extends TextureLayer {
 
 		vi.used = pos;
 
-		to.offset = offsetIndices;
-		to.vertices = (short) (numIndices - offsetIndices);
+		t.offset = offsetIndices;
+		t.vertices = (short) (numIndices - offsetIndices);
 
 		return true;
 	}
 
 	@Override
 	public void clear() {
-		textures = TextureItem.pool.releaseAll(textures);
-		labels = TextItem.pool.releaseAll(labels);
-		vertexItems = VertexItem.pool.releaseAll(vertexItems);
-		verticesCnt = 0;
+		// release textures
+		super.clear();
+
+		clearLabels();
+		//labels = TextItem.pool.releaseAll(labels);
+		//vertexItems = VertexItem.pool.releaseAll(vertexItems);
+		//verticesCnt = 0;
 	}
 
 	public void clearLabels() {

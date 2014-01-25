@@ -38,7 +38,7 @@ public class ElementLayers {
 		BitmapLayer.Renderer.init();
 		MeshLayer.Renderer.init();
 
-		TextureItem.init(gl, 0);
+		TextureItem.init(gl);
 	}
 
 	/** mixed Polygon- and LineLayer */

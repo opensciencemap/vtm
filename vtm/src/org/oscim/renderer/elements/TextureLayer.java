@@ -25,34 +25,52 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.elements.TextureItem.TexturePool;
 
 public abstract class TextureLayer extends RenderElement {
+
+	public final static int INDICES_PER_SPRITE = 6;
+	final static int VERTICES_PER_SPRITE = 4;
+	final static int SHORTS_PER_VERTICE = 6;
+
+	final static int TEXTURE_HEIGHT = 128;
+	final static int TEXTURE_WIDTH = 512;
+	final static int POOL_FILL = 10;
+
+	/** pool shared by TextLayers */
+	final static TexturePool pool = new TexturePool(POOL_FILL,
+	                                                TEXTURE_WIDTH,
+	                                                TEXTURE_HEIGHT);
 
 	protected TextureLayer(byte type) {
 		super(type);
 	}
 
-	// holds textures and offset in vbo
+	/** holds textures and offset in vbo */
 	public TextureItem textures;
 
-	// scale mode
+	/** scale mode */
 	public boolean fixed;
 
-	/**
-	 * @param sbuf
-	 *            buffer to add vertices
-	 */
 	@Override
 	protected void compile(ShortBuffer sbuf) {
 
-		for (TextureItem to = textures; to != null; to = to.next)
-			to.upload();
+		for (TextureItem t = textures; t != null; t = t.next)
+			t.upload();
 
 		// add vertices to vbo
 		ElementLayers.addPoolItems(this, sbuf);
 	}
 
 	abstract public boolean prepare();
+
+	protected void clear() {
+		while (textures != null)
+			textures = textures.dispose();
+
+		vertexItems = VertexItem.pool.releaseAll(vertexItems);
+		verticesCnt = 0;
+	}
 
 	static void putSprite(short buf[], int pos,
 	        short tx, short ty,
@@ -105,10 +123,6 @@ public abstract class TextureLayer extends RenderElement {
 		private static int hTextureTexCoord;
 		private static int hTextureSize;
 
-		public final static int INDICES_PER_SPRITE = 6;
-		final static int VERTICES_PER_SPRITE = 4;
-		final static int SHORTS_PER_VERTICE = 6;
-
 		static void init() {
 
 			mTextureProgram = GLUtils.createProgram(textVertexShader,
@@ -121,9 +135,12 @@ public abstract class TextureLayer extends RenderElement {
 			hTextureScreenScale = GL.glGetUniformLocation(mTextureProgram, "u_swidth");
 			hTextureVertex = GL.glGetAttribLocation(mTextureProgram, "vertex");
 			hTextureTexCoord = GL.glGetAttribLocation(mTextureProgram, "tex_coord");
+
+			// FIXME pool should be disposed on exit...
+			pool.init(0);
 		}
 
-		public static RenderElement draw(RenderElement renderElement, float scale, Matrices m) {
+		public static RenderElement draw(RenderElement l, float scale, Matrices m) {
 
 			GLState.test(false, false);
 			GLState.blend(true);
@@ -132,7 +149,7 @@ public abstract class TextureLayer extends RenderElement {
 
 			GLState.enableVertexArrays(hTextureTexCoord, hTextureVertex);
 
-			TextureLayer tl = (TextureLayer) renderElement;
+			TextureLayer tl = (TextureLayer) l;
 
 			if (tl.fixed)
 				GL.glUniform1f(hTextureScale, (float) Math.sqrt(scale));
@@ -146,20 +163,18 @@ public abstract class TextureLayer extends RenderElement {
 
 			MapRenderer.bindQuadIndicesVBO(true);
 
-			for (TextureItem ti = tl.textures; ti != null; ti = ti.next) {
-
-				ti.bind();
+			for (TextureItem t = tl.textures; t != null; t = t.next) {
+				GL.glUniform2f(hTextureSize,
+				               1f / (t.width * COORD_SCALE),
+				               1f / (t.height * COORD_SCALE));
+				t.bind();
 
 				int maxVertices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
 
-				GL.glUniform2f(hTextureSize,
-				               1f / (ti.width * COORD_SCALE),
-				               1f / (ti.height * COORD_SCALE));
-
 				// draw up to maxVertices in each iteration
-				for (int i = 0; i < ti.vertices; i += maxVertices) {
+				for (int i = 0; i < t.vertices; i += maxVertices) {
 					// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
-					int off = (ti.offset + i) * 8 + tl.offset;
+					int off = (t.offset + i) * 8 + tl.offset;
 
 					GL.glVertexAttribPointer(hTextureVertex, 4,
 					                         GL20.GL_SHORT, false, 12, off);
@@ -167,7 +182,7 @@ public abstract class TextureLayer extends RenderElement {
 					GL.glVertexAttribPointer(hTextureTexCoord, 2,
 					                         GL20.GL_SHORT, false, 12, off + 8);
 
-					int numVertices = ti.vertices - i;
+					int numVertices = t.vertices - i;
 					if (numVertices > maxVertices)
 						numVertices = maxVertices;
 
@@ -178,7 +193,7 @@ public abstract class TextureLayer extends RenderElement {
 
 			MapRenderer.bindQuadIndicesVBO(false);
 
-			return renderElement.next;
+			return l.next;
 		}
 
 		private final static double COORD_DIV = 1.0 / MapRenderer.COORD_SCALE;

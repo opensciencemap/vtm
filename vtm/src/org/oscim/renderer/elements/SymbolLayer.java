@@ -73,7 +73,7 @@ public final class SymbolLayer extends TextureLayer {
 
 		prevTextures = textures;
 		textures = null;
-		TextureItem to = null;
+		TextureItem t = null;
 
 		for (SymbolItem it = symbols; it != null;) {
 			int width = 0, height = 0;
@@ -82,14 +82,13 @@ public final class SymbolLayer extends TextureLayer {
 
 			if (it.texRegion != null) {
 
-				// FIXME this work only with one TextureAtlas per
-				// SymbolLayer.
+				// FIXME this work only with one TextureAtlas per SymbolLayer.
 				if (textures == null) {
-					to = it.texRegion.atlas.loadTexture();
+					t = it.texRegion.atlas.loadTexture();
 					// clone TextureItem to use same texID with
 					// multiple TextureItem
-					to = TextureItem.clone(to);
-					textures = Inlist.appendItem(textures, to);
+					t = TextureItem.clone(t);
+					textures = Inlist.appendItem(textures, t);
 				}
 
 				TextureAtlas.Rect r = it.texRegion.rect;
@@ -99,20 +98,20 @@ public final class SymbolLayer extends TextureLayer {
 				height = r.h;
 
 			} else if (it.bitmap != null) {
-				width = it.bitmap.getWidth();
-				height = it.bitmap.getHeight();
-				to = getTexture(it.bitmap);
-				if (to == null) {
-					to = new TextureItem(it.bitmap);
-					textures = Inlist.appendItem(textures, to);
+				t = getTexture(it.bitmap);
 
-					to.upload();
+				if (t == null) {
+					t = new TextureItem(it.bitmap);
+					textures = Inlist.appendItem(textures, t);
+					t.upload();
+
+					t.offset = numIndices;
+					t.vertices = 0;
 				}
-				to.offset = numIndices;
-				to.vertices = 0;
-			}
+				width = t.width;
+				height = t.height;
 
-			if (to == null) {
+			} else { //if (to == null) {
 				log.debug("Bad SymbolItem");
 				continue;
 			}
@@ -126,9 +125,15 @@ public final class SymbolLayer extends TextureLayer {
 			short x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
 			// add symbol items referencing the same bitmap /
-			for (SymbolItem it2 = it;; it2 = it2.next) {
+			for (SymbolItem prev = it; it != null; it = it.next) {
 
-				if (it == it2 || it.offset != prevOffset) {
+				if (prev.bitmap != null && prev.bitmap != it.bitmap)
+					break;
+
+				if (prev.texRegion != null && prev.texRegion != it.texRegion)
+					break;
+
+				if (it == prev || it.offset != prevOffset) {
 					prevOffset = it.offset;
 					if (it.offset == null) {
 						float hw = width / 2f;
@@ -147,18 +152,12 @@ public final class SymbolLayer extends TextureLayer {
 						y2 = (short) (SCALE * (-hh));
 					}
 				}
-				if (it2 == null
-				        || (it.bitmap != null && it2.bitmap != it.bitmap)
-				        || (it.texRegion != null && it2.texRegion != it.texRegion)) {
-					it = it2;
-					break;
-				}
 
 				// add vertices
-				short tx = (short) ((int) (SCALE * it2.x) & LBIT_MASK
-				        | (it2.billboard ? 1 : 0));
+				short tx = (short) ((int) (SCALE * it.x) & LBIT_MASK
+				        | (it.billboard ? 1 : 0));
 
-				short ty = (short) (SCALE * it2.y);
+				short ty = (short) (SCALE * it.y);
 
 				if (pos == VertexItem.SIZE) {
 					sbuf.put(buf, 0, VertexItem.SIZE);
@@ -168,14 +167,12 @@ public final class SymbolLayer extends TextureLayer {
 				TextureLayer.putSprite(buf, pos, tx, ty,
 				                       x1, y1, x2, y2, u1, v1, u2, v2);
 
-				// TextureRenderer.VERTICES_PER_SPRITE
-				// * TextureRenderer.SHORTS_PER_VERTICE;
-				pos += 24;
+				pos += TextLayer.VERTICES_PER_SPRITE * 6;
 
 				// six elements used to draw the four vertices
-				to.vertices += TextureLayer.Renderer.INDICES_PER_SPRITE;
+				t.vertices += TextureLayer.INDICES_PER_SPRITE;
 			}
-			numIndices += to.vertices;
+			numIndices += t.vertices;
 		}
 
 		if (pos > 0)
@@ -183,35 +180,40 @@ public final class SymbolLayer extends TextureLayer {
 
 		si = VertexItem.pool.release(si);
 
-		prevTextures = TextureItem.pool.releaseAll(prevTextures);
+		for (t = prevTextures; t != null; t = t.dispose());
+		prevTextures = null;
 	}
 
 	private TextureItem getTexture(Bitmap bitmap) {
-		TextureItem to;
+		TextureItem t;
 
-		for (to = prevTextures; to != null; to = to.next) {
-			if (to.bitmap == bitmap) {
-				prevTextures = Inlist.remove(prevTextures, to);
-				textures = Inlist.appendItem(textures, to);
-				break;
+		for (t = prevTextures; t != null; t = t.next) {
+			if (t.bitmap == bitmap) {
+				prevTextures = Inlist.remove(prevTextures, t);
+				textures = Inlist.appendItem(textures, t);
+
+				t.offset = 0;
+				t.vertices = 0;
+				return t;
 			}
 		}
-
-		return to;
+		return null;
 	}
 
 	public void clearItems() {
 		symbols = SymbolItem.pool.releaseAll(symbols);
-		verticesCnt = 0;
+		//verticesCnt = 0;
 	}
 
 	@Override
 	public void clear() {
-		textures = TextureItem.pool.releaseAll(textures);
-		symbols = SymbolItem.pool.releaseAll(symbols);
-		vertexItems = VertexItem.pool.releaseAll(vertexItems);
+		// release textures
+		super.clear();
+		clearItems();
 
-		verticesCnt = 0;
+		//symbols = SymbolItem.pool.releaseAll(symbols);
+		//vertexItems = VertexItem.pool.releaseAll(vertexItems);
+		//verticesCnt = 0;
 	}
 
 	@Override
