@@ -93,6 +93,34 @@ public class DefaultSources {
 		}
 	}
 
+	/**
+	 * Do not use in applications unless you read through and comply to
+	 * the terms of use! Only added here for testing puposes,
+	 * https://github.com/opensciencemap/vtm/issues/18
+	 * 
+	 * https://developers.google.com/maps/faq
+	 */
+	public static class GoogleMaps extends BitmapTileSource {
+		public static final GoogleMaps INSTANCE = new GoogleMaps("http://mt1.google.com");
+
+		public GoogleMaps(String hostName) {
+			super(hostName, 1, 20, "image/png", ""); //jpeg for sat
+		}
+
+		@Override
+		public String getTileUrl(Tile tile) {
+			StringBuilder sb = new StringBuilder(60);
+			sb.append("/vt/x="); //lyrs=y&
+			sb.append(tile.tileX);
+			sb.append("&y=");
+			sb.append(tile.tileY);
+			sb.append("&z=");
+			sb.append(tile.zoomLevel);
+			sb.append("&s=Galileo&scale=2");
+			return sb.toString();
+		}
+	}
+
 	final static FadeStep[] fadeSteps = new FadeStep[] {
 	        new FadeStep(0, 8 - 1, 1, 0.7f),
 	        // dont fade between zoom-min/max
