@@ -109,38 +109,40 @@ public class LwHttp {
 	// to avoid a copy in PbfDecoder one could manage the buffer
 	// array directly and provide access to it.
 	static class Buffer extends BufferedInputStream {
-		OutputStream mCache;
-		int sumRead = 0;
+		OutputStream cache;
+		int bytesRead = 0;
+		int bytesWrote;
 		int marked = -1;
-		int mContentLength;
+		int contentLength;
 
 		public Buffer(InputStream is) {
 			super(is, BUFFER_SIZE);
 		}
 
 		public void setCache(OutputStream cache) {
-			mCache = cache;
+			this.cache = cache;
 		}
 
 		public void start(int length) {
-			sumRead = 0;
-			mContentLength = length;
+			bytesRead = 0;
+			bytesWrote = 0;
+			contentLength = length;
 		}
 
 		public boolean finishedReading() {
-			return sumRead == mContentLength;
+			return bytesRead == contentLength;
 		}
 
 		@Override
 		public synchronized void mark(int readlimit) {
-			marked = sumRead;
+			marked = bytesRead;
 			super.mark(readlimit);
 		}
 
 		@Override
 		public synchronized long skip(long n) throws IOException {
-			// Android Image decoder *requires* skip to
-			// actually skip the requested amout.
+			// Android(4.1.2) image decoder *requires* skip to
+			// actually skip the requested amount.
 			// https://code.google.com/p/android/issues/detail?id=6066
 			long sumSkipped = 0L;
 			while (sumSkipped < n) {
@@ -153,33 +155,37 @@ public class LwHttp {
 					break; // EOF
 
 				sumSkipped += 1;
+				// was incremented by read()
+				bytesRead -= 1;
 			}
-			sumRead += sumSkipped;
+			bytesRead += sumSkipped;
 			return sumSkipped;
 		}
 
 		@Override
 		public synchronized void reset() throws IOException {
 			if (marked >= 0)
-				sumRead = marked;
+				bytesRead = marked;
 			// TODO could check if the mark is  already invalid
 			super.reset();
 		}
 
 		@Override
 		public int read() throws IOException {
-			if (sumRead >= mContentLength)
+			if (bytesRead >= contentLength)
 				return -1;
 
 			int data = super.read();
 
-			sumRead += 1;
+			bytesRead += 1;
 
 			if (dbg)
-				log.debug("read {} {}", sumRead, mContentLength);
+				log.debug("read {} {}", bytesRead, contentLength);
 
-			if (mCache != null)
-				mCache.write(data);
+			if (cache != null && bytesRead > bytesWrote) {
+				bytesWrote = bytesRead;
+				cache.write(data);
+			}
 
 			return data;
 		}
@@ -188,21 +194,24 @@ public class LwHttp {
 		public int read(byte[] buffer, int offset, int byteCount)
 		        throws IOException {
 
-			if (sumRead >= mContentLength)
+			if (bytesRead >= contentLength)
 				return -1;
 
 			int len = super.read(buffer, offset, byteCount);
 
 			if (dbg)
-				log.debug("read {} {} {}", len, sumRead, mContentLength);
+				log.debug("read {} {} {}", len, bytesRead, contentLength);
 
 			if (len <= 0)
 				return len;
 
-			sumRead += len;
+			bytesRead += len;
 
-			if (mCache != null)
-				mCache.write(buffer, offset, len);
+			if (cache != null && bytesRead > bytesWrote) {
+				int add = bytesRead - bytesWrote;
+				bytesWrote = bytesRead;
+				cache.write(buffer, offset + (len - add), add);
+			}
 
 			return len;
 		}
