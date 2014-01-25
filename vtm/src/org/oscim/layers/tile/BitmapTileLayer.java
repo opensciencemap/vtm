@@ -38,7 +38,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 
 	protected static final Logger log = LoggerFactory.getLogger(BitmapTileLayer.class);
 
-	private final static int CACHE_LIMIT = 50;
+	private final static int CACHE_LIMIT = 20;
 
 	protected final TileSource mTileSource;
 
