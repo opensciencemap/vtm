@@ -14,77 +14,100 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 package org.oscim.backend.canvas;
 
 import org.oscim.utils.FastMath;
 
-/**
- * The Class Color.
- */
 public class Color {
 
-	/** The Constant BLACK. */
-	public static final int BLACK = 0xFF000000;
+	public static int fade(int color, double alpha) {
+		alpha = FastMath.clamp(alpha, 0, 1);
 
-	/** The Constant DKGRAY. */
-	public static final int DKGRAY = 0xFF444444;
+		alpha *= (color >>> 24) & 0xff;
+		int c = (((int) alpha) & 0xff) << 24;
 
-	/** The Constant GRAY. */
-	public static final int GRAY = 0xFF888888;
+		alpha /= 255;
 
-	/** The Constant LTGRAY. */
-	public static final int LTGRAY = 0xFFCCCCCC;
+		c |= ((int) (alpha * ((color >>> 16) & 0xff))) << 16;
+		c |= ((int) (alpha * ((color >>> 8) & 0xff))) << 8;
+		c |= ((int) (alpha * (color & 0xff)));
 
-	/** The Constant WHITE. */
-	public static final int WHITE = 0xFFFFFFFF;
+		return c;
+	}
 
-	/** The Constant RED. */
-	public static final int RED = 0xFFFF0000;
-
-	/** The Constant GREEN. */
-	public static final int GREEN = 0xFF00FF00;
-
-	/** The Constant BLUE. */
-	public static final int BLUE = 0xFF0000FF;
-
-	/** The Constant YELLOW. */
-	public static final int YELLOW = 0xFFFFFF00;
-
-	/** The Constant CYAN. */
-	public static final int CYAN = 0xFF00FFFF;
-
-	/** The Constant MAGENTA. */
-	public static final int MAGENTA = 0xFFFF00FF;
-
-	/** The Constant TRANSPARENT. */
-	public static final int TRANSPARENT = 0;
+	public static int rainbow(float pos) {
+		float i = 255 * pos;
+		int r = (int) Math.round(Math.sin(0.024 * i + 0) * 127 + 128);
+		int g = (int) Math.round(Math.sin(0.024 * i + 2) * 127 + 128);
+		int b = (int) Math.round(Math.sin(0.024 * i + 4) * 127 + 128);
+		return 0xff000000 | (r << 16) | (g << 8) | b;
+	}
 
 	/**
-	 * Pack 8 bit r, g, b into one int.
-	 * 
-	 * @param r the r
-	 * @param g the g
-	 * @param b the b
-	 * @return the int
+	 * Pack r, g, b bytes into one int.
 	 */
 	public static int get(int r, int g, int b) {
 		return 0xff << 24 | r << 16 | g << 8 | b;
 	}
+
+	/**
+	 * Pack premultiplied a, r, g, b bytes into one int.
+	 */
+	public static int get(int a, int r, int g, int b) {
+		return a << 24 | r << 16 | g << 8 | b;
+	}
+
+	/**
+	 * Pack r, g, b bytes into one int with premultiplied alpha a.
+	 */
+	public static int get(float a, int r, int g, int b) {
+		return fade(0xff << 24 | r << 16 | g << 8 | b, a);
+	}
+
+	public static float rToFloat(int color) {
+		return ((color >>> 16) & 0xff) / 255f;
+	}
+
+	public static float gToFloat(int color) {
+		return ((color >>> 8) & 0xff) / 255f;
+	}
+
+	public static float bToFloat(int color) {
+		return ((color) & 0xff) / 255f;
+	}
+
+	public static float aToFloat(int color) {
+		return ((color >>> 24) & 0xff) / 255f;
+	}
+
+	/*
+	 * Copyright (C) 2006 The Android Open Source Project
+	 * 
+	 * Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License.
+	 * You may obtain a copy of the License at
+	 * 
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 * 
+	 * Unless required by applicable law or agreed to in writing, software
+	 * distributed under the License is distributed on an "AS IS" BASIS,
+	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 * See the License for the specific language governing permissions and
+	 * limitations under the License.
+	 */
+	public static final int BLACK = 0xFF000000;
+	public static final int DKGRAY = 0xFF444444;
+	public static final int GRAY = 0xFF888888;
+	public static final int LTGRAY = 0xFFCCCCCC;
+	public static final int WHITE = 0xFFFFFFFF;
+	public static final int RED = 0xFFFF0000;
+	public static final int GREEN = 0xFF00FF00;
+	public static final int BLUE = 0xFF0000FF;
+	public static final int YELLOW = 0xFFFFFF00;
+	public static final int CYAN = 0xFF00FFFF;
+	public static final int MAGENTA = 0xFFFF00FF;
+	public static final int TRANSPARENT = 0;
 
 	/**
 	 * Parse the color string, and return the corresponding color-int.
@@ -111,44 +134,5 @@ public class Color {
 			return (int) color;
 		}
 		throw new IllegalArgumentException("Unknown color");
-	}
-
-	public static int fade(int color, double alpha) {
-		alpha = FastMath.clamp(alpha, 0, 1);
-
-		alpha *= (color >>> 24) & 0xff;
-		int c = (((int) alpha) & 0xff) << 24;
-
-		alpha /= 255;
-
-		c |= ((int) (alpha * ((color >>> 16) & 0xff))) << 16;
-		c |= ((int) (alpha * ((color >>> 8) & 0xff))) << 8;
-		c |= ((int) (alpha * (color & 0xff)));
-
-		return c;
-	}
-
-	public static float rToFloat(int color) {
-		return ((color >>> 16) & 0xff) / 255f;
-	}
-
-	public static float gToFloat(int color) {
-		return ((color >>> 8) & 0xff) / 255f;
-	}
-
-	public static float bToFloat(int color) {
-		return ((color) & 0xff) / 255f;
-	}
-
-	public static float aToFloat(int color) {
-		return ((color >>> 24) & 0xff) / 255f;
-	}
-
-	public static int rainbow(float pos) {
-		float i = 255 * pos;
-		int r = (int) Math.round(Math.sin(0.024 * i + 0) * 127 + 128);
-		int g = (int) Math.round(Math.sin(0.024 * i + 2) * 127 + 128);
-		int b = (int) Math.round(Math.sin(0.024 * i + 4) * 127 + 128);
-		return 0xff000000 | (r << 16) | (g << 8) | b;
 	}
 }
