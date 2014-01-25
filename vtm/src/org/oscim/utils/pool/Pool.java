@@ -21,6 +21,8 @@ import javax.annotation.CheckReturnValue;
 public abstract class Pool<T extends Inlist<T>> {
 
 	protected T pool;
+	protected int limit;
+	protected int fill;
 
 	/**
 	 * @param item release resources
@@ -75,41 +77,20 @@ public abstract class Pool<T extends Inlist<T>> {
 		return null;
 	}
 
-	// remove 'item' from 'list' and add back to pool
+	/** remove 'item' from 'list' and add back to pool */
 	public T release(T list, T item) {
 		if (item == null)
 			return list;
 
 		clearItem(item);
 
-		if (item == list) {
-			T ret = item.next;
-
-			item.next = pool;
-			pool = item;
-
-			return ret;
-		}
-
-		for (T prev = list, it = list.next; it != null; it = it.next) {
-
-			if (it == item) {
-				prev.next = it.next;
-
-				item.next = pool;
-				pool = item;
-				break;
-			}
-			prev = it;
-		}
+		Inlist.remove(list, item);
 
 		return list;
 	}
 
-	protected abstract T createItem();
-
+	/** get an item from pool */
 	public T get() {
-
 		if (pool == null)
 			return createItem();
 
@@ -119,4 +100,6 @@ public abstract class Pool<T extends Inlist<T>> {
 		ret.next = null;
 		return ret;
 	}
+
+	protected abstract T createItem();
 }

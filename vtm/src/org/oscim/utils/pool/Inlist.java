@@ -51,7 +51,7 @@ public class Inlist<T extends Inlist<T>> {
 	 */
 	static <T extends Inlist<T>> int size(T list) {
 		int count = 0;
-		for (Inlist<T> l = list; l != null; l = l.next)
+		for (T l = list; l != null; l = l.next)
 			count++;
 		return count;
 	}
@@ -71,7 +71,7 @@ public class Inlist<T extends Inlist<T>> {
 			return head;
 		}
 
-		for (Inlist<T> prev = list, it = list.next; it != null; it = it.next) {
+		for (T prev = list, it = list.next; it != null; it = it.next) {
 			if (it == item) {
 				prev.next = item.next;
 				item.next = null;
@@ -121,8 +121,7 @@ public class Inlist<T extends Inlist<T>> {
 		if (list == null)
 			return item;
 
-		Inlist<T> it = list;
-
+		T it = list;
 		while (it.next != null)
 			it = it.next;
 
@@ -147,15 +146,14 @@ public class Inlist<T extends Inlist<T>> {
 		if (list == other)
 			return list;
 
-		Inlist<T> it = list;
-
-		while (it.next != null) {
-			if (it.next == other)
+		for (T it = list;; it = it.next) {
+			if (it.next == null) {
+				it.next = other;
+				break;
+			} else if (it.next == other) {
 				throw new IllegalArgumentException("'other' alreay in 'list'");
-
-			it = it.next;
+			}
 		}
-		it.next = other;
 
 		return list;
 	}
@@ -198,7 +196,7 @@ public class Inlist<T extends Inlist<T>> {
 			return item;
 		}
 
-		Inlist<T> it = list;
+		T it = list;
 
 		while (it != null && it.next != other)
 			it = it.next;

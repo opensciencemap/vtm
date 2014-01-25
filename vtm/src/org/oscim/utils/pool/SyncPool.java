@@ -39,17 +39,21 @@ public abstract class SyncPool<T extends Inlist<T>> {
 	}
 
 	/**
+	 * To be implemented by subclass.
+	 * 
 	 * @param items
-	 *            number of initial items. NOTE: default does nothing!
+	 *            number of initial items
 	 */
 	public void init(int items) {
+		fill = 0;
+		pool = null;
 	}
 
 	/**
 	 * @param item
 	 *            set initial state
-	 * @return true when item should be added back to pool
-	 *         when returning false freeItem will not be called.
+	 * @return 'true' when item should be added back to pool,
+	 *         'false' when freeItem should be called.
 	 */
 	protected boolean clearItem(T item) {
 		return true;
