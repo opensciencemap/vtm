@@ -31,7 +31,7 @@ import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
-import org.oscim.utils.quadtree.QuadTree;
+import org.oscim.utils.quadtree.Node;
 import org.oscim.utils.quadtree.QuadTreeIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,24 +89,24 @@ public class TileManager {
 
 		@Override
 		public MapTile create(int x, int y, int z) {
-			QuadTree<MapTile> t = super.add(x, y, z);
+			Node<MapTile> t = super.add(x, y, z);
 			t.item = new MapTile(x, y, (byte) z);
-			t.item.rel = t;
+			t.item.node = t;
 
 			return t.item;
 		}
 
 		@Override
 		public void remove(MapTile t) {
-			if (t.rel == null) {
+			if (t.node == null) {
 				log.debug("BUG already removed " + t);
 				return;
 			}
 
-			super.remove(t.rel);
+			super.remove(t.node);
 
-			t.rel.item = null;
-			t.rel = null;
+			t.node.item = null;
+			t.node = null;
 		}
 	};
 
@@ -342,7 +342,7 @@ public class TileManager {
 			boolean add = false;
 
 			// prefetch parent
-			MapTile p = tile.rel.parent.item;
+			MapTile p = tile.node.parent.item;
 
 			if (p == null) {
 				p = mIndex.create(x >> 1, y >> 1, zoomLevel - 1);

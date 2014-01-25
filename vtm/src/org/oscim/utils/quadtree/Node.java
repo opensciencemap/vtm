@@ -16,12 +16,12 @@
  */
 package org.oscim.utils.quadtree;
 
-public class QuadTree<T> {
-	public QuadTree<T> parent;
-	public QuadTree<T> child00;
-	public QuadTree<T> child10;
-	public QuadTree<T> child01;
-	public QuadTree<T> child11;
+public class Node<T> {
+	public Node<T> parent;
+	public Node<T> child00;
+	public Node<T> child10;
+	public Node<T> child01;
+	public Node<T> child11;
 
 	public T item;
 
@@ -31,11 +31,11 @@ public class QuadTree<T> {
 	// number of children and grandchildren
 	int refs = 0;
 
-	public T getParent() {
+	public T parent() {
 		return parent.item;
 	}
 
-	public T get(int i) {
+	public T child(int i) {
 		switch (i) {
 			case 0:
 				return (child00 != null) ? child00.item : null;

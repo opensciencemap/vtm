@@ -148,7 +148,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 					if (!t.hasProxy(1 << j))
 						continue;
 
-					MapTile c = t.rel.get(j);
+					MapTile c = t.node.child(j);
 					el = getLayer(c);
 
 					if (el == null || !el.compiled)

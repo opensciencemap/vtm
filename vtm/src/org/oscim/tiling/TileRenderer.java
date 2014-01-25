@@ -37,7 +37,7 @@ import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.RenderElement;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
-import org.oscim.utils.quadtree.QuadTree;
+import org.oscim.utils.quadtree.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +151,7 @@ public class TileRenderer extends LayerRenderer {
 
 			// check near relatives than can serve as proxy
 			if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-				MapTile rel = tile.rel.parent.item;
+				MapTile rel = tile.node.parent.item;
 				if (rel.state == STATE_NEW_DATA)
 					uploadCnt += uploadTileData(rel);
 
@@ -163,7 +163,7 @@ public class TileRenderer extends LayerRenderer {
 				if ((tile.proxies & 1 << c) == 0)
 					continue;
 
-				MapTile rel = tile.rel.get(i);
+				MapTile rel = tile.node.child(i);
 				if (rel != null && rel.state == STATE_NEW_DATA)
 					uploadCnt += uploadTileData(rel);
 			}
@@ -342,18 +342,18 @@ public class TileRenderer extends LayerRenderer {
 		long maxFade = MapRenderer.frametime - 50;
 
 		for (int c = 0; c < 4; c++) {
-			MapTile ci = t.rel.get(c);
+			MapTile ci = t.node.child(c);
 			if (ci == null)
 				continue;
 
 			if (ci.state == MapTile.STATE_READY || ci.fadeTime > 0)
 				maxFade = Math.min(maxFade, ci.fadeTime);
 		}
-		MapTile p = t.rel.getParent();
+		MapTile p = t.node.parent();
 		if (p != null && (p.state == MapTile.STATE_READY || p.fadeTime > 0)) {
 			maxFade = Math.min(maxFade, p.fadeTime);
 
-			p = p.rel.getParent();
+			p = p.node.parent();
 			if (p != null && (p.state == MapTile.STATE_READY || p.fadeTime > 0))
 				maxFade = Math.min(maxFade, p.fadeTime);
 		}
@@ -560,7 +560,7 @@ public class TileRenderer extends LayerRenderer {
 			if ((tile.proxies & 1 << i) == 0)
 				continue;
 
-			MapTile c = tile.rel.get(i);
+			MapTile c = tile.node.child(i);
 
 			if (c.state == STATE_READY) {
 				drawTile(c, pos);
@@ -573,7 +573,7 @@ public class TileRenderer extends LayerRenderer {
 	private void drawProxyTile(MapTile tile, MapPosition pos, boolean parent,
 	        boolean preferParent) {
 
-		QuadTree<MapTile> r = tile.rel;
+		Node<MapTile> r = tile.node;
 		MapTile proxy;
 
 		if (!preferParent) {

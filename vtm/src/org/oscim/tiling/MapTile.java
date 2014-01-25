@@ -22,7 +22,7 @@ import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.utils.pool.Inlist;
-import org.oscim.utils.quadtree.QuadTree;
+import org.oscim.utils.quadtree.Node;
 
 /**
  * Extends Tile class to hold state and data for concurrent use in
@@ -99,7 +99,7 @@ public class MapTile extends Tile {
 	/**
 	 * Pointer to access relatives in QuadTree
 	 */
-	public QuadTree<MapTile> rel;
+	public Node<MapTile> node;
 
 	/**
 	 * to avoid drawing a tile twice per frame
@@ -162,20 +162,20 @@ public class MapTile extends Tile {
 			return;
 
 		// lock all tiles that could serve as proxy
-		MapTile p = rel.parent.item;
+		MapTile p = node.parent.item;
 		if (p != null && (p.state != 0)) {
 			proxies |= PROXY_PARENT;
 			p.refs++;
 		}
 
-		p = rel.parent.parent.item;
+		p = node.parent.parent.item;
 		if (p != null && (p.state != 0)) {
 			proxies |= PROXY_GRAMPA;
 			p.refs++;
 		}
 
 		for (int j = 0; j < 4; j++) {
-			if ((p = rel.get(j)) == null || p.state == 0)
+			if ((p = node.child(j)) == null || p.state == 0)
 				continue;
 
 			proxies |= (1 << j);
@@ -191,14 +191,14 @@ public class MapTile extends Tile {
 			return;
 
 		if ((proxies & PROXY_PARENT) != 0)
-			rel.parent.item.refs--;
+			node.parent.item.refs--;
 
 		if ((proxies & PROXY_GRAMPA) != 0)
-			rel.parent.parent.item.refs--;
+			node.parent.parent.item.refs--;
 
 		for (int i = 0; i < 4; i++) {
 			if ((proxies & (1 << i)) != 0)
-				rel.get(i).refs--;
+				node.child(i).refs--;
 		}
 		proxies = 0;
 	}

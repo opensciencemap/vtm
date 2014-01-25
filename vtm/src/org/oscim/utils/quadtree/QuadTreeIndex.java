@@ -18,12 +18,12 @@ package org.oscim.utils.quadtree;
 
 public abstract class QuadTreeIndex<T> {
 
-	QuadTree<T> pool;
+	Node<T> pool;
 
-	QuadTree<T> root;
+	Node<T> root;
 
 	public QuadTreeIndex() {
-		root = new QuadTree<T>();
+		root = new Node<T>();
 		root.parent = root;
 	}
 
@@ -37,11 +37,11 @@ public abstract class QuadTreeIndex<T> {
 
 	public abstract void remove(T item);
 
-	public QuadTree<T> add(int x, int y, int z) {
+	public Node<T> add(int x, int y, int z) {
 
 		checkIndex(x, y, 1 << z);
 
-		QuadTree<T> leaf = root;
+		Node<T> leaf = root;
 
 		for (int level = z - 1; level >= 0; level--) {
 
@@ -49,7 +49,7 @@ public abstract class QuadTreeIndex<T> {
 
 			leaf.refs++;
 
-			QuadTree<T> cur = null;
+			Node<T> cur = null;
 
 			switch (id) {
 				case 0:
@@ -75,7 +75,7 @@ public abstract class QuadTreeIndex<T> {
 				cur = pool;
 				pool = pool.parent;
 			} else {
-				cur = new QuadTree<T>();
+				cur = new Node<T>();
 			}
 
 			cur.refs = 0;
@@ -109,7 +109,7 @@ public abstract class QuadTreeIndex<T> {
 
 		checkIndex(x, y, 1 << z);
 
-		QuadTree<T> leaf = root;
+		Node<T> leaf = root;
 
 		for (int level = z - 1; level >= 0; level--) {
 
@@ -140,10 +140,10 @@ public abstract class QuadTreeIndex<T> {
 		return null;
 	}
 
-	public boolean remove(QuadTree<T> item) {
+	public boolean remove(Node<T> item) {
 
-		QuadTree<T> cur = item;
-		QuadTree<T> next;
+		Node<T> cur = item;
+		Node<T> next;
 
 		while (cur != root) {
 			if (cur == null)
