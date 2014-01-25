@@ -138,6 +138,12 @@ public class LwHttp {
 		}
 
 		@Override
+		public synchronized long skip(long n) throws IOException {
+			sumRead += n;
+			return super.skip(n);
+		}
+
+		@Override
 		public synchronized void reset() throws IOException {
 			if (marked >= 0)
 				sumRead = marked;
