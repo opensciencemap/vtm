@@ -18,7 +18,12 @@ package org.oscim.tiling.source;
 
 import java.util.HashMap;
 
+import org.oscim.layers.tile.BitmapTileLayer.FadeStep;
+
 public abstract class TileSource {
+
+	protected int mZoomMin;
+	protected int mZoomMax;
 
 	public abstract ITileDataSource getDataSource();
 
@@ -35,6 +40,18 @@ public abstract class TileSource {
 	 */
 	public void setCache(ITileCache cache) {
 		tileCache = cache;
+	}
+
+	public int getZoomLevelMax() {
+		return mZoomMax;
+	}
+
+	public int getZoomLevelMin() {
+		return mZoomMin;
+	}
+
+	public FadeStep[] getFadeSteps() {
+		return null;
 	}
 
 	public TileSource setOption(String key, String value) {

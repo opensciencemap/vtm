@@ -30,7 +30,6 @@ import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDataSource.QueryResult;
 import org.oscim.tiling.source.TileSource;
-import org.oscim.tiling.source.bitmap.BitmapTileSource;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 
 	private final static int CACHE_LIMIT = 50;
 
-	private final BitmapTileSource mTileSource;
+	protected final TileSource mTileSource;
 
 	public static class FadeStep {
 		public final double scaleStart, scaleEnd;
@@ -55,11 +54,11 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 		}
 	}
 
-	public BitmapTileLayer(Map map, BitmapTileSource tileSource) {
+	public BitmapTileLayer(Map map, TileSource tileSource) {
 		this(map, tileSource, CACHE_LIMIT);
 	}
 
-	public BitmapTileLayer(Map map, BitmapTileSource tileSource, int cacheLimit) {
+	public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit) {
 		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), cacheLimit);
 		mTileSource = tileSource;
 		initLoader();

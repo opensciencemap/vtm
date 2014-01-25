@@ -6,7 +6,6 @@ import java.io.InputStream;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.BitmapTileLayer.FadeStep;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDecoder;
@@ -19,8 +18,6 @@ import org.slf4j.LoggerFactory;
 public abstract class BitmapTileSource extends UrlTileSource {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
-	private final int mZoomMin;
-	private final int mZoomMax;
 	private final String mFileExtension;
 	private final String mMimeType;
 
@@ -39,18 +36,6 @@ public abstract class BitmapTileSource extends UrlTileSource {
 		mZoomMax = zoomMax;
 		mFileExtension = fileExtension;
 		mMimeType = mimeType;
-	}
-
-	public int getZoomLevelMax() {
-		return mZoomMax;
-	}
-
-	public int getZoomLevelMin() {
-		return mZoomMin;
-	}
-
-	public FadeStep[] getFadeSteps() {
-		return null;
 	}
 
 	public String getTileUrl(Tile tile) {
