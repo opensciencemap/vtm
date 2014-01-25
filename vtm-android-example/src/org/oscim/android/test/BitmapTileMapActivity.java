@@ -16,13 +16,20 @@ package org.oscim.android.test;
 
 import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
+import org.oscim.android.cache.TileCache;
 import org.oscim.layers.tile.BitmapTileLayer;
-import org.oscim.tiling.source.bitmap.DefaultSources.OpenStreetMap;
+import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import android.os.Bundle;
 
 public class BitmapTileMapActivity extends MapActivity {
+
+	private final static boolean USE_CACHE = true;
+
 	MapView mMapView;
+
+	private TileCache mCache;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -32,11 +39,22 @@ public class BitmapTileMapActivity extends MapActivity {
 		mMapView = (MapView) findViewById(R.id.mapView);
 		registerMapView(mMapView);
 
-		mMap.getLayers().add(new BitmapTileLayer(mMap, new OpenStreetMap(), 20));
-		//mMap.getLayers().add(new BitmapTileLayer(mMap, new ImagicoLandcover(), 20));
-		//mMap.getLayers().add(new BitmapTileLayer(mMap, new ArcGISWorldShaded(), 20));
-		//mMap.getLayers().add(new BitmapTileLayer(mMap, new HillShadeHD(), 20));
+		TileSource tileSource = new DefaultSources.OpenStreetMap();
+
+		if (USE_CACHE) {
+			mCache = new TileCache(this, null, tileSource.getClass().getSimpleName());
+			mCache.setCacheSize(512 * (1 << 10));
+			tileSource.setCache(mCache);
+		}
+		mMap.getLayers().add(new BitmapTileLayer(mMap, tileSource));
 
 		mMap.setMapPosition(0, 0, 1 << 2);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (USE_CACHE)
+			mCache.dispose();
 	}
 }

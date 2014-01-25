@@ -47,7 +47,7 @@ public class BaseMapActivity extends MapActivity {
 		mTileSource = new OSciMap4TileSource();
 
 		if (USE_CACHE) {
-			mCache = new TileCache(this, "cachedir", "testdb");
+			mCache = new TileCache(this, null, "tile.db");
 			mCache.setCacheSize(512 * (1 << 10));
 			mTileSource.setCache(mCache);
 		}
