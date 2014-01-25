@@ -92,6 +92,7 @@ public class LwHttp {
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
 		REQUEST_GET_END = (extension + " HTTP/1.1" +
+		        "\nUser-Agent: vtm/0.5.9" +
 		        "\nHost: " + host +
 		        "\nConnection: Keep-Alive" +
 		        "\n\n").getBytes();
