@@ -30,6 +30,9 @@ public abstract class TileSource {
 
 	public ITileCache tileCache;
 
+	/**
+	 * Cache MUST be set before TileSource is added to a TileLayer!
+	 */
 	public void setCache(ITileCache cache) {
 		tileCache = cache;
 	}

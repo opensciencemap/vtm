@@ -40,7 +40,7 @@ import android.os.ParcelFileDescriptor;
 public class TileCache implements ITileCache {
 
 	final static org.slf4j.Logger log = LoggerFactory.getLogger(TileCache.class);
-	final static boolean debug = false;
+	final static boolean dbg = false;
 
 	class CacheTileReader implements TileReader {
 		final InputStream mInputStream;
@@ -95,13 +95,12 @@ public class TileCache implements ITileCache {
 	}
 
 	private final ArrayList<ByteArrayOutputStream> mCacheBuffers;
-
 	private final SQLiteHelper dbHelper;
-
 	private final SQLiteDatabase mDatabase;
 	private final SQLiteStatement mStmtGetTile;
 	private final SQLiteStatement mStmtPutTile;
-	private final SQLiteStatement mStmtUpdateTile;
+
+	//private final SQLiteStatement mStmtUpdateTile;
 
 	public void dispose() {
 		if (mDatabase.isOpen())
@@ -110,8 +109,10 @@ public class TileCache implements ITileCache {
 
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 	public TileCache(Context context, String cacheDirectory, String dbName) {
+		if (dbg)
+			log.debug("open cache {}, {}", cacheDirectory, dbName);
 
-		dbHelper = new SQLiteHelper(context);
+		dbHelper = new SQLiteHelper(context, dbName);
 
 		if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
 			dbHelper.setWriteAheadLoggingEnabled(true);
@@ -128,10 +129,10 @@ public class TileCache implements ITileCache {
 		        " (x, y, z, time, last_access, data)" +
 		        " VALUES(?,?,?,?,?,?)");
 
-		mStmtUpdateTile = mDatabase.compileStatement("" +
-		        "UPDATE " + TABLE_NAME +
-		        "  SET last_access=?" +
-		        "  WHERE x=? AND y=? AND z=?");
+		//mStmtUpdateTile = mDatabase.compileStatement("" +
+		//        "UPDATE " + TABLE_NAME +
+		//        "  SET last_access=?" +
+		//        "  WHERE x=? AND y=? AND z=?");
 
 		mCacheBuffers = new ArrayList<ByteArrayOutputStream>();
 	}
@@ -158,10 +159,10 @@ public class TileCache implements ITileCache {
 
 	class SQLiteHelper extends SQLiteOpenHelper {
 
-		private static final String DATABASE_NAME = "tile.db";
-		private static final int DATABASE_VERSION = 8;
+		//private static final String DATABASE_NAME = "tile.db";
+		private static final int DATABASE_VERSION = 1;
 
-		private static final String DATABASE_CREATE =
+		private static final String TILE_SCHEMA =
 		        "CREATE TABLE "
 		                + TABLE_NAME + "("
 		                + "x INTEGER NOT NULL,"
@@ -173,19 +174,25 @@ public class TileCache implements ITileCache {
 		                + COLUMN_DATA + " BLOB,"
 		                + "PRIMARY KEY(x,y,z));";
 
-		public SQLiteHelper(Context context) {
-			super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		public SQLiteHelper(Context context, String dbName) {
+			super(context, dbName, null, DATABASE_VERSION);
 		}
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL(DATABASE_CREATE);
+			log.debug("create table");
+			db.execSQL(TILE_SCHEMA);
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+			log.debug("drop table");
 			db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 			onCreate(db);
+		}
+		@Override
+		public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+			onUpgrade(db, oldVersion, newVersion);
 		}
 	}
 
@@ -200,7 +207,7 @@ public class TileCache implements ITileCache {
 			mCacheBuffers.add(data);
 		}
 
-		if (debug)
+		if (dbg)
 			log.debug("store tile {} {}", tile, Boolean.valueOf(success));
 
 		if (!success)
@@ -237,7 +244,7 @@ public class TileCache implements ITileCache {
 			mStmtGetTile.clearBindings();
 		}
 
-		if (debug)
+		if (dbg)
 			log.debug("load tile {}", tile);
 
 		return new CacheTileReader(tile, in, Integer.MAX_VALUE);
@@ -260,7 +267,7 @@ public class TileCache implements ITileCache {
 		        " WHERE z=? AND x=? AND y=?", mQueryVals);
 
 		if (!cursor.moveToFirst()) {
-			if (debug)
+			if (dbg)
 				log.debug("not in cache {}", tile);
 			return null;
 		}
@@ -270,7 +277,7 @@ public class TileCache implements ITileCache {
 		if (!cursor.isClosed())
 			cursor.close();
 
-		if (debug)
+		if (dbg)
 			log.debug("load tile {}", tile);
 
 		return new CacheTileReader(tile, in, Integer.MAX_VALUE);
