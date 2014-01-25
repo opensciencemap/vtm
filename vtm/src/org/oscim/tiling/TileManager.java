@@ -32,7 +32,7 @@ import org.oscim.renderer.BufferObject;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.Node;
-import org.oscim.utils.quadtree.QuadTreeIndex;
+import org.oscim.utils.quadtree.QuadTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +85,7 @@ public class TileManager {
 	// job queue filled in TileManager and polled by TileLoaders
 	private final JobQueue jobQueue;
 
-	private final QuadTreeIndex<MapTile> mIndex = new QuadTreeIndex<MapTile>() {
+	private final QuadTree<MapTile> mIndex = new QuadTree<MapTile>() {
 
 		@Override
 		public MapTile create(int x, int y, int z) {

@@ -16,13 +16,13 @@
  */
 package org.oscim.utils.quadtree;
 
-public abstract class QuadTreeIndex<T> {
+public abstract class QuadTree<T> {
 
 	Node<T> pool;
 
 	Node<T> root;
 
-	public QuadTreeIndex() {
+	public QuadTree() {
 		root = new Node<T>();
 		root.parent = root;
 	}
