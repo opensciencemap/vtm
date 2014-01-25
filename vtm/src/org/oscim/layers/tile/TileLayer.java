@@ -69,7 +69,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 
 	abstract protected T createLoader(TileManager tm);
 
-	public TileRenderer getTileLayer() {
+	public TileRenderer getTileRenderer() {
 		return (TileRenderer) mRenderer;
 	}
 

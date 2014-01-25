@@ -135,11 +135,11 @@ public abstract class GdxMap implements ApplicationListener {
 
 			if (buildings)
 				mMap.getLayers()
-				    .add(new BuildingLayer(mMap, mMapLayer.getTileLayer()));
+				    .add(new BuildingLayer(mMap, mMapLayer.getTileRenderer()));
 
 			if (labels)
 				mMap.getLayers()
-				    .add(new LabelLayer(mMap, mMapLayer.getTileLayer()));
+				    .add(new LabelLayer(mMap, mMapLayer.getTileRenderer()));
 		}
 
 		if (tileGrid)
