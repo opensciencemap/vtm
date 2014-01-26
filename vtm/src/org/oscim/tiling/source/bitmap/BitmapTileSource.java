@@ -18,46 +18,21 @@ import org.slf4j.LoggerFactory;
 public abstract class BitmapTileSource extends UrlTileSource {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
-	private final String mFileExtension;
-	private final String mMimeType;
-
-	public BitmapTileSource(String url) {
-		this(url, 0, 17);
-	}
-
+	/**
+	 * Create BitmapTileSource for 'url'
+	 * 
+	 * By default path will be formatted as: url/z/x/y.png
+	 * Use e.g. setExtension(".jpg") to overide ending or
+	 * implement getUrlString() for custom formatting.
+	 */
 	public BitmapTileSource(String url, int zoomMin, int zoomMax) {
-		this(url, zoomMin, zoomMax, "image/png", ".png");
-	}
-
-	public BitmapTileSource(String url, int zoomMin, int zoomMax, String mimeType,
-	        String fileExtension) {
-		super(url);
-		mZoomMin = zoomMin;
-		mZoomMax = zoomMax;
-		mFileExtension = fileExtension;
-		mMimeType = mimeType;
-	}
-
-	public String getTileUrl(Tile tile) {
-		return null;
+		super(url, zoomMin, zoomMax);
+		setExtension(".png");
 	}
 
 	@Override
 	public ITileDataSource getDataSource() {
-		LwHttp conn = new LwHttp(mUrl, mMimeType, mFileExtension, false) {
-			@Override
-			protected int formatTilePath(Tile tile, byte[] path, int curPos) {
-				String p = getTileUrl(tile);
-				if (p == null)
-					return super.formatTilePath(tile, path, curPos);
-
-				byte[] b = p.getBytes();
-				System.arraycopy(b, 0, path, curPos, b.length);
-
-				return curPos + b.length;
-			}
-		};
-		return new UrlTileDataSource(this, new BitmapTileDecoder(), conn);
+		return new UrlTileDataSource(this, new BitmapTileDecoder(), new LwHttp(mUrl));
 	}
 
 	public class BitmapTileDecoder implements ITileDecoder {

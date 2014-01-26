@@ -19,6 +19,7 @@ package org.oscim.tiling.source.mapnik;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.zip.InflaterInputStream;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -77,7 +78,7 @@ public class TileDecoder extends PbfDecoder {
 		if (debug)
 			log.debug(tile + " decode");
 
-		setInputStream(is);
+		setInputStream(new InflaterInputStream(is));
 		mTile = tile;
 		mMapDataCallback = mapDataCallback;
 		mScale = REF_TILE_SIZE / Tile.SIZE;

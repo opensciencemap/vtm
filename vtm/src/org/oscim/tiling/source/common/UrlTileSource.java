@@ -19,11 +19,13 @@ package org.oscim.tiling.source.common;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.oscim.core.Tile;
 import org.oscim.tiling.source.TileSource;
 
 public abstract class UrlTileSource extends TileSource {
 
 	protected final URL mUrl;
+	private byte[] mExt;
 
 	public UrlTileSource(String urlString) {
 		URL url = null;
@@ -35,6 +37,12 @@ public abstract class UrlTileSource extends TileSource {
 		mUrl = url;
 	}
 
+	public UrlTileSource(String url, int zoomMin, int zoomMax) {
+		this(url);
+		mZoomMin = zoomMin;
+		mZoomMax = zoomMax;
+	}
+
 	@Override
 	public OpenResult open() {
 		return OpenResult.SUCCESS;
@@ -43,5 +51,56 @@ public abstract class UrlTileSource extends TileSource {
 	@Override
 	public void close() {
 
+	}
+
+	protected void setExtension(String ext) {
+		if (ext == null) {
+			mExt = null;
+			return;
+		}
+		mExt = ext.getBytes();
+	}
+
+	protected void setMimeType(String string) {
+
+	}
+
+	/**
+	 * Create url path for tile
+	 */
+	protected String getTileUrl(Tile tile) {
+		return null;
+	}
+
+	/**
+	 * Write tile url - the low level, no-allocations method,
+	 * 
+	 * override getTileUrl() for custom url formatting using
+	 * Strings
+	 * 
+	 * @param tile Tile
+	 * @param path to write url string
+	 * @param curPos current position
+	 * @return new position
+	 */
+	protected int formatTilePath(Tile tile, byte[] buf, int pos) {
+		String p = getTileUrl(tile);
+		if (p != null) {
+			byte[] b = p.getBytes();
+			System.arraycopy(b, 0, buf, pos, b.length);
+			return pos + b.length;
+		}
+
+		buf[pos++] = '/';
+		pos = LwHttp.writeInt(tile.zoomLevel, pos, buf);
+		buf[pos++] = '/';
+		pos = LwHttp.writeInt(tile.tileX, pos, buf);
+		buf[pos++] = '/';
+		pos = LwHttp.writeInt(tile.tileY, pos, buf);
+		if (mExt == null)
+			return pos;
+
+		System.arraycopy(mExt, 0, buf, pos, mExt.length);
+		return pos + mExt.length;
 	}
 }

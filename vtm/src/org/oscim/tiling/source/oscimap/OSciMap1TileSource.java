@@ -29,11 +29,12 @@ public class OSciMap1TileSource extends UrlTileSource {
 
 	public OSciMap1TileSource(String url) {
 		super(url);
+		setExtension(".osmtile");
+		setMimeType("application/osmtile");
 	}
 
 	@Override
 	public ITileDataSource getDataSource() {
-		LwHttp conn = new LwHttp(mUrl, "application/osmtile", ".osmtile", false);
-		return new UrlTileDataSource(this, new TileDecoder(), conn);
+		return new UrlTileDataSource(this, new TileDecoder(), new LwHttp(mUrl));
 	}
 }

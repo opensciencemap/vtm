@@ -24,7 +24,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URL;
-import java.util.zip.InflaterInputStream;
 
 import org.oscim.core.Tile;
 import org.oscim.utils.ArrayUtils;
@@ -32,17 +31,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Lightweight HTTP connection for tile loading.
+ * Lightweight HTTP connection for tile loading. Does not do redirects,
+ * https, full header parsing or stuff.
  * 
- * Default tile url format is 'z/x/y'. Override formatTilePath() for a
- * different format.
+ * TODO extract API interface to be used by UrlTileSource so that one
+ * could also use HttpUrlConnection, etc.
  */
 public class LwHttp {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 	static final boolean dbg = false;
 
 	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
-	private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
+	//private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
 	private final static byte[] HEADER_CONTENT_LENGTH = "Content-Length".getBytes();
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
 	private final static long RESPONSE_TIMEOUT = (long) 10E9; // 10 second in nanosecond
@@ -64,9 +64,6 @@ public class LwHttp {
 	private final byte[] REQUEST_GET_END;
 	private final byte[] mRequestBuffer;
 
-	private final boolean mInflateContent;
-	private final byte[] mContentType;
-
 	/**
 	 * @param url
 	 *            Base url for tiles
@@ -77,9 +74,7 @@ public class LwHttp {
 	 * @param deflate
 	 *            true when content uses gzip compression
 	 */
-	public LwHttp(URL url, String contentType, String extension, boolean deflate) {
-		mContentType = contentType.getBytes();
-		mInflateContent = deflate;
+	public LwHttp(URL url) {
 
 		int port = url.getPort();
 		if (port < 0)
@@ -91,7 +86,7 @@ public class LwHttp {
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
-		REQUEST_GET_END = (extension + " HTTP/1.1" +
+		REQUEST_GET_END = (" HTTP/1.1" +
 		        "\nUser-Agent: vtm/0.5.9" +
 		        "\nHost: " + host +
 		        "\nConnection: Keep-Alive" +
@@ -229,7 +224,7 @@ public class LwHttp {
 		}
 	}
 
-	public InputStream readHeader() throws IOException {
+	public InputStream read() throws IOException {
 
 		Buffer is = mResponseStream;
 		is.mark(BUFFER_SIZE);
@@ -276,18 +271,17 @@ public class LwHttp {
 				if (!check(HEADER_HTTP_OK, buf, pos + 9, end))
 					ok = false;
 
-			} else if (check(HEADER_CONTENT_TYPE, buf, pos, end)) {
-				// check that response contains the expected
-				// Content-Type
-				if (!check(mContentType, buf, pos +
-				        HEADER_CONTENT_TYPE.length + 2, end))
-					ok = false;
-
 			} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
 				// parse Content-Length
 				contentLength = parseInt(buf, pos +
 				        HEADER_CONTENT_LENGTH.length + 2, end - 1);
 			}
+			//} else if (check(HEADER_CONTENT_TYPE, buf, pos, end)) {
+			// check that response contains the expected
+			// Content-Type
+			//if (!check(mContentType, buf, pos +
+			//        HEADER_CONTENT_TYPE.length + 2, end))
+			//	ok = false;
 
 			if (!ok || dbg) {
 				String line = new String(buf, pos, end - pos - 1);
@@ -307,13 +301,10 @@ public class LwHttp {
 		is.skip(end);
 		is.start(contentLength);
 
-		if (mInflateContent)
-			return new InflaterInputStream(is);
-
 		return is;
 	}
 
-	public boolean sendRequest(Tile tile) throws IOException {
+	public boolean sendRequest(UrlTileSource tileSource, Tile tile) throws IOException {
 
 		if (mSocket != null && ((mMaxReq-- <= 0)
 		        || (System.nanoTime() - mLastRequest > RESPONSE_TIMEOUT))) {
@@ -344,7 +335,7 @@ public class LwHttp {
 		byte[] request = mRequestBuffer;
 		int pos = REQUEST_GET_START.length;
 
-		pos = formatTilePath(tile, request, pos);
+		pos = tileSource.formatTilePath(tile, request, pos);
 
 		int len = REQUEST_GET_END.length;
 		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
@@ -384,7 +375,7 @@ public class LwHttp {
 	}
 
 	// write (positive) integer to byte array
-	protected static int writeInt(int val, int pos, byte[] buf) {
+	public static int writeInt(int val, int pos, byte[] buf) {
 		if (val == 0) {
 			buf[pos] = '0';
 			return pos + 1;
@@ -444,23 +435,4 @@ public class LwHttp {
 
 		return true;
 	}
-
-	/**
-	 * Write custom tile url
-	 * 
-	 * @param tile Tile
-	 * @param path to write url string
-	 * @param curPos current position
-	 * @return new position
-	 */
-	protected int formatTilePath(Tile tile, byte[] request, int pos) {
-		request[pos++] = '/';
-		pos = writeInt(tile.zoomLevel, pos, request);
-		request[pos++] = '/';
-		pos = writeInt(tile.tileX, pos, request);
-		request[pos++] = '/';
-		pos = writeInt(tile.tileY, pos, request);
-		return pos;
-	}
-
 }

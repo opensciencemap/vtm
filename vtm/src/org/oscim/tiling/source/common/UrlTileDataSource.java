@@ -29,7 +29,6 @@ import org.oscim.tiling.source.ITileCache.TileWriter;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDecoder;
-import org.oscim.tiling.source.TileSource;
 import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,20 +38,22 @@ public class UrlTileDataSource implements ITileDataSource {
 
 	protected final LwHttp mConn;
 	protected final ITileDecoder mTileDecoder;
-	protected final ITileCache mTileCache;
+	protected final UrlTileSource mTileSource;
 	protected final boolean mUseCache;
 
-	public UrlTileDataSource(TileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
+	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
 		mTileDecoder = tileDecoder;
-		mTileCache = tileSource.tileCache;
-		mUseCache = (mTileCache != null);
+		mTileSource = tileSource;
+		mUseCache = (tileSource.tileCache != null);
 		mConn = conn;
 	}
 
 	@Override
 	public QueryResult executeQuery(MapTile tile, ITileDataSink sink) {
+		ITileCache cache = mTileSource.tileCache;
+
 		if (mUseCache) {
-			TileReader c = mTileCache.getTile(tile);
+			TileReader c = cache.getTile(tile);
 			if (c != null) {
 				InputStream is = c.getInputStream();
 				try {
@@ -68,17 +69,17 @@ public class UrlTileDataSource implements ITileDataSource {
 		}
 
 		boolean success = false;
-		TileWriter cache = null;
+		TileWriter cacheWriter = null;
 		try {
 			InputStream is;
-			if (!mConn.sendRequest(tile)) {
+			if (!mConn.sendRequest(mTileSource, tile)) {
 				log.debug("{} Request failed", tile);
-			} else if ((is = mConn.readHeader()) == null) {
+			} else if ((is = mConn.read()) == null) {
 				log.debug("{} Network Error", tile);
 			} else {
 				if (mUseCache) {
-					cache = mTileCache.writeTile(tile);
-					mConn.setCache(cache.getOutputStream());
+					cacheWriter = cache.writeTile(tile);
+					mConn.setCache(cacheWriter.getOutputStream());
 				}
 
 				success = mTileDecoder.decode(tile, sink, is);
@@ -94,8 +95,8 @@ public class UrlTileDataSource implements ITileDataSource {
 		} finally {
 			mConn.requestCompleted(success);
 
-			if (cache != null)
-				cache.complete(success);
+			if (cacheWriter != null)
+				cacheWriter.complete(success);
 		}
 		return success ? QueryResult.SUCCESS : QueryResult.FAILED;
 	}

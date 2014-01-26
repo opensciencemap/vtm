@@ -24,17 +24,19 @@ import org.oscim.tiling.source.common.UrlTileSource;
 public class OSciMap4TileSource extends UrlTileSource {
 
 	public OSciMap4TileSource() {
-		super("http://opensciencemap.org/tiles/vtm");
+		this("http://opensciencemap.org/tiles/vtm");
 	}
 
 	public OSciMap4TileSource(String url) {
 		super(url);
+		setExtension(".vtm");
+		// ignored for now
+		//setMimeType("image/png");
+		//setMimeType("application/x-protobuf");
 	}
 
 	@Override
 	public ITileDataSource getDataSource() {
-		//LwHttp conn = new LwHttp(url, "application/x-protobuf", ".vtm", false);
-		LwHttp conn = new LwHttp(mUrl, "image/png", ".vtm", false);
-		return new UrlTileDataSource(this, new TileDecoder(), conn);
+		return new UrlTileDataSource(this, new TileDecoder(), new LwHttp(mUrl));
 	}
 }

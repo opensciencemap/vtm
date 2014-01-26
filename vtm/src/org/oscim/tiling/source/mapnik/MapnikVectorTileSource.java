@@ -30,29 +30,28 @@ public class MapnikVectorTileSource extends UrlTileSource {
 
 	@Override
 	public ITileDataSource getDataSource() {
-		LwHttp conn = new LwHttp(mUrl, "image/png", ".vector.pbf", true) {
-			@Override
-			protected int formatTilePath(Tile tile, byte[] path, int pos) {
-				// url formatter for mapbox streets
-				byte[] hexTable = {
-				        '0', '1', '2', '3',
-				        '4', '5', '6', '7',
-				        '8', '9', 'a', 'b',
-				        'c', 'd', 'e', 'f'
-				};
+		return new UrlTileDataSource(this, new TileDecoder(), new LwHttp(mUrl));
+	}
 
-				path[pos++] = '/';
-				path[pos++] = hexTable[(tile.tileX) % 16];
-				path[pos++] = hexTable[(tile.tileY) % 16];
-				path[pos++] = '/';
-				pos = LwHttp.writeInt(tile.zoomLevel, pos, path);
-				path[pos++] = '/';
-				pos = LwHttp.writeInt(tile.tileX, pos, path);
-				path[pos++] = '/';
-				pos = LwHttp.writeInt(tile.tileY, pos, path);
-				return pos;
-			}
+	protected int formatTilePath(Tile tile, byte[] path, int pos) {
+		// url formatter for mapbox streets
+		byte[] hexTable = {
+		        '0', '1', '2', '3',
+		        '4', '5', '6', '7',
+		        '8', '9', 'a', 'b',
+		        'c', 'd', 'e', 'f'
 		};
-		return new UrlTileDataSource(this, new TileDecoder(), conn);
+
+		path[pos++] = '/';
+		path[pos++] = hexTable[(tile.tileX) % 16];
+		path[pos++] = hexTable[(tile.tileY) % 16];
+		path[pos++] = '/';
+		pos = LwHttp.writeInt(tile.zoomLevel, pos, path);
+		path[pos++] = '/';
+		pos = LwHttp.writeInt(tile.tileX, pos, path);
+		path[pos++] = '/';
+		pos = LwHttp.writeInt(tile.tileY, pos, path);
+
+		return pos;
 	}
 }
