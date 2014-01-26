@@ -21,7 +21,6 @@ import org.oscim.tiling.MapTile;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDecoder;
-import org.oscim.tiling.source.TileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,12 +29,17 @@ public class UrlTileDataSource implements ITileDataSource {
 
 	protected final LwHttp mConn;
 	protected final ITileDecoder mTileDecoder;
+	protected final UrlTileSource mTileSource;
 
-	public UrlTileDataSource(TileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
+	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
+		mTileSource = tileSource;
 		mTileDecoder = tileDecoder;
 		mConn = conn;
 	}
 
+	UrlTileSource getTileSource(){
+		return mTileSource;
+	}
 	private ITileDataSink mSink;
 	private MapTile mTile;
 

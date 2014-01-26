@@ -29,25 +29,17 @@ import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 public class LwHttp {
 	//static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
-	private final String mUrlFileExtension;
 	private final String mUrlPath;
 	private final byte[] mRequestBuffer;
 
-	final boolean mInflateContent;
-	final String mContentType;
 
 	private int mContentLength = -1;
 	private XMLHttpRequest mHttpRequest;
 
 	private ReadyStateChangeHandler mResponseHandler;
 
-	public LwHttp(URL url, String contentType, String extension, boolean deflate) {
-		mContentType = contentType;
-		mInflateContent = deflate;
-
+	public LwHttp(URL url) {
 		mUrlPath = url.toString();
-		mUrlFileExtension = extension;
-
 		mRequestBuffer = new byte[1024];
 	}
 
@@ -83,20 +75,10 @@ public class LwHttp {
 
 		byte[] request = mRequestBuffer;
 		int pos = 0;
-		int newPos = 0;
 
-		if ((newPos = formatTilePath(tile, request, pos)) == 0) {
-			request[pos++] = '/';
-			pos = writeInt(tile.zoomLevel, pos, request);
-			request[pos++] = '/';
-			pos = writeInt(tile.tileX, pos, request);
-			request[pos++] = '/';
-			pos = writeInt(tile.tileY, pos, request);
-		} else {
-			pos = newPos;
-		}
+		pos = dataSource.getTileSource().formatTilePath(tile, request, pos);
 
-		String url = mUrlPath + (new String(request, 0, pos) + mUrlFileExtension);
+		String url = mUrlPath + (new String(request, 0, pos));
 
 		mHttpRequest = XMLHttpRequest.create();
 		mHttpRequest.open("GET", url);
@@ -169,17 +151,4 @@ public class LwHttp {
 	public int getContentLength() {
 		return mContentLength;
 	}
-
-	/**
-	 * Write custom tile url
-	 * 
-	 * @param tile Tile
-	 * @param path to write url string
-	 * @param curPos current position
-	 * @return new position
-	 */
-	protected int formatTilePath(Tile tile, byte[] path, int curPos) {
-		return 0;
-	}
-
 }
