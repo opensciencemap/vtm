@@ -170,6 +170,7 @@ public final class LineLayer extends RenderElement {
 
 			// Unit vector to next node
 			a = (float) Math.sqrt(vx * vx + vy * vy);
+
 			vx /= a;
 			vy /= a;
 
@@ -340,6 +341,11 @@ public final class LineLayer extends RenderElement {
 				wx = nextX - x;
 				wy = nextY - y;
 				a = (float) Math.sqrt(wx * wx + wy * wy);
+				// skip too short segmets
+				if (a < 1) {
+					numVertices -= 2;
+					continue;
+				}
 				wx /= a;
 				wy /= a;
 
@@ -548,7 +554,6 @@ public final class LineLayer extends RenderElement {
 		}
 
 		si.used = opos;
-		//curItem = si;
 	}
 
 	@Override
