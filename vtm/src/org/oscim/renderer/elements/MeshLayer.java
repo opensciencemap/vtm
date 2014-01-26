@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 public class MeshLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(MeshLayer.class);
+	static final boolean dbg = false;
 
 	BufferObject indicesVbo;
 	int numIndices;
@@ -48,10 +49,9 @@ public class MeshLayer extends RenderElement {
 	}
 
 	public void addMesh(GeometryBuffer geom) {
-		if (geom.index[0] < 6) {
-			log.debug("invalid poly");
+		if (geom.index[0] < 6)
 			return;
-		}
+
 		if (vertexItems == null) {
 			vertexItems = VertexItem.pool.get();
 			indiceItems = VertexItem.pool.get();
@@ -148,6 +148,12 @@ public class MeshLayer extends RenderElement {
 
 				GL.glDrawElements(GL20.GL_TRIANGLES, ml.numIndices,
 				                  GL20.GL_UNSIGNED_SHORT, 0);
+
+				if (dbg) {
+					GLUtils.setColor(hColor, Color.GRAY, 0.4f);
+					GL.glDrawElements(GL20.GL_LINES, ml.numIndices,
+					                  GL20.GL_UNSIGNED_SHORT, 0);
+				}
 			}
 
 			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
