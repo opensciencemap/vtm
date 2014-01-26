@@ -230,15 +230,13 @@ public class MapRenderer {
 		GLState.bindTex2D(-1);
 		GLState.useProgram(-1);
 
-		boolean changed = false;
+		mMap.getAnimator().updateAnimation();
 
 		MapPosition pos = mMapPosition;
-
 		Viewport viewport = mMap.getViewport();
+		boolean changed = false;
 
 		synchronized (viewport) {
-			mMap.getAnimator().updateAnimation();
-
 			// get current MapPosition
 			changed = viewport.getMapPosition(pos);
 
