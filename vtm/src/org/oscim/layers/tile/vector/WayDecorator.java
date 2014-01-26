@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile.vector.labeling;
+package org.oscim.layers.tile.vector;
 
 import org.oscim.core.Tile;
 import org.oscim.renderer.elements.TextItem;
