@@ -36,8 +36,8 @@ public class TextItem extends Inlist<TextItem> {
 			// drop references
 			ti.string = null;
 			ti.text = null;
-			ti.n1 = null;
-			ti.n2 = null;
+			//ti.n1 = null;
+			//ti.n2 = null;
 			return true;
 		}
 	};
@@ -70,9 +70,6 @@ public class TextItem extends Inlist<TextItem> {
 		return this;
 	}
 
-	// link to next node
-	//public TextItem next;
-
 	// center
 	public float x, y;
 
@@ -92,8 +89,8 @@ public class TextItem extends Inlist<TextItem> {
 	public short length;
 
 	// link to next/prev label of the way
-	public TextItem n1;
-	public TextItem n2;
+	//public TextItem n1;
+	//public TextItem n2;
 
 	public byte edges;
 
