@@ -3,6 +3,10 @@ package org.oscim.tiling.source.bitmap;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.BitmapTileLayer.FadeStep;
 
+/**
+ * Do not use in applications unless you read through and comply to
+ * their terms of use! Only added here for testing puposes.
+ */
 public class DefaultSources {
 
 	public static class OpenStreetMap extends BitmapTileSource {
@@ -96,14 +100,10 @@ public class DefaultSources {
 	}
 
 	/**
-	 * Do not use in applications unless you read through and comply to
-	 * the terms of use! Only added here for testing puposes,
 	 * https://github.com/opensciencemap/vtm/issues/18
-	 * 
 	 * https://developers.google.com/maps/faq
 	 */
 	public static class GoogleMaps extends BitmapTileSource {
-		public static final GoogleMaps INSTANCE = new GoogleMaps("http://mt1.google.com");
 		private final StringBuilder sb = new StringBuilder(60);
 
 		public GoogleMaps(String hostName) {
