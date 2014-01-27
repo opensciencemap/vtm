@@ -30,6 +30,7 @@ import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 import org.oscim.layers.marker.MarkerSymbol;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -44,9 +45,8 @@ public class MarkerOverlayActivity extends MapActivity implements OnItemGestureL
 		mMapView = (MapView) findViewById(R.id.mapView);
 		registerMapView(mMapView);
 
-		MarkerSymbol symbol = AndroidGraphics.makeMarker(getResources(),
-		                                                 R.drawable.marker_poi,
-		                                                 HotspotPlace.CENTER);
+		Drawable d = getResources().getDrawable(R.drawable.marker_poi);
+		MarkerSymbol symbol = AndroidGraphics.makeMarker(d, HotspotPlace.CENTER);
 
 		ItemizedIconLayer<MarkerItem> markerLayer =
 		        new ItemizedIconLayer<MarkerItem>(mMap, new ArrayList<MarkerItem>(),
