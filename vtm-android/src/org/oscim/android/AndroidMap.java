@@ -29,6 +29,8 @@ public class AndroidMap extends Map {
 	private volatile boolean mWaitRedraw;
 	private volatile boolean mPausing;
 
+	private final int mScaledTouchSlop;
+
 	public AndroidMap(MapView mapView) {
 		super();
 
@@ -40,6 +42,8 @@ public class AndroidMap extends Map {
 		                         android.view.ViewGroup.LayoutParams.MATCH_PARENT);
 
 		mapView.addView(mGLView, params);
+
+		mScaledTouchSlop = ViewConfiguration.get(mMapView.getContext()).getScaledTouchSlop();
 	}
 
 	@Override
@@ -54,7 +58,7 @@ public class AndroidMap extends Map {
 
 	@Override
 	public int getScaledTouchSlop() {
-		return ViewConfiguration.get(mMapView.getContext()).getScaledTouchSlop();
+		return mScaledTouchSlop;
 	}
 
 	@Override
