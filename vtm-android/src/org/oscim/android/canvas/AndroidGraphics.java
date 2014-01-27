@@ -91,13 +91,13 @@ public final class AndroidGraphics extends CanvasAdapter {
 	}
 
 	public static MarkerSymbol makeMarker(Resources res, int id, HotspotPlace place) {
+		return makeMarker(res.getDrawable(id), place);
+	}
 
+	public static MarkerSymbol makeMarker(Drawable drawable, HotspotPlace place) {
 		if (place == null)
 			place = HotspotPlace.CENTER;
 
-		Drawable drawable = res.getDrawable(id);
-
 		return new MarkerSymbol(drawableToBitmap(drawable), place);
 	}
-
 }

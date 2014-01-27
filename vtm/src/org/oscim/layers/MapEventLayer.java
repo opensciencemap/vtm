@@ -40,6 +40,7 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 	private float mSumScale;
 	private float mSumRotate;
 
+	private boolean mDuringMove;
 	private boolean mBeginScale;
 	private boolean mBeginRotate;
 	private boolean mBeginTilt;
@@ -107,6 +108,7 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 		int action = getAction(e);
 
 		if (action == MotionEvent.ACTION_DOWN) {
+			mDuringMove = false;
 			mBeginRotate = false;
 			mBeginTilt = false;
 			mBeginScale = false;
@@ -174,7 +176,12 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 			if (!mEnableMove)
 				return true;
 
-			if (mx > 1 || mx < -1 || my > 1 || my < -1) {
+			int mScaledTouchSlop = 1;
+			if (!mDuringMove)
+				mScaledTouchSlop = mMap.getScaledTouchSlop();
+			
+			if (mx > mScaledTouchSlop || mx < -mScaledTouchSlop || my > mScaledTouchSlop || my < -mScaledTouchSlop) {
+				mDuringMove = true;		// indicate we are moving, so we can reduce slop to 1
 				mMapPosition.moveMap(mx, my);
 				mMap.updateMap(true);
 

@@ -18,6 +18,7 @@ package org.oscim.android;
 
 import org.oscim.map.Map;
 
+import android.view.ViewConfiguration;
 import android.widget.RelativeLayout.LayoutParams;
 
 public class AndroidMap extends Map {
@@ -27,6 +28,8 @@ public class AndroidMap extends Map {
 
 	private volatile boolean mWaitRedraw;
 	private volatile boolean mPausing;
+
+	private final int mScaledTouchSlop;
 
 	public AndroidMap(MapView mapView) {
 		super();
@@ -39,6 +42,8 @@ public class AndroidMap extends Map {
 		                         android.view.ViewGroup.LayoutParams.MATCH_PARENT);
 
 		mapView.addView(mGLView, params);
+
+		mScaledTouchSlop = ViewConfiguration.get(mMapView.getContext()).getScaledTouchSlop();
 	}
 
 	@Override
@@ -49,6 +54,11 @@ public class AndroidMap extends Map {
 	@Override
 	public int getHeight() {
 		return mMapView.getHeight();
+	}
+
+	@Override
+	public int getScaledTouchSlop() {
+		return mScaledTouchSlop;
 	}
 
 	@Override
