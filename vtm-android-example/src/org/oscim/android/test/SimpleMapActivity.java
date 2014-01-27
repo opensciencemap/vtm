@@ -15,6 +15,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */package org.oscim.android.test;
 
+import org.oscim.android.MapScaleBar;
 import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
@@ -37,33 +38,13 @@ public class SimpleMapActivity extends BaseMapActivity {
 		layers.add(new LabelLayer(mMap, l));
 
 		//layers.add(new TileGridLayer(mMap));
+		layers.add(new MapScaleBar(mMapView));
 
 		mMap.setTheme(InternalRenderTheme.DEFAULT);
 		//mMap.setTheme(InternalRenderTheme.TRONRENDER);
 		//mMap.setTheme(InternalRenderTheme.OSMARENDER);
 
 		mMap.setMapPosition(53.08, 8.83, Math.pow(2, 14));
-
-		//loooop(0);
-	}
-
-	void loooop(final int i) {
-		mMapView.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				InternalRenderTheme t;
-				if (i == 0)
-					t = InternalRenderTheme.DEFAULT;
-				else if (i == 1)
-					t = InternalRenderTheme.TRONRENDER;
-				else
-					t = InternalRenderTheme.OSMARENDER;
-
-				mMapView.getMap().setTheme(t);
-
-				loooop((i + 1) % 3);
-			}
-		}, 300 + (int)(Math.random() * 200));
 	}
 
 	@Override
@@ -93,5 +74,25 @@ public class SimpleMapActivity extends BaseMapActivity {
 		}
 
 		return false;
+	}
+
+	// Stress testing
+	void loooop(final int i) {
+		mMapView.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				InternalRenderTheme t;
+				if (i == 0)
+					t = InternalRenderTheme.DEFAULT;
+				else if (i == 1)
+					t = InternalRenderTheme.TRONRENDER;
+				else
+					t = InternalRenderTheme.OSMARENDER;
+
+				mMapView.getMap().setTheme(t);
+
+				loooop((i + 1) % 3);
+			}
+		}, 300 + (int)(Math.random() * 200));
 	}
 }

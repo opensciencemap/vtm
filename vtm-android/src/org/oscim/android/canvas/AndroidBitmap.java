@@ -42,7 +42,7 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 		    .createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
 	}
 
-	AndroidBitmap(android.graphics.Bitmap bitmap) {
+	public AndroidBitmap(android.graphics.Bitmap bitmap) {
 		mBitmap = bitmap;
 	}
 
