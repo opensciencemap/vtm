@@ -26,7 +26,6 @@ import org.oscim.backend.canvas.Paint;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 import org.oscim.layers.marker.MarkerSymbol;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -90,14 +89,10 @@ public final class AndroidGraphics extends CanvasAdapter {
 		return new AndroidBitmap(bitmap);
 	}
 
-	public static MarkerSymbol makeMarker(Resources res, int id, HotspotPlace place) {
-
+	public static MarkerSymbol makeMarker(Drawable drawable, HotspotPlace place) {
 		if (place == null)
 			place = HotspotPlace.CENTER;
 
-		Drawable drawable = res.getDrawable(id);
-
 		return new MarkerSymbol(drawableToBitmap(drawable), place);
 	}
-
 }
