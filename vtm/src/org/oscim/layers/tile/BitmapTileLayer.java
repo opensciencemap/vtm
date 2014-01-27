@@ -16,6 +16,8 @@
  */
 package org.oscim.layers.tile;
 
+import java.util.concurrent.CancellationException;
+
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
 import org.oscim.core.MapPosition;
@@ -123,6 +125,9 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 
 		@Override
 		public void setTileImage(Bitmap bitmap) {
+			if (isCanceled() || mTile.state(MapTile.STATE_CANCEL))
+				throw new CancellationException();
+
 			BitmapLayer l = new BitmapLayer(false);
 			l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE);
 			mTile.layers = new ElementLayers();

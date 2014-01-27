@@ -136,9 +136,9 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			// query database, which calls 'process' callback
 			result = mTileDataSource.executeQuery(mTile, this);
 		} catch (CancellationException e) {
-			log.debug("canceled {}", mTile);
+			log.debug("{} was canceled", mTile);
 		} catch (Exception e) {
-			log.debug("{}", e);
+			log.debug("{} {}", mTile, e.getMessage());
 		} finally {
 			mTile = null;
 			clearState();
@@ -209,10 +209,9 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void process(MapElement element) {
-
 		clearState();
 
-		if (isCanceled())
+		if (isCanceled() || mTile.state(MapTile.STATE_CANCEL))
 			throw new CancellationException();
 
 		mElement = element;
