@@ -58,8 +58,6 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 	private float mFocusX;
 	private float mFocusY;
 
-	protected int mScaledTouchSlop;
-	
 	protected static final int JUMP_THRESHOLD = 100;
 	protected static final double PINCH_ZOOM_THRESHOLD = 5;
 	protected static final double PINCH_ROTATE_THRESHOLD = 0.02;
@@ -72,7 +70,6 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 		super(map);
 		mMapPosition = map.getViewport();
 		mTracker = new VelocityTracker();
-		mScaledTouchSlop = map.getScaledTouchSlop();
 	}
 	
 	@Override
@@ -177,6 +174,8 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 			if (!mEnableMove)
 				return true;
 
+			int mScaledTouchSlop = mMap.getScaledTouchSlop();
+			
 			if (mx > mScaledTouchSlop || mx < -mScaledTouchSlop || my > mScaledTouchSlop || my < -mScaledTouchSlop) {
 				mMapPosition.moveMap(mx, my);
 				mMap.updateMap(true);
