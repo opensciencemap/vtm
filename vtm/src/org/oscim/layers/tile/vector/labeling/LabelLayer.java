@@ -21,30 +21,81 @@ import org.oscim.event.MotionEvent;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.tiling.TileRenderer;
+import org.oscim.utils.async.SimpleWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateListener {
 	static final Logger log = LoggerFactory.getLogger(LabelLayer.class);
-	private final TextRenderer mTextRenderer;
 
-	//private int multi;
+	private final static long MAX_RELABEL_DELAY = 100;
 
-	public LabelLayer(Map map, TileRenderer tileRenderLayer) {
+	private final LabelPlacement mLabelPlacer;
+	private final Worker mWorker;
+
+	public LabelLayer(Map map, TileRenderer tileRenderer) {
 		super(map);
+		mLabelPlacer = new LabelPlacement(map, tileRenderer);
+		mWorker = new Worker(map);
+		mRenderer = new TextRenderer(mWorker);
+	}
 
-		//mTextLayer = new org.oscim.renderer.layers.TextRenderLayer(map, tileRenderLayer);
-		mTextRenderer = new TextRenderer(map, tileRenderLayer);
-		mRenderer = mTextRenderer;
+	class Worker extends SimpleWorker<LabelTask> {
+
+		public Worker(Map map) {
+			super(map, 50, new LabelTask(), new LabelTask());
+		}
+
+		@Override
+		public boolean doWork(LabelTask t) {
+
+			if (mLabelPlacer.updateLabels(t)) {
+				mMap.render();
+				return true;
+			}
+
+			return false;
+		}
+
+		@Override
+		public void cleanup(LabelTask t) {
+		}
+
+		@Override
+		public void finish() {
+			mLabelPlacer.cleanup();
+		}
+
+		public synchronized boolean isRunning() {
+			return mRunning;
+		}
+	}
+
+	public void clearLabels() {
+		mWorker.cancel(true);
+	}
+
+	public void update() {
+		mWorker.submit(MAX_RELABEL_DELAY);
 	}
 
 	@Override
 	public void onDetach() {
 		// TODO stop and clear labeling thread
 		log.debug("DETACH");
-		mTextRenderer.clearLabels();
+
+		// clear labels
+		mWorker.cancel(true);
 
 		super.onDetach();
+	}
+
+	@Override
+	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+		if (clear)
+			mWorker.cancel(true);
+
+		mWorker.submit(MAX_RELABEL_DELAY);
 	}
 
 	@Override
@@ -63,32 +114,5 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 		//		mTextRenderer.hold(false);
 		//	}
 	}
-
-	@Override
-	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-		if (clear)
-			mTextRenderer.clearLabels();
-
-		mTextRenderer.update();
-	}
-
-	//	@Override
-	//	public boolean onTouchEvent(MotionEvent e) {
-	//		int action = e.getAction() & MotionEvent.ACTION_MASK;
-	//		if (action == MotionEvent.ACTION_POINTER_DOWN) {
-	//			multi++;
-	//			mTextRenderer.hold(true);
-	//		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-	//			multi--;
-	//			if (multi == 0)
-	//				mTextRenderer.hold(false);
-	//		} else if (action == MotionEvent.ACTION_CANCEL) {
-	//			multi = 0;
-	//			log.debug("cancel " + multi);
-	//			mTextRenderer.hold(false);
-	//		}
-	//
-	//		return false;
-	//	}
 
 }
