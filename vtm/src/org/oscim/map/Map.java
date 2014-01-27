@@ -215,9 +215,11 @@ public abstract class Map {
 	}
 
 	/**
-	 * Get current {@link MapPosition}.
+	 * Get current {@link MapPosition}. Consider using
+	 * getViewport.getMapPosition(pos) instead to reuse
+	 * MapPosition instance.
 	 */
-	public MapPosition getMapPostion() {
+	public MapPosition getMapPosition() {
 		MapPosition pos = new MapPosition();
 		mViewport.getMapPosition(pos);
 		return pos;
