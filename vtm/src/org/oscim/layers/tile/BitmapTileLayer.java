@@ -112,20 +112,13 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 
 		@Override
 		public void cleanup() {
-
+			mTile = null;
 		}
 
 		@Override
 		protected boolean executeJob(MapTile tile) {
-			QueryResult result;
-
-			try {
-				mTile = tile;
-				result = mTileDataSource.executeQuery(tile, this);
-			} finally {
-				mTile = null;
-			}
-			return result == QueryResult.SUCCESS;
+			mTile = tile;
+			return mTileDataSource.executeQuery(tile, this) == QueryResult.SUCCESS;
 		}
 
 		@Override
