@@ -27,6 +27,7 @@ import java.net.URL;
 
 import org.oscim.core.Tile;
 import org.oscim.utils.ArrayUtils;
+import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -212,18 +213,6 @@ public class LwHttp {
 		}
 	}
 
-	public void close() {
-		if (mSocket != null) {
-			try {
-				mSocket.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				mSocket = null;
-			}
-		}
-	}
-
 	public InputStream read() throws IOException {
 
 		Buffer is = mResponseStream;
@@ -306,30 +295,21 @@ public class LwHttp {
 
 	public boolean sendRequest(UrlTileSource tileSource, Tile tile) throws IOException {
 
-		if (mSocket != null && ((mMaxReq-- <= 0)
-		        || (System.nanoTime() - mLastRequest > RESPONSE_TIMEOUT))) {
-
-			close();
-
-			if (dbg)
-				log.debug("not alive  - recreate connection " + mMaxReq);
+		if (mSocket != null) {
+			if (mMaxReq-- <= 0)
+				close();
+			else if (System.nanoTime() - mLastRequest > RESPONSE_TIMEOUT)
+				close();
+			else if (mResponseStream.available() > 0)
+				close();
 		}
 
 		if (mSocket == null) {
+			// might throw IOException
 			lwHttpConnect();
-			// we know our server
+
+			// TODO parse from header
 			mMaxReq = RESPONSE_EXPECTED_LIVES;
-			// log.debug("create connection");
-		} else {
-			int avail = mResponseStream.available();
-			if (avail > 0) {
-				log.debug("left-over bytes: " + avail);
-				close();
-				lwHttpConnect();
-				// FIXME not sure if this is correct way to drain socket
-				//while ((avail = mResponseStream.available()) > 0)
-				//	mResponseStream.read(buffer);
-			}
 		}
 
 		byte[] request = mRequestBuffer;
@@ -350,12 +330,13 @@ public class LwHttp {
 			return true;
 		} catch (IOException e) {
 			log.debug("recreate connection");
+			close();
+			// might throw IOException
+			lwHttpConnect();
+
+			mCommandStream.write(request, 0, len);
+			mCommandStream.flush();
 		}
-
-		lwHttpConnect();
-
-		mCommandStream.write(request, 0, len);
-		mCommandStream.flush();
 
 		return true;
 	}
@@ -364,13 +345,52 @@ public class LwHttp {
 		if (mSockAddr == null)
 			mSockAddr = new InetSocketAddress(mHost, mPort);
 
-		mSocket = new Socket();
-		mSocket.connect(mSockAddr, 30000);
-		mSocket.setTcpNoDelay(true);
+		try {
+			mSocket = new Socket();
+			mSocket.connect(mSockAddr, 30000);
+			mSocket.setTcpNoDelay(true);
+			mCommandStream = mSocket.getOutputStream();
+			mResponseStream = new Buffer(mSocket.getInputStream());
+		} catch (IOException e) {
+			close();
+			throw e;
+		}
+		return true;
+	}
 
-		mCommandStream = mSocket.getOutputStream();
-		mResponseStream = new Buffer(mSocket.getInputStream());
+	public void close() {
+		if (mSocket == null)
+			return;
 
+		IOUtils.closeQuietly(mSocket);
+		mSocket = null;
+		mCommandStream = null;
+		mResponseStream = null;
+	}
+
+	public void setCache(OutputStream os) {
+		if (mResponseStream == null)
+			return;
+
+		mResponseStream.setCache(os);
+	}
+
+	public boolean requestCompleted(boolean success) {
+		if (mResponseStream == null)
+			return false;
+
+		mLastRequest = System.nanoTime();
+		mResponseStream.setCache(null);
+
+		if (!mResponseStream.finishedReading()) {
+			log.debug("invalid buffer position");
+			close();
+			return false;
+		}
+		if (!success) {
+			close();
+			return false;
+		}
 		return true;
 	}
 
@@ -410,28 +430,6 @@ public class LwHttp {
 		for (int i = 0; i < length; i++)
 			if (buffer[position + i] != string[i])
 				return false;
-
-		return true;
-	}
-
-	public void setCache(OutputStream os) {
-		mResponseStream.setCache(os);
-	}
-
-	public boolean requestCompleted(boolean success) {
-		mLastRequest = System.nanoTime();
-		mResponseStream.setCache(null);
-
-		if (!mResponseStream.finishedReading()) {
-			log.debug("invalid buffer position");
-			close();
-			return false;
-		}
-
-		if (!success) {
-			close();
-			return false;
-		}
 
 		return true;
 	}
