@@ -183,6 +183,11 @@ public abstract class Map {
 	 * Return screen height in pixel.
 	 */
 	public abstract int getHeight();
+	
+	/**
+	 * Return the dpi scaled min number of pixels that are needed for a move event 
+	 */
+	public abstract int getScaledTouchSlop();
 
 	/**
 	 * Request to clear all layers before rendering next frame
