@@ -81,7 +81,6 @@ public class UrlTileDataSource implements ITileDataSource {
 					cacheWriter = cache.writeTile(tile);
 					mConn.setCache(cacheWriter.getOutputStream());
 				}
-
 				success = mTileDecoder.decode(tile, sink, is);
 			}
 		} catch (SocketException e) {
@@ -93,8 +92,7 @@ public class UrlTileDataSource implements ITileDataSource {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			mConn.requestCompleted(success);
-
+			success = mConn.requestCompleted(success);
 			if (cacheWriter != null)
 				cacheWriter.complete(success);
 		}
