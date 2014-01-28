@@ -41,31 +41,33 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 
 	static final Logger log = LoggerFactory.getLogger(MapEventLayer.class);
 
-	private float mSumScale;
-	private float mSumRotate;
+	private boolean mEnableRotate = true;
+	private boolean mEnableTilt = true;
+	private boolean mEnableMove = true;
+	private boolean mEnableScale = true;
 
-	private boolean mBeginScale;
-	private boolean mBeginRotate;
-	private boolean mBeginTilt;
+	private boolean mCanScale;
+	private boolean mCanRotate;
+	private boolean mCanTilt;
+
+	private boolean mDoRotate;
+	private boolean mDoScale;
+	private boolean mDoTilt;
+
+	private boolean mDown;
 	private boolean mDoubleTap;
 
-	private float mPrevX;
-	private float mPrevY;
-
+	private float mPrevX1;
+	private float mPrevY1;
 	private float mPrevX2;
 	private float mPrevY2;
 
 	private double mAngle;
 	private double mPrevPinchWidth;
-
-	private float mFocusX;
-	private float mFocusY;
-
 	private long mStartMove;
 
-	protected static final int JUMP_THRESHOLD = 100;
-	protected static final double PINCH_ZOOM_THRESHOLD = 5;
-	protected static final double PINCH_ROTATE_THRESHOLD = 0.02;
+	protected static final double PINCH_ZOOM_THRESHOLD = 4;
+	protected static final double PINCH_ROTATE_THRESHOLD = 0.2;
 	protected static final float PINCH_TILT_THRESHOLD = 1f;
 
 	/** 1mm as minimal distance to start move: dpi / 2.54 */
@@ -74,12 +76,12 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 	/** 100 ms since start of move to reduce fling scroll */
 	protected static final float FLING_THREHSHOLD = 100;
 
-	private final Viewport mMapPosition;
+	private final Viewport mViewport;
 	private final VelocityTracker mTracker;
 
 	public MapEventLayer(Map map) {
 		super(map);
-		mMapPosition = map.getViewport();
+		mViewport = map.getViewport();
 		mTracker = new VelocityTracker();
 	}
 
@@ -88,18 +90,12 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		onTouchEvent(event);
 	}
 
-	private boolean mEnableRotation = true;
-	private boolean mEnableTilt = true;
-	private boolean mEnableMove = true;
-	private boolean mEnableZoom = true;
-	private boolean mDown;
-
 	public void enableRotation(boolean enable) {
-		mEnableRotation = enable;
+		mEnableRotate = enable;
 	}
 
 	public boolean rotationEnabled() {
-		return mEnableRotation;
+		return mEnableRotate;
 	}
 
 	public void enableTilt(boolean enable) {
@@ -111,7 +107,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 	}
 
 	public void enableZoom(boolean enable) {
-		mEnableZoom = enable;
+		mEnableScale = enable;
 	}
 
 	public boolean onTouchEvent(MotionEvent e) {
@@ -120,15 +116,13 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 
 		if (action == MotionEvent.ACTION_DOWN) {
 			mMap.getAnimator().cancel();
-			mBeginRotate = false;
-			mBeginTilt = false;
-			mBeginScale = false;
+
 			mDoubleTap = false;
 			mStartMove = -1;
-
-			mPrevX = e.getX(0);
-			mPrevY = e.getY(0);
 			mDown = true;
+
+			mPrevX1 = e.getX(0);
+			mPrevY1 = e.getY(0);
 
 			return true;
 		}
@@ -184,20 +178,20 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		float x1 = e.getX(0);
 		float y1 = e.getY(0);
 
-		float mx = x1 - mPrevX;
-		float my = y1 - mPrevY;
+		float mx = x1 - mPrevX1;
+		float my = y1 - mPrevY1;
 
 		float width = mMap.getWidth();
 		float height = mMap.getHeight();
 
 		if (e.getPointerCount() < 2) {
-			mPrevX = x1;
-			mPrevY = y1;
+			mPrevX1 = x1;
+			mPrevY1 = y1;
 
 			// double-tap + hold
 			if (mDoubleTap) {
 
-				mMapPosition.scaleMap(1 - my / (height / 8), 0, 0);
+				mViewport.scaleMap(1 - my / (height / 8), 0, 0);
 				mMap.updateMap(true);
 				mStartMove = -1;
 				return true;
@@ -209,8 +203,8 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 			if (mStartMove < 0) {
 				float minSlop = (CanvasAdapter.dpi / MIN_SLOP);
 				if (FastMath.withinSquaredDist(mx, my, minSlop * minSlop)) {
-					mPrevX -= mx;
-					mPrevY -= my;
+					mPrevX1 -= mx;
+					mPrevY1 -= my;
 					return true;
 				}
 
@@ -218,7 +212,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 				mTracker.start(x1, y1, mStartMove);
 				return true;
 			}
-			mMapPosition.moveMap(mx, my);
+			mViewport.moveMap(mx, my);
 			mTracker.update(x1, y1, e.getTime());
 
 			mMap.updateMap(true);
@@ -230,108 +224,123 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		float y2 = e.getY(1);
 		float dx = (x1 - x2);
 		float dy = (y1 - y2);
-		float slope = 0;
 
-		if (dx != 0)
-			slope = dy / dx;
+		double rotateBy = 0;
+		float scaleBy = 1;
+		float tiltBy = 0;
+
+		if (mCanTilt) {
+			float slope = (dx == 0) ? 0 : dy / dx;
+
+			if (Math.abs(slope) < 1) {
+				// enter exclusive tilt mode
+				mCanScale = false;
+				mCanRotate = false;
+				mDoTilt = true;
+
+				float my2 = y2 - mPrevY2;
+				float t = PINCH_TILT_THRESHOLD;
+
+				if ((my > t && my2 > t) || (my < -t && my2 < -t))
+					tiltBy = my / 5;
+			}
+		}
 
 		double pinchWidth = Math.sqrt(dx * dx + dy * dy);
+		double deltaPinch = pinchWidth - mPrevPinchWidth;
 
-		final double deltaPinchWidth = pinchWidth - mPrevPinchWidth;
+		if (mCanRotate) {
+			double rad = Math.atan2(dy, dx);
+			double r = rad - mAngle;
 
-		double rad = Math.atan2(dy, dx);
-		double r = rad - mAngle;
-
-		boolean startScale = (Math.abs(deltaPinchWidth) > PINCH_ZOOM_THRESHOLD);
-		boolean changed = false;
-
-		if (mEnableZoom && !mBeginTilt && (mBeginScale || startScale)) {
-			mBeginScale = true;
-
-			float scale = (float) (pinchWidth / mPrevPinchWidth);
-
-			// decrease change of scale by the change of rotation
-			// * 20 is just arbitrary
-			if (mBeginRotate)
-				scale = 1 + ((scale - 1) * Math.max((1 - (float) Math.abs(r) * 20), 0));
-
-			mSumScale *= scale;
-
-			if ((mSumScale < 0.99 || mSumScale > 1.01) && mSumRotate < Math.abs(0.02))
-				mBeginRotate = false;
-
-			float fx = (x2 + x1) / 2 - width / 2;
-			float fy = (y2 + y1) / 2 - height / 2;
-
-			//log.debug("zoom " + deltaPinchWidth + " " + scale + " " + mSumScale);
-			changed = mMapPosition.scaleMap(scale, fx, fy);
-		}
-
-		if (mEnableTilt && !mBeginRotate && Math.abs(slope) < 1) {
-			float my2 = y2 - mPrevY2;
-			float threshold = PINCH_TILT_THRESHOLD;
-			//log.debug(r + " " + slope + " m1:" + my + " m2:" + my2);
-
-			if ((my > threshold && my2 > threshold)
-			        || (my < -threshold && my2 < -threshold))
-			{
-				mBeginTilt = true;
-				changed = mMapPosition.tiltMap(my / 5);
-			}
-		} else if (mEnableRotation && !mBeginTilt &&
-		        (mBeginRotate || Math.abs(r) > PINCH_ROTATE_THRESHOLD)) {
-			//log.debug("rotate: " + mBeginRotate + " " + Math.toDegrees(rad));
-			if (!mBeginRotate) {
-				mAngle = rad;
-
-				mSumScale = 1;
-				mSumRotate = 0;
-
-				mBeginRotate = true;
-
-				mFocusX = (width / 2) - (x1 + x2) / 2;
-				mFocusY = (height / 2) - (y1 + y2) / 2;
-			} else {
+			if (mDoRotate) {
 				double da = rad - mAngle;
-				mSumRotate += da;
 
 				if (Math.abs(da) > 0.001) {
-					mMapPosition.rotateMap(da, mFocusX, mFocusY);
-					changed = true;
+					rotateBy = da;
+					mAngle = rad;
+
+					deltaPinch = 0;
+				}
+			} else {
+				r = Math.abs(r);
+				if (r > PINCH_ROTATE_THRESHOLD) {
+					// start rotate, disable tilt
+					mDoRotate = true;
+					mCanTilt = false;
+
+					mAngle = rad;
+				} else if (!mDoScale) {
+					// reduce pince trigger by the amount of 
+					// rotation.
+					deltaPinch *= 1 - (r / PINCH_ROTATE_THRESHOLD);
 				}
 			}
-			mAngle = rad;
 		}
 
-		if (!changed)
+		if (mCanScale || mDoRotate) {
+			if (!(mDoScale || mDoRotate)) {
+				// enter exclusice scale mode
+				if (Math.abs(deltaPinch) > (CanvasAdapter.dpi
+				        / MIN_SLOP * PINCH_ZOOM_THRESHOLD)) {
+					mCanRotate = mDoRotate || false;
+					mCanTilt = false;
+					mDoScale = true;
+				}
+			}
+			if (mDoScale || mDoRotate) {
+				scaleBy = (float) (pinchWidth / mPrevPinchWidth);
+				mPrevPinchWidth = pinchWidth;
+			}
+		}
+
+		if (!(mDoRotate || mDoScale || mDoTilt))
 			return true;
 
-		mMap.updateMap(true);
-		mPrevPinchWidth = pinchWidth;
+		float fx = (x2 + x1) / 2 - width / 2;
+		float fy = (y2 + y1) / 2 - height / 2;
 
-		mPrevX = x1;
-		mPrevY = y1;
+		synchronized (mViewport) {
+			if (rotateBy != 0)
+				mViewport.rotateMap(rotateBy, fx, fy);
+			if (scaleBy != 1)
+				mViewport.scaleMap((float) scaleBy, fx, fy);
+			if (tiltBy != 0)
+				mViewport.tiltMap(tiltBy);
+			if (!mDoTilt)
+				mViewport.moveMap(((x1 + x2) - (mPrevX1 + mPrevX2)) / 4,
+				                  ((y1 + y2) - (mPrevY1 + mPrevY2)) / 4);
+		}
+		mMap.updateMap(true);
+
+		mPrevX1 = x1;
+		mPrevY1 = y1;
 		mPrevX2 = x2;
 		mPrevY2 = y2;
-
 		return true;
 	}
 
 	private void updateMulti(MotionEvent e) {
 		int cnt = e.getPointerCount();
 
-		mPrevX = e.getX(0);
-		mPrevY = e.getY(0);
+		mPrevX1 = e.getX(0);
+		mPrevY1 = e.getY(0);
 
 		if (cnt == 2) {
+			mDoScale = false;
+			mDoRotate = false;
+			mDoTilt = false;
+			mCanScale = mEnableScale;
+			mCanRotate = mEnableRotate;
+			mCanTilt = mEnableTilt;
+
 			mPrevX2 = e.getX(1);
 			mPrevY2 = e.getY(1);
-			double dx = mPrevX - mPrevX2;
-			double dy = mPrevY - mPrevY2;
+			double dx = mPrevX1 - mPrevX2;
+			double dy = mPrevY1 - mPrevY2;
 
 			mAngle = Math.atan2(dy, dx);
 			mPrevPinchWidth = Math.sqrt(dx * dx + dy * dy);
-			mSumScale = 1;
 		}
 	}
 
