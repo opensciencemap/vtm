@@ -588,8 +588,8 @@ public abstract class GdxMap implements ApplicationListener {
 
 					mBeginRotate = true;
 
-					mFocusX = (mWidth / 2) - (x1 + x2) / 2;
-					mFocusY = (mHeight / 2) - (y1 + y2) / 2;
+					mFocusX = (x1 + x2) / 2 - (mWidth / 2);
+					mFocusY = (y1 + y2) / 2 - (mHeight / 2);
 				} else {
 					double da = rad - mAngle;
 					mSumRotate += da;

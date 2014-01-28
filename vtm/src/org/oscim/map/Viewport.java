@@ -477,8 +477,8 @@ public class Viewport {
 		double rsin = Math.sin(radians);
 		double rcos = Math.cos(radians);
 
-		float x = (float) (pivotX * rcos + pivotY * -rsin - pivotX);
-		float y = (float) (pivotX * rsin + pivotY * rcos - pivotY);
+		float x = (float) (-pivotX * rcos - pivotY * -rsin + pivotX);
+		float y = (float) (-pivotX * rsin - pivotY * rcos + pivotY);
 
 		moveMap(x, y);
 
