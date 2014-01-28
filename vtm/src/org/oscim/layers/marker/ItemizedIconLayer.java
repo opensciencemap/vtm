@@ -192,8 +192,8 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 			float dx = (float) (mTmpPoint.x - eventX);
 			float dy = (float) (mTmpPoint.y - eventY);
 
-			double d = dx * dx + dy * dy;
 			// squared dist: 50*50 pixel
+			double d = dx * dx + dy * dy;
 			if (d < 2500) {
 				if (d < dist) {
 					dist = d;

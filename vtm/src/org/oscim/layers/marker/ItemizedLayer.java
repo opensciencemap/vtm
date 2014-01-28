@@ -102,12 +102,12 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 
 			mMap.getViewport().getMapViewProjection(mBox);
 
-			float flipMax = (float) (Tile.SIZE * pos.scale) / 2;
 			/** increase view to show items that are partially visible */
 			for (int i = 0; i < 8; i++)
 				// should suffice for reasonable large items
 				mBox[i] += mBox[i] > 0 ? 100 : -100;
 
+			long flip = (long) (Tile.SIZE * pos.scale) >> 1;
 
 			synchronized (lock) {
 				if (mItems == null) {
@@ -124,10 +124,10 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 					it.x = (float) ((it.px - mx) * scale);
 					it.y = (float) ((it.py - my) * scale);
 
-					if (it.x > flipMax)
-						it.x -= (flipMax * 2);
-					else if (it.x < -flipMax)
-						it.x += (flipMax * 2);
+					if (it.x > flip)
+						it.x -= (flip << 1);
+					else if (it.x < -flip)
+						it.x += (flip << 1);
 
 					if (!GeometryUtils.pointInPoly(it.x, it.y, mBox, 8, 0)) {
 						if (it.visible) {

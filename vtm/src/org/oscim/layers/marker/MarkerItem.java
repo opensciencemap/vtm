@@ -65,8 +65,7 @@ public class MarkerItem {
 		this(null, title, description, geoPoint);
 	}
 
-	public MarkerItem(String uid, String title, String description,
-	        GeoPoint geoPoint) {
+	public MarkerItem(String uid, String title, String description, GeoPoint geoPoint) {
 		mTitle = title;
 		mDescription = description;
 		mGeoPoint = geoPoint;
