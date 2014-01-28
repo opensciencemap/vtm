@@ -78,7 +78,7 @@ public class LabelPlacement {
 
 		for (Label o = mLabels; o != null;) {
 			//check bounding box
-			if (!Label.bboxOverlaps(l, o, 150)) {
+			if (!Label.bboxOverlaps(l, o, 100)) {
 				o = (Label) o.next;
 				continue;
 			}
@@ -164,10 +164,10 @@ public class LabelPlacement {
 		float w = (ti.x2 - ti.x1) / 2f;
 		float h = (ti.y2 - ti.y1) / 2f;
 
-		l.x1 = (int) (l.x - w);
-		l.y1 = (int) (l.y - h);
-		l.x2 = (int) (l.x + w);
-		l.y2 = (int) (l.y + h);
+		l.x1 = l.x - w;
+		l.y1 = l.y - h;
+		l.x2 = l.x + w;
+		l.y2 = l.y + h;
 	}
 
 	private Label addWayLabels(MapTile t, Label l, float dx, float dy,
@@ -337,7 +337,8 @@ public class LabelPlacement {
 			float div = FastMath.pow(diff);
 			float sscale = (float) (pos.scale / (1 << l.tileZ));
 
-			if (l.width > l.length * sscale) {
+			// plus 10 to rather keep label and avoid flickering
+			if (l.width > (l.length + 10) * sscale) {
 				l = mPool.releaseAndGetNext(l);
 				continue;
 			}
