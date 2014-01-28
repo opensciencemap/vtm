@@ -27,7 +27,6 @@ import java.net.URL;
 
 import org.oscim.core.Tile;
 import org.oscim.utils.ArrayUtils;
-import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -362,7 +361,10 @@ public class LwHttp {
 		if (mSocket == null)
 			return;
 
-		IOUtils.closeQuietly(mSocket);
+		try {
+			mSocket.close();
+		} catch (IOException e) {
+		}
 		mSocket = null;
 		mCommandStream = null;
 		mResponseStream = null;
