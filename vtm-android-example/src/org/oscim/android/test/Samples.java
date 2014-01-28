@@ -17,6 +17,9 @@
  */
 package org.oscim.android.test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,6 +32,8 @@ import android.widget.LinearLayout;
  * A simple start screen for the sample activities.
  */
 public class Samples extends Activity {
+	public static Logger log = LoggerFactory.getLogger(Samples.class);
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -37,6 +42,7 @@ public class Samples extends Activity {
 		LinearLayout linearLayout = (LinearLayout) findViewById(R.id.samples);
 		linearLayout.addView(createButton(SimpleMapActivity.class));
 		linearLayout.addView(createButton(BitmapTileMapActivity.class));
+		linearLayout.addView(createButton(MapsforgeMapActivity.class));
 		linearLayout.addView(createButton(PathOverlayActivity.class));
 		linearLayout.addView(createButton(MarkerOverlayActivity.class));
 	}

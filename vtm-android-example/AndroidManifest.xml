@@ -27,6 +27,7 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+    <activity android:name="org.oscim.android.test.MapsforgeMapActivity$MapFilePicker" />
     
     <activity
       android:name="org.oscim.android.test.SimpleMapActivity"
@@ -47,8 +48,14 @@
       android:label="@string/title_activity_map" >
     </activity>
     
-      <activity
+    <activity
       android:name="org.oscim.android.test.BitmapTileMapActivity"
+      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+      android:label="@string/title_activity_map" >
+    </activity>
+    
+    <activity
+      android:name="org.oscim.android.test.MapsforgeMapActivity"
       android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
       android:label="@string/title_activity_map" >
     </activity>

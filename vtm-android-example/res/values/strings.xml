@@ -7,5 +7,9 @@
     <string name="theme_default">Default</string>
     <string name="theme_tubes">Tubes</string>
     <string name="theme_osmarender">Osmarender</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="error">Error</string>
+    <string name="file_invalid">The selected file is invalid.</string>
 
 </resources>
