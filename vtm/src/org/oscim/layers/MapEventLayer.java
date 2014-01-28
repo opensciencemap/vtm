@@ -16,6 +16,7 @@
  */
 package org.oscim.layers;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.Tile;
 import org.oscim.event.Gesture;
 import org.oscim.event.GestureListener;
@@ -67,7 +68,10 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 	protected static final double PINCH_ROTATE_THRESHOLD = 0.02;
 	protected static final float PINCH_TILT_THRESHOLD = 1f;
 
-	/** ms since start of move to reduce fling scroll */
+	/** 1mm as minimal distance to start move: dpi / 2.54 */
+	protected static final float MIN_SLOP = 25.4f;
+
+	/** 100 ms since start of move to reduce fling scroll */
 	protected static final float FLING_THREHSHOLD = 100;
 
 	private final Viewport mMapPosition;
@@ -147,9 +151,8 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 			// reduce velocity for short moves
 			float tx = e.getTime() - mStartMove;
 			if (tx < FLING_THREHSHOLD) {
-				float s = tx / FLING_THREHSHOLD;
-				vx = vx * (s * s);
-				vy = vy * (s * s);
+				vx *= tx / FLING_THREHSHOLD;
+				vy *= tx / FLING_THREHSHOLD;
 			}
 			doFling(vx, vy);
 			return true;
@@ -204,7 +207,8 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 				return true;
 
 			if (mStartMove < 0) {
-				if (FastMath.withinSquaredDist(mx, my, 100)) {
+				float minSlop = (CanvasAdapter.dpi / MIN_SLOP);
+				if (FastMath.withinSquaredDist(mx, my, minSlop * minSlop)) {
 					mPrevX -= mx;
 					mPrevY -= my;
 					return true;
