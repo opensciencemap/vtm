@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile.vector.labeling;
+package org.oscim.layers.tile.vector;
 
 import org.oscim.core.Tile;
 import org.oscim.renderer.elements.TextItem;
@@ -32,11 +32,11 @@ public final class WayDecorator {
 		TextItem t = null;
 
 		// calculate the way name length plus some margin of safety
-		float wayNameWidth = -1;
+		float labelWidth = -1;
 		float minWidth = Tile.SIZE / 10;
 
-		final int min = 0;
-		final int max = Tile.SIZE;
+		//final int min = 0;
+		//final int max = Tile.SIZE;
 
 		// find way segments long enough to draw the way name on them
 		for (int i = pos; i < pos + len - 2; i += 2) {
@@ -45,42 +45,41 @@ public final class WayDecorator {
 			float prevY = coordinates[i + 1];
 
 			byte edge = 0;
-
-			clipper.clipStart(prevX, prevY);
+			//clipper.clipStart(prevX, prevY);
 
 			// get the current way point coordinates
 			float curX = coordinates[i + 2];
 			float curY = coordinates[i + 3];
 
-			int clip;
-			if ((clip = clipper.clipNext(curX, curY)) != 0) {
-				if (clip < 0) {
-					prevX = clipper.out[0];
-					prevY = clipper.out[1];
-					curX = clipper.out[2];
-					curY = clipper.out[3];
-
-					if (prevX == min)
-						edge |= 1 << 0;
-					else if (prevX == max)
-						edge |= 1 << 1;
-
-					if (prevY == min)
-						edge |= 1 << 2;
-					else if (prevY == max)
-						edge |= 1 << 3;
-
-					if (curX == min)
-						edge |= 1 << 4;
-					else if (curX == max)
-						edge |= 1 << 5;
-
-					if (curY == min)
-						edge |= 1 << 5;
-					else if (curY == max)
-						edge |= 1 << 6;
-				}
-			}
+			//int clip;
+			//if ((clip = clipper.clipNext(curX, curY)) != 0) {
+			//	if (clip < 0) {
+			//		prevX = clipper.out[0];
+			//		prevY = clipper.out[1];
+			//		curX = clipper.out[2];
+			//		curY = clipper.out[3];
+			//
+			//		if (prevX == min)
+			//			edge |= 1 << 0;
+			//		else if (prevX == max)
+			//			edge |= 1 << 1;
+			//
+			//		if (prevY == min)
+			//			edge |= 1 << 2;
+			//		else if (prevY == max)
+			//			edge |= 1 << 3;
+			//
+			//		if (curX == min)
+			//			edge |= 1 << 4;
+			//		else if (curX == max)
+			//			edge |= 1 << 5;
+			//
+			//		if (curY == min)
+			//			edge |= 1 << 5;
+			//		else if (curY == max)
+			//			edge |= 1 << 6;
+			//	}
+			//}
 
 			int last = i;
 
@@ -102,15 +101,15 @@ public final class WayDecorator {
 					float nextX = coordinates[j + 0];
 					float nextY = coordinates[j + 1];
 
-					if ((clip = clipper.clipNext(nextX, nextY)) != 0) {
-						if (clip < 0) {
-							curX = clipper.out[0];
-							curY = clipper.out[1];
-							// TODO break when cur has changed
-							nextX = clipper.out[2];
-							nextY = clipper.out[3];
-						}
-					}
+					//if ((clip = clipper.clipNext(nextX, nextY)) != 0) {
+					//	if (clip < 0) {
+					//		curX = clipper.out[0];
+					//		curY = clipper.out[1];
+					//		// TODO break when cur has changed
+					//		nextX = clipper.out[2];
+					//		nextY = clipper.out[3];
+					//	}
+					//}
 
 					float wx = nextX - curX;
 					float wy = nextY - curY;
@@ -147,17 +146,17 @@ public final class WayDecorator {
 					curY = nextY;
 					last = j - 2;
 
-					if (clip < 0) {
-						if (nextX == min)
-							edge |= 1 << 4;
-						else if (nextX == max)
-							edge |= 1 << 5;
-
-						if (nextY == min)
-							edge |= 1 << 6;
-						else if (nextY == max)
-							edge |= 1 << 7;
-					}
+					//if (clip < 0) {
+					//	if (nextX == min)
+					//		edge |= 1 << 4;
+					//	else if (nextX == max)
+					//		edge |= 1 << 5;
+					//
+					//	if (nextY == min)
+					//		edge |= 1 << 6;
+					//	else if (nextY == max)
+					//		edge |= 1 << 7;
+					//}
 				}
 
 				vx = curX - prevX;
@@ -172,15 +171,15 @@ public final class WayDecorator {
 					continue;
 				}
 
-				if (wayNameWidth < 0) {
-					wayNameWidth = text.paint.measureText(string);
+				if (labelWidth < 0) {
+					labelWidth = text.paint.measureText(string);
 				}
 
-				if (segmentLength < wayNameWidth * 0.50) {
+				if (segmentLength < labelWidth * 0.50) {
 					continue;
 				}
-			} else if (wayNameWidth < 0) {
-				wayNameWidth = text.paint.measureText(string);
+			} else if (labelWidth < 0) {
+				labelWidth = text.paint.measureText(string);
 			}
 
 			float x1, y1, x2, y2;
@@ -199,17 +198,17 @@ public final class WayDecorator {
 			TextItem n = TextItem.pool.get();
 
 			// link items together
-			if (t != null) {
-				t.n1 = n;
-				n.n2 = t;
-			}
+			//if (t != null) {
+			//	t.n1 = n;
+			//	n.n2 = t;
+			//}
 
 			t = n;
 			t.x = x1 + (x2 - x1) / 2f;
 			t.y = y1 + (y2 - y1) / 2f;
 			t.string = string;
 			t.text = text;
-			t.width = wayNameWidth;
+			t.width = labelWidth;
 			t.x1 = x1;
 			t.y1 = y1;
 			t.x2 = x2;

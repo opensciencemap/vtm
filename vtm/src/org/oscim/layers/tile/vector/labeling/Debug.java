@@ -17,6 +17,8 @@
 package org.oscim.layers.tile.vector.labeling;
 
 import org.oscim.backend.canvas.Color;
+import org.oscim.core.MapPosition;
+import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.TextItem;
@@ -25,8 +27,10 @@ import org.oscim.theme.styles.Line;
 class Debug {
 
 	private final static float[] mDebugPoints = new float[8];
+	// TODO Auto-generated method stub
+	static ElementLayers dbg;
 
-	static void addDebugBox(ElementLayers dbg, Label l, TextItem ti, int overlaps, boolean prev,
+	static void addDebugBox(Label l, TextItem ti, int overlaps, boolean prev,
 	        float scale) {
 
 		LineLayer ll;
@@ -73,6 +77,21 @@ class Debug {
 		dbg.addLineLayer(2, new Line((Color.GREEN & alpha), 2));
 		dbg.addLineLayer(4, new Line((Color.CYAN & alpha), 2));
 		dbg.addLineLayer(5, new Line((Color.MAGENTA & alpha), 2));
+	}
+
+	public static void draw(MapPosition pos, Matrices m, ElementLayers layers) {
+		//		if (layers.baseLayers != null) {
+		//			//setMatrix(pos, m, true);
+		//
+		//			for (RenderElement l = layers.baseLayers; l != null;) {
+		//				if (l.type == RenderElement.POLYGON) {
+		//					l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
+		//				} else {
+		//					//float div = (float) (mMapPosition.scale / (1 << pos.zoomLevel));
+		//					l = LineLayer.Renderer.draw(layers, l, pos, m, div);
+		//				}
+		//			}
+		//		}
 	}
 
 }

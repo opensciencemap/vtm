@@ -38,7 +38,6 @@ public final class TextLayer extends TextureLayer {
 
 	public TextLayer() {
 		super(RenderElement.SYMBOL);
-		//mCanvas = Graphics.res.getCanvas();
 		mCanvas = CanvasAdapter.g.getCanvas();
 		fixed = true;
 	}
@@ -58,7 +57,7 @@ public final class TextLayer extends TextureLayer {
 				        && !item.string.equals(it.string))
 					it = it.next;
 
-				// unify duplicate string :)
+				// unify duplicate string
 				// Note: this is required for 'packing test' in prepare to work!
 				if (item.string != it.string && item.string.equals(it.string))
 					item.string = it.string;
@@ -139,117 +138,22 @@ public final class TextLayer extends TextureLayer {
 			if (width > TEXTURE_WIDTH)
 				width = TEXTURE_WIDTH;
 
-			float hw = width / 2.0f;
-			float hh = height / 2.0f;
-
-			float hh2 = hh;
-			//if (!it.text.caption) {
-			//	// displace by baseline
-			//	float desc = 0; //(hh - (height - it.text.fontDescent) / 2);
-			//
-			//	//float desc = it.text.fontDescent / 2;
-			//	hh2 = hh + desc;
-			//	hh = hh - desc;
-			//}
-
-			// texture coordinates
-			short u1 = (short) (COORD_SCALE * x);
-			short v1 = (short) (COORD_SCALE * y);
-			short u2 = (short) (COORD_SCALE * (x + width));
-			short v2 = (short) (COORD_SCALE * (y + height));
-
 			while (it != null) {
-
-				short x1, x2, x3, x4, y1, y3, y2, y4;
-
-				if (it.text.caption) {
-					//if (it.origin == 0) {
-					x1 = x3 = (short) (COORD_SCALE * -hw);
-					x2 = x4 = (short) (COORD_SCALE * hw);
-					y1 = y2 = (short) (COORD_SCALE * (it.text.dy + hh));
-					y3 = y4 = (short) (COORD_SCALE * (it.text.dy - hh));
-					//} else {
-					//	x1 = x3 = (short) (SCALE * 0);
-					//	x2 = x4 = (short) (SCALE * width);
-					//	y1 = y2 = (short) (SCALE * 0);
-					//	y3 = y4 = (short) (SCALE * -height);
-					//}
-				} else {
-					float vx = it.x1 - it.x2;
-					float vy = it.y1 - it.y2;
-					float a = (float) Math.sqrt(vx * vx + vy * vy);
-					vx = vx / a;
-					vy = vy / a;
-
-					float ux = -vy * hh;
-					float uy = vx * hh;
-
-					float ux2 = -vy * hh2;
-					float uy2 = vx * hh2;
-
-					vx *= hw;
-					vy *= hw;
-
-					// top-left
-					x1 = (short) (COORD_SCALE * (vx - ux));
-					y1 = (short) (COORD_SCALE * (vy - uy));
-					// top-right
-					x2 = (short) (COORD_SCALE * (-vx - ux));
-					y2 = (short) (COORD_SCALE * (-vy - uy));
-					// bot-right
-					x4 = (short) (COORD_SCALE * (-vx + ux2));
-					y4 = (short) (COORD_SCALE * (-vy + uy2));
-					// bot-left
-					x3 = (short) (COORD_SCALE * (vx + ux2));
-					y3 = (short) (COORD_SCALE * (vy + uy2));
-				}
-
-				// add vertices
-				int tmp = (int) (COORD_SCALE * it.x) & LBIT_MASK;
-				short tx = (short) (tmp | (it.text.caption ? 1 : 0));
-				short ty = (short) (COORD_SCALE * it.y);
-
 				if (pos == VertexItem.SIZE) {
 					vi.used = VertexItem.SIZE;
 					vi = VertexItem.pool.getNext(vi);
 					buf = vi.vertices;
 					pos = 0;
 				}
-
-				// top-left
-				buf[pos++] = tx;
-				buf[pos++] = ty;
-				buf[pos++] = x1;
-				buf[pos++] = y1;
-				buf[pos++] = u1;
-				buf[pos++] = v2;
-				// bot-left
-				buf[pos++] = tx;
-				buf[pos++] = ty;
-				buf[pos++] = x3;
-				buf[pos++] = y3;
-				buf[pos++] = u1;
-				buf[pos++] = v1;
-				// top-right
-				buf[pos++] = tx;
-				buf[pos++] = ty;
-				buf[pos++] = x2;
-				buf[pos++] = y2;
-				buf[pos++] = u2;
-				buf[pos++] = v2;
-				// bot-right
-				buf[pos++] = tx;
-				buf[pos++] = ty;
-				buf[pos++] = x4;
-				buf[pos++] = y4;
-				buf[pos++] = u2;
-				buf[pos++] = v1;
+				addItem(buf, pos, it, width, height, x, y);
+				pos += 24;
 
 				// six indices to draw the four vertices
 				numIndices += TextureLayer.INDICES_PER_SPRITE;
 				numVertices += 4;
 
-				if (it.next == null || (it.next.text != it.text)
+				if (it.next == null
+				        || (it.next.text != it.text)
 				        || (it.next.string != it.string)) {
 					it = it.next;
 					break;
@@ -266,6 +170,86 @@ public final class TextLayer extends TextureLayer {
 		t.vertices = (short) (numIndices - offsetIndices);
 
 		return true;
+	}
+
+	void addItem(short[] buf, int pos, TextItem it, float width, float height, float x, float y) {
+		// texture coordinates
+		short u1 = (short) (COORD_SCALE * x);
+		short v1 = (short) (COORD_SCALE * y);
+		short u2 = (short) (COORD_SCALE * (x + width));
+		short v2 = (short) (COORD_SCALE * (y + height));
+
+		short x1, x2, x3, x4, y1, y3, y2, y4;
+		float hw = width / 2.0f;
+		float hh = height / 2.0f;
+		if (it.text.caption) {
+			x1 = x3 = (short) (COORD_SCALE * -hw);
+			x2 = x4 = (short) (COORD_SCALE * hw);
+			y1 = y2 = (short) (COORD_SCALE * (it.text.dy + hh));
+			y3 = y4 = (short) (COORD_SCALE * (it.text.dy - hh));
+		} else {
+			float vx = it.x1 - it.x2;
+			float vy = it.y1 - it.y2;
+			float a = (float) Math.sqrt(vx * vx + vy * vy);
+			vx = vx / a;
+			vy = vy / a;
+
+			float ux = -vy * hh;
+			float uy = vx * hh;
+
+			float ux2 = -vy * hh;
+			float uy2 = vx * hh;
+
+			vx *= hw;
+			vy *= hw;
+
+			// top-left
+			x1 = (short) (COORD_SCALE * (vx - ux));
+			y1 = (short) (COORD_SCALE * (vy - uy));
+			// top-right
+			x2 = (short) (COORD_SCALE * (-vx - ux));
+			y2 = (short) (COORD_SCALE * (-vy - uy));
+			// bot-right
+			x4 = (short) (COORD_SCALE * (-vx + ux2));
+			y4 = (short) (COORD_SCALE * (-vy + uy2));
+			// bot-left
+			x3 = (short) (COORD_SCALE * (vx + ux2));
+			y3 = (short) (COORD_SCALE * (vy + uy2));
+		}
+
+		// add vertices
+		int tmp = (int) (COORD_SCALE * it.x) & LBIT_MASK;
+		short tx = (short) (tmp | (it.text.caption ? 1 : 0));
+		short ty = (short) (COORD_SCALE * it.y);
+
+		// top-left
+		buf[pos++] = tx;
+		buf[pos++] = ty;
+		buf[pos++] = x1;
+		buf[pos++] = y1;
+		buf[pos++] = u1;
+		buf[pos++] = v2;
+		// bot-left
+		buf[pos++] = tx;
+		buf[pos++] = ty;
+		buf[pos++] = x3;
+		buf[pos++] = y3;
+		buf[pos++] = u1;
+		buf[pos++] = v1;
+		// top-right
+		buf[pos++] = tx;
+		buf[pos++] = ty;
+		buf[pos++] = x2;
+		buf[pos++] = y2;
+		buf[pos++] = u2;
+		buf[pos++] = v2;
+		// bot-right
+		buf[pos++] = tx;
+		buf[pos++] = ty;
+		buf[pos++] = x4;
+		buf[pos++] = y4;
+		buf[pos++] = u2;
+		buf[pos++] = v1;
 	}
 
 	@Override

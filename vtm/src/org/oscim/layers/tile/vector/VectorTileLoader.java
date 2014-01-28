@@ -26,7 +26,6 @@ import org.oscim.core.PointF;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.vector.labeling.WayDecorator;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
