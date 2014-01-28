@@ -247,7 +247,7 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 				it.item = createItem(a);
 
 				// pre-project points
-				MercatorProjection.project(it.item.mGeoPoint, mMapPoint);
+				MercatorProjection.project(it.item.getPoint(), mMapPoint);
 				it.px = mMapPoint.x;
 				it.py = mMapPoint.y;
 			}
