@@ -17,9 +17,12 @@
 package org.oscim.layers;
 
 import org.oscim.core.Tile;
+import org.oscim.event.Gesture;
+import org.oscim.event.GestureListener;
 import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
+import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +36,8 @@ import org.slf4j.LoggerFactory;
  *        http://en.wikipedia.org/wiki/Viterbi_algorithm
  */
 
-public class MapEventLayer extends Layer implements Map.InputListener {
-	private static final boolean debug = false;
+public class MapEventLayer extends Layer implements Map.InputListener, GestureListener {
+
 	static final Logger log = LoggerFactory.getLogger(MapEventLayer.class);
 
 	private float mSumScale;
@@ -44,7 +47,6 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 	private boolean mBeginRotate;
 	private boolean mBeginTilt;
 	private boolean mDoubleTap;
-	private boolean mWasMulti;
 
 	private float mPrevX;
 	private float mPrevY;
@@ -58,10 +60,15 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 	private float mFocusX;
 	private float mFocusY;
 
+	private long mStartMove;
+
 	protected static final int JUMP_THRESHOLD = 100;
 	protected static final double PINCH_ZOOM_THRESHOLD = 5;
 	protected static final double PINCH_ROTATE_THRESHOLD = 0.02;
 	protected static final float PINCH_TILT_THRESHOLD = 1f;
+
+	/** ms since start of move to reduce fling scroll */
+	protected static final float FLING_THREHSHOLD = 100;
 
 	private final Viewport mMapPosition;
 	private final VelocityTracker mTracker;
@@ -81,6 +88,7 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 	private boolean mEnableTilt = true;
 	private boolean mEnableMove = true;
 	private boolean mEnableZoom = true;
+	private boolean mDown;
 
 	public void enableRotation(boolean enable) {
 		mEnableRotation = enable;
@@ -107,30 +115,57 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 		int action = getAction(e);
 
 		if (action == MotionEvent.ACTION_DOWN) {
+			mMap.getAnimator().cancel();
 			mBeginRotate = false;
 			mBeginTilt = false;
 			mBeginScale = false;
 			mDoubleTap = false;
-			mWasMulti = false;
+			mStartMove = -1;
 
 			mPrevX = e.getX(0);
 			mPrevY = e.getY(0);
+			mDown = true;
 
-			mTracker.start(mPrevX, mPrevY, e.getTime());
 			return true;
-		} else if (action == MotionEvent.ACTION_MOVE) {
+		}
+		if (!mDown) {
+			// no down event received
+			return false;
+		}
+
+		if (action == MotionEvent.ACTION_MOVE) {
 			return onActionMove(e);
-		} else if (action == MotionEvent.ACTION_UP) {
-			onFling(mTracker.getVelocityX(), mTracker.getVelocityY());
+		}
+		if (action == MotionEvent.ACTION_UP) {
+			mDown = false;
+			if (mStartMove < 0)
+				return true;
+
+			float vx = mTracker.getVelocityX();
+			float vy = mTracker.getVelocityY();
+
+			// reduce velocity for short moves
+			float tx = e.getTime() - mStartMove;
+			if (tx < FLING_THREHSHOLD) {
+				float s = tx / FLING_THREHSHOLD;
+				vx = vx * (s * s);
+				vy = vy * (s * s);
+			}
+			doFling(vx, vy);
 			return true;
-		} else if (action == MotionEvent.ACTION_CANCEL) {
+		}
+		if (action == MotionEvent.ACTION_CANCEL) {
 			mDoubleTap = false;
+			mStartMove = -1;
+			mDown = false;
 			return true;
-		} else if (action == MotionEvent.ACTION_POINTER_DOWN) {
-			mWasMulti = true;
+		}
+		if (action == MotionEvent.ACTION_POINTER_DOWN) {
+			mStartMove = -1;
 			updateMulti(e);
 			return true;
-		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+		}
+		if (action == MotionEvent.ACTION_POINTER_UP) {
 			updateMulti(e);
 			return true;
 		}
@@ -152,41 +187,43 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 		float width = mMap.getWidth();
 		float height = mMap.getHeight();
 
-		mTracker.update(x1, y1, e.getTime());
-
-		// return if detect a new gesture, as indicated by a large jump
-		if (Math.abs(mx) > JUMP_THRESHOLD || Math.abs(my) > JUMP_THRESHOLD)
-			return true;
-
-		// double-tap + hold
-		if (mDoubleTap) {
-			if (debug)
-				log.debug("tap scale: " + mx + " " + my);
-			mMapPosition.scaleMap(1 - my / (height / 8), 0, 0);
-			mMap.updateMap(true);
-
+		if (e.getPointerCount() < 2) {
 			mPrevX = x1;
 			mPrevY = y1;
-			return true;
-		}
 
-		if (e.getPointerCount() < 2) {
+			// double-tap + hold
+			if (mDoubleTap) {
+
+				mMapPosition.scaleMap(1 - my / (height / 8), 0, 0);
+				mMap.updateMap(true);
+				mStartMove = -1;
+				return true;
+			}
+
 			if (!mEnableMove)
 				return true;
 
-			if (mx > 1 || mx < -1 || my > 1 || my < -1) {
-				mMapPosition.moveMap(mx, my);
-				mMap.updateMap(true);
+			if (mStartMove < 0) {
+				if (FastMath.withinSquaredDist(mx, my, 100)) {
+					mPrevX -= mx;
+					mPrevY -= my;
+					return true;
+				}
 
-				mPrevX = x1;
-				mPrevY = y1;
+				mStartMove = e.getTime();
+				mTracker.start(x1, y1, mStartMove);
+				return true;
 			}
+			mMapPosition.moveMap(mx, my);
+			mTracker.update(x1, y1, e.getTime());
+
+			mMap.updateMap(true);
 			return true;
 		}
+		mStartMove = -1;
 
 		float x2 = e.getX(1);
 		float y2 = e.getY(1);
-
 		float dx = (x1 - x2);
 		float dy = (y1 - y2);
 		float slope = 0;
@@ -202,7 +239,6 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 		double r = rad - mAngle;
 
 		boolean startScale = (Math.abs(deltaPinchWidth) > PINCH_ZOOM_THRESHOLD);
-
 		boolean changed = false;
 
 		if (mEnableZoom && !mBeginTilt && (mBeginScale || startScale)) {
@@ -263,16 +299,16 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 			mAngle = rad;
 		}
 
-		if (changed) {
-			mMap.updateMap(true);
-			mPrevPinchWidth = pinchWidth;
+		if (!changed)
+			return true;
 
-			mPrevX2 = x2;
-			mPrevY2 = y2;
-		}
+		mMap.updateMap(true);
+		mPrevPinchWidth = pinchWidth;
 
 		mPrevX = x1;
 		mPrevY = y1;
+		mPrevX2 = x2;
+		mPrevY2 = y2;
 
 		return true;
 	}
@@ -280,10 +316,10 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 	private void updateMulti(MotionEvent e) {
 		int cnt = e.getPointerCount();
 
-		if (cnt == 2) {
-			mPrevX = e.getX(0);
-			mPrevY = e.getY(0);
+		mPrevX = e.getX(0);
+		mPrevY = e.getY(0);
 
+		if (cnt == 2) {
 			mPrevX2 = e.getX(1);
 			mPrevY2 = e.getY(1);
 			double dx = mPrevX - mPrevX2;
@@ -295,9 +331,7 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 		}
 	}
 
-	private boolean onFling(float velocityX, float velocityY) {
-		if (mWasMulti)
-			return true;
+	private boolean doFling(float velocityX, float velocityY) {
 
 		int w = Tile.SIZE * 3;
 		int h = Tile.SIZE * 3;
@@ -308,43 +342,17 @@ public class MapEventLayer extends Layer implements Map.InputListener {
 		return true;
 	}
 
-	//@Override
-	//public boolean onDoubleTap(MotionEvent e) {
-	//
-	//	mDoubleTap = true;
-	//	//mMapPosition.animateZoom(2);
-	//
-	//	if (debug)
-	//		printState("onDoubleTap");
-	//
-	//	// avoid onLongPress
-	//	mMap.getLayers().cancelGesture();
-	//
-	//	return true;
-	//}
-	//
-	//@Override
-	//public boolean onScroll(final MotionEvent e1, final MotionEvent e2, final float distanceX,
-	//		final float distanceY) {
-	//
-	//	if (e2.getPointerCount() == 1) {
-	//		mMapPosition.moveMap(-distanceX, -distanceY);
-	//		mMap.updateMap(true);
-	//		return true;
-	//	}
-	//
-	//	return false;
-	//}
-	//
-
-	//
-	//private void printState(String action) {
-	//		log.debug(action
-	//				+ " " + mDoubleTap
-	//				+ " " + mBeginScale
-	//				+ " " + mBeginRotate
-	//				+ " " + mBeginTilt);
-	//}
+	@Override
+	public boolean onGesture(Gesture g, MotionEvent e) {
+		if (g instanceof Gesture.DoubleTap) {
+			//mMapPosition.animateZoom(2);
+			// avoid onLongPress
+			// mMap.getLayers().cancelGesture();
+			mDoubleTap = true;
+			return true;
+		}
+		return false;
+	}
 
 	/*******************************************************************************
 	 * Copyright 2011 See libgdx AUTHORS file.

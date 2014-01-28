@@ -274,4 +274,8 @@ public class MapAnimator {
 		mViewport.scaleMap((float) (newScale / mPos.scale),
 		                   (float) mPivot.x, (float) mPivot.y);
 	}
+
+	public synchronized void cancel() {
+		mState = ANIM_NONE;
+	}
 }
