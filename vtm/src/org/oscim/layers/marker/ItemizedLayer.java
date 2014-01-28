@@ -103,6 +103,11 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 			mMap.getViewport().getMapViewProjection(mBox);
 
 			float flipMax = (float) (Tile.SIZE * pos.scale) / 2;
+			/** increase view to show items that are partially visible */
+			for (int i = 0; i < 8; i++)
+				// should suffice for reasonable large items
+				mBox[i] += mBox[i] > 0 ? 100 : -100;
+
 
 			synchronized (lock) {
 				if (mItems == null) {
