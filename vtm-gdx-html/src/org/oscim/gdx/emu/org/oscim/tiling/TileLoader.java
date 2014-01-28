@@ -14,9 +14,6 @@
  */
 package org.oscim.tiling;
 
-import org.oscim.tiling.MapTile;
-import org.oscim.tiling.TileManager;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Timer;
 
@@ -44,6 +41,10 @@ public abstract class TileLoader {
 	}
 
 	boolean mPausing;
+
+	public boolean isCanceled() {
+		return mPausing;
+	}
 
 	public boolean isPausing() {
 		return mPausing;
