@@ -102,6 +102,22 @@ public class MapPosition {
 		return MercatorProjection.toLongitude(x);
 	}
 
+	public void setByBoundingBox(BoundingBox bbox, int viewWidth, int viewHeight) {
+		double minx = MercatorProjection.longitudeToX(bbox.getMinLongitude());
+		double miny = MercatorProjection.latitudeToY(bbox.getMaxLatitude());
+
+		double dx = Math.abs(MercatorProjection.longitudeToX(bbox.getMaxLongitude()) - minx);
+		double dy = Math.abs(MercatorProjection.latitudeToY(bbox.getMinLatitude()) - miny);
+		double zx = viewWidth / (dx * Tile.SIZE);
+		double zy = viewHeight / (dy * Tile.SIZE);
+
+		scale = Math.min(zx, zy);
+		x = minx + dx / 2;
+		y = miny + dy / 2;
+		angle = 0;
+		tilt = 0;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
