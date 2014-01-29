@@ -19,25 +19,22 @@ package org.oscim.android.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.oscim.android.MapActivity;
-import org.oscim.android.MapView;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.PathLayer;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import android.os.Bundle;
 
-public class PathOverlayActivity extends MapActivity {
+public class PathOverlayActivity extends BitmapTileMapActivity {
 
-	MapView mMapView;
+	public PathOverlayActivity() {
+		super(new DefaultSources.StamenToner());
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_map);
-
-		mMapView = (MapView) findViewById(R.id.mapView);
-		registerMapView(mMapView);
 
 		for (double lon = -180; lon < 180; lon += 5) {
 			List<GeoPoint> pts = new ArrayList<GeoPoint>();
@@ -46,9 +43,8 @@ public class PathOverlayActivity extends MapActivity {
 				//pts.add(new GeoPoint(lat, lon));
 				pts.add(new GeoPoint(lat, Math.sin((lat + 180) / 360 * Math.PI) * lon));
 
-			PathLayer pathLayer = new PathLayer(mMap,
-			                                    Color.rainbow((float) (lon + 180) / 360),
-			                                    3);
+			int c = Color.fade(Color.rainbow((float) (lon + 180) / 360), 0.8f);
+			PathLayer pathLayer = new PathLayer(mMap, c, 3);
 			pathLayer.setPoints(pts);
 
 			mMap.getLayers().add(pathLayer);
@@ -59,11 +55,10 @@ public class PathOverlayActivity extends MapActivity {
 
 			for (double lon = -180; lon <= 180; lon += 1)
 				//pts.add(new GeoPoint(lat, lon));
-				pts.add(new GeoPoint(Math.sin(lon/6 * Math.PI) * 3 + lat, lon));
+				pts.add(new GeoPoint(Math.sin(lon / 6 * Math.PI) * 3 + lat, lon));
 
-			PathLayer pathLayer = new PathLayer(mMap,
-			                                    Color.rainbow((float) (lat + 90) / 180),
-			                                    3);
+			int c = Color.fade(Color.rainbow((float) (lat + 90) / 180), 0.8f);
+			PathLayer pathLayer = new PathLayer(mMap, c, 3);
 			pathLayer.setPoints(pts);
 
 			mMap.getLayers().add(pathLayer);

@@ -26,6 +26,15 @@ import android.os.Bundle;
 public class BitmapTileMapActivity extends MapActivity {
 
 	private final static boolean USE_CACHE = true;
+	private final TileSource mTileSource;
+
+	public BitmapTileMapActivity() {
+		mTileSource = new DefaultSources.OpenStreetMap();
+	}
+
+	public BitmapTileMapActivity(TileSource tileSource) {
+		mTileSource = tileSource;
+	}
 
 	MapView mMapView;
 
@@ -39,14 +48,12 @@ public class BitmapTileMapActivity extends MapActivity {
 		mMapView = (MapView) findViewById(R.id.mapView);
 		registerMapView(mMapView);
 
-		TileSource tileSource = new DefaultSources.OpenStreetMap();
-
 		if (USE_CACHE) {
-			mCache = new TileCache(this, null, tileSource.getClass().getSimpleName());
+			mCache = new TileCache(this, null, mTileSource.getClass().getSimpleName());
 			mCache.setCacheSize(512 * (1 << 10));
-			tileSource.setCache(mCache);
+			mTileSource.setCache(mCache);
 		}
-		mMap.getLayers().add(new BitmapTileLayer(mMap, tileSource));
+		mMap.getLayers().add(new BitmapTileLayer(mMap, mTileSource));
 
 		mMap.setMapPosition(0, 0, 1 << 2);
 	}

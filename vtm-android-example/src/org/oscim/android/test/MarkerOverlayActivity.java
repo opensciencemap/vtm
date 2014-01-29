@@ -19,8 +19,6 @@ package org.oscim.android.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.oscim.android.MapActivity;
-import org.oscim.android.MapView;
 import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.TileGridLayer;
@@ -29,21 +27,22 @@ import org.oscim.layers.marker.ItemizedIconLayer.OnItemGestureListener;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 import org.oscim.layers.marker.MarkerSymbol;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Toast;
 
-public class MarkerOverlayActivity extends MapActivity implements OnItemGestureListener<MarkerItem> {
-	MapView mMapView;
+public class MarkerOverlayActivity extends BitmapTileMapActivity
+implements OnItemGestureListener<MarkerItem> {
+
+	public MarkerOverlayActivity() {
+		super(new DefaultSources.StamenToner());
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_map);
-
-		mMapView = (MapView) findViewById(R.id.mapView);
-		registerMapView(mMapView);
 
 		Drawable d = getResources().getDrawable(R.drawable.marker_poi);
 		MarkerSymbol symbol = AndroidGraphics.makeMarker(d, HotspotPlace.CENTER);
