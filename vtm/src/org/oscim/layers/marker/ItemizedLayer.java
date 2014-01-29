@@ -55,7 +55,9 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 	//static final Logger log = LoggerFactory.getLogger(ItemizedOverlay.class);
 
 	protected final MarkerSymbol mDefaultMarker;
-	protected boolean mDrawFocusedItem = true;
+
+	/** increase view to show items that are partially visible */
+	protected int mExtents = 100;
 
 	class InternalItem {
 		InternalItem next;
@@ -101,11 +103,13 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 			int numVisible = 0;
 
 			mMap.getViewport().getMapViewProjection(mBox);
-
-			/** increase view to show items that are partially visible */
-			for (int i = 0; i < 8; i++)
-				// should suffice for reasonable large items
-				mBox[i] += mBox[i] > 0 ? 100 : -100;
+			for (int i = 0; i < 8; i += 2) {
+				float x = mBox[i];
+				float y = mBox[i + 1];
+				float len = (float) Math.sqrt(x * x + y * y);
+				mBox[i + 0] += x / len * mExtents;
+				mBox[i + 1] += y / len * mExtents;
+			}
 
 			long flip = (long) (Tile.SIZE * pos.scale) >> 1;
 
