@@ -106,7 +106,7 @@ public class BitmapLayer extends TextureLayer {
 		buf[pos++] = texMax;
 		buf[pos++] = texMax;
 
-		setOffset(sbuf.position() * 2);
+		this.offset = sbuf.position() * 2;
 		sbuf.put(buf);
 	}
 
@@ -215,7 +215,7 @@ public class BitmapLayer extends TextureLayer {
 				// draw up to maxVertices in each iteration
 				for (int i = 0; i < t.vertices; i += maxVertices) {
 					// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
-					int off = (t.offset + i) * 8 + tl.getOffset();
+					int off = (t.offset + i) * 8 + tl.offset;
 
 					GL.glVertexAttribPointer(hTextureVertex, 4,
 					                         GL20.GL_SHORT, false, 12, off);

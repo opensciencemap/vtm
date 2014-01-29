@@ -17,7 +17,6 @@
 package org.oscim.tiling;
 
 import org.oscim.core.Tile;
-import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
@@ -226,8 +225,6 @@ public class MapTile extends Tile {
 	 */
 	protected void clear() {
 		if (layers != null) {
-			// TODO move this to layers clear
-			layers.vbo = BufferObject.release(layers.vbo);
 			layers.clear();
 			layers = null;
 		}

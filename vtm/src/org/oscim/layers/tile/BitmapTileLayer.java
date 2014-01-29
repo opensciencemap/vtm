@@ -141,7 +141,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 			BitmapLayer l = new BitmapLayer(false);
 			l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE);
 			mTile.layers = new ElementLayers();
-			mTile.layers.textureLayers = l;
+			mTile.layers.setTextureLayers(l);
 		}
 
 		@Override

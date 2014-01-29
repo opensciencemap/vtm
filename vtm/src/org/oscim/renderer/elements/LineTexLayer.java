@@ -247,11 +247,11 @@ public final class LineTexLayer extends RenderElement {
 	}
 
 	@Override
-	protected void clear() {
-	}
-
-	@Override
 	protected void compile(ShortBuffer sbuf) {
+		ElementLayers.addPoolItems(this, sbuf);
+		// add additional vertex for interleaving,
+		// see TexLineLayer.
+		sbuf.position(sbuf.position() + 6);
 	}
 
 	public final static class Renderer {
@@ -369,7 +369,6 @@ public final class LineTexLayer extends RenderElement {
 			for (; l != null && l.type == RenderElement.TEXLINE; l = l.next) {
 				LineTexLayer ll = (LineTexLayer) l;
 				Line line = ll.line;
-				int lOffset = l.getOffset();
 
 				GLUtils.setColor(hTexColor, line.stippleColor, 1);
 				GLUtils.setColor(hBgColor, line.color, 1);
@@ -396,7 +395,7 @@ public final class LineTexLayer extends RenderElement {
 						numIndices = maxIndices;
 
 					// i / 6 * (24 shorts per block * 2 short bytes)
-					int add = (lOffset + i * 8) + vOffset;
+					int add = (l.offset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(hVertexPosition0,
 					                         4, GL20.GL_SHORT, false, STRIDE,
@@ -425,7 +424,7 @@ public final class LineTexLayer extends RenderElement {
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;
 					// i / 6 * (24 shorts per block * 2 short bytes)
-					int add = (lOffset + i * 8) + vOffset;
+					int add = (l.offset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(hVertexPosition0,
 					                         4, GL20.GL_SHORT, false, STRIDE,

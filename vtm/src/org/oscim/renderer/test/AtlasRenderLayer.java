@@ -56,7 +56,7 @@ public class AtlasRenderLayer extends ElementRenderer {
 
 		TextLayer tl = new TextLayer();
 		Text t = Text.createText(20, 0, Color.BLACK, 0, false);
-		layers.textureLayers = tl;
+		layers.setTextureLayers(tl);
 
 		float[] points = new float[10];
 

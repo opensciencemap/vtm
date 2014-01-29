@@ -441,7 +441,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			        / ((long) Tile.SIZE << mTile.zoomLevel));
 
 			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
-			mTile.layers.add(l);
+			mTile.layers.setExtrusionLayers(l);
 		}
 		l.add(mElement, height, minHeight);
 	}

@@ -19,7 +19,6 @@ package org.oscim.renderer.elements;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
@@ -115,14 +114,6 @@ public final class PolygonLayer extends RenderElement {
 		}
 
 		si.used = outPos;
-	}
-
-	@Override
-	protected void compile(ShortBuffer sbuf) {
-	}
-
-	@Override
-	protected void clear() {
 	}
 
 	public static final class Renderer {
@@ -326,7 +317,7 @@ public final class PolygonLayer extends RenderElement {
 				// set stencil mask to draw to
 				GL.glStencilMask(1 << cur++);
 
-				GL.glDrawArrays(GL20.GL_TRIANGLE_FAN, l.getOffset(), l.numVertices);
+				GL.glDrawArrays(GL20.GL_TRIANGLE_FAN, l.offset, l.numVertices);
 
 				// draw up to 7 layers into stencil buffer
 				if (cur == STENCIL_BITS - 1) {

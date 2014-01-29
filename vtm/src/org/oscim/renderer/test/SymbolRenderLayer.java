@@ -28,7 +28,7 @@ public class SymbolRenderLayer extends ElementRenderer {
 
 	public SymbolRenderLayer() {
 		SymbolLayer l = new SymbolLayer();
-		layers.textureLayers = l;
+		layers.setTextureLayers(l);
 
 		SymbolItem it = SymbolItem.pool.get();
 		it.billboard = false;

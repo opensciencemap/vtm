@@ -16,8 +16,6 @@
  */
 package org.oscim.renderer.elements;
 
-import java.nio.ShortBuffer;
-
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Paint.Cap;
@@ -556,16 +554,6 @@ public final class LineLayer extends RenderElement {
 		si.used = opos;
 	}
 
-	@Override
-	public void clear() {
-		vertexItems = VertexItem.pool.releaseAll(vertexItems);
-		numVertices = 0;
-	}
-
-	@Override
-	protected void compile(ShortBuffer sbuf) {
-	}
-
 	public static final class Renderer {
 		// TODO: http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter22.html
 
@@ -668,7 +656,7 @@ public final class LineLayer extends RenderElement {
 			GLState.enableVertexArrays(hLineVertexPosition[mode], -1);
 
 			GL.glVertexAttribPointer(hLineVertexPosition[mode], 4, GL20.GL_SHORT,
-			                         false, 0, layers.lineOffset);
+			                         false, 0, layers.offset[LINE]);
 
 			m.mvp.setAsUniform(hLineMatrix[mode]);
 
@@ -745,7 +733,7 @@ public final class LineLayer extends RenderElement {
 					}
 
 					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
-					                l.getOffset(), l.numVertices);
+					                l.offset, l.numVertices);
 
 					continue;
 				}
@@ -781,7 +769,7 @@ public final class LineLayer extends RenderElement {
 					}
 
 					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
-					                o.getOffset(), o.numVertices);
+					                o.offset, o.numVertices);
 				}
 			}
 

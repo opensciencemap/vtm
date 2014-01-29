@@ -16,6 +16,11 @@
  */
 package org.oscim.tiling;
 
+import static org.oscim.renderer.elements.RenderElement.BITMAP;
+import static org.oscim.renderer.elements.RenderElement.LINE;
+import static org.oscim.renderer.elements.RenderElement.MESH;
+import static org.oscim.renderer.elements.RenderElement.POLYGON;
+import static org.oscim.renderer.elements.RenderElement.TEXLINE;
 import static org.oscim.tiling.MapTile.STATE_NEW_DATA;
 import static org.oscim.tiling.MapTile.STATE_READY;
 
@@ -178,19 +183,19 @@ public class TileRenderer extends LayerRenderer {
 			return 1;
 
 		int newSize = tile.layers.getSize();
-		if (newSize > 0) {
+		if (newSize <= 0)
+			return 1;
 
-			if (tile.layers.vbo == null)
-				tile.layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
+		if (tile.layers.vbo == null)
+			tile.layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
-			if (!ElementRenderer.uploadLayers(tile.layers, newSize, true)) {
-				log.debug("BUG uploadTileData " + tile + " failed!");
+		if (!ElementRenderer.uploadLayers(tile.layers, newSize, true)) {
+			log.debug("BUG uploadTileData " + tile + " failed!");
 
-				tile.layers.vbo = BufferObject.release(tile.layers.vbo);
-				tile.layers.clear();
-				tile.layers = null;
-				return 0;
-			}
+			tile.layers.vbo = BufferObject.release(tile.layers.vbo);
+			tile.layers.clear();
+			tile.layers = null;
+			return 0;
 		}
 
 		return 1;
@@ -395,7 +400,8 @@ public class TileRenderer extends LayerRenderer {
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null)) {
-				boolean preferParent = (scale > 1.5) || (pos.zoomLevel - t.zoomLevel < 0);
+				boolean preferParent = (scale > 1.5)
+				        || (pos.zoomLevel - t.zoomLevel < 0);
 				drawProxyTile(t, pos, true, preferParent);
 			}
 		}
@@ -416,33 +422,29 @@ public class TileRenderer extends LayerRenderer {
 	}
 
 	private void drawTile(MapTile tile, MapPosition pos) {
-		// draw parents only once
+		/** ensure to draw parents only once */
 		if (tile.lastDraw == mDrawSerial)
 			return;
 
 		tile.lastDraw = mDrawSerial;
 
-		MapTile t = tile;
-		if (t.holder != null)
-			t = t.holder;
+		/** use holder proxy when it is set */
+		MapTile t = tile.holder == null ? tile : tile.holder;
 
-		if (t.layers == null || t.layers.vbo == null) {
-			//log.debug("missing data " + (t.layers == null) + " " + (t.vbo == null));
+		if (t.layers == null || t.layers.vbo == null)
+			//throw new IllegalStateException(t + "no data " + (t.layers == null));
 			return;
-		}
 
 		t.layers.vbo.bind();
 
-		// place tile relative to map position
+		/** place tile relative to map position */
 		int z = tile.zoomLevel;
-
 		float div = FastMath.pow(z - pos.zoomLevel);
-
 		double tileScale = Tile.SIZE * pos.scale;
 		float x = (float) ((tile.x - pos.x) * tileScale);
 		float y = (float) ((tile.y - pos.y) * tileScale);
 
-		// scale relative to zoom-level of this tile
+		/** scale relative to zoom-level of this tile */
 		float scale = (float) (pos.scale / (1 << z));
 
 		Matrices m = mMatrices;
@@ -450,64 +452,46 @@ public class TileRenderer extends LayerRenderer {
 		m.mvp.multiplyLhs(m.viewproj);
 
 		boolean clipped = false;
+		RenderElement l = t.layers.getBaseLayers();
 
-		for (RenderElement l = t.layers.baseLayers; l != null;) {
-			switch (l.type) {
-				case RenderElement.POLYGON:
-					l = PolygonLayer.Renderer.draw(pos, l, m, !clipped, div, true);
-					clipped = true;
-					break;
-
-				case RenderElement.LINE:
-					if (!clipped) {
-						clipped = true;
-						PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
-					}
-					l = LineLayer.Renderer.draw(t.layers, l, pos, m, scale);
-					break;
-
-				case RenderElement.TEXLINE:
-					if (!clipped) {
-						clipped = true;
-						PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
-					}
-					l = LineTexLayer.Renderer.draw(t.layers, l, pos, m, div);
-					break;
-
-				case RenderElement.MESH:
-					if (!clipped) {
-						clipped = true;
-						PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
-					}
-					l = MeshLayer.Renderer.draw(pos, l, m);
-					break;
-
-				default:
-					// just in case
-					l = l.next;
+		while (l != null) {
+			if (l.type == POLYGON) {
+				l = PolygonLayer.Renderer.draw(pos, l, m, !clipped, div, true);
+				clipped = true;
+				continue;
 			}
-		}
-
-		for (RenderElement l = t.layers.textureLayers; l != null;) {
 			if (!clipped) {
 				// draw stencil buffer clip region
 				PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
 				clipped = true;
 			}
-			//			if (!clipped) {
-			//				// draw stencil buffer clip region
-			//				PolygonRenderer.clip(m);
-			//				clipped = true;
-			//			}
-			//GLState.test(false, false);
-			switch (l.type) {
-				case RenderElement.BITMAP:
-					l = BitmapLayer.Renderer.draw(l, m, 1, mRenderAlpha);
-					break;
-
-				default:
-					l = l.next;
+			if (l.type == LINE) {
+				l = LineLayer.Renderer.draw(t.layers, l, pos, m, scale);
+				continue;
 			}
+			if (l.type == TEXLINE) {
+				l = LineTexLayer.Renderer.draw(t.layers, l, pos, m, div);
+				continue;
+			}
+			if (l.type == MESH) {
+				l = MeshLayer.Renderer.draw(pos, l, m);
+				continue;
+			}
+			// just in case
+			l = l.next;
+		}
+
+		l = t.layers.getTextureLayers();
+		while (l != null) {
+			if (!clipped) {
+				PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
+				clipped = true;
+			}
+			if (l.type == BITMAP) {
+				l = BitmapLayer.Renderer.draw(l, m, 1, mRenderAlpha);
+				continue;
+			}
+			l = l.next;
 		}
 
 		if (t.fadeTime == 0)

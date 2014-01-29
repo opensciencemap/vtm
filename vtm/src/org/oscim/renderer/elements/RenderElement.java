@@ -24,45 +24,45 @@ import org.oscim.utils.pool.Inlist;
 public abstract class RenderElement extends Inlist<RenderElement> {
 	protected static GL20 GL;
 
-	public final static byte LINE = 0;
-	public final static byte POLYGON = 1;
-	public final static byte MESH = 2;
-	public final static byte TEXLINE = 3;
-	public final static byte SYMBOL = 4;
-	public final static byte BITMAP = 5;
-	public final static byte EXTRUSION = 6;
+	public final static int LINE = 0;
+	public final static int TEXLINE = 1;
+	public final static int POLYGON = 2;
+	public final static int MESH = 3;
+	public final static int SYMBOL = 4;
+	public final static int BITMAP = 5;
+	public final static int EXTRUSION = 6;
 
-	protected RenderElement(byte type) {
+	public final int type;
+
+	/** drawing order from bottom to top. */
+	int level;
+
+	/** number of vertices for this layer. */
+	protected int numVertices;
+
+	/** temporary list of vertex data. */
+	protected VertexItem vertexItems;
+
+	protected RenderElement(int type) {
 		this.type = type;
 	}
 
-	public final byte type;
+	/** clear all resources. */
+	protected void clear() {
+		if (vertexItems != null)
+			vertexItems = VertexItem.pool.releaseAll(vertexItems);
+		numVertices = 0;
+	}
 
-	/** drawing order from bottom to top */
-	int level;
+	/** compile vertex data to vbo. */
+	protected void compile(ShortBuffer sbuf) {
 
-	/** number of vertices for this layer */
-	protected int numVertices;
-
-	protected VertexItem vertexItems;
-
-	abstract protected void compile(ShortBuffer sbuf);
-
-	abstract protected void clear();
+	}
 
 	/**
-	 * for line and polygon layers:
-	 * - number of VERTICES mOffset for this layertype in VBO
-	 * otherwise:
-	 * - offset in byte in VBO
+	 * For line- and polygon-layers this is the offset
+	 * of VERTICES in its layers.vbo.
+	 * For all other types it is the byte offset in vbo.
 	 */
-	private int mOffset;
-
-	public int getOffset() {
-		return mOffset;
-	}
-
-	public void setOffset(int offset) {
-		mOffset = offset;
-	}
+	protected int offset;
 }

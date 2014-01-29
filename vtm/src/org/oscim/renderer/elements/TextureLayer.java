@@ -42,7 +42,7 @@ public abstract class TextureLayer extends RenderElement {
 	                                                TEXTURE_WIDTH,
 	                                                TEXTURE_HEIGHT);
 
-	protected TextureLayer(byte type) {
+	protected TextureLayer(int type) {
 		super(type);
 	}
 
@@ -174,7 +174,7 @@ public abstract class TextureLayer extends RenderElement {
 				// draw up to maxVertices in each iteration
 				for (int i = 0; i < t.vertices; i += maxVertices) {
 					// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
-					int off = (t.offset + i) * 8 + tl.getOffset();
+					int off = (t.offset + i) * 8 + tl.offset;
 
 					GL.glVertexAttribPointer(hTextureVertex, 4,
 					                         GL20.GL_SHORT, false, 12, off);

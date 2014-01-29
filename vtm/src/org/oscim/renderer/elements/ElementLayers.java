@@ -16,15 +16,24 @@
  */
 package org.oscim.renderer.elements;
 
+import static org.oscim.renderer.elements.RenderElement.LINE;
+import static org.oscim.renderer.elements.RenderElement.MESH;
+import static org.oscim.renderer.elements.RenderElement.POLYGON;
+import static org.oscim.renderer.elements.RenderElement.TEXLINE;
+
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.renderer.BufferObject;
 import org.oscim.theme.styles.Line;
-import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class is primarily intended for rendering the vector elements of a
+ * MapTile. It can be used for other purposes as well but some optimizations
+ * applied probably wont make sense in different contexts.
+ */
 public class ElementLayers {
 	static final Logger log = LoggerFactory.getLogger(ElementLayers.class);
 
@@ -42,12 +51,13 @@ public class ElementLayers {
 	}
 
 	/** mixed Polygon- and LineLayer */
-	public RenderElement baseLayers;
+	private RenderElement baseLayers;
 
 	/** Text- and SymbolLayer */
-	public RenderElement textureLayers;
+	private RenderElement textureLayers;
 
-	public RenderElement extrusionLayers;
+	private RenderElement extrusionLayers;
+
 	/**
 	 * VBO holds all vertex data to draw lines and polygons after compilation.
 	 * Layout:
@@ -62,10 +72,9 @@ public class ElementLayers {
 	 * To not need to switch VertexAttribPointer positions all the time:
 	 * 1. polygons are packed in VBO at offset 0
 	 * 2. lines afterwards at lineOffset
-	 * 3. other layers keep their byte offset in RenderElement.offset
+	 * 3. other layers keep their byte offset in offset
 	 */
-	public int lineOffset;
-	public int texLineOffset;
+	public int[] offset = { 0, 0 };
 
 	private RenderElement mCurLayer;
 
@@ -74,7 +83,7 @@ public class ElementLayers {
 	 * ordered from bottom (0) to top
 	 */
 	public LineLayer addLineLayer(int level, Line style) {
-		LineLayer ll = (LineLayer) getLayer(level, RenderElement.LINE);
+		LineLayer ll = (LineLayer) getLayer(level, LINE);
 		if (ll == null)
 			return null;
 
@@ -89,7 +98,7 @@ public class ElementLayers {
 	 * bottom (0) to top
 	 */
 	public LineLayer getLineLayer(int level) {
-		return (LineLayer) getLayer(level, RenderElement.LINE);
+		return (LineLayer) getLayer(level, LINE);
 	}
 
 	/**
@@ -97,7 +106,7 @@ public class ElementLayers {
 	 * bottom (0) to top
 	 */
 	public MeshLayer getMeshLayer(int level) {
-		return (MeshLayer) getLayer(level, RenderElement.MESH);
+		return (MeshLayer) getLayer(level, MESH);
 	}
 
 	/**
@@ -105,7 +114,7 @@ public class ElementLayers {
 	 * bottom (0) to top
 	 */
 	public PolygonLayer getPolygonLayer(int level) {
-		return (PolygonLayer) getLayer(level, RenderElement.POLYGON);
+		return (PolygonLayer) getLayer(level, POLYGON);
 	}
 
 	/**
@@ -113,7 +122,7 @@ public class ElementLayers {
 	 * bottom (0) to top
 	 */
 	public LineTexLayer getLineTexLayer(int level) {
-		return (LineTexLayer) getLayer(level, RenderElement.TEXLINE);
+		return (LineTexLayer) getLayer(level, TEXLINE);
 	}
 
 	public TextLayer addTextLayer(TextLayer textLayer) {
@@ -122,86 +131,127 @@ public class ElementLayers {
 		return textLayer;
 	}
 
-	private RenderElement getLayer(int level, byte type) {
-		RenderElement l = baseLayers;
-		RenderElement renderElement = null;
+	public void setBaseLayers(RenderElement layers) {
+		for (RenderElement l = baseLayers; l != null; l = l.next)
+			l.clear();
 
-		if (!(type == RenderElement.LINE
-		        || type == RenderElement.POLYGON
-		        || type == RenderElement.TEXLINE
-		        || type == RenderElement.MESH))
-			throw new IllegalArgumentException("invalid layer type");
+		baseLayers = layers;
+	}
+
+	public RenderElement getBaseLayers() {
+		return baseLayers;
+	}
+
+	public void setTextureLayers(TextureLayer tl) {
+		for (RenderElement l = textureLayers; l != null; l = l.next)
+			l.clear();
+
+		textureLayers = tl;
+	}
+
+	public RenderElement getTextureLayers() {
+		return textureLayers;
+	}
+
+	public void setExtrusionLayers(ExtrusionLayer el) {
+		for (RenderElement l = extrusionLayers; l != null; l = l.next)
+			l.clear();
+
+		extrusionLayers = el;
+	}
+
+	public ExtrusionLayer getExtrusionLayers() {
+		return (ExtrusionLayer) extrusionLayers;
+	}
+
+	/** cleanup only when layers are not used by tile or overlay anymore! */
+	public void clear() {
+		setBaseLayers(null);
+		setTextureLayers(null);
+		setExtrusionLayers(null);
+		mCurLayer = null;
+
+		if (vbo != null)
+			vbo = BufferObject.release(vbo);
+	}
+
+	private RenderElement getLayer(int level, int type) {
+		RenderElement layer = null;
 
 		if (mCurLayer != null && mCurLayer.level == level) {
-			renderElement = mCurLayer;
-		} else {
+			layer = mCurLayer;
+			if (layer.type != type) {
+				log.error("BUG wrong layer {} {} on layer {}",
+				          layer.type, type, level);
 
-			if (l == null || l.level > level) {
-				// insert new layer at start
-				l = null;
-			} else {
-				while (true) {
-					// found layer
-					if (l.level == level) {
-						renderElement = l;
-						break;
-					}
-
-					// insert new layer between current and next layer
-					if (l.next == null || l.next.level > level)
-						break;
-
-					l = l.next;
-				}
+				throw new IllegalArgumentException();
 			}
+			return layer;
+		}
 
-			if (renderElement == null) {
-				// add a new RenderElement
-				if (type == RenderElement.LINE)
-					renderElement = new LineLayer(level);
-				else if (type == RenderElement.POLYGON)
-					renderElement = new PolygonLayer(level);
-				else if (type == RenderElement.TEXLINE)
-					renderElement = new LineTexLayer(level);
-				else if (type == RenderElement.MESH)
-					renderElement = new MeshLayer(level);
-
-				if (renderElement == null)
-					throw new IllegalArgumentException();
-
-				if (l == null) {
-					// insert at start
-					renderElement.next = baseLayers;
-					baseLayers = renderElement;
-				} else {
-					renderElement.next = l.next;
-					l.next = renderElement;
+		RenderElement l = baseLayers;
+		if (l == null || l.level > level) {
+			/** insert new layer at start */
+			l = null;
+		} else {
+			while (true) {
+				/** found layer */
+				if (l.level == level) {
+					layer = l;
+					break;
 				}
+				/** insert layer between current and next layer */
+				if (l.next == null || l.next.level > level)
+					break;
+
+				l = l.next;
 			}
 		}
 
-		if (renderElement.type != type) {
-			// check if found layer matches requested type
-			log.debug("BUG wrong layer " + renderElement.type + " " + type +
-			        " on layer " + renderElement.level);
+		if (layer == null) {
+			/** add a new RenderElement */
+			if (type == LINE)
+				layer = new LineLayer(level);
+			else if (type == POLYGON)
+				layer = new PolygonLayer(level);
+			else if (type == TEXLINE)
+				layer = new LineTexLayer(level);
+			else if (type == MESH)
+				layer = new MeshLayer(level);
 
+			if (layer == null)
+				throw new IllegalArgumentException();
+
+			if (l == null) {
+				/** insert at start */
+				layer.next = baseLayers;
+				baseLayers = layer;
+			} else {
+				layer.next = l.next;
+				l.next = layer;
+			}
+		}
+
+		/** check if found layer matches requested type */
+		if (layer.type != type) {
+			log.error("BUG wrong layer {} {} on layer {}",
+			          layer.type, type, level);
 			throw new IllegalArgumentException();
 		}
 
-		mCurLayer = renderElement;
+		mCurLayer = layer;
 
-		return renderElement;
+		return layer;
 	}
 
 	private final static int[] VERTEX_SHORT_CNT = {
 	        4, // LINE_VERTEX_SHORTS
+	        6, // TEXLINE_VERTEX_SHORTS
 	        2, // POLY_VERTEX_SHORTS
 	        2, // MESH_VERTEX_SHORTS
-	        6, // TEXLINE_VERTEX_SHORTS
 	};
 
 	private final static int TEXTURE_VERTEX_SHORTS = 6;
-
 	private final static int SHORT_BYTES = 2;
 
 	public int getSize() {
@@ -217,51 +267,32 @@ public class ElementLayers {
 	}
 
 	public void compile(ShortBuffer sbuf, boolean addFill) {
-		// offset from fill coordinates
-		int pos = 0;
-		int size = 0;
 
-		if (addFill) {
-			pos = 4;
-			size = 8;
-		}
+		addLayerItems(sbuf, baseLayers, POLYGON, addFill ? 4 : 0);
 
-		size += addLayerItems(sbuf, baseLayers, RenderElement.POLYGON, pos);
+		offset[LINE] = sbuf.position() * SHORT_BYTES;
+		addLayerItems(sbuf, baseLayers, LINE, 0);
 
-		lineOffset = size * SHORT_BYTES;
-		size += addLayerItems(sbuf, baseLayers, RenderElement.LINE, 0);
-
-		texLineOffset = size * SHORT_BYTES;
+		//offset[TEXLINE] = size * SHORT_BYTES;
 
 		for (RenderElement l = baseLayers; l != null; l = l.next) {
-			if (l.type == RenderElement.TEXLINE) {
-				addPoolItems(l, sbuf);
-				// add additional vertex for interleaving,
-				// see TexLineLayer.
-				sbuf.position(sbuf.position() + 6);
+			if (l.type == TEXLINE || l.type == MESH) {
+				l.compile(sbuf);
 			}
 		}
 
-		for (RenderElement l = baseLayers; l != null; l = l.next) {
-			if (l.type == RenderElement.MESH)
-				l.compile(sbuf);
-		}
-
 		for (RenderElement l = textureLayers; l != null; l = l.next) {
-			//TextureLayer tl = (TextureLayer) l;
 			l.compile(sbuf);
 		}
-
-		// extrusion layers are compiled by extrusion overlay
-		//		for (RenderElement l = extrusionLayers; l != null; l = l.next) {
-		//			ExtrusionLayer tl = (ExtrusionLayer) l;
-		//			tl.compile(sbuf);
-		//		}
 	}
 
-	// optimization for Line- and PolygonLayer:
-	// collect all pool items and add back in one go
-	private static int addLayerItems(ShortBuffer sbuf, RenderElement l, byte type, int pos) {
+	/**
+	 * optimization for Line- and PolygonLayer:
+	 * collect all pool items and add back in one go.
+	 */
+	private static int addLayerItems(ShortBuffer sbuf, RenderElement l,
+	        int type, int pos) {
+
 		VertexItem last = null, items = null;
 		int size = 0;
 
@@ -283,7 +314,7 @@ public class ElementLayers {
 			if (last == null)
 				continue;
 
-			l.setOffset(pos);
+			l.offset = pos;
 			pos += l.numVertices;
 
 			last.next = items;
@@ -298,8 +329,8 @@ public class ElementLayers {
 	}
 
 	static void addPoolItems(RenderElement l, ShortBuffer sbuf) {
-		// offset of layer data in vbo
-		l.setOffset(sbuf.position() * SHORT_BYTES);
+		/** keep offset of layer data in vbo */
+		l.offset = sbuf.position() * SHORT_BYTES;
 
 		for (VertexItem it = l.vertexItems; it != null; it = it.next) {
 			if (it.next == null)
@@ -310,39 +341,4 @@ public class ElementLayers {
 
 		l.vertexItems = VertexItem.pool.releaseAll(l.vertexItems);
 	}
-
-	// cleanup only when layers are not used by tile or overlay anymore!
-	public void clear() {
-
-		// clear line and polygon layers directly
-		for (RenderElement l = baseLayers; l != null; l = l.next) {
-			if (l.vertexItems != null)
-				l.vertexItems = VertexItem.pool.releaseAll(l.vertexItems);
-			l.numVertices = 0;
-		}
-
-		for (RenderElement l = textureLayers; l != null; l = l.next)
-			l.clear();
-
-		for (RenderElement l = extrusionLayers; l != null; l = l.next)
-			l.clear();
-
-		baseLayers = null;
-		textureLayers = null;
-		extrusionLayers = null;
-		mCurLayer = null;
-		//		if (vbo != null){
-		//			BufferObject.release(vbo);
-		//			vbo = null;
-		//		}
-	}
-
-	public void add(ExtrusionLayer l) {
-		extrusionLayers = Inlist.appendItem(extrusionLayers, l);
-	}
-
-	public ExtrusionLayer getExtrusionLayers() {
-		return (ExtrusionLayer) extrusionLayers;
-	}
-
 }
