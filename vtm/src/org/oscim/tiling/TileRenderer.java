@@ -369,6 +369,7 @@ public class TileRenderer extends LayerRenderer {
 	// tile twice per frame.
 	private int mDrawSerial = 0;
 	private Matrices mMatrices;
+	private int mClipMode = 0;
 
 	/**
 	 * Draw tiles:
@@ -381,6 +382,16 @@ public class TileRenderer extends LayerRenderer {
 	private void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m) {
 
 		mMatrices = m;
+
+		mClipMode = 1;
+
+		for (int i = 0; i < tileCnt; i++) {
+			MapTile t = tiles[i];
+			if (t.isVisible && t.state != STATE_READY) {
+				mClipMode = 2;
+				break;
+			}
+		}
 
 		/** draw visible tiles */
 		for (int i = 0; i < tileCnt; i++) {
@@ -395,27 +406,36 @@ public class TileRenderer extends LayerRenderer {
 		 * was drawn to depth buffer.
 		 * TODO draw proxies for placeholder
 		 */
-		double scale = pos.getZoomScale();
+		if (mClipMode > 1) {
+			mClipMode = 3;
+			//GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
-		for (int i = 0; i < tileCnt; i++) {
-			MapTile t = tiles[i];
-			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null)) {
-				boolean preferParent = (scale > 1.5)
-				        || (pos.zoomLevel - t.zoomLevel < 0);
-				drawProxyTile(t, pos, true, preferParent);
+			GL.glDepthFunc(GL20.GL_LESS);
+
+			double scale = pos.getZoomScale();
+			for (int i = 0; i < tileCnt; i++) {
+				MapTile t = tiles[i];
+				if (t.isVisible
+				        && (t.state != STATE_READY)
+				        && (t.holder == null)) {
+					boolean preferParent = (scale > 1.5)
+					        || (pos.zoomLevel - t.zoomLevel < 0);
+					drawProxyTile(t, pos, true, preferParent);
+				}
 			}
-		}
 
-		/** draw grandparents */
-		for (int i = 0; i < tileCnt; i++) {
-			MapTile t = tiles[i];
-			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null))
-				drawProxyTile(t, pos, false, false);
+			/** draw grandparents */
+			for (int i = 0; i < tileCnt; i++) {
+				MapTile t = tiles[i];
+				if (t.isVisible
+				        && (t.state != STATE_READY)
+				        && (t.holder == null))
+					drawProxyTile(t, pos, false, false);
+			}
+			GL.glDepthMask(false);
 		}
-
 		/** make sure stencil buffer write is disabled */
 		GL.glStencilMask(0x00);
-		GL.glDepthMask(false);
 
 		mDrawSerial++;
 		mMatrices = null;
@@ -452,17 +472,18 @@ public class TileRenderer extends LayerRenderer {
 		m.mvp.multiplyLhs(m.viewproj);
 
 		boolean clipped = false;
+		int mode = mClipMode;
 		RenderElement l = t.layers.getBaseLayers();
 
 		while (l != null) {
 			if (l.type == POLYGON) {
-				l = PolygonLayer.Renderer.draw(pos, l, m, !clipped, div, true);
+				l = PolygonLayer.Renderer.draw(pos, l, m, !clipped, div, mode);
 				clipped = true;
 				continue;
 			}
 			if (!clipped) {
 				// draw stencil buffer clip region
-				PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
+				PolygonLayer.Renderer.draw(pos, null, m, true, div, mode);
 				clipped = true;
 			}
 			if (l.type == LINE) {
@@ -484,7 +505,7 @@ public class TileRenderer extends LayerRenderer {
 		l = t.layers.getTextureLayers();
 		while (l != null) {
 			if (!clipped) {
-				PolygonLayer.Renderer.draw(pos, null, m, true, div, true);
+				PolygonLayer.Renderer.draw(pos, null, m, true, div, mode);
 				clipped = true;
 			}
 			if (l.type == BITMAP) {

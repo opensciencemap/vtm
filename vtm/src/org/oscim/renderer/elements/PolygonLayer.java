@@ -279,7 +279,7 @@ public final class PolygonLayer extends RenderElement {
 		 *         next layer
 		 */
 		public static RenderElement draw(MapPosition pos, RenderElement renderElement,
-		        Matrices m, boolean first, float div, boolean clip) {
+		        Matrices m, boolean first, float div, int clip) {
 
 			GLState.test(false, true);
 
@@ -305,7 +305,7 @@ public final class PolygonLayer extends RenderElement {
 					continue;
 
 				if (cur == start) {
-					drawStencilRegion(first);
+					drawStencilRegion(first, clip);
 					first = false;
 
 					// op for stencil method polygon drawing
@@ -329,9 +329,9 @@ public final class PolygonLayer extends RenderElement {
 			if (cur > 0)
 				fillPolygons(m, start, cur, zoom, scale, div);
 
-			if (clip) {
+			if (clip > 0) {
 				if (first) {
-					drawStencilRegion(first);
+					drawStencilRegion(first, clip);
 					// disable writes to stencil buffer
 					GL.glStencilMask(0x00);
 					// enable writes to color buffer
@@ -350,7 +350,7 @@ public final class PolygonLayer extends RenderElement {
 		public static void clip(Matrices m) {
 			setShader(polyShader, m);
 
-			drawStencilRegion(true);
+			drawStencilRegion(true, 1);
 			// disable writes to stencil buffer
 			GL.glStencilMask(0x00);
 			// enable writes to color buffer
@@ -364,7 +364,7 @@ public final class PolygonLayer extends RenderElement {
 		 * @param first in the first run the clip region is set based on
 		 *            depth buffer and depth buffer is updated
 		 */
-		static void drawStencilRegion(boolean first) {
+		static void drawStencilRegion(boolean first, int mode) {
 
 			// disable drawing to color buffer
 			GL.glColorMask(false, false, false, false);
@@ -373,6 +373,21 @@ public final class PolygonLayer extends RenderElement {
 			GL.glStencilMask(0xFF);
 
 			if (first) {
+				// clear previous clip-region from stencil buffer
+				//GL.glClear(GL20.GL_STENCIL_BUFFER_BIT);
+
+				// Draw clip-region into depth and stencil buffer
+				// this is used for tile line and polygon layers.
+				// Depth offset is increased for each tile. Together
+				// with depth test (GL_LESS) this ensures to only
+				// draw where no other tile has drawn yet.
+				//GL.glEnable(GL20.GL_POLYGON_OFFSET_FILL);
+				if (mode > 1) {
+					// test GL_LESS and write to depth buffer
+					GLState.test(true, true);
+					GL.glDepthMask(true);
+				}
+
 				// always pass stencil test and set clip bit
 				GL.glStencilFunc(GL20.GL_ALWAYS, CLIP_BIT, 0x00);
 			} else {
@@ -388,6 +403,12 @@ public final class PolygonLayer extends RenderElement {
 			GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
 			if (first) {
+				if (mode > 1) {
+					// dont modify depth buffer
+					GL.glDepthMask(false);
+					// test only stencil
+					GLState.test(false, true);
+				}
 				GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
 			}
 		}
