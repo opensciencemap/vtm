@@ -28,50 +28,172 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
+import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.theme.styles.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.LineClipper;
+import org.oscim.utils.async.SimpleWorker;
 
 /** This class draws a path line in given color. */
 public class PathLayer extends Layer {
 
 	/** Stores points, converted to the map projection. */
-	/* package */protected final ArrayList<GeoPoint> mPoints;
-	/* package */boolean mUpdatePoints;
+	protected final ArrayList<GeoPoint> mPoints;
+	protected boolean mUpdatePoints;
 
 	/** Line style */
-	/* package */Line mLineStyle;
+	Line mLineStyle;
 
-	class RenderPath extends ElementRenderer {
+	final Worker mWorker;
 
-		private static final int MIN_DIST = 4;
+	public PathLayer(Map map, int lineColor, float lineWidth) {
+		super(map);
+		mWorker = new Worker(map);
+		mLineStyle = new Line(lineColor, lineWidth, Cap.BUTT);
+		mRenderer = new RenderPath();
+		mPoints = new ArrayList<GeoPoint>();
+	}
 
-		// pre-projected points
-		private double[] mPreprojected = new double[2];
+	public PathLayer(Map map, int lineColor) {
+		this(map, lineColor, 2);
+	}
 
-		// projected points
-		private float[] mPPoints;
-		private final LineClipper mClipper;
+	public void clearPath() {
+		if (mPoints.isEmpty())
+			return;
 
-		// limit coords
-		private final int max = 2048;
+		synchronized (mPoints) {
+			mPoints.clear();
+			mUpdatePoints = true;
+		}
+	}
+
+	public void setPoints(List<GeoPoint> pts) {
+		synchronized (mPoints) {
+			mPoints.clear();
+			mPoints.addAll(pts);
+			mUpdatePoints = true;
+		}
+	}
+
+	public void addPoint(GeoPoint pt) {
+		synchronized (mPoints) {
+			mPoints.add(pt);
+			mUpdatePoints = true;
+		}
+	}
+
+	public void addPoint(int latitudeE6, int longitudeE6) {
+		synchronized (mPoints) {
+			mPoints.add(new GeoPoint(latitudeE6, longitudeE6));
+			mUpdatePoints = true;
+		}
+	}
+
+	public List<GeoPoint> getPoints() {
+		return mPoints;
+	}
+
+	/**
+	 * FIXME To be removed
+	 * 
+	 * @deprecated
+	 * 
+	 */
+	public void setGeom(GeometryBuffer geom) {
+		mGeom = geom;
+	}
+
+	GeometryBuffer mGeom;
+
+	/**
+	 * Draw a great circle. Calculate a point for every 100km along the path.
+	 * 
+	 * @param startPoint
+	 *            start point of the great circle
+	 * @param endPoint
+	 *            end point of the great circle
+	 */
+	public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint) {
+		synchronized (mPoints) {
+
+			// get the great circle path length in meters
+			int length = startPoint.distanceTo(endPoint);
+
+			// add one point for every 100kms of the great circle path
+			int numberOfPoints = length / 100000;
+
+			addGreatCircle(startPoint, endPoint, numberOfPoints);
+		}
+	}
+
+	/**
+	 * Draw a great circle.
+	 * 
+	 * @param startPoint
+	 *            start point of the great circle
+	 * @param endPoint
+	 *            end point of the great circle
+	 * @param numberOfPoints
+	 *            number of points to calculate along the path
+	 */
+	public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint,
+	        final int numberOfPoints) {
+		// adapted from page
+		// http://compastic.blogspot.co.uk/2011/07/how-to-draw-great-circle-on-map-in.html
+		// which was adapted from page http://maps.forum.nu/gm_flight_path.html
+
+		// convert to radians
+		double lat1 = startPoint.getLatitude() * Math.PI / 180;
+		double lon1 = startPoint.getLongitude() * Math.PI / 180;
+		double lat2 = endPoint.getLatitude() * Math.PI / 180;
+		double lon2 = endPoint.getLongitude() * Math.PI / 180;
+
+		double d = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat1 - lat2) / 2), 2)
+		        + Math.cos(lat1) * Math.cos(lat2)
+		        * Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
+		double bearing = Math.atan2(
+		                            Math.sin(lon1 - lon2) * Math.cos(lat2),
+		                            Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+		                                    * Math.cos(lat2)
+		                                    * Math.cos(lon1 - lon2))
+		        / -(Math.PI / 180);
+		bearing = bearing < 0 ? 360 + bearing : bearing;
+
+		for (int i = 0, j = numberOfPoints + 1; i < j; i++) {
+			double f = 1.0 / numberOfPoints * i;
+			double A = Math.sin((1 - f) * d) / Math.sin(d);
+			double B = Math.sin(f * d) / Math.sin(d);
+			double x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2)
+			        * Math.cos(lon2);
+			double y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2)
+			        * Math.sin(lon2);
+			double z = A * Math.sin(lat1) + B * Math.sin(lat2);
+
+			double latN = Math.atan2(z, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+			double lonN = Math.atan2(y, x);
+			addPoint((int) (latN / (Math.PI / 180) * 1E6), (int) (lonN / (Math.PI / 180) * 1E6));
+		}
+	}
+
+	/***
+	 * everything below runs on GL- and Worker-Thread
+	 ***/
+	final class RenderPath extends ElementRenderer {
 
 		public RenderPath() {
-			mClipper = new LineClipper(-max, -max, max, max, true);
-			mPPoints = new float[0];
+
 			layers.addLineLayer(0, mLineStyle);
 		}
 
 		private int mCurX = -1;
 		private int mCurY = -1;
 		private int mCurZ = -1;
-		private int mNumPoints;
 
-		// note: this is called from GL-Thread. so check your syncs!
-		// TODO use an Overlay-Thread to build up layers (like for Labeling)
 		@Override
 		public synchronized void update(MapPosition pos, boolean changed, Matrices m) {
 			int tz = 1 << pos.zoomLevel;
@@ -79,14 +201,54 @@ public class PathLayer extends Layer {
 			int ty = (int) (pos.y * tz);
 
 			// update layers when map moved by at least one tile
-			boolean tilesChanged = (tx != mCurX || ty != mCurY || tz != mCurZ);
+			if ((tx != mCurX || ty != mCurY || tz != mCurZ) || mUpdatePoints) {
+				mWorker.submit(100);
+				mCurX = tx;
+				mCurY = ty;
+				mCurZ = tz;
+			}
 
-			if (!tilesChanged && !mUpdatePoints)
+			Task t = mWorker.poll();
+			if (t == null)
 				return;
 
-			mCurX = tx;
-			mCurY = ty;
-			mCurZ = tz;
+			// keep position to render relative to current state
+			mMapPosition.copy(t.pos);
+
+			// compile new layers
+			layers.baseLayers = t.layer.baseLayers;
+			compile();
+		}
+	}
+
+	final class Task {
+		ElementLayers layer = new ElementLayers();
+		MapPosition pos = new MapPosition();
+	}
+
+	final class Worker extends SimpleWorker<Task> {
+
+		// limit coords
+		private final int max = 2048;
+
+		public Worker(Map map) {
+			super(map, 0, new Task(), new Task());
+			mClipper = new LineClipper(-max, -max, max, max, true);
+			mPPoints = new float[0];
+		}
+
+		private static final int MIN_DIST = 3;
+
+		// pre-projected points
+		private double[] mPreprojected = new double[2];
+
+		// projected points
+		private float[] mPPoints;
+		private final LineClipper mClipper;
+		private int mNumPoints;
+
+		@Override
+		public boolean doWork(Task task) {
 
 			int size = mNumPoints;
 
@@ -120,18 +282,21 @@ public class PathLayer extends Layer {
 				}
 
 				for (int i = 0; i < size; i += 2)
-					MercatorProjection.project(geom.points[i + 1], geom.points[i], points, i >> 1);
-
+					MercatorProjection.project(geom.points[i + 1],
+					                           geom.points[i], points,
+					                           i >> 1);
 				mNumPoints = size = size >> 1;
+
+			}
+			if (size == 0) {
+				if (task.layer.baseLayers != null) {
+					task.layer.clear();
+					mMap.render();
+				}
+				return true;
 			}
 
-			if (size == 0) {
-				if (layers.baseLayers != null) {
-					layers.clear();
-					compile();
-				}
-				return;
-			}
+			ElementLayers layers = task.layer;
 
 			LineLayer ll = layers.getLineLayer(0);
 			ll.clear();
@@ -139,24 +304,27 @@ public class PathLayer extends Layer {
 			ll.line = mLineStyle;
 			ll.width = ll.line.width;
 
-			int z = pos.zoomLevel;
+			mMap.getMapPosition(task.pos);
 
-			double mx = pos.x;
-			double my = pos.y;
-			double scale = Tile.SIZE * (1 << z);
+			int zoomlevel = task.pos.zoomLevel;
+			task.pos.scale = 1 << zoomlevel;
 
-			// flip around dateline. complicated stuff..
+			double mx = task.pos.x;
+			double my = task.pos.y;
+			double scale = Tile.SIZE * task.pos.scale;
+
+			// flip around dateline
 			int flip = 0;
-			int flipMax = Tile.SIZE << (z - 1);
+			int maxx = Tile.SIZE << (zoomlevel - 1);
 
 			int x = (int) ((mPreprojected[0] - mx) * scale);
 			int y = (int) ((mPreprojected[1] - my) * scale);
 
-			if (x > flipMax) {
-				x -= (flipMax * 2);
+			if (x > maxx) {
+				x -= (maxx * 2);
 				flip = -1;
-			} else if (x < -flipMax) {
-				x += (flipMax * 2);
+			} else if (x < -maxx) {
+				x += (maxx * 2);
 				flip = 1;
 			}
 
@@ -172,17 +340,17 @@ public class PathLayer extends Layer {
 				x = (int) ((mPreprojected[j + 0] - mx) * scale);
 				y = (int) ((mPreprojected[j + 1] - my) * scale);
 
-				int curFlip = 0;
-				if (x > flipMax) {
-					x -= flipMax * 2;
-					curFlip = -1;
-				} else if (x < -flipMax) {
-					x += flipMax * 2;
-					curFlip = 1;
+				int flipDirection = 0;
+				if (x > maxx) {
+					x -= maxx * 2;
+					flipDirection = -1;
+				} else if (x < -maxx) {
+					x += maxx * 2;
+					flipDirection = 1;
 				}
 
-				if (flip != curFlip) {
-					flip = curFlip;
+				if (flip != flipDirection) {
+					flip = flipDirection;
 					if (i > 2)
 						ll.addLine(projected, i, false);
 
@@ -198,12 +366,9 @@ public class PathLayer extends Layer {
 
 					if (clip < 0) {
 						// add line segment
-						projected[0] = mClipper.out[0];
-						projected[1] = mClipper.out[1];
-
-						projected[2] = prevX = mClipper.out[2];
-						projected[3] = prevY = mClipper.out[3];
-						ll.addLine(projected, 4, false);
+						ll.addLine(mClipper.out, 4, false);
+						prevX = mClipper.out[2];
+						prevY = mClipper.out[3];
 					}
 					i = 0;
 					continue;
@@ -219,13 +384,16 @@ public class PathLayer extends Layer {
 			if (i > 2)
 				ll.addLine(projected, i, false);
 
-			// keep position to render relative to current state
-			mMapPosition.copy(pos);
+			// trigger redraw to let renderer fetch the result.
+			mMap.render();
 
-			// items are placed relative to scale 1
-			mMapPosition.scale = 1 << z;
+			return true;
+		}
 
-			compile();
+		@Override
+		public void cleanup(Task task) {
+			task.layer.vbo = BufferObject.release(task.layer.vbo);
+			task.layer.clear();
 		}
 
 		private int addPoint(float[] points, int i, int x, int y) {
@@ -233,131 +401,5 @@ public class PathLayer extends Layer {
 			points[i++] = y;
 			return i;
 		}
-	}
-
-	public PathLayer(Map map, int lineColor, float lineWidth) {
-		super(map);
-
-		mLineStyle = new Line(lineColor, lineWidth, Cap.BUTT);
-
-		this.mPoints = new ArrayList<GeoPoint>();
-
-		mRenderer = new RenderPath();
-	}
-
-	public PathLayer(Map map, int lineColor) {
-		this(map, lineColor, 2);
-	}
-
-	/**
-	 * Draw a great circle. Calculate a point for every 100km along the path.
-	 * 
-	 * @param startPoint
-	 *            start point of the great circle
-	 * @param endPoint
-	 *            end point of the great circle
-	 */
-	public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint) {
-		synchronized (mPoints) {
-
-			// get the great circle path length in meters
-			final int greatCircleLength = startPoint.distanceTo(endPoint);
-
-			// add one point for every 100kms of the great circle path
-			final int numberOfPoints = greatCircleLength / 100000;
-
-			addGreatCircle(startPoint, endPoint, numberOfPoints);
-		}
-	}
-
-	/**
-	 * Draw a great circle.
-	 * 
-	 * @param startPoint
-	 *            start point of the great circle
-	 * @param endPoint
-	 *            end point of the great circle
-	 * @param numberOfPoints
-	 *            number of points to calculate along the path
-	 */
-	public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint,
-	        final int numberOfPoints) {
-		// adapted from page
-		// http://compastic.blogspot.co.uk/2011/07/how-to-draw-great-circle-on-map-in.html
-		// which was adapted from page http://maps.forum.nu/gm_flight_path.html
-
-		// convert to radians
-		final double lat1 = startPoint.getLatitude() * Math.PI / 180;
-		final double lon1 = startPoint.getLongitude() * Math.PI / 180;
-		final double lat2 = endPoint.getLatitude() * Math.PI / 180;
-		final double lon2 = endPoint.getLongitude() * Math.PI / 180;
-
-		final double d = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat1 - lat2) / 2), 2)
-		        + Math.cos(lat1) * Math.cos(lat2)
-		        * Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
-		double bearing = Math.atan2(
-		                            Math.sin(lon1 - lon2) * Math.cos(lat2),
-		                            Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
-		                                    * Math.cos(lat2)
-		                                    * Math.cos(lon1 - lon2))
-		        / -(Math.PI / 180);
-		bearing = bearing < 0 ? 360 + bearing : bearing;
-
-		for (int i = 0, j = numberOfPoints + 1; i < j; i++) {
-			final double f = 1.0 / numberOfPoints * i;
-			final double A = Math.sin((1 - f) * d) / Math.sin(d);
-			final double B = Math.sin(f * d) / Math.sin(d);
-			final double x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2)
-			        * Math.cos(lon2);
-			final double y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2)
-			        * Math.sin(lon2);
-			final double z = A * Math.sin(lat1) + B * Math.sin(lat2);
-
-			final double latN = Math.atan2(z, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-			final double lonN = Math.atan2(y, x);
-			addPoint((int) (latN / (Math.PI / 180) * 1E6), (int) (lonN / (Math.PI / 180) * 1E6));
-		}
-	}
-
-	public void clearPath() {
-		if (mPoints.isEmpty())
-			return;
-
-		synchronized (mPoints) {
-			mPoints.clear();
-			mUpdatePoints = true;
-		}
-	}
-
-	GeometryBuffer mGeom;
-
-	public void setGeom(GeometryBuffer geom) {
-		mGeom = geom;
-	}
-
-	public void setPoints(List<GeoPoint> pts) {
-		synchronized (mPoints) {
-			mPoints.clear();
-			mPoints.addAll(pts);
-			mUpdatePoints = true;
-		}
-	}
-
-	public void addPoint(GeoPoint pt) {
-		synchronized (mPoints) {
-			mPoints.add(pt);
-			mUpdatePoints = true;
-		}
-	}
-
-	public void addPoint(int latitudeE6, int longitudeE6) {
-		synchronized (mPoints) {
-			mPoints.add(new GeoPoint(latitudeE6, longitudeE6));
-			mUpdatePoints = true;
-		}
-	}
-
-	public List<GeoPoint> getPoints() {
-		return mPoints;
 	}
 }
