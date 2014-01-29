@@ -25,7 +25,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.ElementRenderer;
-import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
@@ -361,15 +360,10 @@ public class TileRenderer extends LayerRenderer {
 		return maxFade;
 	}
 
-	// Counter increases polygon-offset for each tile drawn.
-	private int mOffsetCnt;
-
 	// Current number of frames drawn, used to not draw a
 	// tile twice per frame.
 	private int mDrawSerial = 0;
-
 	private Matrices mMatrices;
-	private final GLMatrix mProjMatrix = new GLMatrix();
 
 	/**
 	 * Draw tiles:
@@ -381,33 +375,23 @@ public class TileRenderer extends LayerRenderer {
 	 */
 	private void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m) {
 
-		mOffsetCnt = -2048;
 		mMatrices = m;
 
-		mProjMatrix.copy(m.proj);
-		// discard depth projection from tilt, we use depth buffer
-		// for clipping
-		mProjMatrix.setValue(10, 0);
-		mProjMatrix.setValue(14, 0);
-		mProjMatrix.multiplyRhs(m.view);
-
-		GL.glDepthMask(true);
-		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
-		GL.glDepthFunc(GL20.GL_LESS);
-
-		// Draw visible tiles
+		/** draw visible tiles */
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && t.state == STATE_READY)
 				drawTile(t, pos);
 		}
 
+		/**
+		 * draw parent or children as proxy for visibile tiles that dont
+		 * have data yet. Proxies are clipped to the region where nothing
+		 * was drawn to depth buffer.
+		 * TODO draw proxies for placeholder
+		 */
 		double scale = pos.getZoomScale();
 
-		// Draw parent or children as proxy for visibile tiles that dont
-		// have data yet. Proxies are clipped to the region where nothing
-		// was drawn to depth buffer.
-		// TODO draw proxies for placeholder
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null)) {
@@ -416,20 +400,18 @@ public class TileRenderer extends LayerRenderer {
 			}
 		}
 
-		// Draw grandparents
+		/** draw grandparents */
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && (t.state != STATE_READY) && (t.holder == null))
 				drawProxyTile(t, pos, false, false);
 		}
 
-		// make sure stencil buffer write is disabled
+		/** make sure stencil buffer write is disabled */
 		GL.glStencilMask(0x00);
 		GL.glDepthMask(false);
 
 		mDrawSerial++;
-
-		// clear reference
 		mMatrices = null;
 	}
 
@@ -465,10 +447,7 @@ public class TileRenderer extends LayerRenderer {
 
 		Matrices m = mMatrices;
 		m.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
-		m.mvp.multiplyLhs(mProjMatrix);
-
-		// set depth offset (used for clipping to tile boundaries)
-		GL.glPolygonOffset(0, mOffsetCnt++);
+		m.mvp.multiplyLhs(m.viewproj);
 
 		boolean clipped = false;
 

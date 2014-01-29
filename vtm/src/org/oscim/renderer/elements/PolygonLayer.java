@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Special Renderer for drawing tile polygons
+ * Special Renderer for drawing tile polygons using a stencil buffer method
  */
 public final class PolygonLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(PolygonLayer.class);
@@ -260,8 +260,9 @@ public final class PolygonLayer extends RenderElement {
 
 			GLState.enableVertexArrays(hPolygonVertexPosition[shader], -1);
 
-			GL.glVertexAttribPointer(hPolygonVertexPosition[shader], 2, GL20.GL_SHORT,
-			                         false, 0, POLYGON_VERTICES_DATA_POS_OFFSET);
+			GL.glVertexAttribPointer(hPolygonVertexPosition[shader], 2,
+			                         GL20.GL_SHORT, false, 0,
+			                         POLYGON_VERTICES_DATA_POS_OFFSET);
 
 			m.mvp.setAsUniform(hPolygonMatrix[shader]);
 		}
@@ -374,14 +375,6 @@ public final class PolygonLayer extends RenderElement {
 		 */
 		static void drawStencilRegion(boolean first) {
 
-			//		if (!first) {
-			//		 GL.glStencilMask(0x7F);
-			//			GL.glClear(GL20.GL_STENCIL_BUFFER_BIT);
-			//			// disable drawing to color buffer
-			//		 GL.glColorMask(false, false, false, false);
-			//		 GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
-			//		}
-
 			// disable drawing to color buffer
 			GL.glColorMask(false, false, false, false);
 
@@ -389,20 +382,6 @@ public final class PolygonLayer extends RenderElement {
 			GL.glStencilMask(0xFF);
 
 			if (first) {
-				// clear previous clip-region from stencil buffer
-				//GL.glClear(GL20.GL_STENCIL_BUFFER_BIT);
-
-				// Draw clip-region into depth and stencil buffer
-				// this is used for tile line and polygon layers.
-				// Depth offset is increased for each tile. Together
-				// with depth test (GL_LESS) this ensures to only
-				// draw where no other tile has drawn yet.
-				GL.glEnable(GL20.GL_POLYGON_OFFSET_FILL);
-
-				// test GL_LESS and write to depth buffer
-				GLState.test(true, true);
-				GL.glDepthMask(true);
-
 				// always pass stencil test and set clip bit
 				GL.glStencilFunc(GL20.GL_ALWAYS, CLIP_BIT, 0x00);
 			} else {
@@ -418,24 +397,17 @@ public final class PolygonLayer extends RenderElement {
 			GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
 			if (first) {
-				// dont modify depth buffer
-				GL.glDepthMask(false);
-				// test only stencil
-				GLState.test(false, true);
-
-				GL.glDisable(GL20.GL_POLYGON_OFFSET_FILL);
-
 				GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
 			}
 		}
 
+		/**
+		 * Clear stencilbuffer for a tile region by drawing
+		 * a quad with func 'always' and op 'zero'. Using 'color'
+		 * and 'alpha' for a fake fade effect.
+		 */
 		public static void drawOver(Matrices m, int color, float alpha) {
 			setShader(polyShader, m);
-
-			/*
-			 * clear stencilbuffer (tile region) by drawing
-			 * a quad with func 'always' and op 'zero'
-			 */
 
 			if (color != 0) {
 				GLUtils.setColor(hPolygonColor[0], color, alpha);
