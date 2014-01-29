@@ -220,11 +220,17 @@ public class MapRenderer {
 			mUpdateColor = false;
 		}
 
+		// some GL implementation do not clear these
+		// buffers unless writes are enabled.
 		GL.glDepthMask(true);
 		GL.glStencilMask(0xFF);
+
 		GL.glClear(GL20.GL_COLOR_BUFFER_BIT
 		        | GL20.GL_DEPTH_BUFFER_BIT
 		        | GL20.GL_STENCIL_BUFFER_BIT);
+
+		GL.glDepthMask(false);
+		GL.glStencilMask(0);
 
 		GLState.blend(false);
 		GLState.bindTex2D(-1);
