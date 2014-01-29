@@ -68,7 +68,7 @@ public class MapDatabase implements ITileDataSource {
 	 * Maximum number of map objects in the zoom table which is considered as
 	 * valid.
 	 */
-	private static final int MAXIMUM_ZOOM_TABLE_OBJECTS = 65536;
+	private static final int MAXIMUM_ZOOM_TABLE_OBJECTS = 65536 * 2;
 
 	/** Bitmask for the optional POI feature "elevation". */
 	private static final int POI_FEATURE_ELEVATION = 0x20;
