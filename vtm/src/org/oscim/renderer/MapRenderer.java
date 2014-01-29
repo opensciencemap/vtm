@@ -318,7 +318,7 @@ public class MapRenderer {
 
 		mNewSurface = false;
 
-		// upload quad indices used by Texture- and LineTexRenderer
+		/** initialize quad indices used by Texture- and LineTexRenderer */
 		int[] vboIds = GLUtils.glGenBuffers(2);
 
 		mQuadIndicesID = vboIds[0];
@@ -343,9 +343,8 @@ public class MapRenderer {
 		                indices.length * 2, buf, GL20.GL_STATIC_DRAW);
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		// initialize default quad
-		FloatBuffer floatBuffer = MapRenderer.getFloatBuffer(indices.length);
-
+		/** initialize default quad */
+		FloatBuffer floatBuffer = MapRenderer.getFloatBuffer(8);
 		float[] quad = new float[] { -1, -1, -1, 1, 1, -1, 1, 1 };
 		floatBuffer.put(quad);
 		floatBuffer.flip();
@@ -391,7 +390,7 @@ public class MapRenderer {
 	 */
 	public static void bindQuadVertexVBO(int location, boolean bind) {
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mQuadVerticesID);
-		if (location > 0)
+		if (location >= 0)
 			GL.glVertexAttribPointer(location, 2, GL20.GL_FLOAT, false, 0, 0);
 	}
 
