@@ -120,7 +120,17 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 		@Override
 		protected boolean executeJob(MapTile tile) {
 			mTile = tile;
-			return mTileDataSource.executeQuery(tile, this) == QueryResult.SUCCESS;
+			QueryResult result = null;
+			try {
+				result = mTileDataSource.executeQuery(tile, this);
+			} catch (CancellationException e) {
+				log.debug("{} was canceled", mTile);
+			} catch (Exception e) {
+				log.debug("{} {}", mTile, e.getMessage());
+			} finally {
+				mTile = null;
+			}
+			return result == QueryResult.SUCCESS;
 		}
 
 		@Override
