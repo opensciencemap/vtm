@@ -96,8 +96,9 @@ public abstract class Map {
 	}
 
 	public VectorTileLayer setBaseMap(TileSource tileSource) {
-		mBaseLayer = new VectorTileLayer(this);
+		// TODO cleanup previous baseLayer here?
 
+		mBaseLayer = new VectorTileLayer(this);
 		mBaseLayer.setTileSource(tileSource);
 		mLayers.add(1, mBaseLayer);
 
@@ -145,7 +146,7 @@ public abstract class Map {
 	 * be called from any thread. Request will be handled on main
 	 * thread.
 	 * 
-	 * @param redraw pass true to render next frame
+	 * @param redraw pass true to render next frame afterwards
 	 */
 	public abstract void updateMap(boolean redraw);
 

@@ -80,8 +80,6 @@ public class TileDecoder extends PbfDecoder {
 	        throws IOException {
 
 		readUnsignedInt(is, buffer);
-		//log.debug(tile + " contentLength:" + byteCount);
-
 		setInputStream(is);
 
 		mTile = tile;
@@ -115,7 +113,8 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_TILE_TAG_KEYS:
 					if (keys == null || curKey >= numKeys) {
-						log.debug(mTile + " wrong number of keys " + numKeys);
+						log.debug("{} wrong number of keys {}",
+						          mTile, numKeys);
 						return false;
 					}
 					keys[curKey++] = decodeString();
@@ -123,7 +122,8 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_TILE_TAG_VALUES:
 					if (values == null || curValue >= numValues) {
-						log.debug(mTile + " wrong number of values " + numValues);
+						log.debug("{} wrong number of values {}",
+						          mTile, numValues);
 						return false;
 					}
 					values[curValue++] = decodeString();
@@ -153,7 +153,7 @@ public class TileDecoder extends PbfDecoder {
 
 					decodeVarintArray(len, mSArray);
 					if (!decodeTileTags(numTags, mSArray, keys, values)) {
-						log.debug(mTile + " invalid tags");
+						log.debug("{} invalid tags", mTile);
 						return false;
 					}
 					break;
@@ -161,13 +161,15 @@ public class TileDecoder extends PbfDecoder {
 				case TAG_TILE_VERSION:
 					version = decodeVarint32();
 					if (version != 4) {
-						log.debug(mTile + " invalid version " + version);
+						log.debug("{} invalid version:{}",
+						          mTile, version);
 						return false;
 					}
 					break;
 
 				default:
-					log.debug(mTile + " invalid type for tile: " + tag);
+					log.debug("{} invalid type for tile:{}",
+					          mTile, tag);
 					return false;
 			}
 		}
@@ -175,9 +177,10 @@ public class TileDecoder extends PbfDecoder {
 		return true;
 	}
 
-	private boolean decodeTileTags(int numTags, short[] tagIdx, String[] keys, String[] vals) {
-		Tag tag;
+	private boolean decodeTileTags(int numTags, short[] tagIdx,
+	        String[] keys, String[] vals) {
 
+		Tag tag;
 		for (int i = 0, n = (numTags << 1); i < n; i += 2) {
 			int k = tagIdx[i];
 			int v = tagIdx[i + 1];
@@ -291,15 +294,17 @@ public class TileDecoder extends PbfDecoder {
 
 				case TAG_ELEM_COORDS:
 					if (coordCnt == 0) {
-						log.debug(mTile + " no coordinates");
+						log.debug("{} no coordinates", mTile);
 					}
 
 					mElem.ensurePointSize(coordCnt, false);
-					int cnt = decodeInterleavedPoints(mElem.points, mScaleFactor);
+					int cnt = decodeInterleavedPoints(mElem.points,
+					                                  mScaleFactor);
 
 					if (cnt != coordCnt) {
-						log.debug(mTile + " wrong number of coordintes "
-						        + coordCnt + "/" + cnt);
+						log.debug("{} wrong number of coordintes {}/{}", mTile,
+						          Integer.valueOf(coordCnt),
+						          Integer.valueOf(cnt));
 						fail = true;
 					}
 					break;
@@ -309,15 +314,17 @@ public class TileDecoder extends PbfDecoder {
 					break;
 
 				default:
-					log.debug(mTile + " invalid type for way: " + tag);
+					log.debug("{} invalid type for way: {}", mTile, tag);
 			}
 		}
 
 		if (fail || numTags == 0 || numIndices == 0) {
-			log.debug(mTile + " failed reading way: bytes:" + bytes + " index:"
-			        + (Arrays.toString(index)) + " tag:"
-			        + (mElem.tags.numTags > 0 ? Arrays.deepToString(mElem.tags.tags) : "null")
-			        + " " + numIndices + " " + coordCnt);
+			log.debug("{} failed: bytes:{}  index:{} tags:{} ({},{})",
+			          mTile, Integer.valueOf(bytes),
+			          Arrays.toString(index),
+			          mElem.tags,
+			          Integer.valueOf(numIndices),
+			          Integer.valueOf(coordCnt));
 			return false;
 		}
 
@@ -353,7 +360,9 @@ public class TileDecoder extends PbfDecoder {
 			int idx = tagIds[i];
 
 			if (idx < 0 || idx > max) {
-				log.debug("{} invalid tag:{}", mTile, idx + ' ' + i);
+				log.debug("{} invalid tag:{}", mTile,
+				          Integer.valueOf(idx),
+				          Integer.valueOf(i));
 				return false;
 			}
 			mElem.tags.add(mTileTags.tags[idx]);

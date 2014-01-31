@@ -283,7 +283,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 					mPrevPinchWidth = pinchWidth;
 				}
 			}
-		} else if (mDoScale) {
+		} else if (mDoScale && mEnableRotate) {
 			// reenable rotation when higher threshold is reached
 			double rad = Math.atan2(dy, dx);
 			double r = rad - mAngle;
@@ -321,12 +321,13 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		synchronized (mViewport) {
 
 			if (!mDoTilt) {
-				mViewport.moveMap(mx, my);
 
 				if (rotateBy != 0)
 					mViewport.rotateMap(rotateBy, fx, fy);
 				if (scaleBy != 1)
 					mViewport.scaleMap(scaleBy, fx, fy);
+
+				mViewport.moveMap(mx, my);
 			} else {
 				if (tiltBy != 0) {
 					mViewport.moveMap(0, my / 2);
@@ -334,12 +335,14 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 				}
 			}
 		}
-		mMap.updateMap(true);
 
 		mPrevX1 = x1;
 		mPrevY1 = y1;
 		mPrevX2 = x2;
 		mPrevY2 = y2;
+
+		mMap.updateMap(true);
+
 		return true;
 	}
 

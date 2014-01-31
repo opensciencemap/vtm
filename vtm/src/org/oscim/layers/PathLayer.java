@@ -28,7 +28,6 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
-import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.ElementLayers;
@@ -390,7 +389,6 @@ public class PathLayer extends Layer {
 
 		@Override
 		public void cleanup(Task task) {
-			task.layer.vbo = BufferObject.release(task.layer.vbo);
 			task.layer.clear();
 		}
 

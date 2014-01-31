@@ -247,7 +247,8 @@ public class MapAnimator {
 				double dy = mVelocity.y * adv;
 				if ((dx - mScroll.x) != 0 || (dy - mScroll.y) != 0) {
 
-					mViewport.moveMap((float) (dx - mScroll.x), (float) (dy - mScroll.y));
+					mViewport.moveMap((float) (dx - mScroll.x),
+					                  (float) (dy - mScroll.y));
 					mScroll.x = dx;
 					mScroll.y = dy;
 

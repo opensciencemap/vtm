@@ -31,7 +31,7 @@ import org.oscim.utils.quadtree.Node;
 public class MapTile extends Tile {
 
 	/**
-	 * 
+	 * To be removed: used by GWT backend
 	 * */
 	public TileLoader loader;
 
@@ -128,10 +128,10 @@ public class MapTile extends Tile {
 	byte proxies;
 
 	/** counting the tiles that use this tile as proxy */
-	byte refs;
+	private byte refs;
 
 	/** up to 255 Threads may lock a tile */
-	byte locked;
+	private byte locked;
 
 	// only used GLRenderer when this tile sits in for another tile.
 	// e.g. x:-1,y:0,z:1 for x:1,y:0
