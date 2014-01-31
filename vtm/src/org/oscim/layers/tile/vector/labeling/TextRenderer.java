@@ -81,7 +81,7 @@ class TextRenderer extends ElementRenderer {
 
 		layers.vbo.bind();
 
-		float scale = (float) (mMapPosition.scale / pos.scale);
+		float scale = (float) (pos.scale / mMapPosition.scale);
 
 		setMatrix(pos, m, false);
 

@@ -122,7 +122,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 				continue;
 			}
 			if (l.type == SYMBOL) {
-				l = TextureLayer.Renderer.draw(l, m, 1 / div);
+				l = TextureLayer.Renderer.draw(l, m, div);
 				continue;
 			}
 			log.debug("invalid layer {}", l.type);
