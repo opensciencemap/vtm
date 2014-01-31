@@ -64,6 +64,12 @@ public class TileRenderer extends LayerRenderer {
 	private int mRenderOverdraw;
 	private float mRenderAlpha;
 
+	// Current number of frames drawn, used to not draw a
+	// tile twice per frame.
+	private int mDrawSerial;
+	private int mClipMode;
+	private Matrices mMatrices;
+
 	/**
 	 * Threadsafe
 	 */
@@ -117,7 +123,69 @@ public class TileRenderer extends LayerRenderer {
 			BufferObject.checkBufferUsage(false);
 		}
 
-		draw(tiles, tileCnt, pos, m);
+		mMatrices = m;
+		mClipMode = 1;
+
+		for (int i = 0; i < tileCnt; i++) {
+			MapTile t = tiles[i];
+			if (t.isVisible && t.state != STATE_READY) {
+				mClipMode = 2;
+				break;
+			}
+		}
+
+		/** draw visible tiles */
+		for (int i = 0; i < tileCnt; i++) {
+			MapTile t = tiles[i];
+			if (t.isVisible && t.state == STATE_READY)
+				drawTile(t, pos);
+		}
+
+		/**
+		 * draw parent or children as proxy for visibile tiles that dont
+		 * have data yet. Proxies are clipped to the region where nothing
+		 * was drawn to depth buffer.
+		 * TODO draw proxies for placeholder
+		 */
+		if (mClipMode > 1) {
+			mClipMode = 3;
+			//GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+
+			GL.glDepthFunc(GL20.GL_LESS);
+
+			double scale = pos.getZoomScale();
+			for (int i = 0; i < tileCnt; i++) {
+				MapTile t = tiles[i];
+				if (t.isVisible
+				        && (t.state != STATE_READY)
+				        && (t.holder == null)) {
+					boolean preferParent = (scale > 1.5)
+					        || (pos.zoomLevel - t.zoomLevel < 0);
+					drawProxyTile(t, pos, true, preferParent);
+				}
+			}
+
+			/** draw grandparents */
+			for (int i = 0; i < tileCnt; i++) {
+				MapTile t = tiles[i];
+				if (t.isVisible
+				        && (t.state != STATE_READY)
+				        && (t.holder == null))
+					drawProxyTile(t, pos, false, false);
+			}
+			GL.glDepthMask(false);
+		}
+
+		/** make sure stencil buffer write is disabled */
+		GL.glStencilMask(0x00);
+
+		mDrawSerial++;
+		mMatrices = null;
+	}
+
+	@Override
+	protected void render(MapPosition position, Matrices matrices) {
+		// render in update() so that tiles cannot vanish in between.
 	}
 
 	public void clearTiles() {
@@ -272,23 +340,15 @@ public class TileRenderer extends LayerRenderer {
 		tileSet.releaseTiles();
 	}
 
-	// Add additional tiles that serve as placeholer when flipping
-	// over date-line.
-	// I dont really like this but cannot think of a better solution:
-	// The other option would be to run scanbox each time for upload,
-	// drawing, proxies and text layer. Adding placeholder only
-	// happens rarely, unless you live on Fidschi
-
 	/* package */int mNumTileHolder;
 	/* package */TileSet mDrawTiles = new TileSet();
 
-	// scanline fill class used to check tile visibility
+	/** scanline fill class used to check tile visibility */
 	private final ScanBox mScanBox = new ScanBox() {
 		@Override
 		protected void setVisible(int y, int x1, int x2) {
-			int cnt = mDrawTiles.cnt;
-
 			MapTile[] tiles = mDrawTiles.tiles;
+			int cnt = mDrawTiles.cnt;
 
 			for (int i = 0; i < cnt; i++) {
 				MapTile t = tiles[i];
@@ -363,82 +423,6 @@ public class TileRenderer extends LayerRenderer {
 		}
 
 		return maxFade;
-	}
-
-	// Current number of frames drawn, used to not draw a
-	// tile twice per frame.
-	private int mDrawSerial = 0;
-	private Matrices mMatrices;
-	private int mClipMode = 0;
-
-	/**
-	 * Draw tiles:
-	 * 
-	 * @param fade
-	 *            alpha value for bitmap tiles
-	 * @param overdrawColor
-	 *            draw color on top, e.g. to darken the layer temporarily
-	 */
-	private void draw(MapTile[] tiles, int tileCnt, MapPosition pos, Matrices m) {
-
-		mMatrices = m;
-
-		mClipMode = 1;
-
-		for (int i = 0; i < tileCnt; i++) {
-			MapTile t = tiles[i];
-			if (t.isVisible && t.state != STATE_READY) {
-				mClipMode = 2;
-				break;
-			}
-		}
-
-		/** draw visible tiles */
-		for (int i = 0; i < tileCnt; i++) {
-			MapTile t = tiles[i];
-			if (t.isVisible && t.state == STATE_READY)
-				drawTile(t, pos);
-		}
-
-		/**
-		 * draw parent or children as proxy for visibile tiles that dont
-		 * have data yet. Proxies are clipped to the region where nothing
-		 * was drawn to depth buffer.
-		 * TODO draw proxies for placeholder
-		 */
-		if (mClipMode > 1) {
-			mClipMode = 3;
-			//GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
-
-			GL.glDepthFunc(GL20.GL_LESS);
-
-			double scale = pos.getZoomScale();
-			for (int i = 0; i < tileCnt; i++) {
-				MapTile t = tiles[i];
-				if (t.isVisible
-				        && (t.state != STATE_READY)
-				        && (t.holder == null)) {
-					boolean preferParent = (scale > 1.5)
-					        || (pos.zoomLevel - t.zoomLevel < 0);
-					drawProxyTile(t, pos, true, preferParent);
-				}
-			}
-
-			/** draw grandparents */
-			for (int i = 0; i < tileCnt; i++) {
-				MapTile t = tiles[i];
-				if (t.isVisible
-				        && (t.state != STATE_READY)
-				        && (t.holder == null))
-					drawProxyTile(t, pos, false, false);
-			}
-			GL.glDepthMask(false);
-		}
-		/** make sure stencil buffer write is disabled */
-		GL.glStencilMask(0x00);
-
-		mDrawSerial++;
-		mMatrices = null;
 	}
 
 	private void drawTile(MapTile tile, MapPosition pos) {
@@ -616,9 +600,5 @@ public class TileRenderer extends LayerRenderer {
 					drawTile(proxy, pos);
 			}
 		}
-	}
-
-	@Override
-	protected void render(MapPosition position, Matrices matrices) {
 	}
 }
