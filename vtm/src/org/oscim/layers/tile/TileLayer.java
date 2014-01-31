@@ -32,7 +32,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 
 	private final static int MAX_ZOOMLEVEL = 17;
 	private final static int MIN_ZOOMLEVEL = 2;
-	private final static int CACHE_LIMIT = 250;
+	private final static int CACHE_LIMIT = 150;
 
 	protected final TileManager mTileManager;
 	protected final TileRenderer mRenderLayer;
