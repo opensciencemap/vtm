@@ -30,6 +30,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
@@ -68,6 +69,8 @@ public class TileRenderer extends LayerRenderer {
 	// tile twice per frame.
 	private int mDrawSerial;
 	private int mClipMode;
+
+	private GLMatrix mViewProj = new GLMatrix();
 	private Matrices mMatrices;
 
 	/**
@@ -107,6 +110,15 @@ public class TileRenderer extends LayerRenderer {
 		// keep constant while rendering frame
 		mRenderAlpha = mAlpha;
 		mRenderOverdraw = mOverdraw;
+
+		/**
+		 * discard depth projection from tilt, depth buffer
+		 * is used for clipping
+		 */
+		mViewProj.copy(m.proj);
+		mViewProj.setValue(10, 0);
+		mViewProj.setValue(14, 0);
+		mViewProj.multiplyRhs(m.view);
 
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
@@ -453,7 +465,7 @@ public class TileRenderer extends LayerRenderer {
 
 		Matrices m = mMatrices;
 		m.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
-		m.mvp.multiplyLhs(m.viewproj);
+		m.mvp.multiplyLhs(mViewProj);
 
 		boolean clipped = false;
 		int mode = mClipMode;
