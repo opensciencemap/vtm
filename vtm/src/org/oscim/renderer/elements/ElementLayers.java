@@ -182,7 +182,9 @@ public class ElementLayers {
 			layer = mCurLayer;
 			if (layer.type != type) {
 				log.error("BUG wrong layer {} {} on layer {}",
-				          layer.type, type, level);
+				          Integer.valueOf(layer.type),
+				          Integer.valueOf(type),
+				          Integer.valueOf(level));
 
 				throw new IllegalArgumentException();
 			}
@@ -235,7 +237,10 @@ public class ElementLayers {
 		/** check if found layer matches requested type */
 		if (layer.type != type) {
 			log.error("BUG wrong layer {} {} on layer {}",
-			          layer.type, type, level);
+			          Integer.valueOf(layer.type),
+			          Integer.valueOf(type),
+			          Integer.valueOf(level));
+
 			throw new IllegalArgumentException();
 		}
 

@@ -10,6 +10,6 @@
 	<classpathentry kind="lib" path="/vtm-libs/gdx/gdx-backend-gwt.jar"/>
 	<classpathentry kind="lib" path="/vtm-libs/gdx/gdx-sources.jar"/>
 	<classpathentry kind="lib" path="/vtm-libs/gdx/gdx.jar"/>
-	<classpathentry kind="lib" path="/vtm-libs/libs/hudson-gwt-slf4j-2.1.2.jar"/>
+	<classpathentry kind="lib" path="/vtm-libs/libs/hudson-gwt-slf4j-3.0.1.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
