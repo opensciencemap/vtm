@@ -140,7 +140,7 @@ public abstract class TextureLayer extends RenderElement {
 			pool.init(0);
 		}
 
-		public static RenderElement draw(RenderElement l, float scale, Matrices m) {
+		public static RenderElement draw(RenderElement l, Matrices m, float scale) {
 
 			GLState.test(false, false);
 			GLState.blend(true);

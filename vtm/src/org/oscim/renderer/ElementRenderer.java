@@ -94,19 +94,19 @@ public abstract class ElementRenderer extends LayerRenderer {
 
 		while (l != null) {
 			if (l.type == POLYGON) {
-				l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, 0);
+				l = PolygonLayer.Renderer.draw(l, m, pos, 1, true, 0);
 				continue;
 			}
 			if (l.type == LINE) {
-				l = LineLayer.Renderer.draw(layers, l, pos, m, div);
+				l = LineLayer.Renderer.draw(l, m, pos, div, layers);
 				continue;
 			}
 			if (l.type == TEXLINE) {
-				l = LineTexLayer.Renderer.draw(layers, l, pos, m, div);
+				l = LineTexLayer.Renderer.draw(l, m, pos, div, layers);
 				continue;
 			}
 			if (l.type == MESH) {
-				l = MeshLayer.Renderer.draw(pos, l, m);
+				l = MeshLayer.Renderer.draw(l, m, pos);
 				continue;
 			}
 			log.debug("invalid layer {}", l.type);
@@ -122,7 +122,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 				continue;
 			}
 			if (l.type == SYMBOL) {
-				l = TextureLayer.Renderer.draw(l, 1 / div, m);
+				l = TextureLayer.Renderer.draw(l, m, 1 / div);
 				continue;
 			}
 			log.debug("invalid layer {}", l.type);

@@ -329,8 +329,8 @@ public final class LineTexLayer extends RenderElement {
 		private final static int STRIDE = 12;
 		private final static int LEN_OFFSET = 8;
 
-		public static RenderElement draw(ElementLayers layers, RenderElement curLayer,
-		        MapPosition pos, Matrices m, float div) {
+		public static RenderElement draw(RenderElement curLayer, Matrices m,
+		        MapPosition pos, float div, ElementLayers layers) {
 
 			// shader failed to compile
 			if (shader == 0)

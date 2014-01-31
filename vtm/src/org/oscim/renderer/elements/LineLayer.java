@@ -628,8 +628,8 @@ public final class LineLayer extends RenderElement {
 			return true;
 		}
 
-		public static RenderElement draw(ElementLayers layers, RenderElement curLayer,
-		        MapPosition pos, Matrices m, float scale) {
+		public static RenderElement draw(RenderElement curLayer, Matrices m,
+		        MapPosition pos, float scale, ElementLayers layers) {
 
 			if (curLayer == null)
 				return null;

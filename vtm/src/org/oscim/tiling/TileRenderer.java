@@ -473,25 +473,25 @@ public class TileRenderer extends LayerRenderer {
 
 		while (l != null) {
 			if (l.type == POLYGON) {
-				l = PolygonLayer.Renderer.draw(pos, l, m, !clipped, div, mode);
+				l = PolygonLayer.Renderer.draw(l, m, pos, div, !clipped, mode);
 				clipped = true;
 				continue;
 			}
 			if (!clipped) {
 				// draw stencil buffer clip region
-				PolygonLayer.Renderer.draw(pos, null, m, true, div, mode);
+				PolygonLayer.Renderer.draw(null, m, pos, div, true, mode);
 				clipped = true;
 			}
 			if (l.type == LINE) {
-				l = LineLayer.Renderer.draw(t.layers, l, pos, m, scale);
+				l = LineLayer.Renderer.draw(l, m, pos, scale, t.layers);
 				continue;
 			}
 			if (l.type == TEXLINE) {
-				l = LineTexLayer.Renderer.draw(t.layers, l, pos, m, div);
+				l = LineTexLayer.Renderer.draw(l, m, pos, div, t.layers);
 				continue;
 			}
 			if (l.type == MESH) {
-				l = MeshLayer.Renderer.draw(pos, l, m);
+				l = MeshLayer.Renderer.draw(l, m, pos);
 				continue;
 			}
 			// just in case
@@ -501,7 +501,7 @@ public class TileRenderer extends LayerRenderer {
 		l = t.layers.getTextureLayers();
 		while (l != null) {
 			if (!clipped) {
-				PolygonLayer.Renderer.draw(pos, null, m, true, div, mode);
+				PolygonLayer.Renderer.draw(null, m, pos, div, true, mode);
 				clipped = true;
 			}
 			if (l.type == BITMAP) {

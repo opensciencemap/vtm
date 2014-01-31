@@ -86,7 +86,7 @@ class TextRenderer extends ElementRenderer {
 		setMatrix(pos, m, false);
 
 		for (RenderElement l = layers.getTextureLayers(); l != null;)
-			l = TextureLayer.Renderer.draw(l, scale, m);
+			l = TextureLayer.Renderer.draw(l, m, scale);
 	}
 
 }

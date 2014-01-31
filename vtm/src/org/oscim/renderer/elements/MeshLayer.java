@@ -119,8 +119,8 @@ public class MeshLayer extends RenderElement {
 			return true;
 		}
 
-		public static RenderElement draw(MapPosition pos, RenderElement l,
-		        Matrices m) {
+		public static RenderElement draw(RenderElement l, Matrices m,
+		        MapPosition pos) {
 
 			GLState.blend(true);
 

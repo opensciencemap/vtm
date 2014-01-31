@@ -261,25 +261,25 @@ public final class PolygonLayer extends RenderElement {
 		/**
 		 * draw polygon layers (unil layer.next is not polygon layer)
 		 * using stencil buffer method
-		 * 
-		 * @param pos
-		 *            used to fade layers accorind to 'fade'
-		 *            in layer.area.
 		 * @param renderElement
 		 *            layer to draw (referencing vertices in current vbo)
 		 * @param m
 		 *            current Matrices
-		 * @param first
-		 *            pass true to clear stencil buffer region
+		 * @param pos
+		 *            used to fade layers according to 'fade' in
+		 *            layer.area style
 		 * @param div
 		 *            scale relative to 'base scale' of the tile
-		 * @param clip
+		 * @param first
+		 *            pass true to clear stencil buffer region
+		 * @param clipMode
 		 *            clip to first quad in current vbo
+		 * 
 		 * @return
 		 *         next layer
 		 */
-		public static RenderElement draw(MapPosition pos, RenderElement renderElement,
-		        Matrices m, boolean first, float div, int clip) {
+		public static RenderElement draw(RenderElement renderElement, Matrices m,
+		        MapPosition pos, float div, boolean first, int clipMode) {
 
 			GLState.test(false, true);
 
@@ -305,7 +305,7 @@ public final class PolygonLayer extends RenderElement {
 					continue;
 
 				if (cur == start) {
-					drawStencilRegion(first, clip);
+					drawStencilRegion(first, clipMode);
 					first = false;
 
 					// op for stencil method polygon drawing
@@ -329,9 +329,9 @@ public final class PolygonLayer extends RenderElement {
 			if (cur > 0)
 				fillPolygons(m, start, cur, zoom, scale, div);
 
-			if (clip > 0) {
+			if (clipMode > 0) {
 				if (first) {
-					drawStencilRegion(first, clip);
+					drawStencilRegion(first, clipMode);
 					// disable writes to stencil buffer
 					GL.glStencilMask(0x00);
 					// enable writes to color buffer
@@ -364,7 +364,7 @@ public final class PolygonLayer extends RenderElement {
 		 * @param first in the first run the clip region is set based on
 		 *            depth buffer and depth buffer is updated
 		 */
-		static void drawStencilRegion(boolean first, int mode) {
+		static void drawStencilRegion(boolean first, int clipMode) {
 
 			// disable drawing to color buffer
 			GL.glColorMask(false, false, false, false);
@@ -382,7 +382,7 @@ public final class PolygonLayer extends RenderElement {
 				// with depth test (GL_LESS) this ensures to only
 				// draw where no other tile has drawn yet.
 				//GL.glEnable(GL20.GL_POLYGON_OFFSET_FILL);
-				if (mode > 1) {
+				if (clipMode > 1) {
 					// test GL_LESS and write to depth buffer
 					GLState.test(true, true);
 					GL.glDepthMask(true);
@@ -403,7 +403,7 @@ public final class PolygonLayer extends RenderElement {
 			GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
 			if (first) {
-				if (mode > 1) {
+				if (clipMode > 1) {
 					// dont modify depth buffer
 					GL.glDepthMask(false);
 					// test only stencil
