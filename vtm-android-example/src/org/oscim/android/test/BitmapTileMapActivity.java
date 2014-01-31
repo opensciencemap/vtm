@@ -17,7 +17,10 @@ package org.oscim.android.test;
 import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.android.cache.TileCache;
+import org.oscim.backend.canvas.Color;
+import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.BitmapTileLayer;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 
@@ -47,6 +50,9 @@ public class BitmapTileMapActivity extends MapActivity {
 
 		mMapView = (MapView) findViewById(R.id.mapView);
 		registerMapView(mMapView);
+
+		MapRenderer.setBackgroundColor(0xff777777);
+		mMap.getLayers().add(new TileGridLayer(mMap, Color.GRAY, 1.8f, 8));
 
 		if (USE_CACHE) {
 			mCache = new TileCache(this, null, mTileSource.getClass().getSimpleName());
