@@ -62,7 +62,7 @@ public class BitmapRenderer extends ElementRenderer {
 
 			BitmapLayer l = new BitmapLayer(true);
 			l.setBitmap(mBitmap, mWidth, mHeight);
-			layers.textureLayers = l;
+			layers.setTextureLayers(l);
 
 			mUpdateBitmap = true;
 		}
@@ -86,6 +86,6 @@ public class BitmapRenderer extends ElementRenderer {
 	@Override
 	protected synchronized void render(MapPosition pos, Matrices m) {
 		m.useScreenCoordinates(false, 8);
-		BitmapLayer.Renderer.draw(layers.textureLayers, m, 1, 1);
+		BitmapLayer.Renderer.draw(layers.getTextureLayers(), m, 1, 1);
 	}
 }

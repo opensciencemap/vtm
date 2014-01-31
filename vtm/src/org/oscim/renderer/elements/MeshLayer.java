@@ -119,8 +119,8 @@ public class MeshLayer extends RenderElement {
 			return true;
 		}
 
-		public static RenderElement draw(MapPosition pos, RenderElement l,
-		        Matrices m) {
+		public static RenderElement draw(RenderElement l, Matrices m,
+		        MapPosition pos) {
 
 			GLState.blend(true);
 
@@ -144,7 +144,7 @@ public class MeshLayer extends RenderElement {
 					GLUtils.setColor(hColor, ml.area.color, 1);
 
 				GL.glVertexAttribPointer(hVertexPosition, 2, GL20.GL_SHORT,
-				                         false, 0, ml.getOffset());
+				                         false, 0, ml.offset);
 
 				GL.glDrawElements(GL20.GL_TRIANGLES, ml.numIndices,
 				                  GL20.GL_UNSIGNED_SHORT, 0);

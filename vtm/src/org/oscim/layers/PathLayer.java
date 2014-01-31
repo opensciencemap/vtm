@@ -216,7 +216,7 @@ public class PathLayer extends Layer {
 			mMapPosition.copy(t.pos);
 
 			// compile new layers
-			layers.baseLayers = t.layer.baseLayers;
+			layers.setBaseLayers(t.layer.getBaseLayers());
 			compile();
 		}
 	}
@@ -289,7 +289,7 @@ public class PathLayer extends Layer {
 
 			}
 			if (size == 0) {
-				if (task.layer.baseLayers != null) {
+				if (task.layer.getBaseLayers() != null) {
 					task.layer.clear();
 					mMap.render();
 				}
@@ -299,8 +299,6 @@ public class PathLayer extends Layer {
 			ElementLayers layers = task.layer;
 
 			LineLayer ll = layers.getLineLayer(0);
-			ll.clear();
-
 			ll.line = mLineStyle;
 			ll.width = ll.line.width;
 

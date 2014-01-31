@@ -16,6 +16,13 @@
  */
 package org.oscim.renderer;
 
+import static org.oscim.renderer.elements.RenderElement.BITMAP;
+import static org.oscim.renderer.elements.RenderElement.LINE;
+import static org.oscim.renderer.elements.RenderElement.MESH;
+import static org.oscim.renderer.elements.RenderElement.POLYGON;
+import static org.oscim.renderer.elements.RenderElement.SYMBOL;
+import static org.oscim.renderer.elements.RenderElement.TEXLINE;
+
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
@@ -51,11 +58,15 @@ public abstract class ElementRenderer extends LayerRenderer {
 
 	/**
 	 * Use mMapPosition.copy(position) to keep the position for which
-	 * the Overlay is _compiled_. NOTE: required by setMatrix utility
+	 * the Overlay is *compiled*. NOTE: required by setMatrix utility
 	 * functions to draw this layer fixed to the map
 	 */
 	protected MapPosition mMapPosition;
 
+	/** Wrap around dateline */
+	protected boolean mFlipOnDateLine = true;
+
+	/** Layer data for rendering */
 	public final ElementLayers layers;
 
 	public ElementRenderer() {
@@ -67,59 +78,55 @@ public abstract class ElementRenderer extends LayerRenderer {
 	 * Render all 'layers'
 	 */
 	@Override
-	protected synchronized void render(MapPosition curPos, Matrices m) {
-		MapPosition pos = mMapPosition;
-
-		float div = (float) (curPos.scale / pos.scale);
-
-		//float div = FastMath.pow(pos.zoomLevel - curPos.zoomLevel);
+	protected synchronized void render(MapPosition pos, Matrices m) {
+		MapPosition layerPos = mMapPosition;
 
 		layers.vbo.bind();
 		GLState.test(false, false);
 		GLState.blend(true);
 
-		if (layers.baseLayers != null) {
-			setMatrix(curPos, m, true);
+		float div = (float) (pos.scale / layerPos.scale);
 
-			for (RenderElement l = layers.baseLayers; l != null;) {
-				switch (l.type) {
-					case RenderElement.POLYGON:
-						l = PolygonLayer.Renderer.draw(curPos, l, m, true, 1, false);
-						break;
+		RenderElement l = layers.getBaseLayers();
 
-					case RenderElement.LINE:
-						l = LineLayer.Renderer.draw(layers, l, curPos, m, div);
-						break;
+		if (l != null)
+			setMatrix(pos, m, true);
 
-					case RenderElement.TEXLINE:
-						l = LineTexLayer.Renderer.draw(layers, l, curPos, m, div);
-						break;
-
-					case RenderElement.MESH:
-						l = MeshLayer.Renderer.draw(pos, l, m);
-						break;
-
-					default:
-						log.debug("invalid layer");
-						l = l.next;
-						break;
-				}
+		while (l != null) {
+			if (l.type == POLYGON) {
+				l = PolygonLayer.Renderer.draw(l, m, pos, 1, true, 0);
+				continue;
 			}
+			if (l.type == LINE) {
+				l = LineLayer.Renderer.draw(l, m, pos, div, layers);
+				continue;
+			}
+			if (l.type == TEXLINE) {
+				l = LineTexLayer.Renderer.draw(l, m, pos, div, layers);
+				continue;
+			}
+			if (l.type == MESH) {
+				l = MeshLayer.Renderer.draw(l, m, pos);
+				continue;
+			}
+			log.debug("invalid layer {}", l.type);
+			break;
 		}
 
-		if (layers.textureLayers != null) {
-			setMatrix(curPos, m, false);
-
-			for (RenderElement l = layers.textureLayers; l != null;) {
-				switch (l.type) {
-					case RenderElement.BITMAP:
-						l = BitmapLayer.Renderer.draw(l, m, 1, 1);
-						break;
-
-					default:
-						l = TextureLayer.Renderer.draw(l, 1 / div, m);
-				}
+		l = layers.getTextureLayers();
+		if (l != null)
+			setMatrix(pos, m, false);
+		while (l != null) {
+			if (l.type == BITMAP) {
+				l = BitmapLayer.Renderer.draw(l, m, 1, 1);
+				continue;
 			}
+			if (l.type == SYMBOL) {
+				l = TextureLayer.Renderer.draw(l, m, div);
+				continue;
+			}
+			log.debug("invalid layer {}", l.type);
+			break;
 		}
 	}
 
@@ -147,7 +154,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 
 	public static boolean uploadLayers(ElementLayers layers, int newSize,
 	        boolean addFill) {
-		// add fill coordinates
+
 		if (addFill)
 			newSize += 8;
 
@@ -192,11 +199,13 @@ public abstract class ElementRenderer extends LayerRenderer {
 		double x = oPos.x - position.x;
 		double y = oPos.y - position.y;
 
-		// wrap around date-line
-		//	while (x < -1)
-		//		x += 1.0;
-		//	while (x > 2)
-		//		x -= 1.0;
+		if (mFlipOnDateLine) {
+			//wrap around date-line
+			while (x < 0.5)
+				x += 1.0;
+			while (x > 0.5)
+				x -= 1.0;
+		}
 
 		matrices.mvp.setTransScale((float) (x * tileScale),
 		                           (float) (y * tileScale),

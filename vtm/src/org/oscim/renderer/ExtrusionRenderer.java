@@ -168,9 +168,9 @@ public class ExtrusionRenderer extends LayerRenderer {
 	}
 
 	private static ExtrusionLayer getLayer(MapTile t) {
-		if (t.layers != null && t.layers.extrusionLayers != null
+		if (t.layers != null && t.layers.getExtrusionLayers() != null
 		        && t.state(MapTile.STATE_READY))
-			return (ExtrusionLayer) t.layers.extrusionLayers;
+			return (ExtrusionLayer) t.layers.getExtrusionLayers();
 		return null;
 	}
 
@@ -200,7 +200,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 			GLState.test(false, false);
 
 			for (int i = 0; i < mTileCnt; i++) {
-				ExtrusionLayer el = (ExtrusionLayer) tiles[i].layers.extrusionLayers;
+				ExtrusionLayer el = tiles[i].layers.getExtrusionLayers();
 
 				setMatrix(pos, m, tiles[i], 0);
 				m.mvp.setAsUniform(uExtMatrix);
@@ -251,7 +251,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		// draw to depth buffer
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
-			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
+			ExtrusionLayer el = t.layers.getExtrusionLayers();
 			int d = MapRenderer.depthOffset(t) * 10;
 			setMatrix(pos, m, t, d);
 			m.mvp.setAsUniform(uExtMatrix);
@@ -277,7 +277,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
-			ExtrusionLayer el = (ExtrusionLayer) t.layers.extrusionLayers;
+			ExtrusionLayer el = t.layers.getExtrusionLayers();
 
 			if (el.colors == null) {
 				currentColor = mColor;

@@ -62,7 +62,7 @@ public final class SymbolLayer extends TextureLayer {
 	@Override
 	protected void compile(ShortBuffer sbuf) {
 		// offset of layer data in vbo
-		setOffset(sbuf.position() * 2); //SHORT_BYTES;
+		this.offset = sbuf.position() * 2; //SHORT_BYTES;
 
 		short numIndices = 0;
 

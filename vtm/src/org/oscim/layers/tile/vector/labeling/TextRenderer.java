@@ -69,7 +69,7 @@ class TextRenderer extends ElementRenderer {
 		}
 
 		// set new TextLayer to be uploaded and rendered
-		layers.textureLayers = t.layers;
+		layers.setTextureLayers(t.layers);
 		mMapPosition = t.pos;
 		compile();
 	}
@@ -81,12 +81,12 @@ class TextRenderer extends ElementRenderer {
 
 		layers.vbo.bind();
 
-		float scale = (float) (mMapPosition.scale / pos.scale);
+		float scale = (float) (pos.scale / mMapPosition.scale);
 
 		setMatrix(pos, m, false);
 
-		for (RenderElement l = layers.textureLayers; l != null;)
-			l = TextureLayer.Renderer.draw(l, scale, m);
+		for (RenderElement l = layers.getTextureLayers(); l != null;)
+			l = TextureLayer.Renderer.draw(l, m, scale);
 	}
 
 }

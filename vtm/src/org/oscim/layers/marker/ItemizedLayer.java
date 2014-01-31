@@ -115,7 +115,7 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 
 			synchronized (lock) {
 				if (mItems == null) {
-					if (layers.textureLayers != null) {
+					if (layers.getTextureLayers() != null) {
 						layers.clear();
 						compile();
 					}
@@ -183,10 +183,9 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 
 					mSymbolLayer.addSymbol(s);
 				}
-
 			}
 			mSymbolLayer.prepare();
-			layers.textureLayers = mSymbolLayer;
+			layers.setTextureLayers(mSymbolLayer);
 
 			compile();
 		}

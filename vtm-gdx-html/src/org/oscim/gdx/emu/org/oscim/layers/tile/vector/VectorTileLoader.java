@@ -417,7 +417,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		if (v != null)
 			minHeight = Integer.parseInt(v);
 
-		ExtrusionLayer l = (ExtrusionLayer) mTile.layers.extrusionLayers;
+		ExtrusionLayer l = mTile.layers.getExtrusionLayers();
 
 		if (l == null) {
 			double lat = MercatorProjection.toLatitude(mTile.y);
@@ -425,7 +425,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			        * MercatorProjection.EARTH_CIRCUMFERENCE
 			        / ((long) Tile.SIZE << mTile.zoomLevel));
 
-			mTile.layers.extrusionLayers = l = new ExtrusionLayer(0, groundScale, extrusion.colors);
+			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
+			mTile.layers.setExtrusionLayers(l);
 		}
 		l.add(mElement, height, minHeight);
 	}
