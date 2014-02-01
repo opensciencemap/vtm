@@ -66,14 +66,14 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 	private double mPrevPinchWidth;
 	private long mStartMove;
 
-	protected static final double PINCH_ZOOM_THRESHOLD = 4;
-	protected static final double PINCH_TILT_THRESHOLD = 4;
+	protected static final double PINCH_ZOOM_THRESHOLD = 2;
+	protected static final double PINCH_TILT_THRESHOLD = 2;
 	protected static final double PINCH_TILT_SLOPE = 0.75;
 	protected static final double PINCH_ROTATE_THRESHOLD = 0.2;
 	protected static final double PINCH_ROTATE_THRESHOLD2 = 0.5;
 
-	/** 1mm as minimal distance to start move: dpi / 2.54 */
-	protected static final float MIN_SLOP = 25.4f;
+	/** 2mm as minimal distance to start move: dpi / 25.4 */
+	protected static final float MIN_SLOP = 25.4f / 2;
 
 	/** 100 ms since start of move to reduce fling scroll */
 	protected static final float FLING_THREHSHOLD = 100;
@@ -216,7 +216,6 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 			}
 			mViewport.moveMap(mx, my);
 			mTracker.update(x1, y1, e.getTime());
-
 			mMap.updateMap(true);
 			return true;
 		}
@@ -411,7 +410,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 	 * limitations under the License.
 	 ******************************************************************************/
 	class VelocityTracker {
-		int sampleSize = 10;
+		int sampleSize = 16;
 		float lastX, lastY;
 		float deltaX, deltaY;
 		long lastTime;
