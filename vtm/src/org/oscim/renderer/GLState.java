@@ -42,6 +42,7 @@ public class GLState {
 		depth = false;
 		stencil = false;
 		shader = -1;
+		currentTexId = -1;
 
 		GL.glDisable(GL20.GL_STENCIL_TEST);
 		GL.glDisable(GL20.GL_DEPTH_TEST);
