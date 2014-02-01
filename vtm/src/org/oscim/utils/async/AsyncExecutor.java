@@ -49,6 +49,7 @@ public class AsyncExecutor {
 			public Thread newThread(Runnable r) {
 				Thread thread = new Thread(r, "VtmAsyncExecutor");
 				thread.setDaemon(true);
+				thread.setPriority(Thread.NORM_PRIORITY - 1);
 				return thread;
 			}
 		});
