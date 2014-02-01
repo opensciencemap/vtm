@@ -137,11 +137,12 @@ public class GridRenderer extends ElementRenderer {
 
 		if (mText != null) {
 			addLabels(x, y, pos.zoomLevel);
-
 			layers.setBaseLayers(mLineLayer);
 			mLineLayer.addLine(mLines);
-		}
+			compile();
 
-		compile();
+		} else if (layers.vbo == null) {
+			compile();
+		}
 	}
 }
