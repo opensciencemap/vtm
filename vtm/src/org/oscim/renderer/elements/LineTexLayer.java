@@ -91,7 +91,7 @@ public final class LineTexLayer extends RenderElement {
 	public Line line;
 	public float width;
 
-	public boolean roundCap;
+	//public boolean roundCap;
 
 	public int evenQuads;
 	public int oddQuads;
@@ -270,7 +270,7 @@ public final class LineTexLayer extends RenderElement {
 		private static int hMatrix;
 		private static int hTexColor;
 		private static int hBgColor;
-		private static int hScale;
+		//private static int hScale;
 		private static int hWidth;
 		private static int hPatternScale;
 		private static int hPatternWidth;
@@ -288,7 +288,7 @@ public final class LineTexLayer extends RenderElement {
 			hMatrix = GL.glGetUniformLocation(shader, "u_mvp");
 			hTexColor = GL.glGetUniformLocation(shader, "u_color");
 			hBgColor = GL.glGetUniformLocation(shader, "u_bgcolor");
-			hScale = GL.glGetUniformLocation(shader, "u_scale");
+			//hScale = GL.glGetUniformLocation(shader, "u_scale");
 			hWidth = GL.glGetUniformLocation(shader, "u_width");
 			hPatternScale = GL.glGetUniformLocation(shader, "u_pscale");
 			hPatternWidth = GL.glGetUniformLocation(shader, "u_pwidth");
@@ -379,7 +379,7 @@ public final class LineTexLayer extends RenderElement {
 				GL.glUniform1f(hPatternScale, (MapRenderer.COORD_SCALE * line.stipple) / pScale);
 				GL.glUniform1f(hPatternWidth, line.stippleWidth);
 
-				GL.glUniform1f(hScale, scale);
+				//GL.glUniform1f(hScale, scale);
 				/* keep line width fixed */
 				GL.glUniform1f(hWidth, ll.width / s * COORD_SCALE_BY_DIR_SCALE);
 
