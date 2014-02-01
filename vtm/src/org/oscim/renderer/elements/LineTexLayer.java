@@ -35,56 +35,58 @@ import org.slf4j.LoggerFactory;
 /**
  * RenderElement for textured or stippled lines
  * this would be all so much simpler with geometry shaders...
+ * 
+ * Interleave two segment quads in one block to be able to use
+ * vertices twice. pos0 and pos1 use the same vertex array where
+ * pos1 has an offset of one vertex. The vertex shader will use
+ * pos0 when the vertexId is even, pos1 when the Id is odd.
+ * 
+ * As there is no gl_VertexId in gles 2.0 an additional 'flip'
+ * array is used. Depending on 'flip' extrusion is inverted.
+ * 
+ * Indices and flip buffers can be static.
+ * 
+ * <pre>
+ * First pass: using even vertex array positions
+ *   (used vertices are in braces)
+ * vertex id   0  1  2  3  4  5  6  7
+ * pos0     x (0) 1 (2) 3 (4) 5 (6) 7 x
+ * pos1        x (0) 1 (2) 3 (4) 5 (6) 7 x
+ * flip        0  1  0  1  0  1  0  1
+ * 
+ * Second pass: using odd vertex array positions
+ * vertex id   0  1  2  3  4  5  6  7
+ * pos0   x 0 (1) 2 (3) 4 (5) 6 (7) x
+ * pos1      x 0 (1) 2 (3) 4 (5) 6 (7) x
+ * flip        0  1  0  1  0  1  0  1
+ * </pre>
+ * 
+ * Vertex layout:
+ * [2 short] position,
+ * [2 short] extrusion,
+ * [1 short] line length
+ * [1 short] unused
+ * 
+ * indices, for two blocks:
+ * 0, 1, 2,
+ * 2, 1, 3,
+ * 4, 5, 6,
+ * 6, 5, 7,
+ * 
+ * BIG NOTE: renderer assumes to be able to offset vertex array position
+ * so that in the first pass 'pos1' offset will be < 0 if no data precedes
+ * - in our case there is always the polygon fill array at start
+ * - see addLine hack otherwise.
  */
 public final class LineTexLayer extends RenderElement {
 
 	static final Logger log = LoggerFactory.getLogger(LineTexLayer.class);
 
-	// Interleave two segment quads in one block to be able to use
-	// vertices twice. pos0 and pos1 use the same vertex array where
-	// pos1 has an offset of one vertex. The vertex shader will use
-	// pos0 when the vertexId is even, pos1 when the Id is odd.
-	//
-	// As there is no gl_VertexId in gles 2.0 an additional 'flip'
-	// array is used. Depending on 'flip' extrusion is inverted.
-	//
-	// Indices and flip buffers can be static.
-	//
-	// First pass: using even vertex array positions
-	//   (used vertices are in braces)
-	// vertex id   0  1  2  3  4  5  6  7
-	// pos0     x (0) 1 (2) 3 (4) 5 (6) 7 x
-	// pos1        x (0) 1 (2) 3 (4) 5 (6) 7 x
-	// flip        0  1  0  1  0  1  0  1
-	//
-	// Second pass: using odd vertex array positions
-	// vertex id   0  1  2  3  4  5  6  7
-	// pos0   x 0 (1) 2 (3) 4 (5) 6 (7) x
-	// pos1      x 0 (1) 2 (3) 4 (5) 6 (7) x
-	// flip        0  1  0  1  0  1  0  1
-	//
-	// Vertex layout:
-	// [2 short] position,
-	// [2 short] extrusion,
-	// [1 short] line length
-	// [1 short] unused
-	//
-	// indices, for two blocks:
-	// 0, 1, 2,
-	// 2, 1, 3,
-	// 4, 5, 6,
-	// 6, 5, 7,
-	//
-	// BIG NOTE: renderer assumes to be able to offset vertex array position
-	// so that in the first pass 'pos1' offset will be < 0 if no data precedes
-	// - in our case there is always the polygon fill array at start
-	// - see addLine hack otherwise.
-
 	private static final float COORD_SCALE = MapRenderer.COORD_SCALE;
-	// scale factor mapping extrusion vector to short values
+	/* scale factor mapping extrusion vector to short values */
 	public static final float DIR_SCALE = 2048;
 
-	// lines referenced by this outline layer
+	/* lines referenced by this outline layer */
 	public LineLayer outlines;
 	public Line line;
 	public float width;
@@ -97,7 +99,7 @@ public final class LineTexLayer extends RenderElement {
 	private boolean evenSegment;
 
 	LineTexLayer(int layer) {
-		super(RenderElement.TEXLINE);
+		super(TEXLINE);
 
 		this.level = layer;
 		this.evenSegment = true;
@@ -132,7 +134,7 @@ public final class LineTexLayer extends RenderElement {
 
 		boolean even = evenSegment;
 
-		// reset offset to last written position
+		/* reset offset to last written position */
 		if (!even)
 			opos -= 12;
 
@@ -150,11 +152,11 @@ public final class LineTexLayer extends RenderElement {
 			if (index != null)
 				length = index[i];
 
-			// check end-marker in indices
+			/* check end-marker in indices */
 			if (length < 0)
 				break;
 
-			// need at least two points
+			/* need at least two points */
 			if (length < 4) {
 				pos += length;
 				continue;
@@ -165,7 +167,7 @@ public final class LineTexLayer extends RenderElement {
 			float x = points[ipos++] * COORD_SCALE;
 			float y = points[ipos++] * COORD_SCALE;
 
-			// randomize a bit
+			/* randomize a bit */
 			float lineLength = (x * x + y * y) % 80;
 
 			int end = pos + length;
@@ -174,17 +176,17 @@ public final class LineTexLayer extends RenderElement {
 				float nx = points[ipos++] * COORD_SCALE;
 				float ny = points[ipos++] * COORD_SCALE;
 
-				// Calculate triangle corners for the given width
+				/* Calculate triangle corners for the given width */
 				float vx = nx - x;
 				float vy = ny - y;
 
 				float a = (float) Math.sqrt(vx * vx + vy * vy);
 
-				// normal vector
+				/* normal vector */
 				vx /= a;
 				vy /= a;
 
-				// perpendicular to line segment
+				/* perpendicular to line segment */
 				float ux = -vy;
 				float uy = vx;
 
@@ -216,19 +218,19 @@ public final class LineTexLayer extends RenderElement {
 				y = ny;
 
 				if (even) {
-					// go to second segment
+					/* go to second segment */
 					opos += 6;
 					even = false;
 
-					// vertex 0 and 2 were added
+					/* vertex 0 and 2 were added */
 					numVertices += 3;
 					evenQuads++;
 				} else {
-					// go to next block
+					/* go to next block */
 					even = true;
 					opos += 18;
 
-					// vertex 1 and 3 were added
+					/* vertex 1 and 3 were added */
 					numVertices += 1;
 					oddQuads++;
 				}
@@ -239,7 +241,7 @@ public final class LineTexLayer extends RenderElement {
 
 		evenSegment = even;
 
-		// advance offset to last written position
+		/* advance offset to last written position */
 		if (!even)
 			opos += 12;
 
@@ -249,17 +251,15 @@ public final class LineTexLayer extends RenderElement {
 	@Override
 	protected void compile(ShortBuffer sbuf) {
 		ElementLayers.addPoolItems(this, sbuf);
-		// add additional vertex for interleaving,
-		// see TexLineLayer.
+		/* add additional vertex for interleaving, see TexLineLayer. */
 		sbuf.position(sbuf.position() + 6);
 	}
 
 	public final static class Renderer {
 
-		// factor to normalize extrusion vector and scale to coord scale
+		/* factor to normalize extrusion vector and scale to coord scale */
 		private final static float COORD_SCALE_BY_DIR_SCALE =
-		        MapRenderer.COORD_SCALE
-		                / LineLayer.DIR_SCALE;
+		        MapRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
 
 		private static int shader;
 		private static int hVertexPosition0;
@@ -302,7 +302,7 @@ public final class LineTexLayer extends RenderElement {
 			int[] vboIds = GLUtils.glGenBuffers(1);
 			mVertexFlipID = vboIds[0];
 
-			// bytes: 0, 1, 0, 1, 0, ...
+			/* bytes: 0, 1, 0, 1, 0, ... */
 			byte[] flip = new byte[MapRenderer.maxQuads * 4];
 			for (int i = 0; i < flip.length; i++)
 				flip[i] = (byte) (i % 2);
@@ -332,7 +332,6 @@ public final class LineTexLayer extends RenderElement {
 		public static RenderElement draw(RenderElement curLayer, Matrices m,
 		        MapPosition pos, float div, ElementLayers layers) {
 
-			// shader failed to compile
 			if (shader == 0)
 				return curLayer.next;
 
@@ -366,7 +365,7 @@ public final class LineTexLayer extends RenderElement {
 			//GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexID[0]);
 
 			RenderElement l = curLayer;
-			for (; l != null && l.type == RenderElement.TEXLINE; l = l.next) {
+			for (; l != null && l.type == TEXLINE; l = l.next) {
 				LineTexLayer ll = (LineTexLayer) l;
 				Line line = ll.line;
 
@@ -381,20 +380,20 @@ public final class LineTexLayer extends RenderElement {
 				GL.glUniform1f(hPatternWidth, line.stippleWidth);
 
 				GL.glUniform1f(hScale, scale);
-				// keep line width fixed
+				/* keep line width fixed */
 				GL.glUniform1f(hWidth, ll.width / s * COORD_SCALE_BY_DIR_SCALE);
 
-				// add offset vertex
+				/* add offset vertex */
 				int vOffset = -STRIDE;
 
-				// first pass
+				/* first pass */
 				int allIndices = (ll.evenQuads * 6);
 				for (int i = 0; i < allIndices; i += maxIndices) {
 					int numIndices = allIndices - i;
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;
 
-					// i / 6 * (24 shorts per block * 2 short bytes)
+					/* i / 6 * (24 shorts per block * 2 short bytes) */
 					int add = (l.offset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(hVertexPosition0,
@@ -417,13 +416,13 @@ public final class LineTexLayer extends RenderElement {
 					                  GL20.GL_UNSIGNED_SHORT, 0);
 				}
 
-				// second pass
+				/* second pass */
 				allIndices = (ll.oddQuads * 6);
 				for (int i = 0; i < allIndices; i += maxIndices) {
 					int numIndices = allIndices - i;
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;
-					// i / 6 * (24 shorts per block * 2 short bytes)
+					/* i / 6 * (24 shorts per block * 2 short bytes) */
 					int add = (l.offset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(hVertexPosition0,
@@ -496,15 +495,15 @@ public final class LineTexLayer extends RenderElement {
 		        + " uniform float u_pwidth;"
 		        + " varying vec2 v_st;"
 		        + " void main() {"
-		        //   distance on perpendicular to the line
+		        /* distance on perpendicular to the line */
 		        + "  float dist = abs(v_st.t);"
 		        + "  float fuzz = fwidth(v_st.t);"
 		        + "  float fuzz_p = fwidth(v_st.s);"
 		        + "  float line_w = smoothstep(0.0, fuzz, 1.0 - dist);"
 		        + "  float stipple_w = smoothstep(0.0, fuzz, u_pwidth - dist);"
-		        // triangle waveform in the range 0..1 for regular pattern
+		        /* triangle waveform in the range 0..1 for regular pattern */
 		        + "  float phase = abs(mod(v_st.s, 2.0) - 1.0);"
-		        // interpolate between on/off phase, 0.5 = equal phase length
+		        /* interpolate between on/off phase, 0.5 = equal phase length */
 		        + "  float stipple_p = smoothstep(0.5 - fuzz_p, 0.5 + fuzz_p, phase);"
 		        + "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
 		        + " } ";  //*/
