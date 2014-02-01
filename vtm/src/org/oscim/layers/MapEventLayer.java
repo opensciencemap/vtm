@@ -301,7 +301,12 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 				// enter exclusice scale mode
 				if (Math.abs(deltaPinch) > (CanvasAdapter.dpi
 				        / MIN_SLOP * PINCH_ZOOM_THRESHOLD)) {
-					mCanRotate = mDoRotate || false;
+
+					if (!mDoRotate) {
+						mPrevPinchWidth = pinchWidth;
+						mCanRotate = false;
+					}
+
 					mCanTilt = false;
 					mDoScale = true;
 				}
