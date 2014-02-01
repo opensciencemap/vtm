@@ -102,19 +102,20 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void cleanup() {
-		mTileDataSource.destroy();
+		if (mTileDataSource != null)
+			mTileDataSource.destroy();
 	}
 
 	@Override
 	public boolean executeJob(MapTile tile) {
 
 		if (mTileDataSource == null) {
-			log.debug("no tile source is set");
+			log.error("no tile source is set");
 			return false;
 		}
 
 		if (renderTheme == null) {
-			log.debug("no theme is set");
+			log.error("no theme is set");
 			return false;
 		}
 
