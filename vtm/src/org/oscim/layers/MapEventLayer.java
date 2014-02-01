@@ -129,7 +129,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 			return true;
 		}
 		if (!mDown) {
-			// no down event received
+			/* no down event received */
 			return false;
 		}
 
@@ -144,7 +144,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 			float vx = mTracker.getVelocityX();
 			float vy = mTracker.getVelocityY();
 
-			// reduce velocity for short moves
+			/* reduce velocity for short moves */
 			float tx = e.getTime() - mStartMove;
 			if (tx < FLING_THREHSHOLD) {
 				vx *= tx / FLING_THREHSHOLD;
@@ -190,7 +190,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 			mPrevX1 = x1;
 			mPrevY1 = y1;
 
-			// double-tap + hold
+			/* double-tap + hold */
 			if (mDoubleTap) {
 
 				mViewport.scaleMap(1 - my / (height / 8), 0, 0);
@@ -243,7 +243,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 					tiltBy = my / 5;
 				} else if (Math.abs(my) > (CanvasAdapter.dpi /
 				        MIN_SLOP * PINCH_TILT_THRESHOLD)) {
-					// enter exclusive tilt mode
+					/* enter exclusive tilt mode */
 					mCanScale = false;
 					mCanRotate = false;
 					mDoTilt = true;
@@ -270,26 +270,25 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 			} else {
 				r = Math.abs(r);
 				if (r > PINCH_ROTATE_THRESHOLD) {
-					// start rotate, disable tilt
+					/* start rotate, disable tilt */
 					mDoRotate = true;
 					mCanTilt = false;
 
 					mAngle = rad;
 				} else if (!mDoScale) {
-					// reduce pince trigger by the amount of 
-					// rotation
+					/* reduce pinch trigger by the amount of rotation */
 					deltaPinch *= 1 - (r / PINCH_ROTATE_THRESHOLD);
 				} else {
 					mPrevPinchWidth = pinchWidth;
 				}
 			}
 		} else if (mDoScale && mEnableRotate) {
-			// reenable rotation when higher threshold is reached
+			/* reenable rotation when higher threshold is reached */
 			double rad = Math.atan2(dy, dx);
 			double r = rad - mAngle;
 
 			if (r > PINCH_ROTATE_THRESHOLD2) {
-				// start rotate again
+				/* start rotate again */
 				mDoRotate = true;
 				mCanRotate = true;
 				mAngle = rad;
@@ -297,8 +296,9 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		}
 
 		if (mCanScale || mDoRotate) {
+
 			if (!(mDoScale || mDoRotate)) {
-				// enter exclusice scale mode
+				/* enter exclusice scale mode */
 				if (Math.abs(deltaPinch) > (CanvasAdapter.dpi
 				        / MIN_SLOP * PINCH_ZOOM_THRESHOLD)) {
 
