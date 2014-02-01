@@ -59,6 +59,14 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 
 	}
 
+	public int getOffset() {
+	    return offset;
+    }
+
+	public void setOffset(int offset) {
+	    this.offset = offset;
+    }
+
 	/**
 	 * For line- and polygon-layers this is the offset
 	 * of VERTICES in its layers.vbo.
