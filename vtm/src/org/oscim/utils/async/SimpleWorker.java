@@ -8,7 +8,7 @@ import org.oscim.map.Map;
  */
 public abstract class SimpleWorker<T> implements Runnable {
 
-	private final Map mMap;
+	protected final Map mMap;
 
 	protected boolean mRunning;
 	protected boolean mWait;
@@ -48,7 +48,12 @@ public abstract class SimpleWorker<T> implements Runnable {
 				return;
 			}
 
+			// FIXME: mTaskTodo == null?
 			if (mDelayed || mTaskTodo == null) {
+
+				if (mDelayed)
+					onMainLoop(mTaskTodo);
+
 				// entered on main-loop
 				mDelayed = false;
 				// unset running temporarily
@@ -88,6 +93,15 @@ public abstract class SimpleWorker<T> implements Runnable {
 
 	}
 
+	/** do stuff on main-loop before executing the task */
+	public void onMainLoop(T task) {
+
+	}
+
+	/**
+	 * If delay > 0 onMainLoop will be called before Task
+	 * is passed to worker-thread
+	 */
 	public synchronized void submit(long delay) {
 
 		if (mRunning) {
@@ -101,9 +115,10 @@ public abstract class SimpleWorker<T> implements Runnable {
 			return;
 		}
 
-		mDelayed = true;
-		mMap.postDelayed(this, delay);
-
+		if (!mDelayed) {
+			mDelayed = true;
+			mMap.postDelayed(this, delay);
+		}
 	}
 
 	public synchronized T poll() {
@@ -133,4 +148,9 @@ public abstract class SimpleWorker<T> implements Runnable {
 		cleanup(mTaskTodo);
 		finish();
 	}
+
+	public synchronized boolean isRunning() {
+		return mRunning;
+	}
+
 }
