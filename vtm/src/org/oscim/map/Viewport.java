@@ -149,8 +149,9 @@ public class Viewport {
 	 * to screen corners by current view-projection-matrix.
 	 * 
 	 * @param box float[8] will be set.
+	 * @param add increase extents of box
 	 */
-	public synchronized void getMapViewProjection(float[] box) {
+	public synchronized void getMapExtents(float[] box, float add) {
 		float t = getDepth(1);
 		float t2 = getDepth(-1);
 
@@ -162,6 +163,17 @@ public class Viewport {
 		unproject(-1, 1, t2, box, 4);
 		// bottom-right
 		unproject(1, 1, t2, box, 6);
+
+		if (add == 0)
+			return;
+
+		for (int i = 0; i < 8; i += 2) {
+			float x = box[i];
+			float y = box[i + 1];
+			float len = (float) Math.sqrt(x * x + y * y);
+			box[i + 0] += x / len * add;
+			box[i + 1] += y / len * add;
+		}
 	}
 
 	/*
@@ -237,7 +249,7 @@ public class Viewport {
 	 */
 	public synchronized void getViewBox(Box box) {
 		float[] coords = mViewCoords;
-		getMapViewProjection(coords);
+		getMapExtents(coords, 0);
 
 		box.minX = coords[0];
 		box.maxX = coords[0];

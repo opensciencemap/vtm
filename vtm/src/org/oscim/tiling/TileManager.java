@@ -189,7 +189,7 @@ public class TileManager {
 		jobQueue.clear();
 
 		// load some tiles more than currently visible (* 0.75)
-		double scale = pos.scale * 0.9f;
+		//double scale = pos.scale * 0.9f;
 
 		int tileZoom = FastMath.clamp(pos.zoomLevel, mMinZoom, mMaxZoom);
 
@@ -205,12 +205,12 @@ public class TileManager {
 			tileZoom = match;
 		}
 
-		mViewport.getMapViewProjection(mMapPlane);
+		mViewport.getMapExtents(mMapPlane, Tile.SIZE / 2);
 
 		// scan visible tiles. callback function calls 'addTile'
 		// which updates mNewTiles
 		mNewTiles.cnt = 0;
-		mScanBox.scan(pos.x, pos.y, scale, tileZoom, mMapPlane);
+		mScanBox.scan(pos.x, pos.y, pos.scale, tileZoom, mMapPlane);
 
 		MapTile[] newTiles = mNewTiles.tiles;
 		int newCnt = mNewTiles.cnt;

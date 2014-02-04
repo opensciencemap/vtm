@@ -124,7 +124,7 @@ public class TileRenderer extends LayerRenderer {
 		MapTile[] tiles = mDrawTiles.tiles;
 
 		if (tilesChanged || changed) {
-			updateTileVisibility(pos, m.mapPlane);
+			updateTileVisibility(pos, m.plane);
 		}
 
 		tileCnt += mNumTileHolder;

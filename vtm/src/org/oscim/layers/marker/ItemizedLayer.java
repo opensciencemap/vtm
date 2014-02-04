@@ -102,14 +102,7 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 			int changedVisible = 0;
 			int numVisible = 0;
 
-			mMap.getViewport().getMapViewProjection(mBox);
-			for (int i = 0; i < 8; i += 2) {
-				float x = mBox[i];
-				float y = mBox[i + 1];
-				float len = (float) Math.sqrt(x * x + y * y);
-				mBox[i + 0] += x / len * mExtents;
-				mBox[i + 1] += y / len * mExtents;
-			}
+			mMap.getViewport().getMapExtents(mBox, mExtents);
 
 			long flip = (long) (Tile.SIZE * pos.scale) >> 1;
 

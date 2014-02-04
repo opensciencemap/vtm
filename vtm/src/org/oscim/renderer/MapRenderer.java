@@ -56,7 +56,7 @@ public class MapRenderer {
 		/** Do not modify! */
 		public final GLMatrix view = new GLMatrix();
 		/** Do not modify! */
-		public final float[] mapPlane = new float[8];
+		public final float[] plane = new float[8];
 
 		/** For temporary use, to setup MVP-Matrix */
 		public final GLMatrix mvp = new GLMatrix();
@@ -247,7 +247,7 @@ public class MapRenderer {
 			changed = viewport.getMapPosition(pos);
 
 			if (changed)
-				viewport.getMapViewProjection(mMatrices.mapPlane);
+				viewport.getMapExtents(mMatrices.plane, 0);
 
 			viewport.getMatrix(mMatrices.view, mMatrices.proj, mMatrices.viewproj);
 
