@@ -69,8 +69,8 @@ public class MapTile extends Tile {
 	/**
 	 * absolute tile coordinates: tileX,Y / Math.pow(2, zoomLevel)
 	 */
-	public double x;
-	public double y;
+	public final double x;
+	public final double y;
 
 	/**
 	 * distance from map center
@@ -102,7 +102,7 @@ public class MapTile extends Tile {
 	/**
 	 * Pointer to access relatives in QuadTree
 	 */
-	public TileNode node;
+	public final TileNode node;
 
 	/**
 	 * to avoid drawing a tile twice per frame
@@ -141,10 +141,11 @@ public class MapTile extends Tile {
 	// e.g. x:-1,y:0,z:1 for x:1,y:0
 	MapTile holder;
 
-	public MapTile(int tileX, int tileY, byte zoomLevel) {
+	public MapTile(TileNode node, int tileX, int tileY, byte zoomLevel) {
 		super(tileX, tileY, zoomLevel);
 		this.x = (double) tileX / (1 << zoomLevel);
 		this.y = (double) tileY / (1 << zoomLevel);
+		this.node = node;
 	}
 
 	/**

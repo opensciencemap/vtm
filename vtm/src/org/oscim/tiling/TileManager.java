@@ -90,8 +90,7 @@ public class TileManager {
 		@Override
 		public MapTile create(int x, int y, int z) {
 			TileNode t = super.add(x, y, z);
-			t.item = new MapTile(x, y, (byte) z);
-			t.item.node = t;
+			t.item = new MapTile(t, x, y, (byte) z);
 
 			return t.item;
 		}
@@ -106,7 +105,6 @@ public class TileManager {
 			super.remove(t.node);
 
 			t.node.item = null;
-			t.node = null;
 		}
 
 		@Override

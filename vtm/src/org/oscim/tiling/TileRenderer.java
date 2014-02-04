@@ -405,7 +405,7 @@ public class TileRenderer extends LayerRenderer {
 					//log.error(" + mNumTileHolder");
 					break;
 				}
-				MapTile holder = new MapTile(x, y, (byte) mZoom);
+				MapTile holder = new MapTile(null, x, y, (byte) mZoom);
 				holder.isVisible = true;
 				holder.holder = tile;
 				tile.isVisible = true;
