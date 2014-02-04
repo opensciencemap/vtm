@@ -1,5 +1,8 @@
 package org.oscim.layers.tile.vector.labeling;
 
+import static org.oscim.tiling.MapTile.State.NEW_DATA;
+import static org.oscim.tiling.MapTile.State.READY;
+
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
@@ -381,7 +384,7 @@ public class LabelPlacement {
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
 			synchronized (t) {
-				if (!t.state(MapTile.STATE_READY))
+				if (!t.state(READY | NEW_DATA))
 					continue;
 
 				float dx = (float) (t.tileX * Tile.SIZE - tileX);
@@ -396,7 +399,7 @@ public class LabelPlacement {
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
 			synchronized (t) {
-				if (!t.state(MapTile.STATE_READY))
+				if (!t.state(READY | NEW_DATA))
 					continue;
 
 				float dx = (float) (t.tileX * Tile.SIZE - tileX);
@@ -437,7 +440,7 @@ public class LabelPlacement {
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
 			synchronized (t) {
-				if (!t.state(MapTile.STATE_READY))
+				if (!t.state(READY | NEW_DATA))
 					continue;
 
 				float dx = (float) (t.tileX * Tile.SIZE - tileX);

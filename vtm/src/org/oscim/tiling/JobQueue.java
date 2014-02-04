@@ -17,8 +17,8 @@
  */
 package org.oscim.tiling;
 
-import static org.oscim.tiling.MapTile.STATE_LOADING;
-import static org.oscim.tiling.MapTile.STATE_NONE;
+import static org.oscim.tiling.MapTile.State.LOADING;
+import static org.oscim.tiling.MapTile.State.NONE;
 
 /**
  * A JobQueue keeps the list of pending jobs for a MapView and prioritizes them.
@@ -34,7 +34,7 @@ public class JobQueue {
 	 */
 	public synchronized void setJobs(MapTile[] tiles) {
 		for (MapTile t : tiles)
-			t.state = STATE_LOADING;
+			t.state = LOADING;
 
 		mJobs = tiles;
 		mCurrentJob = 0;
@@ -51,7 +51,7 @@ public class JobQueue {
 		MapTile[] tiles = mJobs;
 
 		for (int i = mCurrentJob, n = mJobs.length; i < n; i++) {
-			tiles[i].state = STATE_NONE;
+			tiles[i].state = NONE;
 			tiles[i] = null;
 		}
 		mCurrentJob = 0;

@@ -16,6 +16,8 @@
  */
 package org.oscim.layers.tile;
 
+import static org.oscim.tiling.MapTile.State.CANCEL;
+
 import java.util.concurrent.CancellationException;
 
 import org.oscim.backend.canvas.Bitmap;
@@ -135,7 +137,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 
 		@Override
 		public void setTileImage(Bitmap bitmap) {
-			if (isCanceled() || mTile.state(MapTile.STATE_CANCEL))
+			if (isCanceled() || mTile.state(CANCEL))
 				throw new CancellationException();
 
 			BitmapLayer l = new BitmapLayer(false);

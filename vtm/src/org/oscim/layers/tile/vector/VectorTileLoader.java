@@ -16,6 +16,8 @@
  */
 package org.oscim.layers.tile.vector;
 
+import static org.oscim.tiling.MapTile.State.CANCEL;
+
 import java.util.concurrent.CancellationException;
 
 import org.oscim.backend.canvas.Bitmap;
@@ -211,7 +213,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void process(MapElement element) {
 		clearState();
 
-		if (isCanceled() || mTile.state(MapTile.STATE_CANCEL))
+		if (isCanceled() || mTile.state(CANCEL))
 			throw new CancellationException();
 
 		mElement = element;

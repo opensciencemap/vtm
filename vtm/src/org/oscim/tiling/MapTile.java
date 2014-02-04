@@ -25,7 +25,8 @@ import org.oscim.utils.quadtree.Node;
 
 /**
  * Extends Tile class to hold state and data for concurrent use in
- * TileManager (Main Thread), TileLoader (Worker Threads) and
+ * TileManager (Main Thread),
+ * TileLoader (Worker Thread) and
  * TileRenderer (GL Thread).
  */
 public class MapTile extends Tile {
@@ -34,37 +35,53 @@ public class MapTile extends Tile {
 
 	}
 
-	/**
-	 * To be removed: used by GWT backend
-	 * */
+	/** To be removed: used by GWT backend */
 	public TileLoader loader;
 
-	public final static byte STATE_NONE = 0;
+	public static final class State {
+		public final static byte NONE = 0;
 
-	/**
-	 * STATE_LOADING means the tile is about to be loaded / loading.
-	 * Tile belongs to TileLoader thread.
-	 */
-	public final static byte STATE_LOADING = 1 << 0;
+		/**
+		 * STATE_LOADING means the tile is about to be loaded / loading.
+		 * Tile belongs to TileLoader thread.
+		 */
+		public final static byte LOADING = 1 << 0;
 
-	/**
-	 * STATE_NEW_DATA: tile data is prepared for rendering.
-	 * While 'locked' it belongs to GL Thread.
-	 */
-	public final static byte STATE_NEW_DATA = 1 << 1;
+		/**
+		 * STATE_NEW_DATA: tile data is prepared for rendering.
+		 * While 'locked' it belongs to GL Thread.
+		 */
+		public final static byte NEW_DATA = 1 << 1;
 
-	/**
-	 * STATE_READY: tile data is uploaded to GL.
-	 * While 'locked' it belongs to GL Thread.
-	 */
-	public final static byte STATE_READY = 1 << 2;
+		/**
+		 * STATE_READY: tile data is uploaded to GL.
+		 * While 'locked' it belongs to GL Thread.
+		 */
+		public final static byte READY = 1 << 2;
 
-	/**
-	 * TBD
-	 */
-	public final static byte STATE_ERROR = 1 << 3;
+		/**
+		 * STATE_CANCEL: tile is removed from TileManager,
+		 * but may still be processed by TileLoader.
+		 */
+		public final static byte CANCEL = 1 << 3;
+	}
 
-	public final static byte STATE_CANCEL = 1 << 4;
+	public MapTile(TileNode node, int tileX, int tileY, byte zoomLevel) {
+		super(tileX, tileY, zoomLevel);
+		this.x = (double) tileX / (1 << zoomLevel);
+		this.y = (double) tileY / (1 << zoomLevel);
+		this.node = node;
+	}
+
+	byte state;
+
+	public boolean state(int testState) {
+		return (state & testState) != 0;
+	}
+
+	public byte getState() {
+		return state;
+	}
 
 	/**
 	 * absolute tile coordinates: tileX,Y / Math.pow(2, zoomLevel)
@@ -73,7 +90,7 @@ public class MapTile extends Tile {
 	public final double y;
 
 	/**
-	 * distance from map center
+	 * current distance from map center
 	 */
 	public float distance;
 
@@ -111,17 +128,6 @@ public class MapTile extends Tile {
 	public final static int PROXY_GRAMPA = 1 << 5;
 	public final static int PROXY_HOLDER = 1 << 6;
 
-	/** STATE_* */
-	byte state;
-
-	public boolean state(byte testState) {
-		return state == testState;
-	}
-
-	public byte getState() {
-		return state;
-	}
-
 	/** keep track which tiles are locked as proxy for this tile */
 	byte proxies;
 
@@ -131,16 +137,11 @@ public class MapTile extends Tile {
 	/** up to 255 Threads may lock a tile */
 	private byte locked;
 
-	// only used GLRenderer when this tile sits in for another tile.
-	// e.g. x:-1,y:0,z:1 for x:1,y:0
+	/**
+	 * only used GLRenderer when this tile sits in for another tile.
+	 * e.g. x:-1,y:0,z:1 for x:1,y:0
+	 */
 	MapTile holder;
-
-	public MapTile(TileNode node, int tileX, int tileY, byte zoomLevel) {
-		super(tileX, tileY, zoomLevel);
-		this.x = (double) tileX / (1 << zoomLevel);
-		this.y = (double) tileY / (1 << zoomLevel);
-		this.node = node;
-	}
 
 	/**
 	 * @return true when tile might be referenced by render thread.
@@ -159,15 +160,15 @@ public class MapTile extends Tile {
 		if (locked++ > 0)
 			return;
 
-		// lock all tiles that could serve as proxy
+		/* lock all tiles that could serve as proxy */
 		MapTile p = node.parent.item;
-		if (p != null && (p.state != 0)) {
+		if (p != null && (p.state != State.NONE)) {
 			proxies |= PROXY_PARENT;
 			p.refs++;
 		}
 
 		p = node.parent.parent.item;
-		if (p != null && (p.state != 0)) {
+		if (p != null && (p.state != State.NONE)) {
 			proxies |= PROXY_GRAMPA;
 			p.refs++;
 		}
@@ -206,7 +207,7 @@ public class MapTile extends Tile {
 	 *         for rendering
 	 */
 	public boolean isActive() {
-		return state > STATE_NONE && state < STATE_ERROR;
+		return state > State.NONE;
 	}
 
 	/**
@@ -218,9 +219,7 @@ public class MapTile extends Tile {
 	}
 
 	/**
-	 * CAUTION: This function should only be called by {@link TileManager} when
-	 * tile is removed from cache or from {@link TileLoader} when
-	 * tile has failed to get loaded.
+	 * CAUTION: This function may only be called by {@link TileManager}
 	 */
 	protected void clear() {
 		if (layers != null) {
@@ -231,6 +230,7 @@ public class MapTile extends Tile {
 		TextItem.pool.releaseAll(labels.clear());
 		SymbolItem.pool.releaseAll(symbols.clear());
 
-		state = STATE_NONE;
+		// still needed?
+		state = State.NONE;
 	}
 }

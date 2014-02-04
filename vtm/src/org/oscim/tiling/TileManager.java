@@ -17,9 +17,11 @@
 
 package org.oscim.tiling;
 
-import static org.oscim.tiling.MapTile.STATE_CANCEL;
-import static org.oscim.tiling.MapTile.STATE_LOADING;
-import static org.oscim.tiling.MapTile.STATE_NEW_DATA;
+import static org.oscim.tiling.MapTile.State.CANCEL;
+import static org.oscim.tiling.MapTile.State.LOADING;
+import static org.oscim.tiling.MapTile.State.NEW_DATA;
+import static org.oscim.tiling.MapTile.State.NONE;
+import static org.oscim.tiling.MapTile.State.READY;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 public class TileManager {
 	static final Logger log = LoggerFactory.getLogger(TileManager.class);
+	static final boolean dbg = false;
 
 	public final static Event TILE_LOADED = new Event();
 	public final static Event TILE_REMOVED = new Event();
@@ -104,12 +107,11 @@ public class TileManager {
 		@Override
 		public void removeItem(MapTile t) {
 			if (t.node == null) {
-				log.debug("BUG already removed " + t);
+				log.error("already removed {}", t);
 				return;
 			}
 
 			super.remove(t.node);
-
 			t.node.item = null;
 		}
 
@@ -150,8 +152,12 @@ public class TileManager {
 
 	public void init() {
 		/* pass VBOs and VertexItems back to pools */
-		for (int i = 0; i < mTilesSize; i++)
-			clearTile(mTiles[i]);
+		for (int i = 0; i < mTilesSize; i++) {
+			if (mTiles[i] == null)
+				continue;
+			mTiles[i].state = NONE;
+			removeFromCache(mTiles[i]);
+		}
 
 		/* clear references to cached MapTiles */
 		Arrays.fill(mTiles, null);
@@ -259,7 +265,7 @@ public class TileManager {
 
 		MapTile[] jobs = new MapTile[mJobs.size()];
 		jobs = mJobs.toArray(jobs);
-		updateTileDistances(jobs, jobs.length, pos);
+		updateDistances(jobs, jobs.length, pos);
 
 		/* sets tiles to state == LOADING */
 		jobQueue.setJobs(jobs);
@@ -269,7 +275,8 @@ public class TileManager {
 		if (mCacheReduce < mCacheLimit / 2) {
 			if (BufferObject.isMaxFill()) {
 				mCacheReduce += 10;
-				log.debug("reduce tile cache " + (mCacheLimit - mCacheReduce));
+				if (dbg)
+					log.debug("reduce cache {}", (mCacheLimit - mCacheReduce));
 			} else
 				mCacheReduce = 0;
 		}
@@ -322,7 +329,6 @@ public class TileManager {
 			tileSet.setTiles(mCurrentTiles);
 			tileSet.serial = mUpdateSerial;
 		}
-
 		return true;
 	}
 
@@ -348,24 +354,18 @@ public class TileManager {
 
 		if ((zoomLevel > 2) && (mZoomTable == null)) {
 			/* prefetch parent */
-			boolean add = false;
-
 			MapTile p = tile.node.parent.item;
-
 			if (p == null) {
 				p = mIndex.create(x >> 1, y >> 1, zoomLevel - 1);
-
 				addToCache(p);
-				add = true;
-			}
-
-			if (add || !p.isActive()) {
-				// hack to not add tile twice
-				p.state = STATE_LOADING;
+				// hack to not add tile twice to queue
+				p.state = LOADING;
+				mJobs.add(p);
+			} else if (!p.isActive()) {
+				p.state = LOADING;
 				mJobs.add(p);
 			}
 		}
-
 		return tile;
 	}
 
@@ -391,28 +391,151 @@ public class TileManager {
 		mTilesCount++;
 	}
 
-	private void clearTile(MapTile t) {
-		if (t == null)
-			return;
+	private void removeFromCache(MapTile t) {
 
-		if (t.state != STATE_CANCEL && t.state != STATE_LOADING)
+		if (t.state == NEW_DATA || t.state == READY)
 			events.tell(TILE_REMOVED, t);
 
 		synchronized (t) {
-			// still belongs to TileLoader thread
-			if (t.state != STATE_LOADING)
+			/* still belongs to TileLoader thread, defer clearing to
+			 * jobCompleted() */
+			if (t.state != CANCEL)
 				t.clear();
 
-			t.state = STATE_CANCEL;
+			// needed?
+			t.state = CANCEL;
+
 			mIndex.removeItem(t);
 		}
 
 		mTilesCount--;
 	}
 
-	private static void updateTileDistances(MapTile[] tiles, int size, MapPosition pos) {
-		// TODO there is probably a better quad-tree distance function
+	private void limitCache(MapPosition pos, int remove) {
+		MapTile[] tiles = mTiles;
+		int size = mTilesSize;
 
+		/* count tiles that have new data */
+		mTilesForUpload = 0;
+		int newTileCnt = 0;
+
+		/* remove tiles that were never loaded */
+		for (int i = 0; i < size; i++) {
+			MapTile t = tiles[i];
+			if (t == null)
+				continue;
+
+			if (t.state == NEW_DATA)
+				newTileCnt++;
+
+			/* make sure tile cannot be used by GL or MapWorker Thread */
+			if ((t.state != 0) || t.isLocked()) {
+				continue;
+			}
+			removeFromCache(t);
+			tiles[i] = null;
+			remove--;
+		}
+
+		if (remove < CACHE_CLEAR_THRESHOLD && newTileCnt < MAX_TILES_IN_QUEUE)
+			return;
+
+		updateDistances(tiles, size, pos);
+		TileDistanceSort.sort(tiles, 0, size);
+
+		/* sorting also repacks the 'sparse' filled array
+		 * so end of mTiles is at mTilesCount now */
+		size = mTilesSize = mTilesCount;
+
+		// log.debug("remove:" + remove + "  new:" + newTileCnt);
+		// log.debug("cur: " + mapPosition);
+
+		for (int i = size - 1; i >= 0 && remove > 0; i--) {
+			MapTile t = tiles[i];
+			if (t.isLocked()) {
+				/* dont remove tile used by TileRenderer, or somewhere else
+				 * try again in next run. */
+				if (dbg)
+					log.debug("{} locked (state={}, d={})", t, t.state, t.distance);
+				continue;
+
+			}
+
+			if (t.state == LOADING) {
+				/* NOTE: when set loading to false the tile could be
+				 * added to load queue again while still processed in
+				 * VectorTileLoader */
+				t.state = CANCEL;
+				if (dbg)
+					log.debug("{} canceled (d={})", t, t.distance);
+			}
+
+			if (t.state == NEW_DATA) {
+				/* clear unused tile */
+				if (dbg)
+					log.debug("{} unused (d=({})", t, t.distance);
+				newTileCnt--;
+			}
+
+			removeFromCache(t);
+			tiles[i] = null;
+			remove--;
+		}
+
+		remove = (newTileCnt - MAX_TILES_IN_QUEUE) + 10;
+		//int r = remove;
+		for (int i = size - 1; i >= 0 && remove > 0; i--) {
+			MapTile t = tiles[i];
+			if (t != null && t.state == NEW_DATA) {
+				if (!t.isLocked()) {
+					newTileCnt--;
+
+					removeFromCache(t);
+					tiles[i] = null;
+					remove--;
+				}
+			}
+		}
+
+		mTilesForUpload += newTileCnt;
+		//log.debug("cleanup load queue {} / {} - {}", mTilesForUpload, r, remove);
+		if (dbg)
+			log.debug("cleanup: {} {}", mTilesCount, mTilesForUpload);
+	}
+
+	/**
+	 * called from MapWorker Thread when tile is loaded by MapTileLoader
+	 * 
+	 * @param tile
+	 *            Tile ready for upload in TileRenderLayer
+	 * @return caller does not care
+	 */
+	public void jobCompleted(final MapTile tile, final boolean success) {
+		mMap.post(new Runnable() {
+
+			@Override
+			public void run() {
+				if (!success || tile.state == CANCEL) {
+					tile.clear();
+					return;
+				}
+
+				tile.state = NEW_DATA;
+				events.tell(TILE_LOADED, tile);
+
+				mTilesForUpload += 1;
+
+				/* locked means the tile is visible or referenced by
+				 * a tile that might be visible. */
+				if (tile.isLocked())
+					mMap.render();
+			}
+		});
+
+	}
+
+	private static void updateDistances(MapTile[] tiles, int size, MapPosition pos) {
+		/* TODO there is probably a better quad-tree distance function */
 		int zoom = 20;
 		long x = (long) (pos.x * (1 << zoom));
 		long y = (long) (pos.y * (1 << zoom));
@@ -444,128 +567,6 @@ public class TileManager {
 
 			t.distance = (dx * dx + dy * dy) * (dz * dz);
 		}
-	}
-
-	private void limitCache(MapPosition pos, int remove) {
-		MapTile[] tiles = mTiles;
-		int size = mTilesSize;
-
-		// count tiles that have new data
-		mTilesForUpload = 0;
-		int newTileCnt = 0;
-
-		// remove tiles that were never loaded
-		for (int i = 0; i < size; i++) {
-			MapTile t = tiles[i];
-			if (t == null)
-				continue;
-
-			if (t.state == STATE_NEW_DATA)
-				newTileCnt++;
-
-			// make sure tile cannot be used by GL or MapWorker Thread
-			if ((t.state != 0) || t.isLocked()) {
-				continue;
-			}
-			clearTile(t);
-			tiles[i] = null;
-			remove--;
-		}
-
-		if (remove > 10 || newTileCnt > MAX_TILES_IN_QUEUE) {
-			updateTileDistances(tiles, size, pos);
-
-			TileDistanceSort.sort(tiles, 0, size);
-
-			// sorting also repacks the 'sparse' filled array
-			// so end of mTiles is at mTilesCount now
-			size = mTilesSize = mTilesCount;
-
-			// log.debug("remove:" + remove + "  new:" + newTileCnt);
-			// log.debug("cur: " + mapPosition);
-
-			for (int i = size - 1; i >= 0 && remove > 0; i--) {
-				MapTile t = tiles[i];
-				if (t.isLocked()) {
-					// dont remove tile used by GLRenderer, or somewhere else
-					// try again in next run.
-					//log.debug("locked " + t
-					//        + " " + t.distance
-					//        + " " + (t.state == STATE_NEW_DATA)
-					//        + " " + (t.state == STATE_LOADING)
-					//        + " " + pos.zoomLevel);
-				} else if (t.state == STATE_LOADING) {
-					// NOTE: when set loading to false the tile could be
-					// added to load queue again while still processed in
-					// MapTileLoader => need tile.cancel flag.
-					// t.isLoading = false;
-					log.debug("cancel loading " + t
-					        + " " + t.distance);
-				} else {
-					// clear unused tile
-
-					if (t.state == STATE_NEW_DATA) {
-						// log.debug("limitCache: clear unused " + t
-						// + " " + t.distance);
-						newTileCnt--;
-					}
-
-					remove--;
-					clearTile(t);
-					tiles[i] = null;
-				}
-			}
-
-			remove = (newTileCnt - MAX_TILES_IN_QUEUE) + 10;
-			// int r = remove;
-			for (int i = size - 1; i >= 0 && remove > 0; i--) {
-				MapTile t = tiles[i];
-				if (t != null && t.state == STATE_NEW_DATA) {
-					if (!t.isLocked()) {
-						clearTile(t);
-						tiles[i] = null;
-						remove--;
-						newTileCnt--;
-					}
-				}
-			}
-
-			mTilesForUpload += newTileCnt;
-			// log.debug("cleanup load queue " + tilesForUpload + "/" + r +
-			// " - " + remove);
-		}
-	}
-
-	/**
-	 * called from MapWorker Thread when tile is loaded by MapTileLoader
-	 * 
-	 * @param tile
-	 *            Tile ready for upload in TileRenderLayer
-	 * @return caller does not care
-	 */
-	public void jobCompleted(final MapTile tile, final boolean success) {
-		mMap.post(new Runnable() {
-
-			@Override
-			public void run() {
-				if (!success || tile.state == STATE_CANCEL) {
-					tile.clear();
-					return;
-				}
-
-				tile.state = STATE_NEW_DATA;
-
-				events.tell(TILE_LOADED, tile);
-
-				mTilesForUpload += 1;
-
-				/* locked means the tile is visible or referenced by
-				 * a tile that might be visible. */
-				if (tile.isLocked())
-					mMap.render();
-			}
-		});
-
 	}
 
 	private final ScanBox mScanBox = new ScanBox() {
@@ -613,4 +614,8 @@ public class TileManager {
 			mNewTiles.cnt = cnt;
 		}
 	};
+
+	public MapTile getTile(int tileX, int tileY, byte zoomLevel) {
+		return mIndex.getTile(tileX, tileY, zoomLevel);
+	}
 }

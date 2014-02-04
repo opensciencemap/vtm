@@ -21,8 +21,8 @@ import static org.oscim.renderer.elements.RenderElement.LINE;
 import static org.oscim.renderer.elements.RenderElement.MESH;
 import static org.oscim.renderer.elements.RenderElement.POLYGON;
 import static org.oscim.renderer.elements.RenderElement.TEXLINE;
-import static org.oscim.tiling.MapTile.STATE_NEW_DATA;
-import static org.oscim.tiling.MapTile.STATE_READY;
+import static org.oscim.tiling.MapTile.State.NEW_DATA;
+import static org.oscim.tiling.MapTile.State.READY;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
@@ -143,7 +143,7 @@ public class TileRenderer extends LayerRenderer {
 
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
-			if (t.isVisible && t.state != STATE_READY) {
+			if (t.isVisible && t.state != READY) {
 				mClipMode = 2;
 				break;
 			}
@@ -152,7 +152,7 @@ public class TileRenderer extends LayerRenderer {
 		/* draw visible tiles */
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
-			if (t.isVisible && t.state == STATE_READY)
+			if (t.isVisible && t.state == READY)
 				drawTile(t, pos);
 
 		}
@@ -173,7 +173,7 @@ public class TileRenderer extends LayerRenderer {
 			for (int i = 0; i < tileCnt; i++) {
 				MapTile t = tiles[i];
 				if (t.isVisible
-				        && (t.state != STATE_READY)
+				        && (t.state != READY)
 				        && (t.holder == null)) {
 					drawProxyTile(t, pos, true, preferParent);
 				}
@@ -183,7 +183,7 @@ public class TileRenderer extends LayerRenderer {
 			for (int i = 0; i < tileCnt; i++) {
 				MapTile t = tiles[i];
 				if (t.isVisible
-				        && (t.state != STATE_READY)
+				        && (t.state != READY)
 				        && (t.holder == null))
 					drawProxyTile(t, pos, false, false);
 			}
@@ -218,17 +218,17 @@ public class TileRenderer extends LayerRenderer {
 			if (!tile.isVisible)
 				continue;
 
-			if (tile.state == STATE_READY)
+			if (tile.state == READY)
 				continue;
 
-			if (tile.state == STATE_NEW_DATA) {
+			if (tile.state == NEW_DATA) {
 				uploadCnt += uploadTileData(tile);
 				continue;
 			}
 
 			if (tile.holder != null) {
 				/* load tile that is referenced by this holder */
-				if (tile.holder.state == STATE_NEW_DATA)
+				if (tile.holder.state == NEW_DATA)
 					uploadCnt += uploadTileData(tile.holder);
 
 				tile.state = tile.holder.state;
@@ -238,7 +238,7 @@ public class TileRenderer extends LayerRenderer {
 			/* check near relatives than can serve as proxy */
 			if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 				MapTile t = tile.node.parent.item;
-				if (t.state == STATE_NEW_DATA)
+				if (t.state == NEW_DATA)
 					uploadCnt += uploadTileData(t);
 
 				/* dont load child proxies */
@@ -250,7 +250,7 @@ public class TileRenderer extends LayerRenderer {
 					continue;
 
 				MapTile t = tile.node.child(i);
-				if (t != null && t.state == STATE_NEW_DATA)
+				if (t != null && t.state == NEW_DATA)
 					uploadCnt += uploadTileData(t);
 			}
 		}
@@ -258,7 +258,7 @@ public class TileRenderer extends LayerRenderer {
 	}
 
 	private static int uploadTileData(MapTile tile) {
-		tile.state = STATE_READY;
+		tile.state = READY;
 
 		/* tile might contain extrusion or label layers */
 		if (tile.layers == null)
@@ -338,7 +338,7 @@ public class TileRenderer extends LayerRenderer {
 			tileSet.cnt = 0;
 			for (int i = 0; i < cnt; i++) {
 				MapTile t = newTiles[i];
-				if (t.isVisible && t.state == STATE_READY) {
+				if (t.isVisible && t.state == READY) {
 					t.lock();
 					tileSet.tiles[tileSet.cnt++] = t;
 				}
@@ -424,15 +424,15 @@ public class TileRenderer extends LayerRenderer {
 			if (ci == null)
 				continue;
 
-			if (ci.state == MapTile.STATE_READY || ci.fadeTime > 0)
+			if (ci.state == READY || ci.fadeTime > 0)
 				maxFade = Math.min(maxFade, ci.fadeTime);
 		}
 		MapTile p = t.node.parent();
-		if (p != null && (p.state == MapTile.STATE_READY || p.fadeTime > 0)) {
+		if (p != null && (p.state == READY || p.fadeTime > 0)) {
 			maxFade = Math.min(maxFade, p.fadeTime);
 
 			p = p.node.parent();
-			if (p != null && (p.state == MapTile.STATE_READY || p.fadeTime > 0))
+			if (p != null && (p.state == READY || p.fadeTime > 0))
 				maxFade = Math.min(maxFade, p.fadeTime);
 		}
 
@@ -544,7 +544,7 @@ public class TileRenderer extends LayerRenderer {
 
 			MapTile c = tile.node.child(i);
 
-			if (c.state == STATE_READY) {
+			if (c.state == READY) {
 				drawTile(c, pos);
 				drawn++;
 			}
@@ -567,7 +567,7 @@ public class TileRenderer extends LayerRenderer {
 				/* draw parent proxy */
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					proxy = r.parent.item;
-					if (proxy.state == STATE_READY) {
+					if (proxy.state == READY) {
 						//log.debug("1. draw parent " + proxy);
 						drawTile(proxy, pos);
 					}
@@ -576,12 +576,12 @@ public class TileRenderer extends LayerRenderer {
 				/* check if parent was already drawn */
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					proxy = r.parent.item;
-					if (proxy.state == STATE_READY)
+					if (proxy.state == READY)
 						return;
 				}
 
 				proxy = r.parent.parent.item;
-				if (proxy.state == STATE_READY)
+				if (proxy.state == READY)
 					drawTile(proxy, pos);
 			}
 		} else {
@@ -589,7 +589,7 @@ public class TileRenderer extends LayerRenderer {
 			if (parent) {
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					proxy = r.parent.item;
-					if (proxy != null && proxy.state == STATE_READY) {
+					if (proxy != null && proxy.state == READY) {
 						//log.debug("2. draw parent " + proxy);
 						drawTile(proxy, pos);
 						return;
@@ -602,7 +602,7 @@ public class TileRenderer extends LayerRenderer {
 				/* check if parent was already drawn */
 				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
 					proxy = r.parent.item;
-					if (proxy.state == STATE_READY)
+					if (proxy.state == READY)
 						return;
 				}
 				/* this will do nothing, just to check */
@@ -610,7 +610,7 @@ public class TileRenderer extends LayerRenderer {
 					return;
 
 				proxy = r.parent.parent.item;
-				if (proxy.state == STATE_READY)
+				if (proxy.state == READY)
 					drawTile(proxy, pos);
 			}
 		}

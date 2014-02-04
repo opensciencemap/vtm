@@ -16,6 +16,9 @@
  */
 package org.oscim.renderer;
 
+import static org.oscim.tiling.MapTile.State.NEW_DATA;
+import static org.oscim.tiling.MapTile.State.READY;
+
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
@@ -168,10 +171,10 @@ public class ExtrusionRenderer extends LayerRenderer {
 	}
 
 	private static ExtrusionLayer getLayer(MapTile t) {
-		if (t.layers != null && t.layers.getExtrusionLayers() != null
-		        && t.state(MapTile.STATE_READY))
-			return (ExtrusionLayer) t.layers.getExtrusionLayers();
-		return null;
+		if (t.layers == null || !t.state(READY | NEW_DATA))
+			return null;
+
+		return t.layers.getExtrusionLayers();
 	}
 
 	private final boolean debug = false;
