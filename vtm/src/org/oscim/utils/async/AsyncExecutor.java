@@ -1,6 +1,7 @@
 /*******************************************************************************
- * Copyright 2013 See libgdx AUTHORS file.
- *
+ * Copyright 2013 Mario Zechner <badlogicgames@gmail.com>
+ * Copyright 2013 Nathan Sweet <nathan.sweet@gmail.com>
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
