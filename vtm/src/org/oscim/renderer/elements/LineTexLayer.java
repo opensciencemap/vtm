@@ -162,19 +162,16 @@ public final class LineTexLayer extends RenderElement {
 				continue;
 			}
 
-			int ipos = pos;
-
-			float x = points[ipos++] * COORD_SCALE;
-			float y = points[ipos++] * COORD_SCALE;
+			int end = pos + length;
+			float x = points[pos++] * COORD_SCALE;
+			float y = points[pos++] * COORD_SCALE;
 
 			/* randomize a bit */
 			float lineLength = (x * x + y * y) % 80;
 
-			int end = pos + length;
-
-			for (; ipos < end;) {
-				float nx = points[ipos++] * COORD_SCALE;
-				float ny = points[ipos++] * COORD_SCALE;
+			while (pos < end) {
+				float nx = points[pos++] * COORD_SCALE;
+				float ny = points[pos++] * COORD_SCALE;
 
 				/* Calculate triangle corners for the given width */
 				float vx = nx - x;
@@ -235,8 +232,6 @@ public final class LineTexLayer extends RenderElement {
 					oddQuads++;
 				}
 			}
-
-			pos += length;
 		}
 
 		evenSegment = even;
