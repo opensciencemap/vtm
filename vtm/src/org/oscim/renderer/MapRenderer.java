@@ -295,7 +295,8 @@ public class MapRenderer {
 	}
 
 	public void onSurfaceChanged(int width, int height) {
-		log.debug("SurfaceChanged: " + mNewSurface + " " + width + "x" + height);
+		log.debug("onSurfaceChanged: new={}, {}x{}",
+		          mNewSurface, width, height);
 
 		if (width <= 0 || height <= 0)
 			return;
@@ -391,6 +392,8 @@ public class MapRenderer {
 	/**
 	 * Bind VBO for a simple quad. Handy for simple custom RenderLayers
 	 * Vertices: float[]{ -1, -1, -1, 1, 1, -1, 1, 1 }
+	 * 
+	 * GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 	 * 
 	 * @param bind - true to activate, false to unbind
 	 */
