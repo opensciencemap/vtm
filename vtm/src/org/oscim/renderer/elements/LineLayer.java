@@ -16,6 +16,9 @@
  */
 package org.oscim.renderer.elements;
 
+import static org.oscim.renderer.elements.VertexItem.SIZE;
+import static org.oscim.renderer.elements.VertexItem.pool;
+
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Paint.Cap;
@@ -33,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
  * Note:
  * Coordinates must be in range [-4096..4096] and the maximum
  * resolution for coordinates is 0.25 as points will be converted
@@ -112,7 +114,7 @@ public final class LineLayer extends RenderElement {
 			squared = true;
 
 		if (vertexItems == null)
-			vertexItems = VertexItem.pool.get();
+			vertexItems = pool.get();
 
 		VertexItem si = Inlist.last(vertexItems);
 		short v[] = si.vertices;
@@ -151,20 +153,20 @@ public final class LineLayer extends RenderElement {
 			if (index != null)
 				length = index[i];
 
-			// check end-marker in indices
+			/* check end-marker in indices */
 			if (length < 0)
 				break;
 
-			// need at least two points
+			/* need at least two points */
 			if (length < 4) {
 				pos += length;
 				continue;
 			}
 
-			// amount of vertices used
-			// + 2 for drawing triangle-strip
-			// + 4 for round caps
-			// + 2 for closing polygons
+			/* amount of vertices used
+			 * + 2 for drawing triangle-strip
+			 * + 4 for round caps
+			 * + 2 for closing polygons */
 			numVertices += length + (rounded ? 6 : 2) + (closed ? 2 : 0);
 
 			int ipos = pos;
@@ -175,41 +177,41 @@ public final class LineLayer extends RenderElement {
 			nextX = points[ipos++];
 			nextY = points[ipos++];
 
-			// Calculate triangle corners for the given width
+			/* Calculate triangle corners for the given width */
 			vx = nextX - x;
 			vy = nextY - y;
 
-			// Unit vector to next node
+			/* Unit vector to next node */
 			a = (float) Math.sqrt(vx * vx + vy * vy);
 
 			vx /= a;
 			vy /= a;
 
-			// perpendicular on the first segment
+			/* perpendicular on the first segment */
 			ux = -vy;
 			uy = vx;
 
 			int ddx, ddy;
 
-			// vertex point coordinate
+			/* vertex point coordinate */
 			short ox = (short) (x * COORD_SCALE);
 			short oy = (short) (y * COORD_SCALE);
 
-			// vertex extrusion vector, last two bit
-			// encode texture coord.
+			/* vertex extrusion vector, last two bit
+			 * encode texture coord. */
 			short dx, dy;
 
-			// when the endpoint is outside the tile region omit round caps.
+			/* when the endpoint is outside the tile region omit round caps. */
 			boolean outside = (x < tmin || x > tmax || y < tmin || y > tmax);
 
-			if (opos == VertexItem.SIZE) {
-				si = VertexItem.pool.getNext(si);
+			if (opos == SIZE) {
+				si = pool.getNext(si);
 				v = si.vertices;
 				opos = 0;
 			}
 
 			if (rounded && !outside) {
-				// add first vertex twice
+				/* add first vertex twice */
 				ddx = (int) ((ux - vx) * DIR_SCALE);
 				ddy = (int) ((uy - vy) * DIR_SCALE);
 				dx = (short) (0 | ddx & DIR_MASK);
@@ -220,8 +222,8 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -231,8 +233,8 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -245,13 +247,13 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (2 | ddx & DIR_MASK);
 				v[opos++] = (short) (2 | ddy & DIR_MASK);
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
 
-				// Start of line
+				/* Start of line */
 				ddx = (int) (ux * DIR_SCALE);
 				ddy = (int) (uy * DIR_SCALE);
 
@@ -260,8 +262,8 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -272,9 +274,9 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (1 | -ddy & DIR_MASK);
 
 			} else {
-				// outside means line is probably clipped
-				// TODO should align ending with tile boundary
-				// for now, just extend the line a little
+				/* outside means line is probably clipped
+				 * TODO should align ending with tile boundary
+				 * for now, just extend the line a little */
 				float tx = vx;
 				float ty = vy;
 
@@ -289,7 +291,7 @@ public final class LineLayer extends RenderElement {
 				if (rounded)
 					numVertices -= 2;
 
-				// add first vertex twice
+				/* add first vertex twice */
 				ddx = (int) ((ux - tx) * DIR_SCALE);
 				ddy = (int) ((uy - ty) * DIR_SCALE);
 				dx = (short) (0 | ddx & DIR_MASK);
@@ -300,8 +302,8 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -311,8 +313,8 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -330,7 +332,7 @@ public final class LineLayer extends RenderElement {
 			x = nextX;
 			y = nextY;
 			boolean flip = false;
-			// Unit vector pointing back to previous node
+			/* Unit vector pointing back to previous node */
 			vx *= -1;
 			vy *= -1;
 
@@ -341,18 +343,18 @@ public final class LineLayer extends RenderElement {
 					nextX = points[ipos++];
 					nextY = points[ipos++];
 				} else if (closed && ipos < end + 2) {
-					// add startpoint == endpoint
+					/* add startpoint == endpoint */
 					nextX = points[pos];
 					nextY = points[pos + 1];
 					ipos += 2;
 				} else
 					break;
 
-				// Unit vector pointing forward to next node
+				/* Unit vector pointing forward to next node */
 				wx = nextX - x;
 				wy = nextY - y;
 				a = (float) Math.sqrt(wx * wx + wy * wy);
-				// skip too short segmets
+				/* skip too short segmets */
 				if (a < mMinDist) {
 					numVertices -= 2;
 					continue;
@@ -360,23 +362,23 @@ public final class LineLayer extends RenderElement {
 				wx /= a;
 				wy /= a;
 
-				// Sum of these two vectors points
+				/* Sum of these two vectors points */
 				ux = vx + wx;
 				uy = vy + wy;
 
-				// cross-product
+				/* cross-product */
 				a = wx * uy - wy * ux;
 
 				if (FastMath.abs(a) < 0.01f) {
-					// Almost straight
+					/* Almost straight */
 					ux = -wy;
 					uy = wx;
 				} else {
 					ux /= a;
 					uy /= a;
 
-					// avoid miter going to infinity.
-					// TODO add option for round joints
+					/* avoid miter going to infinity.
+					 * TODO add option for round joints */
 					if (FastMath.absMaxCmp(ux, uy, 4f)) {
 						ux = vx - wx;
 						uy = vy - wy;
@@ -398,8 +400,8 @@ public final class LineLayer extends RenderElement {
 					ddx = -ddx;
 					ddy = -ddy;
 				}
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -409,8 +411,8 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -423,7 +425,7 @@ public final class LineLayer extends RenderElement {
 				x = nextX;
 				y = nextY;
 
-				// flip unit vector to point back
+				/* flip unit vector to point back */
 				vx = -wx;
 				vy = -wy;
 			}
@@ -433,8 +435,8 @@ public final class LineLayer extends RenderElement {
 
 			outside = (x < tmin || x > tmax || y < tmin || y > tmax);
 
-			if (opos == VertexItem.SIZE) {
-				si = VertexItem.pool.getNext(si);
+			if (opos == SIZE) {
+				si = pool.getNext(si);
 				opos = 0;
 				v = si.vertices;
 			}
@@ -456,8 +458,8 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
 				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -467,13 +469,13 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (2 | -ddx & DIR_MASK);
 				v[opos++] = (short) (1 | -ddy & DIR_MASK);
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
 
-				// For rounded line edges
+				/* For rounded line edges */
 				ddx = (int) ((ux - vx) * DIR_SCALE);
 				ddy = (int) ((uy - vy) * DIR_SCALE);
 
@@ -485,13 +487,13 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
 
-				// add last vertex twice
+				/* add last vertex twice */
 				ddx = (int) (-(ux + vx) * DIR_SCALE);
 				ddy = (int) (-(uy + vy) * DIR_SCALE);
 				dx = (short) (2 | (flip ? -ddx : ddx) & DIR_MASK);
@@ -502,8 +504,8 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -533,13 +535,13 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = (short) (0 | (flip ? -ddx : ddx) & DIR_MASK);
 				v[opos++] = (short) (1 | (flip ? -ddy : ddy) & DIR_MASK);
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
 
-				// add last vertex twice
+				/* add last vertex twice */
 				ddx = (int) (-(ux + vx) * DIR_SCALE);
 				ddy = (int) (-(uy + vy) * DIR_SCALE);
 				dx = (short) (2 | (flip ? -ddx : ddx) & DIR_MASK);
@@ -550,8 +552,8 @@ public final class LineLayer extends RenderElement {
 				v[opos++] = dx;
 				v[opos++] = dy;
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
+				if (opos == SIZE) {
+					si = pool.getNext(si);
 					v = si.vertices;
 					opos = 0;
 				}
@@ -568,9 +570,10 @@ public final class LineLayer extends RenderElement {
 	}
 
 	public static final class Renderer {
-		// TODO: http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter22.html
+		/* TODO:
+		 * http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter22.html */
 
-		// factor to normalize extrusion vector and scale to coord scale
+		/* factor to normalize extrusion vector and scale to coord scale */
 		private final static float COORD_SCALE_BY_DIR_SCALE =
 		        MapRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
 
@@ -581,7 +584,7 @@ public final class LineLayer extends RenderElement {
 		private final static int SHADER_FLAT = 1;
 		private final static int SHADER_PROJ = 0;
 
-		// shader handles
+		/* shader handles */
 		private static int[] lineProgram = new int[2];
 		private static int[] hLineVertexPosition = new int[2];
 		private static int[] hLineColor = new int[2];
@@ -590,6 +593,7 @@ public final class LineLayer extends RenderElement {
 		private static int[] hLineWidth = new int[2];
 		private static int[] hLineMode = new int[2];
 		private static int[] hLineHeight = new int[2];
+
 		public static int mTexID;
 
 		static boolean init() {
@@ -621,8 +625,8 @@ public final class LineLayer extends RenderElement {
 				hLineVertexPosition[i] = GL.glGetAttribLocation(lineProgram[i], "a_pos");
 			}
 
-			// create lookup table as texture for 'length(0..1,0..1)'
-			// using mirrored wrap mode for 'length(-1..1,-1..1)'
+			/* create lookup table as texture for 'length(0..1,0..1)'
+			 * using mirrored wrap mode for 'length(-1..1,-1..1)' */
 			byte[] pixel = new byte[128 * 128];
 
 			for (int x = 0; x < 128; x++) {
@@ -649,17 +653,17 @@ public final class LineLayer extends RenderElement {
 			if (curLayer == null)
 				return null;
 
-			// simple line shader does not take forward shortening into
-			// account. only used when tilt is 0.
+			/* simple line shader does not take forward shortening into
+			 * account. only used when tilt is 0. */
 			int mode = v.pos.tilt < 1 ? 1 : 0;
 
 			GLState.useProgram(lineProgram[mode]);
 			GLState.blend(true);
 
-			// Somehow we loose the texture after an indefinite
-			// time, when label/symbol textures are used.
-			// Debugging gl on Desktop is most fun imaginable,
-			// so for now:
+			/* Somehow we loose the texture after an indefinite
+			 * time, when label/symbol textures are used.
+			 * Debugging gl on Desktop is most fun imaginable,
+			 * so for now: */
 			if (!GLAdapter.GDX_DESKTOP_QUIRKS)
 				GLState.bindTex2D(mTexID);
 
@@ -676,14 +680,14 @@ public final class LineLayer extends RenderElement {
 
 			v.mvp.setAsUniform(hLineMatrix[mode]);
 
-			// Line scale factor for non fixed lines: Within a zoom-
-			// level lines would be scaled by the factor 2 by view-matrix.
-			// Though lines should only scale by sqrt(2). This is achieved
-			// by inverting scaling of extrusion vector with: width/sqrt(s).
+			/* Line scale factor for non fixed lines: Within a zoom-
+			 * level lines would be scaled by the factor 2 by view-matrix.
+			 * Though lines should only scale by sqrt(2). This is achieved
+			 * by inverting scaling of extrusion vector with: width/sqrt(s). */
 			double variableScale = Math.sqrt(scale);
 
-			// scale factor to map one pixel on tile to one pixel on screen:
-			// used with orthographic projection, (shader mode == 1)
+			/* scale factor to map one pixel on tile to one pixel on screen:
+			 * used with orthographic projection, (shader mode == 1) */
 			double pixel = (mode == SHADER_PROJ) ? 0.0001 : 1.5 / scale;
 
 			GL.glUniform1f(uLineFade, (float) pixel);
@@ -723,11 +727,11 @@ public final class LineLayer extends RenderElement {
 					blur = false;
 				}
 
-				// draw LineLayer
+				/* draw LineLayer */
 				if (!line.outline) {
+					/* invert scaling of extrusion vectors so that line
+					 * width stays the same. */
 					if (line.fixed) {
-						// invert scaling of extrusion vectors so that line
-						// width stays the same. 'max'?
 						width = Math.max(line.width, 1) / scale;
 					} else {
 						width = ll.scale * line.width / variableScale;
@@ -736,7 +740,7 @@ public final class LineLayer extends RenderElement {
 					GL.glUniform1f(uLineWidth,
 					               (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
-					// Line-edge fade
+					/* Line-edge fade */
 					if (line.blur > 0) {
 						GL.glUniform1f(uLineFade, line.blur);
 						blur = true;
@@ -745,8 +749,9 @@ public final class LineLayer extends RenderElement {
 						//GL.glUniform1f(uLineScale, (float)(pixel / (ll.width / s)));
 					}
 
-					// Cap mode
+					/* Cap mode */
 					if (ll.scale < 1.5 /* || ll.line.fixed */) {
+
 						if (capMode != CAP_THIN) {
 							capMode = CAP_THIN;
 							GL.glUniform1f(uLineMode, capMode);
@@ -767,7 +772,8 @@ public final class LineLayer extends RenderElement {
 					continue;
 				}
 
-				// draw LineLayers references by this outline
+				/* draw LineLayers references by this outline */
+
 				for (LineLayer ref = ll.outlines; ref != null; ref = ref.outlines) {
 					Line core = (Line) ref.line.getCurrent();
 
@@ -787,7 +793,7 @@ public final class LineLayer extends RenderElement {
 					GL.glUniform1f(uLineWidth,
 					               (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
-					// Line-edge fade
+					/* Line-edge fade */
 					if (line.blur > 0) {
 						GL.glUniform1f(uLineFade, line.blur);
 						blur = true;
@@ -795,8 +801,9 @@ public final class LineLayer extends RenderElement {
 						GL.glUniform1f(uLineFade, (float) (pixel / width));
 					}
 
-					// Cap mode
+					/* Cap mode */
 					if (ref.roundCap) {
+
 						if (capMode != CAP_ROUND) {
 							capMode = CAP_ROUND;
 							GL.glUniform1f(uLineMode, capMode);
@@ -817,21 +824,49 @@ public final class LineLayer extends RenderElement {
 		private final static String lineVertexShader = ""
 		        + "precision mediump float;"
 		        + "uniform mat4 u_mvp;"
-		        // factor to increase line width relative to scale
+		        //+ "uniform mat4 u_vp;"
+		        /* factor to increase line width relative to scale */
 		        + "uniform float u_width;"
-		        // xy hold position, zw extrusion vector
+		        /* xy hold position, zw extrusion vector */
 		        + "attribute vec4 a_pos;"
 		        + "uniform float u_mode;"
 		        + "uniform float u_height;"
 		        + "varying vec2 v_st;"
 		        + "void main() {"
 
-		        // scale extrusion to u_width pixel
-		        // just ignore the two most insignificant bits.
+		        /* scale extrusion to u_width pixel
+				 * just ignore the two most insignificant bits. */
 		        + "  vec2 dir = a_pos.zw;"
 		        + "  gl_Position = u_mvp * vec4(a_pos.xy + (u_width * dir), u_height, 1.0);"
 
-		        // last two bits hold the texture coordinates.
+		        /* last two bits hold the texture coordinates. */
+		        + "  v_st = abs(mod(dir, 4.0)) - 1.0;"
+		        + "}";
+
+		private final static String lineVertexShader2 = ""
+		        + "precision highp float;"
+		        + "uniform mat4 u_mvp;"
+		        + "uniform mat4 u_vp;"
+		        /* factor to increase line width relative to scale */
+		        + "uniform float u_width;"
+		        /* xy hold position, zw extrusion vector */
+		        + "attribute vec4 a_pos;"
+		        + "uniform float u_mode;"
+		        + "varying vec2 v_st;"
+		        + "void main() {"
+
+		        /* scale extrusion to u_width pixel */
+		        /* just ignore the two most insignificant bits. */
+		        + "  vec2 dir = a_pos.zw;"
+		        + "  vec4 pos = u_vp * vec4(a_pos.xy + (u_width * dir), 0.0, 0.0);"
+		        + "  vec4 orig = u_vp * vec4(a_pos.xy, 0.0, 0.0);"
+		        + "  float len = length(orig - pos);"
+		        //+ "  if (len < 0.0625){"
+		        + "     pos = u_mvp * vec4(a_pos.xy + (u_width * dir) / (len * 4.0), 0.0, 1.0);"
+		        //+ "   }"
+		        //+ "   else  pos = u_mvp * vec4(a_pos.xy + (u_width * dir), 0.0, 1.0);"
+		        + " gl_Position = pos;"
+		        /* last two bits hold the texture coordinates. */
 		        + "  v_st = abs(mod(dir, 4.0)) - 1.0;"
 		        + "}";
 
@@ -846,31 +881,34 @@ public final class LineLayer extends RenderElement {
 		        + "void main() {"
 		        + "float len;"
 		        + "  if (u_mode == 2.0){"
-		        //   round cap line
+		        /* round cap line */
 		        + (GLAdapter.GDX_DESKTOP_QUIRKS
 		                ? "    len = length(v_st);"
 		                : "    len = texture2D(tex, v_st).a;")
 		        + "  } else {"
-		        //     flat cap line
+		        /* flat cap line */
 		        + "    len = abs(v_st.s);"
 		        + "  }"
-		        //   u_mode == 0.0 -> thin line
+		        /* u_mode == 0.0 -> thin line */
 		        //+ "  len = len * clamp(u_mode, len, 1.0);"
 
-		        // use 'max' to avoid branching, need to check performance
+		        /* use 'max' to avoid branching, need to check performance */
 		        //+ (GLAdapter.GDX_DESKTOP_QUIRKS
 		        //        ? " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
 		        //        : " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);")
 
-		        // Antialias line-edges:
-		        // - 'len' is 0 at center of line. -> (1.0 - len) is 0 at the edges
-		        // - 'u_fade' is 'pixel' / 'width', i.e. the inverse width of the
-		        //   line in pixel on screen.
-		        // - 'pixel' is 1.5 / relativeScale
-		        // - '(1.0 - len) / u_fade' interpolates the 'pixel' on line-edge
-		        //   between 0 and 1 (it is greater 1 for all inner pixel).
+		        /* Antialias line-edges:
+				 * - 'len' is 0 at center of line. -> (1.0 - len) is 0 at the
+				 * edges
+				 * - 'u_fade' is 'pixel' / 'width', i.e. the inverse width of
+				 * the
+				 * line in pixel on screen.
+				 * - 'pixel' is 1.5 / relativeScale
+				 * - '(1.0 - len) / u_fade' interpolates the 'pixel' on
+				 * line-edge
+				 * between 0 and 1 (it is greater 1 for all inner pixel). */
 		        + "  gl_FragColor = u_color * clamp((1.0 - len) / u_fade, 0.0, 1.0);"
-		        // -> nicer for thin lines
+		        /* -> nicer for thin lines */
 		        //+ "  gl_FragColor = u_color * clamp((1.0 - (len * len)) / u_fade, 0.0, 1.0);"
 		        + "}";
 
@@ -886,18 +924,18 @@ public final class LineLayer extends RenderElement {
 		        + "  float len;"
 		        + "  float fuzz;"
 		        + "  if (u_mode == 2.0){"
-		        //   round cap line
+		        /* round cap line */
 		        + (GLAdapter.GDX_DESKTOP_QUIRKS
 		                ? "    len = length(v_st);"
 		                : "    len = texture2D(tex, v_st).a;")
 		        + "    vec2 st_width = fwidth(v_st);"
 		        + "    fuzz = max(st_width.s, st_width.t);"
 		        + "  } else {"
-		        //     flat cap line
+		        /* flat cap line */
 		        + "    len = abs(v_st.s);"
 		        + "    fuzz = fwidth(v_st.s);"
 		        + "  }"
-		        //   u_mode == 0.0 -> thin line
+		        /* u_mode == 0.0 -> thin line */
 		        //+ "  len = len * clamp(u_mode, len, 1.0);"
 
 		        + "  if (fuzz > 2.0)"

@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RenderElement for textured or stippled lines
- * this would be all so much simpler with geometry shaders...
  * 
  * Interleave two segment quads in one block to be able to use
  * vertices twice. pos0 and pos1 use the same vertex array where
@@ -374,8 +373,8 @@ public final class LineTexLayer extends RenderElement {
 
 				GL.glUniform1f(hPatternScale, (MapRenderer.COORD_SCALE * line.stipple) / pScale);
 				GL.glUniform1f(hPatternWidth, line.stippleWidth);
-
 				//GL.glUniform1f(hScale, scale);
+
 				/* keep line width fixed */
 				GL.glUniform1f(hWidth, ll.width / s * COORD_SCALE_BY_DIR_SCALE);
 
