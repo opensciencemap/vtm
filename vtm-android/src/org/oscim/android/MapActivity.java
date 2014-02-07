@@ -21,9 +21,9 @@ import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.support.v4.app.FragmentActivity;
 
 /**
  * MapActivity is the abstract base class which must be extended in order to use
@@ -38,7 +38,7 @@ import android.content.SharedPreferences.Editor;
  * and map file of the MapView are saved in a preferences file and restored in
  * the next startup process.
  */
-public abstract class MapActivity extends Activity {
+public abstract class MapActivity extends FragmentActivity {
 	private static final String KEY_LATITUDE = "latitude";
 	private static final String KEY_LONGITUDE = "longitude";
 	private static final String KEY_MAP_SCALE = "map_scale";
