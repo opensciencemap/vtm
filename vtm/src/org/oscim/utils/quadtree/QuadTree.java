@@ -16,32 +16,38 @@
  */
 package org.oscim.utils.quadtree;
 
-public abstract class QuadTree<T> {
+/**
+ * A quad tree for the standard map tiling schema.
+ */
+public abstract class QuadTree<T extends Node<T, E>, E> {
 
-	Node<T> pool;
+	protected final T root;
 
-	Node<T> root;
+	protected T pool;
 
 	public QuadTree() {
-		root = new Node<T>();
+		root = create();
 		root.parent = root;
 	}
 
 	static void checkIndex(int x, int y, int max) {
 		if (x < 0 || x >= max || y < 0 || y >= max) {
-			throw new IllegalArgumentException("invalid position " + x + '/' + y + '/' + (max >> 1));
+			throw new IllegalArgumentException("invalid position "
+			        + x + '/' + y + '/' + (max >> 1));
 		}
 	}
 
-	public abstract T create(int x, int y, int z);
+	public abstract E create(int x, int y, int z);
 
-	public abstract void remove(T item);
+	public abstract T create();
 
-	public Node<T> add(int x, int y, int z) {
+	public abstract void removeItem(E item);
+
+	public T add(int x, int y, int z) {
 
 		checkIndex(x, y, 1 << z);
 
-		Node<T> leaf = root;
+		T leaf = root;
 
 		for (int level = z - 1; level >= 0; level--) {
 
@@ -49,7 +55,7 @@ public abstract class QuadTree<T> {
 
 			leaf.refs++;
 
-			Node<T> cur = null;
+			T cur = null;
 
 			switch (id) {
 				case 0:
@@ -75,7 +81,7 @@ public abstract class QuadTree<T> {
 				cur = pool;
 				pool = pool.parent;
 			} else {
-				cur = new Node<T>();
+				cur = create();
 			}
 
 			cur.refs = 0;
@@ -105,11 +111,11 @@ public abstract class QuadTree<T> {
 		return leaf;
 	}
 
-	public T getTile(int x, int y, int z) {
+	public E getTile(int x, int y, int z) {
 
 		checkIndex(x, y, 1 << z);
 
-		Node<T> leaf = root;
+		T leaf = root;
 
 		for (int level = z - 1; level >= 0; level--) {
 
@@ -140,14 +146,14 @@ public abstract class QuadTree<T> {
 		return null;
 	}
 
-	public boolean remove(Node<T> item) {
+	public boolean remove(T item) {
 
-		Node<T> cur = item;
-		Node<T> next;
+		T cur = item;
+		T next;
 
 		while (cur != root) {
 			if (cur == null)
-				throw new IllegalArgumentException("QuadTree.remove: item not in index");
+				throw new IllegalArgumentException("item not in index");
 
 			// keep pointer to parent
 			next = cur.parent;

@@ -30,6 +30,10 @@ import org.oscim.utils.quadtree.Node;
  */
 public class MapTile extends Tile {
 
+	public static class TileNode extends Node<TileNode, MapTile> {
+
+	}
+
 	/**
 	 * To be removed: used by GWT backend
 	 * */
@@ -98,7 +102,7 @@ public class MapTile extends Tile {
 	/**
 	 * Pointer to access relatives in QuadTree
 	 */
-	public Node<MapTile> node;
+	public TileNode node;
 
 	/**
 	 * to avoid drawing a tile twice per frame

@@ -29,9 +29,9 @@ import org.oscim.core.Tile;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
+import org.oscim.tiling.MapTile.TileNode;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
-import org.oscim.utils.quadtree.Node;
 import org.oscim.utils.quadtree.QuadTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,11 +85,11 @@ public class TileManager {
 	// job queue filled in TileManager and polled by TileLoaders
 	private final JobQueue jobQueue;
 
-	private final QuadTree<MapTile> mIndex = new QuadTree<MapTile>() {
+	private final QuadTree<TileNode, MapTile> mIndex = new QuadTree<TileNode, MapTile>() {
 
 		@Override
 		public MapTile create(int x, int y, int z) {
-			Node<MapTile> t = super.add(x, y, z);
+			TileNode t = super.add(x, y, z);
 			t.item = new MapTile(x, y, (byte) z);
 			t.item.node = t;
 
@@ -97,7 +97,7 @@ public class TileManager {
 		}
 
 		@Override
-		public void remove(MapTile t) {
+		public void removeItem(MapTile t) {
 			if (t.node == null) {
 				log.debug("BUG already removed " + t);
 				return;
@@ -107,6 +107,11 @@ public class TileManager {
 
 			t.node.item = null;
 			t.node = null;
+		}
+
+		@Override
+		public TileNode create() {
+			return new TileNode();
 		}
 	};
 
@@ -324,11 +329,9 @@ public class TileManager {
 		tileSet.releaseTiles();
 	}
 
-	/* package */MapTile addTile(int x, int y, int zoomLevel) {
-		MapTile tile;
-
-		// tile = QuadTree.getTile(x, y, zoomLevel);
-		tile = mIndex.getTile(x, y, zoomLevel);
+	/* package */
+	MapTile addTile(int x, int y, int zoomLevel) {
+		MapTile tile = mIndex.getTile(x, y, zoomLevel);
 
 		if (tile == null) {
 			tile = mIndex.create(x, y, zoomLevel);
@@ -393,7 +396,7 @@ public class TileManager {
 				t.clear();
 
 			t.state = STATE_CANCEL;
-			mIndex.remove(t);
+			mIndex.removeItem(t);
 		}
 		mTilesCount--;
 	}

@@ -40,9 +40,9 @@ import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.MeshLayer;
 import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.RenderElement;
+import org.oscim.tiling.MapTile.TileNode;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
-import org.oscim.utils.quadtree.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +91,7 @@ public class TileRenderer extends LayerRenderer {
 	 * synced with clearTiles, setOverdrawColor and setBitmapAlpha
 	 */
 	@Override
-	protected synchronized void update(MapPosition pos, boolean positionChanged, Matrices m) {
+	protected synchronized void update(MapPosition pos, boolean changed, Matrices m) {
 
 		if (mAlpha == 0) {
 			mTileManager.releaseTiles(mDrawTiles);
@@ -123,7 +123,7 @@ public class TileRenderer extends LayerRenderer {
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
 
-		if (tilesChanged || positionChanged) {
+		if (tilesChanged || changed) {
 			updateTileVisibility(pos, m.mapPlane);
 		}
 
@@ -162,17 +162,17 @@ public class TileRenderer extends LayerRenderer {
 		if (mClipMode > 1) {
 			mClipMode = 3;
 			//GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
-
 			GL.glDepthFunc(GL20.GL_LESS);
 
-			double scale = pos.getZoomScale();
+			/** draw child or parent proxies */
+			boolean preferParent = (pos.getZoomScale() < 1.5)
+			        || (pos.zoomLevel < tiles[0].zoomLevel);
+
 			for (int i = 0; i < tileCnt; i++) {
 				MapTile t = tiles[i];
 				if (t.isVisible
 				        && (t.state != STATE_READY)
 				        && (t.holder == null)) {
-					boolean preferParent = (scale > 1.5)
-					        || (pos.zoomLevel - t.zoomLevel < 0);
 					drawProxyTile(t, pos, true, preferParent);
 				}
 			}
@@ -235,9 +235,9 @@ public class TileRenderer extends LayerRenderer {
 
 			// check near relatives than can serve as proxy
 			if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-				MapTile rel = tile.node.parent.item;
-				if (rel.state == STATE_NEW_DATA)
-					uploadCnt += uploadTileData(rel);
+				MapTile t = tile.node.parent.item;
+				if (t.state == STATE_NEW_DATA)
+					uploadCnt += uploadTileData(t);
 
 				// dont load child proxies
 				continue;
@@ -247,9 +247,9 @@ public class TileRenderer extends LayerRenderer {
 				if ((tile.proxies & 1 << c) == 0)
 					continue;
 
-				MapTile rel = tile.node.child(i);
-				if (rel != null && rel.state == STATE_NEW_DATA)
-					uploadCnt += uploadTileData(rel);
+				MapTile t = tile.node.child(i);
+				if (t != null && t.state == STATE_NEW_DATA)
+					uploadCnt += uploadTileData(t);
 			}
 		}
 		return uploadCnt;
@@ -270,7 +270,7 @@ public class TileRenderer extends LayerRenderer {
 			tile.layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
 		if (!ElementRenderer.uploadLayers(tile.layers, newSize, true)) {
-			log.debug("BUG uploadTileData " + tile + " failed!");
+			log.error("{} uploadTileData failed!", tile);
 
 			tile.layers.vbo = BufferObject.release(tile.layers.vbo);
 			tile.layers.clear();
@@ -550,10 +550,10 @@ public class TileRenderer extends LayerRenderer {
 		return drawn;
 	}
 
-	private void drawProxyTile(MapTile tile, MapPosition pos, boolean parent,
-	        boolean preferParent) {
+	protected void drawProxyTile(MapTile tile, MapPosition pos,
+	        boolean parent, boolean preferParent) {
 
-		Node<MapTile> r = tile.node;
+		TileNode r = tile.node;
 		MapTile proxy;
 
 		if (!preferParent) {

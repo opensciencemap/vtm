@@ -16,14 +16,14 @@
  */
 package org.oscim.utils.quadtree;
 
-public class Node<T> {
-	public Node<T> parent;
-	public Node<T> child00;
-	public Node<T> child10;
-	public Node<T> child01;
-	public Node<T> child11;
+public class Node<T extends Node<T, E>, E> {
+	public T parent;
+	public T child00;
+	public T child10;
+	public T child01;
+	public T child11;
 
-	public T item;
+	public E item;
 
 	// id of this child relative to parent
 	byte id;
@@ -31,11 +31,26 @@ public class Node<T> {
 	// number of children and grandchildren
 	int refs = 0;
 
-	public T parent() {
+	//	public byte getId() {
+	//		if (parent.child00 == this)
+	//			return 0;
+	//		if (parent.child01 == this)
+	//			return 1;
+	//		if (parent.child10 == this)
+	//			return 2;
+	//		if (parent.child00 == this)
+	//			return 3;
+	//
+	//		// is root node
+	//		//if (parent == this)
+	//		return -1;
+	//	}
+
+	public E parent() {
 		return parent.item;
 	}
 
-	public T child(int i) {
+	public E child(int i) {
 		switch (i) {
 			case 0:
 				return (child00 != null) ? child00.item : null;
