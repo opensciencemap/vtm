@@ -308,4 +308,8 @@ public class GeometryBuffer {
 			throw new IllegalArgumentException("not cleared " + m + "<>" + type);
 	}
 
+	public void addPoint(Point p) {
+		addPoint((float) p.x, (float) p.y);
+	}
+
 }
