@@ -103,4 +103,8 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 
 		resumeLoaders();
 	}
+
+	public TileManager getManager() {
+		return mTileManager;
+	}
 }

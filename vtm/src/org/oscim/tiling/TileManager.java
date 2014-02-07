@@ -26,6 +26,8 @@ import java.util.Arrays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.event.EventDispatcher;
+import org.oscim.event.EventDispatcher.Event;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
@@ -38,6 +40,10 @@ import org.slf4j.LoggerFactory;
 
 public class TileManager {
 	static final Logger log = LoggerFactory.getLogger(TileManager.class);
+
+	public final static Event TILE_LOADED = new Event();
+	public final static Event TILE_REMOVED = new Event();
+	public final EventDispatcher<TileManager, MapTile> events;
 
 	private int mCacheLimit;
 	private int mCacheReduce;
@@ -130,8 +136,9 @@ public class TileManager {
 
 		mTilesSize = 0;
 		mTilesForUpload = 0;
-
 		mUpdateSerial = 0;
+
+		events = new EventDispatcher<TileManager, MapTile>(this);
 	}
 
 	private int[] mZoomTable;
@@ -388,6 +395,9 @@ public class TileManager {
 		if (t == null)
 			return;
 
+		if (t.state != STATE_CANCEL && t.state != STATE_LOADING)
+			events.tell(TILE_REMOVED, t);
+
 		synchronized (t) {
 			// still belongs to TileLoader thread
 			if (t.state != STATE_LOADING)
@@ -396,6 +406,7 @@ public class TileManager {
 			t.state = STATE_CANCEL;
 			mIndex.removeItem(t);
 		}
+
 		mTilesCount--;
 	}
 
@@ -532,21 +543,30 @@ public class TileManager {
 	 *            Tile ready for upload in TileRenderLayer
 	 * @return caller does not care
 	 */
-	public void jobCompleted(MapTile tile, boolean success) {
-		if (!success || tile.state == STATE_CANCEL) {
-			tile.clear();
-			return;
-		}
+	public void jobCompleted(final MapTile tile, final boolean success) {
+		mMap.post(new Runnable() {
 
-		tile.state = STATE_NEW_DATA;
+			@Override
+			public void run() {
+				if (!success || tile.state == STATE_CANCEL) {
+					tile.clear();
+					return;
+				}
 
-		// is volatile
-		mTilesForUpload += 1;
+				tile.state = STATE_NEW_DATA;
 
-		// locked means the tile is visible or referenced by
-		// a tile that might be visible.
-		if (tile.isLocked())
-			mMap.render();
+				events.tell(TILE_LOADED, tile);
+
+				// is volatile
+				mTilesForUpload += 1;
+
+				// locked means the tile is visible or referenced by
+				// a tile that might be visible.
+				if (tile.isLocked())
+					mMap.render();
+			}
+		});
+
 	}
 
 	private final ScanBox mScanBox = new ScanBox() {
