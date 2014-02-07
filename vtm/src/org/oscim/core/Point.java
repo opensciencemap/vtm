@@ -36,6 +36,14 @@ public class Point {
 		return y;
 	}
 
+	public double distance(Point other) {
+		return Math.sqrt((x - other.x) * (x - other.x) + (y - other.y) + (y - other.y));
+	}
+
+	public double distanceSq(Point other) {
+		return (x - other.x) * (x - other.x) + (y - other.y) + (y - other.y);
+	}
+
 	@Override
 	public String toString() {
 		return x + " " + y;
