@@ -16,6 +16,8 @@
  */
 package org.oscim.utils.pool;
 
+import java.util.Iterator;
+
 import javax.annotation.CheckReturnValue;
 
 /**
@@ -27,6 +29,58 @@ import javax.annotation.CheckReturnValue;
  * are *REALLY* sure about it. Better do not use it! :)
  */
 public class Inlist<T extends Inlist<T>> {
+	/** UNTESTED */
+	public static class List<T extends Inlist<T>> implements Iterable<T> {
+		T head;
+		T cur;
+		Iterator<T> mIterator = new Iterator<T>() {
+
+			@Override
+			public boolean hasNext() {
+				return cur != null;
+			}
+
+			@Override
+			public T next() {
+				if (cur == null)
+					throw new IllegalStateException();
+
+				T tmp = cur;
+				cur = cur.next;
+				return tmp;
+			}
+
+			@Override
+			public void remove() {
+				T tmp = cur.next;
+				head = Inlist.remove(head, cur);
+				cur = tmp;
+			}
+		};
+
+		@Override
+		public Iterator<T> iterator() {
+			cur = head;
+			return mIterator;
+		}
+
+		public void push(T it) {
+			it.next = head;
+			head = it;
+		}
+
+		public void remove(T it) {
+			cur = null;
+			head = Inlist.remove(head, it);
+		}
+
+		public T clear() {
+			T ret = head;
+			head = null;
+			cur = null;
+			return ret;
+		}
+	}
 
 	public T next;
 
