@@ -21,8 +21,9 @@ import org.oscim.event.EventDispatcher.Event;
 import org.oscim.event.EventDispatcher.Listener;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.Layer;
+import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.map.Map;
-import org.oscim.tiling.TileRenderer;
+import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileManager;
 import org.oscim.utils.async.SimpleWorker;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateListener,
         Listener<MapTile> {
+
 	static final Logger log = LoggerFactory.getLogger(LabelLayer.class);
 
 	private final static long MAX_RELABEL_DELAY = 100;
@@ -37,10 +39,11 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 	private final LabelPlacement mLabelPlacer;
 	private final Worker mWorker;
 
-	public LabelLayer(Map map, TileRenderer tileRenderer) {
+	public LabelLayer(Map map, VectorTileLayer l) {
 		super(map);
 		l.getManager().events.bind(this);
-		mLabelPlacer = new LabelPlacement(map, tileRenderer);
+
+		mLabelPlacer = new LabelPlacement(map, l.getTileRenderer());
 		mWorker = new Worker(map);
 		mRenderer = new TextRenderer(mWorker);
 	}

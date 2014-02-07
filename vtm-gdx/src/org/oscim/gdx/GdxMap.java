@@ -136,10 +136,10 @@ public abstract class GdxMap implements ApplicationListener {
 			mMap.setTheme(InternalRenderTheme.DEFAULT);
 
 			if (buildings)
-				layers.add(new BuildingLayer(mMap, mMapLayer.getTileRenderer()));
+				layers.add(new BuildingLayer(mMap, mMapLayer));
 
 			if (labels)
-				layers.add(new LabelLayer(mMap, mMapLayer.getTileRenderer()));
+				layers.add(new LabelLayer(mMap, mMapLayer));
 		}
 
 		if (tileGrid)

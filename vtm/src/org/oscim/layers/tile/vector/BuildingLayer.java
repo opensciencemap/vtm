@@ -21,7 +21,6 @@ import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
-import org.oscim.tiling.TileRenderer;
 import org.oscim.utils.FastMath;
 
 public class BuildingLayer extends Layer {
@@ -29,9 +28,9 @@ public class BuildingLayer extends Layer {
 
 	final ExtrusionRenderer mExtLayer;
 
-	public BuildingLayer(Map map, TileRenderer tileRenderer) {
+	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
 		super(map);
-		mExtLayer = new ExtrusionRenderer(tileRenderer) {
+		mExtLayer = new ExtrusionRenderer(tileLayer.getTileRenderer()) {
 			private long mStartTime;
 
 			@Override
