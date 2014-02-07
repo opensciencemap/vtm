@@ -39,12 +39,12 @@ public class ItemizedIconLayer<Item extends MarkerItem> extends ItemizedLayer<It
 
 	public ItemizedIconLayer(Map map, List<Item> list,
 	        MarkerSymbol defaultMarker,
-	        ItemizedIconLayer.OnItemGestureListener<Item> onItemGestureListener) {
+	        OnItemGestureListener<Item> onItemGestureListener) {
 
 		super(map, defaultMarker);
 
-		this.mItemList = list;
-		this.mOnItemGestureListener = onItemGestureListener;
+		mItemList = list;
+		mOnItemGestureListener = onItemGestureListener;
 		populate();
 	}
 
