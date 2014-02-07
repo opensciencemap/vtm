@@ -178,7 +178,6 @@ public class MapView extends RelativeLayout {
 			return true;
 
 		mMap.handleMotionEvent(mMotionEvent.wrap(motionEvent));
-		mMotionEvent.wrap(null);
 
 		return true;
 	}
