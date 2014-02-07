@@ -98,6 +98,8 @@ public final class LineTexLayer extends RenderElement {
 
 	private boolean evenSegment;
 
+	protected boolean mRandomizeOffset = true;
+
 	LineTexLayer(int layer) {
 		super(TEXLINE);
 
@@ -167,7 +169,7 @@ public final class LineTexLayer extends RenderElement {
 			float y = points[pos++] * COORD_SCALE;
 
 			/* randomize a bit */
-			float lineLength = (x * x + y * y) % 80;
+			float lineLength = mRandomizeOffset ? (x * x + y * y) % 80 : 0;
 
 			while (pos < end) {
 				float nx = points[pos++] * COORD_SCALE;
@@ -381,6 +383,7 @@ public final class LineTexLayer extends RenderElement {
 				/* add offset vertex */
 				int vOffset = -STRIDE;
 
+				// TODO interleave 1. and 2. pass to improve vertex cache usage?
 				/* first pass */
 				int allIndices = (ll.evenQuads * 6);
 				for (int i = 0; i < allIndices; i += maxIndices) {
