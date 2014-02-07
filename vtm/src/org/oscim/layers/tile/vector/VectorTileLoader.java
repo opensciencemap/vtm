@@ -360,7 +360,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		x /= (n / 2);
 		y /= (n / 2);
 
-		mTile.addLabel(TextItem.pool.get().set(x, y, value, text));
+		mTile.labels.push(TextItem.pool.get().set(x, y, value, text));
 	}
 
 	@Override
@@ -371,7 +371,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
 			PointF p = mElement.getPoint(i);
-			mTile.addLabel(TextItem.pool.get().set(p.x, p.y, value, text));
+			mTile.labels.push(TextItem.pool.get().set(p.x, p.y, value, text));
 		}
 	}
 
@@ -407,7 +407,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 			SymbolItem it = SymbolItem.pool.get();
 			it.set(p.x, p.y, symbol.texture, true);
-			mTile.addSymbol(it);
+			mTile.symbols.push(it);
 		}
 	}
 

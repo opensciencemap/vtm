@@ -214,8 +214,9 @@ public final class WayDecorator {
 			t.x2 = x2;
 			t.y2 = y2;
 			t.length = (short) segmentLength;
+
 			t.edges = edge;
-			tile.addLabel(t);
+			tile.labels.push(t);
 
 			i = last;
 		}

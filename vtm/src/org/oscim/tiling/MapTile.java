@@ -20,7 +20,7 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
-import org.oscim.utils.pool.Inlist;
+import org.oscim.utils.pool.Inlist.List;
 import org.oscim.utils.quadtree.Node;
 
 /**
@@ -81,17 +81,11 @@ public class MapTile extends Tile {
 	 * FIXME move to VectorMapTile
 	 * Tile data set by TileLoader.
 	 */
-	public TextItem labels;
-	public SymbolItem symbols;
+
+	public final List<SymbolItem> symbols = new List<SymbolItem>();
+	public final List<TextItem> labels = new List<TextItem>();
+
 	public ElementLayers layers;
-
-	public void addLabel(TextItem it) {
-		labels = Inlist.push(labels, it);
-	}
-
-	public void addSymbol(SymbolItem it) {
-		symbols = Inlist.push(symbols, it);
-	}
 
 	/**
 	 * Tile is in view region. Set by TileRenderer.
@@ -234,8 +228,8 @@ public class MapTile extends Tile {
 			layers = null;
 		}
 
-		labels = TextItem.pool.releaseAll(labels);
-		symbols = SymbolItem.pool.releaseAll(symbols);
+		TextItem.pool.releaseAll(labels.clear());
+		SymbolItem.pool.releaseAll(symbols.clear());
 
 		state = STATE_NONE;
 	}

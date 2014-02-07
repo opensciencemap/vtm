@@ -173,7 +173,7 @@ public class LabelPlacement {
 	private Label addWayLabels(MapTile t, Label l, float dx, float dy,
 	        double scale) {
 
-		for (TextItem ti = t.labels; ti != null; ti = ti.next) {
+		for (TextItem ti : t.labels) {
 			if (ti.text.caption)
 				continue;
 
@@ -225,7 +225,8 @@ public class LabelPlacement {
 
 	private Label addNodeLabels(MapTile t, Label l, float dx, float dy,
 	        double scale, float cos, float sin) {
-		O: for (TextItem ti = t.labels; ti != null; ti = ti.next) {
+
+		O: for (TextItem ti : t.labels) {
 			if (!ti.text.caption)
 				continue;
 
@@ -443,7 +444,7 @@ public class LabelPlacement {
 				float dy = (float) (t.tileY * Tile.SIZE - tileY);
 				dx = flipLongitude(dx, maxx);
 
-				for (SymbolItem ti = t.symbols; ti != null; ti = ti.next) {
+				for (SymbolItem ti : t.symbols) {
 					if (ti.texRegion == null)
 						continue;
 
