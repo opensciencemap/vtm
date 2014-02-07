@@ -33,23 +33,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * 
+ * Note:
+ * Coordinates must be in range [-4096..4096] and the maximum
+ * resolution for coordinates is 0.25 as points will be converted
+ * to fixed point values.
  */
 public final class LineLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(LineLayer.class);
 
 	private static final float COORD_SCALE = MapRenderer.COORD_SCALE;
-	// scale factor mapping extrusion vector to short values
+	/** scale factor mapping extrusion vector to short values */
 	public static final float DIR_SCALE = 2048;
-	// mask for packing last two bits of extrusion vector with texture
-	// coordinates
+	/**
+	 * mask for packing last two bits of extrusion vector with texture
+	 * coordinates
+	 */
 	private static final int DIR_MASK = 0xFFFFFFFC;
 
-	// lines referenced by this outline layer
+	/* lines referenced by this outline layer */
 	public LineLayer outlines;
 	public Line line;
 	public float width;
 
 	public boolean roundCap;
+	private float mMinDist = 1 / 4f;
 
 	LineLayer(int layer) {
 		super(RenderElement.LINE);
@@ -63,6 +71,13 @@ public final class LineLayer extends RenderElement {
 
 		link.outlines = outlines;
 		outlines = link;
+	}
+
+	/**
+	 * For point reduction by minimal distance. Default is 1/4.
+	 */
+	public void setDropDistance(float minDist) {
+		mMinDist = minDist < 1 / 4f ? 1 / 4f : minDist;
 	}
 
 	public void addLine(GeometryBuffer geom) {
@@ -101,12 +116,10 @@ public final class LineLayer extends RenderElement {
 		short v[] = si.vertices;
 		int opos = si.used;
 
-		// FIXME: remove this when switching to oscimap MapDatabase
-		//if (!MapView.enableClosePolygons)
-		//	closed = false;
-
-		// Note: just a hack to save some vertices, when there are more than 200 lines
-		// per type
+		/*
+		 * Note: just a hack to save some vertices, when there are
+		 * more than 200 lines per type. FIXME make optional!
+		 */
 		if (rounded && index != null) {
 			int cnt = 0;
 			for (int i = 0, n = index.length; i < n; i++, cnt++) {
@@ -340,7 +353,7 @@ public final class LineLayer extends RenderElement {
 				wy = nextY - y;
 				a = (float) Math.sqrt(wx * wx + wy * wy);
 				// skip too short segmets
-				if (a < 1) {
+				if (a < mMinDist) {
 					numVertices -= 2;
 					continue;
 				}
