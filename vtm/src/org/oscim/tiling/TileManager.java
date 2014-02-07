@@ -51,44 +51,44 @@ public class TileManager {
 	private int mMinZoom;
 	private int mMaxZoom;
 
-	// limit number tiles with new data not uploaded to GL
-	// TODO this should depend on the number of tiles displayed
+	/**
+	 * limit number tiles with new data not uploaded to GL
+	 * TODO this should depend on the number of tiles displayed
+	 */
 	private static final int MAX_TILES_IN_QUEUE = 40;
-	// cache limit threshold
+
+	/** cache limit threshold */
 	private static final int CACHE_THRESHOLD = 30;
+	private static final int CACHE_CLEAR_THRESHOLD = 10;
 
 	private final Map mMap;
 	private final Viewport mViewport;
 
-	// cache for all tiles
+	/** cache for all tiles */
 	private MapTile[] mTiles;
 
-	// actual number of tiles in mTiles
+	/** actual number of tiles in mTiles */
 	private int mTilesCount;
 
-	// current end position in mTiles
+	/** current end position in mTiles */
 	private int mTilesSize;
 
-	// counter for tiles with new data not
-	// yet uploaded to GL
-	private volatile int mTilesForUpload;
+	/** counter for tiles with new data not yet loaded to GL */
+	private int mTilesForUpload;
 
-	// new tile jobs for MapWorkers
+	/* new tile jobs for MapWorkers */
 	private final ArrayList<MapTile> mJobs;
 
-	// counter to check whether current TileSet has changed
+	/* counter to check whether current TileSet has changed */
 	private int mUpdateSerial;
 
-	// lock for TileSets while updating MapTile locks
+	/* lock for TileSets while updating MapTile locks - still needed? */
 	private final Object mTilelock = new Object();
-
-	// need to keep track of TileSets to clear on reset.
-	// private final ArrayList<TileSet> mTileSets = new ArrayList<TileSet>(4);
 
 	private TileSet mCurrentTiles;
 	/* package */TileSet mNewTiles;
 
-	// job queue filled in TileManager and polled by TileLoaders
+	/* job queue filled in TileManager and polled by TileLoaders */
 	private final JobQueue jobQueue;
 
 	private final QuadTree<TileNode, MapTile> mIndex = new QuadTree<TileNode, MapTile>() {
@@ -149,16 +149,16 @@ public class TileManager {
 	}
 
 	public void init() {
-		// pass VBOs and VertexItems back to pools
+		/* pass VBOs and VertexItems back to pools */
 		for (int i = 0; i < mTilesSize; i++)
 			clearTile(mTiles[i]);
 
-		// clear references to cached MapTiles
+		/* clear references to cached MapTiles */
 		Arrays.fill(mTiles, null);
 		mTilesSize = 0;
 		mTilesCount = 0;
 
-		// set up TileSet large enough to hold current tiles
+		/* set up TileSet large enough to hold current tiles */
 		int num = Math.max(mMap.getWidth(), mMap.getHeight());
 		int size = Tile.SIZE >> 1;
 		int numTiles = (num * num) / (size * size) * 4;
@@ -168,8 +168,9 @@ public class TileManager {
 	}
 
 	/**
-	 * 1. Update mCurrentTiles TileSet of currently visible tiles. 2. Add not
-	 * yet loaded (or loading) tiles to JobQueue. 3. Manage cache
+	 * 1. Update mCurrentTiles TileSet of currently visible tiles.
+	 * 2. Add not yet loaded (or loading) tiles to JobQueue.
+	 * 3. Manage cache
 	 * 
 	 * @param pos
 	 *            current MapPosition
@@ -180,12 +181,12 @@ public class TileManager {
 		if (mNewTiles == null)
 			init();
 
-		// clear JobQueue and set tiles to state == NONE.
-		// one could also append new tiles and sort in JobQueue
-		// but this has the nice side-effect that MapWorkers dont
-		// start with old jobs while new jobs are calculated, which
-		// should increase the chance that they are free when new
-		// jobs come in.
+		/* clear JobQueue and set tiles to state == NONE.
+		 * one could also append new tiles and sort in JobQueue
+		 * but this has the nice side-effect that MapWorkers dont
+		 * start with old jobs while new jobs are calculated, which
+		 * should increase the chance that they are free when new
+		 * jobs come in. */
 		jobQueue.clear();
 
 		// load some tiles more than currently visible (* 0.75)
@@ -223,7 +224,7 @@ public class TileManager {
 		Arrays.sort(newTiles, 0, newCnt, TileSet.coordComparator);
 
 		if (!changed) {
-			// compare if any tile has changed
+			/* compare if any tile has changed */
 			for (int i = 0; i < newCnt; i++) {
 				if (newTiles[i] != curTiles[i]) {
 					changed = true;
@@ -234,13 +235,13 @@ public class TileManager {
 
 		if (changed) {
 			synchronized (mTilelock) {
-				// lock new tiles
+				/* lock new tiles */
 				mNewTiles.lockTiles();
 
-				// unlock previous tiles
+				/* unlock previous tiles */
 				mCurrentTiles.releaseTiles();
 
-				// make new tiles current
+				/* make new tiles current */
 				TileSet tmp = mCurrentTiles;
 				mCurrentTiles = mNewTiles;
 				mNewTiles = tmp;
@@ -248,7 +249,7 @@ public class TileManager {
 				mUpdateSerial++;
 			}
 
-			// request rendering as tiles changed
+			/* request rendering as tiles changed */
 			mMap.render();
 		}
 
@@ -260,7 +261,7 @@ public class TileManager {
 		jobs = mJobs.toArray(jobs);
 		updateTileDistances(jobs, jobs.length, pos);
 
-		// sets tiles to state == LOADING
+		/* sets tiles to state == LOADING */
 		jobQueue.setJobs(jobs);
 
 		mJobs.clear();
@@ -316,7 +317,7 @@ public class TileManager {
 		if (tileSet.serial == mUpdateSerial)
 			return false;
 
-		// dont flip mNew/mCurrentTiles while copying
+		/* do not flip mNew/mCurrentTiles while copying */
 		synchronized (mTilelock) {
 			tileSet.setTiles(mCurrentTiles);
 			tileSet.serial = mUpdateSerial;
@@ -334,7 +335,6 @@ public class TileManager {
 		tileSet.releaseTiles();
 	}
 
-	/* package */
 	MapTile addTile(int x, int y, int zoomLevel) {
 		MapTile tile = mIndex.getTile(x, y, zoomLevel);
 
@@ -347,9 +347,9 @@ public class TileManager {
 		}
 
 		if ((zoomLevel > 2) && (mZoomTable == null)) {
+			/* prefetch parent */
 			boolean add = false;
 
-			// prefetch parent
 			MapTile p = tile.node.parent.item;
 
 			if (p == null) {
@@ -374,13 +374,13 @@ public class TileManager {
 		if (mTilesSize == mTiles.length) {
 			if (mTilesSize > mTilesCount) {
 				TileDistanceSort.sort(mTiles, 0, mTilesSize);
-				// sorting also repacks the 'sparse' filled array
-				// so end of mTiles is at mTilesCount now
+				/* sorting also repacks the 'sparse' filled array
+				 * so end of mTiles is at mTilesCount now */
 				mTilesSize = mTilesCount;
 			}
 
 			if (mTilesSize == mTiles.length) {
-				log.debug("realloc tiles " + mTilesSize);
+				log.debug("realloc tiles {}", mTilesSize);
 				MapTile[] tmp = new MapTile[mTiles.length + 20];
 				System.arraycopy(mTiles, 0, tmp, 0, mTilesCount);
 				mTiles = tmp;
@@ -557,11 +557,10 @@ public class TileManager {
 
 				events.tell(TILE_LOADED, tile);
 
-				// is volatile
 				mTilesForUpload += 1;
 
-				// locked means the tile is visible or referenced by
-				// a tile that might be visible.
+				/* locked means the tile is visible or referenced by
+				 * a tile that might be visible. */
 				if (tile.isLocked())
 					mMap.render();
 			}
@@ -583,13 +582,13 @@ public class TileManager {
 				MapTile tile = null;
 
 				if (cnt == maxTiles) {
-					log.debug("reached maximum tiles " + maxTiles);
+					log.debug("too many tiles {}", maxTiles);
 					break;
 				}
 				int xx = x;
 
 				if (x < 0 || x >= xmax) {
-					// flip-around date line
+					/* flip-around date line */
 					if (x < 0)
 						xx = xmax + x;
 					else
@@ -599,7 +598,7 @@ public class TileManager {
 						continue;
 				}
 
-				// check if tile is already added
+				/* check if tile is already added */
 				for (int i = 0; i < cnt; i++)
 					if (tiles[i].tileX == xx && tiles[i].tileY == y) {
 						tile = tiles[i];
