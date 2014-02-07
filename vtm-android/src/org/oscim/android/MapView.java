@@ -105,6 +105,10 @@ public class MapView extends RelativeLayout {
 		Tile.SIZE = 400;
 
 		mMap = new AndroidMap(this);
+
+		if (context instanceof MapActivity)
+			((MapActivity)context).registerMapView(this);
+
 		mCompass = new Compass(context, mMap);
 
 		mMap.clearMap();
