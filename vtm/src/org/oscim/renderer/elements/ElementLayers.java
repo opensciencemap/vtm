@@ -25,6 +25,7 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.renderer.BufferObject;
+import org.oscim.theme.styles.Area;
 import org.oscim.theme.styles.Line;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is primarily intended for rendering the vector elements of a
  * MapTile. It can be used for other purposes as well but some optimizations
- * applied probably wont make sense in different contexts.
+ * (and limitations) probably wont make sense in different contexts.
  */
 public class ElementLayers {
 	static final Logger log = LoggerFactory.getLogger(ElementLayers.class);
@@ -83,14 +84,28 @@ public class ElementLayers {
 	 * ordered from bottom (0) to top
 	 */
 	public LineLayer addLineLayer(int level, Line style) {
-		LineLayer ll = (LineLayer) getLayer(level, LINE);
-		if (ll == null)
+		LineLayer l = (LineLayer) getLayer(level, LINE);
+		if (l == null)
 			return null;
+		l.width = style.width;
+		l.line = style;
+		return l;
+	}
 
-		ll.width = style.width;
-		ll.line = style;
+	public PolygonLayer addPolygonLayer(int level, Area style) {
+		PolygonLayer l = (PolygonLayer) getLayer(level, POLYGON);
+		if (l == null)
+			return null;
+		l.area = style;
+		return l;
+	}
 
-		return ll;
+	public MeshLayer addMeshLayer(int level, Area style) {
+		MeshLayer l = (MeshLayer) getLayer(level, MESH);
+		if (l == null)
+			return null;
+		l.area = style;
+		return l;
 	}
 
 	/**
@@ -193,16 +208,16 @@ public class ElementLayers {
 
 		RenderElement l = baseLayers;
 		if (l == null || l.level > level) {
-			/** insert new layer at start */
+			/* insert new layer at start */
 			l = null;
 		} else {
 			while (true) {
-				/** found layer */
+				/* found layer */
 				if (l.level == level) {
 					layer = l;
 					break;
 				}
-				/** insert layer between current and next layer */
+				/* insert layer between current and next layer */
 				if (l.next == null || l.next.level > level)
 					break;
 
@@ -211,7 +226,7 @@ public class ElementLayers {
 		}
 
 		if (layer == null) {
-			/** add a new RenderElement */
+			/* add a new RenderElement */
 			if (type == LINE)
 				layer = new LineLayer(level);
 			else if (type == POLYGON)
@@ -234,7 +249,7 @@ public class ElementLayers {
 			}
 		}
 
-		/** check if found layer matches requested type */
+		/* check if found layer matches requested type */
 		if (layer.type != type) {
 			log.error("BUG wrong layer {} {} on layer {}",
 			          Integer.valueOf(layer.type),
@@ -334,7 +349,7 @@ public class ElementLayers {
 	}
 
 	static void addPoolItems(RenderElement l, ShortBuffer sbuf) {
-		/** keep offset of layer data in vbo */
+		/* keep offset of layer data in vbo */
 		l.offset = sbuf.position() * SHORT_BYTES;
 
 		for (VertexItem it = l.vertexItems; it != null; it = it.next) {
