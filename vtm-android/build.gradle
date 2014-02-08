@@ -2,11 +2,6 @@
 apply plugin: 'android-library'
 apply plugin: 'android-maven'
 
-repositories {
-	mavenCentral()
-	mavenLocal()
-}
-
 //http://stackoverflow.com/questions/20674650/how-to-configure-ndk-with-android-gradle-plugin-0-7
 task nativeLibsToJar(type: Zip, description: 'create a jar with native libs') {
 	destinationDir file("$buildDir/native-libs")
