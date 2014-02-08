@@ -9,7 +9,7 @@
   
   <uses-sdk
     android:minSdkVersion="10"
-    android:targetSdkVersion="18" />
+    android:targetSdkVersion="19" />
 
   <application
     android:label="JeoMap"
