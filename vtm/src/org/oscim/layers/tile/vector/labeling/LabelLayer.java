@@ -89,12 +89,7 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 
 	@Override
 	public void onDetach() {
-		// TODO stop and clear labeling thread
-		log.debug("DETACH");
-
-		// clear labels
 		mWorker.cancel(true);
-
 		super.onDetach();
 	}
 
@@ -103,7 +98,8 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 		if (clear)
 			mWorker.cancel(true);
 
-		mWorker.submit(MAX_RELABEL_DELAY);
+		if (changed || clear)
+			mWorker.submit(MAX_RELABEL_DELAY);
 	}
 
 	@Override
@@ -126,9 +122,11 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 	@Override
 	public void onEvent(Object source, Event e, MapTile tile) {
 		if (e == TileManager.TILE_LOADED) {
-			log.debug("tile loaded: {}", tile);
+			if (tile.isVisible)
+				mWorker.submit(MAX_RELABEL_DELAY / 4);
+			//log.debug("tile loaded: {}", tile);
 		} else if (e == TileManager.TILE_REMOVED) {
-			log.debug("tile removed: {}", tile);
+			//log.debug("tile removed: {}", tile);
 		}
 	}
 
