@@ -19,8 +19,6 @@ package org.oscim.utils;
 /**
  * from http://en.wikipedia.org/wiki/Cohen%E2%80%93
  * Sutherland_algorithm
- * 
- * @adapted by Hannes Janetzek
  */
 
 public class LineClipper {

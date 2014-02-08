@@ -28,15 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Changes Viewport for scroll, fling, scale, rotation and tilt gestures
- * 
- * @TODO:
- *        - better recognition of tilt/rotate/scale state
- *        one could check change of rotation / scale within a
- *        given time to estimate if the mode should be changed:
- *        http://en.wikipedia.org/wiki/Viterbi_algorithm
+ * Changes Viewport for move, fling, scale, rotation and tilt gestures.
  */
-
 public class MapEventLayer extends Layer implements Map.InputListener, GestureListener {
 
 	static final Logger log = LoggerFactory.getLogger(MapEventLayer.class);

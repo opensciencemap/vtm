@@ -277,15 +277,14 @@ public abstract class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer
 	}
 
 	/**
+	 * TODO
 	 * If the given Item is found in the overlay, force it to be the current
-	 * focus-bearer. Any registered {@@link
-	 * ItemizedOverlay#OnFocusChangeListener} will be notified. This does not
-	 * move the map, so if the Item isn't already centered, the user may get
-	 * confused. If the Item is not found, this is a no-op. You can also pass
-	 * null to remove focus.
+	 * focus-bearer. Any registered {link ItemizedLayer#OnFocusChangeListener}
+	 * will be notified. This does not move the map, so if the Item isn't
+	 * already centered, the user may get confused. If the Item is not found,
+	 * this is a no-op. You can also pass null to remove focus.
 	 * 
 	 * @param item
-	 *            ...
 	 */
 	public void setFocus(final Item item) {
 		mFocusedItem = item;

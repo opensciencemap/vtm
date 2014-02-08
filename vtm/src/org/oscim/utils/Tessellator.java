@@ -32,16 +32,6 @@ public class Tessellator {
 	/**
 	 * Special version for ExtrusionLayer to match indices with vertex
 	 * positions.
-	 * 
-	 * @param points
-	 * @param ppos
-	 * @param plen
-	 * @param index
-	 * @param ipos
-	 * @param rings
-	 * @param vertexOffset
-	 * @param outTris
-	 * @return
 	 */
 	public static int tessellate(float[] points, int ppos, int plen, short[] index,
 	        int ipos, int rings, int vertexOffset, VertexItem outTris) {
@@ -116,10 +106,6 @@ public class Tessellator {
 
 	/**
 	 * Untested!
-	 * 
-	 * @param geom
-	 * @param out
-	 * @return
 	 */
 	public static int tessellate(GeometryBuffer geom, GeometryBuffer out) {
 
@@ -171,15 +157,6 @@ public class Tessellator {
 		return 1;
 	}
 
-	/**
-	 * 
-	 * @param geom
-	 * @param scale
-	 * @param outPoints
-	 * @param outTris
-	 * @param vertexOffset
-	 * @return
-	 */
 	public static int tessellate(GeometryBuffer geom, float scale,
 	        VertexItem outPoints, VertexItem outTris, int vertexOffset) {
 

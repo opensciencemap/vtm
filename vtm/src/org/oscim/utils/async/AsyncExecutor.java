@@ -42,7 +42,7 @@ public class AsyncExecutor {
 	 * Creates a new AsynchExecutor that allows maxConcurrent {@link Runnable}
 	 * instances to run in parallel.
 	 * 
-	 * @param maxConcurrent
+	 * @param maxConcurrent number of threads.
 	 */
 	public AsyncExecutor(int maxConcurrent) {
 		executor = Executors.newFixedThreadPool(maxConcurrent, new ThreadFactory() {

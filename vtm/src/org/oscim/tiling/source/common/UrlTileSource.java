@@ -78,9 +78,9 @@ public abstract class UrlTileSource extends TileSource {
 	 * override getTileUrl() for custom url formatting using
 	 * Strings
 	 * 
-	 * @param tile Tile
-	 * @param path to write url string
-	 * @param curPos current position
+	 * @param tile the Tile
+	 * @param buf to write url string
+	 * @param pos current position
 	 * @return new position
 	 */
 	protected int formatTilePath(Tile tile, byte[] buf, int pos) {

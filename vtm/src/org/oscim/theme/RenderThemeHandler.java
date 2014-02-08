@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.XMLReaderAdapter;
 import org.oscim.backend.canvas.Bitmap;
@@ -84,8 +82,6 @@ public class RenderThemeHandler extends DefaultHandler {
 	 *         the input stream.
 	 * @throws SAXException
 	 *             if an error occurs while parsing the render theme XML.
-	 * @throws ParserConfigurationException
-	 *             if an error occurs while creating the XML parser.
 	 * @throws IOException
 	 *             if an I/O error occurs while reading from the input stream.
 	 */

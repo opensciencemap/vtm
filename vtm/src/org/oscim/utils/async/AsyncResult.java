@@ -40,7 +40,7 @@ public class AsyncResult<T> {
 	/**
 	 * @return waits if necessary for the computation to complete and then
 	 *         returns the result
-	 * @throws GdxRuntimeException if there was an error
+	 * @throws RuntimeException if there was an error
 	 */
 	public T get() {
 		try {

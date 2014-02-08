@@ -209,7 +209,7 @@ public abstract class Map {
 	/**
 	 * Get current {@link MapPosition}.
 	 * 
-	 * @param mapPosition
+	 * @return true when MapPosition was updated (has changed)
 	 */
 	public boolean getMapPosition(MapPosition mapPosition) {
 		return mViewport.getMapPosition(mapPosition);

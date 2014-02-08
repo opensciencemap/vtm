@@ -29,12 +29,10 @@ import org.oscim.core.Tile;
  * <pre>
  * Viewport.getMapViewProjection(box)
  * 	ScanBox sb = new ScanBox(){
- * 		@Override
  *          protected void setVisible(int y, int x1, int x2) {
  *          }
  * 	};
  * sb.scan(pos.x, pos.y, pos.scale, * zoomLevel, coords);
- * 
  * </pre>
  * 
  * where zoomLevel is the zoom-level for which tile coordinates should be
@@ -60,9 +58,7 @@ public abstract class ScanBox {
 		return mBox;
 	}
 
-	/*
-	 * ported from Polymaps: Layer.js
-	 */
+	/* ported from Polymaps: Layer.js */
 
 	static class Edge {
 		float x0, y0, x1, y1, dx, dy;

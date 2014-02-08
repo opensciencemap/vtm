@@ -67,12 +67,6 @@ public class LwHttp {
 	/**
 	 * @param url
 	 *            Base url for tiles
-	 * @param contentType
-	 *            Expected Content-Type
-	 * @param extension
-	 *            'file' extension, usually .png
-	 * @param deflate
-	 *            true when content uses gzip compression
 	 */
 	public LwHttp(URL url) {
 

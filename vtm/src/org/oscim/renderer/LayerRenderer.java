@@ -37,7 +37,7 @@ public abstract class LayerRenderer {
 	/**
 	 * Set 'ready for render' state when layer data is ready for rendering.
 	 * 
-	 * @param true if render() should be called, false otherwise.
+	 * @param ready true if render() should be called, false otherwise.
 	 */
 	protected void setReady(boolean ready) {
 		isReady = ready;

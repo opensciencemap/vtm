@@ -26,7 +26,7 @@ public class EventDispatcher<T, E> {
 		 * 
 		 * @param source the event source
 		 * @param event the event object/type
-		 * @param data, some object involved in this event
+		 * @param data some object involved in this event
 		 */
 		public void onEvent(Object source, Event event, E data);
 	}

@@ -333,9 +333,7 @@ public class TileManager {
 	}
 
 	/**
-	 * Unlock tiles and clear all item references.
-	 * 
-	 * @param tiles
+	 * Unlock TileSet and clear all item references.
 	 */
 	public void releaseTiles(TileSet tileSet) {
 		tileSet.releaseTiles();
@@ -508,7 +506,6 @@ public class TileManager {
 	 * 
 	 * @param tile
 	 *            Tile ready for upload in TileRenderLayer
-	 * @return caller does not care
 	 */
 	public void jobCompleted(final MapTile tile, final boolean success) {
 		mMap.post(new Runnable() {
