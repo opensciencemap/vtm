@@ -1,0 +1,29 @@
+project(':vtm-gdx-desktop') {
+	apply plugin: 'java'
+	apply plugin: 'maven'
+	apply plugin: 'application'
+
+	mainClassName = 'org.oscim.gdx.GdxMapApp'
+
+	sourceSets {
+		main.java.srcDirs = ['src']
+		main.resources.srcDirs = ['src']
+
+		main.resources.srcDirs = [
+			file('../vtm/assets').getAbsolutePath()
+		]
+		output.resourcesDir = 'assets'
+	}
+
+	run { ignoreExitValue = true }
+
+	dependencies {
+		compile project(':vtm-gdx')
+		compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl.jar')
+		compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl-natives.jar')
+		compile files('../vtm-ext-libs/gdx/gdx-natives.jar')
+		compile files('../vtm-ext-libs/gdx/vtm-jni-natives.jar')
+		compile 'org.slf4j:slf4j-api:1.7.5'
+		compile 'org.slf4j:slf4j-simple:1.7.5'
+	}
+}
