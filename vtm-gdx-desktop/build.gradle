@@ -5,13 +5,18 @@ project(':vtm-gdx-desktop') {
 
 	mainClassName = 'org.oscim.gdx.GdxMapApp'
 
+	task copyAssets(type: Copy) {
+		from "$rootDir/vtm/assets"
+		into "assets"
+		include '**/*'
+	}
+
+	tasks.withType(JavaCompile) { compileTask -> compileTask.dependsOn copyAssets }
+
 	sourceSets {
 		main.java.srcDirs = ['src']
 		main.resources.srcDirs = ['src']
-
-		main.resources.srcDirs = [
-			file('../vtm/assets').getAbsolutePath()
-		]
+		main.resources.srcDirs = ['assets']
 		output.resourcesDir = 'assets'
 	}
 

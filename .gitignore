@@ -2,6 +2,7 @@
 */gen/*
 */obj/*
 target/
+build/
 *.o
 *.so
 *.jar
@@ -12,6 +13,8 @@ target/
 /vtm/jni/memcpy_wrap.c
 /vtm/jni/poly2tri/
 /vtm/libs/
+/vtm-android-example/assets/
+/vtm-gdx-desktop/assets/
 /vtm-gdx-html/war/assets/
 /vtm-gdx-html/war/WEB-INF/
 /vtm-gdx-html/war/org.oscim.gdx.GwtDefinition/
@@ -26,4 +29,5 @@ target/
 /themes/
 /vtm/assets/themes/
 .gradle
-build/
+.idea
+*.iml

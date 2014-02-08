@@ -5,6 +5,14 @@ dependencies {
 	compile fileTree(dir: 'libs', include: '*.jar')
 }
 
+task copyAssets(type: Copy) {
+	from "$rootDir/vtm/assets"
+	into "assets"
+	include '**/*'
+}
+
+tasks.withType(JavaCompile) { compileTask -> compileTask.dependsOn copyAssets }
+
 android {
 	compileSdkVersion 19
 	buildToolsVersion '19.0.1'
@@ -17,7 +25,7 @@ android {
 			aidl.srcDirs = ['src', 'assets']
 			renderscript.srcDirs = ['src', 'assets']
 			res.srcDirs = ['res']
-			assets.srcDirs = ['../vtm/assets']
+			assets.srcDirs = ['assets']
 		}
 
 		debug.setRoot('build-types/debug')
