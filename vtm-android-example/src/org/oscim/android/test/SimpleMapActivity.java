@@ -15,7 +15,6 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */package org.oscim.android.test;
 
-import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
@@ -35,7 +34,7 @@ public class SimpleMapActivity extends BaseMapActivity {
 		layers.add(new BuildingLayer(mMap, mBaseLayer));
 		layers.add(new LabelLayer(mMap, mBaseLayer));
 
-		layers.add(new TileGridLayer(mMap));
+		//layers.add(new TileGridLayer(mMap));
 
 		mMap.setTheme(InternalRenderTheme.DEFAULT);
 		//mMap.setTheme(InternalRenderTheme.TRONRENDER);
