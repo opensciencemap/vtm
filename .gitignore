@@ -25,3 +25,5 @@ target/
 /tmp/
 /themes/
 /vtm/assets/themes/
+.gradle
+build/

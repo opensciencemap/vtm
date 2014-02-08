@@ -1,0 +1,13 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'nexus'
+
+dependencies {
+	compile fileTree(dir: '../vtm-ext-libs/libs', include: 'slf4j-api-1.7.5.jar')
+	compile fileTree(dir: '../vtm-ext-libs/findbugs', include: 'annotations.jar')
+}
+
+sourceSets {
+	main.java.srcDirs = ['src']
+	//main.resources.srcDirs = ['src']
+}
