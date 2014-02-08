@@ -236,10 +236,10 @@ public class MapRenderer {
 		GLState.bindTex2D(-1);
 		GLState.useProgram(-1);
 
-		mMap.getAnimator().updateAnimation();
+		mMap.animator().updateAnimation();
 
 		MapPosition pos = mMapPosition;
-		Viewport viewport = mMap.getViewport();
+		Viewport viewport = mMap.viewport();
 		boolean changed = false;
 
 		synchronized (viewport) {
@@ -261,7 +261,7 @@ public class MapRenderer {
 		}
 
 		/* update layers */
-		LayerRenderer[] layers = mMap.getLayers().getLayerRenderer();
+		LayerRenderer[] layers = mMap.layers().getLayerRenderer();
 
 		for (int i = 0, n = layers.length; i < n; i++) {
 			LayerRenderer renderer = layers[i];
@@ -304,7 +304,7 @@ public class MapRenderer {
 		screenWidth = width;
 		screenHeight = height;
 
-		mMap.getViewport().getMatrix(null, mMatrices.proj, null);
+		mMap.viewport().getMatrix(null, mMatrices.proj, null);
 
 		GL.glViewport(0, 0, width, height);
 		GL.glScissor(0, 0, width, height);

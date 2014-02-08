@@ -130,7 +130,7 @@ public class TileManager {
 		mCacheLimit = cacheLimit;
 		mCacheReduce = 0;
 
-		mViewport = map.getViewport();
+		mViewport = map.viewport();
 
 		jobQueue = new JobQueue();
 		mJobs = new ArrayList<MapTile>();

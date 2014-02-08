@@ -51,7 +51,7 @@ implements OnItemGestureListener<MarkerItem> {
 		        new ItemizedLayer<MarkerItem>(mMap, new ArrayList<MarkerItem>(),
 		                                          symbol, this);
 
-		mMap.getLayers().add(markerLayer);
+		mMap.layers().add(markerLayer);
 
 		List<MarkerItem> pts = new ArrayList<MarkerItem>();
 
@@ -63,7 +63,7 @@ implements OnItemGestureListener<MarkerItem> {
 
 		markerLayer.addItems(pts);
 
-		mMap.getLayers().add(new TileGridLayer(mMap));
+		mMap.layers().add(new TileGridLayer(mMap));
 		mMap.setMapPosition(0, 0, 1);
 	}
 

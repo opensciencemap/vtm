@@ -78,7 +78,7 @@ public class MarkerRenderer extends ElementRenderer {
 		int changedVisible = 0;
 		int numVisible = 0;
 
-		mMarkerLayer.map().getViewport().getMapExtents(mBox, mExtents);
+		mMarkerLayer.map().viewport().getMapExtents(mBox, mExtents);
 
 		long flip = (long) (Tile.SIZE * pos.scale) >> 1;
 

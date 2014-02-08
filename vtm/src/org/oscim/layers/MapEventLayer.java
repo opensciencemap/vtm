@@ -76,7 +76,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 
 	public MapEventLayer(Map map) {
 		super(map);
-		mViewport = map.getViewport();
+		mViewport = map.viewport();
 		mTracker = new VelocityTracker();
 	}
 
@@ -110,7 +110,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		int action = getAction(e);
 
 		if (action == MotionEvent.ACTION_DOWN) {
-			mMap.getAnimator().cancel();
+			mMap.animator().cancel();
 
 			mDoubleTap = false;
 			mStartMove = -1;
@@ -372,7 +372,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		int w = Tile.SIZE * 3;
 		int h = Tile.SIZE * 3;
 
-		mMap.getAnimator().animateFling(Math.round(velocityX),
+		mMap.animator().animateFling(Math.round(velocityX),
 		                                Math.round(velocityY),
 		                                -w, w, -h, h);
 		return true;

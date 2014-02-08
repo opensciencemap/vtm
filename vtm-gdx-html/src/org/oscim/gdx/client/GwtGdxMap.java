@@ -126,7 +126,7 @@ class GwtGdxMap extends GdxMap {
 			private MapPosition pos = new MapPosition();
 
 			public void run() {
-				mMap.getViewport().getMapPosition(pos);
+				mMap.viewport().getMapPosition(pos);
 				int lat = (int) (MercatorProjection.toLatitude(pos.y) * 1000);
 				int lon = (int) (MercatorProjection.toLongitude(pos.x) * 1000);
 				int rot = (int) (pos.angle);

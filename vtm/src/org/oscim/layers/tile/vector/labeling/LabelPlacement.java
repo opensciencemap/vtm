@@ -284,7 +284,7 @@ public class LabelPlacement {
 		}
 
 		MapPosition pos = work.pos;
-		boolean changedPos = mMap.getViewport().getMapPosition(pos);
+		boolean changedPos = mMap.viewport().getMapPosition(pos);
 
 		/* do not loop! */
 		if (!changedTiles && !changedPos)

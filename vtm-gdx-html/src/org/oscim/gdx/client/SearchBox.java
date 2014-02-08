@@ -204,7 +204,7 @@ public class SearchBox {
 		final TextBox searchField = new TextBox();
 		//searchField.setText("Bremen");
 		final PathLayer mOverlay = new PathLayer(map, 0xCC0000FF);
-		map.getLayers().add(mOverlay);
+		map.layers().add(mOverlay);
 
 		// We can add style names to widgets
 		searchButton.addStyleName("sendButton");
@@ -255,9 +255,9 @@ public class SearchBox {
 					if (b.maxLatitudeE6 - b.minLatitudeE6 < 100 &&
 					        b.maxLongitudeE6 - b.minLongitudeE6 < 100)
 						// for small bbox use zoom=16 to get an overview
-						map.getAnimator().animateTo(500, b.getCenterPoint(), 1 << 16, false);
+						map.animator().animateTo(500, b.getCenterPoint(), 1 << 16, false);
 					else
-						map.getAnimator().animateTo(b);
+						map.animator().animateTo(b);
 					if (d instanceof NominatimData && ((NominatimData) d).getWkt() != null) {
 						String wkt = ((NominatimData) d).getWkt();
 
@@ -288,8 +288,8 @@ public class SearchBox {
 				} else {
 					MapPosition pos = new MapPosition();
 
-					map.getViewport().setTilt(0);
-					map.getViewport().setRotation(0);
+					map.viewport().setTilt(0);
+					map.viewport().setRotation(0);
 
 					pos.setZoomLevel(13);
 					pos.setPosition(d.getLatitude(), d.getLongitude());

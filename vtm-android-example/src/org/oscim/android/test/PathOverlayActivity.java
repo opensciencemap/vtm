@@ -47,7 +47,7 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 			PathLayer pathLayer = new PathLayer(mMap, c, 3);
 			pathLayer.setPoints(pts);
 
-			mMap.getLayers().add(pathLayer);
+			mMap.layers().add(pathLayer);
 		}
 
 		for (double lat = -90; lat <= 90; lat += 5) {
@@ -61,7 +61,7 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 			PathLayer pathLayer = new PathLayer(mMap, c, 3);
 			pathLayer.setPoints(pts);
 
-			mMap.getLayers().add(pathLayer);
+			mMap.layers().add(pathLayer);
 		}
 
 		mMap.setMapPosition(0, 0, 1);

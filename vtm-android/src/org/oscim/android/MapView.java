@@ -184,6 +184,6 @@ public class MapView extends RelativeLayout {
 		mInitialized = (mWidth > 0 && mHeight > 0);
 
 		if (mInitialized)
-			mMap.getViewport().setViewport(width, height);
+			mMap.viewport().setScreenSize(width, height);
 	}
 }

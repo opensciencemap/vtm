@@ -78,7 +78,7 @@ public class Viewport {
 		mPos.tilt = 0;
 	}
 
-	public synchronized void setViewport(int width, int height) {
+	public synchronized void setScreenSize(int width, int height) {
 		float s = VIEW_SCALE;
 		float aspect = height / (float) width;
 		float[] tmp = new float[16];

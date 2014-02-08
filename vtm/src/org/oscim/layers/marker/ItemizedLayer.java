@@ -167,7 +167,7 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 
 		int eventX = (int) event.getX() - mMap.getWidth() / 2;
 		int eventY = (int) event.getY() - mMap.getHeight() / 2;
-		Viewport mapPosition = mMap.getViewport();
+		Viewport mapPosition = mMap.viewport();
 
 		BoundingBox bbox = mapPosition.getViewBox();
 

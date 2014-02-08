@@ -52,14 +52,14 @@ public class BitmapTileMapActivity extends MapActivity {
 		registerMapView(mMapView);
 
 		MapRenderer.setBackgroundColor(0xff777777);
-		mMap.getLayers().add(new TileGridLayer(mMap, Color.GRAY, 1.8f, 8));
+		mMap.layers().add(new TileGridLayer(mMap, Color.GRAY, 1.8f, 8));
 
 		if (USE_CACHE) {
 			mCache = new TileCache(this, null, mTileSource.getClass().getSimpleName());
 			mCache.setCacheSize(512 * (1 << 10));
 			mTileSource.setCache(mCache);
 		}
-		mMap.getLayers().add(new BitmapTileLayer(mMap, mTileSource));
+		mMap.layers().add(new BitmapTileLayer(mMap, mTileSource));
 
 		mMap.setMapPosition(0, 0, 1 << 2);
 	}

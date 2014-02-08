@@ -33,7 +33,7 @@ public class Compass {
 				mAngle = event.values[0];
 
 				if (mMap != null) {
-					mMap.getViewport().setRotation(-mAngle);
+					mMap.viewport().setRotation(-mAngle);
 					mMap.updateMap(true);
 				}
 			}
@@ -65,6 +65,6 @@ public class Compass {
 
 	public void disable() {
 		mSensorManager.unregisterListener(mListener);
-		mMap.getViewport().setRotation(0);
+		mMap.viewport().setRotation(0);
 	}
 }

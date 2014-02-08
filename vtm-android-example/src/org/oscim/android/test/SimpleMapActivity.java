@@ -30,7 +30,7 @@ public class SimpleMapActivity extends BaseMapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Layers layers = mMap.getLayers();
+		Layers layers = mMap.layers();
 		layers.add(new BuildingLayer(mMap, mBaseLayer));
 		layers.add(new LabelLayer(mMap, mBaseLayer));
 

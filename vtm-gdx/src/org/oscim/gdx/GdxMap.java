@@ -129,7 +129,7 @@ public abstract class GdxMap implements ApplicationListener {
 
 	protected void initDefaultLayers(TileSource tileSource, boolean tileGrid, boolean labels,
 	        boolean buildings) {
-		Layers layers = mMap.getLayers();
+		Layers layers = mMap.layers();
 
 		if (tileSource != null) {
 			mMapLayer = mMap.setBaseMap(tileSource);
@@ -166,7 +166,7 @@ public abstract class GdxMap implements ApplicationListener {
 		mWidth = w;
 		mHeight = h;
 
-		mMap.getViewport().setViewport(w, h);
+		mMap.viewport().setScreenSize(w, h);
 
 		//MapPosition p = new MapPosition();
 		//p.setZoomLevel(14);
@@ -222,7 +222,7 @@ public abstract class GdxMap implements ApplicationListener {
 		mWidth = w;
 		mHeight = h;
 
-		mMap.getViewport().setViewport(w, h);
+		mMap.viewport().setScreenSize(w, h);
 		mMapRenderer.onSurfaceChanged(w, h);
 		mMap.render();
 	}
@@ -244,7 +244,7 @@ public abstract class GdxMap implements ApplicationListener {
 		private Viewport mMapPosition;
 
 		public TouchHandler() {
-			mMapPosition = mMap.getViewport();
+			mMapPosition = mMap.viewport();
 		}
 
 		private boolean mActiveScale;
@@ -304,14 +304,14 @@ public abstract class GdxMap implements ApplicationListener {
 					if (mGridLayer == null) {
 						mGridLayer = new TileGridLayer(mMap);
 						mGridLayer.setEnabled(true);
-						mMap.getLayers().add(mGridLayer);
+						mMap.layers().add(mGridLayer);
 					} else {
 						if (mGridLayer.isEnabled()) {
 							mGridLayer.setEnabled(false);
-							mMap.getLayers().remove(mGridLayer);
+							mMap.layers().remove(mGridLayer);
 						} else {
 							mGridLayer.setEnabled(true);
-							mMap.getLayers().add(mGridLayer);
+							mMap.layers().add(mGridLayer);
 						}
 					}
 					mMap.render();
@@ -391,12 +391,12 @@ public abstract class GdxMap implements ApplicationListener {
 
 			if (amount > 0) {
 
-				mMap.getAnimator().animateZoom(150, 0.8f, 0, 0);
+				mMap.animator().animateZoom(150, 0.8f, 0, 0);
 			} else {
 				float fx = mPosX - mMap.getWidth() / 2;
 				float fy = mPosY - mMap.getHeight() / 2;
 
-				mMap.getAnimator().animateZoom(150, 1.25f, fx, fy);
+				mMap.animator().animateZoom(150, 1.25f, fx, fy);
 			}
 			mMap.updateMap(false);
 
@@ -437,7 +437,7 @@ public abstract class GdxMap implements ApplicationListener {
 		private Viewport mMapPosition;
 
 		public ViewController() {
-			mMapPosition = mMap.getViewport();
+			mMapPosition = mMap.viewport();
 		}
 
 		@Override
@@ -464,7 +464,7 @@ public abstract class GdxMap implements ApplicationListener {
 			//log.debug("fling " + button + " " + velocityX + "/" + velocityY);
 			if (mayFling && button == Buttons.LEFT) {
 				int m = Tile.SIZE * 4;
-				mMap.getAnimator().animateFling((int) velocityX, (int) velocityY, -m, m, -m, m);
+				mMap.animator().animateFling((int) velocityX, (int) velocityY, -m, m, -m, m);
 				return true;
 			}
 			return false;

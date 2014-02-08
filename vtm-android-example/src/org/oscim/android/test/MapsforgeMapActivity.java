@@ -101,7 +101,7 @@ public class MapsforgeMapActivity extends MapActivity {
 
 				VectorTileLayer l = mMap.setBaseMap(mTileSource);
 				mMap.setTheme(InternalRenderTheme.DEFAULT);
-				mMap.getLayers().add(new LabelLayer(mMap, l));
+				mMap.layers().add(new LabelLayer(mMap, l));
 
 				MapInfo info = mTileSource.getMapInfo();
 				if (info.boundingBox != null) {

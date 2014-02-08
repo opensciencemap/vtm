@@ -68,7 +68,7 @@ public abstract class MapActivity extends FragmentActivity {
 		// save the map position
 		MapPosition mapPosition = new MapPosition();
 
-		mMap.getViewport().getMapPosition(mapPosition);
+		mMap.viewport().getMapPosition(mapPosition);
 
 		GeoPoint geoPoint = mapPosition.getGeoPoint();
 

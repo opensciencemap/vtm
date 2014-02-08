@@ -226,18 +226,24 @@ public abstract class Map {
 		return pos;
 	}
 
-	public Viewport getViewport() {
+	/**
+	 * @return Viewport instance
+	 */
+	public Viewport viewport() {
 		return mViewport;
 	}
 
-	public Layers getLayers() {
+	/**
+	 * @return Layers instance
+	 */
+	public Layers layers() {
 		return mLayers;
 	}
 
 	/**
 	 * @return MapAnimator instance
 	 */
-	public MapAnimator getAnimator() {
+	public MapAnimator animator() {
 		return mAnimator;
 	}
 
