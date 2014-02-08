@@ -49,15 +49,12 @@ public class MapView extends RelativeLayout {
 		System.loadLibrary("vtm-jni");
 	}
 
-	public static final boolean debugFrameTime = false;
-	public static final boolean testRegionZoom = false;
-
 	public boolean mRotationEnabled = false;
 	public boolean mCompassEnabled = false;
 	public boolean enablePagedFling = false;
 
-	private final Compass mCompass;
 	private final GestureDetector mGestureDetector;
+	final AndroidMotionEvent mMotionEvent;
 
 	private int mWidth;
 	private int mHeight;
@@ -109,11 +106,10 @@ public class MapView extends RelativeLayout {
 		if (context instanceof MapActivity)
 			((MapActivity)context).registerMapView(this);
 
-		mCompass = new Compass(context, mMap);
-
 		mMap.clearMap();
 		mMap.updateMap(false);
 
+		mMotionEvent = new AndroidMotionEvent();
 		mGestureDetector = new GestureDetector(context, new OnGestureListener() {
 			@Override
 			public boolean onSingleTapUp(MotionEvent e) {
@@ -152,25 +148,15 @@ public class MapView extends RelativeLayout {
 
 	public void onStop() {
 		log.debug("onStop");
-		//mMap.destroy();
 	}
 
 	void onPause() {
 		mMap.pause(true);
-
-		if (this.mCompassEnabled)
-			mCompass.disable();
-
 	}
 
 	void onResume() {
-		if (this.mCompassEnabled)
-			mCompass.enable();
-
 		mMap.pause(false);
 	}
-
-	final AndroidMotionEvent mMotionEvent = new AndroidMotionEvent();
 
 	@Override
 	public boolean onTouchEvent(android.view.MotionEvent motionEvent) {
@@ -189,7 +175,6 @@ public class MapView extends RelativeLayout {
 	@Override
 	protected void onSizeChanged(int width, int height,
 	        int oldWidth, int oldHeight) {
-		log.debug("onSizeChanged: " + width + "x" + height);
 
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
 
@@ -201,41 +186,4 @@ public class MapView extends RelativeLayout {
 		if (mInitialized)
 			mMap.getViewport().setViewport(width, height);
 	}
-
-	public void enableRotation(boolean enable) {
-		mRotationEnabled = enable;
-
-		if (enable) {
-			enableCompass(false);
-		}
-	}
-
-	public void enableCompass(boolean enable) {
-		if (enable == mCompassEnabled)
-			return;
-
-		mCompassEnabled = enable;
-
-		if (enable)
-			enableRotation(false);
-
-		if (enable)
-			mCompass.enable();
-		else
-			mCompass.disable();
-	}
-
-	public boolean getCompassEnabled() {
-		return mCompassEnabled;
-	}
-
-	public boolean getRotationEnabled() {
-		return mRotationEnabled;
-	}
-
-	public void destroy() {
-		log.debug("TODO Auto-generated method stub");
-
-	}
-
 }

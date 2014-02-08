@@ -26,13 +26,12 @@ import android.content.SharedPreferences.Editor;
 import android.support.v4.app.FragmentActivity;
 
 /**
- * MapActivity is the abstract base class which must be extended in order to use
- * a {@link Map}. There are no abstract methods in this implementation which
+ * MapActivity is the abstract base class which can be extended in order to use
+ * a {@link MapView}. There are no abstract methods in this implementation which
  * subclasses need to override and no API key or registration is required.
  * <p>
  * A subclass may create a MapView either via one of the MapView constructors or
- * by inflating an XML layout file. It is possible to use more than one MapView
- * at the same time.
+ * by inflating an XML layout file.
  * <p>
  * When the MapActivity is shut down, the current center position, zoom level
  * and map file of the MapView are saved in a preferences file and restored in
@@ -77,8 +76,6 @@ public abstract class MapActivity extends FragmentActivity {
 		editor.putInt(KEY_LONGITUDE, geoPoint.longitudeE6);
 		editor.putFloat(KEY_MAP_SCALE, (float) mapPosition.scale);
 
-		//editor.putString(KEY_THEME, mMap.getRenderTheme());
-
 		editor.commit();
 	}
 
@@ -116,22 +113,5 @@ public abstract class MapActivity extends FragmentActivity {
 
 			mMap.setMapPosition(mapPosition);
 		}
-
-		//String theme = sharedPreferences.getString(KEY_THEME,
-		//		InternalRenderTheme.DEFAULT.name());
-
-		//		if (theme.startsWith("/")) {
-		//			try {
-		//				map.setRenderTheme(theme);
-		//			} catch (FileNotFoundException e) {
-		//				map.setRenderTheme(InternalRenderTheme.DEFAULT);
-		//			}
-		//		} else {
-		//			try {
-		//				map.setRenderTheme(InternalRenderTheme.valueOf(theme));
-		//			} catch (IllegalArgumentException e) {
-		//				map.setRenderTheme(InternalRenderTheme.DEFAULT);
-		//			}
-		//		}
 	}
 }
