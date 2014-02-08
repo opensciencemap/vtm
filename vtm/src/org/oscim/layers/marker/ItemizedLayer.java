@@ -169,7 +169,7 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 		int eventY = (int) event.getY() - mMap.getHeight() / 2;
 		Viewport mapPosition = mMap.viewport();
 
-		BoundingBox bbox = mapPosition.getViewBox();
+		BoundingBox bbox = mapPosition.getBBox();
 
 		int nearest = -1;
 
