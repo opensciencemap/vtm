@@ -12,34 +12,32 @@ import org.slf4j.LoggerFactory;
  * 
  * ... in case this generic isnt obvious at first sight.
  * */
-public abstract class BoxTree<Box extends BoxItem<E>, E>
-        extends QuadTree<BoxNode<Box>, Box> {
+public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNode<Box>, Box> {
 
 	final static Logger log = LoggerFactory.getLogger(BoxTree.class);
 	static boolean dbg = false;
 
-	int extents;
-	int maxDepth;
+	protected final int extents;
+	protected final int maxDepth;
 
 	public static class BoxNode<T extends BoxItem<?>> extends Node<BoxNode<T>, T> {
 		// for non-recursive traversal
 		BoxNode<T> next;
-		public int x;
-		public int y;
-		public int size;
+		// TODO make final? or update to the actual used extent?
+		public int x1;
+		public int y1;
+		public int x2;
+		public int y2;
 
 		//BoxItem<T> list;
 
 		public boolean overlaps(T it) {
-			return (x < it.x2) &&
-			        (y < it.y2) &&
-			        (it.x1 < x + size) &&
-			        (it.y1 < y + size);
+			return (x1 < it.x2) && (y1 < it.y2) && (it.x1 < x2) && (it.y1 < y2);
 		}
 
 		@Override
 		public String toString() {
-			return x + ":" + y + ":" + size;
+			return x1 + ":" + y1 + ":" + (x2 - x1);
 		}
 	}
 
@@ -68,10 +66,7 @@ public abstract class BoxTree<Box extends BoxItem<E>, E>
 		public int y2;
 
 		public boolean overlaps(BoxItem<T> it) {
-			return (x1 < it.x2)
-			        && (it.x1 < x2)
-			        && (y1 < it.y2)
-			        && (it.y1 < y2);
+			return (x1 < it.x2) && (it.x1 < x2) && (y1 < it.y2) && (it.y1 < y2);
 		}
 	}
 
@@ -92,9 +87,10 @@ public abstract class BoxTree<Box extends BoxItem<E>, E>
 	public BoxTree(int extents, int maxDepth) {
 		super();
 		// size is -extents to +extents
-		this.root.size = extents * 2;
-		this.root.x = -extents;
-		this.root.y = -extents;
+		this.root.x1 = -extents;
+		this.root.y1 = -extents;
+		this.root.x2 = extents;
+		this.root.y2 = extents;
 
 		this.extents = extents;
 		this.maxDepth = maxDepth;
@@ -132,7 +128,6 @@ public abstract class BoxTree<Box extends BoxItem<E>, E>
 
 		boolean drop = false;
 
-		//O: 
 		while (stack != null) {
 
 			/** pop cur from stack */
@@ -173,30 +168,36 @@ public abstract class BoxTree<Box extends BoxItem<E>, E>
 			}
 
 			/** put children on stack which overlap with box */
-			if ((c = cur.child00) != null && c.overlaps(box)) {
+			if ((c = cur.child00) != null &&
+			        (x1 < c.x2) && (y1 < c.y2) &&
+			        (c.x1 < x2) && (c.y1 < y2)) {
 				c.next = stack;
 				stack = c;
 			}
-
-			if ((c = cur.child01) != null && c.overlaps(box)) {
+			if ((c = cur.child01) != null &&
+			        (x1 < c.x2) && (y1 < c.y2) &&
+			        (c.x1 < x2) && (c.y1 < y2)) {
 				c.next = stack;
 				stack = c;
 			}
-
-			if ((c = cur.child10) != null && c.overlaps(box)) {
+			if ((c = cur.child10) != null &&
+			        (x1 < c.x2) && (y1 < c.y2) &&
+			        (c.x1 < x2) && (c.y1 < y2)) {
 				c.next = stack;
 				stack = c;
 			}
-
-			if ((c = cur.child11) != null && c.overlaps(box)) {
+			if ((c = cur.child11) != null &&
+			        (x1 < c.x2) && (y1 < c.y2) &&
+			        (c.x1 < x2) && (c.y1 < y2)) {
 				c.next = stack;
 				stack = c;
 			}
 		}
 
 		/** dont keep dangling references */
-		while (stack != null)
-			stack = stack.next;
+		/* gwt optimizer found this cannot be reached :) */
+		//while (stack != null)
+		//	stack = stack.next;
 
 		return drop ? 1 : 0;
 	}
@@ -248,10 +249,9 @@ public abstract class BoxTree<Box extends BoxItem<E>, E>
 
 	public BoxNode<Box> create(BoxNode<Box> parent, int i) {
 		BoxNode<Box> node = new BoxNode<Box>();
-		int size = parent.size >> 1;
-		node.x = parent.x;
-		node.y = parent.y;
-		node.size = size;
+		int size = (parent.x2 - parent.x1) >> 1;
+		node.x1 = parent.x1;
+		node.y1 = parent.y1;
 
 		if (i == 0) {
 			// top-left
@@ -259,17 +259,20 @@ public abstract class BoxTree<Box extends BoxItem<E>, E>
 		} else if (i == 1) {
 			// bottom-left
 			parent.child10 = node;
-			node.y += size;
+			node.y1 += size;
 		} else if (i == 2) {
 			// top-right
 			parent.child01 = node;
-			node.x += size;
+			node.x1 += size;
 		} else {
 			// bottom-right
 			parent.child11 = node;
-			node.x += size;
-			node.y += size;
+			node.x1 += size;
+			node.y1 += size;
 		}
+
+		node.x2 = node.x1 + size;
+		node.y2 = node.y1 + size;
 
 		node.parent = parent;
 
@@ -294,13 +297,13 @@ public abstract class BoxTree<Box extends BoxItem<E>, E>
 		for (int level = 0; level <= maxDepth; level++) {
 			// half size of tile at current z
 			//int hsize = (extents >> level);
-			int hsize = cur.size >> 1;
+			int hsize = (cur.x2 - cur.x1) >> 1;
 
 			// center of tile (shift by -extents)
 			//int cx = px + hsize - extents;
 			//int cy = py + hsize - extents;
-			int cx = cur.x + hsize;
-			int cy = cur.y + hsize;
+			int cx = cur.x1 + hsize;
+			int cy = cur.y1 + hsize;
 
 			child = null;
 			//int childPos = -1;
@@ -330,8 +333,10 @@ public abstract class BoxTree<Box extends BoxItem<E>, E>
 					idY++;
 				}
 			}
-
 			//log.debug("child {}", child);
+
+			if (cur == minNode && child != null)
+				minNode = cur;
 
 			if (child == null || level == maxDepth) {
 				// push item onto list of this node
@@ -342,12 +347,16 @@ public abstract class BoxTree<Box extends BoxItem<E>, E>
 					log.debug("insert at: " + level + " / " + idX + ":"
 					        + idY + " -- " + x1 + ":" + y1
 					        + " /" + (x2) + "x" + (y2));
-
 				break;
 			}
 			cur = child;
 		}
 
+	}
+
+	public void setMinNode(int x1, int y1, int x2, int y2) {
+		/* TODO find lowest node that fully contains the region
+		 * and set it as start for following queries */
 	}
 
 	public abstract boolean process(BoxNode<Box> nodes);

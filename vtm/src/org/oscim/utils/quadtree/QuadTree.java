@@ -23,6 +23,8 @@ public abstract class QuadTree<T extends Node<T, E>, E> {
 
 	protected final T root;
 
+	protected T minNode;
+
 	protected T pool;
 
 	public QuadTree() {
