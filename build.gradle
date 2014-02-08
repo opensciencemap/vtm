@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.2'
+	classpath 'com.android.tools.build:gradle:0.7.+'
+	
+	// https://github.com/dcendents/android-maven-plugin
+	classpath 'com.github.dcendents:android-maven-plugin:1.0'
+    }
+}
+
+allprojects {
+	group = 'org.oscim'	
+	version = '0.5.9-SNAPSHOT'
+	//ext.appName = 'vtm'
+	//ext.gdxVersion = '1.0-SNAPSHOT'
+	
+
+	repositories {
+		mavenCentral()
+		mavenLocal()
+	}
+}
+
+
