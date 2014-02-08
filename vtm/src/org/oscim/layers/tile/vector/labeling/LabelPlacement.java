@@ -13,7 +13,7 @@ import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileRenderer;
 import org.oscim.tiling.TileSet;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.OBB2D;
+import org.oscim.utils.geom.OBB2D;
 
 public class LabelPlacement {
 	static final boolean dbg = false;

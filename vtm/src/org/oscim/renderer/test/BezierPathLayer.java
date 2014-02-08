@@ -10,7 +10,7 @@ import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.theme.styles.Line;
-import org.oscim.utils.math.BezierPath;
+import org.oscim.utils.geom.BezierPath;
 
 public class BezierPathLayer extends ElementRenderer {
 

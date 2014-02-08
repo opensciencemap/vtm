@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright 2011 Mario Zechner <badlogicgames@gmail.com>
  * Copyright 2011 Nathan Sweet <nathan.sweet@gmail.com>
- *   
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.oscim.utils;
+package org.oscim.utils.math;
 
 import java.util.Random;
 
@@ -28,8 +28,6 @@ import java.util.Random;
  */
 public class MathUtils {
 	static public final float nanoToSec = 1 / 1000000000f;
-
-	// ---
 
 	static public final float PI = 3.1415927f;
 	public static final float PI2 = PI * 2;

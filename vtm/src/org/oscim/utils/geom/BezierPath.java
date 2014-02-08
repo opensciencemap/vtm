@@ -1,4 +1,4 @@
-package org.oscim.utils.math;
+package org.oscim.utils.geom;
 
 import java.util.ArrayList;
 import java.util.List;

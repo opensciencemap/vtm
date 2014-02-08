@@ -21,12 +21,11 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
-import org.oscim.map.Map;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.SymbolLayer;
-import org.oscim.utils.GeometryUtils;
+import org.oscim.utils.geom.GeometryUtils;
 import org.oscim.utils.pool.Inlist;
 
 //TODO
@@ -44,7 +43,6 @@ public class MarkerRenderer extends ElementRenderer {
 	/** increase view to show items that are partially visible */
 	protected int mExtents = 100;
 	private boolean mUpdate;
-	private Map mMap;
 	private InternalItem mItems;
 	private final Point mMapPoint = new Point();
 

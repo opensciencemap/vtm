@@ -21,8 +21,8 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.theme.styles.Text;
 import org.oscim.tiling.MapTile;
-import org.oscim.utils.GeometryUtils;
-import org.oscim.utils.LineClipper;
+import org.oscim.utils.geom.GeometryUtils;
+import org.oscim.utils.geom.LineClipper;
 
 public final class WayDecorator {
 

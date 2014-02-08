@@ -32,7 +32,7 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.styles.Area;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.Interpolation;
+import org.oscim.utils.math.Interpolation;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

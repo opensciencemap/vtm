@@ -45,7 +45,7 @@ import org.oscim.tiling.TileManager;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDataSource.QueryResult;
-import org.oscim.utils.LineClipper;
+import org.oscim.utils.geom.LineClipper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

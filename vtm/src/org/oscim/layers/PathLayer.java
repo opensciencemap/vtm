@@ -34,8 +34,8 @@ import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.theme.styles.Line;
 import org.oscim.utils.FastMath;
-import org.oscim.utils.LineClipper;
 import org.oscim.utils.async.SimpleWorker;
+import org.oscim.utils.geom.LineClipper;
 
 /** This class draws a path line in given color. */
 public class PathLayer extends Layer {
