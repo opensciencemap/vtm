@@ -53,4 +53,8 @@ public abstract class Layer {
 	 */
 	public void onDetach() {
 	}
+
+	public Map map() {
+		return mMap;
+	}
 }

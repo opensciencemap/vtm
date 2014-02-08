@@ -22,8 +22,8 @@ import java.util.List;
 import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.TileGridLayer;
-import org.oscim.layers.marker.ItemizedIconLayer;
-import org.oscim.layers.marker.ItemizedIconLayer.OnItemGestureListener;
+import org.oscim.layers.marker.ItemizedLayer;
+import org.oscim.layers.marker.ItemizedLayer.OnItemGestureListener;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 import org.oscim.layers.marker.MarkerSymbol;
@@ -47,8 +47,8 @@ implements OnItemGestureListener<MarkerItem> {
 		Drawable d = getResources().getDrawable(R.drawable.marker_poi);
 		MarkerSymbol symbol = AndroidGraphics.makeMarker(d, HotspotPlace.CENTER);
 
-		ItemizedIconLayer<MarkerItem> markerLayer =
-		        new ItemizedIconLayer<MarkerItem>(mMap, new ArrayList<MarkerItem>(),
+		ItemizedLayer<MarkerItem> markerLayer =
+		        new ItemizedLayer<MarkerItem>(mMap, new ArrayList<MarkerItem>(),
 		                                          symbol, this);
 
 		mMap.getLayers().add(markerLayer);

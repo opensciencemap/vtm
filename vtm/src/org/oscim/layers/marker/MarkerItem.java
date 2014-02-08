@@ -1,6 +1,10 @@
 /*
- * Copyright 2012 osmdroid authors
- * Copyright 2013 Hannes Janetzek
+ * Copyright 2012 osmdroid authors:
+ * Copyright 2012 Nicolas Gramlich
+ * Copyright 2012 Theodore Hong
+ * Copyright 2012 Fred Eisele
+ * 
+ * Copyright 2014 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -16,17 +20,12 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Created by plusminus on 00:02:58 - 03.10.2008
 package org.oscim.layers.marker;
 
 import org.oscim.core.GeoPoint;
 
 /**
  * Immutable class describing a GeoPoint with a Title and a Description.
- * 
- * @author Nicolas Gramlich
- * @author Theodore Hong
- * @author Fred Eisele
  */
 public class MarkerItem {
 
