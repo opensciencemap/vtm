@@ -172,8 +172,10 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 		BoundingBox bbox = mapPosition.getBBox();
 
 		int nearest = -1;
+		int inside = -1;
+		double insideY = -Double.MAX_VALUE;
 
-		/* squared dist: 50*50 pixel */
+		/* squared dist: 50*50 pixel ~ 2mm on 400dpi */
 		double dist = 2500;
 
 		for (int i = 0; i < size; i++) {
@@ -187,6 +189,19 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 			float dx = (float) (mTmpPoint.x - eventX);
 			float dy = (float) (mTmpPoint.y - eventY);
 
+			MarkerSymbol it = item.getMarker();
+			if (it == null)
+				it = mMarkerRenderer.mDefaultMarker;
+
+			if (it.isInside(dx, dy)) {
+				if (mTmpPoint.y > insideY) {
+					insideY = mTmpPoint.y;
+					inside = i;
+				}
+			}
+			if (inside >= 0)
+				continue;
+
 			double d = dx * dx + dy * dy;
 			if (d > dist)
 				continue;
@@ -195,9 +210,14 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 			nearest = i;
 		}
 
-		if (nearest >= 0 && task.run(nearest))
-			return true;
+		if (inside >= 0)
+			nearest = inside;
 
+		if (nearest >= 0 && task.run(nearest)) {
+			mMarkerRenderer.update();
+			mMap.render();
+			return true;
+		}
 		return false;
 	}
 

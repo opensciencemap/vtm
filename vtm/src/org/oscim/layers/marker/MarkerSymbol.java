@@ -22,7 +22,7 @@ import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 
 public class MarkerSymbol {
 	final Bitmap[] mBitmap;
-	// Hotspot offset
+	/** Hotspot offset */
 	final PointF mOffset;
 
 	public MarkerSymbol(Bitmap bitmap, float relX, float relY) {
@@ -32,52 +32,38 @@ public class MarkerSymbol {
 	}
 
 	public MarkerSymbol(Bitmap bitmap, HotspotPlace hotspot) {
-		float x = 0, y = 0;
 		switch (hotspot) {
-			default:
-			case NONE:
-				break;
-			case CENTER:
-				x = 0.5f;
-				y = 0.5f;
-				break;
 			case BOTTOM_CENTER:
-				x = 0.5f;
-				y = 1.0f;
+				mOffset = new PointF(0.5f, 1);
 				break;
 			case TOP_CENTER:
-				x = 0.5f;
-				y = 0.0f;
+				mOffset = new PointF(0.5f, 0);
 				break;
 			case RIGHT_CENTER:
-				x = 1.0f;
-				y = 0.5f;
+				mOffset = new PointF(1, 0.5f);
 				break;
 			case LEFT_CENTER:
-				x = 0.0f;
-				y = 0.5f;
+				mOffset = new PointF(0, 0.5f);
 				break;
 			case UPPER_RIGHT_CORNER:
-				x = 1.0f;
-				y = 0.0f;
+				mOffset = new PointF(1, 0);
 				break;
 			case LOWER_RIGHT_CORNER:
-				x = 1.0f;
-				y = 1.0f;
+				mOffset = new PointF(1, 1);
 				break;
 			case UPPER_LEFT_CORNER:
-				x = 0.0f;
-				y = 0.0f;
+				mOffset = new PointF(0, 0);
 				break;
 			case LOWER_LEFT_CORNER:
-				x = 0.0f;
-				y = 1.0f;
+				mOffset = new PointF(0, 1);
 				break;
+			default:
+				mOffset = new PointF(0.5f, 0.5f);
 		}
 
 		mBitmap = new Bitmap[1];
 		mBitmap[0] = bitmap;
-		mOffset = new PointF(x, y);
+
 	}
 
 	public PointF getHotspot() {
@@ -86,6 +72,15 @@ public class MarkerSymbol {
 
 	public Bitmap getBitmap() {
 		return mBitmap[0];
+	}
+
+	public boolean isInside(float dx, float dy) {
+		int w = mBitmap[0].getWidth();
+		int h = mBitmap[0].getHeight();
+		float ox = -w * mOffset.x;
+		float oy = -h * (1 - mOffset.y);
+
+		return dx >= ox && dy >= oy && dx <= ox + w && dy <= oy + h;
 	}
 
 }
