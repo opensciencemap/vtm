@@ -21,7 +21,7 @@ import org.oscim.utils.FastMath;
 
 public class Color {
 
-	public static int fade(int color, double alpha) {
+	public static int fadePremul(int color, double alpha) {
 		alpha = FastMath.clamp(alpha, 0, 1);
 
 		alpha *= (color >>> 24) & 0xff;
@@ -34,6 +34,15 @@ public class Color {
 		c |= ((int) (alpha * (color & 0xff)));
 
 		return c;
+	}
+
+	public static int fade(int color, double alpha) {
+		alpha = FastMath.clamp(alpha, 0, 1);
+
+		alpha *= (color >>> 24) & 0xff;
+		int c = (((int) alpha) & 0xff) << 24;
+
+		return c | (color & 0x00ffffff);
 	}
 
 	public static int rainbow(float pos) {
@@ -81,8 +90,7 @@ public class Color {
 		return ((color >>> 24) & 0xff) / 255f;
 	}
 
-	/*
-	 * Copyright (C) 2006 The Android Open Source Project
+	/* Copyright (C) 2006 The Android Open Source Project
 	 * 
 	 * Licensed under the Apache License, Version 2.0 (the "License");
 	 * you may not use this file except in compliance with the License.
@@ -94,8 +102,7 @@ public class Color {
 	 * distributed under the License is distributed on an "AS IS" BASIS,
 	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	 * See the License for the specific language governing permissions and
-	 * limitations under the License.
-	 */
+	 * limitations under the License. */
 	public static final int BLACK = 0xFF000000;
 	public static final int DKGRAY = 0xFF444444;
 	public static final int GRAY = 0xFF888888;
