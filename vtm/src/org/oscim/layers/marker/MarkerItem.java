@@ -45,10 +45,10 @@ public class MarkerItem {
 		UPPER_LEFT_CORNER, LOWER_LEFT_CORNER
 	}
 
-	public final String mUid;
-	public final String mTitle;
-	public final String mDescription;
-	public final GeoPoint mGeoPoint;
+	public final Object uid;
+	public final String title;
+	public final String description;
+	public final GeoPoint geoPoint;
 	protected MarkerSymbol mMarker;
 
 	/**
@@ -56,34 +56,32 @@ public class MarkerItem {
 	 *            this should be <b>singleLine</b> (no <code>'\n'</code> )
 	 * @param description
 	 *            a <b>multiLine</b> description ( <code>'\n'</code> possible)
-	 * @param geoPoint
-	 *            ...
 	 */
 	public MarkerItem(String title, String description, GeoPoint geoPoint) {
 		this(null, title, description, geoPoint);
 	}
 
-	public MarkerItem(String uid, String title, String description, GeoPoint geoPoint) {
-		mTitle = title;
-		mDescription = description;
-		mGeoPoint = geoPoint;
-		mUid = uid;
+	public MarkerItem(Object uid, String title, String description, GeoPoint geoPoint) {
+		this.title = title;
+		this.description = description;
+		this.geoPoint = geoPoint;
+		this.uid = uid;
 	}
 
-	public String getUid() {
-		return mUid;
+	public Object getUid() {
+		return uid;
 	}
 
 	public String getTitle() {
-		return mTitle;
+		return title;
 	}
 
 	public String getSnippet() {
-		return mDescription;
+		return description;
 	}
 
 	public GeoPoint getPoint() {
-		return mGeoPoint;
+		return geoPoint;
 	}
 
 	public MarkerSymbol getMarker() {

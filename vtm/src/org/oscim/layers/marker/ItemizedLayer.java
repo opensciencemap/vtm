@@ -181,7 +181,7 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 		for (int i = 0; i < size; i++) {
 			Item item = mItemList.get(i);
 
-			if (!bbox.contains(item.mGeoPoint))
+			if (!bbox.contains(item.geoPoint))
 				continue;
 
 			mapPosition.toScreenPoint(item.getPoint(), mTmpPoint);
@@ -242,5 +242,13 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 			return activateSelectedItems(e, mActiveItemSingleTap);
 
 		return false;
+	}
+
+	public Item getByUid(Object uid) {
+		for (Item it : mItemList)
+			if (it.getUid() == uid)
+				return it;
+
+		return null;
 	}
 }
