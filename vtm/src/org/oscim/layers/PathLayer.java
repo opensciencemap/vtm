@@ -201,7 +201,7 @@ public class PathLayer extends Layer {
 
 			// update layers when map moved by at least one tile
 			if ((tx != mCurX || ty != mCurY || tz != mCurZ) || mUpdatePoints) {
-				mWorker.submit(100);
+				mWorker.submit(mUpdatePoints ? 0 : 100);
 				mCurX = tx;
 				mCurY = ty;
 				mCurZ = tz;
