@@ -36,6 +36,8 @@ import android.widget.Toast;
 public class MarkerOverlayActivity extends BitmapTileMapActivity
 implements OnItemGestureListener<MarkerItem> {
 
+	private MarkerSymbol mFocusMarker;
+
 	public MarkerOverlayActivity() {
 		super(new DefaultSources.StamenToner());
 	}
@@ -46,6 +48,9 @@ implements OnItemGestureListener<MarkerItem> {
 
 		Drawable d = getResources().getDrawable(R.drawable.marker_poi);
 		MarkerSymbol symbol = AndroidGraphics.makeMarker(d, HotspotPlace.CENTER);
+
+		d = getResources().getDrawable(R.drawable.ic_launcher);
+		mFocusMarker = AndroidGraphics.makeMarker(d, HotspotPlace.BOTTOM_CENTER);
 
 		ItemizedLayer<MarkerItem> markerLayer =
 		        new ItemizedLayer<MarkerItem>(mMap, new ArrayList<MarkerItem>(),
@@ -69,6 +74,11 @@ implements OnItemGestureListener<MarkerItem> {
 
 	@Override
 	public boolean onItemSingleTapUp(int index, MarkerItem item) {
+		if (item.getMarker() == null)
+			item.setMarker(mFocusMarker);
+		else
+			item.setMarker(null);
+
 		Toast toast = Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT);
 		toast.show();
 		return true;

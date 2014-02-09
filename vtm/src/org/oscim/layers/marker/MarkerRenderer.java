@@ -17,6 +17,8 @@
 
 package org.oscim.layers.marker;
 
+import java.util.Comparator;
+
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Point;
@@ -25,8 +27,8 @@ import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.SymbolLayer;
+import org.oscim.utils.TimSort;
 import org.oscim.utils.geom.GeometryUtils;
-import org.oscim.utils.pool.Inlist;
 
 //TODO
 //- need to sort items back to front for rendering
@@ -43,15 +45,24 @@ public class MarkerRenderer extends ElementRenderer {
 	/** increase view to show items that are partially visible */
 	protected int mExtents = 100;
 	private boolean mUpdate;
-	private InternalItem mItems;
+
+	private InternalItem[] mItems;
+
 	private final Point mMapPoint = new Point();
 
-	static class InternalItem extends Inlist<InternalItem> {
+	static class InternalItem {
 		MarkerItem item;
 		boolean visible;
 		boolean changes;
 		float x, y;
 		double px, py;
+
+		float dy;
+
+		@Override
+		public String toString() {
+			return "\n" + x + ":" + y + " / " + dy + " " + visible;
+		}
 	}
 
 	public MarkerRenderer(MarkerLayer<MarkerItem> markerLayer, MarkerSymbol defaultSymbol) {
@@ -72,8 +83,8 @@ public class MarkerRenderer extends ElementRenderer {
 		double my = pos.y;
 		double scale = Tile.SIZE * pos.scale;
 
-		int changesInvisible = 0;
-		int changedVisible = 0;
+		//int changesInvisible = 0;
+		//int changedVisible = 0;
 		int numVisible = 0;
 
 		mMarkerLayer.map().viewport().getMapExtents(mBox, mExtents);
@@ -88,8 +99,12 @@ public class MarkerRenderer extends ElementRenderer {
 			return;
 		}
 
+		double angle = Math.toRadians(pos.angle);
+		float cos = (float) Math.cos(angle);
+		float sin = (float) Math.sin(angle);
+
 		/* check visibility */
-		for (InternalItem it = mItems; it != null; it = it.next) {
+		for (InternalItem it : mItems) {
 			it.changes = false;
 			it.x = (float) ((it.px - mx) * scale);
 			it.y = (float) ((it.py - my) * scale);
@@ -102,13 +117,16 @@ public class MarkerRenderer extends ElementRenderer {
 			if (!GeometryUtils.pointInPoly(it.x, it.y, mBox, 8, 0)) {
 				if (it.visible) {
 					it.changes = true;
-					changesInvisible++;
+					//changesInvisible++;
 				}
 				continue;
 			}
+
+			it.dy = sin * it.x + cos * it.y;
+
 			if (!it.visible) {
 				it.visible = true;
-				changedVisible++;
+				//changedVisible++;
 			}
 			numVisible++;
 		}
@@ -117,15 +135,21 @@ public class MarkerRenderer extends ElementRenderer {
 
 		/* only update when zoomlevel changed, new items are visible
 		 * or more than 10 of the current items became invisible */
-		if ((numVisible == 0) && (changedVisible == 0 && changesInvisible < 10))
-			return;
-
-		/* keep position for current state */
-		mMapPosition.copy(pos);
-
+		//if ((numVisible == 0) && (changedVisible == 0 && changesInvisible < 10))
+		//	return;
 		layers.clear();
 
-		for (InternalItem it = mItems; it != null; it = it.next) {
+		if (numVisible == 0) {
+			compile();
+			return;
+		}
+		/* keep position for current state */
+		mMapPosition.copy(pos);
+		mMapPosition.angle = -mMapPosition.angle;
+
+		sort(mItems, 0, mItems.length);
+		//log.debug(Arrays.toString(mItems));
+		for (InternalItem it : mItems) {
 			if (!it.visible)
 				continue;
 
@@ -139,14 +163,9 @@ public class MarkerRenderer extends ElementRenderer {
 				marker = mDefaultMarker;
 
 			SymbolItem s = SymbolItem.pool.get();
-			s.bitmap = marker.getBitmap();
-
-			s.x = it.x;
-			s.y = it.y;
+			s.set(it.x, it.y, marker.getBitmap(), true);
 			s.offset = marker.getHotspot();
-			s.billboard = true;
-
-			mSymbolLayer.addSymbol(s);
+			mSymbolLayer.pushSymbol(s);
 		}
 
 		mSymbolLayer.prepare();
@@ -155,29 +174,13 @@ public class MarkerRenderer extends ElementRenderer {
 		compile();
 	}
 
-	@Override
-	public synchronized void compile() {
-		super.compile();
-	}
+	protected void populate(int size) {
 
-	protected synchronized void populate(int size) {
-
-		InternalItem pool = mItems;
-		mItems = null;
+		InternalItem[] tmp = new InternalItem[size];
 
 		for (int i = 0; i < size; i++) {
-			InternalItem it;
-			if (pool != null) {
-				it = pool;
-				it.visible = false;
-				it.changes = false;
-				pool = pool.next;
-			} else {
-				it = new InternalItem();
-			}
-			it.next = mItems;
-			mItems = it;
-
+			InternalItem it = new InternalItem();
+			tmp[i] = it;
 			it.item = mMarkerLayer.createItem(i);
 
 			/* pre-project points */
@@ -185,6 +188,44 @@ public class MarkerRenderer extends ElementRenderer {
 			it.px = mMapPoint.x;
 			it.py = mMapPoint.y;
 		}
+		synchronized (this) {
+			mUpdate = true;
+			mItems = tmp;
+		}
+	}
+
+	static TimSort<InternalItem> ZSORT = new TimSort<InternalItem>();
+
+	public static void sort(InternalItem[] a, int lo, int hi) {
+		int nRemaining = hi - lo;
+		if (nRemaining < 2) {
+			return;
+		}
+
+		ZSORT.doSort(a, zComparator, lo, hi);
+	}
+
+	final static Comparator<InternalItem> zComparator = new Comparator<InternalItem>() {
+		@Override
+		public int compare(InternalItem a, InternalItem b) {
+			if (a.visible && b.visible) {
+				if (a.dy > b.dy) {
+					return -1;
+				}
+				if (a.dy < b.dy) {
+					return 1;
+				}
+			} else if (a.visible) {
+				return -1;
+			} else if (b.visible) {
+				return 1;
+			}
+
+			return 0;
+		}
+	};
+
+	public void update() {
 		mUpdate = true;
 	}
 

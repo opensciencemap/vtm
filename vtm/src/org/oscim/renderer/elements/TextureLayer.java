@@ -26,8 +26,12 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.TextureItem.TexturePool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class TextureLayer extends RenderElement {
+
+	static final Logger log = LoggerFactory.getLogger(TextureLayer.class);
 
 	public final static int INDICES_PER_SPRITE = 6;
 	final static int VERTICES_PER_SPRITE = 4;
@@ -58,7 +62,7 @@ public abstract class TextureLayer extends RenderElement {
 		for (TextureItem t = textures; t != null; t = t.next)
 			t.upload();
 
-		// add vertices to vbo
+		/* add vertices to vbo */
 		ElementLayers.addPoolItems(this, sbuf);
 	}
 
@@ -79,28 +83,28 @@ public abstract class TextureLayer extends RenderElement {
 	        short u1, short v1,
 	        short u2, short v2) {
 
-		// top-left
+		/* top-left */
 		buf[pos + 0] = tx;
 		buf[pos + 1] = ty;
 		buf[pos + 2] = x1;
 		buf[pos + 3] = y1;
 		buf[pos + 4] = u1;
 		buf[pos + 5] = v2;
-		// bot-left
+		/* bot-left */
 		buf[pos + 6] = tx;
 		buf[pos + 7] = ty;
 		buf[pos + 8] = x1;
 		buf[pos + 9] = y2;
 		buf[pos + 10] = u1;
 		buf[pos + 11] = v1;
-		// top-right
+		/* top-right */
 		buf[pos + 12] = tx;
 		buf[pos + 13] = ty;
 		buf[pos + 14] = x2;
 		buf[pos + 15] = y1;
 		buf[pos + 16] = u2;
 		buf[pos + 17] = v2;
-		// bot-right
+		/* bot-right */
 		buf[pos + 18] = tx;
 		buf[pos + 19] = ty;
 		buf[pos + 20] = x2;
@@ -110,7 +114,6 @@ public abstract class TextureLayer extends RenderElement {
 	}
 
 	public static final class Renderer {
-		//static final Logger log = LoggerFactory.getLogger(TextureRenderer.class);
 
 		public final static boolean debug = false;
 
@@ -124,7 +127,6 @@ public abstract class TextureLayer extends RenderElement {
 		private static int hTextureSize;
 
 		static void init() {
-
 			mTextureProgram = GLUtils.createProgram(textVertexShader,
 			                                        textFragmentShader);
 
@@ -136,7 +138,7 @@ public abstract class TextureLayer extends RenderElement {
 			hTextureVertex = GL.glGetAttribLocation(mTextureProgram, "vertex");
 			hTextureTexCoord = GL.glGetAttribLocation(mTextureProgram, "tex_coord");
 
-			// FIXME pool should be disposed on exit...
+			/* FIXME pool should be disposed on exit... */
 			pool.init(0);
 		}
 
@@ -171,9 +173,10 @@ public abstract class TextureLayer extends RenderElement {
 
 				int maxVertices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
 
-				// draw up to maxVertices in each iteration
+				/* draw up to maxVertices in each iteration */
 				for (int i = 0; i < t.vertices; i += maxVertices) {
-					// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
+					/* to.offset * (24(shorts) * 2(short-bytes)
+					 * / 6(indices) == 8) */
 					int off = (t.offset + i) * 8 + tl.offset;
 
 					GL.glVertexAttribPointer(hTextureVertex, 4,

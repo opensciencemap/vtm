@@ -80,6 +80,10 @@ public class Inlist<T extends Inlist<T>> {
 			cur = null;
 			return ret;
 		}
+
+		public T getHead() {
+			return head;
+		}
 	}
 
 	public T next;

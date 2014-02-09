@@ -33,35 +33,42 @@ public final class SymbolLayer extends TextureLayer {
 	private final static int LBIT_MASK = 0xfffffffe;
 
 	private TextureItem prevTextures;
-	private SymbolItem symbols;
+	private List<SymbolItem> mSymbols = new List<SymbolItem>();
 
 	public SymbolLayer() {
 		super(RenderElement.SYMBOL);
 		fixed = true;
 	}
 
-	// TODO move sorting items to 'prepare'
+	/* TODO move sorting items to 'prepare' */
 	public void addSymbol(SymbolItem item) {
 
-		// needed to calculate 'sbuf' size for compile
+		/* needed to calculate 'sbuf' size for compile */
 		numVertices += VERTICES_PER_SPRITE;
 
-		for (SymbolItem it = symbols; it != null; it = it.next) {
+		for (SymbolItem it : mSymbols) {
 			if (it.bitmap == item.bitmap) {
-				// insert after same bitmap
+				/* insert after same bitmap */
 				item.next = it.next;
 				it.next = item;
 				return;
 			}
 		}
+		mSymbols.push(item);
 
-		item.next = symbols;
-		symbols = item;
+		//item.next = mSymbols;
+		//mSymbols = item;
+	}
+
+	public void pushSymbol(SymbolItem item) {
+		/* needed to calculate 'sbuf' size for compile */
+		numVertices += VERTICES_PER_SPRITE;
+		mSymbols.push(item);
 	}
 
 	@Override
 	protected void compile(ShortBuffer sbuf) {
-		// offset of layer data in vbo
+		/* offset of layer data in vbo */
 		this.offset = sbuf.position() * 2; //SHORT_BYTES;
 
 		short numIndices = 0;
@@ -75,18 +82,17 @@ public final class SymbolLayer extends TextureLayer {
 		textures = null;
 		TextureItem t = null;
 
-		for (SymbolItem it = symbols; it != null;) {
+		for (SymbolItem it = mSymbols.getHead(); it != null;) {
 			int width = 0, height = 0;
 			int x = 0;
 			int y = 0;
 
 			if (it.texRegion != null) {
-
-				// FIXME this work only with one TextureAtlas per SymbolLayer.
+				/* FIXME this work only with one TextureAtlas per SymbolLayer */
 				if (textures == null) {
 					t = it.texRegion.atlas.loadTexture();
-					// clone TextureItem to use same texID with
-					// multiple TextureItem
+					/* clone TextureItem to use same texID with
+					 * multiple TextureItem */
 					t = TextureItem.clone(t);
 					textures = Inlist.appendItem(textures, t);
 				}
@@ -124,7 +130,7 @@ public final class SymbolLayer extends TextureLayer {
 			PointF prevOffset = null;
 			short x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
-			// add symbol items referencing the same bitmap /
+			/* add symbol items referencing the same bitmap */
 			for (SymbolItem prev = it; it != null; it = it.next) {
 
 				if (prev.bitmap != null && prev.bitmap != it.bitmap)
@@ -153,7 +159,7 @@ public final class SymbolLayer extends TextureLayer {
 					}
 				}
 
-				// add vertices
+				/* add vertices */
 				short tx = (short) ((int) (SCALE * it.x) & LBIT_MASK
 				        | (it.billboard ? 1 : 0));
 
@@ -169,7 +175,7 @@ public final class SymbolLayer extends TextureLayer {
 
 				pos += TextLayer.VERTICES_PER_SPRITE * 6;
 
-				// six elements used to draw the four vertices
+				/* six elements used to draw the four vertices */
 				t.vertices += TextureLayer.INDICES_PER_SPRITE;
 			}
 			numIndices += t.vertices;
@@ -201,19 +207,13 @@ public final class SymbolLayer extends TextureLayer {
 	}
 
 	public void clearItems() {
-		symbols = SymbolItem.pool.releaseAll(symbols);
-		//numVertices = 0;
+		SymbolItem.pool.releaseAll(mSymbols.clear());
 	}
 
 	@Override
 	public void clear() {
-		// release textures
 		super.clear();
 		clearItems();
-
-		//symbols = SymbolItem.pool.releaseAll(symbols);
-		//vertexItems = VertexItem.pool.releaseAll(vertexItems);
-		//numVertices = 0;
 	}
 
 	@Override

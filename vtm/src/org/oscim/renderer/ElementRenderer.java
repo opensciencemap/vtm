@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class ElementRenderer extends LayerRenderer {
 
-	static final Logger log = LoggerFactory.getLogger(ElementRenderer.class);
+	public static final Logger log = LoggerFactory.getLogger(ElementRenderer.class);
 
 	private static short[] fillCoords;
 
