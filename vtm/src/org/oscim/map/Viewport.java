@@ -176,11 +176,9 @@ public class Viewport {
 		}
 	}
 
-	/*
-	 * Get Z-value of the map-plane for a point on screen -
+	/* Get Z-value of the map-plane for a point on screen -
 	 * calculate the intersection of a ray from camera origin
-	 * and the map plane
-	 */
+	 * and the map plane */
 	private float getDepth(float y) {
 		if (y == 0)
 			return 0;
@@ -311,13 +309,10 @@ public class Viewport {
 		dx /= cs;
 		dy /= cs;
 
-		if (dx > 1) {
-			while (dx > 1)
-				dx -= 1;
-		} else {
-			while (dx < 0)
-				dx += 1;
-		}
+		while (dx > 1)
+			dx -= 1;
+		while (dx < 0)
+			dx += 1;
 
 		if (dy > 1)
 			dy = 1;
