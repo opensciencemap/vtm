@@ -30,9 +30,6 @@ public class OSciMap4TileSource extends UrlTileSource {
 	public OSciMap4TileSource(String url) {
 		super(url);
 		setExtension(".vtm");
-		// ignored for now
-		//setMimeType("image/png");
-		//setMimeType("application/x-protobuf");
 	}
 
 	@Override

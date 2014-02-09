@@ -26,7 +26,6 @@ import org.oscim.layers.tile.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources.NaturalEarth;
-import org.oscim.tiling.source.oscimap2.OSciMap2TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,11 +106,7 @@ class GwtGdxMap extends GdxMap {
 		String sourceName = c.getTileSource();
 
 		TileSource tileSource;
-		if ("oscimap4".equals(sourceName))
-			tileSource = new OSciMap4TileSource(url);
-		else
-			//if ("oscimap2".equals(source))
-			tileSource = new OSciMap2TileSource(url);
+		tileSource = new OSciMap4TileSource(url);
 
 		initDefaultLayers(tileSource, false, true, true);
 
