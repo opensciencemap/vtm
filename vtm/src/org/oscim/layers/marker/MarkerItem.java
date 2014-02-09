@@ -50,7 +50,6 @@ public class MarkerItem {
 	public final String mDescription;
 	public final GeoPoint mGeoPoint;
 	protected MarkerSymbol mMarker;
-	protected HotspotPlace mHotspotPlace;
 
 	/**
 	 * @param title
@@ -93,13 +92,5 @@ public class MarkerItem {
 
 	public void setMarker(MarkerSymbol marker) {
 		mMarker = marker;
-	}
-
-	public void setMarkerHotspot(HotspotPlace place) {
-		mHotspotPlace = (place == null) ? HotspotPlace.BOTTOM_CENTER : place;
-	}
-
-	public HotspotPlace getMarkerHotspot() {
-		return mHotspotPlace;
 	}
 }
