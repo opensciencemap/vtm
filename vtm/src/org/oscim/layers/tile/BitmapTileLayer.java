@@ -75,7 +75,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 		FadeStep[] fade = mTileSource.getFadeSteps();
 
 		if (fade == null) {
-			mRenderLayer.setBitmapAlpha(1);
+			//mRenderLayer.setBitmapAlpha(1);
 			return;
 		}
 
