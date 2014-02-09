@@ -30,6 +30,7 @@ public class BitmapTileMapActivity extends MapActivity {
 
 	private final static boolean USE_CACHE = true;
 	private final TileSource mTileSource;
+	protected BitmapTileLayer mBitmapLayer;
 
 	public BitmapTileMapActivity() {
 		mTileSource = new DefaultSources.OpenStreetMap();
@@ -59,7 +60,9 @@ public class BitmapTileMapActivity extends MapActivity {
 			mCache.setCacheSize(512 * (1 << 10));
 			mTileSource.setCache(mCache);
 		}
-		mMap.layers().add(new BitmapTileLayer(mMap, mTileSource));
+
+		mBitmapLayer = new BitmapTileLayer(mMap, mTileSource);
+		mMap.layers().add(mBitmapLayer);
 
 		mMap.setMapPosition(0, 0, 1 << 2);
 	}
