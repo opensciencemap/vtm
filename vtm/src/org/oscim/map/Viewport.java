@@ -226,8 +226,8 @@ public class Viewport {
 	 * 
 	 * @return BoundingBox containing view
 	 */
-	public synchronized BoundingBox getBBox() {
-		getBBox(mMapBBox);
+	public synchronized BoundingBox getBBox(int expand) {
+		getBBox(mMapBBox, expand);
 
 		// scale map-pixel coordinates at current scale to
 		// absolute coordinates and apply mercator projection.
@@ -240,14 +240,18 @@ public class Viewport {
 		return new BoundingBox(minLat, minLon, maxLat, maxLon);
 	}
 
+	public synchronized BoundingBox getBBox() {
+		return getBBox(0);
+	}
+
 	/**
 	 * Get the minimal axis-aligned BoundingBox that encloses
 	 * the visible part of the map. Sets box to map coordinates:
 	 * minX,minY,maxY,maxY
 	 */
-	public synchronized void getBBox(Box box) {
+	public synchronized void getBBox(Box box, int expand) {
 		float[] coords = mViewCoords;
-		getMapExtents(coords, 0);
+		getMapExtents(coords, expand);
 
 		box.minX = coords[0];
 		box.maxX = coords[0];
