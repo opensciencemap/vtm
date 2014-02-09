@@ -17,6 +17,8 @@
  */
 package org.oscim.core;
 
+import org.oscim.utils.FastMath;
+
 /**
  * A GeoPoint represents an immutable pair of latitude and longitude
  * coordinates.
@@ -43,19 +45,22 @@ public class GeoPoint implements Comparable<GeoPoint> {
 	private int hashCodeValue = 0;
 
 	/**
-	 * @param latitude
+	 * @param lat
 	 *            the latitude in degrees, will be limited to the possible
 	 *            latitude range.
-	 * @param longitude
+	 * @param lon
 	 *            the longitude in degrees, will be limited to the possible
 	 *            longitude range.
 	 */
-	public GeoPoint(double latitude, double longitude) {
-		double limitLatitude = MercatorProjection.limitLatitude(latitude);
-		this.latitudeE6 = (int) (limitLatitude * CONVERSION_FACTOR);
-
-		double limitLongitude = MercatorProjection.limitLongitude(longitude);
-		this.longitudeE6 = (int) (limitLongitude * CONVERSION_FACTOR);
+	public GeoPoint(double lat, double lon) {
+		lat = FastMath.clamp(lat,
+		                     MercatorProjection.LATITUDE_MIN,
+		                     MercatorProjection.LATITUDE_MAX);
+		this.latitudeE6 = (int) (lat * CONVERSION_FACTOR);
+		lon = FastMath.clamp(lon,
+		                     MercatorProjection.LONGITUDE_MIN,
+		                     MercatorProjection.LONGITUDE_MAX);
+		this.longitudeE6 = (int) (lon * CONVERSION_FACTOR);
 	}
 
 	/**
