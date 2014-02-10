@@ -21,6 +21,7 @@
  */
 package org.oscim.layers.marker;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.oscim.core.BoundingBox;
@@ -41,15 +42,23 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 	protected OnItemGestureListener<Item> mOnItemGestureListener;
 	protected int mDrawnItemsLimit = Integer.MAX_VALUE;
 
+	public ItemizedLayer(Map map, MarkerSymbol defaulMarker) {
+		this(map, new ArrayList<Item>(), defaulMarker, null);
+	}
+
 	public ItemizedLayer(Map map, List<Item> list,
 	        MarkerSymbol defaultMarker,
-	        OnItemGestureListener<Item> onItemGestureListener) {
+	        OnItemGestureListener<Item> listener) {
 
 		super(map, defaultMarker);
 
 		mItemList = list;
-		mOnItemGestureListener = onItemGestureListener;
+		mOnItemGestureListener = listener;
 		populate();
+	}
+
+	public void setOnItemGestureListener(OnItemGestureListener<Item> listener) {
+		mOnItemGestureListener = listener;
 	}
 
 	@Override

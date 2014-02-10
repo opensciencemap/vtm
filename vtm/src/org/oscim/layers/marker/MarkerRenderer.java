@@ -29,11 +29,6 @@ import org.oscim.renderer.elements.SymbolLayer;
 import org.oscim.utils.TimSort;
 import org.oscim.utils.geom.GeometryUtils;
 
-//TODO
-//- need to sort items back to front for rendering
-//- and to make this work for multiple overlays
-//a global scenegraph is probably required.
-
 public class MarkerRenderer extends ElementRenderer {
 
 	protected final MarkerSymbol mDefaultMarker;
@@ -41,13 +36,15 @@ public class MarkerRenderer extends ElementRenderer {
 	private final SymbolLayer mSymbolLayer;
 	private final float[] mBox = new float[8];
 	private final MarkerLayer<MarkerItem> mMarkerLayer;
+	private final Point mMapPoint = new Point();
+
 	/** increase view to show items that are partially visible */
 	protected int mExtents = 100;
+
+	/** flag to force update of markers */
 	private boolean mUpdate;
 
 	private InternalItem[] mItems;
-
-	private final Point mMapPoint = new Point();
 
 	static class InternalItem {
 		MarkerItem item;
@@ -55,7 +52,6 @@ public class MarkerRenderer extends ElementRenderer {
 		boolean changes;
 		float x, y;
 		double px, py;
-
 		float dy;
 
 		@Override
@@ -192,6 +188,10 @@ public class MarkerRenderer extends ElementRenderer {
 		}
 	}
 
+	public void update() {
+		mUpdate = true;
+	}
+
 	static TimSort<InternalItem> ZSORT = new TimSort<InternalItem>();
 
 	public static void sort(InternalItem[] a, int lo, int hi) {
@@ -222,10 +222,6 @@ public class MarkerRenderer extends ElementRenderer {
 			return 0;
 		}
 	};
-
-	public void update() {
-		mUpdate = true;
-	}
 
 	//	/**
 	//	 * Returns the Item at the given index.
