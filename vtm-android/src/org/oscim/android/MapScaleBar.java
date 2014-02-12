@@ -117,7 +117,7 @@ public class MapScaleBar extends Layer implements UpdateListener {
 		mPrevLatitude = latitude;
 
 		double groundResolution = MercatorProjection
-		    .calculateGroundResolution(latitude, mapPosition.scale);
+		    .groundResolution(latitude, mapPosition.scale);
 
 		int[] scaleBarValues;
 		if (mImperialUnits) {

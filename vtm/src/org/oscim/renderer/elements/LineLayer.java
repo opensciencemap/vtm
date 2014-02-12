@@ -21,6 +21,7 @@ import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
+import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
@@ -57,7 +58,9 @@ public final class LineLayer extends RenderElement {
 	public float width;
 
 	public boolean roundCap;
-	private float mMinDist = 1 / 4f;
+	private float mMinDist = 1 / 8f;
+
+	public float heightOffset;
 
 	LineLayer(int layer) {
 		super(RenderElement.LINE);
@@ -77,7 +80,7 @@ public final class LineLayer extends RenderElement {
 	 * For point reduction by minimal distance. Default is 1/4.
 	 */
 	public void setDropDistance(float minDist) {
-		mMinDist = minDist < 1 / 4f ? 1 / 4f : minDist;
+		mMinDist = minDist < 1 / 8f ? 1 / 8f : minDist;
 	}
 
 	public void addLine(GeometryBuffer geom) {
@@ -116,10 +119,8 @@ public final class LineLayer extends RenderElement {
 		short v[] = si.vertices;
 		int opos = si.used;
 
-		/*
-		 * Note: just a hack to save some vertices, when there are
-		 * more than 200 lines per type. FIXME make optional!
-		 */
+		/* Note: just a hack to save some vertices, when there are
+		 * more than 200 lines per type. FIXME make optional! */
 		if (rounded && index != null) {
 			int cnt = 0;
 			for (int i = 0, n = index.length; i < n; i++, cnt++) {
@@ -589,6 +590,7 @@ public final class LineLayer extends RenderElement {
 		private static int[] hLineFade = new int[2];
 		private static int[] hLineWidth = new int[2];
 		private static int[] hLineMode = new int[2];
+		private static int[] hLineHeight = new int[2];
 		public static int mTexID;
 
 		static boolean init() {
@@ -616,6 +618,7 @@ public final class LineLayer extends RenderElement {
 				hLineWidth[i] = GL.glGetUniformLocation(lineProgram[i], "u_width");
 				hLineColor[i] = GL.glGetUniformLocation(lineProgram[i], "u_color");
 				hLineMode[i] = GL.glGetUniformLocation(lineProgram[i], "u_mode");
+				hLineHeight[i] = GL.glGetUniformLocation(lineProgram[i], "u_height");
 				hLineVertexPosition[i] = GL.glGetAttribLocation(lineProgram[i], "a_pos");
 			}
 
@@ -665,6 +668,7 @@ public final class LineLayer extends RenderElement {
 			int uLineMode = hLineMode[mode];
 			int uLineColor = hLineColor[mode];
 			int uLineWidth = hLineWidth[mode];
+			int uLineHeight = hLineHeight[mode];
 
 			GLState.enableVertexArrays(hLineVertexPosition[mode], -1);
 
@@ -681,7 +685,7 @@ public final class LineLayer extends RenderElement {
 
 			// scale factor to map one pixel on tile to one pixel on screen:
 			// used with orthographic projection, (shader mode == 1)
-			double pixel = (mode == SHADER_PROJ) ? 0 : 1.5 / scale;
+			double pixel = (mode == SHADER_PROJ) ? 0.0001 : 1.5 / scale;
 
 			GL.glUniform1f(uLineFade, (float) pixel);
 
@@ -691,10 +695,20 @@ public final class LineLayer extends RenderElement {
 			boolean blur = false;
 			double width;
 
+			float heightOffset = 0;
+			GL.glUniform1f(uLineHeight, heightOffset);
+
 			RenderElement l = curLayer;
 			for (; l != null && l.type == RenderElement.LINE; l = l.next) {
 				LineLayer ll = (LineLayer) l;
 				Line line = ll.line;
+
+				if (ll.heightOffset != heightOffset) {
+					heightOffset = ll.heightOffset;
+
+					GL.glUniform1f(uLineHeight, heightOffset /
+					        MercatorProjection.groundResolution(pos));
+				}
 
 				if (line.fade < pos.zoomLevel) {
 					GLUtils.setColor(uLineColor, line.color, 1);
@@ -706,7 +720,7 @@ public final class LineLayer extends RenderElement {
 				}
 
 				if (mode == SHADER_PROJ && blur && line.blur == 0) {
-					GL.glUniform1f(uLineFade, 0);
+					GL.glUniform1f(uLineFade, (float) pixel);
 					blur = false;
 				}
 
@@ -797,13 +811,14 @@ public final class LineLayer extends RenderElement {
 		        // xy hold position, zw extrusion vector
 		        + "attribute vec4 a_pos;"
 		        + "uniform float u_mode;"
+		        + "uniform float u_height;"
 		        + "varying vec2 v_st;"
 		        + "void main() {"
 
 		        // scale extrusion to u_width pixel
 		        // just ignore the two most insignificant bits.
 		        + "  vec2 dir = a_pos.zw;"
-		        + "  gl_Position = u_mvp * vec4(a_pos.xy + (u_width * dir), 0.0, 1.0);"
+		        + "  gl_Position = u_mvp * vec4(a_pos.xy + (u_width * dir), u_height, 1.0);"
 
 		        // last two bits hold the texture coordinates.
 		        + "  v_st = abs(mod(dir, 4.0)) - 1.0;"

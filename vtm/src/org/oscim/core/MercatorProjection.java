@@ -57,9 +57,16 @@ public final class MercatorProjection {
 	 *            the map scale at which the resolution should be calculated.
 	 * @return the ground resolution at the given latitude and zoom level.
 	 */
-	public static double calculateGroundResolution(double latitude, double scale) {
+	public static double groundResolution(double latitude, double scale) {
 		return Math.cos(latitude * (Math.PI / 180)) * EARTH_CIRCUMFERENCE
 		        / (Tile.SIZE * scale);
+	}
+
+	public static float groundResolution(MapPosition pos) {
+		double lat = MercatorProjection.toLatitude(pos.y);
+		return (float) (Math.cos(lat * (Math.PI / 180))
+		        * MercatorProjection.EARTH_CIRCUMFERENCE
+		        / (Tile.SIZE * pos.scale));
 	}
 
 	/**

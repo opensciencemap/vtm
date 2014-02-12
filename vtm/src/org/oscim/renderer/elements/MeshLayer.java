@@ -22,6 +22,7 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
+import org.oscim.core.MercatorProjection;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
@@ -42,6 +43,7 @@ public class MeshLayer extends RenderElement {
 
 	VertexItem indiceItems;
 	public Area area;
+	public float heightOffset;
 
 	public MeshLayer(int level) {
 		super(RenderElement.MESH);
@@ -106,6 +108,7 @@ public class MeshLayer extends RenderElement {
 		private static int shaderProgram;
 		private static int hMatrix;
 		private static int hColor;
+		private static int hHeightOffset;
 		private static int hVertexPosition;
 
 		static boolean init() {
@@ -115,6 +118,7 @@ public class MeshLayer extends RenderElement {
 
 			hMatrix = GL.glGetUniformLocation(shaderProgram, "u_mvp");
 			hColor = GL.glGetUniformLocation(shaderProgram, "u_color");
+			hHeightOffset = GL.glGetUniformLocation(shaderProgram, "u_height");
 			hVertexPosition = GL.glGetAttribLocation(shaderProgram, "a_pos");
 			return true;
 		}
@@ -130,11 +134,20 @@ public class MeshLayer extends RenderElement {
 
 			m.mvp.setAsUniform(hMatrix);
 
+			float heightOffset = 0;
+
 			for (; l != null && l.type == RenderElement.MESH; l = l.next) {
 				MeshLayer ml = (MeshLayer) l;
 
 				if (ml.indicesVbo == null)
 					continue;
+
+				if (ml.heightOffset != heightOffset) {
+					heightOffset = ml.heightOffset;
+
+					GL.glUniform1f(hHeightOffset, heightOffset /
+					        MercatorProjection.groundResolution(pos));
+				}
 
 				ml.indicesVbo.bind();
 
@@ -164,9 +177,10 @@ public class MeshLayer extends RenderElement {
 		private final static String vertexShader = ""
 		        + "precision mediump float;"
 		        + "uniform mat4 u_mvp;"
-		        + "attribute vec4 a_pos;"
+		        + "uniform float u_height;"
+		        + "attribute vec2 a_pos;"
 		        + "void main() {"
-		        + "  gl_Position = u_mvp * a_pos;"
+		        + "  gl_Position = u_mvp * vec4(a_pos, u_height, 1.0);"
 		        + "}";
 
 		private final static String fragmentShader = ""
