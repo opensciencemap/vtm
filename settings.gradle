@@ -1,4 +1,3 @@
-rootProject.name = 'vtm'
 include ':vtm'
 include ':vtm-android'
 include ':vtm-android-example'

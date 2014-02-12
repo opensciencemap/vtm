@@ -2,22 +2,10 @@
 apply plugin: 'android-library'
 apply plugin: 'android-maven'
 
-//http://stackoverflow.com/questions/20674650/how-to-configure-ndk-with-android-gradle-plugin-0-7
-task nativeLibsToJar(type: Zip, description: 'create a jar with native libs') {
-	destinationDir file("$buildDir/native-libs")
-	baseName 'native-libs'
-	extension 'jar'
-	from fileTree(dir: '../vtm-ext-libs/vtm-android', include: '**/*.so')
-	into 'lib/'
-}
-
-tasks.withType(JavaCompile) {
-	compileTask -> compileTask.dependsOn nativeLibsToJar
-}
 
 dependencies {
 	compile fileTree(dir: '../vtm-ext-libs/libs', include: 'slf4j-api-1.7.5.jar')
-	compile fileTree(dir: "$buildDir/native-libs", include: '*.jar')
+	compile fileTree(dir: "../vtm-ext-libs/vtm-android", include: 'native-libs-*.jar')
 	compile project(':vtm')
 	compile 'com.android.support:support-v4:+'
 }
