@@ -18,8 +18,9 @@ package org.oscim.utils.osm;
 
 import org.oscim.core.TagSet;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 public class OSMNode extends OSMElement {
-	//public static EMPTY_NODE = new OSMNode()
 
 	public final double lat;
 	public final double lon;
@@ -35,4 +36,8 @@ public class OSMNode extends OSMElement {
 		return "n" + id;
 	}
 
+	@Override
+	public Geometry toJts() {
+		return null; //bnew Point(new Coordinate(lat, lon), null);
+	}
 }

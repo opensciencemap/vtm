@@ -23,8 +23,6 @@ public class OSMMember {
 		RELATIOM
 	}
 
-	static final boolean useDebugLabels = true;
-
 	public final String role;
 	public final OSMElement member;
 

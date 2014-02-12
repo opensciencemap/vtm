@@ -18,6 +18,8 @@ package org.oscim.utils.osm;
 
 import org.oscim.core.TagSet;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 public abstract class OSMElement {
 
 	public final TagSet tags;
@@ -59,4 +61,5 @@ public abstract class OSMElement {
 		return "?" + id;
 	}
 
+	public abstract Geometry toJts();
 }

@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.oscim.core.TagSet;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 public class OSMRelation extends OSMElement {
 
 	public final List<OSMMember> relationMembers;
@@ -38,4 +40,8 @@ public class OSMRelation extends OSMElement {
 		return "r" + id;
 	}
 
+	@Override
+	public Geometry toJts() {
+		return null;
+	}
 }

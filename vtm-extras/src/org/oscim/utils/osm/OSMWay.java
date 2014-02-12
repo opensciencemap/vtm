@@ -20,6 +20,11 @@ import java.util.List;
 
 import org.oscim.core.TagSet;
 
+import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.impl.PackedCoordinateSequenceFactory;
+
 public class OSMWay extends OSMElement {
 
 	public final List<OSMNode> nodes;
@@ -39,4 +44,15 @@ public class OSMWay extends OSMElement {
 		return "w" + id;
 	}
 
+	public Geometry toJts() {
+		double[] coords = new double[nodes.size() * 2];
+		int i = 0;
+		for (OSMNode n : nodes) {
+			coords[i++] = n.lon;
+			coords[i++] = n.lat;
+		}
+
+		CoordinateSequence c = PackedCoordinateSequenceFactory.DOUBLE_FACTORY.create(coords, 2);
+		return new LineString(c, null);
+	}
 }

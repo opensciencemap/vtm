@@ -6,5 +6,6 @@
 	<classpathentry exported="true" kind="lib" path="/vtm-libs/extras/jackson-core-2.1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="/vtm-libs/extras/osmosis-osm-binary-0.43.jar"/>
 	<classpathentry exported="true" kind="lib" path="/vtm-libs/extras/protobuf-java-2.4.1.jar" sourcepath="/home/jeff/.m2/repository/com/google/protobuf/protobuf-java/2.4.1/protobuf-java-2.4.1-sources.jar"/>
+	<classpathentry kind="lib" path="/vtm-libs/libs/jts-1.13.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
