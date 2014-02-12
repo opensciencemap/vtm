@@ -135,6 +135,7 @@ public class MeshLayer extends RenderElement {
 			m.mvp.setAsUniform(hMatrix);
 
 			float heightOffset = 0;
+			GL.glUniform1f(hHeightOffset, heightOffset);
 
 			for (; l != null && l.type == RenderElement.MESH; l = l.next) {
 				MeshLayer ml = (MeshLayer) l;
