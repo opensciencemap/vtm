@@ -33,6 +33,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
+import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
@@ -138,6 +139,23 @@ public class MapView extends RelativeLayout {
 			@Override
 			public boolean onDown(MotionEvent e) {
 				return mMap.handleGesture(Gesture.PRESS, mMotionEvent.wrap(e));
+			}
+		});
+		mGestureDetector.setOnDoubleTapListener(new OnDoubleTapListener() {
+
+			@Override
+			public boolean onSingleTapConfirmed(MotionEvent e) {
+				return false;
+			}
+
+			@Override
+			public boolean onDoubleTapEvent(MotionEvent e) {
+				return false;
+			}
+
+			@Override
+			public boolean onDoubleTap(MotionEvent e) {
+				return mMap.handleGesture(Gesture.DOUBLE_TAP, mMotionEvent.wrap(e));
 			}
 		});
 	}

@@ -28,21 +28,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Changes Viewport for move, fling, scale, rotation and tilt gestures.
+ * Changes Viewport by handling move, fling, scale, rotation and tilt gestures.
  */
 public class MapEventLayer extends Layer implements Map.InputListener, GestureListener {
 
 	static final Logger log = LoggerFactory.getLogger(MapEventLayer.class);
 
+	/* TODO replace with bitmasks */
 	private boolean mEnableRotate = true;
 	private boolean mEnableTilt = true;
 	private boolean mEnableMove = true;
 	private boolean mEnableScale = true;
 
+	/* possible state transitions */
 	private boolean mCanScale;
 	private boolean mCanRotate;
 	private boolean mCanTilt;
 
+	/* current gesture state */
 	private boolean mDoRotate;
 	private boolean mDoScale;
 	private boolean mDoTilt;
@@ -185,8 +188,8 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 
 			/* double-tap + hold */
 			if (mDoubleTap) {
-
-				mViewport.scaleMap(1 - my / (height / 8), 0, 0);
+				// FIXME limit scale properly
+				mViewport.scaleMap(1 - my / (height / 6), 0, 0);
 				mMap.updateMap(true);
 				mStartMove = -1;
 				return true;
@@ -275,7 +278,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 				}
 			}
 		} else if (mDoScale && mEnableRotate) {
-			/* reenable rotation when higher threshold is reached */
+			/* re-enable rotation when higher threshold is reached */
 			double rad = Math.atan2(dy, dx);
 			double r = rad - mAngle;
 
@@ -290,7 +293,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		if (mCanScale || mDoRotate) {
 
 			if (!(mDoScale || mDoRotate)) {
-				/* enter exclusice scale mode */
+				/* enter exclusive scale mode */
 				if (Math.abs(deltaPinch) > (CanvasAdapter.dpi
 				        / MIN_SLOP * PINCH_ZOOM_THRESHOLD)) {
 
@@ -373,25 +376,26 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		int h = Tile.SIZE * 3;
 
 		mMap.animator().animateFling(Math.round(velocityX),
-		                                Math.round(velocityY),
-		                                -w, w, -h, h);
+		                             Math.round(velocityY),
+		                             -w, w, -h, h);
 		return true;
 	}
 
 	@Override
 	public boolean onGesture(Gesture g, MotionEvent e) {
-		if (g instanceof Gesture.DoubleTap) {
-			//mMapPosition.animateZoom(2);
-			// avoid onLongPress
-			// mMap.getLayers().cancelGesture();
+		if (g == Gesture.DOUBLE_TAP) {
 			mDoubleTap = true;
+			mDown = true;
 			return true;
 		}
 		return false;
 	}
 
 	/*******************************************************************************
-	 * Copyright 2011 See libgdx AUTHORS file.
+	 * from libgdx:
+	 * Copyright 2011 Mario Zechner <badlogicgames@gmail.com>
+	 * Copyright 2011 Nathan Sweet <nathan.sweet@gmail.com>
+	 * 
 	 * Licensed under the Apache License, Version 2.0 (the "License");
 	 * you may not use this file except in compliance with the License.
 	 * You may obtain a copy of the License at
