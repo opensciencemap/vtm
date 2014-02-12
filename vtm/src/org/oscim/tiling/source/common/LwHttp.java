@@ -44,6 +44,8 @@ public class LwHttp {
 	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
 	//private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
 	private final static byte[] HEADER_CONTENT_LENGTH = "Content-Length".getBytes();
+	private final static byte[] HEADER_CONNECTION_CLOSE = "Connection: close".getBytes();
+
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
 	private final static long RESPONSE_TIMEOUT = (long) 10E9; // 10 second in nanosecond
 
@@ -59,6 +61,9 @@ public class LwHttp {
 	private Buffer mResponseStream;
 	private long mLastRequest = 0;
 	private SocketAddress mSockAddr;
+
+	/** Server requested to close the connection */
+	private boolean mMustClose;
 
 	private final byte[] REQUEST_GET_START;
 	private final byte[] REQUEST_GET_END;
@@ -119,20 +124,29 @@ public class LwHttp {
 		}
 
 		public boolean finishedReading() {
+			try {
+				while (bytesRead < contentLength && read() >= 0);
+			} catch (IOException e) {
+				log.debug(e.getMessage());
+			}
+
 			return bytesRead == contentLength;
 		}
 
 		@Override
 		public synchronized void mark(int readlimit) {
+			if (dbg)
+				log.debug("mark {}", readlimit);
+
 			marked = bytesRead;
 			super.mark(readlimit);
 		}
 
 		@Override
 		public synchronized long skip(long n) throws IOException {
-			// Android(4.1.2) image decoder *requires* skip to
-			// actually skip the requested amount.
-			// https://code.google.com/p/android/issues/detail?id=6066
+			/* Android(4.1.2) image decoder *requires* skip to
+			 * actually skip the requested amount.
+			 * https://code.google.com/p/android/issues/detail?id=6066 */
 			long sumSkipped = 0L;
 			while (sumSkipped < n) {
 				long skipped = super.skip(n - sumSkipped);
@@ -144,18 +158,25 @@ public class LwHttp {
 					break; // EOF
 
 				sumSkipped += 1;
-				// was incremented by read()
+				/* was incremented by read() */
 				bytesRead -= 1;
 			}
+
+			if (dbg)
+				log.debug("skip:{}/{} pos:{}", n, sumSkipped, bytesRead);
+
 			bytesRead += sumSkipped;
 			return sumSkipped;
 		}
 
 		@Override
 		public synchronized void reset() throws IOException {
+			if (dbg)
+				log.debug("reset");
+
 			if (marked >= 0)
 				bytesRead = marked;
-			// TODO could check if the mark is  already invalid
+			/* TODO could check if the mark is already invalid */
 			super.reset();
 		}
 
@@ -166,7 +187,8 @@ public class LwHttp {
 
 			int data = super.read();
 
-			bytesRead += 1;
+			if (data >= 0)
+				bytesRead += 1;
 
 			if (dbg)
 				log.debug("read {} {}", bytesRead, contentLength);
@@ -223,12 +245,12 @@ public class LwHttp {
 
 		int contentLength = -1;
 
-		// header may not be larger than BUFFER_SIZE for this to work
+		/* header may not be larger than BUFFER_SIZE for this to work */
 		for (; (pos < read) || ((read < BUFFER_SIZE) &&
 		        (len = is.read(buf, read, BUFFER_SIZE - read)) >= 0); len = 0) {
 
 			read += len;
-			// end of header lines
+			/* end of header lines */
 			while (end < read && (buf[end] != '\n'))
 				end++;
 
@@ -239,24 +261,26 @@ public class LwHttp {
 			if (buf[end] != '\n')
 				continue;
 
-			// empty line (header end)
+			/* empty line (header end) */
 			if (end - pos == 1) {
 				end += 1;
 				break;
 			}
 
 			if (!ok) {
-				// ignore until end of header
+				/* ignore until end of header */
 			} else if (first) {
 				first = false;
-				// check only for OK ("HTTP/1.? ".length == 9)
+				/* check only for OK ("HTTP/1.? ".length == 9) */
 				if (!check(HEADER_HTTP_OK, buf, pos + 9, end))
 					ok = false;
 
 			} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
-				// parse Content-Length
+				/* parse Content-Length */
 				contentLength = parseInt(buf, pos +
 				        HEADER_CONTENT_LENGTH.length + 2, end - 1);
+			} else if (check(HEADER_CONNECTION_CLOSE, buf, pos, end)) {
+				mMustClose = true;
 			}
 			//} else if (check(HEADER_CONTENT_TYPE, buf, pos, end)) {
 			// check that response contains the expected
@@ -277,7 +301,7 @@ public class LwHttp {
 		if (!ok)
 			return null;
 
-		// back to start of content
+		/* back to start of content */
 		is.reset();
 		is.mark(0);
 		is.skip(end);
@@ -298,10 +322,10 @@ public class LwHttp {
 		}
 
 		if (mSocket == null) {
-			// might throw IOException
+			/* might throw IOException */
 			lwHttpConnect();
 
-			// TODO parse from header
+			/* TODO parse from header */
 			mMaxReq = RESPONSE_EXPECTED_LIVES;
 		}
 
@@ -324,7 +348,7 @@ public class LwHttp {
 		} catch (IOException e) {
 			log.debug("recreate connection");
 			close();
-			// might throw IOException
+			/* might throw IOException */
 			lwHttpConnect();
 
 			mCommandStream.write(request, 0, len);
@@ -348,6 +372,7 @@ public class LwHttp {
 			close();
 			throw e;
 		}
+		mMustClose = false;
 		return true;
 	}
 
@@ -379,18 +404,34 @@ public class LwHttp {
 		mResponseStream.setCache(null);
 
 		if (!mResponseStream.finishedReading()) {
+			//	StringBuffer sb = new StringBuffer();
+			//	try {
+			//		int val;
+			//		while ((val = mResponseStream.read()) >= 0)
+			//			sb.append((char) val);
+			//	} catch (IOException e) {
+			//
+			//	}
+			//log.debug("invalid buffer position {}", sb.toString());
 			log.debug("invalid buffer position");
 			close();
-			return false;
+			return true;
 		}
+
 		if (!success) {
 			close();
 			return false;
 		}
+
+		if (mMustClose) {
+			close();
+			return true;
+		}
+
 		return true;
 	}
 
-	// write (positive) integer to byte array
+	/** write (positive) integer to byte array */
 	public static int writeInt(int val, int pos, byte[] buf) {
 		if (val == 0) {
 			buf[pos] = '0';
@@ -406,7 +447,7 @@ public class LwHttp {
 		return pos + i;
 	}
 
-	// parse (positive) integer from byte array
+	/** parse (positive) integer from byte array */
 	protected static int parseInt(byte[] buf, int pos, int end) {
 		int val = 0;
 		for (; pos < end; pos++)
