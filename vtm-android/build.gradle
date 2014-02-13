@@ -1,13 +1,11 @@
-
 apply plugin: 'android-library'
 apply plugin: 'android-maven'
 
-
 dependencies {
-	compile fileTree(dir: '../vtm-ext-libs/libs', include: 'slf4j-api-1.7.5.jar')
 	compile fileTree(dir: "../vtm-ext-libs/vtm-android", include: 'native-libs-*.jar')
 	compile project(':vtm')
-	compile 'com.android.support:support-v4:+'
+	compile 'com.android.support:support-v4:19.0.1'
+	compile 'org.slf4j:slf4j-android:1.7.6'
 }
 
 android {
