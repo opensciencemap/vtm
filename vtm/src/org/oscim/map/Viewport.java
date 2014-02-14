@@ -55,7 +55,7 @@ public class Viewport {
 	private final GLMatrix mUnprojMatrix = new GLMatrix();
 	private final GLMatrix mTmpMatrix = new GLMatrix();
 
-	// temporary vars: only use in synchronized functions!
+	/* temporary vars: only use in synchronized functions! */
 	private final Point mMovePoint = new Point();
 	private final float[] mv = new float[4];
 	private final float[] mu = new float[4];
@@ -68,7 +68,7 @@ public class Viewport {
 	public final static float VIEW_DISTANCE = 3.0f;
 	public final static float VIEW_NEAR = 1;
 	public final static float VIEW_FAR = 8;
-	// scale map plane at VIEW_DISTANCE to near plane
+	/** scale map plane at VIEW_DISTANCE to near plane */
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
 	Viewport(Map map) {
