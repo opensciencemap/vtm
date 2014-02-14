@@ -124,7 +124,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 
 			return true;
 		}
-		if (!mDown) {
+		if (!(mDown || mDoubleTap)) {
 			/* no down event received */
 			return false;
 		}
@@ -150,9 +150,9 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 			return true;
 		}
 		if (action == MotionEvent.ACTION_CANCEL) {
-			mDoubleTap = false;
-			mStartMove = -1;
+			//mStartMove = -1;
 			mDown = false;
+			mDoubleTap = false;
 			return true;
 		}
 		if (action == MotionEvent.ACTION_POINTER_DOWN) {
@@ -188,6 +188,11 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 
 			/* double-tap + hold */
 			if (mDoubleTap) {
+				if (!mDown) {
+					// TODO check if within tap range
+					mDown = true;
+					return true;
+				}
 				// FIXME limit scale properly
 				mViewport.scaleMap(1 - my / (height / 6), 0, 0);
 				mMap.updateMap(true);
@@ -385,7 +390,6 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 	public boolean onGesture(Gesture g, MotionEvent e) {
 		if (g == Gesture.DOUBLE_TAP) {
 			mDoubleTap = true;
-			mDown = true;
 			return true;
 		}
 		return false;
