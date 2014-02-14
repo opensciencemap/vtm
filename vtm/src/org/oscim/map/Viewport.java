@@ -47,6 +47,7 @@ public class Viewport {
 	private final MapPosition mPos = new MapPosition();
 
 	private final GLMatrix mProjMatrix = new GLMatrix();
+	private final GLMatrix mProjMatrixUnscaled = new GLMatrix();
 	private final GLMatrix mProjMatrixI = new GLMatrix();
 	private final GLMatrix mRotMatrix = new GLMatrix();
 	private final GLMatrix mViewMatrix = new GLMatrix();
@@ -79,23 +80,37 @@ public class Viewport {
 	}
 
 	public synchronized void setScreenSize(int width, int height) {
-		float s = VIEW_SCALE;
-		float aspect = height / (float) width;
+		mHeight = height;
+		mWidth = width;
+
+		/* setup projection matrix:
+		 * 0. scale to window coordinates
+		 * 1. translate to VIEW_DISTANCE
+		 * 2. apply projection
+		 * setup inverse projection:
+		 * 0. invert projection
+		 * 1. invert translate to VIEW_DISTANCE */
+
+		float ratio = (mHeight / mWidth) * VIEW_SCALE;
 		float[] tmp = new float[16];
 
-		GLMatrix.frustumM(tmp, 0, -s, s,
-		                  aspect * s, -aspect * s, VIEW_NEAR, VIEW_FAR);
+		GLMatrix.frustumM(tmp, 0, -VIEW_SCALE, VIEW_SCALE,
+		                  ratio, -ratio, VIEW_NEAR, VIEW_FAR);
 
 		mProjMatrix.set(tmp);
 		mTmpMatrix.setTranslation(0, 0, -VIEW_DISTANCE);
 		mProjMatrix.multiplyRhs(mTmpMatrix);
-		mProjMatrix.get(tmp);
 
+		/* set inverse projection matrix (without scaling) */
+		mProjMatrix.get(tmp);
 		GLMatrix.invertM(tmp, 0, tmp, 0);
 		mProjMatrixI.set(tmp);
 
-		mHeight = height;
-		mWidth = width;
+		mProjMatrixUnscaled.copy(mProjMatrix);
+
+		/* scale to window coordinates */
+		mTmpMatrix.setScale(1 / mWidth, 1 / mWidth, 1 / mWidth);
+		mProjMatrix.multiplyRhs(mTmpMatrix);
 
 		updateMatrix();
 	}
@@ -204,7 +219,7 @@ public class Viewport {
 		mv[1] = (float) (ry / ua);
 		mv[2] = (float) (cx - cx / ua);
 
-		mProjMatrix.prj(mv);
+		mProjMatrixUnscaled.prj(mv);
 
 		return mv[2];
 	}
@@ -362,42 +377,31 @@ public class Viewport {
 	}
 
 	private void updateMatrix() {
-		// - view matrix
-		// 1. scale to window coordinates
-		// 2. apply rotate
-		// 3. apply tilt
-
-		// - projection matrix
-		// 4. translate to VIEW_DISTANCE
-		// 5. apply projection
+		/* - view matrix:
+		 * 0. apply rotate
+		 * 1. apply tilt */
 
 		mRotMatrix.setRotation(mPos.angle, 0, 0, 1);
-
-		// tilt map
 		mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
 
-		// apply first rotation, then tilt
-		mRotMatrix.multiplyMM(mTmpMatrix, mRotMatrix);
+		/* apply first rotation, then tilt */
+		mRotMatrix.multiplyLhs(mTmpMatrix);
 
-		// scale to window coordinates
-		mTmpMatrix.setScale(1 / mWidth, 1 / mWidth, 1 / mWidth);
-
-		mViewMatrix.multiplyMM(mRotMatrix, mTmpMatrix);
+		mViewMatrix.copy(mRotMatrix);
 
 		mVPMatrix.multiplyMM(mProjMatrix, mViewMatrix);
 
-		//--- unproject matrix:
-
-		// inverse scale
+		/* inverse projection matrix: */
+		/* invert scale */
 		mUnprojMatrix.setScale(mWidth, mWidth, 1);
 
-		// inverse rotation and tilt
+		/* invert rotation and tilt */
 		mTmpMatrix.transposeM(mRotMatrix);
 
-		// (AB)^-1 = B^-1*A^-1, unapply scale, tilt and rotation
-		mTmpMatrix.multiplyMM(mUnprojMatrix, mTmpMatrix);
+		/* (AB)^-1 = B^-1*A^-1, invert scale, tilt and rotation */
+		mTmpMatrix.multiplyLhs(mUnprojMatrix);
 
-		// (AB)^-1 = B^-1*A^-1, unapply projection
+		/* (AB)^-1 = B^-1*A^-1, invert projection */
 		mUnprojMatrix.multiplyMM(mTmpMatrix, mProjMatrixI);
 	}
 

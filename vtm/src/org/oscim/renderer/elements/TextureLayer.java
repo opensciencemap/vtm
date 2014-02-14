@@ -122,7 +122,6 @@ public abstract class TextureLayer extends RenderElement {
 		private static int hTextureProjMatrix;
 		private static int hTextureVertex;
 		private static int hTextureScale;
-		private static int hTextureScreenScale;
 		private static int hTextureTexCoord;
 		private static int hTextureSize;
 
@@ -134,7 +133,6 @@ public abstract class TextureLayer extends RenderElement {
 			hTextureProjMatrix = GL.glGetUniformLocation(mTextureProgram, "u_proj");
 			hTextureScale = GL.glGetUniformLocation(mTextureProgram, "u_scale");
 			hTextureSize = GL.glGetUniformLocation(mTextureProgram, "u_div");
-			hTextureScreenScale = GL.glGetUniformLocation(mTextureProgram, "u_swidth");
 			hTextureVertex = GL.glGetAttribLocation(mTextureProgram, "vertex");
 			hTextureTexCoord = GL.glGetAttribLocation(mTextureProgram, "tex_coord");
 
@@ -157,8 +155,6 @@ public abstract class TextureLayer extends RenderElement {
 				GL.glUniform1f(hTextureScale, 1 / scale);
 			else
 				GL.glUniform1f(hTextureScale, 1);
-
-			GL.glUniform1f(hTextureScreenScale, 1f / MapRenderer.screenWidth);
 
 			m.proj.setAsUniform(hTextureProjMatrix);
 			m.mvp.setAsUniform(hTextureMVMatrix);
@@ -208,7 +204,6 @@ public abstract class TextureLayer extends RenderElement {
 		        + "uniform mat4 u_mv;"
 		        + "uniform mat4 u_proj;"
 		        + "uniform float u_scale;"
-		        + "uniform float u_swidth;"
 		        + "uniform vec2 u_div;"
 		        + "varying vec2 tex_c;"
 		        + "const float coord_scale = " + COORD_DIV + ";"
@@ -219,7 +214,7 @@ public abstract class TextureLayer extends RenderElement {
 		        + "       pos = u_proj * (u_mv * vec4(vertex.xy + dir * u_scale, 0.0, 1.0));"
 		        + "  } else {" // place as billboard
 		        + "    vec4 center = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-		        + "    pos = u_proj * (center + vec4(dir * (coord_scale * u_swidth), 0.0, 0.0));"
+		        + "    pos = u_proj * (center + vec4(dir * coord_scale, 0.0, 0.0));"
 		        + "  }"
 		        + "  gl_Position = pos;"
 		        + "  tex_c = tex_coord * u_div;"
