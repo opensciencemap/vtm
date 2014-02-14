@@ -75,11 +75,13 @@ public class MapPosition {
 	}
 
 	public void copy(MapPosition other) {
-		this.zoomLevel = other.zoomLevel;
-		this.angle = other.angle;
-		this.scale = other.scale;
 		this.x = other.x;
 		this.y = other.y;
+
+		this.angle = other.angle;
+		this.scale = other.scale;
+		this.tilt = other.tilt;
+		this.zoomLevel = other.zoomLevel;
 	}
 
 	/**
