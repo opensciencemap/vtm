@@ -20,8 +20,6 @@ import org.oscim.utils.FastMath;
 
 /** A MapPosition Container. */
 public class MapPosition {
-	public final static int MAX_ZOOMLEVEL = 20;
-	public final static int MIN_ZOOMLEVEL = 2;
 
 	/** projected position x 0..1 */
 	public double x;
@@ -35,8 +33,7 @@ public class MapPosition {
 	/** perspective tile */
 	public float tilt;
 
-	// to be removed
-	//  FastMath.log2((int) scale)
+	/** to be removed: FastMath.log2((int) scale) */
 	public int zoomLevel;
 
 	public MapPosition() {
@@ -121,21 +118,14 @@ public class MapPosition {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("[");
-		builder.append("X: ");
-		builder.append(x);
-		builder.append(", Y: ");
-		builder.append(y);
-		builder.append(", Z: ");
-		builder.append(zoomLevel);
-		builder.append("]");
-		builder.append("\tlat=");
-		builder.append(MercatorProjection.toLatitude(y));
-		builder.append(", lon=");
-		builder.append(MercatorProjection.toLongitude(x));
-
-		return builder.toString();
+		return new StringBuilder()
+		    .append("[X:").append(x)
+		    .append(", Y:").append(y)
+		    .append(", Z:").append(zoomLevel)
+		    .append("] lat:")
+		    .append(MercatorProjection.toLatitude(y))
+		    .append(", lon:")
+		    .append(MercatorProjection.toLongitude(x))
+		    .toString();
 	}
-
 }
