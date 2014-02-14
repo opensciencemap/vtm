@@ -41,6 +41,8 @@ public class MapAnimator {
 	private final int ANIM_SCALE = 1 << 1;
 	private final int ANIM_FLING = 1 << 2;
 	private final int ANIM_BBOX = 1 << 3;
+	private final int ANIM_ROTATE = 1 << 4;
+	private final int ANIM_TILT = 1 << 5;
 
 	private final Map mMap;
 	private final Viewport mViewport;
@@ -109,6 +111,39 @@ public class MapAnimator {
 		mDeltaPos.y -= mStartPos.y;
 
 		mState = ANIM_MOVE | ANIM_SCALE;
+
+		animStart(duration);
+	}
+
+	public synchronized void animateTo(long duration, MapPosition mapPosition) {
+
+		mViewport.getMapPosition(mPos);
+
+		mapPosition.scale = FastMath.clamp(mapPosition.scale,
+		                                   Viewport.MIN_SCALE,
+		                                   Viewport.MAX_SCALE);
+		mDeltaPos.scale = mapPosition.scale;
+
+		mScaleBy = mapPosition.scale - mPos.scale;
+
+		mStartPos.x = mPos.x;
+		mStartPos.y = mPos.y;
+		mStartPos.scale = mPos.scale;
+		mStartPos.angle = mPos.angle;
+		mStartPos.tilt = mPos.tilt;
+
+		mDeltaPos.x = MercatorProjection.longitudeToX(mapPosition.getLongitude()) - mStartPos.x;
+		mDeltaPos.y = MercatorProjection.latitudeToY(mapPosition.getLatitude()) - mStartPos.y;
+
+		mDeltaPos.angle = mStartPos.angle - mapPosition.angle;
+		while (mDeltaPos.angle > 180)
+			mDeltaPos.angle -= 360;
+		while (mDeltaPos.angle < -180)
+			mDeltaPos.angle += 360;
+
+		mDeltaPos.tilt = mapPosition.tilt - mStartPos.tilt;
+
+		mState = ANIM_MOVE | ANIM_SCALE | ANIM_ROTATE | ANIM_TILT;
 
 		animStart(duration);
 	}
@@ -251,10 +286,19 @@ public class MapAnimator {
 					                  (float) (dy - mScroll.y));
 					mScroll.x = dx;
 					mScroll.y = dy;
-
 					changed = true;
 				}
 			}
+			if ((mState & ANIM_ROTATE) != 0) {
+				mViewport.setRotation(mStartPos.angle + mDeltaPos.angle * adv);
+				changed = true;
+			}
+
+			if ((mState & ANIM_TILT) != 0) {
+				mViewport.setTilt(mStartPos.tilt + mDeltaPos.tilt * adv);
+				changed = true;
+			}
+
 			// remember current map position
 			mViewport.getMapPosition(mPos);
 
