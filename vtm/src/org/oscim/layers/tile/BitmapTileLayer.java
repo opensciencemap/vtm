@@ -24,6 +24,7 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.event.Event;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.ElementLayers;
@@ -71,8 +72,11 @@ public class BitmapTileLayer extends TileLayer {
 	}
 
 	@Override
-	public void onMapUpdate(MapPosition pos, boolean changed, boolean clear) {
-		super.onMapUpdate(pos, changed, clear);
+	public void onMapEvent(Event event, MapPosition pos) {
+		super.onMapEvent(event, pos);
+
+		if (event != Map.POSITION_EVENT)
+			return;
 
 		FadeStep[] fade = mTileSource.getFadeSteps();
 

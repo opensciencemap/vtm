@@ -17,12 +17,13 @@ package org.oscim.android;
  */
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.oscim.android.canvas.AndroidBitmap;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.event.Event;
 import org.oscim.layers.Layer;
+import org.oscim.map.Map;
 import org.oscim.map.Map.UpdateListener;
 import org.oscim.renderer.BitmapRenderer;
 
@@ -71,7 +72,7 @@ public class MapScaleBar extends Layer implements UpdateListener {
 	private boolean mRedrawNeeded;
 	private double mPrevLatitude = -1;
 	private final double mPrevScale = -1;
-	private final Map<TextField, String> mTextFields;
+	private final HashMap<TextField, String> mTextFields;
 
 	private final Bitmap mBitmap;
 	// passed to BitmapRenderer - need to sync on this object.
@@ -102,7 +103,9 @@ public class MapScaleBar extends Layer implements UpdateListener {
 	}
 
 	@Override
-	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+    public void onMapEvent(Event e, MapPosition mapPosition) {
+		if (e == Map.UPDATE_EVENT)
+			return;
 
 		double latitude = MercatorProjection.toLatitude(mapPosition.y);
 

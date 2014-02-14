@@ -16,10 +16,10 @@
  */
 package org.oscim.map;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.oscim.core.MapPosition;
+import org.oscim.event.Event;
+import org.oscim.event.EventDispatcher;
+import org.oscim.event.EventListener;
 import org.oscim.event.Gesture;
 import org.oscim.event.GestureDetector;
 import org.oscim.event.MotionEvent;
@@ -45,8 +45,8 @@ public abstract class Map {
 	 * register when the layer is added to the map and unregistered when
 	 * the layer is removed.
 	 */
-	public interface UpdateListener {
-		void onMapUpdate(MapPosition mapPosition, boolean positionChanged, boolean clear);
+	public interface UpdateListener extends EventListener {
+		void onMapEvent(Event e, MapPosition mapPosition);
 	}
 
 	/**
@@ -55,41 +55,67 @@ public abstract class Map {
 	 * register when the layer is added to the map and unregistered when
 	 * the layer is removed.
 	 */
-	public interface InputListener {
-		void onMotionEvent(MotionEvent e);
+
+	public interface InputListener extends EventListener {
+		void onInputEvent(Event e, MotionEvent motionEvent);
 	}
+
+	/***/
+	public static Event UPDATE_EVENT = new Event();
+	/**
+	 * Map state has changed in a way that all layers should clear their state
+	 * e.g. the theme or the TilesSource has changed
+	 */
+	public static Event CLEAR_EVENT = new Event();
+	public static Event POSITION_EVENT = new Event();
+
+	public final EventDispatcher<InputListener, MotionEvent> input;
+	public final EventDispatcher<UpdateListener, MapPosition> events;
 
 	private final Layers mLayers;
 	private final ViewController mViewport;
 	private final Animator mAnimator;
-
 	private final MapPosition mMapPosition;
 	private final AsyncExecutor mAsyncExecutor;
 
 	protected final MapEventLayer mEventLayer;
 	protected GestureDetector mGestureDetector;
-
+	/**
+	 * Listener interface for map update notifications.
+	 * Layers implementing this interface they will be automatically
+	 * register when the layer is added to the map and unregistered when
+	 * the layer is removed.
+	 */
 	private VectorTileLayer mBaseLayer;
-
-	private Set<InputListener> mInputListenerSet = new LinkedHashSet<InputListener>();
-	private InputListener[] mInputListeners;
-
-	private Set<UpdateListener> mUpdateListenerSet = new LinkedHashSet<UpdateListener>();
-	private UpdateListener[] mUpdateListeners;
 
 	protected boolean mClearMap = true;
 
 	public Map() {
 		mViewport = new ViewController();
 		mAnimator = new Animator(this);
-
 		mLayers = new Layers(this);
+
+		input = new EventDispatcher<InputListener, MotionEvent>() {
+
+			@Override
+			public void tell(InputListener l, Event e, MotionEvent d) {
+				l.onInputEvent(e, d);
+			}
+		};
+		events = new EventDispatcher<UpdateListener, MapPosition>() {
+
+			@Override
+			public void tell(UpdateListener l, Event e, MapPosition d) {
+				l.onMapEvent(e, d);
+			}
+		};
 
 		mAsyncExecutor = new AsyncExecutor(2);
 		mMapPosition = new MapPosition();
 
 		mEventLayer = new MapEventLayer(this);
 		mLayers.add(0, mEventLayer);
+
 	}
 
 	public MapEventLayer getEventLayer() {
@@ -249,22 +275,6 @@ public abstract class Map {
 	}
 
 	/**
-	 * Register UpdateListener
-	 */
-	public void bind(UpdateListener l) {
-		if (mUpdateListenerSet.add(l))
-			mUpdateListeners = null;
-	}
-
-	/**
-	 * Unregister UpdateListener
-	 */
-	public void unbind(UpdateListener l) {
-		if (mUpdateListenerSet.remove(l))
-			mUpdateListeners = null;
-	}
-
-	/**
 	 * This function is run on main-loop before rendering a frame.
 	 * Caution: Do not call directly!
 	 */
@@ -274,42 +284,14 @@ public abstract class Map {
 
 		changed |= mViewport.getMapPosition(pos);
 
-		if (mUpdateListeners == null) {
-			mUpdateListeners = new UpdateListener[mUpdateListenerSet.size()];
-			mUpdateListenerSet.toArray(mUpdateListeners);
-		}
-
-		for (UpdateListener l : mUpdateListeners)
-			l.onMapUpdate(pos, changed, mClearMap);
+		if (mClearMap)
+			events.fire(CLEAR_EVENT, pos);
+		else if (changed)
+			events.fire(POSITION_EVENT, pos);
+		else
+			events.fire(UPDATE_EVENT, pos);
 
 		mClearMap = false;
-	}
-
-	/**
-	 * Register InputListener
-	 */
-	public void bind(InputListener listener) {
-		if (mInputListenerSet.add(listener))
-			mInputListeners = null;
-	}
-
-	/**
-	 * Unregister InputListener
-	 */
-	public void unbind(InputListener listener) {
-		if (mInputListenerSet.remove(listener))
-			mInputListeners = null;
-	}
-
-	public void handleMotionEvent(MotionEvent e) {
-
-		if (mInputListeners == null) {
-			mInputListeners = new InputListener[mInputListenerSet.size()];
-			mInputListenerSet.toArray(mInputListeners);
-		}
-
-		for (InputListener l : mInputListeners)
-			l.onMotionEvent(e);
 	}
 
 	public boolean handleGesture(Gesture g, MotionEvent e) {

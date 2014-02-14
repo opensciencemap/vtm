@@ -17,6 +17,7 @@
 package org.oscim.layers.tile;
 
 import org.oscim.core.MapPosition;
+import org.oscim.event.Event;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.map.Map.UpdateListener;
@@ -69,19 +70,22 @@ public abstract class TileLayer extends Layer implements UpdateListener {
 	}
 
 	@Override
-	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-		if (clear) {
+	public void onMapEvent(Event event, MapPosition mapPosition) {
+
+		if (event == Map.CLEAR_EVENT) {
 			// sync with TileRenderer
 			synchronized (mRenderer) {
 				tileRenderer().clearTiles();
 				mTileManager.init();
 			}
 
-			changed = true;
-		}
+			if (mTileManager.update(mapPosition))
+				notifyLoaders();
 
-		if (changed && mTileManager.update(mapPosition))
-			notifyLoaders();
+		} else if (event == Map.POSITION_EVENT) {
+			if (mTileManager.update(mapPosition))
+				notifyLoaders();
+		}
 	}
 
 	@Override

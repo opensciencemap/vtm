@@ -5,70 +5,32 @@ import org.oscim.utils.pool.LList;
 /**
  * The Class EventDispatcher.
  * 
- * Events MUST be dispached from main-loop! To add events from other
+ * Events MUST be dispatched from main-loop! To add events from other
  * threads use:
  * Map.post(new Runnable(){ public void run(tell(event,data);)};);
  * 
  * @param <T> the event source type
  * @param <E> the event 'data' type
  */
-public class EventDispatcher<T, E> {
-
-	/**
-	 * Generic event-listener interface.
-	 * 
-	 * @param <E> the type of event 'data'
-	 */
-	public interface Listener<E> {
-
-		/**
-		 * The onEvent handler to be implemented by Listeners.
-		 * 
-		 * @param source the event source
-		 * @param event the event object/type
-		 * @param data some object involved in this event
-		 */
-		public void onEvent(Object source, Event event, E data);
-	}
-
-	/**
-	 * The Class Event to be subclassed by event-producers. Should be used
-	 * to distinguish the type of event when more than one is produced.
-	 */
-	public static class Event {
-		// nothing here
-	}
-
-	/** The event source object. */
-	protected final T mSource;
+public abstract class EventDispatcher<E extends EventListener, T> {
 
 	/** The list of listeners. */
-	protected LList<Listener<E>> mListeners;
-
-	/**
-	 * Instantiates a new event dispatcher.
-	 * 
-	 * @param source the event-source
-	 */
-	public EventDispatcher(T source) {
-		mSource = source;
-	}
+	protected LList<E> mListeners;
 
 	/**
 	 * Bind listener for event notifications.
 	 */
-	public void bind(Listener<E> listener) {
+	public void bind(E listener) {
 		if (LList.find(mListeners, listener) != null) {
-			// throw some poo?
 			return;
 		}
-		mListeners = LList.push(mListeners, new LList<Listener<E>>(listener));
+		mListeners = LList.push(mListeners, new LList<E>(listener));
 	}
 
 	/**
-	 * Unbind listener.
+	 * Remove listener.
 	 */
-	public void unbind(Listener<E> listener) {
+	public void unbind(E listener) {
 		mListeners = LList.remove(mListeners, listener);
 	}
 
@@ -78,9 +40,11 @@ public class EventDispatcher<T, E> {
 	 * @param event the event
 	 * @param data the data
 	 */
-	public void tell(Event event, E data) {
-		for (LList<Listener<E>> l = mListeners; l != null; l = l.next) {
-			l.data.onEvent(mSource, event, data);
+	public abstract void tell(E listener, Event event, T data);
+
+	public void fire(Event event, T data) {
+		for (LList<E> l = mListeners; l != null; l = l.next) {
+			tell(l.data, event, data);
 		}
 	}
 }
