@@ -16,14 +16,16 @@
  */
 package org.oscim.map;
 
+import static org.oscim.core.MercatorProjection.latitudeToY;
+import static org.oscim.core.MercatorProjection.longitudeToX;
+import static org.oscim.utils.FastMath.clamp;
+
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
-import org.oscim.core.MercatorProjection;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.utils.FastMath;
 
 // TODO: rewrite
 
@@ -63,14 +65,13 @@ public class MapAnimator {
 	private int mState = ANIM_NONE;
 
 	public synchronized void animateTo(BoundingBox bbox) {
-		// TODO for large distatance first scale out, then in
+		/* TODO for large distance first scale out, then in
+		 * calculate the maximum scale at which the bbox is completely visible */
+		double dx = Math.abs(longitudeToX(bbox.getMaxLongitude())
+		        - longitudeToX(bbox.getMinLongitude()));
 
-		// calculate the maximum scale at which the bbox is completely visible
-		double dx = Math.abs(MercatorProjection.longitudeToX(bbox.getMaxLongitude())
-		        - MercatorProjection.longitudeToX(bbox.getMinLongitude()));
-
-		double dy = Math.abs(MercatorProjection.latitudeToY(bbox.getMinLatitude())
-		        - MercatorProjection.latitudeToY(bbox.getMaxLatitude()));
+		double dy = Math.abs(latitudeToY(bbox.getMinLatitude())
+		        - latitudeToY(bbox.getMaxLatitude()));
 
 		double zx = mMap.getWidth() / (dx * Tile.SIZE);
 		double zy = mMap.getHeight() / (dy * Tile.SIZE);
@@ -93,7 +94,7 @@ public class MapAnimator {
 				scale = mPos.scale * scale;
 		}
 
-		scale = FastMath.clamp(scale, Viewport.MIN_SCALE, Viewport.MAX_SCALE);
+		scale = clamp(scale, Viewport.MIN_SCALE, Viewport.MAX_SCALE);
 		mDeltaPos.scale = scale;
 
 		mScaleBy = scale - mPos.scale;
@@ -104,8 +105,8 @@ public class MapAnimator {
 		mStartPos.x = mPos.x;
 		mStartPos.y = mPos.y;
 
-		mDeltaPos.x = MercatorProjection.longitudeToX(geoPoint.getLongitude());
-		mDeltaPos.y = MercatorProjection.latitudeToY(geoPoint.getLatitude());
+		mDeltaPos.x = longitudeToX(geoPoint.getLongitude());
+		mDeltaPos.y = latitudeToY(geoPoint.getLatitude());
 
 		mDeltaPos.x -= mStartPos.x;
 		mDeltaPos.y -= mStartPos.y;
@@ -115,16 +116,16 @@ public class MapAnimator {
 		animStart(duration);
 	}
 
-	public synchronized void animateTo(long duration, MapPosition mapPosition) {
+	public synchronized void animateTo(long duration, MapPosition pos) {
 
 		mViewport.getMapPosition(mPos);
 
-		mapPosition.scale = FastMath.clamp(mapPosition.scale,
-		                                   Viewport.MIN_SCALE,
-		                                   Viewport.MAX_SCALE);
-		mDeltaPos.scale = mapPosition.scale;
+		pos.scale = clamp(pos.scale,
+		                  Viewport.MIN_SCALE,
+		                  Viewport.MAX_SCALE);
+		mDeltaPos.scale = pos.scale;
 
-		mScaleBy = mapPosition.scale - mPos.scale;
+		mScaleBy = pos.scale - mPos.scale;
 
 		mStartPos.x = mPos.x;
 		mStartPos.y = mPos.y;
@@ -132,17 +133,16 @@ public class MapAnimator {
 		mStartPos.angle = mPos.angle;
 		mStartPos.tilt = mPos.tilt;
 
-		mDeltaPos.x = MercatorProjection.longitudeToX(mapPosition.getLongitude()) - mStartPos.x;
-		mDeltaPos.y = MercatorProjection.latitudeToY(mapPosition.getLatitude()) - mStartPos.y;
+		mDeltaPos.x = longitudeToX(pos.getLongitude()) - mStartPos.x;
+		mDeltaPos.y = latitudeToY(pos.getLatitude()) - mStartPos.y;
 
-		mDeltaPos.angle = mStartPos.angle - mapPosition.angle;
+		mDeltaPos.angle = mStartPos.angle - pos.angle;
 		while (mDeltaPos.angle > 180)
 			mDeltaPos.angle -= 360;
 		while (mDeltaPos.angle < -180)
 			mDeltaPos.angle += 360;
 
-		mDeltaPos.tilt = mapPosition.tilt - mStartPos.tilt;
-		mDeltaPos.tilt = clamp(mDeltaPos.tilt, 0, Viewport.MAX_TILT);
+		mDeltaPos.tilt = clamp(pos.tilt, 0, Viewport.MAX_TILT) - mStartPos.tilt;
 
 		mState = ANIM_MOVE | ANIM_SCALE | ANIM_ROTATE | ANIM_TILT;
 
@@ -158,7 +158,7 @@ public class MapAnimator {
 		else
 			scale = mPos.scale * scale;
 
-		scale = FastMath.clamp(scale, Viewport.MIN_SCALE, Viewport.MAX_SCALE);
+		scale = clamp(scale, Viewport.MIN_SCALE, Viewport.MAX_SCALE);
 		mDeltaPos.scale = scale;
 
 		mScaleBy = scale - mPos.scale;
@@ -195,8 +195,8 @@ public class MapAnimator {
 		float flingFactor = (duration / 2500);
 		mVelocity.x = velocityX * flingFactor;
 		mVelocity.y = velocityY * flingFactor;
-		FastMath.clamp(mVelocity.x, minX, maxX);
-		FastMath.clamp(mVelocity.y, minY, maxY);
+		clamp(mVelocity.x, minX, maxX);
+		clamp(mVelocity.y, minY, maxY);
 
 		mState = ANIM_FLING;
 
@@ -225,21 +225,21 @@ public class MapAnimator {
 		long millisLeft = mAnimEnd - MapRenderer.frametime;
 
 		boolean changed = false;
-
 		synchronized (mViewport) {
+			Viewport v = mViewport;
 
-			// cancel animation when position was changed since last
-			// update, i.e. when it was modified outside the animator.
-			if (mViewport.getMapPosition(mPos)) {
+			/* cancel animation when position was changed since last
+			 * update, i.e. when it was modified outside the animator. */
+			if (v.getMapPosition(mPos)) {
 				animCancel();
 				return;
 			}
 
 			if (millisLeft <= 0) {
-				// set final position
+				/* set final position */
 				if ((mState & ANIM_MOVE) != 0)
-					mViewport.moveTo(mStartPos.x + mDeltaPos.x,
-					                 mStartPos.y + mDeltaPos.y);
+					v.moveTo(mStartPos.x + mDeltaPos.x,
+					         mStartPos.y + mDeltaPos.y);
 
 				if ((mState & ANIM_SCALE) != 0) {
 					if (mScaleBy > 0)
@@ -253,7 +253,7 @@ public class MapAnimator {
 				return;
 			}
 
-			float adv = FastMath.clamp(1.0f - millisLeft / mDuration, 0, 1);
+			float adv = clamp(1.0f - millisLeft / mDuration, 0, 1);
 
 			if ((mState & ANIM_SCALE) != 0) {
 				if (mScaleBy > 0)
@@ -265,16 +265,16 @@ public class MapAnimator {
 			}
 
 			if ((mState & ANIM_MOVE) != 0) {
-				mViewport.moveTo(mStartPos.x + mDeltaPos.x * adv,
-				                 mStartPos.y + mDeltaPos.y * adv);
+				v.moveTo(mStartPos.x + mDeltaPos.x * adv,
+				         mStartPos.y + mDeltaPos.y * adv);
 				changed = true;
 			}
 
 			if ((mState & ANIM_BBOX) != 0) {
 				if (mPos.angle > 180)
 					mPos.angle -= 360;
-				mViewport.setRotation(mPos.angle * (1 - adv));
-				mViewport.setTilt(mPos.tilt * (1 - adv));
+				v.setRotation(mPos.angle * (1 - adv));
+				v.setTilt(mPos.tilt * (1 - adv));
 			}
 
 			if ((mState & ANIM_FLING) != 0) {
@@ -283,37 +283,36 @@ public class MapAnimator {
 				double dy = mVelocity.y * adv;
 				if ((dx - mScroll.x) != 0 || (dy - mScroll.y) != 0) {
 
-					mViewport.moveMap((float) (dx - mScroll.x),
-					                  (float) (dy - mScroll.y));
+					v.moveMap((float) (dx - mScroll.x),
+					          (float) (dy - mScroll.y));
 					mScroll.x = dx;
 					mScroll.y = dy;
 					changed = true;
 				}
 			}
 			if ((mState & ANIM_ROTATE) != 0) {
-				mViewport.setRotation(mStartPos.angle + mDeltaPos.angle * adv);
+				v.setRotation(mStartPos.angle + mDeltaPos.angle * adv);
 				changed = true;
 			}
 
 			if ((mState & ANIM_TILT) != 0) {
-				mViewport.setTilt(mStartPos.tilt + mDeltaPos.tilt * adv);
+				v.setTilt(mStartPos.tilt + mDeltaPos.tilt * adv);
 				changed = true;
 			}
 
-			// remember current map position
-			mViewport.getMapPosition(mPos);
+			/* remember current map position */
+			v.getMapPosition(mPos);
 
 		}
 
-		// continue animation
+		/* continue animation */
 		if (changed) {
-			// render and inform layers that position has changed
+			/* render and inform layers that position has changed */
 			mMap.updateMap(true);
 		} else {
-			// just render next frame
+			/* just render next frame */
 			mMap.render();
 		}
-
 	}
 
 	private void doScale(double newScale) {
