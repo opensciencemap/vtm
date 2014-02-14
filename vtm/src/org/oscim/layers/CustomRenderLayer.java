@@ -17,6 +17,7 @@
 package org.oscim.layers;
 
 import org.oscim.core.MapPosition;
+import org.oscim.event.Event;
 import org.oscim.map.Map;
 import org.oscim.map.Map.UpdateListener;
 import org.oscim.renderer.LayerRenderer;
@@ -61,7 +62,7 @@ public class CustomRenderLayer extends Layer implements UpdateListener {
 	private int someConccurentVariable;
 
 	@Override
-	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
+	public void onMapEvent(Event e, MapPosition mapPosition) {
 
 		synchronized (mRenderer) {
 			someConccurentVariable++;

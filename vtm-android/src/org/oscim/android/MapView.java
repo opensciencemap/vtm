@@ -185,8 +185,7 @@ public class MapView extends RelativeLayout {
 		if (mGestureDetector.onTouchEvent(motionEvent))
 			return true;
 
-		mMap.handleMotionEvent(mMotionEvent.wrap(motionEvent));
-
+		mMap.input.fire(null, mMotionEvent.wrap(motionEvent));
 		return true;
 	}
 
