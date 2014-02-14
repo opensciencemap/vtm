@@ -142,6 +142,7 @@ public class MapAnimator {
 			mDeltaPos.angle += 360;
 
 		mDeltaPos.tilt = mapPosition.tilt - mStartPos.tilt;
+		mDeltaPos.tilt = clamp(mDeltaPos.tilt, 0, Viewport.MAX_TILT);
 
 		mState = ANIM_MOVE | ANIM_SCALE | ANIM_ROTATE | ANIM_TILT;
 

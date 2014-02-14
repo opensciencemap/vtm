@@ -42,7 +42,7 @@ public class Viewport {
 	public final static double MAX_SCALE = (1 << MAX_ZOOMLEVEL);
 	public final static double MIN_SCALE = (1 << MIN_ZOOMLEVEL);
 
-	private final static float MAX_TILT = 65;
+	public final static float MAX_TILT = 65;
 
 	private final MapPosition mPos = new MapPosition();
 
