@@ -1,5 +1,4 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2012 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -38,10 +37,6 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
-/**
- * A MapView shows a map on the display of the device. It handles all user input
- * and touch gestures to move and zoom the map.
- */
 public class MapView extends RelativeLayout {
 
 	static final Logger log = LoggerFactory.getLogger(MapView.class);
@@ -64,26 +59,9 @@ public class MapView extends RelativeLayout {
 
 	boolean mInitialized = false;
 
-	/**
-	 * @param context
-	 *            the enclosing MapActivity instance.
-	 * @throws IllegalArgumentException
-	 *             if the context object is not an instance of
-	 *             {@link MapActivity} .
-	 */
 	public MapView(Context context) {
 		this(context, null);
 	}
-
-	/**
-	 * @param context
-	 *            the enclosing MapActivity instance.
-	 * @param attributeSet
-	 *            a set of attributes.
-	 * @throws IllegalArgumentException
-	 *             if the context object is not an instance of
-	 *             {@link MapActivity} .
-	 */
 
 	public MapView(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
