@@ -99,9 +99,6 @@ public class MapView extends RelativeLayout {
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
 
-		// TODO make this dpi dependent
-		Tile.SIZE = 400;
-
 		mMap = new AndroidMap(this);
 
 		if (context instanceof MapActivity)
