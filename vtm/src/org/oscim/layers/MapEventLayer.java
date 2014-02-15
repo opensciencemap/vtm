@@ -22,7 +22,7 @@ import org.oscim.event.Gesture;
 import org.oscim.event.GestureListener;
 import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
-import org.oscim.map.Viewport;
+import org.oscim.map.ViewController;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,12 +74,12 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 	/** 100 ms since start of move to reduce fling scroll */
 	protected static final float FLING_THREHSHOLD = 100;
 
-	private final Viewport mViewport;
+	//private final Viewport mViewport;
 	private final VelocityTracker mTracker;
 
 	public MapEventLayer(Map map) {
 		super(map);
-		mViewport = map.viewport();
+		//mViewport = map.viewport();
 		mTracker = new VelocityTracker();
 	}
 
@@ -173,6 +173,7 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 	}
 
 	private boolean onActionMove(MotionEvent e) {
+		ViewController mViewport = mMap.viewport();
 		float x1 = e.getX(0);
 		float y1 = e.getY(0);
 

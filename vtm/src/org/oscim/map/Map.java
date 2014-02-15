@@ -42,7 +42,7 @@ public abstract class Map {
 	/**
 	 * Listener interface for map update notifications.
 	 * Layers implementing this interface they will be automatically
-	 * regiseter when the layer is added to the map and unregistered when
+	 * register when the layer is added to the map and unregistered when
 	 * the layer is removed.
 	 */
 	public interface UpdateListener {
@@ -52,7 +52,7 @@ public abstract class Map {
 	/**
 	 * Listener interface for input events.
 	 * Layers implementing this interface they will be automatically
-	 * regiseter when the layer is added to the map and unregistered when
+	 * register when the layer is added to the map and unregistered when
 	 * the layer is removed.
 	 */
 	public interface InputListener {
@@ -60,7 +60,7 @@ public abstract class Map {
 	}
 
 	private final Layers mLayers;
-	private final Viewport mViewport;
+	private final ViewController mViewport;
 	private final Animator mAnimator;
 
 	private final MapPosition mMapPosition;
@@ -80,7 +80,7 @@ public abstract class Map {
 	protected boolean mClearMap = true;
 
 	public Map() {
-		mViewport = new Viewport(this);
+		mViewport = new ViewController(this);
 		mAnimator = new Animator(this, mViewport);
 
 		mLayers = new Layers(this);
@@ -230,7 +230,7 @@ public abstract class Map {
 	/**
 	 * @return Viewport instance
 	 */
-	public Viewport viewport() {
+	public ViewController viewport() {
 		return mViewport;
 	}
 

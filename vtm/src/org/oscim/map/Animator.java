@@ -196,7 +196,7 @@ public class Animator {
 
 		boolean changed = false;
 
-		Viewport v = mMap.viewport();
+		ViewController v = mMap.viewport();
 
 		synchronized (v) {
 			/* cancel animation when position was changed since last
@@ -252,7 +252,7 @@ public class Animator {
 		}
 	}
 
-	private void doScale(Viewport v, float adv) {
+	private void doScale(ViewController v, float adv) {
 		double newScale;
 
 		newScale = mStartPos.scale + (mDeltaPos.scale * adv);

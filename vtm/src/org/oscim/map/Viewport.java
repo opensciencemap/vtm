@@ -44,26 +44,26 @@ public class Viewport {
 
 	public final static float MAX_TILT = 65;
 
-	private final MapPosition mPos = new MapPosition();
+	protected final MapPosition mPos = new MapPosition();
 
-	private final GLMatrix mProjMatrix = new GLMatrix();
-	private final GLMatrix mProjMatrixUnscaled = new GLMatrix();
-	private final GLMatrix mProjMatrixI = new GLMatrix();
-	private final GLMatrix mRotMatrix = new GLMatrix();
-	private final GLMatrix mViewMatrix = new GLMatrix();
-	private final GLMatrix mVPMatrix = new GLMatrix();
-	private final GLMatrix mUnprojMatrix = new GLMatrix();
-	private final GLMatrix mTmpMatrix = new GLMatrix();
+	protected final GLMatrix mProjMatrix = new GLMatrix();
+	protected final GLMatrix mProjMatrixUnscaled = new GLMatrix();
+	protected final GLMatrix mProjMatrixI = new GLMatrix();
+	protected final GLMatrix mRotMatrix = new GLMatrix();
+	protected final GLMatrix mViewMatrix = new GLMatrix();
+	protected final GLMatrix mVPMatrix = new GLMatrix();
+	protected final GLMatrix mUnprojMatrix = new GLMatrix();
+	protected final GLMatrix mTmpMatrix = new GLMatrix();
 
 	/* temporary vars: only use in synchronized functions! */
-	private final Point mMovePoint = new Point();
-	private final float[] mv = new float[4];
-	private final float[] mu = new float[4];
-	private final float[] mViewCoords = new float[8];
+	protected final Point mMovePoint = new Point();
+	protected final float[] mv = new float[4];
+	protected final float[] mu = new float[4];
+	protected final float[] mViewCoords = new float[8];
 
-	private final Box mMapBBox = new Box();
+	protected final Box mMapBBox = new Box();
 
-	private float mHeight, mWidth;
+	protected float mHeight, mWidth;
 
 	public final static float VIEW_DISTANCE = 3.0f;
 	public final static float VIEW_NEAR = 1;
@@ -77,42 +77,6 @@ public class Viewport {
 		mPos.y = 0.5;
 		mPos.angle = 0;
 		mPos.tilt = 0;
-	}
-
-	public synchronized void setScreenSize(int width, int height) {
-		mHeight = height;
-		mWidth = width;
-
-		/* setup projection matrix:
-		 * 0. scale to window coordinates
-		 * 1. translate to VIEW_DISTANCE
-		 * 2. apply projection
-		 * setup inverse projection:
-		 * 0. invert projection
-		 * 1. invert translate to VIEW_DISTANCE */
-
-		float ratio = (mHeight / mWidth) * VIEW_SCALE;
-		float[] tmp = new float[16];
-
-		GLMatrix.frustumM(tmp, 0, -VIEW_SCALE, VIEW_SCALE,
-		                  ratio, -ratio, VIEW_NEAR, VIEW_FAR);
-
-		mProjMatrix.set(tmp);
-		mTmpMatrix.setTranslation(0, 0, -VIEW_DISTANCE);
-		mProjMatrix.multiplyRhs(mTmpMatrix);
-
-		/* set inverse projection matrix (without scaling) */
-		mProjMatrix.get(tmp);
-		GLMatrix.invertM(tmp, 0, tmp, 0);
-		mProjMatrixI.set(tmp);
-
-		mProjMatrixUnscaled.copy(mProjMatrix);
-
-		/* scale to window coordinates */
-		mTmpMatrix.setScale(1 / mWidth, 1 / mWidth, 1 / mWidth);
-		mProjMatrix.multiplyRhs(mTmpMatrix);
-
-		updateMatrix();
 	}
 
 	/**
@@ -194,7 +158,7 @@ public class Viewport {
 	/* Get Z-value of the map-plane for a point on screen -
 	 * calculate the intersection of a ray from camera origin
 	 * and the map plane */
-	private float getDepth(float y) {
+	protected float getDepth(float y) {
 		if (y == 0)
 			return 0;
 
@@ -224,7 +188,7 @@ public class Viewport {
 		return mv[2];
 	}
 
-	private void unproject(float x, float y, float z, float[] coords, int position) {
+	protected void unproject(float x, float y, float z, float[] coords, int position) {
 		mv[0] = x;
 		mv[1] = y;
 		mv[2] = z;
@@ -374,166 +338,5 @@ public class Viewport {
 
 		out.x = (mv[0] * (mWidth / 2));
 		out.y = -(mv[1] * (mHeight / 2));
-	}
-
-	private void updateMatrix() {
-		/* - view matrix:
-		 * 0. apply rotate
-		 * 1. apply tilt */
-
-		mRotMatrix.setRotation(mPos.angle, 0, 0, 1);
-		mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
-
-		/* apply first rotation, then tilt */
-		mRotMatrix.multiplyLhs(mTmpMatrix);
-
-		mViewMatrix.copy(mRotMatrix);
-
-		mVPMatrix.multiplyMM(mProjMatrix, mViewMatrix);
-
-		/* inverse projection matrix: */
-		/* invert scale */
-		mUnprojMatrix.setScale(mWidth, mWidth, 1);
-
-		/* invert rotation and tilt */
-		mTmpMatrix.transposeM(mRotMatrix);
-
-		/* (AB)^-1 = B^-1*A^-1, invert scale, tilt and rotation */
-		mTmpMatrix.multiplyLhs(mUnprojMatrix);
-
-		/* (AB)^-1 = B^-1*A^-1, invert projection */
-		mUnprojMatrix.multiplyMM(mTmpMatrix, mProjMatrixI);
-	}
-
-	/**
-	 * Moves this Viewport by the given amount of pixels.
-	 * 
-	 * @param mx the amount of pixels to move the map horizontally.
-	 * @param my the amount of pixels to move the map vertically.
-	 */
-	public synchronized void moveMap(float mx, float my) {
-		Point p = applyRotation(mx, my);
-		double tileScale = mPos.scale * Tile.SIZE;
-		moveTo(mPos.x - p.x / tileScale, mPos.y - p.y / tileScale);
-	}
-
-	/* used by MapAnimator */
-	void moveTo(double x, double y) {
-		mPos.x = x;
-		mPos.y = y;
-
-		// clamp latitude
-		mPos.y = FastMath.clamp(mPos.y, 0, 1);
-
-		// wrap longitude
-		while (mPos.x > 1)
-			mPos.x -= 1;
-		while (mPos.x < 0)
-			mPos.x += 1;
-	}
-
-	private Point applyRotation(double mx, double my) {
-		if (mPos.angle == 0) {
-			mMovePoint.x = mx;
-			mMovePoint.y = my;
-		} else {
-			double rad = Math.toRadians(mPos.angle);
-			double rcos = Math.cos(rad);
-			double rsin = Math.sin(rad);
-			mMovePoint.x = mx * rcos + my * rsin;
-			mMovePoint.y = mx * -rsin + my * rcos;
-		}
-		return mMovePoint;
-	}
-
-	/**
-	 * Scale map by scale width center at pivot in pixel relative to
-	 * screen center. Map scale is clamp to MIN_SCALE and MAX_SCALE.
-	 * 
-	 * @param scale
-	 * @param pivotX
-	 * @param pivotY
-	 * @return true if scale was changed
-	 */
-	public synchronized boolean scaleMap(float scale, float pivotX, float pivotY) {
-		// just sanitize input
-		//scale = FastMath.clamp(scale, 0.5f, 2);
-		if (scale < 0.000001)
-			return false;
-
-		double newScale = mPos.scale * scale;
-
-		newScale = FastMath.clamp(newScale, MIN_SCALE, MAX_SCALE);
-
-		if (newScale == mPos.scale)
-			return false;
-
-		scale = (float) (newScale / mPos.scale);
-
-		mPos.scale = newScale;
-
-		if (pivotX != 0 || pivotY != 0)
-			moveMap(pivotX * (1.0f - scale),
-			        pivotY * (1.0f - scale));
-
-		return true;
-	}
-
-	/**
-	 * Rotate map by radians around pivot. Pivot is in pixel relative
-	 * to screen center.
-	 * 
-	 * @param radians
-	 * @param pivotX
-	 * @param pivotY
-	 */
-	public synchronized void rotateMap(double radians, float pivotX, float pivotY) {
-
-		double rsin = Math.sin(radians);
-		double rcos = Math.cos(radians);
-
-		float x = (float) (pivotX - pivotX * rcos + pivotY * rsin);
-		float y = (float) (pivotY - pivotX * rsin - pivotY * rcos);
-
-		moveMap(x, y);
-
-		setRotation(mPos.angle + Math.toDegrees(radians));
-	}
-
-	public synchronized void setRotation(double degree) {
-		while (degree > 360)
-			degree -= 360;
-		while (degree < 0)
-			degree += 360;
-
-		mPos.angle = (float) degree;
-		updateMatrix();
-	}
-
-	public synchronized boolean tiltMap(float move) {
-		return setTilt(mPos.tilt + move);
-	}
-
-	public synchronized boolean setTilt(float tilt) {
-		tilt = FastMath.clamp(tilt, 0, MAX_TILT);
-		if (tilt == mPos.tilt)
-			return false;
-		mPos.tilt = tilt;
-		updateMatrix();
-		return true;
-	}
-
-	public synchronized void setMapPosition(MapPosition mapPosition) {
-		mPos.scale = FastMath.clamp(mapPosition.scale, MIN_SCALE, MAX_SCALE);
-		mPos.x = mapPosition.x;
-		mPos.y = mapPosition.y;
-		mPos.tilt = mapPosition.tilt;
-		mPos.angle = mapPosition.angle;
-		updateMatrix();
-	}
-
-	synchronized void setPos(double x, double y) {
-		mPos.x = x;
-		mPos.y = y;
 	}
 }
