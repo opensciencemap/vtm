@@ -28,8 +28,9 @@ import java.util.Arrays;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.event.Event;
 import org.oscim.event.EventDispatcher;
-import org.oscim.event.EventDispatcher.Event;
+import org.oscim.event.EventListener;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
@@ -46,7 +47,17 @@ public class TileManager {
 
 	public final static Event TILE_LOADED = new Event();
 	public final static Event TILE_REMOVED = new Event();
-	public final EventDispatcher<TileManager, MapTile> events;
+	public final EventDispatcher<Listener, MapTile> events = new EventDispatcher<Listener, MapTile>() {
+
+		@Override
+		public void tell(Listener l, Event event, MapTile tile) {
+			l.onTileManagerEvent(event, tile);
+		}
+	};
+
+	public interface Listener extends EventListener {
+		void onTileManagerEvent(Event event, MapTile tile);
+	};
 
 	private int mCacheLimit;
 	private int mCacheReduce;
@@ -139,8 +150,6 @@ public class TileManager {
 		mTilesSize = 0;
 		mTilesForUpload = 0;
 		mUpdateSerial = 0;
-
-		events = new EventDispatcher<TileManager, MapTile>(this);
 	}
 
 	private int[] mZoomTable;
@@ -392,7 +401,7 @@ public class TileManager {
 	private void removeFromCache(MapTile t) {
 
 		if (t.state == NEW_DATA || t.state == READY)
-			events.tell(TILE_REMOVED, t);
+			events.fire(TILE_REMOVED, t);
 
 		synchronized (t) {
 			/* still belongs to TileLoader thread, defer clearing to
@@ -518,7 +527,7 @@ public class TileManager {
 				}
 
 				tile.state = NEW_DATA;
-				events.tell(TILE_LOADED, tile);
+				events.fire(TILE_LOADED, tile);
 
 				mTilesForUpload += 1;
 

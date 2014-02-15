@@ -17,9 +17,7 @@
 package org.oscim.layers.tile.vector.labeling;
 
 import org.oscim.core.MapPosition;
-import org.oscim.event.EventDispatcher.Event;
-import org.oscim.event.EventDispatcher.Listener;
-import org.oscim.event.MotionEvent;
+import org.oscim.event.Event;
 import org.oscim.layers.Layer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.map.Map;
@@ -29,8 +27,7 @@ import org.oscim.utils.async.SimpleWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateListener,
-        Listener<MapTile> {
+public class LabelLayer extends Layer implements Map.UpdateListener, TileManager.Listener {
 
 	static final Logger log = LoggerFactory.getLogger(LabelLayer.class);
 
@@ -94,33 +91,34 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 	}
 
 	@Override
-	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
-		if (clear)
+	public void onMapEvent(Event event, MapPosition mapPosition) {
+
+		if (event == Map.CLEAR_EVENT)
 			mWorker.cancel(true);
 
-		if (changed || clear)
+		if (event == Map.POSITION_EVENT)
 			mWorker.submit(MAX_RELABEL_DELAY);
 	}
 
-	@Override
-	public void onMotionEvent(MotionEvent e) {
-		//	int action = e.getAction() & MotionEvent.ACTION_MASK;
-		//	if (action == MotionEvent.ACTION_POINTER_DOWN) {
-		//		multi++;
-		//		mTextRenderer.hold(true);
-		//	} else if (action == MotionEvent.ACTION_POINTER_UP) {
-		//		multi--;
-		//		if (multi == 0)
-		//			mTextRenderer.hold(false);
-		//	} else if (action == MotionEvent.ACTION_CANCEL) {
-		//		multi = 0;
-		//		log.debug("cancel " + multi);
-		//		mTextRenderer.hold(false);
-		//	}
-	}
+	//	@Override
+	//	public void onMotionEvent(MotionEvent e) {
+	//		//	int action = e.getAction() & MotionEvent.ACTION_MASK;
+	//		//	if (action == MotionEvent.ACTION_POINTER_DOWN) {
+	//		//		multi++;
+	//		//		mTextRenderer.hold(true);
+	//		//	} else if (action == MotionEvent.ACTION_POINTER_UP) {
+	//		//		multi--;
+	//		//		if (multi == 0)
+	//		//			mTextRenderer.hold(false);
+	//		//	} else if (action == MotionEvent.ACTION_CANCEL) {
+	//		//		multi = 0;
+	//		//		log.debug("cancel " + multi);
+	//		//		mTextRenderer.hold(false);
+	//		//	}
+	//	}
 
 	@Override
-	public void onEvent(Object source, Event e, MapTile tile) {
+	public void onTileManagerEvent(Event e, MapTile tile) {
 		if (e == TileManager.TILE_LOADED) {
 			if (tile.isVisible)
 				mWorker.submit(MAX_RELABEL_DELAY / 4);

@@ -57,9 +57,10 @@ public final class Layers extends AbstractList<Layer> {
 			throw new IllegalArgumentException("layer added twice");
 
 		if (layer instanceof UpdateListener)
-			mMap.bind((UpdateListener) layer);
+			mMap.events.bind((UpdateListener) layer);
+
 		if (layer instanceof InputListener)
-			mMap.bind((InputListener) layer);
+			mMap.input.bind((InputListener) layer);
 
 		mLayerList.add(index, layer);
 		mDirtyLayers = true;
@@ -72,9 +73,9 @@ public final class Layers extends AbstractList<Layer> {
 		Layer remove = mLayerList.remove(index);
 
 		if (remove instanceof UpdateListener)
-			mMap.unbind((UpdateListener) remove);
+			mMap.events.unbind((UpdateListener) remove);
 		if (remove instanceof InputListener)
-			mMap.unbind((InputListener) remove);
+			mMap.input.unbind((InputListener) remove);
 
 		return remove;
 	}
@@ -89,9 +90,9 @@ public final class Layers extends AbstractList<Layer> {
 
 		// unbind replaced layer
 		if (remove instanceof UpdateListener)
-			mMap.unbind((UpdateListener) remove);
+			mMap.events.unbind((UpdateListener) remove);
 		if (remove instanceof InputListener)
-			mMap.unbind((InputListener) remove);
+			mMap.input.unbind((InputListener) remove);
 
 		return remove;
 	}

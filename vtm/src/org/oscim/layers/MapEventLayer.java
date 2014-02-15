@@ -18,10 +18,12 @@ package org.oscim.layers;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.Tile;
+import org.oscim.event.Event;
 import org.oscim.event.Gesture;
 import org.oscim.event.GestureListener;
 import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
+import org.oscim.map.Map.InputListener;
 import org.oscim.map.Viewport;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
@@ -30,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Changes Viewport by handling move, fling, scale, rotation and tilt gestures.
  */
-public class MapEventLayer extends Layer implements Map.InputListener, GestureListener {
+public class MapEventLayer extends Layer implements InputListener, GestureListener {
 
 	static final Logger log = LoggerFactory.getLogger(MapEventLayer.class);
 
@@ -84,8 +86,8 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 	}
 
 	@Override
-	public void onMotionEvent(MotionEvent event) {
-		onTouchEvent(event);
+	public void onInputEvent(Event e, MotionEvent motionEvent) {
+		onTouchEvent(motionEvent);
 	}
 
 	public void enableRotation(boolean enable) {
@@ -495,4 +497,5 @@ public class MapEventLayer extends Layer implements Map.InputListener, GestureLi
 		//	return sum;
 		//}
 	}
+
 }
