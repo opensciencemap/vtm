@@ -22,7 +22,6 @@ import org.oscim.android.input.AndroidMotionEvent;
 import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
-import org.oscim.core.Tile;
 import org.oscim.event.Gesture;
 import org.oscim.map.Map;
 import org.slf4j.Logger;
@@ -39,25 +38,18 @@ import android.widget.RelativeLayout;
 
 public class MapView extends RelativeLayout {
 
-	static final Logger log = LoggerFactory.getLogger(MapView.class);
-
 	static {
 		System.loadLibrary("vtm-jni");
 	}
 
-	public boolean mRotationEnabled = false;
-	public boolean mCompassEnabled = false;
-	public boolean enablePagedFling = false;
+	static final Logger log = LoggerFactory.getLogger(MapView.class);
 
-	private final GestureDetector mGestureDetector;
-	final AndroidMotionEvent mMotionEvent;
+	protected final AndroidMap mMap;
+	protected final GestureDetector mGestureDetector;
+	protected final AndroidMotionEvent mMotionEvent;
 
-	private int mWidth;
-	private int mHeight;
-
-	final AndroidMap mMap;
-
-	boolean mInitialized = false;
+	protected int mWidth;
+	protected int mHeight;
 
 	public MapView(Context context) {
 		this(context, null);
@@ -80,7 +72,7 @@ public class MapView extends RelativeLayout {
 		mMap = new AndroidMap(this);
 
 		if (context instanceof MapActivity)
-			((MapActivity)context).registerMapView(this);
+			((MapActivity) context).registerMapView(this);
 
 		mMap.clearMap();
 		mMap.updateMap(false);
@@ -89,7 +81,7 @@ public class MapView extends RelativeLayout {
 		mGestureDetector = new GestureDetector(context, new OnGestureListener() {
 			@Override
 			public boolean onSingleTapUp(MotionEvent e) {
-				return  mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
+				return mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
 			}
 
 			@Override
@@ -174,9 +166,7 @@ public class MapView extends RelativeLayout {
 		mWidth = width;
 		mHeight = height;
 
-		mInitialized = (mWidth > 0 && mHeight > 0);
-
-		if (mInitialized)
+		if (mWidth > 0 && mHeight > 0)
 			mMap.viewport().setScreenSize(width, height);
 	}
 }
