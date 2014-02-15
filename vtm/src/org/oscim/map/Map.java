@@ -61,7 +61,7 @@ public abstract class Map {
 
 	private final Layers mLayers;
 	private final Viewport mViewport;
-	private final MapAnimator mAnimator;
+	private final Animator mAnimator;
 
 	private final MapPosition mMapPosition;
 	private final AsyncExecutor mAsyncExecutor;
@@ -81,7 +81,7 @@ public abstract class Map {
 
 	public Map() {
 		mViewport = new Viewport(this);
-		mAnimator = new MapAnimator(this, mViewport);
+		mAnimator = new Animator(this, mViewport);
 
 		mMapPosition = new MapPosition();
 		mLayers = new Layers(this);
@@ -243,7 +243,7 @@ public abstract class Map {
 	/**
 	 * @return MapAnimator instance
 	 */
-	public MapAnimator animator() {
+	public Animator animator() {
 		return mAnimator;
 	}
 

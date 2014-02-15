@@ -29,11 +29,11 @@ import org.oscim.renderer.MapRenderer;
 
 // TODO: rewrite
 
-public class MapAnimator {
+public class Animator {
 
 	//static final Logger log = LoggerFactory.getLogger(MapAnimator.class);
 
-	public MapAnimator(Map map, Viewport viewport) {
+	public Animator(Map map, Viewport viewport) {
 		mViewport = viewport;
 		mMap = map;
 	}
