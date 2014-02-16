@@ -97,7 +97,7 @@ public class MarkerRenderer extends ElementRenderer {
 			return;
 		}
 
-		double angle = Math.toRadians(v.pos.angle);
+		double angle = Math.toRadians(v.pos.bearing);
 		float cos = (float) Math.cos(angle);
 		float sin = (float) Math.sin(angle);
 
@@ -143,7 +143,7 @@ public class MarkerRenderer extends ElementRenderer {
 		}
 		/* keep position for current state */
 		mMapPosition.copy(v.pos);
-		mMapPosition.angle = -mMapPosition.angle;
+		mMapPosition.bearing = -mMapPosition.bearing;
 
 		sort(mItems, 0, mItems.length);
 		//log.debug(Arrays.toString(mItems));

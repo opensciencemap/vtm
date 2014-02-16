@@ -303,7 +303,7 @@ public class LabelPlacement {
 		/* scale of tiles zoom-level relative to current position */
 		double scale = pos.scale / (1 << zoom);
 
-		double angle = Math.toRadians(pos.angle);
+		double angle = Math.toRadians(pos.bearing);
 		float cos = (float) Math.cos(angle);
 		float sin = (float) Math.sin(angle);
 

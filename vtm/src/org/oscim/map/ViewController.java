@@ -41,7 +41,7 @@ public class ViewController extends Viewport {
 		mTmpMatrix.setScale(1 / mWidth, 1 / mWidth, 1 / mWidth);
 		mProjMatrix.multiplyRhs(mTmpMatrix);
 
-		updateMatrix();
+		updateMatrices();
 	}
 
 	/**
@@ -72,11 +72,11 @@ public class ViewController extends Viewport {
 	}
 
 	private Point applyRotation(double mx, double my) {
-		if (mPos.angle == 0) {
+		if (mPos.bearing == 0) {
 			mMovePoint.x = mx;
 			mMovePoint.y = my;
 		} else {
-			double rad = Math.toRadians(mPos.angle);
+			double rad = Math.toRadians(mPos.bearing);
 			double rcos = Math.cos(rad);
 			double rsin = Math.sin(rad);
 			mMovePoint.x = mx * rcos + my * rsin;
@@ -136,17 +136,17 @@ public class ViewController extends Viewport {
 
 		moveMap(x, y);
 
-		setRotation(mPos.angle + Math.toDegrees(radians));
+		setRotation(mPos.bearing + Math.toDegrees(radians));
 	}
 
 	public synchronized void setRotation(double degree) {
-		while (degree > 360)
+		while (degree > 180)
 			degree -= 360;
-		while (degree < 0)
+		while (degree < -180)
 			degree += 360;
 
-		mPos.angle = (float) degree;
-		updateMatrix();
+		mPos.bearing = (float) degree;
+		updateMatrices();
 	}
 
 	public synchronized boolean tiltMap(float move) {
@@ -158,7 +158,7 @@ public class ViewController extends Viewport {
 		if (tilt == mPos.tilt)
 			return false;
 		mPos.tilt = tilt;
-		updateMatrix();
+		updateMatrices();
 		return true;
 	}
 
@@ -167,16 +167,16 @@ public class ViewController extends Viewport {
 		mPos.x = mapPosition.x;
 		mPos.y = mapPosition.y;
 		mPos.tilt = mapPosition.tilt;
-		mPos.angle = mapPosition.angle;
-		updateMatrix();
+		mPos.bearing = mapPosition.bearing;
+		updateMatrices();
 	}
 
-	private void updateMatrix() {
+	private void updateMatrices() {
 		/* - view matrix:
 		 * 0. apply rotate
 		 * 1. apply tilt */
 
-		mRotationMatrix.setRotation(mPos.angle, 0, 0, 1);
+		mRotationMatrix.setRotation(mPos.bearing, 0, 0, 1);
 		mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
 
 		/* apply first rotation, then tilt */

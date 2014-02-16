@@ -75,7 +75,7 @@ public class Viewport {
 		mPos.scale = MIN_SCALE;
 		mPos.x = 0.5;
 		mPos.y = 0.5;
-		mPos.angle = 0;
+		mPos.bearing = 0;
 		mPos.tilt = 0;
 	}
 
@@ -92,10 +92,10 @@ public class Viewport {
 		boolean changed = (pos.scale != mPos.scale
 		        || pos.x != mPos.x
 		        || pos.y != mPos.y
-		        || pos.angle != mPos.angle
+		        || pos.bearing != mPos.bearing
 		        || pos.tilt != mPos.tilt);
 
-		pos.angle = mPos.angle;
+		pos.bearing = mPos.bearing;
 		pos.tilt = mPos.tilt;
 
 		pos.x = mPos.x;

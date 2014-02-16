@@ -82,7 +82,7 @@ public class Animator {
 		mDeltaPos.set(longitudeToX(p.getLongitude()) - mStartPos.x,
 		              latitudeToY(p.getLatitude()) - mStartPos.y,
 		              newScale - mStartPos.scale,
-		              -mStartPos.angle,
+		              -mStartPos.bearing,
 		              -mStartPos.tilt);
 
 		animStart(duration, ANIM_MOVE | ANIM_SCALE | ANIM_ROTATE | ANIM_TILT);
@@ -123,7 +123,7 @@ public class Animator {
 		mDeltaPos.set(pos.x - mStartPos.x,
 		              pos.y - mStartPos.y,
 		              pos.scale - mStartPos.scale,
-		              mStartPos.angle - pos.angle,
+		              mStartPos.bearing - pos.bearing,
 		              clamp(pos.tilt, 0, Viewport.MAX_TILT) - mStartPos.tilt);
 
 		animStart(duration, ANIM_MOVE | ANIM_SCALE | ANIM_ROTATE | ANIM_TILT);
@@ -229,7 +229,7 @@ public class Animator {
 				}
 			}
 			if ((mState & ANIM_ROTATE) != 0) {
-				v.setRotation(mStartPos.angle + mDeltaPos.angle * adv);
+				v.setRotation(mStartPos.bearing + mDeltaPos.bearing * adv);
 			}
 
 			if ((mState & ANIM_TILT) != 0) {

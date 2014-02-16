@@ -29,7 +29,7 @@ public class MapPosition {
 	public double scale;
 
 	/** rotation angle */
-	public float angle;
+	public float bearing;
 	/** perspective tile */
 	public float tilt;
 
@@ -41,7 +41,7 @@ public class MapPosition {
 		this.x = 0.5;
 		this.y = 0.5;
 		this.zoomLevel = 1;
-		this.angle = 0;
+		this.bearing = 0;
 	}
 
 	public MapPosition(double latitude, double longitude, double scale) {
@@ -74,22 +74,22 @@ public class MapPosition {
 		this.x = other.x;
 		this.y = other.y;
 
-		this.angle = other.angle;
+		this.bearing = other.bearing;
 		this.scale = other.scale;
 		this.tilt = other.tilt;
 		this.zoomLevel = other.zoomLevel;
 	}
 
-	public void set(double x, double y, double scale, float rotation, float tilt) {
+	public void set(double x, double y, double scale, float bearing, float tilt) {
 		this.x = x;
 		this.y = y;
 		this.scale = scale;
 
-		while (rotation > 180)
-			rotation -= 360;
-		while (rotation < -180)
-			rotation += 360;
-		this.angle = rotation;
+		while (bearing > 180)
+			bearing -= 360;
+		while (bearing < -180)
+			bearing += 360;
+		this.bearing = bearing;
 
 		this.tilt = tilt;
 		this.zoomLevel = FastMath.log2((int) scale);
@@ -127,7 +127,7 @@ public class MapPosition {
 		scale = Math.min(zx, zy);
 		x = minx + dx / 2;
 		y = miny + dy / 2;
-		angle = 0;
+		bearing = 0;
 		tilt = 0;
 	}
 

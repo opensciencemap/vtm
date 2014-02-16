@@ -95,7 +95,7 @@ class GwtGdxMap extends GdxMap {
 		p.setPosition(lat, lon);
 		log.debug("map position: " + p.x + "/" + p.y + " " + lat + "/" + lon);
 
-		p.angle = rotation;
+		p.bearing = rotation;
 		p.tilt = tilt;
 		mMap.setMapPosition(p);
 
@@ -124,12 +124,12 @@ class GwtGdxMap extends GdxMap {
 				mMap.viewport().getMapPosition(pos);
 				int lat = (int) (MercatorProjection.toLatitude(pos.y) * 1000);
 				int lon = (int) (MercatorProjection.toLongitude(pos.x) * 1000);
-				int rot = (int) (pos.angle);
-				rot = (int) (pos.angle) % 360;
+				int rot = (int) (pos.bearing);
+				rot = (int) (pos.bearing) % 360;
 				//rot = rot < 0 ? -rot : rot;
 
 				if (curZoom != pos.zoomLevel || curLat != lat || curLon != lon
-				        || curTilt != rot || curRot != (int) (pos.angle)) {
+				        || curTilt != rot || curRot != (int) (pos.bearing)) {
 
 					curLat = lat;
 					curLon = lon;
