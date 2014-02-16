@@ -83,12 +83,13 @@ public abstract class Map {
 		mViewport = new Viewport(this);
 		mAnimator = new Animator(this, mViewport);
 
-		mMapPosition = new MapPosition();
 		mLayers = new Layers(this);
 		mAsyncExecutor = new AsyncExecutor(2);
+		mMapPosition = new MapPosition();
 
 		mEventLayer = new MapEventLayer(this);
 		mLayers.add(0, mEventLayer);
+
 	}
 
 	public MapEventLayer getEventLayer() {

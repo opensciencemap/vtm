@@ -80,6 +80,21 @@ public class MapPosition {
 		this.zoomLevel = other.zoomLevel;
 	}
 
+	public void set(double x, double y, double scale, float rotation, float tilt) {
+		this.x = x;
+		this.y = y;
+		this.scale = scale;
+
+		while (rotation > 180)
+			rotation -= 360;
+		while (rotation < -180)
+			rotation += 360;
+		this.angle = rotation;
+
+		this.tilt = tilt;
+		this.zoomLevel = FastMath.log2((int) scale);
+	}
+
 	/**
 	 * @return scale relative to zoom-level.
 	 */
