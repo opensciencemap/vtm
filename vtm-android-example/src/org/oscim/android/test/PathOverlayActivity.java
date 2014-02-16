@@ -36,7 +36,7 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mBitmapLayer.getTileRenderer().setBitmapAlpha(0.5f);
+		mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
 
 		createLayers(1, true);
 

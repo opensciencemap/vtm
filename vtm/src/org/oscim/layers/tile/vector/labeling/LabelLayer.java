@@ -43,7 +43,7 @@ public class LabelLayer extends Layer implements Map.InputListener, Map.UpdateLi
 		super(map);
 		l.getManager().events.bind(this);
 
-		mLabelPlacer = new LabelPlacement(map, l.getTileRenderer());
+		mLabelPlacer = new LabelPlacement(map, l.tileRenderer());
 		mWorker = new Worker(map);
 		mRenderer = new TextRenderer(mWorker);
 	}

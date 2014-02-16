@@ -147,7 +147,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	public void setTileDataSource(ITileDataSource mapDatabase) {
+	public void setDataSource(ITileDataSource mapDatabase) {
 		if (mTileDataSource != null)
 			mTileDataSource.destroy();
 

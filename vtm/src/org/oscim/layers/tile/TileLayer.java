@@ -16,18 +16,18 @@
  */
 package org.oscim.layers.tile;
 
-import java.util.ArrayList;
-
 import org.oscim.core.MapPosition;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
+import org.oscim.map.Map.UpdateListener;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
 import org.oscim.tiling.TileRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class TileLayer<T extends TileLoader> extends Layer implements Map.UpdateListener {
+public abstract class TileLayer extends Layer implements UpdateListener {
+
 	static final Logger log = LoggerFactory.getLogger(TileLayer.class);
 
 	private final static int MAX_ZOOMLEVEL = 17;
@@ -35,10 +35,8 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 	private final static int CACHE_LIMIT = 150;
 
 	protected final TileManager mTileManager;
-	protected final TileRenderer mRenderLayer;
 
-	protected final int mNumTileLoader = 4;
-	protected final ArrayList<T> mTileLoader;
+	protected TileLoader[] mTileLoader;
 
 	public TileLayer(Map map) {
 		this(map, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL, CACHE_LIMIT);
@@ -46,39 +44,36 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 
 	public TileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
 		super(map);
-
-		// TileManager responsible for adding visible tiles
-		// to load queue and managing in-memory tile cache.
+		/* TileManager responsible for adding visible tiles
+		 * to load queue and managing in-memory tile cache. */
 		mTileManager = new TileManager(map, minZoom, maxZoom, cacheLimit);
-
-		// Instantiate TileLoader threads
-		mTileLoader = new ArrayList<T>();
-
-		// RenderLayer is working in GL Thread and actually
-		// drawing loaded tiles to screen.
-		mRenderer = mRenderLayer = new TileRenderer(mTileManager);
 	}
 
-	protected void initLoader() {
-		for (int i = 0; i < mNumTileLoader; i++) {
-			T tileGenerator = createLoader(mTileManager);
-			mTileLoader.add(tileGenerator);
-			tileGenerator.start();
-		}
+	abstract protected TileLoader createLoader(TileManager tm);
+
+	protected void setRenderer(TileRenderer renderer) {
+		mRenderer = renderer;
 	}
 
-	abstract protected T createLoader(TileManager tm);
-
-	public TileRenderer getTileRenderer() {
+	public TileRenderer tileRenderer() {
 		return (TileRenderer) mRenderer;
+	}
+
+	protected void initLoader(int numLoaders) {
+		mTileLoader = new TileLoader[numLoaders];
+
+		for (int i = 0; i < numLoaders; i++) {
+			mTileLoader[i] = createLoader(mTileManager);
+			mTileLoader[i].start();
+		}
 	}
 
 	@Override
 	public void onMapUpdate(MapPosition mapPosition, boolean changed, boolean clear) {
 		if (clear) {
 			// sync with TileRenderer
-			synchronized (mRenderLayer) {
-				mRenderLayer.clearTiles();
+			synchronized (mRenderer) {
+				tileRenderer().clearTiles();
 				mTileManager.init();
 			}
 
@@ -91,7 +86,7 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 
 	@Override
 	public void onDetach() {
-		for (T loader : mTileLoader) {
+		for (TileLoader loader : mTileLoader) {
 			loader.pause();
 			loader.interrupt();
 			loader.cleanup();
@@ -99,27 +94,26 @@ public abstract class TileLayer<T extends TileLoader> extends Layer implements M
 	}
 
 	void notifyLoaders() {
-		for (int i = 0; i < mNumTileLoader; i++) {
-			mTileLoader.get(i).go();
-		}
+		for (TileLoader loader : mTileLoader)
+			loader.go();
 	}
 
 	protected void pauseLoaders(boolean wait) {
-		for (T loader : mTileLoader) {
+		for (TileLoader loader : mTileLoader) {
 			if (!loader.isPausing())
 				loader.pause();
 		}
 		if (!wait)
 			return;
 
-		for (T loader : mTileLoader) {
+		for (TileLoader loader : mTileLoader) {
 			if (!loader.isPausing())
 				loader.awaitPausing();
 		}
 	}
 
 	protected void resumeLoaders() {
-		for (T loader : mTileLoader)
+		for (TileLoader loader : mTileLoader)
 			loader.proceed();
 	}
 }

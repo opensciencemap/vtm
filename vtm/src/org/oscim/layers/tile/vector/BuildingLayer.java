@@ -29,7 +29,7 @@ public class BuildingLayer extends Layer {
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
 		super(map);
-		mExtLayer = new ExtrusionRenderer(tileLayer.getTileRenderer()) {
+		mExtLayer = new ExtrusionRenderer(tileLayer.tileRenderer()) {
 			private long mStartTime;
 
 			@Override

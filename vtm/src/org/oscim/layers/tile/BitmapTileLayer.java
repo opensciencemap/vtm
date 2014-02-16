@@ -30,6 +30,7 @@ import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
+import org.oscim.tiling.TileRenderer;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDataSource.QueryResult;
@@ -38,7 +39,7 @@ import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BitmapTileLayer extends TileLayer<TileLoader> {
+public class BitmapTileLayer extends TileLayer {
 
 	protected static final Logger log = LoggerFactory.getLogger(BitmapTileLayer.class);
 
@@ -65,7 +66,8 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 	public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit) {
 		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), cacheLimit);
 		mTileSource = tileSource;
-		initLoader();
+		setRenderer(new TileRenderer(mTileManager));
+		initLoader(4);
 	}
 
 	@Override
@@ -96,7 +98,7 @@ public class BitmapTileLayer extends TileLayer<TileLoader> {
 			break;
 		}
 
-		mRenderLayer.setBitmapAlpha(alpha);
+		tileRenderer().setBitmapAlpha(alpha);
 	}
 
 	@Override

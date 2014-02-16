@@ -21,7 +21,6 @@ import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.TileLayer;
-import org.oscim.layers.tile.example.TestTileLayer.TestTileLoader;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
@@ -32,7 +31,7 @@ import org.oscim.tiling.TileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestTileLayer extends TileLayer<TestTileLoader> {
+public class TestTileLayer extends TileLayer {
 	static final Logger log = LoggerFactory.getLogger(TestTileLayer.class);
 
 	public TestTileLayer(Map map) {

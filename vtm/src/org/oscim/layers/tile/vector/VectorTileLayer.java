@@ -21,7 +21,7 @@ import org.oscim.map.Map;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
-import org.oscim.tiling.source.ITileDataSource;
+import org.oscim.tiling.TileRenderer;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.TileSource.OpenResult;
 import org.slf4j.Logger;
@@ -32,19 +32,21 @@ import org.slf4j.LoggerFactory;
  * {@link VectorTileLoader} that load and assemble vector tiles
  * for rendering.
  */
-public class VectorTileLayer extends TileLayer<VectorTileLoader> {
+public class VectorTileLayer extends TileLayer {
 	static final Logger log = LoggerFactory.getLogger(VectorTileLayer.class);
 
 	private TileSource mTileSource;
 
 	public VectorTileLayer(Map map) {
 		super(map);
-		initLoader();
+		setRenderer(new TileRenderer(mTileManager));
+		initLoader(4);
 	}
 
 	public VectorTileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
 		super(map, minZoom, maxZoom, cacheLimit);
-		initLoader();
+		setRenderer(new TileRenderer(mTileManager));
+		initLoader(4);
 	}
 
 	@Override
@@ -75,10 +77,8 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 
 		mTileSource = tileSource;
 
-		for (int i = 0; i < mNumTileLoader; i++) {
-			ITileDataSource tileDataSource = tileSource.getDataSource();
-			mTileLoader.get(i).setTileDataSource(tileDataSource);
-		}
+		for (TileLoader l : mTileLoader)
+			((VectorTileLoader) l).setDataSource(tileSource.getDataSource());
 
 		mMap.clearMap();
 		resumeLoaders();
@@ -96,10 +96,10 @@ public class VectorTileLayer extends TileLayer<VectorTileLoader> {
 		pauseLoaders(true);
 		mTileManager.clearJobs();
 
-		for (VectorTileLoader g : mTileLoader)
-			g.setRenderTheme(theme);
+		for (TileLoader l : mTileLoader)
+			((VectorTileLoader) l).setRenderTheme(theme);
 
-		mRenderLayer.setOverdrawColor(theme.getMapBackground());
+		tileRenderer().setOverdrawColor(theme.getMapBackground());
 
 		resumeLoaders();
 	}
