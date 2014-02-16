@@ -86,10 +86,6 @@ public class ExtrusionLayer extends RenderElement {
 		short[] index = element.index;
 		float[] points = element.points;
 
-		// 12m default
-		if (height == 0)
-			height = 12 * 100;
-
 		// 10 cm steps
 		float sfactor = 1 / 10f;
 		height *= sfactor;
@@ -100,17 +96,12 @@ public class ExtrusionLayer extends RenderElement {
 		height /= mGroundResolution;
 		minHeight /= mGroundResolution;
 
-		// my preference
-		height *= 0.85;
-		minHeight *= 0.85;
-
-		int length = 0, ipos = 0, ppos = 0;
-
 		boolean complexOutline = false;
 		boolean simpleOutline = true;
 
 		// current vertex id
 		int startVertex = mNumVertices;
+		int length = 0, ipos = 0, ppos = 0;
 
 		for (int n = index.length; ipos < n; ipos++, ppos += length) {
 			length = index[ipos];
