@@ -128,7 +128,7 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 
 		boolean drop = false;
 
-		while (stack != null) {
+		O: while (stack != null) {
 
 			/** pop cur from stack */
 			cur = stack;
@@ -147,7 +147,7 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 						if (dbg)
 							log.debug("{} overlap {} {}", result, box, it);
 						drop = true;
-						//break O;
+						break O;
 					}
 
 					if (result < 0) {
@@ -195,9 +195,9 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 		}
 
 		/** dont keep dangling references */
-		/* gwt optimizer found this cannot be reached :) */
-		//while (stack != null)
-		//	stack = stack.next;
+		///* gwt optimizer found this cannot be reached :) */
+		while (stack != null)
+			stack = stack.next;
 
 		return drop ? 1 : 0;
 	}
