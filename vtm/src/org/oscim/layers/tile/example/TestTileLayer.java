@@ -61,7 +61,7 @@ public class TestTileLayer extends TileLayer {
 
 			LineLayer ll = tile.layers.getLineLayer(0);
 			ll.line = mLineStyle;
-			ll.width = 2;
+			ll.scale = 2;
 
 			int m = 20;
 			int s = Tile.SIZE - m * 2;

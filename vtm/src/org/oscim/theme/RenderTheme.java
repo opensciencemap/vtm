@@ -193,8 +193,8 @@ public class RenderTheme implements IRenderTheme {
 						continue;
 
 					int i = 0;
-					for (RenderStyle style : ri.list) {
-						if (style != matches.get(i))
+					for (RenderStyle r : ri.list) {
+						if (r != matches.get(i))
 							break;
 						i++;
 					}
@@ -256,5 +256,11 @@ public class RenderTheme implements IRenderTheme {
 
 		for (int i = 0, n = mRules.length; i < n; i++)
 			mRules[i].scaleTextSize(scaleFactor * mBaseTextSize);
+	}
+
+	@Override
+	public void updateInstructions() {
+		for (int i = 0, n = mRules.length; i < n; i++)
+			mRules[i].updateInstructions();
 	}
 }

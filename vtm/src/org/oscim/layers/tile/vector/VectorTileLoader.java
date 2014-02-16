@@ -27,7 +27,6 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.core.PointF;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
-import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
@@ -247,6 +246,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void renderWay(Line line, int level) {
 		int numLayer = mCurLayer + level;
 
+		//		line = line.getCurrent();
+
 		if (line.stipple == 0) {
 			if (line.outline && mCurLineLayer == null) {
 				log.debug("missing line for outline! " + mElement.tags
@@ -254,42 +255,37 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				return;
 			}
 
-			LineLayer l = mTile.layers.getLineLayer(numLayer);
+			LineLayer ll = mTile.layers.getLineLayer(numLayer);
 
-			if (l.line == null) {
-				l.line = line;
-
-				float w = line.width;
-				if (!line.fixed)
-					w *= mLineScale;
-
-				l.width = w;
+			if (ll.line == null) {
+				ll.line = line;
+				ll.scale = line.fixed ? 1 : mLineScale;
 			}
 
 			if (line.outline) {
-				l.addOutline(mCurLineLayer);
+				ll.addOutline(mCurLineLayer);
 				return;
 			}
 
-			l.addLine(mElement);
+			ll.addLine(mElement);
 
 			// NB: keep reference for outline layer(s)
-			mCurLineLayer = l;
+			mCurLineLayer = ll;
 
 		} else {
-			LineTexLayer l = mTile.layers.getLineTexLayer(numLayer);
+			LineTexLayer ll = mTile.layers.getLineTexLayer(numLayer);
 
-			if (l.line == null) {
-				l.line = line;
+			if (ll.line == null) {
+				ll.line = line;
 
 				float w = line.width;
 				if (!line.fixed)
 					w *= mLineScale;
 
-				l.width = w;
+				ll.width = w;
 			}
 
-			l.addLine(mElement);
+			ll.addLine(mElement);
 		}
 	}
 
@@ -406,9 +402,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		if (l == null) {
 			double lat = MercatorProjection.toLatitude(mTile.y);
-			float groundScale = (float) (Math.cos(lat * (Math.PI / 180))
-			        * MercatorProjection.EARTH_CIRCUMFERENCE
-			        / ((long) Tile.SIZE << mTile.zoomLevel));
+			float groundScale = (float) MercatorProjection
+			    .groundResolution(lat, 1 << mTile.zoomLevel);
 
 			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
 			mTile.layers.setExtrusionLayers(l);

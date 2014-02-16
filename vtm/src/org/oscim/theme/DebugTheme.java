@@ -29,4 +29,9 @@ public class DebugTheme implements IRenderTheme {
 	public void scaleTextSize(float scaleFactor) {
 	}
 
+	@Override
+	public void updateInstructions() {
+
+	}
+
 }

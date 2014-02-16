@@ -23,6 +23,21 @@ import org.oscim.theme.IRenderTheme.Callback;
  * A RenderInstruction is a basic graphical primitive to draw a map.
  */
 public abstract class RenderStyle {
+
+	RenderStyle mCurrent;
+	RenderStyle mNext;
+	boolean update;
+
+	public void set(RenderStyle next) {
+		update = true;
+		mNext = next;
+	}
+
+	public void unsetOverride() {
+		update = true;
+		mNext = null;
+	}
+
 	/**
 	 * Destroys this RenderInstruction and cleans up all its internal resources.
 	 */
@@ -50,5 +65,16 @@ public abstract class RenderStyle {
 	 *            the factor by which the text size should be scaled.
 	 */
 	public void scaleTextSize(float scaleFactor) {
+	}
+
+	public void update() {
+		if (update) {
+			update = false;
+			mCurrent = mNext;
+		}
+	}
+
+	public RenderStyle getCurrent() {
+		return mCurrent == null ? this : mCurrent;
 	}
 }

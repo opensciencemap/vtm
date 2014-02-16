@@ -43,15 +43,15 @@ public class AtlasRenderLayer extends ElementRenderer {
 
 		LineLayer ll = layers.getLineLayer(0);
 		ll.line = new Line(Color.BLUE, 3, Cap.BUTT);
-		ll.width = 1f;
+		ll.scale = 1f;
 
 		LineLayer ll2 = layers.getLineLayer(1);
 		ll2.line = new Line(Color.RED, 3, Cap.BUTT);
-		ll2.width = 1f;
+		ll2.scale = 1f;
 
 		LineLayer ll3 = layers.getLineLayer(2);
 		ll3.line = new Line(Color.GREEN, 3, Cap.BUTT);
-		ll3.width = 1f;
+		ll3.scale = 1f;
 
 		TextLayer tl = new TextLayer();
 		Text t = Text.createText(20, 0, Color.BLACK, 0, false);

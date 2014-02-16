@@ -51,9 +51,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-/**
- * SAX2 handler to parse XML render theme files.
- */
 public class RenderThemeHandler extends DefaultHandler {
 	static final Logger log = LoggerFactory.getLogger(RenderThemeHandler.class);
 
@@ -345,7 +342,6 @@ public class RenderThemeHandler extends DefaultHandler {
 		int fade = -1;
 		boolean fixed = false;
 		float blur = 0;
-		float min = 0;
 
 		// Stipple
 		int stipple = 0;
@@ -360,7 +356,6 @@ public class RenderThemeHandler extends DefaultHandler {
 			fade = line.fade;
 			cap = line.cap;
 			blur = line.blur;
-			min = line.min;
 			stipple = line.stipple;
 			stippleColor = line.stippleColor;
 			stippleWidth = line.stippleWidth;
@@ -407,7 +402,7 @@ public class RenderThemeHandler extends DefaultHandler {
 				fade = Integer.parseInt(value);
 
 			else if ("min".equals(name))
-				min = Float.parseFloat(value);
+				; //min = Float.parseFloat(value);
 
 			else if ("blur".equals(name))
 				blur = Float.parseFloat(value);
@@ -435,7 +430,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 		return new Line(level, style, color, width, cap, fixed,
 		                stipple, stippleColor, stippleWidth,
-		                fade, blur, isOutline, min);
+		                fade, blur, isOutline);
 	}
 
 	private static void validateLine(float strokeWidth) {

@@ -299,7 +299,7 @@ public class PathLayer extends Layer {
 
 			LineLayer ll = layers.getLineLayer(0);
 			ll.line = mLineStyle;
-			ll.width = ll.line.width;
+			ll.scale = ll.line.width;
 
 			mMap.getMapPosition(task.pos);
 

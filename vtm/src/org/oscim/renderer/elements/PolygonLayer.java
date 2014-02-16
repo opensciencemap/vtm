@@ -181,7 +181,7 @@ public final class PolygonLayer extends RenderElement {
 			int shader = polyShader;
 
 			for (int c = start; c < end; c++) {
-				Area a = mFillPolys[c].area;
+				Area a = (Area) mFillPolys[c].area.getCurrent();
 
 				if (enableTexture && a.texture != null) {
 					shader = texShader;

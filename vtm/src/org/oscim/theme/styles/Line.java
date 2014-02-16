@@ -25,15 +25,6 @@ import org.oscim.theme.IRenderTheme.Callback;
  */
 public final class Line extends RenderStyle {
 
-	//	static float[] parseFloatArray(String dashString) {
-	//		String[] dashEntries = SPLIT_PATTERN.split(dashString);
-	//		float[] dashIntervals = new float[dashEntries.length];
-	//		for (int i = 0; i < dashEntries.length; ++i) {
-	//			dashIntervals[i] = Float.parseFloat(dashEntries[i]);
-	//		}
-	//		return dashIntervals;
-	//	}
-
 	private final int level;
 
 	public final String style;
@@ -44,7 +35,6 @@ public final class Line extends RenderStyle {
 	public final boolean fixed;
 	public final int fade;
 	public final float blur;
-	public final float min;
 
 	public final int stipple;
 	public final int stippleColor;
@@ -53,7 +43,7 @@ public final class Line extends RenderStyle {
 	public Line(int level, String style, int color, float width,
 	        Cap cap, boolean fixed,
 	        int stipple, int stippleColor, float stippleWidth,
-	        int fade, float blur, boolean isOutline, float min) {
+	        int fade, float blur, boolean isOutline) {
 
 		this.level = level;
 		this.style = style;
@@ -85,19 +75,18 @@ public final class Line extends RenderStyle {
 
 		this.blur = blur;
 		this.fade = fade;
-		this.min = min;
 	}
 
 	public Line(int stroke, float width) {
-		this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, 0);
+		this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false);
 	}
 
 	public Line(int level, int stroke, float width) {
-		this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, 0);
+		this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false);
 	}
 
 	public Line(int stroke, float width, Cap cap) {
-		this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, 0);
+		this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false);
 	}
 
 	@Override

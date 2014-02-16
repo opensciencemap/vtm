@@ -243,8 +243,8 @@ public abstract class Rule {
 
 			if (!mMatchFirst || matched) {
 				// add instructions for this rule
-				for (RenderStyle style : mRenderInstructions)
-					matchingList.add(style);
+				for (RenderStyle ri : mRenderInstructions)
+					matchingList.add(ri);
 			}
 
 			// this rule did match
@@ -273,17 +273,49 @@ public abstract class Rule {
 	}
 
 	public void onDestroy() {
-		for (RenderStyle style : mRenderInstructions)
-			style.destroy();
+		for (RenderStyle ri : mRenderInstructions)
+			ri.destroy();
 
 		for (Rule subRule : mSubRules)
 			subRule.onDestroy();
 	}
 
 	public void scaleTextSize(float scaleFactor) {
-		for (RenderStyle style : mRenderInstructions)
-			style.scaleTextSize(scaleFactor);
+		for (RenderStyle ri : mRenderInstructions)
+			ri.scaleTextSize(scaleFactor);
 		for (Rule subRule : mSubRules)
 			subRule.scaleTextSize(scaleFactor);
+	}
+
+	public void updateInstructions() {
+		for (RenderStyle ri : mRenderInstructions)
+			ri.update();
+		for (Rule subRule : mSubRules)
+			subRule.updateInstructions();
+	}
+
+	public static class RuleVisitor {
+		boolean apply(Rule r) {
+
+			for (Rule subRule : r.mSubRules)
+				this.apply(subRule);
+
+			return true;
+		}
+	}
+
+	public static class UpdateVisitor extends RuleVisitor {
+		@Override
+		boolean apply(Rule r) {
+			for (RenderStyle ri : r.mRenderInstructions)
+				ri.update();
+
+			return super.apply(r);
+		}
+	}
+
+	public boolean apply(RuleVisitor v) {
+
+		return v.apply(this);
 	}
 }

@@ -244,48 +244,43 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				return;
 			}
 
-			LineLayer lineLayer = mTile.layers.getLineLayer(numLayer);
+			LineLayer ll = mTile.layers.getLineLayer(numLayer);
 
-			if (lineLayer == null)
+			if (ll == null)
 				return;
 
-			if (lineLayer.line == null) {
-				lineLayer.line = line;
-
-				float w = line.width;
-				if (!line.fixed)
-					w *= mLineScale;
-
-				lineLayer.width = w;
+			if (ll.line == null) {
+				ll.line = line;
+				ll.scale = line.fixed ? 1 : mLineScale;
 			}
 
 			if (line.outline) {
-				lineLayer.addOutline(mCurLineLayer);
+				ll.addOutline(mCurLineLayer);
 				return;
 			}
 
-			lineLayer.addLine(mElement);
+			ll.addLine(mElement);
 
 			// keep reference for outline layer
-			mCurLineLayer = lineLayer;
+			mCurLineLayer = ll;
 
 		} else {
-			LineTexLayer lineLayer = mTile.layers.getLineTexLayer(numLayer);
+			LineTexLayer ll = mTile.layers.getLineTexLayer(numLayer);
 
-			if (lineLayer == null)
+			if (ll == null)
 				return;
 
-			if (lineLayer.line == null) {
-				lineLayer.line = line;
+			if (ll.line == null) {
+				ll.line = line;
 
 				float w = line.width;
 				if (!line.fixed)
 					w *= mLineScale;
 
-				lineLayer.width = w;
+				ll.width = w;
 			}
 
-			lineLayer.addLine(mElement);
+			ll.addLine(mElement);
 		}
 	}
 
@@ -391,13 +386,21 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		if (l == null) {
 			double lat = MercatorProjection.toLatitude(mTile.y);
-			float groundScale = (float) (Math.cos(lat * (Math.PI / 180))
-			        * MercatorProjection.EARTH_CIRCUMFERENCE
-			        / ((long) Tile.SIZE << mTile.zoomLevel));
+			//			float groundScale = (float) (Math.cos(lat * (Math.PI / 180))
+			//			        * MercatorProjection.EARTH_CIRCUMFERENCE
+			//			        / ((long) Tile.SIZE << mTile.zoomLevel));
+
+			float groundScale = (float) MercatorProjection
+			    .groundResolution(lat, 1 << mTile.zoomLevel);
 
 			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
 			mTile.layers.setExtrusionLayers(l);
 		}
+
+		/* 12m default */
+		if (height == 0)
+			height = 12 * 100;
+
 		l.add(mElement, height, minHeight);
 	}
 

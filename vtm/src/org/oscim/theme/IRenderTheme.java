@@ -56,6 +56,8 @@ public interface IRenderTheme {
 	 */
 	public abstract int getMapBackground();
 
+	public void updateInstructions();
+
 	/**
 	 * Scales the text size of this RenderTheme by the given factor.
 	 * 

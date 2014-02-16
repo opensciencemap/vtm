@@ -54,7 +54,7 @@ public final class LineLayer extends RenderElement {
 	/* lines referenced by this outline layer */
 	public LineLayer outlines;
 	public Line line;
-	public float width;
+	public float scale = 1;
 
 	public boolean roundCap;
 	private float mMinDist = 1 / 8f;
@@ -700,7 +700,7 @@ public final class LineLayer extends RenderElement {
 			RenderElement l = curLayer;
 			for (; l != null && l.type == RenderElement.LINE; l = l.next) {
 				LineLayer ll = (LineLayer) l;
-				Line line = ll.line;
+				Line line = (Line) ll.line.getCurrent();
 
 				if (ll.heightOffset != heightOffset) {
 					heightOffset = ll.heightOffset;
@@ -725,10 +725,13 @@ public final class LineLayer extends RenderElement {
 
 				// draw LineLayer
 				if (!line.outline) {
-
-					// invert scaling of extrusion vectors so that line
-					// width stays the same.
-					width = ll.width / (line.fixed ? scale : variableScale);
+					if (line.fixed) {
+						// invert scaling of extrusion vectors so that line
+						// width stays the same. 'max'?
+						width = Math.max(line.width, 1) / scale;
+					} else {
+						width = ll.scale * line.width / variableScale;
+					}
 
 					GL.glUniform1f(uLineWidth,
 					               (float) (width * COORD_SCALE_BY_DIR_SCALE));
@@ -743,7 +746,7 @@ public final class LineLayer extends RenderElement {
 					}
 
 					// Cap mode
-					if (ll.width < 1.5 /* || ll.line.fixed */) {
+					if (ll.scale < 1.5 /* || ll.line.fixed */) {
 						if (capMode != CAP_THIN) {
 							capMode = CAP_THIN;
 							GL.glUniform1f(uLineMode, capMode);
@@ -765,12 +768,21 @@ public final class LineLayer extends RenderElement {
 				}
 
 				// draw LineLayers references by this outline
-				for (LineLayer o = ll.outlines; o != null; o = o.outlines) {
+				for (LineLayer ref = ll.outlines; ref != null; ref = ref.outlines) {
+					Line core = (Line) ref.line.getCurrent();
 
-					if (o.line.fixed)
-						width = (ll.width + o.width) / scale;
-					else
-						width = ll.width / scale + o.width / variableScale;
+					// core width
+					if (core.fixed) {
+						width = Math.max(core.width, 1) / scale;
+					} else {
+						width = ref.scale * core.width / variableScale;
+					}
+					// add outline width
+					if (line.fixed) {
+						width += line.width / scale;
+					} else {
+						width += ll.scale * line.width / variableScale;
+					}
 
 					GL.glUniform1f(uLineWidth,
 					               (float) (width * COORD_SCALE_BY_DIR_SCALE));
@@ -784,7 +796,7 @@ public final class LineLayer extends RenderElement {
 					}
 
 					// Cap mode
-					if (o.roundCap) {
+					if (ref.roundCap) {
 						if (capMode != CAP_ROUND) {
 							capMode = CAP_ROUND;
 							GL.glUniform1f(uLineMode, capMode);
@@ -795,7 +807,7 @@ public final class LineLayer extends RenderElement {
 					}
 
 					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
-					                o.offset, o.numVertices);
+					                ref.offset, ref.numVertices);
 				}
 			}
 
@@ -896,5 +908,4 @@ public final class LineLayer extends RenderElement {
 		        + "}";
 
 	}
-
 }

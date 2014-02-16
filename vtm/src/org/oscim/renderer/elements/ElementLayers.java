@@ -87,7 +87,8 @@ public class ElementLayers {
 		LineLayer l = (LineLayer) getLayer(level, LINE);
 		if (l == null)
 			return null;
-		l.width = style.width;
+		// FIXME l.scale = style.width;
+		l.scale = 1;
 		l.line = style;
 		return l;
 	}
