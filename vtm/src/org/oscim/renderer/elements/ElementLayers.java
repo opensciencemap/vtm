@@ -361,4 +361,17 @@ public class ElementLayers {
 
 		l.vertexItems = VertexItem.pool.releaseAll(l.vertexItems);
 	}
+
+	public void setFrom(ElementLayers layers) {
+		baseLayers = layers.baseLayers;
+		textureLayers = layers.textureLayers;
+		extrusionLayers = layers.extrusionLayers;
+		mCurLayer = null;
+
+		layers.baseLayers = null;
+		layers.textureLayers = null;
+		layers.extrusionLayers = null;
+		layers.mCurLayer = null;
+
+	}
 }
