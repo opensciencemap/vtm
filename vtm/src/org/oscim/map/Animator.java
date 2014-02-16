@@ -131,13 +131,14 @@ public class Animator {
 
 	public synchronized void animateZoom(long duration, double scaleBy,
 	        float pivotX, float pivotY) {
-		mMap.getMapPosition(mStartPos);
+		mMap.getMapPosition(mCurPos);
 
 		if (mState == ANIM_SCALE)
 			scaleBy = (mStartPos.scale + mDeltaPos.scale) * scaleBy;
 		else
-			scaleBy = mStartPos.scale * scaleBy;
+			scaleBy = mCurPos.scale * scaleBy;
 
+		mStartPos.copy(mCurPos);
 		scaleBy = clamp(scaleBy, Viewport.MIN_SCALE, Viewport.MAX_SCALE);
 
 		mDeltaPos.scale = scaleBy - mStartPos.scale;
