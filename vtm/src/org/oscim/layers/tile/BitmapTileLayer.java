@@ -30,7 +30,7 @@ import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
-import org.oscim.tiling.TileRenderer;
+import org.oscim.tiling.VectorTileRenderer;
 import org.oscim.tiling.source.ITileDataSink;
 import org.oscim.tiling.source.ITileDataSource;
 import org.oscim.tiling.source.ITileDataSource.QueryResult;
@@ -66,7 +66,7 @@ public class BitmapTileLayer extends TileLayer {
 	public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit) {
 		super(map, tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax(), cacheLimit);
 		mTileSource = tileSource;
-		setRenderer(new TileRenderer(mTileManager));
+		setRenderer(new VectorTileRenderer(mTileManager));
 		initLoader(4);
 	}
 

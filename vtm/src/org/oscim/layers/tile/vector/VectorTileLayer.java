@@ -21,7 +21,7 @@ import org.oscim.map.Map;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.tiling.TileLoader;
 import org.oscim.tiling.TileManager;
-import org.oscim.tiling.TileRenderer;
+import org.oscim.tiling.VectorTileRenderer;
 import org.oscim.tiling.source.TileSource;
 import org.oscim.tiling.source.TileSource.OpenResult;
 import org.slf4j.Logger;
@@ -39,13 +39,13 @@ public class VectorTileLayer extends TileLayer {
 
 	public VectorTileLayer(Map map) {
 		super(map);
-		setRenderer(new TileRenderer(mTileManager));
+		setRenderer(new VectorTileRenderer(mTileManager));
 		initLoader(4);
 	}
 
 	public VectorTileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
 		super(map, minZoom, maxZoom, cacheLimit);
-		setRenderer(new TileRenderer(mTileManager));
+		setRenderer(new VectorTileRenderer(mTileManager));
 		initLoader(4);
 	}
 

@@ -16,66 +16,50 @@
  */
 package org.oscim.tiling;
 
-import static org.oscim.renderer.elements.RenderElement.BITMAP;
-import static org.oscim.renderer.elements.RenderElement.LINE;
-import static org.oscim.renderer.elements.RenderElement.MESH;
-import static org.oscim.renderer.elements.RenderElement.POLYGON;
-import static org.oscim.renderer.elements.RenderElement.TEXLINE;
 import static org.oscim.tiling.MapTile.State.NEW_DATA;
 import static org.oscim.tiling.MapTile.State.READY;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
-import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.ElementRenderer;
-import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.BitmapLayer;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.LineTexLayer;
-import org.oscim.renderer.elements.MeshLayer;
-import org.oscim.renderer.elements.PolygonLayer;
-import org.oscim.renderer.elements.RenderElement;
-import org.oscim.tiling.MapTile.TileNode;
-import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TileRenderer extends LayerRenderer {
+public abstract class TileRenderer extends LayerRenderer {
 	static final Logger log = LoggerFactory.getLogger(TileRenderer.class);
 
-	private static final boolean debugOverdraw = false;
-
 	/** fade-in time */
-	private static final float FADE_TIME = 500;
+	protected static final float FADE_TIME = 500;
 
 	private final TileManager mTileManager;
+
+	protected final TileSet mDrawTiles;
+	protected int mProxyTileCnt;
+
+	private int mOverdraw = 0;
+	private float mAlpha = 1;
+
+	protected int mRenderOverdraw;
+	protected float mRenderAlpha;
+
 	private int mUploadSerial;
 
 	public TileRenderer(TileManager tileManager) {
 		mTileManager = tileManager;
 		mUploadSerial = 0;
+		mDrawTiles = new TileSet();
 	}
-
-	private int mOverdraw = 0;
-	private float mAlpha = 1;
-
-	private int mRenderOverdraw;
-	private float mRenderAlpha;
 
 	/**
 	 * Current number of frames drawn, used to not draw a
 	 * tile twice per frame.
 	 */
-	private int mDrawSerial;
-	private int mClipMode;
-
-	private GLMatrix mViewProj = new GLMatrix();
+	protected int mDrawSerial;
 
 	/**
 	 * Threadsafe
@@ -115,13 +99,6 @@ public class TileRenderer extends LayerRenderer {
 		mRenderAlpha = mAlpha;
 		mRenderOverdraw = mOverdraw;
 
-		/* discard depth projection from tilt, depth buffer
-		 * is used for clipping */
-		mViewProj.copy(v.proj);
-		mViewProj.setValue(10, 0);
-		mViewProj.setValue(14, 0);
-		mViewProj.multiplyRhs(v.view);
-
 		int tileCnt = mDrawTiles.cnt;
 		MapTile[] tiles = mDrawTiles.tiles;
 
@@ -129,7 +106,7 @@ public class TileRenderer extends LayerRenderer {
 			updateTileVisibility(v.pos, v.plane);
 		}
 
-		tileCnt += mNumTileHolder;
+		tileCnt += mProxyTileCnt;
 
 		/* prepare tiles for rendering */
 		if (compileTileLayers(tiles, tileCnt) > 0) {
@@ -137,62 +114,10 @@ public class TileRenderer extends LayerRenderer {
 			BufferObject.checkBufferUsage(false);
 		}
 
-		mClipMode = 1;
-
-		for (int i = 0; i < tileCnt; i++) {
-			MapTile t = tiles[i];
-			if (t.isVisible && t.state != READY) {
-				mClipMode = 2;
-				break;
-			}
-		}
-
-		/* draw visible tiles */
-		for (int i = 0; i < tileCnt; i++) {
-			MapTile t = tiles[i];
-			if (t.isVisible && t.state == READY)
-				drawTile(t, v);
-
-		}
-
-		/* draw parent or children as proxy for visibile tiles that dont
-		 * have data yet. Proxies are clipped to the region where nothing
-		 * was drawn to depth buffer.
-		 * TODO draw proxies for placeholder */
-		if (mClipMode > 1) {
-			mClipMode = 3;
-			//GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
-			GL.glDepthFunc(GL20.GL_LESS);
-
-			/* draw child or parent proxies */
-			boolean preferParent = (v.pos.getZoomScale() < 1.5)
-			        || (v.pos.zoomLevel < tiles[0].zoomLevel);
-
-			for (int i = 0; i < tileCnt; i++) {
-				MapTile t = tiles[i];
-				if (t.isVisible
-				        && (t.state != READY)
-				        && (t.holder == null)) {
-					drawProxyTile(t, v, true, preferParent);
-				}
-			}
-
-			/* draw grandparents */
-			for (int i = 0; i < tileCnt; i++) {
-				MapTile t = tiles[i];
-				if (t.isVisible
-				        && (t.state != READY)
-				        && (t.holder == null))
-					drawProxyTile(t, v, false, false);
-			}
-			GL.glDepthMask(false);
-		}
-
-		/* make sure stencil buffer write is disabled */
-		GL.glStencilMask(0x00);
-
 		mDrawSerial++;
 	}
+
+	//abstract protected void drawTiles(GLViewport v, MapTile[] tiles, int tileCnt);
 
 	@Override
 	protected void render(GLViewport v) {
@@ -202,7 +127,9 @@ public class TileRenderer extends LayerRenderer {
 	public void clearTiles() {
 		/* Clear all references to MapTiles as all current
 		 * tiles will also be removed from TileManager. */
-		mDrawTiles = new TileSet();
+		//mDrawTiles = new TileSet();
+		mDrawTiles.tiles = new MapTile[1];
+		mDrawTiles.cnt = 0;
 	}
 
 	/** compile tile layer data and upload to VBOs */
@@ -295,7 +222,7 @@ public class TileRenderer extends LayerRenderer {
 				tiles[i].isVisible = false;
 
 			/* count placeholder tiles */
-			mNumTileHolder = 0;
+			mProxyTileCnt = 0;
 
 			/* check visibile tiles */
 			mScanBox.scan(pos.x, pos.y, pos.scale, tileZoom, box);
@@ -351,9 +278,6 @@ public class TileRenderer extends LayerRenderer {
 		tileSet.releaseTiles();
 	}
 
-	int mNumTileHolder;
-	TileSet mDrawTiles = new TileSet();
-
 	/** scanline fill class used to check tile visibility */
 	private final ScanBox mScanBox = new ScanBox() {
 		@Override
@@ -386,7 +310,7 @@ public class TileRenderer extends LayerRenderer {
 				if (xx < 0 || xx >= xmax)
 					continue;
 
-				for (int i = cnt; i < cnt + mNumTileHolder; i++)
+				for (int i = cnt; i < cnt + mProxyTileCnt; i++)
 					if (tiles[i].tileX == x && tiles[i].tileY == y)
 						continue O;
 
@@ -400,7 +324,7 @@ public class TileRenderer extends LayerRenderer {
 				if (tile == null)
 					continue;
 
-				if (cnt + mNumTileHolder >= tiles.length) {
+				if (cnt + mProxyTileCnt >= tiles.length) {
 					//log.error(" + mNumTileHolder");
 					break;
 				}
@@ -408,12 +332,12 @@ public class TileRenderer extends LayerRenderer {
 				holder.isVisible = true;
 				holder.holder = tile;
 				tile.isVisible = true;
-				tiles[cnt + mNumTileHolder++] = holder;
+				tiles[cnt + mProxyTileCnt++] = holder;
 			}
 		}
 	};
 
-	private long getMinFade(MapTile t) {
+	protected long getMinFade(MapTile t) {
 		long maxFade = MapRenderer.frametime - 50;
 
 		for (int c = 0; c < 4; c++) {
@@ -434,182 +358,5 @@ public class TileRenderer extends LayerRenderer {
 		}
 
 		return maxFade;
-	}
-
-	private void drawTile(MapTile tile, GLViewport v) {
-		/* ensure to draw parents only once */
-		if (tile.lastDraw == mDrawSerial)
-			return;
-
-		tile.lastDraw = mDrawSerial;
-
-		/* use holder proxy when it is set */
-		MapTile t = tile.holder == null ? tile : tile.holder;
-
-		if (t.layers == null || t.layers.vbo == null)
-			//throw new IllegalStateException(t + "no data " + (t.layers == null));
-			return;
-
-		t.layers.vbo.bind();
-		MapPosition pos = v.pos;
-		/* place tile relative to map position */
-		int z = tile.zoomLevel;
-		float div = FastMath.pow(z - pos.zoomLevel);
-		double tileScale = Tile.SIZE * pos.scale;
-		float x = (float) ((tile.x - pos.x) * tileScale);
-		float y = (float) ((tile.y - pos.y) * tileScale);
-
-		/* scale relative to zoom-level of this tile */
-		float scale = (float) (pos.scale / (1 << z));
-
-		//GLViewport v = mMatrices;
-		v.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
-		v.mvp.multiplyLhs(mViewProj);
-
-		boolean clipped = false;
-		int mode = mClipMode;
-		RenderElement l = t.layers.getBaseLayers();
-
-		while (l != null) {
-			if (l.type == POLYGON) {
-				l = PolygonLayer.Renderer.draw(l, v, div, !clipped, mode);
-				clipped = true;
-				continue;
-			}
-			if (!clipped) {
-				/* draw stencil buffer clip region */
-				PolygonLayer.Renderer.draw(null, v, div, true, mode);
-				clipped = true;
-			}
-			if (l.type == LINE) {
-				l = LineLayer.Renderer.draw(l, v, scale, t.layers);
-				continue;
-			}
-			if (l.type == TEXLINE) {
-				l = LineTexLayer.Renderer.draw(l, v, div, t.layers);
-				continue;
-			}
-			if (l.type == MESH) {
-				l = MeshLayer.Renderer.draw(l, v);
-				continue;
-			}
-			/* just in case */
-			l = l.next;
-		}
-
-		l = t.layers.getTextureLayers();
-		while (l != null) {
-			if (!clipped) {
-				PolygonLayer.Renderer.draw(null, v, div, true, mode);
-				clipped = true;
-			}
-			if (l.type == BITMAP) {
-				l = BitmapLayer.Renderer.draw(l, v, 1, mRenderAlpha);
-				continue;
-			}
-			l = l.next;
-		}
-
-		if (t.fadeTime == 0)
-			t.fadeTime = getMinFade(t);
-
-		if (debugOverdraw) {
-			if (t.zoomLevel > pos.zoomLevel)
-				PolygonLayer.Renderer.drawOver(v, Color.BLUE, 0.5f);
-			else if (t.zoomLevel < pos.zoomLevel)
-				PolygonLayer.Renderer.drawOver(v, Color.RED, 0.5f);
-			else
-				PolygonLayer.Renderer.drawOver(v, Color.GREEN, 0.5f);
-
-			return;
-		}
-
-		if (mRenderOverdraw != 0 && MapRenderer.frametime - t.fadeTime < FADE_TIME) {
-			float fade = 1 - (MapRenderer.frametime - t.fadeTime) / FADE_TIME;
-			PolygonLayer.Renderer.drawOver(v, mRenderOverdraw, fade * fade);
-			MapRenderer.animate();
-		} else {
-			PolygonLayer.Renderer.drawOver(v, 0, 1);
-		}
-	}
-
-	private int drawProxyChild(MapTile tile, GLViewport v) {
-		int drawn = 0;
-		for (int i = 0; i < 4; i++) {
-			if ((tile.proxies & 1 << i) == 0)
-				continue;
-
-			MapTile c = tile.node.child(i);
-
-			if (c.state == READY) {
-				drawTile(c, v);
-				drawn++;
-			}
-		}
-		return drawn;
-	}
-
-	protected void drawProxyTile(MapTile tile, GLViewport v,
-	        boolean parent, boolean preferParent) {
-
-		TileNode r = tile.node;
-		MapTile proxy;
-
-		if (!preferParent) {
-			/* prefer drawing children */
-			if (drawProxyChild(tile, v) == 4)
-				return;
-
-			if (parent) {
-				/* draw parent proxy */
-				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.item;
-					if (proxy.state == READY) {
-						//log.debug("1. draw parent " + proxy);
-						drawTile(proxy, v);
-					}
-				}
-			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
-				/* check if parent was already drawn */
-				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.item;
-					if (proxy.state == READY)
-						return;
-				}
-
-				proxy = r.parent.parent.item;
-				if (proxy.state == READY)
-					drawTile(proxy, v);
-			}
-		} else {
-			/* prefer drawing parent */
-			if (parent) {
-				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.item;
-					if (proxy != null && proxy.state == READY) {
-						//log.debug("2. draw parent " + proxy);
-						drawTile(proxy, v);
-						return;
-
-					}
-				}
-				drawProxyChild(tile, v);
-
-			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
-				/* check if parent was already drawn */
-				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.item;
-					if (proxy.state == READY)
-						return;
-				}
-				/* this will do nothing, just to check */
-				if (drawProxyChild(tile, v) > 0)
-					return;
-
-				proxy = r.parent.parent.item;
-				if (proxy.state == READY)
-					drawTile(proxy, v);
-			}
-		}
 	}
 }
