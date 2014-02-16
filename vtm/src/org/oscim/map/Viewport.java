@@ -48,10 +48,10 @@ public class Viewport {
 
 	protected final GLMatrix mProjMatrix = new GLMatrix();
 	protected final GLMatrix mProjMatrixUnscaled = new GLMatrix();
-	protected final GLMatrix mProjMatrixI = new GLMatrix();
-	protected final GLMatrix mRotMatrix = new GLMatrix();
+	protected final GLMatrix mProjMatrixInverse = new GLMatrix();
+	protected final GLMatrix mRotationMatrix = new GLMatrix();
 	protected final GLMatrix mViewMatrix = new GLMatrix();
-	protected final GLMatrix mVPMatrix = new GLMatrix();
+	protected final GLMatrix mViewProjMatrix = new GLMatrix();
 	protected final GLMatrix mUnprojMatrix = new GLMatrix();
 	protected final GLMatrix mTmpMatrix = new GLMatrix();
 
@@ -71,7 +71,7 @@ public class Viewport {
 	/** scale map plane at VIEW_DISTANCE to near plane */
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
-	Viewport(Map map) {
+	protected Viewport() {
 		mPos.scale = MIN_SCALE;
 		mPos.x = 0.5;
 		mPos.y = 0.5;
@@ -83,7 +83,9 @@ public class Viewport {
 	 * Get the current MapPosition.
 	 * 
 	 * @param pos MapPosition to be updated.
-	 * @return true if current position is different from pos.
+	 * 
+	 * @return true iff current position is different from
+	 *         passed position.
 	 */
 	public synchronized boolean getMapPosition(MapPosition pos) {
 
@@ -102,24 +104,6 @@ public class Viewport {
 		pos.zoomLevel = FastMath.log2((int) mPos.scale);
 
 		return changed;
-	}
-
-	/**
-	 * Get a copy of current matrices
-	 * 
-	 * @param view view Matrix
-	 * @param proj projection Matrix
-	 * @param vp view and projection
-	 */
-	public synchronized void getMatrix(GLMatrix view, GLMatrix proj, GLMatrix vp) {
-		if (view != null)
-			view.copy(mViewMatrix);
-
-		if (proj != null)
-			proj.copy(mProjMatrix);
-
-		if (vp != null)
-			vp.copy(mVPMatrix);
 	}
 
 	/**
@@ -155,9 +139,11 @@ public class Viewport {
 		}
 	}
 
-	/* Get Z-value of the map-plane for a point on screen -
+	/**
+	 * Get Z-value of the map-plane for a point on screen -
 	 * calculate the intersection of a ray from camera origin
-	 * and the map plane */
+	 * and the map plane
+	 */
 	protected float getDepth(float y) {
 		if (y == 0)
 			return 0;
@@ -208,11 +194,10 @@ public class Viewport {
 	public synchronized BoundingBox getBBox(int expand) {
 		getBBox(mMapBBox, expand);
 
-		// scale map-pixel coordinates at current scale to
-		// absolute coordinates and apply mercator projection.
+		/* scale map-pixel coordinates at current scale to
+		 * absolute coordinates and apply mercator projection. */
 		double minLon = MercatorProjection.toLongitude(mMapBBox.minX);
 		double maxLon = MercatorProjection.toLongitude(mMapBBox.maxX);
-		// sic(k)
 		double minLat = MercatorProjection.toLatitude(mMapBBox.maxY);
 		double maxLat = MercatorProjection.toLatitude(mMapBBox.minY);
 
@@ -334,9 +319,26 @@ public class Viewport {
 		mv[2] = 0;
 		mv[3] = 1;
 
-		mVPMatrix.prj(mv);
+		mViewProjMatrix.prj(mv);
 
 		out.x = (mv[0] * (mWidth / 2));
 		out.y = -(mv[1] * (mHeight / 2));
+	}
+
+	public synchronized boolean copy(Viewport viewport) {
+		mUnprojMatrix.copy(viewport.mUnprojMatrix);
+		mRotationMatrix.copy(viewport.mRotationMatrix);
+		mViewMatrix.copy(viewport.mViewMatrix);
+		mViewProjMatrix.copy(viewport.mViewProjMatrix);
+		return viewport.getMapPosition(mPos);
+	}
+
+	public synchronized void initFrom(Viewport viewport) {
+		mProjMatrix.copy(viewport.mProjMatrix);
+		mProjMatrixUnscaled.copy(viewport.mProjMatrixUnscaled);
+		mProjMatrixInverse.copy(viewport.mProjMatrixInverse);
+
+		mHeight = viewport.mHeight;
+		mWidth = viewport.mWidth;
 	}
 }

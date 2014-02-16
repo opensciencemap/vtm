@@ -8,10 +8,6 @@ import org.oscim.utils.FastMath;
 
 public class ViewController extends Viewport {
 
-	ViewController(Map map) {
-		super(map);
-	}
-
 	public synchronized void setScreenSize(int width, int height) {
 		mHeight = height;
 		mWidth = width;
@@ -37,7 +33,7 @@ public class ViewController extends Viewport {
 		/* set inverse projection matrix (without scaling) */
 		mProjMatrix.get(tmp);
 		GLMatrix.invertM(tmp, 0, tmp, 0);
-		mProjMatrixI.set(tmp);
+		mProjMatrixInverse.set(tmp);
 
 		mProjMatrixUnscaled.copy(mProjMatrix);
 
@@ -65,10 +61,10 @@ public class ViewController extends Viewport {
 		mPos.x = x;
 		mPos.y = y;
 
-		// clamp latitude
+		/* clamp latitude */
 		mPos.y = FastMath.clamp(mPos.y, 0, 1);
 
-		// wrap longitude
+		/* wrap longitude */
 		while (mPos.x > 1)
 			mPos.x -= 1;
 		while (mPos.x < 0)
@@ -180,27 +176,27 @@ public class ViewController extends Viewport {
 		 * 0. apply rotate
 		 * 1. apply tilt */
 
-		mRotMatrix.setRotation(mPos.angle, 0, 0, 1);
+		mRotationMatrix.setRotation(mPos.angle, 0, 0, 1);
 		mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
 
 		/* apply first rotation, then tilt */
-		mRotMatrix.multiplyLhs(mTmpMatrix);
+		mRotationMatrix.multiplyLhs(mTmpMatrix);
 
-		mViewMatrix.copy(mRotMatrix);
+		mViewMatrix.copy(mRotationMatrix);
 
-		mVPMatrix.multiplyMM(mProjMatrix, mViewMatrix);
+		mViewProjMatrix.multiplyMM(mProjMatrix, mViewMatrix);
 
 		/* inverse projection matrix: */
 		/* invert scale */
 		mUnprojMatrix.setScale(mWidth, mWidth, 1);
 
 		/* invert rotation and tilt */
-		mTmpMatrix.transposeM(mRotMatrix);
+		mTmpMatrix.transposeM(mRotationMatrix);
 
 		/* (AB)^-1 = B^-1*A^-1, invert scale, tilt and rotation */
 		mTmpMatrix.multiplyLhs(mUnprojMatrix);
 
 		/* (AB)^-1 = B^-1*A^-1, invert projection */
-		mUnprojMatrix.multiplyMM(mTmpMatrix, mProjMatrixI);
+		mUnprojMatrix.multiplyMM(mTmpMatrix, mProjMatrixInverse);
 	}
 }

@@ -18,7 +18,7 @@ package org.oscim.layers.tile.vector.labeling;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
-import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.TextItem;
@@ -79,7 +79,7 @@ class Debug {
 		dbg.addLineLayer(5, new Line((Color.MAGENTA & alpha), 2));
 	}
 
-	public static void draw(MapPosition pos, Matrices m, ElementLayers layers) {
+	public static void draw(MapPosition pos, GLViewport m, ElementLayers layers) {
 		//		if (layers.baseLayers != null) {
 		//			//setMatrix(pos, m, true);
 		//

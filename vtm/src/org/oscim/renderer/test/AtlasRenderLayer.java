@@ -20,9 +20,8 @@ import java.util.Arrays;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
-import org.oscim.core.MapPosition;
 import org.oscim.renderer.ElementRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.renderer.atlas.TextureAtlas.Slot;
@@ -131,10 +130,10 @@ public class AtlasRenderLayer extends ElementRenderer {
 	boolean initial = true;
 
 	@Override
-	protected void update(MapPosition pos, boolean changed, Matrices m) {
+	protected void update(GLViewport v) {
 
 		if (initial) {
-			mMapPosition.copy(pos);
+			mMapPosition.copy(v.pos);
 			initial = false;
 
 			compile();

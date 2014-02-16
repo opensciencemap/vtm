@@ -22,8 +22,8 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
 
 /**
  * Renderer for a single bitmap, width and height must be power of 2.
@@ -181,7 +181,7 @@ public class BitmapLayer extends TextureLayer {
 			hAlpha = GL.glGetUniformLocation(mTextureProgram, "u_alpha");
 		}
 
-		public static RenderElement draw(RenderElement renderElement, Matrices m, float scale,
+		public static RenderElement draw(RenderElement renderElement, GLViewport v, float scale,
 		        float alpha) {
 			//GLState.test(false, false);
 			GLState.blend(true);
@@ -197,12 +197,12 @@ public class BitmapLayer extends TextureLayer {
 			else
 				GL.glUniform1f(hTextureScale, 1);
 
-			GL.glUniform1f(hTextureScreenScale, 1f / MapRenderer.screenWidth);
+			GL.glUniform1f(hTextureScreenScale, 1f / v.getWidth());
 			GL.glUniform1f(hAlpha, alpha);
 
-			m.proj.setAsUniform(hTextureProjMatrix);
+			v.proj.setAsUniform(hTextureProjMatrix);
 
-			m.mvp.setAsUniform(hTextureMVMatrix);
+			v.mvp.setAsUniform(hTextureMVMatrix);
 
 			MapRenderer.bindQuadIndicesVBO(true);
 

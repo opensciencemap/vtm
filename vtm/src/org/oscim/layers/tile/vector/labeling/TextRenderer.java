@@ -30,11 +30,10 @@ package org.oscim.layers.tile.vector.labeling;
 // 5 QuadTree might be handy
 //
 
-import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.vector.labeling.LabelLayer.Worker;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLState;
-import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.elements.RenderElement;
 import org.oscim.renderer.elements.TextureLayer;
 import org.slf4j.Logger;
@@ -53,8 +52,7 @@ class TextRenderer extends ElementRenderer {
 	long lastDraw = 0;
 
 	@Override
-	public synchronized void update(MapPosition pos, boolean changed,
-	        Matrices matrices) {
+	public synchronized void update(GLViewport v) {
 
 		LabelTask t;
 		synchronized (mWorker) {
@@ -75,18 +73,18 @@ class TextRenderer extends ElementRenderer {
 	}
 
 	@Override
-	public synchronized void render(MapPosition pos, Matrices m) {
+	public synchronized void render(GLViewport v) {
 		GLState.test(false, false);
 		//Debug.draw(pos, layers);
 
 		layers.vbo.bind();
 
-		float scale = (float) (pos.scale / mMapPosition.scale);
+		float scale = (float) (v.pos.scale / mMapPosition.scale);
 
-		setMatrix(pos, m, false);
+		setMatrix(v, false);
 
 		for (RenderElement l = layers.getTextureLayers(); l != null;)
-			l = TextureLayer.Renderer.draw(l, m, scale);
+			l = TextureLayer.Renderer.draw(l, v, scale);
 	}
 
 }

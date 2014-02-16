@@ -23,13 +23,12 @@ import java.nio.FloatBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.GeometryBuffer;
-import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.styles.Area;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.math.Interpolation;
@@ -171,8 +170,8 @@ public final class PolygonLayer extends RenderElement {
 			return true;
 		}
 
-		private static void fillPolygons(Matrices m, int start, int end, int zoom, float scale,
-		        float div) {
+		private static void fillPolygons(GLViewport v, int start, int end, int zoom,
+		        float scale, float div) {
 
 			/* draw to framebuffer */
 			GL.glColorMask(true, true, true, true);
@@ -186,7 +185,7 @@ public final class PolygonLayer extends RenderElement {
 
 				if (enableTexture && a.texture != null) {
 					shader = texShader;
-					setShader(texShader, m);
+					setShader(texShader, v);
 					float num = FastMath.clamp((Tile.SIZE / a.texture.width) >> 1, 1, Tile.SIZE);
 					float transition = Interpolation.exp5.apply(FastMath.clamp(scale - 1, 0, 1));
 					GL.glUniform2f(hPolygonScale[1], transition, div / num);
@@ -237,7 +236,7 @@ public final class PolygonLayer extends RenderElement {
 
 				if (shader != polyShader) {
 					// disable texture shader
-					setShader(polyShader, m);
+					setShader(polyShader, v);
 					shader = polyShader;
 				}
 			}
@@ -246,7 +245,7 @@ public final class PolygonLayer extends RenderElement {
 		// current layer to fill (0 - STENCIL_BITS-1)
 		private static int mCount;
 
-		private static void setShader(int shader, Matrices m) {
+		private static void setShader(int shader, GLViewport v) {
 			GLState.useProgram(polygonProgram[shader]);
 
 			GLState.enableVertexArrays(hPolygonVertexPosition[shader], -1);
@@ -255,16 +254,17 @@ public final class PolygonLayer extends RenderElement {
 			                         GL20.GL_SHORT, false, 0,
 			                         POLYGON_VERTICES_DATA_POS_OFFSET);
 
-			m.mvp.setAsUniform(hPolygonMatrix[shader]);
+			v.mvp.setAsUniform(hPolygonMatrix[shader]);
 		}
 
 		/**
-		 * draw polygon layers (unil layer.next is not polygon layer)
+		 * draw polygon layers (until layer.next is not polygon layer)
 		 * using stencil buffer method
+		 * 
 		 * @param renderElement
 		 *            layer to draw (referencing vertices in current vbo)
-		 * @param m
-		 *            current Matrices
+		 * @param v
+		 *            GLViewport
 		 * @param pos
 		 *            used to fade layers according to 'fade' in
 		 *            layer.area style
@@ -278,15 +278,15 @@ public final class PolygonLayer extends RenderElement {
 		 * @return
 		 *         next layer
 		 */
-		public static RenderElement draw(RenderElement renderElement, Matrices m,
-		        MapPosition pos, float div, boolean first, int clipMode) {
+		public static RenderElement draw(RenderElement renderElement, GLViewport v,
+		        float div, boolean first, int clipMode) {
 
 			GLState.test(false, true);
 
-			setShader(polyShader, m);
+			setShader(polyShader, v);
 
-			int zoom = pos.zoomLevel;
-			float scale = (float) pos.getZoomScale();
+			int zoom = v.pos.zoomLevel;
+			float scale = (float) v.pos.getZoomScale();
 
 			int cur = mCount;
 
@@ -321,13 +321,13 @@ public final class PolygonLayer extends RenderElement {
 
 				// draw up to 7 layers into stencil buffer
 				if (cur == STENCIL_BITS - 1) {
-					fillPolygons(m, start, cur, zoom, scale, div);
+					fillPolygons(v, start, cur, zoom, scale, div);
 					start = cur = 0;
 				}
 			}
 
 			if (cur > 0)
-				fillPolygons(m, start, cur, zoom, scale, div);
+				fillPolygons(v, start, cur, zoom, scale, div);
 
 			if (clipMode > 0) {
 				if (first) {
@@ -347,8 +347,8 @@ public final class PolygonLayer extends RenderElement {
 			return l;
 		}
 
-		public static void clip(Matrices m) {
-			setShader(polyShader, m);
+		public static void clip(GLViewport v) {
+			setShader(polyShader, v);
 
 			drawStencilRegion(true, 1);
 			// disable writes to stencil buffer
@@ -418,8 +418,8 @@ public final class PolygonLayer extends RenderElement {
 		 * a quad with func 'always' and op 'zero'. Using 'color'
 		 * and 'alpha' for a fake fade effect.
 		 */
-		public static void drawOver(Matrices m, int color, float alpha) {
-			setShader(polyShader, m);
+		public static void drawOver(GLViewport v, int color, float alpha) {
+			setShader(polyShader, v);
 
 			if (color != 0) {
 				GLUtils.setColor(hPolygonColor[0], color, alpha);

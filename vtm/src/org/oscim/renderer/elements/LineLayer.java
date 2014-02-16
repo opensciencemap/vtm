@@ -20,13 +20,12 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
-import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.styles.Line;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.pool.Inlist;
@@ -644,15 +643,15 @@ public final class LineLayer extends RenderElement {
 			return true;
 		}
 
-		public static RenderElement draw(RenderElement curLayer, Matrices m,
-		        MapPosition pos, float scale, ElementLayers layers) {
+		public static RenderElement draw(RenderElement curLayer, GLViewport v,
+		        float scale, ElementLayers layers) {
 
 			if (curLayer == null)
 				return null;
 
 			// simple line shader does not take forward shortening into
 			// account. only used when tilt is 0.
-			int mode = pos.tilt < 1 ? 1 : 0;
+			int mode = v.pos.tilt < 1 ? 1 : 0;
 
 			GLState.useProgram(lineProgram[mode]);
 			GLState.blend(true);
@@ -675,7 +674,7 @@ public final class LineLayer extends RenderElement {
 			GL.glVertexAttribPointer(hLineVertexPosition[mode], 4, GL20.GL_SHORT,
 			                         false, 0, layers.offset[LINE]);
 
-			m.mvp.setAsUniform(hLineMatrix[mode]);
+			v.mvp.setAsUniform(hLineMatrix[mode]);
 
 			// Line scale factor for non fixed lines: Within a zoom-
 			// level lines would be scaled by the factor 2 by view-matrix.
@@ -707,12 +706,12 @@ public final class LineLayer extends RenderElement {
 					heightOffset = ll.heightOffset;
 
 					GL.glUniform1f(uLineHeight, heightOffset /
-					        MercatorProjection.groundResolution(pos));
+					        MercatorProjection.groundResolution(v.pos));
 				}
 
-				if (line.fade < pos.zoomLevel) {
+				if (line.fade < v.pos.zoomLevel) {
 					GLUtils.setColor(uLineColor, line.color, 1);
-				} else if (line.fade > pos.zoomLevel) {
+				} else if (line.fade > v.pos.zoomLevel) {
 					continue;
 				} else {
 					float alpha = (float) (scale > 1.2 ? scale : 1.2) - 1;

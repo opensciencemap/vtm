@@ -25,7 +25,7 @@ import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
-import org.oscim.map.Viewport;
+import org.oscim.map.ViewController;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.tiling.source.TileSource;
@@ -178,7 +178,7 @@ public abstract class GdxMap implements ApplicationListener {
 		mMapRenderer.onSurfaceChanged(w, h);
 
 		InputMultiplexer mux = new InputMultiplexer();
-		ViewController controller = new ViewController();
+		MapController controller = new MapController();
 		GestureDetector gestureDetector = new GestureDetector(20, 0.5f, 2, 0.05f, controller);
 		mux.addProcessor(new TouchHandler());
 		mux.addProcessor(gestureDetector);
@@ -241,10 +241,10 @@ public abstract class GdxMap implements ApplicationListener {
 
 	class TouchHandler implements InputProcessor {
 
-		private Viewport mMapPosition;
+		private ViewController mViewport;
 
 		public TouchHandler() {
-			mMapPosition = mMap.viewport();
+			mViewport = mMap.viewport();
 		}
 
 		private boolean mActiveScale;
@@ -261,28 +261,34 @@ public abstract class GdxMap implements ApplicationListener {
 			switch (keycode) {
 
 				case Input.Keys.UP:
-					mMapPosition.moveMap(0, -50);
+					mViewport.moveMap(0, -50);
 					mMap.updateMap(true);
 					break;
 				case Input.Keys.DOWN:
-					mMapPosition.moveMap(0, 50);
+					mViewport.moveMap(0, 50);
 					mMap.updateMap(true);
 					break;
 				case Input.Keys.LEFT:
-					mMapPosition.moveMap(-50, 0);
+					mViewport.moveMap(-50, 0);
 					mMap.updateMap(true);
 					break;
 				case Input.Keys.RIGHT:
-					mMapPosition.moveMap(50, 0);
+					mViewport.moveMap(50, 0);
 					mMap.updateMap(true);
 					break;
 				case Input.Keys.M:
-					mMapPosition.scaleMap(1.05f, 0, 0);
+					mViewport.scaleMap(1.05f, 0, 0);
 					mMap.updateMap(true);
 					break;
 				case Input.Keys.N:
-					mMapPosition.scaleMap(0.95f, 0, 0);
+					mViewport.scaleMap(0.95f, 0, 0);
 					mMap.updateMap(true);
+					break;
+				case Input.Keys.NUM_1:
+					mMap.animator().animateZoom(500, 0.5, 0, 0);
+					break;
+				case Input.Keys.NUM_2:
+					mMap.animator().animateZoom(500, 2, 0, 0);
 					break;
 
 				case Input.Keys.D:
@@ -361,14 +367,14 @@ public abstract class GdxMap implements ApplicationListener {
 
 			if (mActiveScale) {
 				// changed = mMapPosition.tilt((screenY - mStartY) / 5f);
-				changed = mMapPosition.scaleMap(1 - (screenY - mPosY) / 100f, 0, 0);
+				changed = mViewport.scaleMap(1 - (screenY - mPosY) / 100f, 0, 0);
 				mPosY = screenY;
 			}
 
 			if (mActiveRotate) {
-				mMapPosition.rotateMap((screenX - mPosX) / 500f, 0, 0);
+				mViewport.rotateMap((screenX - mPosX) / 500f, 0, 0);
 				mPosX = screenX;
-				mMapPosition.tiltMap((screenY - mPosY) / 10f);
+				mViewport.tiltMap((screenY - mPosY) / 10f);
 				mPosY = screenY;
 				changed = true;
 			}
@@ -391,12 +397,12 @@ public abstract class GdxMap implements ApplicationListener {
 
 			if (amount > 0) {
 
-				mMap.animator().animateZoom(150, 0.8f, 0, 0);
+				mMap.animator().animateZoom(250, 0.9f, 0, 0);
 			} else {
 				float fx = mPosX - mMap.getWidth() / 2;
 				float fy = mPosY - mMap.getHeight() / 2;
 
-				mMap.animator().animateZoom(150, 1.25f, fx, fy);
+				mMap.animator().animateZoom(250, 1.111f, fx, fy);
 			}
 			mMap.updateMap(false);
 
@@ -404,7 +410,7 @@ public abstract class GdxMap implements ApplicationListener {
 		}
 	}
 
-	class ViewController implements GestureListener {
+	class MapController implements GestureListener {
 
 		private boolean mayFling = true;
 
@@ -434,10 +440,10 @@ public abstract class GdxMap implements ApplicationListener {
 		protected static final double PINCH_ROTATE_THRESHOLD = 0.02;
 		protected static final float PINCH_TILT_THRESHOLD = 1f;
 
-		private Viewport mMapPosition;
+		private ViewController mViewport;
 
-		public ViewController() {
-			mMapPosition = mMap.viewport();
+		public MapController() {
+			mViewport = mMap.viewport();
 		}
 
 		@Override
@@ -475,7 +481,7 @@ public abstract class GdxMap implements ApplicationListener {
 			if (mPinch)
 				return true;
 
-			mMapPosition.moveMap(deltaX, deltaY);
+			mViewport.moveMap(deltaX, deltaY);
 			mMap.updateMap(true);
 
 			return false;
@@ -560,7 +566,7 @@ public abstract class GdxMap implements ApplicationListener {
 
 				// log.debug("zoom " + deltaPinchWidth + " " + scale + " " +
 				// mSumScale);
-				changed = mMapPosition.scaleMap(scale, fx, fy);
+				changed = mViewport.scaleMap(scale, fx, fy);
 			}
 
 			if (!mBeginRotate && Math.abs(slope) < 1) {
@@ -572,7 +578,7 @@ public abstract class GdxMap implements ApplicationListener {
 				if ((my > threshold && my2 > threshold)
 				        || (my < -threshold && my2 < -threshold)) {
 					mBeginTilt = true;
-					changed = mMapPosition.tiltMap(my / 5);
+					changed = mViewport.tiltMap(my / 5);
 				}
 			}
 
@@ -600,7 +606,7 @@ public abstract class GdxMap implements ApplicationListener {
 						float x = (float) (mFocusX * rcos + mFocusY * -rsin - mFocusX);
 						float y = (float) (mFocusX * rsin + mFocusY * rcos - mFocusY);
 
-						mMapPosition.rotateMap(da, x, y);
+						mViewport.rotateMap(da, x, y);
 						changed = true;
 					}
 				}

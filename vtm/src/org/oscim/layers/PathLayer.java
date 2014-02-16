@@ -29,7 +29,7 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
 import org.oscim.renderer.ElementRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.theme.styles.Line;
@@ -194,10 +194,10 @@ public class PathLayer extends Layer {
 		private int mCurZ = -1;
 
 		@Override
-		public synchronized void update(MapPosition pos, boolean changed, Matrices m) {
-			int tz = 1 << pos.zoomLevel;
-			int tx = (int) (pos.x * tz);
-			int ty = (int) (pos.y * tz);
+		public synchronized void update(GLViewport v) {
+			int tz = 1 << v.pos.zoomLevel;
+			int tx = (int) (v.pos.x * tz);
+			int ty = (int) (v.pos.y * tz);
 
 			// update layers when map moved by at least one tile
 			if ((tx != mCurX || ty != mCurY || tz != mCurZ) || mUpdatePoints) {

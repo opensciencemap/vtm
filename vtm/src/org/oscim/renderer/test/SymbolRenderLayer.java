@@ -17,9 +17,8 @@
 package org.oscim.renderer.test;
 
 import org.oscim.backend.CanvasAdapter;
-import org.oscim.core.MapPosition;
 import org.oscim.renderer.ElementRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.SymbolLayer;
 
@@ -43,10 +42,10 @@ public class SymbolRenderLayer extends ElementRenderer {
 	}
 
 	@Override
-	protected void update(MapPosition position, boolean changed, Matrices matrices) {
+	protected void update(GLViewport v) {
 		if (initialize) {
 			initialize = false;
-			mMapPosition.copy(position);
+			mMapPosition.copy(v.pos);
 			compile();
 		}
 	}

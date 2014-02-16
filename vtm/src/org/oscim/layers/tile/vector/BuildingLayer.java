@@ -16,11 +16,10 @@
  */
 package org.oscim.layers.tile.vector;
 
-import org.oscim.core.MapPosition;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.GLViewport;
 import org.oscim.utils.FastMath;
 
 public class BuildingLayer extends Layer {
@@ -34,9 +33,9 @@ public class BuildingLayer extends Layer {
 			private long mStartTime;
 
 			@Override
-			public void update(MapPosition pos, boolean changed, Matrices m) {
+			public void update(GLViewport v) {
 
-				boolean show = pos.scale >= (1 << MIN_ZOOM);
+				boolean show = v.pos.scale >= (1 << MIN_ZOOM);
 
 				if (show) {
 					if (mAlpha < 1) {
@@ -66,7 +65,7 @@ public class BuildingLayer extends Layer {
 						mStartTime = 0;
 				}
 				//log.debug(show + " > " + mAlpha);
-				super.update(pos, changed, m);
+				super.update(v);
 			}
 		};
 

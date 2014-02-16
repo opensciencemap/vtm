@@ -21,9 +21,7 @@ import static org.oscim.tiling.MapTile.State.READY;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
-import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.tiling.MapTile;
 import org.oscim.tiling.TileRenderer;
@@ -91,7 +89,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected void update(MapPosition pos, boolean changed, Matrices matrices) {
+	protected void update(GLViewport v) {
 
 		if (!initialized && !initShader())
 			return;
@@ -99,7 +97,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		if (shaderProgram[0] == 0)
 			return;
 
-		if (mAlpha == 0 || pos.zoomLevel < 16) {
+		if (mAlpha == 0 || v.pos.zoomLevel < 16) {
 			setReady(false);
 			return;
 		}
@@ -180,7 +178,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 	private final boolean debug = false;
 
 	@Override
-	protected void render(MapPosition pos, Matrices m) {
+	protected void render(GLViewport v) {
 		// TODO one could render in one pass to texture and then draw the texture
 		// with alpha... might be faster and would allow postprocessing outlines.
 
@@ -205,8 +203,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 			for (int i = 0; i < mTileCnt; i++) {
 				ExtrusionLayer el = tiles[i].layers.getExtrusionLayers();
 
-				setMatrix(pos, m, tiles[i], 0);
-				m.mvp.setAsUniform(uExtMatrix);
+				setMatrix(v, tiles[i], 0);
+				v.mvp.setAsUniform(uExtMatrix);
 
 				el.vboIndices.bind();
 				el.vboVertices.bind();
@@ -240,7 +238,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		GLState.useProgram(shaderProgram[SHADER]);
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
-		if (pos.scale < (1 << 18)) {
+		if (v.pos.scale < (1 << 18)) {
 			// chances are high that one moves through a building
 			// with scale > 2 also draw back sides in this case.
 			GL.glEnable(GL20.GL_CULL_FACE);
@@ -256,8 +254,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 			MapTile t = tiles[i];
 			ExtrusionLayer el = t.layers.getExtrusionLayers();
 			int d = MapRenderer.depthOffset(t) * 10;
-			setMatrix(pos, m, t, d);
-			m.mvp.setAsUniform(uExtMatrix);
+			setMatrix(v, t, d);
+			v.mvp.setAsUniform(uExtMatrix);
 
 			el.vboIndices.bind();
 			el.vboVertices.bind();
@@ -292,8 +290,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 			GL.glDepthFunc(GL20.GL_EQUAL);
 			int d = MapRenderer.depthOffset(t) * 10;
-			setMatrix(pos, m, t, d);
-			m.mvp.setAsUniform(uExtMatrix);
+			setMatrix(v, t, d);
+			v.mvp.setAsUniform(uExtMatrix);
 
 			el.vboIndices.bind();
 			el.vboVertices.bind();
@@ -323,8 +321,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 			// same depth values as polygons, so add offset and draw gl_lequal:
 			GL.glDepthFunc(GL20.GL_LEQUAL);
 
-			m.mvp.addDepthOffset(100);
-			m.mvp.setAsUniform(uExtMatrix);
+			v.mvp.addDepthOffset(100);
+			v.mvp.setAsUniform(uExtMatrix);
 
 			GL.glUniform1i(uExtMode, 3);
 			GL.glDrawElements(GL20.GL_LINES, el.mIndiceCnt[3],
@@ -335,7 +333,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 			tiles[i] = null;
 		}
 
-		if (pos.scale < (1 << 18))
+		if (v.pos.scale < (1 << 18))
 			GL.glDisable(GL20.GL_CULL_FACE);
 
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -343,15 +341,15 @@ public class ExtrusionRenderer extends LayerRenderer {
 		mTileLayer.releaseTiles(mTileSet);
 	}
 
-	private static void setMatrix(MapPosition pos, Matrices m,
+	private static void setMatrix(GLViewport m,
 	        MapTile tile, int delta) {
 
 		int z = tile.zoomLevel;
-		double curScale = Tile.SIZE * pos.scale;
-		float scale = (float) (pos.scale / (1 << z));
+		double curScale = Tile.SIZE * m.pos.scale;
+		float scale = (float) (m.pos.scale / (1 << z));
 
-		float x = (float) ((tile.x - pos.x) * curScale);
-		float y = (float) ((tile.y - pos.y) * curScale);
+		float x = (float) ((tile.x - m.pos.x) * curScale);
+		float y = (float) ((tile.y - m.pos.y) * curScale);
 		m.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
 
 		// scale height

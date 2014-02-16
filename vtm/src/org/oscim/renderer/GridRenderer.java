@@ -19,9 +19,7 @@ package org.oscim.renderer;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
-import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.renderer.elements.TextLayer;
@@ -114,13 +112,13 @@ public class GridRenderer extends ElementRenderer {
 	}
 
 	@Override
-	protected void update(MapPosition pos, boolean changed, Matrices m) {
+	protected void update(GLViewport v) {
 
 		// scale coordinates relative to current 'zoom-level' to
 		// get the position as the nearest tile coordinate
-		int z = 1 << pos.zoomLevel;
-		int x = (int) (pos.x * z);
-		int y = (int) (pos.y * z);
+		int z = 1 << v.pos.zoomLevel;
+		int x = (int) (v.pos.x * z);
+		int y = (int) (v.pos.y * z);
 
 		// update layers when map moved by at least one tile
 		if (x == mCurX && y == mCurY && z == mCurZ)
@@ -130,13 +128,13 @@ public class GridRenderer extends ElementRenderer {
 		mCurY = y;
 		mCurZ = z;
 
-		mMapPosition.copy(pos);
+		mMapPosition.copy(v.pos);
 		mMapPosition.x = (double) x / z;
 		mMapPosition.y = (double) y / z;
 		mMapPosition.scale = z;
 
 		if (mText != null) {
-			addLabels(x, y, pos.zoomLevel);
+			addLabels(x, y, v.pos.zoomLevel);
 			layers.setBaseLayers(mLineLayer);
 			mLineLayer.addLine(mLines);
 			compile();

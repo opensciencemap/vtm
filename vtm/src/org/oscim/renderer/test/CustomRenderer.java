@@ -25,8 +25,8 @@ import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.LayerRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
 
 /*
  * This is an example how to integrate custom OpenGL drawing routines as map overlay
@@ -60,7 +60,7 @@ public class CustomRenderer extends LayerRenderer {
 
 	// ---------- everything below runs in GLRender Thread ----------
 	@Override
-	protected void update(MapPosition pos, boolean changed, Matrices matrices) {
+	protected void update(GLViewport v) {
 		if (!mInitialized) {
 			if (!init())
 				return;
@@ -68,7 +68,7 @@ public class CustomRenderer extends LayerRenderer {
 			mInitialized = true;
 
 			// fix current MapPosition
-			mMapPosition.copy(pos);
+			mMapPosition.copy(v.pos);
 
 			compile();
 		}
@@ -85,7 +85,7 @@ public class CustomRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected void render(MapPosition pos, Matrices m) {
+	protected void render(GLViewport v) {
 
 		// Use the program object
 		GLState.useProgram(mProgramObject);
@@ -110,9 +110,9 @@ public class CustomRenderer extends LayerRenderer {
 
 		float ratio = 1f / mMap.getWidth();
 
-		m.mvp.setScale(ratio, ratio, 1);
-		m.mvp.multiplyLhs(m.proj);
-		m.mvp.setAsUniform(hMatrixPosition);
+		v.mvp.setScale(ratio, ratio, 1);
+		v.mvp.multiplyLhs(v.proj);
+		v.mvp.setAsUniform(hMatrixPosition);
 
 		// Draw the triangle
 		GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);

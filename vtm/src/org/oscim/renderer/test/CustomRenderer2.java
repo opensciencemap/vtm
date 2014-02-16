@@ -20,13 +20,12 @@ import java.nio.FloatBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
-import org.oscim.core.MapPosition;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.utils.FastMath;
 
 /*
@@ -52,7 +51,7 @@ public class CustomRenderer2 extends ElementRenderer {
 	float mCellScale = 60 * MapRenderer.COORD_SCALE;
 
 	@Override
-	protected void update(MapPosition pos, boolean changed, Matrices matrices) {
+	protected void update(GLViewport v) {
 		if (!mInitialized) {
 			if (!init())
 				return;
@@ -67,9 +66,9 @@ public class CustomRenderer2 extends ElementRenderer {
 
 		}
 
-		if (mZoom != pos.zoomLevel) {
-			mMapPosition.copy(pos);
-			mZoom = pos.zoomLevel;
+		if (mZoom != v.pos.zoomLevel) {
+			mMapPosition.copy(v.pos);
+			mZoom = v.pos.zoomLevel;
 		}
 	}
 
@@ -92,7 +91,7 @@ public class CustomRenderer2 extends ElementRenderer {
 	}
 
 	@Override
-	protected void render(MapPosition pos, Matrices m) {
+	protected void render(GLViewport v) {
 
 		// Use the program object
 		GLState.useProgram(mProgramObject);
@@ -111,8 +110,8 @@ public class CustomRenderer2 extends ElementRenderer {
 		/* apply view and projection matrices */
 		// set mvp (tmp) matrix relative to mMapPosition
 		// i.e. fixed on the map
-		setMatrix(pos, m);
-		m.mvp.setAsUniform(hMatrixPosition);
+		setMatrix(v);
+		v.mvp.setAsUniform(hMatrixPosition);
 
 		final int offset_x = 4;
 		final int offset_y = 16;

@@ -21,13 +21,12 @@ import java.nio.ShortBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
-import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.styles.Area;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.pool.Inlist;
@@ -123,8 +122,7 @@ public class MeshLayer extends RenderElement {
 			return true;
 		}
 
-		public static RenderElement draw(RenderElement l, Matrices m,
-		        MapPosition pos) {
+		public static RenderElement draw(RenderElement l, GLViewport v) {
 
 			GLState.blend(true);
 
@@ -132,7 +130,7 @@ public class MeshLayer extends RenderElement {
 
 			GLState.enableVertexArrays(hVertexPosition, -1);
 
-			m.mvp.setAsUniform(hMatrix);
+			v.mvp.setAsUniform(hMatrix);
 
 			float heightOffset = 0;
 			GL.glUniform1f(hHeightOffset, heightOffset);
@@ -147,7 +145,7 @@ public class MeshLayer extends RenderElement {
 					heightOffset = ml.heightOffset;
 
 					GL.glUniform1f(hHeightOffset, heightOffset /
-					        MercatorProjection.groundResolution(pos));
+					        MercatorProjection.groundResolution(v.pos));
 				}
 
 				ml.indicesVbo.bind();

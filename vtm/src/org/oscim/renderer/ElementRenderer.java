@@ -28,7 +28,6 @@ import java.nio.ShortBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
@@ -78,35 +77,35 @@ public abstract class ElementRenderer extends LayerRenderer {
 	 * Render all 'layers'
 	 */
 	@Override
-	protected synchronized void render(MapPosition pos, Matrices m) {
+	protected synchronized void render(GLViewport v) {
 		MapPosition layerPos = mMapPosition;
 
 		layers.vbo.bind();
 		GLState.test(false, false);
 		GLState.blend(true);
 
-		float div = (float) (pos.scale / layerPos.scale);
+		float div = (float) (v.pos.scale / layerPos.scale);
 
 		RenderElement l = layers.getBaseLayers();
 
 		if (l != null)
-			setMatrix(pos, m, true);
+			setMatrix(v, true);
 
 		while (l != null) {
 			if (l.type == POLYGON) {
-				l = PolygonLayer.Renderer.draw(l, m, pos, 1, true, 0);
+				l = PolygonLayer.Renderer.draw(l, v, 1, true, 0);
 				continue;
 			}
 			if (l.type == LINE) {
-				l = LineLayer.Renderer.draw(l, m, pos, div, layers);
+				l = LineLayer.Renderer.draw(l, v, div, layers);
 				continue;
 			}
 			if (l.type == TEXLINE) {
-				l = LineTexLayer.Renderer.draw(l, m, pos, div, layers);
+				l = LineTexLayer.Renderer.draw(l, v, div, layers);
 				continue;
 			}
 			if (l.type == MESH) {
-				l = MeshLayer.Renderer.draw(l, m, pos);
+				l = MeshLayer.Renderer.draw(l, v);
 				continue;
 			}
 			log.debug("invalid layer {}", l.type);
@@ -115,14 +114,14 @@ public abstract class ElementRenderer extends LayerRenderer {
 
 		l = layers.getTextureLayers();
 		if (l != null)
-			setMatrix(pos, m, false);
+			setMatrix(v, false);
 		while (l != null) {
 			if (l.type == BITMAP) {
-				l = BitmapLayer.Renderer.draw(l, m, 1, 1);
+				l = BitmapLayer.Renderer.draw(l, v, 1, 1);
 				continue;
 			}
 			if (l.type == SYMBOL) {
-				l = TextureLayer.Renderer.draw(l, m, div);
+				l = TextureLayer.Renderer.draw(l, v, div);
 				continue;
 			}
 			log.debug("invalid layer {}", l.type);
@@ -184,20 +183,18 @@ public abstract class ElementRenderer extends LayerRenderer {
 	 * Use this to 'stick' your layer to the map. Note: Vertex coordinates
 	 * are assumed to be scaled by MapRenderer.COORD_SCALE (== 8).
 	 * 
-	 * @param position
-	 *            current MapPosition
-	 * @param matrices
-	 *            current Matrices
+	 * @param v
+	 *            GLViewport
 	 * @param project
 	 *            if true apply view- and projection, or just view otherwise.
 	 */
-	protected void setMatrix(MapPosition position, Matrices matrices, boolean project) {
+	protected void setMatrix(GLViewport v, boolean project) {
 		MapPosition oPos = mMapPosition;
 
-		double tileScale = Tile.SIZE * position.scale;
+		double tileScale = Tile.SIZE * v.pos.scale;
 
-		double x = oPos.x - position.x;
-		double y = oPos.y - position.y;
+		double x = oPos.x - v.pos.x;
+		double y = oPos.y - v.pos.y;
 
 		if (mFlipOnDateLine) {
 			//wrap around date-line
@@ -207,23 +204,20 @@ public abstract class ElementRenderer extends LayerRenderer {
 				x -= 1.0;
 		}
 
-		matrices.mvp.setTransScale((float) (x * tileScale),
-		                           (float) (y * tileScale),
-		                           (float) (position.scale / oPos.scale)
-		                                   / MapRenderer.COORD_SCALE);
+		v.mvp.setTransScale((float) (x * tileScale),
+		                    (float) (y * tileScale),
+		                    (float) (v.pos.scale / oPos.scale)
+		                            / MapRenderer.COORD_SCALE);
 
-		matrices.mvp.multiplyLhs(project ? matrices.viewproj : matrices.view);
+		v.mvp.multiplyLhs(project ? v.viewproj : v.view);
 	}
 
 	/**
 	 * Utility: Set matrices.mvp matrix relative to the difference of current
-	 * MapPosition and the last updated Overlay MapPosition and add
-	 * matrices.viewproj
-	 * 
-	 * @param position ...
-	 * @param matrices ...
+	 * MapPosition and the last updated Overlay MapPosition and applies
+	 * view-projection-matrix.
 	 */
-	protected void setMatrix(MapPosition position, Matrices matrices) {
-		setMatrix(position, matrices, true);
+	protected void setMatrix(GLViewport v) {
+		setMatrix(v, true);
 	}
 }

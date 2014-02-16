@@ -4,10 +4,9 @@ import java.util.List;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
-import org.oscim.core.MapPosition;
 import org.oscim.core.Point;
 import org.oscim.renderer.ElementRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.theme.styles.Line;
 import org.oscim.utils.geom.BezierPath;
@@ -61,10 +60,10 @@ public class BezierPathLayer extends ElementRenderer {
 	}
 
 	@Override
-	protected synchronized void update(MapPosition pos, boolean changed, Matrices m) {
+	protected synchronized void update(GLViewport v) {
 
 		if (mMapPosition.scale == 0)
-			mMapPosition.copy(pos);
+			mMapPosition.copy(v.pos);
 
 		if (!isReady()) {
 			compile();

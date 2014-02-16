@@ -17,8 +17,6 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.GL20;
-import org.oscim.core.MapPosition;
-import org.oscim.renderer.MapRenderer.Matrices;
 
 public abstract class LayerRenderer {
 
@@ -64,8 +62,7 @@ public abstract class LayerRenderer {
 	 * @param matrices contains the current view- and projection-matrices
 	 *            and 'mvp' matrix for temporary use.
 	 */
-	protected abstract void update(MapPosition position, boolean changed,
-	        Matrices matrices);
+	protected abstract void update(GLViewport viewport);
 
 	/**
 	 * 2. Draw layer: called by MapRenderer when isReady == true.
@@ -75,6 +72,6 @@ public abstract class LayerRenderer {
 	 *            'matrices.mvp' is for temporary use to build the model-
 	 *            view-projection to set as uniform.
 	 */
-	protected abstract void render(MapPosition position, Matrices matrices);
+	protected abstract void render(GLViewport viewport);
 
 }

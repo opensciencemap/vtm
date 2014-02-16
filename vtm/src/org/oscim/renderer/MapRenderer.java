@@ -25,9 +25,7 @@ import java.nio.ShortBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
-import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
-import org.oscim.map.Viewport;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.tiling.MapTile;
 import org.oscim.utils.pool.Inlist;
@@ -42,55 +40,20 @@ public class MapRenderer {
 
 	/** scale factor used for short vertices */
 	public static final float COORD_SCALE = 8.0f;
-	public static int screenWidth, screenHeight;
 
 	private final Map mMap;
-	private final MapPosition mMapPosition;
+	private final GLViewport mViewport;
 
-	public class Matrices {
-
-		/** Do not modify! */
-		public final GLMatrix viewproj = new GLMatrix();
-		/** Do not modify! */
-		public final GLMatrix proj = new GLMatrix();
-		/** Do not modify! */
-		public final GLMatrix view = new GLMatrix();
-		/** Do not modify! */
-		public final float[] plane = new float[8];
-
-		/** For temporary use, to setup MVP-Matrix */
-		public final GLMatrix mvp = new GLMatrix();
-
-		/**
-		 * Set MVP so that coordinates are in screen pixel coordinates with 0,0
-		 * being center
-		 */
-		public void useScreenCoordinates(boolean center, float scale) {
-			float ratio = (1f / (scale * screenWidth));
-
-			if (center)
-				mvp.setScale(ratio, ratio, ratio);
-			else
-				mvp.setTransScale(
-				                  (-screenWidth / 2) * ratio * scale,
-				                  (-screenHeight / 2) * ratio * scale,
-				                  ratio);
-
-			mvp.multiplyLhs(proj);
-		}
-	}
-
-	private final Matrices mMatrices;
-
-	private static float[] mClearColor = null;
+	private static float[] mClearColor;
 
 	private static int mQuadIndicesID;
 	private static int mQuadVerticesID;
 	public final static int maxQuads = 64;
 
-	private static volatile boolean mUpdateColor = false;
+	private static boolean mUpdateColor;
 
 	public static long frametime;
+	private static boolean rerender;
 
 	// Do not use the same buffer to upload data within a frame twice
 	// - Contrary to what the OpenGL doc says data seems *not* to be
@@ -138,9 +101,8 @@ public class MapRenderer {
 	public MapRenderer(Map map) {
 
 		mMap = map;
-		mMapPosition = new MapPosition();
 
-		mMatrices = new Matrices();
+		mViewport = new GLViewport();
 		mBufferPool = new BufferPool();
 
 		// FIXME should be done in 'destroy' method
@@ -220,8 +182,6 @@ public class MapRenderer {
 			mUpdateColor = false;
 		}
 
-		// some GL implementation do not clear these
-		// buffers unless writes are enabled.
 		GL.glDepthMask(true);
 		GL.glStencilMask(0xFF);
 
@@ -237,27 +197,14 @@ public class MapRenderer {
 		GLState.useProgram(-1);
 
 		mMap.animator().updateAnimation();
+		mViewport.setFrom(mMap.viewport());
 
-		MapPosition pos = mMapPosition;
-		Viewport viewport = mMap.viewport();
-		boolean changed = false;
-
-		synchronized (viewport) {
-			// get current MapPosition
-			changed = viewport.getMapPosition(pos);
-
-			if (changed)
-				viewport.getMapExtents(mMatrices.plane, 0);
-
-			viewport.getMatrix(mMatrices.view, mMatrices.proj, mMatrices.viewproj);
-
-			if (GLAdapter.debugView) {
-				// modify this to scale only the view, to see
-				// which tiles are rendered
-				mMatrices.mvp.setScale(0.5f, 0.5f, 1);
-				mMatrices.viewproj.multiplyLhs(mMatrices.mvp);
-				mMatrices.proj.multiplyLhs(mMatrices.mvp);
-			}
+		if (GLAdapter.debugView) {
+			// modify this to scale only the view, to see
+			// which tiles are rendered
+			mViewport.mvp.setScale(0.5f, 0.5f, 1);
+			mViewport.viewproj.multiplyLhs(mViewport.mvp);
+			mViewport.proj.multiplyLhs(mViewport.mvp);
 		}
 
 		/* update layers */
@@ -271,10 +218,10 @@ public class MapRenderer {
 				renderer.isInitialized = true;
 			}
 
-			renderer.update(pos, changed, mMatrices);
+			renderer.update(mViewport);
 
 			if (renderer.isReady)
-				renderer.render(pos, mMatrices);
+				renderer.render(mViewport);
 
 			if (GLAdapter.debug)
 				GLUtils.checkGlError(renderer.getClass().getName());
@@ -301,14 +248,12 @@ public class MapRenderer {
 		if (width <= 0 || height <= 0)
 			return;
 
-		screenWidth = width;
-		screenHeight = height;
-
-		mMap.viewport().getMatrix(null, mMatrices.proj, null);
-
+		//mMap.viewport().getMatrix(null, mMatrices.proj, null);
+		mViewport.initFrom(mMap.viewport());
 		GL.glViewport(0, 0, width, height);
-		GL.glScissor(0, 0, width, height);
-		GL.glEnable(GL20.GL_SCISSOR_TEST);
+
+		//GL.glScissor(0, 0, width, height);
+		//GL.glEnable(GL20.GL_SCISSOR_TEST);
 
 		GL.glClearStencil(0x00);
 
@@ -412,8 +357,6 @@ public class MapRenderer {
 	public static void bindQuadIndicesVBO(boolean bind) {
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, bind ? mQuadIndicesID : 0);
 	}
-
-	private static boolean rerender;
 
 	/**
 	 * Trigger next redraw from GL-Thread. This should be used to animate

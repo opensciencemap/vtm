@@ -19,8 +19,8 @@ package org.oscim.layers;
 import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
 import org.oscim.map.Map.UpdateListener;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.LayerRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class CustomRenderLayer extends Layer implements UpdateListener {
 
 		// functions running on MapRender Thread
 		@Override
-		protected void update(MapPosition pos, boolean changed, Matrices matrices) {
+		protected void update(GLViewport v) {
 			int currentState;
 
 			synchronized (this) {
@@ -48,7 +48,7 @@ public class CustomRenderLayer extends Layer implements UpdateListener {
 		}
 
 		@Override
-		protected void render(MapPosition pos, Matrices m) {
+		protected void render(GLViewport v) {
 		}
 	}
 

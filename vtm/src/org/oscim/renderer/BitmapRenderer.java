@@ -17,8 +17,6 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.core.MapPosition;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.BitmapLayer;
 
 /**
@@ -56,7 +54,7 @@ public class BitmapRenderer extends ElementRenderer {
 	}
 
 	@Override
-	protected synchronized void update(MapPosition pos, boolean changed, Matrices m) {
+	protected synchronized void update(GLViewport v) {
 		if (!initialized) {
 			layers.clear();
 
@@ -84,8 +82,8 @@ public class BitmapRenderer extends ElementRenderer {
 	}
 
 	@Override
-	protected synchronized void render(MapPosition pos, Matrices m) {
-		m.useScreenCoordinates(false, 8);
-		BitmapLayer.Renderer.draw(layers.getTextureLayers(), m, 1, 1);
+	protected synchronized void render(GLViewport v) {
+		v.useScreenCoordinates(false, 8);
+		BitmapLayer.Renderer.draw(layers.getTextureLayers(), v, 1, 1);
 	}
 }

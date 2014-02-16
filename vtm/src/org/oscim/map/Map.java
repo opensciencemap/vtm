@@ -80,16 +80,16 @@ public abstract class Map {
 	protected boolean mClearMap = true;
 
 	public Map() {
-		mViewport = new ViewController(this);
-		mAnimator = new Animator(this, mViewport);
+		mViewport = new ViewController();
+		mAnimator = new Animator(this);
 
 		mLayers = new Layers(this);
+
 		mAsyncExecutor = new AsyncExecutor(2);
 		mMapPosition = new MapPosition();
 
 		mEventLayer = new MapEventLayer(this);
 		mLayers.add(0, mEventLayer);
-
 	}
 
 	public MapEventLayer getEventLayer() {
@@ -272,7 +272,6 @@ public abstract class Map {
 		boolean changed = false;
 		MapPosition pos = mMapPosition;
 
-		// get the current MapPosition
 		changed |= mViewport.getMapPosition(pos);
 
 		if (mUpdateListeners == null) {
@@ -316,5 +315,4 @@ public abstract class Map {
 	public boolean handleGesture(Gesture g, MotionEvent e) {
 		return mLayers.handleGesture(g, e);
 	}
-
 }

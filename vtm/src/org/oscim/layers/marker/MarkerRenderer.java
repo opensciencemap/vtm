@@ -19,12 +19,11 @@ package org.oscim.layers.marker;
 
 import java.util.Comparator;
 
-import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
 import org.oscim.renderer.ElementRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.SymbolLayer;
 import org.oscim.utils.TimSort;
@@ -72,16 +71,15 @@ public class MarkerRenderer extends ElementRenderer {
 	}
 
 	@Override
-	public synchronized void update(MapPosition pos, boolean changed, Matrices m) {
-
-		if (!changed && !mUpdate)
+	public synchronized void update(GLViewport v) {
+		if (!v.changed() && !mUpdate)
 			return;
 
 		mUpdate = false;
 
-		double mx = pos.x;
-		double my = pos.y;
-		double scale = Tile.SIZE * pos.scale;
+		double mx = v.pos.x;
+		double my = v.pos.y;
+		double scale = Tile.SIZE * v.pos.scale;
 
 		//int changesInvisible = 0;
 		//int changedVisible = 0;
@@ -89,7 +87,7 @@ public class MarkerRenderer extends ElementRenderer {
 
 		mMarkerLayer.map().viewport().getMapExtents(mBox, mExtents);
 
-		long flip = (long) (Tile.SIZE * pos.scale) >> 1;
+		long flip = (long) (Tile.SIZE * v.pos.scale) >> 1;
 
 		if (mItems == null) {
 			if (layers.getTextureLayers() != null) {
@@ -99,7 +97,7 @@ public class MarkerRenderer extends ElementRenderer {
 			return;
 		}
 
-		double angle = Math.toRadians(pos.angle);
+		double angle = Math.toRadians(v.pos.angle);
 		float cos = (float) Math.cos(angle);
 		float sin = (float) Math.sin(angle);
 
@@ -144,7 +142,7 @@ public class MarkerRenderer extends ElementRenderer {
 			return;
 		}
 		/* keep position for current state */
-		mMapPosition.copy(pos);
+		mMapPosition.copy(v.pos);
 		mMapPosition.angle = -mMapPosition.angle;
 
 		sort(mItems, 0, mItems.length);

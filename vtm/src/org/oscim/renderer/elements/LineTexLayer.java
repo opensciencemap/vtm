@@ -22,11 +22,10 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.core.GeometryBuffer;
-import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.theme.styles.Line;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
@@ -326,8 +325,8 @@ public final class LineTexLayer extends RenderElement {
 		private final static int STRIDE = 12;
 		private final static int LEN_OFFSET = 8;
 
-		public static RenderElement draw(RenderElement curLayer, Matrices m,
-		        MapPosition pos, float div, ElementLayers layers) {
+		public static RenderElement draw(RenderElement curLayer, GLViewport v,
+		        float div, ElementLayers layers) {
 
 			if (shader == 0)
 				return curLayer.next;
@@ -343,7 +342,7 @@ public final class LineTexLayer extends RenderElement {
 			GL.glEnableVertexAttribArray(hVertexLength1);
 			GL.glEnableVertexAttribArray(hVertexFlip);
 
-			m.mvp.setAsUniform(hMatrix);
+			v.mvp.setAsUniform(hMatrix);
 
 			int maxIndices = MapRenderer.maxQuads * 6;
 
@@ -355,7 +354,7 @@ public final class LineTexLayer extends RenderElement {
 
 			layers.vbo.bind();
 
-			float scale = (float) pos.getZoomScale();
+			float scale = (float) v.pos.getZoomScale();
 
 			float s = scale / div;
 
@@ -506,8 +505,7 @@ public final class LineTexLayer extends RenderElement {
 		        + "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
 		        + " } ";  //*/
 
-		/*
-		 * final static String fragmentShader = ""
+		/* final static String fragmentShader = ""
 		 * + "#extension GL_OES_standard_derivatives : enable\n"
 		 * + " precision mediump float;"
 		 * + " uniform sampler2D tex;"
@@ -528,10 +526,8 @@ public final class LineTexLayer extends RenderElement {
 		 * + "  gl_FragColor =  u_bgcolor * stipple_p;"
 		 * // +
 		 * "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-		 * + "}"; //
-		 */
-		/*
-		 * final static String fragmentShader = ""
+		 * + "}"; // */
+		/* final static String fragmentShader = ""
 		 * + "#extension GL_OES_standard_derivatives : enable\n"
 		 * + " precision mediump float;"
 		 * + " uniform sampler2D tex;"
@@ -550,8 +546,7 @@ public final class LineTexLayer extends RenderElement {
 		 * + "  float stipple_p = smoothstep(0.495, 0.505, dist);"
 		 * +
 		 * "  gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));"
-		 * + " } "; //
-		 */
+		 * + " } "; // */
 
 	}
 }

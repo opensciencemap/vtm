@@ -23,8 +23,8 @@ import java.nio.ShortBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
+import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.MapRenderer.Matrices;
 import org.oscim.renderer.elements.TextureItem.TexturePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,7 +140,7 @@ public abstract class TextureLayer extends RenderElement {
 			pool.init(0);
 		}
 
-		public static RenderElement draw(RenderElement l, Matrices m, float scale) {
+		public static RenderElement draw(RenderElement l, GLViewport v, float scale) {
 
 			GLState.test(false, false);
 			GLState.blend(true);
@@ -156,8 +156,8 @@ public abstract class TextureLayer extends RenderElement {
 			else
 				GL.glUniform1f(hTextureScale, 1);
 
-			m.proj.setAsUniform(hTextureProjMatrix);
-			m.mvp.setAsUniform(hTextureMVMatrix);
+			v.proj.setAsUniform(hTextureProjMatrix);
+			v.mvp.setAsUniform(hTextureMVMatrix);
 
 			MapRenderer.bindQuadIndicesVBO(true);
 
