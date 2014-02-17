@@ -123,7 +123,7 @@ public class Animator {
 		mDeltaPos.set(pos.x - mStartPos.x,
 		              pos.y - mStartPos.y,
 		              pos.scale - mStartPos.scale,
-		              mStartPos.bearing - pos.bearing,
+		              pos.bearing - mStartPos.bearing,
 		              clamp(pos.tilt, 0, Viewport.MAX_TILT) - mStartPos.tilt);
 
 		animStart(duration, ANIM_MOVE | ANIM_SCALE | ANIM_ROTATE | ANIM_TILT);
