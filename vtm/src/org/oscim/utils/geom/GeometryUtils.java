@@ -116,20 +116,36 @@ public final class GeometryUtils {
 
 	public static double dotProduct(float[] p, int a, int b, int c) {
 
-		double ab = distance(p, a, b);
-		double bc = distance(p, b, c);
-		double d = ab * bc;
-		double dotp = 0;
+		double ux = (p[b] - p[a]);
+		double uy = (p[b + 1] - p[a + 1]);
+		double ab = Math.sqrt(ux * ux + uy * uy);
+		double vx = (p[b] - p[c]);
+		double vy = (p[b + 1] - p[c + 1]);
+		double bc = Math.sqrt(vx * vx + vy * vy);
 
-		if (d > 0) {
-			dotp = ((p[a] - p[b]) * (p[c] - p[b]) +
-			        (p[a + 1] - p[b + 1]) * (p[c + 1] - p[b + 1]))
-			        / d;
-			if (dotp > 1)
-				dotp = 1;
-			else if (dotp < 0)
-				dotp = 0;
-		}
+		double d = ab * bc;
+
+		if (d <= 0)
+			return 0;
+
+		double dotp = (ux * -vx + uy * -vy) / d;
+
+		if (dotp > 1)
+			dotp = 1;
+		else if (dotp < -1)
+			dotp = -1;
+
 		return dotp;
+	}
+
+	public static void main(String[] args) {
+		float[] p = { -1, 0, 0, 0, 0, 0 };
+
+		for (int i = 0; i < 9; i++) {
+			p[4] = (float) Math.cos(Math.toRadians(i * 45));
+			p[5] = (float) Math.sin(Math.toRadians(i * 45));
+			System.out.println("\n> " + (i * 45) + " " + p[3] + ":" + p[4] + "\n="
+			        + dotProduct(p, 0, 2, 4));
+		}
 	}
 }

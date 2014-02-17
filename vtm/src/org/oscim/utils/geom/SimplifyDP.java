@@ -1,5 +1,3 @@
-package org.oscim.utils.geom;
-
 /*
  * Copyright 2012, 2013 Hannes Janetzek
  *
@@ -16,6 +14,8 @@ package org.oscim.utils.geom;
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+package org.oscim.utils.geom;
 
 import static org.oscim.utils.geom.GeometryUtils.squareSegmentDistance;
 

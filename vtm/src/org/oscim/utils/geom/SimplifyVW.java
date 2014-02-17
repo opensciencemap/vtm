@@ -1,3 +1,20 @@
+/*
+ * Copyright 2012, 2013 Hannes Janetzek
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.oscim.utils.geom;
 
 import org.oscim.core.GeometryBuffer;
@@ -7,7 +24,7 @@ import org.oscim.utils.pool.Pool;
 /**
  * Visvalingam-Wyatt simplification
  * 
- * ported from:
+ * based on:
  * https://github.com/mbloch/mapshaper/blob/master/src/mapshaper-visvalingam.js
  * */
 public class SimplifyVW {
@@ -62,12 +79,18 @@ public class SimplifyVW {
 		}
 
 		Item last = push(geom.pointPos - 2, Float.MAX_VALUE);
+
+		//		sorter.doSort(heap, DistanceComparator, 0, size);
+		//		for (int i = 0; i < size; i++)
+		//			heap[i].index = i;
+
 		last.prev = prev;
 		prev.next = last;
 
 		last.next = first;
 		first.prev = last;
 
+		int cnt = 0;
 		while ((it = pop()) != null) {
 			if (it.area > minArea)
 				break;
@@ -85,8 +108,9 @@ public class SimplifyVW {
 				update(geom, it.next);
 
 			it = pool.release(it);
+			cnt++;
 		}
-
+		//System.out.println("dropped: " + cnt + "/" + (geom.pointPos >> 1));
 		first.prev.next = null;
 		first.prev = null;
 		it = first;
@@ -104,63 +128,26 @@ public class SimplifyVW {
 			it = it.next;
 		}
 
-		//if (merged > 0)
-		//	System.out.println("merged: " + merged);
-
-		//		if (geom.points[0] == geom.points[geom.pointPos - 2]
-		//		        && geom.points[1] == geom.points[geom.pointPos - 1]) {
-		//			System.out.println("same points");
-		//			geom.pointPos -= 2;
-		//			geom.index[geom.indexPos] -= 2;
-		//		}
-
 		first = pool.release(first);
 	}
 
 	public static float area(float[] a, int p1, int p2, int p3) {
-		//		float ax = a[p1], ay = a[p1+1];
-		//		float bx = a[p2], by = a[p2+1];
-		//		float cx = a[p3], cy = a[p3+1];
-		//		
-		//		float area = ((ax - cx) * (by - cy) - (bx - cx) * (ay - cy));
-		//
-		//		area = (area < 0 ? -area : area) * 0.5f;
 
-		//		float ab = distance2D(ax, ay, bx, by),
-		//			      bc = distance2D(bx, by, cx, cy),
-		//			      theta, dotp;
-		//		
-		//			  if (ab == 0 || bc == 0) {
-		//			    theta = 0;
-		//			  } else {
-		//			    dotp = ((ax - bx) * (cx - bx) + (ay - by) * (cy - by)) / ab * bc;
-		//			    if (dotp >= 1) {
-		//			      theta = 0;
-		//			    } else if (dotp <= -1) {
-		//			      theta = Math.PI;
-		//			    } else {
-		//			      theta = Math.acos(dotp); // consider using other formula at small dp
-		//			    }
-		//			  }
-		//			  return theta;
-		//		
-		//		float angle = innerAngle(ax, ay, bx, by, cx, cy),
-		//		weight = angle < 0.5 ? 0.1 : angle < 1 ? 0.3 : 1;
 		float area = GeometryUtils.area(a, p1, p2, p3);
-		//area *= (1 + GeometryUtils.squareSegmentDistance(a, p2, p1, p3) * 10);
+		double dotp = GeometryUtils.dotProduct(a, p1, p2, p3);
+		//return (float) (area * (0.5 + 0.5 * (1 - dotp * dotp)));
 
-		float dotp = (float) GeometryUtils.dotProduct(a, p1, p2, p3);
-		if (dotp > 0)
-			return area * (1 - dotp);
-
-		return area;
+		dotp = Math.abs(dotp);
+		double weight = dotp < 0.5 ? 0.1 : dotp < 1 ? 0.3 : 1;
+		return (float) (area * weight);
 	}
 
 	private void update(GeometryBuffer geom, Item it) {
-		remove(it);
-		it.area = area(geom.points, it.prev.id, it.id, it.next.id);
-		//System.out.println("< " + it.area);
-		push(it);
+		float area = area(geom.points, it.prev.id, it.id, it.next.id);
+		update(it, area);
+		//remove(it);
+		//it.area = area(geom.points, it.prev.id, it.id, it.next.id);
+		//push(it);
 	}
 
 	public void push(Item it) {
@@ -194,6 +181,16 @@ public class SimplifyVW {
 		return removed;
 	}
 
+	public void update(Item it, float area) {
+		if (area < it.area) {
+			it.area = area;
+			up(it.index);
+		} else {
+			it.area = area;
+			down(it.index);
+		}
+	}
+
 	public int remove(Item removed) {
 		if (size == 0)
 			throw new IllegalStateException("size == 0");
@@ -202,14 +199,19 @@ public class SimplifyVW {
 		Item obj = heap[--size];
 		heap[size] = null;
 
-		if (i != size) {
-			heap[obj.index = i] = obj;
+		/* if min obj was popped */
+		if (i == size)
+			return i;
 
-			if (obj.area < removed.area)
-				up(i);
-			else
-				down(i);
-		}
+		/* else put min obj in place of the removed item */
+		obj.index = i;
+		heap[i] = obj;
+
+		if (obj.area < removed.area) {
+			up(i);
+		} else
+			down(i);
+
 		return i;
 	};
 
@@ -222,8 +224,11 @@ public class SimplifyVW {
 			if (it.area >= parent.area)
 				break;
 
-			heap[parent.index = i] = parent;
-			heap[it.index = i = up] = it;
+			parent.index = i;
+			heap[i] = parent;
+
+			it.index = i = up;
+			heap[i] = it;
 		}
 	}
 
@@ -249,4 +254,48 @@ public class SimplifyVW {
 			heap[it.index = i = down] = it;
 		}
 	}
+	//	final static Comparator<Item> DistanceComparator = new Comparator<Item>() {
+	//		@Override
+	//		public int compare(Item a, Item b) {
+	//
+	//			if (a.area > b.area) {
+	//				return -1;
+	//			}
+	//			if (a.area < b.area) {
+	//				return 1;
+	//			}
+	//			return 0;
+	//		}
+	//	};
+	//	TimSort<Item> sorter = new TimSort<Item>();
+	//
+	//	Item push(int id, float area) {
+	//		Item it = pool.get();
+	//		//heap[size] = it;
+	//		//it.index = size;
+	//		it.area = area;
+	//		it.id = id;
+	//
+	//		heap[size++] = it;
+	//		return it;
+	//	}
+	//
+	//	Item pop() {
+	//		return heap[--size];
+	//	}
+	//
+	//	void update(Item it, float area) {
+	//		boolean up = it.area < area;
+	//		it.area = area;
+	//		if (up) {
+	//			sorter.doSort(heap, DistanceComparator, 0, it.index + 1);
+	//			for (int i = 0, end = it.index + 1; i < end; i++)
+	//				heap[i].index = i;
+	//		} else {
+	//			sorter.doSort(heap, DistanceComparator, it.index, size);
+	//			for (int i = it.index; i < size; i++)
+	//				heap[i].index = i;
+	//		}
+	//	}
+
 }
