@@ -209,13 +209,14 @@ public class Animator {
 
 			float adv = clamp(1.0f - millisLeft / mDuration, 0, 1);
 
+			double scaleAdv = 1;
 			if ((mState & ANIM_SCALE) != 0) {
-				doScale(v, adv);
+				scaleAdv = doScale(v, adv);
 			}
 
 			if ((mState & ANIM_MOVE) != 0) {
-				v.moveTo(mStartPos.x + mDeltaPos.x * adv,
-				         mStartPos.y + mDeltaPos.y * adv);
+				v.moveTo(mStartPos.x + mDeltaPos.x * (adv / scaleAdv),
+				         mStartPos.y + mDeltaPos.y * (adv / scaleAdv));
 			}
 
 			if ((mState & ANIM_FLING) != 0) {
@@ -253,13 +254,13 @@ public class Animator {
 		}
 	}
 
-	private void doScale(ViewController v, float adv) {
-		double newScale;
-
-		newScale = mStartPos.scale + (mDeltaPos.scale * adv);
+	private double doScale(ViewController v, float adv) {
+		double newScale = mStartPos.scale + mDeltaPos.scale * Math.sqrt(adv);
 
 		v.scaleMap((float) (newScale / mCurPos.scale),
 		           (float) mPivot.x, (float) mPivot.y);
+
+		return newScale / (mStartPos.scale + mDeltaPos.scale);
 	}
 
 	public synchronized void cancel() {
