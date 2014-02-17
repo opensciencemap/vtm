@@ -397,12 +397,12 @@ public abstract class GdxMap implements ApplicationListener {
 
 			if (amount > 0) {
 
-				mMap.animator().animateZoom(250, 0.9f, 0, 0);
+				mMap.animator().animateZoom(250, 0.75f, 0, 0);
 			} else {
 				float fx = mPosX - mMap.getWidth() / 2;
 				float fy = mPosY - mMap.getHeight() / 2;
 
-				mMap.animator().animateZoom(250, 1.111f, fx, fy);
+				mMap.animator().animateZoom(250, 1.333f, fx, fy);
 			}
 			mMap.updateMap(false);
 
