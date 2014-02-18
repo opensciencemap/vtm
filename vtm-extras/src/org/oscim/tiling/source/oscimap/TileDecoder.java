@@ -384,7 +384,7 @@ public class TileDecoder extends PbfDecoder {
 		return coordCnt;
 	}
 
-	@Override
+	//@Override
 	protected int decodeInterleavedPoints(float[] coords, float scale)
 	        throws IOException {
 

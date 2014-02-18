@@ -229,7 +229,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 						}
 
 						mElem.ensurePointSize(coordCnt, false);
-						int cnt = decodeInterleavedPoints(mElem.points, mScale);
+						int cnt = decodeInterleavedPoints(mElem, mScale);
 
 						if (cnt != coordCnt) {
 							log.debug(mTile + " wrong number of coordintes");

@@ -98,7 +98,7 @@ public class GeometryBuffer {
 	}
 
 	public int getNumPoints() {
-		return index[0] >> 1;
+		return pointPos >> 1;
 	}
 
 	/**

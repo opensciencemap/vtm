@@ -298,8 +298,7 @@ public class TileDecoder extends PbfDecoder {
 					}
 
 					mElem.ensurePointSize(coordCnt, false);
-					int cnt = decodeInterleavedPoints(mElem.points,
-					                                  mScaleFactor);
+					int cnt = decodeInterleavedPoints(mElem, mScaleFactor);
 
 					if (cnt != coordCnt) {
 						log.debug("{} wrong number of coordintes {}/{}", mTile,

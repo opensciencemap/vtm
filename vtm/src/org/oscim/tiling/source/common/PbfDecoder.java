@@ -19,6 +19,7 @@ package org.oscim.tiling.source.common;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.oscim.core.GeometryBuffer;
 import org.oscim.tiling.source.ITileDecoder;
 import org.oscim.utils.UTF8Decoder;
 import org.slf4j.Logger;
@@ -187,9 +188,10 @@ public abstract class PbfDecoder implements ITileDecoder {
 		return buffer[bufferPos++] != 0;
 	}
 
-	protected int decodeInterleavedPoints(float[] coords, float scale)
+	protected int decodeInterleavedPoints(GeometryBuffer geom, float scale)
 	        throws IOException {
 
+		float[] points = geom.points;
 		int bytes = decodeVarint32();
 		fillBuffer(bytes);
 
@@ -229,11 +231,11 @@ public abstract class PbfDecoder implements ITileDecoder {
 
 			if (even) {
 				lastX = lastX + s;
-				coords[cnt++] = lastX / scale;
+				points[cnt++] = lastX / scale;
 				even = false;
 			} else {
 				lastY = lastY + s;
-				coords[cnt++] = lastY / scale;
+				points[cnt++] = lastY / scale;
 				even = true;
 			}
 		}
@@ -242,6 +244,8 @@ public abstract class PbfDecoder implements ITileDecoder {
 			throw INVALID_PACKED_SIZE;
 
 		bufferPos = pos;
+
+		geom.pointPos = cnt;
 
 		// return number of points read
 		return (cnt >> 1);
