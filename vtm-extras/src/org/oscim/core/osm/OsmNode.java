@@ -14,44 +14,30 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.utils.osm;
+package org.oscim.core.osm;
 
-import java.util.Collection;
+import org.oscim.core.TagSet;
 
-/**
- * OSM dataset containing nodes, areas and relations
- */
-public class OSMData {
+import com.vividsolutions.jts.geom.Geometry;
 
-	private final Collection<Bound> bounds;
-	private final Collection<OSMNode> nodes;
-	private final Collection<OSMWay> ways;
-	private final Collection<OSMRelation> relations;
+public class OsmNode extends OsmElement {
 
-	public OSMData(Collection<Bound> bounds, Collection<OSMNode> nodes,
-	        Collection<OSMWay> ways, Collection<OSMRelation> relations) {
+	public final double lat;
+	public final double lon;
 
-		this.bounds = bounds;
-		this.nodes = nodes;
-		this.ways = ways;
-		this.relations = relations;
-
+	public OsmNode(double lat, double lon, TagSet tags, long id) {
+		super(tags, id);
+		this.lat = lat;
+		this.lon = lon;
 	}
 
-	public Collection<OSMNode> getNodes() {
-		return nodes;
+	@Override
+	public String toString() {
+		return "n" + id;
 	}
 
-	public Collection<OSMWay> getWays() {
-		return ways;
+	@Override
+	public Geometry toJts() {
+		return null; //bnew Point(new Coordinate(lat, lon), null);
 	}
-
-	public Collection<OSMRelation> getRelations() {
-		return relations;
-	}
-
-	public Collection<Bound> getBounds() {
-		return bounds;
-	}
-
 }

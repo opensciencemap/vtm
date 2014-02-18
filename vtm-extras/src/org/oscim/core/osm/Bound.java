@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Tobias Knerr
+ * Copyright 2013 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -14,27 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.utils.osm;
+package org.oscim.core.osm;
 
-public class OSMMember {
-	public enum MemberType {
-		NODE,
-		WAY,
-		RELATIOM
-	}
-
-	public final String role;
-	public final OSMElement member;
-
-	public OSMMember(String role, OSMElement member) {
-		assert role != null && member != null;
-		this.role = role;
-		this.member = member;
-	}
-
-	@Override
-	public String toString() {
-		return role + ":" + member;
-	}
+public class Bound {
 
 }

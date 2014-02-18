@@ -14,34 +14,44 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.utils.osm;
+package org.oscim.core.osm;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-import org.oscim.core.TagSet;
+/**
+ * Osm dataset containing nodes, areas and relations
+ */
+public class OsmData {
 
-import com.vividsolutions.jts.geom.Geometry;
+	private final Collection<Bound> bounds;
+	private final Collection<OsmNode> nodes;
+	private final Collection<OsmWay> ways;
+	private final Collection<OsmRelation> relations;
 
-public class OSMRelation extends OSMElement {
+	public OsmData(Collection<Bound> bounds, Collection<OsmNode> nodes,
+	        Collection<OsmWay> ways, Collection<OsmRelation> relations) {
 
-	public final List<OSMMember> relationMembers;
+		this.bounds = bounds;
+		this.nodes = nodes;
+		this.ways = ways;
+		this.relations = relations;
 
-	// content added after constructor call
-
-	public OSMRelation(TagSet tags, long id, int initialMemberSize) {
-		super(tags, id);
-		this.relationMembers =
-		        new ArrayList<OSMMember>(initialMemberSize);
 	}
 
-	@Override
-	public String toString() {
-		return "r" + id;
+	public Collection<OsmNode> getNodes() {
+		return nodes;
 	}
 
-	@Override
-	public Geometry toJts() {
-		return null;
+	public Collection<OsmWay> getWays() {
+		return ways;
 	}
+
+	public Collection<OsmRelation> getRelations() {
+		return relations;
+	}
+
+	public Collection<Bound> getBounds() {
+		return bounds;
+	}
+
 }

@@ -25,11 +25,11 @@ import org.openstreetmap.osmosis.osmbinary.BinaryParser;
 import org.openstreetmap.osmosis.osmbinary.Osmformat;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
-import org.oscim.utils.osm.OSMData;
-import org.oscim.utils.osm.OSMMember;
-import org.oscim.utils.osm.OSMNode;
-import org.oscim.utils.osm.OSMRelation;
-import org.oscim.utils.osm.OSMWay;
+import org.oscim.core.osm.OsmData;
+import org.oscim.core.osm.OsmMember;
+import org.oscim.core.osm.OsmNode;
+import org.oscim.core.osm.OsmRelation;
+import org.oscim.core.osm.OsmWay;
 
 /**
  * Class that reads and parses binary files and sends the contained entities to
@@ -65,8 +65,8 @@ public class OsmPbfParser extends BinaryParser {
 	/** The magic number used to indicate no changeset metadata for this entity. */
 	static final int NOCHANGESET = -1;
 
-	HashMap<Long, OSMNode> mNodeMap = new HashMap<Long, OSMNode>();
-	HashMap<Long, OSMWay> mWayMap = new HashMap<Long, OSMWay>();
+	HashMap<Long, OsmNode> mNodeMap = new HashMap<Long, OsmNode>();
+	HashMap<Long, OsmWay> mWayMap = new HashMap<Long, OsmWay>();
 
 	@Override
 	protected void parseNodes(List<Osmformat.Node> nodes) {
@@ -82,16 +82,16 @@ public class OsmPbfParser extends BinaryParser {
 			// long id, int version, Date timestamp, OsmUser user,
 			// long changesetId, Collection<Tag> tags,
 			// double latitude, double longitude
-			OSMNode tmp;
+			OsmNode tmp;
 			long id = i.getId();
 			double latf = parseLat(i.getLat()), lonf = parseLon(i.getLon());
 
 			//			if (i.hasInfo()) {
 			//				Osmformat.Info info = i.getInfo();
-			//				tmp = new OSMNode(new CommonEntityData(id, info.getVersion(), getDate(info),
+			//				tmp = new OsmNode(new CommonEntityData(id, info.getVersion(), getDate(info),
 			//						getUser(info), info.getChangeset(), tags), latf, lonf);
 			//			} else {
-			tmp = new OSMNode(latf, lonf, tags, id);
+			tmp = new OsmNode(latf, lonf, tags, id);
 			//				tmp = new Node(new CommonEntityData(id, NOVERSION, NODATE, OsmUser.NONE,
 			//						NOCHANGESET, tags), latf, lonf);
 			//			}
@@ -115,7 +115,7 @@ public class OsmPbfParser extends BinaryParser {
 		//		}
 
 		for (int i = 0; i < nodes.getIdCount(); i++) {
-			OSMNode tmp;
+			OsmNode tmp;
 			TagSet tags = new TagSet(4);
 			long lat = nodes.getLat(i) + lastLat;
 			lastLat = lat;
@@ -150,9 +150,9 @@ public class OsmPbfParser extends BinaryParser {
 			//                user = new OsmUser(uid, getStringById(userSid));
 			//              }
 			//
-			//              tmp = new OSMNode(id, tags, latf, lonf);
+			//              tmp = new OsmNode(id, tags, latf, lonf);
 			//            } else {
-			tmp = new OSMNode(latf, lonf, tags, id);
+			tmp = new OsmNode(latf, lonf, tags, id);
 
 			mNodeMap.put(Long.valueOf(id), tmp);
 
@@ -178,11 +178,11 @@ public class OsmPbfParser extends BinaryParser {
 			//			}
 
 			long lastId = 0;
-			List<OSMNode> nodes = new ArrayList<OSMNode>();
+			List<OsmNode> nodes = new ArrayList<OsmNode>();
 			for (long j : i.getRefsList()) {
-				OSMNode n = mNodeMap.get(Long.valueOf(j + lastId));
+				OsmNode n = mNodeMap.get(Long.valueOf(j + lastId));
 				if (n == null)
-					n = new OSMNode(Double.NaN, Double.NaN, null, j + lastId);
+					n = new OsmNode(Double.NaN, Double.NaN, null, j + lastId);
 
 				nodes.add(n);
 				lastId = j + lastId;
@@ -193,13 +193,13 @@ public class OsmPbfParser extends BinaryParser {
 			// long id, int version, Date timestamp, OsmUser user,
 			// long changesetId, Collection<Tag> tags,
 			// List<WayNode> wayNodes
-			OSMWay tmp;
+			OsmWay tmp;
 			//			if (i.hasInfo()) {
 			//				Osmformat.Info info = i.getInfo();
 			//				tmp = new Way(new CommonEntityData(id, info.getVersion(), getDate(info),
 			//						getUser(info), info.getChangeset(), tags), nodes);
 			//			} else {
-			tmp = new OSMWay(tags, id, nodes);
+			tmp = new OsmWay(tags, id, nodes);
 			//			}
 
 			mWayMap.put(Long.valueOf(id), tmp);
@@ -220,7 +220,7 @@ public class OsmPbfParser extends BinaryParser {
 			long id = i.getId();
 
 			long lastMid = 0;
-			List<OSMMember> nodes = new ArrayList<OSMMember>();
+			List<OsmMember> nodes = new ArrayList<OsmMember>();
 			int memberCnt = i.getMemidsCount();
 
 			//			for (int j = 0; j < memberCnt; j++) {
@@ -240,14 +240,14 @@ public class OsmPbfParser extends BinaryParser {
 			//					assert false; // TODO; Illegal file?
 			//				}
 			//
-			//				nodes.add(new OSMMember(mid, etype, role));
+			//				nodes.add(new OsmMember(mid, etype, role));
 			//			}
 
 			// long id, int version, TimestampContainer timestampContainer,
 			// OsmUser user,
 			// long changesetId, Collection<Tag> tags,
 			// List<RelationMember> members
-			OSMRelation tmp = new OSMRelation(tags, id, memberCnt);
+			OsmRelation tmp = new OsmRelation(tags, id, memberCnt);
 
 			//			if (i.hasInfo()) {
 			//				Osmformat.Info info = i.getInfo();
@@ -290,16 +290,16 @@ public class OsmPbfParser extends BinaryParser {
 		//        }
 	}
 
-	public OSMData getData() {
+	public OsmData getData() {
 
-		//		for (Entry<OSMRelation, List<TmpRelation>> entry : relationMembersForRelation
+		//		for (Entry<OsmRelation, List<TmpRelation>> entry : relationMembersForRelation
 		//				.entrySet()) {
 		//
-		//			OSMRelation relation = entry.getKey();
+		//			OsmRelation relation = entry.getKey();
 		//
 		//			for (TmpRelation member : entry.getValue()) {
 		//
-		//				OSMElement memberObject = null;
+		//				OsmElement memberObject = null;
 		//
 		//				if ("node".equals(member)) {
 		//					memberObject = nodesById.get(member.id);
@@ -313,7 +313,7 @@ public class OsmPbfParser extends BinaryParser {
 		//				}
 		//
 		//				if (memberObject != null) {
-		//					OSMMember ownMember = new OSMMember(member.role,
+		//					OsmMember ownMember = new OsmMember(member.role,
 		//							memberObject);
 		//
 		//					relation.relationMembers.add(ownMember);
@@ -323,11 +323,11 @@ public class OsmPbfParser extends BinaryParser {
 
 		// give up references to original collections
 
-		ArrayList<OSMWay> ways = new ArrayList<OSMWay>(mWayMap.values());
-		ArrayList<OSMNode> nodes = new ArrayList<OSMNode>(mNodeMap.values());
+		ArrayList<OsmWay> ways = new ArrayList<OsmWay>(mWayMap.values());
+		ArrayList<OsmNode> nodes = new ArrayList<OsmNode>(mNodeMap.values());
 
 		//log.debug("nodes: " + nodes.size() + " ways: " + ways.size());
 
-		return new OSMData(null, nodes, ways, null);
+		return new OsmData(null, nodes, ways, null);
 	}
 }

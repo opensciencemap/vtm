@@ -35,13 +35,13 @@ import java.util.zip.InflaterInputStream;
 
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
-import org.oscim.utils.osm.Bound;
-import org.oscim.utils.osm.OSMData;
-import org.oscim.utils.osm.OSMElement;
-import org.oscim.utils.osm.OSMMember;
-import org.oscim.utils.osm.OSMNode;
-import org.oscim.utils.osm.OSMRelation;
-import org.oscim.utils.osm.OSMWay;
+import org.oscim.core.osm.Bound;
+import org.oscim.core.osm.OsmData;
+import org.oscim.core.osm.OsmElement;
+import org.oscim.core.osm.OsmMember;
+import org.oscim.core.osm.OsmNode;
+import org.oscim.core.osm.OsmRelation;
+import org.oscim.core.osm.OsmWay;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -166,15 +166,15 @@ public class OverpassAPIReader {
 	}
 
 	private final List<Bound> bounds = new ArrayList<Bound>();
-	private Map<Long, OSMNode> nodesById = new HashMap<Long, OSMNode>();
-	private Map<Long, OSMWay> waysById = new HashMap<Long, OSMWay>();
-	private Map<Long, OSMRelation> relationsById = new HashMap<Long, OSMRelation>();
-	private Map<OSMRelation, List<TmpRelation>> relationMembersForRelation =
-	        new HashMap<OSMRelation, List<TmpRelation>>();
+	private Map<Long, OsmNode> nodesById = new HashMap<Long, OsmNode>();
+	private Map<Long, OsmWay> waysById = new HashMap<Long, OsmWay>();
+	private Map<Long, OsmRelation> relationsById = new HashMap<Long, OsmRelation>();
+	private Map<OsmRelation, List<TmpRelation>> relationMembersForRelation =
+	        new HashMap<OsmRelation, List<TmpRelation>>();
 
-	private final Collection<OSMNode> ownNodes = new ArrayList<OSMNode>(10000);
-	private final Collection<OSMWay> ownWays = new ArrayList<OSMWay>(1000);
-	private final Collection<OSMRelation> ownRelations = new ArrayList<OSMRelation>(
+	private final Collection<OsmNode> ownNodes = new ArrayList<OsmNode>(10000);
+	private final Collection<OsmWay> ownWays = new ArrayList<OsmWay>(1000);
+	private final Collection<OsmRelation> ownRelations = new ArrayList<OsmRelation>(
 	                                                                                100);
 
 	public void parse(InputStream in) throws IOException {
@@ -214,7 +214,7 @@ public class OverpassAPIReader {
 
 		long id = 0;
 		double lat = 0, lon = 0;
-		TagSet tags = null; 
+		TagSet tags = null;
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
 
@@ -236,7 +236,7 @@ public class OverpassAPIReader {
 		}
 
 		// log("node: "+id + " "+ lat + " " + lon);
-		OSMNode node = new OSMNode(lat, lon, tags, id);
+		OsmNode node = new OsmNode(lat, lon, tags, id);
 		ownNodes.add(node);
 		nodesById.put(Long.valueOf(id), node);
 	}
@@ -245,7 +245,7 @@ public class OverpassAPIReader {
 
 		long id = 0;
 		TagSet tags = null;
-		ArrayList<OSMNode> wayNodes = new ArrayList<OSMNode>();
+		ArrayList<OsmNode> wayNodes = new ArrayList<OsmNode>();
 
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
 
@@ -259,7 +259,7 @@ public class OverpassAPIReader {
 				while (jp.nextToken() != JsonToken.END_ARRAY) {
 					Long nodeId = Long.valueOf(jp.getLongValue());
 
-					OSMNode node = nodesById.get(nodeId);
+					OsmNode node = nodesById.get(nodeId);
 					if (node != null)
 						// log("missing node " + nodeId);
 						// else
@@ -270,7 +270,7 @@ public class OverpassAPIReader {
 		}
 
 		// log("way: "+ id + " " + wayNodes.size());
-		OSMWay way = new OSMWay(tags, id, wayNodes);
+		OsmWay way = new OsmWay(tags, id, wayNodes);
 		ownWays.add(way);
 		waysById.put(Long.valueOf(id), way);
 	}
@@ -313,7 +313,7 @@ public class OverpassAPIReader {
 				tags = parseTags(jp);
 		}
 
-		OSMRelation relation = new OSMRelation(tags, id, members.size());
+		OsmRelation relation = new OsmRelation(tags, id, members.size());
 		ownRelations.add(relation);
 		relationsById.put(Long.valueOf(id), relation);
 		relationMembersForRelation.put(relation, members);
@@ -342,7 +342,7 @@ public class OverpassAPIReader {
 		System.out.println(msg);
 	}
 
-	public OSMData getData() {
+	public OsmData getData() {
 
 		String encoded;
 		try {
@@ -371,14 +371,14 @@ public class OverpassAPIReader {
 			inputStream = null;
 		}
 
-		for (Entry<OSMRelation, List<TmpRelation>> entry : relationMembersForRelation
+		for (Entry<OsmRelation, List<TmpRelation>> entry : relationMembersForRelation
 		    .entrySet()) {
 
-			OSMRelation relation = entry.getKey();
+			OsmRelation relation = entry.getKey();
 
 			for (TmpRelation member : entry.getValue()) {
 
-				OSMElement memberObject = null;
+				OsmElement memberObject = null;
 
 				if ("node".equals(member)) {
 					memberObject = nodesById.get(member.id);
@@ -392,7 +392,7 @@ public class OverpassAPIReader {
 				}
 
 				if (memberObject != null) {
-					OSMMember ownMember = new OSMMember(member.role,
+					OsmMember ownMember = new OsmMember(member.role,
 					                                    memberObject);
 
 					relation.relationMembers.add(ownMember);
@@ -408,6 +408,6 @@ public class OverpassAPIReader {
 		relationsById = null;
 		relationMembersForRelation = null;
 
-		return new OSMData(bounds, ownNodes, ownWays, ownRelations);
+		return new OsmData(bounds, ownNodes, ownWays, ownRelations);
 	}
 }

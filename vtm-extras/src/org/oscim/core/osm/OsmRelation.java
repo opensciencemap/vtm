@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Hannes Janetzek
+ * Copyright 2013 Tobias Knerr
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -14,8 +14,34 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.utils.osm;
+package org.oscim.core.osm;
 
-public class Bound {
+import java.util.ArrayList;
+import java.util.List;
 
+import org.oscim.core.TagSet;
+
+import com.vividsolutions.jts.geom.Geometry;
+
+public class OsmRelation extends OsmElement {
+
+	public final List<OsmMember> relationMembers;
+
+	// content added after constructor call
+
+	public OsmRelation(TagSet tags, long id, int initialMemberSize) {
+		super(tags, id);
+		this.relationMembers =
+		        new ArrayList<OsmMember>(initialMemberSize);
+	}
+
+	@Override
+	public String toString() {
+		return "r" + id;
+	}
+
+	@Override
+	public Geometry toJts() {
+		return null;
+	}
 }

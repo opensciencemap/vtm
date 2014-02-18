@@ -14,45 +14,52 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.utils.osm;
-
-import java.util.List;
+package org.oscim.core.osm;
 
 import org.oscim.core.TagSet;
 
-import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.impl.PackedCoordinateSequenceFactory;
 
-public class OSMWay extends OSMElement {
+public abstract class OsmElement {
 
-	public final List<OSMNode> nodes;
+	public final TagSet tags;
+	public final long id;
 
-	public OSMWay(TagSet tags, long id, List<OSMNode> nodes) {
-		super(tags, id);
-		this.nodes = nodes;
-	}
-
-	public boolean isClosed() {
-		return nodes.size() > 0 &&
-		        nodes.get(0).equals(nodes.get(nodes.size() - 1));
+	public OsmElement(TagSet tags, long id) {
+		assert tags != null;
+		this.tags = tags;
+		this.id = id;
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (id ^ (id >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		OsmElement other = (OsmElement) obj;
+		if (id != other.id)
+			return false;
+		return true;
+	}
+
+	/**
+	 * returns the id, plus an one-letter prefix for the element type
+	 */
+	@Override
 	public String toString() {
-		return "w" + id;
+		return "?" + id;
 	}
 
-	public Geometry toJts() {
-		double[] coords = new double[nodes.size() * 2];
-		int i = 0;
-		for (OSMNode n : nodes) {
-			coords[i++] = n.lon;
-			coords[i++] = n.lat;
-		}
-
-		CoordinateSequence c = PackedCoordinateSequenceFactory.DOUBLE_FACTORY.create(coords, 2);
-		return new LineString(c, null);
-	}
+	public abstract Geometry toJts();
 }

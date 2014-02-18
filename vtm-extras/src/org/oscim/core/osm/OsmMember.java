@@ -14,30 +14,27 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.utils.osm;
+package org.oscim.core.osm;
 
-import org.oscim.core.TagSet;
+public class OsmMember {
+	public enum MemberType {
+		NODE,
+		WAY,
+		RELATIOM
+	}
 
-import com.vividsolutions.jts.geom.Geometry;
+	public final String role;
+	public final OsmElement member;
 
-public class OSMNode extends OSMElement {
-
-	public final double lat;
-	public final double lon;
-
-	public OSMNode(double lat, double lon, TagSet tags, long id) {
-		super(tags, id);
-		this.lat = lat;
-		this.lon = lon;
+	public OsmMember(String role, OsmElement member) {
+		assert role != null && member != null;
+		this.role = role;
+		this.member = member;
 	}
 
 	@Override
 	public String toString() {
-		return "n" + id;
+		return role + ":" + member;
 	}
 
-	@Override
-	public Geometry toJts() {
-		return null; //bnew Point(new Coordinate(lat, lon), null);
-	}
 }

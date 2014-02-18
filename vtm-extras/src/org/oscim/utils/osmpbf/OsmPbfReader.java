@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
-import org.oscim.utils.osm.OSMData;
+import org.oscim.core.osm.OsmData;
 
 public class OsmPbfReader {
 
-	public static OSMData process(InputStream is) {
+	public static OsmData process(InputStream is) {
 		OsmPbfParser parser = new OsmPbfParser();
 
 		try {
