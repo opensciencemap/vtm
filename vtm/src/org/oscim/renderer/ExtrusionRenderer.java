@@ -16,16 +16,16 @@
  */
 package org.oscim.renderer;
 
-import static org.oscim.tiling.MapTile.State.NEW_DATA;
-import static org.oscim.tiling.MapTile.State.READY;
+import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
+import static org.oscim.layers.tile.MapTile.State.READY;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileRenderer;
+import org.oscim.layers.tile.TileSet;
 import org.oscim.renderer.elements.ExtrusionLayer;
-import org.oscim.tiling.MapTile;
-import org.oscim.tiling.TileRenderer;
-import org.oscim.tiling.TileSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

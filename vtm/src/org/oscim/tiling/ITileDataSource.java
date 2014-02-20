@@ -1,5 +1,6 @@
 /*
- * Copyright 2013 Hannes Janetzek
+ * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2012 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -14,22 +15,35 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.tiling.source;
+package org.oscim.tiling;
 
-import org.oscim.backend.canvas.Bitmap;
-import org.oscim.core.MapElement;
+import org.oscim.layers.tile.MapTile;
+
 
 /**
- * MapDatabase callback (implemented by MapTileLoader)
- * .
- * NOTE: MapElement passed belong to the caller! i.e. dont hold
- * references to its arrays after callback function returns.
+ *
+ *
  */
-public interface ITileDataSink {
+public interface ITileDataSource {
 
-	void process(MapElement element);
+	/**
+	 * Starts a database query with the given parameters.
+	 * 
+	 * @param tile
+	 *            the tile to read.
+	 * @param mapDataSink
+	 *            the callback which handles the extracted map elements.
+	 * @return true if successful
+	 */
+	abstract QueryResult executeQuery(MapTile tile,
+	        ITileDataSink mapDataSink);
 
-	void setTileImage(Bitmap bitmap);
+	abstract void destroy();
 
-	void completed(boolean success);
+	public static enum QueryResult {
+		SUCCESS,
+		FAILED,
+		TILE_NOT_FOUND,
+		DELAYED,
+	}
 }

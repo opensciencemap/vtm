@@ -16,7 +16,7 @@
  */
 package org.oscim.layers.tile;
 
-import static org.oscim.tiling.MapTile.State.CANCEL;
+import static org.oscim.layers.tile.MapTile.State.CANCEL;
 
 import java.util.concurrent.CancellationException;
 
@@ -28,14 +28,10 @@ import org.oscim.event.Event;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.tiling.MapTile;
-import org.oscim.tiling.TileLoader;
-import org.oscim.tiling.TileManager;
-import org.oscim.tiling.VectorTileRenderer;
-import org.oscim.tiling.source.ITileDataSink;
-import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.ITileDataSource.QueryResult;
-import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.TileSource;
+import org.oscim.tiling.ITileDataSource.QueryResult;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

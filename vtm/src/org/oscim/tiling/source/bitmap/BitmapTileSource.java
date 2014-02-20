@@ -6,12 +6,12 @@ import java.io.InputStream;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.Tile;
-import org.oscim.tiling.source.ITileDataSink;
-import org.oscim.tiling.source.ITileDataSource;
+import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.source.ITileDecoder;
-import org.oscim.tiling.source.common.LwHttp;
-import org.oscim.tiling.source.common.UrlTileDataSource;
-import org.oscim.tiling.source.common.UrlTileSource;
+import org.oscim.tiling.source.LwHttp;
+import org.oscim.tiling.source.UrlTileDataSource;
+import org.oscim.tiling.source.UrlTileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

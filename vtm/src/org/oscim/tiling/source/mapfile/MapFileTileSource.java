@@ -21,8 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.mapfile.header.MapFileHeader;
 import org.oscim.tiling.source.mapfile.header.MapFileInfo;
 import org.oscim.utils.IOUtils;

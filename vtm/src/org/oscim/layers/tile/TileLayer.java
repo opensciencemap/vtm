@@ -21,9 +21,6 @@ import org.oscim.event.Event;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.map.Map.UpdateListener;
-import org.oscim.tiling.TileLoader;
-import org.oscim.tiling.TileManager;
-import org.oscim.tiling.TileRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

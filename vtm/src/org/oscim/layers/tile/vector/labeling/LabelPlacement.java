@@ -1,17 +1,17 @@
 package org.oscim.layers.tile.vector.labeling;
 
-import static org.oscim.tiling.MapTile.State.NEW_DATA;
-import static org.oscim.tiling.MapTile.State.READY;
+import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
+import static org.oscim.layers.tile.MapTile.State.READY;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileRenderer;
+import org.oscim.layers.tile.TileSet;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.SymbolLayer;
 import org.oscim.renderer.elements.TextItem;
-import org.oscim.tiling.MapTile;
-import org.oscim.tiling.TileRenderer;
-import org.oscim.tiling.TileSet;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.geom.OBB2D;
 

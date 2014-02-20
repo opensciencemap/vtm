@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.tiling;
+package org.oscim.layers.tile;
 
 import org.oscim.core.Tile;
 import org.oscim.renderer.elements.ElementLayers;
@@ -73,7 +73,7 @@ public class MapTile extends Tile {
 		this.node = node;
 	}
 
-	byte state;
+	protected byte state;
 
 	public boolean state(int testState) {
 		return (state & testState) != 0;

@@ -24,7 +24,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.oscim.core.Tile;
-import org.oscim.tiling.source.ITileCache;
+import org.oscim.tiling.ITileCache;
 import org.slf4j.LoggerFactory;
 
 import android.annotation.TargetApi;

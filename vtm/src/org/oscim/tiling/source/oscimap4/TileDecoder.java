@@ -25,8 +25,8 @@ import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
-import org.oscim.tiling.source.ITileDataSink;
-import org.oscim.tiling.source.common.PbfDecoder;
+import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.source.PbfDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -21,7 +21,7 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import android.os.Bundle;

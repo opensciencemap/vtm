@@ -16,7 +16,7 @@
  */
 package org.oscim.layers.tile.vector;
 
-import static org.oscim.tiling.MapTile.State.CANCEL;
+import static org.oscim.layers.tile.MapTile.State.CANCEL;
 
 import java.util.concurrent.CancellationException;
 
@@ -28,6 +28,9 @@ import org.oscim.core.PointF;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileLoader;
+import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
@@ -45,12 +48,9 @@ import org.oscim.theme.styles.LineSymbol;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.Symbol;
 import org.oscim.theme.styles.Text;
-import org.oscim.tiling.MapTile;
-import org.oscim.tiling.TileLoader;
-import org.oscim.tiling.TileManager;
-import org.oscim.tiling.source.ITileDataSink;
-import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.ITileDataSource.QueryResult;
+import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.ITileDataSource.QueryResult;
 import org.oscim.utils.geom.LineClipper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

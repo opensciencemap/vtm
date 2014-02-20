@@ -30,7 +30,7 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.InternalRenderTheme;
 import org.oscim.theme.ThemeLoader;
-import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.TileSource;
 import org.oscim.utils.async.AsyncExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

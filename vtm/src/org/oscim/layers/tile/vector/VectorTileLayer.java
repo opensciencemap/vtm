@@ -17,13 +17,13 @@
 package org.oscim.layers.tile.vector;
 
 import org.oscim.layers.tile.TileLayer;
+import org.oscim.layers.tile.TileLoader;
+import org.oscim.layers.tile.TileManager;
+import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
 import org.oscim.theme.IRenderTheme;
-import org.oscim.tiling.TileLoader;
-import org.oscim.tiling.TileManager;
-import org.oscim.tiling.VectorTileRenderer;
-import org.oscim.tiling.source.TileSource;
-import org.oscim.tiling.source.TileSource.OpenResult;
+import org.oscim.tiling.TileSource;
+import org.oscim.tiling.TileSource.OpenResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

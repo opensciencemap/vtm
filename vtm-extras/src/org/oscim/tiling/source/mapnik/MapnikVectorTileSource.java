@@ -17,10 +17,10 @@
 package org.oscim.tiling.source.mapnik;
 
 import org.oscim.core.Tile;
-import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.common.LwHttp;
-import org.oscim.tiling.source.common.UrlTileDataSource;
-import org.oscim.tiling.source.common.UrlTileSource;
+import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.source.LwHttp;
+import org.oscim.tiling.source.UrlTileDataSource;
+import org.oscim.tiling.source.UrlTileSource;
 
 public class MapnikVectorTileSource extends UrlTileSource {
 

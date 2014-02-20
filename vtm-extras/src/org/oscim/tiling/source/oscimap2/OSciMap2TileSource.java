@@ -25,12 +25,12 @@ import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
-import org.oscim.tiling.source.ITileDataSink;
-import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.common.LwHttp;
-import org.oscim.tiling.source.common.PbfDecoder;
-import org.oscim.tiling.source.common.UrlTileDataSource;
-import org.oscim.tiling.source.common.UrlTileSource;
+import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.source.LwHttp;
+import org.oscim.tiling.source.PbfDecoder;
+import org.oscim.tiling.source.UrlTileDataSource;
+import org.oscim.tiling.source.UrlTileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

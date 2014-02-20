@@ -28,7 +28,7 @@ import org.oscim.map.Map;
 import org.oscim.map.ViewController;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.InternalRenderTheme;
-import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.TileSource;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;

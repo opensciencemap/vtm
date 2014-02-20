@@ -12,13 +12,14 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.tiling.source.common;
+package org.oscim.tiling.source;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
 import org.oscim.core.Tile;
+import org.oscim.tiling.source.UrlTileDataSource;
 
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Uint8Array;

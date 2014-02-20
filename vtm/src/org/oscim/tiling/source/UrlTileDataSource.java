@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.tiling.source.common;
+package org.oscim.tiling.source;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,13 +22,12 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
-import org.oscim.tiling.MapTile;
-import org.oscim.tiling.source.ITileCache;
-import org.oscim.tiling.source.ITileCache.TileReader;
-import org.oscim.tiling.source.ITileCache.TileWriter;
-import org.oscim.tiling.source.ITileDataSink;
-import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.ITileDecoder;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.tiling.ITileCache;
+import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.ITileCache.TileReader;
+import org.oscim.tiling.ITileCache.TileWriter;
 import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -12,15 +12,18 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.tiling.source.common;
+package org.oscim.tiling.source;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.oscim.tiling.MapTile;
-import org.oscim.tiling.source.ITileDataSink;
-import org.oscim.tiling.source.ITileDataSource;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.source.ITileDecoder;
+import org.oscim.tiling.source.LwHttp;
+import org.oscim.tiling.source.UrlTileDataSource;
+import org.oscim.tiling.source.UrlTileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

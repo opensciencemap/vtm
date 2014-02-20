@@ -23,7 +23,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.oscim.theme.RenderThemeHandler;
-import org.oscim.tiling.source.TileSource.OpenResult;
+import org.oscim.tiling.TileSource.OpenResult;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;

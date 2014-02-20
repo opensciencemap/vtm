@@ -15,13 +15,13 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.oscim.tiling;
+package org.oscim.layers.tile;
 
-import static org.oscim.tiling.MapTile.State.CANCEL;
-import static org.oscim.tiling.MapTile.State.LOADING;
-import static org.oscim.tiling.MapTile.State.NEW_DATA;
-import static org.oscim.tiling.MapTile.State.NONE;
-import static org.oscim.tiling.MapTile.State.READY;
+import static org.oscim.layers.tile.MapTile.State.CANCEL;
+import static org.oscim.layers.tile.MapTile.State.LOADING;
+import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
+import static org.oscim.layers.tile.MapTile.State.NONE;
+import static org.oscim.layers.tile.MapTile.State.READY;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,10 +31,10 @@ import org.oscim.core.Tile;
 import org.oscim.event.Event;
 import org.oscim.event.EventDispatcher;
 import org.oscim.event.EventListener;
+import org.oscim.layers.tile.MapTile.TileNode;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
-import org.oscim.tiling.MapTile.TileNode;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.QuadTree;

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.oscim.core.Tile;
+import org.oscim.tiling.ITileDataSink;
 
 public interface ITileDecoder {
 

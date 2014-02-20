@@ -20,7 +20,7 @@ import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.android.cache.TileCache;
 import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 import android.os.Bundle;

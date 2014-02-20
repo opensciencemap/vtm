@@ -20,14 +20,14 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
+import org.oscim.layers.tile.TileLoader;
+import org.oscim.layers.tile.TileManager;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.theme.styles.Line;
-import org.oscim.tiling.MapTile;
-import org.oscim.tiling.TileLoader;
-import org.oscim.tiling.TileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

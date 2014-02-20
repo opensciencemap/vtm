@@ -12,7 +12,10 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.tiling;
+package org.oscim.layers.tile;
+
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileManager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Timer;

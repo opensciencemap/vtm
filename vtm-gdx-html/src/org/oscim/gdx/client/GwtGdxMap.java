@@ -24,7 +24,7 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.gdx.GdxMap;
 import org.oscim.layers.tile.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.tiling.source.TileSource;
+import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources.NaturalEarth;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.slf4j.Logger;

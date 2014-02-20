@@ -19,10 +19,10 @@ package org.oscim.tiling.source.test;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
-import org.oscim.tiling.MapTile;
-import org.oscim.tiling.source.ITileDataSink;
-import org.oscim.tiling.source.ITileDataSource;
-import org.oscim.tiling.source.TileSource;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.TileSource;
 
 public class TestTileSource extends TileSource {
 

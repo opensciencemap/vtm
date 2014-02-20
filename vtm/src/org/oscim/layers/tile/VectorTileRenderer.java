@@ -1,16 +1,17 @@
-package org.oscim.tiling;
+package org.oscim.layers.tile;
 
+import static org.oscim.layers.tile.MapTile.State.READY;
 import static org.oscim.renderer.elements.RenderElement.BITMAP;
 import static org.oscim.renderer.elements.RenderElement.LINE;
 import static org.oscim.renderer.elements.RenderElement.MESH;
 import static org.oscim.renderer.elements.RenderElement.POLYGON;
 import static org.oscim.renderer.elements.RenderElement.TEXLINE;
-import static org.oscim.tiling.MapTile.State.READY;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.MapTile.TileNode;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
@@ -20,7 +21,6 @@ import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.MeshLayer;
 import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.RenderElement;
-import org.oscim.tiling.MapTile.TileNode;
 import org.oscim.utils.FastMath;
 
 public class VectorTileRenderer extends TileRenderer {
@@ -132,7 +132,6 @@ public class VectorTileRenderer extends TileRenderer {
 		/* scale relative to zoom-level of this tile */
 		float scale = (float) (pos.scale / (1 << z));
 
-		//GLViewport v = mMatrices;
 		v.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
 		v.mvp.multiplyLhs(mViewProj);
 

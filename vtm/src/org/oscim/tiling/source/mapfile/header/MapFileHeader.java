@@ -18,7 +18,7 @@ package org.oscim.tiling.source.mapfile.header;
 
 import java.io.IOException;
 
-import org.oscim.tiling.source.TileSource.OpenResult;
+import org.oscim.tiling.TileSource.OpenResult;
 import org.oscim.tiling.source.mapfile.ReadBuffer;
 
 /**

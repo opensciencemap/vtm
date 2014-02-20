@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.tiling.source.common;
+package org.oscim.tiling.source;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.oscim.core.GeometryBuffer;
-import org.oscim.tiling.source.ITileDecoder;
 import org.oscim.utils.UTF8Decoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

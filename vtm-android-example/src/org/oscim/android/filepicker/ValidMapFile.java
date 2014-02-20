@@ -16,7 +16,7 @@ package org.oscim.android.filepicker;
 
 import java.io.File;
 
-import org.oscim.tiling.source.TileSource.OpenResult;
+import org.oscim.tiling.TileSource.OpenResult;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 
 /**
