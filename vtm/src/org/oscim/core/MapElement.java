@@ -16,10 +16,6 @@
  */
 package org.oscim.core;
 
-// TODO
-// - make this class (and description) more generic or
-// move it to tilesource package
-
 /**
  * The MapElement class is a reusable containter for a geometry
  * with tags.
@@ -30,11 +26,8 @@ package org.oscim.core;
  */
 public class MapElement extends GeometryBuffer {
 
-	/** OSM layer of the way */
+	/** layer of the element (0-10) overrides the theme drawing order */
 	public int layer;
-
-	/** priority for labeling */
-	public int priority;
 
 	public final TagSet tags = new TagSet();
 

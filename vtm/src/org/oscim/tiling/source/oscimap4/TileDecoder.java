@@ -264,7 +264,6 @@ public class TileDecoder extends PbfDecoder {
 		}
 
 		mElem.layer = 5;
-		mElem.priority = 0;
 
 		while (position() < end) {
 			// read tag and wire type

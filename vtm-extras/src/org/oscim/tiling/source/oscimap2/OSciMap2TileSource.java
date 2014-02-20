@@ -197,7 +197,6 @@ public class OSciMap2TileSource extends UrlTileSource {
 			}
 
 			mElem.layer = 5;
-			mElem.priority = 0;
 			//mElem.height = 0;
 			//mElem.minHeight = 0;
 
@@ -252,7 +251,8 @@ public class OSciMap2TileSource extends UrlTileSource {
 						break;
 
 					case TAG_ELEM_PRIORITY:
-						mElem.priority = decodeVarint32();
+						//mElem.priority = 
+						decodeVarint32();
 						break;
 
 					default:
