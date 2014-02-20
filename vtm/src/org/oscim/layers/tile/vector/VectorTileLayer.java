@@ -32,18 +32,10 @@ import org.slf4j.LoggerFactory;
  * {@link VectorTileLoader} that load and assemble vector tiles
  * for rendering.
  */
-public class VectorTileLayer extends TileLayer {
+public abstract class VectorTileLayer extends TileLayer {
 	static final Logger log = LoggerFactory.getLogger(VectorTileLayer.class);
 
-	protected final static int MAX_ZOOMLEVEL = 17;
-	protected final static int MIN_ZOOMLEVEL = 2;
-	protected final static int CACHE_LIMIT = 150;
-
 	protected TileSource mTileSource;
-
-	public VectorTileLayer(Map map) {
-		this(map, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL, CACHE_LIMIT);
-	}
 
 	public VectorTileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
 		super(map, new TileManager(map, minZoom, maxZoom, cacheLimit),
@@ -53,7 +45,7 @@ public class VectorTileLayer extends TileLayer {
 	}
 
 	@Override
-	protected VectorTileLoader createLoader(TileManager tm) {
+	protected TileLoader createLoader(TileManager tm) {
 		return new VectorTileLoader(tm);
 	}
 

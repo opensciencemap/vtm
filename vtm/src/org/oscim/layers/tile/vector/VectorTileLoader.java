@@ -51,11 +51,11 @@ import org.oscim.theme.styles.Text;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.ITileDataSource.QueryResult;
-import org.oscim.utils.geom.LineClipper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback, ITileDataSink {
+public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback,
+        ITileDataSink {
 
 	static final Logger log = LoggerFactory.getLogger(VectorTileLoader.class);
 
@@ -86,8 +86,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	/** Line-scale-factor depending on zoom and latitude */
 	protected float mLineScale = 1.0f;
 
-	protected final LineClipper mClipper;
-
 	protected final TagSet mFilteredTags;
 
 	public void setRenderTheme(IRenderTheme theme) {
@@ -98,7 +96,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public VectorTileLoader(TileManager tileManager) {
 		super(tileManager);
 
-		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE, true);
 		mFilteredTags = new TagSet();
 	}
 
@@ -175,37 +172,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		Tag tag;
 	}
 
-	// Replace tags that should only be matched by key in RenderTheme
-	// to avoid caching RenderInstructions for each way of the same type
-	// only with different name.
-	// Maybe this should be done within RenderTheme, also allowing
-	// to set these replacement rules in theme file.
-	protected static final TagReplacement[] mTagReplacement = {
-	        new TagReplacement(Tag.KEY_NAME),
-	        new TagReplacement(Tag.KEY_HOUSE_NUMBER),
-	        new TagReplacement(Tag.KEY_REF),
-	        new TagReplacement(Tag.KEY_HEIGHT),
-	        new TagReplacement(Tag.KEY_MIN_HEIGHT)
-	};
-
 	protected boolean filterTags(TagSet tagSet) {
-		Tag[] tags = tagSet.tags;
-
-		mFilteredTags.clear();
-
-		O: for (int i = 0, n = tagSet.numTags; i < n; i++) {
-			Tag t = tags[i];
-
-			for (TagReplacement replacement : mTagReplacement) {
-				if (t.key == replacement.key) {
-					mFilteredTags.add(replacement.tag);
-					continue O;
-				}
-			}
-
-			mFilteredTags.add(t);
-		}
-
 		return true;
 	}
 
@@ -389,7 +356,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			if (length < 4)
 				break;
 
-			WayDecorator.renderText(mClipper, mElement.points, value, text,
+			WayDecorator.renderText(null, mElement.points, value, text,
 			                        offset, length, mTile);
 			offset += length;
 		}

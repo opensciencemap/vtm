@@ -25,6 +25,7 @@ import org.oscim.event.GestureDetector;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.MapEventLayer;
 import org.oscim.layers.tile.BitmapTileLayer;
+import org.oscim.layers.tile.vector.OsmTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.IRenderTheme;
@@ -125,7 +126,7 @@ public abstract class Map {
 	public VectorTileLayer setBaseMap(TileSource tileSource) {
 		// TODO cleanup previous baseLayer here?
 
-		mBaseLayer = new VectorTileLayer(this);
+		mBaseLayer = new OsmTileLayer(this);
 		mBaseLayer.setTileSource(tileSource);
 		mLayers.add(1, mBaseLayer);
 

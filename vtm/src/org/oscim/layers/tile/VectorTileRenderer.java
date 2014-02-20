@@ -31,10 +31,6 @@ public class VectorTileRenderer extends TileRenderer {
 
 	protected GLMatrix mViewProj = new GLMatrix();
 
-	//	public VectorTileRenderer(TileManager tileManager) {
-	//		super(tileManager);
-	//	}
-
 	@Override
 	protected synchronized void update(GLViewport v) {
 		super.update(v);
