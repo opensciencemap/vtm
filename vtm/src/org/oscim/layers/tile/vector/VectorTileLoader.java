@@ -59,36 +59,36 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	static final Logger log = LoggerFactory.getLogger(VectorTileLoader.class);
 
-	private static final double STROKE_INCREASE = Math.sqrt(2.5);
-	private static final byte LAYERS = 11;
+	protected static final double STROKE_INCREASE = Math.sqrt(2.5);
+	protected static final byte LAYERS = 11;
 
 	public static final byte STROKE_MIN_ZOOM = 12;
 	public static final byte STROKE_MAX_ZOOM = 17;
 
-	private IRenderTheme renderTheme;
-	private int renderLevels;
+	protected IRenderTheme renderTheme;
+	protected int renderLevels;
 
 	/** current TileDataSource used by this MapTileLoader */
-	private ITileDataSource mTileDataSource;
+	protected ITileDataSource mTileDataSource;
 
 	/** currently processed tile */
-	private MapTile mTile;
+	protected MapTile mTile;
 
 	/** currently processed MapElement */
-	private MapElement mElement;
+	protected MapElement mElement;
 
 	/** current line layer (will be used for outline layers) */
-	private LineLayer mCurLineLayer;
+	protected LineLayer mCurLineLayer;
 
 	/** Current layer for adding elements */
-	private int mCurLayer;
+	protected int mCurLayer;
 
 	/** Line-scale-factor depending on zoom and latitude */
-	private float mLineScale = 1.0f;
+	protected float mLineScale = 1.0f;
 
-	private final LineClipper mClipper;
+	protected final LineClipper mClipper;
 
-	private final TagSet mFilteredTags;
+	protected final TagSet mFilteredTags;
 
 	public void setRenderTheme(IRenderTheme theme) {
 		renderTheme = theme;
@@ -148,7 +148,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		return (result == QueryResult.SUCCESS);
 	}
 
-	private static int getValidLayer(int layer) {
+	protected static int getValidLayer(int layer) {
 		if (layer < 0) {
 			return 0;
 		} else if (layer >= LAYERS) {
@@ -180,7 +180,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	// only with different name.
 	// Maybe this should be done within RenderTheme, also allowing
 	// to set these replacement rules in theme file.
-	private static final TagReplacement[] mTagReplacement = {
+	protected static final TagReplacement[] mTagReplacement = {
 	        new TagReplacement(Tag.KEY_NAME),
 	        new TagReplacement(Tag.KEY_HOUSE_NUMBER),
 	        new TagReplacement(Tag.KEY_REF),
@@ -188,7 +188,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	        new TagReplacement(Tag.KEY_MIN_HEIGHT)
 	};
 
-	private boolean filterTags(TagSet tagSet) {
+	protected boolean filterTags(TagSet tagSet) {
 		Tag[] tags = tagSet.tags;
 
 		mFilteredTags.clear();
@@ -243,7 +243,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mElement = null;
 	}
 
-	//private void debugUnmatched(boolean closed, TagSet tags) {
+	//protected void debugUnmatched(boolean closed, TagSet tags) {
 	//		log.debug("DBG way not matched: " + closed + " "
 	//				+ Arrays.deepToString(tags));
 	//
@@ -255,7 +255,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	//		renderWay(ri);
 	//}
 
-	private void renderWay(RenderStyle[] style) {
+	protected void renderWay(RenderStyle[] style) {
 		if (style == null)
 			return;
 
@@ -263,7 +263,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			style[i].renderWay(this);
 	}
 
-	private void renderNode(RenderStyle[] style) {
+	protected void renderNode(RenderStyle[] style) {
 		if (style == null)
 			return;
 
@@ -271,7 +271,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			style[i].renderNode(this);
 	}
 
-	private void clearState() {
+	protected void clearState() {
 		mCurLineLayer = null;
 	}
 
@@ -328,7 +328,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	// slower to load (requires tesselation) and uses
 	// more memory but should be faster to render
-	private final static boolean USE_MESH_POLY = false;
+	protected final static boolean USE_MESH_POLY = false;
 
 	@Override
 	public void renderArea(Area area, int level) {
