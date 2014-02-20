@@ -63,7 +63,7 @@ public abstract class AbstractVectorLayer<T> extends Layer implements UpdateList
 
 	abstract protected void processFeatures(Task t, BoundingBox b);
 
-	protected class Task {
+	protected static class Task {
 		public final ElementLayers layers = new ElementLayers();
 		public final MapPosition position = new MapPosition();
 	}
