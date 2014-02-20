@@ -36,7 +36,7 @@ public abstract class TileRenderer extends LayerRenderer {
 	/** fade-in time */
 	protected static final float FADE_TIME = 500;
 
-	private final TileManager mTileManager;
+	private TileManager mTileManager;
 
 	protected final TileSet mDrawTiles;
 	protected int mProxyTileCnt;
@@ -49,10 +49,13 @@ public abstract class TileRenderer extends LayerRenderer {
 
 	private int mUploadSerial;
 
-	public TileRenderer(TileManager tileManager) {
-		mTileManager = tileManager;
+	public TileRenderer() {
 		mUploadSerial = 0;
 		mDrawTiles = new TileSet();
+	}
+
+	protected void setTileManager(TileManager tileManager) {
+		mTileManager = tileManager;
 	}
 
 	/**

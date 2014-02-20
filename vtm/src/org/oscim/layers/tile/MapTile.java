@@ -66,8 +66,8 @@ public class MapTile extends Tile {
 		public final static byte CANCEL = 1 << 3;
 	}
 
-	public MapTile(TileNode node, int tileX, int tileY, byte zoomLevel) {
-		super(tileX, tileY, zoomLevel);
+	public MapTile(TileNode node, int tileX, int tileY, int zoomLevel) {
+		super(tileX, tileY, (byte)zoomLevel);
 		this.x = (double) tileX / (1 << zoomLevel);
 		this.y = (double) tileY / (1 << zoomLevel);
 		this.node = node;

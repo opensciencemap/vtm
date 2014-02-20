@@ -35,17 +35,20 @@ import org.slf4j.LoggerFactory;
 public class VectorTileLayer extends TileLayer {
 	static final Logger log = LoggerFactory.getLogger(VectorTileLayer.class);
 
-	private TileSource mTileSource;
+	protected final static int MAX_ZOOMLEVEL = 17;
+	protected final static int MIN_ZOOMLEVEL = 2;
+	protected final static int CACHE_LIMIT = 150;
+
+	protected TileSource mTileSource;
 
 	public VectorTileLayer(Map map) {
-		super(map);
-		setRenderer(new VectorTileRenderer(mTileManager));
-		initLoader(4);
+		this(map, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL, CACHE_LIMIT);
 	}
 
 	public VectorTileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
-		super(map, minZoom, maxZoom, cacheLimit);
-		setRenderer(new VectorTileRenderer(mTileManager));
+		super(map, new TileManager(map, minZoom, maxZoom, cacheLimit),
+		      new VectorTileRenderer());
+
 		initLoader(4);
 	}
 

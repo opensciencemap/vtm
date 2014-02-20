@@ -97,14 +97,8 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 	}
 
 	@Override
-	public Box create(int x, int y, int z) {
-		return null;
-	}
-
-	@Override
 	public BoxNode<Box> create() {
-		BoxNode<Box> node = new BoxNode<Box>();
-		return node;
+		return new BoxNode<Box>();
 	}
 
 	@Override

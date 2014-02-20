@@ -108,14 +108,6 @@ public class TileManager {
 	private final QuadTree<TileNode, MapTile> mIndex = new QuadTree<TileNode, MapTile>() {
 
 		@Override
-		public MapTile create(int x, int y, int z) {
-			TileNode t = super.add(x, y, z);
-			t.item = new MapTile(t, x, y, (byte) z);
-
-			return t.item;
-		}
-
-		@Override
 		public void removeItem(MapTile t) {
 			if (t.node == null) {
 				log.error("already removed {}", t);
@@ -203,9 +195,6 @@ public class TileManager {
 		 * should increase the chance that they are free when new
 		 * jobs come in. */
 		jobQueue.clear();
-
-		// load some tiles more than currently visible (* 0.75)
-		//double scale = pos.scale * 0.9f;
 
 		int tileZoom = FastMath.clamp(pos.zoomLevel, mMinZoom, mMaxZoom);
 
@@ -352,7 +341,8 @@ public class TileManager {
 		MapTile tile = mIndex.getTile(x, y, zoomLevel);
 
 		if (tile == null) {
-			tile = mIndex.create(x, y, zoomLevel);
+			TileNode n = mIndex.add(x, y, zoomLevel);
+			tile = n.item = new MapTile(n, x, y, zoomLevel);
 			mJobs.add(tile);
 			addToCache(tile);
 		} else if (!tile.isActive()) {
@@ -363,7 +353,8 @@ public class TileManager {
 			/* prefetch parent */
 			MapTile p = tile.node.parent.item;
 			if (p == null) {
-				p = mIndex.create(x >> 1, y >> 1, zoomLevel - 1);
+				TileNode n = mIndex.add(x >> 1, y >> 1, zoomLevel - 1);
+				p = n.item = new MapTile(n, x >> 1, y >> 1, zoomLevel - 1);
 				addToCache(p);
 				// hack to not add tile twice to queue
 				p.state = LOADING;

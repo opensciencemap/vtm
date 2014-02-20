@@ -39,8 +39,6 @@ public abstract class QuadTree<T extends Node<T, E>, E> {
 		}
 	}
 
-	public abstract E create(int x, int y, int z);
-
 	public abstract T create();
 
 	public abstract void removeItem(E item);

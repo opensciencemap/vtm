@@ -24,6 +24,7 @@ import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
+import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
@@ -35,7 +36,9 @@ public class TestTileLayer extends TileLayer {
 	static final Logger log = LoggerFactory.getLogger(TestTileLayer.class);
 
 	public TestTileLayer(Map map) {
-		super(map);
+		super(map,
+		      new TileManager(map, 0, 20, 10),
+		      new VectorTileRenderer());
 	}
 
 	@Override

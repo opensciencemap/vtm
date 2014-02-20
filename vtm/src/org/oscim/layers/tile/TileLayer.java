@@ -28,30 +28,24 @@ public abstract class TileLayer extends Layer implements UpdateListener {
 
 	static final Logger log = LoggerFactory.getLogger(TileLayer.class);
 
-	private final static int MAX_ZOOMLEVEL = 17;
-	private final static int MIN_ZOOMLEVEL = 2;
-	private final static int CACHE_LIMIT = 150;
-
+	/**
+	 * TileManager responsible for adding visible tiles
+	 * to load queue and managing in-memory tile cache.
+	 */
 	protected final TileManager mTileManager;
 
 	protected TileLoader[] mTileLoader;
 
-	public TileLayer(Map map) {
-		this(map, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL, CACHE_LIMIT);
-	}
-
-	public TileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
+	public TileLayer(Map map, TileManager tileManager, TileRenderer renderer) {
 		super(map);
-		/* TileManager responsible for adding visible tiles
-		 * to load queue and managing in-memory tile cache. */
-		mTileManager = new TileManager(map, minZoom, maxZoom, cacheLimit);
+		renderer.setTileManager(tileManager);
+
+		mTileManager = tileManager;
+		mRenderer = renderer;
+
 	}
 
 	abstract protected TileLoader createLoader(TileManager tm);
-
-	protected void setRenderer(TileRenderer renderer) {
-		mRenderer = renderer;
-	}
 
 	public TileRenderer tileRenderer() {
 		return (TileRenderer) mRenderer;
