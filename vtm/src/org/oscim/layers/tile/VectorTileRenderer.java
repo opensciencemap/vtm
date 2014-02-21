@@ -51,6 +51,8 @@ public class VectorTileRenderer extends TileRenderer {
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && t.state != READY) {
+				GL.glDepthMask(true);
+				GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 				mClipMode = 2;
 				break;
 			}
@@ -70,7 +72,6 @@ public class VectorTileRenderer extends TileRenderer {
 		 * TODO draw proxies for placeholder */
 		if (mClipMode > 1) {
 			mClipMode = 3;
-			//GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 			GL.glDepthFunc(GL20.GL_LESS);
 
 			/* draw child or parent proxies */
