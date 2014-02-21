@@ -177,15 +177,15 @@ public class GeometryBuffer {
 		setOrCheckMode(GeometryType.LINE);
 
 		// ignore
-		if (index[indexPos] == 0)
-			return this;
+		if (index[indexPos] > 0) {
 
-		// start next
-		if ((index[0] >= 0) && (++indexPos >= index.length))
-			ensureIndexSize(indexPos, true);
+			// start next
+			if ((index[0] >= 0) && (++indexPos >= index.length))
+				ensureIndexSize(indexPos, true);
 
-		// initialize with zero points
-		index[indexPos] = 0;
+			// initialize with zero points
+			index[indexPos] = 0;
+		}
 
 		// set new end marker
 		if (index.length > indexPos + 1)
