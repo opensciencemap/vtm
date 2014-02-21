@@ -30,7 +30,6 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.Line;
-import org.oscim.utils.FastMath;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +46,16 @@ public final class LineLayer extends RenderElement {
 	private static final float COORD_SCALE = MapRenderer.COORD_SCALE;
 	/** scale factor mapping extrusion vector to short values */
 	public static final float DIR_SCALE = 2048;
+
+	/** maximal resoultion */
+	private static final float MIN_DIST = 1 / 8f;
+
+	/**
+	 * not quite right.. need to go back so that additional
+	 * bevel vertices are at least MIN_DIST apart
+	 */
+	//private static final float JOIN_BEVEL = MIN_DIST
+
 	/**
 	 * mask for packing last two bits of extrusion vector with texture
 	 * coordinates
@@ -59,7 +68,7 @@ public final class LineLayer extends RenderElement {
 	public float scale = 1;
 
 	public boolean roundCap;
-	private float mMinDist = 1 / 8f;
+	private float mMinDist = MIN_DIST;
 
 	public float heightOffset;
 
@@ -78,10 +87,10 @@ public final class LineLayer extends RenderElement {
 	}
 
 	/**
-	 * For point reduction by minimal distance. Default is 1/4.
+	 * For point reduction by minimal distance. Default is 1/8.
 	 */
 	public void setDropDistance(float minDist) {
-		mMinDist = minDist < 1 / 8f ? 1 / 8f : minDist;
+		mMinDist = Math.max(minDist, MIN_DIST);
 	}
 
 	public void addLine(GeometryBuffer geom) {
@@ -99,8 +108,6 @@ public final class LineLayer extends RenderElement {
 	}
 
 	private void addLine(float[] points, short[] index, int numPoints, boolean closed) {
-		float x, y, nextX, nextY;
-		float a, ux, uy, vx, vy, wx, wy;
 
 		int tmax = Tile.SIZE + 4;
 		int tmin = -4;
@@ -150,6 +157,13 @@ public final class LineLayer extends RenderElement {
 		}
 
 		for (int i = 0, pos = 0; i < n; i++) {
+			float ux, uy;
+			float vx, vy;
+			float wx, wy;
+			float x, y;
+			float nextX, nextY;
+			double a;
+
 			if (index != null)
 				length = index[i];
 
@@ -331,7 +345,6 @@ public final class LineLayer extends RenderElement {
 
 			x = nextX;
 			y = nextY;
-			boolean flip = false;
 			/* Unit vector pointing back to previous node */
 			vx *= -1;
 			vy *= -1;
@@ -353,7 +366,7 @@ public final class LineLayer extends RenderElement {
 				/* Unit vector pointing forward to next node */
 				wx = nextX - x;
 				wy = nextY - y;
-				a = (float) Math.sqrt(wx * wx + wy * wy);
+				a = Math.sqrt(wx * wx + wy * wy);
 				/* skip too short segmets */
 				if (a < mMinDist) {
 					numVertices -= 2;
@@ -362,32 +375,116 @@ public final class LineLayer extends RenderElement {
 				wx /= a;
 				wy /= a;
 
-				/* Sum of these two vectors points */
+				double dotp = (wx * vx + wy * vy);
+
+				//log.debug("acos " + dotp);
+				if (dotp > 0.7) {
+					/* add bevel join to avoid miter going to infinity */
+					numVertices += 2;
+
+					//dotp = FastMath.clamp(dotp, -1, 1);
+					//double cos = Math.acos(dotp);
+					//log.debug("cos " + Math.toDegrees(cos));
+					//log.debug("back " + (mMinDist * 2 / Math.sin(cos + Math.PI / 2)));
+
+					float px, py;
+					if (dotp > 0.999) {
+						/* 360 degree angle, set points aside */
+						ux = vx + wx;
+						uy = vy + wy;
+						a = wx * uy - wy * ux;
+						if (a < 0.1 && a > -0.1) {
+							/* Almost straight */
+							ux = -wy;
+							uy = wx;
+						} else {
+							ux /= a;
+							uy /= a;
+						}
+						//log.debug("aside " + a + " " + ux + " " + uy);
+						px = x - ux * MIN_DIST * 2;
+						py = y - uy * MIN_DIST * 2;
+						x = x + ux * MIN_DIST * 2;
+						y = y + uy * MIN_DIST * 2;
+					} else {
+						//log.debug("back");
+						/* go back by min dist */
+						px = x + vx * MIN_DIST * 2;
+						py = y + vy * MIN_DIST * 2;
+						/* go forward by min dist */
+						x = x + wx * MIN_DIST * 2;
+						y = y + wy * MIN_DIST * 2;
+					}
+
+					/* Unit vector pointing forward to next node */
+					wx = x - px;
+					wy = y - py;
+					a = Math.sqrt(wx * wx + wy * wy);
+					wx /= a;
+					wy /= a;
+
+					ux = vx + wx;
+					uy = vy + wy;
+					a = wx * uy - wy * ux;
+					if (a < 0.01 && a > -0.01) {
+						ux = -wy;
+						uy = wx;
+					} else {
+						ux /= a;
+						uy /= a;
+					}
+
+					ox = (short) (px * COORD_SCALE);
+					oy = (short) (py * COORD_SCALE);
+
+					ddx = (int) (ux * DIR_SCALE);
+					ddy = (int) (uy * DIR_SCALE);
+
+					if (opos == SIZE) {
+						si = pool.getNext(si);
+						v = si.vertices;
+						opos = 0;
+					}
+
+					v[opos++] = ox;
+					v[opos++] = oy;
+					v[opos++] = (short) (0 | ddx & DIR_MASK);
+					v[opos++] = (short) (1 | ddy & DIR_MASK);
+
+					if (opos == SIZE) {
+						si = pool.getNext(si);
+						v = si.vertices;
+						opos = 0;
+					}
+
+					v[opos++] = ox;
+					v[opos++] = oy;
+					v[opos++] = (short) (2 | -ddx & DIR_MASK);
+					v[opos++] = (short) (1 | -ddy & DIR_MASK);
+
+					/* flip unit vector to point back */
+					vx = -wx;
+					vy = -wy;
+
+					/* Unit vector pointing forward to next node */
+					wx = nextX - x;
+					wy = nextY - y;
+					a = Math.sqrt(wx * wx + wy * wy);
+					wx /= a;
+					wy /= a;
+				}
+
 				ux = vx + wx;
 				uy = vy + wy;
-
-				/* cross-product */
 				a = wx * uy - wy * ux;
 
-				if (FastMath.abs(a) < 0.01f) {
+				if (a < 0.01 && a > -0.01) {
 					/* Almost straight */
 					ux = -wy;
 					uy = wx;
 				} else {
 					ux /= a;
 					uy /= a;
-
-					/* avoid miter going to infinity.
-					 * TODO add option for round joints */
-					if (FastMath.absMaxCmp(ux, uy, 4f)) {
-						ux = vx - wx;
-						uy = vy - wy;
-
-						a = -wy * ux + wx * uy;
-						ux /= a;
-						uy /= a;
-						flip = !flip;
-					}
 				}
 
 				ox = (short) (x * COORD_SCALE);
@@ -396,10 +493,6 @@ public final class LineLayer extends RenderElement {
 				ddx = (int) (ux * DIR_SCALE);
 				ddy = (int) (uy * DIR_SCALE);
 
-				if (flip) {
-					ddx = -ddx;
-					ddy = -ddy;
-				}
 				if (opos == SIZE) {
 					si = pool.getNext(si);
 					v = si.vertices;
@@ -448,11 +541,6 @@ public final class LineLayer extends RenderElement {
 				ddx = (int) (ux * DIR_SCALE);
 				ddy = (int) (uy * DIR_SCALE);
 
-				if (flip) {
-					ddx = -ddx;
-					ddy = -ddy;
-				}
-
 				v[opos++] = ox;
 				v[opos++] = oy;
 				v[opos++] = (short) (0 | ddx & DIR_MASK);
@@ -479,8 +567,8 @@ public final class LineLayer extends RenderElement {
 				ddx = (int) ((ux - vx) * DIR_SCALE);
 				ddy = (int) ((uy - vy) * DIR_SCALE);
 
-				dx = (short) (0 | (flip ? -ddx : ddx) & DIR_MASK);
-				dy = (short) (0 | (flip ? -ddy : ddy) & DIR_MASK);
+				dx = (short) (0 | ddx & DIR_MASK);
+				dy = (short) (0 | ddy & DIR_MASK);
 
 				v[opos++] = ox;
 				v[opos++] = oy;
@@ -496,8 +584,8 @@ public final class LineLayer extends RenderElement {
 				/* add last vertex twice */
 				ddx = (int) (-(ux + vx) * DIR_SCALE);
 				ddy = (int) (-(uy + vy) * DIR_SCALE);
-				dx = (short) (2 | (flip ? -ddx : ddx) & DIR_MASK);
-				dy = (short) (0 | (flip ? -ddy : ddy) & DIR_MASK);
+				dx = (short) (2 | ddx & DIR_MASK);
+				dy = (short) (0 | ddy & DIR_MASK);
 
 				v[opos++] = ox;
 				v[opos++] = oy;
@@ -532,8 +620,8 @@ public final class LineLayer extends RenderElement {
 
 				v[opos++] = ox;
 				v[opos++] = oy;
-				v[opos++] = (short) (0 | (flip ? -ddx : ddx) & DIR_MASK);
-				v[opos++] = (short) (1 | (flip ? -ddy : ddy) & DIR_MASK);
+				v[opos++] = (short) (0 | ddx & DIR_MASK);
+				v[opos++] = (short) (1 | ddy & DIR_MASK);
 
 				if (opos == SIZE) {
 					si = pool.getNext(si);
@@ -544,8 +632,8 @@ public final class LineLayer extends RenderElement {
 				/* add last vertex twice */
 				ddx = (int) (-(ux + vx) * DIR_SCALE);
 				ddy = (int) (-(uy + vy) * DIR_SCALE);
-				dx = (short) (2 | (flip ? -ddx : ddx) & DIR_MASK);
-				dy = (short) (1 | (flip ? -ddy : ddy) & DIR_MASK);
+				dx = (short) (2 | ddx & DIR_MASK);
+				dy = (short) (1 | ddy & DIR_MASK);
 
 				v[opos++] = ox;
 				v[opos++] = oy;
