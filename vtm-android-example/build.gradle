@@ -10,18 +10,19 @@ buildscript {
 apply plugin: 'android'
 
 dependencies {
+  //compile fileTree(dir: 'libs', include: '*.jar')
   compile project(':vtm-android')
-  compile fileTree(dir: 'libs', include: '*.jar')
+  compile project(':vtm-themes')
 }
 
-task copyAssets(type: Copy) {
-  from "$rootDir/vtm/assets"
-  into "assets"
-  include '**/*'
-}
+// task copyAssets(type: Copy) {
+//   from "$rootDir/vtm/assets"
+//   into "assets"
+//   include '**/*'
+// }
 
-tasks.withType(JavaCompile) { compileTask -> 
-  compileTask.dependsOn copyAssets }
+// tasks.withType(JavaCompile) { compileTask ->
+//   compileTask.dependsOn copyAssets }
 
 android {
   compileSdkVersion 19
@@ -60,12 +61,12 @@ eclipse.classpath {
 
     // Manipulation of the classpath XML before merging local
     // and generated copies
-    beforeMerged { classpath ->
-      // Remove all source entries to avoid overlap
-      classpath.entries.removeAll() { c ->
-	c.kind == 'src'
-      }
-    }
+    // beforeMerged { classpath ->
+    //   // Remove all source entries to avoid overlap
+    //   classpath.entries.removeAll() { c ->
+    //	c.kind == 'src'
+    //   }
+    // }
 
     // Direct manipulation of the generated classpath XML
     withXml {
@@ -82,14 +83,13 @@ eclipse.classpath {
 }
 
 eclipse.project {
-  natures = ['com.android.ide.eclipse.adt.AndroidNature', 
+  natures = ['com.android.ide.eclipse.adt.AndroidNature',
 	     'org.eclipse.jdt.core.javanature']
 
   buildCommand 'com.android.ide.eclipse.adt.ResourceManagerBuilder'
   buildCommand 'com.android.ide.eclipse.adt.PreCompilerBuilder'
   buildCommand 'com.android.ide.eclipse.adt.ApkBuilder'
 
-  linkedResource name: 'assets', type: '2', 
-		 locationUri: 'PARENT-1-PROJECT_LOC/vtm/assets'
+  linkedResource name: 'assets', type: '2',
+		 locationUri: 'PARENT-1-PROJECT_LOC/vtm-themes/resources/assets'
 }
-

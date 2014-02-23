@@ -23,7 +23,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
-import org.oscim.theme.InternalRenderTheme;
+import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import org.oscim.tiling.source.mapfile.MapInfo;
 
@@ -68,17 +68,17 @@ public class MapsforgeMapActivity extends MapActivity {
 
 		switch (item.getItemId()) {
 			case R.id.theme_default:
-				mMap.setTheme(InternalRenderTheme.DEFAULT);
+				mMap.setTheme(VtmThemes.DEFAULT);
 				item.setChecked(true);
 				return true;
 
 			case R.id.theme_tubes:
-				mMap.setTheme(InternalRenderTheme.TRONRENDER);
+				mMap.setTheme(VtmThemes.TRONRENDER);
 				item.setChecked(true);
 				return true;
 
 			case R.id.theme_osmarender:
-				mMap.setTheme(InternalRenderTheme.OSMARENDER);
+				mMap.setTheme(VtmThemes.OSMARENDER);
 				item.setChecked(true);
 				return true;
 		}
@@ -100,17 +100,17 @@ public class MapsforgeMapActivity extends MapActivity {
 			if (mTileSource.setMapFile(file)) {
 
 				VectorTileLayer l = mMap.setBaseMap(mTileSource);
-				mMap.setTheme(InternalRenderTheme.DEFAULT);
+				mMap.setTheme(VtmThemes.DEFAULT);
 				mMap.layers().add(new LabelLayer(mMap, l));
 
 				MapInfo info = mTileSource.getMapInfo();
 				if (info.boundingBox != null) {
 					MapPosition pos = new MapPosition();
 					pos.setByBoundingBox(info.boundingBox,
-                                         Tile.SIZE * 4,
-                                         Tile.SIZE * 4);
+					                     Tile.SIZE * 4,
+					                     Tile.SIZE * 4);
 					mMap.setMapPosition(pos);
-					Samples.log.debug("set position {}",pos);
+					Samples.log.debug("set position {}", pos);
 				} else if (info.mapCenter != null) {
 
 					double scale = 1 << 8;

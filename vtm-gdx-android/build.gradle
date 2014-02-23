@@ -9,20 +9,25 @@ buildscript {
 
 apply plugin: 'android'
 
+ext.gdxVersion = "1.0-SNAPSHOT"
+
 dependencies {
   compile project(':vtm-gdx')
+  compile project(':vtm-themes')
   compile files('../vtm-ext-libs/gdx/gdx-backend-android.jar')
-  compile fileTree(dir: 'libs', include: '*.jar')
+  //natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
+  //natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+  //compile fileTree(dir: 'libs', include: '*.jar')
 }
 
-task copyAssets(type: Copy) {
-  from "$rootDir/vtm/assets"
-  into "assets"
-  include '**/*'
-}
+// task copyAssets(type: Copy) {
+//   from "$rootDir/vtm/assets"
+//   into "assets"
+//   include '**/*'
+// }
 
-tasks.withType(JavaCompile) { compileTask -> 
-  compileTask.dependsOn copyAssets }
+// tasks.withType(JavaCompile) { compileTask ->
+//   compileTask.dependsOn copyAssets }
 
 android {
   compileSdkVersion 19
@@ -83,14 +88,14 @@ eclipse.classpath {
 }
 
 eclipse.project {
-  natures = ['com.android.ide.eclipse.adt.AndroidNature', 
+  natures = ['com.android.ide.eclipse.adt.AndroidNature',
 	     'org.eclipse.jdt.core.javanature']
 
   buildCommand 'com.android.ide.eclipse.adt.ResourceManagerBuilder'
   buildCommand 'com.android.ide.eclipse.adt.PreCompilerBuilder'
   buildCommand 'com.android.ide.eclipse.adt.ApkBuilder'
 
-  linkedResource name: 'assets', type: '2', 
+  linkedResource name: 'assets', type: '2',
 		 locationUri: 'PARENT-1-PROJECT_LOC/vtm/assets'
 
   // use extracted jni .so in eclipse

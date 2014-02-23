@@ -5,14 +5,14 @@ apply plugin: 'application'
 
 mainClassName = 'org.oscim.gdx.GdxMapApp'
 
-task copyAssets(type: Copy) {
-  from "$rootDir/vtm/assets"
-  into "assets"
-  include '**/*'
-}
+// task copyAssets(type: Copy) {
+//   from "$rootDir/vtm/assets"
+//   into "assets"
+//   include '**/*'
+// }
 
-tasks.withType(JavaCompile) { compileTask ->
-  compileTask.dependsOn copyAssets }
+// tasks.withType(JavaCompile) { compileTask ->
+//   compileTask.dependsOn copyAssets }
 
 sourceSets {
   main.java.srcDirs = ['src']
@@ -25,15 +25,15 @@ run { ignoreExitValue = true }
 
 dependencies {
   compile project(':vtm-gdx')
+  compile project(':vtm-themes')
   compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl.jar')
   compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl-natives.jar')
   compile files('../vtm-ext-libs/gdx/gdx-natives.jar')
   compile files('../vtm-ext-libs/gdx/vtm-jni-natives.jar')
-  //compile 'org.slf4j:slf4j-api:1.7.5'
   compile 'org.slf4j:slf4j-simple:1.7.5'
 }
 
 eclipse.project {
   linkedResource name: 'assets', type: '2',
-		 locationUri: 'PARENT-1-PROJECT_LOC/vtm/assets'
+		 locationUri: 'PARENT-1-PROJECT_LOC/vtm-themes/resources/assets'
 }

@@ -17,30 +17,15 @@
  */
 package org.oscim.theme;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.Serializable;
 
-import org.oscim.backend.AssetAdapter;
-
-/**
- * Enumeration of all internal rendering themes.
- */
-public enum InternalRenderTheme implements Theme {
-
-	DEFAULT("styles/default.xml"),
-	TRONRENDER("styles/tronrender.xml"),
-	TRON2("styles/newtron.xml"),
-	MAPNIK("styles/carto.xml"),
-	OSMARENDER("styles/osmarender.xml");
-
-	private final String mPath;
-
-	private InternalRenderTheme(String path) {
-		mPath = path;
-	}
-
-	@Override
-	public InputStream getRenderThemeAsStream() {
-		return AssetAdapter.g.openFileAsStream(mPath);
-		//InternalRenderTheme.class.getResourceAsStream(mPath);
-	}
+public interface ThemeFile extends Serializable {
+	/**
+	 * @return an InputStream to read the render theme data from.
+	 * @throws FileNotFoundException
+	 *             if the render theme file cannot be found.
+	 */
+	InputStream getRenderThemeAsStream() throws FileNotFoundException;
 }
