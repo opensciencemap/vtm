@@ -5,16 +5,10 @@ For an introduction see:
 http://www.gwtproject.org/articles/superdevmode.html
 http://www.badlogicgames.com/wordpress/?p=3073
 
-Preparation:
-- Change build.xml <property name="gwt.location" value="/home/src/gwt-2.5.1" /> to the appropriate location.
-  Then run 'ant extract-jars'
-
-- To serve tiles and the html project from the same origin one can use this apache2 configuration:
-	ProxyPass /tiles/ http://city.informatik.uni-bremen.de/tiles/vtm/
-    ProxyPassReverse /tiles/ http://city.informatik.uni-bremen.de/tiles/vtm/
-
-- Create a link to the project by 'ln -s /path/to/vtm/vtm-gdx-html/war ~/public_html/vtm' 
-  to make it available via http://localhost/~my_user/vtm
-  
 Running:  
-- The codeserver can be executed with 'ant VTMSuperDevMode'
+- Serve the website
+$../gradlew jettyDraftWar
+
+- The codeserver can be executed on another shell
+$export _JAVA_OPTIONS="-Xmx1024m"
+$../gradlew gwtSuperDev

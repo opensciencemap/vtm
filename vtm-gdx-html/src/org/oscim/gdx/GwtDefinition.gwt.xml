@@ -21,9 +21,8 @@
   
   <super-source path="emu" />
 
-  <set-configuration-property name="gdx.assetpath" value="../vtm/assets" />
-
-  <!-- for gradle build -->
+  <set-configuration-property name="gdx.assetpath" value="../vtm-themes/resources/assets" />
+  <!-- for gradle build, commend out for eclipse build/devmode -->
   <set-configuration-property name="gdx.assetoutputpath" value="build/gwt/draftOut" />
 
   <set-property name="user.agent" value="safari"/>

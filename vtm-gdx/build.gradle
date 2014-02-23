@@ -2,13 +2,13 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 sourceSets {
-	main.java.srcDirs = ['src']
-	main.resources.srcDirs = ['src']
+  main.java.srcDirs = ['src']
+  main.resources.srcDirs = ['src']
 }
 
 dependencies {
-	compile project(':vtm')
-	compile project(':vtm-themes')
-	compile files('../vtm-ext-libs/gdx/gdx.jar')
-	//compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+  compile project(':vtm')
+  compile project(':vtm-themes')
+  compile files('../vtm-ext-libs/gdx/gdx.jar')
+  //compile "com.badlogicgames.gdx:gdx:$gdxVersion"
 }

@@ -31,5 +31,4 @@ subprojects {
   }
 
   eclipseProject.dependsOn copySettings
-
 }

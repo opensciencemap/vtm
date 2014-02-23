@@ -1,9 +1,10 @@
 buildscript {
   repositories {
+    mavenLocal()
+    mavenCentral()
     maven {
       url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/'
     }
-    mavenCentral()
   }
   dependencies {
     classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.3'
@@ -32,12 +33,11 @@ dependencies {
   providedCompile 'org.slf4j:slf4j-api:1.7.5'
 }
 
-task copyAssets(type: Copy) {
-  from "$rootDir/vtm/assets"
-  into "$buildDir/gwt/draftOut/assets"
-  include '**/*'
-}
-
+// task copyAssets(type: Copy) {
+//   from "$rootDir/vtm/assets"
+//   into "$buildDir/gwt/draftOut/assets"
+//   include '**/*'
+// }
 
 //compileGwt.dependsOn copyAssets
 //draftCompileGwt.dependsOn copyAssets
@@ -45,20 +45,17 @@ task copyAssets(type: Copy) {
 gwt {
   gwtVersion='2.5.1'
   modules 'org.oscim.gdx.GwtDefinition'
-    
+
   superDev {
     noPrecompile=true
   }
-         
-  src += files(sourceSets.main.java.srcDirs)
-  src += files(project(':vtm').sourceSets.main.allJava.srcDirs) 
-  //src += files(project(':vtm').sourceSets.main.output.resourcesDir)
-    
-  src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs) 
-  //src += files(project(':vtm-gdx').sourceSets.main.output.resourcesDir)
-  //src += files(project(':vtm-gdx-html').sourceSets.main.allJava.srcDirs) 
-}
 
+  src += files(sourceSets.main.java.srcDirs)
+  src += files(project(':vtm').sourceSets.main.allJava.srcDirs)
+  src += files(project(':vtm-themes').sourceSets.main.allJava.srcDirs)
+  src += files(project(':vtm-themes').sourceSets.main.resources.srcDirs)
+  src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs)
+}
 
 // Configuring Eclipse classpath
 eclipse.classpath {
@@ -68,7 +65,7 @@ eclipse.classpath {
   file {
 
     whenMerged { classpath ->
-      classpath.entries.findAll { entry -> 
+      classpath.entries.findAll { entry ->
 	entry.path == 'src' }*.excludes = ['main','org/oscim/gdx/emu/']
     }
     // Direct manipulation of the generated classpath XML
