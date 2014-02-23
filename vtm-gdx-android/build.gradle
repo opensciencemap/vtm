@@ -7,9 +7,11 @@ buildscript {
   }
 }
 
-apply plugin: 'android'
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
 
-ext.gdxVersion = "1.0-SNAPSHOT"
+apply plugin: 'android'
 
 dependencies {
   compile project(':vtm-gdx')

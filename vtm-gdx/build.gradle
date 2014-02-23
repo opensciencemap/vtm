@@ -1,3 +1,9 @@
+repositories {
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    mavenLocal()
+}
+
 apply plugin: 'java'
 apply plugin: 'maven'
 
@@ -9,6 +15,6 @@ sourceSets {
 dependencies {
   compile project(':vtm')
   compile project(':vtm-themes')
-  compile files('../vtm-ext-libs/gdx/gdx.jar')
-  //compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+  compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+  //compile files('../vtm-ext-libs/gdx/gdx.jar')
 }

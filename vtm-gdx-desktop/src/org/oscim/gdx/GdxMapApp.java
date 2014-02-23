@@ -16,8 +16,6 @@
  */
 package org.oscim.gdx;
 
-import java.nio.Buffer;
-
 import org.oscim.awt.AwtGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
@@ -28,7 +26,6 @@ import org.oscim.utils.FastMath;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.backends.lwjgl.LwjglGL20;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class GdxMapApp extends GdxMap {
@@ -37,19 +34,19 @@ public class GdxMapApp extends GdxMap {
 	}
 
 	// wrap LwjglGL20 to add GL20 interface
-	static class GdxGL extends LwjglGL20 implements org.oscim.backend.GL20 {
-		@Override
-		public void glGetShaderSource(int shader, int bufsize, Buffer length, String source) {
-			throw new IllegalArgumentException("not implemented");
-		}
-	}
+	//	static class GdxGL extends GdxGL20 {
+	//		@Override
+	//		public void glGetShaderSource(int shader, int bufsize, Buffer length, String source) {
+	//			throw new IllegalArgumentException("not implemented");
+	//		}
+	//	}
 
 	public static void init() {
 		// load native library
 		new SharedLibraryLoader().load("vtm-jni");
 		// init globals
 		CanvasAdapter.g = AwtGraphics.get();
-		GLAdapter.g = new GdxGL();
+		GLAdapter.g = new GdxGL20();
 
 		GLAdapter.GDX_DESKTOP_QUIRKS = true;
 	}

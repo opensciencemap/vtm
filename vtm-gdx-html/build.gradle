@@ -11,6 +11,10 @@ buildscript {
   }
 }
 
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
 apply plugin: 'war'
 apply plugin: 'jetty'
 apply plugin: 'gwt'
@@ -25,10 +29,13 @@ sourceSets {
 
 
 dependencies {
-  compile project(':vtm-gdx')
-  providedCompile files('../vtm-ext-libs/gdx/gdx-sources.jar')
-  providedCompile files('../vtm-ext-libs/gdx/gdx-backend-gwt-sources.jar')
-  providedCompile files('../vtm-ext-libs/gdx/gdx-backend-gwt.jar')
+  providedCompile project(':vtm-gdx')
+  providedCompile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
+  providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
+  providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
+  //providedCompile files('../vtm-ext-libs/gdx/gdx-sources.jar')
+  //providedCompile files('../vtm-ext-libs/gdx/gdx-backend-gwt-sources.jar')
+  //providedCompile files('../vtm-ext-libs/gdx/gdx-backend-gwt.jar')
   providedCompile 'ru.finam:slf4j-gwt:1.2.1'
   providedCompile 'org.slf4j:slf4j-api:1.7.5'
 }
@@ -43,7 +50,7 @@ dependencies {
 //draftCompileGwt.dependsOn copyAssets
 
 gwt {
-  gwtVersion='2.5.1'
+  gwtVersion='2.6.0'
   modules 'org.oscim.gdx.GwtDefinition'
 
   superDev {
