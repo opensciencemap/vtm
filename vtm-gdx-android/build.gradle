@@ -10,7 +10,8 @@ buildscript {
 apply plugin: 'android'
 
 dependencies {
-  compile project(':vtm-android')
+  compile project(':vtm-gdx')
+  compile files('../vtm-ext-libs/gdx/gdx-backend-android.jar')
   compile fileTree(dir: 'libs', include: '*.jar')
 }
 
@@ -91,5 +92,10 @@ eclipse.project {
 
   linkedResource name: 'assets', type: '2', 
 		 locationUri: 'PARENT-1-PROJECT_LOC/vtm/assets'
+
+  // use extracted jni .so in eclipse
+  linkedResource name: 'libs', type: '2',
+		 locationUri: 'PARENT-1-PROJECT_LOC/vtm-ext-libs/vtm-gdx-android'
+
 }
 

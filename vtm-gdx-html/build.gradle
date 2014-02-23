@@ -1,0 +1,93 @@
+buildscript {
+  repositories {
+    maven {
+      url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/'
+    }
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.3'
+  }
+}
+
+apply plugin: 'war'
+apply plugin: 'jetty'
+apply plugin: 'gwt'
+apply plugin: 'eclipse'
+
+sourceSets {
+  main.java.srcDirs = ['src', 'src/org/oscim/gdx/emu']
+  //main.resources.srcDirs = ['src']
+  //main.resources.srcDirs = ['resources']
+  //output.resourcesDir = 'war'
+}
+
+
+dependencies {
+  compile project(':vtm-gdx')
+  providedCompile files('../vtm-ext-libs/gdx/gdx-sources.jar')
+  providedCompile files('../vtm-ext-libs/gdx/gdx-backend-gwt-sources.jar')
+  providedCompile files('../vtm-ext-libs/gdx/gdx-backend-gwt.jar')
+  providedCompile 'ru.finam:slf4j-gwt:1.2.1'
+  providedCompile 'org.slf4j:slf4j-api:1.7.5'
+}
+
+task copyAssets(type: Copy) {
+  from "$rootDir/vtm/assets"
+  into "$buildDir/gwt/draftOut/assets"
+  include '**/*'
+}
+
+
+//compileGwt.dependsOn copyAssets
+//draftCompileGwt.dependsOn copyAssets
+
+gwt {
+  gwtVersion='2.5.1'
+  modules 'org.oscim.gdx.GwtDefinition'
+    
+  superDev {
+    noPrecompile=true
+  }
+         
+  src += files(sourceSets.main.java.srcDirs)
+  src += files(project(':vtm').sourceSets.main.allJava.srcDirs) 
+  //src += files(project(':vtm').sourceSets.main.output.resourcesDir)
+    
+  src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs) 
+  //src += files(project(':vtm-gdx').sourceSets.main.output.resourcesDir)
+  //src += files(project(':vtm-gdx-html').sourceSets.main.allJava.srcDirs) 
+}
+
+
+// Configuring Eclipse classpath
+eclipse.classpath {
+  //customizing the classes output directory:
+  defaultOutputDir = file('war/WEB-INF/classes')
+
+  file {
+
+    whenMerged { classpath ->
+      classpath.entries.findAll { entry -> 
+	entry.path == 'src' }*.excludes = ['main','org/oscim/gdx/emu/']
+    }
+    // Direct manipulation of the generated classpath XML
+    //withXml {
+    // Since non-default source directories are used
+    // they need to be manually added to the classpath XML
+    //  def node = it.asNode()
+    //node.remove
+    // Main source directory
+    //  node.appendNode('classpathentry excluding="main/|org/oscim/gdx/emu/" kind="src" path="src"')
+    // Generated code directory
+    //node.appendNode('classpathentry kind="src" path="gen"')
+    //	}
+  }
+}
+
+
+task jettyDraftWar(type: JettyRunWar) {
+  dependsOn draftWar
+  dependsOn.remove('war')
+  webApp=draftWar.archivePath
+}

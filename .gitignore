@@ -15,9 +15,7 @@ build/
 /vtm/libs/
 /vtm-android-example/assets/
 /vtm-gdx-desktop/assets/
-/vtm-gdx-html/war/assets/
-/vtm-gdx-html/war/WEB-INF/
-/vtm-gdx-html/war/org.oscim.gdx.GwtDefinition/
+/vtm-gdx-html/war/
 /vtm-gdx-html/gwt-unitCache
 /vtm-gdx-ios/
 /vtm-spatialite/
@@ -28,8 +26,14 @@ build/
 /tmp/
 /themes/
 /vtm/assets/themes/
+
 .gradle
 .idea
 *.iml
+
+.settings
+.classpath
+.project
+
 local.properties
 

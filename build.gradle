@@ -1,26 +1,35 @@
 buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-    }
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
 
-    dependencies {
-        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.2'
-	classpath 'com.android.tools.build:gradle:0.7.+'
-	
-	// https://github.com/dcendents/android-maven-plugin
-	classpath 'com.github.dcendents:android-maven-plugin:1.0'
-    }
+  dependencies {
+    classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.2'
+  }
 }
 
 allprojects {
-	group = 'org.oscim'	
-	version = '0.5.9-SNAPSHOT'
+  apply plugin: 'idea'
 
-	repositories {
-		mavenCentral()
-		mavenLocal()
-	}
+  group = 'org.oscim'
+  version = '0.5.9-SNAPSHOT'
+
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
 }
 
+subprojects {
+  apply plugin: 'eclipse'
 
+  task copySettings(type: Copy) {
+    from "$rootDir/eclipse"
+    into ".settings"
+    include '**/*'
+  }
+
+  eclipseProject.dependsOn copySettings
+
+}
