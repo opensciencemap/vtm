@@ -2,9 +2,7 @@ buildscript {
   repositories {
     mavenLocal()
     mavenCentral()
-    maven {
-      url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/'
-    }
+    maven { url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/' }
   }
   dependencies {
     classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.3'
@@ -12,7 +10,7 @@ buildscript {
 }
 
 repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 apply plugin: 'war'
@@ -22,32 +20,16 @@ apply plugin: 'eclipse'
 
 sourceSets {
   main.java.srcDirs = ['src', 'src/org/oscim/gdx/emu']
-  //main.resources.srcDirs = ['src']
-  //main.resources.srcDirs = ['resources']
-  //output.resourcesDir = 'war'
 }
-
 
 dependencies {
   providedCompile project(':vtm-gdx')
   providedCompile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
   providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
   providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
-  //providedCompile files('../vtm-ext-libs/gdx/gdx-sources.jar')
-  //providedCompile files('../vtm-ext-libs/gdx/gdx-backend-gwt-sources.jar')
-  //providedCompile files('../vtm-ext-libs/gdx/gdx-backend-gwt.jar')
   providedCompile 'ru.finam:slf4j-gwt:1.2.1'
   providedCompile 'org.slf4j:slf4j-api:1.7.5'
 }
-
-// task copyAssets(type: Copy) {
-//   from "$rootDir/vtm/assets"
-//   into "$buildDir/gwt/draftOut/assets"
-//   include '**/*'
-// }
-
-//compileGwt.dependsOn copyAssets
-//draftCompileGwt.dependsOn copyAssets
 
 gwt {
   gwtVersion='2.6.0'
@@ -64,34 +46,22 @@ gwt {
   src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs)
 }
 
-// Configuring Eclipse classpath
-eclipse.classpath {
-  //customizing the classes output directory:
-  defaultOutputDir = file('war/WEB-INF/classes')
-
-  file {
-
-    whenMerged { classpath ->
-      classpath.entries.findAll { entry ->
-	entry.path == 'src' }*.excludes = ['main','org/oscim/gdx/emu/']
-    }
-    // Direct manipulation of the generated classpath XML
-    //withXml {
-    // Since non-default source directories are used
-    // they need to be manually added to the classpath XML
-    //  def node = it.asNode()
-    //node.remove
-    // Main source directory
-    //  node.appendNode('classpathentry excluding="main/|org/oscim/gdx/emu/" kind="src" path="src"')
-    // Generated code directory
-    //node.appendNode('classpathentry kind="src" path="gen"')
-    //	}
-  }
-}
-
-
+// Run jetty with draft compiled war
 task jettyDraftWar(type: JettyRunWar) {
   dependsOn draftWar
   dependsOn.remove('war')
   webApp=draftWar.archivePath
+}
+
+// Configuring Eclipse classpath
+eclipse.classpath {
+
+  defaultOutputDir = file('war/WEB-INF/classes')
+
+  file {
+    whenMerged { classpath ->
+      classpath.entries.findAll { entry ->
+	entry.path == 'src' }*.excludes = ['main','org/oscim/gdx/emu/']
+    }
+  }
 }

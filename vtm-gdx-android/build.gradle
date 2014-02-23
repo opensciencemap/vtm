@@ -8,7 +8,7 @@ buildscript {
 }
 
 repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 apply plugin: 'android'
@@ -16,15 +16,15 @@ apply plugin: 'android'
 dependencies {
   compile project(':vtm-gdx')
   compile project(':vtm-themes')
-  compile files('../vtm-ext-libs/gdx/gdx-backend-android.jar')
+  compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
   //natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
   //natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
-  //compile fileTree(dir: 'libs', include: '*.jar')
+  compile files("${rootDir}/vtm-ext-libs/native-libs.jar")
 }
 
-// task copyAssets(type: Copy) {
-//   from "$rootDir/vtm/assets"
-//   into "assets"
+// task copyLibs(type: Copy) {
+//   from "$rootDir/vtm-ext-libs/vtm-gdx-android"
+//   into "libs"
 //   include '**/*'
 // }
 
@@ -105,4 +105,3 @@ eclipse.project {
 		 locationUri: 'PARENT-1-PROJECT_LOC/vtm-ext-libs/vtm-gdx-android'
 
 }
-

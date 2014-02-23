@@ -10,19 +10,11 @@ buildscript {
 apply plugin: 'android'
 
 dependencies {
-  //compile fileTree(dir: 'libs', include: '*.jar')
+  //compile 'org.oscim:vtm-android:0.5.9-SNAPSHOT'
+  //compile 'org.oscim:vtm-themes:0.5.9-SNAPSHOT'
   compile project(':vtm-android')
   compile project(':vtm-themes')
 }
-
-// task copyAssets(type: Copy) {
-//   from "$rootDir/vtm/assets"
-//   into "assets"
-//   include '**/*'
-// }
-
-// tasks.withType(JavaCompile) { compileTask ->
-//   compileTask.dependsOn copyAssets }
 
 android {
   compileSdkVersion 19
@@ -31,10 +23,8 @@ android {
   sourceSets {
     main {
       manifest.srcFile 'AndroidManifest.xml'
-      java.srcDirs = ['src', 'assets']
+      java.srcDirs = ['src']
       resources.srcDirs = ['src', 'assets']
-      aidl.srcDirs = ['src', 'assets']
-      renderscript.srcDirs = ['src', 'assets']
       res.srcDirs = ['res']
       assets.srcDirs = ['assets']
     }
@@ -45,38 +35,23 @@ android {
 }
 
 // Including configurations into Eclipse
-eclipse.classpath.plusConfigurations += configurations.compile
 
-eclipse.jdt{
+eclipse.jdt {
   sourceCompatibility = 1.6
   targetCompatibility = 1.6
 }
 
 // Configuring Eclipse classpath
 eclipse.classpath {
-  //customizing the classes output directory:
+  plusConfigurations += configurations.compile
+
   defaultOutputDir = file('bin/classes')
 
   file {
-
-    // Manipulation of the classpath XML before merging local
-    // and generated copies
-    // beforeMerged { classpath ->
-    //   // Remove all source entries to avoid overlap
-    //   classpath.entries.removeAll() { c ->
-    //	c.kind == 'src'
-    //   }
-    // }
-
     // Direct manipulation of the generated classpath XML
     withXml {
-      // Since non-default source directories are used
-      // they need to be manually added to the classpath XML
       def node = it.asNode()
-
-      // Main source directory
       node.appendNode('classpathentry kind="src" path="src"')
-      // Generated code directory
       node.appendNode('classpathentry kind="src" path="gen"')
     }
   }
@@ -90,6 +65,4 @@ eclipse.project {
   buildCommand 'com.android.ide.eclipse.adt.PreCompilerBuilder'
   buildCommand 'com.android.ide.eclipse.adt.ApkBuilder'
 
-  linkedResource name: 'assets', type: '2',
-		 locationUri: 'PARENT-1-PROJECT_LOC/vtm-themes/resources/assets'
 }
