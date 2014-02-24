@@ -149,6 +149,12 @@ public class LwHttp {
 		}
 
 		@Override
+		public void close() throws IOException {
+			if (dbg)
+				log.debug("close()... ignored");
+		}
+
+		@Override
 		public synchronized void mark(int readlimit) {
 			if (dbg)
 				log.debug("mark {}", readlimit);
@@ -205,8 +211,8 @@ public class LwHttp {
 			if (data >= 0)
 				bytesRead += 1;
 
-			if (dbg)
-				log.debug("read {} {}", bytesRead, contentLength);
+			//if (dbg)
+			//	log.debug("read {} {}", bytesRead, contentLength);
 
 			if (cache != null && bytesRead > bytesWrote) {
 				bytesWrote = bytesRead;
@@ -332,8 +338,15 @@ public class LwHttp {
 				close();
 			else if (System.nanoTime() - mLastRequest > RESPONSE_TIMEOUT)
 				close();
-			else if (mResponseStream.available() > 0)
-				close();
+			else {
+				try {
+					if (mResponseStream.available() > 0)
+						close();
+				} catch (IOException e) {
+					log.debug(e.getMessage());
+					close();
+				}
+			}
 		}
 
 		if (mSocket == null) {
