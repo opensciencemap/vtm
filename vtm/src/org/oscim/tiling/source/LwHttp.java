@@ -24,6 +24,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URL;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.oscim.core.Tile;
 import org.oscim.utils.ArrayUtils;
@@ -74,6 +76,10 @@ public class LwHttp {
 	 *            Base url for tiles
 	 */
 	public LwHttp(URL url) {
+		this(url, null);
+	}
+
+	public LwHttp(URL url, Map<String, String> header) {
 
 		int port = url.getPort();
 		if (port < 0)
@@ -85,10 +91,19 @@ public class LwHttp {
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
+		String addRequest = "";
+		if (header != null) {
+			StringBuffer sb = new StringBuffer();
+			for (Entry<String, String> l : header.entrySet())
+				sb.append('\n').append(l.getKey()).append(": ").append(l.getValue());
+			addRequest = sb.toString();
+		}
+
 		REQUEST_GET_END = (" HTTP/1.1" +
 		        "\nUser-Agent: vtm/0.5.9" +
 		        "\nHost: " + host +
 		        "\nConnection: Keep-Alive" +
+		        addRequest +
 		        "\n\n").getBytes();
 
 		mHost = host;
