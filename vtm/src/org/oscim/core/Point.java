@@ -48,4 +48,25 @@ public class Point {
 	public String toString() {
 		return x + " " + y;
 	}
+
+	public void setPerpendicular(Point other) {
+		x = -other.y;
+		y = other.x;
+	}
+
+	public void setPerpendicular(Point p1, Point p2) {
+		x = p1.x + p2.x;
+		y = p1.y + p2.y;
+
+		double a = p2.x * y - p2.y * x;
+
+		if (a < 0.01 && a > -0.01) {
+			/* Almost straight */
+			x = -p2.y;
+			y = p2.x;
+		} else {
+			x /= a;
+			y /= a;
+		}
+	}
 }
