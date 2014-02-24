@@ -28,6 +28,7 @@ public enum InternalRenderTheme implements Theme {
 
 	DEFAULT("styles/default.xml"),
 	TRONRENDER("styles/tronrender.xml"),
+	TRON2("styles/newtron.xml"),
 	MAPNIK("styles/carto.xml"),
 	OSMARENDER("styles/osmarender.xml");
 
