@@ -169,7 +169,17 @@ public final class LineLayer extends RenderElement {
 			if (length < 4)
 				continue;
 
+			/* start an enpoint are equal */
+			if (length == 4 &&
+			        points[ipos] == points[ipos + 2] &&
+			        points[ipos + 1] == points[ipos + 3])
+				continue;
 
+			/* avoid simple 180 degree angles */
+			if (length == 6 &&
+			        points[ipos] == points[ipos + 4] &&
+			        points[ipos + 1] == points[ipos + 5])
+				length -= 2;
 
 			vertexItem = addLine(vertexItem, points, ipos, length, rounded, squared, closed);
 
