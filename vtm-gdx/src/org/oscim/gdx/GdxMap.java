@@ -27,7 +27,7 @@ import org.oscim.map.Layers;
 import org.oscim.map.Map;
 import org.oscim.map.ViewController;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.theme.InternalRenderTheme;
+import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 
 import com.badlogic.gdx.Application;
@@ -133,7 +133,7 @@ public abstract class GdxMap implements ApplicationListener {
 
 		if (tileSource != null) {
 			mMapLayer = mMap.setBaseMap(tileSource);
-			mMap.setTheme(InternalRenderTheme.DEFAULT);
+			mMap.setTheme(VtmThemes.DEFAULT);
 
 			if (buildings)
 				layers.add(new BuildingLayer(mMap, mMapLayer));
@@ -292,17 +292,17 @@ public abstract class GdxMap implements ApplicationListener {
 					break;
 
 				case Input.Keys.D:
-					mMap.setTheme(InternalRenderTheme.DEFAULT);
+					mMap.setTheme(VtmThemes.DEFAULT);
 					mMap.updateMap(false);
 					break;
 
 				case Input.Keys.T:
-					mMap.setTheme(InternalRenderTheme.TRONRENDER);
+					mMap.setTheme(VtmThemes.TRONRENDER);
 					mMap.updateMap(false);
 					break;
 
 				case Input.Keys.R:
-					mMap.setTheme(InternalRenderTheme.OSMARENDER);
+					mMap.setTheme(VtmThemes.OSMARENDER);
 					mMap.updateMap(false);
 					break;
 

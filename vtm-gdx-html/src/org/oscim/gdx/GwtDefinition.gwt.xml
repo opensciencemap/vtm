@@ -2,7 +2,7 @@
 <module>
   <entry-point class="org.oscim.gdx.client.GwtLauncher" />
   <inherits name="com.google.gwt.xml.XML" />
-  <inherits name="org.slf4j.Slf4j" />
+  <inherits name="ru.finam.slf4jgwt.logging.gwt.Logging"/>
 
   <set-property name='gwt.logging.enabled' value='TRUE' />
   <set-property name='gwt.logging.consoleHandler' value='ENABLED' />
@@ -13,13 +13,17 @@
   <inherits name="GdxMap" />
   <inherits name="com.badlogic.gdx.backends.gdx_backends_gwt" />
   <inherits name="com.google.gwt.user.theme.chrome.Chrome" />
-  
+    
   <!-- super dev mode -->
   <add-linker name="xsiframe"/>
   <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
   <set-configuration-property name="devModeRedirectEnabled" value="true"/>
   
   <super-source path="emu" />
-  <set-configuration-property name="gdx.assetpath" value="../vtm/assets" />
+
+  <set-configuration-property name="gdx.assetpath" value="../vtm-themes/resources/assets" />
+  <!-- for gradle build, commend out for eclipse build/devmode -->
+  <set-configuration-property name="gdx.assetoutputpath" value="build/gwt/draftOut" />
+
   <set-property name="user.agent" value="safari"/>
 </module>

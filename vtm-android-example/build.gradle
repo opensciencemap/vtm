@@ -1,34 +1,68 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.8.+'
+  }
+}
+
 apply plugin: 'android'
 
 dependencies {
-	compile project(':vtm-android')
-	compile fileTree(dir: 'libs', include: '*.jar')
+  //compile 'org.oscim:vtm-android:0.5.9-SNAPSHOT'
+  //compile 'org.oscim:vtm-themes:0.5.9-SNAPSHOT'
+  compile project(':vtm-android')
+  compile project(':vtm-themes')
 }
-
-task copyAssets(type: Copy) {
-	from "$rootDir/vtm/assets"
-	into "assets"
-	include '**/*'
-}
-
-tasks.withType(JavaCompile) { compileTask -> compileTask.dependsOn copyAssets }
 
 android {
-	compileSdkVersion 19
-	buildToolsVersion '19.0.1'
+  compileSdkVersion 19
+  buildToolsVersion '19.0.1'
 
-	sourceSets {
-		main {
-			manifest.srcFile 'AndroidManifest.xml'
-			java.srcDirs = ['src', 'assets']
-			resources.srcDirs = ['src', 'assets']
-			aidl.srcDirs = ['src', 'assets']
-			renderscript.srcDirs = ['src', 'assets']
-			res.srcDirs = ['res']
-			assets.srcDirs = ['assets']
-		}
+  sourceSets {
+    main {
+      manifest.srcFile 'AndroidManifest.xml'
+      java.srcDirs = ['src']
+      resources.srcDirs = ['src', 'assets']
+      res.srcDirs = ['res']
+      assets.srcDirs = ['assets']
+    }
 
-		debug.setRoot('build-types/debug')
-		release.setRoot('build-types/release')
-	}
+    debug.setRoot('build-types/debug')
+    release.setRoot('build-types/release')
+  }
+}
+
+// Including configurations into Eclipse
+
+eclipse.jdt {
+  sourceCompatibility = 1.6
+  targetCompatibility = 1.6
+}
+
+// Configuring Eclipse classpath
+eclipse.classpath {
+  plusConfigurations += configurations.compile
+
+  defaultOutputDir = file('bin/classes')
+
+  file {
+    // Direct manipulation of the generated classpath XML
+    withXml {
+      def node = it.asNode()
+      node.appendNode('classpathentry kind="src" path="src"')
+      node.appendNode('classpathentry kind="src" path="gen"')
+    }
+  }
+}
+
+eclipse.project {
+  natures = ['com.android.ide.eclipse.adt.AndroidNature',
+	     'org.eclipse.jdt.core.javanature']
+
+  buildCommand 'com.android.ide.eclipse.adt.ResourceManagerBuilder'
+  buildCommand 'com.android.ide.eclipse.adt.PreCompilerBuilder'
+  buildCommand 'com.android.ide.eclipse.adt.ApkBuilder'
+
 }

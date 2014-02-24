@@ -29,7 +29,7 @@ import org.oscim.layers.tile.vector.OsmTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.IRenderTheme;
-import org.oscim.theme.InternalRenderTheme;
+import org.oscim.theme.ThemeFile;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tiling.TileSource;
 import org.oscim.utils.async.AsyncExecutor;
@@ -146,7 +146,7 @@ public abstract class Map {
 	 * Utility function to set theme of base vector-layer and
 	 * use map background color from theme.
 	 */
-	public void setTheme(InternalRenderTheme theme) {
+	public void setTheme(ThemeFile theme) {
 		if (mBaseLayer == null) {
 			log.error("No base layer set");
 			throw new IllegalStateException();

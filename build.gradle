@@ -1,26 +1,46 @@
 buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-    }
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
 
-    dependencies {
-        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.2'
-	classpath 'com.android.tools.build:gradle:0.7.+'
-	
-	// https://github.com/dcendents/android-maven-plugin
-	classpath 'com.github.dcendents:android-maven-plugin:1.0'
-    }
+  dependencies {
+    classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.3'
+  }
 }
+
+apply from:'jdee.gradle'
 
 allprojects {
-	group = 'org.oscim'	
-	version = '0.5.9-SNAPSHOT'
+  group = 'org.oscim'
+  version = '0.5.9-SNAPSHOT'
 
-	repositories {
-		mavenCentral()
-		mavenLocal()
-	}
+  ext.gdxVersion = "1.0-SNAPSHOT"
+
+  repositories {
+    mavenCentral()
+    //maven { url 'https://github.com/hjanetzek/maven-repo/raw/master/' }
+    mavenLocal()
+  }
+
+  // create IntelliJ project settings - untested
+  apply plugin: 'idea'
 }
 
+subprojects {
+  // create eclipse  project settings
+  apply plugin: 'eclipse'
+
+  task copySettings(type: Copy) {
+    from "$rootDir/eclipse"
+    into ".settings"
+    include '**/*'
+  }
+
+  eclipseProject.dependsOn copySettings
+
+  // create emacs JDEE project settings
+  // http://ignatyev-dev.blogspot.de/2013/07/gradle-projects-in-jdee.html
+  apply from:'../jdee.gradle'
+}
 

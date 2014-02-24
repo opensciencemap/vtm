@@ -1,29 +1,96 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.8.+'
+    // for aar/maven stuff
+    // https://github.com/dcendents/android-maven-plugin
+    classpath 'com.github.dcendents:android-maven-plugin:1.0'
+  }
+}
+
 apply plugin: 'android-library'
 apply plugin: 'android-maven'
 
 dependencies {
-	compile fileTree(dir: "../vtm-ext-libs/vtm-android", include: 'native-libs-*.jar')
-	compile project(':vtm')
-	compile 'com.android.support:support-v4:19.0.1'
-	compile 'org.slf4j:slf4j-android:1.7.6'
+  //compile 'org.oscim:vtm:0.5.9-SNAPSHOT'
+  compile project(':vtm')
+
+  compile 'com.android.support:support-v4:19.0.1'
+  compile 'org.slf4j:slf4j-android:1.7.6'
+
+  // local jars will be packaged into the aar
+  compile files("${rootDir}/vtm-ext-libs/native-libs.jar")
 }
 
 android {
-	compileSdkVersion 19
-	buildToolsVersion '19.0.1'
+  compileSdkVersion 19
+  buildToolsVersion '19.0.1'
 
-	sourceSets {
-		main {
-			manifest.srcFile 'AndroidManifest.xml'
-			java.srcDirs = ['src']
-			resources.srcDirs = ['src']
-			aidl.srcDirs = ['src']
-			renderscript.srcDirs = ['src']
-			res.srcDirs = ['res']
-			assets.srcDirs = ['assets']
-		}
+  sourceSets {
+    main {
+      manifest.srcFile 'AndroidManifest.xml'
+      java.srcDirs = ['src']
+      resources.srcDirs = ['src']
+      res.srcDirs = ['res']
+      assets.srcDirs = ['assets']
+    }
+    debug.setRoot('build-types/debug')
+    release.setRoot('build-types/release')
+  }
 
-		debug.setRoot('build-types/debug')
-		release.setRoot('build-types/release')
+  lintOptions.abortOnError false
+}
+
+eclipse {
+  classpath {
+    plusConfigurations += configurations.compile
+
+    //customizing the classes output directory:
+    defaultOutputDir = file('bin/classes')
+
+    file {
+      // Manipulation of the classpath XML before merging local
+      // and generated copies
+      beforeMerged { classpath ->
+	// Remove all source entries to avoid overlap
+	classpath.entries.removeAll() { c ->
+	  c.kind == 'src'
 	}
+      }
+
+      // only used to explode jni .so into aar
+      whenMerged { classpath ->
+	classpath.entries.findAll { entry ->
+	  entry.path.contains('native-libs') }*.exported = false
+      }
+
+      // Direct manipulation of the generated classpath XML
+      withXml {
+	// Since non-default source directories are used
+	// they need to be manually added to the classpath XML
+	def node = it.asNode()
+	// Main source directory and generated code directory
+	node.appendNode('classpathentry kind="src" path="src"')
+	node.appendNode('classpathentry kind="src" path="gen"')
+
+      }
+    }
+  }
+  jdt {
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+  }
+  project {
+    natures = ['com.android.ide.eclipse.adt.AndroidNature',
+	       'org.eclipse.jdt.core.javanature']
+    buildCommand 'com.android.ide.eclipse.adt.ResourceManagerBuilder'
+    buildCommand 'com.android.ide.eclipse.adt.PreCompilerBuilder'
+    buildCommand 'com.android.ide.eclipse.adt.ApkBuilder'
+
+    // use extracted jni .so in eclipse
+    linkedResource name: 'libs', type: '2',
+	   locationUri: 'PARENT-1-PROJECT_LOC/vtm-ext-libs/vtm-android'
+  }
 }

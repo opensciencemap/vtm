@@ -30,7 +30,7 @@ import org.oscim.backend.AssetAdapter;
  * An ExternalRenderTheme allows for customizing the rendering style of the map
  * via an XML file.
  */
-public class ExternalRenderTheme implements Theme {
+public class ExternalRenderTheme implements ThemeFile {
 	private static final long serialVersionUID = 1L;
 
 	private final long mFileModificationDate;

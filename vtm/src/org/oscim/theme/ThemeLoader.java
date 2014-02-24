@@ -30,16 +30,6 @@ public class ThemeLoader {
 	static final Logger log = LoggerFactory.getLogger(ThemeLoader.class);
 
 	/**
-	 * Load internal theme, see {@link InternalRenderTheme}.
-	 * 
-	 * @param internalRenderTheme ...
-	 * @return ...
-	 */
-	public static IRenderTheme load(InternalRenderTheme internalRenderTheme) {
-		return load((Theme) internalRenderTheme);
-	}
-
-	/**
 	 * Load theme from XML file.
 	 * 
 	 * @param renderThemePath ..
@@ -50,7 +40,7 @@ public class ThemeLoader {
 		return load(new ExternalRenderTheme(renderThemePath));
 	}
 
-	public static IRenderTheme load(Theme theme) {
+	public static IRenderTheme load(ThemeFile theme) {
 
 		InputStream inputStream = null;
 		try {

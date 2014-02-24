@@ -18,7 +18,7 @@
 import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
-import org.oscim.theme.InternalRenderTheme;
+import org.oscim.theme.VtmThemes;
 
 import android.os.Bundle;
 import android.view.Menu;
@@ -36,9 +36,10 @@ public class SimpleMapActivity extends BaseMapActivity {
 
 		//layers.add(new TileGridLayer(mMap));
 
-		mMap.setTheme(InternalRenderTheme.DEFAULT);
-		//mMap.setTheme(InternalRenderTheme.TRONRENDER);
-		//mMap.setTheme(InternalRenderTheme.OSMARENDER);
+		mMap.setTheme(VtmThemes.DEFAULT);
+		//mMap.setTheme(VtmThemes.TRONRENDER);
+		//mMap.setTheme(VtmThemes.TRON2);
+		//mMap.setTheme(VtmThemes.OSMARENDER);
 
 		mMap.setMapPosition(53.08, 8.83, Math.pow(2, 10));
 	}
@@ -54,17 +55,17 @@ public class SimpleMapActivity extends BaseMapActivity {
 
 		switch (item.getItemId()) {
 			case R.id.theme_default:
-				mMap.setTheme(InternalRenderTheme.DEFAULT);
+				mMap.setTheme(VtmThemes.DEFAULT);
 				item.setChecked(true);
 				return true;
 
 			case R.id.theme_tubes:
-				mMap.setTheme(InternalRenderTheme.TRONRENDER);
+				mMap.setTheme(VtmThemes.TRONRENDER);
 				item.setChecked(true);
 				return true;
 
 			case R.id.theme_osmarender:
-				mMap.setTheme(InternalRenderTheme.OSMARENDER);
+				mMap.setTheme(VtmThemes.OSMARENDER);
 				item.setChecked(true);
 				return true;
 		}
@@ -77,18 +78,18 @@ public class SimpleMapActivity extends BaseMapActivity {
 		mMapView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				InternalRenderTheme t;
+				VtmThemes t;
 				if (i == 0)
-					t = InternalRenderTheme.DEFAULT;
+					t = VtmThemes.DEFAULT;
 				else if (i == 1)
-					t = InternalRenderTheme.TRONRENDER;
+					t = VtmThemes.TRONRENDER;
 				else
-					t = InternalRenderTheme.OSMARENDER;
+					t = VtmThemes.OSMARENDER;
 
 				mMapView.getMap().setTheme(t);
 
 				loooop((i + 1) % 3);
 			}
-		}, 300 + (int)(Math.random() * 200));
+		}, 300 + (int) (Math.random() * 200));
 	}
 }

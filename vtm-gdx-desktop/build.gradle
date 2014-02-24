@@ -1,3 +1,6 @@
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -5,29 +8,37 @@ apply plugin: 'application'
 
 mainClassName = 'org.oscim.gdx.GdxMapApp'
 
-task copyAssets(type: Copy) {
-	from "$rootDir/vtm/assets"
-	into "assets"
-	include '**/*'
-}
+// task copyAssets(type: Copy) {
+//   from "$rootDir/vtm/assets"
+//   into "assets"
+//   include '**/*'
+// }
 
-tasks.withType(JavaCompile) { compileTask -> compileTask.dependsOn copyAssets }
+// tasks.withType(JavaCompile) { compileTask ->
+//   compileTask.dependsOn copyAssets }
 
 sourceSets {
-	main.java.srcDirs = ['src']
-	main.resources.srcDirs = ['src']
-	main.resources.srcDirs = ['assets']
-	output.resourcesDir = 'assets'
+  main.java.srcDirs = ['src']
+  main.resources.srcDirs = ['src']
+  main.resources.srcDirs = ['assets']
+  output.resourcesDir = 'assets'
 }
 
 run { ignoreExitValue = true }
 
 dependencies {
-	compile project(':vtm-gdx')
-	compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl.jar')
-	compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl-natives.jar')
-	compile files('../vtm-ext-libs/gdx/gdx-natives.jar')
-	compile files('../vtm-ext-libs/gdx/vtm-jni-natives.jar')
-	compile 'org.slf4j:slf4j-api:1.7.5'
-	compile 'org.slf4j:slf4j-simple:1.7.5'
+  compile project(':vtm-gdx')
+  compile project(':vtm-themes')
+  compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+  compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+  //compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl.jar')
+  //compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl-natives.jar')
+  //compile files('../vtm-ext-libs/gdx/gdx-natives.jar')
+  compile files('../vtm-ext-libs/gdx/vtm-jni-natives.jar')
+  compile 'org.slf4j:slf4j-simple:1.7.5'
+}
+
+eclipse.project {
+  linkedResource name: 'assets', type: '2',
+		 locationUri: 'PARENT-1-PROJECT_LOC/vtm-themes/resources/assets'
 }
