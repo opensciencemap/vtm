@@ -128,7 +128,7 @@ public class GeometryBuffer {
 	 * @param x the x ordinate
 	 * @param y the y ordinate
 	 */
-	public void addPoint(float x, float y) {
+	public GeometryBuffer addPoint(float x, float y) {
 		if (pointPos > pointLimit)
 			ensurePointSize((pointPos >> 1) + 1, true);
 
@@ -136,6 +136,7 @@ public class GeometryBuffer {
 		points[pointPos++] = y;
 
 		index[indexPos] += 2;
+		return this;
 	}
 
 	public boolean isPoly() {
@@ -172,12 +173,12 @@ public class GeometryBuffer {
 	/**
 	 * Start a new line. Sets geometry type for lines.
 	 */
-	public void startLine() {
+	public GeometryBuffer startLine() {
 		setOrCheckMode(GeometryType.LINE);
 
 		// ignore
 		if (index[indexPos] == 0)
-			return;
+			return this;
 
 		// start next
 		if ((index[0] >= 0) && (++indexPos >= index.length))
@@ -189,12 +190,13 @@ public class GeometryBuffer {
 		// set new end marker
 		if (index.length > indexPos + 1)
 			index[indexPos + 1] = -1;
+		return this;
 	}
 
 	/**
 	 * Start a new polygon. Sets geometry type for polygons.
 	 */
-	public void startPolygon() {
+	public GeometryBuffer startPolygon() {
 		boolean start = (type == GeometryType.NONE);
 		setOrCheckMode(GeometryType.POLY);
 
@@ -215,6 +217,8 @@ public class GeometryBuffer {
 		// set new end marker
 		if (index.length > indexPos + 1)
 			index[indexPos + 1] = -1;
+
+		return this;
 	}
 
 	/**
@@ -310,6 +314,28 @@ public class GeometryBuffer {
 
 	public void addPoint(Point p) {
 		addPoint((float) p.x, (float) p.y);
+	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		int o = 0;
+		for (int i = 0; i < index.length; i++) {
+			if (index[i] < 0)
+				break;
+			if (index[i] == 0)
+				continue;
+
+			for (int j = 0; j < index[i]; j += 2) {
+				sb.append('[')
+				    .append(points[o + j])
+				    .append(",")
+				    .append(points[o + j + 1])
+				    .append(']');
+			}
+			sb.append('\n');
+			o += index[i];
+		}
+		return sb.toString();
 	}
 
 }
