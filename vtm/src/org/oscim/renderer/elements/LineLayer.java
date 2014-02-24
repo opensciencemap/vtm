@@ -54,7 +54,7 @@ public final class LineLayer extends RenderElement {
 	 * not quite right.. need to go back so that additional
 	 * bevel vertices are at least MIN_DIST apart
 	 */
-	//private static final float JOIN_BEVEL = MIN_DIST
+	private static final float BEVEL_MIN = MIN_DIST * 4;
 
 	/**
 	 * mask for packing last two bits of extrusion vector with texture
@@ -107,10 +107,10 @@ public final class LineLayer extends RenderElement {
 			addLine(points, null, numPoints, closed);
 	}
 
-	private void addLine(float[] points, short[] index, int numPoints, boolean closed) {
+	private static int tmax = Tile.SIZE + 4;
+	private static int tmin = -4;
 
-		int tmax = Tile.SIZE + 4;
-		int tmin = -4;
+	private void addLine(float[] points, short[] index, int numPoints, boolean closed) {
 
 		boolean rounded = false;
 		boolean squared = false;
@@ -123,9 +123,7 @@ public final class LineLayer extends RenderElement {
 		if (vertexItems == null)
 			vertexItems = pool.get();
 
-		VertexItem si = Inlist.last(vertexItems);
-		short v[] = si.vertices;
-		int opos = si.used;
+		VertexItem vertexItem = Inlist.last(vertexItems);
 
 		/* Note: just a hack to save some vertices, when there are
 		 * more than 200 lines per type. FIXME make optional! */
@@ -157,13 +155,6 @@ public final class LineLayer extends RenderElement {
 		}
 
 		for (int i = 0, pos = 0; i < n; i++) {
-			float ux, uy;
-			float vx, vy;
-			float wx, wy;
-			float x, y;
-			float nextX, nextY;
-			double a;
-
 			if (index != null)
 				length = index[i];
 
@@ -171,490 +162,446 @@ public final class LineLayer extends RenderElement {
 			if (length < 0)
 				break;
 
-			/* need at least two points */
-			if (length < 4) {
-				pos += length;
-				continue;
-			}
-
-			/* amount of vertices used
-			 * + 2 for drawing triangle-strip
-			 * + 4 for round caps
-			 * + 2 for closing polygons */
-			numVertices += length + (rounded ? 6 : 2) + (closed ? 2 : 0);
-
 			int ipos = pos;
+			pos += length;
 
-			x = points[ipos++];
-			y = points[ipos++];
+			/* need at least two points */
+			if (length < 4)
+				continue;
 
-			nextX = points[ipos++];
-			nextY = points[ipos++];
 
-			/* Calculate triangle corners for the given width */
-			vx = nextX - x;
-			vy = nextY - y;
 
-			/* Unit vector to next node */
-			a = (float) Math.sqrt(vx * vx + vy * vy);
+			vertexItem = addLine(vertexItem, points, ipos, length, rounded, squared, closed);
 
-			vx /= a;
-			vy /= a;
+		}
+	}
 
-			/* perpendicular on the first segment */
-			ux = -vy;
-			uy = vx;
+	private void addVertex(short[] v, int pos, short x, short y, short dx, short dy) {
+		v[pos + 0] = x;
+		v[pos + 1] = y;
+		v[pos + 2] = dx;
+		v[pos + 3] = dy;
+	}
 
-			int ddx, ddy;
+	private VertexItem addVertex(VertexItem vertexItem,
+	        float x, float y,
+	        float vNextX, float vNextY,
+	        float vPrevX, float vPrevY) {
 
-			/* vertex point coordinate */
-			short ox = (short) (x * COORD_SCALE);
-			short oy = (short) (y * COORD_SCALE);
+		float ux = vNextX + vPrevX;
+		float uy = vNextY + vPrevY;
 
-			/* vertex extrusion vector, last two bit
-			 * encode texture coord. */
-			short dx, dy;
+		/* vPrev times perpendicular of sum(vNext, vPrev) */
+		double a = uy * vPrevX - ux * vPrevY;
 
-			/* when the endpoint is outside the tile region omit round caps. */
-			boolean outside = (x < tmin || x > tmax || y < tmin || y > tmax);
+		if (a < 0.01 && a > -0.01) {
+			ux = -vPrevY;
+			uy = vPrevX;
+		} else {
+			ux /= a;
+			uy /= a;
+		}
 
-			if (opos == SIZE) {
-				si = pool.getNext(si);
-				v = si.vertices;
+		short ox = (short) (x * COORD_SCALE);
+		short oy = (short) (y * COORD_SCALE);
+
+		int ddx = (int) (ux * DIR_SCALE);
+		int ddy = (int) (uy * DIR_SCALE);
+
+		int opos = vertexItem.used;
+		short[] v = vertexItem.vertices;
+
+		if (opos == SIZE) {
+			vertexItem = pool.getNext(vertexItem);
+			v = vertexItem.vertices;
+			opos = 0;
+		}
+
+		v[opos + 0] = ox;
+		v[opos + 1] = oy;
+		v[opos + 2] = (short) (0 | ddx & DIR_MASK);
+		v[opos + 3] = (short) (1 | ddy & DIR_MASK);
+
+		if ((opos += 4) == SIZE) {
+			vertexItem = pool.getNext(vertexItem);
+			v = vertexItem.vertices;
+			opos = 0;
+		}
+
+		v[opos + 0] = ox;
+		v[opos + 1] = oy;
+		v[opos + 2] = (short) (2 | -ddx & DIR_MASK);
+		v[opos + 3] = (short) (1 | -ddy & DIR_MASK);
+
+		vertexItem.used = opos + 4;
+		return vertexItem;
+
+	}
+
+	private VertexItem addLine(VertexItem vertexItem, float[] points, int start, int length,
+	        boolean rounded, boolean squared, boolean closed) {
+
+		float ux, uy;
+		float vPrevX, vPrevY;
+		float vNextX, vNextY;
+		float curX, curY;
+		float nextX, nextY;
+		double a;
+
+		short v[] = vertexItem.vertices;
+		int opos = vertexItem.used;
+
+		/* amount of vertices used
+		 * + 2 for drawing triangle-strip
+		 * + 4 for round caps
+		 * + 2 for closing polygons */
+		numVertices += length + (rounded ? 6 : 2) + (closed ? 2 : 0);
+
+		int ipos = start;
+
+		curX = points[ipos++];
+		curY = points[ipos++];
+
+		nextX = points[ipos++];
+		nextY = points[ipos++];
+
+		/* Unit vector to next node */
+		vPrevX = nextX - curX;
+		vPrevY = nextY - curY;
+		a = (float) Math.sqrt(vPrevX * vPrevX + vPrevY * vPrevY);
+		vPrevX /= a;
+		vPrevY /= a;
+
+		/* perpendicular on the first segment */
+		ux = -vPrevY;
+		uy = vPrevX;
+
+		int ddx, ddy;
+
+		/* vertex point coordinate */
+		short ox = (short) (curX * COORD_SCALE);
+		short oy = (short) (curY * COORD_SCALE);
+
+		/* vertex extrusion vector, last two bit
+		 * encode texture coord. */
+		short dx, dy;
+
+		/* when the endpoint is outside the tile region omit round caps. */
+		boolean outside = (curX < tmin || curX > tmax || curY < tmin || curY > tmax);
+
+		if (opos == SIZE) {
+			vertexItem = pool.getNext(vertexItem);
+			v = vertexItem.vertices;
+			opos = 0;
+		}
+
+		if (rounded && !outside) {
+			ddx = (int) ((ux - vPrevX) * DIR_SCALE);
+			ddy = (int) ((uy - vPrevY) * DIR_SCALE);
+			dx = (short) (0 | ddx & DIR_MASK);
+			dy = (short) (2 | ddy & DIR_MASK);
+
+			addVertex(v, opos, ox, oy, dx, dy);
+
+			if ((opos += 4) == SIZE) {
+				vertexItem = pool.getNext(vertexItem);
+				v = vertexItem.vertices;
 				opos = 0;
 			}
 
-			if (rounded && !outside) {
-				/* add first vertex twice */
-				ddx = (int) ((ux - vx) * DIR_SCALE);
-				ddy = (int) ((uy - vy) * DIR_SCALE);
-				dx = (short) (0 | ddx & DIR_MASK);
-				dy = (short) (2 | ddy & DIR_MASK);
+			addVertex(v, opos, ox, oy, dx, dy);
 
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = dx;
-				v[opos++] = dy;
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = dx;
-				v[opos++] = dy;
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				ddx = (int) (-(ux + vx) * DIR_SCALE);
-				ddy = (int) (-(uy + vy) * DIR_SCALE);
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = (short) (2 | ddx & DIR_MASK);
-				v[opos++] = (short) (2 | ddy & DIR_MASK);
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				/* Start of line */
-				ddx = (int) (ux * DIR_SCALE);
-				ddy = (int) (uy * DIR_SCALE);
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = (short) (0 | ddx & DIR_MASK);
-				v[opos++] = (short) (1 | ddy & DIR_MASK);
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = (short) (2 | -ddx & DIR_MASK);
-				v[opos++] = (short) (1 | -ddy & DIR_MASK);
-
-			} else {
-				/* outside means line is probably clipped
-				 * TODO should align ending with tile boundary
-				 * for now, just extend the line a little */
-				float tx = vx;
-				float ty = vy;
-
-				if (squared) {
-					tx = 0;
-					ty = 0;
-				} else if (!outside) {
-					tx *= 0.5;
-					ty *= 0.5;
-				}
-
-				if (rounded)
-					numVertices -= 2;
-
-				/* add first vertex twice */
-				ddx = (int) ((ux - tx) * DIR_SCALE);
-				ddy = (int) ((uy - ty) * DIR_SCALE);
-				dx = (short) (0 | ddx & DIR_MASK);
-				dy = (short) (1 | ddy & DIR_MASK);
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = dx;
-				v[opos++] = dy;
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = dx;
-				v[opos++] = dy;
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				ddx = (int) (-(ux + tx) * DIR_SCALE);
-				ddy = (int) (-(uy + ty) * DIR_SCALE);
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = (short) (2 | ddx & DIR_MASK);
-				v[opos++] = (short) (1 | ddy & DIR_MASK);
-
+			if ((opos += 4) == SIZE) {
+				vertexItem = pool.getNext(vertexItem);
+				v = vertexItem.vertices;
+				opos = 0;
 			}
 
-			x = nextX;
-			y = nextY;
-			/* Unit vector pointing back to previous node */
-			vx *= -1;
-			vy *= -1;
+			ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
+			ddy = (int) (-(uy + vPrevY) * DIR_SCALE);
 
-			int end = pos + length;
+			addVertex(v, opos, ox, oy,
+			          (short) (2 | ddx & DIR_MASK),
+			          (short) (2 | ddy & DIR_MASK));
 
-			for (;;) {
-				if (ipos < end) {
-					nextX = points[ipos++];
-					nextY = points[ipos++];
-				} else if (closed && ipos < end + 2) {
-					/* add startpoint == endpoint */
-					nextX = points[pos];
-					nextY = points[pos + 1];
-					ipos += 2;
-				} else
-					break;
+			if ((opos += 4) == SIZE) {
+				vertexItem = pool.getNext(vertexItem);
+				v = vertexItem.vertices;
+				opos = 0;
+			}
 
-				/* Unit vector pointing forward to next node */
-				wx = nextX - x;
-				wy = nextY - y;
-				a = Math.sqrt(wx * wx + wy * wy);
-				/* skip too short segmets */
-				if (a < mMinDist) {
-					numVertices -= 2;
-					continue;
-				}
-				wx /= a;
-				wy /= a;
+			/* Start of line */
+			ddx = (int) (ux * DIR_SCALE);
+			ddy = (int) (uy * DIR_SCALE);
 
-				double dotp = (wx * vx + wy * vy);
+			addVertex(v, opos, ox, oy,
+			          (short) (0 | ddx & DIR_MASK),
+			          (short) (1 | ddy & DIR_MASK));
 
-				//log.debug("acos " + dotp);
-				if (dotp > 0.7) {
-					/* add bevel join to avoid miter going to infinity */
-					numVertices += 2;
+			if ((opos += 4) == SIZE) {
+				vertexItem = pool.getNext(vertexItem);
+				v = vertexItem.vertices;
+				opos = 0;
+			}
 
-					//dotp = FastMath.clamp(dotp, -1, 1);
-					//double cos = Math.acos(dotp);
-					//log.debug("cos " + Math.toDegrees(cos));
-					//log.debug("back " + (mMinDist * 2 / Math.sin(cos + Math.PI / 2)));
+			addVertex(v, opos, ox, oy,
+			          (short) (2 | -ddx & DIR_MASK),
+			          (short) (1 | -ddy & DIR_MASK));
 
-					float px, py;
-					if (dotp > 0.999) {
-						/* 360 degree angle, set points aside */
-						ux = vx + wx;
-						uy = vy + wy;
-						a = wx * uy - wy * ux;
-						if (a < 0.1 && a > -0.1) {
-							/* Almost straight */
-							ux = -wy;
-							uy = wx;
-						} else {
-							ux /= a;
-							uy /= a;
-						}
-						//log.debug("aside " + a + " " + ux + " " + uy);
-						px = x - ux * MIN_DIST * 2;
-						py = y - uy * MIN_DIST * 2;
-						x = x + ux * MIN_DIST * 2;
-						y = y + uy * MIN_DIST * 2;
-					} else {
-						//log.debug("back");
-						/* go back by min dist */
-						px = x + vx * MIN_DIST * 2;
-						py = y + vy * MIN_DIST * 2;
-						/* go forward by min dist */
-						x = x + wx * MIN_DIST * 2;
-						y = y + wy * MIN_DIST * 2;
-					}
+		} else {
+			/* outside means line is probably clipped
+			 * TODO should align ending with tile boundary
+			 * for now, just extend the line a little */
+			float tx = vPrevX;
+			float ty = vPrevY;
 
-					/* Unit vector pointing forward to next node */
-					wx = x - px;
-					wy = y - py;
-					a = Math.sqrt(wx * wx + wy * wy);
-					wx /= a;
-					wy /= a;
+			if (squared) {
+				tx = 0;
+				ty = 0;
+			} else if (!outside) {
+				tx *= 0.5;
+				ty *= 0.5;
+			}
 
-					ux = vx + wx;
-					uy = vy + wy;
-					a = wx * uy - wy * ux;
-					if (a < 0.01 && a > -0.01) {
-						ux = -wy;
-						uy = wx;
+			if (rounded)
+				numVertices -= 2;
+
+			/* add first vertex twice */
+			ddx = (int) ((ux - tx) * DIR_SCALE);
+			ddy = (int) ((uy - ty) * DIR_SCALE);
+			dx = (short) (0 | ddx & DIR_MASK);
+			dy = (short) (1 | ddy & DIR_MASK);
+
+			addVertex(v, opos, ox, oy, dx, dy);
+
+			if ((opos += 4) == SIZE) {
+				vertexItem = pool.getNext(vertexItem);
+				v = vertexItem.vertices;
+				opos = 0;
+			}
+
+			addVertex(v, opos, ox, oy, dx, dy);
+
+			if ((opos += 4) == SIZE) {
+				vertexItem = pool.getNext(vertexItem);
+				v = vertexItem.vertices;
+				opos = 0;
+			}
+
+			ddx = (int) (-(ux + tx) * DIR_SCALE);
+			ddy = (int) (-(uy + ty) * DIR_SCALE);
+
+			addVertex(v, opos, ox, oy,
+			          (short) (2 | ddx & DIR_MASK),
+			          (short) (1 | ddy & DIR_MASK));
+		}
+
+		curX = nextX;
+		curY = nextY;
+
+		/* Unit vector pointing back to previous node */
+		vPrevX *= -1;
+		vPrevY *= -1;
+
+		vertexItem.used = opos + 4;
+
+		for (int end = start + length;;) {
+
+			if (ipos < end) {
+				nextX = points[ipos++];
+				nextY = points[ipos++];
+			} else if (closed && ipos < end + 2) {
+				/* add startpoint == endpoint */
+				nextX = points[start];
+				nextY = points[start + 1];
+				ipos += 2;
+			} else
+				break;
+
+			/* unit vector pointing forward to next node */
+			vNextX = nextX - curX;
+			vNextY = nextY - curY;
+			a = Math.sqrt(vNextX * vNextX + vNextY * vNextY);
+			/* skip too short segmets */
+			if (a < mMinDist) {
+				numVertices -= 2;
+				continue;
+			}
+			vNextX /= a;
+			vNextY /= a;
+
+			double dotp = (vNextX * vPrevX + vNextY * vPrevY);
+
+			//log.debug("acos " + dotp);
+			if (dotp > 0.65) {
+				/* add bevel join to avoid miter going to infinity */
+				numVertices += 2;
+
+				//dotp = FastMath.clamp(dotp, -1, 1);
+				//double cos = Math.acos(dotp);
+				//log.debug("cos " + Math.toDegrees(cos));
+				//log.debug("back " + (mMinDist * 2 / Math.sin(cos + Math.PI / 2)));
+
+				float px, py;
+				if (dotp > 0.999) {
+					/* 360 degree angle, set points aside */
+					ux = vPrevX + vNextX;
+					uy = vPrevY + vNextY;
+					a = vNextX * uy - vNextY * ux;
+					if (a < 0.1 && a > -0.1) {
+						/* Almost straight */
+						ux = -vNextY;
+						uy = vNextX;
 					} else {
 						ux /= a;
 						uy /= a;
 					}
-
-					ox = (short) (px * COORD_SCALE);
-					oy = (short) (py * COORD_SCALE);
-
-					ddx = (int) (ux * DIR_SCALE);
-					ddy = (int) (uy * DIR_SCALE);
-
-					if (opos == SIZE) {
-						si = pool.getNext(si);
-						v = si.vertices;
-						opos = 0;
-					}
-
-					v[opos++] = ox;
-					v[opos++] = oy;
-					v[opos++] = (short) (0 | ddx & DIR_MASK);
-					v[opos++] = (short) (1 | ddy & DIR_MASK);
-
-					if (opos == SIZE) {
-						si = pool.getNext(si);
-						v = si.vertices;
-						opos = 0;
-					}
-
-					v[opos++] = ox;
-					v[opos++] = oy;
-					v[opos++] = (short) (2 | -ddx & DIR_MASK);
-					v[opos++] = (short) (1 | -ddy & DIR_MASK);
-
-					/* flip unit vector to point back */
-					vx = -wx;
-					vy = -wy;
-
-					/* Unit vector pointing forward to next node */
-					wx = nextX - x;
-					wy = nextY - y;
-					a = Math.sqrt(wx * wx + wy * wy);
-					wx /= a;
-					wy /= a;
-				}
-
-				ux = vx + wx;
-				uy = vy + wy;
-				a = wx * uy - wy * ux;
-
-				if (a < 0.01 && a > -0.01) {
-					/* Almost straight */
-					ux = -wy;
-					uy = wx;
+					//log.debug("aside " + a + " " + ux + " " + uy);
+					px = curX - ux * BEVEL_MIN;
+					py = curY - uy * BEVEL_MIN;
+					curX = curX + ux * BEVEL_MIN;
+					curY = curY + uy * BEVEL_MIN;
 				} else {
-					ux /= a;
-					uy /= a;
+					//log.debug("back");
+					/* go back by min dist */
+					px = curX + vPrevX * BEVEL_MIN;
+					py = curY + vPrevY * BEVEL_MIN;
+					/* go forward by min dist */
+					curX = curX + vNextX * BEVEL_MIN;
+					curY = curY + vNextY * BEVEL_MIN;
 				}
 
-				ox = (short) (x * COORD_SCALE);
-				oy = (short) (y * COORD_SCALE);
+				/* unit vector pointing forward to next node */
+				vNextX = curX - px;
+				vNextY = curY - py;
+				a = Math.sqrt(vNextX * vNextX + vNextY * vNextY);
+				vNextX /= a;
+				vNextY /= a;
 
-				ddx = (int) (ux * DIR_SCALE);
-				ddy = (int) (uy * DIR_SCALE);
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = (short) (0 | ddx & DIR_MASK);
-				v[opos++] = (short) (1 | ddy & DIR_MASK);
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = (short) (2 | -ddx & DIR_MASK);
-				v[opos++] = (short) (1 | -ddy & DIR_MASK);
-
-				x = nextX;
-				y = nextY;
+				vertexItem = addVertex(vertexItem, px, py, vPrevX, vPrevY, vNextX, vNextY);
 
 				/* flip unit vector to point back */
-				vx = -wx;
-				vy = -wy;
+				vPrevX = -vNextX;
+				vPrevY = -vNextY;
+
+				/* unit vector pointing forward to next node */
+				vNextX = nextX - curX;
+				vNextY = nextY - curY;
+				a = Math.sqrt(vNextX * vNextX + vNextY * vNextY);
+				vNextX /= a;
+				vNextY /= a;
 			}
 
-			ux = vy;
-			uy = -vx;
+			vertexItem = addVertex(vertexItem, curX, curY, vPrevX, vPrevY, vNextX, vNextY);
 
-			outside = (x < tmin || x > tmax || y < tmin || y > tmax);
+			curX = nextX;
+			curY = nextY;
 
-			if (opos == SIZE) {
-				si = pool.getNext(si);
-				opos = 0;
-				v = si.vertices;
-			}
-
-			ox = (short) (x * COORD_SCALE);
-			oy = (short) (y * COORD_SCALE);
-
-			if (rounded && !outside) {
-				ddx = (int) (ux * DIR_SCALE);
-				ddy = (int) (uy * DIR_SCALE);
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = (short) (0 | ddx & DIR_MASK);
-				v[opos++] = (short) (1 | ddy & DIR_MASK);
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = (short) (2 | -ddx & DIR_MASK);
-				v[opos++] = (short) (1 | -ddy & DIR_MASK);
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				/* For rounded line edges */
-				ddx = (int) ((ux - vx) * DIR_SCALE);
-				ddy = (int) ((uy - vy) * DIR_SCALE);
-
-				dx = (short) (0 | ddx & DIR_MASK);
-				dy = (short) (0 | ddy & DIR_MASK);
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = dx;
-				v[opos++] = dy;
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				/* add last vertex twice */
-				ddx = (int) (-(ux + vx) * DIR_SCALE);
-				ddy = (int) (-(uy + vy) * DIR_SCALE);
-				dx = (short) (2 | ddx & DIR_MASK);
-				dy = (short) (0 | ddy & DIR_MASK);
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = dx;
-				v[opos++] = dy;
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = dx;
-				v[opos++] = dy;
-
-			} else {
-				if (squared) {
-					vx = 0;
-					vy = 0;
-				} else if (!outside) {
-					vx *= 0.5;
-					vy *= 0.5;
-				}
-
-				if (rounded)
-					numVertices -= 2;
-
-				ddx = (int) ((ux - vx) * DIR_SCALE);
-				ddy = (int) ((uy - vy) * DIR_SCALE);
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = (short) (0 | ddx & DIR_MASK);
-				v[opos++] = (short) (1 | ddy & DIR_MASK);
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				/* add last vertex twice */
-				ddx = (int) (-(ux + vx) * DIR_SCALE);
-				ddy = (int) (-(uy + vy) * DIR_SCALE);
-				dx = (short) (2 | ddx & DIR_MASK);
-				dy = (short) (1 | ddy & DIR_MASK);
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = dx;
-				v[opos++] = dy;
-
-				if (opos == SIZE) {
-					si = pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				v[opos++] = ox;
-				v[opos++] = oy;
-				v[opos++] = dx;
-				v[opos++] = dy;
-			}
-			pos += length;
+			/* flip vector to point back */
+			vPrevX = -vNextX;
+			vPrevY = -vNextY;
 		}
 
-		si.used = opos;
+		opos = vertexItem.used;
+		v = vertexItem.vertices;
+
+		ux = vPrevY;
+		uy = -vPrevX;
+
+		outside = (curX < tmin || curX > tmax || curY < tmin || curY > tmax);
+
+		if (opos == SIZE) {
+			vertexItem = pool.getNext(vertexItem);
+			v = vertexItem.vertices;
+			opos = 0;
+		}
+
+		ox = (short) (curX * COORD_SCALE);
+		oy = (short) (curY * COORD_SCALE);
+
+		if (rounded && !outside) {
+			ddx = (int) (ux * DIR_SCALE);
+			ddy = (int) (uy * DIR_SCALE);
+
+			addVertex(v, opos, ox, oy,
+			          (short) (0 | ddx & DIR_MASK),
+			          (short) (1 | ddy & DIR_MASK));
+
+			if ((opos += 4) == SIZE) {
+				vertexItem = pool.getNext(vertexItem);
+				v = vertexItem.vertices;
+				opos = 0;
+			}
+
+			addVertex(v, opos, ox, oy,
+			          (short) (2 | -ddx & DIR_MASK),
+			          (short) (1 | -ddy & DIR_MASK));
+
+			if ((opos += 4) == SIZE) {
+				vertexItem = pool.getNext(vertexItem);
+				v = vertexItem.vertices;
+				opos = 0;
+			}
+
+			/* For rounded line edges */
+			ddx = (int) ((ux - vPrevX) * DIR_SCALE);
+			ddy = (int) ((uy - vPrevY) * DIR_SCALE);
+
+			addVertex(v, opos, ox, oy,
+			          (short) (0 | ddx & DIR_MASK),
+			          (short) (0 | ddy & DIR_MASK));
+
+			/* last vertex */
+			ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
+			ddy = (int) (-(uy + vPrevY) * DIR_SCALE);
+			dx = (short) (2 | ddx & DIR_MASK);
+			dy = (short) (0 | ddy & DIR_MASK);
+
+		} else {
+			if (squared) {
+				vPrevX = 0;
+				vPrevY = 0;
+			} else if (!outside) {
+				vPrevX *= 0.5;
+				vPrevY *= 0.5;
+			}
+
+			if (rounded)
+				numVertices -= 2;
+
+			ddx = (int) ((ux - vPrevX) * DIR_SCALE);
+			ddy = (int) ((uy - vPrevY) * DIR_SCALE);
+
+			addVertex(v, opos, ox, oy,
+			          (short) (0 | ddx & DIR_MASK),
+			          (short) (1 | ddy & DIR_MASK));
+
+			/* last vertex */
+			ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
+			ddy = (int) (-(uy + vPrevY) * DIR_SCALE);
+			dx = (short) (2 | ddx & DIR_MASK);
+			dy = (short) (1 | ddy & DIR_MASK);
+		}
+
+		/* add last vertex twice */
+		if ((opos += 4) == SIZE) {
+			vertexItem = pool.getNext(vertexItem);
+			v = vertexItem.vertices;
+			opos = 0;
+		}
+
+		addVertex(v, opos, ox, oy, dx, dy);
+
+		if ((opos += 4) == SIZE) {
+			vertexItem = pool.getNext(vertexItem);
+			v = vertexItem.vertices;
+			opos = 0;
+		}
+		addVertex(v, opos, ox, oy, dx, dy);
+
+		vertexItem.used = opos + 4;
+
+		return vertexItem;
 	}
 
 	public static final class Renderer {
