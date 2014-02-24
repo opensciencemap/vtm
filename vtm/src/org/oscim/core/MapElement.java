@@ -47,4 +47,11 @@ public class MapElement extends GeometryBuffer {
 	public void clear() {
 		super.clear();
 	}
+
+	@Override
+	public String toString() {
+
+		return tags.toString() + '\n' + super.toString() + '\n';
+
+	}
 }
