@@ -34,6 +34,6 @@ public class OSciMap4TileSource extends UrlTileSource {
 
 	@Override
 	public ITileDataSource getDataSource() {
-		return new UrlTileDataSource(this, new TileDecoder(), new LwHttp(mUrl));
+		return new UrlTileDataSource(this, new TileDecoder(), new LwHttp(getUrl()));
 	}
 }

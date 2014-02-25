@@ -24,7 +24,7 @@ import org.oscim.tiling.TileSource;
 
 public abstract class UrlTileSource extends TileSource {
 
-	protected final URL mUrl;
+	private final URL mUrl;
 	private byte[] mExt;
 
 	public UrlTileSource(String urlString) {
@@ -83,7 +83,7 @@ public abstract class UrlTileSource extends TileSource {
 	 * @param pos current position
 	 * @return new position
 	 */
-	protected int formatTilePath(Tile tile, byte[] buf, int pos) {
+	public int formatTilePath(Tile tile, byte[] buf, int pos) {
 		String p = getTileUrl(tile);
 		if (p != null) {
 			byte[] b = p.getBytes();
@@ -102,5 +102,9 @@ public abstract class UrlTileSource extends TileSource {
 
 		System.arraycopy(mExt, 0, buf, pos, mExt.length);
 		return pos + mExt.length;
+	}
+
+	public URL getUrl() {
+		return mUrl;
 	}
 }

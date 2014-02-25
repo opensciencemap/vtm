@@ -30,10 +30,10 @@ public class MapnikVectorTileSource extends UrlTileSource {
 
 	@Override
 	public ITileDataSource getDataSource() {
-		return new UrlTileDataSource(this, new TileDecoder(), new LwHttp(mUrl));
+		return new UrlTileDataSource(this, new TileDecoder(), new LwHttp(getUrl()));
 	}
 
-	protected int formatTilePath(Tile tile, byte[] path, int pos) {
+	public int formatTilePath(Tile tile, byte[] path, int pos) {
 		// url formatter for mapbox streets
 		byte[] hexTable = {
 		        '0', '1', '2', '3',
