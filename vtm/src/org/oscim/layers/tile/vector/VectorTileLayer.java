@@ -32,10 +32,23 @@ import org.slf4j.LoggerFactory;
  * {@link VectorTileLoader} that load and assemble vector tiles
  * for rendering.
  */
-public abstract class VectorTileLayer extends TileLayer {
+public class VectorTileLayer extends TileLayer {
 	static final Logger log = LoggerFactory.getLogger(VectorTileLayer.class);
 
 	protected TileSource mTileSource;
+
+	public VectorTileLayer(Map map, TileSource tileSource) {
+
+		super(map, new TileManager(map,
+		                           tileSource.getZoomLevelMin(),
+		                           tileSource.getZoomLevelMax(),
+		                           100),
+		      new VectorTileRenderer());
+
+		// FIXME config!
+		initLoader(2);
+		setTileSource(tileSource);
+	}
 
 	public VectorTileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
 		super(map, new TileManager(map, minZoom, maxZoom, cacheLimit),
