@@ -779,19 +779,19 @@
           <m k="bridge" v="yes|true">
             <m select="first">
               <m v="service">
-                <line stroke="#ffffff" width="0.85" />
+                <line stroke="#ffffff" width="0.85" outline="casing-bridge"/>
                 <m zoom-min="15">
                   <text k="name" style="bold" size="10" stroke="#ffffff" stroke-width="2.0" />
                 </m>
               </m>
               <m v="construction">
-                <line stroke="#d0d0d0" width="1.0" />
+                <line stroke="#d0d0d0" width="1.0" outline="casing-bridge"/>
                 <m zoom-min="15">
                   <text k="name" style="bold" size="10" stroke="#d0d0d0" stroke-width="2.0" />
                 </m>
               </m>
               <m v="road">
-                <line stroke="#d0d0d0" width="1.25" />
+                <line stroke="#d0d0d0" width="1.25" outline="casing-bridge"/>
                 <m zoom-min="15">
                   <text k="name" style="bold" size="10" stroke="#d0d0d0" stroke-width="2.0" />
                 </m>
@@ -803,76 +803,74 @@
                 </m>
               </m>
               <m v="unclassified|residential|living_street">
-                <line stroke="#ffffff" width="1.25" />
+                <line stroke="#ffffff" width="1.25" outline="casing-bridge"/>
                 <m zoom-min="15">
                   <text k="name" style="bold" size="10" stroke="#ffffff" stroke-width="2.0" />
                 </m>
               </m>
               <m v="byway">
-                <line stroke="#efadaa" width="1.15" />
+                <line stroke="#efadaa" width="1.15" outline="casing-bridge"/>
                 <m zoom-min="15">
                   <text k="name" style="bold" size="10" stroke="#efadaa" stroke-width="2.0" />
                 </m>
               </m>
               <m v="tertiary|tertiary_link">
-                <line use="tertiary" cap="square" />
+                <line use="tertiary" cap="square" outline="casing-bridge"/>
                 <m zoom-min="14">
                   <text k="name" style="bold" size="10" stroke="#ffff90" stroke-width="2.0" />
                 </m>
               </m>
               <m v="secondary_link">
-                <line use="secondary" width="-0.1" cap="square" />
+                <line use="secondary" width="-0.1" cap="square" outline="casing-bridge"/>
                 <m zoom-min="14">
                   <text k="name" style="bold" size="10" stroke="#fdbf6f" stroke-width="2.0" />
                 </m>
               </m>
               <m v="primary_link">
-                <line use="primary" width="-0.1" cap="square" />
+                <line use="primary" width="-0.1" cap="square" outline="casing-bridge"/>
                 <m zoom-min="14">
                   <text k="name" style="bold" size="10" stroke="#e46d71" stroke-width="2.0" />
                 </m>
               </m>
               <m v="trunk_link">
-                <line use="trunk" cap="square" />
+                <line use="trunk" cap="square" outline="casing-bridge"/>
                 <m zoom-min="14">
                   <text k="name" style="bold" size="10" stroke="#7fc97f" stroke-width="2.0" />
                 </m>
               </m>
               <m v="motorway_link">
-                <line use="motorway" width="-0.2" cap="square" />
+                <line use="motorway" width="-0.2" cap="square" outline="casing-bridge"/>
                 <m zoom-min="14">
                   <text k="name" style="bold" size="10" stroke="#809bc0" stroke-width="2.0" />
                 </m>
               </m>
               <m v="secondary">
-                <line use="secondary" cap="square" />
+                <line use="secondary" cap="square" outline="casing-bridge"/>
                 <m zoom-min="14">
                   <text k="name" style="bold" size="10" stroke="#fdbf6f" stroke-width="2.0" />
                 </m>
               </m>
               <m v="primary">
-                <line use="primary" cap="square" />
+                <line use="primary" cap="square" outline="casing-bridge"/>
                 <m zoom-min="14">
                   <text k="name" style="bold" size="10" stroke="#e46d71" stroke-width="2.0" />
                   <text k="ref" style="bold" size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
                 </m>
               </m>
               <m v="trunk">
-                <line use="trunk" />
+                <line use="trunk" outline="casing-bridge"/>
                 <m zoom-min="14">
                   <text k="name" style="bold" size="10" stroke="#7fc97f" stroke-width="2.0" />
                   <text k="ref" style="bold" size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
                 </m>
               </m>
               <m v="motorway">
-                <line use="motorway" cap="square" />
+                <line use="motorway" cap="square" outline="casing-bridge"/>
                 <m zoom-min="14">
                   <text k="name" style="bold" size="10" stroke="#809bc0" stroke-width="2.0" />
                   <text k="ref" style="bold" size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
                 </m>
               </m>
-              <!-- add outline for all matches -->
-              <outline use="casing-bridge" />
               <m>
               </m>
             </m>
