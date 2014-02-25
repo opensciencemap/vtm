@@ -22,8 +22,8 @@ import org.oscim.layers.tile.BitmapTileLayer.FadeStep;
 
 public abstract class TileSource {
 
-	protected int mZoomMin;
-	protected int mZoomMax;
+	protected int mZoomMin = 0;
+	protected int mZoomMax = 20;
 
 	public abstract ITileDataSource getDataSource();
 
