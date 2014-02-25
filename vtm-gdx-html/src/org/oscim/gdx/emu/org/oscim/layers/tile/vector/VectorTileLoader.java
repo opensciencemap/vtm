@@ -256,14 +256,12 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 			if (line.outline) {
 				ll.addOutline(mCurLineLayer);
-				return;
+			} else {
+				ll.addLine(mElement);
+
+				// keep reference for outline layer(s)
+				mCurLineLayer = ll;
 			}
-
-			ll.addLine(mElement);
-
-			// keep reference for outline layer
-			mCurLineLayer = ll;
-
 		} else {
 			LineTexLayer ll = mTile.layers.getLineTexLayer(numLayer);
 
@@ -386,9 +384,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		if (l == null) {
 			double lat = MercatorProjection.toLatitude(mTile.y);
-			//			float groundScale = (float) (Math.cos(lat * (Math.PI / 180))
-			//			        * MercatorProjection.EARTH_CIRCUMFERENCE
-			//			        / ((long) Tile.SIZE << mTile.zoomLevel));
 
 			float groundScale = (float) MercatorProjection
 			    .groundResolution(lat, 1 << mTile.zoomLevel);
