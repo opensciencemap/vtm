@@ -39,6 +39,7 @@ import org.oscim.renderer.elements.PolygonLayer;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.theme.IRenderTheme;
+import org.oscim.theme.RenderTheme;
 import org.oscim.theme.styles.Area;
 import org.oscim.theme.styles.Circle;
 import org.oscim.theme.styles.Extrusion;
@@ -171,7 +172,14 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		Tag tag;
 	}
 
+	/**
+	 * Override this method to change tags that should be passed
+	 * to {@link RenderTheme} matching.
+	 */
 	protected boolean filterTags(TagSet tagSet) {
+		mFilteredTags.clear();
+		for (int i = 0; i < tagSet.numTags; i++)
+			mFilteredTags.add(tagSet.tags[i]);
 		return true;
 	}
 
