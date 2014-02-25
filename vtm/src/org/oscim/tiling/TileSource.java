@@ -18,7 +18,7 @@ package org.oscim.tiling;
 
 import java.util.HashMap;
 
-import org.oscim.layers.tile.BitmapTileLayer.FadeStep;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer.FadeStep;
 
 public abstract class TileSource {
 

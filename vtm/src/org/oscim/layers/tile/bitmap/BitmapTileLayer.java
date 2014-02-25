@@ -14,23 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile;
+package org.oscim.layers.tile.bitmap;
 
-import static org.oscim.layers.tile.MapTile.State.CANCEL;
-
-import java.util.concurrent.CancellationException;
-
-import org.oscim.backend.canvas.Bitmap;
-import org.oscim.core.MapElement;
 import org.oscim.core.MapPosition;
-import org.oscim.core.Tile;
 import org.oscim.event.Event;
+import org.oscim.layers.tile.TileLayer;
+import org.oscim.layers.tile.TileLoader;
+import org.oscim.layers.tile.TileManager;
+import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.BitmapLayer;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.tiling.ITileDataSink;
-import org.oscim.tiling.ITileDataSource;
-import org.oscim.tiling.ITileDataSource.QueryResult;
 import org.oscim.tiling.TileSource;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
@@ -110,58 +102,4 @@ public class BitmapTileLayer extends TileLayer {
 	protected TileLoader createLoader(TileManager tm) {
 		return new BitmapTileLoader(tm, mTileSource);
 	}
-
-	class BitmapTileLoader extends TileLoader implements ITileDataSink {
-
-		private final ITileDataSource mTileDataSource;
-		private MapTile mTile;
-
-		public BitmapTileLoader(TileManager tileManager, TileSource tileSource) {
-			super(tileManager);
-			mTileDataSource = tileSource.getDataSource();
-		}
-
-		@Override
-		public void cleanup() {
-			mTile = null;
-		}
-
-		@Override
-		protected boolean executeJob(MapTile tile) {
-			mTile = tile;
-			QueryResult result = null;
-			try {
-				result = mTileDataSource.executeQuery(tile, this);
-			} catch (CancellationException e) {
-				log.debug("{} was canceled", mTile);
-			} catch (Exception e) {
-				log.debug("{} {}", mTile, e.getMessage());
-			} finally {
-				mTile = null;
-			}
-			return result == QueryResult.SUCCESS;
-		}
-
-		@Override
-		public void setTileImage(Bitmap bitmap) {
-			if (isCanceled() || mTile.state(CANCEL))
-				throw new CancellationException();
-
-			BitmapLayer l = new BitmapLayer(false);
-			l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE);
-			mTile.layers = new ElementLayers();
-			mTile.layers.setTextureLayers(l);
-		}
-
-		@Override
-		public void process(MapElement element) {
-
-		}
-
-		@Override
-		public void completed(boolean success) {
-
-		}
-	}
-
 }

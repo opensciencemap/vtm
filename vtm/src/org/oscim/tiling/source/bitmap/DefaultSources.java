@@ -1,7 +1,7 @@
 package org.oscim.tiling.source.bitmap;
 
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.BitmapTileLayer.FadeStep;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer.FadeStep;
 
 /**
  * Do not use in applications unless you read through and comply to
@@ -23,7 +23,7 @@ public class DefaultSources {
 
 	public static class StamenToner extends BitmapTileSource {
 		public StamenToner() {
-			super("http://a.tile.stamen.com/toner", 0, 16);
+			super("http://opensciencemap.org/cors-stamen/toner", 0, 16);
 		}
 	}
 
@@ -67,7 +67,7 @@ public class DefaultSources {
 		private final StringBuilder sb = new StringBuilder(32);
 
 		public ArcGISWorldShaded() {
-			super("http://server.arcgisonline.com/ArcGIS/rest/services", 0, 6);
+			super("http://server.arcgisonline.com/ArcGIS/rest/services", 0, 13);
 		}
 
 		@Override

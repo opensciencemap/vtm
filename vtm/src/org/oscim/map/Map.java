@@ -24,7 +24,7 @@ import org.oscim.event.Gesture;
 import org.oscim.event.GestureDetector;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.MapEventLayer;
-import org.oscim.layers.tile.BitmapTileLayer;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.OsmTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.renderer.MapRenderer;
