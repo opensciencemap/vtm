@@ -1,0 +1,69 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'com.github.jtakakura:gradle-robovm-plugin:0.0.4'
+  }
+}
+
+repositories {
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+apply plugin: 'java'
+apply plugin: 'robovm'
+
+ext {
+  // Configure your application main class
+  mainClassName = "org.oscim.ios.RoboVmLauncher"
+  //roboVMVersion = "0.0.9"
+}
+
+dependencies {
+  compile project(':vtm-gdx')
+  compile project(':vtm-themes')
+  compile 'org.slf4j:slf4j-simple:1.7.5'
+  compile "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
+}
+
+
+sourceCompatibility = '1.7'
+//[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+robovm {
+  // Configure robovm
+  iosSignIdentity = ""
+  iosProvisioningProfile = ""
+}
+
+sourceSets {
+  main {
+    java.srcDirs = ['src/']
+    //resources.srcDirs = ['src/', 'data']
+  }
+  output.resourcesDir = 'assets'
+}
+
+// compile bytecode to llvm and run in the ios simulator
+// task run (dependsOn: compileJava){
+//   doFirst {
+//     println(">> Running RoboVM")
+//     String cmd = "$project.robovm_home/bin/robovm -verbose -arch x86 -os ios -cp $project.robovm_home/lib/robovm-objc.jar:$project.robovm_home/lib/robovm-cocoatouch.jar:$projectDir/build/classes/main/ -run $mainClass"
+//     def proc = cmd.execute()
+
+//     proc.in.eachLine {line -> println line}
+//     proc.err.eachLine {line -> System.err.println( 'ERROR: ' + line)}
+//     proc.waitFor()
+//   }
+// }
+
+
+eclipse {
+  project {
+    natures = [  'org.eclipse.jdt.core.javanature',
+		 'org.robovm.eclipse.RoboVMNature']
+    buildCommand 'org.robovm.eclipse.RoboVMClassBuilder'
+  }
+}

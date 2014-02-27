@@ -81,11 +81,11 @@ public class JniBuilder {
 		android.cppFlags += cflags;
 		android.linkerFlags += " -llog";
 
-		// BuildTarget ios = BuildTarget.newDefaultTarget(TargetOs.IOS, false);
-		// ios.headerDirs = headers;
-		// ios.cIncludes = sources;
-		// ios.cFlags += cflags;
-		// ios.cppFlags += cflags;
+		 BuildTarget ios = BuildTarget.newDefaultTarget(TargetOs.IOS, false);
+		 ios.headerDirs = headers;
+		 ios.cIncludes = sources;
+		 ios.cFlags += cflags;
+		 ios.cppFlags += cflags;
 
 		//new NativeCodeGenerator().generate();
 		new AntScriptGenerator().generate(new BuildConfig("vtm-jni"),
@@ -94,8 +94,9 @@ public class JniBuilder {
 		                                  // win32,
 		                                  // win64,
 		                                  // lin32,
-		                                  lin64,
-		                                  android);
+		                                  //lin64,
+		                                  //android
+		                                  ios);
 
 		// BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v clean");
 		// BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v");
