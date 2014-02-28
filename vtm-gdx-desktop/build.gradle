@@ -1,5 +1,6 @@
 repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+  // libgdx
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 apply plugin: 'java'
@@ -8,33 +9,36 @@ apply plugin: 'application'
 
 mainClassName = 'org.oscim.gdx.GdxMapApp'
 
-// task copyAssets(type: Copy) {
-//   from "$rootDir/vtm/assets"
-//   into "assets"
-//   include '**/*'
-// }
+// need to include themes for the example executable
+// TODO should be removed someday
+task copyAssets(type: Copy) {
+  from "${rootDir}/vtm-themes/resources"
+  into "${buildDir}"
+  include '**/*'
+}
 
-// tasks.withType(JavaCompile) { compileTask ->
-//   compileTask.dependsOn copyAssets }
+// package vtm native libs into jar
+task copyLibs(type: Copy) {
+  from(zipTree("../vtm-ext-libs/gdx/vtm-jni-natives.jar"))
+  into("${buildDir}/assets")
+}
+
+tasks.withType(JavaCompile) { compileTask ->
+  compileTask.dependsOn copyAssets
+  compileTask.dependsOn copyLibs
+}
 
 sourceSets {
   main.java.srcDirs = ['src']
-  main.resources.srcDirs = ['src']
-  main.resources.srcDirs = ['assets']
+  main.resources.srcDirs = ["${buildDir}/assets"]
   output.resourcesDir = 'assets'
 }
-
-run { ignoreExitValue = true }
 
 dependencies {
   compile project(':vtm-gdx')
   compile project(':vtm-themes')
   compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
   compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-  //compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl.jar')
-  //compile files('../vtm-ext-libs/gdx/gdx-backend-lwjgl-natives.jar')
-  //compile files('../vtm-ext-libs/gdx/gdx-natives.jar')
-  compile files('../vtm-ext-libs/gdx/vtm-jni-natives.jar')
   compile 'org.slf4j:slf4j-simple:1.7.5'
 }
 
@@ -42,3 +46,5 @@ eclipse.project {
   linkedResource name: 'assets', type: '2',
 		 locationUri: 'PARENT-1-PROJECT_LOC/vtm-themes/resources/assets'
 }
+
+run { ignoreExitValue = true }
