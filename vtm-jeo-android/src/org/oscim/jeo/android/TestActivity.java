@@ -1,9 +1,9 @@
 package org.oscim.jeo.android;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
 
 import org.jeo.data.VectorDataset;
@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -31,11 +30,9 @@ import android.widget.ToggleButton;
 public class TestActivity extends MapActivity {
 	public static final Logger log = LoggerFactory.getLogger(TestActivity.class);
 
-	//String PATH = "http://opensciencemap.org/featureserver/featureserver.cgi/osm_indoor";
-
 	// from http://overpass-turbo.eu/s/2vp
-	String PATH = "https://gist.github.com/hjanetzek/8959418/raw/overpass.geojson";
-	//String PATH = "https://gist.github.com/anonymous/8960337/raw/overpass.geojson";
+	String PATH = "https://gist.github.com/anonymous/8960337/raw/overpass.geojson";
+	//String PATH = "https://gist.github.com/hjanetzek/9280925/raw/overpass.geojson";
 
 	private OSMIndoorLayer mIndoorLayer;
 
@@ -52,13 +49,13 @@ public class TestActivity extends MapActivity {
 				showToast("load data");
 				InputStream is = null;
 				try {
-					File file = new File(Environment.getExternalStorageDirectory()
-					    .getAbsolutePath(), "osmindoor.json");
-					is = new FileInputStream(file);
+					//File file = new File(Environment.getExternalStorageDirectory()
+					//    .getAbsolutePath(), "osmindoor.json");
+					//is = new FileInputStream(file);
 
-					//URL url = new URL(PATH);
-					//URLConnection conn = url.openConnection();
-					//is = conn.getInputStream();
+					URL url = new URL(PATH);
+					URLConnection conn = url.openConnection();
+					is = conn.getInputStream();
 					loadJson(is);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -73,8 +70,8 @@ public class TestActivity extends MapActivity {
 		mMap.layers().add(new LabelLayer(mMap, baseLayer));
 		mMap.setTheme(VtmThemes.TRON2);
 
-		mMap.setMapPosition(49.417, 8.673, 1 << 17);
-		//	mMap.setMapPosition(53.5620092, 9.9866457, 1 << 16);
+		//mMap.setMapPosition(49.417, 8.673, 1 << 17);
+		mMap.setMapPosition(53.5620092, 9.9866457, 1 << 16);
 
 		//	mMap.layers().add(new TileGridLayer(mMap));
 		//	String file = Environment.getExternalStorageDirectory().getAbsolutePath();

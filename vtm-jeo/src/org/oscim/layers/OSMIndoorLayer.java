@@ -71,11 +71,13 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 
 		LineLayer ll = t.layers.getLineLayer(level * 3 + 1);
 
+		boolean active = activeLevels[level + 1];
+
 		if (ll.line == null) {
 			float width = rule.number(f, CartoCSS.LINE_WIDTH, 1.2f);
 			int color = Color.rainbow((level + 1) / 10f);
 
-			if (level > -2 && !activeLevels[level + 1])
+			if (level > -2 && !active)
 				color = Color.fade(color, 0.1f);
 
 			ll.line = new Line(0, color, width);
@@ -86,7 +88,7 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 		MeshLayer mesh = t.layers.getMeshLayer(level * 3);
 		if (mesh.area == null) {
 			int color = JeoUtils.color(rule.color(f, CartoCSS.POLYGON_FILL, RGB.red));
-			if (level > -2 && !activeLevels[level + 1])
+			if (level > -2 && !active)
 				color = Color.fade(color, 0.1f);
 
 			mesh.area = new Area(color);
@@ -96,20 +98,22 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 
 		addPolygon(t, g, mesh, ll);
 
-		Object o = f.get("name");
-		if (o instanceof String) {
-			float x = 0;
-			float y = 0;
-			int n = mGeom.index[0];
-			for (int i = 0; i < n;) {
-				x += mGeom.points[i++];
-				y += mGeom.points[i++];
+		if (active) {
+			Object o = f.get("name");
+			if (o instanceof String) {
+				float x = 0;
+				float y = 0;
+				int n = mGeom.index[0];
+				for (int i = 0; i < n;) {
+					x += mGeom.points[i++];
+					y += mGeom.points[i++];
+				}
+
+				TextItem ti = TextItem.pool.get();
+				ti.set(x / (n / 2) / 8, y / (n / 2) / 8, (String) o, mText);
+
+				mTextLayer.addText(ti);
 			}
-
-			TextItem ti = TextItem.pool.get();
-			ti.set(x / (n / 2) / 8, y / (n / 2) / 8, (String) o, mText);
-
-			mTextLayer.addText(ti);
 		}
 	}
 
