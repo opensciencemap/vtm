@@ -19,13 +19,6 @@ VTM is part of the OpenScienceMap project and developed at University of Bremen.
   - HTML5/WebGL (through libgdx and GWT)
   - iOS sooner or later
 
-## Getting started
-
-`git clone --recursive https://github.com/opensciencemap/vtm`
-
-`cd vtm/vtm-android-app/assets && ln -s ../../vtm/assets/* .`
-
-
 ### Projects
 - **vtm** contains the core library
 - **vtm-android** Android backend  (no libgdx required)
@@ -36,15 +29,26 @@ VTM is part of the OpenScienceMap project and developed at University of Bremen.
 - **vtm-gdx-html** HTML5/GWT application
 - **vtm-gdx-android** Android application using libgdx backend
 
-### Eclipse
-Import all 'vtm' projects that you need into Eclipse.
+## Getting started
 
-### Gradle / Android-Studio
-Just import build.gradle - should work, not much tested though. <br/>
-Or run gradle tasks from the commandline:<br/>
+`git clone --recursive https://github.com/opensciencemap/vtm`
+
+### Eclipse
+```
+export ANDROID_HOME=/path/to/android-sdk
+./gradlew eclipse
+```
+Import all 'vtm' sub-projects into Eclipse.
+
+### Android-Studio
+Just import build.gradle - should work, not much tested though.
+
+### Gradle
+Or run gradle tasks directly (see also `./gradlew -q tasks`):<br/>
 `./gradlew clean install` <br/> to build the libraries and add them to the local maven repository.<br/>
-`./gradlew :vtm-android-example:installDebug` <br/> to run the android example<br/>
-`./gradlew :vtm-gdx-desktop:run` <br/>to run the desktop demo (only Linux and Win64 or compile the native libs)
+`./gradlew :vtm-android-example:run` <br/> to run the android example<br/>
+`./gradlew :vtm-gdx-desktop:run` <br/>to run the desktop demo (only Linux64 and Win64 native libs are provided atm)<br/>
+`./gradlew :vtm-gdx-html:jettyDraftWar` <br/>to run the webgl demo<br/>
 
 
 ## WebGL Demo
