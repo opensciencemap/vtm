@@ -11,7 +11,6 @@ dependencies {
 sourceSets {
   main.java.srcDirs = ['src']
   main.compileClasspath += configurations.providedCompile
-  //main.resources.srcDirs = ['assets']
 }
 
 //... there is probably a better way
