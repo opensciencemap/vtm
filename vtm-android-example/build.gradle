@@ -64,5 +64,17 @@ eclipse.project {
   buildCommand 'com.android.ide.eclipse.adt.ResourceManagerBuilder'
   buildCommand 'com.android.ide.eclipse.adt.PreCompilerBuilder'
   buildCommand 'com.android.ide.eclipse.adt.ApkBuilder'
+}
 
+
+task run (dependsOn: 'installDebug'){
+  doFirst {
+    println(">> adb run...")
+    String adb = System.getenv()['ANDROID_HOME'] + '/platform-tools/adb'
+    String cmd = "${adb} shell am start -n org.oscim.android.test/.Samples"
+    def proc = cmd.execute()
+    proc.in.eachLine {line -> println line}
+    proc.err.eachLine {line -> System.err.println( 'ERROR: ' + line)}
+    proc.waitFor()
+  }
 }
