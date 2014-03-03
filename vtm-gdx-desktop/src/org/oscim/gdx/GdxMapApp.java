@@ -66,7 +66,7 @@ public class GdxMapApp extends GdxMap {
 	static protected LwjglApplicationConfiguration getConfig() {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "vtm-gdx";
-		cfg.useGL20 = true;
+		//cfg.useGL20 = true;
 		cfg.width = 1280;
 		cfg.height = 800;
 		cfg.stencil = 8;

@@ -20,9 +20,8 @@ import org.oscim.gdx.client.GwtGLAdapter;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.graphics.GL10;
-import com.badlogic.gdx.graphics.GL11;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.GLCommon;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.gwt.canvas.client.Canvas;
@@ -112,15 +111,6 @@ public class GwtGraphics implements Graphics {
 		return context;
 	}
 
-	@Override
-	public boolean isGL11Available() {
-		return false;
-	}
-
-	@Override
-	public boolean isGL20Available() {
-		return true;
-	}
 
 	@Override
 	public GLCommon getGLCommon() {
@@ -128,18 +118,8 @@ public class GwtGraphics implements Graphics {
 	}
 
 	@Override
-	public GL10 getGL10() {
-		return null;
-	}
-
-	@Override
-	public GL11 getGL11() {
-		return null;
-	}
-
-	@Override
 	public GL20 getGL20() {
-		return gl;
+		return null;
 	}
 
 	@Override
@@ -298,7 +278,7 @@ public class GwtGraphics implements Graphics {
 	@Override
 	public boolean supportsExtension(String extension) {
 		if (extensions == null)
-			extensions = Gdx.gl.glGetString(GL10.GL_EXTENSIONS);
+			extensions = Gdx.gl.glGetString(GL20.GL_EXTENSIONS);
 		return extensions.contains(extension);
 	}
 
@@ -350,4 +330,16 @@ public class GwtGraphics implements Graphics {
 	public boolean isFullscreen() {
 		return isFullscreenJSNI();
 	}
+
+	@Override
+    public boolean isGL30Available() {
+	    // TODO Auto-generated method stub
+	    return false;
+    }
+
+	@Override
+    public GL30 getGL30() {
+	    // TODO Auto-generated method stub
+	    return null;
+    }
 }

@@ -47,7 +47,7 @@ public class MainActivity extends AndroidApplication {
 		Tile.SIZE = 400;
 
 		AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
-		cfg.useGL20 = true;
+		//cfg.useGL20 = true;
 
 		new SharedLibraryLoader().load("vtm-jni");
 

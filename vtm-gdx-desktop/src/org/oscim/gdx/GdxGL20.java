@@ -33,7 +33,6 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 
-import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 /**
@@ -248,11 +247,11 @@ final class GdxGL20 implements org.oscim.backend.GL20 {
 	}
 
 	public void glDrawElements(int mode, int count, int type, Buffer indices) {
-		if (indices instanceof ShortBuffer && type == GL10.GL_UNSIGNED_SHORT)
+		if (indices instanceof ShortBuffer && type == GL_UNSIGNED_SHORT)
 			GL11.glDrawElements(mode, (ShortBuffer) indices);
-		else if (indices instanceof ByteBuffer && type == GL10.GL_UNSIGNED_SHORT)
+		else if (indices instanceof ByteBuffer && type == GL_UNSIGNED_SHORT)
 			GL11.glDrawElements(mode, ((ByteBuffer) indices).asShortBuffer()); // FIXME yay...
-		else if (indices instanceof ByteBuffer && type == GL10.GL_UNSIGNED_BYTE)
+		else if (indices instanceof ByteBuffer && type == GL_UNSIGNED_BYTE)
 			GL11.glDrawElements(mode, (ByteBuffer) indices);
 		else
 			throw new GdxRuntimeException("Can't use " + indices.getClass().getName()
