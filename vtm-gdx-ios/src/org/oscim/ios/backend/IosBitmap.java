@@ -3,11 +3,11 @@ package org.oscim.ios.backend;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Bitmap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 
@@ -60,7 +60,7 @@ public class IosBitmap implements Bitmap {
 	@Override
 	public void uploadToTexture(boolean replace) {
 
-		Gdx.gl.glTexImage2D(GL10.GL_TEXTURE_2D, 0, pixmap.getGLInternalFormat(),
+		Gdx.gl.glTexImage2D(GL20.GL_TEXTURE_2D, 0, pixmap.getGLInternalFormat(),
 		                    pixmap.getWidth(), pixmap.getHeight(), 0,
 		                    pixmap.getGLFormat(), pixmap.getGLType(),
 		                    pixmap.getPixels());
