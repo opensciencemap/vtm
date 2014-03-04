@@ -8,16 +8,16 @@ VTM is part of the OpenScienceMap project and developed at University of Bremen.
 - Java map library
 - OpenGL vector-tile rendering
 - Themeable vector layers
-- Support for multiple tile sources: 
+- Support for multiple tile sources:
   - primary opensciencemap (.vtm)
   - mapsforge files
   - experimental mapnik-vector-tile source
   - bitmap: any quadtree-scheme tiles as texture
 - Backends:
   - Android
-  - Desktop 
-  - HTML5/WebGL (through libgdx and GWT)
-  - iOS sooner or later
+  - Desktop (using libgdx/LwjGL)
+  - HTML5/WebGL (using libgdx/GWT)
+  - iOS (using libgdx/robovm)
 
 ### Projects
 - **vtm** contains the core library
@@ -25,23 +25,35 @@ VTM is part of the OpenScienceMap project and developed at University of Bremen.
 - **vtm-android-example** provides examples using **vtm-android**
 - **vtm-android-app** opensciencemap app using **vtm-android**
 - **vtm-gdx** common libgdx backend code
-- **vtm-gdx-desktop** Desktop application 
+- **vtm-gdx-desktop** Desktop application
 - **vtm-gdx-html** HTML5/GWT application
-- **vtm-gdx-android** Android application using libgdx backend
+- **vtm-gdx-android** Android application
+- **vtm-gdx-ios** iOS application
 
 ## Getting started
 
 `git clone --recursive https://github.com/opensciencemap/vtm`
 
+Install Android SDK and build-tools 19.0.1. From extras add
+'Android Support Library/Repository' and 'Google Repository'.
+The commands below should set things up correctly when Android
+SDK is already installed.
+```
+export ANDROID_HOME=/path/to/your/android-sdk
+export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools
+echo yes | android update sdk --filter platform-tools --no-ui
+echo yes | android update sdk --filter android-19 --no-ui
+echo yes | android update sdk --filter extra-android-support --no-ui
+echo yes | android update sdk --filter extra-android-m2repository --no-ui
+```
+
 ### Eclipse
-```
-export ANDROID_HOME=/path/to/android-sdk
-./gradlew eclipse
-```
+`./gradlew eclipse`<br/>
 Import all 'vtm' sub-projects into Eclipse.
 
+
 ### Android-Studio
-Just import build.gradle - should work, not much tested though.
+Just import build.gradle
 
 ### Gradle
 Or run gradle tasks directly (see also `./gradlew -q tasks`):<br/>
@@ -52,7 +64,7 @@ Or run gradle tasks directly (see also `./gradlew -q tasks`):<br/>
 
 
 ## WebGL Demo
-http://opensciencemap.org/map/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807
+[OpenScienceMap](http://opensciencemap.org/map/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807)
 - hold right mouse button to change view direction
 - Keys: `g` toggle tile-grid layer `d` default- `t` tubes- `r` osmarender-theme
 
