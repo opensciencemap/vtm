@@ -43,7 +43,8 @@ public abstract class SimpleWorker<T> implements Runnable {
 				mRunning = false;
 				mDelayed = false;
 				mWait = false;
-				cleanup(mTaskTodo);
+				if (mTaskTodo != null)
+					cleanup(mTaskTodo);
 				finish();
 				return;
 			}
@@ -51,7 +52,7 @@ public abstract class SimpleWorker<T> implements Runnable {
 			// FIXME: mTaskTodo == null?
 			if (mDelayed || mTaskTodo == null) {
 
-				if (mDelayed)
+				if (mDelayed && mTaskTodo != null)
 					onMainLoop(mTaskTodo);
 
 				// entered on main-loop
