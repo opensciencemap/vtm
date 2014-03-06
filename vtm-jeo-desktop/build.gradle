@@ -1,0 +1,22 @@
+repositories {
+  // libgdx
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'application'
+
+mainClassName = 'org.oscim.jeo.test.LayerTest'
+
+sourceSets {
+  main.java.srcDirs = ['src']
+  main.resources.srcDirs = ['resources']
+}
+
+dependencies {
+  compile project(':vtm-jeo')
+  compile 'org.oscim:vtm-gdx-desktop:0.5.9-SNAPSHOT'
+}
+
+run { ignoreExitValue = true }
