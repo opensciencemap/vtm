@@ -16,7 +16,8 @@ sourceSets {
 
 dependencies {
   compile project(':vtm-jeo')
-  compile 'org.oscim:vtm-gdx-desktop:0.5.9-SNAPSHOT'
+  compile project(':vtm-gdx-desktop')
+  // compile project(':vtm-themes')
 }
 
 run { ignoreExitValue = true }

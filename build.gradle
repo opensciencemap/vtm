@@ -19,6 +19,7 @@ allprojects {
 
   repositories {
     mavenCentral()
+    maven { url 'http://repo.opengeo.org' }
     //maven { url 'https://github.com/hjanetzek/maven-repo/raw/master/' }
     mavenLocal()
   }

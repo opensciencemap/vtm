@@ -11,8 +11,8 @@ apply plugin: 'android'
 
 dependencies {
   compile project(':vtm-jeo')
-  compile 'org.oscim:vtm-android:0.5.9-SNAPSHOT'
-  compile 'org.oscim:vtm-themes:0.5.9-SNAPSHOT'
+  compile project(':vtm-android')
+  compile project(':vtm-themes')
 }
 
 android {
@@ -59,12 +59,12 @@ eclipse {
 	node.appendNode('classpathentry kind="src" path="gen"')
       }
 
-      whenMerged { classpath ->
-	classpath.entries.removeAll { entry ->
-	  entry.path.contains('vtm-android-0.5.9') }
-	classpath.entries.removeAll { entry ->
-	  entry.path.contains('vtm-0.5.9') }
-      }
+      // whenMerged { classpath ->
+      // 	classpath.entries.removeAll { entry ->
+      // 	  entry.path.contains('vtm-android-0.5.9') }
+      // 	classpath.entries.removeAll { entry ->
+      // 	  entry.path.contains('vtm-0.5.9') }
+      // }
     }
   }
 
