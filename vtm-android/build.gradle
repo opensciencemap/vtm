@@ -18,7 +18,12 @@ dependencies {
   compile project(':vtm')
 
   compile 'com.android.support:support-v4:19.0.1'
-  compile 'org.slf4j:slf4j-android:1.7.6'
+
+  // -> might be more efficient, but configuring
+  // log-levels is way too complicated...
+  // compile 'org.slf4j:slf4j-android:1.7.6'
+
+  compile 'com.noveogroup.android:android-logger:1.3.1'
 
   // local jars will be packaged into the aar
   compile files("${rootDir}/vtm-ext-libs/native-libs.jar")
