@@ -156,9 +156,15 @@ public class ExtrusionLayer extends RenderElement {
 			double len = Math.sqrt(cx * cx + cy * cy + cz * cz);
 
 			// packing the normal in two bytes
-			int mx = FastMath.clamp(127 + (int) ((cx / len) * 128), 0, 0xff);
-			int my = FastMath.clamp(127 + (int) ((cy / len) * 128), 0, 0xff);
-			short normal = (short) ((my << 8) | (mx & NORMAL_DIR_MASK) | (cz > 0 ? 1 : 0));
+			//(cx / len) / p + 0.5
+			double p = Math.sqrt((cz / len) * 8.0 + 8.0);
+			int mx = FastMath.clamp(127 + (int) ((cx / len / p) * 128), 0, 255);
+			int my = FastMath.clamp(127 + (int) ((cy / len / p) * 128), 0, 255);
+			short normal = (short) ((my << 8) | mx);
+
+			//	int mx = FastMath.clamp(127 + (int) ((cx / len) * 128), 0, 0xff);
+			//	int my = FastMath.clamp(127 + (int) ((cy / len) * 128), 0, 0xff);
+			//	short normal = (short) ((my << 8) | (mx & NORMAL_DIR_MASK) | (cz > 0 ? 1 : 0));
 
 			if (v == VertexItem.SIZE) {
 				mCurVertices.used = VertexItem.SIZE;
@@ -193,6 +199,14 @@ public class ExtrusionLayer extends RenderElement {
 		mNumVertices += vertexCnt; //(vertexCnt / 3);
 	}
 
+	//	private void encodeNormal(float v[], int offset) {
+	//	    var p = Math.sqrt(cartesian.z * 8.0 + 8.0);
+	//	    var result = new Cartesian2();
+	//	    result.x = cartesian.x / p + 0.5;
+	//	    result.y = cartesian.y / p + 0.5;
+	//	    return result;
+	//	}
+	//	
 	public void addNoNormal(MapElement element) {
 		if (element.type != GeometryType.TRIS)
 			return; //FIXME throw

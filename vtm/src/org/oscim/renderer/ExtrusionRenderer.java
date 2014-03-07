@@ -544,17 +544,40 @@ public class ExtrusionRenderer extends LayerRenderer {
 	        + "    color = u_color[3] * z;"
 	        + "  } else {"
 	        //     normalize face x/y direction
-	        + "    vec2 n =  (a_light / 255.0 - 0.5) * 2.0;"
+	        + "    vec2 enc =  (a_light / 255.0);"
+	        + "    vec2 fenc = enc * 4.0 - 2.0;"
+	        + "    float f = dot(fenc, fenc);"
+	        + "    float g = sqrt(1.0 - f / 4.0);"
+	        + "    vec3 r_norm;"
+	        + "    r_norm.xy = fenc * g;"
+	        + "    r_norm.z = 1.0 - f / 2.0;"
+
 	        //     normal points up or down (1,-1)
-	        + "    float dir = 1.0 - (2.0 * abs(mod(a_light.x,2.0)));"
+	        ////+ "    float dir = 1.0 - (2.0 * abs(mod(a_light.x,2.0)));"
 	        //     recreate face normal vector
-	        + "    vec3 r_norm = vec3(n.xy, dir * (1.0 - length(n.xy)));"
-	        + "    vec3 light = normalize(vec3(-0.4,0.4,-1.0));"
+	        ///+ "    vec3 r_norm = vec3(n.xy, dir * (1.0 - length(n.xy)));"
+
+	        + "    vec3 light = normalize(vec3(-0.4,0.4,1.0));"
 	        + "    float l = (1.0 + dot(r_norm, light)) / 2.0;"
-	        + "    l = 0.4 + l * 0.6;"
-	        + "    l = (l + (0.9 + clamp(a_pos.z / 4096.0, 0.0, 0.2))) / 2.0;"
+
+	        /** ambient */
+	        //+ "    l = 0.2 + l * 0.8;"
+	        /** fake-ssao by height */
+	        + "    l = l + (clamp(a_pos.z / 8192.0, 0.0, 0.1) - 0.05);"
 	        + "    color = vec4(l, l, l-0.02, 1.0);"
 	        + "}}}";
+
+	//	vec3 decode(vec2 enc)
+	//	{
+	//	    vec2 fenc = enc * 4.0 - 2.0;
+	//	    float f = dot(fenc, fenc);
+	//	    float g = sqrt(1.0 - f / 4.0);
+	//	    
+	//	    vec3 n;
+	//	    n.xy = fenc * g;
+	//	    n.z = 1.0 - f / 2.0;
+	//	    return n;
+	//	}
 
 	final static String extrusionFragmentShader = ""
 	        + "precision mediump float;"
