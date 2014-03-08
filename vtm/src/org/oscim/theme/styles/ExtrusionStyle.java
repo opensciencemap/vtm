@@ -30,30 +30,30 @@ public class ExtrusionStyle extends RenderStyle {
 		this.level = level;
 	}
 
-	public static void fillColors(int sides, int top, int lines, float[] mNewColors) {
+	public static void fillColors(int sides, int top, int lines, float[] colors) {
 		float a = Color.aToFloat(top);
-		mNewColors[0] = a * Color.rToFloat(top);
-		mNewColors[1] = a * Color.gToFloat(top);
-		mNewColors[2] = a * Color.bToFloat(top);
-		mNewColors[3] = a;
+		colors[0] = a * Color.rToFloat(top);
+		colors[1] = a * Color.gToFloat(top);
+		colors[2] = a * Color.bToFloat(top);
+		colors[3] = a;
 
 		a = Color.aToFloat(sides);
-		mNewColors[4] = a * Color.rToFloat(sides);
-		mNewColors[5] = a * Color.gToFloat(sides);
-		mNewColors[6] = a * Color.bToFloat(sides);
-		mNewColors[7] = a;
+		colors[4] = a * Color.rToFloat(sides);
+		colors[5] = a * Color.gToFloat(sides);
+		colors[6] = a * Color.bToFloat(sides);
+		colors[7] = a;
 
 		a = Color.aToFloat(sides);
-		mNewColors[8] = a * Color.rToFloat(sides);
-		mNewColors[9] = a * Color.gToFloat(sides);
-		mNewColors[10] = a * Color.bToFloat(sides);
-		mNewColors[11] = a;
+		colors[8] = a * Color.rToFloat(sides);
+		colors[9] = a * Color.gToFloat(sides);
+		colors[10] = a * Color.bToFloat(sides);
+		colors[11] = a;
 
 		a = Color.aToFloat(lines);
-		mNewColors[12] = a * Color.rToFloat(lines);
-		mNewColors[13] = a * Color.gToFloat(lines);
-		mNewColors[14] = a * Color.bToFloat(lines);
-		mNewColors[15] = a;
+		colors[12] = a * Color.rToFloat(lines);
+		colors[13] = a * Color.gToFloat(lines);
+		colors[14] = a * Color.bToFloat(lines);
+		colors[15] = a;
 	}
 
 	@Override
