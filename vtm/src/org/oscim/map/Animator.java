@@ -149,7 +149,7 @@ public class Animator {
 		animStart(duration, ANIM_SCALE);
 	}
 
-	public synchronized void animateFling(int velocityX, int velocityY,
+	public synchronized void animateFling(float velocityX, float velocityY,
 	        int minX, int maxX, int minY, int maxY) {
 
 		if (velocityX * velocityX + velocityY * velocityY < 2048)
@@ -162,8 +162,7 @@ public class Animator {
 
 		float duration = 500;
 
-		// pi times thumb..
-		float flingFactor = (duration / 2500);
+		float flingFactor = 0.5f;
 		mVelocity.x = velocityX * flingFactor;
 		mVelocity.y = velocityY * flingFactor;
 		clamp(mVelocity.x, minX, maxX);

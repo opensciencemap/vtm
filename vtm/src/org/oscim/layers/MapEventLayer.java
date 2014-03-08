@@ -139,14 +139,17 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 			if (mStartMove < 0)
 				return true;
 
+			mTracker.update(e.getX(), e.getY(), e.getTime());
+
 			float vx = mTracker.getVelocityX();
 			float vy = mTracker.getVelocityY();
 
 			/* reduce velocity for short moves */
-			float tx = e.getTime() - mStartMove;
-			if (tx < FLING_THREHSHOLD) {
-				vx *= tx / FLING_THREHSHOLD;
-				vy *= tx / FLING_THREHSHOLD;
+			float t = e.getTime() - mStartMove;
+			if (t < FLING_THREHSHOLD) {
+				t = t / FLING_THREHSHOLD;
+				vy *= t * t;
+				vx *= t * t;
 			}
 			doFling(vx, vy);
 			return true;
@@ -383,8 +386,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		int w = Tile.SIZE * 3;
 		int h = Tile.SIZE * 3;
 
-		mMap.animator().animateFling(Math.round(velocityX),
-		                             Math.round(velocityY),
+		mMap.animator().animateFling(velocityX, velocityY,
 		                             -w, w, -h, h);
 		return true;
 	}
@@ -398,105 +400,72 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		return false;
 	}
 
-	/*******************************************************************************
-	 * from libgdx:
-	 * Copyright 2011 Mario Zechner <badlogicgames@gmail.com>
-	 * Copyright 2011 Nathan Sweet <nathan.sweet@gmail.com>
-	 * 
-	 * Licensed under the Apache License, Version 2.0 (the "License");
-	 * you may not use this file except in compliance with the License.
-	 * You may obtain a copy of the License at
-	 * http://www.apache.org/licenses/LICENSE-2.0
-	 * Unless required by applicable law or agreed to in writing, software
-	 * distributed under the License is distributed on an "AS IS" BASIS,
-	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	 * See the License for the specific language governing permissions and
-	 * limitations under the License.
-	 ******************************************************************************/
-	class VelocityTracker {
-		int sampleSize = 16;
-		float lastX, lastY;
-		float deltaX, deltaY;
-		long lastTime;
-		int numSamples;
-		float[] meanX = new float[sampleSize];
-		float[] meanY = new float[sampleSize];
-		long[] meanTime = new long[sampleSize];
+	static class VelocityTracker {
+		/* sample window, 200ms */
+		private static final int MAX_MS = 200;
+		private static final int SAMPLES = 32;
 
-		public void start(float x, float y, long timeStamp) {
-			lastX = x;
-			lastY = y;
-			deltaX = 0;
-			deltaY = 0;
-			numSamples = 0;
-			for (int i = 0; i < sampleSize; i++) {
-				meanX[i] = 0;
-				meanY[i] = 0;
-				meanTime[i] = 0;
+		private float mLastX, mLastY;
+		private long mLastTime;
+		private int mNumSamples;
+		private int mIndex;
+
+		private float[] mMeanX = new float[SAMPLES];
+		private float[] mMeanY = new float[SAMPLES];
+		private int[] mMeanTime = new int[SAMPLES];
+
+		public void start(float x, float y, long time) {
+			mLastX = x;
+			mLastY = y;
+			mNumSamples = 0;
+			mIndex = SAMPLES;
+			mLastTime = time;
+		}
+
+		public void update(float x, float y, long time) {
+			if (--mIndex < 0)
+				mIndex = SAMPLES - 1;
+
+			mMeanX[mIndex] = x - mLastX;
+			mMeanY[mIndex] = y - mLastY;
+			mMeanTime[mIndex] = (int) (time - mLastTime);
+
+			mLastTime = time;
+			mLastX = x;
+			mLastY = y;
+
+			mNumSamples++;
+		}
+
+		private float getVelocity(float[] move) {
+			mNumSamples = Math.min(SAMPLES, mNumSamples);
+
+			double duration = 0;
+			double amount = 0;
+
+			for (int c = 0; c < mNumSamples; c++) {
+				int index = (mIndex + c) % SAMPLES;
+
+				float d = mMeanTime[index];
+				if (c > 0 && duration + d > MAX_MS)
+					break;
+
+				duration += d;
+				amount += move[index] * (d / duration);
 			}
-			lastTime = timeStamp;
-		}
 
-		public void update(float x, float y, long timeStamp) {
-			long currTime = timeStamp;
-			deltaX = x - lastX;
-			deltaY = y - lastY;
-			lastX = x;
-			lastY = y;
-			long deltaTime = currTime - lastTime;
-			lastTime = currTime;
-			int index = numSamples % sampleSize;
-			meanX[index] = deltaX;
-			meanY[index] = deltaY;
-			meanTime[index] = deltaTime;
-			numSamples++;
-		}
-
-		public float getVelocityX() {
-			float meanX = getAverage(this.meanX, numSamples);
-			float meanTime = getAverage(this.meanTime, numSamples) / 1000.0f;
-			if (meanTime == 0)
+			if (duration == 0)
 				return 0;
-			return meanX / meanTime;
+
+			return (float) ((amount * 1000) / duration);
 		}
 
 		public float getVelocityY() {
-			float meanY = getAverage(this.meanY, numSamples);
-			float meanTime = getAverage(this.meanTime, numSamples) / 1000.0f;
-			if (meanTime == 0)
-				return 0;
-			return meanY / meanTime;
+			return getVelocity(mMeanY);
 		}
 
-		private float getAverage(float[] values, int numSamples) {
-			numSamples = Math.min(sampleSize, numSamples);
-			float sum = 0;
-			for (int i = 0; i < numSamples; i++) {
-				sum += values[i];
-			}
-			return sum / numSamples;
+		public float getVelocityX() {
+			return getVelocity(mMeanX);
 		}
-
-		private long getAverage(long[] values, int numSamples) {
-			numSamples = Math.min(sampleSize, numSamples);
-			long sum = 0;
-			for (int i = 0; i < numSamples; i++) {
-				sum += values[i];
-			}
-			if (numSamples == 0)
-				return 0;
-			return sum / numSamples;
-		}
-
-		//private float getSum (float[] values, int numSamples) {
-		//	numSamples = Math.min(sampleSize, numSamples);
-		//	float sum = 0;
-		//	for (int i = 0; i < numSamples; i++) {
-		//		sum += values[i];
-		//	}
-		//	if (numSamples == 0) return 0;
-		//	return sum;
-		//}
 	}
-
 }
