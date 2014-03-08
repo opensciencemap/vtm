@@ -42,6 +42,9 @@ import org.slf4j.LoggerFactory;
 public final class PolygonLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(PolygonLayer.class);
 
+	public final static int CLIP_STENCIL = 1;
+	public final static int CLIP_DEPTH = 2;
+
 	private static final float S = MapRenderer.COORD_SCALE;
 
 	private static final boolean enableTexture = true;
@@ -274,6 +277,7 @@ public final class PolygonLayer extends RenderElement {
 		 *            pass true to clear stencil buffer region
 		 * @param clipMode
 		 *            clip to first quad in current vbo
+		 *            using CLIP_STENCIL / CLIP_DEPTH
 		 * 
 		 * @return
 		 *         next layer
@@ -366,47 +370,43 @@ public final class PolygonLayer extends RenderElement {
 		 */
 		static void drawStencilRegion(boolean first, int clipMode) {
 
-			// disable drawing to color buffer
+			/* disable drawing to color buffer */
 			GL.glColorMask(false, false, false, false);
 
-			// write to all stencil bits
+			/* write to all stencil bits */
 			GL.glStencilMask(0xFF);
 
 			if (first) {
-				// clear previous clip-region from stencil buffer
-				//GL.glClear(GL20.GL_STENCIL_BUFFER_BIT);
+				/* Draw clip-region into depth and stencil buffer.
+				 * This is used for tile line and polygon layers.
+				 * 
+				 * Together with depth test (GL_LESS) this ensures to
+				 * only draw where no other tile has drawn yet. */
 
-				// Draw clip-region into depth and stencil buffer
-				// this is used for tile line and polygon layers.
-				// Depth offset is increased for each tile. Together
-				// with depth test (GL_LESS) this ensures to only
-				// draw where no other tile has drawn yet.
-				//GL.glEnable(GL20.GL_POLYGON_OFFSET_FILL);
-				if (clipMode > 1) {
-					// test GL_LESS and write to depth buffer
+				if (clipMode == CLIP_DEPTH) {
+					/* test GL_LESS/GL_ALWAYS to write to depth buffer */
 					GLState.test(true, true);
 					GL.glDepthMask(true);
 				}
 
-				// always pass stencil test and set clip bit
+				/* always pass stencil test and set clip bit */
 				GL.glStencilFunc(GL20.GL_ALWAYS, CLIP_BIT, 0x00);
 			} else {
-				// use clip bit from stencil buffer
-				// to clear stencil 'layer-bits' (0x7f)
+				/* use clip bit from stencil buffer to clear stencil
+				 * 'layer-bits' (0x7f) */
 				GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
 			}
 
-			// set clip bit (0x80) for draw region
+			/* set clip bit (0x80) for draw region */
 			GL.glStencilOp(GL20.GL_KEEP, GL20.GL_KEEP, GL20.GL_REPLACE);
 
-			// draw a quad for the tile region
+			/* draw a quad for the tile region */
 			GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
 			if (first) {
-				if (clipMode > 1) {
-					// dont modify depth buffer
+				if (clipMode == CLIP_DEPTH) {
+					/* dont modify depth buffer */
 					GL.glDepthMask(false);
-					// test only stencil
 					GLState.test(false, true);
 				}
 				GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
@@ -416,7 +416,7 @@ public final class PolygonLayer extends RenderElement {
 		/**
 		 * Clear stencilbuffer for a tile region by drawing
 		 * a quad with func 'always' and op 'zero'. Using 'color'
-		 * and 'alpha' for a fake fade effect.
+		 * and 'alpha' to fake a fade effect.
 		 */
 		public static void drawOver(GLViewport v, int color, float alpha) {
 			setShader(polyShader, v);
@@ -425,20 +425,24 @@ public final class PolygonLayer extends RenderElement {
 				GLUtils.setColor(hPolygonColor[0], color, alpha);
 				GLState.blend(true);
 			} else {
-				// disable drawing to framebuffer (will be re-enabled in fill)
+				/* disable drawing to framebuffer (will be re-enabled in fill) */
 				GL.glColorMask(false, false, false, false);
 			}
-			// always pass stencil test:
-			//glStencilFunc(GL_ALWAYS, 0x00, 0x00);
+
+			// TODO always pass stencil test: <-- only if not proxy?
+			//GL.glStencilFunc(GL_ALWAYS, 0x00, 0x00);
+
 			GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
 
-			// write to all bits
+			/* write to all bits */
 			GL.glStencilMask(0xFF);
-			// zero out area to draw to
+
+			/* zero out area to draw to */
 			GL.glStencilOp(GL20.GL_KEEP, GL20.GL_KEEP, GL20.GL_ZERO);
 
 			GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
 
+			// FIXME needed here?
 			if (color == 0)
 				GL.glColorMask(true, true, true, true);
 		}

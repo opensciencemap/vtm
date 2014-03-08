@@ -43,18 +43,25 @@ public class VectorTileRenderer extends TileRenderer {
 		mViewProj.setValue(14, 0);
 		mViewProj.multiplyRhs(v.view);
 
-		mClipMode = 1;
+		mClipMode = PolygonLayer.CLIP_STENCIL;
 
 		/* */
 		int tileCnt = mDrawTiles.cnt + mProxyTileCnt;
 		MapTile[] tiles = mDrawTiles.tiles;
+
+		boolean drawProxies = false;
 
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && t.state != READY) {
 				GL.glDepthMask(true);
 				GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
-				mClipMode = 2;
+
+				/* always write depth for non-proxy tiles */
+				GL.glDepthFunc(GL20.GL_ALWAYS);
+
+				mClipMode = PolygonLayer.CLIP_DEPTH;
+				drawProxies = true;
 				break;
 			}
 		}
@@ -71,8 +78,8 @@ public class VectorTileRenderer extends TileRenderer {
 		 * have data yet. Proxies are clipped to the region where nothing
 		 * was drawn to depth buffer.
 		 * TODO draw proxies for placeholder */
-		if (mClipMode > 1) {
-			mClipMode = 3;
+		if (drawProxies) {
+			/* only draw where no other tile is drawn */
 			GL.glDepthFunc(GL20.GL_LESS);
 
 			/* draw child or parent proxies */
