@@ -1217,7 +1217,7 @@
         </m>
       </m>
 
-      <m zoom-min="16" select="first">
+      <!-- <m zoom-min="16" select="first">
         <m v="information" select="first">
           <m k="name">
             <symbol src="information" />
@@ -1228,7 +1228,7 @@
           </m>
         </m>
       </m>
-
+	  -->
       <m v="viewpoint">
         <symbol src="view_point" />
       </m>

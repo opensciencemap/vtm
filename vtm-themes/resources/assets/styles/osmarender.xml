@@ -1305,9 +1305,9 @@
       <m v="hotel" zoom-min="17">
         <symbol src="hotel" />
       </m>
-      <m v="information" zoom-min="17">
+     <!--  <m v="information" zoom-min="17">
         <symbol src="information" />
-      </m>
+      </m> -->
       <m v="viewpoint" zoom-min="15">
         <symbol src="viewpoint" />
       </m>
