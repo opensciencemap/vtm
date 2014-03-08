@@ -35,9 +35,6 @@ public class MapTile extends Tile {
 
 	}
 
-	/** To be removed: used by GWT backend */
-	public TileLoader loader;
-
 	public static final class State {
 		public final static byte NONE = 0;
 
@@ -67,7 +64,7 @@ public class MapTile extends Tile {
 	}
 
 	public MapTile(TileNode node, int tileX, int tileY, int zoomLevel) {
-		super(tileX, tileY, (byte)zoomLevel);
+		super(tileX, tileY, (byte) zoomLevel);
 		this.x = (double) tileX / (1 << zoomLevel);
 		this.y = (double) tileY / (1 << zoomLevel);
 		this.node = node;

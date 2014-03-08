@@ -73,10 +73,7 @@ public class BitmapTileLoader extends TileLoader implements ITileDataSink {
 
 	@Override
 	public void completed(boolean success) {
-		if (success) {
-			mTile.loader.jobCompleted(mTile, true);
-			mTile = null;
-			return;
-		}
+		jobCompleted(mTile, success);
+		mTile = null;
 	}
 }

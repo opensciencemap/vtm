@@ -130,11 +130,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	public void completed(boolean success) {
-		if (success) {
-			mTile.loader.jobCompleted(mTile, true);
-			mTile = null;
-			return;
-		}
+		jobCompleted(mTile, success);
+		mTile = null;
 	}
 
 	protected static int getValidLayer(int layer) {

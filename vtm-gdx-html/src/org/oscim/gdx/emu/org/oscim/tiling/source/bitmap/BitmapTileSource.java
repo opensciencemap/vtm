@@ -73,7 +73,7 @@ public abstract class BitmapTileSource extends UrlTileSource {
 			img.addLoadHandler(new LoadHandler() {
 				public void onLoad(LoadEvent event) {
 					sink.setTileImage(new GwtBitmap(img));
-					tile.loader.jobCompleted(tile, true);
+					sink.completed(true);
 				}
 			});
 
@@ -81,7 +81,7 @@ public abstract class BitmapTileSource extends UrlTileSource {
 
 				@Override
 				public void onError(ErrorEvent event) {
-					tile.loader.jobCompleted(tile, false);
+					sink.completed(false);
 					RootPanel.get().remove(img);
 				}
 			});

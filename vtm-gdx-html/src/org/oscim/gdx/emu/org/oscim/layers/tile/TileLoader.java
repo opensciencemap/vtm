@@ -14,9 +14,6 @@
  */
 package org.oscim.layers.tile;
 
-import org.oscim.layers.tile.MapTile;
-import org.oscim.layers.tile.TileManager;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Timer;
 
@@ -86,7 +83,6 @@ public abstract class TileLoader {
 			return;
 
 		try {
-			tile.loader = this;
 			executeJob(tile);
 
 			mWorking = true;
