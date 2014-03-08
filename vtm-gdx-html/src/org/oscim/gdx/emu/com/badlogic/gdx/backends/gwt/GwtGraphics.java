@@ -22,7 +22,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.GL30;
-import com.badlogic.gdx.graphics.GLCommon;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.dom.client.CanvasElement;
@@ -111,15 +110,9 @@ public class GwtGraphics implements Graphics {
 		return context;
 	}
 
-
-	@Override
-	public GLCommon getGLCommon() {
-		return gl;
-	}
-
 	@Override
 	public GL20 getGL20() {
-		return null;
+		return gl;
 	}
 
 	@Override
@@ -332,14 +325,12 @@ public class GwtGraphics implements Graphics {
 	}
 
 	@Override
-    public boolean isGL30Available() {
-	    // TODO Auto-generated method stub
-	    return false;
-    }
+	public boolean isGL30Available() {
+		return false;
+	}
 
 	@Override
-    public GL30 getGL30() {
-	    // TODO Auto-generated method stub
-	    return null;
-    }
+	public GL30 getGL30() {
+		return null;
+	}
 }
