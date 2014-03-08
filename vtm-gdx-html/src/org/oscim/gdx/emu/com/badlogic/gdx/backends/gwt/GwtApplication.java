@@ -16,6 +16,9 @@
 
 package com.badlogic.gdx.backends.gwt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Audio;
@@ -50,7 +53,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -62,14 +64,14 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author mzechner
  */
 public abstract class GwtApplication implements EntryPoint, Application {
+	private final static Logger log = LoggerFactory.getLogger(GwtApplication.class);
+
 	private ApplicationListener listener;
 	private GwtApplicationConfiguration config;
 	private GwtGraphics graphics;
 	private GwtInput input;
 	private GwtNet net;
 	private Panel root = null;
-	private TextArea log = null;
-	private int logLevel = LOG_ERROR;
 	private Array<Runnable> runnables = new Array<Runnable>();
 	private Array<Runnable> runnablesHelper = new Array<Runnable>();
 	private Array<LifecycleListener> lifecycleListeners = new Array<LifecycleListener>();
@@ -91,7 +93,6 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		GwtApplication.agentInfo = computeAgentInfo();
 		this.listener = getApplicationListener();
 		this.config = getConfig();
-		this.log = config.log;
 
 		if (config.rootPanel != null) {
 			this.root = config.rootPanel;
@@ -118,11 +119,6 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			}
 		}
 
-		//// initialize SoundManager2
-		//SoundManager.init(GWT.getModuleBaseURL(), 9, true, new SoundManager.SoundManagerCallback() {
-		//
-		//	@Override
-		//	public void onready () {
 		final PreloaderCallback callback = getPreloaderCallback();
 		preloader = createPreloader();
 		preloader.preload("assets.txt", new PreloaderCallback() {
@@ -140,16 +136,10 @@ public abstract class GwtApplication implements EntryPoint, Application {
 				}
 			}
 		});
-		//}
-		//@Override
-		//public void ontimeout (String status, String errorType) {
-		//	error("SoundManager", status + " " + errorType);
-		//	}
-		//
-		//});
 	}
 
 	void setupLoop() {
+		Gdx.app = this;
 		// setup modules
 		try {
 			graphics = new GwtGraphics(root, config);
@@ -160,7 +150,6 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		}
 		lastWidth = graphics.getWidth();
 		lastHeight = graphics.getHeight();
-		Gdx.app = this;
 		//Gdx.audio = new GwtAudio();
 		Gdx.graphics = graphics;
 		Gdx.gl20 = graphics.getGL20();
@@ -291,46 +280,32 @@ public abstract class GwtApplication implements EntryPoint, Application {
 
 	@Override
 	public void log(String tag, String message) {
-		if (logLevel >= LOG_INFO) {
-			consoleLog(tag + ": " + message);
-		}
+		log.info("{} : {}", tag, message);
 	}
 
 	@Override
 	public void log(String tag, String message, Throwable exception) {
-		if (logLevel >= LOG_INFO) {
-			consoleLog(tag + ": " + message + "\n" + exception.getMessage());
-			consoleLog(getStackTrace(exception));
-		}
+		log.info("{} : {}\n{}", tag, exception, getStackTrace(exception));
 	}
 
 	@Override
 	public void error(String tag, String message) {
-		if (logLevel >= LOG_ERROR) {
-			consoleLog(tag + ": " + message);
-		}
+		log.error("{} : {}", tag, message);
 	}
 
 	@Override
 	public void error(String tag, String message, Throwable exception) {
-		if (logLevel >= LOG_ERROR) {
-			consoleLog(getStackTrace(exception));
-		}
+		log.error("{} : {}\n{}", tag, message, getStackTrace(exception));
 	}
 
 	@Override
 	public void debug(String tag, String message) {
-		if (logLevel >= LOG_DEBUG) {
-			consoleLog(tag + ": " + message + "\n");
-		}
+		log.debug("{} : {}", tag, message);
 	}
 
 	@Override
 	public void debug(String tag, String message, Throwable exception) {
-		if (logLevel >= LOG_DEBUG) {
-			consoleLog(tag + ": " + message + "\n" + exception.getMessage());
-			consoleLog(getStackTrace(exception));
-		}
+		log.debug("{} : {}\n{}", tag, message, getStackTrace(exception));
 	}
 
 	private String getStackTrace(Throwable e) {
@@ -343,12 +318,11 @@ public abstract class GwtApplication implements EntryPoint, Application {
 
 	@Override
 	public void setLogLevel(int logLevel) {
-		this.logLevel = logLevel;
 	}
 
 	@Override
 	public int getLogLevel() {
-		return logLevel;
+		return LOG_DEBUG;
 	}
 
 	@Override
@@ -489,8 +463,4 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			lifecycleListeners.removeValue(listener, true);
 		}
 	}
-
-	private native void consoleLog(String message) /*-{
-		console.log(message);
-	}-*/;
 }
