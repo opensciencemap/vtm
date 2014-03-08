@@ -20,6 +20,7 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -33,11 +34,6 @@ import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Hannes Janetzek
- *         FIXME check if polygon has self intersections or 0/180 degree
- *         angles! or bad things might happen in Triangle
- */
 public class ExtrusionLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(ExtrusionLayer.class);
 
@@ -48,10 +44,11 @@ public class ExtrusionLayer extends RenderElement {
 	private final VertexItem mCurIndices[];
 	private LineClipper mClipper;
 
+	/** 16 floats rgba for top, even-side, odd-sides and outline */
 	public final float[] colors;
+	public final int color;
 
-	// indices for:
-	// 0. even sides, 1. odd sides, 2. roof, 3. roof outline
+	/** indices for: 0. even sides, 1. odd sides, 2. roof, 3. roof outline */
 	public int numIndices[] = { 0, 0, 0, 0, 0 };
 	public int sumIndices = 0;
 	public int sumVertices = 0;
@@ -65,7 +62,7 @@ public class ExtrusionLayer extends RenderElement {
 	private final static int IND_OUTLINE = 3;
 	private final static int IND_MESH = 4;
 
-	private static final int NORMAL_DIR_MASK = 0xFFFFFFFE;
+	//private static final int NORMAL_DIR_MASK = 0xFFFFFFFE;
 
 	public boolean compiled = false;
 	private final float mGroundResolution;
@@ -76,6 +73,7 @@ public class ExtrusionLayer extends RenderElement {
 		super(RenderElement.EXTRUSION);
 		this.level = level;
 		this.colors = colors;
+		this.color = 0;
 
 		mGroundResolution = groundResolution;
 		mVertices = mCurVertices = VertexItem.pool.get();
@@ -86,6 +84,29 @@ public class ExtrusionLayer extends RenderElement {
 			mIndices[i] = mCurIndices[i] = VertexItem.pool.get();
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE);
+	}
+
+	/**
+	 * ExtrusionLayer for Mesh elements only.
+	 */
+	public ExtrusionLayer(int level, float groundResolution, int color) {
+		super(RenderElement.EXTRUSION);
+		this.level = level;
+		this.color = color;
+		this.colors = new float[4];
+		float a = Color.aToFloat(color);
+		colors[0] = a * Color.rToFloat(color);
+		colors[1] = a * Color.gToFloat(color);
+		colors[2] = a * Color.bToFloat(color);
+		colors[3] = a;
+
+		mGroundResolution = groundResolution;
+		mVertices = mCurVertices = VertexItem.pool.get();
+
+		mIndices = new VertexItem[5];
+		mCurIndices = new VertexItem[5];
+
+		mIndices[4] = mCurIndices[4] = VertexItem.pool.get();
 	}
 
 	public void add(MapElement element) {
@@ -156,7 +177,6 @@ public class ExtrusionLayer extends RenderElement {
 			double len = Math.sqrt(cx * cx + cy * cy + cz * cz);
 
 			// packing the normal in two bytes
-			//(cx / len) / p + 0.5
 			double p = Math.sqrt((cz / len) * 8.0 + 8.0);
 			int mx = FastMath.clamp(127 + (int) ((cx / len / p) * 128), 0, 255);
 			int my = FastMath.clamp(127 + (int) ((cy / len / p) * 128), 0, 255);

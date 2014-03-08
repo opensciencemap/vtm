@@ -20,7 +20,6 @@ import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
 import static org.oscim.layers.tile.MapTile.State.READY;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.canvas.Color;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileRenderer;
@@ -45,6 +44,14 @@ public class ExtrusionRenderer extends LayerRenderer {
 		mTileLayer = tileRenderLayer;
 		mTileSet = new TileSet();
 		mTileZoom = tileZoom;
+		mMode = 0;
+	}
+
+	public ExtrusionRenderer(TileRenderer tileRenderLayer, int tileZoom, boolean mesh) {
+		mTileLayer = tileRenderLayer;
+		mTileSet = new TileSet();
+		mTileZoom = tileZoom;
+		mMode = mesh ? 1 : 0;
 	}
 
 	private static int[] shaderProgram = new int[2];
@@ -61,18 +68,18 @@ public class ExtrusionRenderer extends LayerRenderer {
 	private MapTile[] mTiles;
 	private int mTileCnt;
 
-	private final static int SHADER = 0;
+	private final int mMode;
 
 	private boolean initShader() {
 		initialized = true;
 
-		for (int i = 0; i <= SHADER; i++) {
+		for (int i = 0; i < 2; i++) {
 			if (i == 0) {
 				shaderProgram[i] = GLShader.createProgram(extrusionVertexShader,
 				                                          extrusionFragmentShader);
 			} else {
-				shaderProgram[i] = GLShader.createProgram(extrusionVertexShader,
-				                                          extrusionFragmentShaderZ);
+				shaderProgram[i] = GLShader.createProgram(extrusionVertexShader2,
+				                                          extrusionFragmentShader);
 			}
 
 			if (shaderProgram[i] == 0) {
@@ -105,13 +112,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 			return;
 		}
 
-		//		if (mUpdateColors) {
-		//			synchronized (this) {
-		//				System.arraycopy(mNewColors, 0, mColor, 0, 16);
-		//				mUpdateColors = false;
-		//			}
-		//		}
-
 		int activeTiles = 0;
 		mTileLayer.getVisibleTiles(mTileSet);
 		MapTile[] tiles = mTileSet.tiles;
@@ -131,17 +131,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		ExtrusionLayer el;
 		if (zoom == mTileZoom) {
 			for (int i = 0; i < mTileSet.cnt; i++) {
-				el = getLayer(tiles[i]);
-				if (el == null)
-					continue;
-
-				if (!el.compiled) {
-					int numShorts = el.sumVertices * 8;
-					el.compile(MapRenderer.getShortBuffer(numShorts));
-					GLUtils.checkGlError("...");
-				}
-
-				if (el.compiled)
+				if (compileLayers(getLayer(tiles[i])))
 					mTiles[activeTiles++] = tiles[i];
 			}
 		} else if (zoom == mTileZoom + 1) {
@@ -159,13 +149,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 				if (el == null)
 					continue;
 
-				if (!el.compiled) {
-					int numShorts = el.sumVertices * 8;
-					el.compile(MapRenderer.getShortBuffer(numShorts));
-					GLUtils.checkGlError("...");
-				}
-
-				if (el.compiled)
+				if (compileLayers(el))
 					mTiles[activeTiles++] = t;
 			}
 		} else if (zoom == mTileZoom - 1) {
@@ -187,24 +171,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 			}
 		}
 
-		//			// check if proxy children are ready
-		//			for (int i = 0; i < mTileSet.cnt; i++) {
-		//				MapTile t = tiles[i];
-		//				for (byte j = 0; j < 4; j++) {
-		//					if (!t.hasProxy(1 << j))
-		//						continue;
-		//
-		//					MapTile c = t.rel.get(j);
-		//					el = getLayer(c);
-		//
-		//					if (el == null || !el.compiled)
-		//						continue;
-		//
-		//					mTiles[activeTiles++] = c;
-		//				}
-		//			}
-		//		}
-
 		mTileCnt = activeTiles;
 		//log.debug("" + activeTiles + " " + zoom);
 
@@ -212,6 +178,26 @@ public class ExtrusionRenderer extends LayerRenderer {
 			setReady(true);
 		else
 			mTileLayer.releaseTiles(mTileSet);
+	}
+
+	private boolean compileLayers(ExtrusionLayer el) {
+		if (el == null)
+			return false;
+
+		if (el.compiled)
+			return true;
+
+		boolean compiled = false;
+		for (; el != null; el = (ExtrusionLayer) el.next) {
+			if (!el.compiled) {
+				int numShorts = el.sumVertices * 8;
+				el.compile(MapRenderer.getShortBuffer(numShorts));
+				GLUtils.checkGlError("...");
+			}
+			compiled |= el.compiled;
+		}
+
+		return compiled;
 	}
 
 	private static ExtrusionLayer getLayer(MapTile t) {
@@ -233,15 +219,15 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		MapTile[] tiles = mTiles;
 
-		int uExtAlpha = hAlpha[SHADER];
-		int uExtColor = hColor[SHADER];
-		int uExtVertexPosition = hVertexPosition[SHADER];
-		int uExtLightPosition = hLightPosition[SHADER];
-		int uExtMatrix = hMatrix[SHADER];
-		int uExtMode = hMode[SHADER];
+		int uExtAlpha = hAlpha[mMode];
+		int uExtColor = hColor[mMode];
+		int uExtVertexPosition = hVertexPosition[mMode];
+		int uExtLightPosition = hLightPosition[mMode];
+		int uExtMatrix = hMatrix[mMode];
+		int uExtMode = hMode[mMode];
 
 		if (debug) {
-			GLState.useProgram(shaderProgram[SHADER]);
+			GLState.useProgram(shaderProgram[mMode]);
 
 			GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
 			GL.glUniform1i(uExtMode, 0);
@@ -266,12 +252,14 @@ public class ExtrusionRenderer extends LayerRenderer {
 				                         GL20.GL_UNSIGNED_BYTE, false, 8, 6);
 
 				GL.glDrawElements(GL20.GL_TRIANGLES,
-				                  (el.numIndices[0] + el.numIndices[1] + el.numIndices[2]),
+				                  (el.numIndices[0] + el.numIndices[1]
+				                  + el.numIndices[2]),
 				                  GL20.GL_UNSIGNED_SHORT, 0);
 
 				GL.glDrawElements(GL20.GL_LINES, el.numIndices[3],
 				                  GL20.GL_UNSIGNED_SHORT,
-				                  (el.numIndices[0] + el.numIndices[1] + el.numIndices[2]) * 2);
+				                  (el.numIndices[0] + el.numIndices[1]
+				                  + el.numIndices[2]) * 2);
 
 				// just a temporary reference!
 				tiles[i] = null;
@@ -286,7 +274,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		GLState.test(true, false);
 
-		GLState.useProgram(shaderProgram[SHADER]);
+		GLState.useProgram(shaderProgram[mMode]);
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
 		GLState.blend(false);
 
@@ -319,7 +307,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 					                         GL20.GL_SHORT, false, 8, 0);
 
 					GL.glDrawElements(GL20.GL_TRIANGLES,
-					                  (el.numIndices[0] + el.numIndices[1] + el.numIndices[2]),
+					                  (el.numIndices[0] + el.numIndices[1]
+					                  + el.numIndices[2]),
 					                  GL20.GL_UNSIGNED_SHORT, 0);
 				}
 			}
@@ -340,12 +329,15 @@ public class ExtrusionRenderer extends LayerRenderer {
 			ExtrusionLayer el = t.getLayers().getExtrusionLayers();
 			for (; el != null; el = (ExtrusionLayer) el.next) {
 
+				if (el.vboIndices == null)
+					continue;
+
 				if (el.colors == null) {
 					currentColor = mColor;
-					GLUtils.glUniform4fv(uExtColor, 4, currentColor);
+					GLUtils.glUniform4fv(uExtColor, mMode == 0 ? 4 : 1, currentColor);
 				} else if (currentColor != el.colors) {
 					currentColor = el.colors;
-					GLUtils.glUniform4fv(uExtColor, 4, currentColor);
+					GLUtils.glUniform4fv(uExtColor, mMode == 0 ? 4 : 1, currentColor);
 				}
 
 				int d = 1;
@@ -439,41 +431,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		v.mvp.addDepthOffset(delta);
 	}
-
-	public synchronized void setColors(float[] colors) {
-		System.arraycopy(colors, 0, mNewColors, 0, 16);
-		mUpdateColors = true;
-	}
-
-	public synchronized void setColors(int sides, int top, int lines) {
-		fillColors(sides, top, lines);
-		mUpdateColors = true;
-	}
-
-	private void fillColors(int sides, int top, int lines) {
-		mNewColors[0] = Color.rToFloat(top);
-		mNewColors[1] = Color.gToFloat(top);
-		mNewColors[2] = Color.bToFloat(top);
-		mNewColors[3] = Color.aToFloat(top);
-
-		mNewColors[4] = Color.rToFloat(sides);
-		mNewColors[5] = Color.gToFloat(sides);
-		mNewColors[6] = Color.bToFloat(sides);
-		mNewColors[7] = Color.aToFloat(sides);
-
-		mNewColors[8] = Color.rToFloat(sides);
-		mNewColors[9] = Color.gToFloat(sides);
-		mNewColors[10] = Color.bToFloat(sides);
-		mNewColors[11] = Color.aToFloat(sides);
-
-		mNewColors[12] = Color.rToFloat(lines);
-		mNewColors[13] = Color.gToFloat(lines);
-		mNewColors[14] = Color.bToFloat(lines);
-		mNewColors[15] = Color.aToFloat(lines);
-	}
-
-	private volatile boolean mUpdateColors;
-	private final float[] mNewColors = new float[16];
 
 	private final float _a = 0.88f;
 	private final float _r = 0xe9;
@@ -575,17 +532,43 @@ public class ExtrusionRenderer extends LayerRenderer {
 	        + "    color = vec4(l, l, l-0.02, 1.0);"
 	        + "}}}";
 
-	//	vec3 decode(vec2 enc)
-	//	{
-	//	    vec2 fenc = enc * 4.0 - 2.0;
-	//	    float f = dot(fenc, fenc);
-	//	    float g = sqrt(1.0 - f / 4.0);
-	//	    
-	//	    vec3 n;
-	//	    n.xy = fenc * g;
-	//	    n.z = 1.0 - f / 2.0;
-	//	    return n;
-	//	}
+	final static String extrusionVertexShader2 = ""
+	        + "uniform mat4 u_mvp;"
+	        + "uniform vec4 u_color;"
+	        + "uniform float u_alpha;"
+	        + "attribute vec4 a_pos;"
+	        + "attribute vec2 a_light;"
+	        + "varying vec4 color;"
+	        + "varying float depth;"
+	        + "void main() {"
+	        //   change height by u_alpha
+	        + "  vec4 pos = a_pos;"
+	        + "  pos.z *= u_alpha;"
+	        + "  gl_Position = u_mvp * pos;"
+
+	        //   normalize face x/y direction
+	        + "  vec2 enc =  (a_light / 255.0);"
+	        + "  vec2 fenc = enc * 4.0 - 2.0;"
+	        + "  float f = dot(fenc, fenc);"
+	        + "  float g = sqrt(1.0 - f / 4.0);"
+	        + "  vec3 r_norm;"
+	        + "  r_norm.xy = fenc * g;"
+	        + "  r_norm.z = 1.0 - f / 2.0;"
+
+	        //     normal points up or down (1,-1)
+	        ////+ "    float dir = 1.0 - (2.0 * abs(mod(a_light.x,2.0)));"
+	        //     recreate face normal vector
+	        ///+ "    vec3 r_norm = vec3(n.xy, dir * (1.0 - length(n.xy)));"
+
+	        + "  vec3 light = normalize(vec3(-0.2,0.2,1.0));"
+	        + "  float l = (1.0 + dot(r_norm, light)) / 2.0;"
+
+	        /** ambient */
+	        //+ "  l = 0.2 + l * 0.8;"
+	        /** extreme fake-ssao by height */
+	        + "  l = l + (clamp(a_pos.z / 8192.0, 0.0, 0.1) - 0.05);"
+	        + "  color = u_color * l;" //vec4(l, l, l-0.02, 1.0);"
+	        + "}";
 
 	final static String extrusionFragmentShader = ""
 	        + "precision mediump float;"
@@ -594,13 +577,13 @@ public class ExtrusionRenderer extends LayerRenderer {
 	        + "  gl_FragColor = color;"
 	        + "}";
 
-	final static String extrusionFragmentShaderZ = ""
-	        + "precision mediump float;"
-	        + "varying float depth;"
-	        + "void main() {"
-	        + "float d = depth * 0.2;"
-	        + "if (d < 0.0)"
-	        + "   d = -d;"
-	        + "  gl_FragColor = vec4(1.0 - d, 1.0 - d, 1.0 - d, 1.0 - d);"
-	        + "}";
+	//final static String extrusionFragmentShaderZ = ""
+	//        + "precision mediump float;"
+	//        + "varying float depth;"
+	//        + "void main() {"
+	//        + "float d = depth * 0.2;"
+	//        + "if (d < 0.0)"
+	//        + "   d = -d;"
+	//        + "  gl_FragColor = vec4(1.0 - d, 1.0 - d, 1.0 - d, 1.0 - d);"
+	//        + "}";
 }
