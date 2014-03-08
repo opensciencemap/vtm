@@ -23,7 +23,7 @@ public class DefaultSources {
 
 	public static class StamenToner extends BitmapTileSource {
 		public StamenToner() {
-			super("http://opensciencemap.org/cors-stamen/toner", 0, 16);
+			super("http://a.tile.stamen.com/toner", 0, 18);
 		}
 	}
 
