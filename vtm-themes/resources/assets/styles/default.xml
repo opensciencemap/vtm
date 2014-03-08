@@ -59,7 +59,7 @@
   <!-- <style-line id="highway:z11:bridge" use="highway:z11" cap="butt" /> -->
   <style-line id="trunk_link" stroke="#fee16e" width="1.3" cap="butt" />
   <style-line id="trunk" stroke="#fedb52" width="1.6" />
-  <style-line id="primary:z11" stroke="#fdeb05" width="1.5" />
+  <style-line id="primary:z11" stroke="#e9c065" width="1.5" />
   <style-line id="secondary:z11" use="primary:z11" width="-0.1" />
   <style-line id="tertiary" use="residential" stroke="#fefefa" width="0.2" />
   <style-line id="construction" stroke="#e0e0e0" width="1.2" />
