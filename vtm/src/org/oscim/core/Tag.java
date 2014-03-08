@@ -101,36 +101,36 @@ public class Tag {
 		}
 		Tag other = (Tag) obj;
 
-		if (this.key != other.key)
+		if (key != other.key)
 			return false;
 
-		if (this.intern && other.intern) {
-			if (this.value == other.value)
+		if (intern && other.intern) {
+			if (value == other.value)
 				return true;
-		} else {
-			if (this.value.equals(other.value))
-				return true;
+
+		} else if (!intern && value.equals(other.value)) {
+			return true;
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		if (this.hashCodeValue == 0)
-			this.hashCodeValue = calculateHashCode();
+		if (hashCodeValue == 0)
+			hashCodeValue = calculateHashCode();
 
-		return this.hashCodeValue;
+		return hashCodeValue;
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("Tag [key=");
-		stringBuilder.append(this.key);
-		stringBuilder.append(", value=");
-		stringBuilder.append(this.value);
-		stringBuilder.append("]");
-		return stringBuilder.toString();
+		return new StringBuilder()
+		    .append("Tag[")
+		    .append(key)
+		    .append(',')
+		    .append(value)
+		    .append(']')
+		    .toString();
 	}
 
 	/**
@@ -138,8 +138,8 @@ public class Tag {
 	 */
 	private int calculateHashCode() {
 		int result = 7;
-		result = 31 * result + ((this.key == null) ? 0 : this.key.hashCode());
-		result = 31 * result + ((this.value == null) ? 0 : this.value.hashCode());
+		result = 31 * result + ((key == null) ? 0 : key.hashCode());
+		result = 31 * result + ((value == null) ? 0 : value.hashCode());
 		return result;
 	}
 
