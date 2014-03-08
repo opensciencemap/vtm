@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.oscim.theme.IRenderTheme.ThemeException;
-import org.oscim.theme.RenderThemeHandler;
+import org.oscim.theme.XmlThemeBuilder;
 import org.oscim.theme.styles.RenderStyle;
 import org.xml.sax.Attributes;
 
@@ -185,7 +185,7 @@ public class RuleBuilder {
 				if ("when-matched".equals(value))
 					selector |= SELECT_WHEN_MATCHED;
 			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
 

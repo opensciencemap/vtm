@@ -22,7 +22,7 @@ import java.io.InputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.oscim.theme.RenderThemeHandler;
+import org.oscim.theme.XmlThemeBuilder;
 import org.oscim.tiling.TileSource.OpenResult;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -40,7 +40,7 @@ public final class ValidRenderTheme implements ValidFileFilter {
 
 		try {
 			inputStream = new FileInputStream(file);
-			RenderThemeHandler renderThemeHandler = new RenderThemeHandler();
+			XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder();
 			XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 			xmlReader.setContentHandler(renderThemeHandler);
 			xmlReader.parse(new InputSource(inputStream));

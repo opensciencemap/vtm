@@ -45,7 +45,7 @@ public class ThemeLoader {
 		InputStream inputStream = null;
 		try {
 			inputStream = theme.getRenderThemeAsStream();
-			IRenderTheme t = RenderThemeHandler.getRenderTheme(inputStream);
+			IRenderTheme t = XmlThemeBuilder.from(inputStream);
 
 			if (t != null)
 				t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / 240 - 1) * 0.5f);

@@ -52,8 +52,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class RenderThemeHandler extends DefaultHandler {
-	static final Logger log = LoggerFactory.getLogger(RenderThemeHandler.class);
+public class XmlThemeBuilder extends DefaultHandler {
+	static final Logger log = LoggerFactory.getLogger(XmlThemeBuilder.class);
 
 	private static final int RENDER_THEME_VERSION = 1;
 
@@ -83,10 +83,10 @@ public class RenderThemeHandler extends DefaultHandler {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading from the input stream.
 	 */
-	public static IRenderTheme getRenderTheme(InputStream inputStream)
+	public static IRenderTheme from(InputStream inputStream)
 	        throws SAXException, IOException {
 
-		RenderThemeHandler renderThemeHandler = new RenderThemeHandler();
+		XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder();
 
 		new XMLReaderAdapter().parse(renderThemeHandler, inputStream);
 
@@ -571,7 +571,7 @@ public class RenderThemeHandler extends DefaultHandler {
 			if ("img".equals(name)) {
 				img = value;
 			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
 		if (img == null)
@@ -600,7 +600,7 @@ public class RenderThemeHandler extends DefaultHandler {
 					             Integer.parseInt(pos[3]));
 				}
 			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
 		if (regionName == null || r == null)
@@ -683,7 +683,7 @@ public class RenderThemeHandler extends DefaultHandler {
 				baseTextSize = Float.parseFloat(value);
 
 			else
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
 
 		}
 
