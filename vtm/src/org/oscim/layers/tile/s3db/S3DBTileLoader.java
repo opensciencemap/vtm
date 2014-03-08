@@ -43,8 +43,8 @@ class S3DBTileLoader extends TileLoader {
 		mGroundScale = (float) MercatorProjection
 		    .groundResolution(lat, 1 << mTile.zoomLevel);
 
-		mLayers = new ExtrusionLayer(0, mGroundScale, Color.get(255, 255, 250));
-		mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(218, 220, 220));
+		mLayers = new ExtrusionLayer(0, mGroundScale, Color.get(255, 252, 250));
+		mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(208, 210, 210));
 		mLayers.next = mRoofs;
 
 		ElementLayers layers = new ElementLayers();
@@ -64,6 +64,7 @@ class S3DBTileLoader extends TileLoader {
 
 	String COLOR_KEY = "c";
 	String ROOF_KEY = "roof";
+	String ROOF_SHAPE_KEY = "roof:shape";
 
 	@Override
 	public void process(MapElement element) {
@@ -80,7 +81,9 @@ class S3DBTileLoader extends TileLoader {
 		}
 
 		if (c == 0) {
-			if (isRoof)
+			String roofShape = element.tags.getValue(ROOF_SHAPE_KEY);
+
+			if (isRoof && (roofShape == null || "flat".equals(roofShape)))
 				mRoofs.add(element);
 			else
 				mLayers.add(element);
