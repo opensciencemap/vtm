@@ -60,7 +60,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public static final byte STROKE_MAX_ZOOM = 17;
 
 	protected IRenderTheme renderTheme;
-	protected int renderLevels;
 
 	/** current TileDataSource used by this MapTileLoader */
 	protected ITileDataSource mTileDataSource;
@@ -77,10 +76,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	/** Line-scale-factor depending on zoom and latitude */
 	protected float mLineScale = 1.0f;
 
-	public void setRenderTheme(IRenderTheme theme) {
-		renderTheme = theme;
-		renderLevels = theme.getLevels();
-	}
 	private final VectorTileLayer mTileLayer;
 
 	public VectorTileLoader(VectorTileLayer tileLayer) {
@@ -101,7 +96,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			log.error("no tile source is set");
 			return false;
 		}
-
+		renderTheme = mTileLayer.getTheme();
 		if (renderTheme == null) {
 			log.error("no theme is set");
 			return false;
@@ -179,21 +174,18 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		if (isCanceled() || mTile.state(CANCEL))
 			throw new CancellationException();
 
+		TagSet tags = filterTags(element.tags);
+		if (tags == null)
+			return;
+
 		mElement = element;
 
+		/* get and apply render instructions */
 		if (element.type == GeometryType.POINT) {
-			TagSet tags = filterTags(element.tags);
-
-			/* get and apply render instructions */
 			renderNode(renderTheme.matchElement(element.type, tags, mTile.zoomLevel));
 		} else {
-			TagSet tags = filterTags(element.tags);
-
-			mCurLayer = getValidLayer(element.layer) * renderLevels;
-
-			/* get and apply render instructions */
+			mCurLayer = getValidLayer(element.layer) * renderTheme.getLevels();
 			renderWay(renderTheme.matchElement(element.type, tags, mTile.zoomLevel));
-
 		}
 		clearState();
 	}

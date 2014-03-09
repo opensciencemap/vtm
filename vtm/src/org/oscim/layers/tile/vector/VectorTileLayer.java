@@ -98,19 +98,24 @@ public class VectorTileLayer extends TileLayer {
 	 * Set {@link IRenderTheme} used by {@link TileLoader}
 	 */
 	public void setRenderTheme(IRenderTheme theme) {
-		// wait for loaders to finish all current jobs to
-		// not change theme instance hold by loader instance
-		// while running
+		/* wait for loaders to finish all current jobs to
+		 * not change theme instance hold by loader instance
+		 * while running */
 		pauseLoaders(true);
 		mTileManager.clearJobs();
 
-		for (TileLoader l : mTileLoader)
-			((VectorTileLoader) l).setRenderTheme(theme);
+		mTheme = theme;
+		//	for (TileLoader l : mTileLoader)
+		//	((VectorTileLoader) l).setRenderTheme(theme);
 
 		tileRenderer().setOverdrawColor(theme.getMapBackground());
 
 		resumeLoaders();
 	}
 
+	private IRenderTheme mTheme;
+
+	public IRenderTheme getTheme() {
+		return mTheme;
 	}
 }
