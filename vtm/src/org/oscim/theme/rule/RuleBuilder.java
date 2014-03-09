@@ -47,13 +47,13 @@ public class RuleBuilder {
 		this.valueMatcher = valueMatcher;
 	}
 
-	private static RuleBuilder createRule(Stack<RuleBuilder> ruleStack, int element, String keys,
-	        String values, byte zoomMin, byte zoomMax, int selector) {
+	public RuleBuilder(boolean positive, AttributeMatcher keyMatcher, AttributeMatcher valueMatcher) {
+		this.positiveRule = positive;
+		this.keyMatcher = keyMatcher;
+		this.valueMatcher = valueMatcher;
+	}
 
-		// zoom-level bitmask
-		int zoom = 0;
-		for (int z = zoomMin; z <= zoomMax && z < 32; z++)
-			zoom |= (1 << z);
+	public static RuleBuilder create(Stack<RuleBuilder> ruleStack, String keys, String values) {
 
 		List<String> keyList = null, valueList = null;
 		boolean negativeRule = false;
@@ -90,16 +90,16 @@ public class RuleBuilder {
 
 			if (negativeRule) {
 				AttributeMatcher m = new NegativeMatcher(keyList, valueList, false);
-				return new RuleBuilder(false, element, zoom, selector, m, null);
+				return new RuleBuilder(false, m, null);
 			} else if (exclusionRule) {
 				AttributeMatcher m = new NegativeMatcher(keyList, valueList, true);
-				return new RuleBuilder(false, element, zoom, selector, m, null);
+				return new RuleBuilder(false, m, null);
 			}
 
 			keyMatcher = RuleOptimizer.optimize(keyMatcher, ruleStack);
 		}
 
-		return new RuleBuilder(true, element, zoom, selector, keyMatcher, valueMatcher);
+		return new RuleBuilder(true, keyMatcher, valueMatcher);
 	}
 
 	private static AttributeMatcher getKeyMatcher(List<String> keyList) {
@@ -137,11 +137,9 @@ public class RuleBuilder {
 	}
 
 	private static void validate(byte zoomMin, byte zoomMax) {
-		if (zoomMin < 0)
-			throw new ThemeException("zoom-min must not be negative: " + zoomMin);
-		else if (zoomMax < 0)
-			throw new ThemeException("zoom-max must not be negative: " + zoomMax);
-		else if (zoomMin > zoomMax)
+		XmlThemeBuilder.validateNonNegative("zoom-min", zoomMin);
+		XmlThemeBuilder.validateNonNegative("zoom-max", zoomMax);
+		if (zoomMin > zoomMax)
 			throw new ThemeException("zoom-min must be less or equal zoom-max: " + zoomMin);
 	}
 
@@ -196,7 +194,20 @@ public class RuleBuilder {
 
 		validate(zoomMin, zoomMax);
 
-		return createRule(ruleStack, element, keys, values, zoomMin, zoomMax, selector);
+		RuleBuilder b = create(ruleStack, keys, values);
+		b.setZoom(zoomMin, zoomMax);
+		b.element = element;
+		b.selector = selector;
+		return b;
+	}
+
+	public RuleBuilder setZoom(byte zoomMin, byte zoomMax) {
+		// zoom-level bitmask
+		zoom = 0;
+		for (int z = zoomMin; z <= zoomMax && z < 32; z++)
+			zoom |= (1 << z);
+
+		return this;
 	}
 
 	public Rule onComplete() {
@@ -233,4 +244,28 @@ public class RuleBuilder {
 		subRules.add(rule);
 	}
 
+	RuleBuilder(boolean positive) {
+		this.positiveRule = positive;
+		this.element = Element.ANY;
+		this.zoom = ~0;
+	}
+
+	public static RuleBuilder get() {
+		return new RuleBuilder(true);
+	}
+
+	public RuleBuilder select(int selector) {
+		this.selector = selector;
+		return this;
+	}
+
+	public RuleBuilder zoom(int zoom) {
+		this.zoom = zoom;
+		return this;
+	}
+
+	public RuleBuilder element(int element) {
+		this.element = element;
+		return this;
+	}
 }

@@ -863,13 +863,13 @@ public class XmlThemeBuilder extends DefaultHandler {
 		return new Extrusion(level, colorSide, colorTop, colorLine, defaultHeight);
 	}
 
-	private static void validateNonNegative(String name, float value) {
+	public static void validateNonNegative(String name, float value) {
 		if (value < 0)
 			throw new ThemeException(name + " must not be negative: "
 			        + value);
 	}
 
-	private static void validateExists(String name, Object obj, String elementName) {
+	public static void validateExists(String name, Object obj, String elementName) {
 		if (obj == null)
 			throw new ThemeException("missing attribute " + name
 			        + " for element: " + elementName);
