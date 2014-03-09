@@ -18,6 +18,10 @@ import org.oscim.utils.geom.OBB2D;
 public class LabelPlacement {
 	static final boolean dbg = false;
 
+	public final static LabelTileData getLabels(MapTile tile) {
+		return (LabelTileData) tile.getData(LabelLayer.LABEL_DATA);
+	}
+
 	private final static float MIN_CAPTION_DIST = 5;
 	private final static float MIN_WAY_DIST = 3;
 
@@ -176,7 +180,11 @@ public class LabelPlacement {
 	private Label addWayLabels(MapTile t, Label l, float dx, float dy,
 	        double scale) {
 
-		for (TextItem ti : t.labels) {
+		LabelTileData ld = getLabels(t);
+		if (ld == null)
+			return l;
+
+		for (TextItem ti : ld.labels) {
 			if (ti.text.caption)
 				continue;
 
@@ -229,7 +237,11 @@ public class LabelPlacement {
 	private Label addNodeLabels(MapTile t, Label l, float dx, float dy,
 	        double scale, float cos, float sin) {
 
-		O: for (TextItem ti : t.labels) {
+		LabelTileData ld = getLabels(t);
+		if (ld == null)
+			return l;
+
+		O: for (TextItem ti : ld.labels) {
 			if (!ti.text.caption)
 				continue;
 
@@ -447,7 +459,11 @@ public class LabelPlacement {
 				float dy = (float) (t.tileY * Tile.SIZE - tileY);
 				dx = flipLongitude(dx, maxx);
 
-				for (SymbolItem ti : t.symbols) {
+				LabelTileData ld = getLabels(t);
+				if (ld == null)
+					continue;
+
+				for (SymbolItem ti : ld.symbols) {
 					if (ti.texRegion == null)
 						continue;
 

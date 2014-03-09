@@ -106,14 +106,6 @@ public class MapTile extends Tile {
 	public float distance;
 
 	/**
-	 * FIXME move to VectorMapTile
-	 * Tile data set by TileLoader.
-	 */
-
-	public final List<SymbolItem> symbols = new List<SymbolItem>();
-	public final List<TextItem> labels = new List<TextItem>();
-
-	/**
 	 * Tile is in view region. Set by TileRenderer.
 	 */
 	public boolean isVisible;
@@ -241,9 +233,6 @@ public class MapTile extends Tile {
 			data.dispose();
 			data = data.next;
 		}
-
-		TextItem.pool.releaseAll(labels.clear());
-		SymbolItem.pool.releaseAll(symbols.clear());
 
 		// still needed?
 		state = State.NONE;

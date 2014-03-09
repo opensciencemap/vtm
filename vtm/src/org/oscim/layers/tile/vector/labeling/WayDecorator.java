@@ -15,10 +15,9 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile.vector;
+package org.oscim.layers.tile.vector.labeling;
 
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.MapTile;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.theme.styles.TextStyle;
 import org.oscim.utils.geom.GeometryUtils;
@@ -27,7 +26,7 @@ import org.oscim.utils.geom.LineClipper;
 public final class WayDecorator {
 
 	public static void renderText(LineClipper clipper, float[] coordinates, String string,
-	        TextStyle text, int pos, int len, MapTile tile) {
+	        TextStyle text, int pos, int len, LabelTileData ld) {
 		//TextItem items = textItems;
 		TextItem t = null;
 
@@ -216,7 +215,7 @@ public final class WayDecorator {
 			t.length = (short) segmentLength;
 
 			t.edges = edge;
-			tile.labels.push(t);
+			ld.labels.push(t);
 
 			i = last;
 		}
