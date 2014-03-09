@@ -220,7 +220,7 @@ public class PathLayer extends Layer {
 		}
 	}
 
-	final class Task {
+	final static class Task {
 		ElementLayers layer = new ElementLayers();
 		MapPosition pos = new MapPosition();
 	}
