@@ -45,6 +45,7 @@ import org.oscim.theme.styles.LineSymbol;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.Symbol;
 import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.Text.TextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -83,7 +84,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading from the input stream.
 	 */
-	public static IRenderTheme from(InputStream inputStream)
+	public static IRenderTheme read(InputStream inputStream)
 	        throws SAXException, IOException {
 
 		XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder();
@@ -119,14 +120,15 @@ public class XmlThemeBuilder extends DefaultHandler {
 		log.debug(sb.toString());
 	}
 
-	private ArrayList<RuleBuilder> mRulesList = new ArrayList<RuleBuilder>();
-	private RuleBuilder mCurrentRule;
-
-	private Stack<Element> mElementStack = new Stack<Element>();
-	private Stack<RuleBuilder> mRuleStack = new Stack<RuleBuilder>();
-	private HashMap<String, RenderStyle> mStyles =
+	private final ArrayList<RuleBuilder> mRulesList = new ArrayList<RuleBuilder>();
+	private final Stack<Element> mElementStack = new Stack<Element>();
+	private final Stack<RuleBuilder> mRuleStack = new Stack<RuleBuilder>();
+	private final HashMap<String, RenderStyle> mStyles =
 	        new HashMap<String, RenderStyle>(10);
 
+	private final TextBuilder mTextBuilder = new TextBuilder();
+
+	private RuleBuilder mCurrentRule;
 	private TextureAtlas mTextureAtlas;
 
 	private int mLevels = 0;
@@ -149,10 +151,6 @@ public class XmlThemeBuilder extends DefaultHandler {
 		mRuleStack.clear();
 		mElementStack.clear();
 
-		mStyles = null;
-		mRuleStack = null;
-		mRulesList = null;
-		mElementStack = null;
 		mTextureAtlas = null;
 	}
 
@@ -325,10 +323,6 @@ public class XmlThemeBuilder extends DefaultHandler {
 	/**
 	 * @param line
 	 *            optional: line style defaults
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
 	 * @param level
 	 *            the drawing level of this instruction.
 	 * @param isOutline
@@ -430,17 +424,12 @@ public class XmlThemeBuilder extends DefaultHandler {
 				width = 1;
 
 		} else if (!isOutline) {
-			validateLine(width);
+			validateNonNegative("width", width);
 		}
 
 		return new Line(level, style, color, width, cap, fixed,
 		                stipple, stippleColor, stippleWidth,
 		                fade, blur, isOutline);
-	}
-
-	private static void validateLine(float strokeWidth) {
-		if (strokeWidth < 0)
-			throw new ThemeException("width must not be negative: " + strokeWidth);
 	}
 
 	private void handleAreaElement(String localName, Attributes attributes, boolean isStyle)
@@ -468,12 +457,6 @@ public class XmlThemeBuilder extends DefaultHandler {
 	}
 
 	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
-	 * @param level
-	 *            the drawing level of this instruction.
 	 * @return a new Area with the given rendering attributes.
 	 */
 	private static Area createArea(Area area, String elementName, Attributes attributes, int level) {
@@ -535,8 +518,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 			else
 				logUnknownAttribute(elementName, name, value, i);
 		}
-
-		validateLine(strokeWidth);
+		validateNonNegative("stroke-width", strokeWidth);
 
 		if (src != null) {
 			try {
@@ -574,8 +556,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
-		if (img == null)
-			throw new ThemeException("missing attribute 'img' for element: " + elementName);
+		validateExists("img", img, elementName);
 
 		Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset(IMG_PATH + img);
 		mTextureAtlas = new TextureAtlas(bitmap);
@@ -603,9 +584,8 @@ public class XmlThemeBuilder extends DefaultHandler {
 				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
-		if (regionName == null || r == null)
-			throw new ThemeException("missing attribute 'id' or 'rect' for element: "
-			        + elementName);
+		validateExists("id", regionName, elementName);
+		validateExists("pos", r, elementName);
 
 		mTextureAtlas.addTextureRegion(regionName.intern(), r);
 	}
@@ -687,107 +667,82 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 		}
 
-		if (version == null)
-			throw new ThemeException("missing attribute version for element:" + elementName);
-		else if (version.intValue() != RENDER_THEME_VERSION)
-			throw new ThemeException("invalid render theme version:" + version);
-		else if (baseStrokeWidth < 0)
-			throw new ThemeException("base-stroke-width must not be negative: " + baseStrokeWidth);
-		else if (baseTextSize < 0)
-			throw new ThemeException("base-text-size must not be negative: " + baseTextSize);
+		validateExists("version", version, elementName);
+
+		if (version.intValue() != RENDER_THEME_VERSION)
+			throw new ThemeException("invalid render theme version:"
+			        + version);
+
+		validateNonNegative("base-stroke-width", baseStrokeWidth);
+		validateNonNegative("base-test-size", baseTextSize);
 
 		mMapBackground = mapBackground;
 		mBaseTextSize = baseTextSize;
 	}
 
 	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
 	 * @param caption
 	 *            ...
 	 * @return a new Text with the given rendering attributes.
 	 */
 	private Text createText(String elementName, Attributes attributes, boolean caption) {
-		String textKey = null;
-		FontFamily fontFamily = FontFamily.DEFAULT;
-		FontStyle fontStyle = FontStyle.NORMAL;
-		float fontSize = 0;
-		int fill = Color.BLACK;
-		int stroke = Color.BLACK;
-		float strokeWidth = 0;
-		String style = null;
-		float dy = 0;
-		int priority = Integer.MAX_VALUE;
-		TextureRegion symbol = null;
+		TextBuilder b = mTextBuilder.reset();
+
+		b.caption = caption;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
 			if ("id".equals(name))
-				style = value;
+				b.style = value;
 
 			else if ("k".equals(name))
-				textKey = value.intern();
+				b.textKey = value.intern();
 
 			else if ("font-family".equals(name))
-				fontFamily = FontFamily.valueOf(value.toUpperCase());
+				b.fontFamily = FontFamily.valueOf(value.toUpperCase());
 
 			else if ("style".equals(name))
-				fontStyle = FontStyle.valueOf(value.toUpperCase());
+				b.fontStyle = FontStyle.valueOf(value.toUpperCase());
 
 			else if ("size".equals(name))
-				fontSize = Float.parseFloat(value);
+				b.fontSize = Float.parseFloat(value);
 
 			else if ("fill".equals(name))
-				fill = Color.parseColor(value);
+				b.color = Color.parseColor(value);
 
 			else if ("stroke".equals(name))
-				stroke = Color.parseColor(value);
+				b.stroke = Color.parseColor(value);
 
 			else if ("stroke-width".equals(name))
-				strokeWidth = Float.parseFloat(value);
+				b.strokeWidth = Float.parseFloat(value);
 
 			else if ("caption".equals(name))
-				caption = Boolean.parseBoolean(value);
+				b.caption = Boolean.parseBoolean(value);
 
 			else if ("priority".equals(name))
-				priority = Integer.parseInt(value);
+				b.priority = Integer.parseInt(value);
 
 			else if ("dy".equals(name))
-				dy = Float.parseFloat(value);
+				// NB: minus..
+				b.dy = -Float.parseFloat(value);
 
 			else if ("symbol".equals(name))
-				symbol = getAtlasRegion(value);
+				b.texture = getAtlasRegion(value);
 
 			else
 				logUnknownAttribute(elementName, name, value, i);
-
 		}
 
-		validateText(elementName, textKey, fontSize, strokeWidth);
+		validateExists("k", b.textKey, elementName);
+		validateNonNegative("size", b.fontSize);
+		validateNonNegative("stroke-width", b.strokeWidth);
 
-		return new Text(style, textKey, fontFamily, fontStyle, fontSize, fill, stroke, strokeWidth,
-		                dy, caption, symbol, priority);
-	}
-
-	private static void validateText(String elementName, String textKey, float fontSize,
-	        float strokeWidth) {
-		if (textKey == null)
-			throw new ThemeException("missing attribute k for element: " + elementName);
-		else if (fontSize < 0)
-			throw new ThemeException("font-size must not be negative: " + fontSize);
-		else if (strokeWidth < 0)
-			throw new ThemeException("stroke-width must not be negative: " + strokeWidth);
+		return b.buildInternal();
 	}
 
 	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
 	 * @param level
 	 *            the drawing level of this instruction.
 	 * @return a new Circle with the given rendering attributes.
@@ -822,24 +777,14 @@ public class XmlThemeBuilder extends DefaultHandler {
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		validateCircle(elementName, radius, strokeWidth);
+		validateExists("r", radius, elementName);
+		validateNonNegative("radius", radius);
+		validateNonNegative("stroke-width", strokeWidth);
+
 		return new Circle(radius, scaleRadius, fill, stroke, strokeWidth, level);
 	}
 
-	private static void validateCircle(String elementName, Float radius, float strokeWidth) {
-		if (radius == null)
-			throw new ThemeException("missing attribute r for element: " + elementName);
-		else if (radius.floatValue() < 0)
-			throw new ThemeException("radius must not be negative: " + radius);
-		else if (strokeWidth < 0)
-			throw new ThemeException("stroke-width must not be negative: " + strokeWidth);
-	}
-
 	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
 	 * @return a new LineSymbol with the given rendering attributes.
 	 */
 	private static LineSymbol createLineSymbol(String elementName, Attributes attributes) {
@@ -864,15 +809,11 @@ public class XmlThemeBuilder extends DefaultHandler {
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		validateSymbol(elementName, src);
+		validateExists("src", src, elementName);
 		return new LineSymbol(src, alignCenter, repeat);
 	}
 
 	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
 	 * @return a new Symbol with the given rendering attributes.
 	 */
 	private Symbol createSymbol(String elementName, Attributes attributes) {
@@ -888,14 +829,9 @@ public class XmlThemeBuilder extends DefaultHandler {
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		validateSymbol(elementName, src);
+		validateExists("src", src, elementName);
 
 		return new Symbol(getAtlasRegion(src));
-	}
-
-	private static void validateSymbol(String elementName, String src) {
-		if (src == null)
-			throw new ThemeException("missing attribute src for element: " + elementName);
 	}
 
 	private Extrusion createExtrusion(String elementName, Attributes attributes, int level) {
@@ -925,5 +861,17 @@ public class XmlThemeBuilder extends DefaultHandler {
 		}
 
 		return new Extrusion(level, colorSide, colorTop, colorLine, defaultHeight);
+	}
+
+	private static void validateNonNegative(String name, float value) {
+		if (value < 0)
+			throw new ThemeException(name + " must not be negative: "
+			        + value);
+	}
+
+	private static void validateExists(String name, Object obj, String elementName) {
+		if (obj == null)
+			throw new ThemeException("missing attribute " + name
+			        + " for element: " + elementName);
 	}
 }
