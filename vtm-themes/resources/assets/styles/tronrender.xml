@@ -2,7 +2,7 @@
 <rendertheme xmlns="http://opensciencemap.org/rendertheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd" version="1" map-background="#050508">
 
-    <atlas img="styles/osmarender.png">
+  <atlas img="styles/osmarender.png">
     <rect id="airport" pos="226 38 24 24" />
     <rect id="alpine_hut" pos="198 41 26 21" />
     <rect id="atm" pos="279 2 14 16" />
@@ -62,10 +62,10 @@
     <rect id="vulcan" pos="315 25 9 8" />
     <rect id="windmill" pos="310 2 13 19" />
   </atlas>
-  
-   <style-text id="caption-small-blue" caption="true" dy="12" k="name" style="bold" size="16" fill="#4040ff"
+
+  <style-text id="caption-small-blue" caption="true" dy="12" k="name" style="bold" size="16" fill="#4040ff"
     stroke="#ffffff" stroke-width="2.0" />
-    
+
   <style-text id="road" k="name" style="bold" size="18" stroke="#606050" fill="#eeffee" stroke-width="2.5" />
   <style-text id="major-road" k="name" style="bold" size="19" fill="#ffef7d" stroke="#624f00" stroke-width="2.5" />
 
@@ -1312,7 +1312,7 @@
     </m>
 
 
-    <m k="tourism">
+    <m k="tourism" select="first">
       <m v="alpine_hut" zoom-min="16">
         <symbol src="alpine_hut" />
       </m>
@@ -1332,7 +1332,7 @@
         <symbol src="viewpoint" />
       </m>
 
-      <m zoom-min="17">
+      <m select="when-matched" zoom-min="17">
         <text use="caption-small-blue" />
       </m>
     </m>
