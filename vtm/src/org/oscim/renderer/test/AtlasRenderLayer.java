@@ -30,6 +30,7 @@ import org.oscim.renderer.elements.TextItem;
 import org.oscim.renderer.elements.TextLayer;
 import org.oscim.theme.styles.Line;
 import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.Text.TextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class AtlasRenderLayer extends ElementRenderer {
 		ll3.scale = 1f;
 
 		TextLayer tl = new TextLayer();
-		Text t = Text.createText(20, 0, Color.BLACK, 0, false);
+		Text t = new TextBuilder().setFontSize(20).setColor(Color.BLACK).build();
 		layers.setTextureLayers(tl);
 
 		float[] points = new float[10];

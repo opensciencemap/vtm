@@ -25,6 +25,7 @@ import org.oscim.renderer.elements.TextItem;
 import org.oscim.renderer.elements.TextLayer;
 import org.oscim.theme.styles.Line;
 import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.Text.TextBuilder;
 
 public class GridRenderer extends ElementRenderer {
 	private final TextLayer mTextLayer;
@@ -37,7 +38,7 @@ public class GridRenderer extends ElementRenderer {
 
 	public GridRenderer() {
 		this(1, new Line(Color.LTGRAY, 1.2f, Cap.BUTT),
-		     Text.createText(22, 0, Color.RED, 0, false));
+		     new TextBuilder().setFontSize(22).setColor(Color.RED).build());
 	}
 
 	public GridRenderer(int numLines, Line lineStyle, Text textStyle) {
