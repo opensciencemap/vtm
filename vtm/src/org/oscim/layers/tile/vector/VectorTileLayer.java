@@ -16,12 +16,16 @@
  */
 package org.oscim.layers.tile.vector;
 
+import org.oscim.core.MapElement;
+import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
+import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.theme.IRenderTheme;
+import org.oscim.theme.styles.RenderStyle;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.TileSource.OpenResult;
 import org.slf4j.Logger;
@@ -118,4 +122,24 @@ public class VectorTileLayer extends TileLayer {
 	public IRenderTheme getTheme() {
 		return mTheme;
 	}
+
+	public interface TileLoaderHook {
+		public void render(MapTile tile, ElementLayers layers,
+		        MapElement element, RenderStyle style, int level);
+	}
+
+	private TileLoaderHook[] mLoaderHooks = new TileLoaderHook[0];
+
+	public TileLoaderHook[] getLoaderHooks() {
+		return mLoaderHooks;
+	}
+
+	public void addHook(TileLoaderHook h) {
+		int length = mLoaderHooks.length;
+		TileLoaderHook[] tmp = new TileLoaderHook[length + 1];
+		System.arraycopy(mLoaderHooks, 0, tmp, 0, length);
+		tmp[length] = h;
+		mLoaderHooks = tmp;
+	}
+
 }

@@ -16,19 +16,30 @@
  */
 package org.oscim.layers.tile.vector;
 
+import org.oscim.core.MapElement;
+import org.oscim.core.MercatorProjection;
+import org.oscim.core.Tag;
 import org.oscim.layers.Layer;
+import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderHook;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
+import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.elements.ExtrusionLayer;
+import org.oscim.theme.styles.ExtrusionStyle;
+import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.FastMath;
 
-public class BuildingLayer extends Layer {
+public class BuildingLayer extends Layer implements TileLoaderHook {
 	//static final Logger log = LoggerFactory.getLogger(BuildingOverlay.class);
 
 	final ExtrusionRenderer mExtLayer;
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
 		super(map);
+		tileLayer.addHook(this);
+
 		mExtLayer = new ExtrusionRenderer(tileLayer.tileRenderer()) {
 			private long mStartTime;
 
@@ -78,6 +89,43 @@ public class BuildingLayer extends Layer {
 	private final float mFadeTime = 500;
 
 	private final static int MIN_ZOOM = 17;
+
+	@Override
+	public void render(MapTile tile, ElementLayers layers, MapElement element,
+	        RenderStyle style, int level) {
+
+		if (!(style instanceof ExtrusionStyle))
+			return;
+
+		ExtrusionStyle extrusion = (ExtrusionStyle) style;
+
+		int height = 0;
+		int minHeight = 0;
+
+		String v = element.tags.getValue(Tag.KEY_HEIGHT);
+		if (v != null)
+			height = Integer.parseInt(v);
+		v = element.tags.getValue(Tag.KEY_MIN_HEIGHT);
+		if (v != null)
+			minHeight = Integer.parseInt(v);
+
+		ExtrusionLayer l = layers.getExtrusionLayers();
+
+		if (l == null) {
+			double lat = MercatorProjection.toLatitude(tile.y);
+			float groundScale = (float) MercatorProjection
+			    .groundResolution(lat, 1 << tile.zoomLevel);
+
+			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
+			layers.setExtrusionLayers(l);
+		}
+
+		/* 12m default */
+		if (height == 0)
+			height = 12 * 100;
+
+		l.add(element, height, minHeight);
+	}
 
 	//@Override
 	//public boolean onTouchEvent(MotionEvent e) {

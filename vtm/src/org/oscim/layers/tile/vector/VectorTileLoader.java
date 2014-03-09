@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Hannes Janetzek
+ * Copyright 2012-2014 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -28,8 +28,8 @@ import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
+import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderHook;
 import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.MeshLayer;
@@ -347,10 +347,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public void renderPointCircle(CircleStyle circle, int level) {
-	}
-
-	@Override
 	public void renderPointSymbol(SymbolStyle symbol) {
 		if (symbol.texture == null)
 			return;
@@ -364,37 +360,16 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
+	public void renderExtrusion(ExtrusionStyle extrusion, int level) {
+		for (TileLoaderHook h : mTileLayer.getLoaderHooks())
+			h.render(mTile, mLayers, mElement, extrusion, level);
+	}
+
 	@Override
 	public void renderAreaSymbol(SymbolStyle symbol) {
 	}
 
 	@Override
-	public void renderExtrusion(ExtrusionStyle extrusion, int level) {
-		int height = 0;
-		int minHeight = 0;
-
-		String v = mElement.tags.getValue(Tag.KEY_HEIGHT);
-		if (v != null)
-			height = Integer.parseInt(v);
-		v = mElement.tags.getValue(Tag.KEY_MIN_HEIGHT);
-		if (v != null)
-			minHeight = Integer.parseInt(v);
-
-		ExtrusionLayer l = mLayers.getExtrusionLayers();
-
-		if (l == null) {
-			double lat = MercatorProjection.toLatitude(mTile.y);
-			float groundScale = (float) MercatorProjection
-			    .groundResolution(lat, 1 << mTile.zoomLevel);
-
-			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
-			mLayers.setExtrusionLayers(l);
-		}
-
-		/* 12m default */
-		if (height == 0)
-			height = 12 * 100;
-
-		l.add(mElement, height, minHeight);
+	public void renderPointCircle(CircleStyle circle, int level) {
 	}
 }
