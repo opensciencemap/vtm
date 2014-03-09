@@ -23,7 +23,6 @@ import java.util.concurrent.CancellationException;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
-import org.oscim.core.PointF;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.layers.tile.MapTile;
@@ -34,8 +33,6 @@ import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.MeshLayer;
 import org.oscim.renderer.elements.PolygonLayer;
-import org.oscim.renderer.elements.SymbolItem;
-import org.oscim.renderer.elements.TextItem;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.RenderTheme;
 import org.oscim.theme.styles.AreaStyle;
@@ -295,69 +292,9 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	@Override
-	public void renderAreaText(TextStyle text) {
-		// TODO place somewhere on polygon
-		String value = mElement.tags.getValue(text.textKey);
-		if (value == null || value.length() == 0)
-			return;
-
-		float x = 0;
-		float y = 0;
-		int n = mElement.index[0];
-
-		for (int i = 0; i < n;) {
-			x += mElement.points[i++];
-			y += mElement.points[i++];
-		}
-		x /= (n / 2);
-		y /= (n / 2);
-
-		mTile.labels.push(TextItem.pool.get().set(x, y, value, text));
-	}
-
-	@Override
-	public void renderPointText(TextStyle text) {
-		String value = mElement.tags.getValue(text.textKey);
-		if (value == null || value.length() == 0)
-			return;
-
-		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
-			PointF p = mElement.getPoint(i);
-			mTile.labels.push(TextItem.pool.get().set(p.x, p.y, value, text));
-		}
-	}
-
-	@Override
-	public void renderWayText(TextStyle text) {
-		String value = mElement.tags.getValue(text.textKey);
-		if (value == null || value.length() == 0)
-			return;
-
-		int offset = 0;
-		for (int i = 0, n = mElement.index.length; i < n; i++) {
-			int length = mElement.index[i];
-			if (length < 4)
-				break;
-
-			WayDecorator.renderText(null, mElement.points, value, text,
-			                        offset, length, mTile);
-			offset += length;
-		}
-	}
-
-	@Override
-	public void renderPointSymbol(SymbolStyle symbol) {
-		if (symbol.texture == null)
-			return;
-
-		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
-			PointF p = mElement.getPoint(i);
-
-			SymbolItem it = SymbolItem.pool.get();
-			it.set(p.x, p.y, symbol.texture, true);
-			mTile.symbols.push(it);
-		}
+	public void renderSymbol(SymbolStyle symbol) {
+		for (TileLoaderHook h : mTileLayer.getLoaderHooks())
+			h.render(mTile, mLayers, mElement, symbol, 0);
 	}
 
 	public void renderExtrusion(ExtrusionStyle extrusion, int level) {
@@ -366,10 +303,12 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public void renderAreaSymbol(SymbolStyle symbol) {
+	public void renderCircle(CircleStyle circle, int level) {
 	}
 
 	@Override
-	public void renderPointCircle(CircleStyle circle, int level) {
+	public void renderText(TextStyle text) {
+		for (TileLoaderHook h : mTileLayer.getLoaderHooks())
+			h.render(mTile, mLayers, mElement, text, 0);
 	}
 }

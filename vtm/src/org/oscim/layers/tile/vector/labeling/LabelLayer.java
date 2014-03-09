@@ -39,6 +39,7 @@ public class LabelLayer extends Layer implements Map.UpdateListener, TileManager
 	public LabelLayer(Map map, VectorTileLayer l) {
 		super(map);
 		l.getManager().events.bind(this);
+		l.addHook(new LabelTileLoaderHook());
 
 		mLabelPlacer = new LabelPlacement(map, l.tileRenderer());
 		mWorker = new Worker(map);

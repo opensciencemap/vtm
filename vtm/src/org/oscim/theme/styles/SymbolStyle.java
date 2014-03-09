@@ -36,12 +36,12 @@ public final class SymbolStyle extends RenderStyle {
 	}
 
 	@Override
-	public void renderNode(Callback renderCallback) {
-		renderCallback.renderPointSymbol(this);
+	public void renderNode(Callback cb) {
+		cb.renderSymbol(this);
 	}
 
 	@Override
-	public void renderWay(Callback renderCallback) {
-		renderCallback.renderAreaSymbol(this);
+	public void renderWay(Callback cb) {
+		cb.renderSymbol(this);
 	}
 }
