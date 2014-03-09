@@ -76,6 +76,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	/** Line-scale-factor depending on zoom and latitude */
 	protected float mLineScale = 1.0f;
 
+	protected ElementLayers mLayers;
+
 	private final VectorTileLayer mTileLayer;
 
 	public VectorTileLoader(VectorTileLayer tileLayer) {
@@ -102,6 +104,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			return false;
 		}
 
+		//mTileLayer.getLoaderHooks();
+
 		/* account for area changes with latitude */
 		double lat = MercatorProjection.toLatitude(tile.y);
 		mLineScale = (float) Math.pow(STROKE_INCREASE, tile.zoomLevel - STROKE_MIN_ZOOM);
@@ -110,8 +114,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		/* scale line width relative to latitude + PI * thumb */
 		mLineScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
-
-		tile.layers = new ElementLayers();
+		mLayers = new ElementLayers();
+		tile.data = mLayers;
 
 		try {
 			/* query data source, which calls process() callback */
@@ -165,6 +169,10 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	 * E.g. to replace tags that should not be cached in Rendertheme
 	 */
 	protected TagSet filterTags(TagSet tagSet) {
+		//		if (filterHooks != null){
+		//			tagSet = 
+		//		}
+
 		return tagSet;
 	}
 
@@ -235,7 +243,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				return;
 			}
 
-			LineLayer ll = mTile.layers.getLineLayer(numLayer);
+			LineLayer ll = mLayers.getLineLayer(numLayer);
 
 			if (ll.line == null) {
 				ll.line = line;
@@ -253,7 +261,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			mCurLineLayer = ll;
 
 		} else {
-			LineTexLayer ll = mTile.layers.getLineTexLayer(numLayer);
+			LineTexLayer ll = mLayers.getLineTexLayer(numLayer);
 
 			if (ll.line == null) {
 				ll.line = line;
@@ -277,11 +285,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void renderArea(AreaStyle area, int level) {
 		int numLayer = mCurLayer + level;
 		if (USE_MESH_POLY) {
-			MeshLayer l = mTile.layers.getMeshLayer(numLayer);
+			MeshLayer l = mLayers.getMeshLayer(numLayer);
 			l.area = area;
 			l.addMesh(mElement);
 		} else {
-			PolygonLayer l = mTile.layers.getPolygonLayer(numLayer);
+			PolygonLayer l = mLayers.getPolygonLayer(numLayer);
 			l.area = area;
 			l.addPolygon(mElement.points, mElement.index);
 		}
@@ -372,7 +380,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		if (v != null)
 			minHeight = Integer.parseInt(v);
 
-		ExtrusionLayer l = mTile.layers.getExtrusionLayers();
+		ExtrusionLayer l = mLayers.getExtrusionLayers();
 
 		if (l == null) {
 			double lat = MercatorProjection.toLatitude(mTile.y);
@@ -380,7 +388,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			    .groundResolution(lat, 1 << mTile.zoomLevel);
 
 			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
-			mTile.layers.setExtrusionLayers(l);
+			mLayers.setExtrusionLayers(l);
 		}
 
 		/* 12m default */

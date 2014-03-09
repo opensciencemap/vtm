@@ -20,6 +20,7 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
+import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Inlist.List;
 import org.oscim.utils.quadtree.Node;
 
@@ -63,6 +64,10 @@ public class MapTile extends Tile {
 		public final static byte CANCEL = 1 << 3;
 	}
 
+	public static abstract class TileData extends Inlist<TileData> {
+		protected abstract void dispose();
+	}
+
 	public MapTile(TileNode node, int tileX, int tileY, int zoomLevel) {
 		super(tileX, tileY, (byte) zoomLevel);
 		this.x = (double) tileX / (1 << zoomLevel);
@@ -99,7 +104,7 @@ public class MapTile extends Tile {
 	public final List<SymbolItem> symbols = new List<SymbolItem>();
 	public final List<TextItem> labels = new List<TextItem>();
 
-	public ElementLayers layers;
+	public TileData data;
 
 	/**
 	 * Tile is in view region. Set by TileRenderer.
@@ -219,9 +224,9 @@ public class MapTile extends Tile {
 	 * CAUTION: This function may only be called by {@link TileManager}
 	 */
 	protected void clear() {
-		if (layers != null) {
-			layers.clear();
-			layers = null;
+		while (data != null) {
+			data.dispose();
+			data = data.next;
 		}
 
 		TextItem.pool.releaseAll(labels.clear());
@@ -229,5 +234,12 @@ public class MapTile extends Tile {
 
 		// still needed?
 		state = State.NONE;
+	}
+
+	public ElementLayers getLayers() {
+		if (!(data instanceof ElementLayers))
+			return null;
+
+		return (ElementLayers) data;
 	}
 }

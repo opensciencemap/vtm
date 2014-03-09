@@ -57,9 +57,10 @@ public class TestTileLayer extends TileLayer {
 		@Override
 		public boolean loadTile(MapTile tile) {
 			log.debug("load tile " + tile);
-			tile.layers = new ElementLayers();
+			ElementLayers layers = new ElementLayers();
+			tile.data = layers;
 
-			LineLayer ll = tile.layers.getLineLayer(0);
+			LineLayer ll = layers.getLineLayer(0);
 			ll.line = mLineStyle;
 			ll.scale = 2;
 

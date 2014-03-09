@@ -16,6 +16,7 @@ import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.elements.BitmapLayer;
+import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.MeshLayer;
@@ -113,11 +114,13 @@ public class VectorTileRenderer extends TileRenderer {
 		/* use holder proxy when it is set */
 		MapTile t = tile.holder == null ? tile : tile.holder;
 
-		if (t.layers == null || t.layers.vbo == null)
+		ElementLayers layers = t.getLayers();
+
+		if (layers == null || layers.vbo == null)
 			//throw new IllegalStateException(t + "no data " + (t.layers == null));
 			return;
 
-		t.layers.vbo.bind();
+		layers.vbo.bind();
 		MapPosition pos = v.pos;
 		/* place tile relative to map position */
 		int z = tile.zoomLevel;
@@ -134,7 +137,8 @@ public class VectorTileRenderer extends TileRenderer {
 
 		boolean clipped = false;
 		int mode = mClipMode;
-		RenderElement l = t.layers.getBaseLayers();
+
+		RenderElement l = layers.getBaseLayers();
 
 		while (l != null) {
 			if (l.type == POLYGON) {
@@ -148,11 +152,11 @@ public class VectorTileRenderer extends TileRenderer {
 				clipped = true;
 			}
 			if (l.type == LINE) {
-				l = LineLayer.Renderer.draw(l, v, scale, t.layers);
+				l = LineLayer.Renderer.draw(l, v, scale, layers);
 				continue;
 			}
 			if (l.type == TEXLINE) {
-				l = LineTexLayer.Renderer.draw(l, v, div, t.layers);
+				l = LineTexLayer.Renderer.draw(l, v, div, layers);
 				continue;
 			}
 			if (l.type == MESH) {
@@ -163,7 +167,7 @@ public class VectorTileRenderer extends TileRenderer {
 			l = l.next;
 		}
 
-		l = t.layers.getTextureLayers();
+		l = layers.getTextureLayers();
 		while (l != null) {
 			if (!clipped) {
 				PolygonLayer.Renderer.draw(null, v, div, true, mode);

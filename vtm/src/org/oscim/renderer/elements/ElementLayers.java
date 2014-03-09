@@ -24,6 +24,7 @@ import static org.oscim.renderer.elements.RenderElement.TEXLINE;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
+import org.oscim.layers.tile.MapTile.TileData;
 import org.oscim.renderer.BufferObject;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.LineStyle;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * MapTile. It can be used for other purposes as well but some optimizations
  * (and limitations) probably wont make sense in different contexts.
  */
-public class ElementLayers {
+public class ElementLayers extends TileData {
 	static final Logger log = LoggerFactory.getLogger(ElementLayers.class);
 
 	public static void initRenderer(GL20 gl) {
@@ -384,6 +385,11 @@ public class ElementLayers {
 
 		if (vbo != null)
 			vbo = BufferObject.release(vbo);
+	}
+
+	@Override
+	protected void dispose() {
+		clear();
 	}
 
 }
