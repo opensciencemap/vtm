@@ -79,8 +79,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	/** Line-scale-factor depending on zoom and latitude */
 	protected float mLineScale = 1.0f;
 
-	protected final TagSet mFilteredTags;
-
 	public void setRenderTheme(IRenderTheme theme) {
 		renderTheme = theme;
 		renderLevels = theme.getLevels();
@@ -88,8 +86,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	public VectorTileLoader(TileManager tileManager) {
 		super(tileManager);
-
-		mFilteredTags = new TagSet();
 	}
 
 	@Override
@@ -151,11 +147,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	public void setDataSource(ITileDataSource mapDatabase) {
+	public void setDataSource(ITileDataSource dataSource) {
 		if (mTileDataSource != null)
 			mTileDataSource.destroy();
 
-		mTileDataSource = mapDatabase;
+		mTileDataSource = dataSource;
 	}
 
 	static class TagReplacement {
@@ -171,17 +167,14 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	/**
 	 * Override this method to change tags that should be passed
 	 * to {@link RenderTheme} matching.
+	 * E.g. to replace tags that should not be cached in Rendertheme
 	 */
-	protected boolean filterTags(TagSet tagSet) {
-		mFilteredTags.clear();
-		for (int i = 0; i < tagSet.numTags; i++)
-			mFilteredTags.add(tagSet.tags[i]);
-		return true;
+	protected TagSet filterTags(TagSet tagSet) {
+		return tagSet;
 	}
 
 	@Override
 	public void process(MapElement element) {
-		clearState();
 
 		if (isCanceled() || mTile.state(CANCEL))
 			throw new CancellationException();
@@ -189,28 +182,20 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		mElement = element;
 
 		if (element.type == GeometryType.POINT) {
-			// remove tags that should not be cached in Rendertheme
-			filterTags(element.tags);
+			TagSet tags = filterTags(element.tags);
 
-			// get and apply render instructions
-			renderNode(renderTheme.matchElement(element.type, mFilteredTags, mTile.zoomLevel));
+			/* get and apply render instructions */
+			renderNode(renderTheme.matchElement(element.type, tags, mTile.zoomLevel));
 		} else {
-
-			// replace tags that should not be cached in Rendertheme (e.g. name)
-			if (!filterTags(element.tags))
-				return;
+			TagSet tags = filterTags(element.tags);
 
 			mCurLayer = getValidLayer(element.layer) * renderLevels;
 
-			// get and apply render instructions
-			renderWay(renderTheme.matchElement(element.type, mFilteredTags, mTile.zoomLevel));
+			/* get and apply render instructions */
+			renderWay(renderTheme.matchElement(element.type, tags, mTile.zoomLevel));
 
-			//boolean closed = element.type == GeometryType.POLY;
-
-			mCurLineLayer = null;
 		}
-
-		mElement = null;
+		clearState();
 	}
 
 	//protected void debugUnmatched(boolean closed, TagSet tags) {
@@ -243,6 +228,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	protected void clearState() {
 		mCurLineLayer = null;
+		mElement = null;
 	}
 
 	/*** RenderThemeCallback ***/
@@ -271,7 +257,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 			ll.addLine(mElement);
 
-			// NB: keep reference for outline layer(s)
+			/* keep reference for outline layer(s) */
 			mCurLineLayer = ll;
 
 		} else {
@@ -291,8 +277,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	// slower to load (requires tesselation) and uses
-	// more memory but should be faster to render
+	/* slower to load (requires tesselation) and uses
+	 * more memory but should be faster to render */
 	protected final static boolean USE_MESH_POLY = false;
 
 	@Override

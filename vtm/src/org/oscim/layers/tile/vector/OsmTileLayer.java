@@ -22,9 +22,11 @@ public class OsmTileLayer extends VectorTileLayer {
 	}
 
 	static class OsmTileLoader extends VectorTileLoader {
+		private final TagSet mFilteredTags;
 
 		public OsmTileLoader(TileManager tileManager) {
 			super(tileManager);
+			mFilteredTags = new TagSet();
 		}
 
 		/* Replace tags that should only be matched by key in RenderTheme
@@ -40,7 +42,7 @@ public class OsmTileLayer extends VectorTileLayer {
 		        new TagReplacement(Tag.KEY_MIN_HEIGHT)
 		};
 
-		protected boolean filterTags(TagSet tagSet) {
+		protected TagSet filterTags(TagSet tagSet) {
 			Tag[] tags = tagSet.tags;
 
 			mFilteredTags.clear();
@@ -58,7 +60,7 @@ public class OsmTileLayer extends VectorTileLayer {
 				mFilteredTags.add(t);
 			}
 
-			return true;
+			return mFilteredTags;
 		}
 	}
 }
