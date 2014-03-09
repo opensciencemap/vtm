@@ -137,8 +137,8 @@ public class VectorTileLayer extends TileLayer {
 	public void addHook(TileLoaderHook h) {
 		int length = mLoaderHooks.length;
 		TileLoaderHook[] tmp = new TileLoaderHook[length + 1];
-		System.arraycopy(mLoaderHooks, 0, tmp, 0, length);
-		tmp[length] = h;
+		System.arraycopy(mLoaderHooks, 0, tmp, 1, length);
+		tmp[0] = h;
 		mLoaderHooks = tmp;
 	}
 
