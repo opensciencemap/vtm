@@ -42,13 +42,13 @@ public class TestTileLayer extends TileLayer {
 	}
 
 	@Override
-	protected TestTileLoader createLoader(TileManager tm) {
-		return new TestTileLoader(tm);
+	protected TestTileLoader createLoader() {
+		return new TestTileLoader(this);
 	}
 
 	static class TestTileLoader extends TileLoader {
-		public TestTileLoader(TileManager tileManager) {
-			super(tileManager);
+		public TestTileLoader(TileLayer tileLayer) {
+			super(tileLayer.getManager());
 		}
 
 		GeometryBuffer mGeom = new GeometryBuffer(128, 16);

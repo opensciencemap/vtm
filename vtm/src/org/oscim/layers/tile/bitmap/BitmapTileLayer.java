@@ -99,7 +99,7 @@ public class BitmapTileLayer extends TileLayer {
 	}
 
 	@Override
-	protected TileLoader createLoader(TileManager tm) {
-		return new BitmapTileLoader(tm, mTileSource);
+	protected TileLoader createLoader() {
+		return new BitmapTileLoader(this.getManager(), mTileSource);
 	}
 }

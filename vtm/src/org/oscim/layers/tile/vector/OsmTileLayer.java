@@ -3,7 +3,6 @@ package org.oscim.layers.tile.vector;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.layers.tile.TileManager;
 import org.oscim.map.Map;
 
 public class OsmTileLayer extends VectorTileLayer {
@@ -17,15 +16,15 @@ public class OsmTileLayer extends VectorTileLayer {
 	}
 
 	@Override
-	protected TileLoader createLoader(TileManager tm) {
-		return new OsmTileLoader(tm);
+	protected TileLoader createLoader() {
+		return new OsmTileLoader(this);
 	}
 
 	static class OsmTileLoader extends VectorTileLoader {
 		private final TagSet mFilteredTags;
 
-		public OsmTileLoader(TileManager tileManager) {
-			super(tileManager);
+		public OsmTileLoader(VectorTileLayer tileLayer) {
+			super(tileLayer);
 			mFilteredTags = new TagSet();
 		}
 

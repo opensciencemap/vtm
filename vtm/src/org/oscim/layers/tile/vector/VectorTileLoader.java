@@ -20,7 +20,6 @@ import static org.oscim.layers.tile.MapTile.State.CANCEL;
 
 import java.util.concurrent.CancellationException;
 
-import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -29,7 +28,6 @@ import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
@@ -83,9 +81,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		renderTheme = theme;
 		renderLevels = theme.getLevels();
 	}
+	private final VectorTileLayer mTileLayer;
 
-	public VectorTileLoader(TileManager tileManager) {
-		super(tileManager);
+	public VectorTileLoader(VectorTileLayer tileLayer) {
+		super(tileLayer.getManager());
+		mTileLayer = tileLayer;
 	}
 
 	@Override
@@ -396,10 +396,5 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			height = 12 * 100;
 
 		l.add(mElement, height, minHeight);
-	}
-
-	@Override
-	public void setTileImage(Bitmap bitmap) {
-
 	}
 }

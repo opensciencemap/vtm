@@ -58,8 +58,8 @@ public class VectorTileLayer extends TileLayer {
 	}
 
 	@Override
-	protected TileLoader createLoader(TileManager tm) {
-		return new VectorTileLoader(tm);
+	protected TileLoader createLoader() {
+		return new VectorTileLoader(this);
 	}
 
 	/**
@@ -112,7 +112,5 @@ public class VectorTileLayer extends TileLayer {
 		resumeLoaders();
 	}
 
-	public TileManager getManager() {
-		return mTileManager;
 	}
 }

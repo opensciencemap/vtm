@@ -45,7 +45,7 @@ public abstract class TileLayer extends Layer implements UpdateListener {
 
 	}
 
-	abstract protected TileLoader createLoader(TileManager tm);
+	abstract protected TileLoader createLoader();
 
 	public TileRenderer tileRenderer() {
 		return (TileRenderer) mRenderer;
@@ -55,7 +55,7 @@ public abstract class TileLayer extends Layer implements UpdateListener {
 		mTileLoader = new TileLoader[numLoaders];
 
 		for (int i = 0; i < numLoaders; i++) {
-			mTileLoader[i] = createLoader(mTileManager);
+			mTileLoader[i] = createLoader();
 			mTileLoader[i].start();
 		}
 	}
@@ -110,5 +110,9 @@ public abstract class TileLayer extends Layer implements UpdateListener {
 	protected void resumeLoaders() {
 		for (TileLoader loader : mTileLoader)
 			loader.proceed();
+	}
+
+	public TileManager getManager() {
+		return mTileManager;
 	}
 }
