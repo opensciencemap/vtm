@@ -147,6 +147,9 @@ public class ElementLayers {
 		return textLayer;
 	}
 
+	/**
+	 * Set new Base-Layers and clear previous.
+	 */
 	public void setBaseLayers(RenderElement layers) {
 		for (RenderElement l = baseLayers; l != null; l = l.next)
 			l.clear();
@@ -158,6 +161,9 @@ public class ElementLayers {
 		return baseLayers;
 	}
 
+	/**
+	 * Set new TextureLayers and clear previous.
+	 */
 	public void setTextureLayers(TextureLayer tl) {
 		for (RenderElement l = textureLayers; l != null; l = l.next)
 			l.clear();
@@ -169,6 +175,9 @@ public class ElementLayers {
 		return textureLayers;
 	}
 
+	/**
+	 * Set new ExtrusionLayers and clear previous.
+	 */
 	public void setExtrusionLayers(ExtrusionLayer el) {
 		for (RenderElement l = extrusionLayers; l != null; l = l.next)
 			l.clear();
@@ -178,17 +187,6 @@ public class ElementLayers {
 
 	public ExtrusionLayer getExtrusionLayers() {
 		return (ExtrusionLayer) extrusionLayers;
-	}
-
-	/** cleanup only when layers are not used by tile or overlay anymore! */
-	public void clear() {
-		setBaseLayers(null);
-		setTextureLayers(null);
-		setExtrusionLayers(null);
-		mCurLayer = null;
-
-		if (vbo != null)
-			vbo = BufferObject.release(vbo);
 	}
 
 	private RenderElement getLayer(int level, int type) {
@@ -364,15 +362,28 @@ public class ElementLayers {
 	}
 
 	public void setFrom(ElementLayers layers) {
-		baseLayers = layers.baseLayers;
-		textureLayers = layers.textureLayers;
-		extrusionLayers = layers.extrusionLayers;
-		mCurLayer = null;
+		setBaseLayers(layers.baseLayers);
+		setTextureLayers((TextureLayer) layers.textureLayers);
+		setExtrusionLayers((ExtrusionLayer) layers.extrusionLayers);
 
+		mCurLayer = null;
 		layers.baseLayers = null;
 		layers.textureLayers = null;
 		layers.extrusionLayers = null;
 		layers.mCurLayer = null;
 
 	}
+
+	/** cleanup only when layers are not used by tile or layer anymore! */
+	public void clear() {
+		/* NB: set null calls clear() on each layer! */
+		setBaseLayers(null);
+		setTextureLayers(null);
+		setExtrusionLayers(null);
+		mCurLayer = null;
+
+		if (vbo != null)
+			vbo = BufferObject.release(vbo);
+	}
+
 }
