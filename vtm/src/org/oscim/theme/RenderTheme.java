@@ -1,6 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
- * Copyright 2013 Hannes Janetzek
+ * Copyright 2014 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -30,9 +29,6 @@ import org.oscim.utils.LRUCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A RenderTheme defines how map elements are drawn.
- */
 public class RenderTheme implements IRenderTheme {
 	static final Logger log = LoggerFactory.getLogger(RenderTheme.class);
 
@@ -76,10 +72,13 @@ public class RenderTheme implements IRenderTheme {
 	private final RenderStyleCache[] mStyleCache;
 
 	public RenderTheme(int mapBackground, float baseTextSize, Rule[] rules, int levels) {
+		if (rules == null)
+			throw new IllegalArgumentException("rules missing");
+
 		mMapBackground = mapBackground;
 		mBaseTextSize = baseTextSize;
-		mRules = rules;
 		mLevels = levels;
+		mRules = rules;
 
 		mStyleCache = new RenderStyleCache[3];
 		mStyleCache[0] = new RenderStyleCache(Element.NODE);
@@ -93,10 +92,8 @@ public class RenderTheme implements IRenderTheme {
 		for (int i = 0; i < 3; i++)
 			mStyleCache[i].cache.clear();
 
-		if (mRules != null) {
-			for (int i = 0, n = mRules.length; i < n; i++)
-				mRules[i].onDestroy();
-		}
+		for (Rule rule : mRules)
+			rule.onDestroy();
 	}
 
 	@Override
@@ -109,13 +106,17 @@ public class RenderTheme implements IRenderTheme {
 		return mMapBackground;
 	}
 
+	//AtomicInteger hitCount = new AtomicInteger(0);
+	//AtomicInteger missCount = new AtomicInteger(0);
+	//AtomicInteger sameCount = new AtomicInteger(0);
+
 	@Override
 	public RenderStyle[] matchElement(GeometryType geometryType, TagSet tags, int zoomLevel) {
 
-		// list of renderinsctruction items in cache
+		/* list of items in cache */
 		RenderStyleItem ris = null;
 
-		// the item matching tags and zoomlevel
+		/* the item matching tags and zoomlevel */
 		RenderStyleItem ri = null;
 
 		int type = geometryType.nativeInt;
@@ -126,35 +127,42 @@ public class RenderTheme implements IRenderTheme {
 
 		RenderStyleCache cache = mStyleCache[type - 1];
 
-		// NOTE: maximum zoom level supported is 32
+		/* NOTE: maximum zoom level supported is 32 */
 		int zoomMask = 1 << zoomLevel;
 
 		synchronized (cache) {
 
 			if ((cache.prevItem == null) || (cache.prevItem.zoom & zoomMask) == 0) {
-				// previous instructions zoom does not match
+				/* previous instructions zoom does not match */
 				cache.cacheKey.set(tags, null);
 			} else {
-				// compare if tags match previous instructions
+				/* compare if tags match previous instructions */
 				if (cache.cacheKey.set(tags, cache.prevItem.key)) {
-					//log.debug("same as previous " + Arrays.deepToString(tags));
 					ri = cache.prevItem;
+					//log.debug(hitCount + "/" + sameCount.incrementAndGet()
+					//        + "/" + missCount + "same hit " + tags);
 				}
 			}
 
 			if (ri == null) {
-				// get instruction for current cacheKey
+				/* get instruction for current cacheKey */
 				ris = cache.getRenderInstructions();
 
-				for (ri = ris; ri != null; ri = ri.next)
-					if ((ri.zoom & zoomMask) != 0)
-						// cache hit
+				for (ri = ris; ri != null; ri = ri.next) {
+					if ((ri.zoom & zoomMask) != 0) {
+						/* cache hit */
+
+						//log.debug(hitCount.incrementAndGet()
+						//       + "/" + sameCount + "/" + missCount
+						//       + " cache hit " + tags);
 						break;
+					}
+				}
 			}
 
 			if (ri == null) {
-				// cache miss
-				//log.debug(missCnt++ + " / " + hitCnt + " Cache Miss");
+				/* cache miss */
+				//missCount.incrementAndGet();
 
 				List<RenderStyle> matches = cache.instructionList;
 				matches.clear();
@@ -178,13 +186,13 @@ public class RenderTheme implements IRenderTheme {
 						}
 					}
 				}
-				// check if same instructions are used in another level
+				/* check if same instructions are used in another level */
 				for (ri = ris; ri != null; ri = ri.next) {
 					if (size == 0) {
 						if (ri.list != null)
 							continue;
 
-						// both matchinglists are empty
+						/* both matchinglists are empty */
 						break;
 					}
 
@@ -201,13 +209,13 @@ public class RenderTheme implements IRenderTheme {
 						i++;
 					}
 					if (i == size)
-						// both matching lists contain the same items
+						/* both matching lists contain the same items */
 						break;
 				}
 
 				if (ri != null) {
-					// we found a same matchting list on another zoomlevel add
-					// this zoom level to the existing RenderInstructionItem.
+					/* we found a same matchting list on another zoomlevel add
+					 * this zoom level to the existing RenderInstructionItem. */
 					ri.zoom |= zoomMask;
 
 					//log.debug(zoomLevel + " same instructions " + size + " "
@@ -224,7 +232,7 @@ public class RenderTheme implements IRenderTheme {
 						matches.toArray(ri.list);
 					}
 
-					// attach this list to the one found for MatchingKey
+					/* attach this list to the one found for MatchingKey */
 					if (ris != null) {
 						ri.next = ris.next;
 						ri.key = ris.key;
@@ -235,16 +243,13 @@ public class RenderTheme implements IRenderTheme {
 					}
 				}
 			}
-
 			cache.prevItem = ri;
 		}
-
 		return ri.list;
 	}
 
 	@Override
 	public void scaleTextSize(float scaleFactor) {
-
 		for (Rule rule : mRules)
 			rule.scaleTextSize(scaleFactor * mBaseTextSize);
 	}
