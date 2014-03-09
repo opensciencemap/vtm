@@ -16,6 +16,9 @@
  */
 package org.oscim.tiling.source;
 
+import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
+import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
@@ -24,10 +27,10 @@ import java.net.UnknownHostException;
 
 import org.oscim.layers.tile.MapTile;
 import org.oscim.tiling.ITileCache;
-import org.oscim.tiling.ITileDataSink;
-import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.ITileCache.TileReader;
 import org.oscim.tiling.ITileCache.TileWriter;
+import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.ITileDataSource;
 import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +51,7 @@ public class UrlTileDataSource implements ITileDataSource {
 	}
 
 	@Override
-	public QueryResult executeQuery(MapTile tile, ITileDataSink sink) {
+	public void query(MapTile tile, ITileDataSink sink) {
 		ITileCache cache = mTileSource.tileCache;
 
 		if (mUseCache) {
@@ -56,9 +59,10 @@ public class UrlTileDataSource implements ITileDataSource {
 			if (c != null) {
 				InputStream is = c.getInputStream();
 				try {
-					if (mTileDecoder.decode(tile, sink, is))
-						return QueryResult.SUCCESS;
-
+					if (mTileDecoder.decode(tile, sink, is)) {
+						sink.completed(SUCCESS);
+						return;
+					}
 				} catch (IOException e) {
 					log.debug("{} Cache read: {}", tile, e);
 				} finally {
@@ -95,7 +99,7 @@ public class UrlTileDataSource implements ITileDataSource {
 			if (cacheWriter != null)
 				cacheWriter.complete(success);
 		}
-		return success ? QueryResult.SUCCESS : QueryResult.FAILED;
+		sink.completed(success ? SUCCESS : FAILED);
 	}
 
 	@Override

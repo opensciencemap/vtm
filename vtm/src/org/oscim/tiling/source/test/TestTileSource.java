@@ -16,6 +16,8 @@
  */
 package org.oscim.tiling.source.test;
 
+import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -74,8 +76,7 @@ public class TestTileSource extends TileSource {
 		private boolean renderPlace = false;
 
 		@Override
-		public QueryResult executeQuery(MapTile tile,
-		        ITileDataSink mapDataSink) {
+		public void query(MapTile tile, ITileDataSink sink) {
 
 			int size = Tile.SIZE;
 			MapElement e = mElem;
@@ -107,7 +108,7 @@ public class TestTileSource extends TileSource {
 
 			e.setLayer(0);
 			e.tags.set(mTags);
-			mapDataSink.process(e);
+			sink.process(e);
 
 			if (renderWays) {
 				e.clear();
@@ -128,7 +129,7 @@ public class TestTileSource extends TileSource {
 				e.addPoint(size / 2, size / 2 + size);
 
 				// //e.setLayer(mTagsWay, 0);
-				mapDataSink.process(e);
+				sink.process(e);
 
 				e.clear();
 				// left-top to center
@@ -146,7 +147,7 @@ public class TestTileSource extends TileSource {
 
 				e.setLayer(1);
 				e.tags.set(mTagsWay);
-				mapDataSink.process(e);
+				sink.process(e);
 			}
 
 			if (renderBoundary) {
@@ -162,7 +163,7 @@ public class TestTileSource extends TileSource {
 
 				e.setLayer(1);
 				e.tags.set(mTagsBoundary);
-				mapDataSink.process(e);
+				sink.process(e);
 			}
 
 			if (renderPlace) {
@@ -172,12 +173,10 @@ public class TestTileSource extends TileSource {
 
 				mTagsPlace[1] = new Tag("name", tile.toString());
 				e.tags.set(mTagsPlace);
-				mapDataSink.process(e);
+				sink.process(e);
 			}
 
-			mapDataSink.completed(true);
-
-			return QueryResult.SUCCESS;
+			sink.completed(SUCCESS);
 		}
 
 		@Override

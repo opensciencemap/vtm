@@ -55,7 +55,7 @@ public class TestTileLayer extends TileLayer {
 		Line mLineStyle = new Line(Color.BLUE, 2f, Cap.ROUND);
 
 		@Override
-		public boolean executeJob(MapTile tile) {
+		public boolean loadTile(MapTile tile) {
 			log.debug("load tile " + tile);
 			tile.layers = new ElementLayers();
 

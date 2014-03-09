@@ -24,7 +24,7 @@ public class JeoTileLayer extends BitmapTileLayer {
 			}
 
 			@Override
-			protected boolean executeJob(MapTile tile) {
+			protected boolean loadTile(MapTile tile) {
 				// TODO Auto-generated method stub
 				return false;
 			}

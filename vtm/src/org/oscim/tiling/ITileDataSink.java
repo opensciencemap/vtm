@@ -23,7 +23,7 @@ import org.oscim.core.MapElement;
  * MapDatabase callback (implemented by MapTileLoader)
  * .
  * NOTE: MapElement passed belong to the caller! i.e. dont hold
- * references to its arrays after callback function returns.
+ * references to any of its data after callback function returns.
  */
 public interface ITileDataSink {
 
@@ -31,5 +31,12 @@ public interface ITileDataSink {
 
 	void setTileImage(Bitmap bitmap);
 
-	void completed(boolean success);
+	void completed(QueryResult result);
+
+	public static enum QueryResult {
+		SUCCESS,
+		FAILED,
+		TILE_NOT_FOUND,
+		DELAYED,
+	}
 }

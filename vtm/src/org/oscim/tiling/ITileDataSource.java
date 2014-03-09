@@ -19,7 +19,6 @@ package org.oscim.tiling;
 
 import org.oscim.layers.tile.MapTile;
 
-
 /**
  *
  *
@@ -33,17 +32,9 @@ public interface ITileDataSource {
 	 *            the tile to read.
 	 * @param mapDataSink
 	 *            the callback which handles the extracted map elements.
-	 * @return true if successful
 	 */
-	abstract QueryResult executeQuery(MapTile tile,
-	        ITileDataSink mapDataSink);
+	abstract void query(MapTile tile, ITileDataSink mapDataSink);
 
 	abstract void destroy();
 
-	public static enum QueryResult {
-		SUCCESS,
-		FAILED,
-		TILE_NOT_FOUND,
-		DELAYED,
-	}
 }

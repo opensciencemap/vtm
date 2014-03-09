@@ -17,6 +17,9 @@
  */
 package org.oscim.tiling.source.mapfile;
 
+import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
+import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -142,14 +145,13 @@ public class MapDatabase implements ITileDataSource {
 
 	private final MapFileTileSource mTileSource;
 
-	//private int mReductionCnt;
-	//private int mSkipPoly;
-
 	@Override
-	public QueryResult executeQuery(MapTile tile, ITileDataSink mapDataSink) {
+	public void query(MapTile tile, ITileDataSink sink) {
 
-		if (mTileSource.fileHeader == null)
-			return QueryResult.FAILED;
+		if (mTileSource.fileHeader == null) {
+			sink.completed(FAILED);
+			return;
+		}
 
 		if (mIntBuffer == null)
 			mIntBuffer = new int[MAXIMUM_WAY_NODES_SEQUENCE_LENGTH * 2];
@@ -172,11 +174,6 @@ public class MapDatabase implements ITileDataSource {
 			minLon = (int) (Math.abs(MercatorProjection.toLongitude(tile.x + size)
 			        - MercatorProjection.toLongitude(tile.x)) * 1e6) / simplify;
 
-			//mReductionCnt = 0;
-			//mSkipPoly = 0;
-
-			//log.debug("simplify by " + minLat + "/" + minLon);
-
 			QueryParameters queryParameters = new QueryParameters();
 			queryParameters.queryZoomLevel =
 			        mTileSource.fileHeader.getQueryZoomLevel(tile.zoomLevel);
@@ -189,20 +186,20 @@ public class MapDatabase implements ITileDataSource {
 				log.warn("no sub-file for zoom level: "
 				        + queryParameters.queryZoomLevel);
 
-				return QueryResult.FAILED;
+				sink.completed(FAILED);
+				return;
 			}
 
 			QueryCalculations.calculateBaseTiles(queryParameters, tile, subFileParameter);
 			QueryCalculations.calculateBlocks(queryParameters, subFileParameter);
-			processBlocks(mapDataSink, queryParameters, subFileParameter);
+			processBlocks(sink, queryParameters, subFileParameter);
 		} catch (IOException e) {
 			log.error(e.getMessage());
-			return QueryResult.FAILED;
+			sink.completed(FAILED);
+			return;
 		}
 
-		//log.debug("reduced points " + mReductionCnt + " / polys " + mSkipPoly);
-
-		return QueryResult.SUCCESS;
+		sink.completed(SUCCESS);
 	}
 
 	public MapDatabase(MapFileTileSource tileSource) throws IOException {

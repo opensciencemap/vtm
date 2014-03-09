@@ -14,10 +14,17 @@
  */
 package org.oscim.layers.tile;
 
+import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
+import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+
+import org.oscim.backend.canvas.Bitmap;
+import org.oscim.core.MapElement;
+import org.oscim.tiling.ITileDataSink;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Timer;
 
-public abstract class TileLoader {
+public abstract class TileLoader implements ITileDataSink {
 
 	private final TileManager mTileManager;
 	private Timer mTimer;
@@ -31,7 +38,7 @@ public abstract class TileLoader {
 
 	public abstract void cleanup();
 
-	protected abstract boolean executeJob(MapTile tile);
+	protected abstract boolean loadTile(MapTile tile);
 
 	boolean isInterrupted;
 
@@ -70,48 +77,65 @@ public abstract class TileLoader {
 		mPausing = false;
 	}
 
-	boolean mWorking;
+	protected boolean mWorking;
+	protected MapTile mTile;
 
 	public void go() {
-		if (mWorking) {
+		if (mWorking)
 			return;
-		}
 
-		MapTile tile = mTileManager.getTileJob();
+		mTile = mTileManager.getTileJob();
 
-		if (tile == null)
+		if (mTile == null)
 			return;
 
 		try {
-			executeJob(tile);
-
+			loadTile(mTile);
 			mWorking = true;
-
 		} catch (Exception e) {
 			e.printStackTrace();
-
-			tile.clear();
-			jobCompleted(tile, false);
+			completed(FAILED);
 		}
 	}
 
-	public void jobCompleted(MapTile tile, boolean success) {
-		if (isInterrupted)
-			success = false;
+	/**
+	 * Callback to be called by TileDataSource when finished
+	 * loading or on failure. MUST BE CALLED IN ANY CASE!
+	 */
+	@Override
+	public void completed(QueryResult result) {
+		boolean success = (result == SUCCESS) && !isInterrupted;
 
-		mTileManager.jobCompleted(tile, success);
+		mTileManager.jobCompleted(mTile, success);
+		mTile = null;
 
 		mWorking = false;
 
-		if (!mPausing && mTileManager.hasTileJobs()) {
+		if (mPausing || !mTileManager.hasTileJobs())
+			return;
 
-			Gdx.app.postRunnable(new Runnable() {
-
-				@Override
-				public void run() {
-					go();
-				}
-			});
-		}
+		Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				go();
+			}
+		});
 	}
+
+	/**
+	 * Called by TileDataSource
+	 */
+	@Override
+	public void process(MapElement element) {
+
+	}
+
+	/**
+	 * Called by TileDataSource
+	 */
+	@Override
+	public void setTileImage(Bitmap bitmap) {
+
+	}
+
 }

@@ -48,14 +48,11 @@ import org.oscim.theme.styles.LineSymbol;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.Symbol;
 import org.oscim.theme.styles.Text;
-import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
-import org.oscim.tiling.ITileDataSource.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback,
-        ITileDataSink {
+public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback {
 
 	static final Logger log = LoggerFactory.getLogger(VectorTileLoader.class);
 
@@ -70,9 +67,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	/** current TileDataSource used by this MapTileLoader */
 	protected ITileDataSource mTileDataSource;
-
-	/** currently processed tile */
-	protected MapTile mTile;
 
 	/** currently processed MapElement */
 	protected MapElement mElement;
@@ -106,7 +100,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public boolean executeJob(MapTile tile) {
+	public boolean loadTile(MapTile tile) {
 
 		if (mTileDataSource == null) {
 			log.error("no tile source is set");
@@ -118,31 +112,34 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			return false;
 		}
 
-		// account for area changes with latitude
+		/* account for area changes with latitude */
 		double lat = MercatorProjection.toLatitude(tile.y);
-
 		mLineScale = (float) Math.pow(STROKE_INCREASE, tile.zoomLevel - STROKE_MIN_ZOOM);
 		if (mLineScale < 1)
 			mLineScale = 1;
 
-		// scale line width relative to latitude + PI * thumb
+		/* scale line width relative to latitude + PI * thumb */
 		mLineScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
 
-		mTile = tile;
-		mTile.layers = new ElementLayers();
-		QueryResult result = null;
+		tile.layers = new ElementLayers();
+
 		try {
-			// query database, which calls 'process' callback
-			result = mTileDataSource.executeQuery(mTile, this);
+			/* query data source, which calls process() callback */
+			mTileDataSource.query(tile, this);
 		} catch (CancellationException e) {
-			log.debug("{} was canceled", mTile);
+			log.debug("{} was canceled", tile);
+			return false;
 		} catch (Exception e) {
-			log.debug("{} {}", mTile, e.getMessage());
-		} finally {
-			mTile = null;
-			clearState();
+			log.debug("{} {}", tile, e.getMessage());
+			return false;
 		}
-		return (result == QueryResult.SUCCESS);
+		return true;
+	}
+
+	@Override
+	public void completed(QueryResult result) {
+		super.completed(result);
+		clearState();
 	}
 
 	protected static int getValidLayer(int layer) {
@@ -253,8 +250,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public void renderWay(Line line, int level) {
 		int numLayer = mCurLayer + level;
-
-		//		line = line.getCurrent();
 
 		if (line.stipple == 0) {
 			if (line.outline && mCurLineLayer == null) {
@@ -395,7 +390,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void renderExtrusion(Extrusion extrusion, int level) {
-
 		int height = 0;
 		int minHeight = 0;
 
@@ -422,13 +416,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			height = 12 * 100;
 
 		l.add(mElement, height, minHeight);
-	}
-
-	/**
-	 * used for event-driven loading by html backend
-	 */
-	@Override
-	public void completed(boolean success) {
 	}
 
 	@Override

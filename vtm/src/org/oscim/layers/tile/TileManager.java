@@ -513,6 +513,7 @@ public class TileManager {
 			@Override
 			public void run() {
 				if (!success || tile.state == CANCEL) {
+					log.debug("failed loading: {}", tile);
 					tile.clear();
 					return;
 				}

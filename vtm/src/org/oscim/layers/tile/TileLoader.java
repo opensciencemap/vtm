@@ -16,13 +16,22 @@
  */
 package org.oscim.layers.tile;
 
+import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
+import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+
+import org.oscim.backend.canvas.Bitmap;
+import org.oscim.core.MapElement;
+import org.oscim.tiling.ITileDataSink;
 import org.oscim.utils.PausableThread;
 
-public abstract class TileLoader extends PausableThread {
+public abstract class TileLoader extends PausableThread implements ITileDataSink {
 	private static int id;
 
 	private final String THREAD_NAME;
 	private final TileManager mTileManager;
+
+	/** currently processed tile */
+	protected MapTile mTile;
 
 	public TileLoader(TileManager tileManager) {
 		super();
@@ -30,9 +39,7 @@ public abstract class TileLoader extends PausableThread {
 		THREAD_NAME = "TileLoader" + (id++);
 	}
 
-	public abstract void cleanup();
-
-	protected abstract boolean executeJob(MapTile tile);
+	protected abstract boolean loadTile(MapTile tile);
 
 	public void go() {
 		synchronized (this) {
@@ -42,29 +49,17 @@ public abstract class TileLoader extends PausableThread {
 
 	@Override
 	protected void doWork() {
+		mTile = mTileManager.getTileJob();
 
-		MapTile tile = mTileManager.getTileJob();
-
-		if (tile == null)
+		if (mTile == null)
 			return;
 
-		boolean success = false;
-
 		try {
-			success = executeJob(tile);
+			loadTile(mTile);
 		} catch (Exception e) {
 			e.printStackTrace();
-			success = false;
+			completed(FAILED);
 		}
-
-		if (isInterrupted())
-			success = false;
-
-		mTileManager.jobCompleted(tile, success);
-	}
-
-	public void jobCompleted(MapTile tile, boolean success) {
-
 	}
 
 	@Override
@@ -80,5 +75,35 @@ public abstract class TileLoader extends PausableThread {
 	@Override
 	protected boolean hasWork() {
 		return mTileManager.hasTileJobs();
+	}
+
+	public abstract void cleanup();
+
+	/**
+	 * Callback to be called by TileDataSource when finished
+	 * loading or on failure. MUST BE CALLED IN ANY CASE!
+	 */
+	@Override
+	public void completed(QueryResult result) {
+		boolean success = (result == SUCCESS) && !isInterrupted();
+
+		mTileManager.jobCompleted(mTile, success);
+		mTile = null;
+	}
+
+	/**
+	 * Called by TileDataSource
+	 */
+	@Override
+	public void process(MapElement element) {
+
+	}
+
+	/**
+	 * Called by TileDataSource
+	 */
+	@Override
+	public void setTileImage(Bitmap bitmap) {
+
 	}
 }

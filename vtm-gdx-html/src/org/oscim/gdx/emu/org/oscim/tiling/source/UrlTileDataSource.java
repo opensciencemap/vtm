@@ -14,16 +14,15 @@
  */
 package org.oscim.tiling.source;
 
+import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
+import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.oscim.layers.tile.MapTile;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
-import org.oscim.tiling.source.ITileDecoder;
-import org.oscim.tiling.source.LwHttp;
-import org.oscim.tiling.source.UrlTileDataSource;
-import org.oscim.tiling.source.UrlTileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,25 +39,23 @@ public class UrlTileDataSource implements ITileDataSource {
 		mConn = conn;
 	}
 
-	UrlTileSource getTileSource(){
+	UrlTileSource getTileSource() {
 		return mTileSource;
 	}
+
 	private ITileDataSink mSink;
 	private MapTile mTile;
 
 	@Override
-	public QueryResult executeQuery(MapTile tile, ITileDataSink sink) {
-		QueryResult result = QueryResult.SUCCESS;
+	public void query(MapTile tile, ITileDataSink sink) {
 		mTile = tile;
 		mSink = sink;
 		try {
 			mConn.sendRequest(tile, this);
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-			result = QueryResult.FAILED;
+			sink.completed(FAILED);
 		}
-
-		return result;
 	}
 
 	public void process(InputStream is) {
@@ -72,10 +69,14 @@ public class UrlTileDataSource implements ITileDataSource {
 			}
 		}
 		if (!win)
-			log.debug(mTile + " failed");
+			log.debug("{} failed", mTile);
 
 		mConn.requestCompleted();
-		mSink.completed(win);
+
+		mSink.completed(win ? SUCCESS : FAILED);
+
+		mTile = null;
+		mSink = null;
 	}
 
 	@Override

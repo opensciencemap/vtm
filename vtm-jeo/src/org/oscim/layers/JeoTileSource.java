@@ -1,5 +1,9 @@
 package org.oscim.layers;
 
+import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
+import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+import static org.oscim.tiling.ITileDataSink.QueryResult.TILE_NOT_FOUND;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -32,7 +36,7 @@ public class JeoTileSource extends TileSource {
 		return new ITileDataSource() {
 
 			@Override
-			public QueryResult executeQuery(MapTile tile, ITileDataSink sink) {
+			public void query(MapTile tile, ITileDataSink sink) {
 				log.debug("query {}", tile);
 				try {
 					Tile t = mTileDataset.read(tile.zoomLevel, tile.tileX,
@@ -40,20 +44,20 @@ public class JeoTileSource extends TileSource {
 					                           (1 << tile.zoomLevel) - 1 - tile.tileY);
 					if (t == null) {
 						log.debug("not found {}", tile);
-						return QueryResult.TILE_NOT_FOUND;
+						sink.completed(TILE_NOT_FOUND);
+						return;
 					}
 					Bitmap b = CanvasAdapter.g.decodeBitmap(new ByteArrayInputStream(t.getData()));
 					sink.setTileImage(b);
 					log.debug("success {}", tile);
-
-					return QueryResult.SUCCESS;
+					sink.completed(SUCCESS);
+					return;
 
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				log.debug("fail {}", tile);
-
-				return QueryResult.FAILED;
+				sink.completed(FAILED);
 			}
 
 			@Override

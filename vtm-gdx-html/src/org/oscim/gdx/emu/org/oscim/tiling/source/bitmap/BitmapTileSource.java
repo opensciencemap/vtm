@@ -1,5 +1,8 @@
 package org.oscim.tiling.source.bitmap;
 
+import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
+import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+
 import org.oscim.gdx.client.GwtBitmap;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.tiling.ITileDataSink;
@@ -48,7 +51,7 @@ public abstract class BitmapTileSource extends UrlTileSource {
 		}
 
 		@Override
-		public QueryResult executeQuery(final MapTile tile, final ITileDataSink sink) {
+		public void query(final MapTile tile, final ITileDataSink sink) {
 
 			int pos = mTileSource.formatTilePath(tile, mRequestBuffer, 0);
 
@@ -73,7 +76,7 @@ public abstract class BitmapTileSource extends UrlTileSource {
 			img.addLoadHandler(new LoadHandler() {
 				public void onLoad(LoadEvent event) {
 					sink.setTileImage(new GwtBitmap(img));
-					sink.completed(true);
+					sink.completed(SUCCESS);
 				}
 			});
 
@@ -81,11 +84,10 @@ public abstract class BitmapTileSource extends UrlTileSource {
 
 				@Override
 				public void onError(ErrorEvent event) {
-					sink.completed(false);
+					sink.completed(FAILED);
 					RootPanel.get().remove(img);
 				}
 			});
-			return QueryResult.SUCCESS;
 		}
 
 		@Override
