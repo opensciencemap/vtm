@@ -31,7 +31,7 @@ public class LabelTileLoaderHook implements TileLoaderHook {
 	}
 
 	@Override
-	public void render(MapTile tile, ElementLayers layers, MapElement element,
+	public boolean render(MapTile tile, ElementLayers layers, MapElement element,
 	        RenderStyle style, int level) {
 
 		if (style instanceof TextStyle) {
@@ -41,7 +41,7 @@ public class LabelTileLoaderHook implements TileLoaderHook {
 			if (element.type == LINE) {
 				String value = element.tags.getValue(text.textKey);
 				if (value == null || value.length() == 0)
-					return;
+					return false;
 
 				int offset = 0;
 				for (int i = 0, n = element.index.length; i < n; i++) {
@@ -58,7 +58,7 @@ public class LabelTileLoaderHook implements TileLoaderHook {
 				// TODO place somewhere on polygon
 				String value = element.tags.getValue(text.textKey);
 				if (value == null || value.length() == 0)
-					return;
+					return false;
 
 				float x = 0;
 				float y = 0;
@@ -76,7 +76,7 @@ public class LabelTileLoaderHook implements TileLoaderHook {
 			else if (element.type == POINT) {
 				String value = element.tags.getValue(text.textKey);
 				if (value == null || value.length() == 0)
-					return;
+					return false;
 
 				for (int i = 0, n = element.getNumPoints(); i < n; i++) {
 					PointF p = element.getPoint(i);
@@ -88,7 +88,7 @@ public class LabelTileLoaderHook implements TileLoaderHook {
 			SymbolStyle symbol = (SymbolStyle) style;
 
 			if (symbol.texture == null)
-				return;
+				return false;
 
 			LabelTileData ld = get(tile);
 
@@ -100,6 +100,7 @@ public class LabelTileLoaderHook implements TileLoaderHook {
 				ld.symbols.push(it);
 			}
 		}
+		return false;
 	}
 
 }

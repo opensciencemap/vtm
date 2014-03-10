@@ -124,7 +124,7 @@ public class VectorTileLayer extends TileLayer {
 	}
 
 	public interface TileLoaderHook {
-		public void render(MapTile tile, ElementLayers layers,
+		public boolean render(MapTile tile, ElementLayers layers,
 		        MapElement element, RenderStyle style, int level);
 	}
 
@@ -137,8 +137,8 @@ public class VectorTileLayer extends TileLayer {
 	public void addHook(TileLoaderHook h) {
 		int length = mLoaderHooks.length;
 		TileLoaderHook[] tmp = new TileLoaderHook[length + 1];
-		System.arraycopy(mLoaderHooks, 0, tmp, 1, length);
-		tmp[0] = h;
+		System.arraycopy(mLoaderHooks, 0, tmp, 0, length);
+		tmp[length] = h;
 		mLoaderHooks = tmp;
 	}
 

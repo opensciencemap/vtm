@@ -91,11 +91,11 @@ public class BuildingLayer extends Layer implements TileLoaderHook {
 	private final static int MIN_ZOOM = 17;
 
 	@Override
-	public void render(MapTile tile, ElementLayers layers, MapElement element,
+	public boolean render(MapTile tile, ElementLayers layers, MapElement element,
 	        RenderStyle style, int level) {
 
 		if (!(style instanceof ExtrusionStyle))
-			return;
+			return false;
 
 		ExtrusionStyle extrusion = (ExtrusionStyle) style;
 
@@ -125,6 +125,8 @@ public class BuildingLayer extends Layer implements TileLoaderHook {
 			height = 12 * 100;
 
 		l.add(element, height, minHeight);
+
+		return true;
 	}
 
 	//@Override

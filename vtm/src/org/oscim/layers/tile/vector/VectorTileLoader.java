@@ -294,12 +294,14 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	public void renderSymbol(SymbolStyle symbol) {
 		for (TileLoaderHook h : mTileLayer.getLoaderHooks())
-			h.render(mTile, mLayers, mElement, symbol, 0);
+			if (h.render(mTile, mLayers, mElement, symbol, 0))
+				break;
 	}
 
 	public void renderExtrusion(ExtrusionStyle extrusion, int level) {
 		for (TileLoaderHook h : mTileLayer.getLoaderHooks())
-			h.render(mTile, mLayers, mElement, extrusion, level);
+			if (h.render(mTile, mLayers, mElement, extrusion, level))
+				break;
 	}
 
 	@Override
@@ -309,6 +311,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	@Override
 	public void renderText(TextStyle text) {
 		for (TileLoaderHook h : mTileLayer.getLoaderHooks())
-			h.render(mTile, mLayers, mElement, text, 0);
+			if (h.render(mTile, mLayers, mElement, text, 0))
+				break;
 	}
 }
