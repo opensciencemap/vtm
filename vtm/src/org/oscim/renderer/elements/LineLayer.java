@@ -186,11 +186,11 @@ public final class LineLayer extends RenderElement {
 		}
 	}
 
-	private void addVertex(short[] v, int pos, short x, short y, short dx, short dy) {
+	private void addVertex(short[] v, int pos, short x, short y, int dx, int dy) {
 		v[pos + 0] = x;
 		v[pos + 1] = y;
-		v[pos + 2] = dx;
-		v[pos + 3] = dy;
+		v[pos + 2] = (short) dx;
+		v[pos + 3] = (short) dy;
 	}
 
 	private VertexItem addVertex(VertexItem vertexItem,
@@ -331,8 +331,8 @@ public final class LineLayer extends RenderElement {
 			ddy = (int) (-(uy + vPrevY) * DIR_SCALE);
 
 			addVertex(v, opos, ox, oy,
-			          (short) (2 | ddx & DIR_MASK),
-			          (short) (2 | ddy & DIR_MASK));
+			          (2 | ddx & DIR_MASK),
+			          (2 | ddy & DIR_MASK));
 
 			if ((opos += 4) == SIZE) {
 				vertexItem = pool.getNext(vertexItem);
@@ -345,8 +345,8 @@ public final class LineLayer extends RenderElement {
 			ddy = (int) (uy * DIR_SCALE);
 
 			addVertex(v, opos, ox, oy,
-			          (short) (0 | ddx & DIR_MASK),
-			          (short) (1 | ddy & DIR_MASK));
+			          (0 | ddx & DIR_MASK),
+			          (1 | ddy & DIR_MASK));
 
 			if ((opos += 4) == SIZE) {
 				vertexItem = pool.getNext(vertexItem);
@@ -355,8 +355,8 @@ public final class LineLayer extends RenderElement {
 			}
 
 			addVertex(v, opos, ox, oy,
-			          (short) (2 | -ddx & DIR_MASK),
-			          (short) (1 | -ddy & DIR_MASK));
+			          (2 | -ddx & DIR_MASK),
+			          (1 | -ddy & DIR_MASK));
 
 		} else {
 			/* outside means line is probably clipped
@@ -402,8 +402,8 @@ public final class LineLayer extends RenderElement {
 			ddy = (int) (-(uy + ty) * DIR_SCALE);
 
 			addVertex(v, opos, ox, oy,
-			          (short) (2 | ddx & DIR_MASK),
-			          (short) (1 | ddy & DIR_MASK));
+			          (2 | ddx & DIR_MASK),
+			          (1 | ddy & DIR_MASK));
 		}
 
 		curX = nextX;
@@ -534,8 +534,8 @@ public final class LineLayer extends RenderElement {
 			ddy = (int) (uy * DIR_SCALE);
 
 			addVertex(v, opos, ox, oy,
-			          (short) (0 | ddx & DIR_MASK),
-			          (short) (1 | ddy & DIR_MASK));
+			          (0 | ddx & DIR_MASK),
+			          (1 | ddy & DIR_MASK));
 
 			if ((opos += 4) == SIZE) {
 				vertexItem = pool.getNext(vertexItem);
@@ -544,8 +544,8 @@ public final class LineLayer extends RenderElement {
 			}
 
 			addVertex(v, opos, ox, oy,
-			          (short) (2 | -ddx & DIR_MASK),
-			          (short) (1 | -ddy & DIR_MASK));
+			          (2 | -ddx & DIR_MASK),
+			          (1 | -ddy & DIR_MASK));
 
 			if ((opos += 4) == SIZE) {
 				vertexItem = pool.getNext(vertexItem);
@@ -558,8 +558,8 @@ public final class LineLayer extends RenderElement {
 			ddy = (int) ((uy - vPrevY) * DIR_SCALE);
 
 			addVertex(v, opos, ox, oy,
-			          (short) (0 | ddx & DIR_MASK),
-			          (short) (0 | ddy & DIR_MASK));
+			          (0 | ddx & DIR_MASK),
+			          (0 | ddy & DIR_MASK));
 
 			/* last vertex */
 			ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
@@ -583,8 +583,8 @@ public final class LineLayer extends RenderElement {
 			ddy = (int) ((uy - vPrevY) * DIR_SCALE);
 
 			addVertex(v, opos, ox, oy,
-			          (short) (0 | ddx & DIR_MASK),
-			          (short) (1 | ddy & DIR_MASK));
+			          (0 | ddx & DIR_MASK),
+			          (1 | ddy & DIR_MASK));
 
 			/* last vertex */
 			ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
