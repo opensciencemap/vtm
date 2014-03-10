@@ -20,11 +20,13 @@ import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.android.cache.TileCache;
 import org.oscim.layers.tile.vector.VectorTileLayer;
+import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 
 public class BaseMapActivity extends MapActivity {
 
@@ -63,8 +65,36 @@ public class BaseMapActivity extends MapActivity {
 	}
 
 	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+
+		switch (item.getItemId()) {
+			case R.id.theme_default:
+				mMap.setTheme(VtmThemes.DEFAULT);
+				item.setChecked(true);
+				return true;
+
+			case R.id.theme_tubes:
+				mMap.setTheme(VtmThemes.TRONRENDER);
+				item.setChecked(true);
+				return true;
+
+			case R.id.theme_osmarender:
+				mMap.setTheme(VtmThemes.OSMARENDER);
+				item.setChecked(true);
+				return true;
+
+			case R.id.theme_newtron:
+				mMap.setTheme(VtmThemes.NEWTRON);
+				item.setChecked(true);
+				return true;
+		}
+
+		return false;
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_map, menu);
+		getMenuInflater().inflate(R.menu.theme_menu, menu);
 		return true;
 	}
 }

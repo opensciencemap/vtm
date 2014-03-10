@@ -21,8 +21,6 @@ import org.oscim.map.Layers;
 import org.oscim.theme.VtmThemes;
 
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 public class SimpleMapActivity extends BaseMapActivity {
 
@@ -42,40 +40,6 @@ public class SimpleMapActivity extends BaseMapActivity {
 		//mMap.setTheme(VtmThemes.OSMARENDER);
 
 		mMap.setMapPosition(53.08, 8.83, Math.pow(2, 10));
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.theme_menu, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
-
-		switch (item.getItemId()) {
-			case R.id.theme_default:
-				mMap.setTheme(VtmThemes.DEFAULT);
-				item.setChecked(true);
-				return true;
-
-			case R.id.theme_tubes:
-				mMap.setTheme(VtmThemes.TRONRENDER);
-				item.setChecked(true);
-				return true;
-
-			case R.id.theme_osmarender:
-				mMap.setTheme(VtmThemes.OSMARENDER);
-				item.setChecked(true);
-				return true;
-
-			case R.id.theme_newtron:
-				mMap.setTheme(VtmThemes.NEWTRON);
-				item.setChecked(true);
-				return true;
-		}
-
-		return false;
 	}
 
 	// Stress testing
