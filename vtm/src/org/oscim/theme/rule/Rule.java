@@ -23,12 +23,13 @@ import org.oscim.theme.styles.RenderStyle;
 
 public abstract class Rule {
 
-
 	private final Rule[] subRules;
 	private final RenderStyle[] styles;
 
 	private final int zoom;
 	private final int element;
+	private final boolean selectFirstMatch;
+	private final boolean selectWhenMatched;
 
 	Rule(int element, int zoom, int selector, Rule[] subRules, RenderStyle[] styles) {
 		this.element = element;
@@ -36,36 +37,55 @@ public abstract class Rule {
 		this.subRules = subRules;
 		this.styles = styles;
 
+		selectFirstMatch = (selector & Selector.FIRST) != 0;
+		selectWhenMatched = (selector & Selector.WHEN_MATCHED) != 0;
 	}
 
 	abstract boolean matchesTags(Tag[] tags);
 
-	public boolean matchElement(int type, Tag[] tags, int zoomLevel,
-	        List<RenderStyle> matchingList) {
+	public boolean matchElement(int type, Tag[] tags, int zoomLevel, List<RenderStyle> result) {
 
-		if (((mElement & type) != 0) && ((mZoom & zoomLevel) != 0) && (matchesTags(tags))) {
-
+		if (((element & type) != 0) && ((zoom & zoomLevel) != 0) && (matchesTags(tags))) {
 			boolean matched = false;
 
-			// check subrules
-			for (Rule subRule : mSubRules) {
-				if (subRule.matchElement(type, tags, zoomLevel, matchingList) && mMatchFirst) {
-					matched = true;
-					break;
+			if (subRules != null) {
+				if (selectFirstMatch) {
+					/* only add first matching rule and when-matched rules iff a
+					 * previous rule matched */
+					for (Rule r : subRules) {
+						/* continue if matched xor selectWhenMatch */
+						if (matched ^ r.selectWhenMatched)
+							continue;
+
+						if (r.matchElement(type, tags, zoomLevel, result))
+							matched = true;
+					}
+				} else {
+					/* add all rules and when-matched rules iff a previous rule
+					 * matched */
+					for (Rule r : subRules) {
+						if (r.selectWhenMatched && !matched)
+							continue;
+
+						if (r.matchElement(type, tags, zoomLevel, result))
+							matched = true;
+					}
 				}
 			}
 
-			if (!mMatchFirst || matched) {
-				// add instructions for this rule
-				for (RenderStyle ri : mRenderInstructions)
-					matchingList.add(ri);
-			}
+			if (styles == null)
+				/* matched if styles where added */
+				return matched;
 
-			// this rule did match
+			/* add instructions for this rule */
+			for (RenderStyle ri : styles)
+				result.add(ri);
+
+			/* this rule did not match */
 			return true;
 		}
 
-		// this rule did not match
+		/* this rule did not match */
 		return false;
 	}
 
