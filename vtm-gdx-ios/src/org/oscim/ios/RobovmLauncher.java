@@ -26,19 +26,17 @@ public class RobovmLauncher extends IOSApplication.Delegate {
 		config.orientationPortrait = true;
 		config.stencilFormat = GLKViewDrawableStencilFormat.Format8;
 
-		
-
 		return new IOSApplication(new GdxMap() {
 			@Override
 			public void createLayers() {
 				TileSource tileSource = new OSciMap4TileSource();
 
-				 //initDefaultLayers(tileSource, false,true, false);
-				VectorTileLayer l =  mMap.setBaseMap(tileSource);
+				//initDefaultLayers(tileSource, false,true, false);
+				VectorTileLayer l = mMap.setBaseMap(tileSource);
 				mMap.setTheme(VtmThemes.NEWTRON);
 				mMap.layers().add(new BuildingLayer(mMap, l));
 				mMap.layers().add(new LabelLayer(mMap, l));
-				
+
 				// mMap.getLayers().add(new GenericLayer(mMap, new
 				// GridRenderer(1,new Line(Color.LTGRAY, 1.2f),null)));
 
@@ -54,7 +52,7 @@ public class RobovmLauncher extends IOSApplication.Delegate {
 		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
 		CanvasAdapter.g = IosGraphics.get();
 		GLAdapter.g = new IosGLAdapter();
-		
+
 		UIApplication.main(argv, null, RobovmLauncher.class);
 		pool.drain();
 	}

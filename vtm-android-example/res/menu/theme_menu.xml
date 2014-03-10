@@ -4,7 +4,6 @@
         <item android:id="@+id/theme_default" android:checkable="true" android:title="@string/theme_default" android:checked="true" android:showAsAction="never"></item>
         <item android:id="@+id/theme_tubes" android:checkable="true" android:title="@string/theme_tubes" android:showAsAction="never"></item>
         <item android:id="@+id/theme_osmarender" android:checkable="true" android:title="@string/theme_osmarender" android:showAsAction="never"></item>
-    </group>
-  
-
+        <item android:id="@+id/theme_newtron" android:checkable="true" android:title="@string/theme_newtron" android:showAsAction="never"></item>
+        </group>
 </menu>

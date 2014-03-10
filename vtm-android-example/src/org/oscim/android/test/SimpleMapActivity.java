@@ -68,6 +68,11 @@ public class SimpleMapActivity extends BaseMapActivity {
 				mMap.setTheme(VtmThemes.OSMARENDER);
 				item.setChecked(true);
 				return true;
+
+			case R.id.theme_newtron:
+				mMap.setTheme(VtmThemes.NEWTRON);
+				item.setChecked(true);
+				return true;
 		}
 
 		return false;
