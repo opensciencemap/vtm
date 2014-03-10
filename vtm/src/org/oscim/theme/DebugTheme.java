@@ -41,7 +41,7 @@ public class DebugTheme implements IRenderTheme {
 	}
 
 	@Override
-	public void updateInstructions() {
+	public void updateStyles() {
 
 	}
 

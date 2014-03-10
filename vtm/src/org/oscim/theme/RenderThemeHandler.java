@@ -36,6 +36,7 @@ import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule;
+import org.oscim.theme.rule.RuleBuilder;
 import org.oscim.theme.styles.Area;
 import org.oscim.theme.styles.Circle;
 import org.oscim.theme.styles.Extrusion;
@@ -60,7 +61,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS;
 	}
 
-	//private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
+	private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
 	private static final String ELEMENT_NAME_MATCH = "m";
 	private static final String UNEXPECTED_ELEMENT = "unexpected element: ";
 
@@ -118,26 +119,30 @@ public class RenderThemeHandler extends DefaultHandler {
 		log.debug(sb.toString());
 	}
 
-	private ArrayList<Rule> mRulesList = new ArrayList<Rule>();
-	private Rule mCurrentRule;
+	private ArrayList<RuleBuilder> mRulesList = new ArrayList<RuleBuilder>();
+	private RuleBuilder mCurrentRule;
 
 	private Stack<Element> mElementStack = new Stack<Element>();
-	private Stack<Rule> mRuleStack = new Stack<Rule>();
+	private Stack<RuleBuilder> mRuleStack = new Stack<RuleBuilder>();
 	private HashMap<String, RenderStyle> mStyles =
 	        new HashMap<String, RenderStyle>(10);
 
 	private TextureAtlas mTextureAtlas;
 
-	private int mLevel;
+	private int mLevels = 0;
+	private int mMapBackground = 0xffffffff;
+	private float mBaseTextSize = 1;
+
 	private RenderTheme mRenderTheme;
 
 	@Override
 	public void endDocument() {
-		if (mRenderTheme == null) {
-			throw new IllegalArgumentException("missing element: rules");
-		}
 
-		mRenderTheme.complete(mRulesList, mLevel);
+		Rule[] rules = new Rule[mRulesList.size()];
+		for (int i = 0, n = rules.length; i < n; i++)
+			rules[i] = mRulesList.get(i).onComplete();
+
+		mRenderTheme = new RenderTheme(mMapBackground, mBaseTextSize, rules, mLevels);
 
 		mRulesList.clear();
 		mStyles.clear();
@@ -179,13 +184,13 @@ public class RenderThemeHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName,
 	        Attributes attributes) throws SAXException {
 		try {
-			if ("rendertheme".equals(localName)) {
+			if (ELEMENT_NAME_RENDER_THEME.equals(localName)) {
 				checkState(localName, Element.RENDER_THEME);
-				mRenderTheme = createRenderTheme(localName, attributes);
+				createRenderTheme(localName, attributes);
 
 			} else if (ELEMENT_NAME_MATCH.equals(localName)) {
 				checkState(localName, Element.RULE);
-				Rule rule = Rule.create(localName, attributes, mRuleStack);
+				RuleBuilder rule = RuleBuilder.create(localName, attributes, mRuleStack);
 				if (!mRuleStack.empty()) {
 					mCurrentRule.addSubRule(rule);
 				}
@@ -207,7 +212,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			} else if ("outline-layer".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Line line = createLine(null, localName, attributes, mLevel++, true);
+				Line line = createLine(null, localName, attributes, mLevels++, true);
 				mStyles.put(OUTLINE_STYLE + line.style, line);
 
 			} else if ("area".equals(localName)) {
@@ -217,11 +222,11 @@ public class RenderThemeHandler extends DefaultHandler {
 			} else if ("caption".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				Text text = createText(localName, attributes, true);
-				mCurrentRule.addRenderingInstruction(text);
+				mCurrentRule.addStyle(text);
 			} else if ("circle".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Circle circle = createCircle(localName, attributes, mLevel++);
-				mCurrentRule.addRenderingInstruction(circle);
+				Circle circle = createCircle(localName, attributes, mLevels++);
+				mCurrentRule.addStyle(circle);
 
 			} else if ("line".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -230,18 +235,18 @@ public class RenderThemeHandler extends DefaultHandler {
 			} else if ("lineSymbol".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				LineSymbol lineSymbol = createLineSymbol(localName, attributes);
-				mCurrentRule.addRenderingInstruction(lineSymbol);
+				mCurrentRule.addStyle(lineSymbol);
 
 			} else if ("text".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				String style = attributes.getValue("use");
 				if (style == null) {
 					Text text = createText(localName, attributes, false);
-					mCurrentRule.addRenderingInstruction(text);
+					mCurrentRule.addStyle(text);
 				} else {
 					Text pt = (Text) mStyles.get(TEXT_STYLE + style);
 					if (pt != null)
-						mCurrentRule.addRenderingInstruction(pt);
+						mCurrentRule.addStyle(pt);
 					else
 						log.debug("BUG not a path text style: " + style);
 				}
@@ -249,7 +254,7 @@ public class RenderThemeHandler extends DefaultHandler {
 			} else if ("symbol".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				Symbol symbol = createSymbol(localName, attributes);
-				mCurrentRule.addRenderingInstruction(symbol);
+				mCurrentRule.addStyle(symbol);
 
 			} else if ("outline".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -257,8 +262,8 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			} else if ("extrusion".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Extrusion extrusion = createExtrusion(localName, attributes, mLevel++);
-				mCurrentRule.addRenderingInstruction(extrusion);
+				Extrusion extrusion = createExtrusion(localName, attributes, mLevels++);
+				mCurrentRule.addStyle(extrusion);
 
 			} else if ("atlas".equals(localName)) {
 				checkState(localName, Element.ATLAS);
@@ -305,12 +310,12 @@ public class RenderThemeHandler extends DefaultHandler {
 			}
 		}
 
-		Line line = createLine(style, localName, attributes, mLevel++, false);
+		Line line = createLine(style, localName, attributes, mLevels++, false);
 
 		if (isStyle) {
 			mStyles.put(LINE_STYLE + line.style, line);
 		} else {
-			mCurrentRule.addRenderingInstruction(line);
+			mCurrentRule.addStyle(line);
 			// Note 'outline' will not be inherited, it's just a 
 			// shorcut to add the outline RenderInstruction.
 			addOutline(attributes.getValue("outline"));
@@ -452,13 +457,13 @@ public class RenderThemeHandler extends DefaultHandler {
 			}
 		}
 
-		Area area = createArea(style, localName, attributes, mLevel);
-		mLevel += 2;
+		Area area = createArea(style, localName, attributes, mLevels);
+		mLevels += 2;
 
 		if (isStyle) {
 			mStyles.put(AREA_STYLE + area.style, area);
 		} else {
-			mCurrentRule.addRenderingInstruction(area);
+			mCurrentRule.addStyle(area);
 		}
 	}
 
@@ -550,7 +555,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		if (style != null) {
 			Line line = (Line) mStyles.get(OUTLINE_STYLE + style);
 			if (line != null && line.outline)
-				mCurrentRule.addRenderingInstruction(line);
+				mCurrentRule.addStyle(line);
 			else
 				log.debug("BUG not an outline style: " + style);
 		}
@@ -652,7 +657,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		mElementStack.push(element);
 	}
 
-	static RenderTheme createRenderTheme(String elementName, Attributes attributes) {
+	private void createRenderTheme(String elementName, Attributes attributes) {
 		Integer version = null;
 		int mapBackground = Color.WHITE;
 		float baseStrokeWidth = 1;
@@ -691,7 +696,8 @@ public class RenderThemeHandler extends DefaultHandler {
 		else if (baseTextSize < 0)
 			throw new ThemeException("base-text-size must not be negative: " + baseTextSize);
 
-		return new RenderTheme(mapBackground, baseStrokeWidth, baseTextSize);
+		mMapBackground = mapBackground;
+		mBaseTextSize = baseTextSize;
 	}
 
 	/**

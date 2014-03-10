@@ -258,7 +258,7 @@ public class RenderTheme implements IRenderTheme {
 	}
 
 	@Override
-	public void updateInstructions() {
+	public void updateStyles() {
 		// TODO Auto-generated method stub
 
 	}

@@ -41,8 +41,8 @@ public class RenderTheme implements IRenderTheme {
 	private final float mBaseTextSize;
 	private final int mMapBackground;
 
-	private int mLevels;
-	private Rule[] mRules;
+	private final int mLevels;
+	private final Rule[] mRules;
 
 	class RenderStyleCache {
 		final int matchType;
@@ -75,9 +75,11 @@ public class RenderTheme implements IRenderTheme {
 
 	private final RenderStyleCache[] mStyleCache;
 
-	public RenderTheme(int mapBackground, float baseStrokeWidth, float baseTextSize) {
+	public RenderTheme(int mapBackground, float baseTextSize, Rule[] rules, int levels) {
 		mMapBackground = mapBackground;
 		mBaseTextSize = baseTextSize;
+		mRules = rules;
+		mLevels = levels;
 
 		mStyleCache = new RenderStyleCache[3];
 		mStyleCache[0] = new RenderStyleCache(Element.NODE);
@@ -240,27 +242,16 @@ public class RenderTheme implements IRenderTheme {
 		return ri.list;
 	}
 
-	void complete(List<Rule> rulesList, int levels) {
-		mLevels = levels;
-
-		mRules = new Rule[rulesList.size()];
-		rulesList.toArray(mRules);
-
-		for (int i = 0, n = mRules.length; i < n; i++) {
-			mRules[i].onComplete();
-		}
-	}
-
 	@Override
 	public void scaleTextSize(float scaleFactor) {
 
-		for (int i = 0, n = mRules.length; i < n; i++)
-			mRules[i].scaleTextSize(scaleFactor * mBaseTextSize);
+		for (Rule rule : mRules)
+			rule.scaleTextSize(scaleFactor * mBaseTextSize);
 	}
 
 	@Override
-	public void updateInstructions() {
-		for (int i = 0, n = mRules.length; i < n; i++)
-			mRules[i].updateInstructions();
+	public void updateStyles() {
+		for (Rule rule : mRules)
+			rule.updateStyles();
 	}
 }

@@ -18,12 +18,14 @@
 package org.oscim.theme.rule;
 
 import org.oscim.core.Tag;
+import org.oscim.theme.styles.RenderStyle;
 
 class NegativeRule extends Rule {
 	final AttributeMatcher mAttributeMatcher;
 
-	NegativeRule(int element, int zoom, boolean matchFirst, AttributeMatcher attributeMatcher) {
-		super(element, zoom, matchFirst);
+	NegativeRule(int element, int zoom, int selector, AttributeMatcher attributeMatcher,
+	        Rule[] subRules, RenderStyle[] styles) {
+		super(element, zoom, selector, subRules, styles);
 
 		mAttributeMatcher = attributeMatcher;
 	}
