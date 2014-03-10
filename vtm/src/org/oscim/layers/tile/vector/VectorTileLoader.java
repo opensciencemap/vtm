@@ -27,7 +27,8 @@ import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderHook;
+import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderProcessHook;
+import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
@@ -166,10 +167,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	 * E.g. to replace tags that should not be cached in Rendertheme
 	 */
 	protected TagSet filterTags(TagSet tagSet) {
-		//		if (filterHooks != null){
-		//			tagSet = 
-		//		}
-
 		return tagSet;
 	}
 
@@ -178,6 +175,10 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		if (isCanceled() || mTile.state(CANCEL))
 			throw new CancellationException();
+
+		for (TileLoaderProcessHook h : mTileLayer.loaderProcessHooks())
+			if (h.process(mTile, mLayers, element))
+				return;
 
 		TagSet tags = filterTags(element.tags);
 		if (tags == null)
@@ -292,14 +293,16 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
+	@Override
 	public void renderSymbol(SymbolStyle symbol) {
-		for (TileLoaderHook h : mTileLayer.getLoaderHooks())
+		for (TileLoaderThemeHook h : mTileLayer.loaderThemeHooks())
 			if (h.render(mTile, mLayers, mElement, symbol, 0))
 				break;
 	}
 
+	@Override
 	public void renderExtrusion(ExtrusionStyle extrusion, int level) {
-		for (TileLoaderHook h : mTileLayer.getLoaderHooks())
+		for (TileLoaderThemeHook h : mTileLayer.loaderThemeHooks())
 			if (h.render(mTile, mLayers, mElement, extrusion, level))
 				break;
 	}
@@ -310,7 +313,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void renderText(TextStyle text) {
-		for (TileLoaderHook h : mTileLayer.getLoaderHooks())
+		for (TileLoaderThemeHook h : mTileLayer.loaderThemeHooks())
 			if (h.render(mTile, mLayers, mElement, text, 0))
 				break;
 	}

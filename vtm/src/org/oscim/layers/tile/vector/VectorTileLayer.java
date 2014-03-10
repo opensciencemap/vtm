@@ -123,23 +123,37 @@ public class VectorTileLayer extends TileLayer {
 		return mTheme;
 	}
 
-	public interface TileLoaderHook {
+	public interface TileLoaderProcessHook {
+		public boolean process(MapTile tile, ElementLayers layers, MapElement element);
+	}
+
+	public interface TileLoaderThemeHook {
 		public boolean render(MapTile tile, ElementLayers layers,
 		        MapElement element, RenderStyle style, int level);
 	}
 
-	private TileLoaderHook[] mLoaderHooks = new TileLoaderHook[0];
+	private TileLoaderProcessHook[] mLoaderProcessHooks = new TileLoaderProcessHook[0];
+	private TileLoaderThemeHook[] mLoaderThemeHooks = new TileLoaderThemeHook[0];
 
-	public TileLoaderHook[] getLoaderHooks() {
-		return mLoaderHooks;
+	public TileLoaderProcessHook[] loaderProcessHooks() {
+		return mLoaderProcessHooks;
 	}
 
-	public void addHook(TileLoaderHook h) {
-		int length = mLoaderHooks.length;
-		TileLoaderHook[] tmp = new TileLoaderHook[length + 1];
-		System.arraycopy(mLoaderHooks, 0, tmp, 0, length);
-		tmp[length] = h;
-		mLoaderHooks = tmp;
+	public TileLoaderThemeHook[] loaderThemeHooks() {
+		return mLoaderThemeHooks;
 	}
 
+	public void addHook(TileLoaderProcessHook h) {
+		TileLoaderProcessHook[] tmp = mLoaderProcessHooks;
+		mLoaderProcessHooks = new TileLoaderProcessHook[tmp.length + 1];
+		System.arraycopy(tmp, 0, mLoaderProcessHooks, 0, tmp.length);
+		mLoaderProcessHooks[tmp.length] = h;
+	}
+
+	public void addHook(TileLoaderThemeHook h) {
+		TileLoaderThemeHook[] tmp = mLoaderThemeHooks;
+		mLoaderThemeHooks = new TileLoaderThemeHook[tmp.length + 1];
+		System.arraycopy(tmp, 0, mLoaderThemeHooks, 0, tmp.length);
+		mLoaderThemeHooks[tmp.length] = h;
+	}
 }

@@ -8,7 +8,7 @@ import static org.oscim.layers.tile.vector.labeling.LabelLayer.LABEL_DATA;
 import org.oscim.core.MapElement;
 import org.oscim.core.PointF;
 import org.oscim.layers.tile.MapTile;
-import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderHook;
+import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
@@ -16,7 +16,7 @@ import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.TextStyle;
 
-public class LabelTileLoaderHook implements TileLoaderHook {
+public class LabelTileLoaderHook implements TileLoaderThemeHook {
 
 	//public final static LabelTileData EMPTY = new LabelTileData();
 

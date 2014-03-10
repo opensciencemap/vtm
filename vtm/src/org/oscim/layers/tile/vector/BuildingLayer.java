@@ -21,7 +21,7 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.layers.Layer;
 import org.oscim.layers.tile.MapTile;
-import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderHook;
+import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
@@ -31,7 +31,7 @@ import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.FastMath;
 
-public class BuildingLayer extends Layer implements TileLoaderHook {
+public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 	//static final Logger log = LoggerFactory.getLogger(BuildingOverlay.class);
 
 	final ExtrusionRenderer mExtLayer;
