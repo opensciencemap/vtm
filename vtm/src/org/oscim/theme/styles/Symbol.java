@@ -32,7 +32,7 @@ public final class Symbol extends RenderStyle {
 	}
 
 	@Override
-	public void destroy() {
+	public void dispose() {
 	}
 
 	@Override

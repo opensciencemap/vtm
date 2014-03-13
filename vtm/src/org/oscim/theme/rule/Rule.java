@@ -22,9 +22,11 @@ import org.oscim.core.Tag;
 import org.oscim.theme.styles.RenderStyle;
 
 public abstract class Rule {
+	public final static RenderStyle[] EMPTY_STYLE = new RenderStyle[0];
+	public final static Rule[] EMPTY_RULES = new Rule[0];
 
 	private final Rule[] subRules;
-	private final RenderStyle[] styles;
+	public final RenderStyle[] styles;
 
 	private final int zoom;
 	private final int element;
@@ -34,8 +36,9 @@ public abstract class Rule {
 	Rule(int element, int zoom, int selector, Rule[] subRules, RenderStyle[] styles) {
 		this.element = element;
 		this.zoom = zoom;
-		this.subRules = subRules;
-		this.styles = styles;
+
+		this.subRules = (subRules == null) ? EMPTY_RULES : subRules;
+		this.styles = (styles == null) ? EMPTY_STYLE : styles;
 
 		selectFirstMatch = (selector & Selector.FIRST) != 0;
 		selectWhenMatched = (selector & Selector.WHEN_MATCHED) != 0;
@@ -48,7 +51,7 @@ public abstract class Rule {
 		if (((element & type) != 0) && ((zoom & zoomLevel) != 0) && (matchesTags(tags))) {
 			boolean matched = false;
 
-			if (subRules != null) {
+			if (subRules != EMPTY_RULES) {
 				if (selectFirstMatch) {
 					/* only add first matching rule and when-matched rules iff a
 					 * previous rule matched */
@@ -73,7 +76,7 @@ public abstract class Rule {
 				}
 			}
 
-			if (styles == null)
+			if (styles == EMPTY_STYLE)
 				/* matched if styles where added */
 				return matched;
 
@@ -89,59 +92,62 @@ public abstract class Rule {
 		return false;
 	}
 
-	public void onDestroy() {
-		if (styles != null)
-			for (RenderStyle ri : styles)
-				ri.destroy();
+	public void dispose() {
+		for (RenderStyle ri : styles)
+			ri.dispose();
 
-		if (subRules != null)
-			for (Rule subRule : subRules)
-				subRule.onDestroy();
+		for (Rule subRule : subRules)
+			subRule.dispose();
 	}
 
 	public void scaleTextSize(float scaleFactor) {
-		if (styles != null)
-			for (RenderStyle ri : styles)
-				ri.scaleTextSize(scaleFactor);
+		for (RenderStyle ri : styles)
+			ri.scaleTextSize(scaleFactor);
 
-		if (subRules != null)
-			for (Rule subRule : subRules)
-				subRule.scaleTextSize(scaleFactor);
+		for (Rule subRule : subRules)
+			subRule.scaleTextSize(scaleFactor);
 	}
 
 	public void updateStyles() {
-		if (styles != null)
-			for (RenderStyle ri : styles)
-				ri.update();
+		for (RenderStyle ri : styles)
+			ri.update();
 
-		if (subRules != null)
-			for (Rule subRule : subRules)
-				subRule.updateStyles();
+		for (Rule subRule : subRules)
+			subRule.updateStyles();
 	}
 
 	public static class RuleVisitor {
-		boolean apply(Rule r) {
-			if (r.subRules != null)
-				for (Rule subRule : r.subRules)
-					this.apply(subRule);
+		public void apply(Rule r) {
+			for (Rule subRule : r.subRules)
+				this.apply(subRule);
+		}
+	}
 
-			return true;
+	public static class TextSizeVisitor extends RuleVisitor {
+		float scaleFactor = 1;
+
+		public void setScaleFactor(float scaleFactor) {
+			this.scaleFactor = scaleFactor;
+		}
+
+		@Override
+		public void apply(Rule r) {
+			for (RenderStyle ri : r.styles)
+				ri.scaleTextSize(scaleFactor);
+			super.apply(r);
 		}
 	}
 
 	public static class UpdateVisitor extends RuleVisitor {
 		@Override
-		boolean apply(Rule r) {
-			if (r.styles != null)
-				for (RenderStyle ri : r.styles)
-					ri.update();
-
-			return super.apply(r);
+		public void apply(Rule r) {
+			for (RenderStyle ri : r.styles)
+				ri.update();
+			super.apply(r);
 		}
 	}
 
-	public boolean apply(RuleVisitor v) {
-
-		return v.apply(this);
+	public void apply(RuleVisitor v) {
+		v.apply(this);
 	}
 }

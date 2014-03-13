@@ -41,7 +41,7 @@ public abstract class RenderStyle {
 	/**
 	 * Destroys this RenderInstruction and cleans up all its internal resources.
 	 */
-	public void destroy() {
+	public void dispose() {
 	}
 
 	/**

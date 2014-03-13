@@ -24,6 +24,7 @@ import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
 import org.oscim.theme.rule.Element;
 import org.oscim.theme.rule.Rule;
+import org.oscim.theme.rule.Rule.RuleVisitor;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.LRUCache;
 import org.slf4j.Logger;
@@ -93,7 +94,7 @@ public class RenderTheme implements IRenderTheme {
 			mStyleCache[i].cache.clear();
 
 		for (Rule rule : mRules)
-			rule.onDestroy();
+			rule.dispose();
 	}
 
 	@Override
@@ -259,4 +260,10 @@ public class RenderTheme implements IRenderTheme {
 		for (Rule rule : mRules)
 			rule.updateStyles();
 	}
+
+	public void traverseRules(RuleVisitor visitor) {
+		for (Rule rule : mRules)
+			rule.apply(visitor);
+	}
+
 }
