@@ -60,6 +60,13 @@ public class Color {
 		return 0xff << 24 | r << 16 | g << 8 | b;
 	}
 
+	public static int get(double r, double g, double b) {
+		return 0xff << 24
+		        | (int) Math.round(r * 255) << 16
+		        | (int) Math.round(g * 255) << 8
+		        | (int) Math.round(b * 255);
+	}
+
 	/**
 	 * Pack premultiplied a, r, g, b bytes into one int.
 	 */
@@ -88,6 +95,77 @@ public class Color {
 
 	public static float aToFloat(int color) {
 		return ((color >>> 24) & 0xff) / 255f;
+	}
+
+	public static int a(int color) {
+		return ((color >>> 24) & 0xff);
+	}
+
+	public static int r(int color) {
+		return ((color >>> 16) & 0xff);
+	}
+
+	public static int g(int color) {
+		return ((color >>> 8) & 0xff);
+	}
+
+	public static int b(int color) {
+		return ((color) & 0xff);
+	}
+
+	public static int parseColorComponents(String str) {
+		int numComponents = 4;
+		//boolean rgbMode = true;
+
+		if (str.startsWith("rgb("))
+			numComponents = 3;
+		else if (!str.startsWith("rgba("))
+			parseColorException(str);
+
+		int cur = 4;
+		int end = str.length();
+		int component = 0;
+		int a = 0, r = 0, g = 0, b = 0;
+
+		if (str.charAt(end - 1) != ')')
+			parseColorException(str);
+
+		while (cur < end) {
+			char c = str.charAt(cur);
+			if (c == ',') {
+				component++;
+				if (component >= numComponents)
+					parseColorException(str);
+				continue;
+			} else if (c >= '0' && c <= '9') {
+				if (component == 0) {
+					r *= 10;
+					r += c - '0';
+				} else if (component == 1) {
+					g *= 10;
+					g += c - '0';
+				} else if (component == 2) {
+					b *= 10;
+					b += c - '0';
+				} else {
+					a *= 10;
+					a += c - '0';
+				}
+
+			} else
+				parseColorException(str);
+		}
+		if (r > 255 || g > 255 || b > 255 || a > 255)
+			parseColorException(str);
+
+		if (numComponents == 3)
+			return get(r, g, b);
+		else
+			return get(a, r, g, b);
+	}
+
+	private static void parseColorException(String str) {
+		throw new IllegalArgumentException("Unknown color: \'" + str + '\'');
 	}
 
 	/* Copyright (C) 2006 The Android Open Source Project
@@ -136,9 +214,12 @@ public class Color {
 				// Set the alpha value
 				color |= 0x00000000ff000000;
 			} else if (colorString.length() != 9) {
-				throw new IllegalArgumentException("Unknown color");
+				parseColorException(colorString);
 			}
 			return (int) color;
+		}
+		if (colorString.charAt(0) == 'r') {
+			return parseColorComponents(colorString);
 		}
 		throw new IllegalArgumentException("Unknown color");
 	}
