@@ -1,5 +1,7 @@
 package org.oscim.layers.tile.s3db;
 
+import static org.oscim.layers.tile.s3db.S3DBLayer.getMaterialColor;
+
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -64,6 +66,7 @@ class S3DBTileLoader extends TileLoader {
 	}
 
 	String COLOR_KEY = "c";
+	String MATERIAL_KEY = "m";
 	String ROOF_KEY = "roof";
 	String ROOF_SHAPE_KEY = "roof:shape";
 
@@ -74,11 +77,18 @@ class S3DBTileLoader extends TileLoader {
 			log.debug("wrong type " + element.type);
 			return;
 		}
+
 		boolean isRoof = element.tags.containsKey(ROOF_KEY);
+		//if (isRoof)
+		//	log.debug(element.tags.toString());
 
 		int c = 0;
 		if (element.tags.containsKey(COLOR_KEY)) {
 			c = S3DBLayer.getColor(element.tags.getValue(COLOR_KEY), isRoof);
+		}
+
+		if (c == 0 && element.tags.containsKey(MATERIAL_KEY)) {
+			c = getMaterialColor(element.tags.getValue(MATERIAL_KEY), isRoof);
 		}
 
 		if (c == 0) {
