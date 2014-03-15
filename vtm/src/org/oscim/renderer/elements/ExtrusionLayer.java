@@ -17,6 +17,7 @@
 package org.oscim.renderer.elements;
 
 import java.nio.ShortBuffer;
+import java.util.HashMap;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
@@ -50,7 +51,7 @@ public class ExtrusionLayer extends RenderElement {
 
 	/** indices for: 0. even sides, 1. odd sides, 2. roof, 3. roof outline */
 	public int numIndices[] = { 0, 0, 0, 0, 0 };
-	public int sumIndices = 0;
+	//public int sumIndices = 0;
 	public int sumVertices = 0;
 
 	public BufferObject vboIndices;
@@ -109,6 +110,46 @@ public class ExtrusionLayer extends RenderElement {
 		mIndices[4] = mCurIndices[4] = VertexItem.pool.get();
 	}
 
+	static class Vertex {
+		short x, y, z, n;
+
+		@Override
+		public boolean equals(Object obj) {
+			Vertex o = (Vertex) obj;
+			return x == o.x && y == o.y && z == o.z && n == o.n;
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 31;
+			hash *= x * 31;
+			hash *= y * 31;
+			hash *= n * 31;
+			return hash;
+		}
+
+		public void set(short x, short y, short z, short n) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.n = n;
+		}
+
+		public Vertex() {
+		}
+
+		public Vertex(Vertex v) {
+			this.x = v.x;
+			this.y = v.y;
+			this.z = v.z;
+			this.n = v.n;
+		}
+	}
+
+	private HashMap<Vertex, Integer> mVertexMap = new HashMap<Vertex, Integer>();
+	private Vertex mTmpVertex = new Vertex();
+	private int numIndexHits = 0;
+
 	public void add(MapElement element) {
 		if (element.type != GeometryType.TRIS)
 			return;
@@ -116,35 +157,18 @@ public class ExtrusionLayer extends RenderElement {
 		short[] index = element.index;
 		float[] points = element.points;
 
-		// roof indices for convex shapes
-		int i = mCurIndices[IND_MESH].used;
-		short[] indices = mCurIndices[IND_MESH].vertices;
-		int first = sumVertices;
+		int vertexCnt = sumVertices;
 
-		short[] vertices = mCurVertices.vertices;
-		int v = mCurVertices.used;
-
-		int vertexCnt = 0;
+		Vertex key = mTmpVertex;
+		double scale = S * Tile.SIZE / 4096;
 
 		for (int k = 0, n = index.length; k < n;) {
 			if (index[k] < 0)
 				break;
 
 			// FIXME: workaround: dont overflow max index id.
-			if (sumVertices + vertexCnt >= 1 << 16)
+			if (vertexCnt >= 1 << 16)
 				break;
-
-			if (i == VertexItem.SIZE) {
-				mCurIndices[IND_MESH].used = VertexItem.SIZE;
-				mCurIndices[IND_MESH].next = VertexItem.pool.get();
-				mCurIndices[IND_MESH] = mCurIndices[IND_MESH].next;
-				indices = mCurIndices[IND_MESH].vertices;
-				i = 0;
-			}
-
-			indices[i++] = (short) (first + vertexCnt);
-			indices[i++] = (short) (first + vertexCnt + 1);
-			indices[i++] = (short) (first + vertexCnt + 2);
 
 			int vtx1 = index[k++] * 3;
 			int vtx2 = index[k++] * 3;
@@ -177,46 +201,92 @@ public class ExtrusionLayer extends RenderElement {
 			double len = Math.sqrt(cx * cx + cy * cy + cz * cz);
 
 			// packing the normal in two bytes
+			//	int mx = FastMath.clamp(127 + (int) ((cx / len) * 128), 0, 0xff);
+			//	int my = FastMath.clamp(127 + (int) ((cy / len) * 128), 0, 0xff);
+			//	short normal = (short) ((my << 8) | (mx & NORMAL_DIR_MASK) | (cz > 0 ? 1 : 0));
+
 			double p = Math.sqrt((cz / len) * 8.0 + 8.0);
 			int mx = FastMath.clamp(127 + (int) ((cx / len / p) * 128), 0, 255);
 			int my = FastMath.clamp(127 + (int) ((cy / len / p) * 128), 0, 255);
 			short normal = (short) ((my << 8) | mx);
 
-			//	int mx = FastMath.clamp(127 + (int) ((cx / len) * 128), 0, 0xff);
-			//	int my = FastMath.clamp(127 + (int) ((cy / len) * 128), 0, 0xff);
-			//	short normal = (short) ((my << 8) | (mx & NORMAL_DIR_MASK) | (cz > 0 ? 1 : 0));
+			key.set((short) (vx1 * scale),
+			        (short) (vy1 * scale),
+			        (short) (vz1 * scale),
+			        (short) normal);
 
-			if (v == VertexItem.SIZE) {
-				mCurVertices.used = VertexItem.SIZE;
-				mCurVertices.next = VertexItem.pool.get();
-				mCurVertices = mCurVertices.next;
-				vertices = mCurVertices.vertices;
-				v = 0;
+			Integer vertexId = mVertexMap.get(key);
+			if (vertexId == null) {
+				addVertex(key);
+				addIndex(vertexCnt);
+				mVertexMap.put(new Vertex(key), vertexCnt++);
+			} else {
+				numIndexHits++;
+				addIndex(vertexId.intValue());
 			}
 
-			double s = S * Tile.SIZE / 4096;
+			key.set((short) (vx2 * scale),
+			        (short) (vy2 * scale),
+			        (short) (vz2 * scale),
+			        (short) normal);
 
-			vertices[v++] = (short) (vx1 * s);
-			vertices[v++] = (short) (vy1 * s);
-			vertices[v++] = (short) (vz1 * s);
-			vertices[v++] = (short) normal;
+			vertexId = mVertexMap.get(key);
+			if (vertexId == null) {
+				addVertex(key);
+				addIndex(vertexCnt);
+				mVertexMap.put(new Vertex(key), vertexCnt++);
+			} else {
+				numIndexHits++;
+				addIndex(vertexId.intValue());
+			}
 
-			vertices[v++] = (short) (vx2 * s);
-			vertices[v++] = (short) (vy2 * s);
-			vertices[v++] = (short) (vz2 * s);
-			vertices[v++] = (short) normal;
+			key.set((short) (vx3 * scale),
+			        (short) (vy3 * scale),
+			        (short) (vz3 * scale),
+			        (short) normal);
 
-			vertices[v++] = (short) (vx3 * s);
-			vertices[v++] = (short) (vy3 * s);
-			vertices[v++] = (short) (vz3 * s);
-			vertices[v++] = (short) normal;
-
-			vertexCnt += 3;
+			vertexId = mVertexMap.get(key);
+			if (vertexId == null) {
+				addVertex(key);
+				addIndex(vertexCnt);
+				mVertexMap.put(new Vertex(key), vertexCnt++);
+			} else {
+				numIndexHits++;
+				addIndex(vertexId.intValue());
+			}
 		}
 
-		mCurIndices[IND_MESH].used = i;
-		mCurVertices.used = v;
-		sumVertices += vertexCnt; //(vertexCnt / 3);
+		sumVertices = vertexCnt;
+	}
+
+	private void addVertex(Vertex vertex) {
+		VertexItem vi = mCurVertices;
+
+		if (vi.used == VertexItem.SIZE) {
+			mCurVertices.used = VertexItem.SIZE;
+			mCurVertices.next = VertexItem.pool.get();
+			mCurVertices = mCurVertices.next;
+			vi = mCurVertices;
+		}
+
+		vi.vertices[vi.used++] = vertex.x;
+		vi.vertices[vi.used++] = vertex.y;
+		vi.vertices[vi.used++] = vertex.z;
+		vi.vertices[vi.used++] = vertex.n;
+	}
+
+	private void addIndex(int id) {
+		VertexItem vi = mCurIndices[IND_MESH];
+
+		if (vi.used == VertexItem.SIZE) {
+			mCurIndices[IND_MESH].used = VertexItem.SIZE;
+			mCurIndices[IND_MESH].next = VertexItem.pool.get();
+			mCurIndices[IND_MESH] = mCurIndices[IND_MESH].next;
+			vi = mCurIndices[IND_MESH];
+			//indices = mCurIndices[IND_MESH].vertices;
+			//i = 0;
+		}
+		vi.vertices[vi.used++] = (short) id;
 	}
 
 	//	private void encodeNormal(float v[], int offset) {
@@ -568,11 +638,11 @@ public class ExtrusionLayer extends RenderElement {
 
 	@Override
 	public void compile(ShortBuffer sbuf) {
-
+		mVertexMap.clear();
 		if (sumVertices == 0 || compiled)
 			return;
 
-		sumIndices = 0;
+		int sumIndices = 0;
 		for (int i = 0; i <= IND_MESH; i++) {
 			for (VertexItem vi = mIndices[i]; vi != null; vi = vi.next) {
 				sbuf.put(vi.vertices, 0, vi.used);
@@ -581,7 +651,7 @@ public class ExtrusionLayer extends RenderElement {
 			sumIndices += numIndices[i];
 		}
 
-		//log.debug("compile" + mNumIndices + " / " + mNumVertices);
+		//log.debug("INDEX HITS " + numIndexHits + " / " + sumVertices + " / " + sumIndices);
 
 		int size = sumIndices * 2;
 		vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
