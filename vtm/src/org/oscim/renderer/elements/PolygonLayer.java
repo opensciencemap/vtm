@@ -126,7 +126,7 @@ public final class PolygonLayer extends RenderElement {
 
 		private static final float FADE_START = 1.3f;
 
-		private static PolygonLayer[] mFillPolys;
+		private static AreaStyle[] mAreaFills;
 
 		private static int numShaders = 2;
 		private static int polyShader = 0;
@@ -168,7 +168,7 @@ public final class PolygonLayer extends RenderElement {
 				hPolygonVertexPosition[i] = GL.glGetAttribLocation(polygonProgram[i], "a_pos");
 			}
 
-			mFillPolys = new PolygonLayer[STENCIL_BITS];
+			mAreaFills = new AreaStyle[STENCIL_BITS];
 
 			return true;
 		}
@@ -184,7 +184,7 @@ public final class PolygonLayer extends RenderElement {
 			int shader = polyShader;
 
 			for (int c = start; c < end; c++) {
-				AreaStyle a = (AreaStyle) mFillPolys[c].area.getCurrent();
+				AreaStyle a = mAreaFills[c].current();
 
 				if (enableTexture && a.texture != null) {
 					shader = texShader;
@@ -316,7 +316,7 @@ public final class PolygonLayer extends RenderElement {
 					GL.glStencilOp(GL20.GL_KEEP, GL20.GL_KEEP, GL20.GL_INVERT);
 				}
 
-				mFillPolys[cur] = pl;
+				mAreaFills[cur] = pl.area.current();
 
 				// set stencil mask to draw to
 				GL.glStencilMask(1 << cur++);
