@@ -44,4 +44,9 @@ public final class SymbolStyle extends RenderStyle {
 	public void renderWay(Callback cb) {
 		cb.renderSymbol(this);
 	}
+
+	@Override
+	public SymbolStyle current() {
+		return (SymbolStyle) (mCurrent == null ? this : mCurrent);
+	}
 }

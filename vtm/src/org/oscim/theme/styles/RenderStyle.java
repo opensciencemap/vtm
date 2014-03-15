@@ -74,7 +74,5 @@ public abstract class RenderStyle {
 		}
 	}
 
-	public RenderStyle getCurrent() {
-		return mCurrent == null ? this : mCurrent;
-	}
+	public abstract RenderStyle current();
 }

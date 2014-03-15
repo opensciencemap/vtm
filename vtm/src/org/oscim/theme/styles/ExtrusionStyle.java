@@ -61,6 +61,11 @@ public class ExtrusionStyle extends RenderStyle {
 		renderCallback.renderExtrusion(this, this.level);
 	}
 
+	@Override
+	public ExtrusionStyle current() {
+		return (ExtrusionStyle) (mCurrent == null ? this : mCurrent);
+	}
+
 	private final int level;
 	public final float[] colors;
 	public final int defaultHeight;

@@ -91,6 +91,7 @@ public class AreaStyle extends RenderStyle {
 			outline.update();
 	}
 
+	@Override
 	public AreaStyle current() {
 		return (AreaStyle) (mCurrent == null ? this : mCurrent);
 	}

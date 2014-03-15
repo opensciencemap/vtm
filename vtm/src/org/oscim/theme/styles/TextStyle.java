@@ -192,6 +192,11 @@ public final class TextStyle extends RenderStyle {
 	}
 
 	@Override
+	public TextStyle current() {
+		return (TextStyle) (mCurrent == null ? this : mCurrent);
+	}
+
+	@Override
 	public void scaleTextSize(float scaleFactor) {
 		paint.setTextSize(fontSize * scaleFactor);
 		if (stroke != null)

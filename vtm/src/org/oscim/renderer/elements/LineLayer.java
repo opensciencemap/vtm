@@ -749,7 +749,7 @@ public final class LineLayer extends RenderElement {
 			RenderElement l = curLayer;
 			for (; l != null && l.type == RenderElement.LINE; l = l.next) {
 				LineLayer ll = (LineLayer) l;
-				LineStyle line = (LineStyle) ll.line.getCurrent();
+				LineStyle line = ll.line.current();
 
 				if (ll.heightOffset != heightOffset) {
 					heightOffset = ll.heightOffset;
@@ -820,7 +820,7 @@ public final class LineLayer extends RenderElement {
 				/* draw LineLayers references by this outline */
 
 				for (LineLayer ref = ll.outlines; ref != null; ref = ref.outlines) {
-					LineStyle core = (LineStyle) ref.line.getCurrent();
+					LineStyle core = ref.line.current();
 
 					// core width
 					if (core.fixed) {

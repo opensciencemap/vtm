@@ -93,6 +93,11 @@ public final class LineStyle extends RenderStyle {
 		renderCallback.renderWay(this, level);
 	}
 
+	@Override
+	public LineStyle current() {
+		return (LineStyle) (mCurrent == null ? this : mCurrent);
+	}
+
 	public final static class LineBuilder {
 		public int level;
 

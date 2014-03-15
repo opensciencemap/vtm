@@ -362,7 +362,7 @@ public final class LineTexLayer extends RenderElement {
 			RenderElement l = curLayer;
 			for (; l != null && l.type == TEXLINE; l = l.next) {
 				LineTexLayer ll = (LineTexLayer) l;
-				LineStyle line = ll.line;
+				LineStyle line = ll.line.current();
 
 				GLUtils.setColor(hTexColor, line.stippleColor, 1);
 				GLUtils.setColor(hBgColor, line.color, 1);

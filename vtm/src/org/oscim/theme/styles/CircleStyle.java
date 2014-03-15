@@ -51,4 +51,9 @@ public final class CircleStyle extends RenderStyle {
 	public void renderNode(Callback renderCallback) {
 		renderCallback.renderCircle(this, this.level);
 	}
+
+	@Override
+	public CircleStyle current() {
+		return (CircleStyle) (mCurrent == null ? this : mCurrent);
+	}
 }
