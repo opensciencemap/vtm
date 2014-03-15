@@ -17,6 +17,7 @@
  */
 package org.oscim.theme.styles;
 
+import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.theme.IRenderTheme.Callback;
 
@@ -25,7 +26,59 @@ import org.oscim.theme.IRenderTheme.Callback;
  */
 public final class Line extends RenderStyle {
 
-	private final int level;
+	public final static class LineBuilder {
+		public int level;
+
+		public String style;
+		public float width;
+		public int color;
+		public Cap cap;
+		public boolean outline;
+		public boolean fixed;
+		public int fade;
+		public float blur;
+
+		public int stipple;
+		public int stippleColor;
+		public float stippleWidth;
+
+		public LineBuilder set(Line line) {
+			this.level = line.level;
+			this.style = line.style;
+			this.width = line.width;
+			this.color = line.color;
+			this.cap = line.cap;
+			this.outline = line.outline;
+			this.fixed = line.fixed;
+			this.fade = line.fade;
+			this.blur = line.blur;
+			this.stipple = line.stipple;
+			this.stippleColor = line.stippleColor;
+			this.stippleWidth = line.stippleWidth;
+			return this;
+		}
+
+		public LineBuilder setColor(int color) {
+			this.color = color;
+			return this;
+		}
+
+		public LineBuilder setStippleColor(int color) {
+			this.stippleColor = color;
+			return this;
+		}
+
+		public LineBuilder setColor(String color) {
+			this.color = Color.parseColor(color);
+			return this;
+		}
+
+		public Line build() {
+			return new Line(this);
+		}
+	}
+
+	final int level;
 
 	public final String style;
 	public final float width;
@@ -39,6 +92,21 @@ public final class Line extends RenderStyle {
 	public final int stipple;
 	public final int stippleColor;
 	public final float stippleWidth;
+
+	private Line(LineBuilder builer) {
+		this.level = builer.level;
+		this.style = builer.style;
+		this.width = builer.width;
+		this.color = builer.color;
+		this.cap = builer.cap;
+		this.outline = builer.outline;
+		this.fixed = builer.fixed;
+		this.fade = builer.fade;
+		this.blur = builer.blur;
+		this.stipple = builer.stipple;
+		this.stippleColor = builer.stippleColor;
+		this.stippleWidth = builer.stippleWidth;
+	}
 
 	public Line(int level, String style, int color, float width,
 	        Cap cap, boolean fixed,

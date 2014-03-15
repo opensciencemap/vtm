@@ -26,27 +26,74 @@ import org.oscim.theme.IRenderTheme.Callback;
  */
 public final class Area extends RenderStyle {
 
-	public Area(int fill) {
-		this(0, fill);
+	public static class AreaBuilder {
+		public int level;
+		public String style;
+		public Line outline;
+		public int color;
+		public int fade;
+		public int blendColor;
+		public int blend;
+		public TextureItem texture;
+
+		public AreaBuilder set(Area area) {
+			this.level = area.level;
+			this.style = area.style;
+			this.fade = area.fade;
+			this.blendColor = area.blendColor;
+			this.blend = area.blend;
+			this.color = area.color;
+			this.texture = area.texture;
+			this.outline = area.outline;
+			return this;
+		}
+
+		public AreaBuilder setColor(int color) {
+			this.color = color;
+			return this;
+		}
+
+		public AreaBuilder setColor(String color) {
+			this.color = Color.parseColor(color);
+			return this;
+		}
+
+		public AreaBuilder setBlendColor(int color) {
+			this.blendColor = color;
+			return this;
+		}
+
+		public AreaBuilder setBlendColor(String color) {
+			this.blendColor = Color.parseColor(color);
+			return this;
+		}
+
+		public Area build() {
+			return new Area(this);
+		}
 	}
 
-	public Area(int level, int fill) {
+	public Area(int color) {
+		this(0, color);
+	}
+
+	public Area(int level, int color) {
 		this.level = level;
 		this.style = "";
 		this.fade = -1;
 		this.blendColor = 0;
 		this.blend = -1;
-		this.color = fill;
+		this.color = color;
 		this.texture = null;
 		this.outline = null;
 	}
 
-	public Area(String style, int fill, int stroke, float strokeWidth,
-	        int fade, int level, int blend, int blendFill, TextureItem texture) {
+	public Area(String style, int color, int stroke, float strokeWidth,
+	        int fade, int level, int blend, int blendColor, TextureItem texture) {
 
 		this.style = style;
-		this.color = fill;
-		this.blendColor = blendFill;
+		this.color = color;
+		this.blendColor = blendColor;
 		this.blend = blend;
 		this.fade = fade;
 		this.level = level;
@@ -60,6 +107,17 @@ public final class Area extends RenderStyle {
 		this.outline = new Line(level + 1, stroke, strokeWidth);
 	}
 
+	public Area(AreaBuilder areaBuilder) {
+		this.level = areaBuilder.level;
+		this.style = areaBuilder.style;
+		this.fade = areaBuilder.fade;
+		this.blendColor = areaBuilder.blendColor;
+		this.blend = areaBuilder.blend;
+		this.color = areaBuilder.color;
+		this.texture = areaBuilder.texture;
+		this.outline = areaBuilder.outline;
+	}
+
 	@Override
 	public void renderWay(Callback renderCallback) {
 		renderCallback.renderArea(this, level);
@@ -69,11 +127,18 @@ public final class Area extends RenderStyle {
 	}
 
 	private final int level;
-	public String style;
+	public final String style;
 	public final Line outline;
 	public final int color;
 	public final int fade;
 	public final int blendColor;
 	public final int blend;
 	public final TextureItem texture;
+
+	public void update() {
+		super.update();
+
+		if (outline != null)
+			outline.update();
+	}
 }
