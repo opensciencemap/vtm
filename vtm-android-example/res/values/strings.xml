@@ -11,5 +11,9 @@
     <string name="cancel">Cancel</string>
     <string name="error">Error</string>
     <string name="file_invalid">The selected file is invalid.</string>
+    <string name="styler_mode_line">Line</string>
+    <string name="styler_mode_area">Area</string>
+    <string name="styler_mode_outline">Outline</string>
+    <string name="styler_controls_toggle">Controls</string>
 
 </resources>

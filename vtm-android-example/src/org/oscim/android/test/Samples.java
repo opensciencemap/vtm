@@ -45,6 +45,7 @@ public class Samples extends Activity {
 		linearLayout.addView(createButton(MapsforgeMapActivity.class));
 		linearLayout.addView(createButton(PathOverlayActivity.class));
 		linearLayout.addView(createButton(MarkerOverlayActivity.class));
+		linearLayout.addView(createButton(ThemeStylerActivity.class));
 	}
 
 	private Button createButton(final Class<?> clazz) {

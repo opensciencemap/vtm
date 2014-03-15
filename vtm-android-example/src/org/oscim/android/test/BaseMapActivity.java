@@ -38,10 +38,20 @@ public class BaseMapActivity extends MapActivity {
 
 	private TileCache mCache;
 
+	protected final int mContentView;
+
+	public BaseMapActivity(int contentView) {
+		mContentView = contentView;
+	}
+
+	public BaseMapActivity() {
+		this(R.layout.activity_map);
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_map);
+		setContentView(mContentView);
 
 		mMapView = (MapView) findViewById(R.id.mapView);
 		registerMapView(mMapView);

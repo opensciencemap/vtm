@@ -16,7 +16,6 @@
     android:allowBackup="true"
     android:icon="@drawable/ic_launcher"
     android:label="@string/app_name" >
-
     <!-- android:theme="@android:style/Theme.NoTitleBar.Fullscreen" -->
     <activity
       android:name="org.oscim.android.test.Samples"
@@ -31,32 +30,32 @@
     
     <activity
       android:name="org.oscim.android.test.SimpleMapActivity"
-      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
       android:label="@string/title_activity_map" >
     </activity>
     
      <activity
       android:name="org.oscim.android.test.PathOverlayActivity"
-      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
       android:label="@string/title_activity_map" >
     </activity>
   
        
      <activity
       android:name="org.oscim.android.test.MarkerOverlayActivity"
-      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
       android:label="@string/title_activity_map" >
     </activity>
     
     <activity
       android:name="org.oscim.android.test.BitmapTileMapActivity"
-      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
       android:label="@string/title_activity_map" >
     </activity>
     
     <activity
       android:name="org.oscim.android.test.MapsforgeMapActivity"
-      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+      android:label="@string/title_activity_map" >
+    </activity>
+    
+     <activity
+      android:name="org.oscim.android.test.ThemeStylerActivity"
       android:label="@string/title_activity_map" >
     </activity>
   </application>
