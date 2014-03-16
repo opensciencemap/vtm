@@ -43,14 +43,19 @@ public class GwtGLAdapter extends GwtGL20 implements GL20 {
 
 	@Override
 	public void glTexImage2D(int target, int level, int internalformat, int width, int height,
-	        int border, int format, int type,
-	        Buffer pixels) {
+	        int border, int format, int type, Buffer pixels) {
+
+		if (pixels == null) {
+			gl.texImage2D(target, level, internalformat,
+			              width, height, border, format,
+			              type, null);
+			return;
+		}
+
 		Pixmap pixmap = Pixmap.pixmaps.get(((IntBuffer) pixels).get(0));
 		if (pixmap != null) {
-			// Gdx.app.log("GwtGL20", "load texture "+ target + " "+ width + " " + height + " " + type + " " + format);
 			gl.texImage2D(target, level, internalformat, format, type, pixmap.getCanvasElement());
 		} else if (format == GL20.GL_ALPHA) {
-			// Gdx.app.log("GwtGL20", "load byte texture " + width + " " + height + " " + type + " " + format);
 			int tmp[] = new int[(width * height) >> 2];
 			((IntBuffer) pixels).get(tmp);
 
