@@ -64,7 +64,8 @@ public final class BufferObject extends Inlist<BufferObject> {
 		} else {
 			mBufferMemoryUsage += newSize - size;
 			size = newSize;
-			GL.glBufferData(target, size, buf, GL20.GL_DYNAMIC_DRAW);
+			//GL.glBufferData(target, size, buf, GL20.GL_DYNAMIC_DRAW);
+			GL.glBufferData(target, size, buf, GL20.GL_STATIC_DRAW);
 		}
 	}
 
