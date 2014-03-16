@@ -55,12 +55,15 @@ public class MapRenderer {
 	public static long frametime;
 	private static boolean rerender;
 
-	// Do not use the same buffer to upload data within a frame twice
-	// - Contrary to what the OpenGL doc says data seems *not* to be
-	// *always* copied after glBufferData returns...
-	// - Somehow it does always copy when using Android GL bindings
-	// but not when using libgdx bindings (LWJGL or AndroidGL20)
-
+	/**
+	 * Pool to retrieve temporary native buffer on GL-Thread:
+	 * This pool ensures to not use the same buffer to upload data twice
+	 * within a frame.
+	 * - Contrary to what the OpenGL doc says data seems *not* to be
+	 * always* copied after glBufferData returns...
+	 * - Somehow it does always copy when using Android GL bindings
+	 * but not when using libgdx bindings (LWJGL or AndroidGL20)
+	 */
 	static class BufferPool extends Pool<BufferItem> {
 		private BufferItem mUsedBuffers;
 
