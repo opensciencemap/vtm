@@ -28,9 +28,9 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 	public final static int TEXLINE = 1;
 	public final static int POLYGON = 2;
 	public final static int MESH = 3;
-	public final static int SYMBOL = 4;
-	public final static int BITMAP = 5;
-	public final static int EXTRUSION = 6;
+	public final static int EXTRUSION = 4;
+	public final static int SYMBOL = 5;
+	public final static int BITMAP = 6;
 
 	public final int type;
 
@@ -60,12 +60,12 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 	}
 
 	public int getOffset() {
-	    return offset;
-    }
+		return offset;
+	}
 
 	public void setOffset(int offset) {
-	    this.offset = offset;
-    }
+		this.offset = offset;
+	}
 
 	/**
 	 * For line- and polygon-layers this is the offset
@@ -73,4 +73,8 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 	 * For all other types it is the byte offset in vbo.
 	 */
 	protected int offset;
+
+	protected void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
+
+	}
 }

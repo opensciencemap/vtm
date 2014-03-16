@@ -19,8 +19,6 @@ package org.oscim.renderer.elements;
 import java.nio.ShortBuffer;
 import java.util.HashMap;
 
-import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.GeometryBuffer.GeometryType;
@@ -53,6 +51,7 @@ public class ExtrusionLayer extends RenderElement {
 	public int numIndices[] = { 0, 0, 0, 0, 0 };
 	//public int sumIndices = 0;
 	public int sumVertices = 0;
+	public int sumIndices = 0;
 
 	public BufferObject vboIndices;
 	public BufferObject vboVertices;
@@ -60,6 +59,8 @@ public class ExtrusionLayer extends RenderElement {
 	//private final static int IND_EVEN_SIDE = 0;
 	//private final static int IND_ODD_SIDE = 1;
 	private final static int IND_ROOF = 2;
+
+	// FIXME flip OUTLINE / MESH!
 	private final static int IND_OUTLINE = 3;
 	private final static int IND_MESH = 4;
 
@@ -68,8 +69,18 @@ public class ExtrusionLayer extends RenderElement {
 	public boolean compiled = false;
 	private final float mGroundResolution;
 
-	boolean filled;
+	private HashMap<Vertex, Integer> mVertexMap = new HashMap<Vertex, Integer>();
+	private Vertex mTmpVertex = new Vertex();
 
+	public int indexOffset;
+
+	//private int numIndexHits = 0;
+
+	//boolean filled;
+
+	/**
+	 * ExtrusionLayer for polygon geometries.
+	 */
 	public ExtrusionLayer(int level, float groundResolution, float[] colors) {
 		super(RenderElement.EXTRUSION);
 		this.level = level;
@@ -88,7 +99,7 @@ public class ExtrusionLayer extends RenderElement {
 	}
 
 	/**
-	 * ExtrusionLayer for Mesh elements only.
+	 * ExtrusionLayer for triangle geometries.
 	 */
 	public ExtrusionLayer(int level, float groundResolution, int color) {
 		super(RenderElement.EXTRUSION);
@@ -145,10 +156,6 @@ public class ExtrusionLayer extends RenderElement {
 			this.n = v.n;
 		}
 	}
-
-	private HashMap<Vertex, Integer> mVertexMap = new HashMap<Vertex, Integer>();
-	private Vertex mTmpVertex = new Vertex();
-	private int numIndexHits = 0;
 
 	public void add(MapElement element) {
 		if (element.type != GeometryType.TRIS)
@@ -221,7 +228,7 @@ public class ExtrusionLayer extends RenderElement {
 				addIndex(vertexCnt);
 				mVertexMap.put(new Vertex(key), vertexCnt++);
 			} else {
-				numIndexHits++;
+				//numIndexHits++;
 				addIndex(vertexId.intValue());
 			}
 
@@ -236,7 +243,7 @@ public class ExtrusionLayer extends RenderElement {
 				addIndex(vertexCnt);
 				mVertexMap.put(new Vertex(key), vertexCnt++);
 			} else {
-				numIndexHits++;
+				//numIndexHits++;
 				addIndex(vertexId.intValue());
 			}
 
@@ -251,7 +258,7 @@ public class ExtrusionLayer extends RenderElement {
 				addIndex(vertexCnt);
 				mVertexMap.put(new Vertex(key), vertexCnt++);
 			} else {
-				numIndexHits++;
+				//numIndexHits++;
 				addIndex(vertexId.intValue());
 			}
 		}
@@ -264,8 +271,9 @@ public class ExtrusionLayer extends RenderElement {
 
 		if (vi.used == VertexItem.SIZE) {
 			mCurVertices.used = VertexItem.SIZE;
-			mCurVertices.next = VertexItem.pool.get();
-			mCurVertices = mCurVertices.next;
+			mCurVertices = VertexItem.pool.getNext(vi);
+			//mCurVertices.next = VertexItem.pool.get();
+			//mCurVertices = mCurVertices.next;
 			vi = mCurVertices;
 		}
 
@@ -280,12 +288,16 @@ public class ExtrusionLayer extends RenderElement {
 
 		if (vi.used == VertexItem.SIZE) {
 			mCurIndices[IND_MESH].used = VertexItem.SIZE;
-			mCurIndices[IND_MESH].next = VertexItem.pool.get();
-			mCurIndices[IND_MESH] = mCurIndices[IND_MESH].next;
+			mCurIndices[IND_MESH] = VertexItem.pool.getNext(vi);
 			vi = mCurIndices[IND_MESH];
+
+			//mCurIndices[IND_MESH].next = VertexItem.pool.get();
+			//mCurIndices[IND_MESH] = mCurIndices[IND_MESH].next;
+			//vi = mCurIndices[IND_MESH];
 			//indices = mCurIndices[IND_MESH].vertices;
 			//i = 0;
 		}
+		sumIndices++;
 		vi.vertices[vi.used++] = (short) id;
 	}
 
@@ -436,9 +448,11 @@ public class ExtrusionLayer extends RenderElement {
 				indices = mCurIndices[IND_ROOF].vertices;
 				i = 0;
 			}
+
 			indices[i++] = first;
 			indices[i++] = (short) (first + k + 2);
 			indices[i++] = (short) (first + k + 4);
+			sumIndices += 3;
 		}
 		mCurIndices[IND_ROOF].used = i;
 	}
@@ -456,8 +470,8 @@ public class ExtrusionLayer extends RenderElement {
 			rings++;
 		}
 
-		Tessellator.tessellate(points, ppos, len, index, ipos, rings,
-		                       startVertex + 1, mCurIndices[IND_ROOF]);
+		sumIndices += Tessellator.tessellate(points, ppos, len, index, ipos, rings,
+		                                     startVertex + 1, mCurIndices[IND_ROOF]);
 
 		mCurIndices[IND_ROOF] = Inlist.last(mCurIndices[IND_ROOF]);
 	}
@@ -617,6 +631,7 @@ public class ExtrusionLayer extends RenderElement {
 			indices[ind + 3] = s1;
 			indices[ind + 4] = s2;
 			indices[ind + 5] = s3;
+			sumIndices += 6;
 
 			mCurIndices[even].used += 6;
 			even = (even == 0 ? 1 : 0);
@@ -636,44 +651,52 @@ public class ExtrusionLayer extends RenderElement {
 		return convex;
 	}
 
-	@Override
-	public void compile(ShortBuffer sbuf) {
+	public void complete() {
 		mVertexMap.clear();
+	}
+
+	@Override
+	public void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
+		mVertexMap.clear();
+
 		if (sumVertices == 0 || compiled)
 			return;
 
-		int sumIndices = 0;
+		indexOffset = indexBuffer.position();
+
+		//int sumIndices = 0;
 		for (int i = 0; i <= IND_MESH; i++) {
 			for (VertexItem vi = mIndices[i]; vi != null; vi = vi.next) {
-				sbuf.put(vi.vertices, 0, vi.used);
+				indexBuffer.put(vi.vertices, 0, vi.used);
 				numIndices[i] += vi.used;
 			}
-			sumIndices += numIndices[i];
+			//sumIndices += numIndices[i];
 		}
 
 		//log.debug("INDEX HITS " + numIndexHits + " / " + sumVertices + " / " + sumIndices);
 
-		int size = sumIndices * 2;
-		vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
-		vboIndices.loadBufferData(sbuf.flip(), size);
-
-		GL20 GL = GLAdapter.get();
-		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		//int size = sumIndices * 2;
+		//vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
+		//vboIndices.loadBufferData(vertexBuffer.flip(), size);
+		//
+		//GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		// upload vertices
-		sbuf.clear();
+		//vertexBuffer.clear();
+
+		offset = vertexBuffer.position() * 2;
+
 		for (VertexItem vi = mVertices; vi != null; vi = vi.next)
-			sbuf.put(vi.vertices, 0, vi.used);
+			vertexBuffer.put(vi.vertices, 0, vi.used);
 
-		size = sumVertices * 4 * 2;
-		vboVertices = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
-		vboVertices.loadBufferData(sbuf.flip(), size);
-
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+		//		size = sumVertices * 4 * 2;
+		//		vboVertices = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
+		//		vboVertices.loadBufferData(vertexBuffer.flip(), size);
+		//
+		//		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
 		clear();
 		compiled = true;
-
 		mClipper = null;
 	}
 

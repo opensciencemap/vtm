@@ -269,16 +269,18 @@ public class ElementLayers extends TileData {
 		return layer;
 	}
 
-	private final static int[] VERTEX_SHORT_CNT = {
-	        4, // LINE_VERTEX_SHORTS
-	        6, // TEXLINE_VERTEX_SHORTS
-	        2, // POLY_VERTEX_SHORTS
-	        2, // MESH_VERTEX_SHORTS
+	public final static int[] VERTEX_SHORT_CNT = {
+	        4, // LINE_VERTEX
+	        6, // TEXLINE_VERTEX
+	        2, // POLY_VERTEX
+	        2, // MESH_VERTEX
+	        4, // EXTRUSION_VERTEX
 	};
 
 	private final static int TEXTURE_VERTEX_SHORTS = 6;
 	private final static int SHORT_BYTES = 2;
 
+	// TODO move to specific layer implementation
 	public int getSize() {
 		int size = 0;
 
