@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Hannes Janetzek
+ * Copyright 2012-2014 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * (and limitations) probably wont make sense in different contexts.
  */
 public class ElementLayers extends TileData {
+
 	static final Logger log = LoggerFactory.getLogger(ElementLayers.class);
 
 	public static void initRenderer(GL20 gl) {
@@ -58,6 +59,10 @@ public class ElementLayers extends TileData {
 	/** Text- and SymbolLayer */
 	private RenderElement textureLayers;
 
+	/**
+	 * FIXME this is somewhat out-of-place, as it is not
+	 * compiled with the other layers
+	 */
 	private RenderElement extrusionLayers;
 
 	/**

@@ -47,6 +47,7 @@ public class TestTileLayer extends TileLayer {
 	}
 
 	static class TestTileLoader extends TileLoader {
+
 		public TestTileLoader(TileLayer tileLayer) {
 			super(tileLayer.getManager());
 		}

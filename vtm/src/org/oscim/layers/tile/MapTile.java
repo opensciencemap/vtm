@@ -17,12 +17,12 @@
 package org.oscim.layers.tile;
 
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.vector.VectorTileLoader;
+import org.oscim.layers.tile.vector.labeling.LabelTileLoaderHook;
 import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.SymbolItem;
-import org.oscim.renderer.elements.TextItem;
 import org.oscim.utils.pool.Inlist;
-import org.oscim.utils.pool.Inlist.List;
 import org.oscim.utils.quadtree.Node;
+import org.oscim.utils.quadtree.QuadTree;
 
 /**
  * Extends Tile class to hold state and data for concurrent use in
@@ -65,6 +65,8 @@ public class MapTile extends Tile {
 	}
 
 	public static abstract class TileData extends Inlist<TileData> {
+		Object id;
+
 		protected abstract void dispose();
 	}
 
@@ -86,6 +88,13 @@ public class MapTile extends Tile {
 	}
 
 	/**
+	 * List of TileData for rendering. ElementLayers is always at first
+	 * position (for VectorTileLayer). TileLoaderHooks may add additional
+	 * data. See e.g. {@link LabelTileLoaderHook}.
+	 */
+	public TileData data;
+
+	/**
 	 * absolute tile coordinates: tileX,Y / Math.pow(2, zoomLevel)
 	 */
 	public final double x;
@@ -104,8 +113,6 @@ public class MapTile extends Tile {
 	public final List<SymbolItem> symbols = new List<SymbolItem>();
 	public final List<TextItem> labels = new List<TextItem>();
 
-	public TileData data;
-
 	/**
 	 * Tile is in view region. Set by TileRenderer.
 	 */
@@ -121,6 +128,7 @@ public class MapTile extends Tile {
 	 * to avoid drawing a tile twice per frame
 	 */
 	int lastDraw = 0;
+
 
 	public final static int PROXY_CHILD1 = 1 << 0;
 	public final static int PROXY_CHILD2 = 1 << 1;
@@ -236,10 +244,32 @@ public class MapTile extends Tile {
 		state = State.NONE;
 	}
 
+	/**
+	 * Get the default ElementLayers which are added
+	 * by {@link VectorTileLoader}
+	 */
 	public ElementLayers getLayers() {
 		if (!(data instanceof ElementLayers))
 			return null;
 
 		return (ElementLayers) data;
+	}
+
+	public TileData getData(Object id) {
+		for (TileData d = data; d != null; d = d.next)
+			if (d.id == id)
+				return d;
+		return null;
+	}
+
+	public void addData(Object id, TileData td) {
+		// keeping ElementLayers at position 0!
+		td.id = id;
+		if (data != null) {
+			td.next = data.next;
+			data.next = td;
+		} else {
+			data = td;
+		}
 	}
 }
