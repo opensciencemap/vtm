@@ -63,7 +63,8 @@ public class BitmapTileLoader extends TileLoader {
 			throw new CancellationException();
 
 		BitmapLayer l = new BitmapLayer(false);
-		l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE);
+		l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE, BitmapTileLayer.pool);
+
 		ElementLayers layers = new ElementLayers();
 		layers.setTextureLayers(l);
 		mTile.data = layers;

@@ -24,6 +24,7 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
+import org.oscim.renderer.elements.TextureItem.TexturePool;
 
 /**
  * Renderer for a single bitmap, width and height must be power of 2.
@@ -54,13 +55,25 @@ public class BitmapLayer extends TextureLayer {
 	/**
 	 * w/h sets also target dimension to render the bitmap.
 	 */
+
 	public void setBitmap(Bitmap bitmap, int w, int h) {
+		setBitmap(bitmap, w, h, null);
+	}
+
+	public void setBitmap(Bitmap bitmap, int w, int h, TexturePool pool) {
+
 		mWidth = w;
 		mHeight = h;
 
 		mBitmap = bitmap;
-		if (textures == null)
-			textures = new TextureItem(mBitmap);
+		if (textures == null) {
+			if (pool == null)
+				textures = new TextureItem(mBitmap);
+			else {
+				textures = pool.get();
+				textures.bitmap = mBitmap;
+			}
+		}
 
 		TextureItem t = textures;
 		t.vertices = TextureLayer.INDICES_PER_SPRITE;

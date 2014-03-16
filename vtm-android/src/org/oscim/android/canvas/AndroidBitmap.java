@@ -25,12 +25,13 @@ import android.opengl.GLUtils;
 
 public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 	final Bitmap mBitmap;
+
 	public AndroidBitmap(InputStream inputStream) {
 		mBitmap = BitmapFactory.decodeStream(inputStream);
 	}
 
 	@Override
-	public boolean isValid(){
+	public boolean isValid() {
 		return mBitmap != null;
 	}
 
@@ -86,6 +87,9 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 
 	@Override
 	public void recycle() {
+		if (mBitmap == null)
+			return;
+
 		mBitmap.recycle();
 	}
 }

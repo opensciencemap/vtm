@@ -23,6 +23,7 @@ import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
+import org.oscim.renderer.elements.TextureItem.TexturePool;
 import org.oscim.tiling.TileSource;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
@@ -102,4 +103,40 @@ public class BitmapTileLayer extends TileLayer {
 	protected TileLoader createLoader() {
 		return new BitmapTileLoader(this, mTileSource);
 	}
+
+	final static int TEXTURE_HEIGHT = 256;
+	final static int TEXTURE_WIDTH = 256;
+	final static int POOL_FILL = 40;
+
+	/** pool shared by TextLayers */
+	final static TexturePool pool = new TexturePool(POOL_FILL,
+	                                                TEXTURE_WIDTH,
+	                                                TEXTURE_HEIGHT) {
+
+		//		int sum = 0;
+		//
+		//		public TextureItem release(TextureItem item) {
+		//			log.debug(getFill() + " " + sum + " release tex " + item.id);
+		//			return super.release(item);
+		//		};
+		//
+		//		public synchronized TextureItem get() {
+		//			log.debug(getFill() + " " + sum + " get tex ");
+		//
+		//			return super.get();
+		//		};
+		//
+		//		protected TextureItem createItem() {
+		//			log.debug(getFill() + " " + (sum++) + " create tex ");
+		//
+		//			return super.createItem();
+		//		};
+		//
+		//		protected void freeItem(TextureItem t) {
+		//			log.debug(getFill() + " " + (sum--) + " free tex ");
+		//			super.freeItem(t);
+		//
+		//		};
+	};
+
 }
