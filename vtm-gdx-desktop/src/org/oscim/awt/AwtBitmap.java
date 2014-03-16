@@ -76,8 +76,8 @@ public class AwtBitmap implements Bitmap {
 	public void eraseColor(int transparent) {
 	}
 
-	private static IntBuffer tmpBuffer = BufferUtils.newIntBuffer(512 * 256);
-	private static int[] tmpPixel = new int[512 * 256];
+	private final static IntBuffer tmpBuffer = BufferUtils.newIntBuffer(512 * 256);
+	private final static int[] tmpPixel = new int[512 * 256];
 
 	private final static boolean WRITE_TEX = false;
 	private int dbgCnt;
@@ -112,16 +112,12 @@ public class AwtBitmap implements Bitmap {
 
 		for (int i = 0, n = width * height; i < n; i++) {
 			int c = pixels[i];
-			//if (internal) {
+
 			float alpha = (c >>> 24) / 255f;
 			int r = (int) ((c & 0x000000ff) * alpha);
 			int b = (int) (((c & 0x00ff0000) >>> 16) * alpha);
 			int g = (int) (((c & 0x0000ff00) >>> 8) * alpha);
 			pixels[i] = (c & 0xff000000) | r << 16 | g << 8 | b;
-			//} else {
-			// flip blue with red - silly Java
-			//	pixels[i] = (c & 0xff00ff00) | (c & 0x00ff0000) >>> 16 | (c & 0x000000ff) << 16;
-			//}
 		}
 
 		buffer.put(pixels, 0, width * height);
