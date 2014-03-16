@@ -25,10 +25,10 @@ import org.oscim.utils.quadtree.Node;
 import org.oscim.utils.quadtree.QuadTree;
 
 /**
- * Extends Tile class to hold state and data for concurrent use in
- * TileManager (Main Thread),
- * TileLoader (Worker Thread) and
- * TileRenderer (GL Thread).
+ * Extends Tile class to hold state and data.
+ * 
+ * Used concurrently in: TileManager (Main Thread), TileLoader (Worker Thread)
+ * and TileRenderer (GL Thread).
  */
 public class MapTile extends Tile {
 
@@ -117,18 +117,22 @@ public class MapTile extends Tile {
 	 * Tile is in view region. Set by TileRenderer.
 	 */
 	public boolean isVisible;
+
+	/**
+	 * Used for fade-effects
+	 */
 	public long fadeTime;
 
 	/**
-	 * Pointer to access relatives in QuadTree
-	 */
-	public final TileNode node;
-
-	/**
-	 * to avoid drawing a tile twice per frame
+	 * Used to avoid drawing a tile twice per frame
+	 * TODO remove
 	 */
 	int lastDraw = 0;
 
+	/**
+	 * Pointer to access relatives in {@link QuadTree}
+	 */
+	public final TileNode node;
 
 	public final static int PROXY_CHILD1 = 1 << 0;
 	public final static int PROXY_CHILD2 = 1 << 1;
@@ -221,15 +225,16 @@ public class MapTile extends Tile {
 	}
 
 	/**
-	 * Test whether it is save to access a proxy item through
-	 * this.rel.*
+	 * Test whether it is save to access a proxy item
+	 * through this.node.*
 	 */
 	public boolean hasProxy(int proxy) {
 		return (proxies & proxy) != 0;
 	}
 
 	/**
-	 * CAUTION: This function may only be called by {@link TileManager}
+	 * CAUTION: This function may only be called
+	 * by {@link TileManager}
 	 */
 	protected void clear() {
 		while (data != null) {
