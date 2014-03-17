@@ -265,6 +265,10 @@ public class XmlThemeBuilder extends DefaultHandler {
 				ExtrusionStyle extrusion = createExtrusion(localName, attributes, mLevels++);
 				mCurrentRule.addStyle(extrusion);
 
+			} else if ("lineSymbol".equals(localName)) {
+				checkState(localName, Element.RENDERING_INSTRUCTION);
+				log.error("unknown element: {}", localName);
+
 			} else if ("atlas".equals(localName)) {
 				checkState(localName, Element.ATLAS);
 				createAtlas(localName, attributes);
@@ -274,7 +278,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 				createTextureRegion(localName, attributes);
 
 			} else {
-				log.debug("unknown element: " + localName);
+				log.error("unknown element: {}", localName);
 				//throw new SAXException("unknown element: " + localName);
 			}
 		} catch (ThemeException e) {
