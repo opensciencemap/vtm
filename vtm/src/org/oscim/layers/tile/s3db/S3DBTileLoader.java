@@ -1,7 +1,5 @@
 package org.oscim.layers.tile.s3db;
 
-import java.util.concurrent.CancellationException;
-
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -56,9 +54,6 @@ class S3DBTileLoader extends TileLoader {
 		try {
 			/* query database, which calls process() callback */
 			mTileDataSource.query(mTile, this);
-		} catch (CancellationException e) {
-			log.debug("{}", e);
-			return false;
 		} catch (Exception e) {
 			log.debug("{}", e);
 			return false;
