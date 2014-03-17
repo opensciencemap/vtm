@@ -23,7 +23,6 @@ import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.CircleStyle;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.LineStyle;
-import org.oscim.theme.styles.LineSymbol;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.TextStyle;
@@ -135,14 +134,6 @@ public interface IRenderTheme {
 		 * @param level
 		 */
 		void renderWay(LineStyle line, int level);
-
-		/**
-		 * Renders a way with the given symbol along the way path.
-		 * 
-		 * @param symbol
-		 *            the symbol to be rendered.
-		 */
-		void renderWaySymbol(LineSymbol symbol);
 
 		/**
 		 * Renders a way with the given text along the way path.

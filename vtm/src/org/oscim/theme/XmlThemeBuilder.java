@@ -47,7 +47,6 @@ import org.oscim.theme.styles.CircleStyle;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.LineStyle.LineBuilder;
-import org.oscim.theme.styles.LineSymbol;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.TextStyle;
@@ -237,11 +236,6 @@ public class XmlThemeBuilder extends DefaultHandler {
 			} else if ("line".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				handleLineElement(localName, attributes, false);
-
-			} else if ("lineSymbol".equals(localName)) {
-				checkState(localName, Element.RENDERING_INSTRUCTION);
-				LineSymbol lineSymbol = createLineSymbol(localName, attributes);
-				mCurrentRule.addStyle(lineSymbol);
 
 			} else if ("text".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -437,7 +431,8 @@ public class XmlThemeBuilder extends DefaultHandler {
 	/**
 	 * @return a new Area with the given rendering attributes.
 	 */
-	private AreaStyle createArea(AreaStyle area, String elementName, Attributes attributes, int level) {
+	private AreaStyle createArea(AreaStyle area, String elementName, Attributes attributes,
+	        int level) {
 		AreaBuilder b = mAreaBuilder.set(area);
 		b.level(level);
 
@@ -741,35 +736,6 @@ public class XmlThemeBuilder extends DefaultHandler {
 		validateNonNegative("stroke-width", strokeWidth);
 
 		return new CircleStyle(radius, scaleRadius, fill, stroke, strokeWidth, level);
-	}
-
-	/**
-	 * @return a new LineSymbol with the given rendering attributes.
-	 */
-	private static LineSymbol createLineSymbol(String elementName, Attributes attributes) {
-		String src = null;
-		boolean alignCenter = false;
-		boolean repeat = false;
-
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-
-			if ("src".equals(name))
-				src = value;
-
-			else if ("align-center".equals(name))
-				alignCenter = Boolean.parseBoolean(value);
-
-			else if ("repeat".equals(name))
-				repeat = Boolean.parseBoolean(value);
-
-			else
-				logUnknownAttribute(elementName, name, value, i);
-		}
-
-		validateExists("src", src, elementName);
-		return new LineSymbol(src, alignCenter, repeat);
 	}
 
 	/**

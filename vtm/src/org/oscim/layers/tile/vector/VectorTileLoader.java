@@ -44,7 +44,6 @@ import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.CircleStyle;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.LineStyle;
-import org.oscim.theme.styles.LineSymbol;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.TextStyle;
@@ -381,11 +380,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void renderAreaSymbol(SymbolStyle symbol) {
-	}
-
-	@Override
-	public void renderWaySymbol(LineSymbol symbol) {
-
 	}
 
 	@Override
