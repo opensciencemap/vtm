@@ -41,17 +41,17 @@ import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule;
 import org.oscim.theme.rule.RuleBuilder;
-import org.oscim.theme.styles.Area;
-import org.oscim.theme.styles.Area.AreaBuilder;
-import org.oscim.theme.styles.Circle;
-import org.oscim.theme.styles.Extrusion;
-import org.oscim.theme.styles.Line;
-import org.oscim.theme.styles.Line.LineBuilder;
+import org.oscim.theme.styles.AreaStyle;
+import org.oscim.theme.styles.AreaStyle.AreaBuilder;
+import org.oscim.theme.styles.CircleStyle;
+import org.oscim.theme.styles.ExtrusionStyle;
+import org.oscim.theme.styles.LineStyle;
+import org.oscim.theme.styles.LineStyle.LineBuilder;
 import org.oscim.theme.styles.LineSymbol;
 import org.oscim.theme.styles.RenderStyle;
-import org.oscim.theme.styles.Symbol;
-import org.oscim.theme.styles.Text;
-import org.oscim.theme.styles.Text.TextBuilder;
+import org.oscim.theme.styles.SymbolStyle;
+import org.oscim.theme.styles.TextStyle;
+import org.oscim.theme.styles.TextStyle.TextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -205,7 +205,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 			} else if ("style-text".equals(localName)) {
 				checkState(localName, Element.STYLE);
-				Text text = createText(localName, attributes, false);
+				TextStyle text = createText(localName, attributes, false);
 				mStyles.put(TEXT_STYLE + text.style, text);
 
 			} else if ("style-area".equals(localName)) {
@@ -218,7 +218,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 			} else if ("outline-layer".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Line line = createLine(null, localName, attributes, mLevels++, true);
+				LineStyle line = createLine(null, localName, attributes, mLevels++, true);
 				mStyles.put(OUTLINE_STYLE + line.style, line);
 
 			} else if ("area".equals(localName)) {
@@ -227,11 +227,11 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 			} else if ("caption".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Text text = createText(localName, attributes, true);
+				TextStyle text = createText(localName, attributes, true);
 				mCurrentRule.addStyle(text);
 			} else if ("circle".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Circle circle = createCircle(localName, attributes, mLevels++);
+				CircleStyle circle = createCircle(localName, attributes, mLevels++);
 				mCurrentRule.addStyle(circle);
 
 			} else if ("line".equals(localName)) {
@@ -247,10 +247,10 @@ public class XmlThemeBuilder extends DefaultHandler {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				String style = attributes.getValue("use");
 				if (style == null) {
-					Text text = createText(localName, attributes, false);
+					TextStyle text = createText(localName, attributes, false);
 					mCurrentRule.addStyle(text);
 				} else {
-					Text pt = (Text) mStyles.get(TEXT_STYLE + style);
+					TextStyle pt = (TextStyle) mStyles.get(TEXT_STYLE + style);
 					if (pt != null)
 						mCurrentRule.addStyle(pt);
 					else
@@ -259,7 +259,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 			} else if ("symbol".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Symbol symbol = createSymbol(localName, attributes);
+				SymbolStyle symbol = createSymbol(localName, attributes);
 				mCurrentRule.addStyle(symbol);
 
 			} else if ("outline".equals(localName)) {
@@ -268,7 +268,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 			} else if ("extrusion".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Extrusion extrusion = createExtrusion(localName, attributes, mLevels++);
+				ExtrusionStyle extrusion = createExtrusion(localName, attributes, mLevels++);
 				mCurrentRule.addStyle(extrusion);
 
 			} else if ("atlas".equals(localName)) {
@@ -306,17 +306,17 @@ public class XmlThemeBuilder extends DefaultHandler {
 	        throws SAXException {
 
 		String use = attributes.getValue("use");
-		Line style = null;
+		LineStyle style = null;
 
 		if (use != null) {
-			style = (Line) mStyles.get(LINE_STYLE + use);
+			style = (LineStyle) mStyles.get(LINE_STYLE + use);
 			if (style == null) {
 				log.debug("missing line style 'use': " + use);
 				return;
 			}
 		}
 
-		Line line = createLine(style, localName, attributes, mLevels++, false);
+		LineStyle line = createLine(style, localName, attributes, mLevels++, false);
 
 		if (isStyle) {
 			mStyles.put(LINE_STYLE + line.style, line);
@@ -337,7 +337,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 	 *            is outline layer
 	 * @return a new Line with the given rendering attributes.
 	 */
-	private Line createLine(Line line, String elementName, Attributes attributes,
+	private LineStyle createLine(LineStyle line, String elementName, Attributes attributes,
 	        int level, boolean isOutline) {
 		LineBuilder b = mLineBuilder.set(line);
 		b.isOutline(isOutline);
@@ -414,17 +414,17 @@ public class XmlThemeBuilder extends DefaultHandler {
 	        throws SAXException {
 
 		String use = attributes.getValue("use");
-		Area style = null;
+		AreaStyle style = null;
 
 		if (use != null) {
-			style = (Area) mStyles.get(AREA_STYLE + use);
+			style = (AreaStyle) mStyles.get(AREA_STYLE + use);
 			if (style == null) {
 				log.debug("missing area style 'use': " + use);
 				return;
 			}
 		}
 
-		Area area = createArea(style, localName, attributes, mLevels);
+		AreaStyle area = createArea(style, localName, attributes, mLevels);
 		mLevels += 2;
 
 		if (isStyle) {
@@ -437,7 +437,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 	/**
 	 * @return a new Area with the given rendering attributes.
 	 */
-	private Area createArea(Area area, String elementName, Attributes attributes, int level) {
+	private AreaStyle createArea(AreaStyle area, String elementName, Attributes attributes, int level) {
 		AreaBuilder b = mAreaBuilder.set(area);
 		b.level(level);
 
@@ -494,7 +494,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 	private void addOutline(String style) {
 		if (style != null) {
-			Line line = (Line) mStyles.get(OUTLINE_STYLE + style);
+			LineStyle line = (LineStyle) mStyles.get(OUTLINE_STYLE + style);
 			if (line != null && line.outline)
 				mCurrentRule.addStyle(line);
 			else
@@ -644,7 +644,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 	 *            ...
 	 * @return a new Text with the given rendering attributes.
 	 */
-	private Text createText(String elementName, Attributes attributes, boolean caption) {
+	private TextStyle createText(String elementName, Attributes attributes, boolean caption) {
 		TextBuilder b = mTextBuilder.reset();
 
 		b.caption = caption;
@@ -706,7 +706,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 	 *            the drawing level of this instruction.
 	 * @return a new Circle with the given rendering attributes.
 	 */
-	private static Circle createCircle(String elementName, Attributes attributes, int level) {
+	private static CircleStyle createCircle(String elementName, Attributes attributes, int level) {
 		Float radius = null;
 		boolean scaleRadius = false;
 		int fill = Color.TRANSPARENT;
@@ -740,7 +740,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 		validateNonNegative("radius", radius);
 		validateNonNegative("stroke-width", strokeWidth);
 
-		return new Circle(radius, scaleRadius, fill, stroke, strokeWidth, level);
+		return new CircleStyle(radius, scaleRadius, fill, stroke, strokeWidth, level);
 	}
 
 	/**
@@ -775,7 +775,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 	/**
 	 * @return a new Symbol with the given rendering attributes.
 	 */
-	private Symbol createSymbol(String elementName, Attributes attributes) {
+	private SymbolStyle createSymbol(String elementName, Attributes attributes) {
 		String src = null;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
@@ -790,10 +790,10 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 		validateExists("src", src, elementName);
 
-		return new Symbol(getAtlasRegion(src));
+		return new SymbolStyle(getAtlasRegion(src));
 	}
 
-	private Extrusion createExtrusion(String elementName, Attributes attributes, int level) {
+	private ExtrusionStyle createExtrusion(String elementName, Attributes attributes, int level) {
 		int colorSide = 0;
 		int colorTop = 0;
 		int colorLine = 0;
@@ -819,7 +819,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		return new Extrusion(level, colorSide, colorTop, colorLine, defaultHeight);
+		return new ExtrusionStyle(level, colorSide, colorTop, colorLine, defaultHeight);
 	}
 
 	public static void validateNonNegative(String name, float value) {

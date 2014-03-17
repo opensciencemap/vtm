@@ -3,14 +3,14 @@ package org.oscim.theme;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
-import org.oscim.theme.styles.Area;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.AreaStyle;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.RenderStyle;
 
 public class DebugTheme implements IRenderTheme {
 
-	private final static Line[] line = { new Line(1, Color.MAGENTA, 2) };
-	private final static Area[] area = { new Area(0, Color.CYAN) };
+	private final static LineStyle[] line = { new LineStyle(1, Color.MAGENTA, 2) };
+	private final static AreaStyle[] area = { new AreaStyle(0, Color.CYAN) };
 
 	@Override
 	public RenderStyle[] matchElement(GeometryType type, TagSet tags, int zoomLevel) {

@@ -27,7 +27,7 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.theme.styles.Area;
+import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class MeshLayer extends RenderElement {
 	int numIndices;
 
 	VertexItem indiceItems;
-	public Area area;
+	public AreaStyle area;
 	public float heightOffset;
 
 	public MeshLayer(int level) {

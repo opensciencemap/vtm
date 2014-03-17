@@ -23,7 +23,7 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.theme.IRenderTheme.Callback;
 
-public final class Line extends RenderStyle {
+public final class LineStyle extends RenderStyle {
 
 	final int level;
 	public final String style;
@@ -39,7 +39,7 @@ public final class Line extends RenderStyle {
 	public final int stippleColor;
 	public final float stippleWidth;
 
-	private Line(LineBuilder builer) {
+	private LineStyle(LineBuilder builer) {
 		this.level = builer.level;
 		this.style = builer.style;
 		this.width = builer.width;
@@ -54,7 +54,7 @@ public final class Line extends RenderStyle {
 		this.stippleWidth = builer.stippleWidth;
 	}
 
-	public Line(int level, String style, int color, float width,
+	public LineStyle(int level, String style, int color, float width,
 	        Cap cap, boolean fixed,
 	        int stipple, int stippleColor, float stippleWidth,
 	        int fadeScale, float blur, boolean isOutline) {
@@ -76,15 +76,15 @@ public final class Line extends RenderStyle {
 		this.fadeScale = fadeScale;
 	}
 
-	public Line(int stroke, float width) {
+	public LineStyle(int stroke, float width) {
 		this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false);
 	}
 
-	public Line(int level, int stroke, float width) {
+	public LineStyle(int level, int stroke, float width) {
 		this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false);
 	}
 
-	public Line(int stroke, float width, Cap cap) {
+	public LineStyle(int stroke, float width, Cap cap) {
 		this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false);
 	}
 
@@ -109,7 +109,7 @@ public final class Line extends RenderStyle {
 		public int stippleColor;
 		public float stippleWidth;
 
-		public LineBuilder set(Line line) {
+		public LineBuilder set(LineStyle line) {
 			if (line == null)
 				return reset();
 			this.level = line.level;
@@ -195,8 +195,8 @@ public final class Line extends RenderStyle {
 			return this;
 		}
 
-		public Line build() {
-			return new Line(this);
+		public LineStyle build() {
+			return new LineStyle(this);
 		}
 	}
 }

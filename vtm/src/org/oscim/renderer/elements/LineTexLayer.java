@@ -26,7 +26,7 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +86,7 @@ public final class LineTexLayer extends RenderElement {
 
 	/* lines referenced by this outline layer */
 	public LineLayer outlines;
-	public Line line;
+	public LineStyle line;
 	public float width;
 
 	//public boolean roundCap;
@@ -362,7 +362,7 @@ public final class LineTexLayer extends RenderElement {
 			RenderElement l = curLayer;
 			for (; l != null && l.type == TEXLINE; l = l.next) {
 				LineTexLayer ll = (LineTexLayer) l;
-				Line line = ll.line;
+				LineStyle line = ll.line;
 
 				GLUtils.setColor(hTexColor, line.stippleColor, 1);
 				GLUtils.setColor(hBgColor, line.color, 1);

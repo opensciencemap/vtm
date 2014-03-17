@@ -19,14 +19,14 @@ package org.oscim.theme;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
-import org.oscim.theme.styles.Area;
-import org.oscim.theme.styles.Circle;
-import org.oscim.theme.styles.Extrusion;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.AreaStyle;
+import org.oscim.theme.styles.CircleStyle;
+import org.oscim.theme.styles.ExtrusionStyle;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.LineSymbol;
 import org.oscim.theme.styles.RenderStyle;
-import org.oscim.theme.styles.Symbol;
-import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.SymbolStyle;
+import org.oscim.theme.styles.TextStyle;
 
 public interface IRenderTheme {
 
@@ -76,7 +76,7 @@ public interface IRenderTheme {
 		 * @param area
 		 * @param level
 		 */
-		void renderArea(Area area, int level);
+		void renderArea(AreaStyle area, int level);
 
 		/**
 		 * Renders an extrusion with the given parameters.
@@ -84,7 +84,7 @@ public interface IRenderTheme {
 		 * @param extrusion
 		 * @param level
 		 */
-		void renderExtrusion(Extrusion extrusion, int level);
+		void renderExtrusion(ExtrusionStyle extrusion, int level);
 
 		/**
 		 * Renders an area symbol with the given bitmap.
@@ -92,7 +92,7 @@ public interface IRenderTheme {
 		 * @param symbol
 		 *            the symbol to be rendered.
 		 */
-		void renderAreaSymbol(Symbol symbol);
+		void renderAreaSymbol(SymbolStyle symbol);
 
 		/**
 		 * Renders an area caption with the given text.
@@ -100,7 +100,7 @@ public interface IRenderTheme {
 		 * @param text
 		 *            the text to be rendered.
 		 */
-		void renderAreaText(Text text);
+		void renderAreaText(TextStyle text);
 
 		/**
 		 * Renders a point of interest circle with the given parameters.
@@ -110,7 +110,7 @@ public interface IRenderTheme {
 		 * @param level
 		 *            the drawing level on which the circle should be rendered.
 		 */
-		void renderPointCircle(Circle circle, int level);
+		void renderPointCircle(CircleStyle circle, int level);
 
 		/**
 		 * Renders a point of interest symbol with the given bitmap.
@@ -118,7 +118,7 @@ public interface IRenderTheme {
 		 * @param symbol
 		 *            the symbol to be rendered.
 		 */
-		void renderPointSymbol(Symbol symbol);
+		void renderPointSymbol(SymbolStyle symbol);
 
 		/**
 		 * Renders a point of interest caption with the given text.
@@ -126,7 +126,7 @@ public interface IRenderTheme {
 		 * @param text
 		 *            the text to be rendered.
 		 */
-		void renderPointText(Text text);
+		void renderPointText(TextStyle text);
 
 		/**
 		 * Renders a way with the given parameters.
@@ -134,7 +134,7 @@ public interface IRenderTheme {
 		 * @param line
 		 * @param level
 		 */
-		void renderWay(Line line, int level);
+		void renderWay(LineStyle line, int level);
 
 		/**
 		 * Renders a way with the given symbol along the way path.
@@ -149,7 +149,7 @@ public interface IRenderTheme {
 		 * 
 		 * @param text
 		 */
-		void renderWayText(Text text);
+		void renderWayText(TextStyle text);
 
 	}
 

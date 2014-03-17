@@ -28,7 +28,7 @@ import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.LineStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class TestTileLayer extends TileLayer {
 		}
 
 		GeometryBuffer mGeom = new GeometryBuffer(128, 16);
-		Line mLineStyle = new Line(Color.BLUE, 2f, Cap.ROUND);
+		LineStyle mLineStyle = new LineStyle(Color.BLUE, 2f, Cap.ROUND);
 
 		@Override
 		public boolean loadTile(MapTile tile) {

@@ -29,7 +29,7 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,7 @@ public final class LineLayer extends RenderElement {
 
 	/* lines referenced by this outline layer */
 	public LineLayer outlines;
-	public Line line;
+	public LineStyle line;
 	public float scale = 1;
 
 	public boolean roundCap;
@@ -749,7 +749,7 @@ public final class LineLayer extends RenderElement {
 			RenderElement l = curLayer;
 			for (; l != null && l.type == RenderElement.LINE; l = l.next) {
 				LineLayer ll = (LineLayer) l;
-				Line line = (Line) ll.line.getCurrent();
+				LineStyle line = (LineStyle) ll.line.getCurrent();
 
 				if (ll.heightOffset != heightOffset) {
 					heightOffset = ll.heightOffset;
@@ -820,7 +820,7 @@ public final class LineLayer extends RenderElement {
 				/* draw LineLayers references by this outline */
 
 				for (LineLayer ref = ll.outlines; ref != null; ref = ref.outlines) {
-					Line core = (Line) ref.line.getCurrent();
+					LineStyle core = (LineStyle) ref.line.getCurrent();
 
 					// core width
 					if (core.fixed) {

@@ -22,7 +22,7 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.IRenderTheme.Callback;
 
-public class Area extends RenderStyle {
+public class AreaStyle extends RenderStyle {
 
 	/** Drawing order level */
 	private final int level;
@@ -46,13 +46,13 @@ public class Area extends RenderStyle {
 	public final TextureItem texture;
 
 	/** Outline */
-	public final Line outline;
+	public final LineStyle outline;
 
-	public Area(int color) {
+	public AreaStyle(int color) {
 		this(0, color);
 	}
 
-	public Area(int level, int color) {
+	public AreaStyle(int level, int color) {
 		this.level = level;
 		this.style = "";
 		this.fadeScale = -1;
@@ -63,7 +63,7 @@ public class Area extends RenderStyle {
 		this.outline = null;
 	}
 
-	public Area(AreaBuilder b) {
+	public AreaStyle(AreaBuilder b) {
 		this.level = b.level;
 		this.style = b.style;
 		this.fadeScale = b.fadeScale;
@@ -77,7 +77,7 @@ public class Area extends RenderStyle {
 		        b.outlineWidth == b.outline.width) {
 			this.outline = b.outline;
 		} else if (b.outlineColor != Color.TRANSPARENT) {
-			this.outline = new Line(-1, b.outlineColor, b.outlineWidth);
+			this.outline = new LineStyle(-1, b.outlineColor, b.outlineWidth);
 		} else {
 			this.outline = null;
 		}
@@ -91,8 +91,8 @@ public class Area extends RenderStyle {
 			outline.update();
 	}
 
-	public Area current() {
-		return (Area) (mCurrent == null ? this : mCurrent);
+	public AreaStyle current() {
+		return (AreaStyle) (mCurrent == null ? this : mCurrent);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class Area extends RenderStyle {
 	public static class AreaBuilder {
 		public int level;
 		public String style;
-		public Line outline;
+		public LineStyle outline;
 		public int color;
 		public int fadeScale;
 		public int blendColor;
@@ -117,7 +117,7 @@ public class Area extends RenderStyle {
 
 		public TextureItem texture;
 
-		public AreaBuilder set(Area area) {
+		public AreaBuilder set(AreaStyle area) {
 			if (area == null)
 				return reset();
 
@@ -220,8 +220,8 @@ public class Area extends RenderStyle {
 			return this;
 		}
 
-		public Area build() {
-			return new Area(this);
+		public AreaStyle build() {
+			return new AreaStyle(this);
 		}
 	}
 }

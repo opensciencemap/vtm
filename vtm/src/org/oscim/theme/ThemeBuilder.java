@@ -13,8 +13,8 @@ import org.oscim.theme.rule.RuleBuilder;
 import org.oscim.theme.rule.Selector;
 import org.oscim.theme.rule.SingleKeyMatcher;
 import org.oscim.theme.rule.SingleValueMatcher;
-import org.oscim.theme.styles.Area;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.AreaStyle;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.RenderStyle;
 
 public class ThemeBuilder {
@@ -90,11 +90,11 @@ public class ThemeBuilder {
 
 		b.push(RuleBuilder.get().select(Selector.FIRST))
 		    .push("highway", null)
-		    .addStyle(new Line(1, 1, 1))
+		    .addStyle(new LineStyle(1, 1, 1))
 		    .pop()
 
 		    .push(RuleBuilder.get().select(Selector.WHEN_MATCHED))
-		    .addStyle(new Area(1, 1))
+		    .addStyle(new AreaStyle(1, 1))
 		    .pop()
 		    .pop();
 

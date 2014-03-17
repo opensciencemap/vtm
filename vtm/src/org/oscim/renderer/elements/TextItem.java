@@ -16,7 +16,7 @@
  */
 package org.oscim.renderer.elements;
 
-import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.TextStyle;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
@@ -57,7 +57,7 @@ public class TextItem extends Inlist<TextItem> {
 		return ti;
 	}
 
-	public TextItem set(float x, float y, String string, Text text) {
+	public TextItem set(float x, float y, String string, TextStyle text) {
 		this.x = x;
 		this.y = y;
 		this.string = string;
@@ -77,7 +77,7 @@ public class TextItem extends Inlist<TextItem> {
 	public String string;
 
 	// text style
-	public Text text;
+	public TextStyle text;
 
 	// label width
 	public float width;

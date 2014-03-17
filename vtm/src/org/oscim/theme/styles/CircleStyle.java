@@ -22,7 +22,7 @@ import org.oscim.theme.IRenderTheme.Callback;
 /**
  * Represents a round area on the map.
  */
-public final class Circle extends RenderStyle {
+public final class CircleStyle extends RenderStyle {
 
 	public final int level;
 
@@ -33,7 +33,7 @@ public final class Circle extends RenderStyle {
 	public final boolean scaleRadius;
 	public final float strokeWidth;
 
-	public Circle(Float radius, boolean scaleRadius, int fill, int stroke,
+	public CircleStyle(Float radius, boolean scaleRadius, int fill, int stroke,
 	        float strokeWidth, int level) {
 		super();
 

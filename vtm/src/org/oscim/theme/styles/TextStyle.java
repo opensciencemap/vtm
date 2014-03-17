@@ -25,7 +25,7 @@ import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderTheme.Callback;
 
-public final class Text extends RenderStyle {
+public final class TextStyle extends RenderStyle {
 
 	public static class TextBuilder {
 
@@ -64,15 +64,15 @@ public final class Text extends RenderStyle {
 			reset();
 		}
 
-		public Text build() {
-			Text t = new Text(this);
+		public TextStyle build() {
+			TextStyle t = new TextStyle(this);
 			t.fontHeight = t.paint.getFontHeight();
 			t.fontDescent = t.paint.getFontDescent();
 			return t;
 		}
 
-		public Text buildInternal() {
-			return new Text(this);
+		public TextStyle buildInternal() {
+			return new TextStyle(this);
 		}
 
 		public TextBuilder setStyle(String style) {
@@ -136,7 +136,7 @@ public final class Text extends RenderStyle {
 		}
 	}
 
-	Text(TextBuilder tb) {
+	TextStyle(TextBuilder tb) {
 		this.style = tb.style;
 		this.textKey = tb.textKey;
 		this.caption = tb.caption;

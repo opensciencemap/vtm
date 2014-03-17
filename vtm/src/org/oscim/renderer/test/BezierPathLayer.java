@@ -8,7 +8,7 @@ import org.oscim.core.Point;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.elements.LineLayer;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.utils.geom.BezierPath;
 
 public class BezierPathLayer extends ElementRenderer {
@@ -27,7 +27,7 @@ public class BezierPathLayer extends ElementRenderer {
 			// System.out.println(pts[i]);
 			g.addPoint(pts[i]);
 		}
-		LineLayer ll = layers.addLineLayer(0, new Line(Color.BLUE, 2f));
+		LineLayer ll = layers.addLineLayer(0, new LineStyle(Color.BLUE, 2f));
 		ll.addLine(g);
 
 		List<Point> ctrl = BezierPath.cubicSplineControlPoints(pts, 0.1f);
@@ -49,7 +49,7 @@ public class BezierPathLayer extends ElementRenderer {
 			}
 			p0 = p3;
 		}
-		ll = layers.addLineLayer(1, new Line(Color.CYAN, 2f));
+		ll = layers.addLineLayer(1, new LineStyle(Color.CYAN, 2f));
 		ll.addLine(g);
 
 	}

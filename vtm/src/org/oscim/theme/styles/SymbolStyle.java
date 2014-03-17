@@ -23,11 +23,11 @@ import org.oscim.theme.IRenderTheme.Callback;
 /**
  * Represents an icon on the map.
  */
-public final class Symbol extends RenderStyle {
+public final class SymbolStyle extends RenderStyle {
 
 	public final TextureRegion texture;
 
-	public Symbol(TextureRegion symbol) {
+	public SymbolStyle(TextureRegion symbol) {
 		this.texture = symbol;
 	}
 

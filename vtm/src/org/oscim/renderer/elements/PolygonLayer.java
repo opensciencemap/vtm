@@ -29,7 +29,7 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.theme.styles.Area;
+import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.math.Interpolation;
 import org.oscim.utils.pool.Inlist;
@@ -46,7 +46,7 @@ public final class PolygonLayer extends RenderElement {
 
 	private static final boolean enableTexture = true;
 
-	public Area area;
+	public AreaStyle area;
 
 	PolygonLayer(int layer) {
 		super(RenderElement.POLYGON);
@@ -181,7 +181,7 @@ public final class PolygonLayer extends RenderElement {
 			int shader = polyShader;
 
 			for (int c = start; c < end; c++) {
-				Area a = (Area) mFillPolys[c].area.getCurrent();
+				AreaStyle a = (AreaStyle) mFillPolys[c].area.getCurrent();
 
 				if (enableTexture && a.texture != null) {
 					shader = texShader;
