@@ -18,8 +18,6 @@ package org.oscim.layers.tile.vector;
 
 import static org.oscim.layers.tile.MapTile.State.CANCEL;
 
-import java.util.concurrent.CancellationException;
-
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -118,9 +116,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		try {
 			/* query data source, which calls process() callback */
 			mTileDataSource.query(tile, this);
-		} catch (CancellationException e) {
-			log.debug("{} was canceled", tile);
-			return false;
 		} catch (Exception e) {
 			log.debug("{} {}", tile, e.getMessage());
 			return false;
@@ -172,9 +167,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void process(MapElement element) {
-
 		if (isCanceled() || mTile.state(CANCEL))
-			throw new CancellationException();
+			return;
 
 		for (TileLoaderProcessHook h : mTileLayer.loaderProcessHooks())
 			if (h.process(mTile, mLayers, element))

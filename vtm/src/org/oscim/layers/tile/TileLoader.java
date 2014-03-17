@@ -85,7 +85,13 @@ public abstract class TileLoader extends PausableThread implements ITileDataSink
 	 */
 	@Override
 	public void completed(QueryResult result) {
-		boolean success = (result == SUCCESS) && !isInterrupted();
+		boolean success = result == SUCCESS;
+
+		if (isCanceled())
+			success = false;
+
+		if (isInterrupted())
+			success = false;
 
 		mTileManager.jobCompleted(mTile, success);
 		mTile = null;

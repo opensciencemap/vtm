@@ -502,7 +502,7 @@ public class TileManager {
 	}
 
 	/**
-	 * called from MapWorker Thread when tile is loaded by MapTileLoader
+	 * called by TileLoader thread when tile is loaded.
 	 * 
 	 * @param tile
 	 *            Tile ready for upload in TileRenderLayer
@@ -513,7 +513,10 @@ public class TileManager {
 			@Override
 			public void run() {
 				if (!success || tile.state == CANCEL) {
-					log.debug("failed loading: {}", tile);
+
+					log.debug("loading {}: {}",
+					          (!success ? "failed" : "canceled"),
+					          tile);
 					tile.clear();
 					return;
 				}
