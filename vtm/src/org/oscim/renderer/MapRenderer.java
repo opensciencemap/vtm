@@ -324,6 +324,7 @@ public class MapRenderer {
 
 		GLState.init(GL);
 		GLUtils.init(GL);
+		GLShader.GL = GL;
 
 		// Set up some vertex buffer objects
 		BufferObject.init(GL, 200);

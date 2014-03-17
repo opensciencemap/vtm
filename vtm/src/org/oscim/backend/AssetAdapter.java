@@ -16,7 +16,10 @@
  */
 package org.oscim.backend;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * The Class AssetAdapter.
@@ -33,4 +36,25 @@ public abstract class AssetAdapter {
 	 * @return the input stream
 	 */
 	public abstract InputStream openFileAsStream(String name);
+
+	public String openTextFile(String name) {
+		StringBuilder sb = new StringBuilder();
+
+		InputStream is = g.openFileAsStream(name);
+		if (is == null)
+			return null;
+
+		BufferedReader r = new BufferedReader(new InputStreamReader(is));
+		String line;
+		try {
+			while ((line = r.readLine()) != null) {
+				sb.append(line);
+				sb.append('\n');
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return sb.toString();
+	}
 }

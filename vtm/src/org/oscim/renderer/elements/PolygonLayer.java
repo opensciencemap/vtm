@@ -21,7 +21,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLMatrix;
@@ -145,16 +144,11 @@ public final class PolygonLayer extends RenderElement {
 
 				// Set up the program for rendering polygons
 				if (i == 0) {
-					if (GLAdapter.debugView)
-						polygonProgram[i] = GLUtils.createProgram(polygonVertexShaderZ,
-						                                          polygonFragmentShaderZ);
-					else
-						polygonProgram[i] = GLUtils.createProgram(polygonVertexShader,
-						                                          polygonFragmentShader);
+					polygonProgram[i] = ShaderProgram.loadShader("simple_shader");
+					//polygonProgram[i] = GLUtils.createProgram(polygonVertexShader,
+					//                                         polygonFragmentShader);
 				} else if (i == 1) {
-					polygonProgram[i] = GLUtils.createProgram(textureVertexShader,
-					                                          textureFragmentShader);
-
+					polygonProgram[i] = ShaderProgram.loadShader("poly_texture");
 				}
 
 				if (polygonProgram[i] == 0) {
@@ -482,68 +476,68 @@ public final class PolygonLayer extends RenderElement {
 			GLUtils.checkGlError("draw debug");
 		}
 
-		private final static String polygonVertexShader = ""
-		        + "precision mediump float;"
-		        + "uniform mat4 u_mvp;"
-		        + "attribute vec4 a_pos;"
-		        + "void main() {"
-		        + "  gl_Position = u_mvp * a_pos;"
-		        + "}";
+		//		private final static String polygonVertexShader = ""
+		//		        + "precision mediump float;"
+		//		        + "uniform mat4 u_mvp;"
+		//		        + "attribute vec4 a_pos;"
+		//		        + "void main() {"
+		//		        + "  gl_Position = u_mvp * a_pos;"
+		//		        + "}";
+		//
+		//		private final static String polygonFragmentShader = ""
+		//		        + "precision mediump float;"
+		//		        + "uniform vec4 u_color;"
+		//		        + "void main() {"
+		//		        + "  gl_FragColor = u_color;"
+		//		        + "}";
 
-		private final static String polygonFragmentShader = ""
-		        + "precision mediump float;"
-		        + "uniform vec4 u_color;"
-		        + "void main() {"
-		        + "  gl_FragColor = u_color;"
-		        + "}";
+		//		private final static String polygonVertexShaderZ = ""
+		//		        + "precision highp float;"
+		//		        + "uniform mat4 u_mvp;"
+		//		        + "attribute vec4 a_pos;"
+		//		        + "varying float z;"
+		//		        + "void main() {"
+		//		        + "  gl_Position = u_mvp * a_pos;"
+		//		        + "  z = gl_Position.z;"
+		//		        + "}";
+		//		private final static String polygonFragmentShaderZ = ""
+		//		        + "precision highp float;"
+		//		        + "uniform vec4 u_color;"
+		//		        + "varying float z;"
+		//		        + "void main() {"
+		//		        + "if (z < -1.0)"
+		//		        + "  gl_FragColor = vec4(0.0, z + 2.0, 0.0, 1.0)*0.8;"
+		//		        + "else if (z < 0.0)"
+		//		        + "  gl_FragColor = vec4(z + 1.0, 0.0, 0.0, 1.0)*0.8;"
+		//		        + "else if (z < 1.0)"
+		//		        + "  gl_FragColor = vec4(0.0, 0.0, z, 1.0)*0.8;"
+		//		        + "else"
+		//		        + "  gl_FragColor = vec4(0.0, z - 1.0, 0.0, 1.0)*0.8;"
+		//		        + "}";
 
-		private final static String polygonVertexShaderZ = ""
-		        + "precision highp float;"
-		        + "uniform mat4 u_mvp;"
-		        + "attribute vec4 a_pos;"
-		        + "varying float z;"
-		        + "void main() {"
-		        + "  gl_Position = u_mvp * a_pos;"
-		        + "  z = gl_Position.z;"
-		        + "}";
-		private final static String polygonFragmentShaderZ = ""
-		        + "precision highp float;"
-		        + "uniform vec4 u_color;"
-		        + "varying float z;"
-		        + "void main() {"
-		        + "if (z < -1.0)"
-		        + "  gl_FragColor = vec4(0.0, z + 2.0, 0.0, 1.0)*0.8;"
-		        + "else if (z < 0.0)"
-		        + "  gl_FragColor = vec4(z + 1.0, 0.0, 0.0, 1.0)*0.8;"
-		        + "else if (z < 1.0)"
-		        + "  gl_FragColor = vec4(0.0, 0.0, z, 1.0)*0.8;"
-		        + "else"
-		        + "  gl_FragColor = vec4(0.0, z - 1.0, 0.0, 1.0)*0.8;"
-		        + "}";
-
-		private final static String textureVertexShader = ""
-		        + "precision mediump float;"
-		        + "uniform mat4 u_mvp;"
-		        + "uniform vec2 u_scale;"
-		        + "attribute vec4 a_pos;"
-		        + "varying vec2 v_st;"
-		        + "varying vec2 v_st2;"
-		        + "void main() {"
-		        + "  v_st = clamp(a_pos.xy, 0.0, 1.0) * (2.0 / u_scale.y);"
-		        + "  v_st2 = clamp(a_pos.xy, 0.0, 1.0) * (4.0 / u_scale.y);"
-		        + "  gl_Position = u_mvp * a_pos;"
-		        + "}";
-
-		private final static String textureFragmentShader = ""
-		        + "precision mediump float;"
-		        + "uniform vec4 u_color;"
-		        + "uniform sampler2D tex;"
-		        + "uniform vec2 u_scale;"
-		        + "varying vec2 v_st;"
-		        + "varying vec2 v_st2;"
-		        + "void main() {"
-		        + "  gl_FragColor = mix(texture2D(tex, v_st), texture2D(tex, v_st2), u_scale.x);"
-		        + "}";
+		//		private final static String textureVertexShader = ""
+		//		        + "precision mediump float;"
+		//		        + "uniform mat4 u_mvp;"
+		//		        + "uniform vec2 u_scale;"
+		//		        + "attribute vec4 a_pos;"
+		//		        + "varying vec2 v_st;"
+		//		        + "varying vec2 v_st2;"
+		//		        + "void main() {"
+		//		        + "  v_st = clamp(a_pos.xy, 0.0, 1.0) * (2.0 / u_scale.y);"
+		//		        + "  v_st2 = clamp(a_pos.xy, 0.0, 1.0) * (4.0 / u_scale.y);"
+		//		        + "  gl_Position = u_mvp * a_pos;"
+		//		        + "}";
+		//
+		//		private final static String textureFragmentShader = ""
+		//		        + "precision mediump float;"
+		//		        + "uniform vec4 u_color;"
+		//		        + "uniform sampler2D tex;"
+		//		        + "uniform vec2 u_scale;"
+		//		        + "varying vec2 v_st;"
+		//		        + "varying vec2 v_st2;"
+		//		        + "void main() {"
+		//		        + "  gl_FragColor = mix(texture2D(tex, v_st), texture2D(tex, v_st2), u_scale.x);"
+		//		        + "}";
 	}
 
 }
