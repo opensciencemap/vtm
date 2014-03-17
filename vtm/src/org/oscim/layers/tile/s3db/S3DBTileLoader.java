@@ -73,7 +73,7 @@ class S3DBTileLoader extends TileLoader {
 		layers.setExtrusionLayers(mRoofs);
 		tile.data = layers;
 
-		process(mTilePlane);
+		//process(mTilePlane);
 
 		try {
 			/* query database, which calls process() callback */

@@ -37,6 +37,8 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	boolean initialized;
 
+	private boolean useDepthTexture = false;
+
 	protected boolean setup1(GLViewport viewport) {
 		IntBuffer buf = MapRenderer.getIntBuffer(1);
 
@@ -56,10 +58,6 @@ public class OffscreenRenderer extends LayerRenderer {
 		GL.glGenTextures(1, buf);
 		renderTex = buf.get(0);
 
-		buf.clear();
-		GL.glGenTextures(1, buf);
-		renderDepth = buf.get(0);
-
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, fb);
 
 		// generate color texture
@@ -68,8 +66,8 @@ public class OffscreenRenderer extends LayerRenderer {
 
 		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S, GL20.GL_CLAMP_TO_EDGE);
 		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T, GL20.GL_CLAMP_TO_EDGE);
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER, GL20.GL_LINEAR);
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER, GL20.GL_LINEAR);
+		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER, GL20.GL_NEAREST);
+		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER, GL20.GL_NEAREST);
 
 		GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0, GL20.GL_RGBA,
 		                texW, texH, 0, GL20.GL_RGBA,
@@ -82,24 +80,43 @@ public class OffscreenRenderer extends LayerRenderer {
 
 		GLUtils.checkGlError("00");
 
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, renderDepth);
+		if (useDepthTexture) {
+			buf.clear();
+			GL.glGenTextures(1, buf);
+			renderDepth = buf.get(0);
 
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S, GL20.GL_CLAMP_TO_EDGE);
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T, GL20.GL_CLAMP_TO_EDGE);
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER, GL20.GL_NEAREST);
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER, GL20.GL_NEAREST);
-		GLUtils.checkGlError("1");
+			GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S, GL20.GL_CLAMP_TO_EDGE);
+			GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T, GL20.GL_CLAMP_TO_EDGE);
+			GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER, GL20.GL_NEAREST);
+			GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER, GL20.GL_NEAREST);
+			GLUtils.checkGlError("1");
 
-		GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0, GL20.GL_DEPTH_COMPONENT,
-		                texW, texH, 0, GL20.GL_DEPTH_COMPONENT,
-		                GL20.GL_UNSIGNED_SHORT, null);
+			GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0, GL20.GL_DEPTH_COMPONENT,
+			                texW, texH, 0, GL20.GL_DEPTH_COMPONENT,
+			                GL20.GL_UNSIGNED_SHORT, null);
 
-		GLUtils.checkGlError("11 " + texW + "  / " + texH);
+			GLUtils.checkGlError("11 " + texW + "  / " + texH);
 
-		GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER,
-		                          GL20.GL_DEPTH_ATTACHMENT,
-		                          GL20.GL_TEXTURE_2D,
-		                          renderDepth, 0);
+			GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER,
+			                          GL20.GL_DEPTH_ATTACHMENT,
+			                          GL20.GL_TEXTURE_2D,
+			                          renderDepth, 0);
+		} else {
+			buf.clear();
+			GL.glGenRenderbuffers(1, buf);
+			int depthRenderbuffer = buf.get(0);
+
+			GL.glBindRenderbuffer(GL20.GL_RENDERBUFFER, depthRenderbuffer);
+
+			GL.glRenderbufferStorage(GL20.GL_RENDERBUFFER,
+			                         GL20.GL_DEPTH_COMPONENT16,
+			                         texW, texH);
+
+			GL.glFramebufferRenderbuffer(GL20.GL_FRAMEBUFFER,
+			                             GL20.GL_DEPTH_ATTACHMENT,
+			                             GL20.GL_RENDERBUFFER,
+			                             depthRenderbuffer);
+		}
 
 		GLUtils.checkGlError("111");
 		// create render buffer and bind 16-bit depth buffer
@@ -132,10 +149,12 @@ public class OffscreenRenderer extends LayerRenderer {
 
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
 
-		//shader = GLUtils.createProgram(vShader, fShader);
-		shader = GLShader.createProgram(vShader, fSSAO);
+		//shader = GLShader.createProgram(vShader, fShader);
+		//shader = GLShader.createProgram(vShader, fSSAO);
+		//shader = GLShader.createProgram(vShader, fShaderFXAA);
+		shader = GLShader.loadShader("post_fxaa");
 
-		hTex = GL.glGetUniformLocation(shader, "u_tex");
+		//hTex = GL.glGetUniformLocation(shader, "u_tex");
 		hTexColor = GL.glGetUniformLocation(shader, "u_texColor");
 		//hScreen = GL.glGetUniformLocation(shader, "u_screen");
 		hPixel = GL.glGetUniformLocation(shader, "u_pixel");
@@ -146,8 +165,9 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	int shader;
 	int hPos;
-	int hTex;
+	//int hTex;
 	int hTexColor;
+
 	//int hScreen;
 	int hPixel;
 
@@ -208,16 +228,12 @@ public class OffscreenRenderer extends LayerRenderer {
 		GLUtils.checkGlError("-0");
 
 		// bind the framebuffer texture
-		GL.glActiveTexture(GL20.GL_TEXTURE1);
-		GLUtils.checkGlError("-1");
+		//GL.glActiveTexture(GL20.GL_TEXTURE1);
+		//GLUtils.checkGlError("-1");
 
-		//GL.glBindTexture(GL20.GL_TEXTURE_2D, renderTex);
-		//GL.glBindTexture(GL20.GL_TEXTURE_2D, renderDepth);
-
-		GLState.bindTex2D(renderDepth);
-		GL.glUniform1i(hTex, 1);
-
-		GLUtils.checkGlError("-2");
+		//GLState.bindTex2D(renderDepth);
+		//GL.glUniform1i(hTex, 1);
+		//GLUtils.checkGlError("-2");
 
 		GL.glActiveTexture(GL20.GL_TEXTURE0);
 		GLState.bindTex2D(renderTex);
@@ -242,160 +258,4 @@ public class OffscreenRenderer extends LayerRenderer {
 		//GL.glActiveTexture(GL20.GL_TEXTURE1);
 
 	}
-
-	private final static String vShader = ""
-	        + "precision highp float;"
-	        + "uniform vec2 u_pixel;"
-	        + "attribute vec4 a_pos;"
-	        + "varying vec2 tex_pos;"
-
-	        + "void main() {"
-	        + "  gl_Position = a_pos;"
-	        + "  tex_pos = (a_pos.xy + 1.0) * 0.5;"
-	        + "}";
-
-	private final static String fSSAO = ""
-	        + "precision highp float;"
-	        // Depth texture
-	        + "uniform sampler2D u_tex;"
-	        // Depth texture
-	        + "uniform sampler2D u_texColor;"
-	        // Random texture
-	        //+ "uniform sampler2D rand;"  
-	        //+ "uniform vec2 u_screen;"
-	        + "uniform vec2 u_pixel;"
-
-	        + "varying vec2 tex_pos;"
-	        //
-	        // gauss bell center	
-	        + "const float gdisplace = 0.2;"
-	        //
-	        // "vec2 camerarange = vec2(1.0, 8.0);"
-	        + "const float nearZ = 1.0;"//camerarange.x;"
-	        + "const float farZ = 4.0;" //camerarange.y;"
-	        //
-	        + "float getDepth(float posZ){"
-	        + "	 return (2.0 * nearZ) / (nearZ + farZ - posZ * (farZ - nearZ));"
-	        + "}"
-	        //
-	        + "float compareDepths(in float depth1, in float posZ, inout float far) {"
-	        + "  float depth2 = getDepth(posZ);"
-	        //   depth difference (0-100)
-	        + "	 float diff = (depth1 - depth2) * 100.0;"
-	        //   set 'far == 1.0' when 'diff' > 'gdisplace'
-	        + "	 far = step(diff, gdisplace);"
-	        //   gauss bell width 2, reduce left bell width to avoid self-shadowing
-	        + "  float garea = max((1.0 - far) * 2.0, 0.01);"
-	        + "	 return pow(2.7182, -2.0 * pow(diff - gdisplace,2.0) / pow(garea, 2.0));"
-	        + "}"
-	        //
-	        + "float addAO(float depth, float x1, float y1, float x2, float y2) {"
-	        + "    float ao = 0.0;"
-
-	        + "    float f_11;"
-	        + "    float z_11 = texture2D(u_tex, vec2(x1, y1)).x;"
-	        + "    float d_11 = compareDepths(depth, z_11, f_11);"
-
-	        + "    float f_12;"
-	        + "    float z_12 = texture2D(u_tex, vec2(x1, y2)).x;"
-	        + "    float d_12 = compareDepths(depth, z_12, f_12);"
-
-	        + "    float f_21;"
-	        + "    float z_21 = texture2D(u_tex, vec2(x2, y1)).x;"
-	        + "    float d_21 = compareDepths(depth, z_21, f_21);"
-
-	        + "    float f_22;"
-	        + "    float z_22 = texture2D(u_tex, vec2(x2, y2)).x;"
-	        + "    float d_22 = compareDepths(depth, z_22, f_22);"
-
-	        + "    ao += (1.0 - step(1.0, x1)) * (1.0 - step(1.0, y1))"
-	        + "          * (d_11 + f_11 * (1.0 - d_11) * d_22);"
-
-	        + "    ao += (1.0 - step(1.0, x1)) * step(0.0, y2)"
-	        + "          * (d_12 + f_12 * (1.0 - d_12) * d_21);"
-
-	        + "    ao += step(0.0, x2) * (1.0 - step(1.0, y1))"
-	        + "          * (d_21 + f_21 * (1.0 - d_21) * d_12);"
-
-	        + "    ao += step(0.0, x2) * step(0.0, y2)"
-	        + "          * (d_22 + f_22 * (1.0 - d_22) * d_11);"
-
-	        + "    return ao;"
-	        + "}"
-
-	        + "void main(void) {"
-	        //   randomization texture:
-	        //+ "	 vec2 fres = vec2(20.0, 20.0);"
-	        //+ "	vec3 random = texture2D(rand, gl_TexCoord[0].st * fres.xy);"
-	        //+ "	random = random * 2.0 - vec3(1.0);"
-
-	        //   initialize stuff:
-	        + "  vec4 color = texture2D(u_texColor, tex_pos);"
-
-	        //+ "  vec2 tex_pos = gl_FragCoord.xy / u_screen;"
-	        + "	 float depth = getDepth(texture2D(u_tex, tex_pos).x);"
-	        +
-	        "	 float ao = 0.0;"
-	        + "  float x = tex_pos.x;"
-	        + "  float y = tex_pos.y;"
-	        //   'lookup range in screen pixel'
-	        //+ "  float pw = 1.0 / u_screen.x * 0.5;"
-	        //+ "  float ph = 1.0 / u_screen.y * 0.5;"
-
-	        + "  float pw = u_pixel.x;"
-	        + "  float ph = u_pixel.y;"
-
-	        + "	 for (int i = 0; i < 4; i++) {"
-	        + "    float pwByDepth = pw / depth;"
-	        + "    float phByDepth = ph / depth;"
-
-	        //      calculate color bleeding and ao:
-
-	        + "    ao += addAO(depth, x + pwByDepth, y + phByDepth,x - pwByDepth, y - phByDepth);"
-
-	        + "    pwByDepth *= 1.2;"
-	        + "    phByDepth *= 1.2;"
-
-	        + "    ao += addAO(depth, x + pwByDepth, y, x, y - phByDepth);"
-
-	        //      sample jittering:
-	        //+ "		pw += random.x * 0.0007;"
-	        //+ "		ph += random.y * 0.0007;"
-	        //      increase sampling area:
-	        //+ "		pw *= 1.7;"
-	        //+ "		ph *= 1.7;"
-	        + "		pw *= 1.7;"
-	        + "		ph *= 1.7;"
-
-	        + "	 }"
-	        //	        //   final values, some adjusting
-	        //+ "if ((ao / 32.0) > 1.0){"
-	        //+ "	gl_FragColor = vec4(1.0,1.0,ao / 32.0 - 1.0,1.0);"
-	        //+ ""
-	        //+ "} else {"
-	        + "	 vec3 finalAO = vec3(0.25 * pow((ao / 32.0),1.2));"
-	        + "	 gl_FragColor = vec4(1.0 - finalAO, 1.0);"
-	        //+ "	 gl_FragColor = color - vec4(finalAO, 0.0);"
-	        //+ " }"
-	        //+ "	 gl_FragColor = vec4(finalAO, 1.0) * texture2D(u_texColor, tex_pos.xy);"
-	        //+ "	gl_FragColor = vec4(gl_TexCoord[0].xy,0.0,1.0);"
-	        //+ "	gl_FragColor = vec4(tex_pos.xy,0.0,1.0);"
-	        //+ "	 gl_FragColor = vec4(gl_FragCoord.xy / u_screen, 0.0, 1.0);"
-
-	        + "}";
-
-	//	private final static String fShader = ""
-	//	        + "precision mediump float;"
-	//	        + "uniform sampler2D u_tex;"
-	//	        + "uniform sampler2D u_texColor;"  // Depth texture 
-	//	        + "uniform vec2 u_screen;"
-	//	        + "varying vec2 tex_pos;"
-	//	        + "void main() {"
-	//	        //+ "  vec2 tex_pos = gl_FragCoord.xy / u_screen;"
-	//	        + " vec4 c = texture2D(u_tex, tex_pos.xy);"
-	//	        + "   gl_FragColor = c * texture2D(u_texColor, tex_pos.xy);"
-	//	        + "}";
-
-	//+ "#version 120\n"
-
 }

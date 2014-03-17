@@ -178,11 +178,11 @@ public class MapRenderer {
 
 	private void draw() {
 
-		if (mUpdateColor) {
-			float cc[] = mClearColor;
-			GL.glClearColor(cc[0], cc[1], cc[2], cc[3]);
-			mUpdateColor = false;
-		}
+		//if (mUpdateColor) {
+		float cc[] = mClearColor;
+		GL.glClearColor(cc[0], cc[1], cc[2], cc[3]);
+		mUpdateColor = false;
+		//}
 
 		GL.glDepthMask(true);
 		GL.glStencilMask(0xFF);
