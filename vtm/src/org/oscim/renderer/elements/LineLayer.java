@@ -758,9 +758,9 @@ public final class LineLayer extends RenderElement {
 					        MercatorProjection.groundResolution(v.pos));
 				}
 
-				if (line.fade < v.pos.zoomLevel) {
+				if (line.fadeScale < v.pos.zoomLevel) {
 					GLUtils.setColor(uLineColor, line.color, 1);
-				} else if (line.fade > v.pos.zoomLevel) {
+				} else if (line.fadeScale > v.pos.zoomLevel) {
 					continue;
 				} else {
 					float alpha = (float) (scale > 1.2 ? scale : 1.2) - 1;

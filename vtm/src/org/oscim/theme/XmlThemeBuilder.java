@@ -17,6 +17,10 @@
  */
 package org.oscim.theme;
 
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.Float.parseFloat;
+import static java.lang.Integer.parseInt;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -42,6 +46,7 @@ import org.oscim.theme.styles.Area.AreaBuilder;
 import org.oscim.theme.styles.Circle;
 import org.oscim.theme.styles.Extrusion;
 import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.Line.LineBuilder;
 import org.oscim.theme.styles.LineSymbol;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.Symbol;
@@ -129,6 +134,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 	private final TextBuilder mTextBuilder = new TextBuilder();
 	private final AreaBuilder mAreaBuilder = new AreaBuilder();
+	private final LineBuilder mLineBuilder = new LineBuilder();
 
 	private RuleBuilder mCurrentRule;
 	private TextureAtlas mTextureAtlas;
@@ -333,41 +339,16 @@ public class XmlThemeBuilder extends DefaultHandler {
 	 */
 	private Line createLine(Line line, String elementName, Attributes attributes,
 	        int level, boolean isOutline) {
-
-		// Style name
-		String style = null;
-		float width = 0;
-		Cap cap = Cap.ROUND;
-
-		// Extras
-		int fade = -1;
-		boolean fixed = false;
-		float blur = 0;
-
-		// Stipple
-		int stipple = 0;
-		float stippleWidth = 1;
-
-		int color = Color.TRANSPARENT;
-		int stippleColor = Color.BLACK;
-
-		if (line != null) {
-			color = line.color;
-			fixed = line.fixed;
-			fade = line.fadeScale;
-			cap = line.cap;
-			blur = line.blur;
-			stipple = line.stipple;
-			stippleColor = line.stippleColor;
-			stippleWidth = line.stippleWidth;
-		}
+		LineBuilder b = mLineBuilder.set(line);
+		b.isOutline(isOutline);
+		b.level(level);
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
 			if ("id".equals(name))
-				style = value;
+				b.style = value;
 
 			else if ("src".equals(name))
 				;// src = value;
@@ -379,34 +360,43 @@ public class XmlThemeBuilder extends DefaultHandler {
 				;// ignore
 
 			else if ("stroke".equals(name))
-				color = Color.parseColor(value);
+				b.color(value);
 
-			else if ("width".equals(name) || "stroke-width".equals(name))
-				width = Float.parseFloat(value);
-
+			else if ("width".equals(name) || "stroke-width".equals(name)) {
+				float width = parseFloat(value);
+				if (line == null) {
+					validateNonNegative("width", width);
+				} else {
+					/* use stroke width relative to 'line' */
+					width += line.width;
+					if (width <= 0)
+						width = 1;
+				}
+				b.width = width;
+			}
 			else if ("cap".equals(name) || "stroke-linecap".equals(name))
-				cap = Cap.valueOf(value.toUpperCase());
+				b.cap = Cap.valueOf(value.toUpperCase());
 
 			else if ("fix".equals(name))
-				fixed = Boolean.parseBoolean(value);
+				b.fixed = parseBoolean(value);
 
 			else if ("stipple".equals(name))
-				stipple = Integer.parseInt(value);
+				b.stipple = parseInt(value);
 
 			else if ("stipple-stroke".equals(name))
-				stippleColor = Color.parseColor(value);
+				b.stippleColor(value);
 
 			else if ("stipple-width".equals(name))
-				stippleWidth = Float.parseFloat(value);
+				b.stippleWidth = parseFloat(value);
 
 			else if ("fade".equals(name))
-				fade = Integer.parseInt(value);
+				b.fadeScale = Integer.parseInt(value);
 
 			else if ("min".equals(name))
 				; //min = Float.parseFloat(value);
 
 			else if ("blur".equals(name))
-				blur = Float.parseFloat(value);
+				b.blur = parseFloat(value);
 
 			else if ("style".equals(name))
 				; // ignore
@@ -417,21 +407,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 			else
 				logUnknownAttribute(elementName, name, value, i);
 		}
-
-		// inherit properties from 'line'
-		if (line != null) {
-			// use stroke width relative to 'line'
-			width = line.width + width;
-			if (width <= 0)
-				width = 1;
-
-		} else if (!isOutline) {
-			validateNonNegative("width", width);
-		}
-
-		return new Line(level, style, color, width, cap, fixed,
-		                stipple, stippleColor, stippleWidth,
-		                fade, blur, isOutline);
+		return b.build();
 	}
 
 	private void handleAreaElement(String localName, Attributes attributes, boolean isStyle)

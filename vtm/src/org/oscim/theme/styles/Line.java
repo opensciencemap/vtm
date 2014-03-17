@@ -17,76 +17,22 @@
  */
 package org.oscim.theme.styles;
 
+import static org.oscim.backend.canvas.Color.parseColor;
+
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.theme.IRenderTheme.Callback;
 
-/**
- * Represents a polyline on the map.
- */
 public final class Line extends RenderStyle {
 
-	public final static class LineBuilder {
-		public int level;
-
-		public String style;
-		public float width;
-		public int color;
-		public Cap cap;
-		public boolean outline;
-		public boolean fixed;
-		public int fade;
-		public float blur;
-
-		public int stipple;
-		public int stippleColor;
-		public float stippleWidth;
-
-		public LineBuilder set(Line line) {
-			this.level = line.level;
-			this.style = line.style;
-			this.width = line.width;
-			this.color = line.color;
-			this.cap = line.cap;
-			this.outline = line.outline;
-			this.fixed = line.fixed;
-			this.fade = line.fade;
-			this.blur = line.blur;
-			this.stipple = line.stipple;
-			this.stippleColor = line.stippleColor;
-			this.stippleWidth = line.stippleWidth;
-			return this;
-		}
-
-		public LineBuilder setColor(int color) {
-			this.color = color;
-			return this;
-		}
-
-		public LineBuilder setStippleColor(int color) {
-			this.stippleColor = color;
-			return this;
-		}
-
-		public LineBuilder setColor(String color) {
-			this.color = Color.parseColor(color);
-			return this;
-		}
-
-		public Line build() {
-			return new Line(this);
-		}
-	}
-
 	final int level;
-
 	public final String style;
 	public final float width;
 	public final int color;
 	public final Cap cap;
 	public final boolean outline;
 	public final boolean fixed;
-	public final int fade;
+	public final int fadeScale;
 	public final float blur;
 
 	public final int stipple;
@@ -101,7 +47,7 @@ public final class Line extends RenderStyle {
 		this.cap = builer.cap;
 		this.outline = builer.outline;
 		this.fixed = builer.fixed;
-		this.fade = builer.fade;
+		this.fadeScale = builer.fadeScale;
 		this.blur = builer.blur;
 		this.stipple = builer.stipple;
 		this.stippleColor = builer.stippleColor;
@@ -111,26 +57,11 @@ public final class Line extends RenderStyle {
 	public Line(int level, String style, int color, float width,
 	        Cap cap, boolean fixed,
 	        int stipple, int stippleColor, float stippleWidth,
-	        int fade, float blur, boolean isOutline) {
+	        int fadeScale, float blur, boolean isOutline) {
 
 		this.level = level;
 		this.style = style;
 		this.outline = isOutline;
-
-		// paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		//
-		// if (src != null) {
-		// Shader shader = BitmapUtils.createBitmapShader(src);
-		// paint.setShader(shader);
-		// }
-		//
-		// paint.setStyle(Style.STROKE);
-		// paint.setColor(stroke);
-		// if (strokeDasharray != null) {
-		// paint.setPathEffect(new DashPathEffect(strokeDasharray, 0));
-		// }
-
-		//GlUtils.changeSaturation(color, 1.02f);
 
 		this.cap = cap;
 		this.color = color;
@@ -142,7 +73,7 @@ public final class Line extends RenderStyle {
 		this.stippleWidth = stippleWidth;
 
 		this.blur = blur;
-		this.fade = fade;
+		this.fadeScale = fadeScale;
 	}
 
 	public Line(int stroke, float width) {
@@ -160,5 +91,112 @@ public final class Line extends RenderStyle {
 	@Override
 	public void renderWay(Callback renderCallback) {
 		renderCallback.renderWay(this, level);
+	}
+
+	public final static class LineBuilder {
+		public int level;
+
+		public String style;
+		public float width;
+		public int color;
+		public Cap cap;
+		public boolean outline;
+		public boolean fixed;
+		public int fadeScale;
+		public float blur;
+
+		public int stipple;
+		public int stippleColor;
+		public float stippleWidth;
+
+		public LineBuilder set(Line line) {
+			if (line == null)
+				return reset();
+			this.level = line.level;
+			this.style = line.style;
+			this.width = line.width;
+			this.color = line.color;
+			this.cap = line.cap;
+			this.outline = line.outline;
+			this.fixed = line.fixed;
+			this.fadeScale = line.fadeScale;
+			this.blur = line.blur;
+			this.stipple = line.stipple;
+			this.stippleColor = line.stippleColor;
+			this.stippleWidth = line.stippleWidth;
+			return this;
+		}
+
+		public LineBuilder reset() {
+			level = -1;
+			style = null;
+			color = Color.BLACK;
+			cap = Cap.ROUND;
+			width = 1;
+			fixed = false;
+
+			fadeScale = -1;
+			blur = 0;
+
+			stipple = 0;
+			stippleWidth = 1;
+			stippleColor = Color.BLACK;
+
+			return this;
+		}
+
+		public LineBuilder style(String name) {
+			this.style = name;
+			return this;
+		}
+
+		public LineBuilder level(int level) {
+			this.level = level;
+			return this;
+		}
+
+		public LineBuilder color(int color) {
+			this.color = color;
+			return this;
+		}
+
+		public LineBuilder width(float width) {
+			this.width = width;
+			return this;
+		}
+
+		public LineBuilder blur(float blur) {
+			this.blur = blur;
+			return this;
+		}
+
+		public LineBuilder fadeScale(int zoom) {
+			this.fadeScale = zoom;
+			return this;
+		}
+
+		public LineBuilder stippleColor(int color) {
+			this.stippleColor = color;
+			return this;
+		}
+
+		public LineBuilder color(String color) {
+			this.color = parseColor(color);
+			return this;
+		}
+
+		public LineBuilder stippleColor(String color) {
+			this.stippleColor = parseColor(color);
+			return this;
+		}
+
+		public LineBuilder isOutline(boolean outline) {
+			this.outline = outline;
+			return this;
+		}
+
+		public Line build() {
+			return new Line(this);
+		}
 	}
 }
