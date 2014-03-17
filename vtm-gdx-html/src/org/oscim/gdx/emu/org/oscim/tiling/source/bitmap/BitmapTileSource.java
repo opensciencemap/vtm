@@ -5,6 +5,7 @@ import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
 
 import org.oscim.gdx.client.GwtBitmap;
 import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileLoader;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.source.LwHttp;
@@ -75,8 +76,14 @@ public abstract class BitmapTileSource extends UrlTileSource {
 
 			img.addLoadHandler(new LoadHandler() {
 				public void onLoad(LoadEvent event) {
-					sink.setTileImage(new GwtBitmap(img));
-					sink.completed(SUCCESS);
+					TileLoader.postLoadDelay(new org.oscim.layers.tile.LoadDelayTask() {
+
+						@Override
+						public void continueLoading() {
+							sink.setTileImage(new GwtBitmap(img));
+							sink.completed(SUCCESS);
+						}
+					});
 				}
 			});
 

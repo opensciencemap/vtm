@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileLoader;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
 import org.slf4j.Logger;
@@ -58,25 +59,31 @@ public class UrlTileDataSource implements ITileDataSource {
 		}
 	}
 
-	public void process(InputStream is) {
+	public void process(final InputStream is) {
+		TileLoader.postLoadDelay(new org.oscim.layers.tile.LoadDelayTask() {
 
-		boolean win = false;
-		if (is != null) {
-			try {
-				win = mTileDecoder.decode(mTile, mSink, is);
-			} catch (IOException e) {
-				e.printStackTrace();
+			@Override
+			public void continueLoading() {
+				boolean win = false;
+				if (is != null) {
+					try {
+						win = mTileDecoder.decode(mTile, mSink, is);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				if (!win)
+					log.debug("{} failed", mTile);
+
+				mConn.requestCompleted();
+
+				mSink.completed(win ? SUCCESS : FAILED);
+
+				mTile = null;
+				mSink = null;
 			}
-		}
-		if (!win)
-			log.debug("{} failed", mTile);
+		});
 
-		mConn.requestCompleted();
-
-		mSink.completed(win ? SUCCESS : FAILED);
-
-		mTile = null;
-		mSink = null;
 	}
 
 	@Override

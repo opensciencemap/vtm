@@ -19,12 +19,16 @@ import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.ITileDataSink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Timer;
 
 public abstract class TileLoader implements ITileDataSink {
+	final static Logger log = LoggerFactory.getLogger(TileLoader.class);
 
 	private final TileManager mTileManager;
 	private Timer mTimer;
@@ -98,6 +102,8 @@ public abstract class TileLoader implements ITileDataSink {
 		}
 	}
 
+	public static long lastLoadTime;
+
 	/**
 	 * Callback to be called by TileDataSource when finished
 	 * loading or on failure. MUST BE CALLED IN ANY CASE!
@@ -105,6 +111,10 @@ public abstract class TileLoader implements ITileDataSink {
 	@Override
 	public void completed(QueryResult result) {
 		boolean success = (result == SUCCESS) && !isInterrupted;
+		long now = MapRenderer.frametime;
+
+		log.debug("completed {}  diff time:{}", mTile, (now - lastLoadTime));
+		lastLoadTime = now;
 
 		mTileManager.jobCompleted(mTile, success);
 		mTile = null;
@@ -136,6 +146,10 @@ public abstract class TileLoader implements ITileDataSink {
 	@Override
 	public void setTileImage(Bitmap bitmap) {
 
+	}
+
+	public static void postLoadDelay(LoadDelayTask task) {
+		Gdx.app.postRunnable(task);
 	}
 
 }
