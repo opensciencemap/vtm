@@ -38,6 +38,7 @@ import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule;
 import org.oscim.theme.rule.RuleBuilder;
 import org.oscim.theme.styles.Area;
+import org.oscim.theme.styles.Area.AreaBuilder;
 import org.oscim.theme.styles.Circle;
 import org.oscim.theme.styles.Extrusion;
 import org.oscim.theme.styles.Line;
@@ -127,6 +128,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 	        new HashMap<String, RenderStyle>(10);
 
 	private final TextBuilder mTextBuilder = new TextBuilder();
+	private final AreaBuilder mAreaBuilder = new AreaBuilder();
 
 	private RuleBuilder mCurrentRule;
 	private TextureAtlas mTextureAtlas;
@@ -329,7 +331,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 	 *            is outline layer
 	 * @return a new Line with the given rendering attributes.
 	 */
-	private static Line createLine(Line line, String elementName, Attributes attributes,
+	private Line createLine(Line line, String elementName, Attributes attributes,
 	        int level, boolean isOutline) {
 
 		// Style name
@@ -352,7 +354,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 		if (line != null) {
 			color = line.color;
 			fixed = line.fixed;
-			fade = line.fade;
+			fade = line.fadeScale;
 			cap = line.cap;
 			blur = line.blur;
 			stipple = line.stipple;
@@ -459,37 +461,18 @@ public class XmlThemeBuilder extends DefaultHandler {
 	/**
 	 * @return a new Area with the given rendering attributes.
 	 */
-	private static Area createArea(Area area, String elementName, Attributes attributes, int level) {
+	private Area createArea(Area area, String elementName, Attributes attributes, int level) {
+		AreaBuilder b = mAreaBuilder.set(area);
+		b.level(level);
+
 		String src = null;
-		int fill = Color.BLACK;
-		int stroke = Color.TRANSPARENT;
-		float strokeWidth = 1;
-		int fade = -1;
-		int blend = -1;
-		int blendFill = Color.TRANSPARENT;
-		String style = null;
-
-		TextureItem texture = null;
-
-		if (area != null) {
-			fill = area.color;
-			blend = area.blend;
-			blendFill = area.blendColor;
-			fade = area.fade;
-			// TODO texture = area.texture
-
-			if (area.outline != null) {
-				stroke = area.outline.color;
-				strokeWidth = area.outline.width;
-			}
-		}
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
 			if ("id".equals(name))
-				style = value;
+				b.style = value;
 
 			else if ("use".equals(name))
 				;// ignore
@@ -498,39 +481,39 @@ public class XmlThemeBuilder extends DefaultHandler {
 				src = value;
 
 			else if ("fill".equals(name))
-				fill = Color.parseColor(value);
+				b.color(value);
 
 			else if ("stroke".equals(name))
-				stroke = Color.parseColor(value);
+				b.outlineColor(value);
 
-			else if ("stroke-width".equals(name))
-				strokeWidth = Float.parseFloat(value);
+			else if ("stroke-width".equals(name)) {
+				float strokeWidth = Float.parseFloat(value);
+				validateNonNegative("stroke-width", strokeWidth);
+				b.outlineWidth = strokeWidth;
 
-			else if ("fade".equals(name))
-				fade = Integer.parseInt(value);
+			} else if ("fade".equals(name))
+				b.fadeScale = Integer.parseInt(value);
 
 			else if ("blend".equals(name))
-				blend = Integer.parseInt(value);
+				b.blendScale = Integer.parseInt(value);
 
 			else if ("blend-fill".equals(name))
-				blendFill = Color.parseColor(value);
+				b.blendColor(value);
 
 			else
 				logUnknownAttribute(elementName, name, value, i);
 		}
-		validateNonNegative("stroke-width", strokeWidth);
 
 		if (src != null) {
 			try {
-				Bitmap b = CanvasAdapter.g.loadBitmapAsset(src);
-				if (b != null)
-					texture = new TextureItem(b, true);
+				Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset(src);
+				if (bitmap != null)
+					b.texture = new TextureItem(bitmap, true);
 			} catch (Exception e) {
 				log.debug(e.getMessage());
 			}
 		}
-		return new Area(style, fill, stroke, strokeWidth, fade, level, blend,
-		                blendFill, texture);
+		return b.build();
 	}
 
 	private void addOutline(String style) {

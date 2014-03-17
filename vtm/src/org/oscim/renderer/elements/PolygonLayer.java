@@ -194,10 +194,10 @@ public final class PolygonLayer extends RenderElement {
 					GLState.blend(true);
 					a.texture.bind();
 
-				} else if (a.fade >= zoom) {
+				} else if (a.fadeScale >= zoom) {
 					float f = 1.0f;
 					/* fade in/out */
-					if (a.fade >= zoom) {
+					if (a.fadeScale >= zoom) {
 						if (scale > FADE_START)
 							f = scale - 1;
 						else
@@ -207,11 +207,11 @@ public final class PolygonLayer extends RenderElement {
 
 					GLUtils.setColor(hPolygonColor[shader], a.color, f);
 
-				} else if (a.blend > 0 && a.blend <= zoom) {
+				} else if (a.blendScale > 0 && a.blendScale <= zoom) {
 					/* blend colors (not alpha) */
 					GLState.blend(false);
 
-					if (a.blend == zoom)
+					if (a.blendScale == zoom)
 						GLUtils.setColorBlend(hPolygonColor[shader],
 						                      a.color, a.blendColor, scale - 1.0f);
 					else
@@ -301,7 +301,7 @@ public final class PolygonLayer extends RenderElement {
 				PolygonLayer pl = (PolygonLayer) l;
 
 				// fade out polygon layers (set in RenderTheme)
-				if (pl.area.fade > 0 && pl.area.fade > zoom)
+				if (pl.area.fadeScale > 0 && pl.area.fadeScale > zoom)
 					continue;
 
 				if (cur == start) {
