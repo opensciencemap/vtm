@@ -35,7 +35,7 @@ public class RobovmLauncher extends IOSApplication.Delegate {
 
 				 //initDefaultLayers(tileSource, false,true, false);
 				VectorTileLayer l =  mMap.setBaseMap(tileSource);
-				mMap.setTheme(VtmThemes.TRON2);
+				mMap.setTheme(VtmThemes.NEWTRON);
 				mMap.layers().add(new BuildingLayer(mMap, l));
 				mMap.layers().add(new LabelLayer(mMap, l));
 				

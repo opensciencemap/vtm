@@ -68,7 +68,7 @@ public class TestActivity extends MapActivity {
 		VectorTileLayer baseLayer = mMap.setBaseMap(new OSciMap4TileSource());
 		mMap.layers().add(new BuildingLayer(mMap, baseLayer));
 		mMap.layers().add(new LabelLayer(mMap, baseLayer));
-		mMap.setTheme(VtmThemes.TRON2);
+		mMap.setTheme(VtmThemes.NEWTRON);
 
 		//mMap.setMapPosition(49.417, 8.673, 1 << 17);
 		mMap.setMapPosition(53.5620092, 9.9866457, 1 << 16);
