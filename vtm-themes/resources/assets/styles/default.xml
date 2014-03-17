@@ -20,7 +20,8 @@
   <style-area id="farmland" fill="#e7dab5" fade="11" />
 
   <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
-  <style-area id="wood" fill="#d1dbc7" fade="8" blend="11" blend-fill="#9ac56e" src="textures/wood.png" />
+  <!-- src="textures/wood.png" -->
+  <style-area id="wood" fill="#d1dbc7" fade="8" blend="11" blend-fill="#9ac56e" />
 
   <style-line id="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" />
 
@@ -39,7 +40,8 @@
   <!-- park|common|green|cemetery|golf_course|dog_park -->
   <!-- <style-area id="park" fill="#a3ca7b" fade="11" src="grass2.png" /> -->
   <style-area id="park" fill="#a3ca7b" fade="11" />
-  <style-line id="park" stroke="#a3ca7b" width="1.0" fix="true" cap="butt" fade="11" src="textures/grass.png" />
+  <!-- src="textures/grass.png"  -->
+  <style-line id="park" stroke="#a3ca7b" width="1.0" fix="true" cap="butt" fade="11" />
 
   <!-- de:Kleingartengebiet -->
   <style-area id="allotments" fill="#efeae0" fade="12" />
@@ -83,7 +85,8 @@
   <style-line id="river" use="water" stroke="#a4bbcc" fix="false" />
 
   <!--<style-area id="water" fill="#97b7e5" afc5e3 /> -->
-  <style-area id="water" fill="#99badf" src="textures/water.png" />
+  <!-- src="textures/water.png" -->
+  <style-area id="water" fill="#99badf" />
 
   <!-- no-go area boundary -->
   <style-line id="fence" stroke="#444444" width="1.2" fix="true" cap="butt" />
