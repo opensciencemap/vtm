@@ -18,14 +18,15 @@
 package org.oscim.theme.rule;
 
 import org.oscim.core.Tag;
+import org.oscim.theme.styles.RenderStyle;
 
 class PositiveRule extends Rule {
 	final AttributeMatcher mKeyMatcher;
 	final AttributeMatcher mValueMatcher;
 
-	PositiveRule(int element, int zoom, boolean matchFirst, AttributeMatcher keyMatcher,
-	        AttributeMatcher valueMatcher) {
-		super(element, zoom, matchFirst);
+	PositiveRule(int element, int zoom, int selector, AttributeMatcher keyMatcher,
+	        AttributeMatcher valueMatcher, Rule[] subRules, RenderStyle[] styles) {
+		super(element, zoom, selector, subRules, styles);
 
 		if (keyMatcher instanceof AnyMatcher)
 			mKeyMatcher = null;

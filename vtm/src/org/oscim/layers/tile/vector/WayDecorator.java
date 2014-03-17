@@ -20,14 +20,14 @@ package org.oscim.layers.tile.vector;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.renderer.elements.TextItem;
-import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.TextStyle;
 import org.oscim.utils.geom.GeometryUtils;
 import org.oscim.utils.geom.LineClipper;
 
 public final class WayDecorator {
 
 	public static void renderText(LineClipper clipper, float[] coordinates, String string,
-	        Text text, int pos, int len, MapTile tile) {
+	        TextStyle text, int pos, int len, MapTile tile) {
 		//TextItem items = textItems;
 		TextItem t = null;
 

@@ -1,5 +1,4 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  * 
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -17,305 +16,138 @@
  */
 package org.oscim.theme.rule;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 import org.oscim.core.Tag;
-import org.oscim.theme.IRenderTheme.ThemeException;
-import org.oscim.theme.RenderThemeHandler;
 import org.oscim.theme.styles.RenderStyle;
-import org.xml.sax.Attributes;
 
 public abstract class Rule {
-	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_KEY =
-	        new HashMap<List<String>, AttributeMatcher>();
-	private static final Map<List<String>, AttributeMatcher> MATCHERS_CACHE_VALUE =
-	        new HashMap<List<String>, AttributeMatcher>();
+	public final static RenderStyle[] EMPTY_STYLE = new RenderStyle[0];
+	public final static Rule[] EMPTY_RULES = new Rule[0];
 
-	private static final String STRING_NEGATION = "~";
-	private static final String STRING_EXCLUSIVE = "-";
-	private static final String STRING_WILDCARD = "*";
+	private final Rule[] subRules;
+	public final RenderStyle[] styles;
 
-	private static Rule createRule(Stack<Rule> ruleStack, int element, String keys,
-	        String values, byte zoomMin, byte zoomMax, boolean matchFirst) {
+	private final int zoom;
+	private final int element;
+	private final boolean selectFirstMatch;
+	private final boolean selectWhenMatched;
 
-		// zoom-level bitmask
-		int zoom = 0;
-		for (int z = zoomMin; z <= zoomMax && z < 32; z++)
-			zoom |= (1 << z);
+	Rule(int element, int zoom, int selector, Rule[] subRules, RenderStyle[] styles) {
+		this.element = element;
+		this.zoom = zoom;
 
-		List<String> keyList = null, valueList = null;
-		boolean negativeRule = false;
-		boolean exclusionRule = false;
+		this.subRules = (subRules == null) ? EMPTY_RULES : subRules;
+		this.styles = (styles == null) ? EMPTY_STYLE : styles;
 
-		AttributeMatcher keyMatcher, valueMatcher = null;
-
-		if (values == null) {
-			valueMatcher = AnyMatcher.getInstance();
-		} else {
-			valueList = new ArrayList<String>(Arrays.asList(values.split("\\|")));
-			if (valueList.remove(STRING_NEGATION))
-				negativeRule = true;
-			else if (valueList.remove(STRING_EXCLUSIVE))
-				exclusionRule = true;
-			else {
-				valueMatcher = getValueMatcher(valueList);
-				valueMatcher = RuleOptimizer.optimize(valueMatcher, ruleStack);
-			}
-		}
-
-		if (keys == null) {
-			if (negativeRule || exclusionRule) {
-				throw new ThemeException("negative rule requires key");
-			}
-			keyMatcher = AnyMatcher.getInstance();
-		} else {
-			keyList = new ArrayList<String>(Arrays.asList(keys.split("\\|")));
-			keyMatcher = getKeyMatcher(keyList);
-
-			if ((keyMatcher instanceof AnyMatcher) && (negativeRule || exclusionRule)) {
-				throw new ThemeException("negative rule requires key");
-			}
-
-			if (negativeRule) {
-				AttributeMatcher m = new NegativeMatcher(keyList, valueList, false);
-				return new NegativeRule(element, zoom, matchFirst, m);
-			} else if (exclusionRule) {
-				AttributeMatcher m = new NegativeMatcher(keyList, valueList, true);
-				return new NegativeRule(element, zoom, matchFirst, m);
-			}
-
-			keyMatcher = RuleOptimizer.optimize(keyMatcher, ruleStack);
-		}
-
-		return new PositiveRule(element, zoom, matchFirst, keyMatcher, valueMatcher);
-	}
-
-	private static AttributeMatcher getKeyMatcher(List<String> keyList) {
-		if (STRING_WILDCARD.equals(keyList.get(0))) {
-			return AnyMatcher.getInstance();
-		}
-
-		AttributeMatcher attributeMatcher = MATCHERS_CACHE_KEY.get(keyList);
-		if (attributeMatcher == null) {
-			if (keyList.size() == 1) {
-				attributeMatcher = new SingleKeyMatcher(keyList.get(0));
-			} else {
-				attributeMatcher = new MultiKeyMatcher(keyList);
-			}
-			MATCHERS_CACHE_KEY.put(keyList, attributeMatcher);
-		}
-		return attributeMatcher;
-	}
-
-	private static AttributeMatcher getValueMatcher(List<String> valueList) {
-		if (STRING_WILDCARD.equals(valueList.get(0))) {
-			return AnyMatcher.getInstance();
-		}
-
-		AttributeMatcher attributeMatcher = MATCHERS_CACHE_VALUE.get(valueList);
-		if (attributeMatcher == null) {
-			if (valueList.size() == 1) {
-				attributeMatcher = new SingleValueMatcher(valueList.get(0));
-			} else {
-				attributeMatcher = new MultiValueMatcher(valueList);
-			}
-			MATCHERS_CACHE_VALUE.put(valueList, attributeMatcher);
-		}
-		return attributeMatcher;
-	}
-
-	private static void validate(byte zoomMin, byte zoomMax) {
-		if (zoomMin < 0)
-			throw new ThemeException("zoom-min must not be negative: " + zoomMin);
-		else if (zoomMax < 0)
-			throw new ThemeException("zoom-max must not be negative: " + zoomMax);
-		else if (zoomMin > zoomMax)
-			throw new ThemeException("zoom-min must be less or equal zoom-max: " + zoomMin);
-	}
-
-	public static Rule create(String elementName, Attributes attributes, Stack<Rule> ruleStack) {
-		int element = Element.ANY;
-		int closed = Closed.ANY;
-		String keys = null;
-		String values = null;
-		byte zoomMin = 0;
-		byte zoomMax = Byte.MAX_VALUE;
-		boolean matchFirst = false;
-
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-
-			if ("e".equals(name)) {
-				String val = value.toUpperCase();
-				if ("WAY".equals(val))
-					element = Element.WAY;
-				else if ("NODE".equals(val))
-					element = Element.NODE;
-			} else if ("k".equals(name)) {
-				keys = value;
-			} else if ("v".equals(name)) {
-				values = value;
-			} else if ("closed".equals(name)) {
-				String val = value.toUpperCase();
-				if ("YES".equals(val))
-					closed = Closed.YES;
-				else if ("NO".equals(val))
-					closed = Closed.NO;
-			} else if ("zoom-min".equals(name)) {
-				zoomMin = Byte.parseByte(value);
-			} else if ("zoom-max".equals(name)) {
-				zoomMax = Byte.parseByte(value);
-			} else if ("select".equals(name)) {
-				matchFirst = "first".equals(value);
-			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
-			}
-		}
-
-		if (closed == Closed.YES)
-			element = Element.POLY;
-		else if (closed == Closed.NO)
-			element = Element.LINE;
-
-		validate(zoomMin, zoomMax);
-
-		return createRule(ruleStack, element, keys, values, zoomMin, zoomMax, matchFirst);
-	}
-
-	private Rule[] mSubRules;
-	private RenderStyle[] mRenderInstructions;
-
-	final int mZoom;
-	final int mElement;
-	final boolean mMatchFirst;
-
-	static class Builder {
-		ArrayList<RenderStyle> renderInstructions = new ArrayList<RenderStyle>(4);
-		ArrayList<Rule> subRules = new ArrayList<Rule>(4);
-
-		public void clear() {
-			renderInstructions.clear();
-			renderInstructions = null;
-			subRules.clear();
-			subRules = null;
-		}
-	}
-
-	private Builder builder;
-
-	Rule(int type, int zoom, boolean matchFirst) {
-		builder = new Builder();
-		mElement = type;
-		mZoom = zoom;
-		mMatchFirst = matchFirst;
-	}
-
-	public void addRenderingInstruction(RenderStyle renderInstruction) {
-		builder.renderInstructions.add(renderInstruction);
-	}
-
-	public void addSubRule(Rule rule) {
-		builder.subRules.add(rule);
+		selectFirstMatch = (selector & Selector.FIRST) != 0;
+		selectWhenMatched = (selector & Selector.WHEN_MATCHED) != 0;
 	}
 
 	abstract boolean matchesTags(Tag[] tags);
 
-	public boolean matchElement(int type, Tag[] tags, int zoomLevel,
-	        List<RenderStyle> matchingList) {
+	public boolean matchElement(int type, Tag[] tags, int zoomLevel, List<RenderStyle> result) {
 
-		if (((mElement & type) != 0) && ((mZoom & zoomLevel) != 0) && (matchesTags(tags))) {
-
+		if (((element & type) != 0) && ((zoom & zoomLevel) != 0) && (matchesTags(tags))) {
 			boolean matched = false;
 
-			// check subrules
-			for (Rule subRule : mSubRules) {
-				if (subRule.matchElement(type, tags, zoomLevel, matchingList) && mMatchFirst) {
-					matched = true;
-					break;
+			if (subRules != EMPTY_RULES) {
+				if (selectFirstMatch) {
+					/* only add first matching rule and when-matched rules iff a
+					 * previous rule matched */
+					for (Rule r : subRules) {
+						/* continue if matched xor selectWhenMatch */
+						if (matched ^ r.selectWhenMatched)
+							continue;
+
+						if (r.matchElement(type, tags, zoomLevel, result))
+							matched = true;
+					}
+				} else {
+					/* add all rules and when-matched rules iff a previous rule
+					 * matched */
+					for (Rule r : subRules) {
+						if (r.selectWhenMatched && !matched)
+							continue;
+
+						if (r.matchElement(type, tags, zoomLevel, result))
+							matched = true;
+					}
 				}
 			}
 
-			if (!mMatchFirst || matched) {
-				// add instructions for this rule
-				for (RenderStyle ri : mRenderInstructions)
-					matchingList.add(ri);
-			}
+			if (styles == EMPTY_STYLE)
+				/* matched if styles where added */
+				return matched;
 
-			// this rule did match
+			/* add instructions for this rule */
+			for (RenderStyle ri : styles)
+				result.add(ri);
+
+			/* this rule did not match */
 			return true;
 		}
 
-		// this rule did not match
+		/* this rule did not match */
 		return false;
 	}
 
-	public void onComplete() {
-		MATCHERS_CACHE_KEY.clear();
-		MATCHERS_CACHE_VALUE.clear();
+	public void dispose() {
+		for (RenderStyle ri : styles)
+			ri.dispose();
 
-		mRenderInstructions = new RenderStyle[builder.renderInstructions.size()];
-		builder.renderInstructions.toArray(mRenderInstructions);
-
-		mSubRules = new Rule[builder.subRules.size()];
-		builder.subRules.toArray(mSubRules);
-
-		builder.clear();
-		builder = null;
-
-		for (Rule subRule : mSubRules)
-			subRule.onComplete();
-	}
-
-	public void onDestroy() {
-		for (RenderStyle ri : mRenderInstructions)
-			ri.destroy();
-
-		for (Rule subRule : mSubRules)
-			subRule.onDestroy();
+		for (Rule subRule : subRules)
+			subRule.dispose();
 	}
 
 	public void scaleTextSize(float scaleFactor) {
-		for (RenderStyle ri : mRenderInstructions)
+		for (RenderStyle ri : styles)
 			ri.scaleTextSize(scaleFactor);
-		for (Rule subRule : mSubRules)
+
+		for (Rule subRule : subRules)
 			subRule.scaleTextSize(scaleFactor);
 	}
 
-	public void updateInstructions() {
-		for (RenderStyle ri : mRenderInstructions)
+	public void updateStyles() {
+		for (RenderStyle ri : styles)
 			ri.update();
-		for (Rule subRule : mSubRules)
-			subRule.updateInstructions();
+
+		for (Rule subRule : subRules)
+			subRule.updateStyles();
 	}
 
 	public static class RuleVisitor {
-		boolean apply(Rule r) {
-
-			for (Rule subRule : r.mSubRules)
+		public void apply(Rule r) {
+			for (Rule subRule : r.subRules)
 				this.apply(subRule);
+		}
+	}
 
-			return true;
+	public static class TextSizeVisitor extends RuleVisitor {
+		float scaleFactor = 1;
+
+		public void setScaleFactor(float scaleFactor) {
+			this.scaleFactor = scaleFactor;
+		}
+
+		@Override
+		public void apply(Rule r) {
+			for (RenderStyle ri : r.styles)
+				ri.scaleTextSize(scaleFactor);
+			super.apply(r);
 		}
 	}
 
 	public static class UpdateVisitor extends RuleVisitor {
 		@Override
-		boolean apply(Rule r) {
-			for (RenderStyle ri : r.mRenderInstructions)
+		public void apply(Rule r) {
+			for (RenderStyle ri : r.styles)
 				ri.update();
-
-			return super.apply(r);
+			super.apply(r);
 		}
 	}
 
-	public boolean apply(RuleVisitor v) {
-
-		return v.apply(this);
+	public void apply(RuleVisitor v) {
+		v.apply(this);
 	}
 }

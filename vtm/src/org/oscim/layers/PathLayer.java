@@ -32,7 +32,7 @@ import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.async.SimpleWorker;
 import org.oscim.utils.geom.LineClipper;
@@ -45,14 +45,14 @@ public class PathLayer extends Layer {
 	protected boolean mUpdatePoints;
 
 	/** Line style */
-	Line mLineStyle;
+	LineStyle mLineStyle;
 
 	final Worker mWorker;
 
 	public PathLayer(Map map, int lineColor, float lineWidth) {
 		super(map);
 		mWorker = new Worker(map);
-		mLineStyle = new Line(lineColor, lineWidth, Cap.BUTT);
+		mLineStyle = new LineStyle(lineColor, lineWidth, Cap.BUTT);
 		mRenderer = new RenderPath();
 		mPoints = new ArrayList<GeoPoint>();
 	}

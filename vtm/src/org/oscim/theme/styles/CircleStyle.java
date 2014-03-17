@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -18,19 +19,36 @@ package org.oscim.theme.styles;
 
 import org.oscim.theme.IRenderTheme.Callback;
 
-public class AreaLevel extends RenderStyle {
-	private final Area area;
-	private final int level;
+/**
+ * Represents a round area on the map.
+ */
+public final class CircleStyle extends RenderStyle {
 
-	public AreaLevel(Area area, int level) {
-		this.area = area;
+	public final int level;
+
+	public final int fill;
+	public final int outline;
+	public final float radius;
+	public float renderRadius;
+	public final boolean scaleRadius;
+	public final float strokeWidth;
+
+	public CircleStyle(Float radius, boolean scaleRadius, int fill, int stroke,
+	        float strokeWidth, int level) {
+		super();
+
+		this.radius = radius.floatValue();
+		this.scaleRadius = scaleRadius;
+
+		this.fill = fill;
+		this.outline = stroke;
+
+		this.strokeWidth = strokeWidth;
 		this.level = level;
 	}
 
 	@Override
-	public void renderWay(Callback renderCallback) {
-		renderCallback.renderArea(this.area, level);
-		if (this.area.outline != null)
-			renderCallback.renderWay(this.area.outline, level + 1);
+	public void renderNode(Callback renderCallback) {
+		renderCallback.renderPointCircle(this, this.level);
 	}
 }

@@ -25,8 +25,8 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.renderer.BufferObject;
-import org.oscim.theme.styles.Area;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.AreaStyle;
+import org.oscim.theme.styles.LineStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class ElementLayers {
 	 * add the LineLayer for a level with a given Line style. Levels are
 	 * ordered from bottom (0) to top
 	 */
-	public LineLayer addLineLayer(int level, Line style) {
+	public LineLayer addLineLayer(int level, LineStyle style) {
 		LineLayer l = (LineLayer) getLayer(level, LINE);
 		if (l == null)
 			return null;
@@ -93,7 +93,7 @@ public class ElementLayers {
 		return l;
 	}
 
-	public PolygonLayer addPolygonLayer(int level, Area style) {
+	public PolygonLayer addPolygonLayer(int level, AreaStyle style) {
 		PolygonLayer l = (PolygonLayer) getLayer(level, POLYGON);
 		if (l == null)
 			return null;
@@ -101,7 +101,7 @@ public class ElementLayers {
 		return l;
 	}
 
-	public MeshLayer addMeshLayer(int level, Area style) {
+	public MeshLayer addMeshLayer(int level, AreaStyle style) {
 		MeshLayer l = (MeshLayer) getLayer(level, MESH);
 		if (l == null)
 			return null;

@@ -19,9 +19,9 @@ package org.oscim.theme.styles;
 import org.oscim.backend.canvas.Color;
 import org.oscim.theme.IRenderTheme.Callback;
 
-public class Extrusion extends RenderStyle {
+public class ExtrusionStyle extends RenderStyle {
 
-	public Extrusion(int level, int colorSides, int colorTop, int colorLine, int defaultHeight) {
+	public ExtrusionStyle(int level, int colorSides, int colorTop, int colorLine, int defaultHeight) {
 
 		this.colors = new float[16];
 		fillColors(colorSides, colorTop, colorLine, colors);

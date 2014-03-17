@@ -19,10 +19,10 @@ package org.oscim.theme.rule;
 
 import org.oscim.core.Tag;
 
-class SingleKeyMatcher implements AttributeMatcher {
+public class SingleKeyMatcher implements AttributeMatcher {
 	private final String mKey;
 
-	SingleKeyMatcher(String key) {
+	public SingleKeyMatcher(String key) {
 		mKey = key.intern();
 	}
 

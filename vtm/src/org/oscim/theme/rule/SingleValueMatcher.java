@@ -19,10 +19,10 @@ package org.oscim.theme.rule;
 
 import org.oscim.core.Tag;
 
-class SingleValueMatcher implements AttributeMatcher {
+public class SingleValueMatcher implements AttributeMatcher {
 	private final String mValue;
 
-	SingleValueMatcher(String value) {
+	public SingleValueMatcher(String value) {
 		mValue = value.intern();
 	}
 

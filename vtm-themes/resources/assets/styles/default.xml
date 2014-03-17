@@ -79,7 +79,7 @@
     stipple-stroke="#be6253" />
   <style-line id="water:outline" stroke="#a4bbcc" width="1.0" fix="true" cap="butt" />
 
-  <style-line id="water" stroke="#a4bbcc" width="1.0" cap="butt" fix="true"/>
+  <style-line id="water" stroke="#a4bbcc" width="1.0" cap="butt" fix="true" />
   <style-line id="river" use="water" stroke="#a4bbcc" fix="false" />
 
   <!--<style-area id="water" fill="#97b7e5" afc5e3 /> -->
@@ -143,7 +143,7 @@
   </atlas>
 
   <!-- all closed ways that are not 'highway' or 'building'-->
-  
+
   <m e="way" k="highway|building" v="~" closed="yes">
 
     <!-- landuse base -->
@@ -151,11 +151,11 @@
       <m v="urban">
         <area fill="#f4f3f0" />
       </m>
-      
+
       <m v="meadow|conservation">
         <area use="greens" fade="11" />
       </m>
-      
+
       <m v="residential|commercial|retail|farmyard">
         <area use="residential" />
       </m>
@@ -1064,7 +1064,10 @@
         <m k="amenity" v="cinema">
           <symbol src="cinema" />
         </m>
-        <text use="poi" />
+
+        <m select="when-matched">
+          <text use="poi" />
+        </m>
       </m>
 
       <m zoom-min="16" select="first">
@@ -1089,7 +1092,9 @@
         <m k="amenity" v="bus_station">
           <symbol src="bus_station" />
         </m>
-        <text use="poi" />
+        <m select="when-matched">
+          <text use="poi" />
+        </m>
       </m>
 
       <m zoom-min="17" select="first">
@@ -1152,7 +1157,9 @@
         <m k="amenity" v="theatre">
           <symbol src="theatre" />
         </m>
-        <text use="poi" />
+        <m select="when-matched">
+          <text use="poi" />
+        </m>
       </m>
 
       <m zoom-min="17">
@@ -1176,17 +1183,18 @@
         <m v="supermarket|organic">
           <symbol src="shop_supermarket" />
         </m>
-        <m>
+
+        <m zoom-min="17">
           <symbol src="city" />
         </m>
-      </m>
-      <m zoom-min="17">
-        <text use="poi" />
+
+        <m select="when-matched" zoom-min="17">
+          <text use="poi" />
+        </m>
       </m>
     </m>
 
     <m k="tourism">
-
       <m zoom-min="15" select="first">
         <m v="alpine_hut">
           <symbol src="triangle-stroked" />
@@ -1200,7 +1208,10 @@
         <m v="hotel">
           <symbol src="hotel" />
         </m>
-        <text use="poi" />
+
+        <m select="when-matched">
+          <text use="poi" />
+        </m>
       </m>
 
       <m zoom-min="16" select="first">

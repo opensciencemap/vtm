@@ -23,12 +23,13 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.renderer.elements.TextLayer;
-import org.oscim.theme.styles.Line;
-import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.LineStyle;
+import org.oscim.theme.styles.TextStyle;
+import org.oscim.theme.styles.TextStyle.TextBuilder;
 
 public class GridRenderer extends ElementRenderer {
 	private final TextLayer mTextLayer;
-	private final Text mText;
+	private final TextStyle mText;
 	private final LineLayer mLineLayer;
 	private final GeometryBuffer mLines;
 	private final StringBuffer mStringBuffer;
@@ -36,11 +37,11 @@ public class GridRenderer extends ElementRenderer {
 	private int mCurX, mCurY, mCurZ;
 
 	public GridRenderer() {
-		this(1, new Line(Color.LTGRAY, 1.2f, Cap.BUTT),
-		     Text.createText(22, 0, Color.RED, 0, false));
+		this(1, new LineStyle(Color.LTGRAY, 1.2f, Cap.BUTT),
+		     new TextBuilder().setFontSize(22).setColor(Color.RED).build());
 	}
 
-	public GridRenderer(int numLines, Line lineStyle, Text textStyle) {
+	public GridRenderer(int numLines, LineStyle lineStyle, TextStyle textStyle) {
 		int size = Tile.SIZE;
 
 		// not needed to set but we know:

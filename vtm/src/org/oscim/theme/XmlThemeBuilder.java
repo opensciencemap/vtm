@@ -17,6 +17,10 @@
  */
 package org.oscim.theme;
 
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.Float.parseFloat;
+import static java.lang.Integer.parseInt;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -36,14 +40,17 @@ import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule;
-import org.oscim.theme.styles.Area;
-import org.oscim.theme.styles.Circle;
-import org.oscim.theme.styles.Extrusion;
-import org.oscim.theme.styles.Line;
-import org.oscim.theme.styles.LineSymbol;
+import org.oscim.theme.rule.RuleBuilder;
+import org.oscim.theme.styles.AreaStyle;
+import org.oscim.theme.styles.AreaStyle.AreaBuilder;
+import org.oscim.theme.styles.CircleStyle;
+import org.oscim.theme.styles.ExtrusionStyle;
+import org.oscim.theme.styles.LineStyle;
+import org.oscim.theme.styles.LineStyle.LineBuilder;
 import org.oscim.theme.styles.RenderStyle;
-import org.oscim.theme.styles.Symbol;
-import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.SymbolStyle;
+import org.oscim.theme.styles.TextStyle;
+import org.oscim.theme.styles.TextStyle.TextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -51,8 +58,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class RenderThemeHandler extends DefaultHandler {
-	static final Logger log = LoggerFactory.getLogger(RenderThemeHandler.class);
+public class XmlThemeBuilder extends DefaultHandler {
+	static final Logger log = LoggerFactory.getLogger(XmlThemeBuilder.class);
 
 	private static final int RENDER_THEME_VERSION = 1;
 
@@ -60,7 +67,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS;
 	}
 
-	//private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
+	private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
 	private static final String ELEMENT_NAME_MATCH = "m";
 	private static final String UNEXPECTED_ELEMENT = "unexpected element: ";
 
@@ -82,10 +89,10 @@ public class RenderThemeHandler extends DefaultHandler {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading from the input stream.
 	 */
-	public static IRenderTheme getRenderTheme(InputStream inputStream)
+	public static IRenderTheme read(InputStream inputStream)
 	        throws SAXException, IOException {
 
-		RenderThemeHandler renderThemeHandler = new RenderThemeHandler();
+		XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder();
 
 		new XMLReaderAdapter().parse(renderThemeHandler, inputStream);
 
@@ -118,36 +125,39 @@ public class RenderThemeHandler extends DefaultHandler {
 		log.debug(sb.toString());
 	}
 
-	private ArrayList<Rule> mRulesList = new ArrayList<Rule>();
-	private Rule mCurrentRule;
-
-	private Stack<Element> mElementStack = new Stack<Element>();
-	private Stack<Rule> mRuleStack = new Stack<Rule>();
-	private HashMap<String, RenderStyle> mStyles =
+	private final ArrayList<RuleBuilder> mRulesList = new ArrayList<RuleBuilder>();
+	private final Stack<Element> mElementStack = new Stack<Element>();
+	private final Stack<RuleBuilder> mRuleStack = new Stack<RuleBuilder>();
+	private final HashMap<String, RenderStyle> mStyles =
 	        new HashMap<String, RenderStyle>(10);
 
+	private final TextBuilder mTextBuilder = new TextBuilder();
+	private final AreaBuilder mAreaBuilder = new AreaBuilder();
+	private final LineBuilder mLineBuilder = new LineBuilder();
+
+	private RuleBuilder mCurrentRule;
 	private TextureAtlas mTextureAtlas;
 
-	private int mLevel;
+	private int mLevels = 0;
+	private int mMapBackground = 0xffffffff;
+	private float mBaseTextSize = 1;
+
 	private RenderTheme mRenderTheme;
 
 	@Override
 	public void endDocument() {
-		if (mRenderTheme == null) {
-			throw new IllegalArgumentException("missing element: rules");
-		}
 
-		mRenderTheme.complete(mRulesList, mLevel);
+		Rule[] rules = new Rule[mRulesList.size()];
+		for (int i = 0, n = rules.length; i < n; i++)
+			rules[i] = mRulesList.get(i).onComplete();
+
+		mRenderTheme = new RenderTheme(mMapBackground, mBaseTextSize, rules, mLevels);
 
 		mRulesList.clear();
 		mStyles.clear();
 		mRuleStack.clear();
 		mElementStack.clear();
 
-		mStyles = null;
-		mRuleStack = null;
-		mRulesList = null;
-		mElementStack = null;
 		mTextureAtlas = null;
 	}
 
@@ -179,13 +189,13 @@ public class RenderThemeHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName,
 	        Attributes attributes) throws SAXException {
 		try {
-			if ("rendertheme".equals(localName)) {
+			if (ELEMENT_NAME_RENDER_THEME.equals(localName)) {
 				checkState(localName, Element.RENDER_THEME);
-				mRenderTheme = createRenderTheme(localName, attributes);
+				createRenderTheme(localName, attributes);
 
 			} else if (ELEMENT_NAME_MATCH.equals(localName)) {
 				checkState(localName, Element.RULE);
-				Rule rule = Rule.create(localName, attributes, mRuleStack);
+				RuleBuilder rule = RuleBuilder.create(localName, attributes, mRuleStack);
 				if (!mRuleStack.empty()) {
 					mCurrentRule.addSubRule(rule);
 				}
@@ -194,7 +204,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			} else if ("style-text".equals(localName)) {
 				checkState(localName, Element.STYLE);
-				Text text = createText(localName, attributes, false);
+				TextStyle text = createText(localName, attributes, false);
 				mStyles.put(TEXT_STYLE + text.style, text);
 
 			} else if ("style-area".equals(localName)) {
@@ -207,7 +217,7 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			} else if ("outline-layer".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Line line = createLine(null, localName, attributes, mLevel++, true);
+				LineStyle line = createLine(null, localName, attributes, mLevels++, true);
 				mStyles.put(OUTLINE_STYLE + line.style, line);
 
 			} else if ("area".equals(localName)) {
@@ -216,40 +226,35 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			} else if ("caption".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Text text = createText(localName, attributes, true);
-				mCurrentRule.addRenderingInstruction(text);
+				TextStyle text = createText(localName, attributes, true);
+				mCurrentRule.addStyle(text);
 			} else if ("circle".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Circle circle = createCircle(localName, attributes, mLevel++);
-				mCurrentRule.addRenderingInstruction(circle);
+				CircleStyle circle = createCircle(localName, attributes, mLevels++);
+				mCurrentRule.addStyle(circle);
 
 			} else if ("line".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				handleLineElement(localName, attributes, false);
 
-			} else if ("lineSymbol".equals(localName)) {
-				checkState(localName, Element.RENDERING_INSTRUCTION);
-				LineSymbol lineSymbol = createLineSymbol(localName, attributes);
-				mCurrentRule.addRenderingInstruction(lineSymbol);
-
 			} else if ("text".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
 				String style = attributes.getValue("use");
 				if (style == null) {
-					Text text = createText(localName, attributes, false);
-					mCurrentRule.addRenderingInstruction(text);
+					TextStyle text = createText(localName, attributes, false);
+					mCurrentRule.addStyle(text);
 				} else {
-					Text pt = (Text) mStyles.get(TEXT_STYLE + style);
+					TextStyle pt = (TextStyle) mStyles.get(TEXT_STYLE + style);
 					if (pt != null)
-						mCurrentRule.addRenderingInstruction(pt);
+						mCurrentRule.addStyle(pt);
 					else
 						log.debug("BUG not a path text style: " + style);
 				}
 
 			} else if ("symbol".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Symbol symbol = createSymbol(localName, attributes);
-				mCurrentRule.addRenderingInstruction(symbol);
+				SymbolStyle symbol = createSymbol(localName, attributes);
+				mCurrentRule.addStyle(symbol);
 
 			} else if ("outline".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -257,8 +262,8 @@ public class RenderThemeHandler extends DefaultHandler {
 
 			} else if ("extrusion".equals(localName)) {
 				checkState(localName, Element.RENDERING_INSTRUCTION);
-				Extrusion extrusion = createExtrusion(localName, attributes, mLevel++);
-				mCurrentRule.addRenderingInstruction(extrusion);
+				ExtrusionStyle extrusion = createExtrusion(localName, attributes, mLevels++);
+				mCurrentRule.addStyle(extrusion);
 
 			} else if ("atlas".equals(localName)) {
 				checkState(localName, Element.ATLAS);
@@ -295,22 +300,22 @@ public class RenderThemeHandler extends DefaultHandler {
 	        throws SAXException {
 
 		String use = attributes.getValue("use");
-		Line style = null;
+		LineStyle style = null;
 
 		if (use != null) {
-			style = (Line) mStyles.get(LINE_STYLE + use);
+			style = (LineStyle) mStyles.get(LINE_STYLE + use);
 			if (style == null) {
 				log.debug("missing line style 'use': " + use);
 				return;
 			}
 		}
 
-		Line line = createLine(style, localName, attributes, mLevel++, false);
+		LineStyle line = createLine(style, localName, attributes, mLevels++, false);
 
 		if (isStyle) {
 			mStyles.put(LINE_STYLE + line.style, line);
 		} else {
-			mCurrentRule.addRenderingInstruction(line);
+			mCurrentRule.addStyle(line);
 			// Note 'outline' will not be inherited, it's just a 
 			// shorcut to add the outline RenderInstruction.
 			addOutline(attributes.getValue("outline"));
@@ -320,53 +325,24 @@ public class RenderThemeHandler extends DefaultHandler {
 	/**
 	 * @param line
 	 *            optional: line style defaults
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
 	 * @param level
 	 *            the drawing level of this instruction.
 	 * @param isOutline
 	 *            is outline layer
 	 * @return a new Line with the given rendering attributes.
 	 */
-	private static Line createLine(Line line, String elementName, Attributes attributes,
+	private LineStyle createLine(LineStyle line, String elementName, Attributes attributes,
 	        int level, boolean isOutline) {
-
-		// Style name
-		String style = null;
-		float width = 0;
-		Cap cap = Cap.ROUND;
-
-		// Extras
-		int fade = -1;
-		boolean fixed = false;
-		float blur = 0;
-
-		// Stipple
-		int stipple = 0;
-		float stippleWidth = 1;
-
-		int color = Color.TRANSPARENT;
-		int stippleColor = Color.BLACK;
-
-		if (line != null) {
-			color = line.color;
-			fixed = line.fixed;
-			fade = line.fade;
-			cap = line.cap;
-			blur = line.blur;
-			stipple = line.stipple;
-			stippleColor = line.stippleColor;
-			stippleWidth = line.stippleWidth;
-		}
+		LineBuilder b = mLineBuilder.set(line);
+		b.isOutline(isOutline);
+		b.level(level);
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
 			if ("id".equals(name))
-				style = value;
+				b.style = value;
 
 			else if ("src".equals(name))
 				;// src = value;
@@ -378,34 +354,43 @@ public class RenderThemeHandler extends DefaultHandler {
 				;// ignore
 
 			else if ("stroke".equals(name))
-				color = Color.parseColor(value);
+				b.color(value);
 
-			else if ("width".equals(name) || "stroke-width".equals(name))
-				width = Float.parseFloat(value);
-
+			else if ("width".equals(name) || "stroke-width".equals(name)) {
+				float width = parseFloat(value);
+				if (line == null) {
+					validateNonNegative("width", width);
+				} else {
+					/* use stroke width relative to 'line' */
+					width += line.width;
+					if (width <= 0)
+						width = 1;
+				}
+				b.width = width;
+			}
 			else if ("cap".equals(name) || "stroke-linecap".equals(name))
-				cap = Cap.valueOf(value.toUpperCase());
+				b.cap = Cap.valueOf(value.toUpperCase());
 
 			else if ("fix".equals(name))
-				fixed = Boolean.parseBoolean(value);
+				b.fixed = parseBoolean(value);
 
 			else if ("stipple".equals(name))
-				stipple = Integer.parseInt(value);
+				b.stipple = parseInt(value);
 
 			else if ("stipple-stroke".equals(name))
-				stippleColor = Color.parseColor(value);
+				b.stippleColor(value);
 
 			else if ("stipple-width".equals(name))
-				stippleWidth = Float.parseFloat(value);
+				b.stippleWidth = parseFloat(value);
 
 			else if ("fade".equals(name))
-				fade = Integer.parseInt(value);
+				b.fadeScale = Integer.parseInt(value);
 
 			else if ("min".equals(name))
 				; //min = Float.parseFloat(value);
 
 			else if ("blur".equals(name))
-				blur = Float.parseFloat(value);
+				b.blur = parseFloat(value);
 
 			else if ("style".equals(name))
 				; // ignore
@@ -416,92 +401,49 @@ public class RenderThemeHandler extends DefaultHandler {
 			else
 				logUnknownAttribute(elementName, name, value, i);
 		}
-
-		// inherit properties from 'line'
-		if (line != null) {
-			// use stroke width relative to 'line'
-			width = line.width + width;
-			if (width <= 0)
-				width = 1;
-
-		} else if (!isOutline) {
-			validateLine(width);
-		}
-
-		return new Line(level, style, color, width, cap, fixed,
-		                stipple, stippleColor, stippleWidth,
-		                fade, blur, isOutline);
-	}
-
-	private static void validateLine(float strokeWidth) {
-		if (strokeWidth < 0)
-			throw new ThemeException("width must not be negative: " + strokeWidth);
+		return b.build();
 	}
 
 	private void handleAreaElement(String localName, Attributes attributes, boolean isStyle)
 	        throws SAXException {
 
 		String use = attributes.getValue("use");
-		Area style = null;
+		AreaStyle style = null;
 
 		if (use != null) {
-			style = (Area) mStyles.get(AREA_STYLE + use);
+			style = (AreaStyle) mStyles.get(AREA_STYLE + use);
 			if (style == null) {
 				log.debug("missing area style 'use': " + use);
 				return;
 			}
 		}
 
-		Area area = createArea(style, localName, attributes, mLevel);
-		mLevel += 2;
+		AreaStyle area = createArea(style, localName, attributes, mLevels);
+		mLevels += 2;
 
 		if (isStyle) {
 			mStyles.put(AREA_STYLE + area.style, area);
 		} else {
-			mCurrentRule.addRenderingInstruction(area);
+			mCurrentRule.addStyle(area);
 		}
 	}
 
 	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
-	 * @param level
-	 *            the drawing level of this instruction.
 	 * @return a new Area with the given rendering attributes.
 	 */
-	private static Area createArea(Area area, String elementName, Attributes attributes, int level) {
+	private AreaStyle createArea(AreaStyle area, String elementName, Attributes attributes,
+	        int level) {
+		AreaBuilder b = mAreaBuilder.set(area);
+		b.level(level);
+
 		String src = null;
-		int fill = Color.BLACK;
-		int stroke = Color.TRANSPARENT;
-		float strokeWidth = 1;
-		int fade = -1;
-		int blend = -1;
-		int blendFill = Color.TRANSPARENT;
-		String style = null;
-
-		TextureItem texture = null;
-
-		if (area != null) {
-			fill = area.color;
-			blend = area.blend;
-			blendFill = area.blendColor;
-			fade = area.fade;
-			// TODO texture = area.texture
-
-			if (area.outline != null) {
-				stroke = area.outline.color;
-				strokeWidth = area.outline.width;
-			}
-		}
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
 			if ("id".equals(name))
-				style = value;
+				b.style = value;
 
 			else if ("use".equals(name))
 				;// ignore
@@ -510,47 +452,46 @@ public class RenderThemeHandler extends DefaultHandler {
 				src = value;
 
 			else if ("fill".equals(name))
-				fill = Color.parseColor(value);
+				b.color(value);
 
 			else if ("stroke".equals(name))
-				stroke = Color.parseColor(value);
+				b.outlineColor(value);
 
-			else if ("stroke-width".equals(name))
-				strokeWidth = Float.parseFloat(value);
+			else if ("stroke-width".equals(name)) {
+				float strokeWidth = Float.parseFloat(value);
+				validateNonNegative("stroke-width", strokeWidth);
+				b.outlineWidth = strokeWidth;
 
-			else if ("fade".equals(name))
-				fade = Integer.parseInt(value);
+			} else if ("fade".equals(name))
+				b.fadeScale = Integer.parseInt(value);
 
 			else if ("blend".equals(name))
-				blend = Integer.parseInt(value);
+				b.blendScale = Integer.parseInt(value);
 
 			else if ("blend-fill".equals(name))
-				blendFill = Color.parseColor(value);
+				b.blendColor(value);
 
 			else
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		validateLine(strokeWidth);
-
 		if (src != null) {
 			try {
-				Bitmap b = CanvasAdapter.g.loadBitmapAsset(src);
-				if (b != null)
-					texture = new TextureItem(b, true);
+				Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset(src);
+				if (bitmap != null)
+					b.texture = new TextureItem(bitmap, true);
 			} catch (Exception e) {
 				log.debug(e.getMessage());
 			}
 		}
-		return new Area(style, fill, stroke, strokeWidth, fade, level, blend,
-		                blendFill, texture);
+		return b.build();
 	}
 
 	private void addOutline(String style) {
 		if (style != null) {
-			Line line = (Line) mStyles.get(OUTLINE_STYLE + style);
+			LineStyle line = (LineStyle) mStyles.get(OUTLINE_STYLE + style);
 			if (line != null && line.outline)
-				mCurrentRule.addRenderingInstruction(line);
+				mCurrentRule.addStyle(line);
 			else
 				log.debug("BUG not an outline style: " + style);
 		}
@@ -566,11 +507,10 @@ public class RenderThemeHandler extends DefaultHandler {
 			if ("img".equals(name)) {
 				img = value;
 			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
-		if (img == null)
-			throw new ThemeException("missing attribute 'img' for element: " + elementName);
+		validateExists("img", img, elementName);
 
 		Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset(IMG_PATH + img);
 		mTextureAtlas = new TextureAtlas(bitmap);
@@ -595,12 +535,11 @@ public class RenderThemeHandler extends DefaultHandler {
 					             Integer.parseInt(pos[3]));
 				}
 			} else {
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
 			}
 		}
-		if (regionName == null || r == null)
-			throw new ThemeException("missing attribute 'id' or 'rect' for element: "
-			        + elementName);
+		validateExists("id", regionName, elementName);
+		validateExists("pos", r, elementName);
 
 		mTextureAtlas.addTextureRegion(regionName.intern(), r);
 	}
@@ -652,7 +591,7 @@ public class RenderThemeHandler extends DefaultHandler {
 		mElementStack.push(element);
 	}
 
-	static RenderTheme createRenderTheme(String elementName, Attributes attributes) {
+	private void createRenderTheme(String elementName, Attributes attributes) {
 		Integer version = null;
 		int mapBackground = Color.WHITE;
 		float baseStrokeWidth = 1;
@@ -678,115 +617,91 @@ public class RenderThemeHandler extends DefaultHandler {
 				baseTextSize = Float.parseFloat(value);
 
 			else
-				RenderThemeHandler.logUnknownAttribute(elementName, name, value, i);
+				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
 
 		}
 
-		if (version == null)
-			throw new ThemeException("missing attribute version for element:" + elementName);
-		else if (version.intValue() != RENDER_THEME_VERSION)
-			throw new ThemeException("invalid render theme version:" + version);
-		else if (baseStrokeWidth < 0)
-			throw new ThemeException("base-stroke-width must not be negative: " + baseStrokeWidth);
-		else if (baseTextSize < 0)
-			throw new ThemeException("base-text-size must not be negative: " + baseTextSize);
+		validateExists("version", version, elementName);
 
-		return new RenderTheme(mapBackground, baseStrokeWidth, baseTextSize);
+		if (version.intValue() != RENDER_THEME_VERSION)
+			throw new ThemeException("invalid render theme version:"
+			        + version);
+
+		validateNonNegative("base-stroke-width", baseStrokeWidth);
+		validateNonNegative("base-test-size", baseTextSize);
+
+		mMapBackground = mapBackground;
+		mBaseTextSize = baseTextSize;
 	}
 
 	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
 	 * @param caption
 	 *            ...
 	 * @return a new Text with the given rendering attributes.
 	 */
-	private Text createText(String elementName, Attributes attributes, boolean caption) {
-		String textKey = null;
-		FontFamily fontFamily = FontFamily.DEFAULT;
-		FontStyle fontStyle = FontStyle.NORMAL;
-		float fontSize = 0;
-		int fill = Color.BLACK;
-		int stroke = Color.BLACK;
-		float strokeWidth = 0;
-		String style = null;
-		float dy = 0;
-		int priority = Integer.MAX_VALUE;
-		TextureRegion symbol = null;
+	private TextStyle createText(String elementName, Attributes attributes, boolean caption) {
+		TextBuilder b = mTextBuilder.reset();
+
+		b.caption = caption;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
 			String value = attributes.getValue(i);
 
 			if ("id".equals(name))
-				style = value;
+				b.style = value;
 
 			else if ("k".equals(name))
-				textKey = value.intern();
+				b.textKey = value.intern();
 
 			else if ("font-family".equals(name))
-				fontFamily = FontFamily.valueOf(value.toUpperCase());
+				b.fontFamily = FontFamily.valueOf(value.toUpperCase());
 
 			else if ("style".equals(name))
-				fontStyle = FontStyle.valueOf(value.toUpperCase());
+				b.fontStyle = FontStyle.valueOf(value.toUpperCase());
 
 			else if ("size".equals(name))
-				fontSize = Float.parseFloat(value);
+				b.fontSize = Float.parseFloat(value);
 
 			else if ("fill".equals(name))
-				fill = Color.parseColor(value);
+				b.color = Color.parseColor(value);
 
 			else if ("stroke".equals(name))
-				stroke = Color.parseColor(value);
+				b.stroke = Color.parseColor(value);
 
 			else if ("stroke-width".equals(name))
-				strokeWidth = Float.parseFloat(value);
+				b.strokeWidth = Float.parseFloat(value);
 
 			else if ("caption".equals(name))
-				caption = Boolean.parseBoolean(value);
+				b.caption = Boolean.parseBoolean(value);
 
 			else if ("priority".equals(name))
-				priority = Integer.parseInt(value);
+				b.priority = Integer.parseInt(value);
 
 			else if ("dy".equals(name))
-				dy = Float.parseFloat(value);
+				// NB: minus..
+				b.dy = -Float.parseFloat(value);
 
 			else if ("symbol".equals(name))
-				symbol = getAtlasRegion(value);
+				b.texture = getAtlasRegion(value);
 
 			else
 				logUnknownAttribute(elementName, name, value, i);
-
 		}
 
-		validateText(elementName, textKey, fontSize, strokeWidth);
+		validateExists("k", b.textKey, elementName);
+		validateNonNegative("size", b.fontSize);
+		validateNonNegative("stroke-width", b.strokeWidth);
 
-		return new Text(style, textKey, fontFamily, fontStyle, fontSize, fill, stroke, strokeWidth,
-		                dy, caption, symbol, priority);
-	}
-
-	private static void validateText(String elementName, String textKey, float fontSize,
-	        float strokeWidth) {
-		if (textKey == null)
-			throw new ThemeException("missing attribute k for element: " + elementName);
-		else if (fontSize < 0)
-			throw new ThemeException("font-size must not be negative: " + fontSize);
-		else if (strokeWidth < 0)
-			throw new ThemeException("stroke-width must not be negative: " + strokeWidth);
+		return b.buildInternal();
 	}
 
 	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
 	 * @param level
 	 *            the drawing level of this instruction.
 	 * @return a new Circle with the given rendering attributes.
 	 */
-	private static Circle createCircle(String elementName, Attributes attributes, int level) {
+	private static CircleStyle createCircle(String elementName, Attributes attributes, int level) {
 		Float radius = null;
 		boolean scaleRadius = false;
 		int fill = Color.TRANSPARENT;
@@ -816,60 +731,17 @@ public class RenderThemeHandler extends DefaultHandler {
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		validateCircle(elementName, radius, strokeWidth);
-		return new Circle(radius, scaleRadius, fill, stroke, strokeWidth, level);
-	}
+		validateExists("r", radius, elementName);
+		validateNonNegative("radius", radius);
+		validateNonNegative("stroke-width", strokeWidth);
 
-	private static void validateCircle(String elementName, Float radius, float strokeWidth) {
-		if (radius == null)
-			throw new ThemeException("missing attribute r for element: " + elementName);
-		else if (radius.floatValue() < 0)
-			throw new ThemeException("radius must not be negative: " + radius);
-		else if (strokeWidth < 0)
-			throw new ThemeException("stroke-width must not be negative: " + strokeWidth);
+		return new CircleStyle(radius, scaleRadius, fill, stroke, strokeWidth, level);
 	}
 
 	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
-	 * @return a new LineSymbol with the given rendering attributes.
-	 */
-	private static LineSymbol createLineSymbol(String elementName, Attributes attributes) {
-		String src = null;
-		boolean alignCenter = false;
-		boolean repeat = false;
-
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-
-			if ("src".equals(name))
-				src = value;
-
-			else if ("align-center".equals(name))
-				alignCenter = Boolean.parseBoolean(value);
-
-			else if ("repeat".equals(name))
-				repeat = Boolean.parseBoolean(value);
-
-			else
-				logUnknownAttribute(elementName, name, value, i);
-		}
-
-		validateSymbol(elementName, src);
-		return new LineSymbol(src, alignCenter, repeat);
-	}
-
-	/**
-	 * @param elementName
-	 *            the name of the XML element.
-	 * @param attributes
-	 *            the attributes of the XML element.
 	 * @return a new Symbol with the given rendering attributes.
 	 */
-	private Symbol createSymbol(String elementName, Attributes attributes) {
+	private SymbolStyle createSymbol(String elementName, Attributes attributes) {
 		String src = null;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
@@ -882,17 +754,12 @@ public class RenderThemeHandler extends DefaultHandler {
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		validateSymbol(elementName, src);
+		validateExists("src", src, elementName);
 
-		return new Symbol(getAtlasRegion(src));
+		return new SymbolStyle(getAtlasRegion(src));
 	}
 
-	private static void validateSymbol(String elementName, String src) {
-		if (src == null)
-			throw new ThemeException("missing attribute src for element: " + elementName);
-	}
-
-	private Extrusion createExtrusion(String elementName, Attributes attributes, int level) {
+	private ExtrusionStyle createExtrusion(String elementName, Attributes attributes, int level) {
 		int colorSide = 0;
 		int colorTop = 0;
 		int colorLine = 0;
@@ -918,6 +785,18 @@ public class RenderThemeHandler extends DefaultHandler {
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		return new Extrusion(level, colorSide, colorTop, colorLine, defaultHeight);
+		return new ExtrusionStyle(level, colorSide, colorTop, colorLine, defaultHeight);
+	}
+
+	public static void validateNonNegative(String name, float value) {
+		if (value < 0)
+			throw new ThemeException(name + " must not be negative: "
+			        + value);
+	}
+
+	public static void validateExists(String name, Object obj, String elementName) {
+		if (obj == null)
+			throw new ThemeException("missing attribute " + name
+			        + " for element: " + elementName);
 	}
 }

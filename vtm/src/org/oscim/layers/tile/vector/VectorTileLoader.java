@@ -40,14 +40,13 @@ import org.oscim.renderer.elements.SymbolItem;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.RenderTheme;
-import org.oscim.theme.styles.Area;
-import org.oscim.theme.styles.Circle;
-import org.oscim.theme.styles.Extrusion;
-import org.oscim.theme.styles.Line;
-import org.oscim.theme.styles.LineSymbol;
+import org.oscim.theme.styles.AreaStyle;
+import org.oscim.theme.styles.CircleStyle;
+import org.oscim.theme.styles.ExtrusionStyle;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.RenderStyle;
-import org.oscim.theme.styles.Symbol;
-import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.SymbolStyle;
+import org.oscim.theme.styles.TextStyle;
 import org.oscim.tiling.ITileDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -248,7 +247,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	/*** RenderThemeCallback ***/
 	@Override
-	public void renderWay(Line line, int level) {
+	public void renderWay(LineStyle line, int level) {
 		int numLayer = mCurLayer + level;
 
 		if (line.stipple == 0) {
@@ -297,7 +296,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	protected final static boolean USE_MESH_POLY = false;
 
 	@Override
-	public void renderArea(Area area, int level) {
+	public void renderArea(AreaStyle area, int level) {
 		int numLayer = mCurLayer + level;
 		if (USE_MESH_POLY) {
 			MeshLayer l = mTile.layers.getMeshLayer(numLayer);
@@ -311,7 +310,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public void renderAreaText(Text text) {
+	public void renderAreaText(TextStyle text) {
 		// TODO place somewhere on polygon
 		String value = mElement.tags.getValue(text.textKey);
 		if (value == null || value.length() == 0)
@@ -332,7 +331,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public void renderPointText(Text text) {
+	public void renderPointText(TextStyle text) {
 		String value = mElement.tags.getValue(text.textKey);
 		if (value == null || value.length() == 0)
 			return;
@@ -344,7 +343,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public void renderWayText(Text text) {
+	public void renderWayText(TextStyle text) {
 		String value = mElement.tags.getValue(text.textKey);
 		if (value == null || value.length() == 0)
 			return;
@@ -362,11 +361,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public void renderPointCircle(Circle circle, int level) {
+	public void renderPointCircle(CircleStyle circle, int level) {
 	}
 
 	@Override
-	public void renderPointSymbol(Symbol symbol) {
+	public void renderPointSymbol(SymbolStyle symbol) {
 		if (symbol.texture == null)
 			return;
 
@@ -380,16 +379,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public void renderAreaSymbol(Symbol symbol) {
+	public void renderAreaSymbol(SymbolStyle symbol) {
 	}
 
 	@Override
-	public void renderWaySymbol(LineSymbol symbol) {
-
-	}
-
-	@Override
-	public void renderExtrusion(Extrusion extrusion, int level) {
+	public void renderExtrusion(ExtrusionStyle extrusion, int level) {
 		int height = 0;
 		int minHeight = 0;
 

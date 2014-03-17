@@ -22,12 +22,13 @@ import java.util.Stack;
 final class RuleOptimizer {
 
 	private static AttributeMatcher optimizeKeyMatcher(AttributeMatcher attributeMatcher,
-	        Stack<Rule> ruleStack) {
+	        Stack<RuleBuilder> ruleStack) {
 		for (int i = 0, n = ruleStack.size(); i < n; ++i) {
-			if (ruleStack.get(i) instanceof PositiveRule) {
-				PositiveRule positiveRule = (PositiveRule) ruleStack.get(i);
-				if (positiveRule.mKeyMatcher != null
-				        && positiveRule.mKeyMatcher.isCoveredBy(attributeMatcher)) {
+			if (ruleStack.get(i).positiveRule) {
+				RuleBuilder positiveRule = ruleStack.get(i);
+
+				if (positiveRule.keyMatcher != null
+				        && positiveRule.keyMatcher.isCoveredBy(attributeMatcher)) {
 					return null;
 				}
 			}
@@ -37,13 +38,13 @@ final class RuleOptimizer {
 	}
 
 	private static AttributeMatcher optimizeValueMatcher(
-	        AttributeMatcher attributeMatcher, Stack<Rule> ruleStack) {
+	        AttributeMatcher attributeMatcher, Stack<RuleBuilder> ruleStack) {
 		for (int i = 0, n = ruleStack.size(); i < n; ++i) {
-			if (ruleStack.get(i) instanceof PositiveRule) {
-				PositiveRule positiveRule = (PositiveRule) ruleStack.get(i);
+			if (ruleStack.get(i).positiveRule) {
+				RuleBuilder positiveRule = ruleStack.get(i);
 
-				if (positiveRule.mValueMatcher != null
-				        && positiveRule.mValueMatcher.isCoveredBy(attributeMatcher)) {
+				if (positiveRule.valueMatcher != null
+				        && positiveRule.valueMatcher.isCoveredBy(attributeMatcher)) {
 					return null;
 				}
 			}
@@ -53,7 +54,7 @@ final class RuleOptimizer {
 	}
 
 	static AttributeMatcher optimize(AttributeMatcher attributeMatcher,
-	        Stack<Rule> ruleStack) {
+	        Stack<RuleBuilder> ruleStack) {
 		if (attributeMatcher instanceof AnyMatcher)
 			return attributeMatcher;// return null;
 		else if (attributeMatcher instanceof NegativeMatcher) {

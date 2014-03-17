@@ -19,8 +19,8 @@ import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.theme.IRenderTheme;
-import org.oscim.theme.styles.Area;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.AreaStyle;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.RenderStyle;
 
 public class RenderTheme implements IRenderTheme {
@@ -147,11 +147,11 @@ public class RenderTheme implements IRenderTheme {
 		}
 
 		if (p != null) {
-			s.ri[0] = new Area(mCurLevel++, color(p));
+			s.ri[0] = new AreaStyle(mCurLevel++, color(p));
 		}
 
 		if (l != null) {
-			s.ri[1] = new Line(mCurLevel++, color(l), 1);
+			s.ri[1] = new LineStyle(mCurLevel++, color(l), 1);
 		}
 
 		if (p != null || l != null) {
@@ -198,7 +198,7 @@ public class RenderTheme implements IRenderTheme {
 			RGB c = r.color(f, CartoCSS.POLYGON_FILL, RGB.black);
 			out.println(z + " " + c);
 			return new RenderStyle[] {
-			        new Area(z, color(c))
+			        new AreaStyle(z, color(c))
 			};
 
 		} else if (type == GeometryType.LINE) {
@@ -207,7 +207,7 @@ public class RenderTheme implements IRenderTheme {
 			//out.println(z + " " + c);
 
 			return new RenderStyle[] {
-			        new Line(100 + z, color(c), width)
+			        new LineStyle(100 + z, color(c), width)
 			};
 
 		} else if (type == GeometryType.POINT) {
@@ -258,7 +258,7 @@ public class RenderTheme implements IRenderTheme {
 	}
 
 	@Override
-	public void updateInstructions() {
+	public void updateStyles() {
 		// TODO Auto-generated method stub
 
 	}

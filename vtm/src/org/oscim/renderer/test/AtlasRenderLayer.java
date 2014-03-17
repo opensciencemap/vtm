@@ -28,8 +28,9 @@ import org.oscim.renderer.atlas.TextureAtlas.Slot;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.TextItem;
 import org.oscim.renderer.elements.TextLayer;
-import org.oscim.theme.styles.Line;
-import org.oscim.theme.styles.Text;
+import org.oscim.theme.styles.LineStyle;
+import org.oscim.theme.styles.TextStyle;
+import org.oscim.theme.styles.TextStyle.TextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,19 +43,19 @@ public class AtlasRenderLayer extends ElementRenderer {
 		TextureAtlas mAtlas = TextureAtlas.create(2048, 2048, 1);
 
 		LineLayer ll = layers.getLineLayer(0);
-		ll.line = new Line(Color.BLUE, 3, Cap.BUTT);
+		ll.line = new LineStyle(Color.BLUE, 3, Cap.BUTT);
 		ll.scale = 1f;
 
 		LineLayer ll2 = layers.getLineLayer(1);
-		ll2.line = new Line(Color.RED, 3, Cap.BUTT);
+		ll2.line = new LineStyle(Color.RED, 3, Cap.BUTT);
 		ll2.scale = 1f;
 
 		LineLayer ll3 = layers.getLineLayer(2);
-		ll3.line = new Line(Color.GREEN, 3, Cap.BUTT);
+		ll3.line = new LineStyle(Color.GREEN, 3, Cap.BUTT);
 		ll3.scale = 1f;
 
 		TextLayer tl = new TextLayer();
-		Text t = Text.createText(20, 0, Color.BLACK, 0, false);
+		TextStyle t = new TextBuilder().setFontSize(20).setColor(Color.BLACK).build();
 		layers.setTextureLayers(tl);
 
 		float[] points = new float[10];

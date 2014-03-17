@@ -22,7 +22,7 @@ import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.TextItem;
-import org.oscim.theme.styles.Line;
+import org.oscim.theme.styles.LineStyle;
 
 class Debug {
 
@@ -71,12 +71,12 @@ class Debug {
 		int alpha = 0xaaffffff;
 
 		dbg.clear();
-		dbg.addLineLayer(0, new Line((Color.BLUE & alpha), 2));
-		dbg.addLineLayer(1, new Line((Color.RED & alpha), 2));
-		dbg.addLineLayer(3, new Line((Color.YELLOW & alpha), 2));
-		dbg.addLineLayer(2, new Line((Color.GREEN & alpha), 2));
-		dbg.addLineLayer(4, new Line((Color.CYAN & alpha), 2));
-		dbg.addLineLayer(5, new Line((Color.MAGENTA & alpha), 2));
+		dbg.addLineLayer(0, new LineStyle((Color.BLUE & alpha), 2));
+		dbg.addLineLayer(1, new LineStyle((Color.RED & alpha), 2));
+		dbg.addLineLayer(3, new LineStyle((Color.YELLOW & alpha), 2));
+		dbg.addLineLayer(2, new LineStyle((Color.GREEN & alpha), 2));
+		dbg.addLineLayer(4, new LineStyle((Color.CYAN & alpha), 2));
+		dbg.addLineLayer(5, new LineStyle((Color.MAGENTA & alpha), 2));
 	}
 
 	public static void draw(MapPosition pos, GLViewport m, ElementLayers layers) {

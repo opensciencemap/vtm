@@ -29,7 +29,7 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.theme.styles.Area;
+import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.math.Interpolation;
 import org.oscim.utils.pool.Inlist;
@@ -46,7 +46,7 @@ public final class PolygonLayer extends RenderElement {
 
 	private static final boolean enableTexture = true;
 
-	public Area area;
+	public AreaStyle area;
 
 	PolygonLayer(int layer) {
 		super(RenderElement.POLYGON);
@@ -181,7 +181,7 @@ public final class PolygonLayer extends RenderElement {
 			int shader = polyShader;
 
 			for (int c = start; c < end; c++) {
-				Area a = (Area) mFillPolys[c].area.getCurrent();
+				AreaStyle a = (AreaStyle) mFillPolys[c].area.getCurrent();
 
 				if (enableTexture && a.texture != null) {
 					shader = texShader;
@@ -194,10 +194,10 @@ public final class PolygonLayer extends RenderElement {
 					GLState.blend(true);
 					a.texture.bind();
 
-				} else if (a.fade >= zoom) {
+				} else if (a.fadeScale >= zoom) {
 					float f = 1.0f;
 					/* fade in/out */
-					if (a.fade >= zoom) {
+					if (a.fadeScale >= zoom) {
 						if (scale > FADE_START)
 							f = scale - 1;
 						else
@@ -207,11 +207,11 @@ public final class PolygonLayer extends RenderElement {
 
 					GLUtils.setColor(hPolygonColor[shader], a.color, f);
 
-				} else if (a.blend > 0 && a.blend <= zoom) {
+				} else if (a.blendScale > 0 && a.blendScale <= zoom) {
 					/* blend colors (not alpha) */
 					GLState.blend(false);
 
-					if (a.blend == zoom)
+					if (a.blendScale == zoom)
 						GLUtils.setColorBlend(hPolygonColor[shader],
 						                      a.color, a.blendColor, scale - 1.0f);
 					else
@@ -301,7 +301,7 @@ public final class PolygonLayer extends RenderElement {
 				PolygonLayer pl = (PolygonLayer) l;
 
 				// fade out polygon layers (set in RenderTheme)
-				if (pl.area.fade > 0 && pl.area.fade > zoom)
+				if (pl.area.fadeScale > 0 && pl.area.fadeScale > zoom)
 					continue;
 
 				if (cur == start) {

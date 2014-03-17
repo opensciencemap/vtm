@@ -17,29 +17,31 @@
  */
 package org.oscim.theme.styles;
 
+import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.theme.IRenderTheme.Callback;
 
 /**
- * Represents an icon along a polyline on the map.
+ * Represents an icon on the map.
  */
-public final class LineSymbol extends RenderStyle {
+public final class SymbolStyle extends RenderStyle {
 
-	public final boolean alignCenter;
-	// public final Bitmap bitmap;
-	public final boolean repeat;
-	public final String bitmap;
+	public final TextureRegion texture;
 
-	public LineSymbol(String src, boolean alignCenter, boolean repeat) {
-		super();
+	public SymbolStyle(TextureRegion symbol) {
+		this.texture = symbol;
+	}
 
-		this.bitmap = src;
-		// this.bitmap = BitmapUtils.createBitmap(src);
-		this.alignCenter = alignCenter;
-		this.repeat = repeat;
+	@Override
+	public void dispose() {
+	}
+
+	@Override
+	public void renderNode(Callback renderCallback) {
+		renderCallback.renderPointSymbol(this);
 	}
 
 	@Override
 	public void renderWay(Callback renderCallback) {
-		renderCallback.renderWaySymbol(this);
+		renderCallback.renderAreaSymbol(this);
 	}
 }
