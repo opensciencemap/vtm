@@ -29,7 +29,6 @@ public enum VtmThemes implements ThemeFile {
 	DEFAULT("styles/default.xml"),
 	TRONRENDER("styles/tronrender.xml"),
 	TRON2("styles/newtron.xml"),
-	MAPNIK("styles/carto.xml"),
 	OSMARENDER("styles/osmarender.xml");
 
 	private final String mPath;
