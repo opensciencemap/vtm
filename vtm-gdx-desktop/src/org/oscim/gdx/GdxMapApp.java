@@ -63,6 +63,10 @@ public class GdxMapApp extends GdxMap {
 		new LwjglApplication(map, (config == null ? getConfig() : config));
 	}
 
+	public static void run(LwjglApplicationConfiguration config, int tileSize, GdxMap map) {
+		run(map, config, tileSize);
+	}
+
 	static protected LwjglApplicationConfiguration getConfig() {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "vtm-gdx";
