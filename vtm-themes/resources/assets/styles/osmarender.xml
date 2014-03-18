@@ -772,7 +772,9 @@
                 </m> -->
 
               <!-- add outline for all matches -->
-              <outline use="casing" />
+              <m select="when-matched">
+                <outline use="casing" />
+              </m>
             </m>
           </m>
 
