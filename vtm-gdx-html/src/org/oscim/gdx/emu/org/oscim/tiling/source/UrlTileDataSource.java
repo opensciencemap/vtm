@@ -64,6 +64,12 @@ public class UrlTileDataSource implements ITileDataSource {
 
 			@Override
 			public void continueLoading() {
+				if (!mTile.state(MapTile.State.LOADING)) {
+					mConn.requestCompleted();
+					mSink.completed(FAILED);
+					mTile = null;
+					mSink = null;
+				}
 				boolean win = false;
 				if (is != null) {
 					try {

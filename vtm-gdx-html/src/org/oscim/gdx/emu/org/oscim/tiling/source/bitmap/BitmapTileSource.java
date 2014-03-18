@@ -80,8 +80,13 @@ public abstract class BitmapTileSource extends UrlTileSource {
 
 						@Override
 						public void continueLoading() {
-							sink.setTileImage(new GwtBitmap(img));
-							sink.completed(SUCCESS);
+							if (!tile.state(MapTile.State.LOADING)) {
+								sink.completed(FAILED);
+								RootPanel.get().remove(img);
+							} else {
+								sink.setTileImage(new GwtBitmap(img));
+								sink.completed(SUCCESS);
+							}
 						}
 					});
 				}
