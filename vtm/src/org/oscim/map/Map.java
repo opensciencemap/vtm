@@ -151,15 +151,22 @@ public abstract class Map {
 			log.error("No base layer set");
 			throw new IllegalStateException();
 		}
+		setTheme(ThemeLoader.load(theme));
+	}
 
-		IRenderTheme t = ThemeLoader.load(theme);
-		if (t == null) {
+	public void setTheme(IRenderTheme theme) {
+		if (mBaseLayer == null) {
+			log.error("No base layer set");
+			throw new IllegalStateException();
+		}
+
+		if (theme == null) {
 			log.error("Invalid theme");
 			return;
 		}
 
-		mBaseLayer.setRenderTheme(t);
-		MapRenderer.setBackgroundColor(t.getMapBackground());
+		mBaseLayer.setRenderTheme(theme);
+		MapRenderer.setBackgroundColor(theme.getMapBackground());
 
 		clearMap();
 	}

@@ -42,22 +42,25 @@ public class ThemeLoader {
 
 	public static IRenderTheme load(ThemeFile theme) throws ThemeException {
 
-		InputStream inputStream = null;
 		try {
-			inputStream = theme.getRenderThemeAsStream();
-			IRenderTheme t = XmlThemeBuilder.read(inputStream);
-
-			if (t != null)
-				t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
-
-			return t;
+			InputStream is = theme.getRenderThemeAsStream();
+			return load(is);
 		} catch (FileNotFoundException e) {
 			log.error(e.getMessage());
-		} finally {
-			IOUtils.closeQuietly(inputStream);
 		}
 
 		return null;
 	}
 
+	public static IRenderTheme load(InputStream inputStream) throws ThemeException {
+
+		try {
+			IRenderTheme t = XmlThemeBuilder.read(inputStream);
+			if (t != null)
+				t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
+			return t;
+		} finally {
+			IOUtils.closeQuietly(inputStream);
+		}
+	}
 }

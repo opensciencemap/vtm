@@ -44,7 +44,7 @@ public class ExternalRenderTheme implements ThemeFile {
 
 		File themeFile = new File(fileName);
 		if (!themeFile.exists()) {
-			throw new ThemeException("file does not exist: " + fileName);
+			throw new ThemeException("file does not exist: " + themeFile.getAbsolutePath());
 		} else if (!themeFile.isFile()) {
 			throw new ThemeException("not a file: " + fileName);
 		} else if (!themeFile.canRead()) {
