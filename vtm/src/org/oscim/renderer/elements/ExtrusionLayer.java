@@ -17,7 +17,6 @@
 package org.oscim.renderer.elements;
 
 import java.nio.ShortBuffer;
-import java.util.HashMap;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
@@ -27,9 +26,12 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.KeyMap;
+import org.oscim.utils.KeyMap.HashItem;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.geom.LineClipper;
 import org.oscim.utils.pool.Inlist;
+import org.oscim.utils.pool.SyncPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,14 +71,13 @@ public class ExtrusionLayer extends RenderElement {
 	public boolean compiled = false;
 	private final float mGroundResolution;
 
-	private HashMap<Vertex, Integer> mVertexMap = new HashMap<Vertex, Integer>();
-	private Vertex mTmpVertex = new Vertex();
+	//private HashMap<Vertex, Vertex> mVertexMap = new HashMap<Vertex, Vertex>();
+	private KeyMap<Vertex> mVertexMap = new KeyMap<Vertex>();
+	//private Vertex mTmpVertex = new Vertex();
 
 	public int indexOffset;
 
 	//private int numIndexHits = 0;
-
-	//boolean filled;
 
 	/**
 	 * ExtrusionLayer for polygon geometries.
@@ -121,8 +122,16 @@ public class ExtrusionLayer extends RenderElement {
 		mIndices[4] = mCurIndices[4] = VertexItem.pool.get();
 	}
 
-	static class Vertex {
+	static SyncPool<Vertex> vertexPool = new SyncPool<Vertex>(8192, false) {
+		@Override
+		protected Vertex createItem() {
+			return new Vertex();
+		}
+	};
+
+	static class Vertex extends HashItem {
 		short x, y, z, n;
+		int id;
 
 		@Override
 		public boolean equals(Object obj) {
@@ -132,28 +141,15 @@ public class ExtrusionLayer extends RenderElement {
 
 		@Override
 		public int hashCode() {
-			int hash = 31;
-			hash *= x * 31;
-			hash *= y * 31;
-			hash *= n * 31;
-			return hash;
+			return 7 + ((x << 16 | y) ^ (n << 16 | z)) * 31;
 		}
 
-		public void set(short x, short y, short z, short n) {
+		public Vertex set(short x, short y, short z, short n) {
 			this.x = x;
 			this.y = y;
 			this.z = z;
 			this.n = n;
-		}
-
-		public Vertex() {
-		}
-
-		public Vertex(Vertex v) {
-			this.x = v.x;
-			this.y = v.y;
-			this.z = v.z;
-			this.n = v.n;
+			return this;
 		}
 	}
 
@@ -166,7 +162,7 @@ public class ExtrusionLayer extends RenderElement {
 
 		int vertexCnt = sumVertices;
 
-		Vertex key = mTmpVertex;
+		Vertex key = vertexPool.get();
 		double scale = S * Tile.SIZE / 4096;
 
 		for (int k = 0, n = index.length; k < n;) {
@@ -217,34 +213,41 @@ public class ExtrusionLayer extends RenderElement {
 			int my = FastMath.clamp(127 + (int) ((cy / len / p) * 128), 0, 255);
 			short normal = (short) ((my << 8) | mx);
 
+			if (key == null)
+				key = vertexPool.get();
+
 			key.set((short) (vx1 * scale),
 			        (short) (vy1 * scale),
 			        (short) (vz1 * scale),
-			        (short) normal);
+			        normal);
 
-			Integer vertexId = mVertexMap.get(key);
-			if (vertexId == null) {
+			Vertex vertex = mVertexMap.put(key, false);
+
+			if (vertex == null) {
+				key.id = vertexCnt++;
 				addVertex(key);
-				addIndex(vertexCnt);
-				mVertexMap.put(new Vertex(key), vertexCnt++);
+				addIndex(key);
+				key = vertexPool.get();
 			} else {
 				//numIndexHits++;
-				addIndex(vertexId.intValue());
+				addIndex(vertex);
 			}
 
 			key.set((short) (vx2 * scale),
 			        (short) (vy2 * scale),
 			        (short) (vz2 * scale),
-			        (short) normal);
+			        normal);
 
-			vertexId = mVertexMap.get(key);
-			if (vertexId == null) {
+			vertex = mVertexMap.put(key, false);
+
+			if (vertex == null) {
+				key.id = vertexCnt++;
 				addVertex(key);
-				addIndex(vertexCnt);
-				mVertexMap.put(new Vertex(key), vertexCnt++);
+				addIndex(key);
+				key = vertexPool.get();
 			} else {
 				//numIndexHits++;
-				addIndex(vertexId.intValue());
+				addIndex(vertex);
 			}
 
 			key.set((short) (vx3 * scale),
@@ -252,16 +255,19 @@ public class ExtrusionLayer extends RenderElement {
 			        (short) (vz3 * scale),
 			        (short) normal);
 
-			vertexId = mVertexMap.get(key);
-			if (vertexId == null) {
+			vertex = mVertexMap.put(key, false);
+			if (vertex == null) {
+				key.id = vertexCnt++;
 				addVertex(key);
-				addIndex(vertexCnt);
-				mVertexMap.put(new Vertex(key), vertexCnt++);
+				addIndex(key);
+				key = vertexPool.get();
 			} else {
 				//numIndexHits++;
-				addIndex(vertexId.intValue());
+				addIndex(vertex);
 			}
 		}
+
+		vertexPool.release(key);
 
 		sumVertices = vertexCnt;
 	}
@@ -272,8 +278,6 @@ public class ExtrusionLayer extends RenderElement {
 		if (vi.used == VertexItem.SIZE) {
 			mCurVertices.used = VertexItem.SIZE;
 			mCurVertices = VertexItem.pool.getNext(vi);
-			//mCurVertices.next = VertexItem.pool.get();
-			//mCurVertices = mCurVertices.next;
 			vi = mCurVertices;
 		}
 
@@ -283,22 +287,16 @@ public class ExtrusionLayer extends RenderElement {
 		vi.vertices[vi.used++] = vertex.n;
 	}
 
-	private void addIndex(int id) {
+	private void addIndex(Vertex v) {
 		VertexItem vi = mCurIndices[IND_MESH];
 
 		if (vi.used == VertexItem.SIZE) {
 			mCurIndices[IND_MESH].used = VertexItem.SIZE;
 			mCurIndices[IND_MESH] = VertexItem.pool.getNext(vi);
 			vi = mCurIndices[IND_MESH];
-
-			//mCurIndices[IND_MESH].next = VertexItem.pool.get();
-			//mCurIndices[IND_MESH] = mCurIndices[IND_MESH].next;
-			//vi = mCurIndices[IND_MESH];
-			//indices = mCurIndices[IND_MESH].vertices;
-			//i = 0;
 		}
 		sumIndices++;
-		vi.vertices[vi.used++] = (short) id;
+		vi.vertices[vi.used++] = (short) v.id;
 	}
 
 	//	private void encodeNormal(float v[], int offset) {
@@ -651,57 +649,45 @@ public class ExtrusionLayer extends RenderElement {
 		return convex;
 	}
 
-	public void complete() {
-		mVertexMap.clear();
-	}
-
 	@Override
 	public void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
-		mVertexMap.clear();
+		if (compiled) {
+			throw new IllegalStateException();
+		}
 
-		if (sumVertices == 0 || compiled)
+		vertexPool.releaseAll(mVertexMap.releaseItems());
+
+		mVertexMap = null;
+		mClipper = null;
+
+		if (sumVertices == 0) {
+			compiled = true;
 			return;
+		}
 
 		indexOffset = indexBuffer.position();
 
-		//int sumIndices = 0;
 		for (int i = 0; i <= IND_MESH; i++) {
 			for (VertexItem vi = mIndices[i]; vi != null; vi = vi.next) {
 				indexBuffer.put(vi.vertices, 0, vi.used);
 				numIndices[i] += vi.used;
 			}
-			//sumIndices += numIndices[i];
 		}
 
 		//log.debug("INDEX HITS " + numIndexHits + " / " + sumVertices + " / " + sumIndices);
-
-		//int size = sumIndices * 2;
-		//vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
-		//vboIndices.loadBufferData(vertexBuffer.flip(), size);
-		//
-		//GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		// upload vertices
-		//vertexBuffer.clear();
 
 		offset = vertexBuffer.position() * 2;
 
 		for (VertexItem vi = mVertices; vi != null; vi = vi.next)
 			vertexBuffer.put(vi.vertices, 0, vi.used);
 
-		//		size = sumVertices * 4 * 2;
-		//		vboVertices = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
-		//		vboVertices.loadBufferData(vertexBuffer.flip(), size);
-		//
-		//		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
-
 		clear();
 		compiled = true;
-		mClipper = null;
 	}
 
 	@Override
 	protected void clear() {
+		mVertexMap = null;
 		if (compiled) {
 			vboIndices = BufferObject.release(vboIndices);
 			vboVertices = BufferObject.release(vboVertices);
@@ -709,8 +695,11 @@ public class ExtrusionLayer extends RenderElement {
 			for (int i = 0; i <= IND_MESH; i++)
 				mIndices[i] = VertexItem.pool.releaseAll(mIndices[i]);
 			mIndices = null;
-
 			mVertices = VertexItem.pool.releaseAll(mVertices);
 		}
+	}
+
+	public ExtrusionLayer next() {
+		return (ExtrusionLayer) next;
 	}
 }

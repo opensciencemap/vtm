@@ -192,19 +192,22 @@ public class ExtrusionRenderer extends LayerRenderer {
 		if (el.compiled)
 			return true;
 
-		boolean compiled = false;
-
 		int sumIndices = 0;
 		int sumVertices = 0;
-		for (ExtrusionLayer l = el; l != null; l = (ExtrusionLayer) l.next) {
+		for (ExtrusionLayer l = el; l != null; l = l.next()) {
+			//if (l.sumIndices == 0){
+			//	l.clear();
+			//}
 			sumIndices += l.sumIndices;
 			sumVertices += l.sumVertices;
 		}
-
+		if (sumIndices == 0) {
+			return false;
+		}
 		ShortBuffer vbuf = MapRenderer.getShortBuffer(sumVertices * 4);
 		ShortBuffer ibuf = MapRenderer.getShortBuffer(sumIndices);
 
-		for (ExtrusionLayer l = el; l != null; l = (ExtrusionLayer) l.next)
+		for (ExtrusionLayer l = el; l != null; l = l.next())
 			l.compile(vbuf, ibuf);
 
 		int size = sumIndices * 2;
@@ -233,8 +236,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		//GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
 		GLUtils.checkGlError("compile extrusion layer");
-
-		return compiled;
+		return true;
 	}
 
 	private static ExtrusionLayer getLayer(MapTile t) {
@@ -252,7 +254,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 	}
 
 	private void renderCombined(int vertexPointer, ExtrusionLayer el) {
-		for (; el != null; el = (ExtrusionLayer) el.next) {
+		for (; el != null; el = el.next()) {
 
 			if (el.vboIndices == null)
 				continue;
@@ -385,7 +387,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 			el.vboIndices.bind();
 			el.vboVertices.bind();
 
-			for (; el != null; el = (ExtrusionLayer) el.next) {
+			for (; el != null; el = el.next()) {
 
 				if (el.colors != currentColor) {
 					currentColor = el.colors;
