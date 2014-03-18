@@ -84,17 +84,21 @@ public class XmlThemeBuilder extends DefaultHandler {
 	 *            an input stream containing valid render theme XML data.
 	 * @return a new RenderTheme which is created by parsing the XML data from
 	 *         the input stream.
-	 * @throws SAXException
+	 * @throws ThemeException
 	 *             if an error occurs while parsing the render theme XML.
 	 * @throws IOException
 	 *             if an I/O error occurs while reading from the input stream.
 	 */
 	public static IRenderTheme read(InputStream inputStream)
-	        throws SAXException, IOException {
+	        throws ThemeException {
 
 		XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder();
 
-		new XMLReaderAdapter().parse(renderThemeHandler, inputStream);
+		try {
+			new XMLReaderAdapter().parse(renderThemeHandler, inputStream);
+		} catch (IOException e) {
+			throw new ThemeException(e.getMessage());
+		}
 
 		return renderThemeHandler.mRenderTheme;
 	}
@@ -187,7 +191,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
-	        Attributes attributes) throws SAXException {
+	        Attributes attributes) throws ThemeException {
 		try {
 			if (ELEMENT_NAME_RENDER_THEME.equals(localName)) {
 				checkState(localName, Element.RENDER_THEME);
@@ -281,10 +285,10 @@ public class XmlThemeBuilder extends DefaultHandler {
 				log.error("unknown element: {}", localName);
 				//throw new SAXException("unknown element: " + localName);
 			}
-		} catch (ThemeException e) {
-			throw new SAXException(null, e);
+		} catch (SAXException e) {
+			throw new ThemeException(e.getMessage());
 		} catch (IOException e) {
-			throw new SAXException(null, e);
+			throw new ThemeException(e.getMessage());
 		}
 	}
 
@@ -361,16 +365,16 @@ public class XmlThemeBuilder extends DefaultHandler {
 				b.color(value);
 
 			else if ("width".equals(name) || "stroke-width".equals(name)) {
-				float width = parseFloat(value);
+				b.width = parseFloat(value);
 				if (line == null) {
-					validateNonNegative("width", width);
+					if (!isOutline)
+						validateNonNegative("width", b.width);
 				} else {
 					/* use stroke width relative to 'line' */
-					width += line.width;
-					if (width <= 0)
-						width = 1;
+					b.width += line.width;
+					if (b.width <= 0)
+						b.width = 1;
 				}
-				b.width = width;
 			}
 			else if ("cap".equals(name) || "stroke-linecap".equals(name))
 				b.cap = Cap.valueOf(value.toUpperCase());

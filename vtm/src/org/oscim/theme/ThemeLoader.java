@@ -18,10 +18,10 @@
 package org.oscim.theme;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.oscim.backend.CanvasAdapter;
+import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +32,15 @@ public class ThemeLoader {
 	/**
 	 * Load theme from XML file.
 	 * 
-	 * @param renderThemePath ..
-	 * @return ...
-	 * @throws FileNotFoundException ...
+	 * @throws FileNotFoundException
+	 * @throws ThemeException
 	 */
-	public static IRenderTheme load(String renderThemePath) throws FileNotFoundException {
+	public static IRenderTheme load(String renderThemePath) throws ThemeException,
+	        FileNotFoundException {
 		return load(new ExternalRenderTheme(renderThemePath));
 	}
 
-	public static IRenderTheme load(ThemeFile theme) {
+	public static IRenderTheme load(ThemeFile theme) throws ThemeException {
 
 		InputStream inputStream = null;
 		try {
@@ -51,11 +51,8 @@ public class ThemeLoader {
 				t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
 
 			return t;
-		} catch (IOException e) {
+		} catch (FileNotFoundException e) {
 			log.error(e.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-
 		} finally {
 			IOUtils.closeQuietly(inputStream);
 		}

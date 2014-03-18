@@ -20,11 +20,9 @@ package org.oscim.theme;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 
-import org.oscim.backend.AssetAdapter;
+import org.oscim.theme.IRenderTheme.ThemeException;
 
 /**
  * An ExternalRenderTheme allows for customizing the rendering style of the map
@@ -34,39 +32,30 @@ public class ExternalRenderTheme implements ThemeFile {
 	private static final long serialVersionUID = 1L;
 
 	private final long mFileModificationDate;
-	private transient int mHashCodeValue;
-	private final String mRenderThemePath;
-
-	private InputStream mInputStream;
+	private final String mPath;
 
 	/**
-	 * @param renderThemePath
+	 * @param fileName
 	 *            the path to the XML render theme file.
 	 * @throws FileNotFoundException
 	 *             if the file does not exist or cannot be read.
 	 */
-	public ExternalRenderTheme(String renderThemePath) throws FileNotFoundException {
-		mInputStream = AssetAdapter.g.openFileAsStream(renderThemePath);
-		if (mInputStream != null) {
-			mRenderThemePath = null;
-			mFileModificationDate = 0;
-			return;
-		}
-		File renderThemeFile = new File(renderThemePath);
-		if (!renderThemeFile.exists()) {
-			throw new FileNotFoundException("file does not exist: " + renderThemePath);
-		} else if (!renderThemeFile.isFile()) {
-			throw new FileNotFoundException("not a file: " + renderThemePath);
-		} else if (!renderThemeFile.canRead()) {
-			throw new FileNotFoundException("cannot read file: " + renderThemePath);
+	public ExternalRenderTheme(String fileName) {
+
+		File themeFile = new File(fileName);
+		if (!themeFile.exists()) {
+			throw new ThemeException("file does not exist: " + fileName);
+		} else if (!themeFile.isFile()) {
+			throw new ThemeException("not a file: " + fileName);
+		} else if (!themeFile.canRead()) {
+			throw new ThemeException("cannot read file: " + fileName);
 		}
 
-		mFileModificationDate = renderThemeFile.lastModified();
+		mFileModificationDate = themeFile.lastModified();
 		if (mFileModificationDate == 0L) {
-			throw new FileNotFoundException("cannot read last modification time");
+			throw new ThemeException("cannot read last modification time");
 		}
-		mRenderThemePath = renderThemePath;
-		calculateTransientValues();
+		mPath = fileName;
 	}
 
 	@Override
@@ -79,47 +68,23 @@ public class ExternalRenderTheme implements ThemeFile {
 		ExternalRenderTheme other = (ExternalRenderTheme) obj;
 		if (mFileModificationDate != other.mFileModificationDate) {
 			return false;
-		} else if (mRenderThemePath == null && other.mRenderThemePath != null) {
+		} else if (mPath == null && other.mPath != null) {
 			return false;
-		} else if (mRenderThemePath != null && !mRenderThemePath.equals(other.mRenderThemePath)) {
+		} else if (mPath != null && !mPath.equals(other.mPath)) {
 			return false;
 		}
 		return true;
 	}
 
 	@Override
-	public InputStream getRenderThemeAsStream() throws FileNotFoundException {
-		if (mInputStream != null)
-			return mInputStream;
+	public InputStream getRenderThemeAsStream() {
+		InputStream is;
 
-		return new FileInputStream(mRenderThemePath);
-	}
-
-	@Override
-	public int hashCode() {
-		return mHashCodeValue;
-	}
-
-	/**
-	 * @return the hash code of this object.
-	 */
-	private int calculateHashCode() {
-		int result = 1;
-		result = 31 * result + (int) (mFileModificationDate ^ (mFileModificationDate >>> 32));
-		result = 31 * result + ((mRenderThemePath == null) ? 0 : mRenderThemePath.hashCode());
-		return result;
-	}
-
-	/**
-	 * Calculates the values of some transient variables.
-	 */
-	private void calculateTransientValues() {
-		mHashCodeValue = calculateHashCode();
-	}
-
-	private void readObject(ObjectInputStream objectInputStream) throws IOException,
-	        ClassNotFoundException {
-		objectInputStream.defaultReadObject();
-		calculateTransientValues();
+		try {
+			is = new FileInputStream(mPath);
+		} catch (FileNotFoundException e) {
+			throw new ThemeException(e.getMessage());
+		}
+		return is;
 	}
 }
