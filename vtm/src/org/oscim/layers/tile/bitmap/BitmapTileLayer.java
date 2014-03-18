@@ -104,14 +104,10 @@ public class BitmapTileLayer extends TileLayer {
 		return new BitmapTileLoader(this, mTileSource);
 	}
 
-	final static int TEXTURE_HEIGHT = 256;
-	final static int TEXTURE_WIDTH = 256;
 	final static int POOL_FILL = 40;
 
 	/** pool shared by TextLayers */
-	final static TexturePool pool = new TexturePool(POOL_FILL,
-	                                                TEXTURE_WIDTH,
-	                                                TEXTURE_HEIGHT) {
+	final static TexturePool pool = new TexturePool(POOL_FILL) {
 
 		//		int sum = 0;
 		//

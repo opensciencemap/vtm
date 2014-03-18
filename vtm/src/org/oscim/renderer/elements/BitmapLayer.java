@@ -70,8 +70,7 @@ public class BitmapLayer extends TextureLayer {
 			if (pool == null)
 				textures = new TextureItem(mBitmap);
 			else {
-				textures = pool.get();
-				textures.bitmap = mBitmap;
+				textures = pool.get(mBitmap);
 			}
 		}
 

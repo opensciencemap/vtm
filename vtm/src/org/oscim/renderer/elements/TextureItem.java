@@ -150,6 +150,8 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		private final int mHeight;
 		private final int mWidth;
+		private final boolean mUseBitmapPool;
+
 		//private final int mBitmapFormat;
 		//private final int mBitmapType;
 
@@ -159,6 +161,14 @@ public class TextureItem extends Inlist<TextureItem> {
 			super(maxFill);
 			mWidth = width;
 			mHeight = height;
+			mUseBitmapPool = true;
+		}
+
+		public TexturePool(int maxFill) {
+			super(maxFill);
+			mWidth = 0;
+			mHeight = 0;
+			mUseBitmapPool = false;
 		}
 
 		@Override
@@ -171,6 +181,9 @@ public class TextureItem extends Inlist<TextureItem> {
 		 */
 		public synchronized TextureItem get() {
 			TextureItem t = super.get();
+
+			if (!mUseBitmapPool)
+				return t;
 
 			synchronized (mBitmaps) {
 				int size = mBitmaps.size();
@@ -185,6 +198,13 @@ public class TextureItem extends Inlist<TextureItem> {
 			return t;
 		}
 
+		public synchronized TextureItem get(Bitmap bitmap) {
+			TextureItem t = super.get();
+			t.bitmap = bitmap;
+
+			return t;
+		}
+
 		@Override
 		protected TextureItem createItem() {
 			return new TextureItem(this, -1);
@@ -193,21 +213,14 @@ public class TextureItem extends Inlist<TextureItem> {
 		@Override
 		protected boolean clearItem(TextureItem t) {
 
-			//if (t.ownBitmap) {
-			//	t.bitmap = null;
-			//	t.ownBitmap = false;
-			//	releaseTexture(t);
-			//	return false;
-			//}
-
 			if (t.ref)
 				return false;
 
 			t.ready = false;
-			releaseBitmap(t);
 
-			// only add back to pool when a texture
-			// is already assigned
+			if (mUseBitmapPool)
+				releaseBitmap(t);
+
 			return t.id >= 0;
 		}
 
@@ -273,21 +286,11 @@ public class TextureItem extends Inlist<TextureItem> {
 				t.bitmap.uploadToTexture(true);
 			}
 
-			//if (t.ownBitmap) {
-			//	t.bitmap.uploadToTexture(false);
-			//} else 
-
-			//if (t.width == mWidth && t.height == mHeight) {
-			//	// use faster subimage upload 
-			//	t.bitmap.uploadToTexture(true);
-			//} else {
-			//	t.bitmap.uploadToTexture(false);
-			//}
-
 			if (TextureLayer.Renderer.debug)
 				GLUtils.checkGlError(TextureItem.class.getName());
 
-			releaseBitmap(t);
+			if (mUseBitmapPool)
+				releaseBitmap(t);
 		}
 
 		protected void initTexture(TextureItem t) {
@@ -312,27 +315,13 @@ public class TextureItem extends Inlist<TextureItem> {
 		}
 	};
 
-	// Pool for not-pooled textures. Disposed items will only be released 
-	// on the GL-Thread and will not be put back in any pool.
-	final static TexturePool NOPOOL = new TexturePool(0, 0, 0) {
-		protected void releaseBitmap(TextureItem t) {
-			// TODO
-		};
-	};
-
-	//	public final static TexturePool nopool(){
-	//		return NOPOOL;
-	//	}
+	/* Pool for not-pooled textures. Disposed items will only be released
+	 * on the GL-Thread and will not be put back in any pool. */
+	final static TexturePool NOPOOL = new TexturePool(0);
 
 	private static GL20 GL;
 
 	static void init(GL20 gl) {
 		GL = gl;
-
-		//		mTexCnt = num;
-		//		NOPOOL.init(num);
-		//
-		//		mBitmaps.clear();
-		//		mTexDisposed.clear();
 	}
 }
