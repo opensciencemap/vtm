@@ -18,24 +18,25 @@ package org.oscim.utils.pool;
 
 import javax.annotation.CheckReturnValue;
 
-public abstract class SyncPool<T extends Inlist<T>> {
-	protected final int maxFill;
-	protected int fill;
+public abstract class SyncPool<T extends Inlist<?>> {
+	protected final int mMaxFill;
+	protected final boolean mClearItems;
 
-	protected T pool;
-
-	public SyncPool() {
-		maxFill = 100;
-		fill = 0;
-	}
+	protected int mFill;
+	protected T mPool;
 
 	public SyncPool(int maxItemsInPool) {
-		maxFill = maxItemsInPool;
-		fill = 0;
+		this(maxItemsInPool, true);
+	}
+
+	public SyncPool(int maxItemsInPool, boolean clearItems) {
+		mMaxFill = maxItemsInPool;
+		mFill = 0;
+		mClearItems = clearItems;
 	}
 
 	public int getFill() {
-		return fill;
+		return mFill;
 	}
 
 	/**
@@ -45,8 +46,8 @@ public abstract class SyncPool<T extends Inlist<T>> {
 	 *            number of initial items
 	 */
 	public void init(int items) {
-		fill = 0;
-		pool = null;
+		mFill = 0;
+		mPool = null;
 	}
 
 	/**
@@ -80,24 +81,25 @@ public abstract class SyncPool<T extends Inlist<T>> {
 	 * Usage item = pool.release(item), to ensure to not keep a reference to
 	 * item!
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@CheckReturnValue
 	public T release(T item) {
 		if (item == null)
 			return null;
 
-		if (!clearItem(item)) {
+		if (mClearItems && !clearItem(item)) {
 			// dont add back to pool
 			freeItem(item);
 			return null;
 		}
-		if (fill < maxFill) {
+		if (mFill < mMaxFill) {
 			synchronized (this) {
-				fill++;
+				mFill++;
 
-				item.next = pool;
-				pool = item;
+				((Inlist) item).next = (T) mPool;
+				mPool = item;
 			}
-		} else {
+		} else if (mClearItems) {
 			freeItem(item);
 		}
 		return null;
@@ -109,35 +111,38 @@ public abstract class SyncPool<T extends Inlist<T>> {
 	 * Usage list = pool.releaseAll(list), to ensure to not keep a reference to
 	 * list!
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@CheckReturnValue
 	public T releaseAll(T item) {
 		if (item == null)
 			return null;
 
-		if (fill > maxFill) {
+		if (mFill > mMaxFill) {
 			while (item != null) {
-				clearItem(item);
-				freeItem(item);
-				item = item.next;
+				if (mClearItems) {
+					clearItem(item);
+					freeItem(item);
+				}
+				item = (T) item.next;
 			}
 			return null;
 		}
 
 		synchronized (this) {
 			while (item != null) {
-				T next = item.next;
+				T next = (T) item.next;
 
-				if (!clearItem(item)) {
+				if (mClearItems && !clearItem(item)) {
 					// dont add back to pool
 					freeItem(item);
 					item = next;
 					continue;
 				}
 
-				fill++;
+				mFill++;
 
-				item.next = pool;
-				pool = item;
+				((Inlist) item).next = (T) mPool;
+				mPool = item;
 
 				item = next;
 			}
@@ -151,17 +156,18 @@ public abstract class SyncPool<T extends Inlist<T>> {
 	 * 
 	 * @return the item
 	 */
+	@SuppressWarnings("unchecked")
 	public T get() {
 
 		synchronized (this) {
-			if (pool == null) {
+			if (mPool == null) {
 				return createItem();
 			}
 
-			fill--;
+			mFill--;
 
-			T ret = pool;
-			pool = pool.next;
+			T ret = mPool;
+			mPool = (T) mPool.next;
 
 			ret.next = null;
 			return ret;

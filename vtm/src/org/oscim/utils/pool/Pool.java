@@ -18,11 +18,11 @@ package org.oscim.utils.pool;
 
 import javax.annotation.CheckReturnValue;
 
-public abstract class Pool<T extends Inlist<T>> {
-
-	protected T pool;
-	protected int limit;
-	protected int fill;
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public abstract class Pool<T extends Inlist<?>> {
+	protected T mPool;
+	protected int mLimit;
+	protected int mFill;
 
 	/**
 	 * @param item release resources
@@ -47,8 +47,8 @@ public abstract class Pool<T extends Inlist<T>> {
 		if (!clearItem(item))
 			return null;
 
-		item.next = pool;
-		pool = item;
+		((Inlist) item).next = mPool;
+		mPool = item;
 
 		return null;
 	}
@@ -65,12 +65,13 @@ public abstract class Pool<T extends Inlist<T>> {
 			return null;
 
 		while (list != null) {
-			T next = list.next;
+
+			T next = (T) list.next;
 
 			clearItem(list);
 
-			list.next = pool;
-			pool = list;
+			((Inlist) list).next = mPool;
+			mPool = list;
 
 			list = next;
 		}
@@ -84,21 +85,21 @@ public abstract class Pool<T extends Inlist<T>> {
 
 		clearItem(item);
 
-		Inlist.remove(list, item);
+		Inlist.remove((Inlist) list, item);
 
 		return list;
 	}
 
 	/** get an item from pool */
 	public T get() {
-		if (pool == null)
+		if (mPool == null)
 			return createItem();
 
-		T ret = pool;
-		pool = pool.next;
+		Inlist ret = mPool;
+		mPool = (T) mPool.next;
 
 		ret.next = null;
-		return ret;
+		return (T) ret;
 	}
 
 	protected abstract T createItem();

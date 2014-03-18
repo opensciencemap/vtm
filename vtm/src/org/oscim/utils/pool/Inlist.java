@@ -30,9 +30,11 @@ import javax.annotation.CheckReturnValue;
  */
 public class Inlist<T extends Inlist<T>> {
 	/** UNTESTED */
-	public static class List<T extends Inlist<T>> implements Iterable<T> {
-		T head;
-		T cur;
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static class List<T extends Inlist<?>> implements Iterable<T> {
+		Inlist head;
+		Inlist cur;
 		Iterator<T> mIterator = new Iterator<T>() {
 
 			@Override
@@ -45,14 +47,14 @@ public class Inlist<T extends Inlist<T>> {
 				if (cur == null)
 					throw new IllegalStateException();
 
-				T tmp = cur;
+				Inlist tmp = cur;
 				cur = cur.next;
-				return tmp;
+				return (T) tmp;
 			}
 
 			@Override
 			public void remove() {
-				T tmp = cur.next;
+				T tmp = (T) cur.next;
 				head = Inlist.remove(head, cur);
 				cur = tmp;
 			}
@@ -65,7 +67,7 @@ public class Inlist<T extends Inlist<T>> {
 		}
 
 		public void push(T it) {
-			it.next = head;
+			((Inlist) it).next = head;
 			head = it;
 		}
 
@@ -75,18 +77,22 @@ public class Inlist<T extends Inlist<T>> {
 		}
 
 		public T clear() {
-			T ret = head;
+			Inlist ret = head;
 			head = null;
 			cur = null;
-			return ret;
+			return (T) ret;
 		}
 
 		public T getHead() {
-			return head;
+			return (T) head;
 		}
 	}
 
 	public T next;
+
+	public T next() {
+		return next;
+	}
 
 	/**
 	 * Push 'item' onto 'list'.

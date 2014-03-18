@@ -24,7 +24,7 @@ import org.oscim.utils.pool.SyncPool;
 
 public class SymbolItem extends Inlist<SymbolItem> {
 
-	public final static SyncPool<SymbolItem> pool = new SyncPool<SymbolItem>() {
+	public final static SyncPool<SymbolItem> pool = new SyncPool<SymbolItem>(128) {
 
 		@Override
 		protected SymbolItem createItem() {

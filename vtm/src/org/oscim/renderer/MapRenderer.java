@@ -74,12 +74,12 @@ public class MapRenderer {
 		}
 
 		public BufferItem get(int size) {
-			BufferItem b = pool;
+			BufferItem b = mPool;
 
 			if (b == null) {
 				b = new BufferItem();
 			} else {
-				pool = b.next;
+				mPool = b.next;
 				b.next = null;
 			}
 			if (b.tmpBufferSize < size)
