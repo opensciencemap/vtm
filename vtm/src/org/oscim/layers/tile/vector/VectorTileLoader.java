@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Hannes Janetzek
+ * Copyright 2012-2014 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -20,24 +20,20 @@ import static org.oscim.layers.tile.MapTile.State.CANCEL;
 
 import java.util.concurrent.CancellationException;
 
-import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
-import org.oscim.core.PointF;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.layers.tile.TileManager;
+import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderProcessHook;
+import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.MeshLayer;
 import org.oscim.renderer.elements.PolygonLayer;
-import org.oscim.renderer.elements.SymbolItem;
-import org.oscim.renderer.elements.TextItem;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.RenderTheme;
 import org.oscim.theme.styles.AreaStyle;
@@ -62,7 +58,6 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public static final byte STROKE_MAX_ZOOM = 17;
 
 	protected IRenderTheme renderTheme;
-	protected int renderLevels;
 
 	/** current TileDataSource used by this MapTileLoader */
 	protected ITileDataSource mTileDataSource;
@@ -79,17 +74,13 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	/** Line-scale-factor depending on zoom and latitude */
 	protected float mLineScale = 1.0f;
 
-	protected final TagSet mFilteredTags;
+	protected ElementLayers mLayers;
 
-	public void setRenderTheme(IRenderTheme theme) {
-		renderTheme = theme;
-		renderLevels = theme.getLevels();
-	}
+	private final VectorTileLayer mTileLayer;
 
-	public VectorTileLoader(TileManager tileManager) {
-		super(tileManager);
-
-		mFilteredTags = new TagSet();
+	public VectorTileLoader(VectorTileLayer tileLayer) {
+		super(tileLayer.getManager());
+		mTileLayer = tileLayer;
 	}
 
 	@Override
@@ -105,11 +96,13 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			log.error("no tile source is set");
 			return false;
 		}
-
+		renderTheme = mTileLayer.getTheme();
 		if (renderTheme == null) {
 			log.error("no theme is set");
 			return false;
 		}
+
+		//mTileLayer.getLoaderHooks();
 
 		/* account for area changes with latitude */
 		double lat = MercatorProjection.toLatitude(tile.y);
@@ -119,8 +112,8 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		/* scale line width relative to latitude + PI * thumb */
 		mLineScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
-
-		tile.layers = new ElementLayers();
+		mLayers = new ElementLayers();
+		tile.data = mLayers;
 
 		try {
 			/* query data source, which calls process() callback */
@@ -151,11 +144,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	public void setDataSource(ITileDataSource mapDatabase) {
+	public void setDataSource(ITileDataSource dataSource) {
 		if (mTileDataSource != null)
 			mTileDataSource.destroy();
 
-		mTileDataSource = mapDatabase;
+		mTileDataSource = dataSource;
 	}
 
 	static class TagReplacement {
@@ -171,46 +164,36 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	/**
 	 * Override this method to change tags that should be passed
 	 * to {@link RenderTheme} matching.
+	 * E.g. to replace tags that should not be cached in Rendertheme
 	 */
-	protected boolean filterTags(TagSet tagSet) {
-		mFilteredTags.clear();
-		for (int i = 0; i < tagSet.numTags; i++)
-			mFilteredTags.add(tagSet.tags[i]);
-		return true;
+	protected TagSet filterTags(TagSet tagSet) {
+		return tagSet;
 	}
 
 	@Override
 	public void process(MapElement element) {
-		clearState();
 
 		if (isCanceled() || mTile.state(CANCEL))
 			throw new CancellationException();
 
-		mElement = element;
-
-		if (element.type == GeometryType.POINT) {
-			// remove tags that should not be cached in Rendertheme
-			filterTags(element.tags);
-
-			// get and apply render instructions
-			renderNode(renderTheme.matchElement(element.type, mFilteredTags, mTile.zoomLevel));
-		} else {
-
-			// replace tags that should not be cached in Rendertheme (e.g. name)
-			if (!filterTags(element.tags))
+		for (TileLoaderProcessHook h : mTileLayer.loaderProcessHooks())
+			if (h.process(mTile, mLayers, element))
 				return;
 
-			mCurLayer = getValidLayer(element.layer) * renderLevels;
+		TagSet tags = filterTags(element.tags);
+		if (tags == null)
+			return;
 
-			// get and apply render instructions
-			renderWay(renderTheme.matchElement(element.type, mFilteredTags, mTile.zoomLevel));
+		mElement = element;
 
-			//boolean closed = element.type == GeometryType.POLY;
-
-			mCurLineLayer = null;
+		/* get and apply render instructions */
+		if (element.type == GeometryType.POINT) {
+			renderNode(renderTheme.matchElement(element.type, tags, mTile.zoomLevel));
+		} else {
+			mCurLayer = getValidLayer(element.layer) * renderTheme.getLevels();
+			renderWay(renderTheme.matchElement(element.type, tags, mTile.zoomLevel));
 		}
-
-		mElement = null;
+		clearState();
 	}
 
 	//protected void debugUnmatched(boolean closed, TagSet tags) {
@@ -243,6 +226,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	protected void clearState() {
 		mCurLineLayer = null;
+		mElement = null;
 	}
 
 	/*** RenderThemeCallback ***/
@@ -257,7 +241,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				return;
 			}
 
-			LineLayer ll = mTile.layers.getLineLayer(numLayer);
+			LineLayer ll = mLayers.getLineLayer(numLayer);
 
 			if (ll.line == null) {
 				ll.line = line;
@@ -271,11 +255,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 			ll.addLine(mElement);
 
-			// NB: keep reference for outline layer(s)
+			/* keep reference for outline layer(s) */
 			mCurLineLayer = ll;
 
 		} else {
-			LineTexLayer ll = mTile.layers.getLineTexLayer(numLayer);
+			LineTexLayer ll = mLayers.getLineTexLayer(numLayer);
 
 			if (ll.line == null) {
 				ll.line = line;
@@ -291,129 +275,46 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		}
 	}
 
-	// slower to load (requires tesselation) and uses
-	// more memory but should be faster to render
+	/* slower to load (requires tesselation) and uses
+	 * more memory but should be faster to render */
 	protected final static boolean USE_MESH_POLY = false;
 
 	@Override
 	public void renderArea(AreaStyle area, int level) {
 		int numLayer = mCurLayer + level;
 		if (USE_MESH_POLY) {
-			MeshLayer l = mTile.layers.getMeshLayer(numLayer);
+			MeshLayer l = mLayers.getMeshLayer(numLayer);
 			l.area = area;
 			l.addMesh(mElement);
 		} else {
-			PolygonLayer l = mTile.layers.getPolygonLayer(numLayer);
+			PolygonLayer l = mLayers.getPolygonLayer(numLayer);
 			l.area = area;
 			l.addPolygon(mElement.points, mElement.index);
 		}
 	}
 
 	@Override
-	public void renderAreaText(TextStyle text) {
-		// TODO place somewhere on polygon
-		String value = mElement.tags.getValue(text.textKey);
-		if (value == null || value.length() == 0)
-			return;
-
-		float x = 0;
-		float y = 0;
-		int n = mElement.index[0];
-
-		for (int i = 0; i < n;) {
-			x += mElement.points[i++];
-			y += mElement.points[i++];
-		}
-		x /= (n / 2);
-		y /= (n / 2);
-
-		mTile.labels.push(TextItem.pool.get().set(x, y, value, text));
-	}
-
-	@Override
-	public void renderPointText(TextStyle text) {
-		String value = mElement.tags.getValue(text.textKey);
-		if (value == null || value.length() == 0)
-			return;
-
-		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
-			PointF p = mElement.getPoint(i);
-			mTile.labels.push(TextItem.pool.get().set(p.x, p.y, value, text));
-		}
-	}
-
-	@Override
-	public void renderWayText(TextStyle text) {
-		String value = mElement.tags.getValue(text.textKey);
-		if (value == null || value.length() == 0)
-			return;
-
-		int offset = 0;
-		for (int i = 0, n = mElement.index.length; i < n; i++) {
-			int length = mElement.index[i];
-			if (length < 4)
+	public void renderSymbol(SymbolStyle symbol) {
+		for (TileLoaderThemeHook h : mTileLayer.loaderThemeHooks())
+			if (h.render(mTile, mLayers, mElement, symbol, 0))
 				break;
-
-			WayDecorator.renderText(null, mElement.points, value, text,
-			                        offset, length, mTile);
-			offset += length;
-		}
-	}
-
-	@Override
-	public void renderPointCircle(CircleStyle circle, int level) {
-	}
-
-	@Override
-	public void renderPointSymbol(SymbolStyle symbol) {
-		if (symbol.texture == null)
-			return;
-
-		for (int i = 0, n = mElement.getNumPoints(); i < n; i++) {
-			PointF p = mElement.getPoint(i);
-
-			SymbolItem it = SymbolItem.pool.get();
-			it.set(p.x, p.y, symbol.texture, true);
-			mTile.symbols.push(it);
-		}
-	}
-
-	@Override
-	public void renderAreaSymbol(SymbolStyle symbol) {
 	}
 
 	@Override
 	public void renderExtrusion(ExtrusionStyle extrusion, int level) {
-		int height = 0;
-		int minHeight = 0;
-
-		String v = mElement.tags.getValue(Tag.KEY_HEIGHT);
-		if (v != null)
-			height = Integer.parseInt(v);
-		v = mElement.tags.getValue(Tag.KEY_MIN_HEIGHT);
-		if (v != null)
-			minHeight = Integer.parseInt(v);
-
-		ExtrusionLayer l = mTile.layers.getExtrusionLayers();
-
-		if (l == null) {
-			double lat = MercatorProjection.toLatitude(mTile.y);
-			float groundScale = (float) MercatorProjection
-			    .groundResolution(lat, 1 << mTile.zoomLevel);
-
-			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
-			mTile.layers.setExtrusionLayers(l);
-		}
-
-		/* 12m default */
-		if (height == 0)
-			height = 12 * 100;
-
-		l.add(mElement, height, minHeight);
+		for (TileLoaderThemeHook h : mTileLayer.loaderThemeHooks())
+			if (h.render(mTile, mLayers, mElement, extrusion, level))
+				break;
 	}
 
 	@Override
-	public void setTileImage(Bitmap bitmap) {
+	public void renderCircle(CircleStyle circle, int level) {
+	}
 
+	@Override
+	public void renderText(TextStyle text) {
+		for (TileLoaderThemeHook h : mTileLayer.loaderThemeHooks())
+			if (h.render(mTile, mLayers, mElement, text, 0))
+				break;
 	}
 }

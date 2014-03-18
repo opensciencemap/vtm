@@ -17,17 +17,18 @@
 package org.oscim.layers.tile;
 
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.vector.VectorTileLoader;
+import org.oscim.layers.tile.vector.labeling.LabelTileLoaderHook;
 import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.SymbolItem;
-import org.oscim.renderer.elements.TextItem;
-import org.oscim.utils.pool.Inlist.List;
+import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.quadtree.Node;
+import org.oscim.utils.quadtree.QuadTree;
 
 /**
- * Extends Tile class to hold state and data for concurrent use in
- * TileManager (Main Thread),
- * TileLoader (Worker Thread) and
- * TileRenderer (GL Thread).
+ * Extends Tile class to hold state and data.
+ * 
+ * Used concurrently in: TileManager (Main Thread), TileLoader (Worker Thread)
+ * and TileRenderer (GL Thread).
  */
 public class MapTile extends Tile {
 
@@ -63,6 +64,12 @@ public class MapTile extends Tile {
 		public final static byte CANCEL = 1 << 3;
 	}
 
+	public static abstract class TileData extends Inlist<TileData> {
+		Object id;
+
+		protected abstract void dispose();
+	}
+
 	public MapTile(TileNode node, int tileX, int tileY, int zoomLevel) {
 		super(tileX, tileY, (byte) zoomLevel);
 		this.x = (double) tileX / (1 << zoomLevel);
@@ -81,6 +88,13 @@ public class MapTile extends Tile {
 	}
 
 	/**
+	 * List of TileData for rendering. ElementLayers is always at first
+	 * position (for VectorTileLayer). TileLoaderHooks may add additional
+	 * data. See e.g. {@link LabelTileLoaderHook}.
+	 */
+	public TileData data;
+
+	/**
 	 * absolute tile coordinates: tileX,Y / Math.pow(2, zoomLevel)
 	 */
 	public final double x;
@@ -92,30 +106,25 @@ public class MapTile extends Tile {
 	public float distance;
 
 	/**
-	 * FIXME move to VectorMapTile
-	 * Tile data set by TileLoader.
-	 */
-
-	public final List<SymbolItem> symbols = new List<SymbolItem>();
-	public final List<TextItem> labels = new List<TextItem>();
-
-	public ElementLayers layers;
-
-	/**
 	 * Tile is in view region. Set by TileRenderer.
 	 */
 	public boolean isVisible;
+
+	/**
+	 * Used for fade-effects
+	 */
 	public long fadeTime;
 
 	/**
-	 * Pointer to access relatives in QuadTree
-	 */
-	public final TileNode node;
-
-	/**
-	 * to avoid drawing a tile twice per frame
+	 * Used to avoid drawing a tile twice per frame
+	 * TODO remove
 	 */
 	int lastDraw = 0;
+
+	/**
+	 * Pointer to access relatives in {@link QuadTree}
+	 */
+	public final TileNode node;
 
 	public final static int PROXY_CHILD1 = 1 << 0;
 	public final static int PROXY_CHILD2 = 1 << 1;
@@ -208,26 +217,53 @@ public class MapTile extends Tile {
 	}
 
 	/**
-	 * Test whether it is save to access a proxy item through
-	 * this.rel.*
+	 * Test whether it is save to access a proxy item
+	 * through this.node.*
 	 */
 	public boolean hasProxy(int proxy) {
 		return (proxies & proxy) != 0;
 	}
 
 	/**
-	 * CAUTION: This function may only be called by {@link TileManager}
+	 * CAUTION: This function may only be called
+	 * by {@link TileManager}
 	 */
 	protected void clear() {
-		if (layers != null) {
-			layers.clear();
-			layers = null;
+		while (data != null) {
+			data.dispose();
+			data = data.next;
 		}
-
-		TextItem.pool.releaseAll(labels.clear());
-		SymbolItem.pool.releaseAll(symbols.clear());
 
 		// still needed?
 		state = State.NONE;
+	}
+
+	/**
+	 * Get the default ElementLayers which are added
+	 * by {@link VectorTileLoader}
+	 */
+	public ElementLayers getLayers() {
+		if (!(data instanceof ElementLayers))
+			return null;
+
+		return (ElementLayers) data;
+	}
+
+	public TileData getData(Object id) {
+		for (TileData d = data; d != null; d = d.next)
+			if (d.id == id)
+				return d;
+		return null;
+	}
+
+	public void addData(Object id, TileData td) {
+		// keeping ElementLayers at position 0!
+		td.id = id;
+		if (data != null) {
+			td.next = data.next;
+			data.next = td;
+		} else {
+			data = td;
+		}
 	}
 }

@@ -86,22 +86,6 @@ public interface IRenderTheme {
 		void renderExtrusion(ExtrusionStyle extrusion, int level);
 
 		/**
-		 * Renders an area symbol with the given bitmap.
-		 * 
-		 * @param symbol
-		 *            the symbol to be rendered.
-		 */
-		void renderAreaSymbol(SymbolStyle symbol);
-
-		/**
-		 * Renders an area caption with the given text.
-		 * 
-		 * @param text
-		 *            the text to be rendered.
-		 */
-		void renderAreaText(TextStyle text);
-
-		/**
 		 * Renders a point of interest circle with the given parameters.
 		 * 
 		 * @param circle
@@ -109,7 +93,7 @@ public interface IRenderTheme {
 		 * @param level
 		 *            the drawing level on which the circle should be rendered.
 		 */
-		void renderPointCircle(CircleStyle circle, int level);
+		void renderCircle(CircleStyle circle, int level);
 
 		/**
 		 * Renders a point of interest symbol with the given bitmap.
@@ -117,15 +101,7 @@ public interface IRenderTheme {
 		 * @param symbol
 		 *            the symbol to be rendered.
 		 */
-		void renderPointSymbol(SymbolStyle symbol);
-
-		/**
-		 * Renders a point of interest caption with the given text.
-		 * 
-		 * @param text
-		 *            the text to be rendered.
-		 */
-		void renderPointText(TextStyle text);
+		void renderSymbol(SymbolStyle symbol);
 
 		/**
 		 * Renders a way with the given parameters.
@@ -140,7 +116,7 @@ public interface IRenderTheme {
 		 * 
 		 * @param text
 		 */
-		void renderWayText(TextStyle text);
+		void renderText(TextStyle text);
 
 	}
 

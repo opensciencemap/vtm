@@ -3,7 +3,6 @@ package org.oscim.layers.tile.vector;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.layers.tile.TileManager;
 import org.oscim.map.Map;
 
 public class OsmTileLayer extends VectorTileLayer {
@@ -17,14 +16,16 @@ public class OsmTileLayer extends VectorTileLayer {
 	}
 
 	@Override
-	protected TileLoader createLoader(TileManager tm) {
-		return new OsmTileLoader(tm);
+	protected TileLoader createLoader() {
+		return new OsmTileLoader(this);
 	}
 
 	static class OsmTileLoader extends VectorTileLoader {
+		private final TagSet mFilteredTags;
 
-		public OsmTileLoader(TileManager tileManager) {
-			super(tileManager);
+		public OsmTileLoader(VectorTileLayer tileLayer) {
+			super(tileLayer);
+			mFilteredTags = new TagSet();
 		}
 
 		/* Replace tags that should only be matched by key in RenderTheme
@@ -40,7 +41,7 @@ public class OsmTileLayer extends VectorTileLayer {
 		        new TagReplacement(Tag.KEY_MIN_HEIGHT)
 		};
 
-		protected boolean filterTags(TagSet tagSet) {
+		protected TagSet filterTags(TagSet tagSet) {
 			Tag[] tags = tagSet.tags;
 
 			mFilteredTags.clear();
@@ -58,7 +59,7 @@ public class OsmTileLayer extends VectorTileLayer {
 				mFilteredTags.add(t);
 			}
 
-			return true;
+			return mFilteredTags;
 		}
 	}
 }

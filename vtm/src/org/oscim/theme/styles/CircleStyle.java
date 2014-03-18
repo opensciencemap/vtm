@@ -49,6 +49,6 @@ public final class CircleStyle extends RenderStyle {
 
 	@Override
 	public void renderNode(Callback renderCallback) {
-		renderCallback.renderPointCircle(this, this.level);
+		renderCallback.renderCircle(this, this.level);
 	}
 }

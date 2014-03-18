@@ -23,8 +23,8 @@ import java.util.concurrent.CancellationException;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.tiling.ITileDataSource;
@@ -38,8 +38,8 @@ public class BitmapTileLoader extends TileLoader {
 
 	private final ITileDataSource mTileDataSource;
 
-	public BitmapTileLoader(TileManager tileManager, TileSource tileSource) {
-		super(tileManager);
+	public BitmapTileLoader(TileLayer tileLayer, TileSource tileSource) {
+		super(tileLayer.getManager());
 		mTileDataSource = tileSource.getDataSource();
 	}
 
@@ -64,8 +64,9 @@ public class BitmapTileLoader extends TileLoader {
 
 		BitmapLayer l = new BitmapLayer(false);
 		l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE);
-		mTile.layers = new ElementLayers();
-		mTile.layers.setTextureLayers(l);
+		ElementLayers layers = new ElementLayers();
+		layers.setTextureLayers(l);
+		mTile.data = layers;
 	}
 
 	@Override

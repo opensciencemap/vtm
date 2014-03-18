@@ -2,7 +2,6 @@ package org.oscim.layers;
 
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.map.Map;
 import org.oscim.tiling.source.bitmap.BitmapTileSource;
@@ -14,8 +13,8 @@ public class JeoTileLayer extends BitmapTileLayer {
 	}
 
 	@Override
-	protected TileLoader createLoader(TileManager tm) {
-		return new TileLoader(tm) {
+	protected TileLoader createLoader() {
+		return new TileLoader(this.getManager()) {
 
 			@Override
 			public void cleanup() {

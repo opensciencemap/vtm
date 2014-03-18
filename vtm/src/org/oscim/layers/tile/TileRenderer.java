@@ -26,6 +26,7 @@ import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
+import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.utils.ScanBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,24 +187,25 @@ public abstract class TileRenderer extends LayerRenderer {
 
 	private static int uploadTileData(MapTile tile) {
 		tile.state = READY;
+		ElementLayers layers = tile.getLayers();
 
 		/* tile might contain extrusion or label layers */
-		if (tile.layers == null)
+		if (layers == null)
 			return 1;
 
-		int newSize = tile.layers.getSize();
+		int newSize = layers.getSize();
 		if (newSize <= 0)
 			return 1;
 
-		if (tile.layers.vbo == null)
-			tile.layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
+		if (layers.vbo == null)
+			layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
-		if (!ElementRenderer.uploadLayers(tile.layers, newSize, true)) {
+		if (!ElementRenderer.uploadLayers(layers, newSize, true)) {
 			log.error("{} uploadTileData failed!", tile);
-
-			tile.layers.vbo = BufferObject.release(tile.layers.vbo);
-			tile.layers.clear();
-			tile.layers = null;
+			layers.vbo = BufferObject.release(layers.vbo);
+			layers.clear();
+			/* throw Exception? */
+			//FIXME tile.layers = null;
 			return 0;
 		}
 

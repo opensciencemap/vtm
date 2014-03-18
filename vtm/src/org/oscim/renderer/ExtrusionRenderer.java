@@ -25,6 +25,7 @@ import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileRenderer;
 import org.oscim.layers.tile.TileSet;
+import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,10 +170,11 @@ public class ExtrusionRenderer extends LayerRenderer {
 	}
 
 	private static ExtrusionLayer getLayer(MapTile t) {
-		if (t.layers == null || !t.state(READY | NEW_DATA))
+		ElementLayers layers = t.getLayers();
+		if (layers == null || !t.state(READY | NEW_DATA))
 			return null;
 
-		return t.layers.getExtrusionLayers();
+		return layers.getExtrusionLayers();
 	}
 
 	private final boolean debug = false;
@@ -201,7 +203,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 			GLState.test(false, false);
 
 			for (int i = 0; i < mTileCnt; i++) {
-				ExtrusionLayer el = tiles[i].layers.getExtrusionLayers();
+				ExtrusionLayer el = tiles[i].getLayers().getExtrusionLayers();
 
 				setMatrix(v, tiles[i], 0);
 				v.mvp.setAsUniform(uExtMatrix);
@@ -252,7 +254,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		// draw to depth buffer
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
-			ExtrusionLayer el = t.layers.getExtrusionLayers();
+			ExtrusionLayer el = t.getLayers().getExtrusionLayers();
 			int d = MapRenderer.depthOffset(t) * 10;
 			setMatrix(v, t, d);
 			v.mvp.setAsUniform(uExtMatrix);
@@ -278,7 +280,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
-			ExtrusionLayer el = t.layers.getExtrusionLayers();
+			ExtrusionLayer el = t.getLayers().getExtrusionLayers();
 
 			if (el.colors == null) {
 				currentColor = mColor;

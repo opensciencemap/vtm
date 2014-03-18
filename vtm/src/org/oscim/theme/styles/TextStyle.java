@@ -182,17 +182,13 @@ public final class TextStyle extends RenderStyle {
 	public final TextureRegion texture;
 
 	@Override
-	public void renderNode(Callback renderCallback) {
-		if (caption)
-			renderCallback.renderPointText(this);
+	public void renderNode(Callback cb) {
+		cb.renderText(this);
 	}
 
 	@Override
-	public void renderWay(Callback renderCallback) {
-		if (caption)
-			renderCallback.renderAreaText(this);
-		else
-			renderCallback.renderWayText(this);
+	public void renderWay(Callback cb) {
+		cb.renderText(this);
 	}
 
 	@Override

@@ -16,12 +16,16 @@
  */
 package org.oscim.layers.tile.vector;
 
+import org.oscim.core.MapElement;
+import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
+import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.theme.IRenderTheme;
+import org.oscim.theme.styles.RenderStyle;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.TileSource.OpenResult;
 import org.slf4j.Logger;
@@ -58,8 +62,8 @@ public class VectorTileLayer extends TileLayer {
 	}
 
 	@Override
-	protected TileLoader createLoader(TileManager tm) {
-		return new VectorTileLoader(tm);
+	protected TileLoader createLoader() {
+		return new VectorTileLoader(this);
 	}
 
 	/**
@@ -98,21 +102,58 @@ public class VectorTileLayer extends TileLayer {
 	 * Set {@link IRenderTheme} used by {@link TileLoader}
 	 */
 	public void setRenderTheme(IRenderTheme theme) {
-		// wait for loaders to finish all current jobs to
-		// not change theme instance hold by loader instance
-		// while running
+		/* wait for loaders to finish all current jobs to
+		 * not change theme instance hold by loader instance
+		 * while running */
 		pauseLoaders(true);
 		mTileManager.clearJobs();
 
-		for (TileLoader l : mTileLoader)
-			((VectorTileLoader) l).setRenderTheme(theme);
+		mTheme = theme;
+		//	for (TileLoader l : mTileLoader)
+		//	((VectorTileLoader) l).setRenderTheme(theme);
 
 		tileRenderer().setOverdrawColor(theme.getMapBackground());
 
 		resumeLoaders();
 	}
 
-	public TileManager getManager() {
-		return mTileManager;
+	private IRenderTheme mTheme;
+
+	public IRenderTheme getTheme() {
+		return mTheme;
+	}
+
+	public interface TileLoaderProcessHook {
+		public boolean process(MapTile tile, ElementLayers layers, MapElement element);
+	}
+
+	public interface TileLoaderThemeHook {
+		public boolean render(MapTile tile, ElementLayers layers,
+		        MapElement element, RenderStyle style, int level);
+	}
+
+	private TileLoaderProcessHook[] mLoaderProcessHooks = new TileLoaderProcessHook[0];
+	private TileLoaderThemeHook[] mLoaderThemeHooks = new TileLoaderThemeHook[0];
+
+	public TileLoaderProcessHook[] loaderProcessHooks() {
+		return mLoaderProcessHooks;
+	}
+
+	public TileLoaderThemeHook[] loaderThemeHooks() {
+		return mLoaderThemeHooks;
+	}
+
+	public void addHook(TileLoaderProcessHook h) {
+		TileLoaderProcessHook[] tmp = mLoaderProcessHooks;
+		mLoaderProcessHooks = new TileLoaderProcessHook[tmp.length + 1];
+		System.arraycopy(tmp, 0, mLoaderProcessHooks, 0, tmp.length);
+		mLoaderProcessHooks[tmp.length] = h;
+	}
+
+	public void addHook(TileLoaderThemeHook h) {
+		TileLoaderThemeHook[] tmp = mLoaderThemeHooks;
+		mLoaderThemeHooks = new TileLoaderThemeHook[tmp.length + 1];
+		System.arraycopy(tmp, 0, mLoaderThemeHooks, 0, tmp.length);
+		mLoaderThemeHooks[tmp.length] = h;
 	}
 }
