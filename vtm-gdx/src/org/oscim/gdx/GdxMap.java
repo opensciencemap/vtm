@@ -259,6 +259,9 @@ public abstract class GdxMap implements ApplicationListener {
 				return true;
 
 			switch (keycode) {
+				case Input.Keys.ESCAPE:
+					Gdx.app.exit();
+					break;
 
 				case Input.Keys.UP:
 					mViewport.moveMap(0, -50);
