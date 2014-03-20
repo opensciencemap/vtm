@@ -136,7 +136,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 					continue;
 
 				if (!el.compiled) {
-					int numShorts = el.mNumVertices * 8;
+					int numShorts = el.sumVertices * 8;
 					el.compile(MapRenderer.getShortBuffer(numShorts));
 					GLUtils.checkGlError("...");
 				}
@@ -160,7 +160,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 					continue;
 
 				if (!el.compiled) {
-					int numShorts = el.mNumVertices * 8;
+					int numShorts = el.sumVertices * 8;
 					el.compile(MapRenderer.getShortBuffer(numShorts));
 					GLUtils.checkGlError("...");
 				}
@@ -266,12 +266,12 @@ public class ExtrusionRenderer extends LayerRenderer {
 				                         GL20.GL_UNSIGNED_BYTE, false, 8, 6);
 
 				GL.glDrawElements(GL20.GL_TRIANGLES,
-				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
+				                  (el.numIndices[0] + el.numIndices[1] + el.numIndices[2]),
 				                  GL20.GL_UNSIGNED_SHORT, 0);
 
-				GL.glDrawElements(GL20.GL_LINES, el.mIndiceCnt[3],
+				GL.glDrawElements(GL20.GL_LINES, el.numIndices[3],
 				                  GL20.GL_UNSIGNED_SHORT,
-				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
+				                  (el.numIndices[0] + el.numIndices[1] + el.numIndices[2]) * 2);
 
 				// just a temporary reference!
 				tiles[i] = null;
@@ -305,20 +305,23 @@ public class ExtrusionRenderer extends LayerRenderer {
 			// draw to depth buffer
 			for (int i = 0; i < mTileCnt; i++) {
 				MapTile t = tiles[i];
+
 				ExtrusionLayer el = t.getLayers().getExtrusionLayers();
-				int d = MapTile.depthOffset(t) * 10;
-				setMatrix(v, t, d);
-				v.mvp.setAsUniform(uExtMatrix);
+				for (; el != null; el = (ExtrusionLayer) el.next) {
+					int d = MapTile.depthOffset(t) * 10;
+					setMatrix(v, t, d);
+					v.mvp.setAsUniform(uExtMatrix);
 
-				el.vboIndices.bind();
-				el.vboVertices.bind();
+					el.vboIndices.bind();
+					el.vboVertices.bind();
 
-				GL.glVertexAttribPointer(uExtVertexPosition, 3,
-				                         GL20.GL_SHORT, false, 8, 0);
+					GL.glVertexAttribPointer(uExtVertexPosition, 3,
+					                         GL20.GL_SHORT, false, 8, 0);
 
-				GL.glDrawElements(GL20.GL_TRIANGLES,
-				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
-				                  GL20.GL_UNSIGNED_SHORT, 0);
+					GL.glDrawElements(GL20.GL_TRIANGLES,
+					                  (el.numIndices[0] + el.numIndices[1] + el.numIndices[2]),
+					                  GL20.GL_UNSIGNED_SHORT, 0);
+				}
 			}
 
 			GL.glColorMask(true, true, true, true);
@@ -333,75 +336,80 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
+
 			ExtrusionLayer el = t.getLayers().getExtrusionLayers();
+			for (; el != null; el = (ExtrusionLayer) el.next) {
 
-			if (el.colors == null) {
-				currentColor = mColor;
-				GLUtils.glUniform4fv(uExtColor, 4, currentColor);
-			} else if (currentColor != el.colors) {
-				currentColor = el.colors;
-				GLUtils.glUniform4fv(uExtColor, 4, currentColor);
-			}
-
-			int d = 1;
-			if (drawAlpha) {
-				GL.glDepthFunc(GL20.GL_EQUAL);
-				d = MapTile.depthOffset(t) * 10;
-			}
-
-			setMatrix(v, t, d);
-			v.mvp.setAsUniform(uExtMatrix);
-
-			el.vboIndices.bind();
-			el.vboVertices.bind();
-
-			GL.glVertexAttribPointer(uExtVertexPosition, 3,
-			                         GL20.GL_SHORT, false, 8, 0);
-
-			GL.glVertexAttribPointer(uExtLightPosition, 2,
-			                         GL20.GL_UNSIGNED_BYTE, false, 8, 6);
-
-			// draw extruded outlines
-			if (el.mIndiceCnt[0] > 0) {
-				// draw roof
-				GL.glUniform1i(uExtMode, 0);
-				GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[2],
-				                  GL20.GL_UNSIGNED_SHORT,
-				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1]) * 2);
-
-				// draw sides 1
-				GL.glUniform1i(uExtMode, 1);
-				GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[0],
-				                  GL20.GL_UNSIGNED_SHORT, 0);
-
-				// draw sides 2
-				GL.glUniform1i(uExtMode, 2);
-				GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[1],
-				                  GL20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
-
-				if (drawAlpha) {
-					// drawing gl_lines with the same coordinates does not result in
-					// same depth values as polygons, so add offset and draw gl_lequal:
-					GL.glDepthFunc(GL20.GL_LEQUAL);
+				if (el.colors == null) {
+					currentColor = mColor;
+					GLUtils.glUniform4fv(uExtColor, 4, currentColor);
+				} else if (currentColor != el.colors) {
+					currentColor = el.colors;
+					GLUtils.glUniform4fv(uExtColor, 4, currentColor);
 				}
 
-				v.mvp.addDepthOffset(100);
+				int d = 1;
+				if (drawAlpha) {
+					GL.glDepthFunc(GL20.GL_EQUAL);
+					d = MapTile.depthOffset(t) * 10;
+				}
+
+				setMatrix(v, t, d);
 				v.mvp.setAsUniform(uExtMatrix);
 
-				GL.glUniform1i(uExtMode, 3);
-				GL.glDrawElements(GL20.GL_LINES, el.mIndiceCnt[3],
-				                  GL20.GL_UNSIGNED_SHORT,
-				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
-			}
+				el.vboIndices.bind();
+				el.vboVertices.bind();
 
-			// draw triangle meshes
-			if (el.mIndiceCnt[4] > 0) {
-				int offset = (el.mIndiceCnt[0] + el.mIndiceCnt[1]
-				        + el.mIndiceCnt[2] + el.mIndiceCnt[3]) * 2;
+				GL.glVertexAttribPointer(uExtVertexPosition, 3,
+				                         GL20.GL_SHORT, false, 8, 0);
 
-				GL.glUniform1i(uExtMode, 4);
-				GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[4],
-				                  GL20.GL_UNSIGNED_SHORT, offset);
+				GL.glVertexAttribPointer(uExtLightPosition, 2,
+				                         GL20.GL_UNSIGNED_BYTE, false, 8, 6);
+
+				/* draw extruded outlines */
+				if (el.numIndices[0] > 0) {
+					/* draw roof */
+					GL.glUniform1i(uExtMode, 0);
+					GL.glDrawElements(GL20.GL_TRIANGLES, el.numIndices[2],
+					                  GL20.GL_UNSIGNED_SHORT,
+					                  (el.numIndices[0] + el.numIndices[1]) * 2);
+
+					/* draw sides 1 */
+					GL.glUniform1i(uExtMode, 1);
+					GL.glDrawElements(GL20.GL_TRIANGLES, el.numIndices[0],
+					                  GL20.GL_UNSIGNED_SHORT, 0);
+
+					/* draw sides 2 */
+					GL.glUniform1i(uExtMode, 2);
+					GL.glDrawElements(GL20.GL_TRIANGLES, el.numIndices[1],
+					                  GL20.GL_UNSIGNED_SHORT, el.numIndices[0] * 2);
+
+					if (drawAlpha) {
+						/* drawing gl_lines with the same coordinates does not
+						 * result in same depth values as polygons, so add
+						 * offset and draw gl_lequal: */
+						GL.glDepthFunc(GL20.GL_LEQUAL);
+					}
+
+					v.mvp.addDepthOffset(100);
+					v.mvp.setAsUniform(uExtMatrix);
+
+					GL.glUniform1i(uExtMode, 3);
+					GL.glDrawElements(GL20.GL_LINES, el.numIndices[3],
+					                  GL20.GL_UNSIGNED_SHORT,
+					                  (el.numIndices[0] + el.numIndices[1]
+					                  + el.numIndices[2]) * 2);
+				}
+
+				/* draw triangle meshes */
+				if (el.numIndices[4] > 0) {
+					int offset = (el.numIndices[0] + el.numIndices[1]
+					        + el.numIndices[2] + el.numIndices[3]) * 2;
+
+					GL.glUniform1i(uExtMode, 4);
+					GL.glDrawElements(GL20.GL_TRIANGLES, el.numIndices[4],
+					                  GL20.GL_UNSIGNED_SHORT, offset);
+				}
 			}
 			// just a temporary reference!
 			tiles[i] = null;
@@ -557,12 +565,12 @@ public class ExtrusionRenderer extends LayerRenderer {
 	        //     recreate face normal vector
 	        ///+ "    vec3 r_norm = vec3(n.xy, dir * (1.0 - length(n.xy)));"
 
-	        + "    vec3 light = normalize(vec3(-0.4,0.4,1.0));"
+	        + "    vec3 light = normalize(vec3(-0.2,0.2,1.0));"
 	        + "    float l = (1.0 + dot(r_norm, light)) / 2.0;"
 
 	        /** ambient */
 	        //+ "    l = 0.2 + l * 0.8;"
-	        /** fake-ssao by height */
+	        /** extreme fake-ssao by height */
 	        + "    l = l + (clamp(a_pos.z / 8192.0, 0.0, 0.1) - 0.05);"
 	        + "    color = vec4(l, l, l-0.02, 1.0);"
 	        + "}}}";

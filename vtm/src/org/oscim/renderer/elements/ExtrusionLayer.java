@@ -52,9 +52,9 @@ public class ExtrusionLayer extends RenderElement {
 
 	// indices for:
 	// 0. even sides, 1. odd sides, 2. roof, 3. roof outline
-	public int mIndiceCnt[] = { 0, 0, 0, 0, 0 };
-	public int mNumIndices = 0;
-	public int mNumVertices = 0;
+	public int numIndices[] = { 0, 0, 0, 0, 0 };
+	public int sumIndices = 0;
+	public int sumVertices = 0;
 
 	public BufferObject vboIndices;
 	public BufferObject vboVertices;
@@ -98,7 +98,7 @@ public class ExtrusionLayer extends RenderElement {
 		// roof indices for convex shapes
 		int i = mCurIndices[IND_MESH].used;
 		short[] indices = mCurIndices[IND_MESH].vertices;
-		int first = mNumVertices;
+		int first = sumVertices;
 
 		short[] vertices = mCurVertices.vertices;
 		int v = mCurVertices.used;
@@ -110,7 +110,7 @@ public class ExtrusionLayer extends RenderElement {
 				break;
 
 			// FIXME: workaround: dont overflow max index id.
-			if (mNumVertices + vertexCnt >= 1 << 16)
+			if (sumVertices + vertexCnt >= 1 << 16)
 				break;
 
 			if (i == VertexItem.SIZE) {
@@ -196,7 +196,7 @@ public class ExtrusionLayer extends RenderElement {
 
 		mCurIndices[IND_MESH].used = i;
 		mCurVertices.used = v;
-		mNumVertices += vertexCnt; //(vertexCnt / 3);
+		sumVertices += vertexCnt; //(vertexCnt / 3);
 	}
 
 	//	private void encodeNormal(float v[], int offset) {
@@ -218,7 +218,7 @@ public class ExtrusionLayer extends RenderElement {
 		//log.debug("add " + Arrays.toString(points));
 
 		// current vertex id
-		int startVertex = mNumVertices;
+		int startVertex = sumVertices;
 
 		// roof indices for convex shapes
 		int i = mCurIndices[IND_MESH].used;
@@ -264,7 +264,7 @@ public class ExtrusionLayer extends RenderElement {
 		}
 
 		mCurVertices.used = v;
-		mNumVertices += (vertexCnt / 3);
+		sumVertices += (vertexCnt / 3);
 	}
 
 	public void add(MapElement element, float height, float minHeight) {
@@ -286,7 +286,7 @@ public class ExtrusionLayer extends RenderElement {
 		boolean simpleOutline = true;
 
 		// current vertex id
-		int startVertex = mNumVertices;
+		int startVertex = sumVertices;
 		int length = 0, ipos = 0, ppos = 0;
 
 		for (int n = index.length; ipos < n; ipos++, ppos += length) {
@@ -298,7 +298,7 @@ public class ExtrusionLayer extends RenderElement {
 
 			// start next polygon
 			if (length == 0) {
-				startVertex = mNumVertices;
+				startVertex = sumVertices;
 				simpleOutline = true;
 				complexOutline = false;
 				continue;
@@ -404,7 +404,7 @@ public class ExtrusionLayer extends RenderElement {
 		int angleSign = 0;
 
 		// vertex offset for all vertices in layer
-		int vOffset = mNumVertices;
+		int vOffset = sumVertices;
 
 		short[] vertices = mCurVertices.vertices;
 		int v = mCurVertices.used;
@@ -542,28 +542,28 @@ public class ExtrusionLayer extends RenderElement {
 		}
 
 		mCurVertices.used = v;
-		mNumVertices += vertexCnt;
+		sumVertices += vertexCnt;
 		return convex;
 	}
 
 	@Override
 	public void compile(ShortBuffer sbuf) {
 
-		if (mNumVertices == 0 || compiled)
+		if (sumVertices == 0 || compiled)
 			return;
 
-		mNumIndices = 0;
+		sumIndices = 0;
 		for (int i = 0; i <= IND_MESH; i++) {
 			for (VertexItem vi = mIndices[i]; vi != null; vi = vi.next) {
 				sbuf.put(vi.vertices, 0, vi.used);
-				mIndiceCnt[i] += vi.used;
+				numIndices[i] += vi.used;
 			}
-			mNumIndices += mIndiceCnt[i];
+			sumIndices += numIndices[i];
 		}
 
 		//log.debug("compile" + mNumIndices + " / " + mNumVertices);
 
-		int size = mNumIndices * 2;
+		int size = sumIndices * 2;
 		vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
 		vboIndices.loadBufferData(sbuf.flip(), size);
 
@@ -575,7 +575,7 @@ public class ExtrusionLayer extends RenderElement {
 		for (VertexItem vi = mVertices; vi != null; vi = vi.next)
 			sbuf.put(vi.vertices, 0, vi.used);
 
-		size = mNumVertices * 4 * 2;
+		size = sumVertices * 4 * 2;
 		vboVertices = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
 		vboVertices.loadBufferData(sbuf.flip(), size);
 
