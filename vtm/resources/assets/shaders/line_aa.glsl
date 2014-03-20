@@ -1,4 +1,4 @@
-#ifndef DESKTOP_QUIRKS
+#ifdef GLES
 precision mediump float;
 #endif
 uniform mat4 u_mvp;
@@ -22,7 +22,7 @@ main(){
   v_st = abs(mod(dir, 4.0)) - 1.0;
 }
 $$
-#ifndef DESKTOP_QUIRKS
+#ifdef GLES
 precision mediump float;
 #endif
 uniform sampler2D tex;

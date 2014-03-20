@@ -25,6 +25,7 @@ import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
+import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
@@ -614,6 +615,31 @@ public final class LineLayer extends RenderElement {
 		return vertexItem;
 	}
 
+	static class Shader extends GLShader {
+		int uMVP, uFade, uWidth, uColor, uMode, uHeight, aPos;
+
+		Shader(String shaderFile) {
+			if (!create(shaderFile))
+				return;
+			uMVP = getUniform("u_mvp");
+			uFade = getUniform("u_fade");
+			uWidth = getUniform("u_width");
+			uColor = getUniform("u_color");
+			uMode = getUniform("u_mode");
+			uHeight = getUniform("u_height");
+			aPos = getAttrib("a_pos");
+		}
+
+		@Override
+		public boolean useProgram() {
+			if (super.useProgram()) {
+				GLState.enableVertexArrays(aPos, -1);
+				return true;
+			}
+			return false;
+		}
+	}
+
 	public static final class Renderer {
 		/* TODO:
 		 * http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter22.html */
@@ -629,46 +655,13 @@ public final class LineLayer extends RenderElement {
 		private final static int SHADER_FLAT = 1;
 		private final static int SHADER_PROJ = 0;
 
-		/* shader handles */
-		private static int[] lineProgram = new int[2];
-		private static int[] hLineVertexPosition = new int[2];
-		private static int[] hLineColor = new int[2];
-		private static int[] hLineMatrix = new int[2];
-		private static int[] hLineFade = new int[2];
-		private static int[] hLineWidth = new int[2];
-		private static int[] hLineMode = new int[2];
-		private static int[] hLineHeight = new int[2];
-
 		public static int mTexID;
+		private static Shader[] shaders = { null, null };
 
 		static boolean init() {
 
-			lineProgram[0] = GLUtils.createProgram(lineVertexShader,
-			                                       lineFragmentShader);
-			if (lineProgram[0] == 0) {
-				log.error("Could not create line program.");
-				//return false;
-			}
-
-			lineProgram[1] = GLUtils.createProgram(lineVertexShader,
-			                                       lineSimpleFragmentShader);
-			if (lineProgram[1] == 0) {
-				log.error("Could not create simple line program.");
-				return false;
-			}
-
-			for (int i = 0; i < 2; i++) {
-				if (lineProgram[i] == 0)
-					continue;
-
-				hLineMatrix[i] = GL.glGetUniformLocation(lineProgram[i], "u_mvp");
-				hLineFade[i] = GL.glGetUniformLocation(lineProgram[i], "u_fade");
-				hLineWidth[i] = GL.glGetUniformLocation(lineProgram[i], "u_width");
-				hLineColor[i] = GL.glGetUniformLocation(lineProgram[i], "u_color");
-				hLineMode[i] = GL.glGetUniformLocation(lineProgram[i], "u_mode");
-				hLineHeight[i] = GL.glGetUniformLocation(lineProgram[i], "u_height");
-				hLineVertexPosition[i] = GL.glGetAttribLocation(lineProgram[i], "a_pos");
-			}
+			shaders[0] = new Shader("line_aa_proj");
+			shaders[1] = new Shader("line_aa");
 
 			/* create lookup table as texture for 'length(0..1,0..1)'
 			 * using mirrored wrap mode for 'length(-1..1,-1..1)' */
@@ -702,7 +695,10 @@ public final class LineLayer extends RenderElement {
 			 * account. only used when tilt is 0. */
 			int mode = v.pos.tilt < 1 ? 1 : 0;
 
-			GLState.useProgram(lineProgram[mode]);
+			Shader s = shaders[mode];
+			s.useProgram();
+
+			//GLState.useProgram(lineProgram[mode]);
 			GLState.blend(true);
 
 			/* Somehow we loose the texture after an indefinite
@@ -712,18 +708,16 @@ public final class LineLayer extends RenderElement {
 			if (!GLAdapter.GDX_DESKTOP_QUIRKS)
 				GLState.bindTex2D(mTexID);
 
-			int uLineFade = hLineFade[mode];
-			int uLineMode = hLineMode[mode];
-			int uLineColor = hLineColor[mode];
-			int uLineWidth = hLineWidth[mode];
-			int uLineHeight = hLineHeight[mode];
+			int uLineFade = s.uFade;
+			int uLineMode = s.uMode;
+			int uLineColor = s.uColor;
+			int uLineWidth = s.uWidth;
+			int uLineHeight = s.uHeight;
 
-			GLState.enableVertexArrays(hLineVertexPosition[mode], -1);
-
-			GL.glVertexAttribPointer(hLineVertexPosition[mode], 4, GL20.GL_SHORT,
+			GL.glVertexAttribPointer(s.aPos, 4, GL20.GL_SHORT,
 			                         false, 0, layers.offset[LINE]);
 
-			v.mvp.setAsUniform(hLineMatrix[mode]);
+			v.mvp.setAsUniform(s.uMVP);
 
 			/* Line scale factor for non fixed lines: Within a zoom-
 			 * level lines would be scaled by the factor 2 by view-matrix.
@@ -865,130 +859,5 @@ public final class LineLayer extends RenderElement {
 
 			return l;
 		}
-
-		private final static String lineVertexShader = ""
-		        + "precision mediump float;"
-		        + "uniform mat4 u_mvp;"
-		        //+ "uniform mat4 u_vp;"
-		        /* factor to increase line width relative to scale */
-		        + "uniform float u_width;"
-		        /* xy hold position, zw extrusion vector */
-		        + "attribute vec4 a_pos;"
-		        + "uniform float u_mode;"
-		        + "uniform float u_height;"
-		        + "varying vec2 v_st;"
-		        + "void main() {"
-
-		        /* scale extrusion to u_width pixel
-				 * just ignore the two most insignificant bits. */
-		        + "  vec2 dir = a_pos.zw;"
-		        + "  gl_Position = u_mvp * vec4(a_pos.xy + (u_width * dir), u_height, 1.0);"
-
-		        /* last two bits hold the texture coordinates. */
-		        + "  v_st = abs(mod(dir, 4.0)) - 1.0;"
-		        + "}";
-
-		private final static String lineVertexShader2 = ""
-		        + "precision highp float;"
-		        + "uniform mat4 u_mvp;"
-		        + "uniform mat4 u_vp;"
-		        /* factor to increase line width relative to scale */
-		        + "uniform float u_width;"
-		        /* xy hold position, zw extrusion vector */
-		        + "attribute vec4 a_pos;"
-		        + "uniform float u_mode;"
-		        + "varying vec2 v_st;"
-		        + "void main() {"
-
-		        /* scale extrusion to u_width pixel */
-		        /* just ignore the two most insignificant bits. */
-		        + "  vec2 dir = a_pos.zw;"
-		        + "  vec4 pos = u_vp * vec4(a_pos.xy + (u_width * dir), 0.0, 0.0);"
-		        + "  vec4 orig = u_vp * vec4(a_pos.xy, 0.0, 0.0);"
-		        + "  float len = length(orig - pos);"
-		        //+ "  if (len < 0.0625){"
-		        + "     pos = u_mvp * vec4(a_pos.xy + (u_width * dir) / (len * 4.0), 0.0, 1.0);"
-		        //+ "   }"
-		        //+ "   else  pos = u_mvp * vec4(a_pos.xy + (u_width * dir), 0.0, 1.0);"
-		        + " gl_Position = pos;"
-		        /* last two bits hold the texture coordinates. */
-		        + "  v_st = abs(mod(dir, 4.0)) - 1.0;"
-		        + "}";
-
-		/** Antialising for orthonogonal projection */
-		private final static String lineSimpleFragmentShader = ""
-		        + "precision mediump float;"
-		        + "uniform sampler2D tex;"
-		        + "uniform float u_fade;"
-		        + "uniform float u_mode;"
-		        + "uniform vec4 u_color;"
-		        + "varying vec2 v_st;"
-		        + "void main() {"
-		        + "float len;"
-		        + "  if (u_mode == 2.0){"
-		        /* round cap line */
-		        + (GLAdapter.GDX_DESKTOP_QUIRKS
-		                ? "    len = length(v_st);"
-		                : "    len = texture2D(tex, v_st).a;")
-		        + "  } else {"
-		        /* flat cap line */
-		        + "    len = abs(v_st.s);"
-		        + "  }"
-		        /* u_mode == 0.0 -> thin line */
-		        //+ "  len = len * clamp(u_mode, len, 1.0);"
-
-		        /* use 'max' to avoid branching, need to check performance */
-		        //+ (GLAdapter.GDX_DESKTOP_QUIRKS
-		        //        ? " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * length(v_st));"
-		        //        : " float len = max((1.0 - u_mode) * abs(v_st.s), u_mode * texture2D(tex, v_st).a);")
-
-		        /* Antialias line-edges:
-				 * - 'len' is 0 at center of line. -> (1.0 - len) is 0 at the
-				 * edges
-				 * - 'u_fade' is 'pixel' / 'width', i.e. the inverse width of
-				 * the
-				 * line in pixel on screen.
-				 * - 'pixel' is 1.5 / relativeScale
-				 * - '(1.0 - len) / u_fade' interpolates the 'pixel' on
-				 * line-edge
-				 * between 0 and 1 (it is greater 1 for all inner pixel). */
-		        + "  gl_FragColor = u_color * clamp((1.0 - len) / u_fade, 0.0, 1.0);"
-		        /* -> nicer for thin lines */
-		        //+ "  gl_FragColor = u_color * clamp((1.0 - (len * len)) / u_fade, 0.0, 1.0);"
-		        + "}";
-
-		private final static String lineFragmentShader = ""
-		        + "#extension GL_OES_standard_derivatives : enable\n"
-		        + "precision mediump float;"
-		        + "uniform sampler2D tex;"
-		        + "uniform float u_mode;"
-		        + "uniform vec4 u_color;"
-		        + "uniform float u_fade;"
-		        + "varying vec2 v_st;"
-		        + "void main() {"
-		        + "  float len;"
-		        + "  float fuzz;"
-		        + "  if (u_mode == 2.0){"
-		        /* round cap line */
-		        + (GLAdapter.GDX_DESKTOP_QUIRKS
-		                ? "    len = length(v_st);"
-		                : "    len = texture2D(tex, v_st).a;")
-		        + "    vec2 st_width = fwidth(v_st);"
-		        + "    fuzz = max(st_width.s, st_width.t);"
-		        + "  } else {"
-		        /* flat cap line */
-		        + "    len = abs(v_st.s);"
-		        + "    fuzz = fwidth(v_st.s);"
-		        + "  }"
-		        /* u_mode == 0.0 -> thin line */
-		        //+ "  len = len * clamp(u_mode, len, 1.0);"
-
-		        + "  if (fuzz > 2.0)"
-		        + "  gl_FragColor = u_color * 0.5;" //vec4(1.0, 1.0, 1.0, 1.0);"
-		        + "  else"
-		        + "  gl_FragColor = u_color * clamp((1.0 - len) / max(u_fade, fuzz), 0.0, 1.0);"
-		        //+ "  gl_FragColor = u_color * clamp((1.0 - len), 0.0, 1.0);"
-		        + "}";
-
 	}
 }
