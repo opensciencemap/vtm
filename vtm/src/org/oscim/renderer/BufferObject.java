@@ -22,10 +22,11 @@ import java.nio.Buffer;
 import javax.annotation.CheckReturnValue;
 
 import org.oscim.backend.GL20;
+import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class BufferObject {
+public final class BufferObject extends Inlist<BufferObject> {
 	static final Logger log = LoggerFactory.getLogger(BufferObject.class);
 	private static final int MB = 1024 * 1024;
 	private static final int LIMIT_BUFFERS = 16 * MB;
@@ -41,8 +42,6 @@ public final class BufferObject {
 	/** GL_ARRAY_BUFFER or GL_ELEMENT_ARRAY_BUFFER */
 	private int target;
 
-	private BufferObject next;
-
 	private BufferObject(int target, int id) {
 		this.id = id;
 		this.target = target;
@@ -51,10 +50,10 @@ public final class BufferObject {
 	public void loadBufferData(Buffer buf, int newSize) {
 		boolean clear = false;
 
-		if (buf.position() != 0)
+		if (buf.position() != 0) {
+			log.debug("flip your buffer!");
 			buf.flip();
-
-		//throw new IllegalArgumentException("rewind buffer! " + buf.position());
+		}
 
 		GL.glBindBuffer(target, id);
 
@@ -87,9 +86,7 @@ public final class BufferObject {
 			return;
 
 		log.debug("use: " + mBufferMemoryUsage / MB + "MB");
-
-		mBufferMemoryUsage -= BufferObject.limitUsage(1024 * 1024);
-
+		mBufferMemoryUsage -= BufferObject.limitUsage(MB);
 		log.debug("now: " + mBufferMemoryUsage / MB + "MB");
 	}
 
@@ -102,7 +99,7 @@ public final class BufferObject {
 
 		if (pool[t] == null) {
 			if (counter[t] != 0)
-				throw new IllegalStateException("lost BufferObjects: " + counter[t]);
+				throw new IllegalStateException("lost objects: " + counter[t]);
 
 			createBuffers(target, 10);
 			counter[t] += 10;
@@ -110,21 +107,25 @@ public final class BufferObject {
 		counter[t]--;
 
 		if (size != 0) {
-			// find an item that has bound more than 'size' bytes.
-			// this has the advantage that either memory can be reused or
-			// a large unused block will be replaced by a smaller one.
+			/* find the item with minimal size greater 'size' bytes. */
+			BufferObject bo = pool[t];
+			/* actually points to BufferObject before min */
+			BufferObject min = null;
 			BufferObject prev = null;
-			for (BufferObject bo = pool[t]; bo != null; bo = bo.next) {
-				if (bo.size > size) {
-					if (prev == null)
-						pool[t] = bo.next;
-					else
-						prev.next = bo.next;
 
-					bo.next = null;
-					return bo;
+			for (; bo != null; bo = bo.next) {
+				if (bo.size > size) {
+					if (min == null || min.next.size > bo.size)
+						min = prev;
 				}
 				prev = bo;
+			}
+
+			if (min != null && min != pool[t]) {
+				bo = min.next;
+				min.next = bo.next;
+				bo.next = null;
+				return bo;
 			}
 		}
 
