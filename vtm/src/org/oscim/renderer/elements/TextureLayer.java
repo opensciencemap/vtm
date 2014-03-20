@@ -21,8 +21,8 @@ import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
+import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
-import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.elements.TextureItem.TexturePool;
@@ -113,56 +113,60 @@ public abstract class TextureLayer extends RenderElement {
 		buf[pos + 23] = v1;
 	}
 
+	static class Shader extends GLShader {
+		int uMV, uProj, uScale, uTexSize, aPos, aTexCoord;
+
+		Shader() {
+			if (!create("texture_layer"))
+				return;
+			uMV = getUniform("u_mv");
+			uProj = getUniform("u_proj");
+			uScale = getUniform("u_scale");
+			uTexSize = getUniform("u_div");
+			aPos = getAttrib("vertex");
+			aTexCoord = getAttrib("tex_coord");
+		}
+
+		@Override
+		public boolean useProgram() {
+			if (super.useProgram()) {
+				GLState.enableVertexArrays(aPos, aTexCoord);
+				return true;
+			}
+			return false;
+		}
+	}
+
 	public static final class Renderer {
 
 		public final static boolean debug = false;
 
-		private static int mTextureProgram;
-		private static int hTextureMVMatrix;
-		private static int hTextureProjMatrix;
-		private static int hTextureVertex;
-		private static int hTextureScale;
-		private static int hTextureTexCoord;
-		private static int hTextureSize;
+		private static Shader shader;
 
 		static void init() {
-			mTextureProgram = GLUtils.createProgram(textVertexShader,
-			                                        textFragmentShader);
-
-			hTextureMVMatrix = GL.glGetUniformLocation(mTextureProgram, "u_mv");
-			hTextureProjMatrix = GL.glGetUniformLocation(mTextureProgram, "u_proj");
-			hTextureScale = GL.glGetUniformLocation(mTextureProgram, "u_scale");
-			hTextureSize = GL.glGetUniformLocation(mTextureProgram, "u_div");
-			hTextureVertex = GL.glGetAttribLocation(mTextureProgram, "vertex");
-			hTextureTexCoord = GL.glGetAttribLocation(mTextureProgram, "tex_coord");
+			shader = new Shader();
 
 			/* FIXME pool should be disposed on exit... */
 			pool.init(0);
 		}
 
 		public static RenderElement draw(RenderElement l, GLViewport v, float scale) {
+			shader.useProgram();
 
 			GLState.test(false, false);
 			GLState.blend(true);
 
-			GLState.useProgram(mTextureProgram);
-
-			GLState.enableVertexArrays(hTextureTexCoord, hTextureVertex);
-
 			TextureLayer tl = (TextureLayer) l;
 
-			if (tl.fixed)
-				GL.glUniform1f(hTextureScale, 1 / scale);
-			else
-				GL.glUniform1f(hTextureScale, 1);
+			GL.glUniform1f(shader.uScale, tl.fixed ? 1 / scale : 1);
 
-			v.proj.setAsUniform(hTextureProjMatrix);
-			v.mvp.setAsUniform(hTextureMVMatrix);
+			v.proj.setAsUniform(shader.uProj);
+			v.mvp.setAsUniform(shader.uMV);
 
 			MapRenderer.bindQuadIndicesVBO(true);
 
 			for (TextureItem t = tl.textures; t != null; t = t.next) {
-				GL.glUniform2f(hTextureSize,
+				GL.glUniform2f(shader.uTexSize,
 				               1f / (t.width * COORD_SCALE),
 				               1f / (t.height * COORD_SCALE));
 				t.bind();
@@ -175,10 +179,10 @@ public abstract class TextureLayer extends RenderElement {
 					 * / 6(indices) == 8) */
 					int off = (t.offset + i) * 8 + tl.offset;
 
-					GL.glVertexAttribPointer(hTextureVertex, 4,
+					GL.glVertexAttribPointer(shader.aPos, 4,
 					                         GL20.GL_SHORT, false, 12, off);
 
-					GL.glVertexAttribPointer(hTextureTexCoord, 2,
+					GL.glVertexAttribPointer(shader.aTexCoord, 2,
 					                         GL20.GL_SHORT, false, 12, off + 8);
 
 					int numVertices = t.vertices - i;
@@ -194,38 +198,5 @@ public abstract class TextureLayer extends RenderElement {
 
 			return l.next;
 		}
-
-		private final static double COORD_DIV = 1.0 / MapRenderer.COORD_SCALE;
-
-		private final static String textVertexShader = ""
-		        + "precision highp float;"
-		        + "attribute vec4 vertex;"
-		        + "attribute vec2 tex_coord;"
-		        + "uniform mat4 u_mv;"
-		        + "uniform mat4 u_proj;"
-		        + "uniform float u_scale;"
-		        + "uniform vec2 u_div;"
-		        + "varying vec2 tex_c;"
-		        + "const float coord_scale = " + COORD_DIV + ";"
-		        + "void main() {"
-		        + "  vec4 pos;"
-		        + "  vec2 dir = vertex.zw;"
-		        + " if (mod(vertex.x, 2.0) == 0.0){"
-		        + "       pos = u_proj * (u_mv * vec4(vertex.xy + dir * u_scale, 0.0, 1.0));"
-		        + "  } else {" // place as billboard
-		        + "    vec4 center = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-		        + "    pos = u_proj * (center + vec4(dir * coord_scale, 0.0, 0.0));"
-		        + "  }"
-		        + "  gl_Position = pos;"
-		        + "  tex_c = tex_coord * u_div;"
-		        + "}";
-
-		private final static String textFragmentShader = ""
-		        + "precision highp float;"
-		        + "uniform sampler2D tex;"
-		        + "varying vec2 tex_c;"
-		        + "void main() {"
-		        + "   gl_FragColor = texture2D(tex, tex_c.xy);"
-		        + "}";
 	}
 }
