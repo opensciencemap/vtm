@@ -23,6 +23,7 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MercatorProjection;
 import org.oscim.renderer.BufferObject;
+import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
@@ -104,36 +105,38 @@ public class MeshLayer extends RenderElement {
 	}
 
 	public static class Renderer {
-		private static int shaderProgram;
-		private static int hMatrix;
-		private static int hColor;
-		private static int hHeightOffset;
-		private static int hVertexPosition;
+		static Shader shader;
 
 		static boolean init() {
-			shaderProgram = GLUtils.createProgram(vertexShader, fragmentShader);
-			if (shaderProgram == 0)
-				return false;
-
-			hMatrix = GL.glGetUniformLocation(shaderProgram, "u_mvp");
-			hColor = GL.glGetUniformLocation(shaderProgram, "u_color");
-			hHeightOffset = GL.glGetUniformLocation(shaderProgram, "u_height");
-			hVertexPosition = GL.glGetAttribLocation(shaderProgram, "a_pos");
+			shader = new Shader("mesh_layer_2D");
 			return true;
 		}
 
-		public static RenderElement draw(RenderElement l, GLViewport v) {
+		static class Shader extends GLShader {
+			int uMVP, uColor, uHeight, aPos;
 
+			Shader(String shaderFile) {
+				if (!create(shaderFile))
+					return;
+
+				uMVP = getUniform("u_mvp");
+				uColor = getUniform("u_color");
+				uHeight = getUniform("u_height");
+				aPos = getAttrib("a_pos");
+			}
+		}
+
+		public static RenderElement draw(RenderElement l, GLViewport v) {
 			GLState.blend(true);
 
-			GLState.useProgram(shaderProgram);
+			Shader s = shader;
+			s.useProgram();
+			GLState.enableVertexArrays(s.aPos, -1);
 
-			GLState.enableVertexArrays(hVertexPosition, -1);
-
-			v.mvp.setAsUniform(hMatrix);
+			v.mvp.setAsUniform(s.uMVP);
 
 			float heightOffset = 0;
-			GL.glUniform1f(hHeightOffset, heightOffset);
+			GL.glUniform1f(s.uHeight, heightOffset);
 
 			for (; l != null && l.type == RenderElement.MESH; l = l.next) {
 				MeshLayer ml = (MeshLayer) l;
@@ -144,25 +147,25 @@ public class MeshLayer extends RenderElement {
 				if (ml.heightOffset != heightOffset) {
 					heightOffset = ml.heightOffset;
 
-					GL.glUniform1f(hHeightOffset, heightOffset /
+					GL.glUniform1f(s.uHeight, heightOffset /
 					        MercatorProjection.groundResolution(v.pos));
 				}
 
 				ml.indicesVbo.bind();
 
 				if (ml.area == null)
-					GLUtils.setColor(hColor, Color.BLUE, 0.4f);
+					GLUtils.setColor(s.uColor, Color.BLUE, 0.4f);
 				else
-					GLUtils.setColor(hColor, ml.area.color, 1);
+					GLUtils.setColor(s.uColor, ml.area.color, 1);
 
-				GL.glVertexAttribPointer(hVertexPosition, 2, GL20.GL_SHORT,
+				GL.glVertexAttribPointer(s.aPos, 2, GL20.GL_SHORT,
 				                         false, 0, ml.offset);
 
 				GL.glDrawElements(GL20.GL_TRIANGLES, ml.numIndices,
 				                  GL20.GL_UNSIGNED_SHORT, 0);
 
 				if (dbg) {
-					GLUtils.setColor(hColor, Color.GRAY, 0.4f);
+					GLUtils.setColor(s.uColor, Color.GRAY, 0.4f);
 					GL.glDrawElements(GL20.GL_LINES, ml.numIndices,
 					                  GL20.GL_UNSIGNED_SHORT, 0);
 				}
@@ -172,21 +175,5 @@ public class MeshLayer extends RenderElement {
 
 			return l;
 		}
-
-		private final static String vertexShader = ""
-		        + "precision mediump float;"
-		        + "uniform mat4 u_mvp;"
-		        + "uniform float u_height;"
-		        + "attribute vec2 a_pos;"
-		        + "void main() {"
-		        + "  gl_Position = u_mvp * vec4(a_pos, u_height, 1.0);"
-		        + "}";
-
-		private final static String fragmentShader = ""
-		        + "precision mediump float;"
-		        + "uniform vec4 u_color;"
-		        + "void main() {"
-		        + "  gl_FragColor = u_color;"
-		        + "}";
 	}
 }
