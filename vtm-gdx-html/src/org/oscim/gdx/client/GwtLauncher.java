@@ -55,8 +55,9 @@ public class GwtLauncher extends GwtApplication {
 		cfg.rootPanel = new FlowPanel();
 		p.add(cfg.rootPanel);
 
+		//cfg.antialiasing = true;
 		cfg.stencil = true;
-		cfg.fps = 30;
+		cfg.fps = 60;
 
 		return cfg;
 	}
