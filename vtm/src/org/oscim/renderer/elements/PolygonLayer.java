@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Special Renderer for drawing tile polygons using a stencil buffer method
+ * Special Renderer for drawing tile polygons using the stencil buffer method
  */
 public final class PolygonLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(PolygonLayer.class);
@@ -288,7 +288,7 @@ public final class PolygonLayer extends RenderElement {
 
 			int cur = mCount;
 
-			// reset start when only one layer left in stencil buffer
+			/* reset start when only one layer left in stencil buffer */
 			if (first || cur > 5)
 				cur = 0;
 
@@ -298,7 +298,7 @@ public final class PolygonLayer extends RenderElement {
 			for (; l != null && l.type == RenderElement.POLYGON; l = l.next) {
 				PolygonLayer pl = (PolygonLayer) l;
 
-				// fade out polygon layers (set in RenderTheme)
+				/* fade out polygon layers (set in RenderTheme) */
 				if (pl.area.fadeScale > 0 && pl.area.fadeScale > zoom)
 					continue;
 
@@ -306,18 +306,18 @@ public final class PolygonLayer extends RenderElement {
 					drawStencilRegion(first, clipMode);
 					first = false;
 
-					// op for stencil method polygon drawing
+					/* op for stencil method polygon drawing */
 					GL.glStencilOp(GL20.GL_KEEP, GL20.GL_KEEP, GL20.GL_INVERT);
 				}
 
 				mAreaFills[cur] = pl.area.current();
 
-				// set stencil mask to draw to
+				/* set stencil mask to draw to */
 				GL.glStencilMask(1 << cur++);
 
 				GL.glDrawArrays(GL20.GL_TRIANGLE_FAN, l.offset, l.numVertices);
 
-				// draw up to 7 layers into stencil buffer
+				/* draw up to 7 layers into stencil buffer */
 				if (cur == STENCIL_BITS - 1) {
 					fillPolygons(v, start, cur, zoom, scale, div);
 					start = cur = 0;
@@ -330,12 +330,12 @@ public final class PolygonLayer extends RenderElement {
 			if (clipMode > 0) {
 				if (first) {
 					drawStencilRegion(first, clipMode);
-					// disable writes to stencil buffer
+					/* disable writes to stencil buffer */
 					GL.glStencilMask(0x00);
-					// enable writes to color buffer
+					/* enable writes to color buffer */
 					GL.glColorMask(true, true, true, true);
 				} else {
-					// set test for clip to tile region
+					/* set test for clip to tile region */
 					GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
 				}
 			}
@@ -349,9 +349,9 @@ public final class PolygonLayer extends RenderElement {
 			setShader(polyShader, v);
 
 			drawStencilRegion(true, 1);
-			// disable writes to stencil buffer
+			/* disable writes to stencil buffer */
 			GL.glStencilMask(0x00);
-			// enable writes to color buffer
+			/* enable writes to color buffer */
 			GL.glColorMask(true, true, true, true);
 		}
 
