@@ -21,8 +21,6 @@ public class OffscreenRenderer extends LayerRenderer {
 	public OffscreenRenderer(int w, int h) {
 		texW = w;
 		texH = h;
-		//texW = nearestPowerOf2(texW);
-		//texH = nearestPowerOf2(texH);
 	}
 
 	int nearestPowerOf2(int x) {
@@ -37,22 +35,16 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	boolean initialized;
 
-	private boolean useDepthTexture = false;
+	private boolean useDepthTexture = true;
 
 	protected boolean setup1(GLViewport viewport) {
 		IntBuffer buf = MapRenderer.getIntBuffer(1);
 
 		texW = (int) viewport.getWidth();
 		texH = (int) viewport.getHeight();
-		//texW = nearestPowerOf2(texW);
-		//texH = nearestPowerOf2(texH);
 
 		GL.glGenFramebuffers(1, buf);
 		fb = buf.get(0);
-
-		//		buf.clear();
-		//		GL.glGenRenderbuffers(1, buf);
-		//		depthRb = buf.get(0);
 
 		buf.clear();
 		GL.glGenTextures(1, buf);
@@ -64,13 +56,13 @@ public class OffscreenRenderer extends LayerRenderer {
 		GL.glBindTexture(GL20.GL_TEXTURE_2D, renderTex);
 		GLUtils.checkGlError("0");
 
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S, GL20.GL_CLAMP_TO_EDGE);
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T, GL20.GL_CLAMP_TO_EDGE);
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER, GL20.GL_NEAREST);
-		GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER, GL20.GL_NEAREST);
+		GLUtils.setTextureParameter(GL20.GL_NEAREST,
+		                            GL20.GL_NEAREST,
+		                            GL20.GL_CLAMP_TO_EDGE,
+		                            GL20.GL_CLAMP_TO_EDGE);
 
-		GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0, GL20.GL_RGBA,
-		                texW, texH, 0, GL20.GL_RGBA,
+		GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0,
+		                GL20.GL_RGBA, texW, texH, 0, GL20.GL_RGBA,
 		                GL20.GL_UNSIGNED_BYTE, null);
 
 		GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER,
@@ -84,11 +76,11 @@ public class OffscreenRenderer extends LayerRenderer {
 			buf.clear();
 			GL.glGenTextures(1, buf);
 			renderDepth = buf.get(0);
-
-			GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S, GL20.GL_CLAMP_TO_EDGE);
-			GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T, GL20.GL_CLAMP_TO_EDGE);
-			GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER, GL20.GL_NEAREST);
-			GL.glTexParameteri(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER, GL20.GL_NEAREST);
+			GL.glBindTexture(GL20.GL_TEXTURE_2D, renderDepth);
+			GLUtils.setTextureParameter(GL20.GL_NEAREST,
+			                            GL20.GL_NEAREST,
+			                            GL20.GL_CLAMP_TO_EDGE,
+			                            GL20.GL_CLAMP_TO_EDGE);
 			GLUtils.checkGlError("1");
 
 			GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0, GL20.GL_DEPTH_COMPONENT,
@@ -97,10 +89,8 @@ public class OffscreenRenderer extends LayerRenderer {
 
 			GLUtils.checkGlError("11 " + texW + "  / " + texH);
 
-			GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER,
-			                          GL20.GL_DEPTH_ATTACHMENT,
-			                          GL20.GL_TEXTURE_2D,
-			                          renderDepth, 0);
+			GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER, GL20.GL_DEPTH_ATTACHMENT,
+			                          GL20.GL_TEXTURE_2D, renderDepth, 0);
 		} else {
 			buf.clear();
 			GL.glGenRenderbuffers(1, buf);
@@ -119,44 +109,24 @@ public class OffscreenRenderer extends LayerRenderer {
 		}
 
 		GLUtils.checkGlError("111");
-		// create render buffer and bind 16-bit depth buffer
-		//GL.glBindRenderbuffer(GL20.GL_RENDERBUFFER, depthRb);
-
-		//GL.glRenderbufferStorage(GL20.GL_RENDERBUFFER,
-		//                         GL20.GL_DEPTH_COMPONENT16,
-		//                         texW,
-		//                         texH);
-
-		GLUtils.checkGlError("2");
-
-		GLUtils.checkGlError("3");
-
-		//GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER,
-		//                          GL20.GL_COLOR_ATTACHMENT0,
-		//                          GL20.GL_TEXTURE_2D,
-		//                          renderTex, 0);
-		//
-		//GL.glFramebufferRenderbuffer(GL20.GL_FRAMEBUFFER,
-		//                             GL20.GL_DEPTH_ATTACHMENT,
-		//                             GL20.GL_RENDERBUFFER,
-		//                             depthRb);
 
 		int status = GL.glCheckFramebufferStatus(GL20.GL_FRAMEBUFFER);
+		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
+		GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
+
 		if (status != GL20.GL_FRAMEBUFFER_COMPLETE) {
 			log.debug("invalid framebuffer!!! " + status);
 			return false;
 		}
 
-		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
-
 		//shader = GLShader.createProgram(vShader, fShader);
 		//shader = GLShader.createProgram(vShader, fSSAO);
 		//shader = GLShader.createProgram(vShader, fShaderFXAA);
-		shader = GLShader.loadShader("post_fxaa");
+		//shader = GLShader.loadShader("post_fxaa");
+		shader = GLShader.loadShader("post_combined");
 
-		//hTex = GL.glGetUniformLocation(shader, "u_tex");
+		hTex = GL.glGetUniformLocation(shader, "u_tex");
 		hTexColor = GL.glGetUniformLocation(shader, "u_texColor");
-		//hScreen = GL.glGetUniformLocation(shader, "u_screen");
 		hPixel = GL.glGetUniformLocation(shader, "u_pixel");
 		hPos = GL.glGetAttribLocation(shader, "a_pos");
 
@@ -165,10 +135,8 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	int shader;
 	int hPos;
-	//int hTex;
+	int hTex;
 	int hTexColor;
-
-	//int hScreen;
 	int hPixel;
 
 	public void enable(boolean on) {
@@ -197,7 +165,6 @@ public class OffscreenRenderer extends LayerRenderer {
 			initialized = true;
 		}
 		mRenderer.update(viewport);
-		//log.debug(">>> ist ready " + mRenderer.isReady());
 		setReady(mRenderer.isReady());
 	}
 
@@ -214,28 +181,21 @@ public class OffscreenRenderer extends LayerRenderer {
 		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_COLOR_BUFFER_BIT);
 		//GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
-		GLUtils.checkGlError("-----");
 		((S3DBRenderer) mRenderer).render2(viewport);
-		GLUtils.checkGlError("----");
 
 		GL.glViewport(0, 0, (int) viewport.getWidth(), (int) viewport.getHeight());
 
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
 
-		GLUtils.checkGlError("--");
-
 		GLState.useProgram(shader);
-		GLUtils.checkGlError("-0");
 
 		// bind the framebuffer texture
-		//GL.glActiveTexture(GL20.GL_TEXTURE1);
-		//GLUtils.checkGlError("-1");
-
-		//GLState.bindTex2D(renderDepth);
-		//GL.glUniform1i(hTex, 1);
-		//GLUtils.checkGlError("-2");
-
-		GL.glActiveTexture(GL20.GL_TEXTURE0);
+		if (useDepthTexture) {
+			GL.glActiveTexture(GL20.GL_TEXTURE1);
+			GLState.bindTex2D(renderDepth);
+			GL.glUniform1i(hTex, 1);
+			GL.glActiveTexture(GL20.GL_TEXTURE0);
+		}
 		GLState.bindTex2D(renderTex);
 		GL.glUniform1i(hTexColor, 0);
 
@@ -245,12 +205,12 @@ public class OffscreenRenderer extends LayerRenderer {
 		GL.glUniform2f(hPixel, (float) (1.0 / texW * 0.5), (float) (1.0 / texH * 0.5));
 
 		GLState.enableVertexArrays(hPos, -1);
-		GLUtils.checkGlError("-3");
 
 		GLState.test(false, false);
 		GLState.blend(true);
 		GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
-		GLUtils.checkGlError("-4");
+
+		GLUtils.checkGlError("....");
 
 		//GL.glDepthRangef(1, -1);
 		//GL.glClearDepthf(1);
