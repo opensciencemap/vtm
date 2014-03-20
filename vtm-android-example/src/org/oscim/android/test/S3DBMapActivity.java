@@ -1,10 +1,8 @@
 package org.oscim.android.test;
 
 import org.oscim.android.cache.TileCache;
-import org.oscim.layers.GenericLayer;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.s3db.S3DBLayer;
-import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
@@ -20,6 +18,7 @@ public class S3DBMapActivity extends BaseMapActivity {
 		super.onCreate(savedInstanceState);
 
 		mMap.setTheme(VtmThemes.DEFAULT);
+
 		//mMap.setTheme(VtmThemes.TRONRENDER);
 		//mMap.setTheme(VtmThemes.OSMARENDER);
 
@@ -31,13 +30,15 @@ public class S3DBMapActivity extends BaseMapActivity {
 			ts.setCache(mS3dbCache);
 		}
 		TileLayer tl = new S3DBLayer(mMap, ts);
-		OffscreenRenderer or = new OffscreenRenderer(mMap.getWidth(),
-		                                             mMap.getHeight());
-		or.setRenderer(tl.getRenderer());
+		//OffscreenRenderer or = new OffscreenRenderer(mMap.getWidth(),
+		//                                             mMap.getHeight());
+		//or.setRenderer(tl.getRenderer());
 		mMap.layers().add(tl);
 
-		mMap.layers().add(new GenericLayer(mMap, or));
-		mMap.layers().add(new LabelLayer(mMap, mBaseLayer));
+		//mMap.layers().add(new GenericLayer(mMap, or));
+
+		//mMap.layers().add(new LabelLayer(mMap, mBaseLayer));
+		mMap.setMapPosition(53.08, 8.83, Math.pow(2, 17));
 	}
 
 	@Override

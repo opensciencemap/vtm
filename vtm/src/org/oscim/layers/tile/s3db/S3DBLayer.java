@@ -7,6 +7,7 @@ import org.oscim.layers.tile.TileRenderer;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
+import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.tiling.TileSource;
 import org.oscim.utils.ColorUtil;
 import org.oscim.utils.ColorsCSS;
@@ -41,25 +42,27 @@ public class S3DBLayer extends TileLayer {
 
 	public static class S3DBRenderer extends TileRenderer {
 		ExtrusionRenderer mExtRenderer;
+		OffscreenRenderer or;
 
 		public S3DBRenderer() {
 			mExtRenderer = new ExtrusionRenderer(this, 16, true, false);
+
+			or = new OffscreenRenderer();
+			or.setRenderer(mExtRenderer);
 		}
 
 		@Override
 		protected synchronized void update(GLViewport v) {
 			super.update(v);
-			mExtRenderer.update(v);
-			setReady(mExtRenderer.isReady());
+			//mExtRenderer.update(v);
+			or.update(v);
+			setReady(or.isReady());
 		}
 
 		@Override
 		protected synchronized void render(GLViewport v) {
-			mExtRenderer.render(v);
-		}
-
-		public synchronized void render2(GLViewport v) {
-			mExtRenderer.render2(v);
+			or.render(v);
+			//mExtRenderer.render(v);
 		}
 	}
 
@@ -101,7 +104,7 @@ public class S3DBLayer extends TileLayer {
 			return Color.LTGRAY;
 
 		if ("transparent" == color)
-			return Color.get(128, 128, 128, 128);
+			return Color.get(0, 1, 1, 1);
 
 		Integer css = ColorsCSS.get(color);
 

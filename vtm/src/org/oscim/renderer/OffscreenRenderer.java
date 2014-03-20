@@ -3,7 +3,6 @@ package org.oscim.renderer;
 import java.nio.IntBuffer;
 
 import org.oscim.backend.GL20;
-import org.oscim.layers.tile.s3db.S3DBLayer.S3DBRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,31 +10,15 @@ public class OffscreenRenderer extends LayerRenderer {
 	final static Logger log = LoggerFactory.getLogger(OffscreenRenderer.class);
 
 	int fb;
-	//int depthRb;
 	int renderTex;
 	int renderDepth;
 
-	int texW;
-	int texH;
-
-	public OffscreenRenderer(int w, int h) {
-		texW = w;
-		texH = h;
-	}
-
-	int nearestPowerOf2(int x) {
-		--x;
-		x |= x >> 1;
-		x |= x >> 2;
-		x |= x >> 4;
-		x |= x >> 8;
-		x |= x >> 16;
-		return ++x;
-	}
+	int texW = -1;
+	int texH = -1;
 
 	boolean initialized;
 
-	private boolean useDepthTexture = true;
+	private boolean useDepthTexture = false;
 
 	protected boolean setup1(GLViewport viewport) {
 		IntBuffer buf = MapRenderer.getIntBuffer(1);
@@ -50,11 +33,12 @@ public class OffscreenRenderer extends LayerRenderer {
 		GL.glGenTextures(1, buf);
 		renderTex = buf.get(0);
 
+		GLUtils.checkGlError("0");
+
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, fb);
 
 		// generate color texture
 		GL.glBindTexture(GL20.GL_TEXTURE_2D, renderTex);
-		GLUtils.checkGlError("0");
 
 		GLUtils.setTextureParameter(GL20.GL_NEAREST,
 		                            GL20.GL_NEAREST,
@@ -69,8 +53,7 @@ public class OffscreenRenderer extends LayerRenderer {
 		                          GL20.GL_COLOR_ATTACHMENT0,
 		                          GL20.GL_TEXTURE_2D,
 		                          renderTex, 0);
-
-		GLUtils.checkGlError("00");
+		GLUtils.checkGlError("1");
 
 		if (useDepthTexture) {
 			buf.clear();
@@ -81,16 +64,17 @@ public class OffscreenRenderer extends LayerRenderer {
 			                            GL20.GL_NEAREST,
 			                            GL20.GL_CLAMP_TO_EDGE,
 			                            GL20.GL_CLAMP_TO_EDGE);
-			GLUtils.checkGlError("1");
 
-			GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0, GL20.GL_DEPTH_COMPONENT,
-			                texW, texH, 0, GL20.GL_DEPTH_COMPONENT,
+			GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0,
+			                GL20.GL_DEPTH_COMPONENT,
+			                texW, texH, 0,
+			                GL20.GL_DEPTH_COMPONENT,
 			                GL20.GL_UNSIGNED_SHORT, null);
 
-			GLUtils.checkGlError("11 " + texW + "  / " + texH);
-
-			GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER, GL20.GL_DEPTH_ATTACHMENT,
-			                          GL20.GL_TEXTURE_2D, renderDepth, 0);
+			GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER,
+			                          GL20.GL_DEPTH_ATTACHMENT,
+			                          GL20.GL_TEXTURE_2D,
+			                          renderDepth, 0);
 		} else {
 			buf.clear();
 			GL.glGenRenderbuffers(1, buf);
@@ -108,14 +92,14 @@ public class OffscreenRenderer extends LayerRenderer {
 			                             depthRenderbuffer);
 		}
 
-		GLUtils.checkGlError("111");
+		GLUtils.checkGlError("2");
 
 		int status = GL.glCheckFramebufferStatus(GL20.GL_FRAMEBUFFER);
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
 		GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 
 		if (status != GL20.GL_FRAMEBUFFER_COMPLETE) {
-			log.debug("invalid framebuffer!!! " + status);
+			log.debug("invalid framebuffer! " + status);
 			return false;
 		}
 
@@ -159,7 +143,7 @@ public class OffscreenRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected void update(GLViewport viewport) {
+	public void update(GLViewport viewport) {
 		if (!initialized) {
 			setup1(viewport);
 			initialized = true;
@@ -169,21 +153,15 @@ public class OffscreenRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected void render(GLViewport viewport) {
+	public void render(GLViewport viewport) {
 		//begin();
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, fb);
 		GL.glViewport(0, 0, texW, texH);
 		GL.glDepthMask(true);
-		//GL.glViewport(0, 0, this.texW, this.texH);
 		GL.glClearColor(0, 0, 0, 0);
-		//GL.glDepthRangef(0, 1);
-		//GL.glClearDepthf(1);
 		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_COLOR_BUFFER_BIT);
-		//GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
-		((S3DBRenderer) mRenderer).render2(viewport);
-
-		GL.glViewport(0, 0, (int) viewport.getWidth(), (int) viewport.getHeight());
+		mRenderer.render(viewport);
 
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
 
@@ -201,21 +179,15 @@ public class OffscreenRenderer extends LayerRenderer {
 
 		MapRenderer.bindQuadVertexVBO(hPos, true);
 
-		//GL.glUniform2f(hScreen, texW, texH);
-		GL.glUniform2f(hPixel, (float) (1.0 / texW * 0.5), (float) (1.0 / texH * 0.5));
+		GL.glUniform2f(hPixel,
+		               (float) (1.0 / texW * 0.5),
+		               (float) (1.0 / texH * 0.5));
 
 		GLState.enableVertexArrays(hPos, -1);
 
 		GLState.test(false, false);
 		GLState.blend(true);
 		GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
-
 		GLUtils.checkGlError("....");
-
-		//GL.glDepthRangef(1, -1);
-		//GL.glClearDepthf(1);
-
-		//GL.glActiveTexture(GL20.GL_TEXTURE1);
-
 	}
 }
