@@ -25,7 +25,6 @@ import java.nio.ShortBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
-import org.oscim.layers.tile.MapTile;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.utils.pool.Inlist;
@@ -238,10 +237,6 @@ public class MapRenderer {
 			mMap.render();
 			rerender = false;
 		}
-	}
-
-	public static int depthOffset(MapTile t) {
-		return ((t.tileX % 4) + (t.tileY % 4 * 4) + 1);
 	}
 
 	public void onSurfaceChanged(int width, int height) {

@@ -255,7 +255,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
 			ExtrusionLayer el = t.getLayers().getExtrusionLayers();
-			int d = MapRenderer.depthOffset(t) * 10;
+			int d = MapTile.depthOffset(t) * 10;
 			setMatrix(v, t, d);
 			v.mvp.setAsUniform(uExtMatrix);
 
@@ -291,7 +291,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 			}
 
 			GL.glDepthFunc(GL20.GL_EQUAL);
-			int d = MapRenderer.depthOffset(t) * 10;
+			int d = MapTile.depthOffset(t) * 10;
 			setMatrix(v, t, d);
 			v.mvp.setAsUniform(uExtMatrix);
 
