@@ -53,8 +53,9 @@ public class UrlTileDataSource implements ITileDataSource {
 		mSink = sink;
 		try {
 			mConn.sendRequest(tile, this);
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			///e.printStackTrace();
+			log.error("{} {}", mTile, e.getMessage());
 			sink.completed(FAILED);
 		}
 	}
