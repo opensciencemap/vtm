@@ -43,8 +43,9 @@ class S3DBTileLoader extends TileLoader {
 		mGroundScale = (float) MercatorProjection
 		    .groundResolution(lat, 1 << mTile.zoomLevel);
 
-		mLayers = new ExtrusionLayer(0, mGroundScale, Color.get(255, 252, 250));
-		mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(208, 210, 210));
+		mLayers = new ExtrusionLayer(0, mGroundScale, Color.get(255, 254, 252));
+		//mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(207, 209, 210));
+		mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(247, 249, 250));
 		mLayers.next = mRoofs;
 
 		ElementLayers layers = new ElementLayers();

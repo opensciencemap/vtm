@@ -37,7 +37,7 @@ public class S3DBLayer extends TileLayer {
 		ExtrusionRenderer mExtRenderer;
 
 		public S3DBRenderer() {
-			mExtRenderer = new ExtrusionRenderer(this, 16, true);
+			mExtRenderer = new ExtrusionRenderer(this, 16, true, false);
 		}
 
 		@Override
