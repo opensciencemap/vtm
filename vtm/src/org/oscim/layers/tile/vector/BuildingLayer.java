@@ -34,19 +34,30 @@ import org.oscim.utils.FastMath;
 public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 	//static final Logger log = LoggerFactory.getLogger(BuildingOverlay.class);
 
-	final ExtrusionRenderer mExtLayer;
+	private final static int MIN_ZOOM = 17;
+	private final int mMinZoom;
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
 		super(map);
 		tileLayer.addHook(this);
 
-		mExtLayer = new ExtrusionRenderer(tileLayer.tileRenderer()) {
+		mMinZoom = MIN_ZOOM;
+		mRenderer = new ExtrusionRenderer(tileLayer.tileRenderer(), MIN_ZOOM);
+	}
+
+	public BuildingLayer(Map map, VectorTileLayer tileLayer, int minZoom) {
+		super(map);
+		tileLayer.addHook(this);
+
+		mMinZoom = minZoom;
+		mRenderer = new ExtrusionRenderer(tileLayer.tileRenderer(), mMinZoom) {
+
 			private long mStartTime;
 
 			@Override
 			public void update(GLViewport v) {
 
-				boolean show = v.pos.scale >= (1 << MIN_ZOOM);
+				boolean show = v.pos.scale >= (1 << mMinZoom);
 
 				if (show) {
 					if (mAlpha < 1) {
@@ -79,16 +90,9 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 				super.update(v);
 			}
 		};
-
-		//mExtLayer.setColors(Color.LTGRAY, Color.GRAY, Color.DKGRAY);
-		mRenderer = mExtLayer;
 	}
 
-	//private int multi;
-
 	private final float mFadeTime = 500;
-
-	private final static int MIN_ZOOM = 17;
 
 	@Override
 	public boolean render(MapTile tile, ElementLayers layers, MapElement element,
@@ -129,6 +133,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		return true;
 	}
 
+	//private int multi;
 	//@Override
 	//public boolean onTouchEvent(MotionEvent e) {
 	//	int action = e.getAction() & MotionEvent.ACTION_MASK;
