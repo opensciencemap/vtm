@@ -21,7 +21,7 @@
   
   <super-source path="emu" />
 
-  <set-configuration-property name="gdx.assetpath" value="../vtm-themes/resources/assets" />
+  <set-configuration-property name="gdx.assetpath" value="./assets" />
   <!-- for gradle build, commend out for eclipse build/devmode -->
   <set-configuration-property name="gdx.assetoutputpath" value="build/gwt/draftOut" />
 

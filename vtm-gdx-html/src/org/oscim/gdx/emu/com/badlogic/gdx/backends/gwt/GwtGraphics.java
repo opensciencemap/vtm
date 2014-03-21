@@ -73,7 +73,13 @@ public class GwtGraphics implements Graphics {
 		context.viewport(0, 0, config.width, config.height);
 
 		// this actually *enables* the option to use std derivatives in shader..
-		context.getExtension("OES_standard_derivatives");
+		if (context.getExtension("OES_standard_derivatives") == null) {
+
+		}
+
+		if (context.getExtension("WEBKIT_WEBGL_depth_texture") == null) {
+
+		}
 
 		this.gl = config.useDebugGL ? new GwtGL20Debug(context) : new GwtGLAdapter(context);
 		canvas.setId("gdx-canvas");

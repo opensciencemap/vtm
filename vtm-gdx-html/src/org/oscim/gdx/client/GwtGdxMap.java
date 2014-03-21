@@ -16,6 +16,8 @@
  */
 package org.oscim.gdx.client;
 
+import java.util.HashMap;
+
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
@@ -23,9 +25,14 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.gdx.GdxMap;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
+import org.oscim.layers.tile.vector.VectorTileLayer;
+import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.renderer.MapRenderer;
+import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
-import org.oscim.tiling.source.bitmap.DefaultSources.NaturalEarth;
+import org.oscim.tiling.source.bitmap.BitmapTileSource;
+import org.oscim.tiling.source.bitmap.DefaultSources;
+import org.oscim.tiling.source.bitmap.DefaultSources.StamenToner;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,14 +73,20 @@ class GwtGdxMap extends GdxMap {
 
 		float tilt = 0;
 		float rotation = 0;
+		String themeName = null;
+		String mapName = null;
 
+		final HashMap<String, String> params = new HashMap<String, String>();
+		String addOpts = "";
 		if (Window.Location.getHash() != null) {
 			String hash = Window.Location.getHash();
-
 			hash = hash.substring(1);
-			String[] pairs = hash.split(",");
+			String[] urlParams = null;
+			urlParams = hash.split("&");
+			if (urlParams.length == 1)
+				urlParams = hash.split(",");
 
-			for (String p : pairs) {
+			for (String p : urlParams) {
 				try {
 					if (p.startsWith("lat="))
 						lat = Double.parseDouble(p.substring(4));
@@ -85,33 +98,82 @@ class GwtGdxMap extends GdxMap {
 						rotation = Float.parseFloat(p.substring(4));
 					else if (p.startsWith("tilt="))
 						tilt = Float.parseFloat(p.substring(5));
+					else if (p.startsWith("theme="))
+						themeName = p.substring(6);
+					else if (p.startsWith("map="))
+						mapName = p.substring(4);
+					else {
+						String[] opt = p.split("=");
+						if (opt.length > 1)
+							params.put(opt[0], opt[1]);
+						else
+							params.put(opt[0], null);
+
+						addOpts += p + "&";
+
+					}
 				} catch (NumberFormatException e) {
 
 				}
 			}
 		}
+
+		final String addParam =
+		        (themeName == null ? "" : ("theme=" + themeName + "&"))
+		                + (mapName == null ? "" : ("map=" + mapName + "&"))
+		                + addOpts;
+
 		MapPosition p = new MapPosition();
 		p.setZoomLevel(zoom);
 		p.setPosition(lat, lon);
-		log.debug("map position: " + p.x + "/" + p.y + " " + lat + "/" + lon);
-
 		p.bearing = rotation;
 		p.tilt = tilt;
+
 		mMap.setMapPosition(p);
 
-		//mMap.getViewport().setTilt(tilt);
-		//mMap.getViewport().setRotation(rotation);
+		VectorTileLayer l = null;
 
-		String url = c.getTileUrl();
-		String sourceName = c.getTileSource();
+		if (c.getBackgroundLayer() != null || mapName != null) {
+			BitmapTileSource ts;
 
-		TileSource tileSource;
-		tileSource = new OSciMap4TileSource(url);
+			if ("toner".equals(mapName))
+				ts = new StamenToner();
+			else if ("osm".equals(mapName))
+				ts = new DefaultSources.OpenStreetMap();
+			else if ("watercolor".equals(mapName))
+				ts = new DefaultSources.StamenWatercolor();
+			else if ("arcgis-shaded".equals(mapName))
+				ts = new DefaultSources.ArcGISWorldShaded();
+			else if ("imagico".equals(mapName))
+				ts = new DefaultSources.ImagicoLandcover();
+			else
+				ts = new StamenToner();
 
-		initDefaultLayers(tileSource, false, true, true);
+			mMap.setBackgroundMap(new BitmapTileLayer(mMap, ts));
+		} else {
+			String url = c.getTileUrl();
 
-		if ("naturalearth".equals(c.getBackgroundLayer()))
-			mMap.setBackgroundMap(new BitmapTileLayer(mMap, new NaturalEarth()));
+			TileSource ts = new OSciMap4TileSource(url);
+			l = mMap.setBaseMap(ts);
+
+			if (themeName == null) {
+				mMap.setTheme(VtmThemes.DEFAULT);
+			} else {
+				if ("osmarender".equals(themeName))
+					mMap.setTheme(VtmThemes.OSMARENDER);
+				else if ("tron".equals(themeName))
+					mMap.setTheme(VtmThemes.TRONRENDER);
+				else if ("newtron".equals(themeName))
+					mMap.setTheme(VtmThemes.NEWTRON);
+				else
+					mMap.setTheme(VtmThemes.DEFAULT);
+			}
+		}
+
+		if (l != null) {
+			if (!params.containsKey("nolabel"))
+				mMap.layers().add(new LabelLayer(mMap, l));
+		}
 
 		mSearchBox = new SearchBox(mMap);
 
@@ -139,9 +201,12 @@ class GwtGdxMap extends GdxMap {
 
 					String newURL = Window.Location
 					    .createUrlBuilder()
-					    .setHash("scale=" + pos.zoomLevel + ",rot=" + curRot
-					            + ",tilt=" + curTilt + ",lat=" + (curLat / 1000f)
-					            + ",lon=" + (curLon / 1000f))
+					    .setHash(addParam
+					            + "scale=" + pos.zoomLevel
+					            + "&rot=" + curRot
+					            + "&tilt=" + curTilt
+					            + "&lat=" + (curLat / 1000f)
+					            + "&lon=" + (curLon / 1000f))
 					    .buildString();
 					Window.Location.replace(newURL);
 				}
