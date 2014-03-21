@@ -226,6 +226,10 @@ public abstract class TileRenderer extends LayerRenderer {
 			for (int i = 0; i < mDrawTiles.cnt; i++)
 				tiles[i].isVisible = false;
 
+			if (tileZoom > pos.zoomLevel + 2 || tileZoom < pos.zoomLevel - 4) {
+				//log.debug("skip: zoomlevel diff " + (tileZoom - pos.zoomLevel));
+				return;
+			}
 			/* count placeholder tiles */
 			mProxyTileCnt = 0;
 
@@ -287,6 +291,7 @@ public abstract class TileRenderer extends LayerRenderer {
 	private final ScanBox mScanBox = new ScanBox() {
 		@Override
 		protected void setVisible(int y, int x1, int x2) {
+
 			MapTile[] tiles = mDrawTiles.tiles;
 			int cnt = mDrawTiles.cnt;
 

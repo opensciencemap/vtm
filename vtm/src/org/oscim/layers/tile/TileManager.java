@@ -196,6 +196,15 @@ public class TileManager {
 		 * jobs come in. */
 		jobQueue.clear();
 
+		if (pos.zoomLevel < mMinZoom) {
+			if (mCurrentTiles.cnt > 0 && pos.zoomLevel < mMinZoom - 4) {
+				synchronized (mTilelock) {
+					mCurrentTiles.releaseTiles();
+				}
+			}
+			return false;
+		}
+
 		int tileZoom = FastMath.clamp(pos.zoomLevel, mMinZoom, mMaxZoom);
 
 		if (mZoomTable != null) {
@@ -349,7 +358,7 @@ public class TileManager {
 			mJobs.add(tile);
 		}
 
-		if ((zoomLevel > 2) && (mZoomTable == null)) {
+		if ((zoomLevel > mMinZoom) && (mZoomTable == null)) {
 			/* prefetch parent */
 			MapTile p = tile.node.parent.item;
 			if (p == null) {
