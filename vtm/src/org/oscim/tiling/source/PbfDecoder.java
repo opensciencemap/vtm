@@ -250,6 +250,71 @@ public abstract class PbfDecoder implements ITileDecoder {
 		return (cnt >> 1);
 	}
 
+	protected int decodeInterleavedPoints3D(float[] coords, float scale)
+	        throws IOException {
+
+		int bytes = decodeVarint32();
+		fillBuffer(bytes);
+
+		int cnt = 0;
+		int lastX = 0;
+		int lastY = 0;
+		int lastZ = 0;
+
+		int cur = 0;
+
+		byte[] buf = buffer;
+		int pos = bufferPos;
+		int end = pos + bytes;
+
+		while (pos < end) {
+			byte b = buf[pos++];
+			int val = b;
+
+			if (b < 0) {
+				b = buf[pos++];
+				val = (val & M1) | (b << S1);
+				if (b < 0) {
+					b = buf[pos++];
+					val = (val & M2) | (b << S2);
+					if (b < 0) {
+						b = buf[pos++];
+						val = (val & M3) | (b << S3);
+						if (b < 0) {
+							b = buf[pos++];
+							val = (val & M4) | (b << S4);
+							if (b < 0)
+								throw INVALID_VARINT;
+						}
+					}
+				}
+			}
+			// zigzag decoding
+			int s = ((val >>> 1) ^ -(val & 1));
+
+			if (cur == 0) {
+				lastX = lastX + s;
+				coords[cnt++] = lastX / scale;
+			} else if (cur == 1) {
+				lastY = lastY + s;
+				coords[cnt++] = lastY / scale;
+			} else {
+				lastZ = lastZ + s;
+				coords[cnt++] = lastZ / scale;
+			}
+			cur = (cur + 1) % 3;
+		}
+
+		if (pos != bufferPos + bytes)
+			throw INVALID_PACKED_SIZE;
+
+		bufferPos = pos;
+
+		// return number of points read
+		//FIXME inconsitent with 3d version!
+		return cnt;
+	}
+
 	protected static int deZigZag(int val) {
 		return ((val >>> 1) ^ -(val & 1));
 	}
