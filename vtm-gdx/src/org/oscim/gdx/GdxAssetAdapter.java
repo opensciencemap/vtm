@@ -28,7 +28,7 @@ public class GdxAssetAdapter extends AssetAdapter {
 
 	@Override
 	public InputStream openFileAsStream(String fileName) {
-		FileHandle file = Gdx.files.internal(fileName);
+		FileHandle file = Gdx.files.internal("assets/" + fileName);
 		if (file == null)
 			throw new IllegalArgumentException("missing file " + fileName);
 
