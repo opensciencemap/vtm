@@ -42,23 +42,25 @@ public class VectorTileLayer extends TileLayer {
 	protected TileSource mTileSource;
 
 	public VectorTileLayer(Map map, TileSource tileSource) {
+		this(map, new TileManager(map,
+		                          tileSource.getZoomLevelMin(),
+		                          tileSource.getZoomLevelMax(),
+		                          100),
+		     new VectorTileRenderer(), 2);
 
-		super(map, new TileManager(map,
-		                           tileSource.getZoomLevelMin(),
-		                           tileSource.getZoomLevelMax(),
-		                           100),
-		      new VectorTileRenderer());
-
-		// FIXME config!
-		initLoader(2);
 		setTileSource(tileSource);
 	}
 
 	public VectorTileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
-		super(map, new TileManager(map, minZoom, maxZoom, cacheLimit),
-		      new VectorTileRenderer());
+		this(map, new TileManager(map, minZoom, maxZoom, cacheLimit),
+		     new VectorTileRenderer(), 4);
+	}
 
-		initLoader(4);
+	public VectorTileLayer(Map map, TileManager tileManager,
+	        VectorTileRenderer renderer, int numLoaders) {
+		super(map, tileManager, renderer);
+
+		initLoader(numLoaders);
 	}
 
 	@Override
