@@ -39,7 +39,7 @@ public class S3DBLayer extends TileLayer {
 		return new S3DBTileLoader(getManager(), mTileSource);
 	}
 
-	static class S3DBRenderer extends TileRenderer {
+	public static class S3DBRenderer extends TileRenderer {
 		ExtrusionRenderer mExtRenderer;
 
 		public S3DBRenderer() {
@@ -56,6 +56,10 @@ public class S3DBLayer extends TileLayer {
 		@Override
 		protected synchronized void render(GLViewport v) {
 			mExtRenderer.render(v);
+		}
+
+		public synchronized void render2(GLViewport v) {
+			mExtRenderer.render2(v);
 		}
 	}
 
@@ -97,7 +101,7 @@ public class S3DBLayer extends TileLayer {
 			return Color.LTGRAY;
 
 		if ("transparent" == color)
-			return Color.get(64, 64, 64, 64);
+			return Color.get(128, 128, 128, 128);
 
 		Integer css = ColorsCSS.get(color);
 

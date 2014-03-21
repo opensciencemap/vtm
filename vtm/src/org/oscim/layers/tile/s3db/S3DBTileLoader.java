@@ -3,9 +3,11 @@ package org.oscim.layers.tile.s3db;
 import static org.oscim.layers.tile.s3db.S3DBLayer.getMaterialColor;
 
 import org.oscim.backend.canvas.Color;
+import org.oscim.core.GeometryBuffer;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
+import org.oscim.core.Tag;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
@@ -27,9 +29,25 @@ class S3DBTileLoader extends TileLoader {
 
 	private float mGroundScale;
 
+	static MapElement mTilePlane = new MapElement();
+
+	static {
+		mTilePlane = new MapElement();
+		GeometryBuffer g = mTilePlane;
+		g.type = GeometryType.TRIS;
+		g.points = new float[] {
+		        0, 0, 0,
+		        4096, 0, 0,
+		        0, 4096, 0,
+		        4096, 4096, 0 };
+		g.index = new short[] { 0, 1, 2, 2, 1, 3 };
+		mTilePlane.tags.add(new Tag("c", "transparent"));
+	}
+
 	public S3DBTileLoader(TileManager tileManager, TileSource tileSource) {
 		super(tileManager);
 		mTileDataSource = tileSource.getDataSource();
+
 	}
 
 	@Override
@@ -45,14 +63,17 @@ class S3DBTileLoader extends TileLoader {
 		mGroundScale = (float) MercatorProjection
 		    .groundResolution(lat, 1 << mTile.zoomLevel);
 
+		mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(247, 249, 250));
+
 		mLayers = new ExtrusionLayer(0, mGroundScale, Color.get(255, 254, 252));
 		//mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(207, 209, 210));
-		mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(247, 249, 250));
-		mLayers.next = mRoofs;
+		mRoofs.next = mLayers;
 
 		ElementLayers layers = new ElementLayers();
-		layers.setExtrusionLayers(mLayers);
+		layers.setExtrusionLayers(mRoofs);
 		tile.data = layers;
+
+		process(mTilePlane);
 
 		try {
 			/* query database, which calls process() callback */
@@ -109,16 +130,18 @@ class S3DBTileLoader extends TileLoader {
 		}
 		ExtrusionLayer l = new ExtrusionLayer(0, mGroundScale, c);
 
-		l.next = mRoofs.next;
-		mRoofs.next = l;
+		l.next = mLayers.next;
+		mLayers.next = l;
 
 		l.add(element);
 	}
 
 	@Override
 	public void completed(QueryResult result) {
+
 		mLayers = null;
 		mRoofs = null;
+
 		super.completed(result);
 	}
 }
