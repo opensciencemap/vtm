@@ -35,25 +35,14 @@ import com.badlogic.gdx.backends.gwt.preloader.Preloader.PreloaderState;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Clipboard;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.InlineHTML;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * Implementation of an {@link Application} based on GWT. Clients have to
@@ -71,7 +60,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	private GwtGraphics graphics;
 	private GwtInput input;
 	private GwtNet net;
-	private Panel root = null;
+	private int logLevel = LOG_ERROR;
 	private Array<Runnable> runnables = new Array<Runnable>();
 	private Array<Runnable> runnablesHelper = new Array<Runnable>();
 	private Array<LifecycleListener> lifecycleListeners = new Array<LifecycleListener>();
@@ -94,31 +83,6 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		this.listener = getApplicationListener();
 		this.config = getConfig();
 
-		if (config.rootPanel != null) {
-			this.root = config.rootPanel;
-		} else {
-			Element element = Document.get().getElementById("embed-" + GWT.getModuleName());
-			if (element == null) {
-				VerticalPanel panel = new VerticalPanel();
-				panel.setWidth("" + config.width + "px");
-				panel.setHeight("" + config.height + "px");
-				panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-				panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-				RootPanel.get().add(panel);
-				RootPanel.get().setWidth("" + config.width + "px");
-				RootPanel.get().setHeight("" + config.height + "px");
-				this.root = panel;
-			} else {
-				VerticalPanel panel = new VerticalPanel();
-				panel.setWidth("" + config.width + "px");
-				panel.setHeight("" + config.height + "px");
-				panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-				panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-				element.appendChild(panel.getElement());
-				root = panel;
-			}
-		}
-
 		final PreloaderCallback callback = getPreloaderCallback();
 		preloader = createPreloader();
 		preloader.preload("assets.txt", new PreloaderCallback() {
@@ -131,7 +95,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
 			public void update(PreloaderState state) {
 				callback.update(state);
 				if (state.hasEnded()) {
-					getRootPanel().clear();
+					//getRootPanel().clear();
 					setupLoop();
 				}
 			}
@@ -142,15 +106,16 @@ public abstract class GwtApplication implements EntryPoint, Application {
 		Gdx.app = this;
 		// setup modules
 		try {
-			graphics = new GwtGraphics(root, config);
+			graphics = new GwtGraphics(null, config);
 		} catch (Throwable e) {
-			root.clear();
-			root.add(new Label("Sorry, your browser doesn't seem to support WebGL"));
+			error("GwtApplication", "exception: " + e.getMessage(), e);
+			//root.clear();
+			//root.add(new Label("Sorry, your browser doesn't seem to support WebGL"));
 			return;
 		}
 		lastWidth = graphics.getWidth();
 		lastHeight = graphics.getHeight();
-		//Gdx.audio = new GwtAudio();
+		Gdx.app = this;
 		Gdx.graphics = graphics;
 		Gdx.gl20 = graphics.getGL20();
 		Gdx.gl = Gdx.gl20;
@@ -186,7 +151,6 @@ public abstract class GwtApplication implements EntryPoint, Application {
 					throw new RuntimeException(t);
 				}
 			}
-			//}.scheduleRepeating((int) ((1f / config.fps) * 1000));
 		}.schedule(1);
 	}
 
@@ -214,7 +178,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	}
 
 	public Panel getRootPanel() {
-		return root;
+		throw new GdxRuntimeException("no panel!");
 	}
 
 	long loadStart = TimeUtils.nanoTime();
@@ -224,33 +188,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
 	}
 
 	public PreloaderCallback getPreloaderCallback() {
-		final Panel preloaderPanel = new VerticalPanel();
-		preloaderPanel.setStyleName("gdx-preloader");
-		final Image logo = new Image(GWT.getModuleBaseURL() + "logo.png");
-		logo.setStyleName("logo");
-		preloaderPanel.add(logo);
-		final Panel meterPanel = new SimplePanel();
-		meterPanel.setStyleName("gdx-meter");
-		meterPanel.addStyleName("red");
-		final InlineHTML meter = new InlineHTML();
-		final Style meterStyle = meter.getElement().getStyle();
-		meterStyle.setWidth(0, Unit.PCT);
-		meterPanel.add(meter);
-		preloaderPanel.add(meterPanel);
-		getRootPanel().add(preloaderPanel);
-		return new PreloaderCallback() {
-
-			@Override
-			public void error(String file) {
-				System.out.println("error: " + file);
-			}
-
-			@Override
-			public void update(PreloaderState state) {
-				meterStyle.setWidth(100f * state.getProgress(), Unit.PCT);
-			}
-
-		};
+		return null;
 	}
 
 	@Override

@@ -79,9 +79,16 @@ task copyVtmAssets(type: Copy) {
     include '**/*'
 }
 
+task copyWarSources(type: Copy) {
+    from 'war/index.html'
+    from 'war/default.css'
+    into "src/main/webapp"
+}
+
 tasks.withType(JavaCompile) { compileTask ->
   compileTask.dependsOn copyThemeAssets
   compileTask.dependsOn copyVtmAssets
+  compileTask.dependsOn copyWarSources
 }
 
 // Configuring Eclipse classpath

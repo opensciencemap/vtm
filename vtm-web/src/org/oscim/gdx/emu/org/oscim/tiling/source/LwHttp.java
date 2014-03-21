@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.oscim.core.Tile;
-import org.oscim.tiling.source.UrlTileDataSource;
 
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Uint8Array;
@@ -32,7 +31,6 @@ public class LwHttp {
 
 	private final String mUrlPath;
 	private final byte[] mRequestBuffer;
-
 
 	private int mContentLength = -1;
 	private XMLHttpRequest mHttpRequest;

@@ -49,4 +49,9 @@ class MapConfig extends JavaScriptObject {
 	public final native String getBackgroundLayer() /*-{
 		return this.background;
 	}-*/;
+
+	public final native int getTileSize() /*-{
+		return this.tileSize || 256;
+	}-*/;
+
 }

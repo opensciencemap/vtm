@@ -25,10 +25,8 @@ import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.dom.client.CanvasElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.webgl.client.WebGLContextAttributes;
 import com.google.gwt.webgl.client.WebGLRenderingContext;
@@ -48,19 +46,24 @@ public class GwtGraphics implements Graphics {
 	double pixelRatio;
 
 	public GwtGraphics(Panel root, final GwtApplicationConfiguration config) {
-		Canvas canvasWidget = Canvas.createIfSupported();
-		if (canvasWidget == null)
-			throw new GdxRuntimeException("Canvas not supported");
-		canvas = canvasWidget.getCanvasElement();
-		root.add(canvasWidget);
-
 		this.pixelRatio = getDevicePixelRatioJSNI();
 
-		canvas.setWidth((int) (config.width * pixelRatio));
-		canvas.setHeight((int) (config.height * pixelRatio));
+		if (config.canvasId == null) {
+			Canvas canvasWidget = Canvas.createIfSupported();
+			if (canvasWidget == null)
+				throw new GdxRuntimeException("Canvas not supported");
+			canvas = canvasWidget.getCanvasElement();
+			root.add(canvasWidget);
+		} else {
+			canvas = (CanvasElement) Document.get().getElementById(config.canvasId);
 
-		canvas.getStyle().setWidth(config.width, Unit.PX);
-		canvas.getStyle().setHeight(config.height, Unit.PX);
+			canvas.setWidth((int) (config.width * pixelRatio));
+			canvas.setHeight((int) (config.height * pixelRatio));
+
+			canvas.getStyle().setWidth(config.width, Unit.PX);
+			canvas.getStyle().setHeight(config.height, Unit.PX);
+		}
+
 		this.config = config;
 
 		WebGLContextAttributes attributes = WebGLContextAttributes.create();
@@ -82,22 +85,6 @@ public class GwtGraphics implements Graphics {
 		}
 
 		this.gl = config.useDebugGL ? new GwtGL20Debug(context) : new GwtGLAdapter(context);
-		canvas.setId("gdx-canvas");
-
-		Window.addResizeHandler(new ResizeHandler() {
-			@Override
-			public void onResize(ResizeEvent event) {
-				int w = config.rootPanel.getOffsetWidth();
-				int h = config.rootPanel.getOffsetHeight();
-
-				canvas.getStyle().setWidth(w, Unit.PX);
-				canvas.getStyle().setHeight(h, Unit.PX);
-
-				Gdx.app.log("onResize", w + "/" + h);
-				canvas.setWidth((int) (w * pixelRatio));
-				canvas.setHeight((int) (h * pixelRatio));
-			}
-		});
 	}
 
 	public static native double getDevicePixelRatioJSNI() /*-{

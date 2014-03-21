@@ -22,10 +22,10 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
-import org.oscim.core.MercatorProjection;
 import org.oscim.gdx.GdxAssets;
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.client.GwtGdxGraphics;
+import org.oscim.gdx.client.UrlUpdater;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -42,11 +42,10 @@ import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 
-class GwtGdxMap extends GdxMap {
-	static final Logger log = LoggerFactory.getLogger(GwtGdxMap.class);
+class GwtMap extends GdxMap {
+	static final Logger log = LoggerFactory.getLogger(GwtMap.class);
 
 	SearchBox mSearchBox;
 
@@ -58,7 +57,8 @@ class GwtGdxMap extends GdxMap {
 		// https://bug568526.bugzilla.mozilla.org/attachment.cgi?id=447932
 		// <- circle/stroke test 800ms firefox, 80ms chromium..
 		// TODO use texture atlas to avoid drawing text-textures
-		if (GwtApplication.agentInfo().isLinux() && GwtApplication.agentInfo().isFirefox())
+		if (GwtApplication.agentInfo().isLinux() &&
+		        GwtApplication.agentInfo().isFirefox())
 			GwtGdxGraphics.NO_STROKE_TEXT = true;
 
 		GwtGdxGraphics.init();
@@ -123,10 +123,9 @@ class GwtGdxMap extends GdxMap {
 			}
 		}
 
-		final String addParam =
-		        (themeName == null ? "" : ("theme=" + themeName + "&"))
-		                + (mapName == null ? "" : ("map=" + mapName + "&"))
-		                + addOpts;
+		String addParam = (themeName == null ? "" : ("theme=" + themeName + "&"))
+		        + (mapName == null ? "" : ("map=" + mapName + "&"))
+		        + addOpts;
 
 		MapPosition p = new MapPosition();
 		p.setZoomLevel(zoom);
@@ -185,42 +184,46 @@ class GwtGdxMap extends GdxMap {
 
 		mSearchBox = new SearchBox(mMap);
 
-		// update URL hash to current position, every 5 seconds
-		Timer timer = new Timer() {
-			private int curLon, curLat, curZoom, curTilt, curRot;
-			private MapPosition pos = new MapPosition();
+		//		// update URL hash to current position, every 5 seconds
+		//		Timer timer = new Timer() {
+		//			private int curLon, curLat, curZoom, curTilt, curRot;
+		//			private MapPosition pos = new MapPosition();
+		//
+		//			public void run() {
+		//				mMap.viewport().getMapPosition(pos);
+		//				int lat = (int) (MercatorProjection.toLatitude(pos.y) * 1000);
+		//				int lon = (int) (MercatorProjection.toLongitude(pos.x) * 1000);
+		//				int rot = (int) (pos.bearing);
+		//				rot = (int) (pos.bearing) % 360;
+		//				//rot = rot < 0 ? -rot : rot;
+		//
+		//				if (curZoom != pos.zoomLevel || curLat != lat || curLon != lon
+		//				        || curTilt != rot || curRot != (int) (pos.bearing)) {
+		//
+		//					curLat = lat;
+		//					curLon = lon;
+		//					curZoom = pos.zoomLevel;
+		//					curTilt = (int) pos.tilt;
+		//					curRot = rot;
+		//
+		//					String newURL = Window.Location
+		//					    .createUrlBuilder()
+		//					    .setHash(addParam
+		//					            + "scale=" + pos.zoomLevel
+		//					            + "&rot=" + curRot
+		//					            + "&tilt=" + curTilt
+		//					            + "&lat=" + (curLat / 1000f)
+		//					            + "&lon=" + (curLon / 1000f))
+		//					    .buildString();
+		//					Window.Location.replace(newURL);
+		//				}
+		//			}
+		//		};
+		//		timer.scheduleRepeating(5000);
 
-			public void run() {
-				mMap.viewport().getMapPosition(pos);
-				int lat = (int) (MercatorProjection.toLatitude(pos.y) * 1000);
-				int lon = (int) (MercatorProjection.toLongitude(pos.x) * 1000);
-				int rot = (int) (pos.bearing);
-				rot = (int) (pos.bearing) % 360;
-				//rot = rot < 0 ? -rot : rot;
-
-				if (curZoom != pos.zoomLevel || curLat != lat || curLon != lon
-				        || curTilt != rot || curRot != (int) (pos.bearing)) {
-
-					curLat = lat;
-					curLon = lon;
-					curZoom = pos.zoomLevel;
-					curTilt = (int) pos.tilt;
-					curRot = rot;
-
-					String newURL = Window.Location
-					    .createUrlBuilder()
-					    .setHash(addParam
-					            + "scale=" + pos.zoomLevel
-					            + "&rot=" + curRot
-					            + "&tilt=" + curTilt
-					            + "&lat=" + (curLat / 1000f)
-					            + "&lon=" + (curLon / 1000f))
-					    .buildString();
-					Window.Location.replace(newURL);
-				}
-			}
-		};
-		timer.scheduleRepeating(5000);
+		UrlUpdater urlUpdater = new UrlUpdater(mMap);
+		urlUpdater.setParams(addParam);
+		urlUpdater.scheduleRepeating(5000);
 	}
 
 	@Override
