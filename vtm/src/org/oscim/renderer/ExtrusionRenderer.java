@@ -54,7 +54,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		mTileSet = new TileSet();
 		mTileZoom = tileZoom;
 		mMode = mesh ? 1 : 0;
-		drawAlpha = alpha;
+		drawAlpha = false; //alpha;
 	}
 
 	private static int[] shaderProgram = new int[2];
@@ -215,6 +215,35 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 	@Override
 	public void render(GLViewport v) {
+	}
+
+	private void renderCombined(int vertexPointer, ExtrusionLayer el) {
+		for (; el != null; el = (ExtrusionLayer) el.next) {
+
+			if (el.vboIndices == null)
+				continue;
+
+			el.vboIndices.bind();
+			el.vboVertices.bind();
+
+			GL.glVertexAttribPointer(vertexPointer, 3,
+			                         GL20.GL_SHORT, false, 8, 0);
+
+			int sumIndices = el.numIndices[0] + el.numIndices[1] + el.numIndices[2];
+			if (sumIndices > 0)
+				GL.glDrawElements(GL20.GL_TRIANGLES, sumIndices,
+				                  GL20.GL_UNSIGNED_SHORT, 0);
+
+			if (el.numIndices[2] > 0) {
+				int offset = sumIndices * 2;
+				GL.glDrawElements(GL20.GL_TRIANGLES, el.numIndices[4],
+				                  GL20.GL_UNSIGNED_SHORT, offset);
+
+			}
+		}
+	}
+
+	public void render2(GLViewport v) {
 		// TODO one could render in one pass to texture and then draw the texture
 		// with alpha... might be faster and would allow postprocessing outlines.
 
@@ -243,24 +272,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 				setMatrix(v, tiles[i], 0);
 				v.mvp.setAsUniform(uExtMatrix);
 
-				el.vboIndices.bind();
-				el.vboVertices.bind();
-
-				GL.glVertexAttribPointer(uExtVertexPosition, 3,
-				                         GL20.GL_SHORT, false, 8, 0);
-
-				GL.glVertexAttribPointer(uExtLightPosition, 2,
-				                         GL20.GL_UNSIGNED_BYTE, false, 8, 6);
-
-				GL.glDrawElements(GL20.GL_TRIANGLES,
-				                  (el.numIndices[0] + el.numIndices[1]
-				                  + el.numIndices[2]),
-				                  GL20.GL_UNSIGNED_SHORT, 0);
-
-				GL.glDrawElements(GL20.GL_LINES, el.numIndices[3],
-				                  GL20.GL_UNSIGNED_SHORT,
-				                  (el.numIndices[0] + el.numIndices[1]
-				                  + el.numIndices[2]) * 2);
+				renderCombined(uExtVertexPosition, el);
 
 				// just a temporary reference!
 				tiles[i] = null;
@@ -300,24 +312,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 				setMatrix(v, t, d);
 				v.mvp.setAsUniform(uExtMatrix);
 
-				for (; el != null; el = (ExtrusionLayer) el.next) {
-
-					if (el.vboIndices == null)
-						continue;
-
-					el.vboIndices.bind();
-					el.vboVertices.bind();
-
-					GL.glVertexAttribPointer(uExtVertexPosition, 3,
-					                         GL20.GL_SHORT, false, 8, 0);
-
-					GL.glDrawElements(GL20.GL_TRIANGLES, el.numIndices[0]
-					        + el.numIndices[1] + el.numIndices[2]
-					                  //+ el.numIndices[3] + el.numIndices[4]
-					                  ,
-					                  GL20.GL_UNSIGNED_SHORT,
-					                  0);
-				}
+				renderCombined(uExtVertexPosition, el);
 			}
 
 			GL.glColorMask(true, true, true, true);
@@ -325,14 +320,32 @@ public class ExtrusionRenderer extends LayerRenderer {
 			GLState.blend(true);
 		}
 
+		//GLState.blend(false);
+		//GLState.blend(true);
+		//GL.glEnable(GL20.GL_BLEND);
+
+		GLState.blend(true);
+
 		GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
 
 		float[] currentColor = null;
 
 		for (int i = 0; i < mTileCnt; i++) {
 			MapTile t = tiles[i];
-
 			ExtrusionLayer el = t.getLayers().getExtrusionLayers();
+
+			if (el == null)
+				continue;
+
+			int d = 1;
+			if (drawAlpha) {
+				GL.glDepthFunc(GL20.GL_EQUAL);
+				d = MapTile.depthOffset(t) * 10;
+			}
+
+			setMatrix(v, t, d);
+			v.mvp.setAsUniform(uExtMatrix);
+
 			for (; el != null; el = (ExtrusionLayer) el.next) {
 
 				if (el.vboIndices == null)
@@ -343,15 +356,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 					GLUtils.glUniform4fv(uExtColor, mMode == 0 ? 4 : 1,
 					                     el.colors);
 				}
-
-				int d = 1;
-				if (drawAlpha) {
-					GL.glDepthFunc(GL20.GL_EQUAL);
-					d = MapTile.depthOffset(t) * 10;
-				}
-
-				setMatrix(v, t, d);
-				v.mvp.setAsUniform(uExtMatrix);
 
 				el.vboIndices.bind();
 				el.vboVertices.bind();
@@ -553,7 +557,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 	        /** extreme fake-ssao by height */
 	        + "  l += (clamp(a_pos.z / 2048.0, 0.0, 0.1) - 0.05);"
-	        + "  color = vec4(u_color.rgb * (clamp(l, 0.0, 1.0) * alpha), alpha);"
+	        + "  color = vec4(u_color.rgb * (clamp(l, 0.0, 1.0) * alpha), u_color.a * alpha);"
 	        + "}";
 
 	final static String extrusionFragmentShader = ""
