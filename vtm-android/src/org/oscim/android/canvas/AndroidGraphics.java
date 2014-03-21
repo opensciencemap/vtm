@@ -32,7 +32,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 public final class AndroidGraphics extends CanvasAdapter {
-	public static final AndroidGraphics INSTANCE = new AndroidGraphics();
+
+	public static void init() {
+		g = new AndroidGraphics();
+	}
 
 	public static android.graphics.Paint getAndroidPaint(Paint paint) {
 		return ((AndroidPaint) paint).mPaint;
@@ -96,7 +99,6 @@ public final class AndroidGraphics extends CanvasAdapter {
 
 		return new MarkerSymbol(drawableToBitmap(drawable), place);
 	}
-
 
 	public static MarkerSymbol makeMarker(Resources res, int resId, HotspotPlace place) {
 		if (place == null)

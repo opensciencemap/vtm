@@ -16,6 +16,10 @@ public class IosGraphics extends CanvasAdapter {
 		return INSTANCE;
 	}
 
+	public static void init() {
+		g = INSTANCE;
+	}
+
 	@Override
 	public Canvas getCanvas() {
 		return new IosCanvas();

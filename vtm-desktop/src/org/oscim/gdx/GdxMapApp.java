@@ -17,7 +17,6 @@
 package org.oscim.gdx;
 
 import org.oscim.awt.AwtGraphics;
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
 import org.oscim.tiling.TileSource;
@@ -33,21 +32,13 @@ public class GdxMapApp extends GdxMap {
 		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
 	}
 
-	// wrap LwjglGL20 to add GL20 interface
-	//	static class GdxGL extends GdxGL20 {
-	//		@Override
-	//		public void glGetShaderSource(int shader, int bufsize, Buffer length, String source) {
-	//			throw new IllegalArgumentException("not implemented");
-	//		}
-	//	}
-
 	public static void init() {
 		// load native library
 		new SharedLibraryLoader().load("vtm-jni");
 		// init globals
-		CanvasAdapter.g = AwtGraphics.get();
-		GLAdapter.g = new GdxGL20();
-
+		AwtGraphics.init();
+		GdxAssets.init("assets/");
+		GLAdapter.init(new GdxGL20());
 		GLAdapter.GDX_DESKTOP_QUIRKS = true;
 	}
 
@@ -70,7 +61,6 @@ public class GdxMapApp extends GdxMap {
 	static protected LwjglApplicationConfiguration getConfig() {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "vtm-gdx";
-		//cfg.useGL20 = true;
 		cfg.width = 1280;
 		cfg.height = 800;
 		cfg.stencil = 8;

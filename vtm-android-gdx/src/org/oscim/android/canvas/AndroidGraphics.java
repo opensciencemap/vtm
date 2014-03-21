@@ -35,6 +35,10 @@ import android.graphics.drawable.Drawable;
 public final class AndroidGraphics extends CanvasAdapter {
 	public static final AndroidGraphics INSTANCE = new AndroidGraphics();
 
+	public static void init() {
+		g = INSTANCE;
+	}
+
 	//	public static android.graphics.Bitmap getAndroidBitmap(Bitmap bitmap) {
 	//		return ((AndroidBitmap) bitmap).bitmap;
 	//	}

@@ -14,27 +14,31 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.gdx;
+package org.oscim.android;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.oscim.backend.AssetAdapter;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.GdxRuntimeException;
+import android.content.Context;
 
-public class GdxAssetAdapter extends AssetAdapter {
+public class AndroidAssets extends AssetAdapter {
+	Context mContext;
+
+	public static void init(Context ctx) {
+		g = new AndroidAssets(ctx);
+	}
+
+	private AndroidAssets(Context ctx) {
+		mContext = ctx;
+	}
 
 	@Override
 	public InputStream openFileAsStream(String fileName) {
-		FileHandle file = Gdx.files.internal("assets/" + fileName);
-		if (file == null)
-			throw new IllegalArgumentException("missing file " + fileName);
-
 		try {
-			return file.read();
-		} catch (GdxRuntimeException e) {
+			return mContext.getAssets().open(fileName);
+		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}

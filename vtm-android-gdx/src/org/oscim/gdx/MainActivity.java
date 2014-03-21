@@ -17,7 +17,6 @@
 package org.oscim.gdx;
 
 import org.oscim.android.canvas.AndroidGraphics;
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
@@ -40,8 +39,8 @@ public class MainActivity extends AndroidApplication {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		CanvasAdapter.g = AndroidGraphics.INSTANCE;
-		GLAdapter.g = new AndroidGLAdapter();
+		AndroidGraphics.init();
+		GLAdapter.init(new AndroidGLAdapter());
 
 		// TODO make this dpi dependent
 		Tile.SIZE = 400;

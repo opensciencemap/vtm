@@ -22,7 +22,7 @@ public class GLAdapter {
 	public final static boolean debugView = false;
 
 	/** The instance provided by backend */
-	public static GL20 g;
+	private static GL20 g;
 
 	public static boolean GDX_DESKTOP_QUIRKS;
 	public static boolean GDX_WEBGL_QUIRKS;
@@ -34,5 +34,9 @@ public class GLAdapter {
 			throw new IllegalStateException();
 
 		return g;
+	}
+
+	public static void init(GL20 gl20) {
+		g = gl20;
 	}
 }

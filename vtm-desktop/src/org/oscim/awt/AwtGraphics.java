@@ -32,8 +32,8 @@ import org.oscim.backend.canvas.Paint;
 public class AwtGraphics extends CanvasAdapter {
 	private static final AwtGraphics INSTANCE = new AwtGraphics();
 
-	public static final AwtGraphics get() {
-		return INSTANCE;
+	public static void init() {
+		g = INSTANCE;
 	}
 
 	private AwtGraphics() {

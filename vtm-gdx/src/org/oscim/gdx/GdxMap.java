@@ -16,7 +16,6 @@
  */
 package org.oscim.gdx;
 
-import org.oscim.backend.AssetAdapter;
 import org.oscim.core.Tile;
 import org.oscim.layers.GenericLayer;
 import org.oscim.layers.TileGridLayer;
@@ -51,7 +50,6 @@ public abstract class GdxMap implements ApplicationListener {
 	boolean mRenderRequest;
 
 	public GdxMap() {
-		AssetAdapter.g = new GdxAssetAdapter();
 
 		mMap = new Map() {
 			@Override

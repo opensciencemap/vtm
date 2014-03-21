@@ -19,7 +19,6 @@ package org.oscim.android;
 import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.android.gl.AndroidGL;
 import org.oscim.android.input.AndroidMotionEvent;
-import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.event.Gesture;
@@ -58,9 +57,9 @@ public class MapView extends RelativeLayout {
 	public MapView(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
 
-		CanvasAdapter.g = AndroidGraphics.INSTANCE;
-		AssetAdapter.g = new AndroidAssetAdapter(context);
-		GLAdapter.g = new AndroidGL();
+		AndroidGraphics.init();
+		AndroidAssets.init(context);
+		GLAdapter.init(new AndroidGL());
 
 		this.setWillNotDraw(true);
 		this.setClickable(true);

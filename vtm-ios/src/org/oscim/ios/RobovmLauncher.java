@@ -1,6 +1,5 @@
 package org.oscim.ios;
 
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.gdx.GdxMap;
 import org.oscim.ios.backend.IosGLAdapter;
@@ -50,8 +49,8 @@ public class RobovmLauncher extends IOSApplication.Delegate {
 
 		NSAutoreleasePool pool = new NSAutoreleasePool();
 		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
-		CanvasAdapter.g = IosGraphics.get();
-		GLAdapter.g = new IosGLAdapter();
+		IosGraphics.init();
+		GLAdapter.init(new IosGLAdapter());
 
 		UIApplication.main(argv, null, RobovmLauncher.class);
 		pool.drain();
