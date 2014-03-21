@@ -37,12 +37,14 @@ public class ExtrusionRenderer extends LayerRenderer {
 	static final Logger log = LoggerFactory.getLogger(ExtrusionRenderer.class);
 
 	private final TileRenderer mTileLayer;
+	private final int mTileZoom;
 
 	protected float mAlpha = 1;
 
-	public ExtrusionRenderer(TileRenderer tileRenderLayer) {
+	public ExtrusionRenderer(TileRenderer tileRenderLayer, int tileZoom) {
 		mTileLayer = tileRenderLayer;
 		mTileSet = new TileSet();
+		mTileZoom = tileZoom;
 	}
 
 	private static int[] shaderProgram = new int[2];
@@ -90,7 +92,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected void update(GLViewport v) {
+	public void update(GLViewport v) {
 
 		if (!initialized && !initShader())
 			return;
@@ -98,17 +100,17 @@ public class ExtrusionRenderer extends LayerRenderer {
 		if (shaderProgram[0] == 0)
 			return;
 
-		if (mAlpha == 0 || v.pos.zoomLevel < 16) {
+		if (mAlpha == 0 || v.pos.zoomLevel < mTileZoom) {
 			setReady(false);
 			return;
 		}
 
-		if (mUpdateColors) {
-			synchronized (this) {
-				System.arraycopy(mNewColors, 0, mColor, 0, 16);
-				mUpdateColors = false;
-			}
-		}
+		//		if (mUpdateColors) {
+		//			synchronized (this) {
+		//				System.arraycopy(mNewColors, 0, mColor, 0, 16);
+		//				mUpdateColors = false;
+		//			}
+		//		}
 
 		int activeTiles = 0;
 		mTileLayer.getVisibleTiles(mTileSet);
@@ -127,7 +129,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		int zoom = tiles[0].zoomLevel;
 
 		ExtrusionLayer el;
-		if (zoom == 17) {
+		if (zoom == mTileZoom) {
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				el = getLayer(tiles[i]);
 				if (el == null)
@@ -142,7 +144,31 @@ public class ExtrusionRenderer extends LayerRenderer {
 				if (el.compiled)
 					mTiles[activeTiles++] = tiles[i];
 			}
-		} else if (zoom == 16) {
+		} else if (zoom == mTileZoom + 1) {
+			O: for (int i = 0; i < mTileSet.cnt; i++) {
+				MapTile t = tiles[i].node.parent();
+
+				if (t == null)
+					continue;
+
+				for (MapTile c : mTiles)
+					if (c == t)
+						continue O;
+
+				el = getLayer(t);
+				if (el == null)
+					continue;
+
+				if (!el.compiled) {
+					int numShorts = el.mNumVertices * 8;
+					el.compile(MapRenderer.getShortBuffer(numShorts));
+					GLUtils.checkGlError("...");
+				}
+
+				if (el.compiled)
+					mTiles[activeTiles++] = t;
+			}
+		} else if (zoom == mTileZoom - 1) {
 			// check if proxy children are ready
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				MapTile t = tiles[i];
@@ -161,7 +187,26 @@ public class ExtrusionRenderer extends LayerRenderer {
 			}
 		}
 
+		//			// check if proxy children are ready
+		//			for (int i = 0; i < mTileSet.cnt; i++) {
+		//				MapTile t = tiles[i];
+		//				for (byte j = 0; j < 4; j++) {
+		//					if (!t.hasProxy(1 << j))
+		//						continue;
+		//
+		//					MapTile c = t.rel.get(j);
+		//					el = getLayer(c);
+		//
+		//					if (el == null || !el.compiled)
+		//						continue;
+		//
+		//					mTiles[activeTiles++] = c;
+		//				}
+		//			}
+		//		}
+
 		mTileCnt = activeTiles;
+		//log.debug("" + activeTiles + " " + zoom);
 
 		if (activeTiles > 0)
 			setReady(true);
@@ -179,8 +224,10 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 	private final boolean debug = false;
 
+	private final boolean drawAlpha = false;
+
 	@Override
-	protected void render(GLViewport v) {
+	public void render(GLViewport v) {
 		// TODO one could render in one pass to texture and then draw the texture
 		// with alpha... might be faster and would allow postprocessing outlines.
 
@@ -199,9 +246,10 @@ public class ExtrusionRenderer extends LayerRenderer {
 			GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
 			GL.glUniform1i(uExtMode, 0);
 			GLUtils.glUniform4fv(uExtColor, 4, mColor);
+			GL.glUniform1f(uExtAlpha, 1);
 
 			GLState.test(false, false);
-
+			GLState.blend(true);
 			for (int i = 0; i < mTileCnt; i++) {
 				ExtrusionLayer el = tiles[i].getLayers().getExtrusionLayers();
 
@@ -240,41 +288,46 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		GLState.useProgram(shaderProgram[SHADER]);
 		GLState.enableVertexArrays(uExtVertexPosition, -1);
-		if (v.pos.scale < (1 << 18)) {
-			// chances are high that one moves through a building
-			// with scale > 2 also draw back sides in this case.
-			GL.glEnable(GL20.GL_CULL_FACE);
-		}
+		GLState.blend(false);
+
+		GL.glEnable(GL20.GL_CULL_FACE);
 		GL.glDepthFunc(GL20.GL_LESS);
-		GL.glColorMask(false, false, false, false);
-		GL.glUniform1i(uExtMode, -1);
-		//GLUtils.glUniform4fv(uExtColor, 4, mColor);
-		GL.glUniform1f(uExtAlpha, mAlpha);
 
-		// draw to depth buffer
-		for (int i = 0; i < mTileCnt; i++) {
-			MapTile t = tiles[i];
-			ExtrusionLayer el = t.getLayers().getExtrusionLayers();
-			int d = MapTile.depthOffset(t) * 10;
-			setMatrix(v, t, d);
-			v.mvp.setAsUniform(uExtMatrix);
+		//GL.glUniform1f(uExtAlpha, mAlpha);
+		GL.glUniform1f(uExtAlpha, 1);
 
-			el.vboIndices.bind();
-			el.vboVertices.bind();
+		if (drawAlpha) {
 
-			GL.glVertexAttribPointer(uExtVertexPosition, 3,
-			                         GL20.GL_SHORT, false, 8, 0);
+			GL.glColorMask(false, false, false, false);
+			GL.glUniform1i(uExtMode, -1);
+			//GLUtils.glUniform4fv(uExtColor, 4, mColor);
 
-			GL.glDrawElements(GL20.GL_TRIANGLES,
-			                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
-			                  GL20.GL_UNSIGNED_SHORT, 0);
+			// draw to depth buffer
+			for (int i = 0; i < mTileCnt; i++) {
+				MapTile t = tiles[i];
+				ExtrusionLayer el = t.getLayers().getExtrusionLayers();
+				int d = MapTile.depthOffset(t) * 10;
+				setMatrix(v, t, d);
+				v.mvp.setAsUniform(uExtMatrix);
+
+				el.vboIndices.bind();
+				el.vboVertices.bind();
+
+				GL.glVertexAttribPointer(uExtVertexPosition, 3,
+				                         GL20.GL_SHORT, false, 8, 0);
+
+				GL.glDrawElements(GL20.GL_TRIANGLES,
+				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]),
+				                  GL20.GL_UNSIGNED_SHORT, 0);
+			}
+
+			GL.glColorMask(true, true, true, true);
+			GL.glDepthMask(false);
+			GLState.blend(true);
 		}
 
 		// enable color buffer, use depth mask
 		GLState.enableVertexArrays(uExtVertexPosition, uExtLightPosition);
-		GL.glColorMask(true, true, true, true);
-		GL.glDepthMask(false);
-		GLState.blend(true);
 
 		float[] currentColor = null;
 
@@ -290,8 +343,12 @@ public class ExtrusionRenderer extends LayerRenderer {
 				GLUtils.glUniform4fv(uExtColor, 4, currentColor);
 			}
 
-			GL.glDepthFunc(GL20.GL_EQUAL);
-			int d = MapTile.depthOffset(t) * 10;
+			int d = 1;
+			if (drawAlpha) {
+				GL.glDepthFunc(GL20.GL_EQUAL);
+				d = MapTile.depthOffset(t) * 10;
+			}
+
 			setMatrix(v, t, d);
 			v.mvp.setAsUniform(uExtMatrix);
 
@@ -304,62 +361,75 @@ public class ExtrusionRenderer extends LayerRenderer {
 			GL.glVertexAttribPointer(uExtLightPosition, 2,
 			                         GL20.GL_UNSIGNED_BYTE, false, 8, 6);
 
-			// draw roof
-			GL.glUniform1i(uExtMode, 0);
-			GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[2],
-			                  GL20.GL_UNSIGNED_SHORT, (el.mIndiceCnt[0] + el.mIndiceCnt[1]) * 2);
+			// draw extruded outlines
+			if (el.mIndiceCnt[0] > 0) {
+				// draw roof
+				GL.glUniform1i(uExtMode, 0);
+				GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[2],
+				                  GL20.GL_UNSIGNED_SHORT,
+				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1]) * 2);
 
-			// draw sides 1
-			GL.glUniform1i(uExtMode, 1);
-			GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[0],
-			                  GL20.GL_UNSIGNED_SHORT, 0);
+				// draw sides 1
+				GL.glUniform1i(uExtMode, 1);
+				GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[0],
+				                  GL20.GL_UNSIGNED_SHORT, 0);
 
-			// draw sides 2
-			GL.glUniform1i(uExtMode, 2);
-			GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[1],
-			                  GL20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
+				// draw sides 2
+				GL.glUniform1i(uExtMode, 2);
+				GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[1],
+				                  GL20.GL_UNSIGNED_SHORT, el.mIndiceCnt[0] * 2);
 
-			// drawing gl_lines with the same coordinates does not result in
-			// same depth values as polygons, so add offset and draw gl_lequal:
-			GL.glDepthFunc(GL20.GL_LEQUAL);
+				if (drawAlpha) {
+					// drawing gl_lines with the same coordinates does not result in
+					// same depth values as polygons, so add offset and draw gl_lequal:
+					GL.glDepthFunc(GL20.GL_LEQUAL);
+				}
 
-			v.mvp.addDepthOffset(100);
-			v.mvp.setAsUniform(uExtMatrix);
+				v.mvp.addDepthOffset(100);
+				v.mvp.setAsUniform(uExtMatrix);
 
-			GL.glUniform1i(uExtMode, 3);
-			GL.glDrawElements(GL20.GL_LINES, el.mIndiceCnt[3],
-			                  GL20.GL_UNSIGNED_SHORT,
-			                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
+				GL.glUniform1i(uExtMode, 3);
+				GL.glDrawElements(GL20.GL_LINES, el.mIndiceCnt[3],
+				                  GL20.GL_UNSIGNED_SHORT,
+				                  (el.mIndiceCnt[0] + el.mIndiceCnt[1] + el.mIndiceCnt[2]) * 2);
+			}
 
+			// draw triangle meshes
+			if (el.mIndiceCnt[4] > 0) {
+				int offset = (el.mIndiceCnt[0] + el.mIndiceCnt[1]
+				        + el.mIndiceCnt[2] + el.mIndiceCnt[3]) * 2;
+
+				GL.glUniform1i(uExtMode, 4);
+				GL.glDrawElements(GL20.GL_TRIANGLES, el.mIndiceCnt[4],
+				                  GL20.GL_UNSIGNED_SHORT, offset);
+			}
 			// just a temporary reference!
 			tiles[i] = null;
 		}
 
-		if (v.pos.scale < (1 << 18))
-			GL.glDisable(GL20.GL_CULL_FACE);
+		GL.glDepthMask(false);
+		GL.glDisable(GL20.GL_CULL_FACE);
 
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		mTileLayer.releaseTiles(mTileSet);
 	}
 
-	private static void setMatrix(GLViewport m,
-	        MapTile tile, int delta) {
-
+	private static void setMatrix(GLViewport v, MapTile tile, int delta) {
 		int z = tile.zoomLevel;
-		double curScale = Tile.SIZE * m.pos.scale;
-		float scale = (float) (m.pos.scale / (1 << z));
+		double curScale = Tile.SIZE * v.pos.scale;
+		float scale = (float) (v.pos.scale / (1 << z));
 
-		float x = (float) ((tile.x - m.pos.x) * curScale);
-		float y = (float) ((tile.y - m.pos.y) * curScale);
-		m.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
+		float x = (float) ((tile.x - v.pos.x) * curScale);
+		float y = (float) ((tile.y - v.pos.y) * curScale);
+		v.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
 
-		// scale height
-		m.mvp.setValue(10, scale / 10);
+		// scale height ???
+		v.mvp.setValue(10, scale / 10);
 
-		m.mvp.multiplyLhs(m.viewproj);
+		v.mvp.multiplyLhs(v.viewproj);
 
-		m.mvp.addDepthOffset(delta);
+		v.mvp.addDepthOffset(delta);
 	}
 
 	public synchronized void setColors(float[] colors) {
@@ -394,7 +464,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		mNewColors[15] = Color.aToFloat(lines);
 	}
 
-	private boolean mUpdateColors;
+	private volatile boolean mUpdateColors;
 	private final float[] mNewColors = new float[16];
 
 	private final float _a = 0.88f;
@@ -404,6 +474,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 	private final float _o = 20;
 	private final float _s = 4;
 	private final float _l = 0;
+
 	private final float[] mColor = {
 	        // roof color
 	        _a * ((_r + _l) / 255),
@@ -445,10 +516,10 @@ public class ExtrusionRenderer extends LayerRenderer {
 	        + "  if (u_mode == -1) ;"
 	        //     roof / depth pass
 	        //+ "    color = u_color[0] * u_alpha;"
-	        + "  else if (u_mode == 0)"
+	        + "  else if (u_mode == 0){"
 	        //     roof / depth pass
-	        + "    color = u_color[0] * u_alpha;"
-	        + "  else {"
+	        + "  color = u_color[0] * u_alpha;"
+	        + "  } else {"
 	        //    decrease contrast with distance
 	        + "   if (u_mode == 1){"
 	        //     sides 1 - use 0xff00
@@ -467,10 +538,22 @@ public class ExtrusionRenderer extends LayerRenderer {
 	        + "    color = u_color[2];"
 	        + "    color.rgb *= (0.8 + dir * 0.2) * z * h;"
 	        + "    color *= u_alpha;"
-	        + "  } else {"
+	        + "  } else if (u_mode == 3) {"
 	        //     outline
 	        + "    float z = (0.98 - gl_Position.z * 0.02);"
 	        + "    color = u_color[3] * z;"
+	        + "  } else {"
+	        //     normalize face x/y direction
+	        + "    vec2 n =  (a_light / 255.0 - 0.5) * 2.0;"
+	        //     normal points up or down (1,-1)
+	        + "    float dir = 1.0 - (2.0 * abs(mod(a_light.x,2.0)));"
+	        //     recreate face normal vector
+	        + "    vec3 r_norm = vec3(n.xy, dir * (1.0 - length(n.xy)));"
+	        + "    vec3 light = normalize(vec3(-0.4,0.4,-1.0));"
+	        + "    float l = (1.0 + dot(r_norm, light)) / 2.0;"
+	        + "    l = 0.4 + l * 0.6;"
+	        + "    l = (l + (0.9 + clamp(a_pos.z / 4096.0, 0.0, 0.2))) / 2.0;"
+	        + "    color = vec4(l, l, l-0.02, 1.0);"
 	        + "}}}";
 
 	final static String extrusionFragmentShader = ""

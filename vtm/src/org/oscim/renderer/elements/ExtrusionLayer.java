@@ -21,10 +21,12 @@ import java.nio.ShortBuffer;
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.GeometryBuffer;
+import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tile;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.MapRenderer;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.geom.LineClipper;
 import org.oscim.utils.pool.Inlist;
@@ -50,7 +52,7 @@ public class ExtrusionLayer extends RenderElement {
 
 	// indices for:
 	// 0. even sides, 1. odd sides, 2. roof, 3. roof outline
-	public int mIndiceCnt[] = { 0, 0, 0, 0 };
+	public int mIndiceCnt[] = { 0, 0, 0, 0, 0 };
 	public int mNumIndices = 0;
 	public int mNumVertices = 0;
 
@@ -61,9 +63,14 @@ public class ExtrusionLayer extends RenderElement {
 	//private final static int IND_ODD_SIDE = 1;
 	private final static int IND_ROOF = 2;
 	private final static int IND_OUTLINE = 3;
+	private final static int IND_MESH = 4;
+
+	private static final int NORMAL_DIR_MASK = 0xFFFFFFFE;
 
 	public boolean compiled = false;
 	private final float mGroundResolution;
+
+	boolean filled;
 
 	public ExtrusionLayer(int level, float groundResolution, float[] colors) {
 		super(RenderElement.EXTRUSION);
@@ -73,12 +80,177 @@ public class ExtrusionLayer extends RenderElement {
 		mGroundResolution = groundResolution;
 		mVertices = mCurVertices = VertexItem.pool.get();
 
-		mIndices = new VertexItem[4];
-		mCurIndices = new VertexItem[4];
-		for (int i = 0; i < 4; i++)
+		mIndices = new VertexItem[5];
+		mCurIndices = new VertexItem[5];
+		for (int i = 0; i <= IND_MESH; i++)
 			mIndices[i] = mCurIndices[i] = VertexItem.pool.get();
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE);
+	}
+
+	public void add(MapElement element) {
+		if (element.type != GeometryType.TRIS)
+			return;
+
+		short[] index = element.index;
+		float[] points = element.points;
+
+		// roof indices for convex shapes
+		int i = mCurIndices[IND_MESH].used;
+		short[] indices = mCurIndices[IND_MESH].vertices;
+		int first = mNumVertices;
+
+		short[] vertices = mCurVertices.vertices;
+		int v = mCurVertices.used;
+
+		int vertexCnt = 0;
+
+		for (int k = 0, n = index.length; k < n;) {
+			if (index[k] < 0)
+				break;
+
+			// FIXME: workaround: dont overflow max index id.
+			if (mNumVertices + vertexCnt >= 1 << 16)
+				break;
+
+			if (i == VertexItem.SIZE) {
+				mCurIndices[IND_MESH].used = VertexItem.SIZE;
+				mCurIndices[IND_MESH].next = VertexItem.pool.get();
+				mCurIndices[IND_MESH] = mCurIndices[IND_MESH].next;
+				indices = mCurIndices[IND_MESH].vertices;
+				i = 0;
+			}
+
+			indices[i++] = (short) (first + vertexCnt);
+			indices[i++] = (short) (first + vertexCnt + 1);
+			indices[i++] = (short) (first + vertexCnt + 2);
+
+			int vtx1 = index[k++] * 3;
+			int vtx2 = index[k++] * 3;
+			int vtx3 = index[k++] * 3;
+
+			float vx1 = points[vtx1 + 0];
+			float vy1 = points[vtx1 + 1];
+			float vz1 = points[vtx1 + 2];
+
+			float vx2 = points[vtx2 + 0];
+			float vy2 = points[vtx2 + 1];
+			float vz2 = points[vtx2 + 2];
+
+			float vx3 = points[vtx3 + 0];
+			float vy3 = points[vtx3 + 1];
+			float vz3 = points[vtx3 + 2];
+
+			float ax = vx2 - vx1;
+			float ay = vy2 - vy1;
+			float az = vz2 - vz1;
+
+			float bx = vx3 - vx1;
+			float by = vy3 - vy1;
+			float bz = vz3 - vz1;
+
+			float cx = ay * bz - az * by;
+			float cy = az * bx - ax * bz;
+			float cz = ax * by - ay * bx;
+
+			double len = Math.sqrt(cx * cx + cy * cy + cz * cz);
+
+			// packing the normal in two bytes
+			int mx = FastMath.clamp(127 + (int) ((cx / len) * 128), 0, 0xff);
+			int my = FastMath.clamp(127 + (int) ((cy / len) * 128), 0, 0xff);
+			short normal = (short) ((my << 8) | (mx & NORMAL_DIR_MASK) | (cz > 0 ? 1 : 0));
+
+			if (v == VertexItem.SIZE) {
+				mCurVertices.used = VertexItem.SIZE;
+				mCurVertices.next = VertexItem.pool.get();
+				mCurVertices = mCurVertices.next;
+				vertices = mCurVertices.vertices;
+				v = 0;
+			}
+
+			double s = S * Tile.SIZE / 4096;
+
+			vertices[v++] = (short) (vx1 * s);
+			vertices[v++] = (short) (vy1 * s);
+			vertices[v++] = (short) (vz1 * s);
+			vertices[v++] = (short) normal;
+
+			vertices[v++] = (short) (vx2 * s);
+			vertices[v++] = (short) (vy2 * s);
+			vertices[v++] = (short) (vz2 * s);
+			vertices[v++] = (short) normal;
+
+			vertices[v++] = (short) (vx3 * s);
+			vertices[v++] = (short) (vy3 * s);
+			vertices[v++] = (short) (vz3 * s);
+			vertices[v++] = (short) normal;
+
+			vertexCnt += 3;
+		}
+
+		mCurIndices[IND_MESH].used = i;
+		mCurVertices.used = v;
+		mNumVertices += vertexCnt; //(vertexCnt / 3);
+	}
+
+	public void addNoNormal(MapElement element) {
+		if (element.type != GeometryType.TRIS)
+			return; //FIXME throw
+
+		short[] index = element.index;
+		float[] points = element.points;
+
+		//log.debug("add " + Arrays.toString(index));
+		//log.debug("add " + Arrays.toString(points));
+
+		// current vertex id
+		int startVertex = mNumVertices;
+
+		// roof indices for convex shapes
+		int i = mCurIndices[IND_MESH].used;
+		short[] indices = mCurIndices[IND_MESH].vertices;
+		int first = startVertex;
+
+		for (int k = 0, n = index.length; k < n;) {
+			if (index[k] < 0)
+				break;
+
+			if (i == VertexItem.SIZE) {
+				mCurIndices[IND_MESH].used = VertexItem.SIZE;
+				mCurIndices[IND_MESH].next = VertexItem.pool.get();
+				mCurIndices[IND_MESH] = mCurIndices[IND_MESH].next;
+				indices = mCurIndices[IND_MESH].vertices;
+				i = 0;
+			}
+			indices[i++] = (short) (first + index[k++]);
+			indices[i++] = (short) (first + index[k++]);
+			indices[i++] = (short) (first + index[k++]);
+		}
+		mCurIndices[IND_MESH].used = i;
+
+		short[] vertices = mCurVertices.vertices;
+		int v = mCurVertices.used;
+
+		int vertexCnt = element.pointPos;
+
+		for (int j = 0; j < vertexCnt;) {
+			/* add bottom and top vertex for each point */
+			if (v == VertexItem.SIZE) {
+				mCurVertices.used = VertexItem.SIZE;
+				mCurVertices.next = VertexItem.pool.get();
+				mCurVertices = mCurVertices.next;
+				vertices = mCurVertices.vertices;
+				v = 0;
+			}
+			// set coordinate
+			vertices[v++] = (short) (points[j++] * S);
+			vertices[v++] = (short) (points[j++] * S);
+			vertices[v++] = (short) (points[j++] * S);
+			v++;
+		}
+
+		mCurVertices.used = v;
+		mNumVertices += (vertexCnt / 3);
 	}
 
 	public void add(MapElement element, float height, float minHeight) {
@@ -156,7 +328,7 @@ public class ExtrusionLayer extends RenderElement {
 			if (i == VertexItem.SIZE) {
 				mCurIndices[IND_ROOF].used = VertexItem.SIZE;
 				mCurIndices[IND_ROOF].next = VertexItem.pool.get();
-				mCurIndices[IND_ROOF] = mCurIndices[2].next;
+				mCurIndices[IND_ROOF] = mCurIndices[IND_ROOF].next;
 				indices = mCurIndices[IND_ROOF].vertices;
 				i = 0;
 			}
@@ -367,13 +539,15 @@ public class ExtrusionLayer extends RenderElement {
 			return;
 
 		mNumIndices = 0;
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i <= IND_MESH; i++) {
 			for (VertexItem vi = mIndices[i]; vi != null; vi = vi.next) {
 				sbuf.put(vi.vertices, 0, vi.used);
 				mIndiceCnt[i] += vi.used;
 			}
 			mNumIndices += mIndiceCnt[i];
 		}
+
+		//log.debug("compile" + mNumIndices + " / " + mNumVertices);
 
 		int size = mNumIndices * 2;
 		vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
@@ -405,7 +579,7 @@ public class ExtrusionLayer extends RenderElement {
 			vboIndices = BufferObject.release(vboIndices);
 			vboVertices = BufferObject.release(vboVertices);
 		} else {
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i <= IND_MESH; i++)
 				mIndices[i] = VertexItem.pool.releaseAll(mIndices[i]);
 			mIndices = null;
 
