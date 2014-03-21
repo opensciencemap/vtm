@@ -52,6 +52,10 @@ public abstract class MapActivity extends FragmentActivity {
 
 	protected Map mMap;
 
+	public Map map() {
+		return mMap;
+	}
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -91,7 +95,7 @@ public abstract class MapActivity extends FragmentActivity {
 
 	/**
 	 * This method is called once by each MapView during its setup process.
-	 *
+	 * 
 	 * @param map
 	 *            the calling MapView.
 	 */
