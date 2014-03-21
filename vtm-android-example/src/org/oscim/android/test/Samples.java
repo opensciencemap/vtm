@@ -46,6 +46,7 @@ public class Samples extends Activity {
 		linearLayout.addView(createButton(PathOverlayActivity.class));
 		linearLayout.addView(createButton(MarkerOverlayActivity.class));
 		linearLayout.addView(createButton(ThemeStylerActivity.class));
+		linearLayout.addView(createButton(S3DBMapActivity.class));
 	}
 
 	private Button createButton(final Class<?> clazz) {

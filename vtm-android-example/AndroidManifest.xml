@@ -32,12 +32,16 @@
       android:name="org.oscim.android.test.SimpleMapActivity"
       android:label="@string/title_activity_map" >
     </activity>
-    
-     <activity
+
+    <activity
+      android:name="org.oscim.android.test.S3DBMapActivity"
+      android:label="@string/title_activity_map" >
+    </activity>
+
+    <activity
       android:name="org.oscim.android.test.PathOverlayActivity"
       android:label="@string/title_activity_map" >
     </activity>
-  
        
      <activity
       android:name="org.oscim.android.test.MarkerOverlayActivity"
