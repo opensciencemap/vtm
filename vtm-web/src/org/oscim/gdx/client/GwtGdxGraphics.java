@@ -26,11 +26,11 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
 
-public class GwtCanvasAdapter extends CanvasAdapter {
+public class GwtGdxGraphics extends CanvasAdapter {
 
 	public static boolean NO_STROKE_TEXT = false;
 
-	public static final GwtCanvasAdapter INSTANCE = new GwtCanvasAdapter();
+	public static final GwtGdxGraphics INSTANCE = new GwtGdxGraphics();
 	static final Context2d ctx;
 
 	static {
@@ -40,7 +40,7 @@ public class GwtCanvasAdapter extends CanvasAdapter {
 		ctx = canvas.getContext2d();
 	}
 
-	static synchronized float getTextWidth(String text, String font) {
+	public static synchronized float getTextWidth(String text, String font) {
 		ctx.setFont(font);
 		TextMetrics tm = ctx.measureText(text);
 		return (float) tm.getWidth();
@@ -70,6 +70,10 @@ public class GwtCanvasAdapter extends CanvasAdapter {
 	@Override
 	public org.oscim.backend.canvas.Canvas getCanvas() {
 		return new GwtCanvas();
+	}
+
+	public static void init() {
+		g = INSTANCE;
 	}
 
 }

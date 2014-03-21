@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.gdx.client;
+package org.oscim.web.client;
 
 import java.util.HashMap;
 
@@ -23,8 +23,11 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.gdx.GdxAssets;
 import org.oscim.gdx.GdxMap;
+import org.oscim.gdx.client.GwtGdxGraphics;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
+import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.renderer.MapRenderer;
@@ -56,11 +59,13 @@ class GwtGdxMap extends GdxMap {
 		// <- circle/stroke test 800ms firefox, 80ms chromium..
 		// TODO use texture atlas to avoid drawing text-textures
 		if (GwtApplication.agentInfo().isLinux() && GwtApplication.agentInfo().isFirefox())
-			GwtCanvasAdapter.NO_STROKE_TEXT = true;
+			GwtGdxGraphics.NO_STROKE_TEXT = true;
 
-		CanvasAdapter.g = GwtCanvasAdapter.INSTANCE;
+		GwtGdxGraphics.init();
+		GdxAssets.init("");
 		CanvasAdapter.textScale = 0.7f;
-		GLAdapter.g = (GL20) Gdx.graphics.getGL20();
+
+		GLAdapter.init((GL20) Gdx.graphics.getGL20());
 		GLAdapter.GDX_WEBGL_QUIRKS = true;
 		MapRenderer.setBackgroundColor(0xffffff);
 		//Gdx.app.setLogLevel(Application.LOG_DEBUG);
@@ -173,6 +178,9 @@ class GwtGdxMap extends GdxMap {
 		if (l != null) {
 			if (!params.containsKey("nolabel"))
 				mMap.layers().add(new LabelLayer(mMap, l));
+
+			if (!params.containsKey("nobuildings"))
+				mMap.layers().add(new BuildingLayer(mMap, l));
 		}
 
 		mSearchBox = new SearchBox(mMap);

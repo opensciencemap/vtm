@@ -47,7 +47,7 @@ public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
 
 		GwtPaint p = (GwtPaint) paint;
 
-		if (p.stroke && GwtCanvasAdapter.NO_STROKE_TEXT)
+		if (p.stroke && GwtGdxGraphics.NO_STROKE_TEXT)
 			return;
 
 		Context2d ctx = bitmap.pixmap.getContext();

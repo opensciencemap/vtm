@@ -14,15 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.gdx.client;
+package org.oscim.web.client;
 
 // -draftCompile -localWorkers 2
-import org.oscim.core.Tile;
-
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
-import com.badlogic.gdx.backends.gwt.GwtGraphics;
 import com.badlogic.gdx.backends.gwt.preloader.Preloader.PreloaderCallback;
 import com.badlogic.gdx.backends.gwt.preloader.Preloader.PreloaderState;
 import com.google.gwt.dom.client.Style.Unit;
@@ -35,8 +32,8 @@ public class GwtLauncher extends GwtApplication {
 	@Override
 	public GwtApplicationConfiguration getConfig() {
 		GwtApplicationConfiguration cfg =
-		        new GwtApplicationConfiguration(GwtGraphics.getWindowWidthJSNI(),
-		                                        GwtGraphics.getWindowHeightJSNI());
+		        new GwtApplicationConfiguration(getWindowWidthJSNI(),
+		                                        getWindowHeightJSNI());
 
 		DockLayoutPanel p = new DockLayoutPanel(Unit.EM);
 		p.setHeight("100%");
@@ -64,10 +61,10 @@ public class GwtLauncher extends GwtApplication {
 
 	@Override
 	public ApplicationListener getApplicationListener() {
-		if (GwtGraphics.getDevicePixelRatioJSNI() > 1)
-			Tile.SIZE = 400;
-		else
-			Tile.SIZE = 360;
+		//		if (GwtGraphics.getDevicePixelRatioJSNI() > 1)
+		//			Tile.SIZE = 400;
+		//		else
+		//			Tile.SIZE = 360;
 
 		return new GwtGdxMap();
 	}
@@ -86,4 +83,13 @@ public class GwtLauncher extends GwtApplication {
 			}
 		};
 	}
+
+	public static native int getWindowWidthJSNI() /*-{
+		return $wnd.innerWidth;
+	}-*/;
+
+	public static native int getWindowHeightJSNI() /*-{
+		return $wnd.innerHeight;
+	}-*/;
+
 }

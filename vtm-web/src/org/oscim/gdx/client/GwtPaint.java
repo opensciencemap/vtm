@@ -107,7 +107,7 @@ public class GwtPaint implements Paint {
 
 	@Override
 	public float measureText(String text) {
-		return GwtCanvasAdapter.getTextWidth(text, font);
+		return GwtGdxGraphics.getTextWidth(text, font);
 	}
 
 	// FIXME all estimates. no idea how to properly measure canvas text..

@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<module>
-  <entry-point class="org.oscim.gdx.client.GwtLauncher" />
-  <inherits name="com.google.gwt.xml.XML" />
-  <inherits name="ru.finam.slf4jgwt.logging.gwt.Logging"/>
-
+<module rename-to="VtmWebApp">
+    
+  <entry-point class="org.oscim.web.client.GwtLauncher" />
+  <inherits name="org.oscim.gdx.VtmWeb" />
+  
   <set-property name='gwt.logging.enabled' value='TRUE' />
   <set-property name='gwt.logging.consoleHandler' value='ENABLED' />
   <set-property name='gwt.logging.firebugHandler' value='DISABLED' />
   <set-property name='gwt.logging.popupHandler' value='DISABLED' />
   <set-property name="gwt.logging.logLevel" value="FINE"/> 
 
-  <inherits name="GdxMap" />
-  <inherits name="com.badlogic.gdx.backends.gdx_backends_gwt" />
-  <inherits name="com.google.gwt.user.theme.chrome.Chrome" />
-    
   <!-- super dev mode -->
-  <add-linker name="xsiframe"/>
+  <!-- <add-linker name="xsiframe"/>
   <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
   <set-configuration-property name="devModeRedirectEnabled" value="true"/>
+   -->
+   
+  <!-- <super-source path="emu" /> -->
   
-  <super-source path="emu" />
-
-  <set-configuration-property name="gdx.assetpath" value="./assets" />
+  <set-configuration-property name="gdx.assetpath" value="assets" />
   <!-- for gradle build, commend out for eclipse build/devmode -->
   <set-configuration-property name="gdx.assetoutputpath" value="build/gwt/draftOut" />
 
