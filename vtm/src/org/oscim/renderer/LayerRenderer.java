@@ -41,7 +41,7 @@ public abstract class LayerRenderer {
 		isReady = ready;
 	}
 
-	protected boolean isReady() {
+	public boolean isReady() {
 		return isReady;
 	}
 
