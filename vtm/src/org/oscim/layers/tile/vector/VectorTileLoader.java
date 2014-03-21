@@ -116,6 +116,9 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		try {
 			/* query data source, which calls process() callback */
 			mTileDataSource.query(tile, this);
+		} catch (NullPointerException e) {
+			log.debug("{} {}", tile, e.getMessage());
+			e.printStackTrace();
 		} catch (Exception e) {
 			log.debug("{} {}", tile, e.getMessage());
 			return false;
