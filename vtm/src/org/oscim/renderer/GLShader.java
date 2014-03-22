@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public abstract class GLShader {
 	final static Logger log = LoggerFactory.getLogger(GLShader.class);
 
-	static GL20 GL;
+	private static GL20 GL;
 
 	public int program;
 
@@ -123,7 +123,7 @@ public abstract class GLShader {
 		return program;
 	}
 
-	public static class SimpleShader {
-
+	public static void init(GL20 gl20) {
+		GL = gl20;
 	}
 }
