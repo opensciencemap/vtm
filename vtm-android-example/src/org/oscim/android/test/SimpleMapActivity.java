@@ -55,7 +55,7 @@ public class SimpleMapActivity extends BaseMapActivity {
 				else
 					t = VtmThemes.OSMARENDER;
 
-				mMapView.getMap().setTheme(t);
+				mMapView.map().setTheme(t);
 
 				loooop((i + 1) % 3);
 			}

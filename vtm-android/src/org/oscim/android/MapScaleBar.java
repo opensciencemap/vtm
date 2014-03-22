@@ -80,7 +80,7 @@ public class MapScaleBar extends Layer implements UpdateListener {
 	private final BitmapRenderer mBitmapLayer;
 
 	public MapScaleBar(MapView map) {
-		super(map.getMap());
+		super(map.map());
 
 		mBitmap = Bitmap.createBitmap(BITMAP_WIDTH,
 		                              BITMAP_HEIGHT,

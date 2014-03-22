@@ -100,7 +100,7 @@ public abstract class MapActivity extends FragmentActivity {
 	 *            the calling MapView.
 	 */
 	public final void registerMapView(MapView map) {
-		mMap = map.getMap();
+		mMap = map.map();
 
 		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,
 		                                                           MODE_PRIVATE);

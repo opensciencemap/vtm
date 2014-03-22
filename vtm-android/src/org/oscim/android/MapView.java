@@ -124,10 +124,7 @@ public class MapView extends RelativeLayout {
 				return mMap.handleGesture(Gesture.DOUBLE_TAP, mMotionEvent.wrap(e));
 			}
 		});
-	}
 
-	public Map getMap() {
-		return mMap;
 	}
 
 	public void onStop() {
@@ -166,5 +163,9 @@ public class MapView extends RelativeLayout {
 
 		if (mWidth > 0 && mHeight > 0)
 			mMap.viewport().setScreenSize(width, height);
+	}
+
+	public Map map() {
+		return mMap;
 	}
 }
