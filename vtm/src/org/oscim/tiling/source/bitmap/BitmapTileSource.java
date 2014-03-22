@@ -15,7 +15,7 @@ import org.oscim.tiling.source.UrlTileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class BitmapTileSource extends UrlTileSource {
+public class BitmapTileSource extends UrlTileSource {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
 	/**

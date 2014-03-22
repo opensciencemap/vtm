@@ -22,7 +22,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 
-public abstract class BitmapTileSource extends UrlTileSource {
+public class BitmapTileSource extends UrlTileSource {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
 	/**
