@@ -18,8 +18,6 @@ package org.oscim.event;
 
 public abstract class MotionEvent {
 
-	public static final String TYPE = "MotionEvent";
-
 	public static final int ACTION_DOWN = 0;
 	public static final int ACTION_UP = 1;
 	public static final int ACTION_MOVE = 2;
