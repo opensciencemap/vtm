@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.web.client;
+package org.oscim.gdx.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-class MapConfig extends JavaScriptObject {
+public class MapConfig extends JavaScriptObject {
 	protected MapConfig() {
 	}
 
@@ -27,27 +27,19 @@ class MapConfig extends JavaScriptObject {
 	}-*/;
 
 	public final native double getLatitude() /*-{
-		return this.latitude;
+		return this.latitude || 0;
 	}-*/;
 
 	public final native double getLongitude() /*-{
-		return this.longitude;
+		return this.longitude || 0;
 	}-*/;
 
 	public final native int getZoom() /*-{
-		return this.zoom;
+		return this.zoom || 2;
 	}-*/;
 
 	public final native String getTileSource() /*-{
 		return this.tilesource;
-	}-*/;
-
-	public final native String getTileUrl() /*-{
-		return this.tileurl;
-	}-*/;
-
-	public final native String getBackgroundLayer() /*-{
-		return this.background;
 	}-*/;
 
 	public final native int getTileSize() /*-{

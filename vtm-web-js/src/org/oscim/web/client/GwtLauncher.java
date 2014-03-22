@@ -17,6 +17,7 @@
 package org.oscim.web.client;
 
 import org.oscim.core.Tile;
+import org.oscim.gdx.client.MapConfig;
 import org.timepedia.exporter.client.ExporterUtil;
 
 import com.badlogic.gdx.ApplicationListener;

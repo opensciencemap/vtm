@@ -17,6 +17,7 @@
 package org.oscim.web.client;
 
 import org.oscim.core.Tile;
+import org.oscim.gdx.client.MapConfig;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
