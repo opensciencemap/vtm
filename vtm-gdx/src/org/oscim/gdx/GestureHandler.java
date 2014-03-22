@@ -7,7 +7,7 @@ import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
 
-public class MapController implements GestureListener {
+public class GestureHandler implements GestureListener {
 	private boolean mayFling = true;
 
 	private boolean mPinch;
@@ -39,7 +39,7 @@ public class MapController implements GestureListener {
 	//private ViewController mViewport;
 	private final Map mMap;
 
-	public MapController(Map map) {
+	public GestureHandler(Map map) {
 		//mViewport = mMap.viewport();
 		mMap = map;
 	}

@@ -25,19 +25,21 @@ import org.oscim.map.Map;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 
 public abstract class GdxMap implements ApplicationListener {
+	final static Logger log = LoggerFactory.getLogger(GdxMap.class);
 
 	protected final Map mMap;
-	protected final MapAdapter mMapAdapter;
+	private final MapAdapter mMapAdapter;
 
 	VectorTileLayer mMapLayer;
 	private final MapRenderer mMapRenderer;
@@ -81,14 +83,18 @@ public abstract class GdxMap implements ApplicationListener {
 
 		InputMultiplexer mux = new InputMultiplexer();
 		mux.addProcessor(new InputHandler(mMap));
-		mux.addProcessor(new GestureDetector(20, 0.5f, 2, 0.05f,
-		                                     new MapController(mMap)));
+		//mux.addProcessor(new GestureDetector(20, 0.5f, 2, 0.05f,
+		//                                     new MapController(mMap)));
+		mux.addProcessor(new MotionHandler(mMap));
+
 		Gdx.input.setInputProcessor(mux);
 
 		createLayers();
 	}
 
-	protected abstract void createLayers();
+	protected void createLayers() {
+		mMap.layers().add(new TileGridLayer(mMap));
+	}
 
 	@Override
 	public void dispose() {
@@ -97,9 +103,10 @@ public abstract class GdxMap implements ApplicationListener {
 
 	@Override
 	public void render() {
-		if (mMapAdapter.needsRedraw()) {
-			mMapRenderer.onDrawFrame();
-		}
+		if (!mMapAdapter.needsRedraw())
+			return;
+
+		mMapRenderer.onDrawFrame();
 	}
 
 	@Override
