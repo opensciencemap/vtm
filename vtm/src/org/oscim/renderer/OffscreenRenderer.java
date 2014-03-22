@@ -20,7 +20,20 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	private boolean useDepthTexture = false;
 
-	protected boolean setup1(GLViewport viewport) {
+	static class Shader extends GLShader {
+		int aPos, uTexDepth, uTexColor, uPixel;
+
+		Shader(String shaderFile) {
+			if (!create(shaderFile))
+				return;
+			aPos = getAttrib("a_pos");
+			uTexColor = getUniform("u_texColor");
+			uTexDepth = getUniform("u_tex");
+			uPixel = getUniform("u_pixel");
+		}
+	}
+
+	protected boolean setupFBO(GLViewport viewport) {
 		IntBuffer buf = MapRenderer.getIntBuffer(1);
 
 		texW = (int) viewport.getWidth();
@@ -102,26 +115,17 @@ public class OffscreenRenderer extends LayerRenderer {
 			log.debug("invalid framebuffer! " + status);
 			return false;
 		}
-
-		//shader = GLShader.createProgram(vShader, fShader);
-		//shader = GLShader.createProgram(vShader, fSSAO);
-		//shader = GLShader.createProgram(vShader, fShaderFXAA);
-		//shader = GLShader.loadShader("post_fxaa");
-		shader = GLShader.loadShader("post_combined");
-
-		hTex = GL.glGetUniformLocation(shader, "u_tex");
-		hTexColor = GL.glGetUniformLocation(shader, "u_texColor");
-		hPixel = GL.glGetUniformLocation(shader, "u_pixel");
-		hPos = GL.glGetAttribLocation(shader, "a_pos");
-
 		return true;
 	}
 
-	int shader;
-	int hPos;
-	int hTex;
-	int hTexColor;
-	int hPixel;
+	static void init(GL20 gl20) {
+		GL = gl20;
+		shaders[0] = new Shader("post_fxaa");
+		shaders[1] = new Shader("post_ssao");
+		shaders[2] = new Shader("post_combined");
+	}
+
+	static Shader[] shaders = new Shader[3];
 
 	public void enable(boolean on) {
 		if (on)
@@ -144,17 +148,15 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	@Override
 	public void update(GLViewport viewport) {
-		if (!initialized) {
-			setup1(viewport);
-			initialized = true;
-		}
+		if (texW != viewport.getWidth() || texH != viewport.getHeight())
+			setupFBO(viewport);
+
 		mRenderer.update(viewport);
 		setReady(mRenderer.isReady());
 	}
 
 	@Override
 	public void render(GLViewport viewport) {
-		//begin();
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, fb);
 		GL.glViewport(0, 0, texW, texH);
 		GL.glDepthMask(true);
@@ -165,25 +167,27 @@ public class OffscreenRenderer extends LayerRenderer {
 
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
 
-		GLState.useProgram(shader);
+		Shader s = shaders[0];
+		s.useProgram();
 
-		// bind the framebuffer texture
+		/* bind depth texture */
 		if (useDepthTexture) {
 			GL.glActiveTexture(GL20.GL_TEXTURE1);
 			GLState.bindTex2D(renderDepth);
-			GL.glUniform1i(hTex, 1);
+			GL.glUniform1i(s.uTexDepth, 1);
 			GL.glActiveTexture(GL20.GL_TEXTURE0);
 		}
+		/* bind color texture */
 		GLState.bindTex2D(renderTex);
-		GL.glUniform1i(hTexColor, 0);
+		GL.glUniform1i(s.uTexColor, 0);
 
-		MapRenderer.bindQuadVertexVBO(hPos, true);
+		MapRenderer.bindQuadVertexVBO(s.aPos, true);
 
-		GL.glUniform2f(hPixel,
+		GL.glUniform2f(s.uPixel,
 		               (float) (1.0 / texW * 0.5),
 		               (float) (1.0 / texH * 0.5));
 
-		GLState.enableVertexArrays(hPos, -1);
+		GLState.enableVertexArrays(s.aPos, -1);
 
 		GLState.test(false, false);
 		GLState.blend(true);
