@@ -100,9 +100,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 		if (!initialized && !initShader())
 			return;
 
-		//		if (shaderProgram[0] == 0)
-		//			return;
-
 		if (mAlpha == 0 || v.pos.zoomLevel < mTileZoom) {
 			setReady(false);
 			return;
@@ -118,7 +115,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 			return;
 		}
 
-		// keep a list of tiles available for rendering
+		/* keep a list of tiles available for rendering */
 		if (mTiles == null || mTiles.length < mTileSet.cnt * 4)
 			mTiles = new MapTile[mTileSet.cnt * 4];
 
@@ -149,7 +146,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 					mTiles[activeTiles++] = t;
 			}
 		} else if (zoom == mTileZoom - 1) {
-			// check if proxy children are ready
+			/* check if proxy children are ready */
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				MapTile t = tiles[i];
 				for (byte j = 0; j < 4; j++) {
@@ -313,7 +310,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 			GL.glUniform1i(s.uMode, -1);
 			//GLUtils.glUniform4fv(uExtColor, 4, mColor);
 
-			// draw to depth buffer
+			/* draw to depth buffer */
 			for (int i = 0; i < mTileCnt; i++) {
 				MapTile t = tiles[i];
 				ExtrusionLayer el = t.getLayers().getExtrusionLayers();

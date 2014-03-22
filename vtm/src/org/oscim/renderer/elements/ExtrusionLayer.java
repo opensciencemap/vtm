@@ -51,7 +51,6 @@ public class ExtrusionLayer extends RenderElement {
 
 	/** indices for: 0. even sides, 1. odd sides, 2. roof, 3. roof outline */
 	public int numIndices[] = { 0, 0, 0, 0, 0 };
-	//public int sumIndices = 0;
 	public int sumVertices = 0;
 	public int sumIndices = 0;
 
@@ -66,17 +65,14 @@ public class ExtrusionLayer extends RenderElement {
 	private final static int IND_OUTLINE = 3;
 	private final static int IND_MESH = 4;
 
-	//private static final int NORMAL_DIR_MASK = 0xFFFFFFFE;
-
 	public boolean compiled = false;
 	private final float mGroundResolution;
 
-	//private HashMap<Vertex, Vertex> mVertexMap = new HashMap<Vertex, Vertex>();
 	private KeyMap<Vertex> mVertexMap = new KeyMap<Vertex>();
-	//private Vertex mTmpVertex = new Vertex();
 
 	public int indexOffset;
 
+	//private static final int NORMAL_DIR_MASK = 0xFFFFFFFE;
 	//private int numIndexHits = 0;
 
 	/**
@@ -169,7 +165,7 @@ public class ExtrusionLayer extends RenderElement {
 			if (index[k] < 0)
 				break;
 
-			// FIXME: workaround: dont overflow max index id.
+			/* FIXME: workaround: dont overflow max index id. */
 			if (vertexCnt >= 1 << 16)
 				break;
 
@@ -309,18 +305,15 @@ public class ExtrusionLayer extends RenderElement {
 	//	
 	public void addNoNormal(MapElement element) {
 		if (element.type != GeometryType.TRIS)
-			return; //FIXME throw
+			return;
 
 		short[] index = element.index;
 		float[] points = element.points;
 
-		//log.debug("add " + Arrays.toString(index));
-		//log.debug("add " + Arrays.toString(points));
-
-		// current vertex id
+		/* current vertex id */
 		int startVertex = sumVertices;
 
-		// roof indices for convex shapes
+		/* roof indices for convex shapes */
 		int i = mCurIndices[IND_MESH].used;
 		short[] indices = mCurIndices[IND_MESH].vertices;
 		int first = startVertex;
@@ -356,7 +349,7 @@ public class ExtrusionLayer extends RenderElement {
 				vertices = mCurVertices.vertices;
 				v = 0;
 			}
-			// set coordinate
+			/* set coordinate */
 			vertices[v++] = (short) (points[j++] * S);
 			vertices[v++] = (short) (points[j++] * S);
 			vertices[v++] = (short) (points[j++] * S);
@@ -372,31 +365,30 @@ public class ExtrusionLayer extends RenderElement {
 		short[] index = element.index;
 		float[] points = element.points;
 
-		// 10 cm steps
+		/* 10 cm steps */
 		float sfactor = 1 / 10f;
 		height *= sfactor;
 		minHeight *= sfactor;
 
-		// match height with ground resultion
-		// (meter per pixel)
+		/* match height with ground resultion (meter per pixel) */
 		height /= mGroundResolution;
 		minHeight /= mGroundResolution;
 
 		boolean complexOutline = false;
 		boolean simpleOutline = true;
 
-		// current vertex id
+		/* current vertex id */
 		int startVertex = sumVertices;
 		int length = 0, ipos = 0, ppos = 0;
 
 		for (int n = index.length; ipos < n; ipos++, ppos += length) {
 			length = index[ipos];
 
-			// end marker
+			/* end marker */
 			if (length < 0)
 				break;
 
-			// start next polygon
+			/* start next polygon */
 			if (length == 0) {
 				startVertex = sumVertices;
 				simpleOutline = true;
@@ -404,7 +396,7 @@ public class ExtrusionLayer extends RenderElement {
 				continue;
 			}
 
-			// check: drop last point from explicitly closed rings
+			/* check: drop last point from explicitly closed rings */
 			int len = length;
 			if (points[ppos] == points[ppos + len - 2]
 			        && points[ppos + 1] == points[ppos + len - 1]) {
@@ -412,11 +404,11 @@ public class ExtrusionLayer extends RenderElement {
 				log.debug("explicit closed poly " + len);
 			}
 
-			// need at least three points
+			/* need at least three points */
 			if (len < 6)
 				continue;
 
-			// check if polygon contains inner rings
+			/* check if polygon contains inner rings */
 			if (simpleOutline && (ipos < n - 1) && (index[ipos + 1] > 0))
 				simpleOutline = false;
 
@@ -433,7 +425,7 @@ public class ExtrusionLayer extends RenderElement {
 	}
 
 	private void addRoofSimple(int startVertex, int len) {
-		// roof indices for convex shapes
+		/* roof indices for convex shapes */
 		int i = mCurIndices[IND_ROOF].used;
 		short[] indices = mCurIndices[IND_ROOF].vertices;
 		short first = (short) (startVertex + 1);
@@ -462,7 +454,7 @@ public class ExtrusionLayer extends RenderElement {
 		int len = 0;
 		int rings = 0;
 
-		// get sum of points in polygon
+		/* get sum of points in polygon */
 		for (int i = ipos, n = index.length; i < n && index[i] > 0; i++) {
 			len += index[i];
 			rings++;
@@ -477,7 +469,7 @@ public class ExtrusionLayer extends RenderElement {
 	private boolean addOutline(float[] points, int pos, int len, float minHeight,
 	        float height, boolean convex) {
 
-		// add two vertices for last face to make zigzag indices work
+		/* add two vertices for last face to make zigzag indices work */
 		boolean addFace = (len % 4 != 0);
 		int vertexCnt = len + (addFace ? 2 : 0);
 
@@ -489,10 +481,10 @@ public class ExtrusionLayer extends RenderElement {
 		float nx = points[pos + 0];
 		float ny = points[pos + 1];
 
-		// vector to next point
+		/* vector to next point */
 		float vx = nx - cx;
 		float vy = ny - cy;
-		// vector from previous point
+		/* vector from previous point */
 		float ux, uy;
 
 		float a = (float) Math.sqrt(vx * vx + vy * vy);
@@ -505,7 +497,7 @@ public class ExtrusionLayer extends RenderElement {
 		int changeY = 0;
 		int angleSign = 0;
 
-		// vertex offset for all vertices in layer
+		/* vertex offset for all vertices in layer */
 		int vOffset = sumVertices;
 
 		short[] vertices = mCurVertices.vertices;
@@ -529,15 +521,15 @@ public class ExtrusionLayer extends RenderElement {
 				v = 0;
 			}
 
-			// set coordinate
+			/* set coordinate */
 			vertices[v + 0] = vertices[v + 4] = (short) (cx * S);
 			vertices[v + 1] = vertices[v + 5] = (short) (cy * S);
 
-			// set height
+			/* set height */
 			vertices[v + 2] = mh;
 			vertices[v + 6] = h;
 
-			// get direction to next point
+			/* get direction to next point */
 			if (i < len) {
 				nx = points[pos + i + 0];
 				ny = points[pos + i + 1];
@@ -554,7 +546,7 @@ public class ExtrusionLayer extends RenderElement {
 			vx = nx - cx;
 			vy = ny - cy;
 
-			// set lighting (by direction)
+			/* set lighting (by direction) */
 			a = (float) Math.sqrt(vx * vx + vy * vy);
 			color2 = (short) ((1 + vx / a) * 127);
 
@@ -569,8 +561,8 @@ public class ExtrusionLayer extends RenderElement {
 
 			/* check if polygon is convex */
 			if (convex) {
-				// TODO simple polys with only one concave arc
-				// could be handled without special triangulation
+				/* TODO simple polys with only one concave arc
+				 * could be handled without special triangulation */
 				if ((ux < 0 ? 1 : -1) != (vx < 0 ? 1 : -1))
 					changeX++;
 				if ((uy < 0 ? 1 : -1) != (vy < 0 ? 1 : -1))
@@ -605,7 +597,7 @@ public class ExtrusionLayer extends RenderElement {
 			short s2 = vert++;
 			short s3 = vert++;
 
-			// connect last to first (when number of faces is even)
+			/* connect last to first (when number of faces is even) */
 			if (!addFace && i == len) {
 				s2 -= len;
 				s3 -= len;
