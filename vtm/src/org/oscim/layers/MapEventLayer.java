@@ -423,6 +423,9 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		}
 
 		public void update(float x, float y, long time) {
+			if (time == mLastTime)
+				return;
+
 			if (--mIndex < 0)
 				mIndex = SAMPLES - 1;
 

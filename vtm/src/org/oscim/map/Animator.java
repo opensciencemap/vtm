@@ -20,6 +20,7 @@ import static org.oscim.core.MercatorProjection.latitudeToY;
 import static org.oscim.core.MercatorProjection.longitudeToX;
 import static org.oscim.utils.FastMath.clamp;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
@@ -162,11 +163,15 @@ public class Animator {
 
 		float duration = 500;
 
-		float flingFactor = 0.5f;
+		float flingFactor = 240 / CanvasAdapter.dpi;
 		mVelocity.x = velocityX * flingFactor;
 		mVelocity.y = velocityY * flingFactor;
-		clamp(mVelocity.x, minX, maxX);
-		clamp(mVelocity.y, minY, maxY);
+		mVelocity.x = clamp(mVelocity.x, minX, maxX);
+		mVelocity.y = clamp(mVelocity.y, minY, maxY);
+		if (Double.isNaN(mVelocity.x) || Double.isNaN(mVelocity.y)) {
+			log.debug("fling NaN!");
+			return;
+		}
 
 		animStart(duration, ANIM_FLING);
 	}
