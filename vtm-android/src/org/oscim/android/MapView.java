@@ -19,9 +19,9 @@ package org.oscim.android;
 import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.android.gl.AndroidGL;
 import org.oscim.android.input.AndroidMotionEvent;
+import org.oscim.android.input.GestureHandler;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
-import org.oscim.event.Gesture;
 import org.oscim.map.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +30,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnDoubleTapListener;
-import android.view.GestureDetector.OnGestureListener;
-import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
 public class MapView extends RelativeLayout {
@@ -76,55 +73,11 @@ public class MapView extends RelativeLayout {
 		mMap.clearMap();
 		mMap.updateMap(false);
 
+		GestureHandler gestureHandler = new GestureHandler(mMap);
+		mGestureDetector = new GestureDetector(context, gestureHandler);
+		mGestureDetector.setOnDoubleTapListener(gestureHandler);
+
 		mMotionEvent = new AndroidMotionEvent();
-		mGestureDetector = new GestureDetector(context, new OnGestureListener() {
-			@Override
-			public boolean onSingleTapUp(MotionEvent e) {
-				return mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
-			}
-
-			@Override
-			public void onShowPress(MotionEvent e) {
-			}
-
-			@Override
-			public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-				return false;
-			}
-
-			@Override
-			public void onLongPress(MotionEvent e) {
-				mMap.handleGesture(Gesture.LONG_PRESS, mMotionEvent.wrap(e));
-			}
-
-			@Override
-			public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-				return false;
-			}
-
-			@Override
-			public boolean onDown(MotionEvent e) {
-				return mMap.handleGesture(Gesture.PRESS, mMotionEvent.wrap(e));
-			}
-		});
-		mGestureDetector.setOnDoubleTapListener(new OnDoubleTapListener() {
-
-			@Override
-			public boolean onSingleTapConfirmed(MotionEvent e) {
-				return false;
-			}
-
-			@Override
-			public boolean onDoubleTapEvent(MotionEvent e) {
-				return false;
-			}
-
-			@Override
-			public boolean onDoubleTap(MotionEvent e) {
-				return mMap.handleGesture(Gesture.DOUBLE_TAP, mMotionEvent.wrap(e));
-			}
-		});
-
 	}
 
 	public void onStop() {
