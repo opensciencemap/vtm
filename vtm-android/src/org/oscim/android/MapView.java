@@ -44,23 +44,19 @@ public class MapView extends RelativeLayout {
 	protected final GestureDetector mGestureDetector;
 	protected final AndroidMotionEvent mMotionEvent;
 
-	protected int mWidth;
-	protected int mHeight;
-
 	public MapView(Context context) {
 		this(context, null);
 	}
 
 	public MapView(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
+		this.setWillNotDraw(true);
+		this.setClickable(true);
+		this.setFocusable(true);
 
 		AndroidGraphics.init();
 		AndroidAssets.init(context);
 		GLAdapter.init(new AndroidGL());
-
-		this.setWillNotDraw(true);
-		this.setClickable(true);
-		this.setFocusable(true);
 
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
@@ -81,7 +77,7 @@ public class MapView extends RelativeLayout {
 	}
 
 	public void onStop() {
-		log.debug("onStop");
+
 	}
 
 	void onPause() {
@@ -111,10 +107,7 @@ public class MapView extends RelativeLayout {
 
 		super.onSizeChanged(width, height, oldWidth, oldHeight);
 
-		mWidth = width;
-		mHeight = height;
-
-		if (mWidth > 0 && mHeight > 0)
+		if (width > 0 && height > 0)
 			mMap.viewport().setScreenSize(width, height);
 	}
 
