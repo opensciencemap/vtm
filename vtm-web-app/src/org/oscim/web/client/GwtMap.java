@@ -27,6 +27,7 @@ import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.client.GwtGdxGraphics;
 import org.oscim.gdx.client.UrlUpdater;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
+import org.oscim.layers.tile.s3db.S3DBLayer;
 import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -174,12 +175,17 @@ class GwtMap extends GdxMap {
 			}
 		}
 
+		if (params.containsKey("s3db")) {
+			TileSource ts = new OSciMap4TileSource("http://opensciencemap.org/tiles/s3db");
+			mMap.layers().add(new S3DBLayer(mMap, ts));
+		}
+
 		if (l != null) {
+			if (!params.containsKey("nobuildings") && !params.containsKey("s3db"))
+				mMap.layers().add(new BuildingLayer(mMap, l));
+
 			if (!params.containsKey("nolabel"))
 				mMap.layers().add(new LabelLayer(mMap, l));
-
-			if (!params.containsKey("nobuildings"))
-				mMap.layers().add(new BuildingLayer(mMap, l));
 		}
 
 		mSearchBox = new SearchBox(mMap);
