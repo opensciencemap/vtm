@@ -219,7 +219,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		el.vboVertices.loadBufferData(vbuf.flip(), size);
 		el.vboVertices.unbind();
 
-		GLUtils.checkGlError("compile extrusion layer");
+		GLUtils.checkGlError("extrusion layer");
 		return true;
 	}
 

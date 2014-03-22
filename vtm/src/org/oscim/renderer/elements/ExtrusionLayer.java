@@ -594,7 +594,7 @@ public class ExtrusionLayer extends RenderElement {
 
 			/* check if face is within tile */
 			if (mClipper.clipNext((int) nx, (int) ny) == 0) {
-				even = (even == 0 ? 1 : 0);
+				even = ++even % 2;
 				continue;
 			}
 
@@ -611,37 +611,38 @@ public class ExtrusionLayer extends RenderElement {
 				s3 -= len;
 			}
 
-			short[] indices = mCurIndices[even].vertices;
-			// index id relative to mCurIndices item
-			int ind = mCurIndices[even].used;
-
-			if (ind == VertexItem.SIZE) {
-				mCurIndices[even].next = VertexItem.pool.get();
-				mCurIndices[even] = mCurIndices[even].next;
-				indices = mCurIndices[even].vertices;
-				ind = 0;
+			VertexItem it = mCurIndices[even];
+			if (it.used == VertexItem.SIZE) {
+				it = VertexItem.pool.getNext(it);
+				mCurIndices[even] = it;
 			}
 
+			int ind = it.used;
+			short[] indices = it.vertices;
 			indices[ind + 0] = s0;
 			indices[ind + 1] = s2;
 			indices[ind + 2] = s1;
-
 			indices[ind + 3] = s1;
 			indices[ind + 4] = s2;
 			indices[ind + 5] = s3;
+			it.used += 6;
 			sumIndices += 6;
 
-			mCurIndices[even].used += 6;
-			even = (even == 0 ? 1 : 0);
+			/* flipp even-odd */
+			even = ++even % 2;
 
 			/* add roof outline indices */
-			VertexItem it = mCurIndices[IND_OUTLINE];
+			it = mCurIndices[IND_OUTLINE];
 			if (it.used == VertexItem.SIZE) {
-				it.next = VertexItem.pool.get();
-				it = mCurIndices[IND_OUTLINE] = it.next;
+				it = VertexItem.pool.getNext(it);
+				mCurIndices[IND_OUTLINE] = it;
 			}
-			it.vertices[it.used++] = s1;
-			it.vertices[it.used++] = s3;
+			ind = it.used;
+			indices = it.vertices;
+			indices[ind + 0] = s1;
+			indices[ind + 1] = s3;
+			it.used += 2;
+			sumIndices += 2;
 		}
 
 		mCurVertices.used = v;
