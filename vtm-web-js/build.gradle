@@ -1,0 +1,106 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/' }
+  }
+  dependencies {
+    classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.3'
+  }
+}
+
+repositories {
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+apply plugin: 'war'
+apply plugin: 'jetty'
+apply plugin: 'gwt'
+apply plugin: 'eclipse'
+
+sourceSets {
+  main.java.srcDirs = ['src']
+}
+
+dependencies {
+  providedCompile project(':vtm-web')
+  providedCompile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
+  providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
+  providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
+  providedCompile 'ru.finam:slf4j-gwt:1.2.1'
+  providedCompile 'org.slf4j:slf4j-api:1.7.5'
+  providedCompile 'org.timepedia.exporter:gwtexporter:2.5.0-SNAPSHOT'
+}
+
+// explicit dependencies for org.gradle.configureondemand=true
+evaluationDependsOn(':vtm')
+evaluationDependsOn(':vtm-themes')
+evaluationDependsOn(':vtm-gdx')
+evaluationDependsOn(':vtm-web')
+
+gwt {
+  gwtVersion='2.6.0'
+  modules 'org.oscim.web.VtmWebJs'
+
+  superDev {
+    noPrecompile=true
+  }
+  compiler {
+        enableClosureCompiler = false; // activates -XenableClosureCompiler
+        disableClassMetadata = true; // activates -XdisableClassMetadata
+        disableCastChecking = true; // activates -XdisableCastChecking
+  }
+    
+  src += files(sourceSets.main.java.srcDirs)
+  src += files(project(':vtm').sourceSets.main.allJava.srcDirs)
+  src += files(project(':vtm-themes').sourceSets.main.allJava.srcDirs)
+  src += files(project(':vtm-themes').sourceSets.main.resources.srcDirs)
+  src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs)
+  src += files(project(':vtm-web').sourceSets.main.allJava.srcDirs)
+}
+
+// Run jetty with draft compiled war
+task jettyDraftWar(type: JettyRunWar) {
+  dependsOn draftWar
+  dependsOn.remove('war')
+  webApp=draftWar.archivePath
+}
+
+task copyThemeAssets(type: Copy) {
+    from "$rootDir/vtm-themes/resources/assets"
+    into "assets"
+    include '**/*'
+}
+
+task copyVtmAssets(type: Copy) {
+    from "$rootDir/vtm/resources/assets"
+    into "assets"
+    include '**/*'
+}
+
+task copyWarSources(type: Copy) {
+    from 'war/index.html'
+    from 'war/default.css'
+    from 'war/map.js'
+    into "src/main/webapp"
+    //include '**/*'
+}
+
+tasks.withType(JavaCompile) { compileTask ->
+  compileTask.dependsOn copyThemeAssets
+  compileTask.dependsOn copyVtmAssets
+  compileTask.dependsOn copyWarSources
+}
+
+// Configuring Eclipse classpath
+eclipse.classpath {
+
+  defaultOutputDir = file('war/WEB-INF/classes')
+
+  //file {
+  //  whenMerged { classpath ->
+  //    classpath.entries.findAll { entry ->
+  //	entry.path == 'src' }*.excludes = ['main','org/oscim/gdx/emu/']
+  //  }
+  //}
+}
