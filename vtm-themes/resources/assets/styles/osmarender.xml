@@ -275,10 +275,13 @@
       <m v="stream">
         <line stroke="#b5d6f1" width="0.275" />
       </m>
-      <m v="river">
-        <line stroke="#b5d6f1" width="1.0" />
+ 	    <m v="river" zoom-min="12" >
+        <line stroke="#a5b6e1" width="1.5" />
       </m>
-
+ 	  <m v="river" zoom-max="11" >
+        <line stroke="#a5b6e1" width="1.5" fix="true"/>
+      </m>
+      
       <m v="dock">
         <area fill="#b5d6f1" />
       </m>
