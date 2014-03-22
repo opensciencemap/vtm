@@ -16,6 +16,7 @@
  */
 package org.oscim.android;
 
+import org.oscim.android.gl.GLView;
 import org.oscim.map.Map;
 
 import android.widget.RelativeLayout.LayoutParams;

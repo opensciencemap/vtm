@@ -1,4 +1,4 @@
-package org.oscim.android;
+package org.oscim.android.gl;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
