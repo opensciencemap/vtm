@@ -40,13 +40,11 @@ public class MainActivity extends AndroidApplication {
 		super.onCreate(savedInstanceState);
 
 		AndroidGraphics.init();
+		GdxAssets.init("");
 		GLAdapter.init(new AndroidGLAdapter());
-
-		// TODO make this dpi dependent
 		Tile.SIZE = 400;
 
 		AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
-		//cfg.useGL20 = true;
 
 		new SharedLibraryLoader().load("vtm-jni");
 
