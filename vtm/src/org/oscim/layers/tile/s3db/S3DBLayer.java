@@ -55,11 +55,8 @@ public class S3DBLayer extends TileLayer {
 
 	static int getColor(String color, boolean roof) {
 
-		try {
-			return Color.parseColor(color);
-		} catch (Exception e) {
-
-		}
+		if (color.charAt(0) == '#')
+			return Color.parseColor(color, Color.CYAN);
 
 		if (roof) {
 			if ("brown" == color)
