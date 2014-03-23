@@ -61,7 +61,7 @@ import org.oscim.utils.pool.Inlist;
  * 
  * @param <K> the type of keys maintained by this map
  */
-public class KeyMap<K extends HashItem> {
+public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
 	/**
 	 * Min capacity (other than zero) for a HashMap. Must be a power of two
 	 * greater than 1 (and less than 1 << 30).
