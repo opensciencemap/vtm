@@ -68,7 +68,7 @@ public class ExtrusionLayer extends RenderElement {
 	public boolean compiled = false;
 	private final float mGroundResolution;
 
-	private KeyMap<Vertex> mVertexMap = new KeyMap<Vertex>();
+	private KeyMap<Vertex> mVertexMap;
 
 	public int indexOffset;
 
@@ -116,12 +116,20 @@ public class ExtrusionLayer extends RenderElement {
 		mCurIndices = new VertexItem[5];
 
 		mIndices[4] = mCurIndices[4] = VertexItem.pool.get();
+		mVertexMap = vertexMapPool.get();
 	}
 
 	static SyncPool<Vertex> vertexPool = new SyncPool<Vertex>(8192, false) {
 		@Override
 		protected Vertex createItem() {
 			return new Vertex();
+		}
+	};
+
+	static SyncPool<KeyMap<Vertex>> vertexMapPool = new SyncPool<KeyMap<Vertex>>(64, false) {
+		@Override
+		protected KeyMap<Vertex> createItem() {
+			return new KeyMap<Vertex>(2048);
 		}
 	};
 
@@ -644,14 +652,17 @@ public class ExtrusionLayer extends RenderElement {
 
 	@Override
 	public void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
+		mClipper = null;
+
 		if (compiled) {
 			throw new IllegalStateException();
 		}
 
-		vertexPool.releaseAll(mVertexMap.releaseItems());
-
-		mVertexMap = null;
-		mClipper = null;
+		if (mVertexMap != null) {
+			vertexPool.releaseAll(mVertexMap.releaseItems());
+			mVertexMap = vertexMapPool.release(mVertexMap);
+			mVertexMap = null;
+		}
 
 		if (sumVertices == 0) {
 			compiled = true;
@@ -680,7 +691,14 @@ public class ExtrusionLayer extends RenderElement {
 
 	@Override
 	protected void clear() {
-		mVertexMap = null;
+		mClipper = null;
+
+		if (mVertexMap != null) {
+			vertexPool.releaseAll(mVertexMap.releaseItems());
+			mVertexMap = vertexMapPool.release(mVertexMap);
+			mVertexMap = null;
+		}
+
 		if (compiled) {
 			vboIndices = BufferObject.release(vboIndices);
 			vboVertices = BufferObject.release(vboVertices);
