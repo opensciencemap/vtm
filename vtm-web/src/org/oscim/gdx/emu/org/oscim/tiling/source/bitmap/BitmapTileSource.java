@@ -1,12 +1,11 @@
 package org.oscim.tiling.source.bitmap;
 
-import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
-import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
-
 import org.oscim.gdx.client.GwtBitmap;
+import org.oscim.layers.tile.LoadDelayTask;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.ITileDataSink.QueryResult;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.source.LwHttp;
 import org.oscim.tiling.source.UrlTileSource;
@@ -76,16 +75,16 @@ public class BitmapTileSource extends UrlTileSource {
 
 			img.addLoadHandler(new LoadHandler() {
 				public void onLoad(LoadEvent event) {
-					TileLoader.postLoadDelay(new org.oscim.layers.tile.LoadDelayTask() {
+					TileLoader.postLoadDelay(new LoadDelayTask<Image>(tile, sink, img) {
 
 						@Override
 						public void continueLoading() {
 							if (!tile.state(MapTile.State.LOADING)) {
-								sink.completed(FAILED);
-								RootPanel.get().remove(img);
+								sink.completed(QueryResult.FAILED);
+								RootPanel.get().remove(data);
 							} else {
-								sink.setTileImage(new GwtBitmap(img));
-								sink.completed(SUCCESS);
+								sink.setTileImage(new GwtBitmap(data));
+								sink.completed(QueryResult.SUCCESS);
 							}
 						}
 					});
@@ -96,7 +95,7 @@ public class BitmapTileSource extends UrlTileSource {
 
 				@Override
 				public void onError(ErrorEvent event) {
-					sink.completed(FAILED);
+					sink.completed(QueryResult.FAILED);
 					RootPanel.get().remove(img);
 				}
 			});

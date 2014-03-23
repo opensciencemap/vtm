@@ -20,6 +20,7 @@ import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.oscim.layers.tile.LoadDelayTask;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.tiling.ITileDataSink;
@@ -61,30 +62,32 @@ public class UrlTileDataSource implements ITileDataSource {
 	}
 
 	public void process(final InputStream is) {
-		TileLoader.postLoadDelay(new org.oscim.layers.tile.LoadDelayTask() {
+		TileLoader.postLoadDelay(new LoadDelayTask<InputStream>(mTile, mSink, is) {
 
 			@Override
 			public void continueLoading() {
-				if (!mTile.state(MapTile.State.LOADING)) {
-					mConn.requestCompleted();
-					mSink.completed(FAILED);
-					mTile = null;
-					mSink = null;
-				}
-				boolean win = false;
-				if (is != null) {
-					try {
-						win = mTileDecoder.decode(mTile, mSink, is);
-					} catch (IOException e) {
-						e.printStackTrace();
+
+				if (tile.state(MapTile.State.LOADING)) {
+					boolean win = false;
+					if (is != null) {
+						try {
+							win = mTileDecoder.decode(tile, sink, data);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
+					if (!win)
+						log.debug("{} failed", tile);
+
+					// FIXME
+					mConn.requestCompleted();
+
+					sink.completed(win ? SUCCESS : FAILED);
+				} else {
+					// FIXME
+					mConn.requestCompleted();
+					sink.completed(FAILED);
 				}
-				if (!win)
-					log.debug("{} failed", mTile);
-
-				mConn.requestCompleted();
-
-				mSink.completed(win ? SUCCESS : FAILED);
 
 				mTile = null;
 				mSink = null;

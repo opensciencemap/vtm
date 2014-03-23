@@ -1,10 +1,20 @@
 package org.oscim.layers.tile;
 
 import org.oscim.renderer.MapRenderer;
+import org.oscim.tiling.ITileDataSink;
 
 import com.badlogic.gdx.Gdx;
 
-public abstract class LoadDelayTask implements Runnable {
+public abstract class LoadDelayTask<T> implements Runnable {
+	protected final MapTile tile;
+	protected final ITileDataSink sink;
+	protected final T data;
+
+	public LoadDelayTask(MapTile tile, ITileDataSink sink, T data) {
+		this.tile = tile;
+		this.sink = sink;
+		this.data = data;
+	}
 
 	@Override
 	public void run() {

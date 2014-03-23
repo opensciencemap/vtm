@@ -113,7 +113,7 @@ public abstract class TileLoader implements ITileDataSink {
 		boolean success = (result == SUCCESS) && !isInterrupted;
 		long now = MapRenderer.frametime;
 
-		log.debug("completed {}  diff time:{}", mTile, (now - lastLoadTime));
+		//log.debug("completed {}  diff time:{}", mTile, (now - lastLoadTime));
 		lastLoadTime = now;
 
 		mTileManager.jobCompleted(mTile, success);
@@ -148,7 +148,7 @@ public abstract class TileLoader implements ITileDataSink {
 
 	}
 
-	public static void postLoadDelay(LoadDelayTask task) {
+	public static void postLoadDelay(LoadDelayTask<?> task) {
 		Gdx.app.postRunnable(task);
 	}
 
