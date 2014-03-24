@@ -31,7 +31,6 @@ public class S3DBMapActivity extends BaseMapActivity {
 
 		mMap.layers().add(new S3DBLayer(mMap, ts));
 		mMap.layers().add(new LabelLayer(mMap, mBaseLayer));
-		mMap.setMapPosition(53.08, 8.83, Math.pow(2, 14));
 	}
 
 	@Override

@@ -18,6 +18,7 @@
 import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
+import org.oscim.map.Map;
 import org.oscim.theme.VtmThemes;
 
 import android.os.Bundle;
@@ -27,19 +28,17 @@ public class SimpleMapActivity extends BaseMapActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Map m = this.map();
 
 		Layers layers = mMap.layers();
 		layers.add(new BuildingLayer(mMap, mBaseLayer));
 		layers.add(new LabelLayer(mMap, mBaseLayer));
-
 		//layers.add(new TileGridLayer(mMap));
 
-		mMap.setTheme(VtmThemes.DEFAULT);
+		m.setTheme(VtmThemes.DEFAULT);
 		//mMap.setTheme(VtmThemes.TRONRENDER);
 		//mMap.setTheme(VtmThemes.TRON2);
 		//mMap.setTheme(VtmThemes.OSMARENDER);
-
-		mMap.setMapPosition(53.08, 8.83, Math.pow(2, 10));
 	}
 
 	// Stress testing

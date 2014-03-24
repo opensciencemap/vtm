@@ -63,8 +63,6 @@ public class BitmapTileMapActivity extends MapActivity {
 
 		mBitmapLayer = new BitmapTileLayer(mMap, mTileSource);
 		mMap.layers().add(mBitmapLayer);
-
-		mMap.setMapPosition(0, 0, 1 << 2);
 	}
 
 	@Override

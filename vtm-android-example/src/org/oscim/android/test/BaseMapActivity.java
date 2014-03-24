@@ -19,6 +19,7 @@ package org.oscim.android.test;
 import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.android.cache.TileCache;
+import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
@@ -64,6 +65,13 @@ public class BaseMapActivity extends MapActivity {
 			mTileSource.setCache(mCache);
 		}
 		mBaseLayer = mMap.setBaseMap(mTileSource);
+
+		/* set initial position on first run */
+		MapPosition pos = new MapPosition();
+		mMap.getMapPosition(pos);
+		if (pos.x == 0.5 && pos.y == 0.5)
+			mMap.setMapPosition(53.08, 8.83, Math.pow(2, 16));
+
 	}
 
 	@Override
