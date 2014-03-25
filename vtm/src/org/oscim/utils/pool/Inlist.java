@@ -29,53 +29,85 @@ import javax.annotation.CheckReturnValue;
  * are *REALLY* sure about it. Better do not use it! :)
  */
 public class Inlist<T extends Inlist<T>> {
-	/** UNTESTED */
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static class List<T extends Inlist<?>> implements Iterable<T> {
-		Inlist head;
-		Inlist cur;
-		Iterator<T> mIterator = new Iterator<T>() {
+	public static class List<T extends Inlist<?>> implements Iterable<T>, Iterator<T> {
+		private Inlist head;
+		private Inlist cur;
 
-			@Override
-			public boolean hasNext() {
-				return cur != null;
-			}
-
-			@Override
-			public T next() {
-				if (cur == null)
-					throw new IllegalStateException();
-
-				Inlist tmp = cur;
-				cur = cur.next;
-				return (T) tmp;
-			}
-
-			@Override
-			public void remove() {
-				T tmp = (T) cur.next;
-				head = Inlist.remove(head, cur);
-				cur = tmp;
-			}
-		};
-
-		@Override
-		public Iterator<T> iterator() {
-			cur = head;
-			return mIterator;
-		}
-
+		/**
+		 * Insert single item at start of list.
+		 * item.next must be null.
+		 */
 		public void push(T it) {
+			if (it.next != null)
+				throw new IllegalArgumentException("item.next must be null");
+
 			((Inlist) it).next = head;
 			head = it;
 		}
 
+		/**
+		 * Insert item at start of list.
+		 */
+		public T pop() {
+			if (head == null)
+				return null;
+
+			Inlist it = head;
+			head = it.next;
+			it.next = null;
+			return (T) it;
+		}
+
+		/**
+		 * Reverse list.
+		 */
+		public void reverse() {
+			Inlist tmp;
+			Inlist itr = head;
+			head = null;
+
+			while (itr != null) {
+				/* keep next */
+				tmp = itr.next;
+
+				/* push itr onto new list */
+				itr.next = head;
+				head = itr;
+
+				itr = tmp;
+			}
+		}
+
+		/**
+		 * Append item, O(n) - use push() and
+		 * reverse() to iterate in insertion order!
+		 */
+		public void append(T it) {
+			head = Inlist.appendItem(head, it);
+		}
+
+		/**
+		 * Append Inlist.
+		 */
+		public void appendList(T list) {
+			head = Inlist.appendList(head, list);
+		}
+
+		/**
+		 * Remove item from list.
+		 */
 		public void remove(T it) {
 			cur = null;
 			head = Inlist.remove(head, it);
 		}
 
+		/**
+		 * Clear list.
+		 * 
+		 * @return head of list
+		 */
 		public T clear() {
 			Inlist ret = head;
 			head = null;
@@ -83,16 +115,45 @@ public class Inlist<T extends Inlist<T>> {
 			return (T) ret;
 		}
 
-		public T getHead() {
+		/** @return first node in list */
+		public T head() {
 			return (T) head;
+		}
+
+		/** Iterator: Has next item */
+		@Override
+		public boolean hasNext() {
+			return cur != null;
+		}
+
+		/** Iterator: Get next item */
+		@Override
+		public T next() {
+			if (cur == null)
+				throw new IllegalStateException();
+
+			Inlist tmp = cur;
+			cur = cur.next;
+			return (T) tmp;
+		}
+
+		/** Iterator: Remove current item */
+		@Override
+		public void remove() {
+			T tmp = (T) cur.next;
+			head = Inlist.remove(head, cur);
+			cur = tmp;
+		}
+
+		/** NB: Only one iterator at a time possible! */
+		@Override
+		public Iterator<T> iterator() {
+			cur = head;
+			return this;
 		}
 	}
 
 	public T next;
-
-	public T next() {
-		return next;
-	}
 
 	/**
 	 * Push 'item' onto 'list'.
@@ -101,9 +162,10 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param item the item
 	 * @return the new head of 'list' (item)
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@CheckReturnValue
-	public static <T extends Inlist<T>> T push(T list, T item) {
-		item.next = list;
+	public static <T extends Inlist<?>> T push(T list, T item) {
+		((Inlist) (item)).next = list;
 		return item;
 	}
 
@@ -215,7 +277,7 @@ public class Inlist<T extends Inlist<T>> {
 				it.next = other;
 				break;
 			} else if (it.next == other) {
-				throw new IllegalArgumentException("'other' alreay in 'list'");
+				throw new IllegalArgumentException("'other' already in 'list'");
 			}
 		}
 
@@ -272,5 +334,9 @@ public class Inlist<T extends Inlist<T>> {
 		it.next = item;
 
 		return list;
+	}
+
+	public T next() {
+		return next;
 	}
 }

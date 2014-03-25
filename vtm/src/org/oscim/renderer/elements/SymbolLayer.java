@@ -82,7 +82,7 @@ public final class SymbolLayer extends TextureLayer {
 		textures = null;
 		TextureItem t = null;
 
-		for (SymbolItem it = mSymbols.getHead(); it != null;) {
+		for (SymbolItem it = mSymbols.head(); it != null;) {
 			int width = 0, height = 0;
 			int x = 0;
 			int y = 0;
