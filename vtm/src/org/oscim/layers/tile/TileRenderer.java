@@ -36,6 +36,7 @@ public abstract class TileRenderer extends LayerRenderer {
 
 	/** fade-in time */
 	protected static final float FADE_TIME = 500;
+	protected static final int MAX_TILE_LOAD = 1;
 
 	private TileManager mTileManager;
 
@@ -180,6 +181,9 @@ public abstract class TileRenderer extends LayerRenderer {
 				MapTile t = tile.node.child(i);
 				if (t != null && t.state == NEW_DATA)
 					uploadCnt += uploadTileData(t);
+			}
+			if (uploadCnt >= MAX_TILE_LOAD) {
+				break;
 			}
 		}
 		return uploadCnt;
