@@ -25,6 +25,7 @@ import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
+import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.theme.styles.ExtrusionStyle;
@@ -35,14 +36,22 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 	//static final Logger log = LoggerFactory.getLogger(BuildingOverlay.class);
 
 	private final static int MIN_ZOOM = 17;
+	private final static boolean POST_AA = false;
+
 	private final int mMinZoom;
+	private ExtrusionRenderer mExtRenderer;
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
-		super(map);
-		tileLayer.addHook(this);
+		this(map, tileLayer, MIN_ZOOM);
 
-		mMinZoom = MIN_ZOOM;
-		mRenderer = new ExtrusionRenderer(tileLayer.tileRenderer(), MIN_ZOOM);
+		//		super(map);
+		//		tileLayer.addHook(this);
+		//
+		//		mMinZoom = MIN_ZOOM;
+		//
+		//		OffscreenRenderer or = new OffscreenRenderer();
+		//		or.setRenderer(new ExtrusionRenderer(tileLayer.tileRenderer(), MIN_ZOOM));
+		//		mRenderer = or;
 	}
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer, int minZoom) {
@@ -50,8 +59,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		tileLayer.addHook(this);
 
 		mMinZoom = minZoom;
-		mRenderer = new ExtrusionRenderer(tileLayer.tileRenderer(), mMinZoom) {
-
+		mExtRenderer = new ExtrusionRenderer(tileLayer.tileRenderer(), mMinZoom) {
 			private long mStartTime;
 
 			@Override
@@ -90,6 +98,14 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 				super.update(v);
 			}
 		};
+
+		if (POST_AA) {
+			OffscreenRenderer or = new OffscreenRenderer();
+			or.setRenderer(mExtRenderer);
+			mRenderer = or;
+		} else {
+			mRenderer = mExtRenderer;
+		}
 	}
 
 	private final float mFadeTime = 500;
