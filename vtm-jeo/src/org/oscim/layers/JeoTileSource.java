@@ -7,8 +7,8 @@ import static org.oscim.tiling.ITileDataSink.QueryResult.TILE_NOT_FOUND;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import org.jeo.data.Tile;
 import org.jeo.data.TileDataset;
+import org.jeo.tile.Tile;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.layers.tile.MapTile;
