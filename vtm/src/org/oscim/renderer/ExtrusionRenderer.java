@@ -121,11 +121,21 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		int zoom = tiles[0].zoomLevel;
 
-		ExtrusionLayer el;
+		/* compile one tile max per frame */
+		boolean compiled = false;
+
 		if (zoom == mTileZoom) {
 			for (int i = 0; i < mTileSet.cnt; i++) {
-				if (compileLayers(getLayer(tiles[i])))
+				ExtrusionLayer el = getLayer(tiles[i]);
+				if (el == null)
+					continue;
+
+				if (el.compiled)
 					mTiles[activeTiles++] = tiles[i];
+				else if (!compiled && compileLayers(el)) {
+					mTiles[activeTiles++] = tiles[i];
+					compiled = true;
+				}
 			}
 		} else if (zoom == mTileZoom + 1) {
 			O: for (int i = 0; i < mTileSet.cnt; i++) {
@@ -138,12 +148,17 @@ public class ExtrusionRenderer extends LayerRenderer {
 					if (c == t)
 						continue O;
 
-				el = getLayer(t);
+				ExtrusionLayer el = getLayer(t);
 				if (el == null)
 					continue;
 
-				if (compileLayers(el))
+				if (el.compiled)
+					mTiles[activeTiles++] = tiles[i];
+
+				else if (!compiled && compileLayers(el)) {
 					mTiles[activeTiles++] = t;
+					compiled = true;
+				}
 			}
 		} else if (zoom == mTileZoom - 1) {
 			/* check if proxy children are ready */
@@ -154,7 +169,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 						continue;
 
 					MapTile c = t.node.child(j);
-					el = getLayer(c);
+					ExtrusionLayer el = getLayer(c);
 
 					if (el == null || !el.compiled)
 						continue;
@@ -163,6 +178,10 @@ public class ExtrusionRenderer extends LayerRenderer {
 				}
 			}
 		}
+
+		/* load more tiles on next frame */
+		if (compiled)
+			MapRenderer.animate();
 
 		mTileCnt = activeTiles;
 		//log.debug("" + activeTiles + " " + zoom);
