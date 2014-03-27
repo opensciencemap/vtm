@@ -8,6 +8,8 @@ import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.tiling.TileSource;
+import org.oscim.utils.ColorUtil;
+import org.oscim.utils.ColorsCSS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +18,10 @@ public class S3DBLayer extends TileLayer {
 
 	private final static int MAX_CACHE = 20;
 	private final static int SRC_ZOOM = 16;
+
+	/* TODO get from theme */
+	private final static double HSV_S = 0.7;
+	private final static double HSV_V = 1.2;
 
 	private final TileSource mTileSource;
 
@@ -55,14 +61,17 @@ public class S3DBLayer extends TileLayer {
 
 	static int getColor(String color, boolean roof) {
 
-		if (color.charAt(0) == '#')
-			return Color.parseColor(color, Color.CYAN);
+		if (color.charAt(0) == '#') {
+			int c = Color.parseColor(color, Color.CYAN);
+			/* hardcoded colors are way too saturated for my taste */
+			return ColorUtil.modHsv(c, 1.0, 0.4, HSV_V, true);
+		}
 
 		if (roof) {
 			if ("brown" == color)
 				return Color.get(120, 110, 110);
 			if ("red" == color)
-				return Color.get(255, 87, 69);
+				return Color.get(235, 140, 130);
 			if ("green" == color)
 				return Color.get(150, 200, 130);
 			if ("blue" == color)
@@ -82,28 +91,18 @@ public class S3DBLayer extends TileLayer {
 			return Color.get(190, 190, 255);
 		if ("yellow" == color)
 			return Color.get(255, 255, 175);
-		if ("pink" == color)
-			return Color.get(225, 175, 225);
-		if ("orange" == color)
-			return Color.get(255, 225, 150);
-		if ("brown" == color)
-			return Color.get(170, 130, 80);
-		if ("silver" == color)
-			return Color.get(153, 157, 160);
-		if ("gold" == color)
-			return Color.get(255, 215, 0);
 		if ("darkgray" == color || "darkgrey" == color)
 			return Color.DKGRAY;
 		if ("lightgray" == color || "lightgrey" == color)
 			return Color.LTGRAY;
-		if ("lightblue" == color)
-			return Color.get(173, 216, 230);
-		if ("beige" == color)
-			return Color.get(245, 245, 220);
-		if ("darkblue" == color)
-			return Color.get(50, 50, 189);
+
 		if ("transparent" == color)
 			return Color.get(64, 64, 64, 64);
+
+		Integer css = ColorsCSS.get(color);
+
+		if (css != null)
+			return ColorUtil.modHsv(css.intValue(), 1.0, HSV_S, HSV_V, true);
 
 		log.debug("unknown color:{}", color);
 		return 0;
@@ -157,6 +156,8 @@ public class S3DBLayer extends TileLayer {
 			return Color.get(255, 217, 191);
 		if ("stainless_steel" == material)
 			return Color.get(153, 157, 160);
+		if ("gold" == material)
+			return 0xFFFFD700;
 
 		log.debug("unknown material:{}", material);
 
