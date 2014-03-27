@@ -66,11 +66,11 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		for (int i = 0; i <= SHADER; i++) {
 			if (i == 0) {
-				shaderProgram[i] = GLUtils.createProgram(extrusionVertexShader,
-				                                         extrusionFragmentShader);
+				shaderProgram[i] = GLShader.createProgram(extrusionVertexShader,
+				                                          extrusionFragmentShader);
 			} else {
-				shaderProgram[i] = GLUtils.createProgram(extrusionVertexShader,
-				                                         extrusionFragmentShaderZ);
+				shaderProgram[i] = GLShader.createProgram(extrusionVertexShader,
+				                                          extrusionFragmentShaderZ);
 			}
 
 			if (shaderProgram[i] == 0) {

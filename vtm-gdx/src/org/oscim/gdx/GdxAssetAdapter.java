@@ -35,6 +35,7 @@ public class GdxAssetAdapter extends AssetAdapter {
 		try {
 			return file.read();
 		} catch (GdxRuntimeException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}

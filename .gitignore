@@ -16,6 +16,7 @@ build/
 /vtm-android-example/assets/
 /vtm-gdx-desktop/assets/
 /vtm-gdx-html/war/
+/vtm-gdx-html/assets/
 /vtm-gdx-html/gwt-unitCache
 /vtm-spatialite/
 /vtm-spatialite-android/

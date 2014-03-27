@@ -43,7 +43,12 @@ gwt {
   superDev {
     noPrecompile=true
   }
-
+  compiler {
+        enableClosureCompiler = false; // activates -XenableClosureCompiler
+        disableClassMetadata = true; // activates -XdisableClassMetadata
+        disableCastChecking = true; // activates -XdisableCastChecking
+  }
+    
   src += files(sourceSets.main.java.srcDirs)
   src += files(project(':vtm').sourceSets.main.allJava.srcDirs)
   src += files(project(':vtm-themes').sourceSets.main.allJava.srcDirs)
@@ -56,6 +61,23 @@ task jettyDraftWar(type: JettyRunWar) {
   dependsOn draftWar
   dependsOn.remove('war')
   webApp=draftWar.archivePath
+}
+
+task copyThemeAssets(type: Copy) {
+    from "$rootDir/vtm-themes/resources/assets"
+    into "assets"
+    include '**/*'
+}
+
+task copyVtmAssets(type: Copy) {
+    from "$rootDir/vtm/resources/assets"
+    into "assets"
+    include '**/*'
+}
+
+tasks.withType(JavaCompile) { compileTask ->
+  compileTask.dependsOn copyThemeAssets
+  compileTask.dependsOn copyVtmAssets
 }
 
 // Configuring Eclipse classpath

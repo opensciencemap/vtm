@@ -20,8 +20,8 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Bitmap;
+import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
-import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.elements.TextureItem.TexturePool;
@@ -164,57 +164,50 @@ public class BitmapLayer extends TextureLayer {
 		//textures = null;
 	}
 
+	static class Shader extends GLShader {
+		int uMVP, uAlpha, aPos, aTexCoord;
+
+		Shader(String shaderFile) {
+			if (!create(shaderFile))
+				return;
+			uMVP = getUniform("u_mvp");
+			uAlpha = getUniform("u_alpha");
+			aPos = getAttrib("vertex");
+			aTexCoord = getAttrib("tex_coord");
+		}
+
+		@Override
+		public boolean useProgram() {
+			if (super.useProgram()) {
+				GLState.enableVertexArrays(aPos, aTexCoord);
+				return true;
+			}
+			return false;
+		}
+	}
+
 	public static final class Renderer {
-
-		private static int mTextureProgram;
-		private static int hTextureMVMatrix;
-		private static int hTextureProjMatrix;
-		private static int hTextureVertex;
-		private static int hTextureScale;
-		private static int hTextureScreenScale;
-		private static int hTextureTexCoord;
-
-		private static int hAlpha;
 
 		public final static int INDICES_PER_SPRITE = 6;
 		final static int VERTICES_PER_SPRITE = 4;
 		final static int SHORTS_PER_VERTICE = 6;
+		static Shader shader;
 
 		static void init() {
-			mTextureProgram = GLUtils.createProgram(textVertexShader,
-			                                        textFragmentShader);
-
-			hTextureMVMatrix = GL.glGetUniformLocation(mTextureProgram, "u_mv");
-			hTextureProjMatrix = GL.glGetUniformLocation(mTextureProgram, "u_proj");
-			hTextureScale = GL.glGetUniformLocation(mTextureProgram, "u_scale");
-			hTextureScreenScale = GL.glGetUniformLocation(mTextureProgram, "u_swidth");
-			hTextureVertex = GL.glGetAttribLocation(mTextureProgram, "vertex");
-			hTextureTexCoord = GL.glGetAttribLocation(mTextureProgram, "tex_coord");
-			hAlpha = GL.glGetUniformLocation(mTextureProgram, "u_alpha");
+			shader = new Shader("texture_alpha");
 		}
 
-		public static RenderElement draw(RenderElement renderElement, GLViewport v, float scale,
-		        float alpha) {
-			//GLState.test(false, false);
+		public static RenderElement draw(RenderElement renderElement, GLViewport v,
+		        float scale, float alpha) {
+
 			GLState.blend(true);
-
-			GLState.useProgram(mTextureProgram);
-
-			GLState.enableVertexArrays(hTextureTexCoord, hTextureVertex);
+			Shader s = shader;
+			s.useProgram();
 
 			TextureLayer tl = (TextureLayer) renderElement;
 
-			if (tl.fixed)
-				GL.glUniform1f(hTextureScale, (float) Math.sqrt(scale));
-			else
-				GL.glUniform1f(hTextureScale, 1);
-
-			GL.glUniform1f(hTextureScreenScale, 1f / v.getWidth());
-			GL.glUniform1f(hAlpha, alpha);
-
-			v.proj.setAsUniform(hTextureProjMatrix);
-
-			v.mvp.setAsUniform(hTextureMVMatrix);
+			GL.glUniform1f(s.uAlpha, alpha);
+			v.mvp.setAsUniform(s.uMVP);
 
 			MapRenderer.bindQuadIndicesVBO(true);
 
@@ -229,10 +222,10 @@ public class BitmapLayer extends TextureLayer {
 					// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
 					int off = (t.offset + i) * 8 + tl.offset;
 
-					GL.glVertexAttribPointer(hTextureVertex, 4,
+					GL.glVertexAttribPointer(s.aPos, 2,
 					                         GL20.GL_SHORT, false, 12, off);
 
-					GL.glVertexAttribPointer(hTextureTexCoord, 2,
+					GL.glVertexAttribPointer(s.aTexCoord, 2,
 					                         GL20.GL_SHORT, false, 12, off + 8);
 
 					int numVertices = t.vertices - i;
@@ -248,26 +241,5 @@ public class BitmapLayer extends TextureLayer {
 
 			return renderElement.next;
 		}
-
-		private final static String textVertexShader = ""
-		        + "precision mediump float; "
-		        + "attribute vec4 vertex;"
-		        + "attribute vec2 tex_coord;"
-		        + "uniform mat4 u_mv;"
-		        + "varying vec2 tex_c;"
-		        + "void main() {"
-		        + "  gl_Position = u_mv * vec4(vertex.xy, 0.0, 1.0);"
-		        + "  tex_c = tex_coord;"
-		        + "}";
-
-		private final static String textFragmentShader = ""
-		        + "precision mediump float;"
-		        + "uniform sampler2D tex;"
-		        + "uniform float u_alpha;"
-		        + "varying vec2 tex_c;"
-		        + "void main() {"
-		        + "   gl_FragColor = texture2D(tex, tex_c.xy) * u_alpha;"
-		        + "}";
 	}
-
 }
