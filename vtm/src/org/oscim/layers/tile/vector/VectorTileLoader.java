@@ -140,9 +140,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	public void setDataSource(ITileDataSource dataSource) {
-		if (mTileDataSource != null)
-			mTileDataSource.destroy();
-
+		cleanup();
 		mTileDataSource = dataSource;
 	}
 

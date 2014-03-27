@@ -266,4 +266,8 @@ public class MapTile extends Tile {
 			data = td;
 		}
 	}
+
+	public static int depthOffset(MapTile t) {
+		return ((t.tileX % 4) + (t.tileY % 4 * 4) + 1);
+	}
 }

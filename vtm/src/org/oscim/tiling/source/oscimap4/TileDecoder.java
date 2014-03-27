@@ -18,7 +18,6 @@ package org.oscim.tiling.source.oscimap4;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -48,10 +47,13 @@ public class TileDecoder extends PbfDecoder {
 	private static final int TAG_TILE_LINE = 21;
 	private static final int TAG_TILE_POLY = 22;
 	private static final int TAG_TILE_POINT = 23;
+	/** since version 5 */
+	private static final int TAG_TILE_MESH = 24;
 
 	private static final int TAG_ELEM_NUM_INDICES = 1;
 	private static final int TAG_ELEM_NUM_TAGS = 2;
-	//private static final int TAG_ELEM_HAS_ELEVATION = 3;
+	/** since version 5 */
+	private static final int TAG_ELEM_NUM_COORDINATES = 3;
 	private static final int TAG_ELEM_TAGS = 11;
 	private static final int TAG_ELEM_INDEX = 12;
 	private static final int TAG_ELEM_COORDS = 13;
@@ -65,6 +67,8 @@ public class TileDecoder extends PbfDecoder {
 
 	private final TagSet mTileTags;
 	private ITileDataSink mMapDataSink;
+
+	private int mVersion;
 
 	// scale coordinates to tile size
 	private final static float REF_TILE_SIZE = 4096.0f;
@@ -86,7 +90,6 @@ public class TileDecoder extends PbfDecoder {
 		mMapDataSink = sink;
 
 		mTileTags.clearAndNullTags();
-		int version = -1;
 
 		int val;
 		int numTags = 0;
@@ -108,6 +111,7 @@ public class TileDecoder extends PbfDecoder {
 				case TAG_TILE_LINE:
 				case TAG_TILE_POLY:
 				case TAG_TILE_POINT:
+				case TAG_TILE_MESH:
 					decodeTileElement(tag);
 					break;
 
@@ -159,8 +163,8 @@ public class TileDecoder extends PbfDecoder {
 					break;
 
 				case TAG_TILE_VERSION:
-					version = decodeVarint32();
-					if (version != 4) {
+					int version = decodeVarint32();
+					if (version < 4 || mVersion > 5) {
 						log.debug("{} invalid version:{}",
 						          mTile, version);
 						return false;
@@ -226,18 +230,19 @@ public class TileDecoder extends PbfDecoder {
 		return true;
 	}
 
-	private int decodeWayIndices(int indexCnt) throws IOException {
+	private int decodeWayIndices(int indexCnt, boolean shift) throws IOException {
 		mElem.ensureIndexSize(indexCnt, false);
 		decodeVarintArray(indexCnt, mElem.index);
 
 		short[] index = mElem.index;
 		int coordCnt = 0;
 
-		for (int i = 0; i < indexCnt; i++) {
-			coordCnt += index[i];
-			index[i] *= 2;
+		if (shift) {
+			for (int i = 0; i < indexCnt; i++) {
+				coordCnt += index[i];
+				index[i] *= 2;
+			}
 		}
-
 		// set end marker
 		if (indexCnt < index.length)
 			index[indexCnt] = -1;
@@ -248,7 +253,6 @@ public class TileDecoder extends PbfDecoder {
 	private boolean decodeTileElement(int type) throws IOException {
 
 		int bytes = decodeVarint32();
-		short[] index = null;
 
 		int end = position() + bytes;
 		int numIndices = 1;
@@ -287,8 +291,17 @@ public class TileDecoder extends PbfDecoder {
 					numTags = decodeVarint32();
 					break;
 
+				case TAG_ELEM_NUM_COORDINATES:
+					coordCnt = decodeVarint32();
+					break;
+
 				case TAG_ELEM_INDEX:
-					coordCnt = decodeWayIndices(numIndices);
+					if (type == TAG_TILE_MESH) {
+						decodeWayIndices(numIndices, false);
+					} else {
+						coordCnt = decodeWayIndices(numIndices, true);
+						// otherwise using TAG_ELEM_NUM_COORDINATES
+					}
 					break;
 
 				case TAG_ELEM_COORDS:
@@ -296,14 +309,27 @@ public class TileDecoder extends PbfDecoder {
 						log.debug("{} no coordinates", mTile);
 					}
 
-					mElem.ensurePointSize(coordCnt, false);
-					int cnt = decodeInterleavedPoints(mElem, mScaleFactor);
+					if (type == TAG_TILE_MESH) {
+						mElem.ensurePointSize((coordCnt * 3 / 2), false);
+						int cnt = decodeInterleavedPoints3D(mElem.points, 1);
 
-					if (cnt != coordCnt) {
-						log.debug("{} wrong number of coordintes {}/{}", mTile,
-						          Integer.valueOf(coordCnt),
-						          Integer.valueOf(cnt));
-						fail = true;
+						if (cnt != (3 * coordCnt)) {
+							log.debug("{} wrong number of coordintes {}/{}", mTile,
+							          Integer.valueOf(coordCnt),
+							          Integer.valueOf(cnt));
+							fail = true;
+						}
+						mElem.pointPos = cnt;
+					} else {
+						mElem.ensurePointSize(coordCnt, false);
+						int cnt = decodeInterleavedPoints(mElem, mScaleFactor);
+
+						if (cnt != coordCnt) {
+							log.debug("{} wrong number of coordintes {}/{}", mTile,
+							          Integer.valueOf(coordCnt),
+							          Integer.valueOf(cnt));
+							fail = true;
+						}
 					}
 					break;
 
@@ -317,9 +343,8 @@ public class TileDecoder extends PbfDecoder {
 		}
 
 		if (fail || numTags == 0 || numIndices == 0) {
-			log.debug("{} failed: bytes:{}  index:{} tags:{} ({},{})",
+			log.debug("{} failed: bytes:{} tags:{} ({},{})",
 			          mTile, Integer.valueOf(bytes),
-			          Arrays.toString(index),
 			          mElem.tags,
 			          Integer.valueOf(numIndices),
 			          Integer.valueOf(coordCnt));
@@ -335,6 +360,9 @@ public class TileDecoder extends PbfDecoder {
 				break;
 			case TAG_TILE_POINT:
 				mElem.type = GeometryType.POINT;
+				break;
+			case TAG_TILE_MESH:
+				mElem.type = GeometryType.TRIS;
 				break;
 		}
 

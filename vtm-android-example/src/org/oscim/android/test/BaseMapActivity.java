@@ -30,7 +30,7 @@ import android.view.MenuItem;
 
 public class BaseMapActivity extends MapActivity {
 
-	private final static boolean USE_CACHE = true;
+	final static boolean USE_CACHE = true;
 
 	MapView mMapView;
 	VectorTileLayer mBaseLayer;
@@ -70,7 +70,7 @@ public class BaseMapActivity extends MapActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 
-		if (USE_CACHE)
+		if (mCache != null)
 			mCache.dispose();
 	}
 
