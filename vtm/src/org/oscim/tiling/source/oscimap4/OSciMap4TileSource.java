@@ -17,7 +17,6 @@
 package org.oscim.tiling.source.oscimap4;
 
 import org.oscim.tiling.ITileDataSource;
-import org.oscim.tiling.source.LwHttp;
 import org.oscim.tiling.source.UrlTileDataSource;
 import org.oscim.tiling.source.UrlTileSource;
 
@@ -34,6 +33,6 @@ public class OSciMap4TileSource extends UrlTileSource {
 
 	@Override
 	public ITileDataSource getDataSource() {
-		return new UrlTileDataSource(this, new TileDecoder(), new LwHttp(getUrl()));
+		return new UrlTileDataSource(this, new TileDecoder(), getHttpEngine());
 	}
 }

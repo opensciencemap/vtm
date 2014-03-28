@@ -5,11 +5,16 @@ configurations { providedCompile }
 
 dependencies {
   compile 'org.slf4j:slf4j-api:1.7.6'
+  compile 'com.squareup.okhttp:okhttp:1.5.2'
   providedCompile 'com.google.code.findbugs:annotations:2.0.1'
+  testCompile 'junit:junit:4.11'
+  testCompile 'org.mockito:mockito-all:1.9.5'
+  testCompile 'org.easytesting:fest-assert-core:2.0M10'
 }
 
 sourceSets {
   main.java.srcDirs = ['src']
+  test.java.srcDirs = ['test']
   main.resources.srcDirs = ['resources']
   main.compileClasspath += configurations.providedCompile
 }

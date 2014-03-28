@@ -32,7 +32,7 @@ public class BitmapTileSource extends UrlTileSource {
 
 	@Override
 	public ITileDataSource getDataSource() {
-		return new UrlTileDataSource(this, new BitmapTileDecoder(), new LwHttp(getUrl()));
+		return new UrlTileDataSource(this, new BitmapTileDecoder(), getHttpEngine());
 	}
 
 	public class BitmapTileDecoder implements ITileDecoder {
