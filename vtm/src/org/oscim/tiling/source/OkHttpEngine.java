@@ -27,6 +27,10 @@ public class OkHttpEngine implements HttpEngine {
 
 	@Override
 	public boolean sendRequest(UrlTileSource tileSource, Tile tile) throws IOException {
+		if (tile == null) {
+			throw new IllegalArgumentException("Tile cannot be null.");
+		}
+
 		final URL requestUrl = new URL(baseUrl.toString()
 				+ "/"
 				+ Byte.toString(tile.zoomLevel)
@@ -65,6 +69,7 @@ public class OkHttpEngine implements HttpEngine {
 
 	@Override
 	public boolean requestCompleted(boolean success) {
-		return true;
+		close();
+		return success;
 	}
 }
