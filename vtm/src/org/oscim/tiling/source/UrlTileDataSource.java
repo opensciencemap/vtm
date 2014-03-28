@@ -38,12 +38,12 @@ import org.slf4j.LoggerFactory;
 public class UrlTileDataSource implements ITileDataSource {
 	static final Logger log = LoggerFactory.getLogger(UrlTileDataSource.class);
 
-	protected final LwHttp mConn;
+	protected final HttpEngine mConn;
 	protected final ITileDecoder mTileDecoder;
 	protected final UrlTileSource mTileSource;
 	protected final boolean mUseCache;
 
-	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
+	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, HttpEngine conn) {
 		mTileDecoder = tileDecoder;
 		mTileSource = tileSource;
 		mUseCache = (tileSource.tileCache != null);

@@ -35,11 +35,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Lightweight HTTP connection for tile loading. Does not do redirects,
  * https, full header parsing or stuff.
- * 
- * TODO extract API interface to be used by UrlTileSource so that one
- * could also use HttpUrlConnection, etc.
  */
-public class LwHttp {
+public class LwHttp implements HttpEngine {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 	static final boolean dbg = false;
 
@@ -331,6 +328,7 @@ public class LwHttp {
 		return is;
 	}
 
+	@Override
 	public boolean sendRequest(UrlTileSource tileSource, Tile tile) throws IOException {
 
 		if (mSocket != null) {
@@ -404,6 +402,7 @@ public class LwHttp {
 		return true;
 	}
 
+	@Override
 	public void close() {
 		if (mSocket == null)
 			return;
@@ -417,6 +416,7 @@ public class LwHttp {
 		mResponseStream = null;
 	}
 
+	@Override
 	public void setCache(OutputStream os) {
 		if (mResponseStream == null)
 			return;
@@ -424,6 +424,7 @@ public class LwHttp {
 		mResponseStream.setCache(os);
 	}
 
+	@Override
 	public boolean requestCompleted(boolean success) {
 		if (mResponseStream == null)
 			return false;

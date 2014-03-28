@@ -26,6 +26,7 @@ public abstract class UrlTileSource extends TileSource {
 
 	private final URL mUrl;
 	private byte[] mExt;
+	private HttpEngine httpEngine;
 
 	public UrlTileSource(String urlString) {
 		URL url = null;
@@ -106,5 +107,17 @@ public abstract class UrlTileSource extends TileSource {
 
 	public URL getUrl() {
 		return mUrl;
+	}
+
+	public void setHttpEngine(HttpEngine httpEngine) {
+		this.httpEngine = httpEngine;
+	}
+
+	public HttpEngine getHttpEngine() {
+		if (httpEngine == null) {
+			httpEngine = new LwHttp(getUrl());
+		}
+
+		return httpEngine;
 	}
 }
