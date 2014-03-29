@@ -21,22 +21,23 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine.OkHttpFactory;
+import org.oscim.tiling.source.bitmap.BitmapTileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import android.os.Bundle;
 
 public class BitmapTileMapActivity extends MapActivity {
 
-	private final static boolean USE_CACHE = true;
-	private final TileSource mTileSource;
+	private final static boolean USE_CACHE = false;
+	private final BitmapTileSource mTileSource;
 	protected BitmapTileLayer mBitmapLayer;
 
 	public BitmapTileMapActivity() {
 		mTileSource = new DefaultSources.OpenStreetMap();
 	}
 
-	public BitmapTileMapActivity(TileSource tileSource) {
+	public BitmapTileMapActivity(BitmapTileSource tileSource) {
 		mTileSource = tileSource;
 	}
 
@@ -61,6 +62,7 @@ public class BitmapTileMapActivity extends MapActivity {
 			mTileSource.setCache(mCache);
 		}
 
+		mTileSource.setHttpEngine(new OkHttpFactory());
 		mBitmapLayer = new BitmapTileLayer(mMap, mTileSource);
 		mMap.layers().add(mBitmapLayer);
 	}

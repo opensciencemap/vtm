@@ -22,7 +22,8 @@ import org.oscim.android.cache.TileCache;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.theme.VtmThemes;
-import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine.OkHttpFactory;
+import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 import android.os.Bundle;
@@ -31,11 +32,11 @@ import android.view.MenuItem;
 
 public class BaseMapActivity extends MapActivity {
 
-	final static boolean USE_CACHE = true;
+	final static boolean USE_CACHE = false;
 
 	MapView mMapView;
 	VectorTileLayer mBaseLayer;
-	TileSource mTileSource;
+	UrlTileSource mTileSource;
 
 	private TileCache mCache;
 
@@ -58,6 +59,7 @@ public class BaseMapActivity extends MapActivity {
 		registerMapView(mMapView);
 
 		mTileSource = new OSciMap4TileSource();
+		mTileSource.setHttpEngine(new OkHttpFactory());
 
 		if (USE_CACHE) {
 			mCache = new TileCache(this, null, "tile.db");
