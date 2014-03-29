@@ -1,4 +1,4 @@
-package org.oscim.jeo.test;
+package org.oscim.test.jeo;
 
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.TileGridLayer;

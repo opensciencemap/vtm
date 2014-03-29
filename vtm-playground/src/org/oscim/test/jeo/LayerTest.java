@@ -1,4 +1,4 @@
-package org.oscim.jeo.test;
+package org.oscim.test.jeo;
 
 import java.io.IOException;
 import java.io.InputStream;
