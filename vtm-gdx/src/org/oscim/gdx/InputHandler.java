@@ -16,10 +16,12 @@ public class InputHandler implements InputProcessor {
 	private ViewController mViewport;
 	private final Map mMap;
 	private GenericLayer mGridLayer;
+	private final GdxMap mGdxApp;
 
-	public InputHandler(Map map) {
-		mViewport = map.viewport();
-		mMap = map;
+	public InputHandler(GdxMap map) {
+		mMap = map.getMap();
+		mViewport = mMap.viewport();
+		mGdxApp = map;
 	}
 
 	private boolean mActiveScale;
@@ -30,8 +32,8 @@ public class InputHandler implements InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		//if (onKeyDown(keycode))
-		//	return true;
+		if (mGdxApp.onKeyDown(keycode))
+			return true;
 
 		switch (keycode) {
 			case Input.Keys.ESCAPE:
