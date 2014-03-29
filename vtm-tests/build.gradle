@@ -1,0 +1,15 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+dependencies {
+  compile project(':vtm')
+  testCompile 'junit:junit:4.11'
+  testCompile 'org.mockito:mockito-all:1.9.5'
+  testCompile 'org.easytesting:fest-assert-core:2.0M10'
+  testCompile 'com.squareup.okhttp:mockwebserver:1.5.2'
+}
+
+sourceSets {
+  main.java.srcDirs = ['src']
+  test.java.srcDirs = ['test']
+}
