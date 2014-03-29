@@ -1,23 +1,35 @@
 package org.oscim.tiling.source;
 
-import com.squareup.okhttp.OkHttpClient;
-
-import org.oscim.core.Tile;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.oscim.core.Tile;
+
+import com.squareup.okhttp.OkHttpClient;
+
 public class OkHttpEngine implements HttpEngine {
-	private final URL baseUrl;
 	private final OkHttpClient client;
+
+	public static class OkHttpFactory implements HttpEngine.Factory {
+		private final OkHttpClient client;
+
+		public OkHttpFactory() {
+			this.client = new OkHttpClient();
+		}
+
+		@Override
+		public HttpEngine create() {
+			return new OkHttpEngine(client);
+		}
+	}
+
 	private InputStream inputStream;
 
-	public OkHttpEngine(URL baseUrl) {
-		this.baseUrl = baseUrl;
-		this.client = new OkHttpClient();
+	public OkHttpEngine(OkHttpClient client) {
+		this.client = client;
 	}
 
 	@Override
@@ -31,14 +43,14 @@ public class OkHttpEngine implements HttpEngine {
 			throw new IllegalArgumentException("Tile cannot be null.");
 		}
 
-		final URL requestUrl = new URL(baseUrl.toString()
-				+ "/"
-				+ Byte.toString(tile.zoomLevel)
-				+ "/"
-				+ tile.tileX
-				+ "/"
-				+ tile.tileY
-				+ ".vtm");
+		final URL requestUrl = new URL(tileSource.getUrl()
+		        + "/"
+		        + Byte.toString(tile.zoomLevel)
+		        + "/"
+		        + tile.tileX
+		        + "/"
+		        + tile.tileY
+		        + ".vtm");
 
 		final HttpURLConnection connection = client.open(requestUrl);
 

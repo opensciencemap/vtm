@@ -1,19 +1,24 @@
 package org.oscim.tiling.source;
 
-import org.oscim.core.Tile;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.oscim.core.Tile;
+
 public interface HttpEngine {
-    InputStream read() throws IOException;
 
-    boolean sendRequest(UrlTileSource tileSource, Tile tile) throws IOException;
+	InputStream read() throws IOException;
 
-    void close();
+	boolean sendRequest(UrlTileSource tileSource, Tile tile) throws IOException;
 
-    void setCache(OutputStream os);
+	void close();
 
-    boolean requestCompleted(boolean success);
+	void setCache(OutputStream os);
+
+	boolean requestCompleted(boolean success);
+
+	public interface Factory {
+		public HttpEngine create();
+	}
 }

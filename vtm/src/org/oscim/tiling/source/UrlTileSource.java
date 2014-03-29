@@ -26,7 +26,7 @@ public abstract class UrlTileSource extends TileSource {
 
 	private final URL mUrl;
 	private byte[] mExt;
-	private HttpEngine httpEngine;
+	private HttpEngine.Factory mHttpFactory;
 
 	public UrlTileSource(String urlString) {
 		URL url = null;
@@ -109,15 +109,15 @@ public abstract class UrlTileSource extends TileSource {
 		return mUrl;
 	}
 
-	public void setHttpEngine(HttpEngine httpEngine) {
-		this.httpEngine = httpEngine;
+	public void setHttpEngine(HttpEngine.Factory httpFactory) {
+		mHttpFactory = httpFactory;
 	}
 
 	public HttpEngine getHttpEngine() {
-		if (httpEngine == null) {
-			httpEngine = new LwHttp(getUrl());
+		if (mHttpFactory == null) {
+			return new LwHttp(getUrl());
 		}
 
-		return httpEngine;
+		return mHttpFactory.create();
 	}
 }
