@@ -1,4 +1,4 @@
-package org.oscim.jeo.android;
+package org.oscim.android.test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,15 +8,11 @@ import java.util.Arrays;
 
 import org.jeo.data.VectorDataset;
 import org.jeo.map.Style;
-import org.oscim.android.MapActivity;
 import org.oscim.layers.OSMIndoorLayer;
 import org.oscim.layers.tile.vector.BuildingLayer;
-import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.test.JeoTest;
 import org.oscim.theme.VtmThemes;
-import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +23,8 @@ import android.view.View;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-public class TestActivity extends MapActivity {
-	public static final Logger log = LoggerFactory.getLogger(TestActivity.class);
+public class JeoIndoorMapActivity extends BaseMapActivity {
+	public static final Logger log = LoggerFactory.getLogger(JeoIndoorMapActivity.class);
 
 	// from http://overpass-turbo.eu/s/2vp
 	String PATH = "https://gist.github.com/anonymous/8960337/raw/overpass.geojson";
@@ -36,12 +32,13 @@ public class TestActivity extends MapActivity {
 
 	private OSMIndoorLayer mIndoorLayer;
 
+	public JeoIndoorMapActivity() {
+		super(R.layout.jeo_indoor_map);
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_map);
-
-		MapRenderer.setBackgroundColor(0xff909090);
 
 		mMap.addTask(new Runnable() {
 			@Override
@@ -49,9 +46,9 @@ public class TestActivity extends MapActivity {
 				showToast("load data");
 				InputStream is = null;
 				try {
-					//File file = new File(Environment.getExternalStorageDirectory()
-					//    .getAbsolutePath(), "osmindoor.json");
-					//is = new FileInputStream(file);
+					//	File file = new File(Environment.getExternalStorageDirectory()
+					//	    .getAbsolutePath(), "osmindoor.json");
+					//	is = new FileInputStream(file);
 
 					URL url = new URL(PATH);
 					URLConnection conn = url.openConnection();
@@ -65,10 +62,9 @@ public class TestActivity extends MapActivity {
 			}
 		});
 
-		VectorTileLayer baseLayer = mMap.setBaseMap(new OSciMap4TileSource());
-		mMap.layers().add(new BuildingLayer(mMap, baseLayer));
-		mMap.layers().add(new LabelLayer(mMap, baseLayer));
-		mMap.setTheme(VtmThemes.NEWTRON);
+		mMap.layers().add(new BuildingLayer(mMap, mBaseLayer));
+		mMap.layers().add(new LabelLayer(mMap, mBaseLayer));
+		mMap.setTheme(VtmThemes.TRONRENDER);
 
 		//mMap.setMapPosition(49.417, 8.673, 1 << 17);
 		mMap.setMapPosition(53.5620092, 9.9866457, 1 << 16);

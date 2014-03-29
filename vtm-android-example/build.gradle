@@ -10,9 +10,8 @@ buildscript {
 apply plugin: 'android'
 
 dependencies {
-  //compile 'org.oscim:vtm-android:0.5.9-SNAPSHOT'
-  //compile 'org.oscim:vtm-themes:0.5.9-SNAPSHOT'
   compile project(':vtm-android')
+  compile project(':vtm-jeo')
   compile project(':vtm-themes')
 }
 
@@ -31,6 +30,9 @@ android {
 
     debug.setRoot('build-types/debug')
     release.setRoot('build-types/release')
+  }
+   packagingOptions {
+            exclude 'META-INF/services/org.jeo.data.Driver'
   }
 }
 

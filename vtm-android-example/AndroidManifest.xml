@@ -62,6 +62,11 @@
       android:name="org.oscim.android.test.ThemeStylerActivity"
       android:label="@string/title_activity_map" >
     </activity>
+
+    <activity
+      android:name="org.oscim.android.test.JeoIndoorMapActivity"
+      android:label="@string/title_activity_map" >
+    </activity>
   </application>
 
 </manifest>
