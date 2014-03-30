@@ -20,11 +20,11 @@ function createLayers() {
 	// map.addLayer(new vtm.BuildingLayer(m, l))
 	// map.addLayer(new vtm.LabelLayer(m, l))
 
-	// t = map.loadTheme("TRONRENDER")
-	// ts = new vtm.OsmLanduseJsonTileSource()
-	// l = new vtm.VectorTileLayer(m, ts)
-	// l.setRenderTheme(t)
-	// map.addLayer(l)
+	 t = map.loadTheme("TRONRENDER")
+	 ts = new vtm.OsmLanduseJsonTileSource()
+	 l = new vtm.VectorTileLayer(m, ts)
+	 l.setRenderTheme(t)
+	 map.addLayer(l)
 }
 
 function canvasResize() {

@@ -37,7 +37,6 @@ dependencies {
 evaluationDependsOn(':vtm')
 evaluationDependsOn(':vtm-themes')
 evaluationDependsOn(':vtm-gdx')
-//evaluationDependsOn(':vtm-extras')
 evaluationDependsOn(':vtm-web')
 
 gwt {
@@ -58,7 +57,6 @@ gwt {
   src += files(project(':vtm-themes').sourceSets.main.allJava.srcDirs)
   src += files(project(':vtm-themes').sourceSets.main.resources.srcDirs)
   src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs)
-  //src += files(project(':vtm-extras').sourceSets.main.allJava.srcDirs)
   src += files(project(':vtm-web').sourceSets.main.allJava.srcDirs)
 }
 
