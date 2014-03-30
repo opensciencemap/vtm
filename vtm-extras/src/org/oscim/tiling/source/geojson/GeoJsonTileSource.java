@@ -33,6 +33,11 @@ public abstract class GeoJsonTileSource extends UrlTileSource {
 		setExtension(".json");
 	}
 
+	public GeoJsonTileSource(String url, int zoomMin, int zoomMax) {
+		super(url, zoomMin, zoomMax);
+		setExtension(".json");
+	}
+
 	@Override
 	public ITileDataSource getDataSource() {
 		Map<String, String> opt = new HashMap<String, String>();
