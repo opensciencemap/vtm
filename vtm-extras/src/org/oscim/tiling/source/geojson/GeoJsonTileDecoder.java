@@ -72,7 +72,7 @@ public class GeoJsonTileDecoder implements ITileDecoder {
 
 	private double mTileY, mTileX, mTileScale;
 
-	GeoJsonTileDecoder(GeoJsonTileSource tileSource) {
+	public GeoJsonTileDecoder(GeoJsonTileSource tileSource) {
 		mTileSource = tileSource;
 		mTagMap = new LinkedHashMap<String, Object>();
 		mJsonFactory = new JsonFactory();

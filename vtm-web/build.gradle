@@ -25,6 +25,7 @@ sourceSets {
 
 dependencies {
   compile project(':vtm-gdx')
+  compile project(':vtm-extras')
   compile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
   compile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
   compile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
@@ -36,6 +37,7 @@ dependencies {
 evaluationDependsOn(':vtm')
 evaluationDependsOn(':vtm-themes')
 evaluationDependsOn(':vtm-gdx')
+evaluationDependsOn(':vtm-extras')
 
 gwt {
   gwtVersion='2.6.0'
