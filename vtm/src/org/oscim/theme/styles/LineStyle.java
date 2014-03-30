@@ -95,7 +95,7 @@ public final class LineStyle extends RenderStyle {
 
 	@Override
 	public LineStyle current() {
-		return (LineStyle) (mCurrent == null ? this : mCurrent);
+		return (LineStyle) mCurrent;
 	}
 
 	public final static class LineBuilder {

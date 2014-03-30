@@ -193,7 +193,7 @@ public final class TextStyle extends RenderStyle {
 
 	@Override
 	public TextStyle current() {
-		return (TextStyle) (mCurrent == null ? this : mCurrent);
+		return (TextStyle) mCurrent;
 	}
 
 	@Override

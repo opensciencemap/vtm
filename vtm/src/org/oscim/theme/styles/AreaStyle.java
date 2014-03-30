@@ -93,7 +93,7 @@ public class AreaStyle extends RenderStyle {
 
 	@Override
 	public AreaStyle current() {
-		return (AreaStyle) (mCurrent == null ? this : mCurrent);
+		return (AreaStyle) mCurrent;
 	}
 
 	@Override

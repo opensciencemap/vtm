@@ -24,7 +24,7 @@ import org.oscim.theme.IRenderTheme.Callback;
  */
 public abstract class RenderStyle {
 
-	RenderStyle mCurrent;
+	RenderStyle mCurrent = this;
 	RenderStyle mNext;
 	boolean update;
 

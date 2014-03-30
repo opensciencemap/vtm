@@ -54,6 +54,6 @@ public final class CircleStyle extends RenderStyle {
 
 	@Override
 	public CircleStyle current() {
-		return (CircleStyle) (mCurrent == null ? this : mCurrent);
+		return (CircleStyle) mCurrent;
 	}
 }
