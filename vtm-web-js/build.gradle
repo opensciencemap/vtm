@@ -24,6 +24,7 @@ sourceSets {
 
 dependencies {
   providedCompile project(':vtm-web')
+  providedCompile project(':vtm-extras')
   providedCompile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
   providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
   providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"

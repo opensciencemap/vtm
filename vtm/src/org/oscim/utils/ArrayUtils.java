@@ -61,4 +61,81 @@ public class ArrayUtils {
 			right--;
 		}
 	}
+
+	public static double parseNumber(char[] str, int pos, int end) {
+
+		boolean neg = false;
+		if (str[pos] == '-') {
+			neg = true;
+			pos++;
+		}
+
+		double val = 0;
+		int pre = 0;
+		char c = 0;
+
+		for (; pos < end; pos++, pre++) {
+			c = str[pos];
+			if (c < '0' || c > '9') {
+				if (pre == 0)
+					throw new NumberFormatException("s " + c);
+
+				break;
+			}
+			val = val * 10 + (int) (c - '0');
+		}
+
+		if (pre == 0)
+			throw new NumberFormatException();
+
+		if (c == '.') {
+			float div = 10;
+			for (pos++; pos < end; pos++) {
+				c = str[pos];
+				if (c < '0' || c > '9')
+					break;
+				val = val + ((int) (c - '0')) / div;
+				div *= 10;
+			}
+		}
+
+		if (c == 'e' || c == 'E') {
+			// advance 'e'
+			pos++;
+
+			// check direction
+			int dir = 1;
+			if (str[pos] == '-') {
+				dir = -1;
+				pos++;
+			}
+			// skip leading zeros
+			for (; pos < end; pos++)
+				if (str[pos] != '0')
+					break;
+
+			int shift = 0;
+			for (pre = 0; pos < end; pos++, pre++) {
+				c = str[pos];
+				if (c < '0' || c > '9') {
+					// nothing after 'e'
+					if (pre == 0)
+						throw new NumberFormatException("e " + c);
+					break;
+				}
+				shift = shift * 10 + (int) (c - '0');
+			}
+
+			// guess it's ok for sane values of E
+			if (dir > 0) {
+				while (shift-- > 0)
+					val *= 10;
+			} else {
+				while (shift-- > 0)
+					val /= 10;
+			}
+		}
+
+		return neg ? -val : val;
+	}
 }

@@ -13,12 +13,15 @@ import org.oscim.map.Map;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.geojson.HighroadJsonTileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.timepedia.exporter.client.Export;
 import org.timepedia.exporter.client.ExportOverlay;
 import org.timepedia.exporter.client.ExportPackage;
+import org.timepedia.exporter.client.Exportable;
 
-public final class JsOverlays {
+@ExportPackage("")
+public class JsOverlays implements Exportable {
 	@ExportPackage("vtm")
 	@Export("Layers")
 	public interface XLayers extends ExportOverlay<Layers> {
@@ -67,20 +70,6 @@ public final class JsOverlays {
 	}
 
 	@ExportPackage("vtm")
-	@Export("VectorTileLayer")
-	public static class XVectorTileLayer implements ExportOverlay<VectorTileLayer> {
-		public XVectorTileLayer(Map map, TileSource tileSource) {
-		}
-
-		public boolean setTileSource(TileSource tileSource) {
-			return false;
-		}
-
-		public void setRenderTheme(IRenderTheme theme) {
-		}
-	}
-
-	@ExportPackage("vtm")
 	@Export("OsmTileLayer")
 	public static class XOsmTileLayer implements ExportOverlay<OsmTileLayer> {
 		public XOsmTileLayer(Map map) {
@@ -94,21 +83,13 @@ public final class JsOverlays {
 		}
 	}
 
-	//	@ExportPackage("vtm")
-	//	@Export("OsmLanduseJsonTileSource")
-	//	public static class XOsmLanduseJsonTileSource implements
-	//	        ExportOverlay<OsmLanduseJsonTileSource> {
-	//		public XOsmLanduseJsonTileSource() {
-	//		}
-	//	}
-	//
-	//	@ExportPackage("vtm")
-	//	@Export("HighroadJsonTileSource")
-	//	public static class XHighroadJsonTileSource implements
-	//	        ExportOverlay<HighroadJsonTileSource> {
-	//		public XHighroadJsonTileSource() {
-	//		}
-	//	}
+	@ExportPackage("vtm")
+	@Export("HighroadJsonTileSource")
+	public static class XHighroadJsonTileSource implements
+	        ExportOverlay<HighroadJsonTileSource> {
+		public XHighroadJsonTileSource() {
+		}
+	}
 
 	@ExportPackage("vtm")
 	@Export("OSciMap4TileSource")
