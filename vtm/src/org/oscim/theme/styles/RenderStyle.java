@@ -24,6 +24,12 @@ import org.oscim.theme.IRenderTheme.Callback;
  */
 public abstract class RenderStyle {
 
+	public interface StyleBuilder {
+		RenderStyle build();
+
+		StyleBuilder level(int level);
+	}
+
 	RenderStyle mCurrent = this;
 	RenderStyle mNext;
 	boolean update;

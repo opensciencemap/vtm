@@ -27,7 +27,7 @@ import org.oscim.theme.IRenderTheme.Callback;
 
 public final class TextStyle extends RenderStyle {
 
-	public static class TextBuilder {
+	public static class TextBuilder implements StyleBuilder {
 
 		public String style;
 		public float fontSize;
@@ -132,6 +132,11 @@ public final class TextStyle extends RenderStyle {
 
 		public TextBuilder setStrokeWidth(float strokeWidth) {
 			this.strokeWidth = strokeWidth;
+			return this;
+		}
+
+		@Override
+		public TextBuilder level(int level) {
 			return this;
 		}
 	}
