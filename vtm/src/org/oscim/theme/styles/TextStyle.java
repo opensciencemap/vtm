@@ -27,7 +27,7 @@ import org.oscim.theme.IRenderTheme.Callback;
 
 public final class TextStyle extends RenderStyle {
 
-	public static class TextBuilder {
+	public static class TextBuilder implements StyleBuilder {
 
 		public String style;
 		public float fontSize;
@@ -134,6 +134,11 @@ public final class TextStyle extends RenderStyle {
 			this.strokeWidth = strokeWidth;
 			return this;
 		}
+
+		@Override
+		public TextBuilder level(int level) {
+			return this;
+		}
 	}
 
 	TextStyle(TextBuilder tb) {
@@ -193,7 +198,7 @@ public final class TextStyle extends RenderStyle {
 
 	@Override
 	public TextStyle current() {
-		return (TextStyle) (mCurrent == null ? this : mCurrent);
+		return (TextStyle) mCurrent;
 	}
 
 	@Override

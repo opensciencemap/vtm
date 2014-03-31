@@ -93,7 +93,7 @@ public class AreaStyle extends RenderStyle {
 
 	@Override
 	public AreaStyle current() {
-		return (AreaStyle) (mCurrent == null ? this : mCurrent);
+		return (AreaStyle) mCurrent;
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class AreaStyle extends RenderStyle {
 			renderCallback.renderWay(outline, level + 1);
 	}
 
-	public static class AreaBuilder {
+	public static class AreaBuilder implements StyleBuilder {
 		public int level;
 		public String style;
 		public LineStyle outline;

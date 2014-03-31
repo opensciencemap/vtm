@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
-import org.oscim.theme.rule.Element;
 import org.oscim.theme.rule.Rule;
+import org.oscim.theme.rule.Rule.Element;
 import org.oscim.theme.rule.Rule.RuleVisitor;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.LRUCache;

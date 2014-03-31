@@ -95,10 +95,10 @@ public final class LineStyle extends RenderStyle {
 
 	@Override
 	public LineStyle current() {
-		return (LineStyle) (mCurrent == null ? this : mCurrent);
+		return (LineStyle) mCurrent;
 	}
 
-	public final static class LineBuilder {
+	public final static class LineBuilder implements StyleBuilder {
 		public int level;
 
 		public String style;
@@ -202,6 +202,11 @@ public final class LineStyle extends RenderStyle {
 
 		public LineStyle build() {
 			return new LineStyle(this);
+		}
+
+		public LineBuilder cap(Cap cap) {
+			this.cap = cap;
+			return this;
 		}
 	}
 }

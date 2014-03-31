@@ -47,6 +47,6 @@ public final class SymbolStyle extends RenderStyle {
 
 	@Override
 	public SymbolStyle current() {
-		return (SymbolStyle) (mCurrent == null ? this : mCurrent);
+		return (SymbolStyle) mCurrent;
 	}
 }

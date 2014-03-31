@@ -63,7 +63,7 @@ public class ExtrusionStyle extends RenderStyle {
 
 	@Override
 	public ExtrusionStyle current() {
-		return (ExtrusionStyle) (mCurrent == null ? this : mCurrent);
+		return (ExtrusionStyle) mCurrent;
 	}
 
 	private final int level;

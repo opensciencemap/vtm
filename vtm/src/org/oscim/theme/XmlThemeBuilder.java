@@ -40,6 +40,8 @@ import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule;
+import org.oscim.theme.rule.Rule.Closed;
+import org.oscim.theme.rule.Rule.Selector;
 import org.oscim.theme.rule.RuleBuilder;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.AreaStyle.AreaBuilder;
@@ -153,7 +155,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 		Rule[] rules = new Rule[mRulesList.size()];
 		for (int i = 0, n = rules.length; i < n; i++)
-			rules[i] = mRulesList.get(i).onComplete();
+			rules[i] = mRulesList.get(i).onComplete(null);
 
 		mRenderTheme = new RenderTheme(mMapBackground, mBaseTextSize, rules, mLevels);
 
@@ -199,7 +201,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 			} else if (ELEMENT_NAME_MATCH.equals(localName)) {
 				checkState(localName, Element.RULE);
-				RuleBuilder rule = RuleBuilder.create(localName, attributes, mRuleStack);
+				RuleBuilder rule = createRule(localName, attributes, mRuleStack);
 				if (!mRuleStack.empty()) {
 					mCurrentRule.addSubRule(rule);
 				}
@@ -290,6 +292,67 @@ public class XmlThemeBuilder extends DefaultHandler {
 		} catch (IOException e) {
 			throw new ThemeException(e.getMessage());
 		}
+	}
+
+	private RuleBuilder createRule(String localName, Attributes attributes,
+	        Stack<RuleBuilder> ruleStack) {
+		int element = Rule.Element.ANY;
+		int closed = Closed.ANY;
+		String keys = null;
+		String values = null;
+		byte zoomMin = 0;
+		byte zoomMax = Byte.MAX_VALUE;
+		int selector = 0;
+
+		for (int i = 0; i < attributes.getLength(); ++i) {
+			String name = attributes.getLocalName(i);
+			String value = attributes.getValue(i);
+
+			if ("e".equals(name)) {
+				String val = value.toUpperCase();
+				if ("WAY".equals(val))
+					element = Rule.Element.WAY;
+				else if ("NODE".equals(val))
+					element = Rule.Element.NODE;
+			} else if ("k".equals(name)) {
+				keys = value;
+			} else if ("v".equals(name)) {
+				values = value;
+			} else if ("closed".equals(name)) {
+				String val = value.toUpperCase();
+				if ("YES".equals(val))
+					closed = Closed.YES;
+				else if ("NO".equals(val))
+					closed = Closed.NO;
+			} else if ("zoom-min".equals(name)) {
+				zoomMin = Byte.parseByte(value);
+			} else if ("zoom-max".equals(name)) {
+				zoomMax = Byte.parseByte(value);
+			} else if ("select".equals(name)) {
+				if ("first".equals(value))
+					selector |= Selector.FIRST;
+				if ("when-matched".equals(value))
+					selector |= Selector.WHEN_MATCHED;
+			} else {
+				XmlThemeBuilder.logUnknownAttribute(localName, name, value, i);
+			}
+		}
+
+		if (closed == Closed.YES)
+			element = Rule.Element.POLY;
+		else if (closed == Closed.NO)
+			element = Rule.Element.LINE;
+
+		XmlThemeBuilder.validateNonNegative("zoom-min", zoomMin);
+		XmlThemeBuilder.validateNonNegative("zoom-max", zoomMax);
+		if (zoomMin > zoomMax)
+			throw new ThemeException("zoom-min must be less or equal zoom-max: " + zoomMin);
+
+		RuleBuilder b = RuleBuilder.create(keys, values);
+		b.setZoom(zoomMin, zoomMax);
+		b.element(element);
+		b.select(selector);
+		return b;
 	}
 
 	private TextureRegion getAtlasRegion(String src) {
