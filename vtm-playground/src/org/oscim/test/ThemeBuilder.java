@@ -68,7 +68,7 @@ public class ThemeBuilder {
 
 	public RuleBuilder pushParse(String keys, String values) {
 
-		return RuleBuilder.create(mRuleStack, keys, values)
+		return RuleBuilder.create(keys, values)
 		    .zoom(~0)
 		    .element(Element.ANY);
 	}

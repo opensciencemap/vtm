@@ -1,7 +1,6 @@
 package org.oscim.theme.rule;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule.Element;
@@ -70,7 +69,7 @@ public class RuleBuilder {
 		this.values = EMPTY_KV;
 	}
 
-	public static RuleBuilder create(Stack<RuleBuilder> ruleStack, String keys, String values) {
+	public static RuleBuilder create(String keys, String values) {
 
 		String[] keyList = EMPTY_KV;
 		String[] valueList = EMPTY_KV;
@@ -151,15 +150,13 @@ public class RuleBuilder {
 			return new NegativeRule(type, element, zoom, selector,
 			                        keys, values, rules, styles);
 
-		if (numKeys == 1 && numKeys == 0) {
+		if (numKeys == 1 && numKeys == 0)
 			return new PositiveRuleK(element, zoom, selector, keys[0],
 			                         rules, styles);
-		}
 
-		if (numKeys == 0 && numVals == 1) {
+		if (numKeys == 0 && numVals == 1)
 			return new PositiveRuleV(element, zoom, selector, values[0],
 			                         rules, styles);
-		}
 
 		if (numKeys == 1 && numVals == 1)
 			return new PositiveRuleKV(element, zoom, selector,
