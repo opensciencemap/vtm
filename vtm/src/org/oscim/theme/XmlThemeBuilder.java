@@ -155,7 +155,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 		Rule[] rules = new Rule[mRulesList.size()];
 		for (int i = 0, n = rules.length; i < n; i++)
-			rules[i] = mRulesList.get(i).onComplete();
+			rules[i] = mRulesList.get(i).onComplete(null);
 
 		mRenderTheme = new RenderTheme(mMapBackground, mBaseTextSize, rules, mLevels);
 

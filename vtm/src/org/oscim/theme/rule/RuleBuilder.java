@@ -36,6 +36,7 @@ public class RuleBuilder {
 
 	ArrayList<RenderStyle> renderStyles = new ArrayList<RenderStyle>(4);
 	ArrayList<RuleBuilder> subRules = new ArrayList<RuleBuilder>(4);
+	StyleBuilder[] styleBuilder;
 
 	private static final String STRING_NEGATION = "~";
 	private static final String STRING_EXCLUSIVE = "-";
@@ -112,10 +113,16 @@ public class RuleBuilder {
 		return this;
 	}
 
-	public Rule onComplete() {
+	public Rule onComplete(int[] level) {
 
 		RenderStyle[] styles = null;
 		Rule[] rules = null;
+
+		if (styleBuilder != null)
+			for (StyleBuilder style : styleBuilder) {
+				renderStyles.add(style.level(level[0]).build());
+				level[0] += 2;
+			}
 
 		if (renderStyles.size() > 0) {
 			styles = new RenderStyle[renderStyles.size()];
@@ -125,7 +132,7 @@ public class RuleBuilder {
 		if (subRules.size() > 0) {
 			rules = new Rule[subRules.size()];
 			for (int i = 0; i < rules.length; i++)
-				rules[i] = subRules.get(i).onComplete();
+				rules[i] = subRules.get(i).onComplete(level);
 		}
 
 		int numKeys = keys.length;
@@ -163,22 +170,25 @@ public class RuleBuilder {
 
 	}
 
-	public void addStyle(RenderStyle style) {
+	public RuleBuilder addStyle(RenderStyle style) {
 		renderStyles.add(style);
+		return this;
 	}
 
-	public void addSubRule(RuleBuilder rule) {
+	public RuleBuilder addSubRule(RuleBuilder rule) {
 		subRules.add(rule);
+		return this;
 	}
 
-	RuleBuilder(boolean positive) {
-		this.positiveRule = positive;
-		this.element = Element.ANY;
-		this.zoom = ~0;
+	public RuleBuilder style(StyleBuilder... styles) {
+		styleBuilder = styles;
+		return this;
 	}
 
-	public static RuleBuilder get() {
-		return new RuleBuilder(true);
+	public RuleBuilder rules(RuleBuilder... rules) {
+		for (RuleBuilder rule : rules)
+			subRules.add(rule);
+		return this;
 	}
 
 	public RuleBuilder select(int selector) {
