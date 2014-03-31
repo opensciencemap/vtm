@@ -5,7 +5,15 @@ import java.util.Stack;
 
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.XmlThemeBuilder;
+import org.oscim.theme.rule.Rule.Closed;
+import org.oscim.theme.rule.Rule.Element;
+import org.oscim.theme.rule.Rule.NegativeRule;
+import org.oscim.theme.rule.Rule.PositiveRuleK;
+import org.oscim.theme.rule.Rule.PositiveRuleKV;
+import org.oscim.theme.rule.Rule.PositiveRuleMultiKV;
+import org.oscim.theme.rule.Rule.PositiveRuleV;
 import org.oscim.theme.styles.RenderStyle;
+import org.oscim.theme.styles.RenderStyle.StyleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -93,9 +101,8 @@ public class RuleBuilder {
 		}
 
 		if (type != RuleType.POSITIVE) {
-			if (keyList == null || keyList.length == 0) {
+			if (keyList == null || keyList.length == 0)
 				throw new ThemeException("negative rule requires key");
-			}
 		}
 
 		return new RuleBuilder(type, keyList, valueList);
@@ -191,12 +198,39 @@ public class RuleBuilder {
 				rules[i] = subRules.get(i).onComplete();
 		}
 
+		int numKeys = keys.length;
+		int numVals = values.length;
+
+		if (numKeys == 0 && numVals == 0)
+			return new Rule(element, zoom, selector, rules, styles);
+
+		for (int i = 0; i < numVals; i++)
+			values[i] = values[i].intern();
+
+		for (int i = 0; i < numKeys; i++)
+			keys[i] = keys[i].intern();
+
 		if (type != RuleType.POSITIVE)
 			return new NegativeRule(type, element, zoom, selector,
 			                        keys, values, rules, styles);
-		else
-			return PositiveRule.create(element, zoom, selector,
-			                           keys, values, rules, styles);
+
+		if (numKeys == 1 && numKeys == 0) {
+			return new PositiveRuleK(element, zoom, selector, keys[0],
+			                         rules, styles);
+		}
+
+		if (numKeys == 0 && numVals == 1) {
+			return new PositiveRuleV(element, zoom, selector, values[0],
+			                         rules, styles);
+		}
+
+		if (numKeys == 1 && numVals == 1)
+			return new PositiveRuleKV(element, zoom, selector,
+			                          keys[0], values[0], rules, styles);
+
+		return new PositiveRuleMultiKV(element, zoom, selector,
+		                               keys, values, rules, styles);
+
 	}
 
 	public void addStyle(RenderStyle style) {
