@@ -1,5 +1,4 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -20,28 +19,149 @@ package org.oscim.theme.rule;
 import org.oscim.core.Tag;
 import org.oscim.theme.styles.RenderStyle;
 
-class PositiveRule extends Rule {
-	final AttributeMatcher mKeyMatcher;
-	final AttributeMatcher mValueMatcher;
+class PositiveRule {
 
-	PositiveRule(int element, int zoom, int selector, AttributeMatcher keyMatcher,
-	        AttributeMatcher valueMatcher, Rule[] subRules, RenderStyle[] styles) {
-		super(element, zoom, selector, subRules, styles);
+	static class PositiveRuleK extends Rule {
+		private final String mKey;
 
-		if (keyMatcher instanceof AnyMatcher)
-			mKeyMatcher = null;
-		else
-			mKeyMatcher = keyMatcher;
+		PositiveRuleK(int element, int zoom, int selector, String key,
+		        Rule[] subRules, RenderStyle[] styles) {
 
-		if (valueMatcher instanceof AnyMatcher)
-			mValueMatcher = null;
-		else
-			mValueMatcher = valueMatcher;
+			super(element, zoom, selector, subRules, styles);
+			mKey = key;
+		}
+
+		@Override
+		boolean matchesTags(Tag[] tags) {
+			for (Tag tag : tags)
+				if (mKey == tag.key)
+					return true;
+
+			return false;
+		}
 	}
 
-	@Override
-	boolean matchesTags(Tag[] tags) {
-		return (mKeyMatcher == null || mKeyMatcher.matches(tags))
-		        && (mValueMatcher == null || mValueMatcher.matches(tags));
+	static class PositiveRuleV extends Rule {
+		private final String mValue;
+
+		PositiveRuleV(int element, int zoom, int selector, String value,
+		        Rule[] subRules, RenderStyle[] styles) {
+
+			super(element, zoom, selector, subRules, styles);
+			mValue = value;
+		}
+
+		@Override
+		boolean matchesTags(Tag[] tags) {
+			for (Tag tag : tags)
+				if (mValue == tag.value)
+					return true;
+
+			return false;
+		}
+	}
+
+	static class PositiveRuleKV extends Rule {
+		private final String mKey;
+		private final String mValue;
+
+		PositiveRuleKV(int element, int zoom, int selector, String key, String value,
+		        Rule[] subRules, RenderStyle[] styles) {
+
+			super(element, zoom, selector, subRules, styles);
+			mKey = key;
+			mValue = value;
+		}
+
+		@Override
+		boolean matchesTags(Tag[] tags) {
+			for (Tag tag : tags)
+				if (mKey == tag.key)
+					return (mValue == tag.value);
+
+			return false;
+		}
+	}
+
+	static class PositiveRuleMultiKV extends Rule {
+		private final String mKeys[];
+		private final String mValues[];
+
+		PositiveRuleMultiKV(int element, int zoom, int selector, String keys[], String values[],
+		        Rule[] subRules, RenderStyle[] styles) {
+
+			super(element, zoom, selector, subRules, styles);
+			if (keys.length == 0) {
+				mKeys = null;
+			} else {
+				for (int i = 0; i < keys.length; i++)
+					keys[i] = keys[i].intern();
+				mKeys = keys;
+			}
+
+			if (values.length == 0) {
+				mValues = null;
+			} else {
+				for (int i = 0; i < values.length; i++)
+					values[i] = values[i].intern();
+				mValues = values;
+			}
+		}
+
+		@Override
+		boolean matchesTags(Tag[] tags) {
+			if (mKeys == null) {
+				for (Tag tag : tags) {
+					for (String value : mValues) {
+						if (value == tag.value)
+							return true;
+					}
+				}
+				return false;
+			}
+
+			for (Tag tag : tags)
+				for (String key : mKeys) {
+					if (key == tag.key) {
+						if (mValues == null)
+							return true;
+
+						for (String value : mValues) {
+							if (value == tag.value)
+								return true;
+						}
+					}
+				}
+			return false;
+		}
+	}
+
+	public static Rule create(int element, int zoom, int selector,
+	        String[] keys, String values[], Rule[] subRules, RenderStyle[] styles) {
+		int numKeys = keys.length;
+		int numVals = values.length;
+
+		if (numKeys == 0 && numVals == 0)
+			return new Rule(element, zoom, selector, subRules, styles);
+
+		for (int i = 0; i < numVals; i++)
+			values[i] = values[i].intern();
+
+		for (int i = 0; i < numKeys; i++)
+			keys[i] = keys[i].intern();
+
+		if (numKeys == 1 && numKeys == 0) {
+			return new PositiveRuleK(element, zoom, selector, keys[0], subRules, styles);
+		}
+
+		if (numKeys == 0 && numVals == 1) {
+			return new PositiveRuleV(element, zoom, selector, values[0], subRules, styles);
+		}
+
+		if (numKeys == 1 && numVals == 1)
+			return new PositiveRuleKV(element, zoom, selector, keys[0], values[0], subRules, styles);
+
+		return new PositiveRuleMultiKV(element, zoom, selector, keys, values, subRules, styles);
+
 	}
 }

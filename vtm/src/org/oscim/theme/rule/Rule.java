@@ -21,7 +21,7 @@ import java.util.List;
 import org.oscim.core.Tag;
 import org.oscim.theme.styles.RenderStyle;
 
-public abstract class Rule {
+public class Rule {
 	public final static RenderStyle[] EMPTY_STYLE = new RenderStyle[0];
 	public final static Rule[] EMPTY_RULES = new Rule[0];
 
@@ -44,7 +44,9 @@ public abstract class Rule {
 		selectWhenMatched = (selector & Selector.WHEN_MATCHED) != 0;
 	}
 
-	abstract boolean matchesTags(Tag[] tags);
+	boolean matchesTags(Tag[] tags) {
+		return true;
+	}
 
 	public boolean matchElement(int type, Tag[] tags, int zoomLevel, List<RenderStyle> result) {
 

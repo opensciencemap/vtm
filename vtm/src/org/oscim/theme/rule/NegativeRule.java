@@ -18,20 +18,61 @@
 package org.oscim.theme.rule;
 
 import org.oscim.core.Tag;
+import org.oscim.theme.rule.RuleBuilder.RuleType;
 import org.oscim.theme.styles.RenderStyle;
 
 class NegativeRule extends Rule {
-	final AttributeMatcher mAttributeMatcher;
 
-	NegativeRule(int element, int zoom, int selector, AttributeMatcher attributeMatcher,
+	public final String[] keys;
+	public final String[] values;
+
+	/* (-) 'exclusive negation' matches when either KEY is not present
+	 * or KEY is present and any VALUE is NOT present
+	 * 
+	 * (\) 'except negation' matches when KEY is present
+	 * none items of VALUE is present (TODO).
+	 * (can be emulated by <m k="a"><m k=a v="-|b|c">...</m></m>)
+	 * 
+	 * (~) 'non-exclusive negation' matches when either KEY is not present
+	 * or KEY is present and any VALUE is present */
+
+	public final boolean exclusive;
+
+	NegativeRule(RuleType type, int element, int zoom, int selector,
+	        String[] keys, String[] values,
 	        Rule[] subRules, RenderStyle[] styles) {
 		super(element, zoom, selector, subRules, styles);
 
-		mAttributeMatcher = attributeMatcher;
+		for (int i = 0; i < keys.length; i++)
+			keys[i] = keys[i].intern();
+
+		for (int i = 0; i < values.length; i++)
+			values[i] = values[i].intern();
+
+		this.keys = keys;
+		this.values = values;
+		this.exclusive = type == RuleType.EXCLUDE;
 	}
 
 	@Override
-	boolean matchesTags(Tag[] tags) {
-		return mAttributeMatcher.matches(tags);
+	public boolean matchesTags(Tag[] tags) {
+		if (keyListDoesNotContainKeys(tags))
+			return true;
+
+		for (Tag tag : tags)
+			for (String value : values)
+				if (value == tag.value)
+					return !exclusive;
+
+		return exclusive;
+	}
+
+	private boolean keyListDoesNotContainKeys(Tag[] tags) {
+		for (Tag tag : tags)
+			for (String key : keys)
+				if (key == tag.key)
+					return false;
+
+		return true;
 	}
 }
