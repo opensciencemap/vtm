@@ -3,7 +3,7 @@ language: java
 jdk: openjdk7
 env:
   matrix:
-    - ANDROID_SDKS=android-19 ANDROID_TARGET=android-19  ANDROID_ABI=armeabi-v7a _JAVA_OPTIONS="-Xss6m -Xms512M -Xmx1536M"
+    - ANDROID_SDKS=android-19 ANDROID_TARGET=android-19  ANDROID_ABI=armeabi-v7a
 #branches:
 #  only:
 #    - master
