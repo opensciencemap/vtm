@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -30,7 +29,7 @@ public class OkHttpEngineTest {
 		server = new MockWebServer();
 		server.enqueue(mockResponse);
 		server.play();
-		engine = new OkHttpEngine(server.getUrl("/tiles/vtm"));
+		engine = (OkHttpEngine) new OkHttpEngine.OkHttpFactory().create();
 	}
 
 	@After
@@ -50,7 +49,7 @@ public class OkHttpEngineTest {
 
 	@Test
 	public void sendRequest_shouldAppendXYZToPath() throws Exception {
-		engine.sendRequest(new OSciMap4TileSource("http://www.example.org/tiles/vtm"),
+		engine.sendRequest(new OSciMap4TileSource(server.getUrl("/tiles/vtm").toString()),
 				new Tile(1, 2, new Integer(3).byteValue()));
 
 		RecordedRequest request = server.takeRequest();
@@ -59,7 +58,7 @@ public class OkHttpEngineTest {
 
 	@Test
 	public void read_shouldReturnResponseStream() throws Exception {
-		engine.sendRequest(new OSciMap4TileSource("http://www.example.org/tiles/vtm"),
+		engine.sendRequest(new OSciMap4TileSource(server.getUrl("/tiles/vtm").toString()),
 				new Tile(1, 2, new Integer(3).byteValue()));
 
 		InputStream responseStream = engine.read();
@@ -69,7 +68,7 @@ public class OkHttpEngineTest {
 
 	@Test(expected = IOException.class)
 	public void close_shouldCloseInputStream() throws Exception {
-		engine.sendRequest(new OSciMap4TileSource("http://www.example.org/tiles/vtm"),
+		engine.sendRequest(new OSciMap4TileSource(server.getUrl("/tiles/vtm").toString()),
 				new Tile(1, 2, new Integer(3).byteValue()));
 		engine.close();
 
@@ -80,7 +79,7 @@ public class OkHttpEngineTest {
 
 	@Test(expected = IOException.class)
 	public void requestCompleted_shouldCloseInputStream() throws Exception {
-		engine.sendRequest(new OSciMap4TileSource("http://www.example.org/tiles/vtm"),
+		engine.sendRequest(new OSciMap4TileSource(server.getUrl("/tiles/vtm").toString()),
 				new Tile(1, 2, new Integer(3).byteValue()));
 		engine.requestCompleted(true);
 

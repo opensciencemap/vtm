@@ -1,7 +1,5 @@
 package org.oscim.tiling.source;
 
-import com.squareup.okhttp.OkHttpClient;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.oscim.tiling.ITileDataSource;
@@ -29,7 +27,7 @@ public class UrlTileSourceTest {
 
 	@Test
 	public void shouldUseCustomHttpEngine() throws Exception {
-		tileSource.setHttpEngine(new OkHttpEngine(tileSource.getUrl()));
+		tileSource.setHttpEngine(new OkHttpEngine.OkHttpFactory());
 		TestTileDataSource dataSource = (TestTileDataSource) tileSource.getDataSource();
 		assertThat(dataSource.getConnection()).isInstanceOf(OkHttpEngine.class);
 	}
