@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.source.HttpEngine;
 import org.oscim.tiling.source.LwHttp;
 import org.oscim.tiling.source.OkHttpEngine;
 
@@ -25,7 +26,7 @@ public class OSciMap4TileSourceTest {
 	@Test
 	public void shouldUseLwHttp() throws Exception {
 		LwHttp lwHttp = Mockito.mock(LwHttp.class);
-		tileSource.setHttpEngine(lwHttp);
+		tileSource.setHttpEngine(new TestHttpFactory(lwHttp));
 		ITileDataSource dataSource = tileSource.getDataSource();
 		dataSource.destroy();
 		Mockito.verify(lwHttp).close();
@@ -34,9 +35,25 @@ public class OSciMap4TileSourceTest {
 	@Test
 	public void shouldUseOkHttp() throws Exception {
 		OkHttpEngine okHttp = Mockito.mock(OkHttpEngine.class);
-		tileSource.setHttpEngine(okHttp);
+		tileSource.setHttpEngine(new TestHttpFactory(okHttp));
 		ITileDataSource dataSource = tileSource.getDataSource();
 		dataSource.destroy();
 		Mockito.verify(okHttp).close();
+	}
+
+	/**
+	 * Test factory that allows the specific {@link HttpEngine} instance to be set.
+	 */
+	class TestHttpFactory implements HttpEngine.Factory {
+		final HttpEngine engine;
+
+		public TestHttpFactory(HttpEngine engine) {
+			this.engine = engine;
+		}
+
+		@Override
+		public HttpEngine create() {
+			return engine;
+		}
 	}
 }
