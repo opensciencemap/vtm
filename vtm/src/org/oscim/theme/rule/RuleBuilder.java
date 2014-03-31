@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 import org.oscim.theme.IRenderTheme.ThemeException;
-import org.oscim.theme.XmlThemeBuilder;
-import org.oscim.theme.rule.Rule.Closed;
 import org.oscim.theme.rule.Rule.Element;
 import org.oscim.theme.rule.Rule.NegativeRule;
 import org.oscim.theme.rule.Rule.PositiveRuleK;
@@ -16,7 +14,6 @@ import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.RenderStyle.StyleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.Attributes;
 
 public class RuleBuilder {
 	final static Logger log = LoggerFactory.getLogger(RuleBuilder.class);
@@ -43,10 +40,8 @@ public class RuleBuilder {
 	private static final String STRING_NEGATION = "~";
 	private static final String STRING_EXCLUSIVE = "-";
 	private static final String SEPARATOR = "\\|";
-	//private static final String STRING_WILDCARD = "*";
 
-	private static final int SELECT_FIRST = 1 << 0;
-	private static final int SELECT_WHEN_MATCHED = 1 << 1;
+	//private static final String STRING_WILDCARD = "*";
 
 	public RuleBuilder(RuleType type, int element, int zoom, int selector,
 	        String[] keys, String[] values) {
@@ -106,71 +101,6 @@ public class RuleBuilder {
 		}
 
 		return new RuleBuilder(type, keyList, valueList);
-	}
-
-	private static void validate(byte zoomMin, byte zoomMax) {
-		XmlThemeBuilder.validateNonNegative("zoom-min", zoomMin);
-		XmlThemeBuilder.validateNonNegative("zoom-max", zoomMax);
-		if (zoomMin > zoomMax)
-			throw new ThemeException("zoom-min must be less or equal zoom-max: " + zoomMin);
-	}
-
-	public static RuleBuilder create(String elementName, Attributes attributes,
-	        Stack<RuleBuilder> ruleStack) {
-		int element = Element.ANY;
-		int closed = Closed.ANY;
-		String keys = null;
-		String values = null;
-		byte zoomMin = 0;
-		byte zoomMax = Byte.MAX_VALUE;
-		int selector = 0;
-
-		for (int i = 0; i < attributes.getLength(); ++i) {
-			String name = attributes.getLocalName(i);
-			String value = attributes.getValue(i);
-
-			if ("e".equals(name)) {
-				String val = value.toUpperCase();
-				if ("WAY".equals(val))
-					element = Element.WAY;
-				else if ("NODE".equals(val))
-					element = Element.NODE;
-			} else if ("k".equals(name)) {
-				keys = value;
-			} else if ("v".equals(name)) {
-				values = value;
-			} else if ("closed".equals(name)) {
-				String val = value.toUpperCase();
-				if ("YES".equals(val))
-					closed = Closed.YES;
-				else if ("NO".equals(val))
-					closed = Closed.NO;
-			} else if ("zoom-min".equals(name)) {
-				zoomMin = Byte.parseByte(value);
-			} else if ("zoom-max".equals(name)) {
-				zoomMax = Byte.parseByte(value);
-			} else if ("select".equals(name)) {
-				if ("first".equals(value))
-					selector |= SELECT_FIRST;
-				if ("when-matched".equals(value))
-					selector |= SELECT_WHEN_MATCHED;
-			} else {
-				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
-			}
-		}
-
-		if (closed == Closed.YES)
-			element = Element.POLY;
-		else if (closed == Closed.NO)
-			element = Element.LINE;
-
-		validate(zoomMin, zoomMax);
-
-		RuleBuilder b = create(ruleStack, keys, values);
-		b.setZoom(zoomMin, zoomMax);
-		b.element = element;
-		b.selector = selector;
-		return b;
 	}
 
 	public RuleBuilder setZoom(byte zoomMin, byte zoomMax) {
