@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Hannes Janetzek
+ * Copyright 2014 Hannes Janetzek
  * 
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  * 
