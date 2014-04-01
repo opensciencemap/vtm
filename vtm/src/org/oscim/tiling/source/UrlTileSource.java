@@ -25,7 +25,9 @@ import org.oscim.tiling.TileSource;
 public abstract class UrlTileSource extends TileSource {
 
 	private final URL mUrl;
-	private byte[] mExt;
+	private byte[] mExtBytes;
+	private String mExtString;
+
 	private HttpEngine.Factory mHttpFactory;
 
 	public UrlTileSource(String urlString) {
@@ -55,11 +57,12 @@ public abstract class UrlTileSource extends TileSource {
 	}
 
 	protected void setExtension(String ext) {
+		mExtString = ext;
 		if (ext == null) {
-			mExt = null;
+			mExtBytes = null;
 			return;
 		}
-		mExt = ext.getBytes();
+		mExtBytes = ext.getBytes();
 	}
 
 	protected void setMimeType(String string) {
@@ -98,11 +101,11 @@ public abstract class UrlTileSource extends TileSource {
 		pos = LwHttp.writeInt(tile.tileX, pos, buf);
 		buf[pos++] = '/';
 		pos = LwHttp.writeInt(tile.tileY, pos, buf);
-		if (mExt == null)
+		if (mExtBytes == null)
 			return pos;
 
-		System.arraycopy(mExt, 0, buf, pos, mExt.length);
-		return pos + mExt.length;
+		System.arraycopy(mExtBytes, 0, buf, pos, mExtBytes.length);
+		return pos + mExtBytes.length;
 	}
 
 	public URL getUrl() {
@@ -119,5 +122,9 @@ public abstract class UrlTileSource extends TileSource {
 		}
 
 		return mHttpFactory.create();
+	}
+
+	public String getExtension() {
+		return mExtString == null ? "" : mExtString;
 	}
 }

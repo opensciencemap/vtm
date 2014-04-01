@@ -43,22 +43,24 @@ public class OkHttpEngine implements HttpEngine {
 			throw new IllegalArgumentException("Tile cannot be null.");
 		}
 
-		final URL requestUrl = new URL(tileSource.getUrl()
-		        + "/"
-		        + Byte.toString(tile.zoomLevel)
-		        + "/"
-		        + tile.tileX
-		        + "/"
-		        + tile.tileY
-		        + ".vtm");
-
-		final HttpURLConnection connection = client.open(requestUrl);
-
-		try {
-			inputStream = connection.getInputStream();
-		} catch (Exception e) {
-			e.printStackTrace();
+		StringBuilder sb = new StringBuilder();
+		sb.append(tileSource.getUrl());
+		String path = tileSource.getTileUrl(tile);
+		if (path == null) {
+			sb.append('/');
+			sb.append(tile.zoomLevel);
+			sb.append('/');
+			sb.append(tile.tileX);
+			sb.append('/');
+			sb.append(tile.tileY);
+			sb.append(tileSource.getExtension());
+		} else {
+			sb.append(path);
 		}
+
+		final HttpURLConnection connection = client.open(new URL(sb.toString()));
+
+		inputStream = connection.getInputStream();
 
 		return true;
 	}
