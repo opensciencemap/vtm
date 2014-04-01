@@ -3,7 +3,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.8.+'
+    classpath 'com.android.tools.build:gradle:0.9.+'
     // for aar/maven stuff
     // https://github.com/dcendents/android-maven-plugin
     classpath 'com.github.dcendents:android-maven-plugin:1.0'
