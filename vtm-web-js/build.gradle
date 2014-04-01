@@ -63,7 +63,7 @@ gwt {
 // Run jetty with draft compiled war
 task jettyDraftWar(type: JettyRunWar) {
   dependsOn draftWar
-  dependsOn.remove('war')
+  //dependsOn.remove('war')
   webApp=draftWar.archivePath
 }
 
