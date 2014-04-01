@@ -27,6 +27,7 @@ import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
+import org.oscim.event.Event;
 import org.oscim.map.Map;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLViewport;
@@ -38,7 +39,7 @@ import org.oscim.utils.async.SimpleWorker;
 import org.oscim.utils.geom.LineClipper;
 
 /** This class draws a path line in given color. */
-public class PathLayer extends Layer {
+public class PathLayer extends Layer implements Map.UpdateListener {
 
 	/** Stores points, converted to the map projection. */
 	protected final ArrayList<GeoPoint> mPoints;
@@ -397,5 +398,11 @@ public class PathLayer extends Layer {
 			points[i++] = y;
 			return i;
 		}
+	}
+
+	@Override
+	public void onMapEvent(Event e, MapPosition mapPosition) {
+		if (mUpdatePoints)
+			mWorker.submit(0);
 	}
 }
