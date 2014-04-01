@@ -144,8 +144,6 @@ public class TextureItem extends Inlist<TextureItem> {
 	}
 
 	public static class TexturePool extends SyncPool<TextureItem> {
-
-		private final ArrayList<Integer> mTexDisposed = new ArrayList<Integer>();
 		private final ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
 
 		private final int mHeight;
@@ -226,13 +224,11 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		@Override
 		protected void freeItem(TextureItem t) {
-
-			if (!t.ref) {
-				synchronized (mTexDisposed) {
-					if (t.id >= 0) {
-						mTexDisposed.add(Integer.valueOf(t.id));
-						t.id = -1;
-					}
+			if (!t.ref && t.id >= 0) {
+				mTexCnt--;
+				synchronized (disposedTextures) {
+					disposedTextures.add(Integer.valueOf(t.id));
+					t.id = -1;
 				}
 			}
 		}
@@ -252,19 +248,6 @@ public class TextureItem extends Inlist<TextureItem> {
 
 			if (t.bitmap == null)
 				throw new RuntimeException("Missing bitmap for texture");
-
-			synchronized (mTexDisposed) {
-				int size = mTexDisposed.size();
-				if (size > 0) {
-					int[] tmp = new int[size];
-					for (int i = 0; i < size; i++)
-						tmp[i] = mTexDisposed.get(i).intValue();
-
-					mTexDisposed.clear();
-					GLUtils.glDeleteTextures(size, tmp);
-					mTexCnt -= size;
-				}
-			}
 
 			if (t.id < 0) {
 				int[] textureIds = GLUtils.glGenTextures(1);
@@ -318,10 +301,28 @@ public class TextureItem extends Inlist<TextureItem> {
 	/* Pool for not-pooled textures. Disposed items will only be released
 	 * on the GL-Thread and will not be put back in any pool. */
 	final static TexturePool NOPOOL = new TexturePool(0);
+	final static ArrayList<Integer> disposedTextures = new ArrayList<Integer>();
 
 	private static GL20 GL;
 
 	static void init(GL20 gl) {
 		GL = gl;
+	}
+
+	/** disposed textures are released by MapRenderer after each frame */
+	public static void disposeTextures() {
+		synchronized (disposedTextures) {
+
+			int size = disposedTextures.size();
+			if (size > 0) {
+				int[] tmp = new int[size];
+				for (int i = 0; i < size; i++)
+					tmp[i] = disposedTextures.get(i).intValue();
+
+				disposedTextures.clear();
+				GLUtils.glDeleteTextures(size, tmp);
+				//mTexCnt -= size;
+			}
+		}
 	}
 }
