@@ -18,6 +18,7 @@ package org.oscim.utils.pool;
 
 import javax.annotation.CheckReturnValue;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class SyncPool<T extends Inlist<?>> {
 	protected final int mMaxFill;
 	protected final boolean mClearItems;
@@ -48,6 +49,13 @@ public abstract class SyncPool<T extends Inlist<?>> {
 	public void init(int items) {
 		mFill = 0;
 		mPool = null;
+	}
+
+	public synchronized void clear() {
+		while (mPool != null) {
+			freeItem(mPool);
+			mPool = (T) mPool.next;
+		}
 	}
 
 	/**
@@ -81,7 +89,6 @@ public abstract class SyncPool<T extends Inlist<?>> {
 	 * Usage item = pool.release(item), to ensure to not keep a reference to
 	 * item!
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@CheckReturnValue
 	public T release(T item) {
 		if (item == null)
@@ -111,7 +118,6 @@ public abstract class SyncPool<T extends Inlist<?>> {
 	 * Usage list = pool.releaseAll(list), to ensure to not keep a reference to
 	 * list!
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@CheckReturnValue
 	public T releaseAll(T item) {
 		if (item == null)
@@ -156,7 +162,6 @@ public abstract class SyncPool<T extends Inlist<?>> {
 	 * 
 	 * @return the item
 	 */
-	@SuppressWarnings("unchecked")
 	public T get() {
 
 		synchronized (this) {

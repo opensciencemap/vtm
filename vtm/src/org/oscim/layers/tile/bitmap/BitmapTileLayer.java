@@ -104,10 +104,16 @@ public class BitmapTileLayer extends TileLayer {
 		return new BitmapTileLoader(this, mTileSource);
 	}
 
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		pool.clear();
+	}
+
 	final static int POOL_FILL = 40;
 
 	/** pool shared by TextLayers */
-	final static TexturePool pool = new TexturePool(POOL_FILL) {
+	final TexturePool pool = new TexturePool(POOL_FILL) {
 
 		//		int sum = 0;
 		//

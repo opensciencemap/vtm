@@ -27,6 +27,7 @@ import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.elements.TextureItem;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
 import org.slf4j.Logger;
@@ -174,6 +175,7 @@ public class MapRenderer {
 		draw();
 
 		mBufferPool.releaseBuffers();
+		TextureItem.disposeTextures();
 	}
 
 	private void draw() {
