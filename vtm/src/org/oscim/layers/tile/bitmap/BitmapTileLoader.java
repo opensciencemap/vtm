@@ -21,7 +21,6 @@ import static org.oscim.layers.tile.MapTile.State.CANCEL;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
-import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.ElementLayers;
@@ -35,10 +34,12 @@ public class BitmapTileLoader extends TileLoader {
 	protected static final Logger log = LoggerFactory.getLogger(BitmapTileLoader.class);
 
 	private final ITileDataSource mTileDataSource;
+	private final BitmapTileLayer mLayer;
 
-	public BitmapTileLoader(TileLayer tileLayer, TileSource tileSource) {
+	public BitmapTileLoader(BitmapTileLayer tileLayer, TileSource tileSource) {
 		super(tileLayer.getManager());
 		mTileDataSource = tileSource.getDataSource();
+		mLayer = tileLayer;
 	}
 
 	@Override
@@ -58,7 +59,7 @@ public class BitmapTileLoader extends TileLoader {
 			return;
 
 		BitmapLayer l = new BitmapLayer(false);
-		l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE, BitmapTileLayer.pool);
+		l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE, mLayer.pool);
 
 		ElementLayers layers = new ElementLayers();
 		layers.setTextureLayers(l);
