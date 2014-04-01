@@ -25,10 +25,11 @@ VTM is part of the OpenScienceMap project and developed at University of Bremen.
 - **vtm-android-example** provides examples using **vtm-android**
 - **vtm-android-app** opensciencemap app using **vtm-android**
 - **vtm-gdx** common libgdx backend code
-- **vtm-gdx-desktop** Desktop application
-- **vtm-gdx-html** HTML5/GWT application
-- **vtm-gdx-android** Android application
-- **vtm-gdx-ios** iOS application
+- **vtm-android-gdx** Android application
+- **vtm-desktop** Desktop application
+- **vtm-web** HTML5/GWT backend
+- **vtm-web-app** HTML5/GWT application
+- **vtm-ios** iOS application
 
 ## Getting started
 
@@ -40,11 +41,7 @@ The commands below should set things up correctly when Android
 SDK is already installed.
 ```
 export ANDROID_HOME=/path/to/your/android-sdk
-export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools
-echo yes | android update sdk --filter platform-tools --no-ui
-echo yes | android update sdk --filter android-19 --no-ui
-echo yes | android update sdk --filter extra-android-support --no-ui
-echo yes | android update sdk --filter extra-android-m2repository --no-ui
+./android-stuff.sh
 ```
 
 ### Eclipse
@@ -56,7 +53,7 @@ Import all 'vtm' sub-projects into Eclipse.
 Just import build.gradle
 
 ### Gradle
-Or run gradle tasks directly (see also `./gradlew -q tasks`):<br/>
+You can run gradle tasks directly (see also `./gradlew -q tasks`):<br/>
 `./gradlew clean install` <br/> to build the libraries and add them to the local maven repository.<br/>
 `./gradlew :vtm-android-example:run` <br/> to run the android example<br/>
 `./gradlew :vtm-gdx-desktop:run` <br/>to run the desktop demo (only Linux64 and Win64 native libs are provided atm)<br/>
