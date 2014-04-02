@@ -22,7 +22,7 @@ class S3DBTileLoader extends TileLoader {
 	static final Logger log = LoggerFactory.getLogger(S3DBTileLoader.class);
 
 	/** current TileDataSource used by this MapTileLoader */
-	private ITileDataSource mTileDataSource;
+	private final ITileDataSource mTileDataSource;
 
 	private ExtrusionLayer mLayers;
 	private ExtrusionLayer mRoofs;

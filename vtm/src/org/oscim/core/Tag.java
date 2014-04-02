@@ -148,7 +148,7 @@ public class Tag {
 	 *            the textual representation of the tag.
 	 */
 	public static Tag parse(String tag) {
-		int splitPosition = tag.indexOf("=");
+		int splitPosition = tag.indexOf('=');
 		if (splitPosition < 0) {
 			return new Tag(tag, "");
 		}

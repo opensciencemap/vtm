@@ -55,7 +55,7 @@ public class BoundingBox {
 	/**
 	 * The hash code of this object.
 	 */
-	private transient int hashCodeValue;
+	private final int hashCodeValue;
 
 	/**
 	 * @param minLatitudeE6
@@ -163,29 +163,29 @@ public class BoundingBox {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("BoundingBox [minLat=");
-		sb.append(minLatitudeE6);
-		sb.append(", minLon=");
-		sb.append(minLongitudeE6);
-		sb.append(", maxLat=");
-		sb.append(maxLatitudeE6);
-		sb.append(", maxLon=");
-		sb.append(maxLongitudeE6);
-		sb.append("]");
-		return sb.toString();
+		return new StringBuilder()
+		    .append("BoundingBox [minLat=")
+		    .append(minLatitudeE6)
+		    .append(", minLon=")
+		    .append(minLongitudeE6)
+		    .append(", maxLat=")
+		    .append(maxLatitudeE6)
+		    .append(", maxLon=")
+		    .append(maxLongitudeE6)
+		    .append("]")
+		    .toString();
 	}
 
 	public String format() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(minLatitudeE6 / CONVERSION_FACTOR);
-		sb.append(',');
-		sb.append(minLongitudeE6 / CONVERSION_FACTOR);
-		sb.append(',');
-		sb.append(maxLatitudeE6 / CONVERSION_FACTOR);
-		sb.append(',');
-		sb.append(maxLongitudeE6 / CONVERSION_FACTOR);
-		return sb.toString();
+		return new StringBuilder()
+		    .append(minLatitudeE6 / CONVERSION_FACTOR)
+		    .append(',')
+		    .append(minLongitudeE6 / CONVERSION_FACTOR)
+		    .append(',')
+		    .append(maxLatitudeE6 / CONVERSION_FACTOR)
+		    .append(',')
+		    .append(maxLongitudeE6 / CONVERSION_FACTOR)
+		    .toString();
 	}
 
 	/**

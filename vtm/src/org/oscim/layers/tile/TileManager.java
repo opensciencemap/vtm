@@ -47,23 +47,14 @@ public class TileManager {
 
 	public final static Event TILE_LOADED = new Event();
 	public final static Event TILE_REMOVED = new Event();
-	public final EventDispatcher<Listener, MapTile> events = new EventDispatcher<Listener, MapTile>() {
 
-		@Override
-		public void tell(Listener l, Event event, MapTile tile) {
-			l.onTileManagerEvent(event, tile);
-		}
-	};
-
-	public interface Listener extends EventListener {
-		void onTileManagerEvent(Event event, MapTile tile);
-	};
-
-	private int mCacheLimit;
+	private final int mCacheLimit;
 	private int mCacheReduce;
 
-	private int mMinZoom;
-	private int mMaxZoom;
+	private final int mMinZoom;
+	private final int mMaxZoom;
+
+	private int[] mZoomTable;
 
 	/**
 	 * limit number tiles with new data not uploaded to GL
@@ -105,6 +96,8 @@ public class TileManager {
 	/* job queue filled in TileManager and polled by TileLoaders */
 	private final JobQueue jobQueue;
 
+	private final float[] mMapPlane = new float[8];
+
 	private final QuadTree<TileNode, MapTile> mIndex = new QuadTree<TileNode, MapTile>() {
 
 		@Override
@@ -124,7 +117,17 @@ public class TileManager {
 		}
 	};
 
-	private final float[] mMapPlane = new float[8];
+	public final EventDispatcher<Listener, MapTile> events = new EventDispatcher<Listener, MapTile>() {
+
+		@Override
+		public void tell(Listener l, Event event, MapTile tile) {
+			l.onTileManagerEvent(event, tile);
+		}
+	};
+
+	public interface Listener extends EventListener {
+		void onTileManagerEvent(Event event, MapTile tile);
+	};
 
 	public TileManager(Map map, int minZoom, int maxZoom, int cacheLimit) {
 		mMap = map;
@@ -143,8 +146,6 @@ public class TileManager {
 		mTilesForUpload = 0;
 		mUpdateSerial = 0;
 	}
-
-	private int[] mZoomTable;
 
 	public void setZoomTable(int[] zoomLevel) {
 		mZoomTable = zoomLevel;
@@ -524,7 +525,7 @@ public class TileManager {
 				if (!success || tile.state == CANCEL) {
 
 					log.debug("loading {}: {}",
-					          (!success ? "failed" : "canceled"),
+					          (success ? "canceled" : "failed"),
 					          tile);
 					tile.clear();
 					return;

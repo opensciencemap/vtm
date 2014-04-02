@@ -134,13 +134,13 @@ public class GeoPoint implements Comparable<GeoPoint> {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("GeoPoint [lat=");
-		sb.append(this.getLatitude());
-		sb.append(", lon=");
-		sb.append(this.getLongitude());
-		sb.append("]");
-		return sb.toString();
+		return new StringBuilder()
+		    .append("GeoPoint [lat=")
+		    .append(this.getLatitude())
+		    .append(", lon=")
+		    .append(this.getLongitude())
+		    .append("]")
+		    .toString();
 	}
 
 	/**

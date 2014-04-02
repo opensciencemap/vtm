@@ -35,16 +35,12 @@ public class Animator {
 
 	//static final Logger log = LoggerFactory.getLogger(MapAnimator.class);
 
-	public Animator(Map map) {
-		mMap = map;
-	}
-
-	private final int ANIM_NONE = 0;
-	private final int ANIM_MOVE = 1 << 0;
-	private final int ANIM_SCALE = 1 << 1;
-	private final int ANIM_ROTATE = 1 << 2;
-	private final int ANIM_TILT = 1 << 3;
-	private final int ANIM_FLING = 1 << 4;
+	private final static int ANIM_NONE = 0;
+	private final static int ANIM_MOVE = 1 << 0;
+	private final static int ANIM_SCALE = 1 << 1;
+	private final static int ANIM_ROTATE = 1 << 2;
+	private final static int ANIM_TILT = 1 << 3;
+	private final static int ANIM_FLING = 1 << 4;
 
 	private final Map mMap;
 
@@ -60,6 +56,10 @@ public class Animator {
 	private long mAnimEnd = -1;
 
 	private int mState = ANIM_NONE;
+
+	public Animator(Map map) {
+		mMap = map;
+	}
 
 	public synchronized void animateTo(long duration, BoundingBox bbox) {
 		mMap.getMapPosition(mStartPos);

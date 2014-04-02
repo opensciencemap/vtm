@@ -131,13 +131,13 @@ public abstract class TileSource {
 
 		@Override
 		public String toString() {
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.append("FileOpenResult [success=");
-			stringBuilder.append(this.success);
-			stringBuilder.append(", errorMessage=");
-			stringBuilder.append(this.errorMessage);
-			stringBuilder.append("]");
-			return stringBuilder.toString();
+			return new StringBuilder()
+			    .append("FileOpenResult [success=")
+			    .append(this.success)
+			    .append(", errorMessage=")
+			    .append(this.errorMessage)
+			    .append("]")
+			    .toString();
 		}
 	}
 }

@@ -177,37 +177,37 @@ public class SubFileParameter {
 
 	@Override
 	public String toString() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("SubFileParameter [baseZoomLevel=");
-		stringBuilder.append(this.baseZoomLevel);
-		stringBuilder.append(", blockEntriesTableSize=");
-		stringBuilder.append(this.blockEntriesTableSize);
-		stringBuilder.append(", blocksHeight=");
-		stringBuilder.append(this.blocksHeight);
-		stringBuilder.append(", blocksWidth=");
-		stringBuilder.append(this.blocksWidth);
-		stringBuilder.append(", boundaryTileBottom=");
-		stringBuilder.append(this.boundaryTileBottom);
-		stringBuilder.append(", boundaryTileLeft=");
-		stringBuilder.append(this.boundaryTileLeft);
-		stringBuilder.append(", boundaryTileRight=");
-		stringBuilder.append(this.boundaryTileRight);
-		stringBuilder.append(", boundaryTileTop=");
-		stringBuilder.append(this.boundaryTileTop);
-		stringBuilder.append(", indexStartAddress=");
-		stringBuilder.append(this.indexStartAddress);
-		stringBuilder.append(", numberOfBlocks=");
-		stringBuilder.append(this.numberOfBlocks);
-		stringBuilder.append(", startAddress=");
-		stringBuilder.append(this.startAddress);
-		stringBuilder.append(", subFileSize=");
-		stringBuilder.append(this.subFileSize);
-		stringBuilder.append(", zoomLevelMax=");
-		stringBuilder.append(this.zoomLevelMax);
-		stringBuilder.append(", zoomLevelMin=");
-		stringBuilder.append(this.zoomLevelMin);
-		stringBuilder.append("]");
-		return stringBuilder.toString();
+		return new StringBuilder()
+		    .append("SubFileParameter [baseZoomLevel=")
+		    .append(this.baseZoomLevel)
+		    .append(", blockEntriesTableSize=")
+		    .append(this.blockEntriesTableSize)
+		    .append(", blocksHeight=")
+		    .append(this.blocksHeight)
+		    .append(", blocksWidth=")
+		    .append(this.blocksWidth)
+		    .append(", boundaryTileBottom=")
+		    .append(this.boundaryTileBottom)
+		    .append(", boundaryTileLeft=")
+		    .append(this.boundaryTileLeft)
+		    .append(", boundaryTileRight=")
+		    .append(this.boundaryTileRight)
+		    .append(", boundaryTileTop=")
+		    .append(this.boundaryTileTop)
+		    .append(", indexStartAddress=")
+		    .append(this.indexStartAddress)
+		    .append(", numberOfBlocks=")
+		    .append(this.numberOfBlocks)
+		    .append(", startAddress=")
+		    .append(this.startAddress)
+		    .append(", subFileSize=")
+		    .append(this.subFileSize)
+		    .append(", zoomLevelMax=")
+		    .append(this.zoomLevelMax)
+		    .append(", zoomLevelMin=")
+		    .append(this.zoomLevelMin)
+		    .append("]")
+		    .toString();
 	}
 
 	/**

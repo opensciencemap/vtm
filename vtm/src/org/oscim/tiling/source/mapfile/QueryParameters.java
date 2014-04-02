@@ -31,30 +31,30 @@ class QueryParameters {
 
 	@Override
 	public String toString() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("QueryParameters [fromBaseTileX=");
-		stringBuilder.append(this.fromBaseTileX);
-		stringBuilder.append(", fromBaseTileY=");
-		stringBuilder.append(this.fromBaseTileY);
-		stringBuilder.append(", fromBlockX=");
-		stringBuilder.append(this.fromBlockX);
-		stringBuilder.append(", fromBlockY=");
-		stringBuilder.append(this.fromBlockY);
-		stringBuilder.append(", queryTileBitmask=");
-		stringBuilder.append(this.queryTileBitmask);
-		stringBuilder.append(", queryZoomLevel=");
-		stringBuilder.append(this.queryZoomLevel);
-		stringBuilder.append(", toBaseTileX=");
-		stringBuilder.append(this.toBaseTileX);
-		stringBuilder.append(", toBaseTileY=");
-		stringBuilder.append(this.toBaseTileY);
-		stringBuilder.append(", toBlockX=");
-		stringBuilder.append(this.toBlockX);
-		stringBuilder.append(", toBlockY=");
-		stringBuilder.append(this.toBlockY);
-		stringBuilder.append(", useTileBitmask=");
-		stringBuilder.append(this.useTileBitmask);
-		stringBuilder.append("]");
-		return stringBuilder.toString();
+		return new StringBuilder()
+		    .append("QueryParameters [fromBaseTileX=")
+		    .append(this.fromBaseTileX)
+		    .append(", fromBaseTileY=")
+		    .append(this.fromBaseTileY)
+		    .append(", fromBlockX=")
+		    .append(this.fromBlockX)
+		    .append(", fromBlockY=")
+		    .append(this.fromBlockY)
+		    .append(", queryTileBitmask=")
+		    .append(this.queryTileBitmask)
+		    .append(", queryZoomLevel=")
+		    .append(this.queryZoomLevel)
+		    .append(", toBaseTileX=")
+		    .append(this.toBaseTileX)
+		    .append(", toBaseTileY=")
+		    .append(this.toBaseTileY)
+		    .append(", toBlockX=")
+		    .append(this.toBlockX)
+		    .append(", toBlockY=")
+		    .append(this.toBlockY)
+		    .append(", useTileBitmask=")
+		    .append(this.useTileBitmask)
+		    .append("]")
+		    .toString();
 	}
 }

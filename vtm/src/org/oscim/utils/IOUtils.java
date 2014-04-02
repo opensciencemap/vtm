@@ -18,6 +18,7 @@ package org.oscim.utils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.logging.Level;
 
 /**
@@ -34,6 +35,17 @@ public final class IOUtils {
 	 *            the data source which should be closed (may be null).
 	 */
 	public static void closeQuietly(Closeable closeable) {
+		try {
+			if (closeable != null) {
+				closeable.close();
+			}
+		} catch (IOException e) {
+			//log.debug(e.getMessage() + " " + e);
+		}
+	}
+
+	/* for old java versions */
+	public static void closeQuietly(Socket closeable) {
 		try {
 			if (closeable != null) {
 				closeable.close();

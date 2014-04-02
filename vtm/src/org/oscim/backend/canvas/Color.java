@@ -19,7 +19,7 @@ package org.oscim.backend.canvas;
 
 import org.oscim.utils.FastMath;
 
-public class Color {
+public final class Color {
 
 	public static int fadePremul(int color, double alpha) {
 		alpha = FastMath.clamp(alpha, 0, 1);
@@ -237,5 +237,9 @@ public class Color {
 			return (int) color;
 		}
 		return fallBackColor;
+	}
+
+	private Color() {
+		/* Singleton */
 	}
 }

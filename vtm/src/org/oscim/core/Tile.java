@@ -60,15 +60,15 @@ public class Tile {
 
 	@Override
 	public String toString() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("[X:");
-		stringBuilder.append(this.tileX);
-		stringBuilder.append(", Y:");
-		stringBuilder.append(this.tileY);
-		stringBuilder.append(", Z:");
-		stringBuilder.append(this.zoomLevel);
-		stringBuilder.append("]");
-		return stringBuilder.toString();
+		return new StringBuilder()
+		    .append("[X:")
+		    .append(this.tileX)
+		    .append(", Y:")
+		    .append(this.tileY)
+		    .append(", Z:")
+		    .append(this.zoomLevel)
+		    .append("]")
+		    .toString();
 	}
 
 	@Override

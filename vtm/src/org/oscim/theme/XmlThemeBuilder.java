@@ -119,16 +119,8 @@ public class XmlThemeBuilder extends DefaultHandler {
 	 */
 	public static void logUnknownAttribute(String element, String name,
 	        String value, int attributeIndex) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("unknown attribute in element ");
-		sb.append(element);
-		sb.append(" (");
-		sb.append(attributeIndex);
-		sb.append("): ");
-		sb.append(name);
-		sb.append('=');
-		sb.append(value);
-		log.debug(sb.toString());
+		log.debug("unknown attribute in element {} () : {} = {}",
+		          element, attributeIndex, name, value);
 	}
 
 	private final ArrayList<RuleBuilder> mRulesList = new ArrayList<RuleBuilder>();

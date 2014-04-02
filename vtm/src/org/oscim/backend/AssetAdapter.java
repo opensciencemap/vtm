@@ -48,8 +48,7 @@ public abstract class AssetAdapter {
 		String line;
 		try {
 			while ((line = r.readLine()) != null) {
-				sb.append(line);
-				sb.append('\n');
+				sb.append(line).append('\n');
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

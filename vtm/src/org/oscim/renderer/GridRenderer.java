@@ -32,7 +32,7 @@ public class GridRenderer extends ElementRenderer {
 	private final TextStyle mText;
 	private final LineLayer mLineLayer;
 	private final GeometryBuffer mLines;
-	private final StringBuffer mStringBuffer;
+	private final StringBuilder mStringBuffer;
 
 	private int mCurX, mCurY, mCurZ;
 
@@ -77,7 +77,7 @@ public class GridRenderer extends ElementRenderer {
 		mLineLayer = layers.addLineLayer(0, lineStyle);
 		mLineLayer.addLine(mLines);
 
-		mStringBuffer = new StringBuffer(32);
+		mStringBuffer = new StringBuilder(32);
 	}
 
 	private void addLabels(int x, int y, int z) {
@@ -86,17 +86,17 @@ public class GridRenderer extends ElementRenderer {
 		TextLayer tl = mTextLayer;
 		tl.clear();
 
-		StringBuffer sb = mStringBuffer;
+		StringBuilder sb = mStringBuffer;
 
 		for (int yy = -2; yy < 2; yy++) {
 			for (int xx = -2; xx < 2; xx++) {
 
 				sb.setLength(0);
-				sb.append(x + xx);
-				sb.append(" / ");
-				sb.append(y + yy);
-				sb.append(" / ");
-				sb.append(z);
+				sb.append(x + xx)
+				    .append(" / ")
+				    .append(y + yy)
+				    .append(" / ")
+				    .append(z);
 
 				TextItem ti = TextItem.pool.get();
 				ti.set(s * xx + s / 2, s * yy + s / 2, sb.toString(), mText);

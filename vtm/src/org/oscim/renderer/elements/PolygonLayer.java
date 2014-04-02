@@ -400,12 +400,12 @@ public final class PolygonLayer extends RenderElement {
 			// TODO true could be avoided when same shader and vbo
 			setShader(polyShader, v, true);
 
-			if (color != 0) {
-				GLUtils.setColor(polyShader.uColor, color, alpha);
-				GLState.blend(true);
-			} else {
+			if (color == 0) {
 				/* disable drawing to framebuffer (will be re-enabled in fill) */
 				GL.glColorMask(false, false, false, false);
+			} else {
+				GLUtils.setColor(polyShader.uColor, color, alpha);
+				GLState.blend(true);
 			}
 
 			// TODO always pass stencil test: <-- only if not proxy?
@@ -460,5 +460,9 @@ public final class PolygonLayer extends RenderElement {
 		//
 		//	GLUtils.checkGlError("draw debug");
 		//}
+
+		private Renderer() {
+			/* Singleton */
+		}
 	}
 }

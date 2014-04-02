@@ -328,7 +328,7 @@ public class GeometryBuffer {
 			for (int j = 0; j < index[i]; j += 2) {
 				sb.append('[')
 				    .append(points[o + j])
-				    .append(",")
+				    .append(',')
 				    .append(points[o + j + 1])
 				    .append(']');
 			}

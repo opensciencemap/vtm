@@ -40,18 +40,16 @@ public class ElementLayers extends TileData {
 
 	static final Logger log = LoggerFactory.getLogger(ElementLayers.class);
 
-	public static void initRenderer(GL20 gl) {
-		RenderElement.GL = gl;
+	public final static int[] VERTEX_SHORT_CNT = {
+	        4, // LINE_VERTEX
+	        6, // TEXLINE_VERTEX
+	        2, // POLY_VERTEX
+	        2, // MESH_VERTEX
+	        4, // EXTRUSION_VERTEX
+	};
 
-		LineLayer.Renderer.init();
-		LineTexLayer.Renderer.init();
-		PolygonLayer.Renderer.init();
-		TextureLayer.Renderer.init();
-		BitmapLayer.Renderer.init();
-		MeshLayer.Renderer.init();
-
-		TextureItem.init(gl);
-	}
+	private final static int TEXTURE_VERTEX_SHORTS = 6;
+	private final static int SHORT_BYTES = 2;
 
 	/** mixed Polygon- and LineLayer */
 	private RenderElement baseLayers;
@@ -269,17 +267,6 @@ public class ElementLayers extends TileData {
 		return layer;
 	}
 
-	public final static int[] VERTEX_SHORT_CNT = {
-	        4, // LINE_VERTEX
-	        6, // TEXLINE_VERTEX
-	        2, // POLY_VERTEX
-	        2, // MESH_VERTEX
-	        4, // EXTRUSION_VERTEX
-	};
-
-	private final static int TEXTURE_VERTEX_SHORTS = 6;
-	private final static int SHORT_BYTES = 2;
-
 	// TODO move to specific layer implementation
 	public int getSize() {
 		int size = 0;
@@ -397,6 +384,19 @@ public class ElementLayers extends TileData {
 	@Override
 	protected void dispose() {
 		clear();
+	}
+
+	public static void initRenderer(GL20 gl) {
+		RenderElement.GL = gl;
+
+		LineLayer.Renderer.init();
+		LineTexLayer.Renderer.init();
+		PolygonLayer.Renderer.init();
+		TextureLayer.Renderer.init();
+		BitmapLayer.Renderer.init();
+		MeshLayer.Renderer.init();
+
+		TextureItem.init(gl);
 	}
 
 }
