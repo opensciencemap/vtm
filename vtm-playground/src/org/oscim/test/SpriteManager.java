@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.atlas;
+package org.oscim.test;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Canvas;
+import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.renderer.elements.TextureItem.TexturePool;
@@ -51,13 +52,13 @@ public abstract class SpriteManager<T> {
 	protected TextureItem mTexture;
 
 	public SpriteManager() {
-		mTexture = pool.get();
+		//mTexture = pool.get();
 
 		//mTexture.ownBitmap = true;
 
-		mAtlas = new TextureAtlas(256, 256, 32);
+		//mAtlas = new TextureAtlas(mTexture.bitmap);
 
-		mCanvas.setBitmap(mTexture.bitmap);
+		//mCanvas.setBitmap(mTexture.bitmap);
 	}
 
 	public Sprite getRegion(T item) {
