@@ -14,6 +14,7 @@ dependencies {
   compile project(':vtm-jeo')
   compile project(':vtm-extras')
   compile project(':vtm-themes')
+  compile 'com.squareup.okhttp:okhttp:1.5.2'
 }
 
 android {
