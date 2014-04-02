@@ -16,9 +16,11 @@ package org.oscim.tiling.source;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.MapTile;
 
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Uint8Array;
@@ -26,20 +28,18 @@ import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 
-public class LwHttp {
+public class LwHttp implements HttpEngine {
 	//static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
 	private final String mUrlPath;
-	private final byte[] mRequestBuffer;
-
-	private int mContentLength = -1;
 	private XMLHttpRequest mHttpRequest;
 
 	private ReadyStateChangeHandler mResponseHandler;
 
-	public LwHttp(URL url) {
+	public LwHttp(UrlTileSource tileSource) {
+		mTileSource = tileSource;
+		URL url = tileSource.getUrl();
 		mUrlPath = url.toString();
-		mRequestBuffer = new byte[1024];
 	}
 
 	static class Buffer extends InputStream {
@@ -63,21 +63,18 @@ public class LwHttp {
 	}
 
 	public void close() {
-		if (mHttpRequest != null)
-			mHttpRequest.abort();
+		if (mHttpRequest == null)
+			return;
+
+		mHttpRequest.abort();
+		mHttpRequest = null;
 	}
 
-	private UrlTileDataSource mDataSource;
+	private UrlTileSource mTileSource;
 
-	public boolean sendRequest(Tile tile, UrlTileDataSource dataSource) throws IOException {
-		mDataSource = dataSource;
+	public boolean sendRequest(MapTile tile, final UrlTileDataSource dataSource) {
 
-		byte[] request = mRequestBuffer;
-		int pos = 0;
-
-		pos = dataSource.getTileSource().formatTilePath(tile, request, pos);
-
-		String url = mUrlPath + (new String(request, 0, pos));
+		String url = mUrlPath + mTileSource.formatTilePath(tile);
 
 		mHttpRequest = XMLHttpRequest.create();
 		mHttpRequest.open("GET", url);
@@ -91,16 +88,13 @@ public class LwHttp {
 				//log.debug(mCurrentUrl + "response " + status + "/" + state);
 
 				if (state == XMLHttpRequest.DONE) {
-
-					int status = xhr.getStatus();
-
-					if (status == 200) {
+					if (xhr.getStatus() == 200) {
 						Uint8Array buf = Uint8ArrayNative.create(xhr.getResponseArrayBuffer());
-
-						mDataSource.process(new Buffer(buf));
+						dataSource.process(new Buffer(buf));
 					} else {
-						mDataSource.process(null);
+						dataSource.process(null);
 					}
+					mHttpRequest = null;
 				}
 			}
 		};
@@ -111,43 +105,32 @@ public class LwHttp {
 		return true;
 	}
 
-	// write (positive) integer to byte array
-	protected static int writeInt(int val, int pos, byte[] buf) {
-		if (val == 0) {
-			buf[pos] = '0';
-			return pos + 1;
+	public static class LwHttpFactory implements HttpEngine.Factory {
+
+		@Override
+		public HttpEngine create(UrlTileSource tileSource) {
+			return new LwHttp(tileSource);
 		}
-
-		int i = 0;
-		for (int n = val; n > 0; n = n / 10, i++)
-			buf[pos + i] = (byte) ('0' + n % 10);
-
-		// reverse bytes
-		for (int j = pos, end = pos + i - 1, mid = pos + i / 2; j < mid; j++, end--) {
-			byte tmp = buf[j];
-			buf[j] = buf[end];
-			buf[end] = tmp;
-		}
-
-		return pos + i;
 	}
 
-	// parse (positive) integer from byte array
-	protected static int parseInt(byte[] buf, int pos, int end) {
-		int val = 0;
-		for (; pos < end; pos++)
-			val = val * 10 + (buf[pos]) - '0';
-
-		return val;
+	@Override
+	public InputStream read() throws IOException {
+		return null;
 	}
 
-	public void requestCompleted() {
-
-		mHttpRequest.clearOnReadyStateChange();
-		mHttpRequest = null;
+	@Override
+	public void setCache(OutputStream os) {
 	}
 
-	public int getContentLength() {
-		return mContentLength;
+	@Override
+	public boolean requestCompleted(boolean success) {
+		//	mHttpRequest.clearOnReadyStateChange();
+		//	mHttpRequest = null;
+		return true;
+	}
+
+	@Override
+	public boolean sendRequest(Tile tile) throws IOException {
+		return false;
 	}
 }
