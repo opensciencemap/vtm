@@ -40,10 +40,7 @@ public class LwHttp implements HttpEngine {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 	static final boolean dbg = false;
 
-	private final UrlTileSource mTileSource;
-
 	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
-	//private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
 	private final static byte[] HEADER_CONTENT_LENGTH = "Content-Length".getBytes();
 	private final static byte[] HEADER_CONNECTION_CLOSE = "Connection: close".getBytes();
 
@@ -69,9 +66,11 @@ public class LwHttp implements HttpEngine {
 	private final byte[] REQUEST_GET_START;
 	private final byte[] REQUEST_GET_END;
 	private final byte[] mRequestBuffer;
+	private final byte[][] mTilePath;
 
-	private LwHttp(UrlTileSource tileSource) {
-		mTileSource = tileSource;
+	private LwHttp(UrlTileSource tileSource, byte[][] tilePath) {
+		mTilePath = tilePath;
+
 		URL url = tileSource.getUrl();
 		int port = url.getPort();
 		if (port < 0)
@@ -353,7 +352,7 @@ public class LwHttp implements HttpEngine {
 		byte[] request = mRequestBuffer;
 		int pos = REQUEST_GET_START.length;
 
-		pos = formatTilePath(mTileSource, tile, request, pos);
+		pos = formatTilePath(tile, request, pos);
 
 		int len = REQUEST_GET_END.length;
 		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
@@ -453,7 +452,7 @@ public class LwHttp implements HttpEngine {
 	}
 
 	/** write (positive) integer to byte array */
-	public static int writeInt(int val, int pos, byte[] buf) {
+	private static int writeInt(int val, int pos, byte[] buf) {
 		if (val == 0) {
 			buf[pos] = '0';
 			return pos + 1;
@@ -469,7 +468,7 @@ public class LwHttp implements HttpEngine {
 	}
 
 	/** parse (positive) integer from byte array */
-	protected static int parseInt(byte[] buf, int pos, int end) {
+	private static int parseInt(byte[] buf, int pos, int end) {
 		int val = 0;
 		for (; pos < end; pos++)
 			val = val * 10 + (buf[pos]) - '0';
@@ -495,42 +494,47 @@ public class LwHttp implements HttpEngine {
 	/**
 	 * Write tile url - the low level, no-allocations method,
 	 * 
-	 * override getTileUrl() for custom url formatting using
-	 * Strings
-	 * 
 	 * @param tile the Tile
 	 * @param buf to write url string
 	 * @param pos current position
 	 * @return new position
 	 */
-	public int formatTilePath(UrlTileSource tileSource, Tile tile, byte[] buf, int pos) {
-		String p = tileSource.formatTilePath(tile);
-		log.debug("path {}", p);
-		//if (p != null) {
-		byte[] b = p.getBytes();
-		System.arraycopy(b, 0, buf, pos, b.length);
-		return pos + b.length;
-		//}
-		//
-		//		buf[pos++] = '/';
-		//		pos = LwHttp.writeInt(tile.zoomLevel, pos, buf);
-		//		buf[pos++] = '/';
-		//		pos = LwHttp.writeInt(tile.tileX, pos, buf);
-		//		buf[pos++] = '/';
-		//		pos = LwHttp.writeInt(tile.tileY, pos, buf);
-		//		byte[] ext = tileSource.mExtBytes;
-		//		if (ext == null)
-		//			return pos;
-		//
-		//		System.arraycopy(ext, 0, buf, pos, ext.length);
-		//		return pos + ext.length;
+	private int formatTilePath(Tile tile, byte[] buf, int pos) {
+		for (byte[] b : mTilePath) {
+			if (b.length == 1) {
+				if (b[0] == '/') {
+					buf[pos++] = '/';
+				} else if (b[0] == 'X') {
+					pos = writeInt(tile.tileX, pos, buf);
+					continue;
+				} else if (b[0] == 'Y') {
+					pos = writeInt(tile.tileY, pos, buf);
+					continue;
+				} else if (b[0] == 'Z') {
+					pos = writeInt(tile.zoomLevel, pos, buf);
+					continue;
+				}
+			}
+			System.arraycopy(b, 0, buf, pos, b.length);
+			pos += b.length;
+		}
+		return pos;
+
 	}
 
 	public static class LwHttpFactory implements HttpEngine.Factory {
+		private byte[][] mTilePath;
 
 		@Override
 		public HttpEngine create(UrlTileSource tileSource) {
-			return new LwHttp(tileSource);
+			if (mTilePath == null) {
+				String[] path = tileSource.getTilePath();
+				mTilePath = new byte[path.length][];
+				for (int i = 0; i < path.length; i++)
+					mTilePath[i] = path[i].getBytes();
+			}
+
+			return new LwHttp(tileSource, mTilePath);
 		}
 	}
 }
