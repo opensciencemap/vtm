@@ -105,8 +105,12 @@ public abstract class UrlTileSource extends TileSource {
 		mRequestHeaders = options;
 	}
 
-	protected Map<String, String> getRequestHeader() {
+	public Map<String, String> getRequestHeader() {
 		return mRequestHeaders;
+	}
+
+	public String[] getTilePath() {
+		return mTilePath;
 	}
 
 	public HttpEngine getHttpEngine() {
