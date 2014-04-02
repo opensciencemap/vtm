@@ -35,10 +35,10 @@ public class UrlTileDataSource implements ITileDataSource {
 	protected final ITileDecoder mTileDecoder;
 	protected final UrlTileSource mTileSource;
 
-	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
+	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, HttpEngine conn) {
 		mTileSource = tileSource;
 		mTileDecoder = tileDecoder;
-		mConn = conn;
+		mConn = (LwHttp) conn;
 	}
 
 	UrlTileSource getTileSource() {
@@ -80,12 +80,12 @@ public class UrlTileDataSource implements ITileDataSource {
 						log.debug("{} failed", tile);
 
 					// FIXME
-					mConn.requestCompleted();
+					mConn.requestCompleted(true);
 
 					sink.completed(win ? SUCCESS : FAILED);
 				} else {
 					// FIXME
-					mConn.requestCompleted();
+					mConn.requestCompleted(false);
 					sink.completed(FAILED);
 				}
 
