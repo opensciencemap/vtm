@@ -75,7 +75,7 @@ public class UrlTileDataSource implements ITileDataSource {
 		TileWriter cacheWriter = null;
 		try {
 			InputStream is;
-			if (!mConn.sendRequest(mTileSource, tile)) {
+			if (!mConn.sendRequest(tile)) {
 				log.debug("{} Request failed", tile);
 			} else if ((is = mConn.read()) == null) {
 				log.debug("{} Network Error", tile);

@@ -18,32 +18,44 @@ package org.oscim.tiling.source;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import org.oscim.core.Tile;
 import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.LwHttp.LwHttpFactory;
 
 public abstract class UrlTileSource extends TileSource {
 
 	private final URL mUrl;
-	private byte[] mExtBytes;
-	private String mExtString;
+	private final String[] mTilePath;
 
 	private HttpEngine.Factory mHttpFactory;
+	private Map<String, String> mRequestHeaders;
 
-	public UrlTileSource(String urlString) {
+	public UrlTileSource(String url, String tilePath, int zoomMin, int zoomMax) {
+		this(url, tilePath);
+		mZoomMin = zoomMin;
+		mZoomMax = zoomMax;
+	}
+
+	/**
+	 * @param urlString 'http://example.com/'
+	 * @param tilePath replacement string for tile coordinates,
+	 *            e.g. '{Z}/{X}/{Y}.png'
+	 */
+	public UrlTileSource(String urlString, String tilePath) {
+
+		if (tilePath == null)
+			throw new IllegalArgumentException("tilePath cannot be null.");
+
 		URL url = null;
 		try {
 			url = new URL(urlString);
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException(e);
 		}
 		mUrl = url;
-	}
-
-	public UrlTileSource(String url, int zoomMin, int zoomMax) {
-		this(url);
-		mZoomMin = zoomMin;
-		mZoomMax = zoomMax;
+		mTilePath = tilePath.split("\\{|\\}");
 	}
 
 	@Override
@@ -56,75 +68,52 @@ public abstract class UrlTileSource extends TileSource {
 
 	}
 
-	protected void setExtension(String ext) {
-		mExtString = ext;
-		if (ext == null) {
-			mExtBytes = null;
-			return;
-		}
-		mExtBytes = ext.getBytes();
-	}
-
-	protected void setMimeType(String string) {
-
-	}
-
-	/**
-	 * Create url path for tile
-	 */
-	protected String getTileUrl(Tile tile) {
-		return null;
-	}
-
-	/**
-	 * Write tile url - the low level, no-allocations method,
-	 * 
-	 * override getTileUrl() for custom url formatting using
-	 * Strings
-	 * 
-	 * @param tile the Tile
-	 * @param buf to write url string
-	 * @param pos current position
-	 * @return new position
-	 */
-	public int formatTilePath(Tile tile, byte[] buf, int pos) {
-		String p = getTileUrl(tile);
-		if (p != null) {
-			byte[] b = p.getBytes();
-			System.arraycopy(b, 0, buf, pos, b.length);
-			return pos + b.length;
-		}
-
-		buf[pos++] = '/';
-		pos = LwHttp.writeInt(tile.zoomLevel, pos, buf);
-		buf[pos++] = '/';
-		pos = LwHttp.writeInt(tile.tileX, pos, buf);
-		buf[pos++] = '/';
-		pos = LwHttp.writeInt(tile.tileY, pos, buf);
-		if (mExtBytes == null)
-			return pos;
-
-		System.arraycopy(mExtBytes, 0, buf, pos, mExtBytes.length);
-		return pos + mExtBytes.length;
-	}
-
 	public URL getUrl() {
 		return mUrl;
+	}
+
+	public String formatTilePath(Tile tile) {
+		// TODO only use the actual replacement positions.
+
+		StringBuilder sb = new StringBuilder();
+		for (String b : mTilePath) {
+			if (b.length() == 1) {
+				switch (b.charAt(0)) {
+					case 'X':
+						sb.append(tile.tileX);
+						continue;
+					case 'Y':
+						sb.append(tile.tileY);
+						continue;
+					case 'Z':
+						sb.append(tile.zoomLevel);
+						continue;
+					default:
+						break;
+				}
+			}
+			sb.append(b);
+		}
+		return sb.toString();
 	}
 
 	public void setHttpEngine(HttpEngine.Factory httpFactory) {
 		mHttpFactory = httpFactory;
 	}
 
-	public HttpEngine getHttpEngine() {
-		if (mHttpFactory == null) {
-			return new LwHttp(getUrl());
-		}
-
-		return mHttpFactory.create();
+	public void setHttpRequestHeaders(Map<String, String> options) {
+		mRequestHeaders = options;
 	}
 
-	public String getExtension() {
-		return mExtString == null ? "" : mExtString;
+	protected Map<String, String> getRequestHeader() {
+		return mRequestHeaders;
+	}
+
+	public HttpEngine getHttpEngine() {
+		if (mHttpFactory == null) {
+			mHttpFactory = new LwHttpFactory();
+		}
+
+		return mHttpFactory.create(this);
 	}
 }

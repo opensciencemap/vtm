@@ -27,8 +27,7 @@ public class OSciMap4TileSource extends UrlTileSource {
 	}
 
 	public OSciMap4TileSource(String url) {
-		super(url);
-		setExtension(".vtm");
+		super(url, "/{Z}/{X}/{Y}.vtm");
 	}
 
 	@Override

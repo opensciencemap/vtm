@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.oscim.core.Tile;
@@ -11,25 +12,27 @@ import org.oscim.core.Tile;
 import com.squareup.okhttp.OkHttpClient;
 
 public class OkHttpEngine implements HttpEngine {
-	private final OkHttpClient client;
+	private final OkHttpClient mClient;
+	private final UrlTileSource mTileSource;
 
 	public static class OkHttpFactory implements HttpEngine.Factory {
-		private final OkHttpClient client;
+		private final OkHttpClient mClient;
 
 		public OkHttpFactory() {
-			this.client = new OkHttpClient();
+			mClient = new OkHttpClient();
 		}
 
 		@Override
-		public HttpEngine create() {
-			return new OkHttpEngine(client);
+		public HttpEngine create(UrlTileSource tileSource) {
+			return new OkHttpEngine(mClient, tileSource);
 		}
 	}
 
 	private InputStream inputStream;
 
-	public OkHttpEngine(OkHttpClient client) {
-		this.client = client;
+	public OkHttpEngine(OkHttpClient client, UrlTileSource tileSource) {
+		mClient = client;
+		mTileSource = tileSource;
 	}
 
 	@Override
@@ -37,28 +40,18 @@ public class OkHttpEngine implements HttpEngine {
 		return inputStream;
 	}
 
+	HttpURLConnection openConnection(Tile tile) throws MalformedURLException {
+		return mClient.open(new URL(mTileSource.getUrl() +
+		        mTileSource.formatTilePath(tile)));
+	}
+
 	@Override
-	public boolean sendRequest(UrlTileSource tileSource, Tile tile) throws IOException {
+	public boolean sendRequest(Tile tile) throws IOException {
 		if (tile == null) {
 			throw new IllegalArgumentException("Tile cannot be null.");
 		}
 
-		StringBuilder sb = new StringBuilder();
-		sb.append(tileSource.getUrl());
-		String path = tileSource.getTileUrl(tile);
-		if (path == null) {
-			sb.append('/');
-			sb.append(tile.zoomLevel);
-			sb.append('/');
-			sb.append(tile.tileX);
-			sb.append('/');
-			sb.append(tile.tileY);
-			sb.append(tileSource.getExtension());
-		} else {
-			sb.append(path);
-		}
-
-		final HttpURLConnection connection = client.open(new URL(sb.toString()));
+		final HttpURLConnection connection = openConnection(tile);
 
 		inputStream = connection.getInputStream();
 

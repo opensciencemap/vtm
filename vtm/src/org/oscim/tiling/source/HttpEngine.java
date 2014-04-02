@@ -10,7 +10,7 @@ public interface HttpEngine {
 
 	InputStream read() throws IOException;
 
-	boolean sendRequest(UrlTileSource tileSource, Tile tile) throws IOException;
+	boolean sendRequest(Tile tile) throws IOException;
 
 	void close();
 
@@ -19,6 +19,7 @@ public interface HttpEngine {
 	boolean requestCompleted(boolean success);
 
 	public interface Factory {
-		public HttpEngine create();
+		public abstract HttpEngine create(UrlTileSource tileSource);
 	}
+
 }

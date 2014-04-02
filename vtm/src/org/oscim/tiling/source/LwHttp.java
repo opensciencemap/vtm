@@ -24,7 +24,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URL;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.oscim.core.Tile;
@@ -39,6 +38,8 @@ import org.slf4j.LoggerFactory;
 public class LwHttp implements HttpEngine {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 	static final boolean dbg = false;
+
+	private final UrlTileSource mTileSource;
 
 	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
 	//private final static byte[] HEADER_CONTENT_TYPE = "Content-Type".getBytes();
@@ -68,16 +69,9 @@ public class LwHttp implements HttpEngine {
 	private final byte[] REQUEST_GET_END;
 	private final byte[] mRequestBuffer;
 
-	/**
-	 * @param url
-	 *            Base url for tiles
-	 */
-	public LwHttp(URL url) {
-		this(url, null);
-	}
-
-	public LwHttp(URL url, Map<String, String> header) {
-
+	private LwHttp(UrlTileSource tileSource) {
+		mTileSource = tileSource;
+		URL url = tileSource.getUrl();
 		int port = url.getPort();
 		if (port < 0)
 			port = 80;
@@ -89,9 +83,9 @@ public class LwHttp implements HttpEngine {
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
 		String addRequest = "";
-		if (header != null) {
+		if (tileSource.getRequestHeader() != null) {
 			StringBuffer sb = new StringBuffer();
-			for (Entry<String, String> l : header.entrySet())
+			for (Entry<String, String> l : tileSource.getRequestHeader().entrySet())
 				sb.append('\n').append(l.getKey()).append(": ").append(l.getValue());
 			addRequest = sb.toString();
 		}
@@ -329,7 +323,7 @@ public class LwHttp implements HttpEngine {
 	}
 
 	@Override
-	public boolean sendRequest(UrlTileSource tileSource, Tile tile) throws IOException {
+	public boolean sendRequest(Tile tile) throws IOException {
 
 		if (mSocket != null) {
 			if (mMaxReq-- <= 0)
@@ -358,7 +352,7 @@ public class LwHttp implements HttpEngine {
 		byte[] request = mRequestBuffer;
 		int pos = REQUEST_GET_START.length;
 
-		pos = tileSource.formatTilePath(tile, request, pos);
+		pos = formatTilePath(mTileSource, tile, request, pos);
 
 		int len = REQUEST_GET_END.length;
 		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
@@ -498,5 +492,47 @@ public class LwHttp implements HttpEngine {
 				return false;
 
 		return true;
+	}
+
+	/**
+	 * Write tile url - the low level, no-allocations method,
+	 * 
+	 * override getTileUrl() for custom url formatting using
+	 * Strings
+	 * 
+	 * @param tile the Tile
+	 * @param buf to write url string
+	 * @param pos current position
+	 * @return new position
+	 */
+	public int formatTilePath(UrlTileSource tileSource, Tile tile, byte[] buf, int pos) {
+		String p = tileSource.formatTilePath(tile);
+		log.debug("path {}", p);
+		//if (p != null) {
+		byte[] b = p.getBytes();
+		System.arraycopy(b, 0, buf, pos, b.length);
+		return pos + b.length;
+		//}
+		//
+		//		buf[pos++] = '/';
+		//		pos = LwHttp.writeInt(tile.zoomLevel, pos, buf);
+		//		buf[pos++] = '/';
+		//		pos = LwHttp.writeInt(tile.tileX, pos, buf);
+		//		buf[pos++] = '/';
+		//		pos = LwHttp.writeInt(tile.tileY, pos, buf);
+		//		byte[] ext = tileSource.mExtBytes;
+		//		if (ext == null)
+		//			return pos;
+		//
+		//		System.arraycopy(ext, 0, buf, pos, ext.length);
+		//		return pos + ext.length;
+	}
+
+	public static class LwHttpFactory implements HttpEngine.Factory {
+
+		@Override
+		public HttpEngine create(UrlTileSource tileSource) {
+			return new LwHttp(tileSource);
+		}
 	}
 }
