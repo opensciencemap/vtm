@@ -115,14 +115,14 @@ public class Color {
 
 	public static int parseColorComponents(String str) {
 		int numComponents = 4;
-		//boolean rgbMode = true;
+		int cur = 5;
 
-		if (str.startsWith("rgb("))
+		if (str.startsWith("rgb(")) {
 			numComponents = 3;
-		else if (!str.startsWith("rgba("))
+			cur = 4;
+		} else if (!str.startsWith("rgba("))
 			parseColorException(str);
 
-		int cur = 4;
 		int end = str.length();
 		int component = 0;
 		int a = 0, r = 0, g = 0, b = 0;
@@ -130,7 +130,7 @@ public class Color {
 		if (str.charAt(end - 1) != ')')
 			parseColorException(str);
 
-		while (cur < end) {
+		for (; cur < end; cur++) {
 			char c = str.charAt(cur);
 			if (c == ',') {
 				component++;
