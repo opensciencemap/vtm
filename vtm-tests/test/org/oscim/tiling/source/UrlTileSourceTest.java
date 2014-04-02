@@ -1,17 +1,17 @@
 package org.oscim.tiling.source;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.oscim.tiling.ITileDataSource;
-
-import static org.fest.assertions.api.Assertions.assertThat;
 
 public class UrlTileSourceTest {
 	private UrlTileSource tileSource;
 
 	@Before
 	public void setUp() throws Exception {
-		tileSource = new TestTileSource("http://example.org/tiles/vtm");
+		tileSource = new TestTileSource("http://example.org/tiles/vtm", "/{Z}/{X}/{Z}.vtm");
 	}
 
 	@Test
@@ -33,8 +33,8 @@ public class UrlTileSourceTest {
 	}
 
 	class TestTileSource extends UrlTileSource {
-		public TestTileSource(String urlString) {
-			super(urlString);
+		public TestTileSource(String urlString, String tilePath) {
+			super(urlString, tilePath);
 		}
 
 		@Override
@@ -45,7 +45,7 @@ public class UrlTileSourceTest {
 
 	class TestTileDataSource extends UrlTileDataSource {
 		public TestTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder,
-				HttpEngine conn) {
+		        HttpEngine conn) {
 			super(tileSource, tileDecoder, conn);
 		}
 

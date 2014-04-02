@@ -10,6 +10,7 @@ import org.oscim.tiling.source.HttpEngine;
 import org.oscim.tiling.source.LwHttp;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.UrlTileDataSource;
+import org.oscim.tiling.source.UrlTileSource;
 
 public class BitmapTileSourceTest {
 	private BitmapTileSource tileSource;
@@ -43,7 +44,8 @@ public class BitmapTileSourceTest {
 	}
 
 	/**
-	 * Test factory that allows the specific {@link HttpEngine} instance to be set.
+	 * Test factory that allows the specific {@link HttpEngine} instance to be
+	 * set.
 	 */
 	class TestHttpFactory implements HttpEngine.Factory {
 		final HttpEngine engine;
@@ -53,7 +55,7 @@ public class BitmapTileSourceTest {
 		}
 
 		@Override
-		public HttpEngine create() {
+		public HttpEngine create(UrlTileSource tileSource) {
 			return engine;
 		}
 	}
