@@ -50,8 +50,6 @@ public class MapRenderer {
 	private static int mQuadVerticesID;
 	public final static int maxQuads = 64;
 
-	private static boolean mUpdateColor;
-
 	public static long frametime;
 	private static boolean rerender;
 
@@ -116,7 +114,6 @@ public class MapRenderer {
 
 	public static void setBackgroundColor(int color) {
 		mClearColor = GLUtils.colorToFloat(color);
-		mUpdateColor = true;
 	}
 
 	static class BufferItem extends Inlist<BufferItem> {
@@ -179,12 +176,7 @@ public class MapRenderer {
 	}
 
 	private void draw() {
-
-		//if (mUpdateColor) {
-		float cc[] = mClearColor;
-		GL.glClearColor(cc[0], cc[1], cc[2], cc[3]);
-		mUpdateColor = false;
-		//}
+		GLState.setClearColor(mClearColor);
 
 		GL.glDepthMask(true);
 		GL.glStencilMask(0xFF);
@@ -306,9 +298,6 @@ public class MapRenderer {
 		GL.glBufferData(GL20.GL_ARRAY_BUFFER,
 		                quad.length * 4, floatBuffer, GL20.GL_STATIC_DRAW);
 		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
-
-		if (mClearColor != null)
-			mUpdateColor = true;
 
 		GLState.init(GL);
 

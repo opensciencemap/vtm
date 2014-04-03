@@ -30,6 +30,7 @@ public class GLState {
 	private static boolean depth = false;
 	private static boolean stencil = false;
 	private static int shader;
+	private static float[] clearColor;
 
 	private static int currentTexId;
 
@@ -43,6 +44,7 @@ public class GLState {
 		stencil = false;
 		shader = -1;
 		currentTexId = -1;
+		clearColor = null;
 
 		GL.glDisable(GL20.GL_STENCIL_TEST);
 		GL.glDisable(GL20.GL_DEPTH_TEST);
@@ -130,5 +132,17 @@ public class GLState {
 			GL.glBindTexture(GL20.GL_TEXTURE_2D, id);
 			currentTexId = id;
 		}
+	}
+
+	public static void setClearColor(float[] color) {
+		if (clearColor != null &&
+		        color[0] == clearColor[0] &&
+		        color[1] == clearColor[1] &&
+		        color[2] == clearColor[2] &&
+		        color[3] == clearColor[3])
+			return;
+
+		clearColor = color;
+		GL.glClearColor(color[0], color[1], color[2], color[3]);
 	}
 }

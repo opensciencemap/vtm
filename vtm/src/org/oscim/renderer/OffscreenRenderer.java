@@ -17,6 +17,7 @@ public class OffscreenRenderer extends LayerRenderer {
 	int texH = -1;
 
 	boolean initialized;
+	private float[] mClearColor = { 0, 0, 0, 0 };
 
 	private boolean useDepthTexture = false;
 
@@ -160,7 +161,7 @@ public class OffscreenRenderer extends LayerRenderer {
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, fb);
 		GL.glViewport(0, 0, texW, texH);
 		GL.glDepthMask(true);
-		GL.glClearColor(0, 0, 0, 0);
+		GLState.setClearColor(mClearColor);
 		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_COLOR_BUFFER_BIT);
 
 		mRenderer.render(viewport);
