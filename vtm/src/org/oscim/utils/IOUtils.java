@@ -19,39 +19,44 @@ package org.oscim.utils;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A utility class with IO-specific helper methods.
  */
 public final class IOUtils {
+	final static Logger log = LoggerFactory.getLogger(IOUtils.class);
 
 	/**
 	 * Invokes the {@link Closeable#close()} method on the given object. If an
 	 * {@link IOException} occurs during the
-	 * method call, it will be caught and logged on level {@link Level#WARNING}.
+	 * method call, it will be caught and logged.
 	 * 
 	 * @param closeable
 	 *            the data source which should be closed (may be null).
 	 */
 	public static void closeQuietly(Closeable closeable) {
+		if (closeable == null)
+			return;
+
 		try {
-			if (closeable != null) {
-				closeable.close();
-			}
+			closeable.close();
 		} catch (IOException e) {
-			//log.debug(e.getMessage() + " " + e);
+			log.debug(e.getMessage());
 		}
 	}
 
 	/* for old java versions */
 	public static void closeQuietly(Socket closeable) {
+		if (closeable == null)
+			return;
+
 		try {
-			if (closeable != null) {
-				closeable.close();
-			}
+			closeable.close();
 		} catch (IOException e) {
-			//log.debug(e.getMessage() + " " + e);
+			log.debug(e.getMessage());
 		}
 	}
 
