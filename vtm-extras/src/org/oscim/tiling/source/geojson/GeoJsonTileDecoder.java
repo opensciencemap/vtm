@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
-import java.util.zip.GZIPInputStream;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -89,14 +88,10 @@ public class GeoJsonTileDecoder implements ITileDecoder {
 		mTileY = tile.tileY / mTileScale;
 		mTileScale *= Tile.SIZE;
 
-		is = new GZIPInputStream(is);
-
 		JsonParser jp = mJsonFactory.createParser(new InputStreamReader(is));
 
 		for (JsonToken t; (t = jp.nextToken()) != null;) {
-
 			if (t == FIELD_NAME) {
-
 				if (match(jp, FIELD_FEATURES)) {
 					if (jp.nextToken() != START_ARRAY)
 						continue;
@@ -122,9 +117,7 @@ public class GeoJsonTileDecoder implements ITileDecoder {
 		mTagMap.clear();
 
 		for (JsonToken t; (t = jp.nextToken()) != null;) {
-
 			if (t == FIELD_NAME) {
-
 				if (match(jp, FIELD_GEOMETRY)) {
 					if (jp.nextToken() == START_OBJECT)
 						parseGeometry(jp);

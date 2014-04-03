@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URL;
 import java.util.Map.Entry;
+import java.util.zip.GZIPInputStream;
 
 import org.oscim.core.Tile;
 import org.oscim.utils.ArrayUtils;
@@ -43,6 +44,7 @@ public class LwHttp implements HttpEngine {
 	private final static byte[] HEADER_HTTP_OK = "200 OK".getBytes();
 	private final static byte[] HEADER_CONTENT_LENGTH = "Content-Length".getBytes();
 	private final static byte[] HEADER_CONNECTION_CLOSE = "Connection: close".getBytes();
+	private final static byte[] HEADER_ENCODING_GZIP = "Content-Encoding: gzip".getBytes();
 
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
 	private final static long RESPONSE_TIMEOUT = (long) 10E9; // 10 second in nanosecond
@@ -70,6 +72,8 @@ public class LwHttp implements HttpEngine {
 	private final byte[][] mTilePath;
 	private final UrlTileSource mTileSource;
 
+	//private boolean mUseGZIP;
+
 	private LwHttp(UrlTileSource tileSource, byte[][] tilePath) {
 		mTilePath = tilePath;
 		mTileSource = tileSource;
@@ -79,29 +83,35 @@ public class LwHttp implements HttpEngine {
 		if (port < 0)
 			port = 80;
 
-		String host = url.getHost();
+		mHost = url.getHost();
+		mPort = port;
+
 		String path = url.getPath();
-		//log.debug("open database: {} {} {}", host, port, path);
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
-		StringBuilder opt = new StringBuilder();
-		for (Entry<String, String> l : tileSource.getRequestHeader().entrySet())
-			opt.append('\n').append(l.getKey()).append(": ").append(l.getValue());
+		StringBuilder sb = new StringBuilder()
+		    .append(" HTTP/1.1")
+		    .append("\nUser-Agent: vtm/0.5.9")
+		    .append("\nHost: ")
+		    .append(mHost)
+		    .append("\nConnection: Keep-Alive");
 
-		REQUEST_GET_END = (" HTTP/1.1" +
-		        "\nUser-Agent: vtm/0.5.9" +
-		        "\nHost: " + host +
-		        "\nConnection: Keep-Alive" +
-		        opt.toString() +
-		        "\n\n").getBytes();
+		for (Entry<String, String> l : tileSource.getRequestHeader().entrySet()) {
+			String key = l.getKey();
+			String val = l.getValue();
+			//if ("Accept-Encoding".equals(key) && "gzip".equals(val))
+			//	mUseGZIP = true;
+			sb.append('\n').append(key).append(": ").append(val);
+		}
+		sb.append("\n\n");
 
-		mHost = host;
-		mPort = port;
+		REQUEST_GET_END = sb.toString().getBytes();
 
 		mRequestBuffer = new byte[1024];
 		System.arraycopy(REQUEST_GET_START, 0,
-		                 mRequestBuffer, 0, REQUEST_GET_START.length);
+		                 mRequestBuffer, 0,
+		                 REQUEST_GET_START.length);
 	}
 
 	static final class Buffer extends BufferedInputStream {
@@ -243,6 +253,7 @@ public class LwHttp implements HttpEngine {
 		byte[] buf = buffer;
 		boolean first = true;
 		boolean ok = true;
+		boolean gzip = false;
 
 		int read = 0;
 		int pos = 0;
@@ -284,6 +295,8 @@ public class LwHttp implements HttpEngine {
 					/* parse Content-Length */
 					contentLength = parseInt(buf, pos +
 					        HEADER_CONTENT_LENGTH.length + 2, end - 1);
+				} else if (check(HEADER_ENCODING_GZIP, buf, pos, end)) {
+					gzip = true;
 				} else if (check(HEADER_CONNECTION_CLOSE, buf, pos, end)) {
 					mMustClose = true;
 				}
@@ -307,6 +320,9 @@ public class LwHttp implements HttpEngine {
 		is.skip(end);
 		is.start(contentLength);
 
+		if (gzip) {
+			return new GZIPInputStream(is);
+		}
 		return is;
 	}
 
@@ -320,8 +336,9 @@ public class LwHttp implements HttpEngine {
 				close();
 			else {
 				try {
-					if (mResponseStream.available() > 0) {
-						log.debug("still bytes available");
+					int n = mResponseStream.available();
+					if (n > 0) {
+						log.debug("left over bytes {} ", n);
 						close();
 					}
 				} catch (IOException e) {
