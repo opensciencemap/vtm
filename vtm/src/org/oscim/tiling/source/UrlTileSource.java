@@ -18,6 +18,7 @@ package org.oscim.tiling.source;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Map;
 
 import org.oscim.core.Tile;
@@ -27,12 +28,11 @@ import org.oscim.tiling.source.LwHttp.LwHttpFactory;
 public abstract class UrlTileSource extends TileSource {
 
 	public final static TileUrlFormatter URL_FORMATTER = new DefaultTileUrlFormatter();
-
 	private final URL mUrl;
 	private final String[] mTilePath;
 
 	private HttpEngine.Factory mHttpFactory;
-	private Map<String, String> mRequestHeaders;
+	private Map<String, String> mRequestHeaders = Collections.emptyMap();
 	private TileUrlFormatter mTileUrlFormatter = URL_FORMATTER;
 
 	public interface TileUrlFormatter {

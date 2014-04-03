@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map.Entry;
 
 import org.oscim.core.Tile;
 import org.oscim.utils.IOUtils;
@@ -64,6 +65,9 @@ public class OkHttpEngine implements HttpEngine {
 		}
 		URL url = new URL(mTileSource.getTileUrl(tile));
 		HttpURLConnection conn = mClient.open(url);
+
+		for (Entry<String, String> opt : mTileSource.getRequestHeader().entrySet())
+			conn.addRequestProperty(opt.getKey(), opt.getValue());
 
 		inputStream = conn.getInputStream();
 	}

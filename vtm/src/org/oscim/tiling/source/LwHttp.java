@@ -85,19 +85,15 @@ public class LwHttp implements HttpEngine {
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
-		String addRequest = "";
-		if (tileSource.getRequestHeader() != null) {
-			StringBuffer sb = new StringBuffer();
-			for (Entry<String, String> l : tileSource.getRequestHeader().entrySet())
-				sb.append('\n').append(l.getKey()).append(": ").append(l.getValue());
-			addRequest = sb.toString();
-		}
+		StringBuilder opt = new StringBuilder();
+		for (Entry<String, String> l : tileSource.getRequestHeader().entrySet())
+			opt.append('\n').append(l.getKey()).append(": ").append(l.getValue());
 
 		REQUEST_GET_END = (" HTTP/1.1" +
 		        "\nUser-Agent: vtm/0.5.9" +
 		        "\nHost: " + host +
 		        "\nConnection: Keep-Alive" +
-		        addRequest +
+		        opt.toString() +
 		        "\n\n").getBytes();
 
 		mHost = host;
