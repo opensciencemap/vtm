@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Lightweight HTTP connection for tile loading. Does not do redirects,
- * https, full header parsing or stuff.
+ * https, full header parsing or other stuff.
  */
 public class LwHttp implements HttpEngine {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
@@ -81,7 +81,7 @@ public class LwHttp implements HttpEngine {
 
 		String host = url.getHost();
 		String path = url.getPath();
-		log.debug("open database: " + host + " " + port + " " + path);
+		//log.debug("open database: {} {} {}", host, port, path);
 
 		REQUEST_GET_START = ("GET " + path).getBytes();
 
@@ -104,10 +104,6 @@ public class LwHttp implements HttpEngine {
 		                 mRequestBuffer, 0, REQUEST_GET_START.length);
 	}
 
-	// TODO:
-	// to avoid a copy in PbfDecoder one could manage the buffer
-	// array directly and provide access to it.
-	static class Buffer extends BufferedInputStream {
 	static final class Buffer extends BufferedInputStream {
 		OutputStream cache;
 		int bytesRead = 0;
@@ -203,9 +199,6 @@ public class LwHttp implements HttpEngine {
 			if (data >= 0)
 				bytesRead += 1;
 
-			//if (dbg)
-			//	log.debug("read {} {}", bytesRead, contentLength);
-
 			if (cache != null && bytesRead > bytesWrote) {
 				bytesWrote = bytesRead;
 				cache.write(data);
@@ -280,27 +273,21 @@ public class LwHttp implements HttpEngine {
 				break;
 			}
 
-			if (!ok) {
-				/* ignore until end of header */
-			} else if (first) {
-				first = false;
-				/* check only for OK ("HTTP/1.? ".length == 9) */
-				if (!check(HEADER_HTTP_OK, buf, pos + 9, end))
-					ok = false;
+			if (ok) {
+				if (first) {
+					first = false;
+					/* check only for OK ("HTTP/1.? ".length == 9) */
+					if (!check(HEADER_HTTP_OK, buf, pos + 9, end))
+						ok = false;
 
-			} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
-				/* parse Content-Length */
-				contentLength = parseInt(buf, pos +
-				        HEADER_CONTENT_LENGTH.length + 2, end - 1);
-			} else if (check(HEADER_CONNECTION_CLOSE, buf, pos, end)) {
-				mMustClose = true;
+				} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
+					/* parse Content-Length */
+					contentLength = parseInt(buf, pos +
+					        HEADER_CONTENT_LENGTH.length + 2, end - 1);
+				} else if (check(HEADER_CONNECTION_CLOSE, buf, pos, end)) {
+					mMustClose = true;
+				}
 			}
-			//} else if (check(HEADER_CONTENT_TYPE, buf, pos, end)) {
-			// check that response contains the expected
-			// Content-Type
-			//if (!check(mContentType, buf, pos +
-			//        HEADER_CONTENT_TYPE.length + 2, end))
-			//	ok = false;
 
 			if (!ok || dbg) {
 				String line = new String(buf, pos, end - pos - 1);
@@ -423,15 +410,6 @@ public class LwHttp implements HttpEngine {
 		mResponseStream.setCache(null);
 
 		if (!mResponseStream.finishedReading()) {
-			//	StringBuffer sb = new StringBuffer();
-			//	try {
-			//		int val;
-			//		while ((val = mResponseStream.read()) >= 0)
-			//			sb.append((char) val);
-			//	} catch (IOException e) {
-			//
-			//	}
-			//log.debug("invalid buffer position {}", sb.toString());
 			log.debug("invalid buffer position");
 			close();
 			return true;
@@ -491,8 +469,6 @@ public class LwHttp implements HttpEngine {
 	}
 
 	/**
-	 * Write tile url - the low level, no-allocations method,
-	 * 
 	 * @param tile the Tile
 	 * @param buf to write url string
 	 * @param pos current position
