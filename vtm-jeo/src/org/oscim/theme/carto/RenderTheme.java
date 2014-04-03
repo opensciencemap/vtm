@@ -93,7 +93,7 @@ public class RenderTheme implements IRenderTheme {
 		}
 
 		// get map background
-		RuleList rules = mStyle.getRules().selectByName("Map", false);
+		RuleList rules = mStyle.getRules().selectByName("Map", false, false);
 		if (!rules.isEmpty()) {
 			Rule rule = rules.collapse();
 			RGB bgColor = rule.color(null, BACKGROUND_COLOR, null);
