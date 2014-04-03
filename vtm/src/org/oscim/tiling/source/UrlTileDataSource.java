@@ -38,12 +38,12 @@ import org.slf4j.LoggerFactory;
 public class UrlTileDataSource implements ITileDataSource {
 	static final Logger log = LoggerFactory.getLogger(UrlTileDataSource.class);
 
-	protected final LwHttp mConn;
+	protected final HttpEngine mConn;
 	protected final ITileDecoder mTileDecoder;
 	protected final UrlTileSource mTileSource;
 	protected final boolean mUseCache;
 
-	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
+	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, HttpEngine conn) {
 		mTileDecoder = tileDecoder;
 		mTileSource = tileSource;
 		mUseCache = (tileSource.tileCache != null);
@@ -74,10 +74,9 @@ public class UrlTileDataSource implements ITileDataSource {
 		boolean success = false;
 		TileWriter cacheWriter = null;
 		try {
-			InputStream is;
-			if (!mConn.sendRequest(mTileSource, tile)) {
-				log.debug("{} Request failed", tile);
-			} else if ((is = mConn.read()) == null) {
+			mConn.sendRequest(tile);
+			InputStream is = mConn.read();
+			if (is == null) {
 				log.debug("{} Network Error", tile);
 			} else {
 				if (mUseCache) {

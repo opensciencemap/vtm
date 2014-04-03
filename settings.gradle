@@ -1,4 +1,5 @@
 include ':vtm'
+include ':vtm-tests'
 include ':vtm-extras'
 include ':vtm-android'
 include ':vtm-android-example'

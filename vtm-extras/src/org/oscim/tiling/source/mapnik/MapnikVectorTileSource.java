@@ -18,40 +18,41 @@ package org.oscim.tiling.source.mapnik;
 
 import org.oscim.core.Tile;
 import org.oscim.tiling.ITileDataSource;
-import org.oscim.tiling.source.LwHttp;
 import org.oscim.tiling.source.UrlTileDataSource;
 import org.oscim.tiling.source.UrlTileSource;
 
 public class MapnikVectorTileSource extends UrlTileSource {
 
 	public MapnikVectorTileSource() {
-		super("http://d1s11ojcu7opje.cloudfront.net/dev/764e0b8d");
+		super("http://d1s11ojcu7opje.cloudfront.net/dev/764e0b8d", "");
+		setUrlFormatter(new TileUrlFormatter() {
+			@Override
+			public String formatTilePath(UrlTileSource tileSource, Tile tile) {
+				// url formatter for mapbox streets
+				byte[] hexTable = {
+				        '0', '1', '2', '3',
+				        '4', '5', '6', '7',
+				        '8', '9', 'a', 'b',
+				        'c', 'd', 'e', 'f'
+				};
+				StringBuilder sb = new StringBuilder();
+				sb.append('/');
+				sb.append(hexTable[(tile.tileX) % 16]);
+				sb.append(hexTable[(tile.tileY) % 16]);
+				sb.append('/');
+				sb.append(tile.zoomLevel);
+				sb.append('/');
+				sb.append(tile.tileX);
+				sb.append('/');
+				sb.append(tile.tileY);
+
+				return sb.toString();
+			}
+		});
 	}
 
 	@Override
 	public ITileDataSource getDataSource() {
-		return new UrlTileDataSource(this, new TileDecoder(), new LwHttp(getUrl()));
-	}
-
-	public int formatTilePath(Tile tile, byte[] path, int pos) {
-		// url formatter for mapbox streets
-		byte[] hexTable = {
-		        '0', '1', '2', '3',
-		        '4', '5', '6', '7',
-		        '8', '9', 'a', 'b',
-		        'c', 'd', 'e', 'f'
-		};
-
-		path[pos++] = '/';
-		path[pos++] = hexTable[(tile.tileX) % 16];
-		path[pos++] = hexTable[(tile.tileY) % 16];
-		path[pos++] = '/';
-		pos = LwHttp.writeInt(tile.zoomLevel, pos, path);
-		path[pos++] = '/';
-		pos = LwHttp.writeInt(tile.tileX, pos, path);
-		path[pos++] = '/';
-		pos = LwHttp.writeInt(tile.tileY, pos, path);
-
-		return pos;
+		return new UrlTileDataSource(this, new TileDecoder(), getHttpEngine());
 	}
 }

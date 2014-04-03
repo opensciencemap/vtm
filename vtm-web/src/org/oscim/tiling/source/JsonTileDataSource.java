@@ -41,8 +41,6 @@ public class JsonTileDataSource implements ITileDataSource {
 	protected final GeoJsonTileDecoder mTileDecoder;
 	protected final UrlTileSource mTileSource;
 
-	private final byte[] mRequestBuffer = new byte[1024];
-
 	public JsonTileDataSource(GeoJsonTileSource tileSource) {
 		mTileSource = tileSource;
 		mTileDecoder = new GeoJsonTileDecoder(tileSource);
@@ -61,12 +59,7 @@ public class JsonTileDataSource implements ITileDataSource {
 		mSink = sink;
 
 		try {
-			int pos = mTileSource.formatTilePath(tile, mRequestBuffer, 0);
-
-			String url = mTileSource.getUrl()
-			        + (new String(mRequestBuffer, 0, pos));
-
-			doGet(url);
+			doGet(mTileSource.getTileUrl(tile));
 		} catch (Exception e) {
 			e.printStackTrace();
 			sink.completed(FAILED);

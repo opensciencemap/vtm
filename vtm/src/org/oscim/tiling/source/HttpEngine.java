@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Hannes Janetzek
+ * Copyright 2014 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -18,12 +18,24 @@ package org.oscim.tiling.source;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.oscim.core.Tile;
-import org.oscim.tiling.ITileDataSink;
 
-public interface ITileDecoder {
+public interface HttpEngine {
 
-	boolean decode(Tile tile, ITileDataSink sink, InputStream is)
-	        throws IOException;
+	InputStream read() throws IOException;
+
+	void sendRequest(Tile tile) throws IOException;
+
+	void close();
+
+	void setCache(OutputStream os);
+
+	boolean requestCompleted(boolean success);
+
+	public interface Factory {
+		HttpEngine create(UrlTileSource tileSource);
+	}
+
 }

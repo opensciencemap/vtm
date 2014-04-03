@@ -22,27 +22,29 @@ import java.util.Map;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.tiling.ITileDataSource;
-import org.oscim.tiling.source.LwHttp;
 import org.oscim.tiling.source.UrlTileDataSource;
 import org.oscim.tiling.source.UrlTileSource;
 
 public abstract class GeoJsonTileSource extends UrlTileSource {
 
 	public GeoJsonTileSource(String url) {
-		super(url);
-		setExtension(".json");
+		super(url, "/{Z}/{X}/{Y}.json");
+		Map<String, String> opt = new HashMap<String, String>();
+		opt.put("Accept-Encoding", "gzip");
+		setHttpRequestHeaders(opt);
 	}
 
 	public GeoJsonTileSource(String url, int zoomMin, int zoomMax) {
-		super(url, zoomMin, zoomMax);
-		setExtension(".json");
+		super(url, "/{Z}/{X}/{Y}.json", zoomMin, zoomMax);
+		Map<String, String> opt = new HashMap<String, String>();
+		opt.put("Accept-Encoding", "gzip");
+		setHttpRequestHeaders(opt);
 	}
 
 	@Override
 	public ITileDataSource getDataSource() {
-		Map<String, String> opt = new HashMap<String, String>();
-		opt.put("Accept-Encoding", "gzip");
-		return new UrlTileDataSource(this, new GeoJsonTileDecoder(this), new LwHttp(getUrl(), opt));
+
+		return new UrlTileDataSource(this, new GeoJsonTileDecoder(this), getHttpEngine());
 	}
 
 	public Tag getFeatureTag() {

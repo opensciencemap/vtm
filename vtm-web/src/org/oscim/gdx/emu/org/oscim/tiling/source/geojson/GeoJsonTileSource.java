@@ -30,8 +30,7 @@ public abstract class GeoJsonTileSource extends UrlTileSource {
 	static final Logger log = LoggerFactory.getLogger(GeoJsonTileSource.class);
 
 	public GeoJsonTileSource(String url) {
-		super(url);
-		setExtension(".json");
+		super(url, "/{Z}/{X}/{Y}.json");
 	}
 
 	@Override

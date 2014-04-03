@@ -31,9 +31,17 @@ public class BitmapTileSource extends UrlTileSource {
 	 * Use e.g. setExtension(".jpg") to overide ending or
 	 * implement getUrlString() for custom formatting.
 	 */
+
 	public BitmapTileSource(String url, int zoomMin, int zoomMax) {
-		super(url, zoomMin, zoomMax);
-		setExtension(".png");
+		super(url, "/{Z}/{X}/{Y}.png", zoomMin, zoomMax);
+	}
+
+	public BitmapTileSource(String url, int zoomMin, int zoomMax, String extension) {
+		super(url, "/{Z}/{X}/{Y}" + extension, zoomMin, zoomMax);
+	}
+
+	public BitmapTileSource(String url, String tilePath, int zoomMin, int zoomMax) {
+		super(url, tilePath, zoomMin, zoomMax);
 	}
 
 	@Override
@@ -41,10 +49,9 @@ public class BitmapTileSource extends UrlTileSource {
 		return new BitmapTileDataSource(this);
 	}
 
-	public static class BitmapTileDataSource implements ITileDataSource {
+	public class BitmapTileDataSource implements ITileDataSource {
 
 		protected final UrlTileSource mTileSource;
-		private final byte[] mRequestBuffer = new byte[1024];
 
 		public BitmapTileDataSource(BitmapTileSource bitmapTileSource) {
 			mTileSource = bitmapTileSource;
@@ -53,10 +60,7 @@ public class BitmapTileSource extends UrlTileSource {
 		@Override
 		public void query(final MapTile tile, final ITileDataSink sink) {
 
-			int pos = mTileSource.formatTilePath(tile, mRequestBuffer, 0);
-
-			String url = mTileSource.getUrl()
-			        + (new String(mRequestBuffer, 0, pos));
+			String url = mTileSource.getTileUrl(tile);
 
 			SafeUri uri = UriUtils.fromTrustedString(url);
 

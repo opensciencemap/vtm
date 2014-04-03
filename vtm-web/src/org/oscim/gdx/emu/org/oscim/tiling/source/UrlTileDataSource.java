@@ -35,65 +35,52 @@ public class UrlTileDataSource implements ITileDataSource {
 	protected final ITileDecoder mTileDecoder;
 	protected final UrlTileSource mTileSource;
 
-	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, LwHttp conn) {
-		mTileSource = tileSource;
-		mTileDecoder = tileDecoder;
-		mConn = conn;
-	}
-
-	UrlTileSource getTileSource() {
-		return mTileSource;
-	}
-
 	private ITileDataSink mSink;
 	private MapTile mTile;
+
+	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, HttpEngine conn) {
+		mTileSource = tileSource;
+		mTileDecoder = tileDecoder;
+		mConn = (LwHttp) conn;
+	}
 
 	@Override
 	public void query(MapTile tile, ITileDataSink sink) {
 		mTile = tile;
 		mSink = sink;
-		try {
-			mConn.sendRequest(tile, this);
-		} catch (Exception e) {
-			///e.printStackTrace();
-			log.error("{} {}", mTile, e.getMessage());
-			sink.completed(FAILED);
-		}
+		mConn.sendRequest(tile, this);
 	}
 
 	public void process(final InputStream is) {
-		TileLoader.postLoadDelay(new LoadDelayTask<InputStream>(mTile, mSink, is) {
+		if (is == null) {
+			log.debug("{} no inputstream", mTile);
+			mSink.completed(FAILED);
+			mTile = null;
+			mSink = null;
+			return;
+		}
 
+		TileLoader.postLoadDelay(new LoadDelayTask<InputStream>(mTile, mSink, is) {
 			@Override
 			public void continueLoading() {
-
+				boolean win = false;
 				if (tile.state(MapTile.State.LOADING)) {
-					boolean win = false;
-					if (is != null) {
-						try {
-							win = mTileDecoder.decode(tile, sink, data);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+					try {
+						win = mTileDecoder.decode(tile, sink, data);
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
-					if (!win)
-						log.debug("{} failed", tile);
-
-					// FIXME
-					mConn.requestCompleted();
-
-					sink.completed(win ? SUCCESS : FAILED);
-				} else {
-					// FIXME
-					mConn.requestCompleted();
-					sink.completed(FAILED);
 				}
-
-				mTile = null;
-				mSink = null;
+				if (win) {
+					sink.completed(SUCCESS);
+				} else {
+					sink.completed(FAILED);
+					log.debug("{} decode failed", tile);
+				}
 			}
 		});
-
+		mTile = null;
+		mSink = null;
 	}
 
 	@Override
