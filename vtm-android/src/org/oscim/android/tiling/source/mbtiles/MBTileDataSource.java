@@ -21,7 +21,7 @@ public class MBTileDataSource implements ITileDataSource {
 
     static final Logger log = LoggerFactory.getLogger(MBTileDataSource.class);
 
-    SQLiteDatabase db;
+    MBTileSource mMBTileSource;
     ITileDecoder mTileDecoder;
 
     public final static String TABLE_TILES = "tiles";
@@ -31,7 +31,7 @@ public class MBTileDataSource implements ITileDataSource {
     public final static String COL_TILES_TILE_DATA = "tile_data";
 
     public MBTileDataSource(MBTileSource tileSource, ITileDecoder tileDecoder){
-        db = tileSource.db;
+        mMBTileSource = tileSource;
         mTileDecoder = tileDecoder;
     }
 
@@ -47,7 +47,7 @@ public class MBTileDataSource implements ITileDataSource {
                     , Integer.toString(tile.zoomLevel)
             };
 
-            final Cursor cur = db.query(TABLE_TILES, tiledata, "tile_column=? and tile_row=? and zoom_level=?", xyz, null, null, null);
+            final Cursor cur = mMBTileSource.db.query(TABLE_TILES, tiledata, "tile_column=? and tile_row=? and zoom_level=?", xyz, null, null, null);
 
             if(cur.getCount() != 0) {
                 cur.moveToFirst();
@@ -64,7 +64,7 @@ public class MBTileDataSource implements ITileDataSource {
             log.warn("Error getting db stream: " + tile, e);
             sink.completed(ITileDataSink.QueryResult.FAILED);
         }
-
+        sink.completed(ITileDataSink.QueryResult.FAILED);
 
     }
 
