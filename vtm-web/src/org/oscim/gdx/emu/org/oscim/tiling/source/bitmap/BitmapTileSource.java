@@ -60,8 +60,7 @@ public class BitmapTileSource extends UrlTileSource {
 		@Override
 		public void query(final MapTile tile, final ITileDataSink sink) {
 
-			String url = mTileSource.getUrl()
-			        + BitmapTileSource.this.formatTilePath(tile);
+			String url = mTileSource.getTileUrl(tile);
 
 			SafeUri uri = UriUtils.fromTrustedString(url);
 

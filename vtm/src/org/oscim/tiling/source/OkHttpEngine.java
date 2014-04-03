@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.oscim.core.Tile;
+import org.oscim.utils.IOUtils;
 
 import com.squareup.okhttp.OkHttpClient;
 
@@ -57,33 +57,20 @@ public class OkHttpEngine implements HttpEngine {
 		return inputStream;
 	}
 
-	HttpURLConnection openConnection(Tile tile) throws MalformedURLException {
-		return mClient.open(new URL(mTileSource.getUrl() +
-		        mTileSource.formatTilePath(tile)));
-	}
-
 	@Override
-	public boolean sendRequest(Tile tile) throws IOException {
+	public void sendRequest(Tile tile) throws IOException {
 		if (tile == null) {
 			throw new IllegalArgumentException("Tile cannot be null.");
 		}
+		URL url = new URL(mTileSource.getTileUrl(tile));
+		HttpURLConnection conn = mClient.open(url);
 
-		final HttpURLConnection connection = openConnection(tile);
-
-		inputStream = connection.getInputStream();
-
-		return true;
+		inputStream = conn.getInputStream();
 	}
 
 	@Override
 	public void close() {
-		if (inputStream != null) {
-			try {
-				inputStream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		IOUtils.closeQuietly(inputStream);
 	}
 
 	@Override

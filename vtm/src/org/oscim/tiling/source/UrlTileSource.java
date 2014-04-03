@@ -26,11 +26,18 @@ import org.oscim.tiling.source.LwHttp.LwHttpFactory;
 
 public abstract class UrlTileSource extends TileSource {
 
+	public final static TileUrlFormatter URL_FORMATTER = new DefaultTileUrlFormatter();
+
 	private final URL mUrl;
 	private final String[] mTilePath;
 
 	private HttpEngine.Factory mHttpFactory;
 	private Map<String, String> mRequestHeaders;
+	private TileUrlFormatter mTileUrlFormatter = URL_FORMATTER;
+
+	public interface TileUrlFormatter {
+		public String formatTilePath(UrlTileSource tileSource, Tile tile);
+	}
 
 	public UrlTileSource(String url, String tilePath, int zoomMin, int zoomMax) {
 		this(url, tilePath);
@@ -72,29 +79,8 @@ public abstract class UrlTileSource extends TileSource {
 		return mUrl;
 	}
 
-	public String formatTilePath(Tile tile) {
-		// TODO only use the actual replacement positions.
-
-		StringBuilder sb = new StringBuilder();
-		for (String b : mTilePath) {
-			if (b.length() == 1) {
-				switch (b.charAt(0)) {
-					case 'X':
-						sb.append(tile.tileX);
-						continue;
-					case 'Y':
-						sb.append(tile.tileY);
-						continue;
-					case 'Z':
-						sb.append(tile.zoomLevel);
-						continue;
-					default:
-						break;
-				}
-			}
-			sb.append(b);
-		}
-		return sb.toString();
+	public String getTileUrl(Tile tile) {
+		return mUrl + mTileUrlFormatter.formatTilePath(this, tile);
 	}
 
 	public void setHttpEngine(HttpEngine.Factory httpFactory) {
@@ -113,11 +99,48 @@ public abstract class UrlTileSource extends TileSource {
 		return mTilePath;
 	}
 
+	/**
+	 * 
+	 */
+	public void setUrlFormatter(TileUrlFormatter formatter) {
+		mTileUrlFormatter = formatter;
+	}
+
+	public TileUrlFormatter getUrlFormatter() {
+		return mTileUrlFormatter;
+	}
+
 	public HttpEngine getHttpEngine() {
 		if (mHttpFactory == null) {
 			mHttpFactory = new LwHttpFactory();
 		}
-
 		return mHttpFactory.create(this);
+	}
+
+	static class DefaultTileUrlFormatter implements TileUrlFormatter {
+		@Override
+		public String formatTilePath(UrlTileSource tileSource, Tile tile) {
+
+			StringBuilder sb = new StringBuilder();
+			for (String b : tileSource.getTilePath()) {
+				if (b.length() == 1) {
+					switch (b.charAt(0)) {
+						case 'X':
+							sb.append(tile.tileX);
+							continue;
+						case 'Y':
+							sb.append(tile.tileY);
+							continue;
+						case 'Z':
+							sb.append(tile.zoomLevel);
+							continue;
+						default:
+							break;
+					}
+				}
+				sb.append(b);
+			}
+			return sb.toString();
+		}
 	}
 }

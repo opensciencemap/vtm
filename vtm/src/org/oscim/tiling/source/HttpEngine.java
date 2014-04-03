@@ -26,7 +26,7 @@ public interface HttpEngine {
 
 	InputStream read() throws IOException;
 
-	boolean sendRequest(Tile tile) throws IOException;
+	void sendRequest(Tile tile) throws IOException;
 
 	void close();
 

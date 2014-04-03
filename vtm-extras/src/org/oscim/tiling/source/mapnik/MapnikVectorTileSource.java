@@ -25,32 +25,34 @@ public class MapnikVectorTileSource extends UrlTileSource {
 
 	public MapnikVectorTileSource() {
 		super("http://d1s11ojcu7opje.cloudfront.net/dev/764e0b8d", "");
+		setUrlFormatter(new TileUrlFormatter() {
+			@Override
+			public String formatTilePath(UrlTileSource tileSource, Tile tile) {
+				// url formatter for mapbox streets
+				byte[] hexTable = {
+				        '0', '1', '2', '3',
+				        '4', '5', '6', '7',
+				        '8', '9', 'a', 'b',
+				        'c', 'd', 'e', 'f'
+				};
+				StringBuilder sb = new StringBuilder();
+				sb.append('/');
+				sb.append(hexTable[(tile.tileX) % 16]);
+				sb.append(hexTable[(tile.tileY) % 16]);
+				sb.append('/');
+				sb.append(tile.zoomLevel);
+				sb.append('/');
+				sb.append(tile.tileX);
+				sb.append('/');
+				sb.append(tile.tileY);
+
+				return sb.toString();
+			}
+		});
 	}
 
 	@Override
 	public ITileDataSource getDataSource() {
 		return new UrlTileDataSource(this, new TileDecoder(), getHttpEngine());
-	}
-
-	public String formatTilePath(Tile tile) {
-		// url formatter for mapbox streets
-		byte[] hexTable = {
-		        '0', '1', '2', '3',
-		        '4', '5', '6', '7',
-		        '8', '9', 'a', 'b',
-		        'c', 'd', 'e', 'f'
-		};
-		StringBuilder sb = new StringBuilder();
-		sb.append('/');
-		sb.append(hexTable[(tile.tileX) % 16]);
-		sb.append(hexTable[(tile.tileY) % 16]);
-		sb.append('/');
-		sb.append(tile.zoomLevel);
-		sb.append('/');
-		sb.append(tile.tileX);
-		sb.append('/');
-		sb.append(tile.tileY);
-
-		return sb.toString();
 	}
 }

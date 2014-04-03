@@ -17,7 +17,6 @@ package org.oscim.tiling.source;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
 
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
@@ -31,15 +30,12 @@ import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 public class LwHttp implements HttpEngine {
 	//static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
-	private final String mUrlPath;
 	private XMLHttpRequest mHttpRequest;
 
 	private ReadyStateChangeHandler mResponseHandler;
 
 	public LwHttp(UrlTileSource tileSource) {
 		mTileSource = tileSource;
-		URL url = tileSource.getUrl();
-		mUrlPath = url.toString();
 	}
 
 	static class Buffer extends InputStream {
@@ -72,9 +68,9 @@ public class LwHttp implements HttpEngine {
 
 	private UrlTileSource mTileSource;
 
-	public boolean sendRequest(MapTile tile, final UrlTileDataSource dataSource) {
+	public void sendRequest(MapTile tile, final UrlTileDataSource dataSource) {
 
-		String url = mUrlPath + mTileSource.formatTilePath(tile);
+		String url = mTileSource.getTileUrl(tile);
 
 		mHttpRequest = XMLHttpRequest.create();
 		mHttpRequest.open("GET", url);
@@ -101,8 +97,6 @@ public class LwHttp implements HttpEngine {
 
 		mHttpRequest.setOnReadyStateChange(mResponseHandler);
 		mHttpRequest.send();
-
-		return true;
 	}
 
 	public static class LwHttpFactory implements HttpEngine.Factory {
@@ -130,7 +124,6 @@ public class LwHttp implements HttpEngine {
 	}
 
 	@Override
-	public boolean sendRequest(Tile tile) throws IOException {
-		return false;
+	public void sendRequest(Tile tile) throws IOException {
 	}
 }

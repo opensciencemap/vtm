@@ -59,10 +59,7 @@ public class JsonTileDataSource implements ITileDataSource {
 		mSink = sink;
 
 		try {
-			String url = mTileSource.getUrl()
-			        + mTileSource.formatTilePath(tile);
-
-			doGet(url);
+			doGet(mTileSource.getTileUrl(tile));
 		} catch (Exception e) {
 			e.printStackTrace();
 			sink.completed(FAILED);

@@ -53,7 +53,7 @@ public class LwHttp implements HttpEngine {
 	private final String mHost;
 	private final int mPort;
 
-	private int mMaxReq = 0;
+	private int mMaxRequests = 0;
 	private Socket mSocket;
 	private OutputStream mCommandStream;
 	private Buffer mResponseStream;
@@ -66,10 +66,13 @@ public class LwHttp implements HttpEngine {
 	private final byte[] REQUEST_GET_START;
 	private final byte[] REQUEST_GET_END;
 	private final byte[] mRequestBuffer;
+
 	private final byte[][] mTilePath;
+	private final UrlTileSource mTileSource;
 
 	private LwHttp(UrlTileSource tileSource, byte[][] tilePath) {
 		mTilePath = tilePath;
+		mTileSource = tileSource;
 
 		URL url = tileSource.getUrl();
 		int port = url.getPort();
@@ -109,6 +112,7 @@ public class LwHttp implements HttpEngine {
 	// to avoid a copy in PbfDecoder one could manage the buffer
 	// array directly and provide access to it.
 	static class Buffer extends BufferedInputStream {
+	static final class Buffer extends BufferedInputStream {
 		OutputStream cache;
 		int bytesRead = 0;
 		int bytesWrote;
@@ -188,6 +192,7 @@ public class LwHttp implements HttpEngine {
 
 			if (marked >= 0)
 				bytesRead = marked;
+
 			/* TODO could check if the mark is already invalid */
 			super.reset();
 		}
@@ -323,17 +328,19 @@ public class LwHttp implements HttpEngine {
 	}
 
 	@Override
-	public boolean sendRequest(Tile tile) throws IOException {
+	public void sendRequest(Tile tile) throws IOException {
 
 		if (mSocket != null) {
-			if (mMaxReq-- <= 0)
+			if (--mMaxRequests < 0)
 				close();
 			else if (System.nanoTime() - mLastRequest > RESPONSE_TIMEOUT)
 				close();
 			else {
 				try {
-					if (mResponseStream.available() > 0)
+					if (mResponseStream.available() > 0) {
+						log.debug("still bytes available");
 						close();
+					}
 				} catch (IOException e) {
 					log.debug(e.getMessage());
 					close();
@@ -346,36 +353,32 @@ public class LwHttp implements HttpEngine {
 			lwHttpConnect();
 
 			/* TODO parse from header */
-			mMaxReq = RESPONSE_EXPECTED_LIVES;
+			mMaxRequests = RESPONSE_EXPECTED_LIVES;
 		}
 
-		byte[] request = mRequestBuffer;
 		int pos = REQUEST_GET_START.length;
-
-		pos = formatTilePath(tile, request, pos);
-
 		int len = REQUEST_GET_END.length;
-		System.arraycopy(REQUEST_GET_END, 0, request, pos, len);
+
+		pos = formatTilePath(tile, mRequestBuffer, pos);
+		System.arraycopy(REQUEST_GET_END, 0, mRequestBuffer, pos, len);
 		len += pos;
 
 		if (dbg)
-			log.debug("request: {}", new String(request, 0, len));
+			log.debug("request: {}", new String(mRequestBuffer, 0, len));
 
 		try {
-			mCommandStream.write(request, 0, len);
-			mCommandStream.flush();
-			return true;
+			writeRequest(mRequestBuffer, len);
 		} catch (IOException e) {
 			log.debug("recreate connection");
 			close();
-			/* might throw IOException */
 			lwHttpConnect();
-
-			mCommandStream.write(request, 0, len);
-			mCommandStream.flush();
+			writeRequest(mRequestBuffer, len);
 		}
+	}
 
-		return true;
+	private void writeRequest(byte[] request, int length) throws IOException {
+		mCommandStream.write(request, 0, length);
+		mCommandStream.flush();
 	}
 
 	private boolean lwHttpConnect() throws IOException {
@@ -500,10 +503,19 @@ public class LwHttp implements HttpEngine {
 	 * @return new position
 	 */
 	private int formatTilePath(Tile tile, byte[] buf, int pos) {
+		if (mTilePath == null) {
+			String url = mTileSource.getUrlFormatter()
+			    .formatTilePath(mTileSource, tile);
+			byte[] b = url.getBytes();
+			System.arraycopy(b, 0, buf, pos, b.length);
+			return pos + b.length;
+		}
+
 		for (byte[] b : mTilePath) {
 			if (b.length == 1) {
 				if (b[0] == '/') {
 					buf[pos++] = '/';
+					continue;
 				} else if (b[0] == 'X') {
 					pos = writeInt(tile.tileX, pos, buf);
 					continue;
@@ -527,13 +539,16 @@ public class LwHttp implements HttpEngine {
 
 		@Override
 		public HttpEngine create(UrlTileSource tileSource) {
+			if (tileSource.getUrlFormatter() != UrlTileSource.URL_FORMATTER)
+				return new LwHttp(tileSource, null);
+
+			/* use optimized formatter replacing the default */
 			if (mTilePath == null) {
 				String[] path = tileSource.getTilePath();
 				mTilePath = new byte[path.length][];
 				for (int i = 0; i < path.length; i++)
 					mTilePath[i] = path[i].getBytes();
 			}
-
 			return new LwHttp(tileSource, mTilePath);
 		}
 	}
