@@ -16,9 +16,11 @@ package org.oscim.tiling.source;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.MapTile;
 
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Uint8Array;
@@ -26,20 +28,20 @@ import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 
-public class LwHttp {
+public class LwHttp implements HttpEngine {
 	//static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
 	private final String mUrlPath;
-	private final byte[] mRequestBuffer;
 
 	private int mContentLength = -1;
 	private XMLHttpRequest mHttpRequest;
 
 	private ReadyStateChangeHandler mResponseHandler;
 
-	public LwHttp(URL url) {
+	public LwHttp(UrlTileSource tileSource) {
+		mTileSource = tileSource;
+		URL url = tileSource.getUrl();
 		mUrlPath = url.toString();
-		mRequestBuffer = new byte[1024];
 	}
 
 	static class Buffer extends InputStream {
@@ -67,17 +69,11 @@ public class LwHttp {
 			mHttpRequest.abort();
 	}
 
-	private UrlTileDataSource mDataSource;
+	private UrlTileSource mTileSource;
 
-	public boolean sendRequest(Tile tile, UrlTileDataSource dataSource) throws IOException {
-		mDataSource = dataSource;
+	public boolean sendRequest(MapTile tile, final UrlTileDataSource dataSource) throws IOException {
 
-		byte[] request = mRequestBuffer;
-		int pos = 0;
-
-		pos = dataSource.getTileSource().formatTilePath(tile, request, pos);
-
-		String url = mUrlPath + (new String(request, 0, pos));
+		String url = mUrlPath + mTileSource.formatTilePath(tile);
 
 		mHttpRequest = XMLHttpRequest.create();
 		mHttpRequest.open("GET", url);
@@ -97,9 +93,9 @@ public class LwHttp {
 					if (status == 200) {
 						Uint8Array buf = Uint8ArrayNative.create(xhr.getResponseArrayBuffer());
 
-						mDataSource.process(new Buffer(buf));
+						dataSource.process(new Buffer(buf));
 					} else {
-						mDataSource.process(null);
+						dataSource.process(null);
 					}
 				}
 			}
@@ -149,5 +145,36 @@ public class LwHttp {
 
 	public int getContentLength() {
 		return mContentLength;
+	}
+
+	public static class LwHttpFactory implements HttpEngine.Factory {
+
+		@Override
+		public HttpEngine create(UrlTileSource tileSource) {
+			return new LwHttp(tileSource);
+		}
+	}
+
+	@Override
+	public InputStream read() throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setCache(OutputStream os) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public boolean requestCompleted(boolean success) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean sendRequest(Tile tile) throws IOException {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

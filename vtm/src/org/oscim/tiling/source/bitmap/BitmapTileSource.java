@@ -26,13 +26,20 @@ public class BitmapTileSource extends UrlTileSource {
 	 * implement getUrlString() for custom formatting.
 	 */
 	public BitmapTileSource(String url, int zoomMin, int zoomMax) {
-		super(url, zoomMin, zoomMax);
-		setExtension(".png");
+		super(url, "/{Z}/{X}/{Y}.png", zoomMin, zoomMax);
+	}
+
+	public BitmapTileSource(String url, int zoomMin, int zoomMax, String extension) {
+		super(url, "/{Z}/{X}/{Y}" + extension, zoomMin, zoomMax);
+	}
+
+	public BitmapTileSource(String url, String tilePath, int zoomMin, int zoomMax) {
+		super(url, tilePath, zoomMin, zoomMax);
 	}
 
 	@Override
 	public ITileDataSource getDataSource() {
-		return new UrlTileDataSource(this, new BitmapTileDecoder(), new LwHttp(getUrl()));
+		return new UrlTileDataSource(this, new BitmapTileDecoder(), getHttpEngine());
 	}
 
 	public class BitmapTileDecoder implements ITileDecoder {
