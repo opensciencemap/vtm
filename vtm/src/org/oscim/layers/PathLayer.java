@@ -27,7 +27,6 @@ import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
-import org.oscim.event.Event;
 import org.oscim.map.Map;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLViewport;
@@ -39,7 +38,7 @@ import org.oscim.utils.async.SimpleWorker;
 import org.oscim.utils.geom.LineClipper;
 
 /** This class draws a path line in given color. */
-public class PathLayer extends Layer implements Map.UpdateListener {
+public class PathLayer extends Layer {
 
 	/** Stores points, converted to the map projection. */
 	protected final ArrayList<GeoPoint> mPoints;
@@ -68,30 +67,35 @@ public class PathLayer extends Layer implements Map.UpdateListener {
 
 		synchronized (mPoints) {
 			mPoints.clear();
-			mUpdatePoints = true;
 		}
+		updatePoints();
 	}
 
 	public void setPoints(List<GeoPoint> pts) {
 		synchronized (mPoints) {
 			mPoints.clear();
 			mPoints.addAll(pts);
-			mUpdatePoints = true;
 		}
+		updatePoints();
 	}
 
 	public void addPoint(GeoPoint pt) {
 		synchronized (mPoints) {
 			mPoints.add(pt);
-			mUpdatePoints = true;
 		}
+		updatePoints();
 	}
 
 	public void addPoint(int latitudeE6, int longitudeE6) {
 		synchronized (mPoints) {
 			mPoints.add(new GeoPoint(latitudeE6, longitudeE6));
-			mUpdatePoints = true;
 		}
+		updatePoints();
+	}
+
+	private void updatePoints() {
+		mWorker.submit(10);
+		mUpdatePoints = true;
 	}
 
 	public List<GeoPoint> getPoints() {
@@ -201,8 +205,8 @@ public class PathLayer extends Layer implements Map.UpdateListener {
 			int ty = (int) (v.pos.y * tz);
 
 			// update layers when map moved by at least one tile
-			if ((tx != mCurX || ty != mCurY || tz != mCurZ) || mUpdatePoints) {
-				mWorker.submit(mUpdatePoints ? 0 : 100);
+			if ((tx != mCurX || ty != mCurY || tz != mCurZ)) {
+				mWorker.submit(100);
 				mCurX = tx;
 				mCurY = ty;
 				mCurZ = tz;
@@ -254,7 +258,6 @@ public class PathLayer extends Layer implements Map.UpdateListener {
 
 			if (mUpdatePoints) {
 				synchronized (mPoints) {
-
 					mUpdatePoints = false;
 					mNumPoints = size = mPoints.size();
 
@@ -269,6 +272,7 @@ public class PathLayer extends Layer implements Map.UpdateListener {
 					for (int i = 0; i < size; i++)
 						MercatorProjection.project(geopoints.get(i), points, i);
 				}
+
 			} else if (mGeom != null) {
 				GeometryBuffer geom = mGeom;
 				mGeom = null;
@@ -398,11 +402,5 @@ public class PathLayer extends Layer implements Map.UpdateListener {
 			points[i++] = y;
 			return i;
 		}
-	}
-
-	@Override
-	public void onMapEvent(Event e, MapPosition mapPosition) {
-		if (mUpdatePoints)
-			mWorker.submit(0);
 	}
 }
