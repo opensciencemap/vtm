@@ -158,4 +158,10 @@ public class VectorTileLayer extends TileLayer {
 		System.arraycopy(tmp, 0, mLoaderThemeHooks, 0, tmp.length);
 		mLoaderThemeHooks[tmp.length] = h;
 	}
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		mTileSource.close();
+	}
 }
