@@ -20,6 +20,8 @@ package org.oscim.utils.geom;
 import static org.oscim.utils.geom.GeometryUtils.squareSegmentDistance;
 
 import org.oscim.core.GeometryBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Douglas-Peucker line simplification with stack and some bit twiddling.
@@ -28,8 +30,9 @@ import org.oscim.core.GeometryBuffer;
  * https://github.com/ekeneijeoma/simplify-java
  */
 public class SimplifyDP {
+	final static Logger log = LoggerFactory.getLogger(SimplifyDP.class);
 
-	int[] markers = new int[1];
+	boolean[] markers = new boolean[128];
 	int[] stack = new int[32];
 
 	public void simplify(GeometryBuffer geom, float sqTolerance) {
@@ -48,27 +51,24 @@ public class SimplifyDP {
 				continue;
 			}
 
-			int cnt = simplify(geom.points, inPos, len, outPos, sqTolerance);
-			idx[i] = (short) cnt;
-			outPos += cnt;
+			int end = simplify(geom.points, inPos, len, outPos, sqTolerance);
+			if (end > inPos + len)
+				log.error("out larger than cur: {} > {}", end, inPos + len);
+
+			idx[i] = (short) (end - outPos);
+			outPos = end;
 			inPos += len;
 		}
 	}
 
 	public int simplify(float[] points, int inPos, int length, int out, float sqTolerance) {
 
-		/* cheap int bitset (use length / 32 ints)
-		 * might should use boolean, or BitSet,
-		 * as this is not really a memory hog :) */
-		int n = (length >> 5) + 1;
-		if (markers.length < n) {
-			markers = new int[n];
-		} else {
-			for (int i = 0; i < n; i++)
-				markers[i] = 0;
-		}
+		if ((length >> 1) >= markers.length)
+			markers = new boolean[length >> 1];
+		//else
+		//	Arrays.fill(markers, false);
 
-		int first = 0;
+		int first = inPos;
 		int last = inPos + length - 2;
 		int index = 0;
 
@@ -88,11 +88,7 @@ public class SimplifyDP {
 			}
 
 			if (maxSqDist > sqTolerance) {
-				/* get marker for 'pos' and shift marker relative
-				 * position into it;
-				 * (pos & 0x1F == pos % 32) */
-				int pos = index >> 1;
-				markers[pos >> 5] |= 1 << (pos & 0x1F);
+				markers[(index - inPos) >> 1] = true;
 
 				if (sp + 4 == stack.length) {
 					int tmp[] = new int[stack.length + 64];
@@ -119,22 +115,15 @@ public class SimplifyDP {
 
 		last = inPos + length - 2;
 
-		O: for (int i = 0; i < markers.length; i++) {
-			int marker = markers[i];
-			/* point position of this marker */
-			int mPos = (i << 6);
+		for (int i = 0; i < length / 2; i++) {
+			if (!markers[i])
+				continue;
+			markers[i] = false;
 
-			for (int j = 0; j < 32; j++) {
-				/* check if marker is set */
-				if ((marker & (1 << j)) != 0) {
-					int pos = mPos + (j << 1);
-					if (pos >= last)
-						break O;
+			int pos = inPos + i * 2;
 
-					points[out++] = points[pos];
-					points[out++] = points[pos + 1];
-				}
-			}
+			points[out++] = points[pos];
+			points[out++] = points[pos + 1];
 		}
 		points[out++] = points[last];
 		points[out++] = points[last + 1];
