@@ -54,7 +54,7 @@ public class GLView extends GLSurfaceView {
 		setEGLConfigChooser(new GlConfigChooser());
 		setEGLContextClientVersion(2);
 
-		setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
+		//setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
 		setRenderer(new GLRenderer(map));
 
 		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
