@@ -85,12 +85,8 @@ public final class LineTexLayer extends RenderElement {
 	/* scale factor mapping extrusion vector to short values */
 	public static final float DIR_SCALE = 2048;
 
-	/* lines referenced by this outline layer */
-	public LineLayer outlines;
 	public LineStyle line;
 	public float width;
-
-	//public boolean roundCap;
 
 	public int evenQuads;
 	public int oddQuads;
