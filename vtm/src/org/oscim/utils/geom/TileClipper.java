@@ -55,7 +55,6 @@ public class TileClipper {
 		if (geom.isPoly()) {
 
 			GeometryBuffer out = mGeomOut;
-
 			out.clear();
 
 			clipEdge(geom, out, LineClipper.LEFT);
@@ -102,15 +101,10 @@ public class TileClipper {
 
 		int pointPos = 0;
 
-		for (int i = 0, n = in.index.length; i < n; i++) {
-			int len = in.index[i];
+		for (int indexPos = 0, n = in.index.length; indexPos < n; indexPos++) {
+			int len = in.index[indexPos];
 			if (len < 0)
 				break;
-
-			if (len < 6) {
-				pointPos += len;
-				continue;
-			}
 
 			if (len == 0) {
 				out.startPolygon();
@@ -118,10 +112,28 @@ public class TileClipper {
 				continue;
 			}
 
+			if (len < 6) {
+				pointPos += len;
+				continue;
+			}
+
 			if (!outer)
 				out.startHole();
 
-			clipRing(i, pointPos, in, out, edge);
+			switch (edge) {
+				case LineClipper.LEFT:
+					clipRingLeft(indexPos, pointPos, in, out);
+					break;
+				case LineClipper.RIGHT:
+					clipRingRight(indexPos, pointPos, in, out);
+					break;
+				case LineClipper.TOP:
+					clipRingTop(indexPos, pointPos, in, out);
+					break;
+				case LineClipper.BOTTOM:
+					clipRingBottom(indexPos, pointPos, in, out);
+					break;
+			}
 
 			//if (out.index[i] < 6) {
 			//	out.index[i] = 0;
@@ -134,8 +146,114 @@ public class TileClipper {
 
 			outer = false;
 		}
-
 		return true;
+	}
+
+	private void clipRingLeft(int indexPos, int pointPos, GeometryBuffer in, GeometryBuffer out) {
+		int end = in.index[indexPos] + pointPos;
+		float px = in.points[end - 2];
+		float py = in.points[end - 1];
+
+		for (int i = pointPos; i < end;) {
+			float cx = in.points[i++];
+			float cy = in.points[i++];
+			if (cx > minX) {
+				/* current is inside */
+				if (px > minX) {
+					/* previous was inside */
+					out.addPoint(cx, cy);
+				} else {
+					/* previous was outside, add edge point */
+					out.addPoint(minX, py + (cy - py) * (minX - px) / (cx - px));
+					out.addPoint(cx, cy);
+				}
+			} else {
+				if (px > minX) {
+					/* previous was inside, add edge point */
+					out.addPoint(minX, py + (cy - py) * (minX - px) / (cx - px));
+				}
+				/* else skip point */
+			}
+			px = cx;
+			py = cy;
+		}
+	}
+
+	private void clipRingRight(int indexPos, int pointPos, GeometryBuffer in, GeometryBuffer out) {
+		int len = in.index[indexPos] + pointPos;
+		float px = in.points[len - 2];
+		float py = in.points[len - 1];
+
+		for (int i = pointPos; i < len;) {
+			float cx = in.points[i++];
+			float cy = in.points[i++];
+
+			if (cx < maxX) {
+				if (px < maxX) {
+					out.addPoint(cx, cy);
+				} else {
+					out.addPoint(maxX, py + (cy - py) * (maxX - px) / (cx - px));
+					out.addPoint(cx, cy);
+				}
+			} else {
+				if (px < maxX) {
+					out.addPoint(maxX, py + (cy - py) * (maxX - px) / (cx - px));
+				}
+			}
+			px = cx;
+			py = cy;
+		}
+	}
+
+	private void clipRingTop(int indexPos, int pointPos, GeometryBuffer in, GeometryBuffer out) {
+		int len = in.index[indexPos] + pointPos;
+		float px = in.points[len - 2];
+		float py = in.points[len - 1];
+
+		for (int i = pointPos; i < len;) {
+			float cx = in.points[i++];
+			float cy = in.points[i++];
+
+			if (cy < maxY) {
+				if (py < maxY) {
+					out.addPoint(cx, cy);
+				} else {
+					out.addPoint(px + (cx - px) * (maxY - py) / (cy - py), maxY);
+					out.addPoint(cx, cy);
+				}
+			} else {
+				if (py < maxY) {
+					out.addPoint(px + (cx - px) * (maxY - py) / (cy - py), maxY);
+				}
+			}
+			px = cx;
+			py = cy;
+		}
+	}
+
+	private void clipRingBottom(int indexPos, int pointPos, GeometryBuffer in, GeometryBuffer out) {
+		int len = in.index[indexPos] + pointPos;
+		float px = in.points[len - 2];
+		float py = in.points[len - 1];
+
+		for (int i = pointPos; i < len;) {
+			float cx = in.points[i++];
+			float cy = in.points[i++];
+			if (cy > minY) {
+				if (py > minY) {
+					out.addPoint(cx, cy);
+				} else {
+					out.addPoint(px + (cx - px) * (minY - py) / (cy - py), minY);
+					out.addPoint(cx, cy);
+				}
+			} else {
+				if (py > minY) {
+					out.addPoint(px + (cx - px) * (minY - py) / (cy - py), minY);
+				}
+			}
+			px = cx;
+			py = cy;
+		}
 	}
 
 	private int clipLine(GeometryBuffer in, GeometryBuffer out) {
@@ -208,93 +326,5 @@ public class TileClipper {
 		}
 
 		return numLines;
-	}
-
-	private boolean clipRing(int indexPos, int pointPos, GeometryBuffer in, GeometryBuffer out,
-	        int edge) {
-
-		int len = in.index[indexPos];
-		if (len < 6)
-			return false;
-
-		len += pointPos;
-
-		float px = in.points[len - 2];
-		float py = in.points[len - 1];
-
-		for (int i = pointPos; i < len;) {
-			float cx = in.points[i++];
-			float cy = in.points[i++];
-
-			switch (edge) {
-				case LineClipper.LEFT:
-					if (cx > minX) {
-						// current is inside
-						if (px > minX) {
-							// previous was inside
-							out.addPoint(cx, cy);
-						} else {
-							// previous was outside, add edge point
-							out.addPoint(minX, py + (cy - py) * (minX - px) / (cx - px));
-							out.addPoint(cx, cy);
-						}
-					} else {
-						if (px > minX) {
-							// previous was inside, add edge point
-							out.addPoint(minX, py + (cy - py) * (minX - px) / (cx - px));
-						}
-					}
-					break;
-
-				case LineClipper.RIGHT:
-					if (cx < maxX) {
-						if (px < maxX) {
-							out.addPoint(cx, cy);
-						} else {
-							out.addPoint(maxX, py + (cy - py) * (maxX - px) / (cx - px));
-							out.addPoint(cx, cy);
-						}
-					} else {
-						if (px < maxX) {
-							out.addPoint(maxX, py + (cy - py) * (maxX - px) / (cx - px));
-						}
-					}
-					break;
-
-				case LineClipper.BOTTOM:
-					if (cy > minY) {
-						if (py > minY) {
-							out.addPoint(cx, cy);
-						} else {
-							out.addPoint(px + (cx - px) * (minY - py) / (cy - py), minY);
-							out.addPoint(cx, cy);
-						}
-					} else {
-						if (py > minY) {
-							out.addPoint(px + (cx - px) * (minY - py) / (cy - py), minY);
-						}
-					}
-					break;
-
-				case LineClipper.TOP:
-					if (cy < maxY) {
-						if (py < maxY) {
-							out.addPoint(cx, cy);
-						} else {
-							out.addPoint(px + (cx - px) * (maxY - py) / (cy - py), maxY);
-							out.addPoint(cx, cy);
-						}
-					} else {
-						if (py < maxY) {
-							out.addPoint(px + (cx - px) * (maxY - py) / (cy - py), maxY);
-						}
-					}
-					break;
-			}
-
-			px = cx;
-			py = cy;
-		}
-		return true;
 	}
 }
