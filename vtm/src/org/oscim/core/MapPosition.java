@@ -18,22 +18,31 @@ package org.oscim.core;
 
 import org.oscim.utils.FastMath;
 
-/** A MapPosition Container. */
 public class MapPosition {
 
-	/** projected position x 0..1 */
+	/** Projected position x 0..1 */
 	public double x;
-	/** projected position y 0..1 */
+
+	/** Projected position y 0..1 */
 	public double y;
-	/** absolute scale */
+
+	/**
+	 * Absolute scale
+	 * - use setScale() to modify
+	 */
 	public double scale;
 
-	/** rotation angle */
+	/** Rotation angle */
 	public float bearing;
-	/** perspective tile */
+
+	/** Perspective tilt */
 	public float tilt;
 
-	/** to be removed: FastMath.log2((int) scale) */
+	/**
+	 * Zoom-level for current scale.
+	 * - To be removed: FastMath.log2(scale)
+	 * - use setZoomLevel() to modify
+	 */
 	public int zoomLevel;
 
 	public MapPosition() {
@@ -49,14 +58,60 @@ public class MapPosition {
 		setScale(scale);
 	}
 
-	public void setZoomLevel(int zoomLevel) {
-		this.zoomLevel = zoomLevel;
-		this.scale = 1 << zoomLevel;
+	public double getX() {
+		return x;
 	}
 
-	public void setScale(double scale) {
+	public MapPosition setX(double x) {
+		this.x = x;
+		return this;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public MapPosition setY(double y) {
+		this.y = y;
+		return this;
+	}
+
+	public float getBearing() {
+		return bearing;
+	}
+
+	public MapPosition setBearing(float bearing) {
+		this.bearing = bearing;
+		return this;
+	}
+
+	public float getTilt() {
+		return tilt;
+	}
+
+	public MapPosition setTilt(float tilt) {
+		this.tilt = tilt;
+		return this;
+	}
+
+	public double getScale() {
+		return scale;
+	}
+
+	public int getZoomLevel() {
+		return zoomLevel;
+	}
+
+	public MapPosition setZoomLevel(int zoomLevel) {
+		this.zoomLevel = zoomLevel;
+		this.scale = 1 << zoomLevel;
+		return this;
+	}
+
+	public MapPosition setScale(double scale) {
 		this.zoomLevel = FastMath.log2((int) scale);
 		this.scale = scale;
+		return this;
 	}
 
 	public void setPosition(GeoPoint geoPoint) {
