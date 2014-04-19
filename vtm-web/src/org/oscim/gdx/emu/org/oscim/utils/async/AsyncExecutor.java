@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Disposable;
  * 
  */
 public class AsyncExecutor implements Disposable {
+	private final TaskQueue mainloop;
 
 	/**
 	 * Creates a new AsynchExecutor that allows maxConcurrent {@link Runnable}
@@ -17,32 +18,8 @@ public class AsyncExecutor implements Disposable {
 	 * 
 	 * @param maxConcurrent
 	 */
-	public AsyncExecutor(int maxConcurrent) {
-	}
-
-	// FIXME TODO add wrap into 'FakeFuture' and run via Gdx.app.post()
-	/**
-	 * Submits a {@link Runnable} to be executed asynchronously. If
-	 * maxConcurrent runnables are already running, the runnable
-	 * will be queued.
-	 * 
-	 * @param task the task to execute asynchronously
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> AsyncResult<T> submit(final AsyncTask<T> task) {
-
-		T result = null;
-		boolean error = false;
-		try {
-			task.run();
-			result = task.getResult();
-		} catch (Throwable t) {
-			error = true;
-		}
-		if (error)
-			return null;
-
-		return new AsyncResult(result);
+	public AsyncExecutor(int maxConcurrent, TaskQueue mainloop) {
+		this.mainloop = mainloop;
 	}
 
 	/**
@@ -53,7 +30,12 @@ public class AsyncExecutor implements Disposable {
 	 * @param task the task to execute asynchronously
 	 */
 	public boolean post(Runnable task) {
+		if (task instanceof AsyncTask) {
+			((AsyncTask) task).setTaskQueue(mainloop);
+		}
+
 		Gdx.app.postRunnable(task);
+
 		return true;
 	}
 

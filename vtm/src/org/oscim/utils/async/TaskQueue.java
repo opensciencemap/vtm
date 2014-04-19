@@ -14,45 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.oscim.utils.async;
 
-public abstract class AsyncTask extends Task {
-	private TaskQueue mainloop;
-
-	void setTaskQueue(TaskQueue mainloop) {
-		this.mainloop = mainloop;
-	}
+public interface TaskQueue {
+	/**
+	 * Add task to run on a main thread.
+	 */
+	boolean post(Runnable task);
 
 	/**
-	 * Do not override! Unless you have a reason, of course.
+	 * Add task to run on a worker thread.
 	 */
-	@Override
-	public void run() {
-		if (state == GO) {
-			/* running on worker thread */
-			state = go(false);
-
-			if (state == GO)
-				/* run on worker again */
-				mainloop.addTask(this);
-			else
-				mainloop.post(this);
-		} else {
-			/* post result on main-loop */
-			onPostExecute(state);
-		}
-	}
-
-	/**
-	 * Executed on worker thread.
-	 * 
-	 * @return Task.DONE on success, Task.ERROR otherwise
-	 */
-	public abstract int go(boolean canceled);
-
-	/**
-	 * Executed on mainloop thread.
-	 */
-	public abstract void onPostExecute(int state);
-
+	void addTask(Runnable task);
 }

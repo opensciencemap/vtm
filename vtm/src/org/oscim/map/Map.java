@@ -33,10 +33,11 @@ import org.oscim.theme.ThemeFile;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tiling.TileSource;
 import org.oscim.utils.async.AsyncExecutor;
+import org.oscim.utils.async.TaskQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Map {
+public abstract class Map implements TaskQueue {
 
 	static final Logger log = LoggerFactory.getLogger(Map.class);
 
@@ -111,7 +112,7 @@ public abstract class Map {
 			}
 		};
 
-		mAsyncExecutor = new AsyncExecutor(2);
+		mAsyncExecutor = new AsyncExecutor(4, this);
 		mMapPosition = new MapPosition();
 
 		mEventLayer = new MapEventLayer(this);
@@ -194,6 +195,7 @@ public abstract class Map {
 	/**
 	 * Post a runnable to be executed on main-thread
 	 */
+	@Override
 	public abstract boolean post(Runnable action);
 
 	/**
@@ -203,9 +205,10 @@ public abstract class Map {
 	public abstract boolean postDelayed(Runnable action, long delay);
 
 	/**
-	 * Post a task to run on a shared worker-thread. Only use for
-	 * tasks running less than a second!
+	 * Post a task to run on a shared worker-thread. Shoul only use for
+	 * tasks running less than a second.
 	 */
+	@Override
 	public void addTask(Runnable task) {
 		mAsyncExecutor.post(task);
 	}

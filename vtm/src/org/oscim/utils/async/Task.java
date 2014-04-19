@@ -14,26 +14,30 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.core;
+package org.oscim.utils.async;
 
 public abstract class Task implements Runnable {
+
+	public static final int ERROR = -1;
+	public static final int CANCEL = 0;
+	public static final int GO = 1;
+	public static final int DONE = 2;
+
+	protected int state = GO;
 
 	boolean isCanceled;
 
 	@Override
 	public void run() {
-		run(isCanceled);
+		go(state == CANCEL);
 	}
 
-	public void run(boolean canceled) {
-
-	}
+	/**
+	 * @return ignored
+	 */
+	public abstract int go(boolean canceled);
 
 	public void cancel() {
-		isCanceled = true;
-	}
-
-	public void reset() {
-		isCanceled = false;
+		state = CANCEL;
 	}
 }

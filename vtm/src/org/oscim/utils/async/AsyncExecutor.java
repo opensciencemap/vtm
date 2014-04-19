@@ -17,7 +17,6 @@
 
 package org.oscim.utils.async;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -37,6 +36,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class AsyncExecutor {
 	private final ExecutorService executor;
+	private final TaskQueue mainloop;
 
 	/**
 	 * Creates a new AsynchExecutor that allows maxConcurrent {@link Runnable}
@@ -44,7 +44,8 @@ public class AsyncExecutor {
 	 * 
 	 * @param maxConcurrent number of threads.
 	 */
-	public AsyncExecutor(int maxConcurrent) {
+	public AsyncExecutor(int maxConcurrent, TaskQueue mainloop) {
+		this.mainloop = mainloop;
 		executor = Executors.newFixedThreadPool(maxConcurrent, new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
@@ -63,25 +64,11 @@ public class AsyncExecutor {
 	 * 
 	 * @param task the task to execute asynchronously
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> AsyncResult<T> submit(final AsyncTask<T> task) {
-		return new AsyncResult(executor.submit(new Callable<T>() {
-			@Override
-			public T call() throws Exception {
-				task.run();
-				return task.getResult();
-			}
-		}));
-	}
-
-	/**
-	 * Submits a {@link Runnable} to be executed asynchronously. If
-	 * maxConcurrent runnables are already running, the runnable
-	 * will be queued.
-	 * 
-	 * @param task the task to execute asynchronously
-	 */
 	public boolean post(Runnable task) {
+		if (task instanceof AsyncTask) {
+			((AsyncTask) task).setTaskQueue(mainloop);
+		}
+
 		try {
 			executor.execute(task);
 		} catch (RejectedExecutionException e) {
