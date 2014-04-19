@@ -186,7 +186,7 @@ public class TileManager {
 	public boolean update(MapPosition pos) {
 
 		// FIXME cant expect init to be called otherwise
-		if (mNewTiles == null)
+		if (mNewTiles == null || mNewTiles.tiles.length == 0)
 			init();
 
 		/* clear JobQueue and set tiles to state == NONE.
