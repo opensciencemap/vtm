@@ -110,6 +110,7 @@ public class PathLayer extends Layer {
 	 */
 	public void setGeom(GeometryBuffer geom) {
 		mGeom = geom;
+		mWorker.submit(10);
 	}
 
 	GeometryBuffer mGeom;
