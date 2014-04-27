@@ -46,13 +46,13 @@ public class Rule {
 	public final static RenderStyle[] EMPTY_STYLE = new RenderStyle[0];
 	public final static Rule[] EMPTY_RULES = new Rule[0];
 
-	private final Rule[] subRules;
+	public final Rule[] subRules;
 	public final RenderStyle[] styles;
 
-	private final int zoom;
-	private final int element;
-	private final boolean selectFirstMatch;
-	private final boolean selectWhenMatched;
+	public final int zoom;
+	public final int element;
+	public final boolean selectFirstMatch;
+	public final boolean selectWhenMatched;
 
 	Rule(int element, int zoom, int selector, Rule[] subRules, RenderStyle[] styles) {
 		this.element = element;
@@ -65,7 +65,7 @@ public class Rule {
 		selectWhenMatched = (selector & Selector.WHEN_MATCHED) != 0;
 	}
 
-	boolean matchesTags(Tag[] tags) {
+	public boolean matchesTags(Tag[] tags) {
 		return true;
 	}
 
@@ -181,7 +181,7 @@ public class Rule {
 		}
 
 		@Override
-		boolean matchesTags(Tag[] tags) {
+		public boolean matchesTags(Tag[] tags) {
 			for (Tag tag : tags)
 				if (mKey == tag.key)
 					return true;
@@ -200,7 +200,7 @@ public class Rule {
 		}
 
 		@Override
-		boolean matchesTags(Tag[] tags) {
+		public boolean matchesTags(Tag[] tags) {
 			for (Tag tag : tags)
 				if (mValue == tag.value)
 					return true;
@@ -222,7 +222,7 @@ public class Rule {
 		}
 
 		@Override
-		boolean matchesTags(Tag[] tags) {
+		public boolean matchesTags(Tag[] tags) {
 			for (Tag tag : tags)
 				if (mKey == tag.key)
 					return (mValue == tag.value);
@@ -252,7 +252,7 @@ public class Rule {
 		}
 
 		@Override
-		boolean matchesTags(Tag[] tags) {
+		public boolean matchesTags(Tag[] tags) {
 			if (mKeys == null) {
 				for (Tag tag : tags) {
 					for (String value : mValues) {
