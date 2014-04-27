@@ -29,6 +29,7 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.AreaStyle;
+import org.oscim.utils.ColorUtil;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class MeshLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(MeshLayer.class);
-	static final boolean dbg = false;
+	static final boolean dbgRender = false;
 
 	BufferObject indicesVbo;
 	int numIndices;
@@ -164,8 +165,8 @@ public class MeshLayer extends RenderElement {
 				GL.glDrawElements(GL20.GL_TRIANGLES, ml.numIndices,
 				                  GL20.GL_UNSIGNED_SHORT, 0);
 
-				if (dbg) {
-					GLUtils.setColor(s.uColor, Color.GRAY, 0.4f);
+				if (dbgRender) {
+					GLUtils.setColor(s.uColor, ColorUtil.shiftHue(ml.area.color, 0.5), 0.8f);
 					GL.glDrawElements(GL20.GL_LINES, ml.numIndices,
 					                  GL20.GL_UNSIGNED_SHORT, 0);
 				}
