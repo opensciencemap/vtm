@@ -44,19 +44,8 @@ public class SimplifyVW {
 		}
 	};
 
-	Item[] heap = new Item[100];
-	int size = 0;
-
-	public static void main(String[] args) {
-		SimplifyVW s = new SimplifyVW();
-		float[] p2 = { 0, 0, 10, 0, 10, 10, 10, 10, 0, 10, 0, 0 };
-
-		GeometryBuffer geom = new GeometryBuffer(p2, new short[2]);
-
-		geom.pointPos = 10;
-		s.simplify(geom, 0.5f);
-
-	}
+	private Item[] heap = new Item[100];
+	private int size = 0;
 
 	public void simplify(GeometryBuffer geom, float minArea) {
 		Item prev = null;
@@ -90,7 +79,6 @@ public class SimplifyVW {
 		last.next = first;
 		first.prev = last;
 
-		int cnt = 0;
 		while ((it = pop()) != null) {
 			if (it.area > minArea)
 				break;
@@ -108,9 +96,8 @@ public class SimplifyVW {
 				update(geom, it.next);
 
 			it = pool.release(it);
-			cnt++;
 		}
-		//System.out.println("dropped: " + cnt + "/" + (geom.pointPos >> 1));
+
 		first.prev.next = null;
 		first.prev = null;
 		it = first;
@@ -254,48 +241,4 @@ public class SimplifyVW {
 			heap[it.index = i = down] = it;
 		}
 	}
-	//	final static Comparator<Item> DistanceComparator = new Comparator<Item>() {
-	//		@Override
-	//		public int compare(Item a, Item b) {
-	//
-	//			if (a.area > b.area) {
-	//				return -1;
-	//			}
-	//			if (a.area < b.area) {
-	//				return 1;
-	//			}
-	//			return 0;
-	//		}
-	//	};
-	//	TimSort<Item> sorter = new TimSort<Item>();
-	//
-	//	Item push(int id, float area) {
-	//		Item it = pool.get();
-	//		//heap[size] = it;
-	//		//it.index = size;
-	//		it.area = area;
-	//		it.id = id;
-	//
-	//		heap[size++] = it;
-	//		return it;
-	//	}
-	//
-	//	Item pop() {
-	//		return heap[--size];
-	//	}
-	//
-	//	void update(Item it, float area) {
-	//		boolean up = it.area < area;
-	//		it.area = area;
-	//		if (up) {
-	//			sorter.doSort(heap, DistanceComparator, 0, it.index + 1);
-	//			for (int i = 0, end = it.index + 1; i < end; i++)
-	//				heap[i].index = i;
-	//		} else {
-	//			sorter.doSort(heap, DistanceComparator, it.index, size);
-	//			for (int i = it.index; i < size; i++)
-	//				heap[i].index = i;
-	//		}
-	//	}
-
 }
