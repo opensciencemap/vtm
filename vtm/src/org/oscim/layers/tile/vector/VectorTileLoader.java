@@ -117,10 +117,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			/* query data source, which calls process() callback */
 			mTileDataSource.query(tile, this);
 		} catch (NullPointerException e) {
-			log.debug("{} {}", tile, e.getMessage());
+			log.debug("NPE {} {}", tile, e.getMessage());
 			e.printStackTrace();
 		} catch (Exception e) {
 			log.debug("{} {}", tile, e.getMessage());
+			e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -191,22 +192,25 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 		clearState();
 	}
 
-	//protected void debugUnmatched(boolean closed, TagSet tags) {
-	//		log.debug("DBG way not matched: " + closed + " "
-	//				+ Arrays.deepToString(tags));
+	//	private final static LineStyle DEBUG_LINE =
+	//	        new LineStyle(Integer.MAX_VALUE / 12, Color.MAGENTA, 1.2f);
 	//
-	//		mTagName = new Tag("name", tags[0].key + ":"
-	//				+ tags[0].value, false);
-	//
-	//		mElement.tags = closed ? debugTagArea : debugTagWay;
-	//		RenderInstruction[] ri = renderTheme.matchElement(mElement, mTile.zoomLevel);
-	//		renderWay(ri);
-	//}
+	//	private final static TextStyle DEBUG_TEXT = new TextBuilder()
+	//	    .setFontSize(12)
+	//	    .setColor(Color.RED)
+	//	    .setCaption(true)
+	//	    .setTextKey(Tag.KEY_NAME)
+	//	    .build();
 
 	protected void renderWay(RenderStyle[] style) {
-		if (style == null)
+		if (style == null) {
+			//	DEBUG_LINE.renderWay(this);
+			//	String t = mElement.tags.toString();
+			//	mElement.tags.clear();
+			//	mElement.tags.add(new Tag(Tag.KEY_NAME, t));
+			//	DEBUG_TEXT.renderWay(this);
 			return;
-
+		}
 		for (int i = 0, n = style.length; i < n; i++)
 			style[i].renderWay(this);
 	}
