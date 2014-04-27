@@ -345,26 +345,4 @@ public class OBB2D {
 	public boolean overlaps(OBB2D other) {
 		return overlaps1Way(other) && other.overlaps1Way(this);
 	}
-
-	//    // For testing purposes.
-	//    void moveTo(Vec2 center) {
-	//        Vec2 centroid = (origin[CORNER_X + 0] + origin[CORNER_X + 1] + origin[CORNER_X + 2] + origin[CORNER_X + 3]) / 4;
-	//
-	//        Vec2 translation = center - centroid;
-	//
-	//        for (int c = 0; c < 4; ++c) {
-	//            origin[CORNER_X + c] += translation;
-	//        }
-	//
-	//        computeAxes();
-	//    }
-
-	//    void render() {
-	//        glBegin(GL_LINES);
-	//            for (int c = 0; c < 5; ++c) {
-	//              glVertex2fv(origin[CORNER_X + c & 3]);
-	//            }
-	//        glEnd();
-	//    }
-
 }
