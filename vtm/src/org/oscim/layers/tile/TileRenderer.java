@@ -81,7 +81,7 @@ public abstract class TileRenderer extends LayerRenderer {
 	public synchronized void update(GLViewport v) {
 
 		if (mAlpha == 0) {
-			mTileManager.releaseTiles(mDrawTiles);
+			mDrawTiles.releaseTiles();
 			return;
 		}
 

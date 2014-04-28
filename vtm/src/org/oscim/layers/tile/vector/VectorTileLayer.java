@@ -78,7 +78,7 @@ public class VectorTileLayer extends TileLayer {
 	public boolean setTileSource(TileSource tileSource) {
 		pauseLoaders(true);
 		mTileManager.clearJobs();
-
+		mTileManager.setZoomLevel(tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax());
 		if (mTileSource != null) {
 			mTileSource.close();
 			mTileSource = null;
