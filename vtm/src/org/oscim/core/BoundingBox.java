@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2014 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -53,11 +54,6 @@ public class BoundingBox {
 	public final int minLongitudeE6;
 
 	/**
-	 * The hash code of this object.
-	 */
-	private final int hashCodeValue;
-
-	/**
 	 * @param minLatitudeE6
 	 *            the minimum latitude in microdegrees (degrees * 10^6).
 	 * @param minLongitudeE6
@@ -72,7 +68,6 @@ public class BoundingBox {
 		this.minLongitudeE6 = minLongitudeE6;
 		this.maxLatitudeE6 = maxLatitudeE6;
 		this.maxLongitudeE6 = maxLongitudeE6;
-		this.hashCodeValue = calculateHashCode();
 	}
 
 	public BoundingBox(double minLatitude, double minLongitude, double maxLatitude,
@@ -81,7 +76,6 @@ public class BoundingBox {
 		this.minLongitudeE6 = (int) (minLongitude * 1E6);
 		this.maxLatitudeE6 = (int) (maxLatitude * 1E6);
 		this.maxLongitudeE6 = (int) (maxLongitude * 1E6);
-		this.hashCodeValue = calculateHashCode();
 	}
 
 	/**
@@ -158,7 +152,12 @@ public class BoundingBox {
 
 	@Override
 	public int hashCode() {
-		return hashCodeValue;
+		int result = 7;
+		result = 31 * result + maxLatitudeE6;
+		result = 31 * result + maxLongitudeE6;
+		result = 31 * result + minLatitudeE6;
+		result = 31 * result + minLongitudeE6;
+		return result;
 	}
 
 	@Override
@@ -186,18 +185,6 @@ public class BoundingBox {
 		    .append(',')
 		    .append(maxLongitudeE6 / CONVERSION_FACTOR)
 		    .toString();
-	}
-
-	/**
-	 * @return the hash code of this object.
-	 */
-	private int calculateHashCode() {
-		int result = 7;
-		result = 31 * result + maxLatitudeE6;
-		result = 31 * result + maxLongitudeE6;
-		result = 31 * result + minLatitudeE6;
-		result = 31 * result + minLongitudeE6;
-		return result;
 	}
 
 	/* code below is from osdmroid, @author Nicolas Gramlich */
