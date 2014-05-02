@@ -200,7 +200,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 					return true;
 				}
 				// FIXME limit scale properly
-				mViewport.scaleMap(1 - my / (height / 6), 0, 0);
+				mViewport.scaleMap(1 + my / (height / 6), 0, 0);
 				mMap.updateMap(true);
 				mStartMove = -1;
 				return true;
