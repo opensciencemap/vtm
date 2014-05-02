@@ -54,6 +54,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
 	private boolean mDown;
 	private boolean mDoubleTap;
+	private boolean mDrag;
 
 	private float mPrevX1;
 	private float mPrevY1;
@@ -136,6 +137,12 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		}
 		if (action == MotionEvent.ACTION_UP) {
 			mDown = false;
+			if (mDoubleTap && !mDrag) {
+				mMap.animator().animateZoom(300, 2, 0, 0);
+			}
+
+			mDrag = false;
+
 			if (mStartMove < 0)
 				return true;
 
@@ -200,6 +207,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 					return true;
 				}
 				// FIXME limit scale properly
+				mDrag = true;
 				mViewport.scaleMap(1 + my / (height / 6), 0, 0);
 				mMap.updateMap(true);
 				mStartMove = -1;
