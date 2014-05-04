@@ -43,14 +43,14 @@ public class MapEventLayerTest {
 	@Test
 	public void doubleTap_shouldAnimateZoom() throws Exception {
 		simulateDoubleTap();
-		verify(mockAnimator).animateZoom(300, 2, 0, 0);
+		verify(mockAnimator).animateZoom(300, 2, 1.0f, -2.0f);
 	}
 
 	@Test
 	public void doubleTap_shouldAnimateZoomAfterDoubleTouchDrag() throws Exception {
 		simulateDoubleTouchDragUp();
 		simulateDoubleTap();
-		verify(mockAnimator).animateZoom(300, 2, 0, 0);
+		verify(mockAnimator).animateZoom(300, 2, 1.0f, -2.0f);
 	}
 
 	@Test
