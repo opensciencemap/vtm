@@ -9,6 +9,13 @@ import org.slf4j.LoggerFactory;
 public class OffscreenRenderer extends LayerRenderer {
 	final static Logger log = LoggerFactory.getLogger(OffscreenRenderer.class);
 
+	public enum Mode {
+		FXAA,
+		SSAO,
+		SSAO_FXAA,
+		BYPASS
+	}
+
 	int fb;
 	int renderTex;
 	int renderDepth;
@@ -20,6 +27,7 @@ public class OffscreenRenderer extends LayerRenderer {
 	private float[] mClearColor = { 0, 0, 0, 0 };
 
 	private boolean useDepthTexture = false;
+	private Shader mShader;
 
 	static class Shader extends GLShader {
 		int aPos, uTexDepth, uTexColor, uPixel;
@@ -32,6 +40,12 @@ public class OffscreenRenderer extends LayerRenderer {
 			uTexDepth = getUniform("u_tex");
 			uPixel = getUniform("u_pixel");
 		}
+	}
+
+	public final Mode mode;
+
+	public OffscreenRenderer(Mode mode) {
+		this.mode = mode;
 	}
 
 	protected boolean setupFBO(GLViewport viewport) {
@@ -54,8 +68,11 @@ public class OffscreenRenderer extends LayerRenderer {
 		// generate color texture
 		GL.glBindTexture(GL20.GL_TEXTURE_2D, renderTex);
 
-		GLUtils.setTextureParameter(GL20.GL_NEAREST,
-		                            GL20.GL_NEAREST,
+		GLUtils.setTextureParameter(
+		                            GL20.GL_LINEAR,
+		                            GL20.GL_LINEAR,
+		                            //GL20.GL_NEAREST,
+		                            //GL20.GL_NEAREST,
 		                            GL20.GL_CLAMP_TO_EDGE,
 		                            GL20.GL_CLAMP_TO_EDGE);
 
@@ -121,12 +138,7 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	static void init(GL20 gl20) {
 		GL = gl20;
-		shaders[0] = new Shader("post_fxaa");
-		shaders[1] = new Shader("post_ssao");
-		shaders[2] = new Shader("post_combined");
 	}
-
-	static Shader[] shaders = new Shader[3];
 
 	public void enable(boolean on) {
 		if (on)
@@ -149,9 +161,23 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	@Override
 	public void update(GLViewport viewport) {
-		if (texW != viewport.getWidth() || texH != viewport.getHeight())
+		if (texW != viewport.getWidth() || texH != viewport.getHeight()) {
 			setupFBO(viewport);
-
+			switch (mode) {
+				case FXAA:
+					mShader = new Shader("post_fxaa");
+					break;
+				case SSAO:
+					mShader = new Shader("post_ssao");
+					break;
+				case SSAO_FXAA:
+					mShader = new Shader("post_combined");
+					break;
+				case BYPASS:
+					mShader = new Shader("post_bypass");
+					break;
+			}
+		}
 		mRenderer.update(viewport);
 		setReady(mRenderer.isReady());
 	}
@@ -168,27 +194,26 @@ public class OffscreenRenderer extends LayerRenderer {
 
 		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
 
-		Shader s = shaders[0];
-		s.useProgram();
+		mShader.useProgram();
 
 		/* bind depth texture */
 		if (useDepthTexture) {
 			GL.glActiveTexture(GL20.GL_TEXTURE1);
 			GLState.bindTex2D(renderDepth);
-			GL.glUniform1i(s.uTexDepth, 1);
+			GL.glUniform1i(mShader.uTexDepth, 1);
 			GL.glActiveTexture(GL20.GL_TEXTURE0);
 		}
 		/* bind color texture */
 		GLState.bindTex2D(renderTex);
-		GL.glUniform1i(s.uTexColor, 0);
+		GL.glUniform1i(mShader.uTexColor, 0);
 
-		MapRenderer.bindQuadVertexVBO(s.aPos, true);
+		MapRenderer.bindQuadVertexVBO(mShader.aPos, true);
 
-		GL.glUniform2f(s.uPixel,
+		GL.glUniform2f(mShader.uPixel,
 		               (float) (1.0 / texW * 0.5),
 		               (float) (1.0 / texH * 0.5));
 
-		GLState.enableVertexArrays(s.aPos, -1);
+		GLState.enableVertexArrays(mShader.aPos, -1);
 
 		GLState.test(false, false);
 		GLState.blend(true);

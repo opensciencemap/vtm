@@ -8,6 +8,7 @@ import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.OffscreenRenderer;
+import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.tiling.TileSource;
 import org.oscim.utils.ColorUtil;
 import org.oscim.utils.ColorsCSS;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class S3DBLayer extends TileLayer {
 	static final Logger log = LoggerFactory.getLogger(S3DBLayer.class);
+	static final boolean POST_FXAA = false;
 
 	private final static int MAX_CACHE = 20;
 	private final static int SRC_ZOOM = 16;
@@ -46,23 +48,31 @@ public class S3DBLayer extends TileLayer {
 
 		public S3DBRenderer() {
 			mExtRenderer = new ExtrusionRenderer(this, 16, true, false);
-
-			or = new OffscreenRenderer();
-			or.setRenderer(mExtRenderer);
+			if (POST_FXAA) {
+				or = new OffscreenRenderer(Mode.FXAA);
+				or.setRenderer(mExtRenderer);
+			}
 		}
 
 		@Override
 		protected synchronized void update(GLViewport v) {
 			super.update(v);
-			//mExtRenderer.update(v);
-			or.update(v);
-			setReady(or.isReady());
+			if (POST_FXAA) {
+				or.update(v);
+				setReady(or.isReady());
+			} else {
+				mExtRenderer.update(v);
+				setReady(mExtRenderer.isReady());
+			}
 		}
 
 		@Override
 		protected synchronized void render(GLViewport v) {
-			or.render(v);
-			//mExtRenderer.render(v);
+			if (POST_FXAA) {
+				or.render(v);
+			} else {
+				mExtRenderer.render(v);
+			}
 		}
 	}
 

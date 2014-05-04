@@ -26,6 +26,7 @@ import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.OffscreenRenderer;
+import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.theme.styles.ExtrusionStyle;
@@ -100,7 +101,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		};
 
 		if (POST_AA) {
-			OffscreenRenderer or = new OffscreenRenderer();
+			OffscreenRenderer or = new OffscreenRenderer(Mode.FXAA);
 			or.setRenderer(mExtRenderer);
 			mRenderer = or;
 		} else {
