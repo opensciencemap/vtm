@@ -75,14 +75,12 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 	protected static final float MIN_SLOP = 25.4f / 2;
 
 	/** 100 ms since start of move to reduce fling scroll */
-	protected static final float FLING_THREHSHOLD = 100;
+	protected static final float FLING_MIN_THREHSHOLD = 100;
 
-	//private final Viewport mViewport;
 	private final VelocityTracker mTracker;
 
 	public MapEventLayer(Map map) {
 		super(map);
-		//mViewport = map.viewport();
 		mTracker = new VelocityTracker();
 	}
 
@@ -121,6 +119,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 			mDoubleTap = false;
 			mStartMove = -1;
 			mDown = true;
+			mDrag = false;
 
 			mPrevX1 = e.getX(0);
 			mPrevY1 = e.getY(0);
@@ -138,34 +137,32 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		if (action == MotionEvent.ACTION_UP) {
 			mDown = false;
 			if (mDoubleTap && !mDrag) {
-				mMap.animator().animateZoom(300, 2, 0, 0);
+				/* handle double tap zoom */
+				mMap.animator().animateZoom(300, 2,
+				                            mPrevX1 - mMap.getWidth() / 2,
+				                            mPrevY1 - mMap.getHeight() / 2);
+
+			} else if (mStartMove > 0) {
+				/* handle fling gesture */
+				mTracker.update(e.getX(), e.getY(), e.getTime());
+				float vx = mTracker.getVelocityX();
+				float vy = mTracker.getVelocityY();
+
+				/* reduce velocity for short moves */
+				float t = e.getTime() - mStartMove;
+				if (t < FLING_MIN_THREHSHOLD) {
+					t = t / FLING_MIN_THREHSHOLD;
+					vy *= t * t;
+					vx *= t * t;
+				}
+				doFling(vx, vy);
+
 			}
 
-			mDrag = false;
-
-			if (mStartMove < 0)
-				return true;
-
-			mTracker.update(e.getX(), e.getY(), e.getTime());
-
-			float vx = mTracker.getVelocityX();
-			float vy = mTracker.getVelocityY();
-
-			/* reduce velocity for short moves */
-			float t = e.getTime() - mStartMove;
-			if (t < FLING_THREHSHOLD) {
-				t = t / FLING_THREHSHOLD;
-				vy *= t * t;
-				vx *= t * t;
-			}
-			doFling(vx, vy);
 			return true;
 		}
 		if (action == MotionEvent.ACTION_CANCEL) {
-			//mStartMove = -1;
-			mDown = false;
-			mDoubleTap = false;
-			return true;
+			return false;
 		}
 		if (action == MotionEvent.ACTION_POINTER_DOWN) {
 			mStartMove = -1;
