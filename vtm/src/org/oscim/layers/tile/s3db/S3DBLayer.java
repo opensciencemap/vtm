@@ -141,19 +141,19 @@ public class S3DBLayer extends TileLayer {
 			return Color.get(210, 212, 212);
 
 		if ("metal" == material)
-			return Color.get(170, 130, 80);
+			return 0xFFC0C0C0;
 		if ("tar_paper" == material)
-			return Color.get(170, 130, 80);
+			return 0xFF969998;
 		if ("eternit" == material)
 			return Color.get(216, 167, 111);
 		if ("tin" == material)
-			return Color.get(170, 130, 80);
+			return 0xFFC0C0C0;
 		if ("asbestos" == material)
 			return Color.get(160, 152, 141);
 		if ("glass" == material)
 			return Color.get(130, 224, 255);
 		if ("slate" == material)
-			return Color.get(170, 130, 80);
+			return 0xFF605960;
 		if ("zink" == material)
 			return Color.get(180, 180, 180);
 		if ("gravel" == material)
@@ -164,7 +164,7 @@ public class S3DBLayer extends TileLayer {
 		if ("wood" == material)
 			return Color.get(170, 130, 80);
 		if ("grass" == material)
-			return Color.get(170, 130, 80);
+			return 0xFF50AA50;
 		if ("stone" == material)
 			return Color.get(206, 207, 181);
 		if ("plaster" == material)
