@@ -7,6 +7,10 @@ buildscript {
   }
 }
 
+repositories {
+  maven { url "${System.env.ANDROID_HOME}/extras/android/m2repository" }
+}
+
 apply plugin: 'android'
 
 dependencies {
@@ -45,10 +49,6 @@ android {
 
 // Including configurations into Eclipse
 
-eclipse.jdt {
-  sourceCompatibility = 1.6
-  targetCompatibility = 1.6
-}
 
 // Configuring Eclipse classpath
 eclipse.classpath {

@@ -13,11 +13,15 @@ buildscript {
 apply plugin: 'android-library'
 apply plugin: 'android-maven'
 
+repositories {
+	maven { url "${System.env.ANDROID_HOME}/extras/android/m2repository" } 
+}
+
 dependencies {
   //compile 'org.oscim:vtm:0.5.9-SNAPSHOT'
   compile project(':vtm')
 
-  compile 'com.android.support:support-v4:19.0.1'
+  compile 'com.android.support:support-v4:19.1.0'
 
   // -> might be more efficient, but configuring
   // log-levels is way too complicated...
@@ -82,10 +86,6 @@ eclipse {
 
       }
     }
-  }
-  jdt {
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
   }
   project {
     natures = ['com.android.ide.eclipse.adt.AndroidNature',
