@@ -82,8 +82,7 @@ public class TileRenderTest extends GdxMap {
 		final VectorTileLoader[] tileLoader = { null };
 
 		VectorTileLayer l = new VectorTileLayer(mMap, tileManager,
-		                                        new VectorTileRenderer(), 1) {
-
+		                                        new VectorTileRenderer()) {
 			protected TileLoader createLoader() {
 				tileLoader[0] = new VectorTileLoader(this) {
 

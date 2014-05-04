@@ -62,7 +62,7 @@ public class BitmapTileLayer extends TileLayer {
 		      new VectorTileRenderer());
 
 		mTileSource = tileSource;
-		initLoader(4);
+		initLoader(getNumLoaders());
 	}
 
 	@Override

@@ -24,9 +24,14 @@ import org.oscim.map.Map.UpdateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * TODO - add a TileLayer.Builder
+ */
 public abstract class TileLayer extends Layer implements UpdateListener {
 
 	static final Logger log = LoggerFactory.getLogger(TileLayer.class);
+
+	private static final int NUM_LOADERS = 4;
 
 	/**
 	 * TileManager responsible for adding visible tiles
@@ -60,11 +65,18 @@ public abstract class TileLayer extends Layer implements UpdateListener {
 		}
 	}
 
+	/**
+	 * Override to set number of loader threads. Default is 4.
+	 */
+	protected int getNumLoaders() {
+		return NUM_LOADERS;
+	}
+
 	@Override
 	public void onMapEvent(Event event, MapPosition mapPosition) {
 
 		if (event == Map.CLEAR_EVENT) {
-			// sync with TileRenderer
+			/* sync with TileRenderer */
 			synchronized (mRenderer) {
 				tileRenderer().clearTiles();
 				mTileManager.init();
