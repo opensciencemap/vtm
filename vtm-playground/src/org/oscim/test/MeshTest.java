@@ -16,7 +16,7 @@ public class MeshTest extends GdxMapApp {
 		//VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
 		//mMap.setTheme(VtmThemes.DEFAULT);
 
-		mMap.setBackgroundMap(new BitmapTileLayer(mMap, new DefaultSources.StamenToner()));
+		mMap.setBaseMap(new BitmapTileLayer(mMap, new DefaultSources.StamenToner()));
 
 		TileSource ts = new OSciMap4TileSource("http://opensciencemap.org/tiles/s3db");
 		S3DBLayer tl = new S3DBLayer(mMap, ts);

@@ -115,7 +115,7 @@ public class TileRenderTest extends GdxMap {
 			}
 		}
 
-		mMap.setBackgroundMap(new BitmapTileLayer(mMap, new DefaultSources.StamenToner()));
+		mMap.setBaseMap(new BitmapTileLayer(mMap, new DefaultSources.StamenToner()));
 
 		mMap.layers().add(l);
 	}

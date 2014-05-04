@@ -24,7 +24,7 @@ public class LayerTest extends GdxMap {
 
 	@Override
 	public void createLayers() {
-		mMap.setBackgroundMap(new BitmapTileLayer(mMap, new StamenToner()));
+		mMap.setBaseMap(new BitmapTileLayer(mMap, new StamenToner()));
 		mMap.layers().add(new TileGridLayer(mMap));
 
 		mMap.addTask(new Runnable() {

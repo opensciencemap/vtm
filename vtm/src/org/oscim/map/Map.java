@@ -24,7 +24,7 @@ import org.oscim.event.Gesture;
 import org.oscim.event.GestureDetector;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.MapEventLayer;
-import org.oscim.layers.tile.bitmap.BitmapTileLayer;
+import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.vector.OsmTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.renderer.MapRenderer;
@@ -88,7 +88,7 @@ public abstract class Map implements TaskQueue {
 	 * register when the layer is added to the map and unregistered when
 	 * the layer is removed.
 	 */
-	private VectorTileLayer mBaseLayer;
+	private TileLayer mBaseLayer;
 
 	protected boolean mClearMap = true;
 
@@ -124,23 +124,23 @@ public abstract class Map implements TaskQueue {
 		return mEventLayer;
 	}
 
+	/**
+	 * Create OsmTileLayer with given TileSource and
+	 * set as base map (layer 1)
+	 * 
+	 * TODO deprecate
+	 */
 	public VectorTileLayer setBaseMap(TileSource tileSource) {
-		// TODO cleanup previous baseLayer here?
-
-		mBaseLayer = new OsmTileLayer(this);
-		mBaseLayer.setTileSource(tileSource);
-		mLayers.add(1, mBaseLayer);
-
-		return mBaseLayer;
+		VectorTileLayer l = new OsmTileLayer(this);
+		l.setTileSource(tileSource);
+		setBaseMap(l);
+		return l;
 	}
 
-	public void setBackgroundMap(BitmapTileLayer tileLayer) {
+	public TileLayer setBaseMap(TileLayer tileLayer) {
 		mLayers.add(1, tileLayer);
-	}
-
-	public VectorTileLayer setBaseMap(BitmapTileLayer tileLayer) {
-		mLayers.add(1, tileLayer);
-		return null;
+		mBaseLayer = tileLayer;
+		return tileLayer;
 	}
 
 	/**
@@ -156,17 +156,16 @@ public abstract class Map implements TaskQueue {
 	}
 
 	public void setTheme(IRenderTheme theme) {
-		if (mBaseLayer == null) {
-			log.error("No base layer set");
-			throw new IllegalStateException();
-		}
-
 		if (theme == null) {
-			log.error("Invalid theme");
-			return;
+			throw new IllegalArgumentException("Theme cannot be null.");
 		}
 
-		mBaseLayer.setRenderTheme(theme);
+		if (mBaseLayer == null) {
+			log.warn("No base layer set.");
+		} else if (mBaseLayer instanceof VectorTileLayer) {
+			((VectorTileLayer) mBaseLayer).setRenderTheme(theme);
+		}
+
 		MapRenderer.setBackgroundColor(theme.getMapBackground());
 
 		clearMap();

@@ -102,7 +102,7 @@ class GwtMap extends GdxMap {
 			else
 				ts = new StamenToner();
 
-			mMap.setBackgroundMap(new BitmapTileLayer(mMap, ts));
+			mMap.setBaseMap(new BitmapTileLayer(mMap, ts));
 		} else {
 			TileSource ts = new OSciMap4TileSource();
 			l = mMap.setBaseMap(ts);

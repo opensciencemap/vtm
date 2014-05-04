@@ -49,7 +49,7 @@ public class OsmJsonMapActivity extends MapActivity {
 
 		mTileSource = new OsmWaterJsonTileSource();
 
-		mMap.setBackgroundMap(new BitmapTileLayer(mMap, new StamenToner()));
+		mMap.setBaseMap(new BitmapTileLayer(mMap, new StamenToner()));
 		mMap.layers().add(new TileGridLayer(mMap));
 
 		IRenderTheme theme = ThemeLoader.load(VtmThemes.OSMARENDER);
