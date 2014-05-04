@@ -310,7 +310,6 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		}
 
 		if (mCanScale || mDoRotate) {
-
 			if (!(mDoScale || mDoRotate)) {
 				/* enter exclusive scale mode */
 				if (Math.abs(deltaPinch) > (CanvasAdapter.dpi
@@ -338,9 +337,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		float fy = (y2 + y1) / 2 - height / 2;
 
 		synchronized (mViewport) {
-
 			if (!mDoTilt) {
-
 				if (rotateBy != 0)
 					mViewport.rotateMap(rotateBy, fx, fy);
 				if (scaleBy != 1)
@@ -348,10 +345,8 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
 				mViewport.moveMap(mx, my);
 			} else {
-				if (tiltBy != 0) {
+				if (tiltBy != 0 && mViewport.tiltMap(-tiltBy))
 					mViewport.moveMap(0, my / 2);
-					mViewport.tiltMap(tiltBy);
-				}
 			}
 		}
 
