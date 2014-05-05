@@ -83,14 +83,14 @@ public class MapEventLayerTest {
 	private void simulateDoubleTouchDragUp() {
 		layer.onTouchEvent(new TestMotionEvent(MotionEvent.ACTION_DOWN, 1, 1));
 		layer.onGesture(Gesture.DOUBLE_TAP, new TestMotionEvent(MotionEvent.ACTION_MOVE, 1, 0));
-		layer.onTouchEvent(new TestMotionEvent(MotionEvent.ACTION_MOVE, 1, 0));
+		layer.onTouchEvent(new TestMotionEvent(MotionEvent.ACTION_MOVE, -100, 0));
 		layer.onTouchEvent(new TestMotionEvent(MotionEvent.ACTION_UP, 1, 0));
 	}
 
 	private void simulateDoubleTouchDragDown() {
 		layer.onTouchEvent(new TestMotionEvent(MotionEvent.ACTION_DOWN, 1, 1));
 		layer.onGesture(Gesture.DOUBLE_TAP, new TestMotionEvent(MotionEvent.ACTION_MOVE, 1, 2));
-		layer.onTouchEvent(new TestMotionEvent(MotionEvent.ACTION_MOVE, 1, 2));
+		layer.onTouchEvent(new TestMotionEvent(MotionEvent.ACTION_MOVE, 100, 2));
 		layer.onTouchEvent(new TestMotionEvent(MotionEvent.ACTION_UP, 1, 2));
 	}
 
