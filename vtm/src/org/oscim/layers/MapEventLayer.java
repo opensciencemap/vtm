@@ -16,7 +16,9 @@
  */
 package org.oscim.layers;
 
-import org.oscim.backend.CanvasAdapter;
+import static org.oscim.backend.CanvasAdapter.dpi;
+import static org.oscim.utils.FastMath.withinSquaredDist;
+
 import org.oscim.core.Tile;
 import org.oscim.event.Event;
 import org.oscim.event.Gesture;
@@ -25,7 +27,6 @@ import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
 import org.oscim.map.Map.InputListener;
 import org.oscim.map.ViewController;
-import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
 	private boolean mDown;
 	private boolean mDoubleTap;
-	private boolean mDrag;
+	private boolean mDragZoom;
 
 	private float mPrevX1;
 	private float mPrevY1;
@@ -116,14 +117,14 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		if (action == MotionEvent.ACTION_DOWN) {
 			mMap.animator().cancel();
 
-			mDoubleTap = false;
 			mStartMove = -1;
-			mDown = true;
-			mDrag = false;
+			mDoubleTap = false;
+			mDragZoom = false;
 
 			mPrevX1 = e.getX(0);
 			mPrevY1 = e.getY(0);
 
+			mDown = true;
 			return true;
 		}
 		if (!(mDown || mDoubleTap)) {
@@ -132,11 +133,12 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		}
 
 		if (action == MotionEvent.ACTION_MOVE) {
-			return onActionMove(e);
+			onActionMove(e);
+			return true;
 		}
 		if (action == MotionEvent.ACTION_UP) {
 			mDown = false;
-			if (mDoubleTap && !mDrag) {
+			if (mDoubleTap && !mDragZoom) {
 				/* handle double tap zoom */
 				mMap.animator().animateZoom(300, 2,
 				                            mPrevX1 - mMap.getWidth() / 2,
@@ -156,9 +158,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 					vx *= t * t;
 				}
 				doFling(vx, vy);
-
 			}
-
 			return true;
 		}
 		if (action == MotionEvent.ACTION_CANCEL) {
@@ -181,7 +181,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		return e.getAction() & MotionEvent.ACTION_MASK;
 	}
 
-	private boolean onActionMove(MotionEvent e) {
+	private void onActionMove(MotionEvent e) {
 		ViewController mViewport = mMap.viewport();
 		float x1 = e.getX(0);
 		float y1 = e.getY(0);
@@ -196,40 +196,50 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 			mPrevX1 = x1;
 			mPrevY1 = y1;
 
-			/* double-tap + hold */
+			/* double-tap drag zoom */
 			if (mDoubleTap) {
+				/* just ignore first move event to set mPrevX/Y */
 				if (!mDown) {
-					// TODO check if within tap range
 					mDown = true;
-					return true;
+					return;
 				}
-				// FIXME limit scale properly
-				mDrag = true;
+				if (!mDragZoom && !isMinimalMove(mx, my)) {
+					mPrevX1 -= mx;
+					mPrevY1 -= my;
+					return;
+				}
+
+				// TODO limit scale properly
+				mDragZoom = true;
 				mViewport.scaleMap(1 + my / (height / 6), 0, 0);
 				mMap.updateMap(true);
 				mStartMove = -1;
-				return true;
+				return;
 			}
 
+			/* simple move */
 			if (!mEnableMove)
-				return true;
+				return;
 
 			if (mStartMove < 0) {
-				float minSlop = (CanvasAdapter.dpi / MIN_SLOP);
-				if (FastMath.withinSquaredDist(mx, my, minSlop * minSlop)) {
+				if (!isMinimalMove(mx, my)) {
 					mPrevX1 -= mx;
 					mPrevY1 -= my;
-					return true;
+					return;
+				}
+
+				float minSlop = (dpi / MIN_SLOP);
+				if (withinSquaredDist(mx, my, minSlop * minSlop)) {
 				}
 
 				mStartMove = e.getTime();
 				mTracker.start(x1, y1, mStartMove);
-				return true;
+				return;
 			}
 			mViewport.moveMap(mx, my);
 			mTracker.update(x1, y1, e.getTime());
 			mMap.updateMap(true);
-			return true;
+			return;
 		}
 		mStartMove = -1;
 
@@ -252,8 +262,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
 				if (mDoTilt) {
 					tiltBy = my / 5;
-				} else if (Math.abs(my) > (CanvasAdapter.dpi /
-				        MIN_SLOP * PINCH_TILT_THRESHOLD)) {
+				} else if (Math.abs(my) > (dpi / MIN_SLOP * PINCH_TILT_THRESHOLD)) {
 					/* enter exclusive tilt mode */
 					mCanScale = false;
 					mCanRotate = false;
@@ -309,8 +318,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		if (mCanScale || mDoRotate) {
 			if (!(mDoScale || mDoRotate)) {
 				/* enter exclusive scale mode */
-				if (Math.abs(deltaPinch) > (CanvasAdapter.dpi
-				        / MIN_SLOP * PINCH_ZOOM_THRESHOLD)) {
+				if (Math.abs(deltaPinch) > (dpi / MIN_SLOP * PINCH_ZOOM_THRESHOLD)) {
 
 					if (!mDoRotate) {
 						mPrevPinchWidth = pinchWidth;
@@ -328,7 +336,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		}
 
 		if (!(mDoRotate || mDoScale || mDoTilt))
-			return true;
+			return;
 
 		float fx = (x2 + x1) / 2 - width / 2;
 		float fy = (y2 + y1) / 2 - height / 2;
@@ -353,8 +361,6 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		mPrevY2 = y2;
 
 		mMap.updateMap(true);
-
-		return true;
 	}
 
 	private void updateMulti(MotionEvent e) {
@@ -379,6 +385,11 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 			mAngle = Math.atan2(dy, dx);
 			mPrevPinchWidth = Math.sqrt(dx * dx + dy * dy);
 		}
+	}
+
+	private boolean isMinimalMove(float mx, float my) {
+		float minSlop = (dpi / MIN_SLOP);
+		return !withinSquaredDist(mx, my, minSlop * minSlop);
 	}
 
 	private boolean doFling(float velocityX, float velocityY) {
