@@ -32,6 +32,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Changes Viewport by handling move, fling, scale, rotation and tilt gestures.
+ * 
+ * TODO rewrite using gesture primitives to build more complex gestures:
+ * maybe something similar to this https://github.com/ucbvislab/Proton
  */
 public class MapEventLayer extends Layer implements InputListener, GestureListener {
 
@@ -66,14 +69,14 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 	private double mPrevPinchWidth;
 	private long mStartMove;
 
-	protected static final double PINCH_ZOOM_THRESHOLD = 2;
-	protected static final double PINCH_TILT_THRESHOLD = 2;
-	protected static final double PINCH_TILT_SLOPE = 0.75;
-	protected static final double PINCH_ROTATE_THRESHOLD = 0.2;
-	protected static final double PINCH_ROTATE_THRESHOLD2 = 0.5;
-
 	/** 2mm as minimal distance to start move: dpi / 25.4 */
 	protected static final float MIN_SLOP = 25.4f / 2;
+
+	protected static final float PINCH_ZOOM_THRESHOLD = MIN_SLOP / 2;
+	protected static final float PINCH_TILT_THRESHOLD = MIN_SLOP / 2;
+	protected static final float PINCH_TILT_SLOPE = 0.75f;
+	protected static final float PINCH_ROTATE_THRESHOLD = 0.2f;
+	protected static final float PINCH_ROTATE_THRESHOLD2 = 0.5f;
 
 	/** 100 ms since start of move to reduce fling scroll */
 	protected static final float FLING_MIN_THREHSHOLD = 100;
@@ -228,10 +231,6 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 					return;
 				}
 
-				float minSlop = (dpi / MIN_SLOP);
-				if (withinSquaredDist(mx, my, minSlop * minSlop)) {
-				}
-
 				mStartMove = e.getTime();
 				mTracker.start(x1, y1, mStartMove);
 				return;
@@ -262,7 +261,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
 				if (mDoTilt) {
 					tiltBy = my / 5;
-				} else if (Math.abs(my) > (dpi / MIN_SLOP * PINCH_TILT_THRESHOLD)) {
+				} else if (Math.abs(my) > (dpi / PINCH_TILT_THRESHOLD)) {
 					/* enter exclusive tilt mode */
 					mCanScale = false;
 					mCanRotate = false;
@@ -318,7 +317,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		if (mCanScale || mDoRotate) {
 			if (!(mDoScale || mDoRotate)) {
 				/* enter exclusive scale mode */
-				if (Math.abs(deltaPinch) > (dpi / MIN_SLOP * PINCH_ZOOM_THRESHOLD)) {
+				if (Math.abs(deltaPinch) > (dpi / PINCH_ZOOM_THRESHOLD)) {
 
 					if (!mDoRotate) {
 						mPrevPinchWidth = pinchWidth;
