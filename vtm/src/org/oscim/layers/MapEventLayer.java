@@ -40,6 +40,9 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
 	static final Logger log = LoggerFactory.getLogger(MapEventLayer.class);
 
+	/* TODO create getter/setter? */
+	public boolean mFixedCenter = false;
+	
 	/* TODO replace with bitmasks */
 	private boolean mEnableRotate = true;
 	private boolean mEnableTilt = true;
@@ -143,10 +146,12 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 			mDown = false;
 			if (mDoubleTap && !mDragZoom) {
 				/* handle double tap zoom */
-				mMap.animator().animateZoom(300, 2,
-				                            mPrevX1 - mMap.getWidth() / 2,
-				                            mPrevY1 - mMap.getHeight() / 2);
-
+				if (mFixedCenter)
+					mMap.animator().animateZoom(300, 2, 0, 0);
+				else
+					mMap.animator().animateZoom(300, 2,
+					                            mPrevX1 - mMap.getWidth() / 2,
+					                            mPrevY1 - mMap.getHeight() / 2);
 			} else if (mStartMove > 0) {
 				/* handle fling gesture */
 				mTracker.update(e.getX(), e.getY(), e.getTime());
@@ -342,12 +347,21 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
 		synchronized (mViewport) {
 			if (!mDoTilt) {
-				if (rotateBy != 0)
-					mViewport.rotateMap(rotateBy, fx, fy);
-				if (scaleBy != 1)
-					mViewport.scaleMap(scaleBy, fx, fy);
-
-				mViewport.moveMap(mx, my);
+				if (rotateBy != 0) {
+					if (mFixedCenter)
+						mViewport.rotateMap(rotateBy, 0, 0);
+					else
+						mViewport.rotateMap(rotateBy, fx, fy);
+				}
+				if (scaleBy != 1) {
+					if (mFixedCenter)
+						mViewport.scaleMap(scaleBy, 0, 0);
+					else
+						mViewport.scaleMap(scaleBy, fx, fy);
+				}
+ 
+ 				if (!mFixedCenter)
+					mViewport.moveMap(mx, my);
 			} else {
 				if (tiltBy != 0 && mViewport.tiltMap(-tiltBy))
 					mViewport.moveMap(0, my / 2);
