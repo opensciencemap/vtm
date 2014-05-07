@@ -40,11 +40,11 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
 	static final Logger log = LoggerFactory.getLogger(MapEventLayer.class);
 
-	/* TODO replace with bitmasks */
 	private boolean mEnableRotate = true;
 	private boolean mEnableTilt = true;
 	private boolean mEnableMove = true;
 	private boolean mEnableScale = true;
+	private boolean mFixOnCenter = false;
 
 	/* possible state transitions */
 	private boolean mCanScale;
@@ -113,6 +113,13 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		mEnableScale = enable;
 	}
 
+	/**
+	 * When enabled zoom- and rotation-gestures will not move the viewport.
+	 */
+	public void setFixOnCenter(boolean enable) {
+		mFixOnCenter = enable;
+	}
+
 	public boolean onTouchEvent(MotionEvent e) {
 
 		int action = getAction(e);
@@ -142,10 +149,14 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		if (action == MotionEvent.ACTION_UP) {
 			mDown = false;
 			if (mDoubleTap && !mDragZoom) {
+				float pivotX = 0, pivotY = 0;
+				if (!mFixOnCenter) {
+					pivotX = mPrevX1 - mMap.getWidth() / 2;
+					pivotY = mPrevY1 - mMap.getHeight() / 2;
+				}
+
 				/* handle double tap zoom */
-				mMap.animator().animateZoom(300, 2,
-				                            mPrevX1 - mMap.getWidth() / 2,
-				                            mPrevY1 - mMap.getHeight() / 2);
+				mMap.animator().animateZoom(300, 2, pivotX, pivotY);
 
 			} else if (mStartMove > 0) {
 				/* handle fling gesture */
@@ -337,17 +348,22 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		if (!(mDoRotate || mDoScale || mDoTilt))
 			return;
 
-		float fx = (x2 + x1) / 2 - width / 2;
-		float fy = (y2 + y1) / 2 - height / 2;
+		float pivotX = 0, pivotY = 0;
+
+		if (!mFixOnCenter) {
+			pivotX = (x2 + x1) / 2 - width / 2;
+			pivotY = (y2 + y1) / 2 - height / 2;
+		}
 
 		synchronized (mViewport) {
 			if (!mDoTilt) {
 				if (rotateBy != 0)
-					mViewport.rotateMap(rotateBy, fx, fy);
+					mViewport.rotateMap(rotateBy, pivotX, pivotY);
 				if (scaleBy != 1)
-					mViewport.scaleMap(scaleBy, fx, fy);
+					mViewport.scaleMap(scaleBy, pivotX, pivotY);
 
-				mViewport.moveMap(mx, my);
+				if (!mFixOnCenter)
+					mViewport.moveMap(mx, my);
 			} else {
 				if (tiltBy != 0 && mViewport.tiltMap(-tiltBy))
 					mViewport.moveMap(0, my / 2);
