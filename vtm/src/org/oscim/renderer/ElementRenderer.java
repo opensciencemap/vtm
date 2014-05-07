@@ -23,6 +23,8 @@ import static org.oscim.renderer.elements.RenderElement.POLYGON;
 import static org.oscim.renderer.elements.RenderElement.SYMBOL;
 import static org.oscim.renderer.elements.RenderElement.TEXLINE;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
@@ -80,7 +82,11 @@ public abstract class ElementRenderer extends LayerRenderer {
 	protected synchronized void render(GLViewport v) {
 		MapPosition layerPos = mMapPosition;
 
-		layers.vbo.bind();
+		if (layers.useVBO)
+			layers.vbo.bind();
+		else
+			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+
 		GLState.test(false, false);
 		GLState.blend(true);
 
@@ -121,7 +127,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 				continue;
 			}
 			if (l.type == SYMBOL) {
-				l = TextureLayer.Renderer.draw(l, v, div);
+				l = TextureLayer.Renderer.draw(layers, l, v, div);
 				continue;
 			}
 			log.debug("invalid layer {}", l.type);
@@ -144,7 +150,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 			return;
 		}
 
-		if (layers.vbo == null)
+		if (layers.useVBO && layers.vbo == null)
 			layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
 
 		if (uploadLayers(layers, newSize, true))
@@ -157,7 +163,15 @@ public abstract class ElementRenderer extends LayerRenderer {
 		if (addFill)
 			newSize += 8;
 
-		ShortBuffer sbuf = MapRenderer.getShortBuffer(newSize);
+		ShortBuffer sbuf;
+		if (layers.useVBO) {
+			sbuf = MapRenderer.getShortBuffer(newSize);
+		} else {
+			layers.vertexArrayBuffer = ByteBuffer
+			    .allocateDirect(newSize * 2)
+			    .order(ByteOrder.nativeOrder());
+			sbuf = layers.vertexArrayBuffer.asShortBuffer();
+		}
 
 		if (addFill)
 			sbuf.put(fillCoords, 0, 8);
@@ -172,8 +186,9 @@ public abstract class ElementRenderer extends LayerRenderer {
 			        + " buffer fill: " + sbuf.remaining());
 			return false;
 		}
+		if (layers.useVBO)
+			layers.vbo.loadBufferData(sbuf.flip(), newSize * 2);
 
-		layers.vbo.loadBufferData(sbuf.flip(), newSize * 2);
 		return true;
 	}
 

@@ -150,14 +150,15 @@ public abstract class TextureLayer extends RenderElement {
 			pool.init(0);
 		}
 
-		public static RenderElement draw(RenderElement l, GLViewport v, float scale) {
-			shader.useProgram();
+		public static RenderElement draw(ElementLayers layers, RenderElement l,
+		        GLViewport v, float scale) {
 
 			GLState.test(false, false);
 			GLState.blend(true);
 
-			TextureLayer tl = (TextureLayer) l;
+			shader.useProgram();
 
+			TextureLayer tl = (TextureLayer) l;
 			GL.glUniform1f(shader.uScale, tl.fixed ? 1 / scale : 1);
 
 			v.proj.setAsUniform(shader.uProj);
@@ -179,18 +180,31 @@ public abstract class TextureLayer extends RenderElement {
 					 * / 6(indices) == 8) */
 					int off = (t.offset + i) * 8 + tl.offset;
 
-					GL.glVertexAttribPointer(shader.aPos, 4,
-					                         GL20.GL_SHORT, false, 12, off);
+					if (layers.useVBO) {
+						GL.glVertexAttribPointer(shader.aPos, 4,
+						                         GL20.GL_SHORT,
+						                         false, 12, off);
 
-					GL.glVertexAttribPointer(shader.aTexCoord, 2,
-					                         GL20.GL_SHORT, false, 12, off + 8);
-
+						GL.glVertexAttribPointer(shader.aTexCoord, 2,
+						                         GL20.GL_SHORT,
+						                         false, 12, off + 8);
+					} else {
+						layers.vertexArrayBuffer.position(off);
+						GL.glVertexAttribPointer(shader.aPos, 4,
+						                         GL20.GL_SHORT, false, 12,
+						                         layers.vertexArrayBuffer);
+						layers.vertexArrayBuffer.position(off + 8);
+						GL.glVertexAttribPointer(shader.aTexCoord,
+						                         2, GL20.GL_SHORT, false, 12,
+						                         layers.vertexArrayBuffer);
+					}
 					int numVertices = t.vertices - i;
 					if (numVertices > maxVertices)
 						numVertices = maxVertices;
 
 					GL.glDrawElements(GL20.GL_TRIANGLES, numVertices,
 					                  GL20.GL_UNSIGNED_SHORT, 0);
+
 				}
 			}
 

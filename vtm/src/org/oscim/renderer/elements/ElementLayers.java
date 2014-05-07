@@ -21,6 +21,7 @@ import static org.oscim.renderer.elements.RenderElement.MESH;
 import static org.oscim.renderer.elements.RenderElement.POLYGON;
 import static org.oscim.renderer.elements.RenderElement.TEXLINE;
 
+import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
@@ -72,6 +73,10 @@ public class ElementLayers extends TileData {
 	 * ...
 	 */
 	public BufferObject vbo;
+	public boolean useVBO = true;
+
+	/* holds vertex data for rendering when not using VBO */
+	public ByteBuffer vertexArrayBuffer;
 
 	/**
 	 * To not need to switch VertexAttribPointer positions all the time:
@@ -379,6 +384,8 @@ public class ElementLayers extends TileData {
 
 		if (vbo != null)
 			vbo = BufferObject.release(vbo);
+
+		vertexArrayBuffer = null;
 	}
 
 	@Override
