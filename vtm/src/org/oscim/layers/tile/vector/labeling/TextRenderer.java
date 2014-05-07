@@ -30,6 +30,8 @@ package org.oscim.layers.tile.vector.labeling;
 // 5 QuadTree might be handy
 //
 
+import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.layers.tile.vector.labeling.LabelLayer.Worker;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLState;
@@ -47,6 +49,8 @@ class TextRenderer extends ElementRenderer {
 
 	public TextRenderer(Worker worker) {
 		mWorker = worker;
+
+		layers.useVBO = GLAdapter.VBO_TEXTURE_LAYERS;
 	}
 
 	long lastDraw = 0;
@@ -77,14 +81,17 @@ class TextRenderer extends ElementRenderer {
 		GLState.test(false, false);
 		//Debug.draw(pos, layers);
 
-		layers.vbo.bind();
+		if (layers.useVBO)
+			layers.vbo.bind();
+		else
+			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
 
 		float scale = (float) (v.pos.scale / mMapPosition.scale);
 
 		setMatrix(v, false);
 
 		for (RenderElement l = layers.getTextureLayers(); l != null;)
-			l = TextureLayer.Renderer.draw(l, v, scale);
+			l = TextureLayer.Renderer.draw(layers, l, v, scale);
 	}
 
 }

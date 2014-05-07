@@ -29,6 +29,12 @@ public class GLAdapter {
 
 	public static boolean NON_PREMUL_CANVAS;
 
+	/**
+	 * Set false as workaround for adreno driver issue:
+	 * https://github.com/opensciencemap/vtm/issues/52
+	 */
+	public static boolean VBO_TEXTURE_LAYERS = false;
+
 	public static GL20 get() {
 		if (g == null)
 			throw new IllegalStateException();
