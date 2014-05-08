@@ -19,6 +19,7 @@ package org.oscim.layers.marker;
 
 import java.util.Comparator;
 
+import org.oscim.backend.GLAdapter;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
@@ -61,6 +62,8 @@ public class MarkerRenderer extends ElementRenderer {
 	}
 
 	public MarkerRenderer(MarkerLayer<MarkerItem> markerLayer, MarkerSymbol defaultSymbol) {
+		layers.useVBO = GLAdapter.VBO_TEXTURE_LAYERS;
+
 		mSymbolLayer = new SymbolLayer();
 		mMarkerLayer = markerLayer;
 		mDefaultMarker = defaultSymbol;

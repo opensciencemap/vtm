@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
@@ -57,6 +58,12 @@ public class MapView extends RelativeLayout {
 		AndroidGraphics.init();
 		AndroidAssets.init(context);
 		GLAdapter.init(new AndroidGL());
+
+		/* Use workaround for adreno driver bug in some
+		 * samsung S4 and Note3 models */
+		if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT
+		        && "samsung".equals(Build.MANUFACTURER))
+			GLAdapter.VBO_TEXTURE_LAYERS = false;
 
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
