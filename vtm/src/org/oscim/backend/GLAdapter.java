@@ -24,16 +24,14 @@ public class GLAdapter {
 	/** The instance provided by backend */
 	private static GL20 g;
 
-	public static boolean GDX_DESKTOP_QUIRKS;
-	public static boolean GDX_WEBGL_QUIRKS;
-
-	public static boolean NON_PREMUL_CANVAS;
+	public static boolean GDX_DESKTOP_QUIRKS = false;
+	public static boolean GDX_WEBGL_QUIRKS = false;
 
 	/**
 	 * Set false as workaround for adreno driver issue:
 	 * https://github.com/opensciencemap/vtm/issues/52
 	 */
-	public static boolean VBO_TEXTURE_LAYERS = false;
+	public static boolean VBO_TEXTURE_LAYERS = true;
 
 	public static GL20 get() {
 		if (g == null)
