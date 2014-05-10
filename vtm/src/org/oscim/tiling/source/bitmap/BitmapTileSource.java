@@ -72,7 +72,7 @@ public class BitmapTileSource extends UrlTileSource {
 		public boolean decode(Tile tile, ITileDataSink sink, InputStream is)
 		        throws IOException {
 
-			Bitmap bitmap = CanvasAdapter.g.decodeBitmap(is);
+			Bitmap bitmap = CanvasAdapter.decodeBitmap(is);
 			if (!bitmap.isValid()) {
 				log.debug("{} invalid bitmap", tile);
 				return false;

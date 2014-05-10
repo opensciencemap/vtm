@@ -531,7 +531,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 		if (src != null) {
 			try {
-				Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset(src);
+				Bitmap bitmap = CanvasAdapter.getBitmapAsset(src);
 				if (bitmap != null)
 					b.texture = new TextureItem(bitmap, true);
 			} catch (Exception e) {
@@ -566,7 +566,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 		}
 		validateExists("img", img, elementName);
 
-		Bitmap bitmap = CanvasAdapter.g.loadBitmapAsset(IMG_PATH + img);
+		Bitmap bitmap = CanvasAdapter.getBitmapAsset(IMG_PATH + img);
 		mTextureAtlas = new TextureAtlas(bitmap);
 	}
 

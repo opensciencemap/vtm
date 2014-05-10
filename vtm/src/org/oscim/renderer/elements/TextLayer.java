@@ -42,7 +42,7 @@ public class TextLayer extends TextureLayer {
 
 	public TextLayer() {
 		super(RenderElement.SYMBOL);
-		mCanvas = CanvasAdapter.g.getCanvas();
+		mCanvas = CanvasAdapter.newCanvas();
 		fixed = true;
 	}
 

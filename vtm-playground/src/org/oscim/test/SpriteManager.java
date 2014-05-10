@@ -48,7 +48,7 @@ public abstract class SpriteManager<T> {
 
 	Sprite items;
 
-	protected final Canvas mCanvas = CanvasAdapter.g.getCanvas();
+	protected final Canvas mCanvas = CanvasAdapter.newCanvas();
 	protected TextureItem mTexture;
 
 	public SpriteManager() {

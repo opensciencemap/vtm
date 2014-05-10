@@ -45,7 +45,7 @@ public abstract class GLShader {
 
 	public static int loadShader(String file) {
 		String path = "shaders/" + file + ".glsl";
-		String vs = AssetAdapter.g.openTextFile(path);
+		String vs = AssetAdapter.readTextFile(path);
 
 		if (vs == null)
 			throw new IllegalArgumentException("shader file not found: " + path);

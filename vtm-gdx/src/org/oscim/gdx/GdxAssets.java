@@ -46,6 +46,6 @@ public class GdxAssets extends AssetAdapter {
 	}
 
 	public static void init(String path) {
-		g = new GdxAssets(path);
+		AssetAdapter.init(new GdxAssets(path));
 	}
 }

@@ -33,7 +33,7 @@ public class SymbolRenderLayer extends ElementRenderer {
 		it.billboard = false;
 
 		try {
-			it.bitmap = CanvasAdapter.g.loadBitmapAsset("jar:symbols/cafe.png");
+			it.bitmap = CanvasAdapter.getBitmapAsset("jar:symbols/cafe.png");
 		} catch (Exception e) {
 			e.printStackTrace();
 

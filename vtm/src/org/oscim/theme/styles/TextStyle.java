@@ -165,7 +165,7 @@ public final class TextStyle extends RenderStyle {
 		this.priority = tb.priority;
 		this.texture = tb.texture;
 
-		paint = CanvasAdapter.g.getPaint();
+		paint = CanvasAdapter.newPaint();
 		paint.setTextAlign(Align.CENTER);
 		paint.setTypeface(tb.fontFamily, tb.fontStyle);
 
@@ -173,7 +173,7 @@ public final class TextStyle extends RenderStyle {
 		paint.setTextSize(tb.fontSize);
 
 		if (tb.strokeWidth > 0) {
-			stroke = CanvasAdapter.g.getPaint();
+			stroke = CanvasAdapter.newPaint();
 			stroke.setStyle(Paint.Style.STROKE);
 			stroke.setTextAlign(Align.CENTER);
 			stroke.setTypeface(tb.fontFamily, tb.fontStyle);

@@ -18,7 +18,7 @@ public class ThemeTest {
 
 	public static void main(String[] args) {
 		AwtGraphics.init();
-		AssetAdapter.g = new AssetAdapter() {
+		AssetAdapter.init(new AssetAdapter() {
 			@Override
 			public InputStream openFileAsStream(String name) {
 				try {
@@ -29,7 +29,7 @@ public class ThemeTest {
 					return null;
 				}
 			}
-		};
+		});
 
 		IRenderTheme t = ThemeLoader.load(VtmThemes.DEFAULT);
 

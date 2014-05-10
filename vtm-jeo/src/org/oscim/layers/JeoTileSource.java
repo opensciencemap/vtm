@@ -47,7 +47,7 @@ public class JeoTileSource extends TileSource {
 						sink.completed(TILE_NOT_FOUND);
 						return;
 					}
-					Bitmap b = CanvasAdapter.g.decodeBitmap(new ByteArrayInputStream(t.getData()));
+					Bitmap b = CanvasAdapter.decodeBitmap(new ByteArrayInputStream(t.getData()));
 					sink.setTileImage(b);
 					log.debug("success {}", tile);
 					sink.completed(SUCCESS);

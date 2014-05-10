@@ -27,7 +27,7 @@ public class AndroidAssets extends AssetAdapter {
 	Context mContext;
 
 	public static void init(Context ctx) {
-		g = new AndroidAssets(ctx);
+		AssetAdapter.init(new AndroidAssets(ctx));
 	}
 
 	private AndroidAssets(Context ctx) {

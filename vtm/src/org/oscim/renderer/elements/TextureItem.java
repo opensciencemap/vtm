@@ -186,7 +186,7 @@ public class TextureItem extends Inlist<TextureItem> {
 			synchronized (mBitmaps) {
 				int size = mBitmaps.size();
 				if (size == 0)
-					t.bitmap = CanvasAdapter.g.getBitmap(mWidth, mHeight, 0);
+					t.bitmap = CanvasAdapter.newBitmap(mWidth, mHeight, 0);
 				else {
 					t.bitmap = mBitmaps.remove(size - 1);
 					t.bitmap.eraseColor(Color.TRANSPARENT);

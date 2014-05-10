@@ -29,7 +29,7 @@ import org.oscim.backend.canvas.Paint;
 public abstract class CanvasAdapter {
 
 	/** The instance provided by backend */
-	public static CanvasAdapter g;
+	static CanvasAdapter g;
 
 	/** The dpi. */
 	public static float dpi = 240;
@@ -42,14 +42,22 @@ public abstract class CanvasAdapter {
 	 * 
 	 * @return the canvas
 	 */
-	public abstract Canvas getCanvas();
+	protected abstract Canvas newCanvasImpl();
+
+	public static Canvas newCanvas() {
+		return g.newCanvasImpl();
+	}
 
 	/**
 	 * Create Paint.
 	 * 
 	 * @return the paint
 	 */
-	public abstract Paint getPaint();
+	protected abstract Paint newPaintImpl();
+
+	public static Paint newPaint() {
+		return g.newPaintImpl();
+	}
 
 	/**
 	 * Create {@link Bitmap} with given dimensions.
@@ -59,7 +67,11 @@ public abstract class CanvasAdapter {
 	 * @param format the format
 	 * @return the bitmap
 	 */
-	public abstract Bitmap getBitmap(int width, int height, int format);
+	protected abstract Bitmap newBitmapImpl(int width, int height, int format);
+
+	public static Bitmap newBitmap(int width, int height, int format) {
+		return g.newBitmapImpl(width, height, format);
+	}
 
 	/**
 	 * Create {@link Bitmap} from InputStream.
@@ -67,7 +79,11 @@ public abstract class CanvasAdapter {
 	 * @param inputStream the input stream
 	 * @return the bitmap
 	 */
-	public abstract Bitmap decodeBitmap(InputStream inputStream);
+	protected abstract Bitmap decodeBitmapImpl(InputStream inputStream);
+
+	public static Bitmap decodeBitmap(InputStream inputStream) {
+		return g.decodeBitmapImpl(inputStream);
+	}
 
 	/**
 	 * Create {@link Bitmap} from bundled assets.
@@ -75,7 +91,11 @@ public abstract class CanvasAdapter {
 	 * @param fileName the file name
 	 * @return the bitmap
 	 */
-	public abstract Bitmap loadBitmapAsset(String fileName);
+	protected abstract Bitmap loadBitmapAssetImpl(String fileName);
+
+	public static Bitmap getBitmapAsset(String fileName) {
+		return g.loadBitmapAssetImpl(fileName);
+	}
 
 	protected static Bitmap createBitmap(String src) throws IOException {
 		if (src == null || src.length() == 0) {
@@ -89,8 +109,12 @@ public abstract class CanvasAdapter {
 			return null;
 		}
 
-		Bitmap bitmap = CanvasAdapter.g.decodeBitmap(inputStream);
+		Bitmap bitmap = decodeBitmap(inputStream);
 		inputStream.close();
 		return bitmap;
+	}
+
+	protected static void init(CanvasAdapter adapter) {
+		g = adapter;
 	}
 }

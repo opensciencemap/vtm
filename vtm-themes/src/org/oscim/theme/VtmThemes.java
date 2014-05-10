@@ -39,6 +39,6 @@ public enum VtmThemes implements ThemeFile {
 
 	@Override
 	public InputStream getRenderThemeAsStream() {
-		return AssetAdapter.g.openFileAsStream(mPath);
+		return AssetAdapter.readFileAsStream(mPath);
 	}
 }

@@ -30,10 +30,9 @@ import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Paint;
 
 public class AwtGraphics extends CanvasAdapter {
-	private static final AwtGraphics INSTANCE = new AwtGraphics();
 
 	public static void init() {
-		g = INSTANCE;
+		CanvasAdapter.init(new AwtGraphics());
 	}
 
 	private AwtGraphics() {
@@ -41,17 +40,17 @@ public class AwtGraphics extends CanvasAdapter {
 	}
 
 	@Override
-	public Paint getPaint() {
+	public Paint newPaintImpl() {
 		return new AwtPaint();
 	}
 
 	@Override
-	public Bitmap getBitmap(int width, int height, int format) {
+	public Bitmap newBitmapImpl(int width, int height, int format) {
 		return new AwtBitmap(width, height, format);
 	}
 
 	@Override
-	public Canvas getCanvas() {
+	public Canvas newCanvasImpl() {
 		return new AwtCanvas();
 	}
 
@@ -87,7 +86,7 @@ public class AwtGraphics extends CanvasAdapter {
 	}
 
 	@Override
-	public Bitmap decodeBitmap(InputStream inputStream) {
+	public Bitmap decodeBitmapImpl(InputStream inputStream) {
 		try {
 			return new AwtBitmap(inputStream);
 		} catch (IOException e) {
@@ -97,7 +96,7 @@ public class AwtGraphics extends CanvasAdapter {
 	}
 
 	@Override
-	public Bitmap loadBitmapAsset(String fileName) {
+	public Bitmap loadBitmapAssetImpl(String fileName) {
 		try {
 			return createBitmap(fileName);
 		} catch (IOException e) {

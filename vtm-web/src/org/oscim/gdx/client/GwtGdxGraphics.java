@@ -30,7 +30,6 @@ public class GwtGdxGraphics extends CanvasAdapter {
 
 	public static boolean NO_STROKE_TEXT = false;
 
-	public static final GwtGdxGraphics INSTANCE = new GwtGdxGraphics();
 	static final Context2d ctx;
 
 	static {
@@ -47,33 +46,32 @@ public class GwtGdxGraphics extends CanvasAdapter {
 	}
 
 	@Override
-	public Bitmap decodeBitmap(InputStream in) {
+	public Bitmap decodeBitmapImpl(InputStream in) {
 		//ImageData data = new ImageData();
 		return null;
 	}
 
 	@Override
-	public Bitmap loadBitmapAsset(String fileName) {
+	public Bitmap loadBitmapAssetImpl(String fileName) {
 		return new GwtBitmap(fileName);
 	}
 
 	@Override
-	public Paint getPaint() {
+	public Paint newPaintImpl() {
 		return new GwtPaint();
 	}
 
 	@Override
-	public Bitmap getBitmap(int width, int height, int format) {
+	public Bitmap newBitmapImpl(int width, int height, int format) {
 		return new GwtBitmap(width, height, format);
 	}
 
 	@Override
-	public org.oscim.backend.canvas.Canvas getCanvas() {
+	public org.oscim.backend.canvas.Canvas newCanvasImpl() {
 		return new GwtCanvas();
 	}
 
 	public static void init() {
-		g = INSTANCE;
+		CanvasAdapter.init(new GwtGdxGraphics());
 	}
-
 }

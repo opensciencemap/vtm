@@ -27,20 +27,21 @@ import java.io.InputStreamReader;
 public abstract class AssetAdapter {
 
 	/** The instance provided by backend */
-	public static AssetAdapter g;
+	static AssetAdapter g;
 
 	/**
 	 * Open file from asset path as stream.
-	 * 
-	 * @param name the name
-	 * @return the input stream
 	 */
-	public abstract InputStream openFileAsStream(String name);
+	protected abstract InputStream openFileAsStream(String file);
 
-	public String openTextFile(String name) {
+	public static InputStream readFileAsStream(String file) {
+		return g.openFileAsStream(file);
+	}
+
+	public static String readTextFile(String file) {
 		StringBuilder sb = new StringBuilder();
 
-		InputStream is = g.openFileAsStream(name);
+		InputStream is = g.openFileAsStream(file);
 		if (is == null)
 			return null;
 
@@ -55,5 +56,10 @@ public abstract class AssetAdapter {
 		}
 
 		return sb.toString();
+
+	}
+
+	public static void init(AssetAdapter adapter) {
+		g = adapter;
 	}
 }
