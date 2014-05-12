@@ -238,7 +238,7 @@ public class PathLayer extends Layer {
 
 		public Worker(Map map) {
 			super(map, 0, new Task(), new Task());
-			mClipper = new LineClipper(-max, -max, max, max, true);
+			mClipper = new LineClipper(-max, -max, max, max);
 			mPPoints = new float[0];
 		}
 
@@ -339,6 +339,8 @@ public class PathLayer extends Layer {
 			float prevX = x;
 			float prevY = y;
 
+			float[] segment = null;
+
 			for (int j = 2; j < size * 2; j += 2) {
 				x = (int) ((mPreprojected[j + 0] - mx) * scale);
 				y = (int) ((mPreprojected[j + 1] - my) * scale);
@@ -368,10 +370,11 @@ public class PathLayer extends Layer {
 						ll.addLine(projected, i, false);
 
 					if (clip < 0) {
-						// add line segment
-						ll.addLine(mClipper.out, 4, false);
-						prevX = mClipper.out[2];
-						prevY = mClipper.out[3];
+						/* add line segment */
+						segment = mClipper.getLine(segment, 0);
+						ll.addLine(segment, 4, false);
+						prevX = mClipper.outX2;
+						prevY = mClipper.outY2;
 					}
 					i = 0;
 					continue;

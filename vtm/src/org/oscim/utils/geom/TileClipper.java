@@ -19,12 +19,12 @@ package org.oscim.utils.geom;
 import org.oscim.core.GeometryBuffer;
 
 /**
- * Clip polygon to a rectangle. Output cannot expected to be valid
- * Simple-Feature geometry, i.e. all rings are clipped independently
+ * Clip polygons and lines to a rectangle. Output cannot expected to be valid
+ * Simple-Feature geometry, i.e. all polygon rings are clipped independently
  * so that inner and outer rings might touch, etc.
  * 
  * based on http://www.cs.rit.edu/~icss571/clipTrans/PolyClipBack.html
- * */
+ */
 public class TileClipper {
 	private float minX;
 	private float maxX;
@@ -36,7 +36,7 @@ public class TileClipper {
 		this.minY = minY;
 		this.maxX = maxX;
 		this.maxY = maxY;
-		mLineClipper = new LineClipper((int) minX, (int) minY, (int) maxX, (int) maxY, true);
+		mLineClipper = new LineClipper(minX, minY, maxX, maxY);
 	}
 
 	public void setRect(float minX, float minY, float maxX, float maxY) {
@@ -44,10 +44,10 @@ public class TileClipper {
 		this.minY = minY;
 		this.maxX = maxX;
 		this.maxY = maxY;
-		mLineClipper = new LineClipper((int) minX, (int) minY, (int) maxX, (int) maxY, true);
+		mLineClipper.setRect(minX, minY, maxX, maxY);
 	}
 
-	private LineClipper mLineClipper;
+	private final LineClipper mLineClipper;
 
 	private final GeometryBuffer mGeomOut = new GeometryBuffer(10, 1);
 
@@ -77,7 +77,7 @@ public class TileClipper {
 			GeometryBuffer out = mGeomOut;
 			out.clear();
 
-			int numLines = clipLine(geom, out);
+			int numLines = mLineClipper.clipLine(geom, out);
 
 			short idx[] = geom.ensureIndexSize(numLines + 1, false);
 			System.arraycopy(out.index, 0, idx, 0, numLines);
@@ -254,77 +254,5 @@ public class TileClipper {
 			px = cx;
 			py = cy;
 		}
-	}
-
-	private int clipLine(GeometryBuffer in, GeometryBuffer out) {
-
-		int pointPos = 0;
-		int numLines = 0;
-		for (int i = 0, n = in.index.length; i < n; i++) {
-			int len = in.index[i];
-			if (len < 0)
-				break;
-
-			if (len < 4) {
-				pointPos += len;
-				continue;
-			}
-
-			if (len == 0) {
-				continue;
-			}
-
-			int inPos = pointPos;
-			int end = inPos + len;
-
-			float prevX = in.points[inPos + 0];
-			float prevY = in.points[inPos + 1];
-
-			boolean inside = mLineClipper.clipStart(prevX, prevY);
-
-			if (inside) {
-				out.startLine();
-				out.addPoint(prevX, prevY);
-				numLines++;
-			}
-
-			for (inPos += 2; inPos < end; inPos += 2) {
-				// get the current way point coordinates
-				float curX = in.points[inPos];
-				float curY = in.points[inPos + 1];
-
-				int clip;
-				if ((clip = mLineClipper.clipNext(curX, curY)) != 0) {
-					//System.out.println(inside + " clip: " + clip + " "
-					//        + Arrays.toString(mLineClipper.out));
-					if (clip < 0) {
-						if (inside) {
-							// previous was inside
-							out.addPoint(mLineClipper.out[2], mLineClipper.out[3]);
-							inside = false;
-
-						} else {
-							// previous was outside
-							out.startLine();
-							numLines++;
-							out.addPoint(mLineClipper.out[0], mLineClipper.out[1]);
-							out.addPoint(mLineClipper.out[2], mLineClipper.out[3]);
-
-							inside = mLineClipper.clipStart(curX, curY);
-						}
-					} else {
-						out.addPoint(curX, curY);
-
-					}
-				} else {
-					inside = false;
-				}
-
-			}
-
-			pointPos += len;
-		}
-
-		return numLines;
 	}
 }
