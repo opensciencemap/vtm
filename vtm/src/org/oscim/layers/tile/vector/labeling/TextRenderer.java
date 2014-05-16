@@ -31,7 +31,6 @@ package org.oscim.layers.tile.vector.labeling;
 //
 
 import org.oscim.backend.GL20;
-import org.oscim.backend.GLAdapter;
 import org.oscim.layers.tile.vector.labeling.LabelLayer.Worker;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLState;
@@ -49,8 +48,6 @@ class TextRenderer extends ElementRenderer {
 
 	public TextRenderer(Worker worker) {
 		mWorker = worker;
-
-		layers.useVBO = GLAdapter.VBO_TEXTURE_LAYERS;
 	}
 
 	long lastDraw = 0;

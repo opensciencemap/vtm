@@ -28,11 +28,9 @@ public class GLAdapter {
 	public static boolean GDX_WEBGL_QUIRKS = false;
 
 	/**
-	 * Set false as workaround for adreno driver issue:
+	 * Set true as workaround for adreno driver issue:
 	 * https://github.com/opensciencemap/vtm/issues/52
 	 */
-	public static boolean VBO_TEXTURE_LAYERS = true;
-
 	public static boolean NO_BUFFER_SUB_DATA = false;
 
 	public static GL20 get() {
