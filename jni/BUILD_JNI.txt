@@ -1,18 +1,10 @@
-#!/bin/bash
-
 # Build native libraries:
-# - modify jni/builder/JniBuilder.java for your platform.
-# - get gdx-jnigen, then run:
-
-javac -cp ../vtm-ext-libs/gdx/gdx-jnigen.jar jni/builder/JniBuilder.java
-java -cp ../vtm-ext-libs/gdx/gdx-jnigen.jar:../vtm-ext-libs/gdx/gdx-jnigen-sources.jar:jni/builder JniBuilder
+- modify src/JniBuilder.java for your platform.
 
 ## to build android:
-export ANDROID_HOME=/home/jeff/android-sdk
-export NDK_HOME=/home/jeff/android-ndk-r8d
+export NDK_HOME=/path_to_android_sdk
 
 ## compile
-cd jni
 ant -v
 
 ## copy vtm/libs/armeabi* to vtm-android/libs

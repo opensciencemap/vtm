@@ -97,6 +97,9 @@ transposeM(float* mTrans, int mTransOffset, float* m, int mOffset);
 static inline void
 matrix4_proj(float* mat, float* vec);
 
+static inline void
+matrix4_proj2D(float* mat, float* vec);
+
 jlong JNI(alloc)(JNIEnv *env, jclass* clazz)
 {
   return (long) calloc(16, sizeof(float));
@@ -244,12 +247,36 @@ void JNI(strans)(JNIEnv* env, jclass* clazz, jlong ptr_r, jlong ptr_a)
   transposeM(matr, 0, mata, 0);
 }
 
-void JNI(prj)(JNIEnv* env, jclass* clazz, jlong ptr, jfloatArray obj_vec)
+void JNI(prj)(JNIEnv* env, jclass* clazz, jlong ptr, jfloatArray obj_vec){
+  float* m = CAST(ptr);
+   float* vec = (float*) (*env)->GetPrimitiveArrayCritical(env, obj_vec, 0);
+
+   matrix4_proj(m, vec);
+
+   (*env)->ReleasePrimitiveArrayCritical(env, obj_vec, vec, 0);
+}
+
+void JNI(prj3D)(JNIEnv* env, jclass* clazz, jlong ptr, jfloatArray obj_vec, int offset, int cnt)
 {
   float* m = CAST(ptr);
   float* vec = (float*) (*env)->GetPrimitiveArrayCritical(env, obj_vec, 0);
 
-  matrix4_proj(m, vec);
+  int length = cnt * 3;
+  for (int i = offset * 3; i < length; i += 3)
+      matrix4_proj(m, (vec + i));
+
+  (*env)->ReleasePrimitiveArrayCritical(env, obj_vec, vec, 0);
+}
+
+void JNI(prj2D)(JNIEnv* env, jclass* clazz, jlong ptr, jfloatArray obj_vec, int offset, int cnt)
+{
+  float* m = CAST(ptr);
+  float* vec = (float*) (*env)->GetPrimitiveArrayCritical(env, obj_vec, 0);
+
+  int length = cnt * 2;
+
+  for (int i = offset * 2; i < length; i += 2)
+    matrix4_proj2D(m, (vec + i));
 
   (*env)->ReleasePrimitiveArrayCritical(env, obj_vec, vec, 0);
 }
@@ -489,4 +516,16 @@ matrix4_proj(float* mat, float* vec)
   vec[0] = x;
   vec[1] = y;
   vec[2] = z;
+}
+
+static inline void
+matrix4_proj2D(float* mat, float* vec)
+{
+
+  float inv_w = 1.0f / (vec[0] * mat[M30] + vec[1] * mat[M31] + mat[M33]);
+  float x = (vec[0] * mat[M00] + vec[1] * mat[M01] + mat[M03]) * inv_w;
+  float y = (vec[0] * mat[M10] + vec[1] * mat[M11] + mat[M13]) * inv_w;
+
+  vec[0] = x;
+  vec[1] = y;
 }
