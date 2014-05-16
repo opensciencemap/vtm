@@ -22,6 +22,7 @@ import java.nio.Buffer;
 import javax.annotation.CheckReturnValue;
 
 import org.oscim.backend.GL20;
+import org.oscim.backend.GLAdapter;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,9 +58,10 @@ public final class BufferObject extends Inlist<BufferObject> {
 
 		GL.glBindBuffer(target, id);
 
-		// reuse memory allocated for vbo when possible and allocated
-		// memory is less then four times the new data
-		if (!clear && (size > newSize) && (size < newSize * 4)) {
+		/* reuse memory allocated for vbo when possible and allocated
+		 * memory is less then four times the new data */
+		if (!GLAdapter.NO_BUFFER_SUB_DATA && !clear &&
+		        (size > newSize) && (size < newSize * 4)) {
 			GL.glBufferSubData(target, 0, newSize, buf);
 		} else {
 			mBufferMemoryUsage += newSize - size;

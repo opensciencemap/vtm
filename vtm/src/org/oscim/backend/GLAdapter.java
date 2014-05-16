@@ -33,6 +33,8 @@ public class GLAdapter {
 	 */
 	public static boolean VBO_TEXTURE_LAYERS = true;
 
+	public static boolean NO_BUFFER_SUB_DATA = false;
+
 	public static GL20 get() {
 		if (g == null)
 			throw new IllegalStateException();

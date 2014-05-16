@@ -63,7 +63,7 @@ public class MapView extends RelativeLayout {
 		 * samsung S4 and Note3 models */
 		if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT
 		        && "samsung".equals(Build.MANUFACTURER))
-			GLAdapter.VBO_TEXTURE_LAYERS = false;
+			GLAdapter.NO_BUFFER_SUB_DATA = true;
 
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
