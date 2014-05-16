@@ -75,7 +75,7 @@ public class BitmapLayer extends TextureLayer {
 		}
 
 		TextureItem t = textures;
-		t.vertices = TextureLayer.INDICES_PER_SPRITE;
+		t.indices = TextureLayer.INDICES_PER_SPRITE;
 	}
 
 	private void setVertices(ShortBuffer sbuf) {
@@ -215,10 +215,10 @@ public class BitmapLayer extends TextureLayer {
 
 				t.bind();
 
-				int maxVertices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
+				int maxIndices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
 
 				// draw up to maxVertices in each iteration
-				for (int i = 0; i < t.vertices; i += maxVertices) {
+				for (int i = 0; i < t.indices; i += maxIndices) {
 					// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
 					int off = (t.offset + i) * 8 + tl.offset;
 
@@ -228,11 +228,11 @@ public class BitmapLayer extends TextureLayer {
 					GL.glVertexAttribPointer(s.aTexCoord, 2,
 					                         GL20.GL_SHORT, false, 12, off + 8);
 
-					int numVertices = t.vertices - i;
-					if (numVertices > maxVertices)
-						numVertices = maxVertices;
+					int numIndices = t.indices - i;
+					if (numIndices > maxIndices)
+						numIndices = maxIndices;
 
-					GL.glDrawElements(GL20.GL_TRIANGLES, numVertices,
+					GL.glDrawElements(GL20.GL_TRIANGLES, numIndices,
 					                  GL20.GL_UNSIGNED_SHORT, 0);
 				}
 			}

@@ -112,7 +112,7 @@ public final class SymbolLayer extends TextureLayer {
 					t.upload();
 
 					t.offset = numIndices;
-					t.vertices = 0;
+					t.indices = 0;
 				}
 				width = t.width;
 				height = t.height;
@@ -176,9 +176,9 @@ public final class SymbolLayer extends TextureLayer {
 				pos += TextLayer.VERTICES_PER_SPRITE * 6;
 
 				/* six elements used to draw the four vertices */
-				t.vertices += TextureLayer.INDICES_PER_SPRITE;
+				t.indices += TextureLayer.INDICES_PER_SPRITE;
 			}
-			numIndices += t.vertices;
+			numIndices += t.indices;
 		}
 
 		if (pos > 0)
@@ -199,7 +199,7 @@ public final class SymbolLayer extends TextureLayer {
 				textures = Inlist.appendItem(textures, t);
 
 				t.offset = 0;
-				t.vertices = 0;
+				t.indices = 0;
 				return t;
 			}
 		}

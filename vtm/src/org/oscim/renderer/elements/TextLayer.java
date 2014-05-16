@@ -112,7 +112,7 @@ public final class TextLayer extends TextureLayer {
 
 				if (y + height > TEXTURE_HEIGHT) {
 					t.offset = offsetIndices;
-					t.vertices = (short) (numIndices - offsetIndices);
+					t.indices = (short) (numIndices - offsetIndices);
 					offsetIndices = numIndices;
 
 					t.next = pool.get();
@@ -167,7 +167,7 @@ public final class TextLayer extends TextureLayer {
 		vi.used = pos;
 
 		t.offset = offsetIndices;
-		t.vertices = (short) (numIndices - offsetIndices);
+		t.indices = (short) (numIndices - offsetIndices);
 
 		return true;
 	}

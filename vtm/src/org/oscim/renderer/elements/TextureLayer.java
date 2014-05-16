@@ -172,10 +172,10 @@ public abstract class TextureLayer extends RenderElement {
 				               1f / (t.height * COORD_SCALE));
 				t.bind();
 
-				int maxVertices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
+				int maxIndices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
 
 				/* draw up to maxVertices in each iteration */
-				for (int i = 0; i < t.vertices; i += maxVertices) {
+				for (int i = 0; i < t.indices; i += maxIndices) {
 					/* to.offset * (24(shorts) * 2(short-bytes)
 					 * / 6(indices) == 8) */
 					int off = (t.offset + i) * 8 + tl.offset;
@@ -198,11 +198,11 @@ public abstract class TextureLayer extends RenderElement {
 						                         2, GL20.GL_SHORT, false, 12,
 						                         layers.vertexArrayBuffer);
 					}
-					int numVertices = t.vertices - i;
-					if (numVertices > maxVertices)
-						numVertices = maxVertices;
+					int numIndices = t.indices - i;
+					if (numIndices > maxIndices)
+						numIndices = maxIndices;
 
-					GL.glDrawElements(GL20.GL_TRIANGLES, numVertices,
+					GL.glDrawElements(GL20.GL_TRIANGLES, numIndices,
 					                  GL20.GL_UNSIGNED_SHORT, 0);
 
 				}
