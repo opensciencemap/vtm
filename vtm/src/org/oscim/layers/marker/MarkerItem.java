@@ -48,7 +48,7 @@ public class MarkerItem {
 	public final Object uid;
 	public final String title;
 	public final String description;
-	public final GeoPoint geoPoint;
+	public GeoPoint geoPoint;
 	protected MarkerSymbol mMarker;
 
 	/**
@@ -83,6 +83,10 @@ public class MarkerItem {
 	public GeoPoint getPoint() {
 		return geoPoint;
 	}
+
+    public void setPoint(GeoPoint point) {
+        geoPoint = point;
+    }
 
 	public MarkerSymbol getMarker() {
 		return mMarker;
