@@ -423,6 +423,9 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 			mDoubleTap = true;
 			return true;
 		}
+        else if (g == Gesture.LONG_PRESS && mDoubleTap) {
+            return true;
+        }
 		return false;
 	}
 
