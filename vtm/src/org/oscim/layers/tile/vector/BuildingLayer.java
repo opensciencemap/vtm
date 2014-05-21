@@ -25,6 +25,7 @@ import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.renderer.elements.ElementLayers;
@@ -32,15 +33,19 @@ import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BuildingLayer extends Layer implements TileLoaderThemeHook {
-	//static final Logger log = LoggerFactory.getLogger(BuildingOverlay.class);
+	static final Logger log = LoggerFactory.getLogger(BuildingLayer.class);
 
 	private final static int MIN_ZOOM = 17;
 	private final static boolean POST_AA = false;
 
 	private final int mMinZoom;
 	private ExtrusionRenderer mExtRenderer;
+
+	private final float mFadeTime = 300;
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
 		this(map, tileLayer, MIN_ZOOM);
@@ -64,38 +69,52 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 			private long mStartTime;
 
 			@Override
+			protected boolean setup() {
+				mAlpha = 0;
+				return super.setup();
+			}
+
+			@Override
 			public void update(GLViewport v) {
 
-				boolean show = v.pos.scale >= (1 << mMinZoom);
+				int diff = (v.pos.zoomLevel - mMinZoom);
+
+				/* if below min zoom or already faded out */
+				if ((diff < -1)) {// || (diff < 0 && mAlpha == 0)){
+					setReady(false);
+					return;
+				}
+
+				boolean show = diff >= 0;
 
 				if (show) {
 					if (mAlpha < 1) {
+						//log.debug("fade in {}", mAlpha);
 						long now = System.currentTimeMillis();
-
 						if (mStartTime == 0) {
 							mStartTime = now;
 						}
 						float a = (now - mStartTime) / mFadeTime;
 						mAlpha = FastMath.clamp(a, 0, 1);
-						mMap.render();
+						MapRenderer.animate();
 					} else
 						mStartTime = 0;
 				} else {
 					if (mAlpha > 0) {
+						//log.debug("fade out {} {}", mAlpha, mStartTime);
 						long now = System.currentTimeMillis();
 						if (mStartTime == 0) {
-							mStartTime = now + 100;
+							mStartTime = now;
 						}
-						long diff = (now - mStartTime);
-						if (diff > 0) {
-							float a = 1 - diff / mFadeTime;
+						long dt = (now - mStartTime);
+						if (dt > 0) {
+							float a = 1 - dt / mFadeTime;
 							mAlpha = FastMath.clamp(a, 0, 1);
 						}
-						mMap.render();
+						MapRenderer.animate();
 					} else
 						mStartTime = 0;
 				}
-				//log.debug(show + " > " + mAlpha);
 				super.update(v);
 			}
 		};
@@ -108,8 +127,6 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 			mRenderer = mExtRenderer;
 		}
 	}
-
-	private final float mFadeTime = 500;
 
 	@Override
 	public boolean render(MapTile tile, ElementLayers layers, MapElement element,
@@ -150,29 +167,27 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		return true;
 	}
 
-	//private int multi;
-	//@Override
-	//public boolean onTouchEvent(MotionEvent e) {
-	//	int action = e.getAction() & MotionEvent.ACTION_MASK;
-	//	if (action == MotionEvent.ACTION_POINTER_DOWN) {
-	//		multi++;
-	//	} else if (action == MotionEvent.ACTION_POINTER_UP) {
-	//		multi--;
-	//		if (!mActive && mAlpha > 0) {
-	//			// finish hiding
-	//			//log.debug("add multi hide timer " + mAlpha);
-	//			addShowTimer(mFadeTime * mAlpha, false);
-	//		}
-	//	} else if (action == MotionEvent.ACTION_CANCEL) {
-	//		multi = 0;
-	//		log.debug("cancel " + multi);
-	//		if (mTimer != null) {
-	//			mTimer.cancel();
-	//			mTimer = null;
+	//	private int multi;
+	//	@Override
+	//	public void onInputEvent(Event event, MotionEvent e) {
+	//		int action = e.getAction() & MotionEvent.ACTION_MASK;
+	//		if (action == MotionEvent.ACTION_POINTER_DOWN) {
+	//			multi++;
+	//		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+	//			multi--;
+	//			if (!mActive && mAlpha > 0) {
+	//				// finish hiding
+	//				//log.debug("add multi hide timer " + mAlpha);
+	//				addShowTimer(mFadeTime * mAlpha, false);
+	//			}
+	//		} else if (action == MotionEvent.ACTION_CANCEL) {
+	//			multi = 0;
+	//			log.debug("cancel " + multi);
+	//			if (mTimer != null) {
+	//				mTimer.cancel();
+	//				mTimer = null;
+	//			}
 	//		}
 	//	}
-	//
-	//	return false;
-	//}
 
 }

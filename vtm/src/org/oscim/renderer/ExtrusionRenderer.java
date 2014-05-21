@@ -100,7 +100,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		if (!initialized && !initShader())
 			return;
 
-		if (mAlpha == 0 || v.pos.zoomLevel < mTileZoom) {
+		if (mAlpha == 0 || v.pos.zoomLevel < (mTileZoom - 1)) {
 			setReady(false);
 			return;
 		}
@@ -184,7 +184,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 			MapRenderer.animate();
 
 		mTileCnt = activeTiles;
-		//log.debug("" + activeTiles + " " + zoom);
 
 		if (activeTiles > 0)
 			setReady(true);
@@ -321,8 +320,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		GL.glEnable(GL20.GL_CULL_FACE);
 		GL.glDepthFunc(GL20.GL_LESS);
 
-		//GL.glUniform1f(uExtAlpha, mAlpha);
-		GL.glUniform1f(s.uAlpha, 1);
+		GL.glUniform1f(s.uAlpha, mAlpha);
 
 		if (drawAlpha) {
 			GL.glColorMask(false, false, false, false);
