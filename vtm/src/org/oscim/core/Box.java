@@ -55,6 +55,13 @@ public class Box {
 		this.maxY = maxY;
 	}
 
+	public Box(Box bbox) {
+		this.minX = bbox.minX;
+		this.minY = bbox.minY;
+		this.maxX = bbox.maxX;
+		this.maxY = bbox.maxY;
+	}
+
 	/**
 	 * Check if Box contains point defined by coordinates x and y.
 	 * 
@@ -68,11 +75,33 @@ public class Box {
 
 	/**
 	 * Check if Box contains Point.
-	 * 
-	 * @param p the point
-	 * @return true, if point is inside box.
 	 */
 	public boolean contains(Point p) {
 		return (p.x >= minX && p.x <= maxY && p.y >= minY && p.y <= maxY);
 	}
+
+	/**
+	 * Check if this Box is inside box.
+	 */
+	public boolean inside(Box box) {
+		return minX >= box.minX && maxX <= box.maxX && minY >= box.minY && maxY <= box.maxY;
+	}
+
+	public double getWidth() {
+		return maxX - minX;
+	}
+
+	public double getHeight() {
+		return maxY - minY;
+	}
+
+	public boolean overlap(Box other) {
+		return !(minX > other.maxX || maxX < other.minX || minY > other.maxY || maxY < other.minY);
+	}
+
+	@Override
+	public String toString() {
+		return "[" + minX + ',' + minY + ',' + maxX + ',' + maxY + ']';
+	}
+
 }
