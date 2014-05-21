@@ -316,13 +316,12 @@ public class ExtrusionRenderer extends LayerRenderer {
 		s.useProgram();
 		//GLState.useProgram(shaderProgram[mMode]);
 		GLState.enableVertexArrays(s.aPos, -1);
-		GLState.blend(false);
 
-		GL.glEnable(GL20.GL_CULL_FACE);
 		GL.glDepthFunc(GL20.GL_LESS);
 
+		GL.glUniform1i(s.uMode, -1);
+		GL.glUniform1f(s.uAlpha, mAlpha);
 		//GL.glUniform1f(uExtAlpha, mAlpha);
-		GL.glUniform1f(s.uAlpha, 1);
 
 		if (drawAlpha) {
 			GL.glColorMask(false, false, false, false);
