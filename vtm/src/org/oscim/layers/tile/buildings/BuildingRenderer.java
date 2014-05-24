@@ -1,7 +1,9 @@
 package org.oscim.layers.tile.buildings;
 
+import static java.lang.System.currentTimeMillis;
 import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
 import static org.oscim.layers.tile.MapTile.State.READY;
+import static org.oscim.utils.FastMath.clamp;
 
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileDistanceSort;
@@ -12,9 +14,11 @@ import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayers;
-import org.oscim.utils.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BuildingRenderer extends ExtrusionRenderer {
+	static final Logger log = LoggerFactory.getLogger(BuildingRenderer.class);
 
 	private final TileRenderer mTileLayer;
 	private final TileSet mTileSet;
@@ -22,10 +26,11 @@ public class BuildingRenderer extends ExtrusionRenderer {
 	private final int mZoomMin;
 	private final int mZoomMax;
 
-	private final float mFadeInTime = 300;
-	private final float mFadeOutTime = 500;
+	private final float mFadeInTime = 250;
+	private final float mFadeOutTime = 400;
 
-	private long mStartTime;
+	private long mAnimTime;
+	private boolean mShow;
 
 	public BuildingRenderer(TileRenderer tileRenderLayer, int zoomMin, int zoomMax,
 	        boolean mesh, boolean alpha) {
@@ -50,43 +55,36 @@ public class BuildingRenderer extends ExtrusionRenderer {
 		int diff = (v.pos.zoomLevel - mZoomMin);
 
 		/* if below min zoom or already faded out */
-		if ((diff < -1)) {
+		if (diff < -1) {
+			mAlpha = 0;
+			mShow = false;
 			setReady(false);
 			return;
 		}
 
-		boolean show = diff >= 0;
-
-		if (show) {
+		if (diff >= 0) {
 			if (mAlpha < 1) {
-				//log.debug("fade in {}", mAlpha);
-				long now = System.currentTimeMillis();
-				if (mStartTime == 0) {
-					mStartTime = now;
-				}
-				float a = (now - mStartTime) / mFadeInTime;
-				mAlpha = FastMath.clamp(a, 0, 1);
+				long now = currentTimeMillis();
+				if (!mShow)
+					mAnimTime = now - (long) (mAlpha * mFadeInTime);
+
+				mShow = true;
+				mAlpha = clamp((now - mAnimTime) / mFadeInTime, 0, 1);
 				MapRenderer.animate();
-			} else
-				mStartTime = 0;
+			}
 		} else {
 			if (mAlpha > 0) {
-				//log.debug("fade out {} {}", mAlpha, mStartTime);
-				long now = System.currentTimeMillis();
-				if (mStartTime == 0) {
-					mStartTime = now + 200; // delay hide a little
-				}
-				long dt = (now - mStartTime);
-				if (dt > 0) {
-					float a = 1 - dt / mFadeOutTime;
-					mAlpha = FastMath.clamp(a, 0, 1);
-				}
+				long now = currentTimeMillis();
+				if (mShow)
+					mAnimTime = now - (long) ((1 - mAlpha) * mFadeOutTime);
+
+				mShow = false;
+				mAlpha = clamp(1 - (now - mAnimTime) / mFadeOutTime, 0, 1);
 				MapRenderer.animate();
-			} else
-				mStartTime = 0;
+			}
 		}
 
-		if (mAlpha == 0 || v.pos.zoomLevel < (mZoomMin - 1)) {
+		if (mAlpha == 0) {
 			setReady(false);
 			return;
 		}
