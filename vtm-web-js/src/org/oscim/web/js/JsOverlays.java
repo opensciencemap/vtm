@@ -4,7 +4,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.layers.GenericLayer;
 import org.oscim.layers.Layer;
 import org.oscim.layers.TileGridLayer;
-import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.OsmTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;

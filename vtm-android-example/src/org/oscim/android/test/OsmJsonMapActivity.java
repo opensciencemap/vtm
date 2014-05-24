@@ -18,7 +18,7 @@ import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
-import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.IRenderTheme;

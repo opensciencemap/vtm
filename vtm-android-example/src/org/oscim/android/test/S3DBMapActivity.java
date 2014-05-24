@@ -2,7 +2,7 @@ package org.oscim.android.test;
 
 import org.oscim.android.cache.TileCache;
 import org.oscim.layers.tile.TileLayer;
-import org.oscim.layers.tile.s3db.S3DBLayer;
+import org.oscim.layers.tile.buildings.S3DBLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;

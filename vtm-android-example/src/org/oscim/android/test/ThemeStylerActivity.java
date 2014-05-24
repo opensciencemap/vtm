@@ -3,7 +3,7 @@ package org.oscim.android.test;
 import static org.oscim.utils.ColorUtil.modHsv;
 import static org.oscim.utils.ColorUtil.shiftHue;
 
-import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;

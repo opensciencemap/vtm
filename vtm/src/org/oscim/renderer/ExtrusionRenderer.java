@@ -16,46 +16,29 @@
  */
 package org.oscim.renderer;
 
-import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
-import static org.oscim.layers.tile.MapTile.State.READY;
-
 import org.oscim.backend.GL20;
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.MapTile;
-import org.oscim.layers.tile.TileRenderer;
-import org.oscim.layers.tile.TileSet;
-import org.oscim.layers.tile.vector.BuildingLayer;
-import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.ExtrusionLayers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExtrusionRenderer extends LayerRenderer {
+public abstract class ExtrusionRenderer extends LayerRenderer {
 	static final Logger log = LoggerFactory.getLogger(ExtrusionRenderer.class);
-	private final boolean debug = false;
+	static final boolean debugDraw = false;
 
-	private final TileRenderer mTileLayer;
-	private final int mZoomMin;
-	private final int mZoomMax;
 	private final boolean drawAlpha;
-
-	protected float mAlpha = 1;
 	private final int mMode;
+	private Shader mShader;
 
-	public ExtrusionRenderer(TileRenderer tileRenderLayer,
-	        int zoomMin, int zoomMax, boolean mesh, boolean alpha) {
-		mTileLayer = tileRenderLayer;
-		mTileSet = new TileSet();
-		mZoomMin = zoomMin;
-		mZoomMax = zoomMax;
+	protected ExtrusionLayers[] mExtrusionLayerSet;
+	protected int mExtrusionLayerCnt;
+	protected float mAlpha = 1;
+
+	public ExtrusionRenderer(boolean mesh, boolean alpha) {
 		mMode = mesh ? 1 : 0;
 		drawAlpha = alpha;
 	}
-
-	private final TileSet mTileSet;
-	private ExtrusionLayers[] mExtrusionLayerSet;
-	private int mExtrusionLayerCnt;
 
 	public static class Shader extends GLShader {
 		int uMVP, uColor, uAlpha, uMode, aPos, aLight;
@@ -73,122 +56,14 @@ public class ExtrusionRenderer extends LayerRenderer {
 		}
 	}
 
-	protected Shader mShader;
-
 	@Override
 	protected boolean setup() {
 		if (mMode == 0)
 			mShader = new Shader("extrusion_layer_ext");
 		else
 			mShader = new Shader("extrusion_layer_mesh");
+
 		return true;
-	}
-
-	@Override
-	public void update(GLViewport v) {
-
-		if (mAlpha == 0 || v.pos.zoomLevel < (mZoomMin - 1)) {
-			setReady(false);
-			return;
-		}
-
-		int activeTiles = 0;
-		mTileLayer.getVisibleTiles(mTileSet);
-		MapTile[] tiles = mTileSet.tiles;
-
-		if (mTileSet.cnt == 0) {
-			mTileLayer.releaseTiles(mTileSet);
-			setReady(false);
-			return;
-		}
-
-		/* keep a list of tiles available for rendering */
-		if (mExtrusionLayerSet == null || mExtrusionLayerSet.length < mTileSet.cnt * 4)
-			mExtrusionLayerSet = new ExtrusionLayers[mTileSet.cnt * 4];
-
-		int zoom = tiles[0].zoomLevel;
-
-		/* compile one tile max per frame */
-		boolean compiled = false;
-
-		if (zoom >= mZoomMin && zoom <= mZoomMax) {
-			/* TODO - if tile is not available try parent or children */
-
-			for (int i = 0; i < mTileSet.cnt; i++) {
-				ExtrusionLayers els = getLayer(tiles[i]);
-				if (els == null)
-					continue;
-
-				if (els.compiled)
-					mExtrusionLayerSet[activeTiles++] = els;
-				else if (!compiled && els.compileLayers()) {
-					mExtrusionLayerSet[activeTiles++] = els;
-					compiled = true;
-				}
-			}
-		} else if (zoom == mZoomMax + 1) {
-			/* special case for s3db: render from parent tiles */
-			for (int i = 0; i < mTileSet.cnt; i++) {
-				MapTile t = tiles[i].node.parent();
-
-				if (t == null)
-					continue;
-
-				//	for (MapTile c : mTiles)
-				//		if (c == t)
-				//			continue O;
-
-				ExtrusionLayers els = getLayer(t);
-				if (els == null)
-					continue;
-
-				if (els.compiled)
-					mExtrusionLayerSet[activeTiles++] = els;
-
-				else if (!compiled && els.compileLayers()) {
-					mExtrusionLayerSet[activeTiles++] = els;
-					compiled = true;
-				}
-			}
-		} else if (zoom == mZoomMin - 1) {
-			/* check if proxy children are ready */
-			for (int i = 0; i < mTileSet.cnt; i++) {
-				MapTile t = tiles[i];
-				for (byte j = 0; j < 4; j++) {
-					if (!t.hasProxy(1 << j))
-						continue;
-
-					MapTile c = t.node.child(j);
-					ExtrusionLayers el = getLayer(c);
-
-					if (el == null || !el.compiled)
-						continue;
-
-					mExtrusionLayerSet[activeTiles++] = el;
-				}
-			}
-		}
-
-		/* load more tiles on next frame */
-		if (compiled)
-			MapRenderer.animate();
-
-		mExtrusionLayerCnt = activeTiles;
-
-		//log.debug("active tiles: {}", mExtrusionLayerCnt);
-
-		if (activeTiles > 0)
-			setReady(true);
-		else
-			mTileLayer.releaseTiles(mTileSet);
-	}
-
-	private static ExtrusionLayers getLayer(MapTile t) {
-		ElementLayers layers = t.getLayers();
-		if (layers != null && !t.state(READY | NEW_DATA))
-			return null;
-
-		return BuildingLayer.get(t);
 	}
 
 	private void renderCombined(int vertexPointer, ExtrusionLayers els) {
@@ -222,13 +97,10 @@ public class ExtrusionRenderer extends LayerRenderer {
 		// with alpha... might be faster and would allow postprocessing outlines.
 
 		ExtrusionLayers[] els = mExtrusionLayerSet;
-		Shader s = mShader; //[mMode];
+		Shader s = mShader;
 
-		if (debug) {
+		if (debugDraw) {
 			s.useProgram();
-
-			//GLState.useProgram(shaderProgram[mMode]);
-
 			GLState.enableVertexArrays(s.aPos, s.aLight);
 			GL.glUniform1i(s.uMode, 0);
 			GLUtils.glUniform4fv(s.uColor, 4, DEBUG_COLOR);
@@ -393,10 +265,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		GL.glDepthMask(false);
 		GL.glDisable(GL20.GL_CULL_FACE);
-
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		mTileLayer.releaseTiles(mTileSet);
 	}
 
 	private static void setMatrix(GLViewport v, ExtrusionLayers l, int delta) {

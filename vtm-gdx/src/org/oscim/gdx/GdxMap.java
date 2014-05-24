@@ -17,7 +17,7 @@
 package org.oscim.gdx;
 
 import org.oscim.layers.TileGridLayer;
-import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;

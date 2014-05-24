@@ -2,6 +2,7 @@ package org.oscim.test;
 
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
@@ -18,7 +19,7 @@ public class MapTest extends GdxMap {
 
 		VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
 		mMap.setTheme(VtmThemes.DEFAULT);
-
+		mMap.layers().add(new BuildingLayer(mMap, l));
 		mMap.layers().add(new LabelLayer(mMap, l));
 
 		mMap.setMapPosition(53.08, 8.82, 1 << 17);

@@ -1,6 +1,6 @@
-package org.oscim.layers.tile.s3db;
+package org.oscim.layers.tile.buildings;
 
-import static org.oscim.layers.tile.s3db.S3DBLayer.getMaterialColor;
+import static org.oscim.layers.tile.buildings.S3DBLayer.getMaterialColor;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
@@ -11,7 +11,6 @@ import org.oscim.core.Tag;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
-import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.ExtrusionLayers;
 import org.oscim.tiling.ITileDataSource;

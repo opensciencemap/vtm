@@ -14,18 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile.vector;
+package org.oscim.layers.tile.buildings;
 
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.layers.Layer;
 import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
-import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.renderer.elements.ElementLayers;
@@ -33,7 +32,6 @@ import org.oscim.renderer.elements.ExtrusionLayer;
 import org.oscim.renderer.elements.ExtrusionLayers;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
-import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,12 +44,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
 	private static final Object BUILDING_DATA = BuildingLayer.class.getName();
 
-	private final int mMinZoom;
-	private final int mMaxZoom;
-
 	private ExtrusionRenderer mExtRenderer;
-
-	private final float mFadeTime = 300;
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
 		this(map, tileLayer, MIN_ZOOM, MAX_ZOOM);
@@ -70,64 +63,8 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		super(map);
 		tileLayer.addHook(this);
 
-		mMinZoom = zoomMin;
-		mMaxZoom = zoomMax;
-
-		mExtRenderer = new ExtrusionRenderer(tileLayer.tileRenderer(),
-		                                     mMinZoom, mMaxZoom,
-		                                     false, true) {
-			private long mStartTime;
-
-			@Override
-			protected boolean setup() {
-				mAlpha = 0;
-				return super.setup();
-			}
-
-			@Override
-			public void update(GLViewport v) {
-
-				int diff = (v.pos.zoomLevel - mMinZoom);
-
-				/* if below min zoom or already faded out */
-				if ((diff < -1)) {// || (diff < 0 && mAlpha == 0)){
-					setReady(false);
-					return;
-				}
-
-				boolean show = diff >= 0;
-
-				if (show) {
-					if (mAlpha < 1) {
-						//log.debug("fade in {}", mAlpha);
-						long now = System.currentTimeMillis();
-						if (mStartTime == 0) {
-							mStartTime = now;
-						}
-						float a = (now - mStartTime) / mFadeTime;
-						mAlpha = FastMath.clamp(a, 0, 1);
-						MapRenderer.animate();
-					} else
-						mStartTime = 0;
-				} else {
-					if (mAlpha > 0) {
-						//log.debug("fade out {} {}", mAlpha, mStartTime);
-						long now = System.currentTimeMillis();
-						if (mStartTime == 0) {
-							mStartTime = now;
-						}
-						long dt = (now - mStartTime);
-						if (dt > 0) {
-							float a = 1 - dt / mFadeTime;
-							mAlpha = FastMath.clamp(a, 0, 1);
-						}
-						MapRenderer.animate();
-					} else
-						mStartTime = 0;
-				}
-				super.update(v);
-			}
-		};
+		mExtRenderer = new BuildingRenderer(tileLayer.tileRenderer(),
+		                                    zoomMin, zoomMax, false, true);
 
 		if (POST_AA) {
 			OffscreenRenderer or = new OffscreenRenderer(Mode.FXAA);
@@ -138,6 +75,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		}
 	}
 
+	/** TileLoaderThemeHook */
 	@Override
 	public boolean render(MapTile tile, ElementLayers layers, MapElement element,
 	        RenderStyle style, int level) {

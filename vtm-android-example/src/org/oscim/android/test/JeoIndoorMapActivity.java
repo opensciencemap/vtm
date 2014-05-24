@@ -9,7 +9,7 @@ import java.util.Arrays;
 import org.jeo.data.VectorDataset;
 import org.jeo.map.Style;
 import org.oscim.layers.OSMIndoorLayer;
-import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.test.JeoTest;
 import org.oscim.theme.VtmThemes;

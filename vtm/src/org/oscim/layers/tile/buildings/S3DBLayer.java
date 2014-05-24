@@ -1,11 +1,10 @@
-package org.oscim.layers.tile.s3db;
+package org.oscim.layers.tile.buildings;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.TileRenderer;
 import org.oscim.map.Map;
-import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.OffscreenRenderer.Mode;
@@ -43,12 +42,11 @@ public class S3DBLayer extends TileLayer {
 	}
 
 	public static class S3DBRenderer extends TileRenderer {
-		ExtrusionRenderer mExtRenderer;
+		BuildingRenderer mExtRenderer;
 		OffscreenRenderer or;
 
 		public S3DBRenderer() {
-			mExtRenderer = new ExtrusionRenderer(this, SRC_ZOOM, SRC_ZOOM,
-			                                     true, false);
+			mExtRenderer = new BuildingRenderer(this, SRC_ZOOM, SRC_ZOOM, true, false);
 
 			if (POST_FXAA) {
 				or = new OffscreenRenderer(Mode.FXAA);
@@ -75,6 +73,17 @@ public class S3DBLayer extends TileLayer {
 			} else {
 				mExtRenderer.render(v);
 			}
+		}
+
+		@Override
+		protected boolean setup() {
+			if (POST_FXAA) {
+				or.setup();
+			} else {
+				mExtRenderer.setup();
+			}
+
+			return super.setup();
 		}
 	}
 

@@ -160,6 +160,12 @@ public class OffscreenRenderer extends LayerRenderer {
 	}
 
 	@Override
+	public boolean setup() {
+		mRenderer.setup();
+		return super.setup();
+	}
+
+	@Override
 	public void update(GLViewport viewport) {
 		if (texW != viewport.getWidth() || texH != viewport.getHeight()) {
 			setupFBO(viewport);
