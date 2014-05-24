@@ -30,6 +30,7 @@ import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
+import org.oscim.renderer.elements.ExtrusionLayers;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.FastMath;
@@ -42,6 +43,8 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 	private final static int MIN_ZOOM = 17;
 	private final static int MAX_ZOOM = 17;
 	private final static boolean POST_AA = false;
+
+	private static final Object BUILDING_DATA = BuildingLayer.class.getName();
 
 	private final int mMinZoom;
 	private final int mMaxZoom;
@@ -154,24 +157,32 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		if (v != null)
 			minHeight = Integer.parseInt(v);
 
-		ExtrusionLayer l = layers.getExtrusionLayers();
+		ExtrusionLayers el = get(tile);
 
-		if (l == null) {
+		if (el.layers == null) {
 			double lat = MercatorProjection.toLatitude(tile.y);
 			float groundScale = (float) MercatorProjection
 			    .groundResolution(lat, 1 << tile.zoomLevel);
 
-			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
-			layers.setExtrusionLayers(l);
+			el.layers = new ExtrusionLayer(0, groundScale, extrusion.colors);
 		}
 
 		/* 12m default */
 		if (height == 0)
 			height = 12 * 100;
 
-		l.add(element, height, minHeight);
+		el.layers.add(element, height, minHeight);
 
 		return true;
+	}
+
+	public static ExtrusionLayers get(MapTile tile) {
+		ExtrusionLayers el = (ExtrusionLayers) tile.getData(BUILDING_DATA);
+		if (el == null) {
+			el = new ExtrusionLayers(tile);
+			tile.addData(BUILDING_DATA, el);
+		}
+		return el;
 	}
 
 	//	private int multi;

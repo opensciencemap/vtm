@@ -59,12 +59,6 @@ public class ElementLayers extends TileData {
 	private RenderElement textureLayers;
 
 	/**
-	 * FIXME this is somewhat out-of-place, as it is not
-	 * compiled with the other layers
-	 */
-	private RenderElement extrusionLayers;
-
-	/**
 	 * VBO holds all vertex data to draw lines and polygons after compilation.
 	 * Layout:
 	 * 16 bytes fill coordinates,
@@ -182,20 +176,6 @@ public class ElementLayers extends TileData {
 
 	public RenderElement getTextureLayers() {
 		return textureLayers;
-	}
-
-	/**
-	 * Set new ExtrusionLayers and clear previous.
-	 */
-	public void setExtrusionLayers(ExtrusionLayer el) {
-		for (RenderElement l = extrusionLayers; l != null; l = l.next)
-			l.clear();
-
-		extrusionLayers = el;
-	}
-
-	public ExtrusionLayer getExtrusionLayers() {
-		return (ExtrusionLayer) extrusionLayers;
 	}
 
 	private RenderElement getLayer(int level, int type) {
@@ -364,14 +344,11 @@ public class ElementLayers extends TileData {
 	public void setFrom(ElementLayers layers) {
 		setBaseLayers(layers.baseLayers);
 		setTextureLayers((TextureLayer) layers.textureLayers);
-		setExtrusionLayers((ExtrusionLayer) layers.extrusionLayers);
 
 		mCurLayer = null;
 		layers.baseLayers = null;
 		layers.textureLayers = null;
-		layers.extrusionLayers = null;
 		layers.mCurLayer = null;
-
 	}
 
 	/** cleanup only when layers are not used by tile or layer anymore! */
@@ -379,7 +356,6 @@ public class ElementLayers extends TileData {
 		/* NB: set null calls clear() on each layer! */
 		setBaseLayers(null);
 		setTextureLayers(null);
-		setExtrusionLayers(null);
 		mCurLayer = null;
 
 		if (vbo != null)

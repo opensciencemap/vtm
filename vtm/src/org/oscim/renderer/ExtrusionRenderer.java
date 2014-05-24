@@ -19,23 +19,21 @@ package org.oscim.renderer;
 import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
 import static org.oscim.layers.tile.MapTile.State.READY;
 
-import java.nio.ShortBuffer;
-
 import org.oscim.backend.GL20;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileRenderer;
 import org.oscim.layers.tile.TileSet;
+import org.oscim.layers.tile.vector.BuildingLayer;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
+import org.oscim.renderer.elements.ExtrusionLayers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO move MapTile part to BuildingLayer and make
-// this class work on ExtrusionLayers
-
 public class ExtrusionRenderer extends LayerRenderer {
 	static final Logger log = LoggerFactory.getLogger(ExtrusionRenderer.class);
+	private final boolean debug = false;
 
 	private final TileRenderer mTileLayer;
 	private final int mZoomMin;
@@ -43,6 +41,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 	private final boolean drawAlpha;
 
 	protected float mAlpha = 1;
+	private final int mMode;
 
 	public ExtrusionRenderer(TileRenderer tileRenderLayer,
 	        int zoomMin, int zoomMax, boolean mesh, boolean alpha) {
@@ -54,15 +53,11 @@ public class ExtrusionRenderer extends LayerRenderer {
 		drawAlpha = alpha;
 	}
 
-	private boolean initialized = false;
-
 	private final TileSet mTileSet;
-	private MapTile[] mTiles;
-	private int mTileCnt;
+	private ExtrusionLayers[] mExtrusionLayerSet;
+	private int mExtrusionLayerCnt;
 
-	private final int mMode;
-
-	static class Shader extends GLShader {
+	public static class Shader extends GLShader {
 		int uMVP, uColor, uAlpha, uMode, aPos, aLight;
 
 		public Shader(String shader) {
@@ -78,22 +73,19 @@ public class ExtrusionRenderer extends LayerRenderer {
 		}
 	}
 
-	private Shader mShader[] = { null, null };
+	protected Shader mShader;
 
-	private boolean initShader() {
-		initialized = true;
-
-		mShader[0] = new Shader("extrusion_layer_ext");
-		mShader[1] = new Shader("extrusion_layer_mesh");
-
+	@Override
+	protected boolean setup() {
+		if (mMode == 0)
+			mShader = new Shader("extrusion_layer_ext");
+		else
+			mShader = new Shader("extrusion_layer_mesh");
 		return true;
 	}
 
 	@Override
 	public void update(GLViewport v) {
-
-		if (!initialized && !initShader())
-			return;
 
 		if (mAlpha == 0 || v.pos.zoomLevel < (mZoomMin - 1)) {
 			setReady(false);
@@ -111,8 +103,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 		}
 
 		/* keep a list of tiles available for rendering */
-		if (mTiles == null || mTiles.length < mTileSet.cnt * 4)
-			mTiles = new MapTile[mTileSet.cnt * 4];
+		if (mExtrusionLayerSet == null || mExtrusionLayerSet.length < mTileSet.cnt * 4)
+			mExtrusionLayerSet = new ExtrusionLayers[mTileSet.cnt * 4];
 
 		int zoom = tiles[0].zoomLevel;
 
@@ -120,41 +112,41 @@ public class ExtrusionRenderer extends LayerRenderer {
 		boolean compiled = false;
 
 		if (zoom >= mZoomMin && zoom <= mZoomMax) {
-			// TODO - if tile is not available try parent or children
+			/* TODO - if tile is not available try parent or children */
 
 			for (int i = 0; i < mTileSet.cnt; i++) {
-				ExtrusionLayer el = getLayer(tiles[i]);
-				if (el == null)
+				ExtrusionLayers els = getLayer(tiles[i]);
+				if (els == null)
 					continue;
 
-				if (el.compiled)
-					mTiles[activeTiles++] = tiles[i];
-				else if (!compiled && compileLayers(el)) {
-					mTiles[activeTiles++] = tiles[i];
+				if (els.compiled)
+					mExtrusionLayerSet[activeTiles++] = els;
+				else if (!compiled && els.compileLayers()) {
+					mExtrusionLayerSet[activeTiles++] = els;
 					compiled = true;
 				}
 			}
 		} else if (zoom == mZoomMax + 1) {
 			/* special case for s3db: render from parent tiles */
-			O: for (int i = 0; i < mTileSet.cnt; i++) {
+			for (int i = 0; i < mTileSet.cnt; i++) {
 				MapTile t = tiles[i].node.parent();
 
 				if (t == null)
 					continue;
 
-				for (MapTile c : mTiles)
-					if (c == t)
-						continue O;
+				//	for (MapTile c : mTiles)
+				//		if (c == t)
+				//			continue O;
 
-				ExtrusionLayer el = getLayer(t);
-				if (el == null)
+				ExtrusionLayers els = getLayer(t);
+				if (els == null)
 					continue;
 
-				if (el.compiled)
-					mTiles[activeTiles++] = tiles[i];
+				if (els.compiled)
+					mExtrusionLayerSet[activeTiles++] = els;
 
-				else if (!compiled && compileLayers(el)) {
-					mTiles[activeTiles++] = t;
+				else if (!compiled && els.compileLayers()) {
+					mExtrusionLayerSet[activeTiles++] = els;
 					compiled = true;
 				}
 			}
@@ -167,12 +159,12 @@ public class ExtrusionRenderer extends LayerRenderer {
 						continue;
 
 					MapTile c = t.node.child(j);
-					ExtrusionLayer el = getLayer(c);
+					ExtrusionLayers el = getLayer(c);
 
 					if (el == null || !el.compiled)
 						continue;
 
-					mTiles[activeTiles++] = c;
+					mExtrusionLayerSet[activeTiles++] = el;
 				}
 			}
 		}
@@ -181,7 +173,9 @@ public class ExtrusionRenderer extends LayerRenderer {
 		if (compiled)
 			MapRenderer.animate();
 
-		mTileCnt = activeTiles;
+		mExtrusionLayerCnt = activeTiles;
+
+		//log.debug("active tiles: {}", mExtrusionLayerCnt);
 
 		if (activeTiles > 0)
 			setReady(true);
@@ -189,71 +183,22 @@ public class ExtrusionRenderer extends LayerRenderer {
 			mTileLayer.releaseTiles(mTileSet);
 	}
 
-	private boolean compileLayers(ExtrusionLayer el) {
-		if (el == null)
-			return false;
-
-		if (el.compiled)
-			return true;
-
-		int sumIndices = 0;
-		int sumVertices = 0;
-		for (ExtrusionLayer l = el; l != null; l = l.next()) {
-			sumIndices += l.sumIndices;
-			sumVertices += l.sumVertices;
-		}
-		if (sumIndices == 0) {
-			return false;
-		}
-		ShortBuffer vbuf = MapRenderer.getShortBuffer(sumVertices * 4);
-		ShortBuffer ibuf = MapRenderer.getShortBuffer(sumIndices);
-
-		for (ExtrusionLayer l = el; l != null; l = l.next())
-			l.compile(vbuf, ibuf);
-
-		int size = sumIndices * 2;
-		if (ibuf.position() != sumIndices) {
-			int pos = ibuf.position();
-			log.error("invalid indice size: {} {}", sumIndices, pos);
-			size = pos * 2;
-		}
-		el.vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
-		el.vboIndices.loadBufferData(ibuf.flip(), size);
-		el.vboIndices.unbind();
-
-		size = sumVertices * 4 * 2;
-		if (vbuf.position() != sumVertices * 4) {
-			int pos = vbuf.position();
-			log.error("invalid vertex size: {} {}", sumVertices, pos);
-			size = pos * 2;
-		}
-
-		el.vboVertices = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
-		el.vboVertices.loadBufferData(vbuf.flip(), size);
-		el.vboVertices.unbind();
-
-		GLUtils.checkGlError("extrusion layer");
-		return true;
-	}
-
-	private static ExtrusionLayer getLayer(MapTile t) {
+	private static ExtrusionLayers getLayer(MapTile t) {
 		ElementLayers layers = t.getLayers();
-		if (layers == null || !t.state(READY | NEW_DATA))
+		if (layers != null && !t.state(READY | NEW_DATA))
 			return null;
 
-		return layers.getExtrusionLayers();
+		return BuildingLayer.get(t);
 	}
 
-	private final boolean debug = false;
+	private void renderCombined(int vertexPointer, ExtrusionLayers els) {
+		if (els.vboIndices == null)
+			return;
 
-	private void renderCombined(int vertexPointer, ExtrusionLayer el) {
-		for (; el != null; el = el.next()) {
+		els.vboIndices.bind();
+		els.vboVertices.bind();
 
-			if (el.vboIndices == null)
-				continue;
-
-			el.vboIndices.bind();
-			el.vboVertices.bind();
+		for (ExtrusionLayer el = els.layers; el != null; el = el.next()) {
 
 			GL.glVertexAttribPointer(vertexPointer, 3,
 			                         GL20.GL_SHORT, false, 8, 0);
@@ -276,8 +221,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 		// TODO one could render in one pass to texture and then draw the texture
 		// with alpha... might be faster and would allow postprocessing outlines.
 
-		MapTile[] tiles = mTiles;
-		Shader s = mShader[mMode];
+		ExtrusionLayers[] els = mExtrusionLayerSet;
+		Shader s = mShader; //[mMode];
 
 		if (debug) {
 			s.useProgram();
@@ -291,16 +236,16 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 			GLState.test(false, false);
 			GLState.blend(true);
-			for (int i = 0; i < mTileCnt; i++) {
-				ExtrusionLayer el = tiles[i].getLayers().getExtrusionLayers();
+			for (int i = 0; i < mExtrusionLayerCnt; i++) {
+				ExtrusionLayer el = els[i].getLayers();
 
-				setMatrix(v, tiles[i], 0);
+				setMatrix(v, els[i], 0);
 				v.mvp.setAsUniform(s.uMVP);
 
-				renderCombined(s.aPos, el);
+				renderCombined(s.aPos, els[i]);
 
-				// just a temporary reference!
-				tiles[i] = null;
+				/* just a temporary reference! */
+				els[i] = null;
 			}
 			return;
 		}
@@ -311,7 +256,6 @@ public class ExtrusionRenderer extends LayerRenderer {
 		GLState.test(true, false);
 
 		s.useProgram();
-		//GLState.useProgram(shaderProgram[mMode]);
 		GLState.enableVertexArrays(s.aPos, -1);
 		GLState.blend(false);
 
@@ -326,18 +270,17 @@ public class ExtrusionRenderer extends LayerRenderer {
 			//GLUtils.glUniform4fv(uExtColor, 4, mColor);
 
 			/* draw to depth buffer */
-			for (int i = 0; i < mTileCnt; i++) {
-				MapTile t = tiles[i];
-				ExtrusionLayer el = t.getLayers().getExtrusionLayers();
+			for (int i = 0; i < mExtrusionLayerCnt; i++) {
+				ExtrusionLayer el = els[i].getLayers();
 				if (el == null)
 					continue;
 
-				int d = MapTile.depthOffset(t) * 10;
+				int d = 0; // FIXME MapTile.depthOffset(t) * 10;
 
-				setMatrix(v, t, d);
+				setMatrix(v, els[i], d);
 				v.mvp.setAsUniform(s.uMVP);
 
-				renderCombined(s.aPos, el);
+				renderCombined(s.aPos, els[i]);
 			}
 
 			GL.glColorMask(true, true, true, true);
@@ -350,27 +293,27 @@ public class ExtrusionRenderer extends LayerRenderer {
 
 		float[] currentColor = null;
 
-		for (int i = 0; i < mTileCnt; i++) {
-			MapTile t = tiles[i];
-			ExtrusionLayer el = t.getLayers().getExtrusionLayers();
+		for (int i = 0; i < mExtrusionLayerCnt; i++) {
+			ExtrusionLayer el = els[i].getLayers();
 
 			if (el == null)
 				continue;
 
-			if (el.vboIndices == null)
+			if (els[i].vboIndices == null)
 				continue;
 
-			int d = 1;
+			els[i].vboIndices.bind();
+			els[i].vboVertices.bind();
+
+			int d = 0;
 			if (drawAlpha) {
 				GL.glDepthFunc(GL20.GL_EQUAL);
-				d = MapTile.depthOffset(t) * 10;
+
+				// FIXME d = MapTile.depthOffset(t) * 10;
 			}
 
-			setMatrix(v, t, d);
+			setMatrix(v, els[i], d);
 			v.mvp.setAsUniform(s.uMVP);
-
-			el.vboIndices.bind();
-			el.vboVertices.bind();
 
 			for (; el != null; el = el.next()) {
 
@@ -443,8 +386,9 @@ public class ExtrusionRenderer extends LayerRenderer {
 					                  GL20.GL_UNSIGNED_SHORT, offset);
 				}
 			}
-			// just a temporary reference!
-			tiles[i] = null;
+
+			/* just a temporary reference! */
+			els[i] = null;
 		}
 
 		GL.glDepthMask(false);
@@ -455,13 +399,13 @@ public class ExtrusionRenderer extends LayerRenderer {
 		mTileLayer.releaseTiles(mTileSet);
 	}
 
-	private static void setMatrix(GLViewport v, MapTile tile, int delta) {
-		int z = tile.zoomLevel;
+	private static void setMatrix(GLViewport v, ExtrusionLayers l, int delta) {
+		int z = l.zoomLevel;
 		double curScale = Tile.SIZE * v.pos.scale;
 		float scale = (float) (v.pos.scale / (1 << z));
 
-		float x = (float) ((tile.x - v.pos.x) * curScale);
-		float y = (float) ((tile.y - v.pos.y) * curScale);
+		float x = (float) ((l.x - v.pos.x) * curScale);
+		float y = (float) ((l.y - v.pos.y) * curScale);
 		v.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
 
 		// scale height ???

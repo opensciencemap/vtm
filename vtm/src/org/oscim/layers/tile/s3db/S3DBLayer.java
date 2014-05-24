@@ -47,7 +47,9 @@ public class S3DBLayer extends TileLayer {
 		OffscreenRenderer or;
 
 		public S3DBRenderer() {
-			mExtRenderer = new ExtrusionRenderer(this, SRC_ZOOM, SRC_ZOOM, true, false);
+			mExtRenderer = new ExtrusionRenderer(this, SRC_ZOOM, SRC_ZOOM,
+			                                     true, false);
+
 			if (POST_FXAA) {
 				or = new OffscreenRenderer(Mode.FXAA);
 				or.setRenderer(mExtRenderer);
