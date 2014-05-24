@@ -38,25 +38,20 @@ public class ExtrusionRenderer extends LayerRenderer {
 	static final Logger log = LoggerFactory.getLogger(ExtrusionRenderer.class);
 
 	private final TileRenderer mTileLayer;
-	private final int mTileZoom;
+	private final int mZoomMin;
+	private final int mZoomMax;
 	private final boolean drawAlpha;
 
 	protected float mAlpha = 1;
 
-	public ExtrusionRenderer(TileRenderer tileRenderLayer, int tileZoom) {
+	public ExtrusionRenderer(TileRenderer tileRenderLayer,
+	        int zoomMin, int zoomMax, boolean mesh, boolean alpha) {
 		mTileLayer = tileRenderLayer;
 		mTileSet = new TileSet();
-		mTileZoom = tileZoom;
-		mMode = 0;
-		drawAlpha = true;
-	}
-
-	public ExtrusionRenderer(TileRenderer tileRenderLayer, int tileZoom, boolean mesh, boolean alpha) {
-		mTileLayer = tileRenderLayer;
-		mTileSet = new TileSet();
-		mTileZoom = tileZoom;
+		mZoomMin = zoomMin;
+		mZoomMax = zoomMax;
 		mMode = mesh ? 1 : 0;
-		drawAlpha = false; //alpha;
+		drawAlpha = alpha;
 	}
 
 	private boolean initialized = false;
@@ -100,7 +95,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 		if (!initialized && !initShader())
 			return;
 
-		if (mAlpha == 0 || v.pos.zoomLevel < (mTileZoom - 1)) {
+		if (mAlpha == 0 || v.pos.zoomLevel < (mZoomMin - 1)) {
 			setReady(false);
 			return;
 		}
@@ -124,7 +119,9 @@ public class ExtrusionRenderer extends LayerRenderer {
 		/* compile one tile max per frame */
 		boolean compiled = false;
 
-		if (zoom == mTileZoom) {
+		if (zoom >= mZoomMin && zoom <= mZoomMax) {
+			// TODO - if tile is not available try parent or children
+
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				ExtrusionLayer el = getLayer(tiles[i]);
 				if (el == null)
@@ -137,7 +134,8 @@ public class ExtrusionRenderer extends LayerRenderer {
 					compiled = true;
 				}
 			}
-		} else if (zoom == mTileZoom + 1) {
+		} else if (zoom == mZoomMax + 1) {
+			/* special case for s3db: render from parent tiles */
 			O: for (int i = 0; i < mTileSet.cnt; i++) {
 				MapTile t = tiles[i].node.parent();
 
@@ -160,7 +158,7 @@ public class ExtrusionRenderer extends LayerRenderer {
 					compiled = true;
 				}
 			}
-		} else if (zoom == mTileZoom - 1) {
+		} else if (zoom == mZoomMin - 1) {
 			/* check if proxy children are ready */
 			for (int i = 0; i < mTileSet.cnt; i++) {
 				MapTile t = tiles[i];

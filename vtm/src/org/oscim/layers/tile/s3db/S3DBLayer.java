@@ -19,7 +19,7 @@ public class S3DBLayer extends TileLayer {
 	static final Logger log = LoggerFactory.getLogger(S3DBLayer.class);
 	static final boolean POST_FXAA = false;
 
-	private final static int MAX_CACHE = 20;
+	private final static int MAX_CACHE = 32;
 	private final static int SRC_ZOOM = 16;
 
 	/* TODO get from theme */
@@ -47,7 +47,7 @@ public class S3DBLayer extends TileLayer {
 		OffscreenRenderer or;
 
 		public S3DBRenderer() {
-			mExtRenderer = new ExtrusionRenderer(this, 16, true, false);
+			mExtRenderer = new ExtrusionRenderer(this, SRC_ZOOM, SRC_ZOOM, true, false);
 			if (POST_FXAA) {
 				or = new OffscreenRenderer(Mode.FXAA);
 				or.setRenderer(mExtRenderer);

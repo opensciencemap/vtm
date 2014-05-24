@@ -40,15 +40,18 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 	static final Logger log = LoggerFactory.getLogger(BuildingLayer.class);
 
 	private final static int MIN_ZOOM = 17;
+	private final static int MAX_ZOOM = 17;
 	private final static boolean POST_AA = false;
 
 	private final int mMinZoom;
+	private final int mMaxZoom;
+
 	private ExtrusionRenderer mExtRenderer;
 
 	private final float mFadeTime = 300;
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
-		this(map, tileLayer, MIN_ZOOM);
+		this(map, tileLayer, MIN_ZOOM, MAX_ZOOM);
 
 		//		super(map);
 		//		tileLayer.addHook(this);
@@ -60,12 +63,16 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		//		mRenderer = or;
 	}
 
-	public BuildingLayer(Map map, VectorTileLayer tileLayer, int minZoom) {
+	public BuildingLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax) {
 		super(map);
 		tileLayer.addHook(this);
 
-		mMinZoom = minZoom;
-		mExtRenderer = new ExtrusionRenderer(tileLayer.tileRenderer(), mMinZoom) {
+		mMinZoom = zoomMin;
+		mMaxZoom = zoomMax;
+
+		mExtRenderer = new ExtrusionRenderer(tileLayer.tileRenderer(),
+		                                     mMinZoom, mMaxZoom,
+		                                     false, true) {
 			private long mStartTime;
 
 			@Override
