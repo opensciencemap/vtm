@@ -19,7 +19,7 @@ package org.oscim.utils.quadtree;
 /**
  * A quad tree for the standard map tiling schema.
  */
-public abstract class QuadTree<T extends TreeNode<T, E>, E> {
+public abstract class TileIndex<T extends TreeNode<T, E>, E> {
 
 	protected final T root;
 
@@ -27,7 +27,7 @@ public abstract class QuadTree<T extends TreeNode<T, E>, E> {
 
 	protected T pool;
 
-	public QuadTree() {
+	public TileIndex() {
 		root = create();
 		root.id = -1;
 		root.parent = root;

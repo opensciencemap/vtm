@@ -37,7 +37,7 @@ import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
-import org.oscim.utils.quadtree.QuadTree;
+import org.oscim.utils.quadtree.TileIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +98,7 @@ public class TileManager {
 
 	private final float[] mMapPlane = new float[8];
 
-	private final QuadTree<TileNode, MapTile> mIndex = new QuadTree<TileNode, MapTile>() {
+	private final TileIndex<TileNode, MapTile> mIndex = new TileIndex<TileNode, MapTile>() {
 
 		@Override
 		public void removeItem(MapTile t) {
