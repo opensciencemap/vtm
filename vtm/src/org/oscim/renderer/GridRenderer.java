@@ -44,13 +44,12 @@ public class GridRenderer extends ElementRenderer {
 	public GridRenderer(int numLines, LineStyle lineStyle, TextStyle textStyle) {
 		int size = Tile.SIZE;
 
-		// not needed to set but we know:
-		// 16 lines 'a' two points
+		/* not needed to set but we know: 16 lines 'a' two points */
 		mLines = new GeometryBuffer(2 * 16, 16);
 
 		float pos = -size * 4;
 
-		// 8 vertical lines
+		/* 8 vertical lines */
 		for (int i = 0; i < 8 * numLines; i++) {
 			float x = pos + i * size / numLines;
 			mLines.startLine();
@@ -58,7 +57,7 @@ public class GridRenderer extends ElementRenderer {
 			mLines.addPoint(x, pos + size * 8);
 		}
 
-		// 8 horizontal lines
+		/* 8 horizontal lines */
 		for (int j = 0; j < 8 * numLines; j++) {
 			float y = pos + j * size / numLines;
 			mLines.startLine();
@@ -100,28 +99,26 @@ public class GridRenderer extends ElementRenderer {
 
 				TextItem ti = TextItem.pool.get();
 				ti.set(s * xx + s / 2, s * yy + s / 2, sb.toString(), mText);
-
 				tl.addText(ti);
 			}
 		}
 
-		// render TextItems to a bitmap and prepare vertex buffer data.
+		/* render TextItems to a bitmap and prepare vertex buffer data. */
 		tl.prepare();
 
-		// release TextItems
+		/* release TextItems */
 		tl.clearLabels();
 	}
 
 	@Override
 	protected void update(GLViewport v) {
-
-		// scale coordinates relative to current 'zoom-level' to
-		// get the position as the nearest tile coordinate
+		/* scale coordinates relative to current 'zoom-level' to
+		 * get the position as the nearest tile coordinate */
 		int z = 1 << v.pos.zoomLevel;
 		int x = (int) (v.pos.x * z);
 		int y = (int) (v.pos.y * z);
 
-		// update layers when map moved by at least one tile
+		/* update layers when map moved by at least one tile */
 		if (x == mCurX && y == mCurY && z == mCurZ)
 			return;
 
