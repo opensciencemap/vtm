@@ -1,6 +1,6 @@
-package org.oscim.layers.tile.s3db;
+package org.oscim.layers.tile.buildings;
 
-import static org.oscim.layers.tile.s3db.S3DBLayer.getMaterialColor;
+import static org.oscim.layers.tile.buildings.S3DBLayer.getMaterialColor;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
@@ -11,8 +11,8 @@ import org.oscim.core.Tag;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
-import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
+import org.oscim.renderer.elements.ExtrusionLayers;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.TileSource;
 import org.slf4j.Logger;
@@ -59,22 +59,6 @@ class S3DBTileLoader extends TileLoader {
 	protected boolean loadTile(MapTile tile) {
 		mTile = tile;
 
-		double lat = MercatorProjection.toLatitude(tile.y);
-		mGroundScale = (float) MercatorProjection
-		    .groundResolution(lat, 1 << mTile.zoomLevel);
-
-		mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(247, 249, 250));
-
-		mLayers = new ExtrusionLayer(0, mGroundScale, Color.get(255, 254, 252));
-		//mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(207, 209, 210));
-		mRoofs.next = mLayers;
-
-		ElementLayers layers = new ElementLayers();
-		layers.setExtrusionLayers(mRoofs);
-		tile.data = layers;
-
-		process(mTilePlane);
-
 		try {
 			/* query database, which calls process() callback */
 			mTileDataSource.query(mTile, this);
@@ -86,6 +70,24 @@ class S3DBTileLoader extends TileLoader {
 		return true;
 	}
 
+	private void initTile(MapTile tile) {
+		double lat = MercatorProjection.toLatitude(tile.y);
+		mGroundScale = (float) MercatorProjection
+		    .groundResolution(lat, 1 << mTile.zoomLevel);
+
+		mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(247, 249, 250));
+
+		mLayers = new ExtrusionLayer(0, mGroundScale, Color.get(255, 254, 252));
+		//mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(207, 209, 210));
+		mRoofs.next = mLayers;
+
+		ExtrusionLayers layers = BuildingLayer.get(tile);
+
+		layers.setLayers(mRoofs);
+
+		process(mTilePlane);
+	}
+
 	String COLOR_KEY = "c";
 	String MATERIAL_KEY = "m";
 	String ROOF_KEY = "roof";
@@ -93,11 +95,14 @@ class S3DBTileLoader extends TileLoader {
 
 	@Override
 	public void process(MapElement element) {
-		//log.debug("TAG {}", element.tags);
+
 		if (element.type != GeometryType.TRIS) {
 			log.debug("wrong type " + element.type);
 			return;
 		}
+
+		if (mLayers == null)
+			initTile(mTile);
 
 		boolean isRoof = element.tags.containsKey(ROOF_KEY);
 		//if (isRoof)

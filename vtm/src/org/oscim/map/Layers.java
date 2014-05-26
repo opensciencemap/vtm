@@ -138,7 +138,8 @@ public final class Layers extends AbstractList<Layer> {
 
 			if (o.getRenderer() != null)
 				numRenderLayers++;
-			mLayers[i] = o;
+
+			mLayers[n - i - 1] = o;
 		}
 
 		mLayerRenderer = new LayerRenderer[numRenderLayers];

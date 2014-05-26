@@ -568,7 +568,7 @@
         </m>
       </m>
       <m zoom-min="17">
-        <extrusion side-color="#faecebe9" top-color="#faf9f8f6" line-color="#ffd9d8d6" />
+        <extrusion side-color="#eaecebe9" top-color="#eaf9f8f6" line-color="#ffd9d8d6" />
       </m>
       <m zoom-min="17">
         <caption k="name" style="bold" size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />

@@ -2,7 +2,7 @@ package org.oscim.test;
 
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
-import org.oscim.layers.tile.s3db.S3DBLayer;
+import org.oscim.layers.tile.buildings.S3DBLayer;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;

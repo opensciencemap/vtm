@@ -21,7 +21,7 @@ import org.jeo.geojson.GeoJSONReader;
 import org.jeo.geom.GeomBuilder;
 import org.jeo.map.Style;
 import org.oscim.layers.OSMIndoorLayer;
-import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.map.Map;
 import org.oscim.renderer.MapRenderer;

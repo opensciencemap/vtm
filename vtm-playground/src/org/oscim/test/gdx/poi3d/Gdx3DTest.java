@@ -2,7 +2,7 @@ package org.oscim.test.gdx.poi3d;
 
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.renderer.MapRenderer;

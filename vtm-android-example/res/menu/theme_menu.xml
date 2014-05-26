@@ -27,4 +27,11 @@
         </item>
     </group>
 
+    <item
+        android:id="@+id/gridlayer"
+        android:showAsAction="never"
+        android:checkable="true"
+        android:title="@string/menu_gridlayer">
+    </item>
+
 </menu>

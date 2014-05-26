@@ -12,3 +12,5 @@ sourceSets {
 dependencies {
   compile "com.badlogicgames.gdx:gdx-jnigen:$gdxVersion"
 }
+
+eclipse.project.name = 'vtm-jni'

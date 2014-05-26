@@ -23,7 +23,6 @@ import org.oscim.core.GeometryBuffer;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tile;
-import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.KeyMap;
@@ -54,9 +53,6 @@ public class ExtrusionLayer extends RenderElement {
 	public int sumVertices = 0;
 	public int sumIndices = 0;
 
-	public BufferObject vboIndices;
-	public BufferObject vboVertices;
-
 	//private final static int IND_EVEN_SIDE = 0;
 	//private final static int IND_ODD_SIDE = 1;
 	private final static int IND_ROOF = 2;
@@ -65,7 +61,6 @@ public class ExtrusionLayer extends RenderElement {
 	private final static int IND_OUTLINE = 3;
 	private final static int IND_MESH = 4;
 
-	public boolean compiled = false;
 	private final float mGroundResolution;
 
 	private KeyMap<Vertex> mVertexMap;
@@ -654,10 +649,6 @@ public class ExtrusionLayer extends RenderElement {
 	public void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
 		mClipper = null;
 
-		if (compiled) {
-			throw new IllegalStateException();
-		}
-
 		if (mVertexMap != null) {
 			vertexPool.releaseAll(mVertexMap.releaseItems());
 			mVertexMap = vertexMapPool.release(mVertexMap);
@@ -665,7 +656,6 @@ public class ExtrusionLayer extends RenderElement {
 		}
 
 		if (sumVertices == 0) {
-			compiled = true;
 			return;
 		}
 
@@ -686,7 +676,6 @@ public class ExtrusionLayer extends RenderElement {
 			vertexBuffer.put(vi.vertices, 0, vi.used);
 
 		clear();
-		compiled = true;
 	}
 
 	@Override
@@ -699,10 +688,7 @@ public class ExtrusionLayer extends RenderElement {
 			mVertexMap = null;
 		}
 
-		if (compiled) {
-			vboIndices = BufferObject.release(vboIndices);
-			vboVertices = BufferObject.release(vboVertices);
-		} else {
+		if (mIndices != null) {
 			for (int i = 0; i <= IND_MESH; i++)
 				mIndices[i] = VertexItem.pool.releaseAll(mIndices[i]);
 			mIndices = null;

@@ -14,36 +14,40 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile.vector;
+package org.oscim.layers.tile.buildings;
 
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.layers.Layer;
 import org.oscim.layers.tile.MapTile;
+import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
-import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.ExtrusionLayer;
+import org.oscim.renderer.elements.ExtrusionLayers;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
-import org.oscim.utils.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BuildingLayer extends Layer implements TileLoaderThemeHook {
-	//static final Logger log = LoggerFactory.getLogger(BuildingOverlay.class);
+	static final Logger log = LoggerFactory.getLogger(BuildingLayer.class);
 
 	private final static int MIN_ZOOM = 17;
+	private final static int MAX_ZOOM = 17;
 	private final static boolean POST_AA = false;
 
-	private final int mMinZoom;
+	private static final Object BUILDING_DATA = BuildingLayer.class.getName();
+
 	private ExtrusionRenderer mExtRenderer;
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
-		this(map, tileLayer, MIN_ZOOM);
+		this(map, tileLayer, MIN_ZOOM, MAX_ZOOM);
 
 		//		super(map);
 		//		tileLayer.addHook(this);
@@ -55,50 +59,12 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		//		mRenderer = or;
 	}
 
-	public BuildingLayer(Map map, VectorTileLayer tileLayer, int minZoom) {
+	public BuildingLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax) {
 		super(map);
 		tileLayer.addHook(this);
 
-		mMinZoom = minZoom;
-		mExtRenderer = new ExtrusionRenderer(tileLayer.tileRenderer(), mMinZoom) {
-			private long mStartTime;
-
-			@Override
-			public void update(GLViewport v) {
-
-				boolean show = v.pos.scale >= (1 << mMinZoom);
-
-				if (show) {
-					if (mAlpha < 1) {
-						long now = System.currentTimeMillis();
-
-						if (mStartTime == 0) {
-							mStartTime = now;
-						}
-						float a = (now - mStartTime) / mFadeTime;
-						mAlpha = FastMath.clamp(a, 0, 1);
-						mMap.render();
-					} else
-						mStartTime = 0;
-				} else {
-					if (mAlpha > 0) {
-						long now = System.currentTimeMillis();
-						if (mStartTime == 0) {
-							mStartTime = now + 100;
-						}
-						long diff = (now - mStartTime);
-						if (diff > 0) {
-							float a = 1 - diff / mFadeTime;
-							mAlpha = FastMath.clamp(a, 0, 1);
-						}
-						mMap.render();
-					} else
-						mStartTime = 0;
-				}
-				//log.debug(show + " > " + mAlpha);
-				super.update(v);
-			}
-		};
+		mExtRenderer = new BuildingRenderer(tileLayer.tileRenderer(),
+		                                    zoomMin, zoomMax, false, true);
 
 		if (POST_AA) {
 			OffscreenRenderer or = new OffscreenRenderer(Mode.FXAA);
@@ -109,8 +75,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		}
 	}
 
-	private final float mFadeTime = 500;
-
+	/** TileLoaderThemeHook */
 	@Override
 	public boolean render(MapTile tile, ElementLayers layers, MapElement element,
 	        RenderStyle style, int level) {
@@ -130,49 +95,55 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		if (v != null)
 			minHeight = Integer.parseInt(v);
 
-		ExtrusionLayer l = layers.getExtrusionLayers();
+		ExtrusionLayers el = get(tile);
 
-		if (l == null) {
+		if (el.layers == null) {
 			double lat = MercatorProjection.toLatitude(tile.y);
 			float groundScale = (float) MercatorProjection
 			    .groundResolution(lat, 1 << tile.zoomLevel);
 
-			l = new ExtrusionLayer(0, groundScale, extrusion.colors);
-			layers.setExtrusionLayers(l);
+			el.layers = new ExtrusionLayer(0, groundScale, extrusion.colors);
 		}
 
 		/* 12m default */
 		if (height == 0)
 			height = 12 * 100;
 
-		l.add(element, height, minHeight);
+		el.layers.add(element, height, minHeight);
 
 		return true;
 	}
 
-	//private int multi;
-	//@Override
-	//public boolean onTouchEvent(MotionEvent e) {
-	//	int action = e.getAction() & MotionEvent.ACTION_MASK;
-	//	if (action == MotionEvent.ACTION_POINTER_DOWN) {
-	//		multi++;
-	//	} else if (action == MotionEvent.ACTION_POINTER_UP) {
-	//		multi--;
-	//		if (!mActive && mAlpha > 0) {
-	//			// finish hiding
-	//			//log.debug("add multi hide timer " + mAlpha);
-	//			addShowTimer(mFadeTime * mAlpha, false);
-	//		}
-	//	} else if (action == MotionEvent.ACTION_CANCEL) {
-	//		multi = 0;
-	//		log.debug("cancel " + multi);
-	//		if (mTimer != null) {
-	//			mTimer.cancel();
-	//			mTimer = null;
+	public static ExtrusionLayers get(MapTile tile) {
+		ExtrusionLayers el = (ExtrusionLayers) tile.getData(BUILDING_DATA);
+		if (el == null) {
+			el = new ExtrusionLayers(tile);
+			tile.addData(BUILDING_DATA, el);
+		}
+		return el;
+	}
+
+	//	private int multi;
+	//	@Override
+	//	public void onInputEvent(Event event, MotionEvent e) {
+	//		int action = e.getAction() & MotionEvent.ACTION_MASK;
+	//		if (action == MotionEvent.ACTION_POINTER_DOWN) {
+	//			multi++;
+	//		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+	//			multi--;
+	//			if (!mActive && mAlpha > 0) {
+	//				// finish hiding
+	//				//log.debug("add multi hide timer " + mAlpha);
+	//				addShowTimer(mFadeTime * mAlpha, false);
+	//			}
+	//		} else if (action == MotionEvent.ACTION_CANCEL) {
+	//			multi = 0;
+	//			log.debug("cancel " + multi);
+	//			if (mTimer != null) {
+	//				mTimer.cancel();
+	//				mTimer = null;
+	//			}
 	//		}
 	//	}
-	//
-	//	return false;
-	//}
 
 }
