@@ -126,6 +126,18 @@ public class GLMatrix {
 		vec[2] = z;
 	}
 
+	public void prj2D(float[] vec, int offset, int cnt) {
+		offset <<= 1;
+		cnt <<= 1;
+
+		for (int x = offset, y = x + 1; x < cnt + offset; x += 2, y += 2) {
+			float inv_w = 1.0f / (vec[x] * val[M30] + vec[y] * val[M31] + val[M33]);
+			float ox = (vec[x] * val[M00] + vec[y] * val[M01] + val[M03]) * inv_w;
+			vec[y] = (vec[x] * val[M10] + vec[y] * val[M11] + val[M13]) * inv_w;
+			vec[x] = ox;
+		}
+	}
+
 	/**
 	 * Multiply rhs onto Matrix.
 	 * 
@@ -341,8 +353,7 @@ public class GLMatrix {
 	//			delete(pointer);
 	//	}
 
-	/*
-	 * Copyright (C) 2007 The Android Open Source Project
+	/* Copyright (C) 2007 The Android Open Source Project
 	 * 
 	 * Licensed under the Apache License, Version 2.0 (the "License");
 	 * you may not use this file except in compliance with the License.
@@ -354,8 +365,7 @@ public class GLMatrix {
 	 * distributed under the License is distributed on an "AS IS" BASIS,
 	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	 * See the License for the specific language governing permissions and
-	 * limitations under the License.
-	 */
+	 * limitations under the License. */
 
 	/**
 	 * Define a projection matrix in terms of six clip planes
