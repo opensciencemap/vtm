@@ -20,7 +20,7 @@ package org.oscim.utils;
 /**
  * Stripped down HashMap making HashItem entries public - So you have your custom
  * 'Entry' holding key and value. HashItem must implement equals() and hashCode() 
- * only for the 'key' part.
+ * only for the 'key' part. Items may only be in one KeyMap at a time!
  * 
  * KeyMap.put(HashItem, boolean replace) allows to get or add an item in one invocation.
  * 
@@ -228,10 +228,6 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
 	 */
 	@SuppressWarnings("unchecked")
 	public K get(HashItem key) {
-		//		if (key == null) {
-		//			HashItem e = entryForNullKey;
-		//			return e == null ? null : e.key;
-		//		}
 
 		// Doug Lea's supplemental secondaryHash function (inlined)
 		int hash = key.hashCode();
@@ -247,69 +243,6 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
 		}
 		return null;
 	}
-
-	//	/**
-	//	 * Returns whether this map contains the specified key.
-	//	 * 
-	//	 * @param key
-	//	 *            the key to search for.
-	//	 * @return {@code true} if this map contains the specified key,
-	//	 *         {@code false} otherwise.
-	//	 */
-	//	//@Override
-	//	public boolean containsKey(Object key) {
-	//		if (key == null) {
-	//			return entryForNullKey != null;
-	//		}
-	//
-	//		// Doug Lea's supplemental secondaryHash function (inlined)
-	//		int hash = key.hashCode();
-	//		hash ^= (hash >>> 20) ^ (hash >>> 12);
-	//		hash ^= (hash >>> 7) ^ (hash >>> 4);
-	//
-	//		HashItem[] tab = table;
-	//		for (HashItem e = tab[hash & (tab.length - 1)]; e != null; e = e.next) {
-	//			K eKey = e.key;
-	//			if (eKey == key || (e.hash == hash && key.equals(eKey))) {
-	//				return true;
-	//			}
-	//		}
-	//		return false;
-	//	}
-
-	//	/**
-	//	 * Returns whether this map contains the specified value.
-	//	 * 
-	//	 * @param value
-	//	 *            the value to search for.
-	//	 * @return {@code true} if this map contains the specified value,
-	//	 *         {@code false} otherwise.
-	//	 */
-	//	@Override
-	//	public boolean containsValue(Object value) {
-	//		HashMapEntry[] tab = table;
-	//		int len = tab.length;
-	//		if (value == null) {
-	//			for (int i = 0; i < len; i++) {
-	//				for (HashMapEntry e = tab[i]; e != null; e = e.next) {
-	//					if (e.value == null) {
-	//						return true;
-	//					}
-	//				}
-	//			}
-	//			return entryForNullKey != null && entryForNullKey.value == null;
-	//		}
-	//
-	//		// value is non-null
-	//		for (int i = 0; i < len; i++) {
-	//			for (HashMapEntry e = tab[i]; e != null; e = e.next) {
-	//				if (value.equals(e.value)) {
-	//					return true;
-	//				}
-	//			}
-	//		}
-	//		return entryForNullKey != null && value.equals(entryForNullKey.value);
-	//	}
 
 	/**
 	 * Maps the specified key to the specified value.
@@ -327,6 +260,8 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
 
 	@SuppressWarnings("unchecked")
 	public K put(K key, boolean replace) {
+		if (key.next != null)
+			throw new IllegalStateException("item not unhooked");
 
 		int hash = secondaryHash(key.hashCode());
 		HashItem[] tab = table;
@@ -352,47 +287,36 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
 		return null;
 	}
 
-	//	public K put(K key) {
-	//		//		if (key == null) {
-	//		//			return putValueForNullKey(value);
-	//		//		}
-	//
-	//		int hash = secondaryHash(key.hashCode());
-	//		HashItem[] tab = table;
-	//		int index = hash & (tab.length - 1);
-	//		for (HashItem e = tab[index]; e != null; e = e.next) {
-	//			if (e.hash == hash && key.equals(e.key)) {
-	//				preModify(e);
-	//				//V oldValue = e.value;
-	//				//e.value = value;
-	//				return e.key; //oldValue;
-	//			}
-	//		}
-	//
-	//		// No entry for (non-null) key is present; create one
-	//		modCount++;
-	//		if (size++ > threshold) {
-	//			tab = doubleCapacity();
-	//			index = hash & (tab.length - 1);
-	//		}
-	//		addNewEntry(key, hash, index);
-	//		return null;
-	//	}
+	/**
+	 * Removes the mapping with the specified key from this map.
+	 * 
+	 * @param key
+	 *            the key of the mapping to remove.
+	 * @return the value of the removed mapping or {@code null} if no mapping
+	 *         for the specified key was found.
+	 */
+	@SuppressWarnings("unchecked")
+	public K remove(K key) {
 
-	//	private V putValueForNullKey(V value) {
-	//		HashMapEntry<K> entry = entryForNullKey;
-	//		if (entry == null) {
-	//			addNewEntryForNullKey(value);
-	//			size++;
-	//			modCount++;
-	//			return null;
-	//		} else {
-	//			preModify(entry);
-	//			V oldValue = entry.value;
-	//			entry.value = value;
-	//			return oldValue;
-	//		}
-	//	}
+		int hash = secondaryHash(key.hashCode());
+		HashItem[] tab = table;
+		int index = hash & (tab.length - 1);
+		for (HashItem e = tab[index], prev = null; e != null; prev = e, e = e.next) {
+			if (e.hash == hash && key.equals(e)) {
+				if (prev == null) {
+					tab[index] = e.next;
+				} else {
+					prev.next = e.next;
+				}
+				e.next = null;
+				//modCount++;
+				size--;
+				//postRemove(e);
+				return (K) e;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Creates a new entry for the given key, value, hash, and index and
@@ -404,46 +328,6 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
 		key.setIndex(hash, table[index]);
 		table[index] = key;
 	}
-
-	///**
-	// * Ensures that the hash table has sufficient capacity to store the
-	// * specified number of mappings, with room to grow. If not, it increases the
-	// * capacity as appropriate. Like doubleCapacity, this method moves existing
-	// * entries to new buckets as appropriate. Unlike doubleCapacity, this method
-	// * can grow the table by factors of 2^n for n > 1. Hopefully, a single call
-	// * to this method will be faster than multiple calls to doubleCapacity.
-	// * 
-	// * <p>
-	// * This method is called only by putAll.
-	// */
-	//private void ensureCapacity(int numMappings) {
-	//	int newCapacity = roundUpToPowerOfTwo(capacityForInitSize(numMappings));
-	//	HashItem[] oldTable = table;
-	//	int oldCapacity = oldTable.length;
-	//	if (newCapacity <= oldCapacity) {
-	//		return;
-	//	}
-	//	if (newCapacity == oldCapacity * 2) {
-	//		doubleCapacity();
-	//		return;
-	//	}
-	//
-	//	// We're growing by at least 4x, rehash in the obvious way
-	//	HashItem[] newTable = makeTable(newCapacity);
-	//	if (size != 0) {
-	//		int newMask = newCapacity - 1;
-	//		for (int i = 0; i < oldCapacity; i++) {
-	//			for (HashItem e = oldTable[i]; e != null;) {
-	//				HashItem oldNext = e.next;
-	//				int newIndex = e.hash & newMask;
-	//				HashItem newNext = newTable[newIndex];
-	//				newTable[newIndex] = e;
-	//				e.next = newNext;
-	//				e = oldNext;
-	//			}
-	//		}
-	//	}
-	//}
 
 	/**
 	 * Allocate a table of the given capacity and set the threshold accordingly.
@@ -501,38 +385,6 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
 		}
 		return newTable;
 	}
-
-	//	/**
-	//	 * Removes the mapping with the specified key from this map.
-	//	 * 
-	//	 * @param key
-	//	 *            the key of the mapping to remove.
-	//	 * @return the value of the removed mapping or {@code null} if no mapping
-	//	 *         for the specified key was found.
-	//	 */
-	//	@Override
-	//	public V remove(Object key) {
-	//		if (key == null) {
-	//			return removeNullKey();
-	//		}
-	//		int hash = secondaryHash(key.hashCode());
-	//		HashMapEntry<K>[] tab = table;
-	//		int index = hash & (tab.length - 1);
-	//		for (HashMapEntry<K> e = tab[index], prev = null; e != null; prev = e, e = e.next) {
-	//			if (e.hash == hash && key.equals(e.key)) {
-	//				if (prev == null) {
-	//					tab[index] = e.next;
-	//				} else {
-	//					prev.next = e.next;
-	//				}
-	//				modCount++;
-	//				size--;
-	//				postRemove(e);
-	//				return e.value;
-	//			}
-	//		}
-	//		return null;
-	//	}
 
 	/**
 	 * Subclass overrides this method to unlink entry.
@@ -638,4 +490,150 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
 
 		return i + 1;
 	}
+
+	//	public K put(K key) {
+	//		//		if (key == null) {
+	//		//			return putValueForNullKey(value);
+	//		//		}
+	//
+	//		int hash = secondaryHash(key.hashCode());
+	//		HashItem[] tab = table;
+	//		int index = hash & (tab.length - 1);
+	//		for (HashItem e = tab[index]; e != null; e = e.next) {
+	//			if (e.hash == hash && key.equals(e.key)) {
+	//				preModify(e);
+	//				//V oldValue = e.value;
+	//				//e.value = value;
+	//				return e.key; //oldValue;
+	//			}
+	//		}
+	//
+	//		// No entry for (non-null) key is present; create one
+	//		modCount++;
+	//		if (size++ > threshold) {
+	//			tab = doubleCapacity();
+	//			index = hash & (tab.length - 1);
+	//		}
+	//		addNewEntry(key, hash, index);
+	//		return null;
+	//	}
+
+	//	private V putValueForNullKey(V value) {
+	//		HashMapEntry<K> entry = entryForNullKey;
+	//		if (entry == null) {
+	//			addNewEntryForNullKey(value);
+	//			size++;
+	//			modCount++;
+	//			return null;
+	//		} else {
+	//			preModify(entry);
+	//			V oldValue = entry.value;
+	//			entry.value = value;
+	//			return oldValue;
+	//		}
+	//	}
+
+	//	/**
+	//	 * Returns whether this map contains the specified key.
+	//	 * 
+	//	 * @param key
+	//	 *            the key to search for.
+	//	 * @return {@code true} if this map contains the specified key,
+	//	 *         {@code false} otherwise.
+	//	 */
+	//	//@Override
+	//	public boolean containsKey(Object key) {
+	//		if (key == null) {
+	//			return entryForNullKey != null;
+	//		}
+	//
+	//		// Doug Lea's supplemental secondaryHash function (inlined)
+	//		int hash = key.hashCode();
+	//		hash ^= (hash >>> 20) ^ (hash >>> 12);
+	//		hash ^= (hash >>> 7) ^ (hash >>> 4);
+	//
+	//		HashItem[] tab = table;
+	//		for (HashItem e = tab[hash & (tab.length - 1)]; e != null; e = e.next) {
+	//			K eKey = e.key;
+	//			if (eKey == key || (e.hash == hash && key.equals(eKey))) {
+	//				return true;
+	//			}
+	//		}
+	//		return false;
+	//	}
+
+	//	/**
+	//	 * Returns whether this map contains the specified value.
+	//	 * 
+	//	 * @param value
+	//	 *            the value to search for.
+	//	 * @return {@code true} if this map contains the specified value,
+	//	 *         {@code false} otherwise.
+	//	 */
+	//	@Override
+	//	public boolean containsValue(Object value) {
+	//		HashMapEntry[] tab = table;
+	//		int len = tab.length;
+	//		if (value == null) {
+	//			for (int i = 0; i < len; i++) {
+	//				for (HashMapEntry e = tab[i]; e != null; e = e.next) {
+	//					if (e.value == null) {
+	//						return true;
+	//					}
+	//				}
+	//			}
+	//			return entryForNullKey != null && entryForNullKey.value == null;
+	//		}
+	//
+	//		// value is non-null
+	//		for (int i = 0; i < len; i++) {
+	//			for (HashMapEntry e = tab[i]; e != null; e = e.next) {
+	//				if (value.equals(e.value)) {
+	//					return true;
+	//				}
+	//			}
+	//		}
+	//		return entryForNullKey != null && value.equals(entryForNullKey.value);
+	//	}
+
+	///**
+	// * Ensures that the hash table has sufficient capacity to store the
+	// * specified number of mappings, with room to grow. If not, it increases the
+	// * capacity as appropriate. Like doubleCapacity, this method moves existing
+	// * entries to new buckets as appropriate. Unlike doubleCapacity, this method
+	// * can grow the table by factors of 2^n for n > 1. Hopefully, a single call
+	// * to this method will be faster than multiple calls to doubleCapacity.
+	// * 
+	// * <p>
+	// * This method is called only by putAll.
+	// */
+	//private void ensureCapacity(int numMappings) {
+	//	int newCapacity = roundUpToPowerOfTwo(capacityForInitSize(numMappings));
+	//	HashItem[] oldTable = table;
+	//	int oldCapacity = oldTable.length;
+	//	if (newCapacity <= oldCapacity) {
+	//		return;
+	//	}
+	//	if (newCapacity == oldCapacity * 2) {
+	//		doubleCapacity();
+	//		return;
+	//	}
+	//
+	//	// We're growing by at least 4x, rehash in the obvious way
+	//	HashItem[] newTable = makeTable(newCapacity);
+	//	if (size != 0) {
+	//		int newMask = newCapacity - 1;
+	//		for (int i = 0; i < oldCapacity; i++) {
+	//			for (HashItem e = oldTable[i]; e != null;) {
+	//				HashItem oldNext = e.next;
+	//				int newIndex = e.hash & newMask;
+	//				HashItem newNext = newTable[newIndex];
+	//				newTable[newIndex] = e;
+	//				e.next = newNext;
+	//				e = oldNext;
+	//			}
+	//		}
+	//	}
+	//}
+
 }
