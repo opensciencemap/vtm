@@ -30,7 +30,7 @@ import org.oscim.utils.KeyMap.HashItem;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.geom.LineClipper;
 import org.oscim.utils.pool.Inlist;
-import org.oscim.utils.pool.SyncPool;
+import org.oscim.utils.pool.Pool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,17 +111,19 @@ public class ExtrusionLayer extends RenderElement {
 		mCurIndices = new VertexItem[5];
 
 		mIndices[4] = mCurIndices[4] = VertexItem.pool.get();
-		mVertexMap = vertexMapPool.get();
+		synchronized (vertexPool) {
+			mVertexMap = vertexMapPool.get();
+		}
 	}
 
-	static SyncPool<Vertex> vertexPool = new SyncPool<Vertex>(8192, false) {
+	static Pool<Vertex> vertexPool = new Pool<Vertex>() {
 		@Override
 		protected Vertex createItem() {
 			return new Vertex();
 		}
 	};
 
-	static SyncPool<KeyMap<Vertex>> vertexMapPool = new SyncPool<KeyMap<Vertex>>(64, false) {
+	static Pool<KeyMap<Vertex>> vertexMapPool = new Pool<KeyMap<Vertex>>() {
 		@Override
 		protected KeyMap<Vertex> createItem() {
 			return new KeyMap<Vertex>(2048);
@@ -160,114 +162,115 @@ public class ExtrusionLayer extends RenderElement {
 		float[] points = element.points;
 
 		int vertexCnt = sumVertices;
+		synchronized (vertexPool) {
 
-		Vertex key = vertexPool.get();
-		double scale = S * Tile.SIZE / 4096;
+			Vertex key = vertexPool.get();
+			double scale = S * Tile.SIZE / 4096;
 
-		for (int k = 0, n = index.length; k < n;) {
-			if (index[k] < 0)
-				break;
+			for (int k = 0, n = index.length; k < n;) {
+				if (index[k] < 0)
+					break;
 
-			/* FIXME: workaround: dont overflow max index id. */
-			if (vertexCnt >= 1 << 16)
-				break;
+				/* FIXME: workaround: dont overflow max index id. */
+				if (vertexCnt >= 1 << 16)
+					break;
 
-			int vtx1 = index[k++] * 3;
-			int vtx2 = index[k++] * 3;
-			int vtx3 = index[k++] * 3;
+				int vtx1 = index[k++] * 3;
+				int vtx2 = index[k++] * 3;
+				int vtx3 = index[k++] * 3;
 
-			float vx1 = points[vtx1 + 0];
-			float vy1 = points[vtx1 + 1];
-			float vz1 = points[vtx1 + 2];
+				float vx1 = points[vtx1 + 0];
+				float vy1 = points[vtx1 + 1];
+				float vz1 = points[vtx1 + 2];
 
-			float vx2 = points[vtx2 + 0];
-			float vy2 = points[vtx2 + 1];
-			float vz2 = points[vtx2 + 2];
+				float vx2 = points[vtx2 + 0];
+				float vy2 = points[vtx2 + 1];
+				float vz2 = points[vtx2 + 2];
 
-			float vx3 = points[vtx3 + 0];
-			float vy3 = points[vtx3 + 1];
-			float vz3 = points[vtx3 + 2];
+				float vx3 = points[vtx3 + 0];
+				float vy3 = points[vtx3 + 1];
+				float vz3 = points[vtx3 + 2];
 
-			float ax = vx2 - vx1;
-			float ay = vy2 - vy1;
-			float az = vz2 - vz1;
+				float ax = vx2 - vx1;
+				float ay = vy2 - vy1;
+				float az = vz2 - vz1;
 
-			float bx = vx3 - vx1;
-			float by = vy3 - vy1;
-			float bz = vz3 - vz1;
+				float bx = vx3 - vx1;
+				float by = vy3 - vy1;
+				float bz = vz3 - vz1;
 
-			float cx = ay * bz - az * by;
-			float cy = az * bx - ax * bz;
-			float cz = ax * by - ay * bx;
+				float cx = ay * bz - az * by;
+				float cy = az * bx - ax * bz;
+				float cz = ax * by - ay * bx;
 
-			double len = Math.sqrt(cx * cx + cy * cy + cz * cz);
+				double len = Math.sqrt(cx * cx + cy * cy + cz * cz);
 
-			// packing the normal in two bytes
-			//	int mx = FastMath.clamp(127 + (int) ((cx / len) * 128), 0, 0xff);
-			//	int my = FastMath.clamp(127 + (int) ((cy / len) * 128), 0, 0xff);
-			//	short normal = (short) ((my << 8) | (mx & NORMAL_DIR_MASK) | (cz > 0 ? 1 : 0));
+				// packing the normal in two bytes
+				//	int mx = FastMath.clamp(127 + (int) ((cx / len) * 128), 0, 0xff);
+				//	int my = FastMath.clamp(127 + (int) ((cy / len) * 128), 0, 0xff);
+				//	short normal = (short) ((my << 8) | (mx & NORMAL_DIR_MASK) | (cz > 0 ? 1 : 0));
 
-			double p = Math.sqrt((cz / len) * 8.0 + 8.0);
-			int mx = FastMath.clamp(127 + (int) ((cx / len / p) * 128), 0, 255);
-			int my = FastMath.clamp(127 + (int) ((cy / len / p) * 128), 0, 255);
-			short normal = (short) ((my << 8) | mx);
+				double p = Math.sqrt((cz / len) * 8.0 + 8.0);
+				int mx = FastMath.clamp(127 + (int) ((cx / len / p) * 128), 0, 255);
+				int my = FastMath.clamp(127 + (int) ((cy / len / p) * 128), 0, 255);
+				short normal = (short) ((my << 8) | mx);
 
-			if (key == null)
-				key = vertexPool.get();
+				if (key == null)
+					key = vertexPool.get();
 
-			key.set((short) (vx1 * scale),
-			        (short) (vy1 * scale),
-			        (short) (vz1 * scale),
-			        normal);
+				key.set((short) (vx1 * scale),
+				        (short) (vy1 * scale),
+				        (short) (vz1 * scale),
+				        normal);
 
-			Vertex vertex = mVertexMap.put(key, false);
+				Vertex vertex = mVertexMap.put(key, false);
 
-			if (vertex == null) {
-				key.id = vertexCnt++;
-				addVertex(key);
-				addIndex(key);
-				key = vertexPool.get();
-			} else {
-				//numIndexHits++;
-				addIndex(vertex);
+				if (vertex == null) {
+					key.id = vertexCnt++;
+					addVertex(key);
+					addIndex(key);
+					key = vertexPool.get();
+				} else {
+					//numIndexHits++;
+					addIndex(vertex);
+				}
+
+				key.set((short) (vx2 * scale),
+				        (short) (vy2 * scale),
+				        (short) (vz2 * scale),
+				        normal);
+
+				vertex = mVertexMap.put(key, false);
+
+				if (vertex == null) {
+					key.id = vertexCnt++;
+					addVertex(key);
+					addIndex(key);
+					key = vertexPool.get();
+				} else {
+					//numIndexHits++;
+					addIndex(vertex);
+				}
+
+				key.set((short) (vx3 * scale),
+				        (short) (vy3 * scale),
+				        (short) (vz3 * scale),
+				        (short) normal);
+
+				vertex = mVertexMap.put(key, false);
+				if (vertex == null) {
+					key.id = vertexCnt++;
+					addVertex(key);
+					addIndex(key);
+					key = vertexPool.get();
+				} else {
+					//numIndexHits++;
+					addIndex(vertex);
+				}
 			}
 
-			key.set((short) (vx2 * scale),
-			        (short) (vy2 * scale),
-			        (short) (vz2 * scale),
-			        normal);
-
-			vertex = mVertexMap.put(key, false);
-
-			if (vertex == null) {
-				key.id = vertexCnt++;
-				addVertex(key);
-				addIndex(key);
-				key = vertexPool.get();
-			} else {
-				//numIndexHits++;
-				addIndex(vertex);
-			}
-
-			key.set((short) (vx3 * scale),
-			        (short) (vy3 * scale),
-			        (short) (vz3 * scale),
-			        (short) normal);
-
-			vertex = mVertexMap.put(key, false);
-			if (vertex == null) {
-				key.id = vertexCnt++;
-				addVertex(key);
-				addIndex(key);
-				key = vertexPool.get();
-			} else {
-				//numIndexHits++;
-				addIndex(vertex);
-			}
+			vertexPool.release(key);
 		}
-
-		vertexPool.release(key);
-
 		sumVertices = vertexCnt;
 	}
 
@@ -649,11 +652,7 @@ public class ExtrusionLayer extends RenderElement {
 	public void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
 		mClipper = null;
 
-		if (mVertexMap != null) {
-			vertexPool.releaseAll(mVertexMap.releaseItems());
-			mVertexMap = vertexMapPool.release(mVertexMap);
-			mVertexMap = null;
-		}
+		releaseVertexPool();
 
 		if (sumVertices == 0) {
 			return;
@@ -682,17 +681,22 @@ public class ExtrusionLayer extends RenderElement {
 	protected void clear() {
 		mClipper = null;
 
-		if (mVertexMap != null) {
-			vertexPool.releaseAll(mVertexMap.releaseItems());
-			mVertexMap = vertexMapPool.release(mVertexMap);
-			mVertexMap = null;
-		}
-
 		if (mIndices != null) {
 			for (int i = 0; i <= IND_MESH; i++)
 				mIndices[i] = VertexItem.pool.releaseAll(mIndices[i]);
 			mIndices = null;
 			mVertices = VertexItem.pool.releaseAll(mVertices);
+		}
+		releaseVertexPool();
+	}
+
+	void releaseVertexPool() {
+		if (mVertexMap == null)
+			return;
+
+		synchronized (vertexPool) {
+			vertexPool.releaseAll(mVertexMap.releaseItems());
+			mVertexMap = vertexMapPool.release(mVertexMap);
 		}
 	}
 
