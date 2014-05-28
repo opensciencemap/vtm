@@ -17,6 +17,8 @@
 package com.badlogic.gdx.backends.gwt;
 
 import org.oscim.gdx.client.GwtGLAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
@@ -32,6 +34,8 @@ import com.google.gwt.webgl.client.WebGLContextAttributes;
 import com.google.gwt.webgl.client.WebGLRenderingContext;
 
 public class GwtGraphics implements Graphics {
+	static final Logger log = LoggerFactory.getLogger(GwtGraphics.class);
+
 	CanvasElement canvas;
 	WebGLRenderingContext context;
 	GL20 gl;
@@ -73,15 +77,18 @@ public class GwtGraphics implements Graphics {
 		attributes.setPremultipliedAlpha(false);
 
 		context = WebGLRenderingContext.getContext(canvas, attributes);
+		if (context == null)
+			throw new GdxRuntimeException("Could not create Canvas for " + attributes);
+
 		context.viewport(0, 0, config.width, config.height);
 
 		// this actually *enables* the option to use std derivatives in shader..
 		if (context.getExtension("OES_standard_derivatives") == null) {
-
+			log.error("Missing gl extension for OES_standard_derivatives");
 		}
 
 		if (context.getExtension("WEBKIT_WEBGL_depth_texture") == null) {
-
+			log.error("Missing gl extension for WEBKIT_WEBGL_depth_texture");
 		}
 
 		this.gl = config.useDebugGL ? new GwtGL20Debug(context) : new GwtGLAdapter(context);
