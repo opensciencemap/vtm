@@ -22,8 +22,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 
@@ -60,10 +60,10 @@ public class LwHttp implements HttpEngine {
 	private OutputStream mCommandStream;
 	private Buffer mResponseStream;
 	private long mLastRequest = 0;
-	private SocketAddress mSockAddr;
+	private InetSocketAddress mSockAddr;
 
 	/** Server requested to close the connection */
-	private boolean mMustClose;
+	private boolean mMustCloseConnection;
 
 	private final byte[] REQUEST_GET_START;
 	private final byte[] REQUEST_GET_END;
@@ -298,7 +298,7 @@ public class LwHttp implements HttpEngine {
 				} else if (check(HEADER_ENCODING_GZIP, buf, pos, end)) {
 					gzip = true;
 				} else if (check(HEADER_CONNECTION_CLOSE, buf, pos, end)) {
-					mMustClose = true;
+					mMustCloseConnection = true;
 				}
 			}
 
@@ -367,36 +367,41 @@ public class LwHttp implements HttpEngine {
 			log.debug("request: {}", new String(mRequestBuffer, 0, len));
 
 		try {
-			writeRequest(mRequestBuffer, len);
+			writeRequest(len);
 		} catch (IOException e) {
 			log.debug("recreate connection");
 			close();
+
 			lwHttpConnect();
-			writeRequest(mRequestBuffer, len);
+			writeRequest(len);
 		}
 	}
 
-	private void writeRequest(byte[] request, int length) throws IOException {
-		mCommandStream.write(request, 0, length);
-		mCommandStream.flush();
+	private void writeRequest(int length) throws IOException {
+		mCommandStream.write(mRequestBuffer, 0, length);
+		//mCommandStream.flush();
 	}
 
-	private boolean lwHttpConnect() throws IOException {
-		if (mSockAddr == null)
+	private void lwHttpConnect() throws IOException {
+		if (mSockAddr == null || mSockAddr.isUnresolved()) {
 			mSockAddr = new InetSocketAddress(mHost, mPort);
+			if (mSockAddr.isUnresolved())
+				throw new UnknownHostException(mHost);
+		}
 
 		try {
 			mSocket = new Socket();
-			mSocket.connect(mSockAddr, 30000);
 			mSocket.setTcpNoDelay(true);
+			mSocket.setSoTimeout(5000);
+			mSocket.connect(mSockAddr, 10000);
 			mCommandStream = mSocket.getOutputStream();
 			mResponseStream = new Buffer(mSocket.getInputStream());
+
+			mMustCloseConnection = false;
 		} catch (IOException e) {
 			close();
 			throw e;
 		}
-		mMustClose = false;
-		return true;
 	}
 
 	@Override
@@ -427,7 +432,8 @@ public class LwHttp implements HttpEngine {
 		mResponseStream.setCache(null);
 
 		if (!mResponseStream.finishedReading()) {
-			log.debug("invalid buffer position");
+			if (dbg)
+				log.debug("invalid buffer position");
 			close();
 			return true;
 		}
@@ -437,7 +443,7 @@ public class LwHttp implements HttpEngine {
 			return false;
 		}
 
-		if (mMustClose) {
+		if (mMustCloseConnection) {
 			close();
 			return true;
 		}
