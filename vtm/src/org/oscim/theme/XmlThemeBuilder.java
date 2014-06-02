@@ -138,7 +138,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
 	private int mLevels = 0;
 	private int mMapBackground = 0xffffffff;
-	private float mBaseTextSize = 1;
+	private float mTextScale = 1;
 
 	private RenderTheme mRenderTheme;
 
@@ -149,7 +149,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 		for (int i = 0, n = rules.length; i < n; i++)
 			rules[i] = mRulesList.get(i).onComplete(null);
 
-		mRenderTheme = new RenderTheme(mMapBackground, mBaseTextSize, rules, mLevels);
+		mRenderTheme = new RenderTheme(mMapBackground, mTextScale, rules, mLevels);
 
 		mRulesList.clear();
 		mStyles.clear();
@@ -658,7 +658,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 		Integer version = null;
 		int mapBackground = Color.WHITE;
 		float baseStrokeWidth = 1;
-		float baseTextSize = 1;
+		float baseTextScale = 1;
 
 		for (int i = 0; i < attributes.getLength(); ++i) {
 			String name = attributes.getLocalName(i);
@@ -676,8 +676,8 @@ public class XmlThemeBuilder extends DefaultHandler {
 			else if ("base-stroke-width".equals(name))
 				baseStrokeWidth = Float.parseFloat(value);
 
-			else if ("base-text-size".equals(name))
-				baseTextSize = Float.parseFloat(value);
+			else if ("base-text-scale".equals(name))
+				baseTextScale = Float.parseFloat(value);
 
 			else
 				XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
@@ -691,10 +691,10 @@ public class XmlThemeBuilder extends DefaultHandler {
 			        + version);
 
 		validateNonNegative("base-stroke-width", baseStrokeWidth);
-		validateNonNegative("base-test-size", baseTextSize);
+		validateNonNegative("base-text-scale", baseTextScale);
 
 		mMapBackground = mapBackground;
-		mBaseTextSize = baseTextSize;
+		mTextScale = baseTextScale;
 	}
 
 	/**
