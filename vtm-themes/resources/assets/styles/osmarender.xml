@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rendertheme xmlns="http://opensciencemap.org/rendertheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd" version="1" map-background="#fffcfa">
+<rendertheme xmlns="http://opensciencemap.org/rendertheme" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd" 
+    version="1" 
+    map-background="#fffcfa">
 
   <atlas img="styles/osmarender.png">
     <rect id="airport" pos="226 38 24 24" />
@@ -71,7 +74,10 @@
 
   <style-text id="caption-small-blue" caption="true" dy="12" k="name" style="bold" size="14" fill="#4040ff"
     stroke="#ffffff" stroke-width="2.0" />
-
+  
+  <style-text id="highway-road" k="name" style="bold" size="16" stroke="#d0d0d0" stroke-width="2.0" /> 
+  <style-text id="highway-track" k="name" style="bold" size="16" stroke="#fff2de" stroke-width="2.0" />
+  
   <!-- ways -->
   <m e="way">
     <!-- landuse -->
@@ -585,7 +591,7 @@
 
       <m zoom-min="17">
         <text use="caption-small-blue" priority="9" />
-        <caption k="addr:housenumber" style="bold" size="10" fill="#606060" stroke="#ffffff" stroke-width="2.0"
+        <caption k="addr:housenumber" style="bold" size="16" fill="#606060" stroke="#ffffff" stroke-width="2.0"
           priority="10" />
       </m>
     </m>
@@ -600,68 +606,68 @@
           <m v="steps">
             <line stroke="#e5e0c2" width="0.45" dasharray="3,1" cap="butt" />
             <m zoom-min="15">
-              <text k="name" style="bold" size="10" stroke="#e5e0c2" stroke-width="2.0" />
+              <text k="name" style="bold" size="16" stroke="#e5e0c2" stroke-width="2.0" />
             </m>
           </m>
           <m v="footway|platform|corridor">
             <line stroke="#e5e0c2" width="1.4" fix="true" cap="butt" />
             <m zoom-min="15">
-              <text k="name" style="bold" size="10" stroke="#e5e0c2" stroke-width="2.0" />
+              <text k="name" style="bold" size="16" stroke="#e5e0c2" stroke-width="2.0" />
             </m>
           </m>
           <m v="cycleway">
             <line stipple="4" stipple-width="0.8" fix="true" stipple-stroke="#0000dd" stroke="#d1fad1" width="1.4" />
             <m zoom-min="15">
-              <text k="name" style="bold" size="10" stroke="#d1fad1" stroke-width="2.0" />
+              <text k="name" style="bold" size="16" stroke="#d1fad1" stroke-width="2.0" />
             </m>
           </m>
           <m v="bridleway">
             <line stroke="#d3cb98" width="0.85" />
             <m zoom-min="15">
-              <text k="name" style="bold" size="10" stroke="#d3cb98" stroke-width="2.0" />
+              <text k="name" style="bold" size="16" stroke="#d3cb98" stroke-width="2.0" />
             </m>
           </m>
           <m v="path">
             <line stroke="#d0d0d0" width="1.45" fix="true" />
             <m zoom-min="15">
-              <text k="name" style="bold" size="10" stroke="#d0d0d0" stroke-width="2.0" />
+              <text use="highway-road"/>
             </m>
           </m>
           <m v="track" select="first">
             <m k="tracktype" v="grade1">
               <line stroke="#fffaf2" width="0.75" />
               <m zoom-min="15">
-                <text k="name" style="bold" size="10" stroke="#fffaf2" stroke-width="2.0" />
+                <text k="name" style="bold" size="16" stroke="#fffaf2" stroke-width="2.0" />
               </m>
             </m>
             <m k="tracktype" v="grade2">
               <line stroke="#fff2de" width="0.75" />
               <m zoom-min="15">
-                <text k="name" style="bold" size="10" stroke="#fff2de" stroke-width="2.0" />
+                <text use="highway-track"/>
               </m>
             </m>
             <m k="tracktype" v="grade3">
               <line stroke="#fff2de" width="0.7" />
               <m zoom-min="15">
-                <text k="name" style="bold" size="10" stroke="#fff2de" stroke-width="2.0" />
+                <text use="highway-track"/>
               </m>
             </m>
             <m k="tracktype" v="grade4">
               <line stroke="#fff2de" width="0.7" />
               <m zoom-min="15">
-                <text k="name" style="bold" size="10" stroke="#fff2de" stroke-width="2.0" />
+                <text use="highway-track"/>
               </m>
             </m>
             <m k="tracktype" v="grade5">
               <line stroke="#fff2de" width="0.7" />
               <m zoom-min="15">
-                <text k="name" style="bold" size="10" stroke="#fff2de" stroke-width="2.0" />
+                <text use="highway-track"/>
               </m>
             </m>
             <m k="tracktype" v="~|no|false">
               <line stroke="#fff2de" width="0.75" />
               <m zoom-min="15">
-                <text k="name" style="bold" size="10" stroke="#fff2de" stroke-width="2.0" />
+                <text use="highway-track"/>
               </m>
             </m>
           </m>
@@ -671,93 +677,93 @@
               <m v="service">
                 <line stroke="#ffffff" width="0.85" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#ffffff" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#ffffff" stroke-width="2.0" />
                 </m>
               </m>
               <m v="construction">
                 <line stroke="#d0d0d0" width="1.0" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#d0d0d0" stroke-width="2.0" />
+                  <text use="highway-road"/>
                 </m>
               </m>
               <m v="road">
                 <line stroke="#d0d0d0" width="1.25" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#d0d0d0" stroke-width="2.0" />
+                  <text use="highway-road"/>
                 </m>
               </m>
               <m v="pedestrian">
                 <line stroke="#e5e0c2" width="0.85" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#e5e0c2" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#e5e0c2" stroke-width="2.0" />
                 </m>
               </m>
               <m v="unclassified|residential|living_street">
                 <line stroke="#ffffff" width="1.25" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#ffffff" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#ffffff" stroke-width="2.0" />
                 </m>
               </m>
               <m v="byway">
                 <line stroke="#efadaa" width="1.15" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#efadaa" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#efadaa" stroke-width="2.0" />
                 </m>
               </m>
               <m v="tertiary|tertiary_link">
                 <line use="tertiary" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#ffff90" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#ffff90" stroke-width="2.0" />
                 </m>
               </m>
               <m v="secondary_link">
                 <line use="secondary" width="-0.1" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#fdbf6f" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#fdbf6f" stroke-width="2.0" />
                 </m>
               </m>
               <m v="primary_link">
                 <line use="primary" width="-0.1" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#e46d71" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#e46d71" stroke-width="2.0" />
                 </m>
               </m>
               <m v="trunk_link">
                 <line use="trunk" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#7fc97f" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#7fc97f" stroke-width="2.0" />
                 </m>
               </m>
               <m v="motorway_link">
                 <line use="motorway" width="-0.2" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#809bc0" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#809bc0" stroke-width="2.0" />
                 </m>
               </m>
               <m v="secondary">
                 <line use="secondary" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#fdbf6f" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#fdbf6f" stroke-width="2.0" />
                 </m>
               </m>
               <m v="primary">
                 <line use="primary" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#e46d71" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#e46d71" stroke-width="2.0" />
                   <text k="ref" style="bold" size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
                 </m>
               </m>
               <m v="trunk">
                 <line use="trunk" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#7fc97f" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#7fc97f" stroke-width="2.0" />
                   <text k="ref" style="bold" size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
                 </m>
               </m>
               <m v="motorway">
                 <line use="motorway" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#809bc0" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#809bc0" stroke-width="2.0" />
                   <text k="ref" style="bold" size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
                 </m>
               </m>
@@ -786,93 +792,93 @@
               <m v="service">
                 <line stroke="#ffffff" width="0.85" outline="casing-bridge" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#ffffff" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#ffffff" stroke-width="2.0" />
                 </m>
               </m>
               <m v="construction">
                 <line stroke="#d0d0d0" width="1.0" outline="casing-bridge" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#d0d0d0" stroke-width="2.0" />
+                  <text use="highway-road"/>
                 </m>
               </m>
               <m v="road">
                 <line stroke="#d0d0d0" width="1.25" outline="casing-bridge" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#d0d0d0" stroke-width="2.0" />
+                  <text use="highway-road"/>
                 </m>
               </m>
               <m v="pedestrian">
                 <line stroke="#e5e0c2" width="0.85" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#e5e0c2" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#e5e0c2" stroke-width="2.0" />
                 </m>
               </m>
               <m v="unclassified|residential|living_street">
                 <line stroke="#ffffff" width="1.25" outline="casing-bridge" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#ffffff" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#ffffff" stroke-width="2.0" />
                 </m>
               </m>
               <m v="byway">
                 <line stroke="#efadaa" width="1.15" outline="casing-bridge" />
                 <m zoom-min="15">
-                  <text k="name" style="bold" size="10" stroke="#efadaa" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#efadaa" stroke-width="2.0" />
                 </m>
               </m>
               <m v="tertiary|tertiary_link">
                 <line use="tertiary" cap="square" outline="casing-bridge" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#ffff90" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#ffff90" stroke-width="2.0" />
                 </m>
               </m>
               <m v="secondary_link">
                 <line use="secondary" width="-0.1" cap="square" outline="casing-bridge" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#fdbf6f" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#fdbf6f" stroke-width="2.0" />
                 </m>
               </m>
               <m v="primary_link">
                 <line use="primary" width="-0.1" cap="square" outline="casing-bridge" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#e46d71" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#e46d71" stroke-width="2.0" />
                 </m>
               </m>
               <m v="trunk_link">
                 <line use="trunk" cap="square" outline="casing-bridge" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#7fc97f" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#7fc97f" stroke-width="2.0" />
                 </m>
               </m>
               <m v="motorway_link">
                 <line use="motorway" width="-0.2" cap="square" outline="casing-bridge" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#809bc0" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#809bc0" stroke-width="2.0" />
                 </m>
               </m>
               <m v="secondary">
                 <line use="secondary" cap="square" outline="casing-bridge" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#fdbf6f" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#fdbf6f" stroke-width="2.0" />
                 </m>
               </m>
               <m v="primary">
                 <line use="primary" cap="square" outline="casing-bridge" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#e46d71" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#e46d71" stroke-width="2.0" />
                   <text k="ref" style="bold" size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
                 </m>
               </m>
               <m v="trunk">
                 <line use="trunk" outline="casing-bridge" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#7fc97f" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#7fc97f" stroke-width="2.0" />
                   <text k="ref" style="bold" size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
                 </m>
               </m>
               <m v="motorway">
                 <line use="motorway" cap="square" outline="casing-bridge" />
                 <m zoom-min="14">
-                  <text k="name" style="bold" size="10" stroke="#809bc0" stroke-width="2.0" />
+                  <text k="name" style="bold" size="16" stroke="#809bc0" stroke-width="2.0" />
                   <text k="ref" style="bold" size="12" stroke="#ffffff" fill="#606060" stroke-width="2.0" />
                 </m>
               </m>
@@ -952,7 +958,7 @@
         <lineSymbol src="gondola" />
       </m>
       <m zoom-min="14">
-        <text k="name" style="bold" size="10" fill="#606060" stroke="#ffffff" stroke-width="2.0" />
+        <text k="name" style="bold" size="16" fill="#606060" stroke="#ffffff" stroke-width="2.0" />
       </m>
     </m>
 
@@ -1052,13 +1058,13 @@
 
 
     <!-- <m k="historic" v="ruins" zoom-min="17">
-      <caption k="name" style="bold" size="10" fill="#4040ff"
+      <caption k="name" style="bold" size="16" fill="#4040ff"
       stroke="#ffffff" width="2.0" />
       </m>
 
 
       <m k="place" v="locality" zoom-min="17">
-      <caption k="name" style="bold" size="10" fill="#000000"
+      <caption k="name" style="bold" size="16" fill="#000000"
       stroke="#ffffff" width="2.0" />
       </m> -->
   </m>
@@ -1206,7 +1212,7 @@
 
 
     <m k="addr:housenumber" zoom-min="18">
-      <caption k="addr:housenumber" style="bold" size="10" fill="#606060" stroke="#ffffff" stroke-width="2.0" />
+      <caption k="addr:housenumber" style="bold" size="16" fill="#606060" stroke="#ffffff" stroke-width="2.0" />
     </m>
 
 
@@ -1227,7 +1233,7 @@
         </m>
         <m v="peak" zoom-min="12">
           <symbol src="peak" />
-          <caption k="ele" dy="20" style="bold" size="10" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+          <caption k="ele" dy="20" style="bold" size="16" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
         </m>
         <m v="tree" zoom-min="16">
           <symbol src="tree" />
@@ -1235,9 +1241,10 @@
         <m v="volcano" zoom-min="12">
           <symbol src="vulcan" />
         </m>
-      </m>
-      <m zoom-min="17">
-        <caption k="name" style="bold" size="10" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+        
+        <m select="when-matched" zoom-min="17">
+          <caption k="name" style="bold" size="16" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+        </m>
       </m>
     </m>
 
