@@ -140,9 +140,17 @@ public class Inlist<T extends Inlist<T>> {
 		/** Iterator: Remove current item */
 		@Override
 		public void remove() {
-			T tmp = (T) cur.next;
-			head = Inlist.remove(head, cur);
-			cur = tmp;
+			/* iterator is at first position */
+			if (head.next == cur) {
+				head = head.next;
+				return;
+			}
+
+			Inlist prev = head;
+			while (prev.next.next != cur)
+				prev = prev.next;
+
+			prev.next = cur;
 		}
 
 		/** NB: Only one iterator at a time possible! */
@@ -151,9 +159,17 @@ public class Inlist<T extends Inlist<T>> {
 			cur = head;
 			return this;
 		}
+
+		public int size() {
+			return Inlist.size(head);
+		}
 	}
 
 	public T next;
+
+	public T next() {
+		return next;
+	}
 
 	/**
 	 * Push 'item' onto 'list'.
@@ -165,6 +181,9 @@ public class Inlist<T extends Inlist<T>> {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@CheckReturnValue
 	public static <T extends Inlist<?>> T push(T list, T item) {
+		if (item.next != null)
+			throw new IllegalArgumentException("'item' is a list");
+
 		((Inlist) (item)).next = list;
 		return item;
 	}
@@ -175,9 +194,9 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param list the list
 	 * @return the number of items in 'list'
 	 */
-	static <T extends Inlist<T>> int size(T list) {
+	public static <T extends Inlist<?>> int size(T list) {
 		int count = 0;
-		for (T l = list; l != null; l = l.next)
+		for (Inlist<?> l = list; l != null; l = l.next)
 			count++;
 		return count;
 	}
@@ -189,15 +208,16 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param item the item
 	 * @return the new head of 'list'
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@CheckReturnValue
-	public static <T extends Inlist<T>> T remove(T list, T item) {
+	public static <T extends Inlist<?>> T remove(T list, T item) {
 		if (item == list) {
-			T head = item.next;
+			Inlist head = item.next;
 			item.next = null;
-			return head;
+			return (T) head;
 		}
 
-		for (T prev = list, it = list.next; it != null; it = it.next) {
+		for (Inlist prev = list, it = list.next; it != null; it = it.next) {
 			if (it == item) {
 				prev.next = item.next;
 				item.next = null;
@@ -216,13 +236,14 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param i the index
 	 * @return the item or null
 	 */
+	@SuppressWarnings({ "unchecked" })
 	@CheckReturnValue
-	public static <T extends Inlist<T>> T get(T list, int i) {
+	public static <T extends Inlist<?>> T get(T list, int i) {
 		if (i < 0)
 			return null;
 
 		while (--i > 0 && list != null)
-			list = list.next;
+			list = (T) list.next;
 
 		if (i == 0)
 			return list;
@@ -238,8 +259,9 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param item the item
 	 * @return the new head of 'list'
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@CheckReturnValue
-	public static <T extends Inlist<T>> T appendItem(T list, T item) {
+	public static <T extends Inlist<?>> T appendItem(T list, T item) {
 
 		if (item.next != null)
 			throw new IllegalArgumentException("'item' is list");
@@ -247,11 +269,11 @@ public class Inlist<T extends Inlist<T>> {
 		if (list == null)
 			return item;
 
-		T it = list;
+		Inlist<?> it = list;
 		while (it.next != null)
 			it = it.next;
 
-		it.next = item;
+		((Inlist) it).next = item;
 
 		return list;
 	}
@@ -263,22 +285,24 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param other the other
 	 * @return the head of 'list'
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@CheckReturnValue
-	public static <T extends Inlist<T>> T appendList(T list, T other) {
+	public static <T extends Inlist> T appendList(T list, T other) {
 
 		if (list == null)
 			return other;
 
-		if (list == other)
+		if (other == null)
 			return list;
 
-		for (T it = list;; it = it.next) {
+		for (Inlist it = list;; it = it.next) {
 			if (it.next == null) {
-				it.next = other;
+				((Inlist) it).next = other;
 				break;
-			} else if (it.next == other) {
-				throw new IllegalArgumentException("'other' already in 'list'");
 			}
+			//else if (it.next == other) {
+			//	throw new IllegalArgumentException("'other' already in 'list'");
+			//}
 		}
 
 		return list;
@@ -290,12 +314,13 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param list the list
 	 * @return the last item
 	 */
+	@SuppressWarnings("unchecked")
 	@CheckReturnValue
-	public static <T extends Inlist<T>> T last(T list) {
+	public static <T extends Inlist<?>> T last(T list) {
 		while (list != null) {
 			if (list.next == null)
 				return list;
-			list = list.next;
+			list = (T) list.next;
 		}
 		return null;
 	}
@@ -308,8 +333,9 @@ public class Inlist<T extends Inlist<T>> {
 	 * @param other the other list
 	 * @return the new head of list
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@CheckReturnValue
-	public static <T extends Inlist<T>> T prependRelative(T list, T item, T other) {
+	public static <T extends Inlist<?>> T prependRelative(T list, T item, T other) {
 
 		if (item.next != null)
 			throw new IllegalArgumentException("'item' is list");
@@ -318,25 +344,21 @@ public class Inlist<T extends Inlist<T>> {
 			throw new IllegalArgumentException("'list' is null");
 
 		if (list == other) {
-			item.next = list;
+			((Inlist) item).next = list;
 			return item;
 		}
 
 		T it = list;
 
 		while (it != null && it.next != other)
-			it = it.next;
+			it = (T) it.next;
 
 		if (it == null)
 			throw new IllegalArgumentException("'other' not in 'list'");
 
-		item.next = it.next;
-		it.next = item;
+		((Inlist) item).next = it.next;
+		((Inlist) it).next = item;
 
 		return list;
-	}
-
-	public T next() {
-		return next;
 	}
 }
