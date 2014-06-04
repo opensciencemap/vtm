@@ -409,10 +409,10 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
 	private boolean doFling(float velocityX, float velocityY) {
 
-		int w = Tile.SIZE * 3;
-		int h = Tile.SIZE * 3;
+		int w = Tile.SIZE * 5;
+		int h = Tile.SIZE * 5;
 
-		mMap.animator().animateFling(velocityX, velocityY,
+		mMap.animator().animateFling(velocityX * 2, velocityY * 2,
 		                             -w, w, -h, h);
 		return true;
 	}
