@@ -316,32 +316,24 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
 	 * @param a_context User context to pass as parameter to a_resultCallback
 	 * @return Returns the number of entries found
 	 */
-	public int search(double min[], double max[], SearchCb<T> cb, Object context) {
+	public boolean search(double min[], double max[], SearchCb<T> cb, Object context) {
 		Rect r = getRect();
 		r.set(min, max);
 
-		/* NOTE: May want to return search result another way,
-		 * perhaps returning the number of found elements here. */
-		//int[] foundCount = { 0 };
-		//search(mRoot, r, foundCount, cb, context);
 		searchStack(r, cb, context);
 
 		releaseRect(r);
-		return 0; //foundCount[0];
+		return true;
 	}
 
-	public int search(Box bbox, SearchCb<T> cb, Object context) {
+	public boolean search(Box bbox, SearchCb<T> cb, Object context) {
 		Rect r = getRect();
 		r.set(bbox);
 
-		/* NOTE: May want to return search result another way,
-		 * perhaps returning the number of found elements here. */
-		//int[] foundCount = { 0 };
-		//search(mRoot, r, foundCount, cb, context);
 		searchStack(r, cb, context);
 
 		releaseRect(r);
-		return 0; //foundCount[0];
+		return true;
 	}
 
 	public List<T> search(Box bbox, List<T> results) {
@@ -385,7 +377,7 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
 	/**
 	 * Remove all entries from tree.
 	 */
-	public void removeAll() {
+	public void clear() {
 		/* Delete all existing nodes */
 		reset();
 
