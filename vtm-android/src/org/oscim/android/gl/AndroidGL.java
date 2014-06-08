@@ -22,8 +22,10 @@ import java.nio.IntBuffer;
 
 import org.oscim.backend.GL20;
 
+import android.annotation.SuppressLint;
 import android.opengl.GLES20;
 
+@SuppressLint("NewApi")
 public class AndroidGL implements GL20 {
 
 	@Override
