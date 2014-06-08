@@ -135,9 +135,9 @@ public class GeoPoint implements Comparable<GeoPoint> {
 	@Override
 	public String toString() {
 		return new StringBuilder()
-		    .append("GeoPoint [lat=")
+		    .append("[lat=")
 		    .append(this.getLatitude())
-		    .append(", lon=")
+		    .append(",lon=")
 		    .append(this.getLongitude())
 		    .append("]")
 		    .toString();
@@ -170,12 +170,19 @@ public class GeoPoint implements Comparable<GeoPoint> {
 	 *            ...
 	 * @return distance in meters
 	 */
-	public int distanceTo(final GeoPoint other) {
+	public double distanceTo(GeoPoint other) {
+		return distance(latitudeE6 / 1E6,
+		                longitudeE6 / 1E6,
+		                other.latitudeE6 / 1E6,
+		                other.longitudeE6 / 1E6);
+	}
 
-		double a1 = DEG2RAD * latitudeE6 / 1E6;
-		double a2 = DEG2RAD * longitudeE6 / 1E6;
-		double b1 = DEG2RAD * other.latitudeE6 / 1E6;
-		double b2 = DEG2RAD * other.longitudeE6 / 1E6;
+	public static double distance(double lat1, double lon1, double lat2, double lon2) {
+
+		double a1 = DEG2RAD * lat1;
+		double a2 = DEG2RAD * lon1;
+		double b1 = DEG2RAD * lat2;
+		double b2 = DEG2RAD * lon2;
 
 		double cosa1 = Math.cos(a1);
 		double cosb1 = Math.cos(b1);
@@ -187,6 +194,6 @@ public class GeoPoint implements Comparable<GeoPoint> {
 
 		double tt = Math.acos(t1 + t2 + t3);
 
-		return (int) (RADIUS_EARTH_METERS * tt);
+		return (RADIUS_EARTH_METERS * tt);
 	}
 }

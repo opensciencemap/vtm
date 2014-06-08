@@ -126,11 +126,11 @@ public class PathLayer extends Layer {
 	public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint) {
 		synchronized (mPoints) {
 
-			// get the great circle path length in meters
-			int length = startPoint.distanceTo(endPoint);
+			/* get the great circle path length in meters */
+			double length = startPoint.distanceTo(endPoint);
 
-			// add one point for every 100kms of the great circle path
-			int numberOfPoints = length / 100000;
+			/* add one point for every 100kms of the great circle path */
+			int numberOfPoints = (int) (length / 100000);
 
 			addGreatCircle(startPoint, endPoint, numberOfPoints);
 		}
