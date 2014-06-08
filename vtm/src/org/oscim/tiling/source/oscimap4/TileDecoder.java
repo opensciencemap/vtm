@@ -121,7 +121,7 @@ public class TileDecoder extends PbfDecoder {
 						          mTile, numKeys);
 						return false;
 					}
-					keys[curKey++] = decodeString();
+					keys[curKey++] = decodeString().intern();
 					break;
 
 				case TAG_TILE_TAG_VALUES:
@@ -222,7 +222,7 @@ public class TileDecoder extends PbfDecoder {
 			        || key == Tag.KEY_ELE)
 				tag = new Tag(key, val, false);
 			else
-				tag = new Tag(key, val, true);
+				tag = new Tag(key, val, false, true);
 
 			mTileTags.add(tag);
 		}

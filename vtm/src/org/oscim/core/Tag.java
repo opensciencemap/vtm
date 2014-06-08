@@ -68,28 +68,31 @@ public class Tag {
 	 *            the value of the tag.
 	 */
 	public Tag(String key, String value) {
-		this.key = (key == null ? null : key.intern());
-		this.value = (value == null ? null : value.intern());
+		this.key = key == null ? null : key.intern();
+		this.value = value == null ? null : value.intern();
 		this.intern = true;
 	}
 
 	/**
+	 * Create Tag with interned Key.
+	 * 
 	 * @param key
 	 *            the key of the tag.
 	 * @param value
 	 *            the value of the tag.
-	 * @param intern
+	 * @param internValue
 	 *            true when value string should be intern()alized.
 	 */
-	public Tag(String key, String value, boolean intern) {
-		this.key = key.intern();
+	public Tag(String key, String value, boolean internValue) {
+		this.key = key;
+		this.value = (value == null || !internValue) ? value : value.intern();
+		this.intern = internValue;
+	}
 
-		if (intern)
-			this.value = (value == null ? null : value.intern());
-		else
-			this.value = value;
-
-		this.intern = intern;
+	public Tag(String key, String value, boolean internKey, boolean internValue) {
+		this.key = (key == null || !internKey) ? key : key.intern();
+		this.value = (value == null || !internValue) ? value : value.intern();
+		this.intern = internValue;
 	}
 
 	@Override
