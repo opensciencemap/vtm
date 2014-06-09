@@ -9,6 +9,10 @@ buildscript {
   }
 }
 
+//task wrapper(type: Wrapper) {
+//    gradleVersion = '1.12'
+//}
+
 apply from:'jdee.gradle'
 
 allprojects {

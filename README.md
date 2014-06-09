@@ -35,7 +35,7 @@ VTM is part of the OpenScienceMap project and developed at University of Bremen.
 
 `git clone --recursive https://github.com/opensciencemap/vtm`
 
-Install Android SDK and build-tools 19.0.3. From extras add
+Install Android SDK and build-tools 19.1. From extras add
 'Android Support Library/Repository' and 'Google Repository'.
 The commands below should set things up correctly when Android
 SDK is already installed.
@@ -43,9 +43,9 @@ SDK is already installed.
 export ANDROID_HOME=/path/to/your/android-sdk
 ./android-stuff.sh
 ```
-To use a different  build-tools version (x) run:
+To use a different  build-tools version X run:
 ```
-find -name build.gradle | xargs sed -i 's/19.0.3/19.0.x/g'
+find -name build.gradle | xargs sed -i 's/19\.1/19.X/g'
 ```
 
 ### Eclipse
