@@ -29,7 +29,6 @@ import org.oscim.utils.KeyMap;
 import org.oscim.utils.KeyMap.HashItem;
 import org.oscim.utils.Tessellator;
 import org.oscim.utils.geom.LineClipper;
-import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +37,8 @@ public class ExtrusionLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(ExtrusionLayer.class);
 
 	private static final float S = MapRenderer.COORD_SCALE;
-	private VertexItem mVertices;
-	private VertexItem mCurVertices;
-	private VertexItem mIndices[];
-	private final VertexItem mCurIndices[];
+	private VertexData mVertices;
+	private VertexData mIndices[];
 	private LineClipper mClipper;
 
 	/** 16 floats rgba for top, even-side, odd-sides and outline */
@@ -80,12 +77,12 @@ public class ExtrusionLayer extends RenderElement {
 		this.color = 0;
 
 		mGroundResolution = groundResolution;
-		mVertices = mCurVertices = VertexItem.pool.get();
+		mVertices = VertexData.get();
 
-		mIndices = new VertexItem[5];
-		mCurIndices = new VertexItem[5];
+		mIndices = new VertexData[5];
+
 		for (int i = 0; i <= IND_MESH; i++)
-			mIndices[i] = mCurIndices[i] = VertexItem.pool.get();
+			mIndices[i] = VertexData.get();
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE);
 	}
@@ -97,20 +94,20 @@ public class ExtrusionLayer extends RenderElement {
 		super(RenderElement.EXTRUSION);
 		this.level = level;
 		this.color = color;
-		this.colors = new float[4];
+
 		float a = Color.aToFloat(color);
+		colors = new float[4];
 		colors[0] = a * Color.rToFloat(color);
 		colors[1] = a * Color.gToFloat(color);
 		colors[2] = a * Color.bToFloat(color);
 		colors[3] = a;
 
 		mGroundResolution = groundResolution;
-		mVertices = mCurVertices = VertexItem.pool.get();
+		mVertices = VertexData.get();
 
-		mIndices = new VertexItem[5];
-		mCurIndices = new VertexItem[5];
+		mIndices = new VertexData[5];
+		mIndices[4] = VertexData.get();
 
-		mIndices[4] = mCurIndices[4] = VertexItem.pool.get();
 		synchronized (vertexPool) {
 			mVertexMap = vertexMapPool.get();
 		}
@@ -227,12 +224,11 @@ public class ExtrusionLayer extends RenderElement {
 
 				if (vertex == null) {
 					key.id = vertexCnt++;
-					addVertex(key);
-					addIndex(key);
+					addIndex(key, true);
 					key = vertexPool.get();
 				} else {
 					//numIndexHits++;
-					addIndex(vertex);
+					addIndex(vertex, false);
 				}
 
 				key.set((short) (vx2 * scale),
@@ -244,12 +240,11 @@ public class ExtrusionLayer extends RenderElement {
 
 				if (vertex == null) {
 					key.id = vertexCnt++;
-					addVertex(key);
-					addIndex(key);
+					addIndex(key, true);
 					key = vertexPool.get();
 				} else {
 					//numIndexHits++;
-					addIndex(vertex);
+					addIndex(vertex, false);
 				}
 
 				key.set((short) (vx3 * scale),
@@ -260,12 +255,11 @@ public class ExtrusionLayer extends RenderElement {
 				vertex = mVertexMap.put(key, false);
 				if (vertex == null) {
 					key.id = vertexCnt++;
-					addVertex(key);
-					addIndex(key);
+					addIndex(key, true);
 					key = vertexPool.get();
 				} else {
 					//numIndexHits++;
-					addIndex(vertex);
+					addIndex(vertex, false);
 				}
 			}
 
@@ -274,31 +268,12 @@ public class ExtrusionLayer extends RenderElement {
 		sumVertices = vertexCnt;
 	}
 
-	private void addVertex(Vertex vertex) {
-		VertexItem vi = mCurVertices;
+	private void addIndex(Vertex v, boolean addVertex) {
+		if (addVertex)
+			mVertices.add(v.x, v.y, v.z, v.n);
 
-		if (vi.used == VertexItem.SIZE) {
-			mCurVertices.used = VertexItem.SIZE;
-			mCurVertices = VertexItem.pool.getNext(vi);
-			vi = mCurVertices;
-		}
-
-		vi.vertices[vi.used++] = vertex.x;
-		vi.vertices[vi.used++] = vertex.y;
-		vi.vertices[vi.used++] = vertex.z;
-		vi.vertices[vi.used++] = vertex.n;
-	}
-
-	private void addIndex(Vertex v) {
-		VertexItem vi = mCurIndices[IND_MESH];
-
-		if (vi.used == VertexItem.SIZE) {
-			mCurIndices[IND_MESH].used = VertexItem.SIZE;
-			mCurIndices[IND_MESH] = VertexItem.pool.getNext(vi);
-			vi = mCurIndices[IND_MESH];
-		}
+		mIndices[IND_MESH].add((short) v.id);
 		sumIndices++;
-		vi.vertices[vi.used++] = (short) v.id;
 	}
 
 	//	private void encodeNormal(float v[], int offset) {
@@ -309,62 +284,59 @@ public class ExtrusionLayer extends RenderElement {
 	//	    return result;
 	//	}
 	//	
-	public void addNoNormal(MapElement element) {
-		if (element.type != GeometryType.TRIS)
-			return;
-
-		short[] index = element.index;
-		float[] points = element.points;
-
-		/* current vertex id */
-		int startVertex = sumVertices;
-
-		/* roof indices for convex shapes */
-		int i = mCurIndices[IND_MESH].used;
-		short[] indices = mCurIndices[IND_MESH].vertices;
-		int first = startVertex;
-
-		for (int k = 0, n = index.length; k < n;) {
-			if (index[k] < 0)
-				break;
-
-			if (i == VertexItem.SIZE) {
-				mCurIndices[IND_MESH].used = VertexItem.SIZE;
-				mCurIndices[IND_MESH].next = VertexItem.pool.get();
-				mCurIndices[IND_MESH] = mCurIndices[IND_MESH].next;
-				indices = mCurIndices[IND_MESH].vertices;
-				i = 0;
-			}
-			indices[i++] = (short) (first + index[k++]);
-			indices[i++] = (short) (first + index[k++]);
-			indices[i++] = (short) (first + index[k++]);
-		}
-		mCurIndices[IND_MESH].used = i;
-
-		short[] vertices = mCurVertices.vertices;
-		int v = mCurVertices.used;
-
-		int vertexCnt = element.pointPos;
-
-		for (int j = 0; j < vertexCnt;) {
-			/* add bottom and top vertex for each point */
-			if (v == VertexItem.SIZE) {
-				mCurVertices.used = VertexItem.SIZE;
-				mCurVertices.next = VertexItem.pool.get();
-				mCurVertices = mCurVertices.next;
-				vertices = mCurVertices.vertices;
-				v = 0;
-			}
-			/* set coordinate */
-			vertices[v++] = (short) (points[j++] * S);
-			vertices[v++] = (short) (points[j++] * S);
-			vertices[v++] = (short) (points[j++] * S);
-			v++;
-		}
-
-		mCurVertices.used = v;
-		sumVertices += (vertexCnt / 3);
-	}
+	//public void addNoNormal(MapElement element) {
+	//	if (element.type != GeometryType.TRIS)
+	//		return;
+	//
+	//	short[] index = element.index;
+	//	float[] points = element.points;
+	//
+	//	/* current vertex id */
+	//	int startVertex = sumVertices;
+	//
+	//	/* roof indices for convex shapes */
+	//	int i = mCurIndices[IND_MESH].used;
+	//	short[] indices = mCurIndices[IND_MESH].vertices;
+	//	
+	//	int first = startVertex;
+	//
+	//	for (int k = 0, n = index.length; k < n;) {
+	//		if (index[k] < 0)
+	//			break;
+	//
+	//		if (i == VertexItem.SIZE) {
+	//			mCurIndices[IND_MESH] = VertexItem.getNext(mCurIndices[IND_MESH]);
+	//			indices = mCurIndices[IND_MESH].vertices;
+	//			i = 0;
+	//		}
+	//		indices[i++] = (short) (first + index[k++]);
+	//		indices[i++] = (short) (first + index[k++]);
+	//		indices[i++] = (short) (first + index[k++]);
+	//	}
+	//	mCurIndices[IND_MESH].used = i;
+	//
+	//	short[] vertices = mCurVertices.vertices;
+	//	int v = mCurVertices.used;
+	//
+	//	int vertexCnt = element.pointPos;
+	//
+	//	for (int j = 0; j < vertexCnt;) {
+	//		/* add bottom and top vertex for each point */
+	//		if (v == VertexItem.SIZE) {
+	//			mCurVertices = VertexItem.getNext(mCurVertices);
+	//			vertices = mCurVertices.vertices;
+	//			v = 0;
+	//		}
+	//		/* set coordinate */
+	//		vertices[v++] = (short) (points[j++] * S);
+	//		vertices[v++] = (short) (points[j++] * S);
+	//		vertices[v++] = (short) (points[j++] * S);
+	//		v++;
+	//	}
+	//
+	//	mCurVertices.used = v;
+	//	sumVertices += (vertexCnt / 3);
+	//}
 
 	public void add(MapElement element, float height, float minHeight) {
 
@@ -418,8 +390,8 @@ public class ExtrusionLayer extends RenderElement {
 			if (simpleOutline && (ipos < n - 1) && (index[ipos + 1] > 0))
 				simpleOutline = false;
 
-			boolean convex = addOutline(points, ppos, len, minHeight,
-			                            height, simpleOutline);
+			boolean convex = extrudeOutline(points, ppos, len, minHeight,
+			                                height, simpleOutline);
 
 			if (simpleOutline && (convex || len <= 8)) {
 				addRoofSimple(startVertex, len);
@@ -430,29 +402,20 @@ public class ExtrusionLayer extends RenderElement {
 		}
 	}
 
+	/** roof indices for convex shapes */
 	private void addRoofSimple(int startVertex, int len) {
-		/* roof indices for convex shapes */
-		int i = mCurIndices[IND_ROOF].used;
-		short[] indices = mCurIndices[IND_ROOF].vertices;
 		short first = (short) (startVertex + 1);
-
-		for (int k = 0; k < len - 4; k += 2) {
-			if (i == VertexItem.SIZE) {
-				mCurIndices[IND_ROOF].used = VertexItem.SIZE;
-				mCurIndices[IND_ROOF].next = VertexItem.pool.get();
-				mCurIndices[IND_ROOF] = mCurIndices[IND_ROOF].next;
-				indices = mCurIndices[IND_ROOF].vertices;
-				i = 0;
-			}
-
-			indices[i++] = first;
-			indices[i++] = (short) (first + k + 2);
-			indices[i++] = (short) (first + k + 4);
-			sumIndices += 3;
+		VertexData it = mIndices[IND_ROOF];
+		len -= 4;
+		for (int k = 0; k < len; k += 2) {
+			it.add(first,
+			       (short) (first + k + 2),
+			       (short) (first + k + 4));
 		}
-		mCurIndices[IND_ROOF].used = i;
+		sumIndices += (len / 2) * 3;
 	}
 
+	/** roof indices for concave shapes */
 	private void addRoof(int startVertex, GeometryBuffer geom, int ipos, int ppos) {
 		short[] index = geom.index;
 		float[] points = geom.points;
@@ -466,21 +429,18 @@ public class ExtrusionLayer extends RenderElement {
 			rings++;
 		}
 
-		sumIndices += Tessellator.tessellate(points, ppos, len, index, ipos, rings,
-		                                     startVertex + 1, mCurIndices[IND_ROOF]);
-
-		mCurIndices[IND_ROOF] = Inlist.last(mCurIndices[IND_ROOF]);
+		sumIndices += Tessellator.tessellate(points, ppos, len,
+		                                     index, ipos, rings,
+		                                     startVertex + 1,
+		                                     mIndices[IND_ROOF]);
 	}
 
-	private boolean addOutline(float[] points, int pos, int len, float minHeight,
-	        float height, boolean convex) {
+	private boolean extrudeOutline(float[] points, int pos, int len,
+	        float minHeight, float height, boolean convex) {
 
 		/* add two vertices for last face to make zigzag indices work */
 		boolean addFace = (len % 4 != 0);
 		int vertexCnt = len + (addFace ? 2 : 0);
-
-		short h = (short) height;
-		short mh = (short) minHeight;
 
 		float cx = points[pos + len - 2];
 		float cy = points[pos + len - 1];
@@ -495,45 +455,25 @@ public class ExtrusionLayer extends RenderElement {
 
 		float a = (float) Math.sqrt(vx * vx + vy * vy);
 		short color1 = (short) ((1 + vx / a) * 127);
-		short fcolor = color1;
-		short color2 = 0;
+
+		short fcolor = color1, color2 = 0;
+
+		short h = (short) height, mh = (short) minHeight;
 
 		int even = 0;
-		int changeX = 0;
-		int changeY = 0;
-		int angleSign = 0;
+		int changeX = 0, changeY = 0, angleSign = 0;
 
 		/* vertex offset for all vertices in layer */
 		int vOffset = sumVertices;
 
-		short[] vertices = mCurVertices.vertices;
-		int v = mCurVertices.used;
-
 		mClipper.clipStart((int) nx, (int) ny);
 
-		for (int i = 2, n = vertexCnt + 2; i < n; i += 2, v += 8) {
+		for (int i = 2, n = vertexCnt + 2; i < n; i += 2 /* , v += 8 */) {
 			cx = nx;
 			cy = ny;
 
 			ux = vx;
 			uy = vy;
-
-			/* add bottom and top vertex for each point */
-			if (v == VertexItem.SIZE) {
-				mCurVertices.used = VertexItem.SIZE;
-				mCurVertices.next = VertexItem.pool.get();
-				mCurVertices = mCurVertices.next;
-				vertices = mCurVertices.vertices;
-				v = 0;
-			}
-
-			/* set coordinate */
-			vertices[v + 0] = vertices[v + 4] = (short) (cx * S);
-			vertices[v + 1] = vertices[v + 5] = (short) (cy * S);
-
-			/* set height */
-			vertices[v + 2] = mh;
-			vertices[v + 6] = h;
 
 			/* get direction to next point */
 			if (i < len) {
@@ -544,8 +484,11 @@ public class ExtrusionLayer extends RenderElement {
 				ny = points[pos + 1];
 			} else { // if (addFace)
 				short c = (short) (color1 | fcolor << 8);
-				vertices[v + 3] = vertices[v + 7] = c;
-				v += 8;
+				/* add bottom and top vertex for each point */
+				mVertices.add((short) (cx * S), (short) (cy * S), mh, c);
+				mVertices.add((short) (cx * S), (short) (cy * S), h, c);
+
+				//v += 8;
 				break;
 			}
 
@@ -562,7 +505,10 @@ public class ExtrusionLayer extends RenderElement {
 			else
 				c = (short) (color2 | color1 << 8);
 
-			vertices[v + 3] = vertices[v + 7] = c;
+			/* add bottom and top vertex for each point */
+			mVertices.add((short) (cx * S), (short) (cy * S), mh, c);
+			mVertices.add((short) (cx * S), (short) (cy * S), h, c);
+
 			color1 = color2;
 
 			/* check if polygon is convex */
@@ -609,41 +555,18 @@ public class ExtrusionLayer extends RenderElement {
 				s3 -= len;
 			}
 
-			VertexItem it = mCurIndices[even];
-			if (it.used == VertexItem.SIZE) {
-				it = VertexItem.pool.getNext(it);
-				mCurIndices[even] = it;
-			}
-
-			int ind = it.used;
-			short[] indices = it.vertices;
-			indices[ind + 0] = s0;
-			indices[ind + 1] = s2;
-			indices[ind + 2] = s1;
-			indices[ind + 3] = s1;
-			indices[ind + 4] = s2;
-			indices[ind + 5] = s3;
-			it.used += 6;
+			mIndices[even].add(s0, s2, s1);
+			mIndices[even].add(s1, s2, s3);
 			sumIndices += 6;
 
 			/* flipp even-odd */
 			even = ++even % 2;
 
 			/* add roof outline indices */
-			it = mCurIndices[IND_OUTLINE];
-			if (it.used == VertexItem.SIZE) {
-				it = VertexItem.pool.getNext(it);
-				mCurIndices[IND_OUTLINE] = it;
-			}
-			ind = it.used;
-			indices = it.vertices;
-			indices[ind + 0] = s1;
-			indices[ind + 1] = s3;
-			it.used += 2;
+			mIndices[IND_OUTLINE].add(s1, s3);
 			sumIndices += 2;
 		}
 
-		mCurVertices.used = v;
 		sumVertices += vertexCnt;
 		return convex;
 	}
@@ -651,28 +574,21 @@ public class ExtrusionLayer extends RenderElement {
 	@Override
 	public void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
 		mClipper = null;
-
 		releaseVertexPool();
 
-		if (sumVertices == 0) {
+		if (sumVertices == 0)
 			return;
-		}
 
 		indexOffset = indexBuffer.position();
 
 		for (int i = 0; i <= IND_MESH; i++) {
-			for (VertexItem vi = mIndices[i]; vi != null; vi = vi.next) {
-				indexBuffer.put(vi.vertices, 0, vi.used);
-				numIndices[i] += vi.used;
-			}
+			if (mIndices[i] == null)
+				continue;
+			numIndices[i] += mIndices[i].compile(indexBuffer);
 		}
-
-		//log.debug("INDEX HITS " + numIndexHits + " / " + sumVertices + " / " + sumIndices);
-
 		offset = vertexBuffer.position() * 2;
 
-		for (VertexItem vi = mVertices; vi != null; vi = vi.next)
-			vertexBuffer.put(vi.vertices, 0, vi.used);
+		mVertices.compile(vertexBuffer);
 
 		clear();
 	}
@@ -680,14 +596,19 @@ public class ExtrusionLayer extends RenderElement {
 	@Override
 	protected void clear() {
 		mClipper = null;
+		releaseVertexPool();
 
 		if (mIndices != null) {
-			for (int i = 0; i <= IND_MESH; i++)
-				mIndices[i] = VertexItem.pool.releaseAll(mIndices[i]);
+			for (int i = 0; i <= IND_MESH; i++) {
+				if (mIndices[i] == null)
+					continue;
+				mIndices[i].dispose();
+			}
 			mIndices = null;
-			mVertices = VertexItem.pool.releaseAll(mVertices);
+
+			mVertices.dispose();
+			mVertices = null;
 		}
-		releaseVertexPool();
 	}
 
 	void releaseVertexPool() {

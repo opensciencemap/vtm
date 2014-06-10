@@ -6,7 +6,6 @@ import org.oscim.backend.GL20;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.MapTile.TileData;
 import org.oscim.renderer.BufferObject;
-import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.MapRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,29 +57,26 @@ public class ExtrusionLayers extends TileData {
 	}
 
 	public boolean compileLayers() {
-		ExtrusionLayer el = layers;
 
-		if (el == null)
+		if (layers == null)
 			return false;
-
-		//if (el.compiled)
-		//	return true;
 
 		int sumIndices = 0;
 		int sumVertices = 0;
-		for (ExtrusionLayer l = el; l != null; l = l.next()) {
+
+		for (ExtrusionLayer l = layers; l != null; l = l.next()) {
 			sumIndices += l.sumIndices;
 			sumVertices += l.sumVertices;
 		}
-		if (sumIndices == 0) {
+		if (sumIndices == 0)
 			return false;
-		}
+
 		ShortBuffer vbuf = MapRenderer.getShortBuffer(sumVertices * 4);
 		ShortBuffer ibuf = MapRenderer.getShortBuffer(sumIndices);
 
-		for (ExtrusionLayer l = el; l != null; l = l.next())
+		for (ExtrusionLayer l = layers; l != null; l = l.next()) {
 			l.compile(vbuf, ibuf);
-
+		}
 		int size = sumIndices * 2;
 		if (ibuf.position() != sumIndices) {
 			int pos = ibuf.position();
@@ -102,9 +98,8 @@ public class ExtrusionLayers extends TileData {
 		vboVertices.loadBufferData(vbuf.flip(), size);
 		vboVertices.unbind();
 
-		GLUtils.checkGlError("extrusion layer");
-
 		compiled = true;
+
 		return true;
 	}
 

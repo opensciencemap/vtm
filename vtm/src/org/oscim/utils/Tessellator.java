@@ -19,7 +19,7 @@ package org.oscim.utils;
 import java.util.Arrays;
 
 import org.oscim.core.GeometryBuffer;
-import org.oscim.renderer.elements.VertexItem;
+import org.oscim.renderer.elements.VertexData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class Tessellator {
 	 * positions.
 	 */
 	public static int tessellate(float[] points, int ppos, int plen, short[] index,
-	        int ipos, int rings, int vertexOffset, VertexItem outTris) {
+	        int ipos, int rings, int vertexOffset, VertexData outTris) {
 
 		int[] result = new int[2];
 
@@ -50,29 +50,26 @@ public class Tessellator {
 		}
 
 		int cnt;
-		int numIndices = 0;
+		int sumIndices = 0;
 
-		if (outTris.used == VertexItem.SIZE)
-			outTris = VertexItem.pool.getNext(outTris);
+		VertexData.Chunk vd = outTris.obtainChunk();
 
-		while ((cnt = Tessellator.tessGetIndicesWO(ctx,
-		                                           outTris.vertices,
-		                                           outTris.used)) > 0) {
-			int start = outTris.used;
+		while ((cnt = Tessellator.tessGetIndicesWO(ctx, vd.vertices, vd.used)) > 0) {
+			int start = vd.used;
 			int end = start + cnt;
-			short[] v = outTris.vertices;
+			short[] v = vd.vertices;
 
 			for (int i = start; i < end; i++)
 				v[i] *= 2;
 
-			// when a ring has an odd number of points one (or rather two)
-			// additional vertices will be added. so the following rings
-			// needs extra offset
+			/* when a ring has an odd number of points one (or rather two)
+			 * additional vertices will be added. so the following rings
+			 * needs extra offset */
 			int shift = 0;
 			for (int i = 0, m = rings - 1; i < m; i++) {
 				shift += (index[ipos + i]);
 
-				// even number of points?
+				/* even number of points? */
 				if (((index[ipos + i] >> 1) & 1) == 0)
 					continue;
 
@@ -83,25 +80,27 @@ public class Tessellator {
 				shift += 2;
 			}
 
-			// shift by vertexOffset
+			/* shift by vertexOffset */
 			for (int i = start; i < end; i++)
 				v[i] += vertexOffset;
 
-			outTris.used += cnt;
-			numIndices += cnt;
+			sumIndices += cnt;
 
-			if (outTris.used == VertexItem.SIZE) {
-				outTris = VertexItem.pool.getNext(outTris);
+			vd.used += cnt;
+			outTris.releaseChunk();
+
+			if (vd.used == VertexData.SIZE) {
+				/* gets next item since this one is full */
+				vd = outTris.obtainChunk();
 				continue;
 			}
-
-			// no more indices to get.
+			/* no more indices to get. */
 			break;
 		}
 
 		Tessellator.tessFinish(ctx);
 
-		return numIndices;
+		return sumIndices;
 	}
 
 	/**
@@ -133,7 +132,7 @@ public class Tessellator {
 		}
 
 		if (out == null) {
-			// overwrite geom contents
+			/* overwrite geom contents */
 			out = geom;
 			if (verticesAdded) {
 				out.ensurePointSize(result[RESULT_VERTICES], false);
@@ -158,7 +157,7 @@ public class Tessellator {
 	}
 
 	public static int tessellate(GeometryBuffer geom, float scale,
-	        VertexItem outPoints, VertexItem outTris, int vertexOffset) {
+	        VertexData outPoints, VertexData outTris, int vertexOffset) {
 
 		int numIndices = 0;
 		int indexPos = 0;
@@ -198,47 +197,40 @@ public class Tessellator {
 
 			pointPos += numPoints;
 
-			if (outTris.used == VertexItem.SIZE)
-				outTris = VertexItem.pool.getNext(outTris);
-
 			while (true) {
-				int cnt = Tessellator.tessGetIndicesWO(ctx,
-				                                       outTris.vertices,
-				                                       outTris.used);
+				VertexData.Chunk vd = outTris.obtainChunk();
+
+				int cnt = Tessellator.tessGetIndicesWO(ctx, vd.vertices, vd.used);
 				if (cnt <= 0)
 					break;
 
-				// shift by vertexOffset
-				for (int pos = outTris.used, end = pos + cnt; pos < end; pos++)
-					outTris.vertices[pos] += vertexOffset;
+				/* shift by vertexOffset */
+				for (int pos = vd.used, end = pos + cnt; pos < end; pos++)
+					vd.vertices[pos] += vertexOffset;
 
-				outTris.used += cnt;
 				numIndices += cnt;
 
-				if (outTris.used < VertexItem.SIZE)
-					break;
+				vd.used += cnt;
+				outTris.releaseChunk();
 
-				outTris = VertexItem.pool.getNext(outTris);
+				if (vd.used < VertexData.SIZE)
+					break;
 			}
 
-			if (outPoints.used == VertexItem.SIZE)
-				outPoints = VertexItem.pool.getNext(outPoints);
-
 			while (true) {
-				int cnt = Tessellator.tessGetVerticesWO(ctx,
-				                                        outPoints.vertices,
-				                                        outPoints.used,
-				                                        scale);
+				VertexData.Chunk vd = outPoints.obtainChunk();
+
+				int cnt = Tessellator.tessGetVerticesWO(ctx, vd.vertices, vd.used, scale);
 				if (cnt <= 0)
 					break;
 
-				outPoints.used += cnt;
 				vertexOffset += cnt >> 1;
 
-				if (outPoints.used < VertexItem.SIZE)
-					break;
+				vd.used += cnt;
+				outPoints.releaseChunk();
 
-				outPoints = VertexItem.pool.getNext(outPoints);
+				if (vd.used < VertexData.SIZE)
+					break;
 			}
 
 			Tessellator.tessFinish(ctx);
@@ -249,6 +241,7 @@ public class Tessellator {
 
 		if (vertexOffset > Short.MAX_VALUE) {
 			log.debug("too much !!!" + Arrays.toString(geom.index));
+			return 0;
 		}
 
 		return numIndices;

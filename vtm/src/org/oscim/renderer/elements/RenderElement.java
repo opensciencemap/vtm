@@ -41,7 +41,7 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 	protected int numVertices;
 
 	/** temporary list of vertex data. */
-	protected VertexItem vertexItems;
+	protected final VertexData vertexItems = new VertexData();
 
 	protected RenderElement(int type) {
 		this.type = type;
@@ -49,8 +49,7 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 
 	/** clear all resources. */
 	protected void clear() {
-		if (vertexItems != null)
-			vertexItems = VertexItem.pool.releaseAll(vertexItems);
+		vertexItems.dispose();
 		numVertices = 0;
 	}
 

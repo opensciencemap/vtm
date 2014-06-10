@@ -292,53 +292,25 @@ public class ElementLayers extends TileData {
 	private static int addLayerItems(ShortBuffer sbuf, RenderElement l,
 	        int type, int pos) {
 
-		VertexItem last = null, items = null;
 		int size = 0;
 
 		for (; l != null; l = l.next) {
 			if (l.type != type)
 				continue;
 
-			for (VertexItem it = l.vertexItems; it != null; it = it.next) {
-				if (it.next == null) {
-					size += it.used;
-					sbuf.put(it.vertices, 0, it.used);
-				}
-				else {
-					size += VertexItem.SIZE;
-					sbuf.put(it.vertices, 0, VertexItem.SIZE);
-				}
-				last = it;
-			}
-			if (last == null)
-				continue;
+			size += l.vertexItems.compile(sbuf);
 
 			l.offset = pos;
 			pos += l.numVertices;
-
-			last.next = items;
-			items = l.vertexItems;
-			last = null;
-
-			l.vertexItems = null;
 		}
-		items = VertexItem.pool.releaseAll(items);
-
 		return size;
 	}
 
 	static void addPoolItems(RenderElement l, ShortBuffer sbuf) {
+
 		/* keep offset of layer data in vbo */
 		l.offset = sbuf.position() * SHORT_BYTES;
-
-		for (VertexItem it = l.vertexItems; it != null; it = it.next) {
-			if (it.next == null)
-				sbuf.put(it.vertices, 0, it.used);
-			else
-				sbuf.put(it.vertices, 0, VertexItem.SIZE);
-		}
-
-		l.vertexItems = VertexItem.pool.releaseAll(l.vertexItems);
+		l.vertexItems.compile(sbuf);
 	}
 
 	public void setFrom(ElementLayers layers) {

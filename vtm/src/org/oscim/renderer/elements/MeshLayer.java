@@ -31,7 +31,6 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.ColorUtil;
 import org.oscim.utils.Tessellator;
-import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,7 @@ public class MeshLayer extends RenderElement {
 	BufferObject indicesVbo;
 	int numIndices;
 
-	VertexItem indiceItems;
+	VertexData indiceItems = new VertexData();
 	public AreaStyle area;
 	public float heightOffset;
 
@@ -55,42 +54,30 @@ public class MeshLayer extends RenderElement {
 		if (geom.index[0] < 6)
 			return;
 
-		if (vertexItems == null) {
-			vertexItems = VertexItem.pool.get();
-			indiceItems = VertexItem.pool.get();
-		}
-
 		numIndices += Tessellator.tessellate(geom, MapRenderer.COORD_SCALE,
-		                                     Inlist.last(vertexItems),
-		                                     Inlist.last(indiceItems),
+		                                     vertexItems,
+		                                     indiceItems,
 		                                     numVertices);
 
-		numVertices = vertexItems.getSize() / 2;
+		numVertices = vertexItems.countSize() / 2;
 
-		if (numIndices <= 0) {
+		if (numIndices <= 0)
 			log.debug("empty " + geom.index);
-			vertexItems = VertexItem.pool.releaseAll(vertexItems);
-			indiceItems = VertexItem.pool.releaseAll(indiceItems);
-		}
 	}
 
 	@Override
 	protected void compile(ShortBuffer sbuf) {
-		if (indiceItems == null) {
+		if (numIndices <= 0) {
 			indicesVbo = BufferObject.release(indicesVbo);
 			return;
 		}
 
-		// add vertices to shared VBO
+		/* add vertices to shared VBO */
 		ElementLayers.addPoolItems(this, sbuf);
 
-		// add indices to indicesVbo
+		/* add indices to indicesVbo */
 		sbuf = MapRenderer.getShortBuffer(numIndices);
-
-		for (VertexItem it = indiceItems; it != null; it = it.next)
-			sbuf.put(it.vertices, 0, it.used);
-
-		indiceItems = VertexItem.pool.releaseAll(indiceItems);
+		indiceItems.compile(sbuf);
 
 		if (indicesVbo == null)
 			indicesVbo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -101,8 +88,10 @@ public class MeshLayer extends RenderElement {
 	@Override
 	protected void clear() {
 		indicesVbo = BufferObject.release(indicesVbo);
-		indiceItems = VertexItem.pool.releaseAll(indiceItems);
-		vertexItems = VertexItem.pool.releaseAll(vertexItems);
+		vertexItems.dispose();
+		indiceItems.dispose();
+		numIndices = 0;
+		numVertices = 0;
 	}
 
 	public static class Renderer {

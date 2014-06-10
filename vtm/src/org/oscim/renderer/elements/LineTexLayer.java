@@ -28,7 +28,6 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.LineStyle;
-import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,32 +107,24 @@ public final class LineTexLayer extends RenderElement {
 
 	public void addLine(float[] points, short[] index) {
 
-		VertexItem si = Inlist.last(vertexItems);
-
-		if (si == null) {
-			si = VertexItem.pool.get();
-			vertexItems = si;
-
-			//curItem = vertexItems;
-			// HACK add one vertex offset when compiling
-			// buffer otherwise one cant use the full
-			// VertexItem (see Layers.compile)
-			// add the two 'x' at front and end
+		if (vertexItems.empty()) {
+			/* HACK add one vertex offset when compiling
+			 * buffer otherwise one cant use the full
+			 * VertexItem (see Layers.compile)
+			 * add the two 'x' at front and end */
 			//numVertices = 2;
 
-			// the additional end vertex to make sure
-			// not to read outside allocated memory
+			/* the additional end vertex to make sure
+			 * not to read outside allocated memory */
 			numVertices = 1;
 		}
-
-		short v[] = si.vertices;
-		int opos = si.used;
+		VertexData vi = vertexItems;
 
 		boolean even = evenSegment;
 
 		/* reset offset to last written position */
 		if (!even)
-			opos -= 12;
+			vi.seek(-12);
 
 		int n;
 		int length = 0;
@@ -187,33 +178,27 @@ public final class LineTexLayer extends RenderElement {
 				short dx = (short) (ux * DIR_SCALE);
 				short dy = (short) (uy * DIR_SCALE);
 
-				if (opos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
-					v = si.vertices;
-					opos = 0;
-				}
-
-				v[opos + 0] = (short) x;
-				v[opos + 1] = (short) y;
-				v[opos + 2] = dx;
-				v[opos + 3] = dy;
-				v[opos + 4] = (short) lineLength;
-				v[opos + 5] = 0;
+				vi.add((short) x,
+				       (short) y,
+				       dx, dy,
+				       (short) lineLength,
+				       (short) 0);
 
 				lineLength += a;
-				v[opos + 12] = (short) nx;
-				v[opos + 13] = (short) ny;
-				v[opos + 14] = dx;
-				v[opos + 15] = dy;
-				v[opos + 16] = (short) lineLength;
-				v[opos + 17] = 0;
+
+				vi.seek(6);
+				vi.add((short) nx,
+				       (short) ny,
+				       dx, dy,
+				       (short) lineLength,
+				       (short) 0);
 
 				x = nx;
 				y = ny;
 
 				if (even) {
 					/* go to second segment */
-					opos += 6;
+					vi.seek(-12);
 					even = false;
 
 					/* vertex 0 and 2 were added */
@@ -222,7 +207,6 @@ public final class LineTexLayer extends RenderElement {
 				} else {
 					/* go to next block */
 					even = true;
-					opos += 18;
 
 					/* vertex 1 and 3 were added */
 					numVertices += 1;
@@ -235,9 +219,7 @@ public final class LineTexLayer extends RenderElement {
 
 		/* advance offset to last written position */
 		if (!even)
-			opos += 12;
-
-		si.used = opos;
+			vi.seek(12);
 	}
 
 	@Override

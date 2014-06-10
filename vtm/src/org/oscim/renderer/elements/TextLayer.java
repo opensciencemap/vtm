@@ -21,19 +21,23 @@ import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Canvas;
 
-public final class TextLayer extends TextureLayer {
+public class TextLayer extends TextureLayer {
 	//static final Logger log = LoggerFactory.getLogger(TextureLayer.class);
 
-	private final static int LBIT_MASK = 0xfffffffe;
+	protected final static int LBIT_MASK = 0xfffffffe;
 
-	private static int mFontPadX = 1;
+	protected static int mFontPadX = 1;
 	//private static int mFontPadY = 1;
 
 	public TextItem labels;
-	private final Canvas mCanvas;
+	protected final Canvas mCanvas;
 
 	public TextItem getLabels() {
 		return labels;
+	}
+
+	public void setLabels(TextItem labels) {
+		this.labels = labels;
 	}
 
 	public TextLayer() {
@@ -49,20 +53,21 @@ public final class TextLayer extends TextureLayer {
 
 			if (item.text == it.text) {
 				while (it.next != null
-				        // break if next item uses different text style
+				        /* break if next item uses different text style */
 				        && item.text == it.next.text
-				        // check same string instance
+				        /* check same string instance */
 				        && item.string != it.string
-				        // check same string
+				        /* check same string */
 				        && !item.string.equals(it.string))
 					it = it.next;
 
-				// unify duplicate string
-				// Note: this is required for 'packing test' in prepare to work!
+				/* unify duplicate string
+				 * // Note: this is required for 'packing test' in prepare to
+				 * work! */
 				if (item.string != it.string && item.string.equals(it.string))
 					item.string = it.string;
 
-				// insert after text of same type and/or before same string
+				/* insert after text of same type and/or before same string */
 				item.next = it.next;
 				it.next = item;
 				return;
@@ -75,14 +80,8 @@ public final class TextLayer extends TextureLayer {
 
 	@Override
 	public boolean prepare() {
-
 		short numIndices = 0;
 		short offsetIndices = 0;
-
-		VertexItem vi = vertexItems = VertexItem.pool.get();
-		int pos = vi.used; // 0
-		short buf[] = vi.vertices;
-
 		numVertices = 0;
 
 		int advanceY = 0;
@@ -139,16 +138,9 @@ public final class TextLayer extends TextureLayer {
 				width = TEXTURE_WIDTH;
 
 			while (it != null) {
-				if (pos == VertexItem.SIZE) {
-					vi.used = VertexItem.SIZE;
-					vi = VertexItem.pool.getNext(vi);
-					buf = vi.vertices;
-					pos = 0;
-				}
-				addItem(buf, pos, it, width, height, x, y);
-				pos += 24;
+				addItem(it, width, height, x, y);
 
-				// six indices to draw the four vertices
+				/* six indices to draw the four vertices */
 				numIndices += TextureLayer.INDICES_PER_SPRITE;
 				numVertices += 4;
 
@@ -164,16 +156,15 @@ public final class TextLayer extends TextureLayer {
 			x += width;
 		}
 
-		vi.used = pos;
-
 		t.offset = offsetIndices;
 		t.indices = (short) (numIndices - offsetIndices);
 
 		return true;
 	}
 
-	void addItem(short[] buf, int pos, TextItem it, float width, float height, float x, float y) {
-		// texture coordinates
+	protected void addItem(TextItem it,
+	        float width, float height, float x, float y) {
+		/* texture coordinates */
 		short u1 = (short) (COORD_SCALE * x);
 		short v1 = (short) (COORD_SCALE * y);
 		short u2 = (short) (COORD_SCALE * (x + width));
@@ -203,64 +194,35 @@ public final class TextLayer extends TextureLayer {
 			vx *= hw;
 			vy *= hw;
 
-			// top-left
+			/* top-left */
 			x1 = (short) (COORD_SCALE * (vx - ux));
 			y1 = (short) (COORD_SCALE * (vy - uy));
-			// top-right
+			/* top-right */
 			x2 = (short) (COORD_SCALE * (-vx - ux));
 			y2 = (short) (COORD_SCALE * (-vy - uy));
-			// bot-right
+			/* bot-right */
 			x4 = (short) (COORD_SCALE * (-vx + ux2));
 			y4 = (short) (COORD_SCALE * (-vy + uy2));
-			// bot-left
+			/* bot-left */
 			x3 = (short) (COORD_SCALE * (vx + ux2));
 			y3 = (short) (COORD_SCALE * (vy + uy2));
 		}
 
-		// add vertices
+		/* add vertices */
 		int tmp = (int) (COORD_SCALE * it.x) & LBIT_MASK;
 		short tx = (short) (tmp | (it.text.caption ? 1 : 0));
 		short ty = (short) (COORD_SCALE * it.y);
 
-		// top-left
-		buf[pos++] = tx;
-		buf[pos++] = ty;
-		buf[pos++] = x1;
-		buf[pos++] = y1;
-		buf[pos++] = u1;
-		buf[pos++] = v2;
-		// bot-left
-		buf[pos++] = tx;
-		buf[pos++] = ty;
-		buf[pos++] = x3;
-		buf[pos++] = y3;
-		buf[pos++] = u1;
-		buf[pos++] = v1;
-		// top-right
-		buf[pos++] = tx;
-		buf[pos++] = ty;
-		buf[pos++] = x2;
-		buf[pos++] = y2;
-		buf[pos++] = u2;
-		buf[pos++] = v2;
-		// bot-right
-		buf[pos++] = tx;
-		buf[pos++] = ty;
-		buf[pos++] = x4;
-		buf[pos++] = y4;
-		buf[pos++] = u2;
-		buf[pos++] = v1;
+		vertexItems.add(tx, ty, x1, y1, u1, v2);
+		vertexItems.add(tx, ty, x3, y3, u1, v1);
+		vertexItems.add(tx, ty, x2, y2, u2, v2);
+		vertexItems.add(tx, ty, x4, y4, u2, v1);
 	}
 
 	@Override
 	public void clear() {
-		// release textures
 		super.clear();
-
 		clearLabels();
-		//labels = TextItem.pool.releaseAll(labels);
-		//vertexItems = VertexItem.pool.releaseAll(vertexItems);
-		//numVertices = 0;
 	}
 
 	public void clearLabels() {

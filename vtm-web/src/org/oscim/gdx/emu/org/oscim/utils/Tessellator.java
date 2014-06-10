@@ -1,7 +1,7 @@
 package org.oscim.utils;
 
 import org.oscim.core.GeometryBuffer;
-import org.oscim.renderer.elements.VertexItem;
+import org.oscim.renderer.elements.VertexData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ public class Tessellator {
 	static final Logger log = LoggerFactory.getLogger(Tessellator.class);
 
 	public static int tessellate(GeometryBuffer geom, float scale,
-	        VertexItem outPoints, VertexItem outTris, int vertexOffset) {
+	        VertexData outPoints, VertexData outTris, int vertexOffset) {
 
 		int numIndices = 0;
 		int indexPos = 0;
@@ -38,7 +38,7 @@ public class Tessellator {
 				numPoints += geom.index[idx];
 			}
 
-			if (numPoints <= 0 && numRings == 1){
+			if (numPoints <= 0 && numRings == 1) {
 				log.debug("tessellation skip empty");
 				pointPos += numPoints;
 				continue;
@@ -64,22 +64,19 @@ public class Tessellator {
 			numIndices += resIndices;
 
 			for (int k = 0, cnt = 0; k < resIndices; k += cnt) {
+				VertexData.Chunk chunk = outTris.obtainChunk();
 
-				if (outTris.used == VertexItem.SIZE) {
-					outTris.next = VertexItem.pool.get();
-					outTris = outTris.next;
-				}
-
-				cnt = VertexItem.SIZE - outTris.used;
+				cnt = VertexData.SIZE - chunk.used;
 
 				if (k + cnt > resIndices)
 					cnt = resIndices - k;
 
 				for (int i = 0; i < cnt; i++)
-					outTris.vertices[outTris.used + i] =
+					chunk.vertices[chunk.used + i] =
 					        (short) (vertexOffset + io.get(k + i));
 
-				outTris.used += cnt;
+				chunk.used += cnt;
+				outTris.releaseChunk();
 			}
 
 			Float32Array po = res.getPoints(res);
@@ -88,22 +85,19 @@ public class Tessellator {
 			vertexOffset += (resPoints >> 1);
 
 			for (int k = 0, cnt = 0; k < resPoints; k += cnt) {
+				VertexData.Chunk chunk = outPoints.obtainChunk();
 
-				if (outPoints.used == VertexItem.SIZE) {
-					outPoints.next = VertexItem.pool.get();
-					outPoints = outPoints.next;
-				}
-
-				cnt = VertexItem.SIZE - outPoints.used;
+				cnt = VertexData.SIZE - chunk.used;
 
 				if (k + cnt > resPoints)
 					cnt = resPoints - k;
 
 				for (int i = 0; i < cnt; i++)
-					outPoints.vertices[outPoints.used + i] =
+					chunk.vertices[chunk.used + i] =
 					        (short) (po.get(k + i) * scale);
 
-				outPoints.used += cnt;
+				chunk.used += cnt;
+				outPoints.releaseChunk();
 			}
 
 			if (idx >= indexEnd || geom.index[idx] < 0)
@@ -114,7 +108,7 @@ public class Tessellator {
 	}
 
 	public static int tessellate(float[] points, int ppos, int plen, short[] index,
-	        int ipos, int rings, int vertexOffset, VertexItem outTris) {
+	        int ipos, int rings, int vertexOffset, VertexData outTris) {
 
 		Int32Array io;
 		try {
@@ -145,22 +139,19 @@ public class Tessellator {
 		int numIndices = io.length();
 
 		for (int k = 0, cnt = 0; k < numIndices; k += cnt) {
+			VertexData.Chunk chunk = outTris.obtainChunk();
 
-			if (outTris.used == VertexItem.SIZE) {
-				outTris.next = VertexItem.pool.get();
-				outTris = outTris.next;
-			}
-
-			cnt = VertexItem.SIZE - outTris.used;
+			cnt = VertexData.SIZE - chunk.used;
 
 			if (k + cnt > numIndices)
 				cnt = numIndices - k;
 
 			for (int i = 0; i < cnt; i++) {
 				int idx = (vertexOffset + io.get(k + i));
-				outTris.vertices[outTris.used + i] = (short) idx;
+				chunk.vertices[chunk.used + i] = (short) idx;
 			}
-			outTris.used += cnt;
+			chunk.used += cnt;
+			outTris.releaseChunk();
 		}
 
 		return numIndices;

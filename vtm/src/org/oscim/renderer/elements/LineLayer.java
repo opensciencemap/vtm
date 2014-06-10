@@ -16,9 +16,6 @@
  */
 package org.oscim.renderer.elements;
 
-import static org.oscim.renderer.elements.VertexItem.SIZE;
-import static org.oscim.renderer.elements.VertexItem.pool;
-
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Paint.Cap;
@@ -30,7 +27,6 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.LineStyle;
-import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,11 +120,6 @@ public final class LineLayer extends RenderElement {
 		else if (line.cap == Cap.SQUARE)
 			squared = true;
 
-		if (vertexItems == null)
-			vertexItems = pool.get();
-
-		VertexItem vertexItem = Inlist.last(vertexItems);
-
 		/* Note: just a hack to save some vertices, when there are
 		 * more than 200 lines per type. FIXME make optional! */
 		if (rounded && index != null) {
@@ -185,19 +176,12 @@ public final class LineLayer extends RenderElement {
 			        points[ipos + 1] == points[ipos + 5])
 				length -= 2;
 
-			vertexItem = addLine(vertexItem, points, ipos, length, rounded, squared, closed);
+			addLine(vertexItems, points, ipos, length, rounded, squared, closed);
 
 		}
 	}
 
-	private void addVertex(short[] v, int pos, short x, short y, int dx, int dy) {
-		v[pos + 0] = x;
-		v[pos + 1] = y;
-		v[pos + 2] = (short) dx;
-		v[pos + 3] = (short) dy;
-	}
-
-	private VertexItem addVertex(VertexItem vertexItem,
+	private void addVertex(VertexData vi,
 	        float x, float y,
 	        float vNextX, float vNextY,
 	        float vPrevX, float vPrevY) {
@@ -222,37 +206,16 @@ public final class LineLayer extends RenderElement {
 		int ddx = (int) (ux * DIR_SCALE);
 		int ddy = (int) (uy * DIR_SCALE);
 
-		int opos = vertexItem.used;
-		short[] v = vertexItem.vertices;
+		vi.add(ox, oy,
+		       (short) (0 | ddx & DIR_MASK),
+		       (short) (1 | ddy & DIR_MASK));
 
-		if (opos == SIZE) {
-			vertexItem = pool.getNext(vertexItem);
-			v = vertexItem.vertices;
-			opos = 0;
-		}
-
-		v[opos + 0] = ox;
-		v[opos + 1] = oy;
-		v[opos + 2] = (short) (0 | ddx & DIR_MASK);
-		v[opos + 3] = (short) (1 | ddy & DIR_MASK);
-
-		if ((opos += 4) == SIZE) {
-			vertexItem = pool.getNext(vertexItem);
-			v = vertexItem.vertices;
-			opos = 0;
-		}
-
-		v[opos + 0] = ox;
-		v[opos + 1] = oy;
-		v[opos + 2] = (short) (2 | -ddx & DIR_MASK);
-		v[opos + 3] = (short) (1 | -ddy & DIR_MASK);
-
-		vertexItem.used = opos + 4;
-		return vertexItem;
-
+		vi.add(ox, oy,
+		       (short) (2 | -ddx & DIR_MASK),
+		       (short) (1 | -ddy & DIR_MASK));
 	}
 
-	private VertexItem addLine(VertexItem vertexItem, float[] points, int start, int length,
+	private void addLine(VertexData vertices, float[] points, int start, int length,
 	        boolean rounded, boolean squared, boolean closed) {
 
 		float ux, uy;
@@ -261,9 +224,6 @@ public final class LineLayer extends RenderElement {
 		float curX, curY;
 		float nextX, nextY;
 		double a;
-
-		short v[] = vertexItem.vertices;
-		int opos = vertexItem.used;
 
 		/* amount of vertices used
 		 * + 2 for drawing triangle-strip
@@ -302,65 +262,33 @@ public final class LineLayer extends RenderElement {
 		/* when the endpoint is outside the tile region omit round caps. */
 		boolean outside = (curX < tmin || curX > tmax || curY < tmin || curY > tmax);
 
-		if (opos == SIZE) {
-			vertexItem = pool.getNext(vertexItem);
-			v = vertexItem.vertices;
-			opos = 0;
-		}
-
 		if (rounded && !outside) {
 			ddx = (int) ((ux - vPrevX) * DIR_SCALE);
 			ddy = (int) ((uy - vPrevY) * DIR_SCALE);
 			dx = (short) (0 | ddx & DIR_MASK);
 			dy = (short) (2 | ddy & DIR_MASK);
 
-			addVertex(v, opos, ox, oy, dx, dy);
-
-			if ((opos += 4) == SIZE) {
-				vertexItem = pool.getNext(vertexItem);
-				v = vertexItem.vertices;
-				opos = 0;
-			}
-
-			addVertex(v, opos, ox, oy, dx, dy);
-
-			if ((opos += 4) == SIZE) {
-				vertexItem = pool.getNext(vertexItem);
-				v = vertexItem.vertices;
-				opos = 0;
-			}
+			vertices.add(ox, oy, (short) dx, (short) dy);
+			vertices.add(ox, oy, (short) dx, (short) dy);
 
 			ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
 			ddy = (int) (-(uy + vPrevY) * DIR_SCALE);
 
-			addVertex(v, opos, ox, oy,
-			          (2 | ddx & DIR_MASK),
-			          (2 | ddy & DIR_MASK));
-
-			if ((opos += 4) == SIZE) {
-				vertexItem = pool.getNext(vertexItem);
-				v = vertexItem.vertices;
-				opos = 0;
-			}
+			vertices.add(ox, oy,
+			             (short) (2 | ddx & DIR_MASK),
+			             (short) (2 | ddy & DIR_MASK));
 
 			/* Start of line */
 			ddx = (int) (ux * DIR_SCALE);
 			ddy = (int) (uy * DIR_SCALE);
 
-			addVertex(v, opos, ox, oy,
-			          (0 | ddx & DIR_MASK),
-			          (1 | ddy & DIR_MASK));
+			vertices.add(ox, oy,
+			             (short) (0 | ddx & DIR_MASK),
+			             (short) (1 | ddy & DIR_MASK));
 
-			if ((opos += 4) == SIZE) {
-				vertexItem = pool.getNext(vertexItem);
-				v = vertexItem.vertices;
-				opos = 0;
-			}
-
-			addVertex(v, opos, ox, oy,
-			          (2 | -ddx & DIR_MASK),
-			          (1 | -ddy & DIR_MASK));
-
+			vertices.add(ox, oy,
+			             (short) (2 | -ddx & DIR_MASK),
+			             (short) (1 | -ddy & DIR_MASK));
 		} else {
 			/* outside means line is probably clipped
 			 * TODO should align ending with tile boundary
@@ -385,28 +313,15 @@ public final class LineLayer extends RenderElement {
 			dx = (short) (0 | ddx & DIR_MASK);
 			dy = (short) (1 | ddy & DIR_MASK);
 
-			addVertex(v, opos, ox, oy, dx, dy);
-
-			if ((opos += 4) == SIZE) {
-				vertexItem = pool.getNext(vertexItem);
-				v = vertexItem.vertices;
-				opos = 0;
-			}
-
-			addVertex(v, opos, ox, oy, dx, dy);
-
-			if ((opos += 4) == SIZE) {
-				vertexItem = pool.getNext(vertexItem);
-				v = vertexItem.vertices;
-				opos = 0;
-			}
+			vertices.add(ox, oy, (short) dx, (short) dy);
+			vertices.add(ox, oy, (short) dx, (short) dy);
 
 			ddx = (int) (-(ux + tx) * DIR_SCALE);
 			ddy = (int) (-(uy + ty) * DIR_SCALE);
 
-			addVertex(v, opos, ox, oy,
-			          (2 | ddx & DIR_MASK),
-			          (1 | ddy & DIR_MASK));
+			vertices.add(ox, oy,
+			             (short) (2 | ddx & DIR_MASK),
+			             (short) (1 | ddy & DIR_MASK));
 		}
 
 		curX = nextX;
@@ -416,7 +331,7 @@ public final class LineLayer extends RenderElement {
 		vPrevX *= -1;
 		vPrevY *= -1;
 
-		vertexItem.used = opos + 4;
+		//		vertexItem.used = opos + 4;
 
 		for (int end = start + length;;) {
 
@@ -491,7 +406,7 @@ public final class LineLayer extends RenderElement {
 				vNextX /= a;
 				vNextY /= a;
 
-				vertexItem = addVertex(vertexItem, px, py, vPrevX, vPrevY, vNextX, vNextY);
+				addVertex(vertices, px, py, vPrevX, vPrevY, vNextX, vNextY);
 
 				/* flip unit vector to point back */
 				vPrevX = -vNextX;
@@ -505,7 +420,7 @@ public final class LineLayer extends RenderElement {
 				vNextY /= a;
 			}
 
-			vertexItem = addVertex(vertexItem, curX, curY, vPrevX, vPrevY, vNextX, vNextY);
+			addVertex(vertices, curX, curY, vPrevX, vPrevY, vNextX, vNextY);
 
 			curX = nextX;
 			curY = nextY;
@@ -515,19 +430,10 @@ public final class LineLayer extends RenderElement {
 			vPrevY = -vNextY;
 		}
 
-		opos = vertexItem.used;
-		v = vertexItem.vertices;
-
 		ux = vPrevY;
 		uy = -vPrevX;
 
 		outside = (curX < tmin || curX > tmax || curY < tmin || curY > tmax);
-
-		if (opos == SIZE) {
-			vertexItem = pool.getNext(vertexItem);
-			v = vertexItem.vertices;
-			opos = 0;
-		}
 
 		ox = (short) (curX * COORD_SCALE);
 		oy = (short) (curY * COORD_SCALE);
@@ -536,33 +442,21 @@ public final class LineLayer extends RenderElement {
 			ddx = (int) (ux * DIR_SCALE);
 			ddy = (int) (uy * DIR_SCALE);
 
-			addVertex(v, opos, ox, oy,
-			          (0 | ddx & DIR_MASK),
-			          (1 | ddy & DIR_MASK));
+			vertices.add(ox, oy,
+			             (short) (0 | ddx & DIR_MASK),
+			             (short) (1 | ddy & DIR_MASK));
 
-			if ((opos += 4) == SIZE) {
-				vertexItem = pool.getNext(vertexItem);
-				v = vertexItem.vertices;
-				opos = 0;
-			}
-
-			addVertex(v, opos, ox, oy,
-			          (2 | -ddx & DIR_MASK),
-			          (1 | -ddy & DIR_MASK));
-
-			if ((opos += 4) == SIZE) {
-				vertexItem = pool.getNext(vertexItem);
-				v = vertexItem.vertices;
-				opos = 0;
-			}
+			vertices.add(ox, oy,
+			             (short) (2 | -ddx & DIR_MASK),
+			             (short) (1 | -ddy & DIR_MASK));
 
 			/* For rounded line edges */
 			ddx = (int) ((ux - vPrevX) * DIR_SCALE);
 			ddy = (int) ((uy - vPrevY) * DIR_SCALE);
 
-			addVertex(v, opos, ox, oy,
-			          (0 | ddx & DIR_MASK),
-			          (0 | ddy & DIR_MASK));
+			vertices.add(ox, oy,
+			             (short) (0 | ddx & DIR_MASK),
+			             (short) (0 | ddy & DIR_MASK));
 
 			/* last vertex */
 			ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
@@ -585,9 +479,9 @@ public final class LineLayer extends RenderElement {
 			ddx = (int) ((ux - vPrevX) * DIR_SCALE);
 			ddy = (int) ((uy - vPrevY) * DIR_SCALE);
 
-			addVertex(v, opos, ox, oy,
-			          (0 | ddx & DIR_MASK),
-			          (1 | ddy & DIR_MASK));
+			vertices.add(ox, oy,
+			             (short) (0 | ddx & DIR_MASK),
+			             (short) (1 | ddy & DIR_MASK));
 
 			/* last vertex */
 			ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
@@ -597,24 +491,8 @@ public final class LineLayer extends RenderElement {
 		}
 
 		/* add last vertex twice */
-		if ((opos += 4) == SIZE) {
-			vertexItem = pool.getNext(vertexItem);
-			v = vertexItem.vertices;
-			opos = 0;
-		}
-
-		addVertex(v, opos, ox, oy, dx, dy);
-
-		if ((opos += 4) == SIZE) {
-			vertexItem = pool.getNext(vertexItem);
-			v = vertexItem.vertices;
-			opos = 0;
-		}
-		addVertex(v, opos, ox, oy, dx, dy);
-
-		vertexItem.used = opos + 4;
-
-		return vertexItem;
+		vertices.add(ox, oy, (short) dx, (short) dy);
+		vertices.add(ox, oy, (short) dx, (short) dy);
 	}
 
 	static class Shader extends GLShader {

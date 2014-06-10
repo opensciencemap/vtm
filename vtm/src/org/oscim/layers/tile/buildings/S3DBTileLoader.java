@@ -127,7 +127,7 @@ class S3DBTileLoader extends TileLoader {
 			return;
 		}
 
-		for (ExtrusionLayer l = mLayers; l != null; l = (ExtrusionLayer) l.next) {
+		for (ExtrusionLayer l = mLayers; l != null; l = l.next()) {
 			if (l.color == c) {
 				l.add(element);
 				return;

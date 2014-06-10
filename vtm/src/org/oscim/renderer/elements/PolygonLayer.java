@@ -27,7 +27,6 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.math.Interpolation;
-import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,6 @@ public final class PolygonLayer extends RenderElement {
 		super(RenderElement.POLYGON);
 
 		level = layer;
-		vertexItems = VertexItem.pool.get();
 	}
 
 	public void addPolygon(GeometryBuffer geom) {
@@ -60,57 +58,32 @@ public final class PolygonLayer extends RenderElement {
 	public void addPolygon(float[] points, short[] index) {
 		short center = (short) ((Tile.SIZE >> 1) * S);
 
-		VertexItem si = Inlist.last(vertexItems);
-		short[] v = si.vertices;
-		int outPos = si.used;
-
 		for (int i = 0, pos = 0, n = index.length; i < n; i++) {
 			int length = index[i];
 			if (length < 0)
 				break;
 
-			// need at least three points
+			/* need at least three points */
 			if (length < 6) {
 				pos += length;
 				continue;
 			}
 
 			numVertices += length / 2 + 2;
+			vertexItems.add(center, center);
 
 			int inPos = pos;
 
-			if (outPos == VertexItem.SIZE) {
-				si = VertexItem.pool.getNext(si);
-				v = si.vertices;
-				outPos = 0;
-			}
-
-			v[outPos++] = center;
-			v[outPos++] = center;
-
 			for (int j = 0; j < length; j += 2) {
-				if (outPos == VertexItem.SIZE) {
-					si = VertexItem.pool.getNext(si);
-					v = si.vertices;
-					outPos = 0;
-				}
-				v[outPos++] = (short) (points[inPos++] * S);
-				v[outPos++] = (short) (points[inPos++] * S);
+				vertexItems.add((short) (points[inPos++] * S),
+				                (short) (points[inPos++] * S));
 			}
 
-			if (outPos == VertexItem.SIZE) {
-				si = VertexItem.pool.getNext(si);
-				v = si.vertices;
-				outPos = 0;
-			}
-
-			v[outPos++] = (short) (points[pos + 0] * S);
-			v[outPos++] = (short) (points[pos + 1] * S);
+			vertexItems.add((short) (points[pos + 0] * S),
+			                (short) (points[pos + 1] * S));
 
 			pos += length;
 		}
-
-		si.used = outPos;
 	}
 
 	static class Shader extends GLShader {

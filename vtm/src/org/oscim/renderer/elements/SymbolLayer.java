@@ -55,9 +55,6 @@ public final class SymbolLayer extends TextureLayer {
 			}
 		}
 		mSymbols.push(item);
-
-		//item.next = mSymbols;
-		//mSymbols = item;
 	}
 
 	public void pushSymbol(SymbolItem item) {
@@ -72,11 +69,6 @@ public final class SymbolLayer extends TextureLayer {
 		this.offset = sbuf.position() * 2; //SHORT_BYTES;
 
 		short numIndices = 0;
-
-		VertexItem si = VertexItem.pool.get();
-
-		int pos = 0;
-		short buf[] = si.vertices;
 
 		prevTextures = textures;
 		textures = null;
@@ -165,15 +157,10 @@ public final class SymbolLayer extends TextureLayer {
 
 				short ty = (short) (SCALE * it.y);
 
-				if (pos == VertexItem.SIZE) {
-					sbuf.put(buf, 0, VertexItem.SIZE);
-					pos = 0;
-				}
-
-				TextureLayer.putSprite(buf, pos, tx, ty,
-				                       x1, y1, x2, y2, u1, v1, u2, v2);
-
-				pos += TextLayer.VERTICES_PER_SPRITE * 6;
+				vertexItems.add(tx, ty, x1, y1, u1, v2);
+				vertexItems.add(tx, ty, x1, y2, u1, v1);
+				vertexItems.add(tx, ty, x2, y1, u2, v2);
+				vertexItems.add(tx, ty, x2, y2, u2, v1);
 
 				/* six elements used to draw the four vertices */
 				t.indices += TextureLayer.INDICES_PER_SPRITE;
@@ -181,10 +168,7 @@ public final class SymbolLayer extends TextureLayer {
 			numIndices += t.indices;
 		}
 
-		if (pos > 0)
-			sbuf.put(buf, 0, pos);
-
-		si = VertexItem.pool.release(si);
+		vertexItems.compile(sbuf);
 
 		for (t = prevTextures; t != null; t = t.dispose());
 		prevTextures = null;
