@@ -74,17 +74,17 @@ public class AwtCanvas implements Canvas {
 			canvas.drawString(text, x + 2, y);
 		} else {
 			setColorAndStroke(awtPaint);
-			TextLayout textLayout = new TextLayout(text,
-			                                       awtPaint.font,
-			                                       canvas.getFontRenderContext());
-			AffineTransform affineTransform = new AffineTransform();
-			affineTransform.translate(x + 2, y);
-			canvas.draw(textLayout.getOutline(affineTransform));
+			TextLayout tl = new TextLayout(text, awtPaint.font, canvas.getFontRenderContext());
+			AffineTransform tx = new AffineTransform();
+			tx.translate(x + 2, y);
+			canvas.draw(tl.getOutline(tx));
+			canvas.drawString(text, x + 2, y);
 		}
 	}
 
 	private void setColorAndStroke(AwtPaint awtPaint) {
 		canvas.setColor(awtPaint.color);
+
 		if (awtPaint.stroke != null) {
 			canvas.setStroke(awtPaint.stroke);
 		}

@@ -25,6 +25,7 @@ import java.nio.IntBuffer;
 import javax.imageio.ImageIO;
 
 import org.oscim.backend.canvas.Bitmap;
+import org.oscim.renderer.elements.TextureLayer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -76,8 +77,10 @@ public class AwtBitmap implements Bitmap {
 	public void eraseColor(int transparent) {
 	}
 
-	private final static IntBuffer tmpBuffer = BufferUtils.newIntBuffer(512 * 256);
-	private final static int[] tmpPixel = new int[512 * 256];
+	private final static IntBuffer tmpBuffer = BufferUtils.newIntBuffer(TextureLayer.TEXTURE_HEIGHT
+	        * TextureLayer.TEXTURE_WIDTH);
+	private final static int[] tmpPixel = new int[TextureLayer.TEXTURE_HEIGHT
+	        * TextureLayer.TEXTURE_WIDTH];
 
 	private final static boolean WRITE_TEX = false;
 	private int dbgCnt;
@@ -87,7 +90,7 @@ public class AwtBitmap implements Bitmap {
 		int[] pixels;
 		IntBuffer buffer;
 
-		if (width * height < 512 * 256) {
+		if (width * height < TextureLayer.TEXTURE_HEIGHT * TextureLayer.TEXTURE_WIDTH) {
 			pixels = tmpPixel;
 			buffer = tmpBuffer;
 			buffer.clear();
@@ -112,6 +115,8 @@ public class AwtBitmap implements Bitmap {
 
 		for (int i = 0, n = width * height; i < n; i++) {
 			int c = pixels[i];
+			if (c == 0)
+				continue;
 
 			float alpha = (c >>> 24) / 255f;
 			int r = (int) ((c & 0x000000ff) * alpha);

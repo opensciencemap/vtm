@@ -37,8 +37,8 @@ public abstract class TextureLayer extends RenderElement {
 	final static int VERTICES_PER_SPRITE = 4;
 	final static int SHORTS_PER_VERTICE = 6;
 
-	final static int TEXTURE_HEIGHT = 128;
-	final static int TEXTURE_WIDTH = 512;
+	public final static int TEXTURE_HEIGHT = 128;
+	public final static int TEXTURE_WIDTH = 512;
 	final static int POOL_FILL = 10;
 
 	/** pool shared by TextLayers */
