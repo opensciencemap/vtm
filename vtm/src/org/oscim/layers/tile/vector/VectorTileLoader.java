@@ -23,6 +23,7 @@ import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
+import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderProcessHook;
@@ -245,6 +246,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			if (ll.line == null) {
 				ll.line = line;
 				ll.scale = line.fixed ? 1 : mLineScale;
+				ll.setExtents(-4, Tile.SIZE + 4);
 			}
 
 			if (line.outline) {

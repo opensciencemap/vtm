@@ -24,7 +24,6 @@ import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MercatorProjection;
-import org.oscim.core.Tile;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
@@ -73,6 +72,8 @@ public final class LineLayer extends RenderElement {
 
 	public float heightOffset;
 
+	private int tmin = Integer.MIN_VALUE, tmax = Integer.MAX_VALUE;
+
 	LineLayer(int layer) {
 		super(RenderElement.LINE);
 		this.level = layer;
@@ -85,6 +86,11 @@ public final class LineLayer extends RenderElement {
 
 		link.outlines = outlines;
 		outlines = link;
+	}
+
+	public void setExtents(int min, int max) {
+		tmin = min;
+		tmax = max;
 	}
 
 	/**
@@ -107,9 +113,6 @@ public final class LineLayer extends RenderElement {
 		if (numPoints >= 4)
 			addLine(points, null, numPoints, closed);
 	}
-
-	private static int tmax = Tile.SIZE + 4;
-	private static int tmin = -4;
 
 	private void addLine(float[] points, short[] index, int numPoints, boolean closed) {
 
@@ -272,7 +275,6 @@ public final class LineLayer extends RenderElement {
 
 		curX = points[ipos++];
 		curY = points[ipos++];
-
 		nextX = points[ipos++];
 		nextY = points[ipos++];
 
