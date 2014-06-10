@@ -139,6 +139,22 @@ public final class TextStyle extends RenderStyle {
 		public TextBuilder level(int level) {
 			return this;
 		}
+
+		public TextBuilder setFrom(TextBuilder tb) {
+			fontFamily = tb.fontFamily;
+			fontStyle = tb.fontStyle;
+			style = tb.style;
+			textKey = tb.textKey;
+			fontSize = tb.fontSize;
+			caption = tb.caption;
+			priority = tb.priority;
+			texture = tb.texture;
+			color = tb.color;
+			stroke = tb.stroke;
+			strokeWidth = tb.strokeWidth;
+			dy = tb.dy;
+			return this;
+		}
 	}
 
 	TextStyle(TextBuilder tb) {
