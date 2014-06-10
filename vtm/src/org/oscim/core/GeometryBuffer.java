@@ -16,11 +16,10 @@
  */
 package org.oscim.core;
 
-// TODO
-// - getter methods!
-// - check indexPos < Short.Max
-// - should make internals private, maybe
-
+/* TODO
+ * - check indexPos < Short.Max
+ * - should make internals private, maybe
+ */
 /**
  * The GeometryBuffer class holds temporary geometry data for processing.
  * Only One geometry type can be set at a time. Use 'clear()' to reset the
@@ -91,10 +90,32 @@ public class GeometryBuffer {
 		this.pointLimit = points.length - 2;
 	}
 
+	/**
+	 * @param out PointF to set coordinates to.
+	 * @return when out is null a temporary PointF is
+	 *         returned which belongs to GeometryBuffer.
+	 */
+	public void getPoint(int i, PointF out) {
+		out.x = points[(i << 1)];
+		out.y = points[(i << 1) + 1];
+	}
+
+	public float getPointX(int i) {
+		return points[(i << 1)];
+	}
+
+	public float getPointY(int i) {
+		return points[(i << 1) + 1];
+	}
+
+	/**
+	 * @return PointF belongs to GeometryBuffer.
+	 */
 	public PointF getPoint(int i) {
-		mTmpPoint.x = points[(i << 1)];
-		mTmpPoint.y = points[(i << 1) + 1];
-		return mTmpPoint;
+		PointF out = mTmpPoint;
+		out.x = points[(i << 1)];
+		out.y = points[(i << 1) + 1];
+		return out;
 	}
 
 	public int getNumPoints() {
@@ -111,7 +132,6 @@ public class GeometryBuffer {
 		this(new float[numPoints * 2], new short[numIndices]);
 	}
 
-	// ---- API ----
 	/**
 	 * Reset buffer.
 	 */
@@ -176,18 +196,18 @@ public class GeometryBuffer {
 	public GeometryBuffer startLine() {
 		setOrCheckMode(GeometryType.LINE);
 
-		// ignore
+		/* ignore */
 		if (index[indexPos] > 0) {
 
-			// start next
+			/* start next */
 			if ((index[0] >= 0) && (++indexPos >= index.length))
 				ensureIndexSize(indexPos, true);
 
-			// initialize with zero points
+			/* initialize with zero points */
 			index[indexPos] = 0;
 		}
 
-		// set new end marker
+		/* set new end marker */
 		if (index.length > indexPos + 1)
 			index[indexPos + 1] = -1;
 		return this;
@@ -204,17 +224,17 @@ public class GeometryBuffer {
 			ensureIndexSize(indexPos + 2, true);
 
 		if (!start && index[indexPos] != 0) {
-			// end polygon
+			/* end polygon */
 			index[++indexPos] = 0;
 
-			// next polygon start
+			/* next polygon start */
 			indexPos++;
 		}
 
-		// initialize with zero points
+		/* initialize with zero points */
 		index[indexPos] = 0;
 
-		// set new end marker
+		/* set new end marker */
 		if (index.length > indexPos + 1)
 			index[indexPos + 1] = -1;
 
@@ -230,10 +250,10 @@ public class GeometryBuffer {
 		if ((indexPos + 2) > index.length)
 			ensureIndexSize(indexPos + 1, true);
 
-		// initialize with zero points
+		/* initialize with zero points */
 		index[++indexPos] = 0;
 
-		// set new end marker
+		/* set new end marker */
 		if (index.length > indexPos + 1)
 			index[indexPos + 1] = -1;
 	}
@@ -316,6 +336,10 @@ public class GeometryBuffer {
 		addPoint((float) p.x, (float) p.y);
 	}
 
+	public void addPoint(PointF p) {
+		addPoint(p.x, p.y);
+	}
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		int o = 0;
@@ -324,6 +348,9 @@ public class GeometryBuffer {
 				break;
 			if (index[i] == 0)
 				continue;
+			sb.append(":");
+			sb.append(index[i]);
+			sb.append('\n');
 
 			for (int j = 0; j < index[i]; j += 2) {
 				sb.append('[')
@@ -331,6 +358,9 @@ public class GeometryBuffer {
 				    .append(',')
 				    .append(points[o + j + 1])
 				    .append(']');
+
+				if (j % 4 == 0)
+					sb.append('\n');
 			}
 			sb.append('\n');
 			o += index[i];
