@@ -19,16 +19,17 @@ package org.oscim.utils.quadtree;
 /**
  * A quad tree for the standard map tiling schema.
  */
-public abstract class QuadTree<T extends Node<T, E>, E> {
+public abstract class QuadTree<T extends TreeNode<T, E>, E> {
 
 	protected final T root;
 
-	protected T minNode;
+	//protected T minNode;
 
 	protected T pool;
 
 	public QuadTree() {
 		root = create();
+		root.id = -1;
 		root.parent = root;
 	}
 
@@ -153,15 +154,15 @@ public abstract class QuadTree<T extends Node<T, E>, E> {
 
 		while (cur != root) {
 			if (cur == null)
-				throw new IllegalArgumentException("item not in index");
+				throw new IllegalStateException("Item not in index");
 
-			// keep pointer to parent
+			/* keep pointer to parent */
 			next = cur.parent;
 			cur.refs--;
 
-			// if current node has no children
+			/* if current node has no children */
 			if (cur.refs == 0) {
-				// unhook from parent
+				/* unhook from parent */
 
 				switch (cur.id) {
 					case 0:
@@ -178,7 +179,7 @@ public abstract class QuadTree<T extends Node<T, E>, E> {
 						break;
 				}
 
-				// add item back to pool
+				/* add item back to pool */
 				cur.parent = pool;
 				pool = cur;
 			}

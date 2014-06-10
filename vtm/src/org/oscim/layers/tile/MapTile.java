@@ -21,7 +21,7 @@ import org.oscim.layers.tile.vector.VectorTileLoader;
 import org.oscim.layers.tile.vector.labeling.LabelTileLoaderHook;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.utils.pool.Inlist;
-import org.oscim.utils.quadtree.Node;
+import org.oscim.utils.quadtree.TreeNode;
 import org.oscim.utils.quadtree.QuadTree;
 
 /**
@@ -32,7 +32,7 @@ import org.oscim.utils.quadtree.QuadTree;
  */
 public class MapTile extends Tile {
 
-	public static class TileNode extends Node<TileNode, MapTile> {
+	public static class TileNode extends TreeNode<TileNode, MapTile> {
 
 	}
 

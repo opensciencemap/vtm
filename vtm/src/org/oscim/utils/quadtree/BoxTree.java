@@ -1,6 +1,10 @@
 package org.oscim.utils.quadtree;
 
+import java.util.Arrays;
+
+import org.oscim.utils.SpatialIndex.SearchCb;
 import org.oscim.utils.pool.Inlist;
+import org.oscim.utils.pool.Pool;
 import org.oscim.utils.quadtree.BoxTree.BoxItem;
 import org.oscim.utils.quadtree.BoxTree.BoxNode;
 import org.slf4j.Logger;
@@ -12,28 +16,55 @@ import org.slf4j.LoggerFactory;
  * 
  * ... in case this generic isnt obvious at first sight.
  * */
-public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNode<Box>, Box> {
+public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
 
 	final static Logger log = LoggerFactory.getLogger(BoxTree.class);
 	static boolean dbg = false;
 
 	protected final int extents;
 	protected final int maxDepth;
+	private final static int MAX_STACK = 32;
 
-	public static class BoxNode<T extends BoxItem<?>> extends Node<BoxNode<T>, T> {
-		// for non-recursive traversal
-		BoxNode<T> next;
-		// TODO make final? or update to the actual used extent?
+	static class Stack<E> extends Inlist<Stack<E>> {
+		/** Top of stack index */
+		int tos;
+
+		final E[] nodes;
+
+		@SuppressWarnings("unchecked")
+		Stack() {
+			nodes = (E[]) new BoxNode[MAX_STACK];
+		}
+
+		void push(E node) {
+			nodes[tos] = node;
+			tos++;
+		}
+
+		/** Pop element off iteration stack (For internal use only) */
+		E pop() {
+			// assert (tos > 0);
+			nodes[tos--] = null;
+			return (E) nodes[tos];
+		}
+
+		E node() {
+			return (E) nodes[tos];
+		}
+
+		boolean empty() {
+			return tos <= 0;
+		}
+	}
+
+	public static class BoxNode<T extends BoxItem<?>> extends TreeNode<BoxNode<T>, T> {
+		// TODO this is redundant - use tile ids
 		public int x1;
 		public int y1;
 		public int x2;
 		public int y2;
 
-		//BoxItem<T> list;
-
-		public boolean overlaps(T it) {
-			return (x1 < it.x2) && (y1 < it.y2) && (it.x1 < x2) && (it.y1 < y2);
-		}
+		// inherits BoxItem<E> item;
 
 		@Override
 		public String toString() {
@@ -44,9 +75,17 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 	public static class BoxItem<T> extends Inlist<BoxItem<T>> {
 		public BoxItem(int x1, int y1, int x2, int y2) {
 			this.x1 = x1;
-			this.x2 = x2;
 			this.y1 = y1;
+			this.x2 = x2;
 			this.y2 = y2;
+		}
+
+		public BoxItem(org.oscim.core.Box box, T item) {
+			this.x1 = (int) box.minX;
+			this.y1 = (int) box.minY;
+			this.x2 = (int) box.maxX;
+			this.y2 = (int) box.maxY;
+			this.item = item;
 		}
 
 		@Override
@@ -66,7 +105,7 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 		public int y2;
 
 		public boolean overlaps(BoxItem<T> it) {
-			return (x1 < it.x2) && (it.x1 < x2) && (y1 < it.y2) && (it.y1 < y2);
+			return !((x1 > it.x2) || (it.x1 > x2) || (y1 > it.y2) || (it.y1 > y2));
 		}
 	}
 
@@ -74,19 +113,16 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 		boolean process(T item);
 	}
 
-	//	public class NodeVistor<T> implements Visitor<BoxNode<T>> {
-	//
-	//		@Override
-	//		public boolean process(BoxNode<T> item) {
-	//
-	//			return false;
-	//		}
-	//
-	//	}
+	boolean isPowerOfTwo(int x) {
+		return ((x > 0) && (x & (x - 1)) == 0);
+	}
 
 	public BoxTree(int extents, int maxDepth) {
 		super();
-		// size is -extents to +extents
+		if (!isPowerOfTwo(extents))
+			throw new IllegalArgumentException("Extents must be power of two!");
+
+		//size is -extents to +extents
 		this.root.x1 = -extents;
 		this.root.y1 = -extents;
 		this.root.x2 = extents;
@@ -97,169 +133,231 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 	}
 
 	@Override
-	public BoxNode<Box> create() {
-		return new BoxNode<Box>();
+	public BoxNode<T> create() {
+		return new BoxNode<T>();
 	}
 
 	@Override
-	public void removeItem(Box item) {
+	public void removeItem(T item) {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	public int query(Box box) {
-		if (box.x1 > box.x2 || box.y1 > box.y2)
-			throw new IllegalArgumentException();
+	Pool<Stack<BoxNode<T>>> stackPool = new Pool<Stack<BoxNode<T>>>() {
+		@Override
+		protected Stack<BoxNode<T>> createItem() {
+			return new Stack<BoxNode<T>>();
+		}
 
-		int x1 = box.x1;
-		int x2 = box.x2;
-		int y1 = box.y1;
-		int y2 = box.y2;
+		protected boolean clearItem(Stack<BoxNode<T>> item) {
+			if (item.tos != 0) {
+				item.tos = 0;
+				Arrays.fill(item.nodes, null);
+			}
+			return true;
+		};
+	};
 
-		BoxNode<Box> cur, c;
-		BoxNode<Box> stack = root;
-		int result = 0;
+	public boolean search(T box, SearchCb<E> cb, Object ctxt) {
+		BoxNode<T> n;
 
-		boolean drop = false;
+		Stack<BoxNode<T>> stack = stackPool.get();
+		stack.push(root);
 
-		O: while (stack != null) {
+		O: while (!stack.empty()) {
 
-			/** pop cur from stack */
-			cur = stack;
-			stack = stack.next;
+			n = stack.pop();
 
-			/** process overlapping items from cur node */
-			Box prev = cur.item;
-
-			for (Box it = cur.item; it != null; it = (Box) it.next) {
-				if ((x1 <= it.x2) && (x2 >= it.x1) &&
-				        (y1 <= it.y2) && (y2 >= it.y1)) {
-
-					result = process(box, it);
-
-					if (result > 0) {
-						if (dbg)
-							log.debug("{} overlap {} {}", result, box, it);
-						drop = true;
+			/* process overlapping items from cur node */
+			for (BoxItem<E> it = n.item; it != null; it = it.next) {
+				if (it.overlaps(box)) {
+					if (!cb.call(it.item, ctxt))
 						break O;
+				}
+			}
+
+			BoxNode<T> p = n.parent;
+
+			/* push next node on same level onto stack */
+			switch (n.id) {
+				case 0:
+					if (overlaps(p.child01, box)) {
+						stack.push(p.child01);
+						break;
 					}
+				case 1:
+					if (overlaps(p.child10, box)) {
+						stack.push(p.child10);
+						break;
+					}
+				case 2:
+					if (overlaps(p.child11, box)) {
+						stack.push(p.child11);
+						break;
+					}
+				default:
+					break;
+			}
+			/* push next level child onto stack */
+			if (overlaps(n.child00, box))
+				stack.push(n.child00);
+			else if (overlaps(n.child01, box))
+				stack.push(n.child01);
+			else if (overlaps(n.child10, box))
+				stack.push(n.child10);
+			else if (overlaps(n.child11, box))
+				stack.push(n.child11);
+		}
+		stackPool.release(stack);
+		return false;
+	}
 
-					if (result < 0) {
-						result = 0;
-						if (dbg)
-							log.debug("remove overlap {} {}", box, it);
-						// remove this itemchild = cur.child11;
-						//cur.item = Inlist.remove(cur.item, it);
-						if (it == cur.item)
-							prev = cur.item = it;
-						else
-							prev.next = it.next;
+	public interface SearchBoxCb<T extends BoxItem<?>> {
+		boolean call(T item);
+	}
 
-						continue;
+	public boolean search(T box, SearchBoxCb<T> cb) {
+		BoxNode<T> n;
+		BoxNode<T> start = getNode(box, false);
+		if (start == null)
+			return false;
+
+		Stack<BoxNode<T>> stack = stackPool.get();
+		stack.push(start);
+
+		while (!stack.empty()) {
+			n = stack.pop();
+
+			/* process overlapping items from cur node */
+			for (BoxItem<E> it = n.item; it != null; it = it.next) {
+				if (it.overlaps(box)) {
+					@SuppressWarnings("unchecked")
+					T item = (T) it;
+					if (!cb.call(item)) {
+						stackPool.release(stack);
+						return false;
 					}
 				}
-				prev = it;
 			}
 
-			/** put children on stack which overlap with box */
-			if ((c = cur.child00) != null &&
-			        (x1 < c.x2) && (y1 < c.y2) &&
-			        (c.x1 < x2) && (c.y1 < y2)) {
-				c.next = stack;
-				stack = c;
+			BoxNode<T> p = n.parent;
+
+			/* push next node on same level onto stack */
+			switch (n.id) {
+				case 0:
+					if (overlaps(p.child01, box)) {
+						stack.push(p.child01);
+						break;
+					}
+				case 1:
+					if (overlaps(p.child10, box)) {
+						stack.push(p.child10);
+						break;
+					}
+				case 2:
+					if (overlaps(p.child11, box)) {
+						stack.push(p.child11);
+						break;
+					}
+				default:
+					break;
 			}
-			if ((c = cur.child01) != null &&
-			        (x1 < c.x2) && (y1 < c.y2) &&
-			        (c.x1 < x2) && (c.y1 < y2)) {
-				c.next = stack;
-				stack = c;
-			}
-			if ((c = cur.child10) != null &&
-			        (x1 < c.x2) && (y1 < c.y2) &&
-			        (c.x1 < x2) && (c.y1 < y2)) {
-				c.next = stack;
-				stack = c;
-			}
-			if ((c = cur.child11) != null &&
-			        (x1 < c.x2) && (y1 < c.y2) &&
-			        (c.x1 < x2) && (c.y1 < y2)) {
-				c.next = stack;
-				stack = c;
-			}
+
+			/* push next level child onto stack */
+			if (overlaps(n.child00, box))
+				stack.push(n.child00);
+			else if (overlaps(n.child01, box))
+				stack.push(n.child01);
+			else if (overlaps(n.child10, box))
+				stack.push(n.child10);
+			else if (overlaps(n.child11, box))
+				stack.push(n.child11);
 		}
+		stackPool.release(stack);
 
-		/** dont keep dangling references */
-		///* gwt optimizer found this cannot be reached :) */
-		while (stack != null)
-			stack = stack.next;
-
-		return drop ? 1 : 0;
+		return true;
 	}
 
-	public abstract boolean collectAll(BoxNode<Box> node);
-
-	public int all() {
-		return all(root);
+	private static boolean overlaps(BoxNode<?> a, BoxItem<?> b) {
+		return a != null && !((a.x1 > b.x2) || (b.x1 > a.x2) || (a.y1 > b.y2) || (b.y1 > a.y2));
 	}
 
-	public int all(BoxNode<Box> node) {
+	public interface SearchNodeCb<E extends BoxNode<?>> {
+		boolean call(E item);
+	}
 
-		BoxNode<Box> cur, c;
-		BoxNode<Box> stack = node;
+	public boolean collect(SearchNodeCb<BoxNode<T>> cb) {
+		BoxNode<T> n;
 
-		while (stack != null) {
-			cur = stack;
-			stack = stack.next;
+		Stack<BoxNode<T>> stack = stackPool.get();
 
-			if (cur.item != null && !collectAll(cur))
-				break;
+		stack.push(root);
 
-			if ((c = cur.child00) != null) {
-				c.next = stack;
-				stack = c;
+		while (!stack.empty()) {
+			n = stack.pop();
+
+			/* process overlapping items from cur node */
+			cb.call(n);
+
+			BoxNode<T> p = n.parent;
+
+			/* push next node on same level onto stack */
+			switch (n.id) {
+				case 0:
+					if (p.child01 != null) {
+						stack.push(p.child01);
+						break;
+					}
+				case 1:
+					if (p.child10 != null) {
+						stack.push(p.child10);
+						break;
+					}
+				case 2:
+					if (p.child11 != null) {
+						stack.push(p.child11);
+						break;
+					}
+				default:
+					break;
 			}
-			if ((c = cur.child01) != null) {
-				c.next = stack;
-				stack = c;
-			}
-			if ((c = cur.child10) != null) {
-				c.next = stack;
-				stack = c;
-			}
-			if ((c = cur.child11) != null) {
-				c.next = stack;
-				stack = c;
-			}
+
+			/* push next level child onto stack */
+			if (n.child00 != null)
+				stack.push(n.child00);
+			else if (n.child01 != null)
+				stack.push(n.child01);
+			else if (n.child10 != null)
+				stack.push(n.child10);
+			else if (n.child11 != null)
+				stack.push(n.child11);
 		}
-
-		// dont keep dangling references
-		while (stack != null)
-			stack = stack.next;
-
-		return 0;
+		stackPool.release(stack);
+		return false;
 	}
 
-	public abstract int process(Box box, Box it);
+	public BoxNode<T> create(BoxNode<T> parent, int i) {
+		BoxNode<T> node;
+		if (pool != null) {
+			node = pool;
+			pool = pool.parent;
+		} else
+			node = new BoxNode<T>();
 
-	public BoxNode<Box> create(BoxNode<Box> parent, int i) {
-		BoxNode<Box> node = new BoxNode<Box>();
+		node.parent = parent;
+
 		int size = (parent.x2 - parent.x1) >> 1;
 		node.x1 = parent.x1;
 		node.y1 = parent.y1;
 
 		if (i == 0) {
-			// top-left
 			parent.child00 = node;
 		} else if (i == 1) {
-			// bottom-left
-			parent.child10 = node;
+			parent.child01 = node;
 			node.y1 += size;
 		} else if (i == 2) {
-			// top-right
-			parent.child01 = node;
+			parent.child10 = node;
 			node.x1 += size;
 		} else {
-			// bottom-right
 			parent.child11 = node;
 			node.x1 += size;
 			node.y1 += size;
@@ -267,93 +365,196 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 
 		node.x2 = node.x1 + size;
 		node.y2 = node.y1 + size;
-
-		node.parent = parent;
+		node.id = (byte) i;
 
 		return node;
 	}
 
-	public void insert(Box box) {
+	public void insert(T box) {
 		if (box.x1 > box.x2 || box.y1 > box.y2)
 			throw new IllegalArgumentException();
 
-		BoxNode<Box> cur = root;
-		BoxNode<Box> child = null;
+		if (box.next != null)
+			throw new IllegalStateException("BoxItem is list");
 
-		// tile position in tree
-		//int px = 0, py = 0;
-		int idX = 0, idY = 0;
+		BoxNode<T> cur = root;
+		BoxNode<T> child = null;
+
 		int x1 = box.x1;
 		int x2 = box.x2;
 		int y1 = box.y1;
 		int y2 = box.y2;
 
 		for (int level = 0; level <= maxDepth; level++) {
-			// half size of tile at current z
-			//int hsize = (extents >> level);
+			cur.refs++;
+
+			/* half size of tile at current level */
 			int hsize = (cur.x2 - cur.x1) >> 1;
 
-			// center of tile (shift by -extents)
-			//int cx = px + hsize - extents;
-			//int cy = py + hsize - extents;
+			/* center of tile */
 			int cx = cur.x1 + hsize;
 			int cy = cur.y1 + hsize;
 
 			child = null;
-			//int childPos = -1;
-			//log.debug(cx + ":" + cy + " " + hsize);
-			if (x2 <= cx) {
-				if (y2 <= cy) {
-					if ((child = cur.child00) == null)
-						child = create(cur, 0);
+
+			if (level < maxDepth) {
+				if (x2 < cx) {
+					if (y2 < cy) {
+						if ((child = cur.child00) == null)
+							child = create(cur, 0);
+					} else if (y1 >= cy) {
+						if ((child = cur.child01) == null)
+							child = create(cur, 1);
+					}
 				}
-				// should be else?
-				if (y1 >= cy) {
-					if ((child = cur.child10) == null)
-						child = create(cur, 1);
-					idX++;
+				if (x1 >= cx) {
+					if (y2 < cy) {
+						if ((child = cur.child10) == null)
+							child = create(cur, 2);
+					} else if (y1 >= cy) {
+						if ((child = cur.child11) == null)
+							child = create(cur, 3);
+					}
 				}
 			}
-			if (x1 >= cx) {
-				if (y2 <= cy) {
-					if ((child = cur.child01) == null)
-						child = create(cur, 2);
-					idY++;
-				}
-				if (y1 >= cy) {
-					if ((child = cur.child11) == null)
-						child = create(cur, 3);
-					idX++;
-					idY++;
-				}
-			}
-			//log.debug("child {}", child);
 
-			if (cur == minNode && child != null)
-				minNode = cur;
-
-			if (child == null || level == maxDepth) {
-				// push item onto list of this node
+			if (child == null) {
+				/* push item onto list of this node */
 				box.next = cur.item;
 				cur.item = box;
 
 				if (dbg)
-					log.debug("insert at: " + level + " / " + idX + ":"
-					        + idY + " -- " + x1 + ":" + y1
-					        + " /" + (x2) + "x" + (y2));
+					log.debug("insert: " + level
+					        + " cnt:" + Inlist.size(cur.item) + " " + x1 + ":" + y1
+					        + " /" + (x2) + "x" + (y2) + " " + box.item);
 				break;
 			}
 			cur = child;
 		}
-
 	}
 
-	public void setMinNode(int x1, int y1, int x2, int y2) {
-		/* TODO find lowest node that fully contains the region
-		 * and set it as start for following queries */
+	public boolean remove(T box, E item) {
+		if (box.x1 > box.x2 || box.y1 > box.y2)
+			throw new IllegalArgumentException();
+
+		BoxNode<T> cur = root;
+		BoxNode<T> child = null;
+
+		int x1 = box.x1;
+		int x2 = box.x2;
+		int y1 = box.y1;
+		int y2 = box.y2;
+
+		for (int level = 0; level <= maxDepth; level++) {
+			/* half size of tile at current level */
+			int hsize = (cur.x2 - cur.x1) >> 1;
+
+			/* center of tile */
+			int cx = cur.x1 + hsize;
+			int cy = cur.y1 + hsize;
+
+			child = null;
+			if (level < maxDepth) {
+				if (x2 < cx) {
+					if (y2 < cy) {
+						if ((child = cur.child00) == null)
+							return false;
+					} else if (y1 >= cy) {
+						if ((child = cur.child01) == null)
+							return false;
+					}
+				} else if (x1 >= cx) {
+					if (y2 < cy) {
+						if ((child = cur.child10) == null)
+							return false;
+					} else if (y1 >= cy) {
+						if ((child = cur.child11) == null)
+							return false;
+					}
+				}
+			}
+			if (child == null) {
+				/* push item onto list of this node */
+				BoxItem<E> prev = cur.item;
+
+				for (BoxItem<E> it = cur.item; it != null; it = it.next) {
+					if (it.item == item) {
+						if (dbg)
+							log.debug("remove: " + level
+							        + " cnt:" + Inlist.size(cur.item) + " " + x1 + ":" + y1
+							        + " /" + (x2) + "x" + (y2) + " " + item);
+
+						if (cur.item == it) {
+							// FUNKY GENERICS...
+							@SuppressWarnings("unchecked")
+							T b = (T) it.next;
+							cur.item = b;
+						} else
+							prev.next = it.next;
+
+						remove(cur);
+						return true;
+					}
+					prev = it;
+				}
+				return false;
+			}
+
+			cur = child;
+		}
+		return false;
 	}
 
-	public abstract boolean process(BoxNode<Box> nodes);
+	public BoxNode<T> getNode(T box, boolean create) {
+		if (box.x1 > box.x2 || box.y1 > box.y2)
+			throw new IllegalArgumentException();
+
+		BoxNode<T> cur = root;
+		BoxNode<T> child = null;
+
+		int x1 = box.x1;
+		int x2 = box.x2;
+		int y1 = box.y1;
+		int y2 = box.y2;
+
+		for (int level = 0; level <= maxDepth; level++) {
+			cur.refs++;
+
+			/* half size of tile at current z */
+			int hsize = (cur.x2 - cur.x1) >> 1;
+
+			/* center of tile (shift by -extents) */
+			int cx = cur.x1 + hsize;
+			int cy = cur.y1 + hsize;
+
+			child = null;
+
+			if (x2 < cx) {
+				if (y2 < cy) {
+					if ((child = cur.child00) == null && create)
+						child = create(cur, 0);
+				} else if (y1 >= cy) {
+					if ((child = cur.child01) == null && create)
+						child = create(cur, 1);
+				}
+			}
+			if (x1 >= cx) {
+				if (y2 < cy) {
+					if ((child = cur.child10) == null && create)
+						child = create(cur, 2);
+				} else if (y1 >= cy) {
+					if ((child = cur.child11) == null && create)
+						child = create(cur, 3);
+				}
+			}
+
+			if (child == null || level == maxDepth)
+				return cur;
+
+			cur = child;
+		}
+		return null;
+	}
 
 	public void clear() {
 		root.child00 = null;
@@ -361,67 +562,10 @@ public abstract class BoxTree<Box extends BoxItem<E>, E> extends QuadTree<BoxNod
 		root.child10 = null;
 		root.child11 = null;
 		root.item = null;
-
-		//root = create();
-		//root.parent = root;
+		root.refs = 0;
 	}
 
-	static class Item extends BoxItem<Integer> {
-		public Item(int x1, int y1, int x2, int y2) {
-			super(x1, y1, x2, y2);
-		}
-
-		public Item() {
-			// TODO Auto-generated constructor stub
-		}
+	public int size() {
+		return root.refs;
 	}
-
-	//	static {
-	//	System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
-	//}
-	//	public static void main(String[] args) {
-	//
-	//		BoxTree<Item, Integer> tree = new BoxTree<Item, Integer>(4096, 12) {
-	//
-	//			@Override
-	//			public int process(Item box, Item it) {
-	//				System.out.println("found ... " + box + "\t\t" + it);
-	//				return 1;
-	//			}
-	//
-	//			@Override
-	//			public boolean process(BoxNode<Item> nodes) {
-	//				System.out.println("found ... ");
-	//				//for (BoxItem it = nodes.item; it != null; it = it.next) {
-	//				//	System.out.println("it: " + it.x1 + "/" + it.y1);
-	//				//}
-	//
-	//				// TODO Auto-generated method stub
-	//				return false;
-	//			}
-	//
-	//			@Override
-	//			public boolean collectAll(BoxNode<Item> nodes) {
-	//				for (Item it = nodes.item; it != null; it = (Item) it.next) {
-	//					System.out.println("all: " + it);
-	//				}
-	//				return false;
-	//			}
-	//
-	//		};
-	//		//[VtmAsyncExecutor] DEBUG org.oscim.utils.quadtree.BoxTree - insert at: 8 / 9:0 -- -631:266 /106x187
-	//
-	//		tree.insert(new Item(-631, 266, -631 + 106, 266 + 187));
-	//
-	//		//tree.insert(new Item(-40, -40, -32, -32));
-	//		//		tree.insert(new Item(-60, -60, -40, -40));
-	//		//		tree.insert(new Item(100, 10, 200, 100));
-	//		//		tree.insert(new Item(100, 200, 200, 300));
-	//		//		tree.insert(new Item(100, 200, 1000, 1000));
-	//		//
-	//		//		tree.query(new Item(-100, -100, 10, 10));
-	//		//tree.query(new Item(10, 10, 100, 100));
-	//
-	//		tree.all();
-	//	}
 }

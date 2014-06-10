@@ -16,35 +16,30 @@
  */
 package org.oscim.utils.quadtree;
 
-public class Node<T extends Node<T, E>, E> {
+public class TreeNode<T extends TreeNode<T, E>, E> {
+
 	public T parent;
+
+	/** top-left */
 	public T child00;
-	public T child10;
+
+	/** bottom-left */
 	public T child01;
+
+	/** top-right */
+	public T child10;
+
+	/** bottom-right */
 	public T child11;
 
+	/** payload */
 	public E item;
 
-	// id of this child relative to parent
-	byte id;
+	/** id of this child relative to parent */
+	int id;
 
-	// number of children and grandchildren
+	/** number of children and grandchildren */
 	int refs = 0;
-
-	//	public byte getId() {
-	//		if (parent.child00 == this)
-	//			return 0;
-	//		if (parent.child01 == this)
-	//			return 1;
-	//		if (parent.child10 == this)
-	//			return 2;
-	//		if (parent.child00 == this)
-	//			return 3;
-	//
-	//		// is root node
-	//		//if (parent == this)
-	//		return -1;
-	//	}
 
 	public E parent() {
 		return parent.item;
