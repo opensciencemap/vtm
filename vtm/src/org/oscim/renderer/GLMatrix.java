@@ -84,6 +84,30 @@ public class GLMatrix {
 	}
 
 	/**
+	 * Project Vectors with Matrix
+	 * 
+	 * @param vec3 Vector to project
+	 */
+	public void prj3D(float[] vec3, int start, int cnt) {
+		if (vec3 == null || vec3.length / (start + cnt) < 1)
+			throw new IllegalArgumentException(INVALID_INPUT);
+
+		prj3D(pointer, vec3, start, cnt);
+	}
+
+	/**
+	 * Project Vectors with Matrix
+	 * 
+	 * @param vec2 Vector to project
+	 */
+	public void prj2D(float[] vec2, int start, int cnt) {
+		if (vec2 == null || vec2.length % 2 == 1)
+			throw new IllegalArgumentException(INVALID_INPUT);
+
+		prj2D(pointer, vec2, start, cnt);
+	}
+
+	/**
 	 * Multiply rhs onto Matrix.
 	 * 
 	 * @param rhs right hand side
@@ -106,8 +130,8 @@ public class GLMatrix {
 	 * 
 	 * This matrix MUST be different from lhs and rhs!
 	 * 
-	 * As you know, when combining matrices for vector projection
-	 * this has the same effect first as applying rhs then lhs.
+	 * when combining matrices for vector projection this
+	 * has the same effect first as applying rhs then lhs.
 	 * 
 	 * @param lhs left hand side
 	 * @param rhs right hand side
@@ -215,8 +239,7 @@ public class GLMatrix {
 			delete(pointer);
 	}
 
-	/*
-	 * Copyright (C) 2007 The Android Open Source Project
+	/* Copyright (C) 2007 The Android Open Source Project
 	 * 
 	 * Licensed under the Apache License, Version 2.0 (the "License");
 	 * you may not use this file except in compliance with the License.
@@ -228,8 +251,7 @@ public class GLMatrix {
 	 * distributed under the License is distributed on an "AS IS" BASIS,
 	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	 * See the License for the specific language governing permissions and
-	 * limitations under the License.
-	 */
+	 * limitations under the License. */
 
 	/**
 	 * Define a projection matrix in terms of six clip planes
@@ -438,6 +460,10 @@ public class GLMatrix {
 	private native static void strans(long self, long rhs_ptr);
 
 	private native static void prj(long self, float[] vec3);
+
+	private native static void prj3D(long self, float[] vec3, int start, int cnt);
+
+	private native static void prj2D(long self, float[] vec2, int start, int cnt);
 
 	private native static void setRotation(long self, float a, float x, float y, float z);
 
