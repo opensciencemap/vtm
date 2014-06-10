@@ -4,14 +4,14 @@ import org.oscim.backend.GLAdapter;
 import org.oscim.gdx.GdxMap;
 import org.oscim.ios.backend.IosGLAdapter;
 import org.oscim.ios.backend.IosGraphics;
-import org.oscim.layers.tile.vector.BuildingLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.robovm.apple.glkit.GLKViewDrawableStencilFormat;
 import org.robovm.cocoatouch.foundation.NSAutoreleasePool;
-import org.robovm.cocoatouch.glkit.GLKViewDrawableStencilFormat;
 import org.robovm.cocoatouch.uikit.UIApplication;
 
 import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
@@ -23,7 +23,7 @@ public class RobovmLauncher extends IOSApplication.Delegate {
 		IOSApplicationConfiguration config = new IOSApplicationConfiguration();
 		config.orientationLandscape = true;
 		config.orientationPortrait = true;
-		config.stencilFormat = GLKViewDrawableStencilFormat.Format8;
+		config.stencilFormat = GLKViewDrawableStencilFormat._8;
 
 		return new IOSApplication(new GdxMap() {
 			@Override
