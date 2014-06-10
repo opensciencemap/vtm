@@ -1,6 +1,5 @@
 package org.oscim.ios.backend;
 
-import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Paint;
 
 public class IosPaint implements Paint {
@@ -11,25 +10,7 @@ public class IosPaint implements Paint {
 	}
 
 	@Override
-	public int getTextHeight(String text) {
-		return 0;
-	}
-
-	@Override
-	public int getTextWidth(String text) {
-		return 0;
-	}
-
-	@Override
-	public void setBitmapShader(Bitmap bitmap) {
-	}
-
-	@Override
 	public void setColor(int color) {
-	}
-
-	@Override
-	public void setDashPathEffect(float[] strokeDasharray) {
 	}
 
 	@Override

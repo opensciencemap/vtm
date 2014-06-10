@@ -19,14 +19,7 @@ package org.oscim.android.canvas;
 
 import org.oscim.backend.canvas.Paint;
 
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapShader;
-import android.graphics.DashPathEffect;
 import android.graphics.Paint.FontMetrics;
-import android.graphics.PathEffect;
-import android.graphics.Rect;
-import android.graphics.Shader;
-import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
 
 class AndroidPaint implements Paint {
@@ -74,42 +67,8 @@ class AndroidPaint implements Paint {
 	}
 
 	@Override
-	public int getTextHeight(String text) {
-		Rect rect = new Rect();
-		mPaint.getTextBounds(text, 0, text.length(), rect);
-		return rect.height();
-	}
-
-	@Override
-	public int getTextWidth(String text) {
-		Rect rect = new Rect();
-		mPaint.getTextBounds(text, 0, text.length(), rect);
-		return rect.width();
-	}
-
-	@Override
-	public void setBitmapShader(org.oscim.backend.canvas.Bitmap bitmap) {
-		if (bitmap == null) {
-			return;
-		}
-
-		android.graphics.Bitmap androidBitmap = android.graphics.Bitmap
-		    .createBitmap(bitmap.getPixels(), bitmap.getWidth(),
-		                  bitmap.getHeight(), Config.ARGB_8888);
-		Shader shader = new BitmapShader(androidBitmap, TileMode.REPEAT,
-		                                 TileMode.REPEAT);
-		mPaint.setShader(shader);
-	}
-
-	@Override
 	public void setColor(int color) {
 		mPaint.setColor(color);
-	}
-
-	@Override
-	public void setDashPathEffect(float[] strokeDasharray) {
-		PathEffect pathEffect = new DashPathEffect(strokeDasharray, 0);
-		mPaint.setPathEffect(pathEffect);
 	}
 
 	@Override

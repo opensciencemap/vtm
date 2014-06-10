@@ -27,7 +27,6 @@ import java.text.AttributedCharacterIterator.Attribute;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Paint;
 
 public class AwtPaint implements Paint {
@@ -71,31 +70,11 @@ public class AwtPaint implements Paint {
 	}
 
 	@Override
-	public int getTextHeight(String text) {
-		return 0;
-	}
-
-	@Override
-	public int getTextWidth(String text) {
-		return 0;
-	}
-
-	@Override
-	public void setBitmapShader(Bitmap bitmap) {
-	}
-
-	@Override
 	public void setColor(int c) {
 		color = new Color(((c >> 16) & 0xff) / 255f,
 		                  ((c >> 8) & 0xff) / 255f,
 		                  ((c >> 0) & 0xff) / 255f,
 		                  ((c >> 24) & 0xff) / 255f);
-	}
-
-	@Override
-	public void setDashPathEffect(float[] strokeDasharray) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

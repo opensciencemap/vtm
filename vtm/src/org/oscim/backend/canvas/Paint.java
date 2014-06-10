@@ -44,15 +44,7 @@ public interface Paint {
 
 	int getColor();
 
-	int getTextHeight(String text);
-
-	int getTextWidth(String text);
-
-	void setBitmapShader(Bitmap bitmap);
-
 	void setColor(int color);
-
-	void setDashPathEffect(float[] strokeDasharray);
 
 	void setStrokeCap(Cap cap);
 
