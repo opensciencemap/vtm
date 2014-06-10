@@ -108,9 +108,9 @@ public class S3DBLayer extends TileLayer {
 		if ("white" == color)
 			return Color.get(240, 240, 240);
 		if ("black" == color)
-			return Color.get(76, 76, 76);
+			return Color.get(86, 86, 86);
 		if ("grey" == color || "gray" == color)
-			return Color.get(100, 100, 100);
+			return Color.get(120, 120, 120);
 		if ("red" == color)
 			return Color.get(255, 190, 190);
 		if ("green" == color)
