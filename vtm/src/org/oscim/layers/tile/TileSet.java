@@ -65,6 +65,7 @@ public final class TileSet {
 
 		Arrays.fill(tiles, null);
 		cnt = 0;
+		serial = 0;
 	}
 
 	/**
@@ -115,5 +116,5 @@ public final class TileSet {
 				return true;
 
 		return false;
-    }
+	}
 }
