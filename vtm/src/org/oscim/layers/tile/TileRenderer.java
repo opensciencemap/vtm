@@ -122,8 +122,6 @@ public abstract class TileRenderer extends LayerRenderer {
 		mDrawSerial++;
 	}
 
-	//abstract protected void drawTiles(GLViewport v, MapTile[] tiles, int tileCnt);
-
 	@Override
 	protected void render(GLViewport v) {
 		/* render in update() so that tiles cannot vanish in between. */
@@ -352,7 +350,7 @@ public abstract class TileRenderer extends LayerRenderer {
 	};
 
 	protected long getMinFade(MapTile t) {
-		long maxFade = MapRenderer.frametime - 50;
+		long minFade = MapRenderer.frametime - 50;
 
 		for (int c = 0; c < 4; c++) {
 			MapTile ci = t.node.child(c);
@@ -360,17 +358,22 @@ public abstract class TileRenderer extends LayerRenderer {
 				continue;
 
 			if (ci.state == READY || ci.fadeTime > 0)
-				maxFade = Math.min(maxFade, ci.fadeTime);
+				minFade = Math.min(minFade, ci.fadeTime);
 		}
 		MapTile p = t.node.parent();
-		if (p != null && (p.state == READY || p.fadeTime > 0)) {
-			maxFade = Math.min(maxFade, p.fadeTime);
 
-			p = p.node.parent();
-			if (p != null && (p.state == READY || p.fadeTime > 0))
-				maxFade = Math.min(maxFade, p.fadeTime);
-		}
+		if (p == null)
+			return minFade;
+		if (p.state == READY || p.fadeTime > 0)
+			minFade = Math.min(minFade, p.fadeTime);
 
-		return maxFade;
+		p = p.node.parent();
+		if (p == null)
+			return minFade;
+
+		if (p.state == READY || p.fadeTime > 0)
+			minFade = Math.min(minFade, p.fadeTime);
+
+		return minFade;
 	}
 }
