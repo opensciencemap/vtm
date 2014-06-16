@@ -103,4 +103,8 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
 		return false;
 	}
 
+	@Override
+	public void complete(MapTile tile, boolean success) {
+	}
+
 }

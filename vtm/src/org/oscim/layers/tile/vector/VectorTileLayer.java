@@ -28,6 +28,8 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.TileSource.OpenResult;
+import org.oscim.utils.pool.Inlist.List;
+import org.oscim.utils.pool.LList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,43 +127,88 @@ public class VectorTileLayer extends TileLayer {
 		return mTheme;
 	}
 
+	/**
+	 * Hook to intercept tile data processing. Called concurently by tile
+	 * loader threads, so dont keep tile specific state.
+	 */
 	public interface TileLoaderProcessHook {
 		public boolean process(MapTile tile, ElementLayers layers, MapElement element);
+
+		/** Called on loader thread when tile loading is completed */
+		public void complete(MapTile tile, boolean success);
 	}
 
+	/**
+	 * Hook to intercept tile data processing after theme style lookup. Called
+	 * concurently by tile loader threads, so dont keep tile specific state. See
+	 * e.g. LabelTileLoaderHook.
+	 */
 	public interface TileLoaderThemeHook {
+		/** Called for each RenderStyle found for a MapElement. */
 		public boolean render(MapTile tile, ElementLayers layers,
 		        MapElement element, RenderStyle style, int level);
+
+		/** Called on loader thread when tile loading is completed */
+		public void complete(MapTile tile, boolean success);
 	}
 
-	private TileLoaderProcessHook[] mLoaderProcessHooks = new TileLoaderProcessHook[0];
-	private TileLoaderThemeHook[] mLoaderThemeHooks = new TileLoaderThemeHook[0];
+	private List<LList<TileLoaderProcessHook>> mLoaderProcessHooks =
+	        new List<LList<TileLoaderProcessHook>>();
 
-	public TileLoaderProcessHook[] loaderProcessHooks() {
-		return mLoaderProcessHooks;
-	}
-
-	public TileLoaderThemeHook[] loaderThemeHooks() {
-		return mLoaderThemeHooks;
-	}
+	private List<LList<TileLoaderThemeHook>> mLoaderThemeHooks =
+	        new List<LList<TileLoaderThemeHook>>();
 
 	public void addHook(TileLoaderProcessHook h) {
-		TileLoaderProcessHook[] tmp = mLoaderProcessHooks;
-		mLoaderProcessHooks = new TileLoaderProcessHook[tmp.length + 1];
-		System.arraycopy(tmp, 0, mLoaderProcessHooks, 0, tmp.length);
-		mLoaderProcessHooks[tmp.length] = h;
+		mLoaderProcessHooks.append(new LList<TileLoaderProcessHook>(h));
 	}
 
 	public void addHook(TileLoaderThemeHook h) {
-		TileLoaderThemeHook[] tmp = mLoaderThemeHooks;
-		mLoaderThemeHooks = new TileLoaderThemeHook[tmp.length + 1];
-		System.arraycopy(tmp, 0, mLoaderThemeHooks, 0, tmp.length);
-		mLoaderThemeHooks[tmp.length] = h;
+		mLoaderThemeHooks.append(new LList<TileLoaderThemeHook>(h));
 	}
 
 	@Override
 	public void onDetach() {
 		super.onDetach();
 		mTileSource.close();
+	}
+
+	public void callThemeHooks(MapTile tile, ElementLayers layers, MapElement element,
+	        RenderStyle style, int level) {
+
+		LList<TileLoaderThemeHook> th = mLoaderThemeHooks.head();
+		while (th != null) {
+			if (th.data.render(tile, layers, element, style, level))
+				return;
+
+			th = th.next;
+		}
+	}
+
+	public boolean callProcessHooks(MapTile tile, ElementLayers layers, MapElement element) {
+
+		LList<TileLoaderProcessHook> ph = mLoaderProcessHooks.head();
+		while (ph != null) {
+			if (ph.data.process(tile, layers, element))
+				return true;
+			ph = ph.next;
+		}
+
+		return false;
+	}
+
+	public void callHooksComplete(MapTile tile, boolean success) {
+		/* cannot use simple iterater as this function is called concurently */
+
+		LList<TileLoaderThemeHook> th = mLoaderThemeHooks.head();
+		while (th != null) {
+			th.data.complete(tile, success);
+			th = th.next;
+		}
+
+		LList<TileLoaderProcessHook> ph = mLoaderProcessHooks.head();
+		while (ph != null) {
+			ph.data.complete(tile, success);
+			ph = ph.next;
+		}
 	}
 }

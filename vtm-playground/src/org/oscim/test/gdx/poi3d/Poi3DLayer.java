@@ -73,6 +73,10 @@ public class Poi3DLayer extends Layer implements Map.UpdateListener {
 
 				return true;
 			}
+
+			@Override
+			public void complete(MapTile tile, boolean success) {
+			}
 		});
 		mTileLayer = tileLayer;
 

@@ -123,6 +123,10 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		return el;
 	}
 
+	@Override
+	public void complete(MapTile tile, boolean success) {
+	}
+
 	//	private int multi;
 	//	@Override
 	//	public void onInputEvent(Event event, MotionEvent e) {
