@@ -199,8 +199,10 @@ public class LineClipper {
 	}
 
 	public int clipLine(GeometryBuffer in, GeometryBuffer out) {
+		out.clear();
 		int pointPos = 0;
 		int numLines = 0;
+
 		for (int i = 0, n = in.index.length; i < n; i++) {
 			int len = in.index[i];
 			if (len < 0)
@@ -218,47 +220,44 @@ public class LineClipper {
 			int inPos = pointPos;
 			int end = inPos + len;
 
-			float prevX = in.points[inPos + 0];
-			float prevY = in.points[inPos + 1];
+			float x = in.points[inPos++];
+			float y = in.points[inPos++];
 
-			boolean inside = clipStart(prevX, prevY);
+			boolean inside = clipStart(x, y);
 
 			if (inside) {
 				out.startLine();
-				out.addPoint(prevX, prevY);
+				out.addPoint(x, y);
 				numLines++;
 			}
 
-			for (inPos += 2; inPos < end; inPos += 2) {
+			while (inPos < end) {
 				/* get the current way point coordinates */
-				float curX = in.points[inPos];
-				float curY = in.points[inPos + 1];
+				x = in.points[inPos++];
+				y = in.points[inPos++];
 
-				int clip;
-				if ((clip = clipNext(curX, curY)) != 0) {
-					if (clip < 0) {
-						if (inside) {
-							/* previous was inside */
-							out.addPoint(outX2, outY2);
-							inside = false;
-
-						} else {
-							/* previous was outside */
-							out.startLine();
-							numLines++;
-							out.addPoint(outX1, outY1);
-							out.addPoint(outX2, outY2);
-
-							inside = clipStart(curX, curY);
-						}
+				int clip = clipNext(x, y);
+				if (clip == 0) {
+					/* current segment is fully outside */
+					inside = false; // needed?
+				} else if (clip == 1) {
+					/* current segment is fully within */
+					out.addPoint(x, y);
+				} else { /* clip == -1 */
+					if (inside) {
+						/* previous was inside */
+						out.addPoint(outX2, outY2);
 					} else {
-						out.addPoint(curX, curY);
+						/* previous was outside */
+						out.startLine();
+						numLines++;
+						out.addPoint(outX1, outY1);
+						out.addPoint(outX2, outY2);
 					}
-				} else {
-					inside = false;
+					inside = clipStart(x, y);
 				}
 			}
-			pointPos += len;
+			pointPos = end;
 		}
 		return numLines;
 	}
