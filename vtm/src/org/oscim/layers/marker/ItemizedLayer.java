@@ -31,11 +31,13 @@ import org.oscim.event.GestureListener;
 import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
         implements GestureListener {
 
-	//static final Logger log = LoggerFactory.getLogger(ItemizedIconOverlay.class);
+	static final Logger log = LoggerFactory.getLogger(ItemizedLayer.class);
 
 	protected final List<Item> mItemList;
 	protected final Point mTmpPoint = new Point();
@@ -137,30 +139,20 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 		}
 	};
 
-	//	@Override
-	//	public boolean onLongPress(MotionEvent event, MapPosition pos) {
-	//		return activateSelectedItems(event, mActiveItemLongPress);
-	//	}
+	protected boolean onLongPressHelper(int index, Item item) {
+		return this.mOnItemGestureListener.onItemLongPress(index, item);
+	}
 
-	//	protected boolean onLongPressHelper(int index, Item item) {
-	//		return this.mOnItemGestureListener.onItemLongPress(index, item);
-	//	}
-	//
-	//	private final ActiveItem mActiveItemLongPress = new ActiveItem() {
-	//		@Override
-	//		public boolean run(final int index) {
-	//			final ItemizedIconLayer<Item> that = ItemizedIconLayer.this;
-	//			if (that.mOnItemGestureListener == null) {
-	//				return false;
-	//			}
-	//			return onLongPressHelper(index, getItem(index));
-	//		}
-	//	};
-
-	//	@Override
-	//	public boolean onPress(MotionEvent e, MapPosition pos) {
-	//		return false;
-	//	}
+	private final ActiveItem mActiveItemLongPress = new ActiveItem() {
+		@Override
+		public boolean run(final int index) {
+			final ItemizedLayer<Item> that = ItemizedLayer.this;
+			if (that.mOnItemGestureListener == null) {
+				return false;
+			}
+			return onLongPressHelper(index, that.mItemList.get(index));
+		}
+	};
 
 	/**
 	 * When a content sensitive action is performed the content item needs to be
@@ -249,6 +241,9 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 	public boolean onGesture(Gesture g, MotionEvent e) {
 		if (g instanceof Gesture.Tap)
 			return activateSelectedItems(e, mActiveItemSingleTap);
+
+		if (g instanceof Gesture.LongPress)
+			return activateSelectedItems(e, mActiveItemLongPress);
 
 		return false;
 	}
