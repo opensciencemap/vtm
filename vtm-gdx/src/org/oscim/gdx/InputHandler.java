@@ -25,7 +25,7 @@ public class InputHandler implements InputProcessor {
 	}
 
 	private boolean mActiveScale;
-	//private boolean mActiveTilt;
+	private boolean mActiveTilt;
 	private boolean mActiveRotate;
 
 	private int mPosX, mPosY;
@@ -38,6 +38,17 @@ public class InputHandler implements InputProcessor {
 		switch (keycode) {
 			case Input.Keys.ESCAPE:
 				Gdx.app.exit();
+				break;
+
+			case Input.Keys.SHIFT_LEFT:
+				mActiveScale = true;
+				mPosY = Gdx.input.getY();
+				break;
+
+			case Input.Keys.CONTROL_LEFT:
+				mActiveTilt = true;
+				mPosX = Gdx.input.getX();
+				mPosY = Gdx.input.getY();
 				break;
 
 			case Input.Keys.UP:
@@ -108,6 +119,16 @@ public class InputHandler implements InputProcessor {
 
 	@Override
 	public boolean keyUp(int keycode) {
+		switch (keycode) {
+			case Input.Keys.SHIFT_LEFT:
+				mActiveScale = false;
+				break;
+			case Input.Keys.CONTROL_LEFT:
+				mActiveTilt = false;
+				break;
+
+		}
+
 		return false;
 	}
 
@@ -142,11 +163,16 @@ public class InputHandler implements InputProcessor {
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		boolean changed = false;
 
-		if (!(mActiveScale || mActiveRotate))
+		if (!(mActiveScale || mActiveRotate || mActiveTilt))
 			return false;
 
+		if (mActiveTilt) {
+			changed = mViewport.tiltMap((screenY - mPosY) / 5f);
+			mPosY = screenY;
+
+		}
+
 		if (mActiveScale) {
-			// changed = mMapPosition.tilt((screenY - mStartY) / 5f);
 			changed = mViewport.scaleMap(1 - (screenY - mPosY) / 100f, 0, 0);
 			mPosY = screenY;
 		}
@@ -167,6 +193,7 @@ public class InputHandler implements InputProcessor {
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
+
 		mPosX = screenX;
 		mPosY = screenY;
 		return false;
