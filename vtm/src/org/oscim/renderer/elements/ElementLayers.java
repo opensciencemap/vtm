@@ -267,10 +267,28 @@ public class ElementLayers extends TileData {
 
 	public void compile(ShortBuffer sbuf, boolean addFill) {
 
-		addLayerItems(sbuf, baseLayers, POLYGON, addFill ? 4 : 0);
+		int pos = addFill ? 4 : 0;
+
+		for (RenderElement l = baseLayers; l != null; l = l.next) {
+			if (l.type == POLYGON) {
+				l.compile(sbuf);
+
+				//log.debug("offset {} {}", l.offset, pos);
+				l.offset = pos;
+				pos += l.numVertices;
+			}
+		}
 
 		offset[LINE] = sbuf.position() * SHORT_BYTES;
-		addLayerItems(sbuf, baseLayers, LINE, 0);
+		pos = 0;
+		for (RenderElement l = baseLayers; l != null; l = l.next) {
+			if (l.type == LINE) {
+				l.compile(sbuf);
+
+				l.offset = pos;
+				pos += l.numVertices;
+			}
+		}
 
 		//offset[TEXLINE] = size * SHORT_BYTES;
 
@@ -283,34 +301,6 @@ public class ElementLayers extends TileData {
 		for (RenderElement l = textureLayers; l != null; l = l.next) {
 			l.compile(sbuf);
 		}
-	}
-
-	/**
-	 * optimization for Line- and PolygonLayer:
-	 * collect all pool items and add back in one go.
-	 */
-	private static int addLayerItems(ShortBuffer sbuf, RenderElement l,
-	        int type, int pos) {
-
-		int size = 0;
-
-		for (; l != null; l = l.next) {
-			if (l.type != type)
-				continue;
-
-			size += l.vertexItems.compile(sbuf);
-
-			l.offset = pos;
-			pos += l.numVertices;
-		}
-		return size;
-	}
-
-	static void addPoolItems(RenderElement l, ShortBuffer sbuf) {
-
-		/* keep offset of layer data in vbo */
-		l.offset = sbuf.position() * SHORT_BYTES;
-		l.vertexItems.compile(sbuf);
 	}
 
 	public void setFrom(ElementLayers layers) {

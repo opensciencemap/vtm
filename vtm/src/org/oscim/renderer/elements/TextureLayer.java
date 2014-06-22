@@ -63,7 +63,7 @@ public abstract class TextureLayer extends RenderElement {
 			t.upload();
 
 		/* add vertices to vbo */
-		ElementLayers.addPoolItems(this, sbuf);
+		compileVertexItems(sbuf);
 	}
 
 	abstract public boolean prepare();

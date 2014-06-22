@@ -55,7 +55,7 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 
 	/** compile vertex data to vbo. */
 	protected void compile(ShortBuffer sbuf) {
-
+		compileVertexItems(sbuf);
 	}
 
 	public int getOffset() {
@@ -76,4 +76,11 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 	protected void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
 
 	}
+
+	protected void compileVertexItems(ShortBuffer sbuf) {
+		/* keep offset of layer data in vbo */
+		offset = sbuf.position() * 2;
+		vertexItems.compile(sbuf);
+	}
+
 }

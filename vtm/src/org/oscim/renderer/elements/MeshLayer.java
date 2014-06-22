@@ -73,7 +73,7 @@ public class MeshLayer extends RenderElement {
 		}
 
 		/* add vertices to shared VBO */
-		ElementLayers.addPoolItems(this, sbuf);
+		ElementLayers.compileVertexItems(this, sbuf);
 
 		/* add indices to indicesVbo */
 		sbuf = MapRenderer.getShortBuffer(numIndices);

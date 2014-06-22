@@ -224,7 +224,7 @@ public final class LineTexLayer extends RenderElement {
 
 	@Override
 	protected void compile(ShortBuffer sbuf) {
-		ElementLayers.addPoolItems(this, sbuf);
+		compileVertexItems(sbuf);
 		/* add additional vertex for interleaving, see TexLineLayer. */
 		sbuf.position(sbuf.position() + 6);
 	}
