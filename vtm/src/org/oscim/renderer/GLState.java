@@ -73,6 +73,18 @@ public class GLState {
 		blend = enable;
 	}
 
+	public static void testDepth(boolean enable) {
+		if (depth != enable) {
+
+			if (enable)
+				GL.glEnable(GL20.GL_DEPTH_TEST);
+			else
+				GL.glDisable(GL20.GL_DEPTH_TEST);
+
+			depth = enable;
+		}
+	}
+
 	public static void test(boolean depthTest, boolean stencilTest) {
 		if (depth != depthTest) {
 
@@ -145,4 +157,5 @@ public class GLState {
 		clearColor = color;
 		GL.glClearColor(color[0], color[1], color[2], color[3]);
 	}
+
 }

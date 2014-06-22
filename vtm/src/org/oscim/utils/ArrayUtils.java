@@ -138,4 +138,13 @@ public class ArrayUtils {
 
 		return neg ? -val : val;
 	}
+
+	public static boolean withinRange(float[] vec, float min, float max) {
+		for (int i = 0, n = vec.length; i < n; i++) {
+			float v = vec[i];
+			if (v < min || v > max)
+				return false;
+		}
+		return true;
+	}
 }

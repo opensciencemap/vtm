@@ -73,6 +73,21 @@ public class LineClipper {
 		return mPrevOutcode == INSIDE;
 	}
 
+	public int outcode(float x, float y) {
+
+		int outcode = INSIDE;
+		if (x < xmin)
+			outcode |= LEFT;
+		else if (x > xmax)
+			outcode |= RIGHT;
+		if (y < ymin)
+			outcode |= BOTTOM;
+		else if (y > ymax)
+			outcode |= TOP;
+
+		return outcode;
+	}
+
 	/**
 	 * @return 0 if not intersection, 1 fully within, -1 clipped (and 'out' set
 	 *         to new points)
@@ -85,6 +100,7 @@ public class LineClipper {
 			outcode |= LEFT;
 		else if (x1 > xmax)
 			outcode |= RIGHT;
+
 		if (y1 < ymin)
 			outcode |= BOTTOM;
 		else if (y1 > ymax)

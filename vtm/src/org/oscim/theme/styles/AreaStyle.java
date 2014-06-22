@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Hannes Janetzek
+ * Copyright 2014 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -22,7 +22,12 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.theme.IRenderTheme.Callback;
 
+/*TODO 
+ * - add custom shaders
+ * - create distance field per tile?
+ */
 public class AreaStyle extends RenderStyle {
+	private static final int OPAQUE = 0xff000000;
 
 	/** Drawing order level */
 	private final int level;
@@ -86,6 +91,27 @@ public class AreaStyle extends RenderStyle {
 	@Override
 	public void renderWay(Callback renderCallback) {
 		renderCallback.renderArea(this, level);
+	}
+
+	public boolean hasAlpha(int zoom) {
+		if ((color & OPAQUE) != OPAQUE)
+			return true;
+
+		if (texture != null)
+			return true;
+
+		if (blendScale < 0 && fadeScale < 0)
+			return false;
+
+		if (zoom >= blendScale) {
+			if ((blendColor & OPAQUE) != OPAQUE)
+				return true;
+		}
+
+		if (fadeScale <= zoom)
+			return true;
+
+		return false;
 	}
 
 	public static class AreaBuilder implements StyleBuilder {

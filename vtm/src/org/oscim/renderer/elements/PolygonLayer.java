@@ -41,6 +41,7 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.AreaStyle;
+import org.oscim.utils.geom.LineClipper;
 import org.oscim.utils.math.Interpolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,12 @@ public final class PolygonLayer extends IndexedRenderElement {
 		addPolygon(geom.points, geom.index);
 	}
 
+	float xmin = Short.MAX_VALUE;
+	float ymin = Short.MAX_VALUE;
+	float xmax = Short.MIN_VALUE;
+	float ymax = Short.MIN_VALUE;
+	float[] bbox = new float[8];
+
 	public void addPolygon(float[] points, short[] index) {
 		short center = (short) ((Tile.SIZE >> 1) * S);
 
@@ -96,8 +103,19 @@ public final class PolygonLayer extends IndexedRenderElement {
 			int inPos = pos;
 
 			for (int j = 0; j < length; j += 2) {
-				vertexItems.add((short) (points[inPos++] * S),
-				                (short) (points[inPos++] * S));
+				float x = (points[inPos++] * S);
+				float y = (points[inPos++] * S);
+				if (x > xmax)
+					xmax = x;
+				if (x < xmin)
+					xmin = x;
+
+				if (y > ymax)
+					ymax = y;
+				if (y < ymin)
+					ymin = y;
+
+				vertexItems.add((short) x, (short) y);
 
 				if (outline) {
 					indiceItems.add(id++);
@@ -126,6 +144,19 @@ public final class PolygonLayer extends IndexedRenderElement {
 			compileVertexItems(sbuf);
 			return;
 		}
+
+		bbox[0] = xmin;
+		bbox[1] = ymin;
+
+		bbox[2] = xmax;
+		bbox[3] = ymin;
+
+		bbox[4] = xmax;
+		bbox[5] = ymax;
+
+		bbox[6] = xmin;
+		bbox[7] = xmax;
+
 		/* compile with indexed outline */
 		super.compile(sbuf);
 	}
@@ -155,7 +186,7 @@ public final class PolygonLayer extends IndexedRenderElement {
 
 		private static final float FADE_START = 1.3f;
 
-		private static PolygonLayer[] mAreaFills;
+		private static PolygonLayer[] mAreaLayer;
 
 		private static Shader polyShader;
 		private static Shader texShader;
@@ -164,7 +195,7 @@ public final class PolygonLayer extends IndexedRenderElement {
 			polyShader = new Shader("base_shader");
 			texShader = new Shader("polygon_layer_tex");
 
-			mAreaFills = new PolygonLayer[STENCIL_BITS];
+			mAreaLayer = new PolygonLayer[STENCIL_BITS];
 
 			return true;
 		}
@@ -180,7 +211,7 @@ public final class PolygonLayer extends IndexedRenderElement {
 			Shader s;
 
 			for (int i = start; i < end; i++) {
-				PolygonLayer l = mAreaFills[i];
+				PolygonLayer l = mAreaLayer[i];
 				AreaStyle a = l.area.current();
 
 				boolean useTexture = enableTexture && a.texture != null;
@@ -253,6 +284,8 @@ public final class PolygonLayer extends IndexedRenderElement {
 				GL.glVertexAttribPointer(HairLineLayer.Renderer.shader.aPos, 2, GL_SHORT,
 				                         false, 0, l.offset << 2);
 
+				//GL.glUniform1f(HairLineLayer.Renderer.shader.uWidth, );
+
 				GL.glDrawElements(GL_LINES, l.numIndices,
 				                  GL_UNSIGNED_SHORT, 0);
 				GL.glLineWidth(1);
@@ -279,6 +312,9 @@ public final class PolygonLayer extends IndexedRenderElement {
 			}
 			return shader;
 		}
+
+		static float[] mBBox = new float[8];
+		static LineClipper mScreenClip = new LineClipper(-1, -1, 1, 1);
 
 		/**
 		 * draw polygon layers (until layer.next is not polygon layer)
@@ -323,13 +359,30 @@ public final class PolygonLayer extends IndexedRenderElement {
 
 			boolean drawn = false;
 
+			byte stencilMask = 0;
+
 			RenderElement l = renderElement;
 			for (; l != null && l.type == POLYGON; l = l.next) {
 				PolygonLayer pl = (PolygonLayer) l;
+				AreaStyle area = pl.area.current();
 
 				/* fade out polygon layers (set in RenderTheme) */
-				if (pl.area.fadeScale > 0 && pl.area.fadeScale > zoom)
+				if (area.fadeScale > 0 && area.fadeScale > zoom)
 					continue;
+
+				//	v.mvp.prj2D(pl.bbox, 0, mBBox, 0, 4);
+				//	mScreenClip.clipStart(mBBox[0], mBBox[1]);
+				//
+				//	if (mScreenClip.clipNext(mBBox[2], mBBox[3]) == 0 &&
+				//	        mScreenClip.clipNext(mBBox[4], mBBox[5]) == 0 &&
+				//	        mScreenClip.clipNext(mBBox[6], mBBox[7]) == 0 &&
+				//	        mScreenClip.clipNext(mBBox[0], mBBox[1]) == 0) {
+				//
+				//		/* check the very unlikely case where the view might be
+				//		 * completly contained within mBBox */
+				//		if (!ArrayUtils.withinRange(mBBox, -1f, 1f))
+				//			continue;
+				//	}
 
 				if (mClear) {
 					clearStencilRegion();
@@ -339,10 +392,19 @@ public final class PolygonLayer extends IndexedRenderElement {
 					start = cur = 0;
 				}
 
-				mAreaFills[cur] = pl;
+				mAreaLayer[cur] = pl;
 
 				/* set stencil mask to draw to */
-				GL.glStencilMask(1 << cur++);
+				int stencil = 1 << cur++;
+
+				if (area.hasAlpha(zoom)) {
+					GL.glStencilMask(stencil);
+					stencilMask |= stencil;
+				}
+				else {
+					stencilMask |= stencil;
+					GL.glStencilMask(stencilMask);
+				}
 
 				GL.glDrawArrays(GL_TRIANGLE_FAN, l.offset, l.numVertices);
 
@@ -355,8 +417,10 @@ public final class PolygonLayer extends IndexedRenderElement {
 					mClear = true;
 					start = cur = 0;
 
-					if (l.next != null && l.next.type == POLYGON)
+					if (l.next != null && l.next.type == POLYGON) {
 						setShader(polyShader, v.mvp, false);
+						stencilMask = 0;
+					}
 				}
 			}
 
@@ -415,10 +479,9 @@ public final class PolygonLayer extends IndexedRenderElement {
 			 * only draw where no other tile has drawn yet. */
 
 			if (clipMode == CLIP_DEPTH) {
-				/* tests GL_LESS/GL_ALWAYS */
-				GLState.test(true, true);
-
+				/* tests GL_LESS/GL_ALWAYS and */
 				/* write tile region to depth buffer */
+				GLState.test(true, true);
 				GL.glDepthMask(true);
 			} else {
 				GLState.test(false, true);
@@ -450,11 +513,12 @@ public final class PolygonLayer extends IndexedRenderElement {
 			/* disable drawing to color buffer */
 			GL.glColorMask(false, false, false, false);
 
-			/* write to all stencil bits */
+			/* write to all stencil bits except clip bit */
 			GL.glStencilMask(0xFF);
 
 			/* use clip bit from stencil buffer to clear stencil
 			 * 'layer-bits' (0x7f) */
+			//GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
 			GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
 
 			/* set clip bit (0x80) for draw region */
