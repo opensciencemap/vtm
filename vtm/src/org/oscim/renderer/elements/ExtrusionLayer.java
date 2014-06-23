@@ -37,7 +37,7 @@ public class ExtrusionLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(ExtrusionLayer.class);
 
 	private static final float S = MapRenderer.COORD_SCALE;
-	private VertexData mVertices;
+
 	private VertexData mIndices[];
 	private LineClipper mClipper;
 
@@ -77,7 +77,6 @@ public class ExtrusionLayer extends RenderElement {
 		this.color = 0;
 
 		mGroundResolution = groundResolution;
-		mVertices = VertexData.get();
 
 		mIndices = new VertexData[5];
 
@@ -103,7 +102,6 @@ public class ExtrusionLayer extends RenderElement {
 		colors[3] = a;
 
 		mGroundResolution = groundResolution;
-		mVertices = VertexData.get();
 
 		mIndices = new VertexData[5];
 		mIndices[4] = VertexData.get();
@@ -270,7 +268,7 @@ public class ExtrusionLayer extends RenderElement {
 
 	private void addIndex(Vertex v, boolean addVertex) {
 		if (addVertex)
-			mVertices.add(v.x, v.y, v.z, v.n);
+			vertexItems.add(v.x, v.y, v.z, v.n);
 
 		mIndices[IND_MESH].add((short) v.id);
 		sumIndices++;
@@ -485,8 +483,8 @@ public class ExtrusionLayer extends RenderElement {
 			} else { // if (addFace)
 				short c = (short) (color1 | fcolor << 8);
 				/* add bottom and top vertex for each point */
-				mVertices.add((short) (cx * S), (short) (cy * S), mh, c);
-				mVertices.add((short) (cx * S), (short) (cy * S), h, c);
+				vertexItems.add((short) (cx * S), (short) (cy * S), mh, c);
+				vertexItems.add((short) (cx * S), (short) (cy * S), h, c);
 
 				//v += 8;
 				break;
@@ -506,8 +504,8 @@ public class ExtrusionLayer extends RenderElement {
 				c = (short) (color2 | color1 << 8);
 
 			/* add bottom and top vertex for each point */
-			mVertices.add((short) (cx * S), (short) (cy * S), mh, c);
-			mVertices.add((short) (cx * S), (short) (cy * S), h, c);
+			vertexItems.add((short) (cx * S), (short) (cy * S), mh, c);
+			vertexItems.add((short) (cx * S), (short) (cy * S), h, c);
 
 			color1 = color2;
 
@@ -588,7 +586,7 @@ public class ExtrusionLayer extends RenderElement {
 		}
 		offset = vertexBuffer.position() * 2;
 
-		mVertices.compile(vertexBuffer);
+		vertexItems.compile(vertexBuffer);
 
 		clear();
 	}
@@ -606,8 +604,7 @@ public class ExtrusionLayer extends RenderElement {
 			}
 			mIndices = null;
 
-			mVertices.dispose();
-			mVertices = null;
+			vertexItems.dispose();
 		}
 	}
 
