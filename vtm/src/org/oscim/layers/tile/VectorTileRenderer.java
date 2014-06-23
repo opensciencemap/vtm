@@ -70,7 +70,7 @@ public class VectorTileRenderer extends TileRenderer {
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
 			if (t.isVisible && t.state == READY)
-				drawTile(t, v);
+				drawTile(t, v, 0);
 
 		}
 
@@ -111,7 +111,7 @@ public class VectorTileRenderer extends TileRenderer {
 
 	}
 
-	private void drawTile(MapTile tile, GLViewport v) {
+	private void drawTile(MapTile tile, GLViewport v, int proxyLevel) {
 		/* ensure to draw parents only once */
 		if (tile.lastDraw == mDrawSerial)
 			return;
@@ -188,7 +188,7 @@ public class VectorTileRenderer extends TileRenderer {
 		}
 
 		if (t.fadeTime == 0)
-			t.fadeTime = getMinFade(t);
+			t.fadeTime = getMinFade(t, proxyLevel);
 
 		if (debugOverdraw) {
 			if (t.zoomLevel > pos.zoomLevel)
@@ -219,7 +219,7 @@ public class VectorTileRenderer extends TileRenderer {
 			MapTile c = tile.node.child(i);
 
 			if (c.state == READY) {
-				drawTile(c, v);
+				drawTile(c, v, 1);
 				drawn++;
 			}
 		}
@@ -243,7 +243,7 @@ public class VectorTileRenderer extends TileRenderer {
 					proxy = r.parent.item;
 					if (proxy.state == READY) {
 						//log.debug("1. draw parent " + proxy);
-						drawTile(proxy, v);
+						drawTile(proxy, v, -1);
 					}
 				}
 			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
@@ -256,7 +256,7 @@ public class VectorTileRenderer extends TileRenderer {
 
 				proxy = r.parent.parent.item;
 				if (proxy.state == READY)
-					drawTile(proxy, v);
+					drawTile(proxy, v, -2);
 			}
 		} else {
 			/* prefer drawing parent */
@@ -265,7 +265,7 @@ public class VectorTileRenderer extends TileRenderer {
 					proxy = r.parent.item;
 					if (proxy != null && proxy.state == READY) {
 						//log.debug("2. draw parent " + proxy);
-						drawTile(proxy, v);
+						drawTile(proxy, v, -1);
 						return;
 
 					}
@@ -285,7 +285,7 @@ public class VectorTileRenderer extends TileRenderer {
 
 				proxy = r.parent.parent.item;
 				if (proxy.state == READY)
-					drawTile(proxy, v);
+					drawTile(proxy, v, -2);
 			}
 		}
 	}

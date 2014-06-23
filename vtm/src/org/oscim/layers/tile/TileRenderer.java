@@ -349,31 +349,41 @@ public abstract class TileRenderer extends LayerRenderer {
 		}
 	};
 
-	protected long getMinFade(MapTile t) {
+	protected long getMinFade(MapTile t, int proxyLevel) {
 		long minFade = MapRenderer.frametime - 50;
+		if (proxyLevel <= 0) {
+			for (int c = 0; c < 4; c++) {
+				MapTile ci = t.node.child(c);
+				if (ci == null)
+					continue;
 
-		for (int c = 0; c < 4; c++) {
-			MapTile ci = t.node.child(c);
-			if (ci == null)
-				continue;
+				if (ci.fadeTime > 0 && ci.fadeTime < minFade)
+					minFade = ci.fadeTime;
 
-			if (ci.state == READY || ci.fadeTime > 0)
-				minFade = Math.min(minFade, ci.fadeTime);
+				/* when drawing the parent of the current level
+				 * we also check if the children of current level
+				 * are visible */
+				if (proxyLevel > -2) {
+					long m = getMinFade(ci, proxyLevel - 1);
+					if (m < minFade)
+						minFade = m;
+				}
+			}
 		}
-		MapTile p = t.node.parent();
+		if (proxyLevel >= -1) {
+			MapTile p = t.node.parent();
+			if (p != null) {
+				if (p.fadeTime > 0 && p.fadeTime < minFade)
+					minFade = p.fadeTime;
 
-		if (p == null)
-			return minFade;
-		if (p.state == READY || p.fadeTime > 0)
-			minFade = Math.min(minFade, p.fadeTime);
-
-		p = p.node.parent();
-		if (p == null)
-			return minFade;
-
-		if (p.state == READY || p.fadeTime > 0)
-			minFade = Math.min(minFade, p.fadeTime);
-
+				if (proxyLevel >= 0) {
+					if ((p = p.node.parent()) != null) {
+						if (p.fadeTime > 0 && p.fadeTime < minFade)
+							minFade = p.fadeTime;
+					}
+				}
+			}
+		}
 		return minFade;
 	}
 }
