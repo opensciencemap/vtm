@@ -16,32 +16,30 @@
  */
 package org.oscim.renderer.elements;
 
-import java.nio.ShortBuffer;
+import static org.oscim.backend.GL20.GL_ELEMENT_ARRAY_BUFFER;
+import static org.oscim.backend.GL20.GL_LINES;
+import static org.oscim.backend.GL20.GL_SHORT;
+import static org.oscim.backend.GL20.GL_TRIANGLES;
+import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
-import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MercatorProjection;
-import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.ColorUtil;
 import org.oscim.utils.Tessellator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MeshLayer extends RenderElement {
+public class MeshLayer extends IndexedRenderElement {
 	static final Logger log = LoggerFactory.getLogger(MeshLayer.class);
 	static final boolean dbgRender = false;
 
-	BufferObject indicesVbo;
-	int numIndices;
-
-	VertexData indiceItems = new VertexData();
 	public AreaStyle area;
 	public float heightOffset;
 
@@ -54,7 +52,7 @@ public class MeshLayer extends RenderElement {
 		if (geom.index[0] < 6)
 			return;
 
-		numIndices += Tessellator.tessellate(geom, MapRenderer.COORD_SCALE,
+		numIndices += Tessellator.tessellate(geom, COORD_SCALE,
 		                                     vertexItems,
 		                                     indiceItems,
 		                                     numVertices);
@@ -63,35 +61,6 @@ public class MeshLayer extends RenderElement {
 
 		if (numIndices <= 0)
 			log.debug("empty " + geom.index);
-	}
-
-	@Override
-	protected void compile(ShortBuffer sbuf) {
-		if (numIndices <= 0) {
-			indicesVbo = BufferObject.release(indicesVbo);
-			return;
-		}
-
-		/* add vertices to shared VBO */
-		ElementLayers.compileVertexItems(this, sbuf);
-
-		/* add indices to indicesVbo */
-		sbuf = MapRenderer.getShortBuffer(numIndices);
-		indiceItems.compile(sbuf);
-
-		if (indicesVbo == null)
-			indicesVbo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		indicesVbo.loadBufferData(sbuf.flip(), sbuf.limit() * 2);
-	}
-
-	@Override
-	protected void clear() {
-		indicesVbo = BufferObject.release(indicesVbo);
-		vertexItems.dispose();
-		indiceItems.dispose();
-		numIndices = 0;
-		numVertices = 0;
 	}
 
 	public static class Renderer {
@@ -128,7 +97,7 @@ public class MeshLayer extends RenderElement {
 			float heightOffset = 0;
 			GL.glUniform1f(s.uHeight, heightOffset);
 
-			for (; l != null && l.type == RenderElement.MESH; l = l.next) {
+			for (; l != null && l.type == MESH; l = l.next) {
 				MeshLayer ml = (MeshLayer) l;
 
 				if (ml.indicesVbo == null)
@@ -148,20 +117,21 @@ public class MeshLayer extends RenderElement {
 				else
 					GLUtils.setColor(s.uColor, ml.area.color, 1);
 
-				GL.glVertexAttribPointer(s.aPos, 2, GL20.GL_SHORT,
+				GL.glVertexAttribPointer(s.aPos, 2, GL_SHORT,
 				                         false, 0, ml.offset);
 
-				GL.glDrawElements(GL20.GL_TRIANGLES, ml.numIndices,
-				                  GL20.GL_UNSIGNED_SHORT, 0);
+				GL.glDrawElements(GL_TRIANGLES, ml.numIndices,
+				                  GL_UNSIGNED_SHORT, 0);
 
 				if (dbgRender) {
-					GLUtils.setColor(s.uColor, ColorUtil.shiftHue(ml.area.color, 0.5), 0.8f);
-					GL.glDrawElements(GL20.GL_LINES, ml.numIndices,
-					                  GL20.GL_UNSIGNED_SHORT, 0);
+					int c = ColorUtil.shiftHue(ml.area.color, 0.5);
+					GLUtils.setColor(s.uColor, c, 0.8f);
+					GL.glDrawElements(GL_LINES, ml.numIndices,
+					                  GL_UNSIGNED_SHORT, 0);
 				}
 			}
 
-			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+			GL.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 			return l;
 		}
