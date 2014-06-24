@@ -59,12 +59,6 @@ public class MapView extends RelativeLayout {
 		AndroidAssets.init(context);
 		GLAdapter.init(new AndroidGL());
 
-		/* Use workaround for adreno driver bug in some
-		 * samsung S4 and Note3 models */
-		if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT
-		        && "samsung".equals(Build.MANUFACTURER))
-			GLAdapter.NO_BUFFER_SUB_DATA = true;
-
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
 

@@ -307,6 +307,15 @@ public class MapRenderer {
 	public void onSurfaceCreated() {
 		GL = GLAdapter.get();
 		// log.debug(GL.glGetString(GL20.GL_EXTENSIONS));
+		String vendor = GL.glGetString(GL20.GL_VENDOR);
+		String renderer = GL.glGetString(GL20.GL_RENDERER);
+		String version = GL.glGetString(GL20.GL_VERSION);
+		log.debug("{}/{}/{}", vendor, renderer, version);
+
+		if ("Adreno (TM) 330".equals(renderer) || "Adreno (TM) 320".equals(renderer)) {
+			log.debug("==> not using glBufferSubData");
+			GLAdapter.NO_BUFFER_SUB_DATA = true;
+		}
 
 		GLState.init(GL);
 		GLUtils.init(GL);
