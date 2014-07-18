@@ -17,17 +17,23 @@
 package org.oscim.gdx;
 
 import org.oscim.awt.AwtGraphics;
+import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.oscim.utils.FastMath;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.jglfw.JglfwApplication;
+import com.badlogic.gdx.backends.jglfw.JglfwApplicationConfiguration;
+import com.badlogic.gdx.backends.jglfw.JglfwGL20;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class GdxMapApp extends GdxMap {
+
+	static class GdxGL20Wrapper extends JglfwGL20 implements GL20 {
+
+	}
 
 	public static void init() {
 		// load native library
@@ -35,28 +41,28 @@ public class GdxMapApp extends GdxMap {
 		// init globals
 		AwtGraphics.init();
 		GdxAssets.init("assets/");
-		GLAdapter.init(new GdxGL20());
+		GLAdapter.init(new GdxGL20Wrapper());
 		GLAdapter.GDX_DESKTOP_QUIRKS = true;
 	}
 
 	public static void main(String[] args) {
 		Tile.SIZE = 360;
 		init();
-		new LwjglApplication(new GdxMapApp(), getConfig());
+		new JglfwApplication(new GdxMapApp(), getConfig());
 	}
 
-	public static void run(GdxMap map, LwjglApplicationConfiguration config, int tileSize) {
+	public static void run(GdxMap map, JglfwApplicationConfiguration config, int tileSize) {
 		Tile.SIZE = FastMath.clamp(tileSize, 128, 512);
 
-		new LwjglApplication(map, (config == null ? getConfig() : config));
+		new JglfwApplication(map, (config == null ? getConfig() : config));
 	}
 
-	public static void run(LwjglApplicationConfiguration config, int tileSize, GdxMap map) {
+	public static void run(JglfwApplicationConfiguration config, int tileSize, GdxMap map) {
 		run(map, config, tileSize);
 	}
 
-	static protected LwjglApplicationConfiguration getConfig() {
-		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+	static protected JglfwApplicationConfiguration getConfig() {
+		JglfwApplicationConfiguration cfg = new JglfwApplicationConfiguration();
 		cfg.title = "vtm-gdx";
 		cfg.width = 1280;
 		cfg.height = 800;
