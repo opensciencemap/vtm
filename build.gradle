@@ -19,7 +19,7 @@ allprojects {
   group = 'org.oscim'
   version = '0.5.9-SNAPSHOT'
 
-  ext.gdxVersion = "1.0-SNAPSHOT"
+  ext.gdxVersion = "1.2.0"
 
   repositories {
     mavenCentral()
