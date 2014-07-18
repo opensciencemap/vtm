@@ -48,7 +48,7 @@ public class MapRenderer {
 
 	private static int mQuadIndicesID;
 	private static int mQuadVerticesID;
-	public final static int maxQuads = 64;
+	public final static int maxQuads = 512;
 
 	public static long frametime;
 	private static boolean rerender;
@@ -349,7 +349,7 @@ public class MapRenderer {
 	}
 
 	/**
-	 * Bind indices for rendering up to 64 (MapRenderer.maxQuads) in
+	 * Bind indices for rendering up to MapRenderer.maxQuads (512) in
 	 * one draw call. Vertex order is 0-1-2 2-1-3
 	 * 
 	 * @param bind - true to activate, false to unbind (dont forget!)
