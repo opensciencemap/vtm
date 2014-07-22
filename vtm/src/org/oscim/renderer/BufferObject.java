@@ -96,6 +96,10 @@ public final class BufferObject extends Inlist<BufferObject> {
 	private final static BufferObject pool[] = new BufferObject[2];
 	private final static int counter[] = new int[2];
 
+	/**
+	 * @param target can be GL20.GL_ARRAY_BUFFER or GL20.GL_ELEMENT_ARRAY_BUFFER
+	 * @param size requested size in bytes. optional - can be 0.
+	 */
 	public static synchronized BufferObject get(int target, int size) {
 
 		int t = (target == GL20.GL_ARRAY_BUFFER) ? 0 : 1;

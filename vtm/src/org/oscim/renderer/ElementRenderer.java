@@ -120,7 +120,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 				continue;
 			}
 
-			log.debug("invalid layer {}", l.type);
+			log.error("invalid layer {}", l.type);
 			break;
 		}
 
@@ -136,7 +136,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 				l = TextureLayer.Renderer.draw(layers, l, v, div);
 				continue;
 			}
-			log.debug("invalid layer {}", l.type);
+			log.error("invalid layer {}", l.type);
 			break;
 		}
 	}

@@ -28,6 +28,7 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.TextureItem;
+import org.oscim.renderer.elements.TextureLayer;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
 import org.slf4j.Logger;
@@ -234,8 +235,7 @@ public class MapRenderer {
 	}
 
 	public void onSurfaceChanged(int width, int height) {
-		log.debug("onSurfaceChanged: new={}, {}x{}",
-		          mNewSurface, width, height);
+		//log.debug("onSurfaceChanged: new={}, {}x{}", mNewSurface, width, height);
 
 		if (width <= 0 || height <= 0)
 			return;
@@ -266,7 +266,7 @@ public class MapRenderer {
 		int[] vboIds = GLUtils.glGenBuffers(2);
 
 		mQuadIndicesID = vboIds[0];
-		int maxIndices = maxQuads * 6;
+		int maxIndices = maxQuads * TextureLayer.INDICES_PER_SPRITE;
 		short[] indices = new short[maxIndices];
 		for (int i = 0, j = 0; i < maxIndices; i += 6, j += 4) {
 			indices[i + 0] = (short) (j + 0);

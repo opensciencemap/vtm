@@ -42,7 +42,7 @@ public class ExtrusionLayers extends TileData {
 	}
 
 	public ExtrusionLayer getLayers() {
-		return (ExtrusionLayer) layers;
+		return layers;
 	}
 
 	@Override
