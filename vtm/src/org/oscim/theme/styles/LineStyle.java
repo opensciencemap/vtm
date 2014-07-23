@@ -208,5 +208,10 @@ public final class LineStyle extends RenderStyle {
 			this.cap = cap;
 			return this;
 		}
+
+		public LineBuilder fixed(boolean b) {
+			this.fixed = b;
+			return this;
+		}
 	}
 }
