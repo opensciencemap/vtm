@@ -51,6 +51,7 @@ public abstract class MapActivity extends FragmentActivity {
 	}
 
 	protected Map mMap;
+	protected MapView mMapView;
 
 	public Map map() {
 		return mMap;
@@ -86,21 +87,24 @@ public abstract class MapActivity extends FragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		mMapView.onResume();
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		mMapView.onPause();
 	}
 
 	/**
 	 * This method is called once by each MapView during its setup process.
 	 * 
-	 * @param map
+	 * @param mapView
 	 *            the calling MapView.
 	 */
-	public final void registerMapView(MapView map) {
-		mMap = map.map();
+	public final void registerMapView(MapView mapView) {
+		mMapView = mapView;
+		mMap = mapView.map();
 
 		SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCES_FILE,
 		                                                           MODE_PRIVATE);
