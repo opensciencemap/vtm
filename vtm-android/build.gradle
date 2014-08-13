@@ -3,7 +3,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.11.1'
+    classpath 'com.android.tools.build:gradle:0.12.+'
     // for aar/maven stuff
     // https://github.com/dcendents/android-maven-plugin
     classpath 'com.github.dcendents:android-maven-plugin:1.0'
@@ -21,7 +21,7 @@ dependencies {
   //compile 'org.oscim:vtm:0.5.9-SNAPSHOT'
   compile project(':vtm')
 
-  compile 'com.android.support:support-v4:19.1.0'
+  compile 'com.android.support:support-v4:19.+'
 
   // -> might be more efficient, but configuring
   // log-levels is way too complicated...
@@ -35,7 +35,7 @@ dependencies {
 
 android {
   compileSdkVersion 19
-  buildToolsVersion '19.1'
+  buildToolsVersion '20.0'
 
   sourceSets {
     main {
