@@ -1,6 +1,3 @@
 [submodule "vtm-ext-libs"]
 	path = vtm-ext-libs
 	url = https://github.com/hjanetzek/vtm-ext-libs.git
-[submodule "vtm-android-app"]
-	path = vtm-android-app
-	url = https://github.com/opensciencemap/vtm-app.git
