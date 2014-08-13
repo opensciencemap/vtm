@@ -74,7 +74,17 @@ public class OkHttpEngine implements HttpEngine {
 
 	@Override
 	public void close() {
-		IOUtils.closeQuietly(inputStream);
+		if (inputStream == null)
+			return;
+
+		final InputStream is = inputStream;
+		inputStream = null;
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				IOUtils.closeQuietly(is);
+			}
+		}).start();
 	}
 
 	@Override
@@ -84,7 +94,9 @@ public class OkHttpEngine implements HttpEngine {
 
 	@Override
 	public boolean requestCompleted(boolean success) {
-		close();
+		IOUtils.closeQuietly(inputStream);
+		inputStream = null;
+
 		return success;
 	}
 }
