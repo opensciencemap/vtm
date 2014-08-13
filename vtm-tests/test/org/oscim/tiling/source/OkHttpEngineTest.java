@@ -3,7 +3,6 @@ package org.oscim.tiling.source;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -65,25 +64,23 @@ public class OkHttpEngineTest {
 		assertThat(response).isEqualTo("TEST RESPONSE");
 	}
 
-	@Test(expected = IOException.class)
-	public void close_shouldCloseInputStream() throws Exception {
-		engine.sendRequest(new Tile(1, 2, new Integer(3).byteValue()));
-		engine.close();
-
-		// Calling read after the stream is closed should throw an exception.
-		InputStream responseStream = engine.read();
-		responseStream.read();
-	}
-
-	@Test(expected = IOException.class)
-	public void requestCompleted_shouldCloseInputStream() throws Exception {
-		engine.sendRequest(new Tile(1, 2, new Integer(3).byteValue()));
-		engine.requestCompleted(true);
-
-		// Calling read after the stream is closed should throw an exception.
-		InputStream responseStream = engine.read();
-		responseStream.read();
-	}
+	//	@Test(expected = IOException.class)
+	//	public void close_shouldCloseInputStream() throws Exception {
+	//		engine.sendRequest(new Tile(1, 2, new Integer(3).byteValue()));
+	//		engine.close();
+	//		// Calling read after the stream is closed should throw an exception.
+	//		InputStream responseStream = engine.read();
+	//		responseStream.read();
+	//	}
+	//
+	//	@Test(expected = IOException.class)
+	//	public void requestCompleted_shouldCloseInputStream() throws Exception {
+	//		engine.sendRequest(new Tile(1, 2, new Integer(3).byteValue()));
+	//		engine.requestCompleted(true);
+	//		// Calling read after the stream is closed should throw an exception.
+	//		InputStream responseStream = engine.read();
+	//		responseStream.read();
+	//	}
 
 	@Test
 	public void requestCompleted_shouldReturnValueGiven() throws Exception {
