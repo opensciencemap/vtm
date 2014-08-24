@@ -554,7 +554,7 @@ public class MapDatabase implements ITileDataSource {
 		}
 
 		//short[] wayLengths = new short[numBlocks];
-		short[] wayLengths = mElem.ensureIndexSize(numBlocks, false);
+		int[] wayLengths = mElem.ensureIndexSize(numBlocks, false);
 		if (wayLengths.length > numBlocks)
 			wayLengths[numBlocks] = -1;
 
@@ -962,7 +962,7 @@ public class MapDatabase implements ITileDataSource {
 	private boolean projectToTile(GeometryBuffer geom) {
 
 		float[] coords = geom.points;
-		short[] indices = geom.index;
+		int[] indices = geom.index;
 
 		long x = mTile.tileX * Tile.SIZE;
 		long y = mTile.tileY * Tile.SIZE + Tile.SIZE;

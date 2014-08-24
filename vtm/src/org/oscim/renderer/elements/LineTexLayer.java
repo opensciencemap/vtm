@@ -105,7 +105,7 @@ public final class LineTexLayer extends RenderElement {
 		addLine(geom.points, geom.index);
 	}
 
-	public void addLine(float[] points, short[] index) {
+	public void addLine(float[] points, int[] index) {
 
 		if (vertexItems.empty()) {
 			/* HACK add one vertex offset when compiling

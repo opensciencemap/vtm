@@ -33,7 +33,7 @@ public class Tessellator {
 	 * Special version for ExtrusionLayer to match indices with vertex
 	 * positions.
 	 */
-	public static int tessellate(float[] points, int ppos, int plen, short[] index,
+	public static int tessellate(float[] points, int ppos, int plen, int[] index,
 	        int ipos, int rings, int vertexOffset, VertexData outTris) {
 
 		int[] result = new int[2];
@@ -156,6 +156,7 @@ public class Tessellator {
 		return 1;
 	}
 
+	/* FIXME This modifies geom ?! */
 	public static int tessellate(GeometryBuffer geom, float scale,
 	        VertexData outPoints, VertexData outTris, int vertexOffset) {
 
@@ -180,6 +181,7 @@ public class Tessellator {
 				numPoints += geom.index[idx];
 			}
 
+			/* FIXME !!! */
 			for (int i = pointPos; i < pointPos + numPoints; i += 2) {
 				geom.points[i + 0] = (int) (geom.points[i + 0] * s);
 				geom.points[i + 1] = (int) (geom.points[i + 1] * s);
@@ -257,7 +259,7 @@ public class Tessellator {
 	 * @return context - must be freed with tessFinish()
 	 */
 	protected static native long tessellate(float[] points, int pos,
-	        short[] index, int ipos, int numRings, int[] result);
+	        int[] index, int ipos, int numRings, int[] result);
 
 	protected static native void tessFinish(long ctx);
 
@@ -268,7 +270,7 @@ public class Tessellator {
 
 	protected static native int tessGetVerticesFloat(long ctx, float[] coordinates);
 
-	protected static native int tessGetIndices(long ctx, short[] indices);
+	protected static native int tessGetIndices(long ctx, int[] indices);
 
 	protected static native int tessGetIndicesWO(long ctx, short[] indices, int offset);
 }

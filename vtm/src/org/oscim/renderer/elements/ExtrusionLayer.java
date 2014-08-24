@@ -153,7 +153,7 @@ public class ExtrusionLayer extends RenderElement {
 		if (element.type != GeometryType.TRIS)
 			return;
 
-		short[] index = element.index;
+		int[] index = element.index;
 		float[] points = element.points;
 
 		int vertexCnt = sumVertices;
@@ -338,7 +338,7 @@ public class ExtrusionLayer extends RenderElement {
 
 	public void add(MapElement element, float height, float minHeight) {
 
-		short[] index = element.index;
+		int[] index = element.index;
 		float[] points = element.points;
 
 		/* 10 cm steps */
@@ -415,7 +415,7 @@ public class ExtrusionLayer extends RenderElement {
 
 	/** roof indices for concave shapes */
 	private void addRoof(int startVertex, GeometryBuffer geom, int ipos, int ppos) {
-		short[] index = geom.index;
+		int[] index = geom.index;
 		float[] points = geom.points;
 
 		int len = 0;

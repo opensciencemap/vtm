@@ -43,7 +43,7 @@ public final class LineLayer extends RenderElement {
 	/** scale factor mapping extrusion vector to short values */
 	public static final float DIR_SCALE = 2048;
 
-	/** maximal resoultion */
+	/** maximal resolution */
 	private static final float MIN_DIST = 1 / 8f;
 
 	/**
@@ -110,7 +110,7 @@ public final class LineLayer extends RenderElement {
 			addLine(points, null, numPoints, closed);
 	}
 
-	private void addLine(float[] points, short[] index, int numPoints, boolean closed) {
+	private void addLine(float[] points, int[] index, int numPoints, boolean closed) {
 
 		boolean rounded = false;
 		boolean squared = false;

@@ -319,7 +319,7 @@ public abstract class PbfDecoder implements ITileDecoder {
 		return ((val >>> 1) ^ -(val & 1));
 	}
 
-	public void decodeVarintArray(int num, short[] array) throws IOException {
+	public void decodeVarintArray(int num, int[] array) throws IOException {
 		int bytes = decodeVarint32();
 		fillBuffer(bytes);
 
@@ -353,7 +353,7 @@ public abstract class PbfDecoder implements ITileDecoder {
 				}
 			}
 
-			array[cnt] = (short) val;
+			array[cnt] = val;
 		}
 
 		if (pos != bufferPos + bytes)

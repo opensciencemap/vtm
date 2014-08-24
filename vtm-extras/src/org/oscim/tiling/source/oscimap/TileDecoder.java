@@ -369,7 +369,7 @@ public class TileDecoder extends PbfDecoder {
 
 		decodeVarintArray(indexCnt, mElem.index);
 
-		short[] index = mElem.index;
+		int[] index = mElem.index;
 		int coordCnt = 0;
 
 		for (int i = 0; i < indexCnt; i++) {

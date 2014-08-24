@@ -65,7 +65,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 		private static final int TAG_ELEM_MIN_HEIGHT = 32;
 		private static final int TAG_ELEM_PRIORITY = 41;
 
-		private short[] mSArray;
+		private int[] mSArray;
 		private final TagSet mTileTags;
 		private final MapElement mElem;
 
@@ -82,7 +82,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 			mTileTags = new TagSet(20);
 
 			// temp array for decoding shorts
-			mSArray = new short[100];
+			mSArray = new int[100];
 		}
 
 		@Override
@@ -115,7 +115,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 					case TAG_TILE_TAG_KEYS:
 						int len = numTags;
 						if (mSArray.length < len)
-							mSArray = new short[len];
+							mSArray = new int[len];
 
 						decodeVarintArray(numTags, mSArray);
 						break;
@@ -163,7 +163,7 @@ public class OSciMap2TileSource extends UrlTileSource {
 			mElem.ensureIndexSize(indexCnt, false);
 			decodeVarintArray(indexCnt, mElem.index);
 
-			short[] index = mElem.index;
+			int[] index = mElem.index;
 			int coordCnt = 0;
 
 			for (int i = 0; i < indexCnt; i++) {

@@ -40,7 +40,7 @@ class S3DBTileLoader extends TileLoader {
 		        4096, 0, 0,
 		        0, 4096, 0,
 		        4096, 4096, 0 };
-		g.index = new short[] { 0, 1, 2, 2, 1, 3 };
+		g.index = new int[] { 0, 1, 2, 2, 1, 3 };
 		mTilePlane.tags.add(new Tag("c", "transparent"));
 	}
 

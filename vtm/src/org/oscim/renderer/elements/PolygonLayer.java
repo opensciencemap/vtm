@@ -78,7 +78,7 @@ public final class PolygonLayer extends IndexedRenderElement {
 	float ymax = Short.MIN_VALUE;
 	float[] bbox = new float[8];
 
-	public void addPolygon(float[] points, short[] index) {
+	public void addPolygon(float[] points, int[] index) {
 		short center = (short) ((Tile.SIZE >> 1) * S);
 
 		short id = (short) numVertices;

@@ -59,7 +59,7 @@ public class TileDecoder extends PbfDecoder {
 	private static final int TAG_ELEM_COORDS = 13;
 	private static final int TAG_ELEM_LAYER = 21;
 
-	private short[] mSArray = new short[100];
+	private int[] mSArray = new int[100];
 
 	private Tile mTile;
 
@@ -153,7 +153,7 @@ public class TileDecoder extends PbfDecoder {
 				case TAG_TILE_TAGS:
 					int len = numTags * 2;
 					if (mSArray.length < len)
-						mSArray = new short[len];
+						mSArray = new int[len];
 
 					decodeVarintArray(len, mSArray);
 					if (!decodeTileTags(numTags, mSArray, keys, values)) {
@@ -181,7 +181,7 @@ public class TileDecoder extends PbfDecoder {
 		return true;
 	}
 
-	private boolean decodeTileTags(int numTags, short[] tagIdx,
+	private boolean decodeTileTags(int numTags, int[] tagIdx,
 	        String[] keys, String[] vals) {
 
 		Tag tag;
@@ -234,7 +234,7 @@ public class TileDecoder extends PbfDecoder {
 		mElem.ensureIndexSize(indexCnt, false);
 		decodeVarintArray(indexCnt, mElem.index);
 
-		short[] index = mElem.index;
+		int[] index = mElem.index;
 		int coordCnt = 0;
 
 		if (shift) {
@@ -373,8 +373,8 @@ public class TileDecoder extends PbfDecoder {
 
 	private boolean decodeElementTags(int numTags) throws IOException {
 		if (mSArray.length < numTags)
-			mSArray = new short[numTags];
-		short[] tagIds = mSArray;
+			mSArray = new int[numTags];
+		int[] tagIds = mSArray;
 
 		decodeVarintArray(numTags, tagIds);
 

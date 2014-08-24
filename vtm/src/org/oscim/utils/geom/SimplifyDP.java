@@ -36,7 +36,7 @@ public class SimplifyDP {
 	int[] stack = new int[32];
 
 	public void simplify(GeometryBuffer geom, float sqTolerance) {
-		short[] idx = geom.index;
+		int[] idx = geom.index;
 
 		int inPos = 0;
 		int outPos = 0;

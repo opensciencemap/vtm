@@ -56,7 +56,7 @@ public class GeometryBuffer {
 	public float[] points;
 
 	/** The indexes. */
-	public short[] index;
+	public int[] index;
 
 	/** The current index position. */
 	public int indexPos;
@@ -76,11 +76,11 @@ public class GeometryBuffer {
 	 * @param points the points
 	 * @param index the index
 	 */
-	public GeometryBuffer(float[] points, short[] index) {
+	public GeometryBuffer(float[] points, int[] index) {
 		if (points == null)
 			points = new float[GROW_POINTS];
 		if (index == null)
-			index = new short[GROW_INDICES];
+			index = new int[GROW_INDICES];
 
 		this.points = points;
 		this.index = index;
@@ -129,7 +129,7 @@ public class GeometryBuffer {
 	 * @param numIndices the num indices
 	 */
 	public GeometryBuffer(int numPoints, int numIndices) {
-		this(new float[numPoints * 2], new short[numIndices]);
+		this(new float[numPoints * 2], new int[numIndices]);
 	}
 
 	/**
@@ -304,11 +304,11 @@ public class GeometryBuffer {
 	 * @param copy the copy
 	 * @return the short[] array holding current index
 	 */
-	public short[] ensureIndexSize(int size, boolean copy) {
+	public int[] ensureIndexSize(int size, boolean copy) {
 		if (size < index.length)
 			return index;
 
-		short[] newIndex = new short[size + GROW_INDICES];
+		int[] newIndex = new int[size + GROW_INDICES];
 		if (copy)
 			System.arraycopy(index, 0, newIndex, 0, index.length);
 

@@ -79,7 +79,7 @@ public class TileClipper {
 
 			int numLines = mLineClipper.clipLine(geom, out);
 
-			short idx[] = geom.ensureIndexSize(numLines + 1, false);
+			int idx[] = geom.ensureIndexSize(numLines + 1, false);
 			System.arraycopy(out.index, 0, idx, 0, numLines);
 			geom.index[numLines] = -1;
 
