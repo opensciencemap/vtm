@@ -263,13 +263,13 @@ public class TileCache implements ITileCache {
 		if (!cursor.moveToFirst()) {
 			if (dbg)
 				log.debug("not in cache {}", tile);
+
+			cursor.close();
 			return null;
 		}
 
 		InputStream in = new ByteArrayInputStream(cursor.getBlob(0));
-
-		if (!cursor.isClosed())
-			cursor.close();
+		cursor.close();
 
 		if (dbg)
 			log.debug("load tile {}", tile);
