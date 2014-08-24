@@ -38,7 +38,7 @@ public interface ITileCache {
 	 * @param tile
 	 *            The accessed tile.
 	 * @return
-	 *         The stored file for this tile.
+	 *         The stored file for this tile or null if tile is not stored.
 	 */
 	TileReader getTile(Tile tile);
 
@@ -52,8 +52,6 @@ public interface ITileCache {
 		Tile getTile();
 
 		InputStream getInputStream();
-
-		int getBytes();
 	}
 
 	public interface TileWriter {
