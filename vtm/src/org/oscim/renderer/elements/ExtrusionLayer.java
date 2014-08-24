@@ -81,7 +81,7 @@ public class ExtrusionLayer extends RenderElement {
 		mIndices = new VertexData[5];
 
 		for (int i = 0; i <= IND_MESH; i++)
-			mIndices[i] = VertexData.get();
+			mIndices[i] = new VertexData();
 
 		mClipper = new LineClipper(0, 0, Tile.SIZE, Tile.SIZE);
 	}
@@ -104,7 +104,7 @@ public class ExtrusionLayer extends RenderElement {
 		mGroundResolution = groundResolution;
 
 		mIndices = new VertexData[5];
-		mIndices[4] = VertexData.get();
+		mIndices[4] = new VertexData();
 
 		synchronized (vertexPool) {
 			mVertexMap = vertexMapPool.get();

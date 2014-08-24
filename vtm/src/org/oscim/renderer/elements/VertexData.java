@@ -25,10 +25,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A linked list of array chunks to hold temporary vertex data.
+ * 
  * TODO override append() etc to update internal (cur) state.
  */
 public class VertexData extends Inlist.List<Chunk> {
 	static final Logger log = LoggerFactory.getLogger(VertexData.class);
+
+	/**
+	 * Size of array chunks. Must be multiple of:
+	 * 4 (LineLayer/PolygonLayer),
+	 * 24 (TexLineLayer - one block, i.e. two segments)
+	 * 24 (TextureLayer)
+	 */
+	public static final int SIZE = 360;
+
+	/**
+	 * Shared chunk pool size.
+	 */
+	private static final int MAX_POOL = 500;
 
 	public static class Chunk extends Inlist<Chunk> {
 		public final short[] vertices = new short[SIZE];
@@ -78,15 +93,7 @@ public class VertexData extends Inlist.List<Chunk> {
 		return super.clear();
 	}
 
-	private static final int MAX_POOL = 500;
-
 	private final static Pool pool = new Pool();
-
-	/* Must be multiple of
-	 * 4 (LineLayer/PolygonLayer),
-	 * 24 (TexLineLayer - one block, i.e. two segments)
-	 * 24 (TextureLayer) */
-	public static final int SIZE = 360;
 
 	public void dispose() {
 		pool.releaseAll(super.clear());
@@ -184,11 +191,11 @@ public class VertexData extends Inlist.List<Chunk> {
 		used += 6;
 	}
 
-	public static VertexData get() {
-		return new VertexData();
-	}
-
-	/** When changing the position releaseChunk to update internal state */
+	/**
+	 * Direct access to the current chunk of VertexData. Use with care!
+	 * 
+	 * When changing the position use releaseChunk to update internal state
+	 */
 	public Chunk obtainChunk() {
 		if (used == SIZE)
 			getNext();
@@ -201,16 +208,16 @@ public class VertexData extends Inlist.List<Chunk> {
 		used = cur.used;
 	}
 
+	/* Do not use! */
 	public void seek(int offset) {
 		used += offset;
 		cur.used = used;
 
 		if (used > SIZE || used < 0)
-			throw new IllegalStateException("seekkeed: " + offset + ":" + used);
+			throw new IllegalStateException("seeked too far: " + offset + "/" + used);
 	}
 
 	public boolean empty() {
 		return cur == null;
 	}
-
 }
