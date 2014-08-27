@@ -270,6 +270,10 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void renderArea(AreaStyle area, int level) {
+		/* dont add faded out polygon layers */
+		if (area.fadeScale > 0 && mTile.zoomLevel < area.fadeScale + 1)
+			return;
+
 		int nLevel = mCurBucket + level;
 
 		if (USE_MESH_POLY) {
