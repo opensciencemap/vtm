@@ -16,11 +16,11 @@
  */
 package org.oscim.renderer.bucket;
 
-import static org.oscim.backend.GL20.GL_LINES;
 import static org.oscim.backend.GL20.GL_SHORT;
 import static org.oscim.backend.GL20.GL_TRIANGLES;
 import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
 
+import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MercatorProjection;
@@ -140,6 +140,9 @@ public class MeshBucket extends RenderBucket {
 			float heightOffset = 0;
 			GL.glUniform1f(s.uHeight, heightOffset);
 
+			int zoom = v.pos.zoomLevel;
+			float scale = (float) v.pos.getZoomScale();
+
 			for (; l != null && l.type == MESH; l = l.next) {
 				MeshBucket ml = (MeshBucket) l;
 
@@ -157,9 +160,9 @@ public class MeshBucket extends RenderBucket {
 
 				if (ml.area == null)
 					GLUtils.setColor(s.uColor, Color.BLUE, 0.4f);
-				else
-					GLUtils.setColor(s.uColor, ml.area.color, 1);
-
+				else {
+					setColor(ml.area.current(), s, zoom, scale);
+				}
 				GL.glVertexAttribPointer(s.aPos, 2, GL_SHORT,
 				                         false, 0, ml.vertexOffset);
 
@@ -172,17 +175,55 @@ public class MeshBucket extends RenderBucket {
 
 				if (dbgRender) {
 					int c = (ml.area == null) ? Color.BLUE : ml.area.color;
-
-					c = ColorUtil.shiftHue(c, 0.5);
-					GLUtils.setColor(s.uColor, c, 0.8f);
-					GL.glDrawElements(GL_LINES, ml.numIndices,
-					                  GL_UNSIGNED_SHORT, 0);
+					GL.glLineWidth(1);
+					//c = ColorUtil.shiftHue(c, 0.5);
+					c = ColorUtil.modHsv(c, 1.1, 1.0, 0.8, true);
+					GLUtils.setColor(s.uColor, c, 1);
+					GL.glDrawElements(GL20.GL_LINES,
+					                  ml.numIndices,
+					                  GL_UNSIGNED_SHORT,
+					                  ml.vertexOffset);
 				}
 			}
 
 			//GL.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 			return l;
+		}
+
+		private static final int OPAQUE = 0xff000000;
+		private static final float FADE_START = 1.3f;
+
+		static void setColor(AreaStyle a, Shader s, int zoom, float scale) {
+			if (a.fadeScale >= zoom) {
+				float f = 1.0f;
+				/* fade in/out */
+				if (a.fadeScale >= zoom) {
+					if (scale > FADE_START)
+						f = scale - 1;
+					else
+						f = FADE_START - 1;
+				}
+				GLState.blend(true);
+
+				GLUtils.setColor(s.uColor, a.color, f);
+
+			} else if (a.blendScale > 0 && a.blendScale <= zoom) {
+				/* blend colors (not alpha) */
+				GLState.blend(false);
+
+				if (a.blendScale == zoom)
+					GLUtils.setColorBlend(s.uColor, a.color,
+					                      a.blendColor, scale - 1.0f);
+				else
+					GLUtils.setColor(s.uColor, a.blendColor, 1);
+
+			} else {
+				/* test if color contains alpha */
+				GLState.blend((a.color & OPAQUE) != OPAQUE);
+
+				GLUtils.setColor(s.uColor, a.color, 1);
+			}
 		}
 	}
 }
