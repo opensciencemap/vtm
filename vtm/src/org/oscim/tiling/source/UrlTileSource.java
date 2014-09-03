@@ -16,6 +16,8 @@
  */
 package org.oscim.tiling.source;
 
+import com.squareup.okhttp.HttpResponseCache;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -31,6 +33,7 @@ public abstract class UrlTileSource extends TileSource {
 	private final URL mUrl;
 	private final String[] mTilePath;
 
+	private HttpResponseCache mResponseCache;
 	private HttpEngine.Factory mHttpFactory;
 	private Map<String, String> mRequestHeaders = Collections.emptyMap();
 	private TileUrlFormatter mTileUrlFormatter = URL_FORMATTER;
@@ -85,6 +88,14 @@ public abstract class UrlTileSource extends TileSource {
 
 	public void setHttpEngine(HttpEngine.Factory httpFactory) {
 		mHttpFactory = httpFactory;
+	}
+
+	public void setResponseCache(HttpResponseCache responseCache) {
+		mResponseCache = responseCache;
+	}
+
+	public HttpResponseCache getResponseCache() {
+		return mResponseCache;
 	}
 
 	public void setHttpRequestHeaders(Map<String, String> options) {
