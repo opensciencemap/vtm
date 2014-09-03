@@ -63,10 +63,8 @@ You can run gradle tasks directly (see also `./gradlew -q tasks`):<br/>
 
 
 ## WebGL Demo
-[OpenScienceMap](http://opensciencemap.org/map/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807)
+[OpenScienceMap](http://opensciencemap.org/s3db/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807) view of Bremen.
 - hold right mouse button to change view direction
-- Keys: `g` toggle tile-grid layer `d` default- `t` tubes- `r` osmarender-theme
-
 
 
 ## Credits
