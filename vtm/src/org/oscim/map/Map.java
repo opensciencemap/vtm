@@ -43,9 +43,9 @@ public abstract class Map implements TaskQueue {
 
 	/**
 	 * Listener interface for map update notifications.
-	 * Layers implementing this interface they will be automatically
-	 * register when the layer is added to the map and unregistered when
-	 * the layer is removed.
+	 * Layers implementing this interface they will be automatically register
+	 * when the layer is added to the map and unregistered when the layer is
+	 * removed. Otherwise use map.events.bind(UpdateListener).
 	 */
 	public interface UpdateListener extends EventListener {
 		void onMapEvent(Event e, MapPosition mapPosition);
@@ -53,23 +53,32 @@ public abstract class Map implements TaskQueue {
 
 	/**
 	 * Listener interface for input events.
-	 * Layers implementing this interface they will be automatically
-	 * register when the layer is added to the map and unregistered when
-	 * the layer is removed.
+	 * Layers implementing this interface they will be automatically register
+	 * when the layer is added to the map and unregistered when the layer is
+	 * removed.
 	 */
 
 	public interface InputListener extends EventListener {
 		void onInputEvent(Event e, MotionEvent motionEvent);
 	}
 
-	/***/
-	public static Event UPDATE_EVENT = new Event();
 	/**
-	 * Map state has changed in a way that all layers should clear their state
-	 * e.g. the theme or the TilesSource has changed
+	 * UpdateListener event. Map position has changed.
+	 */
+	public static Event POSITION_EVENT = new Event();
+
+	/**
+	 * UpdateLister event. Delivered on main-thread when updateMap() was called
+	 * and no CLEAR_EVENT or POSITION_EVENT was triggered.
+	 */
+	public static Event UPDATE_EVENT = new Event();
+
+	/**
+	 * UpdateListerner event. Map state has changed in a way that all layers
+	 * should clear their state e.g. the theme or the TilesSource has changed.
+	 * TODO should have an event-source to only clear affected layers.
 	 */
 	public static Event CLEAR_EVENT = new Event();
-	public static Event POSITION_EVENT = new Event();
 
 	public final EventDispatcher<InputListener, MotionEvent> input;
 	public final EventDispatcher<UpdateListener, MapPosition> events;
@@ -82,12 +91,7 @@ public abstract class Map implements TaskQueue {
 
 	protected final MapEventLayer mEventLayer;
 	protected GestureDetector mGestureDetector;
-	/**
-	 * Listener interface for map update notifications.
-	 * Layers implementing this interface they will be automatically
-	 * register when the layer is added to the map and unregistered when
-	 * the layer is removed.
-	 */
+
 	private TileLayer mBaseLayer;
 
 	protected boolean mClearMap = true;
