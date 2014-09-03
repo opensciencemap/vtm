@@ -1,8 +1,8 @@
 #  *\<vector\<tile\>\>map*
 
 <br/>
-http://www.opensciencemap.org<br/>
-VTM is part of the OpenScienceMap project and developed at University of Bremen.
+
+VTM is developed within the [OpenScienceMap](http://opensciencemap.org) project.
 
 ## Features
 - Java map library
@@ -11,7 +11,7 @@ VTM is part of the OpenScienceMap project and developed at University of Bremen.
 - Support for multiple tile sources:
   - primary opensciencemap (.vtm)
   - mapsforge files
-  - experimental mapnik-vector-tile source
+  - GeoJSON tiles
   - bitmap: any quadtree-scheme tiles as texture
 - Backends:
   - Android
@@ -29,6 +29,9 @@ VTM is part of the OpenScienceMap project and developed at University of Bremen.
 - **vtm-web** HTML5/GWT backend
 - **vtm-web-app** HTML5/GWT application
 - **vtm-ios** iOS application
+
+The libgdx backends for GWT and iOS are very experimental. 
+
 
 ## Getting started
 
@@ -73,3 +76,4 @@ This library contains code from several projects:
 - **libgdx**: AsyncTask, MathUtils and Interpolation classes (https://github.com/libgdx)
 - **Android**: some Matrix code, TimSort (http://source.android.com)
 - **tessellate**: (https://github.com/cscheid/tessellate)
+
