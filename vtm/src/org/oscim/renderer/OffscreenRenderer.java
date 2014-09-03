@@ -46,6 +46,8 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	public OffscreenRenderer(Mode mode) {
 		this.mode = mode;
+		if (mode == Mode.SSAO || mode == Mode.SSAO_FXAA)
+			useDepthTexture = true;
 	}
 
 	protected boolean setupFBO(GLViewport viewport) {

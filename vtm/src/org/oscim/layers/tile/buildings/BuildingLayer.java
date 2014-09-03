@@ -67,7 +67,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		                                    zoomMin, zoomMax, false, true);
 
 		if (POST_AA) {
-			OffscreenRenderer or = new OffscreenRenderer(Mode.FXAA);
+			OffscreenRenderer or = new OffscreenRenderer(Mode.SSAO_FXAA);
 			or.setRenderer(mExtRenderer);
 			mRenderer = or;
 		} else {
