@@ -35,20 +35,20 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 
 	public final int type;
 
-	/** drawing order from bottom to top. */
+	/** Drawing order from bottom to top. */
 	int level;
 
-	/** number of vertices for this layer. */
+	/** Number of vertices for this layer. */
 	protected int numVertices;
 
-	/** temporary list of vertex data. */
+	/** Temporary list of vertex data. */
 	protected final VertexData vertexItems = new VertexData();
 
 	protected RenderElement(int type) {
 		this.type = type;
 	}
 
-	/** clear all resources. */
+	/** Clear all resources. */
 	protected void clear() {
 		vertexItems.dispose();
 		numVertices = 0;
@@ -67,6 +67,12 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 		compileVertexItems(sbuf);
 	}
 
+	/**
+	 * For line- and polygon-layers this is the offset
+	 * of VERTICES in its layers.vbo.
+	 * For all other types it is the byte offset in vbo.
+	 * FIXME - always use byte offset?
+	 */
 	public int getOffset() {
 		return offset;
 	}
@@ -75,11 +81,6 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 		this.offset = offset;
 	}
 
-	/**
-	 * For line- and polygon-layers this is the offset
-	 * of VERTICES in its layers.vbo.
-	 * For all other types it is the byte offset in vbo.
-	 */
 	protected int offset;
 
 	protected void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
