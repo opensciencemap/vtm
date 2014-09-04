@@ -28,6 +28,7 @@ import org.oscim.theme.styles.TextStyle;
 import org.oscim.theme.styles.TextStyle.TextBuilder;
 
 public class GridRenderer extends BucketRenderer {
+
 	private final TextBucket mTextBucket;
 	private final TextStyle mText;
 	private final LineBucket mLineBucket;
@@ -67,13 +68,18 @@ public class GridRenderer extends BucketRenderer {
 
 		mText = textStyle;
 
-		if (mText != null)
-			mTextBucket = buckets.addTextBucket(new TextBucket());
-		else
-			mTextBucket = null;
+		mLineBucket = new LineBucket(0);
+		mLineBucket.line = lineStyle;
 
-		mLineBucket = buckets.addLineBucket(0, lineStyle);
-		mLineBucket.addLine(mLines);
+		if (mText != null) {
+			mTextBucket = new TextBucket();
+			buckets.set(mTextBucket);
+			mTextBucket.next = mLineBucket;
+			buckets.set(mTextBucket);
+		} else {
+			mTextBucket = null;
+			buckets.set(mLineBucket);
+		}
 
 		mStringBuffer = new StringBuilder(32);
 	}
@@ -101,12 +107,6 @@ public class GridRenderer extends BucketRenderer {
 				tl.addText(ti);
 			}
 		}
-
-		/* render TextItems to a bitmap and prepare vertex buffer data. */
-		tl.prepare();
-
-		/* release TextItems */
-		tl.clearLabels();
 	}
 
 	@Override
@@ -131,13 +131,14 @@ public class GridRenderer extends BucketRenderer {
 		mMapPosition.scale = z;
 
 		if (mText != null) {
+			buckets.set(mTextBucket);
 			addLabels(x, y, v.pos.zoomLevel);
-			buckets.setBaseBuckets(mLineBucket);
 			mLineBucket.addLine(mLines);
-			compile();
-
-		} else if (buckets.vbo == null) {
-			compile();
+			buckets.prepare();
+			setReady(false);
 		}
+
+		if (!isReady())
+			compile();
 	}
 }

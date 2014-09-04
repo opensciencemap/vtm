@@ -61,9 +61,9 @@ public class BitmapTileLoader extends TileLoader {
 		BitmapBucket l = new BitmapBucket(false);
 		l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE, mLayer.pool);
 
-		RenderBuckets layers = new RenderBuckets();
-		layers.setTextureBuckets(l);
-		mTile.data = layers;
+		RenderBuckets b = new RenderBuckets();
+		b.set(l);
+		mTile.data = b;
 	}
 
 	@Override

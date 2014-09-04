@@ -221,7 +221,7 @@ public class PathLayer extends Layer {
 			mMapPosition.copy(t.pos);
 
 			// compile new layers
-			buckets.setBaseBuckets(t.bucket.getBaseBuckets());
+			buckets.set(t.bucket.get());
 			compile();
 		}
 	}
@@ -294,7 +294,7 @@ public class PathLayer extends Layer {
 
 			}
 			if (size == 0) {
-				if (task.bucket.getBaseBuckets() != null) {
+				if (task.bucket.get() != null) {
 					task.bucket.clear();
 					mMap.render();
 				}

@@ -50,16 +50,13 @@ public class RenderBuckets extends TileData {
 	        2, // MESH_VERTEX
 	        4, // EXTRUSION_VERTEX
 	        2, // HAIRLINE_VERTEX
+	        6, // SYMBOL
+	        6, // BITMAP
 	};
 
-	private final static int TEXTURE_VERTEX_SHORTS = 6;
 	private final static int SHORT_BYTES = 2;
 
-	/** mixed Polygon- and LineBuckets */
-	private RenderBucket baseBuckets;
-
-	/** Text- and SymbolBuckets */
-	private RenderBucket textureBuckets;
+	private RenderBucket buckets;
 
 	/**
 	 * VBO holds all vertex data to draw lines and polygons after compilation.
@@ -161,38 +158,21 @@ public class RenderBuckets extends TileData {
 		return (HairLineBucket) getBucket(level, HAIRLINE);
 	}
 
-	public TextBucket addTextBucket(TextBucket textBucket) {
-		textBucket.next = textureBuckets;
-		textureBuckets = textBucket;
-		return textBucket;
+	/**
+	 * Set new bucket items and clear previous.
+	 */
+	public void set(RenderBucket buckets) {
+		for (RenderBucket l = this.buckets; l != null; l = l.next)
+			l.clear();
+
+		this.buckets = buckets;
 	}
 
 	/**
-	 * Set new Base-Buckets and clear previous.
+	 * @return internal linked list of RenderBucket items
 	 */
-	public void setBaseBuckets(RenderBucket buckets) {
-		for (RenderBucket l = baseBuckets; l != null; l = l.next)
-			l.clear();
-
-		baseBuckets = buckets;
-	}
-
-	public RenderBucket getBaseBuckets() {
-		return baseBuckets;
-	}
-
-	/**
-	 * Set new TextureBuckets and clear previous.
-	 */
-	public void setTextureBuckets(TextureBucket tl) {
-		for (RenderBucket l = textureBuckets; l != null; l = l.next)
-			l.clear();
-
-		textureBuckets = tl;
-	}
-
-	public RenderBucket getTextureBuckets() {
-		return textureBuckets;
+	public RenderBucket get() {
+		return buckets;
 	}
 
 	private RenderBucket getBucket(int level, int type) {
@@ -211,7 +191,7 @@ public class RenderBuckets extends TileData {
 			return bucket;
 		}
 
-		RenderBucket b = baseBuckets;
+		RenderBucket b = buckets;
 		if (b == null || b.level > level) {
 			/* insert new bucket at start */
 			b = null;
@@ -248,8 +228,8 @@ public class RenderBuckets extends TileData {
 
 			if (b == null) {
 				/** insert at start */
-				bucket.next = baseBuckets;
-				baseBuckets = bucket;
+				bucket.next = buckets;
+				buckets = bucket;
 			} else {
 				bucket.next = b.next;
 				b.next = bucket;
@@ -274,11 +254,8 @@ public class RenderBuckets extends TileData {
 	private int countVboSize() {
 		int vboShorts = 0;
 
-		for (RenderBucket l = baseBuckets; l != null; l = l.next)
+		for (RenderBucket l = buckets; l != null; l = l.next)
 			vboShorts += l.numVertices * VERTEX_SHORT_CNT[l.type];
-
-		for (RenderBucket l = textureBuckets; l != null; l = l.next)
-			vboShorts += l.numVertices * TEXTURE_VERTEX_SHORTS;
 
 		return vboShorts;
 	}
@@ -286,30 +263,24 @@ public class RenderBuckets extends TileData {
 	private int countIboSize() {
 		int numIndices = 0;
 
-		for (RenderBucket l = baseBuckets; l != null; l = l.next)
-			numIndices += l.numIndices;
-
-		for (RenderBucket l = textureBuckets; l != null; l = l.next)
+		for (RenderBucket l = buckets; l != null; l = l.next)
 			numIndices += l.numIndices;
 
 		return numIndices;
 	}
 
 	public void setFrom(RenderBuckets buckets) {
-		setBaseBuckets(buckets.baseBuckets);
-		setTextureBuckets((TextureBucket) buckets.textureBuckets);
+		set(buckets.buckets);
 
 		mCurBucket = null;
-		buckets.baseBuckets = null;
-		buckets.textureBuckets = null;
+		buckets.buckets = null;
 		buckets.mCurBucket = null;
 	}
 
 	/** cleanup only when buckets are not used by tile or bucket anymore! */
 	public void clear() {
 		/* NB: set null calls clear() on each bucket! */
-		setBaseBuckets(null);
-		setTextureBuckets(null);
+		set(null);
 		mCurBucket = null;
 
 		vbo = BufferObject.release(vbo);
@@ -322,10 +293,7 @@ public class RenderBuckets extends TileData {
 	}
 
 	public void prepare() {
-		for (RenderBucket l = baseBuckets; l != null; l = l.next)
-			l.prepare();
-
-		for (RenderBucket l = textureBuckets; l != null; l = l.next)
+		for (RenderBucket l = buckets; l != null; l = l.next)
 			l.prepare();
 	}
 
@@ -343,7 +311,6 @@ public class RenderBuckets extends TileData {
 		int vboSize = countVboSize();
 
 		if (vboSize <= 0) {
-			// FIXME just clear?
 			vbo = BufferObject.release(vbo);
 			ibo = BufferObject.release(ibo);
 			return false;
@@ -364,14 +331,11 @@ public class RenderBuckets extends TileData {
 			iboData = MapRenderer.getShortBuffer(iboSize);
 		}
 
-		//>>compile(vboData, iboData, addFill);
 		int pos = addFill ? 4 : 0;
 
-		for (RenderBucket l = baseBuckets; l != null; l = l.next) {
+		for (RenderBucket l = buckets; l != null; l = l.next) {
 			if (l.type == POLYGON) {
 				l.compile(vboData, iboData);
-
-				//log.debug("offset {} {}", l.offset, pos);
 				l.vertexOffset = pos;
 				pos += l.numVertices;
 			}
@@ -379,7 +343,7 @@ public class RenderBuckets extends TileData {
 
 		offset[LINE] = vboData.position() * SHORT_BYTES;
 		pos = 0;
-		for (RenderBucket l = baseBuckets; l != null; l = l.next) {
+		for (RenderBucket l = buckets; l != null; l = l.next) {
 			if (l.type == LINE) {
 				l.compile(vboData, iboData);
 
@@ -388,18 +352,12 @@ public class RenderBuckets extends TileData {
 			}
 		}
 
-		//offset[TEXLINE] = size * SHORT_BYTES;
-
-		for (RenderBucket l = baseBuckets; l != null; l = l.next) {
-			if (l.type == TEXLINE || l.type == MESH || l.type == HAIRLINE) {
+		for (RenderBucket l = buckets; l != null; l = l.next) {
+			if (l.type != LINE && l.type != POLYGON) {
 				l.compile(vboData, iboData);
 			}
 		}
 
-		for (RenderBucket l = textureBuckets; l != null; l = l.next) {
-			l.compile(vboData, iboData);
-		}
-		//<<
 		if (vboSize != vboData.position()) {
 			log.debug("wrong vertex buffer size: "
 			        + " new size: " + vboSize

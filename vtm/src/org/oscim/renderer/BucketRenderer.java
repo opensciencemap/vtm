@@ -17,6 +17,7 @@
 package org.oscim.renderer;
 
 import static org.oscim.renderer.bucket.RenderBucket.BITMAP;
+import static org.oscim.renderer.bucket.RenderBucket.HAIRLINE;
 import static org.oscim.renderer.bucket.RenderBucket.LINE;
 import static org.oscim.renderer.bucket.RenderBucket.MESH;
 import static org.oscim.renderer.bucket.RenderBucket.POLYGON;
@@ -78,53 +79,42 @@ public abstract class BucketRenderer extends LayerRenderer {
 
 		float div = (float) (v.pos.scale / layerPos.scale);
 
-		RenderBucket b = buckets.getBaseBuckets();
+		setMatrix(v, true);
 
-		if (b != null)
-			setMatrix(v, true);
-
-		while (b != null) {
-			if (b.type == POLYGON) {
-				b = PolygonBucket.Renderer.draw(b, v, 1, true);
-				continue;
+		for (RenderBucket b = buckets.get(); b != null;) {
+			switch (b.type) {
+				case POLYGON:
+					b = PolygonBucket.Renderer.draw(b, v, 1, true);
+					break;
+				case LINE:
+					b = LineBucket.Renderer.draw(b, v, div, buckets);
+					break;
+				case TEXLINE:
+					b = LineTexBucket.Renderer.draw(b, v, div, buckets);
+					// rebind
+					buckets.ibo.bind();
+					break;
+				case MESH:
+					b = MeshBucket.Renderer.draw(b, v);
+					break;
+				case HAIRLINE:
+					b = HairLineBucket.Renderer.draw(b, v);
+					break;
+				case BITMAP:
+					b = BitmapBucket.Renderer.draw(b, v, 1, 1);
+					// rebind
+					buckets.ibo.bind();
+					break;
+				case SYMBOL:
+					b = TextureBucket.Renderer.draw(buckets, b, v, div);
+					// rebind
+					buckets.ibo.bind();
+					break;
+				default:
+					log.error("invalid bucket {}", b.type);
+					b = b.next;
+					break;
 			}
-			if (b.type == LINE) {
-				b = LineBucket.Renderer.draw(b, v, div, buckets);
-				continue;
-			}
-			if (b.type == TEXLINE) {
-				b = LineTexBucket.Renderer.draw(b, v, div, buckets);
-				// rebind
-				buckets.ibo.bind();
-				continue;
-			}
-			if (b.type == MESH) {
-				b = MeshBucket.Renderer.draw(b, v);
-				continue;
-			}
-			if (b.type == RenderBucket.HAIRLINE) {
-				b = HairLineBucket.Renderer.draw(b, v);
-				continue;
-			}
-
-			log.error("invalid bucket {}", b.type);
-			break;
-		}
-
-		b = buckets.getTextureBuckets();
-		if (b != null)
-			setMatrix(v, false);
-		while (b != null) {
-			if (b.type == BITMAP) {
-				b = BitmapBucket.Renderer.draw(b, v, 1, 1);
-				continue;
-			}
-			if (b.type == SYMBOL) {
-				b = TextureBucket.Renderer.draw(buckets, b, v, div);
-				continue;
-			}
-			log.error("invalid bucket {}", b.type);
-			break;
 		}
 	}
 

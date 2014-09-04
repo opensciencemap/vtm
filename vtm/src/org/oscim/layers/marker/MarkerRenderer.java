@@ -86,7 +86,7 @@ public class MarkerRenderer extends BucketRenderer {
 		long flip = (long) (Tile.SIZE * v.pos.scale) >> 1;
 
 		if (mItems == null) {
-			if (buckets.getTextureBuckets() != null) {
+			if (buckets.get() != null) {
 				buckets.clear();
 				compile();
 			}
@@ -162,7 +162,7 @@ public class MarkerRenderer extends BucketRenderer {
 			mSymbolLayer.pushSymbol(s);
 		}
 
-		buckets.setTextureBuckets(mSymbolLayer);
+		buckets.set(mSymbolLayer);
 		buckets.prepare();
 
 		compile();

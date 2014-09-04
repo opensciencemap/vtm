@@ -178,50 +178,40 @@ public class VectorTileRenderer extends TileRenderer {
 
 		PolygonBucket.Renderer.clip(mClipMVP, mClipMode);
 
-		RenderBucket b = buckets.getBaseBuckets();
-
 		boolean first = true;
-		while (b != null) {
-			if (b.type == POLYGON) {
-				b = PolygonBucket.Renderer.draw(b, v, div, first);
-				first = false;
 
-				/* set test for clip to tile region */
-				GL.glStencilFunc(GL_EQUAL, 0x80, 0x80);
-				continue;
+		for (RenderBucket b = buckets.get(); b != null;) {
+			switch (b.type) {
+				case POLYGON:
+					b = PolygonBucket.Renderer.draw(b, v, div, first);
+					first = false;
+					/* set test for clip to tile region */
+					GL.glStencilFunc(GL_EQUAL, 0x80, 0x80);
+					break;
+				case LINE:
+					b = LineBucket.Renderer.draw(b, v, scale, buckets);
+					break;
+				case TEXLINE:
+					b = LineTexBucket.Renderer.draw(b, v, div, buckets);
+					if (buckets.ibo != null)
+						buckets.ibo.bind();
+					break;
+				case MESH:
+					b = MeshBucket.Renderer.draw(b, v);
+					break;
+				case HAIRLINE:
+					b = HairLineBucket.Renderer.draw(b, v);
+					break;
+				case BITMAP:
+					b = BitmapBucket.Renderer.draw(b, v, 1, mLayerAlpha);
+					break;
+				default:
+					/* just in case */
+					log.error("unknown layer {}", b.type);
+					b = b.next;
+					break;
 			}
-			if (b.type == LINE) {
-				b = LineBucket.Renderer.draw(b, v, scale, buckets);
-				continue;
-			}
-			if (b.type == TEXLINE) {
-				b = LineTexBucket.Renderer.draw(b, v, div, buckets);
-				if (buckets.ibo != null)
-					buckets.ibo.bind();
-				continue;
-			}
-			if (b.type == MESH) {
-				b = MeshBucket.Renderer.draw(b, v);
-				continue;
-			}
-			if (b.type == HAIRLINE) {
-				b = HairLineBucket.Renderer.draw(b, v);
-				continue;
-			}
-
-			/* just in case */
-			log.error("unknown layer {}", b.type);
-			b = b.next;
-		}
-
-		b = buckets.getTextureBuckets();
-		while (b != null) {
-			if (b.type == BITMAP) {
-				b = BitmapBucket.Renderer.draw(b, v, 1, mLayerAlpha);
-				continue;
-			}
-			log.error("unknown layer {}", b.type);
-			b = b.next;
+			buckets.bind();
 		}
 
 		if (debugOverdraw) {

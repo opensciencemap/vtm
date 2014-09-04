@@ -67,7 +67,7 @@ class TextRenderer extends BucketRenderer {
 		}
 
 		// set new TextLayer to be uploaded and rendered
-		buckets.setTextureBuckets(t.layers);
+		buckets.set(t.layers);
 		mMapPosition = t.pos;
 		compile();
 	}
@@ -83,7 +83,7 @@ class TextRenderer extends BucketRenderer {
 
 		setMatrix(v, false);
 
-		for (RenderBucket l = buckets.getTextureBuckets(); l != null;)
+		for (RenderBucket l = buckets.get(); l != null;)
 			l = TextureBucket.Renderer.draw(buckets, l, v, scale);
 	}
 

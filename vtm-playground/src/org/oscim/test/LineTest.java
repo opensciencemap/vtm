@@ -80,7 +80,7 @@ public class LineTest extends GdxMap {
 				}
 
 				buckets.clear();
-				buckets.setBaseBuckets(ll);
+				buckets.set(ll);
 				g.clear();
 				for (int i = 0; i < 60; i++) {
 					g.startLine();

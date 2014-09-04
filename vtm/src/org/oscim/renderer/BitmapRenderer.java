@@ -60,7 +60,7 @@ public class BitmapRenderer extends BucketRenderer {
 
 			BitmapBucket l = new BitmapBucket(true);
 			l.setBitmap(mBitmap, mWidth, mHeight);
-			buckets.setTextureBuckets(l);
+			buckets.set(l);
 
 			mUpdateBitmap = true;
 		}
@@ -84,6 +84,6 @@ public class BitmapRenderer extends BucketRenderer {
 	@Override
 	protected synchronized void render(GLViewport v) {
 		v.useScreenCoordinates(false, 8);
-		BitmapBucket.Renderer.draw(buckets.getTextureBuckets(), v, 1, 1);
+		BitmapBucket.Renderer.draw(buckets.get(), v, 1, 1);
 	}
 }

@@ -53,6 +53,7 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
 	/** Clear all resources. */
 	protected void clear() {
 		vertexItems.dispose();
+		indiceItems.dispose();
 		numVertices = 0;
 		numIndices = 0;
 	}
@@ -78,6 +79,13 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
 	 */
 	public int getVertexOffset() {
 		return vertexOffset;
+	}
+
+	/**
+	 * Start position in ibo for this bucket
+	 */
+	public int getIndiceOffset() {
+		return indiceOffset;
 	}
 
 	public void setVertexOffset(int offset) {
