@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import java.nio.ShortBuffer;
 
@@ -33,8 +33,8 @@ import org.oscim.utils.pool.Pool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExtrusionLayer extends RenderElement {
-	static final Logger log = LoggerFactory.getLogger(ExtrusionLayer.class);
+public class ExtrusionBucket extends RenderBucket {
+	static final Logger log = LoggerFactory.getLogger(ExtrusionBucket.class);
 
 	private static final float S = MapRenderer.COORD_SCALE;
 
@@ -68,8 +68,8 @@ public class ExtrusionLayer extends RenderElement {
 	/**
 	 * ExtrusionLayer for polygon geometries.
 	 */
-	public ExtrusionLayer(int level, float groundResolution, float[] colors) {
-		super(RenderElement.EXTRUSION);
+	public ExtrusionBucket(int level, float groundResolution, float[] colors) {
+		super(RenderBucket.EXTRUSION);
 		this.level = level;
 		this.colors = colors;
 		this.color = 0;
@@ -87,8 +87,8 @@ public class ExtrusionLayer extends RenderElement {
 	/**
 	 * ExtrusionLayer for triangle geometries.
 	 */
-	public ExtrusionLayer(int level, float groundResolution, int color) {
-		super(RenderElement.EXTRUSION);
+	public ExtrusionBucket(int level, float groundResolution, int color) {
+		super(RenderBucket.EXTRUSION);
 		this.level = level;
 		this.color = color;
 
@@ -620,7 +620,7 @@ public class ExtrusionLayer extends RenderElement {
 		}
 	}
 
-	public ExtrusionLayer next() {
-		return (ExtrusionLayer) next;
+	public ExtrusionBucket next() {
+		return (ExtrusionBucket) next;
 	}
 }

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import java.nio.ShortBuffer;
 
@@ -24,12 +24,12 @@ import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.TextureItem.TexturePool;
+import org.oscim.renderer.bucket.TextureItem.TexturePool;
 
 /**
  * Renderer for a single bitmap, width and height must be power of 2.
  */
-public class BitmapLayer extends TextureLayer {
+public class BitmapBucket extends TextureBucket {
 	// TODO share layers.vbo() between BitmapTileLayers
 
 	//	static final Logger log = LoggerFactory.getLogger(BitmapLayer.class);
@@ -42,8 +42,8 @@ public class BitmapLayer extends TextureLayer {
 	 * @param reuseBitmap false if the Bitmap should be disposed
 	 *            after loading to texture.
 	 */
-	public BitmapLayer(boolean reuseBitmap) {
-		super(RenderElement.BITMAP);
+	public BitmapBucket(boolean reuseBitmap) {
+		super(RenderBucket.BITMAP);
 
 		mReuseBitmap = reuseBitmap;
 		mVertices = new short[24];
@@ -75,7 +75,7 @@ public class BitmapLayer extends TextureLayer {
 		}
 
 		TextureItem t = textures;
-		t.indices = TextureLayer.INDICES_PER_SPRITE;
+		t.indices = TextureBucket.INDICES_PER_SPRITE;
 	}
 
 	private void setVertices(ShortBuffer vboData) {
@@ -192,14 +192,14 @@ public class BitmapLayer extends TextureLayer {
 			shader = new Shader("texture_alpha");
 		}
 
-		public static RenderElement draw(RenderElement renderElement, GLViewport v,
+		public static RenderBucket draw(RenderBucket renderElement, GLViewport v,
 		        float scale, float alpha) {
 
 			GLState.blend(true);
 			Shader s = shader;
 			s.useProgram();
 
-			TextureLayer tl = (TextureLayer) renderElement;
+			TextureBucket tl = (TextureBucket) renderElement;
 
 			GL.glUniform1f(s.uAlpha, alpha);
 			v.mvp.setAsUniform(s.uMVP);

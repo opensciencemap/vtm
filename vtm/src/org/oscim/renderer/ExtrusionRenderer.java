@@ -18,8 +18,8 @@ package org.oscim.renderer;
 
 import org.oscim.backend.GL20;
 import org.oscim.core.Tile;
-import org.oscim.renderer.elements.ExtrusionLayer;
-import org.oscim.renderer.elements.ExtrusionLayers;
+import org.oscim.renderer.bucket.ExtrusionBucket;
+import org.oscim.renderer.bucket.ExtrusionBuckets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 	private final int mMode;
 	private Shader mShader;
 
-	protected ExtrusionLayers[] mExtrusionLayerSet;
+	protected ExtrusionBuckets[] mExtrusionLayerSet;
 	protected int mExtrusionLayerCnt;
 	protected float mAlpha = 1;
 
@@ -65,9 +65,9 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 		return true;
 	}
 
-	private void renderCombined(int vertexPointer, ExtrusionLayers els) {
+	private void renderCombined(int vertexPointer, ExtrusionBuckets els) {
 
-		for (ExtrusionLayer el = els.layers; el != null; el = el.next()) {
+		for (ExtrusionBucket el = els.layers; el != null; el = el.next()) {
 
 			GL.glVertexAttribPointer(vertexPointer, 3,
 			                         GL20.GL_SHORT, false, 8, 0);
@@ -105,7 +105,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 		GL.glDepthFunc(GL20.GL_LESS);
 		GL.glUniform1f(s.uAlpha, mAlpha);
 
-		ExtrusionLayers[] els = mExtrusionLayerSet;
+		ExtrusionBuckets[] els = mExtrusionLayerSet;
 
 		if (mTranslucent) {
 			/* only draw to depth buffer */
@@ -150,7 +150,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 				v.mvp.setAsUniform(s.uMVP);
 			}
 
-			ExtrusionLayer el = els[i].getLayers();
+			ExtrusionBucket el = els[i].getLayers();
 			for (; el != null; el = el.next()) {
 
 				if (el.colors != currentColor) {
@@ -243,7 +243,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	private static void setMatrix(GLViewport v, ExtrusionLayers l, boolean offset) {
+	private static void setMatrix(GLViewport v, ExtrusionBuckets l, boolean offset) {
 
 		int z = l.zoomLevel;
 		double curScale = Tile.SIZE * v.pos.scale;

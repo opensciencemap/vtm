@@ -9,9 +9,9 @@ import org.oscim.layers.Layer;
 import org.oscim.map.Map;
 import org.oscim.map.Map.UpdateListener;
 import org.oscim.map.Viewport;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.utils.async.SimpleWorker;
 import org.oscim.utils.geom.TileClipper;
 import org.slf4j.Logger;
@@ -64,7 +64,7 @@ public abstract class AbstractVectorLayer<T> extends Layer implements UpdateList
 	abstract protected void processFeatures(Task t, BoundingBox b);
 
 	protected static class Task {
-		public final ElementLayers layers = new ElementLayers();
+		public final RenderBuckets buckets = new RenderBuckets();
 		public final MapPosition position = new MapPosition();
 	}
 
@@ -77,8 +77,8 @@ public abstract class AbstractVectorLayer<T> extends Layer implements UpdateList
 		/** automatically in sync with worker thread */
 		@Override
 		public void cleanup(Task t) {
-			if (t.layers != null)
-				t.layers.clear();
+			if (t.buckets != null)
+				t.buckets.clear();
 		}
 
 		/** running on worker thread */
@@ -103,7 +103,7 @@ public abstract class AbstractVectorLayer<T> extends Layer implements UpdateList
 
 	}
 
-	public class Renderer extends ElementRenderer {
+	public class Renderer extends BucketRenderer {
 		MapPosition mTmpPos = new MapPosition();
 
 		@Override
@@ -117,7 +117,7 @@ public abstract class AbstractVectorLayer<T> extends Layer implements UpdateList
 			mMapPosition.copy(t.position);
 			mMapPosition.setScale(mMapPosition.scale / UNSCALE_COORD);
 
-			layers.setFrom(t.layers);
+			buckets.setFrom(t.buckets);
 
 			compile();
 			//log.debug("is ready " + isReady() + " " + layers.getSize());

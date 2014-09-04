@@ -23,7 +23,7 @@ import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.TextureItem.TexturePool;
+import org.oscim.renderer.bucket.TextureItem.TexturePool;
 import org.oscim.tiling.TileSource;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;

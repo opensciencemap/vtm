@@ -11,10 +11,10 @@ import org.jeo.map.Style;
 import org.oscim.backend.canvas.Color;
 import org.oscim.jeo.JeoUtils;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.MeshLayer;
-import org.oscim.renderer.elements.TextItem;
-import org.oscim.renderer.elements.TextLayer;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.MeshBucket;
+import org.oscim.renderer.bucket.TextBucket;
+import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.TextStyle;
@@ -26,7 +26,7 @@ import com.vividsolutions.jts.geom.LineString;
 
 public class OSMIndoorLayer extends JeoVectorLayer {
 
-	protected TextLayer mTextLayer;
+	protected TextBucket mTextLayer;
 	protected TextStyle mText = new TextBuilder()
 	    .setFontSize(16).setColor(Color.BLACK)
 	    .setStrokeWidth(2.2f).setStroke(Color.WHITE)
@@ -40,7 +40,9 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 
 	@Override
 	protected void processFeatures(Task t, Envelope b) {
-		mTextLayer = t.layers.addTextLayer(new TextLayer());
+		mTextLayer = new TextBucket();
+
+		t.buckets.set(mTextLayer);
 
 		super.processFeatures(t, b);
 
@@ -58,7 +60,7 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 
 		int level = getLevel(f);
 
-		LineLayer ll = t.layers.getLineLayer(level * 3 + 2);
+		LineBucket ll = t.buckets.getLineBucket(level * 3 + 2);
 		if (ll.line == null) {
 			RGB color = rule.color(f, CartoCSS.LINE_COLOR, RGB.black);
 			float width = rule.number(f, CartoCSS.LINE_WIDTH, 1.2f);
@@ -73,7 +75,7 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 	protected void addPolygon(Task t, Feature f, Rule rule, Geometry g) {
 		int level = getLevel(f);
 
-		LineLayer ll = t.layers.getLineLayer(level * 3 + 1);
+		LineBucket ll = t.buckets.getLineBucket(level * 3 + 1);
 
 		boolean active = activeLevels[level + 1];
 
@@ -89,7 +91,7 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 			ll.setDropDistance(0);
 		}
 
-		MeshLayer mesh = t.layers.getMeshLayer(level * 3);
+		MeshBucket mesh = t.buckets.getMeshBucket(level * 3);
 		if (mesh.area == null) {
 			int color = JeoUtils.color(rule.color(f, CartoCSS.POLYGON_FILL, RGB.red));
 			if (level > -2 && !active)

@@ -22,18 +22,18 @@ import java.util.Comparator;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.elements.SymbolItem;
-import org.oscim.renderer.elements.SymbolLayer;
+import org.oscim.renderer.bucket.SymbolBucket;
+import org.oscim.renderer.bucket.SymbolItem;
 import org.oscim.utils.TimSort;
 import org.oscim.utils.geom.GeometryUtils;
 
-public class MarkerRenderer extends ElementRenderer {
+public class MarkerRenderer extends BucketRenderer {
 
 	protected final MarkerSymbol mDefaultMarker;
 
-	private final SymbolLayer mSymbolLayer;
+	private final SymbolBucket mSymbolLayer;
 	private final float[] mBox = new float[8];
 	private final MarkerLayer<MarkerItem> mMarkerLayer;
 	private final Point mMapPoint = new Point();
@@ -61,7 +61,7 @@ public class MarkerRenderer extends ElementRenderer {
 	}
 
 	public MarkerRenderer(MarkerLayer<MarkerItem> markerLayer, MarkerSymbol defaultSymbol) {
-		mSymbolLayer = new SymbolLayer();
+		mSymbolLayer = new SymbolBucket();
 		mMarkerLayer = markerLayer;
 		mDefaultMarker = defaultSymbol;
 	}
@@ -86,8 +86,8 @@ public class MarkerRenderer extends ElementRenderer {
 		long flip = (long) (Tile.SIZE * v.pos.scale) >> 1;
 
 		if (mItems == null) {
-			if (layers.getTextureLayers() != null) {
-				layers.clear();
+			if (buckets.getTextureBuckets() != null) {
+				buckets.clear();
 				compile();
 			}
 			return;
@@ -131,7 +131,7 @@ public class MarkerRenderer extends ElementRenderer {
 		 * or more than 10 of the current items became invisible */
 		//if ((numVisible == 0) && (changedVisible == 0 && changesInvisible < 10))
 		//	return;
-		layers.clear();
+		buckets.clear();
 
 		if (numVisible == 0) {
 			compile();
@@ -162,8 +162,8 @@ public class MarkerRenderer extends ElementRenderer {
 			mSymbolLayer.pushSymbol(s);
 		}
 
-		layers.setTextureLayers(mSymbolLayer);
-		layers.prepare();
+		buckets.setTextureBuckets(mSymbolLayer);
+		buckets.prepare();
 
 		compile();
 	}

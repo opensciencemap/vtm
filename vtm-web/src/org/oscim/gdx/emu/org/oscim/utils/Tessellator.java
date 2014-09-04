@@ -1,7 +1,7 @@
 package org.oscim.utils;
 
 import org.oscim.core.GeometryBuffer;
-import org.oscim.renderer.elements.VertexData;
+import org.oscim.renderer.bucket.VertexData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

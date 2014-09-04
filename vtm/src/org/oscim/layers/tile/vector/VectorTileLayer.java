@@ -23,7 +23,7 @@ import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.tiling.TileSource;
@@ -132,7 +132,7 @@ public class VectorTileLayer extends TileLayer {
 	 * loader threads, so dont keep tile specific state.
 	 */
 	public interface TileLoaderProcessHook {
-		public boolean process(MapTile tile, ElementLayers layers, MapElement element);
+		public boolean process(MapTile tile, RenderBuckets layers, MapElement element);
 
 		/** Called on loader thread when tile loading is completed */
 		public void complete(MapTile tile, boolean success);
@@ -145,7 +145,7 @@ public class VectorTileLayer extends TileLayer {
 	 */
 	public interface TileLoaderThemeHook {
 		/** Called for each RenderStyle found for a MapElement. */
-		public boolean render(MapTile tile, ElementLayers layers,
+		public boolean render(MapTile tile, RenderBuckets buckets,
 		        MapElement element, RenderStyle style, int level);
 
 		/** Called on loader thread when tile loading is completed */
@@ -172,7 +172,7 @@ public class VectorTileLayer extends TileLayer {
 		mTileSource.close();
 	}
 
-	public void callThemeHooks(MapTile tile, ElementLayers layers, MapElement element,
+	public void callThemeHooks(MapTile tile, RenderBuckets layers, MapElement element,
 	        RenderStyle style, int level) {
 
 		LList<TileLoaderThemeHook> th = mLoaderThemeHooks.head();
@@ -184,7 +184,7 @@ public class VectorTileLayer extends TileLayer {
 		}
 	}
 
-	public boolean callProcessHooks(MapTile tile, ElementLayers layers, MapElement element) {
+	public boolean callProcessHooks(MapTile tile, RenderBuckets layers, MapElement element) {
 
 		LList<TileLoaderProcessHook> ph = mLoaderProcessHooks.head();
 		while (ph != null) {

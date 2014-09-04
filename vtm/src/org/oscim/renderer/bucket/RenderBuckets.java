@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
-import static org.oscim.renderer.elements.RenderElement.HAIRLINE;
-import static org.oscim.renderer.elements.RenderElement.LINE;
-import static org.oscim.renderer.elements.RenderElement.MESH;
-import static org.oscim.renderer.elements.RenderElement.POLYGON;
-import static org.oscim.renderer.elements.RenderElement.TEXLINE;
+import static org.oscim.renderer.bucket.RenderBucket.HAIRLINE;
+import static org.oscim.renderer.bucket.RenderBucket.LINE;
+import static org.oscim.renderer.bucket.RenderBucket.MESH;
+import static org.oscim.renderer.bucket.RenderBucket.POLYGON;
+import static org.oscim.renderer.bucket.RenderBucket.TEXLINE;
 
 import java.nio.ShortBuffer;
 
@@ -39,9 +39,9 @@ import org.slf4j.LoggerFactory;
  * MapTile. It can be used for other purposes as well but some optimizations
  * (and limitations) probably wont make sense in different contexts.
  */
-public class ElementLayers extends TileData {
+public class RenderBuckets extends TileData {
 
-	static final Logger log = LoggerFactory.getLogger(ElementLayers.class);
+	static final Logger log = LoggerFactory.getLogger(RenderBuckets.class);
 
 	public final static int[] VERTEX_SHORT_CNT = {
 	        4, // LINE_VERTEX
@@ -55,11 +55,11 @@ public class ElementLayers extends TileData {
 	private final static int TEXTURE_VERTEX_SHORTS = 6;
 	private final static int SHORT_BYTES = 2;
 
-	/** mixed Polygon- and LineLayer */
-	private RenderElement baseLayers;
+	/** mixed Polygon- and LineBuckets */
+	private RenderBucket baseBuckets;
 
-	/** Text- and SymbolLayer */
-	private RenderElement textureLayers;
+	/** Text- and SymbolBuckets */
+	private RenderBucket textureBuckets;
 
 	/**
 	 * VBO holds all vertex data to draw lines and polygons after compilation.
@@ -76,18 +76,18 @@ public class ElementLayers extends TileData {
 	 * To not need to switch VertexAttribPointer positions all the time:
 	 * 1. polygons are packed in VBO at offset 0
 	 * 2. lines afterwards at lineOffset
-	 * 3. other layers keep their byte offset in offset
+	 * 3. other buckets keep their byte offset in offset
 	 */
 	public int[] offset = { 0, 0 };
 
-	private RenderElement mCurLayer;
+	private RenderBucket mCurBucket;
 
 	/**
-	 * add the LineLayer for a level with a given Line style. Levels are
+	 * add the LineBucket for a level with a given Line style. Levels are
 	 * ordered from bottom (0) to top
 	 */
-	public LineLayer addLineLayer(int level, LineStyle style) {
-		LineLayer l = (LineLayer) getLayer(level, LINE);
+	public LineBucket addLineBucket(int level, LineStyle style) {
+		LineBucket l = (LineBucket) getBucket(level, LINE);
 		if (l == null)
 			return null;
 		// FIXME l.scale = style.width;
@@ -96,24 +96,24 @@ public class ElementLayers extends TileData {
 		return l;
 	}
 
-	public PolygonLayer addPolygonLayer(int level, AreaStyle style) {
-		PolygonLayer l = (PolygonLayer) getLayer(level, POLYGON);
+	public PolygonBucket addPolygonBucket(int level, AreaStyle style) {
+		PolygonBucket l = (PolygonBucket) getBucket(level, POLYGON);
 		if (l == null)
 			return null;
 		l.area = style;
 		return l;
 	}
 
-	public MeshLayer addMeshLayer(int level, AreaStyle style) {
-		MeshLayer l = (MeshLayer) getLayer(level, MESH);
+	public MeshBucket addMeshBucket(int level, AreaStyle style) {
+		MeshBucket l = (MeshBucket) getBucket(level, MESH);
 		if (l == null)
 			return null;
 		l.area = style;
 		return l;
 	}
 
-	public HairLineLayer addHairLineLayer(int level, LineStyle style) {
-		HairLineLayer ll = getHairLineLayer(level);
+	public HairLineBucket addHairLineBucket(int level, LineStyle style) {
+		HairLineBucket ll = getHairLineBucket(level);
 		if (ll == null)
 			return null;
 		ll.line = style;
@@ -122,162 +122,162 @@ public class ElementLayers extends TileData {
 	}
 
 	/**
-	 * Get or add the LineLayer for a level. Levels are ordered from
+	 * Get or add the LineBucket for a level. Levels are ordered from
 	 * bottom (0) to top
 	 */
-	public LineLayer getLineLayer(int level) {
-		return (LineLayer) getLayer(level, LINE);
+	public LineBucket getLineBucket(int level) {
+		return (LineBucket) getBucket(level, LINE);
 	}
 
 	/**
-	 * Get or add the MeshLayer for a level. Levels are ordered from
+	 * Get or add the MeshBucket for a level. Levels are ordered from
 	 * bottom (0) to top
 	 */
-	public MeshLayer getMeshLayer(int level) {
-		return (MeshLayer) getLayer(level, MESH);
+	public MeshBucket getMeshBucket(int level) {
+		return (MeshBucket) getBucket(level, MESH);
 	}
 
 	/**
-	 * Get or add the PolygonLayer for a level. Levels are ordered from
+	 * Get or add the PolygonBucket for a level. Levels are ordered from
 	 * bottom (0) to top
 	 */
-	public PolygonLayer getPolygonLayer(int level) {
-		return (PolygonLayer) getLayer(level, POLYGON);
+	public PolygonBucket getPolygonBucket(int level) {
+		return (PolygonBucket) getBucket(level, POLYGON);
 	}
 
 	/**
-	 * Get or add the TexLineLayer for a level. Levels are ordered from
+	 * Get or add the TexLineBucket for a level. Levels are ordered from
 	 * bottom (0) to top
 	 */
-	public LineTexLayer getLineTexLayer(int level) {
-		return (LineTexLayer) getLayer(level, TEXLINE);
+	public LineTexBucket getLineTexBucket(int level) {
+		return (LineTexBucket) getBucket(level, TEXLINE);
 	}
 
 	/**
-	 * Get or add the TexLineLayer for a level. Levels are ordered from
+	 * Get or add the TexLineBucket for a level. Levels are ordered from
 	 * bottom (0) to top
 	 */
-	public HairLineLayer getHairLineLayer(int level) {
-		return (HairLineLayer) getLayer(level, HAIRLINE);
+	public HairLineBucket getHairLineBucket(int level) {
+		return (HairLineBucket) getBucket(level, HAIRLINE);
 	}
 
-	public TextLayer addTextLayer(TextLayer textLayer) {
-		textLayer.next = textureLayers;
-		textureLayers = textLayer;
-		return textLayer;
+	public TextBucket addTextBucket(TextBucket textBucket) {
+		textBucket.next = textureBuckets;
+		textureBuckets = textBucket;
+		return textBucket;
 	}
 
 	/**
-	 * Set new Base-Layers and clear previous.
+	 * Set new Base-Buckets and clear previous.
 	 */
-	public void setBaseLayers(RenderElement layers) {
-		for (RenderElement l = baseLayers; l != null; l = l.next)
+	public void setBaseBuckets(RenderBucket buckets) {
+		for (RenderBucket l = baseBuckets; l != null; l = l.next)
 			l.clear();
 
-		baseLayers = layers;
+		baseBuckets = buckets;
 	}
 
-	public RenderElement getBaseLayers() {
-		return baseLayers;
+	public RenderBucket getBaseBuckets() {
+		return baseBuckets;
 	}
 
 	/**
-	 * Set new TextureLayers and clear previous.
+	 * Set new TextureBuckets and clear previous.
 	 */
-	public void setTextureLayers(TextureLayer tl) {
-		for (RenderElement l = textureLayers; l != null; l = l.next)
+	public void setTextureBuckets(TextureBucket tl) {
+		for (RenderBucket l = textureBuckets; l != null; l = l.next)
 			l.clear();
 
-		textureLayers = tl;
+		textureBuckets = tl;
 	}
 
-	public RenderElement getTextureLayers() {
-		return textureLayers;
+	public RenderBucket getTextureBuckets() {
+		return textureBuckets;
 	}
 
-	private RenderElement getLayer(int level, int type) {
-		RenderElement layer = null;
+	private RenderBucket getBucket(int level, int type) {
+		RenderBucket bucket = null;
 
-		if (mCurLayer != null && mCurLayer.level == level) {
-			layer = mCurLayer;
-			if (layer.type != type) {
-				log.error("BUG wrong layer {} {} on layer {}",
-				          Integer.valueOf(layer.type),
+		if (mCurBucket != null && mCurBucket.level == level) {
+			bucket = mCurBucket;
+			if (bucket.type != type) {
+				log.error("BUG wrong bucket {} {} on level {}",
+				          Integer.valueOf(bucket.type),
 				          Integer.valueOf(type),
 				          Integer.valueOf(level));
 
 				throw new IllegalArgumentException();
 			}
-			return layer;
+			return bucket;
 		}
 
-		RenderElement l = baseLayers;
-		if (l == null || l.level > level) {
-			/* insert new layer at start */
-			l = null;
+		RenderBucket b = baseBuckets;
+		if (b == null || b.level > level) {
+			/* insert new bucket at start */
+			b = null;
 		} else {
 			while (true) {
-				/* found layer */
-				if (l.level == level) {
-					layer = l;
+				/* found bucket */
+				if (b.level == level) {
+					bucket = b;
 					break;
 				}
-				/* insert layer between current and next layer */
-				if (l.next == null || l.next.level > level)
+				/* insert bucket between current and next bucket */
+				if (b.next == null || b.next.level > level)
 					break;
 
-				l = l.next;
+				b = b.next;
 			}
 		}
 
-		if (layer == null) {
+		if (bucket == null) {
 			/* add a new RenderElement */
 			if (type == LINE)
-				layer = new LineLayer(level);
+				bucket = new LineBucket(level);
 			else if (type == POLYGON)
-				layer = new PolygonLayer(level);
+				bucket = new PolygonBucket(level);
 			else if (type == TEXLINE)
-				layer = new LineTexLayer(level);
+				bucket = new LineTexBucket(level);
 			else if (type == MESH)
-				layer = new MeshLayer(level);
+				bucket = new MeshBucket(level);
 			else if (type == HAIRLINE)
-				layer = new HairLineLayer(level);
+				bucket = new HairLineBucket(level);
 
-			if (layer == null)
+			if (bucket == null)
 				throw new IllegalArgumentException();
 
-			if (l == null) {
+			if (b == null) {
 				/** insert at start */
-				layer.next = baseLayers;
-				baseLayers = layer;
+				bucket.next = baseBuckets;
+				baseBuckets = bucket;
 			} else {
-				layer.next = l.next;
-				l.next = layer;
+				bucket.next = b.next;
+				b.next = bucket;
 			}
 		}
 
-		/* check if found layer matches requested type */
-		if (layer.type != type) {
-			log.error("BUG wrong layer {} {} on layer {}",
-			          Integer.valueOf(layer.type),
+		/* check if found buckets matches requested type */
+		if (bucket.type != type) {
+			log.error("BUG wrong bucket {} {} on level {}",
+			          Integer.valueOf(bucket.type),
 			          Integer.valueOf(type),
 			          Integer.valueOf(level));
 
 			throw new IllegalArgumentException();
 		}
 
-		mCurLayer = layer;
+		mCurBucket = bucket;
 
-		return layer;
+		return bucket;
 	}
 
 	private int countVboSize() {
 		int vboShorts = 0;
 
-		for (RenderElement l = baseLayers; l != null; l = l.next)
+		for (RenderBucket l = baseBuckets; l != null; l = l.next)
 			vboShorts += l.numVertices * VERTEX_SHORT_CNT[l.type];
 
-		for (RenderElement l = textureLayers; l != null; l = l.next)
+		for (RenderBucket l = textureBuckets; l != null; l = l.next)
 			vboShorts += l.numVertices * TEXTURE_VERTEX_SHORTS;
 
 		return vboShorts;
@@ -286,31 +286,31 @@ public class ElementLayers extends TileData {
 	private int countIboSize() {
 		int numIndices = 0;
 
-		for (RenderElement l = baseLayers; l != null; l = l.next)
+		for (RenderBucket l = baseBuckets; l != null; l = l.next)
 			numIndices += l.numIndices;
 
-		for (RenderElement l = textureLayers; l != null; l = l.next)
+		for (RenderBucket l = textureBuckets; l != null; l = l.next)
 			numIndices += l.numIndices;
 
 		return numIndices;
 	}
 
-	public void setFrom(ElementLayers layers) {
-		setBaseLayers(layers.baseLayers);
-		setTextureLayers((TextureLayer) layers.textureLayers);
+	public void setFrom(RenderBuckets buckets) {
+		setBaseBuckets(buckets.baseBuckets);
+		setTextureBuckets((TextureBucket) buckets.textureBuckets);
 
-		mCurLayer = null;
-		layers.baseLayers = null;
-		layers.textureLayers = null;
-		layers.mCurLayer = null;
+		mCurBucket = null;
+		buckets.baseBuckets = null;
+		buckets.textureBuckets = null;
+		buckets.mCurBucket = null;
 	}
 
-	/** cleanup only when layers are not used by tile or layer anymore! */
+	/** cleanup only when buckets are not used by tile or bucket anymore! */
 	public void clear() {
-		/* NB: set null calls clear() on each layer! */
-		setBaseLayers(null);
-		setTextureLayers(null);
-		mCurLayer = null;
+		/* NB: set null calls clear() on each bucket! */
+		setBaseBuckets(null);
+		setTextureBuckets(null);
+		mCurBucket = null;
 
 		vbo = BufferObject.release(vbo);
 		ibo = BufferObject.release(ibo);
@@ -322,10 +322,10 @@ public class ElementLayers extends TileData {
 	}
 
 	public void prepare() {
-		for (RenderElement l = baseLayers; l != null; l = l.next)
+		for (RenderBucket l = baseBuckets; l != null; l = l.next)
 			l.prepare();
 
-		for (RenderElement l = textureLayers; l != null; l = l.next)
+		for (RenderBucket l = textureBuckets; l != null; l = l.next)
 			l.prepare();
 	}
 
@@ -367,7 +367,7 @@ public class ElementLayers extends TileData {
 		//>>compile(vboData, iboData, addFill);
 		int pos = addFill ? 4 : 0;
 
-		for (RenderElement l = baseLayers; l != null; l = l.next) {
+		for (RenderBucket l = baseBuckets; l != null; l = l.next) {
 			if (l.type == POLYGON) {
 				l.compile(vboData, iboData);
 
@@ -379,7 +379,7 @@ public class ElementLayers extends TileData {
 
 		offset[LINE] = vboData.position() * SHORT_BYTES;
 		pos = 0;
-		for (RenderElement l = baseLayers; l != null; l = l.next) {
+		for (RenderBucket l = baseBuckets; l != null; l = l.next) {
 			if (l.type == LINE) {
 				l.compile(vboData, iboData);
 
@@ -390,13 +390,13 @@ public class ElementLayers extends TileData {
 
 		//offset[TEXLINE] = size * SHORT_BYTES;
 
-		for (RenderElement l = baseLayers; l != null; l = l.next) {
+		for (RenderBucket l = baseBuckets; l != null; l = l.next) {
 			if (l.type == TEXLINE || l.type == MESH || l.type == HAIRLINE) {
 				l.compile(vboData, iboData);
 			}
 		}
 
-		for (RenderElement l = textureLayers; l != null; l = l.next) {
+		for (RenderBucket l = textureBuckets; l != null; l = l.next) {
 			l.compile(vboData, iboData);
 		}
 		//<<
@@ -441,15 +441,15 @@ public class ElementLayers extends TileData {
 	}
 
 	public static void initRenderer(GL20 gl) {
-		RenderElement.GL = gl;
+		RenderBucket.GL = gl;
 
-		LineLayer.Renderer.init();
-		LineTexLayer.Renderer.init();
-		PolygonLayer.Renderer.init();
-		TextureLayer.Renderer.init();
-		BitmapLayer.Renderer.init();
-		MeshLayer.Renderer.init();
-		HairLineLayer.Renderer.init();
+		LineBucket.Renderer.init();
+		LineTexBucket.Renderer.init();
+		PolygonBucket.Renderer.init();
+		TextureBucket.Renderer.init();
+		BitmapBucket.Renderer.init();
+		MeshBucket.Renderer.init();
+		HairLineBucket.Renderer.init();
 
 		TextureItem.init(gl);
 	}

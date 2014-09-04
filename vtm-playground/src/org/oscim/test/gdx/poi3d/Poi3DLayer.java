@@ -16,8 +16,8 @@ import org.oscim.layers.tile.TileSet;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderProcessHook;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.SymbolItem;
+import org.oscim.renderer.bucket.RenderBuckets;
+import org.oscim.renderer.bucket.SymbolItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class Poi3DLayer extends Layer implements Map.UpdateListener {
 		tileLayer.addHook(new TileLoaderProcessHook() {
 
 			@Override
-			public boolean process(MapTile tile, ElementLayers layers, MapElement element) {
+			public boolean process(MapTile tile, RenderBuckets buckets, MapElement element) {
 
 				if (!element.tags.contains(TREE_TAG))
 					return false;

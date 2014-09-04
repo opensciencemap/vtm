@@ -9,9 +9,9 @@ import org.oscim.core.MapElement;
 import org.oscim.core.PointF;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.SymbolItem;
-import org.oscim.renderer.elements.TextItem;
+import org.oscim.renderer.bucket.RenderBuckets;
+import org.oscim.renderer.bucket.SymbolItem;
+import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.TextStyle;
@@ -31,7 +31,7 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
 	}
 
 	@Override
-	public boolean render(MapTile tile, ElementLayers layers, MapElement element,
+	public boolean render(MapTile tile, RenderBuckets buckets, MapElement element,
 	        RenderStyle style, int level) {
 
 		if (style instanceof TextStyle) {

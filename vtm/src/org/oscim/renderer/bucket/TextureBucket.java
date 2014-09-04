@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
@@ -25,13 +25,13 @@ import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.TextureItem.TexturePool;
+import org.oscim.renderer.bucket.TextureItem.TexturePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class TextureLayer extends RenderElement {
+public abstract class TextureBucket extends RenderBucket {
 
-	static final Logger log = LoggerFactory.getLogger(TextureLayer.class);
+	static final Logger log = LoggerFactory.getLogger(TextureBucket.class);
 
 	public final static int INDICES_PER_SPRITE = 6;
 	final static int VERTICES_PER_SPRITE = 4;
@@ -46,7 +46,7 @@ public abstract class TextureLayer extends RenderElement {
 	                                                       TEXTURE_WIDTH,
 	                                                       TEXTURE_HEIGHT);
 
-	protected TextureLayer(int type) {
+	protected TextureBucket(int type) {
 		super(type);
 	}
 
@@ -111,7 +111,7 @@ public abstract class TextureLayer extends RenderElement {
 			pool.init(0);
 		}
 
-		public static RenderElement draw(ElementLayers layers, RenderElement l,
+		public static RenderBucket draw(RenderBuckets layers, RenderBucket l,
 		        GLViewport v, float scale) {
 
 			GLState.test(false, false);
@@ -119,7 +119,7 @@ public abstract class TextureLayer extends RenderElement {
 
 			shader.useProgram();
 
-			TextureLayer tl = (TextureLayer) l;
+			TextureBucket tl = (TextureBucket) l;
 			GL.glUniform1f(shader.uScale, tl.fixed ? 1 / scale : 1);
 
 			v.proj.setAsUniform(shader.uProj);

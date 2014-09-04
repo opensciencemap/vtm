@@ -16,35 +16,35 @@
  */
 package org.oscim.renderer;
 
-import static org.oscim.renderer.elements.RenderElement.BITMAP;
-import static org.oscim.renderer.elements.RenderElement.LINE;
-import static org.oscim.renderer.elements.RenderElement.MESH;
-import static org.oscim.renderer.elements.RenderElement.POLYGON;
-import static org.oscim.renderer.elements.RenderElement.SYMBOL;
-import static org.oscim.renderer.elements.RenderElement.TEXLINE;
+import static org.oscim.renderer.bucket.RenderBucket.BITMAP;
+import static org.oscim.renderer.bucket.RenderBucket.LINE;
+import static org.oscim.renderer.bucket.RenderBucket.MESH;
+import static org.oscim.renderer.bucket.RenderBucket.POLYGON;
+import static org.oscim.renderer.bucket.RenderBucket.SYMBOL;
+import static org.oscim.renderer.bucket.RenderBucket.TEXLINE;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.renderer.elements.BitmapLayer;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.HairLineLayer;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.LineTexLayer;
-import org.oscim.renderer.elements.MeshLayer;
-import org.oscim.renderer.elements.PolygonLayer;
-import org.oscim.renderer.elements.RenderElement;
-import org.oscim.renderer.elements.TextureLayer;
+import org.oscim.renderer.bucket.BitmapBucket;
+import org.oscim.renderer.bucket.HairLineBucket;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.LineTexBucket;
+import org.oscim.renderer.bucket.MeshBucket;
+import org.oscim.renderer.bucket.PolygonBucket;
+import org.oscim.renderer.bucket.RenderBucket;
+import org.oscim.renderer.bucket.RenderBuckets;
+import org.oscim.renderer.bucket.TextureBucket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Base class to use the renderer.elements for drawing.
  * 
- * All methods that modify 'layers' MUST be synchronized!
+ * All methods that modify 'buckets' MUST be synchronized!
  */
-public abstract class ElementRenderer extends LayerRenderer {
+public abstract class BucketRenderer extends LayerRenderer {
 
-	public static final Logger log = LoggerFactory.getLogger(ElementRenderer.class);
+	public static final Logger log = LoggerFactory.getLogger(BucketRenderer.class);
 
 	/**
 	 * Use mMapPosition.copy(position) to keep the position for which
@@ -56,11 +56,11 @@ public abstract class ElementRenderer extends LayerRenderer {
 	/** Wrap around dateline */
 	protected boolean mFlipOnDateLine = true;
 
-	/** Layer data for rendering */
-	public final ElementLayers layers;
+	/** Buckets for rendering */
+	public final RenderBuckets buckets;
 
-	public ElementRenderer() {
-		layers = new ElementLayers();
+	public BucketRenderer() {
+		buckets = new RenderBuckets();
 		mMapPosition = new MapPosition();
 	}
 
@@ -71,70 +71,70 @@ public abstract class ElementRenderer extends LayerRenderer {
 	protected synchronized void render(GLViewport v) {
 		MapPosition layerPos = mMapPosition;
 
-		layers.bind();
+		buckets.bind();
 
 		GLState.test(false, false);
 		GLState.blend(true);
 
 		float div = (float) (v.pos.scale / layerPos.scale);
 
-		RenderElement l = layers.getBaseLayers();
+		RenderBucket b = buckets.getBaseBuckets();
 
-		if (l != null)
+		if (b != null)
 			setMatrix(v, true);
 
-		while (l != null) {
-			if (l.type == POLYGON) {
-				l = PolygonLayer.Renderer.draw(l, v, 1, true);
+		while (b != null) {
+			if (b.type == POLYGON) {
+				b = PolygonBucket.Renderer.draw(b, v, 1, true);
 				continue;
 			}
-			if (l.type == LINE) {
-				l = LineLayer.Renderer.draw(l, v, div, layers);
+			if (b.type == LINE) {
+				b = LineBucket.Renderer.draw(b, v, div, buckets);
 				continue;
 			}
-			if (l.type == TEXLINE) {
-				l = LineTexLayer.Renderer.draw(l, v, div, layers);
+			if (b.type == TEXLINE) {
+				b = LineTexBucket.Renderer.draw(b, v, div, buckets);
 				// rebind
-				layers.ibo.bind();
+				buckets.ibo.bind();
 				continue;
 			}
-			if (l.type == MESH) {
-				l = MeshLayer.Renderer.draw(l, v);
+			if (b.type == MESH) {
+				b = MeshBucket.Renderer.draw(b, v);
 				continue;
 			}
-			if (l.type == RenderElement.HAIRLINE) {
-				l = HairLineLayer.Renderer.draw(l, v);
+			if (b.type == RenderBucket.HAIRLINE) {
+				b = HairLineBucket.Renderer.draw(b, v);
 				continue;
 			}
 
-			log.error("invalid layer {}", l.type);
+			log.error("invalid bucket {}", b.type);
 			break;
 		}
 
-		l = layers.getTextureLayers();
-		if (l != null)
+		b = buckets.getTextureBuckets();
+		if (b != null)
 			setMatrix(v, false);
-		while (l != null) {
-			if (l.type == BITMAP) {
-				l = BitmapLayer.Renderer.draw(l, v, 1, 1);
+		while (b != null) {
+			if (b.type == BITMAP) {
+				b = BitmapBucket.Renderer.draw(b, v, 1, 1);
 				continue;
 			}
-			if (l.type == SYMBOL) {
-				l = TextureLayer.Renderer.draw(layers, l, v, div);
+			if (b.type == SYMBOL) {
+				b = TextureBucket.Renderer.draw(buckets, b, v, div);
 				continue;
 			}
-			log.error("invalid layer {}", l.type);
+			log.error("invalid bucket {}", b.type);
 			break;
 		}
 	}
 
 	/**
-	 * Compile all layers into one BufferObject. Sets renderer to be ready
-	 * when successful. When no data is available (layer.countVboSize() == 0)
-	 * then BufferObject will be released and layers will not be rendered.
+	 * Compile all buckets into one BufferObject. Sets renderer to be ready
+	 * when successful. When no data is available (buckets.countVboSize() == 0)
+	 * then BufferObject will be released and buckets will not be rendered.
 	 */
 	protected synchronized void compile() {
-		boolean ok = layers.compile(true);
+		boolean ok = buckets.compile(true);
 		setReady(ok);
 	}
 

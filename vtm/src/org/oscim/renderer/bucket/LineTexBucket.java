@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -76,9 +76,9 @@ import org.slf4j.LoggerFactory;
  * - in our case there is always the polygon fill array at start
  * - see addLine hack otherwise.
  */
-public final class LineTexLayer extends RenderElement {
+public final class LineTexBucket extends RenderBucket {
 
-	static final Logger log = LoggerFactory.getLogger(LineTexLayer.class);
+	static final Logger log = LoggerFactory.getLogger(LineTexBucket.class);
 
 	private static final float COORD_SCALE = MapRenderer.COORD_SCALE;
 	/* scale factor mapping extrusion vector to short values */
@@ -94,7 +94,7 @@ public final class LineTexLayer extends RenderElement {
 
 	protected boolean mRandomizeOffset = true;
 
-	LineTexLayer(int layer) {
+	LineTexBucket(int layer) {
 		super(TEXLINE);
 
 		this.level = layer;
@@ -261,7 +261,7 @@ public final class LineTexLayer extends RenderElement {
 
 		/* factor to normalize extrusion vector and scale to coord scale */
 		private final static float COORD_SCALE_BY_DIR_SCALE =
-		        MapRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
+		        MapRenderer.COORD_SCALE / LineBucket.DIR_SCALE;
 
 		private static int mVertexFlipID;
 
@@ -299,8 +299,8 @@ public final class LineTexLayer extends RenderElement {
 		private final static int STRIDE = 12;
 		private final static int LEN_OFFSET = 8;
 
-		public static RenderElement draw(RenderElement curLayer, GLViewport v,
-		        float div, ElementLayers layers) {
+		public static RenderBucket draw(RenderBucket curLayer, GLViewport v,
+		        float div, RenderBuckets layers) {
 
 			//if (shader == 0)
 			//	return curLayer.next;
@@ -341,9 +341,9 @@ public final class LineTexLayer extends RenderElement {
 
 			//GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexID[0]);
 
-			RenderElement l = curLayer;
+			RenderBucket l = curLayer;
 			for (; l != null && l.type == TEXLINE; l = l.next) {
-				LineTexLayer ll = (LineTexLayer) l;
+				LineTexBucket ll = (LineTexBucket) l;
 				LineStyle line = ll.line.current();
 
 				GLUtils.setColor(shader.uColor, line.stippleColor, 1);

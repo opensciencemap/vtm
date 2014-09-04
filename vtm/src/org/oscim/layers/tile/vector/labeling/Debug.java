@@ -19,38 +19,38 @@ package org.oscim.layers.tile.vector.labeling;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.TextItem;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.RenderBuckets;
+import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.LineStyle;
 
 class Debug {
 
 	private final static float[] mDebugPoints = new float[8];
 	// TODO Auto-generated method stub
-	static ElementLayers dbg;
+	static RenderBuckets dbg;
 
 	static void addDebugBox(Label l, TextItem ti, int overlaps, boolean prev,
 	        float scale) {
 
-		LineLayer ll;
+		LineBucket ll;
 		if (prev) {
 			if (overlaps == 1)
-				ll = dbg.getLineLayer(4);
+				ll = dbg.getLineBucket(4);
 			else
-				ll = dbg.getLineLayer(5);
+				ll = dbg.getLineBucket(5);
 
 		} else {
 			if (ti.width > ti.length * scale) {
-				ll = dbg.getLineLayer(1);
+				ll = dbg.getLineBucket(1);
 				overlaps = 3;
 			}
 			else if (overlaps == 1)
-				ll = dbg.getLineLayer(0);
+				ll = dbg.getLineBucket(0);
 			else if (overlaps == 2)
-				ll = dbg.getLineLayer(3);
+				ll = dbg.getLineBucket(3);
 			else
-				ll = dbg.getLineLayer(2);
+				ll = dbg.getLineBucket(2);
 		}
 		float[] points = mDebugPoints;
 		float width = (ti.x2 - ti.x1) / 2f;
@@ -67,19 +67,19 @@ class Debug {
 		}
 	}
 
-	static void addDebugLayers(ElementLayers dbg) {
+	static void addDebugLayers(RenderBuckets dbg) {
 		int alpha = 0xaaffffff;
 
 		dbg.clear();
-		dbg.addLineLayer(0, new LineStyle((Color.BLUE & alpha), 2));
-		dbg.addLineLayer(1, new LineStyle((Color.RED & alpha), 2));
-		dbg.addLineLayer(3, new LineStyle((Color.YELLOW & alpha), 2));
-		dbg.addLineLayer(2, new LineStyle((Color.GREEN & alpha), 2));
-		dbg.addLineLayer(4, new LineStyle((Color.CYAN & alpha), 2));
-		dbg.addLineLayer(5, new LineStyle((Color.MAGENTA & alpha), 2));
+		dbg.addLineBucket(0, new LineStyle((Color.BLUE & alpha), 2));
+		dbg.addLineBucket(1, new LineStyle((Color.RED & alpha), 2));
+		dbg.addLineBucket(3, new LineStyle((Color.YELLOW & alpha), 2));
+		dbg.addLineBucket(2, new LineStyle((Color.GREEN & alpha), 2));
+		dbg.addLineBucket(4, new LineStyle((Color.CYAN & alpha), 2));
+		dbg.addLineBucket(5, new LineStyle((Color.MAGENTA & alpha), 2));
 	}
 
-	public static void draw(MapPosition pos, GLViewport m, ElementLayers layers) {
+	public static void draw(MapPosition pos, GLViewport m, RenderBuckets layers) {
 		//		if (layers.baseLayers != null) {
 		//			//setMatrix(pos, m, true);
 		//

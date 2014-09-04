@@ -26,8 +26,8 @@ import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.LineLayer;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.theme.styles.LineStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,10 +58,10 @@ public class TestTileLayer extends TileLayer {
 		@Override
 		public boolean loadTile(MapTile tile) {
 			log.debug("load tile " + tile);
-			ElementLayers layers = new ElementLayers();
+			RenderBuckets layers = new RenderBuckets();
 			tile.data = layers;
 
-			LineLayer ll = layers.getLineLayer(0);
+			LineBucket ll = layers.getLineBucket(0);
 			ll.line = mLineStyle;
 			ll.scale = 2;
 

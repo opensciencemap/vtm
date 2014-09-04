@@ -5,12 +5,12 @@ import static org.oscim.layers.tile.MapTile.PROXY_GRAMPA;
 import static org.oscim.layers.tile.MapTile.PROXY_PARENT;
 import static org.oscim.layers.tile.MapTile.State.READY;
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
-import static org.oscim.renderer.elements.RenderElement.BITMAP;
-import static org.oscim.renderer.elements.RenderElement.HAIRLINE;
-import static org.oscim.renderer.elements.RenderElement.LINE;
-import static org.oscim.renderer.elements.RenderElement.MESH;
-import static org.oscim.renderer.elements.RenderElement.POLYGON;
-import static org.oscim.renderer.elements.RenderElement.TEXLINE;
+import static org.oscim.renderer.bucket.RenderBucket.BITMAP;
+import static org.oscim.renderer.bucket.RenderBucket.HAIRLINE;
+import static org.oscim.renderer.bucket.RenderBucket.LINE;
+import static org.oscim.renderer.bucket.RenderBucket.MESH;
+import static org.oscim.renderer.bucket.RenderBucket.POLYGON;
+import static org.oscim.renderer.bucket.RenderBucket.TEXLINE;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
@@ -19,14 +19,14 @@ import org.oscim.core.Tile;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.BitmapLayer;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.HairLineLayer;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.LineTexLayer;
-import org.oscim.renderer.elements.MeshLayer;
-import org.oscim.renderer.elements.PolygonLayer;
-import org.oscim.renderer.elements.RenderElement;
+import org.oscim.renderer.bucket.BitmapBucket;
+import org.oscim.renderer.bucket.HairLineBucket;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.LineTexBucket;
+import org.oscim.renderer.bucket.MeshBucket;
+import org.oscim.renderer.bucket.PolygonBucket;
+import org.oscim.renderer.bucket.RenderBucket;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.utils.FastMath;
 
 public class VectorTileRenderer extends TileRenderer {
@@ -55,7 +55,7 @@ public class VectorTileRenderer extends TileRenderer {
 		mClipProj.setValue(14, 0);
 		mClipProj.multiplyRhs(v.view);
 
-		mClipMode = PolygonLayer.CLIP_STENCIL;
+		mClipMode = PolygonBucket.CLIP_STENCIL;
 
 		int tileCnt = mDrawTiles.cnt + mProxyTileCnt;
 
@@ -77,7 +77,7 @@ public class VectorTileRenderer extends TileRenderer {
 				 * draw where tiles were already drawn */
 				GL.glDepthFunc(GL20.GL_ALWAYS);
 
-				mClipMode = PolygonLayer.CLIP_DEPTH;
+				mClipMode = PolygonBucket.CLIP_DEPTH;
 				drawProxies = true;
 
 				break;
@@ -150,11 +150,11 @@ public class VectorTileRenderer extends TileRenderer {
 		tile.lastDraw = mDrawSerial;
 
 		/* use holder proxy when it is set */
-		ElementLayers layers = (tile.holder == null)
+		RenderBuckets buckets = (tile.holder == null)
 		        ? tile.getLayers()
 		        : tile.holder.getLayers();
 
-		if (layers == null || layers.vbo == null)
+		if (buckets == null || buckets.vbo == null)
 			return;
 
 		MapPosition pos = v.pos;
@@ -174,63 +174,63 @@ public class VectorTileRenderer extends TileRenderer {
 		mClipMVP.setTransScale(x, y, scale / COORD_SCALE);
 		mClipMVP.multiplyLhs(mClipProj);
 
-		layers.bind();
+		buckets.bind();
 
-		RenderElement l = layers.getBaseLayers();
-		PolygonLayer.Renderer.clip(mClipMVP, mClipMode);
+		PolygonBucket.Renderer.clip(mClipMVP, mClipMode);
+
+		RenderBucket b = buckets.getBaseBuckets();
 
 		boolean first = true;
-		while (l != null) {
-			if (l.type == POLYGON) {
-				l = PolygonLayer.Renderer.draw(l, v, div, first);
+		while (b != null) {
+			if (b.type == POLYGON) {
+				b = PolygonBucket.Renderer.draw(b, v, div, first);
 				first = false;
 
 				/* set test for clip to tile region */
 				GL.glStencilFunc(GL_EQUAL, 0x80, 0x80);
 				continue;
 			}
-			if (l.type == LINE) {
-				l = LineLayer.Renderer.draw(l, v, scale, layers);
+			if (b.type == LINE) {
+				b = LineBucket.Renderer.draw(b, v, scale, buckets);
 				continue;
 			}
-			if (l.type == TEXLINE) {
-				l = LineTexLayer.Renderer.draw(l, v, div, layers);
-				if (layers.ibo != null)
-					layers.ibo.bind();
+			if (b.type == TEXLINE) {
+				b = LineTexBucket.Renderer.draw(b, v, div, buckets);
+				if (buckets.ibo != null)
+					buckets.ibo.bind();
 				continue;
 			}
-			if (l.type == MESH) {
-				l = MeshLayer.Renderer.draw(l, v);
+			if (b.type == MESH) {
+				b = MeshBucket.Renderer.draw(b, v);
 				continue;
 			}
-			if (l.type == HAIRLINE) {
-				l = HairLineLayer.Renderer.draw(l, v);
+			if (b.type == HAIRLINE) {
+				b = HairLineBucket.Renderer.draw(b, v);
 				continue;
 			}
 
 			/* just in case */
-			log.error("unknown layer {}", l.type);
-			l = l.next;
+			log.error("unknown layer {}", b.type);
+			b = b.next;
 		}
 
-		l = layers.getTextureLayers();
-		while (l != null) {
-			if (l.type == BITMAP) {
-				l = BitmapLayer.Renderer.draw(l, v, 1, mLayerAlpha);
+		b = buckets.getTextureBuckets();
+		while (b != null) {
+			if (b.type == BITMAP) {
+				b = BitmapBucket.Renderer.draw(b, v, 1, mLayerAlpha);
 				continue;
 			}
-			log.error("unknown layer {}", l.type);
-			l = l.next;
+			log.error("unknown layer {}", b.type);
+			b = b.next;
 		}
 
 		if (debugOverdraw) {
-
 			if (tile.zoomLevel > pos.zoomLevel)
-				PolygonLayer.Renderer.drawOver(mClipMVP, Color.BLUE, 0.5f);
+				PolygonBucket.Renderer.drawOver(mClipMVP, Color.BLUE, 0.5f);
 			else if (tile.zoomLevel < pos.zoomLevel)
-				PolygonLayer.Renderer.drawOver(mClipMVP, Color.RED, 0.5f);
+				PolygonBucket.Renderer.drawOver(mClipMVP, Color.RED, 0.5f);
 			else
-				PolygonLayer.Renderer.drawOver(mClipMVP, Color.GREEN, 0.5f);
+				PolygonBucket.Renderer.drawOver(mClipMVP, Color.GREEN, 0.5f);
 
 			return;
 		}
@@ -244,12 +244,12 @@ public class VectorTileRenderer extends TileRenderer {
 		long dTime = MapRenderer.frametime - tile.fadeTime;
 
 		if (mOverdrawColor == 0 || dTime > FADE_TIME) {
-			PolygonLayer.Renderer.drawOver(mClipMVP, 0, 1);
+			PolygonBucket.Renderer.drawOver(mClipMVP, 0, 1);
 			return;
 		}
 
 		float fade = 1 - dTime / FADE_TIME;
-		PolygonLayer.Renderer.drawOver(mClipMVP, mOverdrawColor, fade * fade);
+		PolygonBucket.Renderer.drawOver(mClipMVP, mOverdrawColor, fade * fade);
 
 		MapRenderer.animate();
 	}

@@ -13,8 +13,8 @@ import org.jeo.map.RuleList;
 import org.jeo.map.Style;
 import org.oscim.jeo.JeoUtils;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.MeshLayer;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.MeshBucket;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.LineStyle;
 import org.slf4j.Logger;
@@ -113,7 +113,7 @@ public class JeoVectorLayer extends JtsLayer {
 			return;
 		}
 
-		LineLayer ll = t.layers.getLineLayer(2);
+		LineBucket ll = t.buckets.getLineBucket(2);
 		if (ll.line == null) {
 			RGB color = rule.color(f, CartoCSS.LINE_COLOR, RGB.black);
 			float width = rule.number(f, CartoCSS.LINE_WIDTH, 1.2f);
@@ -126,7 +126,7 @@ public class JeoVectorLayer extends JtsLayer {
 
 	protected void addPolygon(Task t, Feature f, Rule rule, Geometry g) {
 
-		LineLayer ll = t.layers.getLineLayer(1);
+		LineBucket ll = t.buckets.getLineBucket(1);
 
 		if (ll.line == null) {
 			float width = rule.number(f, CartoCSS.LINE_WIDTH, 1.2f);
@@ -135,7 +135,7 @@ public class JeoVectorLayer extends JtsLayer {
 			ll.setDropDistance(0.5f);
 		}
 
-		MeshLayer mesh = t.layers.getMeshLayer(0);
+		MeshBucket mesh = t.buckets.getMeshBucket(0);
 		if (mesh.area == null) {
 			int color = JeoUtils.color(rule.color(f, CartoCSS.POLYGON_FILL, RGB.red));
 			mesh.area = new AreaStyle(color);

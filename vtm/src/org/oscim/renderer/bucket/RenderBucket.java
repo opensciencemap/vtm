@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
 import org.oscim.utils.pool.Inlist;
 
-public abstract class RenderElement extends Inlist<RenderElement> {
+public abstract class RenderBucket extends Inlist<RenderBucket> {
 	protected static GL20 GL;
 
 	public static final int LINE = 0;
@@ -46,7 +46,7 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 	protected final VertexData vertexItems = new VertexData();
 	protected final VertexData indiceItems = new VertexData();
 
-	protected RenderElement(int type) {
+	protected RenderBucket(int type) {
 		this.type = type;
 	}
 

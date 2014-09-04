@@ -31,15 +31,15 @@ package org.oscim.layers.tile.vector.labeling;
 //
 
 import org.oscim.layers.tile.vector.labeling.LabelLayer.Worker;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.elements.RenderElement;
-import org.oscim.renderer.elements.TextureLayer;
+import org.oscim.renderer.bucket.RenderBucket;
+import org.oscim.renderer.bucket.TextureBucket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class TextRenderer extends ElementRenderer {
+class TextRenderer extends BucketRenderer {
 	static final Logger log = LoggerFactory.getLogger(TextRenderer.class);
 	static final boolean dbg = false;
 
@@ -63,11 +63,11 @@ class TextRenderer extends ElementRenderer {
 				}
 				return;
 			}
-			layers.clear();
+			buckets.clear();
 		}
 
 		// set new TextLayer to be uploaded and rendered
-		layers.setTextureLayers(t.layers);
+		buckets.setTextureBuckets(t.layers);
 		mMapPosition = t.pos;
 		compile();
 	}
@@ -77,14 +77,14 @@ class TextRenderer extends ElementRenderer {
 		GLState.test(false, false);
 		//Debug.draw(pos, layers);
 
-		layers.vbo.bind();
+		buckets.vbo.bind();
 
 		float scale = (float) (v.pos.scale / mMapPosition.scale);
 
 		setMatrix(v, false);
 
-		for (RenderElement l = layers.getTextureLayers(); l != null;)
-			l = TextureLayer.Renderer.draw(layers, l, v, scale);
+		for (RenderBucket l = buckets.getTextureBuckets(); l != null;)
+			l = TextureBucket.Renderer.draw(buckets, l, v, scale);
 	}
 
 }

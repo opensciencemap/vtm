@@ -1,6 +1,6 @@
 package org.oscim.layers.tile.vector.labeling;
 
-import org.oscim.renderer.elements.TextItem;
+import org.oscim.renderer.bucket.TextItem;
 import org.oscim.utils.pool.Pool;
 
 final class LabelPool extends Pool<TextItem> {

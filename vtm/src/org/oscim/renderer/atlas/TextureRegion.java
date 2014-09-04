@@ -17,7 +17,7 @@
 package org.oscim.renderer.atlas;
 
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
-import org.oscim.renderer.elements.TextureItem;
+import org.oscim.renderer.bucket.TextureItem;
 
 public class TextureRegion {
 

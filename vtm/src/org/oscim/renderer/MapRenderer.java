@@ -24,9 +24,9 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.TextureItem;
-import org.oscim.renderer.elements.TextureLayer;
+import org.oscim.renderer.bucket.RenderBuckets;
+import org.oscim.renderer.bucket.TextureBucket;
+import org.oscim.renderer.bucket.TextureItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,7 +165,7 @@ public class MapRenderer {
 		int[] vboIds = GLUtils.glGenBuffers(2);
 
 		mQuadIndicesID = vboIds[0];
-		int maxIndices = maxQuads * TextureLayer.INDICES_PER_SPRITE;
+		int maxIndices = maxQuads * TextureBucket.INDICES_PER_SPRITE;
 		short[] indices = new short[maxIndices];
 		for (int i = 0, j = 0; i < maxIndices; i += 6, j += 4) {
 			indices[i + 0] = (short) (j + 0);
@@ -225,7 +225,7 @@ public class MapRenderer {
 		BufferObject.init(GL, 200);
 
 		// classes that require GL context for initialization
-		ElementLayers.initRenderer(GL);
+		RenderBuckets.initRenderer(GL);
 		LayerRenderer.init(GL);
 
 		mNewSurface = true;

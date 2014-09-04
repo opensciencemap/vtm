@@ -18,7 +18,7 @@ package org.oscim.utils;
 
 import java.util.Arrays;
 
-import org.oscim.renderer.elements.VertexData;
+import org.oscim.renderer.bucket.VertexData;
 import org.oscim.utils.math.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -8,9 +8,9 @@ import org.oscim.core.Point;
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.GenericLayer;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.elements.LineLayer;
+import org.oscim.renderer.bucket.LineBucket;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.utils.geom.BezierPath;
 
@@ -26,7 +26,7 @@ public class BezierTest extends GdxMap {
 		GdxMapApp.run(new BezierTest(), null, 400);
 	}
 
-	static class BezierPathLayer extends ElementRenderer {
+	static class BezierPathLayer extends BucketRenderer {
 
 		public BezierPathLayer() {
 			mMapPosition.scale = 0;
@@ -42,7 +42,7 @@ public class BezierTest extends GdxMap {
 				// System.out.println(pts[i]);
 				g.addPoint(pts[i]);
 			}
-			LineLayer ll = layers.addLineLayer(0, new LineStyle(Color.BLUE, 2f));
+			LineBucket ll = buckets.addLineBucket(0, new LineStyle(Color.BLUE, 2f));
 			ll.addLine(g);
 
 			List<Point> ctrl = BezierPath.cubicSplineControlPoints(pts, 0.1f);
@@ -64,13 +64,13 @@ public class BezierTest extends GdxMap {
 				}
 				p0 = p3;
 			}
-			ll = layers.addLineLayer(1, new LineStyle(Color.CYAN, 2f));
+			ll = buckets.addLineBucket(1, new LineStyle(Color.CYAN, 2f));
 			ll.addLine(g);
 
 		}
 
 		public synchronized void clear() {
-			layers.clear();
+			buckets.clear();
 			setReady(false);
 		}
 

@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Canvas;
 
-public class TextLayer extends TextureLayer {
+public class TextBucket extends TextureBucket {
 	//static final Logger log = LoggerFactory.getLogger(TextureLayer.class);
 
 	protected final static int LBIT_MASK = 0xfffffffe;
@@ -40,8 +40,8 @@ public class TextLayer extends TextureLayer {
 		this.labels = labels;
 	}
 
-	public TextLayer() {
-		super(RenderElement.SYMBOL);
+	public TextBucket() {
+		super(RenderBucket.SYMBOL);
 		mCanvas = CanvasAdapter.newCanvas();
 		fixed = true;
 	}
@@ -141,7 +141,7 @@ public class TextLayer extends TextureLayer {
 				addItem(it, width, height, x, y);
 
 				/* six indices to draw the four vertices */
-				numIndices += TextureLayer.INDICES_PER_SPRITE;
+				numIndices += TextureBucket.INDICES_PER_SPRITE;
 				numVertices += 4;
 
 				if (it.next == null

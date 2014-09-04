@@ -64,7 +64,7 @@ package org.oscim.renderer.atlas;
 import java.util.HashMap;
 
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.renderer.elements.TextureItem;
+import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

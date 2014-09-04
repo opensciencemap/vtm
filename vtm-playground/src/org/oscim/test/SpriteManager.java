@@ -20,8 +20,8 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
-import org.oscim.renderer.elements.TextureItem;
-import org.oscim.renderer.elements.TextureItem.TexturePool;
+import org.oscim.renderer.bucket.TextureItem;
+import org.oscim.renderer.bucket.TextureItem.TexturePool;
 import org.oscim.utils.pool.Inlist;
 
 /**

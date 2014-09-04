@@ -5,10 +5,10 @@ import org.oscim.core.GeometryBuffer;
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.GenericLayer;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.LineLayer;
+import org.oscim.renderer.bucket.LineBucket;
 import org.oscim.theme.styles.LineStyle;
 
 import com.badlogic.gdx.Gdx;
@@ -38,10 +38,10 @@ public class LineTest extends GdxMap {
 
 	@Override
 	protected void createLayers() {
-		mMap.layers().add(new GenericLayer(mMap, new ElementRenderer() {
+		mMap.layers().add(new GenericLayer(mMap, new BucketRenderer() {
 			boolean init;
 
-			LineLayer ll = layers.addLineLayer(0,
+			LineBucket ll = buckets.addLineBucket(0,
 			                                   new LineStyle(Color.fade(Color.CYAN, 0.5f), 1.5f));
 
 			GeometryBuffer g = new GeometryBuffer(10, 1);
@@ -79,8 +79,8 @@ public class LineTest extends GdxMap {
 					// compile();
 				}
 
-				layers.clear();
-				layers.setBaseLayers(ll);
+				buckets.clear();
+				buckets.setBaseBuckets(ll);
 				g.clear();
 				for (int i = 0; i < 60; i++) {
 					g.startLine();

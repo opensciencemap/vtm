@@ -8,7 +8,7 @@ import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.BufferObject;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
@@ -35,7 +35,7 @@ public class HexagonRenderTest extends GdxMap {
 	 * based on chapter 2 from:
 	 * https://github.com/dalinaum/opengl-es-book-samples/tree/master/Android */
 
-	static class HexagonRenderer extends ElementRenderer {
+	static class HexagonRenderer extends BucketRenderer {
 
 		private int mProgramObject;
 		private int hVertexPosition;

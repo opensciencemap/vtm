@@ -17,14 +17,14 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.renderer.elements.BitmapLayer;
+import org.oscim.renderer.bucket.BitmapBucket;
 
 /**
  * RenderLayer to draw a custom Bitmap.
  * NOTE: Only modify the Bitmap within a synchronized block!
  * synchronized(bitmap){} Then call updateBitmap().
  */
-public class BitmapRenderer extends ElementRenderer {
+public class BitmapRenderer extends BucketRenderer {
 
 	private Bitmap mBitmap;
 	private int mWidth;
@@ -56,11 +56,11 @@ public class BitmapRenderer extends ElementRenderer {
 	@Override
 	protected synchronized void update(GLViewport v) {
 		if (!initialized) {
-			layers.clear();
+			buckets.clear();
 
-			BitmapLayer l = new BitmapLayer(true);
+			BitmapBucket l = new BitmapBucket(true);
 			l.setBitmap(mBitmap, mWidth, mHeight);
-			layers.setTextureLayers(l);
+			buckets.setTextureBuckets(l);
 
 			mUpdateBitmap = true;
 		}
@@ -84,6 +84,6 @@ public class BitmapRenderer extends ElementRenderer {
 	@Override
 	protected synchronized void render(GLViewport v) {
 		v.useScreenCoordinates(false, 8);
-		BitmapLayer.Renderer.draw(layers.getTextureLayers(), v, 1, 1);
+		BitmapBucket.Renderer.draw(buckets.getTextureBuckets(), v, 1, 1);
 	}
 }

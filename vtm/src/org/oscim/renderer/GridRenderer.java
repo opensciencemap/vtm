@@ -20,17 +20,17 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.TextItem;
-import org.oscim.renderer.elements.TextLayer;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.TextBucket;
+import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.TextStyle;
 import org.oscim.theme.styles.TextStyle.TextBuilder;
 
-public class GridRenderer extends ElementRenderer {
-	private final TextLayer mTextLayer;
+public class GridRenderer extends BucketRenderer {
+	private final TextBucket mTextBucket;
 	private final TextStyle mText;
-	private final LineLayer mLineLayer;
+	private final LineBucket mLineBucket;
 	private final GeometryBuffer mLines;
 	private final StringBuilder mStringBuffer;
 
@@ -67,14 +67,13 @@ public class GridRenderer extends ElementRenderer {
 
 		mText = textStyle;
 
-		if (mText != null) {
-			mTextLayer = layers.addTextLayer(new TextLayer());
-		} else {
-			mTextLayer = null;
-		}
+		if (mText != null)
+			mTextBucket = buckets.addTextBucket(new TextBucket());
+		else
+			mTextBucket = null;
 
-		mLineLayer = layers.addLineLayer(0, lineStyle);
-		mLineLayer.addLine(mLines);
+		mLineBucket = buckets.addLineBucket(0, lineStyle);
+		mLineBucket.addLine(mLines);
 
 		mStringBuffer = new StringBuilder(32);
 	}
@@ -82,7 +81,7 @@ public class GridRenderer extends ElementRenderer {
 	private void addLabels(int x, int y, int z) {
 		int s = Tile.SIZE;
 
-		TextLayer tl = mTextLayer;
+		TextBucket tl = mTextBucket;
 		tl.clear();
 
 		StringBuilder sb = mStringBuffer;
@@ -133,11 +132,11 @@ public class GridRenderer extends ElementRenderer {
 
 		if (mText != null) {
 			addLabels(x, y, v.pos.zoomLevel);
-			layers.setBaseLayers(mLineLayer);
-			mLineLayer.addLine(mLines);
+			buckets.setBaseBuckets(mLineBucket);
+			mLineBucket.addLine(mLines);
 			compile();
 
-		} else if (layers.vbo == null) {
+		} else if (buckets.vbo == null) {
 			compile();
 		}
 	}

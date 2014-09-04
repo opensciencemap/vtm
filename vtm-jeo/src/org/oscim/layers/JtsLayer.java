@@ -8,8 +8,8 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 import org.oscim.layers.vector.AbstractVectorLayer;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.MeshLayer;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.MeshBucket;
 import org.oscim.utils.geom.SimplifyDP;
 import org.oscim.utils.geom.SimplifyVW;
 
@@ -69,7 +69,7 @@ public abstract class JtsLayer extends AbstractVectorLayer<Geometry> {
 	SimplifyDP mSimpDP = new SimplifyDP();
 	SimplifyVW mSimpVW = new SimplifyVW();
 
-	protected void addPolygon(Task t, Geometry g, MeshLayer ml, LineLayer ll) {
+	protected void addPolygon(Task t, Geometry g, MeshBucket ml, LineBucket ll) {
 		mGeom.clear();
 		mGeom.startPolygon();
 
@@ -90,7 +90,7 @@ public abstract class JtsLayer extends AbstractVectorLayer<Geometry> {
 		ml.addMesh(mGeom);
 	}
 
-	protected void addLine(Task t, Geometry g, LineLayer ll) {
+	protected void addLine(Task t, Geometry g, LineBucket ll) {
 		mGeom.clear();
 		mGeom.startLine();
 

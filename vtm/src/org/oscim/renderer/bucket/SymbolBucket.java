@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import java.nio.ShortBuffer;
 
@@ -25,8 +25,8 @@ import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class SymbolLayer extends TextureLayer {
-	static final Logger log = LoggerFactory.getLogger(SymbolLayer.class);
+public final class SymbolBucket extends TextureBucket {
+	static final Logger log = LoggerFactory.getLogger(SymbolBucket.class);
 
 	private final static float SCALE = 8.0f;
 	private final static int VERTICES_PER_SPRITE = 4;
@@ -35,8 +35,8 @@ public final class SymbolLayer extends TextureLayer {
 	private TextureItem prevTextures;
 	private List<SymbolItem> mSymbols = new List<SymbolItem>();
 
-	public SymbolLayer() {
-		super(RenderElement.SYMBOL);
+	public SymbolBucket() {
+		super(RenderBucket.SYMBOL);
 		fixed = true;
 	}
 
@@ -160,7 +160,7 @@ public final class SymbolLayer extends TextureLayer {
 				vertexItems.add(tx, ty, x2, y2, u2, v1);
 
 				/* six elements used to draw the four vertices */
-				t.indices += TextureLayer.INDICES_PER_SPRITE;
+				t.indices += TextureBucket.INDICES_PER_SPRITE;
 			}
 			numIndices += t.indices;
 		}

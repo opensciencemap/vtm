@@ -22,8 +22,8 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.renderer.elements.BitmapLayer;
-import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.bucket.BitmapBucket;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.TileSource;
 import org.slf4j.Logger;
@@ -58,11 +58,11 @@ public class BitmapTileLoader extends TileLoader {
 		if (isCanceled() || mTile.state(CANCEL))
 			return;
 
-		BitmapLayer l = new BitmapLayer(false);
+		BitmapBucket l = new BitmapBucket(false);
 		l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE, mLayer.pool);
 
-		ElementLayers layers = new ElementLayers();
-		layers.setTextureLayers(l);
+		RenderBuckets layers = new RenderBuckets();
+		layers.setTextureBuckets(l);
 		mTile.data = layers;
 	}
 

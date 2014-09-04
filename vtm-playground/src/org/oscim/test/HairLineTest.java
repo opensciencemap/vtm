@@ -6,12 +6,12 @@ import org.oscim.core.GeometryBuffer;
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.GenericLayer;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.HairLineLayer;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.PolygonLayer;
+import org.oscim.renderer.bucket.HairLineBucket;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.PolygonBucket;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.LineStyle.LineBuilder;
@@ -31,24 +31,24 @@ public class HairLineTest extends GdxMap {
 		return in;
 	}
 
-	static class Renderer extends ElementRenderer {
+	static class Renderer extends BucketRenderer {
 		boolean init;
 		LineBuilder l = new LineStyle.LineBuilder()
 		    .color(Color.WHITE)
 		    .width(1.5f)
 		    .cap(Cap.ROUND);
 
-		HairLineLayer ll = layers.addHairLineLayer(1, l.build());
+		HairLineBucket ll = buckets.addHairLineBucket(1, l.build());
 
 		//LineLayer ll = layers.addLineLayer(1, new LineStyle(Color.fade(Color.CYAN, 0.6f), 2.5f));
 		LineStyle style = new LineStyle(Color.fade(Color.MAGENTA, 0.6f), 2.5f);
 
-		HairLineLayer l1 = layers.addHairLineLayer(2, style);
+		HairLineBucket l1 = buckets.addHairLineBucket(2, style);
 
 		//style = new LineStyle(Color.fade(Color.LTGRAY, 0.8f), 1.5f);
-		LineLayer l2 = layers.addLineLayer(3, style);
+		LineBucket l2 = buckets.addLineBucket(3, style);
 
-		PolygonLayer pl = layers.addPolygonLayer(4, new AreaStyle.AreaBuilder()
+		PolygonBucket pl = buckets.addPolygonBucket(4, new AreaStyle.AreaBuilder()
 		    .color(Color.BLUE)
 		    //.outline(Color.CYAN, 1)
 		    .build());

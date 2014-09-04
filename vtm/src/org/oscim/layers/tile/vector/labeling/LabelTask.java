@@ -1,23 +1,23 @@
 package org.oscim.layers.tile.vector.labeling;
 
 import org.oscim.core.MapPosition;
-import org.oscim.renderer.elements.SymbolLayer;
-import org.oscim.renderer.elements.TextLayer;
-import org.oscim.renderer.elements.TextureLayer;
+import org.oscim.renderer.bucket.SymbolBucket;
+import org.oscim.renderer.bucket.TextBucket;
+import org.oscim.renderer.bucket.TextureBucket;
 
 final class LabelTask {
 
-	final TextureLayer layers;
-	final TextLayer textLayer;
-	final SymbolLayer symbolLayer;
+	final TextureBucket layers;
+	final TextBucket textLayer;
+	final SymbolBucket symbolLayer;
 
 	final MapPosition pos;
 
 	LabelTask() {
 		pos = new MapPosition();
 
-		symbolLayer = new SymbolLayer();
-		textLayer = new TextLayer();
+		symbolLayer = new SymbolBucket();
+		textLayer = new TextBucket();
 
 		layers = symbolLayer;
 		symbolLayer.next = textLayer;

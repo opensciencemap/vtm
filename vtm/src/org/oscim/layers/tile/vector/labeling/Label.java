@@ -16,7 +16,7 @@
  */
 package org.oscim.layers.tile.vector.labeling;
 
-import org.oscim.renderer.elements.TextItem;
+import org.oscim.renderer.bucket.TextItem;
 import org.oscim.utils.geom.OBB2D;
 
 final class Label extends TextItem {

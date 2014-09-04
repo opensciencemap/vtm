@@ -37,7 +37,7 @@ import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.renderer.atlas.TextureRegion;
-import org.oscim.renderer.elements.TextureItem;
+import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule;
 import org.oscim.theme.rule.Rule.Closed;

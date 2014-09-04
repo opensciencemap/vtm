@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import static org.oscim.backend.GL20.GL_LINES;
 import static org.oscim.backend.GL20.GL_SHORT;
@@ -29,15 +29,15 @@ import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.VertexData.Chunk;
+import org.oscim.renderer.bucket.VertexData.Chunk;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.ColorUtil;
 import org.oscim.utils.TessJNI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MeshLayer extends RenderElement {
-	static final Logger log = LoggerFactory.getLogger(MeshLayer.class);
+public class MeshBucket extends RenderBucket {
+	static final Logger log = LoggerFactory.getLogger(MeshBucket.class);
 	static final boolean dbgRender = false;
 
 	public AreaStyle area;
@@ -45,8 +45,8 @@ public class MeshLayer extends RenderElement {
 
 	TessJNI tess = new TessJNI(8);
 
-	public MeshLayer(int level) {
-		super(RenderElement.MESH);
+	public MeshBucket(int level) {
+		super(RenderBucket.MESH);
 		this.level = level;
 
 	}
@@ -127,7 +127,7 @@ public class MeshLayer extends RenderElement {
 			}
 		}
 
-		public static RenderElement draw(RenderElement l, GLViewport v) {
+		public static RenderBucket draw(RenderBucket l, GLViewport v) {
 			GLState.blend(true);
 
 			Shader s = shader;
@@ -141,7 +141,7 @@ public class MeshLayer extends RenderElement {
 			GL.glUniform1f(s.uHeight, heightOffset);
 
 			for (; l != null && l.type == MESH; l = l.next) {
-				MeshLayer ml = (MeshLayer) l;
+				MeshBucket ml = (MeshBucket) l;
 
 				//if (ml.indicesVbo == null)
 				//	continue;

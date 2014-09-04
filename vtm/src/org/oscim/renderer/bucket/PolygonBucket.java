@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import static org.oscim.backend.GL20.GL_ALWAYS;
 import static org.oscim.backend.GL20.GL_EQUAL;
@@ -48,9 +48,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Special Renderer for drawing tile polygons using the stencil buffer method
  */
-public final class PolygonLayer extends RenderElement {
+public final class PolygonBucket extends RenderBucket {
 
-	static final Logger log = LoggerFactory.getLogger(PolygonLayer.class);
+	static final Logger log = LoggerFactory.getLogger(PolygonBucket.class);
 
 	public final static int CLIP_STENCIL = 1;
 	public final static int CLIP_DEPTH = 2;
@@ -62,8 +62,8 @@ public final class PolygonLayer extends RenderElement {
 
 	public AreaStyle area;
 
-	PolygonLayer(int layer) {
-		super(RenderElement.POLYGON);
+	PolygonBucket(int layer) {
+		super(RenderBucket.POLYGON);
 		level = layer;
 	}
 
@@ -183,7 +183,7 @@ public final class PolygonLayer extends RenderElement {
 
 		private static final float FADE_START = 1.3f;
 
-		private static PolygonLayer[] mAreaLayer;
+		private static PolygonBucket[] mAreaLayer;
 
 		private static Shader polyShader;
 		private static Shader texShader;
@@ -192,7 +192,7 @@ public final class PolygonLayer extends RenderElement {
 			polyShader = new Shader("base_shader");
 			texShader = new Shader("polygon_layer_tex");
 
-			mAreaLayer = new PolygonLayer[STENCIL_BITS];
+			mAreaLayer = new PolygonBucket[STENCIL_BITS];
 
 			return true;
 		}
@@ -208,7 +208,7 @@ public final class PolygonLayer extends RenderElement {
 			Shader s;
 
 			for (int i = start; i < end; i++) {
-				PolygonLayer l = mAreaLayer[i];
+				PolygonBucket l = mAreaLayer[i];
 				AreaStyle a = l.area.current();
 
 				boolean useTexture = enableTexture && a.texture != null;
@@ -271,17 +271,17 @@ public final class PolygonLayer extends RenderElement {
 
 				GLState.blend(true);
 
-				HairLineLayer.Renderer.shader.set(v);
+				HairLineBucket.Renderer.shader.set(v);
 
-				GLUtils.setColor(HairLineLayer.Renderer.shader.uColor,
+				GLUtils.setColor(HairLineBucket.Renderer.shader.uColor,
 				                 l.area.strokeColor, 1);
 
-				GL.glVertexAttribPointer(HairLineLayer.Renderer.shader.aPos,
+				GL.glVertexAttribPointer(HairLineBucket.Renderer.shader.aPos,
 				                         2, GL_SHORT, false, 0,
 				                         // 4 bytes per vertex
 				                         l.vertexOffset << 2);
 
-				GL.glUniform1f(HairLineLayer.Renderer.shader.uWidth,
+				GL.glUniform1f(HairLineBucket.Renderer.shader.uWidth,
 				               a.strokeWidth);
 
 				GL.glDrawElements(GL_LINES,
@@ -304,8 +304,10 @@ public final class PolygonLayer extends RenderElement {
 		private static Shader setShader(Shader shader, GLMatrix mvp, boolean first) {
 			if (shader.useProgram() || first) {
 				GLState.enableVertexArrays(shader.aPos, -1);
+
 				GL.glVertexAttribPointer(shader.aPos, 2,
 				                         GL_SHORT, false, 0, 0);
+
 				mvp.setAsUniform(shader.uMVP);
 			}
 			return shader;
@@ -336,7 +338,7 @@ public final class PolygonLayer extends RenderElement {
 		 * @return
 		 *         next layer
 		 */
-		public static RenderElement draw(RenderElement renderElement, GLViewport v,
+		public static RenderBucket draw(RenderBucket renderElement, GLViewport v,
 		        float div, boolean first) {
 
 			GLState.test(false, true);
@@ -359,9 +361,9 @@ public final class PolygonLayer extends RenderElement {
 
 			byte stencilMask = 0;
 
-			RenderElement l = renderElement;
+			RenderBucket l = renderElement;
 			for (; l != null && l.type == POLYGON; l = l.next) {
-				PolygonLayer pl = (PolygonLayer) l;
+				PolygonBucket pl = (PolygonBucket) l;
 				AreaStyle area = pl.area.current();
 
 				/* fade out polygon layers (set in RenderTheme) */
@@ -503,7 +505,6 @@ public final class PolygonLayer extends RenderElement {
 		}
 
 		static void clearStencilRegion() {
-			//log.debug("clear stencil");
 
 			mCount = 0;
 			mClear = false;
@@ -516,7 +517,6 @@ public final class PolygonLayer extends RenderElement {
 
 			/* use clip bit from stencil buffer to clear stencil
 			 * 'layer-bits' (0x7f) */
-			//GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
 			GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
 
 			/* set clip bit (0x80) for draw region */
@@ -532,7 +532,7 @@ public final class PolygonLayer extends RenderElement {
 		 * and 'alpha' to fake a fade effect.
 		 */
 		public static void drawOver(GLMatrix mvp, int color, float alpha) {
-			// TODO true could be avoided when same shader and vbo
+			/* TODO true could be avoided when same shader and vbo */
 			setShader(polyShader, mvp, true);
 
 			if (color == 0) {

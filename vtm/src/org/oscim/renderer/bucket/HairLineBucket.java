@@ -1,4 +1,4 @@
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import static org.oscim.backend.GL20.GL_LINES;
 import static org.oscim.backend.GL20.GL_SHORT;
@@ -14,13 +14,13 @@ import org.oscim.theme.styles.LineStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HairLineLayer extends RenderElement {
-	static final Logger log = LoggerFactory.getLogger(HairLineLayer.class);
+public class HairLineBucket extends RenderBucket {
+	static final Logger log = LoggerFactory.getLogger(HairLineBucket.class);
 
 	public LineStyle line;
 
-	public HairLineLayer(int level) {
-		super(RenderElement.HAIRLINE);
+	public HairLineBucket(int level) {
+		super(RenderBucket.HAIRLINE);
 		this.level = level;
 	}
 
@@ -112,7 +112,7 @@ public class HairLineLayer extends RenderElement {
 			}
 		}
 
-		public static RenderElement draw(RenderElement l, GLViewport v) {
+		public static RenderBucket draw(RenderBucket l, GLViewport v) {
 			GLState.blend(true);
 
 			Shader s = shader;
@@ -120,7 +120,7 @@ public class HairLineLayer extends RenderElement {
 			s.set(v);
 
 			for (; l != null && l.type == HAIRLINE; l = l.next) {
-				HairLineLayer ll = (HairLineLayer) l;
+				HairLineBucket ll = (HairLineBucket) l;
 
 				GLUtils.setColor(s.uColor, ll.line.color, 1);
 

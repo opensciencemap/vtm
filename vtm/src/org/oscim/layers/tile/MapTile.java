@@ -23,7 +23,7 @@ import static org.oscim.layers.tile.MapTile.State.READY;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.VectorTileLoader;
 import org.oscim.layers.tile.vector.labeling.LabelTileLoaderHook;
-import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.quadtree.TileIndex;
 import org.oscim.utils.quadtree.TreeNode;
@@ -266,11 +266,11 @@ public class MapTile extends Tile {
 	 * Get the default ElementLayers which are added
 	 * by {@link VectorTileLoader}
 	 */
-	public ElementLayers getLayers() {
-		if (!(data instanceof ElementLayers))
+	public RenderBuckets getLayers() {
+		if (!(data instanceof RenderBuckets))
 			return null;
 
-		return (ElementLayers) data;
+		return (RenderBuckets) data;
 	}
 
 	public TileData getData(Object id) {

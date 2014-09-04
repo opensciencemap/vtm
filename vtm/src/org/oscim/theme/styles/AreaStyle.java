@@ -19,7 +19,7 @@ package org.oscim.theme.styles;
 import static org.oscim.backend.canvas.Color.parseColor;
 
 import org.oscim.backend.canvas.Color;
-import org.oscim.renderer.elements.TextureItem;
+import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.theme.IRenderTheme.Callback;
 
 /*TODO 

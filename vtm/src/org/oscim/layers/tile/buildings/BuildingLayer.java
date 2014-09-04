@@ -27,9 +27,9 @@ import org.oscim.map.Map;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.OffscreenRenderer.Mode;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.ExtrusionLayer;
-import org.oscim.renderer.elements.ExtrusionLayers;
+import org.oscim.renderer.bucket.ExtrusionBucket;
+import org.oscim.renderer.bucket.ExtrusionBuckets;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
 import org.slf4j.Logger;
@@ -77,7 +77,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
 	/** TileLoaderThemeHook */
 	@Override
-	public boolean render(MapTile tile, ElementLayers layers, MapElement element,
+	public boolean render(MapTile tile, RenderBuckets buckets, MapElement element,
 	        RenderStyle style, int level) {
 
 		if (!(style instanceof ExtrusionStyle))
@@ -95,14 +95,14 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		if (v != null)
 			minHeight = Integer.parseInt(v);
 
-		ExtrusionLayers el = get(tile);
+		ExtrusionBuckets el = get(tile);
 
 		if (el.layers == null) {
 			double lat = MercatorProjection.toLatitude(tile.y);
 			float groundScale = (float) MercatorProjection
 			    .groundResolution(lat, 1 << tile.zoomLevel);
 
-			el.layers = new ExtrusionLayer(0, groundScale, extrusion.colors);
+			el.layers = new ExtrusionBucket(0, groundScale, extrusion.colors);
 		}
 
 		/* 12m default */
@@ -114,10 +114,10 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		return true;
 	}
 
-	public static ExtrusionLayers get(MapTile tile) {
-		ExtrusionLayers el = (ExtrusionLayers) tile.getData(BUILDING_DATA);
+	public static ExtrusionBuckets get(MapTile tile) {
+		ExtrusionBuckets el = (ExtrusionBuckets) tile.getData(BUILDING_DATA);
 		if (el == null) {
-			el = new ExtrusionLayers(tile);
+			el = new ExtrusionBuckets(tile);
 			tile.addData(BUILDING_DATA, el);
 		}
 		return el;

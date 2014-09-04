@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.renderer.elements.VertexData.Chunk;
+import org.oscim.renderer.bucket.VertexData.Chunk;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 import org.slf4j.Logger;
@@ -102,6 +102,9 @@ public class VertexData extends Inlist.List<Chunk> {
 		vertices = null;
 	}
 
+	/**
+	 * @return sum of elements added
+	 */
 	public int compile(ShortBuffer sbuf) {
 		if (cur == null)
 			return 0;
@@ -114,7 +117,6 @@ public class VertexData extends Inlist.List<Chunk> {
 			sbuf.put(it.vertices, 0, it.used);
 		}
 		dispose();
-		//log.debug("compiled {}", size);
 		return size;
 	}
 

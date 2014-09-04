@@ -1,4 +1,4 @@
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import java.nio.ShortBuffer;
 
@@ -10,10 +10,10 @@ import org.oscim.renderer.MapRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExtrusionLayers extends TileData {
-	static final Logger log = LoggerFactory.getLogger(ExtrusionLayers.class);
+public class ExtrusionBuckets extends TileData {
+	static final Logger log = LoggerFactory.getLogger(ExtrusionBuckets.class);
 
-	public ExtrusionLayer layers;
+	public ExtrusionBucket layers;
 
 	public boolean compiled;
 
@@ -25,7 +25,7 @@ public class ExtrusionLayers extends TileData {
 	public BufferObject ibo;
 	public BufferObject vbo;
 
-	public ExtrusionLayers(MapTile tile) {
+	public ExtrusionBuckets(MapTile tile) {
 		zoomLevel = tile.zoomLevel;
 		x = tile.x;
 		y = tile.y;
@@ -34,14 +34,14 @@ public class ExtrusionLayers extends TileData {
 	/**
 	 * Set new ExtrusionLayers and clear previous.
 	 */
-	public void setLayers(ExtrusionLayer el) {
-		for (RenderElement l = layers; l != null; l = l.next)
+	public void setLayers(ExtrusionBucket el) {
+		for (RenderBucket l = layers; l != null; l = l.next)
 			l.clear();
 
 		layers = el;
 	}
 
-	public ExtrusionLayer getLayers() {
+	public ExtrusionBucket getLayers() {
 		return layers;
 	}
 
@@ -57,7 +57,7 @@ public class ExtrusionLayers extends TileData {
 	}
 
 	public void prepare() {
-		for (RenderElement l = layers; l != null; l = l.next)
+		for (RenderBucket l = layers; l != null; l = l.next)
 			l.prepare();
 	}
 
@@ -69,7 +69,7 @@ public class ExtrusionLayers extends TileData {
 		int sumIndices = 0;
 		int sumVertices = 0;
 
-		for (ExtrusionLayer l = layers; l != null; l = l.next()) {
+		for (ExtrusionBucket l = layers; l != null; l = l.next()) {
 			sumIndices += l.numIndices;
 			sumVertices += l.numVertices;
 		}
@@ -79,7 +79,7 @@ public class ExtrusionLayers extends TileData {
 		ShortBuffer vboData = MapRenderer.getShortBuffer(sumVertices * 4);
 		ShortBuffer iboData = MapRenderer.getShortBuffer(sumIndices);
 
-		for (ExtrusionLayer l = layers; l != null; l = l.next()) {
+		for (ExtrusionBucket l = layers; l != null; l = l.next()) {
 			l.compile(vboData, iboData);
 		}
 		int size = sumIndices * 2;

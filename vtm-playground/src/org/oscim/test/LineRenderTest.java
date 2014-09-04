@@ -6,11 +6,11 @@ import org.oscim.core.GeometryBuffer;
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.GenericLayer;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.LineTexLayer;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.LineTexBucket;
 import org.oscim.theme.styles.LineStyle;
 
 import com.badlogic.gdx.Input;
@@ -75,10 +75,10 @@ public class LineRenderTest extends GdxMap {
 		LineStyle outline2 = new LineStyle(0, null, Color.RED, 2.0f, Cap.ROUND, false, 0,
 		                                   0, 0, 0, 0, true);
 
-		LineLayer ol = l.layers.addLineLayer(0, outline);
-		LineLayer ol2 = l.layers.addLineLayer(5, outline2);
+		LineBucket ol = l.buckets.addLineBucket(0, outline);
+		LineBucket ol2 = l.buckets.addLineBucket(5, outline2);
 
-		LineLayer ll = l.layers.addLineLayer(10, line1);
+		LineBucket ll = l.buckets.addLineBucket(10, line1);
 		ll.addLine(g.translate(0, -20));
 		ll.addLine(g.translate(0, 10.5f));
 		addCircle(-200, -200, 100, ll);
@@ -86,7 +86,7 @@ public class LineRenderTest extends GdxMap {
 		if (addOutline)
 			ol.addOutline(ll);
 
-		ll = l.layers.addLineLayer(20, line2);
+		ll = l.buckets.addLineBucket(20, line2);
 		ll.addLine(g.translate(0, 10.5f));
 		ll.addLine(g.translate(0, 10.5f));
 		addCircle(200, -200, 100, ll);
@@ -94,7 +94,7 @@ public class LineRenderTest extends GdxMap {
 		if (addOutline)
 			ol.addOutline(ll);
 
-		LineTexLayer lt = l.layers.getLineTexLayer(30);
+		LineTexBucket lt = l.buckets.getLineTexBucket(30);
 		lt.line = line3;
 		lt.addLine(g.translate(0, 10.5f));
 		lt.addLine(g.translate(0, 10.5f));
@@ -103,7 +103,7 @@ public class LineRenderTest extends GdxMap {
 		// if (addOutline)
 		// ol2.addOutline(ll);
 
-		ll = l.layers.addLineLayer(40, line4);
+		ll = l.buckets.addLineBucket(40, line4);
 		ll.addLine(g.translate(0, 10.5f));
 		ll.addLine(g.translate(0, 10.5f));
 		addCircle(-200, 200, 100, ll);
@@ -112,7 +112,7 @@ public class LineRenderTest extends GdxMap {
 			ol2.addOutline(ll);
 	}
 
-	void addCircle(float cx, float cy, float radius, LineLayer ll) {
+	void addCircle(float cx, float cy, float radius, LineBucket ll) {
 		GeometryBuffer g = mGeom;
 
 		g.clear();
@@ -128,7 +128,7 @@ public class LineRenderTest extends GdxMap {
 		}
 	}
 
-	void addCircle(float cx, float cy, float radius, LineTexLayer ll) {
+	void addCircle(float cx, float cy, float radius, LineTexBucket ll) {
 		GeometryBuffer g = mGeom;
 
 		g.clear();
@@ -173,14 +173,14 @@ public class LineRenderTest extends GdxMap {
 		return true;
 	}
 
-	class LineTest extends ElementRenderer {
+	class LineTest extends BucketRenderer {
 
 		public LineTest() {
 			mMapPosition.scale = 0;
 		}
 
 		public synchronized void clear() {
-			layers.clear();
+			buckets.clear();
 			setReady(false);
 		}
 

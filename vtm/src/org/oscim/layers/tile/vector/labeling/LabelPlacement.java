@@ -9,9 +9,9 @@ import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileRenderer;
 import org.oscim.layers.tile.TileSet;
 import org.oscim.map.Map;
-import org.oscim.renderer.elements.SymbolItem;
-import org.oscim.renderer.elements.SymbolLayer;
-import org.oscim.renderer.elements.TextItem;
+import org.oscim.renderer.bucket.SymbolBucket;
+import org.oscim.renderer.bucket.SymbolItem;
+import org.oscim.renderer.bucket.TextItem;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.geom.OBB2D;
 
@@ -322,7 +322,7 @@ public class LabelPlacement {
 		int maxx = Tile.SIZE << (zoom - 1);
 
 		// FIXME ???
-		SymbolLayer sl = work.symbolLayer;
+		SymbolBucket sl = work.symbolLayer;
 		sl.clearItems();
 
 		double tileX = (pos.x * (Tile.SIZE << zoom));

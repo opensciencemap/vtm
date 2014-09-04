@@ -26,11 +26,11 @@ import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.LineLayer;
-import org.oscim.renderer.elements.LineTexLayer;
-import org.oscim.renderer.elements.MeshLayer;
-import org.oscim.renderer.elements.PolygonLayer;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.LineTexBucket;
+import org.oscim.renderer.bucket.MeshBucket;
+import org.oscim.renderer.bucket.PolygonBucket;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.RenderTheme;
 import org.oscim.theme.styles.AreaStyle;
@@ -63,7 +63,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	protected MapElement mElement;
 
 	/** current line layer (will be used for outline layers) */
-	protected LineLayer mCurLineLayer;
+	protected LineBucket mCurLineLayer;
 
 	/** Current layer for adding elements */
 	protected int mCurLayer;
@@ -71,7 +71,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	/** Line-scale-factor depending on zoom and latitude */
 	protected float mLineScale = 1.0f;
 
-	protected ElementLayers mLayers;
+	protected RenderBuckets mLayers;
 
 	private final VectorTileLayer mTileLayer;
 
@@ -109,7 +109,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 		/* scale line width relative to latitude + PI * thumb */
 		mLineScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
-		mLayers = new ElementLayers();
+		mLayers = new RenderBuckets();
 		tile.data = mLayers;
 
 		try {
@@ -244,7 +244,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 				return;
 			}
 
-			LineLayer ll = mLayers.getLineLayer(numLayer);
+			LineBucket ll = mLayers.getLineBucket(numLayer);
 
 			if (ll.line == null) {
 				ll.line = line;
@@ -263,7 +263,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 			mCurLineLayer = ll;
 
 		} else {
-			LineTexLayer ll = mLayers.getLineTexLayer(numLayer);
+			LineTexBucket ll = mLayers.getLineTexBucket(numLayer);
 
 			if (ll.line == null) {
 				ll.line = line;
@@ -287,11 +287,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void renderArea(AreaStyle area, int level) {
 		int numLayer = mCurLayer + level;
 		if (USE_MESH_POLY) {
-			MeshLayer l = mLayers.getMeshLayer(numLayer);
+			MeshBucket l = mLayers.getMeshBucket(numLayer);
 			l.area = area;
 			l.addMesh(mElement);
 		} else {
-			PolygonLayer l = mLayers.getPolygonLayer(numLayer);
+			PolygonBucket l = mLayers.getPolygonBucket(numLayer);
 			l.area = area;
 			l.addPolygon(mElement.points, mElement.index);
 		}

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.renderer.elements;
+package org.oscim.renderer.bucket;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
  * resolution for coordinates is 0.25 as points will be converted
  * to fixed point values.
  */
-public final class LineLayer extends RenderElement {
-	static final Logger log = LoggerFactory.getLogger(LineLayer.class);
+public final class LineBucket extends RenderBucket {
+	static final Logger log = LoggerFactory.getLogger(LineBucket.class);
 
 	private static final float COORD_SCALE = MapRenderer.COORD_SCALE;
 	/** scale factor mapping extrusion vector to short values */
@@ -59,7 +59,7 @@ public final class LineLayer extends RenderElement {
 	private static final int DIR_MASK = 0xFFFFFFFC;
 
 	/* lines referenced by this outline layer */
-	public LineLayer outlines;
+	public LineBucket outlines;
 	public LineStyle line;
 	public float scale = 1;
 
@@ -70,13 +70,13 @@ public final class LineLayer extends RenderElement {
 
 	private int tmin = Integer.MIN_VALUE, tmax = Integer.MAX_VALUE;
 
-	LineLayer(int layer) {
-		super(RenderElement.LINE);
+	public LineBucket(int layer) {
+		super(RenderBucket.LINE);
 		this.level = layer;
 	}
 
-	public void addOutline(LineLayer link) {
-		for (LineLayer l = outlines; l != null; l = l.outlines)
+	public void addOutline(LineBucket link) {
+		for (LineBucket l = outlines; l != null; l = l.outlines)
 			if (link == l)
 				return;
 
@@ -526,7 +526,7 @@ public final class LineLayer extends RenderElement {
 
 		/* factor to normalize extrusion vector and scale to coord scale */
 		private final static float COORD_SCALE_BY_DIR_SCALE =
-		        MapRenderer.COORD_SCALE / LineLayer.DIR_SCALE;
+		        MapRenderer.COORD_SCALE / LineBucket.DIR_SCALE;
 
 		private final static int CAP_THIN = 0;
 		private final static int CAP_BUTT = 1;
@@ -565,8 +565,8 @@ public final class LineLayer extends RenderElement {
 			return true;
 		}
 
-		public static RenderElement draw(RenderElement curLayer, GLViewport v,
-		        float scale, ElementLayers layers) {
+		public static RenderBucket draw(RenderBucket curLayer, GLViewport v,
+		        float scale, RenderBuckets buckets) {
 
 			if (curLayer == null)
 				return null;
@@ -578,7 +578,6 @@ public final class LineLayer extends RenderElement {
 			Shader s = shaders[mode];
 			s.useProgram();
 
-			//GLState.useProgram(lineProgram[mode]);
 			GLState.blend(true);
 
 			/* Somehow we loose the texture after an indefinite
@@ -595,7 +594,7 @@ public final class LineLayer extends RenderElement {
 			int uLineHeight = s.uHeight;
 
 			GL.glVertexAttribPointer(s.aPos, 4, GL20.GL_SHORT,
-			                         false, 0, layers.offset[LINE]);
+			                         false, 0, buckets.offset[LINE]);
 
 			v.mvp.setAsUniform(s.uMVP);
 
@@ -620,9 +619,9 @@ public final class LineLayer extends RenderElement {
 			float heightOffset = 0;
 			GL.glUniform1f(uLineHeight, heightOffset);
 
-			RenderElement l = curLayer;
-			for (; l != null && l.type == RenderElement.LINE; l = l.next) {
-				LineLayer ll = (LineLayer) l;
+			RenderBucket l = curLayer;
+			for (; l != null && l.type == RenderBucket.LINE; l = l.next) {
+				LineBucket ll = (LineBucket) l;
 				LineStyle line = ll.line.current();
 
 				if (ll.heightOffset != heightOffset) {
@@ -693,7 +692,7 @@ public final class LineLayer extends RenderElement {
 
 				/* draw LineLayers references by this outline */
 
-				for (LineLayer ref = ll.outlines; ref != null; ref = ref.outlines) {
+				for (LineBucket ref = ll.outlines; ref != null; ref = ref.outlines) {
 					LineStyle core = ref.line.current();
 
 					// core width

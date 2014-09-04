@@ -28,10 +28,10 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.LineLayer;
+import org.oscim.renderer.bucket.LineBucket;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.async.SimpleWorker;
@@ -188,11 +188,11 @@ public class PathLayer extends Layer {
 	/***
 	 * everything below runs on GL- and Worker-Thread
 	 ***/
-	final class RenderPath extends ElementRenderer {
+	final class RenderPath extends BucketRenderer {
 
 		public RenderPath() {
 
-			layers.addLineLayer(0, mLineStyle);
+			buckets.addLineBucket(0, mLineStyle);
 		}
 
 		private int mCurX = -1;
@@ -221,13 +221,13 @@ public class PathLayer extends Layer {
 			mMapPosition.copy(t.pos);
 
 			// compile new layers
-			layers.setBaseLayers(t.layer.getBaseLayers());
+			buckets.setBaseBuckets(t.bucket.getBaseBuckets());
 			compile();
 		}
 	}
 
 	final static class Task {
-		ElementLayers layer = new ElementLayers();
+		RenderBuckets bucket = new RenderBuckets();
 		MapPosition pos = new MapPosition();
 	}
 
@@ -294,16 +294,16 @@ public class PathLayer extends Layer {
 
 			}
 			if (size == 0) {
-				if (task.layer.getBaseLayers() != null) {
-					task.layer.clear();
+				if (task.bucket.getBaseBuckets() != null) {
+					task.bucket.clear();
 					mMap.render();
 				}
 				return true;
 			}
 
-			ElementLayers layers = task.layer;
+			RenderBuckets layers = task.bucket;
 
-			LineLayer ll = layers.getLineLayer(0);
+			LineBucket ll = layers.getLineBucket(0);
 			ll.line = mLineStyle;
 			ll.scale = ll.line.width;
 
@@ -398,7 +398,7 @@ public class PathLayer extends Layer {
 
 		@Override
 		public void cleanup(Task task) {
-			task.layer.clear();
+			task.bucket.clear();
 		}
 
 		private int addPoint(float[] points, int i, int x, int y) {

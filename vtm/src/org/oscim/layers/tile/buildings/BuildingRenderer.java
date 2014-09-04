@@ -12,8 +12,8 @@ import org.oscim.layers.tile.TileSet;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.ElementLayers;
-import org.oscim.renderer.elements.ExtrusionLayers;
+import org.oscim.renderer.bucket.ExtrusionBuckets;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
 
 		/* keep a list of tiles available for rendering */
 		if (mExtrusionLayerSet == null || mExtrusionLayerSet.length < mTileSet.cnt * 4)
-			mExtrusionLayerSet = new ExtrusionLayers[mTileSet.cnt * 4];
+			mExtrusionLayerSet = new ExtrusionBuckets[mTileSet.cnt * 4];
 
 		/* compile one tile max per frame */
 		boolean compiled = false;
@@ -114,7 +114,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
 			/* TODO - if tile is not available try parent or children */
 
 			for (int i = 0; i < mTileSet.cnt; i++) {
-				ExtrusionLayers els = getLayer(tiles[i]);
+				ExtrusionBuckets els = getLayer(tiles[i]);
 				if (els == null)
 					continue;
 
@@ -137,7 +137,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
 				//		if (c == t)
 				//			continue O;
 
-				ExtrusionLayers els = getLayer(t);
+				ExtrusionBuckets els = getLayer(t);
 				if (els == null)
 					continue;
 
@@ -158,7 +158,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
 						continue;
 
 					MapTile c = t.node.child(j);
-					ExtrusionLayers el = getLayer(c);
+					ExtrusionBuckets el = getLayer(c);
 
 					if (el == null || !el.compiled)
 						continue;
@@ -192,8 +192,8 @@ public class BuildingRenderer extends ExtrusionRenderer {
 		mTileLayer.releaseTiles(mTileSet);
 	}
 
-	private static ExtrusionLayers getLayer(MapTile t) {
-		ElementLayers layers = t.getLayers();
+	private static ExtrusionBuckets getLayer(MapTile t) {
+		RenderBuckets layers = t.getLayers();
 		if (layers != null && !t.state(READY | NEW_DATA))
 			return null;
 

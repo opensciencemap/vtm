@@ -18,7 +18,7 @@
 package org.oscim.layers.tile.vector.labeling;
 
 import org.oscim.core.Tile;
-import org.oscim.renderer.elements.TextItem;
+import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.TextStyle;
 import org.oscim.utils.geom.GeometryUtils;
 import org.oscim.utils.geom.LineClipper;

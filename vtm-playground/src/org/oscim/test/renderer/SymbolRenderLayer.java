@@ -17,17 +17,17 @@
 package org.oscim.test.renderer;
 
 import org.oscim.backend.CanvasAdapter;
-import org.oscim.renderer.ElementRenderer;
+import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.elements.SymbolItem;
-import org.oscim.renderer.elements.SymbolLayer;
+import org.oscim.renderer.bucket.SymbolBucket;
+import org.oscim.renderer.bucket.SymbolItem;
 
-public class SymbolRenderLayer extends ElementRenderer {
+public class SymbolRenderLayer extends BucketRenderer {
 	boolean initialize = true;
 
 	public SymbolRenderLayer() {
-		SymbolLayer l = new SymbolLayer();
-		layers.setTextureLayers(l);
+		SymbolBucket l = new SymbolBucket();
+		buckets.setTextureBuckets(l);
 
 		SymbolItem it = SymbolItem.pool.get();
 		it.billboard = false;

@@ -11,8 +11,8 @@ import org.oscim.core.Tag;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
-import org.oscim.renderer.elements.ExtrusionLayer;
-import org.oscim.renderer.elements.ExtrusionLayers;
+import org.oscim.renderer.bucket.ExtrusionBucket;
+import org.oscim.renderer.bucket.ExtrusionBuckets;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.TileSource;
 import org.slf4j.Logger;
@@ -24,8 +24,8 @@ class S3DBTileLoader extends TileLoader {
 	/** current TileDataSource used by this MapTileLoader */
 	private final ITileDataSource mTileDataSource;
 
-	private ExtrusionLayer mLayers;
-	private ExtrusionLayer mRoofs;
+	private ExtrusionBucket mLayers;
+	private ExtrusionBucket mRoofs;
 
 	private float mGroundScale;
 
@@ -75,13 +75,13 @@ class S3DBTileLoader extends TileLoader {
 		mGroundScale = (float) MercatorProjection
 		    .groundResolution(lat, 1 << mTile.zoomLevel);
 
-		mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(247, 249, 250));
+		mRoofs = new ExtrusionBucket(0, mGroundScale, Color.get(247, 249, 250));
 
-		mLayers = new ExtrusionLayer(0, mGroundScale, Color.get(255, 254, 252));
+		mLayers = new ExtrusionBucket(0, mGroundScale, Color.get(255, 254, 252));
 		//mRoofs = new ExtrusionLayer(0, mGroundScale, Color.get(207, 209, 210));
 		mRoofs.next = mLayers;
 
-		ExtrusionLayers layers = BuildingLayer.get(tile);
+		ExtrusionBuckets layers = BuildingLayer.get(tile);
 
 		layers.setLayers(mRoofs);
 
@@ -127,13 +127,13 @@ class S3DBTileLoader extends TileLoader {
 			return;
 		}
 
-		for (ExtrusionLayer l = mLayers; l != null; l = l.next()) {
+		for (ExtrusionBucket l = mLayers; l != null; l = l.next()) {
 			if (l.color == c) {
 				l.add(element);
 				return;
 			}
 		}
-		ExtrusionLayer l = new ExtrusionLayer(0, mGroundScale, c);
+		ExtrusionBucket l = new ExtrusionBucket(0, mGroundScale, c);
 
 		l.next = mLayers.next;
 		mLayers.next = l;

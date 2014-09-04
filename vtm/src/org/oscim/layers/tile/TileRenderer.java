@@ -26,7 +26,7 @@ import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.utils.ScanBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,7 +175,7 @@ public abstract class TileRenderer extends LayerRenderer {
 
 	private static int uploadTileData(MapTile tile) {
 		tile.state = READY;
-		ElementLayers layers = tile.getLayers();
+		RenderBuckets layers = tile.getLayers();
 
 		/* tile might only contain label layers */
 		if (layers == null)
