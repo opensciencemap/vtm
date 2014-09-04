@@ -79,7 +79,7 @@ public class TextLayer extends TextureLayer {
 	}
 
 	@Override
-	public boolean prepare() {
+	public void prepare() {
 		short numIndices = 0;
 		short offsetIndices = 0;
 		numVertices = 0;
@@ -158,8 +158,6 @@ public class TextLayer extends TextureLayer {
 
 		t.offset = offsetIndices;
 		t.indices = (short) (numIndices - offsetIndices);
-
-		return true;
 	}
 
 	protected void addItem(TextItem it,

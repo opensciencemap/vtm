@@ -162,8 +162,8 @@ public class MarkerRenderer extends ElementRenderer {
 			mSymbolLayer.pushSymbol(s);
 		}
 
-		mSymbolLayer.prepare();
 		layers.setTextureLayers(mSymbolLayer);
+		layers.prepare();
 
 		compile();
 	}

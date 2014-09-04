@@ -54,7 +54,15 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 		numVertices = 0;
 	}
 
-	/** compile vertex data to vbo. */
+	/**
+	 * Final preparation of content before compilation
+	 * for stuff that should not be done on render-thread.
+	 */
+	protected void prepare() {
+
+	}
+
+	/** Compile vertex data to vbo. */
 	protected void compile(ShortBuffer sbuf) {
 		compileVertexItems(sbuf);
 	}

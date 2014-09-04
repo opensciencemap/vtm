@@ -365,4 +365,12 @@ public class ElementLayers extends TileData {
 
 		TextureItem.init(gl);
 	}
+
+	public void prepare() {
+		for (RenderElement l = baseLayers; l != null; l = l.next)
+			l.prepare();
+
+		for (RenderElement l = textureLayers; l != null; l = l.next)
+			l.prepare();
+	}
 }

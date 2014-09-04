@@ -130,7 +130,11 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	public void completed(QueryResult result) {
 		mTileLayer.callHooksComplete(mTile, result == QueryResult.SUCCESS);
 
+		/* finish layers - tessellate and cleanup on worker-thread */
+		mLayers.prepare();
+
 		super.completed(result);
+
 		clearState();
 	}
 

@@ -66,7 +66,6 @@ public abstract class TextureLayer extends RenderElement {
 		compileVertexItems(sbuf);
 	}
 
-	abstract public boolean prepare();
 
 	protected void clear() {
 		while (textures != null)

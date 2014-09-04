@@ -123,11 +123,6 @@ public class BitmapLayer extends TextureLayer {
 	}
 
 	@Override
-	public boolean prepare() {
-		return false;
-	}
-
-	@Override
 	protected void compile(ShortBuffer sbuf) {
 
 		if (mBitmap == null)

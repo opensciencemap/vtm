@@ -196,9 +196,4 @@ public final class SymbolLayer extends TextureLayer {
 		super.clear();
 		clearItems();
 	}
-
-	@Override
-	public boolean prepare() {
-		return true;
-	}
 }
