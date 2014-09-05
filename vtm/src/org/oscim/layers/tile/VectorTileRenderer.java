@@ -135,6 +135,7 @@ public class VectorTileRenderer extends TileRenderer {
 				continue;
 			drawGrandParent(t, v);
 		}
+
 		GL.glDepthMask(false);
 
 		/* make sure stencil buffer write is disabled */
@@ -177,7 +178,6 @@ public class VectorTileRenderer extends TileRenderer {
 		buckets.bind();
 
 		PolygonBucket.Renderer.clip(mClipMVP, mClipMode);
-
 		boolean first = true;
 
 		for (RenderBucket b = buckets.get(); b != null;) {
@@ -193,8 +193,6 @@ public class VectorTileRenderer extends TileRenderer {
 					break;
 				case TEXLINE:
 					b = LineTexBucket.Renderer.draw(b, v, div, buckets);
-					if (buckets.ibo != null)
-						buckets.ibo.bind();
 					break;
 				case MESH:
 					b = MeshBucket.Renderer.draw(b, v);
@@ -211,6 +209,8 @@ public class VectorTileRenderer extends TileRenderer {
 					b = b.next;
 					break;
 			}
+
+			/* make sure buffers are bound again */
 			buckets.bind();
 		}
 

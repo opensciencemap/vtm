@@ -240,7 +240,6 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 		if (v.pos.zoomLevel < 18)
 			GL.glDisable(GL20.GL_CULL_FACE);
 
-		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
 	private static void setMatrix(GLViewport v, ExtrusionBuckets l, boolean offset) {

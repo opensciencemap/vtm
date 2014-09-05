@@ -88,9 +88,12 @@ public class MapRenderer {
 		GL.glDepthMask(false);
 		GL.glStencilMask(0);
 
+		GLState.test(false, false);
 		GLState.blend(false);
 		GLState.bindTex2D(-1);
 		GLState.useProgram(-1);
+		GLState.bindElementBuffer(-1);
+		GLState.bindVertexBuffer(-1);
 
 		mMap.animator().updateAnimation();
 		mViewport.setFrom(mMap.viewport());
@@ -180,11 +183,11 @@ public class MapRenderer {
 		buf.put(indices);
 		buf.flip();
 
-		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER,
-		                mQuadIndicesID);
+		GLState.bindElementBuffer(mQuadIndicesID);
 		GL.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER,
-		                indices.length * 2, buf, GL20.GL_STATIC_DRAW);
-		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		                indices.length * 2, buf,
+		                GL20.GL_STATIC_DRAW);
+		GLState.bindElementBuffer(0);
 
 		/** initialize default quad */
 		FloatBuffer floatBuffer = MapRenderer.getFloatBuffer(8);
@@ -193,10 +196,11 @@ public class MapRenderer {
 		floatBuffer.flip();
 		mQuadVerticesID = vboIds[1];
 
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mQuadVerticesID);
+		GLState.bindVertexBuffer(mQuadVerticesID);
 		GL.glBufferData(GL20.GL_ARRAY_BUFFER,
-		                quad.length * 4, floatBuffer, GL20.GL_STATIC_DRAW);
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+		                quad.length * 4, floatBuffer,
+		                GL20.GL_STATIC_DRAW);
+		GLState.bindVertexBuffer(0);
 
 		GLState.init(GL);
 
@@ -238,13 +242,14 @@ public class MapRenderer {
 	 * Vertices: float[]{ -1, -1, -1, 1, 1, -1, 1, 1 }
 	 * 
 	 * GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
-	 * 
-	 * @param bind - true to activate, false to unbind
 	 */
-	public static void bindQuadVertexVBO(int location, boolean bind) {
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mQuadVerticesID);
-		if (location >= 0)
+	public static void bindQuadVertexVBO(int location) {
+
+		if (location >= 0) {
+			GLState.bindVertexBuffer(mQuadVerticesID);
+			GLState.enableVertexArrays(location, -1);
 			GL.glVertexAttribPointer(location, 2, GL20.GL_FLOAT, false, 0, 0);
+		}
 	}
 
 	/**
@@ -254,7 +259,8 @@ public class MapRenderer {
 	 * @param bind - true to activate, false to unbind (dont forget!)
 	 * */
 	public static void bindQuadIndicesVBO(boolean bind) {
-		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, bind ? mQuadIndicesID : 0);
+		GLState.bindElementBuffer(bind ? mQuadIndicesID : 0);
+
 	}
 
 	/**

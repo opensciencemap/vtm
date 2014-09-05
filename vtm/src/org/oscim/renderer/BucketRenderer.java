@@ -72,8 +72,6 @@ public abstract class BucketRenderer extends LayerRenderer {
 	protected synchronized void render(GLViewport v) {
 		MapPosition layerPos = mMapPosition;
 
-		buckets.bind();
-
 		GLState.test(false, false);
 		GLState.blend(true);
 
@@ -82,6 +80,9 @@ public abstract class BucketRenderer extends LayerRenderer {
 		setMatrix(v, true);
 
 		for (RenderBucket b = buckets.get(); b != null;) {
+
+			buckets.bind();
+
 			switch (b.type) {
 				case POLYGON:
 					b = PolygonBucket.Renderer.draw(b, v, 1, true);
@@ -91,8 +92,6 @@ public abstract class BucketRenderer extends LayerRenderer {
 					break;
 				case TEXLINE:
 					b = LineTexBucket.Renderer.draw(b, v, div, buckets);
-					// rebind
-					buckets.ibo.bind();
 					break;
 				case MESH:
 					b = MeshBucket.Renderer.draw(b, v);
@@ -102,13 +101,9 @@ public abstract class BucketRenderer extends LayerRenderer {
 					break;
 				case BITMAP:
 					b = BitmapBucket.Renderer.draw(b, v, 1, 1);
-					// rebind
-					buckets.ibo.bind();
 					break;
 				case SYMBOL:
 					b = TextureBucket.Renderer.draw(buckets, b, v, div);
-					// rebind
-					buckets.ibo.bind();
 					break;
 				default:
 					log.error("invalid bucket {}", b.type);

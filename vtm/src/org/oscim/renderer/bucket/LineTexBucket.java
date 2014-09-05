@@ -284,10 +284,11 @@ public final class LineTexBucket extends RenderBucket {
 
 			ShortBuffer sbuf = buf.asShortBuffer();
 
-			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
+			//GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
+			GLState.bindVertexBuffer(mVertexFlipID);
 			GL.glBufferData(GL20.GL_ARRAY_BUFFER, flip.length, sbuf,
 			                GL20.GL_STATIC_DRAW);
-			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+			GLState.bindVertexBuffer(0);
 
 			//		mTexID = new int[10];
 			//		byte[] stipple = new byte[2];
@@ -329,7 +330,7 @@ public final class LineTexBucket extends RenderBucket {
 
 			MapRenderer.bindQuadIndicesVBO(true);
 
-			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
+			GLState.bindVertexBuffer(mVertexFlipID);
 			GL.glVertexAttribPointer(shader.aFlip, 1,
 			                         GL20.GL_BYTE, false, 0, 0);
 
@@ -418,8 +419,6 @@ public final class LineTexBucket extends RenderBucket {
 				}
 				//GlUtils.checkGlError(TAG);
 			}
-
-			MapRenderer.bindQuadIndicesVBO(false);
 
 			GL.glDisableVertexAttribArray(aPos0);
 			GL.glDisableVertexAttribArray(aPos1);

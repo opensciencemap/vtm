@@ -31,6 +31,8 @@ public class GLState {
 	private static boolean stencil = false;
 	private static int shader;
 	private static float[] clearColor;
+	private static int glVertexBuffer;
+	private static int glIndexBuffer;
 
 	private static int currentTexId;
 
@@ -44,6 +46,8 @@ public class GLState {
 		stencil = false;
 		shader = -1;
 		currentTexId = -1;
+		glVertexBuffer = -1;
+		glIndexBuffer = -1;
 		clearColor = null;
 
 		GL.glDisable(GL20.GL_STENCIL_TEST);
@@ -158,4 +162,48 @@ public class GLState {
 		GL.glClearColor(color[0], color[1], color[2], color[3]);
 	}
 
+	public static void bindBuffer(int target, int id) {
+		//log.debug(">> buffer {} {}", target == GL20.GL_ARRAY_BUFFER, id);
+
+		if (target == GL20.GL_ARRAY_BUFFER) {
+			if (glVertexBuffer == id)
+				return;
+			glVertexBuffer = id;
+		}
+		else if (target == GL20.GL_ELEMENT_ARRAY_BUFFER) {
+			if (glIndexBuffer == id)
+				return;
+			glIndexBuffer = id;
+		}
+		else {
+			log.debug("invalid target {}", target);
+			return;
+		}
+		//log.debug("bind buffer {} {}", target == GL20.GL_ARRAY_BUFFER, id);
+
+		if (id >= 0)
+			GL.glBindBuffer(target, id);
+	}
+
+	public static void bindElementBuffer(int id) {
+
+		if (glIndexBuffer == id)
+			return;
+		glIndexBuffer = id;
+
+		if (id >= 0)
+			GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, id);
+
+	}
+
+	public static void bindVertexBuffer(int id) {
+
+		if (glVertexBuffer == id)
+			return;
+		glVertexBuffer = id;
+
+		if (id >= 0)
+			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, id);
+
+	}
 }

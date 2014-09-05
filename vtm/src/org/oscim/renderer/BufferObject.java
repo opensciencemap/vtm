@@ -59,7 +59,7 @@ public final class BufferObject extends Inlist<BufferObject> {
 			buf.flip();
 		}
 
-		GL.glBindBuffer(target, id);
+		GLState.bindBuffer(target, id);
 
 		/* reuse memory allocated for vbo when possible and allocated
 		 * memory is less then four times the new data */
@@ -75,11 +75,11 @@ public final class BufferObject extends Inlist<BufferObject> {
 	}
 
 	public void bind() {
-		GL.glBindBuffer(target, id);
+		GLState.bindBuffer(target, id);
 	}
 
 	public void unbind() {
-		GL.glBindBuffer(target, 0);
+		GLState.bindBuffer(target, 0);
 	}
 
 	// ---------------------------- pool ----------------------------

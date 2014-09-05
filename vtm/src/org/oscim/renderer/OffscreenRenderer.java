@@ -213,13 +213,11 @@ public class OffscreenRenderer extends LayerRenderer {
 		GLState.bindTex2D(renderTex);
 		GL.glUniform1i(mShader.uTexColor, 0);
 
-		MapRenderer.bindQuadVertexVBO(mShader.aPos, true);
+		MapRenderer.bindQuadVertexVBO(mShader.aPos);
 
 		GL.glUniform2f(mShader.uPixel,
 		               (float) (1.0 / texW * 0.5),
 		               (float) (1.0 / texH * 0.5));
-
-		GLState.enableVertexArrays(mShader.aPos, -1);
 
 		GLState.test(false, false);
 		GLState.blend(true);
