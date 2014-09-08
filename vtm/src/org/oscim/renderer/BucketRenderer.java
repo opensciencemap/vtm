@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * 
  * All methods that modify 'buckets' MUST be synchronized!
  */
-public abstract class BucketRenderer extends LayerRenderer {
+public class BucketRenderer extends LayerRenderer {
 
 	public static final Logger log = LoggerFactory.getLogger(BucketRenderer.class);
 
@@ -63,6 +63,21 @@ public abstract class BucketRenderer extends LayerRenderer {
 	public BucketRenderer() {
 		buckets = new RenderBuckets();
 		mMapPosition = new MapPosition();
+	}
+
+	protected boolean mInititialzed;
+
+	/**
+	 * Default implementation:
+	 * Copy initial Viewport position and compile buckets.
+	 */
+	@Override
+	protected void update(GLViewport v) {
+		if (!mInititialzed) {
+			mMapPosition.copy(v.pos);
+			mInititialzed = true;
+			compile();
+		}
 	}
 
 	/**
