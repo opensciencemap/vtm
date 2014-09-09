@@ -395,7 +395,7 @@ public interface GL20 {
 
 	public void glDisableVertexAttribArray(int index);
 
-	public void glDrawElements(int mode, int count, int type, int indices);
+	public void glDrawElements(int mode, int count, int type, int offset);
 
 	public void glEnableVertexAttribArray(int index);
 
@@ -565,8 +565,11 @@ public interface GL20 {
 	public void glVertexAttribPointer(int indx, int size, int type, boolean normalized, int stride,
 	        Buffer ptr);
 
+	/**
+	 * 
+	 */
 	public void glVertexAttribPointer(int indx, int size, int type, boolean normalized, int stride,
-	        int ptr);
+	        int offset);
 
 	//------------------------
 

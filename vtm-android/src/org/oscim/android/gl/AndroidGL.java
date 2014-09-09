@@ -139,8 +139,8 @@ public class AndroidGL implements GL20 {
 	}
 
 	@Override
-	public void glDrawElements(int mode, int count, int type, int indices) {
-		GLES20.glDrawElements(mode, count, type, indices);
+	public void glDrawElements(int mode, int count, int type, int offset) {
+		GLES20.glDrawElements(mode, count, type, offset);
 	}
 
 	@Override
