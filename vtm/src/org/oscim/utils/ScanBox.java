@@ -84,7 +84,7 @@ public abstract class ScanBox {
 	private Edge bc = new Edge();
 	private Edge ca = new Edge();
 
-	private int minX, maxX;
+	private int xmin, xmax;
 
 	protected int mZoom;
 
@@ -113,8 +113,8 @@ public abstract class ScanBox {
 		if (min == max)
 			max++;
 
-		minX = (int) min;
-		maxX = (int) max;
+		xmin = (int) min;
+		xmax = (int) max;
 
 		// top-left -> top-right
 		ab.set(box[0], box[1], box[2], box[3]);
@@ -210,11 +210,11 @@ public abstract class ScanBox {
 
 			int x1 = (int) Math.floor(e1.x0 + m1 * dy);
 
-			if (x1 < minX)
-				x1 = minX;
+			if (x1 < xmin)
+				x1 = xmin;
 
-			if (x0 > maxX)
-				x0 = maxX;
+			if (x0 > xmax)
+				x0 = xmax;
 
 			if (x1 < x0)
 				setVisible(y, x1, x0);

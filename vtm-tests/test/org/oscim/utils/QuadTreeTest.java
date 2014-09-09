@@ -35,10 +35,10 @@ public class QuadTreeTest {
 		ArrayList<Item> items = new ArrayList<Item>(numItems + 16);
 
 		for (int i = 0; i < numItems; i++) {
-			box.minX = (int) (rand.nextDouble() * 10000 - 5000);
-			box.minY = (int) (rand.nextDouble() * 10000 - 5000);
-			box.maxX = (int) (box.minX + rand.nextDouble() * 500);
-			box.maxY = (int) (box.minY + rand.nextDouble() * 500);
+			box.xmin = (int) (rand.nextDouble() * 10000 - 5000);
+			box.ymin = (int) (rand.nextDouble() * 10000 - 5000);
+			box.xmax = (int) (box.xmin + rand.nextDouble() * 500);
+			box.ymax = (int) (box.ymin + rand.nextDouble() * 500);
 
 			Item it = new Item(box, i);
 			q.insert(box, it);
@@ -77,8 +77,8 @@ public class QuadTreeTest {
 			}, it);
 
 			if (f == matched[0])
-				out.println((it.bbox.maxX - it.bbox.minX)
-				        + " x " + (it.bbox.maxY - it.bbox.minY)
+				out.println((it.bbox.xmax - it.bbox.xmin)
+				        + " x " + (it.bbox.ymax - it.bbox.ymin)
 				        + " ==> " + it);
 		}
 
@@ -135,8 +135,8 @@ public class QuadTreeTest {
 		int cnt = numItems;
 		for (Item it : items) {
 			if (!q.remove(it.bbox, it)) {
-				out.println((it.bbox.maxX - it.bbox.minX)
-				        + " x " + (it.bbox.maxY - it.bbox.minY)
+				out.println((it.bbox.xmax - it.bbox.xmin)
+				        + " x " + (it.bbox.ymax - it.bbox.ymin)
 				        + " ==> " + it);
 
 				q.search(it.bbox, new SearchCb<Item>() {
@@ -160,8 +160,8 @@ public class QuadTreeTest {
 		cnt = numItems;
 		for (Item it : items) {
 			if (!q.remove(it.bbox, it))
-				out.println((it.bbox.maxX - it.bbox.minX)
-				        + " x " + (it.bbox.maxY - it.bbox.minY)
+				out.println((it.bbox.xmax - it.bbox.xmin)
+				        + " x " + (it.bbox.ymax - it.bbox.ymin)
 				        + " => " + it);
 
 			Assert.assertEquals(--cnt, q.size());
@@ -208,8 +208,8 @@ public class QuadTreeTest {
 			}
 			//Assert.assertEquals(cnt, found[0]);
 			if (f == matched[0])
-				out.println((it.bbox.maxX - it.bbox.minX)
-				        + " x " + (it.bbox.maxY - it.bbox.minY)
+				out.println((it.bbox.xmax - it.bbox.xmin)
+				        + " x " + (it.bbox.ymax - it.bbox.ymin)
 				        + " ==> " + it);
 		}
 

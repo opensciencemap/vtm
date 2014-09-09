@@ -26,10 +26,10 @@ public class QuadTree<T> extends BoxTree<BoxItem<T>, T> implements SpatialIndex<
 
 	private BoxItem<T> getBox(Box box) {
 		BoxItem<T> it = boxPool.get();
-		it.x1 = (int) box.minX;
-		it.y1 = (int) box.minY;
-		it.x2 = (int) box.maxX;
-		it.y2 = (int) box.maxY;
+		it.x1 = (int) box.xmin;
+		it.y1 = (int) box.ymin;
+		it.x2 = (int) box.xmax;
+		it.y2 = (int) box.ymax;
 		return it;
 	}
 

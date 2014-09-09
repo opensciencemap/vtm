@@ -730,27 +730,27 @@ public class MapDatabase implements ITileDataSource {
 
 		//log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
 		if (numRows > 0) {
-			int minX = -2;
-			int minY = -2;
-			int maxX = Tile.SIZE + 2;
-			int maxY = Tile.SIZE + 2;
+			int xmin = -2;
+			int ymin = -2;
+			int xmax = Tile.SIZE + 2;
+			int ymax = Tile.SIZE + 2;
 
 			int w = (int) (Tile.SIZE / (numCols + 1));
 			int h = (int) (Tile.SIZE / (numRows + 1));
 
 			if (mCurrentCol > 0)
-				minX = (int) (mCurrentCol * w);
+				xmin = (int) (mCurrentCol * w);
 
 			if (mCurrentCol < numCols)
-				maxX = (int) (mCurrentCol * w + w);
+				xmax = (int) (mCurrentCol * w + w);
 
 			if (mCurrentRow > 0)
-				minY = (int) (mCurrentRow * h);
+				ymin = (int) (mCurrentRow * h);
 
 			if (mCurrentRow < numRows)
-				maxY = (int) (mCurrentRow * h + h);
-			//log.debug(minX + " " + minY + " " + maxX + " " + maxY);
-			mTileClipper.setRect(minX, minY, maxX, maxY);
+				ymax = (int) (mCurrentRow * h + h);
+			//log.debug(xmin + " " + ymin + " " + xmax + " " + ymax);
+			mTileClipper.setRect(xmin, ymin, xmax, ymax);
 		} else {
 			mTileClipper.setRect(-2, -2, Tile.SIZE + 2, Tile.SIZE + 2);
 		}

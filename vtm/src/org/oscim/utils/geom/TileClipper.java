@@ -26,25 +26,25 @@ import org.oscim.core.GeometryBuffer;
  * based on http://www.cs.rit.edu/~icss571/clipTrans/PolyClipBack.html
  */
 public class TileClipper {
-	private float minX;
-	private float maxX;
-	private float minY;
-	private float maxY;
+	private float xmin;
+	private float xmax;
+	private float ymin;
+	private float ymax;
 
-	public TileClipper(float minX, float minY, float maxX, float maxY) {
-		this.minX = minX;
-		this.minY = minY;
-		this.maxX = maxX;
-		this.maxY = maxY;
-		mLineClipper = new LineClipper(minX, minY, maxX, maxY);
+	public TileClipper(float xmin, float ymin, float xmax, float ymax) {
+		this.xmin = xmin;
+		this.ymin = ymin;
+		this.xmax = xmax;
+		this.ymax = ymax;
+		mLineClipper = new LineClipper(xmin, ymin, xmax, ymax);
 	}
 
-	public void setRect(float minX, float minY, float maxX, float maxY) {
-		this.minX = minX;
-		this.minY = minY;
-		this.maxX = maxX;
-		this.maxY = maxY;
-		mLineClipper.setRect(minX, minY, maxX, maxY);
+	public void setRect(float xmin, float ymin, float xmax, float ymax) {
+		this.xmin = xmin;
+		this.ymin = ymin;
+		this.xmax = xmax;
+		this.ymax = ymax;
+		mLineClipper.setRect(xmin, ymin, xmax, ymax);
 	}
 
 	private final LineClipper mLineClipper;
@@ -157,20 +157,20 @@ public class TileClipper {
 		for (int i = pointPos; i < end;) {
 			float cx = in.points[i++];
 			float cy = in.points[i++];
-			if (cx > minX) {
+			if (cx > xmin) {
 				/* current is inside */
-				if (px > minX) {
+				if (px > xmin) {
 					/* previous was inside */
 					out.addPoint(cx, cy);
 				} else {
 					/* previous was outside, add edge point */
-					out.addPoint(minX, py + (cy - py) * (minX - px) / (cx - px));
+					out.addPoint(xmin, py + (cy - py) * (xmin - px) / (cx - px));
 					out.addPoint(cx, cy);
 				}
 			} else {
-				if (px > minX) {
+				if (px > xmin) {
 					/* previous was inside, add edge point */
-					out.addPoint(minX, py + (cy - py) * (minX - px) / (cx - px));
+					out.addPoint(xmin, py + (cy - py) * (xmin - px) / (cx - px));
 				}
 				/* else skip point */
 			}
@@ -188,16 +188,16 @@ public class TileClipper {
 			float cx = in.points[i++];
 			float cy = in.points[i++];
 
-			if (cx < maxX) {
-				if (px < maxX) {
+			if (cx < xmax) {
+				if (px < xmax) {
 					out.addPoint(cx, cy);
 				} else {
-					out.addPoint(maxX, py + (cy - py) * (maxX - px) / (cx - px));
+					out.addPoint(xmax, py + (cy - py) * (xmax - px) / (cx - px));
 					out.addPoint(cx, cy);
 				}
 			} else {
-				if (px < maxX) {
-					out.addPoint(maxX, py + (cy - py) * (maxX - px) / (cx - px));
+				if (px < xmax) {
+					out.addPoint(xmax, py + (cy - py) * (xmax - px) / (cx - px));
 				}
 			}
 			px = cx;
@@ -214,16 +214,16 @@ public class TileClipper {
 			float cx = in.points[i++];
 			float cy = in.points[i++];
 
-			if (cy < maxY) {
-				if (py < maxY) {
+			if (cy < ymax) {
+				if (py < ymax) {
 					out.addPoint(cx, cy);
 				} else {
-					out.addPoint(px + (cx - px) * (maxY - py) / (cy - py), maxY);
+					out.addPoint(px + (cx - px) * (ymax - py) / (cy - py), ymax);
 					out.addPoint(cx, cy);
 				}
 			} else {
-				if (py < maxY) {
-					out.addPoint(px + (cx - px) * (maxY - py) / (cy - py), maxY);
+				if (py < ymax) {
+					out.addPoint(px + (cx - px) * (ymax - py) / (cy - py), ymax);
 				}
 			}
 			px = cx;
@@ -239,16 +239,16 @@ public class TileClipper {
 		for (int i = pointPos; i < len;) {
 			float cx = in.points[i++];
 			float cy = in.points[i++];
-			if (cy > minY) {
-				if (py > minY) {
+			if (cy > ymin) {
+				if (py > ymin) {
 					out.addPoint(cx, cy);
 				} else {
-					out.addPoint(px + (cx - px) * (minY - py) / (cy - py), minY);
+					out.addPoint(px + (cx - px) * (ymin - py) / (cy - py), ymin);
 					out.addPoint(cx, cy);
 				}
 			} else {
-				if (py > minY) {
-					out.addPoint(px + (cx - px) * (minY - py) / (cy - py), minY);
+				if (py > ymin) {
+					out.addPoint(px + (cx - px) * (ymin - py) / (cy - py), ymin);
 				}
 			}
 			px = cx;

@@ -22,16 +22,16 @@ package org.oscim.core;
 public class Box {
 
 	/** The min x. */
-	public double minX;
+	public double xmin;
 
 	/** The max x. */
-	public double maxX;
+	public double xmax;
 
 	/** The min y. */
-	public double minY;
+	public double ymin;
 
 	/** The max y. */
-	public double maxY;
+	public double ymax;
 
 	/**
 	 * Instantiates a new Box with all values being 0.
@@ -43,23 +43,23 @@ public class Box {
 	/**
 	 * Instantiates a new Box.
 	 * 
-	 * @param minX the min x
-	 * @param minY the min y
-	 * @param maxX the max x
-	 * @param maxY the max y
+	 * @param xmin the min x
+	 * @param ymin the min y
+	 * @param xmax the max x
+	 * @param ymax the max y
 	 */
-	public Box(double minX, double minY, double maxX, double maxY) {
-		this.minX = minX;
-		this.minY = minY;
-		this.maxX = maxX;
-		this.maxY = maxY;
+	public Box(double xmin, double ymin, double xmax, double ymax) {
+		this.xmin = xmin;
+		this.ymin = ymin;
+		this.xmax = xmax;
+		this.ymax = ymax;
 	}
 
 	public Box(Box bbox) {
-		this.minX = bbox.minX;
-		this.minY = bbox.minY;
-		this.maxX = bbox.maxX;
-		this.maxY = bbox.maxY;
+		this.xmin = bbox.xmin;
+		this.ymin = bbox.ymin;
+		this.xmax = bbox.xmax;
+		this.ymax = bbox.ymax;
 	}
 
 	/**
@@ -70,38 +70,38 @@ public class Box {
 	 * @return true, if point is inside box.
 	 */
 	public boolean contains(double x, double y) {
-		return (x >= minX && x <= maxY && y >= minY && y <= maxY);
+		return (x >= xmin && x <= ymax && y >= ymin && y <= ymax);
 	}
 
 	/**
 	 * Check if Box contains Point.
 	 */
 	public boolean contains(Point p) {
-		return (p.x >= minX && p.x <= maxY && p.y >= minY && p.y <= maxY);
+		return (p.x >= xmin && p.x <= ymax && p.y >= ymin && p.y <= ymax);
 	}
 
 	/**
 	 * Check if this Box is inside box.
 	 */
 	public boolean inside(Box box) {
-		return minX >= box.minX && maxX <= box.maxX && minY >= box.minY && maxY <= box.maxY;
+		return xmin >= box.xmin && xmax <= box.xmax && ymin >= box.ymin && ymax <= box.ymax;
 	}
 
 	public double getWidth() {
-		return maxX - minX;
+		return xmax - xmin;
 	}
 
 	public double getHeight() {
-		return maxY - minY;
+		return ymax - ymin;
 	}
 
 	public boolean overlap(Box other) {
-		return !(minX > other.maxX || maxX < other.minX || minY > other.maxY || maxY < other.minY);
+		return !(xmin > other.xmax || xmax < other.xmin || ymin > other.ymax || ymax < other.ymin);
 	}
 
 	@Override
 	public String toString() {
-		return "[" + minX + ',' + minY + ',' + maxX + ',' + maxY + ']';
+		return "[" + xmin + ',' + ymin + ',' + xmax + ',' + ymax + ']';
 	}
 
 }

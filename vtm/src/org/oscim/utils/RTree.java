@@ -129,21 +129,21 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
 	static class Rect {
 
 		/** dimensions of bounding box */
-		double minX, minY, maxX, maxY;
+		double xmin, ymin, xmax, ymax;
 
 		public Rect() {
 		}
 
 		public Rect(Box box) {
 			if (DEBUG) {
-				assert (minX <= maxX);
-				assert (minY <= maxY);
+				assert (xmin <= xmax);
+				assert (ymin <= ymax);
 			}
 
-			minX = box.minX;
-			minY = box.minY;
-			maxX = box.maxX;
-			maxY = box.maxY;
+			xmin = box.xmin;
+			ymin = box.ymin;
+			xmax = box.xmax;
+			ymax = box.ymax;
 		}
 
 		public Rect(double[] min, double[] max) {
@@ -153,48 +153,48 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
 					assert (min[index] <= max[index]);
 			}
 
-			minX = min[0];
-			minY = min[1];
-			maxX = max[0];
-			maxY = max[1];
+			xmin = min[0];
+			ymin = min[1];
+			xmax = max[0];
+			ymax = max[1];
 		}
 
 		/**
 		 * Calculate the n-dimensional volume of a rectangle
 		 */
 		public double calcRectVolume() {
-			return (maxX - minX) * (maxY - minY);
+			return (xmax - xmin) * (ymax - ymin);
 		}
 
 		/**
 		 * Decide whether two rectangles overlap.
 		 */
 		public boolean overlap(Rect other) {
-			return !(minX > other.maxX || maxX < other.minX || minY > other.maxY || maxY < other.minY);
+			return !(xmin > other.xmax || xmax < other.xmin || ymin > other.ymax || ymax < other.ymin);
 		}
 
 		/**
 		 * Combine two rectangles into larger one containing both
 		 */
 		public void combine(Rect rectA, Rect rectB) {
-			minX = Math.min(rectA.minX, rectB.minX);
-			minY = Math.min(rectA.minY, rectB.minY);
-			maxX = Math.max(rectA.maxX, rectB.maxX);
-			maxY = Math.max(rectA.maxY, rectB.maxY);
+			xmin = Math.min(rectA.xmin, rectB.xmin);
+			ymin = Math.min(rectA.ymin, rectB.ymin);
+			xmax = Math.max(rectA.xmax, rectB.xmax);
+			ymax = Math.max(rectA.ymax, rectB.ymax);
 		}
 
 		public void add(Rect rect) {
-			minX = Math.min(minX, rect.minX);
-			minY = Math.min(minY, rect.minY);
-			maxX = Math.max(maxX, rect.maxX);
-			maxY = Math.max(maxY, rect.maxY);
+			xmin = Math.min(xmin, rect.xmin);
+			ymin = Math.min(ymin, rect.ymin);
+			xmax = Math.max(xmax, rect.xmax);
+			ymax = Math.max(ymax, rect.ymax);
 		}
 
 		public void set(Rect rect) {
-			minX = rect.minX;
-			minY = rect.minY;
-			maxX = rect.maxX;
-			maxY = rect.maxY;
+			xmin = rect.xmin;
+			ymin = rect.ymin;
+			xmax = rect.xmax;
+			ymax = rect.ymax;
 		}
 
 		public void set(double[] min, double[] max) {
@@ -204,21 +204,21 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
 				}
 			}
 
-			minX = min[0];
-			minY = min[1];
-			maxX = max[0];
-			maxY = max[1];
+			xmin = min[0];
+			ymin = min[1];
+			xmax = max[0];
+			ymax = max[1];
 		}
 
 		public void set(Box box) {
 			if (DEBUG) {
-				assert (box.minX <= box.maxX);
-				assert (box.minY <= box.maxY);
+				assert (box.xmin <= box.xmax);
+				assert (box.ymin <= box.ymax);
 			}
-			minX = box.minX;
-			minY = box.minY;
-			maxX = box.maxX;
-			maxY = box.maxY;
+			xmin = box.xmin;
+			ymin = box.ymin;
+			xmax = box.xmax;
+			ymax = box.ymax;
 		}
 
 		/**
@@ -486,8 +486,8 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
 	}
 
 	final static double mergedArea(Rect a, Rect b) {
-		return ((a.maxX > b.maxX ? a.maxX : b.maxX) - (a.minX < b.minX ? a.minX : b.minX)
-		        * ((a.maxY > b.maxY ? a.maxY : b.maxY) - (a.minY < b.minY ? a.minY : b.minY)));
+		return ((a.xmax > b.xmax ? a.xmax : b.xmax) - (a.xmin < b.xmin ? a.xmin : b.xmin)
+		        * ((a.ymax > b.ymax ? a.ymax : b.ymax) - (a.ymin < b.ymin ? a.ymin : b.ymin)));
 	}
 
 	/**
@@ -1290,7 +1290,7 @@ class Partition {
 //		/** dimensions of bounding box */
 //		double bounds[] = new double[NUMDIMS * 2];
 //
-//		//double minX, minY, maxX, maxY;
+//		//double xmin, ymin, xmax, ymax;
 //
 //		public Rect() {
 //		}

@@ -196,10 +196,10 @@ public class Viewport {
 
 		/* scale map-pixel coordinates at current scale to
 		 * absolute coordinates and apply mercator projection. */
-		double minLon = MercatorProjection.toLongitude(mMapBBox.minX);
-		double maxLon = MercatorProjection.toLongitude(mMapBBox.maxX);
-		double minLat = MercatorProjection.toLatitude(mMapBBox.maxY);
-		double maxLat = MercatorProjection.toLatitude(mMapBBox.minY);
+		double minLon = MercatorProjection.toLongitude(mMapBBox.xmin);
+		double maxLon = MercatorProjection.toLongitude(mMapBBox.xmax);
+		double minLat = MercatorProjection.toLatitude(mMapBBox.ymax);
+		double maxLat = MercatorProjection.toLatitude(mMapBBox.ymin);
 
 		return new BoundingBox(minLat, minLon, maxLat, maxLon);
 	}
@@ -211,22 +211,22 @@ public class Viewport {
 	/**
 	 * Get the minimal axis-aligned BoundingBox that encloses
 	 * the visible part of the map. Sets box to map coordinates:
-	 * minX,minY,maxY,maxY
+	 * xmin,ymin,ymax,ymax
 	 */
 	public synchronized void getBBox(Box box, int expand) {
 		float[] coords = mViewCoords;
 		getMapExtents(coords, expand);
 
-		box.minX = coords[0];
-		box.maxX = coords[0];
-		box.minY = coords[1];
-		box.maxY = coords[1];
+		box.xmin = coords[0];
+		box.xmax = coords[0];
+		box.ymin = coords[1];
+		box.ymax = coords[1];
 
 		for (int i = 2; i < 8; i += 2) {
-			box.minX = Math.min(box.minX, coords[i]);
-			box.maxX = Math.max(box.maxX, coords[i]);
-			box.minY = Math.min(box.minY, coords[i + 1]);
-			box.maxY = Math.max(box.maxY, coords[i + 1]);
+			box.xmin = Math.min(box.xmin, coords[i]);
+			box.xmax = Math.max(box.xmax, coords[i]);
+			box.ymin = Math.min(box.ymin, coords[i + 1]);
+			box.ymax = Math.max(box.ymax, coords[i + 1]);
 		}
 
 		//updatePosition();
@@ -234,10 +234,10 @@ public class Viewport {
 		double cx = mPos.x * cs;
 		double cy = mPos.y * cs;
 
-		box.minX = (cx + box.minX) / cs;
-		box.maxX = (cx + box.maxX) / cs;
-		box.minY = (cy + box.minY) / cs;
-		box.maxY = (cy + box.maxY) / cs;
+		box.xmin = (cx + box.xmin) / cs;
+		box.xmax = (cx + box.xmax) / cs;
+		box.ymin = (cy + box.ymin) / cs;
+		box.ymax = (cy + box.ymax) / cs;
 	}
 
 	/**

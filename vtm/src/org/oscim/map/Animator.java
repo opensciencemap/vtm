@@ -151,7 +151,7 @@ public class Animator {
 	}
 
 	public synchronized void animateFling(float velocityX, float velocityY,
-	        int minX, int maxX, int minY, int maxY) {
+	        int xmin, int xmax, int ymin, int ymax) {
 
 		if (velocityX * velocityX + velocityY * velocityY < 2048)
 			return;
@@ -166,8 +166,8 @@ public class Animator {
 		float flingFactor = 240 / CanvasAdapter.dpi;
 		mVelocity.x = velocityX * flingFactor;
 		mVelocity.y = velocityY * flingFactor;
-		mVelocity.x = clamp(mVelocity.x, minX, maxX);
-		mVelocity.y = clamp(mVelocity.y, minY, maxY);
+		mVelocity.x = clamp(mVelocity.x, xmin, xmax);
+		mVelocity.y = clamp(mVelocity.y, ymin, ymax);
 		if (Double.isNaN(mVelocity.x) || Double.isNaN(mVelocity.y)) {
 			log.debug("fling NaN!");
 			return;

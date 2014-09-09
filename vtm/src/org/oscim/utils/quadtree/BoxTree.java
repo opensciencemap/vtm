@@ -92,10 +92,10 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
 		}
 
 		public BoxItem(org.oscim.core.Box box, T item) {
-			this.x1 = (int) box.minX;
-			this.y1 = (int) box.minY;
-			this.x2 = (int) box.maxX;
-			this.y2 = (int) box.maxY;
+			this.x1 = (int) box.xmin;
+			this.y1 = (int) box.ymin;
+			this.x2 = (int) box.xmax;
+			this.y2 = (int) box.ymax;
 			this.item = item;
 		}
 
