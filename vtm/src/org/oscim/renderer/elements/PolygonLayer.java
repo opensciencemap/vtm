@@ -17,7 +17,6 @@
 package org.oscim.renderer.elements;
 
 import static org.oscim.backend.GL20.GL_ALWAYS;
-import static org.oscim.backend.GL20.GL_ELEMENT_ARRAY_BUFFER;
 import static org.oscim.backend.GL20.GL_EQUAL;
 import static org.oscim.backend.GL20.GL_INVERT;
 import static org.oscim.backend.GL20.GL_KEEP;
@@ -49,7 +48,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Special Renderer for drawing tile polygons using the stencil buffer method
  */
-public final class PolygonLayer extends IndexedRenderElement {
+public final class PolygonLayer extends RenderElement {
 
 	static final Logger log = LoggerFactory.getLogger(PolygonLayer.class);
 
@@ -81,8 +80,6 @@ public final class PolygonLayer extends IndexedRenderElement {
 	public void addPolygon(float[] points, int[] index) {
 		short center = (short) ((Tile.SIZE >> 1) * S);
 
-		short id = (short) numVertices;
-
 		boolean outline = area.strokeWidth > 0;
 
 		for (int i = 0, pos = 0, n = index.length; i < n; i++) {
@@ -96,9 +93,8 @@ public final class PolygonLayer extends IndexedRenderElement {
 				continue;
 			}
 
-			//numVertices += length / 2 + 2;
 			vertexItems.add(center, center);
-			id++;
+			numVertices++;
 
 			int inPos = pos;
 
@@ -115,33 +111,34 @@ public final class PolygonLayer extends IndexedRenderElement {
 				if (y < ymin)
 					ymin = y;
 
+				if (outline) {
+					indiceItems.add((short) numVertices);
+					numIndices++;
+				}
+
 				vertexItems.add((short) x, (short) y);
+				numVertices++;
 
 				if (outline) {
-					indiceItems.add(id++);
+					indiceItems.add((short) numVertices);
 					numIndices++;
-
-					indiceItems.add(id);
-					numIndices++;
-				} else {
-					id++;
 				}
 			}
 
 			vertexItems.add((short) (points[pos + 0] * S),
 			                (short) (points[pos + 1] * S));
-			id++;
+			numVertices++;
 
 			pos += length;
 		}
-		numVertices = id;
 	}
 
+	// FIXME move to prepare
 	@Override
-	protected void compile(ShortBuffer sbuf) {
+	protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
 		if (area.strokeWidth == 0) {
 			/* add vertices to shared VBO */
-			compileVertexItems(sbuf);
+			compileVertexItems(vboData);
 			return;
 		}
 
@@ -158,7 +155,7 @@ public final class PolygonLayer extends IndexedRenderElement {
 		bbox[7] = xmax;
 
 		/* compile with indexed outline */
-		super.compile(sbuf);
+		super.compile(vboData, iboData);
 	}
 
 	static class Shader extends GLShader {
@@ -267,34 +264,35 @@ public final class PolygonLayer extends IndexedRenderElement {
 				/* draw tile fill coordinates */
 				GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-				if (l.indicesVbo == null)
+				if (a.strokeWidth <= 0)
 					continue;
 
 				GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
 
 				GLState.blend(true);
-				//GLState.testDepth(false);
 
 				HairLineLayer.Renderer.shader.set(v);
 
-				l.indicesVbo.bind();
+				GLUtils.setColor(HairLineLayer.Renderer.shader.uColor,
+				                 l.area.strokeColor, 1);
 
-				GLUtils.setColor(HairLineLayer.Renderer.shader.uColor, l.area.strokeColor, 1);
+				GL.glVertexAttribPointer(HairLineLayer.Renderer.shader.aPos,
+				                         2, GL_SHORT, false, 0,
+				                         // 4 bytes per vertex
+				                         l.vertexOffset << 2);
 
-				GL.glVertexAttribPointer(HairLineLayer.Renderer.shader.aPos, 2, GL_SHORT,
-				                         false, 0, l.offset << 2);
+				GL.glUniform1f(HairLineLayer.Renderer.shader.uWidth,
+				               a.strokeWidth);
 
-				//GL.glUniform1f(HairLineLayer.Renderer.shader.uWidth, );
-
-				GL.glDrawElements(GL_LINES, l.numIndices,
-				                  GL_UNSIGNED_SHORT, 0);
+				GL.glDrawElements(GL_LINES,
+				                  l.numIndices,
+				                  GL_UNSIGNED_SHORT,
+				                  l.indiceOffset);
 				GL.glLineWidth(1);
-
-				GL.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 				///* disable texture shader */
 				//if (s != polyShader)
-				//s = setShader(polyShader, v, false);
+				//	s = setShader(polyShader, v.mvp, false);
 			}
 		}
 
@@ -406,7 +404,7 @@ public final class PolygonLayer extends IndexedRenderElement {
 					GL.glStencilMask(stencilMask);
 				}
 
-				GL.glDrawArrays(GL_TRIANGLE_FAN, l.offset, l.numVertices);
+				GL.glDrawArrays(GL_TRIANGLE_FAN, l.vertexOffset, l.numVertices);
 
 				/* draw up to 7 layers into stencil buffer */
 				if (cur == STENCIL_BITS - 1) {

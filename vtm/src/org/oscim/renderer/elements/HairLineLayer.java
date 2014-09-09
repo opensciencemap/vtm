@@ -1,6 +1,5 @@
 package org.oscim.renderer.elements;
 
-import static org.oscim.backend.GL20.GL_ELEMENT_ARRAY_BUFFER;
 import static org.oscim.backend.GL20.GL_LINES;
 import static org.oscim.backend.GL20.GL_SHORT;
 import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
@@ -15,7 +14,7 @@ import org.oscim.theme.styles.LineStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HairLineLayer extends IndexedRenderElement {
+public class HairLineLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(HairLineLayer.class);
 
 	public LineStyle line;
@@ -108,7 +107,7 @@ public class HairLineLayer extends IndexedRenderElement {
 				v.mvp.setAsUniform(uMVP);
 
 				GL.glUniform2f(uScreen, v.getWidth() / 2, v.getHeight() / 2);
-
+				GL.glUniform1f(uWidth, 1.5f);
 				GL.glLineWidth(2);
 			}
 		}
@@ -117,34 +116,23 @@ public class HairLineLayer extends IndexedRenderElement {
 			GLState.blend(true);
 
 			Shader s = shader;
-			s.useProgram();
-			GLState.enableVertexArrays(s.aPos, -1);
 
-			v.mvp.setAsUniform(s.uMVP);
-
-			GL.glUniform2f(s.uScreen, v.getWidth() / 2, v.getHeight() / 2);
-
-			GL.glLineWidth(2);
+			s.set(v);
 
 			for (; l != null && l.type == HAIRLINE; l = l.next) {
 				HairLineLayer ll = (HairLineLayer) l;
 
-				if (ll.indicesVbo == null)
-					continue;
-
-				ll.indicesVbo.bind();
-
 				GLUtils.setColor(s.uColor, ll.line.color, 1);
 
 				GL.glVertexAttribPointer(s.aPos, 2, GL_SHORT,
-				                         false, 0, ll.offset);
+				                         false, 0, ll.vertexOffset);
 
-				GL.glDrawElements(GL_LINES, ll.numIndices,
-				                  GL_UNSIGNED_SHORT, 0);
+				GL.glDrawElements(GL_LINES,
+				                  ll.numIndices,
+				                  GL_UNSIGNED_SHORT,
+				                  ll.indiceOffset);
 			}
-			GL.glLineWidth(1);
-
-			GL.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			//GL.glLineWidth(1);
 
 			return l;
 		}

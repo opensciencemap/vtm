@@ -125,6 +125,10 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
 	@Override
 	public void complete(MapTile tile, boolean success) {
+		if (success)
+			get(tile).prepare();
+		else
+			get(tile).setLayers(null);
 	}
 
 	//	private int multi;

@@ -157,8 +157,6 @@ public class VectorTileRenderer extends TileRenderer {
 		if (layers == null || layers.vbo == null)
 			return;
 
-		layers.vbo.bind();
-
 		MapPosition pos = v.pos;
 		/* place tile relative to map position */
 		int z = tile.zoomLevel;
@@ -176,6 +174,8 @@ public class VectorTileRenderer extends TileRenderer {
 		mClipMVP.setTransScale(x, y, scale / COORD_SCALE);
 		mClipMVP.multiplyLhs(mClipProj);
 
+		layers.bind();
+
 		RenderElement l = layers.getBaseLayers();
 		PolygonLayer.Renderer.clip(mClipMVP, mClipMode);
 
@@ -187,8 +187,6 @@ public class VectorTileRenderer extends TileRenderer {
 
 				/* set test for clip to tile region */
 				GL.glStencilFunc(GL_EQUAL, 0x80, 0x80);
-
-				//	clipped = true;
 				continue;
 			}
 			if (l.type == LINE) {
@@ -197,6 +195,8 @@ public class VectorTileRenderer extends TileRenderer {
 			}
 			if (l.type == TEXLINE) {
 				l = LineTexLayer.Renderer.draw(l, v, div, layers);
+				if (layers.ibo != null)
+					layers.ibo.bind();
 				continue;
 			}
 			if (l.type == MESH) {

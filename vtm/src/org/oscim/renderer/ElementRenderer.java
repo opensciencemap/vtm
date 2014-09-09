@@ -23,11 +23,6 @@ import static org.oscim.renderer.elements.RenderElement.POLYGON;
 import static org.oscim.renderer.elements.RenderElement.SYMBOL;
 import static org.oscim.renderer.elements.RenderElement.TEXLINE;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-
-import org.oscim.backend.GL20;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.elements.BitmapLayer;
@@ -51,13 +46,6 @@ public abstract class ElementRenderer extends LayerRenderer {
 
 	public static final Logger log = LoggerFactory.getLogger(ElementRenderer.class);
 
-	private static short[] fillCoords;
-
-	static {
-		short s = (short) (Tile.SIZE * MapRenderer.COORD_SCALE);
-		fillCoords = new short[] { 0, s, s, s, 0, 0, s, 0 };
-	}
-
 	/**
 	 * Use mMapPosition.copy(position) to keep the position for which
 	 * the Overlay is *compiled*. NOTE: required by setMatrix utility
@@ -77,16 +65,13 @@ public abstract class ElementRenderer extends LayerRenderer {
 	}
 
 	/**
-	 * Render all 'layers'
+	 * Render all 'buckets'
 	 */
 	@Override
 	protected synchronized void render(GLViewport v) {
 		MapPosition layerPos = mMapPosition;
 
-		if (layers.useVBO)
-			layers.vbo.bind();
-		else
-			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+		layers.bind();
 
 		GLState.test(false, false);
 		GLState.blend(true);
@@ -109,6 +94,8 @@ public abstract class ElementRenderer extends LayerRenderer {
 			}
 			if (l.type == TEXLINE) {
 				l = LineTexLayer.Renderer.draw(l, v, div, layers);
+				// rebind
+				layers.ibo.bind();
 				continue;
 			}
 			if (l.type == MESH) {
@@ -142,60 +129,13 @@ public abstract class ElementRenderer extends LayerRenderer {
 	}
 
 	/**
-	 * Compiles all layers into one BufferObject. Sets renderer to be ready
-	 * when successful. When no data is available (layer.getSize() == 0) then
-	 * BufferObject will be released and layers will not be rendered.
+	 * Compile all layers into one BufferObject. Sets renderer to be ready
+	 * when successful. When no data is available (layer.countVboSize() == 0)
+	 * then BufferObject will be released and layers will not be rendered.
 	 */
 	protected synchronized void compile() {
-
-		int newSize = layers.getSize();
-
-		if (newSize <= 0) {
-			layers.vbo = BufferObject.release(layers.vbo);
-			setReady(false);
-			return;
-		}
-
-		if (layers.useVBO && layers.vbo == null)
-			layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
-
-		if (uploadLayers(layers, newSize, true))
-			setReady(true);
-	}
-
-	public static boolean uploadLayers(ElementLayers layers, int newSize,
-	        boolean addFill) {
-
-		if (addFill)
-			newSize += 8;
-
-		ShortBuffer sbuf;
-		if (layers.useVBO) {
-			sbuf = MapRenderer.getShortBuffer(newSize);
-		} else {
-			layers.vertexArrayBuffer = ByteBuffer
-			    .allocateDirect(newSize * 2)
-			    .order(ByteOrder.nativeOrder());
-			sbuf = layers.vertexArrayBuffer.asShortBuffer();
-		}
-
-		if (addFill)
-			sbuf.put(fillCoords, 0, 8);
-
-		layers.compile(sbuf, addFill);
-
-		if (newSize != sbuf.position()) {
-			log.debug("wrong size: "
-			        + " new size: " + newSize
-			        + " buffer pos: " + sbuf.position()
-			        + " buffer limit: " + sbuf.limit()
-			        + " buffer fill: " + sbuf.remaining());
-			return false;
-		}
-		if (layers.useVBO)
-			layers.vbo.loadBufferData(sbuf.flip(), newSize * 2);
-
-		return true;
+		boolean ok = layers.compile(true);
+		setReady(ok);
 	}
 
 	/**

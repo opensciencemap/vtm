@@ -16,7 +16,6 @@
  */
 package org.oscim.renderer.elements;
 
-import static org.oscim.backend.GL20.GL_ELEMENT_ARRAY_BUFFER;
 import static org.oscim.backend.GL20.GL_LINES;
 import static org.oscim.backend.GL20.GL_SHORT;
 import static org.oscim.backend.GL20.GL_TRIANGLES;
@@ -37,7 +36,7 @@ import org.oscim.utils.TessJNI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MeshLayer extends IndexedRenderElement {
+public class MeshLayer extends RenderElement {
 	static final Logger log = LoggerFactory.getLogger(MeshLayer.class);
 	static final boolean dbgRender = false;
 
@@ -132,6 +131,7 @@ public class MeshLayer extends IndexedRenderElement {
 			GLState.blend(true);
 
 			Shader s = shader;
+
 			s.useProgram();
 			GLState.enableVertexArrays(s.aPos, -1);
 
@@ -143,8 +143,8 @@ public class MeshLayer extends IndexedRenderElement {
 			for (; l != null && l.type == MESH; l = l.next) {
 				MeshLayer ml = (MeshLayer) l;
 
-				if (ml.indicesVbo == null)
-					continue;
+				//if (ml.indicesVbo == null)
+				//	continue;
 
 				if (ml.heightOffset != heightOffset) {
 					heightOffset = ml.heightOffset;
@@ -153,7 +153,7 @@ public class MeshLayer extends IndexedRenderElement {
 					        MercatorProjection.groundResolution(v.pos));
 				}
 
-				ml.indicesVbo.bind();
+				//ml.indicesVbo.bind();
 
 				if (ml.area == null)
 					GLUtils.setColor(s.uColor, Color.BLUE, 0.4f);
@@ -161,10 +161,14 @@ public class MeshLayer extends IndexedRenderElement {
 					GLUtils.setColor(s.uColor, ml.area.color, 1);
 
 				GL.glVertexAttribPointer(s.aPos, 2, GL_SHORT,
-				                         false, 0, ml.offset);
+				                         false, 0, ml.vertexOffset);
 
-				GL.glDrawElements(GL_TRIANGLES, ml.numIndices,
-				                  GL_UNSIGNED_SHORT, 0);
+				//System.out.println("draw " + ml.numIndices + " / " + ml.indiceOffset);
+
+				GL.glDrawElements(GL_TRIANGLES,
+				                  ml.numIndices,
+				                  GL_UNSIGNED_SHORT,
+				                  ml.indiceOffset);
 
 				if (dbgRender) {
 					int c = (ml.area == null) ? Color.BLUE : ml.area.color;
@@ -176,7 +180,7 @@ public class MeshLayer extends IndexedRenderElement {
 				}
 			}
 
-			GL.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			//GL.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 			return l;
 		}

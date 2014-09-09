@@ -223,10 +223,10 @@ public final class LineTexLayer extends RenderElement {
 	}
 
 	@Override
-	protected void compile(ShortBuffer sbuf) {
-		compileVertexItems(sbuf);
+	protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
+		compileVertexItems(vboData);
 		/* add additional vertex for interleaving, see TexLineLayer. */
-		sbuf.position(sbuf.position() + 6);
+		vboData.position(vboData.position() + 6);
 	}
 
 	static class Shader extends GLShader {
@@ -374,7 +374,7 @@ public final class LineTexLayer extends RenderElement {
 						numIndices = maxIndices;
 
 					/* i / 6 * (24 shorts per block * 2 short bytes) */
-					int add = (l.offset + i * 8) + vOffset;
+					int add = (l.vertexOffset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(aPos0, 4, GL20.GL_SHORT, false, STRIDE,
 					                         add + STRIDE);
@@ -399,7 +399,7 @@ public final class LineTexLayer extends RenderElement {
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;
 					/* i / 6 * (24 shorts per block * 2 short bytes) */
-					int add = (l.offset + i * 8) + vOffset;
+					int add = (l.vertexOffset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(aPos0, 4, GL20.GL_SHORT, false, STRIDE,
 					                         add + 2 * STRIDE);

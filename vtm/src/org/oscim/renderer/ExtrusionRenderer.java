@@ -72,14 +72,14 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 			GL.glVertexAttribPointer(vertexPointer, 3,
 			                         GL20.GL_SHORT, false, 8, 0);
 
-			int sumIndices = el.numIndices[0] + el.numIndices[1] + el.numIndices[2];
+			int sumIndices = el.idx[0] + el.idx[1] + el.idx[2];
 			if (sumIndices > 0)
 				GL.glDrawElements(GL20.GL_TRIANGLES, sumIndices,
 				                  GL20.GL_UNSIGNED_SHORT, 0);
 
-			if (el.numIndices[2] > 0) {
+			if (el.idx[2] > 0) {
 				int offset = sumIndices * 2;
-				GL.glDrawElements(GL20.GL_TRIANGLES, el.numIndices[4],
+				GL.glDrawElements(GL20.GL_TRIANGLES, el.idx[4],
 				                  GL20.GL_UNSIGNED_SHORT, offset);
 			}
 		}
@@ -114,11 +114,11 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 			GL.glUniform1i(s.uMode, -1);
 
 			for (int i = 0; i < mExtrusionLayerCnt; i++) {
-				if (els[i].vboIndices == null)
+				if (els[i].ibo == null)
 					return;
 
-				els[i].vboIndices.bind();
-				els[i].vboVertices.bind();
+				els[i].ibo.bind();
+				els[i].vbo.bind();
 
 				setMatrix(v, els[i], true);
 				v.mvp.setAsUniform(s.uMVP);
@@ -139,11 +139,11 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 		float[] currentColor = null;
 
 		for (int i = 0; i < mExtrusionLayerCnt; i++) {
-			if (els[i].vboIndices == null)
+			if (els[i].ibo == null)
 				continue;
 
-			els[i].vboIndices.bind();
-			els[i].vboVertices.bind();
+			els[i].ibo.bind();
+			els[i].vbo.bind();
 
 			if (!mTranslucent) {
 				setMatrix(v, els[i], false);
@@ -161,14 +161,14 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 				}
 
 				GL.glVertexAttribPointer(s.aPos, 3, GL20.GL_SHORT,
-				                         false, 8, el.getOffset());
+				                         false, 8, el.getVertexOffset());
 
 				GL.glVertexAttribPointer(s.aLight, 2,
 				                         GL20.GL_UNSIGNED_BYTE,
-				                         false, 8, el.getOffset() + 6);
+				                         false, 8, el.getVertexOffset() + 6);
 
 				/* draw extruded outlines */
-				if (el.numIndices[0] > 0) {
+				if (el.idx[0] > 0) {
 					if (mTranslucent) {
 						GL.glDepthFunc(GL20.GL_EQUAL);
 						setMatrix(v, els[i], true);
@@ -178,23 +178,23 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 					/* draw roof */
 					GL.glUniform1i(s.uMode, 0);
 					GL.glDrawElements(GL20.GL_TRIANGLES,
-					                  el.numIndices[2],
+					                  el.idx[2],
 					                  GL20.GL_UNSIGNED_SHORT,
-					                  (el.numIndices[0]
-					                  + el.numIndices[1]) * 2);
+					                  (el.idx[0]
+					                  + el.idx[1]) * 2);
 
 					/* draw sides 1 */
 					GL.glUniform1i(s.uMode, 1);
 					GL.glDrawElements(GL20.GL_TRIANGLES,
-					                  el.numIndices[0],
+					                  el.idx[0],
 					                  GL20.GL_UNSIGNED_SHORT, 0);
 
 					/* draw sides 2 */
 					GL.glUniform1i(s.uMode, 2);
 					GL.glDrawElements(GL20.GL_TRIANGLES,
-					                  el.numIndices[1],
+					                  el.idx[1],
 					                  GL20.GL_UNSIGNED_SHORT,
-					                  el.numIndices[0] * 2);
+					                  el.idx[0] * 2);
 
 					if (mTranslucent) {
 						/* drawing gl_lines with the same coordinates does not
@@ -207,27 +207,24 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 
 					GL.glUniform1i(s.uMode, 3);
 					int offset = 2 * (el.indexOffset
-					        + el.numIndices[0]
-					        + el.numIndices[1]
-					        + el.numIndices[2]);
+					        + el.idx[0] + el.idx[1]
+					        + el.idx[2]);
 
 					GL.glDrawElements(GL20.GL_LINES,
-					                  el.numIndices[3],
+					                  el.idx[3],
 					                  GL20.GL_UNSIGNED_SHORT,
 					                  offset);
 
 				}
 
 				/* draw triangle meshes */
-				if (el.numIndices[4] > 0) {
+				if (el.idx[4] > 0) {
 					int offset = 2 * (el.indexOffset
-					        + el.numIndices[0]
-					        + el.numIndices[1]
-					        + el.numIndices[2]
-					        + el.numIndices[3]);
+					        + el.idx[0] + el.idx[1]
+					        + el.idx[2] + el.idx[3]);
 
 					GL.glDrawElements(GL20.GL_TRIANGLES,
-					                  el.numIndices[4],
+					                  el.idx[4],
 					                  GL20.GL_UNSIGNED_SHORT,
 					                  offset);
 				}

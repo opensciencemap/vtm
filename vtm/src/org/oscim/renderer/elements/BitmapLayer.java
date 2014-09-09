@@ -78,7 +78,7 @@ public class BitmapLayer extends TextureLayer {
 		t.indices = TextureLayer.INDICES_PER_SPRITE;
 	}
 
-	private void setVertices(ShortBuffer sbuf) {
+	private void setVertices(ShortBuffer vboData) {
 		short[] buf = mVertices;
 		short w = (short) (mWidth * MapRenderer.COORD_SCALE);
 		short h = (short) (mHeight * MapRenderer.COORD_SCALE);
@@ -118,17 +118,17 @@ public class BitmapLayer extends TextureLayer {
 		buf[pos++] = texMax;
 		buf[pos++] = texMax;
 
-		this.offset = sbuf.position() * 2;
-		sbuf.put(buf);
+		this.vertexOffset = vboData.position() * 2;
+		vboData.put(buf);
 	}
 
 	@Override
-	protected void compile(ShortBuffer sbuf) {
+	protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
 
 		if (mBitmap == null)
 			return;
 
-		setVertices(sbuf);
+		setVertices(vboData);
 
 		textures.upload();
 
@@ -215,7 +215,7 @@ public class BitmapLayer extends TextureLayer {
 				// draw up to maxVertices in each iteration
 				for (int i = 0; i < t.indices; i += maxIndices) {
 					// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
-					int off = (t.offset + i) * 8 + tl.offset;
+					int off = (t.offset + i) * 8 + tl.vertexOffset;
 
 					GL.glVertexAttribPointer(s.aPos, 2,
 					                         GL20.GL_SHORT, false, 12, off);

@@ -686,7 +686,7 @@ public final class LineLayer extends RenderElement {
 					}
 
 					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
-					                l.offset, l.numVertices);
+					                l.vertexOffset, l.numVertices);
 
 					continue;
 				}
@@ -733,7 +733,7 @@ public final class LineLayer extends RenderElement {
 					}
 
 					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
-					                ref.offset, ref.numVertices);
+					                ref.vertexOffset, ref.numVertices);
 				}
 			}
 

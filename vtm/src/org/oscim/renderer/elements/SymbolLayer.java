@@ -64,9 +64,9 @@ public final class SymbolLayer extends TextureLayer {
 	}
 
 	@Override
-	protected void compile(ShortBuffer sbuf) {
+	protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
 		/* offset of layer data in vbo */
-		this.offset = sbuf.position() * 2; //SHORT_BYTES;
+		this.vertexOffset = vboData.position() * 2; //SHORT_BYTES;
 
 		short numIndices = 0;
 
@@ -165,7 +165,7 @@ public final class SymbolLayer extends TextureLayer {
 			numIndices += t.indices;
 		}
 
-		vertexItems.compile(sbuf);
+		vertexItems.compile(vboData);
 
 		for (t = prevTextures; t != null; t = t.dispose());
 		prevTextures = null;

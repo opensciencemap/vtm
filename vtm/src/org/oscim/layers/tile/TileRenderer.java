@@ -20,11 +20,9 @@ import static org.oscim.layers.tile.MapTile.PROXY_PARENT;
 import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
 import static org.oscim.layers.tile.MapTile.State.READY;
 
-import org.oscim.backend.GL20;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.MapTile.TileNode;
 import org.oscim.renderer.BufferObject;
-import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.MapRenderer;
@@ -179,23 +177,12 @@ public abstract class TileRenderer extends LayerRenderer {
 		tile.state = READY;
 		ElementLayers layers = tile.getLayers();
 
-		/* tile might contain extrusion or label layers */
+		/* tile might only contain label layers */
 		if (layers == null)
-			return 1;
+			return 0;
 
-		int newSize = layers.getSize();
-		if (newSize <= 0)
-			return 1;
-
-		if (layers.vbo == null)
-			layers.vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, newSize);
-
-		if (!ElementRenderer.uploadLayers(layers, newSize, true)) {
-			log.error("{} uploadTileData failed!", tile);
-			layers.vbo = BufferObject.release(layers.vbo);
+		if (!layers.compile(true)) {
 			layers.clear();
-			/* throw Exception? */
-			//FIXME tile.layers = null;
 			return 0;
 		}
 

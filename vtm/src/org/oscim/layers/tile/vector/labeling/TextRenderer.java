@@ -30,7 +30,6 @@ package org.oscim.layers.tile.vector.labeling;
 // 5 QuadTree might be handy
 //
 
-import org.oscim.backend.GL20;
 import org.oscim.layers.tile.vector.labeling.LabelLayer.Worker;
 import org.oscim.renderer.ElementRenderer;
 import org.oscim.renderer.GLState;
@@ -78,10 +77,7 @@ class TextRenderer extends ElementRenderer {
 		GLState.test(false, false);
 		//Debug.draw(pos, layers);
 
-		if (layers.useVBO)
-			layers.vbo.bind();
-		else
-			GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+		layers.vbo.bind();
 
 		float scale = (float) (v.pos.scale / mMapPosition.scale);
 

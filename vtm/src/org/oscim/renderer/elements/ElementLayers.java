@@ -22,12 +22,13 @@ import static org.oscim.renderer.elements.RenderElement.MESH;
 import static org.oscim.renderer.elements.RenderElement.POLYGON;
 import static org.oscim.renderer.elements.RenderElement.TEXLINE;
 
-import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL20;
+import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile.TileData;
 import org.oscim.renderer.BufferObject;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.LineStyle;
 import org.slf4j.Logger;
@@ -69,10 +70,7 @@ public class ElementLayers extends TileData {
 	 * ...
 	 */
 	public BufferObject vbo;
-	public boolean useVBO = true;
-
-	/* holds vertex data for rendering when not using VBO */
-	public ByteBuffer vertexArrayBuffer;
+	public BufferObject ibo;
 
 	/**
 	 * To not need to switch VertexAttribPointer positions all the time:
@@ -273,55 +271,28 @@ public class ElementLayers extends TileData {
 		return layer;
 	}
 
-	// TODO move to specific layer implementation
-	public int getSize() {
-		int size = 0;
+	private int countVboSize() {
+		int vboShorts = 0;
 
 		for (RenderElement l = baseLayers; l != null; l = l.next)
-			size += l.numVertices * VERTEX_SHORT_CNT[l.type];
+			vboShorts += l.numVertices * VERTEX_SHORT_CNT[l.type];
 
 		for (RenderElement l = textureLayers; l != null; l = l.next)
-			size += l.numVertices * TEXTURE_VERTEX_SHORTS;
+			vboShorts += l.numVertices * TEXTURE_VERTEX_SHORTS;
 
-		return size;
+		return vboShorts;
 	}
 
-	public void compile(ShortBuffer sbuf, boolean addFill) {
+	private int countIboSize() {
+		int numIndices = 0;
 
-		int pos = addFill ? 4 : 0;
+		for (RenderElement l = baseLayers; l != null; l = l.next)
+			numIndices += l.numIndices;
 
-		for (RenderElement l = baseLayers; l != null; l = l.next) {
-			if (l.type == POLYGON) {
-				l.compile(sbuf);
+		for (RenderElement l = textureLayers; l != null; l = l.next)
+			numIndices += l.numIndices;
 
-				//log.debug("offset {} {}", l.offset, pos);
-				l.offset = pos;
-				pos += l.numVertices;
-			}
-		}
-
-		offset[LINE] = sbuf.position() * SHORT_BYTES;
-		pos = 0;
-		for (RenderElement l = baseLayers; l != null; l = l.next) {
-			if (l.type == LINE) {
-				l.compile(sbuf);
-
-				l.offset = pos;
-				pos += l.numVertices;
-			}
-		}
-
-		//offset[TEXLINE] = size * SHORT_BYTES;
-
-		for (RenderElement l = baseLayers; l != null; l = l.next) {
-			if (l.type == TEXLINE || l.type == MESH || l.type == HAIRLINE) {
-				l.compile(sbuf);
-			}
-		}
-
-		for (RenderElement l = textureLayers; l != null; l = l.next) {
-			l.compile(sbuf);
-		}
+		return numIndices;
 	}
 
 	public void setFrom(ElementLayers layers) {
@@ -341,15 +312,132 @@ public class ElementLayers extends TileData {
 		setTextureLayers(null);
 		mCurLayer = null;
 
-		if (vbo != null)
-			vbo = BufferObject.release(vbo);
-
-		vertexArrayBuffer = null;
+		vbo = BufferObject.release(vbo);
+		ibo = BufferObject.release(ibo);
 	}
 
 	@Override
 	protected void dispose() {
 		clear();
+	}
+
+	public void prepare() {
+		for (RenderElement l = baseLayers; l != null; l = l.next)
+			l.prepare();
+
+		for (RenderElement l = textureLayers; l != null; l = l.next)
+			l.prepare();
+	}
+
+	public void bind() {
+		if (vbo != null)
+			vbo.bind();
+
+		if (ibo != null)
+			ibo.bind();
+
+	}
+
+	public boolean compile(boolean addFill) {
+
+		int vboSize = countVboSize();
+
+		if (vboSize <= 0) {
+			// FIXME just clear?
+			vbo = BufferObject.release(vbo);
+			ibo = BufferObject.release(ibo);
+			return false;
+		}
+
+		if (addFill)
+			vboSize += 8;
+
+		ShortBuffer vboData = MapRenderer.getShortBuffer(vboSize);
+
+		if (addFill)
+			vboData.put(fillCoords, 0, 8);
+
+		ShortBuffer iboData = null;
+
+		int iboSize = countIboSize();
+		if (iboSize > 0) {
+			iboData = MapRenderer.getShortBuffer(iboSize);
+		}
+
+		//>>compile(vboData, iboData, addFill);
+		int pos = addFill ? 4 : 0;
+
+		for (RenderElement l = baseLayers; l != null; l = l.next) {
+			if (l.type == POLYGON) {
+				l.compile(vboData, iboData);
+
+				//log.debug("offset {} {}", l.offset, pos);
+				l.vertexOffset = pos;
+				pos += l.numVertices;
+			}
+		}
+
+		offset[LINE] = vboData.position() * SHORT_BYTES;
+		pos = 0;
+		for (RenderElement l = baseLayers; l != null; l = l.next) {
+			if (l.type == LINE) {
+				l.compile(vboData, iboData);
+
+				l.vertexOffset = pos;
+				pos += l.numVertices;
+			}
+		}
+
+		//offset[TEXLINE] = size * SHORT_BYTES;
+
+		for (RenderElement l = baseLayers; l != null; l = l.next) {
+			if (l.type == TEXLINE || l.type == MESH || l.type == HAIRLINE) {
+				l.compile(vboData, iboData);
+			}
+		}
+
+		for (RenderElement l = textureLayers; l != null; l = l.next) {
+			l.compile(vboData, iboData);
+		}
+		//<<
+		if (vboSize != vboData.position()) {
+			log.debug("wrong vertex buffer size: "
+			        + " new size: " + vboSize
+			        + " buffer pos: " + vboData.position()
+			        + " buffer limit: " + vboData.limit()
+			        + " buffer fill: " + vboData.remaining());
+			return false;
+		}
+
+		if (iboSize > 0 && iboSize != iboData.position()) {
+			log.debug("wrong indice buffer size: "
+			        + " new size: " + iboSize
+			        + " buffer pos: " + iboData.position()
+			        + " buffer limit: " + iboData.limit()
+			        + " buffer fill: " + iboData.remaining());
+			return false;
+		}
+
+		if (vbo == null)
+			vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, vboSize);
+
+		vbo.loadBufferData(vboData.flip(), vboSize * 2);
+
+		if (iboSize > 0) {
+			if (ibo == null)
+				ibo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, iboSize);
+
+			ibo.loadBufferData(iboData.flip(), iboSize * 2);
+		}
+
+		return true;
+	}
+
+	private static short[] fillCoords;
+
+	static {
+		short s = (short) (Tile.SIZE * MapRenderer.COORD_SCALE);
+		fillCoords = new short[] { 0, s, s, s, 0, 0, s, 0 };
 	}
 
 	public static void initRenderer(GL20 gl) {
@@ -364,13 +452,5 @@ public class ElementLayers extends TileData {
 		HairLineLayer.Renderer.init();
 
 		TextureItem.init(gl);
-	}
-
-	public void prepare() {
-		for (RenderElement l = baseLayers; l != null; l = l.next)
-			l.prepare();
-
-		for (RenderElement l = textureLayers; l != null; l = l.next)
-			l.prepare();
 	}
 }

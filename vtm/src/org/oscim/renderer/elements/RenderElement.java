@@ -40,9 +40,11 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 
 	/** Number of vertices for this layer. */
 	protected int numVertices;
+	protected int numIndices;
 
 	/** Temporary list of vertex data. */
 	protected final VertexData vertexItems = new VertexData();
+	protected final VertexData indiceItems = new VertexData();
 
 	protected RenderElement(int type) {
 		this.type = type;
@@ -52,6 +54,7 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 	protected void clear() {
 		vertexItems.dispose();
 		numVertices = 0;
+		numIndices = 0;
 	}
 
 	/**
@@ -62,10 +65,10 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 
 	}
 
-	/** Compile vertex data to vbo. */
-	protected void compile(ShortBuffer sbuf) {
-		compileVertexItems(sbuf);
-	}
+	//	/** Compile vertex data to vbo. */
+	//	protected void compile(ShortBuffer sbuf) {
+	//		compileVertexItems(sbuf);
+	//	}
 
 	/**
 	 * For line- and polygon-layers this is the offset
@@ -73,24 +76,35 @@ public abstract class RenderElement extends Inlist<RenderElement> {
 	 * For all other types it is the byte offset in vbo.
 	 * FIXME - always use byte offset?
 	 */
-	public int getOffset() {
-		return offset;
+	public int getVertexOffset() {
+		return vertexOffset;
 	}
 
-	public void setOffset(int offset) {
-		this.offset = offset;
+	public void setVertexOffset(int offset) {
+		this.vertexOffset = offset;
 	}
 
-	protected int offset;
+	protected int vertexOffset;
 
-	protected void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
+	protected int indiceOffset;
 
+	protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
+		compileVertexItems(vboData);
+		compileIndiceItems(iboData);
 	}
 
-	protected void compileVertexItems(ShortBuffer sbuf) {
+	protected void compileVertexItems(ShortBuffer vboData) {
 		/* keep offset of layer data in vbo */
-		offset = sbuf.position() * 2;
-		vertexItems.compile(sbuf);
+		vertexOffset = vboData.position() * 2; // FIXME 2? - should be vertex stride / num shorts
+		vertexItems.compile(vboData);
 	}
 
+	protected void compileIndiceItems(ShortBuffer iboData) {
+		/* keep offset of layer data in vbo */
+		if (indiceItems.empty())
+			return;
+
+		indiceOffset = iboData.position() * 2; // needs byte offset...
+		indiceItems.compile(iboData);
+	}
 }

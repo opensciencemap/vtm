@@ -48,6 +48,9 @@ public final class BufferObject extends Inlist<BufferObject> {
 		this.target = target;
 	}
 
+	/**
+	 * @param newSize size required in bytes
+	 */
 	public void loadBufferData(Buffer buf, int newSize) {
 		boolean clear = false;
 

@@ -57,13 +57,13 @@ public abstract class TextureLayer extends RenderElement {
 	public boolean fixed;
 
 	@Override
-	protected void compile(ShortBuffer sbuf) {
+	protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
 
 		for (TextureItem t = textures; t != null; t = t.next)
 			t.upload();
 
 		/* add vertices to vbo */
-		compileVertexItems(sbuf);
+		compileVertexItems(vboData);
 	}
 
 
@@ -139,26 +139,16 @@ public abstract class TextureLayer extends RenderElement {
 				for (int i = 0; i < t.indices; i += maxIndices) {
 					/* to.offset * (24(shorts) * 2(short-bytes)
 					 * / 6(indices) == 8) */
-					int off = (t.offset + i) * 8 + tl.offset;
+					int off = (t.offset + i) * 8 + tl.vertexOffset;
 
-					if (layers.useVBO) {
-						GL.glVertexAttribPointer(shader.aPos, 4,
-						                         GL20.GL_SHORT,
-						                         false, 12, off);
+					GL.glVertexAttribPointer(shader.aPos, 4,
+					                         GL20.GL_SHORT,
+					                         false, 12, off);
 
-						GL.glVertexAttribPointer(shader.aTexCoord, 2,
-						                         GL20.GL_SHORT,
-						                         false, 12, off + 8);
-					} else {
-						layers.vertexArrayBuffer.position(off);
-						GL.glVertexAttribPointer(shader.aPos, 4,
-						                         GL20.GL_SHORT, false, 12,
-						                         layers.vertexArrayBuffer);
-						layers.vertexArrayBuffer.position(off + 8);
-						GL.glVertexAttribPointer(shader.aTexCoord,
-						                         2, GL20.GL_SHORT, false, 12,
-						                         layers.vertexArrayBuffer);
-					}
+					GL.glVertexAttribPointer(shader.aTexCoord, 2,
+					                         GL20.GL_SHORT,
+					                         false, 12, off + 8);
+
 					int numIndices = t.indices - i;
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;

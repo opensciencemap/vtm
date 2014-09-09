@@ -22,8 +22,8 @@ public class ExtrusionLayers extends TileData {
 	public final double x;
 	public final double y;
 
-	public BufferObject vboIndices;
-	public BufferObject vboVertices;
+	public BufferObject ibo;
+	public BufferObject vbo;
 
 	public ExtrusionLayers(MapTile tile) {
 		zoomLevel = tile.zoomLevel;
@@ -50,10 +50,15 @@ public class ExtrusionLayers extends TileData {
 		setLayers(null);
 
 		if (compiled) {
-			vboIndices = BufferObject.release(vboIndices);
-			vboVertices = BufferObject.release(vboVertices);
+			ibo = BufferObject.release(ibo);
+			vbo = BufferObject.release(vbo);
 		}
 
+	}
+
+	public void prepare() {
+		for (RenderElement l = layers; l != null; l = l.next)
+			l.prepare();
 	}
 
 	public boolean compileLayers() {
@@ -65,38 +70,38 @@ public class ExtrusionLayers extends TileData {
 		int sumVertices = 0;
 
 		for (ExtrusionLayer l = layers; l != null; l = l.next()) {
-			sumIndices += l.sumIndices;
-			sumVertices += l.sumVertices;
+			sumIndices += l.numIndices;
+			sumVertices += l.numVertices;
 		}
 		if (sumIndices == 0)
 			return false;
 
-		ShortBuffer vbuf = MapRenderer.getShortBuffer(sumVertices * 4);
-		ShortBuffer ibuf = MapRenderer.getShortBuffer(sumIndices);
+		ShortBuffer vboData = MapRenderer.getShortBuffer(sumVertices * 4);
+		ShortBuffer iboData = MapRenderer.getShortBuffer(sumIndices);
 
 		for (ExtrusionLayer l = layers; l != null; l = l.next()) {
-			l.compile(vbuf, ibuf);
+			l.compile(vboData, iboData);
 		}
 		int size = sumIndices * 2;
-		if (ibuf.position() != sumIndices) {
-			int pos = ibuf.position();
+		if (iboData.position() != sumIndices) {
+			int pos = iboData.position();
 			log.error("invalid indice size: {} {}", sumIndices, pos);
 			size = pos * 2;
 		}
-		vboIndices = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
-		vboIndices.loadBufferData(ibuf.flip(), size);
-		vboIndices.unbind();
+		ibo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
+		ibo.loadBufferData(iboData.flip(), size);
+		ibo.unbind();
 
 		size = sumVertices * 4 * 2;
-		if (vbuf.position() != sumVertices * 4) {
-			int pos = vbuf.position();
+		if (vboData.position() != sumVertices * 4) {
+			int pos = vboData.position();
 			log.error("invalid vertex size: {} {}", sumVertices, pos);
 			size = pos * 2;
 		}
 
-		vboVertices = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
-		vboVertices.loadBufferData(vbuf.flip(), size);
-		vboVertices.unbind();
+		vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
+		vbo.loadBufferData(vboData.flip(), size);
+		vbo.unbind();
 
 		compiled = true;
 

@@ -46,9 +46,7 @@ public class ExtrusionLayer extends RenderElement {
 	public final int color;
 
 	/** indices for: 0. even sides, 1. odd sides, 2. roof, 3. roof outline */
-	public int numIndices[] = { 0, 0, 0, 0, 0 };
-	public int sumVertices = 0;
-	public int sumIndices = 0;
+	public int idx[] = { 0, 0, 0, 0, 0 };
 
 	//private final static int IND_EVEN_SIDE = 0;
 	//private final static int IND_ODD_SIDE = 1;
@@ -156,7 +154,7 @@ public class ExtrusionLayer extends RenderElement {
 		int[] index = element.index;
 		float[] points = element.points;
 
-		int vertexCnt = sumVertices;
+		int vertexCnt = numVertices;
 		synchronized (vertexPool) {
 
 			Vertex key = vertexPool.get();
@@ -263,7 +261,7 @@ public class ExtrusionLayer extends RenderElement {
 
 			vertexPool.release(key);
 		}
-		sumVertices = vertexCnt;
+		numVertices = vertexCnt;
 	}
 
 	private void addIndex(Vertex v, boolean addVertex) {
@@ -271,7 +269,7 @@ public class ExtrusionLayer extends RenderElement {
 			vertexItems.add(v.x, v.y, v.z, v.n);
 
 		mIndices[IND_MESH].add((short) v.id);
-		sumIndices++;
+		numIndices++;
 	}
 
 	//	private void encodeNormal(float v[], int offset) {
@@ -354,7 +352,7 @@ public class ExtrusionLayer extends RenderElement {
 		boolean simpleOutline = true;
 
 		/* current vertex id */
-		int startVertex = sumVertices;
+		int startVertex = numVertices;
 		int length = 0, ipos = 0, ppos = 0;
 
 		for (int n = index.length; ipos < n; ipos++, ppos += length) {
@@ -366,7 +364,7 @@ public class ExtrusionLayer extends RenderElement {
 
 			/* start next polygon */
 			if (length == 0) {
-				startVertex = sumVertices;
+				startVertex = numVertices;
 				simpleOutline = true;
 				complexOutline = false;
 				continue;
@@ -410,7 +408,7 @@ public class ExtrusionLayer extends RenderElement {
 			       (short) (first + k + 2),
 			       (short) (first + k + 4));
 		}
-		sumIndices += (len / 2) * 3;
+		numIndices += (len / 2) * 3;
 	}
 
 	/** roof indices for concave shapes */
@@ -427,11 +425,10 @@ public class ExtrusionLayer extends RenderElement {
 			numRings++;
 		}
 
-		sumIndices += Tessellator.tessellate(points, ppos, numPoints,
+		numIndices += Tessellator.tessellate(points, ppos, numPoints,
 		                                     index, ipos, numRings,
 		                                     startVertex + 1,
 		                                     mIndices[IND_ROOF]);
-
 	}
 
 	private boolean extrudeOutline(float[] points, int pos, int len,
@@ -463,7 +460,7 @@ public class ExtrusionLayer extends RenderElement {
 		int changeX = 0, changeY = 0, angleSign = 0;
 
 		/* vertex offset for all vertices in layer */
-		int vOffset = sumVertices;
+		int vOffset = numVertices;
 
 		mClipper.clipStart((int) nx, (int) ny);
 
@@ -556,38 +553,36 @@ public class ExtrusionLayer extends RenderElement {
 
 			mIndices[even].add(s0, s2, s1);
 			mIndices[even].add(s1, s2, s3);
-			sumIndices += 6;
+			numIndices += 6;
 
 			/* flipp even-odd */
 			even = ++even % 2;
 
 			/* add roof outline indices */
 			mIndices[IND_OUTLINE].add(s1, s3);
-			sumIndices += 2;
+			numIndices += 2;
 		}
 
-		sumVertices += vertexCnt;
+		numVertices += vertexCnt;
 		return convex;
 	}
 
 	@Override
-	public void compile(ShortBuffer vertexBuffer, ShortBuffer indexBuffer) {
-		mClipper = null;
-		releaseVertexPool();
+	public void compile(ShortBuffer vboData, ShortBuffer iboData) {
 
-		if (sumVertices == 0)
+		if (numVertices == 0)
 			return;
 
-		indexOffset = indexBuffer.position();
+		indexOffset = iboData.position();
 
 		for (int i = 0; i <= IND_MESH; i++) {
 			if (mIndices[i] == null)
 				continue;
-			numIndices[i] += mIndices[i].compile(indexBuffer);
+			idx[i] += mIndices[i].compile(iboData);
 		}
-		offset = vertexBuffer.position() * 2;
+		vertexOffset = vboData.position() * 2;
 
-		vertexItems.compile(vertexBuffer);
+		vertexItems.compile(vboData);
 
 		clear();
 	}
@@ -607,6 +602,12 @@ public class ExtrusionLayer extends RenderElement {
 
 			vertexItems.dispose();
 		}
+	}
+
+	@Override
+	protected void prepare() {
+		mClipper = null;
+		releaseVertexPool();
 	}
 
 	void releaseVertexPool() {
