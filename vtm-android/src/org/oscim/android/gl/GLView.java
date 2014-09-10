@@ -19,6 +19,7 @@ package org.oscim.android.gl;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.oscim.backend.GLAdapter;
 import org.oscim.map.Map;
 
 import android.content.Context;
@@ -54,7 +55,9 @@ public class GLView extends GLSurfaceView {
 		setEGLConfigChooser(new GlConfigChooser());
 		setEGLContextClientVersion(2);
 
-		//setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
+		if (GLAdapter.debug)
+			setDebugFlags(GLSurfaceView.DEBUG_CHECK_GL_ERROR | GLSurfaceView.DEBUG_LOG_GL_CALLS);
+
 		setRenderer(new GLRenderer(map));
 
 		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
