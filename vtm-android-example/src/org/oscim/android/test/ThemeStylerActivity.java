@@ -81,15 +81,7 @@ public class ThemeStylerActivity extends BaseMapActivity implements OnSeekBarCha
 					s.set(areaBuilder.set(s)
 					    .color(modColor(s.color, areaColor))
 					    .blendColor(modColor(s.blendColor, areaColor))
-					    .build());
-
-					if (s.outline == null)
-						continue;
-
-					s.outline.set(lineBuilder.set(s.outline)
-					    .color(modColor(s.outline.color, areaColor))
-					    .stippleColor(modColor(s.outline.stippleColor,
-					                           areaColor))
+					    .strokeColor(modColor(s.strokeColor, areaColor))
 					    .build());
 				}
 			}

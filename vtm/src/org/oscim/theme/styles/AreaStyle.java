@@ -46,7 +46,8 @@ public class AreaStyle extends RenderStyle {
 	public final TextureItem texture;
 
 	/** Outline */
-	public final LineStyle outline;
+	public final int strokeColor;
+	public final float strokeWidth;
 
 	public AreaStyle(int color) {
 		this(0, color);
@@ -60,7 +61,8 @@ public class AreaStyle extends RenderStyle {
 		this.blendScale = -1;
 		this.color = color;
 		this.texture = null;
-		this.outline = null;
+		this.strokeColor = color;
+		this.strokeWidth = 1;
 	}
 
 	public AreaStyle(AreaBuilder b) {
@@ -72,23 +74,8 @@ public class AreaStyle extends RenderStyle {
 		this.color = b.color;
 		this.texture = b.texture;
 
-		if (b.outline != null &&
-		        b.outlineColor == b.outline.color &&
-		        b.outlineWidth == b.outline.width) {
-			this.outline = b.outline;
-		} else if (b.outlineColor != Color.TRANSPARENT) {
-			this.outline = new LineStyle(-1, b.outlineColor, b.outlineWidth);
-		} else {
-			this.outline = null;
-		}
-	}
-
-	@Override
-	public void update() {
-		super.update();
-
-		if (outline != null)
-			outline.update();
+		this.strokeColor = b.strokeColor;
+		this.strokeWidth = b.strokeWidth;
 	}
 
 	@Override
@@ -99,22 +86,18 @@ public class AreaStyle extends RenderStyle {
 	@Override
 	public void renderWay(Callback renderCallback) {
 		renderCallback.renderArea(this, level);
-
-		if (outline != null)
-			renderCallback.renderWay(outline, level + 1);
 	}
 
 	public static class AreaBuilder implements StyleBuilder {
 		public int level;
 		public String style;
-		public LineStyle outline;
 		public int color;
 		public int fadeScale;
 		public int blendColor;
 		public int blendScale;
 
-		public int outlineColor;
-		public float outlineWidth;
+		public int strokeColor;
+		public float strokeWidth;
 
 		public TextureItem texture;
 
@@ -129,14 +112,8 @@ public class AreaStyle extends RenderStyle {
 			this.blendScale = area.blendScale;
 			this.color = area.color;
 			this.texture = area.texture;
-			this.outline = area.outline;
-			if (area.outline != null) {
-				this.outlineColor = outline.color;
-				this.outlineWidth = outline.width;
-			} else {
-				outlineColor = Color.TRANSPARENT;
-				outlineWidth = 1;
-			}
+			this.strokeColor = area.strokeColor;
+			this.strokeWidth = area.strokeWidth;
 
 			return this;
 		}
@@ -152,23 +129,23 @@ public class AreaStyle extends RenderStyle {
 		}
 
 		public AreaBuilder outline(int color, float width) {
-			this.outlineColor = color;
-			this.outlineWidth = width;
+			this.strokeColor = color;
+			this.strokeWidth = width;
 			return this;
 		}
 
-		public AreaBuilder outlineColor(int color) {
-			this.outlineColor = color;
+		public AreaBuilder strokeColor(int color) {
+			this.strokeColor = color;
 			return this;
 		}
 
-		public AreaBuilder outlineColor(String color) {
-			this.outlineColor = parseColor(color);
+		public AreaBuilder strokeColor(String color) {
+			this.strokeColor = parseColor(color);
 			return this;
 		}
 
-		public AreaBuilder outlineWidth(float width) {
-			this.outlineWidth = width;
+		public AreaBuilder strokeWidth(float width) {
+			this.strokeWidth = width;
 			return this;
 		}
 
@@ -209,10 +186,8 @@ public class AreaStyle extends RenderStyle {
 
 		public AreaBuilder reset() {
 			color = Color.BLACK;
-
-			outlineColor = Color.TRANSPARENT;
-			outlineWidth = 1;
-
+			strokeColor = Color.BLACK;
+			strokeWidth = 0;
 			fadeScale = -1;
 			blendScale = -1;
 			blendColor = Color.TRANSPARENT;

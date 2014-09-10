@@ -472,8 +472,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 			}
 		}
 
-		AreaStyle area = createArea(style, localName, attributes, mLevels);
-		mLevels += 2;
+		AreaStyle area = createArea(style, localName, attributes, mLevels++);
 
 		if (isStyle) {
 			mStyles.put(AREA_STYLE + area.style, area);
@@ -509,12 +508,12 @@ public class XmlThemeBuilder extends DefaultHandler {
 				b.color(value);
 
 			else if ("stroke".equals(name))
-				b.outlineColor(value);
+				b.strokeColor(value);
 
 			else if ("stroke-width".equals(name)) {
 				float strokeWidth = Float.parseFloat(value);
 				validateNonNegative("stroke-width", strokeWidth);
-				b.outlineWidth = strokeWidth;
+				b.strokeWidth = strokeWidth;
 
 			} else if ("fade".equals(name))
 				b.fadeScale = Integer.parseInt(value);

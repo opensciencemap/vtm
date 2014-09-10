@@ -17,15 +17,20 @@
 package org.oscim.renderer.elements;
 
 import static org.oscim.backend.GL20.GL_ALWAYS;
+import static org.oscim.backend.GL20.GL_ELEMENT_ARRAY_BUFFER;
 import static org.oscim.backend.GL20.GL_EQUAL;
 import static org.oscim.backend.GL20.GL_INVERT;
 import static org.oscim.backend.GL20.GL_KEEP;
+import static org.oscim.backend.GL20.GL_LINES;
 import static org.oscim.backend.GL20.GL_REPLACE;
 import static org.oscim.backend.GL20.GL_SHORT;
 import static org.oscim.backend.GL20.GL_TRIANGLE_FAN;
 import static org.oscim.backend.GL20.GL_TRIANGLE_STRIP;
+import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
 import static org.oscim.backend.GL20.GL_ZERO;
 import static org.oscim.utils.FastMath.clamp;
+
+import java.nio.ShortBuffer;
 
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
@@ -43,7 +48,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Special Renderer for drawing tile polygons using the stencil buffer method
  */
-public final class PolygonLayer extends RenderElement {
+public final class PolygonLayer extends IndexedRenderElement {
+
 	static final Logger log = LoggerFactory.getLogger(PolygonLayer.class);
 
 	public final static int CLIP_STENCIL = 1;
@@ -68,6 +74,10 @@ public final class PolygonLayer extends RenderElement {
 	public void addPolygon(float[] points, short[] index) {
 		short center = (short) ((Tile.SIZE >> 1) * S);
 
+		short id = (short) numVertices;
+
+		boolean outline = area.strokeWidth > 0;
+
 		for (int i = 0, pos = 0, n = index.length; i < n; i++) {
 			int length = index[i];
 			if (length < 0)
@@ -79,21 +89,45 @@ public final class PolygonLayer extends RenderElement {
 				continue;
 			}
 
-			numVertices += length / 2 + 2;
+			//numVertices += length / 2 + 2;
 			vertexItems.add(center, center);
+			id++;
 
 			int inPos = pos;
 
 			for (int j = 0; j < length; j += 2) {
 				vertexItems.add((short) (points[inPos++] * S),
 				                (short) (points[inPos++] * S));
+
+				if (outline) {
+					indiceItems.add(id++);
+					numIndices++;
+
+					indiceItems.add(id);
+					numIndices++;
+				} else {
+					id++;
+				}
 			}
 
 			vertexItems.add((short) (points[pos + 0] * S),
 			                (short) (points[pos + 1] * S));
+			id++;
 
 			pos += length;
 		}
+		numVertices = id;
+	}
+
+	@Override
+	protected void compile(ShortBuffer sbuf) {
+		if (area.strokeWidth == 0) {
+			/* add vertices to shared VBO */
+			compileVertexItems(sbuf);
+			return;
+		}
+		/* compile with indexed outline */
+		super.compile(sbuf);
 	}
 
 	static class Shader extends GLShader {
@@ -121,7 +155,7 @@ public final class PolygonLayer extends RenderElement {
 
 		private static final float FADE_START = 1.3f;
 
-		private static AreaStyle[] mAreaFills;
+		private static PolygonLayer[] mAreaFills;
 
 		private static Shader polyShader;
 		private static Shader texShader;
@@ -130,7 +164,7 @@ public final class PolygonLayer extends RenderElement {
 			polyShader = new Shader("base_shader");
 			texShader = new Shader("polygon_layer_tex");
 
-			mAreaFills = new AreaStyle[STENCIL_BITS];
+			mAreaFills = new PolygonLayer[STENCIL_BITS];
 
 			return true;
 		}
@@ -143,15 +177,19 @@ public final class PolygonLayer extends RenderElement {
 
 			/* do not modify stencil buffer */
 			GL.glStencilMask(0x00);
-			//int shader = polyShader;
+			Shader s;
 
-			Shader s = setShader(polyShader, v.mvp, false);
+			for (int i = start; i < end; i++) {
+				PolygonLayer l = mAreaFills[i];
+				AreaStyle a = l.area.current();
 
-			for (int c = start; c < end; c++) {
-				AreaStyle a = mAreaFills[c].current();
-
-				if (enableTexture && a.texture != null) {
+				boolean useTexture = enableTexture && a.texture != null;
+				if (useTexture)
 					s = setShader(texShader, v.mvp, false);
+				else
+					s = setShader(polyShader, v.mvp, false);
+
+				if (useTexture) {
 					float num = clamp((Tile.SIZE / a.texture.width) >> 1, 1, Tile.SIZE);
 					float transition = Interpolation.exp5.apply(clamp(scale - 1, 0, 1));
 					GL.glUniform2f(s.uScale, transition, div / num);
@@ -184,10 +222,8 @@ public final class PolygonLayer extends RenderElement {
 						GLUtils.setColor(s.uColor, a.blendColor, 1);
 
 				} else {
-					if (a.color < 0xff000000)
-						GLState.blend(true);
-					else
-						GLState.blend(false);
+					/* test if color contains alpha */
+					GLState.blend((a.color & OPAQUE) != OPAQUE);
 
 					GLUtils.setColor(s.uColor, a.color, 1);
 				}
@@ -195,14 +231,37 @@ public final class PolygonLayer extends RenderElement {
 				/* set stencil buffer mask used to draw this layer
 				 * also check that clip bit is set to avoid overdraw
 				 * of other tiles */
-				GL.glStencilFunc(GL_EQUAL, 0xff, CLIP_BIT | 1 << c);
+				GL.glStencilFunc(GL_EQUAL, 0xff, CLIP_BIT | 1 << i);
 
 				/* draw tile fill coordinates */
 				GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-				/* disable texture shader */
-				if (s != polyShader)
-					s = setShader(polyShader, v.mvp, false);
+				if (l.indicesVbo == null)
+					continue;
+
+				GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
+
+				GLState.blend(true);
+				//GLState.testDepth(false);
+
+				HairLineLayer.Renderer.shader.set(v);
+
+				l.indicesVbo.bind();
+
+				GLUtils.setColor(HairLineLayer.Renderer.shader.uColor, l.area.strokeColor, 1);
+
+				GL.glVertexAttribPointer(HairLineLayer.Renderer.shader.aPos, 2, GL_SHORT,
+				                         false, 0, l.offset << 2);
+
+				GL.glDrawElements(GL_LINES, l.numIndices,
+				                  GL_UNSIGNED_SHORT, 0);
+				GL.glLineWidth(1);
+
+				GL.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+				///* disable texture shader */
+				//if (s != polyShader)
+				//s = setShader(polyShader, v, false);
 			}
 		}
 
@@ -280,7 +339,7 @@ public final class PolygonLayer extends RenderElement {
 					start = cur = 0;
 				}
 
-				mAreaFills[cur] = pl.area.current();
+				mAreaFills[cur] = pl;
 
 				/* set stencil mask to draw to */
 				GL.glStencilMask(1 << cur++);
