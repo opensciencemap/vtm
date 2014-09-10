@@ -16,6 +16,7 @@
  */
 package org.oscim.renderer.elements;
 
+import static org.oscim.renderer.elements.RenderElement.HAIRLINE;
 import static org.oscim.renderer.elements.RenderElement.LINE;
 import static org.oscim.renderer.elements.RenderElement.MESH;
 import static org.oscim.renderer.elements.RenderElement.POLYGON;
@@ -47,6 +48,7 @@ public class ElementLayers extends TileData {
 	        2, // POLY_VERTEX
 	        2, // MESH_VERTEX
 	        4, // EXTRUSION_VERTEX
+	        2, // HAIRLINE_VERTEX
 	};
 
 	private final static int TEXTURE_VERTEX_SHORTS = 6;
@@ -112,6 +114,15 @@ public class ElementLayers extends TileData {
 		return l;
 	}
 
+	public HairLineLayer addHairLineLayer(int level, LineStyle style) {
+		HairLineLayer ll = getHairLineLayer(level);
+		if (ll == null)
+			return null;
+		ll.line = style;
+
+		return ll;
+	}
+
 	/**
 	 * Get or add the LineLayer for a level. Levels are ordered from
 	 * bottom (0) to top
@@ -142,6 +153,14 @@ public class ElementLayers extends TileData {
 	 */
 	public LineTexLayer getLineTexLayer(int level) {
 		return (LineTexLayer) getLayer(level, TEXLINE);
+	}
+
+	/**
+	 * Get or add the TexLineLayer for a level. Levels are ordered from
+	 * bottom (0) to top
+	 */
+	public HairLineLayer getHairLineLayer(int level) {
+		return (HairLineLayer) getLayer(level, HAIRLINE);
 	}
 
 	public TextLayer addTextLayer(TextLayer textLayer) {
@@ -223,6 +242,8 @@ public class ElementLayers extends TileData {
 				layer = new LineTexLayer(level);
 			else if (type == MESH)
 				layer = new MeshLayer(level);
+			else if (type == HAIRLINE)
+				layer = new HairLineLayer(level);
 
 			if (layer == null)
 				throw new IllegalArgumentException();
@@ -293,7 +314,7 @@ public class ElementLayers extends TileData {
 		//offset[TEXLINE] = size * SHORT_BYTES;
 
 		for (RenderElement l = baseLayers; l != null; l = l.next) {
-			if (l.type == TEXLINE || l.type == MESH) {
+			if (l.type == TEXLINE || l.type == MESH || l.type == HAIRLINE) {
 				l.compile(sbuf);
 			}
 		}
@@ -340,8 +361,8 @@ public class ElementLayers extends TileData {
 		TextureLayer.Renderer.init();
 		BitmapLayer.Renderer.init();
 		MeshLayer.Renderer.init();
+		HairLineLayer.Renderer.init();
 
 		TextureItem.init(gl);
 	}
-
 }

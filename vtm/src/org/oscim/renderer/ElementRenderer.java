@@ -32,6 +32,7 @@ import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.elements.HairLineLayer;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.MeshLayer;
@@ -114,6 +115,11 @@ public abstract class ElementRenderer extends LayerRenderer {
 				l = MeshLayer.Renderer.draw(l, v);
 				continue;
 			}
+			if (l.type == RenderElement.HAIRLINE) {
+				l = HairLineLayer.Renderer.draw(l, v);
+				continue;
+			}
+
 			log.debug("invalid layer {}", l.type);
 			break;
 		}

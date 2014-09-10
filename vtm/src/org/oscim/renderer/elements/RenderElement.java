@@ -24,13 +24,14 @@ import org.oscim.utils.pool.Inlist;
 public abstract class RenderElement extends Inlist<RenderElement> {
 	protected static GL20 GL;
 
-	public final static int LINE = 0;
-	public final static int TEXLINE = 1;
-	public final static int POLYGON = 2;
-	public final static int MESH = 3;
-	public final static int EXTRUSION = 4;
-	public final static int SYMBOL = 5;
-	public final static int BITMAP = 6;
+	public static final int LINE = 0;
+	public static final int TEXLINE = 1;
+	public static final int POLYGON = 2;
+	public static final int MESH = 3;
+	public static final int EXTRUSION = 4;
+	public static final int HAIRLINE = 5;
+	public static final int SYMBOL = 6;
+	public static final int BITMAP = 7;
 
 	public final int type;
 

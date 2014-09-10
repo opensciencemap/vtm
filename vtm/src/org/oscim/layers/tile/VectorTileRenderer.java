@@ -4,6 +4,7 @@ import static org.oscim.layers.tile.MapTile.PROXY_GRAMPA;
 import static org.oscim.layers.tile.MapTile.PROXY_PARENT;
 import static org.oscim.layers.tile.MapTile.State.READY;
 import static org.oscim.renderer.elements.RenderElement.BITMAP;
+import static org.oscim.renderer.elements.RenderElement.HAIRLINE;
 import static org.oscim.renderer.elements.RenderElement.LINE;
 import static org.oscim.renderer.elements.RenderElement.MESH;
 import static org.oscim.renderer.elements.RenderElement.POLYGON;
@@ -18,6 +19,7 @@ import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.elements.BitmapLayer;
 import org.oscim.renderer.elements.ElementLayers;
+import org.oscim.renderer.elements.HairLineLayer;
 import org.oscim.renderer.elements.LineLayer;
 import org.oscim.renderer.elements.LineTexLayer;
 import org.oscim.renderer.elements.MeshLayer;
@@ -71,6 +73,7 @@ public class VectorTileRenderer extends TileRenderer {
 
 				mClipMode = PolygonLayer.CLIP_DEPTH;
 				drawProxies = true;
+
 				break;
 			}
 		}
@@ -191,7 +194,13 @@ public class VectorTileRenderer extends TileRenderer {
 				l = MeshLayer.Renderer.draw(l, v);
 				continue;
 			}
+			if (l.type == HAIRLINE) {
+				l = HairLineLayer.Renderer.draw(l, v);
+				continue;
+			}
+
 			/* just in case */
+			log.error("unknown layer {}", l.type);
 			l = l.next;
 		}
 
@@ -205,6 +214,7 @@ public class VectorTileRenderer extends TileRenderer {
 				l = BitmapLayer.Renderer.draw(l, v, 1, mLayerAlpha);
 				continue;
 			}
+			log.error("unknown layer {}", l.type);
 			l = l.next;
 		}
 
