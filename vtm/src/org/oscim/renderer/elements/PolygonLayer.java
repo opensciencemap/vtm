@@ -441,41 +441,6 @@ public final class PolygonLayer extends RenderElement {
 				GL.glColorMask(true, true, true, true);
 		}
 
-		//private static float[] debugFillColor = { 0.3f, 0.0f, 0.0f, 0.3f };
-		//private static float[] debugFillColor2 = { .8f, .8f, .8f, .8f };
-		//private static FloatBuffer mDebugFill;
-
-		//static void debugDraw(GLMatrix m, float[] coords, int color) {
-		//	GLState.test(false, false);
-		//	if (mDebugFill == null) {
-		//		mDebugFill = ByteBuffer
-		//		    .allocateDirect(32)
-		//		    .order(ByteOrder.nativeOrder())
-		//		    .asFloatBuffer();
-		//		mDebugFill.put(coords);
-		//	}
-		//
-		//	GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
-		//
-		//	mDebugFill.position(0);
-		//	GLState.useProgram(polygonProgram[0]);
-		//	GL.glEnableVertexAttribArray(hPolygonVertexPosition[0]);
-		//
-		//	GL.glVertexAttribPointer(hPolygonVertexPosition[0], 2, GL20.GL_FLOAT,
-		//	                         false, 0, mDebugFill);
-		//
-		//	m.setAsUniform(hPolygonMatrix[0]);
-		//
-		//	if (color == 0)
-		//		GLUtils.glUniform4fv(hPolygonColor[0], 1, debugFillColor);
-		//	else
-		//		GLUtils.glUniform4fv(hPolygonColor[0], 1, debugFillColor2);
-		//
-		//	GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
-		//
-		//	GLUtils.checkGlError("draw debug");
-		//}
-
 		private Renderer() {
 			/* Singleton */
 		}
