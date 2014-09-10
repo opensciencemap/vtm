@@ -2,30 +2,24 @@ import com.badlogic.gdx.jnigen.AntScriptGenerator;
 import com.badlogic.gdx.jnigen.BuildConfig;
 import com.badlogic.gdx.jnigen.BuildTarget;
 import com.badlogic.gdx.jnigen.BuildTarget.TargetOs;
+import com.badlogic.gdx.jnigen.NativeCodeGenerator;
 
 public class JniBuilder {
-	public static void main(String[] args) {
-		String[] headers = { "." };
+	public static void main(String[] args) throws Exception {
+		String[] headers = { ".", "libtess2/Include" };
 		String[] sources = {
-		        // Matrix stuff
 		        "gl/utils.c",
-
-		        // libtessellate
-		        "tessellate/dict.c",
-		        "tessellate/mesh.c",
-		        "tessellate/render.c",
-		        "tessellate/tess.c",
-		        "tessellate/geom.c",
-		        "tessellate/memalloc.c",
-		        "tessellate/normal.c",
-		        "tessellate/priorityq.c",
-		        "tessellate/sweep.c",
-		        "tessellate/tessmono.c",
-		        "tessellate/tessellate.c",
-		        "tessellate/TessellateJni.c"
+		        "libtess2/Source/bucketalloc.c",
+		        "libtess2/Source/dict.c",
+		        "libtess2/Source/geom.c",
+		        "libtess2/Source/mesh.c",
+		        "libtess2/Source/priorityq.c",
+		        "libtess2/Source/sweep.c",
+		        "libtess2/Source/tess.c",
 		};
 
 		String cflags = " -Wall -std=c99 -O2 -ffast-math";
+		cflags += " -DNDEBUG"; /* disable debug in libtess2 */
 
 		//BuildTarget win32home = BuildTarget
 		//    .newDefaultTarget(TargetOs.Windows, false);
@@ -87,20 +81,22 @@ public class JniBuilder {
 		ios.cFlags += cflags;
 		ios.cppFlags += cflags;
 
-		//new NativeCodeGenerator().generate();
-		new AntScriptGenerator().generate(new BuildConfig("vtm-jni"),
-		                                  // mac,
-		                                  // win32home, 
-		                                  // win32,
-		                                  // win64,
-		                                  // lin32,
-		                                  lin64,
-		                                  android
-		    //ios
+		new NativeCodeGenerator().generate();
+
+		new AntScriptGenerator()
+		    .generate(new BuildConfig("vtm-jni"),
+		              android,
+		              lin64,
+		              lin32,
+		              mac,
+		              ios,
+		              //win32home, 
+		              win32,
+		              win64
 		    );
 
 		// BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v clean");
-		// BuildExecutor.executeAnt("jni/build-windows32home.xml", "-v");
+		// BuildExecutor.executeAnt("jni/build-linux64.xml", "-v");
 		// BuildExecutor.executeAnt("jni/build.xml", "pack-natives -v");
 	}
 }
