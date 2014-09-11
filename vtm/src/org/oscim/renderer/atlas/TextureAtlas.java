@@ -83,25 +83,11 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 	final int mHeight;
 
 	/** Depth (in bytes) of the underlying texture */
-	final int mDepth;
 
 	/** Allocated surface size */
 	int mUsed;
 
 	public TextureItem texture;
-
-	/**
-	 * only call in GL-Thread
-	 */
-	public TextureItem loadTexture() {
-		if (texture != null) {
-			texture.upload();
-			return texture;
-		}
-
-		log.debug("Missing atlas texture");
-		return null;
-	}
 
 	public static class Slot extends Inlist<Slot> {
 		public int x, y, w;
@@ -122,17 +108,20 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 		}
 
 		public int x, y, w, h;
+
+		@Override
+		public String toString() {
+			return x + ":" + y + " " + w + "x" + h;
+		}
 	}
 
-	TextureAtlas(int width, int height, int depth) {
+	public TextureAtlas(int width, int height) {
 		mWidth = width;
 		mHeight = height;
-		mDepth = depth;
 		mSlots = new Slot(1, 1, width - 2);
 	}
 
 	public TextureAtlas(Bitmap bitmap) {
-		mDepth = 0;
 		texture = new TextureItem(bitmap);
 		mWidth = texture.width;
 		mHeight = texture.height;
@@ -144,7 +133,7 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 
 	public void addTextureRegion(Object key, Rect r) {
 
-		mRegions.put(key, new TextureRegion(this, r));
+		mRegions.put(key, new TextureRegion(this.texture, r));
 
 	}
 
@@ -251,7 +240,7 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
 		if (!(depth == 1 || depth == 3 || depth == 4))
 			throw new IllegalArgumentException("invalid depth");
 
-		return new TextureAtlas(width, height, depth);
+		return new TextureAtlas(width, height);
 	}
 
 	//	/// FIXME

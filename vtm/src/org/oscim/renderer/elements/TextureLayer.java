@@ -103,8 +103,6 @@ public abstract class TextureLayer extends RenderElement {
 
 	public static final class Renderer {
 
-		public final static boolean debug = false;
-
 		private static Shader shader;
 
 		static void init() {

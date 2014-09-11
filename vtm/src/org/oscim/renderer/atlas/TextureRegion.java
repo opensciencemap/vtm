@@ -17,14 +17,15 @@
 package org.oscim.renderer.atlas;
 
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
+import org.oscim.renderer.elements.TextureItem;
 
 public class TextureRegion {
 
-	public TextureRegion(TextureAtlas textureAtlas, Rect r) {
-		this.atlas = textureAtlas;
+	public TextureRegion(TextureItem texture, Rect r) {
+		this.texture = texture;
 		this.rect = r;
 	}
 
-	public final TextureAtlas atlas;
 	public final Rect rect;
+	public final TextureItem texture;
 }

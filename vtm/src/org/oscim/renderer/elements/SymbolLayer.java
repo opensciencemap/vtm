@@ -82,10 +82,9 @@ public final class SymbolLayer extends TextureLayer {
 			if (it.texRegion != null) {
 				/* FIXME this work only with one TextureAtlas per SymbolLayer */
 				if (textures == null) {
-					t = it.texRegion.atlas.loadTexture();
 					/* clone TextureItem to use same texID with
 					 * multiple TextureItem */
-					t = TextureItem.clone(t);
+					t = TextureItem.clone(it.texRegion.texture);
 					textures = Inlist.appendItem(textures, t);
 				}
 
@@ -101,8 +100,6 @@ public final class SymbolLayer extends TextureLayer {
 				if (t == null) {
 					t = new TextureItem(it.bitmap);
 					textures = Inlist.appendItem(textures, t);
-					t.upload();
-
 					t.offset = numIndices;
 					t.indices = 0;
 				}

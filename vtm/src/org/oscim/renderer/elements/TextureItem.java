@@ -34,8 +34,10 @@ import org.slf4j.LoggerFactory;
 public class TextureItem extends Inlist<TextureItem> {
 	static final Logger log = LoggerFactory.getLogger(TextureItem.class);
 
+	static final boolean dbg = false;
+
 	/** texture ID */
-	public int id;
+	private int id;
 
 	/** current settings */
 	public final int width;
@@ -43,6 +45,7 @@ public class TextureItem extends Inlist<TextureItem> {
 	public final boolean repeat;
 
 	/** vertex offset from which this texture is referenced */
+	/* FIXME dont put this here! */
 	public short offset;
 	public short indices;
 
@@ -50,58 +53,44 @@ public class TextureItem extends Inlist<TextureItem> {
 	public Bitmap bitmap;
 
 	/** do not release the texture when TextureItem is released. */
-	private boolean ref;
+	private TextureItem ref;
+	private int used = 0;
 
 	/** texture data is ready */
-	private boolean ready;
+	boolean loaded;
 
 	final TexturePool pool;
 
 	private TextureItem(TexturePool pool, int id) {
-		this.id = id;
-		this.width = pool.mWidth;
-		this.height = pool.mHeight;
-		this.pool = pool;
-		this.repeat = false;
+		this(pool, id, pool.mWidth, pool.mHeight, false);
 	}
 
 	public TextureItem(Bitmap bitmap) {
-		this.bitmap = bitmap;
-		this.id = -1;
-		this.width = bitmap.getWidth();
-		this.height = bitmap.getHeight();
-		this.pool = NOPOOL;
-		this.repeat = false;
-
+		this(bitmap, false);
 	}
 
 	public TextureItem(Bitmap bitmap, boolean repeat) {
+		this(NOPOOL, -1, bitmap.getWidth(), bitmap.getHeight(), repeat);
 		this.bitmap = bitmap;
-		this.id = -1;
-		this.width = bitmap.getWidth();
-		this.height = bitmap.getHeight();
-		this.repeat = repeat;
-		this.pool = NOPOOL;
-
 	}
 
-	private TextureItem(TexturePool pool, int id, int width, int height) {
+	private TextureItem(TexturePool pool, int id, int width, int height, boolean repeat) {
 		this.id = id;
 		this.width = width;
 		this.height = height;
 		this.pool = pool;
-		this.repeat = false;
+		this.repeat = repeat;
 	}
 
 	public static TextureItem clone(TextureItem ti) {
-		// original texture needs to be loaded
-		if (!ti.ready)
-			throw new IllegalStateException();
 
-		TextureItem clone = new TextureItem(ti.pool, ti.id, ti.width, ti.height);
+		TextureItem clone = new TextureItem(NOPOOL, ti.id, ti.width, ti.height, ti.repeat);
 		clone.id = ti.id;
-		clone.ref = true;
-		clone.ready = true;
+		clone.ref = (ti.ref == null) ? ti : ti.ref;
+		clone.loaded = ti.loaded;
+
+		clone.ref.used++;
+
 		return clone;
 	}
 
@@ -110,10 +99,19 @@ public class TextureItem extends Inlist<TextureItem> {
 	 * [on GL-Thread]
 	 */
 	public void upload() {
-		if (!ready) {
+		if (loaded)
+			return;
+
+		if (ref == null) {
 			pool.uploadTexture(this);
-			ready = true;
+
+		} else {
+			/* load referenced texture */
+			ref.upload();
+			id = ref.id;
+
 		}
+		loaded = true;
 	}
 
 	/**
@@ -121,12 +119,10 @@ public class TextureItem extends Inlist<TextureItem> {
 	 * [on GL-Thread]
 	 */
 	public void bind() {
-		if (!ready) {
-			pool.uploadTexture(this);
-			ready = true;
-		} else {
+		if (loaded)
 			GLState.bindTex2D(id);
-		}
+		else
+			upload();
 	}
 
 	/**
@@ -211,10 +207,20 @@ public class TextureItem extends Inlist<TextureItem> {
 		@Override
 		protected boolean clearItem(TextureItem t) {
 
-			if (t.ref)
+			if (t.used > 0)
 				return false;
 
-			t.ready = false;
+			if (t.ref != null) {
+				/* dispose texture if this clone holds the last handle */
+				if (t.ref.used == 0) {
+					t.ref.dispose();
+					return false;
+				}
+				t.ref.used--;
+				return false;
+			}
+
+			t.loaded = false;
 
 			if (mUseBitmapPool)
 				releaseBitmap(t);
@@ -224,7 +230,8 @@ public class TextureItem extends Inlist<TextureItem> {
 
 		@Override
 		protected void freeItem(TextureItem t) {
-			if (!t.ref && t.id >= 0) {
+
+			if (t.ref == null && t.used == 0 && t.id >= 0) {
 				mTexCnt--;
 				synchronized (disposedTextures) {
 					disposedTextures.add(Integer.valueOf(t.id));
@@ -255,7 +262,7 @@ public class TextureItem extends Inlist<TextureItem> {
 
 				initTexture(t);
 
-				if (TextureLayer.Renderer.debug)
+				if (dbg)
 					log.debug("fill:" + getFill()
 					        + " count:" + mTexCnt
 					        + " new texture " + t.id);
@@ -265,11 +272,12 @@ public class TextureItem extends Inlist<TextureItem> {
 				t.bitmap.uploadToTexture(false);
 			} else {
 				GLState.bindTex2D(t.id);
-				// use faster subimage upload 
+
+				/* use faster subimage upload */
 				t.bitmap.uploadToTexture(true);
 			}
 
-			if (TextureLayer.Renderer.debug)
+			if (dbg)
 				GLUtils.checkGlError(TextureItem.class.getName());
 
 			if (mUseBitmapPool)
@@ -309,7 +317,9 @@ public class TextureItem extends Inlist<TextureItem> {
 		GL = gl;
 	}
 
-	/** disposed textures are released by MapRenderer after each frame */
+	/**
+	 * Disposed textures are released by MapRenderer after each frame
+	 */
 	public static void disposeTextures() {
 		synchronized (disposedTextures) {
 
@@ -321,7 +331,6 @@ public class TextureItem extends Inlist<TextureItem> {
 
 				disposedTextures.clear();
 				GLUtils.glDeleteTextures(size, tmp);
-				//mTexCnt -= size;
 			}
 		}
 	}
