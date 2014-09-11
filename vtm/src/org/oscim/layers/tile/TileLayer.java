@@ -50,6 +50,16 @@ public abstract class TileLayer extends Layer implements UpdateListener {
 
 	}
 
+	public TileLayer(Map map, TileManager tileManager) {
+		super(map);
+		mTileManager = tileManager;
+	}
+
+	protected void setRenderer(TileRenderer renderer) {
+		renderer.setTileManager(mTileManager);
+		mRenderer = renderer;
+	}
+
 	abstract protected TileLoader createLoader();
 
 	public TileRenderer tileRenderer() {

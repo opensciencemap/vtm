@@ -16,6 +16,17 @@
  */
 package org.oscim.renderer;
 
+import static org.oscim.backend.GL20.GL_CULL_FACE;
+import static org.oscim.backend.GL20.GL_DEPTH_BUFFER_BIT;
+import static org.oscim.backend.GL20.GL_EQUAL;
+import static org.oscim.backend.GL20.GL_LEQUAL;
+import static org.oscim.backend.GL20.GL_LESS;
+import static org.oscim.backend.GL20.GL_LINES;
+import static org.oscim.backend.GL20.GL_SHORT;
+import static org.oscim.backend.GL20.GL_TRIANGLES;
+import static org.oscim.backend.GL20.GL_UNSIGNED_BYTE;
+import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
+
 import org.oscim.backend.GL20;
 import org.oscim.core.Tile;
 import org.oscim.renderer.bucket.ExtrusionBucket;
@@ -30,8 +41,8 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 	private final int mMode;
 	private Shader mShader;
 
-	protected ExtrusionBuckets[] mExtrusionLayerSet;
-	protected int mExtrusionLayerCnt;
+	protected ExtrusionBuckets[] mExtrusionBucketSet = {};
+	protected int mBucketsCnt;
 	protected float mAlpha = 1;
 
 	public ExtrusionRenderer(boolean mesh, boolean alpha) {
@@ -65,22 +76,25 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 		return true;
 	}
 
-	private void renderCombined(int vertexPointer, ExtrusionBuckets els) {
+	private void renderCombined(int vertexPointer, ExtrusionBuckets ebs) {
 
-		for (ExtrusionBucket el = els.layers; el != null; el = el.next()) {
+		for (ExtrusionBucket eb = ebs.buckets(); eb != null; eb = eb.next()) {
 
 			GL.glVertexAttribPointer(vertexPointer, 3,
-			                         GL20.GL_SHORT, false, 8, 0);
+			                         GL_SHORT, false, 8,
+			                         eb.getVertexOffset());
 
-			int sumIndices = el.idx[0] + el.idx[1] + el.idx[2];
+			int sumIndices = eb.idx[0] + eb.idx[1] + eb.idx[2];
+
+			/* extrusion */
 			if (sumIndices > 0)
-				GL.glDrawElements(GL20.GL_TRIANGLES, sumIndices,
-				                  GL20.GL_UNSIGNED_SHORT, 0);
+				GL.glDrawElements(GL_TRIANGLES, sumIndices,
+				                  GL_UNSIGNED_SHORT, eb.off[0]);
 
-			if (el.idx[2] > 0) {
-				int offset = sumIndices * 2;
-				GL.glDrawElements(GL20.GL_TRIANGLES, el.idx[4],
-				                  GL20.GL_UNSIGNED_SHORT, offset);
+			/* mesh */
+			if (eb.idx[4] > 0) {
+				GL.glDrawElements(GL_TRIANGLES, eb.idx[4],
+				                  GL_UNSIGNED_SHORT, eb.off[4]);
 			}
 		}
 	}
@@ -89,7 +103,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 	public void render(GLViewport v) {
 
 		GL.glDepthMask(true);
-		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+		GL.glClear(GL_DEPTH_BUFFER_BIT);
 
 		GLState.test(true, false);
 
@@ -100,12 +114,12 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 		/* only use face-culling when it's unlikely
 		 * that one'moves through the building' */
 		if (v.pos.zoomLevel < 18)
-			GL.glEnable(GL20.GL_CULL_FACE);
+			GL.glEnable(GL_CULL_FACE);
 
-		GL.glDepthFunc(GL20.GL_LESS);
+		GL.glDepthFunc(GL_LESS);
 		GL.glUniform1f(s.uAlpha, mAlpha);
 
-		ExtrusionBuckets[] els = mExtrusionLayerSet;
+		ExtrusionBuckets[] ebs = mExtrusionBucketSet;
 
 		if (mTranslucent) {
 			/* only draw to depth buffer */
@@ -113,24 +127,24 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 			GL.glColorMask(false, false, false, false);
 			GL.glUniform1i(s.uMode, -1);
 
-			for (int i = 0; i < mExtrusionLayerCnt; i++) {
-				if (els[i].ibo == null)
+			for (int i = 0; i < mBucketsCnt; i++) {
+				if (ebs[i].ibo == null)
 					return;
 
-				els[i].ibo.bind();
-				els[i].vbo.bind();
+				ebs[i].ibo.bind();
+				ebs[i].vbo.bind();
 
-				setMatrix(v, els[i], true);
+				setMatrix(v, ebs[i], true);
 				v.mvp.setAsUniform(s.uMVP);
 
-				renderCombined(s.aPos, els[i]);
+				renderCombined(s.aPos, ebs[i]);
 			}
 
 			/* only draw to color buffer */
 			GL.glColorMask(true, true, true, true);
 			GL.glDepthMask(false);
 
-			GL.glDepthFunc(GL20.GL_EQUAL);
+			GL.glDepthFunc(GL_EQUAL);
 		}
 
 		GLState.blend(true);
@@ -138,108 +152,83 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 		GLState.enableVertexArrays(s.aPos, s.aLight);
 		float[] currentColor = null;
 
-		for (int i = 0; i < mExtrusionLayerCnt; i++) {
-			if (els[i].ibo == null)
+		for (int i = 0; i < mBucketsCnt; i++) {
+			if (ebs[i].ibo == null)
 				continue;
 
-			els[i].ibo.bind();
-			els[i].vbo.bind();
+			ebs[i].ibo.bind();
+			ebs[i].vbo.bind();
 
 			if (!mTranslucent) {
-				setMatrix(v, els[i], false);
+				setMatrix(v, ebs[i], false);
 				v.mvp.setAsUniform(s.uMVP);
 			}
 
-			ExtrusionBucket el = els[i].getLayers();
-			for (; el != null; el = el.next()) {
+			ExtrusionBucket eb = ebs[i].buckets();
 
-				if (el.colors != currentColor) {
-					currentColor = el.colors;
+			for (; eb != null; eb = eb.next()) {
+
+				if (eb.colors != currentColor) {
+					currentColor = eb.colors;
 					GLUtils.glUniform4fv(s.uColor,
 					                     mMode == 0 ? 4 : 1,
-					                     el.colors);
+					                     eb.colors);
 				}
+				GL.glVertexAttribPointer(s.aPos, 3, GL_SHORT,
+				                         false, 8, eb.getVertexOffset());
 
-				GL.glVertexAttribPointer(s.aPos, 3, GL20.GL_SHORT,
-				                         false, 8, el.getVertexOffset());
-
-				GL.glVertexAttribPointer(s.aLight, 2,
-				                         GL20.GL_UNSIGNED_BYTE,
-				                         false, 8, el.getVertexOffset() + 6);
+				GL.glVertexAttribPointer(s.aLight, 2, GL_UNSIGNED_BYTE,
+				                         false, 8, eb.getVertexOffset() + 6);
 
 				/* draw extruded outlines */
-				if (el.idx[0] > 0) {
+				if (eb.idx[0] > 0) {
 					if (mTranslucent) {
 						GL.glDepthFunc(GL20.GL_EQUAL);
-						setMatrix(v, els[i], true);
+						setMatrix(v, ebs[i], true);
 						v.mvp.setAsUniform(s.uMVP);
 					}
 
 					/* draw roof */
 					GL.glUniform1i(s.uMode, 0);
-					GL.glDrawElements(GL20.GL_TRIANGLES,
-					                  el.idx[2],
-					                  GL20.GL_UNSIGNED_SHORT,
-					                  (el.idx[0]
-					                  + el.idx[1]) * 2);
+					GL.glDrawElements(GL_TRIANGLES, eb.idx[2], GL_UNSIGNED_SHORT, eb.off[2]);
 
 					/* draw sides 1 */
 					GL.glUniform1i(s.uMode, 1);
-					GL.glDrawElements(GL20.GL_TRIANGLES,
-					                  el.idx[0],
-					                  GL20.GL_UNSIGNED_SHORT, 0);
+					GL.glDrawElements(GL_TRIANGLES, eb.idx[0], GL_UNSIGNED_SHORT, eb.off[0]);
 
 					/* draw sides 2 */
 					GL.glUniform1i(s.uMode, 2);
-					GL.glDrawElements(GL20.GL_TRIANGLES,
-					                  el.idx[1],
-					                  GL20.GL_UNSIGNED_SHORT,
-					                  el.idx[0] * 2);
+					GL.glDrawElements(GL_TRIANGLES, eb.idx[1], GL_UNSIGNED_SHORT, eb.off[1]);
 
 					if (mTranslucent) {
 						/* drawing gl_lines with the same coordinates does not
 						 * result in same depth values as polygons, so add
 						 * offset and draw gl_lequal: */
-						GL.glDepthFunc(GL20.GL_LEQUAL);
+						GL.glDepthFunc(GL_LEQUAL);
 						v.mvp.addDepthOffset(100);
 						v.mvp.setAsUniform(s.uMVP);
 					}
 
 					GL.glUniform1i(s.uMode, 3);
-					int offset = 2 * (el.indexOffset
-					        + el.idx[0] + el.idx[1]
-					        + el.idx[2]);
 
-					GL.glDrawElements(GL20.GL_LINES,
-					                  el.idx[3],
-					                  GL20.GL_UNSIGNED_SHORT,
-					                  offset);
-
+					GL.glDrawElements(GL_LINES, eb.idx[3], GL_UNSIGNED_SHORT, eb.off[3]);
 				}
 
 				/* draw triangle meshes */
-				if (el.idx[4] > 0) {
-					int offset = 2 * (el.indexOffset
-					        + el.idx[0] + el.idx[1]
-					        + el.idx[2] + el.idx[3]);
-
-					GL.glDrawElements(GL20.GL_TRIANGLES,
-					                  el.idx[4],
-					                  GL20.GL_UNSIGNED_SHORT,
-					                  offset);
+				if (eb.idx[4] > 0) {
+					GL.glDrawElements(GL_TRIANGLES, eb.idx[4], GL_UNSIGNED_SHORT, eb.off[4]);
 				}
 			}
 
 			/* just a temporary reference! */
-			els[i] = null;
+			ebs[i] = null;
 		}
 
 		if (!mTranslucent)
 			GL.glDepthMask(false);
 
 		if (v.pos.zoomLevel < 18)
-			GL.glDisable(GL20.GL_CULL_FACE);
-
+			GL.glDisable(GL_CULL_FACE);
 	}
 
 	private static void setMatrix(GLViewport v, ExtrusionBuckets l, boolean offset) {

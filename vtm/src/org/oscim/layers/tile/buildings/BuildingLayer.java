@@ -24,7 +24,6 @@ import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.map.Map;
-import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.renderer.bucket.ExtrusionBucket;
@@ -32,6 +31,7 @@ import org.oscim.renderer.bucket.ExtrusionBuckets;
 import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
+import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,39 +40,27 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
 	private final static int MIN_ZOOM = 17;
 	private final static int MAX_ZOOM = 17;
+
 	private final static boolean POST_AA = false;
+	private final static boolean TRANSLUCENT = true;
 
 	private static final Object BUILDING_DATA = BuildingLayer.class.getName();
 
-	private ExtrusionRenderer mExtRenderer;
-
 	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
 		this(map, tileLayer, MIN_ZOOM, MAX_ZOOM);
-
-		//		super(map);
-		//		tileLayer.addHook(this);
-		//
-		//		mMinZoom = MIN_ZOOM;
-		//
-		//		OffscreenRenderer or = new OffscreenRenderer();
-		//		or.setRenderer(new ExtrusionRenderer(tileLayer.tileRenderer(), MIN_ZOOM));
-		//		mRenderer = or;
 	}
 
 	public BuildingLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax) {
+
 		super(map);
+
 		tileLayer.addHook(this);
 
-		mExtRenderer = new BuildingRenderer(tileLayer.tileRenderer(),
-		                                    zoomMin, zoomMax, false, true);
-
-		if (POST_AA) {
-			OffscreenRenderer or = new OffscreenRenderer(Mode.SSAO_FXAA);
-			or.setRenderer(mExtRenderer);
-			mRenderer = or;
-		} else {
-			mRenderer = mExtRenderer;
-		}
+		mRenderer = new BuildingRenderer(tileLayer.tileRenderer(),
+		                                 zoomMin, zoomMax,
+		                                 false, TRANSLUCENT);
+		if (POST_AA)
+			mRenderer = new OffscreenRenderer(Mode.SSAO_FXAA, mRenderer);
 	}
 
 	/** TileLoaderThemeHook */
@@ -91,36 +79,44 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		String v = element.tags.getValue(Tag.KEY_HEIGHT);
 		if (v != null)
 			height = Integer.parseInt(v);
+
 		v = element.tags.getValue(Tag.KEY_MIN_HEIGHT);
 		if (v != null)
 			minHeight = Integer.parseInt(v);
-
-		ExtrusionBuckets el = get(tile);
-
-		if (el.layers == null) {
-			double lat = MercatorProjection.toLatitude(tile.y);
-			float groundScale = (float) MercatorProjection
-			    .groundResolution(lat, 1 << tile.zoomLevel);
-
-			el.layers = new ExtrusionBucket(0, groundScale, extrusion.colors);
-		}
 
 		/* 12m default */
 		if (height == 0)
 			height = 12 * 100;
 
-		el.layers.add(element, height, minHeight);
+		ExtrusionBuckets ebs = get(tile);
+
+		for (ExtrusionBucket b = ebs.buckets; b != null; b = b.next()) {
+			if (b.colors == extrusion.colors) {
+				b.add(element, height, minHeight);
+				return true;
+			}
+		}
+
+		double lat = MercatorProjection.toLatitude(tile.y);
+		float groundScale = (float) MercatorProjection
+		    .groundResolution(lat, 1 << tile.zoomLevel);
+
+		ebs.buckets = Inlist.push(ebs.buckets,
+		                          new ExtrusionBucket(0, groundScale,
+		                                              extrusion.colors));
+
+		ebs.buckets.add(element, height, minHeight);
 
 		return true;
 	}
 
 	public static ExtrusionBuckets get(MapTile tile) {
-		ExtrusionBuckets el = (ExtrusionBuckets) tile.getData(BUILDING_DATA);
-		if (el == null) {
-			el = new ExtrusionBuckets(tile);
-			tile.addData(BUILDING_DATA, el);
+		ExtrusionBuckets eb = (ExtrusionBuckets) tile.getData(BUILDING_DATA);
+		if (eb == null) {
+			eb = new ExtrusionBuckets(tile);
+			tile.addData(BUILDING_DATA, eb);
 		}
-		return el;
+		return eb;
 	}
 
 	@Override
@@ -128,7 +124,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 		if (success)
 			get(tile).prepare();
 		else
-			get(tile).setLayers(null);
+			get(tile).setBuckets(null);
 	}
 
 	//	private int multi;

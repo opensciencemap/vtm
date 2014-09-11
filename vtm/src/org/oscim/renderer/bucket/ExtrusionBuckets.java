@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 public class ExtrusionBuckets extends TileData {
 	static final Logger log = LoggerFactory.getLogger(ExtrusionBuckets.class);
 
-	public ExtrusionBucket layers;
+	public ExtrusionBucket buckets;
 
 	public boolean compiled;
 
@@ -34,20 +34,20 @@ public class ExtrusionBuckets extends TileData {
 	/**
 	 * Set new ExtrusionLayers and clear previous.
 	 */
-	public void setLayers(ExtrusionBucket el) {
-		for (RenderBucket l = layers; l != null; l = l.next)
-			l.clear();
+	public void setBuckets(ExtrusionBucket el) {
+		for (RenderBucket b = buckets; b != null; b = b.next)
+			b.clear();
 
-		layers = el;
+		buckets = el;
 	}
 
-	public ExtrusionBucket getLayers() {
-		return layers;
+	public ExtrusionBucket buckets() {
+		return buckets;
 	}
 
 	@Override
 	protected void dispose() {
-		setLayers(null);
+		setBuckets(null);
 
 		if (compiled) {
 			ibo = BufferObject.release(ibo);
@@ -57,21 +57,21 @@ public class ExtrusionBuckets extends TileData {
 	}
 
 	public void prepare() {
-		for (RenderBucket l = layers; l != null; l = l.next)
-			l.prepare();
+		for (RenderBucket b = buckets; b != null; b = b.next)
+			b.prepare();
 	}
 
-	public boolean compileLayers() {
+	public boolean compile() {
 
-		if (layers == null)
+		if (buckets == null)
 			return false;
 
 		int sumIndices = 0;
 		int sumVertices = 0;
 
-		for (ExtrusionBucket l = layers; l != null; l = l.next()) {
-			sumIndices += l.numIndices;
-			sumVertices += l.numVertices;
+		for (ExtrusionBucket b = buckets; b != null; b = b.next()) {
+			sumIndices += b.numIndices;
+			sumVertices += b.numVertices;
 		}
 		if (sumIndices == 0)
 			return false;
@@ -79,9 +79,9 @@ public class ExtrusionBuckets extends TileData {
 		ShortBuffer vboData = MapRenderer.getShortBuffer(sumVertices * 4);
 		ShortBuffer iboData = MapRenderer.getShortBuffer(sumIndices);
 
-		for (ExtrusionBucket l = layers; l != null; l = l.next()) {
-			l.compile(vboData, iboData);
-		}
+		for (ExtrusionBucket b = buckets; b != null; b = b.next())
+			b.compile(vboData, iboData);
+
 		int size = sumIndices * 2;
 		if (iboData.position() != sumIndices) {
 			int pos = iboData.position();
@@ -90,7 +90,6 @@ public class ExtrusionBuckets extends TileData {
 		}
 		ibo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
 		ibo.loadBufferData(iboData.flip(), size);
-		ibo.unbind();
 
 		size = sumVertices * 4 * 2;
 		if (vboData.position() != sumVertices * 4) {
@@ -101,7 +100,6 @@ public class ExtrusionBuckets extends TileData {
 
 		vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
 		vbo.loadBufferData(vboData.flip(), size);
-		vbo.unbind();
 
 		compiled = true;
 

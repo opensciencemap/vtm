@@ -47,6 +47,8 @@ public class ExtrusionBucket extends RenderBucket {
 
 	/** indices for: 0. even sides, 1. odd sides, 2. roof, 3. roof outline */
 	public int idx[] = { 0, 0, 0, 0, 0 };
+	/** indices offsets in bytes */
+	public int off[] = { 0, 0, 0, 0, 0 };
 
 	//private final static int IND_EVEN_SIDE = 0;
 	//private final static int IND_ODD_SIDE = 1;
@@ -59,8 +61,6 @@ public class ExtrusionBucket extends RenderBucket {
 	private final float mGroundResolution;
 
 	private KeyMap<Vertex> mVertexMap;
-
-	public int indexOffset;
 
 	//private static final int NORMAL_DIR_MASK = 0xFFFFFFFE;
 	//private int numIndexHits = 0;
@@ -573,22 +573,24 @@ public class ExtrusionBucket extends RenderBucket {
 		if (numVertices == 0)
 			return;
 
-		indexOffset = iboData.position();
+		indiceOffset = iboData.position();
 
+		int iOffset = indiceOffset;
 		for (int i = 0; i <= IND_MESH; i++) {
-			if (mIndices[i] == null)
-				continue;
-			idx[i] += mIndices[i].compile(iboData);
+			if (mIndices[i] != null) {
+				idx[i] = mIndices[i].compile(iboData);
+				off[i] = iOffset * 2;
+				iOffset += idx[i];
+			}
 		}
 		vertexOffset = vboData.position() * 2;
-
 		vertexItems.compile(vboData);
 
 		clear();
 	}
 
 	@Override
-	protected void clear() {
+	public void clear() {
 		mClipper = null;
 		releaseVertexPool();
 

@@ -6,6 +6,7 @@ import org.oscim.layers.tile.TileManager;
 import org.oscim.layers.tile.TileRenderer;
 import org.oscim.map.Map;
 import org.oscim.renderer.GLViewport;
+import org.oscim.renderer.LayerRenderer;
 import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.tiling.TileSource;
@@ -28,9 +29,8 @@ public class S3DBLayer extends TileLayer {
 	private final TileSource mTileSource;
 
 	public S3DBLayer(Map map, TileSource tileSource) {
-		super(map,
-		      new TileManager(map, SRC_ZOOM, SRC_ZOOM, MAX_CACHE),
-		      new S3DBRenderer());
+		super(map, new TileManager(map, SRC_ZOOM, SRC_ZOOM, MAX_CACHE));
+		setRenderer(new S3DBRenderer());
 
 		mTileSource = tileSource;
 		initLoader(2);
@@ -42,48 +42,30 @@ public class S3DBLayer extends TileLayer {
 	}
 
 	public static class S3DBRenderer extends TileRenderer {
-		BuildingRenderer mExtRenderer;
-		OffscreenRenderer or;
+		LayerRenderer mRenderer;
 
 		public S3DBRenderer() {
-			mExtRenderer = new BuildingRenderer(this, SRC_ZOOM, SRC_ZOOM, true, false);
+			mRenderer = new BuildingRenderer(this, SRC_ZOOM, SRC_ZOOM, true, false);
 
-			if (POST_FXAA) {
-				//or = new OffscreenRenderer(Mode.FXAA);
-				or = new OffscreenRenderer(Mode.SSAO_FXAA);
-				or.setRenderer(mExtRenderer);
-			}
+			if (POST_FXAA)
+				mRenderer = new OffscreenRenderer(Mode.SSAO_FXAA, mRenderer);
 		}
 
 		@Override
-		protected synchronized void update(GLViewport v) {
+		public synchronized void update(GLViewport v) {
 			super.update(v);
-			if (POST_FXAA) {
-				or.update(v);
-				setReady(or.isReady());
-			} else {
-				mExtRenderer.update(v);
-				setReady(mExtRenderer.isReady());
-			}
+			mRenderer.update(v);
+			setReady(mRenderer.isReady());
 		}
 
 		@Override
-		protected synchronized void render(GLViewport v) {
-			if (POST_FXAA) {
-				or.render(v);
-			} else {
-				mExtRenderer.render(v);
-			}
+		public synchronized void render(GLViewport v) {
+			mRenderer.render(v);
 		}
 
 		@Override
-		protected boolean setup() {
-			if (POST_FXAA) {
-				or.setup();
-			} else {
-				mExtRenderer.setup();
-			}
-
+		public boolean setup() {
+			mRenderer.setup();
 			return super.setup();
 		}
 	}
