@@ -17,6 +17,7 @@
  */
 package org.oscim.tiling.source;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,7 +70,12 @@ public class OkHttpEngine implements HttpEngine {
 		for (Entry<String, String> opt : mTileSource.getRequestHeader().entrySet())
 			conn.addRequestProperty(opt.getKey(), opt.getValue());
 
-		inputStream = conn.getInputStream();
+		try {
+			inputStream = conn.getInputStream();
+		} catch (FileNotFoundException e) {
+			throw new IOException("ERROR " + conn.getResponseCode()
+			        + ": " + conn.getResponseMessage());
+		}
 	}
 
 	@Override

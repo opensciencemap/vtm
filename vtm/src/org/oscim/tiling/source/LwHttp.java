@@ -252,7 +252,6 @@ public class LwHttp implements HttpEngine {
 
 		byte[] buf = buffer;
 		boolean first = true;
-		boolean ok = true;
 		boolean gzip = false;
 
 		int read = 0;
@@ -272,7 +271,7 @@ public class LwHttp implements HttpEngine {
 				end++;
 
 			if (end == BUFFER_SIZE) {
-				return null;
+				throw new IOException("Header too large!");
 			}
 
 			if (buf[end] != '\n')
@@ -284,25 +283,24 @@ public class LwHttp implements HttpEngine {
 				break;
 			}
 
-			if (ok) {
-				if (first) {
-					first = false;
-					/* check only for OK ("HTTP/1.? ".length == 9) */
-					if (!check(HEADER_HTTP_OK, buf, pos + 9, end))
-						ok = false;
-
-				} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
-					/* parse Content-Length */
-					contentLength = parseInt(buf, pos +
-					        HEADER_CONTENT_LENGTH.length + 2, end - 1);
-				} else if (check(HEADER_ENCODING_GZIP, buf, pos, end)) {
-					gzip = true;
-				} else if (check(HEADER_CONNECTION_CLOSE, buf, pos, end)) {
-					mMustCloseConnection = true;
+			if (first) {
+				first = false;
+				/* check only for OK ("HTTP/1.? ".length == 9) */
+				if (!check(HEADER_HTTP_OK, buf, pos + 9, end)) {
+					throw new IOException("HTTP Error: "
+					        + new String(buf, pos, end - pos - 1));
 				}
+			} else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
+				/* parse Content-Length */
+				contentLength = parseInt(buf, pos +
+				        HEADER_CONTENT_LENGTH.length + 2, end - 1);
+			} else if (check(HEADER_ENCODING_GZIP, buf, pos, end)) {
+				gzip = true;
+			} else if (check(HEADER_CONNECTION_CLOSE, buf, pos, end)) {
+				mMustCloseConnection = true;
 			}
 
-			if (!ok || dbg) {
+			if (dbg) {
 				String line = new String(buf, pos, end - pos - 1);
 				log.debug("> {} <", line);
 			}
@@ -310,9 +308,6 @@ public class LwHttp implements HttpEngine {
 			pos += (end - pos) + 1;
 			end = pos;
 		}
-
-		if (!ok)
-			return null;
 
 		/* back to start of content */
 		is.reset();
