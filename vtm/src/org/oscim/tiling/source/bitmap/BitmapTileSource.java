@@ -18,6 +18,26 @@ import org.slf4j.LoggerFactory;
 public class BitmapTileSource extends UrlTileSource {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
+	public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
+
+		public Builder() {
+			super(null, "/{Z}/{X}/{Y}.png", 0, 17);
+		}
+
+		public BitmapTileSource build() {
+			return new BitmapTileSource(this);
+		}
+	}
+
+	protected BitmapTileSource(Builder<?> builder) {
+		super(builder);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static Builder<?> builder() {
+		return new Builder();
+	}
+
 	/**
 	 * Create BitmapTileSource for 'url'
 	 * 
@@ -26,15 +46,19 @@ public class BitmapTileSource extends UrlTileSource {
 	 * implement getUrlString() for custom formatting.
 	 */
 	public BitmapTileSource(String url, int zoomMin, int zoomMax) {
-		super(url, "/{Z}/{X}/{Y}.png", zoomMin, zoomMax);
+		this(url, "/{Z}/{X}/{Y}.png", zoomMin, zoomMax);
 	}
 
 	public BitmapTileSource(String url, int zoomMin, int zoomMax, String extension) {
-		super(url, "/{Z}/{X}/{Y}" + extension, zoomMin, zoomMax);
+		this(url, "/{Z}/{X}/{Y}" + extension, zoomMin, zoomMax);
 	}
 
 	public BitmapTileSource(String url, String tilePath, int zoomMin, int zoomMax) {
-		super(url, tilePath, zoomMin, zoomMax);
+		super(builder()
+		    .url(url)
+		    .tilePath(tilePath)
+		    .zoomMin(zoomMin)
+		    .zoomMax(zoomMax));
 	}
 
 	@Override

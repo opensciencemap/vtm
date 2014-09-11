@@ -1,5 +1,7 @@
 package org.oscim.test.jeo;
 
+import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -14,7 +16,6 @@ import org.oscim.layers.OSMIndoorLayer;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.test.JeoTest;
-import org.oscim.tiling.source.bitmap.DefaultSources.StamenToner;
 
 public class LayerTest extends GdxMap {
 
@@ -24,7 +25,7 @@ public class LayerTest extends GdxMap {
 
 	@Override
 	public void createLayers() {
-		mMap.setBaseMap(new BitmapTileLayer(mMap, new StamenToner()));
+		mMap.setBaseMap(new BitmapTileLayer(mMap, STAMEN_TONER.build()));
 		mMap.layers().add(new TileGridLayer(mMap));
 
 		mMap.addTask(new Runnable() {

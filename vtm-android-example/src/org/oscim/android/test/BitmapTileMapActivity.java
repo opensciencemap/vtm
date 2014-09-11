@@ -14,6 +14,8 @@
  */
 package org.oscim.android.test;
 
+import static org.oscim.tiling.source.bitmap.DefaultSources.OPENSTREETMAP;
+
 import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.android.cache.TileCache;
@@ -22,7 +24,6 @@ import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.TileSource;
-import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import android.os.Bundle;
 
@@ -33,7 +34,7 @@ public class BitmapTileMapActivity extends MapActivity {
 	protected BitmapTileLayer mBitmapLayer;
 
 	public BitmapTileMapActivity() {
-		mTileSource = new DefaultSources.OpenStreetMap();
+		mTileSource = OPENSTREETMAP.build();
 	}
 
 	public BitmapTileMapActivity(TileSource tileSource) {

@@ -1,10 +1,11 @@
 package org.oscim.test;
 
+import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
+
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.buildings.S3DBLayer;
 import org.oscim.tiling.TileSource;
-import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class MeshTest extends GdxMapApp {
@@ -16,7 +17,7 @@ public class MeshTest extends GdxMapApp {
 		//VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
 		//mMap.setTheme(VtmThemes.DEFAULT);
 
-		mMap.setBaseMap(new BitmapTileLayer(mMap, new DefaultSources.StamenToner()));
+		mMap.setBaseMap(new BitmapTileLayer(mMap, STAMEN_TONER.build()));
 
 		TileSource ts = new OSciMap4TileSource("http://opensciencemap.org/tiles/s3db");
 		S3DBLayer tl = new S3DBLayer(mMap, ts);

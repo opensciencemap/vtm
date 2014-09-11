@@ -24,6 +24,26 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class BitmapTileSource extends UrlTileSource {
 	static final Logger log = LoggerFactory.getLogger(LwHttp.class);
 
+	public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
+
+		public Builder() {
+			super(null, "/{Z}/{X}/{Y}.png", 0, 17);
+		}
+
+		public BitmapTileSource build() {
+			return new BitmapTileSource(this);
+		}
+	}
+
+	protected BitmapTileSource(Builder<?> builder) {
+		super(builder);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static Builder<?> builder() {
+		return new Builder();
+	}
+
 	/**
 	 * Create BitmapTileSource for 'url'
 	 * 

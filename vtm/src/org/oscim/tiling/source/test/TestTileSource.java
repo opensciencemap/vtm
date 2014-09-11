@@ -30,6 +30,10 @@ public class TestTileSource extends TileSource {
 
 	// private boolean mOpenFile = false;
 
+	public TestTileSource() {
+		super(0, 18);
+	}
+
 	@Override
 	public ITileDataSource getDataSource() {
 		return new TileDataSource();

@@ -27,6 +27,40 @@ import org.oscim.tiling.source.LwHttp.LwHttpFactory;
 
 public abstract class UrlTileSource extends TileSource {
 
+	public abstract static class Builder<T extends Builder<T>> extends TileSource.Builder<T> {
+		protected int zoomMin, zoomMax;
+		protected String tilePath;
+		protected String url;
+		private HttpEngine.Factory engineFactory;
+
+		protected Builder() {
+
+		}
+
+		protected Builder(String url, String tilePath, int zoomMin, int zoomMax) {
+			this.url = url;
+			this.tilePath = tilePath;
+			this.zoomMin = zoomMin;
+			this.zoomMax = zoomMax;
+		}
+
+		public T tilePath(String tilePath) {
+			this.tilePath = tilePath;
+			return self();
+		}
+
+		public T url(String url) {
+			this.url = url;
+			return self();
+		}
+
+		public T httpFactory(HttpEngine.Factory factory) {
+			this.engineFactory = factory;
+			return self();
+		}
+
+	}
+
 	public final static TileUrlFormatter URL_FORMATTER = new DefaultTileUrlFormatter();
 	private final URL mUrl;
 	private final String[] mTilePath;
@@ -39,19 +73,17 @@ public abstract class UrlTileSource extends TileSource {
 		public String formatTilePath(UrlTileSource tileSource, Tile tile);
 	}
 
-	public UrlTileSource(String url, String tilePath, int zoomMin, int zoomMax) {
-		this(url, tilePath);
-		mZoomMin = zoomMin;
-		mZoomMax = zoomMax;
+	protected UrlTileSource(Builder<?> builder) {
+		this(builder.url, builder.tilePath, builder.zoomMin, builder.zoomMax);
+		mHttpFactory = builder.engineFactory;
 	}
 
-	/**
-	 * @param urlString 'http://example.com/'
-	 * @param tilePath replacement string for tile coordinates,
-	 *            e.g. '{Z}/{X}/{Y}.png'
-	 */
-	public UrlTileSource(String urlString, String tilePath) {
+	protected UrlTileSource(String urlString, String tilePath) {
+		this(urlString, tilePath, 0, 17);
+	}
 
+	protected UrlTileSource(String urlString, String tilePath, int zoomMin, int zoomMax) {
+		super(zoomMin, zoomMax);
 		if (tilePath == null)
 			throw new IllegalArgumentException("tilePath cannot be null.");
 

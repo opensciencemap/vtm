@@ -1,5 +1,7 @@
 package org.oscim.test;
 
+import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
+
 import org.oscim.core.MercatorProjection;
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
@@ -15,7 +17,6 @@ import org.oscim.layers.tile.vector.VectorTileLoader;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.DebugTheme;
 import org.oscim.tiling.TileSource;
-import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class TileRenderTest extends GdxMap {
@@ -114,7 +115,7 @@ public class TileRenderTest extends GdxMap {
 			}
 		}
 
-		mMap.setBaseMap(new BitmapTileLayer(mMap, new DefaultSources.StamenToner()));
+		mMap.setBaseMap(new BitmapTileLayer(mMap, STAMEN_TONER.build()));
 
 		mMap.layers().add(l);
 	}

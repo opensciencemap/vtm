@@ -14,6 +14,8 @@
  */
 package org.oscim.android.test;
 
+import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
+
 import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.layers.TileGridLayer;
@@ -25,7 +27,6 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
-import org.oscim.tiling.source.bitmap.DefaultSources.StamenToner;
 import org.oscim.tiling.source.geojson.HighroadJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmBuildingJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmLanduseJsonTileSource;
@@ -49,7 +50,7 @@ public class OsmJsonMapActivity extends MapActivity {
 
 		mTileSource = new OsmWaterJsonTileSource();
 
-		mMap.setBaseMap(new BitmapTileLayer(mMap, new StamenToner()));
+		mMap.setBaseMap(new BitmapTileLayer(mMap, STAMEN_TONER.build()));
 		mMap.layers().add(new TileGridLayer(mMap));
 
 		IRenderTheme theme = ThemeLoader.load(VtmThemes.OSMARENDER);

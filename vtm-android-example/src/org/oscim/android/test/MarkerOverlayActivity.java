@@ -16,6 +16,8 @@
  */
 package org.oscim.android.test;
 
+import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,19 +29,18 @@ import org.oscim.layers.marker.ItemizedLayer.OnItemGestureListener;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 import org.oscim.layers.marker.MarkerSymbol;
-import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Toast;
 
 public class MarkerOverlayActivity extends BitmapTileMapActivity
-implements OnItemGestureListener<MarkerItem> {
+        implements OnItemGestureListener<MarkerItem> {
 
 	private MarkerSymbol mFocusMarker;
 
 	public MarkerOverlayActivity() {
-		super(new DefaultSources.StamenToner());
+		super(STAMEN_TONER.build());
 	}
 
 	@Override
@@ -54,7 +55,7 @@ implements OnItemGestureListener<MarkerItem> {
 
 		ItemizedLayer<MarkerItem> markerLayer =
 		        new ItemizedLayer<MarkerItem>(mMap, new ArrayList<MarkerItem>(),
-		                                          symbol, this);
+		                                      symbol, this);
 
 		mMap.layers().add(markerLayer);
 

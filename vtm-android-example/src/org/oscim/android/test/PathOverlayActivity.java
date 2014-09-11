@@ -16,13 +16,14 @@
  */
 package org.oscim.android.test;
 
+import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.PathLayer;
-import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -30,7 +31,7 @@ import android.os.SystemClock;
 public class PathOverlayActivity extends BitmapTileMapActivity {
 
 	public PathOverlayActivity() {
-		super(new DefaultSources.StamenToner());
+		super(STAMEN_TONER.build());
 	}
 
 	@Override
@@ -58,7 +59,8 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 			}
 		}, 50);
 	}
-	void redraw(){
+
+	void redraw() {
 		mMap.render();
 	}
 
@@ -71,7 +73,7 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 		for (double lat = -90; lat <= 90; lat += 5) {
 			List<GeoPoint> pts = new ArrayList<GeoPoint>();
 
-			for (double lon = -180; lon <= 180; lon += 2){
+			for (double lon = -180; lon <= 180; lon += 2) {
 				//pts.add(new GeoPoint(lat, lon));
 				double longitude = lon + (pos * 180);
 				if (longitude < -180)
@@ -79,8 +81,8 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 				if (longitude > 180)
 					longitude -= 360;
 
-				double latitude = lat +  (pos * 90);
-				if (latitude< -90)
+				double latitude = lat + (pos * 90);
+				if (latitude < -90)
 					latitude += 180;
 				if (latitude > 90)
 					latitude -= 180;
