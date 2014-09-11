@@ -27,10 +27,15 @@ import java.util.Map.Entry;
 
 import org.oscim.core.Tile;
 import org.oscim.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.squareup.okhttp.HttpResponseCache;
 import com.squareup.okhttp.OkHttpClient;
 
 public class OkHttpEngine implements HttpEngine {
+	static final Logger log = LoggerFactory.getLogger(OkHttpEngine.class);
+
 	private final OkHttpClient mClient;
 	private final UrlTileSource mTileSource;
 
@@ -39,6 +44,11 @@ public class OkHttpEngine implements HttpEngine {
 
 		public OkHttpFactory() {
 			mClient = new OkHttpClient();
+		}
+
+		public OkHttpFactory(HttpResponseCache responseCache) {
+			mClient = new OkHttpClient();
+			mClient.setResponseCache(responseCache);
 		}
 
 		@Override
@@ -95,7 +105,7 @@ public class OkHttpEngine implements HttpEngine {
 
 	@Override
 	public void setCache(OutputStream os) {
-		// TODO: Evaluate OkHttp response cache and determine if additional caching is required.
+		// OkHttp cache implented through tileSource setResponseCache
 	}
 
 	@Override
