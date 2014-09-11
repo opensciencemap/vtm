@@ -45,7 +45,7 @@ public class VectorTileRenderer extends TileRenderer {
 	protected int mDrawSerial;
 
 	@Override
-	protected synchronized void update(GLViewport v) {
+	public synchronized void update(GLViewport v) {
 		super.update(v);
 
 		/* discard depth projection from tilt, depth buffer

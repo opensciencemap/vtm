@@ -54,7 +54,7 @@ public class BitmapRenderer extends BucketRenderer {
 	}
 
 	@Override
-	protected synchronized void update(GLViewport v) {
+	public synchronized void update(GLViewport v) {
 		if (!initialized) {
 			buckets.clear();
 
@@ -82,7 +82,7 @@ public class BitmapRenderer extends BucketRenderer {
 	}
 
 	@Override
-	protected synchronized void render(GLViewport v) {
+	public synchronized void render(GLViewport v) {
 		v.useScreenCoordinates(false, 8);
 		BitmapBucket.Renderer.draw(buckets.get(), v, 1, 1);
 	}

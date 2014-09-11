@@ -56,7 +56,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected boolean setup() {
+	public boolean setup() {
 		if (mMode == 0)
 			mShader = new Shader("extrusion_layer_ext");
 		else

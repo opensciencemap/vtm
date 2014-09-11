@@ -110,7 +110,7 @@ public class GridRenderer extends BucketRenderer {
 	}
 
 	@Override
-	protected void update(GLViewport v) {
+	public void update(GLViewport v) {
 		/* scale coordinates relative to current 'zoom-level' to
 		 * get the position as the nearest tile coordinate */
 		int z = 1 << v.pos.zoomLevel;

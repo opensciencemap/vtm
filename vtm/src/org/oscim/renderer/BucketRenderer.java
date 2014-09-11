@@ -72,7 +72,7 @@ public class BucketRenderer extends LayerRenderer {
 	 * Copy initial Viewport position and compile buckets.
 	 */
 	@Override
-	protected void update(GLViewport v) {
+	public void update(GLViewport v) {
 		if (!mInititialzed) {
 			mMapPosition.copy(v.pos);
 			mInititialzed = true;
@@ -84,7 +84,7 @@ public class BucketRenderer extends LayerRenderer {
 	 * Render all 'buckets'
 	 */
 	@Override
-	protected synchronized void render(GLViewport v) {
+	public synchronized void render(GLViewport v) {
 		MapPosition layerPos = mMapPosition;
 
 		GLState.test(false, false);

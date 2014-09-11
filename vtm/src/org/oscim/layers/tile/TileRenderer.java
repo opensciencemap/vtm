@@ -78,7 +78,7 @@ public abstract class TileRenderer extends LayerRenderer {
 	 * synced with clearTiles, setOverdrawColor and setBitmapAlpha
 	 */
 	@Override
-	protected synchronized void update(GLViewport v) {
+	public synchronized void update(GLViewport v) {
 
 		if (mAlpha == 0) {
 			mTileManager.releaseTiles(mDrawTiles);
@@ -115,7 +115,7 @@ public abstract class TileRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected void render(GLViewport v) {
+	public void render(GLViewport v) {
 		/* render in update() so that tiles cannot vanish in between. */
 	}
 

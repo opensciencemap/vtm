@@ -107,7 +107,7 @@ public abstract class AbstractVectorLayer<T> extends Layer implements UpdateList
 		MapPosition mTmpPos = new MapPosition();
 
 		@Override
-		protected void update(GLViewport v) {
+		public void update(GLViewport v) {
 
 			Task t = mWorker.poll();
 

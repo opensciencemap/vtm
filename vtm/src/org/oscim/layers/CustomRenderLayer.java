@@ -33,7 +33,7 @@ public class CustomRenderLayer extends Layer implements UpdateListener {
 
 		// functions running on MapRender Thread
 		@Override
-		protected void update(GLViewport v) {
+		public void update(GLViewport v) {
 			int currentState;
 
 			synchronized (this) {
@@ -49,7 +49,7 @@ public class CustomRenderLayer extends Layer implements UpdateListener {
 		}
 
 		@Override
-		protected void render(GLViewport v) {
+		public void render(GLViewport v) {
 		}
 	}
 

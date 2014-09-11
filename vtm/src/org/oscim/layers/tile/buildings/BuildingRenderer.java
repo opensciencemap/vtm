@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class BuildingRenderer extends ExtrusionRenderer {
 	static final Logger log = LoggerFactory.getLogger(BuildingRenderer.class);
 
-	private final TileRenderer mTileLayer;
+	private final TileRenderer mTileRenderer;
 	private final TileSet mTileSet;
 
 	private final int mZoomMin;
@@ -32,18 +32,18 @@ public class BuildingRenderer extends ExtrusionRenderer {
 	private long mAnimTime;
 	private boolean mShow;
 
-	public BuildingRenderer(TileRenderer tileRenderLayer, int zoomMin, int zoomMax,
+	public BuildingRenderer(TileRenderer tileRenderer, int zoomMin, int zoomMax,
 	        boolean mesh, boolean alpha) {
 		super(mesh, alpha);
 
 		mZoomMax = zoomMax;
 		mZoomMin = zoomMin;
-		mTileLayer = tileRenderLayer;
+		mTileRenderer = tileRenderer;
 		mTileSet = new TileSet();
 	}
 
 	@Override
-	protected boolean setup() {
+	public boolean setup() {
 		mAlpha = 0;
 		return super.setup();
 
@@ -89,10 +89,10 @@ public class BuildingRenderer extends ExtrusionRenderer {
 			return;
 		}
 
-		mTileLayer.getVisibleTiles(mTileSet);
+		mTileRenderer.getVisibleTiles(mTileSet);
 
 		if (mTileSet.cnt == 0) {
-			mTileLayer.releaseTiles(mTileSet);
+			mTileRenderer.releaseTiles(mTileSet);
 			setReady(false);
 			return;
 		}
@@ -177,7 +177,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
 		//log.debug("active tiles: {}", mExtrusionLayerCnt);
 
 		if (activeTiles == 0) {
-			mTileLayer.releaseTiles(mTileSet);
+			mTileRenderer.releaseTiles(mTileSet);
 			setReady(false);
 			return;
 		}
@@ -189,7 +189,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
 		super.render(v);
 
 		/* release lock on tile data */
-		mTileLayer.releaseTiles(mTileSet);
+		mTileRenderer.releaseTiles(mTileSet);
 	}
 
 	private static ExtrusionBuckets getLayer(MapTile t) {
