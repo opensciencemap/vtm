@@ -20,7 +20,8 @@ public class GestureHandler implements OnGestureListener, OnDoubleTapListener {
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
-		return mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
+		//	return mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
+		return false;
 	}
 
 	@Override
@@ -50,7 +51,7 @@ public class GestureHandler implements OnGestureListener, OnDoubleTapListener {
 	/* DoubleTapListener */
 	@Override
 	public boolean onSingleTapConfirmed(MotionEvent e) {
-		return false;
+		return mMap.handleGesture(Gesture.TAP, mMotionEvent.wrap(e));
 	}
 
 	@Override
