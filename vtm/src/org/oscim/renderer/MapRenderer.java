@@ -16,8 +16,6 @@
  */
 package org.oscim.renderer;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
@@ -29,8 +27,6 @@ import org.oscim.map.Map;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.renderer.elements.TextureItem;
 import org.oscim.renderer.elements.TextureLayer;
-import org.oscim.utils.pool.Inlist;
-import org.oscim.utils.pool.Pool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,118 +50,21 @@ public class MapRenderer {
 	public static long frametime;
 	private static boolean rerender;
 
-	/**
-	 * Pool to retrieve temporary native buffer on GL-Thread:
-	 * This pool ensures to not use the same buffer to upload data twice
-	 * within a frame.
-	 * - Contrary to what the OpenGL doc says data seems *not* to be
-	 * always* copied after glBufferData returns...
-	 * - Somehow it does always copy when using Android GL bindings
-	 * but not when using libgdx bindings (LWJGL or AndroidGL20)
-	 */
-	static class BufferPool extends Pool<BufferItem> {
-		private BufferItem mUsedBuffers;
+	private static NativeBufferPool mBufferPool;
 
-		@Override
-		protected BufferItem createItem() {
-			// unused;
-			return null;
-		}
-
-		public BufferItem get(int size) {
-			BufferItem b = mPool;
-
-			if (b == null) {
-				b = new BufferItem();
-			} else {
-				mPool = b.next;
-				b.next = null;
-			}
-			if (b.tmpBufferSize < size)
-				b.growBuffer(size);
-
-			mUsedBuffers = Inlist.push(mUsedBuffers, b);
-
-			return b;
-		}
-
-		public void releaseBuffers() {
-			mUsedBuffers = releaseAll(mUsedBuffers);
-		}
-	}
-
-	private static BufferPool mBufferPool;
-
-	/**
-	 * @param map
-	 *            the MapView
-	 */
 	public MapRenderer(Map map) {
-
 		mMap = map;
-
 		mViewport = new GLViewport();
-		mBufferPool = new BufferPool();
+		mBufferPool = new NativeBufferPool();
 
-		// FIXME should be done in 'destroy' method
-		// clear all previous vbo refs
+		/* FIXME should be done in 'destroy' method
+		 * clear all previous vbo refs */
 		BufferObject.clear();
 		setBackgroundColor(Color.DKGRAY);
 	}
 
 	public static void setBackgroundColor(int color) {
 		mClearColor = GLUtils.colorToFloat(color);
-	}
-
-	static class BufferItem extends Inlist<BufferItem> {
-
-		ShortBuffer shortBuffer;
-		FloatBuffer floatBuffer;
-		IntBuffer intBuffer;
-		int tmpBufferSize;
-
-		void growBuffer(int size) {
-			//log.debug("grow buffer " + size);
-			// 32kb min size
-			if (size < (1 << 15))
-				size = (1 << 15);
-
-			ByteBuffer buf = ByteBuffer
-			    .allocateDirect(size)
-			    .order(ByteOrder.nativeOrder());
-
-			this.floatBuffer = buf.asFloatBuffer();
-			this.shortBuffer = buf.asShortBuffer();
-			this.intBuffer = buf.asIntBuffer();
-			this.tmpBufferSize = size;
-		}
-	}
-
-	/**
-	 * Only use on GL Thread! Get a native ShortBuffer for temporary use.
-	 */
-	public static ShortBuffer getShortBuffer(int size) {
-		BufferItem b = mBufferPool.get(size * 2);
-		b.shortBuffer.clear();
-		return b.shortBuffer;
-	}
-
-	/**
-	 * Only use on GL Thread! Get a native FloatBuffer for temporary use.
-	 */
-	public static FloatBuffer getFloatBuffer(int size) {
-		BufferItem b = mBufferPool.get(size * 4);
-		b.floatBuffer.clear();
-		return b.floatBuffer;
-	}
-
-	/**
-	 * Only use on GL Thread! Get a native IntBuffer for temporary use.
-	 */
-	public static IntBuffer getIntBuffer(int size) {
-		BufferItem b = mBufferPool.get(size * 4);
-		b.intBuffer.clear();
-		return b.intBuffer;
 	}
 
 	public void onDrawFrame() {
@@ -197,8 +96,8 @@ public class MapRenderer {
 		mViewport.setFrom(mMap.viewport());
 
 		if (GLAdapter.debugView) {
-			// modify this to scale only the view, to see
-			// which tiles are rendered
+			/* modify this to scale only the view, to see
+			 * which tiles are rendered */
 			mViewport.mvp.setScale(0.5f, 0.5f, 1);
 			mViewport.viewproj.multiplyLhs(mViewport.mvp);
 			mViewport.proj.multiplyLhs(mViewport.mvp);
@@ -365,4 +264,17 @@ public class MapRenderer {
 	public static void animate() {
 		rerender = true;
 	}
+
+	public static FloatBuffer getFloatBuffer(int size) {
+		return mBufferPool.getFloatBuffer(size);
+	}
+
+	public static ShortBuffer getShortBuffer(int size) {
+		return mBufferPool.getShortBuffer(size);
+	}
+
+	public static IntBuffer getIntBuffer(int size) {
+		return mBufferPool.getIntBuffer(size);
+	}
+
 }
