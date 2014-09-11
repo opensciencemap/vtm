@@ -100,7 +100,7 @@ public abstract class ElementRenderer extends LayerRenderer {
 
 		while (l != null) {
 			if (l.type == POLYGON) {
-				l = PolygonLayer.Renderer.draw(l, v, 1, true, 0);
+				l = PolygonLayer.Renderer.draw(l, v, 1, true);
 				continue;
 			}
 			if (l.type == LINE) {

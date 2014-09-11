@@ -16,16 +16,26 @@
  */
 package org.oscim.renderer.elements;
 
-import org.oscim.backend.GL20;
+import static org.oscim.backend.GL20.GL_ALWAYS;
+import static org.oscim.backend.GL20.GL_EQUAL;
+import static org.oscim.backend.GL20.GL_INVERT;
+import static org.oscim.backend.GL20.GL_KEEP;
+import static org.oscim.backend.GL20.GL_REPLACE;
+import static org.oscim.backend.GL20.GL_SHORT;
+import static org.oscim.backend.GL20.GL_TRIANGLE_FAN;
+import static org.oscim.backend.GL20.GL_TRIANGLE_STRIP;
+import static org.oscim.backend.GL20.GL_ZERO;
+import static org.oscim.utils.FastMath.clamp;
+
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
+import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.AreaStyle;
-import org.oscim.utils.FastMath;
 import org.oscim.utils.math.Interpolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +48,7 @@ public final class PolygonLayer extends RenderElement {
 
 	public final static int CLIP_STENCIL = 1;
 	public final static int CLIP_DEPTH = 2;
+	public final static int CLIP_TEST_DEPTH = 3;
 
 	private static final float S = MapRenderer.COORD_SCALE;
 
@@ -47,7 +58,6 @@ public final class PolygonLayer extends RenderElement {
 
 	PolygonLayer(int layer) {
 		super(RenderElement.POLYGON);
-
 		level = layer;
 	}
 
@@ -105,8 +115,9 @@ public final class PolygonLayer extends RenderElement {
 
 	public static final class Renderer {
 
+		private static final int OPAQUE = 0xff000000;
 		private static final int STENCIL_BITS = 8;
-		private final static int CLIP_BIT = 0x80;
+		public final static int CLIP_BIT = 0x80;
 
 		private static final float FADE_START = 1.3f;
 
@@ -134,15 +145,15 @@ public final class PolygonLayer extends RenderElement {
 			GL.glStencilMask(0x00);
 			//int shader = polyShader;
 
-			Shader s = setShader(polyShader, v, false);
+			Shader s = setShader(polyShader, v.mvp, false);
 
 			for (int c = start; c < end; c++) {
 				AreaStyle a = mAreaFills[c].current();
 
 				if (enableTexture && a.texture != null) {
-					s = setShader(texShader, v, false);
-					float num = FastMath.clamp((Tile.SIZE / a.texture.width) >> 1, 1, Tile.SIZE);
-					float transition = Interpolation.exp5.apply(FastMath.clamp(scale - 1, 0, 1));
+					s = setShader(texShader, v.mvp, false);
+					float num = clamp((Tile.SIZE / a.texture.width) >> 1, 1, Tile.SIZE);
+					float transition = Interpolation.exp5.apply(clamp(scale - 1, 0, 1));
 					GL.glUniform2f(s.uScale, transition, div / num);
 
 					//if (a.texture.alpha);
@@ -184,29 +195,28 @@ public final class PolygonLayer extends RenderElement {
 				/* set stencil buffer mask used to draw this layer
 				 * also check that clip bit is set to avoid overdraw
 				 * of other tiles */
-				GL.glStencilFunc(GL20.GL_EQUAL, 0xff, CLIP_BIT | 1 << c);
+				GL.glStencilFunc(GL_EQUAL, 0xff, CLIP_BIT | 1 << c);
 
 				/* draw tile fill coordinates */
-				GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
+				GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 				/* disable texture shader */
 				if (s != polyShader)
-					s = setShader(polyShader, v, false);
+					s = setShader(polyShader, v.mvp, false);
 			}
 		}
 
-		// current layer to fill (0 - STENCIL_BITS-1)
+		/** current layer to fill (0 - STENCIL_BITS-1) */
 		private static int mCount;
+		/** must clear stencil for next draw */
+		private static boolean mClear;
 
-		private static Shader setShader(Shader shader, GLViewport v, boolean first) {
+		private static Shader setShader(Shader shader, GLMatrix mvp, boolean first) {
 			if (shader.useProgram() || first) {
-
 				GLState.enableVertexArrays(shader.aPos, -1);
-
 				GL.glVertexAttribPointer(shader.aPos, 2,
-				                         GL20.GL_SHORT, false, 0, 0);
-
-				v.mvp.setAsUniform(shader.uMVP);
+				                         GL_SHORT, false, 0, 0);
+				mvp.setAsUniform(shader.uMVP);
 			}
 			return shader;
 		}
@@ -234,37 +244,40 @@ public final class PolygonLayer extends RenderElement {
 		 *         next layer
 		 */
 		public static RenderElement draw(RenderElement renderElement, GLViewport v,
-		        float div, boolean first, int clipMode) {
+		        float div, boolean first) {
 
 			GLState.test(false, true);
 
-			setShader(polyShader, v, first);
+			setShader(polyShader, v.mvp, first);
 
 			int zoom = v.pos.zoomLevel;
 			float scale = (float) v.pos.getZoomScale();
 
 			int cur = mCount;
+			int start = mCount;
 
-			/* reset start when only one layer left in stencil buffer */
-			if (first || cur > 5)
-				cur = 0;
+			/* draw to stencil buffer */
+			GL.glColorMask(false, false, false, false);
 
-			int start = cur;
+			/* op for stencil method polygon drawing */
+			GL.glStencilOp(GL_KEEP, GL_KEEP, GL_INVERT);
+
+			boolean drawn = false;
 
 			RenderElement l = renderElement;
-			for (; l != null && l.type == RenderElement.POLYGON; l = l.next) {
+			for (; l != null && l.type == POLYGON; l = l.next) {
 				PolygonLayer pl = (PolygonLayer) l;
 
 				/* fade out polygon layers (set in RenderTheme) */
 				if (pl.area.fadeScale > 0 && pl.area.fadeScale > zoom)
 					continue;
 
-				if (cur == start) {
-					drawStencilRegion(first, clipMode);
-					first = false;
-
+				if (mClear) {
+					clearStencilRegion();
 					/* op for stencil method polygon drawing */
-					GL.glStencilOp(GL20.GL_KEEP, GL20.GL_KEEP, GL20.GL_INVERT);
+					GL.glStencilOp(GL_KEEP, GL_KEEP, GL_INVERT);
+
+					start = cur = 0;
 				}
 
 				mAreaFills[cur] = pl.area.current();
@@ -272,42 +285,48 @@ public final class PolygonLayer extends RenderElement {
 				/* set stencil mask to draw to */
 				GL.glStencilMask(1 << cur++);
 
-				GL.glDrawArrays(GL20.GL_TRIANGLE_FAN, l.offset, l.numVertices);
+				GL.glDrawArrays(GL_TRIANGLE_FAN, l.offset, l.numVertices);
 
 				/* draw up to 7 layers into stencil buffer */
 				if (cur == STENCIL_BITS - 1) {
+					//log.debug("fill1 {} {}", start, cur);
 					fillPolygons(v, start, cur, zoom, scale, div);
+					drawn = true;
+
+					mClear = true;
 					start = cur = 0;
+
+					if (l.next != null && l.next.type == POLYGON)
+						setShader(polyShader, v.mvp, false);
 				}
 			}
 
-			if (cur > 0)
+			if (cur > 0) {
+				//log.debug("fill2 {} {}", start, cur);
 				fillPolygons(v, start, cur, zoom, scale, div);
+				drawn = true;
+			}
 
-			if (clipMode > 0) {
-				if (first) {
-					drawStencilRegion(first, clipMode);
-					/* disable writes to stencil buffer */
-					GL.glStencilMask(0x00);
-					/* enable writes to color buffer */
-					GL.glColorMask(true, true, true, true);
-				} else {
-					/* set test for clip to tile region */
-					GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
-				}
+			if (!drawn) {
+				/* fillPolygons would re-enable color-mask
+				 * but it's possible that all polygon layers
+				 * were skipped */
+				GL.glColorMask(true, true, true, true);
+				GL.glStencilMask(0x00);
 			}
 
 			mCount = cur;
-
 			return l;
 		}
 
-		public static void clip(GLViewport v) {
-			setShader(polyShader, v, true);
+		public static void clip(GLMatrix mvp, int clipMode) {
+			setShader(polyShader, mvp, true);
 
-			drawStencilRegion(true, 1);
+			drawStencilRegion(clipMode);
+
 			/* disable writes to stencil buffer */
 			GL.glStencilMask(0x00);
+
 			/* enable writes to color buffer */
 			GL.glColorMask(true, true, true, true);
 		}
@@ -319,7 +338,10 @@ public final class PolygonLayer extends RenderElement {
 		 * @param first in the first run the clip region is set based on
 		 *            depth buffer and depth buffer is updated
 		 */
-		static void drawStencilRegion(boolean first, int clipMode) {
+		static void drawStencilRegion(int clipMode) {
+			//log.debug("draw stencil {}", clipMode);
+			mCount = 0;
+			mClear = false;
 
 			/* disable drawing to color buffer */
 			GL.glColorMask(false, false, false, false);
@@ -327,41 +349,60 @@ public final class PolygonLayer extends RenderElement {
 			/* write to all stencil bits */
 			GL.glStencilMask(0xFF);
 
-			if (first) {
-				/* Draw clip-region into depth and stencil buffer.
-				 * This is used for tile line and polygon layers.
-				 * 
-				 * Together with depth test (GL_LESS) this ensures to
-				 * only draw where no other tile has drawn yet. */
+			/* Draw clip-region into depth and stencil buffer.
+			 * This is used for tile line and polygon layers.
+			 * 
+			 * Together with depth test (GL_LESS) this ensures to
+			 * only draw where no other tile has drawn yet. */
 
-				if (clipMode == CLIP_DEPTH) {
-					/* test GL_LESS/GL_ALWAYS to write to depth buffer */
-					GLState.test(true, true);
-					GL.glDepthMask(true);
-				}
+			if (clipMode == CLIP_DEPTH) {
+				/* tests GL_LESS/GL_ALWAYS */
+				GLState.test(true, true);
 
-				/* always pass stencil test and set clip bit */
-				GL.glStencilFunc(GL20.GL_ALWAYS, CLIP_BIT, 0x00);
+				/* write tile region to depth buffer */
+				GL.glDepthMask(true);
 			} else {
-				/* use clip bit from stencil buffer to clear stencil
-				 * 'layer-bits' (0x7f) */
-				GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
+				GLState.test(false, true);
 			}
+
+			/* always pass stencil test and set clip bit */
+			GL.glStencilFunc(GL_ALWAYS, CLIP_BIT, 0x00);
 
 			/* set clip bit (0x80) for draw region */
-			GL.glStencilOp(GL20.GL_KEEP, GL20.GL_KEEP, GL20.GL_REPLACE);
+			GL.glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 			/* draw a quad for the tile region */
-			GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
+			GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-			if (first) {
-				if (clipMode == CLIP_DEPTH) {
-					/* dont modify depth buffer */
-					GL.glDepthMask(false);
-					GLState.test(false, true);
-				}
-				GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
+			if (clipMode == CLIP_DEPTH) {
+				/* dont modify depth buffer */
+				GL.glDepthMask(false);
+				GLState.test(false, true);
 			}
+			GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
+		}
+
+		static void clearStencilRegion() {
+			//log.debug("clear stencil");
+
+			mCount = 0;
+			mClear = false;
+
+			/* disable drawing to color buffer */
+			GL.glColorMask(false, false, false, false);
+
+			/* write to all stencil bits */
+			GL.glStencilMask(0xFF);
+
+			/* use clip bit from stencil buffer to clear stencil
+			 * 'layer-bits' (0x7f) */
+			GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
+
+			/* set clip bit (0x80) for draw region */
+			GL.glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+			/* draw a quad for the tile region */
+			GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		}
 
 		/**
@@ -369,12 +410,11 @@ public final class PolygonLayer extends RenderElement {
 		 * a quad with func 'always' and op 'zero'. Using 'color'
 		 * and 'alpha' to fake a fade effect.
 		 */
-		public static void drawOver(GLViewport v, int color, float alpha) {
+		public static void drawOver(GLMatrix mvp, int color, float alpha) {
 			// TODO true could be avoided when same shader and vbo
-			setShader(polyShader, v, true);
+			setShader(polyShader, mvp, true);
 
 			if (color == 0) {
-				/* disable drawing to framebuffer (will be re-enabled in fill) */
 				GL.glColorMask(false, false, false, false);
 			} else {
 				GLUtils.setColor(polyShader.uColor, color, alpha);
@@ -384,17 +424,19 @@ public final class PolygonLayer extends RenderElement {
 			// TODO always pass stencil test: <-- only if not proxy?
 			//GL.glStencilFunc(GL_ALWAYS, 0x00, 0x00);
 
-			GL.glStencilFunc(GL20.GL_EQUAL, CLIP_BIT, CLIP_BIT);
+			GL.glStencilFunc(GL_EQUAL, CLIP_BIT, CLIP_BIT);
 
 			/* write to all bits */
 			GL.glStencilMask(0xFF);
 
+			// FIXME uneeded probably
+			GLState.test(false, true);
+
 			/* zero out area to draw to */
-			GL.glStencilOp(GL20.GL_KEEP, GL20.GL_KEEP, GL20.GL_ZERO);
+			GL.glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
 
-			GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
+			GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-			// FIXME needed here?
 			if (color == 0)
 				GL.glColorMask(true, true, true, true);
 		}

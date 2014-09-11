@@ -1,8 +1,10 @@
 package org.oscim.layers.tile;
 
+import static org.oscim.backend.GL20.GL_EQUAL;
 import static org.oscim.layers.tile.MapTile.PROXY_GRAMPA;
 import static org.oscim.layers.tile.MapTile.PROXY_PARENT;
 import static org.oscim.layers.tile.MapTile.State.READY;
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import static org.oscim.renderer.elements.RenderElement.BITMAP;
 import static org.oscim.renderer.elements.RenderElement.HAIRLINE;
 import static org.oscim.renderer.elements.RenderElement.LINE;
@@ -33,7 +35,8 @@ public class VectorTileRenderer extends TileRenderer {
 
 	protected int mClipMode;
 
-	protected GLMatrix mViewProj = new GLMatrix();
+	protected GLMatrix mClipProj = new GLMatrix();
+	protected GLMatrix mClipMVP = new GLMatrix();
 
 	/**
 	 * Current number of frames drawn, used to not draw a
@@ -47,10 +50,10 @@ public class VectorTileRenderer extends TileRenderer {
 
 		/* discard depth projection from tilt, depth buffer
 		 * is used for clipping */
-		mViewProj.copy(v.proj);
-		mViewProj.setValue(10, 0);
-		mViewProj.setValue(14, 0);
-		mViewProj.multiplyRhs(v.view);
+		mClipProj.copy(v.proj);
+		mClipProj.setValue(10, 0);
+		mClipProj.setValue(14, 0);
+		mClipProj.multiplyRhs(v.view);
 
 		mClipMode = PolygonLayer.CLIP_STENCIL;
 
@@ -64,11 +67,14 @@ public class VectorTileRenderer extends TileRenderer {
 
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
+			// TODO check if proxies are actually available
 			if (t.isVisible && t.state != READY) {
 				GL.glDepthMask(true);
 				GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
-				/* always write depth for non-proxy tiles */
+				/* always write depth for non-proxy tiles
+				 * this is used in drawProxies pass to not
+				 * draw where tiles were already drawn */
 				GL.glDepthFunc(GL20.GL_ALWAYS);
 
 				mClipMode = PolygonLayer.CLIP_DEPTH;
@@ -152,6 +158,7 @@ public class VectorTileRenderer extends TileRenderer {
 			return;
 
 		layers.vbo.bind();
+
 		MapPosition pos = v.pos;
 		/* place tile relative to map position */
 		int z = tile.zoomLevel;
@@ -163,24 +170,26 @@ public class VectorTileRenderer extends TileRenderer {
 		/* scale relative to zoom-level of this tile */
 		float scale = (float) (pos.scale / (1 << z));
 
-		v.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
-		v.mvp.multiplyLhs(mViewProj);
+		v.mvp.setTransScale(x, y, scale / COORD_SCALE);
+		v.mvp.multiplyLhs(v.viewproj);
 
-		boolean clipped = false;
-		int mode = mClipMode;
+		mClipMVP.setTransScale(x, y, scale / COORD_SCALE);
+		mClipMVP.multiplyLhs(mClipProj);
 
 		RenderElement l = layers.getBaseLayers();
+		PolygonLayer.Renderer.clip(mClipMVP, mClipMode);
 
+		boolean first = true;
 		while (l != null) {
 			if (l.type == POLYGON) {
-				l = PolygonLayer.Renderer.draw(l, v, div, !clipped, mode);
-				clipped = true;
+				l = PolygonLayer.Renderer.draw(l, v, div, first);
+				first = false;
+
+				/* set test for clip to tile region */
+				GL.glStencilFunc(GL_EQUAL, 0x80, 0x80);
+
+				//	clipped = true;
 				continue;
-			}
-			if (!clipped) {
-				/* draw stencil buffer clip region */
-				PolygonLayer.Renderer.draw(null, v, div, true, mode);
-				clipped = true;
 			}
 			if (l.type == LINE) {
 				l = LineLayer.Renderer.draw(l, v, scale, layers);
@@ -206,10 +215,6 @@ public class VectorTileRenderer extends TileRenderer {
 
 		l = layers.getTextureLayers();
 		while (l != null) {
-			if (!clipped) {
-				PolygonLayer.Renderer.draw(null, v, div, true, mode);
-				clipped = true;
-			}
 			if (l.type == BITMAP) {
 				l = BitmapLayer.Renderer.draw(l, v, 1, mLayerAlpha);
 				continue;
@@ -219,12 +224,13 @@ public class VectorTileRenderer extends TileRenderer {
 		}
 
 		if (debugOverdraw) {
+
 			if (tile.zoomLevel > pos.zoomLevel)
-				PolygonLayer.Renderer.drawOver(v, Color.BLUE, 0.5f);
+				PolygonLayer.Renderer.drawOver(mClipMVP, Color.BLUE, 0.5f);
 			else if (tile.zoomLevel < pos.zoomLevel)
-				PolygonLayer.Renderer.drawOver(v, Color.RED, 0.5f);
+				PolygonLayer.Renderer.drawOver(mClipMVP, Color.RED, 0.5f);
 			else
-				PolygonLayer.Renderer.drawOver(v, Color.GREEN, 0.5f);
+				PolygonLayer.Renderer.drawOver(mClipMVP, Color.GREEN, 0.5f);
 
 			return;
 		}
@@ -238,12 +244,12 @@ public class VectorTileRenderer extends TileRenderer {
 		long dTime = MapRenderer.frametime - tile.fadeTime;
 
 		if (mOverdrawColor == 0 || dTime > FADE_TIME) {
-			PolygonLayer.Renderer.drawOver(v, 0, 1);
+			PolygonLayer.Renderer.drawOver(mClipMVP, 0, 1);
 			return;
 		}
 
 		float fade = 1 - dTime / FADE_TIME;
-		PolygonLayer.Renderer.drawOver(v, mOverdrawColor, fade * fade);
+		PolygonLayer.Renderer.drawOver(mClipMVP, mOverdrawColor, fade * fade);
 
 		MapRenderer.animate();
 	}
