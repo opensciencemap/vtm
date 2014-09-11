@@ -20,9 +20,11 @@ import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Canvas;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TextBucket extends TextureBucket {
-	//static final Logger log = LoggerFactory.getLogger(TextureLayer.class);
+	static final Logger log = LoggerFactory.getLogger(TextBucket.class);
 
 	protected final static int LBIT_MASK = 0xfffffffe;
 
@@ -44,6 +46,7 @@ public class TextBucket extends TextureBucket {
 		super(RenderBucket.SYMBOL);
 		mCanvas = CanvasAdapter.newCanvas();
 		fixed = true;
+		level = -1;
 	}
 
 	public void addText(TextItem item) {
@@ -82,7 +85,6 @@ public class TextBucket extends TextureBucket {
 	public void prepare() {
 		short numIndices = 0;
 		short offsetIndices = 0;
-		numVertices = 0;
 
 		int advanceY = 0;
 		float x = 0;

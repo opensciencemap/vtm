@@ -51,7 +51,7 @@ public abstract class TextureBucket extends RenderBucket {
 	}
 
 	/** holds textures and offset in vbo */
-	public TextureItem textures;
+	protected TextureItem textures;
 
 	/** scale mode */
 	public boolean fixed;
@@ -66,14 +66,10 @@ public abstract class TextureBucket extends RenderBucket {
 		compileVertexItems(vboData);
 	}
 
-
 	protected void clear() {
 		while (textures != null)
 			textures = textures.dispose();
-
-		vertexItems.dispose();
-
-		numVertices = 0;
+		super.clear();
 	}
 
 	static class Shader extends GLShader {
@@ -132,7 +128,6 @@ public abstract class TextureBucket extends RenderBucket {
 				               1f / (t.width * COORD_SCALE),
 				               1f / (t.height * COORD_SCALE));
 				t.bind();
-
 				int maxIndices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
 
 				/* draw up to maxVertices in each iteration */
@@ -163,5 +158,9 @@ public abstract class TextureBucket extends RenderBucket {
 
 			return l.next;
 		}
+	}
+
+	public TextureItem getTextures() {
+		return textures;
 	}
 }
