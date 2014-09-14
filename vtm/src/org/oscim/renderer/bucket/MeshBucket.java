@@ -19,6 +19,7 @@ package org.oscim.renderer.bucket;
 import static org.oscim.backend.GL20.GL_SHORT;
 import static org.oscim.backend.GL20.GL_TRIANGLES;
 import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
 import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
@@ -43,31 +44,73 @@ public class MeshBucket extends RenderBucket {
 	public AreaStyle area;
 	public float heightOffset;
 
-	TessJNI tess = new TessJNI(8);
+	private TessJNI tess;
+
+	private int numPoints;
 
 	public MeshBucket(int level) {
 		super(RenderBucket.MESH);
 		this.level = level;
-
 	}
 
-	int pcount;
-
 	public void addMesh(GeometryBuffer geom) {
-		pcount += geom.pointPos;
+		numPoints += geom.pointPos;
+		if (tess == null)
+			tess = new TessJNI(8);
 
 		tess.addContour2D(geom.index, geom.points);
 	}
 
+	public void addConvexMesh(GeometryBuffer geom) {
+		short start = (short) numVertices;
+
+		if (numVertices >= (1 << 16)) {
+			return;
+		}
+
+		vertexItems.add((short) (geom.points[0] * COORD_SCALE),
+		                (short) (geom.points[1] * COORD_SCALE));
+
+		vertexItems.add((short) (geom.points[2] * COORD_SCALE),
+		                (short) (geom.points[3] * COORD_SCALE));
+		short prev = (short) (start + 1);
+
+		numVertices += 2;
+
+		for (int i = 4; i < geom.index[0]; i += 2) {
+
+			vertexItems.add((short) (geom.points[i + 0] * COORD_SCALE),
+			                (short) (geom.points[i + 1] * COORD_SCALE));
+
+			indiceItems.add(start, prev, ++prev);
+			numVertices++;
+
+			numIndices += 3;
+		}
+
+		//numPoints += geom.pointPos;
+		//tess.addContour2D(geom.index, geom.points);
+	}
+
 	protected void prepare() {
+		if (tess == null)
+			return;
+
+		if (numPoints == 0) {
+			tess.dispose();
+			return;
+		}
 		if (!tess.tesselate()) {
-			log.error("error in tessellation");
+			tess.dispose();
+			log.error("error in tessellation {}", numPoints);
 			return;
 		}
 
 		int nelems = tess.getElementCount() * 3;
 
-		for (int offset = 0; offset < nelems;) {
+		//int startVertex = vertexItems.countSize();
+
+		for (int offset = indiceItems.countSize(); offset < nelems;) {
 			int size = nelems - offset;
 			if (size > VertexData.SIZE)
 				size = VertexData.SIZE;
@@ -76,6 +119,9 @@ public class MeshBucket extends RenderBucket {
 
 			tess.getElements(chunk.vertices, offset, size);
 			offset += size;
+
+			//if (startVertex != 0)
+			// FIXME 
 
 			indiceItems.releaseChunk(size);
 		}
@@ -91,16 +137,13 @@ public class MeshBucket extends RenderBucket {
 
 			tess.getVertices(chunk.vertices, offset, size,
 			                 MapRenderer.COORD_SCALE);
-
 			offset += size;
 
 			vertexItems.releaseChunk(size);
 		}
 
-		this.numIndices = nelems;
-		this.numVertices = nverts >> 1;
-
-		//log.debug("{} - {}", nverts, pcount);
+		this.numIndices += nelems;
+		this.numVertices += nverts >> 1;
 
 		tess.dispose();
 	}
@@ -146,17 +189,12 @@ public class MeshBucket extends RenderBucket {
 			for (; l != null && l.type == MESH; l = l.next) {
 				MeshBucket ml = (MeshBucket) l;
 
-				//if (ml.indicesVbo == null)
-				//	continue;
-
 				if (ml.heightOffset != heightOffset) {
 					heightOffset = ml.heightOffset;
 
 					GL.glUniform1f(s.uHeight, heightOffset /
 					        MercatorProjection.groundResolution(v.pos));
 				}
-
-				//ml.indicesVbo.bind();
 
 				if (ml.area == null)
 					GLUtils.setColor(s.uColor, Color.BLUE, 0.4f);
@@ -165,8 +203,6 @@ public class MeshBucket extends RenderBucket {
 				}
 				GL.glVertexAttribPointer(s.aPos, 2, GL_SHORT,
 				                         false, 0, ml.vertexOffset);
-
-				//System.out.println("draw " + ml.numIndices + " / " + ml.indiceOffset);
 
 				GL.glDrawElements(GL_TRIANGLES,
 				                  ml.numIndices,
@@ -185,9 +221,6 @@ public class MeshBucket extends RenderBucket {
 					                  ml.vertexOffset);
 				}
 			}
-
-			//GL.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
 			return l;
 		}
 
