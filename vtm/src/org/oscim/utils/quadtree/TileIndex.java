@@ -23,8 +23,6 @@ public abstract class TileIndex<T extends TreeNode<T, E>, E> {
 
 	protected final T root;
 
-	//protected T minNode;
-
 	protected T pool;
 
 	public TileIndex() {
@@ -47,6 +45,9 @@ public abstract class TileIndex<T extends TreeNode<T, E>, E> {
 	public T add(int x, int y, int z) {
 
 		checkIndex(x, y, 1 << z);
+
+		if (z == 0)
+			return root;
 
 		T leaf = root;
 
@@ -116,8 +117,10 @@ public abstract class TileIndex<T extends TreeNode<T, E>, E> {
 
 		checkIndex(x, y, 1 << z);
 
-		T leaf = root;
+		if (z == 0)
+			return root.item;
 
+		T leaf = root;
 		for (int level = z - 1; level >= 0; level--) {
 
 			int id = ((x >> level) & 1) | ((y >> level) & 1) << 1;
@@ -148,22 +151,19 @@ public abstract class TileIndex<T extends TreeNode<T, E>, E> {
 	}
 
 	public boolean remove(T item) {
-
 		T cur = item;
-		T next;
 
 		while (cur != root) {
 			if (cur == null)
 				throw new IllegalStateException("Item not in index");
 
 			/* keep pointer to parent */
-			next = cur.parent;
+			T next = cur.parent;
 			cur.refs--;
 
 			/* if current node has no children */
 			if (cur.refs == 0) {
 				/* unhook from parent */
-
 				switch (cur.id) {
 					case 0:
 						next.child00 = null;
@@ -190,4 +190,9 @@ public abstract class TileIndex<T extends TreeNode<T, E>, E> {
 
 		return true;
 	}
+
+	public int size() {
+		return root.refs;
+	}
+
 }
