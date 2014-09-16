@@ -58,4 +58,9 @@ public class TreeNode<T extends TreeNode<T, E>, E> {
 		}
 		return null;
 	}
+
+	public boolean isRoot() {
+		return this == parent;
+	}
+
 }

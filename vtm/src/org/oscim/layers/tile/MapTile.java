@@ -16,13 +16,19 @@
  */
 package org.oscim.layers.tile;
 
+import static org.oscim.layers.tile.MapTile.State.DEADBEEF;
+import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
+import static org.oscim.layers.tile.MapTile.State.READY;
+
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.VectorTileLoader;
 import org.oscim.layers.tile.vector.labeling.LabelTileLoaderHook;
 import org.oscim.renderer.elements.ElementLayers;
 import org.oscim.utils.pool.Inlist;
-import org.oscim.utils.quadtree.TreeNode;
 import org.oscim.utils.quadtree.TileIndex;
+import org.oscim.utils.quadtree.TreeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extends Tile class to hold state and data.
@@ -32,8 +38,9 @@ import org.oscim.utils.quadtree.TileIndex;
  */
 public class MapTile extends Tile {
 
-	public static class TileNode extends TreeNode<TileNode, MapTile> {
+	static final Logger log = LoggerFactory.getLogger(MapTile.class);
 
+	public static class TileNode extends TreeNode<TileNode, MapTile> {
 	}
 
 	public static final class State {
@@ -43,49 +50,46 @@ public class MapTile extends Tile {
 		 * STATE_LOADING means the tile is about to be loaded / loading.
 		 * Tile belongs to TileLoader thread.
 		 */
-		public final static byte LOADING = 1 << 0;
+		public final static byte LOADING = (1 << 0);
 
 		/**
 		 * STATE_NEW_DATA: tile data is prepared for rendering.
 		 * While 'locked' it belongs to GL Thread.
 		 */
-		public final static byte NEW_DATA = 1 << 1;
+		public final static byte NEW_DATA = (1 << 1);
 
 		/**
 		 * STATE_READY: tile data is uploaded to GL.
 		 * While 'locked' it belongs to GL Thread.
 		 */
-		public final static byte READY = 1 << 2;
+		public final static byte READY = (1 << 2);
 
 		/**
 		 * STATE_CANCEL: tile is removed from TileManager,
 		 * but may still be processed by TileLoader.
 		 */
-		public final static byte CANCEL = 1 << 3;
+		public final static byte CANCEL = (1 << 3);
+
+		public final static byte DEADBEEF = (1 << 4);
+
 	}
 
-	public static abstract class TileData extends Inlist<TileData> {
-		Object id;
+	public final static int PROXY_CHILD00 = (1 << 0);
+	public final static int PROXY_CHILD01 = (1 << 1);
+	public final static int PROXY_CHILD10 = (1 << 2);
+	public final static int PROXY_CHILD11 = (1 << 3);
+	public final static int PROXY_PARENT = (1 << 4);
+	public final static int PROXY_GRAMPA = (1 << 5);
+	public final static int PROXY_HOLDER = (1 << 6);
 
-		protected abstract void dispose();
-	}
+	/** Tile state */
+	byte state;
 
-	public MapTile(TileNode node, int tileX, int tileY, int zoomLevel) {
-		super(tileX, tileY, (byte) zoomLevel);
-		this.x = (double) tileX / (1 << zoomLevel);
-		this.y = (double) tileY / (1 << zoomLevel);
-		this.node = node;
-	}
-
-	protected byte state;
-
-	public boolean state(int testState) {
-		return (state & testState) != 0;
-	}
-
-	public byte getState() {
-		return state;
-	}
+	/**
+	 * absolute tile coordinates: tileX,Y / Math.pow(2, zoomLevel)
+	 */
+	public final double x;
+	public final double y;
 
 	/**
 	 * List of TileData for rendering. ElementLayers is always at first
@@ -95,10 +99,9 @@ public class MapTile extends Tile {
 	public TileData data;
 
 	/**
-	 * absolute tile coordinates: tileX,Y / Math.pow(2, zoomLevel)
+	 * Pointer to access relatives in {@link TileIndex}
 	 */
-	public final double x;
-	public final double y;
+	public final TileNode node;
 
 	/**
 	 * current distance from map center
@@ -117,40 +120,50 @@ public class MapTile extends Tile {
 
 	/**
 	 * Used to avoid drawing a tile twice per frame
-	 * TODO remove
 	 */
 	int lastDraw = 0;
 
-	/**
-	 * Pointer to access relatives in {@link TileIndex}
-	 */
-	public final TileNode node;
+	/** Keep track which tiles are locked as proxy for this tile */
+	private int proxy = 0;
 
-	public final static int PROXY_CHILD1 = 1 << 0;
-	public final static int PROXY_CHILD2 = 1 << 1;
-	public final static int PROXY_CHILD3 = 1 << 2;
-	public final static int PROXY_CHILD4 = 1 << 3;
-	public final static int PROXY_PARENT = 1 << 4;
-	public final static int PROXY_GRAMPA = 1 << 5;
-	public final static int PROXY_HOLDER = 1 << 6;
+	/** Tile lock counter, synced in TileManager */
+	private int locked = 0;
 
-	/** keep track which tiles are locked as proxy for this tile */
-	byte proxies;
-
-	/** counting the tiles that use this tile as proxy */
-	private byte refs;
-
-	/** up to 255 Threads may lock a tile */
-	private byte locked;
+	private int refs = 0;
 
 	/**
-	 * only used GLRenderer when this tile sits in for another tile.
+	 * Only used GLRenderer when this tile sits in for another tile.
 	 * e.g. x:-1,y:0,z:1 for x:1,y:0
 	 */
 	MapTile holder;
 
+	public static abstract class TileData extends Inlist<TileData> {
+		Object id;
+
+		protected abstract void dispose();
+
+		public TileData next() {
+			return (TileData) next;
+		}
+	}
+
+	public MapTile(TileNode node, int tileX, int tileY, int zoomLevel) {
+		super(tileX, tileY, (byte) zoomLevel);
+		this.x = (double) tileX / (1 << zoomLevel);
+		this.y = (double) tileY / (1 << zoomLevel);
+		this.node = node;
+	}
+
+	public boolean state(int testState) {
+		return (state & testState) != 0;
+	}
+
+	public int getState() {
+		return state;
+	}
+
 	/**
-	 * @return true when tile might be referenced by render thread.
+	 * @return true when tile could be used by another thread.
 	 */
 	boolean isLocked() {
 		return locked > 0 || refs > 0;
@@ -166,24 +179,34 @@ public class MapTile extends Tile {
 		if (locked++ > 0)
 			return;
 
+		MapTile p;
 		/* lock all tiles that could serve as proxy */
-		MapTile p = node.parent.item;
-		if (p != null && (p.state != State.NONE)) {
-			proxies |= PROXY_PARENT;
-			p.refs++;
-		}
-
-		p = node.parent.parent.item;
-		if (p != null && (p.state != State.NONE)) {
-			proxies |= PROXY_GRAMPA;
-			p.refs++;
-		}
-
-		for (int j = 0; j < 4; j++) {
-			if ((p = node.child(j)) == null || p.state == 0)
+		for (int i = 0; i < 4; i++) {
+			p = node.child(i);
+			if (p == null)
 				continue;
 
-			proxies |= (1 << j);
+			if (p.state(READY | NEW_DATA)) {
+				proxy |= (1 << i);
+				p.refs++;
+			}
+		}
+
+		if (node.isRoot())
+			return;
+
+		p = node.parent();
+		if (p != null && p.state(READY | NEW_DATA)) {
+			proxy |= PROXY_PARENT;
+			p.refs++;
+		}
+
+		if (node.parent.isRoot())
+			return;
+
+		p = node.parent.parent();
+		if (p != null && p.state(READY | NEW_DATA)) {
+			proxy |= PROXY_GRAMPA;
 			p.refs++;
 		}
 	}
@@ -192,25 +215,28 @@ public class MapTile extends Tile {
 	 * Unlocks this tile when it cannot be used by render-thread.
 	 */
 	void unlock() {
-		if (--locked > 0 || proxies == 0)
+		if (--locked > 0)
 			return;
 
-		if ((proxies & PROXY_PARENT) != 0)
-			node.parent.item.refs--;
+		TileNode parent = node.parent;
+		if ((proxy & PROXY_PARENT) != 0)
+			parent.item.refs--;
 
-		if ((proxies & PROXY_GRAMPA) != 0)
-			node.parent.parent.item.refs--;
-
+		if ((proxy & PROXY_GRAMPA) != 0) {
+			parent = parent.parent;
+			parent.item.refs--;
+		}
 		for (int i = 0; i < 4; i++) {
-			if ((proxies & (1 << i)) != 0)
+			if ((proxy & (1 << i)) != 0)
 				node.child(i).refs--;
 		}
-		proxies = 0;
+
+		/* removed all proxy references for this tile */
+		proxy = 0;
 	}
 
 	/**
-	 * @return true if tile is loading, has new data or is ready
-	 *         for rendering
+	 * @return true if tile is state is not NONE.
 	 */
 	public boolean isActive() {
 		return state > State.NONE;
@@ -221,7 +247,7 @@ public class MapTile extends Tile {
 	 * through this.node.*
 	 */
 	public boolean hasProxy(int proxy) {
-		return (proxies & proxy) != 0;
+		return (this.proxy & proxy) != 0;
 	}
 
 	/**
@@ -233,9 +259,7 @@ public class MapTile extends Tile {
 			data.dispose();
 			data = data.next;
 		}
-
-		// still needed?
-		state = State.NONE;
+		state = DEADBEEF;
 	}
 
 	/**
@@ -257,7 +281,7 @@ public class MapTile extends Tile {
 	}
 
 	public void addData(Object id, TileData td) {
-		// keeping ElementLayers at position 0!
+		/* keeping ElementLayers at position 0! */
 		td.id = id;
 		if (data != null) {
 			td.next = data.next;
@@ -267,7 +291,80 @@ public class MapTile extends Tile {
 		}
 	}
 
+	public TileData removeData(Object id) {
+		if (data == null)
+			return null;
+
+		TileData prev = data;
+		if (data.id == id) {
+			data = data.next;
+			return prev;
+		}
+		for (TileData d = data.next; d != null; d = d.next) {
+			if (d.id == id) {
+				prev.next = d.next;
+				return d;
+			}
+			prev = d;
+		}
+		return null;
+	}
+
 	public static int depthOffset(MapTile t) {
 		return ((t.tileX % 4) + (t.tileY % 4 * 4) + 1);
+	}
+
+	public MapTile getProxyChild(int id, byte state) {
+		if ((proxy & (1 << id)) == 0)
+			return null;
+
+		MapTile child = node.child(id);
+		if (child == null || (child.state & state) == 0)
+			return null;
+
+		return child;
+	}
+
+	public MapTile getParent() {
+		if ((proxy & PROXY_PARENT) == 0)
+			return null;
+
+		return node.parent.item;
+	}
+
+	public MapTile getProxy(int proxy, byte state) {
+
+		if ((this.proxy & proxy) == 0)
+			return null;
+
+		MapTile p = null;
+		switch (proxy) {
+			case PROXY_CHILD00:
+				p = node.child(0);
+				break;
+			case PROXY_CHILD01:
+				p = node.child(1);
+				break;
+			case PROXY_CHILD10:
+				p = node.child(2);
+				break;
+			case PROXY_CHILD11:
+				p = node.child(3);
+				break;
+			case PROXY_PARENT:
+				p = node.parent();
+				break;
+			case PROXY_GRAMPA:
+				p = node.parent.parent();
+				break;
+			case PROXY_HOLDER:
+				p = holder;
+				break;
+		}
+
+		if (p == null || (p.state & state) == 0)
+			return null;
+
+		return p;
 	}
 }

@@ -1,5 +1,7 @@
 package org.oscim.layers.tile;
 
+import static org.oscim.layers.tile.MapTile.PROXY_GRAMPA;
+import static org.oscim.layers.tile.MapTile.PROXY_PARENT;
 import static org.oscim.layers.tile.MapTile.State.READY;
 import static org.oscim.renderer.elements.RenderElement.BITMAP;
 import static org.oscim.renderer.elements.RenderElement.LINE;
@@ -11,7 +13,6 @@ import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.MapTile.TileNode;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
@@ -32,6 +33,12 @@ public class VectorTileRenderer extends TileRenderer {
 
 	protected GLMatrix mViewProj = new GLMatrix();
 
+	/**
+	 * Current number of frames drawn, used to not draw a
+	 * tile twice per frame.
+	 */
+	protected int mDrawSerial;
+
 	@Override
 	protected synchronized void update(GLViewport v) {
 		super.update(v);
@@ -45,11 +52,13 @@ public class VectorTileRenderer extends TileRenderer {
 
 		mClipMode = PolygonLayer.CLIP_STENCIL;
 
-		/* */
 		int tileCnt = mDrawTiles.cnt + mProxyTileCnt;
+
 		MapTile[] tiles = mDrawTiles.tiles;
 
 		boolean drawProxies = false;
+
+		mDrawSerial++;
 
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
@@ -71,47 +80,60 @@ public class VectorTileRenderer extends TileRenderer {
 			MapTile t = tiles[i];
 			if (t.isVisible && t.state == READY)
 				drawTile(t, v, 0);
-
 		}
 
 		/* draw parent or children as proxy for visibile tiles that dont
 		 * have data yet. Proxies are clipped to the region where nothing
 		 * was drawn to depth buffer.
 		 * TODO draw proxies for placeholder */
-		if (drawProxies) {
-			/* only draw where no other tile is drawn */
-			GL.glDepthFunc(GL20.GL_LESS);
+		if (!drawProxies)
+			return;
 
-			/* draw child or parent proxies */
-			boolean preferParent = (v.pos.getZoomScale() < 1.5)
-			        || (v.pos.zoomLevel < tiles[0].zoomLevel);
+		/* only draw where no other tile is drawn */
+		GL.glDepthFunc(GL20.GL_LESS);
 
+		/* draw child or parent proxies */
+		boolean preferParent = (v.pos.getZoomScale() < 1.5)
+		        || (v.pos.zoomLevel < tiles[0].zoomLevel);
+
+		if (preferParent) {
 			for (int i = 0; i < tileCnt; i++) {
 				MapTile t = tiles[i];
-				if (t.isVisible
-				        && (t.state != READY)
-				        && (t.holder == null)) {
-					drawProxyTile(t, v, true, preferParent);
-				}
+				if ((!t.isVisible) || (t.lastDraw == mDrawSerial))
+					continue;
+				if (!drawParent(t, v))
+					drawChildren(t, v);
 			}
-
-			/* draw grandparents */
+		} else {
 			for (int i = 0; i < tileCnt; i++) {
 				MapTile t = tiles[i];
-				if (t.isVisible
-				        && (t.state != READY)
-				        && (t.holder == null))
-					drawProxyTile(t, v, false, false);
+				if ((!t.isVisible) || (t.lastDraw == mDrawSerial))
+					continue;
+				drawChildren(t, v);
 			}
-			GL.glDepthMask(false);
+			for (int i = 0; i < tileCnt; i++) {
+				MapTile t = tiles[i];
+				if ((!t.isVisible) || (t.lastDraw == mDrawSerial))
+					continue;
+				drawParent(t, v);
+			}
 		}
 
-		/* make sure stencil buffer write is disabled */
-		GL.glStencilMask(0x00);
+		/* draw grandparents */
+		for (int i = 0; i < tileCnt; i++) {
+			MapTile t = tiles[i];
+			if ((!t.isVisible) || (t.lastDraw == mDrawSerial))
+				continue;
+			drawGrandParent(t, v);
+		}
+		GL.glDepthMask(false);
 
+		/* make sure stencil buffer write is disabled */
+		//GL.glStencilMask(0x00);
 	}
 
 	private void drawTile(MapTile tile, GLViewport v, int proxyLevel) {
+
 		/* ensure to draw parents only once */
 		if (tile.lastDraw == mDrawSerial)
 			return;
@@ -119,12 +141,11 @@ public class VectorTileRenderer extends TileRenderer {
 		tile.lastDraw = mDrawSerial;
 
 		/* use holder proxy when it is set */
-		MapTile t = tile.holder == null ? tile : tile.holder;
-
-		ElementLayers layers = t.getLayers();
+		ElementLayers layers = (tile.holder == null)
+		        ? tile.getLayers()
+		        : tile.holder.getLayers();
 
 		if (layers == null || layers.vbo == null)
-			//throw new IllegalStateException(t + "no data " + (t.layers == null));
 			return;
 
 		layers.vbo.bind();
@@ -181,19 +202,16 @@ public class VectorTileRenderer extends TileRenderer {
 				clipped = true;
 			}
 			if (l.type == BITMAP) {
-				l = BitmapLayer.Renderer.draw(l, v, 1, mRenderAlpha);
+				l = BitmapLayer.Renderer.draw(l, v, 1, mLayerAlpha);
 				continue;
 			}
 			l = l.next;
 		}
 
-		if (t.fadeTime == 0)
-			t.fadeTime = getMinFade(t, proxyLevel);
-
 		if (debugOverdraw) {
-			if (t.zoomLevel > pos.zoomLevel)
+			if (tile.zoomLevel > pos.zoomLevel)
 				PolygonLayer.Renderer.drawOver(v, Color.BLUE, 0.5f);
-			else if (t.zoomLevel < pos.zoomLevel)
+			else if (tile.zoomLevel < pos.zoomLevel)
 				PolygonLayer.Renderer.drawOver(v, Color.RED, 0.5f);
 			else
 				PolygonLayer.Renderer.drawOver(v, Color.GREEN, 0.5f);
@@ -201,92 +219,57 @@ public class VectorTileRenderer extends TileRenderer {
 			return;
 		}
 
-		if (mRenderOverdraw != 0 && MapRenderer.frametime - t.fadeTime < FADE_TIME) {
-			float fade = 1 - (MapRenderer.frametime - t.fadeTime) / FADE_TIME;
-			PolygonLayer.Renderer.drawOver(v, mRenderOverdraw, fade * fade);
-			MapRenderer.animate();
-		} else {
-			PolygonLayer.Renderer.drawOver(v, 0, 1);
+		if (tile.fadeTime == 0) {
+			/* need to use original tile to get the fade */
+			MapTile t = (tile.holder == null) ? tile : tile.holder;
+			tile.fadeTime = getMinFade(t, proxyLevel);
 		}
+
+		long dTime = MapRenderer.frametime - tile.fadeTime;
+
+		if (mOverdrawColor == 0 || dTime > FADE_TIME) {
+			PolygonLayer.Renderer.drawOver(v, 0, 1);
+			return;
+		}
+
+		float fade = 1 - dTime / FADE_TIME;
+		PolygonLayer.Renderer.drawOver(v, mOverdrawColor, fade * fade);
+
+		MapRenderer.animate();
 	}
 
-	private int drawProxyChild(MapTile tile, GLViewport v) {
+	protected boolean drawChildren(MapTile t, GLViewport v) {
 		int drawn = 0;
 		for (int i = 0; i < 4; i++) {
-			if ((tile.proxies & 1 << i) == 0)
+			MapTile c = t.getProxyChild(i, READY);
+			if (c == null)
 				continue;
 
-			MapTile c = tile.node.child(i);
-
-			if (c.state == READY) {
-				drawTile(c, v, 1);
-				drawn++;
-			}
+			drawTile(c, v, 1);
+			drawn++;
 		}
-		return drawn;
+		if (drawn == 4) {
+			t.lastDraw = mDrawSerial;
+			return true;
+		}
+		return false;
 	}
 
-	protected void drawProxyTile(MapTile tile, GLViewport v,
-	        boolean parent, boolean preferParent) {
+	protected boolean drawParent(MapTile t, GLViewport v) {
+		MapTile proxy = t.getProxy(PROXY_PARENT, READY);
+		if (proxy != null) {
+			drawTile(proxy, v, -1);
+			t.lastDraw = mDrawSerial;
+			return true;
+		}
+		return false;
+	}
 
-		TileNode r = tile.node;
-		MapTile proxy;
-
-		if (!preferParent) {
-			/* prefer drawing children */
-			if (drawProxyChild(tile, v) == 4)
-				return;
-
-			if (parent) {
-				/* draw parent proxy */
-				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.item;
-					if (proxy.state == READY) {
-						//log.debug("1. draw parent " + proxy);
-						drawTile(proxy, v, -1);
-					}
-				}
-			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
-				/* check if parent was already drawn */
-				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.item;
-					if (proxy.state == READY)
-						return;
-				}
-
-				proxy = r.parent.parent.item;
-				if (proxy.state == READY)
-					drawTile(proxy, v, -2);
-			}
-		} else {
-			/* prefer drawing parent */
-			if (parent) {
-				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.item;
-					if (proxy != null && proxy.state == READY) {
-						//log.debug("2. draw parent " + proxy);
-						drawTile(proxy, v, -1);
-						return;
-
-					}
-				}
-				drawProxyChild(tile, v);
-
-			} else if ((tile.proxies & MapTile.PROXY_GRAMPA) != 0) {
-				/* check if parent was already drawn */
-				if ((tile.proxies & MapTile.PROXY_PARENT) != 0) {
-					proxy = r.parent.item;
-					if (proxy.state == READY)
-						return;
-				}
-				/* this will do nothing, just to check */
-				if (drawProxyChild(tile, v) > 0)
-					return;
-
-				proxy = r.parent.parent.item;
-				if (proxy.state == READY)
-					drawTile(proxy, v, -2);
-			}
+	protected void drawGrandParent(MapTile t, GLViewport v) {
+		MapTile proxy = t.getProxy(PROXY_GRAMPA, READY);
+		if (proxy != null) {
+			drawTile(proxy, v, -2);
+			t.lastDraw = mDrawSerial;
 		}
 	}
 }
