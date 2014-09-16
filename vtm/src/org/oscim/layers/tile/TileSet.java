@@ -52,17 +52,20 @@ public final class TileSet {
 	 * Call releaseTiles() when tiles are not needed any longer.
 	 */
 	public void lockTiles() {
-		for (int i = 0; i < cnt; i++)
-			tiles[i].lock();
+		synchronized (TileSet.class) {
+			for (int i = 0; i < cnt; i++)
+				tiles[i].lock();
+		}
 	}
 
 	/**
 	 * Release locked tiles.
 	 */
 	public void releaseTiles() {
-		for (int i = 0; i < cnt; i++)
-			tiles[i].unlock();
-
+		synchronized (TileSet.class) {
+			for (int i = 0; i < cnt; i++)
+				tiles[i].unlock();
+		}
 		Arrays.fill(tiles, null);
 		cnt = 0;
 		serial = 0;
@@ -73,10 +76,10 @@ public final class TileSet {
 	 * new tiles.
 	 */
 	public void setTiles(TileSet source) {
-		//lock tiles (and their proxies) to not be removed from cache
+		/* lock tiles (and their proxies) to not be removed from cache */
 		source.lockTiles();
 
-		// unlock previous tiles
+		/* unlock previous tiles */
 		releaseTiles();
 
 		if (source.tiles.length != tiles.length) {
