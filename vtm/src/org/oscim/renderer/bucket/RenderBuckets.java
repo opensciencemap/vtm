@@ -273,6 +273,9 @@ public class RenderBuckets extends TileData {
 	}
 
 	public void setFrom(RenderBuckets buckets) {
+		if (buckets == this)
+			throw new IllegalArgumentException("Cannot set from oneself!");
+
 		set(buckets.buckets);
 
 		mCurBucket = null;
@@ -288,6 +291,15 @@ public class RenderBuckets extends TileData {
 
 		vbo = BufferObject.release(vbo);
 		ibo = BufferObject.release(ibo);
+	}
+
+	/** cleanup only when buckets are not used by tile or bucket anymore! */
+	public void clearBuckets() {
+		/* NB: set null calls clear() on each bucket! */
+		for (RenderBucket l = buckets; l != null; l = l.next)
+			l.clear();
+
+		mCurBucket = null;
 	}
 
 	@Override
