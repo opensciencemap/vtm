@@ -196,6 +196,9 @@ public class RenderBuckets extends TileData {
 			/* insert new bucket at start */
 			b = null;
 		} else {
+			if (mCurBucket != null && level > mCurBucket.level)
+				b = mCurBucket;
+
 			while (true) {
 				/* found bucket */
 				if (b.level == level) {
