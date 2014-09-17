@@ -77,11 +77,18 @@ public abstract class BucketRenderer extends LayerRenderer {
 
 		float div = (float) (v.pos.scale / layerPos.scale);
 
-		setMatrix(v, true);
+		boolean project = true;
+
+		setMatrix(v, project);
 
 		for (RenderBucket b = buckets.get(); b != null;) {
 
 			buckets.bind();
+
+			if (!project && b.type != SYMBOL) {
+				project = true;
+				setMatrix(v, project);
+			}
 
 			switch (b.type) {
 				case POLYGON:
@@ -103,6 +110,10 @@ public abstract class BucketRenderer extends LayerRenderer {
 					b = BitmapBucket.Renderer.draw(b, v, 1, 1);
 					break;
 				case SYMBOL:
+					if (project) {
+						project = false;
+						setMatrix(v, project);
+					}
 					b = TextureBucket.Renderer.draw(buckets, b, v, div);
 					break;
 				default:
@@ -135,6 +146,14 @@ public abstract class BucketRenderer extends LayerRenderer {
 	 *            if true apply view- and projection, or just view otherwise.
 	 */
 	protected void setMatrix(GLViewport v, boolean project) {
+		setMatrix(v, project, MapRenderer.COORD_SCALE);
+	}
+
+	protected void setMatrix(GLViewport v, boolean project, float coordScale) {
+		setMatrix(v.mvp, v, project, coordScale);
+	}
+
+	protected void setMatrix(GLMatrix mvp, GLViewport v, boolean project, float coordScale) {
 		MapPosition oPos = mMapPosition;
 
 		double tileScale = Tile.SIZE * v.pos.scale;
@@ -150,12 +169,11 @@ public abstract class BucketRenderer extends LayerRenderer {
 				x -= 1.0;
 		}
 
-		v.mvp.setTransScale((float) (x * tileScale),
-		                    (float) (y * tileScale),
-		                    (float) (v.pos.scale / oPos.scale)
-		                            / MapRenderer.COORD_SCALE);
+		mvp.setTransScale((float) (x * tileScale),
+		                  (float) (y * tileScale),
+		                  (float) (v.pos.scale / oPos.scale) / coordScale);
 
-		v.mvp.multiplyLhs(project ? v.viewproj : v.view);
+		mvp.multiplyLhs(project ? v.viewproj : v.view);
 	}
 
 	/**
