@@ -126,6 +126,10 @@ public class GLMatrix {
 		vec[2] = z;
 	}
 
+	public void prj3D(float[] vec, int offset, int cnt) {
+		throw new RuntimeException("unimplemented");
+	}
+
 	public void prj2D(float[] vec, int offset, int cnt) {
 		offset <<= 1;
 		cnt <<= 1;
@@ -135,6 +139,33 @@ public class GLMatrix {
 			float ox = (vec[x] * val[M00] + vec[y] * val[M01] + val[M03]) * inv_w;
 			vec[y] = (vec[x] * val[M10] + vec[y] * val[M11] + val[M13]) * inv_w;
 			vec[x] = ox;
+		}
+	}
+
+	/**
+	 * Project Vectors with Matrix
+	 * 
+	 * 
+	 * @param vec2 Vector to project
+	 */
+	public void prj2D(float[] src, int src_offset, float[] dst, int dst_offset, int length) {
+		if (src == null || src_offset < 0 || length + src_offset * 2 > src.length)
+			throw new IllegalArgumentException(INVALID_INPUT);
+
+		int x = (src_offset << 1);
+		int y = x + 1;
+
+		int end = x + (length << 1);
+
+		dst_offset <<= 1;
+
+		while (x < end) {
+			float inv_w = 1.0f / (src[x] * val[M30] + src[y] * val[M31] + val[M33]);
+
+			dst[dst_offset++] = (src[x] * val[M00] + src[y] * val[M01] + val[M03]) * inv_w;
+			dst[dst_offset++] = (src[x] * val[M10] + src[y] * val[M11] + val[M13]) * inv_w;
+			x += 2;
+			y += 2;
 		}
 	}
 

@@ -88,11 +88,11 @@ public class GLMatrix {
 	 * 
 	 * @param vec3 Vector to project
 	 */
-	public void prj3D(float[] vec3, int start, int cnt) {
-		if (vec3 == null || vec3.length / (start + cnt) < 1)
+	public void prj3D(float[] vec3, int offset, int length) {
+		if (vec3 == null || vec3.length / (offset + length) < 1)
 			throw new IllegalArgumentException(INVALID_INPUT);
 
-		prj3D(pointer, vec3, start, cnt);
+		prj3D(pointer, vec3, offset, length);
 	}
 
 	/**
@@ -100,11 +100,24 @@ public class GLMatrix {
 	 * 
 	 * @param vec2 Vector to project
 	 */
-	public void prj2D(float[] vec2, int start, int cnt) {
-		if (vec2 == null || vec2.length % 2 == 1)
+	public void prj2D(float[] vec2, int offset, int length) {
+		if (vec2 == null || offset < 0 || (length + offset) * 2 > vec2.length)
 			throw new IllegalArgumentException(INVALID_INPUT);
 
-		prj2D(pointer, vec2, start, cnt);
+		prj2D(pointer, vec2, offset, length);
+	}
+
+	/**
+	 * Project Vectors with Matrix
+	 * 
+	 * 
+	 * @param vec2 Vector to project
+	 */
+	public void prj2D(float[] src, int src_offset, float[] dst, int dst_offset, int length) {
+		if (src == null || src_offset < 0 || length + src_offset * 2 > src.length)
+			throw new IllegalArgumentException(INVALID_INPUT);
+
+		prj2D2(pointer, src, src_offset, dst, dst_offset, length);
 	}
 
 	/**
@@ -238,6 +251,53 @@ public class GLMatrix {
 		if (pointer != 0)
 			delete(pointer);
 	}
+
+	private native static long alloc();
+
+	private native static void delete(long self);
+
+	private native static void set(long self, float[] m);
+
+	private native static void copy(long self, long other);
+
+	private native static void identity(long self);
+
+	private native static void get(long self, float[] m);
+
+	private native static void mul(long self, long lhs_ptr);
+
+	private native static void smul(long self, long rhs_ptr, long lhs_ptr);
+
+	private native static void smulrhs(long self, long rhs_ptr);
+
+	private native static void smullhs(long self, long lhs_ptr);
+
+	private native static void strans(long self, long rhs_ptr);
+
+	private native static void prj(long self, float[] vec3);
+
+	private native static void prj3D(long self, float[] vec3, int start, int cnt);
+
+	private native static void prj2D(long self, float[] vec2, int start, int cnt);
+
+	private native static void prj2D2(long self, float[] vec2, int src_offset,
+	        float[] dst_vec, int dst_offset, int length);
+
+	private native static void setRotation(long self, float a, float x, float y, float z);
+
+	private native static void setScale(long self, float x, float y, float z);
+
+	private native static void setTranslation(long self, float x, float y, float z);
+
+	private native static void setTransScale(long self, float tx, float ty, float scale);
+
+	//private native static void setAsUniform(long self, int handle);
+
+	private native static void setValueAt(long self, int pos, float value);
+
+	private native static void addDepthOffset(long self, int delta);
+
+	private native static ByteBuffer getBuffer(long self);
 
 	/* Copyright (C) 2007 The Android Open Source Project
 	 * 
@@ -436,48 +496,4 @@ public class GLMatrix {
 
 		return true;
 	}
-
-	private native static long alloc();
-
-	private native static void delete(long self);
-
-	private native static void set(long self, float[] m);
-
-	private native static void copy(long self, long other);
-
-	private native static void identity(long self);
-
-	private native static void get(long self, float[] m);
-
-	private native static void mul(long self, long lhs_ptr);
-
-	private native static void smul(long self, long rhs_ptr, long lhs_ptr);
-
-	private native static void smulrhs(long self, long rhs_ptr);
-
-	private native static void smullhs(long self, long lhs_ptr);
-
-	private native static void strans(long self, long rhs_ptr);
-
-	private native static void prj(long self, float[] vec3);
-
-	private native static void prj3D(long self, float[] vec3, int start, int cnt);
-
-	private native static void prj2D(long self, float[] vec2, int start, int cnt);
-
-	private native static void setRotation(long self, float a, float x, float y, float z);
-
-	private native static void setScale(long self, float x, float y, float z);
-
-	private native static void setTranslation(long self, float x, float y, float z);
-
-	private native static void setTransScale(long self, float tx, float ty, float scale);
-
-	//private native static void setAsUniform(long self, int handle);
-
-	private native static void setValueAt(long self, int pos, float value);
-
-	private native static void addDepthOffset(long self, int delta);
-
-	private native static ByteBuffer getBuffer(long self);
 }

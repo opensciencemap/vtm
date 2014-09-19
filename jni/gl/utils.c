@@ -98,7 +98,7 @@ static inline void
 matrix4_proj(float* mat, float* vec);
 
 static inline void
-matrix4_proj2D(float* mat, float* vec);
+matrix4_proj2D(float* mat, float* vec, float *out);
 
 jlong JNI(alloc)(JNIEnv *env, jclass* clazz)
 {
@@ -273,12 +273,31 @@ void JNI(prj2D)(JNIEnv* env, jclass* clazz, jlong ptr, jfloatArray obj_vec, int 
   float* m = CAST(ptr);
   float* vec = (float*) (*env)->GetPrimitiveArrayCritical(env, obj_vec, 0);
 
-  int length = cnt * 2;
+  offset *= 2;
 
-  for (int i = offset * 2; i < length; i += 2)
-    matrix4_proj2D(m, (vec + i));
+  for (int end = offset + cnt * 2; offset < end; offset += 2)
+    matrix4_proj2D(m, (vec + offset), (vec + offset));
 
   (*env)->ReleasePrimitiveArrayCritical(env, obj_vec, vec, 0);
+}
+
+void JNI(prj2D2)(JNIEnv* env, jclass* clazz, jlong ptr,
+    jfloatArray obj_src_vec, int src_offset,
+    jfloatArray obj_dst_vec, int dst_offset, int cnt)
+{
+  float* m = CAST(ptr);
+  float* src = (float*) (*env)->GetPrimitiveArrayCritical(env, obj_src_vec, 0);
+  float* dst = (float*) (*env)->GetPrimitiveArrayCritical(env, obj_dst_vec, 0);
+
+  int off_src = src_offset * 2;
+  int off_dst = dst_offset * 2;
+
+
+  for (int end = off_src + cnt * 2; off_src < end; off_src += 2, off_dst += 2)
+    matrix4_proj2D(m, (src + off_src), (dst + off_dst));
+
+  (*env)->ReleasePrimitiveArrayCritical(env, obj_dst_vec, dst, 0);
+  (*env)->ReleasePrimitiveArrayCritical(env, obj_src_vec, src, 0);
 }
 
 static float someRandomEpsilon = 1.0f / (1 << 11);
@@ -519,13 +538,13 @@ matrix4_proj(float* mat, float* vec)
 }
 
 static inline void
-matrix4_proj2D(float* mat, float* vec)
+matrix4_proj2D(float* mat, float* vec, float *out)
 {
 
   float inv_w = 1.0f / (vec[0] * mat[M30] + vec[1] * mat[M31] + mat[M33]);
   float x = (vec[0] * mat[M00] + vec[1] * mat[M01] + mat[M03]) * inv_w;
   float y = (vec[0] * mat[M10] + vec[1] * mat[M11] + mat[M13]) * inv_w;
 
-  vec[0] = x;
-  vec[1] = y;
+  out[0] = x;
+  out[1] = y;
 }
