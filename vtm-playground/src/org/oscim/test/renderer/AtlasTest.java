@@ -56,7 +56,7 @@ public class AtlasTest extends GdxMap {
 
 			TextBucket tl = new TextBucket();
 			TextStyle t = new TextBuilder().setFontSize(20).setColor(Color.BLACK).build();
-			buckets.setTextureBuckets(tl);
+			buckets.set(tl);
 
 			float[] points = new float[10];
 
@@ -101,7 +101,6 @@ public class AtlasTest extends GdxMap {
 
 				TextItem ti = TextItem.pool.get();
 				ti.set(r.x + r.w / 2, r.y + r.h / 2, "" + i, t);
-
 				ti.x1 = 0;
 				ti.y1 = 1; // (short) (size / 2);
 				ti.x2 = 1; // (short) size;
@@ -131,7 +130,7 @@ public class AtlasTest extends GdxMap {
 		boolean initial = true;
 
 		@Override
-		protected void update(GLViewport v) {
+		public void update(GLViewport v) {
 
 			if (initial) {
 				mMapPosition.copy(v.pos);

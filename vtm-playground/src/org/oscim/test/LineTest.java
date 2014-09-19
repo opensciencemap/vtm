@@ -42,12 +42,12 @@ public class LineTest extends GdxMap {
 			boolean init;
 
 			LineBucket ll = buckets.addLineBucket(0,
-			                                   new LineStyle(Color.fade(Color.CYAN, 0.5f), 1.5f));
+			                                      new LineStyle(Color.fade(Color.CYAN, 0.5f), 1.5f));
 
 			GeometryBuffer g = new GeometryBuffer(10, 1);
 
 			@Override
-			protected void update(GLViewport v) {
+			public void update(GLViewport v) {
 				if (!init) {
 					mMapPosition.copy(v.pos);
 					init = true;
@@ -82,13 +82,13 @@ public class LineTest extends GdxMap {
 				buckets.clear();
 				buckets.set(ll);
 				g.clear();
-				for (int i = 0; i < 60; i++) {
-					g.startLine();
-					g.addPoint(-1, 0);
-					g.addPoint(0, 0);
-					g.addPoint((float) Math.cos(Math.toRadians(angle)),
-					           (float) Math.sin(Math.toRadians(angle)));
-				}
+				//for (int i = 0; i < 60; i++) {
+				g.startLine();
+				g.addPoint(-1, 0);
+				g.addPoint(0, 0);
+				g.addPoint((float) Math.cos(Math.toRadians(angle)),
+				           (float) Math.sin(Math.toRadians(angle)));
+				//}
 
 				g.scale(100, 100);
 

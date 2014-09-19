@@ -54,13 +54,13 @@ public class HairLineTest extends GdxMap {
 		    .build());
 
 		@Override
-		protected boolean setup() {
+		public boolean setup() {
 			//ll.roundCap = true;
 			return super.setup();
 		}
 
 		@Override
-		protected void update(GLViewport v) {
+		public void update(GLViewport v) {
 			if (!init) {
 				mMapPosition.copy(v.pos);
 				init = true;

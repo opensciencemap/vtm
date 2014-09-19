@@ -61,7 +61,7 @@ public class CustomRenderer extends LayerRenderer {
 
 	// ---------- everything below runs in GLRender Thread ----------
 	@Override
-	protected void update(GLViewport v) {
+	public void update(GLViewport v) {
 		if (!mInitialized) {
 			if (!init())
 				return;
@@ -86,7 +86,7 @@ public class CustomRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected void render(GLViewport v) {
+	public void render(GLViewport v) {
 
 		// Use the program object
 		GLState.useProgram(mProgramObject);

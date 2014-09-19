@@ -7,8 +7,8 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.GenericLayer;
-import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.BucketRenderer;
+import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
@@ -51,7 +51,7 @@ public class HexagonRenderTest extends GdxMap {
 		float mCellScale = 60 * MapRenderer.COORD_SCALE;
 
 		@Override
-		protected void update(GLViewport v) {
+		public void update(GLViewport v) {
 			if (!mInitialized) {
 				if (!init()) {
 					return;
@@ -87,7 +87,7 @@ public class HexagonRenderTest extends GdxMap {
 		}
 
 		@Override
-		protected void render(GLViewport v) {
+		public void render(GLViewport v) {
 
 			// Use the program object
 			GLState.useProgram(mProgramObject);

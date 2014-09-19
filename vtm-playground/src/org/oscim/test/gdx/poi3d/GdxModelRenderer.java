@@ -46,7 +46,7 @@ public class GdxModelRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected boolean setup() {
+	public boolean setup() {
 
 		modelBatch = new ModelBatch(new DefaultShaderProvider());
 
@@ -67,7 +67,7 @@ public class GdxModelRenderer extends LayerRenderer {
 	}
 
 	@Override
-	protected synchronized void update(GLViewport v) {
+	public synchronized void update(GLViewport v) {
 		// if (loading && assets.update())
 		// doneLoading();
 
@@ -87,7 +87,7 @@ public class GdxModelRenderer extends LayerRenderer {
 	Renderable r = new Renderable();
 
 	@Override
-	protected void render(GLViewport v) {
+	public void render(GLViewport v) {
 		if (instances.size == 0)
 			return;
 

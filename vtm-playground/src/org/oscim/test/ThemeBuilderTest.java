@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public class ThemeBuilderTest extends GdxMap {
 
-	final Logger log = LoggerFactory.getLogger(MeshTest.class);
+	final Logger log = LoggerFactory.getLogger(S3DBLayerTest.class);
 
 	static class MyTheme extends ThemeBuilder {
 		public MyTheme() {

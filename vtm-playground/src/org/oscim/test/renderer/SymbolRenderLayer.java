@@ -27,7 +27,7 @@ public class SymbolRenderLayer extends BucketRenderer {
 
 	public SymbolRenderLayer() {
 		SymbolBucket l = new SymbolBucket();
-		buckets.setTextureBuckets(l);
+		buckets.set(l);
 
 		SymbolItem it = SymbolItem.pool.get();
 		it.billboard = false;
@@ -42,7 +42,7 @@ public class SymbolRenderLayer extends BucketRenderer {
 	}
 
 	@Override
-	protected void update(GLViewport v) {
+	public void update(GLViewport v) {
 		if (initialize) {
 			initialize = false;
 			mMapPosition.copy(v.pos);

@@ -23,6 +23,8 @@ import org.oscim.core.Tile;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.oscim.utils.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.backends.jglfw.JglfwApplication;
 import com.badlogic.gdx.backends.jglfw.JglfwApplicationConfiguration;
@@ -30,6 +32,8 @@ import com.badlogic.gdx.backends.jglfw.JglfwGL20;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class GdxMapApp extends GdxMap {
+
+	public static final Logger log = LoggerFactory.getLogger(GdxMapApp.class);
 
 	static class GdxGL20Wrapper extends JglfwGL20 implements GL20 {
 

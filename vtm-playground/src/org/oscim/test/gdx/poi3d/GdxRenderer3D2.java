@@ -36,7 +36,7 @@ public class GdxRenderer3D2 extends LayerRenderer {
 	}
 
 	@Override
-	protected boolean setup() {
+	public boolean setup() {
 
 		// if (assets == null)
 		// assets = new AssetManager();
@@ -60,7 +60,7 @@ public class GdxRenderer3D2 extends LayerRenderer {
 	}
 
 	@Override
-	protected synchronized void update(GLViewport v) {
+	public synchronized void update(GLViewport v) {
 		// if (loading && assets.update())
 		// doneLoading();
 
@@ -78,7 +78,7 @@ public class GdxRenderer3D2 extends LayerRenderer {
 	float[] mBox = new float[8];
 
 	@Override
-	protected void render(GLViewport v) {
+	public void render(GLViewport v) {
 		if (instances.size == 0)
 			return;
 

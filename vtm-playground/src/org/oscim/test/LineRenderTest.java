@@ -185,7 +185,7 @@ public class LineRenderTest extends GdxMap {
 		}
 
 		@Override
-		protected synchronized void update(GLViewport v) {
+		public synchronized void update(GLViewport v) {
 
 			if (mMapPosition.scale == 0)
 				mMapPosition.copy(v.pos);
