@@ -72,8 +72,8 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
 	//	}
 
 	/**
-	 * For line- and polygon-layers this is the offset
-	 * of VERTICES in its layers.vbo.
+	 * For line- and polygon-buckets this is the offset
+	 * of VERTICES in its bucket.vbo.
 	 * For all other types it is the byte offset in vbo.
 	 * FIXME - always use byte offset?
 	 */

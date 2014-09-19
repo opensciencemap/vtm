@@ -152,8 +152,8 @@ public class VectorTileRenderer extends TileRenderer {
 
 		/* use holder proxy when it is set */
 		RenderBuckets buckets = (tile.holder == null)
-		        ? tile.getLayers()
-		        : tile.holder.getLayers();
+		        ? tile.getBuckets()
+		        : tile.holder.getBuckets();
 
 		if (buckets == null || buckets.vbo == null)
 			return;

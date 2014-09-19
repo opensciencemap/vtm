@@ -117,7 +117,7 @@ public class GridRenderer extends BucketRenderer {
 		int x = (int) (v.pos.x * z);
 		int y = (int) (v.pos.y * z);
 
-		/* update layers when map moved by at least one tile */
+		/* update buckets when map moved by at least one tile */
 		if (x == mCurX && y == mCurY && z == mCurZ)
 			return;
 

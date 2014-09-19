@@ -114,7 +114,7 @@ public abstract class BucketRenderer extends LayerRenderer {
 						project = false;
 						setMatrix(v, project);
 					}
-					b = TextureBucket.Renderer.draw(buckets, b, v, div);
+					b = TextureBucket.Renderer.draw(b, v, div);
 					break;
 				default:
 					log.error("invalid bucket {}", b.type);

@@ -58,12 +58,12 @@ public class TestTileLayer extends TileLayer {
 		@Override
 		public boolean loadTile(MapTile tile) {
 			log.debug("load tile " + tile);
-			RenderBuckets layers = new RenderBuckets();
-			tile.data = layers;
+			RenderBuckets buckets = new RenderBuckets();
+			tile.data = buckets;
 
-			LineBucket ll = layers.getLineBucket(0);
-			ll.line = mLineStyle;
-			ll.scale = 2;
+			LineBucket lb = buckets.getLineBucket(0);
+			lb.line = mLineStyle;
+			lb.scale = 2;
 
 			int m = 20;
 			int s = Tile.SIZE - m * 2;
@@ -77,7 +77,7 @@ public class TestTileLayer extends TileLayer {
 			g.addPoint(s, m);
 			g.addPoint(m, m);
 
-			ll.addLine(g);
+			lb.addLine(g);
 
 			return true;
 		}

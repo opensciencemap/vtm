@@ -94,10 +94,10 @@ public final class LineTexBucket extends RenderBucket {
 
 	protected boolean mRandomizeOffset = true;
 
-	LineTexBucket(int layer) {
+	LineTexBucket(int level) {
 		super(TEXLINE);
 
-		this.level = layer;
+		this.level = level;
 		this.evenSegment = true;
 	}
 
@@ -300,8 +300,8 @@ public final class LineTexBucket extends RenderBucket {
 		private final static int STRIDE = 12;
 		private final static int LEN_OFFSET = 8;
 
-		public static RenderBucket draw(RenderBucket curLayer, GLViewport v,
-		        float div, RenderBuckets layers) {
+		public static RenderBucket draw(RenderBucket b, GLViewport v,
+		        float div, RenderBuckets buckets) {
 
 			//if (shader == 0)
 			//	return curLayer.next;
@@ -334,7 +334,7 @@ public final class LineTexBucket extends RenderBucket {
 			GL.glVertexAttribPointer(shader.aFlip, 1,
 			                         GL20.GL_BYTE, false, 0, 0);
 
-			layers.vbo.bind();
+			buckets.vbo.bind();
 
 			float scale = (float) v.pos.getZoomScale();
 
@@ -342,10 +342,9 @@ public final class LineTexBucket extends RenderBucket {
 
 			//GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexID[0]);
 
-			RenderBucket l = curLayer;
-			for (; l != null && l.type == TEXLINE; l = l.next) {
-				LineTexBucket ll = (LineTexBucket) l;
-				LineStyle line = ll.line.current();
+			for (; b != null && b.type == TEXLINE; b = b.next) {
+				LineTexBucket lb = (LineTexBucket) b;
+				LineStyle line = lb.line.current();
 
 				GLUtils.setColor(shader.uColor, line.stippleColor, 1);
 				GLUtils.setColor(shader.uBgColor, line.color, 1);
@@ -361,21 +360,21 @@ public final class LineTexBucket extends RenderBucket {
 				//GL.glUniform1f(hScale, scale);
 
 				/* keep line width fixed */
-				GL.glUniform1f(shader.uWidth, ll.width / s * COORD_SCALE_BY_DIR_SCALE);
+				GL.glUniform1f(shader.uWidth, lb.width / s * COORD_SCALE_BY_DIR_SCALE);
 
 				/* add offset vertex */
 				int vOffset = -STRIDE;
 
 				// TODO interleave 1. and 2. pass to improve vertex cache usage?
 				/* first pass */
-				int allIndices = (ll.evenQuads * 6);
+				int allIndices = (lb.evenQuads * 6);
 				for (int i = 0; i < allIndices; i += maxIndices) {
 					int numIndices = allIndices - i;
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;
 
 					/* i / 6 * (24 shorts per block * 2 short bytes) */
-					int add = (l.vertexOffset + i * 8) + vOffset;
+					int add = (b.vertexOffset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(aPos0, 4, GL20.GL_SHORT, false, STRIDE,
 					                         add + STRIDE);
@@ -394,13 +393,13 @@ public final class LineTexBucket extends RenderBucket {
 				}
 
 				/* second pass */
-				allIndices = (ll.oddQuads * 6);
+				allIndices = (lb.oddQuads * 6);
 				for (int i = 0; i < allIndices; i += maxIndices) {
 					int numIndices = allIndices - i;
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;
 					/* i / 6 * (24 shorts per block * 2 short bytes) */
-					int add = (l.vertexOffset + i * 8) + vOffset;
+					int add = (b.vertexOffset + i * 8) + vOffset;
 
 					GL.glVertexAttribPointer(aPos0, 4, GL20.GL_SHORT, false, STRIDE,
 					                         add + 2 * STRIDE);
@@ -428,7 +427,7 @@ public final class LineTexBucket extends RenderBucket {
 
 			//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
 
-			return l;
+			return b;
 		}
 	}
 }

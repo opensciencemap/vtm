@@ -84,7 +84,7 @@ class TextRenderer extends BucketRenderer {
 		setMatrix(v, false);
 
 		for (RenderBucket l = buckets.get(); l != null;)
-			l = TextureBucket.Renderer.draw(buckets, l, v, scale);
+			l = TextureBucket.Renderer.draw(l, v, scale);
 	}
 
 }

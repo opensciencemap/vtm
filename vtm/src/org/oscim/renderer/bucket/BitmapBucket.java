@@ -192,30 +192,30 @@ public class BitmapBucket extends TextureBucket {
 			shader = new Shader("texture_alpha");
 		}
 
-		public static RenderBucket draw(RenderBucket renderElement, GLViewport v,
+		public static RenderBucket draw(RenderBucket b, GLViewport v,
 		        float scale, float alpha) {
 
 			GLState.blend(true);
 			Shader s = shader;
 			s.useProgram();
 
-			TextureBucket tl = (TextureBucket) renderElement;
+			TextureBucket tb = (TextureBucket) b;
 
 			GL.glUniform1f(s.uAlpha, alpha);
 			v.mvp.setAsUniform(s.uMVP);
 
 			MapRenderer.bindQuadIndicesVBO(true);
 
-			for (TextureItem t = tl.textures; t != null; t = t.next) {
+			for (TextureItem t = tb.textures; t != null; t = t.next) {
 
 				t.bind();
 
 				int maxIndices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
 
-				// draw up to maxVertices in each iteration
+				// draw up to maxVertices in each iteration */
 				for (int i = 0; i < t.indices; i += maxIndices) {
 					// to.offset * (24(shorts) * 2(short-bytes) / 6(indices) == 8)
-					int off = (t.offset + i) * 8 + tl.vertexOffset;
+					int off = (t.offset + i) * 8 + tb.vertexOffset;
 
 					GL.glVertexAttribPointer(s.aPos, 2,
 					                         GL20.GL_SHORT, false, 12, off);
@@ -234,7 +234,7 @@ public class BitmapBucket extends TextureBucket {
 
 			MapRenderer.bindQuadIndicesVBO(false);
 
-			return renderElement.next;
+			return b.next;
 		}
 	}
 }

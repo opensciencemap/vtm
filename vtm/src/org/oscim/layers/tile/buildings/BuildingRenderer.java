@@ -193,7 +193,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
 	}
 
 	private static ExtrusionBuckets getLayer(MapTile t) {
-		RenderBuckets layers = t.getLayers();
+		RenderBuckets layers = t.getBuckets();
 		if (layers != null && !t.state(READY | NEW_DATA))
 			return null;
 

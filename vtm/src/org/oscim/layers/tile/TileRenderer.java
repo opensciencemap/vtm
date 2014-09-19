@@ -175,14 +175,14 @@ public abstract class TileRenderer extends LayerRenderer {
 
 	private static int uploadTileData(MapTile tile) {
 		tile.state = READY;
-		RenderBuckets layers = tile.getLayers();
+		RenderBuckets buckets = tile.getBuckets();
 
 		/* tile might only contain label layers */
-		if (layers == null)
+		if (buckets == null)
 			return 0;
 
-		if (!layers.compile(true)) {
-			layers.clear();
+		if (!buckets.compile(true)) {
+			buckets.clear();
 			return 0;
 		}
 

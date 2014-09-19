@@ -317,15 +317,15 @@ public final class PolygonBucket extends RenderBucket {
 		static LineClipper mScreenClip = new LineClipper(-1, -1, 1, 1);
 
 		/**
-		 * draw polygon layers (until layer.next is not polygon layer)
+		 * draw polygon buckets (until bucket.next is not polygon bucket)
 		 * using stencil buffer method
 		 * 
-		 * @param renderElement
+		 * @param buckets
 		 *            layer to draw (referencing vertices in current vbo)
 		 * @param v
 		 *            GLViewport
 		 * @param pos
-		 *            used to fade layers according to 'fade' in
+		 *            used to fade buckets according to 'fade' in
 		 *            layer.area style
 		 * @param div
 		 *            scale relative to 'base scale' of the tile
@@ -338,7 +338,7 @@ public final class PolygonBucket extends RenderBucket {
 		 * @return
 		 *         next layer
 		 */
-		public static RenderBucket draw(RenderBucket renderElement, GLViewport v,
+		public static RenderBucket draw(RenderBucket buckets, GLViewport v,
 		        float div, boolean first) {
 
 			GLState.test(false, true);
@@ -361,12 +361,12 @@ public final class PolygonBucket extends RenderBucket {
 
 			byte stencilMask = 0;
 
-			RenderBucket l = renderElement;
-			for (; l != null && l.type == POLYGON; l = l.next) {
-				PolygonBucket pl = (PolygonBucket) l;
-				AreaStyle area = pl.area.current();
+			RenderBucket b = buckets;
+			for (; b != null && b.type == POLYGON; b = b.next) {
+				PolygonBucket pb = (PolygonBucket) b;
+				AreaStyle area = pb.area.current();
 
-				/* fade out polygon layers (set in RenderTheme) */
+				/* fade out polygon bucket (set in RenderTheme) */
 				if (area.fadeScale > 0 && area.fadeScale > zoom)
 					continue;
 
@@ -392,7 +392,7 @@ public final class PolygonBucket extends RenderBucket {
 					start = cur = 0;
 				}
 
-				mAreaLayer[cur] = pl;
+				mAreaLayer[cur] = pb;
 
 				/* set stencil mask to draw to */
 				int stencil = 1 << cur++;
@@ -406,9 +406,9 @@ public final class PolygonBucket extends RenderBucket {
 					GL.glStencilMask(stencilMask);
 				}
 
-				GL.glDrawArrays(GL_TRIANGLE_FAN, l.vertexOffset, l.numVertices);
+				GL.glDrawArrays(GL_TRIANGLE_FAN, b.vertexOffset, b.numVertices);
 
-				/* draw up to 7 layers into stencil buffer */
+				/* draw up to 7 buckets into stencil buffer */
 				if (cur == STENCIL_BITS - 1) {
 					//log.debug("fill1 {} {}", start, cur);
 					fillPolygons(v, start, cur, zoom, scale, div);
@@ -417,7 +417,7 @@ public final class PolygonBucket extends RenderBucket {
 					mClear = true;
 					start = cur = 0;
 
-					if (l.next != null && l.next.type == POLYGON) {
+					if (b.next != null && b.next.type == POLYGON) {
 						setShader(polyShader, v.mvp, false);
 						stencilMask = 0;
 					}
@@ -432,14 +432,14 @@ public final class PolygonBucket extends RenderBucket {
 
 			if (!drawn) {
 				/* fillPolygons would re-enable color-mask
-				 * but it's possible that all polygon layers
+				 * but it's possible that all polygon buckets
 				 * were skipped */
 				GL.glColorMask(true, true, true, true);
 				GL.glStencilMask(0x00);
 			}
 
 			mCount = cur;
-			return l;
+			return b;
 		}
 
 		public static void clip(GLMatrix mvp, int clipMode) {
@@ -473,7 +473,7 @@ public final class PolygonBucket extends RenderBucket {
 			GL.glStencilMask(0xFF);
 
 			/* Draw clip-region into depth and stencil buffer.
-			 * This is used for tile line and polygon layers.
+			 * This is used for tile line and polygon buckets.
 			 * 
 			 * Together with depth test (GL_LESS) this ensures to
 			 * only draw where no other tile has drawn yet. */

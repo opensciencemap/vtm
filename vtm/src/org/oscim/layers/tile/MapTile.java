@@ -266,7 +266,7 @@ public class MapTile extends Tile {
 	 * Get the default ElementLayers which are added
 	 * by {@link VectorTileLoader}
 	 */
-	public RenderBuckets getLayers() {
+	public RenderBuckets getBuckets() {
 		if (!(data instanceof RenderBuckets))
 			return null;
 

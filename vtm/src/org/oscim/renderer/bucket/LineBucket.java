@@ -565,11 +565,8 @@ public final class LineBucket extends RenderBucket {
 			return true;
 		}
 
-		public static RenderBucket draw(RenderBucket curLayer, GLViewport v,
+		public static RenderBucket draw(RenderBucket b, GLViewport v,
 		        float scale, RenderBuckets buckets) {
-
-			if (curLayer == null)
-				return null;
 
 			/* simple line shader does not take forward shortening into
 			 * account. only used when tilt is 0. */
@@ -619,13 +616,12 @@ public final class LineBucket extends RenderBucket {
 			float heightOffset = 0;
 			GL.glUniform1f(uLineHeight, heightOffset);
 
-			RenderBucket l = curLayer;
-			for (; l != null && l.type == RenderBucket.LINE; l = l.next) {
-				LineBucket ll = (LineBucket) l;
-				LineStyle line = ll.line.current();
+			for (; b != null && b.type == RenderBucket.LINE; b = b.next) {
+				LineBucket lb = (LineBucket) b;
+				LineStyle line = lb.line.current();
 
-				if (ll.heightOffset != heightOffset) {
-					heightOffset = ll.heightOffset;
+				if (lb.heightOffset != heightOffset) {
+					heightOffset = lb.heightOffset;
 
 					GL.glUniform1f(uLineHeight, heightOffset /
 					        MercatorProjection.groundResolution(v.pos));
@@ -652,7 +648,7 @@ public final class LineBucket extends RenderBucket {
 					if (line.fixed) {
 						width = Math.max(line.width, 1) / scale;
 					} else {
-						width = ll.scale * line.width / variableScale;
+						width = lb.scale * line.width / variableScale;
 					}
 
 					GL.glUniform1f(uLineWidth,
@@ -668,13 +664,13 @@ public final class LineBucket extends RenderBucket {
 					}
 
 					/* Cap mode */
-					if (ll.scale < 1.5 /* || ll.line.fixed */) {
+					if (lb.scale < 1.5 /* || ll.line.fixed */) {
 
 						if (capMode != CAP_THIN) {
 							capMode = CAP_THIN;
 							GL.glUniform1f(uLineMode, capMode);
 						}
-					} else if (ll.roundCap) {
+					} else if (lb.roundCap) {
 						if (capMode != CAP_ROUND) {
 							capMode = CAP_ROUND;
 							GL.glUniform1f(uLineMode, capMode);
@@ -685,14 +681,14 @@ public final class LineBucket extends RenderBucket {
 					}
 
 					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
-					                l.vertexOffset, l.numVertices);
+					                b.vertexOffset, b.numVertices);
 
 					continue;
 				}
 
 				/* draw LineLayers references by this outline */
 
-				for (LineBucket ref = ll.outlines; ref != null; ref = ref.outlines) {
+				for (LineBucket ref = lb.outlines; ref != null; ref = ref.outlines) {
 					LineStyle core = ref.line.current();
 
 					// core width
@@ -705,7 +701,7 @@ public final class LineBucket extends RenderBucket {
 					if (line.fixed) {
 						width += line.width / scale;
 					} else {
-						width += ll.scale * line.width / variableScale;
+						width += lb.scale * line.width / variableScale;
 					}
 
 					GL.glUniform1f(uLineWidth,
@@ -736,7 +732,7 @@ public final class LineBucket extends RenderBucket {
 				}
 			}
 
-			return l;
+			return b;
 		}
 	}
 }

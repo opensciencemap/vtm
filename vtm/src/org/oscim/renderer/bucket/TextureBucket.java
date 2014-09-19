@@ -107,23 +107,22 @@ public abstract class TextureBucket extends RenderBucket {
 			pool.init(0);
 		}
 
-		public static RenderBucket draw(RenderBuckets layers, RenderBucket l,
-		        GLViewport v, float scale) {
+		public static RenderBucket draw(RenderBucket b, GLViewport v, float scale) {
 
 			GLState.test(false, false);
 			GLState.blend(true);
 
 			shader.useProgram();
 
-			TextureBucket tl = (TextureBucket) l;
-			GL.glUniform1f(shader.uScale, tl.fixed ? 1 / scale : 1);
+			TextureBucket tb = (TextureBucket) b;
+			GL.glUniform1f(shader.uScale, tb.fixed ? 1 / scale : 1);
 
 			v.proj.setAsUniform(shader.uProj);
 			v.mvp.setAsUniform(shader.uMV);
 
 			MapRenderer.bindQuadIndicesVBO(true);
 
-			for (TextureItem t = tl.textures; t != null; t = t.next) {
+			for (TextureItem t = tb.textures; t != null; t = t.next) {
 				GL.glUniform2f(shader.uTexSize,
 				               1f / (t.width * COORD_SCALE),
 				               1f / (t.height * COORD_SCALE));
@@ -134,7 +133,7 @@ public abstract class TextureBucket extends RenderBucket {
 				for (int i = 0; i < t.indices; i += maxIndices) {
 					/* to.offset * (24(shorts) * 2(short-bytes)
 					 * / 6(indices) == 8) */
-					int off = (t.offset + i) * 8 + tl.vertexOffset;
+					int off = (t.offset + i) * 8 + tb.vertexOffset;
 
 					GL.glVertexAttribPointer(shader.aPos, 4,
 					                         GL20.GL_SHORT,
@@ -156,7 +155,7 @@ public abstract class TextureBucket extends RenderBucket {
 
 			MapRenderer.bindQuadIndicesVBO(false);
 
-			return l.next;
+			return b.next;
 		}
 	}
 
