@@ -40,6 +40,7 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.AreaStyle;
+import org.oscim.utils.ArrayUtils;
 import org.oscim.utils.geom.LineClipper;
 import org.oscim.utils.math.Interpolation;
 import org.slf4j.Logger;
@@ -75,7 +76,8 @@ public final class PolygonBucket extends RenderBucket {
 	float ymin = Short.MAX_VALUE;
 	float xmax = Short.MIN_VALUE;
 	float ymax = Short.MIN_VALUE;
-	float[] bbox = new float[8];
+
+	final float[] bbox = new float[8];
 
 	public void addPolygon(float[] points, int[] index) {
 		short center = (short) ((Tile.SIZE >> 1) * S);
@@ -101,15 +103,10 @@ public final class PolygonBucket extends RenderBucket {
 			for (int j = 0; j < length; j += 2) {
 				float x = (points[inPos++] * S);
 				float y = (points[inPos++] * S);
-				if (x > xmax)
-					xmax = x;
-				if (x < xmin)
-					xmin = x;
-
-				if (y > ymax)
-					ymax = y;
-				if (y < ymin)
-					ymin = y;
+				xmax = Math.max(xmax, x);
+				xmin = Math.min(xmin, x);
+				ymax = Math.max(ymax, y);
+				ymin = Math.min(ymin, y);
 
 				if (outline) {
 					indiceItems.add((short) numVertices);
@@ -133,29 +130,20 @@ public final class PolygonBucket extends RenderBucket {
 		}
 	}
 
-	// FIXME move to prepare
+	@Override
+	protected void prepare() {
+		ArrayUtils.setBox2D(bbox, xmin, ymin, xmax, ymax);
+	}
+
 	@Override
 	protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
 		if (area.strokeWidth == 0) {
 			/* add vertices to shared VBO */
 			compileVertexItems(vboData);
-			return;
+		} else {
+			/* compile with indexed outline */
+			super.compile(vboData, iboData);
 		}
-
-		bbox[0] = xmin;
-		bbox[1] = ymin;
-
-		bbox[2] = xmax;
-		bbox[3] = ymin;
-
-		bbox[4] = xmax;
-		bbox[5] = ymax;
-
-		bbox[6] = xmin;
-		bbox[7] = xmax;
-
-		/* compile with indexed outline */
-		super.compile(vboData, iboData);
 	}
 
 	static class Shader extends GLShader {
@@ -361,6 +349,8 @@ public final class PolygonBucket extends RenderBucket {
 
 			byte stencilMask = 0;
 
+			float[] box = mBBox;
+
 			RenderBucket b = buckets;
 			for (; b != null && b.type == POLYGON; b = b.next) {
 				PolygonBucket pb = (PolygonBucket) b;
@@ -370,19 +360,37 @@ public final class PolygonBucket extends RenderBucket {
 				if (area.fadeScale > 0 && area.fadeScale > zoom)
 					continue;
 
-				//	v.mvp.prj2D(pl.bbox, 0, mBBox, 0, 4);
-				//	mScreenClip.clipStart(mBBox[0], mBBox[1]);
-				//
-				//	if (mScreenClip.clipNext(mBBox[2], mBBox[3]) == 0 &&
-				//	        mScreenClip.clipNext(mBBox[4], mBBox[5]) == 0 &&
-				//	        mScreenClip.clipNext(mBBox[6], mBBox[7]) == 0 &&
-				//	        mScreenClip.clipNext(mBBox[0], mBBox[1]) == 0) {
-				//
-				//		/* check the very unlikely case where the view might be
-				//		 * completly contained within mBBox */
-				//		if (!ArrayUtils.withinRange(mBBox, -1f, 1f))
-				//			continue;
-				//	}
+				v.mvp.prj2D(pb.bbox, 0, box, 0, 4);
+				boolean clipRect = true;
+				int out = 0;
+
+				for (int i = 0; i < 8; i += 2) {
+					int o = mScreenClip.outcode(box[i], box[i + 1]);
+
+					if (o == 0) {
+						/* at least one corner is inside */
+						clipRect = false;
+						break;
+					}
+					out |= o;
+				}
+
+				/* Check if any polygon-bucket edge intersects the screen.
+				 * Also check the very unlikely case where the view might be
+				 * completly contained within box */
+				if (clipRect && (out != 0xF)) {
+					mScreenClip.clipStart(box[0], box[1]);
+
+					if (mScreenClip.clipNext(box[2], box[3]) == 0 &&
+					        mScreenClip.clipNext(box[4], box[5]) == 0 &&
+					        mScreenClip.clipNext(box[6], box[7]) == 0 &&
+					        mScreenClip.clipNext(box[0], box[1]) == 0) {
+						//	log.debug("outside {} {} {}", out,
+						//	          Arrays.toString(box),
+						//	          Arrays.toString(pb.bbox));
+						continue;
+					}
+				}
 
 				if (mClear) {
 					clearStencilRegion();
