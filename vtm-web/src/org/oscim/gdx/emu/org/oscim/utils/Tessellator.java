@@ -107,7 +107,7 @@ public class Tessellator {
 		return numIndices;
 	}
 
-	public static int tessellate(float[] points, int ppos, int plen, short[] index,
+	public static int tessellate(float[] points, int ppos, int plen, int[] index,
 	        int ipos, int rings, int vertexOffset, VertexData outTris) {
 
 		Int32Array io;

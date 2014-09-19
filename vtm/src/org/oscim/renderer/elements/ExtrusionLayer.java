@@ -418,19 +418,20 @@ public class ExtrusionLayer extends RenderElement {
 		int[] index = geom.index;
 		float[] points = geom.points;
 
-		int len = 0;
-		int rings = 0;
+		int numPoints = 0;
+		int numRings = 0;
 
 		/* get sum of points in polygon */
 		for (int i = ipos, n = index.length; i < n && index[i] > 0; i++) {
-			len += index[i];
-			rings++;
+			numPoints += index[i];
+			numRings++;
 		}
 
-		sumIndices += Tessellator.tessellate(points, ppos, len,
-		                                     index, ipos, rings,
+		sumIndices += Tessellator.tessellate(points, ppos, numPoints,
+		                                     index, ipos, numRings,
 		                                     startVertex + 1,
 		                                     mIndices[IND_ROOF]);
+
 	}
 
 	private boolean extrudeOutline(float[] points, int pos, int len,

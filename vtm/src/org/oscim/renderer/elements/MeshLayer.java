@@ -21,7 +21,6 @@ import static org.oscim.backend.GL20.GL_LINES;
 import static org.oscim.backend.GL20.GL_SHORT;
 import static org.oscim.backend.GL20.GL_TRIANGLES;
 import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
-import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
@@ -30,9 +29,11 @@ import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
+import org.oscim.renderer.MapRenderer;
+import org.oscim.renderer.elements.VertexData.Chunk;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.ColorUtil;
-import org.oscim.utils.Tessellator;
+import org.oscim.utils.TessJNI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,24 +44,66 @@ public class MeshLayer extends IndexedRenderElement {
 	public AreaStyle area;
 	public float heightOffset;
 
+	TessJNI tess = new TessJNI(8);
+
 	public MeshLayer(int level) {
 		super(RenderElement.MESH);
 		this.level = level;
+
 	}
 
+	int pcount;
+
 	public void addMesh(GeometryBuffer geom) {
-		if (geom.index[0] < 6)
+		pcount += geom.pointPos;
+
+		tess.addContour2D(geom.index, geom.points);
+	}
+
+	protected void prepare() {
+		if (!tess.tesselate()) {
+			log.error("error in tessellation");
 			return;
+		}
 
-		numIndices += Tessellator.tessellate(geom, COORD_SCALE,
-		                                     vertexItems,
-		                                     indiceItems,
-		                                     numVertices);
+		int nelems = tess.getElementCount() * 3;
 
-		numVertices = vertexItems.countSize() / 2;
+		for (int offset = 0; offset < nelems;) {
+			int size = nelems - offset;
+			if (size > VertexData.SIZE)
+				size = VertexData.SIZE;
 
-		if (numIndices <= 0)
-			log.debug("empty " + geom.index);
+			Chunk chunk = indiceItems.obtainChunk();
+
+			tess.getElements(chunk.vertices, offset, size);
+			offset += size;
+
+			indiceItems.releaseChunk(size);
+		}
+
+		int nverts = tess.getVertexCount() * 2;
+
+		for (int offset = 0; offset < nverts;) {
+			int size = nverts - offset;
+			if (size > VertexData.SIZE)
+				size = VertexData.SIZE;
+
+			Chunk chunk = vertexItems.obtainChunk();
+
+			tess.getVertices(chunk.vertices, offset, size,
+			                 MapRenderer.COORD_SCALE);
+
+			offset += size;
+
+			vertexItems.releaseChunk(size);
+		}
+
+		this.numIndices = nelems;
+		this.numVertices = nverts >> 1;
+
+		//log.debug("{} - {}", nverts, pcount);
+
+		tess.dispose();
 	}
 
 	public static class Renderer {
@@ -124,7 +167,9 @@ public class MeshLayer extends IndexedRenderElement {
 				                  GL_UNSIGNED_SHORT, 0);
 
 				if (dbgRender) {
-					int c = ColorUtil.shiftHue(ml.area.color, 0.5);
+					int c = (ml.area == null) ? Color.BLUE : ml.area.color;
+
+					c = ColorUtil.shiftHue(c, 0.5);
 					GLUtils.setColor(s.uColor, c, 0.8f);
 					GL.glDrawElements(GL_LINES, ml.numIndices,
 					                  GL_UNSIGNED_SHORT, 0);

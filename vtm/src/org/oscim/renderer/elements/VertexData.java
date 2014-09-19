@@ -199,6 +199,7 @@ public class VertexData extends Inlist.List<Chunk> {
 	public Chunk obtainChunk() {
 		if (used == SIZE)
 			getNext();
+
 		cur.used = used;
 
 		return cur;
@@ -206,6 +207,11 @@ public class VertexData extends Inlist.List<Chunk> {
 
 	public void releaseChunk() {
 		used = cur.used;
+	}
+
+	public void releaseChunk(int size) {
+		cur.used = size;
+		used = size;
 	}
 
 	/* Do not use! */
