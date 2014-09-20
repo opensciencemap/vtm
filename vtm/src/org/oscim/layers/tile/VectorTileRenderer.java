@@ -225,13 +225,20 @@ public class VectorTileRenderer extends TileRenderer {
 			return;
 		}
 
-		if (tile.fadeTime == 0) {
-			/* need to use original tile to get the fade */
-			MapTile t = (tile.holder == null) ? tile : tile.holder;
-			tile.fadeTime = getMinFade(t, proxyLevel);
+		long fadeTime = tile.fadeTime;
+		if (fadeTime == 0) {
+			if (tile.holder == null) {
+				fadeTime = getMinFade(tile, proxyLevel);
+			} else {
+				/* need to use time from original tile */
+				fadeTime = tile.holder.fadeTime;
+				if (fadeTime == 0)
+					fadeTime = getMinFade(tile.holder, proxyLevel);
+			}
+			tile.fadeTime = fadeTime;
 		}
 
-		long dTime = MapRenderer.frametime - tile.fadeTime;
+		long dTime = MapRenderer.frametime - fadeTime;
 
 		if (mOverdrawColor == 0 || dTime > FADE_TIME) {
 			PolygonBucket.Renderer.drawOver(mClipMVP, 0, 1);
