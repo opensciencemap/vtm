@@ -360,16 +360,16 @@ public final class PolygonBucket extends RenderBucket {
 				if (area.fadeScale > 0 && area.fadeScale > zoom)
 					continue;
 
+				/* project bbox of polygon to screen */
 				v.mvp.prj2D(pb.bbox, 0, box, 0, 4);
-				boolean clipRect = true;
-				int out = 0;
 
+				int out = 0;
 				for (int i = 0; i < 8; i += 2) {
 					int o = mScreenClip.outcode(box[i], box[i + 1]);
 
 					if (o == 0) {
 						/* at least one corner is inside */
-						clipRect = false;
+						out = 0;
 						break;
 					}
 					out |= o;
@@ -378,7 +378,7 @@ public final class PolygonBucket extends RenderBucket {
 				/* Check if any polygon-bucket edge intersects the screen.
 				 * Also check the very unlikely case where the view might be
 				 * completly contained within box */
-				if (clipRect && (out != 0xF)) {
+				if ((out != 0) && (out != 0xF)) {
 					mScreenClip.clipStart(box[0], box[1]);
 
 					if (mScreenClip.clipNext(box[2], box[3]) == 0 &&

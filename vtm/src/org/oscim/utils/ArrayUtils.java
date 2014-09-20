@@ -148,10 +148,17 @@ public class ArrayUtils {
 		return true;
 	}
 
+	/**
+	 * Set bbox array to:
+	 * xmin, ymin,
+	 * xmin, ymax,
+	 * xmax, ymax,
+	 * xmax, ymin,
+	 */
 	public static void setBox2D(float[] bbox, float xmin, float ymin, float xmax, float ymax) {
 		bbox[0] = bbox[2] = xmin;
 		bbox[4] = bbox[6] = xmax;
-		bbox[1] = bbox[5] = ymin;
-		bbox[3] = bbox[7] = ymax;
+		bbox[1] = bbox[7] = ymin;
+		bbox[3] = bbox[5] = ymax;
 	}
 }
