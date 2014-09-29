@@ -49,6 +49,9 @@ public class LwHttp implements HttpEngine {
 	private final static int RESPONSE_EXPECTED_LIVES = 100;
 	private final static long RESPONSE_TIMEOUT = (long) 10E9; // 10 second in nanosecond
 
+	private final static int CONNECT_TIMEOUT = 15000; // 15 seconds
+	private final static int SOCKET_TIMEOUT = 8000; // 8 seconds
+
 	private final static int BUFFER_SIZE = 8192;
 	private final byte[] buffer = new byte[BUFFER_SIZE];
 
@@ -387,8 +390,8 @@ public class LwHttp implements HttpEngine {
 		try {
 			mSocket = new Socket();
 			mSocket.setTcpNoDelay(true);
-			mSocket.setSoTimeout(5000);
-			mSocket.connect(mSockAddr, 10000);
+			mSocket.setSoTimeout(SOCKET_TIMEOUT);
+			mSocket.connect(mSockAddr, CONNECT_TIMEOUT);
 			mCommandStream = mSocket.getOutputStream();
 			mResponseStream = new Buffer(mSocket.getInputStream());
 
@@ -429,21 +432,16 @@ public class LwHttp implements HttpEngine {
 		if (!mResponseStream.finishedReading()) {
 			if (dbg)
 				log.debug("invalid buffer position");
+
+			/* hmmm, some bitmaps seems to not be decoded to the
+			 * end but still working */
 			close();
-			return true;
 		}
 
-		if (!success) {
+		if (!success || mMustCloseConnection)
 			close();
-			return false;
-		}
 
-		if (mMustCloseConnection) {
-			close();
-			return true;
-		}
-
-		return true;
+		return success;
 	}
 
 	/** write (positive) integer to byte array */

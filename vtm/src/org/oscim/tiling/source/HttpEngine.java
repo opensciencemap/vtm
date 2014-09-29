@@ -32,6 +32,12 @@ public interface HttpEngine {
 
 	void setCache(OutputStream os);
 
+	/**
+	 * @param success maybe false when tile could not be decoded.
+	 *            Dont write cache in this case, close socket, etc
+	 *            at your option.
+	 * @return true when everything went ok
+	 */
 	boolean requestCompleted(boolean success);
 
 	public interface Factory {
