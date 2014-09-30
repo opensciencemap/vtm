@@ -31,6 +31,8 @@ import org.oscim.backend.canvas.Paint;
 
 public class AwtPaint implements Paint {
 
+	final static float TEXT_OFFSET = 2;
+
 	private static int getCap(Cap cap) {
 		switch (cap) {
 			case BUTT:
@@ -85,7 +87,7 @@ public class AwtPaint implements Paint {
 
 	@Override
 	public void setStrokeWidth(float width) {
-		strokeWidth = width;
+		strokeWidth = width + 1;
 		createStroke();
 
 		// int size = font.getSize();
@@ -108,7 +110,7 @@ public class AwtPaint implements Paint {
 
 	@Override
 	public void setTextSize(float textSize) {
-		font = font.deriveFont(textSize - 2);
+		font = font.deriveFont(textSize);
 
 	}
 

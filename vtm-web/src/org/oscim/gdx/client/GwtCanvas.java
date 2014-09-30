@@ -39,13 +39,13 @@ public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
 	}
 
 	@Override
-	public void drawText(String string, float x, float y, Paint paint) {
+	public void drawText(String string, float x, float y, Paint fill, Paint stroke) {
 		if (bitmap == null) {
 			//log.debug("no bitmap set");
 			return;
 		}
 
-		GwtPaint p = (GwtPaint) paint;
+		GwtPaint p = (GwtPaint) fill;
 
 		if (p.stroke && GwtGdxGraphics.NO_STROKE_TEXT)
 			return;

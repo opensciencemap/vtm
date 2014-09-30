@@ -33,9 +33,13 @@ public class AndroidCanvas implements Canvas {
 	}
 
 	@Override
-	public void drawText(String string, float x, float y, Paint stroke) {
-		if (string != null)
-			canvas.drawText(string, x, y, ((AndroidPaint) stroke).mPaint);
+	public void drawText(String string, float x, float y, Paint fill, Paint stroke) {
+		if (string != null) {
+			if (stroke != null)
+				canvas.drawText(string, x, y, ((AndroidPaint) stroke).mPaint);
+
+			canvas.drawText(string, x, y, ((AndroidPaint) fill).mPaint);
+		}
 	}
 
 	@Override

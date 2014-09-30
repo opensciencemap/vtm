@@ -127,13 +127,9 @@ public class TextBucket extends TextureBucket {
 				}
 			}
 
-			//yy = y + (height - 1) - it.text.fontDescent - mFontPadY;
-			yy = y + height - it.text.fontDescent; // - mFontPadY;
+			yy = y + height - it.text.fontDescent;
 
-			if (it.text.stroke != null)
-				mCanvas.drawText(it.string, x, yy, it.text.stroke);
-
-			mCanvas.drawText(it.string, x, yy, it.text.paint);
+			mCanvas.drawText(it.string, x, yy, it.text.paint, it.text.stroke);
 
 			// FIXME !!!
 			if (width > TEXTURE_WIDTH)

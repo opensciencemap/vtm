@@ -36,8 +36,9 @@ public interface Canvas {
 	 * @param x
 	 * @param y
 	 * @param stroke the stroke
+	 * @param
 	 */
-	void drawText(String string, float x, float y, Paint stroke);
+	void drawText(String string, float x, float y, Paint fill, Paint stroke);
 
 	/**
 	 * Draw Bitmap to Canvas.

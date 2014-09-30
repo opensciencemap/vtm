@@ -20,6 +20,7 @@ package org.oscim.awt;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 
@@ -49,60 +50,47 @@ public class AwtCanvas implements Canvas {
 
 		canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 
-		canvas.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-		                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		//canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-		canvas.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		//canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+		//                        RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		canvas.setRenderingHint(RenderingHints.KEY_RENDERING,
+		                        RenderingHints.VALUE_RENDER_QUALITY);
+		canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+		                        RenderingHints.VALUE_ANTIALIAS_ON);
 
 	}
+
+	private final AffineTransform tx = new AffineTransform();
 
 	@Override
-	public void drawText(String text, float x, float y, Paint paint) {
+	public void drawText(String text, float x, float y, Paint fill, Paint stroke) {
 
-		//		if (paint.isTransparent()) {
-		//			return;
-		//		}
+		AwtPaint fillPaint = (AwtPaint) fill;
 
-		AwtPaint awtPaint = (AwtPaint) paint;
-
-		//AwtPaint awtPaint = AwtGraphicFactory.getAwtPaint(paint);
-
-		if (awtPaint.stroke == null) {
-			canvas.setColor(awtPaint.color);
-			canvas.setFont(awtPaint.font);
-			canvas.drawString(text, x + 2, y);
+		if (stroke == null) {
+			canvas.setColor(fillPaint.color);
+			canvas.setFont(fillPaint.font);
+			canvas.drawString(text, x + AwtPaint.TEXT_OFFSET, y);
 		} else {
-			setColorAndStroke(awtPaint);
-			TextLayout tl = new TextLayout(text, awtPaint.font, canvas.getFontRenderContext());
-			AffineTransform tx = new AffineTransform();
-			tx.translate(x + 2, y);
-			canvas.draw(tl.getOutline(tx));
-			canvas.drawString(text, x + 2, y);
+			AwtPaint strokePaint = (AwtPaint) stroke;
+
+			canvas.setColor(strokePaint.color);
+			canvas.setStroke(strokePaint.stroke);
+
+			TextLayout tl = new TextLayout(text, fillPaint.font,
+			                               canvas.getFontRenderContext());
+			tx.setToIdentity();
+			tx.translate(x, y);
+
+			Shape s = tl.getOutline(tx);
+
+			canvas.draw(s);
+			canvas.setColor(fillPaint.color);
+			canvas.fill(s);
 		}
 	}
-
-	private void setColorAndStroke(AwtPaint awtPaint) {
-		canvas.setColor(awtPaint.color);
-
-		if (awtPaint.stroke != null) {
-			canvas.setStroke(awtPaint.stroke);
-		}
-	}
-
-	//	@Override
-	//	public void drawText(String string, float x, float y, Paint stroke) {
-	//		AwtPaint p = (AwtPaint)stroke;
-	//
-	//		canvas.setFont(p.font);
-	//		canvas.setColor(p.color);
-	//
-	//		canvas.drawString(string, (int)x, (int)y);
-	//	}
 
 	@Override
 	public void drawBitmap(Bitmap bitmap, float x, float y) {
-		// TODO Auto-generated method stub
 		throw new UnknownError("not implemented");
 	}
 }
