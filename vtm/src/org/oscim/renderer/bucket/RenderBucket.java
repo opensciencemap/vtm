@@ -32,6 +32,7 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
 	public static final int HAIRLINE = 5;
 	public static final int SYMBOL = 6;
 	public static final int BITMAP = 7;
+	public static final int SDF = 8;
 
 	public final int type;
 
@@ -43,11 +44,21 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
 	protected int numIndices;
 
 	/** Temporary list of vertex data. */
-	protected final VertexData vertexItems = new VertexData();
-	protected final VertexData indiceItems = new VertexData();
+	protected final VertexData vertexItems;
+	protected final VertexData indiceItems;
 
-	protected RenderBucket(int type) {
+	final static VertexData EMPTY = new VertexData();
+	final boolean quads;
+
+	protected RenderBucket(int type, boolean indexed, boolean quads) {
 		this.type = type;
+		vertexItems = new VertexData();
+		if (indexed)
+			indiceItems = new VertexData();
+		else
+			indiceItems = EMPTY;
+
+		this.quads = quads;
 	}
 
 	/** Clear all resources. */
@@ -65,11 +76,6 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
 	protected void prepare() {
 
 	}
-
-	//	/** Compile vertex data to vbo. */
-	//	protected void compile(ShortBuffer sbuf) {
-	//		compileVertexItems(sbuf);
-	//	}
 
 	/**
 	 * For line- and polygon-buckets this is the offset
@@ -98,7 +104,8 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
 
 	protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
 		compileVertexItems(vboData);
-		compileIndiceItems(iboData);
+		if (iboData != null)
+			compileIndiceItems(iboData);
 	}
 
 	protected void compileVertexItems(ShortBuffer vboData) {
@@ -109,7 +116,7 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
 
 	protected void compileIndiceItems(ShortBuffer iboData) {
 		/* keep offset of layer data in vbo */
-		if (indiceItems.empty())
+		if (indiceItems == null || indiceItems.empty())
 			return;
 
 		indiceOffset = iboData.position() * 2; // needs byte offset...

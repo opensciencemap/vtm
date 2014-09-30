@@ -16,6 +16,9 @@
  */
 package org.oscim.renderer.bucket;
 
+import static org.oscim.backend.GL20.GL_SHORT;
+import static org.oscim.backend.GL20.GL_TRIANGLE_STRIP;
+
 import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Paint.Cap;
@@ -71,7 +74,7 @@ public final class LineBucket extends RenderBucket {
 	private int tmin = Integer.MIN_VALUE, tmax = Integer.MAX_VALUE;
 
 	public LineBucket(int layer) {
-		super(RenderBucket.LINE);
+		super(RenderBucket.LINE, false, false);
 		this.level = layer;
 	}
 
@@ -590,8 +593,8 @@ public final class LineBucket extends RenderBucket {
 			int uLineWidth = s.uWidth;
 			int uLineHeight = s.uHeight;
 
-			GL.glVertexAttribPointer(s.aPos, 4, GL20.GL_SHORT,
-			                         false, 0, buckets.offset[LINE]);
+			GL.glVertexAttribPointer(s.aPos, 4, GL_SHORT, false, 0,
+			                         buckets.offset[LINE]);
 
 			v.mvp.setAsUniform(s.uMVP);
 
@@ -680,7 +683,7 @@ public final class LineBucket extends RenderBucket {
 						GL.glUniform1f(uLineMode, capMode);
 					}
 
-					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
+					GL.glDrawArrays(GL_TRIANGLE_STRIP,
 					                b.vertexOffset, b.numVertices);
 
 					continue;
@@ -727,7 +730,7 @@ public final class LineBucket extends RenderBucket {
 						GL.glUniform1f(uLineMode, capMode);
 					}
 
-					GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP,
+					GL.glDrawArrays(GL_TRIANGLE_STRIP,
 					                ref.vertexOffset, ref.numVertices);
 				}
 			}

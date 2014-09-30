@@ -95,7 +95,7 @@ public final class LineTexBucket extends RenderBucket {
 	protected boolean mRandomizeOffset = true;
 
 	LineTexBucket(int level) {
-		super(TEXLINE);
+		super(TEXLINE, false, true);
 
 		this.level = level;
 		this.evenSegment = true;

@@ -16,11 +16,13 @@
  */
 package org.oscim.renderer.bucket;
 
+import static org.oscim.backend.GL20.GL_SHORT;
+import static org.oscim.backend.GL20.GL_TRIANGLES;
+import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.backend.GL20;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLViewport;
@@ -29,7 +31,7 @@ import org.oscim.renderer.bucket.TextureItem.TexturePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class TextureBucket extends RenderBucket {
+public class TextureBucket extends RenderBucket {
 
 	static final Logger log = LoggerFactory.getLogger(TextureBucket.class);
 
@@ -46,12 +48,12 @@ public abstract class TextureBucket extends RenderBucket {
 	                                                       TEXTURE_WIDTH,
 	                                                       TEXTURE_HEIGHT);
 
-	protected TextureBucket(int type) {
-		super(type);
+	public TextureBucket(int type) {
+		super(type, false, true);
 	}
 
 	/** holds textures and offset in vbo */
-	protected TextureItem textures;
+	public TextureItem textures;
 
 	/** scale mode */
 	public boolean fixed;
@@ -78,6 +80,7 @@ public abstract class TextureBucket extends RenderBucket {
 		Shader() {
 			if (!create("texture_layer"))
 				return;
+
 			uMV = getUniform("u_mv");
 			uProj = getUniform("u_proj");
 			uScale = getUniform("u_scale");
@@ -96,9 +99,9 @@ public abstract class TextureBucket extends RenderBucket {
 		}
 	}
 
-	public static final class Renderer {
+	static Shader shader;
 
-		private static Shader shader;
+	public static final class Renderer {
 
 		static void init() {
 			shader = new Shader();
@@ -135,21 +138,11 @@ public abstract class TextureBucket extends RenderBucket {
 					 * / 6(indices) == 8) */
 					int off = (t.offset + i) * 8 + tb.vertexOffset;
 
-					GL.glVertexAttribPointer(shader.aPos, 4,
-					                         GL20.GL_SHORT,
-					                         false, 12, off);
-
-					GL.glVertexAttribPointer(shader.aTexCoord, 2,
-					                         GL20.GL_SHORT,
-					                         false, 12, off + 8);
-
 					int numIndices = t.indices - i;
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;
 
-					GL.glDrawElements(GL20.GL_TRIANGLES, numIndices,
-					                  GL20.GL_UNSIGNED_SHORT, 0);
-
+					tb.render(off, numIndices);
 				}
 			}
 
@@ -161,5 +154,16 @@ public abstract class TextureBucket extends RenderBucket {
 
 	public TextureItem getTextures() {
 		return textures;
+	}
+
+	public void render(int offset, int numIndices) {
+		GL.glVertexAttribPointer(shader.aPos, 4, GL_SHORT,
+		                         false, 12, offset);
+
+		GL.glVertexAttribPointer(shader.aTexCoord, 2, GL_SHORT,
+		                         false, 12, offset + 8);
+
+		GL.glDrawElements(GL_TRIANGLES, numIndices,
+		                  GL_UNSIGNED_SHORT, 0);
 	}
 }

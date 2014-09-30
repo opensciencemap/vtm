@@ -69,7 +69,7 @@ public class ExtrusionBucket extends RenderBucket {
 	 * ExtrusionLayer for polygon geometries.
 	 */
 	public ExtrusionBucket(int level, float groundResolution, float[] colors) {
-		super(RenderBucket.EXTRUSION);
+		super(RenderBucket.EXTRUSION, true, false);
 		this.level = level;
 		this.colors = colors;
 		this.color = 0;
@@ -88,7 +88,7 @@ public class ExtrusionBucket extends RenderBucket {
 	 * ExtrusionLayer for triangle geometries.
 	 */
 	public ExtrusionBucket(int level, float groundResolution, int color) {
-		super(RenderBucket.EXTRUSION);
+		super(RenderBucket.EXTRUSION, true, false);
 		this.level = level;
 		this.color = color;
 

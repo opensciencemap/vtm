@@ -20,7 +20,7 @@ public class HairLineBucket extends RenderBucket {
 	public LineStyle line;
 
 	public HairLineBucket(int level) {
-		super(RenderBucket.HAIRLINE);
+		super(RenderBucket.HAIRLINE, true, false);
 		this.level = level;
 	}
 

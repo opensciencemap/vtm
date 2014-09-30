@@ -16,9 +16,12 @@
  */
 package org.oscim.renderer.bucket;
 
+import static org.oscim.backend.GL20.GL_SHORT;
+import static org.oscim.backend.GL20.GL_TRIANGLES;
+import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
+
 import java.nio.ShortBuffer;
 
-import org.oscim.backend.GL20;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
@@ -218,17 +221,17 @@ public class BitmapBucket extends TextureBucket {
 					int off = (t.offset + i) * 8 + tb.vertexOffset;
 
 					GL.glVertexAttribPointer(s.aPos, 2,
-					                         GL20.GL_SHORT, false, 12, off);
+					                         GL_SHORT, false, 12, off);
 
 					GL.glVertexAttribPointer(s.aTexCoord, 2,
-					                         GL20.GL_SHORT, false, 12, off + 8);
+					                         GL_SHORT, false, 12, off + 8);
 
 					int numIndices = t.indices - i;
 					if (numIndices > maxIndices)
 						numIndices = maxIndices;
 
-					GL.glDrawElements(GL20.GL_TRIANGLES, numIndices,
-					                  GL20.GL_UNSIGNED_SHORT, 0);
+					GL.glDrawElements(GL_TRIANGLES, numIndices,
+					                  GL_UNSIGNED_SHORT, 0);
 				}
 			}
 

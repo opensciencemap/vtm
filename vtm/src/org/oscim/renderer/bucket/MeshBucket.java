@@ -49,7 +49,7 @@ public class MeshBucket extends RenderBucket {
 	private int numPoints;
 
 	public MeshBucket(int level) {
-		super(RenderBucket.MESH);
+		super(RenderBucket.MESH, true, false);
 		this.level = level;
 	}
 
