@@ -16,6 +16,9 @@
  */
 package org.oscim.renderer.bucket;
 
+import static org.oscim.renderer.MapRenderer.MAX_INDICES;
+import static org.oscim.renderer.MapRenderer.bindQuadIndicesVBO;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
@@ -273,7 +276,7 @@ public final class LineTexBucket extends RenderBucket {
 			mVertexFlipID = vboIds[0];
 
 			/* bytes: 0, 1, 0, 1, 0, ... */
-			byte[] flip = new byte[MapRenderer.maxQuads * 4];
+			byte[] flip = new byte[MapRenderer.MAX_QUADS * 4];
 			for (int i = 0; i < flip.length; i++)
 				flip[i] = (byte) (i % 2);
 
@@ -326,9 +329,7 @@ public final class LineTexBucket extends RenderBucket {
 
 			v.mvp.setAsUniform(shader.uMVP);
 
-			int maxIndices = MapRenderer.maxQuads * 6;
-
-			MapRenderer.bindQuadIndicesVBO(true);
+			bindQuadIndicesVBO();
 
 			GLState.bindVertexBuffer(mVertexFlipID);
 			GL.glVertexAttribPointer(shader.aFlip, 1,
@@ -368,10 +369,10 @@ public final class LineTexBucket extends RenderBucket {
 				// TODO interleave 1. and 2. pass to improve vertex cache usage?
 				/* first pass */
 				int allIndices = (lb.evenQuads * 6);
-				for (int i = 0; i < allIndices; i += maxIndices) {
+				for (int i = 0; i < allIndices; i += MAX_INDICES) {
 					int numIndices = allIndices - i;
-					if (numIndices > maxIndices)
-						numIndices = maxIndices;
+					if (numIndices > MAX_INDICES)
+						numIndices = MAX_INDICES;
 
 					/* i / 6 * (24 shorts per block * 2 short bytes) */
 					int add = (b.vertexOffset + i * 8) + vOffset;
@@ -394,10 +395,10 @@ public final class LineTexBucket extends RenderBucket {
 
 				/* second pass */
 				allIndices = (lb.oddQuads * 6);
-				for (int i = 0; i < allIndices; i += maxIndices) {
+				for (int i = 0; i < allIndices; i += MAX_INDICES) {
 					int numIndices = allIndices - i;
-					if (numIndices > maxIndices)
-						numIndices = maxIndices;
+					if (numIndices > MAX_INDICES)
+						numIndices = MAX_INDICES;
 					/* i / 6 * (24 shorts per block * 2 short bytes) */
 					int add = (b.vertexOffset + i * 8) + vOffset;
 

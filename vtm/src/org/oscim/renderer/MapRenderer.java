@@ -25,7 +25,6 @@ import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.map.Map;
 import org.oscim.renderer.bucket.RenderBuckets;
-import org.oscim.renderer.bucket.TextureBucket;
 import org.oscim.renderer.bucket.TextureItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,11 @@ public class MapRenderer {
 
 	private static int mQuadIndicesID;
 	private static int mQuadVerticesID;
-	public final static int maxQuads = 512;
+
+	/** Number of Quads that can be rendered with bindQuadIndicesVBO() */
+	public final static int MAX_QUADS = 512;
+	/** Number of Indices that can be rendered with bindQuadIndicesVBO() */
+	public final static int MAX_INDICES = MAX_QUADS * 6;
 
 	public static long frametime;
 	private static boolean rerender;
@@ -168,9 +171,9 @@ public class MapRenderer {
 		int[] vboIds = GLUtils.glGenBuffers(2);
 
 		mQuadIndicesID = vboIds[0];
-		int maxIndices = maxQuads * TextureBucket.INDICES_PER_SPRITE;
-		short[] indices = new short[maxIndices];
-		for (int i = 0, j = 0; i < maxIndices; i += 6, j += 4) {
+
+		short[] indices = new short[MAX_INDICES];
+		for (int i = 0, j = 0; i < MAX_INDICES; i += 6, j += 4) {
 			indices[i + 0] = (short) (j + 0);
 			indices[i + 1] = (short) (j + 1);
 			indices[i + 2] = (short) (j + 2);
@@ -253,14 +256,12 @@ public class MapRenderer {
 	}
 
 	/**
-	 * Bind indices for rendering up to MapRenderer.maxQuads (512) in
-	 * one draw call. Vertex order is 0-1-2 2-1-3
-	 * 
-	 * @param bind - true to activate, false to unbind (dont forget!)
-	 * */
-	public static void bindQuadIndicesVBO(boolean bind) {
-		GLState.bindElementBuffer(bind ? mQuadIndicesID : 0);
-
+	 * Bind indices for rendering up to MAX_QUADS (512),
+	 * ie. MAX_INDICES (512*6) in one draw call.
+	 * Vertex order is 0-1-2 2-1-3
+	 */
+	public static void bindQuadIndicesVBO() {
+		GLState.bindElementBuffer(mQuadIndicesID);
 	}
 
 	/**

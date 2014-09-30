@@ -20,6 +20,7 @@ import static org.oscim.backend.GL20.GL_SHORT;
 import static org.oscim.backend.GL20.GL_TRIANGLES;
 import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
+import static org.oscim.renderer.MapRenderer.MAX_INDICES;
 
 import java.nio.ShortBuffer;
 
@@ -123,30 +124,27 @@ public class TextureBucket extends RenderBucket {
 			v.proj.setAsUniform(shader.uProj);
 			v.mvp.setAsUniform(shader.uMV);
 
-			MapRenderer.bindQuadIndicesVBO(true);
+			MapRenderer.bindQuadIndicesVBO();
 
 			for (TextureItem t = tb.textures; t != null; t = t.next) {
 				GL.glUniform2f(shader.uTexSize,
 				               1f / (t.width * COORD_SCALE),
 				               1f / (t.height * COORD_SCALE));
 				t.bind();
-				int maxIndices = MapRenderer.maxQuads * INDICES_PER_SPRITE;
 
 				/* draw up to maxVertices in each iteration */
-				for (int i = 0; i < t.indices; i += maxIndices) {
+				for (int i = 0; i < t.indices; i += MAX_INDICES) {
 					/* to.offset * (24(shorts) * 2(short-bytes)
 					 * / 6(indices) == 8) */
 					int off = (t.offset + i) * 8 + tb.vertexOffset;
 
 					int numIndices = t.indices - i;
-					if (numIndices > maxIndices)
-						numIndices = maxIndices;
+					if (numIndices > MAX_INDICES)
+						numIndices = MAX_INDICES;
 
 					tb.render(off, numIndices);
 				}
 			}
-
-			MapRenderer.bindQuadIndicesVBO(false);
 
 			return b.next;
 		}
