@@ -18,9 +18,9 @@
 package org.oscim.layers.tile;
 
 import static org.oscim.layers.tile.MapTile.State.CANCEL;
+import static org.oscim.layers.tile.MapTile.State.DEADBEEF;
 import static org.oscim.layers.tile.MapTile.State.LOADING;
 import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
-import static org.oscim.layers.tile.MapTile.State.NONE;
 import static org.oscim.layers.tile.MapTile.State.READY;
 
 import java.util.ArrayList;
@@ -169,8 +169,8 @@ public class TileManager {
 		for (int i = 0; i < mTilesSize; i++) {
 			if (mTiles[i] == null)
 				continue;
-			mTiles[i].state = NONE;
 			removeFromCache(mTiles[i]);
+			mTiles[i].state = CANCEL;
 		}
 
 		/* clear references to cached MapTiles */
@@ -387,12 +387,12 @@ public class TileManager {
 
 		if (mLoadParent && (zoomLevel > mMinZoom) && (mZoomTable == null)) {
 			/* prefetch parent */
-			MapTile p = tile.node.parent.item;
+			MapTile p = tile.node.parent();
 			if (p == null) {
 				TileNode n = mIndex.add(x >> 1, y >> 1, zoomLevel - 1);
 				p = n.item = new MapTile(n, x >> 1, y >> 1, zoomLevel - 1);
 				addToCache(p);
-				/* hack to not add tile twice to queue */
+				/* this prevents to add tile twice to queue */
 				p.state = LOADING;
 				mJobs.add(p);
 			} else if (!p.isActive()) {
@@ -432,10 +432,9 @@ public class TileManager {
 		if (dbg)
 			log.debug("remove from cache {} {} {}", t, t.state, t.isLocked());
 
-		//synchronized (t) {
 		/* When in CANCEL state tile belongs to TileLoader thread,
 		 * defer clearing to jobCompleted() */
-		if (t.state(NEW_DATA | READY))
+		if (t.state != CANCEL)
 			t.clear();
 
 		mIndex.removeItem(t);
@@ -460,16 +459,24 @@ public class TileManager {
 			if (t.state == NEW_DATA)
 				newTileCnt++;
 
+			if (t.state == DEADBEEF) {
+				//log.debug("found DEADBEEF {}", t);
+				tiles[i] = null;
+				mTilesCount--;
+				continue;
+			}
 			/* make sure tile cannot be used by GL or MapWorker Thread */
 			if ((t.state != 0) || t.isLocked()) {
 				continue;
 			}
+
+			/* empty tile */
 			removeFromCache(t);
 			tiles[i] = null;
 			remove--;
 		}
 
-		if (remove < CACHE_CLEAR_THRESHOLD && newTileCnt < MAX_TILES_IN_QUEUE)
+		if ((remove < CACHE_CLEAR_THRESHOLD) && (newTileCnt < MAX_TILES_IN_QUEUE))
 			return;
 
 		updateDistances(tiles, size, pos);
@@ -482,31 +489,30 @@ public class TileManager {
 		// log.debug("remove:" + remove + "  new:" + newTileCnt);
 		// log.debug("cur: " + mapPosition);
 
+		/* start with farest away tile */
 		for (int i = size - 1; i >= 0 && remove > 0; i--) {
 			MapTile t = tiles[i];
+
+			/* dont remove tile used by TileRenderer, or somewhere else
+			 * try again in next run. */
 			if (t.isLocked()) {
-				/* dont remove tile used by TileRenderer, or somewhere else
-				 * try again in next run. */
 				if (dbg)
 					log.debug("{} locked (state={}, d={})", t, t.state, t.distance);
 				continue;
-
 			}
 
+			/* cancel loading of tiles that should not even be cached */
 			if (t.state == LOADING) {
-				/* NOTE: when set loading to false the tile could be
-				 * added to load queue again while still processed in
-				 * VectorTileLoader */
 				t.state = CANCEL;
 				if (dbg)
 					log.debug("{} canceled (d={})", t, t.distance);
 			}
 
+			/* clear new and unused tile */
 			if (t.state == NEW_DATA) {
-				/* clear unused tile */
+				newTileCnt--;
 				if (dbg)
 					log.debug("{} unused (d=({})", t, t.distance);
-				newTileCnt--;
 			}
 
 			removeFromCache(t);
@@ -515,21 +521,17 @@ public class TileManager {
 		}
 
 		remove = (newTileCnt - MAX_TILES_IN_QUEUE) + QUEUE_CLEAR_THRESHOLD;
-		//int r = remove;
 		for (int i = size - 1; i >= 0 && remove > 0; i--) {
 			MapTile t = tiles[i];
-			if (t != null && !t.isLocked() && t.state == NEW_DATA) {
-				newTileCnt--;
+			if ((t != null) && (t.state == NEW_DATA) && !t.isLocked()) {
 				removeFromCache(t);
 				tiles[i] = null;
 				remove--;
+				newTileCnt--;
 			}
 		}
 
 		mTilesForUpload += newTileCnt;
-		//log.debug("cleanup load queue {} / {} - {}", mTilesForUpload, r, remove);
-		if (dbg)
-			log.debug("cleanup: {} {}", mTilesCount, mTilesForUpload);
 	}
 
 	/**
@@ -562,7 +564,6 @@ public class TileManager {
 		@Override
 		public void run() {
 			if (success && tile.state != CANCEL) {
-
 				tile.state = NEW_DATA;
 				events.fire(TILE_LOADED, tile);
 
@@ -575,10 +576,10 @@ public class TileManager {
 			          success ? "canceled"
 			                  : "failed");
 
-			tile.clear();
-
 			if (tile.state == LOADING)
 				mIndex.removeItem(tile);
+
+			tile.clear();
 		}
 	}
 
