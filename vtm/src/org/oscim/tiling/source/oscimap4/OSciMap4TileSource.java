@@ -28,7 +28,7 @@ public class OSciMap4TileSource extends UrlTileSource {
 	public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
 
 		public Builder() {
-			super(DEFAULT_URL, DEFAULT_PATH, 0, 17);
+			super(DEFAULT_URL, DEFAULT_PATH, 1, 17);
 		}
 
 		public OSciMap4TileSource build() {
