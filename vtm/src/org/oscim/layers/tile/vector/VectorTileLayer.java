@@ -145,7 +145,7 @@ public class VectorTileLayer extends TileLayer {
 	 */
 	public interface TileLoaderThemeHook {
 		/** Called for each RenderStyle found for a MapElement. */
-		public boolean render(MapTile tile, RenderBuckets buckets,
+		public boolean process(MapTile tile, RenderBuckets buckets,
 		        MapElement element, RenderStyle style, int level);
 
 		/** Called on loader thread when tile loading is completed */
@@ -177,7 +177,7 @@ public class VectorTileLayer extends TileLayer {
 
 		LList<TileLoaderThemeHook> th = mLoaderThemeHooks.head();
 		while (th != null) {
-			if (th.data.render(tile, layers, element, style, level))
+			if (th.data.process(tile, layers, element, style, level))
 				return;
 
 			th = th.next;

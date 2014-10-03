@@ -65,7 +65,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
 	/** TileLoaderThemeHook */
 	@Override
-	public boolean render(MapTile tile, RenderBuckets buckets, MapElement element,
+	public boolean process(MapTile tile, RenderBuckets buckets, MapElement element,
 	        RenderStyle style, int level) {
 
 		if (!(style instanceof ExtrusionStyle))

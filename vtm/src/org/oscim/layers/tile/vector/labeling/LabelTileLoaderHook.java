@@ -31,7 +31,7 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
 	}
 
 	@Override
-	public boolean render(MapTile tile, RenderBuckets buckets, MapElement element,
+	public boolean process(MapTile tile, RenderBuckets buckets, MapElement element,
 	        RenderStyle style, int level) {
 
 		if (style instanceof TextStyle) {
