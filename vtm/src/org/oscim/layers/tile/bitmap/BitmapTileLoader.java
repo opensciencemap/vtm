@@ -16,7 +16,7 @@
  */
 package org.oscim.layers.tile.bitmap;
 
-import static org.oscim.layers.tile.MapTile.State.CANCEL;
+import static org.oscim.layers.tile.MapTile.State.LOADING;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.Tile;
@@ -55,23 +55,26 @@ public class BitmapTileLoader extends TileLoader {
 
 	@Override
 	public void setTileImage(Bitmap bitmap) {
-		if (isCanceled() || mTile.state(CANCEL))
+		if (isCanceled() || !mTile.state(LOADING)) {
+			bitmap.recycle();
 			return;
+		}
 
 		BitmapBucket l = new BitmapBucket(false);
 		l.setBitmap(bitmap, Tile.SIZE, Tile.SIZE, mLayer.pool);
 
-		RenderBuckets b = new RenderBuckets();
-		b.set(l);
-		mTile.data = b;
+		RenderBuckets buckets = new RenderBuckets();
+		buckets.set(l);
+		mTile.data = buckets;
 	}
 
 	@Override
 	public void dispose() {
+		mTileDataSource.cancel();
 	}
 
 	@Override
 	public void cancel() {
+		mTileDataSource.cancel();
 	}
-
 }

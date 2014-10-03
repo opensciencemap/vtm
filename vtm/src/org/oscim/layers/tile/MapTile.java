@@ -16,9 +16,13 @@
  */
 package org.oscim.layers.tile;
 
+import static org.oscim.layers.tile.MapTile.State.CANCEL;
 import static org.oscim.layers.tile.MapTile.State.DEADBEEF;
+import static org.oscim.layers.tile.MapTile.State.LOADING;
 import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
+import static org.oscim.layers.tile.MapTile.State.NONE;
 import static org.oscim.layers.tile.MapTile.State.READY;
+import static org.oscim.layers.tile.MapTile.State.TIMEOUT;
 
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.VectorTileLoader;
@@ -44,34 +48,38 @@ public class MapTile extends Tile {
 	}
 
 	public static final class State {
-		public final static byte NONE = 0;
+		public final static byte NONE = (1 << 0);
 
 		/**
 		 * STATE_LOADING means the tile is about to be loaded / loading.
 		 * Tile belongs to TileLoader thread.
 		 */
-		public final static byte LOADING = (1 << 0);
+		public final static byte LOADING = (1 << 1);
 
 		/**
 		 * STATE_NEW_DATA: tile data is prepared for rendering.
 		 * While 'locked' it belongs to GL Thread.
 		 */
-		public final static byte NEW_DATA = (1 << 1);
+		public final static byte NEW_DATA = (1 << 2);
 
 		/**
 		 * STATE_READY: tile data is uploaded to GL.
 		 * While 'locked' it belongs to GL Thread.
 		 */
-		public final static byte READY = (1 << 2);
+		public final static byte READY = (1 << 3);
 
 		/**
 		 * STATE_CANCEL: tile is removed from TileManager,
 		 * but may still be processed by TileLoader.
 		 */
-		public final static byte CANCEL = (1 << 3);
+		public final static byte CANCEL = (1 << 4);
 
-		public final static byte DEADBEEF = (1 << 4);
+		public final static byte TIMEOUT = (1 << 5);
 
+		/**
+		 * Dont touch if you find some.
+		 */
+		public final static byte DEADBEEF = (1 << 6);
 	}
 
 	public final static int PROXY_CHILD00 = (1 << 0);
@@ -83,7 +91,7 @@ public class MapTile extends Tile {
 	public final static int PROXY_HOLDER = (1 << 6);
 
 	/** Tile state */
-	byte state;
+	byte state = State.NONE;
 
 	/**
 	 * absolute tile coordinates: tileX,Y / Math.pow(2, zoomLevel)
@@ -176,6 +184,11 @@ public class MapTile extends Tile {
 	 * used. This function should only be called through {@link TileManager}
 	 */
 	void lock() {
+		if (state == DEADBEEF) {
+			log.debug("Locking dead tile {}", this);
+			return;
+		}
+
 		if (locked++ > 0)
 			return;
 
@@ -218,6 +231,12 @@ public class MapTile extends Tile {
 		if (--locked > 0)
 			return;
 
+		if (state == DEADBEEF) {
+			log.debug("Unlock dead tile {}", this);
+			clear();
+			return;
+		}
+
 		TileNode parent = node.parent;
 		if ((proxy & PROXY_PARENT) != 0)
 			parent.item.refs--;
@@ -259,7 +278,7 @@ public class MapTile extends Tile {
 			data.dispose();
 			data = data.next;
 		}
-		state = DEADBEEF;
+		state = NONE;
 	}
 
 	/**
@@ -366,5 +385,76 @@ public class MapTile extends Tile {
 			return null;
 
 		return p;
+	}
+
+	public String state() {
+		switch (state) {
+			case State.NONE:
+				return "None";
+			case State.LOADING:
+				return "Loading";
+			case State.NEW_DATA:
+				return "Data";
+			case State.READY:
+				return "Ready";
+			case State.CANCEL:
+				return "Cancel";
+			case State.TIMEOUT:
+				return "Timeout";
+			case State.DEADBEEF:
+				return "Dead";
+		}
+		return "";
+	}
+
+	void setState(byte newState) {
+		if (state == newState)
+			return;
+
+		switch (newState) {
+			case NONE:
+				if (state(LOADING | CANCEL)) {
+					state = newState;
+					return;
+				}
+				throw new IllegalStateException("None"
+				        + " <= " + state() + " " + this);
+			case LOADING:
+				if (state == NONE) {
+					state = newState;
+					return;
+				}
+				throw new IllegalStateException("Loading"
+				        + " <= " + state() + " " + this);
+			case NEW_DATA:
+				if (state == LOADING) {
+					state = newState;
+					return;
+				}
+				throw new IllegalStateException("NewData"
+				        + " <= " + state() + " " + this);
+
+			case READY:
+				if (state == NEW_DATA) {
+					state = newState;
+					return;
+				}
+				throw new IllegalStateException("Ready"
+				        + " <= " + state() + " " + this);
+
+			case CANCEL:
+				if (state == LOADING) {
+					state = newState;
+					return;
+				}
+				throw new IllegalStateException("Cancel" +
+				        " <= " + state() + " " + this);
+			case TIMEOUT:
+				// TODO
+				break;
+			case DEADBEEF:
+				state = newState;
+				break;
+		}
 	}
 }

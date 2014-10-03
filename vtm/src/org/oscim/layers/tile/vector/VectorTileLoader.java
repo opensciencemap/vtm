@@ -16,7 +16,7 @@
  */
 package org.oscim.layers.tile.vector;
 
-import static org.oscim.layers.tile.MapTile.State.CANCEL;
+import static org.oscim.layers.tile.MapTile.State.LOADING;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -134,14 +134,15 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void completed(QueryResult result) {
-		mTileLayer.callHooksComplete(mTile, result == QueryResult.SUCCESS);
+		boolean ok = (result == QueryResult.SUCCESS);
+
+		mTileLayer.callHooksComplete(mTile, ok);
 
 		/* finish buckets- tessellate and cleanup on worker-thread */
 		mBuckets.prepare();
+		clearState();
 
 		super.completed(result);
-
-		clearState();
 	}
 
 	protected static int getValidLayer(int layer) {
@@ -180,7 +181,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 
 	@Override
 	public void process(MapElement element) {
-		if (isCanceled() || mTile.state(CANCEL))
+		if (isCanceled() || !mTile.state(LOADING))
 			return;
 
 		if (mTileLayer.callProcessHooks(mTile, mBuckets, element))

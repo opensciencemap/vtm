@@ -16,6 +16,7 @@
  */
 package org.oscim.layers.tile;
 
+import static org.oscim.layers.tile.MapTile.State.CANCEL;
 import static org.oscim.layers.tile.MapTile.State.LOADING;
 import static org.oscim.layers.tile.MapTile.State.NONE;
 
@@ -37,9 +38,6 @@ public class JobQueue {
 	 *            the jobs to be added to this queue.
 	 */
 	public synchronized void setJobs(MapTile[] tiles) {
-		for (MapTile t : tiles)
-			t.state = LOADING;
-
 		mJobs = tiles;
 		mCurrentJob = 0;
 	}
@@ -55,12 +53,12 @@ public class JobQueue {
 		MapTile[] tiles = mJobs;
 
 		for (int i = mCurrentJob, n = mJobs.length; i < n; i++) {
-
-			if (tiles[i].state == LOADING)
-				tiles[i].state = NONE;
-			else
-				log.debug("wrong tile in queue {} {}", tiles[i], tiles[i].state);
-
+			MapTile t = tiles[i];
+			if (t.state(LOADING | CANCEL)) {
+				t.setState(NONE);
+			} else {
+				log.error("Wrong tile in queue {} {}", t, t.state());
+			}
 			tiles[i] = null;
 		}
 		mCurrentJob = 0;

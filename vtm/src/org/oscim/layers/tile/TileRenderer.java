@@ -20,7 +20,6 @@ import static org.oscim.layers.tile.MapTile.PROXY_PARENT;
 import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
 import static org.oscim.layers.tile.MapTile.State.READY;
 
-import org.oscim.core.MapPosition;
 import org.oscim.layers.tile.MapTile.TileNode;
 import org.oscim.renderer.BufferObject;
 import org.oscim.renderer.GLViewport;
@@ -79,50 +78,61 @@ public abstract class TileRenderer extends LayerRenderer {
 	 */
 	@Override
 	public synchronized void update(GLViewport v) {
+		/* count placeholder tiles */
 
 		if (mAlpha == 0) {
 			mDrawTiles.releaseTiles();
+			setReady(false);
 			return;
 		}
-
-		/* get current tiles to draw */
-		boolean tilesChanged;
-		synchronized (tilelock) {
-			tilesChanged = mTileManager.getActiveTiles(mDrawTiles);
-		}
-
-		if (mDrawTiles.cnt == 0)
-			return;
 
 		/* keep constant while rendering frame */
 		mLayerAlpha = mAlpha;
 		mOverdrawColor = mOverdraw;
 
-		int tileCnt = mDrawTiles.cnt;
-		MapTile[] tiles = mDrawTiles.tiles;
+		/* get current tiles to draw */
+		synchronized (tilelock) {
+			boolean tilesChanged = mTileManager.getActiveTiles(mDrawTiles);
 
-		if (tilesChanged || v.changed()) {
-			updateTileVisibility(v.pos, v.plane);
+			if (mDrawTiles.cnt == 0) {
+				setReady(false);
+				mProxyTileCnt = 0;
+				return;
+			}
+
+			/* update isVisible flag true for tiles that intersect view */
+			if (tilesChanged || v.changed()) {
+
+				/* lock tiles while updating isVisible state */
+				mProxyTileCnt = 0;
+
+				MapTile[] tiles = mDrawTiles.tiles;
+				int tileZoom = tiles[0].zoomLevel;
+
+				for (int i = 0; i < mDrawTiles.cnt; i++)
+					tiles[i].isVisible = false;
+
+				/* no renderable tile can be locked at this point */
+				if (tileZoom > v.pos.zoomLevel + 2 || tileZoom < v.pos.zoomLevel - 4) {
+					return;
+				}
+
+				/* check visibile tiles */
+				mScanBox.scan(v.pos.x, v.pos.y, v.pos.scale, tileZoom, v.plane);
+			}
 		}
-
-		tileCnt += mProxyTileCnt;
-
 		/* prepare tiles for rendering */
-		if (compileTileLayers(tiles, tileCnt) > 0) {
+		if (compileTileLayers(mDrawTiles.tiles, mDrawTiles.cnt + mProxyTileCnt) > 0) {
 			mUploadSerial++;
 			BufferObject.checkBufferUsage(false);
 		}
-	}
-
-	@Override
-	public void render(GLViewport v) {
-		/* render in update() so that tiles cannot vanish in between. */
+		setReady(true);
 	}
 
 	public void clearTiles() {
 		/* Clear all references to MapTiles as all current
 		 * tiles will also be removed from TileManager. */
-		//mDrawTiles = new TileSet();
+		mDrawTiles.releaseTiles();
 		mDrawTiles.tiles = new MapTile[1];
 		mDrawTiles.cnt = 0;
 	}
@@ -137,17 +147,17 @@ public abstract class TileRenderer extends LayerRenderer {
 			if (!tile.isVisible)
 				continue;
 
-			if (tile.state == READY)
+			if (tile.state(READY))
 				continue;
 
-			if (tile.state == NEW_DATA) {
+			if (tile.state(NEW_DATA)) {
 				uploadCnt += uploadTileData(tile);
 				continue;
 			}
 
 			/* load tile that is referenced by this holder */
 			MapTile proxy = tile.holder;
-			if (proxy != null && proxy.state == NEW_DATA) {
+			if (proxy != null && proxy.state(NEW_DATA)) {
 				uploadCnt += uploadTileData(proxy);
 				tile.state = proxy.state;
 				continue;
@@ -174,7 +184,7 @@ public abstract class TileRenderer extends LayerRenderer {
 	}
 
 	private static int uploadTileData(MapTile tile) {
-		tile.state = READY;
+		tile.setState(READY);
 		RenderBuckets buckets = tile.getBuckets();
 
 		/* tile might only contain label layers */
@@ -190,30 +200,6 @@ public abstract class TileRenderer extends LayerRenderer {
 	}
 
 	private final Object tilelock = new Object();
-
-	/** set tile isVisible flag true for tiles that intersect view */
-	private void updateTileVisibility(MapPosition pos, float[] box) {
-
-		/* lock tiles while updating isVisible state */
-		synchronized (tilelock) {
-			MapTile[] tiles = mDrawTiles.tiles;
-
-			int tileZoom = tiles[0].zoomLevel;
-
-			for (int i = 0; i < mDrawTiles.cnt; i++)
-				tiles[i].isVisible = false;
-
-			if (tileZoom > pos.zoomLevel + 2 || tileZoom < pos.zoomLevel - 4) {
-				//log.debug("skip: zoomlevel diff " + (tileZoom - pos.zoomLevel));
-				return;
-			}
-			/* count placeholder tiles */
-			mProxyTileCnt = 0;
-
-			/* check visibile tiles */
-			mScanBox.scan(pos.x, pos.y, pos.scale, tileZoom, box);
-		}
-	}
 
 	/**
 	 * Update tileSet with currently visible tiles get a TileSet of currently
@@ -248,7 +234,7 @@ public abstract class TileRenderer extends LayerRenderer {
 			tileSet.cnt = 0;
 			for (int i = 0; i < cnt; i++) {
 				MapTile t = newTiles[i];
-				if (t.isVisible && t.state == READY) {
+				if (t.isVisible && t.state(READY)) {
 					t.lock();
 					tileSet.tiles[tileSet.cnt++] = t;
 				}

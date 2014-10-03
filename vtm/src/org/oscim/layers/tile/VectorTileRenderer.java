@@ -45,8 +45,7 @@ public class VectorTileRenderer extends TileRenderer {
 	protected int mDrawSerial;
 
 	@Override
-	public synchronized void update(GLViewport v) {
-		super.update(v);
+	public synchronized void render(GLViewport v) {
 
 		/* discard depth projection from tilt, depth buffer
 		 * is used for clipping */
@@ -67,8 +66,8 @@ public class VectorTileRenderer extends TileRenderer {
 
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
-			// TODO check if proxies are actually available
-			if (t.isVisible && t.state != READY) {
+
+			if (t.isVisible && !t.state(READY)) {
 				GL.glDepthMask(true);
 				GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
@@ -87,7 +86,7 @@ public class VectorTileRenderer extends TileRenderer {
 		/* draw visible tiles */
 		for (int i = 0; i < tileCnt; i++) {
 			MapTile t = tiles[i];
-			if (t.isVisible && t.state == READY)
+			if (t.isVisible && t.state(READY))
 				drawTile(t, v, 0);
 		}
 
@@ -155,8 +154,10 @@ public class VectorTileRenderer extends TileRenderer {
 		        ? tile.getBuckets()
 		        : tile.holder.getBuckets();
 
-		if (buckets == null || buckets.vbo == null)
+		if (buckets == null || buckets.vbo == null) {
+			//log.debug("{} no buckets!", tile);
 			return;
+		}
 
 		MapPosition pos = v.pos;
 		/* place tile relative to map position */
