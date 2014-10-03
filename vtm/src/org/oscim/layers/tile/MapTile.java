@@ -278,6 +278,9 @@ public class MapTile extends Tile {
 			data.dispose();
 			data = data.next;
 		}
+		if (state == DEADBEEF)
+			return;
+
 		state = NONE;
 	}
 
