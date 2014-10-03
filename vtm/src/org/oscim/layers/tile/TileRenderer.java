@@ -130,11 +130,13 @@ public abstract class TileRenderer extends LayerRenderer {
 	}
 
 	public void clearTiles() {
-		/* Clear all references to MapTiles as all current
-		 * tiles will also be removed from TileManager. */
-		mDrawTiles.releaseTiles();
-		mDrawTiles.tiles = new MapTile[1];
-		mDrawTiles.cnt = 0;
+		synchronized (tilelock) {
+			/* Clear all references to MapTiles as all current
+			 * tiles will also be removed from TileManager. */
+			mDrawTiles.releaseTiles();
+			mDrawTiles.tiles = new MapTile[1];
+			mDrawTiles.cnt = 0;
+		}
 	}
 
 	/** compile tile layer data and upload to VBOs */
@@ -222,9 +224,6 @@ public abstract class TileRenderer extends LayerRenderer {
 			MapTile[] newTiles = mDrawTiles.tiles;
 			int cnt = mDrawTiles.cnt;
 
-			/* unlock previous tiles */
-			tileSet.releaseTiles();
-
 			/* ensure same size */
 			if (tileSet.tiles.length != newTiles.length) {
 				tileSet.tiles = new MapTile[newTiles.length];
@@ -234,10 +233,17 @@ public abstract class TileRenderer extends LayerRenderer {
 			tileSet.cnt = 0;
 			for (int i = 0; i < cnt; i++) {
 				MapTile t = newTiles[i];
-				if (t.isVisible && t.state(READY)) {
+				if (t.isVisible && t.state(READY))
 					t.lock();
+			}
+
+			/* unlock previous tiles */
+			tileSet.releaseTiles();
+
+			for (int i = 0; i < cnt; i++) {
+				MapTile t = newTiles[i];
+				if (t.isVisible && t.state(READY))
 					tileSet.tiles[tileSet.cnt++] = t;
-				}
 			}
 
 			tileSet.serial = mUploadSerial;
