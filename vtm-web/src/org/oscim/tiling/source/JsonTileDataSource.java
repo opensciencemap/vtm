@@ -72,7 +72,12 @@ public class JsonTileDataSource implements ITileDataSource {
 	boolean mFinished;
 
 	@Override
-	public void destroy() {
+	public void dispose() {
+		mFinished = true;
+	}
+
+	@Override
+	public void cancel() {
 		mFinished = true;
 	}
 

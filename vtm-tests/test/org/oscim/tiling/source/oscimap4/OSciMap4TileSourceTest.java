@@ -29,7 +29,7 @@ public class OSciMap4TileSourceTest {
 		LwHttp lwHttp = Mockito.mock(LwHttp.class);
 		tileSource.setHttpEngine(new TestHttpFactory(lwHttp));
 		ITileDataSource dataSource = tileSource.getDataSource();
-		dataSource.destroy();
+		dataSource.dispose();
 		Mockito.verify(lwHttp).close();
 	}
 
@@ -38,7 +38,7 @@ public class OSciMap4TileSourceTest {
 		OkHttpEngine okHttp = Mockito.mock(OkHttpEngine.class);
 		tileSource.setHttpEngine(new TestHttpFactory(okHttp));
 		ITileDataSource dataSource = tileSource.getDataSource();
-		dataSource.destroy();
+		dataSource.dispose();
 		Mockito.verify(okHttp).close();
 	}
 

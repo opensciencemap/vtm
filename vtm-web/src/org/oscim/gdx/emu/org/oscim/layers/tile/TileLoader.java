@@ -40,15 +40,20 @@ public abstract class TileLoader implements ITileDataSink {
 		mTileManager = tileManager;
 	}
 
-	public abstract void cleanup();
+	public abstract void dispose();
 
 	protected abstract boolean loadTile(MapTile tile);
 
 	boolean isInterrupted;
 
-	public void interrupt() {
+	public void finish() {
 		isInterrupted = true;
 		// cancel loading
+	}
+
+	public void cancel() {
+		isInterrupted = true;
+		// cancel loading... ?
 	}
 
 	boolean mPausing;

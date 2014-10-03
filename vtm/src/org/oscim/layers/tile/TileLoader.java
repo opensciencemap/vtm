@@ -23,8 +23,13 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.utils.PausableThread;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class TileLoader extends PausableThread implements ITileDataSink {
+
+	static final Logger log = LoggerFactory.getLogger(TileLoader.class);
+
 	private static int id;
 
 	private final String THREAD_NAME;
@@ -77,7 +82,9 @@ public abstract class TileLoader extends PausableThread implements ITileDataSink
 		return mTileManager.hasTileJobs();
 	}
 
-	public abstract void cleanup();
+	public abstract void dispose();
+
+	public abstract void cancel();
 
 	/**
 	 * Callback to be called by TileDataSource when finished
@@ -85,15 +92,12 @@ public abstract class TileLoader extends PausableThread implements ITileDataSink
 	 */
 	@Override
 	public void completed(QueryResult result) {
-		boolean success = result == SUCCESS;
+		boolean ok = (result == SUCCESS);
 
-		if (isCanceled())
-			success = false;
+		if (ok && (isCanceled() || isInterrupted()))
+			ok = false;
 
-		if (isInterrupted())
-			success = false;
-
-		mTileManager.jobCompleted(mTile, success);
+		mTileManager.jobCompleted(mTile, ok);
 		mTile = null;
 	}
 

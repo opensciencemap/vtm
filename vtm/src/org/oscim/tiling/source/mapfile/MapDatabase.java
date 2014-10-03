@@ -213,13 +213,13 @@ public class MapDatabase implements ITileDataSource {
 		} catch (IOException e) {
 			log.error(e.getMessage());
 			// make sure that the file is closed
-			destroy();
+			dispose();
 			throw new IOException();
 		}
 	}
 
 	@Override
-	public void destroy() {
+	public void dispose() {
 		mReadBuffer = null;
 		if (mInputFile != null) {
 
@@ -230,6 +230,10 @@ public class MapDatabase implements ITileDataSource {
 				log.error(e.getMessage());
 			}
 		}
+	}
+
+	@Override
+	public void cancel() {
 	}
 
 	/**

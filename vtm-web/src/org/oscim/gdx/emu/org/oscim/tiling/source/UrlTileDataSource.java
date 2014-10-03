@@ -84,7 +84,13 @@ public class UrlTileDataSource implements ITileDataSource {
 	}
 
 	@Override
-	public void destroy() {
+	public void dispose() {
 		mConn.close();
 	}
+
+	@Override
+	public void cancel() {
+		mConn.close();
+	}
+
 }

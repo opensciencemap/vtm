@@ -50,8 +50,13 @@ class S3DBTileLoader extends TileLoader {
 	}
 
 	@Override
-	public void cleanup() {
-		mTileDataSource.destroy();
+	public void dispose() {
+		mTileDataSource.dispose();
+	}
+
+	@Override
+	public void cancel() {
+		mTileDataSource.cancel();
 	}
 
 	@Override

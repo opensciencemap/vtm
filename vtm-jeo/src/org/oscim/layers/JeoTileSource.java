@@ -61,9 +61,15 @@ public class JeoTileSource extends TileSource {
 			}
 
 			@Override
-			public void destroy() {
+			public void dispose() {
 
 			}
+
+			@Override
+			public void cancel() {
+
+			}
+
 		};
 	}
 

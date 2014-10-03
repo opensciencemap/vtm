@@ -30,7 +30,7 @@ public class BitmapTileSourceTest {
 		LwHttp lwHttp = Mockito.mock(LwHttp.class);
 		tileSource.setHttpEngine(new TestHttpFactory(lwHttp));
 		ITileDataSource dataSource = tileSource.getDataSource();
-		dataSource.destroy();
+		dataSource.dispose();
 		Mockito.verify(lwHttp).close();
 	}
 
@@ -39,7 +39,7 @@ public class BitmapTileSourceTest {
 		OkHttpEngine okHttp = Mockito.mock(OkHttpEngine.class);
 		tileSource.setHttpEngine(new TestHttpFactory(okHttp));
 		UrlTileDataSource dataSource = (UrlTileDataSource) tileSource.getDataSource();
-		dataSource.destroy();
+		dataSource.dispose();
 		Mockito.verify(okHttp).close();
 	}
 

@@ -1,6 +1,5 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
- * Copyright 2012 Hannes Janetzek
+ * Copyright 2014 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,22 +18,20 @@ package org.oscim.tiling;
 
 import org.oscim.layers.tile.MapTile;
 
-/**
- *
- *
- */
 public interface ITileDataSource {
 
 	/**
-	 * Starts a database query with the given parameters.
-	 * 
 	 * @param tile
-	 *            the tile to read.
+	 *            the tile to load.
 	 * @param mapDataSink
-	 *            the callback which handles the extracted map elements.
+	 *            the callback to handle the extracted map elements.
 	 */
 	abstract void query(MapTile tile, ITileDataSink mapDataSink);
 
-	abstract void destroy();
+	/** Implementations should cancel and release all resources */
+	abstract void dispose();
+
+	/** Implementations should cancel their IO work and return */
+	abstract void cancel();
 
 }

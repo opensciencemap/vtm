@@ -126,7 +126,12 @@ public class BitmapTileSource extends UrlTileSource {
 		}
 
 		@Override
-		public void destroy() {
+		public void dispose() {
 		}
+
+		@Override
+		public void cancel() {
+		}
+
 	}
 }

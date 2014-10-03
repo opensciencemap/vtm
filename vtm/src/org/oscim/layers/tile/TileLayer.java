@@ -105,8 +105,8 @@ public abstract class TileLayer extends Layer implements UpdateListener {
 	public void onDetach() {
 		for (TileLoader loader : mTileLoader) {
 			loader.pause();
-			loader.interrupt();
-			loader.cleanup();
+			loader.finish();
+			loader.dispose();
 		}
 	}
 
@@ -117,9 +117,12 @@ public abstract class TileLayer extends Layer implements UpdateListener {
 
 	protected void pauseLoaders(boolean wait) {
 		for (TileLoader loader : mTileLoader) {
+			loader.cancel();
+
 			if (!loader.isPausing())
 				loader.pause();
 		}
+
 		if (!wait)
 			return;
 

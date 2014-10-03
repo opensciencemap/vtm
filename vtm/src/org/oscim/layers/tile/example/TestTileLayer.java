@@ -83,7 +83,12 @@ public class TestTileLayer extends TileLayer {
 		}
 
 		@Override
-		public void cleanup() {
+		public void dispose() {
 		}
+
+		@Override
+		public void cancel() {
+		}
+
 	}
 }

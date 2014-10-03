@@ -67,6 +67,11 @@ public class BitmapTileLoader extends TileLoader {
 	}
 
 	@Override
-	public void cleanup() {
+	public void dispose() {
 	}
+
+	@Override
+	public void cancel() {
+	}
+
 }

@@ -81,9 +81,15 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	@Override
-	public void cleanup() {
+	public void dispose() {
 		if (mTileDataSource != null)
-			mTileDataSource.destroy();
+			mTileDataSource.dispose();
+	}
+
+	@Override
+	public void cancel() {
+		if (mTileDataSource != null)
+			mTileDataSource.cancel();
 	}
 
 	@Override
@@ -149,7 +155,7 @@ public class VectorTileLoader extends TileLoader implements IRenderTheme.Callbac
 	}
 
 	public void setDataSource(ITileDataSource dataSource) {
-		cleanup();
+		dispose();
 		mTileDataSource = dataSource;
 	}
 
