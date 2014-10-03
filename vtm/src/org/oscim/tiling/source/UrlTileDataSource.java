@@ -71,7 +71,7 @@ public class UrlTileDataSource implements ITileDataSource {
 			}
 		}
 
-		boolean success = false;
+		boolean ok = false;
 		TileWriter cacheWriter = null;
 		try {
 			mConn.sendRequest(tile);
@@ -80,7 +80,7 @@ public class UrlTileDataSource implements ITileDataSource {
 				cacheWriter = cache.writeTile(tile);
 				mConn.setCache(cacheWriter.getOutputStream());
 			}
-			success = mTileDecoder.decode(tile, sink, is);
+			ok = mTileDecoder.decode(tile, sink, is);
 		} catch (SocketException e) {
 			log.debug("{} Socket Error: {}", tile, e.getMessage());
 		} catch (SocketTimeoutException e) {
@@ -90,11 +90,12 @@ public class UrlTileDataSource implements ITileDataSource {
 		} catch (IOException e) {
 			log.debug("{} Network Error: {}", tile, e.getMessage());
 		} finally {
-			success = mConn.requestCompleted(success);
+			ok = mConn.requestCompleted(ok);
 			if (cacheWriter != null)
-				cacheWriter.complete(success);
+				cacheWriter.complete(ok);
+
+			sink.completed(ok ? SUCCESS : FAILED);
 		}
-		sink.completed(success ? SUCCESS : FAILED);
 	}
 
 	@Override

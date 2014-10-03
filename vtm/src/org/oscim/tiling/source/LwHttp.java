@@ -247,7 +247,13 @@ public class LwHttp implements HttpEngine {
 		}
 	}
 
-	public InputStream read() throws IOException {
+	private void checkSocket() throws IOException {
+		if (mSocket == null)
+			throw new IOException("No Socket");
+	}
+
+	public synchronized InputStream read() throws IOException {
+		checkSocket();
 
 		Buffer is = mResponseStream;
 		is.mark(BUFFER_SIZE);
@@ -325,7 +331,7 @@ public class LwHttp implements HttpEngine {
 	}
 
 	@Override
-	public void sendRequest(Tile tile) throws IOException {
+	public synchronized void sendRequest(Tile tile) throws IOException {
 
 		if (mSocket != null) {
 			if (--mMaxRequests < 0)
@@ -380,7 +386,7 @@ public class LwHttp implements HttpEngine {
 		//mCommandStream.flush();
 	}
 
-	private void lwHttpConnect() throws IOException {
+	private synchronized void lwHttpConnect() throws IOException {
 		if (mSockAddr == null || mSockAddr.isUnresolved()) {
 			mSockAddr = new InetSocketAddress(mHost, mPort);
 			if (mSockAddr.isUnresolved())
@@ -404,44 +410,34 @@ public class LwHttp implements HttpEngine {
 
 	@Override
 	public void close() {
-		if (mSocket == null)
-			return;
-
 		IOUtils.closeQuietly(mSocket);
-		mSocket = null;
-		mCommandStream = null;
-		mResponseStream = null;
+		synchronized (this) {
+			mSocket = null;
+			mCommandStream = null;
+			mResponseStream = null;
+		}
 	}
 
 	@Override
-	public void setCache(OutputStream os) {
-		if (mResponseStream == null)
+	public synchronized void setCache(OutputStream os) {
+		if (mSocket == null)
 			return;
 
 		mResponseStream.setCache(os);
 	}
 
 	@Override
-	public boolean requestCompleted(boolean success) {
-		if (mResponseStream == null)
+	public synchronized boolean requestCompleted(boolean ok) {
+		if (mSocket == null)
 			return false;
 
 		mLastRequest = System.nanoTime();
 		mResponseStream.setCache(null);
 
-		if (!mResponseStream.finishedReading()) {
-			if (dbg)
-				log.debug("invalid buffer position");
-
-			/* hmmm, some bitmaps seems to not be decoded to the
-			 * end but still working */
-			close();
-		}
-
-		if (!success || mMustCloseConnection)
+		if (!ok || mMustCloseConnection || !mResponseStream.finishedReading())
 			close();
 
-		return success;
+		return ok;
 	}
 
 	/** write (positive) integer to byte array */
