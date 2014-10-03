@@ -25,43 +25,42 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class PausableThread extends Thread {
 	private final static Logger log = LoggerFactory.getLogger(PausableThread.class);
-	private final static boolean DEBUG = false;
+	private final static boolean dbg = false;
 
 	private boolean mPausing = true;
+	private boolean mRunning = true;
 	private boolean mShouldPause = false;
+	private boolean mShouldStop = false;
 
 	/**
 	 * Causes the current thread to wait until this thread is pausing.
 	 */
 	public final void awaitPausing() {
 		synchronized (this) {
-			while (!isInterrupted() && !isPausing()) {
-				if (DEBUG)
-					log.debug("await {}", getThreadName());
+
+			while (!isPausing()) {
+
+				if (dbg)
+					log.debug("Await Pause {}", getThreadName());
+
 				try {
-					wait(10);
+					wait(100);
 				} catch (InterruptedException e) {
-					// restore the interrupted status
-					Thread.currentThread().interrupt();
+					/* restore the interrupted status */
+					this.interrupt();
 				}
 			}
 		}
 	}
 
-	@Override
-	public void interrupt() {
-		if (DEBUG)
-			log.debug("interrupt {}", getThreadName());
+	public synchronized void finish() {
+		if (!mRunning)
+			return;
 
-		// first acquire the monitor which is used to call wait()
-		synchronized (this) {
-			super.interrupt();
-		}
-		//try {
-		//	join();
-		//} catch (InterruptedException e) {
-		//	e.printStackTrace();
-		//}
+		log.debug("Finish {}", getThreadName());
+
+		mShouldStop = true;
+		this.interrupt();
 	}
 
 	/**
@@ -77,12 +76,8 @@ public abstract class PausableThread extends Thread {
 	public final synchronized void pause() {
 		if (!mShouldPause) {
 			mShouldPause = true;
-			notify();
+			this.interrupt();
 		}
-	}
-
-	public final synchronized boolean isCanceled() {
-		return mShouldPause;
 	}
 
 	/**
@@ -95,22 +90,43 @@ public abstract class PausableThread extends Thread {
 		}
 	}
 
+	public final synchronized boolean isCanceled() {
+		return mShouldPause;
+	}
+
 	@Override
 	public final void run() {
+		mRunning = true;
 		setName(getThreadName());
 		setPriority(getThreadPriority());
 
-		while (!isInterrupted()) {
+		O: while (!mShouldStop) {
+
 			synchronized (this) {
-				while (!isInterrupted() && (mShouldPause || !hasWork())) {
+				if (mShouldStop)
+					break;
+
+				while ((mShouldPause || !hasWork())) {
 					try {
 						if (mShouldPause) {
 							mPausing = true;
+
+							if (dbg)
+								log.debug("Pausing: {}",
+								          getThreadName());
 						}
+
 						wait();
+
 					} catch (InterruptedException e) {
-						// restore the interrupted status
-						interrupt();
+						if (dbg)
+							log.debug("Interrupted {} {}:{}",
+							          getThreadName(),
+							          mShouldPause,
+							          mShouldStop);
+
+						if (mShouldStop)
+							break O;
 					}
 				}
 
@@ -118,27 +134,24 @@ public abstract class PausableThread extends Thread {
 					mPausing = false;
 					afterPause();
 				}
-
-				if (DEBUG)
-					log.debug("resume {}", getThreadName());
-			}
-
-			if (isInterrupted()) {
-				break;
 			}
 
 			try {
 				doWork();
 			} catch (InterruptedException e) {
-				// restore the interrupted status
-				interrupt();
+				if (dbg)
+					log.debug("Interrupted {} {}:{}",
+					          getThreadName(),
+					          mShouldPause,
+					          mShouldStop);
+
 			}
 		}
 
-		if (DEBUG)
-			log.debug("finish {}", getThreadName());
+		log.debug("Done {}", getThreadName());
 
 		mPausing = true;
+		mRunning = false;
 
 		afterRun();
 	}
