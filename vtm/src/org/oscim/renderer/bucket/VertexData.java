@@ -19,6 +19,7 @@ package org.oscim.renderer.bucket;
 import java.nio.ShortBuffer;
 
 import org.oscim.renderer.bucket.VertexData.Chunk;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 import org.slf4j.Logger;
@@ -150,6 +151,14 @@ public class VertexData extends Inlist.List<Chunk> {
 		vertices[used++] = a;
 	}
 
+	static final short toShort(float v) {
+		return (short) FastMath.clamp(v, Short.MIN_VALUE, Short.MAX_VALUE);
+	}
+
+	public void add(float a, float b) {
+		add(toShort(a), toShort(b));
+	}
+
 	public void add(short a, short b) {
 		if (used == SIZE)
 			getNext();
@@ -157,6 +166,10 @@ public class VertexData extends Inlist.List<Chunk> {
 		vertices[used + 0] = a;
 		vertices[used + 1] = b;
 		used += 2;
+	}
+
+	public void add(float a, float b, float c) {
+		add(toShort(a), toShort(b), toShort(c));
 	}
 
 	public void add(short a, short b, short c) {
@@ -169,6 +182,10 @@ public class VertexData extends Inlist.List<Chunk> {
 		used += 3;
 	}
 
+	public void add(float a, float b, float c, float d) {
+		add(toShort(a), toShort(b), toShort(c), toShort(d));
+	}
+
 	public void add(short a, short b, short c, short d) {
 		if (used == SIZE)
 			getNext();
@@ -178,6 +195,10 @@ public class VertexData extends Inlist.List<Chunk> {
 		vertices[used + 2] = c;
 		vertices[used + 3] = d;
 		used += 4;
+	}
+
+	public void add(float a, float b, float c, float d, float e, float f) {
+		add(toShort(a), toShort(b), toShort(c), toShort(d), toShort(e), toShort(f));
 	}
 
 	public void add(short a, short b, short c, short d, short e, short f) {
@@ -216,7 +237,7 @@ public class VertexData extends Inlist.List<Chunk> {
 		used = size;
 	}
 
-	/* Do not use! */
+	/** Do not use! */
 	public void seek(int offset) {
 		used += offset;
 		cur.used = used;

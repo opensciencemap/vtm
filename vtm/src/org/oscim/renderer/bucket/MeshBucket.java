@@ -68,19 +68,19 @@ public class MeshBucket extends RenderBucket {
 			return;
 		}
 
-		vertexItems.add((short) (geom.points[0] * COORD_SCALE),
-		                (short) (geom.points[1] * COORD_SCALE));
+		vertexItems.add(geom.points[0] * COORD_SCALE,
+		                geom.points[1] * COORD_SCALE);
 
-		vertexItems.add((short) (geom.points[2] * COORD_SCALE),
-		                (short) (geom.points[3] * COORD_SCALE));
+		vertexItems.add(geom.points[2] * COORD_SCALE,
+		                geom.points[3] * COORD_SCALE);
 		short prev = (short) (start + 1);
 
 		numVertices += 2;
 
 		for (int i = 4; i < geom.index[0]; i += 2) {
 
-			vertexItems.add((short) (geom.points[i + 0] * COORD_SCALE),
-			                (short) (geom.points[i + 1] * COORD_SCALE));
+			vertexItems.add(geom.points[i + 0] * COORD_SCALE,
+			                geom.points[i + 1] * COORD_SCALE);
 
 			indiceItems.add(start, prev, ++prev);
 			numVertices++;
