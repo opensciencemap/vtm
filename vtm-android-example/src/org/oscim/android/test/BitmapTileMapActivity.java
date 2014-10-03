@@ -14,27 +14,29 @@
  */
 package org.oscim.android.test;
 
-import static org.oscim.tiling.source.bitmap.DefaultSources.OPENSTREETMAP;
-
 import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.android.cache.TileCache;
 import org.oscim.backend.canvas.Color;
+import org.oscim.core.MapPosition;
+import org.oscim.core.MercatorProjection;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import android.os.Bundle;
 
 public class BitmapTileMapActivity extends MapActivity {
 
-	private final static boolean USE_CACHE = true;
+	private final static boolean USE_CACHE = false;
 	private final TileSource mTileSource;
 	protected BitmapTileLayer mBitmapLayer;
 
 	public BitmapTileMapActivity() {
-		mTileSource = OPENSTREETMAP.build();
+		//mTileSource = DefaultSources.STAMEN_TONER.build();
+		mTileSource = DefaultSources.OPENSTREETMAP.build();
 	}
 
 	public BitmapTileMapActivity(TileSource tileSource) {
@@ -64,6 +66,8 @@ public class BitmapTileMapActivity extends MapActivity {
 
 		mBitmapLayer = new BitmapTileLayer(mMap, mTileSource);
 		mMap.layers().add(mBitmapLayer);
+
+		//loooop(1);
 	}
 
 	@Override
@@ -71,5 +75,37 @@ public class BitmapTileMapActivity extends MapActivity {
 		super.onDestroy();
 		if (USE_CACHE)
 			mCache.dispose();
+	}
+
+	// Stress testing
+	void loooop(final int i) {
+		final long time = (long) (500 + Math.random() * 1000);
+		mMapView.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+
+				MapPosition p = new MapPosition();
+				if (i == 1) {
+					mMapView.map().getMapPosition(p);
+					p.setScale(4);
+					mMapView.map().animator().animateTo(time, p);
+				} else {
+					//mMapView.map().setMapPosition(p);
+					p.setScale(2 + (1 << (int) (Math.random() * 13)));
+					//	p.setX((p.getX() + (Math.random() * 4 - 2) / p.getScale()));
+					//	p.setY((p.getY() + (Math.random() * 4 - 2) / p.getScale()));
+					p.setX(MercatorProjection.longitudeToX(Math.random() * 180));
+					p.setY(MercatorProjection.latitudeToY(Math.random() * 60));
+
+					p.setTilt((float) (Math.random() * 60));
+					p.setBearing((float) (Math.random() * 360));
+					//mMapView.map().setMapPosition(p);
+
+					mMapView.map().animator().animateTo(time, p);
+				}
+				loooop((i + 1) % 2);
+
+			}
+		}, time);
 	}
 }

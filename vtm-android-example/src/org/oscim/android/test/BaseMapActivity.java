@@ -25,14 +25,17 @@ import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class BaseMapActivity extends MapActivity {
+	static final Logger log = LoggerFactory.getLogger(BaseMapActivity.class);
 
-	final static boolean USE_CACHE = true;
+	final static boolean USE_CACHE = false;
 
 	MapView mMapView;
 	VectorTileLayer mBaseLayer;

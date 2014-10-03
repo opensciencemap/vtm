@@ -15,10 +15,13 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */package org.oscim.android.test;
 
-import org.oscim.layers.tile.buildings.BuildingLayer;
+import org.oscim.core.MapPosition;
+import org.oscim.core.MercatorProjection;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
+import org.oscim.theme.IRenderTheme;
+import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
 
 import android.os.Bundle;
@@ -31,33 +34,53 @@ public class SimpleMapActivity extends BaseMapActivity {
 		Map m = this.map();
 
 		Layers layers = mMap.layers();
-		layers.add(new BuildingLayer(mMap, mBaseLayer));
+		//layers.add(new BuildingLayer(mMap, mBaseLayer));
 		layers.add(new LabelLayer(mMap, mBaseLayer));
-		//layers.add(new TileGridLayer(mMap));
 
 		m.setTheme(VtmThemes.DEFAULT);
-		//mMap.setTheme(VtmThemes.TRONRENDER);
-		//mMap.setTheme(VtmThemes.TRON2);
-		//mMap.setTheme(VtmThemes.OSMARENDER);
 	}
+
+	void runTheMonkey() {
+		themes[0] = ThemeLoader.load(VtmThemes.DEFAULT);
+		themes[1] = ThemeLoader.load(VtmThemes.OSMARENDER);
+		themes[2] = ThemeLoader.load(VtmThemes.TRONRENDER);
+		loooop(1);
+	}
+
+	IRenderTheme[] themes = new IRenderTheme[3];
 
 	// Stress testing
 	void loooop(final int i) {
+		final long time = (long) (500 + Math.random() * 1000);
 		mMapView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				VtmThemes t;
-				if (i == 0)
-					t = VtmThemes.DEFAULT;
-				else if (i == 1)
-					t = VtmThemes.TRONRENDER;
-				else
-					t = VtmThemes.OSMARENDER;
 
-				mMapView.map().setTheme(t);
+				mMapView.map().setTheme(themes[i]);
 
-				loooop((i + 1) % 3);
+				MapPosition p = new MapPosition();
+				if (i == 1) {
+					mMapView.map().getMapPosition(p);
+					p.setScale(4);
+					mMapView.map().animator().animateTo(time, p);
+				} else {
+					//mMapView.map().setMapPosition(p);
+
+					p.setScale(2 + (1 << (int) (Math.random() * 13)));
+					//	p.setX((p.getX() + (Math.random() * 4 - 2) / p.getScale()));
+					//	p.setY((p.getY() + (Math.random() * 4 - 2) / p.getScale()));
+					p.setX(MercatorProjection.longitudeToX(Math.random() * 180));
+					p.setY(MercatorProjection.latitudeToY(Math.random() * 60));
+
+					p.setTilt((float) (Math.random() * 60));
+					p.setBearing((float) (Math.random() * 360));
+					//mMapView.map().setMapPosition(p);
+
+					mMapView.map().animator().animateTo(time, p);
+				}
+				loooop((i + 1) % 2);
+
 			}
-		}, 300 + (int) (Math.random() * 200));
+		}, time);
 	}
 }
