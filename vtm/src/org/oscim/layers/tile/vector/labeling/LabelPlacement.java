@@ -395,31 +395,27 @@ public class LabelPlacement {
 		/* add way labels */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			synchronized (t) {
-				if (!t.state(READY | NEW_DATA))
-					continue;
+			if (!t.state(READY | NEW_DATA))
+				continue;
 
-				float dx = (float) (t.tileX * Tile.SIZE - tileX);
-				float dy = (float) (t.tileY * Tile.SIZE - tileY);
-				dx = flipLongitude(dx, maxx);
+			float dx = (float) (t.tileX * Tile.SIZE - tileX);
+			float dy = (float) (t.tileY * Tile.SIZE - tileY);
+			dx = flipLongitude(dx, maxx);
 
-				l = addWayLabels(t, l, dx, dy, scale);
-			}
+			l = addWayLabels(t, l, dx, dy, scale);
 		}
 
 		/* add caption */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			synchronized (t) {
-				if (!t.state(READY | NEW_DATA))
-					continue;
+			if (!t.state(READY | NEW_DATA))
+				continue;
 
-				float dx = (float) (t.tileX * Tile.SIZE - tileX);
-				float dy = (float) (t.tileY * Tile.SIZE - tileY);
-				dx = flipLongitude(dx, maxx);
+			float dx = (float) (t.tileX * Tile.SIZE - tileX);
+			float dy = (float) (t.tileY * Tile.SIZE - tileY);
+			dx = flipLongitude(dx, maxx);
 
-				l = addNodeLabels(t, l, dx, dy, scale, cos, sin);
-			}
+			l = addNodeLabels(t, l, dx, dy, scale, cos, sin);
 		}
 
 		for (Label ti = mLabels; ti != null; ti = (Label) ti.next) {
@@ -451,35 +447,33 @@ public class LabelPlacement {
 		/* add symbol items */
 		for (int i = 0, n = mTileSet.cnt; i < n; i++) {
 			MapTile t = tiles[i];
-			synchronized (t) {
-				if (!t.state(READY | NEW_DATA))
+			if (!t.state(READY | NEW_DATA))
+				continue;
+
+			float dx = (float) (t.tileX * Tile.SIZE - tileX);
+			float dy = (float) (t.tileY * Tile.SIZE - tileY);
+			dx = flipLongitude(dx, maxx);
+
+			LabelTileData ld = getLabels(t);
+			if (ld == null)
+				continue;
+
+			for (SymbolItem ti : ld.symbols) {
+				if (ti.texRegion == null)
 					continue;
 
-				float dx = (float) (t.tileX * Tile.SIZE - tileX);
-				float dy = (float) (t.tileY * Tile.SIZE - tileY);
-				dx = flipLongitude(dx, maxx);
+				int x = (int) ((dx + ti.x) * scale);
+				int y = (int) ((dy + ti.y) * scale);
 
-				LabelTileData ld = getLabels(t);
-				if (ld == null)
+				if (!isVisible(x, y))
 					continue;
 
-				for (SymbolItem ti : ld.symbols) {
-					if (ti.texRegion == null)
-						continue;
-
-					int x = (int) ((dx + ti.x) * scale);
-					int y = (int) ((dy + ti.y) * scale);
-
-					if (!isVisible(x, y))
-						continue;
-
-					SymbolItem s = SymbolItem.pool.get();
-					s.texRegion = ti.texRegion;
-					s.x = x;
-					s.y = y;
-					s.billboard = true;
-					sl.addSymbol(s);
-				}
+				SymbolItem s = SymbolItem.pool.get();
+				s.texRegion = ti.texRegion;
+				s.x = x;
+				s.y = y;
+				s.billboard = true;
+				sl.addSymbol(s);
 			}
 		}
 
