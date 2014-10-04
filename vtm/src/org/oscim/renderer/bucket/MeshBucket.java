@@ -182,9 +182,6 @@ public class MeshBucket extends RenderBucket {
 			float heightOffset = 0;
 			gl.uniform1f(s.uHeight, heightOffset);
 
-			int zoom = v.pos.zoomLevel;
-			float scale = (float) v.pos.getZoomScale();
-
 			for (; l != null && l.type == MESH; l = l.next) {
 				MeshBucket ml = (MeshBucket) l;
 
@@ -225,8 +222,6 @@ public class MeshBucket extends RenderBucket {
 
 		private static final int OPAQUE = 0xff000000;
 
-		//private static final float FADE_START = 1.3f;
-
 		static void setColor(AreaStyle a, Shader s, MapPosition pos) {
 			float fade = a.getFade(pos.scale);
 			float blend = a.getBlend(pos.scale);
@@ -234,12 +229,12 @@ public class MeshBucket extends RenderBucket {
 			if (fade < 1.0f) {
 				GLState.blend(true);
 				GLUtils.setColor(s.uColor, a.color, fade);
-			} else if (blend < 1.0f) {
-				if (blend == 0.0f)
+			} else if (blend > 0.0f) {
+				if (blend == 1.0f)
 					GLUtils.setColor(s.uColor, a.blendColor, 1);
 				else
 					GLUtils.setColorBlend(s.uColor, a.color,
-					                      a.blendColor, 1 - blend);
+					                      a.blendColor, blend);
 			} else {
 				/* test if color contains alpha */
 				GLState.blend((a.color & OPAQUE) != OPAQUE);

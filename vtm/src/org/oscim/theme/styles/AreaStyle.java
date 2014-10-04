@@ -28,6 +28,7 @@ import org.oscim.utils.FastMath;
  */
 public class AreaStyle extends RenderStyle {
 	private static final int OPAQUE = 0xff000000;
+	private static final float FADE_START = 0.25f;
 
 	/** Drawing order level */
 	private final int level;
@@ -119,14 +120,14 @@ public class AreaStyle extends RenderStyle {
 			return 1;
 
 		float f = (float) (scale / (1 << fadeScale)) - 1;
-		return FastMath.clamp(f, 0, 1);
+		return FastMath.clamp(f, FADE_START, 1);
 	}
 
 	public float getBlend(double scale) {
 		if (blendScale < 0)
-			return 1;
+			return 0;
 
-		float f = (float) ((1 << blendScale) / scale) - 1;
+		float f = (float) (scale / (1 << blendScale)) - 1;
 		return FastMath.clamp(f, 0, 1);
 	}
 

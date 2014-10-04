@@ -161,8 +161,6 @@ public final class PolygonBucket extends RenderBucket {
 		private static final int STENCIL_BITS = 8;
 		public final static int CLIP_BIT = 0x80;
 
-		//private static final float FADE_START = 1.3f;
-
 		private static PolygonBucket[] mAreaLayer;
 
 		private static Shader polyShader;
@@ -214,12 +212,12 @@ public final class PolygonBucket extends RenderBucket {
 					if (fade < 1.0f) {
 						GLState.blend(true);
 						GLUtils.setColor(s.uColor, a.color, fade);
-					} else if (blend < 1.0f) {
-						if (blend == 0.0f)
+					} else if (blend > 0.0f) {
+						if (blend == 1.0f)
 							GLUtils.setColor(s.uColor, a.blendColor, 1);
 						else
 							GLUtils.setColorBlend(s.uColor, a.color,
-							                      a.blendColor, 1 - blend);
+							                      a.blendColor, blend);
 					} else {
 						/* test if color contains alpha */
 						GLState.blend((a.color & OPAQUE) != OPAQUE);
