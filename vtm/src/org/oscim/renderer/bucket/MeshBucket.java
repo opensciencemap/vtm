@@ -22,6 +22,7 @@ import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
+import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
@@ -197,7 +198,7 @@ public class MeshBucket extends RenderBucket {
 				if (ml.area == null)
 					GLUtils.setColor(s.uColor, Color.BLUE, 0.4f);
 				else {
-					setColor(ml.area.current(), s, zoom, scale);
+					setColor(ml.area.current(), s, v.pos);
 				}
 				gl.vertexAttribPointer(s.aPos, 2, GL.SHORT,
 				                       false, 0, ml.vertexOffset);
@@ -223,36 +224,25 @@ public class MeshBucket extends RenderBucket {
 		}
 
 		private static final int OPAQUE = 0xff000000;
-		private static final float FADE_START = 1.3f;
 
-		static void setColor(AreaStyle a, Shader s, int zoom, float scale) {
-			if (a.fadeScale >= zoom) {
-				float f = 1.0f;
-				/* fade in/out */
-				if (a.fadeScale >= zoom) {
-					if (scale > FADE_START)
-						f = scale - 1;
-					else
-						f = FADE_START - 1;
-				}
+		//private static final float FADE_START = 1.3f;
+
+		static void setColor(AreaStyle a, Shader s, MapPosition pos) {
+			float fade = a.getFade(pos.scale);
+			float blend = a.getBlend(pos.scale);
+
+			if (fade < 1.0f) {
 				GLState.blend(true);
-
-				GLUtils.setColor(s.uColor, a.color, f);
-
-			} else if (a.blendScale > 0 && a.blendScale <= zoom) {
-				/* blend colors (not alpha) */
-				GLState.blend(false);
-
-				if (a.blendScale == zoom)
-					GLUtils.setColorBlend(s.uColor, a.color,
-					                      a.blendColor, scale - 1.0f);
-				else
+				GLUtils.setColor(s.uColor, a.color, fade);
+			} else if (blend < 1.0f) {
+				if (blend == 0.0f)
 					GLUtils.setColor(s.uColor, a.blendColor, 1);
-
+				else
+					GLUtils.setColorBlend(s.uColor, a.color,
+					                      a.blendColor, 1 - blend);
 			} else {
 				/* test if color contains alpha */
 				GLState.blend((a.color & OPAQUE) != OPAQUE);
-
 				GLUtils.setColor(s.uColor, a.color, 1);
 			}
 		}

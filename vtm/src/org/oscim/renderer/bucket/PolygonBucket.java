@@ -23,6 +23,7 @@ import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL;
 import org.oscim.core.GeometryBuffer;
+import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.renderer.GLShader;
@@ -160,7 +161,7 @@ public final class PolygonBucket extends RenderBucket {
 		private static final int STENCIL_BITS = 8;
 		public final static int CLIP_BIT = 0x80;
 
-		private static final float FADE_START = 1.3f;
+		//private static final float FADE_START = 1.3f;
 
 		private static PolygonBucket[] mAreaLayer;
 
@@ -176,8 +177,8 @@ public final class PolygonBucket extends RenderBucket {
 			return true;
 		}
 
-		private static void fillPolygons(GLViewport v, int start, int end, int zoom,
-		        float scale, float div) {
+		private static void fillPolygons(GLViewport v, int start, int end,
+		        MapPosition pos, float div) {
 
 			/* draw to framebuffer */
 			gl.colorMask(true, true, true, true);
@@ -190,51 +191,41 @@ public final class PolygonBucket extends RenderBucket {
 				PolygonBucket l = mAreaLayer[i];
 				AreaStyle a = l.area.current();
 
-				boolean useTexture = enableTexture && a.texture != null;
-				if (useTexture)
+				if (enableTexture && (a.texture != null)) {
 					s = setShader(texShader, v.mvp, false);
-				else
-					s = setShader(polyShader, v.mvp, false);
 
-				if (useTexture) {
 					float num = clamp((Tile.SIZE / a.texture.width) >> 1, 1, Tile.SIZE);
-					float transition = Interpolation.exp5.apply(clamp(scale - 1, 0, 1));
+
+					float scale = (float) pos.getZoomScale();
+					float transition = clamp(scale - 1, 0, 1);
+					transition = Interpolation.exp5.apply(transition);
+
 					gl.uniform2f(s.uScale, transition, div / num);
 
-					//if (a.texture.alpha);
 					GLState.blend(true);
 					a.texture.bind();
 
-				} else if (a.fadeScale >= zoom) {
-					float f = 1.0f;
-					/* fade in/out */
-					if (a.fadeScale >= zoom) {
-						if (scale > FADE_START)
-							f = scale - 1;
-						else
-							f = FADE_START - 1;
-					}
-					GLState.blend(true);
-
-					GLUtils.setColor(s.uColor, a.color, f);
-
-				} else if (a.blendScale > 0 && a.blendScale <= zoom) {
-					/* blend colors (not alpha) */
-					GLState.blend(false);
-
-					if (a.blendScale == zoom)
-						GLUtils.setColorBlend(s.uColor, a.color,
-						                      a.blendColor, scale - 1.0f);
-					else
-						GLUtils.setColor(s.uColor, a.blendColor, 1);
-
 				} else {
-					/* test if color contains alpha */
-					GLState.blend((a.color & OPAQUE) != OPAQUE);
+					s = setShader(polyShader, v.mvp, false);
 
-					GLUtils.setColor(s.uColor, a.color, 1);
+					float fade = a.getFade(pos.scale);
+					float blend = a.getBlend(pos.scale);
+
+					if (fade < 1.0f) {
+						GLState.blend(true);
+						GLUtils.setColor(s.uColor, a.color, fade);
+					} else if (blend < 1.0f) {
+						if (blend == 0.0f)
+							GLUtils.setColor(s.uColor, a.blendColor, 1);
+						else
+							GLUtils.setColorBlend(s.uColor, a.color,
+							                      a.blendColor, 1 - blend);
+					} else {
+						/* test if color contains alpha */
+						GLState.blend((a.color & OPAQUE) != OPAQUE);
+						GLUtils.setColor(s.uColor, a.color, 1);
+					}
 				}
-
 				/* set stencil buffer mask used to draw this layer
 				 * also check that clip bit is set to avoid overdraw
 				 * of other tiles */
@@ -325,7 +316,6 @@ public final class PolygonBucket extends RenderBucket {
 			setShader(polyShader, v.mvp, first);
 
 			int zoom = v.pos.zoomLevel;
-			float scale = (float) v.pos.getZoomScale();
 
 			int cur = mCount;
 			int start = mCount;
@@ -409,8 +399,7 @@ public final class PolygonBucket extends RenderBucket {
 
 				/* draw up to 7 buckets into stencil buffer */
 				if (cur == STENCIL_BITS - 1) {
-					//log.debug("fill1 {} {}", start, cur);
-					fillPolygons(v, start, cur, zoom, scale, div);
+					fillPolygons(v, start, cur, v.pos, div);
 					drawn = true;
 
 					mClear = true;
@@ -424,8 +413,7 @@ public final class PolygonBucket extends RenderBucket {
 			}
 
 			if (cur > 0) {
-				//log.debug("fill2 {} {}", start, cur);
-				fillPolygons(v, start, cur, zoom, scale, div);
+				fillPolygons(v, start, cur, v.pos, div);
 				drawn = true;
 			}
 

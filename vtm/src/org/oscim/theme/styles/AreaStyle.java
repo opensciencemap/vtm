@@ -21,6 +21,7 @@ import static org.oscim.backend.canvas.Color.parseColor;
 import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.theme.IRenderTheme.Callback;
+import org.oscim.utils.FastMath;
 
 /*TODO 
  * - add custom shaders
@@ -226,4 +227,21 @@ public class AreaStyle extends RenderStyle {
 			return new AreaStyle(this);
 		}
 	}
+
+	public float getFade(double scale) {
+		if (fadeScale < 0)
+			return 1;
+
+		float f = (float) (scale / (1 << fadeScale)) - 1;
+		return FastMath.clamp(f, 0, 1);
+	}
+
+	public float getBlend(double scale) {
+		if (blendScale < 0)
+			return 1;
+
+		float f = (float) ((1 << blendScale) / scale) - 1;
+		return FastMath.clamp(f, 0, 1);
+	}
+
 }
