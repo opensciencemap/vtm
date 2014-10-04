@@ -30,7 +30,8 @@ import android.os.Bundle;
 
 public class BitmapTileMapActivity extends MapActivity {
 
-	private final static boolean USE_CACHE = false;
+	private final static boolean USE_CACHE = true;
+
 	private final TileSource mTileSource;
 	protected BitmapTileLayer mBitmapLayer;
 

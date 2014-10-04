@@ -35,7 +35,7 @@ import android.view.MenuItem;
 public class BaseMapActivity extends MapActivity {
 	static final Logger log = LoggerFactory.getLogger(BaseMapActivity.class);
 
-	final static boolean USE_CACHE = false;
+	final static boolean USE_CACHE = true;
 
 	MapView mMapView;
 	VectorTileLayer mBaseLayer;
