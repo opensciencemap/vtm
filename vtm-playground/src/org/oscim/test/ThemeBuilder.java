@@ -8,9 +8,12 @@ import org.oscim.theme.rule.Rule;
 import org.oscim.theme.rule.Rule.Element;
 import org.oscim.theme.rule.RuleBuilder;
 import org.oscim.theme.rule.RuleBuilder.RuleType;
+import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.AreaStyle.AreaBuilder;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.LineStyle.LineBuilder;
 import org.oscim.theme.styles.RenderStyle;
+import org.oscim.theme.styles.TextStyle;
 import org.oscim.theme.styles.TextStyle.TextBuilder;
 
 public class ThemeBuilder {
@@ -82,28 +85,28 @@ public class ThemeBuilder {
 
 	};
 
-	public static LineBuilder line(int color, float width) {
-		return new LineBuilder()
+	public static LineBuilder<?> line(int color, float width) {
+		return LineStyle.builder()
 		    .color(color)
-		    .width(width);
+		    .strokeWidth(width);
 	}
 
-	public static AreaBuilder area(int color) {
-		return new AreaBuilder()
+	public static AreaBuilder<?> area(int color) {
+		return AreaStyle.builder()
 		    .color(color);
 	}
 
-	public static TextBuilder wayText(float size, int color) {
-		return new TextBuilder()
-		    .setFontSize(size)
-		    .setColor(color);
+	public static TextBuilder<?> wayText(float size, int color) {
+		return TextStyle.builder()
+		    .fontSize(size)
+		    .color(color);
 	}
 
-	public static TextBuilder nodeText(float size, int color) {
-		return new TextBuilder()
-		    .setFontSize(size)
-		    .setColor(color)
-		    .setCaption(true);
+	public static TextBuilder<?> nodeText(float size, int color) {
+		return TextStyle.builder()
+		    .fontSize(size)
+		    .color(color)
+		    .isCaption(true);
 	}
 
 	public static RuleBuilder matchKey(String key) {

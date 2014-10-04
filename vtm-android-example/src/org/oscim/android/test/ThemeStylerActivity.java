@@ -49,8 +49,8 @@ public class ThemeStylerActivity extends BaseMapActivity implements OnSeekBarCha
 	}
 
 	class ModStyleVisitor extends RuleVisitor {
-		private final LineBuilder lineBuilder = new LineBuilder();
-		private final AreaBuilder areaBuilder = new AreaBuilder();
+		private final LineBuilder<?> lineBuilder = LineStyle.builder();
+		private final AreaBuilder<?> areaBuilder = AreaStyle.builder();
 
 		@Override
 		public void apply(Rule r) {

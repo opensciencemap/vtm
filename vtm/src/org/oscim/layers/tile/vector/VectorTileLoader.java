@@ -44,7 +44,7 @@ import org.oscim.tiling.ITileDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VectorTileLoader extends TileLoader implements IRenderTheme.Callback {
+public class VectorTileLoader extends TileLoader implements RenderStyle.Callback {
 
 	static final Logger log = LoggerFactory.getLogger(VectorTileLoader.class);
 

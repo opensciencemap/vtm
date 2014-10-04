@@ -17,8 +17,6 @@
  */
 package org.oscim.theme.styles;
 
-import org.oscim.theme.IRenderTheme.Callback;
-
 /**
  * Represents a round area on the map.
  */
@@ -48,8 +46,8 @@ public final class CircleStyle extends RenderStyle {
 	}
 
 	@Override
-	public void renderNode(Callback renderCallback) {
-		renderCallback.renderCircle(this, this.level);
+	public void renderNode(Callback cb) {
+		cb.renderCircle(this, this.level);
 	}
 
 	@Override

@@ -17,7 +17,6 @@
 package org.oscim.theme.styles;
 
 import org.oscim.backend.canvas.Color;
-import org.oscim.theme.IRenderTheme.Callback;
 
 public class ExtrusionStyle extends RenderStyle {
 
@@ -57,8 +56,8 @@ public class ExtrusionStyle extends RenderStyle {
 	}
 
 	@Override
-	public void renderWay(Callback renderCallback) {
-		renderCallback.renderExtrusion(this, this.level);
+	public void renderWay(Callback cb) {
+		cb.renderExtrusion(this, this.level);
 	}
 
 	@Override

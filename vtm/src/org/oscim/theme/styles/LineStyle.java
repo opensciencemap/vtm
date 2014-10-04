@@ -21,7 +21,6 @@ import static org.oscim.backend.canvas.Color.parseColor;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
-import org.oscim.theme.IRenderTheme.Callback;
 
 public final class LineStyle extends RenderStyle {
 
@@ -39,11 +38,11 @@ public final class LineStyle extends RenderStyle {
 	public final int stippleColor;
 	public final float stippleWidth;
 
-	private LineStyle(LineBuilder builer) {
+	private LineStyle(LineBuilder<?> builer) {
 		this.level = builer.level;
 		this.style = builer.style;
-		this.width = builer.width;
-		this.color = builer.color;
+		this.width = builer.strokeWidth;
+		this.color = builer.fillColor;
 		this.cap = builer.cap;
 		this.outline = builer.outline;
 		this.fixed = builer.fixed;
@@ -89,8 +88,8 @@ public final class LineStyle extends RenderStyle {
 	}
 
 	@Override
-	public void renderWay(Callback renderCallback) {
-		renderCallback.renderWay(this, level);
+	public void renderWay(Callback cb) {
+		cb.renderWay(this, level);
 	}
 
 	@Override
@@ -98,12 +97,9 @@ public final class LineStyle extends RenderStyle {
 		return (LineStyle) mCurrent;
 	}
 
-	public final static class LineBuilder implements StyleBuilder {
-		public int level;
+	public static class LineBuilder<T extends LineBuilder<T>> extends StyleBuilder<T> {
 
 		public String style;
-		public float width;
-		public int color;
 		public Cap cap;
 		public boolean outline;
 		public boolean fixed;
@@ -114,13 +110,13 @@ public final class LineStyle extends RenderStyle {
 		public int stippleColor;
 		public float stippleWidth;
 
-		public LineBuilder set(LineStyle line) {
+		public T set(LineStyle line) {
 			if (line == null)
 				return reset();
 			this.level = line.level;
 			this.style = line.style;
-			this.width = line.width;
-			this.color = line.color;
+			this.strokeWidth = line.width;
+			this.fillColor = line.color;
 			this.cap = line.cap;
 			this.outline = line.outline;
 			this.fixed = line.fixed;
@@ -129,15 +125,15 @@ public final class LineStyle extends RenderStyle {
 			this.stipple = line.stipple;
 			this.stippleColor = line.stippleColor;
 			this.stippleWidth = line.stippleWidth;
-			return this;
+			return self();
 		}
 
-		public LineBuilder reset() {
+		public T reset() {
 			level = -1;
 			style = null;
-			color = Color.BLACK;
+			fillColor = Color.BLACK;
 			cap = Cap.ROUND;
-			width = 1;
+			strokeWidth = 1;
 			fixed = false;
 
 			fadeScale = -1;
@@ -147,71 +143,56 @@ public final class LineStyle extends RenderStyle {
 			stippleWidth = 1;
 			stippleColor = Color.BLACK;
 
-			return this;
+			return self();
 		}
 
-		public LineBuilder style(String name) {
+		public T style(String name) {
 			this.style = name;
-			return this;
+			return self();
 		}
 
-		public LineBuilder level(int level) {
-			this.level = level;
-			return this;
-		}
-
-		public LineBuilder color(int color) {
-			this.color = color;
-			return this;
-		}
-
-		public LineBuilder width(float width) {
-			this.width = width;
-			return this;
-		}
-
-		public LineBuilder blur(float blur) {
+		public T blur(float blur) {
 			this.blur = blur;
-			return this;
+			return self();
 		}
 
-		public LineBuilder fadeScale(int zoom) {
+		public T fadeScale(int zoom) {
 			this.fadeScale = zoom;
-			return this;
+			return self();
 		}
 
-		public LineBuilder stippleColor(int color) {
+		public T stippleColor(int color) {
 			this.stippleColor = color;
-			return this;
+			return self();
 		}
 
-		public LineBuilder color(String color) {
-			this.color = parseColor(color);
-			return this;
-		}
-
-		public LineBuilder stippleColor(String color) {
+		public T stippleColor(String color) {
 			this.stippleColor = parseColor(color);
-			return this;
+			return self();
 		}
 
-		public LineBuilder isOutline(boolean outline) {
+		public T isOutline(boolean outline) {
 			this.outline = outline;
-			return this;
+			return self();
 		}
 
 		public LineStyle build() {
 			return new LineStyle(this);
 		}
 
-		public LineBuilder cap(Cap cap) {
+		public T cap(Cap cap) {
 			this.cap = cap;
-			return this;
+			return self();
 		}
 
-		public LineBuilder fixed(boolean b) {
+		public T fixed(boolean b) {
 			this.fixed = b;
-			return this;
+			return self();
 		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static LineBuilder<?> builder() {
+		return new LineBuilder();
 	}
 }

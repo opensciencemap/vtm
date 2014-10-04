@@ -18,7 +18,6 @@
 package org.oscim.theme.styles;
 
 import org.oscim.renderer.atlas.TextureRegion;
-import org.oscim.theme.IRenderTheme.Callback;
 
 /**
  * Represents an icon on the map.

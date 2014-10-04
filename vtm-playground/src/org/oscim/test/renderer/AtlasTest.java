@@ -17,7 +17,6 @@ import org.oscim.renderer.bucket.TextBucket;
 import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.TextStyle;
-import org.oscim.theme.styles.TextStyle.TextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +41,10 @@ public class AtlasTest extends GdxMap {
 
 			TextureAtlas mAtlas = TextureAtlas.create(2048, 2048, 1);
 
+			TextBucket tl = new TextBucket();
+			TextStyle t = TextStyle.builder().fontSize(20).color(Color.BLACK).build();
+			buckets.set(tl);
+
 			LineBucket ll = buckets.getLineBucket(0);
 			ll.line = new LineStyle(Color.BLUE, 3, Cap.BUTT);
 			ll.scale = 1f;
@@ -53,10 +56,6 @@ public class AtlasTest extends GdxMap {
 			LineBucket ll3 = buckets.getLineBucket(2);
 			ll3.line = new LineStyle(Color.GREEN, 3, Cap.BUTT);
 			ll3.scale = 1f;
-
-			TextBucket tl = new TextBucket();
-			TextStyle t = new TextBuilder().setFontSize(20).setColor(Color.BLACK).build();
-			buckets.set(tl);
 
 			float[] points = new float[10];
 

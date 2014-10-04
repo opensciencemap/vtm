@@ -25,7 +25,6 @@ import org.oscim.renderer.bucket.TextBucket;
 import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.TextStyle;
-import org.oscim.theme.styles.TextStyle.TextBuilder;
 
 public class GridRenderer extends BucketRenderer {
 
@@ -39,7 +38,10 @@ public class GridRenderer extends BucketRenderer {
 
 	public GridRenderer() {
 		this(1, new LineStyle(Color.LTGRAY, 1.2f, Cap.BUTT),
-		     new TextBuilder().setFontSize(22).setColor(Color.RED).build());
+		     TextStyle.builder()
+		         .fontSize(22)
+		         .color(Color.RED)
+		         .build());
 	}
 
 	public GridRenderer(int numLines, LineStyle lineStyle, TextStyle textStyle) {

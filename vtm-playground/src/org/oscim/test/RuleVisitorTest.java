@@ -77,8 +77,8 @@ public class RuleVisitorTest extends GdxMap {
 	}
 
 	static class SaturateLineStyles extends RuleVisitor {
-		private final LineBuilder lineBuilder = new LineBuilder();
-		private final AreaBuilder areaBuilder = new AreaBuilder();
+		private final LineBuilder<?> lineBuilder = LineStyle.builder();
+		private final AreaBuilder<?> areaBuilder = AreaStyle.builder();
 
 		private final double saturation;
 		private final boolean modifyArea;

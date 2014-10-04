@@ -88,7 +88,7 @@ public class RenderTheme implements IRenderTheme {
 	}
 
 	@Override
-	public void destroy() {
+	public void dispose() {
 
 		for (int i = 0; i < 3; i++)
 			mStyleCache[i].cache.clear();

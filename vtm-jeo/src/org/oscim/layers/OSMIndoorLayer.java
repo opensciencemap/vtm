@@ -18,7 +18,6 @@ import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.TextStyle;
-import org.oscim.theme.styles.TextStyle.TextBuilder;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -27,9 +26,9 @@ import com.vividsolutions.jts.geom.LineString;
 public class OSMIndoorLayer extends JeoVectorLayer {
 
 	protected TextBucket mTextLayer;
-	protected TextStyle mText = new TextBuilder()
-	    .setFontSize(16).setColor(Color.BLACK)
-	    .setStrokeWidth(2.2f).setStroke(Color.WHITE)
+	protected TextStyle mText = TextStyle.builder()
+	    .fontSize(16).color(Color.BLACK)
+	    .strokeWidth(2.2f).strokeColor(Color.WHITE)
 	    .build();
 
 	public OSMIndoorLayer(Map map, VectorDataset data, Style style) {

@@ -328,4 +328,7 @@ public class Rule {
 		}
 	}
 
+	public static RuleBuilder builder() {
+		return new RuleBuilder();
+	}
 }

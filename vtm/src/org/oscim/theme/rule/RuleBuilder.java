@@ -51,7 +51,7 @@ public class RuleBuilder {
 
 	ArrayList<RenderStyle> renderStyles = new ArrayList<RenderStyle>(4);
 	ArrayList<RuleBuilder> subRules = new ArrayList<RuleBuilder>(4);
-	StyleBuilder[] styleBuilder;
+	StyleBuilder<?>[] styleBuilder;
 
 	private static final String STRING_NEGATION = "~";
 	private static final String STRING_EXCLUSIVE = "-";
@@ -134,7 +134,7 @@ public class RuleBuilder {
 		Rule[] rules = null;
 
 		if (styleBuilder != null)
-			for (StyleBuilder style : styleBuilder) {
+			for (StyleBuilder<?> style : styleBuilder) {
 				renderStyles.add(style.level(level[0]).build());
 				level[0] += 2;
 			}
@@ -193,7 +193,7 @@ public class RuleBuilder {
 		return this;
 	}
 
-	public RuleBuilder style(StyleBuilder... styles) {
+	public RuleBuilder style(StyleBuilder<?>... styles) {
 		styleBuilder = styles;
 		return this;
 	}

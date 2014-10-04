@@ -229,7 +229,7 @@ public class RenderTheme implements IRenderTheme {
 	}
 
 	@Override
-	public void destroy() {
+	public void dispose() {
 	}
 
 	@Override

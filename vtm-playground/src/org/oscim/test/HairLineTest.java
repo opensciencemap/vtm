@@ -33,9 +33,9 @@ public class HairLineTest extends GdxMap {
 
 	static class Renderer extends BucketRenderer {
 		boolean init;
-		LineBuilder l = new LineStyle.LineBuilder()
+		LineBuilder<?> l = LineStyle.builder()
 		    .color(Color.WHITE)
-		    .width(1.5f)
+		    .strokeWidth(1.5f)
 		    .cap(Cap.ROUND);
 
 		HairLineBucket ll = buckets.addHairLineBucket(1, l.build());
@@ -48,7 +48,7 @@ public class HairLineTest extends GdxMap {
 		//style = new LineStyle(Color.fade(Color.LTGRAY, 0.8f), 1.5f);
 		LineBucket l2 = buckets.addLineBucket(3, style);
 
-		PolygonBucket pl = buckets.addPolygonBucket(4, new AreaStyle.AreaBuilder()
+		PolygonBucket pl = buckets.addPolygonBucket(4, AreaStyle.builder()
 		    .color(Color.BLUE)
 		    //.outline(Color.CYAN, 1)
 		    .build());

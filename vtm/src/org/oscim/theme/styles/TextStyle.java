@@ -23,13 +23,11 @@ import org.oscim.backend.canvas.Paint.Align;
 import org.oscim.backend.canvas.Paint.FontFamily;
 import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.renderer.atlas.TextureRegion;
-import org.oscim.theme.IRenderTheme.Callback;
 
 public final class TextStyle extends RenderStyle {
 
-	public static class TextBuilder implements StyleBuilder {
+	public static class TextBuilder<T extends TextBuilder<T>> extends StyleBuilder<T> {
 
-		public String style;
 		public float fontSize;
 
 		public String textKey;
@@ -40,11 +38,7 @@ public final class TextStyle extends RenderStyle {
 		public FontFamily fontFamily;
 		public FontStyle fontStyle;
 
-		public int color;
-		public int stroke;
-		public float strokeWidth;
-
-		public TextBuilder reset() {
+		public T reset() {
 			fontFamily = FontFamily.DEFAULT;
 			fontStyle = FontStyle.NORMAL;
 			style = null;
@@ -53,11 +47,11 @@ public final class TextStyle extends RenderStyle {
 			caption = false;
 			priority = Integer.MAX_VALUE;
 			texture = null;
-			color = Color.BLACK;
-			stroke = Color.BLACK;
+			fillColor = Color.BLACK;
+			strokeColor = Color.BLACK;
 			strokeWidth = 0;
 			dy = 0;
-			return this;
+			return self();
 		}
 
 		public TextBuilder() {
@@ -75,89 +69,80 @@ public final class TextStyle extends RenderStyle {
 			return new TextStyle(this);
 		}
 
-		public TextBuilder setStyle(String style) {
-			this.style = style;
-			return this;
-		}
-
-		public TextBuilder setFontSize(float fontSize) {
+		public T fontSize(float fontSize) {
 			this.fontSize = fontSize;
-			return this;
+			return self();
 		}
 
-		public TextBuilder setTextKey(String textKey) {
+		public T textKey(String textKey) {
 			this.textKey = textKey;
-			return this;
+			return self();
 		}
 
-		public TextBuilder setCaption(boolean caption) {
+		public T isCaption(boolean caption) {
 			this.caption = caption;
-			return this;
+			return self();
 		}
 
-		public TextBuilder setOffsetY(float dy) {
+		public T offsetY(float dy) {
 			this.dy = dy;
-			return this;
+			return self();
 		}
 
-		public TextBuilder setPriority(int priority) {
+		public T priority(int priority) {
 			this.priority = priority;
-			return this;
+			return self();
 		}
 
-		public TextBuilder setTexture(TextureRegion texture) {
+		public T texture(TextureRegion texture) {
 			this.texture = texture;
-			return this;
+			return self();
 		}
 
-		public TextBuilder setFontFamily(FontFamily fontFamily) {
+		public T fontFamily(FontFamily fontFamily) {
 			this.fontFamily = fontFamily;
-			return this;
+			return self();
 		}
 
-		public TextBuilder setFontStyle(FontStyle fontStyle) {
+		public T fontStyle(FontStyle fontStyle) {
 			this.fontStyle = fontStyle;
-			return this;
+			return self();
 		}
 
-		public TextBuilder setColor(int color) {
-			this.color = color;
-			return this;
+		public T from(TextBuilder<?> other) {
+			fontFamily = other.fontFamily;
+			fontStyle = other.fontStyle;
+			style = other.style;
+			textKey = other.textKey;
+			fontSize = other.fontSize;
+			caption = other.caption;
+			priority = other.priority;
+			texture = other.texture;
+			fillColor = other.fillColor;
+			strokeColor = other.strokeColor;
+			strokeWidth = other.strokeWidth;
+			dy = other.dy;
+			return self();
 		}
 
-		public TextBuilder setStroke(int stroke) {
-			this.stroke = stroke;
-			return this;
-		}
-
-		public TextBuilder setStrokeWidth(float strokeWidth) {
-			this.strokeWidth = strokeWidth;
-			return this;
-		}
-
-		@Override
-		public TextBuilder level(int level) {
-			return this;
-		}
-
-		public TextBuilder setFrom(TextBuilder tb) {
-			fontFamily = tb.fontFamily;
-			fontStyle = tb.fontStyle;
-			style = tb.style;
-			textKey = tb.textKey;
-			fontSize = tb.fontSize;
-			caption = tb.caption;
-			priority = tb.priority;
-			texture = tb.texture;
-			color = tb.color;
-			stroke = tb.stroke;
-			strokeWidth = tb.strokeWidth;
-			dy = tb.dy;
-			return this;
+		public TextBuilder<?> from(TextStyle style) {
+			this.style = style.style;
+			this.textKey = style.textKey;
+			this.caption = style.caption;
+			this.dy = style.dy;
+			this.priority = style.priority;
+			this.texture = style.texture;
+			this.fillColor = style.paint.getColor();
+			this.fontFamily = FontFamily.DEFAULT;
+			this.fontStyle = FontStyle.NORMAL;
+			this.strokeColor = style.stroke.getColor();
+			this.strokeWidth = 2;
+			this.fontSize = style.fontSize;
+			return self();
 		}
 	}
 
-	TextStyle(TextBuilder tb) {
+	TextStyle(TextBuilder<?> tb) {
 		this.style = tb.style;
 		this.textKey = tb.textKey;
 		this.caption = tb.caption;
@@ -169,7 +154,7 @@ public final class TextStyle extends RenderStyle {
 		paint.setTextAlign(Align.CENTER);
 		paint.setTypeface(tb.fontFamily, tb.fontStyle);
 
-		paint.setColor(tb.color);
+		paint.setColor(tb.fillColor);
 		paint.setTextSize(tb.fontSize);
 
 		if (tb.strokeWidth > 0) {
@@ -177,7 +162,7 @@ public final class TextStyle extends RenderStyle {
 			stroke.setStyle(Paint.Style.STROKE);
 			stroke.setTextAlign(Align.CENTER);
 			stroke.setTypeface(tb.fontFamily, tb.fontStyle);
-			stroke.setColor(tb.stroke);
+			stroke.setColor(tb.strokeColor);
 			stroke.setStrokeWidth(tb.strokeWidth);
 			stroke.setTextSize(tb.fontSize);
 		} else
@@ -225,5 +210,10 @@ public final class TextStyle extends RenderStyle {
 
 		fontHeight = paint.getFontHeight();
 		fontDescent = paint.getFontDescent();
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static TextBuilder<?> builder() {
+		return new TextBuilder();
 	}
 }
