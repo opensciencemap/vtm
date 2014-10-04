@@ -73,11 +73,10 @@ public class GridRenderer extends BucketRenderer {
 
 		if (mText != null) {
 			mTextBucket = new TextBucket();
-			buckets.set(mTextBucket);
 			mTextBucket.next = mLineBucket;
-			buckets.set(mTextBucket);
 		} else {
 			mTextBucket = null;
+			mLineBucket.addLine(mLines);
 			buckets.set(mLineBucket);
 		}
 
