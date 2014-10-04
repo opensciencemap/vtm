@@ -16,12 +16,14 @@
  */
 package org.oscim.renderer.bucket;
 
+import static org.oscim.backend.GLAdapter.gl;
+
 import java.util.ArrayList;
 
 import javax.annotation.CheckReturnValue;
 
 import org.oscim.backend.CanvasAdapter;
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
 import org.oscim.renderer.GLState;
@@ -287,21 +289,21 @@ public class TextureItem extends Inlist<TextureItem> {
 		protected void initTexture(TextureItem t) {
 			GLState.bindTex2D(t.id);
 
-			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MIN_FILTER,
-			                   GL20.GL_LINEAR);
-			GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAG_FILTER,
-			                   GL20.GL_LINEAR);
+			gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER,
+			                 GL.LINEAR);
+			gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER,
+			                 GL.LINEAR);
 
 			if (t.repeat) {
-				GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
-				                   GL20.GL_REPEAT);
-				GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
-				                   GL20.GL_REPEAT);
+				gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S,
+				                 GL.REPEAT);
+				gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T,
+				                 GL.REPEAT);
 			} else {
-				GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_S,
-				                   GL20.GL_CLAMP_TO_EDGE);
-				GL.glTexParameterf(GL20.GL_TEXTURE_2D, GL20.GL_TEXTURE_WRAP_T,
-				                   GL20.GL_CLAMP_TO_EDGE);
+				gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S,
+				                 GL.CLAMP_TO_EDGE);
+				gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T,
+				                 GL.CLAMP_TO_EDGE);
 			}
 		}
 	};
@@ -310,12 +312,6 @@ public class TextureItem extends Inlist<TextureItem> {
 	 * on the GL-Thread and will not be put back in any pool. */
 	final static TexturePool NOPOOL = new TexturePool(0);
 	final static ArrayList<Integer> disposedTextures = new ArrayList<Integer>();
-
-	private static GL20 GL;
-
-	static void init(GL20 gl) {
-		GL = gl;
-	}
 
 	/**
 	 * Disposed textures are released by MapRenderer after each frame

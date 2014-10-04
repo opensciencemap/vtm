@@ -24,11 +24,11 @@ import java.nio.IntBuffer;
 
 import javax.imageio.ImageIO;
 
+import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.bucket.TextureBucket;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.BufferUtils;
 
 public class AwtBitmap implements Bitmap {
@@ -77,8 +77,9 @@ public class AwtBitmap implements Bitmap {
 	public void eraseColor(int transparent) {
 	}
 
-	private final static IntBuffer tmpBuffer = BufferUtils.newIntBuffer(TextureBucket.TEXTURE_HEIGHT
-	        * TextureBucket.TEXTURE_WIDTH);
+	private final static IntBuffer tmpBuffer = BufferUtils
+	    .newIntBuffer(TextureBucket.TEXTURE_HEIGHT
+	            * TextureBucket.TEXTURE_WIDTH);
 	private final static int[] tmpPixel = new int[TextureBucket.TEXTURE_HEIGHT
 	        * TextureBucket.TEXTURE_WIDTH];
 
@@ -128,8 +129,8 @@ public class AwtBitmap implements Bitmap {
 		buffer.put(pixels, 0, width * height);
 		buffer.flip();
 
-		Gdx.gl20.glTexImage2D(GL20.GL_TEXTURE_2D, 0, GL20.GL_RGBA, width,
-		                      height, 0, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, buffer);
+		Gdx.gl20.glTexImage2D(GL.TEXTURE_2D, 0, GL.RGBA, width,
+		                      height, 0, GL.RGBA, GL.UNSIGNED_BYTE, buffer);
 	}
 
 	@Override

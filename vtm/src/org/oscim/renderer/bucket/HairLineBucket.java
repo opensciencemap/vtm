@@ -1,10 +1,9 @@
 package org.oscim.renderer.bucket;
 
-import static org.oscim.backend.GL20.GL_LINES;
-import static org.oscim.backend.GL20.GL_SHORT;
-import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
+import static org.oscim.backend.GLAdapter.gl;
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
+import org.oscim.backend.GL;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
@@ -106,9 +105,9 @@ public class HairLineBucket extends RenderBucket {
 
 				v.mvp.setAsUniform(uMVP);
 
-				GL.glUniform2f(uScreen, v.getWidth() / 2, v.getHeight() / 2);
-				GL.glUniform1f(uWidth, 1.5f);
-				GL.glLineWidth(2);
+				gl.uniform2f(uScreen, v.getWidth() / 2, v.getHeight() / 2);
+				gl.uniform1f(uWidth, 1.5f);
+				gl.lineWidth(2);
 			}
 		}
 
@@ -124,15 +123,15 @@ public class HairLineBucket extends RenderBucket {
 
 				GLUtils.setColor(s.uColor, ll.line.color, 1);
 
-				GL.glVertexAttribPointer(s.aPos, 2, GL_SHORT,
-				                         false, 0, ll.vertexOffset);
+				gl.vertexAttribPointer(s.aPos, 2, GL.SHORT,
+				                       false, 0, ll.vertexOffset);
 
-				GL.glDrawElements(GL_LINES,
-				                  ll.numIndices,
-				                  GL_UNSIGNED_SHORT,
-				                  ll.indiceOffset);
+				gl.drawElements(GL.LINES,
+				                ll.numIndices,
+				                GL.UNSIGNED_SHORT,
+				                ll.indiceOffset);
 			}
-			//GL.glLineWidth(1);
+			//GL.lineWidth(1);
 
 			return l;
 		}

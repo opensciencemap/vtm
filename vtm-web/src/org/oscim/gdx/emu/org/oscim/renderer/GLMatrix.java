@@ -17,6 +17,8 @@
 
 package org.oscim.renderer;
 
+import static org.oscim.backend.GLAdapter.gl;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -295,7 +297,7 @@ public class GLMatrix {
 		buffer.clear();
 		buffer.put(val, 0, 16);
 		buffer.position(0);
-		MapRenderer.GL.glUniformMatrix4fv(location, 1, false, buffer);
+		gl.uniformMatrix4fv(location, 1, false, buffer);
 	}
 
 	/**

@@ -75,10 +75,10 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 		int type = GLUtils.getType(mBitmap);
 
 		if (replace)
-			GLUtils.texSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, mBitmap, format,
+			GLUtils.texSubImage2D(GL20.TEXTURE_2D, 0, 0, 0, mBitmap, format,
 			                      type);
 		else
-			GLUtils.texImage2D(GL20.GL_TEXTURE_2D, 0, format, mBitmap, type, 0);
+			GLUtils.texImage2D(GL20.TEXTURE_2D, 0, format, mBitmap, type, 0);
 	}
 
 	@Override

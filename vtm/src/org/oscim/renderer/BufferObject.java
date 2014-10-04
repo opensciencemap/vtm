@@ -17,11 +17,13 @@
 
 package org.oscim.renderer;
 
+import static org.oscim.backend.GLAdapter.gl;
+
 import java.nio.Buffer;
 
 import javax.annotation.CheckReturnValue;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.GLAdapter;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
@@ -31,8 +33,6 @@ public final class BufferObject extends Inlist<BufferObject> {
 	static final Logger log = LoggerFactory.getLogger(BufferObject.class);
 	private static final int MB = 1024 * 1024;
 	private static final int LIMIT_BUFFERS = 16 * MB;
-
-	private static GL20 GL;
 
 	/** GL identifier */
 	private int id;
@@ -65,12 +65,12 @@ public final class BufferObject extends Inlist<BufferObject> {
 		 * memory is less then four times the new data */
 		if (!GLAdapter.NO_BUFFER_SUB_DATA && !clear &&
 		        (size > newSize) && (size < newSize * 4)) {
-			GL.glBufferSubData(target, 0, newSize, buf);
+			gl.bufferSubData(target, 0, newSize, buf);
 		} else {
 			mBufferMemoryUsage += newSize - size;
 			size = newSize;
-			//GL.glBufferData(target, size, buf, GL20.GL_DYNAMIC_DRAW);
-			GL.glBufferData(target, size, buf, GL20.GL_STATIC_DRAW);
+			//GL.bufferData(target, size, buf, GL20.DYNAMIC_DRAW);
+			gl.bufferData(target, size, buf, GL.STATIC_DRAW);
 		}
 	}
 
@@ -100,12 +100,12 @@ public final class BufferObject extends Inlist<BufferObject> {
 	private final static int counter[] = new int[2];
 
 	/**
-	 * @param target can be GL20.GL_ARRAY_BUFFER or GL20.GL_ELEMENT_ARRAY_BUFFER
+	 * @param target can be GL20.ARRAY_BUFFER or GL20.ELEMENT_ARRAY_BUFFER
 	 * @param size requested size in bytes. optional - can be 0.
 	 */
 	public static synchronized BufferObject get(int target, int size) {
 
-		int t = (target == GL20.GL_ARRAY_BUFFER) ? 0 : 1;
+		int t = (target == GL.ARRAY_BUFFER) ? 0 : 1;
 
 		if (pool[t] == null) {
 			if (counter[t] != 0)
@@ -153,7 +153,7 @@ public final class BufferObject extends Inlist<BufferObject> {
 		// if (counter > 200) {
 		// log.debug("should clear some buffers " + counter);
 		// }
-		int t = (bo.target == GL20.GL_ARRAY_BUFFER) ? 0 : 1;
+		int t = (bo.target == GL.ARRAY_BUFFER) ? 0 : 1;
 
 		bo.next = pool[t];
 		pool[t] = bo;
@@ -209,7 +209,7 @@ public final class BufferObject extends Inlist<BufferObject> {
 	static void createBuffers(int target, int num) {
 		int[] mVboIds = GLUtils.glGenBuffers(num);
 
-		int t = (target == GL20.GL_ARRAY_BUFFER) ? 0 : 1;
+		int t = (target == GL.ARRAY_BUFFER) ? 0 : 1;
 
 		for (int i = 0; i < num; i++) {
 			BufferObject bo = new BufferObject(target, mVboIds[i]);
@@ -227,10 +227,8 @@ public final class BufferObject extends Inlist<BufferObject> {
 		counter[1] = 0;
 	}
 
-	static synchronized void init(GL20 gl, int num) {
-		GL = gl;
-
-		createBuffers(GL20.GL_ARRAY_BUFFER, num);
+	static synchronized void init(int num) {
+		createBuffers(GL.ARRAY_BUFFER, num);
 		counter[0] += num;
 	}
 

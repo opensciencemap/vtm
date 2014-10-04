@@ -17,7 +17,7 @@
 package org.oscim.web.client;
 
 import org.oscim.backend.CanvasAdapter;
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.gdx.GdxAssets;
@@ -63,7 +63,7 @@ class GwtMap extends GdxMap {
 		GdxAssets.init("");
 		CanvasAdapter.textScale = 0.7f;
 
-		GLAdapter.init((GL20) Gdx.graphics.getGL20());
+		GLAdapter.init((GL) Gdx.graphics.getGL20());
 		GLAdapter.GDX_WEBGL_QUIRKS = true;
 		MapRenderer.setBackgroundColor(0xffffff);
 		//Gdx.app.setLogLevel(Application.LOG_DEBUG);

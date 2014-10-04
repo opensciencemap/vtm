@@ -16,12 +16,10 @@
  */
 package org.oscim.renderer.bucket;
 
-import static org.oscim.backend.GL20.GL_SHORT;
-import static org.oscim.backend.GL20.GL_TRIANGLES;
-import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
+import static org.oscim.backend.GLAdapter.gl;
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MercatorProjection;
@@ -181,7 +179,7 @@ public class MeshBucket extends RenderBucket {
 			v.mvp.setAsUniform(s.uMVP);
 
 			float heightOffset = 0;
-			GL.glUniform1f(s.uHeight, heightOffset);
+			gl.uniform1f(s.uHeight, heightOffset);
 
 			int zoom = v.pos.zoomLevel;
 			float scale = (float) v.pos.getZoomScale();
@@ -192,7 +190,7 @@ public class MeshBucket extends RenderBucket {
 				if (ml.heightOffset != heightOffset) {
 					heightOffset = ml.heightOffset;
 
-					GL.glUniform1f(s.uHeight, heightOffset /
+					gl.uniform1f(s.uHeight, heightOffset /
 					        MercatorProjection.groundResolution(v.pos));
 				}
 
@@ -201,24 +199,24 @@ public class MeshBucket extends RenderBucket {
 				else {
 					setColor(ml.area.current(), s, zoom, scale);
 				}
-				GL.glVertexAttribPointer(s.aPos, 2, GL_SHORT,
-				                         false, 0, ml.vertexOffset);
+				gl.vertexAttribPointer(s.aPos, 2, GL.SHORT,
+				                       false, 0, ml.vertexOffset);
 
-				GL.glDrawElements(GL_TRIANGLES,
-				                  ml.numIndices,
-				                  GL_UNSIGNED_SHORT,
-				                  ml.indiceOffset);
+				gl.drawElements(GL.TRIANGLES,
+				                ml.numIndices,
+				                GL.UNSIGNED_SHORT,
+				                ml.indiceOffset);
 
 				if (dbgRender) {
 					int c = (ml.area == null) ? Color.BLUE : ml.area.color;
-					GL.glLineWidth(1);
+					gl.lineWidth(1);
 					//c = ColorUtil.shiftHue(c, 0.5);
 					c = ColorUtil.modHsv(c, 1.1, 1.0, 0.8, true);
 					GLUtils.setColor(s.uColor, c, 1);
-					GL.glDrawElements(GL20.GL_LINES,
-					                  ml.numIndices,
-					                  GL_UNSIGNED_SHORT,
-					                  ml.vertexOffset);
+					gl.drawElements(GL.LINES,
+					                ml.numIndices,
+					                GL.UNSIGNED_SHORT,
+					                ml.vertexOffset);
 				}
 			}
 			return l;

@@ -1,17 +1,17 @@
 package org.oscim.renderer;
 
+import static org.oscim.backend.GLAdapter.gl;
+
 import java.nio.IntBuffer;
 
 import org.oscim.backend.AssetAdapter;
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.GLAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class GLShader {
 	final static Logger log = LoggerFactory.getLogger(GLShader.class);
-
-	protected static GL20 GL;
 
 	public int program;
 
@@ -26,14 +26,14 @@ public abstract class GLShader {
 	}
 
 	protected int getAttrib(String name) {
-		int loc = GL.glGetAttribLocation(program, name);
+		int loc = gl.getAttribLocation(program, name);
 		if (loc < 0)
 			log.debug("missing attribute: {}", name);
 		return loc;
 	}
 
 	protected int getUniform(String name) {
-		int loc = GL.glGetUniformLocation(program, name);
+		int loc = gl.getUniformLocation(program, name);
 		if (loc < 0)
 			log.debug("missing uniform: {}", name);
 		return loc;
@@ -67,18 +67,18 @@ public abstract class GLShader {
 
 	public static int loadShader(int shaderType, String source) {
 
-		int shader = GL.glCreateShader(shaderType);
+		int shader = gl.createShader(shaderType);
 		if (shader != 0) {
-			GL.glShaderSource(shader, source);
-			GL.glCompileShader(shader);
+			gl.shaderSource(shader, source);
+			gl.compileShader(shader);
 			IntBuffer compiled = MapRenderer.getIntBuffer(1);
 
-			GL.glGetShaderiv(shader, GL20.GL_COMPILE_STATUS, compiled);
+			gl.getShaderiv(shader, GL.COMPILE_STATUS, compiled);
 			compiled.position(0);
 			if (compiled.get() == 0) {
 				log.error("Could not compile shader " + shaderType + ":");
-				log.error(GL.glGetShaderInfoLog(shader));
-				GL.glDeleteShader(shader);
+				log.error(gl.getShaderInfoLog(shader));
+				gl.deleteShader(shader);
 				shader = 0;
 			}
 		}
@@ -92,38 +92,34 @@ public abstract class GLShader {
 		else
 			defs += "#define GLES 1\n";
 
-		int vertexShader = loadShader(GL20.GL_VERTEX_SHADER, defs + vertexSource);
+		int vertexShader = loadShader(GL.VERTEX_SHADER, defs + vertexSource);
 		if (vertexShader == 0) {
 			return 0;
 		}
 
-		int pixelShader = loadShader(GL20.GL_FRAGMENT_SHADER, defs + fragmentSource);
+		int pixelShader = loadShader(GL.FRAGMENT_SHADER, defs + fragmentSource);
 		if (pixelShader == 0) {
 			return 0;
 		}
 
-		int program = GL.glCreateProgram();
+		int program = gl.createProgram();
 		if (program != 0) {
 			GLUtils.checkGlError("glCreateProgram");
-			GL.glAttachShader(program, vertexShader);
+			gl.attachShader(program, vertexShader);
 			GLUtils.checkGlError("glAttachShader");
-			GL.glAttachShader(program, pixelShader);
+			gl.attachShader(program, pixelShader);
 			GLUtils.checkGlError("glAttachShader");
-			GL.glLinkProgram(program);
+			gl.linkProgram(program);
 			IntBuffer linkStatus = MapRenderer.getIntBuffer(1);
-			GL.glGetProgramiv(program, GL20.GL_LINK_STATUS, linkStatus);
+			gl.getProgramiv(program, GL.LINK_STATUS, linkStatus);
 			linkStatus.position(0);
-			if (linkStatus.get() != GL20.GL_TRUE) {
+			if (linkStatus.get() != GL.TRUE) {
 				log.error("Could not link program: ");
-				log.error(GL.glGetProgramInfoLog(program));
-				GL.glDeleteProgram(program);
+				log.error(gl.getProgramInfoLog(program));
+				gl.deleteProgram(program);
 				program = 0;
 			}
 		}
 		return program;
-	}
-
-	public static void init(GL20 gl20) {
-		GL = gl20;
 	}
 }

@@ -17,7 +17,6 @@
 package org.oscim.gdx;
 
 import org.oscim.awt.AwtGraphics;
-import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
 import org.oscim.tiling.TileSource;
@@ -28,16 +27,11 @@ import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.backends.jglfw.JglfwApplication;
 import com.badlogic.gdx.backends.jglfw.JglfwApplicationConfiguration;
-import com.badlogic.gdx.backends.jglfw.JglfwGL20;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class GdxMapApp extends GdxMap {
 
 	public static final Logger log = LoggerFactory.getLogger(GdxMapApp.class);
-
-	static class GdxGL20Wrapper extends JglfwGL20 implements GL20 {
-
-	}
 
 	public static void init() {
 		// load native library
@@ -45,7 +39,7 @@ public class GdxMapApp extends GdxMap {
 		// init globals
 		AwtGraphics.init();
 		GdxAssets.init("assets/");
-		GLAdapter.init(new GdxGL20Wrapper());
+		GLAdapter.init(new GdxGL());
 		GLAdapter.GDX_DESKTOP_QUIRKS = true;
 	}
 

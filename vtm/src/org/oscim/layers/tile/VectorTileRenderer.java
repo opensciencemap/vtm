@@ -1,6 +1,6 @@
 package org.oscim.layers.tile;
 
-import static org.oscim.backend.GL20.GL_EQUAL;
+import static org.oscim.backend.GLAdapter.gl;
 import static org.oscim.layers.tile.MapTile.PROXY_GRAMPA;
 import static org.oscim.layers.tile.MapTile.PROXY_PARENT;
 import static org.oscim.layers.tile.MapTile.State.READY;
@@ -12,7 +12,7 @@ import static org.oscim.renderer.bucket.RenderBucket.MESH;
 import static org.oscim.renderer.bucket.RenderBucket.POLYGON;
 import static org.oscim.renderer.bucket.RenderBucket.TEXLINE;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -68,13 +68,13 @@ public class VectorTileRenderer extends TileRenderer {
 			MapTile t = tiles[i];
 
 			if (t.isVisible && !t.state(READY)) {
-				GL.glDepthMask(true);
-				GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+				gl.depthMask(true);
+				gl.clear(GL.DEPTH_BUFFER_BIT);
 
 				/* always write depth for non-proxy tiles
 				 * this is used in drawProxies pass to not
 				 * draw where tiles were already drawn */
-				GL.glDepthFunc(GL20.GL_ALWAYS);
+				gl.depthFunc(GL.ALWAYS);
 
 				mClipMode = PolygonBucket.CLIP_DEPTH;
 				drawProxies = true;
@@ -98,7 +98,7 @@ public class VectorTileRenderer extends TileRenderer {
 			return;
 
 		/* only draw where no other tile is drawn */
-		GL.glDepthFunc(GL20.GL_LESS);
+		gl.depthFunc(GL.LESS);
 
 		/* draw child or parent proxies */
 		boolean preferParent = (v.pos.getZoomScale() < 1.5)
@@ -135,10 +135,10 @@ public class VectorTileRenderer extends TileRenderer {
 			drawGrandParent(t, v);
 		}
 
-		GL.glDepthMask(false);
+		gl.depthMask(false);
 
 		/* make sure stencil buffer write is disabled */
-		//GL.glStencilMask(0x00);
+		//GL.stencilMask(0x00);
 	}
 
 	private void drawTile(MapTile tile, GLViewport v, int proxyLevel) {
@@ -187,7 +187,7 @@ public class VectorTileRenderer extends TileRenderer {
 					b = PolygonBucket.Renderer.draw(b, v, div, first);
 					first = false;
 					/* set test for clip to tile region */
-					GL.glStencilFunc(GL_EQUAL, 0x80, 0x80);
+					gl.stencilFunc(GL.EQUAL, 0x80, 0x80);
 					break;
 				case LINE:
 					b = LineBucket.Renderer.draw(b, v, scale, buckets);

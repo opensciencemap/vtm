@@ -16,11 +16,13 @@
  */
 package org.oscim.test.renderer;
 
+import static org.oscim.backend.GLAdapter.gl;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.core.MapPosition;
 import org.oscim.map.Map;
 import org.oscim.renderer.GLShader;
@@ -95,13 +97,13 @@ public class CustomRenderer extends LayerRenderer {
 		GLState.test(false, false);
 
 		// unbind previously bound VBOs
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+		gl.bindBuffer(GL.ARRAY_BUFFER, 0);
 
 		// Load the vertex data
 		//mVertices.position(0);
-		GL.glVertexAttribPointer(hVertexPosition, 3, GL20.GL_FLOAT, false, 0, mVertices);
+		gl.vertexAttribPointer(hVertexPosition, 3, GL.FLOAT, false, 0, mVertices);
 		//mVertices.position(2);
-		//GL.glVertexAttribPointer(hVertexPosition, 2, GL20.GL_FLOAT, false, 4, mVertices);
+		//GL.vertexAttribPointer(hVertexPosition, 2, GL20.FLOAT, false, 4, mVertices);
 
 		GLState.enableVertexArrays(hVertexPosition, -1);
 
@@ -116,7 +118,7 @@ public class CustomRenderer extends LayerRenderer {
 		v.mvp.setAsUniform(hMatrixPosition);
 
 		// Draw the triangle
-		GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
+		gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
 
 		GLUtils.checkGlError("...");
 	}
@@ -129,9 +131,9 @@ public class CustomRenderer extends LayerRenderer {
 			return false;
 
 		// Handle for vertex position in shader
-		hVertexPosition = GL.glGetAttribLocation(programObject, "a_pos");
+		hVertexPosition = gl.getAttribLocation(programObject, "a_pos");
 
-		hMatrixPosition = GL.glGetUniformLocation(programObject, "u_mvp");
+		hMatrixPosition = gl.getUniformLocation(programObject, "u_mvp");
 
 		// Store the program object
 		mProgramObject = programObject;

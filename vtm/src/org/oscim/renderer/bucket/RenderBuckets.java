@@ -24,7 +24,7 @@ import static org.oscim.renderer.bucket.RenderBucket.TEXLINE;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile.TileData;
 import org.oscim.renderer.BufferObject;
@@ -392,13 +392,13 @@ public class RenderBuckets extends TileData {
 		}
 
 		if (vbo == null)
-			vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, vboSize);
+			vbo = BufferObject.get(GL.ARRAY_BUFFER, vboSize);
 
 		vbo.loadBufferData(vboData.flip(), vboSize * 2);
 
 		if (iboSize > 0) {
 			if (ibo == null)
-				ibo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, iboSize);
+				ibo = BufferObject.get(GL.ELEMENT_ARRAY_BUFFER, iboSize);
 
 			ibo.loadBufferData(iboData.flip(), iboSize * 2);
 		}
@@ -413,9 +413,7 @@ public class RenderBuckets extends TileData {
 		fillCoords = new short[] { 0, s, s, s, 0, 0, s, 0 };
 	}
 
-	public static void initRenderer(GL20 gl) {
-		RenderBucket.GL = gl;
-
+	public static void initRenderer() {
 		LineBucket.Renderer.init();
 		LineTexBucket.Renderer.init();
 		PolygonBucket.Renderer.init();
@@ -423,7 +421,5 @@ public class RenderBuckets extends TileData {
 		BitmapBucket.Renderer.init();
 		MeshBucket.Renderer.init();
 		HairLineBucket.Renderer.init();
-
-		TextureItem.init(gl);
 	}
 }

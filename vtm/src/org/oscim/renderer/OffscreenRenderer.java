@@ -1,8 +1,10 @@
 package org.oscim.renderer;
 
+import static org.oscim.backend.GLAdapter.gl;
+
 import java.nio.IntBuffer;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,103 +59,99 @@ public class OffscreenRenderer extends LayerRenderer {
 		texW = (int) viewport.getWidth();
 		texH = (int) viewport.getHeight();
 
-		GL.glGenFramebuffers(1, buf);
+		gl.genFramebuffers(1, buf);
 		fb = buf.get(0);
 
 		buf.clear();
-		GL.glGenTextures(1, buf);
+		gl.genTextures(1, buf);
 		renderTex = buf.get(0);
 
 		GLUtils.checkGlError("0");
 
-		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, fb);
+		gl.bindFramebuffer(GL.FRAMEBUFFER, fb);
 
 		// generate color texture
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, renderTex);
+		gl.bindTexture(GL.TEXTURE_2D, renderTex);
 
 		GLUtils.setTextureParameter(
-		                            GL20.GL_LINEAR,
-		                            GL20.GL_LINEAR,
-		                            //GL20.GL_NEAREST,
-		                            //GL20.GL_NEAREST,
-		                            GL20.GL_CLAMP_TO_EDGE,
-		                            GL20.GL_CLAMP_TO_EDGE);
+		                            GL.LINEAR,
+		                            GL.LINEAR,
+		                            //GL20.NEAREST,
+		                            //GL20.NEAREST,
+		                            GL.CLAMP_TO_EDGE,
+		                            GL.CLAMP_TO_EDGE);
 
-		GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0,
-		                GL20.GL_RGBA, texW, texH, 0, GL20.GL_RGBA,
-		                GL20.GL_UNSIGNED_BYTE, null);
+		gl.texImage2D(GL.TEXTURE_2D, 0,
+		              GL.RGBA, texW, texH, 0, GL.RGBA,
+		              GL.UNSIGNED_BYTE, null);
 
-		GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER,
-		                          GL20.GL_COLOR_ATTACHMENT0,
-		                          GL20.GL_TEXTURE_2D,
-		                          renderTex, 0);
+		gl.framebufferTexture2D(GL.FRAMEBUFFER,
+		                        GL.COLOR_ATTACHMENT0,
+		                        GL.TEXTURE_2D,
+		                        renderTex, 0);
 		GLUtils.checkGlError("1");
 
 		if (useDepthTexture) {
 			buf.clear();
-			GL.glGenTextures(1, buf);
+			gl.genTextures(1, buf);
 			renderDepth = buf.get(0);
-			GL.glBindTexture(GL20.GL_TEXTURE_2D, renderDepth);
-			GLUtils.setTextureParameter(GL20.GL_NEAREST,
-			                            GL20.GL_NEAREST,
-			                            GL20.GL_CLAMP_TO_EDGE,
-			                            GL20.GL_CLAMP_TO_EDGE);
+			gl.bindTexture(GL.TEXTURE_2D, renderDepth);
+			GLUtils.setTextureParameter(GL.NEAREST,
+			                            GL.NEAREST,
+			                            GL.CLAMP_TO_EDGE,
+			                            GL.CLAMP_TO_EDGE);
 
-			GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0,
-			                GL20.GL_DEPTH_COMPONENT,
-			                texW, texH, 0,
-			                GL20.GL_DEPTH_COMPONENT,
-			                GL20.GL_UNSIGNED_SHORT, null);
+			gl.texImage2D(GL.TEXTURE_2D, 0,
+			              GL.DEPTH_COMPONENT,
+			              texW, texH, 0,
+			              GL.DEPTH_COMPONENT,
+			              GL.UNSIGNED_SHORT, null);
 
-			GL.glFramebufferTexture2D(GL20.GL_FRAMEBUFFER,
-			                          GL20.GL_DEPTH_ATTACHMENT,
-			                          GL20.GL_TEXTURE_2D,
-			                          renderDepth, 0);
+			gl.framebufferTexture2D(GL.FRAMEBUFFER,
+			                        GL.DEPTH_ATTACHMENT,
+			                        GL.TEXTURE_2D,
+			                        renderDepth, 0);
 		} else {
 			buf.clear();
-			GL.glGenRenderbuffers(1, buf);
+			gl.genRenderbuffers(1, buf);
 			int depthRenderbuffer = buf.get(0);
 
-			GL.glBindRenderbuffer(GL20.GL_RENDERBUFFER, depthRenderbuffer);
+			gl.bindRenderbuffer(GL.RENDERBUFFER, depthRenderbuffer);
 
-			GL.glRenderbufferStorage(GL20.GL_RENDERBUFFER,
-			                         GL20.GL_DEPTH_COMPONENT16,
-			                         texW, texH);
+			gl.renderbufferStorage(GL.RENDERBUFFER,
+			                       GL.DEPTH_COMPONENT16,
+			                       texW, texH);
 
-			GL.glFramebufferRenderbuffer(GL20.GL_FRAMEBUFFER,
-			                             GL20.GL_DEPTH_ATTACHMENT,
-			                             GL20.GL_RENDERBUFFER,
-			                             depthRenderbuffer);
+			gl.framebufferRenderbuffer(GL.FRAMEBUFFER,
+			                           GL.DEPTH_ATTACHMENT,
+			                           GL.RENDERBUFFER,
+			                           depthRenderbuffer);
 		}
 
 		GLUtils.checkGlError("2");
 
-		int status = GL.glCheckFramebufferStatus(GL20.GL_FRAMEBUFFER);
-		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
-		GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
+		int status = gl.checkFramebufferStatus(GL.FRAMEBUFFER);
+		gl.bindFramebuffer(GL.FRAMEBUFFER, 0);
+		gl.bindTexture(GL.TEXTURE_2D, 0);
 
-		if (status != GL20.GL_FRAMEBUFFER_COMPLETE) {
+		if (status != GL.FRAMEBUFFER_COMPLETE) {
 			log.debug("invalid framebuffer! " + status);
 			return false;
 		}
 		return true;
 	}
 
-	static void init(GL20 gl20) {
-		GL = gl20;
-	}
-
 	public void enable(boolean on) {
 		if (on)
-			GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, fb);
+			gl.bindFramebuffer(GL.FRAMEBUFFER, fb);
 		else
-			GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
+			gl.bindFramebuffer(GL.FRAMEBUFFER, 0);
 	}
 
 	public void begin() {
-		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, fb);
-		GL.glDepthMask(true);
-		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+		gl.bindFramebuffer(GL.FRAMEBUFFER, fb);
+		gl.depthMask(true);
+		gl.clear(GL.DEPTH_BUFFER_BIT);
 	}
 
 	LayerRenderer mRenderer;
@@ -193,38 +191,38 @@ public class OffscreenRenderer extends LayerRenderer {
 
 	@Override
 	public void render(GLViewport viewport) {
-		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, fb);
-		GL.glViewport(0, 0, texW, texH);
-		GL.glDepthMask(true);
+		gl.bindFramebuffer(GL.FRAMEBUFFER, fb);
+		gl.viewport(0, 0, texW, texH);
+		gl.depthMask(true);
 		GLState.setClearColor(mClearColor);
-		GL.glClear(GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_COLOR_BUFFER_BIT);
+		gl.clear(GL.DEPTH_BUFFER_BIT | GL.COLOR_BUFFER_BIT);
 
 		mRenderer.render(viewport);
 
-		GL.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
+		gl.bindFramebuffer(GL.FRAMEBUFFER, 0);
 
 		mShader.useProgram();
 
 		/* bind depth texture */
 		if (useDepthTexture) {
-			GL.glActiveTexture(GL20.GL_TEXTURE1);
+			gl.activeTexture(GL.TEXTURE1);
 			GLState.bindTex2D(renderDepth);
-			GL.glUniform1i(mShader.uTexDepth, 1);
-			GL.glActiveTexture(GL20.GL_TEXTURE0);
+			gl.uniform1i(mShader.uTexDepth, 1);
+			gl.activeTexture(GL.TEXTURE0);
 		}
 		/* bind color texture */
 		GLState.bindTex2D(renderTex);
-		GL.glUniform1i(mShader.uTexColor, 0);
+		gl.uniform1i(mShader.uTexColor, 0);
 
 		MapRenderer.bindQuadVertexVBO(mShader.aPos);
 
-		GL.glUniform2f(mShader.uPixel,
-		               (float) (1.0 / texW * 0.5),
-		               (float) (1.0 / texH * 0.5));
+		gl.uniform2f(mShader.uPixel,
+		             (float) (1.0 / texW * 0.5),
+		             (float) (1.0 / texH * 0.5));
 
 		GLState.test(false, false);
 		GLState.blend(true);
-		GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
+		gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
 		GLUtils.checkGlError("....");
 	}
 }

@@ -18,11 +18,9 @@ package org.oscim.renderer.bucket;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.backend.GL20;
 import org.oscim.utils.pool.Inlist;
 
 public abstract class RenderBucket extends Inlist<RenderBucket> {
-	protected static GL20 GL;
 
 	public static final int LINE = 0;
 	public static final int TEXLINE = 1;

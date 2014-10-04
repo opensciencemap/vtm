@@ -1,6 +1,8 @@
 package org.oscim.test.gdx.poi3d;
 
-import org.oscim.backend.GL20;
+import static org.oscim.backend.GLAdapter.gl;
+
+import org.oscim.backend.GL;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
@@ -84,12 +86,12 @@ public class GdxRenderer3D2 extends LayerRenderer {
 
 		// GLUtils.checkGlError(">" + TAG);
 
-		GL.glDepthMask(true);
+		gl.depthMask(true);
 
 		if (v.pos.zoomLevel < 17)
-			GL.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+			gl.clear(GL.DEPTH_BUFFER_BIT);
 
-		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, 0);
 
 		// set state that is expected after modelBatch.end();
 		// modelBatch keeps track of its own state
@@ -99,8 +101,8 @@ public class GdxRenderer3D2 extends LayerRenderer {
 		GLState.test(false, false);
 		GLState.blend(false);
 
-		// GL.glCullFace(GL20.GL_BACK);
-		// GL.glFrontFace(GL20.GL_CW);
+		// GL.cullFace(GL20.BACK);
+		// GL.frontFace(GL20.CW);
 
 		cam.update(v);
 		long time = System.currentTimeMillis();
@@ -145,9 +147,9 @@ public class GdxRenderer3D2 extends LayerRenderer {
 
 		// GLUtils.checkGlError("<" + TAG);
 
-		GL.glDepthMask(false);
-		GL.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, 0);
-		GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+		gl.depthMask(false);
+		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, 0);
+		gl.bindBuffer(GL.ARRAY_BUFFER, 0);
 
 		// GLState.bindTex2D(-1);
 		// GLState.useProgram(-1);

@@ -2,7 +2,7 @@ package org.oscim.renderer.bucket;
 
 import java.nio.ShortBuffer;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.MapTile.TileData;
 import org.oscim.renderer.BufferObject;
@@ -88,7 +88,7 @@ public class ExtrusionBuckets extends TileData {
 			log.error("invalid indice size: {} {}", sumIndices, pos);
 			size = pos * 2;
 		}
-		ibo = BufferObject.get(GL20.GL_ELEMENT_ARRAY_BUFFER, size);
+		ibo = BufferObject.get(GL.ELEMENT_ARRAY_BUFFER, size);
 		ibo.loadBufferData(iboData.flip(), size);
 
 		size = sumVertices * 4 * 2;
@@ -98,7 +98,7 @@ public class ExtrusionBuckets extends TileData {
 			size = pos * 2;
 		}
 
-		vbo = BufferObject.get(GL20.GL_ARRAY_BUFFER, size);
+		vbo = BufferObject.get(GL.ARRAY_BUFFER, size);
 		vbo.loadBufferData(vboData.flip(), size);
 
 		compiled = true;

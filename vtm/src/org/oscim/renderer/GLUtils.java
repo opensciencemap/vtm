@@ -16,12 +16,14 @@
  */
 package org.oscim.renderer;
 
+import static org.oscim.backend.GLAdapter.gl;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.GLAdapter;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
@@ -33,12 +35,6 @@ import org.slf4j.LoggerFactory;
 public class GLUtils {
 	static final Logger log = LoggerFactory.getLogger(GLUtils.class);
 
-	private static GL20 GL;
-
-	static void init(GL20 gl) {
-		GL = gl;
-	}
-
 	public static void setColor(int location, int color, float alpha) {
 		if (alpha >= 1)
 			alpha = ((color >>> 24) & 0xff) / 255f;
@@ -48,46 +44,46 @@ public class GLUtils {
 			alpha *= ((color >>> 24) & 0xff) / 255f;
 
 		if (alpha == 1) {
-			GL.glUniform4f(location,
-			               ((color >>> 16) & 0xff) / 255f,
-			               ((color >>> 8) & 0xff) / 255f,
-			               ((color >>> 0) & 0xff) / 255f,
-			               alpha);
+			gl.uniform4f(location,
+			             ((color >>> 16) & 0xff) / 255f,
+			             ((color >>> 8) & 0xff) / 255f,
+			             ((color >>> 0) & 0xff) / 255f,
+			             alpha);
 		} else {
-			GL.glUniform4f(location,
-			               ((color >>> 16) & 0xff) / 255f * alpha,
-			               ((color >>> 8) & 0xff) / 255f * alpha,
-			               ((color >>> 0) & 0xff) / 255f * alpha,
-			               alpha);
+			gl.uniform4f(location,
+			             ((color >>> 16) & 0xff) / 255f * alpha,
+			             ((color >>> 8) & 0xff) / 255f * alpha,
+			             ((color >>> 0) & 0xff) / 255f * alpha,
+			             alpha);
 		}
 	}
 
 	public static void setColorBlend(int location, int color1, int color2, float mix) {
 		float a1 = (((color1 >>> 24) & 0xff) / 255f) * (1 - mix);
 		float a2 = (((color2 >>> 24) & 0xff) / 255f) * mix;
-		GL.glUniform4f(location,
-		               ((((color1 >>> 16) & 0xff) / 255f) * a1
-		               + (((color2 >>> 16) & 0xff) / 255f) * a2),
-		               ((((color1 >>> 8) & 0xff) / 255f) * a1
-		               + (((color2 >>> 8) & 0xff) / 255f) * a2),
-		               ((((color1 >>> 0) & 0xff) / 255f) * a1
-		               + (((color2 >>> 0) & 0xff) / 255f) * a2),
-		               (a1 + a2));
+		gl.uniform4f(location,
+		             ((((color1 >>> 16) & 0xff) / 255f) * a1
+		             + (((color2 >>> 16) & 0xff) / 255f) * a2),
+		             ((((color1 >>> 8) & 0xff) / 255f) * a1
+		             + (((color2 >>> 8) & 0xff) / 255f) * a2),
+		             ((((color1 >>> 0) & 0xff) / 255f) * a1
+		             + (((color2 >>> 0) & 0xff) / 255f) * a2),
+		             (a1 + a2));
 	}
 
 	public static void setTextureParameter(int min_filter, int mag_filter, int wrap_s, int wrap_t) {
-		GL.glTexParameterf(GL20.GL_TEXTURE_2D,
-		                   GL20.GL_TEXTURE_MIN_FILTER,
-		                   min_filter);
-		GL.glTexParameterf(GL20.GL_TEXTURE_2D,
-		                   GL20.GL_TEXTURE_MAG_FILTER,
-		                   mag_filter);
-		GL.glTexParameterf(GL20.GL_TEXTURE_2D,
-		                   GL20.GL_TEXTURE_WRAP_S,
-		                   wrap_s); // Set U Wrapping
-		GL.glTexParameterf(GL20.GL_TEXTURE_2D,
-		                   GL20.GL_TEXTURE_WRAP_T,
-		                   wrap_t); // Set V Wrapping
+		gl.texParameterf(GL.TEXTURE_2D,
+		                 GL.TEXTURE_MIN_FILTER,
+		                 min_filter);
+		gl.texParameterf(GL.TEXTURE_2D,
+		                 GL.TEXTURE_MAG_FILTER,
+		                 mag_filter);
+		gl.texParameterf(GL.TEXTURE_2D,
+		                 GL.TEXTURE_WRAP_S,
+		                 wrap_s); // Set U Wrapping
+		gl.texParameterf(GL.TEXTURE_2D,
+		                 GL.TEXTURE_WRAP_T,
+		                 wrap_t); // Set V Wrapping
 	}
 
 	public static int loadTexture(byte[] pixel, int width, int height, int format,
@@ -102,8 +98,8 @@ public class GLUtils {
 		buf.put(pixel);
 		buf.position(0);
 		IntBuffer intBuf = buf.asIntBuffer();
-		GL.glTexImage2D(GL20.GL_TEXTURE_2D, 0, format, width, height, 0, format,
-		                GL20.GL_UNSIGNED_BYTE, intBuf);
+		gl.texImage2D(GL.TEXTURE_2D, 0, format, width, height, 0, format,
+		              GL.UNSIGNED_BYTE, intBuf);
 
 		GLState.bindTex2D(0);
 
@@ -135,18 +131,18 @@ public class GLUtils {
 			pos += flip;
 		}
 
-		return loadTexture(pixel, sum, 1, GL20.GL_ALPHA,
-		                   GL20.GL_LINEAR, GL20.GL_LINEAR,
+		return loadTexture(pixel, sum, 1, GL.ALPHA,
+		                   GL.LINEAR, GL.LINEAR,
 		                   // GLES20.GL_NEAREST, GLES20.GL_NEAREST,
-		                   GL20.GL_REPEAT,
-		                   GL20.GL_REPEAT);
+		                   GL.REPEAT,
+		                   GL.REPEAT);
 	}
 
 	public static void checkGlError(String op) {
 		//GL = GLAdapter.get();
 
 		int error;
-		while ((error = GL.glGetError()) != 0) { // GL20.GL_NO_ERROR) {
+		while ((error = gl.getError()) != 0) { // GL20.NO_ERROR) {
 			log.error(op + ": glError " + error);
 			// throw new RuntimeException(op + ": glError " + error);
 		}
@@ -155,7 +151,7 @@ public class GLUtils {
 	public static boolean checkGlOutOfMemory(String op) {
 		int error;
 		boolean oom = false;
-		while ((error = GL.glGetError()) != 0) {// GL20.GL_NO_ERROR) {
+		while ((error = gl.getError()) != 0) {// GL20.NO_ERROR) {
 			log.error(op + ": glError " + error);
 			// throw new RuntimeException(op + ": glError " + error);
 			if (error == 1285)
@@ -166,17 +162,17 @@ public class GLUtils {
 
 	public static void setColor(int handle, float[] c, float alpha) {
 		if (alpha >= 1) {
-			GL.glUniform4f(handle, c[0], c[1], c[2], c[3]);
+			gl.uniform4f(handle, c[0], c[1], c[2], c[3]);
 		} else {
 			if (alpha < 0) {
 				log.debug("setColor: " + alpha);
 				alpha = 0;
-				GL.glUniform4f(handle, 0, 0, 0, 0);
+				gl.uniform4f(handle, 0, 0, 0, 0);
 			}
 
-			GL.glUniform4f(handle,
-			               c[0] * alpha, c[1] * alpha,
-			               c[2] * alpha, c[3] * alpha);
+			gl.uniform4f(handle,
+			             c[0] * alpha, c[1] * alpha,
+			             c[2] * alpha, c[3] * alpha);
 		}
 	}
 
@@ -225,14 +221,14 @@ public class GLUtils {
 		FloatBuffer buf = MapRenderer.getFloatBuffer(count * 4);
 		buf.put(val);
 		buf.flip();
-		GL.glUniform4fv(location, count, buf);
+		gl.uniform4fv(location, count, buf);
 	}
 
 	public static int[] glGenBuffers(int num) {
 		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.position(0);
 		buf.limit(num);
-		GL.glGenBuffers(num, buf);
+		gl.genBuffers(num, buf);
 		int[] ret = new int[num];
 		buf.position(0);
 		buf.limit(num);
@@ -244,7 +240,7 @@ public class GLUtils {
 		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.put(ids, 0, num);
 		buf.flip();
-		GL.glDeleteBuffers(num, buf);
+		gl.deleteBuffers(num, buf);
 	}
 
 	public static int[] glGenTextures(int num) {
@@ -256,13 +252,13 @@ public class GLUtils {
 
 		if (GLAdapter.GDX_WEBGL_QUIRKS) {
 			for (int i = 0; i < num; i++) {
-				GL.glGenTextures(num, buf);
+				gl.genTextures(num, buf);
 				buf.position(0);
 				ret[i] = buf.get();
 				buf.position(0);
 			}
 		} else {
-			GL.glGenTextures(num, buf);
+			gl.genTextures(num, buf);
 			buf.position(0);
 			buf.get(ret);
 		}
@@ -274,6 +270,6 @@ public class GLUtils {
 		IntBuffer buf = MapRenderer.getIntBuffer(num);
 		buf.put(ids, 0, num);
 		buf.flip();
-		GL.glDeleteTextures(num, buf);
+		gl.deleteTextures(num, buf);
 	}
 }

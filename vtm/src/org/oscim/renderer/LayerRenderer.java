@@ -16,15 +16,7 @@
  */
 package org.oscim.renderer;
 
-import org.oscim.backend.GL20;
-
 public abstract class LayerRenderer {
-
-	protected static GL20 GL;
-
-	static void init(GL20 gl) {
-		GL = gl;
-	}
 
 	/** flag to set when layer is ready for rendering */
 	boolean isReady;

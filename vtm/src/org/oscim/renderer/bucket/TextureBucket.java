@@ -16,14 +16,13 @@
  */
 package org.oscim.renderer.bucket;
 
-import static org.oscim.backend.GL20.GL_SHORT;
-import static org.oscim.backend.GL20.GL_TRIANGLES;
-import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
+import static org.oscim.backend.GLAdapter.gl;
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import static org.oscim.renderer.MapRenderer.MAX_INDICES;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.backend.GL;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLViewport;
@@ -119,7 +118,7 @@ public class TextureBucket extends RenderBucket {
 			shader.useProgram();
 
 			TextureBucket tb = (TextureBucket) b;
-			GL.glUniform1f(shader.uScale, tb.fixed ? 1 / scale : 1);
+			gl.uniform1f(shader.uScale, tb.fixed ? 1 / scale : 1);
 
 			v.proj.setAsUniform(shader.uProj);
 			v.mvp.setAsUniform(shader.uMV);
@@ -127,9 +126,9 @@ public class TextureBucket extends RenderBucket {
 			MapRenderer.bindQuadIndicesVBO();
 
 			for (TextureItem t = tb.textures; t != null; t = t.next) {
-				GL.glUniform2f(shader.uTexSize,
-				               1f / (t.width * COORD_SCALE),
-				               1f / (t.height * COORD_SCALE));
+				gl.uniform2f(shader.uTexSize,
+				             1f / (t.width * COORD_SCALE),
+				             1f / (t.height * COORD_SCALE));
 				t.bind();
 
 				/* draw up to maxVertices in each iteration */
@@ -155,13 +154,13 @@ public class TextureBucket extends RenderBucket {
 	}
 
 	public void render(int offset, int numIndices) {
-		GL.glVertexAttribPointer(shader.aPos, 4, GL_SHORT,
-		                         false, 12, offset);
+		gl.vertexAttribPointer(shader.aPos, 4, GL.SHORT,
+		                       false, 12, offset);
 
-		GL.glVertexAttribPointer(shader.aTexCoord, 2, GL_SHORT,
-		                         false, 12, offset + 8);
+		gl.vertexAttribPointer(shader.aTexCoord, 2, GL.SHORT,
+		                       false, 12, offset + 8);
 
-		GL.glDrawElements(GL_TRIANGLES, numIndices,
-		                  GL_UNSIGNED_SHORT, 0);
+		gl.drawElements(GL.TRIANGLES, numIndices,
+		                GL.UNSIGNED_SHORT, 0);
 	}
 }

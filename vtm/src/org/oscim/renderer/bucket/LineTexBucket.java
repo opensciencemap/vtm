@@ -16,6 +16,7 @@
  */
 package org.oscim.renderer.bucket;
 
+import static org.oscim.backend.GLAdapter.gl;
 import static org.oscim.renderer.MapRenderer.MAX_INDICES;
 import static org.oscim.renderer.MapRenderer.bindQuadIndicesVBO;
 
@@ -23,7 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
@@ -287,10 +288,10 @@ public final class LineTexBucket extends RenderBucket {
 
 			ShortBuffer sbuf = buf.asShortBuffer();
 
-			//GL.glBindBuffer(GL20.GL_ARRAY_BUFFER, mVertexFlipID);
+			//GL.bindBuffer(GL20.ARRAY_BUFFER, mVertexFlipID);
 			GLState.bindVertexBuffer(mVertexFlipID);
-			GL.glBufferData(GL20.GL_ARRAY_BUFFER, flip.length, sbuf,
-			                GL20.GL_STATIC_DRAW);
+			gl.bufferData(GL.ARRAY_BUFFER, flip.length, sbuf,
+			              GL.STATIC_DRAW);
 			GLState.bindVertexBuffer(0);
 
 			//		mTexID = new int[10];
@@ -321,19 +322,19 @@ public final class LineTexBucket extends RenderBucket {
 			int aPos1 = shader.aPos1;
 			int aFlip = shader.aFlip;
 
-			GL.glEnableVertexAttribArray(aPos0);
-			GL.glEnableVertexAttribArray(aPos1);
-			GL.glEnableVertexAttribArray(aLen0);
-			GL.glEnableVertexAttribArray(aLen1);
-			GL.glEnableVertexAttribArray(aFlip);
+			gl.enableVertexAttribArray(aPos0);
+			gl.enableVertexAttribArray(aPos1);
+			gl.enableVertexAttribArray(aLen0);
+			gl.enableVertexAttribArray(aLen1);
+			gl.enableVertexAttribArray(aFlip);
 
 			v.mvp.setAsUniform(shader.uMVP);
 
 			bindQuadIndicesVBO();
 
 			GLState.bindVertexBuffer(mVertexFlipID);
-			GL.glVertexAttribPointer(shader.aFlip, 1,
-			                         GL20.GL_BYTE, false, 0, 0);
+			gl.vertexAttribPointer(shader.aFlip, 1,
+			                       GL.BYTE, false, 0, 0);
 
 			buckets.vbo.bind();
 
@@ -341,7 +342,7 @@ public final class LineTexBucket extends RenderBucket {
 
 			float s = scale / div;
 
-			//GL.glBindTexture(GL20.GL_TEXTURE_2D, mTexID[0]);
+			//GL.bindTexture(GL20.TEXTURE_2D, mTexID[0]);
 
 			for (; b != null && b.type == TEXLINE; b = b.next) {
 				LineTexBucket lb = (LineTexBucket) b;
@@ -354,14 +355,14 @@ public final class LineTexBucket extends RenderBucket {
 				if (pScale < 1)
 					pScale = 1;
 
-				GL.glUniform1f(shader.uPatternScale,
-				               (MapRenderer.COORD_SCALE * line.stipple) / pScale);
+				gl.uniform1f(shader.uPatternScale,
+				             (MapRenderer.COORD_SCALE * line.stipple) / pScale);
 
-				GL.glUniform1f(shader.uPatternWidth, line.stippleWidth);
-				//GL.glUniform1f(hScale, scale);
+				gl.uniform1f(shader.uPatternWidth, line.stippleWidth);
+				//GL.uniform1f(hScale, scale);
 
 				/* keep line width fixed */
-				GL.glUniform1f(shader.uWidth, lb.width / s * COORD_SCALE_BY_DIR_SCALE);
+				gl.uniform1f(shader.uWidth, lb.width / s * COORD_SCALE_BY_DIR_SCALE);
 
 				/* add offset vertex */
 				int vOffset = -STRIDE;
@@ -377,20 +378,20 @@ public final class LineTexBucket extends RenderBucket {
 					/* i / 6 * (24 shorts per block * 2 short bytes) */
 					int add = (b.vertexOffset + i * 8) + vOffset;
 
-					GL.glVertexAttribPointer(aPos0, 4, GL20.GL_SHORT, false, STRIDE,
-					                         add + STRIDE);
+					gl.vertexAttribPointer(aPos0, 4, GL.SHORT, false, STRIDE,
+					                       add + STRIDE);
 
-					GL.glVertexAttribPointer(aLen0, 2, GL20.GL_SHORT, false, STRIDE,
-					                         add + STRIDE + LEN_OFFSET);
+					gl.vertexAttribPointer(aLen0, 2, GL.SHORT, false, STRIDE,
+					                       add + STRIDE + LEN_OFFSET);
 
-					GL.glVertexAttribPointer(aPos1, 4, GL20.GL_SHORT, false, STRIDE,
-					                         add);
+					gl.vertexAttribPointer(aPos1, 4, GL.SHORT, false, STRIDE,
+					                       add);
 
-					GL.glVertexAttribPointer(aLen1, 2, GL20.GL_SHORT, false, STRIDE,
-					                         add + LEN_OFFSET);
+					gl.vertexAttribPointer(aLen1, 2, GL.SHORT, false, STRIDE,
+					                       add + LEN_OFFSET);
 
-					GL.glDrawElements(GL20.GL_TRIANGLES, numIndices,
-					                  GL20.GL_UNSIGNED_SHORT, 0);
+					gl.drawElements(GL.TRIANGLES, numIndices,
+					                GL.UNSIGNED_SHORT, 0);
 				}
 
 				/* second pass */
@@ -402,31 +403,31 @@ public final class LineTexBucket extends RenderBucket {
 					/* i / 6 * (24 shorts per block * 2 short bytes) */
 					int add = (b.vertexOffset + i * 8) + vOffset;
 
-					GL.glVertexAttribPointer(aPos0, 4, GL20.GL_SHORT, false, STRIDE,
-					                         add + 2 * STRIDE);
+					gl.vertexAttribPointer(aPos0, 4, GL.SHORT, false, STRIDE,
+					                       add + 2 * STRIDE);
 
-					GL.glVertexAttribPointer(aLen0, 2, GL20.GL_SHORT, false, STRIDE,
-					                         add + 2 * STRIDE + LEN_OFFSET);
+					gl.vertexAttribPointer(aLen0, 2, GL.SHORT, false, STRIDE,
+					                       add + 2 * STRIDE + LEN_OFFSET);
 
-					GL.glVertexAttribPointer(aPos1, 4, GL20.GL_SHORT, false, STRIDE,
-					                         add + STRIDE);
+					gl.vertexAttribPointer(aPos1, 4, GL.SHORT, false, STRIDE,
+					                       add + STRIDE);
 
-					GL.glVertexAttribPointer(aLen1, 2, GL20.GL_SHORT, false, STRIDE,
-					                         add + STRIDE + LEN_OFFSET);
+					gl.vertexAttribPointer(aLen1, 2, GL.SHORT, false, STRIDE,
+					                       add + STRIDE + LEN_OFFSET);
 
-					GL.glDrawElements(GL20.GL_TRIANGLES, numIndices,
-					                  GL20.GL_UNSIGNED_SHORT, 0);
+					gl.drawElements(GL.TRIANGLES, numIndices,
+					                GL.UNSIGNED_SHORT, 0);
 				}
 				//GlUtils.checkGlError(TAG);
 			}
 
-			GL.glDisableVertexAttribArray(aPos0);
-			GL.glDisableVertexAttribArray(aPos1);
-			GL.glDisableVertexAttribArray(aLen0);
-			GL.glDisableVertexAttribArray(aLen1);
-			GL.glDisableVertexAttribArray(aFlip);
+			gl.disableVertexAttribArray(aPos0);
+			gl.disableVertexAttribArray(aPos1);
+			gl.disableVertexAttribArray(aLen0);
+			gl.disableVertexAttribArray(aLen1);
+			gl.disableVertexAttribArray(aFlip);
 
-			//GL.glBindTexture(GL20.GL_TEXTURE_2D, 0);
+			//GL.bindTexture(GL20.TEXTURE_2D, 0);
 
 			return b;
 		}

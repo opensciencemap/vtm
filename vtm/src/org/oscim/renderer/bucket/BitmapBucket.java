@@ -16,14 +16,13 @@
  */
 package org.oscim.renderer.bucket;
 
-import static org.oscim.backend.GL20.GL_SHORT;
-import static org.oscim.backend.GL20.GL_TRIANGLES;
-import static org.oscim.backend.GL20.GL_UNSIGNED_SHORT;
+import static org.oscim.backend.GLAdapter.gl;
 import static org.oscim.renderer.MapRenderer.MAX_INDICES;
 import static org.oscim.renderer.MapRenderer.bindQuadIndicesVBO;
 
 import java.nio.ShortBuffer;
 
+import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
@@ -206,7 +205,7 @@ public class BitmapBucket extends TextureBucket {
 
 			TextureBucket tb = (TextureBucket) b;
 
-			GL.glUniform1f(s.uAlpha, alpha);
+			gl.uniform1f(s.uAlpha, alpha);
 			v.mvp.setAsUniform(s.uMVP);
 
 			bindQuadIndicesVBO();
@@ -219,18 +218,18 @@ public class BitmapBucket extends TextureBucket {
 					 * 2(short-bytes) / 6(indices) == 8) */
 					int off = (t.offset + i) * 8 + tb.vertexOffset;
 
-					GL.glVertexAttribPointer(s.aPos, 2,
-					                         GL_SHORT, false, 12, off);
+					gl.vertexAttribPointer(s.aPos, 2,
+					                       GL.SHORT, false, 12, off);
 
-					GL.glVertexAttribPointer(s.aTexCoord, 2,
-					                         GL_SHORT, false, 12, off + 8);
+					gl.vertexAttribPointer(s.aTexCoord, 2,
+					                       GL.SHORT, false, 12, off + 8);
 
 					int numIndices = t.indices - i;
 					if (numIndices > MAX_INDICES)
 						numIndices = MAX_INDICES;
 
-					GL.glDrawElements(GL_TRIANGLES, numIndices,
-					                  GL_UNSIGNED_SHORT, 0);
+					gl.drawElements(GL.TRIANGLES, numIndices,
+					                GL.UNSIGNED_SHORT, 0);
 				}
 			}
 

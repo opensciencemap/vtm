@@ -16,7 +16,7 @@
 
 package com.badlogic.gdx.backends.gwt;
 
-import org.oscim.gdx.client.GwtGLAdapter;
+import org.oscim.gdx.client.GdxGL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +91,7 @@ public class GwtGraphics implements Graphics {
 			log.error("Missing gl extension for WEBKIT_WEBGL_depth_texture");
 		}
 
-		this.gl = config.useDebugGL ? new GwtGL20Debug(context) : new GwtGLAdapter(context);
+		this.gl = config.useDebugGL ? new GwtGL20Debug(context) : new GdxGL(context);
 	}
 
 	public static native double getDevicePixelRatioJSNI() /*-{

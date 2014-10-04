@@ -16,7 +16,7 @@
  */
 package org.oscim.gdx.client;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Bitmap;
 
 import com.badlogic.gdx.Gdx;
@@ -79,7 +79,7 @@ public class GwtBitmap implements Bitmap {
 	@Override
 	public void uploadToTexture(boolean replace) {
 
-		Gdx.gl.glTexImage2D(GL20.GL_TEXTURE_2D, 0, pixmap.getGLInternalFormat(), pixmap.getWidth(),
+		Gdx.gl.glTexImage2D(GL.TEXTURE_2D, 0, pixmap.getGLInternalFormat(), pixmap.getWidth(),
 		                    pixmap.getHeight(), 0,
 		                    pixmap.getGLFormat(), pixmap.getGLType(), pixmap.getPixels());
 

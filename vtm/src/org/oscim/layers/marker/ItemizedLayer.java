@@ -1,8 +1,5 @@
 /*
- * Copyright 2012 osmdroid authors:
- * Copyright 2012 Nicolas Gramlich
- * Copyright 2012 Theodore Hong
- * Copyright 2012 Fred Eisele
+ * Copyright 2012 osmdroid authors: Nicolas Gramlich, Theodore Hong, Fred Eisele
  * 
  * Copyright 2013 Hannes Janetzek
  *

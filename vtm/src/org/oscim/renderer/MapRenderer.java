@@ -16,11 +16,13 @@
  */
 package org.oscim.renderer;
 
+import static org.oscim.backend.GLAdapter.gl;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.map.Map;
@@ -31,8 +33,6 @@ import org.slf4j.LoggerFactory;
 
 public class MapRenderer {
 	static final Logger log = LoggerFactory.getLogger(MapRenderer.class);
-
-	static GL20 GL;
 
 	/** scale factor used for short vertices */
 	public static final float COORD_SCALE = 8.0f;
@@ -81,15 +81,15 @@ public class MapRenderer {
 	private void draw() {
 		GLState.setClearColor(mClearColor);
 
-		GL.glDepthMask(true);
-		GL.glStencilMask(0xFF);
+		gl.depthMask(true);
+		gl.stencilMask(0xFF);
 
-		GL.glClear(GL20.GL_COLOR_BUFFER_BIT
-		        | GL20.GL_DEPTH_BUFFER_BIT
-		        | GL20.GL_STENCIL_BUFFER_BIT);
+		gl.clear(GL.COLOR_BUFFER_BIT
+		        | GL.DEPTH_BUFFER_BIT
+		        | GL.STENCIL_BUFFER_BIT);
 
-		GL.glDepthMask(false);
-		GL.glStencilMask(0);
+		gl.depthMask(false);
+		gl.stencilMask(0);
 
 		GLState.test(false, false);
 		GLState.blend(false);
@@ -147,18 +147,18 @@ public class MapRenderer {
 
 		//mMap.viewport().getMatrix(null, mMatrices.proj, null);
 		mViewport.initFrom(mMap.viewport());
-		GL.glViewport(0, 0, width, height);
+		gl.viewport(0, 0, width, height);
 
-		//GL.glScissor(0, 0, width, height);
-		//GL.glEnable(GL20.GL_SCISSOR_TEST);
+		//GL.scissor(0, 0, width, height);
+		//GL.enable(GL20.SCISSOR_TEST);
 
-		GL.glClearStencil(0x00);
+		gl.clearStencil(0x00);
 
-		GL.glDisable(GL20.GL_CULL_FACE);
-		GL.glBlendFunc(GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		gl.disable(GL.CULL_FACE);
+		gl.blendFunc(GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
 
-		GL.glFrontFace(GL20.GL_CW);
-		GL.glCullFace(GL20.GL_BACK);
+		gl.frontFace(GL.CW);
+		gl.cullFace(GL.BACK);
 
 		if (!mNewSurface) {
 			mMap.updateMap(false);
@@ -187,9 +187,9 @@ public class MapRenderer {
 		buf.flip();
 
 		GLState.bindElementBuffer(mQuadIndicesID);
-		GL.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER,
-		                indices.length * 2, buf,
-		                GL20.GL_STATIC_DRAW);
+		gl.bufferData(GL.ELEMENT_ARRAY_BUFFER,
+		              indices.length * 2, buf,
+		              GL.STATIC_DRAW);
 		GLState.bindElementBuffer(0);
 
 		/** initialize default quad */
@@ -200,22 +200,21 @@ public class MapRenderer {
 		mQuadVerticesID = vboIds[1];
 
 		GLState.bindVertexBuffer(mQuadVerticesID);
-		GL.glBufferData(GL20.GL_ARRAY_BUFFER,
-		                quad.length * 4, floatBuffer,
-		                GL20.GL_STATIC_DRAW);
+		gl.bufferData(GL.ARRAY_BUFFER,
+		              quad.length * 4, floatBuffer,
+		              GL.STATIC_DRAW);
 		GLState.bindVertexBuffer(0);
 
-		GLState.init(GL);
+		GLState.init();
 
 		mMap.updateMap(true);
 	}
 
 	public void onSurfaceCreated() {
-		GL = GLAdapter.get();
-		// log.debug(GL.glGetString(GL20.GL_EXTENSIONS));
-		String vendor = GL.glGetString(GL20.GL_VENDOR);
-		String renderer = GL.glGetString(GL20.GL_RENDERER);
-		String version = GL.glGetString(GL20.GL_VERSION);
+		// log.debug(GL.getString(GL20.EXTENSIONS));
+		String vendor = gl.getString(GL.VENDOR);
+		String renderer = gl.getString(GL.RENDERER);
+		String version = gl.getString(GL.VERSION);
 		log.debug("{}/{}/{}", vendor, renderer, version);
 
 		if ("Adreno (TM) 330".equals(renderer) || "Adreno (TM) 320".equals(renderer)) {
@@ -223,17 +222,13 @@ public class MapRenderer {
 			GLAdapter.NO_BUFFER_SUB_DATA = true;
 		}
 
-		GLState.init(GL);
-		GLUtils.init(GL);
-		GLShader.init(GL);
-		OffscreenRenderer.init(GL);
+		GLState.init();
 
 		// Set up some vertex buffer objects
-		BufferObject.init(GL, 200);
+		BufferObject.init(200);
 
 		// classes that require GL context for initialization
-		RenderBuckets.initRenderer(GL);
-		LayerRenderer.init(GL);
+		RenderBuckets.initRenderer();
 
 		mNewSurface = true;
 	}
@@ -244,14 +239,14 @@ public class MapRenderer {
 	 * Bind VBO for a simple quad. Handy for simple custom RenderLayers
 	 * Vertices: float[]{ -1, -1, -1, 1, 1, -1, 1, 1 }
 	 * 
-	 * GL.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4);
+	 * GL.drawArrays(GL20.TRIANGLE_STRIP, 0, 4);
 	 */
 	public static void bindQuadVertexVBO(int location) {
 
 		if (location >= 0) {
 			GLState.bindVertexBuffer(mQuadVerticesID);
 			GLState.enableVertexArrays(location, -1);
-			GL.glVertexAttribPointer(location, 2, GL20.GL_FLOAT, false, 0, 0);
+			gl.vertexAttribPointer(location, 2, GL.FLOAT, false, 0, 0);
 		}
 	}
 

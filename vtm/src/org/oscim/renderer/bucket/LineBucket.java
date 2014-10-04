@@ -16,10 +16,9 @@
  */
 package org.oscim.renderer.bucket;
 
-import static org.oscim.backend.GL20.GL_SHORT;
-import static org.oscim.backend.GL20.GL_TRIANGLE_STRIP;
+import static org.oscim.backend.GLAdapter.gl;
 
-import org.oscim.backend.GL20;
+import org.oscim.backend.GL;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
@@ -561,10 +560,10 @@ public final class LineBucket extends RenderBucket {
 				}
 			}
 
-			mTexID = GLUtils.loadTexture(pixel, 128, 128, GL20.GL_ALPHA,
-			                             GL20.GL_NEAREST, GL20.GL_NEAREST,
-			                             GL20.GL_MIRRORED_REPEAT,
-			                             GL20.GL_MIRRORED_REPEAT);
+			mTexID = GLUtils.loadTexture(pixel, 128, 128, GL.ALPHA,
+			                             GL.NEAREST, GL.NEAREST,
+			                             GL.MIRRORED_REPEAT,
+			                             GL.MIRRORED_REPEAT);
 			return true;
 		}
 
@@ -593,8 +592,8 @@ public final class LineBucket extends RenderBucket {
 			int uLineWidth = s.uWidth;
 			int uLineHeight = s.uHeight;
 
-			GL.glVertexAttribPointer(s.aPos, 4, GL_SHORT, false, 0,
-			                         buckets.offset[LINE]);
+			gl.vertexAttribPointer(s.aPos, 4, GL.SHORT, false, 0,
+			                       buckets.offset[LINE]);
 
 			v.mvp.setAsUniform(s.uMVP);
 
@@ -608,16 +607,16 @@ public final class LineBucket extends RenderBucket {
 			 * used with orthographic projection, (shader mode == 1) */
 			double pixel = (mode == SHADER_PROJ) ? 0.0001 : 1.5 / scale;
 
-			GL.glUniform1f(uLineFade, (float) pixel);
+			gl.uniform1f(uLineFade, (float) pixel);
 
 			int capMode = 0;
-			GL.glUniform1f(uLineMode, capMode);
+			gl.uniform1f(uLineMode, capMode);
 
 			boolean blur = false;
 			double width;
 
 			float heightOffset = 0;
-			GL.glUniform1f(uLineHeight, heightOffset);
+			gl.uniform1f(uLineHeight, heightOffset);
 
 			for (; b != null && b.type == RenderBucket.LINE; b = b.next) {
 				LineBucket lb = (LineBucket) b;
@@ -626,7 +625,7 @@ public final class LineBucket extends RenderBucket {
 				if (lb.heightOffset != heightOffset) {
 					heightOffset = lb.heightOffset;
 
-					GL.glUniform1f(uLineHeight, heightOffset /
+					gl.uniform1f(uLineHeight, heightOffset /
 					        MercatorProjection.groundResolution(v.pos));
 				}
 
@@ -640,7 +639,7 @@ public final class LineBucket extends RenderBucket {
 				}
 
 				if (mode == SHADER_PROJ && blur && line.blur == 0) {
-					GL.glUniform1f(uLineFade, (float) pixel);
+					gl.uniform1f(uLineFade, (float) pixel);
 					blur = false;
 				}
 
@@ -654,16 +653,16 @@ public final class LineBucket extends RenderBucket {
 						width = lb.scale * line.width / variableScale;
 					}
 
-					GL.glUniform1f(uLineWidth,
-					               (float) (width * COORD_SCALE_BY_DIR_SCALE));
+					gl.uniform1f(uLineWidth,
+					             (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
 					/* Line-edge fade */
 					if (line.blur > 0) {
-						GL.glUniform1f(uLineFade, line.blur);
+						gl.uniform1f(uLineFade, line.blur);
 						blur = true;
 					} else if (mode == SHADER_FLAT) {
-						GL.glUniform1f(uLineFade, (float) (pixel / width));
-						//GL.glUniform1f(uLineScale, (float)(pixel / (ll.width / s)));
+						gl.uniform1f(uLineFade, (float) (pixel / width));
+						//GL.uniform1f(uLineScale, (float)(pixel / (ll.width / s)));
 					}
 
 					/* Cap mode */
@@ -671,20 +670,20 @@ public final class LineBucket extends RenderBucket {
 
 						if (capMode != CAP_THIN) {
 							capMode = CAP_THIN;
-							GL.glUniform1f(uLineMode, capMode);
+							gl.uniform1f(uLineMode, capMode);
 						}
 					} else if (lb.roundCap) {
 						if (capMode != CAP_ROUND) {
 							capMode = CAP_ROUND;
-							GL.glUniform1f(uLineMode, capMode);
+							gl.uniform1f(uLineMode, capMode);
 						}
 					} else if (capMode != CAP_BUTT) {
 						capMode = CAP_BUTT;
-						GL.glUniform1f(uLineMode, capMode);
+						gl.uniform1f(uLineMode, capMode);
 					}
 
-					GL.glDrawArrays(GL_TRIANGLE_STRIP,
-					                b.vertexOffset, b.numVertices);
+					gl.drawArrays(GL.TRIANGLE_STRIP,
+					              b.vertexOffset, b.numVertices);
 
 					continue;
 				}
@@ -707,15 +706,15 @@ public final class LineBucket extends RenderBucket {
 						width += lb.scale * line.width / variableScale;
 					}
 
-					GL.glUniform1f(uLineWidth,
-					               (float) (width * COORD_SCALE_BY_DIR_SCALE));
+					gl.uniform1f(uLineWidth,
+					             (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
 					/* Line-edge fade */
 					if (line.blur > 0) {
-						GL.glUniform1f(uLineFade, line.blur);
+						gl.uniform1f(uLineFade, line.blur);
 						blur = true;
 					} else if (mode == SHADER_FLAT) {
-						GL.glUniform1f(uLineFade, (float) (pixel / width));
+						gl.uniform1f(uLineFade, (float) (pixel / width));
 					}
 
 					/* Cap mode */
@@ -723,15 +722,15 @@ public final class LineBucket extends RenderBucket {
 
 						if (capMode != CAP_ROUND) {
 							capMode = CAP_ROUND;
-							GL.glUniform1f(uLineMode, capMode);
+							gl.uniform1f(uLineMode, capMode);
 						}
 					} else if (capMode != CAP_BUTT) {
 						capMode = CAP_BUTT;
-						GL.glUniform1f(uLineMode, capMode);
+						gl.uniform1f(uLineMode, capMode);
 					}
 
-					GL.glDrawArrays(GL_TRIANGLE_STRIP,
-					                ref.vertexOffset, ref.numVertices);
+					gl.drawArrays(GL.TRIANGLE_STRIP,
+					              ref.vertexOffset, ref.numVertices);
 				}
 			}
 
