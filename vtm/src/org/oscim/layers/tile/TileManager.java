@@ -37,6 +37,7 @@ import org.oscim.layers.tile.MapTile.TileNode;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
+import org.oscim.tiling.QueryResult;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.TileIndex;
 import org.slf4j.Logger;
@@ -576,29 +577,33 @@ public class TileManager {
 	 * @param tile
 	 *            Tile ready for upload in TileRenderLayer
 	 */
-	public void jobCompleted(MapTile tile, boolean success) {
+	public void jobCompleted(MapTile tile, QueryResult result) {
 
 		/* send TILE_LOADED event on main-loop */
-		mMap.post(new JobCompletedEvent(tile, success));
+		mMap.post(new JobCompletedEvent(tile, result));
 
 		/* locked means the tile is visible or referenced by
 		 * a tile that might be visible. */
-		if (tile.isLocked())
-			mMap.render();
+		if (tile.isLocked()) {
+			if (result == QueryResult.DELAYED && tile.isLocked())
+				mMap.updateMap(false);
+			else
+				mMap.render();
+		}
 	}
 
 	class JobCompletedEvent implements Runnable {
 		final MapTile tile;
-		final boolean success;
+		final QueryResult result;
 
-		public JobCompletedEvent(MapTile tile, boolean success) {
+		public JobCompletedEvent(MapTile tile, QueryResult result) {
 			this.tile = tile;
-			this.success = success;
+			this.result = result;
 		}
 
 		@Override
 		public void run() {
-			if (success && tile.state(LOADING)) {
+			if (result == QueryResult.SUCCESS && tile.state(LOADING)) {
 				tile.setState(NEW_DATA);
 				events.fire(TILE_LOADED, tile);
 				mTilesToUpload++;
@@ -606,7 +611,7 @@ public class TileManager {
 			}
 			// TODO use mMap.update(true) to retry tile loading?
 			log.debug("Load: {} {} state:{}",
-			          tile, success ? "success" : "failed",
+			          tile, result,
 			          tile.state());
 
 			/* got orphaned tile */

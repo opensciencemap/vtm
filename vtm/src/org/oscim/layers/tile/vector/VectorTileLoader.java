@@ -41,6 +41,7 @@ import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.TextStyle;
 import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

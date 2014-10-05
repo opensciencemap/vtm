@@ -14,13 +14,13 @@
  */
 package org.oscim.layers.tile;
 
-import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
-import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+import static org.oscim.tiling.QueryResult.FAILED;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,13 +115,12 @@ public abstract class TileLoader implements ITileDataSink {
 	 */
 	@Override
 	public void completed(QueryResult result) {
-		boolean success = (result == SUCCESS) && !isInterrupted;
 		long now = MapRenderer.frametime;
 
 		//log.debug("completed {}  diff time:{}", mTile, (now - lastLoadTime));
 		lastLoadTime = now;
 
-		mTileManager.jobCompleted(mTile, success);
+		mTileManager.jobCompleted(mTile, result);
 		mTile = null;
 
 		mWorking = false;

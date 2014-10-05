@@ -16,12 +16,13 @@
  */
 package org.oscim.layers.tile;
 
-import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
-import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+import static org.oscim.tiling.QueryResult.FAILED;
+import static org.oscim.tiling.QueryResult.SUCCESS;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
 import org.oscim.tiling.ITileDataSink;
+import org.oscim.tiling.QueryResult;
 import org.oscim.utils.PausableThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,9 +96,9 @@ public abstract class TileLoader extends PausableThread implements ITileDataSink
 		boolean ok = (result == SUCCESS);
 
 		if (ok && (isCanceled() || isInterrupted()))
-			ok = false;
+			result = QueryResult.FAILED;
 
-		mTileManager.jobCompleted(mTile, ok);
+		mTileManager.jobCompleted(mTile, result);
 		mTile = null;
 	}
 

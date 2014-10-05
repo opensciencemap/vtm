@@ -13,6 +13,7 @@ import org.oscim.layers.tile.TileLoader;
 import org.oscim.layers.tile.TileManager;
 import org.oscim.renderer.bucket.ExtrusionBucket;
 import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.QueryResult;
 import org.oscim.tiling.TileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
