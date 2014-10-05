@@ -238,7 +238,7 @@ public class TileManager {
 		/* greater 1 when zoomed in further than current zoomlevel */
 		double scaleDiv = pos.scale / (1 << tileZoom);
 
-		mLoadParent = false;
+		mLoadParent = true;
 
 		if (mZoomTable == null) {
 			/* positive when current zoomlevel is greater than previous */
@@ -247,8 +247,9 @@ public class TileManager {
 				/* dont switch zoomlevel if */
 				if (scaleDiv < mLevelUpThreshold)
 					tileZoom = mPrevZoomlevel;
+				mLoadParent = false;
 			} else if (zoomDiff == -1) {
-				mLoadParent = true;
+				//mLoadParent = true;
 				/* dont switch zoomlevel if */
 				if (scaleDiv > mLevelDownThreshold)
 					tileZoom = mPrevZoomlevel;
