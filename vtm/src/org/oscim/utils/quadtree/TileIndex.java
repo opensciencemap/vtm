@@ -195,4 +195,11 @@ public abstract class TileIndex<T extends TreeNode<T, E>, E> {
 		return root.refs;
 	}
 
+	public void drop() {
+		root.item = null;
+		root.child00 = null;
+		root.child01 = null;
+		root.child10 = null;
+		root.child11 = null;
+	}
 }

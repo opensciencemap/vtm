@@ -22,7 +22,6 @@ import static org.oscim.layers.tile.MapTile.State.LOADING;
 import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
 import static org.oscim.layers.tile.MapTile.State.NONE;
 import static org.oscim.layers.tile.MapTile.State.READY;
-import static org.oscim.layers.tile.MapTile.State.TIMEOUT;
 
 import org.oscim.core.Tile;
 import org.oscim.layers.tile.vector.VectorTileLoader;
@@ -73,8 +72,6 @@ public class MapTile extends Tile {
 		 * but may still be processed by TileLoader.
 		 */
 		public final static byte CANCEL = (1 << 4);
-
-		public final static byte TIMEOUT = (1 << 5);
 
 		/**
 		 * Dont touch if you find some.
@@ -231,12 +228,6 @@ public class MapTile extends Tile {
 		if (--locked > 0)
 			return;
 
-		if (state == DEADBEEF) {
-			log.debug("Unlock dead tile {}", this);
-			clear();
-			return;
-		}
-
 		TileNode parent = node.parent;
 		if ((proxy & PROXY_PARENT) != 0)
 			parent.item.refs--;
@@ -252,6 +243,11 @@ public class MapTile extends Tile {
 
 		/* removed all proxy references for this tile */
 		proxy = 0;
+
+		if (state == DEADBEEF) {
+			log.debug("Unlock dead tile {}", this);
+			clear();
+		}
 	}
 
 	/**
@@ -278,10 +274,7 @@ public class MapTile extends Tile {
 			data.dispose();
 			data = data.next;
 		}
-		if (state == DEADBEEF)
-			return;
-
-		state = NONE;
+		setState(NONE);
 	}
 
 	/**
@@ -402,26 +395,27 @@ public class MapTile extends Tile {
 				return "Ready";
 			case State.CANCEL:
 				return "Cancel";
-			case State.TIMEOUT:
-				return "Timeout";
 			case State.DEADBEEF:
 				return "Dead";
 		}
 		return "";
 	}
 
-	void setState(byte newState) {
+	public synchronized void setState(byte newState) {
 		if (state == newState)
+			return;
+
+		/* Renderer could have uploaded the tile while the layer
+		 * was cleared. This prevents to set tile to READY state. */
+		/* All other state changes are on the main-thread. */
+		if (state == DEADBEEF)
 			return;
 
 		switch (newState) {
 			case NONE:
-				if (state(LOADING | CANCEL)) {
-					state = newState;
-					return;
-				}
-				throw new IllegalStateException("None"
-				        + " <= " + state() + " " + this);
+				state = newState;
+				return;
+
 			case LOADING:
 				if (state == NONE) {
 					state = newState;
@@ -452,12 +446,9 @@ public class MapTile extends Tile {
 				}
 				throw new IllegalStateException("Cancel" +
 				        " <= " + state() + " " + this);
-			case TIMEOUT:
-				// TODO
-				break;
 			case DEADBEEF:
 				state = newState;
-				break;
+				return;
 		}
 	}
 }

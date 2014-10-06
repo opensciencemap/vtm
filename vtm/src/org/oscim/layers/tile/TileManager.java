@@ -167,20 +167,22 @@ public class TileManager {
 	public void init() {
 		if (mCurrentTiles != null)
 			mCurrentTiles.releaseTiles();
-		/* pass VBOs and VertexItems back to pools */
+
+		mIndex.drop();
+
+		/* Pass VBOs and VertexItems back to pools */
 		for (int i = 0; i < mTilesEnd; i++) {
 			MapTile t = mTiles[i];
 			if (t == null)
 				continue;
 
-			if (!t.isLocked()) {
-				//log.debug("init clear {} {}", t, t.state());
+			/* Check if tile is used by another thread */
+			if (!t.isLocked())
 				t.clear();
-			}
-			mIndex.removeItem(t);
 
-			/* in case the tile is still loading:
-			 * clear when returned from loader */
+			/* In case the tile is still loading or used by
+			 * another thread: clear when returned from loader
+			 * or becomes unlocked */
 			t.setState(DEADBEEF);
 		}
 
@@ -592,7 +594,6 @@ public class TileManager {
 				mTilesToUpload++;
 				return;
 			}
-
 			// TODO use mMap.update(true) to retry tile loading?
 			log.debug("Load: {} {} state:{}",
 			          tile, success ? "success" : "failed",
