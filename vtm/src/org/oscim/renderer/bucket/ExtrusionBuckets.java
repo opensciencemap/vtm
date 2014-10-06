@@ -16,6 +16,7 @@ public class ExtrusionBuckets extends TileData {
 	public ExtrusionBucket buckets;
 
 	public boolean compiled;
+	public long animTime;
 
 	public final int zoomLevel;
 
