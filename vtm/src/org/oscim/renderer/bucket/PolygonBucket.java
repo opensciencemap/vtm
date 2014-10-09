@@ -147,11 +147,9 @@ public final class PolygonBucket extends RenderBucket {
 
 			uMVP = getUniform("u_mvp");
 			aPos = getAttrib("a_pos");
-
+			uColor = getUniform("u_color");
 			if (shaderFile == "polygon_layer_tex")
 				uScale = getUniform("u_scale");
-			else
-				uColor = getUniform("u_color");
 		}
 	}
 
@@ -191,7 +189,6 @@ public final class PolygonBucket extends RenderBucket {
 
 				if (enableTexture && (a.texture != null)) {
 					s = setShader(texShader, v.mvp, false);
-
 					float num = clamp((Tile.SIZE / a.texture.width) >> 1, 1, Tile.SIZE);
 
 					float scale = (float) pos.getZoomScale();
@@ -199,31 +196,32 @@ public final class PolygonBucket extends RenderBucket {
 					transition = Interpolation.exp5.apply(transition);
 
 					gl.uniform2f(s.uScale, transition, div / num);
-
-					GLState.blend(true);
 					a.texture.bind();
 
 				} else {
 					s = setShader(polyShader, v.mvp, false);
-
-					float fade = a.getFade(pos.scale);
-					float blend = a.getBlend(pos.scale);
-
-					if (fade < 1.0f) {
-						GLState.blend(true);
-						GLUtils.setColor(s.uColor, a.color, fade);
-					} else if (blend > 0.0f) {
-						if (blend == 1.0f)
-							GLUtils.setColor(s.uColor, a.blendColor, 1);
-						else
-							GLUtils.setColorBlend(s.uColor, a.color,
-							                      a.blendColor, blend);
-					} else {
-						/* test if color contains alpha */
-						GLState.blend((a.color & OPAQUE) != OPAQUE);
-						GLUtils.setColor(s.uColor, a.color, 1);
-					}
 				}
+
+				float fade = a.getFade(pos.scale);
+				float blendFill = a.getBlend(pos.scale);
+				boolean blend = (s == texShader || fade < 1.0);
+
+				if (fade < 1.0) {
+					GLUtils.setColor(s.uColor, a.color, fade);
+				} else if (blendFill > 0.0f) {
+					if (blendFill == 1.0f) {
+						GLUtils.setColor(s.uColor, a.blendColor, 1);
+					} else {
+						GLUtils.setColorBlend(s.uColor, a.color,
+						                      a.blendColor, blendFill);
+					}
+				} else {
+					blend |= (a.color & OPAQUE) != OPAQUE;
+					GLUtils.setColor(s.uColor, a.color, fade);
+				}
+
+				GLState.blend(blend);
+
 				/* set stencil buffer mask used to draw this layer
 				 * also check that clip bit is set to avoid overdraw
 				 * of other tiles */

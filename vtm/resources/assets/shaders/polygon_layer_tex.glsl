@@ -24,5 +24,5 @@ varying vec2 v_st;
 varying vec2 v_st2;
 void
 main(){
-  gl_FragColor = mix(texture2D(tex, v_st), texture2D(tex, v_st2), u_scale.x);
+  gl_FragColor = mix(texture2D(tex, v_st), texture2D(tex, v_st2), u_scale.x) * u_color;
 }
