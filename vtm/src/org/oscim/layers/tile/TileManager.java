@@ -154,8 +154,8 @@ public class TileManager {
 		mUpdateSerial = 0;
 	}
 
-	public void setZoomTable(int[] zoomLevel) {
-		mZoomTable = zoomLevel;
+	public void setZoomTable(int[] zoomTable) {
+		mZoomTable = zoomTable;
 	}
 
 	public MapTile getTile(int x, int y, int z) {
@@ -235,28 +235,28 @@ public class TileManager {
 
 		int tileZoom = FastMath.clamp(pos.zoomLevel, mMinZoom, mMaxZoom);
 
-		//mLoadParent = pos.getZoomScale() < 1.5;
-
-		/* greater 1 when zoomed in further than current zoomlevel */
-		double scaleDiv = pos.scale / (1 << tileZoom);
-
-		mLoadParent = true;
-
 		if (mZoomTable == null) {
-			/* positive when current zoomlevel is greater than previous */
+			/* greater 1 when zoomed in further than
+			 * tile zoomlevel, so [1..2] while whithin
+			 * min/maxZoom */
+			double scaleDiv = pos.scale / (1 << tileZoom);
 			int zoomDiff = tileZoom - mPrevZoomlevel;
-			if (zoomDiff == 1) {
-				/* dont switch zoomlevel if */
+			if (zoomDiff > 0) {
+				/* dont switch zoomlevel yet */
 				if (scaleDiv < mLevelUpThreshold)
 					tileZoom = mPrevZoomlevel;
 				mLoadParent = false;
-			} else if (zoomDiff == -1) {
-				//mLoadParent = true;
-				/* dont switch zoomlevel if */
+			} else if (zoomDiff < 0) {
+				/* dont switch zoomlevel yet */
 				if (scaleDiv > mLevelDownThreshold)
 					tileZoom = mPrevZoomlevel;
 			}
+			mLoadParent = scaleDiv < 1.5;
+			//	log.debug("p:{} {}:{}=>{} | {} <> {}", mLoadParent,
+			//	          mPrevZoomlevel, pos.zoomLevel, tileZoom,
+			//	          scaleDiv, (pos.scale / (1 << tileZoom)));
 		} else {
+			mLoadParent = false;
 			int match = 0;
 			for (int z : mZoomTable) {
 				if (z <= tileZoom && z > match)
@@ -267,7 +267,6 @@ public class TileManager {
 
 			tileZoom = match;
 		}
-		//log.debug("{}|{}|{}|{}", mLoadParent, mPrevZoomlevel, pos.zoomLevel, scaleDiv);
 		mPrevZoomlevel = tileZoom;
 
 		mViewport.getMapExtents(mMapPlane, Tile.SIZE / 2);
