@@ -17,6 +17,7 @@
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
@@ -34,7 +35,7 @@ public class SimpleMapActivity extends BaseMapActivity {
 		Map m = this.map();
 
 		Layers layers = mMap.layers();
-		//layers.add(new BuildingLayer(mMap, mBaseLayer));
+		layers.add(new BuildingLayer(mMap, mBaseLayer));
 		layers.add(new LabelLayer(mMap, mBaseLayer));
 
 		m.setTheme(VtmThemes.DEFAULT);
