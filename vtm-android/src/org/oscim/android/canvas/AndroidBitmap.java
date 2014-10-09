@@ -16,6 +16,8 @@
  */
 package org.oscim.android.canvas;
 
+import static android.graphics.Bitmap.Config.ARGB_8888;
+
 import java.io.InputStream;
 
 import android.graphics.Bitmap;
@@ -27,7 +29,13 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 	final Bitmap mBitmap;
 
 	public AndroidBitmap(InputStream inputStream) {
-		mBitmap = BitmapFactory.decodeStream(inputStream);
+		Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+		try {
+			GLUtils.getType(bitmap);
+		} catch (IllegalArgumentException e) {
+			bitmap = bitmap.copy(ARGB_8888, false);
+		}
+		mBitmap = bitmap;
 	}
 
 	@Override
@@ -40,7 +48,7 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 	 */
 	public AndroidBitmap(int width, int height, int format) {
 		mBitmap = android.graphics.Bitmap
-		    .createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+		    .createBitmap(width, height, ARGB_8888);
 	}
 
 	public AndroidBitmap(android.graphics.Bitmap bitmap) {
@@ -74,15 +82,15 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
 
 	@Override
 	public void uploadToTexture(boolean replace) {
-
 		int format = GLUtils.getInternalFormat(mBitmap);
 		int type = GLUtils.getType(mBitmap);
 
 		if (replace)
-			GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mBitmap, format,
-			                      type);
+			GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0,
+			                      mBitmap, format, type);
 		else
-			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, format, mBitmap, type, 0);
+			GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, format,
+			                   mBitmap, type, 0);
 	}
 
 	@Override
