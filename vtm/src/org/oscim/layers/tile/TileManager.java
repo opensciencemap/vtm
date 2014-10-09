@@ -23,6 +23,7 @@ import static org.oscim.layers.tile.MapTile.State.LOADING;
 import static org.oscim.layers.tile.MapTile.State.NEW_DATA;
 import static org.oscim.layers.tile.MapTile.State.NONE;
 import static org.oscim.layers.tile.MapTile.State.READY;
+import static org.oscim.utils.FastMath.clamp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +37,6 @@ import org.oscim.layers.tile.MapTile.TileNode;
 import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 import org.oscim.renderer.BufferObject;
-import org.oscim.utils.FastMath;
 import org.oscim.utils.ScanBox;
 import org.oscim.utils.quadtree.TileIndex;
 import org.slf4j.Logger;
@@ -99,13 +99,11 @@ public class TileManager {
 
 	private final float[] mMapPlane = new float[8];
 
-	private boolean mLoadParent = false;
+	private boolean mLoadParent;
 	private int mPrevZoomlevel;
 
-	//private final double mLevelUpThreshold = 1.15;
-	//private final double mLevelDownThreshold = 1.95;
-	private final double mLevelUpThreshold = 1;
-	private final double mLevelDownThreshold = 2;
+	private double mLevelUpThreshold = 1;
+	private double mLevelDownThreshold = 2;
 
 	private final TileIndex<TileNode, MapTile> mIndex =
 	        new TileIndex<TileNode, MapTile>() {
@@ -156,6 +154,15 @@ public class TileManager {
 
 	public void setZoomTable(int[] zoomTable) {
 		mZoomTable = zoomTable;
+	}
+
+	/**
+	 * TESTING: avoid flickering when switching zoom-levels:
+	 * 1.85, 1.15 seems to work well
+	 */
+	public void setZoomThresholds(float down, float up) {
+		mLevelDownThreshold = clamp(down, 1, 2);
+		mLevelUpThreshold = clamp(up, 1, 2);
 	}
 
 	public MapTile getTile(int x, int y, int z) {
@@ -233,25 +240,29 @@ public class TileManager {
 			return false;
 		}
 
-		int tileZoom = FastMath.clamp(pos.zoomLevel, mMinZoom, mMaxZoom);
+		int tileZoom = clamp(pos.zoomLevel, mMinZoom, mMaxZoom);
 
 		if (mZoomTable == null) {
 			/* greater 1 when zoomed in further than
 			 * tile zoomlevel, so [1..2] while whithin
 			 * min/maxZoom */
 			double scaleDiv = pos.scale / (1 << tileZoom);
-			int zoomDiff = tileZoom - mPrevZoomlevel;
-			if (zoomDiff > 0) {
-				/* dont switch zoomlevel yet */
-				if (scaleDiv < mLevelUpThreshold)
-					tileZoom = mPrevZoomlevel;
-				mLoadParent = false;
-			} else if (zoomDiff < 0) {
-				/* dont switch zoomlevel yet */
-				if (scaleDiv > mLevelDownThreshold)
-					tileZoom = mPrevZoomlevel;
-			}
 			mLoadParent = scaleDiv < 1.5;
+
+			int zoomDiff = tileZoom - mPrevZoomlevel;
+			if (zoomDiff == 1) {
+				/* dont switch zoomlevel up yet */
+				if (scaleDiv < mLevelUpThreshold) {
+					tileZoom = mPrevZoomlevel;
+					mLoadParent = false;
+				}
+			} else if (zoomDiff == -1) {
+				/* dont switch zoomlevel down yet */
+				if (scaleDiv > mLevelDownThreshold) {
+					tileZoom = mPrevZoomlevel;
+					mLoadParent = true;
+				}
+			}
 			//	log.debug("p:{} {}:{}=>{} | {} <> {}", mLoadParent,
 			//	          mPrevZoomlevel, pos.zoomLevel, tileZoom,
 			//	          scaleDiv, (pos.scale / (1 << tileZoom)));
