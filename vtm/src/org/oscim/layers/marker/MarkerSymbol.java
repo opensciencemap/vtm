@@ -24,14 +24,25 @@ public class MarkerSymbol {
 	final Bitmap[] mBitmap;
 	/** Hotspot offset */
 	final PointF mOffset;
+	final boolean mBillboard;
 
 	public MarkerSymbol(Bitmap bitmap, float relX, float relY) {
+		this(bitmap, relX, relY, true);
+	}
+
+	public MarkerSymbol(Bitmap bitmap, float relX, float relY, boolean billboard) {
 		mBitmap = new Bitmap[1];
 		mBitmap[0] = bitmap;
 		mOffset = new PointF(relX, relY);
+		mBillboard = billboard;
 	}
 
 	public MarkerSymbol(Bitmap bitmap, HotspotPlace hotspot) {
+		this(bitmap, hotspot, true);
+	}
+
+	public MarkerSymbol(Bitmap bitmap, HotspotPlace hotspot, boolean billboard) {
+
 		switch (hotspot) {
 			case BOTTOM_CENTER:
 				mOffset = new PointF(0.5f, 1);
@@ -63,7 +74,11 @@ public class MarkerSymbol {
 
 		mBitmap = new Bitmap[1];
 		mBitmap[0] = bitmap;
+		mBillboard = billboard;
+	}
 
+	public boolean isBillboard() {
+		return mBillboard;
 	}
 
 	public PointF getHotspot() {
@@ -75,6 +90,7 @@ public class MarkerSymbol {
 	}
 
 	public boolean isInside(float dx, float dy) {
+		/* TODO handle no-billboard */
 		int w = mBitmap[0].getWidth();
 		int h = mBitmap[0].getHeight();
 		float ox = -w * mOffset.x;
@@ -82,5 +98,4 @@ public class MarkerSymbol {
 
 		return dx >= ox && dy >= oy && dx <= ox + w && dy <= oy + h;
 	}
-
 }

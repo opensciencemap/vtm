@@ -93,6 +93,13 @@ public final class AndroidGraphics extends CanvasAdapter {
 		return new AndroidBitmap(bitmap);
 	}
 
+	public static Bitmap drawableToBitmap(Resources res, int resId) {
+		return new AndroidBitmap(res.openRawResource(resId));
+	}
+
+	/**
+	 * @deprecated
+	 */
 	public static MarkerSymbol makeMarker(Drawable drawable, HotspotPlace place) {
 		if (place == null)
 			place = HotspotPlace.CENTER;
@@ -100,6 +107,9 @@ public final class AndroidGraphics extends CanvasAdapter {
 		return new MarkerSymbol(drawableToBitmap(drawable), place);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public static MarkerSymbol makeMarker(Resources res, int resId, HotspotPlace place) {
 		if (place == null)
 			place = HotspotPlace.CENTER;

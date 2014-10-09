@@ -16,12 +16,13 @@
  */
 package org.oscim.android.test;
 
+import static org.oscim.android.canvas.AndroidGraphics.drawableToBitmap;
 import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.oscim.android.canvas.AndroidGraphics;
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.marker.ItemizedLayer;
@@ -37,6 +38,7 @@ import android.widget.Toast;
 public class MarkerOverlayActivity extends BitmapTileMapActivity
         implements OnItemGestureListener<MarkerItem> {
 
+	private static final boolean BILLBOARDS = true;
 	private MarkerSymbol mFocusMarker;
 
 	public MarkerOverlayActivity() {
@@ -47,11 +49,23 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Drawable d = getResources().getDrawable(R.drawable.marker_poi);
-		MarkerSymbol symbol = AndroidGraphics.makeMarker(d, HotspotPlace.CENTER);
+		/* directly load bitmap from resources */
+		Bitmap bitmap = drawableToBitmap(getResources(), R.drawable.marker_poi);
 
-		d = getResources().getDrawable(R.drawable.ic_launcher);
-		mFocusMarker = AndroidGraphics.makeMarker(d, HotspotPlace.BOTTOM_CENTER);
+		MarkerSymbol symbol;
+		if (BILLBOARDS)
+			symbol = new MarkerSymbol(bitmap, HotspotPlace.CENTER);
+		else
+			symbol = new MarkerSymbol(bitmap, 0.5f, 0.5f, false);
+
+		/* another option: use some bitmap drawable */
+		Drawable d = getResources().getDrawable(R.drawable.ic_launcher);
+		if (BILLBOARDS)
+			mFocusMarker = new MarkerSymbol(drawableToBitmap(d),
+			                                HotspotPlace.BOTTOM_CENTER);
+		else
+			mFocusMarker = new MarkerSymbol(drawableToBitmap(d),
+			                                0.5f, 0.5f, false);
 
 		ItemizedLayer<MarkerItem> markerLayer =
 		        new ItemizedLayer<MarkerItem>(mMap, new ArrayList<MarkerItem>(),

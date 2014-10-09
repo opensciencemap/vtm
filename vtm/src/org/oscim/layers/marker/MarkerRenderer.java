@@ -159,6 +159,7 @@ public class MarkerRenderer extends BucketRenderer {
 			SymbolItem s = SymbolItem.pool.get();
 			s.set(it.x, it.y, marker.getBitmap(), true);
 			s.offset = marker.getHotspot();
+			s.billboard = marker.isBillboard();
 			mSymbolLayer.pushSymbol(s);
 		}
 
