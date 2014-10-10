@@ -27,7 +27,7 @@ import org.oscim.utils.FastMath;
  * - create distance field per tile?
  */
 public class AreaStyle extends RenderStyle {
-	private static final int OPAQUE = 0xff000000;
+
 	private static final float FADE_START = 0.25f;
 
 	/** Drawing order level */
@@ -95,7 +95,7 @@ public class AreaStyle extends RenderStyle {
 	}
 
 	public boolean hasAlpha(int zoom) {
-		if ((color & OPAQUE) != OPAQUE)
+		if (!Color.isOpaque(color))
 			return true;
 
 		if (texture != null)
@@ -105,7 +105,7 @@ public class AreaStyle extends RenderStyle {
 			return false;
 
 		if (zoom >= blendScale) {
-			if ((blendColor & OPAQUE) != OPAQUE)
+			if (!Color.isOpaque(blendColor))
 				return true;
 		}
 

@@ -22,6 +22,7 @@ import static org.oscim.utils.FastMath.clamp;
 import java.nio.ShortBuffer;
 
 import org.oscim.backend.GL;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -155,7 +156,6 @@ public final class PolygonBucket extends RenderBucket {
 
 	public static final class Renderer {
 
-		private static final int OPAQUE = 0xff000000;
 		private static final int STENCIL_BITS = 8;
 		public final static int CLIP_BIT = 0x80;
 
@@ -216,7 +216,7 @@ public final class PolygonBucket extends RenderBucket {
 						                      a.blendColor, blendFill);
 					}
 				} else {
-					blend |= (a.color & OPAQUE) != OPAQUE;
+					blend |= !Color.isOpaque(a.color);
 					GLUtils.setColor(s.uColor, a.color, fade);
 				}
 

@@ -21,6 +21,8 @@ import org.oscim.utils.FastMath;
 
 public final class Color {
 
+	private static final int OPAQUE = 0xff000000;
+
 	public static int fadePremul(int color, double alpha) {
 		alpha = FastMath.clamp(alpha, 0, 1);
 
@@ -239,7 +241,10 @@ public final class Color {
 		return fallBackColor;
 	}
 
+	public static boolean isOpaque(int color) {
+		return (color & OPAQUE) == OPAQUE;
+	}
+
 	private Color() {
-		/* Singleton */
 	}
 }
