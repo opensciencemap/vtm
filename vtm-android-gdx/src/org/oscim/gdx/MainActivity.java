@@ -17,7 +17,6 @@
 package org.oscim.gdx;
 
 import org.oscim.android.canvas.AndroidGraphics;
-import org.oscim.backend.GL20;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
 import org.oscim.tiling.TileSource;
@@ -27,13 +26,9 @@ import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import com.badlogic.gdx.backends.android.AndroidGL20;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class MainActivity extends AndroidApplication {
-
-	private final class AndroidGLAdapter extends AndroidGL20 implements GL20 {
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -41,7 +36,7 @@ public class MainActivity extends AndroidApplication {
 
 		AndroidGraphics.init();
 		GdxAssets.init("");
-		GLAdapter.init(new AndroidGLAdapter());
+		GLAdapter.init(new AndroidGL());
 		Tile.SIZE = 400;
 
 		AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();

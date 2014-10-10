@@ -1,9 +1,8 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
- * Copyright 2013 Hannes Janetzek
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later version.
@@ -58,7 +57,8 @@ class AndroidPaint implements Paint {
 	final android.graphics.Paint mPaint;
 
 	AndroidPaint() {
-		mPaint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+		mPaint = new android.graphics.Paint(
+		                                    android.graphics.Paint.ANTI_ALIAS_FLAG);
 	}
 
 	@Override
@@ -90,7 +90,6 @@ class AndroidPaint implements Paint {
 
 	@Override
 	public void setTextAlign(Align align) {
-
 		//mPaint.setTextAlign(android.graphics.Paint.Align.valueOf(align.name()));
 	}
 

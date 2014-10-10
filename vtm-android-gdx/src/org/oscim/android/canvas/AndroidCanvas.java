@@ -24,23 +24,23 @@ public class AndroidCanvas implements Canvas {
 	final android.graphics.Canvas canvas;
 
 	public AndroidCanvas() {
-		this.canvas = new android.graphics.Canvas();
+		canvas = new android.graphics.Canvas();
 	}
 
 	@Override
 	public void setBitmap(Bitmap bitmap) {
-		this.canvas.setBitmap(((AndroidBitmap) bitmap).mBitmap);
+		canvas.setBitmap(((AndroidBitmap) bitmap).mBitmap);
 	}
 
 	@Override
 	public void drawText(String string, float x, float y, Paint stroke) {
-		this.canvas.drawText(string, x, y, ((AndroidPaint) stroke).mPaint);
-
+		if (string != null)
+			canvas.drawText(string, x, y, ((AndroidPaint) stroke).mPaint);
 	}
 
 	@Override
 	public void drawBitmap(Bitmap bitmap, float x, float y) {
-		this.canvas.drawBitmap(((AndroidBitmap) bitmap).mBitmap, x, y, null);
+		canvas.drawBitmap(((AndroidBitmap) bitmap).mBitmap, x, y, null);
 
 	}
 

@@ -22,7 +22,7 @@ dependencies {
   compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
   //compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
   //compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
-  compile files("${rootDir}/vtm-ext-libs/gdx-native-libs.jar")
+  compile files("${rootDir}/vtm-ext-libs/gdx/gdx-native-libs.jar")
   compile files("${rootDir}/vtm-ext-libs/native-libs.jar")
 }
 
@@ -75,7 +75,7 @@ eclipse {
 	  entry.path.contains('native-libs') }*.exported = false
 
 	classpath.entries.removeAll { entry ->
-       	  entry.path.contains('gdx-1.0-SNAPSHOT') }
+       	  entry.path.contains('gdx-2') }
       }
 
 
