@@ -1,50 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rendertheme xmlns="http://opensciencemap.org/rendertheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd" version="1" map-background="#fffcfa">
+  xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd" version="1" map-background="#fffcfa" base-text-scale="1.25"
+>
 
   <!-- base style for fixed width lines -->
   <style-line id="fix" width="1.0" cap="butt" fix="true" />
 
   <style-text id="road" k="name" size="16" fill="#101010" stroke="#eeeeee" stroke-width="2.0" priority="2" />
 
-  <style-text id="major-road" k="name" style="bold" size="16" fill="#101010" stroke="#eeeeee" stroke-width="2.0"
-    priority="1" />
+  <style-text id="major-road" k="name" style="bold" size="16" fill="#101010" stroke="#eeeeee" stroke-width="2.0" priority="1" />
 
-  <style-text id="poi" k="name" size="16" fill="#777744" stroke="#aaffffff" stroke-width="2.0" dy="16"
-    caption="true" />
+  <style-text id="poi" k="name" size="16" fill="#777744" stroke="#aaffffff" stroke-width="2.0" dy="16" caption="true" />
 
   <style-area id="residential" fill="#e8e7e3" fade="11" />
 
   <style-area id="railway|industrial" fill="#e6e3e5" fade="10" />
 
-  <style-area id="farmland" fill="#e7dab5" fade="11" />
 
   <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
   <!-- src="textures/wood.png" -->
-  <style-area id="wood" fill="#d1dbc7" fade="8" blend="11" blend-fill="#9ac56e" />
+  <!-- <style-area id="wood" fill="#d1dbc7" fade="8" blend="11" blend-fill="#9ac56e" /> -->
 
-  <style-line id="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" />
+  <style-area id="tex1" src="textures/rough.png" />
 
-  <!-- grass|meadow|garden|grassland|scrub -->
-  <style-area id="greens" fill="#c9dc91" fade="10" />
+  <!-- meadow|garden -->
+  <style-area id="greens" use="tex1" fill="#c9dc91" fade="10" />
 
-  <style-area id="lightgreen" fill="#d3dcb9" fade="10" />
+  <!-- grass -->
+  <style-area id="lightgreen" use="tex1" fill="#d3dcb9" fade="12" />
 
-  <style-area id="darkgreen" fill="#c2cba5" fade="10" />
+  <!-- grassland|scrub -->
+  <style-area id="darkgreen" use="tex1" fill="#c2cba5" fade="10" />
+
+  <style-area id="farmland" use="tex1" fill="#e4dab5" fade="12" stroke="#d1dbc7" stroke-width="1.0" />
 
   <!-- <style-area id="greens" fill="#d2e5ce" fade="10" /> -->
 
-  <!-- marsh|wetland|nature_reserve -->
+  <!-- marsh|wetland|mud|nature_reserve -->
   <style-area id="greens2" fill="#deecb9" fade="12" />
 
   <!-- park|common|green|cemetery|golf_course|dog_park -->
-  <!-- <style-area id="park" fill="#a3ca7b" fade="11" src="grass2.png" /> -->
-  <style-area id="park" fill="#a3ca7b" fade="11" />
-  <!-- src="textures/grass.png"  -->
-  <style-line id="park" stroke="#a3ca7b" width="1.0" fix="true" cap="butt" fade="11" />
+  <style-area id="park" use="tex1" fill="#9ac56e" fade="11" />
+  <!-- <style-area id="wood" use="park" fill="#9ac56e" fade="8" stroke="#d1dbc7" stroke-width="1.0"/> -->
+
+  <style-area id="wood" use="park" fill="#b3d095" fade="8" blend="11" blend-fill="#83aa5b" />
+  <!-- <style-line id="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" /> -->
+
+  <!-- <style-area id="park" fill="#a3ca7b" fade="11" /> -->
+  <style-line id="park" stroke="#ff0000" width="1.0" fix="true" cap="butt" fade="14" />
 
   <!-- de:Kleingartengebiet -->
-  <style-area id="allotments" fill="#efeae0" fade="12" />
+  <style-area id="allotments" use="tex1" fill="#efeae0" fade="12" />
 
   <!-- de:Steinbruch, Schotter-, Kies-, Sand- und Tongrube -->
   <style-area id="quarry" fill="#ddddcc" fade="10" />
@@ -59,15 +65,14 @@
   <!-- <style-line id="highway:z11:bridge" use="highway:z11" cap="butt" /> -->
   <style-line id="trunk_link" stroke="#fee16e" width="1.3" cap="butt" />
   <style-line id="trunk" stroke="#fedb52" width="1.6" />
-  <style-line id="primary:z11" stroke="#e9c065" width="1.5" />
+  <style-line id="primary:z11" stroke="#f4d26e" width="1.5" />
   <style-line id="secondary:z11" use="primary:z11" width="-0.1" />
   <style-line id="tertiary" use="residential" stroke="#fefefa" width="0.2" />
   <style-line id="construction" stroke="#e0e0e0" width="1.2" />
   <style-line id="highway-service" use="residential" width="-0.6" />
 
   <!-- track|footway|path|cycleway -->
-  <style-line id="footway" stroke="#aaffffff" width="1.8" cap="butt" fix="true" stipple="2" stipple-width="0.6"
-    stipple-stroke="#d35c48" />
+  <style-line id="footway" stroke="#aaffffff" width="1.8" cap="butt" fix="true" stipple="2" stipple-width="0.6" stipple-stroke="#d35c48" />
   <style-line id="highway:cycleway" use="footway" width="0.1" stipple-stroke="#4040ee" />
   <style-line id="highway:track" use="footway" width="0.1" stipple="3" stipple-stroke="#a39b68" />
   <style-line id="highway:path" use="footway" width="0.1" stipple="2" stipple-stroke="#837b58" />
@@ -77,8 +82,7 @@
 
   <!-- de: ein Weg der für Reiter vorgeshen ist.. -->
   <style-line id="bridleway" use="footway" stroke="#d3cb98" width="0.1" cap="butt" stipple-stroke="#837b58" />
-  <style-line id="steps" stroke="#aaffffff" width="4.2" cap="butt" fix="true" stipple="2" stipple-width="1.0"
-    stipple-stroke="#be6253" />
+  <style-line id="steps" stroke="#aaffffff" width="4.2" cap="butt" fix="true" stipple="2" stipple-width="1.0" stipple-stroke="#be6253" />
   <style-line id="water:outline" stroke="#a4bbcc" width="1.0" fix="true" cap="butt" />
 
   <style-line id="water" stroke="#a4bbcc" width="1.0" cap="butt" fix="true" />
@@ -86,7 +90,7 @@
 
   <!--<style-area id="water" fill="#97b7e5" afc5e3 /> -->
   <!-- src="textures/water.png" -->
-  <style-area id="water" fill="#99badf" />
+  <style-area id="water" fill="#99badf" use="tex1" fade="-1" />
 
   <!-- no-go area boundary -->
   <style-line id="fence" stroke="#444444" width="1.2" fix="true" cap="butt" />
@@ -145,7 +149,7 @@
     <rect id="windmill" pos="55 23 10 15" />
   </atlas>
 
-  <!-- all closed ways that are not 'highway' or 'building'-->
+  <!-- all closed ways that are not 'highway' or 'building' -->
 
   <m e="way" k="highway|building" v="~" closed="yes">
 
@@ -230,6 +234,9 @@
         <!-- how about 'leisure' for this one? -->
         <m v="cemetery">
           <area use="park" />
+          <m zoom-min="14">
+            <line use="park" />
+          </m>
         </m>
       </m>
       <m k="landuse" v="village_green|recreation_ground">
@@ -248,12 +255,15 @@
 
       <!-- Heideland, keep below forest -->
       <m zoom-min="10" v="heath|sand">
-        <area fill="#fffad1" fade="10" />
+        <area use="tex1" fill="#fffad1" fade="10" />
       </m>
+
       <m k="landuse|natural" v="forest|wood">
-        <area use="wood" />
-        <m zoom-min="14">
-          <line use="wood" />
+        <m zoom-min="8" zoom-max="9">
+          <area use="wood" />
+        </m>
+        <m zoom-min="10">
+          <area use="wood" stroke="#91bf63" stroke-width="1.0" />
         </m>
       </m>
 
@@ -321,7 +331,7 @@
           <area fill="#daefdb" fade="12" />
         </m>
         <m zoom-min="15" v="playground|miniature_golf">
-          <area fill="#f4f4de" />
+          <area use="tex1" fill="#f4f4de" />
           <line stroke="#d9d9a3" width="1.0" fix="true" cap="butt" />
         </m>
         <m v="playing_fields|pitch">
@@ -359,7 +369,7 @@
       </m>
     </m><!-- end landuse|natural|leisure||amenity|tourism -->
   </m>
-  
+
   <!-- waterways -->
   <m e="way" k="waterway">
     <m v="ditch|drain" zoom-min="14">
@@ -585,24 +595,24 @@
 
     <!-- highway -->
     <m k="highway">
-      <m zoom-min="3" zoom-max="5" select="first">
+      <m zoom-min="4" zoom-max="5" select="first">
         <m k="area" v="~|no|false">
           <!-- <m v="secondary|primary_link" zoom-min="9">
             <line stroke="#f2df6d" width="1.3" cap="butt" fix="true" fade="9"/>
             </m> -->
 
           <m v="route_primary" zoom-min="3">
-            <line stroke="#c6c5a2" width="1.4" cap="butt" fix="true" fade="3" />
+            <line fix="true" cap="butt" stroke="#c6c5a2" width="1.2" fade="5" />
           </m>
           <m v="route_trunk" zoom-min="3">
-            <line stroke="#c6c5a2" width="1.4" cap="butt" fix="true" fade="3" />
+            <line fix="true" cap="butt" stroke="#deb683" width="1.3" fade="5" />
           </m>
           <m v="route_motorway">
-            <line stroke="#deb683" width="1.5" cap="butt" fix="true" fade="3" />
+            <line fix="true" cap="butt" stroke="#deb683" width="1.4" fade="5" />
           </m>
         </m>
       </m>
-      <m zoom-min="5" zoom-max="10" select="first">
+      <m zoom-min="5" zoom-max="7" select="first">
         <m k="area" v="~|no|false">
           <m v="secondary|primary_link" zoom-min="9">
             <line use="fix" stroke="#e2cf5d" width="0.3" fade="9" />
@@ -617,11 +627,11 @@
             <line use="fix" stroke="#c6c5a2" width="0.5" fade="5" />
           </m>
           <m v="motorway">
-            <line use="fix" stroke="#deb683" width="0.6" fade="3" />
+            <line use="fix" stroke="#deb683" width="0.6" fade="4" />
           </m>
         </m>
       </m>
-      <m zoom-min="11">
+      <m zoom-min="8">
         <!-- when tunnel|bridge is present it must be 'no' -->
         <m k="tunnel|bridge" v="~|no">
           <!-- highway area -->
@@ -888,8 +898,7 @@
           <line stroke="#ddaa9988" width="1.0" cap="butt" fix="true" fade="12" />
         </m>
         <m k="railway" v="rail|turntable" zoom-min="15">
-          <line stroke="#aaa6a4" width="2.0" cap="butt" fix="true" fade="12" stipple="10" stipple-width="0.8"
-            stipple-stroke="#ffffff" />
+          <line stroke="#aaa6a4" width="2.0" cap="butt" fix="true" fade="12" stipple="10" stipple-width="0.8" stipple-stroke="#ffffff" />
         </m>
 
         <!-- <m k="railway" v="rail" zoom-max="14" zoom-min="13">
@@ -921,13 +930,10 @@
     <!--<m k="boundary" v="administrative"> -->
     <m k="admin_level">
       <m k="admin_level" v="4">
-        <line stroke="#fafafa" width="1.1" fix="true" cap="butt" stipple-width="1.05" stipple="2" stipple-stroke="#888888" />
-      </m>
-      <m k="admin_level" v="3">
-        <line stroke="#999999" width="1.2" fix="true" cap="butt" />
+        <line stroke="#dadada" width="1.3" fix="true" stipple-width="1.0" stipple="4" stipple-stroke="#888888" />
       </m>
       <m k="admin_level" v="2">
-        <line stroke="#606060" width="1.2" fix="true" cap="butt" />
+        <line stroke="#dadada" width="1.6" fix="true" stipple-width="1.0" stipple="6" stipple-stroke="#647b9c" />
       </m>
     </m>
     <!-- </m> -->
@@ -1005,17 +1011,14 @@
         <caption k="name" style="bold" size="20" fill="#000000" stroke="#ffffff" stroke-width="2.0" priority="1" />
       </m>
       <m v="town">
-        <caption k="name" size="19" fill="#000000" stroke="#ffffff" stroke-width="2.0" priority="2" dy="20"
-          symbol="town" />
+        <caption k="name" size="19" fill="#000000" stroke="#ffffff" stroke-width="2.0" priority="2" dy="20" symbol="town" />
       </m>
       <m v="city">
         <m zoom-min="7">
-          <caption k="name" style="bold" size="19" fill="#000000" stroke="#ffffff" stroke-width="2.0" priority="1"
-            dy="14" symbol="city" />
+          <caption k="name" style="bold" size="19" fill="#000000" stroke="#ffffff" stroke-width="2.0" priority="1" dy="14" symbol="city" />
         </m>
         <m zoom-max="6">
-          <caption k="name" size="19" fill="#000000" stroke="#ffffff" stroke-width="2.0" priority="1" dy="14"
-            symbol="city" />
+          <caption k="name" size="19" fill="#000000" stroke="#ffffff" stroke-width="2.0" priority="1" dy="14" symbol="city" />
         </m>
       </m>
       <m v="country">
@@ -1219,16 +1222,16 @@
 
       <!-- <m zoom-min="16" select="first">
         <m v="information" select="first">
-          <m k="name">
-            <symbol src="information" />
-            <text use="poi" />
-          </m>
-          <m>
-            <circle r="1.5" fill="#ff0000" />
-          </m>
+        <m k="name">
+        <symbol src="information" />
+        <text use="poi" />
         </m>
-      </m>
-	  -->
+        <m>
+        <circle r="1.5" fill="#ff0000" />
+        </m>
+        </m>
+        </m>
+      -->
       <m v="viewpoint">
         <symbol src="view_point" />
       </m>
