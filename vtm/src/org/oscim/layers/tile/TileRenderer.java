@@ -113,7 +113,7 @@ public abstract class TileRenderer extends LayerRenderer {
 					tiles[i].isVisible = false;
 
 				/* no renderable tile can be locked at this point */
-				if (tileZoom > v.pos.zoomLevel + 2 || tileZoom < v.pos.zoomLevel - 4) {
+				if (tileZoom < v.pos.zoomLevel - 4) {
 					return;
 				}
 
