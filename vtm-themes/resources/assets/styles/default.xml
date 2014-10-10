@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rendertheme xmlns="http://opensciencemap.org/rendertheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd" version="1" map-background="#fffcfa" base-text-scale="1.25"
->
+  xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd" version="1" map-background="#fffcfa" base-text-scale="1.25">
 
   <!-- base style for fixed width lines -->
   <style-line id="fix" width="1.0" cap="butt" fix="true" />
@@ -47,7 +46,7 @@
   <!-- <style-line id="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" /> -->
 
   <!-- <style-area id="park" fill="#a3ca7b" fade="11" /> -->
-  <style-line id="park" stroke="#ff0000" width="1.0" fix="true" cap="butt" fade="14" />
+  <style-line id="park" stroke="#9ac56e" width="1.0" fix="true" cap="butt" fade="14" />
 
   <!-- de:Kleingartengebiet -->
   <style-area id="allotments" use="tex1" fill="#efeae0" fade="12" />
@@ -450,88 +449,90 @@
     <m k="tunnel" zoom-min="11">
       <!-- match tunnel-tag that are not 'no' or 'false' -->
       <m k="tunnel" v="-|no|false">
+           <!-- match area-tag that are 'no' or 'false' or not present -->
+        <m k="area" v="~|no|false">
         <!-- highway tunnels -->
-        <m k="highway">
-          <m zoom-min="16">
-            <m v="steps">
-              <line use="steps" />
+          <m k="highway">
+            <m zoom-min="16">
+              <m v="steps">
+                <line use="steps" />
               <!-- <outline use="0"/> -->
-            </m>
+              </m>
             <!-- <m v="track|footway|path|cycleway" zoom-min="16">
               <line use="footway:z16"/>
               </m> -->
-          </m>
-          <m zoom-min="14">
-            <m v="footway">
-              <line use="footway" />
             </m>
-            <m v="cycleway">
-              <line use="highway:cycleway" />
-            </m>
-            <m v="track">
-              <line use="highway:track" />
-            </m>
-            <m v="path">
-              <line use="highway:path" />
-            </m>
-            <m v="bridleway">
-              <line use="bridleway" />
-            </m>
-            <m v="construction">
-              <outline use="0" />
-              <line use="construction" outline="0" />
-            </m>
-            <m v="service">
-              <m k="service" v="~|parking_aisle">
-                <line use="highway-service" outline="0" />
+            <m zoom-min="14">
+              <m v="footway">
+                <line use="footway" />
+              </m>
+              <m v="cycleway">
+                <line use="highway:cycleway" />
+              </m>
+              <m v="track">
+                <line use="highway:track" />
+              </m>
+              <m v="path">
+                <line use="highway:path" />
+              </m>
+              <m v="bridleway">
+                <line use="bridleway" />
+              </m>
+              <m v="construction">
+                <outline use="0" />
+                <line use="construction" outline="0" />
+              </m>
+              <m v="service">
+                <m k="service" v="~|parking_aisle">
+                  <line use="highway-service" outline="0" />
+                </m>
               </m>
             </m>
-          </m>
-          <m v="trunk_link|motorway_link">
-            <line use="trunk_link" outline="0" />
-            <text use="major-road" />
-          </m>
-          <m zoom-min="13">
-            <m v="byway|pedestrian">
-              <line use="pedestrian" outline="0" />
+            <m v="trunk_link|motorway_link">
+              <line use="trunk_link" outline="0" />
+              <text use="major-road" />
+            </m>
+            <m zoom-min="13">
+              <m v="byway|pedestrian">
+                <line use="pedestrian" outline="0" />
+                <text use="road" />
+              </m>
+              <m v="residential|road|unclassified|living_street">
+                <line use="residential" outline="0" />
+                <text use="road" />
+              </m>
+            </m>
+            <m v="tertiary|secondary_link">
+              <line use="tertiary" outline="0" />
               <text use="road" />
             </m>
-            <m v="residential|road|unclassified|living_street">
-              <line use="residential" outline="0" />
-              <text use="road" />
+            <m v="secondary|primary_link">
+              <line use="secondary:z11" outline="0" />
+              <text use="major-road" />
+            </m>
+            <m v="primary">
+              <line use="primary:z11" outline="0" />
+              <text use="major-road" />
+            </m>
+            <m v="trunk">
+              <line use="trunk" blur="0.3" outline="0" />
+            <!-- <outline use="glow"/> -->
+              <text use="major-road" />
+            </m>
+            <m v="motorway">
+              <line use="highway:z11" blur="0.3" outline="0" />
+            <!-- <outline use="glow"/> -->
+              <text use="major-road" />
             </m>
           </m>
-          <m v="tertiary|secondary_link">
-            <line use="tertiary" outline="0" />
-            <text use="road" />
-          </m>
-          <m v="secondary|primary_link">
-            <line use="secondary:z11" outline="0" />
-            <text use="major-road" />
-          </m>
-          <m v="primary">
-            <line use="primary:z11" outline="0" />
-            <text use="major-road" />
-          </m>
-          <m v="trunk">
-            <line use="trunk" blur="0.3" outline="0" />
-            <!-- <outline use="glow"/> -->
-            <text use="major-road" />
-          </m>
-          <m v="motorway">
-            <line use="highway:z11" blur="0.3" outline="0" />
-            <!-- <outline use="glow"/> -->
-            <text use="major-road" />
-          </m>
-        </m>
-
         <!-- railway tunnel -->
-        <m k="railway">
+          <m k="railway">
           <!-- <m k="railway" v="tram|subway|light_rail|narrow_gauge">
             <line stroke="#a0a0a0" width="0.8" cap="butt" fix="true"/>
             </m> -->
-          <m k="railway" v="rail">
-            <line stroke="#aa888888" width="0.9" cap="butt" fix="true" />
+            <m k="railway" v="rail">
+              <line stroke="#aa888888" width="0.9" cap="butt" fix="true" />
+            </m>
           </m>
         </m>
       </m>
@@ -824,8 +825,8 @@
                 <line stroke="#c0c0c0" width="0.15" cap="butt" />
               </m>
               <m zoom-min="13" v="pedestrian|service|unclassified|residential|road|living_street">
-                <area fill="#ffffff" />
-                <line stroke="#d0d0d0" width="1.0" fix="true" cap="butt" />
+                <area fill="#eeffffff" />
+                <line stroke="#c0c0c0" width="1.0" fix="true" cap="butt" />
               </m>
             </m>  <!-- end area=yes|true -->
           </m>  <!-- end bridge=yes -->
