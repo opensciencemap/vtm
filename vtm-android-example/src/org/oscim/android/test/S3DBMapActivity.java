@@ -31,12 +31,9 @@ public class S3DBMapActivity extends BaseMapActivity {
 			mS3dbCache.setCacheSize(512 * (1 << 10));
 			ts.setCache(mS3dbCache);
 		}
-		TileLayer tl = new S3DBLayer(mMap, ts);
+		TileLayer tl = new S3DBLayer(mMap, ts, true, false);
 		mMap.layers().add(tl);
-
 		mMap.layers().add(new LabelLayer(mMap, mBaseLayer));
-
-		mMap.setMapPosition(53.08, 8.83, Math.pow(2, 17));
 	}
 
 	@Override

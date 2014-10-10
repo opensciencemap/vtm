@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 public class S3DBLayer extends TileLayer {
 	static final Logger log = LoggerFactory.getLogger(S3DBLayer.class);
-	static final boolean POST_FXAA = true;
 
 	private final static int MAX_CACHE = 32;
 	private final static int SRC_ZOOM = 16;
@@ -29,8 +28,12 @@ public class S3DBLayer extends TileLayer {
 	private final TileSource mTileSource;
 
 	public S3DBLayer(Map map, TileSource tileSource) {
+		this(map, tileSource, true, false);
+	}
+
+	public S3DBLayer(Map map, TileSource tileSource, boolean fxaa, boolean ssao) {
 		super(map, new TileManager(map, SRC_ZOOM, SRC_ZOOM, MAX_CACHE));
-		setRenderer(new S3DBRenderer());
+		setRenderer(new S3DBRenderer(fxaa, ssao));
 
 		mTileSource = tileSource;
 		initLoader(2);
@@ -44,11 +47,17 @@ public class S3DBLayer extends TileLayer {
 	public static class S3DBRenderer extends TileRenderer {
 		LayerRenderer mRenderer;
 
-		public S3DBRenderer() {
+		public S3DBRenderer(boolean fxaa, boolean ssao) {
 			mRenderer = new BuildingRenderer(this, SRC_ZOOM, SRC_ZOOM, true, false);
 
-			if (POST_FXAA)
-				mRenderer = new OffscreenRenderer(Mode.SSAO_FXAA, mRenderer);
+			if (fxaa || ssao) {
+				Mode mode = Mode.FXAA;
+				if (fxaa && ssao)
+					mode = Mode.SSAO_FXAA;
+				else if (ssao)
+					mode = Mode.SSAO;
+				mRenderer = new OffscreenRenderer(mode, mRenderer);
+			}
 		}
 
 		@Override
