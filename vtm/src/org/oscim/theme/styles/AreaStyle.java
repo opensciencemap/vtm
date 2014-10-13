@@ -185,7 +185,7 @@ public class AreaStyle extends RenderStyle {
 		}
 
 		public T reset() {
-			fillColor = Color.BLACK;
+			fillColor = Color.WHITE;
 			strokeColor = Color.BLACK;
 			strokeWidth = 0;
 			fadeScale = -1;
