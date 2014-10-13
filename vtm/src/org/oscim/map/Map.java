@@ -66,29 +66,32 @@ public abstract class Map implements TaskQueue {
 	/**
 	 * UpdateListener event. Map position has changed.
 	 */
-	public static Event POSITION_EVENT = new Event();
+	public static final Event POSITION_EVENT = new Event();
 
 	/**
 	 * UpdateLister event. Delivered on main-thread when updateMap() was called
 	 * and no CLEAR_EVENT or POSITION_EVENT was triggered.
 	 */
-	public static Event UPDATE_EVENT = new Event();
+	public static final Event UPDATE_EVENT = new Event();
 
 	/**
 	 * UpdateListerner event. Map state has changed in a way that all layers
 	 * should clear their state e.g. the theme or the TilesSource has changed.
 	 * TODO should have an event-source to only clear affected layers.
 	 */
-	public static Event CLEAR_EVENT = new Event();
+	public static final Event CLEAR_EVENT = new Event();
+
+	public static final Event ANIM_END = new Event();
 
 	public final EventDispatcher<InputListener, MotionEvent> input;
 	public final EventDispatcher<UpdateListener, MapPosition> events;
 
 	private final Layers mLayers;
 	private final ViewController mViewport;
-	protected final Animator mAnimator;
-	private final MapPosition mMapPosition;
 	private final AsyncExecutor mAsyncExecutor;
+
+	protected final Animator mAnimator;
+	protected final MapPosition mMapPosition;
 
 	protected final MapEventLayer mEventLayer;
 	protected GestureDetector mGestureDetector;

@@ -211,11 +211,8 @@ public class Animator {
 
 		long millisLeft = mAnimEnd - MapRenderer.frametime;
 
-		//boolean changed = false;
-
 		ViewController v = mMap.viewport();
 
-		//synchronized (v) {
 		/* cancel animation when position was changed since last
 		 * update, i.e. when it was modified outside the animator. */
 		if (v.getMapPosition(mCurPos)) {
@@ -293,5 +290,10 @@ public class Animator {
 		mState = ANIM_NONE;
 		mPivot.x = 0;
 		mPivot.y = 0;
+		mMap.events.fire(Map.ANIM_END, mMap.mMapPosition);
+	}
+
+	public boolean isActive() {
+		return mState != ANIM_NONE;
 	}
 }
