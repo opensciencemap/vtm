@@ -1,5 +1,7 @@
 package org.oscim.map;
 
+import static org.oscim.utils.FastMath.clamp;
+
 import org.oscim.core.MapPosition;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
@@ -179,10 +181,10 @@ public class ViewController extends Viewport {
 	public void setMapPosition(MapPosition mapPosition) {
 		ThreadUtils.assertMainThread();
 
-		mPos.scale = FastMath.clamp(mapPosition.scale, MIN_SCALE, MAX_SCALE);
+		mPos.scale = clamp(mapPosition.scale, MIN_SCALE, MAX_SCALE);
 		mPos.x = mapPosition.x;
 		mPos.y = mapPosition.y;
-		mPos.tilt = mapPosition.tilt;
+		mPos.tilt = clamp(mapPosition.tilt, 0, MAX_TILT);
 		mPos.bearing = mapPosition.bearing;
 		updateMatrices();
 	}
