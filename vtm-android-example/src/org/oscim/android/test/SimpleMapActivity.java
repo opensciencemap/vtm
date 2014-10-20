@@ -21,7 +21,6 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
-import org.oscim.map.Map;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
@@ -33,14 +32,13 @@ public class SimpleMapActivity extends BaseMapActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Map m = this.map();
 
 		Layers layers = mMap.layers();
 		layers.add(new BuildingLayer(mMap, mBaseLayer));
 		layers.add(new LabelLayer(mMap, mBaseLayer));
 		layers.add(new MapScaleBar(mMapView));
 
-		m.setTheme(VtmThemes.DEFAULT);
+		mMap.setTheme(VtmThemes.DEFAULT);
 	}
 
 	void runTheMonkey() {

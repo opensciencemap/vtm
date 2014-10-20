@@ -14,8 +14,6 @@
  */
 package org.oscim.android.test;
 
-import org.oscim.android.MapActivity;
-import org.oscim.android.MapView;
 import org.oscim.android.cache.TileCache;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
@@ -23,44 +21,51 @@ import org.oscim.core.MercatorProjection;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.bitmap.BitmapTileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.os.Bundle;
 
 public class BitmapTileMapActivity extends MapActivity {
 
+	static final Logger log = LoggerFactory.getLogger(BitmapTileMapActivity.class);
+
 	private final static boolean USE_CACHE = true;
 
-	private final TileSource mTileSource;
+	private final BitmapTileSource mTileSource;
 	protected BitmapTileLayer mBitmapLayer;
 
 	public BitmapTileMapActivity() {
-		//mTileSource = DefaultSources.STAMEN_TONER.build();
-		mTileSource = DefaultSources.OPENSTREETMAP.build();
+		this(DefaultSources.OPENSTREETMAP.build());
 	}
 
-	public BitmapTileMapActivity(TileSource tileSource) {
+	public BitmapTileMapActivity(BitmapTileSource tileSource) {
+		super(R.layout.activity_map);
 		mTileSource = tileSource;
 	}
-
-	MapView mMapView;
 
 	private TileCache mCache;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_map);
-
-		mMapView = (MapView) findViewById(R.id.mapView);
-		registerMapView(mMapView);
 
 		MapRenderer.setBackgroundColor(0xff777777);
 		mMap.layers().add(new TileGridLayer(mMap, Color.GRAY, 1.8f, 8));
 
+		if (mTileSource == null)
+			return;
+
 		if (USE_CACHE) {
-			mCache = new TileCache(this, null, mTileSource.getClass().getSimpleName());
+			String cacheFile = mTileSource.getUrl()
+			    .toString()
+			    .replaceFirst("https?://", "")
+			    .replaceAll("/", "-");
+
+			log.debug("use bitmap cache {}", cacheFile);
+			mCache = new TileCache(this, null, cacheFile);
 			mCache.setCacheSize(512 * (1 << 10));
 			mTileSource.setCache(mCache);
 		}
@@ -74,7 +79,7 @@ public class BitmapTileMapActivity extends MapActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (USE_CACHE)
+		if (mCache != null)
 			mCache.dispose();
 	}
 

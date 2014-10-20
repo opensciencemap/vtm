@@ -84,7 +84,14 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
 		markerLayer.addItems(pts);
 
 		mMap.layers().add(new TileGridLayer(mMap));
-		mMap.setMapPosition(0, 0, 1);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		/* ignore saved position */
+		mMap.setMapPosition(0, 0, 1 << 2);
+		mMapView.onResume();
 	}
 
 	@Override

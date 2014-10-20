@@ -60,7 +60,6 @@ public class MapView extends GLSurfaceView {
 		this(context, null);
 	}
 
-	@SuppressWarnings("deprecation")
 	public MapView(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
 
@@ -91,10 +90,6 @@ public class MapView extends GLSurfaceView {
 
 		setRenderer(new GLRenderer(mMap));
 		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
-		/* to be removed */
-		if (context instanceof MapActivity)
-			((MapActivity) context).registerMapView(this);
 
 		mMap.clearMap();
 		mMap.updateMap(false);

@@ -41,9 +41,15 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 
 		createLayers(1, true);
 
-		mMap.setMapPosition(0, 0, 1 << 2);
-
 		looooop();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		/* ignore saved position */
+		mMap.setMapPosition(0, 0, 1 << 2);
+		mMapView.onResume();
 	}
 
 	void looooop() {

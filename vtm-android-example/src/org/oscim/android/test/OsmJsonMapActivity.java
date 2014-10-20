@@ -16,7 +16,6 @@ package org.oscim.android.test;
 
 import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
 
-import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
@@ -43,10 +42,6 @@ public class OsmJsonMapActivity extends MapActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_map);
-
-		mMapView = (MapView) findViewById(R.id.mapView);
-		registerMapView(mMapView);
 
 		mTileSource = new OsmWaterJsonTileSource();
 

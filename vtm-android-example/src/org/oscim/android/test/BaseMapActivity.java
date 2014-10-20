@@ -16,8 +16,6 @@
  */
 package org.oscim.android.test;
 
-import org.oscim.android.MapActivity;
-import org.oscim.android.MapView;
 import org.oscim.android.cache.TileCache;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.TileGridLayer;
@@ -37,30 +35,22 @@ public class BaseMapActivity extends MapActivity {
 
 	final static boolean USE_CACHE = true;
 
-	MapView mMapView;
 	VectorTileLayer mBaseLayer;
 	TileSource mTileSource;
 	TileGridLayer mGridLayer;
 
 	private TileCache mCache;
 
-	protected final int mContentView;
-
 	public BaseMapActivity(int contentView) {
-		mContentView = contentView;
+		super(contentView);
 	}
 
 	public BaseMapActivity() {
-		this(R.layout.activity_map);
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(mContentView);
-
-		mMapView = (MapView) findViewById(R.id.mapView);
-		registerMapView(mMapView);
 
 		mTileSource = new OSciMap4TileSource();
 
@@ -76,7 +66,6 @@ public class BaseMapActivity extends MapActivity {
 		mMap.getMapPosition(pos);
 		if (pos.x == 0.5 && pos.y == 0.5)
 			mMap.setMapPosition(53.08, 8.83, Math.pow(2, 16));
-
 	}
 
 	@Override
@@ -88,7 +77,7 @@ public class BaseMapActivity extends MapActivity {
 	}
 
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
 			case R.id.theme_default:
