@@ -16,6 +16,8 @@
  */
 package org.oscim.map;
 
+import org.oscim.core.BoundingBox;
+import org.oscim.core.Box;
 import org.oscim.core.MapPosition;
 import org.oscim.event.Event;
 import org.oscim.event.EventDispatcher;
@@ -285,6 +287,13 @@ public abstract class Map implements TaskQueue {
 		MapPosition pos = new MapPosition();
 		mViewport.getMapPosition(pos);
 		return pos;
+	}
+
+	public BoundingBox getBoundingBox(int expand) {
+		Box box = new Box();
+		mViewport.getBBox(box, expand);
+		box.map2mercator();
+		return new BoundingBox(box.ymin, box.xmin, box.ymax, box.xmax);
 	}
 
 	/**
