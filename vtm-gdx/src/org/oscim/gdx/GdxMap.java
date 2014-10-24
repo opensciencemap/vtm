@@ -38,15 +38,12 @@ import com.badlogic.gdx.utils.Timer.Task;
 public abstract class GdxMap implements ApplicationListener {
 	final static Logger log = LoggerFactory.getLogger(GdxMap.class);
 
-	protected final Map mMap;
-	private final MapAdapter mMapAdapter;
+	protected Map mMap;
 
 	VectorTileLayer mMapLayer;
-	private final MapRenderer mMapRenderer;
+	private MapRenderer mMapRenderer;
 
 	public GdxMap() {
-		mMap = mMapAdapter = new MapAdapter();
-		mMapRenderer = new MapRenderer(mMap);
 	}
 
 	protected void initDefaultLayers(TileSource tileSource, boolean tileGrid, boolean labels,
@@ -70,6 +67,8 @@ public abstract class GdxMap implements ApplicationListener {
 
 	@Override
 	public void create() {
+		mMap = new MapAdapter();
+		mMapRenderer = new MapRenderer(mMap);
 
 		Gdx.graphics.setContinuousRendering(false);
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
@@ -101,9 +100,13 @@ public abstract class GdxMap implements ApplicationListener {
 
 	}
 
+	/* private */boolean mRenderWait;
+	/* private */boolean mRenderRequest;
+	/* private */boolean mUpdateRequest;
+
 	@Override
 	public void render() {
-		if (!mMapAdapter.needsRedraw())
+		if (!mRenderRequest)
 			return;
 
 		mMapRenderer.onDrawFrame();
@@ -132,8 +135,7 @@ public abstract class GdxMap implements ApplicationListener {
 		return mMap;
 	}
 
-	static class MapAdapter extends Map {
-		boolean mRenderRequest;
+	class MapAdapter extends Map {
 
 		@Override
 		public int getWidth() {
@@ -145,21 +147,35 @@ public abstract class GdxMap implements ApplicationListener {
 			return Gdx.graphics.getHeight();
 		}
 
+		private final Runnable mRedrawCb = new Runnable() {
+			@Override
+			public void run() {
+				prepareFrame();
+				Gdx.graphics.requestRendering();
+			}
+		};
+
 		@Override
 		public void updateMap(boolean forceRender) {
-			if (!mWaitRedraw) {
-				mWaitRedraw = true;
-				Gdx.app.postRunnable(mRedrawRequest);
+
+			if (!mRenderRequest) {
+				mRenderRequest = true;
+				Gdx.app.postRunnable(mRedrawCb);
+			} else {
+				mRenderWait = true;
 			}
 		}
 
 		@Override
 		public void render() {
+			//updateMap(true);
+
 			mRenderRequest = true;
 			if (mClearMap)
 				updateMap(false);
-			else
+			else {
 				Gdx.graphics.requestRendering();
+			}
 		}
 
 		@Override
@@ -179,35 +195,22 @@ public abstract class GdxMap implements ApplicationListener {
 			return true;
 		}
 
-		/**
-		 * Update all Layers on Main thread.
-		 * 
-		 * @param forceRedraw
-		 *            also render frame FIXME (does nothing atm)
-		 */
-		private void redrawMapInternal(boolean forceRedraw) {
-			updateLayers();
-
-			mRenderRequest = true;
-			Gdx.graphics.requestRendering();
+		@Override
+		public void beginFrame() {
 		}
 
-		/* private */boolean mWaitRedraw;
-		private final Runnable mRedrawRequest = new Runnable() {
-			@Override
-			public void run() {
-				mWaitRedraw = false;
-				redrawMapInternal(false);
-			}
-		};
-
-		public boolean needsRedraw() {
-			if (!mRenderRequest)
-				return false;
-
+		@Override
+		public void doneFrame() {
 			mRenderRequest = false;
-			return true;
-		}
 
+			if (mRenderWait) {
+				mRenderWait = false;
+
+				mRenderRequest = true;
+
+				prepareFrame();
+				Gdx.graphics.requestRendering();
+			}
+		}
 	}
 }

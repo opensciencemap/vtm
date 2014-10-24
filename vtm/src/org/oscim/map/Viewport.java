@@ -87,7 +87,7 @@ public class Viewport {
 	 * @return true iff current position is different from
 	 *         passed position.
 	 */
-	public synchronized boolean getMapPosition(MapPosition pos) {
+	public boolean getMapPosition(MapPosition pos) {
 
 		boolean changed = (pos.scale != mPos.scale
 		        || pos.x != mPos.x
@@ -114,7 +114,7 @@ public class Viewport {
 	 * @param box float[8] will be set.
 	 * @param add increase extents of box
 	 */
-	public synchronized void getMapExtents(float[] box, float add) {
+	public void getMapExtents(float[] box, float add) {
 		float t = getDepth(1);
 		float t2 = getDepth(-1);
 
@@ -143,6 +143,8 @@ public class Viewport {
 	 * Get Z-value of the map-plane for a point on screen -
 	 * calculate the intersection of a ray from camera origin
 	 * and the map plane
+	 * TODO use
+	 * www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
 	 */
 	protected float getDepth(float y) {
 		// origin is moved by VIEW_DISTANCE
@@ -244,7 +246,7 @@ public class Viewport {
 	 * @param y screen coordinate
 	 * @return the corresponding GeoPoint
 	 */
-	public synchronized GeoPoint fromScreenPoint(float x, float y) {
+	public GeoPoint fromScreenPoint(float x, float y) {
 		fromScreenPoint(x, y, mMovePoint);
 		return new GeoPoint(
 		                    MercatorProjection.toLatitude(mMovePoint.y),
@@ -257,7 +259,7 @@ public class Viewport {
 	 * @param x screen coordinate
 	 * @param y screen coordinate
 	 */
-	public synchronized void fromScreenPoint(double x, double y, Point out) {
+	public void fromScreenPoint(double x, double y, Point out) {
 		// scale to -1..1
 		float mx = (float) (1 - (x / mWidth * 2));
 		float my = (float) (1 - (y / mHeight * 2));
@@ -294,7 +296,7 @@ public class Viewport {
 	 * @param geoPoint the GeoPoint
 	 * @param out Point projected to screen pixel relative to center
 	 */
-	public synchronized void toScreenPoint(GeoPoint geoPoint, Point out) {
+	public void toScreenPoint(GeoPoint geoPoint, Point out) {
 		MercatorProjection.project(geoPoint, out);
 		toScreenPoint(out.x, out.y, out);
 	}
@@ -304,7 +306,7 @@ public class Viewport {
 	 * 
 	 * @param out Point projected to screen coordinate
 	 */
-	public synchronized void toScreenPoint(double x, double y, Point out) {
+	public void toScreenPoint(double x, double y, Point out) {
 
 		double cs = mPos.scale * Tile.SIZE;
 		double cx = mPos.x * cs;
@@ -322,20 +324,17 @@ public class Viewport {
 		out.y = -(mv[1] * (mHeight / 2));
 	}
 
-	public synchronized boolean copy(Viewport viewport) {
+	protected boolean copy(Viewport viewport) {
+		mHeight = viewport.mHeight;
+		mWidth = viewport.mWidth;
+		mProjMatrix.copy(viewport.mProjMatrix);
+		mProjMatrixUnscaled.copy(viewport.mProjMatrixUnscaled);
+		mProjMatrixInverse.copy(viewport.mProjMatrixInverse);
+
 		mUnprojMatrix.copy(viewport.mUnprojMatrix);
 		mRotationMatrix.copy(viewport.mRotationMatrix);
 		mViewMatrix.copy(viewport.mViewMatrix);
 		mViewProjMatrix.copy(viewport.mViewProjMatrix);
 		return viewport.getMapPosition(mPos);
-	}
-
-	public synchronized void initFrom(Viewport viewport) {
-		mProjMatrix.copy(viewport.mProjMatrix);
-		mProjMatrixUnscaled.copy(viewport.mProjMatrixUnscaled);
-		mProjMatrixInverse.copy(viewport.mProjMatrixInverse);
-
-		mHeight = viewport.mHeight;
-		mWidth = viewport.mWidth;
 	}
 }

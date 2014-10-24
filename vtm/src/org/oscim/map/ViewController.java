@@ -5,10 +5,13 @@ import org.oscim.core.Point;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.ThreadUtils;
 
 public class ViewController extends Viewport {
 
-	public synchronized void setScreenSize(int width, int height) {
+	public void setScreenSize(int width, int height) {
+		ThreadUtils.assertMainThread();
+
 		mHeight = height;
 		mWidth = width;
 
@@ -50,7 +53,9 @@ public class ViewController extends Viewport {
 	 * @param mx the amount of pixels to move the map horizontally.
 	 * @param my the amount of pixels to move the map vertically.
 	 */
-	public synchronized void moveMap(float mx, float my) {
+	public void moveMap(float mx, float my) {
+		ThreadUtils.assertMainThread();
+
 		Point p = applyRotation(mx, my);
 		double tileScale = mPos.scale * Tile.SIZE;
 		moveTo(mPos.x - p.x / tileScale, mPos.y - p.y / tileScale);
@@ -94,7 +99,9 @@ public class ViewController extends Viewport {
 	 * @param pivotY
 	 * @return true if scale was changed
 	 */
-	public synchronized boolean scaleMap(float scale, float pivotX, float pivotY) {
+	public boolean scaleMap(float scale, float pivotX, float pivotY) {
+		ThreadUtils.assertMainThread();
+
 		// just sanitize input
 		//scale = FastMath.clamp(scale, 0.5f, 2);
 		if (scale < 0.000001)
@@ -126,7 +133,8 @@ public class ViewController extends Viewport {
 	 * @param pivotX
 	 * @param pivotY
 	 */
-	public synchronized void rotateMap(double radians, float pivotX, float pivotY) {
+	public void rotateMap(double radians, float pivotX, float pivotY) {
+		ThreadUtils.assertMainThread();
 
 		double rsin = Math.sin(radians);
 		double rcos = Math.cos(radians);
@@ -139,7 +147,9 @@ public class ViewController extends Viewport {
 		setRotation(mPos.bearing + Math.toDegrees(radians));
 	}
 
-	public synchronized void setRotation(double degree) {
+	public void setRotation(double degree) {
+		ThreadUtils.assertMainThread();
+
 		while (degree > 180)
 			degree -= 360;
 		while (degree < -180)
@@ -149,11 +159,15 @@ public class ViewController extends Viewport {
 		updateMatrices();
 	}
 
-	public synchronized boolean tiltMap(float move) {
+	public boolean tiltMap(float move) {
+		ThreadUtils.assertMainThread();
+
 		return setTilt(mPos.tilt + move);
 	}
 
-	public synchronized boolean setTilt(float tilt) {
+	public boolean setTilt(float tilt) {
+		ThreadUtils.assertMainThread();
+
 		tilt = FastMath.clamp(tilt, 0, MAX_TILT);
 		if (tilt == mPos.tilt)
 			return false;
@@ -162,7 +176,9 @@ public class ViewController extends Viewport {
 		return true;
 	}
 
-	public synchronized void setMapPosition(MapPosition mapPosition) {
+	public void setMapPosition(MapPosition mapPosition) {
+		ThreadUtils.assertMainThread();
+
 		mPos.scale = FastMath.clamp(mapPosition.scale, MIN_SCALE, MAX_SCALE);
 		mPos.x = mapPosition.x;
 		mPos.y = mapPosition.y;
@@ -199,4 +215,30 @@ public class ViewController extends Viewport {
 		/* (AB)^-1 = B^-1*A^-1, invert projection */
 		mUnprojMatrix.multiplyMM(mTmpMatrix, mProjMatrixInverse);
 	}
+
+	public final Viewport mNextFrame = new Viewport();
+
+	/** synchronize on this object when doing multiple calls on it */
+	public final Viewport getSyncViewport() {
+		return mNextFrame;
+	}
+
+	void syncViewport() {
+		synchronized (mNextFrame) {
+			mNextFrame.copy(this);
+		}
+	}
+
+	public boolean getSyncViewport(Viewport v) {
+		synchronized (mNextFrame) {
+			return v.copy(mNextFrame);
+		}
+	}
+
+	public boolean getSyncMapPosition(MapPosition mapPosition) {
+		synchronized (mNextFrame) {
+			return mNextFrame.getMapPosition(mapPosition);
+		}
+	}
+
 }

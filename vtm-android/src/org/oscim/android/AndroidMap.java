@@ -18,16 +18,20 @@ package org.oscim.android;
 
 import org.oscim.android.gl.GLView;
 import org.oscim.map.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.widget.RelativeLayout.LayoutParams;
 
 public class AndroidMap extends Map {
+	static final Logger log = LoggerFactory.getLogger(AndroidMap.class);
 
 	private final MapView mMapView;
 	final GLView mGLView;
 
-	private volatile boolean mWaitRedraw;
-	private volatile boolean mPausing;
+	private boolean mRenderRequest;
+	private boolean mRenderWait;
+	private boolean mPausing;
 
 	public AndroidMap(MapView mapView) {
 		super();
@@ -52,14 +56,24 @@ public class AndroidMap extends Map {
 		return mMapView.getHeight();
 	}
 
+	private final Runnable mRedrawCb = new Runnable() {
+		@Override
+		public void run() {
+			prepareFrame();
+			mGLView.requestRender();
+		}
+	};
+
 	@Override
 	public void updateMap(boolean redraw) {
-		//if (redraw && !mClearMap && !mPausing)
-		//	mGLView.requestRender();
+		if (mPausing)
+			return;
 
-		if (!mWaitRedraw) {
-			mWaitRedraw = true;
-			mMapView.post(mRedrawRequest);
+		if (!mRenderRequest) {
+			mRenderRequest = true;
+			mMapView.post(mRedrawCb);
+		} else {
+			mRenderWait = true;
 		}
 	}
 
@@ -68,25 +82,24 @@ public class AndroidMap extends Map {
 		if (mPausing)
 			return;
 
-		if (mClearMap)
-			updateMap(false);
-		else
-			mGLView.requestRender();
+		updateMap(true);
 	}
 
-	private final Runnable mRedrawRequest = new Runnable() {
-		@Override
-		public void run() {
-			redrawMapInternal();
+	@Override
+	public void beginFrame() {
+	}
+
+	@Override
+	public void doneFrame() {
+		mRenderRequest = false;
+
+		if (mRenderWait) {
+			//log.debug("redraw");
+			mRenderWait = false;
+			updateMap(true);
+			//prepareFrame();
+			//mGLView.requestRender();
 		}
-	};
-
-	void redrawMapInternal() {
-		mWaitRedraw = false;
-
-		updateLayers();
-
-		mGLView.requestRender();
 	}
 
 	@Override
@@ -100,6 +113,7 @@ public class AndroidMap extends Map {
 	}
 
 	public void pause(boolean pause) {
+		log.debug("pause... {}", pause);
 		mPausing = pause;
 	}
 }

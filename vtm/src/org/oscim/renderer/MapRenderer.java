@@ -70,9 +70,27 @@ public class MapRenderer {
 		mClearColor = GLUtils.colorToFloat(color);
 	}
 
+	private final Runnable renderBegin = new Runnable() {
+		@Override
+		public void run() {
+			mMap.beginFrame();
+		}
+	};
+	private final Runnable renderDone = new Runnable() {
+		@Override
+		public void run() {
+			mMap.doneFrame();
+		}
+	};
+
 	public void onDrawFrame() {
 		frametime = System.currentTimeMillis();
+
+		mMap.post(renderBegin);
+
 		draw();
+
+		mMap.post(renderDone);
 
 		mBufferPool.releaseBuffers();
 		TextureItem.disposeTextures();
@@ -98,8 +116,7 @@ public class MapRenderer {
 		GLState.bindElementBuffer(-1);
 		GLState.bindVertexBuffer(-1);
 
-		mMap.animator().updateAnimation();
-		mViewport.setFrom(mMap.viewport());
+		mViewport.setFrom(mMap);
 
 		if (GLAdapter.debugView) {
 			/* modify this to scale only the view, to see
@@ -145,8 +162,6 @@ public class MapRenderer {
 		if (width <= 0 || height <= 0)
 			return;
 
-		//mMap.viewport().getMatrix(null, mMatrices.proj, null);
-		mViewport.initFrom(mMap.viewport());
 		gl.viewport(0, 0, width, height);
 
 		//GL.scissor(0, 0, width, height);

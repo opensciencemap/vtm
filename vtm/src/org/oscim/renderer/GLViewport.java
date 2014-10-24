@@ -1,6 +1,7 @@
 package org.oscim.renderer;
 
 import org.oscim.core.MapPosition;
+import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 
 public class GLViewport extends Viewport {
@@ -40,8 +41,8 @@ public class GLViewport extends Viewport {
 		return changed;
 	}
 
-	void setFrom(Viewport viewport) {
-		changed = super.copy(viewport);
+	void setFrom(Map map) {
+		changed = map.viewport().getSyncViewport(this);
 		getMapExtents(plane, 0);
 	}
 
