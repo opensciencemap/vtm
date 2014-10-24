@@ -1,34 +1,63 @@
 # from https://github.com/Ruenzuo/android-cd-travis-example/blob/master/.travis.yml
+
 language: java
-jdk: openjdk7
+jdk:
+  - openjdk7
+
 env:
   matrix:
-    - ANDROID_SDKS=android-19 ANDROID_TARGET=android-19  ANDROID_ABI=armeabi-v7a
-#branches:
-#  only:
-#    - master
+    - ANDROID_SDKS=android-21 ANDROID_TARGET=android-21  ANDROID_ABI=armeabi-v7a
+
+branches:
+ only:
+   - master
+
 before_install:
   - chmod +x gradlew
   # Install base Android SDK
   - sudo apt-get update
   - if [ `uname -m` = x86_64 ]; then sudo apt-get install --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch > /dev/null; fi
-  - wget http://dl.google.com/android/android-sdk_r23-linux.tgz
-  - tar xzf android-sdk_r23-linux.tgz
+  - wget http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz
+  - tar xzf android-sdk_r23.0.2-linux.tgz
   - export ANDROID_HOME=$PWD/android-sdk-linux
   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
   # install android build tools
-  - wget https://dl-ssl.google.com/android/repository/build-tools_r20-linux.zip
-  - unzip build-tools_r20-linux.zip -d $ANDROID_HOME
+  - wget https://dl-ssl.google.com/android/repository/build-tools_r21.0.2-linux.zip
+  - unzip build-tools_r21.0.2-linux.zip -d $ANDROID_HOME
   - mkdir -p $ANDROID_HOME/build-tools/
-  - mv $ANDROID_HOME/android-4.4W $ANDROID_HOME/build-tools/20.0.0
+  - mv $ANDROID_HOME/android-5.0 $ANDROID_HOME/build-tools/21.0.2
   # Install required components.
   # For a full list, run `android list sdk -a --extended`
   # Note that sysimg-18 downloads the ARM, x86 and MIPS images (we should optimize this).
   # Other relevant API's
   - echo yes | android update sdk --filter platform-tools --no-ui --force
-  - echo yes | android update sdk --filter android-19 --no-ui --force
+  - echo yes | android update sdk --filter android-21 --no-ui --force
   - echo yes | android update sdk --filter extra-android-support --no-ui --force
   - echo yes | android update sdk --filter extra-android-m2repository --no-ui --force
   # Create and start emulator
   #- echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
   #- emulator -avd test -no-skin -no-audio -no-window &
+
+
+# language: android
+# android:
+#   components:
+#     # Uncomment the lines below if you want to
+#     # use the latest revision of Android SDK Tools
+#     - platform-tools
+#     - tools
+#     # The BuildTools version used by your project
+#     # - build-tools-21.0.1
+#     # The SDK version used to compile your project
+#     - android-21
+#     # Additional components
+#     - extra-android-support
+#     # - extra-google-google_play_services
+#     - extra-google-m2repository
+#     - extra-android-m2repository
+#     - addon-google_apis-google-21
+#     # Specify at least one system image,
+#     # if you need to run emulator(s) during your tests
+#     #- sys-img-armeabi-v7a-android-19
+#     #- sys-img-x86-android-17
+

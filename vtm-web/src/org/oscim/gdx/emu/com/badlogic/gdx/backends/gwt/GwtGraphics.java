@@ -333,4 +333,10 @@ public class GwtGraphics implements Graphics {
 	public GL30 getGL30() {
 		return null;
 	}
+
+	@Override
+	public long getFrameId() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

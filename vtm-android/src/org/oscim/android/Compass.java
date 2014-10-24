@@ -50,6 +50,7 @@ public class Compass {
 	private final SensorManager mSensorManager;
 	private final Sensor mSensor;
 
+	@SuppressWarnings("deprecation")
 	public Compass(Context context, Map map) {
 		mMap = map;
 		mSensorManager = (SensorManager) context

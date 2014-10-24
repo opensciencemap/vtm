@@ -944,4 +944,16 @@ public class GwtInput implements Input {
 	private static final int KEY_BACKSLASH = 220;
 	private static final int KEY_CLOSE_BRACKET = 221;
 	private static final int KEY_SINGLE_QUOTE = 222;
+
+	@Override
+	public boolean isKeyJustPressed(int key) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isCatchBackKey() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

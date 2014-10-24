@@ -6,31 +6,50 @@ buildscript {
 
   dependencies {
     classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.3'
+
+    classpath 'com.android.tools.build:gradle:0.13.1'
+
+    // for aar/maven stuff
+    // https://github.com/dcendents/android-maven-plugin
+    classpath 'com.github.dcendents:android-maven-plugin:1.1'
   }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.12'
+def filterProjects(filter) {
+  return subprojects.findAll { project -> filter.contains(project.name) }
 }
 
-apply from:'jdee.gradle'
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.1'
+}
+
+//apply from:'jdee.gradle'
 
 allprojects {
   group = 'org.oscim'
-  version = '0.5.9-SNAPSHOT'
+  version = '0.6.0-SNAPSHOT'
 
-  ext.gdxVersion = "1.2.0"
+  ext.gdxVersion = "1.4.1"
+  ext.androidBuildVersionTools = "21.0.2"
 
   repositories {
     mavenCentral()
+    // Jeo
     maven { url 'http://repo.boundlessgeo.com/main' }
     //maven { url 'https://github.com/hjanetzek/maven-repo/raw/master/' }
     mavenLocal()
+    // Local andoird repo
+    maven { url "${System.env.ANDROID_HOME}/extras/android/m2repository" }
   }
 
   // create IntelliJ project settings - untested
   apply plugin: 'idea'
 }
+
+def androidMinSdk() { return 10 }
+def androidTargetSdk() { return 21 }
+def versionCode() { return 50 }
+def versionName() { return version }
 
 subprojects {
   // create eclipse  project settings
@@ -42,15 +61,14 @@ subprojects {
     include '**/*'
   }
 
-  tasks.withType(JavaCompile) { 
-    sourceCompatibility = "1.7"
-    targetCompatibility = "1.7" 
+  tasks.withType(JavaCompile) {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
   }
 
   eclipseProject.dependsOn copySettings
 
   // create emacs JDEE project settings
   // http://ignatyev-dev.blogspot.de/2013/07/gradle-projects-in-jdee.html
-  apply from:'../jdee.gradle'
+  //apply from:'../jdee.gradle'
 }
-

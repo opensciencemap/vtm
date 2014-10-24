@@ -1,41 +1,17 @@
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath 'com.android.tools.build:gradle:0.12.+'
-    // for aar/maven stuff
-    // https://github.com/dcendents/android-maven-plugin
-    classpath 'com.github.dcendents:android-maven-plugin:1.0'
-  }
-}
-
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 apply plugin: 'android-maven'
 
-repositories {
-	maven { url "${System.env.ANDROID_HOME}/extras/android/m2repository" } 
-}
-
 dependencies {
-  //compile 'org.oscim:vtm:0.5.9-SNAPSHOT'
   compile project(':vtm')
+  provided files("${rootDir}/vtm-ext-libs/native-libs.jar")
 
-  compile 'com.android.support:support-v4:19.+'
-
-  // -> might be more efficient, but configuring
-  // log-levels is way too complicated...
-  // compile 'org.slf4j:slf4j-android:1.7.6'
-
-  compile 'com.noveogroup.android:android-logger:1.3.1'
-
-  // local jars will be packaged into the aar
-  compile files("${rootDir}/vtm-ext-libs/native-libs.jar")
+  //compile 'com.android.support:support-v4:21.+'
+  compile project(':appcompat')
 }
 
 android {
-  compileSdkVersion 19
-  buildToolsVersion '20.0'
+  compileSdkVersion androidTargetSdk()
+  buildToolsVersion = "$androidBuildVersionTools"
 
   sourceSets {
     main {
@@ -54,25 +30,31 @@ android {
 
 eclipse {
   classpath {
-    plusConfigurations += configurations.compile
+    plusConfigurations += [ configurations.compile, configurations.provided ]
+    //noExportConfigurations += [ configurations.provided ]
 
     //customizing the classes output directory:
     defaultOutputDir = file('bin/classes')
+
+    containers = ['com.android.ide.eclipse.adt.ANDROID_FRAMEWORK',
+		  'com.android.ide.eclipse.adt.LIBRARIES',
+		  'com.android.ide.eclipse.adt.DEPENDENCIES']
 
     file {
       // Manipulation of the classpath XML before merging local
       // and generated copies
       beforeMerged { classpath ->
 	// Remove all source entries to avoid overlap
-	classpath.entries.removeAll() { c ->
-	  c.kind == 'src'
-	}
+	classpath.entries.removeAll() { c -> c.kind == 'src' }
       }
 
       // only used to explode jni .so into aar
-      whenMerged { classpath ->
-	classpath.entries.findAll { entry ->
-	  entry.path.contains('native-libs') }*.exported = false
+      whenMerged {
+	classpath ->
+	  classpath.entries.findAll { entry ->
+	    entry.path.contains('native-libs') ||
+	    entry.path.contains('ANDROID_FRAMEWORK')
+	  }*.exported = false
       }
 
       // Direct manipulation of the generated classpath XML
@@ -83,7 +65,6 @@ eclipse {
 	// Main source directory and generated code directory
 	node.appendNode('classpathentry kind="src" path="src"')
 	node.appendNode('classpathentry kind="src" path="gen"')
-
       }
     }
   }

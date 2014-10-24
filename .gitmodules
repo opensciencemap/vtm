@@ -6,3 +6,6 @@
         path = jni/jni/libtess2
         url = https://github.com/memononen/libtess2.git
 
+[submodule "appcompat"]
+        path = appcompat
+        url = https://github.com/hjanetzek/android-support-v7-appcompat.git

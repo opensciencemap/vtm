@@ -19,9 +19,11 @@ tasks.withType(JavaCompile) { compileTask ->
 }
 
 sourceSets {
-  main.java.srcDirs = ['src']
-  main.resources.srcDirs = ["${buildDir}/assets"]
-  output.resourcesDir = 'assets'
+  main {
+    java.srcDirs = ['src']
+    resources.srcDirs = ["${buildDir}/assets"]
+    output.resourcesDir = 'assets'
+  }
 }
 
 dependencies {

@@ -15,12 +15,20 @@ sourceSets {
   main.compileClasspath += configurations.providedCompile
 }
 
-//... there is probably a better way
 eclipse.classpath {
-  plusConfigurations += configurations.providedCompile
+  //you can tweak the classpath of the Eclipse project by adding extra configurations:
+  plusConfigurations += [ configurations.providedCompile ]
 
   file.whenMerged { classpath ->
     classpath.entries.findAll { entry ->
       entry.path.contains('annotations') }*.exported = false
   }
+
+  //if you don't want some classpath entries 'exported' in Eclipse
+  noExportConfigurations += [ configurations.providedCompile ]
+
+
+  //default settings for downloading sources and Javadoc:
+  //downloadSources = true
+  //downloadJavadoc = false
 }

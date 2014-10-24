@@ -9,13 +9,13 @@
   
   <uses-sdk
     android:minSdkVersion="10"
-    android:targetSdkVersion="19" />
+    android:targetSdkVersion="21" />
 
   <application
     android:label="VTM Start"
     android:icon="@drawable/ic_launcher"
-    android:allowBackup="true"
-    android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+    android:allowBackup="true" >
+    <!-- android:theme="@style/AppTheme" -->
     <activity
       android:name="org.oscim.android.start.TestActivity"
       android:label="VTM Start" >

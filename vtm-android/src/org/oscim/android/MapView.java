@@ -26,8 +26,8 @@ import org.oscim.map.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
@@ -89,6 +89,7 @@ public class MapView extends RelativeLayout {
 		mMap.pause(false);
 	}
 
+	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public boolean onTouchEvent(android.view.MotionEvent motionEvent) {
 
