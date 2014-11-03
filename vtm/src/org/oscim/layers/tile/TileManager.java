@@ -134,10 +134,10 @@ public class TileManager {
 		void onTileManagerEvent(Event event, MapTile tile);
 	};
 
-	public TileManager(Map map, int minZoom, int maxZoom, int cacheLimit) {
+	public TileManager(Map map, int cacheLimit) {
 		mMap = map;
-		mMaxZoom = maxZoom;
-		mMinZoom = minZoom;
+		mMaxZoom = 20;
+		mMinZoom = 0;
 		mCacheLimit = cacheLimit;
 		mCacheReduce = 0;
 

@@ -70,7 +70,7 @@ public class TileRenderTest extends GdxMapApp {
 			tileManager = new TestTileManager(mMap, tiles);
 		} else {
 			/* create TileManager and calculate tiles for current position */
-			tileManager = new TileManager(mMap, 0, 32, 100);
+			tileManager = new TileManager(mMap, 100);
 		}
 
 		/* get the loader created by VectorTileLayer ... */
@@ -180,7 +180,7 @@ public class TileRenderTest extends GdxMapApp {
 		TileSet fixedTiles;
 
 		public TestTileManager(Map map, TileSet fixedTiles) {
-			super(map, 0, 30, 100);
+			super(map, 100);
 			this.fixedTiles = fixedTiles;
 		}
 

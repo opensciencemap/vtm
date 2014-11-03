@@ -45,16 +45,14 @@ public class VectorTileLayer extends TileLayer {
 
 	public VectorTileLayer(Map map, TileSource tileSource) {
 		this(map, new TileManager(map,
-		                          tileSource.getZoomLevelMin(),
-		                          tileSource.getZoomLevelMax(),
 		                          100),
 		     new VectorTileRenderer());
 
 		setTileSource(tileSource);
 	}
 
-	public VectorTileLayer(Map map, int minZoom, int maxZoom, int cacheLimit) {
-		this(map, new TileManager(map, minZoom, maxZoom, cacheLimit),
+	public VectorTileLayer(Map map, int cacheLimit) {
+		this(map, new TileManager(map, cacheLimit),
 		     new VectorTileRenderer());
 	}
 
@@ -78,7 +76,9 @@ public class VectorTileLayer extends TileLayer {
 	public boolean setTileSource(TileSource tileSource) {
 		pauseLoaders(true);
 		mTileManager.clearJobs();
-		mTileManager.setZoomLevel(tileSource.getZoomLevelMin(), tileSource.getZoomLevelMax());
+		mTileManager.setZoomLevel(tileSource.getZoomLevelMin(),
+		                          tileSource.getZoomLevelMax());
+
 		if (mTileSource != null) {
 			mTileSource.close();
 			mTileSource = null;

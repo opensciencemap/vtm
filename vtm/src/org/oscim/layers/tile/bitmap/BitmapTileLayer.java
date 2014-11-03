@@ -55,11 +55,11 @@ public class BitmapTileLayer extends TileLayer {
 
 	public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit) {
 		super(map,
-		      new TileManager(map,
-		                      tileSource.getZoomLevelMin(),
-		                      tileSource.getZoomLevelMax(),
-		                      cacheLimit),
+		      new TileManager(map, cacheLimit),
 		      new VectorTileRenderer());
+
+		mTileManager.setZoomLevel(tileSource.getZoomLevelMin(),
+		                          tileSource.getZoomLevelMax());
 
 		mTileSource = tileSource;
 		initLoader(getNumLoaders());

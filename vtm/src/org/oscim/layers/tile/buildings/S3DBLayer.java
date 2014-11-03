@@ -32,9 +32,10 @@ public class S3DBLayer extends TileLayer {
 	}
 
 	public S3DBLayer(Map map, TileSource tileSource, boolean fxaa, boolean ssao) {
-		super(map, new TileManager(map, SRC_ZOOM, SRC_ZOOM, MAX_CACHE));
+		super(map, new TileManager(map, MAX_CACHE));
 		setRenderer(new S3DBRenderer(fxaa, ssao));
 
+		mTileManager.setZoomLevel(SRC_ZOOM, SRC_ZOOM);
 		mTileSource = tileSource;
 		initLoader(2);
 	}

@@ -37,7 +37,7 @@ public class TestTileLayer extends TileLayer {
 
 	public TestTileLayer(Map map) {
 		super(map,
-		      new TileManager(map, 0, 20, 10),
+		      new TileManager(map, 10),
 		      new VectorTileRenderer());
 	}
 

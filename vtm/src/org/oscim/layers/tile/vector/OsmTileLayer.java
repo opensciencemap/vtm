@@ -12,7 +12,8 @@ public class OsmTileLayer extends VectorTileLayer {
 	protected final static int CACHE_LIMIT = 150;
 
 	public OsmTileLayer(Map map) {
-		super(map, MIN_ZOOMLEVEL, MAX_ZOOMLEVEL, CACHE_LIMIT);
+		super(map, CACHE_LIMIT);
+		mTileManager.setZoomLevel(MIN_ZOOMLEVEL, MAX_ZOOMLEVEL);
 	}
 
 	@Override
