@@ -5,6 +5,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer.FadeStep;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.source.HttpEngine;
 import org.oscim.tiling.source.LwHttp;
@@ -41,6 +42,21 @@ public class BitmapTileSourceTest {
 		UrlTileDataSource dataSource = (UrlTileDataSource) tileSource.getDataSource();
 		dataSource.dispose();
 		Mockito.verify(okHttp).close();
+	}
+
+	@Test
+	public void shouldUseBuilderConfig() {
+		BitmapTileSource ts = BitmapTileSource.builder()
+		    .url("http://example.com")
+		    .zoomMax(42)
+		    .zoomMin(23)
+		    .fadeSteps(new FadeStep[] { new FadeStep(0, 10, 0.5f, 1.0f) })
+		    .build();
+
+		assertThat(ts.getUrl().getHost()).isEqualTo("example.com");
+		assertThat(ts.getZoomLevelMin()).isEqualTo(23);
+		assertThat(ts.getZoomLevelMax()).isEqualTo(42);
+		assertThat(ts.getFadeSteps()).isNotNull();
 	}
 
 	/**

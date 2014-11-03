@@ -23,16 +23,16 @@ import org.oscim.layers.tile.bitmap.BitmapTileLayer.FadeStep;
 public abstract class TileSource {
 
 	public abstract static class Builder<T extends Builder<T>> {
-		int minZoom, maxZoom;
-		FadeStep[] fadeSteps;
+		protected int zoomMin, zoomMax;
+		protected FadeStep[] fadeSteps;
 
 		public T zoomMin(int zoom) {
-			minZoom = zoom;
+			zoomMin = zoom;
 			return self();
 		}
 
 		public T zoomMax(int zoom) {
-			maxZoom = zoom;
+			zoomMax = zoom;
 			return self();
 		}
 
@@ -58,6 +58,12 @@ public abstract class TileSource {
 	protected TileSource(int zoomMin, int zoomMax) {
 		mZoomMin = zoomMin;
 		mZoomMax = zoomMax;
+	}
+
+	public TileSource(Builder<?> builder) {
+		mZoomMin = builder.zoomMin;
+		mZoomMax = builder.zoomMax;
+		mFadeSteps = builder.fadeSteps;
 	}
 
 	public abstract ITileDataSource getDataSource();

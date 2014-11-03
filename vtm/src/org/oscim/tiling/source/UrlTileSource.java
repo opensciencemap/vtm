@@ -28,7 +28,6 @@ import org.oscim.tiling.source.LwHttp.LwHttpFactory;
 public abstract class UrlTileSource extends TileSource {
 
 	public abstract static class Builder<T extends Builder<T>> extends TileSource.Builder<T> {
-		protected int zoomMin, zoomMax;
 		protected String tilePath;
 		protected String url;
 		private HttpEngine.Factory engineFactory;
@@ -74,7 +73,9 @@ public abstract class UrlTileSource extends TileSource {
 	}
 
 	protected UrlTileSource(Builder<?> builder) {
-		this(builder.url, builder.tilePath, builder.zoomMin, builder.zoomMax);
+		super(builder);
+		mUrl = makeUrl(builder.url);
+		mTilePath = builder.tilePath.split("\\{|\\}");
 		mHttpFactory = builder.engineFactory;
 	}
 
@@ -84,17 +85,25 @@ public abstract class UrlTileSource extends TileSource {
 
 	protected UrlTileSource(String urlString, String tilePath, int zoomMin, int zoomMax) {
 		super(zoomMin, zoomMax);
+		mUrl = makeUrl(urlString);
+		mTilePath = makeTilePath(tilePath);
+	}
+
+	private String[] makeTilePath(String tilePath) {
 		if (tilePath == null)
 			throw new IllegalArgumentException("tilePath cannot be null.");
 
+		return tilePath.split("\\{|\\}");
+	}
+
+	private URL makeUrl(String urlString) {
 		URL url = null;
 		try {
 			url = new URL(urlString);
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException(e);
 		}
-		mUrl = url;
-		mTilePath = tilePath.split("\\{|\\}");
+		return url;
 	}
 
 	@Override
