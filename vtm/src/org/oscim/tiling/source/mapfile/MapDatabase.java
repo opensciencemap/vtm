@@ -163,7 +163,7 @@ public class MapDatabase implements ITileDataSource {
 
 		mTileProjection = new TileProjection();
 
-		mTileClipper = new TileClipper(-2, -2, Tile.SIZE + 2, Tile.SIZE + 2);
+		mTileClipper = new TileClipper(0, 0, 0, 0);
 	}
 
 	@Override
@@ -719,12 +719,12 @@ public class MapDatabase implements ITileDataSource {
 		long numCols = queryParameters.toBlockX - queryParameters.fromBlockX;
 
 		//log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
-		if (numRows > 0) {
-			int xmin = -2;
-			int ymin = -2;
-			int xmax = Tile.SIZE + 2;
-			int ymax = Tile.SIZE + 2;
+		int xmin = -16;
+		int ymin = -16;
+		int xmax = Tile.SIZE + 16;
+		int ymax = Tile.SIZE + 16;
 
+		if (numRows > 0) {
 			int w = (int) (Tile.SIZE / (numCols + 1));
 			int h = (int) (Tile.SIZE / (numRows + 1));
 
@@ -739,12 +739,8 @@ public class MapDatabase implements ITileDataSource {
 
 			if (mCurrentRow < numRows)
 				ymax = (int) (mCurrentRow * h + h);
-			//log.debug(xmin + " " + ymin + " " + xmax + " " + ymax);
-
-			mTileClipper.setRect(xmin, ymin, xmax, ymax);
-		} else {
-			mTileClipper.setRect(-2, -2, Tile.SIZE + 2, Tile.SIZE + 2);
 		}
+		mTileClipper.setRect(xmin, ymin, xmax, ymax);
 
 		for (int elementCounter = numberOfWays; elementCounter != 0; --elementCounter) {
 			if (mDebugFile) {
@@ -892,11 +888,11 @@ public class MapDatabase implements ITileDataSource {
 
 				mTileProjection.project(e);
 
-				if (e.isPoly()) {
-					if (!mTileClipper.clip(e)) {
-						continue;
-					}
+				//if (e.isPoly()) {
+				if (!mTileClipper.clip(e)) {
+					continue;
 				}
+				//}
 
 				e.setLayer(layer);
 				mapDataSink.process(e);
@@ -976,7 +972,7 @@ public class MapDatabase implements ITileDataSource {
 			divx = (180.0 * COORD_SCALE) / (mapExtents >> 1);
 
 			/* scale latidute to map-pixel */
-			divy = (mapExtents >> 1) / (Math.PI * 2.0);
+			divy = (Math.PI * 2.0) / (mapExtents >> 1);
 		}
 
 		public void projectPoint(int lat, int lon, MapElement out) {
@@ -989,7 +985,7 @@ public class MapDatabase implements ITileDataSource {
 			double s = Math.sin(lat * ((Math.PI / 180) / COORD_SCALE));
 			double r = Math.log((1.0 + s) / (1.0 - s));
 
-			return Tile.SIZE - (float) (r * divy + dy);
+			return Tile.SIZE - (float) (r / divy + dy);
 		}
 
 		public float projectLon(double lon) {
