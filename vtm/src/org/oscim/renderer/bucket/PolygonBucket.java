@@ -337,38 +337,41 @@ public final class PolygonBucket extends RenderBucket {
 				if (area.fadeScale > 0 && area.fadeScale > zoom)
 					continue;
 
-				/* project bbox of polygon to screen */
-				v.mvp.prj2D(pb.bbox, 0, box, 0, 4);
+				if (div > 0.5) {
+					/* project bbox of polygon to screen */
+					v.mvp.prj2D(pb.bbox, 0, box, 0, 4);
 
-				int out = 0;
-				for (int i = 0; i < 8; i += 2) {
-					int o = mScreenClip.outcode(box[i], box[i + 1]);
+					int out = 0;
+					for (int i = 0; i < 8; i += 2) {
+						int o = mScreenClip.outcode(box[i], box[i + 1]);
 
-					if (o == 0) {
-						/* at least one corner is inside */
+						if (o == 0) {
+							/* at least one corner is inside */
+							out = 0;
+							break;
+						}
+						out |= o;
+					}
+					/* Check if any polygon-bucket edge intersects the screen.
+					 * Also check the very unlikely case where the view might
+					 * be
+					 * completly contained within box */
+					if ((out != 0) && (out != 0xF)) {
+						mScreenClip.clipStart(box[6], box[7]);
 						out = 0;
-						break;
-					}
-					out |= o;
-				}
+						for (int i = 0; i < 8 && out == 0; i += 2)
+							out = mScreenClip.clipNext(box[i], box[i + 1]);
 
-				/* Check if any polygon-bucket edge intersects the screen.
-				 * Also check the very unlikely case where the view might be
-				 * completly contained within box */
-				if ((out != 0) && (out != 0xF)) {
-					mScreenClip.clipStart(box[0], box[1]);
+						if (out == 0) {
+							//log.debug("out {}\n {}\n {}", out, Arrays.toString(pb.bbox), Arrays.toString(box));
 
-					if (mScreenClip.clipNext(box[2], box[3]) == 0 &&
-					        mScreenClip.clipNext(box[4], box[5]) == 0 &&
-					        mScreenClip.clipNext(box[6], box[7]) == 0 &&
-					        mScreenClip.clipNext(box[0], box[1]) == 0) {
-						//	log.debug("outside {} {} {}", out,
-						//	          Arrays.toString(box),
-						//	          Arrays.toString(pb.bbox));
-						continue;
+							//	log.debug("outside {} {} {}", out,
+							//	          Arrays.toString(box),
+							//	          Arrays.toString(pb.bbox));
+							continue;
+						}
 					}
 				}
-
 				if (mClear) {
 					clearStencilRegion();
 					/* op for stencil method polygon drawing */
