@@ -112,11 +112,6 @@ public abstract class TileRenderer extends LayerRenderer {
 				for (int i = 0; i < mDrawTiles.cnt; i++)
 					tiles[i].isVisible = false;
 
-				/* no renderable tile can be locked at this point */
-				if (tileZoom < v.pos.zoomLevel - 4) {
-					return;
-				}
-
 				/* check visibile tiles */
 				mScanBox.scan(v.pos.x, v.pos.y, v.pos.scale, tileZoom, v.plane);
 			}
