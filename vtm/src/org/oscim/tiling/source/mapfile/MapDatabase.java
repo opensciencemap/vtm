@@ -17,6 +17,8 @@
  */
 package org.oscim.tiling.source.mapfile;
 
+import static org.oscim.core.GeometryBuffer.GeometryType.LINE;
+import static org.oscim.core.GeometryBuffer.GeometryType.POLY;
 import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
 import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
 
@@ -162,7 +164,6 @@ public class MapDatabase implements ITileDataSource {
 		}
 
 		mTileProjection = new TileProjection();
-
 		mTileClipper = new TileClipper(0, 0, 0, 0);
 	}
 
@@ -320,42 +321,81 @@ public class MapDatabase implements ITileDataSource {
 
 	}
 
-	private long mCurrentRow;
-	private long mCurrentCol;
+	//	private long mCurrentRow;
+	//	private long mCurrentCol;
 
-	private void processBlocks(ITileDataSink mapDataSink,
-	        QueryParameters queryParameters,
+	private int xmin, ymin, xmax, ymax;
+
+	private void setTileClipping(QueryParameters queryParameters, long mCurrentRow, long mCurrentCol) {
+		long numRows = queryParameters.toBlockY - queryParameters.fromBlockY;
+		long numCols = queryParameters.toBlockX - queryParameters.fromBlockX;
+
+		//log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
+		xmin = -16;
+		ymin = -16;
+		xmax = Tile.SIZE + 16;
+		ymax = Tile.SIZE + 16;
+
+		if (numRows > 0) {
+			int w = (int) (Tile.SIZE / (numCols + 1));
+			int h = (int) (Tile.SIZE / (numRows + 1));
+
+			if (mCurrentCol > 0)
+				xmin = (int) (mCurrentCol * w);
+
+			if (mCurrentCol < numCols)
+				xmax = (int) (mCurrentCol * w + w);
+
+			if (mCurrentRow > 0)
+				ymin = (int) (mCurrentRow * h);
+
+			if (mCurrentRow < numRows)
+				ymax = (int) (mCurrentRow * h + h);
+		}
+		mTileClipper.setRect(xmin, ymin, xmax, ymax);
+	}
+
+	private final static Tag mWaterTag = new Tag("natural", "water");
+
+	private void processBlocks(ITileDataSink mapDataSink, QueryParameters queryParams,
 	        SubFileParameter subFileParameter) throws IOException {
-		boolean queryIsWater = true;
-		// boolean queryReadWaterInfo = false;
 
 		/* read and process all blocks from top to bottom and from left to right */
-		for (long row = queryParameters.fromBlockY; row <= queryParameters.toBlockY; row++) {
-			for (long column = queryParameters.fromBlockX; column <= queryParameters.toBlockX; column++) {
-				mCurrentCol = column - queryParameters.fromBlockX;
-				mCurrentRow = row - queryParameters.fromBlockY;
+		for (long row = queryParams.fromBlockY; row <= queryParams.toBlockY; row++) {
+			for (long column = queryParams.fromBlockX; column <= queryParams.toBlockX; column++) {
+				//mCurrentCol = column - queryParameters.fromBlockX;
+				//mCurrentRow = row - queryParameters.fromBlockY;
+
+				setTileClipping(queryParams,
+				                row - queryParams.fromBlockY,
+				                column - queryParams.fromBlockX);
 
 				/* calculate the actual block number of the needed block in the
 				 * file */
 				long blockNumber = row * subFileParameter.blocksWidth + column;
 
 				/* get the current index entry */
-				long currentBlockIndexEntry =
-				        mTileSource.databaseIndexCache.getIndexEntry(subFileParameter, blockNumber);
+				long blockIndexEntry = mTileSource.databaseIndexCache.getIndexEntry(subFileParameter,
+				                                                                    blockNumber);
 
-				/* check if the current query would still return a water tile */
-				if (queryIsWater) {
-					// check the water flag of the current block in its index
-					// entry
-					queryIsWater &= (currentBlockIndexEntry & BITMASK_INDEX_WATER) != 0;
-					// queryReadWaterInfo = true;
+				/* check the water flag of the block in its index entry */
+				if ((blockIndexEntry & BITMASK_INDEX_WATER) != 0) {
+					MapElement e = mElem;
+					e.clear();
+					e.tags.clear();
+					e.tags.add(mWaterTag);
+					e.startPolygon();
+					e.addPoint(xmin, ymin);
+					e.addPoint(xmax, ymin);
+					e.addPoint(xmax, ymax);
+					e.addPoint(xmin, ymax);
+					mapDataSink.process(e);
 				}
 
 				/* get and check the current block pointer */
-				long currentBlockPointer = currentBlockIndexEntry & BITMASK_INDEX_OFFSET;
-				if (currentBlockPointer < 1
-				        || currentBlockPointer > subFileParameter.subFileSize) {
-					log.warn("invalid current block pointer: " + currentBlockPointer);
+				long blockPointer = blockIndexEntry & BITMASK_INDEX_OFFSET;
+				if (blockPointer < 1 || blockPointer > subFileParameter.subFileSize) {
+					log.warn("invalid current block pointer: " + blockPointer);
 					log.warn("subFileSize: " + subFileParameter.subFileSize);
 					return;
 				}
@@ -367,12 +407,11 @@ public class MapDatabase implements ITileDataSource {
 					nextBlockPointer = subFileParameter.subFileSize;
 				} else {
 					/* get and check the next block pointer */
-					nextBlockPointer =
-					        mTileSource.databaseIndexCache.getIndexEntry(subFileParameter,
-					                                                     blockNumber + 1)
-					                & BITMASK_INDEX_OFFSET;
-					if (nextBlockPointer < 1
-					        || nextBlockPointer > subFileParameter.subFileSize) {
+					nextBlockPointer = mTileSource.databaseIndexCache.getIndexEntry(subFileParameter,
+					                                                                blockNumber + 1);
+					nextBlockPointer &= BITMASK_INDEX_OFFSET;
+
+					if (nextBlockPointer < 1 || nextBlockPointer > subFileParameter.subFileSize) {
 						log.warn("invalid next block pointer: " + nextBlockPointer);
 						log.warn("sub-file size: " + subFileParameter.subFileSize);
 						return;
@@ -380,32 +419,32 @@ public class MapDatabase implements ITileDataSource {
 				}
 
 				/* calculate the size of the current block */
-				int currentBlockSize = (int) (nextBlockPointer - currentBlockPointer);
-				if (currentBlockSize < 0) {
+				int blockSize = (int) (nextBlockPointer - blockPointer);
+				if (blockSize < 0) {
 					log.warn("current block size must not be negative: "
-					        + currentBlockSize);
+					        + blockSize);
 					return;
-				} else if (currentBlockSize == 0) {
+				} else if (blockSize == 0) {
 					/* the current block is empty, continue with the next block */
 					continue;
-				} else if (currentBlockSize > ReadBuffer.MAXIMUM_BUFFER_SIZE) {
+				} else if (blockSize > ReadBuffer.MAXIMUM_BUFFER_SIZE) {
 					/* the current block is too large, continue with the next
 					 * block */
-					log.warn("current block size too large: " + currentBlockSize);
+					log.warn("current block size too large: " + blockSize);
 					continue;
-				} else if (currentBlockPointer + currentBlockSize > mFileSize) {
+				} else if (blockPointer + blockSize > mFileSize) {
 					log.warn("current block larger than file size: "
-					        + currentBlockSize);
+					        + blockSize);
 					return;
 				}
 
 				/* seek to the current block in the map file */
-				mInputFile.seek(subFileParameter.startAddress + currentBlockPointer);
+				mInputFile.seek(subFileParameter.startAddress + blockPointer);
 
 				/* read the current block into the buffer */
-				if (!mReadBuffer.readFromFile(currentBlockSize)) {
+				if (!mReadBuffer.readFromFile(blockSize)) {
 					/* skip the current block */
-					log.warn("reading current block has failed: " + currentBlockSize);
+					log.warn("reading current block has failed: " + blockSize);
 					return;
 				}
 
@@ -420,20 +459,9 @@ public class MapDatabase implements ITileDataSource {
 				mTileLatitude = (int) (tileLatitudeDeg * 1E6);
 				mTileLongitude = (int) (tileLongitudeDeg * 1E6);
 
-				processBlock(queryParameters, subFileParameter, mapDataSink);
+				processBlock(queryParams, subFileParameter, mapDataSink);
 			}
 		}
-
-		// the query is finished, was the water flag set for all blocks?
-		// if (queryIsWater && queryReadWaterInfo) {
-		// Tag[] tags = new Tag[1];
-		// tags[0] = TAG_NATURAL_WATER;
-		//
-		// System.arraycopy(WATER_TILE_COORDINATES, 0, mWayNodes,
-		// mWayNodePosition, 8);
-		// mWayNodePosition += 8;
-		// mapDatabaseCallback.renderWaterBackground(tags, wayDataContainer);
-		// }
 	}
 
 	/**
@@ -553,7 +581,6 @@ public class MapDatabase implements ITileDataSource {
 
 		/* read the way coordinate blocks */
 		for (int coordinateBlock = 0; coordinateBlock < numBlocks; ++coordinateBlock) {
-			// get and check the number of way nodes (VBE-U)
 			int numWayNodes = mReadBuffer.readUnsignedInt();
 
 			if (numWayNodes < 2 || numWayNodes > MAXIMUM_WAY_NODES_SEQUENCE_LENGTH) {
@@ -565,30 +592,23 @@ public class MapDatabase implements ITileDataSource {
 			/* each way node consists of latitude and longitude */
 			int len = numWayNodes * 2;
 
-			if (doubleDeltaEncoding) {
-				len = decodeWayNodesDoubleDelta(e, len, isLine);
-			} else {
-				len = decodeWayNodesSingleDelta(e, len, isLine);
-			}
-			wayLengths[coordinateBlock] = (short) len;
+			wayLengths[coordinateBlock] = decodeWayNodes(doubleDeltaEncoding,
+			                                             e, len, isLine);;
 		}
 
 		return true;
 	}
 
-	private int decodeWayNodesDoubleDelta(MapElement e, int length, boolean isLine) {
+	private int decodeWayNodes(boolean doubleDelta, MapElement e, int length, boolean isLine) {
 		int[] buffer = mIntBuffer;
-
 		mReadBuffer.readSignedInt(buffer, length);
 
 		float[] outBuffer = e.ensurePointSize(e.pointPos + length, true);
 		int outPos = e.pointPos;
 		int lat, lon;
 
-		/* get the first way node latitude offset */
+		/* first node latitude single-delta offset */
 		int firstLat = lat = mTileLatitude + buffer[0];
-
-		/* get the first way node longitude offset */
 		int firstLon = lon = mTileLongitude + buffer[1];
 
 		outBuffer[outPos++] = lon;
@@ -599,61 +619,14 @@ public class MapDatabase implements ITileDataSource {
 		int deltaLon = 0;
 
 		for (int pos = 2; pos < length; pos += 2) {
-			deltaLat = buffer[pos] + deltaLat;
-			lat += deltaLat;
-
-			deltaLon = buffer[pos + 1] + deltaLon;
-			lon += deltaLon;
-
-			if (pos == length - 2) {
-				boolean line = isLine || (lon != firstLon && lat != firstLat);
-				/* this also removes closed ways that are not polygon,
-				 * but how do we know? */
-				if (line) {
-					outBuffer[outPos++] = lon;
-					outBuffer[outPos++] = lat;
-					cnt += 2;
-				}
-
-				if (e.type == GeometryType.NONE) {
-					e.type = line ? GeometryType.LINE : GeometryType.POLY;
-				}
-
-			} else if (deltaLon > minDeltaLon || deltaLon < -minDeltaLon
-			        || deltaLat > minDeltaLat || deltaLat < -minDeltaLat) {
-				outBuffer[outPos++] = lon;
-				outBuffer[outPos++] = lat;
-				cnt += 2;
+			if (doubleDelta) {
+				deltaLat = buffer[pos] + deltaLat;
+				deltaLon = buffer[pos + 1] + deltaLon;
+			} else {
+				deltaLat = buffer[pos];
+				deltaLon = buffer[pos + 1];
 			}
-		}
-
-		e.pointPos = outPos;
-		return cnt;
-	}
-
-	private int decodeWayNodesSingleDelta(MapElement e, int length, boolean isLine) {
-		int[] buffer = mIntBuffer;
-		mReadBuffer.readSignedInt(buffer, length);
-
-		float[] outBuffer = e.ensurePointSize(e.pointPos + length, true);
-		int outPos = e.pointPos;
-		int lat, lon;
-
-		/* get the first way node latitude single-delta offset */
-		int firstLat = lat = mTileLatitude + buffer[0];
-
-		/* get the first way node longitude single-delta offset */
-		int firstLon = lon = mTileLongitude + buffer[1];
-
-		outBuffer[outPos++] = lon;
-		outBuffer[outPos++] = lat;
-		int cnt = 2;
-
-		for (int pos = 2; pos < length; pos += 2) {
-			int deltaLat = buffer[pos];
 			lat += deltaLat;
-
-			int deltaLon = buffer[pos + 1];
 			lon += deltaLon;
 
 			if (pos == length - 2) {
@@ -666,7 +639,7 @@ public class MapDatabase implements ITileDataSource {
 				}
 
 				if (e.type == GeometryType.NONE)
-					e.type = line ? GeometryType.LINE : GeometryType.POLY;
+					e.type = line ? LINE : POLY;
 
 			} else if (deltaLon > minDeltaLon || deltaLon < -minDeltaLon
 			        || deltaLat > minDeltaLat || deltaLat < -minDeltaLat) {
@@ -715,32 +688,7 @@ public class MapDatabase implements ITileDataSource {
 			mReadBuffer.skipBytes(stringsSize);
 		}
 
-		long numRows = queryParameters.toBlockY - queryParameters.fromBlockY;
-		long numCols = queryParameters.toBlockX - queryParameters.fromBlockX;
-
-		//log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
-		int xmin = -16;
-		int ymin = -16;
-		int xmax = Tile.SIZE + 16;
-		int ymax = Tile.SIZE + 16;
-
-		if (numRows > 0) {
-			int w = (int) (Tile.SIZE / (numCols + 1));
-			int h = (int) (Tile.SIZE / (numRows + 1));
-
-			if (mCurrentCol > 0)
-				xmin = (int) (mCurrentCol * w);
-
-			if (mCurrentCol < numCols)
-				xmax = (int) (mCurrentCol * w + w);
-
-			if (mCurrentRow > 0)
-				ymin = (int) (mCurrentRow * h);
-
-			if (mCurrentRow < numRows)
-				ymax = (int) (mCurrentRow * h + h);
-		}
-		mTileClipper.setRect(xmin, ymin, xmax, ymax);
+		//setTileClipping(queryParameters);
 
 		for (int elementCounter = numberOfWays; elementCounter != 0; --elementCounter) {
 			if (mDebugFile) {
@@ -866,6 +814,7 @@ public class MapDatabase implements ITileDataSource {
 				wayDataBlocks = 1;
 			}
 
+			/* some guessing if feature is a line or a polygon */
 			boolean linearFeature = e.tags.containsKey("highway") ||
 			        e.tags.containsKey("boundary") ||
 			        e.tags.containsKey("railway");
@@ -888,11 +837,10 @@ public class MapDatabase implements ITileDataSource {
 
 				mTileProjection.project(e);
 
-				//if (e.isPoly()) {
-				if (!mTileClipper.clip(e)) {
-					continue;
-				}
-				//}
+				if (!e.tags.containsKey("building"))
+					if (!mTileClipper.clip(e)) {
+						continue;
+					}
 
 				e.setLayer(layer);
 				mapDataSink.process(e);
@@ -1000,6 +948,8 @@ public class MapDatabase implements ITileDataSource {
 			int inPos = 0;
 			int outPos = 0;
 
+			boolean isPoly = e.isPoly();
+
 			for (int idx = 0, m = indices.length; idx < m; idx++) {
 				int len = indices[idx];
 				if (len == 0)
@@ -1026,15 +976,14 @@ public class MapDatabase implements ITileDataSource {
 					cnt += 2;
 				}
 
-				if (coords[first] == pLon && coords[first + 1] == pLat) {
+				if (isPoly && coords[first] == pLon && coords[first + 1] == pLat) {
 					/* remove identical start/end point */
-					log.debug("would drop closing point {}", e);
-					//indices[idx] = (short) (cnt - 2);
-					//outPos -= 2;
+					//log.debug("drop closing point {}", e);
+					indices[idx] = (short) (cnt - 2);
+					outPos -= 2;
+				} else {
+					indices[idx] = (short) cnt;
 				}
-				//else {
-				indices[idx] = (short) cnt;
-				//}
 			}
 		}
 	}
