@@ -145,9 +145,6 @@ public class Viewport {
 	 * and the map plane
 	 */
 	protected float getDepth(float y) {
-		if (y == 0)
-			return 0;
-
 		// origin is moved by VIEW_DISTANCE
 		double cx = VIEW_DISTANCE;
 		// 'height' of the ray
