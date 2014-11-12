@@ -340,6 +340,61 @@ public class GeometryBuffer {
 		addPoint(p.x, p.y);
 	}
 
+	/**
+	 * Remove points with distance less than minSqDist
+	 * 
+	 * TODO could avoid superfluous copying
+	 * 
+	 * @param minSqDist
+	 * @param keepLines keep endpoint when line would
+	 *            otherwise collapse into a single point
+	 */
+	public void simplify(float minSqDist, boolean keepLines) {
+		int outPos = 0;
+		int inPos = 0;
+		for (int idx = 0; idx < index.length; idx++) {
+			if (index[idx] < 0)
+				break;
+			if (index[idx] == 0)
+				continue;
+
+			int first = inPos;
+			float px = points[inPos++];
+			float py = points[inPos++];
+
+			/* add first point */
+			points[outPos++] = px;
+			points[outPos++] = py;
+			int cnt = 2;
+
+			for (int pt = 2, end = index[idx]; pt < end; pt += 2) {
+				float cx = points[inPos++];
+				float cy = points[inPos++];
+				float dx = cx - px;
+				float dy = cy - py;
+
+				if ((dx * dx + dy * dy) < minSqDist) {
+					if (!keepLines || (pt < end - 2))
+						continue;
+				}
+				px = cx;
+				py = cy;
+				points[outPos++] = cx;
+				points[outPos++] = cy;
+				cnt += 2;
+			}
+
+			if ((type == GeometryType.POLY) &&
+			        (points[first] == px) &&
+			        (points[first + 1] == py)) {
+				/* remove identical start/end point */
+				cnt -= 2;
+				outPos -= 2;
+			}
+			index[idx] = cnt;
+		}
+	}
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		int o = 0;
