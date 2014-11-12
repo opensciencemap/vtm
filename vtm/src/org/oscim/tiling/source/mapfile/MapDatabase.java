@@ -841,6 +841,7 @@ public class MapDatabase implements ITileDataSource {
 					if (!mTileClipper.clip(e)) {
 						continue;
 					}
+				e.simplify(1, true);
 
 				e.setLayer(layer);
 				mapDataSink.process(e);
