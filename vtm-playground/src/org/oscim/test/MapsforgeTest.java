@@ -2,6 +2,7 @@ package org.oscim.test;
 
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.renderer.MapRenderer;
@@ -18,11 +19,11 @@ public class MapsforgeTest extends GdxMap {
 		// mMap.setMapPosition(52.5, 13.3, 1 << 15);
 
 		MapFileTileSource tileSource = new MapFileTileSource();
-		tileSource.setMapFile("/home/jeff/germany.map");
+		tileSource.setMapFile("/home/jeff/Downloads/bremen.map");
 
 		VectorTileLayer l = mMap.setBaseMap(tileSource);
 
-		// mMap.getLayers().add(new BuildingLayer(mMap, l.getTileLayer()));
+		mMap.layers().add(new BuildingLayer(mMap, l));
 		mMap.layers().add(new LabelLayer(mMap, l));
 
 		// mMap.setTheme(VtmThemes.DEFAULT);

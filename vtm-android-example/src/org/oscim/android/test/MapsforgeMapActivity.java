@@ -21,6 +21,7 @@ import org.oscim.android.filepicker.FilterByFileExtension;
 import org.oscim.android.filepicker.ValidMapFile;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
@@ -101,6 +102,8 @@ public class MapsforgeMapActivity extends MapActivity {
 
 				VectorTileLayer l = mMap.setBaseMap(mTileSource);
 				mMap.setTheme(VtmThemes.DEFAULT);
+
+				mMap.layers().add(new BuildingLayer(mMap, l));
 				mMap.layers().add(new LabelLayer(mMap, l));
 
 				MapInfo info = mTileSource.getMapInfo();
