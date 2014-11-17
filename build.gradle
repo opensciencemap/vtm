@@ -1,3 +1,7 @@
+if (!(new File("$rootDir/appcompat/build.gradle").exists())) {
+   throw new GradleException('Missing git sub modules!\nPLEASE RUN: "git submodule init && git submodule update"')
+}
+
 buildscript {
   repositories {
     mavenCentral()
