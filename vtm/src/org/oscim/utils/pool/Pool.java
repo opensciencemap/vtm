@@ -85,9 +85,7 @@ public abstract class Pool<T extends Inlist<?>> {
 
 		clearItem(item);
 
-		Inlist.remove((Inlist) list, item);
-
-		return list;
+		return (T) Inlist.remove((Inlist) list, item);
 	}
 
 	/** get an item from pool */
