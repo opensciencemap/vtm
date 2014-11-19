@@ -1,12 +1,17 @@
 apply plugin: 'com.android.library'
 apply plugin: 'android-maven'
 
+configurations {
+  eclipseCompile
+}
+
 dependencies {
   compile project(':vtm')
   provided files("${rootDir}/vtm-ext-libs/native-libs.jar")
 
-  //compile 'com.android.support:support-v4:21.+'
-  compile project(':appcompat')
+  compile 'com.android.support:support-v4:21.+'
+
+  eclipseCompile project(':appcompat')
 }
 
 android {
@@ -28,9 +33,18 @@ android {
   lintOptions.abortOnError false
 }
 
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+   from android.sourceSets.main.java.srcDirs
+}
+artifacts {
+   archives sourcesJar
+}
+
 eclipse {
   classpath {
-    plusConfigurations += [ configurations.compile, configurations.provided ]
+    plusConfigurations += [ configurations.compile, configurations.eclipseCompile ]
+
     //noExportConfigurations += [ configurations.provided ]
 
     //customizing the classes output directory:
@@ -45,16 +59,22 @@ eclipse {
       // and generated copies
       beforeMerged { classpath ->
 	// Remove all source entries to avoid overlap
-	classpath.entries.removeAll() { c -> c.kind == 'src' }
+	classpath.entries.removeAll() { c ->
+	  c.kind == 'src'
+	}
       }
 
       // only used to explode jni .so into aar
       whenMerged {
 	classpath ->
-	  classpath.entries.findAll { entry ->
-	    entry.path.contains('native-libs') ||
-	    entry.path.contains('ANDROID_FRAMEWORK')
+	  classpath.entries.findAll { c ->
+	    c.path.contains('native-libs') ||
+	    c.path.contains('ANDROID_FRAMEWORK')
 	  }*.exported = false
+
+	  classpath.entries.removeAll() { c ->
+	    c.path.contains('support')
+	}
       }
 
       // Direct manipulation of the generated classpath XML
