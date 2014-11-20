@@ -10,7 +10,6 @@ dependencies {
   provided files("${rootDir}/vtm-ext-libs/native-libs.jar")
 
   compile 'com.android.support:support-v4:21.+'
-
   eclipseCompile project(':appcompat')
 }
 
@@ -59,21 +58,20 @@ eclipse {
       // and generated copies
       beforeMerged { classpath ->
 	// Remove all source entries to avoid overlap
-	classpath.entries.removeAll() { c ->
-	  c.kind == 'src'
+	classpath.entries.removeAll() { e ->
+	  e.kind == 'src'
 	}
       }
 
       // only used to explode jni .so into aar
       whenMerged {
 	classpath ->
-	  classpath.entries.findAll { c ->
-	    c.path.contains('native-libs') ||
-	    c.path.contains('ANDROID_FRAMEWORK')
+	  classpath.entries.findAll { e ->
+	    e.path.contains('native-libs') ||
+	    e.path.contains('ANDROID_FRAMEWORK')
 	  }*.exported = false
-
-	  classpath.entries.removeAll() { c ->
-	    c.path.contains('support')
+	  classpath.entries.removeAll() { e ->
+	    e.path.contains('support')
 	}
       }
 

@@ -1,14 +1,16 @@
 apply plugin: 'com.android.application'
 
-configurations { providedCompile }
+configurations {
+  providedCompile
+  eclipseCompile
+}
 
 dependencies {
   compile project(':vtm-android')
   compile project(':vtm-themes')
 
-  compile project(':appcompat')
-  //compile 'com.android.support:support-v4:21.+'
-  //compile 'com.android.support:appcompat-v7:21.0.0'
+  compile 'com.android.support:support-v4:21.+'
+  eclipseCompile project(':appcompat')
 
   compile 'com.noveogroup.android:android-logger:1.3.4'
 }
@@ -44,7 +46,7 @@ eclipse {
 
   // Configuring Eclipse classpath
   classpath {
-    plusConfigurations += [ configurations.compile ]
+    plusConfigurations += [ configurations.compile, configurations.eclipseCompile ]
 
     defaultOutputDir = file('bin/classes')
 
@@ -57,18 +59,20 @@ eclipse {
       // and generated copies
       beforeMerged { classpath ->
 	// Remove all source entries to avoid overlap
-	classpath.entries.removeAll() { c ->
-	  c.kind == 'src'
+	classpath.entries.removeAll() { e ->
+	  e.kind == 'src'
 	}
       }
 
       // only used to explode jni .so into aar
       whenMerged {
 	classpath ->
-	  classpath.entries.findAll { entry ->
-	    entry.path.contains('ANDROID_FRAMEWORK') ||
-	    entry.path.contains('support')
+	  classpath.entries.findAll { e ->
+	    e.path.contains('ANDROID_FRAMEWORK')
 	  }*.exported = false
+	  classpath.entries.removeAll() { e ->
+	    e.path.contains('support')
+	  }
       }
 
       // Direct manipulation of the generated classpath XML
