@@ -11,6 +11,10 @@ import org.oscim.utils.ThreadUtils;
 
 public class ViewController extends Viewport {
 
+	protected float mPivotY = 0.0f;
+
+	private final float[] mat = new float[16];
+
 	public void setScreenSize(int width, int height) {
 		ThreadUtils.assertMainThread();
 
@@ -26,19 +30,19 @@ public class ViewController extends Viewport {
 		 * 1. invert translate to VIEW_DISTANCE */
 
 		float ratio = (mHeight / mWidth) * VIEW_SCALE;
-		float[] tmp = new float[16];
 
-		GLMatrix.frustumM(tmp, 0, -VIEW_SCALE, VIEW_SCALE,
+		GLMatrix.frustumM(mat, 0, -VIEW_SCALE, VIEW_SCALE,
 		                  ratio, -ratio, VIEW_NEAR, VIEW_FAR);
 
-		mProjMatrix.set(tmp);
+		mProjMatrix.set(mat);
+
 		mTmpMatrix.setTranslation(0, 0, -VIEW_DISTANCE);
 		mProjMatrix.multiplyRhs(mTmpMatrix);
 
 		/* set inverse projection matrix (without scaling) */
-		mProjMatrix.get(tmp);
-		GLMatrix.invertM(tmp, 0, tmp, 0);
-		mProjMatrixInverse.set(tmp);
+		mProjMatrix.get(mat);
+		GLMatrix.invertM(mat, 0, mat, 0);
+		mProjMatrixInverse.set(mat);
 
 		mProjMatrixUnscaled.copy(mProjMatrix);
 
@@ -47,6 +51,15 @@ public class ViewController extends Viewport {
 		mProjMatrix.multiplyRhs(mTmpMatrix);
 
 		updateMatrices();
+	}
+
+	/**
+	 * Set pivot height relative to screen center. E.g. 0.5 is usually preferred
+	 * for navigation, moving the center to 25% of the screen height.
+	 * Range is [-1, 1].
+	 */
+	public void setMapScreenCenter(float pivotY) {
+		mPivotY = FastMath.clamp(pivotY, -1, 1) * 0.5f;
 	}
 
 	/**
@@ -120,10 +133,12 @@ public class ViewController extends Viewport {
 
 		mPos.scale = newScale;
 
-		if (pivotX != 0 || pivotY != 0)
+		if (pivotX != 0 || pivotY != 0) {
+			pivotY -= mHeight * mPivotY;
+
 			moveMap(pivotX * (1.0f - scale),
 			        pivotY * (1.0f - scale));
-
+		}
 		return true;
 	}
 
@@ -140,6 +155,8 @@ public class ViewController extends Viewport {
 
 		double rsin = Math.sin(radians);
 		double rcos = Math.cos(radians);
+
+		pivotY -= mHeight * mPivotY;
 
 		float x = (float) (pivotX - pivotX * rcos + pivotY * rsin);
 		float y = (float) (pivotY - pivotX * rsin - pivotY * rcos);
@@ -202,20 +219,14 @@ public class ViewController extends Viewport {
 
 		mViewMatrix.copy(mRotationMatrix);
 
+		mTmpMatrix.setTranslation(0, mPivotY * mHeight, 0);
+		mViewMatrix.multiplyLhs(mTmpMatrix);
+
 		mViewProjMatrix.multiplyMM(mProjMatrix, mViewMatrix);
 
-		/* inverse projection matrix: */
-		/* invert scale */
-		mUnprojMatrix.setScale(mWidth, mWidth, 1);
-
-		/* invert rotation and tilt */
-		mTmpMatrix.transposeM(mRotationMatrix);
-
-		/* (AB)^-1 = B^-1*A^-1, invert scale, tilt and rotation */
-		mTmpMatrix.multiplyLhs(mUnprojMatrix);
-
-		/* (AB)^-1 = B^-1*A^-1, invert projection */
-		mUnprojMatrix.multiplyMM(mTmpMatrix, mProjMatrixInverse);
+		mViewProjMatrix.get(mat);
+		GLMatrix.invertM(mat, 0, mat, 0);
+		mUnprojMatrix.set(mat);
 	}
 
 	public final Viewport mNextFrame = new Viewport();

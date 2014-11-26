@@ -71,7 +71,7 @@ public class Viewport {
 	/** scale map plane at VIEW_DISTANCE to near plane */
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
-	protected Viewport() {
+	public Viewport() {
 		mPos.scale = MIN_SCALE;
 		mPos.x = 0.5;
 		mPos.y = 0.5;
@@ -115,17 +115,14 @@ public class Viewport {
 	 * @param add increase extents of box
 	 */
 	public void getMapExtents(float[] box, float add) {
-		float t = getDepth(1);
-		float t2 = getDepth(-1);
-
-		// top-right
-		unproject(1, -1, t, box, 0);
-		// top-left
-		unproject(-1, -1, t, box, 2);
-		// bottom-left
-		unproject(-1, 1, t2, box, 4);
-		// bottom-right
-		unproject(1, 1, t2, box, 6);
+		/* top-right */
+		unproject(1, -1, box, 0);
+		/* top-left */
+		unproject(-1, -1, box, 2);
+		/* bottom-left */
+		unproject(-1, 1, box, 4);
+		/* bottom-right */
+		unproject(1, 1, box, 6);
 
 		if (add == 0)
 			return;
@@ -139,49 +136,31 @@ public class Viewport {
 		}
 	}
 
-	/**
-	 * Get Z-value of the map-plane for a point on screen -
-	 * calculate the intersection of a ray from camera origin
-	 * and the map plane
-	 * TODO use
-	 * www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
-	 */
-	protected float getDepth(float y) {
-		// origin is moved by VIEW_DISTANCE
-		double cx = VIEW_DISTANCE;
-		// 'height' of the ray
-		double ry = y * (mHeight / mWidth) * 0.5f;
-
-		double ua;
-
-		if (y == 0)
-			ua = 1;
-		else {
-			// tilt of the plane (center is kept on x = 0)
-			double t = Math.toRadians(mPos.tilt);
-			double px = y * Math.sin(t);
-			double py = y * Math.cos(t);
-			ua = 1 + (px * ry) / (py * cx);
-		}
-
-		mv[0] = 0;
-		mv[1] = (float) (ry / ua);
-		mv[2] = (float) (cx - cx / ua);
-
-		mProjMatrixUnscaled.prj(mv);
-
-		return mv[2];
-	}
-
-	protected void unproject(float x, float y, float z, float[] coords, int position) {
+	protected void unproject(float x, float y, float[] coords, int position) {
 		mv[0] = x;
 		mv[1] = y;
-		mv[2] = z;
-
+		mv[2] = -1;
 		mUnprojMatrix.prj(mv);
+		double nx = mv[0];
+		double ny = mv[1];
+		double nz = mv[2];
 
-		coords[position + 0] = mv[0];
-		coords[position + 1] = mv[1];
+		mv[0] = x;
+		mv[1] = y;
+		mv[2] = 1;
+		mUnprojMatrix.prj(mv);
+		double fx = mv[0];
+		double fy = mv[1];
+		double fz = mv[2];
+
+		double dx = fx - nx;
+		double dy = fy - ny;
+		double dz = fz - nz;
+
+		double dist = -nz / dz;
+
+		coords[position + 0] = (float) (nx + dist * dx);
+		coords[position + 1] = (float) (ny + dist * dy);
 	}
 
 	/**
@@ -253,6 +232,14 @@ public class Viewport {
 		                    MercatorProjection.toLongitude(mMovePoint.x));
 	}
 
+	protected void unprojectScreen(double x, double y, float[] out) {
+		/* scale to -1..1 */
+		float mx = (float) (1 - (x / mWidth * 2));
+		float my = (float) (1 - (y / mHeight * 2));
+
+		unproject(-mx, my, out, 0);
+	}
+
 	/**
 	 * Get the map position for x,y in screen coordinates.
 	 * 
@@ -260,11 +247,7 @@ public class Viewport {
 	 * @param y screen coordinate
 	 */
 	public void fromScreenPoint(double x, double y, Point out) {
-		// scale to -1..1
-		float mx = (float) (1 - (x / mWidth * 2));
-		float my = (float) (1 - (y / mHeight * 2));
-
-		unproject(-mx, my, getDepth(-my), mu, 0);
+		unprojectScreen(x, y, mu);
 
 		double cs = mPos.scale * Tile.SIZE;
 		double cx = mPos.x * cs;
