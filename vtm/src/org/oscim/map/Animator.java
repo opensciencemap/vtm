@@ -112,7 +112,7 @@ public class Animator {
 		if (relative)
 			scale = mStartPos.scale * scale;
 
-		scale = clamp(scale, Viewport.MIN_SCALE, Viewport.MAX_SCALE);
+		scale = mMap.viewport().limitScale(scale);
 
 		mDeltaPos.set(longitudeToX(geoPoint.getLongitude()) - mStartPos.x,
 		              latitudeToY(geoPoint.getLatitude()) - mStartPos.y,
@@ -131,15 +131,13 @@ public class Animator {
 
 		mMap.getMapPosition(mStartPos);
 
-		pos.scale = clamp(pos.scale,
-		                  Viewport.MIN_SCALE,
-		                  Viewport.MAX_SCALE);
+		pos.scale = mMap.viewport().limitScale(pos.scale);
 
 		mDeltaPos.set(pos.x - mStartPos.x,
 		              pos.y - mStartPos.y,
 		              pos.scale - mStartPos.scale,
 		              pos.bearing - mStartPos.bearing,
-		              clamp(pos.tilt, 0, Viewport.MAX_TILT) - mStartPos.tilt);
+		              mMap.viewport().limitTilt(pos.tilt) - mStartPos.tilt);
 
 		animStart(duration, ANIM_MOVE | ANIM_SCALE | ANIM_ROTATE | ANIM_TILT);
 	}
@@ -156,7 +154,7 @@ public class Animator {
 			scaleBy = mCurPos.scale * scaleBy;
 
 		mStartPos.copy(mCurPos);
-		scaleBy = clamp(scaleBy, Viewport.MIN_SCALE, Viewport.MAX_SCALE);
+		scaleBy = mMap.viewport().limitScale(scaleBy);
 
 		mDeltaPos.scale = scaleBy - mStartPos.scale;
 

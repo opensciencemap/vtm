@@ -36,13 +36,24 @@ import org.oscim.utils.FastMath;
 public class Viewport {
 	//static final Logger log = LoggerFactory.getLogger(Viewport.class);
 
-	public final static int MAX_ZOOMLEVEL = 20;
-	public final static int MIN_ZOOMLEVEL = 2;
+	private final static int MAX_ZOOMLEVEL = 20;
+	private final static int MIN_ZOOMLEVEL = 2;
+	private final static float MIN_TILT = 0;
+	private final static float MAX_TILT = 65;
 
-	public final static double MAX_SCALE = (1 << MAX_ZOOMLEVEL);
-	public final static double MIN_SCALE = (1 << MIN_ZOOMLEVEL);
+	protected double mMaxScale = (1 << MAX_ZOOMLEVEL);
+	protected double mMinScale = (1 << MIN_ZOOMLEVEL);
 
-	public final static float MAX_TILT = 65;
+	protected float mMinTilt = MIN_TILT;
+	protected float mMaxTilt = MAX_TILT;
+
+	protected float mMinBearing = -180;
+	protected float mMaxBearing = 180;
+
+	protected double mMinX = 0;
+	protected double mMaxX = 1;
+	protected double mMinY = 0;
+	protected double mMaxY = 1;
 
 	protected final MapPosition mPos = new MapPosition();
 
@@ -72,11 +83,74 @@ public class Viewport {
 	public final static float VIEW_SCALE = (VIEW_NEAR / VIEW_DISTANCE) * 0.5f;
 
 	public Viewport() {
-		mPos.scale = MIN_SCALE;
+		mPos.scale = mMinScale;
 		mPos.x = 0.5;
 		mPos.y = 0.5;
 		mPos.bearing = 0;
 		mPos.tilt = 0;
+	}
+
+	public double limitScale(double scale) {
+		if (scale > mMaxScale)
+			return mMaxScale;
+		else if (scale < mMinScale)
+			return mMinScale;
+
+		return scale;
+	}
+
+	public float limitTilt(float tilt) {
+		if (tilt > mMaxTilt)
+			return mMaxTilt;
+		else if (tilt < mMinTilt)
+			return mMinTilt;
+
+		return tilt;
+	}
+
+	public boolean limitPosition(MapPosition pos) {
+		boolean changed = false;
+		if (pos.scale > mMaxScale) {
+			pos.scale = mMaxScale;
+			changed = true;
+		} else if (pos.scale < mMinScale) {
+			pos.scale = mMinScale;
+			changed = true;
+		}
+
+		if (pos.tilt > mMaxTilt) {
+			pos.tilt = mMaxTilt;
+			changed = true;
+		} else if (pos.tilt < mMinTilt) {
+			pos.tilt = mMinTilt;
+			changed = true;
+		}
+
+		if (pos.bearing > mMaxBearing) {
+			pos.bearing = mMaxBearing;
+			changed = true;
+		} else if (pos.bearing < mMinBearing) {
+			pos.bearing = mMinBearing;
+			changed = true;
+		}
+
+		if (pos.x > mMaxX) {
+			pos.x = mMaxX;
+			changed = true;
+		} else if (pos.x < mMinX) {
+			pos.x = mMinX;
+			changed = true;
+		}
+
+		if (pos.y > mMaxY) {
+			pos.y = mMaxY;
+			changed = true;
+		} else if (pos.y < mMinY) {
+			pos.y = mMinY;
+			changed = true;
+		}
+
+		return changed;
 	}
 
 	/**

@@ -124,7 +124,7 @@ public class ViewController extends Viewport {
 
 		double newScale = mPos.scale * scale;
 
-		newScale = FastMath.clamp(newScale, MIN_SCALE, MAX_SCALE);
+		newScale = clamp(newScale, mMinScale, mMaxScale);
 
 		if (newScale == mPos.scale)
 			return false;
@@ -175,21 +175,21 @@ public class ViewController extends Viewport {
 			degree += 360;
 
 		mPos.bearing = (float) degree;
+
 		updateMatrices();
 	}
 
 	public boolean tiltMap(float move) {
-		ThreadUtils.assertMainThread();
-
 		return setTilt(mPos.tilt + move);
 	}
 
 	public boolean setTilt(float tilt) {
 		ThreadUtils.assertMainThread();
 
-		tilt = FastMath.clamp(tilt, 0, MAX_TILT);
+		tilt = limitTilt(tilt);
 		if (tilt == mPos.tilt)
 			return false;
+
 		mPos.tilt = tilt;
 		updateMatrices();
 		return true;
@@ -198,11 +198,15 @@ public class ViewController extends Viewport {
 	public void setMapPosition(MapPosition mapPosition) {
 		ThreadUtils.assertMainThread();
 
-		mPos.scale = clamp(mapPosition.scale, MIN_SCALE, MAX_SCALE);
-		mPos.x = mapPosition.x;
-		mPos.y = mapPosition.y;
-		mPos.tilt = clamp(mapPosition.tilt, 0, MAX_TILT);
-		mPos.bearing = mapPosition.bearing;
+		mPos.copy(mapPosition);
+		limitPosition(mPos);
+
+		//	mPos.scale = clamp(mapPosition.scale, mMinScale, mMaxScale);
+		//	mPos.x = mapPosition.x;
+		//	mPos.y = mapPosition.y;
+		//	mPos.tilt = limitTilt(mapPosition.tilt);
+		//	mPos.bearing = mapPosition.bearing;
+
 		updateMatrices();
 	}
 
