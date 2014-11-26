@@ -157,24 +157,25 @@ public abstract class GdxMap implements ApplicationListener {
 
 		@Override
 		public void updateMap(boolean forceRender) {
-
-			if (!mRenderRequest) {
-				mRenderRequest = true;
-				Gdx.app.postRunnable(mRedrawCb);
-			} else {
-				mRenderWait = true;
+			synchronized (mRedrawCb) {
+				if (!mRenderRequest) {
+					mRenderRequest = true;
+					Gdx.app.postRunnable(mRedrawCb);
+				} else {
+					mRenderWait = true;
+				}
 			}
 		}
 
 		@Override
 		public void render() {
-			//updateMap(true);
-
-			mRenderRequest = true;
-			if (mClearMap)
-				updateMap(false);
-			else {
-				Gdx.graphics.requestRendering();
+			synchronized (mRedrawCb) {
+				mRenderRequest = true;
+				if (mClearMap)
+					updateMap(false);
+				else {
+					Gdx.graphics.requestRendering();
+				}
 			}
 		}
 
@@ -200,16 +201,13 @@ public abstract class GdxMap implements ApplicationListener {
 		}
 
 		@Override
-		public void doneFrame() {
-			mRenderRequest = false;
-
-			if (mRenderWait) {
-				mRenderWait = false;
-
-				mRenderRequest = true;
-
-				prepareFrame();
-				Gdx.graphics.requestRendering();
+		public void doneFrame(boolean animate) {
+			synchronized (mRedrawCb) {
+				mRenderRequest = false;
+				if (animate || mRenderWait) {
+					mRenderWait = false;
+					updateMap(true);
+				}
 			}
 		}
 	}

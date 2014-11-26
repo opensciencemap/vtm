@@ -70,33 +70,22 @@ public class MapRenderer {
 		mClearColor = GLUtils.colorToFloat(color);
 	}
 
-	private final Runnable renderBegin = new Runnable() {
-		@Override
-		public void run() {
-			mMap.beginFrame();
-		}
-	};
-	private final Runnable renderDone = new Runnable() {
-		@Override
-		public void run() {
-			mMap.doneFrame();
-		}
-	};
-
 	public void onDrawFrame() {
 		frametime = System.currentTimeMillis();
+		rerender = false;
 
-		mMap.post(renderBegin);
+		mMap.beginFrame();
 
 		draw();
 
-		mMap.post(renderDone);
+		mMap.doneFrame(rerender);
 
 		mBufferPool.releaseBuffers();
 		TextureItem.disposeTextures();
 	}
 
 	private void draw() {
+
 		GLState.setClearColor(mClearColor);
 
 		gl.depthMask(true);
@@ -149,10 +138,6 @@ public class MapRenderer {
 		if (GLUtils.checkGlOutOfMemory("finish")) {
 			BufferObject.checkBufferUsage(true);
 			// FIXME also throw out some textures etc
-		}
-		if (rerender) {
-			mMap.render();
-			rerender = false;
 		}
 	}
 

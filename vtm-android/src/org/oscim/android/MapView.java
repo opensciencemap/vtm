@@ -174,14 +174,16 @@ public class MapView extends GLSurfaceView {
 
 		@Override
 		public void updateMap(boolean redraw) {
-			if (mPausing)
-				return;
+			synchronized (mRedrawCb) {
+				if (mPausing)
+					return;
 
-			if (!mRenderRequest) {
-				mRenderRequest = true;
-				mMapView.post(mRedrawCb);
-			} else {
-				mRenderWait = true;
+				if (!mRenderRequest) {
+					mRenderRequest = true;
+					mMapView.post(mRedrawCb);
+				} else {
+					mRenderWait = true;
+				}
 			}
 		}
 
@@ -190,7 +192,8 @@ public class MapView extends GLSurfaceView {
 			if (mPausing)
 				return;
 
-			updateMap(true);
+			/** TODO should not need to call prepareFrame in mRedrawCb */
+			updateMap(false);
 		}
 
 		@Override
@@ -198,15 +201,13 @@ public class MapView extends GLSurfaceView {
 		}
 
 		@Override
-		public void doneFrame() {
-			mRenderRequest = false;
-
-			if (mRenderWait) {
-				//log.debug("redraw");
-				mRenderWait = false;
-				updateMap(true);
-				//prepareFrame();
-				//mGLView.requestRender();
+		public void doneFrame(boolean animate) {
+			synchronized (mRedrawCb) {
+				mRenderRequest = false;
+				if (animate || mRenderWait) {
+					mRenderWait = false;
+					render();
+				}
 			}
 		}
 

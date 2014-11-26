@@ -340,7 +340,9 @@ public abstract class Map implements TaskQueue {
 		return mLayers.handleGesture(g, e);
 	}
 
+	/** Called on render thread, use synchronized! */
 	public abstract void beginFrame();
 
-	public abstract void doneFrame();
+	/** Called on render thread, use synchronized! */
+	public abstract void doneFrame(boolean needsRedraw);
 }
