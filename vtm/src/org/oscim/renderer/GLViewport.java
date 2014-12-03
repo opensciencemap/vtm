@@ -24,14 +24,12 @@ public class GLViewport extends Viewport {
 	 * being center
 	 */
 	public void useScreenCoordinates(boolean center, float scale) {
-		float ratio = (1f / (scale * mWidth));
+		float invScale = 1f / scale;
 
 		if (center)
-			mvp.setScale(ratio, ratio, ratio);
+			mvp.setScale(invScale, invScale, invScale);
 		else
-			mvp.setTransScale((-mWidth / 2) * ratio * scale,
-			                  (-mHeight / 2) * ratio * scale,
-			                  ratio);
+			mvp.setTransScale(-mWidth / 2, -mHeight / 2, invScale);
 
 		mvp.multiplyLhs(proj);
 	}
