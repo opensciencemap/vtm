@@ -48,8 +48,8 @@ public class TextureItem extends Inlist<TextureItem> {
 
 	/** vertex offset from which this texture is referenced */
 	/* FIXME dont put this here! */
-	public short offset;
-	public short indices;
+	public int offset;
+	public int indices;
 
 	/** temporary Bitmap */
 	public Bitmap bitmap;

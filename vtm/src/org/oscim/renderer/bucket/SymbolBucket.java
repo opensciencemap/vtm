@@ -68,7 +68,7 @@ public final class SymbolBucket extends TextureBucket {
 		/* offset of layer data in vbo */
 		this.vertexOffset = vboData.position() * 2; //SHORT_BYTES;
 
-		short numIndices = 0;
+		int numIndices = 0;
 
 		prevTextures = textures;
 		textures = null;
