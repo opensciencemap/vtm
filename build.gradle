@@ -11,11 +11,11 @@ buildscript {
   dependencies {
     classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.3'
 
-    classpath 'com.android.tools.build:gradle:0.14.2'
+    classpath 'com.android.tools.build:gradle:1.0.1'
 
     // for aar/maven stuff
     // https://github.com/dcendents/android-maven-plugin
-    classpath 'com.github.dcendents:android-maven-plugin:1.1'
+    classpath 'com.github.dcendents:android-maven-plugin:1.2'
   }
 }
 
@@ -24,7 +24,7 @@ def filterProjects(filter) {
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.1'
+  gradleVersion = '2.3'
 }
 
 //apply from:'jdee.gradle'
@@ -34,13 +34,13 @@ allprojects {
   version = '0.6.0-SNAPSHOT'
 
   ext.gdxVersion = "1.4.1"
-  ext.androidBuildVersionTools = "21.1.1"
+  ext.androidBuildVersionTools = "22"
 
   repositories {
+    maven { url 'https://github.com/hjanetzek/maven-repo/raw/master/' }
     mavenCentral()
     // Jeo
-    maven { url 'http://repo.boundlessgeo.com/main' }
-    //maven { url 'https://github.com/hjanetzek/maven-repo/raw/master/' }
+    // maven { url 'http://repo.boundlessgeo.com/main' }
     mavenLocal()
     // Local andoird repo
     maven { url "${System.env.ANDROID_HOME}/extras/android/m2repository" }

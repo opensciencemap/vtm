@@ -58,8 +58,8 @@ Just import build.gradle
 You can run gradle tasks directly (see also `./gradlew -q tasks`):<br/>
 `./gradlew clean install` <br/> to build the libraries and add them to the local maven repository.<br/>
 `./gradlew :vtm-android-example:run` <br/> to run the android example<br/>
-`./gradlew :vtm-gdx-desktop:run` <br/>to run the desktop demo (only Linux64 and Win64 native libs are provided atm)<br/>
-`./gradlew :vtm-gdx-html:jettyDraftWar` <br/>to run the webgl demo<br/>
+`./gradlew :vtm-desktop:run` <br/>to run the desktop demo (only Linux64 and Win64 native libs are provided atm)<br/>
+`./gradlew :vtm-web-app:jettyDraftWar` <br/>to run the webgl demo<br/>
 
 
 ## WebGL Demo
