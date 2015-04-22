@@ -217,7 +217,8 @@ public class MapRenderer {
 		String version = gl.getString(GL.VERSION);
 		log.debug("{}/{}/{}", vendor, renderer, version);
 
-		if ("Adreno (TM) 330".equals(renderer) || "Adreno (TM) 320".equals(renderer)) {
+		// Prevent issue with Adreno 3xx series
+		if (renderer != null && renderer.startsWith("Adreno (TM) 3")) {
 			log.debug("==> not using glBufferSubData");
 			GLAdapter.NO_BUFFER_SUB_DATA = true;
 		}
