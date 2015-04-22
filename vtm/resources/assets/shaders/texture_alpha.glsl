@@ -1,5 +1,5 @@
 #ifdef GLES
-precision mediump float;
+precision highp float;
 #endif
 attribute vec2 vertex;
 attribute vec2 tex_coord;

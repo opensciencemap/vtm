@@ -1,4 +1,6 @@
-precision mediump float;
+#ifdef GLES
+precision highp float;
+#endif
 uniform mat4 u_mvp;
 uniform vec2 u_scale;
 attribute vec4 a_pos;
@@ -11,7 +13,9 @@ void main() {
 }
 
 §
+#ifdef GLES
 precision mediump float;
+#endif
 uniform vec4 u_color;
 uniform sampler2D tex;
 uniform vec2 u_scale;
