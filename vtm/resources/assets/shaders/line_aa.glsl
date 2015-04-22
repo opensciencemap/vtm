@@ -1,5 +1,6 @@
 #ifdef GLES
-precision mediump float;
+// highp is necessary to not loose texture coordinate bits
+precision highp float;
 #endif
 uniform mat4 u_mvp;
 // uniform mat4 u_vp;
