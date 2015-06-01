@@ -1,5 +1,4 @@
-#  *\<vector\<tile\>\>map*
-
+# V™
 <br/>
 
 VTM is developed within the [OpenScienceMap](http://opensciencemap.org) project.
