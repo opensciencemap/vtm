@@ -44,7 +44,7 @@ main(){
 $$
 
 #ifdef GLES
-precision mediump float;
+precision highp float;
 #endif
 varying vec4 color;
 void

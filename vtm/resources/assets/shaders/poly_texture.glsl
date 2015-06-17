@@ -14,7 +14,7 @@ void main() {
 
 §
 #ifdef GLES
-precision mediump float;
+precision highp float;
 #endif
 uniform vec4 u_color;
 uniform sampler2D tex;

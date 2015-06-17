@@ -31,7 +31,7 @@ $$
 
 #extension GL_OES_standard_derivatives : enable
 #ifdef GLES
-precision mediump float;
+precision highp float;
 #endif
 uniform vec4 u_color;
 uniform vec4 u_bgcolor;

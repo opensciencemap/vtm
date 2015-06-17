@@ -24,7 +24,7 @@ main(){
 }
 $$
 #ifdef GLES
-precision mediump float;
+precision highp float;
 #endif
 uniform sampler2D tex;
 uniform float u_fade;

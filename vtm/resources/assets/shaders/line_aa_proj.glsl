@@ -24,8 +24,8 @@ main(){
 }
 $$
 #extension GL_OES_standard_derivatives : enable
-#ifndef DESKTOP_QUIRKS
-precision mediump float;
+#ifdef GLES
+precision highp float;
 #endif
 uniform sampler2D tex;
 uniform float u_mode;
