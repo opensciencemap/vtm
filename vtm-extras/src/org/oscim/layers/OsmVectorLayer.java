@@ -1,6 +1,6 @@
 package org.oscim.layers;
 
-import org.oscim.core.BoundingBox;
+import org.oscim.core.Box;
 import org.oscim.core.osm.OsmElement;
 import org.oscim.layers.vector.AbstractVectorLayer;
 import org.oscim.map.Map;
@@ -12,7 +12,7 @@ public class OsmVectorLayer extends AbstractVectorLayer<OsmElement> {
 	}
 
 	@Override
-	protected void processFeatures(Task t, BoundingBox b) {
+	protected void processFeatures(Task t, Box b) {
 
 	}
 

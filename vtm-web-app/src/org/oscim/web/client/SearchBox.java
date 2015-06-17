@@ -268,7 +268,7 @@ public class SearchBox {
 						} catch (Exception e) {
 							log.debug(wkt);
 						}
-						mOverlay.setGeom(g);
+						//FIXME mOverlay.setGeom(g);
 
 						//log.debug("add polygon " + p.length());
 					} else {

@@ -5,6 +5,7 @@ configurations { providedCompile }
 
 dependencies {
   compile 'org.slf4j:slf4j-api:1.7.6'
+  compile 'com.vividsolutions:jts:1.13'
   providedCompile 'com.squareup.okhttp:okhttp:1.5.2'
   providedCompile 'com.google.code.findbugs:annotations:2.0.1'
 }
@@ -29,7 +30,10 @@ eclipse.classpath {
 
   file.whenMerged { classpath ->
     classpath.entries.findAll { entry ->
-      entry.path.contains('annotations') }*.exported = false
+      entry.path.contains('annotations') || 
+      entry.path.contains('okhttp') ||
+      entry.path.contains('okio')
+      }*.exported = false
   }
 
   //if you don't want some classpath entries 'exported' in Eclipse

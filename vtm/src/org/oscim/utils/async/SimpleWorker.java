@@ -146,7 +146,8 @@ public abstract class SimpleWorker<T> implements Runnable {
 			return;
 		}
 
-		cleanup(mTaskTodo);
+		if (mTaskTodo != null)
+			cleanup(mTaskTodo);
 		finish();
 	}
 
