@@ -87,8 +87,8 @@ public abstract class AbstractVectorLayer<T> extends Layer implements UpdateList
 			Viewport v = mMap.viewport();
 			BoundingBox bbox;
 			synchronized (v) {
-				bbox = v.getBBox();
-				v.getMapPosition(t.position);
+				bbox = v.getBBox(null, 0);
+				mMap.getMapPosition(t.position);
 			}
 
 			double scale = t.position.scale * Tile.SIZE;

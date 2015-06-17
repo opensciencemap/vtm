@@ -16,7 +16,6 @@
  */
 package org.oscim.map;
 
-import org.oscim.core.BoundingBox;
 import org.oscim.core.Box;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
@@ -25,6 +24,8 @@ import org.oscim.core.Point;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.utils.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Viewport class contains a MapPosition and the projection matrices.
@@ -34,7 +35,8 @@ import org.oscim.utils.FastMath;
  * Public methods are thread safe.
  */
 public class Viewport {
-	//static final Logger log = LoggerFactory.getLogger(Viewport.class);
+
+	static final Logger log = LoggerFactory.getLogger(Viewport.class);
 
 	private final static int MAX_ZOOMLEVEL = 20;
 	private final static int MIN_ZOOMLEVEL = 2;
@@ -71,8 +73,6 @@ public class Viewport {
 	protected final float[] mv = new float[4];
 	protected final float[] mu = new float[4];
 	protected final float[] mViewCoords = new float[8];
-
-	protected final Box mMapBBox = new Box();
 
 	protected float mHeight, mWidth;
 
@@ -239,33 +239,13 @@ public class Viewport {
 
 	/**
 	 * Get the minimal axis-aligned BoundingBox that encloses
-	 * the visible part of the map.
-	 * 
-	 * @return BoundingBox containing view
-	 */
-	public synchronized BoundingBox getBBox(int expand) {
-		getBBox(mMapBBox, expand);
-
-		/* scale map-pixel coordinates at current scale to
-		 * absolute coordinates and apply mercator projection. */
-		double minLon = MercatorProjection.toLongitude(mMapBBox.xmin);
-		double maxLon = MercatorProjection.toLongitude(mMapBBox.xmax);
-		double minLat = MercatorProjection.toLatitude(mMapBBox.ymax);
-		double maxLat = MercatorProjection.toLatitude(mMapBBox.ymin);
-
-		return new BoundingBox(minLat, minLon, maxLat, maxLon);
-	}
-
-	public synchronized BoundingBox getBBox() {
-		return getBBox(0);
-	}
-
-	/**
-	 * Get the minimal axis-aligned BoundingBox that encloses
 	 * the visible part of the map. Sets box to map coordinates:
-	 * xmin,ymin,ymax,ymax
+	 * xmin,ymin,xmax,ymax
 	 */
-	public synchronized void getBBox(Box box, int expand) {
+	public Box getBBox(Box box, int expand) {
+		if (box == null)
+			box = new Box();
+
 		float[] coords = mViewCoords;
 		getMapExtents(coords, expand);
 
@@ -281,7 +261,6 @@ public class Viewport {
 			box.ymax = Math.max(box.ymax, coords[i + 1]);
 		}
 
-		//updatePosition();
 		double cs = mPos.scale * Tile.SIZE;
 		double cx = mPos.x * cs;
 		double cy = mPos.y * cs;
@@ -290,6 +269,8 @@ public class Viewport {
 		box.xmax = (cx + box.xmax) / cs;
 		box.ymin = (cy + box.ymin) / cs;
 		box.ymax = (cy + box.ymax) / cs;
+
+		return box;
 	}
 
 	/**

@@ -21,7 +21,7 @@ package org.oscim.layers.marker;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.oscim.core.BoundingBox;
+import org.oscim.core.Box;
 import org.oscim.core.Point;
 import org.oscim.event.Gesture;
 import org.oscim.event.GestureListener;
@@ -167,7 +167,9 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 		int eventY = (int) event.getY() - mMap.getHeight() / 2;
 		Viewport mapPosition = mMap.viewport();
 
-		BoundingBox bbox = mapPosition.getBBox(128);
+		Box box = mapPosition.getBBox(null, 128);
+		box.map2mercator();
+		box.scale(1E6);
 
 		int nearest = -1;
 		int inside = -1;
@@ -179,7 +181,8 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 		for (int i = 0; i < size; i++) {
 			Item item = mItemList.get(i);
 
-			if (!bbox.contains(item.geoPoint))
+			if (!box.contains(item.geoPoint.longitudeE6,
+			                  item.geoPoint.latitudeE6))
 				continue;
 
 			mapPosition.toScreenPoint(item.getPoint(), mTmpPoint);
