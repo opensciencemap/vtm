@@ -148,7 +148,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		}
 		if (action == MotionEvent.ACTION_UP) {
 			mDown = false;
-			if (mDoubleTap && !mDragZoom) {
+			if (mDoubleTap && !mDragZoom && mCanScale) {
 				float pivotX = 0, pivotY = 0;
 				if (!mFixOnCenter) {
 					pivotX = mPrevX1 - mMap.getWidth() / 2;
@@ -211,7 +211,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 			mPrevY1 = y1;
 
 			/* double-tap drag zoom */
-			if (mDoubleTap) {
+			if (mDoubleTap && mCanScale) {
 				/* just ignore first move event to set mPrevX/Y */
 				if (!mDown) {
 					mDown = true;
@@ -339,7 +339,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 					mDoScale = true;
 				}
 			}
-			if (mDoScale || mDoRotate) {
+			if (mCanScale && (mDoScale || mDoRotate)) {
 				scaleBy = (float) (pinchWidth / mPrevPinchWidth);
 				mPrevPinchWidth = pinchWidth;
 			}
