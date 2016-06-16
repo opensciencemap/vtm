@@ -29,7 +29,7 @@ allprojects {
   group = 'org.oscim'
   version = '0.6.0-SNAPSHOT'
 
-  ext.gdxVersion = "1.4.1"
+  ext.gdxVersion = "1.9.3"
   ext.androidBuildVersionTools = "23.0.3"
 
   repositories {
