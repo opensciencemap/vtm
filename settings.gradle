@@ -1,3 +1,4 @@
+rootProject.name = 'vtm-parent'
 include ':appcompat'
 include ':vtm'
 include ':vtm-tests'

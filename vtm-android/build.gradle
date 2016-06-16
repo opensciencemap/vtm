@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'android-maven'
+apply plugin: 'com.github.dcendents.android-maven'
 
 configurations {
   eclipseCompile
@@ -97,4 +97,16 @@ eclipse {
     linkedResource name: 'libs', type: '2',
 	   locationUri: 'PARENT-1-PROJECT_LOC/vtm-ext-libs/vtm-android'
   }
+}
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals("debug")) {
+        print "Skipping debug jar"
+        return; // Skip debug builds.
+    }
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile
+    task.from variant.javaCompile.destinationDir
+    artifacts.add('archives', task);
 }
