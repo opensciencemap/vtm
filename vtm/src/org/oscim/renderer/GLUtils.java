@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -248,7 +249,12 @@ public class GLUtils {
 			return null;
 
 		int[] ret = new int[num];
-		IntBuffer buf = MapRenderer.getIntBuffer(num);
+		// Workaround for texture memory leaks on desktop
+		IntBuffer buf;
+		if (GLAdapter.GDX_DESKTOP_QUIRKS)
+			buf = ByteBuffer.allocateDirect(num * 4).order(ByteOrder.nativeOrder()).asIntBuffer();
+		else
+			buf = MapRenderer.getIntBuffer(num);
 
 		if (GLAdapter.GDX_WEBGL_QUIRKS) {
 			for (int i = 0; i < num; i++) {
