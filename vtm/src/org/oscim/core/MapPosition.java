@@ -1,5 +1,6 @@
 /*
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -180,6 +181,7 @@ public class MapPosition {
 		double zy = viewHeight / (dy * Tile.SIZE);
 
 		scale = Math.min(zx, zy);
+		zoomLevel = FastMath.log2((int) scale);
 		x = minx + dx / 2;
 		y = miny + dy / 2;
 		bearing = 0;
