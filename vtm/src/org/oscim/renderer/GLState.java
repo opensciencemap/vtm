@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,6 +20,7 @@ package org.oscim.renderer;
 import static org.oscim.backend.GLAdapter.gl;
 
 import org.oscim.backend.GL;
+import org.oscim.backend.GLAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,12 +151,15 @@ public class GLState {
 	}
 
 	public static void setClearColor(float[] color) {
-		if (clearColor != null &&
-		        color[0] == clearColor[0] &&
-		        color[1] == clearColor[1] &&
-		        color[2] == clearColor[2] &&
-		        color[3] == clearColor[3])
-			return;
+		// Workaround for artifacts at canvas resize on desktop
+		if (!GLAdapter.GDX_DESKTOP_QUIRKS) {
+			if (clearColor != null &&
+					color[0] == clearColor[0] &&
+					color[1] == clearColor[1] &&
+					color[2] == clearColor[2] &&
+					color[3] == clearColor[3])
+				return;
+		}
 
 		clearColor = color;
 		gl.clearColor(color[0], color[1], color[2], color[3]);
