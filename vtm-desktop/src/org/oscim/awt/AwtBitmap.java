@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -55,6 +56,15 @@ public class AwtBitmap implements Bitmap {
 		this.height = this.bitmap.getHeight();
 		if (!this.bitmap.isAlphaPremultiplied()
 		        && this.bitmap.getType() == BufferedImage.TYPE_INT_ARGB)
+			this.bitmap.coerceData(true);
+	}
+
+	public AwtBitmap(BufferedImage bitmap) {
+		this.bitmap = bitmap;
+		this.width = this.bitmap.getWidth();
+		this.height = this.bitmap.getHeight();
+		if (!this.bitmap.isAlphaPremultiplied()
+				&& this.bitmap.getType() == BufferedImage.TYPE_INT_ARGB)
 			this.bitmap.coerceData(true);
 	}
 

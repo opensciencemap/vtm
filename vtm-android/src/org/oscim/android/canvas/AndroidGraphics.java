@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -39,6 +40,10 @@ public final class AndroidGraphics extends CanvasAdapter {
 
 	public static android.graphics.Paint getAndroidPaint(Paint paint) {
 		return ((AndroidPaint) paint).mPaint;
+	}
+
+	public static android.graphics.Bitmap getBitmap(Bitmap bitmap) {
+		return ((AndroidBitmap) bitmap).mBitmap;
 	}
 
 	private AndroidGraphics() {
