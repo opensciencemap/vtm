@@ -10,7 +10,7 @@ dependencies {
   //compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
   //compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
   compile files("${rootDir}/vtm-ext-libs/gdx/gdx-native-libs.jar")
-  compile files("${rootDir}/vtm-ext-libs/native-libs.jar")
+  compile files("${rootDir}/vtm-android/vtm-jni-natives.jar")
 }
 
 //task copyLibs(type: Copy) {
