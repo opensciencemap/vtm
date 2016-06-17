@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.gdx;
 
 import org.oscim.layers.GenericLayer;
@@ -41,11 +57,14 @@ public class InputHandler implements InputProcessor {
 				break;
 
 			case Input.Keys.SHIFT_LEFT:
+			case Input.Keys.SHIFT_RIGHT:
 				mActiveScale = true;
 				mPosY = Gdx.input.getY();
 				break;
 
 			case Input.Keys.CONTROL_LEFT:
+			case Input.Keys.CONTROL_RIGHT:
+				mActiveRotate = true;
 				mActiveTilt = true;
 				mPosX = Gdx.input.getX();
 				mPosY = Gdx.input.getY();
@@ -121,9 +140,12 @@ public class InputHandler implements InputProcessor {
 	public boolean keyUp(int keycode) {
 		switch (keycode) {
 			case Input.Keys.SHIFT_LEFT:
+			case Input.Keys.SHIFT_RIGHT:
 				mActiveScale = false;
 				break;
 			case Input.Keys.CONTROL_LEFT:
+			case Input.Keys.CONTROL_RIGHT:
+				mActiveRotate = false;
 				mActiveTilt = false;
 				break;
 
@@ -155,6 +177,7 @@ public class InputHandler implements InputProcessor {
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		mActiveScale = false;
 		mActiveRotate = false;
+		mActiveTilt = false;
 
 		return false;
 	}
