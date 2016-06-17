@@ -2,6 +2,7 @@
  * Copyright 2012 osmdroid authors: Nicolas Gramlich, Theodore Hong, Fred Eisele
  * 
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -181,8 +182,8 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
 		for (int i = 0; i < size; i++) {
 			Item item = mItemList.get(i);
 
-			if (!box.contains(item.geoPoint.longitudeE6,
-			                  item.geoPoint.latitudeE6))
+			if (!box.contains(item.getPoint().longitudeE6,
+			                  item.getPoint().latitudeE6))
 				continue;
 
 			mapPosition.toScreenPoint(item.getPoint(), mTmpPoint);
