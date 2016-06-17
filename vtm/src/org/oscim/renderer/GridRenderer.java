@@ -1,5 +1,6 @@
 /*
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -97,11 +98,11 @@ public class GridRenderer extends BucketRenderer {
 			for (int xx = -2; xx < 2; xx++) {
 
 				sb.setLength(0);
-				sb.append(x + xx)
+				sb.append(z)
 				    .append(" / ")
-				    .append(y + yy)
+				    .append(x + xx)
 				    .append(" / ")
-				    .append(z);
+				    .append(y + yy);
 
 				TextItem ti = TextItem.pool.get();
 				ti.set(s * xx + s / 2, s * yy + s / 2, sb.toString(), mText);
