@@ -1,5 +1,6 @@
 /*
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -374,5 +375,101 @@ public class Viewport {
 		mViewMatrix.copy(viewport.mViewMatrix);
 		mViewProjMatrix.copy(viewport.mViewProjMatrix);
 		return viewport.getMapPosition(mPos);
+	}
+
+	public double getMaxScale() {
+		return mMaxScale;
+	}
+
+	public void setMaxScale(double maxScale) {
+		this.mMaxScale = maxScale;
+	}
+
+	public double getMinScale() {
+		return mMinScale;
+	}
+
+	public void setMinScale(double minScale) {
+		this.mMinScale = minScale;
+	}
+
+	public int getMaxZoomLevel() {
+		return FastMath.log2((int) mMaxScale);
+	}
+
+	public void setMaxZoomLevel(int maxZoomLevel) {
+		this.mMaxScale = (1 << maxZoomLevel);
+	}
+
+	public int getMinZoomLevel() {
+		return FastMath.log2((int) mMinScale);
+	}
+
+	public void setMinZoomLevel(int minZoomLevel) {
+		this.mMinScale = (1 << minZoomLevel);
+	}
+
+	public float getMaxTilt() {
+		return mMaxTilt;
+	}
+
+	public void setMaxTilt(float maxTilt) {
+		this.mMaxTilt = maxTilt;
+	}
+
+	public float getMinTilt() {
+		return mMinTilt;
+	}
+
+	public void setMinTilt(float minTilt) {
+		this.mMinTilt = minTilt;
+	}
+
+	public float getMaxBearing() {
+		return mMaxBearing;
+	}
+
+	public void setMaxBearing(float maxBearing) {
+		this.mMaxBearing = maxBearing;
+	}
+
+	public float getMinBearing() {
+		return mMinBearing;
+	}
+
+	public void setMinBearing(float minBearing) {
+		this.mMinBearing = minBearing;
+	}
+
+	public double getMaxX() {
+		return mMaxX;
+	}
+
+	public void setMaxX(double maxX) {
+		this.mMaxX = maxX;
+	}
+
+	public double getMinX() {
+		return mMinX;
+	}
+
+	public void setMinX(double minX) {
+		this.mMinX = minX;
+	}
+
+	public double getMaxY() {
+		return mMaxY;
+	}
+
+	public void setMaxY(double maxY) {
+		this.mMaxY = maxY;
+	}
+
+	public double getMinY() {
+		return mMinY;
+	}
+
+	public void setMinY(double minY) {
+		this.mMinY = minY;
 	}
 }
