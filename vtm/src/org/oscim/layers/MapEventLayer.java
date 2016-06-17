@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -105,12 +106,24 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 		mEnableTilt = enable;
 	}
 
+	public boolean tiltEnabled() {
+		return mEnableTilt;
+	}
+
 	public void enableMove(boolean enable) {
 		mEnableMove = enable;
 	}
 
+	public boolean moveEnabled() {
+		return mEnableMove;
+	}
+
 	public void enableZoom(boolean enable) {
 		mEnableScale = enable;
+	}
+
+	public boolean zoomEnabled() {
+		return mEnableScale;
 	}
 
 	/**
