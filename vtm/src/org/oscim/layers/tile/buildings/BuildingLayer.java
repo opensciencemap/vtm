@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -42,7 +43,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 	private final static int MAX_ZOOM = 17;
 
 	private final static boolean POST_AA = false;
-	private final static boolean TRANSLUCENT = true;
+	public static boolean TRANSLUCENT = true;
 
 	private static final Object BUILDING_DATA = BuildingLayer.class.getName();
 
