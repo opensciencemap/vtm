@@ -16,14 +16,6 @@ sourceSets {
   main.compileClasspath += configurations.providedCompile
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-  classifier = 'sources'
-  from sourceSets.main.allSource
-}
-artifacts {
-  archives sourcesJar
-}
-
 eclipse.classpath {
   //you can tweak the classpath of the Eclipse project by adding extra configurations:
   plusConfigurations += [ configurations.providedCompile ]
