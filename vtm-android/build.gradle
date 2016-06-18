@@ -10,7 +10,7 @@ dependencies {
   provided files('vtm-jni-natives.jar')
 
   compile 'com.android.support:support-v4:21.+'
-  eclipseCompile project(':appcompat')
+  //eclipseCompile project(':appcompat')
 }
 
 android {
