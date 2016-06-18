@@ -1,7 +1,3 @@
-[submodule "vtm-ext-libs"]
-	path = vtm-ext-libs
-	url = https://github.com/hjanetzek/vtm-ext-libs.git
-
 [submodule "libtess2"]
         path = jni/jni/libtess2
         url = https://github.com/memononen/libtess2.git
