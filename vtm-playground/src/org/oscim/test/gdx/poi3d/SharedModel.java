@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.model.NodeAnimation;
 import com.badlogic.gdx.graphics.g3d.model.NodeKeyframe;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -100,13 +101,13 @@ public class SharedModel implements RenderableProvider {
 		this.transform = transform == null ? new Matrix4() : transform; 
 		nodePartBones.clear();
 		Node copy, node = model.getNode(nodeId, recursive);
-		this.nodes.add(copy = copyNode(null, node));
+		this.nodes.add(copy = copyNode(node));
 		if (mergeTransform) {
 			this.transform.mul(parentTransform ? node.globalTransform : node.localTransform);
 			copy.translation.set(0,0,0);
 			copy.rotation.idt();
 			copy.scale.set(1,1,1);
-		} else if (parentTransform && copy.getParent() != null)
+		} else if (parentTransform && copy.hasParent())
 			this.transform.mul(node.getParent().globalTransform);
 		setBones();
 		copyAnimations(model.animations);
@@ -185,7 +186,7 @@ public class SharedModel implements RenderableProvider {
 		nodePartBones.clear();
 		for(int i = 0, n = nodes.size; i<n; ++i) {
 			final Node node = nodes.get(i);
-			this.nodes.add(copyNode(null, node));
+			this.nodes.add(copyNode(node));
 		}
 		setBones();
 	}
@@ -196,7 +197,7 @@ public class SharedModel implements RenderableProvider {
 			final Node node = nodes.get(i);
 			for (final String nodeId : nodeIds) {
 				if (nodeId.equals(node.id)) {
-					this.nodes.add(copyNode(null, node));
+					this.nodes.add(copyNode(node));
 					break;
 				}
 			}
@@ -210,7 +211,7 @@ public class SharedModel implements RenderableProvider {
 			final Node node = nodes.get(i);
 			for (final String nodeId : nodeIds) {
 				if (nodeId.equals(node.id)) {
-					this.nodes.add(copyNode(null, node));
+					this.nodes.add(copyNode(node));
 					break;
 				}
 			}
@@ -233,9 +234,10 @@ public class SharedModel implements RenderableProvider {
 		}
 	}
 	
-	private Node copyNode(Node parent, Node node) {
-		Node copy = parent.copy();
+	private Node copyNode(Node node) {
+		Node copy = new Node();
 		copy.id = node.id;
+		copy.inheritTransform = node.inheritTransform;
 		copy.translation.set(node.translation);
 		copy.rotation.set(node.rotation);
 		copy.scale.set(node.scale);
@@ -245,7 +247,7 @@ public class SharedModel implements RenderableProvider {
 			copy.parts.add(copyNodePart(nodePart));
 		}
 		for(Node child: node.getChildren()) {
-			copy.addChild(copyNode(copy, child));
+			copy.addChild(copyNode(child));
 		}
 		return copy;
 	}
@@ -277,19 +279,42 @@ public class SharedModel implements RenderableProvider {
 		for (final Animation anim : source) {
 			Animation animation = new Animation();
 			animation.id = anim.id;
-			animation.duration = anim.duration;
 			for (final NodeAnimation nanim : anim.nodeAnimations) {
 				final Node node = getNode(nanim.node.id);
 				if (node == null)
 					continue;
 				NodeAnimation nodeAnim = new NodeAnimation();
 				nodeAnim.node = node;
-				for (final NodeKeyframe kf : nanim.translation) {
-					NodeKeyframe keyframe = new NodeKeyframe(kf.keytime,kf);
-					keyframe.keytime = kf.keytime;
-					nodeAnim.translation.add(keyframe);
+				if (nanim.rotation != null) {
+					nodeAnim.rotation = new Array<NodeKeyframe<Quaternion>>();
+					nodeAnim.rotation.ensureCapacity(nanim.rotation.size);
+					for (final NodeKeyframe<Quaternion> kf : nanim.rotation) {
+						if (kf.keytime > animation.duration)
+							animation.duration = kf.keytime;
+						nodeAnim.rotation.add(new NodeKeyframe<Quaternion>(kf.keytime, new Quaternion(kf.value == null ? node.rotation : kf.value)));
+					}
 				}
-				if (nodeAnim.translation.size > 0)
+				if (nanim.scaling != null) {
+					nodeAnim.scaling = new Array<NodeKeyframe<Vector3>>();
+					nodeAnim.scaling.ensureCapacity(nanim.scaling.size);
+					for (final NodeKeyframe<Vector3> kf : nanim.scaling) {
+						if (kf.keytime > animation.duration)
+							animation.duration = kf.keytime;
+						nodeAnim.scaling.add(new NodeKeyframe<Vector3>(kf.keytime, new Vector3(kf.value == null ? node.scale : kf.value)));
+					}
+				}
+				if (nanim.translation != null) {
+					nodeAnim.translation = new Array<NodeKeyframe<Vector3>>();
+					nodeAnim.translation.ensureCapacity(nanim.translation.size);
+					for (final NodeKeyframe<Vector3> kf : nanim.translation) {
+						if (kf.keytime > animation.duration)
+							animation.duration = kf.keytime;
+						nodeAnim.translation.add(new NodeKeyframe<Vector3>(kf.keytime, new Vector3(kf.value == null ? node.translation : kf.value)));
+					}
+				}
+				if ((nodeAnim.rotation != null && nodeAnim.rotation.size > 0)
+						|| (nodeAnim.scaling != null && nodeAnim.scaling.size > 0)
+						|| (nodeAnim.translation != null && nodeAnim.translation.size > 0))
 					animation.nodeAnimations.add(nodeAnim);
 			}
 			if (animation.nodeAnimations.size > 0)
