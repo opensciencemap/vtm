@@ -564,7 +564,7 @@
     </m>
 
     <!-- turning circles -->
-    <!-- <m k="highway" v="turning_circle"> <circle r="1.5" scale-radius="true"
+    <!-- <m k="highway" v="turning_circle"> <circle radius="1.5" scale-radius="true"
       fill="#707070" />
       </m> -->
 
@@ -963,35 +963,35 @@
     <m k="barrier">
       <m zoom-min="10">
         <m v="bollard">
-          <circle r="1.5" fill="#909090" />
+          <circle radius="1.5" fill="#909090" />
         </m>
         <m v="block">
-          <circle r="1.5" fill="#909090" />
+          <circle radius="1.5" fill="#909090" />
         </m>
         <m v="gate">
-          <circle r="1.5" fill="#909090" />
+          <circle radius="1.5" fill="#909090" />
         </m>
         <m v="lift_gate">
-          <circle r="1.5" fill="#909090" />
+          <circle radius="1.5" fill="#909090" />
         </m>
       </m>
     </m>
 
     <m k="highway">
       <m v="traffic_signals">
-        <circle r="1.5" fill="#ff0000" />
+        <circle radius="1.5" fill="#ff0000" />
       </m>
       <m v="bus_stop">
-        <circle r="1.5" fill="#ff0000" />
+        <circle radius="1.5" fill="#ff0000" />
       </m>
       <m v="turning_circle">
-        <circle r="1.4" scale-radius="true" fill="#ffffff" />
+        <circle radius="1.4" scale-radius="true" fill="#ffffff" />
       </m>
     </m>
 
     <!-- historic -->
-    <!-- <m k="historic"> <circle r="3" fill="#4040ff" stroke="#606060"
-      width="1.5" /> <m zoom-min="17"> <caption
+    <!-- <m k="historic"> <circle radius="3" fill="#4040ff" stroke="#606060"
+      stroke-width="1.5" /> <m zoom-min="17"> <caption
       k="name" dy="-10" style="bold" size="10" fill="#4040ff" stroke="#ffffff"
       width="2.0" /> </m> </m> -->
 
@@ -1030,16 +1030,16 @@
     <!-- railway -->
     <m k="railway">
       <m v="station" zoom-min="14">
-        <circle r="6" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
+        <circle radius="6" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
         <caption k="name" dy="-10" style="bold" size="13" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
       </m>
 
       <m v="halt|tram_stop">
-        <circle r="4" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
+        <circle radius="4" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
         <caption k="name" dy="-15" style="bold" size="11" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
       </m>
       <m v="level_crossing">
-        <circle r="1.5" fill="#ff0000" />
+        <circle radius="1.5" fill="#ff0000" />
       </m>
     </m>
 
@@ -1228,7 +1228,7 @@
         <text use="poi" />
         </m>
         <m>
-        <circle r="1.5" fill="#ff0000" />
+        <circle radius="1.5" fill="#ff0000" />
         </m>
         </m>
         </m>
@@ -1243,7 +1243,7 @@
     </m>
 
     <m k="natural" v="tree" zoom-min="15">
-      <circle r="10" />
+      <circle radius="10" />
     </m>
   </m>
 

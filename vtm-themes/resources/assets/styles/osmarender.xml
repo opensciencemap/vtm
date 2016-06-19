@@ -5,6 +5,18 @@
     version="1" 
     map-background="#fffcfa">
 
+  <style-line id="trunk" stroke="#7fc97f" width="1.5" />
+  <style-line id="motorway" stroke="#809bc0" width="1.7" />
+  <style-line id="primary" stroke="#e46d71" width="1.5" />
+  <style-line id="secondary" stroke="#fdbf6f" width="1.4" />
+  <style-line id="tertiary" stroke="#ffff90" width="1.15" />
+
+  <style-text id="caption-small-blue" caption="true" dy="12" k="name" style="bold" size="14" fill="#4040ff"
+    stroke="#ffffff" stroke-width="2.0" />
+  
+  <style-text id="highway-road" k="name" style="bold" size="16" stroke="#d0d0d0" stroke-width="2.0" /> 
+  <style-text id="highway-track" k="name" style="bold" size="16" stroke="#fff2de" stroke-width="2.0" />
+
   <atlas img="styles/osmarender.png">
     <rect id="airport" pos="226 38 24 24" />
     <rect id="alpine_hut" pos="198 41 26 21" />
@@ -66,18 +78,6 @@
     <rect id="windmill" pos="310 2 13 19" />
   </atlas>
 
-  <style-line id="trunk" stroke="#7fc97f" width="1.5" />
-  <style-line id="motorway" stroke="#809bc0" width="1.7" />
-  <style-line id="primary" stroke="#e46d71" width="1.5" />
-  <style-line id="secondary" stroke="#fdbf6f" width="1.4" />
-  <style-line id="tertiary" stroke="#ffff90" width="1.15" />
-
-  <style-text id="caption-small-blue" caption="true" dy="12" k="name" style="bold" size="14" fill="#4040ff"
-    stroke="#ffffff" stroke-width="2.0" />
-  
-  <style-text id="highway-road" k="name" style="bold" size="16" stroke="#d0d0d0" stroke-width="2.0" /> 
-  <style-text id="highway-track" k="name" style="bold" size="16" stroke="#fff2de" stroke-width="2.0" />
-  
   <!-- ways -->
   <m e="way">
     <!-- landuse -->
@@ -1277,11 +1277,11 @@
         <symbol src="railway-crossing" />
       </m>
       <m k="railway" v="station" zoom-min="14">
-        <circle r="6" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
+        <circle radius="6" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
         <caption k="name" dy="-10" style="bold" size="13" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
       </m>
       <m k="railway" v="halt|tram_stop" zoom-min="15">
-        <circle r="4" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
+        <circle radius="4" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
         <caption k="name" dy="-15" style="bold" size="11" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
       </m>
     </m>
