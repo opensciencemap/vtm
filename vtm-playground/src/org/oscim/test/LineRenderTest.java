@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.test;
 
 import org.oscim.backend.canvas.Color;
@@ -62,12 +78,12 @@ public class LineRenderTest extends GdxMap {
 			line2 = new LineStyle(0, null, Color.GREEN, 6.0f, Cap.BUTT, true, 0, 0,
 			                      0, 0, 1f, false);
 
+			line3 = new LineStyle(0, null, Color.BLUE, 2.0f, Cap.ROUND, false, 4,
+			                      Color.CYAN, 1, 0, 0, false);
+
 			line4 = new LineStyle(0, null, Color.LTGRAY, 2.0f, Cap.ROUND, false, 0,
 			                      0, 0, 0, 1f, false);
 		}
-
-		line3 = new LineStyle(0, null, Color.BLUE, 2.0f, Cap.ROUND, true, 4,
-		                      Color.CYAN, 1, 0, 0, false);
 
 		LineStyle outline = new LineStyle(0, null, Color.BLUE, 2.0f, Cap.ROUND, false, 0,
 		                                  0, 0, 0, 1f, true);
@@ -96,6 +112,7 @@ public class LineRenderTest extends GdxMap {
 
 		LineTexBucket lt = l.buckets.getLineTexBucket(30);
 		lt.line = line3;
+		lt.width = line3.width;
 		lt.addLine(g.translate(0, 10.5f));
 		lt.addLine(g.translate(0, 10.5f));
 		addCircle(200, 200, 100, lt);
