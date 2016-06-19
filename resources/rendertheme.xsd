@@ -36,6 +36,7 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="first" />
       <xs:enumeration value="any" />
+      <xs:enumeration value="when-matched" />
     </xs:restriction>
   </xs:simpleType>
   
@@ -116,7 +117,7 @@
   </xs:complexType>
 
   <xs:complexType name="circle">
-    <xs:attribute name="r" type="tns:nonNegativeFloat" use="required" />
+    <xs:attribute name="radius" type="tns:nonNegativeFloat" use="required" />
     <xs:attribute name="scale-radius" type="xs:boolean" use="optional" default="false" />
     <xs:attribute name="fill" type="tns:color" use="optional" default="#00000000" />
     <xs:attribute name="stroke" type="tns:color" use="optional" default="#00000000" />
@@ -225,10 +226,14 @@
 
   </xs:complexType>
 
+  <xs:complexType name="atlasRect">
+    <xs:attribute name="id" type="xs:string" use="required" />
+    <xs:attribute name="pos" type="xs:string" use="required" />
+  </xs:complexType>
+
   <xs:complexType name="atlas">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
-      <!-- TODO -->
-      <xs:element name="rect"></xs:element>
+      <xs:element name="rect" type="tns:atlasRect" />
     </xs:choice>
     <xs:attribute name="img" type="xs:string" use="required" />
   </xs:complexType>
@@ -259,7 +264,7 @@
     <xs:attribute name="version" type="xs:positiveInteger" use="required" />
     <xs:attribute name="map-background" type="tns:color" use="optional" default="#ffffff" />
     <xs:attribute name="base-stroke-width" type="tns:nonNegativeFloat" use="optional" default="1" />
-    <xs:attribute name="base-text-size" type="tns:nonNegativeFloat" use="optional" default="1" />
+    <xs:attribute name="base-text-scale" type="tns:nonNegativeFloat" use="optional" default="1" />
   </xs:complexType>
 
 

@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -812,7 +813,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 				logUnknownAttribute(elementName, name, value, i);
 		}
 
-		validateExists("r", radius, elementName);
+		validateExists("radius", radius, elementName);
 		validateNonNegative("radius", radius);
 		validateNonNegative("stroke-width", strokeWidth);
 
