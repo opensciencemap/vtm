@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -50,9 +51,9 @@ public class MapInfo {
 	public final int fileVersion;
 
 	/**
-	 * The preferred language for names as defined in ISO 3166-1 (may be null).
+	 * The preferred language(s) separated with ',' for names as defined in ISO 639-1 or ISO 639-2 (may be null).
 	 */
-	public final String languagePreference;
+	public final String languagesPreference;
 
 	/**
 	 * The center point of the map file.
@@ -120,7 +121,7 @@ public class MapInfo {
 		this.mapDate = date;
 		this.boundingBox = bbox;
 		this.mapCenter = bbox.getCenterPoint();
-		this.languagePreference = language;
+		this.languagesPreference = language;
 		this.fileSize = size;
 		this.fileVersion = version;
 

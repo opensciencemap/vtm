@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -57,7 +58,7 @@ public class MapFileInfo extends org.oscim.tiling.source.mapfile.MapInfo {
 		      mapFileInfoBuilder.mapDate,
 		      mapFileInfoBuilder.fileSize,
 		      mapFileInfoBuilder.fileVersion,
-		      mapFileInfoBuilder.optionalFields.languagePreference,
+		      mapFileInfoBuilder.optionalFields.languagesPreference,
 		      mapFileInfoBuilder.optionalFields.comment,
 		      mapFileInfoBuilder.optionalFields.createdBy,
 		      mapFileInfoBuilder.zoomLevel);

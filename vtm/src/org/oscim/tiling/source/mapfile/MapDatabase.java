@@ -540,7 +540,7 @@ public class MapDatabase implements ITileDataSource {
 			/* bit 1-3 enable optional features
 			 * check if the POI has a name */
 			if ((featureByte & POI_FEATURE_NAME) != 0) {
-				String str = mReadBuffer.readUTF8EncodedString();
+				String str = mTileSource.extractLocalized(mReadBuffer.readUTF8EncodedString());
 				e.tags.add(new Tag(Tag.KEY_NAME, str, false));
 			}
 
@@ -769,7 +769,7 @@ public class MapDatabase implements ITileDataSource {
 			if (mTileSource.experimental) {
 				if (hasName) {
 					int textPos = mReadBuffer.readUnsignedInt();
-					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
+					String str = mTileSource.extractLocalized(mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos));
 					e.tags.add(new Tag(Tag.KEY_NAME, str, false));
 				}
 				if (hasHouseNr) {
@@ -784,7 +784,7 @@ public class MapDatabase implements ITileDataSource {
 				}
 			} else {
 				if (hasName) {
-					String str = mReadBuffer.readUTF8EncodedString();
+					String str = mTileSource.extractLocalized(mReadBuffer.readUTF8EncodedString());
 					e.tags.add(new Tag(Tag.KEY_NAME, str, false));
 				}
 				if (hasHouseNr) {

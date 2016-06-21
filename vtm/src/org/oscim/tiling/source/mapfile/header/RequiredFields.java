@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -50,10 +51,14 @@ final class RequiredFields {
 	private static final char SPACE = ' ';
 
 	/**
-	 * Version of the map file format which is supported by this implementation.
+	 * Lowest version of the map file format supported by this implementation.
 	 */
-	private static final int FILE_VERSION_3 = 3;
-	private static final int FILE_VERSION_4 = 4;
+	private static final int SUPPORTED_FILE_VERSION_MIN = 3;
+
+	/**
+	 * Highest version of the map file format supported by this implementation.
+	 */
+	private static final int SUPPORTED_FILE_VERSION_MAX = 4;
 
 	/**
 	 * The maximum latitude values in microdegrees.
@@ -126,7 +131,7 @@ final class RequiredFields {
 	static OpenResult readFileVersion(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
 		// get and check the file version (4 bytes)
 		int fileVersion = readBuffer.readInt();
-		if (fileVersion != FILE_VERSION_3 && fileVersion != FILE_VERSION_4) {
+		if (fileVersion < SUPPORTED_FILE_VERSION_MIN || fileVersion > SUPPORTED_FILE_VERSION_MAX) {
 			return new OpenResult("unsupported file version: " + fileVersion);
 		}
 		mapFileInfoBuilder.fileVersion = fileVersion;

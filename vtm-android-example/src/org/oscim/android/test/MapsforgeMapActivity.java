@@ -91,6 +91,7 @@ public class MapsforgeMapActivity extends MapActivity {
 				return;
 
 			MapFileTileSource tileSource = new MapFileTileSource();
+			tileSource.setPreferredLanguage("en");
 			String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
 			if (tileSource.setMapFile(file)) {
 
@@ -104,6 +105,7 @@ public class MapsforgeMapActivity extends MapActivity {
 				MapPosition pos = new MapPosition();
 				pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
 				mMap.setMapPosition(pos);
+
 				mPrefs.clear();
 			}
 		}

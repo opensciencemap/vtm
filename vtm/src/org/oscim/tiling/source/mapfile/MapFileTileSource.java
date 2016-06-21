@@ -1,6 +1,7 @@
 /*
- * Copyright 2013 Hannes Janetzek
  * Copyright 2013 mapsforge.org
+ * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -45,8 +46,28 @@ public class MapFileTileSource extends TileSource {
 	File mapFile;
 	RandomAccessFile mInputFile;
 
+	/**
+	 * The preferred language when extracting labels from this tile source.
+	 */
+	private String preferredLanguage;
+	private Callback callback;
+
 	public MapFileTileSource() {
 		super(0, 17);
+	}
+
+	/**
+	 * Extracts substring of preferred language from multilingual string using
+	 * the preferredLanguage setting.
+	 */
+	String extractLocalized(String s) {
+		if (callback != null)
+			return callback.extractLocalized(s);
+		return MapFileUtils.extract(s, preferredLanguage);
+	}
+
+	public void setCallback(Callback callback) {
+		this.callback = callback;
 	}
 
 	public boolean setMapFile(String filename) {
@@ -63,6 +84,10 @@ public class MapFileTileSource extends TileSource {
 		}
 
 		return true;
+	}
+
+	public void setPreferredLanguage(String preferredLanguage) {
+		this.preferredLanguage = preferredLanguage;
 	}
 
 	@Override
@@ -101,7 +126,8 @@ public class MapFileTileSource extends TileSource {
 			mapFile = file;
 			databaseIndexCache = new IndexCache(mInputFile, INDEX_CACHE_SIZE);
 
-			experimental = fileInfo.fileVersion == 4;
+			// Experimental?
+			//experimental = fileInfo.fileVersion == 4;
 
 			log.debug("File version: " + fileInfo.fileVersion);
 			return OpenResult.SUCCESS;
@@ -141,4 +167,10 @@ public class MapFileTileSource extends TileSource {
 		return fileInfo;
 	}
 
+	public interface Callback {
+		/**
+		 * Extracts substring of preferred language from multilingual string.
+		 */
+		String extractLocalized(String s);
+	}
 }

@@ -33,6 +33,7 @@ public class MapsforgeTest extends GdxMap {
 	public void createLayers() {
 		MapFileTileSource tileSource = new MapFileTileSource();
 		tileSource.setMapFile(System.getProperty("user.home") + "/Downloads/berlin.map");
+		tileSource.setPreferredLanguage("en");
 
 		VectorTileLayer l = mMap.setBaseMap(tileSource);
 		mMap.setTheme(VtmThemes.DEFAULT);
