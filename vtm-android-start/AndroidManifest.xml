@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.oscim.android.start"
   android:versionCode="1"
@@ -9,7 +10,7 @@
   
   <uses-sdk
     android:minSdkVersion="10"
-    android:targetSdkVersion="21" />
+    android:targetSdkVersion="22" />
 
   <application
     android:label="VTM Start"

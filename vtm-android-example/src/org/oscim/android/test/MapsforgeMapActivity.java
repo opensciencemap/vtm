@@ -1,5 +1,8 @@
 /*
  * Copyright 2014 Hannes Janetzek
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,7 +17,6 @@
  */
 package org.oscim.android.test;
 
-import org.oscim.android.MapView;
 import org.oscim.android.filepicker.FilePicker;
 import org.oscim.android.filepicker.FilterByFileExtension;
 import org.oscim.android.filepicker.ValidMapFile;
@@ -34,9 +36,6 @@ import android.view.MenuItem;
 
 public class MapsforgeMapActivity extends MapActivity {
 	private static final int SELECT_MAP_FILE = 0;
-
-	MapView mMapView;
-	MapFileTileSource mTileSource;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,34 +90,21 @@ public class MapsforgeMapActivity extends MapActivity {
 			if (intent.getStringExtra(FilePicker.SELECTED_FILE) == null)
 				return;
 
-			mTileSource = new MapFileTileSource();
+			MapFileTileSource tileSource = new MapFileTileSource();
 			String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
-			if (mTileSource.setMapFile(file)) {
+			if (tileSource.setMapFile(file)) {
 
-				VectorTileLayer l = mMap.setBaseMap(mTileSource);
+				VectorTileLayer l = mMap.setBaseMap(tileSource);
 				mMap.setTheme(VtmThemes.DEFAULT);
 
 				mMap.layers().add(new BuildingLayer(mMap, l));
 				mMap.layers().add(new LabelLayer(mMap, l));
 
-				MapInfo info = mTileSource.getMapInfo();
-				if (info.boundingBox != null) {
-					MapPosition pos = new MapPosition();
-					pos.setByBoundingBox(info.boundingBox,
-					                     Tile.SIZE * 4,
-					                     Tile.SIZE * 4);
-					mMap.setMapPosition(pos);
-					Samples.log.debug("set position {}", pos);
-				} else if (info.mapCenter != null) {
-
-					double scale = 1 << 8;
-					if (info.startZoomLevel != null)
-						scale = 1 << info.startZoomLevel.intValue();
-
-					mMap.setMapPosition(info.mapCenter.getLatitude(),
-					                    info.mapCenter.getLongitude(),
-					                    scale);
-				}
+				MapInfo info = tileSource.getMapInfo();
+				MapPosition pos = new MapPosition();
+				pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
+				mMap.setMapPosition(pos);
+				mPrefs.clear();
 			}
 		}
 	}

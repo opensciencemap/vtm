@@ -1,34 +1,49 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.test;
 
+import org.oscim.core.MapPosition;
+import org.oscim.core.Tile;
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
+import org.oscim.tiling.source.mapfile.MapInfo;
 
 public class MapsforgeTest extends GdxMap {
 
 	@Override
 	public void createLayers() {
-		MapRenderer.setBackgroundColor(0xff888888);
-
-		mMap.setMapPosition(53.072, 8.80, 1 << 15);
-		// mMap.setMapPosition(52.5, 13.3, 1 << 15);
-
 		MapFileTileSource tileSource = new MapFileTileSource();
-		tileSource.setMapFile("/home/jeff/Downloads/bremen.map");
+		tileSource.setMapFile(System.getProperty("user.home") + "/Downloads/berlin.map");
 
 		VectorTileLayer l = mMap.setBaseMap(tileSource);
+		mMap.setTheme(VtmThemes.DEFAULT);
 
 		mMap.layers().add(new BuildingLayer(mMap, l));
 		mMap.layers().add(new LabelLayer(mMap, l));
 
-		// mMap.setTheme(VtmThemes.DEFAULT);
-		// mMap.setTheme(VtmThemes.TRONRENDER);
-		mMap.setTheme(VtmThemes.OSMARENDER);
+		MapInfo info = tileSource.getMapInfo();
+		MapPosition pos = new MapPosition();
+		pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
+		mMap.setMapPosition(pos);
 	}
 
 	public static void main(String[] args) {

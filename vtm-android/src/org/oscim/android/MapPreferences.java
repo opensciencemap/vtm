@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.android;
 
 import org.oscim.core.MapPosition;
@@ -21,6 +37,12 @@ public class MapPreferences {
 		this.PREFERENCES_FILE = name;
 	}
 
+	public void clear() {
+		Editor editor = ctx.getSharedPreferences(PREFERENCES_FILE, Activity.MODE_PRIVATE).edit();
+		editor.clear();
+		editor.apply();
+	}
+
 	private void putDouble(Editor editor, String key, double value) {
 		editor.putLong(key, Double.doubleToLongBits(value));
 	}
@@ -40,8 +62,7 @@ public class MapPreferences {
 		putDouble(editor, KEY_LATITUDE, pos.y);
 		putDouble(editor, KEY_LONGITUDE, pos.x);
 		putDouble(editor, KEY_SCALE, pos.scale);
-		putDouble(editor, KEY_LATITUDE, pos.y);
-		editor.commit();
+		editor.apply();
 	}
 
 	private static boolean containsViewport(SharedPreferences prefs) {
