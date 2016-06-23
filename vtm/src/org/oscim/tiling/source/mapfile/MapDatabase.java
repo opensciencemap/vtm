@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013, 2014 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -545,17 +546,14 @@ public class MapDatabase implements ITileDataSource {
 
 			/* check if the POI has a house number */
 			if ((featureByte & POI_FEATURE_HOUSE_NUMBER) != 0) {
-				// mReadBuffer.getPositionAndSkip();
-				// String str =
-				mReadBuffer.readUTF8EncodedString();
+				String str = mReadBuffer.readUTF8EncodedString();
+				e.tags.add(new Tag(Tag.KEY_HOUSE_NUMBER, str, false));
 			}
 
 			/* check if the POI has an elevation */
 			if ((featureByte & POI_FEATURE_ELEVATION) != 0) {
-				mReadBuffer.readSignedInt();
-				// mReadBuffer.getPositionAndSkip();// tags.add(new
-				// Tag(Tag.TAG_KEY_ELE,
-				// Integer.toString(mReadBuffer.readSignedInt())));
+				String str = Integer.toString(mReadBuffer.readSignedInt());
+				e.tags.add(new Tag(Tag.KEY_ELE, str, false));
 			}
 			mTileProjection.projectPoint(latitude, longitude, e);
 
