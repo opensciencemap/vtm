@@ -639,8 +639,9 @@ public class MapDatabase implements ITileDataSource {
 				if (e.type == GeometryType.NONE)
 					e.type = line ? LINE : POLY;
 
-			} else if (deltaLon > minDeltaLon || deltaLon < -minDeltaLon
-			        || deltaLat > minDeltaLat || deltaLat < -minDeltaLat) {
+			} else if ((deltaLon > minDeltaLon || deltaLon < -minDeltaLon
+			        || deltaLat > minDeltaLat || deltaLat < -minDeltaLat)
+					|| e.tags.contains("natural", "nosea")) {
 				outBuffer[outPos++] = lon;
 				outBuffer[outPos++] = lat;
 				cnt += 2;
