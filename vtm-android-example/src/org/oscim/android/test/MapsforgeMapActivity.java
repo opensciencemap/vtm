@@ -22,6 +22,7 @@ import org.oscim.android.filepicker.FilterByFileExtension;
 import org.oscim.android.filepicker.ValidMapFile;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -36,6 +37,8 @@ import android.view.MenuItem;
 
 public class MapsforgeMapActivity extends MapActivity {
 	private static final int SELECT_MAP_FILE = 0;
+
+	private TileGridLayer mGridLayer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +78,25 @@ public class MapsforgeMapActivity extends MapActivity {
 			case R.id.theme_osmarender:
 				mMap.setTheme(VtmThemes.OSMARENDER);
 				item.setChecked(true);
+				return true;
+
+			case R.id.theme_newtron:
+				mMap.setTheme(VtmThemes.NEWTRON);
+				item.setChecked(true);
+				return true;
+
+			case R.id.gridlayer:
+				if (item.isChecked()) {
+					item.setChecked(false);
+					mMap.layers().remove(mGridLayer);
+				} else {
+					item.setChecked(true);
+					if (mGridLayer == null)
+						mGridLayer = new TileGridLayer(mMap);
+
+					mMap.layers().add(mGridLayer);
+				}
+				mMap.updateMap(true);
 				return true;
 		}
 
