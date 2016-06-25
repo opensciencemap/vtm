@@ -591,7 +591,7 @@ public class MapDatabase implements ITileDataSource {
 			int len = numWayNodes * 2;
 
 			wayLengths[coordinateBlock] = decodeWayNodes(doubleDeltaEncoding,
-			                                             e, len, isLine);;
+			                                             e, len, isLine);
 		}
 
 		return true;
@@ -813,14 +813,7 @@ public class MapDatabase implements ITileDataSource {
 			}
 
 			/* some guessing if feature is a line or a polygon */
-			boolean linearFeature = e.tags.containsKey("highway") ||
-			        e.tags.containsKey("boundary") ||
-			        e.tags.containsKey("railway");
-			if (linearFeature) {
-				Tag areaTag = e.tags.get("area");
-				if (areaTag != null && areaTag.value == Tag.VALUE_YES)
-					linearFeature = false;
-			}
+			boolean linearFeature = !OSMUtils.isArea(e);
 
 			for (int wayDataBlock = 0; wayDataBlock < wayDataBlocks; wayDataBlock++) {
 				e.clear();
