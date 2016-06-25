@@ -98,6 +98,7 @@
     <xs:attribute name="fade" type="xs:integer" use="optional" default="-1" />
     <xs:attribute name="blend" type="xs:integer" use="optional" default="-1" />
     <xs:attribute name="blend-fill" type="tns:color" use="optional" default="#000000" />
+    <xs:attribute name="mesh" type="xs:boolean" use="optional" default="false" />
   </xs:complexType>
 
   <xs:complexType name="caption">

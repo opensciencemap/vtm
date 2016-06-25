@@ -525,6 +525,9 @@ public class XmlThemeBuilder extends DefaultHandler {
 			else if ("blend-fill".equals(name))
 				b.blendColor(value);
 
+			else if ("mesh".equals(name))
+				b.mesh(Boolean.parseBoolean(value));
+
 			else
 				logUnknownAttribute(elementName, name, value, i);
 		}

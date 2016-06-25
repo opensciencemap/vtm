@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -55,6 +56,9 @@ public class AreaStyle extends RenderStyle {
 	public final int strokeColor;
 	public final float strokeWidth;
 
+	/** Tessellation */
+	public final boolean mesh;
+
 	public AreaStyle(int color) {
 		this(0, color);
 	}
@@ -69,6 +73,7 @@ public class AreaStyle extends RenderStyle {
 		this.texture = null;
 		this.strokeColor = color;
 		this.strokeWidth = 1;
+		this.mesh = false;
 	}
 
 	public AreaStyle(AreaBuilder<?> b) {
@@ -79,9 +84,9 @@ public class AreaStyle extends RenderStyle {
 		this.blendScale = b.blendScale;
 		this.color = b.fillColor;
 		this.texture = b.texture;
-
 		this.strokeColor = b.strokeColor;
 		this.strokeWidth = b.strokeWidth;
+		this.mesh = b.mesh;
 	}
 
 	@Override
@@ -136,6 +141,7 @@ public class AreaStyle extends RenderStyle {
 		public int fadeScale;
 		public int blendColor;
 		public int blendScale;
+		public boolean mesh;
 
 		public TextureItem texture;
 
@@ -155,6 +161,7 @@ public class AreaStyle extends RenderStyle {
 			this.texture = area.texture;
 			this.strokeColor = area.strokeColor;
 			this.strokeWidth = area.strokeWidth;
+			this.mesh = area.mesh;
 
 			return self();
 		}
@@ -184,6 +191,11 @@ public class AreaStyle extends RenderStyle {
 			return self();
 		}
 
+		public T mesh(boolean mesh) {
+			this.mesh = mesh;
+			return self();
+		}
+
 		public T reset() {
 			fillColor = Color.WHITE;
 			strokeColor = Color.BLACK;
@@ -193,6 +205,7 @@ public class AreaStyle extends RenderStyle {
 			blendColor = Color.TRANSPARENT;
 			style = null;
 			texture = null;
+			mesh = false;
 			return self();
 		}
 

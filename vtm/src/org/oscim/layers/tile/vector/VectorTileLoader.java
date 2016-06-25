@@ -285,7 +285,7 @@ public class VectorTileLoader extends TileLoader implements RenderStyle.Callback
 
 		int nLevel = mCurBucket + level;
 
-		if (USE_MESH_POLY) {
+		if (USE_MESH_POLY || area.mesh) {
 			MeshBucket mb = mBuckets.getMeshBucket(nLevel);
 			mb.area = area;
 			mb.addMesh(mElement);
