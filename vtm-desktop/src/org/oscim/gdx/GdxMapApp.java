@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -62,8 +63,8 @@ public class GdxMapApp extends GdxMap {
 	static protected JglfwApplicationConfiguration getConfig() {
 		JglfwApplicationConfiguration cfg = new JglfwApplicationConfiguration();
 		cfg.title = "vtm-gdx";
-		cfg.width = 1280;
-		cfg.height = 800;
+		cfg.width = 800;
+		cfg.height = 600;
 		cfg.stencil = 8;
 		//cfg.samples = 2;
 		cfg.foregroundFPS = 30;
