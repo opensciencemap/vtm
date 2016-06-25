@@ -148,6 +148,14 @@
     <rect id="windmill" pos="55 23 10 15" />
   </atlas>
 
+  <m e="way" k="natural" v="issea|sea">
+    <area use="water" />
+  </m>
+
+  <m e="way" k="natural" v="nosea">
+    <area fill="#f8f8f8" mesh="true" />
+  </m>
+
   <!-- all closed ways that are not 'highway' or 'building' -->
 
   <m e="way" k="highway|building" v="~" closed="yes">
@@ -431,7 +439,7 @@
   <m e="way">
     <m k="natural" v="water" closed="yes">
       <area use="water" />
-      <line use="water:outline" />
+      <!--<line use="water:outline" />-->
     </m>
 
     <!-- sport -->

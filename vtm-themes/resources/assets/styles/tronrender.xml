@@ -137,6 +137,14 @@
     <rect id="windmill" pos="310 2 13 19" />
   </atlas>
 
+  <m e="way" k="natural" v="issea|sea">
+    <area use="water" />
+  </m>
+
+  <m e="way" k="natural" v="nosea">
+    <area fill="#080808" mesh="true" />
+  </m>
+
   <!-- ways -->
   <m e="way">
 
@@ -384,7 +392,7 @@
 
     <m k="natural" v="water">
       <area use="water" />
-      <line use="water:outline" width="0.5" fix="true" />
+      <!--<line use="water:outline" width="0.5" fix="true" />-->
     </m>
 
 

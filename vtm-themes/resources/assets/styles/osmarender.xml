@@ -78,6 +78,14 @@
     <rect id="windmill" pos="310 2 13 19" />
   </atlas>
 
+  <m e="way" k="natural" v="issea|sea">
+    <area fill="#b5d6f1" />
+  </m>
+
+  <m e="way" k="natural" v="nosea">
+    <area fill="#f8f8f8" mesh="true" />
+  </m>
+
   <!-- ways -->
   <m e="way">
     <!-- landuse -->
@@ -192,14 +200,14 @@
     <!-- natural -->
     <m k="natural">
       <m select="first">
-        <m v="coastline">
-          <!-- <m closed="no">
+        <!--<m v="coastline">
+          &lt;!&ndash; <m closed="no">
             <line stroke="#708599" fix="true" cap="butt" width="2.0" />
-            </m> -->
+            </m> &ndash;&gt;
           <m closed="yes">
             <area fill="#b5d6f1" stroke="#b5d6f1" stroke-width="0.4" />
           </m>
-        </m>
+        </m>-->
         <m v="glacier">
           <area fill="#fafaff" stroke="#add8e6" stroke-width="0.8" />
         </m>
@@ -349,9 +357,9 @@
       <area fill="#b5d6f1" />
     </m>
 
-    <m k="natural" v="coastline" closed="no">
+    <!--<m k="natural" v="coastline" closed="no">
       <line stroke="#708599" fix="true" cap="butt" width="2.0" />
-    </m>
+    </m>-->
 
     <!-- tunnel -->
     <m k="tunnel" v="true|yes">
