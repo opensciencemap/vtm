@@ -1,5 +1,6 @@
 /*
  * Copyright 2012-2014 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -274,7 +275,7 @@ public class VectorTileLoader extends TileLoader implements RenderStyle.Callback
 
 	/* slower to load (requires tesselation) and uses
 	 * more memory but should be faster to render */
-	protected final static boolean USE_MESH_POLY = false;
+	public static boolean USE_MESH_POLY = false;
 
 	@Override
 	public void renderArea(AreaStyle area, int level) {
