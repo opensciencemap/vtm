@@ -27,12 +27,16 @@ import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import org.oscim.tiling.source.mapfile.MapInfo;
 
+import java.io.File;
+
 public class MapsforgeTest extends GdxMap {
+
+	private static File mapFile;
 
 	@Override
 	public void createLayers() {
 		MapFileTileSource tileSource = new MapFileTileSource();
-		tileSource.setMapFile(System.getProperty("user.home") + "/Downloads/berlin.map");
+		tileSource.setMapFile(mapFile.getAbsolutePath());
 		tileSource.setPreferredLanguage("en");
 
 		VectorTileLayer l = mMap.setBaseMap(tileSource);
@@ -47,7 +51,25 @@ public class MapsforgeTest extends GdxMap {
 		mMap.setMapPosition(pos);
 	}
 
+	private static File getMapFile(String[] args) {
+		if (args.length == 0) {
+			throw new IllegalArgumentException("missing argument: <mapFile>");
+		}
+
+		File file = new File(args[0]);
+		if (!file.exists()) {
+			throw new IllegalArgumentException("file does not exist: " + file);
+		} else if (!file.isFile()) {
+			throw new IllegalArgumentException("not a file: " + file);
+		} else if (!file.canRead()) {
+			throw new IllegalArgumentException("cannot read file: " + file);
+		}
+		return file;
+	}
+
 	public static void main(String[] args) {
+		mapFile = getMapFile(args);
+
 		GdxMapApp.init();
 		GdxMapApp.run(new MapsforgeTest(), null, 400);
 	}
