@@ -1003,7 +1003,7 @@
 
     <!-- place -->
     <m k="place" v="locality" zoom-min="17">
-      <caption k="name" style="bold" size="10" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+      <caption k="name" style="bold" size="12" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
     </m>
     <m k="debug" v="area">
       <line stroke="#ff0000" width="1.2" fix="true" cap="butt" />
@@ -1259,7 +1259,7 @@
         </m>
       </m>
       <m zoom-min="17">
-        <caption k="name" style="bold" size="10" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+        <caption k="name" style="bold" size="12" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
       </m>
     </m>
 
