@@ -599,7 +599,7 @@
 
       <m zoom-min="17">
         <text use="caption-small-blue" priority="9" />
-        <caption k="addr:housenumber" style="bold" size="16" fill="#606060" stroke="#ffffff" stroke-width="2.0"
+        <caption k="addr:housenumber" style="bold" size="10" fill="#606060" stroke="#ffffff" stroke-width="2.0"
           priority="10" />
       </m>
     </m>
@@ -1220,7 +1220,7 @@
 
 
     <m k="addr:housenumber" zoom-min="18">
-      <caption k="addr:housenumber" style="bold" size="16" fill="#606060" stroke="#ffffff" stroke-width="2.0" />
+      <caption k="addr:housenumber" style="bold" size="10" fill="#606060" stroke="#ffffff" stroke-width="2.0" />
     </m>
 
 
@@ -1241,7 +1241,7 @@
         </m>
         <m v="peak" zoom-min="12">
           <symbol src="peak" />
-          <caption k="ele" dy="20" style="bold" size="16" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+          <caption k="ele" dy="20" style="bold" size="12" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
         </m>
         <m v="tree" zoom-min="16">
           <symbol src="tree" />
@@ -1251,7 +1251,7 @@
         </m>
         
         <m select="when-matched" zoom-min="17">
-          <caption k="name" style="bold" size="16" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
+          <caption k="name" style="bold" size="12" fill="#000000" stroke="#ffffff" stroke-width="2.0" />
         </m>
       </m>
     </m>
@@ -1290,7 +1290,7 @@
       </m>
       <m k="railway" v="halt|tram_stop" zoom-min="15">
         <circle radius="4" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
-        <caption k="name" dy="-15" style="bold" size="11" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
+        <caption k="name" dy="-15" style="bold" size="12" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
       </m>
     </m>
 

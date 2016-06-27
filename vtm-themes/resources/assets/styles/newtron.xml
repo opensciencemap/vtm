@@ -1305,7 +1305,7 @@
       </m>
       <m k="railway" v="halt|tram_stop" zoom-min="15">
         <circle radius="4" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
-        <caption k="name" dy="-15" style="bold" size="11" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
+        <caption k="name" dy="-15" style="bold" size="12" fill="#ec2d2d" stroke="#ffffff" stroke-width="2.0" />
       </m>
     </m>
 
