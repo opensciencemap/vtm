@@ -107,10 +107,10 @@ public class MapsforgeMapActivity extends MapActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		if (requestCode == SELECT_MAP_FILE) {
-			if (resultCode != RESULT_OK || intent == null)
+			if (resultCode != RESULT_OK || intent == null || intent.getStringExtra(FilePicker.SELECTED_FILE) == null) {
+				finish();
 				return;
-			if (intent.getStringExtra(FilePicker.SELECTED_FILE) == null)
-				return;
+			}
 
 			MapFileTileSource tileSource = new MapFileTileSource();
 			tileSource.setPreferredLanguage("en");
