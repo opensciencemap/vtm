@@ -356,7 +356,7 @@ public class MapDatabase implements ITileDataSource {
 		mTileClipper.setRect(xmin, ymin, xmax, ymax);
 	}
 
-	private final static Tag mWaterTag = new Tag("natural", "water");
+	//private final static Tag mWaterTag = new Tag("natural", "water");
 
 	private void processBlocks(ITileDataSink mapDataSink, QueryParameters queryParams,
 	        SubFileParameter subFileParameter) throws IOException {
@@ -381,7 +381,8 @@ public class MapDatabase implements ITileDataSource {
 
 				/* check the water flag of the block in its index entry */
 				if ((blockIndexEntry & BITMASK_INDEX_WATER) != 0) {
-					MapElement e = mElem;
+					// Deprecate water tiles rendering
+					/*MapElement e = mElem;
 					e.clear();
 					e.tags.clear();
 					e.tags.add(mWaterTag);
@@ -390,7 +391,7 @@ public class MapDatabase implements ITileDataSource {
 					e.addPoint(xmax, ymin);
 					e.addPoint(xmax, ymax);
 					e.addPoint(xmin, ymax);
-					mapDataSink.process(e);
+					mapDataSink.process(e);*/
 				}
 
 				/* get and check the current block pointer */
