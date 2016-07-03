@@ -44,9 +44,9 @@ uploadArchives {
             pom.project {
                 packaging 'jar'
 
-                name 'mapsforge'
-                description 'The mapsforge project provides free and open software for OpenStreetMap-based applications.'
-                url 'https://github.com/mapsforge/mapsforge'
+                name 'vtm'
+                description 'A vector-tile map library written in Java - running on Android, iOS, Desktop and within the browser.'
+                url 'https://github.com/mapsforge/vtm'
 
                 licenses {
                     license {
@@ -57,26 +57,16 @@ uploadArchives {
                 }
 
                 scm {
-                    connection 'scm:git:https://github.com/mapsforge/mapsforge'
-                    developerConnection 'scm:git:https://github.com/mapsforge/mapsforge'
-                    url 'https://github.com/mapsforge/mapsforge'
+                    connection 'scm:git:https://github.com/mapsforge/vtm'
+                    developerConnection 'scm:git:https://github.com/mapsforge/vtm'
+                    url 'https://github.com/mapsforge/vtm'
                 }
 
                 developers {
                     developer {
-                        id 'thilo.muehlberg'
-                        name 'Thilo Mühlberg'
-                        email 'thilo.muehlberg@gmail.com'
-                    }
-                    developer {
-                        id 'jjbross'
-                        name 'Jürgen Broß'
-                        email 'jjbross@gmail.com'
-                    }
-                    developer {
-                        id 'ludwigbrinckmann'
-                        name 'Ludwig M Brinckmann'
-                        email 'ludwigbrinckmann@gmail.com'
+                        id 'hannes.janetzek'
+                        name 'Hannes Janetzek'
+                        email 'hannes.janetzek@gmail.com'
                     }
                     developer {
                         id 'devemux86'
