@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -89,9 +90,9 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
+
 		/* ignore saved position */
 		mMap.setMapPosition(0, 0, 1 << 2);
-		mMapView.onResume();
 	}
 
 	@Override

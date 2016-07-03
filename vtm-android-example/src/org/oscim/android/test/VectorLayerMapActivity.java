@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -13,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
- */package org.oscim.android.test;
+ */
+package org.oscim.android.test;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.layers.TileGridLayer;
@@ -31,7 +33,7 @@ public class VectorLayerMapActivity extends BaseMapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mMap.setTheme(VtmThemes.NEWTRON);
+		mMap.setTheme(VtmThemes.DEFAULT);
 
 		VectorLayer vectorLayer = new VectorLayer(mMap);
 

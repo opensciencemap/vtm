@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -15,6 +16,8 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.android.test;
+
+import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
 
 import java.util.ArrayList;
 
@@ -33,8 +36,7 @@ import android.os.Bundle;
 public class PathOverlayActivity extends BitmapTileMapActivity {
 
 	public PathOverlayActivity() {
-		//super(STAMEN_TONER.build());
-		super(null);
+		super(STAMEN_TONER.build());
 	}
 
 	@Override
@@ -67,9 +69,9 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+
 		/* ignore saved position */
 		mMap.setMapPosition(0, 0, 1 << 2);
-		mMapView.onResume();
 	}
 
 	ArrayList<PathLayer> mPathLayers = new ArrayList<PathLayer>();
