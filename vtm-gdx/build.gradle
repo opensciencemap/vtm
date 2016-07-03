@@ -1,17 +1,13 @@
-repositories {
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 apply plugin: 'java'
 apply plugin: 'maven'
 
-sourceSets {
-  main.java.srcDirs = ['src']
-  main.resources.srcDirs = ['src']
+dependencies {
+    compile project(':vtm')
+    compile project(':vtm-themes')
+    compile "com.badlogicgames.gdx:gdx:$gdxVersion"
 }
 
-dependencies {
-  compile project(':vtm')
-  compile project(':vtm-themes')
-  compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+sourceSets {
+    main.java.srcDirs = ['src']
+    main.resources.srcDirs = ['src']
 }

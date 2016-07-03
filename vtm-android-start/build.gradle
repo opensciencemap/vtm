@@ -1,108 +1,51 @@
 apply plugin: 'com.android.application'
 
-configurations {
-  providedCompile
-  eclipseCompile
-}
-
 dependencies {
-  compile project(':vtm-android')
-  compile project(':vtm-themes')
-  compile files("${rootDir}/vtm-android/vtm-natives-android.jar")
-
-  compile 'com.android.support:support-v4:22.+'
-  compile 'com.android.support:appcompat-v7:22.+'
-  //eclipseCompile project(':appcompat')
-
-  compile 'com.noveogroup.android:android-logger:1.3.4'
+    compile project(':vtm-android')
+    compile project(':vtm-themes')
+    compile files("${rootDir}/vtm-android/vtm-natives-android.jar")
+    compile 'com.android.support:support-v4:24.0.0'
+    compile 'com.android.support:appcompat-v7:24.0.0'
 }
 
 android {
-  compileSdkVersion androidTargetSdk()
-  buildToolsVersion "$androidBuildVersionTools"
-
-  sourceSets {
-    main {
-      manifest.srcFile 'AndroidManifest.xml'
-      java.srcDirs = ['src']
-      resources.srcDirs = ['src', 'assets']
-      res.srcDirs = ['res']
-      assets.srcDirs = ['assets']
-    }
+    compileSdkVersion androidCompileSdk()
+    buildToolsVersion "$androidBuildVersionTools"
 
     compileOptions {
-      sourceCompatibility JavaVersion.VERSION_1_7
-      targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 
-    debug.setRoot('build-types/debug')
-    release.setRoot('build-types/release')
-  }
-
-  // ignore deprecated
-  lintOptions.abortOnError false
-}
-
-//Including configurations into Eclipse
-eclipse {
-
-  // Configuring Eclipse classpath
-  classpath {
-    plusConfigurations += [ configurations.compile, configurations.eclipseCompile ]
-
-    defaultOutputDir = file('bin/classes')
-
-    containers = ['com.android.ide.eclipse.adt.ANDROID_FRAMEWORK',
-		  'com.android.ide.eclipse.adt.LIBRARIES',
-		  'com.android.ide.eclipse.adt.DEPENDENCIES']
-
-    file {
-      // Manipulation of the classpath XML before merging local
-      // and generated copies
-      beforeMerged { classpath ->
-	// Remove all source entries to avoid overlap
-	classpath.entries.removeAll() { e ->
-	  e.kind == 'src'
-	}
-      }
-
-      // only used to explode jni .so into aar
-      whenMerged {
-	classpath ->
-	  classpath.entries.findAll { e ->
-	    e.path.contains('ANDROID_FRAMEWORK')
-	  }*.exported = false
-	  classpath.entries.removeAll() { e ->
-	    e.path.contains('support')
-	  }
-      }
-
-      // Direct manipulation of the generated classpath XML
-      withXml {
-	def node = it.asNode()
-	node.appendNode('classpathentry kind="src" path="src"')
-	node.appendNode('classpathentry kind="src" path="gen"')
-      }
+    defaultConfig {
+        versionCode versionCode()
+        versionName versionName()
+        minSdkVersion androidMinSdk()
     }
-  }
 
-  project {
-    natures = ['com.android.ide.eclipse.adt.AndroidNature',
-	       'org.eclipse.jdt.core.javanature']
-    buildCommand 'com.android.ide.eclipse.adt.ResourceManagerBuilder'
-    buildCommand 'com.android.ide.eclipse.adt.PreCompilerBuilder'
-    buildCommand 'com.android.ide.eclipse.adt.ApkBuilder'
-  }
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src', 'assets']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+        debug.setRoot('build-types/debug')
+        release.setRoot('build-types/release')
+    }
+
+    lintOptions { abortOnError false }
 }
 
-task run (dependsOn: 'installDebug'){
-  doFirst {
-    println(">> adb run <<")
-    String adb = System.getenv()['ANDROID_HOME'] + '/platform-tools/adb'
-    String cmd = "${adb} shell am start -n org.oscim.android.start/.TestActivity"
-    def proc = cmd.execute()
-    proc.in.eachLine {line -> println line}
-    proc.err.eachLine {line -> System.err.println( 'ERROR: ' + line)}
-    proc.waitFor()
-  }
+task run(dependsOn: 'installDebug') {
+    doFirst {
+        println(">> adb run <<")
+        String adb = System.getenv()['ANDROID_HOME'] + '/platform-tools/adb'
+        String cmd = "${adb} shell am start -n org.oscim.android.start/.TestActivity"
+        def proc = cmd.execute()
+        proc.in.eachLine { line -> println line }
+        proc.err.eachLine { line -> System.err.println('ERROR: ' + line) }
+        proc.waitFor()
+    }
 }

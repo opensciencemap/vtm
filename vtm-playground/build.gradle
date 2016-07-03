@@ -1,34 +1,19 @@
-repositories {
-  // libgdx
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 apply plugin: 'java'
 apply plugin: 'application'
 
+dependencies {
+    compile project(':vtm-desktop')
+    compile project(':vtm-extras')
+    compile project(':vtm-jeo')
+}
+
 mainClassName = 'org.oscim.gdx.GdxMapApp'
 
-// package vtm native libs into jar
-task copyLibs(type: Copy) {
-  from(zipTree("../vtm-desktop/vtm-natives-desktop.jar"))
-  into("${buildDir}/assets")
-}
-
-tasks.withType(JavaCompile) { compileTask ->
-  compileTask.dependsOn copyLibs
-}
-
 sourceSets {
-  main {
-    java.srcDirs = ['src']
-    resources.srcDirs = ["${buildDir}/assets"]
-  }
-}
-
-dependencies {
-  compile project(':vtm-desktop')
-  compile project(':vtm-extras')
-  compile project(':vtm-jeo')
+    main {
+        java.srcDirs = ['src']
+        resources.srcDirs = ["${buildDir}/assets"]
+    }
 }
 
 run { ignoreExitValue = true }

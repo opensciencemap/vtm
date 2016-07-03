@@ -1,36 +1,35 @@
 buildscript {
-  repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url 'http://dl.bintray.com/steffenschaefer/maven' }
-  }
-  dependencies {
-    classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.5'
-  }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url 'http://dl.bintray.com/steffenschaefer/maven' }
+    }
+    dependencies {
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.5'
+    }
 }
 
 repositories {
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 apply plugin: 'war'
 apply plugin: 'jetty'
 apply plugin: 'gwt'
-apply plugin: 'eclipse'
 
 sourceSets {
-  main.java.srcDirs = ['src']
+    main.java.srcDirs = ['src']
 }
 
 dependencies {
-  providedCompile project(':vtm-web')
-  providedCompile project(':vtm-extras')
-  providedCompile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
-  providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
-  providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
-  providedCompile 'ru.finam:slf4j-gwt:1.2.1'
-  providedCompile 'org.slf4j:slf4j-api:1.7.5'
-  providedCompile 'org.timepedia.exporter:gwtexporter:2.5.0-SNAPSHOT'
+    providedCompile project(':vtm-web')
+    providedCompile project(':vtm-extras')
+    providedCompile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
+    providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
+    providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
+    providedCompile 'ru.finam:slf4j-gwt:1.2.1'
+    providedCompile 'org.slf4j:slf4j-api:1.7.5'
+    providedCompile 'org.timepedia.exporter:gwtexporter:2.5.0-SNAPSHOT'
 }
 
 // explicit dependencies for org.gradle.configureondemand=true
@@ -40,31 +39,31 @@ evaluationDependsOn(':vtm-gdx')
 evaluationDependsOn(':vtm-web')
 
 gwt {
-  gwtVersion='2.6.1'
-  modules 'org.oscim.web.VtmWebJs'
+    gwtVersion = '2.6.1'
+    modules 'org.oscim.web.VtmWebJs'
 
-  superDev {
-    noPrecompile=true
-  }
-  compiler {
+    superDev {
+        noPrecompile = true
+    }
+    compiler {
         enableClosureCompiler = false; // activates -XenableClosureCompiler
         disableClassMetadata = true; // activates -XdisableClassMetadata
         disableCastChecking = true; // activates -XdisableCastChecking
-  }
-    
-  src += files(sourceSets.main.java.srcDirs)
-  src += files(project(':vtm').sourceSets.main.allJava.srcDirs)
-  src += files(project(':vtm-themes').sourceSets.main.allJava.srcDirs)
-  src += files(project(':vtm-themes').sourceSets.main.resources.srcDirs)
-  src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs)
-  src += files(project(':vtm-web').sourceSets.main.allJava.srcDirs)
+    }
+
+    src += files(sourceSets.main.java.srcDirs)
+    src += files(project(':vtm').sourceSets.main.allJava.srcDirs)
+    src += files(project(':vtm-themes').sourceSets.main.allJava.srcDirs)
+    src += files(project(':vtm-themes').sourceSets.main.resources.srcDirs)
+    src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs)
+    src += files(project(':vtm-web').sourceSets.main.allJava.srcDirs)
 }
 
 // Run jetty with draft compiled war
 task jettyDraftWar(type: JettyRunWar) {
-  dependsOn draftWar
-  //dependsOn.remove('war')
-  webApp=draftWar.archivePath
+    dependsOn draftWar
+    //dependsOn.remove('war')
+    webApp = draftWar.archivePath
 }
 
 task copyThemeAssets(type: Copy) {
@@ -88,20 +87,7 @@ task copyWarSources(type: Copy) {
 }
 
 tasks.withType(JavaCompile) { compileTask ->
-  compileTask.dependsOn copyThemeAssets
-  compileTask.dependsOn copyVtmAssets
-  compileTask.dependsOn copyWarSources
-}
-
-// Configuring Eclipse classpath
-eclipse.classpath {
-
-  defaultOutputDir = file('war/WEB-INF/classes')
-
-  //file {
-  //  whenMerged { classpath ->
-  //    classpath.entries.findAll { entry ->
-  //	entry.path == 'src' }*.excludes = ['main','org/oscim/gdx/emu/']
-  //  }
-  //}
+    compileTask.dependsOn copyThemeAssets
+    compileTask.dependsOn copyVtmAssets
+    compileTask.dependsOn copyWarSources
 }

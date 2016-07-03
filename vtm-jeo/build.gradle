@@ -1,23 +1,17 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 
+dependencies {
+    compile project(':vtm')
+    compile('org.jeo:jeo:0-SNAPSHOT') {
+        exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+    }
+    compile('org.jeo:jeo-carto:0-SNAPSHOT') {
+        exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+    }
+}
 
 sourceSets {
-  main.java.srcDirs = ['src']
-  main.resources.srcDirs = ['src']
+    main.java.srcDirs = ['src']
+    main.resources.srcDirs = ['src']
 }
-
-dependencies {
-  compile project(':vtm')
-  compile ('org.jeo:jeo:0-SNAPSHOT') {
-    exclude group: 'org.slf4j', module: 'slf4j-jdk14'
-  }
-  compile ('org.jeo:jeo-carto:0-SNAPSHOT') {
-    exclude group: 'org.slf4j', module: 'slf4j-jdk14'
-  }
-}
-
-// eclipse.classpath.file.whenMerged { classpath ->
-//   classpath.entries.findAll { entry ->
-//     entry.path.contains('vtm-0.5.9-SNAPSHOT.jar') }*.exported = false
-// }

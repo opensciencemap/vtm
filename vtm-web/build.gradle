@@ -1,36 +1,35 @@
 buildscript {
-  repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url 'http://dl.bintray.com/steffenschaefer/maven' }
-  }
-  dependencies {
-    classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.5'
-  }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url 'http://dl.bintray.com/steffenschaefer/maven' }
+    }
+    dependencies {
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.5'
+    }
 }
 
 repositories {
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 //apply plugin: 'war'
 //apply plugin: 'jetty'
 apply plugin: 'java'
 apply plugin: 'gwt-base'
-apply plugin: 'eclipse'
 
 sourceSets {
-  main.java.srcDirs = ['src', 'src/org/oscim/gdx/emu']
+    main.java.srcDirs = ['src', 'src/org/oscim/gdx/emu']
 }
 
 dependencies {
-  compile project(':vtm-gdx')
-  compile project(':vtm-extras')
-  compile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
-  compile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
-  compile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
-  compile 'ru.finam:slf4j-gwt:1.2.1'
-  compile 'org.slf4j:slf4j-api:1.7.5'
+    compile project(':vtm-gdx')
+    compile project(':vtm-extras')
+    compile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
+    compile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
+    compile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
+    compile 'ru.finam:slf4j-gwt:1.2.1'
+    compile 'org.slf4j:slf4j-api:1.7.5'
 }
 
 // explicit dependencies for org.gradle.configureondemand=true
@@ -40,23 +39,23 @@ evaluationDependsOn(':vtm-gdx')
 evaluationDependsOn(':vtm-extras')
 
 gwt {
-  gwtVersion='2.6.1'
-  modules 'org.oscim.gdx.VtmWeb'
+    gwtVersion = '2.6.1'
+    modules 'org.oscim.gdx.VtmWeb'
 
-  superDev {
-    noPrecompile=true
-  }
-  compiler {
+    superDev {
+        noPrecompile = true
+    }
+    compiler {
         enableClosureCompiler = false; // activates -XenableClosureCompiler
         disableClassMetadata = true; // activates -XdisableClassMetadata
         disableCastChecking = true; // activates -XdisableCastChecking
-  }
-    
-  src += files(sourceSets.main.java.srcDirs)
-  src += files(project(':vtm').sourceSets.main.allJava.srcDirs)
-  src += files(project(':vtm-themes').sourceSets.main.allJava.srcDirs)
-  src += files(project(':vtm-themes').sourceSets.main.resources.srcDirs)
-  src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs)
+    }
+
+    src += files(sourceSets.main.java.srcDirs)
+    src += files(project(':vtm').sourceSets.main.allJava.srcDirs)
+    src += files(project(':vtm-themes').sourceSets.main.allJava.srcDirs)
+    src += files(project(':vtm-themes').sourceSets.main.resources.srcDirs)
+    src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs)
 }
 
 // Run jetty with draft compiled war
@@ -82,16 +81,3 @@ gwt {
 //  compileTask.dependsOn copyThemeAssets
 //  compileTask.dependsOn copyVtmAssets
 //}
-
-// Configuring Eclipse classpath
-eclipse.classpath {
-
-  defaultOutputDir = file('war/WEB-INF/classes')
-
-  file {
-    whenMerged { classpath ->
-      classpath.entries.findAll { entry ->
-	entry.path == 'src' }*.excludes = ['main','org/oscim/gdx/emu/']
-    }
-  }
-}

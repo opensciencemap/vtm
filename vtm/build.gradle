@@ -4,35 +4,14 @@ apply plugin: 'maven'
 configurations { providedCompile }
 
 dependencies {
-  compile 'org.slf4j:slf4j-api:1.7.6'
-  compile 'com.vividsolutions:jts:1.13'
-  providedCompile 'com.squareup.okhttp:okhttp:1.5.2'
-  providedCompile 'com.google.code.findbugs:annotations:2.0.1'
+    compile 'com.vividsolutions:jts:1.13'
+    compile 'org.slf4j:slf4j-api:1.7.21'
+    providedCompile 'com.google.code.findbugs:annotations:2.0.1'
+    providedCompile 'com.squareup.okhttp:okhttp:1.5.2'
 }
 
 sourceSets {
-  main.java.srcDirs = ['src']
-  main.resources.srcDirs = ['resources']
-  main.compileClasspath += configurations.providedCompile
-}
-
-eclipse.classpath {
-  //you can tweak the classpath of the Eclipse project by adding extra configurations:
-  plusConfigurations += [ configurations.providedCompile ]
-
-  file.whenMerged { classpath ->
-    classpath.entries.findAll { entry ->
-      entry.path.contains('annotations') || 
-      entry.path.contains('okhttp') ||
-      entry.path.contains('okio')
-      }*.exported = false
-  }
-
-  //if you don't want some classpath entries 'exported' in Eclipse
-  noExportConfigurations += [ configurations.providedCompile ]
-
-
-  //default settings for downloading sources and Javadoc:
-  //downloadSources = true
-  //downloadJavadoc = false
+    main.java.srcDirs = ['src']
+    main.resources.srcDirs = ['resources']
+    main.compileClasspath += configurations.providedCompile
 }

@@ -1,40 +1,23 @@
-repositories {
-  // libgdx
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'application'
 
-mainClassName = 'org.oscim.gdx.GdxMapApp'
-
-// package vtm native libs into jar
-//task copyLibs(type: Copy) {
-//  from(zipTree("../vtm-ext-libs/gdx/vtm-jni-natives.jar"))
-//  into("${buildDir}/assets")
-//}
-
-//tasks.withType(JavaCompile) { compileTask ->
-//  compileTask.dependsOn copyLibs
-//}
-
-sourceSets {
-  main {
-    java.srcDirs = ['src']
-    //main.resources.srcDirs = ["${buildDir}/assets"]
-    output.resourcesDir = 'assets'
-  }
+dependencies {
+    compile project(':vtm-gdx')
+    compile project(':vtm-themes')
+    compile files('vtm-natives-desktop.jar')
+    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    compile "com.badlogicgames.gdx:gdx-backend-jglfw:$gdxVersion"
+    compile 'org.slf4j:slf4j-simple:1.7.21'
 }
 
-dependencies {
-  compile project(':vtm-gdx')
-  compile project(':vtm-themes')
-  //compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-  compile "com.badlogicgames.gdx:gdx-backend-jglfw:$gdxVersion"
-  compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-  compile 'org.slf4j:slf4j-simple:1.7.6'
-  compile files('vtm-natives-desktop.jar')
+mainClassName = 'org.oscim.gdx.GdxMapApp'
+
+sourceSets {
+    main {
+        java.srcDirs = ['src']
+        output.resourcesDir = 'assets'
+    }
 }
 
 run { ignoreExitValue = true }

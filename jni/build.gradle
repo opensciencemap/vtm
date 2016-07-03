@@ -1,16 +1,10 @@
-repositories {
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 apply plugin: 'java'
 
-sourceSets {
-  main.java.srcDirs = ['src']
-  main.resources.srcDirs = ['src']
-}
-
 dependencies {
-  compile "com.badlogicgames.gdx:gdx-jnigen:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-jnigen:$gdxVersion"
 }
 
-eclipse.project.name = 'vtm-jni'
+sourceSets {
+    main.java.srcDirs = ['src']
+    main.resources.srcDirs = ['src']
+}

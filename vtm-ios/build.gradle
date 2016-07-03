@@ -1,17 +1,14 @@
 buildscript {
-  repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    jcenter()
-  }
-  dependencies {
-    classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.1.0'
-  }
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.1.0'
+    }
 }
 
-apply plugin: "java"
-apply plugin: "robovm"
+apply plugin: 'java'
+apply plugin: 'robovm'
 
 sourceSets.main.java.srcDirs = ["src/"]
 
@@ -19,9 +16,9 @@ sourceCompatibility = '1.7'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 ext {
-  // Configure your application main class
-  mainClassName = "org.oscim.ios.RoboVmLauncher"
-  roboVMVersion = "2.1.0"
+    // Configure your application main class
+    mainClassName = "org.oscim.ios.RoboVmLauncher"
+    roboVMVersion = "2.1.0"
 }
 
 launchIPhoneSimulator.dependsOn build
@@ -30,43 +27,39 @@ launchIOSDevice.dependsOn build
 createIPA.dependsOn build
 
 dependencies {
-  compile project(':vtm')
-  compile project(':vtm-gdx')
-  compile project(':vtm-themes')
-  compile 'org.slf4j:slf4j-simple:1.7.5'
-  compile "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"
-  compile "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
-  compile "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
-  compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
+    compile project(':vtm')
+    compile project(':vtm-gdx')
+    compile project(':vtm-themes')
+    compile 'org.slf4j:slf4j-simple:1.7.21'
+    compile "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"
+    compile "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
+    compile "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
 }
 
-
-
-
-
-task copyLibs(type: Copy){
-  from (zipTree("vtm-natives-ios.jar"))
-  into ("${buildDir}/natives")
+task copyLibs(type: Copy) {
+    from(zipTree("vtm-natives-ios.jar"))
+    into("${buildDir}/natives")
 }
 
-task copyVtmResources(type: Copy){
-    from ("../vtm/resources")
-    into ("${buildDir}")
+task copyVtmResources(type: Copy) {
+    from("../vtm/resources")
+    into("${buildDir}")
 }
 
-task copyVtmThemesResources(type: Copy){
-    from ("../vtm-themes/resources")
-    into ("${buildDir}")
+task copyVtmThemesResources(type: Copy) {
+    from("../vtm-themes/resources")
+    into("${buildDir}")
 }
 
-tasks.withType(org.gradle.api.tasks.compile.JavaCompile){
-  compileTask -> compileTask.dependsOn copyLibs
+tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
+    compileTask -> compileTask.dependsOn copyLibs
 }
 
-tasks.withType(org.gradle.api.tasks.compile.JavaCompile){
+tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
     compileTask -> compileTask.dependsOn copyVtmResources
 }
 
-tasks.withType(org.gradle.api.tasks.compile.JavaCompile){
+tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
     compileTask -> compileTask.dependsOn copyVtmThemesResources
 }
