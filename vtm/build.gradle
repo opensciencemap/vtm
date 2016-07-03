@@ -15,3 +15,10 @@ sourceSets {
     main.resources.srcDirs = ['resources']
     main.compileClasspath += configurations.providedCompile
 }
+
+// Automated Gradle project deployment to Sonatype OSSRH
+if (isReleaseVersion && project.hasProperty("SONATYPE_USERNAME")) {
+    afterEvaluate {
+        project.apply from: "${rootProject.projectDir}/deploy.gradle"
+    }
+}

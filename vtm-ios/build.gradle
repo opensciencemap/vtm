@@ -8,6 +8,7 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'maven'
 apply plugin: 'robovm'
 
 sourceSets.main.java.srcDirs = ["src/"]
@@ -62,4 +63,11 @@ tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
 
 tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
     compileTask -> compileTask.dependsOn copyVtmThemesResources
+}
+
+// Automated Gradle project deployment to Sonatype OSSRH
+if (isReleaseVersion && project.hasProperty("SONATYPE_USERNAME")) {
+    afterEvaluate {
+        project.apply from: "${rootProject.projectDir}/deploy.gradle"
+    }
 }

@@ -9,8 +9,9 @@ buildscript {
 }
 
 allprojects {
-    group = 'org.oscim'
+    group = 'org.mapsforge'
     version = '0.6.0-SNAPSHOT'
+    ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
     ext.androidBuildVersionTools = "23.0.3"
     ext.gdxVersion = "1.9.3"
