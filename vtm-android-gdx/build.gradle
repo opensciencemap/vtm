@@ -65,6 +65,10 @@ android.applicationVariants.all { variant ->
     artifacts.add('archives', task);
 }
 
+afterEvaluate {
+    configurations.archives.artifacts.removeAll { it.file =~ 'apk' }
+}
+
 task run(dependsOn: 'installDebug') {
     doFirst {
         println(">> adb run...")
