@@ -38,11 +38,6 @@ dependencies {
     compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
 }
 
-task copyLibs(type: Copy) {
-    from("natives")
-    into("${buildDir}/natives")
-}
-
 task copyVtmResources(type: Copy) {
     from("../vtm/resources")
     into("${buildDir}")
@@ -53,9 +48,6 @@ task copyVtmThemesResources(type: Copy) {
     into("${buildDir}")
 }
 
-tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
-    compileTask -> compileTask.dependsOn copyLibs
-}
 
 tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
     compileTask -> compileTask.dependsOn copyVtmResources
