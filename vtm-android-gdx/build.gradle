@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
     compile project(':vtm-gdx')
@@ -41,6 +42,18 @@ android {
     lintOptions { abortOnError false }
 }
 
+android.applicationVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals("debug")) {
+        print "Skipping debug jar"
+        return; // Skip debug builds.
+    }
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile
+    task.from variant.javaCompile.destinationDir
+    artifacts.add('archives', task);
+}
+
 task run(dependsOn: 'installDebug') {
     doFirst {
         println(">> adb run...")
@@ -50,5 +63,12 @@ task run(dependsOn: 'installDebug') {
         proc.in.eachLine { line -> println line }
         proc.err.eachLine { line -> System.err.println('ERROR: ' + line) }
         proc.waitFor()
+    }
+}
+
+// Automated Gradle project deployment to Sonatype OSSRH
+if (isReleaseVersion && project.hasProperty("SONATYPE_USERNAME")) {
+    afterEvaluate {
+        project.apply from: "${rootProject.projectDir}/deploy.gradle"
     }
 }
