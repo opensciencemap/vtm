@@ -6,6 +6,7 @@ dependencies {
     compile files("${rootDir}/vtm-android/vtm-natives-android.jar")
     compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
     compile files('gdx-natives-android.jar')
+    compile 'com.noveogroup.android:android-logger:1.3.6'
 }
 
 android {
