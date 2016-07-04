@@ -7,8 +7,6 @@ dependencies {
     compile project(':vtm-jeo')
 }
 
-mainClassName = 'org.oscim.gdx.GdxMapApp'
-
 sourceSets {
     main {
         java.srcDirs = ['src']
@@ -16,4 +14,5 @@ sourceSets {
     }
 }
 
+mainClassName = 'org.oscim.gdx.GdxMapApp'
 run { ignoreExitValue = true }

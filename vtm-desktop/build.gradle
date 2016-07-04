@@ -5,13 +5,11 @@ apply plugin: 'application'
 dependencies {
     compile project(':vtm-gdx')
     compile project(':vtm-themes')
-    compile files('vtm-natives-desktop.jar')
+    compile files('natives')
     compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     compile "com.badlogicgames.gdx:gdx-backend-jglfw:$gdxVersion"
     compile 'org.slf4j:slf4j-simple:1.7.21'
 }
-
-mainClassName = 'org.oscim.gdx.GdxMapApp'
 
 sourceSets {
     main {
@@ -20,6 +18,16 @@ sourceSets {
     }
 }
 
+task nativesJar(type: Jar) {
+    classifier = 'natives'
+    from('natives')
+}
+
+artifacts {
+    archives nativesJar
+}
+
+mainClassName = 'org.oscim.gdx.GdxMapApp'
 run { ignoreExitValue = true }
 
 // Automated Gradle project deployment to Sonatype OSSRH

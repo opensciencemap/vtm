@@ -39,7 +39,7 @@ dependencies {
 }
 
 task copyLibs(type: Copy) {
-    from(zipTree("vtm-natives-ios.jar"))
+    from("natives")
     into("${buildDir}/natives")
 }
 
@@ -63,6 +63,15 @@ tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
 
 tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
     compileTask -> compileTask.dependsOn copyVtmThemesResources
+}
+
+task nativesJar(type: Jar) {
+    classifier = 'natives'
+    from('natives')
+}
+
+artifacts {
+    archives nativesJar
 }
 
 // Automated Gradle project deployment to Sonatype OSSRH

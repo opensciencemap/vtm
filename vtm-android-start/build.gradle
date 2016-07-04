@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 dependencies {
     compile project(':vtm-android')
     compile project(':vtm-themes')
-    compile files("${rootDir}/vtm-android/vtm-natives-android.jar")
     compile 'com.android.support:support-v4:24.0.0'
     compile 'com.android.support:appcompat-v7:24.0.0'
     compile 'com.noveogroup.android:android-logger:1.3.6'
@@ -31,6 +30,7 @@ android {
             resources.srcDirs = ['src', 'assets']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ["${rootDir}/vtm-android/natives/lib"]
         }
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')

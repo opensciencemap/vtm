@@ -47,6 +47,18 @@ android.libraryVariants.all { variant ->
     artifacts.add('archives', task);
 }
 
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals("debug")) {
+        print "Skipping debug jar"
+        return; // Skip debug builds.
+    }
+    def task = project.tasks.create "nativesJar${name.capitalize()}", Jar
+    task.classifier = 'natives'
+    task.from('natives')
+    artifacts.add('archives', task);
+}
+
 // Automated Gradle project deployment to Sonatype OSSRH
 if (isReleaseVersion && project.hasProperty("SONATYPE_USERNAME")) {
     afterEvaluate {
