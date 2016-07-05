@@ -1,84 +1,66 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.oscim.android.test"
-  android:versionCode="1"
-  android:versionName="1.0" >
+    package="org.oscim.android.test"
+    android:installLocation="auto"
+    android:versionCode="1"
+    android:versionName="1.0">
 
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-  <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-  <uses-sdk
-    android:minSdkVersion="10"
-    android:targetSdkVersion="22" />
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="22" />
 
-  <application
-    android:allowBackup="true"
-    android:icon="@drawable/ic_launcher"
-    android:label="@string/app_name"
-    android:theme="@style/AppTheme" >
-    <activity
-      android:name="org.oscim.android.test.Samples"
-      android:label="@string/app_name" >
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".Samples"
+            android:configChanges="keyboardHidden|orientation|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-    </activity>
-    <activity android:name="org.oscim.android.test.MapsforgeMapActivity$MapFilePicker" />
-    
-    <activity
-      android:name="org.oscim.android.test.SimpleMapActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-
-    <activity
-      android:name="org.oscim.android.test.S3DBMapActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-
-    <activity
-      android:name="org.oscim.android.test.PathOverlayActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-       
-     <activity
-      android:name="org.oscim.android.test.MarkerOverlayActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-    
-    <activity
-      android:name="org.oscim.android.test.BitmapTileMapActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-    
-    <activity
-      android:name="org.oscim.android.test.MapsforgeMapActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-    
-     <activity
-      android:name="org.oscim.android.test.ThemeStylerActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-
-    <activity
-      android:name="org.oscim.android.test.JeoIndoorMapActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-    
-    <activity
-      android:name="org.oscim.android.test.OsmJsonMapActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-
-    <activity
-      android:name="org.oscim.android.test.VectorLayerMapActivity"
-      android:label="@string/title_activity_map" >
-    </activity>
-   
-</application>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MapsforgeMapActivity$MapFilePicker"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".SimpleMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".S3DBMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".PathOverlayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".MarkerOverlayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".BitmapTileMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".MapsforgeMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ThemeStylerActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".JeoIndoorMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".OsmJsonMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".VectorLayerMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+    </application>
 
 </manifest>
