@@ -1,5 +1,8 @@
 /*
  * Copyright 2014 Hannes Janetzek
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,9 +17,6 @@
  */
 package org.oscim.android.test;
 
-import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
-
-import org.oscim.android.MapView;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
@@ -25,34 +25,32 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
-import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.geojson.HighroadJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmBuildingJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmLanduseJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmWaterJsonTileSource;
+import org.oscim.tiling.source.geojson.RiverJsonTileSource;
 
 import android.os.Bundle;
 
 public class OsmJsonMapActivity extends MapActivity {
 
-	MapView mMapView;
-	VectorTileLayer mBaseLayer;
-	TileSource mTileSource;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mTileSource = new OsmWaterJsonTileSource();
-
-		mMap.setBaseMap(new BitmapTileLayer(mMap, STAMEN_TONER.build()));
-		mMap.layers().add(new TileGridLayer(mMap));
+		mMap.setBaseMap(new BitmapTileLayer(mMap, new OsmLanduseJsonTileSource()));
 
 		IRenderTheme theme = ThemeLoader.load(VtmThemes.OSMARENDER);
 		MapRenderer.setBackgroundColor(theme.getMapBackground());
 
 		VectorTileLayer l;
-		l = new VectorTileLayer(mMap, new OsmLanduseJsonTileSource());
+		l = new VectorTileLayer(mMap, new OsmWaterJsonTileSource());
+		l.setRenderTheme(theme);
+		l.tileRenderer().setOverdrawColor(0);
+		mMap.layers().add(l);
+
+		l = new VectorTileLayer(mMap, new RiverJsonTileSource());
 		l.setRenderTheme(theme);
 		l.tileRenderer().setOverdrawColor(0);
 		mMap.layers().add(l);
@@ -67,6 +65,8 @@ public class OsmJsonMapActivity extends MapActivity {
 		l.tileRenderer().setOverdrawColor(0);
 		mMap.layers().add(l);
 		mMap.layers().add(new BuildingLayer(mMap, l));
+
+		mMap.layers().add(new TileGridLayer(mMap));
 
 		mMap.setMapPosition(53.08, 8.83, Math.pow(2, 16));
 	}
