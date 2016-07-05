@@ -18,10 +18,8 @@
 package org.oscim.android.test;
 
 import org.oscim.layers.TileGridLayer;
-import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
@@ -39,18 +37,17 @@ public class OsmJsonMapActivity extends MapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mMap.setBaseMap(new BitmapTileLayer(mMap, new OsmLanduseJsonTileSource()));
-
 		IRenderTheme theme = ThemeLoader.load(VtmThemes.OSMARENDER);
-		MapRenderer.setBackgroundColor(theme.getMapBackground());
 
-		VectorTileLayer l;
-		l = new VectorTileLayer(mMap, new OsmWaterJsonTileSource());
+		mMap.setBaseMap(new VectorTileLayer(mMap, new OsmLanduseJsonTileSource()));
+		mMap.setTheme(theme);
+
+		VectorTileLayer l = new VectorTileLayer(mMap, new RiverJsonTileSource());
 		l.setRenderTheme(theme);
 		l.tileRenderer().setOverdrawColor(0);
 		mMap.layers().add(l);
 
-		l = new VectorTileLayer(mMap, new RiverJsonTileSource());
+		l = new VectorTileLayer(mMap, new OsmWaterJsonTileSource());
 		l.setRenderTheme(theme);
 		l.tileRenderer().setOverdrawColor(0);
 		mMap.layers().add(l);
