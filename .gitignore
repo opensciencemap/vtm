@@ -7,6 +7,7 @@ robovm-build
 *.o
 *.so
 *.class
+/vtm-tests/tmp/
 /vtm-web/war/
 /vtm-web/assets/
 /vtm-web/gwt-unitCache
