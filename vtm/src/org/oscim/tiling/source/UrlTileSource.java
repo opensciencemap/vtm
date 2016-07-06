@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -31,6 +32,7 @@ public abstract class UrlTileSource extends TileSource {
 		protected String tilePath;
 		protected String url;
 		private HttpEngine.Factory engineFactory;
+		private String apiKey;
 
 		protected Builder() {
 
@@ -41,6 +43,11 @@ public abstract class UrlTileSource extends TileSource {
 			this.tilePath = tilePath;
 			this.zoomMin = zoomMin;
 			this.zoomMax = zoomMax;
+		}
+
+		public T apiKey(String apiKey) {
+			this.apiKey = apiKey;
+			return self();
 		}
 
 		public T tilePath(String tilePath) {
@@ -67,13 +74,15 @@ public abstract class UrlTileSource extends TileSource {
 	private HttpEngine.Factory mHttpFactory;
 	private Map<String, String> mRequestHeaders = Collections.emptyMap();
 	private TileUrlFormatter mTileUrlFormatter = URL_FORMATTER;
+	private String mApiKey;
 
 	public interface TileUrlFormatter {
-		public String formatTilePath(UrlTileSource tileSource, Tile tile);
+		String formatTilePath(UrlTileSource tileSource, Tile tile);
 	}
 
 	protected UrlTileSource(Builder<?> builder) {
 		super(builder);
+		mApiKey = builder.apiKey;
 		mUrl = makeUrl(builder.url);
 		mTilePath = builder.tilePath.split("\\{|\\}");
 		mHttpFactory = builder.engineFactory;
@@ -97,7 +106,7 @@ public abstract class UrlTileSource extends TileSource {
 	}
 
 	private URL makeUrl(String urlString) {
-		URL url = null;
+		URL url;
 		try {
 			url = new URL(urlString);
 		} catch (MalformedURLException e) {
@@ -116,12 +125,20 @@ public abstract class UrlTileSource extends TileSource {
 
 	}
 
+	public void setApiKey(String apiKey) {
+		mApiKey = apiKey;
+	}
+
 	public URL getUrl() {
 		return mUrl;
 	}
 
 	public String getTileUrl(Tile tile) {
-		return mUrl + mTileUrlFormatter.formatTilePath(this, tile);
+		String tileUrl = mUrl + mTileUrlFormatter.formatTilePath(this, tile);
+		if (mApiKey != null) {
+			tileUrl += String.format("?api_key=%s", mApiKey);
+		}
+		return tileUrl;
 	}
 
 	public void setHttpEngine(HttpEngine.Factory httpFactory) {
@@ -140,9 +157,6 @@ public abstract class UrlTileSource extends TileSource {
 		return mTilePath;
 	}
 
-	/**
-	 * 
-	 */
 	public void setUrlFormatter(TileUrlFormatter formatter) {
 		mTileUrlFormatter = formatter;
 	}
