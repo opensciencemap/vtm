@@ -23,14 +23,14 @@ import org.oscim.core.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HighroadJsonTileSource extends GeoJsonTileSource {
+public class OsmRoadLineJsonTileSource extends GeoJsonTileSource {
 
-	static final Logger log = LoggerFactory.getLogger(HighroadJsonTileSource.class);
+	static final Logger log = LoggerFactory.getLogger(OsmRoadLineJsonTileSource.class);
 
 	Tag mTagTunnel = new Tag("tunnel", "yes");
 	Tag mTagBridge = new Tag("bridge", "yes");
 
-	public HighroadJsonTileSource() {
+	public OsmRoadLineJsonTileSource() {
 		super("http://tile.openstreetmap.us/vectiles-highroad");
 	}
 

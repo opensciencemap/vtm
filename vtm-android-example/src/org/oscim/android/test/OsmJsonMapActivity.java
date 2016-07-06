@@ -20,14 +20,15 @@ package org.oscim.android.test;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
+import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
-import org.oscim.tiling.source.geojson.HighroadJsonTileSource;
+import org.oscim.tiling.source.geojson.OsmRoadLineJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmBuildingJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmLanduseJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmWaterJsonTileSource;
-import org.oscim.tiling.source.geojson.RiverJsonTileSource;
+import org.oscim.tiling.source.geojson.OsmRoadLabelJsonTileSource;
 
 import android.os.Bundle;
 
@@ -37,22 +38,17 @@ public class OsmJsonMapActivity extends MapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		IRenderTheme theme = ThemeLoader.load(VtmThemes.OSMARENDER);
+		IRenderTheme theme = ThemeLoader.load(VtmThemes.DEFAULT);
 
 		mMap.setBaseMap(new VectorTileLayer(mMap, new OsmLanduseJsonTileSource()));
 		mMap.setTheme(theme);
 
-		VectorTileLayer l = new VectorTileLayer(mMap, new RiverJsonTileSource());
+		VectorTileLayer l = new VectorTileLayer(mMap, new OsmWaterJsonTileSource());
 		l.setRenderTheme(theme);
 		l.tileRenderer().setOverdrawColor(0);
 		mMap.layers().add(l);
 
-		l = new VectorTileLayer(mMap, new OsmWaterJsonTileSource());
-		l.setRenderTheme(theme);
-		l.tileRenderer().setOverdrawColor(0);
-		mMap.layers().add(l);
-
-		l = new VectorTileLayer(mMap, new HighroadJsonTileSource());
+		l = new VectorTileLayer(mMap, new OsmRoadLineJsonTileSource());
 		l.setRenderTheme(theme);
 		l.tileRenderer().setOverdrawColor(0);
 		mMap.layers().add(l);
@@ -62,6 +58,12 @@ public class OsmJsonMapActivity extends MapActivity {
 		l.tileRenderer().setOverdrawColor(0);
 		mMap.layers().add(l);
 		mMap.layers().add(new BuildingLayer(mMap, l));
+
+		l = new VectorTileLayer(mMap, new OsmRoadLabelJsonTileSource());
+		l.setRenderTheme(theme);
+		l.tileRenderer().setOverdrawColor(0);
+		mMap.layers().add(l);
+		mMap.layers().add(new LabelLayer(mMap, l));
 
 		mMap.layers().add(new TileGridLayer(mMap));
 
