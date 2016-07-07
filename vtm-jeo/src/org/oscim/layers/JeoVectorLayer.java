@@ -1,10 +1,26 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.layers;
 
 import java.io.IOException;
 
-import org.jeo.data.Query;
-import org.jeo.data.VectorDataset;
-import org.jeo.feature.Feature;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorDataset;
+import org.jeo.vector.Feature;
 import org.jeo.geom.Geom;
 import org.jeo.map.CartoCSS;
 import org.jeo.map.RGB;
@@ -40,7 +56,7 @@ public class JeoVectorLayer extends JtsLayer {
 		super(map);
 		mDataset = data;
 
-		mRules = style.getRules().selectById(data.getName(), true).flatten();
+		mRules = style.getRules().selectById(data.name(), true).flatten();
 		//mRules = style.getRules().selectById("way", true).flatten();
 		log.debug(mRules.toString());
 
@@ -58,7 +74,7 @@ public class JeoVectorLayer extends JtsLayer {
 		}
 
 		try {
-			Query q = new Query().bounds(b);
+			VectorQuery q = new VectorQuery().bounds(b);
 			if (dbg)
 				log.debug("query {}", b);
 			for (Feature f : mDataset.cursor(q)) {
@@ -104,7 +120,7 @@ public class JeoVectorLayer extends JtsLayer {
 				}
 			}
 		} catch (IOException e) {
-			log.error("Error querying layer " + mDataset.getName() + e);
+			log.error("Error querying layer " + mDataset.name() + e);
 		}
 	}
 

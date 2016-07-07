@@ -22,7 +22,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorDataset;
 import org.jeo.map.Style;
 import org.oscim.layers.OSMIndoorLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;

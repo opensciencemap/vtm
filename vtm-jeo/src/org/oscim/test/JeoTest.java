@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.test;
 
 import java.io.File;
@@ -8,14 +24,14 @@ import java.io.InputStream;
 
 import org.jeo.carto.Carto;
 import org.jeo.data.Dataset;
-import org.jeo.data.Query;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorDataset;
 import org.jeo.data.mem.MemVector;
 import org.jeo.data.mem.MemWorkspace;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Features;
-import org.jeo.feature.Schema;
-import org.jeo.feature.SchemaBuilder;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Features;
+import org.jeo.vector.Schema;
+import org.jeo.vector.SchemaBuilder;
 import org.jeo.geojson.GeoJSONDataset;
 import org.jeo.geojson.GeoJSONReader;
 import org.jeo.geom.GeomBuilder;
@@ -115,7 +131,7 @@ public class JeoTest {
 			try {
 
 				Schema s = data.schema();
-				Query q = new Query();
+				VectorQuery q = new VectorQuery();
 
 				MemVector memData = mem.create(s);
 
