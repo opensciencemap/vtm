@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.test;
 
 import java.util.ArrayList;
@@ -9,13 +25,16 @@ import org.oscim.core.MapPosition;
 import org.oscim.event.Event;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.JtsPathLayer;
-import org.oscim.map.Map;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.map.Map.UpdateListener;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 
 public class PathLayerTest extends GdxMapApp {
 
 	@Override
 	public void createLayers() {
+		mMap.setBaseMap(new BitmapTileLayer(mMap, DefaultSources.STAMEN_TONER.build()));
+
 		createLayers(1, true);
 
 		mMap.setMapPosition(0, 0, 1 << 2);
@@ -23,24 +42,24 @@ public class PathLayerTest extends GdxMapApp {
 		mMap.events.bind(new UpdateListener() {
 			@Override
 			public void onMapEvent(Event e, MapPosition mapPosition) {
-				if (e == Map.UPDATE_EVENT) {
-					long t = System.currentTimeMillis();
-					float pos = t % 20000 / 10000f - 1f;
-					createLayers(pos, false);
-					mMap.updateMap(true);
-				}
+				//if (e == Map.UPDATE_EVENT) {
+				long t = System.currentTimeMillis();
+				float pos = t % 20000 / 10000f - 1f;
+				createLayers(pos, false);
+				mMap.updateMap(true);
+				//}
 			}
 		});
 	}
 
-	ArrayList<JtsPathLayer> mPathLayers = new ArrayList<JtsPathLayer>();
+	ArrayList<JtsPathLayer> mPathLayers = new ArrayList<>();
 
 	void createLayers(float pos, boolean init) {
 
 		int i = 0;
 
 		for (double lat = -90; lat <= 90; lat += 5) {
-			List<GeoPoint> pts = new ArrayList<GeoPoint>();
+			List<GeoPoint> pts = new ArrayList<>();
 
 			for (double lon = -180; lon <= 180; lon += 2) {
 				//pts.add(new GeoPoint(lat, lon));

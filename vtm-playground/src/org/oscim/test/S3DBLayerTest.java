@@ -1,21 +1,33 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.test;
 
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.tile.buildings.S3DBLayer;
+import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
-import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class S3DBLayerTest extends GdxMapApp {
 
 	@Override
 	public void createLayers() {
-
-		//VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
-		//mMap.setTheme(VtmThemes.DEFAULT);
-
-		mMap.setBaseMap(new BitmapTileLayer(mMap, DefaultSources.STAMEN_TONER.build()));
+		mMap.setBaseMap(new OSciMap4TileSource());
+		mMap.setTheme(VtmThemes.DEFAULT);
 
 		TileSource ts = OSciMap4TileSource
 		    .builder()

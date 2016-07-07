@@ -1,22 +1,39 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.test;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.vector.VectorLayer;
 import org.oscim.layers.vector.geometries.PointDrawable;
 import org.oscim.layers.vector.geometries.Style;
-import org.oscim.map.Map;
+import org.oscim.theme.VtmThemes;
+import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.oscim.utils.ColorUtil;
 
 public class VectorLayerTest extends GdxMapApp {
 
 	@Override
 	public void createLayers() {
-		Map map = getMap();
+		mMap.setBaseMap(new OSciMap4TileSource());
+		mMap.setTheme(VtmThemes.DEFAULT);
 
-		//VectorTileLayer tileLayer = map.setBaseMap(new OSciMap4TileSource());
-
-		VectorLayer vectorLayer = new VectorLayer(map);
+		VectorLayer vectorLayer = new VectorLayer(mMap);
 
 		//		vectorLayer.add(new PointDrawable(0, 180, Style.builder()
 		//		    .setBuffer(10)
@@ -38,8 +55,6 @@ public class VectorLayerTest extends GdxMapApp {
 		    .fillColor(Color.RED)
 		    .fillAlpha(0.2);
 
-		Style style = sb.fillAlpha(0.2).build();
-
 		//		int tileSize = 5;
 		//		for (int x = -180; x < 200; x += tileSize) {
 		//			for (int y = -90; y < 90; y += tileSize) {
@@ -54,7 +69,7 @@ public class VectorLayerTest extends GdxMapApp {
 		//		}
 
 		for (int i = 0; i < 1000; i++) {
-			style = sb.buffer(Math.random() * 1)
+			Style style = sb.buffer(Math.random() * 1)
 			    .fillColor(ColorUtil.setHue(Color.RED,
 			                                   Math.random()))
 			    .fillAlpha(0.5)
@@ -66,12 +81,10 @@ public class VectorLayerTest extends GdxMapApp {
 
 		}
 
-		map.layers().add(vectorLayer);
+		mMap.layers().add(vectorLayer);
+		mMap.layers().add(new TileGridLayer(mMap, 0xff222222, 1.2f, 1));
 
-		//map.layers().add(new LabelLayer(map, tileLayer));
-		//map.setTheme(VtmThemes.DEFAULT);
-
-		map.setMapPosition(0, 0, 1 << 2);
+		mMap.setMapPosition(0, 0, 1 << 2);
 	}
 
 	public static void main(String[] args) {
