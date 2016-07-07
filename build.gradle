@@ -37,7 +37,7 @@ def versionName() { return version }
 
 subprojects {
     repositories {
-        maven { url 'http://repo.boundlessgeo.com/main' }
+        maven { url 'https://repo.boundlessgeo.com/main' }
         jcenter()
     }
 
