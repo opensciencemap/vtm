@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.event.Event;
-import org.oscim.layers.PathLayer;
+import org.oscim.layers.JtsPathLayer;
 import org.oscim.map.Map.UpdateListener;
 
 import android.os.Bundle;
@@ -47,7 +47,7 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 		mMap.setMapPosition(0, 0, 1 << 2);
 		for (double lat = -90; lat <= 90; lat += 5) {
 			int c = Color.fade(Color.rainbow((float) (lat + 90) / 180), 0.5f);
-			PathLayer pathLayer = new PathLayer(mMap, c, 6);
+			JtsPathLayer pathLayer = new JtsPathLayer(mMap, c, 6);
 			mMap.layers().add(pathLayer);
 			mPathLayers.add(pathLayer);
 		}
@@ -74,7 +74,7 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
 		mMap.setMapPosition(0, 0, 1 << 2);
 	}
 
-	ArrayList<PathLayer> mPathLayers = new ArrayList<PathLayer>();
+	ArrayList<JtsPathLayer> mPathLayers = new ArrayList<JtsPathLayer>();
 
 	void createLayers(float pos) {
 
